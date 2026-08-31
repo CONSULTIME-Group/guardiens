@@ -14,7 +14,7 @@ interface DayStats {
   clicked: number;
 }
 
-const pct = (num: number, den: number) => (den > 0 ? `${((num / den) * 100).toFixed(1)}%` : "–");
+const pct = (num: number, den: number) => (den > 0 ? `${((num / den) * 100).toFixed(1)}%` : "·");
 
 /**
  * Onglet admin dédié au digest quotidien entraide (missions).

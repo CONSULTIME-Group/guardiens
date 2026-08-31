@@ -12,7 +12,7 @@ const resolveCover = (sit: any): string | null =>
   || (Array.isArray(sit?.properties?.photos) ? sit.properties.photos[0] : null)
   || null;
 
-/** Tache aquarelle douce (fallback sans photo) — dérivée des tokens HSL. */
+/** Tache aquarelle douce (fallback sans photo), dérivée des tokens HSL. */
 const aquarelleBg: CSSProperties = {
   backgroundImage: [
     "radial-gradient(ellipse at 28% 30%, hsl(var(--primary) / 0.28), transparent 62%)",

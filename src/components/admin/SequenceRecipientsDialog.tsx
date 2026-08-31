@@ -264,7 +264,7 @@ export const SequenceRecipientsDialog = ({ open, onOpenChange, sequenceKey, sequ
         {!loading && totalCount > 0 && (
           <div className="flex items-center justify-between pt-3 border-t mt-2">
             <p className="text-xs text-muted-foreground">
-              {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, totalCount)} sur {totalCount}
+              {page * PAGE_SIZE + 1} à {Math.min((page + 1) * PAGE_SIZE, totalCount)} sur {totalCount}
             </p>
             <div className="flex items-center gap-2">
               <Button

@@ -1,5 +1,5 @@
 /**
- * SitterAffinitySection — grammaire ring partagée sur la page annonce (vague 21).
+ * SitterAffinitySection, grammaire ring partagée sur la page annonce (vague 21).
  *
  * Encapsule le calcul via useAffinityWithShadow et le rendu premium :
  *  - trio d'en-tête signature (SectionHeader partagé),

@@ -1,5 +1,5 @@
 /**
- * CommunityPulseBanner — panneau vert chaleureux « Le pouls de la communauté ».
+ * CommunityPulseBanner, panneau vert chaleureux « Le pouls de la communauté ».
  *
  * VAGUE 4 (rail confirmé) : liste verticale de TROIS chiffres MAX, sans icônes,
  * priorité au local. Chaque libellé dit explicitement son périmètre.

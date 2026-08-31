@@ -57,7 +57,7 @@ export default function BingOnlyQueriesCard({ gscQueries }: Props) {
                 <td className="py-1.5 text-right font-mono">{r.Clicks ?? 0}</td>
                 <td className="py-1.5 text-right font-mono">{r.Impressions ?? 0}</td>
                 <td className="py-1.5 text-right font-mono text-muted-foreground">
-                  {r.AvgImpressionPosition ? Number(r.AvgImpressionPosition).toFixed(1) : "–"}
+                  {r.AvgImpressionPosition ? Number(r.AvgImpressionPosition).toFixed(1) : "·"}
                 </td>
               </tr>
             ))}

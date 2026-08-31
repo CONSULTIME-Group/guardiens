@@ -77,7 +77,7 @@ export const LiquidityBlock = () => {
     } else {
       cells.push({
         label: "Délai médian de première réponse",
-        value: "–",
+        value: "·",
         sub:
           data.response_count > 0
             ? `${data.response_count} ${plural(data.response_count, "candidature avec réponse", "candidatures avec réponse")}, effectif trop faible pour une médiane`

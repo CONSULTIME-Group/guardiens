@@ -1,5 +1,5 @@
 /**
- * Alma Pass 4 — Trigger 7 (P0 réciprocité).
+ * Alma Pass 4, Trigger 7 (P0 réciprocité).
  *
  * Composant invisible monté sur PublicSitterProfile côté owner authentifié.
  * Détection : le sitter consulté a vu au moins 1 fois l'annonce de cet owner

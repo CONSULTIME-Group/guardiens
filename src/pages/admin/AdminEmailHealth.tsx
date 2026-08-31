@@ -335,7 +335,7 @@ export default function AdminEmailHealth() {
               label="Taux d'échec (1h)"
               value={
                 health.failure_rate_1h == null
-                  ? "—"
+                  ? "·"
                   : `${Math.round(health.failure_rate_1h * 100)}%`
               }
               hint={`${health.attempts_1h ?? 0} tentative${(health.attempts_1h ?? 0) > 1 ? "s" : ""}`}
@@ -384,10 +384,10 @@ export default function AdminEmailHealth() {
                     <TableRow key={s}>
                       <TableCell className="capitalize">{s}</TableCell>
                       <TableCell className="text-right tabular-nums">
-                        {logs24h ? logs24h[s] : "—"}
+                        {logs24h ? logs24h[s] : "·"}
                       </TableCell>
                       <TableCell className="text-right tabular-nums">
-                        {logs7d ? logs7d[s] : "—"}
+                        {logs7d ? logs7d[s] : "·"}
                       </TableCell>
                     </TableRow>
                   ),
@@ -395,10 +395,10 @@ export default function AdminEmailHealth() {
                 <TableRow>
                   <TableCell className="font-medium">Total unique</TableCell>
                   <TableCell className="text-right tabular-nums font-medium">
-                    {logs24h ? logs24h.total : "—"}
+                    {logs24h ? logs24h.total : "·"}
                   </TableCell>
                   <TableCell className="text-right tabular-nums font-medium">
-                    {logs7d ? logs7d.total : "—"}
+                    {logs7d ? logs7d.total : "·"}
                   </TableCell>
                 </TableRow>
               </TableBody>
@@ -435,12 +435,12 @@ export default function AdminEmailHealth() {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           <StatCard
             label="Pending"
-            value={deferred?.pending ?? "—"}
+            value={deferred?.pending ?? "·"}
             tone={deferredPendingLate ? "destructive" : "muted"}
           />
-          <StatCard label="Sent" value={deferred?.sent ?? "—"} tone="success" />
-          <StatCard label="Failed" value={deferred?.failed ?? "—"} tone="warning" />
-          <StatCard label="Expired" value={deferred?.expired ?? "—"} tone="muted" />
+          <StatCard label="Sent" value={deferred?.sent ?? "·"} tone="success" />
+          <StatCard label="Failed" value={deferred?.failed ?? "·"} tone="warning" />
+          <StatCard label="Expired" value={deferred?.expired ?? "·"} tone="muted" />
           <StatCard
             label="Plus vieux pending"
             value={formatAge(deferred?.oldest_pending_age_seconds ?? null)}

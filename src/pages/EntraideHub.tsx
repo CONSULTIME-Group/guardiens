@@ -522,7 +522,7 @@ const EntraideHub = () => {
                     aria-label="Distance indisponible"
                     title="Distance indisponible"
                   >
-                    – km
+                    distance inconnue
                   </span>
                 )
               )}

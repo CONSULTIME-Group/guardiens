@@ -1,5 +1,5 @@
 /**
- * ApplicationCapSection — plafond de candidatures atteint, côté propriétaire.
+ * ApplicationCapSection, plafond de candidatures atteint, côté propriétaire.
  *
  * Action prioritaire, ton de service : on constate, et on ouvre deux issues,
  * traiter les candidatures en attente, ou relever le plafond par paliers.

@@ -1,5 +1,5 @@
 /**
- * <AlmaBubble /> — composant réutilisable pour incarner Alma, la narratrice IA.
+ * <AlmaBubble />, composant réutilisable pour incarner Alma, la narratrice IA.
  *
  * Règle éditoriale : vouvoiement absolu, quelle que soit l'audience (owner ou sitter).
  * Le prop `audience` reste obligatoire pour permettre des adaptations non textuelles

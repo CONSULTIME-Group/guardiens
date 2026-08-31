@@ -1,5 +1,5 @@
 /**
- * OwnerAnnonceSection (vague 11) — VOTRE ANNONCE.
+ * OwnerAnnonceSection (vague 11), VOTRE ANNONCE.
  *
  * Rendu calme, une seule carte pour l'annonce la plus proche dans le temps,
  * rangées compactes pour les autres. Pas de bloc candidatures (la star les porte).

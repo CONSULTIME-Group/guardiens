@@ -621,7 +621,7 @@ const AdminUsers = () => {
             <CardContent className="p-4">
               <p className="text-xs text-muted-foreground">{k.label}</p>
               <p className="text-2xl font-bold text-foreground mt-1">
-                {k.value === undefined ? "–" : k.value.toLocaleString("fr-FR")}
+                {k.value === undefined ? "·" : k.value.toLocaleString("fr-FR")}
               </p>
             </CardContent>
           </Card>

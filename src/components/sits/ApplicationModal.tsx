@@ -126,7 +126,7 @@ const ApplicationModal = ({
       const own: string[] = Array.isArray(sp.own_animals) ? sp.own_animals : [];
       const ownAnimalsDetail = own
         .filter((s: string) => s && s.toLowerCase() !== "non")
-        .map((s: string) => s.replace(/^Oui[\s,\-—]*/i, "").trim())
+        .map((s: string) => s.replace(/^Oui[\s,\-\u2014]*/i, "").trim())
         .filter(Boolean)
         .join(", ");
       const acceptsPets = (sit.accepts_sitter_pets as string) || "discuss";

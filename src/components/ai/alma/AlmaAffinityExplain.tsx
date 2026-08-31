@@ -1,5 +1,5 @@
 /**
- * Alma Pass 1 — Chantier 5
+ * Alma Pass 1, Chantier 5
  * CTA "Comprendre mon score" affiché à côté du badge d'affinité.
  * Sur clic, appelle `explain-affinity-score` et affiche l'explication
  * narrative (matched + missing avec suggestions actionnables) dans un AlmaBubble.

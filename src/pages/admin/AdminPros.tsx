@@ -211,15 +211,15 @@ const AdminPros = () => {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm">
             <div>
               <div className="text-xs text-muted-foreground">Activité déclarée</div>
-              <div>{row.declared_specialty || "–"}</div>
+              <div>{row.declared_specialty || "·"}</div>
             </div>
             <div>
               <div className="text-xs text-muted-foreground">Raison sociale</div>
-              <div>{row.declared_business_name || "–"}</div>
+              <div>{row.declared_business_name || "·"}</div>
             </div>
             <div>
               <div className="text-xs text-muted-foreground">SIRET déclaré</div>
-              <div className="font-mono text-xs">{row.declared_siret || "–"}</div>
+              <div className="font-mono text-xs">{row.declared_siret || "·"}</div>
             </div>
           </div>
 

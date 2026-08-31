@@ -125,7 +125,7 @@ export default function PublicSitterProfile() {
   const [profile, setProfile] = useState<any>(null);
   const [sitterProfile, setSitterProfile] = useState<any>(null);
 
-  // Pass 5 — compagnon culturel : fait race si l'un des animaux du gardien matche.
+  // Pass 5, compagnon culturel : fait race si l'un des animaux du gardien matche.
   useAlmaCulturalFact({
     surface: "sitter_profile",
     enabled: !!auth.user?.id,
@@ -286,7 +286,7 @@ export default function PublicSitterProfile() {
           <ul className="text-sm text-foreground/80 font-body space-y-1">
             {props.sitterProfile?.travels_with_own_animals && (() => {
               const own: string[] = (props.sitterProfile?.own_animals || []).filter((s: string) => s && s.toLowerCase() !== "non");
-              const detail = own.length > 0 ? own.map(s => s.replace(/^Oui[\s,\-—]*/i, "").trim()).filter(Boolean).join(", ") : "";
+              const detail = own.length > 0 ? own.map(s => s.replace(/^Oui[\s,\-\u2014]*/i, "").trim()).filter(Boolean).join(", ") : "";
               return (
                 <li>Voyage avec ses animaux{detail ? ` : ${detail}` : ""}</li>
               );
@@ -493,7 +493,7 @@ export default function PublicSitterProfile() {
       // par tout visiteur ; `profiles` reste réservé au propriétaire du profil.
       const PUBLIC_PROFILE_COLS =
         "id, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, completed_sits_count, last_seen_at, pro_status, pro_specialty, pro_tagline, pro_pricing_note, pro_business_name";
-      // `last_name` retiré du select — jamais rendu publiquement.
+      // `last_name` retiré du select, jamais rendu publiquement.
       const BASE_PROFILE_COLS =
         "id, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, profile_completion, completed_sits_count, cancellation_count, hero_image_index";
 
@@ -778,7 +778,7 @@ export default function PublicSitterProfile() {
 
         // Query 3, Gardes passées (annonces archivées, hors annulées et modération).
         //   Les avis reçus en tant que propriétaire sont désormais dérivés du set principal
-        //   `reviews` via `sitOwnerBySitId` (cf. useMemo `ownerReviewsDerived`) — plus de
+        //   `reviews` via `sitOwnerBySitId` (cf. useMemo `ownerReviewsDerived`), plus de
         //   requête dédiée ici, pour garantir la cohérence des compteurs par rôle.
         // Lecture via la vue publique réduite : la table `sits` n'est plus lisible
         // en anonyme hors `published`. La vue n'expose ni date ni texte libre.
@@ -1554,7 +1554,7 @@ export default function PublicSitterProfile() {
               return <StoryTiles tiles={tiles} />;
             })()}
 
-            {/* 2. Qui est {prénom} — bio + motivation + grille de faits */}
+            {/* 2. Qui est {prénom}, bio + motivation + grille de faits */}
             <section aria-label={`À propos de ${firstName}`} className="scroll-mt-20">
               <div className="mb-5">
                 <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-secondary">
@@ -1643,7 +1643,7 @@ export default function PublicSitterProfile() {
               </TrustStory>
             )}
 
-            {/* 4. Avis — liste réelle ou empty raconté */}
+            {/* 4. Avis, liste réelle ou empty raconté */}
             <section aria-label="Avis reçus" className="scroll-mt-20">
               <div className="mb-5">
                 <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-secondary">
@@ -1804,7 +1804,7 @@ export default function PublicSitterProfile() {
             </div>
           </div>
 
-          {/* Rail STICKY (desktop ≥ lg) — 340 px, aligné haut, self-start. */}
+          {/* Rail STICKY (desktop ≥ lg), 340 px, aligné haut, self-start. */}
           <ProfileRail>{railChildren}</ProfileRail>
           </div>
           {/* CTA sticky mobile : unifié en dehors des onglets (vague 38). */}
@@ -1815,7 +1815,7 @@ export default function PublicSitterProfile() {
 
 
 
-      {/* ── ONGLET PROPRIO — flux narratif miroir vague 37 (vague 38) ── */}
+      {/* ── ONGLET PROPRIO, flux narratif miroir vague 37 (vague 38) ── */}
       {activeTab === 'proprio' && (() => {
         // Rail droit contextuel : affinité miroir (sitter → owner) + Alma + Pouls.
         const redirectTo = `/gardiens/${id}?tab=proprio`;

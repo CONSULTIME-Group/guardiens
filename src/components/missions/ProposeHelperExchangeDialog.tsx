@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { logger } from "@/lib/logger";
 import { useNavigate } from "react-router-dom";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -73,7 +75,7 @@ const ProposeHelperExchangeDialog = ({
       const messageContent = [
         needDescription.trim(),
         exchangeOffer.trim(),
-        exchangeDate ? `Le ${exchangeDate} me conviendrait.` : "",
+        exchangeDate ? `Le ${format(new Date(exchangeDate), "d MMMM yyyy", { locale: fr })} me conviendrait.` : "",
       ].filter(Boolean).join("\n");
 
       const { error: msgError } = await supabase.from("messages").insert({

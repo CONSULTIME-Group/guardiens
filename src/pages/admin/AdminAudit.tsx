@@ -308,7 +308,7 @@ const AdminAudit = () => {
                     </TableCell>
                     <TableCell className="max-w-md">
                       <div className="text-xs text-muted-foreground truncate" title={metadataSummary(r)}>
-                        {metadataSummary(r) || "—"}
+                        {metadataSummary(r) || "·"}
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
@@ -330,7 +330,7 @@ const AdminAudit = () => {
 
       <div className="flex items-center justify-between text-sm text-muted-foreground">
         <div>
-          {total > 0 ? `${page * PAGE_SIZE + 1}–${Math.min((page + 1) * PAGE_SIZE, total)} sur ${total}` : "0 résultat"}
+          {total > 0 ? `${page * PAGE_SIZE + 1} à ${Math.min((page + 1) * PAGE_SIZE, total)} sur ${total}` : "0 résultat"}
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={page === 0 || loading}>

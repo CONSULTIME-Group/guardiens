@@ -1,5 +1,5 @@
 /**
- * Alma — Trigger sitter_reactive_owner_context (P2).
+ * Alma, Trigger sitter_reactive_owner_context (P2).
  *
  * Monté sur SitterSitView. Charge la latence médiane de première réponse de
  * l'owner via RPC `get_owner_response_median_minutes`. Ne s'affiche QUE si

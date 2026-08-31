@@ -1,5 +1,5 @@
 /**
- * Owner Pass 3 — Concierge IA : composant "décrivez votre absence en 1 phrase".
+ * Owner Pass 3, Concierge IA : composant "décrivez votre absence en 1 phrase".
  *
  * Appelle l'edge function `draft-sit-from-prompt` qui génère un brouillon
  * complet et l'insère en DB. Redirection vers /sits/create?draftId=... où

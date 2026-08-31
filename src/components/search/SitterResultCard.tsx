@@ -1,7 +1,7 @@
 import { storageImageUrl } from "@/lib/storageImage";
 
 /**
- * Carte gardien — vague 42, refonte visuelle "carnet".
+ * Carte gardien, vague 42, refonte visuelle "carnet".
  *
  * Comportement (vague 40) INCHANGÉ :
  *  - carte = Link vers /gardiens/:id

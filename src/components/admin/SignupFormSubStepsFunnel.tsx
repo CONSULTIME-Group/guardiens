@@ -2,7 +2,7 @@
  * Funnel des sous-étapes du formulaire /inscription sur 30j.
  * Objectif : localiser précisément le drop entre "rôle choisi" et
  * "submit cliqué". Compte les utilisateurs uniques par étape
- * (fallback : nb d'events si user_id NULL — visiteurs anonymes).
+ * (fallback : nb d'events si user_id NULL, visiteurs anonymes).
  */
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -91,7 +91,7 @@ export function SignupFormSubStepsFunnel() {
                         <span className="ml-2 text-destructive">-{dropPct}%</span>
                       )}
                       {dropPct !== null && dropPct <= 0 && (
-                        <span className="ml-2 text-muted-foreground/60">–</span>
+                        <span className="ml-2 text-muted-foreground/60">·</span>
                       )}
                     </span>
                   </div>

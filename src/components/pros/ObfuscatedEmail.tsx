@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
 interface Props {
-  /** Plain email — never rendered into the DOM until the user clicks reveal. */
+  /** Plain email, never rendered into the DOM until the user clicks reveal. */
   email: string;
   label?: string;
 }

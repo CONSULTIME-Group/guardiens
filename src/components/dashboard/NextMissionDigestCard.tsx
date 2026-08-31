@@ -7,7 +7,7 @@ import { useAlmaFrequency } from "@/hooks/useAlmaFrequency";
 import { trackEvent } from "@/lib/analytics";
 
 /**
- * NextMissionDigestCard — équivalent NextDigestCard pour le digest entraide
+ * NextMissionDigestCard, équivalent NextDigestCard pour le digest entraide
  * hebdomadaire (mardi 10h). Affiché sur les dashboards gardien et propriétaire
  * si `email_preferences.new_mission_digest` est true.
  *

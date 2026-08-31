@@ -170,7 +170,7 @@ export default function AdminAnalysisRequests() {
         <Card>
           <CardContent className="p-4">
             <p className="text-2xl font-bold text-primary">
-              {kpi.medianDays === null ? "–" : `${Math.round(kpi.medianDays)} j`}
+              {kpi.medianDays === null ? "·" : `${Math.round(kpi.medianDays)} j`}
             </p>
             <p className="text-xs text-muted-foreground">Délai médian de livraison</p>
           </CardContent>

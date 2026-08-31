@@ -17,7 +17,7 @@ interface SitterActivityPanelProps {
 }
 
 /**
- * Bandeau « Mon activité » — KPI strip horizontale pleine largeur.
+ * Bandeau « Mon activité », KPI strip horizontale pleine largeur.
  * Posée juste sous le cockpit, elle remplace l'ancienne colonne 3/12 isolée
  * qui destructurait la page. 6 tuiles cliquables, responsive 2 → 3 → 6 cols.
  */

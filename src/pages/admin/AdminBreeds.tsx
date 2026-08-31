@@ -460,7 +460,7 @@ const AdminBreeds = () => {
           </div>
           {progress && (
             <p className="text-sm text-muted-foreground">
-              {progress.done}/{progress.total} – réussites : {progress.ok} · échecs : {progress.failed}
+              {progress.done}/{progress.total}, réussites : {progress.ok} · échecs : {progress.failed}
             </p>
           )}
           <p className="text-xs text-muted-foreground">

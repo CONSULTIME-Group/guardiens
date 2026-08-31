@@ -95,7 +95,7 @@ const MissionResponseModal = ({
             <div className="flex items-center justify-between mt-1.5">
               <span className={`text-[11px] ${tooShort ? "text-destructive" : "text-muted-foreground"}`}>
                 {tooShort
-                  ? `Encore ${MIN_LEN - trimmed.length} caractères minimum`
+                  ? `Encore ${MIN_LEN - trimmed.length} caractères minimum pour envoyer`
                   : `Lue uniquement par ${authorFirstName || "l'auteur de l'annonce"}`}
               </span>
               <span className={`text-[11px] ${message.length > 450 ? "text-warning" : "text-muted-foreground"}`}>
@@ -111,7 +111,7 @@ const MissionResponseModal = ({
           </Button>
           <Button onClick={handleSubmit} disabled={!valid || submitting} className="gap-1.5">
             <Send className="h-3.5 w-3.5" />
-            {submitting ? "Envoi…" : "Publier ma réponse"}
+            {submitting ? "Envoi…" : "Envoyer ma réponse"}
           </Button>
         </DialogFooter>
       </DialogContent>

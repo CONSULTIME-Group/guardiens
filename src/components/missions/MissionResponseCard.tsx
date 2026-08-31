@@ -30,9 +30,10 @@ interface Props {
 
 /**
  * Carte "réponse" (esprit commentaire) sur une petite mission.
- * - Lecture publique.
+ * - Lecture privée : seuls l'auteur de la réponse, l'auteur de la mission et les
+ *   administrateurs peuvent lire cette réponse (policies de small_mission_responses).
  * - L'auteur de la mission peut « Retenir cette personne » ou décliner.
- * - Tout membre connecté (sauf l'auteur de la réponse et l'auteur de la mission) peut dire « Merci » (helpful_count).
+ * - Seul l'auteur de la mission peut dire « Merci » (helpful_count).
  */
 const MissionResponseCard = ({
   response: r,
@@ -52,10 +53,8 @@ const MissionResponseCard = ({
   const [acceptMode, setAcceptMode] = useState<"keep" | "decline_others">("decline_others");
 
   const isOwnResponse = currentUserId && r.responder_id === currentUserId;
-  const canThank =
-    !!currentUserId &&
-    !isOwnResponse &&
-    currentUserId !== missionOwnerId; // l'auteur de la mission a déjà « Retenir »
+  // Seul l'auteur de la mission lit ces réponses, lui seul peut donc remercier.
+  const canThank = !!currentUserId && !isOwnResponse && currentUserId === missionOwnerId;
 
   useEffect(() => {
     if (!currentUserId) return;
@@ -135,7 +134,7 @@ const MissionResponseCard = ({
           <p className="text-sm text-foreground/85 leading-relaxed whitespace-pre-wrap">{r.message}</p>
 
           <div className="flex items-center gap-2 mt-3 flex-wrap">
-            {/* Merci (tous les membres, sauf auteur de la mission et de la réponse) */}
+            {/* Merci : réservé à l'auteur de la mission */}
             {canThank && (
               <button
                 type="button"

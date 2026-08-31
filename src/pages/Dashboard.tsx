@@ -174,7 +174,7 @@ const Dashboard = () => {
         window.history.replaceState({}, "", "/dashboard");
       }
     }
-    // Pass 3 — Welcome Alma : premier atterrissage depuis l'email de bienvenue.
+    // Pass 3, Welcome Alma : premier atterrissage depuis l'email de bienvenue.
     if (searchParams.get("welcome") === "alma") {
       try {
         trackEvent("alma_dashboard_first_meeting_seen", {

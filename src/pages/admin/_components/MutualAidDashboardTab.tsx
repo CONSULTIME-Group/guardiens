@@ -12,7 +12,7 @@ import { trackEvent } from "@/lib/analytics";
 import { missionCategoryLabel } from "@/lib/missionCategories";
 
 /**
- * Chantier 8 Pass 3 — Dashboard admin dédié à l'entraide.
+ * Chantier 8 Pass 3, Dashboard admin dédié à l'entraide.
  * URL : /admin/emails?tab=mutual-aid
  * Analytics : admin_mutual_aid_dashboard_seen émis une fois par montage.
  */
@@ -25,7 +25,7 @@ const RANGE_LABEL: Record<Range, string> = {
   "90d": "90 derniers jours",
 };
 
-const pct = (num: number, den: number) => (den > 0 ? `${((num / den) * 100).toFixed(1)}%` : "–");
+const pct = (num: number, den: number) => (den > 0 ? `${((num / den) * 100).toFixed(1)}%` : "·");
 
 interface EmailStats {
   key: string;
@@ -208,7 +208,7 @@ const MutualAidDashboardTab = () => {
     setDormant((dormantRes.data || []) as DormantMission[]);
     setAutoClosed((autoRes.data || []) as AutoClosedMission[]);
 
-    // Funnel — s'appuie sur la RPC dédiée. Silencieux si erreur pour ne pas
+    // Funnel, s'appuie sur la RPC dédiée. Silencieux si erreur pour ne pas
     // casser le reste du dashboard.
     try {
       const periodDays = range === "7d" ? 7 : range === "30d" ? 30 : 90;
@@ -319,7 +319,7 @@ const MutualAidDashboardTab = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2 border-t border-border">
               <MetricPill
                 label="Bout en bout"
-                value={funnel.missions.rate_end_to_end != null ? `${funnel.missions.rate_end_to_end}%` : "–"}
+                value={funnel.missions.rate_end_to_end != null ? `${funnel.missions.rate_end_to_end}%` : "·"}
                 hint="Publication vers retour laissé"
               />
               <MetricPill
@@ -329,7 +329,7 @@ const MutualAidDashboardTab = () => {
               />
               <MetricPill
                 label="Questions avec réponse"
-                value={funnel.questions.rate_answered != null ? `${funnel.questions.rate_answered}%` : "–"}
+                value={funnel.questions.rate_answered != null ? `${funnel.questions.rate_answered}%` : "·"}
                 hint={`${funnel.questions.with_answer} sur ${funnel.questions.posted} posée${funnel.questions.posted > 1 ? "s" : ""}`}
               />
             </div>
@@ -395,7 +395,7 @@ const MutualAidDashboardTab = () => {
                 {dormant.map((m) => (
                   <TableRow key={m.id}>
                     <TableCell className="font-medium max-w-[24rem]"><span className="line-clamp-1">{m.title}</span></TableCell>
-                    <TableCell>{m.city || "–"}</TableCell>
+                    <TableCell>{m.city || "·"}</TableCell>
                     <TableCell>{missionCategoryLabel(m.category)}</TableCell>
                     <TableCell>{format(new Date(m.created_at), "d MMM yyyy", { locale: fr })}</TableCell>
                     <TableCell className="text-right">
@@ -448,7 +448,7 @@ const MutualAidDashboardTab = () => {
                 {autoClosed.map((m) => (
                   <TableRow key={m.id}>
                     <TableCell className="font-medium max-w-[24rem]"><span className="line-clamp-1">{m.title}</span></TableCell>
-                    <TableCell>{m.city || "–"}</TableCell>
+                    <TableCell>{m.city || "·"}</TableCell>
                     <TableCell>{missionCategoryLabel(m.category)}</TableCell>
                     <TableCell>{format(new Date(m.closed_at), "d MMM yyyy", { locale: fr })}</TableCell>
                     <TableCell><code className="text-[11px] px-1.5 py-0.5 rounded bg-muted">{m.close_reason}</code></TableCell>
@@ -489,7 +489,7 @@ const MetricPill = ({ label, value, hint }: { label: string; value: string; hint
 );
 
 const formatMedianDuration = (seconds: number | null): string => {
-  if (seconds == null) return "–";
+  if (seconds == null) return "·";
   if (seconds < 3600) return `${Math.round(seconds / 60)} min`;
   if (seconds < 86400) return `${(seconds / 3600).toFixed(1)} h`;
   return `${(seconds / 86400).toFixed(1)} j`;

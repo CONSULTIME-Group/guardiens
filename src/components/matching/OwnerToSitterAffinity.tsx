@@ -22,7 +22,7 @@ interface Props {
   size?: "sm" | "md";
   /** Afficher le CTA "compléter votre profil" si owner incomplet. */
   showCta?: boolean;
-  /** "single" (détail) ou "list" (carte de liste) — affecte le wording du CTA. */
+  /** "single" (détail) ou "list" (carte de liste), affecte le wording du CTA. */
   scope?: "single" | "list";
   /** Texte adjacent au badge. */
   caption?: string;

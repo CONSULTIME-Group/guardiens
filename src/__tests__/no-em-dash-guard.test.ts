@@ -41,7 +41,7 @@ const EXCLUDE = [
 function search(pattern: string): string[] {
   let output = '';
   try {
-    output = execSync(`rg -n "${pattern}" ${SCAN_PATHS} ${EXCLUDE.join(' ')}`, {
+    output = execSync(`rg -n '${pattern}' ${SCAN_PATHS} ${EXCLUDE.join(' ')}`, {
       encoding: 'utf8',
     });
   } catch (e: any) {
@@ -54,7 +54,8 @@ function search(pattern: string): string[] {
 
 describe('Tirets longs', () => {
   it("le cadratin « — » (U+2014) n'apparaît jamais dans le contenu user-visible", () => {
-    const lines = search('\\xE2\\x80\\x94');
+    const lines = search('\\x{2014}');
+
     if (lines.length > 0) {
       throw new Error(
         `${lines.length} tiret(s) cadratin « — » détecté(s) dans le contenu user-visible.\n` +
@@ -69,7 +70,7 @@ describe('Tirets longs', () => {
     // Seul cas toléré : séparateur de plage numérique collé, du type « 10–12 » ou
     // « 2024–2026 ». Toute occurrence non encadrée par deux chiffres est de la
     // ponctuation de phrase.
-    const lines = search('\\xE2\\x80\\x93').filter((line) =>
+    const lines = search('\\x{2013}').filter((line) =>
       /(?<!\d)\u2013|\u2013(?!\d)/.test(line)
     );
     if (lines.length > 0) {

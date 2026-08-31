@@ -83,7 +83,7 @@ export default function BingVisibilityCard({ period = 28 }: { period?: BingPerio
               <div className="space-y-1 text-xs">
                 {queryRows.slice(0, 10).map((q, i) => (
                   <div key={i} className="flex justify-between gap-2 border-b border-border/40 pb-1">
-                    <span className="truncate">{q.Query ?? "–"}</span>
+                    <span className="truncate">{q.Query ?? "·"}</span>
                     <span className="font-mono shrink-0 text-muted-foreground">
                       {q.Clicks ?? 0} cl · {q.Impressions ?? 0} imp
                     </span>
@@ -99,7 +99,7 @@ export default function BingVisibilityCard({ period = 28 }: { period?: BingPerio
               <div className="space-y-1 text-xs">
                 {pageRows.slice(0, 10).map((p, i) => (
                   <div key={i} className="flex justify-between gap-2 border-b border-border/40 pb-1">
-                    <span className="truncate font-mono">{(p.Page ?? "–").replace(/^https?:\/\/[^/]+/, "")}</span>
+                    <span className="truncate font-mono">{(p.Page ?? "·").replace(/^https?:\/\/[^/]+/, "")}</span>
                     <span className="font-mono shrink-0 text-muted-foreground">
                       {p.Clicks ?? 0} cl · {p.Impressions ?? 0} imp
                     </span>

@@ -319,7 +319,7 @@ const SitterDashboard = () => {
     myMissions.length === 0 && nearbyMissions.length === 0;
 
 
-  // VAGUE 3 — L'entraide, invitation calme, une seule mission mise en avant.
+  // VAGUE 3, L'entraide, invitation calme, une seule mission mise en avant.
   const firstNearbyMission = nearbyMissions[0];
   const myActiveMission = myMissions.find((m: any) => m.status !== "completed" && m.status !== "cancelled") ?? null;
 
@@ -348,13 +348,13 @@ const SitterDashboard = () => {
         <RoleActivationBanner userRole={user?.role || "sitter"} />
       </div>
 
-      {/* ═══ FLUX VERTICAL UNIQUE — plus de colonne aside isolée ═══
+      {/* ═══ FLUX VERTICAL UNIQUE, plus de colonne aside isolée ═══
           Ordre cockpit : Header + Action prioritaire → KPI strip Mon activité
           → Activation → Opportunités → Profil (accordéon). */}
       <div className="min-w-0">
         {isNewSitter ? (
           <div className="mx-auto w-full max-w-4xl lg:max-w-6xl px-4 sm:px-5 lg:px-8 lg:grid lg:grid-cols-12 lg:gap-6 lg:items-start">
-            {/* ═══ FLUX principal (gauche) — rythme vertical 52px ═══ */}
+            {/* ═══ FLUX principal (gauche), rythme vertical 52px ═══ */}
             <div className="min-w-0 space-y-[52px] lg:col-span-8">
               {/* 1. ACCUEIL, salutation Bienvenue */}
               <div className="min-w-0">
@@ -406,7 +406,7 @@ const SitterDashboard = () => {
 
 
 
-            {/* ═══ RAIL droite — espacement 34px, mt-[52px] mobile. Collant
+            {/* ═══ RAIL droite, espacement 34px, mt-[52px] mobile. Collant
                 seulement si son contenu tient dans la fenêtre, sinon il
                 défile avec la page : jamais de défilement interne. ═══ */}
             <DashboardRail>
@@ -498,7 +498,7 @@ const SitterDashboard = () => {
                 </div>
               )}
 
-              {/* VAGUE 2 — carte rencontre, star unique de l'écran */}
+              {/* VAGUE 2, carte rencontre, star unique de l'écran */}
               <div className="">
                 <SitterMatchSection
                   topSits={topSits}
@@ -523,7 +523,7 @@ const SitterDashboard = () => {
                 />
               </div>
 
-              {/* VAGUE 3 — tuiles histoire (remplace SitterActivityPanel côté confirmé) */}
+              {/* VAGUE 3, tuiles histoire (remplace SitterActivityPanel côté confirmé) */}
               <div className="">
                 <SitterStoryTiles
                   pendingAppsCount={pendingAppsCount ?? 0}

@@ -356,7 +356,7 @@ const OwnerDashboard = () => {
                 parallèle, le changement d'onglet ne relance aucun réseau. */}
             <OwnerSitterSpotlight />
 
-            {/* 5. ENTRAIDE bidimensionnelle (vague 20) — même composant que le dashboard gardien */}
+            {/* 5. ENTRAIDE bidimensionnelle (vague 20), même composant que le dashboard gardien */}
             <div className="px-4 sm:px-5 md:px-8">
               <SitterEntraideSection
                 firstNearbyMission={firstNearbyMission}
@@ -390,19 +390,19 @@ const OwnerDashboard = () => {
           {/* ═══ RAIL droite : a. Pouls  b. Prochain pas  c. Alma  d. À lire  + accès.
               Collant seulement si son contenu tient dans la fenêtre. ═══ */}
           <DashboardRail>
-            {/* a. Pouls — seul bloc sombre de la page */}
+            {/* a. Pouls, seul bloc sombre de la page */}
             <div className="">
               <CommunityPulseBanner userId={user?.id} />
             </div>
 
-            {/* b. Prochain pas — terracotta doux, titre Playfair, progression */}
+            {/* b. Prochain pas, terracotta doux, titre Playfair, progression */}
             {ownerNextStepRail && (
               <div className="">
                 <NextStepRailCard step={ownerNextStepRail} />
               </div>
             )}
 
-            {/* c. Alma — une seule voix par écran, portée par le rail */}
+            {/* c. Alma, une seule voix par écran, portée par le rail */}
             <div className="">
               <AlmaRailWhisper
                 variant="owner"
@@ -420,14 +420,14 @@ const OwnerDashboard = () => {
               />
             </div>
 
-            {/* d. À lire — fiche race, saison, journal (3 liens max) */}
+            {/* d. À lire, fiche race, saison, journal (3 liens max) */}
             {ownerReadings.length > 0 && (
               <div className="">
                 <RailReadingsCard items={ownerReadings} />
               </div>
             )}
 
-            {/* e. Conseils compagnons — tuiles pratiques, PAS une voix Alma :
+            {/* e. Conseils compagnons, tuiles pratiques, PAS une voix Alma :
                 le heading visible ne mentionne pas Alma (déjà portée par
                 AlmaRailWhisper ci-dessus), le contenu reste inchangé. */}
             <div className="">

@@ -195,7 +195,7 @@ const DeliveryTab = () => {
                 <TableCell className="text-xs text-right">{pct(s.open_rate)}</TableCell>
                 <TableCell className="text-xs text-right">{pct(s.click_rate)}</TableCell>
                 <TableCell className="text-xs text-right">
-                  {s.breaches.length > 0 ? <Badge variant="destructive">{s.breaches.length}</Badge> : <span className="text-muted-foreground">–</span>}
+                  {s.breaches.length > 0 ? <Badge variant="destructive">{s.breaches.length}</Badge> : <span className="text-muted-foreground">·</span>}
                 </TableCell>
               </TableRow>
             ))}

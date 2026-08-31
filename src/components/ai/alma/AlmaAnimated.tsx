@@ -1,5 +1,5 @@
 /**
- * <AlmaAnimated /> — façade historique.
+ * <AlmaAnimated />, façade historique.
  *
  * Alma n'a plus qu'un seul visage : le SVG stage-aware. Ce wrapper est
  * conservé pour les points d'appel qui rendaient auparavant le plein

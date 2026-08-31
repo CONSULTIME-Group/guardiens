@@ -82,7 +82,7 @@ const MessageComposer = ({ value, onChange, onSend, onPickPhoto, onProposeVideoC
         tabIndex={-1}
       />
 
-      {/* Bouton photo — cible tactile 44 × 44 px */}
+      {/* Bouton photo, cible tactile 44 × 44 px */}
       <button
         type="button"
         onClick={() => fileInputRef.current?.click()}
@@ -130,7 +130,7 @@ const MessageComposer = ({ value, onChange, onSend, onPickPhoto, onProposeVideoC
         ].join(" ")}
       />
 
-      {/* Bouton envoi — 44 × 44 px, ombre pin (seule ombre colorée de l'écran) */}
+      {/* Bouton envoi, 44 × 44 px, ombre pin (seule ombre colorée de l'écran) */}
       <Button
         size="icon"
         onClick={onSend}

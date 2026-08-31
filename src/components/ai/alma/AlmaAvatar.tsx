@@ -1,5 +1,5 @@
 /**
- * <AlmaAvatar /> — façade historique.
+ * <AlmaAvatar />, façade historique.
  *
  * Alma n'a plus qu'un seul visage dans l'app : le SVG stage-aware de
  * <AlmaAvatarAnimated />. Ce fichier reste un wrapper de compatibilité

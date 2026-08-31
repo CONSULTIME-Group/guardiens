@@ -221,7 +221,6 @@ const SmallMissionDetail = () => {
   const [author, setAuthor] = useState<any>(null);
   const [responses, setResponses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [hasResponded, setHasResponded] = useState(false);
   const [closeModalOpen, setCloseModalOpen] = useState(false);
@@ -387,15 +386,12 @@ const SmallMissionDetail = () => {
 
   const MIN_MESSAGE_LEN = 10;
   const MAX_MESSAGE_LEN = 500;
-  const trimmedMessage = message.trim();
-  const messageTooShort = trimmedMessage.length > 0 && trimmedMessage.length < MIN_MESSAGE_LEN;
-  const messageValid = trimmedMessage.length >= MIN_MESSAGE_LEN && trimmedMessage.length <= MAX_MESSAGE_LEN;
 
   const handleRespond = async (overrideMessage?: string) => {
     if (!user || !id || submitting) return;
-    const msg = (overrideMessage ?? message).trim();
+    const msg = (overrideMessage ?? "").trim();
     if (!msg) {
-      toast({ variant: "destructive", title: "Message vide", description: "Écrivez un mot avant de publier votre réponse." });
+      toast({ variant: "destructive", title: "Message vide", description: "Écrivez un mot avant d'envoyer votre réponse." });
       return;
     }
     if (msg.length < MIN_MESSAGE_LEN) {
@@ -463,7 +459,6 @@ const SmallMissionDetail = () => {
           });
         }
         setHasResponded(true);
-        setMessage("");
         const originFeed = readMissionSource(missionUuid!);
         void trackEvent("mission_response_source", {
           metadata: {
@@ -473,7 +468,7 @@ const SmallMissionDetail = () => {
             path: "composer",
           },
         });
-        toast({ title: "Réponse publiée !", description: "La personne qui demande va être prévenue." });
+        toast({ title: "Réponse envoyée !", description: "La personne qui demande va être prévenue." });
 
         // Note : le fan-out (notif in-app + email) est déclenché côté serveur
         // par le trigger `notify_new_mission_response` sur l'insertion de la
@@ -482,7 +477,7 @@ const SmallMissionDetail = () => {
 
     } catch (err: any) {
       logger.error("[handleRespond]", { err: String(err) });
-      toast({ variant: "destructive", title: "Erreur", description: err?.message || "Impossible de publier votre réponse." });
+      toast({ variant: "destructive", title: "Erreur", description: err?.message || "Impossible d'envoyer votre réponse." });
     } finally {
       setSubmitting(false);
     }
@@ -863,7 +858,7 @@ const SmallMissionDetail = () => {
           <div className="bg-card p-5 rounded-2xl shadow-sm border border-border space-y-3">
             <div className="flex items-center gap-2">
               <Clock className="h-5 w-5 text-info" />
-              <p className="font-heading text-lg font-semibold">Réponse publiée</p>
+              <p className="font-heading text-lg font-semibold">Réponse envoyée</p>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
               {author?.first_name || "L'auteur"} a reçu votre mot. Vous serez prévenu(e) dès qu'il y a une réponse.
@@ -964,7 +959,7 @@ const SmallMissionDetail = () => {
       );
     }
 
-    // Visiteur connecté, peut répondre — carte compacte, la vraie saisie se fait sous le fil
+    // Visiteur connecté, peut répondre, carte compacte, la vraie saisie se fait sous le fil
     if (mission.status === "open" && canApplyMissions) {
       const isOffer = (mission as any).mission_type === "offre";
       const ctaLabel = isOffer ? "Solliciter cette aide" : "Répondre à cette annonce";
@@ -1379,10 +1374,13 @@ const SmallMissionDetail = () => {
                         <Calendar className="h-3 w-3" /> Période
                       </dt>
                       <dd className="text-sm font-semibold text-foreground">
-                        {mission.date_needed
-                          ? format(new Date(mission.date_needed), "d MMM", { locale: fr })
-                          : "Dès que possible"}
-                        {mission.end_date ? ` – ${format(new Date(mission.end_date), "d MMM", { locale: fr })}` : ""}
+                        {mission.date_needed && mission.end_date
+                          ? `du ${format(new Date(mission.date_needed), "d MMM", { locale: fr })} au ${format(new Date(mission.end_date), "d MMM", { locale: fr })}`
+                          : mission.date_needed
+                            ? format(new Date(mission.date_needed), "d MMM", { locale: fr })
+                            : mission.end_date
+                              ? `jusqu'au ${format(new Date(mission.end_date), "d MMM", { locale: fr })}`
+                              : "Dès que possible"}
                       </dd>
                     </div>
                   )}
@@ -1446,7 +1444,7 @@ const SmallMissionDetail = () => {
         </div>
 
         {/* ══════════════════════════════════════════════════════ */}
-        {/* ── Réponses (lecture publique, esprit commentaires) ── */}
+        {/* ── Réponses privées : chaque proposition n'est lue que par son auteur et par l'auteur de l'annonce ── */}
         {/* ══════════════════════════════════════════════════════ */}
         {(mission.status === "open" || mission.status === "in_progress" || mission.status === "completed") && (
           <section id="reponses" className="mt-8 md:mt-12 pt-6 md:pt-8 border-t border-border scroll-mt-8">
@@ -1475,8 +1473,6 @@ const SmallMissionDetail = () => {
                     Seul {author?.first_name || "l'auteur"} peut la lire. Si vous êtes
                     <span className="font-semibold text-foreground"> retenu(e) pour l'aider</span>, vous apparaîtrez alors
                     comme <span className="font-semibold text-success">« personne retenue »</span> ici et sur votre profil public.
-                    Vous pouvez aussi dire
-                    <span className="font-semibold text-foreground"> « Merci »</span> à une réponse utile.
                   </>
                 )}
               </div>
@@ -1512,10 +1508,11 @@ const SmallMissionDetail = () => {
 
               {/* Zone live pour annoncer l'ajout d'une réponse aux lecteurs d'écran */}
               <div className="sr-only" aria-live="polite" aria-atomic="true">
-                {responses.length > 0 ? `${responses.length} réponse${responses.length > 1 ? "s" : ""} publiée${responses.length > 1 ? "s" : ""}.` : ""}
+                {responses.length > 0 ? `${responses.length} réponse${responses.length > 1 ? "s" : ""} envoyée${responses.length > 1 ? "s" : ""}.` : ""}
               </div>
 
-              {/* Composer inline type commentaire */}
+              {/* Chemin de réponse unique : la modale, qui porte l'aide à la
+                  rédaction et la mention de confidentialité. */}
               {!isAuthor && mission.status === "open" && canApplyMissions && !hasResponded && (
                 pendingResponses.length >= 5 ? (
                   <div className="rounded-2xl border border-warning/40 bg-warning-soft/40 p-4 text-sm text-foreground/85">
@@ -1525,92 +1522,37 @@ const SmallMissionDetail = () => {
                     </p>
                   </div>
                 ) : (
-                <section
-                  id="composer"
-                  className="scroll-mt-24 space-y-3"
-                  aria-labelledby="composer-heading"
-                >
-                  <h3 id="composer-heading" className="sr-only">Publier une réponse à la mission</h3>
+                <section id="composer" className="scroll-mt-24 space-y-3" aria-labelledby="composer-heading">
+                  <h3 id="composer-heading" className="sr-only">Envoyer une réponse privée à l'auteur</h3>
                   {pendingResponses.length > 0 && (
                     <p className="text-xs text-muted-foreground">
                       {pendingResponses.length} personne{pendingResponses.length > 1 ? "s" : ""} {pendingResponses.length > 1 ? "ont" : "a"} déjà proposé son aide (5 maximum).
                     </p>
                   )}
                   {identityRecommended && <IdentityRecommendedHint />}
-                  <form
-                    className="bg-card border border-border rounded-2xl p-3 md:p-4 flex items-start gap-3"
-                    onSubmit={(e) => { e.preventDefault(); handleRespond(); }}
-                    aria-busy={submitting}
+                  <Button
+                    size="lg"
+                    className="rounded-full gap-1.5"
+                    onClick={() => {
+                      setResponseModalOpen(true);
+                      trackEvent("mission_response_modal_opened", {
+                        metadata: {
+                          mission_id: mission.id,
+                          mission_type: (mission as any).mission_type === "offre" ? "offre" : "besoin",
+                        },
+                      });
+                    }}
                   >
-                    {(user as any)?.avatar_url ? (
-                      <img
-                        src={avatarImageUrl((user as any).avatar_url, 40)}
-                        alt=""
-                        aria-hidden="true"
-                        className="w-9 h-9 md:w-10 md:h-10 rounded-full object-cover shrink-0"
-                      />
-                    ) : (
-                      <div
-                        aria-hidden="true"
-                        className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-muted flex items-center justify-center font-bold text-sm shrink-0"
-                      >
-                        {(user as any)?.first_name?.charAt(0) || "?"}
-                      </div>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <label htmlFor="composer-textarea" className="sr-only">
-                        Votre réponse à {author?.first_name || "l'auteur"} (minimum {MIN_MESSAGE_LEN} caractères, maximum {MAX_MESSAGE_LEN})
-                      </label>
-                      <Textarea
-                        id="composer-textarea"
-                        name="mission-response"
-                        placeholder={`Répondez à ${author?.first_name || "l'auteur"}, présentez-vous en deux mots…`}
-                        value={message}
-                        onChange={(e) => setMessage(e.target.value.slice(0, MAX_MESSAGE_LEN))}
-                        onKeyDown={(e) => {
-                          if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && messageValid && !submitting) {
-                            e.preventDefault();
-                            handleRespond();
-                          }
-                        }}
-                        rows={3}
-                        required
-                        minLength={MIN_MESSAGE_LEN}
-                        maxLength={MAX_MESSAGE_LEN}
-                        aria-required="true"
-                        aria-invalid={messageTooShort}
-                        aria-describedby={messageTooShort ? "composer-error composer-help" : "composer-help"}
-                        className={`min-h-[72px] resize-none rounded-xl border-0 bg-muted/50 focus-visible:ring-1 text-sm md:text-base ${messageTooShort ? "focus-visible:ring-destructive/60 ring-1 ring-destructive/40" : "focus-visible:ring-primary/40"}`}
-                      />
-                      {messageTooShort && (
-                        <p id="composer-error" className="text-[11px] text-destructive mt-1.5" role="alert">
-                          Encore {MIN_MESSAGE_LEN - trimmedMessage.length} caractère{MIN_MESSAGE_LEN - trimmedMessage.length > 1 ? "s" : ""} minimum pour publier.
-                        </p>
-                      )}
-                      <div className="flex items-center justify-between gap-2 mt-2">
-                        <span id="composer-help" className={`text-[11px] ${message.length > 450 ? "text-warning" : "text-muted-foreground"}`}>
-                          <span aria-hidden="true">{message.length}/{MAX_MESSAGE_LEN} · Lue uniquement par {author?.first_name || "l'auteur de l'annonce"}</span>
-                          <span className="sr-only">
-                            {message.length} caractères sur {MAX_MESSAGE_LEN}. Votre réponse n'est lue que par {author?.first_name || "l'auteur de l'annonce"}. Elle n'apparaît nulle part publiquement. Astuce : Ctrl + Entrée pour publier.
-                          </span>
-                        </span>
-                        <Button
-                          type="submit"
-                          size="sm"
-                          disabled={submitting || !messageValid}
-                          aria-disabled={submitting || !messageValid}
-                          aria-label={submitting ? "Envoi de la réponse en cours" : "Publier la réponse"}
-                          className="rounded-full gap-1.5 min-h-11"
-                        >
-                          <Send className="h-3.5 w-3.5" aria-hidden="true" />
-                          <span>{submitting ? "Envoi…" : "Publier"}</span>
-                        </Button>
-                      </div>
-                    </div>
-                  </form>
+                    <Send className="h-3.5 w-3.5" aria-hidden="true" />
+                    Répondre
+                  </Button>
+                  <p className="text-[11px] text-muted-foreground">
+                    Votre réponse n'est lue que par {author?.first_name || "l'auteur de l'annonce"}.
+                  </p>
                 </section>
                 )
               )}
+
 
               {/* États composer : déjà répondu / non éligible */}
               {!isAuthor && hasResponded && (
@@ -1822,9 +1764,13 @@ const SmallMissionDetail = () => {
               size="lg"
               className="w-full rounded-full font-bold text-base shadow-lg shadow-primary/20"
               onClick={() => {
-                const el = document.getElementById("composer");
-                el?.scrollIntoView({ behavior: "smooth", block: "center" });
-                setTimeout(() => document.getElementById("composer-textarea")?.focus(), 400);
+                setResponseModalOpen(true);
+                trackEvent("mission_response_modal_opened", {
+                  metadata: {
+                    mission_id: mission.id,
+                    mission_type: (mission as any).mission_type === "offre" ? "offre" : "besoin",
+                  },
+                });
               }}
             >
               {(mission as any).mission_type === "offre" ? "Solliciter cette aide" : "Répondre à cette annonce"}

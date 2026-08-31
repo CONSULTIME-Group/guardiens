@@ -1,5 +1,5 @@
 /**
- * Alma Pass 1 — Chantier 2 : brise-glace Messages.
+ * Alma Pass 1, Chantier 2 : brise-glace Messages.
  * S'affiche quand un thread est vide et qu'il y a un contexte sit ou mission.
  * Vouvoiement/tutoiement selon l'audience.
  */

@@ -53,7 +53,7 @@ const RESPONSE_CHUNK = 200;
 // view_count = vues uniques (hors auteur, 1 par session) : libellé unifié partout.
 const VIEWS_LABEL = "Vues uniques";
 const VIEWS_HINT = "Vues uniques (hors auteur, 1 par session)";
-// Detect money mentions — symbol/word boundary based, lower false positives
+// Detect money mentions, symbol/word boundary based, lower false positives
 const moneyPattern = /(\d+\s*€|€\s*\d+|\beuros?\b|\brémunér|\brémuner|\bremuner|\bsalaire\b|\btarif\b|\bpayer\b|\bpaiement\b|\bcash\b|\bespèces?\b)/i;
 
 type SortKey = "created_at" | "view_count" | "response_count";
@@ -485,7 +485,7 @@ const AdminSmallMissions = () => {
               const views = m.view_count ?? 0;
               const resp = responseCounts[m.id] || 0;
               const notified = notifiedCounts[m.id] || 0;
-              const ratio = views > 0 ? `${((resp / views) * 100).toFixed(0)}%` : "–";
+              const ratio = views > 0 ? `${((resp / views) * 100).toFixed(0)}%` : "·";
               return (
                 <TableRow key={m.id} className={isSuspect ? "bg-warning-soft/50" : ""}>
                   <TableCell className="font-medium max-w-[180px] truncate">

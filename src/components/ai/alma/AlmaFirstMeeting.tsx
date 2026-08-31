@@ -1,5 +1,5 @@
 /**
- * <AlmaFirstMeeting /> — moment d'accueil unique où Alma se présente sur
+ * <AlmaFirstMeeting />, moment d'accueil unique où Alma se présente sur
  * le dashboard. S'affiche UNE seule fois par utilisateur (flag serveur
  * `profiles.alma_first_meeting_seen`), puis plus jamais.
  *

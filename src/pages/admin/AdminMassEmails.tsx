@@ -766,7 +766,7 @@ const AdminMassEmails = () => {
           </div>
         </div>
 
-        {/* Right column – History */}
+        {/* Right column, History */}
         <div>
           <Card>
             <CardHeader><CardTitle className="text-base">Envois précédents</CardTitle></CardHeader>
@@ -818,7 +818,7 @@ const AdminMassEmails = () => {
                                 )}
                               </span>
                             ) : (
-                              <span className="text-muted-foreground">–</span>
+                              <span className="text-muted-foreground">·</span>
                             )}
                           </TableCell>
                           <TableCell>

@@ -59,8 +59,8 @@ export const CITIES: CityData[] = [
  },
  ],
  riskProfile: [
- "Verglas et neige : octobre–avril, notamment sur les hauteurs de Seynod et Cran-Gevrier",
- "Affluence touristique juillet–août : accès lac saturé le week-end",
+ "Verglas et neige : octobre à avril, notamment sur les hauteurs de Seynod et Cran-Gevrier",
+ "Affluence touristique juillet à août : accès lac saturé le week-end",
  ],
  expertiseTips: [
  "Nos gardiens Annecy connaissent les périodes de gel et anticipent la gestion du chauffage et des canalisations.",
@@ -152,7 +152,7 @@ export const CITIES: CityData[] = [
  },
  ],
  riskProfile: [
- "Pollution en cuvette : pic aux particules fréquent novembre–février, fenêtres fermées recommandées",
+ "Pollution en cuvette : pic aux particules fréquent novembre à février, fenêtres fermées recommandées",
  "Enneigement ponctuel sur les hauteurs de Meylan et Eybens en hiver",
  ],
  expertiseTips: [
@@ -196,7 +196,7 @@ export const CITIES: CityData[] = [
  },
  ],
  riskProfile: [
- "Inondations Saône : quais bas inondables décembre–mars, logements proches à surveiller",
+ "Inondations Saône : quais bas inondables décembre à mars, logements proches à surveiller",
  "Jardins avec piscine : fermeture sécurisée à vérifier avant chaque mission",
  ],
  expertiseTips: [
@@ -242,7 +242,7 @@ export const CITIES: CityData[] = [
  },
  ],
  riskProfile: [
- "Verglas fréquent novembre–mars, notamment sur les hauteurs de Jacob-Bellecombette",
+ "Verglas fréquent novembre à mars, notamment sur les hauteurs de Jacob-Bellecombette",
  "Brouillard matinal automnal persistent : vigilance pour les sorties tôt le matin",
  ],
  expertiseTips: [

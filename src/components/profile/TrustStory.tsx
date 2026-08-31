@@ -1,5 +1,5 @@
 /**
- * TrustStory — bloc « Confiance » narratif du profil public gardien (vague 37).
+ * TrustStory, bloc « Confiance » narratif du profil public gardien (vague 37).
  *
  * Lot 1b : shell d'API minimal, la composition narrative est branchée au Lot 3.
  * On expose deux ancres id compatibles avec le hero (ID vérifiée → scroll) :

@@ -15,7 +15,7 @@ interface AuthIllustrationPanelProps {
 /**
  * Panneau d'illustration partagé entre /login et /inscription.
  *
- * v3 — Optimisations performance majeures :
+ * v3, Optimisations performance majeures :
  *  - WebM supprimé (encodage VP9 inefficace sur gouache détaillée : 5MB vs MP4 1.9MB).
  *    MP4 H.264 unique, supporté partout (Chrome/FF/Safari/Edge desktop+mobile).
  *  - Lecture UNIQUE (loop={false}) puis freeze sur la dernière frame.

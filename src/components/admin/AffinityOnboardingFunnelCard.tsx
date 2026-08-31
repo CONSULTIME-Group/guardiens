@@ -159,7 +159,7 @@ export function AffinityOnboardingFunnelCard({ since }: { since: string }) {
           />
           <KpiTile
             label="Durée moyenne"
-            value={stats.avgDuration ? `${stats.avgDuration} s` : "–"}
+            value={stats.avgDuration ? `${stats.avgDuration} s` : "·"}
           />
         </div>
         {stats.started === 0 && (

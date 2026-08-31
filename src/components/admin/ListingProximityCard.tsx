@@ -1,5 +1,5 @@
 /**
- * ListingProximityCard — envoi ciblé d'une annonce de garde aux gardiens
+ * ListingProximityCard, envoi ciblé d'une annonce de garde aux gardiens
  * de proximité.
  *
  * Flux : preview (compte + liste) → confirmation explicite (saisie du nombre

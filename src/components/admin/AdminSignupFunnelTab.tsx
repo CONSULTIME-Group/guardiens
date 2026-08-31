@@ -71,7 +71,7 @@ const TARGET = {
 };
 
 function pct(n: number | null | undefined, digits = 1): string {
-  if (n === null || n === undefined || Number.isNaN(n)) return "–";
+  if (n === null || n === undefined || Number.isNaN(n)) return "·";
   return `${(n * 100).toFixed(digits)} %`;
 }
 
@@ -342,7 +342,7 @@ export default function AdminSignupFunnelTab() {
                     <TableCell>{r.code}</TableCell>
                     <TableCell className="text-right">{r.volume.toLocaleString("fr-FR")}</TableCell>
                     <TableCell className="text-right">
-                      {r.last_seen ? new Date(r.last_seen).toLocaleString("fr-FR") : "–"}
+                      {r.last_seen ? new Date(r.last_seen).toLocaleString("fr-FR") : "·"}
                     </TableCell>
                   </TableRow>
                 ))}

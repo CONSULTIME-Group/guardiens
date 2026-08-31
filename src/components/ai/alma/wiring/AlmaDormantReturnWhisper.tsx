@@ -1,5 +1,5 @@
 /**
- * Alma Pass 4 — Trigger 12 (P0 retour d'absence longue).
+ * Alma Pass 4, Trigger 12 (P0 retour d'absence longue).
  *
  * Composant invisible monté dans Dashboard. Détecte une première session
  * après plus de 14 jours d'inactivité (via `profiles.last_dashboard_visit_at`).

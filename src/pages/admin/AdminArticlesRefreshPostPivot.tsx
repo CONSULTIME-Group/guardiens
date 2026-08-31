@@ -356,8 +356,8 @@ export default function AdminArticlesRefreshPostPivot() {
                       </Badge>
                     </TableCell>
                     <TableCell>{log.applied ? "Oui" : "Non"}</TableCell>
-                    <TableCell>{log.noindex_after == null ? "–" : log.noindex_after ? "Oui" : "Non"}</TableCell>
-                    <TableCell>{log.changes_count ?? "–"}</TableCell>
+                    <TableCell>{log.noindex_after == null ? "·" : log.noindex_after ? "Oui" : "Non"}</TableCell>
+                    <TableCell>{log.changes_count ?? "·"}</TableCell>
                   </TableRow>
                 );
               })}

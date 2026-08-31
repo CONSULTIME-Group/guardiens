@@ -1708,7 +1708,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  </SelectContent>
  </Select>
  </div>
-   {/* Lien "Français à l'étranger" retiré du toolbar — trop peu utilisé pour occuper cette place. Déplacé en fin de résultats. */}
+   {/* Lien "Français à l'étranger" retiré du toolbar, trop peu utilisé pour occuper cette place. Déplacé en fin de résultats. */}
   {/* Bouton « Créer une alerte » retiré du toolbar : l'empty state et OutOfZoneBanner exposent déjà ce CTA au bon moment. */}
   <div className="hidden sm:flex border border-border rounded-lg overflow-hidden shrink-0">
  <button

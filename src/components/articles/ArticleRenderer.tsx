@@ -11,7 +11,7 @@ const SB = "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/pr
 
 
 const ARTICLE_IMAGES: Record<string, string> = {
-  // ── LOT 1 – migrated to Supabase Storage ──────────────────
+  // ── LOT 1, migrated to Supabase Storage ──────────────────
   "/images/parc-tete-dor-chiens-lyon.jpg": `${SB}/parc-tete-dor-chiens-lyon.webp`,
   "/images/golden-retriever-tete-dor-lyon.jpg": `${SB}/golden-retriever-tete-dor-lyon.webp`,
   "/images/parc-parilly-labrador-lyon.jpg": `${SB}/parc-parilly-labrador-lyon.webp`,
@@ -25,7 +25,7 @@ const ARTICLE_IMAGES: Record<string, string> = {
   "/images/saint-etienne-confiance-cafe.jpg": `${SB}/saint-etienne-confiance-cafe.webp`,
   "/images/garde-animaux-croix-rousse-lyon.jpg": `${SB}/garde-animaux-croix-rousse-lyon.webp`,
 
-  // ── LOT 2 – migrated to Supabase Storage ──────────────────
+  // ── LOT 2, migrated to Supabase Storage ──────────────────
   "/images/lyon-hero-quais.jpg": `${SB}/lyon-hero-quais.webp`,
   "/images/lyon-chat-fenetre.jpg": `${SB}/lyon-chat-fenetre.webp`,
   "/images/venissieux-parilly-chat.jpg": `${SB}/venissieux-parilly-chat.webp`,
@@ -42,7 +42,7 @@ const ARTICLE_IMAGES: Record<string, string> = {
   "/images/valence-parc-chien.jpg": `${SB}/valence-parc-chien.webp`,
   "/images/villeurbanne-gratteciel-chien.jpg": `${SB}/villeurbanne-gratteciel-chien.webp`,
 
-  // ── LOT 3 – migrated to Supabase Storage ──────────────────
+  // ── LOT 3, migrated to Supabase Storage ──────────────────
   "/images/grenoble-bastille-chien.jpg": `${SB}/grenoble-bastille-chien.webp`,
   "/images/grenoble-chat-chartreuse.jpg": `${SB}/grenoble-chat-chartreuse.webp`,
   "/images/saint-etienne-chat-forez.jpg": `${SB}/saint-etienne-chat-forez.webp`,

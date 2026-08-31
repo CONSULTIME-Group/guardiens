@@ -1,5 +1,5 @@
 /**
- * Rail droit — carte Alma unique (une seule phrase en Playfair italique,
+ * Rail droit, carte Alma unique (une seule phrase en Playfair italique,
  * vouvoiement). Remplace l'empilement des trois whispers historiques sur le
  * profil public gardien. Choisit UNE phrase pertinente selon le contexte.
  *

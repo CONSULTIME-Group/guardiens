@@ -766,7 +766,7 @@ const CreateSmallMission = () => {
                   inputClassName="h-12 text-base"
                 />
 
-                {/* Date — Drawer full-screen mobile */}
+                {/* Date, Drawer full-screen mobile */}
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">{tp("date_label")}</Label>
                   <Drawer open={calendarOpen} onOpenChange={setCalendarOpen}>
@@ -956,22 +956,19 @@ const CreateSmallMission = () => {
         <div ref={actionBarRef} className="fixed bottom-[var(--bottom-nav-h,0px)] inset-x-0 bg-card/95 backdrop-blur border-t border-border px-4 py-3 z-40 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
           <div className="max-w-2xl mx-auto space-y-2">
             {step === 2 && identityRecommended && <IdentityRecommendedHint compact />}
-            {step === 2 && audienceCount !== null && audienceCount > 0 && (
+            {step === 2 && audienceCount !== null && (
               <div className="text-center space-y-1">
                 <p className="text-xs text-muted-foreground">
-                  {audienceCount === 1
-                    ? "1 personne de votre secteur, disponible pour ce type de coup de main, sera prévenue."
-                    : `${audienceCount} personnes de votre secteur, disponibles pour ce type de coup de main, seront prévenues.`}
+                  {audienceCount === 0
+                    ? "Personne n'est encore disponible dans votre secteur pour cette catégorie. Publiez quand même, votre annonce reste visible et les nouveaux membres la verront."
+                    : audienceCount === 1
+                      ? "1 personne de votre secteur, disponible pour ce type de coup de main, sera prévenue."
+                      : `${audienceCount} personnes de votre secteur, disponibles pour ce type de coup de main, seront prévenues.`}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Les personnes prévenues sont celles qui ont indiqué le rayon et le type d'aide qui leur conviennent.
+                  Sont prévenues les personnes du secteur dont les compétences renseignées correspondent à votre catégorie.
                 </p>
               </div>
-            )}
-            {step === 2 && audienceCount === 0 && (
-              <p className="text-xs text-muted-foreground text-center">
-                Personne n'est encore disponible dans votre secteur pour cette catégorie. Publiez quand même, votre annonce reste visible et les nouveaux membres la verront.
-              </p>
             )}
             {step === 1 ? (
               <Button

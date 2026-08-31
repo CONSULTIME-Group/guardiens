@@ -53,7 +53,7 @@ export default function IndexNowHistory() {
                   <XCircle className="h-3.5 w-3.5 text-destructive shrink-0" />
                 )}
                 <span className="text-muted-foreground shrink-0 w-20">
-                  {r.status_code ?? "–"}
+                  {r.status_code ?? "·"}
                 </span>
                 <span className="font-mono shrink-0 w-16 text-right">{r.url_count} URLs</span>
                 <span className="text-muted-foreground shrink-0 w-24 truncate">
