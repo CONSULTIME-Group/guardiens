@@ -18,8 +18,7 @@ const CATEGORY_GRADIENT: Record<string, string> = {
 };
 
 // Illustration gouache par catégorie (réutilise les assets existants src/assets/missions/).
-// Les 4 catégories réelles du schéma small_mission_category ont toutes une gouache adaptée,
-// donc l'avatar flouté n'est plus utilisé qu'en filet ultime pour d'éventuelles catégories futures.
+// Les 4 catégories réelles du schéma small_mission_category ont toutes une gouache adaptée.
 const CATEGORY_ILLUSTRATION: Record<string, string> = {
   animals: spotChien,
   garden: spotJardin,
@@ -130,7 +129,7 @@ const MissionCard = ({ mission: m, currentUserId, isAuthenticated, canApplyMissi
         isCompleted ? "opacity-70" : "",
       ].join(" ")}
     >
-      {/* Cover : photo mission → gouache catégorie → avatar flouté → gradient + glyph */}
+      {/* Cover : photo mission, puis gouache catégorie, puis gradient et glyph */}
       <div className="relative h-52 overflow-hidden shrink-0">
         {cover ? (
           <img
