@@ -194,8 +194,7 @@ const CreateSmallMission = () => {
    * Photo requise pour toutes les offres, et pour les catégories qui ont un
    * objet à montrer. Facultative là où il n'y a souvent rien à photographier.
    */
-  const photoRequiredByRule =
-    missionType === "offre" || ["animals", "garden", "house"].includes(category);
+  const photoRequiredByRule = isPhotoRequiredByRule(missionType, category);
   const photoRequired = photoRequiredByRule && !photoWaived;
 
   const step1Valid =
