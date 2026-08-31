@@ -971,7 +971,7 @@ const SmallMissionDetail = () => {
     // Visiteur connecté, peut répondre — carte compacte, la vraie saisie se fait sous le fil
     if (mission.status === "open" && canApplyMissions) {
       const isOffer = (mission as any).mission_type === "offre";
-      const ctaLabel = isOffer ? "Solliciter cette aide" : "Répondre publiquement";
+      const ctaLabel = isOffer ? "Solliciter cette aide" : "Répondre à cette annonce";
       return (
         <div className="bg-card p-5 rounded-2xl shadow-sm border border-border space-y-4">
           <div>
@@ -980,8 +980,9 @@ const SmallMissionDetail = () => {
               Adressez une proposition privée.
             </p>
             <p className="text-sm text-muted-foreground leading-relaxed mt-1">
-              Votre réponse n'est visible que par {author?.first_name || "l'auteur"} de l'annonce. S'il vous
-              <span className="font-semibold text-foreground"> retient pour aider</span>, votre nom apparaîtra alors publiquement.
+              Votre réponse n'est lue que par {author?.first_name || "l'auteur de l'annonce"}. Elle n'apparaît nulle part
+              publiquement. Si cette personne vous
+              <span className="font-semibold text-foreground"> retient pour aider</span>, votre nom apparaîtra alors sur la publication.
             </p>
           </div>
           {responsesCapReached ? (
@@ -1003,22 +1004,6 @@ const SmallMissionDetail = () => {
               >
                 {ctaLabel}
               </Button>
-              {isOffer && (
-                <Button
-                  variant="ghost"
-                  className="w-full rounded-full font-semibold text-sm gap-2"
-                  onClick={() => {
-                    setResponseModalOpen(true);
-                    trackEvent("mission_response_modal_opened", {
-                      metadata: { mission_id: mission.id, mission_type: "offre" },
-                    });
-                  }}
-                >
-                  <MessageSquare className="h-4 w-4" />
-                  Répondre à cette offre
-                </Button>
-              )}
-
             </>
           )}
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
@@ -1611,9 +1596,9 @@ const SmallMissionDetail = () => {
                       )}
                       <div className="flex items-center justify-between gap-2 mt-2">
                         <span id="composer-help" className={`text-[11px] ${message.length > 450 ? "text-warning" : "text-muted-foreground"}`}>
-                          <span aria-hidden="true">{message.length}/{MAX_MESSAGE_LEN} · Visible uniquement par l'auteur</span>
+                          <span aria-hidden="true">{message.length}/{MAX_MESSAGE_LEN} · Lue uniquement par {author?.first_name || "l'auteur de l'annonce"}</span>
                           <span className="sr-only">
-                            {message.length} caractères sur {MAX_MESSAGE_LEN}. Visible uniquement par l'auteur de la mission. Astuce : Ctrl + Entrée pour publier.
+                            {message.length} caractères sur {MAX_MESSAGE_LEN}. Votre réponse n'est lue que par {author?.first_name || "l'auteur de l'annonce"}. Elle n'apparaît nulle part publiquement. Astuce : Ctrl + Entrée pour publier.
                           </span>
                         </span>
                         <Button
@@ -1820,7 +1805,6 @@ const SmallMissionDetail = () => {
       <MissionResponseModal
         open={responseModalOpen}
         onOpenChange={setResponseModalOpen}
-        missionId={mission.id}
         missionType={((mission as any).mission_type === "offre" ? "offre" : "besoin") as "besoin" | "offre"}
         authorFirstName={author?.first_name}
         submitting={submitting}
@@ -1851,7 +1835,7 @@ const SmallMissionDetail = () => {
                 setTimeout(() => document.getElementById("composer-textarea")?.focus(), 400);
               }}
             >
-              {(mission as any).mission_type === "offre" ? "Solliciter cette aide" : "Répondre publiquement"}
+              {(mission as any).mission_type === "offre" ? "Solliciter cette aide" : "Répondre à cette annonce"}
             </Button>
           )}
         </div>
