@@ -38,7 +38,6 @@ export const SKILL_PILL_META: Record<string, { label: string }> = {
   coups_de_main: { label: MISSION_CATEGORY_LABEL.house },
 };
 
-
 export const DURATION_LABELS: Record<string, string> = {
   "1-2h": "1-2 heures",
   half_day: "Demi-journée",
@@ -60,8 +59,6 @@ export function formatDuration(raw: string): string {
 /** Union fermée dérivée de la source unique, plus « Tout » et « Mes missions ». */
 export type CategoryFilter = MissionCategory | "all" | "mine";
 export type ModeFilter = "need" | "offer";
-
-
 
 export const ENTRAIDE_HEADER_URL =
   "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/property-photos/misc/entraide-header.webp";

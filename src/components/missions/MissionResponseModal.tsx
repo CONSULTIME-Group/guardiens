@@ -9,7 +9,6 @@ import {
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  missionId: string;
   missionType: "besoin" | "offre";
   authorFirstName?: string | null;
   submitting: boolean;
@@ -31,7 +30,7 @@ const MIN_LEN = 10;
 const MAX_LEN = 500;
 
 const MissionResponseModal = ({
-  open, onOpenChange, missionId, missionType,
+  open, onOpenChange, missionType,
   authorFirstName, submitting, onSubmit,
 }: Props) => {
   const [message, setMessage] = useState("");
@@ -59,8 +58,6 @@ const MissionResponseModal = ({
     setMessage("");
   };
 
-
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
@@ -71,7 +68,7 @@ const MissionResponseModal = ({
               : `Répondre à ${authorFirstName || "l'auteur"}`}
           </DialogTitle>
           <DialogDescription>
-            Votre réponse est publique. Un mot bienveillant et concret suffit.
+            Votre réponse n'est lue que par {authorFirstName || "l'auteur de l'annonce"}. Elle n'apparaît nulle part publiquement.
           </DialogDescription>
         </DialogHeader>
 
@@ -99,7 +96,7 @@ const MissionResponseModal = ({
               <span className={`text-[11px] ${tooShort ? "text-destructive" : "text-muted-foreground"}`}>
                 {tooShort
                   ? `Encore ${MIN_LEN - trimmed.length} caractères minimum`
-                  : "Visible par tout le monde"}
+                  : `Lue uniquement par ${authorFirstName || "l'auteur de l'annonce"}`}
               </span>
               <span className={`text-[11px] ${message.length > 450 ? "text-warning" : "text-muted-foreground"}`}>
                 {message.length}/{MAX_LEN}

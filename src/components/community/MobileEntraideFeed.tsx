@@ -281,17 +281,18 @@ const MobileEntraideFeed = ({ missions, questions, loading, onPublish, proximity
                     photo={m.photos && m.photos[0] ? m.photos[0] : null}
                     category={m.category}
                     title={m.title}
+                    showLabel={false}
                     className="w-24 shrink-0 aspect-[4/3] rounded-lg"
                   />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5 flex-wrap mb-1.5">
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary uppercase tracking-wide">
+                        {MISSION_CATEGORY_LABEL[m.category as keyof typeof MISSION_CATEGORY_LABEL] || "Autre"}
+                      </span>
                       <span
                         className={`text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wide ${badgeCls}`}
                       >
                         {badgeLabel}
-                      </span>
-                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary uppercase tracking-wide">
-                        {MISSION_CATEGORY_LABEL[m.category as keyof typeof MISSION_CATEGORY_LABEL] || "Autre"}
                       </span>
                       {statusBadge && (
                         <span
