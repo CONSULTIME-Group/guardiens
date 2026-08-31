@@ -36,22 +36,36 @@ interface MissionCardCoverProps {
    * catégorie apparaît deux fois sur la même carte.
    */
   showLabel?: boolean;
+  /**
+   * Avatar de l'auteur. Sur une offre sans photo, c'est une personne qui se
+   * propose : son visage est le bon visuel, l'illustration générique ment.
+   */
+  avatarUrl?: string | null;
+  missionType?: string | null;
 }
 
-const MissionCardCover = ({ photo, category, title, className, showLabel = true }: MissionCardCoverProps) => {
+const MissionCardCover = ({
+  photo,
+  category,
+  title,
+  className,
+  showLabel = true,
+  avatarUrl = null,
+  missionType = null,
+}: MissionCardCoverProps) => {
   const [imgError, setImgError] = useState(false);
+  const [avatarError, setAvatarError] = useState(false);
   const cat = (category || "animals") as string;
   const label = missionCategoryLabel(cat);
   const gradient = CATEGORY_GRADIENT[cat] || CATEGORY_GRADIENT.other;
 
 
   const showImage = !!photo && !imgError;
+  const showAvatar = !showImage && missionType === "offre" && !!avatarUrl && !avatarError;
 
   return (
     <div
-      className={
-        "rounded-2xl overflow-hidden aspect-[4/3] bg-muted shadow-sm " + (className || "")
-      }
+      className={cn("rounded-2xl overflow-hidden aspect-[4/3] bg-muted shadow-sm", className)}
     >
       {showImage ? (
         <img
@@ -62,6 +76,20 @@ const MissionCardCover = ({ photo, category, title, className, showLabel = true 
           onError={() => setImgError(true)}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
         />
+      ) : showAvatar ? (
+        <div
+          className={`relative w-full h-full bg-gradient-to-br ${gradient} group-hover:scale-105 transition-transform duration-700 flex items-center justify-center overflow-hidden`}
+        >
+          <img
+            src={avatarImageUrl(avatarUrl, 128)}
+            alt=""
+            aria-hidden="true"
+            loading="lazy"
+            decoding="async"
+            onError={() => setAvatarError(true)}
+            className="h-[60%] aspect-square rounded-full object-cover ring-2 ring-background shadow-sm"
+          />
+        </div>
       ) : (
         <div
           className={`relative w-full h-full bg-gradient-to-br ${gradient} group-hover:scale-105 transition-transform duration-700 flex items-center justify-center overflow-hidden`}
