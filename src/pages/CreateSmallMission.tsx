@@ -422,6 +422,17 @@ const CreateSmallMission = () => {
         toast({ title: "Compte non actif", description: "Contactez le support pour rétablir l'accès à l'entraide.", variant: "destructive" });
         return;
       }
+      if (hint === "duplicate_small_mission" || msg.includes("duplicate_small_mission")) {
+        toast({
+          title: "Vous avez déjà cette annonce en ligne",
+          description: error.message,
+          variant: "destructive",
+        });
+        setStep(1);
+        setTitleTouched(true);
+        return;
+      }
+
       toast({ title: tp("toast_error_title"), description: error.message, variant: "destructive" });
       return;
     }
