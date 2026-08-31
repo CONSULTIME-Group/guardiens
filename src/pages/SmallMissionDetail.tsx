@@ -44,7 +44,6 @@ import PublicMissionView from "@/components/missions/PublicMissionView";
 import RelatedMissionCard from "@/components/missions/RelatedMissionCard";
 import MissionResponseCard from "@/components/missions/MissionResponseCard";
 import MissionResponseModal from "@/components/missions/MissionResponseModal";
-import { startConversation } from "@/lib/conversation";
 import ApproximateLocationMap from "@/components/shared/ApproximateLocationMap";
 import { isAuthorOf } from "@/lib/ownership";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
@@ -232,7 +231,6 @@ const SmallMissionDetail = () => {
   const [processingResponseId, setProcessingResponseId] = useState<string | null>(null);
   const [completing, setCompleting] = useState(false);
   const [responseModalOpen, setResponseModalOpen] = useState(false);
-  const [oneClickInterestBusy, setOneClickInterestBusy] = useState(false);
 
   // Per-person feedback tracking: receiverId → submitted
   const [feedbackSent, setFeedbackSent] = useState<Record<string, boolean>>({});
