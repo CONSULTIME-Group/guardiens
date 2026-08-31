@@ -40,8 +40,9 @@ import IdentityRecommendedHint from "@/components/missions/IdentityRecommendedHi
 import { MISSION_CATEGORIES } from "@/lib/missionCategories";
 import {
   categoryDescHelp,
-  categoryExchangeSuggestions,
+  categoryExchangeHint,
   categoryTitleExample,
+
 } from "@/lib/missionCategoryCopy";
 import { durationMismatch, DURATION_LABEL } from "@/lib/missionDurationCoherence";
 
