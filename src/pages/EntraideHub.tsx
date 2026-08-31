@@ -462,6 +462,8 @@ const EntraideHub = () => {
             category={m.category}
             title={m.title}
             showLabel={false}
+            avatarUrl={m.profiles?.avatar_url ?? null}
+            missionType={m.mission_type}
             className="w-24 sm:w-32 shrink-0 aspect-[4/3] rounded-lg"
           />
           <div className="flex-1 min-w-0">
