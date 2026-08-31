@@ -200,7 +200,8 @@ export type EventType =
   | "entraide_geoloc_banner_accepted"           // Clic "Utiliser ma position" sur le banner
   | "entraide_geoloc_banner_dismissed"          // Fermeture du banner (X ou "Plus tard")
   | "mission_composer_opened"                   // Ouverture de /petites-missions/creer (type: besoin|offre)
-  | "mission_composer_step1_completed"          // Passage step 1 → step 2 (has_template)
+  | "mission_composer_step1_completed"          // Passage étape 1 vers étape 2 (titre saisi)
+  | "mission_composer_step2_completed"          // Passage étape 2 vers étape 3 (détail complété)
   | "mission_composer_field_abandoned"          // Blur sans valeur suffisante sur un champ obligatoire (field)
   | "mission_composer_submitted"                // Submit form réussi (mission_id, category, mission_type)
   | "mission_composer_abandoned"                // Unmount avec step >= 1 sans submit (last_step, has_title)

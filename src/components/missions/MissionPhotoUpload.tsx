@@ -118,7 +118,11 @@ const MissionPhotoUpload = ({ userId, photos, onChange, onUploadingChange, onUpl
         <Progress value={progress} className="h-2" />
       )}
 
-      <p className="text-xs text-muted-foreground">{photos.length}/{MAX_PHOTOS} photos</p>
+      {/* Le compteur n'apparaît qu'une fois une photo ajoutée : un « 0/3 » à
+          vide ressemble à une exigence avant même d'avoir commencé. */}
+      {photos.length > 0 && (
+        <p className="text-xs text-muted-foreground">{photos.length}/{MAX_PHOTOS} photos</p>
+      )}
 
       <input
         ref={inputRef}
