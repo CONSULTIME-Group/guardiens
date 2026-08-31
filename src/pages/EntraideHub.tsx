@@ -28,6 +28,7 @@ import { useMissionDistance } from "@/hooks/useMissionDistance";
 import { trackEvent } from "@/lib/analytics";
 import MobileEntraideFeed from "@/components/community/MobileEntraideFeed";
 import { MISSION_CATEGORIES, MISSION_CATEGORY_LABEL } from "@/lib/missionCategories";
+import { questionCategoryToMissionCategory } from "@/lib/communityCategories";
 import { publicFirstName } from "@/lib/displayName";
 
 /**
@@ -46,12 +47,6 @@ type MissionStatus = "all" | "open" | "in_progress" | "completed";
 
 const PAGE_SIZE = 20;
 
-/** Les catégories de questions rejoignent les 4 catégories de missions. */
-const QUESTION_CAT_TO_MISSION: Record<string, string> = {
-  animaux: "animals",
-  jardin: "garden",
-  maison: "house",
-};
 
 interface MissionRow {
   id: string;
