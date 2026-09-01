@@ -337,7 +337,7 @@ const AdminListings = () => {
   const paginated = filtered.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
 
   const handleExportCsv = () => {
-    const header = ["Titre", "Proprio", "Ville", "Pays", "Début", "Fin", "Statut", "Vues", "Uniques", "Messages", "Candidatures", "Dernière vue"];
+    const header = ["Titre", "Proprio", "Ville", "Pays", "Début", "Fin", "Statut", "Vues", "Uniques", "Messages", "Candidatures", "Dernière vue", "Dépubliée le", "Motif de dépublication"];
     const esc = (v: any) => {
       const s = v == null ? "" : String(v);
       return `"${s.replace(/"/g, '""')}"`;
@@ -358,6 +358,9 @@ const AdminListings = () => {
         st?.messages ?? 0,
         st?.applications ?? 0,
         st?.lastViewAt ? format(new Date(st.lastViewAt), "yyyy-MM-dd HH:mm") : "",
+        l.unpublished_at ? format(new Date(l.unpublished_at), "d MMMM yyyy", { locale: fr }) : "",
+        l.unpublished_at ? unpublishReasonAdminLabel(l.last_unpublished_reason) : "",
+
       ].map(esc).join(",");
     });
     const csv = "\uFEFF" + [header.map(esc).join(","), ...rows].join("\n");
@@ -643,7 +646,17 @@ const AdminListings = () => {
                   <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
                     {st?.lastViewAt ? formatDistanceToNow(new Date(st.lastViewAt), { addSuffix: true, locale: fr }) : ","}
                   </TableCell>
-                  <TableCell><Badge variant={s.variant}>{s.label}</Badge></TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1 flex-wrap">
+                      <Badge variant={s.variant}>{s.label}</Badge>
+                      {listing.status === "draft" && listing.unpublished_at && listing.last_unpublished_reason && (
+                        <span className="text-[11px] text-muted-foreground">
+                          {unpublishReasonAdminLabel(listing.last_unpublished_reason)}
+                        </span>
+                      )}
+                    </div>
+                  </TableCell>
+
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
                       <Button
