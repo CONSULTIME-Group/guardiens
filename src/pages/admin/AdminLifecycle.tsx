@@ -18,6 +18,16 @@ interface SeqRow {
   exit_rate: number;
 }
 
+interface ExitRow {
+  transition: string;
+  motif: string;
+  libelle: string;
+  n: number;
+  proprios: number;
+  candidatures_perdues: number;
+  derniere: string;
+}
+
 interface TplRow {
   template_name: string;
   sent: number;
@@ -38,6 +48,40 @@ const AdminLifecycle = () => {
   const [seqs, setSeqs] = useState<SeqRow[]>([]);
   const [tpls, setTpls] = useState<TplRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [exits, setExits] = useState<ExitRow[]>([]);
+  const [exitsLoading, setExitsLoading] = useState(true);
+  const [exitsError, setExitsError] = useState(false);
+
+  // Pourquoi les annonces sortent : lecture de sit_status_history via la RPC
+  // administrateur, donc conservée même après republication.
+  useEffect(() => {
+    if (!isAdmin) return;
+    let cancelled = false;
+    (async () => {
+      setExitsLoading(true);
+      setExitsError(false);
+      const { data, error } = await supabase.rpc("admin_sit_exit_reasons" as any, { p_days: 180 });
+      if (cancelled) return;
+      if (error) {
+        setExitsError(true);
+        setExits([]);
+      } else {
+        const rows = ((data as any[]) || []).map((r) => ({
+          transition: r.transition ?? "",
+          motif: r.motif ?? "",
+          libelle: r.libelle ?? "",
+          n: Number(r.n) || 0,
+          proprios: Number(r.proprios) || 0,
+          candidatures_perdues: Number(r.candidatures_perdues) || 0,
+          derniere: r.derniere ?? "",
+        })) as ExitRow[];
+        rows.sort((a, b) => b.candidatures_perdues - a.candidatures_perdues);
+        setExits(rows);
+      }
+      setExitsLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, [isAdmin]);
 
   useEffect(() => {
     if (!isAdmin) return;
@@ -165,6 +209,47 @@ const AdminLifecycle = () => {
                     <TableCell className="text-right tabular-nums">{r.exited}</TableCell>
                     <TableCell className="text-right">
                       <Badge variant={r.exit_rate > 30 ? "destructive" : "secondary"}>{r.exit_rate} %</Badge>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader><CardTitle className="text-lg">Pourquoi les annonces sortent</CardTitle></CardHeader>
+        <CardContent className="overflow-x-auto space-y-3">
+          <p className="text-sm text-muted-foreground">
+            Ce que les propriétaires déclarent au moment où leur annonce quitte la plateforme, et ce que ces sorties coûtent en candidatures.
+          </p>
+          {exitsLoading ? (
+            <p className="text-sm text-muted-foreground">Chargement…</p>
+          ) : exitsError ? (
+            <p className="text-sm text-destructive">Lecture impossible pour le moment.</p>
+          ) : exits.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Aucune sortie d'annonce sur la période.</p>
+          ) : (
+            <Table>
+              <TableHeader><TableRow>
+                <TableHead>Transition</TableHead>
+                <TableHead>Motif</TableHead>
+                <TableHead className="text-right">Nombre</TableHead>
+                <TableHead className="text-right">Propriétaires</TableHead>
+                <TableHead className="text-right">Candidatures perdues</TableHead>
+                <TableHead className="text-right">Dernière</TableHead>
+              </TableRow></TableHeader>
+              <TableBody>
+                {exits.map((r) => (
+                  <TableRow key={`${r.transition}-${r.motif}`}>
+                    <TableCell className="text-xs">{r.transition}</TableCell>
+                    <TableCell className="text-sm">{r.libelle}</TableCell>
+                    <TableCell className="text-right tabular-nums">{r.n}</TableCell>
+                    <TableCell className="text-right tabular-nums">{r.proprios}</TableCell>
+                    <TableCell className="text-right tabular-nums">{r.candidatures_perdues}</TableCell>
+                    <TableCell className="text-right tabular-nums">
+                      {r.derniere ? new Date(r.derniere).toLocaleDateString("fr-FR") : ""}
                     </TableCell>
                   </TableRow>
                 ))}
