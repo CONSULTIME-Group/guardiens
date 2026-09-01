@@ -5674,6 +5674,75 @@ export type Database = {
           },
         ]
       }
+      seasonal_nurture_cohorts: {
+        Row: {
+          a_deja_publie: boolean | null
+          derniere_visite: string | null
+          frozen_at: string
+          groupe: string
+          period_key: string
+          user_id: string
+          zone: string | null
+        }
+        Insert: {
+          a_deja_publie?: boolean | null
+          derniere_visite?: string | null
+          frozen_at?: string
+          groupe: string
+          period_key: string
+          user_id: string
+          zone?: string | null
+        }
+        Update: {
+          a_deja_publie?: boolean | null
+          derniere_visite?: string | null
+          frozen_at?: string
+          groupe?: string
+          period_key?: string
+          user_id?: string
+          zone?: string | null
+        }
+        Relationships: []
+      }
+      seasonal_periods: {
+        Row: {
+          active: boolean
+          created_at: string
+          key: string
+          label: string
+          period_end: string
+          season_year: string
+          send_at: string
+          zone_a_start: string
+          zone_b_start: string
+          zone_c_start: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          key: string
+          label: string
+          period_end: string
+          season_year: string
+          send_at: string
+          zone_a_start: string
+          zone_b_start: string
+          zone_c_start: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          key?: string
+          label?: string
+          period_end?: string
+          season_year?: string
+          send_at?: string
+          zone_a_start?: string
+          zone_b_start?: string
+          zone_c_start?: string
+        }
+        Relationships: []
+      }
       seo_cache: {
         Row: {
           cache_key: string
@@ -8958,6 +9027,13 @@ export type Database = {
           canonical_user_id: string
         }[]
       }
+      freeze_seasonal_cohorts: {
+        Args: { p_active_days?: number; p_period_key: string }
+        Returns: {
+          groupe: string
+          n: number
+        }[]
+      }
       gallery_photo_count: { Args: { p_user_id: string }; Returns: number }
       generate_sit_slug: {
         Args: { p_city: string; p_id: string; p_title: string }
@@ -9503,6 +9579,38 @@ export type Database = {
         Returns: undefined
       }
       retry_missing_geocoding: { Args: never; Returns: Json }
+      school_zone_from_postal_code: { Args: { p_cp: string }; Returns: string }
+      seasonal_nurture_plan: {
+        Args: { p_active_days?: number; p_period_key: string }
+        Returns: {
+          a_deja_publie: boolean
+          city: string
+          date_certaine: boolean
+          derniere_visite: string
+          email: string
+          first_name: string
+          jours_avant: number
+          period_end: string
+          period_key: string
+          period_label: string
+          period_start: string
+          user_id: string
+          zone: string
+        }[]
+      }
+      seasonal_nurture_result: {
+        Args: { p_period_key: string }
+        Returns: {
+          clics: number
+          effectif: number
+          emails_envoyes: number
+          groupe: string
+          ont_publie_couvrant: number
+          ont_publie_quoi_que_ce_soit: number
+          ouvertures: number
+          taux_publication: number
+        }[]
+      }
       set_email_preferences_by_token: {
         Args: {
           p_alert: boolean
