@@ -67,6 +67,8 @@ import AnimalMentionDialog from "@/components/sits/owner/AnimalMentionDialog";
 import { shouldPromptAnimalMention } from "@/lib/sitAnimalMention";
 import { trackEvent } from "@/lib/analytics";
 import { sendTransactionalEmail } from "@/lib/sendTransactionalEmail";
+import { SITE_URL } from "@/lib/seo";
+import { publicFirstName } from "@/lib/displayName";
 
 import SitDetailHeader from "./SitDetailHeader";
 import SitFooterReassurance from "./SitFooterReassurance";
@@ -441,8 +443,10 @@ const OwnerSitView = ({
         recipientUserId: currentUserId,
         idempotencyKey: `unpublished-feedback-${sit.id}-${today}`,
         templateData: {
+          firstName: publicFirstName(ownerProfile?.first_name ?? ""),
           sitTitle: sit.title ?? "",
-          sitUrl: `${window.location.origin}/sits/${sit.id}`,
+          // URL canonique de production, jamais l'origine de prévisualisation.
+          sitUrl: `${SITE_URL}/sits/${sit.id}`,
           reason: unpublishReason,
         },
       }).catch(() => undefined);

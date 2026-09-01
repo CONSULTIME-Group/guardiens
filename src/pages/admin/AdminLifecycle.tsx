@@ -60,7 +60,7 @@ const AdminLifecycle = () => {
     (async () => {
       setExitsLoading(true);
       setExitsError(false);
-      const { data, error } = await supabase.rpc("admin_sit_exit_reasons" as any, { p_days: 180 });
+      const { data, error } = await supabase.rpc("admin_sit_exit_reasons" as any, { p_days: windowDays });
       if (cancelled) return;
       if (error) {
         setExitsError(true);
@@ -81,7 +81,7 @@ const AdminLifecycle = () => {
       setExitsLoading(false);
     })();
     return () => { cancelled = true; };
-  }, [isAdmin]);
+  }, [isAdmin, windowDays]);
 
   useEffect(() => {
     if (!isAdmin) return;
@@ -219,7 +219,7 @@ const AdminLifecycle = () => {
       </Card>
 
       <Card>
-        <CardHeader><CardTitle className="text-lg">Pourquoi les annonces sortent</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-lg">Pourquoi les annonces sortent, sur {windowDays} jours</CardTitle></CardHeader>
         <CardContent className="overflow-x-auto space-y-3">
           <p className="text-sm text-muted-foreground">
             Ce que les propriétaires déclarent au moment où leur annonce quitte la plateforme, et ce que ces sorties coûtent en candidatures.
