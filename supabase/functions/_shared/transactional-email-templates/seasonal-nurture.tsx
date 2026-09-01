@@ -79,7 +79,7 @@ const Email = ({
           <Text style={p}>
             {alreadyPublished
               ? 'Vous avez déjà publié une annonce, vous connaissez le principe. Celle-ci se prépare de la même façon.'
-              : 'Publier prend une dizaine de minutes, et vous pourrez compléter les détails plus tard.'}
+              : 'Vous pouvez publier maintenant et compléter les détails plus tard.'}
           </Text>
 
           <Section style={{ textAlign: 'center', margin: '24px 0' }}>
