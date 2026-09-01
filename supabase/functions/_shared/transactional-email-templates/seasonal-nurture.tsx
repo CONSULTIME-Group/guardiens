@@ -63,7 +63,7 @@ const Email = ({
         <Container style={container}>
           <BrandHeader />
           <AlmaSignature />
-          <AlmaIntro firstName={firstName} seen="Je vous ecris pour une date qui approche." />
+          <AlmaIntro firstName={firstName} seen="Je vous écris pour une date qui approche." />
           <Heading style={h1}>{title}</Heading>
 
           <Text style={p}>
@@ -92,7 +92,7 @@ const Email = ({
 
           <Hr style={hr} />
           <AlmaSignoff />
-          <LegalFooter purpose="l'envoi de rappels saisonniers aux proprietaires inscrits" basis="6.1.f" />
+          <LegalFooter purpose="l'envoi de rappels saisonniers aux propriétaires inscrits" basis="6.1.f" />
         </Container>
       </Body>
     </Html>
