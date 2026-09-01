@@ -149,13 +149,20 @@ const OwnerSitView = ({
 
   // Porte de sortie honnête depuis l'email de relance : le lien secondaire
   // « J'ai finalement trouvé autrement » pointe sur #depublier et ouvre
-  // directement le questionnaire de motif.
+  // le même parcours que le bouton, candidatures ouvertes comprises.
+  const unpublishHashHandled = useRef(false);
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (window.location.hash !== "#depublier") return;
     if (sit.status !== "published") return;
-    setUnpublishConfirmOpen(true);
+    if (unpublishHashHandled.current) return;
+    unpublishHashHandled.current = true;
+    void requestUnpublish();
+    // requestUnpublish est stable pour ce montage, le verrou évite toute
+    // double ouverture et toute boucle de rendu.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sit.status]);
+
 
   // Recompte par statut à l'arrivée + quand appCount change (proxy refetch).
   useEffect(() => {
