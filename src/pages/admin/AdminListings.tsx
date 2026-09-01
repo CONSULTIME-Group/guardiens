@@ -41,8 +41,14 @@ const resolveStatusBadge = (listing: any): { label: string; variant: BadgeVarian
       ? { label: "Masquée (admin)", variant: "destructive" }
       : { label: "Annulée (auteur)", variant: "outline" };
   }
+  // Une annonce dépubliée revient en draft : elle ne doit pas être confondue
+  // avec un brouillon jamais publié.
+  if (listing.status === "draft" && listing.unpublished_at) {
+    return { label: "Dépubliée", variant: "outline" };
+  }
   return resolveSitStatusBadge(listing.status);
 };
+
 
 
 type Stats = {
