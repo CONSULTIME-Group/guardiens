@@ -29,6 +29,7 @@ interface PlanRow {
   period_label: string | null
   period_start: string | null
   period_end: string | null
+  suggested_end: string | null
   date_certaine: boolean | null
   jours_avant: number | null
   derniere_visite: string | null
@@ -118,7 +119,7 @@ Deno.serve(async (req) => {
             periodKey: row.period_key,
             periodStart: row.period_start,
             suggestedStart: row.period_start,
-            suggestedEnd: row.period_end,
+            suggestedEnd: row.suggested_end,
             dateCertaine: row.date_certaine,
             alreadyPublished: row.a_deja_publie,
           },
