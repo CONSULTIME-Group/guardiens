@@ -108,6 +108,8 @@ export type EventType =
   | "sit_first_publish"                // Toute première annonce du compte (minutes_since_signup, first_session)
   | "sit_publish_blocked"              // Publication refusée (blockers, step)
   | "sit_animal_mention_prompt_shown"  // Signal animaux affiché : texte avec animaux, fiche sans animaux (sit_id)
+  | "sit_unpublished"                  // Dépublication (reason, open_applications, declined_first, days_since_published)
+
   | "sit_animal_mention_add_pets"      // Signal animaux : choix d'ajouter les animaux (sit_id)
   | "sit_animal_mention_publish_anyway" // Signal animaux : publication maintenue sans animal (sit_id)
   // Hygiène ré-audit : events émis en prod, désormais typés -------------------
