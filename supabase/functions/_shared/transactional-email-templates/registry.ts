@@ -101,6 +101,7 @@ import { template as ownerPendingApplicationNudge } from './owner-pending-applic
 import { template as ownerSitUnconfirmed } from './owner-sit-unconfirmed.tsx'
 import { template as discussionStalledNudge } from './discussion-stalled-nudge.tsx'
 import { template as founderPersonalNotice } from './founder-personal-notice.tsx'
+import { template as seasonalNurture } from './seasonal-nurture.tsx'
 
 
 

@@ -96,6 +96,8 @@ const PRODUCT: ReadonlyArray<string> = [
   'owner-no-sit-j21',
   'reactivation-d30',
   'sitter-encourage-candidature',
+  // Rappel avant chaque periode de vacances scolaires
+  'seasonal-nurture',
   // Conseils annonce / profil
   'conseils-publication-annonce',
   'conseils-annonce-personnalises',
