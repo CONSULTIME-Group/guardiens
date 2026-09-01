@@ -66,6 +66,7 @@ import InviteSittersBlock from "@/components/sits/owner/InviteSittersBlock";
 import AnimalMentionDialog from "@/components/sits/owner/AnimalMentionDialog";
 import { shouldPromptAnimalMention } from "@/lib/sitAnimalMention";
 import { trackEvent } from "@/lib/analytics";
+import { sendTransactionalEmail } from "@/lib/sendTransactionalEmail";
 
 import SitDetailHeader from "./SitDetailHeader";
 import SitFooterReassurance from "./SitFooterReassurance";
