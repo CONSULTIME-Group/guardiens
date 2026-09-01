@@ -305,6 +305,25 @@ export function localDraftHasContent(d: Record<string, any> | null | undefined):
   return false;
 }
 
+// Paramètres d'URL ?debut=YYYY-MM-DD&fin=YYYY-MM-DD depuis l'email saisonnier.
+// On ignore tout paramètre absent, mal formé ou dans le passé, sans message.
+function parsePrefillDate(raw: string | null): string | null {
+  if (!raw) return null;
+  const trimmed = raw.trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return null;
+  const [y, m, d] = trimmed.split("-").map((n) => parseInt(n, 10));
+  const date = new Date(y, m - 1, d, 12, 0, 0);
+  if (
+    date.getFullYear() !== y ||
+    date.getMonth() !== m - 1 ||
+    date.getDate() !== d
+  ) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  if (date < today) return null;
+  return trimmed;
+}
+
 const CreateSit = () => {
   const { user } = useAuth();
   const { toast } = useToast();
