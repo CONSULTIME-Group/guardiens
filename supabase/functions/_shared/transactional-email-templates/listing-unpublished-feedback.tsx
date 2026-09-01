@@ -34,6 +34,13 @@ const variantFor = (reason?: string): { question: string | null; closing: string
       closing: "Votre annonce reste en brouillon, elle se republie en un clic.",
     }
   }
+  if (reason === 'other') {
+    // Motif libre : on ne suppose rien sur les dates ni sur la suite.
+    return {
+      question: "Qu'est-ce qui aurait fait que vous trouviez chez nous ?",
+      closing: "Votre annonce reste en brouillon, elle se republie en un clic.",
+    }
+  }
   return {
     question: null,
     closing: "Quand vos dates seront fixées, votre annonce vous attend en brouillon.",

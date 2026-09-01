@@ -67,6 +67,8 @@ import AnimalMentionDialog from "@/components/sits/owner/AnimalMentionDialog";
 import { shouldPromptAnimalMention } from "@/lib/sitAnimalMention";
 import { trackEvent } from "@/lib/analytics";
 import { sendTransactionalEmail } from "@/lib/sendTransactionalEmail";
+import { SITE_URL } from "@/lib/seo";
+import { publicFirstName } from "@/lib/displayName";
 
 import SitDetailHeader from "./SitDetailHeader";
 import SitFooterReassurance from "./SitFooterReassurance";
