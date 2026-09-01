@@ -964,6 +964,27 @@ const CreateSit = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, fromSitId, draftIdParam]);
 
+  // Préremplissage des dates depuis l'email saisonnier (?debut=&fin=).
+  // Le paramètre resume gagne : s'il est présent, on ignore debut/fin.
+  // Le préremplissage ne s'applique qu'au premier rendu d'un formulaire vierge,
+  // jamais quand un brouillon ou une annonce source est repris.
+  useEffect(() => {
+    if (datePrefilledRef.current) return;
+    if (loading) return;
+    if (draftIdParam || fromSitId || republishMode || searchParams.get("resume")) return;
+    const formEmpty =
+      !title && !startDate && !endDate && !ownerMessage && !dailyRoutine &&
+      !coverPhotoUrl && !specificExpectations && openTo.length === 0 &&
+      sitEnvironments.length === 0 && !isUrgent && !flexibleDates && !flexibleNotes;
+    if (!formEmpty) return;
+    const debut = parsePrefillDate(searchParams.get("debut"));
+    const fin = parsePrefillDate(searchParams.get("fin"));
+    if (debut) setStartDate(debut);
+    if (fin && (!debut || fin >= debut)) setEndDate(fin);
+    datePrefilledRef.current = true;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading]);
+
   // Auto-save draft (debounced)
   useEffect(() => {
     if (!user || !property || !initialLoadedRef.current) return;
