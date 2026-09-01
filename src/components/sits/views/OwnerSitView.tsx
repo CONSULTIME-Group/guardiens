@@ -429,6 +429,25 @@ const OwnerSitView = ({
       },
     });
 
+    // Retour du fondateur au propriétaire, adapté au motif déjà déclaré.
+    // L'envoi est volontairement non bloquant : la dépublication reste réussie
+    // même si l'email échoue, et aucune erreur n'est affichée. Les préférences
+    // (email_preferences.product_emails) et la liste de suppression sont
+    // appliquées côté fonction d'envoi.
+    if (currentUserId) {
+      const today = new Date().toISOString().slice(0, 10);
+      void sendTransactionalEmail({
+        templateName: "listing-unpublished-feedback",
+        recipientUserId: currentUserId,
+        idempotencyKey: `unpublished-feedback-${sit.id}-${today}`,
+        templateData: {
+          sitTitle: sit.title ?? "",
+          sitUrl: `${window.location.origin}/sits/${sit.id}`,
+          reason: unpublishReason,
+        },
+      }).catch(() => undefined);
+    }
+
 
     setSit({
       ...sit,
