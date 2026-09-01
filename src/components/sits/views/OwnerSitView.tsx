@@ -418,13 +418,16 @@ const OwnerSitView = ({
     // Mesure de la sortie d'annonce, jamais bloquante pour la dépublication.
     const publishedAt = (sit as any).published_at as string | null | undefined;
     void trackEvent("sit_unpublished", {
-      reason: reasonText,
-      open_applications: pendingAppsToCancel,
-      declined_first: declineOpenFirst,
-      days_since_published: publishedAt
-        ? Math.max(0, Math.floor((Date.now() - new Date(publishedAt).getTime()) / 86400000))
-        : null,
+      metadata: {
+        reason: reasonText,
+        open_applications: pendingAppsToCancel,
+        declined_first: declineOpenFirst,
+        days_since_published: publishedAt
+          ? Math.max(0, Math.floor((Date.now() - new Date(publishedAt).getTime()) / 86400000))
+          : null,
+      },
     });
+
 
     setSit({
       ...sit,
