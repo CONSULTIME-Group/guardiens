@@ -34,6 +34,8 @@ const Email = ({
   periodLabel = 'prochaines vacances',
   periodKey,
   periodStart,
+  suggestedStart,
+  suggestedEnd,
   dateCertaine,
   alreadyPublished,
 }: Props) => {
@@ -45,7 +47,13 @@ const Email = ({
   const title = certain
     ? `Les ${periodLabel} commencent le ${startFr}`
     : `Les ${periodLabel} approchent`
-  const ctaUrl = `https://guardiens.fr/sits/create?utm_source=email&utm_campaign=seasonal_nurture&utm_medium=${periodKey ?? 'seasonal'}`
+  let ctaUrl = `https://guardiens.fr/sits/create?utm_source=email&utm_campaign=seasonal_nurture&utm_medium=${periodKey ?? 'seasonal'}`
+  if (suggestedStart) {
+    ctaUrl += `&debut=${encodeURIComponent(suggestedStart)}`
+  }
+  if (suggestedEnd) {
+    ctaUrl += `&fin=${encodeURIComponent(suggestedEnd)}`
+  }
 
   return (
     <Html lang="fr" dir="ltr">
