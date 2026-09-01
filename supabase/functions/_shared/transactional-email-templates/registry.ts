@@ -175,6 +175,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'mission-nudge-close': missionNudgeClose,
   'mission-nudge-no-response': missionNudgeNoResponse,
   'mutual-aid-weekly-digest': mutualAidWeeklyDigest,
+  'seasonal-nurture': seasonalNurture,
   'nearby-daily-digest': nearbyDailyDigest,
   'weekly-nearby-digest': weeklyNearbyDigest,
   'first-application-received': firstApplicationReceived,
