@@ -9594,6 +9594,7 @@ export type Database = {
           period_key: string
           period_label: string
           period_start: string
+          suggested_end: string
           user_id: string
           zone: string
         }[]
