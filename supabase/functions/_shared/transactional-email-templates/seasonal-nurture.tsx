@@ -63,7 +63,7 @@ const Email = ({
         <Container style={container}>
           <BrandHeader />
           <AlmaSignature />
-          <AlmaIntro firstName={firstName} />
+          <AlmaIntro firstName={firstName} seen="Je vous ecris pour une date qui approche." />
           <Heading style={h1}>{title}</Heading>
 
           <Text style={p}>
@@ -83,7 +83,7 @@ const Email = ({
           </Text>
 
           <Section style={{ textAlign: 'center', margin: '24px 0' }}>
-            <Button href={ctaUrl} style={btnPrimary}>{`Publier mon annonce pour ${periodLabel}`}</Button>
+            <Button href={ctaUrl} style={btnPrimary}>Publier mon annonce</Button>
           </Section>
 
           <Text style={pCenter}>
@@ -92,7 +92,7 @@ const Email = ({
 
           <Hr style={hr} />
           <AlmaSignoff />
-          <LegalFooter />
+          <LegalFooter purpose="l'envoi de rappels saisonniers aux proprietaires inscrits" basis="6.1.f" />
         </Container>
       </Body>
     </Html>
@@ -102,7 +102,7 @@ const Email = ({
 export const template = {
   component: Email,
   subject: (data: Record<string, any>) =>
-    `Vous partez pour ${data?.periodLabel ?? 'les prochaines vacances'} ?`,
+    `Vous partez pour les ${data?.periodLabel ?? 'prochaines vacances'} ?`,
   displayName: 'Nurturing saisonnier',
   previewData: {
     firstName: 'Marie',
@@ -111,7 +111,7 @@ export const template = {
     periodKey: 'toussaint-2026',
     periodStart: '2026-10-17',
     suggestedStart: '2026-10-17',
-    suggestedEnd: '2026-11-02',
+    suggestedEnd: '2026-11-01',
     dateCertaine: true,
     alreadyPublished: false,
   },
