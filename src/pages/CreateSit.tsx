@@ -307,7 +307,7 @@ export function localDraftHasContent(d: Record<string, any> | null | undefined):
 
 // Paramètres d'URL ?debut=YYYY-MM-DD&fin=YYYY-MM-DD depuis l'email saisonnier.
 // On ignore tout paramètre absent, mal formé ou dans le passé, sans message.
-function parsePrefillDate(raw: string | null): string | null {
+export function parsePrefillDate(raw: string | null): string | null {
   if (!raw) return null;
   const trimmed = raw.trim();
   if (!/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return null;
