@@ -1470,6 +1470,17 @@ const SitCard = ({
                 </h3>
               )}
 
+              {isOwner && effectiveStatus === "unpublished" && sit.unpublished_at && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  {(() => {
+                    const when = format(parseISO(sit.unpublished_at), "d MMMM", { locale: fr });
+                    const why = unpublishReasonSentence(sit.last_unpublished_reason);
+                    return why ? `Dépubliée le ${when}, ${why}.` : `Dépubliée le ${when}.`;
+                  })()}
+                </p>
+              )}
+
+
               <div className="flex items-center gap-2 mt-1 flex-wrap">
                 {city && (
                   <span className="text-xs text-muted-foreground flex items-center gap-1">
