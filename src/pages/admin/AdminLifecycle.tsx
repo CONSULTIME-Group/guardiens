@@ -81,7 +81,7 @@ const AdminLifecycle = () => {
       setExitsLoading(false);
     })();
     return () => { cancelled = true; };
-  }, [isAdmin]);
+  }, [isAdmin, windowDays]);
 
   useEffect(() => {
     if (!isAdmin) return;
@@ -219,7 +219,7 @@ const AdminLifecycle = () => {
       </Card>
 
       <Card>
-        <CardHeader><CardTitle className="text-lg">Pourquoi les annonces sortent</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-lg">Pourquoi les annonces sortent, sur {windowDays} jours</CardTitle></CardHeader>
         <CardContent className="overflow-x-auto space-y-3">
           <p className="text-sm text-muted-foreground">
             Ce que les propriétaires déclarent au moment où leur annonce quitte la plateforme, et ce que ces sorties coûtent en candidatures.
