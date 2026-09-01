@@ -60,7 +60,7 @@ const AdminLifecycle = () => {
     (async () => {
       setExitsLoading(true);
       setExitsError(false);
-      const { data, error } = await supabase.rpc("admin_sit_exit_reasons" as any, { p_days: 180 });
+      const { data, error } = await supabase.rpc("admin_sit_exit_reasons" as any, { p_days: windowDays });
       if (cancelled) return;
       if (error) {
         setExitsError(true);

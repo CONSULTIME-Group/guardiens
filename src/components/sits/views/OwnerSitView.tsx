@@ -443,8 +443,10 @@ const OwnerSitView = ({
         recipientUserId: currentUserId,
         idempotencyKey: `unpublished-feedback-${sit.id}-${today}`,
         templateData: {
+          firstName: publicFirstName(ownerProfile?.first_name ?? ""),
           sitTitle: sit.title ?? "",
-          sitUrl: `${window.location.origin}/sits/${sit.id}`,
+          // URL canonique de production, jamais l'origine de prévisualisation.
+          sitUrl: `${SITE_URL}/sits/${sit.id}`,
           reason: unpublishReason,
         },
       }).catch(() => undefined);
