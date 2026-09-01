@@ -1203,7 +1203,8 @@ Deno.serve(async (req) => {
   }
   // Le gabarit d'avis invite explicitement à répondre (mot du fondateur) :
   // la promesse doit aboutir dans une boîte réellement relevée.
-  if (templateName === 'review-reminder') {
+  // Même règle pour le retour après dépublication d'une annonce.
+  if (templateName === 'review-reminder' || templateName === 'listing-unpublished-feedback') {
     resendPayload.reply_to = REPLY_TO_ADDRESS
   }
 
