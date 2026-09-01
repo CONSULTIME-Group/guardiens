@@ -117,6 +117,8 @@ Deno.serve(async (req) => {
             periodLabel: row.period_label,
             periodKey: row.period_key,
             periodStart: row.period_start,
+            suggestedStart: row.period_start,
+            suggestedEnd: row.period_end,
             dateCertaine: row.date_certaine,
             alreadyPublished: row.a_deja_publie,
           },

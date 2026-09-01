@@ -305,6 +305,25 @@ export function localDraftHasContent(d: Record<string, any> | null | undefined):
   return false;
 }
 
+// Paramètres d'URL ?debut=YYYY-MM-DD&fin=YYYY-MM-DD depuis l'email saisonnier.
+// On ignore tout paramètre absent, mal formé ou dans le passé, sans message.
+export function parsePrefillDate(raw: string | null): string | null {
+  if (!raw) return null;
+  const trimmed = raw.trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return null;
+  const [y, m, d] = trimmed.split("-").map((n) => parseInt(n, 10));
+  const date = new Date(y, m - 1, d, 12, 0, 0);
+  if (
+    date.getFullYear() !== y ||
+    date.getMonth() !== m - 1 ||
+    date.getDate() !== d
+  ) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  if (date < today) return null;
+  return trimmed;
+}
+
 const CreateSit = () => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -322,6 +341,9 @@ const CreateSit = () => {
   const lastStepRef = useRef<number>(0);
   const visitedStepsRef = useRef<Set<number>>(new Set());
   const funnelStartedAtRef = useRef<number>(Date.now());
+  // Préremplissage des dates depuis l'email saisonnier : une seule fois, jamais
+  // après une saisie utilisateur, et jamais quand un brouillon est repris.
+  const datePrefilledRef = useRef(false);
   // Écran de choix à la sortie : annonce prête, jamais publiée, sortie demandée.
   const [sitPublishedAt, setSitPublishedAt] = useState<string | null>(null);
   const [exitChoiceOpen, setExitChoiceOpen] = useState(false);
@@ -941,6 +963,27 @@ const CreateSit = () => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, fromSitId, draftIdParam]);
+
+  // Préremplissage des dates depuis l'email saisonnier (?debut=&fin=).
+  // Le paramètre resume gagne : s'il est présent, on ignore debut/fin.
+  // Le préremplissage ne s'applique qu'au premier rendu d'un formulaire vierge,
+  // jamais quand un brouillon ou une annonce source est repris.
+  useEffect(() => {
+    if (datePrefilledRef.current) return;
+    if (loading) return;
+    if (draftIdParam || fromSitId || republishMode || searchParams.get("resume")) return;
+    const formEmpty =
+      !title && !startDate && !endDate && !ownerMessage && !dailyRoutine &&
+      !coverPhotoUrl && !specificExpectations && openTo.length === 0 &&
+      sitEnvironments.length === 0 && !isUrgent && !flexibleDates && !flexibleNotes;
+    if (!formEmpty) return;
+    const debut = parsePrefillDate(searchParams.get("debut"));
+    const fin = parsePrefillDate(searchParams.get("fin"));
+    if (debut) setStartDate(debut);
+    if (fin && (!debut || fin >= debut)) setEndDate(fin);
+    datePrefilledRef.current = true;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading]);
 
   // Auto-save draft (debounced)
   useEffect(() => {

@@ -17,6 +17,8 @@ interface Props {
   periodLabel?: string
   periodKey?: string
   periodStart?: string | null
+  suggestedStart?: string | null
+  suggestedEnd?: string | null
   dateCertaine?: boolean
   alreadyPublished?: boolean
 }
@@ -32,6 +34,8 @@ const Email = ({
   periodLabel = 'prochaines vacances',
   periodKey,
   periodStart,
+  suggestedStart,
+  suggestedEnd,
   dateCertaine,
   alreadyPublished,
 }: Props) => {
@@ -43,7 +47,13 @@ const Email = ({
   const title = certain
     ? `Les ${periodLabel} commencent le ${startFr}`
     : `Les ${periodLabel} approchent`
-  const ctaUrl = `https://guardiens.fr/sits/create?utm_source=email&utm_campaign=seasonal_nurture&utm_medium=${periodKey ?? 'seasonal'}`
+  let ctaUrl = `https://guardiens.fr/sits/create?utm_source=email&utm_campaign=seasonal_nurture&utm_medium=${periodKey ?? 'seasonal'}`
+  if (suggestedStart) {
+    ctaUrl += `&debut=${encodeURIComponent(suggestedStart)}`
+  }
+  if (suggestedEnd) {
+    ctaUrl += `&fin=${encodeURIComponent(suggestedEnd)}`
+  }
 
   return (
     <Html lang="fr" dir="ltr">
@@ -100,6 +110,8 @@ export const template = {
     periodLabel: 'vacances de la Toussaint',
     periodKey: 'toussaint-2026',
     periodStart: '2026-10-17',
+    suggestedStart: '2026-10-17',
+    suggestedEnd: '2026-11-02',
     dateCertaine: true,
     alreadyPublished: false,
   },
