@@ -17,6 +17,8 @@ interface Props {
   periodLabel?: string
   periodKey?: string
   periodStart?: string | null
+  suggestedStart?: string | null
+  suggestedEnd?: string | null
   dateCertaine?: boolean
   alreadyPublished?: boolean
 }
