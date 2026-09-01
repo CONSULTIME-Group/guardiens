@@ -322,6 +322,9 @@ const CreateSit = () => {
   const lastStepRef = useRef<number>(0);
   const visitedStepsRef = useRef<Set<number>>(new Set());
   const funnelStartedAtRef = useRef<number>(Date.now());
+  // Préremplissage des dates depuis l'email saisonnier : une seule fois, jamais
+  // après une saisie utilisateur, et jamais quand un brouillon est repris.
+  const datePrefilledRef = useRef(false);
   // Écran de choix à la sortie : annonce prête, jamais publiée, sortie demandée.
   const [sitPublishedAt, setSitPublishedAt] = useState<string | null>(null);
   const [exitChoiceOpen, setExitChoiceOpen] = useState(false);
