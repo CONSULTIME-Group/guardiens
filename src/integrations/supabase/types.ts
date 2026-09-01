@@ -8545,6 +8545,18 @@ export type Database = {
         Args: { p_content: string; p_target_user_id: string }
         Returns: string
       }
+      admin_sit_exit_reasons: {
+        Args: { p_days?: number }
+        Returns: {
+          candidatures_perdues: number
+          derniere: string
+          libelle: string
+          motif: string
+          n: number
+          proprios: number
+          transition: string
+        }[]
+      }
       admin_top_message_users: {
         Args: { _limit?: number; _since?: string }
         Returns: Json
