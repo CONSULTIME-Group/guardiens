@@ -110,6 +110,8 @@ export const template = {
     periodLabel: 'vacances de la Toussaint',
     periodKey: 'toussaint-2026',
     periodStart: '2026-10-17',
+    suggestedStart: '2026-10-17',
+    suggestedEnd: '2026-11-02',
     dateCertaine: true,
     alreadyPublished: false,
   },
