@@ -17,8 +17,8 @@ const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
 const TEMPLATE = 'referral-boost-monthly'
 const CAMPAIGN = 'partage_communaute'
-const BATCH_SIZE = 2
-const BATCH_PAUSE_MS = 300
+const BATCH_SIZE = 1
+const BATCH_PAUSE_MS = 500
 const PAGE = 1000
 
 interface PlanRow {
