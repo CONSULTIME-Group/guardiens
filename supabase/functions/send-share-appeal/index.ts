@@ -115,10 +115,37 @@ Deno.serve(async (req) => {
       planRows = planRows.slice(0, body.limit)
     }
 
+    // Dedupication en une seule passe : adresses deja servies par cette campagne.
+    const alreadyServed = new Set<string>()
+    for (let from = 0; ; from += PAGE) {
+      const { data, error } = await admin
+        .from('email_send_log')
+        .select('recipient_email')
+        .eq('template_name', TEMPLATE)
+        .eq('metadata->>campaign', CAMPAIGN)
+        .in('status', ['sent', 'pending', 'deferred'])
+        .order('id', { ascending: true })
+        .range(from, from + PAGE - 1)
+      if (error) throw error
+      const rows = (data ?? []) as Array<{ recipient_email: string | null }>
+      for (const r of rows) if (r.recipient_email) alreadyServed.add(r.recipient_email.trim().toLowerCase())
+      if (rows.length < PAGE) break
+    }
+
+    let skippedBecauseAlreadyServed = 0
+    planRows = planRows.filter((p) => {
+      const email = (p.email ?? '').trim().toLowerCase()
+      if (alreadyServed.has(email)) {
+        skippedBecauseAlreadyServed++
+        return false
+      }
+      return true
+    })
+
     const planned = planRows.length
     if (planned === 0) {
-      await run.finish('success', { planned: 0, sent: 0, skipped: 0, failed: 0, interrompu: false, restants: 0, campaign: CAMPAIGN, dry_run: !!body.dry_run })
-      return json({ ok: true, planned: 0, sent: 0, skipped: 0, failed: 0, interrompu: false, restants: 0, reason: 'no_plan' })
+      await run.finish('success', { planned: 0, sent: 0, skipped: 0, failed: 0, deja_servis: alreadyServed.size, interrompu: false, restants: 0, campaign: CAMPAIGN, dry_run: !!body.dry_run })
+      return json({ ok: true, planned: 0, sent: 0, skipped: 0, failed: 0, deja_servis: alreadyServed.size, interrompu: false, restants: 0, reason: 'no_plan' })
     }
 
     let sent = 0
@@ -131,17 +158,6 @@ Deno.serve(async (req) => {
     async function processOne(row: PlanRow): Promise<'sent' | 'skipped' | 'failed'> {
       const email = (row.email ?? '').trim()
       if (!email) return 'skipped'
-
-      // Deduplication definitive sur la campagne, jamais deux fois la meme adresse.
-      const { data: prev } = await admin
-        .from('email_send_log')
-        .select('id')
-        .eq('template_name', TEMPLATE)
-        .eq('recipient_email', email)
-        .in('status', ['sent', 'pending', 'deferred'])
-        .eq('metadata->>campaign', CAMPAIGN)
-        .limit(1)
-      if (prev && prev.length > 0) return 'skipped'
 
       if (body.dry_run) return 'skipped'
 
@@ -200,8 +216,9 @@ Deno.serve(async (req) => {
     await run.finish(status, {
       planned,
       sent,
-      skipped,
+      skipped: skipped + skippedBecauseAlreadyServed,
       failed,
+      deja_servis: alreadyServed.size,
       interrompu,
       restants,
       campaign: CAMPAIGN,
@@ -213,8 +230,9 @@ Deno.serve(async (req) => {
       ok: true,
       planned,
       sent,
-      skipped,
+      skipped: skipped + skippedBecauseAlreadyServed,
       failed,
+      deja_servis: alreadyServed.size,
       interrompu,
       restants,
       campaign: CAMPAIGN,
