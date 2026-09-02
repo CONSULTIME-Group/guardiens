@@ -1,7 +1,13 @@
 /// <reference types="npm:@types/react@18.3.1" />
 //
-// `<AlmaSignature />` — bloc identité Alma (avatar SVG 32px + prénom + baseline),
+// `<AlmaSignature />` — bloc identité Alma (avatar PNG 56px + prénom + baseline),
 // rendu sous le wordmark <BrandHeader /> pour incarner l'assistante Guardiens.
+//
+// Le passage du SVG inline au PNG externe est volontaire : Gmail ne rend pas
+// le SVG, ni inline ni en <img src="...svg">. Sans PNG, Alma est invisible
+// pour une grande partie des destinataires.
+// L'image est servie a https://guardiens.fr/alma.png, generee par
+// scripts/generate-alma-png.mjs.
 //
 // `<AlmaIntro firstName={...} />` — phrase d'ouverture personnalisée standardisée
 // pour les digests signés Alma. Vouvoiement absolu (mem://style/editorial-tone-mapping).
@@ -9,7 +15,7 @@
 // Garde-fou : aucun tiret cadratin, aucun emoji (mem://style/no-em-dash + no-icons).
 
 import * as React from 'npm:react@18.3.1'
-import { Section, Text } from 'npm:@react-email/components@0.0.22'
+import { Img, Section, Text } from 'npm:@react-email/components@0.0.22'
 
 const wrap = {
   display: 'block' as const,
@@ -20,11 +26,6 @@ const row = {
   fontSize: '0',
   lineHeight: '0',
   margin: '0 0 4px',
-}
-const avatarCell = {
-  display: 'inline-block' as const,
-  verticalAlign: 'middle' as const,
-  marginRight: '10px',
 }
 const nameCell = {
   display: 'inline-block' as const,
@@ -44,38 +45,21 @@ const baseline = {
   letterSpacing: '0.02em',
 }
 
-// Avatar Alma : rond vert olive avec initiale « A » stylisée Playfair.
-// SVG inline (32x32) pour rendu email fiable sans image externe.
-const AlmaAvatarSvg = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="32"
-    height="32"
-    viewBox="0 0 32 32"
-    role="img"
-    aria-label="Alma"
-  >
-    <circle cx="16" cy="16" r="16" fill="#3d7a5f" />
-    <text
-      x="16"
-      y="22"
-      textAnchor="middle"
-      fontFamily="'Playfair Display', Georgia, serif"
-      fontSize="18"
-      fontWeight="700"
-      fill="#ffffff"
-    >
-      A
-    </text>
-  </svg>
-)
-
 export const AlmaSignature = () => (
   <Section style={wrap}>
     <div style={row}>
-      <span style={avatarCell}>
-        <AlmaAvatarSvg />
-      </span>
+      <Img
+        src="https://guardiens.fr/alma.png"
+        alt="Alma"
+        width="56"
+        height="56"
+        style={{
+          borderRadius: '50%',
+          display: 'inline-block',
+          verticalAlign: 'middle',
+          marginRight: '10px',
+        }}
+      />
       <span style={nameCell}>Alma</span>
     </div>
     <Text style={baseline}>Votre assistante Guardiens</Text>
