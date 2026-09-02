@@ -159,17 +159,6 @@ Deno.serve(async (req) => {
       const email = (row.email ?? '').trim()
       if (!email) return 'skipped'
 
-      // Deduplication definitive sur la campagne, jamais deux fois la meme adresse.
-      const { data: prev } = await admin
-        .from('email_send_log')
-        .select('id')
-        .eq('template_name', TEMPLATE)
-        .eq('recipient_email', email)
-        .in('status', ['sent', 'pending', 'deferred'])
-        .eq('metadata->>campaign', CAMPAIGN)
-        .limit(1)
-      if (prev && prev.length > 0) return 'skipped'
-
       if (body.dry_run) return 'skipped'
 
       const requestBody = JSON.stringify({
