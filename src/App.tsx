@@ -16,6 +16,7 @@ import OfflineBanner from "@/components/layout/OfflineBanner";
 import { PreviewDiagnosticBanner } from "@/components/PreviewDiagnosticBanner";
 import DuplicateAccountGuard from "@/components/auth/DuplicateAccountGuard";
 import ScrollToTop from "@/components/layout/ScrollToTop";
+import RefCapture from "@/components/referral/RefCapture";
 import { useShellMode } from "@/components/layout/useShellMode";
 import GlobalBottomNav from "@/components/layout/GlobalBottomNav";
 import { ChromeVisibilityProvider } from "@/components/layout/ChromeVisibility";
@@ -624,6 +625,7 @@ const App = () => (
             <Sonner />
             <BrowserRouter>
               <ScrollToTop />
+              <RefCapture />
               <LangUrlSync />
               <OfflineBanner />
               <PreviewDiagnosticBanner />

@@ -291,25 +291,14 @@ const Register = () => {
  const storedRef = sessionStorage.getItem("guardiens_ref");
  if (storedRef && result?.user?.id) {
  try {
- const { data: referrer } = await supabase
-.from("profiles")
-.select("id")
-.eq("referral_code", storedRef)
-.maybeSingle();
-
- if (referrer && referrer.id !== result.user.id) {
- await supabase
-.from("profiles")
-.update({ referred_by: referrer.id } as any)
-.eq("id", result.user.id);
-
- await supabase
-.from("referrals")
-.insert({
- referrer_id: referrer.id,
- referred_id: result.user.id,
- status: "pending",
- } as any);
+ const { data, error } = await (supabase.rpc as any)("link_referral", {
+ p_code: storedRef,
+ });
+ if (error || !data?.ok) {
+ logger.error("Referral linking refused", {
+ error: error?.message,
+ reason: data?.raison,
+ });
  }
  } catch (refErr) {
  logger.error("Referral linking error", { err: String(refErr) });
@@ -447,8 +436,26 @@ const Register = () => {
  logOAuthStage("redirecting", "/inscription");
  return;
  }
- logOAuthStage("tokens_received", "/inscription");
- navigate(postAuthTarget, { replace: true });
+  logOAuthStage("tokens_received", "/inscription");
+  try {
+    const storedRef = sessionStorage.getItem("guardiens_ref");
+    if (storedRef) {
+      const { data, error } = await (supabase.rpc as any)("link_referral", {
+        p_code: storedRef,
+      });
+      if (error || !data?.ok) {
+        logger.error("Referral linking refused (Google)", {
+          error: error?.message,
+          reason: data?.raison,
+        });
+      }
+    }
+  } catch (refErr) {
+    logger.error("Referral linking error (Google)", { err: String(refErr) });
+  } finally {
+    sessionStorage.removeItem("guardiens_ref");
+  }
+  navigate(postAuthTarget, { replace: true });
  };
 
  return (
