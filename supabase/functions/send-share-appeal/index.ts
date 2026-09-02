@@ -2,7 +2,7 @@
 // -----------------------------------------------------------------------------
 // Campagne d'appel au partage (template referral-boost-monthly). Aucun cron :
 // appel manuel uniquement, avec garde-fou de confirmation pour l'envoi de masse.
-// Body : { dry_run?: boolean, recipient_id?: string, limit?: number, confirm?: string }
+// Body : { dry_run?: boolean, recipient_id?: string, limit?: number, confirm?: string, max_seconds?: number }
 import { createClient } from 'npm:@supabase/supabase-js@2.45.0'
 import { requireCronCaller } from '../_shared/require-cron-caller.ts'
 import { startCronRun } from '../_shared/cron-run-log.ts'
@@ -17,8 +17,8 @@ const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
 const TEMPLATE = 'referral-boost-monthly'
 const CAMPAIGN = 'partage_communaute'
-const BATCH_SIZE = 20
-const BATCH_PAUSE_MS = 1200
+const BATCH_SIZE = 8
+const BATCH_PAUSE_MS = 1100
 const PAGE = 1000
 
 interface PlanRow {
@@ -28,6 +28,7 @@ interface PlanRow {
 }
 
 Deno.serve(async (req) => {
+  const startedAt = Date.now()
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
   const guard = await requireCronCaller(req, corsHeaders, 'send-share-appeal')
@@ -38,8 +39,12 @@ Deno.serve(async (req) => {
     recipient_id?: string
     limit?: number
     confirm?: string
+    max_seconds?: number
   } = {}
   try { if (req.body) body = await req.json() } catch { /* noop */ }
+  const maxSeconds = typeof body.max_seconds === 'number' && body.max_seconds > 0
+    ? body.max_seconds
+    : 110
 
   // Garde-fou : un envoi de masse reel exige une confirmation explicite.
   if (body.dry_run !== true && !body.recipient_id && body.confirm !== 'ENVOI REEL A TOUS') {
@@ -112,13 +117,15 @@ Deno.serve(async (req) => {
 
     const planned = planRows.length
     if (planned === 0) {
-      await run.finish('success', { planned: 0, sent: 0, skipped: 0, failed: 0, campaign: CAMPAIGN, dry_run: !!body.dry_run })
-      return json({ ok: true, planned: 0, sent: 0, skipped: 0, failed: 0, reason: 'no_plan' })
+      await run.finish('success', { planned: 0, sent: 0, skipped: 0, failed: 0, interrompu: false, restants: 0, campaign: CAMPAIGN, dry_run: !!body.dry_run })
+      return json({ ok: true, planned: 0, sent: 0, skipped: 0, failed: 0, interrompu: false, restants: 0, reason: 'no_plan' })
     }
 
     let sent = 0
     let skipped = 0
     let failed = 0
+    let processed = 0
+    let interrompu = false
     const errors: Array<{ user_id: string; reason: string }> = []
 
     async function processOne(row: PlanRow): Promise<'sent' | 'skipped' | 'failed'> {
@@ -138,19 +145,28 @@ Deno.serve(async (req) => {
 
       if (body.dry_run) return 'skipped'
 
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/send-transactional-email`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SERVICE_KEY}` },
-        body: JSON.stringify({
+      const requestBody = JSON.stringify({
           templateName: TEMPLATE,
           recipientEmail: email,
           idempotencyKey: `partage-communaute-${row.id}`,
           templateData: { firstName: row.first_name ?? undefined },
           logMetadata: { campaign: CAMPAIGN },
-        }),
       })
+      const send = () => fetch(`${SUPABASE_URL}/functions/v1/send-transactional-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SERVICE_KEY}` },
+        body: requestBody,
+      })
+
+      let res = await send()
       if (!res.ok) {
-        const txt = await res.text().catch(() => '')
+        let txt = await res.text().catch(() => '')
+        if (txt.includes('429') || txt.includes('Too many requests')) {
+          await new Promise((resolve) => setTimeout(resolve, 2000))
+          res = await send()
+          if (res.ok) return 'sent'
+          txt = await res.text().catch(() => '')
+        }
         console.error('send-transactional-email failed', res.status, txt)
         errors.push({ user_id: row.id, reason: `send-transactional-email ${res.status}: ${txt}` })
         return 'failed'
@@ -159,6 +175,10 @@ Deno.serve(async (req) => {
     }
 
     for (let i = 0; i < planRows.length; i += BATCH_SIZE) {
+      if ((Date.now() - startedAt) / 1000 > maxSeconds) {
+        interrompu = true
+        break
+      }
       const batch = planRows.slice(i, i + BATCH_SIZE)
       const outcomes = await Promise.all(batch.map(async (row) => {
         try {
@@ -174,11 +194,13 @@ Deno.serve(async (req) => {
         else if (outcome === 'skipped') skipped++
         else failed++
       }
+      processed += batch.length
       if (i + BATCH_SIZE < planRows.length) {
         await new Promise((resolve) => setTimeout(resolve, BATCH_PAUSE_MS))
       }
     }
 
+    const restants = planned - processed
     const status = !body.dry_run && sent < planned * 0.8 ? 'partial' : 'success'
 
     await run.finish(status, {
@@ -186,6 +208,8 @@ Deno.serve(async (req) => {
       sent,
       skipped,
       failed,
+      interrompu,
+      restants,
       campaign: CAMPAIGN,
       dry_run: !!body.dry_run,
       shortfall_ratio: planned > 0 ? Number((1 - sent / planned).toFixed(2)) : 0,
@@ -197,6 +221,8 @@ Deno.serve(async (req) => {
       sent,
       skipped,
       failed,
+      interrompu,
+      restants,
       campaign: CAMPAIGN,
       dry_run: !!body.dry_run,
       errors: errors.slice(0, 20),
