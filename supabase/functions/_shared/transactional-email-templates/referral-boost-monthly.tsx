@@ -4,7 +4,7 @@ import {
 } from 'npm:@react-email/components@0.0.22'
 import { BrandedHead } from './_branded-head.tsx'
 import { BrandHeader } from './_brand-header.tsx'
-import { AlmaSignature, AlmaIntro } from './_alma-signature.tsx'
+import { AlmaIntro } from './_alma-signature.tsx'
 import { LegalFooter } from './_legal-footer.tsx'
 import type { TemplateEntry } from './registry.ts'
 
@@ -29,8 +29,8 @@ const Email = ({ firstName }: Props) => {
               style={{ borderRadius: '50%', display: 'block', margin: '0 auto' }}
             />
           </Section>
+          <Text style={almaLine}>Alma, votre assistante Guardiens</Text>
           <Heading style={title}>Des nouvelles, et un petit service</Heading>
-          <AlmaSignature />
           <AlmaIntro firstName={firstName} seen="Des nouvelles de Guardiens, et un petit service à vous demander." />
           <Text style={text}>
             Depuis le lancement en mai, plus de trente annonces ont été publiées sur Guardiens. En Bretagne, à Marseille, en Alsace, au Pays basque, dans le Quercy. Et aussi à Marrakech, à La Réunion, et une maison à Tahiti pour tout le mois de décembre. On ne s'y attendait pas, et ça fait vraiment plaisir.
@@ -101,4 +101,11 @@ const closingBlock = {
   color: '#5A544B',
   textAlign: 'center' as const,
   fontStyle: 'italic' as const,
+}
+const almaLine = {
+  fontSize: '13px',
+  color: '#8A8378',
+  textAlign: 'center' as const,
+  margin: '10px 0 0',
+  letterSpacing: '0.02em',
 }

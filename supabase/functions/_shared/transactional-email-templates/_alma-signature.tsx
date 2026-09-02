@@ -22,14 +22,9 @@ const wrap = {
   textAlign: 'center' as const,
   margin: '0 0 18px',
 }
-const row = {
-  fontSize: '0',
-  lineHeight: '0',
-  margin: '0 0 4px',
-}
 const nameCell = {
-  display: 'inline-block' as const,
-  verticalAlign: 'middle' as const,
+  display: 'block' as const,
+  textAlign: 'center' as const,
   fontFamily: "'Playfair Display', Georgia, serif",
   fontSize: '17px',
   fontWeight: 600 as const,
@@ -47,21 +42,18 @@ const baseline = {
 
 export const AlmaSignature = () => (
   <Section style={wrap}>
-    <div style={row}>
-      <Img
-        src="https://guardiens.fr/alma.png"
-        alt="Alma"
-        width="56"
-        height="56"
-        style={{
-          borderRadius: '50%',
-          display: 'inline-block',
-          verticalAlign: 'middle',
-          marginRight: '10px',
-        }}
-      />
-      <span style={nameCell}>Alma</span>
-    </div>
+    <Img
+      src="https://guardiens.fr/alma.png"
+      alt="Alma"
+      width="56"
+      height="56"
+      style={{
+        borderRadius: '50%',
+        display: 'block',
+        margin: '0 auto 8px',
+      }}
+    />
+    <span style={nameCell}>Alma</span>
     <Text style={baseline}>Votre assistante Guardiens</Text>
   </Section>
 )
