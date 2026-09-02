@@ -17,8 +17,8 @@ const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
 const TEMPLATE = 'referral-boost-monthly'
 const CAMPAIGN = 'partage_communaute'
-const BATCH_SIZE = 8
-const BATCH_PAUSE_MS = 1100
+const BATCH_SIZE = 2
+const BATCH_PAUSE_MS = 300
 const PAGE = 1000
 
 interface PlanRow {
@@ -126,7 +126,7 @@ Deno.serve(async (req) => {
     let failed = 0
     let processed = 0
     let interrompu = false
-    const errors: Array<{ user_id: string; reason: string }> = []
+    const errors: Array<{ user_id: string; reason: string; http_status?: number }> = []
 
     async function processOne(row: PlanRow): Promise<'sent' | 'skipped' | 'failed'> {
       const email = (row.email ?? '').trim()
@@ -161,14 +161,12 @@ Deno.serve(async (req) => {
       let res = await send()
       if (!res.ok) {
         let txt = await res.text().catch(() => '')
-        if (txt.includes('429') || txt.includes('Too many requests')) {
-          await new Promise((resolve) => setTimeout(resolve, 2000))
-          res = await send()
-          if (res.ok) return 'sent'
-          txt = await res.text().catch(() => '')
-        }
+        await new Promise((resolve) => setTimeout(resolve, 1500))
+        res = await send()
+        if (res.ok) return 'sent'
+        txt = await res.text().catch(() => '')
         console.error('send-transactional-email failed', res.status, txt)
-        errors.push({ user_id: row.id, reason: `send-transactional-email ${res.status}: ${txt}` })
+        errors.push({ user_id: row.id, reason: `send-transactional-email ${res.status}: ${txt}`, http_status: res.status })
         return 'failed'
       }
       return 'sent'
