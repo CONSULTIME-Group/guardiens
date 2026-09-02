@@ -9361,6 +9361,7 @@ export type Database = {
         Args: { p_action: string; p_application_id: string }
         Returns: string
       }
+      link_referral: { Args: { p_code: string }; Returns: Json }
       list_identity_documents_to_purge: {
         Args: { _retention_days?: number }
         Returns: {

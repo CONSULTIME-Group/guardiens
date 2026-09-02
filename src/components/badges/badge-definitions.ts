@@ -48,7 +48,7 @@ export const PROPRIO_BADGE_IDS: string[] = [
 ]
 
 export const SPECIAL_BADGE_IDS: string[] = [
-  'premiere_annonce', 'id_verifiee', 'gardien_urgence', 'courant_passe',
+  'premiere_annonce', 'id_verifiee', 'gardien_urgence', 'courant_passe', 'passe_le_mot',
 ]
 
 export const MISSION_BADGE_IDS: string[] = [
@@ -323,6 +323,15 @@ export const BADGE_DEFINITIONS: Record<string, BadgeDefinition> = {
     tooltip: "Les deux parties se sont évalué positivement à l'issue de la garde.",
     bg: '#7A5200', iconColor: '#FFE27A',
     svgIcon: `<rect x="17" y="14" width="6" height="8" rx="1" fill="none" stroke="#FFE27A" stroke-width="1.5"/><line x1="19" y1="13" x2="19" y2="14" stroke="#FFE27A" stroke-width="2" stroke-linecap="round"/><line x1="21" y1="13" x2="21" y2="14" stroke="#FFE27A" stroke-width="2" stroke-linecap="round"/><path d="M20 22 L20 25 Q20 29 24 29 Q28 29 28 25 L28 22" fill="none" stroke="#FFE27A" stroke-width="1.5" stroke-linecap="round"/>`,
+  },
+
+  passe_le_mot: {
+    label: "Passe le mot",
+    labelArc: "PASSE LE MOT",
+    category: 'special', expirable: false, fixedTier: 'gold',
+    tooltip: "Quelqu'un a rejoint Guardiens grâce à vous. C'est comme ça que la communauté grandit.",
+    bg: '#7A5200', iconColor: '#FFE27A',
+    svgIcon: `<circle cx="14" cy="14" r="2.5" fill="#FFE27A"/><path d="M9 29c0-4 4-6.5 5-6.5s5 2.5 5 6.5" fill="none" stroke="#FFE27A" stroke-width="1.5" stroke-linecap="round"/><circle cx="26" cy="14" r="2.5" fill="#FFE27A"/><path d="M21 29c0-4 4-6.5 5-6.5s5 2.5 5 6.5" fill="none" stroke="#FFE27A" stroke-width="1.5" stroke-linecap="round"/><path d="M16.5 16 Q20 21 23.5 16" fill="none" stroke="#FFE27A" stroke-width="1.5" stroke-linecap="round"/>`,
   },
 
   // ══════════════════════════════════════════════════════════
