@@ -17,8 +17,8 @@ const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
 const TEMPLATE = 'referral-boost-monthly'
 const CAMPAIGN = 'partage_communaute'
-const BATCH_SIZE = 2
-const BATCH_PAUSE_MS = 300
+const BATCH_SIZE = 1
+const BATCH_PAUSE_MS = 500
 const PAGE = 1000
 
 interface PlanRow {
@@ -158,13 +158,9 @@ Deno.serve(async (req) => {
         body: requestBody,
       })
 
-      let res = await send()
+      const res = await send()
       if (!res.ok) {
-        let txt = await res.text().catch(() => '')
-        await new Promise((resolve) => setTimeout(resolve, 1500))
-        res = await send()
-        if (res.ok) return 'sent'
-        txt = await res.text().catch(() => '')
+        const txt = await res.text().catch(() => '')
         console.error('send-transactional-email failed', res.status, txt)
         errors.push({ user_id: row.id, reason: `send-transactional-email ${res.status}: ${txt}`, http_status: res.status })
         return 'failed'
