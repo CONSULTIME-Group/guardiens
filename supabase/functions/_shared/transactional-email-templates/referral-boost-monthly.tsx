@@ -16,7 +16,7 @@ const Email = ({ firstName }: Props) => {
   return (
     <Html lang="fr" dir="ltr">
       <BrandedHead />
-      <Preview>Des nouvelles de Guardiens, et un service à vous demander.</Preview>
+      <Preview>Des nouvelles de Guardiens, et un coup de main à vous demander.</Preview>
       <Body style={main}>
         <Container style={container}>
           <BrandHeader />
@@ -26,20 +26,26 @@ const Email = ({ firstName }: Props) => {
               alt="Alma, l'assistante de Guardiens"
               width="120"
               height="120"
-              style={{ borderRadius: '50%', display: 'block', margin: '0 auto' }}
+              style={{ borderRadius: '50%', display: 'block', margin: '0 auto', maxWidth: '120px', height: 'auto' }}
             />
           </Section>
           <Text style={almaLine}>Alma, votre assistante Guardiens</Text>
-          <Heading style={title}>Des nouvelles, et un petit service</Heading>
-          <AlmaIntro firstName={firstName} seen="Des nouvelles de Guardiens, et un petit service à vous demander." />
+          <Heading style={title}>On est maintenant plus de 1 200</Heading>
+          <AlmaIntro firstName={firstName} seen="Des nouvelles de Guardiens, et un coup de main à vous demander." />
           <Text style={text}>
-            Depuis le lancement en mai, plus de trente annonces ont été publiées sur Guardiens. En Bretagne, à Marseille, en Alsace, au Pays basque, dans le Quercy. Et aussi à Marrakech, à La Réunion, et une maison à Tahiti pour tout le mois de décembre. On ne s'y attendait pas, et ça fait vraiment plaisir.
+            Depuis juin, près de 700 personnes nous ont rejoints. On est aujourd'hui plus de 1 200, et on ne s'attendait pas à ce rythme. Merci.
           </Text>
           <Text style={text}>
-            Il y a une chose qu'on aimerait voir grandir encore plus : l'entraide entre voisins. Arroser des plantes le temps d'un week-end, sortir un chien, donner un coup de main. C'est gratuit, ça ne passe jamais par de l'argent, et ça ne marche que sur quelques kilomètres. Il ne faut pas du monde partout, il faut du monde tout près.
+            Des annonces sont parties de Bretagne, de Marseille, d'Alsace, du Pays basque, du Quercy. Et aussi de Marrakech, de La Réunion, et d'une maison à Tahiti qui cherche quelqu'un pour tout le mois de décembre. Celle-là, on ne l'avait pas vue venir.
           </Text>
           <Text style={text}>
-            C'est pour ça qu'on vous écrit. Si Guardiens vous plaît, parlez-en autour de vous. Un partage, un message à quelqu'un du quartier. Ça ne coûte rien, et c'est ce qui nous aide le plus.
+            En parallèle, on écrit. Plus de 200 articles et guides sont en ligne, sur les races, sur les villes, sur la préparation d'une garde. On avance comme on peut, tout est gratuit pour le moment, alors on fait au mieux.
+          </Text>
+          <Text style={text}>
+            Il y a une chose qu'on aimerait vraiment voir décoller : l'entraide entre voisins. Arroser des plantes le temps d'un week-end, sortir un chien, donner un coup de main. Ça ne passe jamais par de l'argent, et ça ne marche que sur quelques kilomètres. Pour que ça prenne, il ne faut pas du monde partout, il faut du monde tout près. Beaucoup de monde.
+          </Text>
+          <Text style={text}>
+            C'est là qu'on compte sur vous. Parlez de Guardiens autour de vous. Un partage, un message à quelqu'un du quartier, une mention dans un groupe. C'est ce qui nous aide le plus, et de loin.
           </Text>
           <Section style={ctaSection}>
             <Button style={button} href="https://guardiens.fr/?utm_source=email&utm_campaign=partage_communaute&utm_medium=nurturing">
@@ -62,20 +68,20 @@ const Email = ({ firstName }: Props) => {
 
 export const template = {
   component: Email,
-  subject: 'De la Bretagne à Tahiti',
+  subject: 'On est plus de 1 200',
   displayName: 'Appel au partage',
   previewData: { firstName: 'Marie' },
 } satisfies TemplateEntry
 
 const main = { backgroundColor: '#FAF8F5', padding: '28px 12px', fontFamily: "'Outfit', Arial, sans-serif" }
-const container = { backgroundColor: '#FFFFFF', borderRadius: '16px', border: '1px solid #EFE9E0', padding: '32px 30px', maxWidth: '560px', margin: '0 auto' }
+const container = { backgroundColor: '#FFFFFF', borderRadius: '16px', border: '1px solid #EFE9E0', padding: '32px 24px', maxWidth: '560px', width: '100%', margin: '0 auto' }
 const text = { fontSize: '15px', color: '#5A544B', lineHeight: '1.7', margin: '0 0 16px' }
 const hr = { borderColor: '#E9E4DD', margin: '20px 0' }
 const ctaSection = { textAlign: 'center' as const, margin: '28px 0' }
 const button = {
   backgroundColor: '#2C6D50', color: '#ffffff', padding: '14px 32px',
   borderRadius: '10px', fontSize: '16px', fontWeight: '600' as const,
-  textDecoration: 'none', display: 'inline-block',
+  textDecoration: 'none', display: 'inline-block', maxWidth: '100%', boxSizing: 'border-box' as const,
 }
 const smallCentered = {
   fontSize: '13px',
