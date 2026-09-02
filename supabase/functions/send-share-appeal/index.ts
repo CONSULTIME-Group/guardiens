@@ -158,13 +158,9 @@ Deno.serve(async (req) => {
         body: requestBody,
       })
 
-      let res = await send()
+      const res = await send()
       if (!res.ok) {
-        let txt = await res.text().catch(() => '')
-        await new Promise((resolve) => setTimeout(resolve, 1500))
-        res = await send()
-        if (res.ok) return 'sent'
-        txt = await res.text().catch(() => '')
+        const txt = await res.text().catch(() => '')
         console.error('send-transactional-email failed', res.status, txt)
         errors.push({ user_id: row.id, reason: `send-transactional-email ${res.status}: ${txt}`, http_status: res.status })
         return 'failed'
