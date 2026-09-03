@@ -17,9 +17,10 @@ const mocks = vi.hoisted(() => {
   for (const k of ["select", "eq", "order", "limit", "insert", "upsert"]) {
     builder[k] = () => builder;
   }
+  builder.insert = vi.fn(() => builder);
   builder.maybeSingle = async () => ({ data: null, error: null });
   builder.then = (r: any) => Promise.resolve({ data: [], error: null }).then(r);
-  return { from: vi.fn(() => builder), upload: vi.fn() };
+  return { from: vi.fn(() => builder), insert: builder.insert, upload: vi.fn() };
 });
 
 vi.mock("@/integrations/supabase/client", () => ({
@@ -47,6 +48,7 @@ const renderPage = () =>
 describe("ProOnboarding : champs obligatoires bloquants", () => {
   beforeEach(() => {
     mocks.from.mockClear();
+    mocks.insert.mockClear();
     mocks.upload.mockClear();
     localStorage.clear();
   });
@@ -84,7 +86,7 @@ describe("ProOnboarding : champs obligatoires bloquants", () => {
   it("aucun appel base n'est déclenché tant que le formulaire est invalide", () => {
     renderPage();
     fireEvent.click(screen.getByRole("button", { name: "Continuer" }));
-    expect(mocks.from).not.toHaveBeenCalled();
+    expect(mocks.insert).not.toHaveBeenCalled();
     expect(mocks.upload).not.toHaveBeenCalled();
   });
 });
