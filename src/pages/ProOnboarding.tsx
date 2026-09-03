@@ -313,12 +313,15 @@ export default function ProOnboarding() {
               onSubmit={(e) => {
                 e.preventDefault();
                 if (step < 3) {
-                  if (step === 1) {
-                    if (!form.raison_sociale || !form.category || !form.city) {
-                      toast.error("Raison sociale, catégorie et ville sont obligatoires.");
-                      return;
-                    }
+                  if (step === 1 && !step1Valid) {
+                    toast.error("Raison sociale, catégorie, ville et photo sont obligatoires.");
+                    return;
                   }
+                  if (step === 2 && !step2Valid) {
+                    toast.error("La présentation doit faire au moins 50 caractères.");
+                    return;
+                  }
+
                   setStep((s) => (s + 1) as 1 | 2 | 3);
                   window.scrollTo({ top: 0, behavior: "smooth" });
                 } else {
