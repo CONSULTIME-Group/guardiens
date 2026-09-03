@@ -10,6 +10,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { getCategoryByValue } from "@/lib/proCategories";
+import { signalTypeLabel } from "@/components/admin/signals/signalGrouping";
+
 import { sendTransactionalEmail } from "@/lib/sendTransactionalEmail";
 import { trackEvent } from "@/lib/analytics";
 import { ShieldCheck } from "lucide-react";
