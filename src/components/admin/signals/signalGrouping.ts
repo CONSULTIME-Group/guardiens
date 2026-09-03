@@ -45,6 +45,8 @@ export const SIGNAL_TYPE_LABELS: Record<string, string> = {
   animal_rehoming_listing: "Cession ou adoption d'animal",
   sit_published_zero_reach: "Annonce publiée sans aucun gardien touché",
   email_recipient_address_invalid: "Adresse email refusée par le fournisseur",
+  pro_pending_review: "Fiche pro en attente de validation",
+
 
 };
 
@@ -92,9 +94,12 @@ export const entityNoun = (signals: AdminSignalBase[]): string => {
 };
 
 export function signalAdminLink(s: AdminSignalBase): string {
+  // L'annuaire pro a son propre écran de modération, quel que soit entity_type.
+  if (s.signal_type === "pro_pending_review") return "/admin/pros-annuaire";
   switch (s.entity_type) {
     case "sit":
       return "/admin/listings";
+
     case "mission":
       return "/admin/small-missions";
     case "profile":
@@ -170,4 +175,6 @@ export const SIGNAL_TOPIC: Record<string, string> = {
   identity_orphan_documents: "verifications_identite",
   repeated_cancellations: "retention_membres",
   repeated_republish: "retention_membres",
+  pro_pending_review: "annuaire_pros",
 };
+

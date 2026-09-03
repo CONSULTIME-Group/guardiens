@@ -10,6 +10,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { getCategoryByValue } from "@/lib/proCategories";
+import { signalTypeLabel } from "@/components/admin/signals/signalGrouping";
+
 import { sendTransactionalEmail } from "@/lib/sendTransactionalEmail";
 import { trackEvent } from "@/lib/analytics";
 import { ShieldCheck } from "lucide-react";
@@ -47,9 +49,17 @@ type ProRow = {
 
 type Tab = "pending" | "approved" | "rejected";
 
+type ProSignal = {
+  id: string;
+  entity_id: string;
+  detected_at: string;
+  metadata: Record<string, unknown> | null;
+};
+
 export default function AdminProDirectory() {
   const [tab, setTab] = useState<Tab>("pending");
   const [rows, setRows] = useState<ProRow[]>([]);
+  const [signals, setSignals] = useState<ProSignal[]>([]);
   const [loading, setLoading] = useState(true);
   const [reasonById, setReasonById] = useState<Record<string, string>>({});
   const [rejectModal, setRejectModal] = useState<{ open: boolean; row: ProRow | null; label: "Refuser" | "Retirer" }>({
@@ -68,9 +78,34 @@ export default function AdminProDirectory() {
     setLoading(false);
   };
 
+  /**
+   * Signaux admin_signals de type pro_pending_review, posés par un trigger
+   * à chaque fiche en attente et résolus automatiquement à la décision.
+   * Ils portent la gravité info, donc ils n'apparaissent pas dans la file
+   * générale de /admin : cet écran les affiche directement.
+   */
+  const loadSignals = async () => {
+    const { data, error } = await supabase
+      .from("admin_signals")
+      .select("id, entity_id, detected_at, metadata")
+      .eq("signal_type", "pro_pending_review")
+      .is("resolved_at", null)
+      .order("detected_at", { ascending: false });
+    if (error) {
+      console.error("[AdminProDirectory] signaux pro_pending_review", error);
+      return;
+    }
+    setSignals((data as any) ?? []);
+  };
+
   useEffect(() => {
     load(tab);
   }, [tab]);
+
+  useEffect(() => {
+    void loadSignals();
+  }, []);
+
 
   const decide = async (row: ProRow, decision: "approved" | "rejected") => {
     setBusyId(row.id);
@@ -124,6 +159,8 @@ export default function AdminProDirectory() {
     setBusyId(null);
     setRejectModal({ open: false, row: null, label: "Refuser" });
     load(tab);
+    void loadSignals();
+
   };
 
   const toggleVerified = async (row: ProRow) => {
@@ -163,6 +200,37 @@ export default function AdminProDirectory() {
           <Link to="/admin/pros">Vérifications Pro (diplômes, SIRET)</Link>
         </Button>
       </div>
+
+      {signals.length > 0 && (
+        <Card className="mb-4 border-primary/30">
+          <CardContent className="p-4 space-y-2">
+            <p className="text-sm font-semibold text-foreground">
+              {signalTypeLabel("pro_pending_review")} : {signals.length}
+            </p>
+            <ul className="text-xs text-muted-foreground space-y-1">
+              {signals.slice(0, 8).map((s) => (
+                <li key={s.id}>
+                  {typeof s.metadata?.raison_sociale === "string"
+                    ? s.metadata.raison_sociale
+                    : "Fiche sans raison sociale"}
+                  {" · "}
+                  {new Date(s.detected_at).toLocaleDateString("fr-FR")}
+                </li>
+              ))}
+            </ul>
+            {signals.length > 8 && (
+              <p className="text-xs text-muted-foreground">
+                et {signals.length - 8} autres fiches en attente.
+              </p>
+            )}
+            <p className="text-xs text-muted-foreground">
+              Ces signaux se résolvent automatiquement à l'approbation ou au refus.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+
 
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)}>

@@ -143,22 +143,27 @@ export default function ProOnboarding() {
 
   const update = (k: string, v: any) => setForm((f) => ({ ...f, [k]: v }));
 
+  // Règles obligatoires alignées sur les contraintes de la base :
+  // photo, description d'au moins 50 caractères, un contact au moins, ville.
+  const DESCRIPTION_MIN = 50;
+  const descriptionLength = form.description.trim().length;
+  const hasLogo = Boolean(logoFile);
+  const hasDescription = descriptionLength >= DESCRIPTION_MIN;
+  const hasContact = Boolean(form.phone.trim() || form.email_contact.trim());
+  const hasCity = Boolean(form.city.trim());
+  const step1Valid = Boolean(form.raison_sociale.trim() && form.category && hasCity && hasLogo);
+  const step2Valid = hasDescription;
+  const step3Valid = hasContact;
+  const allValid = step1Valid && step2Valid && step3Valid;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
-    if (!form.raison_sociale || !form.category) {
-      toast.error("Raison sociale et catégorie sont obligatoires.");
+    if (!allValid) {
+      toast.error("Complétez les champs obligatoires avant l'envoi.");
       return;
     }
-    // F-11 : au moins un moyen de contact public
-    if (!form.phone && !form.email_contact && !form.website) {
-      toast.error("Renseignez au moins un contact (téléphone, email ou site web).");
-      return;
-    }
-    if (!form.city) {
-      toast.error("La ville est obligatoire pour le référencement local.");
-      return;
-    }
+
 
     setLoading(true);
     try {
@@ -308,12 +313,15 @@ export default function ProOnboarding() {
               onSubmit={(e) => {
                 e.preventDefault();
                 if (step < 3) {
-                  if (step === 1) {
-                    if (!form.raison_sociale || !form.category || !form.city) {
-                      toast.error("Raison sociale, catégorie et ville sont obligatoires.");
-                      return;
-                    }
+                  if (step === 1 && !step1Valid) {
+                    toast.error("Raison sociale, catégorie, ville et photo sont obligatoires.");
+                    return;
                   }
+                  if (step === 2 && !step2Valid) {
+                    toast.error("La présentation doit faire au moins 50 caractères.");
+                    return;
+                  }
+
                   setStep((s) => (s + 1) as 1 | 2 | 3);
                   window.scrollTo({ top: 0, behavior: "smooth" });
                 } else {
@@ -375,11 +383,12 @@ export default function ProOnboarding() {
                   </div>
 
                   <div>
-                    <Label htmlFor="logo">Logo (optionnel, 2 Mo max)</Label>
+                    <Label htmlFor="logo">Photo ou logo * (2 Mo max)</Label>
                     <Input
                       id="logo"
                       type="file"
                       accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                      aria-invalid={!hasLogo}
                       onChange={(e) => {
                         const f = e.target.files?.[0] ?? null;
                         if (f && f.size > 2 * 1024 * 1024) {
@@ -389,7 +398,13 @@ export default function ProOnboarding() {
                         setLogoFile(f);
                       }}
                     />
+                    {!hasLogo && (
+                      <p className="text-sm text-destructive mt-1">
+                        Une photo ou un logo est obligatoire pour publier votre fiche.
+                      </p>
+                    )}
                   </div>
+
 
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
@@ -398,8 +413,14 @@ export default function ProOnboarding() {
                         id="city"
                         value={form.city}
                         onChange={(e) => update("city", e.target.value)}
+                        aria-invalid={!hasCity}
                         required
                       />
+                      {!hasCity && (
+                        <p className="text-sm text-destructive mt-1">
+                          La ville est obligatoire pour le référencement local.
+                        </p>
+                      )}
                     </div>
                     <div>
                       <Label htmlFor="cp">Code postal</Label>
@@ -416,15 +437,24 @@ export default function ProOnboarding() {
               {step === 2 && (
                 <>
                   <div>
-                    <Label htmlFor="desc">Présentation de votre activité</Label>
+                    <Label htmlFor="desc">Présentation de votre activité *</Label>
                     <Textarea
                       id="desc"
                       rows={6}
                       value={form.description}
                       onChange={(e) => update("description", e.target.value)}
+                      aria-invalid={!hasDescription}
                       placeholder="Spécialités, parcours, ce qui vous distingue…"
                     />
+                    <p
+                      className={`text-sm mt-1 ${hasDescription ? "text-muted-foreground" : "text-destructive"}`}
+                    >
+                      {hasDescription
+                        ? `${descriptionLength} caractères.`
+                        : `${descriptionLength} caractères sur 50 minimum.`}
+                    </p>
                   </div>
+
 
                   <div>
                     <Label htmlFor="hor">Horaires d'ouverture</Label>
@@ -463,7 +493,7 @@ export default function ProOnboarding() {
               {step === 3 && (
                 <>
                   <p className="text-sm text-muted-foreground">
-                    Au moins un moyen de contact public est obligatoire.
+                    Un téléphone ou un email de contact est obligatoire.
                   </p>
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
@@ -471,6 +501,7 @@ export default function ProOnboarding() {
                       <Input
                         id="phone"
                         value={form.phone}
+                        aria-invalid={!hasContact}
                         onChange={(e) => update("phone", e.target.value)}
                       />
                     </div>
@@ -480,10 +511,17 @@ export default function ProOnboarding() {
                         id="email"
                         type="email"
                         value={form.email_contact}
+                        aria-invalid={!hasContact}
                         onChange={(e) => update("email_contact", e.target.value)}
                       />
                     </div>
                   </div>
+                  {!hasContact && (
+                    <p className="text-sm text-destructive">
+                      Renseignez au moins un téléphone ou un email de contact.
+                    </p>
+                  )}
+
 
                   <div>
                     <Label htmlFor="web">Site web</Label>
@@ -526,6 +564,18 @@ export default function ProOnboarding() {
                 </>
               )}
 
+              {step === 3 && !allValid && (
+                <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-3 text-sm text-destructive space-y-1">
+                  <p className="font-medium">Il reste des informations obligatoires :</p>
+                  <ul className="list-disc pl-5 space-y-0.5">
+                    {!hasLogo && <li>Photo ou logo (étape Identité)</li>}
+                    {!hasCity && <li>Ville (étape Identité)</li>}
+                    {!hasDescription && <li>Présentation de 50 caractères minimum (étape Présentation)</li>}
+                    {!hasContact && <li>Téléphone ou email de contact</li>}
+                  </ul>
+                </div>
+              )}
+
               <div className="flex gap-2 pt-2">
                 {step > 1 && (
                   <Button
@@ -540,10 +590,20 @@ export default function ProOnboarding() {
                     Retour
                   </Button>
                 )}
-                <Button type="submit" disabled={loading} className="flex-1">
+                <Button
+                  type="submit"
+                  disabled={
+                    loading ||
+                    (step === 1 && !step1Valid) ||
+                    (step === 2 && !step2Valid) ||
+                    (step === 3 && !allValid)
+                  }
+                  className="flex-1"
+                >
                   {step < 3 ? "Continuer" : loading ? "Envoi…" : "Envoyer pour validation"}
                 </Button>
               </div>
+
             </form>
           </CardContent>
         </Card>
