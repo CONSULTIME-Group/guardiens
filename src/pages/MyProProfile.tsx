@@ -612,9 +612,7 @@ export default function MyProProfile() {
                   <p
                     className={`text-sm mt-1 ${hasDescription ? "text-muted-foreground" : "text-destructive"}`}
                   >
-                    {hasDescription
-                      ? `${descriptionLength} / ${DESCRIPTION_MIN} caractères minimum`
-                      : `${descriptionLength} / ${DESCRIPTION_MIN} caractères minimum`}
+                    {`${descriptionLength} / ${DESCRIPTION_MIN} caractères minimum`}
                   </p>
                 </div>
 
