@@ -564,6 +564,18 @@ export default function ProOnboarding() {
                 </>
               )}
 
+              {step === 3 && !allValid && (
+                <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-3 text-sm text-destructive space-y-1">
+                  <p className="font-medium">Il reste des informations obligatoires :</p>
+                  <ul className="list-disc pl-5 space-y-0.5">
+                    {!hasLogo && <li>Photo ou logo (étape Identité)</li>}
+                    {!hasCity && <li>Ville (étape Identité)</li>}
+                    {!hasDescription && <li>Présentation de 50 caractères minimum (étape Présentation)</li>}
+                    {!hasContact && <li>Téléphone ou email de contact</li>}
+                  </ul>
+                </div>
+              )}
+
               <div className="flex gap-2 pt-2">
                 {step > 1 && (
                   <Button
@@ -578,10 +590,20 @@ export default function ProOnboarding() {
                     Retour
                   </Button>
                 )}
-                <Button type="submit" disabled={loading} className="flex-1">
+                <Button
+                  type="submit"
+                  disabled={
+                    loading ||
+                    (step === 1 && !step1Valid) ||
+                    (step === 2 && !step2Valid) ||
+                    (step === 3 && !allValid)
+                  }
+                  className="flex-1"
+                >
                   {step < 3 ? "Continuer" : loading ? "Envoi…" : "Envoyer pour validation"}
                 </Button>
               </div>
+
             </form>
           </CardContent>
         </Card>
