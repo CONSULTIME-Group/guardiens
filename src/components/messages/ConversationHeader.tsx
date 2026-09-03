@@ -58,6 +58,7 @@ const ConversationHeader = ({
   const navigate = useNavigate();
   const [reportOpen, setReportOpen] = useState(false);
   const [reportReason, setReportReason] = useState("");
+  const [reportDetails, setReportDetails] = useState("");
   const [reportSending, setReportSending] = useState(false);
   const [blockOpen, setBlockOpen] = useState(false);
   const [blockSending, setBlockSending] = useState(false);
@@ -200,6 +201,7 @@ const ConversationHeader = ({
       target_id: reportedUserId,
       report_type: "inappropriate",
       reason: reportReason.trim(),
+      details: reportDetails.trim().slice(0, 300) || null,
     });
     setReportSending(false);
     if (error) {
@@ -209,6 +211,7 @@ const ConversationHeader = ({
     toast.success("Signalement envoyé. On examine ça dans les 24h.");
     setReportOpen(false);
     setReportReason("");
+    setReportDetails("");
   };
 
   const handleAcceptApplication = async () => {
