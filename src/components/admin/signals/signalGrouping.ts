@@ -45,6 +45,8 @@ export const SIGNAL_TYPE_LABELS: Record<string, string> = {
   animal_rehoming_listing: "Cession ou adoption d'animal",
   sit_published_zero_reach: "Annonce publiée sans aucun gardien touché",
   email_recipient_address_invalid: "Adresse email refusée par le fournisseur",
+  pro_pending_review: "Fiche pro en attente de validation",
+
 
 };
 
