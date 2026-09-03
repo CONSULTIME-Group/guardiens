@@ -449,9 +449,7 @@ export default function ProOnboarding() {
                     <p
                       className={`text-sm mt-1 ${hasDescription ? "text-muted-foreground" : "text-destructive"}`}
                     >
-                      {hasDescription
-                        ? `${descriptionLength} caractères.`
-                        : `${descriptionLength} caractères sur 50 minimum.`}
+                      {`${descriptionLength} / ${DESCRIPTION_MIN} caractères minimum`}
                     </p>
                   </div>
 
