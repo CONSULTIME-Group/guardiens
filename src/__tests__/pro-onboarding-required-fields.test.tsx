@@ -12,10 +12,15 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 
-const mocks = vi.hoisted(() => ({
-  from: vi.fn(() => ({ insert: vi.fn(), select: vi.fn(), upsert: vi.fn() })),
-  upload: vi.fn(),
-}));
+const mocks = vi.hoisted(() => {
+  const builder: any = {};
+  for (const k of ["select", "eq", "order", "limit", "insert", "upsert"]) {
+    builder[k] = () => builder;
+  }
+  builder.maybeSingle = async () => ({ data: null, error: null });
+  builder.then = (r: any) => Promise.resolve({ data: [], error: null }).then(r);
+  return { from: vi.fn(() => builder), upload: vi.fn() };
+});
 
 vi.mock("@/integrations/supabase/client", () => ({
   supabase: {
