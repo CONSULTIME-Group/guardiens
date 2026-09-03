@@ -586,6 +586,18 @@ const ConversationHeader = ({
             />
             <p className="text-xs text-muted-foreground text-right" aria-live="polite">{reportReason.length}/300</p>
           </div>
+          <div className="space-y-2 rounded-lg border border-border bg-accent/40 p-3">
+            <label className="text-sm font-medium block">Expliquez ce qui se passe (recommandé)</label>
+            <Textarea
+              placeholder="Décrivez ce qui vous a semblé suspect ou inapproprié"
+              aria-label="Détails du signalement"
+              value={reportDetails}
+              onChange={e => setReportDetails(e.target.value.slice(0, 300))}
+              maxLength={300}
+              className="min-h-[80px]"
+            />
+            <p className="text-xs text-muted-foreground text-right" aria-live="polite">{reportDetails.length}/300</p>
+          </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setReportOpen(false)}>Annuler</Button>
             <Button onClick={handleReport} disabled={reportSending || !reportReason.trim()}>
