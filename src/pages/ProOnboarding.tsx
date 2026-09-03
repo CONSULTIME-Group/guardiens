@@ -493,7 +493,7 @@ export default function ProOnboarding() {
               {step === 3 && (
                 <>
                   <p className="text-sm text-muted-foreground">
-                    Au moins un moyen de contact public est obligatoire.
+                    Un téléphone ou un email de contact est obligatoire.
                   </p>
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
@@ -501,6 +501,7 @@ export default function ProOnboarding() {
                       <Input
                         id="phone"
                         value={form.phone}
+                        aria-invalid={!hasContact}
                         onChange={(e) => update("phone", e.target.value)}
                       />
                     </div>
@@ -510,10 +511,17 @@ export default function ProOnboarding() {
                         id="email"
                         type="email"
                         value={form.email_contact}
+                        aria-invalid={!hasContact}
                         onChange={(e) => update("email_contact", e.target.value)}
                       />
                     </div>
                   </div>
+                  {!hasContact && (
+                    <p className="text-sm text-destructive">
+                      Renseignez au moins un téléphone ou un email de contact.
+                    </p>
+                  )}
+
 
                   <div>
                     <Label htmlFor="web">Site web</Label>
