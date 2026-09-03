@@ -149,7 +149,7 @@ export default function ProOnboarding() {
   const descriptionLength = form.description.trim().length;
   const hasLogo = Boolean(logoFile);
   const hasDescription = descriptionLength >= DESCRIPTION_MIN;
-  const hasContact = Boolean(form.phone.trim() || form.email_contact.trim());
+  const hasContact = Boolean(form.phone.trim() || form.email_contact.trim() || form.website.trim());
   const hasCity = Boolean(form.city.trim());
   const step1Valid = Boolean(form.raison_sociale.trim() && form.category && hasCity && hasLogo);
   const step2Valid = hasDescription;
