@@ -122,6 +122,8 @@ export default function MyProProfile() {
       return;
     }
     setSaving(true);
+    try {
+
 
       let logo_url = profile.logo_url;
       if (logoFile) {
