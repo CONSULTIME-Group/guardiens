@@ -731,7 +731,20 @@ export default function MyProProfile() {
                   </Label>
                 </div>
 
-                <Button onClick={handleSave} disabled={saving} className="w-full">
+                {!canSave && (
+                  <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-3 text-sm text-destructive space-y-1">
+                    <p className="font-medium">Il reste des informations obligatoires :</p>
+                    <ul className="list-disc pl-5 space-y-0.5">
+                      {!hasLogo && <li>Photo ou logo</li>}
+                      {!hasCity && <li>Ville</li>}
+                      {!hasDescription && <li>Présentation de 50 caractères minimum</li>}
+                      {!hasContact && <li>Téléphone ou email de contact</li>}
+                    </ul>
+                  </div>
+                )}
+
+                <Button onClick={handleSave} disabled={saving || !canSave} className="w-full">
+
                   {saving ? "Enregistrement…" : "Enregistrer"}
                 </Button>
               </CardContent>
