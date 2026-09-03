@@ -383,11 +383,12 @@ export default function ProOnboarding() {
                   </div>
 
                   <div>
-                    <Label htmlFor="logo">Logo (optionnel, 2 Mo max)</Label>
+                    <Label htmlFor="logo">Photo ou logo * (2 Mo max)</Label>
                     <Input
                       id="logo"
                       type="file"
                       accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                      aria-invalid={!hasLogo}
                       onChange={(e) => {
                         const f = e.target.files?.[0] ?? null;
                         if (f && f.size > 2 * 1024 * 1024) {
@@ -397,7 +398,13 @@ export default function ProOnboarding() {
                         setLogoFile(f);
                       }}
                     />
+                    {!hasLogo && (
+                      <p className="text-sm text-destructive mt-1">
+                        Une photo ou un logo est obligatoire pour publier votre fiche.
+                      </p>
+                    )}
                   </div>
+
 
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
