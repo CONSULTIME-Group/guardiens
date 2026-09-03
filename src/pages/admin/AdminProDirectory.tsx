@@ -157,6 +157,8 @@ export default function AdminProDirectory() {
     setBusyId(null);
     setRejectModal({ open: false, row: null, label: "Refuser" });
     load(tab);
+    void loadSignals();
+
   };
 
   const toggleVerified = async (row: ProRow) => {
