@@ -552,7 +552,7 @@ export default function MyProProfile() {
                 </div>
 
                 <div>
-                  <Label>Logo</Label>
+                  <Label>Photo ou logo *</Label>
                   {profile.logo_url && !logoFile && (
                     <img
                       src={profile.logo_url}
@@ -563,6 +563,7 @@ export default function MyProProfile() {
                   <Input
                     type="file"
                     accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                    aria-invalid={!hasLogo}
                     onChange={(e) => {
                       const f = e.target.files?.[0] ?? null;
                       if (f && f.size > 2 * 1024 * 1024) {
@@ -572,12 +573,24 @@ export default function MyProProfile() {
                       setLogoFile(f);
                     }}
                   />
+                  {!hasLogo && (
+                    <p className="text-sm text-destructive mt-1">
+                      Une photo ou un logo est obligatoire.
+                    </p>
+                  )}
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <Label>Ville</Label>
-                    <Input value={profile.city ?? ""} onChange={(e) => update("city", e.target.value)} />
+                    <Label>Ville *</Label>
+                    <Input
+                      value={profile.city ?? ""}
+                      aria-invalid={!hasCity}
+                      onChange={(e) => update("city", e.target.value)}
+                    />
+                    {!hasCity && (
+                      <p className="text-sm text-destructive mt-1">La ville est obligatoire.</p>
+                    )}
                   </div>
                   <div>
                     <Label>Code postal</Label>
@@ -589,28 +602,47 @@ export default function MyProProfile() {
                 </div>
 
                 <div>
-                  <Label>Présentation</Label>
+                  <Label>Présentation *</Label>
                   <Textarea
                     rows={6}
                     value={profile.description ?? ""}
+                    aria-invalid={!hasDescription}
                     onChange={(e) => update("description", e.target.value)}
                   />
+                  <p
+                    className={`text-sm mt-1 ${hasDescription ? "text-muted-foreground" : "text-destructive"}`}
+                  >
+                    {hasDescription
+                      ? `${descriptionLength} caractères.`
+                      : `${descriptionLength} caractères sur 50 minimum.`}
+                  </p>
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <Label>Téléphone</Label>
-                    <Input value={profile.phone ?? ""} onChange={(e) => update("phone", e.target.value)} />
+                    <Input
+                      value={profile.phone ?? ""}
+                      aria-invalid={!hasContact}
+                      onChange={(e) => update("phone", e.target.value)}
+                    />
                   </div>
                   <div>
                     <Label>Email contact</Label>
                     <Input
                       type="email"
                       value={profile.email_contact ?? ""}
+                      aria-invalid={!hasContact}
                       onChange={(e) => update("email_contact", e.target.value)}
                     />
                   </div>
                 </div>
+                {!hasContact && (
+                  <p className="text-sm text-destructive">
+                    Renseignez au moins un téléphone ou un email de contact.
+                  </p>
+                )}
+
 
                 <div>
                   <Label>Site web</Label>
