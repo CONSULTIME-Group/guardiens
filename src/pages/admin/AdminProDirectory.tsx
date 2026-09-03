@@ -199,6 +199,37 @@ export default function AdminProDirectory() {
         </Button>
       </div>
 
+      {signals.length > 0 && (
+        <Card className="mb-4 border-primary/30">
+          <CardContent className="p-4 space-y-2">
+            <p className="text-sm font-semibold text-foreground">
+              {signalTypeLabel("pro_pending_review")} : {signals.length}
+            </p>
+            <ul className="text-xs text-muted-foreground space-y-1">
+              {signals.slice(0, 8).map((s) => (
+                <li key={s.id}>
+                  {typeof s.metadata?.raison_sociale === "string"
+                    ? s.metadata.raison_sociale
+                    : "Fiche sans raison sociale"}
+                  {" · "}
+                  {new Date(s.detected_at).toLocaleDateString("fr-FR")}
+                </li>
+              ))}
+            </ul>
+            {signals.length > 8 && (
+              <p className="text-xs text-muted-foreground">
+                et {signals.length - 8} autres fiches en attente.
+              </p>
+            )}
+            <p className="text-xs text-muted-foreground">
+              Ces signaux se résolvent automatiquement à l'approbation ou au refus.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+
+
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)}>
         <TabsList>
