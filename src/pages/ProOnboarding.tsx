@@ -413,8 +413,14 @@ export default function ProOnboarding() {
                         id="city"
                         value={form.city}
                         onChange={(e) => update("city", e.target.value)}
+                        aria-invalid={!hasCity}
                         required
                       />
+                      {!hasCity && (
+                        <p className="text-sm text-destructive mt-1">
+                          La ville est obligatoire pour le référencement local.
+                        </p>
+                      )}
                     </div>
                     <div>
                       <Label htmlFor="cp">Code postal</Label>
@@ -431,15 +437,24 @@ export default function ProOnboarding() {
               {step === 2 && (
                 <>
                   <div>
-                    <Label htmlFor="desc">Présentation de votre activité</Label>
+                    <Label htmlFor="desc">Présentation de votre activité *</Label>
                     <Textarea
                       id="desc"
                       rows={6}
                       value={form.description}
                       onChange={(e) => update("description", e.target.value)}
+                      aria-invalid={!hasDescription}
                       placeholder="Spécialités, parcours, ce qui vous distingue…"
                     />
+                    <p
+                      className={`text-sm mt-1 ${hasDescription ? "text-muted-foreground" : "text-destructive"}`}
+                    >
+                      {hasDescription
+                        ? `${descriptionLength} caractères.`
+                        : `${descriptionLength} caractères sur 50 minimum.`}
+                    </p>
                   </div>
+
 
                   <div>
                     <Label htmlFor="hor">Horaires d'ouverture</Label>
