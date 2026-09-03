@@ -111,7 +111,9 @@ export default function MyProProfile() {
   const hasLogo = Boolean(logoFile || profile.logo_url);
   const hasDescription = descriptionLength >= DESCRIPTION_MIN;
   const hasContact = Boolean(
-    (profile.phone ?? "").trim() || (profile.email_contact ?? "").trim(),
+    (profile.phone ?? "").trim() ||
+      (profile.email_contact ?? "").trim() ||
+      (profile.website ?? "").trim(),
   );
   const hasCity = Boolean((profile.city ?? "").trim());
   const canSave = hasLogo && hasDescription && hasContact && hasCity;
@@ -612,9 +614,7 @@ export default function MyProProfile() {
                   <p
                     className={`text-sm mt-1 ${hasDescription ? "text-muted-foreground" : "text-destructive"}`}
                   >
-                    {hasDescription
-                      ? `${descriptionLength} caractères.`
-                      : `${descriptionLength} caractères sur 50 minimum.`}
+                    {`${descriptionLength} / ${DESCRIPTION_MIN} caractères minimum`}
                   </p>
                 </div>
 
