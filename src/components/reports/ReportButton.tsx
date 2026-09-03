@@ -71,7 +71,7 @@ const ReportButton = ({ targetId, targetType, className }: ReportButtonProps) =>
       target_type: targetType,
       report_type: targetType,
       reason,
-      details: details.trim().slice(0, 1000),
+      details: details.trim().slice(0, 300),
     });
     setSubmitting(false);
     if (error) {
@@ -123,15 +123,18 @@ const ReportButton = ({ targetId, targetType, className }: ReportButtonProps) =>
               </Select>
             </div>
 
-            <div>
-              <label className="text-sm font-medium mb-1.5 block">Détails (optionnel)</label>
+            <div className="rounded-lg border border-border bg-accent/40 p-3">
+              <label className="text-sm font-medium mb-1.5 block">Expliquez ce qui se passe (recommandé)</label>
               <Textarea
-                placeholder="Décrivez la situation..."
+                placeholder="Décrivez ce qui vous a semblé suspect ou inapproprié"
                 value={details}
-                onChange={(e) => setDetails(e.target.value)}
-                maxLength={1000}
+                onChange={(e) => setDetails(e.target.value.slice(0, 300))}
+                maxLength={300}
                 rows={4}
               />
+              <p className="text-xs text-muted-foreground text-right mt-1" aria-live="polite">
+                {details.length}/300
+              </p>
             </div>
           </div>
 

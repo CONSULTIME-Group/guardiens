@@ -58,6 +58,7 @@ const ConversationHeader = ({
   const navigate = useNavigate();
   const [reportOpen, setReportOpen] = useState(false);
   const [reportReason, setReportReason] = useState("");
+  const [reportDetails, setReportDetails] = useState("");
   const [reportSending, setReportSending] = useState(false);
   const [blockOpen, setBlockOpen] = useState(false);
   const [blockSending, setBlockSending] = useState(false);
@@ -200,6 +201,7 @@ const ConversationHeader = ({
       target_id: reportedUserId,
       report_type: "inappropriate",
       reason: reportReason.trim(),
+      details: reportDetails.trim().slice(0, 300) || null,
     });
     setReportSending(false);
     if (error) {
@@ -209,6 +211,7 @@ const ConversationHeader = ({
     toast.success("Signalement envoyé. On examine ça dans les 24h.");
     setReportOpen(false);
     setReportReason("");
+    setReportDetails("");
   };
 
   const handleAcceptApplication = async () => {
@@ -582,6 +585,18 @@ const ConversationHeader = ({
               className="min-h-[100px]"
             />
             <p className="text-xs text-muted-foreground text-right" aria-live="polite">{reportReason.length}/300</p>
+          </div>
+          <div className="space-y-2 rounded-lg border border-border bg-accent/40 p-3">
+            <label className="text-sm font-medium block">Expliquez ce qui se passe (recommandé)</label>
+            <Textarea
+              placeholder="Décrivez ce qui vous a semblé suspect ou inapproprié"
+              aria-label="Détails du signalement"
+              value={reportDetails}
+              onChange={e => setReportDetails(e.target.value.slice(0, 300))}
+              maxLength={300}
+              className="min-h-[80px]"
+            />
+            <p className="text-xs text-muted-foreground text-right" aria-live="polite">{reportDetails.length}/300</p>
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setReportOpen(false)}>Annuler</Button>
