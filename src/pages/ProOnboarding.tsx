@@ -143,22 +143,27 @@ export default function ProOnboarding() {
 
   const update = (k: string, v: any) => setForm((f) => ({ ...f, [k]: v }));
 
+  // Règles obligatoires alignées sur les contraintes de la base :
+  // photo, description d'au moins 50 caractères, un contact au moins, ville.
+  const DESCRIPTION_MIN = 50;
+  const descriptionLength = form.description.trim().length;
+  const hasLogo = Boolean(logoFile);
+  const hasDescription = descriptionLength >= DESCRIPTION_MIN;
+  const hasContact = Boolean(form.phone.trim() || form.email_contact.trim());
+  const hasCity = Boolean(form.city.trim());
+  const step1Valid = Boolean(form.raison_sociale.trim() && form.category && hasCity && hasLogo);
+  const step2Valid = hasDescription;
+  const step3Valid = hasContact;
+  const allValid = step1Valid && step2Valid && step3Valid;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
-    if (!form.raison_sociale || !form.category) {
-      toast.error("Raison sociale et catégorie sont obligatoires.");
+    if (!allValid) {
+      toast.error("Complétez les champs obligatoires avant l'envoi.");
       return;
     }
-    // F-11 : au moins un moyen de contact public
-    if (!form.phone && !form.email_contact && !form.website) {
-      toast.error("Renseignez au moins un contact (téléphone, email ou site web).");
-      return;
-    }
-    if (!form.city) {
-      toast.error("La ville est obligatoire pour le référencement local.");
-      return;
-    }
+
 
     setLoading(true);
     try {
