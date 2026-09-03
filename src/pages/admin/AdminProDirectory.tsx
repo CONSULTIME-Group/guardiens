@@ -47,9 +47,17 @@ type ProRow = {
 
 type Tab = "pending" | "approved" | "rejected";
 
+type ProSignal = {
+  id: string;
+  entity_id: string;
+  detected_at: string;
+  metadata: Record<string, unknown> | null;
+};
+
 export default function AdminProDirectory() {
   const [tab, setTab] = useState<Tab>("pending");
   const [rows, setRows] = useState<ProRow[]>([]);
+  const [signals, setSignals] = useState<ProSignal[]>([]);
   const [loading, setLoading] = useState(true);
   const [reasonById, setReasonById] = useState<Record<string, string>>({});
   const [rejectModal, setRejectModal] = useState<{ open: boolean; row: ProRow | null; label: "Refuser" | "Retirer" }>({
@@ -68,9 +76,34 @@ export default function AdminProDirectory() {
     setLoading(false);
   };
 
+  /**
+   * Signaux admin_signals de type pro_pending_review, posés par un trigger
+   * à chaque fiche en attente et résolus automatiquement à la décision.
+   * Ils portent la gravité info, donc ils n'apparaissent pas dans la file
+   * générale de /admin : cet écran les affiche directement.
+   */
+  const loadSignals = async () => {
+    const { data, error } = await supabase
+      .from("admin_signals")
+      .select("id, entity_id, detected_at, metadata")
+      .eq("signal_type", "pro_pending_review")
+      .is("resolved_at", null)
+      .order("detected_at", { ascending: false });
+    if (error) {
+      console.error("[AdminProDirectory] signaux pro_pending_review", error);
+      return;
+    }
+    setSignals((data as any) ?? []);
+  };
+
   useEffect(() => {
     load(tab);
   }, [tab]);
+
+  useEffect(() => {
+    void loadSignals();
+  }, []);
+
 
   const decide = async (row: ProRow, decision: "approved" | "rejected") => {
     setBusyId(row.id);
