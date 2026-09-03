@@ -111,7 +111,9 @@ export default function MyProProfile() {
   const hasLogo = Boolean(logoFile || profile.logo_url);
   const hasDescription = descriptionLength >= DESCRIPTION_MIN;
   const hasContact = Boolean(
-    (profile.phone ?? "").trim() || (profile.email_contact ?? "").trim(),
+    (profile.phone ?? "").trim() ||
+      (profile.email_contact ?? "").trim() ||
+      (profile.website ?? "").trim(),
   );
   const hasCity = Boolean((profile.city ?? "").trim());
   const canSave = hasLogo && hasDescription && hasContact && hasCity;
