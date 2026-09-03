@@ -104,9 +104,25 @@ export default function MyProProfile() {
 
   const update = (k: string, v: any) => setProfile((p: any) => ({ ...p, [k]: v }));
 
+  // Règles obligatoires alignées sur les contraintes de la base :
+  // photo, description d'au moins 50 caractères, un contact au moins, ville.
+  const DESCRIPTION_MIN = 50;
+  const descriptionLength = (profile.description ?? "").trim().length;
+  const hasLogo = Boolean(logoFile || profile.logo_url);
+  const hasDescription = descriptionLength >= DESCRIPTION_MIN;
+  const hasContact = Boolean(
+    (profile.phone ?? "").trim() || (profile.email_contact ?? "").trim(),
+  );
+  const hasCity = Boolean((profile.city ?? "").trim());
+  const canSave = hasLogo && hasDescription && hasContact && hasCity;
+
   const handleSave = async () => {
+    if (!canSave) {
+      toast.error("Complétez les champs obligatoires avant d'enregistrer.");
+      return;
+    }
     setSaving(true);
-    try {
+
       let logo_url = profile.logo_url;
       if (logoFile) {
         const ext = logoFile.name.split(".").pop();
