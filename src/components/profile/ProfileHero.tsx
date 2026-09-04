@@ -18,6 +18,7 @@ import StatutGardienBadge from "@/components/profile/StatutGardienBadge";
 import FavoriteButton from "@/components/shared/FavoriteButton";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import ReplyTimeBadge from "@/components/sitters/ReplyTimeBadge";
+import ResponsivenessBadge from "@/components/profile/ResponsivenessBadge";
 import { avatarImageUrl } from "@/lib/storageImage";
 
 export type HeroCtaVariant =
@@ -379,6 +380,9 @@ const ProfileHero = ({
               {replyMedianMinutes != null && (
                 <ReplyTimeBadge minutes={replyMedianMinutes} className="self-start mt-1" />
               )}
+
+              {/* Réactivité calculée (90 jours), identique gardien et propriétaire. */}
+              <ResponsivenessBadge userId={id} className="self-start mt-1" />
 
               {city && (
                 <p className="text-sm sm:text-base text-foreground/80 flex items-center gap-1 font-medium min-w-0 max-w-full break-words">
