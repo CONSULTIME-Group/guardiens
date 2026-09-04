@@ -6,14 +6,25 @@
  *  - l'absence totale d'affichage quand aucun palier n'est renvoyé,
  *  - l'absence de chiffre brut, de pourcentage et de tournure négative.
  */
+import React from "react";
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import fs from "node:fs";
 import path from "node:path";
 import ResponsivenessBadge, {
   RESPONSIVENESS_LABELS,
   responsivenessLabel,
 } from "@/components/profile/ResponsivenessBadge";
+
+function Wrapper({ children }: { children: React.ReactNode }) {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+}
 
 const COMPONENT_PATH = path.resolve(
   process.cwd(),
