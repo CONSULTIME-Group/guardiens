@@ -8745,16 +8745,6 @@ export type Database = {
         }
         Returns: boolean
       }
-      compute_responsiveness_stats: {
-        Args: never
-        Returns: {
-          contacts_total: number
-          median_reply_minutes: number
-          replied_count: number
-          response_rate: number
-          user_id: string
-        }[]
-      }
       consume_application_action_token: {
         Args: { p_reason?: string; p_token: string }
         Returns: Json
