@@ -49,7 +49,9 @@ describe("Badge de réactivité, affichage", () => {
   });
 
   it("n'affiche rien sur un palier inconnu, par exemple au-delà de 72 h", () => {
-    const { container } = render(<ResponsivenessBadge tier="over_72h" />);
+    const { container } = render(<ResponsivenessBadge tier="over_72h" />, {
+      wrapper: Wrapper,
+    });
     expect(container).toBeEmptyDOMElement();
     expect(responsivenessLabel("over_72h")).toBeNull();
   });
