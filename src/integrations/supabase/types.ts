@@ -7927,6 +7927,13 @@ export type Database = {
         }
         Relationships: []
       }
+      public_responsiveness: {
+        Row: {
+          tier: string | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
       public_sitter_profiles: {
         Row: {
           accompanied_by: string | null
@@ -8737,6 +8744,16 @@ export type Database = {
           p_postal_code: string
         }
         Returns: boolean
+      }
+      compute_responsiveness_stats: {
+        Args: never
+        Returns: {
+          contacts_total: number
+          median_reply_minutes: number
+          replied_count: number
+          response_rate: number
+          user_id: string
+        }[]
       }
       consume_application_action_token: {
         Args: { p_reason?: string; p_token: string }
