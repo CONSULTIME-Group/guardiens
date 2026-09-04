@@ -64,7 +64,7 @@ describe("Badge de réactivité, affichage", () => {
       two_three_days: "Répond généralement en 2 à 3 jours",
     };
     expect(RESPONSIVENESS_LABELS).toEqual(expected);
-    render(<ResponsivenessBadge tier="under_1h" />);
+    render(<ResponsivenessBadge tier="under_1h" />, { wrapper: Wrapper });
     expect(screen.getByText(expected.under_1h)).toBeTruthy();
   });
 });
