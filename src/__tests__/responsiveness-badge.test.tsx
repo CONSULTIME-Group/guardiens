@@ -42,7 +42,9 @@ const migrationSql = (): string => {
 
 describe("Badge de réactivité, affichage", () => {
   it("n'affiche rien sans palier", () => {
-    const { container } = render(<ResponsivenessBadge tier={null} />);
+    const { container } = render(<ResponsivenessBadge tier={null} />, {
+      wrapper: Wrapper,
+    });
     expect(container).toBeEmptyDOMElement();
   });
 
