@@ -7927,6 +7927,13 @@ export type Database = {
         }
         Relationships: []
       }
+      public_responsiveness: {
+        Row: {
+          tier: string | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
       public_sitter_profiles: {
         Row: {
           accompanied_by: string | null
