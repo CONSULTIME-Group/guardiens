@@ -6,14 +6,25 @@
  *  - l'absence totale d'affichage quand aucun palier n'est renvoyé,
  *  - l'absence de chiffre brut, de pourcentage et de tournure négative.
  */
+import React from "react";
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import fs from "node:fs";
 import path from "node:path";
 import ResponsivenessBadge, {
   RESPONSIVENESS_LABELS,
   responsivenessLabel,
 } from "@/components/profile/ResponsivenessBadge";
+
+function Wrapper({ children }: { children: React.ReactNode }) {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+}
 
 const COMPONENT_PATH = path.resolve(
   process.cwd(),
@@ -31,12 +42,16 @@ const migrationSql = (): string => {
 
 describe("Badge de réactivité, affichage", () => {
   it("n'affiche rien sans palier", () => {
-    const { container } = render(<ResponsivenessBadge tier={null} />);
+    const { container } = render(<ResponsivenessBadge tier={null} />, {
+      wrapper: Wrapper,
+    });
     expect(container).toBeEmptyDOMElement();
   });
 
   it("n'affiche rien sur un palier inconnu, par exemple au-delà de 72 h", () => {
-    const { container } = render(<ResponsivenessBadge tier="over_72h" />);
+    const { container } = render(<ResponsivenessBadge tier="over_72h" />, {
+      wrapper: Wrapper,
+    });
     expect(container).toBeEmptyDOMElement();
     expect(responsivenessLabel("over_72h")).toBeNull();
   });
@@ -49,7 +64,7 @@ describe("Badge de réactivité, affichage", () => {
       two_three_days: "Répond généralement en 2 à 3 jours",
     };
     expect(RESPONSIVENESS_LABELS).toEqual(expected);
-    render(<ResponsivenessBadge tier="under_1h" />);
+    render(<ResponsivenessBadge tier="under_1h" />, { wrapper: Wrapper });
     expect(screen.getByText(expected.under_1h)).toBeTruthy();
   });
 });
