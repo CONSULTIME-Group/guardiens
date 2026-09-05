@@ -81,8 +81,8 @@ const HouseSittingHub = () => {
   return (
     <>
       <PageMeta
-        title="House-sitting en France : toutes les villes couvertes | Guardiens"
-        description="Toutes les villes où Guardiens met en relation propriétaires et gardiens de maison et d'animaux. Choisissez votre ville et découvrez les gardes disponibles près de chez vous."
+        title="Home sitter en France, home sitting ville par ville | Guardiens"
+        description="Trouvez un home sitter de confiance en France. Le home sitting ville par ville, rencontre avant chaque garde, avis croisés, gardiens près de chez vous."
         path="/house-sitting"
         jsonLd={jsonLd}
       />
@@ -92,14 +92,14 @@ const HouseSittingHub = () => {
 
         <section className="max-w-5xl mx-auto px-4 py-10 md:py-14">
           <h1 className="font-heading text-3xl md:text-5xl font-bold text-foreground mb-5">
-            House-sitting en France, ville par ville
+            Home sitting en France : trouvez votre home sitter, ville par ville
           </h1>
           <p className="text-lg text-muted-foreground max-w-3xl leading-relaxed">
-            Le house-sitting, c'est confier sa maison et ses animaux à une personne de confiance
+            Le home sitting, c'est confier sa maison et ses animaux à un home sitter de confiance
             qui s'installe chez vous pendant votre absence. Vos animaux restent dans leur
             environnement, votre logement reste habité. Guardiens couvre la France entière :
-            choisissez votre ville pour voir comment cela se passe près de chez vous, qui sont les
-            gardiens inscrits et quelles gardes sont ouvertes.
+            choisissez votre ville pour voir les home sitters inscrits près de chez vous et les
+            gardes ouvertes.
           </p>
           <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm">
             <Link to="/departement" className="text-primary hover:underline">
