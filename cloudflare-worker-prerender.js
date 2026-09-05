@@ -39,7 +39,6 @@
  *  `cacheTtl`, une 404 transitoire pendant un déploiement serait figée un an à
  *  la frontière. Ici, seul un 200 franc est stocké.
  *
- *
  * ══ v7.1 (2026-08-11) — CORRECTIFS D'AUDIT, avant tout déploiement ══
  *
  *  Le v7 n'a jamais été déployé. Un audit adversarial a trouvé dix défauts,
