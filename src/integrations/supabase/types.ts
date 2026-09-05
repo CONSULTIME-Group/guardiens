@@ -9636,6 +9636,14 @@ export type Database = {
       sitter_missing_opportunities:
         | { Args: never; Returns: Json }
         | { Args: { _sitter_id?: string }; Returns: Json }
+      sitters_awaiting_gallery_photo: {
+        Args: { p_limit?: number }
+        Returns: {
+          email: string
+          first_name: string
+          id: string
+        }[]
+      }
       slugify: { Args: { input: string }; Returns: string }
       slugify_city: { Args: { input: string }; Returns: string }
       strip_emojis: { Args: { t: string }; Returns: string }
