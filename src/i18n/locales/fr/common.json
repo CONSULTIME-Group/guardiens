@@ -755,6 +755,16 @@
       "dog_friendly_restaurant": "Restaurants dog-friendly",
       "pet_shop": "Animaleries",
       "water_point": "Points d'eau"
+    },
+    "questions": {
+      "dog_park": "Où promener son chien à {{city}} ?",
+      "general_park": "Quels parcs accueillent les chiens à {{city}} ?",
+      "walk_trail": "Quelles balades faire avec un chien autour de {{city}} ?",
+      "vet": "Quel vétérinaire appeler à {{city}} ?",
+      "dog_friendly_cafe": "Peut-on entrer au café ou au restaurant avec son chien à {{city}} ?",
+      "dog_friendly_restaurant": "Quels restaurants acceptent les chiens à {{city}} ?",
+      "pet_shop": "Où acheter des croquettes à {{city}} ?",
+      "water_point": "Où trouver un point d'eau pour son chien à {{city}} ?"
     }
   },
   "about": {
