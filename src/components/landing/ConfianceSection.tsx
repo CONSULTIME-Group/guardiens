@@ -1,7 +1,10 @@
 import { useTranslation } from "react-i18next";
 import RevealOnScroll from "@/components/ui/RevealOnScroll";
 import { RevealSection } from "@/components/ui/RevealSection";
-import franceLocalNational from "@/assets/illustrations/france-local-national.webp";
+import franceAvif462 from "@/assets/illustrations/france-local-national-462.avif";
+import franceAvif924 from "@/assets/illustrations/france-local-national-924.avif";
+import franceWebp462 from "@/assets/illustrations/france-local-national-462.webp";
+import franceWebp924 from "@/assets/illustrations/france-local-national-924.webp";
 
 export function ConfianceSection() {
   const { t } = useTranslation();
@@ -26,17 +29,29 @@ export function ConfianceSection() {
           <RevealOnScroll from="left" className="relative order-2 lg:order-1 mx-auto w-full max-w-md lg:max-w-none group/illu">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 rounded-3xl blur-2xl transition-opacity duration-500 group-hover/illu:opacity-80 opacity-60" aria-hidden="true" />
             <div className="relative bg-card/50 border border-border rounded-3xl p-4 sm:p-5 md:p-7 shadow-sm transition-all duration-500 group-hover/illu:shadow-lg group-hover/illu:-translate-y-0.5">
-              <img
-                src={franceLocalNational}
-                alt="Illustration gouache d'une carte de France parsemée de points reliés, symbolisant le réseau de gardiens partout dans le pays."
-                width={960}
-                height={960}
-                loading="lazy"
-                decoding="async"
-                sizes="(max-width: 640px) 90vw, (max-width: 1024px) 60vw, 480px"
-                className="block w-full h-auto max-w-[420px] sm:max-w-[460px] lg:max-w-none mx-auto rounded-2xl transition-transform duration-700 ease-out group-hover/illu:scale-[1.02] motion-reduce:transition-none motion-reduce:transform-none"
-                style={{ imageRendering: 'auto' }}
-              />
+              <picture>
+                <source
+                  type="image/avif"
+                  srcSet={`${franceAvif462} 462w, ${franceAvif924} 924w`}
+                  sizes="(max-width: 640px) 90vw, (max-width: 1024px) 60vw, 480px"
+                />
+                <source
+                  type="image/webp"
+                  srcSet={`${franceWebp462} 462w, ${franceWebp924} 924w`}
+                  sizes="(max-width: 640px) 90vw, (max-width: 1024px) 60vw, 480px"
+                />
+                <img
+                  src={franceWebp924}
+                  alt="Illustration gouache d'une carte de France parsemée de points reliés, symbolisant le réseau de gardiens partout dans le pays."
+                  width={960}
+                  height={960}
+                  loading="lazy"
+                  decoding="async"
+                  sizes="(max-width: 640px) 90vw, (max-width: 1024px) 60vw, 480px"
+                  className="block w-full h-auto max-w-[420px] sm:max-w-[460px] lg:max-w-none mx-auto rounded-2xl transition-transform duration-700 ease-out group-hover/illu:scale-[1.02] motion-reduce:transition-none motion-reduce:transform-none"
+                  style={{ imageRendering: 'auto' }}
+                />
+              </picture>
             </div>
           </RevealOnScroll>
 
