@@ -1,10 +1,11 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { lazy, Suspense } from "react";
+import { Suspense } from "react";
+import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
 import Head from "@/components/seo/Head";
 import ProfileSkeleton from "@/components/profile/ProfileSkeleton";
 
-const SitterProfilePage = lazy(() => import("./SitterProfile"));
-const OwnerProfilePage = lazy(() => import("./OwnerProfile"));
+const SitterProfilePage = lazy(() => import("./SitterProfile"), "SitterProfile");
+const OwnerProfilePage = lazy(() => import("./OwnerProfile"), "OwnerProfile");
 
 const Profile = () => {
   const { activeRole } = useAuth();
