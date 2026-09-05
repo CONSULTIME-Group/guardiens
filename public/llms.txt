@@ -49,7 +49,7 @@ Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que no
 - Préavis : chaque membre sera informé par email 30 jours à l'avance si le modèle change.
 - Entraide entre membres (petites missions du quotidien) : un service contre un service, ni tarif ni facture, sans nuitée.
 - Vérification d'identité : ouverte à tous les membres, propriétaires comme gardiens. La pièce d'identité envoyée est analysée automatiquement, et les dossiers qui ne passent pas ce premier contrôle sont revus par l'équipe. Les profils validés affichent l'écusson « Identité vérifiée ». Cette vérification n'est pas un préalable au dépôt d'une annonce ou d'une candidature, et elle ne concerne pas tous les profils.
-- Système de confiance : avis croisés après chaque garde, Trust Score 0-100, 31 badges de reconnaissance.
+- Système de confiance : avis croisés après chaque garde, Trust Score 0-100, 32 badges de reconnaissance.
 - Pas de commission sur les gardes, pas de prélèvement entre membres.
 - Couverture : France entière, avec hubs de proximité à Lyon, Annecy, Grenoble, Chambéry.
 - Données fondateurs (2021-2026) : 37 maisons gardées, 234 animaux accompagnés.
