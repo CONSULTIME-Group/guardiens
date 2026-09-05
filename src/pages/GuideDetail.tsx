@@ -473,6 +473,14 @@ const GuideDetail = () => {
             }),
           }}
         />
+
+        {/* JSON-LD: ItemList des lieux utiles */}
+        {placesSchema && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(placesSchema) }}
+          />
+        )}
       </div>
     </>
   );
