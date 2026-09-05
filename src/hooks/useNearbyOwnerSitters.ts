@@ -60,6 +60,8 @@ export function useNearbyOwnerSitters(currentUserId: string | undefined) {
     queryKey: ["nearby-owner-sitters", currentUserId],
     enabled: !!currentUserId,
     staleTime: 5 * 60 * 1000,
+    // Un retour d'onglet ne doit pas relancer les lots du vivier.
+    refetchOnWindowFocus: false,
     queryFn: async () => {
       // 1. Coordonnées propriétaire (profiles puis fallback public_profiles)
       const { data: meRaw } = await supabase

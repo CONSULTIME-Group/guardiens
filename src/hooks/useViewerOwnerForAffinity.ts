@@ -5,14 +5,12 @@
  *
  * Cache module-level pour éviter une refetch par carte dans une liste.
  */
-import { useEffect, useState } from "react";
+import { useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import type { AffinityOwnerInput } from "@/lib/affinityScore";
 
 type Loaded = AffinityOwnerInput | null;
-
-const cache = new Map<string, Promise<Loaded>>();
 
 async function fetchOwnerWithPets(userId: string): Promise<Loaded> {
   const [ownerRes, propsRes] = await Promise.all([
@@ -41,43 +39,41 @@ async function fetchOwnerWithPets(userId: string): Promise<Loaded> {
   } as AffinityOwnerInput;
 }
 
+// Client React Query actif, mémorisé pour permettre l'invalidation depuis
+// `clearViewerOwnerCache` hors d'un composant.
+let activeClient: QueryClient | null = null;
+
 export function useViewerOwnerForAffinity(): {
   owner: Loaded;
   loading: boolean;
 } {
   const { user } = useAuth();
-  const [state, setState] = useState<{ owner: Loaded; loading: boolean }>({
-    owner: null,
-    loading: !!user,
+  const userId = user?.id;
+  activeClient = useQueryClient();
+
+  const { data, isPending } = useQuery({
+    queryKey: ["viewer-owner-affinity", userId],
+    enabled: !!userId,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    queryFn: async () => {
+      try {
+        return await fetchOwnerWithPets(userId!);
+      } catch {
+        return null;
+      }
+    },
   });
 
-  useEffect(() => {
-    if (!user) {
-      setState({ owner: null, loading: false });
-      return;
-    }
-    let cancelled = false;
-    let p = cache.get(user.id);
-    if (!p) {
-      p = fetchOwnerWithPets(user.id);
-      cache.set(user.id, p);
-    }
-    setState((s) => ({ ...s, loading: true }));
-    p.then((owner) => {
-      if (!cancelled) setState({ owner, loading: false });
-    }).catch(() => {
-      if (!cancelled) setState({ owner: null, loading: false });
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [user]);
-
-  return state;
+  // Signature inchangée : `loading` vaut true tant qu'un utilisateur est
+  // présent et que la première lecture n'est pas résolue.
+  return { owner: data ?? null, loading: !!userId && isPending };
 }
 
 /** Permet d'invalider le cache après une édition de profil/animaux. */
 export function clearViewerOwnerCache(userId?: string) {
-  if (userId) cache.delete(userId);
-  else cache.clear();
+  if (!activeClient) return;
+  if (userId) activeClient.removeQueries({ queryKey: ["viewer-owner-affinity", userId] });
+  else activeClient.removeQueries({ queryKey: ["viewer-owner-affinity"] });
 }

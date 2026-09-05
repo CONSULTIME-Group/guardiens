@@ -62,8 +62,10 @@ export function useOwnerTopAffinitySitters(): Result {
   const q = useQuery({
     queryKey: ["owner-top-affinity-sitters", userId],
     enabled: !!userId,
-    staleTime: 10 * 60 * 1000,
+    staleTime: 5 * 60 * 1000,
     gcTime: 15 * 60 * 1000,
+    // Un retour d'onglet ne doit pas relancer les ~22 lots du vivier.
+    refetchOnWindowFocus: false,
     queryFn: async () => {
       // 1. Owner : coordonnées + prefs matching + pets + voiture requise
       const [{ data: me }, { data: ownerPrefs }, { data: pets }, { data: myProperties }] = await Promise.all([

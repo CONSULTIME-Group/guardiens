@@ -8,6 +8,17 @@
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import type { ReactNode } from "react";
+
+const makeWrapper = () => {
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return ({ children }: { children: ReactNode }) => (
+    <QueryClientProvider client={client}>{children}</QueryClientProvider>
+  );
+};
 
 let currentUser: any = { id: "owner-1" };
 
@@ -47,7 +58,7 @@ describe("useViewerOwnerForAffinity, stabilité au re-render", () => {
   });
 
   it("conserve le profil owner quand l'objet user change d'identité sans changer de valeur", async () => {
-    const { result, rerender } = renderHook(() => useViewerOwnerForAffinity());
+    const { result, rerender } = renderHook(() => useViewerOwnerForAffinity(), { wrapper: makeWrapper() });
 
     await waitFor(() => expect(result.current.owner).not.toBeNull());
     const first = result.current.owner;
@@ -66,7 +77,7 @@ describe("useViewerOwnerForAffinity, stabilité au re-render", () => {
   });
 
   it("ne déclenche pas d'état de chargement effaçant le badge déjà calculé", async () => {
-    const { result, rerender } = renderHook(() => useViewerOwnerForAffinity());
+    const { result, rerender } = renderHook(() => useViewerOwnerForAffinity(), { wrapper: makeWrapper() });
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     currentUser = { id: "owner-1" };

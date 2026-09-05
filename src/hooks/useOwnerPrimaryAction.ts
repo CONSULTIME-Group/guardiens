@@ -31,28 +31,25 @@ export function useOwnerPrimaryAction(userId: string | undefined) {
     queryFn: async () => {
       if (!userId) return { action: null, draftId: null };
 
-      // Détecte l'existence d'au moins une annonce publiée (état "activé").
-      const { count: publishedCount, error: publishedErr } = await supabase
+      // Une seule lecture : le compte d'annonces publiées et le dernier
+      // brouillon se déduisent côté client de la même liste, triée comme
+      // l'ancienne requête brouillon (updated_at desc, created_at desc).
+      const { data: rows, error } = await supabase
         .from("sits")
-        .select("id", { count: "exact", head: true })
+        .select("id, status, updated_at, created_at")
         .eq("user_id", userId)
-        .in("status", PUBLISHED_STATUSES);
-      if (publishedErr) throw publishedErr;
-      if ((publishedCount ?? 0) > 0) {
+        .order("updated_at", { ascending: false, nullsFirst: false })
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      const list = rows ?? [];
+
+      // Au moins une annonce publiée (état "activé") : on ne pousse plus.
+      if (list.some((r) => (PUBLISHED_STATUSES as readonly string[]).includes(r.status))) {
         return { action: null, draftId: null };
       }
 
-      // Sinon, dernier brouillon éventuel.
-      const { data: drafts, error: draftErr } = await supabase
-        .from("sits")
-        .select("id, updated_at, created_at")
-        .eq("user_id", userId)
-        .eq("status", "draft")
-        .order("updated_at", { ascending: false, nullsFirst: false })
-        .order("created_at", { ascending: false })
-        .limit(1);
-      if (draftErr) throw draftErr;
-      const draft = drafts?.[0];
+      // Sinon, dernier brouillon éventuel (premier dans l'ordre ci-dessus).
+      const draft = list.find((r) => r.status === "draft");
       if (draft) {
         return { action: "publish_draft", draftId: draft.id };
       }
