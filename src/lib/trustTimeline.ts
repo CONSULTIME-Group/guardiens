@@ -169,14 +169,6 @@ export function maxActivity(months: ActivityMonth[]): number {
   return months.reduce((m, x) => Math.max(m, x.count), 0);
 }
 
-/** Évènements Schema.org pour enrichir le bloc Person. */
-export function timelineToSchemaEvents(events: TimelineEvent[]) {
-  return events.map((e) => ({
-    "@type": "Event",
-    name: e.label,
-    startDate: e.date.slice(0, 10),
-  }));
-}
 
 export function monthsSince(iso: string): number {
   return Math.max(0, differenceInMonths(new Date(), new Date(iso)));
