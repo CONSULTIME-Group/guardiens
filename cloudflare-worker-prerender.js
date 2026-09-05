@@ -1,7 +1,7 @@
 // MIROIR DE DOCUMENTATION, CE FICHIER NE DÉPLOIE RIEN.
 // La source de vérité est l'éditeur Cloudflare (Workers & Pages >
 // guardiens-prerender > Edit code). Ce fichier reflète la version active
-// b6f880ea (v7.1 du 11/08/2026), capturée le 05/09/2026 et vérifiée identique
+// 415a7bc4 (v7.2 du 05/09/2026), capturée le 05/09/2026 et vérifiée identique
 // au déployé par empreinte SHA-256. Toute modification faite ici reste sans
 // effet sur la production tant qu'elle n'est pas reportée dans l'éditeur
 // Cloudflare, ou déployée par `npx wrangler deploy`.
@@ -12,6 +12,37 @@
  * Deploy: Cloudflare Dashboard > Workers & Pages > guardiens-prerender > Edit code
  *         ou `npx wrangler deploy`
  * Route:  guardiens.fr/* + *guardiens.fr/*
+ *
+ * ══ v7.2 (2026-09-05) — CACHE EDGE DES FICHIERS À NOM HACHÉ ══
+ *
+ *  MESURE du 05/09/2026 sur la page d'accueil : les 44 fichiers statiques
+ *  revenaient tous en `cf-cache-status: BYPASS`, médiane 306 ms, p90 481 ms,
+ *  pour 17 ms d'attente serveur. Le temps perdu était du transit, pas de
+ *  l'origine. Cause : `fetchOrigin` transmet les cookies de session dans la
+ *  sous-requête, ce qui interdit à Cloudflare de stocker ou de servir la
+ *  réponse depuis son cache.
+ *
+ *  CORRIGÉ : court-circuit `serveImmutableAsset`, placé avant toute détection
+ *  de bot, pour les préfixes `/assets/` et `/lovable-uploads/`. Sous-requête
+ *  sans cookie, réponse stockée dans le cache edge via la Cache API et
+ *  renvoyée avec `Cache-Control: immutable`.
+ *
+ *  CE N'EST PAS UNE REMISE EN CAUSE DU « NON RETENU » CI-DESSOUS. Ce qui était
+ *  écarté, c'est la mise en cache edge du HTML PRÉRENDU : le pipeline
+ *  `seo_dirty_at` ne sait pas purger cette couche, donc du vieux HTML resterait
+ *  servi après déploiement. Ici, seuls sont mis en cache des fichiers dont le
+ *  nom porte une empreinte de contenu (hash Vite, UUID d'upload). Un contenu
+ *  différent produit un nom différent, donc ce cache ne peut pas devenir
+ *  obsolète et n'a rien à purger. Le HTML n'entre jamais dans ce chemin.
+ *
+ *  Pilotage par la Cache API plutôt que par `cf: { cacheTtl }` : avec
+ *  `cacheTtl`, une 404 transitoire pendant un déploiement serait figée un an à
+ *  la frontière. Ici, seul un 200 franc est stocké.
+ *
+ *  RÉSULTAT MESURÉ après déploiement, 40 fichiers `/assets/` : 40 HIT sur 40,
+ *  médiane 37 ms, p90 47 ms, contre 306 ms et 481 ms avant. Encodage passé de
+ *  gzip à zstd. Pages HTML inchangées (`cf-cache-status: DYNAMIC`), test en
+ *  direct Google Search Console au vert.
  *
  * ══ v7.1 (2026-08-11) — CORRECTIFS D'AUDIT, avant tout déploiement ══
  *
@@ -394,6 +425,63 @@ async function fetchOrigin(request) {
   });
 }
 
+/**
+ * Cache edge des fichiers dont le nom porte une empreinte de contenu.
+ * Voir l'entrée v7.2 de l'en-tête pour le motif et pour la raison qui rend
+ * cette dérogation compatible avec le « NON RETENU » du v7.1.
+ */
+const IMMUTABLE_PREFIXES = ['/assets/', '/lovable-uploads/'];
+const IMMUTABLE_TTL = 31536000; // 1 an
+
+function isImmutableAsset(pathname) {
+  return IMMUTABLE_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+}
+
+/**
+ * Sert un fichier immuable depuis le cache edge, en le remplissant au premier
+ * passage. Seul un 200 franc est stocké : une 404 transitoire pendant un
+ * déploiement ne doit pas être figée un an à la frontière.
+ */
+async function serveImmutableAsset(request, ctx) {
+  const url = new URL(request.url);
+  // Nom haché : la query string ne change jamais le contenu. On la retire pour
+  // qu'un `?v=123` ne crée pas une entrée de cache distincte.
+  const originUrl = `https://${LOVABLE_ORIGIN_HOST}${url.pathname}`;
+  const cacheKey = new Request(originUrl, { method: 'GET' });
+  const cache = caches.default;
+
+  const cached = await cache.match(cacheKey);
+  if (cached) return cached;
+
+  // Cookies et autorisation retirés : leur simple présence suffit à faire
+  // basculer Cloudflare en BYPASS.
+  const headers = new Headers(request.headers);
+  headers.delete('cookie');
+  headers.delete('authorization');
+  headers.delete('host');
+  headers.delete('range');
+  headers.set('x-forwarded-host', CANONICAL_ORIGIN);
+  headers.set('x-forwarded-proto', 'https');
+  headers.set('x-lovable-skip-redirect', '1');
+
+  let originResponse;
+  try {
+    originResponse = await fetch(originUrl, { method: 'GET', headers, redirect: 'manual' });
+  } catch (err) {
+    // Jamais de page blanche sur un asset : on laisse le chemin normal reprendre.
+    return fetchOrigin(request);
+  }
+
+  if (originResponse.status !== 200) return originResponse;
+
+  const out = new Response(originResponse.body, originResponse);
+  out.headers.set('cache-control', `public, max-age=${IMMUTABLE_TTL}, immutable`);
+  out.headers.delete('set-cookie');
+  out.headers.set('x-guardiens-asset-cache', 'stored');
+  ctx.waitUntil(cache.put(cacheKey, out.clone()));
+  return out;
+}
+
 // Fonction profile-jsonld (SSR du Schema.org pour Rich Results)
 const PROFILE_JSONLD_URL = 'https://erhccyqevdyevpyctsjj.supabase.co/functions/v1/profile-jsonld';
 const PROFILE_PATH_RE = /^\/gardiens\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\/?$/i;
@@ -469,10 +557,22 @@ export default {
         'cache-control': 'public, max-age=3600',
       };
       if (debug) {
-        headers['x-prerender-worker'] = 'guardiens-prerender-v7.1';
+        headers['x-prerender-worker'] = 'guardiens-prerender-v7.2';
         headers['x-prerender-status'] = 'www-to-apex-308';
       }
       return new Response(null, { status: 308, headers });
+    }
+
+    // === Cache edge des fichiers à nom haché (v7.2) ===
+    // Court-circuit placé le plus tôt possible : ces fichiers n'ont rien à
+    // faire dans la détection de bot ni dans la normalisation d'URL. Limité au
+    // GET sans Range, pour ne jamais stocker de réponse partielle.
+    if (
+      request.method === 'GET' &&
+      !request.headers.get('range') &&
+      isImmutableAsset(pathname)
+    ) {
+      return serveImmutableAsset(request, ctx);
     }
 
     // URL normalisée : c'est ELLE, et non `request.url`, qui devient la clé de
@@ -485,7 +585,7 @@ export default {
 
     const baseDiag = debug
       ? {
-          'X-Prerender-Worker': 'guardiens-prerender-v7.1',
+          'X-Prerender-Worker': 'guardiens-prerender-v7.2',
           'X-Prerender-Bot-Detected': String(isBot),
           'X-Prerender-UA': ua || '(empty)',
           'X-Prerender-Skip-Reasons': reasons.join(',') || 'none',
