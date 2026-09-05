@@ -347,6 +347,31 @@ const GuideDetail = () => {
           <p className="text-sm italic text-secondary font-medium">{guide.ideal_for}</p>
           </div>
         </header>
+        {/* L'essentiel : questions et reponses construites uniquement depuis les donnees en base.
+            Chaque entree disparait si ses donnees manquent, le bloc entier aussi. */}
+        {essentials.length > 0 && (
+          <div className="max-w-5xl mx-auto px-4 pt-8">
+            <h2 className="font-heading text-xl font-semibold text-foreground mb-4">
+              {t("guide_detail.essentials.title", { city: guide.city })}
+            </h2>
+            <dl className="space-y-5">
+              {essentials.map((entry) => (
+                <div key={entry.question}>
+                  <dt className="font-semibold text-foreground">{entry.question}</dt>
+                  <dd className="text-foreground/80 mt-1">
+                    {entry.answer}
+                    {entry.source && (
+                      <span className="block text-xs text-muted-foreground mt-1">
+                        {t("guide_detail.essentials.source_prefix", { source: entry.source })}
+                      </span>
+                    )}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        )}
+
         <div className="max-w-5xl mx-auto px-4 pt-6">
 
           {/* Search bar */}
