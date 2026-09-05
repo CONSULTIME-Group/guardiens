@@ -99,14 +99,21 @@ export function useOwnerDashboardData(userId: string | undefined) {
 
     const load = async () => {
       try {
-        const [sitsRes, propsRes, reviewsRes, profileRes, highlightsRes, missionsRes] = await Promise.all([
+        // Vague 1 : tout ce qui ne dépend que de userId part ensemble.
+        const [
+          sitsRes, propsRes, reviewsRes, profileRes, highlightsRes, missionsRes,
+          myMissionsDataRes, allMyMissionsCountRes,
+        ] = await Promise.all([
           supabase.from("sits").select("*, applications(id, status, sitter_id)").eq("user_id", userId).order("created_at", { ascending: false }),
           supabase.from("properties").select("id, type, environment, photos").eq("user_id", userId),
           supabase.from("reviews").select("overall_rating").eq("reviewee_id", userId).eq("published", true),
           supabase.from("profiles").select("first_name, avatar_url, bio, identity_verification_status, onboarding_completed, onboarding_dismissed_at, onboarding_minimal_completed").eq("id", userId).single(),
           supabase.from("owner_highlights").select("*").eq("owner_id", userId).eq("hidden", false).order("created_at", { ascending: false }).limit(5),
           supabase.from("small_missions").select("id, title, category, city, created_at").eq("status", "open").order("created_at", { ascending: false }).limit(2),
+          supabase.from("small_missions").select("id, title, category, status, created_at, small_mission_responses(id, status)").eq("user_id", userId).order("created_at", { ascending: false }).limit(3),
+          supabase.from("small_missions").select("id, status").eq("user_id", userId),
         ]);
+
 
         if (cancelled) return;
 
