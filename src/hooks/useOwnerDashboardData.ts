@@ -232,21 +232,43 @@ export function useOwnerDashboardData(userId: string | undefined) {
         const sitterBadges: Record<string, { badge_key: string; count: number }[]> = {};
         const sitterAffinityProfiles: Record<string, AffinitySitterInput> = {};
 
-        // Hydratation RLS-safe des fiches gardiens (applications + highlights)
-        // via la vue publique public_profiles.
+        // Vague 3 : hydratation des fiches gardiens et données associées, en
+        // une seule salve. Les identifiants gardiens se dérivent directement
+        // des candidatures brutes, sans attendre l'hydratation.
         const rawApps = (appsRes.data || []) as any[];
         const rawHighlights = (highlightsRes.data || []) as any[];
         const hydrateIds = Array.from(new Set(
           [...rawApps.map((a) => a.sitter_id), ...rawHighlights.map((h) => h.sitter_id)].filter(Boolean),
         )) as string[];
+        const sitterIds = sitIds.length > 0
+          ? (Array.from(new Set(rawApps.map((a) => a.sitter_id).filter(Boolean))) as string[])
+          : [];
+
+        const emptyRows = Promise.resolve({ data: [] as any[], error: null });
+        const [profsRes, badgesRes, sitterReviewsRes, affinityRes] = await Promise.all([
+          hydrateIds.length > 0
+            ? supabase
+                .from("public_profiles")
+                .select("id, first_name, avatar_url, identity_verified, completed_sits_count")
+                .in("id", hydrateIds)
+            : emptyRows,
+          sitterIds.length > 0
+            ? supabase.from("badge_attributions").select("user_id, badge_id").in("user_id", sitterIds)
+            : emptyRows,
+          sitterIds.length > 0
+            ? supabase.from("reviews").select("reviewee_id, overall_rating").in("reviewee_id", sitterIds).eq("published", true)
+            : emptyRows,
+          sitterIds.length > 0
+            ? supabase.from("sitter_profiles_affinity")
+                .select("user_id, experience_years, life_pace, lifestyle, availability_during, has_vehicle, has_license, languages, interests, work_during_sit, sensitivities, animal_types, sitter_type, travels_with_children, travels_with_own_animals, special_animal_skills, farm_animals_ok")
+                .in("user_id", sitterIds)
+            : emptyRows,
+        ]);
+
+        if (cancelled) return;
+
         const sitterProfMap = new Map<string, any>();
-        if (hydrateIds.length > 0) {
-          const { data: sitterProfs } = await supabase
-            .from("public_profiles")
-            .select("id, first_name, avatar_url, identity_verified, completed_sits_count")
-            .in("id", hydrateIds);
-          (sitterProfs ?? []).forEach((p: any) => sitterProfMap.set(p.id, p));
-        }
+        (profsRes.data ?? []).forEach((p: any) => sitterProfMap.set(p.id, p));
         rawApps.forEach((a: any) => { a.sitter = a.sitter_id ? sitterProfMap.get(a.sitter_id) ?? null : null; });
         rawHighlights.forEach((h: any) => {
           const p = h.sitter_id ? sitterProfMap.get(h.sitter_id) : null;
@@ -260,17 +282,10 @@ export function useOwnerDashboardData(userId: string | undefined) {
             if (a.sitter?.id) sitterProfiles[a.sitter.id] = a.sitter;
           });
 
-          const sitterIds = [...new Set(recentApps.map(a => a.sitter?.id).filter(Boolean))] as string[];
           if (sitterIds.length > 0) {
-            const [{ data: badgeData }, { data: sitterReviews }, { data: affinityRows }] = await Promise.all([
-              supabase.from("badge_attributions").select("user_id, badge_id").in("user_id", sitterIds),
-              supabase.from("reviews").select("reviewee_id, overall_rating").in("reviewee_id", sitterIds).eq("published", true),
-              supabase.from("sitter_profiles_affinity")
-                .select("user_id, experience_years, life_pace, lifestyle, availability_during, has_vehicle, has_license, languages, interests, work_during_sit, sensitivities, animal_types, sitter_type, travels_with_children, travels_with_own_animals, special_animal_skills, farm_animals_ok")
-                .in("user_id", sitterIds),
-            ]);
-
-            if (cancelled) return;
+            const badgeData = badgesRes.data as any[] | null;
+            const sitterReviews = sitterReviewsRes.data as any[] | null;
+            const affinityRows = affinityRes.data as any[] | null;
 
             const grouped: Record<string, Record<string, number>> = {};
             (badgeData || []).forEach((b: { user_id: string; badge_id: string }) => {
@@ -303,6 +318,7 @@ export function useOwnerDashboardData(userId: string | undefined) {
             });
           }
         }
+
 
         // Trusted sitter count
         const completedSitsData = sitsData.filter(s => s.status === "completed");
