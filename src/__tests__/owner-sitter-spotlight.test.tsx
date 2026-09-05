@@ -181,10 +181,11 @@ describe("OwnerSitterSpotlight, montage parallèle des deux viviers", () => {
     expect(mocks.nearby).toHaveBeenCalled();
   });
 
-  it("changer d'onglet ne déclenche aucun nouvel appel réseau", async () => {
+  it("changer d'onglet ne déclenche aucun nouvel appel réseau", () => {
     renderSpotlight();
-    // Effet du panneau proximité flushé (fetch sitter_profiles_affinity).
-    await waitFor(() => expect(mocks.supabaseFrom).toHaveBeenCalled());
+    // Lot 2B (05/09/2026) : le panneau proximité ne lit plus
+    // sitter_profiles_affinity lui même, l'entrée d'affinité vient du hook.
+    // Le comportement verrouillé reste le même : aucun appel au clic.
     const callsBefore = mocks.supabaseFrom.mock.calls.length;
 
     fireEvent.click(screen.getByRole("tab", { name: /Près de chez vous/ }));

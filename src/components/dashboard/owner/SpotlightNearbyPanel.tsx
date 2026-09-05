@@ -14,52 +14,21 @@
  * n'est trouvé, le panneau affiche un état vide court, jamais du blanc :
  * l'onglet reste visible et cliquable dans tous les cas.
  */
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNearbyOwnerSitters } from "@/hooks/useNearbyOwnerSitters";
-import { supabase } from "@/integrations/supabase/client";
-import type { AffinitySitterInput } from "@/lib/affinityScore";
 import OwnerToSitterAffinity from "@/components/matching/OwnerToSitterAffinity";
 import { avatarImageUrl } from "@/lib/storageImage";
 import { SectionHeader } from "@/components/dashboard/sitter/SitterMatchSection";
 import { Button } from "@/components/ui/button";
-
-const AFFINITY_COLUMNS =
-  "user_id, experience_years, life_pace, lifestyle, availability_during, has_vehicle, has_license, languages, interests, work_during_sit, sensitivities, animal_types, sitter_type, travels_with_children, travels_with_own_animals, special_animal_skills, farm_animals_ok";
 
 const SpotlightNearbyPanel = () => {
   const { user } = useAuth();
   const { data, isLoading } = useNearbyOwnerSitters(user?.id);
   const sitters = (data?.sitters ?? []).slice(0, 3);
   const radiusUsed = data?.radiusUsed ?? null;
-  const [affinityMap, setAffinityMap] = useState<Record<string, AffinitySitterInput>>({});
-
-  useEffect(() => {
-    if (sitters.length === 0) return;
-    const ids = sitters.map((s) => s.id);
-    let cancelled = false;
-    supabase
-      .from("sitter_profiles_affinity")
-      .select(AFFINITY_COLUMNS)
-      .in("user_id", ids)
-      .then(({ data: rows }) => {
-        if (cancelled) return;
-        const next: Record<string, AffinitySitterInput> = {};
-        (rows || []).forEach((row: any) => {
-          if (row?.user_id) {
-            const { user_id, ...rest } = row;
-            next[user_id] = rest as AffinitySitterInput;
-          }
-        });
-        setAffinityMap(next);
-      });
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sitters.map((s) => s.id).join(",")]);
-
+  // Lot 2B (05/09/2026) : l'entrée d'affinité arrive avec le hook de
+  // proximité, plus de requête dédiée depuis le panneau.
   if (isLoading) return null;
 
   // Différence de tri posée explicitement (25/08/2026) : ce panneau est un
@@ -109,7 +78,7 @@ const SpotlightNearbyPanel = () => {
 
       <ul role="list" className="flex flex-col" style={{ gap: "14px" }}>
         {sitters.map((s) => {
-          const affinityInput = affinityMap[s.id] ?? null;
+          const affinityInput = s.affinity_input;
           const distanceKm =
             typeof s.distance_km === "number" && s.distance_km > 0
               ? s.distance_km < 1
