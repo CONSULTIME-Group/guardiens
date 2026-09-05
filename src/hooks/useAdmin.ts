@@ -33,6 +33,6 @@ export const useAdmin = () => {
 
   return {
     isAdmin: data === true,
-    loading: data === undefined || isFetching,
+    loading: data === undefined && isFetching,
   };
 };
