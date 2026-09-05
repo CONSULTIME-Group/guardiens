@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, type MouseEvent as ReactMouseEvent } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { petSpeciesLabelLower } from "@/lib/petLabels";
@@ -290,6 +291,80 @@ const DateSheet = ({
   );
 };
 
+// Champ de date adaptatif : feuille mobile native, input desktop direct.
+const DateField = ({
+  id,
+  label,
+  value,
+  onChange,
+  min,
+  invalid,
+  onBlur,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  min?: string;
+  invalid: boolean;
+  onBlur?: () => void;
+}) => {
+  const isMobile = useIsMobile();
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const displayValue = value
+    ? new Date(value + "T12:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })
+    : "JJ/MM/AAAA";
+  const ariaLabel = value
+    ? `Date de ${label.toLowerCase()} : ${new Date(value + "T12:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })}`
+    : `Date de ${label.toLowerCase()}, non renseignée`;
+
+  return (
+    <div>
+      <Label htmlFor={id} className="text-xs text-muted-foreground mb-1 block">{label}</Label>
+      {isMobile ? (
+        <>
+          <button
+            id={id}
+            type="button"
+            onClick={() => setSheetOpen(true)}
+            aria-label={ariaLabel}
+            className={cn(
+              "w-full h-12 text-base rounded-md border px-3 text-left flex items-center justify-between transition-colors",
+              !value ? "text-muted-foreground border-input" : "text-foreground border-input",
+              invalid ? "border-destructive" : ""
+            )}
+            onBlur={onBlur}
+          >
+            <span>{displayValue}</span>
+            <Calendar className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+          </button>
+          <DateSheet
+            open={sheetOpen}
+            onOpenChange={setSheetOpen}
+            label={`Date de ${label.toLowerCase()}`}
+            value={value}
+            onChange={onChange}
+            min={min}
+          />
+        </>
+      ) : (
+        <Input
+          id={id}
+          type="date"
+          value={value}
+          min={min}
+          onChange={(e) => onChange(e.target.value)}
+          onBlur={onBlur}
+          className={cn(
+            "w-full h-12 text-base rounded-md border px-3",
+            invalid ? "border-destructive" : "border-input"
+          )}
+        />
+      )}
+    </div>
+  );
+};
+
 /**
  * Une copie locale ne vaut d'être restaurée que si elle porte réellement du
  * contenu. Sans ce contrôle, un formulaire ouvert puis quitté sans saisie
@@ -424,9 +499,6 @@ const CreateSit = () => {
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const touch = (field: string) => setTouched(prev => ({ ...prev, [field]: true }));
 
-  // Date sheets
-  const [startSheetOpen, setStartSheetOpen] = useState(false);
-  const [endSheetOpen, setEndSheetOpen] = useState(false);
 
   // Relative time ticker
   const [, setTick] = useState(0);
@@ -2144,43 +2216,24 @@ const CreateSit = () => {
           <div id="dates-field" className="scroll-mt-24">
             <Label className="text-sm font-medium block mb-2">Dates de la garde *</Label>
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label htmlFor="start-date" className="text-xs text-muted-foreground mb-1 block">Début</Label>
-                {/* Native date input, tappable to open sheet on mobile */}
-                <button
-                  id="start-date"
-                  type="button"
-                  onClick={() => setStartSheetOpen(true)}
-                  aria-label={startDate ? `Date de début : ${new Date(startDate + "T12:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })}` : "Date de début, non renseignée"}
-                  className={cn(
-                    "w-full h-12 text-base rounded-md border px-3 text-left flex items-center justify-between transition-colors",
-                    !startDate ? "text-muted-foreground border-input" : "text-foreground border-input",
-                    touched.startDate && !startDate ? "border-destructive" : "",
-                  )}
-                  onBlur={() => touch("startDate")}
-                >
-                  <span>{startDate ? new Date(startDate + "T12:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" }) : "JJ/MM/AAAA"}</span>
-                  <Calendar className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-                </button>
-              </div>
-              <div>
-                <Label htmlFor="end-date" className="text-xs text-muted-foreground mb-1 block">Fin</Label>
-                <button
-                  id="end-date"
-                  type="button"
-                  onClick={() => setEndSheetOpen(true)}
-                  aria-label={endDate ? `Date de fin : ${new Date(endDate + "T12:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })}` : "Date de fin, non renseignée"}
-                  className={cn(
-                    "w-full h-12 text-base rounded-md border px-3 text-left flex items-center justify-between transition-colors",
-                    !endDate ? "text-muted-foreground border-input" : "text-foreground border-input",
-                    touched.endDate && !endDate ? "border-destructive" : "",
-                  )}
-                  onBlur={() => touch("endDate")}
-                >
-                  <span>{endDate ? new Date(endDate + "T12:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" }) : "JJ/MM/AAAA"}</span>
-                  <Calendar className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-                </button>
-              </div>
+              <DateField
+                id="start-date"
+                label="Début"
+                value={startDate}
+                onChange={v => { setStartDate(v); touch("startDate"); }}
+                min={today}
+                invalid={touched.startDate && !startDate}
+                onBlur={() => touch("startDate")}
+              />
+              <DateField
+                id="end-date"
+                label="Fin"
+                value={endDate}
+                onChange={v => { setEndDate(v); touch("endDate"); }}
+                min={startDate || today}
+                invalid={touched.endDate && !endDate}
+                onBlur={() => touch("endDate")}
+              />
             </div>
             {dateError ? (
               <p className="text-sm text-destructive flex items-center gap-1.5 mt-2">
@@ -2196,24 +2249,6 @@ const CreateSit = () => {
               </p>
             ) : null}
           </div>
-
-          {/* Date sheets */}
-          <DateSheet
-            open={startSheetOpen}
-            onOpenChange={setStartSheetOpen}
-            label="Date de début"
-            value={startDate}
-            onChange={v => { setStartDate(v); touch("startDate"); }}
-            min={today}
-          />
-          <DateSheet
-            open={endSheetOpen}
-            onOpenChange={setEndSheetOpen}
-            label="Date de fin"
-            value={endDate}
-            onChange={v => { setEndDate(v); touch("endDate"); }}
-            min={startDate || today}
-          />
 
           {/* Description */}
           <div id="description-field" className="scroll-mt-24">
