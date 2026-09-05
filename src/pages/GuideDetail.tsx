@@ -215,7 +215,9 @@ const GuideDetail = () => {
         };
       }),
     };
-  }, [places, guide.city, guide.department]);
+  // Dependances en acces optionnel : guide vaut undefined pendant le chargement,
+  // dereferencer guide.city ici ferait tomber le composant avant le garde NotFound.
+  }, [places, guide?.city, guide?.department]);
 
   // Bloc « L'essentiel » : chaque entree n'existe que si ses donnees existent.
   // Cette liste unique alimente a la fois l'affichage et le JSON-LD FAQPage,
