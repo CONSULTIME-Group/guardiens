@@ -184,7 +184,7 @@ const GuideDetail = () => {
     return {
       "@context": "https://schema.org",
       "@type": "ItemList",
-      name: `Lieux utiles pour garder un chien a ${guide.city}`,
+      name: `Lieux utiles pour garder un chien à ${guide.city}`,
       numberOfItems: places.length,
       itemListElement: places.map((place, index) => {
         const item: Record<string, any> = {
@@ -331,7 +331,11 @@ const GuideDetail = () => {
               const config = CATEGORY_CONFIG[cat] || { key: cat, icon: MapPin, color: "gray" };
               const Icon = config.icon;
               const catPlaces = filteredPlaces.filter((p) => p.category === cat);
-              const catLabel = t(`guide_detail.categories.${config.key}`, cat);
+              // H2 sous forme de question reelle (extractible par les moteurs), repli sur le libelle de categorie si la cle manque.
+              const catLabel = t(`guide_detail.questions.${config.key}`, {
+                city: guide.city,
+                defaultValue: t(`guide_detail.categories.${config.key}`, cat),
+              });
 
               return (
                 <section key={cat}>
