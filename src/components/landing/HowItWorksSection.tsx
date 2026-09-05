@@ -3,9 +3,18 @@ import { useNavigate } from "react-router-dom";
 import { trackEvent } from "@/lib/analytics";
 import { RevealSection } from "@/components/ui/RevealSection";
 import { getSeasonalBannerKeys } from "@/lib/seasonalBanner";
-import howtoStep1 from "@/assets/illustrations/howto-step-1-annonce.png";
-import howtoStep2 from "@/assets/illustrations/howto-step-2-rencontre.png";
-import howtoStep3 from "@/assets/illustrations/howto-step-3-depart.png";
+import howtoStep1Avif224 from "@/assets/illustrations/howto-step-1-annonce-224.avif";
+import howtoStep1Avif448 from "@/assets/illustrations/howto-step-1-annonce-448.avif";
+import howtoStep1Webp224 from "@/assets/illustrations/howto-step-1-annonce-224.webp";
+import howtoStep1Webp448 from "@/assets/illustrations/howto-step-1-annonce-448.webp";
+import howtoStep2Avif224 from "@/assets/illustrations/howto-step-2-rencontre-224.avif";
+import howtoStep2Avif448 from "@/assets/illustrations/howto-step-2-rencontre-448.avif";
+import howtoStep2Webp224 from "@/assets/illustrations/howto-step-2-rencontre-224.webp";
+import howtoStep2Webp448 from "@/assets/illustrations/howto-step-2-rencontre-448.webp";
+import howtoStep3Avif224 from "@/assets/illustrations/howto-step-3-depart-224.avif";
+import howtoStep3Avif448 from "@/assets/illustrations/howto-step-3-depart-448.avif";
+import howtoStep3Webp224 from "@/assets/illustrations/howto-step-3-depart-224.webp";
+import howtoStep3Webp448 from "@/assets/illustrations/howto-step-3-depart-448.webp";
 
 export function HowItWorksSection() {
   const { t } = useTranslation();
@@ -31,15 +40,27 @@ export function HowItWorksSection() {
           <RevealSection delay={0.1}>
             <div className="text-center">
               <div className="relative mx-auto mb-4 w-56 h-56">
-                <img
-                  src={howtoStep1}
-                  alt="Illustration gouache d'un cottage en pierre avec un chat à la fenêtre et un chien à la porte."
-                  width={1024}
-                  height={1024}
-                  loading="lazy"
-                  decoding="async"
-                  className="w-full h-full object-contain"
-                />
+                <picture>
+                  <source
+                    type="image/avif"
+                    srcSet={`${howtoStep1Avif224} 224w, ${howtoStep1Avif448} 448w`}
+                    sizes="224px"
+                  />
+                  <source
+                    type="image/webp"
+                    srcSet={`${howtoStep1Webp224} 224w, ${howtoStep1Webp448} 448w`}
+                    sizes="224px"
+                  />
+                  <img
+                    src={howtoStep1Webp448}
+                    alt="Illustration gouache d'un cottage en pierre avec un chat à la fenêtre et un chien à la porte."
+                    width={224}
+                    height={224}
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full h-full object-contain"
+                  />
+                </picture>
                 <div className="absolute top-0 left-0 w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-heading font-bold text-base shadow-md">
                   1
                 </div>
@@ -54,15 +75,27 @@ export function HowItWorksSection() {
           <RevealSection delay={0.2}>
             <div className="text-center">
               <div className="relative mx-auto mb-4 w-56 h-56">
-                <img
-                  src={howtoStep2}
-                  alt="Illustration gouache de deux personnes qui se serrent la main autour d'une table, un chat et un chien à leurs côtés."
-                  width={1024}
-                  height={1024}
-                  loading="lazy"
-                  decoding="async"
-                  className="w-full h-full object-contain"
-                />
+                <picture>
+                  <source
+                    type="image/avif"
+                    srcSet={`${howtoStep2Avif224} 224w, ${howtoStep2Avif448} 448w`}
+                    sizes="224px"
+                  />
+                  <source
+                    type="image/webp"
+                    srcSet={`${howtoStep2Webp224} 224w, ${howtoStep2Webp448} 448w`}
+                    sizes="224px"
+                  />
+                  <img
+                    src={howtoStep2Webp448}
+                    alt="Illustration gouache de deux personnes qui se serrent la main autour d'une table, un chat et un chien à leurs côtés."
+                    width={224}
+                    height={224}
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full h-full object-contain"
+                  />
+                </picture>
                 <div className="absolute top-0 left-0 w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-heading font-bold text-base shadow-md">
                   2
                 </div>
@@ -77,15 +110,27 @@ export function HowItWorksSection() {
           <RevealSection delay={0.3}>
             <div className="text-center">
               <div className="relative mx-auto mb-4 w-56 h-56">
-                <img
-                  src={howtoStep3}
-                  alt="Illustration gouache d'une valise vintage prête au départ avec un chat et un chien à côté."
-                  width={1024}
-                  height={1024}
-                  loading="lazy"
-                  decoding="async"
-                  className="w-full h-full object-contain"
-                />
+                <picture>
+                  <source
+                    type="image/avif"
+                    srcSet={`${howtoStep3Avif224} 224w, ${howtoStep3Avif448} 448w`}
+                    sizes="224px"
+                  />
+                  <source
+                    type="image/webp"
+                    srcSet={`${howtoStep3Webp224} 224w, ${howtoStep3Webp448} 448w`}
+                    sizes="224px"
+                  />
+                  <img
+                    src={howtoStep3Webp448}
+                    alt="Illustration gouache d'une valise vintage prête au départ avec un chat et un chien à côté."
+                    width={224}
+                    height={224}
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full h-full object-contain"
+                  />
+                </picture>
                 <div className="absolute top-0 left-0 w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-heading font-bold text-base shadow-md">
                   3
                 </div>
