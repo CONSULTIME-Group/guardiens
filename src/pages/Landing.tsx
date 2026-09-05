@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import AlmaTipsTeaser from "@/components/landing/AlmaTipsTeaser";
 
-import franceLocalNational from "@/assets/illustrations/france-local-national.webp";
+import franceLocalNational from "@/assets/illustrations/france-local-national-462.avif";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { trackEvent } from "@/lib/analytics";
@@ -127,7 +127,7 @@ const Landing = () => {
  link.rel = "preload";
  link.as = "image";
  link.href = franceLocalNational;
- link.type = "image/webp";
+ link.type = "image/avif";
  // Low priority so it never competes with the hero / LCP resources.
  link.setAttribute("fetchpriority", "low");
  link.dataset.preload = "france-local-national";

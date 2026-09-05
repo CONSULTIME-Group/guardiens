@@ -104,6 +104,8 @@ const PRODUCT: ReadonlyArray<string> = [
   'relance-cp-manquant',
   'relance-profil-incomplet',
   'nudge-missing-photo',
+  'nudge-sitter-gallery-photo',
+
   'availability-nudge',
   'sit-draft-reminder',
   'summer-listing-reminder',

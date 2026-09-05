@@ -1,8 +1,8 @@
 import { useTranslation } from "react-i18next";
 import { staticRoutes, DEFAULT_OG_IMAGE } from "@/data/siteRoutes";
-import howtoStep1 from "@/assets/illustrations/howto-step-1-annonce.png";
-import howtoStep2 from "@/assets/illustrations/howto-step-2-rencontre.png";
-import howtoStep3 from "@/assets/illustrations/howto-step-3-depart.png";
+import howtoStep1 from "@/assets/illustrations/howto-step-1-annonce-448.webp";
+import howtoStep2 from "@/assets/illustrations/howto-step-2-rencontre-448.webp";
+import howtoStep3 from "@/assets/illustrations/howto-step-3-depart-448.webp";
 
 const HOME_CONTENT_LAST_MODIFIED = "2026-08-14";
 
