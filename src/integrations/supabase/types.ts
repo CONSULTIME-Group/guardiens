@@ -1622,6 +1622,8 @@ export type Database = {
           id: string
           ideal_for: string
           intro: string
+          leash_rule: string | null
+          leash_rule_source: string | null
           postal_code: string
           published: boolean
           seo_dirty_at: string | null
@@ -1636,6 +1638,8 @@ export type Database = {
           id?: string
           ideal_for?: string
           intro?: string
+          leash_rule?: string | null
+          leash_rule_source?: string | null
           postal_code?: string
           published?: boolean
           seo_dirty_at?: string | null
@@ -1650,6 +1654,8 @@ export type Database = {
           id?: string
           ideal_for?: string
           intro?: string
+          leash_rule?: string | null
+          leash_rule_source?: string | null
           postal_code?: string
           published?: boolean
           seo_dirty_at?: string | null
