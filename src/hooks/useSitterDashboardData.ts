@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { differenceInDays, differenceInHours } from "date-fns";
 import { haversineDistance } from "@/utils/geo";
+import { chunkArray } from "@/lib/chunkArray";
 
 export interface GroupedBadge {
   badge_id: string;
