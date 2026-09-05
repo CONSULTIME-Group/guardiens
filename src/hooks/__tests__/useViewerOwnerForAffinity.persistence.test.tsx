@@ -58,7 +58,7 @@ describe("useViewerOwnerForAffinity, stabilité au re-render", () => {
   });
 
   it("conserve le profil owner quand l'objet user change d'identité sans changer de valeur", async () => {
-    const { result, rerender } = renderHook(() => useViewerOwnerForAffinity());
+    const { result, rerender } = renderHook(() => useViewerOwnerForAffinity(), { wrapper: makeWrapper() });
 
     await waitFor(() => expect(result.current.owner).not.toBeNull());
     const first = result.current.owner;
@@ -77,7 +77,7 @@ describe("useViewerOwnerForAffinity, stabilité au re-render", () => {
   });
 
   it("ne déclenche pas d'état de chargement effaçant le badge déjà calculé", async () => {
-    const { result, rerender } = renderHook(() => useViewerOwnerForAffinity());
+    const { result, rerender } = renderHook(() => useViewerOwnerForAffinity(), { wrapper: makeWrapper() });
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     currentUser = { id: "owner-1" };
