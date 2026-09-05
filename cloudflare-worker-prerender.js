@@ -39,10 +39,6 @@
  *  `cacheTtl`, une 404 transitoire pendant un déploiement serait figée un an à
  *  la frontière. Ici, seul un 200 franc est stocké.
  *
- *  RÉSULTAT MESURÉ après déploiement, 40 fichiers `/assets/` : 40 HIT sur 40,
- *  médiane 37 ms, p90 47 ms, contre 306 ms et 481 ms avant. Encodage passé de
- *  gzip à zstd. Pages HTML inchangées (`cf-cache-status: DYNAMIC`), test en
- *  direct Google Search Console au vert.
  *
  * ══ v7.1 (2026-08-11) — CORRECTIFS D'AUDIT, avant tout déploiement ══
  *
