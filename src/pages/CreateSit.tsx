@@ -291,6 +291,80 @@ const DateSheet = ({
   );
 };
 
+// Champ de date adaptatif : feuille mobile native, input desktop direct.
+const DateField = ({
+  id,
+  label,
+  value,
+  onChange,
+  min,
+  invalid,
+  onBlur,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  min?: string;
+  invalid: boolean;
+  onBlur?: () => void;
+}) => {
+  const isMobile = useIsMobile();
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const displayValue = value
+    ? new Date(value + "T12:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })
+    : "JJ/MM/AAAA";
+  const ariaLabel = value
+    ? `Date de ${label.toLowerCase()} : ${new Date(value + "T12:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })}`
+    : `Date de ${label.toLowerCase()}, non renseignée`;
+
+  return (
+    <div>
+      <Label htmlFor={id} className="text-xs text-muted-foreground mb-1 block">{label}</Label>
+      {isMobile ? (
+        <>
+          <button
+            id={id}
+            type="button"
+            onClick={() => setSheetOpen(true)}
+            aria-label={ariaLabel}
+            className={cn(
+              "w-full h-12 text-base rounded-md border px-3 text-left flex items-center justify-between transition-colors",
+              !value ? "text-muted-foreground border-input" : "text-foreground border-input",
+              invalid ? "border-destructive" : ""
+            )}
+            onBlur={onBlur}
+          >
+            <span>{displayValue}</span>
+            <Calendar className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+          </button>
+          <DateSheet
+            open={sheetOpen}
+            onOpenChange={setSheetOpen}
+            label={`Date de ${label.toLowerCase()}`}
+            value={value}
+            onChange={onChange}
+            min={min}
+          />
+        </>
+      ) : (
+        <Input
+          id={id}
+          type="date"
+          value={value}
+          min={min}
+          onChange={(e) => onChange(e.target.value)}
+          onBlur={onBlur}
+          className={cn(
+            "w-full h-12 text-base rounded-md border px-3",
+            invalid ? "border-destructive" : "border-input"
+          )}
+        />
+      )}
+    </div>
+  );
+};
+
 /**
  * Une copie locale ne vaut d'être restaurée que si elle porte réellement du
  * contenu. Sans ce contrôle, un formulaire ouvert puis quitté sans saisie
