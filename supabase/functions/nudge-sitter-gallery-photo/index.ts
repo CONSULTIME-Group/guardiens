@@ -21,6 +21,15 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
+/** Découpe une liste en lots : un `.in()` de plusieurs centaines de valeurs
+ *  dépasse la longueur d'URL acceptée et échoue silencieusement. */
+const chunk = <T>(arr: T[], size: number): T[][] => {
+  const out: T[][] = [];
+  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+  return out;
+};
+const CHUNK_SIZE = 100;
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -106,7 +115,12 @@ Deno.serve(async (req) => {
       }));
 
     if (candidates.length === 0) {
-      return new Response(JSON.stringify({ mode, count: 0, eligible: 0 }), {
+      return new Response(JSON.stringify({
+        mode,
+        count: 0,
+        eligible: 0,
+        ...(mode === "count" ? { prefsRows: 0 } : {}),
+      }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -116,30 +130,45 @@ Deno.serve(async (req) => {
     const userIds = candidates.map((c) => c.id);
 
     // Suppression list.
-    const { data: suppressed } = await service
-      .from("suppressed_emails").select("email").in("email", emails);
-    const suppressedSet = new Set((suppressed || []).map((s: any) => s.email));
+    const suppressedRows: Array<{ email: string }> = [];
+    for (const emailBatch of chunk(emails, CHUNK_SIZE)) {
+      const { data, error } = await service
+        .from("suppressed_emails").select("email").in("email", emailBatch);
+      if (error) throw error;
+      suppressedRows.push(...(data || []));
+    }
+    const suppressedSet = new Set(suppressedRows.map((s) => s.email));
 
     // Opt-out produit.
-    const { data: prefs } = await service
-      .from("email_preferences")
-      .select("user_id, product_emails")
-      .in("user_id", userIds);
+    const prefs: Array<{ user_id: string; product_emails: boolean | null }> = [];
+    for (const userIdBatch of chunk(userIds, CHUNK_SIZE)) {
+      const { data, error } = await service
+        .from("email_preferences")
+        .select("user_id, product_emails")
+        .in("user_id", userIdBatch);
+      if (error) throw error;
+      prefs.push(...(data || []));
+    }
     const optedOut = new Set(
-      (prefs || [])
-        .filter((p: any) => p.product_emails === false)
-        .map((p: any) => p.user_id as string),
+      prefs
+        .filter((p) => p.product_emails === false)
+        .map((p) => p.user_id),
     );
 
     // Dédup : déjà relancés par ce nudge.
-    const { data: alreadySent } = await service
-      .from("email_send_log")
-      .select("recipient_email")
-      .eq("template_name", TEMPLATE_NAME)
-      .in("recipient_email", emails)
-      .in("status", ["sent", "pending", "deferred"]);
+    const alreadySent: Array<{ recipient_email: string }> = [];
+    for (const emailBatch of chunk(emails, CHUNK_SIZE)) {
+      const { data, error } = await service
+        .from("email_send_log")
+        .select("recipient_email")
+        .eq("template_name", TEMPLATE_NAME)
+        .in("recipient_email", emailBatch)
+        .in("status", ["sent", "pending", "deferred"]);
+      if (error) throw error;
+      alreadySent.push(...(data || []));
+    }
     const sentSet = new Set(
-      (alreadySent || []).map((s: any) => (s.recipient_email as string).trim().toLowerCase()),
+      alreadySent.map((s) => s.recipient_email.trim().toLowerCase()),
     );
 
     const targets = candidates
@@ -157,6 +186,7 @@ Deno.serve(async (req) => {
         rawCandidates: candidates.length,
         suppressed: suppressedSet.size,
         optedOut: optedOut.size,
+        prefsRows: prefs.length,
         alreadySent: sentSet.size,
         sample: targets.slice(0, 5).map((t) => ({ id: t.id, email: t.email })),
       }), {
