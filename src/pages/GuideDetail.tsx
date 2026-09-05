@@ -54,6 +54,18 @@ const CATEGORY_CONFIG: Record<string, { key: string; icon: any; color: string }>
   water_point: { key: "water_point", icon: Droplets, color: "hsl(200, 70%, 50%)" },
 };
 
+// Schema.org : type associe a chaque categorie de lieu.
+// Maintenu a cote de CATEGORY_CONFIG pour eviter les divergences.
+const SCHEMA_TYPE_MAP: Record<string, string> = {
+  dog_park: "Park",
+  general_park: "Park",
+  walk_trail: "Place",
+  vet: "VeterinaryCare",
+  dog_friendly_cafe: "FoodEstablishment",
+  dog_friendly_restaurant: "Restaurant",
+  pet_shop: "PetStore",
+  water_point: "Place",
+};
 
 const StarRating = ({ rating }: { rating: number | null }) => {
   if (!rating) return null;
