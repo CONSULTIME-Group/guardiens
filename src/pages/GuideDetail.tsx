@@ -26,6 +26,8 @@ interface CityGuide {
   intro: string;
   ideal_for: string;
   department: string;
+  leash_rule: string | null;
+  leash_rule_source: string | null;
 }
 
 interface GuidePlace {
@@ -215,6 +217,77 @@ const GuideDetail = () => {
     };
   }, [places, guide.city, guide.department]);
 
+  // Bloc « L'essentiel » : chaque entree n'existe que si ses donnees existent.
+  // Cette liste unique alimente a la fois l'affichage et le JSON-LD FAQPage,
+  // ce qui garantit que les deux ne peuvent pas diverger.
+  const essentials = useMemo(() => {
+    if (!guide) return [];
+    const entries: { question: string; answer: string; source?: string }[] = [];
+    const city = guide.city;
+
+    if (guide.leash_rule) {
+      entries.push({
+        question: t("guide_detail.essentials.leash_q", { city }),
+        answer: guide.leash_rule,
+        source: guide.leash_rule_source || undefined,
+      });
+    }
+
+    const walkPlaces = places.filter((p) => ["dog_park", "general_park", "walk_trail"].includes(p.category));
+    if (walkPlaces.length > 0) {
+      const names = walkPlaces.slice(0, 6).map((p) => p.name);
+      let list = names.join(", ");
+      const rest = walkPlaces.length - names.length;
+      if (rest > 0) list = `${list}, ${t("guide_detail.essentials.and_more", { count: rest })}`;
+      entries.push({
+        question: t("guide_detail.questions.dog_park", { city }),
+        answer: t("guide_detail.essentials.places_answer", { count: walkPlaces.length, names: list }),
+      });
+    }
+
+    const vets = places.filter((p) => p.category === "vet").slice(0, 4);
+    if (vets.length > 0) {
+      entries.push({
+        question: t("guide_detail.questions.vet", { city }),
+        answer: vets.map((p) => `${p.name} (${p.address})`).join("; "),
+      });
+    }
+
+    const cafes = places.filter((p) => ["dog_friendly_cafe", "dog_friendly_restaurant"].includes(p.category)).slice(0, 5);
+    if (cafes.length > 0) {
+      entries.push({
+        question: t("guide_detail.questions.dog_friendly_cafe", { city }),
+        answer: cafes.map((p) => p.name).join(", "),
+      });
+    }
+
+    const shops = places.filter((p) => p.category === "pet_shop").slice(0, 4);
+    if (shops.length > 0) {
+      entries.push({
+        question: t("guide_detail.questions.pet_shop", { city }),
+        answer: shops.map((p) => p.name).join(", "),
+      });
+    }
+
+    return entries;
+  }, [guide, places, t]);
+
+  const faqSchema = useMemo(() => {
+    if (essentials.length === 0) return null;
+    return {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: essentials.map((e) => ({
+        "@type": "Question",
+        name: e.question,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: e.source ? `${e.answer} ${t("guide_detail.essentials.source_prefix", { source: e.source })}` : e.answer,
+        },
+      })),
+    };
+  }, [essentials, t]);
+
   if (guideLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -274,6 +347,31 @@ const GuideDetail = () => {
           <p className="text-sm italic text-secondary font-medium">{guide.ideal_for}</p>
           </div>
         </header>
+        {/* L'essentiel : questions et reponses construites uniquement depuis les donnees en base.
+            Chaque entree disparait si ses donnees manquent, le bloc entier aussi. */}
+        {essentials.length > 0 && (
+          <div className="max-w-5xl mx-auto px-4 pt-8">
+            <h2 className="font-heading text-xl font-semibold text-foreground mb-4">
+              {t("guide_detail.essentials.title", { city: guide.city })}
+            </h2>
+            <dl className="space-y-5">
+              {essentials.map((entry) => (
+                <div key={entry.question}>
+                  <dt className="font-semibold text-foreground">{entry.question}</dt>
+                  <dd className="text-foreground/80 mt-1">
+                    {entry.answer}
+                    {entry.source && (
+                      <span className="block text-xs text-muted-foreground mt-1">
+                        {t("guide_detail.essentials.source_prefix", { source: entry.source })}
+                      </span>
+                    )}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        )}
+
         <div className="max-w-5xl mx-auto px-4 pt-6">
 
           {/* Search bar */}
@@ -483,6 +581,14 @@ const GuideDetail = () => {
           <script
             type="application/ld+json"
             dangerouslySetInnerHTML={{ __html: JSON.stringify(placesSchema) }}
+          />
+        )}
+
+        {/* JSON-LD: FAQPage, construit depuis la meme liste « essentials » que l'affichage */}
+        {faqSchema && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
           />
         )}
       </div>

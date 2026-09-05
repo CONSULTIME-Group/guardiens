@@ -765,6 +765,13 @@
       "dog_friendly_restaurant": "Quels restaurants acceptent les chiens à {{city}} ?",
       "pet_shop": "Où acheter des croquettes à {{city}} ?",
       "water_point": "Où trouver un point d'eau pour son chien à {{city}} ?"
+    },
+    "essentials": {
+      "title": "L'essentiel pour garder un chien à {{city}}",
+      "leash_q": "Faut-il tenir son chien en laisse à {{city}} ?",
+      "source_prefix": "Source : {{source}}",
+      "places_answer": "{{count}} lieux référencés, dont {{names}}",
+      "and_more": "et {{count}} autres"
     }
   },
   "about": {
