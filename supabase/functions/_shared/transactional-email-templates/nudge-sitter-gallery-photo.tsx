@@ -7,7 +7,6 @@ import { BrandHeader } from './_brand-header.tsx'
 import { LegalFooter } from './_legal-footer.tsx'
 import type { TemplateEntry } from './registry.ts'
 
-const SITE_NAME = 'Guardiens'
 const SITE_URL = 'https://guardiens.fr'
 
 interface NudgeSitterGalleryPhotoProps {
