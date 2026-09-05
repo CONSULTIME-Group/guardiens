@@ -128,9 +128,12 @@ export function useSitterDashboardData(userId: string | undefined) {
 
 
     const load = async () => {
+      // Vague 1 : toutes les requêtes qui ne dépendent que de userId.
+      const todayIso = new Date().toISOString().slice(0, 10);
       const [
         appsRes, sitterRes, profileRes, reviewsRes,
         badgesRes, articlesRes, unreadRes, allBadgesRes, emProfileRes, reputationRes,
+        meApproxRes, listingsRes, openMissionsRes, myMissionsRes,
       ] = await Promise.all([
         supabase.from("applications")
           .select("*, sit:sits(id, title, city, start_date, end_date, status, user_id, property_id, properties:property_id(photos))")
@@ -158,7 +161,34 @@ export function useSitterDashboardData(userId: string | undefined) {
         // Reputation — replaces useProfileReputation
         (supabase as any).from("profile_reputation")
           .select("*").eq("user_id", userId).maybeSingle(),
+        // Coordonnées approximatives de l'utilisateur : lancées toujours, mais
+        // utilisées seulement si profiles.latitude ou longitude est null.
+        supabase.from("public_profiles")
+          .select("latitude_approx, longitude_approx")
+          .eq("id", userId).maybeSingle(),
+        // Annonces publiées et non terminées (end_date >= aujourd'hui).
+        supabase.from("sits")
+          .select("id, title, start_date, end_date, user_id, property_id, status, created_at, is_urgent, cover_photo_url, properties:property_id(photos, type, environment, cover_photo_url)")
+          .eq("status", "published")
+          .neq("user_id", userId)
+          .gte("end_date", todayIso)
+          .order("created_at", { ascending: false })
+          .limit(500),
+        // Missions ouvertes : lancées toujours, traitées seulement si le
+        // gardien a un département connu.
+        supabase.from("small_missions")
+          .select("id, title, category, city, postal_code, date_needed, status, created_at, user_id")
+          .eq("status", "open")
+          .order("created_at", { ascending: false })
+          .limit(20),
+        supabase.from("small_missions")
+          .select("id, title, category, city, date_needed, status, created_at, small_mission_responses(id, status)")
+          .eq("user_id", userId)
+          .in("status", ["open", "completed"])
+          .order("created_at", { ascending: false })
+          .limit(8),
       ]);
+
 
       // Socle : profiles obligatoire (compte authentifié = ligne existante),
       // sitter_profiles peut légitimement être absent (PGRST116 = 0 rows) tant
