@@ -81,8 +81,8 @@ const HouseSittingHub = () => {
   return (
     <>
       <PageMeta
-        title="House-sitting en France : toutes les villes couvertes | Guardiens"
-        description="Toutes les villes où Guardiens met en relation propriétaires et gardiens de maison et d'animaux. Choisissez votre ville et découvrez les gardes disponibles près de chez vous."
+        title="Home sitter en France, home sitting ville par ville | Guardiens"
+        description="Trouvez un home sitter de confiance en France. Le home sitting ville par ville, rencontre avant chaque garde, avis croisés, gardiens près de chez vous."
         path="/house-sitting"
         jsonLd={jsonLd}
       />
