@@ -254,16 +254,13 @@ export function useSitterDashboardData(userId: string | undefined) {
       let meLat = (profile as any)?.latitude as number | null | undefined;
       let meLng = (profile as any)?.longitude as number | null | undefined;
       if (meLat == null || meLng == null) {
-        const { data: meApprox } = await supabase
-          .from("public_profiles")
-          .select("latitude_approx, longitude_approx")
-          .eq("id", userId)
-          .maybeSingle();
+        const meApprox = meApproxRes.data as any;
         if (meApprox?.latitude_approx && meApprox?.longitude_approx) {
           meLat = meApprox.latitude_approx as number;
           meLng = meApprox.longitude_approx as number;
         }
       }
+
       const hasMyCoords = typeof meLat === "number" && typeof meLng === "number";
       const NEARBY_LISTINGS_RADIUS_STEPS = [30, 50, 100];
       const NEARBY_LISTINGS_LIMIT = 4;
