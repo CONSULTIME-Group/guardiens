@@ -12,11 +12,12 @@ const guideHeaderImg = "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/obje
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { lazy, Suspense, useState, useMemo, useEffect } from "react";
+import { Suspense, useState, useMemo, useEffect } from "react";
+import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
 
 // Carte chargée uniquement quand l'utilisateur s'en approche (lazy + IntersectionObserver)
 // pour préserver le LCP et limiter le poids JS initial.
-const GuideMapLazy = lazy(() => import("@/components/guides/GuideMapLazy"));
+const GuideMapLazy = lazy(() => import("@/components/guides/GuideMapLazy"), "GuideMapLazy");
 
 interface CityGuide {
   id: string;

@@ -1,4 +1,5 @@
-import { lazy, Suspense, useMemo } from "react";
+import { Suspense, useMemo } from "react";
+import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
 import { useSearchParams } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,10 +9,10 @@ import MetricCard from "@/components/admin/seo/MetricCard";
 import TrafficSources from "@/components/admin/seo/TrafficSources";
 import { useSeoData } from "@/hooks/useSeoData";
 
-const AdminAnalytics = lazy(() => import("./AdminAnalytics"));
-const AdminSEO = lazy(() => import("./AdminSEO"));
-const AdminSignupFunnelTab = lazy(() => import("@/components/admin/AdminSignupFunnelTab"));
-const SignupFormSubStepsFunnel = lazy(() => import("@/components/admin/SignupFormSubStepsFunnel"));
+const AdminAnalytics = lazy(() => import("./AdminAnalytics"), "AdminAnalytics");
+const AdminSEO = lazy(() => import("./AdminSEO"), "AdminSEO");
+const AdminSignupFunnelTab = lazy(() => import("@/components/admin/AdminSignupFunnelTab"), "AdminSignupFunnelTab");
+const SignupFormSubStepsFunnel = lazy(() => import("@/components/admin/SignupFormSubStepsFunnel"), "SignupFormSubStepsFunnel");
 
 function pctChange(current: number, previous: number): number | undefined {
   if (previous === 0 && current === 0) return 0;
