@@ -118,12 +118,12 @@ Tout est sur la plateforme : messagerie, avis croisés, guide de la maison, et m
  },
 
  lyon: {
- heroAlt: "Garde de chien et de chat à Lyon - Vue panoramique depuis Fourvière au coucher du soleil - Guardiens",
- subtitle: "Faites garder votre chien, votre chat ou votre maison à Lyon par un home sitter de proximité. Sans commission, sans frais de pension.",
- articleSections: [
-  {
- id: "introduction",
- title: "Comment faire garder son chien ou son chat à Lyon ?",
+  heroAlt: "Garde de chien et de chat à Lyon - Vue panoramique depuis Fourvière au coucher du soleil - Guardiens",
+  subtitle: "Le home sitting à Lyon, c'est un home sitter de confiance qui s'installe chez vous et veille sur votre chien, votre chat et votre maison. Votre animal garde ses repères, et vous rencontrez votre gardien avant de lui confier vos clés.",
+  articleSections: [
+   {
+  id: "introduction",
+  title: "Home sitting à Lyon : comment faire garder son chien ou son chat ?",
  content: `Trouver un gardien à Lyon pour son chien ou son chat, à domicile et sans mise en pension, se fait via une plateforme d'entraide entre particuliers. Guardiens réunit des gardiens de confiance dans tous les arrondissements lyonnais, de la Presqu'île à la Croix-Rousse, de Confluence au 3ème et au 6ème. Recommandations par la communauté, rencontre avant chaque garde.
 
 Lyon est l'une des villes les plus accueillantes de France pour les animaux de compagnie. Près d'un quart des foyers lyonnais vivent avec un chien ou un chat. Du parc de la Tête d'Or aux quais de Saône, la ville offre un cadre de vie où les animaux ont toute leur place.

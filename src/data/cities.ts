@@ -76,18 +76,19 @@ export const CITIES: CityData[] = [
  departmentCode: "69",
  coordinates: { lat: 45.764, lng: 4.8357 },
  zoneProfile: "urbain",
- keywordPrimary: "garde chien Lyon",
- keywordSecondary: [
- "pet sitter Lyon",
- "home sitting Lyon",
- "home sitter Lyon",
- "garde animaux Lyon",
- "gardien maison Lyon",
- "house-sitting Lyon",
- ],
- h1: "Garde chien et chat à Lyon : gardiens de confiance à domicile",
- metaDescription:
- "Faites garder votre chien ou votre chat à Lyon par un gardien de confiance à domicile. Sans mise en pension, sans commission, rencontre avant chaque garde. Guardiens couvre tous les arrondissements lyonnais.",
+  keywordPrimary: "home sitter Lyon",
+  keywordSecondary: [
+  "pet sitter Lyon",
+  "home sitting Lyon",
+  "home sitter Lyon",
+  "garde animaux Lyon",
+  "gardien maison Lyon",
+  "house-sitting Lyon",
+  "garde chien Lyon",
+  ],
+  h1: "Home sitting à Lyon : un home sitter de confiance pour votre chien, votre chat et votre maison",
+  metaDescription:
+  "Trouvez un home sitter à Lyon pour garder votre chien, votre chat et votre maison. Rencontre avant chaque garde, avis croisés, tous les arrondissements.",
  localSpots: [
  {
  name: "Parc de la Tête d'Or",
