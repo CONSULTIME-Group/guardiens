@@ -99,14 +99,21 @@ export function useOwnerDashboardData(userId: string | undefined) {
 
     const load = async () => {
       try {
-        const [sitsRes, propsRes, reviewsRes, profileRes, highlightsRes, missionsRes] = await Promise.all([
+        // Vague 1 : tout ce qui ne dépend que de userId part ensemble.
+        const [
+          sitsRes, propsRes, reviewsRes, profileRes, highlightsRes, missionsRes,
+          myMissionsDataRes, allMyMissionsCountRes,
+        ] = await Promise.all([
           supabase.from("sits").select("*, applications(id, status, sitter_id)").eq("user_id", userId).order("created_at", { ascending: false }),
           supabase.from("properties").select("id, type, environment, photos").eq("user_id", userId),
           supabase.from("reviews").select("overall_rating").eq("reviewee_id", userId).eq("published", true),
           supabase.from("profiles").select("first_name, avatar_url, bio, identity_verification_status, onboarding_completed, onboarding_dismissed_at, onboarding_minimal_completed").eq("id", userId).single(),
           supabase.from("owner_highlights").select("*").eq("owner_id", userId).eq("hidden", false).order("created_at", { ascending: false }).limit(5),
           supabase.from("small_missions").select("id, title, category, city, created_at").eq("status", "open").order("created_at", { ascending: false }).limit(2),
+          supabase.from("small_missions").select("id, title, category, status, created_at, small_mission_responses(id, status)").eq("user_id", userId).order("created_at", { ascending: false }).limit(3),
+          supabase.from("small_missions").select("id, status").eq("user_id", userId),
         ]);
+
 
         if (cancelled) return;
 
@@ -164,7 +171,19 @@ export function useOwnerDashboardData(userId: string | undefined) {
           hasSit: sitsData.length > 0,
         };
 
-        // Pets + Applications — parallèles (indépendantes)
+        // Dérivations en mémoire remontées avant la vague 2 : elles ne
+        // dépendent que de sitsData (vague 1) et conditionnent la requête des
+        // avis déjà déposés par le propriétaire.
+        const completedSitsData = sitsData.filter(s => s.status === "completed");
+        const fourteenDaysAgo = new Date();
+        fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+        const recentCompleted = completedSitsData.filter(s => {
+          if (!s.end_date) return false;
+          return new Date(s.end_date) >= fourteenDaysAgo;
+        });
+        const recentSitIds = recentCompleted.map(s => s.id);
+
+        // Vague 2 : pets, candidatures, vues, avis déjà déposés.
         const propIds = propsData.map((pr) => pr.id);
         const sitIds = sitsData.map(s => s.id);
 
@@ -184,13 +203,17 @@ export function useOwnerDashboardData(userId: string | undefined) {
               .limit(20)
           : Promise.resolve({ data: [], error: null });
 
-        const [petsRes, appsRes, viewsRes] = await Promise.all([
+        const [petsRes, appsRes, viewsRes, ownerReviewsRes] = await Promise.all([
           petsPromise,
           appsPromise,
           sitIds.length > 0
             ? supabase.rpc("get_sit_views_count", { p_sit_ids: sitIds })
             : Promise.resolve({ data: [], error: null }),
+          recentSitIds.length > 0
+            ? supabase.from("reviews").select("sit_id").eq("reviewer_id", userId).in("sit_id", recentSitIds)
+            : Promise.resolve({ data: [], error: null }),
         ]);
+
         if (cancelled) return;
 
         const viewsMap = new Map<string, { views_30d: number; views_total: number }>();
@@ -209,21 +232,43 @@ export function useOwnerDashboardData(userId: string | undefined) {
         const sitterBadges: Record<string, { badge_key: string; count: number }[]> = {};
         const sitterAffinityProfiles: Record<string, AffinitySitterInput> = {};
 
-        // Hydratation RLS-safe des fiches gardiens (applications + highlights)
-        // via la vue publique public_profiles.
+        // Vague 3 : hydratation des fiches gardiens et données associées, en
+        // une seule salve. Les identifiants gardiens se dérivent directement
+        // des candidatures brutes, sans attendre l'hydratation.
         const rawApps = (appsRes.data || []) as any[];
         const rawHighlights = (highlightsRes.data || []) as any[];
         const hydrateIds = Array.from(new Set(
           [...rawApps.map((a) => a.sitter_id), ...rawHighlights.map((h) => h.sitter_id)].filter(Boolean),
         )) as string[];
+        const sitterIds = sitIds.length > 0
+          ? (Array.from(new Set(rawApps.map((a) => a.sitter_id).filter(Boolean))) as string[])
+          : [];
+
+        const emptyRows = Promise.resolve({ data: [] as any[], error: null });
+        const [profsRes, badgesRes, sitterReviewsRes, affinityRes] = await Promise.all([
+          hydrateIds.length > 0
+            ? supabase
+                .from("public_profiles")
+                .select("id, first_name, avatar_url, identity_verified, completed_sits_count")
+                .in("id", hydrateIds)
+            : emptyRows,
+          sitterIds.length > 0
+            ? supabase.from("badge_attributions").select("user_id, badge_id").in("user_id", sitterIds)
+            : emptyRows,
+          sitterIds.length > 0
+            ? supabase.from("reviews").select("reviewee_id, overall_rating").in("reviewee_id", sitterIds).eq("published", true)
+            : emptyRows,
+          sitterIds.length > 0
+            ? supabase.from("sitter_profiles_affinity")
+                .select("user_id, experience_years, life_pace, lifestyle, availability_during, has_vehicle, has_license, languages, interests, work_during_sit, sensitivities, animal_types, sitter_type, travels_with_children, travels_with_own_animals, special_animal_skills, farm_animals_ok")
+                .in("user_id", sitterIds)
+            : emptyRows,
+        ]);
+
+        if (cancelled) return;
+
         const sitterProfMap = new Map<string, any>();
-        if (hydrateIds.length > 0) {
-          const { data: sitterProfs } = await supabase
-            .from("public_profiles")
-            .select("id, first_name, avatar_url, identity_verified, completed_sits_count")
-            .in("id", hydrateIds);
-          (sitterProfs ?? []).forEach((p: any) => sitterProfMap.set(p.id, p));
-        }
+        (profsRes.data ?? []).forEach((p: any) => sitterProfMap.set(p.id, p));
         rawApps.forEach((a: any) => { a.sitter = a.sitter_id ? sitterProfMap.get(a.sitter_id) ?? null : null; });
         rawHighlights.forEach((h: any) => {
           const p = h.sitter_id ? sitterProfMap.get(h.sitter_id) : null;
@@ -237,17 +282,10 @@ export function useOwnerDashboardData(userId: string | undefined) {
             if (a.sitter?.id) sitterProfiles[a.sitter.id] = a.sitter;
           });
 
-          const sitterIds = [...new Set(recentApps.map(a => a.sitter?.id).filter(Boolean))] as string[];
           if (sitterIds.length > 0) {
-            const [{ data: badgeData }, { data: sitterReviews }, { data: affinityRows }] = await Promise.all([
-              supabase.from("badge_attributions").select("user_id, badge_id").in("user_id", sitterIds),
-              supabase.from("reviews").select("reviewee_id, overall_rating").in("reviewee_id", sitterIds).eq("published", true),
-              supabase.from("sitter_profiles_affinity")
-                .select("user_id, experience_years, life_pace, lifestyle, availability_during, has_vehicle, has_license, languages, interests, work_during_sit, sensitivities, animal_types, sitter_type, travels_with_children, travels_with_own_animals, special_animal_skills, farm_animals_ok")
-                .in("user_id", sitterIds),
-            ]);
-
-            if (cancelled) return;
+            const badgeData = badgesRes.data as any[] | null;
+            const sitterReviews = sitterReviewsRes.data as any[] | null;
+            const affinityRows = affinityRes.data as any[] | null;
 
             const grouped: Record<string, Record<string, number>> = {};
             (badgeData || []).forEach((b: { user_id: string; badge_id: string }) => {
@@ -281,8 +319,8 @@ export function useOwnerDashboardData(userId: string | undefined) {
           }
         }
 
+
         // Trusted sitter count
-        const completedSitsData = sitsData.filter(s => s.status === "completed");
         const sitterSitCounts: Record<string, number> = {};
         completedSitsData.forEach(s => {
           (s.applications || [])
@@ -292,25 +330,9 @@ export function useOwnerDashboardData(userId: string | undefined) {
         const trustedSitterCount = Object.values(sitterSitCounts).filter(c => c >= 2).length;
 
         // Pending reviews : gardes terminées récentes (< 14j) avec sitter accepté,
-        // sans avis encore laissé par le propriétaire.
-        const fourteenDaysAgo = new Date();
-        fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
-        const recentCompleted = completedSitsData.filter(s => {
-          if (!s.end_date) return false;
-          return new Date(s.end_date) >= fourteenDaysAgo;
-        });
-        const recentSitIds = recentCompleted.map(s => s.id);
+        // sans avis encore laissé par le propriétaire. Les données proviennent
+        // des vagues 1 et 2, plus aucune requête ici.
 
-        // My missions + reviews déjà laissés par le propriétaire
-        const [myMissionsDataRes, allMyMissionsCountRes, ownerReviewsRes] = await Promise.all([
-          supabase.from("small_missions").select("id, title, category, status, created_at, small_mission_responses(id, status)").eq("user_id", userId).order("created_at", { ascending: false }).limit(3),
-          supabase.from("small_missions").select("id, status").eq("user_id", userId),
-          recentSitIds.length > 0
-            ? supabase.from("reviews").select("sit_id").eq("reviewer_id", userId).in("sit_id", recentSitIds)
-            : Promise.resolve({ data: [], error: null }),
-        ]);
-
-        if (cancelled) return;
 
         const reviewedSitIds = new Set((ownerReviewsRes.data || []).map((r: { sit_id: string }) => r.sit_id));
         const pendingReviews: PendingReview[] = recentCompleted

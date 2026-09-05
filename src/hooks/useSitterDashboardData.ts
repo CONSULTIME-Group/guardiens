@@ -128,9 +128,12 @@ export function useSitterDashboardData(userId: string | undefined) {
 
 
     const load = async () => {
+      // Vague 1 : toutes les requêtes qui ne dépendent que de userId.
+      const todayIso = new Date().toISOString().slice(0, 10);
       const [
         appsRes, sitterRes, profileRes, reviewsRes,
         badgesRes, articlesRes, unreadRes, allBadgesRes, emProfileRes, reputationRes,
+        meApproxRes, listingsRes, openMissionsRes, myMissionsRes,
       ] = await Promise.all([
         supabase.from("applications")
           .select("*, sit:sits(id, title, city, start_date, end_date, status, user_id, property_id, properties:property_id(photos))")
@@ -158,7 +161,34 @@ export function useSitterDashboardData(userId: string | undefined) {
         // Reputation — replaces useProfileReputation
         (supabase as any).from("profile_reputation")
           .select("*").eq("user_id", userId).maybeSingle(),
+        // Coordonnées approximatives de l'utilisateur : lancées toujours, mais
+        // utilisées seulement si profiles.latitude ou longitude est null.
+        supabase.from("public_profiles")
+          .select("latitude_approx, longitude_approx")
+          .eq("id", userId).maybeSingle(),
+        // Annonces publiées et non terminées (end_date >= aujourd'hui).
+        supabase.from("sits")
+          .select("id, title, start_date, end_date, user_id, property_id, status, created_at, is_urgent, cover_photo_url, properties:property_id(photos, type, environment, cover_photo_url)")
+          .eq("status", "published")
+          .neq("user_id", userId)
+          .gte("end_date", todayIso)
+          .order("created_at", { ascending: false })
+          .limit(500),
+        // Missions ouvertes : lancées toujours, traitées seulement si le
+        // gardien a un département connu.
+        supabase.from("small_missions")
+          .select("id, title, category, city, postal_code, date_needed, status, created_at, user_id")
+          .eq("status", "open")
+          .order("created_at", { ascending: false })
+          .limit(20),
+        supabase.from("small_missions")
+          .select("id, title, category, city, date_needed, status, created_at, small_mission_responses(id, status)")
+          .eq("user_id", userId)
+          .in("status", ["open", "completed"])
+          .order("created_at", { ascending: false })
+          .limit(8),
       ]);
+
 
       // Socle : profiles obligatoire (compte authentifié = ligne existante),
       // sitter_profiles peut légitimement être absent (PGRST116 = 0 rows) tant
@@ -224,16 +254,13 @@ export function useSitterDashboardData(userId: string | undefined) {
       let meLat = (profile as any)?.latitude as number | null | undefined;
       let meLng = (profile as any)?.longitude as number | null | undefined;
       if (meLat == null || meLng == null) {
-        const { data: meApprox } = await supabase
-          .from("public_profiles")
-          .select("latitude_approx, longitude_approx")
-          .eq("id", userId)
-          .maybeSingle();
+        const meApprox = meApproxRes.data as any;
         if (meApprox?.latitude_approx && meApprox?.longitude_approx) {
           meLat = meApprox.latitude_approx as number;
           meLng = meApprox.longitude_approx as number;
         }
       }
+
       const hasMyCoords = typeof meLat === "number" && typeof meLng === "number";
       const NEARBY_LISTINGS_RADIUS_STEPS = [30, 50, 100];
       const NEARBY_LISTINGS_LIMIT = 4;
@@ -242,21 +269,13 @@ export function useSitterDashboardData(userId: string | undefined) {
       let nearbyListingsRadius: number | null = null;
       let nearbyError: string | null = null;
       {
-        // Annonces publiées ET non terminées (end_date >= aujourd'hui).
-        // Évite d'afficher dans le dashboard des gardes dont la date de fin
-        // est dépassée mais qui n'ont pas encore été archivées automatiquement.
-        const todayIso = new Date().toISOString().slice(0, 10);
-        const { data: allListings, error: listErr } = await supabase
-          .from("sits")
-          .select("id, title, start_date, end_date, user_id, property_id, status, created_at, is_urgent, cover_photo_url, properties:property_id(photos, type, environment, cover_photo_url)")
-          .eq("status", "published")
-          .neq("user_id", userId)
-          .gte("end_date", todayIso)
-          .order("created_at", { ascending: false })
-          .limit(500);
+        // Annonces publiées ET non terminées : chargées en vague 1.
+        const allListings = listingsRes.data as any[] | null;
+        const listErr = listingsRes.error;
         if (listErr) {
           nearbyError = "Impossible de charger les annonces près de chez vous.";
         } else {
+
           const candidateOwnerIds = Array.from(new Set((allListings || []).map((s: any) => s.user_id)));
           if (candidateOwnerIds.length > 0) {
             const { data: owners, error: ownersErr } = await supabase
@@ -364,12 +383,8 @@ export function useSitterDashboardData(userId: string | undefined) {
       let nearbyMissions: any[] = [];
       let nearbyMissionsError: string | null = null;
       if (userDept) {
-        const { data: missions, error: missionsErr } = await supabase
-          .from("small_missions")
-          .select("id, title, category, city, postal_code, date_needed, status, created_at, user_id")
-          .eq("status", "open")
-          .order("created_at", { ascending: false })
-          .limit(20);
+        const missions = openMissionsRes.data as any[] | null;
+        const missionsErr = openMissionsRes.error;
         if (missionsErr) {
           nearbyMissionsError = "Impossible de charger les échanges autour de vous.";
         } else {
@@ -404,23 +419,15 @@ export function useSitterDashboardData(userId: string | undefined) {
       }
 
       // My missions — published by the sitter (open + completed),
-      // with response counts. Used by SitterMissionsSection.
+      // with response counts. Chargées en vague 1.
       let myMissions: any[] = [];
       let myMissionsError: string | null = null;
-      {
-        const { data: mine, error: mineErr } = await supabase
-          .from("small_missions")
-          .select("id, title, category, city, date_needed, status, created_at, small_mission_responses(id, status)")
-          .eq("user_id", userId)
-          .in("status", ["open", "completed"])
-          .order("created_at", { ascending: false })
-          .limit(8);
-        if (mineErr) {
-          myMissionsError = "Impossible de charger vos missions publiées.";
-        } else {
-          myMissions = mine || [];
-        }
+      if (myMissionsRes.error) {
+        myMissionsError = "Impossible de charger vos missions publiées.";
+      } else {
+        myMissions = (myMissionsRes.data as any[]) || [];
       }
+
 
       // Next guard
       let nextGuard: any = null;

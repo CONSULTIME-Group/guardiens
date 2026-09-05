@@ -36,34 +36,58 @@ export function useNavBadgeCounts(userId: string | undefined): NavBadgeCounts {
       if (!userId) return EMPTY;
       const result: NavBadgeCounts = { ...EMPTY };
 
-      const { data: convs } = await supabase
-        .from("conversations")
-        .select("id, small_mission_id")
-        .or(`owner_id.eq.${userId},sitter_id.eq.${userId}`);
-
-      const convIds = (convs ?? []).map((c: any) => c.id);
-      if (convIds.length > 0) {
-        const { count } = await supabase
-          .from("messages")
+      // Vague 1 : tout ce qui ne dépend que de userId.
+      const [convsRes, userSitsRes, myAppsRes] = await Promise.all([
+        supabase
+          .from("conversations")
+          .select("id, small_mission_id")
+          .or(`owner_id.eq.${userId},sitter_id.eq.${userId}`),
+        supabase.from("sits").select("id").eq("user_id", userId),
+        supabase
+          .from("applications")
           .select("id", { count: "exact", head: true })
-          .in("conversation_id", convIds)
-          .neq("sender_id", userId)
-          .is("read_at", null);
-        const totalUnread = count || 0;
+          .eq("sitter_id", userId)
+          .eq("status", "pending"),
+      ]);
 
-        const missionConvIds = (convs ?? [])
-          .filter((c: any) => c.small_mission_id)
-          .map((c: any) => c.id);
-        let missionUnread = 0;
-        if (missionConvIds.length > 0) {
-          const { count: mCount } = await supabase
-            .from("messages")
-            .select("id", { count: "exact", head: true })
-            .in("conversation_id", missionConvIds)
-            .neq("sender_id", userId)
-            .is("read_at", null);
-          missionUnread = mCount || 0;
-        }
+      const convs = convsRes.data ?? [];
+      const convIds = convs.map((c: any) => c.id);
+      const missionConvIds = convs
+        .filter((c: any) => c.small_mission_id)
+        .map((c: any) => c.id);
+      const userSits = userSitsRes.data ?? [];
+      result.sitterActionCount = myAppsRes.count || 0;
+
+      // Vague 2 : les comptes qui dépendent des listes d'ids ci-dessus.
+      const [unreadRes, missionUnreadRes, ownerInboxRes] = await Promise.all([
+        convIds.length > 0
+          ? supabase
+              .from("messages")
+              .select("id", { count: "exact", head: true })
+              .in("conversation_id", convIds)
+              .neq("sender_id", userId)
+              .is("read_at", null)
+          : Promise.resolve({ count: 0 } as any),
+        missionConvIds.length > 0
+          ? supabase
+              .from("messages")
+              .select("id", { count: "exact", head: true })
+              .in("conversation_id", missionConvIds)
+              .neq("sender_id", userId)
+              .is("read_at", null)
+          : Promise.resolve({ count: 0 } as any),
+        userSits.length > 0
+          ? supabase
+              .from("applications")
+              .select("id", { count: "exact", head: true })
+              .in("sit_id", userSits.map((s: any) => s.id))
+              .eq("status", "pending")
+          : Promise.resolve({ count: 0 } as any),
+      ]);
+
+      if (convIds.length > 0) {
+        const totalUnread = unreadRes.count || 0;
+        const missionUnread = missionUnreadRes.count || 0;
         // Choix de comptage : un même message non lu ne doit jamais alimenter
         // deux pastilles. La pastille Entraide compte les non lus des
         // conversations de petites missions ; la pastille Messages compte
@@ -72,28 +96,11 @@ export function useNavBadgeCounts(userId: string | undefined): NavBadgeCounts {
         result.unreadCount = messagesUnreadExclusive(totalUnread, missionUnread);
       }
 
-      const { data: userSits } = await supabase
-        .from("sits")
-        .select("id")
-        .eq("user_id", userId);
-      if (userSits?.length) {
-        const { count: appCount } = await supabase
-          .from("applications")
-          .select("id", { count: "exact", head: true })
-          .in("sit_id", userSits.map((s: any) => s.id))
-          .eq("status", "pending");
-        result.ownerInboxCount = appCount || 0;
-      }
-
-      const { count: myAppsCount } = await supabase
-        .from("applications")
-        .select("id", { count: "exact", head: true })
-        .eq("sitter_id", userId)
-        .eq("status", "pending");
-      result.sitterActionCount = myAppsCount || 0;
+      result.ownerInboxCount = ownerInboxRes.count || 0;
 
       return result;
     },
+
   });
 
   return data ?? EMPTY;
