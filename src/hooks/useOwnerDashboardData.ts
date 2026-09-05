@@ -171,7 +171,19 @@ export function useOwnerDashboardData(userId: string | undefined) {
           hasSit: sitsData.length > 0,
         };
 
-        // Pets + Applications — parallèles (indépendantes)
+        // Dérivations en mémoire remontées avant la vague 2 : elles ne
+        // dépendent que de sitsData (vague 1) et conditionnent la requête des
+        // avis déjà déposés par le propriétaire.
+        const completedSitsData = sitsData.filter(s => s.status === "completed");
+        const fourteenDaysAgo = new Date();
+        fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+        const recentCompleted = completedSitsData.filter(s => {
+          if (!s.end_date) return false;
+          return new Date(s.end_date) >= fourteenDaysAgo;
+        });
+        const recentSitIds = recentCompleted.map(s => s.id);
+
+        // Vague 2 : pets, candidatures, vues, avis déjà déposés.
         const propIds = propsData.map((pr) => pr.id);
         const sitIds = sitsData.map(s => s.id);
 
@@ -191,13 +203,17 @@ export function useOwnerDashboardData(userId: string | undefined) {
               .limit(20)
           : Promise.resolve({ data: [], error: null });
 
-        const [petsRes, appsRes, viewsRes] = await Promise.all([
+        const [petsRes, appsRes, viewsRes, ownerReviewsRes] = await Promise.all([
           petsPromise,
           appsPromise,
           sitIds.length > 0
             ? supabase.rpc("get_sit_views_count", { p_sit_ids: sitIds })
             : Promise.resolve({ data: [], error: null }),
+          recentSitIds.length > 0
+            ? supabase.from("reviews").select("sit_id").eq("reviewer_id", userId).in("sit_id", recentSitIds)
+            : Promise.resolve({ data: [], error: null }),
         ]);
+
         if (cancelled) return;
 
         const viewsMap = new Map<string, { views_30d: number; views_total: number }>();
