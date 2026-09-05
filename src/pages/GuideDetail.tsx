@@ -583,6 +583,14 @@ const GuideDetail = () => {
             dangerouslySetInnerHTML={{ __html: JSON.stringify(placesSchema) }}
           />
         )}
+
+        {/* JSON-LD: FAQPage, construit depuis la meme liste « essentials » que l'affichage */}
+        {faqSchema && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+          />
+        )}
       </div>
     </>
   );
