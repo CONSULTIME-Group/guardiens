@@ -499,9 +499,6 @@ const CreateSit = () => {
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const touch = (field: string) => setTouched(prev => ({ ...prev, [field]: true }));
 
-  // Date sheets
-  const [startSheetOpen, setStartSheetOpen] = useState(false);
-  const [endSheetOpen, setEndSheetOpen] = useState(false);
 
   // Relative time ticker
   const [, setTick] = useState(0);
