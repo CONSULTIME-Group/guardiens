@@ -64,31 +64,32 @@ export function useOwnerTopAffinitySitters(): Result {
     enabled: !!userId,
     staleTime: 5 * 60 * 1000,
     gcTime: 15 * 60 * 1000,
-    // Un retour d'onglet ne doit pas relancer les ~22 lots du vivier.
+    // Un retour d'onglet ne doit pas relancer la lecture du vivier.
     refetchOnWindowFocus: false,
     queryFn: async () => {
-      // 1. Owner : coordonnées + prefs matching + pets + voiture requise
-      const [{ data: me }, { data: ownerPrefs }, { data: pets }, { data: myProperties }] = await Promise.all([
+      // 1. Owner (coordonnées, prefs matching, pets, voiture requise) ET
+      // vivier gardiens : cinq lectures qui ne dépendent que de userId,
+      // donc une seule vague.
+      const [{ data: me }, { data: ownerPrefs }, { data: pets }, { data: myProperties }, { data: pool }] = await Promise.all([
         supabase.from("profiles").select("latitude, longitude, city").eq("id", userId!).maybeSingle(),
         supabase.from("owner_profiles").select("preferred_sitter_types, home_ambiance, languages, interests, life_pace, presence_expected").eq("user_id", userId!).maybeSingle(),
         supabase.from("pets").select("species, special_needs, breed, property_id, properties!inner(user_id)").eq("properties.user_id", userId!),
         supabase.from("properties").select("car_required").eq("user_id", userId!),
+        // Vivier de gardiens actifs, COMPLET : aucun filtre de confiance
+        // (identité vérifiée, complétude). La vue public_profiles ne contient
+        // déjà que des comptes actifs avec prénom, c'est la seule hygiène
+        // admise. Le plafond de lecture est une borne technique, tracée.
+        supabase
+          .from("public_profiles")
+          .select("id, first_name, avatar_url, city, latitude_approx, longitude_approx, identity_verified, profile_completion, role")
+          .in("role", ["sitter", "both"])
+          .neq("id", userId!)
+          .limit(POOL_READ_CAP),
       ]);
 
       const meLat = (me?.latitude as number | null) ?? null;
       const meLng = (me?.longitude as number | null) ?? null;
       const hasGeo = meLat !== null && meLng !== null;
-
-      // 2. Vivier de gardiens actifs, COMPLET : aucun filtre de confiance
-      // (identité vérifiée, complétude). La vue public_profiles ne contient
-      // déjà que des comptes actifs avec prénom, c'est la seule hygiène
-      // admise. Le plafond de lecture est une borne technique, tracée.
-      const { data: pool } = await supabase
-        .from("public_profiles")
-        .select("id, first_name, avatar_url, city, latitude_approx, longitude_approx, identity_verified, profile_completion, role")
-        .in("role", ["sitter", "both"])
-        .neq("id", userId!)
-        .limit(POOL_READ_CAP);
 
       if (pool && pool.length === POOL_READ_CAP) {
         console.warn(
@@ -100,22 +101,7 @@ export function useOwnerTopAffinitySitters(): Result {
         return { topSitters: [] as AffinitySitterCard[], totalPool: 0, scoredCount: 0, hasGeo, poolExcludedByCap: 0 };
       }
 
-      const ids = pool.map((p) => p.id);
-      const affinityResults = await Promise.all(
-        chunkArray(ids, 50).map((batch) =>
-          supabase
-            .from("sitter_profiles_affinity")
-            .select("user_id, experience_years, life_pace, lifestyle, availability_during, has_vehicle, has_license, languages, interests, work_during_sit, sensitivities, animal_types, sitter_type, travels_with_children, travels_with_own_animals, special_animal_skills, farm_animals_ok")
-            .in("user_id", batch),
-        ),
-      );
-      const affinityError = affinityResults.find((result) => result.error)?.error;
-      if (affinityError) throw affinityError;
-      const sitterRows = affinityResults.flatMap((result) => result.data ?? []);
-
-      const sitterByUser = new Map<string, any>((sitterRows ?? []).map((s: any) => [s.user_id, s]));
-
-      // 3. Distance, puis plafond de scoring : on garde les plus proches.
+      // 2. Distance, puis plafond de scoring : on garde les plus proches.
       const withDistance = pool.map((p: any) => {
         let distance_km: number | null = null;
         if (hasGeo && p.latitude_approx != null && p.longitude_approx != null) {
@@ -135,12 +121,35 @@ export function useOwnerTopAffinitySitters(): Result {
         return Number(b.identity_verified === true) - Number(a.identity_verified === true);
       });
       const scoped = byDistance.slice(0, POOL_SCORING_CAP);
+
       const poolExcludedByCap = byDistance.length - scoped.length;
       if (poolExcludedByCap > 0) {
         console.info(
           `[top3] plafond de scoring ${POOL_SCORING_CAP} atteint : ${poolExcludedByCap} gardiens les plus éloignés non scorés.`,
         );
       }
+
+      // 3. Affinité, uniquement pour les gardiens réellement scorés. Pur
+      // réordonnancement par rapport à l'ancienne version (lecture avant le
+      // tri) : la population scorée et ses données sont identiques, seuls
+      // les profils écartés par le plafond ne sont plus chargés pour rien.
+      // Lots de 150 ids : la limite réelle est la longueur de l'URL
+      // PostgREST, qui casse au-delà d'environ 390 UUID.
+      const ids = scoped.map((p: any) => p.id);
+      const affinityResults = await Promise.all(
+        chunkArray(ids, 150).map((batch) =>
+          supabase
+            .from("sitter_profiles_affinity")
+            .select("user_id, experience_years, life_pace, lifestyle, availability_during, has_vehicle, has_license, languages, interests, work_during_sit, sensitivities, animal_types, sitter_type, travels_with_children, travels_with_own_animals, special_animal_skills, farm_animals_ok")
+            .in("user_id", batch),
+        ),
+      );
+      const affinityError = affinityResults.find((result) => result.error)?.error;
+      if (affinityError) throw affinityError;
+      const sitterRows = affinityResults.flatMap((result) => result.data ?? []);
+      const sitterByUser = new Map<string, any>((sitterRows ?? []).map((s: any) => [s.user_id, s]));
+
+
 
       // 4. Score d'affinité, moteur unique. Un gardien sans ligne
       // sitter_profiles est scoré avec une entrée vide : tous ses critères
