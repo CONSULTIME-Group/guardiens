@@ -26,6 +26,8 @@ interface CityGuide {
   intro: string;
   ideal_for: string;
   department: string;
+  leash_rule: string | null;
+  leash_rule_source: string | null;
 }
 
 interface GuidePlace {
@@ -214,6 +216,77 @@ const GuideDetail = () => {
       }),
     };
   }, [places, guide.city, guide.department]);
+
+  // Bloc « L'essentiel » : chaque entree n'existe que si ses donnees existent.
+  // Cette liste unique alimente a la fois l'affichage et le JSON-LD FAQPage,
+  // ce qui garantit que les deux ne peuvent pas diverger.
+  const essentials = useMemo(() => {
+    if (!guide) return [];
+    const entries: { question: string; answer: string; source?: string }[] = [];
+    const city = guide.city;
+
+    if (guide.leash_rule) {
+      entries.push({
+        question: t("guide_detail.essentials.leash_q", { city }),
+        answer: guide.leash_rule,
+        source: guide.leash_rule_source || undefined,
+      });
+    }
+
+    const walkPlaces = places.filter((p) => ["dog_park", "general_park", "walk_trail"].includes(p.category));
+    if (walkPlaces.length > 0) {
+      const names = walkPlaces.slice(0, 6).map((p) => p.name);
+      let list = names.join(", ");
+      const rest = walkPlaces.length - names.length;
+      if (rest > 0) list = `${list}, ${t("guide_detail.essentials.and_more", { count: rest })}`;
+      entries.push({
+        question: t("guide_detail.questions.dog_park", { city }),
+        answer: t("guide_detail.essentials.places_answer", { count: walkPlaces.length, names: list }),
+      });
+    }
+
+    const vets = places.filter((p) => p.category === "vet").slice(0, 4);
+    if (vets.length > 0) {
+      entries.push({
+        question: t("guide_detail.questions.vet", { city }),
+        answer: vets.map((p) => `${p.name} (${p.address})`).join("; "),
+      });
+    }
+
+    const cafes = places.filter((p) => ["dog_friendly_cafe", "dog_friendly_restaurant"].includes(p.category)).slice(0, 5);
+    if (cafes.length > 0) {
+      entries.push({
+        question: t("guide_detail.questions.dog_friendly_cafe", { city }),
+        answer: cafes.map((p) => p.name).join(", "),
+      });
+    }
+
+    const shops = places.filter((p) => p.category === "pet_shop").slice(0, 4);
+    if (shops.length > 0) {
+      entries.push({
+        question: t("guide_detail.questions.pet_shop", { city }),
+        answer: shops.map((p) => p.name).join(", "),
+      });
+    }
+
+    return entries;
+  }, [guide, places, t]);
+
+  const faqSchema = useMemo(() => {
+    if (essentials.length === 0) return null;
+    return {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: essentials.map((e) => ({
+        "@type": "Question",
+        name: e.question,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: e.source ? `${e.answer} ${t("guide_detail.essentials.source_prefix", { source: e.source })}` : e.answer,
+        },
+      })),
+    };
+  }, [essentials, t]);
 
   if (guideLoading) {
     return (
