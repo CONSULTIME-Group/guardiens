@@ -265,142 +265,140 @@ export function useSitterDashboardData(userId: string | undefined) {
       const NEARBY_LISTINGS_RADIUS_STEPS = [30, 50, 100];
       const NEARBY_LISTINGS_LIMIT = 4;
 
+      // Étape A : tout ce qui se calcule en mémoire à partir de la vague 1,
+      // sans aucune requête réseau.
+      const userDept = profile?.postal_code?.slice(0, 2);
+
+      const allListings = (listingsRes.error ? null : listingsRes.data) as any[] | null;
+      const candidateOwnerIds = listingsRes.error
+        ? []
+        : Array.from(new Set((allListings || []).map((s: any) => s.user_id)));
+
+      const deptMissions: any[] = userDept && !openMissionsRes.error
+        ? ((openMissionsRes.data as any[]) || [])
+            .filter((m: any) => m.user_id !== userId && m.postal_code?.startsWith(userDept))
+        : [];
+      // Coords des auteurs de missions : utiles seulement si on a notre
+      // propre position (sinon aucune distance ne serait calculée).
+      const authorIds = hasMyCoords
+        ? Array.from(new Set(deptMissions.map((m: any) => m.user_id)))
+        : [];
+
+      const now = new Date();
+      const futureGuards = acceptedApps
+        .filter((a: any) => a.sit?.start_date && new Date(a.sit.start_date) > now)
+        .sort((a: any, b: any) => new Date(a.sit.start_date).getTime() - new Date(b.sit.start_date).getTime());
+
+      // Étape B, vague 2 : un seul Promise.all.
+      // 1) Coordonnées de l'union dédupliquée propriétaires + auteurs, en
+      //    lots de 150 ids lancés en parallèle. Obligatoire : au-delà d'environ
+      //    390 UUID dans un .in(), l'URL PostgREST dépasse la limite serveur et
+      //    la requête échoue. Chaque lot lit aussi `error`.
+      // 2) Prénom du propriétaire de la prochaine garde (si elle existe).
+      // 3) Animaux de la prochaine garde (si elle existe).
+      const coordsIds = Array.from(new Set([...candidateOwnerIds, ...authorIds]));
+      const coordsBatches = chunkArray(coordsIds, 150).map((batch) =>
+        supabase
+          .from("public_profiles")
+          .select("id, latitude_approx, longitude_approx")
+          .in("id", batch)
+      );
+      const neutralResult = Promise.resolve({ data: null, error: null } as any);
+      const nextOwnerPromise = futureGuards.length > 0
+        ? supabase.from("public_profiles").select("first_name").eq("id", futureGuards[0].sit.user_id).single()
+        : neutralResult;
+      const nextPetsPromise = futureGuards.length > 0
+        ? supabase.from("pets").select("id, name, species, breed").eq("property_id", futureGuards[0].sit.property_id)
+        : neutralResult;
+
+      const [coordsResults, nextOwnerRes, nextPetsRes] = await Promise.all([
+        Promise.all(coordsBatches),
+        nextOwnerPromise,
+        nextPetsPromise,
+      ]);
+      if (cancelled) return;
+
+      // En mémoire, à partir du même jeu de lignes de coordonnées.
+      const coordsErr = (coordsResults as any[]).some((r) => r?.error);
+      const coordRows = coordsErr
+        ? []
+        : (coordsResults as any[]).flatMap((r) => r.data || []);
+      const coordById = new Map<string, any>(coordRows.map((o: any) => [o.id, o]));
+
       let nearbyListings: any[] = [];
       let nearbyListingsRadius: number | null = null;
       let nearbyError: string | null = null;
-      {
-        // Annonces publiées ET non terminées : chargées en vague 1.
-        const allListings = listingsRes.data as any[] | null;
-        const listErr = listingsRes.error;
-        if (listErr) {
-          nearbyError = "Impossible de charger les annonces près de chez vous.";
-        } else {
+      if (listingsRes.error || coordsErr) {
+        nearbyError = "Impossible de charger les annonces près de chez vous.";
+      } else if (candidateOwnerIds.length > 0) {
+        const ownerById = coordById;
+        const enriched = (allListings || []).map((s: any) => {
+          const owner = ownerById.get(s.user_id);
+          const distance_km = hasMyCoords && owner?.latitude_approx && owner?.longitude_approx
+            ? haversineDistance(
+                { lat: meLat as number, lng: meLng as number },
+                { lat: owner.latitude_approx, lng: owner.longitude_approx },
+              )
+            : null;
+          return { ...s, distance_km };
+        });
 
-          const candidateOwnerIds = Array.from(new Set((allListings || []).map((s: any) => s.user_id)));
-          if (candidateOwnerIds.length > 0) {
-            const { data: owners, error: ownersErr } = await supabase
-              .from("public_profiles")
-              .select("id, latitude_approx, longitude_approx")
-              .in("id", candidateOwnerIds);
-            if (ownersErr) {
-              nearbyError = "Impossible de charger les annonces près de chez vous.";
-            } else {
-              const ownerById = new Map<string, any>((owners || []).map((o: any) => [o.id, o]));
-              const enriched = (allListings || []).map((s: any) => {
-                const owner = ownerById.get(s.user_id);
-                const distance_km = hasMyCoords && owner?.latitude_approx && owner?.longitude_approx
-                  ? haversineDistance(
-                      { lat: meLat as number, lng: meLng as number },
-                      { lat: owner.latitude_approx, lng: owner.longitude_approx },
-                    )
-                  : null;
-                return { ...s, distance_km };
-              });
-
-              if (hasMyCoords) {
-                // Fallback progressif : on cherche un palier qui rend >= 3
-                // résultats, sinon on prend tout ce qui rentre dans 100 km.
-                const withDistance = enriched.filter((s) => s.distance_km !== null);
-                let selected: any[] = [];
-                for (const radius of NEARBY_LISTINGS_RADIUS_STEPS) {
-                  const inRange = withDistance.filter((s) => s.distance_km! <= radius);
-                  if (inRange.length >= 3) {
-                    selected = inRange;
-                    nearbyListingsRadius = radius;
-                    break;
-                  }
-                }
-                if (selected.length === 0) {
-                  selected = withDistance.filter(
-                    (s) => s.distance_km! <= NEARBY_LISTINGS_RADIUS_STEPS[NEARBY_LISTINGS_RADIUS_STEPS.length - 1],
-                  );
-                  if (selected.length > 0) {
-                    nearbyListingsRadius = NEARBY_LISTINGS_RADIUS_STEPS[NEARBY_LISTINGS_RADIUS_STEPS.length - 1];
-                  }
-                }
-                // Filet ultime : aucune annonce dans 100 km → on met en avant
-                // la/les plus proche(s) disponible(s), flaggée(s) is_beyond
-                // pour que l'UI affiche un libellé « Plus loin ».
-                if (selected.length === 0 && withDistance.length > 0) {
-                  const sortedAll = [...withDistance].sort(
-                    (a, b) => (a.distance_km ?? Infinity) - (b.distance_km ?? Infinity),
-                  );
-                  selected = sortedAll.slice(0, 2).map((s) => ({ ...s, is_beyond: true }));
-                  nearbyListingsRadius = null; // signale « hors rayon standard »
-                }
-                selected.sort((a, b) => (a.distance_km ?? Infinity) - (b.distance_km ?? Infinity));
-                nearbyListings = selected.slice(0, NEARBY_LISTINGS_LIMIT);
-              } else {
-                // Pas de géoloc côté gardien : on ne peut pas trier par
-                // distance, on retombe sur l'ordre chronologique récent.
-                nearbyListings = enriched.slice(0, NEARBY_LISTINGS_LIMIT);
-              }
+        if (hasMyCoords) {
+          // Fallback progressif : on cherche un palier qui rend >= 3
+          // résultats, sinon on prend tout ce qui rentre dans 100 km.
+          const withDistance = enriched.filter((s) => s.distance_km !== null);
+          let selected: any[] = [];
+          for (const radius of NEARBY_LISTINGS_RADIUS_STEPS) {
+            const inRange = withDistance.filter((s) => s.distance_km! <= radius);
+            if (inRange.length >= 3) {
+              selected = inRange;
+              nearbyListingsRadius = radius;
+              break;
             }
           }
+          if (selected.length === 0) {
+            selected = withDistance.filter(
+              (s) => s.distance_km! <= NEARBY_LISTINGS_RADIUS_STEPS[NEARBY_LISTINGS_RADIUS_STEPS.length - 1],
+            );
+            if (selected.length > 0) {
+              nearbyListingsRadius = NEARBY_LISTINGS_RADIUS_STEPS[NEARBY_LISTINGS_RADIUS_STEPS.length - 1];
+            }
+          }
+          // Filet ultime : aucune annonce dans 100 km → on met en avant
+          // la/les plus proche(s) disponible(s), flaggée(s) is_beyond
+          // pour que l'UI affiche un libellé « Plus loin ».
+          if (selected.length === 0 && withDistance.length > 0) {
+            const sortedAll = [...withDistance].sort(
+              (a, b) => (a.distance_km ?? Infinity) - (b.distance_km ?? Infinity),
+            );
+            selected = sortedAll.slice(0, 2).map((s) => ({ ...s, is_beyond: true }));
+            nearbyListingsRadius = null; // signale « hors rayon standard »
+          }
+          selected.sort((a, b) => (a.distance_km ?? Infinity) - (b.distance_km ?? Infinity));
+          nearbyListings = selected.slice(0, NEARBY_LISTINGS_LIMIT);
+        } else {
+          // Pas de géoloc côté gardien : on ne peut pas trier par
+          // distance, on retombe sur l'ordre chronologique récent.
+          nearbyListings = enriched.slice(0, NEARBY_LISTINGS_LIMIT);
         }
-      }
-
-      // Fallback cover photo : si une annonce affichée n'a aucune photo
-      // (ni sit.cover_photo_url, ni properties.cover_photo_url, ni
-      // properties.photos), on récupère la 1re photo de la galerie
-      // propriétaire (owner_gallery) pour éviter la vignette vide.
-      // Cas d'usage : annonces récentes publiées sans photo de couverture
-      // dédiée, mais dont le propriétaire a une galerie remplie (ex: Marrakech).
-      try {
-        const needCover = nearbyListings.filter((s: any) => {
-          const hasCover = s?.cover_photo_url
-            || s?.properties?.cover_photo_url
-            || (Array.isArray(s?.properties?.photos) && s.properties.photos[0]);
-          return !hasCover;
-        });
-        const ownerIds = Array.from(new Set(needCover.map((s: any) => s.user_id)));
-        if (ownerIds.length > 0) {
-          const { data: galleryRows } = await supabase
-            .from("owner_gallery")
-            .select("user_id, photo_url, position")
-            .in("user_id", ownerIds)
-            .order("position", { ascending: true });
-          const firstByOwner = new Map<string, string>();
-          (galleryRows || []).forEach((row: any) => {
-            if (!firstByOwner.has(row.user_id)) firstByOwner.set(row.user_id, row.photo_url);
-          });
-          nearbyListings = nearbyListings.map((s: any) => {
-            const hasCover = s?.cover_photo_url
-              || s?.properties?.cover_photo_url
-              || (Array.isArray(s?.properties?.photos) && s.properties.photos[0]);
-            if (hasCover) return s;
-            const fallback = firstByOwner.get(s.user_id);
-            return fallback ? { ...s, cover_photo_url: fallback } : s;
-          });
-        }
-      } catch {
-        // silencieux : pas critique
       }
 
       // Nearby missions — conserve la logique département (entraide locale,
       // pas de trajets longs). À migrer séparément si besoin.
-      const userDept = profile?.postal_code?.slice(0, 2);
       let nearbyMissions: any[] = [];
       let nearbyMissionsError: string | null = null;
       if (userDept) {
-        const missions = openMissionsRes.data as any[] | null;
-        const missionsErr = openMissionsRes.error;
-        if (missionsErr) {
+        if (openMissionsRes.error) {
           nearbyMissionsError = "Impossible de charger les échanges autour de vous.";
         } else {
-          const deptMissions = (missions || [])
-            .filter((m: any) => m.user_id !== userId && m.postal_code?.startsWith(userDept));
-          // Enrichissement coords auteur — un seul appel batch.
-          const authorIds = Array.from(new Set(deptMissions.map((m: any) => m.user_id)));
-          let authorCoords = new Map<string, { lat: number; lng: number }>();
-          if (authorIds.length > 0 && hasMyCoords) {
-            const { data: authors } = await supabase
-              .from("public_profiles")
-              .select("id, latitude_approx, longitude_approx")
-              .in("id", authorIds);
-            (authors || []).forEach((a: any) => {
-              if (typeof a.latitude_approx === "number" && typeof a.longitude_approx === "number") {
-                authorCoords.set(a.id, { lat: a.latitude_approx, lng: a.longitude_approx });
+          // Lot de coordonnées en erreur : authorCoords reste vide, les
+          // distances de missions passent à null sans faire échouer le reste.
+          const authorCoords = new Map<string, { lat: number; lng: number }>();
+          if (!coordsErr && hasMyCoords) {
+            authorIds.forEach((id) => {
+              const a = coordById.get(id);
+              if (a && typeof a.latitude_approx === "number" && typeof a.longitude_approx === "number") {
+                authorCoords.set(id, { lat: a.latitude_approx, lng: a.longitude_approx });
               }
             });
           }
@@ -434,27 +432,59 @@ export function useSitterDashboardData(userId: string | undefined) {
       let nextGuardError: string | null = appsRes.error
         ? "Impossible de charger votre prochaine garde."
         : null;
-      const now = new Date();
-      const futureGuards = acceptedApps
-        .filter((a: any) => a.sit?.start_date && new Date(a.sit.start_date) > now)
-        .sort((a: any, b: any) => new Date(a.sit.start_date).getTime() - new Date(b.sit.start_date).getTime());
 
       if (futureGuards.length > 0) {
         const g = futureGuards[0];
-        const [ownerRes, petsRes] = await Promise.all([
-          supabase.from("public_profiles").select("first_name").eq("id", g.sit.user_id).single(),
-          supabase.from("pets").select("id, name, species, breed").eq("property_id", g.sit.property_id),
-        ]);
-        if (ownerRes.error || petsRes.error) {
+        if (nextOwnerRes.error || nextPetsRes.error) {
           nextGuardError = "Détails de la prochaine garde indisponibles.";
         }
         nextGuard = {
           ...g.sit,
-          ownerName: ownerRes.data?.first_name || "",
+          ownerName: nextOwnerRes.data?.first_name || "",
           daysUntil: differenceInDays(new Date(g.sit.start_date), now),
-          pets: petsRes.data || [],
+          pets: nextPetsRes.data || [],
         };
       }
+
+      // Étape C, vague 3 : fallback cover photo. Seul await après la vague 2,
+      // car il dépend de la sélection finale de nearbyListings.
+      // Si une annonce affichée n'a aucune photo (ni sit.cover_photo_url, ni
+      // properties.cover_photo_url, ni properties.photos), on récupère la 1re
+      // photo de la galerie propriétaire (owner_gallery) pour éviter la
+      // vignette vide.
+      // Cas d'usage : annonces récentes publiées sans photo de couverture
+      // dédiée, mais dont le propriétaire a une galerie remplie (ex: Marrakech).
+      try {
+        const needCover = nearbyListings.filter((s: any) => {
+          const hasCover = s?.cover_photo_url
+            || s?.properties?.cover_photo_url
+            || (Array.isArray(s?.properties?.photos) && s.properties.photos[0]);
+          return !hasCover;
+        });
+        const ownerIds = Array.from(new Set(needCover.map((s: any) => s.user_id)));
+        if (ownerIds.length > 0) {
+          const { data: galleryRows } = await supabase
+            .from("owner_gallery")
+            .select("user_id, photo_url, position")
+            .in("user_id", ownerIds)
+            .order("position", { ascending: true });
+          const firstByOwner = new Map<string, string>();
+          (galleryRows || []).forEach((row: any) => {
+            if (!firstByOwner.has(row.user_id)) firstByOwner.set(row.user_id, row.photo_url);
+          });
+          nearbyListings = nearbyListings.map((s: any) => {
+            const hasCover = s?.cover_photo_url
+              || s?.properties?.cover_photo_url
+              || (Array.isArray(s?.properties?.photos) && s.properties.photos[0]);
+            if (hasCover) return s;
+            const fallback = firstByOwner.get(s.user_id);
+            return fallback ? { ...s, cover_photo_url: fallback } : s;
+          });
+        }
+      } catch {
+        // silencieux : pas critique
+      }
+
 
       if (cancelled) return;
       setData({
