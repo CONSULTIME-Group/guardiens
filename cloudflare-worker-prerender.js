@@ -557,7 +557,7 @@ export default {
         'cache-control': 'public, max-age=3600',
       };
       if (debug) {
-        headers['x-prerender-worker'] = 'guardiens-prerender-v7.1';
+        headers['x-prerender-worker'] = 'guardiens-prerender-v7.2';
         headers['x-prerender-status'] = 'www-to-apex-308';
       }
       return new Response(null, { status: 308, headers });
