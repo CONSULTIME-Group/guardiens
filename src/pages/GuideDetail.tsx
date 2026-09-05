@@ -54,6 +54,18 @@ const CATEGORY_CONFIG: Record<string, { key: string; icon: any; color: string }>
   water_point: { key: "water_point", icon: Droplets, color: "hsl(200, 70%, 50%)" },
 };
 
+// Schema.org : type associe a chaque categorie de lieu.
+// Maintenu a cote de CATEGORY_CONFIG pour eviter les divergences.
+const SCHEMA_TYPE_MAP: Record<string, string> = {
+  dog_park: "Park",
+  general_park: "Park",
+  walk_trail: "Place",
+  vet: "VeterinaryCare",
+  dog_friendly_cafe: "FoodEstablishment",
+  dog_friendly_restaurant: "Restaurant",
+  pet_shop: "PetStore",
+  water_point: "Place",
+};
 
 const StarRating = ({ rating }: { rating: number | null }) => {
   if (!rating) return null;
@@ -165,6 +177,43 @@ const GuideDetail = () => {
 
   const categories = [...new Set(filteredPlaces.map((p) => p.category))];
   const placesWithCoords = filteredPlaces.filter((p) => p.latitude && p.longitude);
+
+  // JSON-LD ItemList des lieux : balise l'ensemble de places, independamment du filtre de recherche.
+  const placesSchema = useMemo(() => {
+    if (places.length === 0) return null;
+    return {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      name: `Lieux utiles pour garder un chien a ${guide.city}`,
+      numberOfItems: places.length,
+      itemListElement: places.map((place, index) => {
+        const item: Record<string, any> = {
+          "@type": SCHEMA_TYPE_MAP[place.category] || "Place",
+          name: place.name,
+          description: place.description,
+          address: {
+            "@type": "PostalAddress",
+            streetAddress: place.address,
+            addressLocality: guide.city,
+            addressRegion: guide.department,
+            addressCountry: "FR",
+          },
+        };
+        if (place.latitude != null && place.longitude != null) {
+          item.geo = {
+            "@type": "GeoCoordinates",
+            latitude: place.latitude,
+            longitude: place.longitude,
+          };
+        }
+        return {
+          "@type": "ListItem",
+          position: index + 1,
+          item,
+        };
+      }),
+    };
+  }, [places, guide.city, guide.department]);
 
   if (guideLoading) {
     return (
@@ -424,6 +473,14 @@ const GuideDetail = () => {
             }),
           }}
         />
+
+        {/* JSON-LD: ItemList des lieux utiles */}
+        {placesSchema && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(placesSchema) }}
+          />
+        )}
       </div>
     </>
   );
