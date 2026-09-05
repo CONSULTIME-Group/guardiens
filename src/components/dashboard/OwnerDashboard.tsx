@@ -86,6 +86,14 @@ const OwnerDashboard = () => {
   /* ── UI state ── */
   const [showOnboarding, setShowOnboarding] = useState(false);
 
+  // Montage différé de la section « Les gardiens » (sous la ligne de
+  // flottaison) : ses hooks ne partent qu'à 400 px du viewport, le contenu
+  // est prêt avant d'être atteint et aucun décalage visible ne se produit.
+  const { ref: spotlightRef, inView: spotlightInView } = useInView<HTMLDivElement>({
+    rootMargin: "400px 0px",
+    threshold: 0,
+  });
+
   /* ── Derived values ── */
   const now = new Date();
   const activeSits = useMemo(() => sits.filter(s => ["published", "confirmed"].includes(s.status)), [sits]);
@@ -355,7 +363,17 @@ const OwnerDashboard = () => {
                 onglets, « Pour vous » (affinité, défaut) et « Près de chez
                 vous » (proximité). Les deux viviers sont montés en
                 parallèle, le changement d'onglet ne relance aucun réseau. */}
-            <OwnerSitterSpotlight />
+            <div ref={spotlightRef} className="min-w-0">
+              {spotlightInView ? (
+                <OwnerSitterSpotlight />
+              ) : (
+                // Substitut de hauteur comparable au bloc réel (en-tête,
+                // carte à trois gardiens, porte de sortie). Le remplacement
+                // a lieu environ 400 px avant l'entrée dans le champ de
+                // vision, donc hors écran : aucun décalage visible.
+                <div aria-hidden="true" className="min-h-[560px] md:min-h-[440px]" />
+              )}
+            </div>
 
             {/* 5. ENTRAIDE bidimensionnelle (vague 20), même composant que le dashboard gardien */}
             <div className="px-4 sm:px-5 md:px-8">
