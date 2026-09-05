@@ -383,12 +383,8 @@ export function useSitterDashboardData(userId: string | undefined) {
       let nearbyMissions: any[] = [];
       let nearbyMissionsError: string | null = null;
       if (userDept) {
-        const { data: missions, error: missionsErr } = await supabase
-          .from("small_missions")
-          .select("id, title, category, city, postal_code, date_needed, status, created_at, user_id")
-          .eq("status", "open")
-          .order("created_at", { ascending: false })
-          .limit(20);
+        const missions = openMissionsRes.data as any[] | null;
+        const missionsErr = openMissionsRes.error;
         if (missionsErr) {
           nearbyMissionsError = "Impossible de charger les échanges autour de vous.";
         } else {
@@ -423,23 +419,15 @@ export function useSitterDashboardData(userId: string | undefined) {
       }
 
       // My missions — published by the sitter (open + completed),
-      // with response counts. Used by SitterMissionsSection.
+      // with response counts. Chargées en vague 1.
       let myMissions: any[] = [];
       let myMissionsError: string | null = null;
-      {
-        const { data: mine, error: mineErr } = await supabase
-          .from("small_missions")
-          .select("id, title, category, city, date_needed, status, created_at, small_mission_responses(id, status)")
-          .eq("user_id", userId)
-          .in("status", ["open", "completed"])
-          .order("created_at", { ascending: false })
-          .limit(8);
-        if (mineErr) {
-          myMissionsError = "Impossible de charger vos missions publiées.";
-        } else {
-          myMissions = mine || [];
-        }
+      if (myMissionsRes.error) {
+        myMissionsError = "Impossible de charger vos missions publiées.";
+      } else {
+        myMissions = (myMissionsRes.data as any[]) || [];
       }
+
 
       // Next guard
       let nextGuard: any = null;
