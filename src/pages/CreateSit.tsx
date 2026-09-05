@@ -2219,43 +2219,24 @@ const CreateSit = () => {
           <div id="dates-field" className="scroll-mt-24">
             <Label className="text-sm font-medium block mb-2">Dates de la garde *</Label>
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label htmlFor="start-date" className="text-xs text-muted-foreground mb-1 block">Début</Label>
-                {/* Native date input, tappable to open sheet on mobile */}
-                <button
-                  id="start-date"
-                  type="button"
-                  onClick={() => setStartSheetOpen(true)}
-                  aria-label={startDate ? `Date de début : ${new Date(startDate + "T12:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })}` : "Date de début, non renseignée"}
-                  className={cn(
-                    "w-full h-12 text-base rounded-md border px-3 text-left flex items-center justify-between transition-colors",
-                    !startDate ? "text-muted-foreground border-input" : "text-foreground border-input",
-                    touched.startDate && !startDate ? "border-destructive" : "",
-                  )}
-                  onBlur={() => touch("startDate")}
-                >
-                  <span>{startDate ? new Date(startDate + "T12:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" }) : "JJ/MM/AAAA"}</span>
-                  <Calendar className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-                </button>
-              </div>
-              <div>
-                <Label htmlFor="end-date" className="text-xs text-muted-foreground mb-1 block">Fin</Label>
-                <button
-                  id="end-date"
-                  type="button"
-                  onClick={() => setEndSheetOpen(true)}
-                  aria-label={endDate ? `Date de fin : ${new Date(endDate + "T12:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })}` : "Date de fin, non renseignée"}
-                  className={cn(
-                    "w-full h-12 text-base rounded-md border px-3 text-left flex items-center justify-between transition-colors",
-                    !endDate ? "text-muted-foreground border-input" : "text-foreground border-input",
-                    touched.endDate && !endDate ? "border-destructive" : "",
-                  )}
-                  onBlur={() => touch("endDate")}
-                >
-                  <span>{endDate ? new Date(endDate + "T12:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" }) : "JJ/MM/AAAA"}</span>
-                  <Calendar className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-                </button>
-              </div>
+              <DateField
+                id="start-date"
+                label="Début"
+                value={startDate}
+                onChange={v => { setStartDate(v); touch("startDate"); }}
+                min={today}
+                invalid={touched.startDate && !startDate}
+                onBlur={() => touch("startDate")}
+              />
+              <DateField
+                id="end-date"
+                label="Fin"
+                value={endDate}
+                onChange={v => { setEndDate(v); touch("endDate"); }}
+                min={startDate || today}
+                invalid={touched.endDate && !endDate}
+                onBlur={() => touch("endDate")}
+              />
             </div>
             {dateError ? (
               <p className="text-sm text-destructive flex items-center gap-1.5 mt-2">
@@ -2271,24 +2252,6 @@ const CreateSit = () => {
               </p>
             ) : null}
           </div>
-
-          {/* Date sheets */}
-          <DateSheet
-            open={startSheetOpen}
-            onOpenChange={setStartSheetOpen}
-            label="Date de début"
-            value={startDate}
-            onChange={v => { setStartDate(v); touch("startDate"); }}
-            min={today}
-          />
-          <DateSheet
-            open={endSheetOpen}
-            onOpenChange={setEndSheetOpen}
-            label="Date de fin"
-            value={endDate}
-            onChange={v => { setEndDate(v); touch("endDate"); }}
-            min={startDate || today}
-          />
 
           {/* Description */}
           <div id="description-field" className="scroll-mt-24">
