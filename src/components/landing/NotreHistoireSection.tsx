@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { RevealSection } from "@/components/ui/RevealSection";
+import notreHistoirePanoramaAvif from "@/assets/story-photo-1104.avif";
 import notreHistoirePanorama from "@/assets/story-photo.webp";
 
 export function NotreHistoireSection() {
@@ -67,15 +68,18 @@ export function NotreHistoireSection() {
         </div>
 
         <div className="w-full mt-16 rounded-2xl overflow-hidden">
-          <img
-            src={notreHistoirePanorama}
-            alt="Photographie panoramique d'une maison de campagne aux volets bleus, illustrant l'esprit du house-sitting Guardiens : on confie ses clés, on est invité dans une vie."
-            className="w-full h-64 md:h-96 object-cover object-center"
-            loading="lazy"
-            width={1920}
-            height={600}
-            decoding="async"
-          />
+          <picture>
+            <source type="image/avif" srcSet={notreHistoirePanoramaAvif} />
+            <img
+              src={notreHistoirePanorama}
+              alt="Photographie panoramique d'une maison de campagne aux volets bleus, illustrant l'esprit du house-sitting Guardiens : on confie ses clés, on est invité dans une vie."
+              className="w-full h-64 md:h-96 object-cover object-center"
+              loading="lazy"
+              width={1920}
+              height={600}
+              decoding="async"
+            />
+          </picture>
         </div>
       </div>
     </section>
