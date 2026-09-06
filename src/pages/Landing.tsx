@@ -17,6 +17,8 @@ import { useInventaireCounts } from "@/hooks/useInventaireCounts";
 import { usePublicStats } from "@/hooks/usePublicStats";
 import LiveListingsStrip from "@/components/landing/LiveListingsStrip";
 import TestimonialsSection from "@/components/landing/TestimonialsSection";
+import { PressStrip } from "@/components/landing/PressStrip";
+
 import { UsagesSection } from "@/components/landing/UsagesSection";
 import { RencontreSection } from "@/components/landing/RencontreSection";
 import { EntraideSection } from "@/components/landing/EntraideSection";
