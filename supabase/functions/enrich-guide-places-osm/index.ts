@@ -258,6 +258,9 @@ Deno.serve(async (req) => {
         premier_message_erreur,
         requete_exemple,
         cle_absente: false,
+        cle_longueur: googleKey.length,
+        cle_prefixe_attendu: googleKey.startsWith("AIza"),
+        cle_espaces_parasites: /[\s]/.test(googleKey),
       });
     }
 
