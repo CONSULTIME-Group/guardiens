@@ -17,7 +17,7 @@ import { useInventaireCounts } from "@/hooks/useInventaireCounts";
 import { usePublicStats } from "@/hooks/usePublicStats";
 import LiveListingsStrip from "@/components/landing/LiveListingsStrip";
 import TestimonialsSection from "@/components/landing/TestimonialsSection";
-import { PressStrip } from "@/components/landing/PressStrip";
+import PressQuote from "@/components/shared/PressQuote";
 
 import { UsagesSection } from "@/components/landing/UsagesSection";
 import { RencontreSection } from "@/components/landing/RencontreSection";
@@ -323,6 +323,9 @@ const Landing = () => {
       {/* ═══════════════ SECTION 2, CONFIANCE & PÉRIMÈTRE (positionnée tôt : réponse à la peur n°1) ═══════════════ */}
       <ConfianceSection />
 
+      {/* ═══════════════ SECTION 2.25, VOIX EXTERNE (presse comme témoignage, jamais bannière) ═══════════════ */}
+      <PressQuote />
+
       {/* ═══════════════ APERÇU LIVE ANNONCES ═══════════════ */}
       <LiveListingsStrip />
 
@@ -407,11 +410,6 @@ const Landing = () => {
 
       {/* ═══════════════ SECTION 7, TÉMOIGNAGES ═══════════════ */}
       <TestimonialsSection />
-
-      {/* ═══════════════ SECTION 7.5, PRESSE (PressStrip) ═══════════════ */}
-      <RevealSection>
-        <PressStrip />
-      </RevealSection>
 
 
 
