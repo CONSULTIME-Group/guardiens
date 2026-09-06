@@ -100,18 +100,16 @@ const Landing = () => {
     return () => { cancelled = true; };
   }, [navigate]);
 
-  // KPI hero : "maisons gardées" et "animaux accompagnés" additionnent l'historique
-  // personnel des fondateurs (37 maisons, 234 animaux, raconté dans Notre histoire
-  // et la carte piliers) et l'activité réelle de la plateforme. Décision produit
+  // Bande chiffres sous le hero : "animaux accompagnés" additionne l'historique
+  // personnel des fondateurs (234 animaux, raconté dans Notre histoire et la
+  // carte piliers) et l'activité réelle de la plateforme. Décision produit
   // confirmée par Jérémie le 03/08/2026 : partir de ce socle vécu et cumuler
-  // par-dessus au fur et à mesure que la plateforme grandit. "Inscrits" et
-  // "missions_entraide" restent des compteurs plateforme purs, sans offset.
-  const FOUNDER_BASE_MAISONS = 37;
+  // par-dessus au fur et à mesure que la plateforme grandit. "Inscrits" reste
+  // un compteur plateforme pur, sans offset. Recomposition du 06/09/2026 : les
+  // compteurs "maisons gardées" et "missions d'entraide" sortent de la home.
   const FOUNDER_BASE_ANIMAUX = 234;
-  const kpiMaisons = FOUNDER_BASE_MAISONS + (publicStats?.maisons_gardees ?? 0);
   const kpiAnimaux = FOUNDER_BASE_ANIMAUX + (publicStats?.animaux_accompagnes ?? 0);
   const kpiInscrits = publicStats?.total_inscrits ?? 0;
-  const kpiMissions = publicStats?.missions_entraide ?? 0;
   const isPressHighlighted = new Date() < PRESS_HIGHLIGHT_UNTIL;
 
 
@@ -191,29 +189,38 @@ const Landing = () => {
             decoding="async"
           />
         </picture>
-        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/75 to-black/55" />
-        <div className="absolute inset-0 bg-foreground/20" aria-hidden />
+        {/* Voile renforcé sous la colonne (520 px) et qui s'efface vers le
+            sujet de la photo : contraste AA sur tous les textes du hero. */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/75 via-45% to-black/25" />
 
         <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 lg:px-16 py-6 md:py-24 pb-[calc(9rem+env(safe-area-inset-bottom))] md:pb-24">
-          <div className="max-w-2xl lg:max-w-3xl">
+          {/* Colonne resserrée à 520 px : la maison et le paysage restent
+              visibles à droite. */}
+          <div className="max-w-[520px]">
 
             <p className="flex items-center gap-2 font-body text-xs text-white/85 tracking-[0.2em] uppercase mb-2 md:mb-[14px]">
               <span className="inline-block w-5 h-0.5 bg-[#9A6A44] align-middle" aria-hidden="true" />
               {t("landing.hero.eyebrow")}
             </p>
 
-            {/* Sous 640 px, taille fluide en clamp() : bornes 24/36 et 20/30
-                prises dans l'échelle Tailwind (2xl→4xl, xl→3xl), plafonds
-                identiques aux classes sm: pour une transition sans saut à
-                640 px. Mesures du 16/08/2026 : 4 lignes à 360 px, 3 à 390 et
-                430 px. */}
-            <h1 className="font-heading text-[clamp(24px,8vw,36px)] sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-[14px] md:mb-[22px] max-w-3xl">
-              <span className="block text-balance">{t("landing.hero.title_main")}</span>
-              <span className="block text-balance text-[clamp(20px,6.4vw,30px)] sm:text-3xl md:text-4xl lg:text-5xl text-white/80">{t("landing.hero.title_accent")}</span>
+            {/* Une seule star typographique : l'accroche, seule en Playfair.
+                La ligne title_accent quitte le Playfair et redescend en
+                précision de paragraphe, plus bas. */}
+            <h1 className="font-heading text-[clamp(26px,8.4vw,38px)] sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-[12px] md:mb-[18px] text-balance">
+              {t("landing.hero.title_main")}
             </h1>
 
+            {/* La ligne qui porte le modèle : échange de services et esprit
+                d'entraide. Playfair italique, taille intermédiaire entre le
+                titre et le paragraphe. */}
+            <p className="font-heading italic text-[clamp(17px,4.8vw,21px)] md:text-2xl text-white/95 leading-snug mb-[12px] md:mb-[18px] animate-hero-fade-up animation-delay-400">
+              {t("landing.hero.motto")}
+            </p>
 
-            <p className="font-body text-lg md:text-xl text-white max-w-xl mb-[22px] md:mb-[34px] leading-relaxed animate-hero-fade-up animation-delay-700">
+            <p className="font-body text-base md:text-lg text-white/90 leading-relaxed mb-1.5 animate-hero-fade-up animation-delay-700">
+              {t("landing.hero.title_accent")}
+            </p>
+            <p className="font-body text-sm md:text-base text-white/80 leading-relaxed mb-[20px] md:mb-[30px] animate-hero-fade-up animation-delay-700">
               {t("landing.hero.lede")}
             </p>
 
@@ -260,27 +267,21 @@ const Landing = () => {
                     : t("landing.hero.cta_member_sitter", "Proposer un coup de main")
                   : t("landing.hero.cta_sitter")}
               </button>
-              {/* Tertiaire entraide : même rangée que les boutons, traitement texte
-                  souligné sans fond ni bordure pour préserver la hiérarchie
-                  (une seule action principale par écran). Cible 44 px minimum. */}
-              <Link
-                to="/petites-missions"
-                onClick={() => {
-                  trackEvent("cta_aid_clicked", { metadata: { location: "hero" } });
-                }}
-                className="inline-flex items-center justify-center sm:justify-start min-h-[44px] px-5 rounded-full font-body text-sm font-medium text-white underline underline-offset-4 decoration-white/40 hover:decoration-white transition-colors"
-              >
-                {t("landing.hero.cta_aid")}
-              </Link>
             </div>
 
-
-            <p className="font-body text-sm text-white/85 mt-[14px] md:mt-[22px] animate-hero-fade-up animation-delay-1000">
-              {t("landing.hero.reassurance")}
-            </p>
-            <p className="font-body text-sm text-white/85 mt-2 animate-hero-fade-up animation-delay-1050">
-              {t("landing.hero.guides_promise")}
-            </p>
+            {/* Réassurance en trois pastilles : contour fin clair, fond
+                légèrement voilé, Outfit 12 px, coins pleinement arrondis.
+                La mention des guides est déjà portée par le paragraphe. */}
+            <ul className="flex flex-wrap items-center gap-2 mt-[14px] md:mt-[22px] animate-hero-fade-up animation-delay-1000">
+              {(["chip_identity", "chip_reviews", "chip_affinity"] as const).map((key) => (
+                <li
+                  key={key}
+                  className="inline-flex items-center rounded-full border border-white/55 bg-white/10 px-3 py-1 font-body text-xs text-white/90"
+                >
+                  {t(`landing.hero.${key}`)}
+                </li>
+              ))}
+            </ul>
 
             {/* Mention presse : ligne discrète posée sur la photo, sans cadre
                 ni fond. Visible uniquement jusqu'à PRESS_HIGHLIGHT_UNTIL,
@@ -290,7 +291,7 @@ const Landing = () => {
                 href={PRESS_ARTICLE_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-[14px] inline-flex items-center gap-2.5 opacity-90 hover:opacity-100 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40 rounded-sm animate-hero-fade-up animation-delay-1075"
+                 className="mt-[14px] inline-flex items-center gap-2.5 opacity-90 hover:opacity-100 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40 rounded-sm animate-hero-fade-up animation-delay-1100"
               >
                 <span className="font-body text-[11px] uppercase tracking-[0.16em] text-white/70">
                   Vu dans
@@ -309,44 +310,43 @@ const Landing = () => {
                 </span>
               </a>
             )}
-
-            {(kpiMaisons >= 10 || kpiAnimaux >= 10 || kpiInscrits > 0 || kpiMissions >= 10) && (
-              <div className={`flex flex-row flex-wrap justify-start gap-x-6 gap-y-3 md:gap-x-12 md:gap-y-6 animate-hero-fade-up animation-delay-1100 ${isPressHighlighted ? "mt-[22px]" : "mt-[34px] md:mt-[52px]"}`}>
-                {/* Seuils : un compteur ne s'affiche qu'au-dessus d'un volume qui prouve
-                    l'activité. maisons/animaux intègrent le socle fondateurs donc passent
-                    toujours ce seuil ; inscrits est un pur compteur sans seuil bloquant ;
-                    missions_entraide passe à un seuil de 10 (arbitrage Jérémie, 03/08/2026,
-                    aligné sur le seuil maisons/animaux). */}
-                {kpiMaisons >= 10 && (
-                  <div className="border-r border-white/20 pr-6 md:pr-12 last:border-r-0 last:pr-0">
-                    <span className="block text-3xl font-heading font-bold text-white tabular-nums">{kpiMaisons}</span>
-                    <span className="text-xs font-body text-white/80 tracking-wide uppercase mt-1 block">{t("landing.hero.kpi_houses")}</span>
-                  </div>
-                )}
-                {kpiAnimaux >= 10 && (
-                  <div className="border-r border-white/20 pr-6 md:pr-12 last:border-r-0 last:pr-0">
-                    <span className="block text-3xl font-heading font-bold text-white tabular-nums">{kpiAnimaux}</span>
-                    <span className="text-xs font-body text-white/80 tracking-wide uppercase mt-1 block">{t("landing.hero.kpi_animals")}</span>
-                  </div>
-                )}
-                {kpiInscrits > 0 && (
-                  <div className="border-r border-white/20 pr-6 md:pr-12 last:border-r-0 last:pr-0">
-                    <span className="block text-3xl font-heading font-bold text-white tabular-nums">{kpiInscrits}</span>
-                    <span className="text-xs font-body text-white/80 tracking-wide uppercase mt-1 block">{t("landing.hero.kpi_members")}</span>
-                  </div>
-                )}
-                {/* Seuil 10 : en dessous, un compteur d'entraide isolé à côté des autres compteurs souligne le vide au lieu de prouver l'activité. Abaissé de 30 à 10 le 03/08/2026 (arbitrage Jérémie), aligné sur le seuil maisons/animaux. */}
-                {kpiMissions >= 10 && (
-                  <div>
-                    <span className="block text-3xl font-heading font-bold text-white tabular-nums">{kpiMissions}</span>
-                    <span className="text-xs font-body text-white/80 tracking-wide uppercase mt-1 block">{t("landing.hero.kpi_missions")}</span>
-                  </div>
-                )}
-              </div>
-            )}
           </div>
         </div>
       </section>
+
+       {/* ═══════════════ BANDE CHIFFRES + ENTRAIDE (hors hero, fond crème) ═══════════════
+           Deux compteurs seulement, ceux qui portent : inscrits et animaux
+           accompagnés (ce dernier intègre le socle fondateurs). Le lien
+           entraide, sorti du hero, vit à droite de cette bande. */}
+       {(kpiInscrits > 0 || kpiAnimaux >= 10) && (
+         <section className="bg-accent border-b border-border/60">
+           <div className="max-w-6xl mx-auto px-6 py-4 md:py-5 flex flex-wrap items-center justify-between gap-x-10 gap-y-3">
+             <dl className="flex flex-wrap items-center gap-x-8 md:gap-x-14 gap-y-2">
+               {kpiInscrits > 0 && (
+                 <div>
+                   <dd className="font-heading text-2xl md:text-3xl font-bold text-foreground tabular-nums leading-none">{kpiInscrits}</dd>
+                   <dt className="font-body text-[11px] uppercase tracking-[0.16em] text-muted-foreground mt-1">{t("landing.hero.kpi_members")}</dt>
+                 </div>
+               )}
+               {kpiAnimaux >= 10 && (
+                 <div>
+                   <dd className="font-heading text-2xl md:text-3xl font-bold text-foreground tabular-nums leading-none">{kpiAnimaux}</dd>
+                   <dt className="font-body text-[11px] uppercase tracking-[0.16em] text-muted-foreground mt-1">{t("landing.hero.kpi_animals")}</dt>
+                 </div>
+               )}
+             </dl>
+             <Link
+               to="/petites-missions"
+               onClick={() => {
+                 trackEvent("cta_aid_clicked", { metadata: { location: "kpi_band" } });
+               }}
+               className="inline-flex items-center min-h-[44px] font-body text-sm font-medium text-muted-foreground underline underline-offset-4 decoration-border hover:text-foreground hover:decoration-foreground/50 transition-colors"
+             >
+               {t("landing.hero.cta_aid")}
+             </Link>
+           </div>
+         </section>
+       )}
 
       {/* ═══════════════ SECTION 2, CONFIANCE & PÉRIMÈTRE (positionnée tôt : réponse à la peur n°1) ═══════════════ */}
       <ConfianceSection />
