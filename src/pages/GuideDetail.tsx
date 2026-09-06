@@ -308,6 +308,16 @@ const GuideDetail = () => {
     return <NotFound />;
   }
 
+  const metaTitle = hasCommercialPlaces
+    ? t("guide_detail.meta_title", { city: guide.city })
+    : t("guide_detail.meta_title_nature", { city: guide.city });
+  const h1Title = hasCommercialPlaces
+    ? t("guide_detail.title", { city: guide.city })
+    : t("guide_detail.title_nature", { city: guide.city });
+  const metaDescription = hasCommercialPlaces
+    ? t("guide_detail.meta_description", { city: guide.city, ideal: guide.ideal_for })
+    : t("guide_detail.meta_description_nature", { city: guide.city, ideal: guide.ideal_for });
+
   return (
     <>
       <PageMeta
