@@ -110,6 +110,133 @@ Deno.serve(async (req) => {
     const dryRun = body?.dry_run === true;
     const limit = Math.min(10, Math.max(1, Number(body?.limit) || 3));
 
+    // ------------------------------------------------------------------
+    // Mode "rating" : second étage optionnel.
+    // N'ajoute la note Google que sur des lieux DÉJÀ vérifiés par OSM.
+    // Aucun appel réseau supplémentaire tant que GOOGLE_PLACES_API_KEY
+    // est absent ou vide : le mode reste totalement inerte.
+    // Coût : le champ `rating` bascule l'appel en palier Enterprise
+    // (environ 35 USD / 1 000 appels, 1 000 gratuits par mois).
+    // Un appel par lieu, jamais plus. Pas de cron, déclenchement explicite.
+    // ------------------------------------------------------------------
+    if (body?.mode === "rating") {
+      const ratingLimit = Math.min(60, Math.max(1, Number(body?.limit) || 20));
+      const googleKey = Deno.env.get("GOOGLE_PLACES_API_KEY");
+      if (!googleKey) {
+        return json({
+          mode: "rating",
+          traites: 0,
+          notes_ecrites: 0,
+          sans_resultat: 0,
+          rejetes_appariement: 0,
+          cle_absente: true,
+        });
+      }
+
+      const { data: rows, error: selErr } = await supabase
+        .from("city_guide_places")
+        .select("id, name, address, latitude, longitude")
+        .not("verified_at", "is", null)
+        .like("source_url", "https://www.openstreetmap.org/%")
+        .is("google_place_id", null)
+        .order("verified_at", { ascending: true })
+        .limit(ratingLimit);
+      if (selErr) return json({ error: selErr.message }, 500);
+
+      let notes_ecrites = 0;
+      let sans_resultat = 0;
+      let rejetes_appariement = 0;
+
+      const haversine = (
+        lat1: number, lon1: number, lat2: number, lon2: number,
+      ): number => {
+        const R = 6371000;
+        const dLat = ((lat2 - lat1) * Math.PI) / 180;
+        const dLon = ((lon2 - lon1) * Math.PI) / 180;
+        const a = Math.sin(dLat / 2) ** 2 +
+          Math.cos((lat1 * Math.PI) / 180) *
+            Math.cos((lat2 * Math.PI) / 180) *
+            Math.sin(dLon / 2) ** 2;
+        return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      };
+
+      let firstCall = true;
+      for (const row of rows ?? []) {
+        if (!firstCall) await sleep(120);
+        firstCall = false;
+
+        let place: any = null;
+        try {
+          const r = await fetch("https://places.googleapis.com/v1/places:searchText", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-Goog-Api-Key": googleKey,
+              "X-Goog-FieldMask":
+                "places.id,places.rating,places.userRatingCount,places.displayName,places.formattedAddress,places.location",
+            },
+            body: JSON.stringify({
+              textQuery: `${row.name} ${row.address ?? ""}`.trim(),
+              languageCode: "fr",
+              regionCode: "FR",
+              maxResultCount: 1,
+              locationBias: {
+                circle: {
+                  center: { latitude: row.latitude, longitude: row.longitude },
+                  radius: 300.0,
+                },
+              },
+            }),
+          });
+          if (r.ok) {
+            const data = await r.json();
+            place = Array.isArray(data?.places) ? data.places[0] ?? null : null;
+          }
+        } catch {
+          place = null;
+        }
+
+        if (!place || !place.id) {
+          sans_resultat++;
+          continue;
+        }
+
+        // Garde-fou d'appariement : moins de 200 mètres entre les
+        // coordonnées Google et celles en base, sinon on n'écrit rien.
+        const gLat = Number(place.location?.latitude);
+        const gLon = Number(place.location?.longitude);
+        const dist = Number.isFinite(gLat) && Number.isFinite(gLon)
+          ? haversine(row.latitude, row.longitude, gLat, gLon)
+          : Number.POSITIVE_INFINITY;
+        if (dist >= 200) {
+          rejetes_appariement++;
+          continue;
+        }
+
+        // name et address ne sont jamais écrasés : OSM et la BAN font foi.
+        const { error: upErr } = await supabase
+          .from("city_guide_places")
+          .update({
+            google_place_id: String(place.id),
+            google_rating: typeof place.rating === "number" ? place.rating : null,
+            google_rating_count: typeof place.userRatingCount === "number"
+              ? place.userRatingCount
+              : null,
+          })
+          .eq("id", row.id);
+        if (!upErr) notes_ecrites++;
+      }
+
+      return json({
+        mode: "rating",
+        traites: (rows ?? []).length,
+        notes_ecrites,
+        sans_resultat,
+        rejetes_appariement,
+        cle_absente: false,
+      });
+    }
+
     // Sélection des guides
     let guides: any[] = [];
     if (slugs) {
