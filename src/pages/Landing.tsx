@@ -342,11 +342,8 @@ const Landing = () => {
          </section>
        )}
 
-      {/* ═══════════════ SECTION 2, CONFIANCE & PÉRIMÈTRE (positionnée tôt : réponse à la peur n°1) ═══════════════ */}
-      <ConfianceSection />
+      {/* Confiance et annonces déplacées après la section Prétexte le 06/09/2026 */}
 
-      {/* ═══════════════ APERÇU LIVE ANNONCES ═══════════════ */}
-      <LiveListingsStrip />
 
 
 
@@ -396,10 +393,19 @@ const Landing = () => {
       {/* ═══════════════ SECTION 2, CE QU'ON FAIT ENSEMBLE ═══════════════ */}
       <UsagesSection />
 
-      {/* ═══════════════ SECTION 2bis, LE PRÉTEXTE (bloc sombre signature,
+      {/* ═══════════════ SECTION 2bis, CONFIANCE & PÉRIMÈTRE ═══════════════ */}
+      <ConfianceSection />
+
+      {/* ═══════════════ SECTION 3, LE PRÉTEXTE (bloc sombre signature,
           fusion des anciennes Rencontre + Entraide, remontée ici le
           06/09/2026) ═══════════════ */}
       <PretexteSection />
+
+
+      {/* ═══════════════ APERÇU LIVE ANNONCES ═══════════════ */}
+      <LiveListingsStrip />
+
+
 
       {/* ═══════════════ SECTION 2.2, VOIX EXTERNE (presse comme témoignage, jamais bannière) ═══════════════ */}
       <PressQuote />
