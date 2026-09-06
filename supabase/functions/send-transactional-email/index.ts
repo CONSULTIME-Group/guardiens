@@ -218,7 +218,12 @@ Deno.serve(async (req) => {
   // Resolve effective recipient: template-level `to` takes precedence over
   // the caller-provided recipientEmail. This allows notification templates
   // to always send to a fixed address (e.g., site owner from env var).
-  const effectiveRecipient = template.to || recipientEmail
+  // Normalisation : une adresse stockee avec des espaces ou sous la forme
+  // "Prenom Nom <a@b.fr>" est refusee par Resend en 422. On nettoie ici, puis
+  // on refuse proprement en 400 plutot que de laisser passer un 500.
+  const rawRecipient = String(template.to || recipientEmail || '').trim()
+  const bracketed = rawRecipient.match(/<\s*([^<>\s]+@[^<>\s]+)\s*>/)
+  const effectiveRecipient = (bracketed ? bracketed[1] : rawRecipient).trim()
 
   if (!effectiveRecipient) {
     return new Response(
