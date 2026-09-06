@@ -64,7 +64,7 @@ export function PressQuote({
   return (
     <figure
       className={cn(
-        "py-[52px] transition-opacity duration-[360ms] ease-out",
+        "py-[52px] transition-opacity duration-[360ms] ease-out not-prose",
         visible ? "opacity-100" : "opacity-0",
         className
       )}
