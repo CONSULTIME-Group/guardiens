@@ -112,9 +112,9 @@ export function PressQuote({
                   <img
                     src={logoPath}
                     alt={`Logo ${source}`}
-                    width={242}
-                    height={54}
-                    className="h-8 md:h-10 w-auto object-contain"
+                    width={512}
+                    height={114}
+                    className="h-8 md:h-10 w-auto object-contain rounded-md"
                     loading="lazy"
                     decoding="async"
                     onError={() => setLogoError(true)}
@@ -185,9 +185,9 @@ export function PressQuote({
                       <img
                         src={logoPath}
                         alt={`Logo ${source}`}
-                        width={120}
-                        height={24}
-                        className="h-[18px] w-auto object-contain opacity-80"
+                        width={512}
+                        height={114}
+                        className="h-[18px] w-auto object-contain opacity-80 rounded-[3px]"
                         loading="lazy"
                         decoding="async"
                         onError={() => setLogoError(true)}
@@ -203,9 +203,9 @@ export function PressQuote({
                       <img
                         src={logoPath}
                         alt={`Logo ${source}`}
-                        width={120}
-                        height={24}
-                        className="h-[18px] w-auto object-contain opacity-80"
+                        width={512}
+                        height={114}
+                        className="h-[18px] w-auto object-contain opacity-80 rounded-[3px]"
                         loading="lazy"
                         decoding="async"
                         onError={() => setLogoError(true)}
