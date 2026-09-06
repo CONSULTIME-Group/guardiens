@@ -445,7 +445,20 @@
       }
     },
     "meta_title": "Garde d'animaux à domicile, maison et jardin | House-sitting | Guardiens",
-    "meta_description": "House-sitting et garde de maison entre particuliers : trouvez un gardien qui veille sur vos animaux, vos plantes et votre maison. Partout en France, y compris pour les Français de l'étranger."
+    "meta_description": "House-sitting et garde de maison entre particuliers : trouvez un gardien qui veille sur vos animaux, vos plantes et votre maison. Partout en France, y compris pour les Français de l'étranger.",
+    "how": {
+      "cta_owner": "Publier mon annonce",
+      "cta_secondary": "Ou commencer par un coup de main →",
+      "eyebrow": "Simple et transparent",
+      "footnote": "Inscription en 2 minutes",
+      "step1_text": "Vos dates, vos animaux, votre maison. Quelques minutes suffisent, votre annonce est en ligne.",
+      "step1_title": "Publiez votre annonce",
+      "step2_text": "Des gardiens dont le profil correspond à votre besoin postulent. Vous lisez les profils, les avis, vous échangez. Puis vous vous voyez, un café, une visite, avant de décider.",
+      "step2_title": "Choisissez après une rencontre",
+      "step3_text": "L'accord de garde signé, votre gardien s'installe. Vous recevez des nouvelles. Vous rentrez chez vous, souvent avec une nouvelle relation.",
+      "step3_title": "Partez l'esprit léger",
+      "title": "Comment ça marche ?"
+    }
   },
   "faq": {
     "title": "Questions fréquentes",
