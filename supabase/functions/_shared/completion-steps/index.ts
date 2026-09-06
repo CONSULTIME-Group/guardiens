@@ -12,8 +12,12 @@
  * deblocage quand il en reste plusieurs.
  */
 
-/** Seuil de candidature cote diffusion (parite avec le digest). */
-export const APPLY_COMPLETION_THRESHOLD = 60;
+/**
+ * Seuil de candidature cote diffusion. DOIT rester aligne sur
+ * `MIN_COMPLETION_TO_APPLY` de `src/hooks/useAccessLevel.ts` (40 %), sinon les
+ * emails annoncent un blocage a des gardiens qui peuvent deja candidater.
+ */
+export const APPLY_COMPLETION_THRESHOLD = 40;
 
 export interface CompletionStepInput {
   first_name?: string | null;
