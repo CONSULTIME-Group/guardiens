@@ -120,54 +120,13 @@
         "cta": "Rejoindre le réseau d'urgence"
       }
     },
-    "meeting": {
-      "eyebrow": "Ce qu'on n'écrit jamais dans une annonce",
-      "title_a": "Le vrai prétexte,",
-      "title_b": "c'est la rencontre.",
-      "p1": "Ce qu'on raconte rarement, c'est ce qui se passe autour. Connaître la mami du coin et son histoire parce qu'on l'a aidée à ramasser ses fruits du jardin. Échanger avec Gerardo pendant qu'il vous donne un coup de main pour bricoler, et lui proposer un repas fait maison en retour.",
-      "p2": "Pas besoin d'un animal pour qu'une rencontre commence. Demander un coup de main, en proposer un : c'est déjà ouvrir une porte. Garder une maison, c'est en ouvrir une autre, un même geste, deux échelles.",
-      "p3": "On apprend, on découvre, on s'attache, sans aller le chercher. Juste en laissant la place à ce qui peut arriver."
-    },
-    "how": {
-      "eyebrow": "Simple et transparent",
-      "title": "Comment ça marche ?",
-      "step1_title": "Publiez votre annonce",
-      "step1_text": "Vos dates, vos animaux, votre maison. Quelques minutes suffisent, votre annonce est en ligne.",
-      "step2_title": "Choisissez après une rencontre",
-      "step2_text": "Des gardiens dont le profil correspond à votre besoin postulent. Vous lisez les profils, les avis, vous échangez. Puis vous vous voyez, un café, une visite, avant de décider.",
-      "step3_title": "Partez l'esprit léger",
-      "step3_text": "L'accord de garde signé, votre gardien s'installe. Vous recevez des nouvelles. Vous rentrez chez vous, souvent avec une nouvelle relation.",
-      "cta_owner": "Publier mon annonce",
-      "cta_secondary": "Ou commencer par un coup de main →",
-      "footnote": "Inscription en 2 minutes"
-    },
-    "aid": {
-      "eyebrow": "Pour tous · Entre gens du coin",
-      "title": "Osez demander. Osez proposer.",
-      "p1": "Avant, il y avait quelqu'un du coin qui passait arroser le jardin, qui gardait le chien, qui venait fixer un volet. Quelqu'un à qui on offrait une part de gâteau ou un coup de main en retour.",
-      "p2": "Cette habitude n'a pas disparu, on n'ose simplement plus la première question. Guardiens, c'est le prétexte pour la reposer, et au passage, vivre des expériences qu'aucun voyage organisé ne vous offrira.",
-      "need_title": "« J'ai besoin d'un coup de main »",
-      "need_text": "Votre potager pendant les vacances. Vos poules ce week-end. Promener votre chien après une opération. Le demander, ce n'est pas avouer une faiblesse, c'est faire confiance.",
-      "need_footer": "Un service contre un service. C'est le pari.",
-      "offer_title": "« Je peux donner un peu de mon temps »",
-      "offer_text": "Vous savez tailler les rosiers. Vous adorez les chiens. Vous avez deux heures samedi matin. Proposez, et vivez ce que vous n'auriez jamais vécu sans cette rencontre.",
-      "offer_footer": "C'est comme ça qu'un tissu social se retisse.",
-      "seen_this_week": "Quelques échanges vus sur Guardiens cette semaine",
-      "examples": {
-        "water_plants": "Arroser les plantes",
-        "small_diy": "Petit bricolage",
-        "garden_pruning": "Tailler le jardin",
-        "bread_class": "Cours de pain maison",
-        "reiki": "Séance de Reiki",
-        "parcel": "Réceptionner un colis",
-        "carpool": "Covoiturage rdv",
-        "seedlings": "Bouture, semis",
-        "coffee_listen": "Café & écoute",
-        "groceries": "Aide aux courses",
-        "moving_help": "Coup de main déménagement",
-        "sewing": "Apprendre la couture"
-      },
-      "quote": "« La vie de village n'a pas disparu. Elle attendait simplement qu'on ose la première question. »",
+    "pretexte": {
+      "eyebrow": "Ce qu'on trouve sans l'avoir cherché",
+      "title": "Le vrai prétexte, c'est ce qui arrive autour.",
+      "p1": "Vous partez l'esprit léger, quelqu'un veille sur votre maison. Vous gardez une maison, vous découvrez une ville de l'intérieur, un jardin, un chien qui vous adopte en trois jours. Des deux côtés, la garde est le prétexte.",
+      "p2": "Ce qui reste, c'est autre chose. Connaître la mami du quartier et son histoire parce que vous l'avez aidée à ramasser ses fruits. Échanger avec Gerardo pendant qu'il vous donne un coup de main pour bricoler, et lui proposer un repas fait maison en retour.",
+      "p3": "Avant, il y avait quelqu'un qui passait arroser le jardin, qui gardait le chien, qui venait fixer un volet. Quelqu'un à qui on offrait une part de gâteau en retour. Cette habitude existe toujours, il suffit d'oser la demander.",
+      "closing": "Osez demander. Osez proposer.",
       "cta": "Découvrir les petites missions"
     },
     "trust": {
