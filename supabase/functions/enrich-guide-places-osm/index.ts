@@ -556,10 +556,24 @@ Deno.serve(async (req) => {
       }
 
       details.push({ slug: guide.slug, inseres: rows.length, rejetes: rejetesGuide });
+      } finally {
+        await markAttempted(guide.id);
+      }
+    }
+
+    // Avancement de la file : guides jamais tentés restants après ce passage.
+    let guides_jamais_tentes: number | null = null;
+    {
+      const { count, error: countErr } = await supabase
+        .from("city_guides")
+        .select("id", { count: "exact", head: true })
+        .is("osm_enrich_attempted_at", null);
+      if (!countErr) guides_jamais_tentes = count ?? 0;
     }
 
     return json({
       guides_traites,
+      guides_jamais_tentes,
       lieux_inseres,
       rejetes_departement,
       rejetes_distance,
