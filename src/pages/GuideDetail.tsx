@@ -557,41 +557,7 @@ const GuideDetail = () => {
           )}
         </div>
 
-        {/* Schema.org */}
-        {/* JSON-LD: Breadcrumb */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "BreadcrumbList",
-              itemListElement: [
-                { "@type": "ListItem", position: 1, name: "Guardiens", item: "https://guardiens.fr" },
-                { "@type": "ListItem", position: 2, name: "Guides", item: "https://guardiens.fr/guides" },
-                { "@type": "ListItem", position: 3, name: guide.city, item: `https://guardiens.fr/guides/${guide.slug}` },
-              ],
-            }),
-          }}
-        />
-
-        {/* JSON-LD: TouristDestination */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "TouristDestination",
-              name: `${guide.city}, Guide pet sitting`,
-              description: `Guide pratique pour les gardiens d'animaux à ${guide.city}. ${guide.intro}`,
-              url: `https://guardiens.fr/guides/${guide.slug}`,
-              touristType: ["Pet sitter", "House sitter", "Gardien d'animaux"],
-              containedInPlace: {
-                "@type": "AdministrativeArea",
-                name: guide.department,
-              },
-            }),
-          }}
-        />
+        {/* Schema.org : ItemList des lieux et FAQPage uniquement */}
 
         {/* JSON-LD: ItemList des lieux utiles */}
         {placesSchema && (
