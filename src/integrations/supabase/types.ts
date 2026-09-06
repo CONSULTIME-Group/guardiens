@@ -1613,6 +1613,66 @@ export type Database = {
           },
         ]
       }
+      city_guide_places_archive: {
+        Row: {
+          address: string
+          archive_reason: string | null
+          archived_at: string
+          category: Database["public"]["Enums"]["guide_place_category"]
+          city_guide_id: string
+          created_at: string
+          description: string
+          dogs_welcome: boolean
+          google_place_id: string | null
+          google_rating: number | null
+          id: string
+          latitude: number | null
+          leash_required: boolean | null
+          longitude: number | null
+          name: string
+          photo_url: string | null
+          tips: string | null
+        }
+        Insert: {
+          address?: string
+          archive_reason?: string | null
+          archived_at?: string
+          category: Database["public"]["Enums"]["guide_place_category"]
+          city_guide_id: string
+          created_at?: string
+          description?: string
+          dogs_welcome?: boolean
+          google_place_id?: string | null
+          google_rating?: number | null
+          id?: string
+          latitude?: number | null
+          leash_required?: boolean | null
+          longitude?: number | null
+          name: string
+          photo_url?: string | null
+          tips?: string | null
+        }
+        Update: {
+          address?: string
+          archive_reason?: string | null
+          archived_at?: string
+          category?: Database["public"]["Enums"]["guide_place_category"]
+          city_guide_id?: string
+          created_at?: string
+          description?: string
+          dogs_welcome?: boolean
+          google_place_id?: string | null
+          google_rating?: number | null
+          id?: string
+          latitude?: number | null
+          leash_required?: boolean | null
+          longitude?: number | null
+          name?: string
+          photo_url?: string | null
+          tips?: string | null
+        }
+        Relationships: []
+      }
       city_guides: {
         Row: {
           city: string
