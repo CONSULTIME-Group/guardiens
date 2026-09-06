@@ -133,8 +133,8 @@
       "eyebrow": "Ce qui compte vraiment",
       "title": "Vos besoins, son savoir-faire. Vous choisissez.",
       "lede": "Votre rythme, vos habitudes, les besoins de vos animaux, face à son expérience. On vous montre où ça correspond. Vous rencontrez, et vous décidez.",
-      "p1_title": "Un matching qui vous ressemble",
-      "p1_text": "Le score d'affinité compare votre rythme de vie, vos habitudes et vos animaux à ceux du gardien, critère par critère. Vous voyez le détail du calcul, vous gardez la main.",
+      "p1_title": "Votre gardien idéal, décrit par vous",
+      "p1_text": "Un couple, un retraité, une famille, quelqu'un d'actif ou quelqu'un qui reste à la maison, avec voiture ou sans. Vous décrivez qui vous voulez chez vous, et le score d'affinité classe les candidatures là-dessus, critère par critère. Vous voyez le détail du calcul, vous gardez la main.",
       "p2_title": "Un gardien qui arrive préparé",
       "p2_text": "Le guide de la race de votre animal et le guide de votre ville, transmis avant la garde. Votre gardien sait déjà ce qui compte avant même d'arriver.",
       "p3_title": "Des conseils à chaque étape",
@@ -237,11 +237,11 @@
       }
     },
     "affinity": {
-      "title": "Le match qui compte, pas juste la proximité",
-      "subtitle": "Un score calculé automatiquement entre chaque propriétaire et chaque gardien, pondéré, transparent, visible.",
-      "bullet1": "Calcul automatique dès qu'un gardien postule à votre annonce",
-      "bullet2": "Plusieurs critères pondérés, propres à chaque couple : animaux, présence pendant la garde, véhicule, rythme de vie, langues, intérêts, profil idéal, ambiance du foyer, besoins spéciaux, distance",
-      "bullet3": "Vous voyez le détail, vous décidez",
+      "title": "Vous décrivez qui vous voulez chez vous",
+      "subtitle": "Un couple, un retraité, une famille, quelqu'un qui part randonner la journée ou quelqu'un qui reste à la maison, avec voiture ou sans. Vous le dites à l'inscription, et chaque candidature reçoit un score calculé sur ce que vous avez décrit.",
+      "bullet1": "Vous décrivez votre gardien idéal, votre rythme de vie, l'ambiance de votre foyer et la présence que vous attendez pendant la garde.",
+      "bullet2": "Chaque candidature est notée critère par critère, avec le poids de chacun affiché.",
+      "bullet3": "Vous voyez le détail, vous décidez.",
       "cta": "Comprendre le score d'affinité",
       "demo_label": "Exemple illustratif",
       "demo": {
