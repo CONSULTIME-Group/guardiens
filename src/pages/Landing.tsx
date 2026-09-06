@@ -191,29 +191,38 @@ const Landing = () => {
             decoding="async"
           />
         </picture>
-        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/75 to-black/55" />
-        <div className="absolute inset-0 bg-foreground/20" aria-hidden />
+        {/* Voile renforcé sous la colonne (520 px) et qui s'efface vers le
+            sujet de la photo : contraste AA sur tous les textes du hero. */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/75 via-45% to-black/25" />
 
         <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 lg:px-16 py-6 md:py-24 pb-[calc(9rem+env(safe-area-inset-bottom))] md:pb-24">
-          <div className="max-w-2xl lg:max-w-3xl">
+          {/* Colonne resserrée à 520 px : la maison et le paysage restent
+              visibles à droite. */}
+          <div className="max-w-[520px]">
 
             <p className="flex items-center gap-2 font-body text-xs text-white/85 tracking-[0.2em] uppercase mb-2 md:mb-[14px]">
               <span className="inline-block w-5 h-0.5 bg-[#9A6A44] align-middle" aria-hidden="true" />
               {t("landing.hero.eyebrow")}
             </p>
 
-            {/* Sous 640 px, taille fluide en clamp() : bornes 24/36 et 20/30
-                prises dans l'échelle Tailwind (2xl→4xl, xl→3xl), plafonds
-                identiques aux classes sm: pour une transition sans saut à
-                640 px. Mesures du 16/08/2026 : 4 lignes à 360 px, 3 à 390 et
-                430 px. */}
-            <h1 className="font-heading text-[clamp(24px,8vw,36px)] sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-[14px] md:mb-[22px] max-w-3xl">
-              <span className="block text-balance">{t("landing.hero.title_main")}</span>
-              <span className="block text-balance text-[clamp(20px,6.4vw,30px)] sm:text-3xl md:text-4xl lg:text-5xl text-white/80">{t("landing.hero.title_accent")}</span>
+            {/* Une seule star typographique : l'accroche, seule en Playfair.
+                La ligne title_accent quitte le Playfair et redescend en
+                précision de paragraphe, plus bas. */}
+            <h1 className="font-heading text-[clamp(26px,8.4vw,38px)] sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-[12px] md:mb-[18px] text-balance">
+              {t("landing.hero.title_main")}
             </h1>
 
+            {/* La ligne qui porte le modèle : échange de services et esprit
+                d'entraide. Playfair italique, taille intermédiaire entre le
+                titre et le paragraphe. */}
+            <p className="font-heading italic text-[clamp(17px,4.8vw,21px)] md:text-2xl text-white/95 leading-snug mb-[12px] md:mb-[18px] animate-hero-fade-up animation-delay-400">
+              {t("landing.hero.motto")}
+            </p>
 
-            <p className="font-body text-lg md:text-xl text-white max-w-xl mb-[22px] md:mb-[34px] leading-relaxed animate-hero-fade-up animation-delay-700">
+            <p className="font-body text-base md:text-lg text-white/90 leading-relaxed mb-1.5 animate-hero-fade-up animation-delay-700">
+              {t("landing.hero.title_accent")}
+            </p>
+            <p className="font-body text-sm md:text-base text-white/80 leading-relaxed mb-[20px] md:mb-[30px] animate-hero-fade-up animation-delay-700">
               {t("landing.hero.lede")}
             </p>
 
