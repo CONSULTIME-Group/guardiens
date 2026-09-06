@@ -287,7 +287,7 @@ const Landing = () => {
 
             {/* Mention presse : ligne discrète posée sur la photo, sans cadre
                 ni fond. Visible uniquement jusqu'à PRESS_HIGHLIGHT_UNTIL,
-                ensuite la carte PressQuote après UsagesSection reste seule. */}
+                ensuite seule la ligne discrète du pied de page subsiste. */}
             {isPressHighlighted && (
               <a
                 href={PRESS_ARTICLE_URL}
