@@ -201,7 +201,7 @@ const Landing = () => {
             sujet de la photo : contraste AA sur tous les textes du hero. */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/75 via-45% to-black/25" />
 
-        <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 lg:px-16 py-6 md:py-24 pb-[calc(9rem+env(safe-area-inset-bottom))] md:pb-24">
+        <div className="relative z-10 lp-wide py-[52px] md:py-24 pb-[calc(9rem+env(safe-area-inset-bottom))] md:pb-24">
           {/* Colonne resserrée à 520 px : la maison et le paysage restent
               visibles à droite. */}
           <div className="max-w-[520px]">
