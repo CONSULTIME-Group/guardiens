@@ -17,7 +17,8 @@ import { useInventaireCounts } from "@/hooks/useInventaireCounts";
 import { usePublicStats } from "@/hooks/usePublicStats";
 import LiveListingsStrip from "@/components/landing/LiveListingsStrip";
 import TestimonialsSection from "@/components/landing/TestimonialsSection";
-import PressQuote, { PRESS_HIGHLIGHT_UNTIL } from "@/components/shared/PressQuote";
+import PressQuote, { PRESS_ARTICLE_URL, PRESS_HIGHLIGHT_UNTIL } from "@/components/shared/PressQuote";
+import { LE_PROGRES_LOGO } from "@/assets/pressLogos";
 
 import { UsagesSection } from "@/components/landing/UsagesSection";
 import { RencontreSection } from "@/components/landing/RencontreSection";
@@ -281,10 +282,36 @@ const Landing = () => {
               {t("landing.hero.guides_promise")}
             </p>
 
-
+            {/* Mention presse : ligne discrète posée sur la photo, sans cadre
+                ni fond. Visible uniquement jusqu'à PRESS_HIGHLIGHT_UNTIL,
+                ensuite la carte PressQuote après UsagesSection reste seule. */}
+            {isPressHighlighted && (
+              <a
+                href={PRESS_ARTICLE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-[14px] inline-flex items-center gap-2.5 opacity-90 hover:opacity-100 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40 rounded-sm animate-hero-fade-up animation-delay-1075"
+              >
+                <span className="font-body text-[11px] uppercase tracking-[0.16em] text-white/70">
+                  Vu dans
+                </span>
+                <img
+                  src={LE_PROGRES_LOGO}
+                  alt="Le Progrès"
+                  width={272}
+                  height={40}
+                  className="h-5 w-auto object-contain opacity-90"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <span className="font-body text-xs text-white/70">
+                  6 septembre 2026
+                </span>
+              </a>
+            )}
 
             {(kpiMaisons >= 10 || kpiAnimaux >= 10 || kpiInscrits > 0 || kpiMissions >= 10) && (
-              <div className="flex flex-row flex-wrap justify-start gap-x-6 gap-y-3 mt-[34px] md:gap-x-12 md:gap-y-6 md:mt-[52px] animate-hero-fade-up animation-delay-1100">
+              <div className={`flex flex-row flex-wrap justify-start gap-x-6 gap-y-3 md:gap-x-12 md:gap-y-6 animate-hero-fade-up animation-delay-1100 ${isPressHighlighted ? "mt-[22px]" : "mt-[34px] md:mt-[52px]"}`}>
                 {/* Seuils : un compteur ne s'affiche qu'au-dessus d'un volume qui prouve
                     l'activité. maisons/animaux intègrent le socle fondateurs donc passent
                     toujours ce seuil ; inscrits est un pur compteur sans seuil bloquant ;
@@ -320,9 +347,6 @@ const Landing = () => {
           </div>
         </div>
       </section>
-
-      {/* ═══════════════ SECTION 1.5, VOIX EXTERNE EN MISE EN AVANT (presse comme témoignage, jamais bannière) ═══════════════ */}
-      {isPressHighlighted && <PressQuote />}
 
       {/* ═══════════════ SECTION 2, CONFIANCE & PÉRIMÈTRE (positionnée tôt : réponse à la peur n°1) ═══════════════ */}
       <ConfianceSection />
@@ -379,7 +403,7 @@ const Landing = () => {
       <UsagesSection />
 
       {/* ═══════════════ SECTION 2.2, VOIX EXTERNE (presse comme témoignage, jamais bannière) ═══════════════ */}
-      {!isPressHighlighted && <PressQuote />}
+      <PressQuote />
 
       {/* ═══════════════ SECTION 2.5, INTERNATIONAL (InternationalStrip) ═══════════════ */}
       <RevealSection>
