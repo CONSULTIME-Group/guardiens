@@ -1222,7 +1222,10 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const resendRes = await resendFetch('https://api.resend.com/emails', {
+    // Resend plafonne a 10 requetes par seconde. Un envoi en rafale (digest,
+    // vidage de file) prenait un 429 definitif et l'email etait perdu. On
+    // retente avec attente, en respectant Retry-After quand il est fourni.
+    const callResend = () => resendFetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -1230,6 +1233,18 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify(resendPayload),
     }, { functionName: "send-transactional-email" })
+
+    let resendRes = await callResend()
+    const RETRY_DELAYS_MS = [600, 1500, 3000]
+    for (let attempt = 0; attempt < RETRY_DELAYS_MS.length && resendRes.status === 429; attempt++) {
+      const retryAfter = Number(resendRes.headers.get('retry-after'))
+      const waitMs = Number.isFinite(retryAfter) && retryAfter > 0
+        ? Math.min(retryAfter * 1000, 5000)
+        : RETRY_DELAYS_MS[attempt]
+      console.warn('Resend 429, nouvelle tentative', { attempt: attempt + 1, waitMs, templateName })
+      await new Promise((r) => setTimeout(r, waitMs))
+      resendRes = await callResend()
+    }
 
     const resendData = await resendRes.json()
 
