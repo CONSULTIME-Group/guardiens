@@ -237,6 +237,14 @@ Deno.serve(async (req) => {
     )
   }
 
+  if (!/^[^\s@,;<>]+@[^\s@,;<>]+\.[^\s@,;<>]{2,}$/.test(effectiveRecipient)) {
+    console.error('recipient rejected before send', { templateName })
+    return new Response(
+      JSON.stringify({ success: false, reason: 'invalid_recipient_email' }),
+      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  }
+
   // Create Supabase client with service role (bypasses RLS)
   const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
