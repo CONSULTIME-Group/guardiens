@@ -93,6 +93,11 @@ export default {
           soft: "hsl(var(--terra-soft))",
           border: "hsl(var(--terra-border))",
         },
+        pine: {
+          DEFAULT: "hsl(var(--pine))",
+          deep: "hsl(var(--pine-deep))",
+          foreground: "hsl(var(--pine-foreground))",
+        },
 
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",

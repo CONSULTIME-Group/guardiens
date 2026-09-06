@@ -21,8 +21,7 @@ import PressQuote, { PRESS_ARTICLE_URL, PRESS_HIGHLIGHT_UNTIL } from "@/componen
 import { LE_PROGRES_LOGO } from "@/assets/pressLogos";
 
 import { UsagesSection } from "@/components/landing/UsagesSection";
-import { RencontreSection } from "@/components/landing/RencontreSection";
-import { EntraideSection } from "@/components/landing/EntraideSection";
+import { PretexteSection } from "@/components/landing/PretexteSection";
 import HomeJsonLd from "@/components/landing/HomeJsonLd";
 import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
 import { ConfianceSection } from "@/components/landing/ConfianceSection";
@@ -203,23 +202,18 @@ const Landing = () => {
               {t("landing.hero.eyebrow")}
             </p>
 
-            {/* Une seule star typographique : l'accroche, seule en Playfair.
-                La ligne title_accent quitte le Playfair et redescend en
-                précision de paragraphe, plus bas. */}
+            {/* Une seule star typographique : l'accroche, seule en Playfair. */}
             <h1 className="font-heading text-[clamp(26px,8.4vw,38px)] sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-[12px] md:mb-[18px] text-balance">
               {t("landing.hero.title_main")}
             </h1>
 
-            {/* La ligne qui porte le modèle : échange de services et esprit
-                d'entraide. Playfair italique, taille intermédiaire entre le
+            {/* La ligne qui porte l'ouverture : ce qu'on trouve sans l'avoir
+                cherché. Playfair italique, taille intermédiaire entre le
                 titre et le paragraphe. */}
             <p className="font-heading italic text-[clamp(17px,4.8vw,21px)] md:text-2xl text-white/95 leading-snug mb-[12px] md:mb-[18px] animate-hero-fade-up animation-delay-400">
               {t("landing.hero.motto")}
             </p>
 
-            <p className="font-body text-base md:text-lg text-white/90 leading-relaxed mb-1.5 animate-hero-fade-up animation-delay-700">
-              {t("landing.hero.title_accent")}
-            </p>
             <p className="font-body text-sm md:text-base text-white/80 leading-relaxed mb-[20px] md:mb-[30px] animate-hero-fade-up animation-delay-700">
               {t("landing.hero.lede")}
             </p>
@@ -269,11 +263,11 @@ const Landing = () => {
               </button>
             </div>
 
-            {/* Réassurance en trois pastilles : contour fin clair, fond
+            {/* Réassurance en quatre pastilles : contour fin clair, fond
                 légèrement voilé, Outfit 12 px, coins pleinement arrondis.
-                La mention des guides est déjà portée par le paragraphe. */}
+                La quatrième porte la promesse des guides de race et de ville. */}
             <ul className="flex flex-wrap items-center gap-2 mt-[14px] md:mt-[22px] animate-hero-fade-up animation-delay-1000">
-              {(["chip_identity", "chip_reviews", "chip_affinity"] as const).map((key) => (
+              {(["chip_identity", "chip_reviews", "chip_affinity", "chip_guides"] as const).map((key) => (
                 <li
                   key={key}
                   className="inline-flex items-center rounded-full border border-white/55 bg-white/10 px-3 py-1 font-body text-xs text-white/90"
@@ -402,6 +396,11 @@ const Landing = () => {
       {/* ═══════════════ SECTION 2, CE QU'ON FAIT ENSEMBLE ═══════════════ */}
       <UsagesSection />
 
+      {/* ═══════════════ SECTION 2bis, LE PRÉTEXTE (bloc sombre signature,
+          fusion des anciennes Rencontre + Entraide, remontée ici le
+          06/09/2026) ═══════════════ */}
+      <PretexteSection />
+
       {/* ═══════════════ SECTION 2.2, VOIX EXTERNE (presse comme témoignage, jamais bannière) ═══════════════ */}
       <PressQuote />
 
@@ -410,15 +409,9 @@ const Landing = () => {
         <InternationalStrip />
       </RevealSection>
 
-      {/* ═══════════════ SECTION 2bis, CE QUI ARRIVE EN PLUS ═══════════════ */}
-      <RencontreSection />
-
       {/* ═══════════════ SECTION 3, COMMENT ÇA MARCHE ═══════════════ */}
       <HowItWorksSection />
 
-
-      {/* ═══════════════ SECTION 4, OSEZ L'ENTRAIDE ═══════════════ */}
-      <EntraideSection />
 
       {/* ═══════════════ SECTION 5.5, CHIFFRES DU RÉSEAU (InventoryStrip) ═══════════════ */}
       <RevealSection>
