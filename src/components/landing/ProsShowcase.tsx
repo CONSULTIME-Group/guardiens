@@ -61,10 +61,10 @@ export default function ProsShowcase() {
     <section
       id="pros"
       ref={ref}
-      className="py-10 md:py-20 bg-muted/30 scroll-mt-24"
+      className="py-[52px] md:py-20 bg-muted/30 scroll-mt-24"
       aria-labelledby="pros-heading"
     >
-      <div className="max-w-6xl mx-auto px-5 sm:px-6 text-center">
+      <div className="lp-wide text-center">
         <h2 id="pros-heading" className="font-heading text-3xl md:text-5xl font-semibold text-foreground leading-tight">
           {t("landing.pros.title")}
         </h2>

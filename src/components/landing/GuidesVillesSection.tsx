@@ -9,8 +9,8 @@ export function GuidesVillesSection() {
   const { t } = useTranslation();
 
   return (
-    <section id="guides-villes" className="py-10 md:py-20 bg-background scroll-mt-24">
-      <div className="max-w-6xl mx-auto px-6">
+    <section id="guides-villes" className="py-[52px] md:py-20 bg-background scroll-mt-24">
+      <div className="lp-wide">
         <RevealSection className="text-center mb-14">
           <span className="text-xs tracking-widest uppercase text-primary font-body mb-4 block">
             {t("landing.cities.eyebrow")}

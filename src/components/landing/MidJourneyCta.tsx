@@ -21,7 +21,7 @@ export function MidJourneyCta() {
 
   return (
     <section className="bg-accent">
-      <div className="max-w-2xl mx-auto px-6 py-[52px] text-center">
+      <div className="lp-read py-[52px] text-center">
         <p className="font-heading text-2xl md:text-3xl text-foreground leading-snug mb-7">
           {t("landing.mid_cta.title")}
         </p>

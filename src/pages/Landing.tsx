@@ -324,7 +324,7 @@ const Landing = () => {
            hero, vit à droite de cette bande. */}
         {(kpiMaisons > 0 || kpiAnimaux >= 10 || kpiInscrits > 0 || kpiMissions > 0) && (
           <section className="bg-accent border-b border-border/60">
-            <div className="max-w-6xl mx-auto px-6 py-4 md:py-5 flex flex-wrap items-center justify-between gap-x-10 gap-y-3">
+            <div className="lp-wide py-4 md:py-5 flex flex-wrap items-center justify-between gap-x-10 gap-y-3">
               <dl className="flex flex-wrap items-center gap-x-8 md:gap-x-14 gap-y-2">
                 {kpiMaisons > 0 && (
                   <div>
@@ -373,7 +373,7 @@ const Landing = () => {
         aria-label={t("landing.toc.aria")}
         className="border-b border-border/60 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60"
       >
-        <div className="max-w-6xl mx-auto px-6">
+        <div className="lp-wide">
           <ul className="flex items-center gap-1 overflow-x-auto scrollbar-none py-2.5 -mx-2 px-2">
             {(() => {
               const items = [

@@ -22,8 +22,8 @@ export function HowItWorksSection() {
   const seasonal = getSeasonalBannerKeys();
 
   return (
-    <section id="comment-ca-marche" className="py-10 md:py-20 bg-muted/30 scroll-mt-24">
-      <div className="max-w-5xl mx-auto px-6">
+    <section id="comment-ca-marche" className="py-[52px] md:py-20 bg-muted/30 scroll-mt-24">
+      <div className="lp-wide">
         <RevealSection>
           <span className="text-xs tracking-widest uppercase text-primary font-body mb-4 block text-center">
             {t("landing.how.eyebrow")}

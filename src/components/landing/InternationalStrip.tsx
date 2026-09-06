@@ -46,10 +46,10 @@ export default function InternationalStrip() {
     <section
       id="international"
       ref={ref}
-      className="py-10 md:py-20 bg-background scroll-mt-24"
+      className="py-[52px] md:py-20 bg-background scroll-mt-24"
       aria-labelledby="international-heading"
     >
-      <div className="max-w-6xl mx-auto px-5 sm:px-6">
+      <div className="lp-wide">
         <div className="text-center max-w-3xl mx-auto mb-10">
           <h2 id="international-heading" className="font-heading text-3xl md:text-5xl font-semibold text-foreground leading-tight">
             {t("landing.international.title")}
