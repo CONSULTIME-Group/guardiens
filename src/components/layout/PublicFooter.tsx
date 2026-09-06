@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useInAppShell } from "./AppShellContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { PRESS_ARTICLE_URL } from "@/components/shared/PressQuote";
+import { LE_PROGRES_LOGO } from "@/assets/pressLogos";
 
 const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
   const { t } = useTranslation();
@@ -105,6 +107,33 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
             <span aria-hidden="true" className="hidden sm:inline text-white/40">·</span>
             <Link to="/contact" className="hover:text-white transition-colors">{t("footer.legal.contact")}</Link>
           </div>
+        </div>
+
+        {/* Mention presse permanente : ligne discrète, sans cadre ni fond.
+            Le lettrage du logo est blanc d'origine, il reste tel quel sur ce
+            pied de page sombre (pas d'inversion, il deviendrait invisible).
+            Après l'expiration de la ligne « Vu dans » du hero d'accueil
+            (6 octobre 2026), cette ligne est la seule mention presse du site. */}
+        <div className="mt-6 flex justify-center">
+          <a
+            href={PRESS_ARTICLE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2.5 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40"
+          >
+            <span className="font-body text-[11px] uppercase tracking-[0.16em] text-white/50">Vu dans</span>
+            <img
+              src={LE_PROGRES_LOGO}
+              alt="Le Progrès"
+              width={597}
+              height={80}
+              className="h-4 w-auto object-contain"
+              style={{ opacity: 0.6 }}
+              loading="lazy"
+              decoding="async"
+            />
+            <span className="font-body text-[11px] text-white/50">6 septembre 2026</span>
+          </a>
         </div>
       </div>
     </footer>

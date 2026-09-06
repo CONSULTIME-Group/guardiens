@@ -18,7 +18,7 @@ import { useInventaireCounts } from "@/hooks/useInventaireCounts";
 import { usePublicStats } from "@/hooks/usePublicStats";
 import LiveListingsStrip from "@/components/landing/LiveListingsStrip";
 import TestimonialsSection from "@/components/landing/TestimonialsSection";
-import PressQuote, { PRESS_ARTICLE_URL, PRESS_HIGHLIGHT_UNTIL } from "@/components/shared/PressQuote";
+import { PRESS_ARTICLE_URL, PRESS_HIGHLIGHT_UNTIL } from "@/components/shared/PressQuote";
 import { LE_PROGRES_LOGO } from "@/assets/pressLogos";
 
 import { UsagesSection } from "@/components/landing/UsagesSection";
@@ -103,16 +103,20 @@ const Landing = () => {
     return () => { cancelled = true; };
   }, [navigate]);
 
-  // Bande chiffres sous le hero : "animaux accompagnés" additionne l'historique
-  // personnel des fondateurs (234 animaux, raconté dans Notre histoire et la
-  // carte piliers) et l'activité réelle de la plateforme. Décision produit
+  // Bande chiffres sous le hero : quatre compteurs dynamiques. "Maisons
+  // gardées" (37) et "animaux accompagnés" (234) additionnent l'historique
+  // personnel des fondateurs (raconté dans Notre histoire et la carte
+  // piliers) et l'activité réelle de la plateforme. Décision produit
   // confirmée par Jérémie le 03/08/2026 : partir de ce socle vécu et cumuler
-  // par-dessus au fur et à mesure que la plateforme grandit. "Inscrits" reste
-  // un compteur plateforme pur, sans offset. Recomposition du 06/09/2026 : les
-  // compteurs "maisons gardées" et "missions d'entraide" sortent de la home.
+  // par-dessus au fur et à mesure que la plateforme grandit. "Inscrits" et
+  // "missions d'entraide" restent des compteurs plateforme purs, sans offset.
+  // Rétablissement des quatre compteurs le 06/09/2026.
+  const FOUNDER_BASE_MAISONS = 37;
   const FOUNDER_BASE_ANIMAUX = 234;
+  const kpiMaisons = FOUNDER_BASE_MAISONS + (publicStats?.maisons_gardees ?? 0);
   const kpiAnimaux = FOUNDER_BASE_ANIMAUX + (publicStats?.animaux_accompagnes ?? 0);
   const kpiInscrits = publicStats?.total_inscrits ?? 0;
+  const kpiMissions = publicStats?.missions_entraide ?? 0;
   const isPressHighlighted = new Date() < PRESS_HIGHLIGHT_UNTIL;
 
 
@@ -283,7 +287,7 @@ const Landing = () => {
 
             {/* Mention presse : ligne discrète posée sur la photo, sans cadre
                 ni fond. Visible uniquement jusqu'à PRESS_HIGHLIGHT_UNTIL,
-                ensuite la carte PressQuote après UsagesSection reste seule. */}
+                ensuite seule la ligne discrète du pied de page subsiste. */}
             {isPressHighlighted && (
               <a
                 href={PRESS_ARTICLE_URL}
@@ -313,26 +317,39 @@ const Landing = () => {
       </section>
 
        {/* ═══════════════ BANDE CHIFFRES + ENTRAIDE (hors hero, fond crème) ═══════════════
-           Deux compteurs seulement, ceux qui portent : inscrits et animaux
-           accompagnés (ce dernier intègre le socle fondateurs). Le lien
-           entraide, sorti du hero, vit à droite de cette bande. */}
-       {(kpiInscrits > 0 || kpiAnimaux >= 10) && (
-         <section className="bg-accent border-b border-border/60">
-           <div className="max-w-6xl mx-auto px-6 py-4 md:py-5 flex flex-wrap items-center justify-between gap-x-10 gap-y-3">
-             <dl className="flex flex-wrap items-center gap-x-8 md:gap-x-14 gap-y-2">
-               {kpiInscrits > 0 && (
-                 <div>
-                   <dd className="font-heading text-2xl md:text-3xl font-bold text-foreground tabular-nums leading-none">{kpiInscrits}</dd>
-                   <dt className="font-body text-[11px] uppercase tracking-[0.16em] text-muted-foreground mt-1">{t("landing.hero.kpi_members")}</dt>
-                 </div>
-               )}
-               {kpiAnimaux >= 10 && (
-                 <div>
-                   <dd className="font-heading text-2xl md:text-3xl font-bold text-foreground tabular-nums leading-none">{kpiAnimaux}</dd>
-                   <dt className="font-body text-[11px] uppercase tracking-[0.16em] text-muted-foreground mt-1">{t("landing.hero.kpi_animals")}</dt>
-                 </div>
-               )}
-             </dl>
+           Quatre compteurs dynamiques dans l'ordre d'origine : maisons
+           gardées, animaux accompagnés (socle fondateurs inclus dans les
+           deux), inscrits, missions d'entraide. Le lien entraide, sorti du
+           hero, vit à droite de cette bande. */}
+        {(kpiMaisons > 0 || kpiAnimaux >= 10 || kpiInscrits > 0 || kpiMissions > 0) && (
+          <section className="bg-accent border-b border-border/60">
+            <div className="max-w-6xl mx-auto px-6 py-4 md:py-5 flex flex-wrap items-center justify-between gap-x-10 gap-y-3">
+              <dl className="flex flex-wrap items-center gap-x-8 md:gap-x-14 gap-y-2">
+                {kpiMaisons > 0 && (
+                  <div>
+                    <dd className="font-heading text-2xl md:text-3xl font-bold text-foreground tabular-nums leading-none">{kpiMaisons}</dd>
+                    <dt className="font-body text-[11px] uppercase tracking-[0.16em] text-muted-foreground mt-1">{t("landing.hero.kpi_houses")}</dt>
+                  </div>
+                )}
+                {kpiAnimaux >= 10 && (
+                  <div>
+                    <dd className="font-heading text-2xl md:text-3xl font-bold text-foreground tabular-nums leading-none">{kpiAnimaux}</dd>
+                    <dt className="font-body text-[11px] uppercase tracking-[0.16em] text-muted-foreground mt-1">{t("landing.hero.kpi_animals")}</dt>
+                  </div>
+                )}
+                {kpiInscrits > 0 && (
+                  <div>
+                    <dd className="font-heading text-2xl md:text-3xl font-bold text-foreground tabular-nums leading-none">{kpiInscrits}</dd>
+                    <dt className="font-body text-[11px] uppercase tracking-[0.16em] text-muted-foreground mt-1">{t("landing.hero.kpi_members")}</dt>
+                  </div>
+                )}
+                {kpiMissions > 0 && (
+                  <div>
+                    <dd className="font-heading text-2xl md:text-3xl font-bold text-foreground tabular-nums leading-none">{kpiMissions}</dd>
+                    <dt className="font-body text-[11px] uppercase tracking-[0.16em] text-muted-foreground mt-1">{t("landing.hero.kpi_missions")}</dt>
+                  </div>
+                )}
+              </dl>
              <Link
                to="/petites-missions"
                onClick={() => {
@@ -416,9 +433,6 @@ const Landing = () => {
 
       {/* ═══════════════ SECTION 7, TÉMOIGNAGES ═══════════════ */}
       <TestimonialsSection />
-
-      {/* ═══════════════ VOIX EXTERNE (presse comme témoignage) ═══════════════ */}
-      <PressQuote />
 
       {/* ═══════════════ SECTION INTERNATIONAL (au-dessus du seuil seulement) ═══════════════ */}
       {hasInternationalSection && (
