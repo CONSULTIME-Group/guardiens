@@ -31,6 +31,7 @@ export function PressQuote({
   source = DEFAULT_SOURCE,
   date = DEFAULT_DATE,
   logoPath = DEFAULT_LOGO,
+  showLogo = false,
   eyebrow = DEFAULT_EYEBROW,
   citeUrl,
   className,
