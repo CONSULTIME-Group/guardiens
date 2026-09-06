@@ -293,63 +293,46 @@ const Landing = () => {
                 href={PRESS_ARTICLE_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-[14px] inline-flex items-center gap-2.5 opacity-90 hover:opacity-100 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40 rounded-sm animate-hero-fade-up animation-delay-1075"
-              >
-                <span className="font-body text-[11px] uppercase tracking-[0.16em] text-white/70">
-                  Vu dans
-                </span>
-                <img
-                  src={LE_PROGRES_LOGO}
-                  alt="Le Progrès"
-                  width={597}
-                  height={80}
-                  className="h-5 w-auto object-contain opacity-90"
-                  loading="lazy"
-                  decoding="async"
-                />
-                <span className="font-body text-xs text-white/70">
-                  6 septembre 2026
-                </span>
-              </a>
-            )}
+                 className="mt-[14px] inline-flex items-center gap-2.5 opacity-90 hover:opacity-100 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40 rounded-sm animate-hero-fade-up animation-delay-1100"
+...
+             )}
+           </div>
+         </div>
+       </section>
 
-            {(kpiMaisons >= 10 || kpiAnimaux >= 10 || kpiInscrits > 0 || kpiMissions >= 10) && (
-              <div className={`flex flex-row flex-wrap justify-start gap-x-6 gap-y-3 md:gap-x-12 md:gap-y-6 animate-hero-fade-up animation-delay-1100 ${isPressHighlighted ? "mt-[22px]" : "mt-[34px] md:mt-[52px]"}`}>
-                {/* Seuils : un compteur ne s'affiche qu'au-dessus d'un volume qui prouve
-                    l'activité. maisons/animaux intègrent le socle fondateurs donc passent
-                    toujours ce seuil ; inscrits est un pur compteur sans seuil bloquant ;
-                    missions_entraide passe à un seuil de 10 (arbitrage Jérémie, 03/08/2026,
-                    aligné sur le seuil maisons/animaux). */}
-                {kpiMaisons >= 10 && (
-                  <div className="border-r border-white/20 pr-6 md:pr-12 last:border-r-0 last:pr-0">
-                    <span className="block text-3xl font-heading font-bold text-white tabular-nums">{kpiMaisons}</span>
-                    <span className="text-xs font-body text-white/80 tracking-wide uppercase mt-1 block">{t("landing.hero.kpi_houses")}</span>
-                  </div>
-                )}
-                {kpiAnimaux >= 10 && (
-                  <div className="border-r border-white/20 pr-6 md:pr-12 last:border-r-0 last:pr-0">
-                    <span className="block text-3xl font-heading font-bold text-white tabular-nums">{kpiAnimaux}</span>
-                    <span className="text-xs font-body text-white/80 tracking-wide uppercase mt-1 block">{t("landing.hero.kpi_animals")}</span>
-                  </div>
-                )}
-                {kpiInscrits > 0 && (
-                  <div className="border-r border-white/20 pr-6 md:pr-12 last:border-r-0 last:pr-0">
-                    <span className="block text-3xl font-heading font-bold text-white tabular-nums">{kpiInscrits}</span>
-                    <span className="text-xs font-body text-white/80 tracking-wide uppercase mt-1 block">{t("landing.hero.kpi_members")}</span>
-                  </div>
-                )}
-                {/* Seuil 10 : en dessous, un compteur d'entraide isolé à côté des autres compteurs souligne le vide au lieu de prouver l'activité. Abaissé de 30 à 10 le 03/08/2026 (arbitrage Jérémie), aligné sur le seuil maisons/animaux. */}
-                {kpiMissions >= 10 && (
-                  <div>
-                    <span className="block text-3xl font-heading font-bold text-white tabular-nums">{kpiMissions}</span>
-                    <span className="text-xs font-body text-white/80 tracking-wide uppercase mt-1 block">{t("landing.hero.kpi_missions")}</span>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
+       {/* ═══════════════ BANDE CHIFFRES + ENTRAIDE (hors hero, fond crème) ═══════════════
+           Deux compteurs seulement, ceux qui portent : inscrits et animaux
+           accompagnés (ce dernier intègre le socle fondateurs). Le lien
+           entraide, sorti du hero, vit à droite de cette bande. */}
+       {(kpiInscrits > 0 || kpiAnimaux >= 10) && (
+         <section className="bg-accent border-b border-border/60">
+           <div className="max-w-6xl mx-auto px-6 py-4 md:py-5 flex flex-wrap items-center justify-between gap-x-10 gap-y-3">
+             <dl className="flex flex-wrap items-center gap-x-8 md:gap-x-14 gap-y-2">
+               {kpiInscrits > 0 && (
+                 <div>
+                   <dd className="font-heading text-2xl md:text-3xl font-bold text-foreground tabular-nums leading-none">{kpiInscrits}</dd>
+                   <dt className="font-body text-[11px] uppercase tracking-[0.16em] text-muted-foreground mt-1">{t("landing.hero.kpi_members")}</dt>
+                 </div>
+               )}
+               {kpiAnimaux >= 10 && (
+                 <div>
+                   <dd className="font-heading text-2xl md:text-3xl font-bold text-foreground tabular-nums leading-none">{kpiAnimaux}</dd>
+                   <dt className="font-body text-[11px] uppercase tracking-[0.16em] text-muted-foreground mt-1">{t("landing.hero.kpi_animals")}</dt>
+                 </div>
+               )}
+             </dl>
+             <Link
+               to="/petites-missions"
+               onClick={() => {
+                 trackEvent("cta_aid_clicked", { metadata: { location: "kpi_band" } });
+               }}
+               className="inline-flex items-center min-h-[44px] font-body text-sm font-medium text-muted-foreground underline underline-offset-4 decoration-border hover:text-foreground hover:decoration-foreground/50 transition-colors"
+             >
+               {t("landing.hero.cta_aid")}
+             </Link>
+           </div>
+         </section>
+       )}
 
       {/* ═══════════════ SECTION 2, CONFIANCE & PÉRIMÈTRE (positionnée tôt : réponse à la peur n°1) ═══════════════ */}
       <ConfianceSection />
