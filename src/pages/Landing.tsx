@@ -393,13 +393,14 @@ const Landing = () => {
       {/* ═══════════════ SECTION 2, CE QU'ON FAIT ENSEMBLE ═══════════════ */}
       <UsagesSection />
 
-      {/* ═══════════════ SECTION 2bis, LE PRÉTEXTE (bloc sombre signature,
+      {/* ═══════════════ SECTION 2bis, CONFIANCE & PÉRIMÈTRE ═══════════════ */}
+      <ConfianceSection />
+
+      {/* ═══════════════ SECTION 3, LE PRÉTEXTE (bloc sombre signature,
           fusion des anciennes Rencontre + Entraide, remontée ici le
           06/09/2026) ═══════════════ */}
       <PretexteSection />
 
-      {/* ═══════════════ SECTION 3, CONFIANCE & PÉRIMÈTRE ═══════════════ */}
-      <ConfianceSection />
 
       {/* ═══════════════ APERÇU LIVE ANNONCES ═══════════════ */}
       <LiveListingsStrip />
