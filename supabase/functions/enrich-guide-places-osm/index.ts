@@ -287,7 +287,7 @@ Deno.serve(async (req) => {
     } else {
       const { data: allGuides, error } = await supabase
         .from("city_guides")
-        .select("id, slug, city, postal_code, department")
+        .select("id, slug, city, postal_code, department, osm_enrich_attempted_at")
         .order("slug", { ascending: true });
       if (error) return json({ error: error.message }, 500);
       const { data: done } = await supabase
@@ -296,7 +296,22 @@ Deno.serve(async (req) => {
         .in("category", ["vet", "pet_shop"])
         .not("verified_at", "is", null);
       const doneSet = new Set((done ?? []).map((r: any) => r.city_guide_id));
-      guides = (allGuides ?? []).filter((g: any) => !doneSet.has(g.id)).slice(0, limit);
+      // Rotation de la file : un guide qui ne produit aucun lieu est un
+      // résultat normal, pas une erreur. Il est marqué `osm_enrich_attempted_at`
+      // et repasse en fin de file au lieu de geler les suivants.
+      // Ordre : jamais tentés d'abord, puis plus anciennement tentés, puis slug.
+      guides = (allGuides ?? [])
+        .filter((g: any) => !doneSet.has(g.id))
+        .sort((a: any, b: any) => {
+          const ta = a.osm_enrich_attempted_at ? Date.parse(a.osm_enrich_attempted_at) : null;
+          const tb = b.osm_enrich_attempted_at ? Date.parse(b.osm_enrich_attempted_at) : null;
+          if (ta === null && tb === null) return String(a.slug).localeCompare(String(b.slug));
+          if (ta === null) return -1;
+          if (tb === null) return 1;
+          if (ta !== tb) return ta - tb;
+          return String(a.slug).localeCompare(String(b.slug));
+        })
+        .slice(0, limit);
     }
 
     // source_url déjà présents en base
@@ -318,11 +333,25 @@ Deno.serve(async (req) => {
     const details: any[] = [];
     const dryRows: any[] = [];
 
+    // Marque le guide comme tenté, quel que soit le résultat (y compris
+    // Overpass indisponible ou tous les candidats rejetés). Un guide sans
+    // vétérinaire ni animalerie dans son rayon est un résultat normal :
+    // sans ce marquage, il gèle la file éternellement.
+    // En dry_run on n'écrit rien : c'est une simulation.
+    const markAttempted = async (guideId: string) => {
+      if (dryRun) return;
+      await supabase
+        .from("city_guides")
+        .update({ osm_enrich_attempted_at: new Date().toISOString() })
+        .eq("id", guideId);
+    };
+
     let first = true;
     for (const guide of guides) {
       if (!first) await sleep(1000);
       first = false;
       guides_traites++;
+      try {
 
       const guideDept = deptFromPostal(guide.postal_code) ??
         (guide.department ? null : null);
@@ -527,10 +556,24 @@ Deno.serve(async (req) => {
       }
 
       details.push({ slug: guide.slug, inseres: rows.length, rejetes: rejetesGuide });
+      } finally {
+        await markAttempted(guide.id);
+      }
+    }
+
+    // Avancement de la file : guides jamais tentés restants après ce passage.
+    let guides_jamais_tentes: number | null = null;
+    {
+      const { count, error: countErr } = await supabase
+        .from("city_guides")
+        .select("id", { count: "exact", head: true })
+        .is("osm_enrich_attempted_at", null);
+      if (!countErr) guides_jamais_tentes = count ?? 0;
     }
 
     return json({
       guides_traites,
+      guides_jamais_tentes,
       lieux_inseres,
       rejetes_departement,
       rejetes_distance,

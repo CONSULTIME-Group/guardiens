@@ -1,0 +1,2 @@
+ALTER TABLE public.city_guides ADD COLUMN IF NOT EXISTS osm_enrich_attempted_at timestamptz DEFAULT NULL;
+COMMENT ON COLUMN public.city_guides.osm_enrich_attempted_at IS 'Dernière tentative d''enrichissement OSM (vet/pet_shop), écrite même sans insertion, pour faire tourner la file des guides.';
