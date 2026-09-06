@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import AlmaTipsTeaser from "@/components/landing/AlmaTipsTeaser";
 import franceLocalNational from "@/assets/illustrations/france-local-national-462.avif";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -11,8 +10,6 @@ import PageMeta from "@/components/PageMeta";
 import InternationalStrip from "@/components/landing/InternationalStrip";
 import { useInternationalSitsCount } from "@/hooks/useInternationalSitsCount";
 import { showInternationalSection } from "@/components/landing/internationalPlacement";
-import ProsShowcase from "@/components/landing/ProsShowcase";
-import { useInventaireCounts } from "@/hooks/useInventaireCounts";
 import { usePublicStats } from "@/hooks/usePublicStats";
 import LiveListingsStrip from "@/components/landing/LiveListingsStrip";
 import TestimonialsSection from "@/components/landing/TestimonialsSection";
@@ -68,9 +65,7 @@ const Landing = () => {
   // à quelqu'un qui en a déjà un, on propose son action principale.
   const isMember = shellMode === "app";
   const memberIsOwner = (user?.role === "both" ? activeRole : user?.role) === "owner";
-  const { data: inventaire } = useInventaireCounts();
   const { data: publicStats } = usePublicStats();
-  const hasPros = (inventaire?.pros_total ?? 0) > 0;
   // Sous le seuil, la vitrine internationale vit dans la FAQ.
   const { count: internationalCount } = useInternationalSitsCount();
   const hasInternationalSection = showInternationalSection(internationalCount);
@@ -385,7 +380,6 @@ const Landing = () => {
                 { href: "#matching", label: t("landing.toc.matching"), mobile: true },
                 { href: "#temoignages", label: t("landing.toc.testimonials"), mobile: true },
                 { href: "#notre-histoire", label: t("landing.toc.story"), mobile: false },
-                { href: "#pros", label: t("landing.toc.pros"), mobile: false, hidden: !hasPros },
                 { href: "#guides-villes", label: t("landing.toc.cities"), mobile: false },
                 { href: "#faq", label: t("landing.toc.faq"), mobile: true },
               ];
@@ -439,16 +433,10 @@ const Landing = () => {
       <ComparatifSection />
 
       {/* ═══════════════ GUIDES + VILLES + INVENTAIRE ═══════════════ */}
-      <RevealSection>
-        <ProsShowcase />
-      </RevealSection>
-
       <GuidesVillesSection />
 
       {/* ═══════════════ SECTION 9bis, FAQ (section dédiée, miroir du JSON-LD FAQPage) ═══════════════ */}
       <FaqSection />
-
-      <AlmaTipsTeaser />
 
       {/* ═══════════════ SECTION 10, CTA FINAL (fusion Fondateur + double CTA) ═══════════════ */}
       <FinalCtaSection />
