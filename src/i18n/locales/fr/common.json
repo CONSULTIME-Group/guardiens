@@ -227,6 +227,11 @@
       "cta_sitter": "Je veux garder",
       "footnote": "Inscription en 2 minutes, sans carte bancaire."
     },
+    "mid_cta": {
+      "title": "Votre maison peut être la prochaine.",
+      "cta_owner": "Publier mon annonce",
+      "cta_sitter": "Je veux garder"
+    },
     "international": {
       "title": "Français à l'étranger ? Faites veiller sur votre maison en France, et inversement.",
       "subtitle_active_one": "Depuis le lancement, des gardes s'organisent entre la France et le reste du monde. {{count}} annonce internationale en cours.",
