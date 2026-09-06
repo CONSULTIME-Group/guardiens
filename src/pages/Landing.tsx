@@ -1,6 +1,4 @@
 import { useEffect } from "react";
-import AlmaTipsTeaser from "@/components/landing/AlmaTipsTeaser";
-
 import franceLocalNational from "@/assets/illustrations/france-local-national-462.avif";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -9,11 +7,9 @@ import { supabase } from "@/integrations/supabase/client";
 
 import PageMeta from "@/components/PageMeta";
 
-import InventoryStrip from "@/components/landing/InventoryStrip";
 import InternationalStrip from "@/components/landing/InternationalStrip";
 import { useInternationalSitsCount } from "@/hooks/useInternationalSitsCount";
 import { showInternationalSection } from "@/components/landing/internationalPlacement";
-import ProsShowcase from "@/components/landing/ProsShowcase";
 import { useInventaireCounts } from "@/hooks/useInventaireCounts";
 import { usePublicStats } from "@/hooks/usePublicStats";
 import LiveListingsStrip from "@/components/landing/LiveListingsStrip";
@@ -407,28 +403,28 @@ const Landing = () => {
       </nav>
 
 
-      {/* ═══════════════ SECTION 2, CE QU'ON FAIT ENSEMBLE ═══════════════ */}
-      <UsagesSection />
-
-      {/* ═══════════════ SECTION 3, LE PRÉTEXTE (bloc sombre signature,
+      {/* ═══════════════ LE PRÉTEXTE (bloc sombre signature,
           l'ADN avant les mécaniques) ═══════════════ */}
       <PretexteSection />
 
-      {/* ═══════════════ SECTION 4, CONFIANCE & PÉRIMÈTRE
+      {/* ═══════════════ CONFIANCE & PÉRIMÈTRE
           (accueille désormais la démo du score d'affinité) ═══════════════ */}
       <ConfianceSection />
 
-      {/* ═══════════════ SECTION 5, COMMENT ÇA MARCHE (avant le catalogue) ═══════════════ */}
+      {/* ═══════════════ COMMENT ÇA MARCHE ═══════════════ */}
       <HowItWorksSection />
 
-      {/* ═══════════════ SECTION 6, NOTRE HISTOIRE (récit fondateur remonté) ═══════════════ */}
+      {/* ═══════════════ NOTRE HISTOIRE ═══════════════ */}
       <NotreHistoireSection />
 
-      {/* ═══════════════ SECTION 7, TÉMOIGNAGES ═══════════════ */}
+      {/* ═══════════════ TÉMOIGNAGES ═══════════════ */}
       <TestimonialsSection />
 
       {/* ═══════════════ RAPPEL D'ACTION MI-PARCOURS (06/09/2026) ═══════════════ */}
       <MidJourneyCta />
+
+      {/* ═══════════════ DÉFINITION ET USAGES, bloc de fond ═══════════════ */}
+      <UsagesSection />
 
       {/* ═══════════════ SECTION INTERNATIONAL (au-dessus du seuil seulement) ═══════════════ */}
       {hasInternationalSection && (
@@ -440,23 +436,11 @@ const Landing = () => {
       {/* ═══════════════ SECTION COMPARATIF (extractible, GEO) ═══════════════ */}
       <ComparatifSection />
 
-      {/* ═══════════════ CHIFFRES DU RÉSEAU (InventoryStrip) ═══════════════ */}
-      <RevealSection>
-        <InventoryStrip />
-      </RevealSection>
-
-      {/* ═══════════════ PROS ANIMALIERS (ProsShowcase) ═══════════════ */}
-      <RevealSection>
-        <ProsShowcase />
-      </RevealSection>
-
-      {/* ═══════════════ GUIDES + VILLES (fusion SEO) ═══════════════ */}
+      {/* ═══════════════ GUIDES + VILLES + INVENTAIRE ═══════════════ */}
       <GuidesVillesSection />
 
       {/* ═══════════════ SECTION 9bis, FAQ (section dédiée, miroir du JSON-LD FAQPage) ═══════════════ */}
       <FaqSection />
-
-      <AlmaTipsTeaser />
 
       {/* ═══════════════ SECTION 10, CTA FINAL (fusion Fondateur + double CTA) ═══════════════ */}
       <FinalCtaSection />
