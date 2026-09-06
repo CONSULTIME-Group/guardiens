@@ -179,6 +179,11 @@ const GuideDetail = () => {
 
   const categories = [...new Set(filteredPlaces.map((p) => p.category))];
   const placesWithCoords = filteredPlaces.filter((p) => p.latitude && p.longitude);
+  // Vrai uniquement si la page contient encore des lieux commerciaux verifies.
+  // Les 83 guides desormais sans veto/animalerie/cafe/restaurant passent sur un titre nature.
+  const hasCommercialPlaces = places.some((p) =>
+    ["vet", "pet_shop", "dog_friendly_cafe", "dog_friendly_restaurant"].includes(p.category)
+  );
 
   // JSON-LD ItemList des lieux : balise l'ensemble de places, independamment du filtre de recherche.
   const placesSchema = useMemo(() => {
@@ -303,11 +308,21 @@ const GuideDetail = () => {
     return <NotFound />;
   }
 
+  const metaTitle = hasCommercialPlaces
+    ? t("guide_detail.meta_title", { city: guide.city })
+    : t("guide_detail.meta_title_nature", { city: guide.city });
+  const h1Title = hasCommercialPlaces
+    ? t("guide_detail.title", { city: guide.city })
+    : t("guide_detail.title_nature", { city: guide.city });
+  const metaDescription = hasCommercialPlaces
+    ? t("guide_detail.meta_description", { city: guide.city, ideal: guide.ideal_for })
+    : t("guide_detail.meta_description_nature", { city: guide.city, ideal: guide.ideal_for });
+
   return (
     <>
       <PageMeta
-        title={t("guide_detail.meta_title", { city: guide.city })}
-        description={t("guide_detail.meta_description", { city: guide.city, ideal: guide.ideal_for })}
+        title={metaTitle}
+        description={metaDescription}
         path={`/guides/${guide.slug}`}
         ready={contentReady}
       />
@@ -341,7 +356,7 @@ const GuideDetail = () => {
           </div>
           <div className="relative max-w-5xl mx-auto px-4 py-6 sm:py-10 md:py-14">
           <h1 className="font-heading text-2xl sm:text-4xl font-bold text-foreground mb-3 md:mb-4">
-            {t("guide_detail.title", { city: guide.city })}
+            {h1Title}
           </h1>
           <p className="text-muted-foreground text-base md:text-lg leading-relaxed max-w-3xl mb-3">
             {guide.intro}
@@ -542,41 +557,7 @@ const GuideDetail = () => {
           )}
         </div>
 
-        {/* Schema.org */}
-        {/* JSON-LD: Breadcrumb */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "BreadcrumbList",
-              itemListElement: [
-                { "@type": "ListItem", position: 1, name: "Guardiens", item: "https://guardiens.fr" },
-                { "@type": "ListItem", position: 2, name: "Guides", item: "https://guardiens.fr/guides" },
-                { "@type": "ListItem", position: 3, name: guide.city, item: `https://guardiens.fr/guides/${guide.slug}` },
-              ],
-            }),
-          }}
-        />
-
-        {/* JSON-LD: TouristDestination */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "TouristDestination",
-              name: `${guide.city}, Guide pet sitting`,
-              description: `Guide pratique pour les gardiens d'animaux à ${guide.city}. ${guide.intro}`,
-              url: `https://guardiens.fr/guides/${guide.slug}`,
-              touristType: ["Pet sitter", "House sitter", "Gardien d'animaux"],
-              containedInPlace: {
-                "@type": "AdministrativeArea",
-                name: guide.department,
-              },
-            }),
-          }}
-        />
+        {/* Schema.org : ItemList des lieux et FAQPage uniquement */}
 
         {/* JSON-LD: ItemList des lieux utiles */}
         {placesSchema && (
