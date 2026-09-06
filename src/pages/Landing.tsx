@@ -21,8 +21,7 @@ import PressQuote, { PRESS_ARTICLE_URL, PRESS_HIGHLIGHT_UNTIL } from "@/componen
 import { LE_PROGRES_LOGO } from "@/assets/pressLogos";
 
 import { UsagesSection } from "@/components/landing/UsagesSection";
-import { RencontreSection } from "@/components/landing/RencontreSection";
-import { EntraideSection } from "@/components/landing/EntraideSection";
+import { PretexteSection } from "@/components/landing/PretexteSection";
 import HomeJsonLd from "@/components/landing/HomeJsonLd";
 import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
 import { ConfianceSection } from "@/components/landing/ConfianceSection";
