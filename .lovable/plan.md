@@ -1,20 +1,27 @@
-# Lot 12, digest hebdomadaire entraide
+# Unification des largeurs de la page d'accueil
 
 ## Mise en œuvre
 
-1. Remplacer toute la construction JavaScript du plan d'envoi par un unique appel à `mutual_aid_weekly_digest_plan` avec les paramètres 30 km, 7 jours et 5 missions.
-2. Conserver le mode manuel, le dry run, le filtre `recipient_id`, la déduplication à 6 jours et le journal cron.
-3. Charger une seule fois les questions et membres à l'honneur, sans jamais les utiliser comme condition d'envoi.
-4. Traiter les destinataires planifiés par lots de 20 en parallèle, avec comptage séparé des destinataires planifiés, envoyés, ignorés et en erreur.
-5. Terminer le journal en statut `partial` lorsque le déficit réel d'envoi dépasse 20 pour cent, et enregistrer les métriques détaillées.
-6. Adapter le template au contenu local : sujet et titre selon `nb_nouvelles`, distance, repère Nouveau, slug, distinction demande ou offre, rappel du service contre service sans argent.
+1. Définir deux conteneurs réutilisables dans le système global : lecture à 768 px et large à 1152 px, avec une gouttière mobile commune de 24 px.
+2. Appliquer le conteneur de lecture à « Qu'est-ce que Guardiens ? », au récit fondateur, au rappel d'action, à la FAQ, au contenu du bloc sombre et au CTA final.
+3. Appliquer le conteneur large à la bande des compteurs, aux annonces, aux cartes de besoins, à « Comment ça marche ? », aux témoignages, au comparatif, aux contenus construits pour les membres et aux guides.
+4. Conserver le hero et le fond du bloc sombre en pleine largeur, avec leur contenu intérieur aligné sur le conteneur adapté.
+5. Uniformiser la respiration verticale entre sections sur 52 px, sans modifier les contenus, l'ordre, les données ni les interactions.
+
+## Détails techniques
+
+- Les largeurs correspondent à la zone de contenu hors gouttières : 768 px et 1152 px maximum.
+- Les classes partagées remplacent les variantes locales `max-w-*` sur les sections de la page d'accueil.
+- Les tableaux gardent leur défilement interne sur petit écran, sans provoquer de débordement de page.
+- Les états chargement et vide des annonces utilisent les mêmes conteneurs que l'état rempli.
 
 ## Vérification
 
-- Ajouter ou ajuster uniquement les tests ciblant cette fonction et ce template si des tests existants les couvrent déjà.
-- Déployer uniquement `send-mutual-aid-weekly-digest`.
-- Exécuter la fonction en `dry_run`, sans email, puis relever le nombre de destinataires et la moyenne d'annonces par mail.
+- Mesurer dans le rendu réel chaque section et confirmer uniquement trois catégories : 768 px, 1152 px et pleine largeur.
+- Contrôler les vues desktop large, 1280 px et mobile 390 px.
+- Vérifier l'absence de défilement horizontal, de clé de traduction brute et d'erreur de rendu.
+- Exécuter les tests ciblés de la page d'accueil et contrôler le build automatique.
 
 ## Périmètre
 
-Aucune modification du cron, des fonctions SQL ou d'un fichier extérieur à la fonction et à son template.
+Aucun changement de copie, de données, de logique métier, d'ordre des sections ou de publication.
