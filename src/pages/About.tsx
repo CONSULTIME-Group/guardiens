@@ -7,6 +7,7 @@ import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
 import { supabase } from "@/integrations/supabase/client";
 import { getAffinityThresholds } from "@/lib/affinityScore";
+import PressQuote from "@/components/shared/PressQuote";
 
 const CRITERIA_WORDS = ["zéro", "un", "deux", "trois", "quatre", "cinq"];
 
@@ -103,6 +104,8 @@ const About = () => {
           <p>
             Pas une marketplace anonyme. Un <strong className="text-foreground">réseau local de confiance</strong>, basé à Lyon et ouvert à toute la France.
           </p>
+
+          <PressQuote className="my-2" />
 
           <h2 id="affinite" className="font-heading text-xl md:text-2xl font-bold text-foreground pt-4 scroll-mt-24">Le score d'affinité</h2>
           <p>
