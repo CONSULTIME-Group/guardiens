@@ -434,9 +434,6 @@ const Landing = () => {
       {/* ═══════════════ SECTION 7, TÉMOIGNAGES ═══════════════ */}
       <TestimonialsSection />
 
-      {/* ═══════════════ VOIX EXTERNE (presse comme témoignage) ═══════════════ */}
-      <PressQuote />
-
       {/* ═══════════════ SECTION INTERNATIONAL (au-dessus du seuil seulement) ═══════════════ */}
       {hasInternationalSection && (
         <RevealSection>

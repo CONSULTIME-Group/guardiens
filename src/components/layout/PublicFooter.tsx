@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useInAppShell } from "./AppShellContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { PRESS_ARTICLE_URL } from "@/components/shared/PressQuote";
+import { LE_PROGRES_LOGO } from "@/assets/pressLogos";
 
 const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
   const { t } = useTranslation();
