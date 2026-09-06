@@ -1567,7 +1567,9 @@ export type Database = {
           longitude: number | null
           name: string
           photo_url: string | null
+          source_url: string | null
           tips: string | null
+          verified_at: string | null
         }
         Insert: {
           address?: string
@@ -1584,7 +1586,9 @@ export type Database = {
           longitude?: number | null
           name: string
           photo_url?: string | null
+          source_url?: string | null
           tips?: string | null
+          verified_at?: string | null
         }
         Update: {
           address?: string
@@ -1601,7 +1605,9 @@ export type Database = {
           longitude?: number | null
           name?: string
           photo_url?: string | null
+          source_url?: string | null
           tips?: string | null
+          verified_at?: string | null
         }
         Relationships: [
           {
@@ -8761,6 +8767,19 @@ export type Database = {
           p_user_id: string
         }
         Returns: undefined
+      }
+      check_city_guide_places_geo: {
+        Args: never
+        Returns: {
+          dept_guide: string
+          dept_lieu: string
+          guide_city: string
+          guide_slug: string
+          place_address: string
+          place_id: string
+          place_name: string
+          signale_proximite: boolean
+        }[]
       }
       check_content_quality: {
         Args: { p_forcer_erreur?: boolean; p_seuil_alertes?: number }
