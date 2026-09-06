@@ -269,27 +269,21 @@ const Landing = () => {
                     : t("landing.hero.cta_member_sitter", "Proposer un coup de main")
                   : t("landing.hero.cta_sitter")}
               </button>
-              {/* Tertiaire entraide : même rangée que les boutons, traitement texte
-                  souligné sans fond ni bordure pour préserver la hiérarchie
-                  (une seule action principale par écran). Cible 44 px minimum. */}
-              <Link
-                to="/petites-missions"
-                onClick={() => {
-                  trackEvent("cta_aid_clicked", { metadata: { location: "hero" } });
-                }}
-                className="inline-flex items-center justify-center sm:justify-start min-h-[44px] px-5 rounded-full font-body text-sm font-medium text-white underline underline-offset-4 decoration-white/40 hover:decoration-white transition-colors"
-              >
-                {t("landing.hero.cta_aid")}
-              </Link>
             </div>
 
-
-            <p className="font-body text-sm text-white/85 mt-[14px] md:mt-[22px] animate-hero-fade-up animation-delay-1000">
-              {t("landing.hero.reassurance")}
-            </p>
-            <p className="font-body text-sm text-white/85 mt-2 animate-hero-fade-up animation-delay-1050">
-              {t("landing.hero.guides_promise")}
-            </p>
+            {/* Réassurance en trois pastilles : contour fin clair, fond
+                légèrement voilé, Outfit 12 px, coins pleinement arrondis.
+                La mention des guides est déjà portée par le paragraphe. */}
+            <ul className="flex flex-wrap items-center gap-2 mt-[14px] md:mt-[22px] animate-hero-fade-up animation-delay-1000">
+              {(["chip_identity", "chip_reviews", "chip_affinity"] as const).map((key) => (
+                <li
+                  key={key}
+                  className="inline-flex items-center rounded-full border border-white/55 bg-white/10 px-3 py-1 font-body text-xs text-white/90"
+                >
+                  {t(`landing.hero.${key}`)}
+                </li>
+              ))}
+            </ul>
 
             {/* Mention presse : ligne discrète posée sur la photo, sans cadre
                 ni fond. Visible uniquement jusqu'à PRESS_HIGHLIGHT_UNTIL,
