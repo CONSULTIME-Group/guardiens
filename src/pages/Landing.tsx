@@ -408,7 +408,8 @@ const Landing = () => {
       {/* ═══════════════ SECTION 7, TÉMOIGNAGES ═══════════════ */}
       <TestimonialsSection />
 
-
+      {/* ═══════════════ SECTION 7.5, VOIX EXTERNE (presse comme témoignage, jamais bannière) ═══════════════ */}
+      <PressQuote />
 
       {/* ═══════════════ SECTION 8, NOTRE HISTOIRE ═══════════════ */}
       <NotreHistoireSection />
