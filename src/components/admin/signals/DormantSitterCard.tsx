@@ -57,7 +57,7 @@ export const DormantSitterCard = ({ signal }: Props) => {
     setRelaunching(true);
     try {
       const { error } = await supabase.functions.invoke("nudge-sitter-dormant", {
-        body: {},
+        body: { sitter_id: signal.entity_id },
       });
       if (error) throw error;
       await resolve("email_sent_manual");

@@ -64,6 +64,10 @@ Deno.serve(async (req) => {
   }
   const run = await startCronRun("nudge-sitter-dormant");
   try {
+    const requestBody = await req.json().catch(() => ({})) as { sitter_id?: unknown };
+    const requestedSitterId = typeof requestBody.sitter_id === "string"
+      ? requestBody.sitter_id.trim()
+      : "";
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
@@ -83,7 +87,18 @@ Deno.serve(async (req) => {
 
     const { data, error } = await service.rpc("detect_dormant_sitters");
     if (error) throw error;
-    const sitters: DormantSitter[] = (data as DormantSitter[]) ?? [];
+    const detectedSitters: DormantSitter[] = (data as DormantSitter[]) ?? [];
+    const sitters = requestedSitterId
+      ? detectedSitters.filter((s) => s.sitter_id === requestedSitterId)
+      : detectedSitters;
+
+    if (requestedSitterId && sitters.length === 0) {
+      await run.finish("success", { detected: 0, requested_sitter_id: requestedSitterId });
+      return new Response(
+        JSON.stringify({ skipped: "sitter_not_eligible", detected: 0 }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
 
     const now = new Date();
     const { year, week } = isoWeek(now);
