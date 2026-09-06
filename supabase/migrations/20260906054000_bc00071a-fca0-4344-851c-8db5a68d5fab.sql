@@ -1,0 +1,1 @@
+ALTER TABLE public.city_guide_places ADD COLUMN IF NOT EXISTS google_rating_count integer;

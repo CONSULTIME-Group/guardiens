@@ -1561,6 +1561,7 @@ export type Database = {
           dogs_welcome: boolean
           google_place_id: string | null
           google_rating: number | null
+          google_rating_count: number | null
           id: string
           latitude: number | null
           leash_required: boolean | null
@@ -1580,6 +1581,7 @@ export type Database = {
           dogs_welcome?: boolean
           google_place_id?: string | null
           google_rating?: number | null
+          google_rating_count?: number | null
           id?: string
           latitude?: number | null
           leash_required?: boolean | null
@@ -1599,6 +1601,7 @@ export type Database = {
           dogs_welcome?: boolean
           google_place_id?: string | null
           google_rating?: number | null
+          google_rating_count?: number | null
           id?: string
           latitude?: number | null
           leash_required?: boolean | null
