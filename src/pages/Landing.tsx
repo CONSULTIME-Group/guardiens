@@ -323,9 +323,6 @@ const Landing = () => {
       {/* ═══════════════ SECTION 2, CONFIANCE & PÉRIMÈTRE (positionnée tôt : réponse à la peur n°1) ═══════════════ */}
       <ConfianceSection />
 
-      {/* ═══════════════ SECTION 2.25, VOIX EXTERNE (presse comme témoignage, jamais bannière) ═══════════════ */}
-      <PressQuote />
-
       {/* ═══════════════ APERÇU LIVE ANNONCES ═══════════════ */}
       <LiveListingsStrip />
 

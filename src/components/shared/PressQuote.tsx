@@ -110,7 +110,7 @@ export function PressQuote({
                 alt={`Logo ${source}`}
                 width={120}
                 height={24}
-                className="h-[18px] w-auto object-contain opacity-80"
+                className="h-[18px] w-auto object-contain opacity-80 grayscale"
                 loading="lazy"
                 decoding="async"
               />
