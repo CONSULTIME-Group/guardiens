@@ -121,3 +121,6 @@ project_id = "erhccyqevdyevpyctsjj"
 
   [functions.geocode-city-pages]
     verify_jwt = false
+
+  [functions.enrich-guide-places-osm]
+    verify_jwt = false
