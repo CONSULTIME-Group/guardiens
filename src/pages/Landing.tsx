@@ -398,6 +398,14 @@ const Landing = () => {
           06/09/2026) ═══════════════ */}
       <PretexteSection />
 
+      {/* ═══════════════ SECTION 3, CONFIANCE & PÉRIMÈTRE ═══════════════ */}
+      <ConfianceSection />
+
+      {/* ═══════════════ APERÇU LIVE ANNONCES ═══════════════ */}
+      <LiveListingsStrip />
+
+
+
       {/* ═══════════════ SECTION 2.2, VOIX EXTERNE (presse comme témoignage, jamais bannière) ═══════════════ */}
       <PressQuote />
 
