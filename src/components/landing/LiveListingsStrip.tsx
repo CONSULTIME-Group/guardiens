@@ -98,8 +98,10 @@ const LiveListingsStrip: React.FC = () => {
           .select("user_id, photo_url, position")
           .in("user_id", ownerIds)
           .order("position", { ascending: true }),
+        // Vue publique (les pets eux-mêmes sont réservés aux connectés) :
+        // seul le compte par propriété nous intéresse ici.
         propIds.length
-          ? supabase.from("pets").select("property_id").in("property_id", propIds as string[])
+          ? supabase.from("public_pets" as any).select("property_id").in("property_id", propIds as string[])
           : Promise.resolve({ data: [] as any[] }),
       ]);
 
