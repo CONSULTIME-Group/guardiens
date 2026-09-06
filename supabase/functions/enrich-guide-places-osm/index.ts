@@ -121,6 +121,7 @@ Deno.serve(async (req) => {
     // ------------------------------------------------------------------
     if (body?.mode === "rating") {
       const ratingLimit = Math.min(60, Math.max(1, Number(body?.limit) || 20));
+      const sansNote = body?.sans_note === true;
       const googleKey = Deno.env.get("GOOGLE_PLACES_API_KEY");
       if (!googleKey) {
         return json({
@@ -177,14 +178,17 @@ Deno.serve(async (req) => {
         let place: any = null;
         let responseStatus: number | null = null;
         let responseBody: string | null = null;
+        const fieldMask = sansNote
+          ? "places.id,places.displayName,places.formattedAddress,places.location"
+          : "places.id,places.rating,places.userRatingCount,places.displayName,places.formattedAddress,places.location";
+
         try {
           const r = await fetch("https://places.googleapis.com/v1/places:searchText", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
               "X-Goog-Api-Key": googleKey,
-              "X-Goog-FieldMask":
-                "places.id,places.rating,places.userRatingCount,places.displayName,places.formattedAddress,places.location",
+              "X-Goog-FieldMask": fieldMask,
             },
             body: JSON.stringify({
               textQuery,
