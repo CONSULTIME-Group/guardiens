@@ -34,7 +34,12 @@ export default function InternationalStrip() {
 
   const subtitle =
     count > 0
-      ? t("landing.international.subtitle_active", { count })
+      ? t(
+          count === 1
+            ? "landing.international.subtitle_active_one"
+            : "landing.international.subtitle_active_other",
+          { count },
+        )
       : t("landing.international.subtitle_soon");
 
   return (

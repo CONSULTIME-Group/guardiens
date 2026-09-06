@@ -11,7 +11,8 @@ import PageMeta from "@/components/PageMeta";
 
 import InventoryStrip from "@/components/landing/InventoryStrip";
 import InternationalStrip from "@/components/landing/InternationalStrip";
-import AffinityScoreShowcase from "@/components/landing/AffinityScoreShowcase";
+import { useInternationalSitsCount } from "@/hooks/useInternationalSitsCount";
+import { showInternationalSection } from "@/components/landing/internationalPlacement";
 import ProsShowcase from "@/components/landing/ProsShowcase";
 import { useInventaireCounts } from "@/hooks/useInventaireCounts";
 import { usePublicStats } from "@/hooks/usePublicStats";
@@ -71,6 +72,9 @@ const Landing = () => {
   const { data: inventaire } = useInventaireCounts();
   const { data: publicStats } = usePublicStats();
   const hasPros = (inventaire?.pros_total ?? 0) > 0;
+  // Sous le seuil, la vitrine internationale vit dans la FAQ.
+  const { count: internationalCount } = useInternationalSitsCount();
+  const hasInternationalSection = showInternationalSection(internationalCount);
 
   
 
@@ -361,7 +365,7 @@ const Landing = () => {
             {(() => {
               const items = [
                 { href: "#usages", label: t("landing.toc.care_aid"), mobile: true },
-                { href: "#international", label: t("landing.toc.international"), mobile: false },
+                { href: "#international", label: t("landing.toc.international"), mobile: false, hidden: !hasInternationalSection },
                 { href: "#comment-ca-marche", label: t("landing.toc.how"), mobile: false },
                 { href: "#entraide", label: t("landing.toc.aid"), mobile: false },
                 { href: "#chiffres", label: t("landing.toc.numbers"), mobile: true },
@@ -393,60 +397,50 @@ const Landing = () => {
       {/* ═══════════════ SECTION 2, CE QU'ON FAIT ENSEMBLE ═══════════════ */}
       <UsagesSection />
 
-      {/* ═══════════════ SECTION 2bis, CONFIANCE & PÉRIMÈTRE ═══════════════ */}
-      <ConfianceSection />
-
       {/* ═══════════════ SECTION 3, LE PRÉTEXTE (bloc sombre signature,
-          fusion des anciennes Rencontre + Entraide, remontée ici le
-          06/09/2026) ═══════════════ */}
+          l'ADN avant les mécaniques) ═══════════════ */}
       <PretexteSection />
 
+      {/* ═══════════════ SECTION 4, CONFIANCE & PÉRIMÈTRE
+          (accueille désormais la démo du score d'affinité) ═══════════════ */}
+      <ConfianceSection />
+
+      {/* ═══════════════ SECTION 5, COMMENT ÇA MARCHE (avant le catalogue) ═══════════════ */}
+      <HowItWorksSection />
 
       {/* ═══════════════ APERÇU LIVE ANNONCES ═══════════════ */}
       <LiveListingsStrip />
 
-
-
-      {/* ═══════════════ SECTION 2.2, VOIX EXTERNE (presse comme témoignage, jamais bannière) ═══════════════ */}
-      <PressQuote />
-
-      {/* ═══════════════ SECTION 2.5, INTERNATIONAL (InternationalStrip) ═══════════════ */}
-      <RevealSection>
-        <InternationalStrip />
-      </RevealSection>
-
-      {/* ═══════════════ SECTION 3, COMMENT ÇA MARCHE ═══════════════ */}
-      <HowItWorksSection />
-
-
-      {/* ═══════════════ SECTION 5.5, CHIFFRES DU RÉSEAU (InventoryStrip) ═══════════════ */}
-      <RevealSection>
-        <InventoryStrip />
-      </RevealSection>
-
-
-      {/* ═══════════════ SECTION COMPARATIF (extractible, GEO) ═══════════════ */}
-      <ComparatifSection />
-
-
-
-      {/* ═══════════════ SECTION 6.5, SCORE D'AFFINITÉ (AffinityScoreShowcase) ═══════════════ */}
-      <RevealSection>
-        <AffinityScoreShowcase />
-      </RevealSection>
+      {/* ═══════════════ SECTION 6, NOTRE HISTOIRE (récit fondateur remonté) ═══════════════ */}
+      <NotreHistoireSection />
 
       {/* ═══════════════ SECTION 7, TÉMOIGNAGES ═══════════════ */}
       <TestimonialsSection />
 
-      {/* ═══════════════ SECTION 8, NOTRE HISTOIRE ═══════════════ */}
-      <NotreHistoireSection />
+      {/* ═══════════════ VOIX EXTERNE (presse comme témoignage) ═══════════════ */}
+      <PressQuote />
 
-      {/* ═══════════════ SECTION 8.5, PROS ANIMALIERS (ProsShowcase) ═══════════════ */}
+      {/* ═══════════════ SECTION INTERNATIONAL (au-dessus du seuil seulement) ═══════════════ */}
+      {hasInternationalSection && (
+        <RevealSection>
+          <InternationalStrip />
+        </RevealSection>
+      )}
+
+      {/* ═══════════════ SECTION COMPARATIF (extractible, GEO) ═══════════════ */}
+      <ComparatifSection />
+
+      {/* ═══════════════ CHIFFRES DU RÉSEAU (InventoryStrip) ═══════════════ */}
+      <RevealSection>
+        <InventoryStrip />
+      </RevealSection>
+
+      {/* ═══════════════ PROS ANIMALIERS (ProsShowcase) ═══════════════ */}
       <RevealSection>
         <ProsShowcase />
       </RevealSection>
 
-      {/* ═══════════════ SECTION 9, GUIDES + VILLES (fusion SEO) ═══════════════ */}
+      {/* ═══════════════ GUIDES + VILLES (fusion SEO) ═══════════════ */}
       <GuidesVillesSection />
 
       {/* ═══════════════ SECTION 9bis, FAQ (section dédiée, miroir du JSON-LD FAQPage) ═══════════════ */}
