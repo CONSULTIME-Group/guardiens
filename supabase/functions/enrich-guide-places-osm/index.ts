@@ -239,15 +239,18 @@ Deno.serve(async (req) => {
         }
 
         // name et address ne sont jamais écrasés : OSM et la BAN font foi.
+        const updatePayload: Record<string, unknown> = {
+          google_place_id: String(place.id),
+        };
+        if (!sansNote) {
+          updatePayload.google_rating = typeof place.rating === "number" ? place.rating : null;
+          updatePayload.google_rating_count = typeof place.userRatingCount === "number"
+            ? place.userRatingCount
+            : null;
+        }
         const { error: upErr } = await supabase
           .from("city_guide_places")
-          .update({
-            google_place_id: String(place.id),
-            google_rating: typeof place.rating === "number" ? place.rating : null,
-            google_rating_count: typeof place.userRatingCount === "number"
-              ? place.userRatingCount
-              : null,
-          })
+          .update(updatePayload)
           .eq("id", row.id);
         if (!upErr) notes_ecrites++;
       }
@@ -261,6 +264,9 @@ Deno.serve(async (req) => {
         premier_statut_http,
         premier_message_erreur,
         requete_exemple,
+        field_mask_utilise: sansNote
+          ? "places.id,places.displayName,places.formattedAddress,places.location"
+          : "places.id,places.rating,places.userRatingCount,places.displayName,places.formattedAddress,places.location",
         cle_absente: false,
         cle_longueur: googleKey.length,
         cle_prefixe_attendu: googleKey.startsWith("AIza"),
