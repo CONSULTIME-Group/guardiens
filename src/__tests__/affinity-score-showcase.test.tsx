@@ -8,13 +8,13 @@ vi.mock("@/hooks/useImpressionOnce", () => ({ useImpressionOnce: () => false }))
 // Les libellés de la démo passent par i18n : on charge l'instance réelle,
 // dont le dictionnaire français est embarqué, sinon seules les clés sortent.
 import "@/i18n";
-import AffinityScoreShowcase from "@/components/landing/AffinityScoreShowcase";
+import AffinityDemoCard from "@/components/landing/AffinityDemoCard";
 
-describe("AffinityScoreShowcase", () => {
+describe("AffinityDemoCard", () => {
   it("affiche les 10 critères réels de computeAffinityResultFull", () => {
     render(
       <MemoryRouter>
-        <AffinityScoreShowcase />
+        <AffinityDemoCard />
       </MemoryRouter>,
     );
     expect(screen.getByText("Animaux")).toBeInTheDocument();
@@ -32,7 +32,7 @@ describe("AffinityScoreShowcase", () => {
   it("affiche le badge score 85 % · 8/10", () => {
     render(
       <MemoryRouter>
-        <AffinityScoreShowcase />
+        <AffinityDemoCard />
       </MemoryRouter>,
     );
     expect(screen.getByText(/85/)).toBeInTheDocument();
@@ -42,7 +42,7 @@ describe("AffinityScoreShowcase", () => {
   it("n'affirme aucun nombre fixe de critères dans la copy", () => {
     render(
       <MemoryRouter>
-        <AffinityScoreShowcase />
+        <AffinityDemoCard />
       </MemoryRouter>,
     );
     // Doctrine : dénominateur dynamique, jamais de chiffre codé en dur

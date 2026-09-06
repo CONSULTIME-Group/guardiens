@@ -204,7 +204,11 @@
       "q7": "Quel est le modèle économique de Guardiens ?",
       "a7": "Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que nous vous offrons. Vous avez accès à tout, sans limite, sans engagement. Vous serez prévenu à l'avance quand cela changera.",
       "q8": "Le house-sitting est-il sécurisé ?",
-      "a8": "La vérification d'identité est ouverte à tous les membres : la pièce envoyée est analysée automatiquement, les dossiers qui ne passent pas ce premier contrôle sont revus par notre équipe, et les profils validés affichent l'écusson « Identité vérifiée ». Une rencontre préalable entre le propriétaire et le gardien est vivement recommandée avant toute garde. Après chaque expérience, les avis croisés publiés sur le profil construisent une réputation vérifiable, visible par tous les membres."
+      "a8": "La vérification d'identité est ouverte à tous les membres : la pièce envoyée est analysée automatiquement, les dossiers qui ne passent pas ce premier contrôle sont revus par notre équipe, et les profils validés affichent l'écusson « Identité vérifiée ». Une rencontre préalable entre le propriétaire et le gardien est vivement recommandée avant toute garde. Après chaque expérience, les avis croisés publiés sur le profil construisent une réputation vérifiable, visible par tous les membres.",
+      "q9": "Est-ce que ça marche depuis l'étranger ?",
+      "a9": "Oui, dans les deux sens. Si vous vivez à l'étranger, publiez votre annonce pour faire veiller sur votre résidence en France pendant votre absence. Si vous partez à l'étranger, consultez les annonces internationales et trouvez un gardien de confiance sur place. {{listings}}",
+      "a9_count_one": "{{count}} annonce internationale est en cours.",
+      "a9_count_other": "{{count}} annonces internationales sont en cours."
     },
     "inventory": {
       "title": "Ce qu'on a construit pour vous",
@@ -225,7 +229,8 @@
     },
     "international": {
       "title": "Français à l'étranger ? Faites veiller sur votre maison en France, et inversement.",
-      "subtitle_active": "Depuis le lancement, des gardes s'organisent entre la France et le reste du monde. {{count}} annonces internationales en cours.",
+      "subtitle_active_one": "Depuis le lancement, des gardes s'organisent entre la France et le reste du monde. {{count}} annonce internationale en cours.",
+      "subtitle_active_other": "Depuis le lancement, des gardes s'organisent entre la France et le reste du monde. {{count}} annonces internationales en cours.",
       "subtitle_soon": "Les premiers gardiens s'organisent. Bientôt disponible dans plusieurs pays.",
       "card1": {
         "title": "Vous vivez à l'étranger, gardez votre résidence en France.",

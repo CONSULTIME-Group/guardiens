@@ -1,4 +1,6 @@
 import { useTranslation } from "react-i18next";
+import { useInternationalSitsCount } from "@/hooks/useInternationalSitsCount";
+import { showInternationalFaq } from "@/components/landing/internationalPlacement";
 import { staticRoutes, DEFAULT_OG_IMAGE } from "@/data/siteRoutes";
 import howtoStep1 from "@/assets/illustrations/howto-step-1-annonce-448.webp";
 import howtoStep2 from "@/assets/illustrations/howto-step-2-rencontre-448.webp";
@@ -15,6 +17,19 @@ const HOME_OG_IMAGE = HOME_ROUTE?.ogImage ?? DEFAULT_OG_IMAGE;
  */
 export default function HomeJsonLd() {
   const { t } = useTranslation();
+  // Le FAQPage reflète strictement les questions visibles : la question
+  // internationale n'apparaît que lorsque la FAQ la porte.
+  const { count: internationalCount } = useInternationalSitsCount();
+  const faqNumbers = showInternationalFaq(internationalCount)
+    ? [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    : [1, 2, 3, 4, 5, 6, 7, 8];
+  const internationalListings =
+    internationalCount > 0
+      ? t(
+          internationalCount === 1 ? "landing.faq.a9_count_one" : "landing.faq.a9_count_other",
+          { count: internationalCount },
+        )
+      : "";
 
   return (
     <script
@@ -192,12 +207,12 @@ export default function HomeJsonLd() {
             {
               "@type": "FAQPage",
               "@id": "https://guardiens.fr/#faq",
-              mainEntity: [1, 2, 3, 4, 5, 6, 7, 8].map((n) => ({
+              mainEntity: faqNumbers.map((n) => ({
                 "@type": "Question",
                 name: t(`landing.faq.q${n}`),
                 acceptedAnswer: {
                   "@type": "Answer",
-                  text: t(`landing.faq.a${n}`),
+                  text: t(`landing.faq.a${n}`, { listings: internationalListings }).trim(),
                 },
               })),
             },

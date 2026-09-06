@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import RevealOnScroll from "@/components/ui/RevealOnScroll";
 import { RevealSection } from "@/components/ui/RevealSection";
+import AffinityDemoCard from "@/components/landing/AffinityDemoCard";
 import franceAvif462 from "@/assets/illustrations/france-local-national-462.avif";
 import franceAvif924 from "@/assets/illustrations/france-local-national-924.avif";
 import franceWebp462 from "@/assets/illustrations/france-local-national-462.webp";
@@ -90,6 +91,7 @@ export function ConfianceSection() {
             </article>
           </RevealOnScroll>
         </div>
+        <AffinityDemoCard />
       </div>
     </section>
   );
