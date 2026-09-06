@@ -25,7 +25,7 @@ function renderStrip() {
 }
 
 describe("InventoryStrip", () => {
-  it("affiche les 4 cards quand tous les chiffres sont > 0", () => {
+  it("affiche les 3 chiffres intégrés aux guides", () => {
     mockCounts.mockReturnValue({
       data: {
         cities_total: 54,
@@ -43,7 +43,7 @@ describe("InventoryStrip", () => {
     expect(screen.getByTestId("inventory-card-cities")).toBeInTheDocument();
     expect(screen.getByTestId("inventory-card-breeds")).toBeInTheDocument();
     expect(screen.getByTestId("inventory-card-places")).toBeInTheDocument();
-    expect(screen.getByTestId("inventory-card-pros")).toBeInTheDocument();
+    expect(screen.queryByTestId("inventory-card-pros")).not.toBeInTheDocument();
   });
 
   it("masque la card dont la valeur est 0", () => {
@@ -64,28 +64,9 @@ describe("InventoryStrip", () => {
     expect(screen.queryByTestId("inventory-card-breeds")).not.toBeInTheDocument();
   });
 
-  it("affiche 4 skeletons pendant le chargement", () => {
+  it("affiche 3 skeletons pendant le chargement", () => {
     mockCounts.mockReturnValue({ data: undefined, isLoading: true });
     renderStrip();
-    expect(screen.getAllByTestId("inventory-skeleton")).toHaveLength(4);
-  });
-
-  it("expose un CTA pointant vers /observatoire-garde-animaux#datapoints", () => {
-    mockCounts.mockReturnValue({
-      data: {
-        cities_total: 10,
-        breeds_total: 10,
-        places_total: 10,
-        pros_total: 10,
-        places_by_category: {},
-        breeds_by_species: {},
-        pros_by_category: {},
-        generated_at: "",
-      },
-      isLoading: false,
-    });
-    renderStrip();
-    const cta = screen.getByRole("link");
-    expect(cta.getAttribute("href")).toBe("/observatoire-garde-animaux#datapoints");
+    expect(screen.getAllByTestId("inventory-skeleton")).toHaveLength(3);
   });
 });

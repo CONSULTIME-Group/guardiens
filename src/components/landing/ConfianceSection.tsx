@@ -1,11 +1,6 @@
 import { useTranslation } from "react-i18next";
-import RevealOnScroll from "@/components/ui/RevealOnScroll";
 import { RevealSection } from "@/components/ui/RevealSection";
 import AffinityDemoCard from "@/components/landing/AffinityDemoCard";
-import franceAvif462 from "@/assets/illustrations/france-local-national-462.avif";
-import franceAvif924 from "@/assets/illustrations/france-local-national-924.avif";
-import franceWebp462 from "@/assets/illustrations/france-local-national-462.webp";
-import franceWebp924 from "@/assets/illustrations/france-local-national-924.webp";
 
 export function ConfianceSection() {
   const { t } = useTranslation();
@@ -25,73 +20,34 @@ export function ConfianceSection() {
           </p>
         </RevealSection>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          {/* Illustration France */}
-          <RevealOnScroll from="left" className="relative order-2 lg:order-1 mx-auto w-full max-w-md lg:max-w-none group/illu">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 rounded-3xl blur-2xl transition-opacity duration-500 group-hover/illu:opacity-80 opacity-60" aria-hidden="true" />
-            <div className="relative bg-card/50 border border-border rounded-3xl p-4 sm:p-5 md:p-7 shadow-sm transition-all duration-500 group-hover/illu:shadow-lg group-hover/illu:-translate-y-0.5">
-              <picture>
-                <source
-                  type="image/avif"
-                  srcSet={`${franceAvif462} 462w, ${franceAvif924} 924w`}
-                  sizes="(max-width: 640px) 90vw, (max-width: 1024px) 60vw, 480px"
-                />
-                <source
-                  type="image/webp"
-                  srcSet={`${franceWebp462} 462w, ${franceWebp924} 924w`}
-                  sizes="(max-width: 640px) 90vw, (max-width: 1024px) 60vw, 480px"
-                />
-                <img
-                  src={franceWebp924}
-                  alt="Illustration gouache d'une carte de France parsemée de points reliés, symbolisant le réseau de gardiens partout dans le pays."
-                  width={960}
-                  height={960}
-                  loading="lazy"
-                  decoding="async"
-                  sizes="(max-width: 640px) 90vw, (max-width: 1024px) 60vw, 480px"
-                  className="block w-full h-auto max-w-[420px] sm:max-w-[460px] lg:max-w-none mx-auto rounded-2xl transition-transform duration-700 ease-out group-hover/illu:scale-[1.02] motion-reduce:transition-none motion-reduce:transform-none"
-                  style={{ imageRendering: 'auto' }}
-                />
-              </picture>
+        <RevealSection delay={0.1}>
+          <article className="rounded-2xl border border-primary/25 bg-primary/5 p-[22px] md:p-[34px]">
+            <div className="max-w-3xl">
+              <p className="text-xs tracking-widest uppercase text-primary font-body font-medium">{t("landing.trust.main_label")}</p>
+              <h3 className="mt-[14px] font-heading text-2xl md:text-3xl font-semibold text-foreground">{t("landing.trust.p1_title")}</h3>
+              <p className="mt-[14px] text-foreground/75 leading-relaxed">{t("landing.trust.p1_text")}</p>
+              <div className="mt-[22px] flex flex-wrap gap-2" aria-label={t("landing.trust.examples_label")}>
+                {["couple", "retiree", "family", "active", "home", "vehicle"].map((example) => (
+                  <span key={example} className="rounded-full border border-primary/20 bg-background px-3 py-2 text-sm text-foreground/80">
+                    {t(`landing.trust.examples.${example}`)}
+                  </span>
+                ))}
+              </div>
             </div>
-          </RevealOnScroll>
+            <AffinityDemoCard />
+          </article>
+        </RevealSection>
 
-          {/* 4 piliers */}
-          <RevealOnScroll from="right" delay={120} className="order-1 lg:order-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <article className="bg-card border border-border rounded-2xl p-6 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 motion-reduce:transition-none motion-reduce:transform-none">
-              <p className="text-xs tracking-widest uppercase text-primary font-body">01</p>
-              <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">{t("landing.trust.p1_title")}</h3>
-              <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-                {t("landing.trust.p1_text")}
-              </p>
-            </article>
-
-            <article className="bg-card border border-border rounded-2xl p-6 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 motion-reduce:transition-none motion-reduce:transform-none">
-              <p className="text-xs tracking-widest uppercase text-primary font-body">02</p>
-              <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">{t("landing.trust.p2_title")}</h3>
-              <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-                {t("landing.trust.p2_text")}
-              </p>
-            </article>
-
-            <article className="bg-card border border-border rounded-2xl p-6 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 motion-reduce:transition-none motion-reduce:transform-none">
-              <p className="text-xs tracking-widest uppercase text-primary font-body">03</p>
-              <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">{t("landing.trust.p3_title")}</h3>
-              <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-                {t("landing.trust.p3_text")}
-              </p>
-            </article>
-
-            <article className="bg-card border border-border rounded-2xl p-6 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 motion-reduce:transition-none motion-reduce:transform-none">
-              <p className="text-xs tracking-widest uppercase text-primary font-body">04</p>
-              <h3 className="mt-3 font-heading font-semibold text-lg text-foreground">{t("landing.trust.p4_title")}</h3>
-              <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-                {t("landing.trust.p4_text")}
-              </p>
-            </article>
-          </RevealOnScroll>
+        <div className="mt-[22px] grid grid-cols-1 md:grid-cols-2 gap-[22px]">
+          {[2, 3].map((pillar, index) => (
+            <RevealSection key={pillar} delay={0.2 + index * 0.1}>
+              <article className="h-full border-t border-border px-1 pt-[22px]">
+                <h3 className="font-heading font-semibold text-xl text-foreground">{t(`landing.trust.p${pillar}_title`)}</h3>
+                <p className="mt-[14px] text-muted-foreground text-sm leading-relaxed">{t(`landing.trust.p${pillar}_text`)}</p>
+              </article>
+            </RevealSection>
+          ))}
         </div>
-        <AffinityDemoCard />
       </div>
     </section>
   );

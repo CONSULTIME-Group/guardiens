@@ -135,6 +135,16 @@
       "lede": "Votre rythme, vos habitudes, les besoins de vos animaux, face à son expérience. On vous montre où ça correspond. Vous rencontrez, et vous décidez.",
       "p1_title": "Votre gardien idéal, décrit par vous",
       "p1_text": "Un couple, un retraité, une famille, quelqu'un d'actif ou quelqu'un qui reste à la maison, avec voiture ou sans. Vous décrivez qui vous voulez chez vous, et le score d'affinité classe les candidatures là-dessus, critère par critère. Vous voyez le détail du calcul, vous gardez la main.",
+      "main_label": "La pièce maîtresse",
+      "examples_label": "Exemples de préférences",
+      "examples": {
+        "couple": "Un couple",
+        "retiree": "Un retraité",
+        "family": "Une famille",
+        "active": "Quelqu'un d'actif",
+        "home": "Quelqu'un qui reste à la maison",
+        "vehicle": "Avec voiture ou sans"
+      },
       "p2_title": "Un gardien qui arrive préparé",
       "p2_text": "Le guide de la race de votre animal et le guide de votre ville, transmis avant la garde. Votre gardien sait déjà ce qui compte avant même d'arriver.",
       "p3_title": "Des conseils à chaque étape",
