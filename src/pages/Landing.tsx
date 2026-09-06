@@ -323,9 +323,6 @@ const Landing = () => {
       {/* ═══════════════ SECTION 2, CONFIANCE & PÉRIMÈTRE (positionnée tôt : réponse à la peur n°1) ═══════════════ */}
       <ConfianceSection />
 
-      {/* ═══════════════ SECTION 2.25, VOIX EXTERNE (presse comme témoignage, jamais bannière) ═══════════════ */}
-      <PressQuote />
-
       {/* ═══════════════ APERÇU LIVE ANNONCES ═══════════════ */}
       <LiveListingsStrip />
 
@@ -411,7 +408,8 @@ const Landing = () => {
       {/* ═══════════════ SECTION 7, TÉMOIGNAGES ═══════════════ */}
       <TestimonialsSection />
 
-
+      {/* ═══════════════ SECTION 7.5, VOIX EXTERNE (presse comme témoignage, jamais bannière) ═══════════════ */}
+      <PressQuote />
 
       {/* ═══════════════ SECTION 8, NOTRE HISTOIRE ═══════════════ */}
       <NotreHistoireSection />
