@@ -31,7 +31,7 @@ export function PressQuote({
   source = DEFAULT_SOURCE,
   date = DEFAULT_DATE,
   logoPath = DEFAULT_LOGO,
-  showLogo = false,
+  showLogo = true,
   eyebrow = DEFAULT_EYEBROW,
   citeUrl,
   className,
@@ -112,7 +112,7 @@ export function PressQuote({
                 alt={`Logo ${source}`}
                 width={120}
                 height={24}
-                className="h-[18px] w-auto object-contain opacity-80 grayscale"
+                className="h-[18px] w-auto object-contain opacity-80"
                 loading="lazy"
                 decoding="async"
               />
