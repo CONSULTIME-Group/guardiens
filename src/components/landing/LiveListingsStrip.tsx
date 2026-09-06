@@ -21,8 +21,11 @@ interface LiveSit {
   gallery_photo: string | null;
   sit_city: string | null;
   user_id: string;
+  pet_count: number;
 }
 
+// Vague conversion du 06/09/2026 : six annonces en grille 3 x 2.
+const MAX_LISTINGS = 6;
 
 
 
@@ -41,12 +44,12 @@ const isForeign = (country: string | null) => {
   return c !== "FRANCE" && c !== "FR" && c !== "";
 };
 
-const isHighlighted = (s: LiveSit) => s.is_urgent && isForeign(s.country);
-
 /**
- * Aperçu live des annonces sous le Hero.
- * Une carte "opportunité" (urgente + étrangère) en grand format à gauche,
- * et une carte secondaire à droite (ou une grille uniforme s'il n'y a pas d'opportunité phare).
+ * Preuve vivante de la page d'accueil : les annonces réelles, remontées en
+ * troisième position. Une grille uniforme de six annonces, photo, lieu,
+ * dates, nature de la garde et nombre d'animaux quand il y en a. Uniquement
+ * des données de la base, aucune annonce fictive : sous six annonces
+ * publiées, on affiche celles qui existent.
  */
 const LiveListingsStrip: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -87,7 +90,7 @@ const LiveListingsStrip: React.FC = () => {
       const ownerIds = Array.from(new Set(rawSits.map((s) => s.user_id).filter(Boolean)));
       const propIds = Array.from(new Set(rawSits.map((s) => s.property_id).filter(Boolean)));
 
-      const [{ data: owners }, { data: props }, { data: gallery }] = await Promise.all([
+      const [{ data: owners }, { data: props }, { data: gallery }, { data: pets }] = await Promise.all([
         supabase.from("public_profiles").select("id, city").in("id", ownerIds),
         supabase.from("properties").select("id, cover_photo_url, photos").in("id", propIds as string[]),
         supabase
@@ -95,6 +98,11 @@ const LiveListingsStrip: React.FC = () => {
           .select("user_id, photo_url, position")
           .in("user_id", ownerIds)
           .order("position", { ascending: true }),
+        // Vue publique (les pets eux-mêmes sont réservés aux connectés) :
+        // seul le compte par propriété nous intéresse ici.
+        propIds.length
+          ? supabase.from("public_pets" as any).select("property_id").in("property_id", propIds as string[])
+          : Promise.resolve({ data: [] as any[] }),
       ]);
 
       const ownerMap = new Map((owners || []).map((o: any) => [o.id, o]));
@@ -102,6 +110,10 @@ const LiveListingsStrip: React.FC = () => {
       const galleryMap = new Map<string, string>();
       (gallery || []).forEach((g: any) => {
         if (!galleryMap.has(g.user_id) && g.photo_url) galleryMap.set(g.user_id, g.photo_url);
+      });
+      const petCountMap = new Map<string, number>();
+      (pets || []).forEach((p: any) => {
+        if (p.property_id) petCountMap.set(p.property_id, (petCountMap.get(p.property_id) ?? 0) + 1);
       });
 
       const enriched: LiveSit[] = rawSits.map((s) => {
@@ -121,6 +133,7 @@ const LiveListingsStrip: React.FC = () => {
           first_photo: p?.photos?.[0] ?? null,
           gallery_photo: galleryMap.get(s.user_id) ?? null,
           user_id: s.user_id,
+          pet_count: s.property_id ? petCountMap.get(s.property_id) ?? 0 : 0,
         };
       });
 
@@ -132,7 +145,7 @@ const LiveListingsStrip: React.FC = () => {
       });
 
       if (!cancelled) {
-        setSits(enriched.slice(0, 4));
+        setSits(enriched.slice(0, MAX_LISTINGS));
         setEnriching(false);
       }
     })();
@@ -148,17 +161,22 @@ const LiveListingsStrip: React.FC = () => {
         aria-busy="true"
         className="bg-gradient-to-b from-accent/20 to-background border-b border-border/40"
       >
-        <div className="max-w-6xl mx-auto px-4 md:px-6 py-7 md:py-10">
-          <div className="mb-4 md:mb-6 space-y-2">
+        <div className="max-w-6xl mx-auto px-4 md:px-6 py-8 md:py-12">
+          <div className="mb-6 space-y-2">
             <div className="h-3 w-24 rounded-full bg-muted animate-pulse" />
-            <div className="h-6 w-72 max-w-full rounded-md bg-muted animate-pulse" />
+            <div className="h-7 w-80 max-w-full rounded-md bg-muted animate-pulse" />
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-5">
-            <div className="lg:col-span-3 aspect-[16/10] md:aspect-[16/9] rounded-3xl bg-muted animate-pulse" />
-            <div className="lg:col-span-1 grid grid-cols-1 gap-3 md:gap-4">
-              <div className="h-24 md:h-32 rounded-2xl bg-muted animate-pulse" />
-              <div className="h-24 md:h-32 rounded-2xl bg-muted animate-pulse" />
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="rounded-2xl overflow-hidden border border-border">
+                <div className="aspect-[4/3] bg-muted animate-pulse" />
+                <div className="p-4 space-y-2">
+                  <div className="h-3 w-20 rounded-full bg-muted animate-pulse" />
+                  <div className="h-4 w-full rounded-md bg-muted animate-pulse" />
+                  <div className="h-3 w-32 rounded-full bg-muted animate-pulse" />
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -216,197 +234,93 @@ const LiveListingsStrip: React.FC = () => {
   const fmtDates = (s: LiveSit) =>
     s.start_date && s.end_date ? `${fmt(s.start_date)} - ${fmt(s.end_date)}` : null;
 
-  const featured = sits.find(isHighlighted);
-  const rest = featured ? sits.filter((s) => s.id !== featured.id).slice(0, 1) : sits;
-
   return (
     <section
       aria-label={t("live_listings.aria")}
       className="bg-gradient-to-b from-accent/20 to-background border-b border-border/40"
     >
-      <div className="max-w-6xl mx-auto px-4 md:px-6 py-7 md:py-10">
-        <div className="flex items-end justify-between gap-3 mb-4 md:mb-6">
-          <div className="min-w-0">
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="relative flex h-2 w-2 shrink-0" aria-hidden="true">
-                <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-60 animate-ping" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
-              </span>
-              <p className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-primary font-semibold font-body">
-                {t("live_listings.eyebrow")}
-              </p>
-
-            </div>
-            <h2 className="font-heading text-lg md:text-2xl font-semibold text-foreground leading-tight">
-              {t("live_listings.title")}
-            </h2>
+      <div className="max-w-6xl mx-auto px-4 md:px-6 py-8 md:py-12">
+        <div className="mb-6 md:mb-8">
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="relative flex h-2 w-2 shrink-0" aria-hidden="true">
+              <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-60 animate-ping" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+            </span>
+            <p className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-primary font-semibold font-body">
+              {t("live_listings.eyebrow")}
+            </p>
           </div>
-          <Link
-            to="/annonces"
-            className="text-xs md:text-sm text-primary font-semibold hover:underline whitespace-nowrap shrink-0 pb-1"
-          >
-            {t("live_listings.see_all")} <span aria-hidden>→</span>
-          </Link>
+          <h2 className="font-heading text-2xl md:text-3xl font-semibold text-foreground leading-tight">
+            {t("live_listings.title")}
+          </h2>
         </div>
 
-        {featured ? (
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-5">
-            {/* Carte featured surdimensionnée */}
-            <Link
-              to={`/annonces/${featured.slug || featured.id}`}
-              className="group lg:col-span-3 relative overflow-hidden rounded-3xl border-2 border-destructive/40 bg-card shadow-lg hover:shadow-2xl hover:border-destructive/70 transition-all"
-            >
-              <div className="aspect-[16/10] md:aspect-[16/9] relative overflow-hidden">
-                {resolvePhoto(featured) ? (
-                  <img
-                    src={storageImageUrl(resolvePhoto(featured), { width: 960, height: 540 }) || (resolvePhoto(featured) as string)}
-                    srcSet={storageImageSrcSet(resolvePhoto(featured), [640, 960, 1280], 75, 16 / 9)}
-                    sizes="(min-width: 1024px) 720px, 100vw"
-                    alt={featured.title}
-                    loading="lazy"
-                    width={960}
-                    height={540}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-accent/60 to-muted" />
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-
-                {/* Bandeau {t("live_listings.super_opportunity")} */}
-                <div className="absolute top-3 left-3 flex flex-wrap items-center gap-2">
-                  <span className="inline-flex items-center gap-1.5 bg-destructive text-destructive-foreground text-[11px] md:text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full shadow-lg">
-                    <span className="h-1.5 w-1.5 rounded-full bg-destructive-foreground animate-pulse" aria-hidden />
-                    {t("live_listings.urgent")}
-                  </span>
-
-                  <span className="inline-flex items-center bg-amber-500 text-white text-[11px] md:text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full shadow-lg">
-                    {t("live_listings.super_opportunity")}
-                  </span>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+          {sits.map((s) => {
+            const photo = resolvePhoto(s);
+            const dates = fmtDates(s);
+            const geo = labelGeo(s);
+            return (
+              <Link
+                key={s.id}
+                to={`/annonces/${s.slug || s.id}`}
+                className="notebook-card notebook-card-paper group relative min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+              >
+                <div className="notebook-card-edge" aria-hidden="true" />
+                <div className="aspect-[4/3] bg-muted relative overflow-hidden">
+                  {photo ? (
+                    <img
+                      src={storageImageUrl(photo, { width: 480, height: 360 }) || photo}
+                      srcSet={storageImageSrcSet(photo, [400, 640], 75, 4 / 3)}
+                      sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw"
+                      alt={s.title}
+                      loading="lazy"
+                      width={480}
+                      height={360}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-accent/60 to-muted" />
+                  )}
+                  {s.is_urgent && (
+                    <span className="absolute top-2 left-2 bg-destructive text-destructive-foreground text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full">
+                      {t("live_listings.urgent")}
+                    </span>
+                  )}
+                  {geo && (
+                    <span className="absolute bottom-2 left-2 bg-background/95 backdrop-blur text-foreground text-[11px] md:text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm max-w-[85%]">
+                      <span className="truncate">{geo}</span>
+                    </span>
+                  )}
                 </div>
-
-                {/* Contenu en bas */}
-                <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6 text-white">
-                  <p className="text-[11px] md:text-xs uppercase tracking-[0.18em] font-semibold opacity-90 mb-2">
-                    {labelGeo(featured)}
-                  </p>
-                  <h3 className="font-heading text-xl md:text-3xl font-bold leading-tight mb-2 line-clamp-2">
-                    {featured.title}
+                <div className="p-3.5 md:p-4">
+                  <h3 className="font-heading text-base md:text-lg font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors leading-snug">
+                    {s.title}
                   </h3>
-                  {fmtDates(featured) && (
-                    <p className="text-sm md:text-base font-medium opacity-90">
-                      {fmtDates(featured)}
+                  {dates && (
+                    <p className="text-xs md:text-sm text-muted-foreground mt-1 font-medium">
+                      {dates}
                     </p>
                   )}
-                  <span className="mt-3 inline-flex items-center gap-1.5 bg-white/95 text-foreground text-xs md:text-sm font-semibold px-3 py-1.5 rounded-full">
-                    {t("live_listings.discover")} <span aria-hidden>→</span>
-                  </span>
+                  <p className="text-xs md:text-sm text-muted-foreground mt-1">
+                    {s.pet_count > 0
+                      ? `${t("live_listings.nature_both")} · ${t("live_listings.animals", { count: s.pet_count })}`
+                      : t("live_listings.nature_house")}
+                  </p>
                 </div>
-              </div>
-            </Link>
+              </Link>
+            );
+          })}
+        </div>
 
-            {/* Pile de 3 cartes secondaires */}
-            <div className="lg:col-span-1 grid grid-cols-1 gap-3 md:gap-4">
-              {rest.map((s) => {
-                const photo = resolvePhoto(s);
-                const dates = fmtDates(s);
-                const geo = labelGeo(s);
-                return (
-                  <Link
-                    key={s.id}
-                    to={`/annonces/${s.slug || s.id}`}
-                    className="group bg-card border border-border rounded-2xl overflow-hidden hover:border-primary/50 hover:shadow-md transition-all flex lg:flex-row flex-col"
-                  >
-                    <div className="lg:w-2/5 aspect-[4/3] lg:aspect-auto bg-muted relative overflow-hidden shrink-0">
-                      {photo ? (
-                        <img
-                         src={storageImageUrl(photo, { width: 400, height: 300 }) || photo}
-                          alt={s.title}
-                          loading="lazy"
-                          width={320}
-                          height={240}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-accent/60 to-muted" />
-                      )}
-                      {s.is_urgent && (
-                        <span className="absolute top-1.5 left-1.5 bg-destructive text-destructive-foreground text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full">
-                          {t("live_listings.urgent")}
-                        </span>
-
-                      )}
-                    </div>
-                    <div className="p-2.5 md:p-3 flex-1 min-w-0 flex flex-col justify-center">
-                      {geo && (
-                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1 truncate">
-                          {geo}
-                        </p>
-                      )}
-                      <h3 className="font-heading text-xs md:text-sm font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors leading-snug">
-                        {s.title}
-                      </h3>
-                      {dates && (
-                        <p className="text-[10px] md:text-xs text-muted-foreground mt-1 font-medium">
-                          {dates}
-                        </p>
-                      )}
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        ) : (
-          // Pas d'opportunité phare : grille uniforme
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-            {rest.map((s) => {
-              const photo = resolvePhoto(s);
-              const dates = fmtDates(s);
-              const geo = labelGeo(s);
-              return (
-                <Link
-                  key={s.id}
-                  to={`/annonces/${s.slug || s.id}`}
-                  className="notebook-card notebook-card-paper group relative"
-                >
-                  <div className="notebook-card-edge" aria-hidden="true" />
-                  <div className="aspect-[4/3] bg-muted relative overflow-hidden">
-                    {photo ? (
-                      <img
-                        src={storageImageUrl(photo, { width: 400, height: 300 }) || photo}
-                        alt={s.title}
-                        loading="lazy"
-                        width={400}
-                        height={300}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-accent/60 to-muted" />
-                    )}
-                    {s.is_urgent && (
-                      <span className="absolute top-2 left-2 bg-destructive text-destructive-foreground text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full">
-                        {t("live_listings.urgent")}
-                      </span>
-
-                    )}
-                    {geo && (
-                      <span className="absolute bottom-2 left-2 bg-background/95 backdrop-blur text-foreground text-[11px] md:text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm max-w-[85%]">
-                        <span className="truncate">{geo}</span>
-                      </span>
-                    )}
-                  </div>
-                  <div className="p-3">
-                    <h3 className="font-heading text-xs md:text-sm font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors leading-snug">
-                      {s.title}
-                    </h3>
-                    {dates && <p className="text-[10px] md:text-xs text-muted-foreground mt-1.5 font-medium">{dates}</p>}
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        )}
+        <div className="mt-8 text-center">
+          <Link
+            to="/annonces"
+            className="inline-flex items-center min-h-[44px] text-sm text-primary font-semibold hover:underline underline-offset-4"
+          >
+            {t("live_listings.see_all")} <span aria-hidden className="ml-1">→</span>
+          </Link>
+        </div>
       </div>
     </section>
   );

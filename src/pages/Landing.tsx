@@ -31,6 +31,7 @@ import { NotreHistoireSection } from "@/components/landing/NotreHistoireSection"
 import { GuidesVillesSection } from "@/components/landing/GuidesVillesSection";
 import { FaqSection } from "@/components/landing/FaqSection";
 import { FinalCtaSection } from "@/components/landing/FinalCtaSection";
+import { MidJourneyCta } from "@/components/landing/MidJourneyCta";
 
 import PublicHeader from "@/components/layout/PublicHeader";
 import { useShellMode } from "@/components/layout/useShellMode";
@@ -363,14 +364,9 @@ const Landing = () => {
          </section>
        )}
 
-      {/* Confiance et annonces déplacées après la section Prétexte le 06/09/2026 */}
-
-
-
-
-
-
-
+      {/* ═══════════════ ANNONCES DISPONIBLES (preuve vivante, remontée en
+          troisième position le 06/09/2026, agrandie à six annonces) ═══════════════ */}
+      <LiveListingsStrip />
 
       {/* ═══════════════ SOMMAIRE DE PAGE, maillage interne ═══════════════ */}
       <nav
@@ -425,14 +421,14 @@ const Landing = () => {
       {/* ═══════════════ SECTION 5, COMMENT ÇA MARCHE (avant le catalogue) ═══════════════ */}
       <HowItWorksSection />
 
-      {/* ═══════════════ APERÇU LIVE ANNONCES ═══════════════ */}
-      <LiveListingsStrip />
-
       {/* ═══════════════ SECTION 6, NOTRE HISTOIRE (récit fondateur remonté) ═══════════════ */}
       <NotreHistoireSection />
 
       {/* ═══════════════ SECTION 7, TÉMOIGNAGES ═══════════════ */}
       <TestimonialsSection />
+
+      {/* ═══════════════ RAPPEL D'ACTION MI-PARCOURS (06/09/2026) ═══════════════ */}
+      <MidJourneyCta />
 
       {/* ═══════════════ SECTION INTERNATIONAL (au-dessus du seuil seulement) ═══════════════ */}
       {hasInternationalSection && (

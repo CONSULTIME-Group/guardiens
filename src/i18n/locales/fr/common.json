@@ -227,6 +227,11 @@
       "cta_sitter": "Je veux garder",
       "footnote": "Inscription en 2 minutes, sans carte bancaire."
     },
+    "mid_cta": {
+      "title": "Votre maison peut être la prochaine.",
+      "cta_owner": "Publier mon annonce",
+      "cta_sitter": "Je veux garder"
+    },
     "international": {
       "title": "Français à l'étranger ? Faites veiller sur votre maison en France, et inversement.",
       "subtitle_active_one": "Depuis le lancement, des gardes s'organisent entre la France et le reste du monde. {{count}} annonce internationale en cours.",
@@ -1612,7 +1617,11 @@
     "empty_title": "Soyez le premier à publier une annonce près de chez vous",
     "empty_body": "Des gardiens du coin sont déjà inscrits et attendent votre demande.",
     "empty_cta": "Publier mon annonce",
-    "loading": "Chargement des annonces en cours"
+    "loading": "Chargement des annonces en cours",
+    "nature_house": "Maison",
+    "nature_both": "Maison et animaux",
+    "animals_one": "{{count}} animal",
+    "animals_other": "{{count}} animaux"
   },
   "search_auto_widen": {
     "to_dept": "Aucune annonce à moins de {{radius}} km de chez vous. Voici les {{count}} annonces de votre département.",
