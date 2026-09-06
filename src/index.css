@@ -150,6 +150,12 @@
     --terra-foreground: 40 33% 97%;
     --terra-soft: 22 65% 96%;
     --terra-border: 22 45% 82%;
+
+    /* Pin profond : bloc sombre signature du corps de page (section
+       Prétexte). Identique en light et dark, comme --footer. */
+    --pine: 153 42% 30%;
+    --pine-deep: 153 48% 14%;
+    --pine-foreground: 40 33% 97%;
   }
 
 
@@ -233,6 +239,12 @@
     --terra-foreground: 40 15% 95%;
     --terra-soft: 22 25% 18%;
     --terra-border: 22 30% 32%;
+
+    /* Pin profond : valeurs identiques au light, le bloc Prétexte reste
+       sombre dans les deux thèmes. */
+    --pine: 153 42% 30%;
+    --pine-deep: 153 48% 14%;
+    --pine-foreground: 40 33% 97%;
 
     /* Papier sketchbook en dark mode — teinte chaude suffisamment soutenue pour le contraste */
     --hero-paper: 40 15% 18%;
