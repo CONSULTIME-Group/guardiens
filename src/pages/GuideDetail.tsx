@@ -179,6 +179,11 @@ const GuideDetail = () => {
 
   const categories = [...new Set(filteredPlaces.map((p) => p.category))];
   const placesWithCoords = filteredPlaces.filter((p) => p.latitude && p.longitude);
+  // Vrai uniquement si la page contient encore des lieux commerciaux verifies.
+  // Les 83 guides desormais sans veto/animalerie/cafe/restaurant passent sur un titre nature.
+  const hasCommercialPlaces = places.some((p) =>
+    ["vet", "pet_shop", "dog_friendly_cafe", "dog_friendly_restaurant"].includes(p.category)
+  );
 
   // JSON-LD ItemList des lieux : balise l'ensemble de places, independamment du filtre de recherche.
   const placesSchema = useMemo(() => {
