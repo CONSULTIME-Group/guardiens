@@ -23,7 +23,7 @@ export function PretexteSection() {
       aria-labelledby="pretexte-title"
       className="scroll-mt-24 bg-gradient-to-br from-pine-deep to-pine text-pine-foreground"
     >
-      <div className="max-w-3xl mx-auto px-6 py-16 md:py-24">
+      <div className="lp-read py-[52px] md:py-24">
         <RevealSection>
           <p className="flex items-center justify-center gap-2 font-body text-xs tracking-[0.2em] uppercase text-terra-soft mb-6">
             <span className="inline-block w-5 h-0.5 bg-terra align-middle" aria-hidden="true" />

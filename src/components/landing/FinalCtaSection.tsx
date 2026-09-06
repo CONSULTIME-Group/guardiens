@@ -8,8 +8,8 @@ export function FinalCtaSection() {
   const navigate = useNavigate();
 
   return (
-    <section id="commencer" className="py-10 md:py-20 bg-primary scroll-mt-24">
-      <RevealSection className="max-w-2xl mx-auto px-6 text-center">
+    <section id="commencer" className="py-[52px] md:py-20 bg-primary scroll-mt-24">
+      <RevealSection className="lp-read text-center">
         {/* Chips "Programme Fondateur" retirés (signal de deadline implicite). */}
         <h2 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-6">
           {t("landing.final.title")}

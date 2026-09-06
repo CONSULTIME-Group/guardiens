@@ -40,8 +40,8 @@ const TestimonialsSection = () => {
   }, [isTestimonialsPaused, testimonialPages.length]);
 
   return (
-    <section id="temoignages" className="py-10 md:py-20 bg-background scroll-mt-24">
-      <div className="max-w-6xl mx-auto px-6 md:px-12">
+    <section id="temoignages" className="py-[52px] md:py-20 bg-background scroll-mt-24">
+      <div className="lp-wide">
         <RevealSection className="text-center mb-16">
           <h2 id="ils-ont-ose" className="font-heading text-4xl md:text-5xl font-semibold text-foreground leading-snug scroll-mt-24">
             {t("landing.testimonials.title")}

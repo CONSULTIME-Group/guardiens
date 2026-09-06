@@ -28,8 +28,8 @@ export function FaqSection() {
   }
 
   return (
-    <section id="faq" className="py-10 md:py-20 bg-background scroll-mt-24" aria-labelledby="faq-heading">
-      <div className="max-w-3xl mx-auto px-[5%] md:px-[8%]">
+    <section id="faq" className="py-[52px] md:py-20 bg-background scroll-mt-24" aria-labelledby="faq-heading">
+      <div className="lp-read">
         <RevealSection>
           <h2 id="faq-heading" className="font-heading text-3xl md:text-4xl font-semibold text-foreground text-center mb-10 scroll-mt-24">
             {t("landing.faq.title")}

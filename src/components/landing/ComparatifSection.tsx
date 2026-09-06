@@ -4,8 +4,8 @@ export function ComparatifSection() {
   const { t } = useTranslation();
 
   return (
-    <section id="comparatif" className="py-10 md:py-16 bg-accent/30 border-b border-border/40 scroll-mt-24">
-      <div className="max-w-4xl mx-auto px-6">
+    <section id="comparatif" className="py-[52px] md:py-16 bg-accent/30 border-b border-border/40 scroll-mt-24">
+      <div className="lp-wide">
         <h2 className="font-heading text-2xl md:text-4xl font-semibold text-foreground mb-3 scroll-mt-24">
           {t("landing.compare.title")}
         </h2>

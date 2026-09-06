@@ -8,7 +8,7 @@ export function NotreHistoireSection() {
 
   return (
     <section id="notre-histoire" className="bg-muted/30 scroll-mt-24">
-      <div className="max-w-6xl mx-auto px-6 py-10 md:py-20">
+      <div className="lp-read py-[52px] md:py-20">
         <RevealSection>
           <span className="text-xs tracking-widest uppercase text-primary font-body mb-4 block">
             {t("landing.story.eyebrow")}
@@ -18,7 +18,7 @@ export function NotreHistoireSection() {
           </h2>
         </RevealSection>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-start">
+        <div className="grid grid-cols-1 gap-8 items-start">
           <RevealSection delay={0.1}>
             <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
               {t("landing.story.p1")}

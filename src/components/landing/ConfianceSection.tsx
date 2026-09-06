@@ -11,8 +11,8 @@ export function ConfianceSection() {
   const { t } = useTranslation();
 
   return (
-    <section id="confiance" className="bg-background py-10 md:py-20 scroll-mt-24" aria-labelledby="trust-heading">
-      <div className="max-w-6xl mx-auto px-5 sm:px-6">
+    <section id="confiance" className="bg-background py-[52px] md:py-20 scroll-mt-24" aria-labelledby="trust-heading">
+      <div className="lp-wide">
         <RevealSection className="text-center max-w-3xl mx-auto mb-8 md:mb-16">
           <p className="text-xs md:text-[13px] tracking-[0.2em] uppercase text-primary font-body font-medium">
             {t("landing.trust.eyebrow")}

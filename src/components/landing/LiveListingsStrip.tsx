@@ -161,7 +161,7 @@ const LiveListingsStrip: React.FC = () => {
         aria-busy="true"
         className="bg-gradient-to-b from-accent/20 to-background border-b border-border/40"
       >
-        <div className="max-w-6xl mx-auto px-4 md:px-6 py-8 md:py-12">
+        <div className="lp-wide py-[52px] md:py-12">
           <div className="mb-6 space-y-2">
             <div className="h-3 w-24 rounded-full bg-muted animate-pulse" />
             <div className="h-7 w-80 max-w-full rounded-md bg-muted animate-pulse" />
@@ -189,7 +189,7 @@ const LiveListingsStrip: React.FC = () => {
         aria-label={t("live_listings.aria")}
         className="bg-gradient-to-b from-accent/20 to-background border-b border-border/40"
       >
-        <div className="max-w-3xl mx-auto px-4 md:px-6 py-10 md:py-14 text-center">
+        <div className="lp-read py-[52px] md:py-14 text-center">
           <div className="flex items-center justify-center gap-2 mb-3">
             <span className="relative flex h-2 w-2 shrink-0" aria-hidden="true">
               <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-60 animate-ping" />
@@ -239,7 +239,7 @@ const LiveListingsStrip: React.FC = () => {
       aria-label={t("live_listings.aria")}
       className="bg-gradient-to-b from-accent/20 to-background border-b border-border/40"
     >
-      <div className="max-w-6xl mx-auto px-4 md:px-6 py-8 md:py-12">
+      <div className="lp-wide py-[52px] md:py-12">
         <div className="mb-6 md:mb-8">
           <div className="flex items-center gap-2 mb-1.5">
             <span className="relative flex h-2 w-2 shrink-0" aria-hidden="true">

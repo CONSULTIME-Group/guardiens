@@ -33,10 +33,10 @@ export default function InventoryStrip() {
     <section
       id="chiffres"
       ref={ref}
-      className="py-10 md:py-20 bg-background scroll-mt-24"
+      className="py-[52px] md:py-20 bg-background scroll-mt-24"
       aria-labelledby="inventory-heading"
     >
-      <div className="max-w-6xl mx-auto px-5 sm:px-6 text-center">
+      <div className="lp-wide text-center">
         <h2 id="inventory-heading" className="font-heading text-3xl md:text-5xl font-semibold text-foreground">
           {t("landing.inventory.title")}
         </h2>

@@ -371,6 +371,21 @@
 
 /* ========== Rich Article Styles ========== */
 @layer components {
+  /* Largeurs de contenu unifiées de la page d'accueil (vague 2).
+     Trois catégories seulement : lecture (768 px), large (1152 px) et
+     pleine largeur. Gouttière mobile de 22 px, 24 px au-dessus de 640 px.
+     Toute nouvelle section de la page d'accueil se branche sur l'une des
+     deux classes ci-dessous, jamais sur un max-w-* local. */
+  .lp-read {
+    @apply w-full max-w-[768px] mx-auto px-[22px] sm:px-6;
+  }
+
+  .lp-wide {
+    @apply w-full max-w-[1152px] mx-auto px-[22px] sm:px-6;
+  }
+}
+
+@layer components {
   .article-rich-content {
     @apply max-w-none;
     line-height: 1.85;

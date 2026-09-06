@@ -114,8 +114,8 @@ export default function AlmaTipsTeaser() {
 
   return (
     <>
-      <section ref={ref} className="py-10 md:py-20 bg-background scroll-mt-24" aria-labelledby="alma-tips-heading">
-        <div className="max-w-6xl mx-auto px-5 sm:px-6">
+      <section ref={ref} className="py-[52px] md:py-20 bg-background scroll-mt-24" aria-labelledby="alma-tips-heading">
+        <div className="lp-wide">
           <div className="mb-8 md:mb-10">
             <p className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-primary font-semibold font-body mb-3">
               {t("landing.alma_tips.eyebrow")}
