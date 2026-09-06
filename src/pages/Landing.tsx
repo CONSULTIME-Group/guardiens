@@ -298,8 +298,8 @@ const Landing = () => {
                 <img
                   src={LE_PROGRES_LOGO}
                   alt="Le Progrès"
-                  width={272}
-                  height={40}
+                  width={597}
+                  height={80}
                   className="h-5 w-auto object-contain opacity-90"
                   loading="lazy"
                   decoding="async"

@@ -65,8 +65,8 @@ export function PressQuote({
     <img
       src={LE_PROGRES_LOGO}
       alt={`Logo ${source}`}
-      width={272}
-      height={40}
+      width={597}
+      height={80}
       className="h-[18px] w-auto object-contain"
       style={{ filter: "invert(1)", opacity: 0.72 }}
       loading="lazy"
