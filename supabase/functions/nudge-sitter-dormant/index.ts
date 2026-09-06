@@ -38,6 +38,36 @@ function isoWeek(d: Date): { year: number; week: number } {
   return { year: date.getUTCFullYear(), week };
 }
 
+/** Pause simple. */
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * Appel du sender avec tolerance au rate limit de la passerelle.
+ * `fetch` peut LEVER une RateLimitError (pas un 429 HTTP) : sans capture, le
+ * cron entier tombait en 500. On respecte `retryAfterMs`, borne a 20 s, deux
+ * tentatives supplementaires au plus, puis on abandonne ce destinataire.
+ */
+async function postWithBackoff(
+  url: string,
+  init: RequestInit,
+  attempts = 3,
+): Promise<Response | { rateLimited: true }> {
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await fetch(url, init);
+    } catch (err) {
+      const wait = Number((err as { retryAfterMs?: number })?.retryAfterMs ?? 0);
+      const isRateLimit = (err as { name?: string })?.name === "RateLimitError" || wait > 0;
+      if (!isRateLimit || i === attempts - 1) {
+        if (isRateLimit) return { rateLimited: true };
+        throw err;
+      }
+      await sleep(Math.min(wait || 1000, 20000));
+    }
+  }
+  return { rateLimited: true };
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -137,7 +167,7 @@ Deno.serve(async (req) => {
 
       // Envoi via send-transactional-email : cap, suppression, opt-out categorie,
       // en-tetes List-Unsubscribe et pied de page tokenise centralises.
-      const resp = await fetch(`${SUPABASE_URL}/functions/v1/send-transactional-email`, {
+      const result = await postWithBackoff(`${SUPABASE_URL}/functions/v1/send-transactional-email`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -155,6 +185,14 @@ Deno.serve(async (req) => {
           logMetadata: { sitter_id: s.sitter_id, days_since_signup: s.days_since_signup },
         }),
       });
+      if (!("ok" in result)) {
+        // Passerelle saturee : on differe ce destinataire a la prochaine
+        // execution hebdomadaire, sans faire echouer le cron.
+        emailsDeferred += 1;
+        await sleep(1000);
+        continue;
+      }
+      const resp = result;
       if (!resp.ok) {
         console.error("[nudge-sitter-dormant] send failed", resp.status, await resp.text());
         emailsSkipped += 1;
@@ -166,6 +204,9 @@ Deno.serve(async (req) => {
       if (outcome?.deferred) emailsDeferred += 1;
       else if (outcome?.skipped) emailsSkipped += 1;
       else emailsSent += 1;
+      // Espacement volontaire : la passerelle limite les appels fonction a
+      // fonction, une rafale sur 100 gardiens la declenche.
+      await sleep(250);
     }
 
     await run.finish(errors.length > 0 ? "partial" : "success", {
