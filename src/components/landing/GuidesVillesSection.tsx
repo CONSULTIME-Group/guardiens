@@ -4,6 +4,7 @@ import { RevealSection } from "@/components/ui/RevealSection";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { guideLinks, cityLinks } from "@/data/homeGuidesCities";
+import InventoryStrip from "@/components/landing/InventoryStrip";
 
 export function GuidesVillesSection() {
   const { t } = useTranslation();
@@ -23,7 +24,9 @@ export function GuidesVillesSection() {
           </p>
         </RevealSection>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+        <InventoryStrip />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-[34px] mb-12">
           {/* Colonne Guides */}
           <RevealSection delay={0.1}>
             <div className="rounded-2xl bg-card border border-border p-8 h-full">
