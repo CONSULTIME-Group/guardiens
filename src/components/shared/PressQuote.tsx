@@ -6,6 +6,7 @@ interface PressQuoteProps {
   source?: string;
   date?: string;
   logoPath?: string;
+  showLogo?: boolean;
   eyebrow?: string;
   citeUrl?: string;
   className?: string;
