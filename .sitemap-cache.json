@@ -5,8 +5,8 @@
       "fetchedAt": "2026-09-06T03:57:47.273Z"
     },
     "seo_city_pages": {
-      "head": "2026-09-06T12:50:02.138552+00:00|164",
-      "fetchedAt": "2026-09-06T12:52:35.485Z"
+      "head": "2026-09-06T13:40:03.116136+00:00|164",
+      "fetchedAt": "2026-09-06T13:47:15.368Z"
     },
     "seo_department_pages": {
       "head": "2026-09-06T04:07:00.297806+00:00|102",
@@ -29,8 +29,8 @@
       "fetchedAt": "2026-09-06T12:52:35.513Z"
     },
     "public_profiles": {
-      "head": "2026-09-06T12:52:19.047356+00:00|1087",
-      "fetchedAt": "2026-09-06T12:52:35.912Z"
+      "head": "2026-09-06T13:49:43.378728+00:00|1094",
+      "fetchedAt": "2026-09-06T13:52:32.252Z"
     }
   },
   "entries": {
@@ -39,12 +39,6 @@
       {
         "loc": "/house-sitting/bastia",
         "lastmod": "2026-08-23",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/clermont-ferrand",
-        "lastmod": "2026-08-24",
         "changefreq": "weekly",
         "priority": "0.8"
       },
@@ -230,12 +224,6 @@
       },
       {
         "loc": "/house-sitting/bondy",
-        "lastmod": "2026-09-06",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/villeurbanne",
         "lastmod": "2026-09-06",
         "changefreq": "weekly",
         "priority": "0.8"
@@ -535,14 +523,14 @@
         "priority": "0.8"
       },
       {
-        "loc": "/house-sitting/tassin-la-demi-lune",
-        "lastmod": "2026-09-06",
+        "loc": "/house-sitting/toulon",
+        "lastmod": "2026-09-02",
         "changefreq": "weekly",
         "priority": "0.8"
       },
       {
-        "loc": "/house-sitting/toulon",
-        "lastmod": "2026-09-02",
+        "loc": "/house-sitting/tassin-la-demi-lune",
+        "lastmod": "2026-09-06",
         "changefreq": "weekly",
         "priority": "0.8"
       },
@@ -553,7 +541,7 @@
         "priority": "0.8"
       },
       {
-        "loc": "/house-sitting/caluire-et-cuire",
+        "loc": "/house-sitting/villeurbanne",
         "lastmod": "2026-09-06",
         "changefreq": "weekly",
         "priority": "0.8"
@@ -577,14 +565,26 @@
         "priority": "0.8"
       },
       {
+        "loc": "/house-sitting/clermont-ferrand",
+        "lastmod": "2026-09-06",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/megeve",
+        "lastmod": "2026-09-06",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
         "loc": "/house-sitting/saint-andre",
         "lastmod": "2026-09-03",
         "changefreq": "weekly",
         "priority": "0.8"
       },
       {
-        "loc": "/house-sitting/megeve",
-        "lastmod": "2026-09-03",
+        "loc": "/house-sitting/caluire-et-cuire",
+        "lastmod": "2026-09-06",
         "changefreq": "weekly",
         "priority": "0.8"
       },
@@ -733,13 +733,13 @@
         "priority": "0.8"
       },
       {
-        "loc": "/house-sitting/chambery",
+        "loc": "/house-sitting/grenoble",
         "lastmod": "2026-09-06",
         "changefreq": "weekly",
         "priority": "0.8"
       },
       {
-        "loc": "/house-sitting/grenoble",
+        "loc": "/house-sitting/chambery",
         "lastmod": "2026-09-06",
         "changefreq": "weekly",
         "priority": "0.8"
@@ -2977,7 +2977,7 @@
         "priority": "0.5"
       },
       {
-        "loc": "/gardiens/7bf29905-d372-4669-93b1-ec7def9b06d5",
+        "loc": "/gardiens/339f8d3b-7f54-4d9c-ae05-62172327476a",
         "lastmod": "2026-09-06",
         "changefreq": "monthly",
         "priority": "0.5"
@@ -3169,6 +3169,12 @@
         "priority": "0.5"
       },
       {
+        "loc": "/gardiens/7bf29905-d372-4669-93b1-ec7def9b06d5",
+        "lastmod": "2026-09-06",
+        "changefreq": "monthly",
+        "priority": "0.5"
+      },
+      {
         "loc": "/gardiens/b27b3a37-3994-4d11-9e13-e73607cf5c79",
         "lastmod": "2026-08-28",
         "changefreq": "monthly",
@@ -3195,6 +3201,12 @@
       {
         "loc": "/gardiens/6a283676-3b1b-45bf-9c3a-be45e18a0528",
         "lastmod": "2026-08-17",
+        "changefreq": "monthly",
+        "priority": "0.5"
+      },
+      {
+        "loc": "/gardiens/c9ec92ff-3003-43c1-80c7-54d6666c4c32",
+        "lastmod": "2026-09-06",
         "changefreq": "monthly",
         "priority": "0.5"
       },
@@ -3231,12 +3243,6 @@
       {
         "loc": "/gardiens/9a4b2013-fe29-48c9-80cc-32d97db0a93b",
         "lastmod": "2026-05-20",
-        "changefreq": "monthly",
-        "priority": "0.5"
-      },
-      {
-        "loc": "/gardiens/c9ec92ff-3003-43c1-80c7-54d6666c4c32",
-        "lastmod": "2026-09-02",
         "changefreq": "monthly",
         "priority": "0.5"
       },
@@ -3332,7 +3338,7 @@
       },
       {
         "loc": "/gardiens/588d9ab7-189e-42b1-9312-2d7792d85540",
-        "lastmod": "2026-08-18",
+        "lastmod": "2026-09-06",
         "changefreq": "monthly",
         "priority": "0.5"
       },

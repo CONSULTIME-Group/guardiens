@@ -374,6 +374,9 @@ const Landing = () => {
       {/* ═══════════════ SECTION 2, CE QU'ON FAIT ENSEMBLE ═══════════════ */}
       <UsagesSection />
 
+      {/* ═══════════════ SECTION 2.2, VOIX EXTERNE (presse comme témoignage, jamais bannière) ═══════════════ */}
+      <PressQuote />
+
       {/* ═══════════════ SECTION 2.5, INTERNATIONAL (InternationalStrip) ═══════════════ */}
       <RevealSection>
         <InternationalStrip />
@@ -407,9 +410,6 @@ const Landing = () => {
 
       {/* ═══════════════ SECTION 7, TÉMOIGNAGES ═══════════════ */}
       <TestimonialsSection />
-
-      {/* ═══════════════ SECTION 7.5, VOIX EXTERNE (presse comme témoignage, jamais bannière) ═══════════════ */}
-      <PressQuote />
 
       {/* ═══════════════ SECTION 8, NOTRE HISTOIRE ═══════════════ */}
       <NotreHistoireSection />

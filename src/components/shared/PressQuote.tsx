@@ -17,6 +17,8 @@ const DEFAULT_SOURCE = "Le Progrès";
 const DEFAULT_DATE = "6 septembre 2026";
 const DEFAULT_LOGO = "/presse/le-progres.png";
 const DEFAULT_EYEBROW = "Dans la presse";
+const DEFAULT_CITE_URL =
+  "https://c.leprogres.fr/economie/2026/09/06/apres-avoir-garde-234-animaux-et-37-maisons-ils-lancent-leur-plateforme-de-home-sitting";
 
 /**
  * Citation presse, traitée comme un témoignage éditorial.
@@ -33,7 +35,7 @@ export function PressQuote({
   logoPath = DEFAULT_LOGO,
   showLogo = true,
   eyebrow = DEFAULT_EYEBROW,
-  citeUrl,
+  citeUrl = DEFAULT_CITE_URL,
   className,
 }: PressQuoteProps) {
   const [logoExists, setLogoExists] = useState(false);
@@ -105,21 +107,47 @@ export function PressQuote({
             </p>
           </blockquote>
 
-          <figcaption className="mt-6 flex items-center justify-center gap-3">
-            {showLogo && logoExists && (
-              <img
-                src={logoPath}
-                alt={`Logo ${source}`}
-                width={120}
-                height={24}
-                className="h-[18px] w-auto object-contain opacity-80"
-                loading="lazy"
-                decoding="async"
-              />
+          <figcaption className="mt-6 flex items-center justify-center">
+            {citeUrl ? (
+              <a
+                href={citeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-3 font-body text-xs md:text-[13px] text-muted-foreground underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+              >
+                {showLogo && logoExists && (
+                  <img
+                    src={logoPath}
+                    alt={`Logo ${source}`}
+                    width={120}
+                    height={24}
+                    className="h-[18px] w-auto object-contain opacity-80"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                )}
+                <span>
+                  {source}, {date}
+                </span>
+              </a>
+            ) : (
+              <span className="inline-flex items-center justify-center gap-3 font-body text-xs md:text-[13px] text-muted-foreground">
+                {showLogo && logoExists && (
+                  <img
+                    src={logoPath}
+                    alt={`Logo ${source}`}
+                    width={120}
+                    height={24}
+                    className="h-[18px] w-auto object-contain opacity-80"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                )}
+                <span>
+                  {source}, {date}
+                </span>
+              </span>
             )}
-            <span className="font-body text-xs md:text-[13px] text-muted-foreground">
-              {source}, {date}
-            </span>
           </figcaption>
         </div>
       </div>
