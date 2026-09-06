@@ -715,12 +715,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/house-sitting/clermont-ferrand</loc>
-    <lastmod>2026-08-24</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://guardiens.fr/house-sitting/le-mans</loc>
     <lastmod>2026-08-29</lastmod>
     <changefreq>weekly</changefreq>
@@ -902,12 +896,6 @@
   </url>
   <url>
     <loc>https://guardiens.fr/house-sitting/bondy</loc>
-    <lastmod>2026-09-06</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/house-sitting/villeurbanne</loc>
     <lastmod>2026-09-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -1201,20 +1189,26 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/house-sitting/tassin-la-demi-lune</loc>
-    <lastmod>2026-09-06</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://guardiens.fr/house-sitting/toulon</loc>
     <lastmod>2026-09-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/house-sitting/tassin-la-demi-lune</loc>
+    <lastmod>2026-09-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/house-sitting/dijon</loc>
     <lastmod>2026-09-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/house-sitting/villeurbanne</loc>
+    <lastmod>2026-09-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1237,13 +1231,19 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/house-sitting/saint-andre</loc>
-    <lastmod>2026-09-03</lastmod>
+    <loc>https://guardiens.fr/house-sitting/clermont-ferrand</loc>
+    <lastmod>2026-09-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/house-sitting/megeve</loc>
+    <lastmod>2026-09-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/house-sitting/saint-andre</loc>
     <lastmod>2026-09-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -3019,7 +3019,7 @@
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/gardiens/7bf29905-d372-4669-93b1-ec7def9b06d5</loc>
+    <loc>https://guardiens.fr/gardiens/339f8d3b-7f54-4d9c-ae05-62172327476a</loc>
     <lastmod>2026-09-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
@@ -3211,6 +3211,12 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/gardiens/7bf29905-d372-4669-93b1-ec7def9b06d5</loc>
+    <lastmod>2026-09-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/gardiens/b27b3a37-3994-4d11-9e13-e73607cf5c79</loc>
     <lastmod>2026-08-28</lastmod>
     <changefreq>monthly</changefreq>
@@ -3237,6 +3243,12 @@
   <url>
     <loc>https://guardiens.fr/gardiens/6a283676-3b1b-45bf-9c3a-be45e18a0528</loc>
     <lastmod>2026-08-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/gardiens/c9ec92ff-3003-43c1-80c7-54d6666c4c32</loc>
+    <lastmod>2026-09-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -3273,12 +3285,6 @@
   <url>
     <loc>https://guardiens.fr/gardiens/9a4b2013-fe29-48c9-80cc-32d97db0a93b</loc>
     <lastmod>2026-05-20</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/gardiens/c9ec92ff-3003-43c1-80c7-54d6666c4c32</loc>
-    <lastmod>2026-09-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -3374,7 +3380,7 @@
   </url>
   <url>
     <loc>https://guardiens.fr/gardiens/588d9ab7-189e-42b1-9312-2d7792d85540</loc>
-    <lastmod>2026-08-18</lastmod>
+    <lastmod>2026-09-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
