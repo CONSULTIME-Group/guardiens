@@ -6,6 +6,7 @@ interface PressQuoteProps {
   source?: string;
   date?: string;
   logoPath?: string;
+  showLogo?: boolean;
   eyebrow?: string;
   citeUrl?: string;
   className?: string;
@@ -30,6 +31,7 @@ export function PressQuote({
   source = DEFAULT_SOURCE,
   date = DEFAULT_DATE,
   logoPath = DEFAULT_LOGO,
+  showLogo = false,
   eyebrow = DEFAULT_EYEBROW,
   citeUrl,
   className,
@@ -103,8 +105,8 @@ export function PressQuote({
             </p>
           </blockquote>
 
-          <figcaption className="mt-6 flex items-center gap-3">
-            {logoExists && (
+          <figcaption className="mt-6 flex items-center justify-center gap-3">
+            {showLogo && logoExists && (
               <img
                 src={logoPath}
                 alt={`Logo ${source}`}
