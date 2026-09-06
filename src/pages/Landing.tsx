@@ -342,11 +342,8 @@ const Landing = () => {
          </section>
        )}
 
-      {/* ═══════════════ SECTION 2, CONFIANCE & PÉRIMÈTRE (positionnée tôt : réponse à la peur n°1) ═══════════════ */}
-      <ConfianceSection />
+      {/* Confiance et annonces déplacées après la section Prétexte le 06/09/2026 */}
 
-      {/* ═══════════════ APERÇU LIVE ANNONCES ═══════════════ */}
-      <LiveListingsStrip />
 
 
 
