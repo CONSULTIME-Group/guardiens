@@ -203,9 +203,9 @@ export function PressQuote({
                       <img
                         src={logoPath}
                         alt={`Logo ${source}`}
-                        width={120}
-                        height={24}
-                        className="h-[18px] w-auto object-contain opacity-80"
+                        width={512}
+                        height={114}
+                        className="h-[18px] w-auto object-contain opacity-80 rounded-[3px]"
                         loading="lazy"
                         decoding="async"
                         onError={() => setLogoError(true)}
