@@ -292,11 +292,27 @@ const Landing = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                  className="mt-[14px] inline-flex items-center gap-2.5 opacity-90 hover:opacity-100 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40 rounded-sm animate-hero-fade-up animation-delay-1100"
-...
-             )}
-           </div>
-         </div>
-       </section>
+              >
+                <span className="font-body text-[11px] uppercase tracking-[0.16em] text-white/70">
+                  Vu dans
+                </span>
+                <img
+                  src={LE_PROGRES_LOGO}
+                  alt="Le Progrès"
+                  width={597}
+                  height={80}
+                  className="h-5 w-auto object-contain opacity-90"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <span className="font-body text-xs text-white/70">
+                  6 septembre 2026
+                </span>
+              </a>
+            )}
+          </div>
+        </div>
+      </section>
 
        {/* ═══════════════ BANDE CHIFFRES + ENTRAIDE (hors hero, fond crème) ═══════════════
            Deux compteurs seulement, ceux qui portent : inscrits et animaux
