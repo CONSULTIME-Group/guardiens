@@ -187,7 +187,9 @@ const GuideDetail = () => {
 
   // JSON-LD ItemList des lieux : balise l'ensemble de places, independamment du filtre de recherche.
   const placesSchema = useMemo(() => {
-    if (places.length === 0) return null;
+    // guide vaut undefined pendant le chargement : les lieux peuvent arriver
+    // avant la fiche guide, dereférencer guide.city ici ferait tomber la page.
+    if (!guide || places.length === 0) return null;
     return {
       "@context": "https://schema.org",
       "@type": "ItemList",
