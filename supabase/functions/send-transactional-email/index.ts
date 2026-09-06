@@ -218,7 +218,12 @@ Deno.serve(async (req) => {
   // Resolve effective recipient: template-level `to` takes precedence over
   // the caller-provided recipientEmail. This allows notification templates
   // to always send to a fixed address (e.g., site owner from env var).
-  const effectiveRecipient = template.to || recipientEmail
+  // Normalisation : une adresse stockee avec des espaces ou sous la forme
+  // "Prenom Nom <a@b.fr>" est refusee par Resend en 422. On nettoie ici, puis
+  // on refuse proprement en 400 plutot que de laisser passer un 500.
+  const rawRecipient = String(template.to || recipientEmail || '').trim()
+  const bracketed = rawRecipient.match(/<\s*([^<>\s]+@[^<>\s]+)\s*>/)
+  const effectiveRecipient = (bracketed ? bracketed[1] : rawRecipient).trim()
 
   if (!effectiveRecipient) {
     return new Response(
@@ -229,6 +234,14 @@ Deno.serve(async (req) => {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
+    )
+  }
+
+  if (!/^[^\s@,;<>]+@[^\s@,;<>]+\.[^\s@,;<>]{2,}$/.test(effectiveRecipient)) {
+    console.error('recipient rejected before send', { templateName })
+    return new Response(
+      JSON.stringify({ success: false, reason: 'invalid_recipient_email' }),
+      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
 
@@ -1209,7 +1222,10 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const resendRes = await resendFetch('https://api.resend.com/emails', {
+    // Resend plafonne a 10 requetes par seconde. Un envoi en rafale (digest,
+    // vidage de file) prenait un 429 definitif et l'email etait perdu. On
+    // retente avec attente, en respectant Retry-After quand il est fourni.
+    const callResend = () => resendFetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -1217,6 +1233,18 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify(resendPayload),
     }, { functionName: "send-transactional-email" })
+
+    let resendRes = await callResend()
+    const RETRY_DELAYS_MS = [600, 1500, 3000]
+    for (let attempt = 0; attempt < RETRY_DELAYS_MS.length && resendRes.status === 429; attempt++) {
+      const retryAfter = Number(resendRes.headers.get('retry-after'))
+      const waitMs = Number.isFinite(retryAfter) && retryAfter > 0
+        ? Math.min(retryAfter * 1000, 5000)
+        : RETRY_DELAYS_MS[attempt]
+      console.warn('Resend 429, nouvelle tentative', { attempt: attempt + 1, waitMs, templateName })
+      await new Promise((r) => setTimeout(r, waitMs))
+      resendRes = await callResend()
+    }
 
     const resendData = await resendRes.json()
 

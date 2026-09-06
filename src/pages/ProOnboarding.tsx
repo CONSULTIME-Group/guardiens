@@ -101,7 +101,10 @@ export default function ProOnboarding() {
       if (!raw) return;
       const draft = JSON.parse(raw);
       if (draft?.form && typeof draft.form === "object") setForm((f) => ({ ...f, ...draft.form }));
-      if (draft?.step === 1 || draft?.step === 2 || draft?.step === 3) setStep(draft.step);
+      // La photo n'est pas serialisable : elle est toujours perdue au retour.
+      // Comme elle est obligatoire a l'etape 1, on rouvre a l'etape 1 pour que
+      // l'envoi final ne reste jamais grise sans explication.
+      setStep(1);
     } catch {
       /* draft corrompu : on l'ignore */
     }
