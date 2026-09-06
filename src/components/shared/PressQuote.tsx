@@ -105,8 +105,8 @@ export function PressQuote({
             </p>
           </blockquote>
 
-          <figcaption className="mt-6 flex items-center gap-3">
-            {logoExists && (
+          <figcaption className="mt-6 flex items-center justify-center gap-3">
+            {showLogo && logoExists && (
               <img
                 src={logoPath}
                 alt={`Logo ${source}`}
