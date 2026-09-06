@@ -100,18 +100,16 @@ const Landing = () => {
     return () => { cancelled = true; };
   }, [navigate]);
 
-  // KPI hero : "maisons gardées" et "animaux accompagnés" additionnent l'historique
-  // personnel des fondateurs (37 maisons, 234 animaux, raconté dans Notre histoire
-  // et la carte piliers) et l'activité réelle de la plateforme. Décision produit
+  // Bande chiffres sous le hero : "animaux accompagnés" additionne l'historique
+  // personnel des fondateurs (234 animaux, raconté dans Notre histoire et la
+  // carte piliers) et l'activité réelle de la plateforme. Décision produit
   // confirmée par Jérémie le 03/08/2026 : partir de ce socle vécu et cumuler
-  // par-dessus au fur et à mesure que la plateforme grandit. "Inscrits" et
-  // "missions_entraide" restent des compteurs plateforme purs, sans offset.
-  const FOUNDER_BASE_MAISONS = 37;
+  // par-dessus au fur et à mesure que la plateforme grandit. "Inscrits" reste
+  // un compteur plateforme pur, sans offset. Recomposition du 06/09/2026 : les
+  // compteurs "maisons gardées" et "missions d'entraide" sortent de la home.
   const FOUNDER_BASE_ANIMAUX = 234;
-  const kpiMaisons = FOUNDER_BASE_MAISONS + (publicStats?.maisons_gardees ?? 0);
   const kpiAnimaux = FOUNDER_BASE_ANIMAUX + (publicStats?.animaux_accompagnes ?? 0);
   const kpiInscrits = publicStats?.total_inscrits ?? 0;
-  const kpiMissions = publicStats?.missions_entraide ?? 0;
   const isPressHighlighted = new Date() < PRESS_HIGHLIGHT_UNTIL;
 
 
