@@ -60,16 +60,14 @@ describe("diffusion des annonces, ciblage par proximité", () => {
 });
 
 describe("message de complétion, une étape ou plusieurs", () => {
+  // Bareme du 30/08/2026, seuil de candidature a 40 % : bio 15 + localisation
+  // 15 = 30, seule la photo (20) fait franchir le seuil.
   const base = {
     first_name: "Faïza",
     postal_code: "69003",
     country: "FR",
     bio: "x".repeat(60),
-    interests: ["a", "b", "c"],
-    languages: ["fr"],
-    life_pace: "calme",
-    animal_types: ["chien"],
-    gallery_count: 3,
+    gallery_count: 0,
   };
 
   it("promet le déblocage quand la photo est la seule étape restante", () => {
