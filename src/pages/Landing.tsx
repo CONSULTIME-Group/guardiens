@@ -202,9 +202,7 @@ const Landing = () => {
               {t("landing.hero.eyebrow")}
             </p>
 
-            {/* Une seule star typographique : l'accroche, seule en Playfair.
-                La ligne title_accent quitte le Playfair et redescend en
-                précision de paragraphe, plus bas. */}
+            {/* Une seule star typographique : l'accroche, seule en Playfair. */}
             <h1 className="font-heading text-[clamp(26px,8.4vw,38px)] sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-[12px] md:mb-[18px] text-balance">
               {t("landing.hero.title_main")}
             </h1>
