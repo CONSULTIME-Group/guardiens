@@ -38,34 +38,24 @@ function isoWeek(d: Date): { year: number; week: number } {
   return { year: date.getUTCFullYear(), week };
 }
 
-/** Pause simple. */
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
 /**
  * Appel du sender avec tolerance au rate limit de la passerelle.
- * `fetch` peut LEVER une RateLimitError (pas un 429 HTTP) : sans capture, le
- * cron entier tombait en 500. On respecte `retryAfterMs`, borne a 20 s, deux
- * tentatives supplementaires au plus, puis on abandonne ce destinataire.
+ * `fetch` peut lever une RateLimitError avant de produire une reponse HTTP.
+ * Le lot doit alors s'arreter et repondre normalement, sans attendre dans la
+ * requete admin et sans accentuer la saturation par de nouvelles tentatives.
  */
 async function postWithBackoff(
   url: string,
   init: RequestInit,
-  attempts = 3,
-): Promise<Response | { rateLimited: true }> {
-  for (let i = 0; i < attempts; i++) {
-    try {
-      return await fetch(url, init);
-    } catch (err) {
-      const wait = Number((err as { retryAfterMs?: number })?.retryAfterMs ?? 0);
-      const isRateLimit = (err as { name?: string })?.name === "RateLimitError" || wait > 0;
-      if (!isRateLimit || i === attempts - 1) {
-        if (isRateLimit) return { rateLimited: true };
-        throw err;
-      }
-      await sleep(Math.min(wait || 1000, 20000));
-    }
+): Promise<Response | { rateLimited: true; retryAfterMs: number }> {
+  try {
+    return await fetch(url, init);
+  } catch (err) {
+    const retryAfterMs = Number((err as { retryAfterMs?: number })?.retryAfterMs ?? 0);
+    const isRateLimit = (err as { name?: string })?.name === "RateLimitError" || retryAfterMs > 0;
+    if (isRateLimit) return { rateLimited: true, retryAfterMs };
+    throw err;
   }
-  return { rateLimited: true };
 }
 
 Deno.serve(async (req) => {
@@ -74,6 +64,10 @@ Deno.serve(async (req) => {
   }
   const run = await startCronRun("nudge-sitter-dormant");
   try {
+    const requestBody = await req.json().catch(() => ({})) as { sitter_id?: unknown };
+    const requestedSitterId = typeof requestBody.sitter_id === "string"
+      ? requestBody.sitter_id.trim()
+      : "";
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
@@ -93,7 +87,18 @@ Deno.serve(async (req) => {
 
     const { data, error } = await service.rpc("detect_dormant_sitters");
     if (error) throw error;
-    const sitters: DormantSitter[] = (data as DormantSitter[]) ?? [];
+    const detectedSitters: DormantSitter[] = (data as DormantSitter[]) ?? [];
+    const sitters = requestedSitterId
+      ? detectedSitters.filter((s) => s.sitter_id === requestedSitterId)
+      : detectedSitters;
+
+    if (requestedSitterId && sitters.length === 0) {
+      await run.finish("success", { detected: 0, requested_sitter_id: requestedSitterId });
+      return new Response(
+        JSON.stringify({ skipped: "sitter_not_eligible", detected: 0 }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
 
     const now = new Date();
     const { year, week } = isoWeek(now);
@@ -104,6 +109,7 @@ Deno.serve(async (req) => {
     let emailsSent = 0;
     let emailsDeferred = 0;
     let emailsSkipped = 0;
+    let rateLimitRetryAfterMs = 0;
     const errors: Array<{ sitter_id: string; error: string }> = [];
 
     for (const s of sitters) {
@@ -186,15 +192,21 @@ Deno.serve(async (req) => {
         }),
       });
       if (!("ok" in result)) {
-        // Passerelle saturee : on differe ce destinataire a la prochaine
-        // execution hebdomadaire, sans faire echouer le cron.
-        emailsDeferred += 1;
-        await sleep(1000);
-        continue;
+        // La passerelle est saturee. Le destinataire courant et tous les
+        // suivants restent eligibles a la prochaine execution hebdomadaire.
+        emailsDeferred += sitters.length - emailsSent - emailsSkipped - emailsDeferred;
+        rateLimitRetryAfterMs = result.retryAfterMs;
+        break;
       }
       const resp = result;
       if (!resp.ok) {
-        console.error("[nudge-sitter-dormant] send failed", resp.status, await resp.text());
+        const responseText = await resp.text();
+        if (resp.status === 429 || (resp.status >= 500 && responseText.includes("Rate limit exceeded"))) {
+          emailsDeferred += sitters.length - emailsSent - emailsSkipped - emailsDeferred;
+          rateLimitRetryAfterMs = Number(resp.headers.get("retry-after") ?? 0) * 1000;
+          break;
+        }
+        console.error("[nudge-sitter-dormant] send failed", resp.status, responseText);
         emailsSkipped += 1;
         continue;
       }
@@ -204,9 +216,6 @@ Deno.serve(async (req) => {
       if (outcome?.deferred) emailsDeferred += 1;
       else if (outcome?.skipped) emailsSkipped += 1;
       else emailsSent += 1;
-      // Espacement volontaire : la passerelle limite les appels fonction a
-      // fonction, une rafale sur 100 gardiens la declenche.
-      await sleep(250);
     }
 
     await run.finish(errors.length > 0 ? "partial" : "success", {
@@ -217,6 +226,7 @@ Deno.serve(async (req) => {
       emails_deferred: emailsDeferred,
       emails_skipped: emailsSkipped,
       errors_count: errors.length,
+      rate_limit_retry_after_ms: rateLimitRetryAfterMs,
     });
     return new Response(
       JSON.stringify({
@@ -226,6 +236,7 @@ Deno.serve(async (req) => {
         emails_sent: emailsSent,
         emails_deferred: emailsDeferred,
         emails_skipped: emailsSkipped,
+        rate_limit_retry_after_ms: rateLimitRetryAfterMs,
         errors,
         generated_at: new Date().toISOString(),
       }),
