@@ -6,6 +6,8 @@
  *
  * Source unique de vérité pour les routes statiques : src/data/siteRoutes.ts
  * (staticRoutes + SITE_URL). Ne PAS redéclarer ces valeurs ici.
+ *
+ * Dernière régénération forcée : 2026-09-06 (sortie de noindex de 20 pages villes)
  */
 import { createClient } from "@supabase/supabase-js";
 import fs from "fs";
