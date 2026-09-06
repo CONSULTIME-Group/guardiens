@@ -89,7 +89,10 @@ export function PressQuote({
             {eyebrow}
           </p>
 
-          <blockquote cite={citeUrl}>
+          <blockquote
+            cite={citeUrl}
+            className="border-0 m-0 p-0 bg-transparent"
+          >
             <p
               className={cn(
                 "font-heading italic text-foreground leading-snug",
