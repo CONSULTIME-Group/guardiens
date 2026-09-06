@@ -181,6 +181,19 @@ Deno.serve(async (req) => {
         errors.push({ user_id: row.id, reason: `send-transactional-email ${res.status}: ${txt}`, http_status: res.status })
         return 'failed'
       }
+      // Un HTTP 200 ne prouve pas l'envoi : la fonction rend aussi 200 pour un
+      // refus (desabonnement, adresse supprimee, doublon) ou un report.
+      const payload = await res.json().catch(() => null) as
+        | { success?: boolean; skipped?: boolean; deferred?: boolean; reason?: string; status?: string }
+        | null
+      if (payload && (payload.skipped === true || payload.success === false)) {
+        errors.push({ user_id: row.id, reason: payload.reason ?? payload.status ?? 'refuse', http_status: 200 })
+        return 'skipped'
+      }
+      if (payload?.deferred === true) {
+        errors.push({ user_id: row.id, reason: payload.reason ?? 'deferred', http_status: 200 })
+        return 'skipped'
+      }
       return 'sent'
     }
 
