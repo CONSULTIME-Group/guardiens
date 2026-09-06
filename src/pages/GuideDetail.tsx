@@ -356,7 +356,7 @@ const GuideDetail = () => {
           </div>
           <div className="relative max-w-5xl mx-auto px-4 py-6 sm:py-10 md:py-14">
           <h1 className="font-heading text-2xl sm:text-4xl font-bold text-foreground mb-3 md:mb-4">
-            {t("guide_detail.title", { city: guide.city })}
+            {h1Title}
           </h1>
           <p className="text-muted-foreground text-base md:text-lg leading-relaxed max-w-3xl mb-3">
             {guide.intro}
