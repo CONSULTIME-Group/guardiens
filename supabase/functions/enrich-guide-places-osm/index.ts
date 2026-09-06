@@ -333,11 +333,25 @@ Deno.serve(async (req) => {
     const details: any[] = [];
     const dryRows: any[] = [];
 
+    // Marque le guide comme tenté, quel que soit le résultat (y compris
+    // Overpass indisponible ou tous les candidats rejetés). Un guide sans
+    // vétérinaire ni animalerie dans son rayon est un résultat normal :
+    // sans ce marquage, il gèle la file éternellement.
+    // En dry_run on n'écrit rien : c'est une simulation.
+    const markAttempted = async (guideId: string) => {
+      if (dryRun) return;
+      await supabase
+        .from("city_guides")
+        .update({ osm_enrich_attempted_at: new Date().toISOString() })
+        .eq("id", guideId);
+    };
+
     let first = true;
     for (const guide of guides) {
       if (!first) await sleep(1000);
       first = false;
       guides_traites++;
+      try {
 
       const guideDept = deptFromPostal(guide.postal_code) ??
         (guide.department ? null : null);
