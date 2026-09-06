@@ -17,7 +17,7 @@ import { useInventaireCounts } from "@/hooks/useInventaireCounts";
 import { usePublicStats } from "@/hooks/usePublicStats";
 import LiveListingsStrip from "@/components/landing/LiveListingsStrip";
 import TestimonialsSection from "@/components/landing/TestimonialsSection";
-import PressQuote from "@/components/shared/PressQuote";
+import PressQuote, { PRESS_HIGHLIGHT_UNTIL } from "@/components/shared/PressQuote";
 
 import { UsagesSection } from "@/components/landing/UsagesSection";
 import { RencontreSection } from "@/components/landing/RencontreSection";
@@ -111,6 +111,7 @@ const Landing = () => {
   const kpiAnimaux = FOUNDER_BASE_ANIMAUX + (publicStats?.animaux_accompagnes ?? 0);
   const kpiInscrits = publicStats?.total_inscrits ?? 0;
   const kpiMissions = publicStats?.missions_entraide ?? 0;
+  const isPressHighlighted = new Date() < PRESS_HIGHLIGHT_UNTIL;
 
 
  /* ── Idle preload of the France illustration (low priority, post-LCP) ── */
@@ -320,6 +321,9 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* ═══════════════ SECTION 1.5, VOIX EXTERNE EN MISE EN AVANT (presse comme témoignage, jamais bannière) ═══════════════ */}
+      {isPressHighlighted && <PressQuote />}
+
       {/* ═══════════════ SECTION 2, CONFIANCE & PÉRIMÈTRE (positionnée tôt : réponse à la peur n°1) ═══════════════ */}
       <ConfianceSection />
 
@@ -375,7 +379,7 @@ const Landing = () => {
       <UsagesSection />
 
       {/* ═══════════════ SECTION 2.2, VOIX EXTERNE (presse comme témoignage, jamais bannière) ═══════════════ */}
-      <PressQuote />
+      {!isPressHighlighted && <PressQuote />}
 
       {/* ═══════════════ SECTION 2.5, INTERNATIONAL (InternationalStrip) ═══════════════ */}
       <RevealSection>

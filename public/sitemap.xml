@@ -733,12 +733,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/house-sitting/choisy-le-roi</loc>
-    <lastmod>2026-09-06</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://guardiens.fr/house-sitting/angers</loc>
     <lastmod>2026-08-29</lastmod>
     <changefreq>weekly</changefreq>
@@ -747,6 +741,12 @@
   <url>
     <loc>https://guardiens.fr/house-sitting/brest</loc>
     <lastmod>2026-08-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/house-sitting/choisy-le-roi</loc>
+    <lastmod>2026-09-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -763,14 +763,20 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/house-sitting/rouen</loc>
+    <lastmod>2026-08-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/house-sitting/ecully</loc>
     <lastmod>2026-09-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/house-sitting/rouen</loc>
-    <lastmod>2026-08-25</lastmod>
+    <loc>https://guardiens.fr/house-sitting/aulnay-sous-bois</loc>
+    <lastmod>2026-09-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -787,12 +793,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/house-sitting/aulnay-sous-bois</loc>
-    <lastmod>2026-09-06</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://guardiens.fr/house-sitting/saint-pierre</loc>
     <lastmod>2026-09-03</lastmod>
     <changefreq>weekly</changefreq>
@@ -805,19 +805,19 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/house-sitting/toulouse</loc>
-    <lastmod>2026-09-04</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/house-sitting/le-blanc-mesnil</loc>
+    <loc>https://guardiens.fr/house-sitting/compiegne</loc>
     <lastmod>2026-09-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/house-sitting/compiegne</loc>
+    <loc>https://guardiens.fr/house-sitting/toulouse</loc>
+    <lastmod>2026-09-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/house-sitting/le-blanc-mesnil</loc>
     <lastmod>2026-09-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -829,20 +829,8 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/house-sitting/fontenay-sous-bois</loc>
-    <lastmod>2026-09-06</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/house-sitting/clichy</loc>
-    <lastmod>2026-09-06</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://guardiens.fr/house-sitting/paris</loc>
-    <lastmod>2026-09-05</lastmod>
+    <lastmod>2026-09-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -854,12 +842,6 @@
   </url>
   <url>
     <loc>https://guardiens.fr/house-sitting/clamart</loc>
-    <lastmod>2026-09-06</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/house-sitting/issy-les-moulineaux</loc>
     <lastmod>2026-09-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -997,26 +979,20 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/house-sitting/saint-maur-des-fosses</loc>
-    <lastmod>2026-09-06</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://guardiens.fr/house-sitting/chalons-en-champagne</loc>
     <lastmod>2026-08-30</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/house-sitting/laval</loc>
-    <lastmod>2026-08-30</lastmod>
+    <loc>https://guardiens.fr/house-sitting/saint-maur-des-fosses</loc>
+    <lastmod>2026-09-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/house-sitting/boulogne-billancourt</loc>
-    <lastmod>2026-09-06</lastmod>
+    <loc>https://guardiens.fr/house-sitting/laval</loc>
+    <lastmod>2026-08-30</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1033,7 +1009,7 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/house-sitting/ivry-sur-seine</loc>
+    <loc>https://guardiens.fr/house-sitting/boulogne-billancourt</loc>
     <lastmod>2026-09-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -1045,13 +1021,13 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/house-sitting/argenteuil</loc>
+    <loc>https://guardiens.fr/house-sitting/ivry-sur-seine</loc>
     <lastmod>2026-09-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/house-sitting/champigny-sur-marne</loc>
+    <loc>https://guardiens.fr/house-sitting/argenteuil</loc>
     <lastmod>2026-09-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -1059,6 +1035,12 @@
   <url>
     <loc>https://guardiens.fr/house-sitting/merignac</loc>
     <lastmod>2026-08-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/house-sitting/champigny-sur-marne</loc>
+    <lastmod>2026-09-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1135,12 +1117,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/house-sitting/bagneux</loc>
-    <lastmod>2026-09-06</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://guardiens.fr/house-sitting/reims</loc>
     <lastmod>2026-09-03</lastmod>
     <changefreq>weekly</changefreq>
@@ -1207,6 +1183,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/house-sitting/meaux</loc>
+    <lastmod>2026-09-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/house-sitting/villeurbanne</loc>
     <lastmod>2026-09-06</lastmod>
     <changefreq>weekly</changefreq>
@@ -1214,12 +1196,6 @@
   </url>
   <url>
     <loc>https://guardiens.fr/house-sitting/pantin</loc>
-    <lastmod>2026-09-06</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/house-sitting/meaux</loc>
     <lastmod>2026-09-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -1263,6 +1239,30 @@
   <url>
     <loc>https://guardiens.fr/house-sitting/marseille</loc>
     <lastmod>2026-09-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/house-sitting/bagneux</loc>
+    <lastmod>2026-09-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/house-sitting/fontenay-sous-bois</loc>
+    <lastmod>2026-09-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/house-sitting/clichy</loc>
+    <lastmod>2026-09-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/house-sitting/issy-les-moulineaux</loc>
+    <lastmod>2026-09-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1327,14 +1327,14 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/house-sitting/evreux</loc>
-    <lastmod>2026-09-06</lastmod>
+    <loc>https://guardiens.fr/house-sitting/cannes</loc>
+    <lastmod>2026-09-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/house-sitting/cannes</loc>
-    <lastmod>2026-09-02</lastmod>
+    <loc>https://guardiens.fr/house-sitting/evreux</loc>
+    <lastmod>2026-09-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1381,14 +1381,14 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/house-sitting/la-seyne-sur-mer</loc>
-    <lastmod>2026-09-02</lastmod>
+    <loc>https://guardiens.fr/house-sitting/valence</loc>
+    <lastmod>2026-09-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/house-sitting/valence</loc>
-    <lastmod>2026-09-06</lastmod>
+    <loc>https://guardiens.fr/house-sitting/la-seyne-sur-mer</loc>
+    <lastmod>2026-09-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1603,12 +1603,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guides/decines-charpieu</loc>
-    <lastmod>2026-03-26</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://guardiens.fr/guides/oullins</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
@@ -1633,12 +1627,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guides/echirolles</loc>
-    <lastmod>2026-03-26</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://guardiens.fr/guides/vichy</loc>
     <lastmod>2026-03-26</lastmod>
     <changefreq>weekly</changefreq>
@@ -1647,6 +1635,12 @@
   <url>
     <loc>https://guardiens.fr/guides/voiron</loc>
     <lastmod>2026-03-26</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/guides/echirolles</loc>
+    <lastmod>2026-09-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1777,19 +1771,7 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guides/chassenard</loc>
-    <lastmod>2026-08-02</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://guardiens.fr/guides/upaix</loc>
-    <lastmod>2026-08-04</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/guides/cogny</loc>
     <lastmod>2026-08-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -1809,6 +1791,18 @@
   <url>
     <loc>https://guardiens.fr/guides/monteleger</loc>
     <lastmod>2026-08-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/guides/chassenard</loc>
+    <lastmod>2026-09-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/guides/cogny</loc>
+    <lastmod>2026-09-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1849,12 +1843,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/guides/conquereuil-44290</loc>
-    <lastmod>2026-09-05</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://guardiens.fr/guides/saint-vulbas</loc>
     <lastmod>2026-09-05</lastmod>
     <changefreq>weekly</changefreq>
@@ -1862,6 +1850,12 @@
   </url>
   <url>
     <loc>https://guardiens.fr/guides/paris</loc>
+    <lastmod>2026-09-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/guides/conquereuil-44290</loc>
     <lastmod>2026-09-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -1952,6 +1946,12 @@
   </url>
   <url>
     <loc>https://guardiens.fr/guides/rennes</loc>
+    <lastmod>2026-09-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/guides/decines-charpieu</loc>
     <lastmod>2026-09-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -3146,7 +3146,7 @@
   </url>
   <url>
     <loc>https://guardiens.fr/gardiens/d593fac5-cf87-4696-8041-70fd3a8d3c76</loc>
-    <lastmod>2026-09-04</lastmod>
+    <lastmod>2026-09-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -3315,6 +3315,12 @@
   <url>
     <loc>https://guardiens.fr/gardiens/89be1931-71d4-4e66-8ec0-33a6ac4c1aaf</loc>
     <lastmod>2026-04-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/gardiens/3f1c1f58-0538-4f00-89e4-94bad2d3bd7e</loc>
+    <lastmod>2026-09-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
