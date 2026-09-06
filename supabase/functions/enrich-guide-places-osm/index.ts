@@ -146,6 +146,9 @@ Deno.serve(async (req) => {
       let notes_ecrites = 0;
       let sans_resultat = 0;
       let rejetes_appariement = 0;
+      let premier_statut_http: number | null = null;
+      let premier_message_erreur: string | null = null;
+      let requete_exemple: string | null = null;
 
       const haversine = (
         lat1: number, lon1: number, lat2: number, lon2: number,
@@ -165,7 +168,12 @@ Deno.serve(async (req) => {
         if (!firstCall) await sleep(120);
         firstCall = false;
 
+        const textQuery = `${row.name} ${row.address ?? ""}`.trim();
+        if (requete_exemple === null) requete_exemple = textQuery;
+
         let place: any = null;
+        let responseStatus: number | null = null;
+        let responseBody: string | null = null;
         try {
           const r = await fetch("https://places.googleapis.com/v1/places:searchText", {
             method: "POST",
@@ -176,7 +184,7 @@ Deno.serve(async (req) => {
                 "places.id,places.rating,places.userRatingCount,places.displayName,places.formattedAddress,places.location",
             },
             body: JSON.stringify({
-              textQuery: `${row.name} ${row.address ?? ""}`.trim(),
+              textQuery,
               languageCode: "fr",
               regionCode: "FR",
               maxResultCount: 1,
@@ -188,9 +196,12 @@ Deno.serve(async (req) => {
               },
             }),
           });
+          responseStatus = r.status;
           if (r.ok) {
             const data = await r.json();
             place = Array.isArray(data?.places) ? data.places[0] ?? null : null;
+          } else {
+            responseBody = (await r.text()).slice(0, 300);
           }
         } catch {
           place = null;
@@ -198,6 +209,13 @@ Deno.serve(async (req) => {
 
         if (!place || !place.id) {
           sans_resultat++;
+          if (
+            premier_statut_http === null &&
+            (responseStatus !== null || responseBody !== null)
+          ) {
+            premier_statut_http = responseStatus ?? 0;
+            premier_message_erreur = responseBody ?? "erreur réseau";
+          }
           continue;
         }
 
@@ -233,6 +251,9 @@ Deno.serve(async (req) => {
         notes_ecrites,
         sans_resultat,
         rejetes_appariement,
+        premier_statut_http,
+        premier_message_erreur,
+        requete_exemple,
         cle_absente: false,
       });
     }
