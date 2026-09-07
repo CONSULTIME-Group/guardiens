@@ -319,9 +319,10 @@ const CityPage = () => {
   ? `${stats.guardiansCount} gardien${stats.guardiansCount > 1 ? "s" : ""} inscrit${stats.guardiansCount > 1 ? "s" : ""} ${departmentIn(cityData.department)} · Gratuit pour les propriétaires`
   : `Gardiens inscrits ${departmentIn(cityData.department)} · Gratuit pour les propriétaires`)
  }
- heroAlt={cityData.heroImageAlt || `House-sitting à ${cityData.name}`}
- department={cityData.department}
- />
+  heroAlt={cityData.heroImageAlt || `House-sitting à ${cityData.name}`}
+  department={cityData.department}
+  departmentSlug={departmentPageExists ? departmentSlug ?? undefined : undefined}
+  />
  );
  }
 
@@ -562,12 +563,14 @@ const CityPage = () => {
  <Link to={`/guides/${cityData.slug}`} className="text-primary hover:underline">
  Guide local de {cityData.name} →
  </Link>
- <Link
- to={`/departement/${cityData.department.toLowerCase().replace(/\s+/g, "-").replace(/'/g, "")}`}
- className="text-primary hover:underline"
- >
- House-sitting {departmentIn(cityData.department)} →
- </Link>
+  {departmentPageExists && departmentSlug && (
+  <Link
+  to={`/departement/${departmentSlug}`}
+  className="text-primary hover:underline"
+  >
+  House-sitting {departmentIn(cityData.department)} →
+  </Link>
+  )}
  <Link to="/guides" className="text-primary hover:underline">Tous les guides locaux →</Link>
  <Link to="/tarifs" className="text-primary hover:underline">Voir les tarifs →</Link>
  <Link to="/gardien-urgence" className="text-primary hover:underline">Gardiens d'urgence →</Link>
