@@ -56,6 +56,9 @@
 
     --primary: 153 42% 30%;
     --primary-foreground: 40 33% 97%;
+    /* Variante claire du vert de charte, reservee aux fonds sombres
+       (mot-symbole du pied de page). Ratio >= 4.5 sur --footer. */
+    --primary-on-dark: 153 42% 52%;
 
     /* AA: secondary-foreground (clair) sur secondary doit ≥ 3:1 (texte large) */
     --secondary: 27 38% 42%;
@@ -171,6 +174,7 @@
 
     --primary: 153 42% 40%;
     --primary-foreground: 160 10% 8%;
+    --primary-on-dark: 153 42% 52%;
 
     --secondary: 27 30% 45%;
     --secondary-foreground: 40 15% 90%;

@@ -43,9 +43,10 @@ describe("pricing helpers (pivot gratuit sans deadline)", () => {
     expect(PRICING_LONG).not.toMatch(/30\s+septembre\s+2026/);
   });
 
-  it("PRICING_SHORT et PRICING_VERY_SHORT sont concis et sans date", () => {
+  it("PRICING_SHORT et PRICING_VERY_SHORT sont concis, affirmatifs et sans date", () => {
     for (const t of [PRICING_SHORT, PRICING_VERY_SHORT]) {
-      expect(t.toLowerCase()).toContain("sans engagement");
+      expect(t.toLowerCase()).toContain("adresse email");
+      expect(t.toLowerCase()).not.toContain("carte bancaire");
       expect(t).not.toMatch(/2026/);
     }
   });

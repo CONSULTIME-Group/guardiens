@@ -172,7 +172,7 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
             >
               {t(`nav.${l.key}`)}
               {l.beta && (
-                <span className="ml-1.5 text-[9px] uppercase tracking-wider font-bold bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded">
+                <span className="ml-1.5 text-[11px] leading-none uppercase tracking-wider font-bold bg-amber-200 text-amber-900 px-1.5 py-0.5 rounded">
                   {t("nav.beta")}
                 </span>
               )}

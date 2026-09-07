@@ -74,7 +74,7 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
               <li><Link to="/petites-missions" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.small_missions")}</Link></li>
 
               <li><Link to="/gardien-urgence" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.emergency_sitter")}</Link></li>
-              <li><Link to="/pros" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.pet_pros")} <span className="ml-1 text-[9px] uppercase tracking-wider font-bold bg-amber-200/90 text-amber-900 px-1.5 py-0.5 rounded">{t("nav.beta")}</span></Link></li>
+              <li><Link to="/pros" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.pet_pros")} <span className="ml-1 text-[11px] leading-none uppercase tracking-wider font-bold bg-amber-200 text-amber-900 px-1.5 py-0.5 rounded">{t("nav.beta")}</span></Link></li>
             </ul>
           </div>
         </div>
@@ -83,7 +83,7 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
           <div>
             <h3 className="font-heading text-lg font-semibold text-white/90">
               <Link to="/" aria-label="Guardiens, accueil" className="hover:opacity-80 transition-opacity">
-                <span className="text-primary">g</span>uardiens
+                <span className="text-primary-on-dark">g</span>uardiens
               </Link>
             </h3>
             <p className="font-body text-sm text-white/70">
