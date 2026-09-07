@@ -1119,7 +1119,10 @@ export default function PublicSitterProfile() {
     bio,
     motivation,
     identityVerified: profile?.identity_verified,
-    galleryCount: gallery.length,
+    // Compte anonyme (RPC gallery_photo_count), jamais gallery.length : la
+    // galerie n'est chargée que pour un membre connecté, donc un bot verrait
+    // toujours 0 et la fiche passerait en noindex à tort.
+    galleryCount,
   });
   const shouldNoindex = !isRichProfile;
 
