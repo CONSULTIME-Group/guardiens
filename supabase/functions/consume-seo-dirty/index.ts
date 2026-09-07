@@ -357,10 +357,12 @@ Deno.serve(async (req) => {
     }
 
     for (const a of articles) {
-      if (urlsOk >= 0 && clearedIds.length >= ARTICLE_RENDER_BUDGET) {
+      if (articlesAttempted >= ARTICLE_RENDER_BUDGET) {
         articlesDeferred += 1;
         continue;
       }
+      articlesAttempted += 1;
+
       const base = a.canonical_url && a.canonical_url.startsWith("http")
         ? a.canonical_url
         : `${SITE}/actualites/${a.slug}`;
