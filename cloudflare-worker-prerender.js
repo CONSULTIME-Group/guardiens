@@ -1,5 +1,4 @@
 // MIROIR DE DOCUMENTATION, CE FICHIER NE DÉPLOIE RIEN.
-// (ligne 1 conservée pour ancrage)
 // La source de vérité est l'éditeur Cloudflare (Workers & Pages >
 // guardiens-prerender > Edit code). Ce fichier reflète la version active
 // 1f3bf743 (v7.3 du 07/09/2026), capturée le 07/09/2026. Toute modification
@@ -489,7 +488,7 @@ async function serveImmutableAsset(request, ctx) {
   const url = new URL(request.url);
   // Nom haché : la query string ne change jamais le contenu. On la retire pour
   // qu'un `?v=123` ne crée pas une entrée de cache distincte.
-  const originUrl = `https://${LOVABLE_ORIGIN_HOST}${url.pathname}`;
+  const originUrl = `https://${LOVABLE_ORIGIN_HOST}${canonicalPath(url.pathname)}`;
   const cacheKey = new Request(originUrl, { method: 'GET' });
   const cache = caches.default;
 
