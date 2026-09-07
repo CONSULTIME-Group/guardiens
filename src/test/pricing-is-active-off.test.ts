@@ -26,9 +26,9 @@ describe("Pricing helpers (PRICING_IS_ACTIVE = false)", () => {
     expect(getOwnerPriceLabel()).toBe("Gratuit");
   });
 
-  it("getPricingBaseline() contient la promesse pivot", () => {
+  it("getPricingBaseline() annonce l'ouverture pendant la phase de lancement", () => {
     expect(getPricingBaseline()).toContain(
-      "gratuit tant que nous ne sommes pas satisfaits",
+      "ouvert pendant la phase de lancement",
     );
   });
 
