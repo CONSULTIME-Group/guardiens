@@ -59,7 +59,7 @@ Updated: 2026-08-24
 - [Footer Token](mem://style/footer-token) — `bg-footer`/`text-footer-foreground` figés identiques light/dark, immunisés contre l'inversion
 - [Status Tokens](mem://style/semantic-status-tokens) — success/info/warning tokens, badge-success réservé pricing
 - [Pricing Article](mem://marketing/pricing/detailed-article) — SEO article with Schema.org pricing
-- [SEO Editorial](mem://marketing/seo-editorial-quality) — No competitors, « gratuit » au lieu de « 0 € » partout (Landing, Pricing, CityPage, FAQ), pas de « à vie / pour toujours », YMYL tone
+- [SEO Editorial](mem://marketing/seo-editorial-quality) — No competitors, côté propriétaire on dit le chiffre (« Propriétaires : 0 € », « 0 € pour les propriétaires », Schema.org « Espace propriétaire à 0 €. ») ; ailleurs éviter « gratuit » comme promesse, pas de « à vie / pour toujours », copie affirmative (dire ce qu'une chose EST), YMYL tone
 - [SEO Policy](mem://security/seo-indexing-policy) — Sitemap quality filters, 12 blocked routes, noindex rules
 - [Registration Roles](mem://auth/registration-role-preselection) — Pre-select role, strict password rules
 - [Breadcrumbs](mem://ui/navigation/breadcrumb-logic) — Standard nomenclature, JSON-LD
