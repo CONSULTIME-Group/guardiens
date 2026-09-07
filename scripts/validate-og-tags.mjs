@@ -375,7 +375,7 @@ const SITE_NAME = "Guardiens";
 function computeFinalTitle(rawTitle, path_) {
   const stripped = rawTitle
     .replace(/\s*\|\s*Guardiens\s*$/i, "")
-    .replace(/\s*-\s*Guardiens\s*$/i, "");
+    .replace(/\s*\u2014\s*Guardiens\s*$/i, "");
   return path_ === "/" ? stripped : `${stripped} | ${SITE_NAME}`;
 }
 
@@ -514,7 +514,7 @@ function stripSiteSuffix(s) {
   if (typeof s !== "string") return s;
   return s
     .replace(/\s*\|\s*Guardiens\s*$/i, "")
-    .replace(/\s*-\s*Guardiens\s*$/i, "")
+    .replace(/\s*\u2014\s*Guardiens\s*$/i, "")
     .trim();
 }
 
@@ -537,7 +537,7 @@ function diffTags(actualTags, expectedTags, options = {}) {
     // F3 : titre dynamique avec sampleParams → check soft : présence du param
     // interpolé + suffixe " | Guardiens".
     if (softTitleKeys.has(key)) {
-      const hasSuffix = /\|\s*Guardiens\s*$/i.test(actual) || /-\s*Guardiens\s*$/i.test(actual);
+      const hasSuffix = /\|\s*Guardiens\s*$/i.test(actual) || /\u2014\s*Guardiens\s*$/i.test(actual);
       const hasParam = softTitleParam
         ? actual.toLowerCase().includes(softTitleParam.toLowerCase())
         : true;

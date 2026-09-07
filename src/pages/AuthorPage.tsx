@@ -52,7 +52,6 @@ export default function AuthorPage() {
         .order("published_at", { ascending: false });
       setArticles((data as ArticleRow[]) || []);
       setLoading(false);
-      window.prerenderReady = true;
     };
     fetchArticles();
   }, [author]);
