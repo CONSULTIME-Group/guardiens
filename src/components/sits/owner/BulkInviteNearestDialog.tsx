@@ -285,19 +285,19 @@ const BulkInviteNearestDialog = ({
               {candidates.map((c) => {
                 const firstName = publicFirstName(c.first_name) || "Gardien";
                 return (
-                <div key={c.id} className="flex items-center gap-2 text-sm">
-                  <Avatar className="h-7 w-7">
-                    <AvatarImage src={c.avatar_url || undefined} alt={firstName} />
-                    <AvatarFallback className="text-[10px]">
-                      {firstName.slice(0, 1).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="font-medium truncate flex-1">{firstName}</span>
-                  <span className="text-xs text-muted-foreground truncate">{c.city}</span>
-                  {c.distance_km !== null && (
-                    <span className="text-xs font-medium text-primary tabular-nums shrink-0">{c.distance_km} km</span>
-                  )}
-                </div>
+                  <div key={c.id} className="flex items-center gap-2 text-sm">
+                    <Avatar className="h-7 w-7">
+                      <AvatarImage src={c.avatar_url || undefined} alt={firstName} />
+                      <AvatarFallback className="text-[10px]">
+                        {firstName.slice(0, 1).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="font-medium truncate flex-1">{firstName}</span>
+                    <span className="text-xs text-muted-foreground truncate">{c.city}</span>
+                    {c.distance_km !== null && (
+                      <span className="text-xs font-medium text-primary tabular-nums shrink-0">{c.distance_km} km</span>
+                    )}
+                  </div>
                 );
               })}
             </div>

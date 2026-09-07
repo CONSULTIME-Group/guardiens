@@ -207,7 +207,8 @@ const CitySittersGrid = ({ city, citySlug, aggregateCities, departmentCode, city
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 mb-8">
           {cards.map(({ row: s, nearby: isNearby }) => {
             // RGPD : certains membres saisissent leur nom complet dans le
-            // champ prénom, seul le premier mot est affiché publiquement.
+            // Les prénoms composés restent entiers. Un nom de famille est
+            // retiré uniquement quand sa forme permet de le distinguer.
             const displayName = publicFirstName(s.first_name);
             return (
             <Link
