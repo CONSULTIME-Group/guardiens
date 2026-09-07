@@ -1,9 +1,11 @@
 {
   "nav": {
     "listings": "Annonces en cours",
+    "listings_short": "Annonces",
     "small_missions": "Entraide",
     "pros": "Pros animaliers",
     "guides": "Guides locaux",
+    "guides_short": "Guides",
     "pricing": "Tarifs",
     "news": "Le journal",
     "login": "Connexion",
