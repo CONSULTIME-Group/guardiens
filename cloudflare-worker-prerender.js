@@ -414,6 +414,11 @@ async function fetchPrerender(url, token, ua, clientIp) {
   }
 }
 
+// Statuts sans corps. `fetchOrigin` retransmet les en-têtes conditionnels de
+// la requête, l'origine peut donc répondre 304. Attacher un corps à 204, 205
+// ou 304 lève une TypeError : erreur 1101, page perdue.
+const NO_BODY_STATUSES = new Set([204, 205, 304]);
+
 function withDiagHeaders(response, diag, debug) {
   if (!debug) return response;
   const headers = new Headers(response.headers);
@@ -425,7 +430,7 @@ function withDiagHeaders(response, diag, debug) {
       headers.set(k, safe);
     } catch (_e) { /* en-tête invalide, on l'omet */ }
   }
-  return new Response(response.body, {
+  return new Response(NO_BODY_STATUSES.has(response.status) ? null : response.body, {
     status: response.status,
     statusText: response.statusText,
     headers,
@@ -468,7 +473,10 @@ const IMMUTABLE_PREFIXES = ['/assets/', '/lovable-uploads/'];
 const IMMUTABLE_TTL = 31536000; // 1 an
 
 function isImmutableAsset(pathname) {
-  return IMMUTABLE_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+  // Chemin effondré : `//assets/index.js` ne commence pas par `/assets/` et
+  // ratait le cache edge.
+  const p = canonicalPath(pathname);
+  return IMMUTABLE_PREFIXES.some((prefix) => p.startsWith(prefix));
 }
 
 /**
