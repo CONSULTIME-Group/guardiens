@@ -24,7 +24,7 @@ export function NotreHistoireSection() {
             sizes="(max-width: 767px) 96px, 128px"
             alt="Illustration à la gouache d'une clé ancienne en bronze patiné, posée légèrement de biais."
             width={720}
-            height={558}
+            height={580}
             loading="lazy"
             decoding="async"
             className="mb-[22px] block w-24 md:w-32 h-auto"
