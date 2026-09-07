@@ -121,7 +121,7 @@ export const staticRoutes: SiteRoute[] = [
  {
  path: "/",
 		title: "Garde de maison et d'animaux entre particuliers | Guardiens",
-		metaDescription: "House-sitting entre particuliers : un gardien veille sur votre maison et vos animaux pendant votre absence. Partout en France, sans commission.",
+		metaDescription: "House-sitting en France : un gardien veille sur votre maison et vos animaux pendant votre absence. Vous choisissez après une rencontre.",
  h1: "Guardiens, comme confier ses clés à quelqu'un du coin",
  sitemapPriority: "1.0",
  changeFreq: "daily",
