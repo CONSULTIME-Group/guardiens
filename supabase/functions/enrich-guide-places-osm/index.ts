@@ -410,6 +410,9 @@ Deno.serve(async (req) => {
       if (!first) await sleep(1000);
       first = false;
       guides_traites++;
+      // Issue réelle du guide, écrite dans `osm_enrich_last_result`.
+      // null = ne pas écraser la valeur existante (ex. insert en échec).
+      let guideResult: string | null = null;
       try {
 
       const guideDept = deptFromPostal(guide.postal_code) ??
@@ -455,6 +458,7 @@ Deno.serve(async (req) => {
 
       if (lat == null || lon == null || Number.isNaN(lat) || Number.isNaN(lon)) {
         sans_coordonnees++;
+        guideResult = "sans_coordonnees";
         details.push({ slug: guide.slug, inseres: 0, rejetes: 0 });
         continue;
       }
