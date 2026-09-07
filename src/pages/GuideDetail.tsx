@@ -5,6 +5,7 @@ import { slugify } from "@/lib/normalize";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCityPageExists } from "@/hooks/useCityPageExists";
+import { useDepartmentPageExists } from "@/hooks/useDepartmentPageExists";
 import PageMeta from "@/components/PageMeta";
 import { MapPin, TreePine, Stethoscope, Coffee, Store, Footprints, Droplets, Trees, Star, ArrowRight, ArrowLeft, Search } from "lucide-react";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
@@ -109,6 +110,7 @@ const GuideDetail = () => {
   // La page ville /house-sitting/<slug> n'existe pas pour chaque guide :
   // ne lier que si elle est réellement servie, sinon le lien mène à un 404.
   const hasCityPage = useCityPageExists(guide?.slug ?? null);
+  const hasDepartmentPage = useDepartmentPageExists(guide?.department ? slugify(guide.department) : null);
 
   const { data: places = [], isSuccess: placesLoaded } = useQuery({
     queryKey: ["guide-places", guide?.id],
@@ -413,7 +415,7 @@ const GuideDetail = () => {
                 {t("guide_detail.see_sits", { city: guide.city })} <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             )}
-            {guide.department && (
+            {guide.department && hasDepartmentPage && (
               <Link
                 to={`/departement/${slugify(guide.department)}`}
                 className="text-sm text-primary hover:underline flex items-center gap-1"
