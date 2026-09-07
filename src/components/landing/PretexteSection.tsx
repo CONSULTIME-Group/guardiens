@@ -28,7 +28,7 @@ export function PretexteSection() {
     >
       {/* Grain de papier à 4 % sur le grand aplat sombre. */}
       <GrainOverlay />
-      <div className="relative lp-read py-[52px] md:py-24">
+      <div className="relative lp-read pt-[52px] pb-0 md:pt-24">
         <RevealSection>
           <p className="flex items-center justify-center gap-2 font-body text-xs tracking-[0.2em] uppercase text-terra-soft mb-6">
             <span className="inline-block w-5 h-0.5 bg-terra align-middle" aria-hidden="true" />
