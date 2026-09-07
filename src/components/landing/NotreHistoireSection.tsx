@@ -10,70 +10,50 @@ export function NotreHistoireSection() {
     <section id="notre-histoire" className="bg-muted/30 scroll-mt-24">
       <div className="lp-read py-[52px] md:py-20">
         <RevealSection>
-          <span className="text-xs tracking-widest uppercase text-primary font-body mb-4 block">
+          <span className="text-xs tracking-widest uppercase text-primary font-body mb-3 block">
             {t("landing.story.eyebrow")}
           </span>
-          <h2 id="commence-avec-un-visa" className="text-2xl md:text-5xl font-heading font-semibold leading-snug text-foreground mb-12 scroll-mt-24">
+          <h2 id="commence-avec-un-visa" className="text-2xl md:text-5xl font-heading font-semibold leading-snug text-foreground mb-8 scroll-mt-24">
             {t("landing.story.title")}
           </h2>
         </RevealSection>
 
-        <div className="grid grid-cols-1 gap-8 items-start">
-          <RevealSection delay={0.1}>
-            <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-              {t("landing.story.p1")}
+        <RevealSection delay={0.1}>
+          <p className="text-base md:text-lg font-body leading-relaxed text-foreground/85 mb-5">
+            {t("landing.story.p1")}
+          </p>
+          <p className="text-base md:text-lg font-body leading-relaxed text-foreground/85 mb-5">
+            {t("landing.story.quote_lead")}
+          </p>
+          <div className="border-l-4 border-primary pl-5 my-6">
+            <p className="text-xl md:text-2xl font-heading font-semibold italic text-foreground leading-snug">
+              {t("landing.story.quote")}
             </p>
-            <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-              {t("landing.story.p2")}
-            </p>
-            <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-              {t("landing.story.quote_lead")}
-            </p>
-            <div className="border-l-4 border-primary pl-6 my-8">
-              <p className="text-2xl md:text-3xl font-heading font-semibold italic text-foreground leading-snug">
-                {t("landing.story.quote")}
-              </p>
-            </div>
-            <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-              {t("landing.story.p3")}
-            </p>
-            <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-              {t("landing.story.p4")}
-            </p>
-          </RevealSection>
+          </div>
+          <p className="text-base md:text-lg font-body leading-relaxed text-foreground/85 mb-5">
+            {t("landing.story.p2")}
+          </p>
+          <p className="text-base md:text-lg font-body leading-relaxed text-foreground/85 mb-5">
+            {t("landing.story.p3")}
+          </p>
+          <p className="text-base md:text-lg font-body leading-relaxed text-foreground/85 mb-5">
+            {t("landing.story.p4")}
+          </p>
+          <p className="text-base md:text-lg font-body leading-relaxed text-foreground/85 mb-5">
+            {t("landing.story.p5")}
+          </p>
+          <span className="text-sm font-body italic text-foreground/50 mt-6 block">
+            {t("landing.story.signature")}
+          </span>
+        </RevealSection>
 
-          <RevealSection delay={0.2}>
-            <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-              {t("landing.story.p5")}
-            </p>
-            <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-              {t("landing.story.p6")}
-            </p>
-            <p className="text-lg md:text-xl font-body font-bold leading-relaxed text-foreground mb-7">
-              {t("landing.story.p7")}
-            </p>
-            <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-              {t("landing.story.p8")}
-            </p>
-            <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-              {t("landing.story.p9")}
-            </p>
-            <p className="text-lg font-body leading-relaxed text-foreground/85 mb-7">
-              {t("landing.story.p10")}
-            </p>
-            <span className="text-sm font-body italic text-foreground/50 mt-10 block">
-              {t("landing.story.signature")}
-            </span>
-          </RevealSection>
-        </div>
-
-        <div className="w-full mt-16 rounded-2xl overflow-hidden">
+        <div className="w-full mt-10 rounded-2xl overflow-hidden">
           <picture>
             <source type="image/avif" srcSet={notreHistoirePanoramaAvif} />
             <img
               src={notreHistoirePanorama}
               alt="Photographie panoramique d'une maison de campagne aux volets bleus, illustrant l'esprit du house-sitting Guardiens : on confie ses clés, on est invité dans une vie."
-              className="w-full h-64 md:h-96 object-cover object-center"
+              className="w-full h-48 md:h-64 object-cover object-center"
               loading="lazy"
               width={1920}
               height={600}
