@@ -1,5 +1,5 @@
 /**
- * Logger d'erreurs front — capture window.error + unhandledrejection.
+ * Logger d'erreurs front, capture window.error + unhandledrejection.
  * Envoie via RPC log_client_error qui groupe par fingerprint.
  * Fire-and-forget, throttle local pour éviter les boucles.
  */
@@ -12,7 +12,7 @@ const MAX_PER_SESSION = 50;
 let sessionCount = 0;
 
 /**
- * Patterns d'erreurs non actionnables — ignorés silencieusement.
+ * Patterns d'erreurs non actionnables, ignorés silencieusement.
  * - "Script error." : cross-origin sans stack (pixel FB, GA…)
  * - chunks périmés : déjà gérés par lazyWithRetry
  * - ResizeObserver : warning bénin
@@ -29,12 +29,12 @@ const IGNORED_PATTERNS: RegExp[] = [
   /The (user|operation) (aborted|was aborted)/i,
   /AbortError/i,
   /Load failed/i,
-  // Supabase Auth navigator.locks : verrou volé par un autre onglet — bénin, géré en interne par le SDK
+  // Supabase Auth navigator.locks : verrou volé par un autre onglet, bénin, géré en interne par le SDK
   /Lock ".*" was (released|not granted) because/i,
   /lock:sb-.*-auth-token/i,
   // Navigateurs trop anciens (Chrome <92, Safari <15) : APIs ES2022 manquantes
   // (.at(), .findLast(), Object.hasOwn…) utilisées par web-vitals ou polyfills.
-  // Non actionnable côté code — on ne supporte pas ces versions.
+  // Non actionnable côté code, on ne supporte pas ces versions.
   /\.at is not a function/i,
   /'at' is not a function/i,
   /\.findLast(Index)? is not a function/i,
@@ -54,7 +54,7 @@ function shouldIgnore(message: string): boolean {
 }
 
 /**
- * Sources tierces non actionnables — JS injecté par WebViews, extensions,
+ * Sources tierces non actionnables, JS injecté par WebViews, extensions,
  * pixels marketing, scripts cross-origin… Une erreur dont la source provient
  * de l'un de ces patterns n'est pas issue de notre bundle Vite et ne doit
  * pas être loggée.
@@ -119,7 +119,7 @@ export function detectThirdPartySource(
   source?: string | null,
   stack?: string | null,
 ): ThirdPartyReason | null {
-  // 1. Stack signatures fortes (WebView bridges) — verdict immédiat
+  // 1. Stack signatures fortes (WebView bridges), verdict immédiat
   if (stack && THIRD_PARTY_STACK_PATTERNS.some((re) => re.test(stack))) {
     return "webview_bridge";
   }
@@ -128,7 +128,7 @@ export function detectThirdPartySource(
   //     window.fetch insèrent leurs frames SOUS nos frames (ex: erreurs
   //     "Network non-2xx", qui restent actionnables). On ne classe
   //     "extension" que si la PREMIÈRE frame portant une URL (le site de
-  //     lancement) est une URL d'extension — cas des unhandledrejection,
+  //     lancement) est une URL d'extension, cas des unhandledrejection,
   //     qui n'ont pas de filename (ex: "reading 'M_ID'" levé par un
   //     assistant de saisie tiers, empreinte l588z7).
   if (stack) {
@@ -194,7 +194,7 @@ export function detectThirdPartySource(
 }
 
 /**
- * @deprecated Conservé pour compat — utiliser detectThirdPartySource qui renvoie le motif.
+ * @deprecated Conservé pour compat, utiliser detectThirdPartySource qui renvoie le motif.
  */
 function isThirdPartySource(source?: string | null, stack?: string | null): boolean {
   return detectThirdPartySource(source, stack) !== null;
@@ -314,7 +314,7 @@ async function send(payload: {
   if (shouldIgnore(payload.message)) return;
 
   // Détection JS tiers (WebViews FB/IG, extensions, pixels…) : on n'abandonne
-  // pas silencieusement — on enregistre avec une sévérité dédiée et un motif,
+  // pas silencieusement, on enregistre avec une sévérité dédiée et un motif,
   // pour que l'admin sache pourquoi cette erreur n'a pas été retenue comme bug.
   // Priorité au filtre par User-Agent : si la session entière tourne dans un
   // WebView in-app (Facebook FB_IAB/FBAV, Instagram, TikTok…), TOUTES les
@@ -351,7 +351,7 @@ async function send(payload: {
 
   const now = Date.now();
   const last = SENT_FINGERPRINTS.get(payload.fingerprint);
-  // Throttle agressif (1h) pour les erreurs tierces — non actionnables, on
+  // Throttle agressif (1h) pour les erreurs tierces, non actionnables, on
   // veut juste pouvoir les inspecter dans l'admin sans saturer la table.
   const throttle = thirdPartyReason ? 60 * 60 * 1000 : THROTTLE_MS;
   if (last && now - last < throttle) return;
@@ -460,7 +460,7 @@ export function installGlobalErrorLogger() {
       Object.keys(reason as object).length === 0;
 
     if (isAbort || isEmptyNoise) {
-      // On n'envoie pas — ce n'est pas actionnable.
+      // On n'envoie pas, ce n'est pas actionnable.
       if (import.meta.env.DEV) {
         // eslint-disable-next-line no-console
         console.debug("[errorLogger] ignored rejection:", reason);

@@ -1,5 +1,5 @@
 /**
- * useStarVisibilityGate — retourne true tant que la section "star" désignée
+ * useStarVisibilityGate, retourne true tant que la section "star" désignée
  * (attribut data-dashboard-star=variant) est visible à l'écran. Utilisé par
  * les sticky CTA mobiles pour éviter de doubler le bouton primaire de la
  * star. Fallback : si aucune star ou observer indisponible, la carte est

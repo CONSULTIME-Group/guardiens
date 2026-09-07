@@ -3,7 +3,7 @@
  * Validation systématique JSON-LD
  * Scanne tout le code source pour les schémas Schema.org et vérifie:
  *   - Aucun vocabulaire proscrit (AURA, Auvergne-Rhône-Alpes, voisin, votre région, "gratuit" en SEO)
- *   - Cohérence des prix (0 € propriétaire, 6,99 € sitter — pas de "9 €/mois")
+ *   - Cohérence des prix (0 € propriétaire, 6,99 € sitter, pas de "9 €/mois")
  *   - areaServed = global / France (pas régional restreint)
  *   - Présence des @type clés selon les pages
  *
@@ -210,7 +210,7 @@ for (const { file, issues } of report) {
   console.log(`\n📄 ${file}`);
   for (const i of issues) {
     const icon = i.severity === "error" ? "❌" : "⚠️ ";
-    console.log(`  ${icon} [L${i.line}] @type=${i.schemaType} — ${i.label}`);
+    console.log(`  ${icon} [L${i.line}] @type=${i.schemaType}, ${i.label}`);
     console.log(`     « …${i.snippet}… »`);
   }
 }

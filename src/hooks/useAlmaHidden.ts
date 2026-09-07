@@ -1,5 +1,5 @@
 /**
- * useAlmaHidden — préférence utilisateur "Alma masquée".
+ * useAlmaHidden, préférence utilisateur "Alma masquée".
  *
  * Lit et met à jour la colonne `profiles.alma_hidden`. Quand true, le dock
  * Alma disparaît complètement de l'UI. Réversible depuis Réglages > Alma.

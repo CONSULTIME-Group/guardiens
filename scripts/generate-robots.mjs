@@ -7,7 +7,7 @@
  *   1. `Allow: /` global pour toutes les pages publiques indexables.
  *   2. `Disallow:` pour chaque chemin de `privateDisallowPaths` (espace privé).
  *   3. `Disallow:` pour chaque route de `staticRoutes` marquée `index: false`
- *      (ex. `/login`, `/recherche` — outils internes ou pages auth).
+ *      (ex. `/login`, `/recherche`, outils internes ou pages auth).
  *   4. Référence du sitemap (`Sitemap: …/sitemap.xml`).
  *
  * Mode CI :
@@ -59,7 +59,7 @@ function parseSiteRoutes() {
   if (!staticMatch) throw new Error("staticRoutes introuvable dans siteRoutes.ts");
 
   const noindexFromStatic = [];
-  // Chaque entrée commence par "{ path:" — on découpe à plat
+  // Chaque entrée commence par "{ path:", on découpe à plat
   const entryRe = /\{\s*path:\s*["']([^"']+)["']([\s\S]*?)\n\s{2}\}/g;
   let m;
   while ((m = entryRe.exec(staticMatch[1])) !== null) {
@@ -132,7 +132,7 @@ function buildRobotsTxt({ siteUrl, privatePaths, noindexFromStatic }) {
     uas.flatMap((ua) => [`User-agent: ${ua}`, directive, ""]);
 
   const lines = [
-    "# AUTO-GÉNÉRÉ par scripts/generate-robots.mjs — NE PAS ÉDITER À LA MAIN.",
+    "# AUTO-GÉNÉRÉ par scripts/generate-robots.mjs, NE PAS ÉDITER À LA MAIN.",
     "# Source de vérité : src/data/siteRoutes.ts (privateDisallowPaths + index:false).",
     "# Politique AI/GEO juillet 2026 : visibilité LLM ouverte (GPTBot, ClaudeBot,",
     "# PerplexityBot, Google-Extended, Applebot-Extended, Bingbot… tous Allow).",
@@ -142,15 +142,15 @@ function buildRobotsTxt({ siteUrl, privatePaths, noindexFromStatic }) {
     "# ------------------------------------------------------------",
     ...block(searchBots, "Allow: /"),
     "# ------------------------------------------------------------",
-    "# Bots IA (training + retrieval) — Allow (visibilité générative)",
+    "# Bots IA (training + retrieval), Allow (visibilité générative)",
     "# ------------------------------------------------------------",
     ...block(aiBotsAllowed, "Allow: /"),
     "# ------------------------------------------------------------",
-    "# Scrapers sans valeur SEO/GEO — Disallow",
+    "# Scrapers sans valeur SEO/GEO, Disallow",
     "# ------------------------------------------------------------",
     ...block(scrapersBlocked, "Disallow: /"),
     "# ------------------------------------------------------------",
-    "# Outils SEO / analytics — Allow",
+    "# Outils SEO / analytics, Allow",
     "# ------------------------------------------------------------",
     ...block(seoTools, "Allow: /"),
     "# ------------------------------------------------------------",
@@ -165,7 +165,7 @@ function buildRobotsTxt({ siteUrl, privatePaths, noindexFromStatic }) {
     ...privatePaths.map((p) => `Disallow: ${p}`),
     "",
     "# Routes publiques marquées index:false dans staticRoutes",
-    "# (outils internes / pages d'auth — cohérent avec <meta robots> + sitemap)",
+    "# (outils internes / pages d'auth, cohérent avec <meta robots> + sitemap)",
     ...noindexFromStatic.map((p) => `Disallow: ${p}`),
     "",
     "# Profils publics : /gardiens/:id reste crawlable. Une fiche est indexable",

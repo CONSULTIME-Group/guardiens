@@ -1,5 +1,5 @@
 /**
- * useRailReadings — alimente le bloc « À lire » du rail droit des
+ * useRailReadings, alimente le bloc « À lire » du rail droit des
  * dashboards (refonte rail, août 2026).
  *
  * Trois liens maximum, choisis dans cet ordre de priorité :

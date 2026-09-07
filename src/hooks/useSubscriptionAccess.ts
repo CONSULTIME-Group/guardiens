@@ -41,7 +41,7 @@ export const useSubscriptionAccess = () => {
       return;
     }
 
-    // Safety timeout — never stay loading forever
+    // Safety timeout, never stay loading forever
     const timeout = setTimeout(() => setLoading(false), 5000);
 
     const load = async () => {
@@ -56,7 +56,7 @@ export const useSubscriptionAccess = () => {
         const createdDate = p?.created_at ? new Date(p.created_at) : new Date();
         const isFounder = p?.is_founder || createdDate < LAUNCH_DATE;
 
-        // Check subscription from DB — data can be null (never subscribed)
+        // Check subscription from DB, data can be null (never subscribed)
         const sub = subRes.data;
         const hasActiveSub = sub != null && (
           sub.status === "active" || sub.status === "trial"

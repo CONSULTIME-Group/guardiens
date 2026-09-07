@@ -12,12 +12,12 @@
  *
  * Règles de validité d'une pastille :
  *  - 2 à 22 caractères après trim
- *  - pas de ponctuation de phrase (. ! ?) — restes de phrase = bruit
+ *  - pas de ponctuation de phrase (. ! ?), restes de phrase = bruit
  *  - dédupliqué insensible à la casse
  *  - capitalisation cosmétique (1ʳᵉ lettre en majuscule)
  */
 
-const SEPARATORS = /\s*(?:,|;|\/|\||·|•|\n|\r|\bet\b|&|—|–| - )\s*/gi;
+const SEPARATORS = /\s*(?:,|;|\/|\||·|•|\n|\r|\bet\b|&|-|-| - )\s*/gi;
 
 /**
  * Bornes par défaut de longueur d'une pastille « savoir-faire ».
@@ -46,7 +46,7 @@ const stripStopPrefix = (s: string): string => {
 const cleanToken = (raw: string): string => {
   return raw
     .trim()
-    .replace(/^[-–—•·*\s]+/, "")     // puces & tirets de début
+    .replace(/^[---•·*\s]+/, "")     // puces & tirets de début
     .replace(/[.!?…]+$/, "")          // ponctuation finale
     .trim();
 };
@@ -120,7 +120,7 @@ export const tokenizeSkillPhrases = (
 
 /**
  * Déduplique une liste d'objets « chip » par label normalisé.
- * Garde la 1ʳᵉ occurrence — passez les chips prioritaires en premier
+ * Garde la 1ʳᵉ occurrence, passez les chips prioritaires en premier
  * (ex. custom avant category).
  */
 export const dedupeChipsByLabel = <T extends { label: string }>(chips: T[]): T[] => {

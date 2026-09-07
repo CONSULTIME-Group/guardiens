@@ -1,5 +1,5 @@
 /**
- * useOwnerPrimaryAction — activation goulot proprio.
+ * useOwnerPrimaryAction, activation goulot proprio.
  *
  * Retourne l'unique action prioritaire pour un proprio tant qu'il n'a pas
  * publié sa première annonce :

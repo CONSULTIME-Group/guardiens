@@ -7,7 +7,7 @@ export interface SeoDebugEntry {
   ts: string;
   path: string;
   source: "PageMeta" | "ArticleDetail" | "manual";
-  // Inputs (props) — what the component was asked to render
+  // Inputs (props), what the component was asked to render
   input: {
     title?: string;
     description?: string;

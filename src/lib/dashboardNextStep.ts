@@ -1,5 +1,5 @@
 /**
- * dashboardNextStep — contenu du bloc « prochain pas » du rail droit des
+ * dashboardNextStep, contenu du bloc « prochain pas » du rail droit des
  * deux dashboards (refonte rail, août 2026).
  *
  * Logique pure, testable : calcule eyebrow, titre, phrase douce, CTA et

@@ -1,5 +1,5 @@
 /**
- * Score d'affinité owner ↔ gardien — ré-exportation.
+ * Score d'affinité owner ↔ gardien, ré-exportation.
  *
  * Le MOTEUR UNIQUE vit dans `supabase/functions/_shared/affinity/score.ts`,
  * partagé entre le client et les fonctions edge (distribution des gardes).

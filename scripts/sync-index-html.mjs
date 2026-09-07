@@ -149,7 +149,7 @@ function textEncode(s) {
 
 /**
  * Remplace le contenu d'une balise meta identifiée par property="…" ou name="…".
- * Ne crée pas de nouvelle balise — on exige qu'elle existe déjà, pour éviter
+ * Ne crée pas de nouvelle balise, on exige qu'elle existe déjà, pour éviter
  * les doublons côté bots sociaux (FB prend la dernière occurrence).
  */
 function replaceMetaContent(html, { attr, key, value }) {
@@ -254,7 +254,7 @@ function main() {
   }
 
   if (!changed) {
-    console.log("✅ index.html déjà à jour — aucun changement.");
+    console.log("✅ index.html déjà à jour, aucun changement.");
     return;
   }
 

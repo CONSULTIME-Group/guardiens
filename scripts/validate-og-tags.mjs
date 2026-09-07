@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Validation SEO complète — compare ce qui est servi sur chaque route publique
+ * Validation SEO complète, compare ce qui est servi sur chaque route publique
  * à la source de vérité (siteRoutes.ts + DEFAULT_OG_IMAGE + index.html).
  *
  * Checks couverts :
@@ -72,7 +72,7 @@ const concurrency = concurrencyArg
   ? Math.max(1, parseInt(concurrencyArg.slice("--concurrency=".length), 10) || 3)
   : 3;
 const strictMode = cliArgs.includes("--strict");
-// --check : mode CI — toute divergence (même les warnings "pré-rendu") fait
+// --check : mode CI, toute divergence (même les warnings "pré-rendu") fait
 // échouer le processus (exit 1). Utile pour bloquer le build.
 const checkMode = cliArgs.includes("--check");
 const includeDynamic = cliArgs.includes("--include-dynamic");
@@ -375,7 +375,7 @@ const SITE_NAME = "Guardiens";
 function computeFinalTitle(rawTitle, path_) {
   const stripped = rawTitle
     .replace(/\s*\|\s*Guardiens\s*$/i, "")
-    .replace(/\s*—\s*Guardiens\s*$/i, "");
+    .replace(/\s*\u2014\s*Guardiens\s*$/i, "");
   return path_ === "/" ? stripped : `${stripped} | ${SITE_NAME}`;
 }
 
@@ -507,14 +507,14 @@ async function runWithConcurrency(items, limit, worker) {
 
 /**
  * F4 : normalise une valeur de titre en retirant le suffixe " | Guardiens"
- * (ou " — Guardiens"). Permet de comparer titre attendu vs réel sans
+ * (ou ", Guardiens"). Permet de comparer titre attendu vs réel sans
  * faux positif structurel quand l'un porte le suffixe et l'autre non.
  */
 function stripSiteSuffix(s) {
   if (typeof s !== "string") return s;
   return s
     .replace(/\s*\|\s*Guardiens\s*$/i, "")
-    .replace(/\s*—\s*Guardiens\s*$/i, "")
+    .replace(/\s*\u2014\s*Guardiens\s*$/i, "")
     .trim();
 }
 
@@ -537,7 +537,7 @@ function diffTags(actualTags, expectedTags, options = {}) {
     // F3 : titre dynamique avec sampleParams → check soft : présence du param
     // interpolé + suffixe " | Guardiens".
     if (softTitleKeys.has(key)) {
-      const hasSuffix = /\|\s*Guardiens\s*$/i.test(actual) || /—\s*Guardiens\s*$/i.test(actual);
+      const hasSuffix = /\|\s*Guardiens\s*$/i.test(actual) || /\u2014\s*Guardiens\s*$/i.test(actual);
       const hasParam = softTitleParam
         ? actual.toLowerCase().includes(softTitleParam.toLowerCase())
         : true;
@@ -713,7 +713,7 @@ async function validateRobots(origin, routes, siteUrl) {
 // ──────────────────────────────────────────────────────────────
 
 async function main() {
-  console.log(c("bold", "\n🔎 Validation SEO — OG, canonical, schema, sitemap, robots\n"));
+  console.log(c("bold", "\n🔎 Validation SEO, OG, canonical, schema, sitemap, robots\n"));
 
   const { routes, siteUrl, defaultOgImage, dynamicConfigs } = loadSiteConfig();
   const filteredStaticRoutes = pathFilter
@@ -828,7 +828,7 @@ async function main() {
           console.log(`  ${c("green", "✅")} sitemap.xml (${entriesCount} URLs) ${c("dim", url)}`);
         } else {
           blockingIssues += diffs.length;
-          console.log(`  ${c("red", "❌")} sitemap.xml — ${diffs.length} problème(s) ${c("dim", url)}`);
+          console.log(`  ${c("red", "❌")} sitemap.xml, ${diffs.length} problème(s) ${c("dim", url)}`);
           for (const d of diffs) console.log(`      • ${c("yellow", d.path)} : ${d.issue}`);
         }
       } catch (err) {
@@ -847,7 +847,7 @@ async function main() {
           console.log(`  ${c("green", "✅")} robots.txt ${c("dim", url)}`);
         } else {
           blockingIssues += issues.length;
-          console.log(`  ${c("red", "❌")} robots.txt — ${issues.length} problème(s) ${c("dim", url)}`);
+          console.log(`  ${c("red", "❌")} robots.txt, ${issues.length} problème(s) ${c("dim", url)}`);
           for (const i of issues) console.log(`      • ${i}`);
         }
       } catch (err) {
@@ -1058,7 +1058,7 @@ async function main() {
   }
 
   if (checkMode && warnings > 0 && blockingIssues === 0 && totalErrors === 0) {
-    console.log(c("red", `\n❌ --check : ${warnings} divergence(s) détectée(s) — le build doit être bloqué.\n`));
+    console.log(c("red", `\n❌ --check : ${warnings} divergence(s) détectée(s), le build doit être bloqué.\n`));
   } else {
     console.log(c("dim", "\n💡 Si seule la prod diverge : purger Prerender.io / Cloudflare puis relancer.\n"));
   }
@@ -1158,7 +1158,7 @@ function writeHtmlReport(report, filePath) {
   const indexHtmlBlock = indexHtml
     ? (indexHtml.ok
         ? `<p class="ok">✅ index.html synchronisé avec la route <code>/</code>.</p>`
-        : `<p class="err">⚠️ index.html diverge de la route <code>/</code> — lancez <code>npm run sync-index-html</code>.</p>
+        : `<p class="err">⚠️ index.html diverge de la route <code>/</code>, lancez <code>npm run sync-index-html</code>.</p>
            <table class="compact"><thead><tr><th>Clé</th><th>Statut</th><th>Attendu</th><th>Trouvé</th></tr></thead>
            <tbody>${indexHtml.diffs.map((d) => `<tr><td><code>${escapeHtml(d.key)}</code></td><td>${escapeHtml(d.status)}</td><td><pre>${escapeHtml(d.expected)}</pre></td><td><pre>${escapeHtml(d.actual ?? "(absent)")}</pre></td></tr>`).join("")}</tbody></table>`)
     : "";
@@ -1167,7 +1167,7 @@ function writeHtmlReport(report, filePath) {
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<title>Rapport validation OG — Guardiens</title>
+<title>Rapport validation OG, Guardiens</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
   :root { --bg:#0f172a; --fg:#e2e8f0; --muted:#94a3b8; --card:#1e293b; --ok:#22c55e; --warn:#eab308; --err:#ef4444; --border:#334155; }
@@ -1209,7 +1209,7 @@ function writeHtmlReport(report, filePath) {
 </head>
 <body>
 <header class="top">
-  <h1>Rapport validation OG — Guardiens</h1>
+  <h1>Rapport validation OG, Guardiens</h1>
   <div class="sub">Généré le ${escapeHtml(new Date(generatedAt).toLocaleString("fr-FR"))} · origines : ${perOrigin.map((o) => escapeHtml(o.origin)).join(", ")}</div>
 </header>
 <main>

@@ -1,5 +1,5 @@
 /**
- * useCommunityPulse — agrège des chiffres RÉELS de vitalité communautaire
+ * useCommunityPulse, agrège des chiffres RÉELS de vitalité communautaire
  * à afficher sur le dashboard (bandeau « Le pouls de la communauté »).
  *
  * Sources : RPC `get_public_stats` (source primaire). Aucun chiffre inventé.

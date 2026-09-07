@@ -15,7 +15,7 @@ import { MIN_COMPLETION_TO_APPLY } from "@/hooks/useAccessLevel";
  *  5. Mode dispo OFF          → activer la visibilité
  *  6. Fallback                → explorer
  *
- * Ne fait AUCUN fetch — consomme les données déjà chargées par
+ * Ne fait AUCUN fetch, consomme les données déjà chargées par
  * `useSitterDashboardData` pour rester gratuit.
  */
 
@@ -47,7 +47,7 @@ export function useSitterPriorityAction(input: Input): SitterPriorityAction {
   return useMemo(() => {
     const { nextGuard, profileCompletion, postalCode, nearbyListings, isAvailable, competencesCount = 0, interestsCount = 0, identityDone = true, completedSitsCount = 0 } = input;
 
-    // 1. Prochaine garde imminente — toujours prioritaire
+    // 1. Prochaine garde imminente, toujours prioritaire
     if (nextGuard) {
       const d = nextGuard.daysUntil ?? 0;
       const dayLabel = d <= 0 ? "aujourd'hui" : d === 1 ? "demain" : `dans ${d} jours`;
@@ -62,7 +62,7 @@ export function useSitterPriorityAction(input: Input): SitterPriorityAction {
       };
     }
 
-    // 2. Profil incomplet — bloque les candidatures
+    // 2. Profil incomplet, bloque les candidatures
     if (profileCompletion < MIN_COMPLETION_TO_APPLY) {
       return {
         variant: "profile",
@@ -75,7 +75,7 @@ export function useSitterPriorityAction(input: Input): SitterPriorityAction {
       };
     }
 
-    // 3. Code postal manquant — bloque le géo
+    // 3. Code postal manquant, bloque le géo
     if (!postalCode) {
       return {
         variant: "postal",
@@ -88,7 +88,7 @@ export function useSitterPriorityAction(input: Input): SitterPriorityAction {
       };
     }
 
-    // 3b. Compétences absentes — débloque le feed d'entraide et qualifie le profil
+    // 3b. Compétences absentes, débloque le feed d'entraide et qualifie le profil
     if (competencesCount === 0) {
       return {
         variant: "skills",
@@ -101,7 +101,7 @@ export function useSitterPriorityAction(input: Input): SitterPriorityAction {
       };
     }
 
-    // 3c. Centres d'intérêt absents — affine le matching d'affinité
+    // 3c. Centres d'intérêt absents, affine le matching d'affinité
     if (interestsCount === 0) {
       return {
         variant: "interests",
@@ -132,7 +132,7 @@ export function useSitterPriorityAction(input: Input): SitterPriorityAction {
       };
     }
 
-    // 4. Annonce à proximité — opportunité fraîche
+    // 4. Annonce à proximité, opportunité fraîche
     //    On EXCLUT les annonces flaggées `is_beyond` : sinon le cockpit
     //    annonce « 2 annonces près de chez vous » alors que la carte
     //    plus bas affiche « Aucune garde à moins de 100 km ».
@@ -155,7 +155,7 @@ export function useSitterPriorityAction(input: Input): SitterPriorityAction {
     // la section Découverte plus bas porte déjà « Annonces ailleurs en France ».
     // On laisse le cockpit basculer sur entraide ou disponibilité.
 
-    // 5. Mode dispo OFF — sans ça aucune sollicitation directe
+    // 5. Mode dispo OFF, sans ça aucune sollicitation directe
     if (!isAvailable) {
       return {
         variant: "availability",
@@ -184,7 +184,7 @@ export function useSitterPriorityAction(input: Input): SitterPriorityAction {
       };
     }
 
-    // 7. Fallback — tout est prêt
+    // 7. Fallback, tout est prêt
     return {
       variant: "explore",
       eyebrow: "Tout est prêt",

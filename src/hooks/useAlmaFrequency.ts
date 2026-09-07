@@ -1,8 +1,8 @@
 /**
- * useAlmaFrequency — lit la préférence `profiles.alma_frequency` de l'utilisateur.
+ * useAlmaFrequency, lit la préférence `profiles.alma_frequency` de l'utilisateur.
  *
  * Valeurs : "silent" (Alma ne parle jamais spontanément), "balanced" (défaut),
- * "talkative" (Alma parle davantage, cross-page whispers — activé en Pass 4).
+ * "talkative" (Alma parle davantage, cross-page whispers, activé en Pass 4).
  *
  * Retourne "balanced" tant que la valeur n'est pas chargée, pour ne pas masquer
  * l'UI par défaut. `silent` = kill switch dur pour toutes les bulles proactives.

@@ -1,5 +1,5 @@
 /**
- * pickDiscoverySit (vague 17) — logique pure d'extraction de la carte
+ * pickDiscoverySit (vague 17), logique pure d'extraction de la carte
  * « découverte » d'un pool d'annonces déjà scoré.
  *
  * Extraite de `useSitterTopAffinitySits` pour être testable en isolation

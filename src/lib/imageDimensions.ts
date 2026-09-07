@@ -2,7 +2,7 @@
  * Mesure les dimensions (largeur/hauteur en pixels) d'un fichier image dans le navigateur.
  * Utilisé à l'upload pour stocker la qualité réelle de la photo (filtrage SEO indexation).
  *
- * Renvoie `{ width: 0, height: 0 }` en cas d'échec — le caller décide de la tolérance.
+ * Renvoie `{ width: 0, height: 0 }` en cas d'échec, le caller décide de la tolérance.
  */
 export async function getImageDimensions(file: Blob): Promise<{ width: number; height: number }> {
   return new Promise((resolve) => {

@@ -58,7 +58,7 @@ export async function sendTransactionalEmail(
         email = data;
       }
     } catch (e) {
-      // RPC absente — on tombera dans le warn ci-dessous
+      // RPC absente, on tombera dans le warn ci-dessous
     }
   }
 

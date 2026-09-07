@@ -1,5 +1,5 @@
 /**
- * useAlmaEvolution — calcule le stade d'évolution de l'utilisateur courant
+ * useAlmaEvolution, calcule le stade d'évolution de l'utilisateur courant
  * à partir de signaux RÉELS uniquement (jamais monétaire, jamais inventé).
  *
  * Les seuils sont centralisés dans ALMA_THRESHOLDS pour être ajustés facilement.

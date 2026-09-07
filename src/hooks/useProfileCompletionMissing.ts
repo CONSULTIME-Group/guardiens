@@ -1,5 +1,5 @@
 /**
- * useProfileCompletionMissing — champs manquants du barème de complétion,
+ * useProfileCompletionMissing, champs manquants du barème de complétion,
  * calculés côté client avec le même barème que la fonction SQL
  * `calculate_profile_completion` (parité fixée par src/lib/profileCompletion.ts).
  *

@@ -1,5 +1,5 @@
 /**
- * pickAlmaRailPhrase (vague 17) — logique pure de choix de la phrase
+ * pickAlmaRailPhrase (vague 17), logique pure de choix de la phrase
  * murmurée par Alma dans le rail du dashboard.
  *
  * Extraite de `AlmaRailWhisper` pour être testable en isolation. Les

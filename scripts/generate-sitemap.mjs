@@ -58,7 +58,7 @@ function loadStaticRoutes() {
 const { siteUrl: SITE_URL, routes: STATIC_ROUTES } = loadStaticRoutes();
 
 // Filtrage automatique : on ne garde que les routes marquées indexables.
-// Pas de SITEMAP_EXCLUDE en doublon — la décision est prise dans siteRoutes.ts
+// Pas de SITEMAP_EXCLUDE en doublon, la décision est prise dans siteRoutes.ts
 // via le flag `index`. Toute incohérence est impossible par construction.
 const staticPages = STATIC_ROUTES.filter((r) => r.indexable);
 
@@ -313,7 +313,7 @@ async function main() {
       }
     ),
 
-    // Annonces individuelles `/annonces/:id` — filtre qualité aligné avec
+    // Annonces individuelles `/annonces/:id`, filtre qualité aligné avec
     // l'indexabilité côté client (PublicSitDetail) via la règle partagée
     // src/lib/sitIndexability.js : statut publié, candidatures ouvertes,
     // titre ≥10 caractères, cumul de contenu rédigé ≥200 caractères.
@@ -424,7 +424,7 @@ async function main() {
   for (const e of profiles_pros || []) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
   for (const e of proSiloEntries) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
   // Pages légales (/cgu, /confidentialite, /mentions-legales) déjà incluses
-  // dans staticPages via staticRoutes — ne pas les ré-ajouter ici.
+  // dans staticPages via staticRoutes. Ne pas les ré-ajouter ici.
 
   // Déduplication finale : un même <loc> ne doit jamais apparaître 2 fois
   // (cityLandingPages hardcodées vs seo_city_pages DB notamment).

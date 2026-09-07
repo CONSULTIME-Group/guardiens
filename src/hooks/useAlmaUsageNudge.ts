@@ -1,5 +1,5 @@
 /**
- * useAlmaUsageNudge — hook client Alma étape 1.
+ * useAlmaUsageNudge, hook client Alma étape 1.
  *
  * Interroge la RPC `get_alma_usage_nudge` avec le role + state du user
  * courant, puis queue un whisper de type "usage_nudge" (P2). Le scheduler

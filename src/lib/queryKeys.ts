@@ -11,7 +11,7 @@
  * pour tous les utilisateurs au prochain mount.
  *
  * Convention : `qk.<domaine>(...args)` renvoie un tuple stable.
- * Ne JAMAIS construire de queryKey ad hoc dans les hooks — toujours passer
+ * Ne JAMAIS construire de queryKey ad hoc dans les hooks, toujours passer
  * par ce fichier pour garder la traçabilité des bumps en un seul endroit.
  *
  * Historique des bumps :

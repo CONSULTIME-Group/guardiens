@@ -480,13 +480,6 @@ const PublicSitDetail = () => {
    : `https://erhccyqevdyevpyctsjj.supabase.co/functions/v1/og-sit?id=${sit.id}&v=cover-only-20260522`;
  const ogImageAlt = `${sit.title || "Annonce de garde"}, ${cityForTitle}, ${datesShort}`;
 
-  const MetaReady = () => {
-    useEffect(() => {
-      window.prerenderReady = true;
-    }, []);
-    return null;
-  };
-
  const jsonLd: Record<string, any> = {
  "@context": "https://schema.org",
  "@type": "Service",
@@ -624,7 +617,6 @@ const PublicSitDetail = () => {
           { attr: "name", key: "twitter:image:alt", content: ogImageAlt },
         ]}
       />
-      <MetaReady />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
 

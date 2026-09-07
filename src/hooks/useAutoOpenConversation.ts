@@ -199,7 +199,7 @@ export function useAutoOpenConversation<C extends ConvLike>({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [routeConvId]);
 
-  // ── Cas 3 : fallback desktop — ouvre la conv non-lue la plus récente ──
+  // ── Cas 3 : fallback desktop, ouvre la conv non-lue la plus récente ──
   useEffect(() => {
     if (loading || isMobile || activeConv || !user) return;
     const hasUrlParam =

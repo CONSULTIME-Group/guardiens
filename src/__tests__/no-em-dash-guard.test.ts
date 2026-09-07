@@ -2,16 +2,16 @@ import { describe, it, expect } from 'vitest';
 import { execSync } from 'child_process';
 
 /**
- * Garde anti-régression : le tiret cadratin « — » (U+2014) est PROSCRIT
+ * Garde anti-régression : le tiret cadratin U+2014 (U+2014) est PROSCRIT
  * dans tout le contenu user-visible (UI, copy, SEO, articles, emails, alt, OG, toasts).
- * Le demi-cadratin « – » (U+2013) est proscrit lui aussi en ponctuation de phrase.
+ * Le demi-cadratin U+2013 (U+2013) est proscrit lui aussi en ponctuation de phrase.
  * Remplacer par virgule, deux-points, parenthèses ou point.
  * cf. mem://style/no-em-dash
  *
  * Tests, logs techniques et fichiers utilitaires non-visibles sont exclus.
  */
 
-const SCAN_PATHS = 'src/pages src/components src/data src/i18n/locales index.html';
+const SCAN_PATHS = 'src/pages src/components src/data src/i18n/locales src/lib src/hooks scripts index.html';
 
 const EXCLUDE = [
   '--glob=!**/*.test.*',
@@ -53,12 +53,12 @@ function search(pattern: string): string[] {
 }
 
 describe('Tirets longs', () => {
-  it("le cadratin « — » (U+2014) n'apparaît jamais dans le contenu user-visible", () => {
+  it("le cadratin U+2014 (U+2014) n'apparaît jamais dans le contenu user-visible", () => {
     const lines = search('\\x{2014}');
 
     if (lines.length > 0) {
       throw new Error(
-        `${lines.length} tiret(s) cadratin « — » détecté(s) dans le contenu user-visible.\n` +
+        `${lines.length} tiret(s) cadratin U+2014 détecté(s) dans le contenu user-visible.\n` +
           `Remplacer par virgule, deux-points, parenthèses ou point.\n` +
           `cf. mem://style/no-em-dash\n\nExemples :\n${lines.slice(0, 10).join('\n')}`
       );
@@ -66,18 +66,18 @@ describe('Tirets longs', () => {
     expect(lines.length).toBe(0);
   });
 
-  it("le demi-cadratin « – » (U+2013) n'est jamais utilisé en ponctuation de phrase", () => {
-    // Seul cas toléré : séparateur de plage numérique collé, du type « 10–12 » ou
-    // « 2024–2026 ». Toute occurrence non encadrée par deux chiffres est de la
+  it("le demi-cadratin U+2013 (U+2013) n'est jamais utilisé en ponctuation de phrase", () => {
+    // Seul cas toléré : séparateur de plage numérique collé, du type « 10 à 12 » ou
+    // « 2024 à 2026 ». Toute occurrence non encadrée par deux chiffres est de la
     // ponctuation de phrase.
     const lines = search('\\x{2013}').filter((line) =>
       /(?<!\d)\u2013|\u2013(?!\d)/.test(line)
     );
     if (lines.length > 0) {
       throw new Error(
-        `${lines.length} tiret(s) demi-cadratin « – » utilisé(s) en ponctuation.\n` +
+        `${lines.length} tiret(s) demi-cadratin U+2013 utilisé(s) en ponctuation.\n` +
           `Remplacer par virgule, deux-points, parenthèses ou point. ` +
-          `Seules les plages numériques collées (10–12) sont tolérées.\n` +
+          `Seules les plages numériques collées (10 à 12) sont tolérées.\n` +
           `cf. mem://style/no-em-dash\n\nExemples :\n${lines.slice(0, 10).join('\n')}`
       );
     }

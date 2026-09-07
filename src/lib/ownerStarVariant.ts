@@ -1,13 +1,13 @@
 /**
- * ownerStarVariant (vague 17) — logique pure de sélection de la STAR du
+ * ownerStarVariant (vague 17), logique pure de sélection de la STAR du
  * dashboard propriétaire.
  *
  * Extraite de `OwnerStarSection` pour être testable en isolation.
  * Retourne l'une des 4 variantes exclusives, par priorité :
- *   1. `ongoing`        — une garde est en cours
- *   2. `applications`   — au moins une candidature pending
- *   3. `draft`          — au moins un brouillon « vivant »
- *   4. `publish`        — aucune annonce, invitation à publier
+ *   1. `ongoing`       , une garde est en cours
+ *   2. `applications`  , au moins une candidature pending
+ *   3. `draft`         , au moins un brouillon « vivant »
+ *   4. `publish`       , aucune annonce, invitation à publier
  *
  * Un brouillon est considéré « vivant » s'il n'est pas archivé et si ses
  * dates ne sont pas déjà passées (cf. règles OwnerDashboard).
