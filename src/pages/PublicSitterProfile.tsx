@@ -973,6 +973,14 @@ export default function PublicSitterProfile() {
   if (loadError === 'error') {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center px-6">
+        {/* PageMeta en noindex : relâche le verrou prerenderMetaPending et
+            lève prerenderReady, sinon Prerender.io attend son timeout de
+            20 secondes et facture un render pour une page en erreur. */}
+        <PageMeta
+          title="Profil momentanément indisponible"
+          description="Ce profil n'a pas pu être chargé. Vous pouvez réessayer dans un instant."
+          noindex
+        />
         <div className="text-center space-y-3 max-w-md">
           <p className="text-lg font-semibold text-foreground">Impossible de charger ce profil</p>
           <p className="text-sm text-muted-foreground">Un problème réseau est peut-être en cause. Vous pouvez réessayer dans un instant.</p>
