@@ -370,24 +370,17 @@ const Landing = () => {
         className="border-b border-border/60 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60"
       >
         <div className="lp-wide">
-          <ul className="flex items-center gap-1 overflow-x-auto scrollbar-none py-2.5 -mx-2 px-2">
+          <ul className="flex flex-wrap items-center justify-center gap-1 py-2.5">
             {(() => {
               const items = [
-                { href: "#usages", label: t("landing.toc.care_aid"), mobile: true },
-                { href: "#international", label: t("landing.toc.international"), mobile: false, hidden: !hasInternationalSection },
-                { href: "#comment-ca-marche", label: t("landing.toc.how"), mobile: false },
-                { href: "#entraide", label: t("landing.toc.aid"), mobile: false },
-                { href: "#chiffres", label: t("landing.toc.numbers"), mobile: true },
-                { href: "#confiance", label: t("landing.toc.trust"), mobile: true },
-                { href: "#comparatif", label: t("landing.toc.compare", { defaultValue: "Comparatif" }), mobile: false },
-                { href: "#matching", label: t("landing.toc.matching"), mobile: true },
-                { href: "#temoignages", label: t("landing.toc.testimonials"), mobile: true },
-                { href: "#notre-histoire", label: t("landing.toc.story"), mobile: false },
-                { href: "#guides-villes", label: t("landing.toc.cities"), mobile: false },
-                { href: "#faq", label: t("landing.toc.faq"), mobile: true },
+                { href: "#usages", label: t("landing.toc.care_aid") },
+                { href: "#comment-ca-marche", label: t("landing.toc.how") },
+                { href: "#confiance", label: t("landing.toc.trust") },
+                { href: "#notre-histoire", label: t("landing.toc.story") },
+                { href: "#faq", label: t("landing.toc.faq") },
               ];
-              return items.filter((item) => !("hidden" in item) || !item.hidden).map((item) => (
-                <li key={item.href} className={item.mobile ? "shrink-0" : "shrink-0 hidden md:list-item"}>
+              return items.map((item) => (
+                <li key={item.href} className="shrink-0">
                 <a
                   href={item.href}
                   className="inline-flex items-center min-h-[44px] px-3 py-1.5 rounded-full text-[11px] tracking-[0.14em] uppercase font-body text-foreground/75 hover:text-primary hover:bg-primary/5 transition-colors whitespace-nowrap"

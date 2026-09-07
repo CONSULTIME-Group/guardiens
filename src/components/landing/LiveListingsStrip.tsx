@@ -44,6 +44,15 @@ const isForeign = (country: string | null) => {
   return c !== "FRANCE" && c !== "FR" && c !== "";
 };
 
+const listingTitleWithoutDates = (title: string): string => {
+  const month = "janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre";
+  const writtenPeriod = new RegExp(`\\s*(?:,|\\||-)?\\s*(?:du\\s+)?\\d{1,2}(?:er)?\\s+(?:${month})(?:\\s+\\d{4})?\\s+(?:au|à|-)\\s+\\d{1,2}(?:er)?(?:\\s+(?:${month}))?(?:\\s+\\d{4})?.*$`, "iu");
+  const numericPeriod = /\s*(?:,|\||-)?\s*(?:du\s+)?\d{1,2}[/.]\d{1,2}(?:[/.]\d{2,4})?\s+(?:au|à|-)\s+\d{1,2}[/.]\d{1,2}(?:[/.]\d{2,4})?.*$/iu;
+  const cleaned = title.replace(writtenPeriod, "").replace(numericPeriod, "").trim();
+  const concise = cleaned || title;
+  return concise.length > 72 ? `${concise.slice(0, 69).trimEnd()}...` : concise;
+};
+
 /**
  * Preuve vivante de la page d'accueil : les annonces réelles, remontées en
  * troisième position. Une grille uniforme de six annonces, photo, lieu,
@@ -260,20 +269,20 @@ const LiveListingsStrip: React.FC = () => {
             const photo = resolvePhoto(s);
             const dates = fmtDates(s);
             const geo = labelGeo(s);
+            const displayTitle = listingTitleWithoutDates(s.title);
             return (
               <Link
                 key={s.id}
                 to={`/annonces/${s.slug || s.id}`}
-                className="notebook-card notebook-card-paper group relative min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                className="group relative min-h-[44px] overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
               >
-                <div className="notebook-card-edge" aria-hidden="true" />
                 <div className="aspect-[4/3] bg-muted relative overflow-hidden">
                   {photo ? (
                     <img
                       src={storageImageUrl(photo, { width: 480, height: 360 }) || photo}
                       srcSet={storageImageSrcSet(photo, [400, 640], 75, 4 / 3)}
                       sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw"
-                      alt={s.title}
+                      alt={displayTitle}
                       loading="lazy"
                       width={480}
                       height={360}
@@ -295,7 +304,7 @@ const LiveListingsStrip: React.FC = () => {
                 </div>
                 <div className="p-3.5 md:p-4">
                   <h3 className="font-heading text-base md:text-lg font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors leading-snug">
-                    {s.title}
+                    {displayTitle}
                   </h3>
                   {dates && (
                     <p className="text-xs md:text-sm text-muted-foreground mt-1 font-medium">
