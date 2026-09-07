@@ -86,6 +86,11 @@ describe("Garde-fou pricing : aucune mention obsolète dans les .tsx/.ts", () =>
         // Ignore les commentaires purs
         const trimmed = line.trimStart();
         if (trimmed.startsWith("//") || trimmed.startsWith("*")) return;
+        // Exception assumée : la description Schema.org de l'offre
+        // propriétaire des pages ville accompagne price: "0", le texte et la
+        // donnée structurée doivent se répondre.
+        if (trimmed === 'description: "Espace propriétaire à 0 €.",') return;
+
         for (const { label, regex } of PATTERNS) {
           if (regex.test(line)) {
             findings.push(`${file}:${i + 1}  [${label}]  ${line.trim().slice(0, 140)}`);
