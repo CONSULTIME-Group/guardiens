@@ -4,9 +4,9 @@
 // entrée `queued` dans `sitter_digest_queue`. L'identité vérifiée n'est plus
 // un filtre d'éligibilité. La file est consommée dans l'ordre FIFO.
 // La complétude de profil n'est pas un filtre non plus (décision du
-// 20/08/2026) : sous 60 % le gardien ne peut pas candidater, mais il reçoit
-// les annonces avec un appel à compléter son profil (même source de calcul
-// des manques que le bloc dashboard, `_shared/missing-opportunities`).
+// 20/08/2026) : sous APPLY_COMPLETION_THRESHOLD % le gardien ne peut pas
+// candidater, mais il reçoit les annonces avec un appel à compléter son profil
+// (même source de calcul des manques que le bloc dashboard, `_shared/missing-opportunities`).
 // Depuis le 20/08/2026, le score d'affinité est calculé ICI par le moteur
 // unique partagé (`_shared/affinity/score.ts`, le même que l'affichage), en
 // mode distribution : seuls les refus explicitement déclarés par le gardien
@@ -34,7 +34,7 @@ import { recordDeliveryFailure } from '../_shared/delivery-failure.ts'
 import { startCronRun } from '../_shared/cron-run-log.ts'
 import { acquireWorkerLock, releaseWorkerLock } from '../_shared/worker-lock.ts'
 import { computeAffinityResultFull } from '../_shared/affinity/score.ts'
-import { completionMessageFor, remainingCompletionSteps } from '../_shared/completion-steps/index.ts'
+import { APPLY_COMPLETION_THRESHOLD, completionMessageFor, remainingCompletionSteps } from '../_shared/completion-steps/index.ts'
 
 
 // La plateforme coupe actuellement ce traitement vers 150 secondes. Le
@@ -563,11 +563,12 @@ Deno.serve(async (req) => {
           claimGranted++
         }
 
-        // 2g bis. CTA selon complétude : sous 60 %, le gardien ne peut pas
-        // candidater (useAccessLevel niveau 1). Mêmes annonces, même ordre,
-        // seul l'appel à l'action change. Depuis le 30/08/2026, le message
-        // nomme un seul geste, mais dit la vérité sur le nombre d'étapes
-        // restantes, calculé sur le barème réel de _calculate_sitter_score.
+        // 2g bis. CTA selon complétude : sous APPLY_COMPLETION_THRESHOLD %,
+        // le gardien ne peut pas candidater (useAccessLevel niveau 1). Mêmes
+        // annonces, même ordre, seul l'appel à l'action change. Depuis le
+        // 30/08/2026, le message nomme un seul geste, mais dit la vérité sur le
+        // nombre d'étapes restantes, calculé sur le barème réel de
+        // _calculate_sitter_score.
         const profileCompletion = profile.profile_completion ?? 0
         const canApply = profileCompletion >= 60
         let completionSentence: string | undefined

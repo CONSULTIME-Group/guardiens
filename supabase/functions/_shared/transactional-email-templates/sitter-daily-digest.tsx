@@ -39,9 +39,10 @@ interface Props {
    */
   isCatchup?: boolean
   /**
-   * false quand le profil est rempli à moins de 60 % : le gardien ne peut
-   * pas candidater (useAccessLevel niveau 1). Mêmes annonces, même ordre,
-   * seul l'appel à l'action change (doctrine du 20/08/2026).
+   * false quand le profil est rempli à moins de APPLY_COMPLETION_THRESHOLD % :
+   * le gardien ne peut pas candidater (useAccessLevel niveau 1). Mêmes
+   * annonces, même ordre, seul l'appel à l'action change (doctrine du
+   * 20/08/2026).
    */
   canApply?: boolean
   /** Pourcentage actuel de complétude, affiché quand canApply est false. */
