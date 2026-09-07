@@ -1407,7 +1407,6 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
   // Overlay neutralisé tant que PRICING_IS_ACTIVE = false (promesse "sans limite").
   const isSitterLocked = PRICING_IS_ACTIVE && !!user && !hasAccess && tab === "sits";
 
- const memberFirstName = publicFirstName(member.first_name) || "Membre";
  return (
  <>
  {/* Réserve basse : la barre de navigation est déjà compensée par le body,
@@ -2123,6 +2122,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  const activePublishers = availableMembers.filter((m: any) => m.has_published_offre && !m.is_demo);
  const complementary = availableMembers.filter((m: any) => !m.has_published_offre || m.is_demo);
  const renderCard = (member: any) => {
+ const memberFirstName = publicFirstName(member.first_name) || "Membre";
  const skillMeta: Record<string, { label: string; icon: typeof Sprout }> = {
  jardin: { label: "Jardin", icon: Sprout },
  animaux: { label: "Animaux", icon: PawPrint },
