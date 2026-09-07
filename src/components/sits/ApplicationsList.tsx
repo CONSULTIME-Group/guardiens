@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
-import { getMemberAvatarUrl, getMemberDisplayName, getMemberInitial, isMemberLinkable } from "@/lib/memberUtils";
+import { getMemberAvatarUrl, getMemberPublicFirstName, getMemberInitial, isMemberLinkable } from "@/lib/memberUtils";
+import { publicFirstName } from "@/lib/displayName";
 import { logger } from "@/lib/logger";
 import { trackEvent } from "@/lib/analytics";
 
@@ -232,7 +233,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
     if (accepting) return;
     setAccepting(true);
     try {
-      const sitterName = getMemberDisplayName(app.sitter, "Ce gardien");
+      const sitterName = getMemberPublicFirstName(app.sitter, "Ce gardien");
       const sitterId = app.sitter_id;
 
       // 1) Appel RPC atomique côté serveur.
@@ -344,8 +345,8 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
           type: "sit_confirmed",
           title: "Garde confirmée",
           body: guideCheck
-            ? `Votre garde chez ${proprio?.first_name ?? "votre hôte"} est confirmée. Le guide de la maison sera disponible dans votre espace à partir du ${startFormatted}.`
-            : `Votre garde chez ${proprio?.first_name ?? "votre hôte"} est confirmée. Rendez-vous dans "Mes gardes" pour les détails.`,
+            ? `Votre garde chez ${publicFirstName(proprio?.first_name) || "votre hôte"} est confirmée. Le guide de la maison sera disponible dans votre espace à partir du ${startFormatted}.`
+            : `Votre garde chez ${publicFirstName(proprio?.first_name) || "votre hôte"} est confirmée. Rendez-vous dans "Mes gardes" pour les détails.`,
           link: notifLink,
         });
       }
@@ -357,7 +358,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
         idempotencyKey: `app-accepted-${app.id}`,
         templateData: {
           sitTitle,
-          ownerFirstName: proprio?.first_name ?? "",
+          ownerFirstName: publicFirstName(proprio?.first_name),
         },
       }).catch(() => {});
 
@@ -374,7 +375,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
         idempotencyKey: `sit-confirmed-${sitId}`,
         templateData: {
           sitTitle,
-          sitterFirstName: app.sitter?.first_name ?? "",
+          sitterFirstName: getMemberPublicFirstName(app.sitter, ""),
           startDate: startFormattedFull,
           endDate: endFormatted,
           petNames: petNames.join(", "),
@@ -445,11 +446,11 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
         dateFin: endDate ?? "",
         adresse,
         proprio: {
-          prenom: proprioProfile?.first_name ?? "Le propriétaire",
+          prenom: publicFirstName(proprioProfile?.first_name) || "Le propriétaire",
           telephone: "",
         },
         gardien: {
-          prenom: app.sitter?.first_name ?? "Le gardien",
+          prenom: getMemberPublicFirstName(app.sitter, "Le gardien"),
         },
         animaux: pets,
         reglesVie: {
@@ -552,7 +553,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
       if (error) throw error;
       toast({
         title: "Candidature rouverte",
-        description: `${app.sitter?.first_name ?? "Le gardien"} peut reprendre la discussion et repostuler.`,
+        description: `${getMemberPublicFirstName(app.sitter, "Le gardien")} peut reprendre la discussion et repostuler.`,
       });
       load();
     } catch (err: any) {
@@ -665,7 +666,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
                   sitsCount={completedSits}
                 >
                   {getMemberAvatarUrl(sitter) ? (
-                    <img src={avatarImageUrl(getMemberAvatarUrl(sitter)!, 48)} alt={`Photo de ${getMemberDisplayName(sitter, "gardien")}`} className="w-full h-full object-cover" />
+                    <img src={avatarImageUrl(getMemberAvatarUrl(sitter)!, 48)} alt={`Photo de ${getMemberPublicFirstName(sitter, "gardien")}`} className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium text-lg">
                       {getMemberInitial(sitter)}
@@ -676,7 +677,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
               </>
             );
             return isMemberLinkable(sitter) ? (
-              <Link to={`/gardiens/${app.sitter_id}`} className="shrink-0 relative block" aria-label={`Voir le profil de ${getMemberDisplayName(sitter, "ce gardien")}`}>
+              <Link to={`/gardiens/${app.sitter_id}`} className="shrink-0 relative block" aria-label={`Voir le profil de ${getMemberPublicFirstName(sitter, "ce gardien")}`}>
                 {avatarInner}
               </Link>
             ) : (
@@ -687,11 +688,11 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
             <div className="flex items-center gap-2 flex-wrap">
               {isMemberLinkable(sitter) ? (
                 <Link to={`/gardiens/${app.sitter_id}`} className="text-base font-semibold text-foreground hover:underline">
-                  {getMemberDisplayName(sitter, "Gardien")}
+                  {getMemberPublicFirstName(sitter, "Gardien")}
                 </Link>
               ) : (
                 <span className="text-base font-semibold text-foreground">
-                  {getMemberDisplayName(sitter, "Gardien")}
+                  {getMemberPublicFirstName(sitter, "Gardien")}
                 </span>
               )}
 
@@ -953,7 +954,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle className="font-heading">
-                Accepter la candidature de {confirmApp.sitter?.first_name} ?
+                Accepter la candidature de {getMemberPublicFirstName(confirmApp.sitter, "ce gardien")} ?
               </DialogTitle>
               <DialogDescription>
                 Les autres candidats seront automatiquement déclinés. Cette action confirme la garde.
@@ -974,7 +975,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
         <Dialog open={!!declineApp} onOpenChange={(o) => { if (!o) { setDeclineApp(null); setDeclineMessage(""); setDeclineCustom(false); } }}>
           <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle className="font-heading">Décliner la candidature de {declineApp.sitter?.first_name} ?</DialogTitle>
+              <DialogTitle className="font-heading">Décliner la candidature de {getMemberPublicFirstName(declineApp.sitter, "ce gardien")} ?</DialogTitle>
               <DialogDescription>
                 Le gardien sera notifié. Vous pouvez toujours accepter d'autres candidatures.
               </DialogDescription>

@@ -37,8 +37,9 @@ export function getMemberDisplayName(
 
 /**
  * Prénom affichable sur une surface publique, jamais vide.
- * Ne garde que le premier mot du champ prénom, certains membres y
- * saisissent leur nom complet. Un membre supprimé garde son nom neutre.
+ * Conserve les prénoms composés et retire un nom de famille uniquement quand
+ * sa casse ou ses initiales permettent de le distinguer. Un membre supprimé
+ * garde son nom neutre.
  */
 export function getMemberPublicFirstName(
   member: MemberLike | null | undefined,

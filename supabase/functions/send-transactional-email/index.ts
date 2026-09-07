@@ -12,6 +12,34 @@ import { REPLY_TO_ADDRESS } from '../_shared/sender-address.ts'
 
 const SITE_URL = 'https://guardiens.fr'
 
+function publicFirstName(value: unknown): unknown {
+  if (typeof value !== 'string') return value
+  const words = value.trim().split(/\s+/).filter(Boolean)
+  if (words.length === 0) return ''
+  const looksLikeSurname = (word: string) => {
+    if (word.includes('.')) return true
+    const letters = word.replace(/[^\p{L}]/gu, '')
+    return letters.length >= 2
+      && letters === letters.toLocaleUpperCase('fr-FR')
+      && letters !== letters.toLocaleLowerCase('fr-FR')
+  }
+  const hasNonSurnameWord = words.some((word) => !looksLikeSurname(word))
+  const kept: string[] = []
+  for (const word of words) {
+    if (hasNonSurnameWord && looksLikeSurname(word)) break
+    kept.push(word)
+    if (kept.length === 3) break
+  }
+  return (kept.length ? kept : [words[0]]).join(' ')
+}
+
+function normalizeEmailFirstNames(templateData: Record<string, any>): Record<string, any> {
+  return Object.fromEntries(Object.entries(templateData).map(([key, value]) => [
+    key,
+    /FirstName$/.test(key) ? publicFirstName(value) : value,
+  ]))
+}
+
 // Configuration baked in at scaffold time — do NOT change these manually.
 // To update, re-run the email domain setup flow.
 const SITE_NAME = "Guardiens"
@@ -1050,6 +1078,7 @@ Deno.serve(async (req) => {
 
   // 4. Render React Email template to HTML and plain text (synchrone,
   // voir la note d'import : renderAsync corrompt les accents).
+  templateData = normalizeEmailFirstNames(templateData)
   let html = render(
     React.createElement(template.component, templateData)
   )

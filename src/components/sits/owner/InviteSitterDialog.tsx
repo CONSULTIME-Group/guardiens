@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useSendSitInvitation } from "@/hooks/useSitInvitations";
 import { formatSitPeriod } from "@/lib/dateRange";
+import { publicFirstName } from "@/lib/displayName";
 
 interface Props {
   open: boolean;
@@ -43,17 +44,18 @@ const InviteSitterDialog = ({
 }: Props) => {
   const { mutate, isPending } = useSendSitInvitation(sitId, ownerId);
   const [message, setMessage] = useState("");
+  const sitterFirstName = publicFirstName(sitter?.first_name);
 
   useEffect(() => {
     if (!open || !sitter) return;
     const period = formatSitPeriod(startDate, endDate);
-    const intro = sitter.first_name ? `Bonjour ${sitter.first_name},` : "Bonjour,";
+    const intro = sitterFirstName ? `Bonjour ${sitterFirstName},` : "Bonjour,";
     const lieu = sitCity ? ` à ${sitCity}` : "";
     const dates = period ? ` du ${period}` : "";
     setMessage(
       `${intro}\n\nJe publie une garde${lieu}${dates}. Votre profil m'a tapé dans l'œil et je serais ravi(e) que vous y candidatiez si cela vous intéresse.\n\nÀ très vite !`,
     );
-  }, [open, sitter, sitCity, startDate, endDate]);
+  }, [open, sitter, sitterFirstName, sitCity, startDate, endDate]);
 
   const handleSend = () => {
     if (!sitter) return;
@@ -69,7 +71,7 @@ const InviteSitterDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Inviter {sitter?.first_name || "ce gardien"}</DialogTitle>
+          <DialogTitle>Inviter {sitterFirstName || "ce gardien"}</DialogTitle>
           <DialogDescription>
             Personnalisez votre message. Le gardien recevra une notification et un lien vers «{" "}
             {sitTitle || "votre annonce"} ».

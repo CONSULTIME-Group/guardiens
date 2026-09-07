@@ -48,6 +48,7 @@ import { computeAffinityResultFull, speciesIntersects, type AffinityOwnerInput, 
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { avatarImageUrl } from "@/lib/storageImage";
 import { chunkArray } from "@/lib/chunkArray";
+import { publicFirstName } from "@/lib/displayName";
 
 
 
@@ -1753,7 +1754,7 @@ const SearchOwner = () => {
               {(() => {
                 const nameCounts: Record<string, number> = {};
                 results.forEach((s: any) => {
-                  const fn = (s.profile?.first_name || "Gardien").toLowerCase();
+                  const fn = (publicFirstName(s.profile?.first_name) || "Gardien").toLowerCase();
                   nameCounts[fn] = (nameCounts[fn] || 0) + 1;
                 });
                 return results.map((s: any) => (
@@ -1763,7 +1764,7 @@ const SearchOwner = () => {
                     photos={s._photos || []}
                     affinity={s._affinity || null}
                     hasOwnerProfile={!!viewerOwner}
-                    duplicateName={nameCounts[(s.profile?.first_name || "Gardien").toLowerCase()] > 1}
+                    duplicateName={nameCounts[(publicFirstName(s.profile?.first_name) || "Gardien").toLowerCase()] > 1}
                     city={city}
                   />
                 ));
@@ -1778,7 +1779,7 @@ const SearchOwner = () => {
           <div className="order-2 md:order-1 w-full md:w-1/2 flex-1 min-h-0 overflow-y-auto border-r border-border p-4 space-y-3">
             {results.map((s: any) => {
               const profile = s.profile;
-              const firstName = profile?.first_name || "Gardien";
+              const firstName = publicFirstName(profile?.first_name) || "Gardien";
               const nSits = profile?.completed_sits_count || 0;
               const distTxt =
                 s._dist === 0 ? "Dans votre ville" : (s._dist != null && s._dist !== Infinity) ? `${s._dist} km` : null;
@@ -1841,7 +1842,7 @@ const SearchOwner = () => {
                   .map((s: any) => ({
                     id: s.id,
                     user_id: s.user_id,
-                    firstName: s.profile?.first_name || "Gardien",
+                    firstName: publicFirstName(s.profile?.first_name) || "Gardien",
                     city: s.profile?.city ?? null,
                     avatar: s.profile?.avatar_url ?? null,
                     avgRating: s.avgRating ?? null,
