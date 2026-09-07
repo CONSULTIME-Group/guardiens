@@ -196,7 +196,7 @@ const ActivateRoleDialog = ({
             Envie de garder des maisons aussi ?
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground text-center">
-            L'espace gardien est <strong>gratuit aujourd'hui, sans engagement</strong>. Vous serez prévenu à l'avance en cas d'évolution tarifaire.
+            L'espace gardien est <strong>ouvert pendant la phase de lancement</strong>. Vous serez prévenu à l'avance en cas d'évolution tarifaire.
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-2 pt-2">

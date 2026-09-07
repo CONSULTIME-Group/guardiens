@@ -19,7 +19,7 @@ interface PremiumGateDialogProps {
 const PremiumGateDialog = ({ open, onClose, featureName }: PremiumGateDialogProps) => {
   const navigate = useNavigate();
 
-  const description = `Activez votre espace gardien pour accéder à ${featureName}. C'est gratuit aujourd'hui, sans engagement.`;
+  const description = `Activez votre espace gardien pour accéder à ${featureName}. C'est ouvert pendant la phase de lancement.`;
   const ctaLabel = "Activer mon espace gardien";
 
   return (

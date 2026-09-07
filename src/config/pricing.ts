@@ -1,5 +1,5 @@
 /**
- * Guardiens reste gratuit tant que Jérémie considère que le service
+ * L'accès à Guardiens est ouvert tant que Jérémie considère que le service
  * n'a pas atteint le niveau qu'il veut offrir. Ce flag reste `false`
  * jusqu'à décision explicite. La structure de prix reste en code
  * pour permettre une réactivation propre.

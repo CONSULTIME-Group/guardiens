@@ -1137,7 +1137,7 @@ const BillingSection = ({ user }: { user: any }) => {
           <div className="rounded-lg border border-border bg-muted/30 p-4">
             <p className="text-sm font-medium">Espace gardien</p>
             <p className="text-xs text-muted-foreground mt-1">
-              L'espace gardien est gratuit aujourd'hui, sans engagement. Vous serez prévenu à l'avance en cas d'évolution tarifaire.
+              L'espace gardien est ouvert pendant la phase de lancement. Vous serez prévenu à l'avance en cas d'évolution tarifaire.
             </p>
           </div>
         )}

@@ -396,7 +396,7 @@ export default function ArticleDetail() {
  "price": "0",
  "priceCurrency": "EUR",
  "eligibleCustomerType": "Sitter",
- "description": "Accès gardien gratuit aujourd'hui, sans engagement.",
+ "description": "Accès gardien ouvert pendant la phase de lancement.",
  "availability": "https://schema.org/InStock"
  }
  }) }} />

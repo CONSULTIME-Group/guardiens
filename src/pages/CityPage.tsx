@@ -293,7 +293,7 @@ const CityPage = () => {
  ]
  : [
  { q: `Comment trouver un gardien de maison à ${cityData.name} ?`, a: `Sur Guardiens, vous publiez une annonce et les gardiens disponibles à ${cityData.name} et ses environs postulent directement. La vérification d'identité est ouverte à tous les membres : la pièce envoyée est analysée automatiquement, les dossiers qui ne passent pas sont revus par l'équipe, et les profils validés affichent l'écusson « Identité vérifiée ». Regardez cet écusson sur les profils avant de choisir.` },
- { q: `Y a-t-il des frais pour les propriétaires à ${cityData.name} ?`, a: "Non. L'espace propriétaire est sans frais et sans commission. L'espace gardien est lui aussi ouvert sans frais aujourd'hui, sans engagement et sans carte bancaire." },
+ { q: `Y a-t-il des frais pour les propriétaires à ${cityData.name} ?`, a: "Non. L'espace propriétaire est sans frais et sans commission. L'espace gardien est lui aussi ouvert sans frais aujourd'hui, pendant la phase de lancement." },
  { q: `Que se passe-t-il en cas d'urgence pendant la garde à ${cityData.name} ?`, a: `Guardiens dispose d'un réseau de Gardiens d'Urgence dans chaque zone. En cas d'imprévu, animal malade, problème technique, le gardien en poste peut déclencher une alerte.` },
  { q: `Combien coûte une pension pour animaux à ${cityData.name} ?`, a: `Les pensions autour de ${cityData.name} facturent en moyenne 25 à 45 euros par nuit et par animal. Ordres de grandeur constatés en 2026, variables selon la ville, la saison et la taille de l'animal. Sur Guardiens, c'est sans frais pour le propriétaire : le gardien s'installe chez vous et s'occupe de vos animaux dans leur environnement habituel.` },
  { q: `Comment devenir gardien à ${cityData.name} ?`, a: `Inscrivez-vous, complétez votre profil et faites vérifier votre identité. Vous pourrez ensuite postuler aux gardes disponibles ${departmentIn(cityData.department)}. L'accès gardien est ouvert sans frais aujourd'hui, sans engagement.` },
@@ -686,7 +686,7 @@ const CityPage = () => {
     },
     {
       q: `Y a-t-il des frais pour les propriétaires à ${dbPage.city} ?`,
-      a: "Non. L'espace propriétaire est sans frais et sans commission. L'espace gardien est lui aussi ouvert sans frais aujourd'hui, sans engagement et sans carte bancaire.",
+      a: "Non. L'espace propriétaire est sans frais et sans commission. L'espace gardien est lui aussi ouvert sans frais aujourd'hui, pendant la phase de lancement.",
     },
     {
       q: `Que se passe-t-il en cas d'urgence pendant la garde à ${dbPage.city} ?`,
@@ -817,7 +817,7 @@ const CityPage = () => {
             )}
             <Badge variant="outline" className="text-base px-4 py-2 gap-2">
               <Heart className="h-4 w-4" />
-              Inscription sans carte bancaire
+              Inscription avec une adresse email
             </Badge>
           </div>
           {dbNearbyMention && (

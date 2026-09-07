@@ -63,7 +63,7 @@ const ANNECY_FAQ = [
  },
  {
  q: "Combien coûte une garde de maison à Annecy ?",
- a: "Pour les propriétaires, Guardiens est gratuit : aucun frais, aucune commission. L'accès gardien est également gratuit aujourd'hui, sans engagement.",
+ a: "Pour les propriétaires, Guardiens est gratuit : aucun frais, aucune commission. L'accès gardien est ouvert pendant la phase de lancement.",
  },
  {
  q: "Combien de temps à l'avance publier mon annonce pour les vacances d'été ?",
@@ -94,7 +94,7 @@ const GRENOBLE_FAQ = [
  },
  {
  q: "À combien revient une garde de chien à Grenoble ?",
- a: "Pour les propriétaires, c'est gratuit : aucun frais ni commission sur la plateforme. L'accès gardien est également gratuit aujourd'hui, sans engagement.",
+ a: "Pour les propriétaires, c'est gratuit : aucun frais ni commission sur la plateforme. L'accès gardien est ouvert pendant la phase de lancement.",
  },
 ];
 
@@ -117,7 +117,7 @@ const CHAMBERY_FAQ = [
  },
  {
  q: "Combien coûte Guardiens à Chambéry ?",
- a: "Pour les propriétaires, c'est entièrement gratuit. L'accès gardien est également gratuit aujourd'hui, sans engagement.",
+ a: "Pour les propriétaires, c'est entièrement gratuit. L'accès gardien est ouvert pendant la phase de lancement.",
  },
 ];
 
@@ -128,7 +128,7 @@ const DEFAULT_FAQ = (cityName: string) => [
  },
  {
  q: `Est-ce vraiment gratuit pour les propriétaires à ${cityName} ?`,
- a: "Oui. Guardiens est gratuit pour tous les propriétaires : aucun frais, aucune commission. L'accès gardien est également gratuit aujourd'hui, sans engagement.",
+ a: "Oui. Guardiens est gratuit pour tous les propriétaires : aucun frais, aucune commission. L'accès gardien est ouvert pendant la phase de lancement.",
  },
  {
  q: `Que se passe-t-il en cas d'urgence pendant la garde à ${cityName} ?`,

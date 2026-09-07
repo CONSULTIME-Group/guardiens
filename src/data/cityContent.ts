@@ -216,7 +216,7 @@ Lyon se compose de neuf arrondissements et d'une ceinture de communes limitrophe
 
 **Vous rencontrez votre gardien avant de lui confier vos clés.** C'est un principe fondamental de Guardiens : pas de garde sans rencontre préalable. Un café dans votre quartier, une visite de votre logement, une promenade avec votre chien. Vous évaluez le contact humain, votre animal aussi.
 
-**Aucune commission sur les gardes.** Guardiens ne prélève aucun pourcentage sur les gardes. Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que nous vous offrons. Vous avez accès à tout, sans limite, sans engagement. Vous serez prévenu à l'avance quand cela changera.
+**Aucune commission sur les gardes.** Guardiens ne prélève aucun pourcentage sur les gardes. L'accès à Guardiens est ouvert pendant la phase de lancement. Vous accédez à l'ensemble des fonctionnalités, et vous restez libre à tout moment. Vous serez prévenu à l'avance en cas d'évolution tarifaire.
 
 **Un accord de garde clair.** Un document optionnel formalise les engagements de chaque partie : dates, responsabilités, contacts d'urgence. Jamais contraignant, toujours rassurant.
 
@@ -246,7 +246,7 @@ Lyon se compose de neuf arrondissements et d'une ceinture de communes limitrophe
 
 **Gardiens est gratuit aujourd'hui**, sans engagement, pour les propriétaires comme pour les gardiens. Vous serez prévenu à l'avance en cas d'évolution tarifaire. [Consultez le détail des formules sur la page tarifs](/tarifs).
 
-**Aucune commission par garde.** Guardiens ne touche rien sur les gardes elles-mêmes. Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que nous vous offrons. Vous avez accès à tout, sans limite, sans engagement. Vous serez prévenu à l'avance quand cela changera.`,
+**Aucune commission par garde.** Guardiens ne touche rien sur les gardes elles-mêmes. L'accès à Guardiens est ouvert pendant la phase de lancement. Vous accédez à l'ensemble des fonctionnalités, et vous restez libre à tout moment. Vous serez prévenu à l'avance en cas d'évolution tarifaire.`,
  },
  {
  id: "histoire",

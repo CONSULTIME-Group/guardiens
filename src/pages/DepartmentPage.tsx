@@ -237,7 +237,7 @@ const DepartmentPage = () => {
   </Badge>
  <Badge variant="outline" className="text-base px-4 py-2 gap-2">
  <Heart className="h-4 w-4" />
- Inscription sans carte bancaire
+ Inscription avec une adresse email
  </Badge>
  </div>
 
@@ -321,7 +321,7 @@ const DepartmentPage = () => {
       Combien coûte une garde d'animaux {deptIn} ?
     </h2>
     <p className="text-base text-foreground/90 leading-relaxed mb-3">
-      Guardiens reste sans frais tant que nous ne sommes pas satisfaits du service que nous vous offrons. Aucune commission côté propriétaire, aucun frais de mise en relation, une rencontre systématique avant chaque garde.
+      L'accès à Guardiens est ouvert pendant la phase de lancement. Aucune commission côté propriétaire, aucun frais de mise en relation, une rencontre systématique avant chaque garde.
     </p>
     <p className="text-base text-foreground/80 leading-relaxed">
       Une pension pour animaux {deptIn} se facture généralement entre 25 et 50 € par nuit et par animal, soit 350 à 700 € pour deux semaines avec un chien. Confier son animal à un gardien à domicile, c'est éviter le stress de la mise en pension, garder votre logement occupé pendant votre absence, et bénéficier d'une relation directe entre particuliers, sans intermédiaire commercial. Les profils dont l'identité a été validée affichent l'écusson « Identité vérifiée ». Consultez aussi les avis publics de la communauté et organisez une rencontre en amont.
@@ -424,7 +424,7 @@ const DepartmentPage = () => {
  <Heart className="h-8 w-8 text-primary mb-3" />
  <h3 className="font-semibold text-foreground mb-2">Sans frais pour les propriétaires</h3>
  <p className="text-sm text-muted-foreground">
- Inscription sans carte bancaire. Pas de commission sur les gardes.
+ Inscription avec une adresse email. Aucune commission prélevée sur les gardes.
  </p>
  </CardContent>
  </Card>

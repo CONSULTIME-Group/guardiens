@@ -508,11 +508,11 @@
     "meta": {
       "title_before": "Tarifs, gratuits jusqu'au {{date}}",
       "title_after": "Tarifs, gratuit propriétaires · {{price}}",
-      "desc_before": "Accès offert jusqu'au {{date}} pour tous, gardiens comme propriétaires. Sans carte bancaire, sans commission.",
-      "desc_after": "Gratuit pour les propriétaires. {{price}} pour les gardiens, sans engagement. Sans commission, sans frais cachés."
+      "desc_before": "Accès offert jusqu'au {{date}} pour tous, gardiens comme propriétaires. Aucune commission prélevée sur les gardes.",
+      "desc_after": "Gratuit pour les propriétaires. {{price}} pour les gardiens, sans engagement. Aucune commission prélevée sur les gardes."
     },
     "hero": {
-      "eyebrow": "Sans commission, sans frais cachés",
+      "eyebrow": "Aucune commission prélevée sur les gardes",
       "title_before_a": "Offert.",
       "title_before_b": "Pour tout le monde.",
       "title_after_a": "Un seul prix.",
@@ -524,13 +524,13 @@
     },
     "grace": {
       "title": "Accès offert jusqu'au {{date}}",
-      "text": "Les premiers membres bénéficient d'un accès gratuit, sans engagement."
+      "text": "Les premiers membres bénéficient d'un accès ouvert pendant la phase de lancement."
     },
     "owner_card": {
       "badge": "Toujours gratuit",
       "label": "Propriétaire",
       "price": "Gratuit",
-      "subtitle": "Sans abonnement, sans carte bancaire.",
+      "subtitle": "Accès ouvert pendant la phase de lancement.",
       "cta": "Publier une annonce",
       "features": [
         "Publiez une annonce en 5 minutes",
@@ -847,7 +847,7 @@
     "intl_count_one": "{{count}} annonce hors France",
     "intl_count_other": "{{count}} annonces hors France",
     "become_sitter_title": "Vous cherchez à devenir gardien ?",
-    "become_sitter_body": "Inscription en 2 minutes, sans engagement.",
+    "become_sitter_body": "Inscription en 2 minutes.",
     "become_sitter_cta": "Découvrir l'espace gardien",
     "explore_title": "Explorer aussi",
     "explore_missions": "Petites missions",
@@ -1770,7 +1770,7 @@
     "accommodation_value": "Logement inclus",
     "applications_closed": "Candidatures fermées",
     "apply": "Postuler à cette garde",
-    "signup_2min": "Inscription en 2 minutes, sans engagement.",
+    "signup_2min": "Inscription en 2 minutes.",
     "already_member": "Déjà membre ?",
     "login": "Se connecter",
     "applied": "Candidature envoyée",
@@ -1836,7 +1836,7 @@
     "asap": "Dès que possible",
     "animal": "Animal",
     "cta_help": "Proposer mon aide",
-    "signup_2min": "Inscription en 2 minutes, sans engagement.",
+    "signup_2min": "Inscription en 2 minutes.",
     "already_member": "Déjà membre ?",
     "login": "Se connecter",
     "location_note": "Localisation approximative. L'adresse exacte est partagée après mise en relation.",

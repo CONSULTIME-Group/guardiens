@@ -117,7 +117,7 @@ export default function ArticleInventaire() {
         name: "Est-ce que c'est payant pour les propriétaires ?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "Non. Les propriétaires ne paient rien, jamais. L'espace gardien est également gratuit aujourd'hui, sans engagement, sans commission sur les gardes.",
+          text: "Non. Les propriétaires ne paient rien, jamais. L'espace gardien est ouvert pendant la phase de lancement, sans commission sur les gardes.",
         },
       },
     ],
