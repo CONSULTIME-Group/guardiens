@@ -1697,6 +1697,7 @@ export type Database = {
           leash_rule: string | null
           leash_rule_source: string | null
           osm_enrich_attempted_at: string | null
+          osm_enrich_last_result: string | null
           postal_code: string
           published: boolean
           seo_dirty_at: string | null
@@ -1714,6 +1715,7 @@ export type Database = {
           leash_rule?: string | null
           leash_rule_source?: string | null
           osm_enrich_attempted_at?: string | null
+          osm_enrich_last_result?: string | null
           postal_code?: string
           published?: boolean
           seo_dirty_at?: string | null
@@ -1731,6 +1733,7 @@ export type Database = {
           leash_rule?: string | null
           leash_rule_source?: string | null
           osm_enrich_attempted_at?: string | null
+          osm_enrich_last_result?: string | null
           postal_code?: string
           published?: boolean
           seo_dirty_at?: string | null
