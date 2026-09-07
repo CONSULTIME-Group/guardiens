@@ -7,12 +7,21 @@
  * sur l'URL canonique FR. Guardiens est monolingue français depuis le
  * 17/08/2026 : il n'existe plus aucune variante de langue à recacher.
  *
+ * Depuis le 07/09/2026, la même passe consomme aussi `profiles.seo_dirty_at`,
+ * posé par les triggers `profiles_mark_seo_dirty` et
+ * `sitter_profiles_mark_seo_dirty`, pour les fiches gardien `/gardiens/{id}`.
+ * Le compte Prerender est partagé avec un autre domaine, quota mensuel de
+ * 25 000 renders : le nombre de fiches réellement recachées par passage est
+ * plafonné à SITTER_RENDER_BUDGET. Les fiches non indexables au sens de
+ * `isSitterProfileIndexable` voient leur flag effacé sans consommer de render.
+ *
  * Le flag n'est effacé que si TOUS les recaches de l'article ont réussi.
  * Chaque tentative est journalisée dans public.prerender_recache_log.
  * En cas d'échec, la fonction renvoie un statut non-2xx.
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { startCronRun } from "../_shared/cron-run-log.ts";
+import { isSitterProfileIndexable } from "../_shared/sitterProfileIndexability.js";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -21,6 +30,10 @@ const corsHeaders = {
 
 const SITE = "https://guardiens.fr";
 const BATCH = 50;
+/** Fiches gardien examinées par passage (lecture seule, non facturée). */
+const SITTER_SCAN_BATCH = 300;
+/** Renders Prerender réellement dépensés par passage pour les fiches gardien. */
+const SITTER_RENDER_BUDGET = 25;
 
 interface ArticleRow {
   id: string;
@@ -28,6 +41,7 @@ interface ArticleRow {
   canonical_url: string | null;
   seo_dirty_at: string;
 }
+
 
 async function recache(url: string, token: string): Promise<{ ok: boolean; status: number | null; detail: string }> {
   try {
