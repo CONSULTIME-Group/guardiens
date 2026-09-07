@@ -656,6 +656,7 @@ Deno.serve(async (req) => {
       rejetes_doublon,
       sans_coordonnees,
       overpass_indisponible,
+      miroir_utilise: miroirUtilise,
       details,
       ...(dryRun ? { dry_run: true, lignes: dryRows } : {}),
     });
