@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { RevealSection } from "@/components/ui/RevealSection";
-import { PaintedKey } from "@/components/landing/painted/PaintedKey";
+import cle720 from "@/assets/landing/cle-ancienne-720.webp";
+import cle360 from "@/assets/landing/cle-ancienne-360.webp";
 import notreHistoirePanoramaAvif from "@/assets/story-photo-1104.avif";
 import notreHistoirePanorama from "@/assets/story-photo.webp";
 import notreHistoireMobileAvif from "@/assets/story-photo-736.avif";
