@@ -11,6 +11,14 @@ export const SITE_URL = "https://guardiens.fr";
  */
 export const DEFAULT_OG_IMAGE = `${SITE_URL}/og-default.jpg`;
 
+/**
+ * Paragraphe de description du site, injecté dans le <noscript> d'index.html
+ * par scripts/sync-index-html.mjs. Il décrit le service, jamais le tarif :
+ * la baseline tarifaire vit dans src/lib/pricing.ts (getPricingBaseline).
+ */
+export const SITE_DESCRIPTION_LONG =
+  "Guardiens met en relation des propriétaires et des gardiens pour la garde de maison et d'animaux, partout en France. Vous publiez votre annonce, vous recevez des candidatures, vous choisissez après une rencontre. L'accès à la plateforme est ouvert pendant la phase de lancement, toute évolution sera annoncée à l'avance.";
+
 export interface SiteRoute {
  path: string;
  title: string;

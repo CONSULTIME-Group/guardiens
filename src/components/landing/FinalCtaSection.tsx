@@ -51,7 +51,7 @@ export function FinalCtaSection() {
             {t("landing.final.cta_sitter")}
           </button>
         </div>
-        <p className="text-xs text-white/70 font-body">
+        <p className="text-xs text-white/85 font-body">
           {t("landing.final.footnote")}
         </p>
       </RevealSection>

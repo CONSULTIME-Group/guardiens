@@ -46,7 +46,7 @@ const TestimonialsSection = () => {
           <h2 id="ils-ont-ose" className="font-heading text-4xl md:text-5xl font-semibold text-foreground leading-snug scroll-mt-24">
             {t("landing.testimonials.title")}
           </h2>
-          <p className="mt-4 font-body text-sm text-foreground/55 max-w-xl mx-auto">
+          <p className="mt-4 font-body text-sm text-foreground/70 max-w-xl mx-auto">
             {t("landing.testimonials.source")}
           </p>
         </RevealSection>
@@ -98,7 +98,7 @@ const TestimonialsSection = () => {
                         <span className="font-body text-sm font-semibold text-foreground">
                           {quote.name}
                         </span>
-                        <span className="font-body text-xs text-foreground/55">
+                        <span className="font-body text-xs text-foreground/70">
                           {quote.detail}
                         </span>
                       </span>

@@ -84,7 +84,7 @@ export function GuidesVillesSection() {
                 <Button asChild variant="outline" size="sm" className="rounded-full min-h-[44px]">
                   <Link to="/annonces">{t("landing.guides_cities.all_listings")}</Link>
                 </Button>
-                <p className="text-xs text-foreground/60 leading-relaxed flex-1">
+                <p className="text-xs text-foreground/70 leading-relaxed flex-1">
                   {t("landing.cities.cities_footer")}
                 </p>
               </div>

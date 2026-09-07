@@ -18,7 +18,6 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
 const INDEX_PATH = resolve(ROOT, "index.html");
 const ROUTES_PATH = resolve(ROOT, "src/data/siteRoutes.ts");
-const PRICING_PATH = resolve(ROOT, "src/lib/pricing.ts");
 
 const CHECK_ONLY = process.argv.includes("--check");
 
@@ -108,21 +107,11 @@ function decodeStringLiteral(quote, raw) {
   return JSON.parse(`${quote}${raw}${quote}`);
 }
 
-function loadPricingTruth() {
-  const src = readFileSync(PRICING_PATH, "utf8");
-  const values = {};
-  const re = /(?:export\s+)?const\s+(\w+)\s*=\s*(["'`])([\s\S]*?)\2;/g;
-  let m;
-  while ((m = re.exec(src))) {
-    const [, name, quote, raw] = m;
-    const decoded = decodeStringLiteral(quote, raw);
-    values[name] = decoded.replace(/\$\{(\w+)\}/g, (_placeholder, key) => {
-      if (!(key in values)) throw new Error(`Constante ${key} introuvable avant ${name} dans pricing.ts`);
-      return values[key];
-    });
-  }
-  if (!values.PRICING_LONG) throw new Error("PRICING_LONG introuvable dans pricing.ts");
-  return values.PRICING_LONG;
+function loadSiteDescriptionLong() {
+  const src = readFileSync(ROUTES_PATH, "utf8");
+  const m = src.match(/export\s+const\s+SITE_DESCRIPTION_LONG\s*=\s*(["'`])([\s\S]*?)\1;/);
+  if (!m) throw new Error("SITE_DESCRIPTION_LONG introuvable dans siteRoutes.ts");
+  return decodeStringLiteral(m[1], m[2]);
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -192,11 +181,11 @@ function replaceNoscriptHero(html, { title, description }) {
   };
 }
 
-function replaceNoscriptPricing(html, pricingLong) {
+function replaceNoscriptDescription(html, descriptionLong) {
   const re = /(<noscript>[\s\S]*?<\/nav>\s*<p>)([\s\S]*?)(<\/p>\s*<\/noscript>)/i;
   if (!re.test(html)) return { html, replaced: false };
   return {
-    html: html.replace(re, `$1${textEncode(pricingLong)}$3`),
+    html: html.replace(re, `$1${textEncode(descriptionLong)}$3`),
     replaced: true,
   };
 }
@@ -216,7 +205,7 @@ function syncIndexHtml(html, truth) {
     { kind: "twitter:description", apply: (h) => replaceMetaContent(h, { attr: "name", key: "twitter:description", value: truth.description }) },
     { kind: "twitter:image", apply: (h) => replaceMetaContent(h, { attr: "name", key: "twitter:image", value: truth.image }) },
     { kind: "noscript", apply: (h) => replaceNoscriptHero(h, truth) },
-    { kind: "noscript-pricing", apply: (h) => replaceNoscriptPricing(h, truth.pricingLong) },
+    { kind: "noscript-description", apply: (h) => replaceNoscriptDescription(h, truth.descriptionLong) },
   ];
 
   let current = html;
@@ -230,7 +219,7 @@ function syncIndexHtml(html, truth) {
 }
 
 function main() {
-  const truth = { ...loadHomeTruth(), pricingLong: loadPricingTruth() };
+  const truth = { ...loadHomeTruth(), descriptionLong: loadSiteDescriptionLong() };
   assertNoForbiddenVocabulary(truth);
   const original = readFileSync(INDEX_PATH, "utf8");
   const { html: updated, unreplaced } = syncIndexHtml(original, truth);
@@ -263,7 +252,7 @@ function main() {
   console.log(`   • title/og:title/twitter:title : ${truth.title}`);
   console.log(`   • og:description/twitter:description : ${truth.description}`);
   console.log(`   • og:image/twitter:image : ${truth.image}`);
-  console.log(`   • noscript pricing : ${truth.pricingLong}`);
+  console.log(`   • noscript description : ${truth.descriptionLong}`);
 }
 
 main();

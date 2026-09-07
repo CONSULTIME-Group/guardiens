@@ -38,7 +38,7 @@ describe("pricing helpers (pivot gratuit sans deadline)", () => {
 
   it("PRICING_LONG contient la baseline pivot", () => {
     expect(PRICING_LONG).toBe(getPricingBaseline());
-    expect(PRICING_LONG).toContain("gratuit tant que nous ne sommes pas satisfaits");
+    expect(PRICING_LONG).toContain("ouvert pendant la phase de lancement");
     expect(PRICING_LONG).not.toMatch(/1er\s+octobre\s+2026/);
     expect(PRICING_LONG).not.toMatch(/30\s+septembre\s+2026/);
   });

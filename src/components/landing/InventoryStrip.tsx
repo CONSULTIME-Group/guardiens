@@ -32,7 +32,7 @@ export default function InventoryStrip() {
       <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-[22px]">
         <div>
           <p className="font-heading text-xl font-semibold text-foreground">{t("landing.inventory.title")}</p>
-          <p className="mt-2 text-xs text-foreground/50">
+          <p className="mt-2 text-xs text-foreground/70">
             {t("landing.inventory.updated_on", {
               date: new Date().toLocaleDateString(safeLocale(i18n.language), { day: "numeric", month: "long", year: "numeric" }),
             })}
@@ -52,7 +52,7 @@ export default function InventoryStrip() {
                   <div className="font-heading text-2xl md:text-3xl font-bold text-foreground tabular-nums">
                     {fmt(value)}
                   </div>
-                  <div className="mt-1 text-xs uppercase tracking-widest text-foreground/60">{label}</div>
+                  <div className="mt-1 text-xs uppercase tracking-widest text-foreground/70">{label}</div>
                 </div>
               ))}
         </div>

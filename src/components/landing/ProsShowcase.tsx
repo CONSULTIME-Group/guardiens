@@ -91,7 +91,7 @@ export default function ProsShowcase() {
         </div>
 
         {(data.pros_verified ?? 0) > 0 && (
-          <p className="mt-8 text-sm text-foreground/60 tabular-nums">
+          <p className="mt-8 text-sm text-foreground/70 tabular-nums">
             {t("landing.pros.counter", {
               total: fmt(data.pros_total),
               verified: fmt(data.pros_verified ?? 0),
