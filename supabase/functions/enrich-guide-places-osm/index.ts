@@ -29,6 +29,15 @@ const json = (body: unknown, status = 200) =>
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+// Miroirs Overpass essayés dans l'ordre, bascule au premier échec.
+const OVERPASS_MIRRORS = [
+  "https://overpass-api.de/api/interpreter",
+  "https://overpass.kumi.systems/api/interpreter",
+  "https://overpass.private.coffee/api/interpreter",
+];
+// Délai par miroir : la requête porte [timeout:25], on laisse une marge.
+const OVERPASS_TIMEOUT_MS = 30_000;
+
 const norm = (s: string) =>
   (s ?? "")
     .toString()
@@ -372,6 +381,8 @@ Deno.serve(async (req) => {
     let rejetes_doublon = 0;
     let sans_coordonnees = 0;
     let overpass_indisponible = 0;
+    // Nom d'hôte du dernier miroir Overpass ayant répondu, null si aucun.
+    let miroirUtilise: string | null = null;
     const details: any[] = [];
     const dryRows: any[] = [];
 
