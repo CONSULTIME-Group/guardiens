@@ -14,7 +14,17 @@ export function FinalCtaSection() {
       <RevealSection className="lp-read text-center">
         {/* Chips "Programme Fondateur" retirés (signal de deadline implicite). */}
         {/* Maison peinte au-dessus du titre : le foyer confié. */}
-        <PaintedHouse className="mx-auto mb-6" />
+        <img
+          src={maison900}
+          srcSet={`${maison450} 450w, ${maison900} 900w`}
+          sizes="(max-width: 767px) 200px, 260px"
+          alt="Illustration à la gouache d'une maison de village aux volets clairs, une fenêtre allumée et un buisson près de la porte."
+          width={900}
+          height={773}
+          loading="lazy"
+          decoding="async"
+          className="mx-auto mb-10 md:mb-12 block w-[200px] md:w-[260px] h-auto"
+        />
         <h2 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-6">
           {t("landing.final.title")}
         </h2>
