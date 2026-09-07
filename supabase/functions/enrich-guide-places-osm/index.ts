@@ -320,7 +320,7 @@ Deno.serve(async (req) => {
     } else {
       const { data: allGuides, error } = await supabase
         .from("city_guides")
-        .select("id, slug, city, postal_code, department, osm_enrich_attempted_at")
+        .select("id, slug, city, postal_code, department, osm_enrich_attempted_at, osm_enrich_last_result")
         .order("slug", { ascending: true });
       if (error) return json({ error: error.message }, 500);
       const { data: done } = await supabase
@@ -332,10 +332,19 @@ Deno.serve(async (req) => {
       // Rotation de la file : un guide qui ne produit aucun lieu est un
       // résultat normal, pas une erreur. Il est marqué `osm_enrich_attempted_at`
       // et repasse en fin de file au lieu de geler les suivants.
-      // Ordre : jamais tentés d'abord, puis plus anciennement tentés, puis slug.
+      // Ordre : pannes Overpass d'abord (jamais réellement interrogés), puis
+      // jamais tentés, puis plus anciennement tentés, puis slug.
+      const priorite = (g: any): number => {
+        if (g.osm_enrich_last_result === "overpass_indisponible") return 0;
+        if (!g.osm_enrich_attempted_at) return 1;
+        return 2;
+      };
       guides = (allGuides ?? [])
         .filter((g: any) => !doneSet.has(g.id))
         .sort((a: any, b: any) => {
+          const pa = priorite(a);
+          const pb = priorite(b);
+          if (pa !== pb) return pa - pb;
           const ta = a.osm_enrich_attempted_at ? Date.parse(a.osm_enrich_attempted_at) : null;
           const tb = b.osm_enrich_attempted_at ? Date.parse(b.osm_enrich_attempted_at) : null;
           if (ta === null && tb === null) return String(a.slug).localeCompare(String(b.slug));
