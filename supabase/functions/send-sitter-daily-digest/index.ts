@@ -570,7 +570,7 @@ Deno.serve(async (req) => {
         // nombre d'étapes restantes, calculé sur le barème réel de
         // _calculate_sitter_score.
         const profileCompletion = profile.profile_completion ?? 0
-        const canApply = profileCompletion >= 60
+        const canApply = profileCompletion >= APPLY_COMPLETION_THRESHOLD
         let completionSentence: string | undefined
         let completionHref: string | undefined
         let completionSteps = 0
