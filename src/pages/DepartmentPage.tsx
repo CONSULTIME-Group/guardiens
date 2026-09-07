@@ -185,10 +185,10 @@ const DepartmentPage = () => {
   const h1Title = rewriteDepartmentMention(page.h1_title, page.department);
   const metaTitle = page.meta_title
     ? rewriteDepartmentMention(page.meta_title, page.department)
-    : `Pet sitting & House sitting ${deptIn}, garde d'animaux, de maison et de jardin sans frais pour les propriétaires | Guardiens`;
+    : `Pet sitting & House sitting ${deptIn}, garde d'animaux, de maison et de jardin à 0 € pour les propriétaires | Guardiens`;
   const metaDescription = page.meta_description
     ? rewriteDepartmentMention(page.meta_description, page.department)
-    : `Trouvez un pet sitter ou house sitter ${deptIn}. Garde d'animaux, de maison et de jardin entre particuliers, sans frais pour les propriétaires. ${countLabel(cityPages.length, "ville couverte")} sur Guardiens.`;
+    : `Trouvez un pet sitter ou house sitter ${deptIn}. Garde d'animaux, de maison et de jardin entre particuliers, à 0 € pour les propriétaires. ${countLabel(cityPages.length, "ville couverte")} sur Guardiens.`;
 
  return (
  <>
@@ -340,7 +340,7 @@ const DepartmentPage = () => {
       <Card>
         <CardContent className="p-5">
           <h3 className="font-semibold text-foreground mb-2">1. Publiez votre annonce</h3>
-          <p className="text-sm text-muted-foreground">Décrivez votre maison, vos animaux, les dates, vos attentes. La publication est sans frais côté propriétaire. Précisez votre ville ou commune pour être trouvé par les gardiens de proximité.</p>
+          <p className="text-sm text-muted-foreground">Décrivez votre maison, vos animaux, les dates, vos attentes. La publication est à 0 € pour les propriétaires. Précisez votre ville ou commune pour être trouvé par les gardiens de proximité.</p>
         </CardContent>
       </Card>
       <Card>
@@ -474,7 +474,7 @@ const DepartmentPage = () => {
  "@context": "https://schema.org",
  "@type": "Service",
   name: `Pet sitting & House sitting ${deptIn}`,
-  description: `Service de garde d'animaux, de maison et de jardin, house sitting sans frais pour les propriétaires ${deptIn}. ${countLabel(cityPages.length, "ville couverte")}.`,
+  description: `Service de garde d'animaux, de maison et de jardin, house sitting à 0 € pour les propriétaires ${deptIn}. ${countLabel(cityPages.length, "ville couverte")}.`,
  provider: {
  "@type": "Organization",
  name: "Guardiens",
@@ -513,15 +513,15 @@ const DepartmentPage = () => {
   name: `Comment trouver un pet sitter ${deptIn} ?`,
   acceptedAnswer: {
   "@type": "Answer",
-  text: `Inscrivez-vous sans frais sur Guardiens et parcourez ${countLabel(cityPages.length, "ville")} ${deptOf} pour trouver un gardien près de chez vous.`,
+  text: `Inscrivez-vous à 0 € sur Guardiens et parcourez ${countLabel(cityPages.length, "ville")} ${deptOf} pour trouver un gardien près de chez vous.`,
  },
  },
  {
  "@type": "Question",
- name: `Le house sitting ${deptIn} est-il sans frais ?`,
+ name: `Le house sitting ${deptIn} coûte-t-il quelque chose au propriétaire ?`,
  acceptedAnswer: {
  "@type": "Answer",
- text: "Oui, Guardiens est sans frais pour les propriétaires. Le house sitting repose sur l'échange : le gardien loge sans frais en échange de la garde de vos animaux.",
+ text: "Guardiens est à 0 € pour les propriétaires. Le house sitting repose sur l'échange : le gardien loge à 0 € en échange de la garde de vos animaux.",
  },
  },
  ],

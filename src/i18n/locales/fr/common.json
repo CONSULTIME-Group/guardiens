@@ -197,7 +197,7 @@
     "faq": {
       "title": "Questions fréquentes",
       "q1": "Qu'est-ce que le house-sitting ?",
-      "a1": "Le house-sitting est un échange de services : un gardien habite sans frais dans votre maison pendant votre absence et prend soin de vos animaux. L'échange n'implique aucune transaction financière entre les deux parties.",
+      "a1": "Le house-sitting est un échange de services : un gardien habite à 0 € dans votre maison pendant votre absence et prend soin de vos animaux. L'échange n'implique aucune transaction financière entre les deux parties.",
       "q2": "Comment fonctionne l'accès à Guardiens ?",
       "a2": "L'accès à Guardiens est ouvert pendant la phase de lancement : vous accédez à l'ensemble des fonctionnalités, et vous restez libre à tout moment. Toute évolution tarifaire vous sera annoncée à l'avance.",
       "q3": "Comment trouver un pet sitter près de chez moi ?",
@@ -354,7 +354,7 @@
       "body_3": "À côté des gardes, les membres se rendent des coups de main : arrosage, courses, compagnie. L'échange se décide entre vous.",
       "body_4": "La mise en relation s'appuie sur un score d'affinité calculé sur plusieurs critères pondérés, propres à chaque couple, où le mode de vie compte autant que la distance. Les membres documentent leur profil et peuvent faire vérifier leur identité. Les avis sont croisés, et un statut de gardien d'urgence répond aux imprévus.",
       "body_5": "Guardiens publie aussi des guides de race et des guides locaux ville par ville. S'y ajoutent un annuaire de professionnels animaliers dont le SIRET est contrôlé, et un journal de conseils pratiques.",
-      "body_6": "Le réseau couvre la France entière, et met en relation les Français de l'étranger avec des gardiens sur place. Vous avez accès à tout, sans engagement."
+      "body_6": "Le réseau couvre la France entière, et met en relation les Français de l'étranger avec des gardiens sur place. Vous accédez à l'ensemble des fonctionnalités."
     },
     "compare": {
       "title": "House-sitting, pension, pet-sitter : que choisir ?",
@@ -509,7 +509,7 @@
       "title_before": "Tarifs, gratuits jusqu'au {{date}}",
       "title_after": "Tarifs, gratuit propriétaires · {{price}}",
       "desc_before": "Accès offert jusqu'au {{date}} pour tous, gardiens comme propriétaires. Aucune commission prélevée sur les gardes.",
-      "desc_after": "Gratuit pour les propriétaires. {{price}} pour les gardiens, sans engagement. Aucune commission prélevée sur les gardes."
+      "desc_after": "0 € pour les propriétaires. {{price}} pour les gardiens, résiliable à tout moment. Aucune commission prélevée sur les gardes."
     },
     "hero": {
       "eyebrow": "Aucune commission prélevée sur les gardes",
@@ -518,7 +518,7 @@
       "title_after_a": "Un seul prix.",
       "title_after_b": "Transparent.",
       "lede_before": "Jusqu'au {{date}}, l'accès complet est offert, gardiens comme propriétaires. Aucune carte bancaire demandée.",
-      "lede_after": "Gratuit pour les propriétaires. {{price}} pour les gardiens, sans engagement. C'est tout.",
+      "lede_after": "0 € pour les propriétaires. {{price}} pour les gardiens, résiliable à tout moment. C'est tout.",
       "cta_owner": "Publier mon annonce, gratuitement",
       "cta_sitter": "Je veux garder"
     },
@@ -1263,7 +1263,7 @@
     "faq3_q": "Mon chien est réactif ou anxieux, est-ce possible quand même ?",
     "faq3_a": "Oui, c'est même un cas typique d'urgence. Quand vous activez l'alerte, vous précisez le profil de votre animal (réactif, anxieux, soin particulier, etc.). Seuls les gardiens d'urgence ayant l'expérience et la compétence requises sont notifiés. Aucun gardien ne prend une garde sans rencontrer l'animal d'abord, c'est la règle.",
     "faq4_q": "Combien ça coûte une garde d'urgence ?",
-    "faq4_a": "Pour les propriétaires, l'inscription et l'utilisation de Guardiens (y compris l'alerte d'urgence) sont sans frais. Aucun supplément n'est appliqué pour une garde d'urgence par rapport à une garde classique. La logique reste celle du house-sitting : pas d'argent qui circule entre vous et le gardien.",
+    "faq4_a": "Pour les propriétaires, l'inscription et l'utilisation de Guardiens (y compris l'alerte d'urgence) sont à 0 €. Aucun supplément n'est appliqué pour une garde d'urgence par rapport à une garde classique. La logique reste celle du house-sitting : pas d'argent qui circule entre vous et le gardien.",
     "faq5_q": "Quelle différence avec une garde classique ?",
     "faq5_a": "Une garde classique se prépare à l'avance : vous publiez votre annonce, recevez plusieurs candidatures, choisissez. Une garde d'urgence suit un chemin plus court : un gardien éligible (5 gardes minimum, note 4.7+, 0 annulation, identité vérifiée) est notifié en priorité, vous le rencontrez, puis la garde peut démarrer dès que vous êtes d'accord tous les deux.",
     "faq6_q": "Et si je suis hospitalisé(e), comment ça se passe ?",
@@ -1851,7 +1851,7 @@
     "two_minutes": "2 minutes",
     "sticky_cta": "Proposer mon aide",
     "meta_title": "{{title}} · Coup de main à {{city}}",
-    "meta_fallback": "Coup de main entre particuliers : un service contre un service, sans engagement.",
+    "meta_fallback": "Coup de main entre particuliers : un service contre un service, à 0 €.",
     "meta_exchange": "En échange : {{offer}}"
   },
   "search_results": {

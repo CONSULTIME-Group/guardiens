@@ -53,7 +53,7 @@ const KEY_STATS: Stat[] = [
  {
  label: "Abonnement gardien",
  value: "Aucun frais",
- detail: "Accès complet aux fonctionnalités, sans limite, pendant la phase de lancement.",
+ detail: "Accès complet aux fonctionnalités pendant la phase de lancement.",
  },
 
  {
@@ -258,7 +258,7 @@ const Observatoire = () => {
     name: "La garde à domicile implique-t-elle un paiement entre particuliers ?",
     acceptedAnswer: {
      "@type": "Answer",
-     text: "Non. Sur Guardiens, la garde repose sur un échange : le gardien loge sur place et veille sur les animaux et le logement, sans transaction financière directe entre membres et sans commission de la plateforme.",
+     text: "Non. Sur Guardiens, la garde repose sur un échange : le gardien loge sur place et veille sur les animaux et le logement, sans transaction financière directe entre membres, et aucune commission prélevée par la plateforme.",
     },
    },
    {
@@ -467,7 +467,7 @@ const Observatoire = () => {
  Les chiffres « 37 maisons gardées » et « 234 animaux accompagnés » correspondent au cumul vécu par les fondateurs Jérémie et Elisa entre 2021 et 2026, période de validation terrain qui a précédé l'ouverture publique de Guardiens.
  </p>
  <p>
- Les éléments tarifaires (accès complet, sans limite et sans engagement) sont publiés sur <Link to="/tarifs" className="text-primary hover:underline">la page Nos engagements</Link>.
+ Les éléments tarifaires (accès complet pendant la phase de lancement) sont publiés sur <Link to="/tarifs" className="text-primary hover:underline">la page Nos engagements</Link>.
  </p>
 
  <p>
@@ -484,7 +484,7 @@ const Observatoire = () => {
  Vous voulez tester ?
  </h2>
  <p className="text-muted-foreground mb-6">
- Publication d'annonce sans engagement, candidatures sous quelques jours.
+ Publication d'annonce à 0 €, candidatures sous quelques jours.
  </p>
  <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
  <Link to="/inscription?role=owner">

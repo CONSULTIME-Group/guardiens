@@ -577,7 +577,7 @@ const EntraideHub = () => {
     <>
       <PageMeta
         title="Entraide, questions et coups de main entre gens du coin, Guardiens"
-        description="Posez une question, demandez un coup de main (garde animaux, jardin, promenade) ou proposez votre aide près de chez vous, sans engagement."
+        description="Posez une question, demandez un coup de main (garde animaux, jardin, promenade) ou proposez votre aide près de chez vous, à 0 €."
         path="/petites-missions"
       />
       <div className="bg-background">
@@ -833,7 +833,7 @@ const EntraideHub = () => {
                   "Vous publiez une question, une demande ou une offre de coup de main.",
                   "Les membres intéressés vous répondent en message privé ou en commentaire.",
                   "Vous convenez d'un échange, jamais d'argent : un café, des œufs du jardin, un service en retour.",
-                  "Vous convenez ensemble du jour et du cadre, sans engagement.",
+                  "Vous convenez ensemble du jour et du cadre.",
                 ]}
               />
             )}

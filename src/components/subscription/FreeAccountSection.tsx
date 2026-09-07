@@ -5,7 +5,7 @@
  * - /mon-abonnement (espace utilisateur)
  * - écrans de checkout
  *
- * Objectif : clarifier ce qui reste accessible sans frais
+ * Objectif : clarifier ce qui reste accessible à 0 €
  * pour TOUS les comptes après le évolution à venir, qu'ils soient
  * abonnés ou non. Aucun CTA, section purement informative.
  */
@@ -38,7 +38,7 @@ const accesGratuits: Array<{ titre: string; detail: string }> = [
  {
  titre: "Recherche et favoris",
  detail:
- "Parcourir les annonces, consulter les profils gardiens, ajouter des favoris, accessible sans frais.",
+ "Parcourir les annonces, consulter les profils gardiens, ajouter des favoris, accessible à 0 €.",
  },
 ];
 

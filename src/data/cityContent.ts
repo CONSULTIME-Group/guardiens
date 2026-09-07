@@ -164,7 +164,7 @@ Le home sitting existe depuis des décennies dans les pays anglo-saxons. Le prin
 
 ### Etape 1, Publiez votre annonce
 
-Décrivez votre maison, vos animaux, les dates de votre absence et vos attentes. La publication est entièrement sans frais pour les propriétaires. Précisez votre arrondissement ou votre commune pour que les gardiens de proximité vous trouvent. [Voir les tarifs](/tarifs).
+Décrivez votre maison, vos animaux, les dates de votre absence et vos attentes. La publication est à 0 € pour les propriétaires. Précisez votre arrondissement ou votre commune pour que les gardiens de proximité vous trouvent. [Voir les tarifs](/tarifs).
 
 ### Etape 2, Rencontrez les gardiens intéressés
 
@@ -242,9 +242,9 @@ Lyon se compose de neuf arrondissements et d'une ceinture de communes limitrophe
  title: "Tarifs Guardiens : transparents et sans surprise",
  content: `Le modèle économique de Guardiens est conçu pour être lisible :
 
-**Propriétaires : sans frais.** Vous publiez votre annonce, vous recevez des candidatures, vous choisissez votre gardien. Tout cela sans débourser un centime, toute l'année 2026.
+**Propriétaires : 0 €.** Vous publiez votre annonce, vous recevez des candidatures, vous choisissez votre gardien. Tout cela sans débourser un centime, toute l'année 2026.
 
-**Gardiens est gratuit aujourd'hui**, sans engagement, pour les propriétaires comme pour les gardiens. Vous serez prévenu à l'avance en cas d'évolution tarifaire. [Consultez le détail des formules sur la page tarifs](/tarifs).
+**0 € pour les propriétaires**, et accès gardien ouvert pendant la phase de lancement. Vous serez prévenu à l'avance en cas d'évolution tarifaire. [Consultez le détail des formules sur la page tarifs](/tarifs).
 
 **Aucune commission par garde.** Guardiens ne touche rien sur les gardes elles-mêmes. L'accès à Guardiens est ouvert pendant la phase de lancement. Vous accédez à l'ensemble des fonctionnalités, et vous restez libre à tout moment. Vous serez prévenu à l'avance en cas d'évolution tarifaire.`,
  },
@@ -295,7 +295,7 @@ Que vous viviez dans le Vieux-Lyon, à la Croix-Rousse, à Monplaisir ou à Vill
 
 Le réseau s'étend progressivement à toute la France : [Annecy](/actualites/house-sitting-annecy), Grenoble, Chambéry, et bien au-delà. Mais Lyon reste le pilier, la ville de référence, celle où tout a commencé.
 
-[Publiez votre première annonce](/inscription?role=owner), c'est sans frais pour les propriétaires.
+[Publiez votre première annonce](/inscription?role=owner), c'est 0 € pour les propriétaires.
 
 [Devenez gardien à Lyon](/inscription?role=guardian), rejoignez le réseau de confiance.
 

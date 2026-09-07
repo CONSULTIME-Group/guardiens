@@ -1032,7 +1032,7 @@ const SmallMissionDetail = () => {
           const parts = [
             `${catMeta.label} à ${cityLabel}`,
             mission.exchange_offer ? `En échange : ${mission.exchange_offer}` : null,
-            "Coup de main entre particuliers : un service contre un service, sans engagement.",
+            "Coup de main entre particuliers : un service contre un service, à 0 €.",
           ].filter(Boolean);
           return parts.join(". ").slice(0, 155);
         })()}

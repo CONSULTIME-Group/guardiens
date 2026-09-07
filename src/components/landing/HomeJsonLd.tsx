@@ -190,7 +190,7 @@ export default function HomeJsonLd() {
               "@id": "https://guardiens.fr/#service",
               name: "House-sitting, garde d'animaux, de maison et de jardin, entraide locale entre gens du coin",
               description:
-                "Deux services indépendants : house-sitting, garde d'animaux à domicile, de maison et de jardin d'un côté ; petites missions d'entraide entre gens du coin de l'autre. Avis croisés, vérification d'identité, sans commission.",
+                "Deux services indépendants : house-sitting, garde d'animaux à domicile, de maison et de jardin d'un côté ; petites missions d'entraide entre gens du coin de l'autre. Avis croisés, vérification d'identité, aucune commission prélevée sur les gardes.",
               provider: { "@id": "https://guardiens.fr/#organization" },
               areaServed: { "@type": "Country", name: "France" },
               serviceType: [

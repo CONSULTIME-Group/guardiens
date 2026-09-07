@@ -1144,7 +1144,7 @@ const BillingSection = ({ user }: { user: any }) => {
 
         <div className="rounded-lg border border-border bg-muted/30 p-4">
           <p className="text-sm font-medium">Petites missions d'entraide</p>
-          <p className="text-xs text-muted-foreground mt-1">L'entraide est gratuite, sans frais ni commission.</p>
+          <p className="text-xs text-muted-foreground mt-1">L'entraide est à 0 €, aucune commission prélevée.</p>
         </div>
 
         <div className="flex flex-wrap gap-2 pt-2">
