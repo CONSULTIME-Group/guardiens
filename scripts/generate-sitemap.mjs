@@ -283,13 +283,13 @@ async function main() {
         const [{ data: profiles }, { data: sitters }, { data: galleryRows }] = await Promise.all([
           supabase.from("public_profiles").select("id, last_seen_at, created_at, bio, identity_verified, role").in("role", ["sitter", "both"]).limit(5000),
           supabase.from("public_sitter_profiles").select("user_id, motivation").limit(5000),
-          supabase.from("sitter_gallery").select("user_id").limit(20000),
+          // `sitter_gallery` est fermée à anon depuis août 2026 (les URLs de
+          // photos ne sont jamais servies). On lit la vue publique qui
+          // n'expose que le NOMBRE de photos par gardien.
+          supabase.from("public_sitter_gallery_counts").select("user_id, photo_count").limit(20000),
         ]);
         const motivationById = new Map((sitters || []).map(s => [s.user_id, s.motivation]));
-        const galleryCountById = new Map();
-        for (const g of galleryRows || []) {
-          galleryCountById.set(g.user_id, (galleryCountById.get(g.user_id) || 0) + 1);
-        }
+        const galleryCountById = new Map((galleryRows || []).map(g => [g.user_id, g.photo_count || 0]));
         return (profiles || []).map(p => ({
           ...p,
           motivation: motivationById.get(p.id) || null,
