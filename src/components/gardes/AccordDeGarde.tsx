@@ -363,7 +363,7 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
   <div>
   <p className="font-semibold text-sm mb-2">Ce que ce document est vraiment</p>
   <p className="text-sm">
-  Cette garde est réalisée dans un esprit d'échange et de confiance mutuelle : {p} prête son logement à {g} gratuitement, pour des dates précises, et {g} s'engage à le restituer à la date prévue. Ce n'est ni un contrat de travail, ni un bail d'habitation : {g} ne reçoit aucune rémunération et ne devient jamais locataire.
+  Cette garde est réalisée dans un esprit d'échange et de confiance mutuelle : {p} prête son logement à {g}, sans loyer, pour des dates précises, et {g} s'engage à le restituer à la date prévue. Ce n'est ni un contrat de travail, ni un bail d'habitation : {g} ne reçoit aucune rémunération et ne devient jamais locataire.
   </p>
   <p className="text-sm mt-3">
   Guardiens génère cet accord à chaque garde confirmée pour que tout soit clair dès le départ : qui fait quoi, jusqu'à quand, et avec quelles limites. Des dates écrites et signées par les deux parties évitent bien des malentendus, et servent de référence commune en cas de question.

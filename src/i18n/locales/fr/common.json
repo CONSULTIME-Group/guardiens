@@ -197,7 +197,7 @@
     "faq": {
       "title": "Questions fréquentes",
       "q1": "Qu'est-ce que le house-sitting ?",
-      "a1": "Le house-sitting est un échange de services : un gardien habite sans frais dans votre maison pendant votre absence et prend soin de vos animaux. L'échange n'implique aucune transaction financière entre les deux parties.",
+      "a1": "Le house-sitting est un échange de services : un gardien habite dans votre maison pendant votre absence et prend soin de vos animaux. L'échange n'implique aucune transaction financière entre les deux parties.",
       "q2": "Comment fonctionne l'accès à Guardiens ?",
       "a2": "L'accès à Guardiens est ouvert pendant la phase de lancement : vous accédez à l'ensemble des fonctionnalités, et vous restez libre à tout moment. Toute évolution tarifaire vous sera annoncée à l'avance.",
       "q3": "Comment trouver un pet sitter près de chez moi ?",
@@ -354,7 +354,7 @@
       "body_3": "À côté des gardes, les membres se rendent des coups de main : arrosage, courses, compagnie. L'échange se décide entre vous.",
       "body_4": "La mise en relation s'appuie sur un score d'affinité calculé sur plusieurs critères pondérés, propres à chaque couple, où le mode de vie compte autant que la distance. Les membres documentent leur profil et peuvent faire vérifier leur identité. Les avis sont croisés, et un statut de gardien d'urgence répond aux imprévus.",
       "body_5": "Guardiens publie aussi des guides de race et des guides locaux ville par ville. S'y ajoutent un annuaire de professionnels animaliers dont le SIRET est contrôlé, et un journal de conseils pratiques.",
-      "body_6": "Le réseau couvre la France entière, et met en relation les Français de l'étranger avec des gardiens sur place. Vous avez accès à tout, sans engagement."
+      "body_6": "Le réseau couvre la France entière, et met en relation les Français de l'étranger avec des gardiens sur place. Vous accédez à l'ensemble des fonctionnalités."
     },
     "compare": {
       "title": "House-sitting, pension, pet-sitter : que choisir ?",
@@ -393,7 +393,7 @@
           "label": "Garde par un proche",
           "pet_home": "Variable",
           "house_lived": "Variable",
-          "cost": "Sans frais en général",
+          "cost": "0 € en général",
           "human": "Connaît déjà vos habitudes, mais rien de formalisé"
         }
       }
@@ -508,29 +508,29 @@
     "meta": {
       "title_before": "Tarifs, gratuits jusqu'au {{date}}",
       "title_after": "Tarifs, gratuit propriétaires · {{price}}",
-      "desc_before": "Accès offert jusqu'au {{date}} pour tous, gardiens comme propriétaires. Sans carte bancaire, sans commission.",
-      "desc_after": "Gratuit pour les propriétaires. {{price}} pour les gardiens, sans engagement. Sans commission, sans frais cachés."
+      "desc_before": "Accès offert jusqu'au {{date}} pour tous, gardiens comme propriétaires. Aucune commission prélevée sur les gardes.",
+      "desc_after": "0 € pour les propriétaires. {{price}} pour les gardiens, résiliable à tout moment. Aucune commission prélevée sur les gardes."
     },
     "hero": {
-      "eyebrow": "Sans commission, sans frais cachés",
+      "eyebrow": "Aucune commission prélevée sur les gardes",
       "title_before_a": "Offert.",
       "title_before_b": "Pour tout le monde.",
       "title_after_a": "Un seul prix.",
       "title_after_b": "Transparent.",
       "lede_before": "Jusqu'au {{date}}, l'accès complet est offert, gardiens comme propriétaires. Aucune carte bancaire demandée.",
-      "lede_after": "Gratuit pour les propriétaires. {{price}} pour les gardiens, sans engagement. C'est tout.",
+      "lede_after": "0 € pour les propriétaires. {{price}} pour les gardiens, résiliable à tout moment. C'est tout.",
       "cta_owner": "Publier mon annonce, gratuitement",
       "cta_sitter": "Je veux garder"
     },
     "grace": {
       "title": "Accès offert jusqu'au {{date}}",
-      "text": "Les premiers membres bénéficient d'un accès gratuit, sans engagement."
+      "text": "Les premiers membres bénéficient d'un accès ouvert pendant la phase de lancement."
     },
     "owner_card": {
       "badge": "Toujours gratuit",
       "label": "Propriétaire",
       "price": "Gratuit",
-      "subtitle": "Sans abonnement, sans carte bancaire.",
+      "subtitle": "Accès ouvert pendant la phase de lancement.",
       "cta": "Publier une annonce",
       "features": [
         "Publiez une annonce en 5 minutes",
@@ -552,7 +552,7 @@
       "per_month_short": "le mois",
       "from": "à partir de",
       "per_month": "/mois",
-      "note_monthly": "Sans engagement · Résiliable à tout moment",
+      "note_monthly": "Résiliable à tout moment",
       "note_annual": "Soit {{equiv}} €/mois équivalent · Résiliable à tout moment",
       "note_oneshot": "Paiement unique · Sans renouvellement",
       "features": [
@@ -569,7 +569,7 @@
       "oneshot_sub": "Paiement immédiat · Sans renouvellement",
       "monthly_title": "Mensuel",
       "monthly_tag": "Le plus choisi",
-      "monthly_sub": "Sans engagement · Résiliable à tout moment",
+      "monthly_sub": "Résiliable à tout moment",
       "annual_title": "Annuel",
       "annual_sub": "Un paiement par an · Renouvellement annuel · Résiliable à tout moment",
       "annual_equiv": "Soit ~{{equiv}} €/mois équivalent · Économie de {{savings}} €/an",
@@ -580,7 +580,7 @@
       "opening_checkout": "Ouverture du paiement…",
       "note_before": "Aucune carte bancaire demandée.",
       "note_visitor": "Inscription gratuite. Aucune carte bancaire avant la souscription d'une formule.",
-      "note_after_monthly": "Sans engagement. Résiliable à tout moment.",
+      "note_after_monthly": "Résiliable à tout moment.",
       "note_after_annual": "Renouvellement annuel automatique. Résiliable à tout moment.",
       "note_after_oneshot": "Paiement unique pour un mois d'accès, sans renouvellement."
     },
@@ -627,7 +627,7 @@
     "final_cta": {
       "title_before": "Rejoignez Guardiens dès maintenant",
       "title_after": "Prêt à rejoindre Guardiens ?",
-      "lede": "Sans carte bancaire à l'inscription. Vous décidez ensuite.",
+      "lede": "Une adresse email suffit à l'inscription. Vous décidez ensuite.",
       "cta_sitter": "Devenir gardien",
       "cta_owner": "Publier une annonce"
     }
@@ -847,7 +847,7 @@
     "intl_count_one": "{{count}} annonce hors France",
     "intl_count_other": "{{count}} annonces hors France",
     "become_sitter_title": "Vous cherchez à devenir gardien ?",
-    "become_sitter_body": "Inscription en 2 minutes, sans engagement.",
+    "become_sitter_body": "Inscription en 2 minutes.",
     "become_sitter_cta": "Découvrir l'espace gardien",
     "explore_title": "Explorer aussi",
     "explore_missions": "Petites missions",
@@ -1082,7 +1082,7 @@
     "most_popular": "Le plus choisi",
     "role_change_hint": "Vous changerez d'avis ? Le rôle reste modifiable à tout moment depuis vos paramètres.",
     "trust_no_spam": "Pas de spam, désinscription en 1 clic",
-    "trust_no_commitment": "Sans engagement",
+    "trust_no_commitment": "Résiliable à tout moment",
     "trust_france": "Données hébergées en France",
     "change_role": "Changer de rôle",
     "after_owner": "Vous pourrez <1>publier vos premières annonces</1> juste après.",
@@ -1263,7 +1263,7 @@
     "faq3_q": "Mon chien est réactif ou anxieux, est-ce possible quand même ?",
     "faq3_a": "Oui, c'est même un cas typique d'urgence. Quand vous activez l'alerte, vous précisez le profil de votre animal (réactif, anxieux, soin particulier, etc.). Seuls les gardiens d'urgence ayant l'expérience et la compétence requises sont notifiés. Aucun gardien ne prend une garde sans rencontrer l'animal d'abord, c'est la règle.",
     "faq4_q": "Combien ça coûte une garde d'urgence ?",
-    "faq4_a": "Pour les propriétaires, l'inscription et l'utilisation de Guardiens (y compris l'alerte d'urgence) sont sans frais. Aucun supplément n'est appliqué pour une garde d'urgence par rapport à une garde classique. La logique reste celle du house-sitting : pas d'argent qui circule entre vous et le gardien.",
+    "faq4_a": "Pour les propriétaires, l'inscription et l'utilisation de Guardiens (y compris l'alerte d'urgence) coûtent 0 €. Aucun supplément n'est appliqué pour une garde d'urgence par rapport à une garde classique. La logique reste celle du house-sitting : pas d'argent qui circule entre vous et le gardien.",
     "faq5_q": "Quelle différence avec une garde classique ?",
     "faq5_a": "Une garde classique se prépare à l'avance : vous publiez votre annonce, recevez plusieurs candidatures, choisissez. Une garde d'urgence suit un chemin plus court : un gardien éligible (5 gardes minimum, note 4.7+, 0 annulation, identité vérifiée) est notifié en priorité, vous le rencontrez, puis la garde peut démarrer dès que vous êtes d'accord tous les deux.",
     "faq6_q": "Et si je suis hospitalisé(e), comment ça se passe ?",
@@ -1770,7 +1770,7 @@
     "accommodation_value": "Logement inclus",
     "applications_closed": "Candidatures fermées",
     "apply": "Postuler à cette garde",
-    "signup_2min": "Inscription en 2 minutes, sans engagement.",
+    "signup_2min": "Inscription en 2 minutes.",
     "already_member": "Déjà membre ?",
     "login": "Se connecter",
     "applied": "Candidature envoyée",
@@ -1788,8 +1788,8 @@
     "cta_body": "Rejoignez la communauté Guardiens : des gardiens du coin, un cadre clair, et la liberté de partir sans inquiétude.",
     "cta_see_open": "Voir les annonces ouvertes",
     "cta_signup": "S'inscrire et postuler",
-    "no_card": "Sans carte bancaire",
-    "no_commitment": "Sans engagement",
+    "no_card": "Inscription par email",
+    "no_commitment": "Résiliable à tout moment",
     "two_minutes": "2 minutes",
     "cadre_title": "Le cadre proposé par {{name}}",
     "cadre_presence": "Présence prévue",
@@ -1836,7 +1836,7 @@
     "asap": "Dès que possible",
     "animal": "Animal",
     "cta_help": "Proposer mon aide",
-    "signup_2min": "Inscription en 2 minutes, sans engagement.",
+    "signup_2min": "Inscription en 2 minutes.",
     "already_member": "Déjà membre ?",
     "login": "Se connecter",
     "location_note": "Localisation approximative. L'adresse exacte est partagée après mise en relation.",
@@ -1847,11 +1847,11 @@
     "cta_body": "Une heure offerte aujourd'hui, et c'est parfois une rencontre, une amitié, une saison qui s'invente. Inscrivez-vous pour entrer en contact.",
     "cta_signup": "Créer mon compte et proposer mon aide",
     "no_card": "Ni tarif ni facture",
-    "no_commitment": "Sans engagement",
+    "no_commitment": "Résiliable à tout moment",
     "two_minutes": "2 minutes",
     "sticky_cta": "Proposer mon aide",
     "meta_title": "{{title}} · Coup de main à {{city}}",
-    "meta_fallback": "Coup de main entre particuliers : un service contre un service, sans engagement.",
+    "meta_fallback": "Coup de main entre particuliers : un service contre un service, 0 €.",
     "meta_exchange": "En échange : {{offer}}"
   },
   "search_results": {

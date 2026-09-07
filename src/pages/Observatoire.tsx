@@ -53,7 +53,7 @@ const KEY_STATS: Stat[] = [
  {
  label: "Abonnement gardien",
  value: "Aucun frais",
- detail: "Accès complet aux fonctionnalités, sans limite, sans engagement et sans carte bancaire.",
+ detail: "Accès complet aux fonctionnalités pendant la phase de lancement.",
  },
 
  {
@@ -258,7 +258,7 @@ const Observatoire = () => {
     name: "La garde à domicile implique-t-elle un paiement entre particuliers ?",
     acceptedAnswer: {
      "@type": "Answer",
-     text: "Non. Sur Guardiens, la garde repose sur un échange : le gardien loge sur place et veille sur les animaux et le logement, sans transaction financière directe entre membres et sans commission de la plateforme.",
+     text: "Non. Sur Guardiens, la garde repose sur un échange : le gardien loge sur place et veille sur les animaux et le logement, sans transaction financière directe entre membres, et aucune commission prélevée par la plateforme.",
     },
    },
    {
@@ -394,7 +394,7 @@ const Observatoire = () => {
  Guardiens fonctionne sur un modèle volontairement déséquilibré : <strong>les propriétaires d'animaux n'ont jamais rien à payer</strong>. Pas d'inscription, pas de frais de mise en relation, pas de commission sur les gardes. C'est un choix structurel qui distingue la plateforme depuis sa création.
  </p>
  <p>
- Les gardiens accèdent aujourd'hui à toutes les fonctionnalités sans abonnement. <strong>Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que nous vous offrons. Vous avez accès à tout, sans limite, sans engagement. Vous serez prévenu à l'avance quand cela changera.</strong> Aucune commission n'est prélevée sur les échanges, parce qu'il n'y a pas de transaction financière entre membres : l'échange repose sur la garde du logement contre la garde des animaux.
+ Les gardiens accèdent aujourd'hui à toutes les fonctionnalités sans abonnement. <strong>L'accès à Guardiens est ouvert pendant la phase de lancement. Vous accédez à l'ensemble des fonctionnalités, et vous restez libre à tout moment. Vous serez prévenu à l'avance en cas d'évolution tarifaire.</strong> Aucune commission n'est prélevée sur les échanges, parce qu'il n'y a pas de transaction financière entre membres : l'échange repose sur la garde du logement contre la garde des animaux.
  </p>
 
  </div>
@@ -467,7 +467,7 @@ const Observatoire = () => {
  Les chiffres « 37 maisons gardées » et « 234 animaux accompagnés » correspondent au cumul vécu par les fondateurs Jérémie et Elisa entre 2021 et 2026, période de validation terrain qui a précédé l'ouverture publique de Guardiens.
  </p>
  <p>
- Les éléments tarifaires (accès complet, sans limite et sans engagement) sont publiés sur <Link to="/tarifs" className="text-primary hover:underline">la page Nos engagements</Link>.
+ Les éléments tarifaires (accès complet pendant la phase de lancement) sont publiés sur <Link to="/tarifs" className="text-primary hover:underline">la page Nos engagements</Link>.
  </p>
 
  <p>
@@ -484,7 +484,7 @@ const Observatoire = () => {
  Vous voulez tester ?
  </h2>
  <p className="text-muted-foreground mb-6">
- Publication d'annonce sans engagement, candidatures sous quelques jours.
+ Publication d'annonce, 0 €, candidatures sous quelques jours.
  </p>
  <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
  <Link to="/inscription?role=owner">

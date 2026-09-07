@@ -236,7 +236,7 @@ const ProfileHero = ({
       : cta.kind === "muted"
         ? (cta.hint ?? "")
         : cta.kind === "unauthenticated"
-          ? "L'inscription est gratuite, sans engagement."
+          ? "L'inscription est ouverte pendant la phase de lancement."
           : "Contact direct, sans intermédiaire.";
   const reassurance = ctaReassurance ?? defaultReassurance;
 

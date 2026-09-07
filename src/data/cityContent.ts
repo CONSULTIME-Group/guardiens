@@ -40,7 +40,7 @@ const cityContent: Record<string, CityContentData> = {
 
 Les pensions pour animaux autour d'Annecy coûtent entre 25 et 45 € par jour. Pour deux semaines, ça fait vite 350 à 600 €. Et votre chat qui déteste les cages ? Votre chien qui a besoin de son jardin ?
 
-Le house-sitting (parfois appelé home sitting en français), c'est la solution de bon sens : un gardien du coin vient chez vous, s'occupe de vos animaux dans leur environnement, arrose le jardin, et veille sur la maison. **Gratuit pour le propriétaire. Logement offert pour le gardien.**
+Le house-sitting (parfois appelé home sitting en français), c'est la solution de bon sens : un gardien du coin vient chez vous, s'occupe de vos animaux dans leur environnement, arrose le jardin, et veille sur la maison. **0 € pour le propriétaire. Logement offert pour le gardien.**
 
 À Annecy, cette logique de proximité est naturelle. Les gens se connaissent entre quartiers, l'entraide est dans l'ADN savoyard. Guardiens digitalise cette confiance de proximité.`,
  },
@@ -63,7 +63,7 @@ En été, c'est l'arrosage du jardin, la gestion des volets contre la chaleur, e
  title: "Le match : pension animale vs Guardiens",
  content: `| | Pension | Guardiens |
 |---|---|---|
-| **Coût** | 25-45 €/jour | Gratuit |
+| **Coût** | 25-45 €/jour | 0 € |
 | **Environnement** | Cage / box collectif | Chez vous |
 | **Stress animal** | Élevé (changement) | Minimal (habitudes) |
 | **Maison surveillée** | Non | Oui |
@@ -75,7 +75,7 @@ Pour un séjour de 14 jours avec un chien et un chat, **vous économisez 500 à 
  {
  id: "comment",
  title: "Comment ça marche ?",
- content: `**1. Inscrivez-vous**, gratuitement en 2 minutes, que vous soyez propriétaire ou gardien.
+ content: `**1. Inscrivez-vous** en 2 minutes, que vous soyez propriétaire ou gardien.
 
 **2. Publiez votre annonce**, décrivez votre maison, vos animaux, les dates, et vos attentes.
 
@@ -164,7 +164,7 @@ Le home sitting existe depuis des décennies dans les pays anglo-saxons. Le prin
 
 ### Etape 1, Publiez votre annonce
 
-Décrivez votre maison, vos animaux, les dates de votre absence et vos attentes. La publication est entièrement sans frais pour les propriétaires. Précisez votre arrondissement ou votre commune pour que les gardiens de proximité vous trouvent. [Voir les tarifs](/tarifs).
+Décrivez votre maison, vos animaux, les dates de votre absence et vos attentes. La publication coûte 0 € aux propriétaires. Précisez votre arrondissement ou votre commune pour que les gardiens de proximité vous trouvent. [Voir les tarifs](/tarifs).
 
 ### Etape 2, Rencontrez les gardiens intéressés
 
@@ -216,7 +216,7 @@ Lyon se compose de neuf arrondissements et d'une ceinture de communes limitrophe
 
 **Vous rencontrez votre gardien avant de lui confier vos clés.** C'est un principe fondamental de Guardiens : pas de garde sans rencontre préalable. Un café dans votre quartier, une visite de votre logement, une promenade avec votre chien. Vous évaluez le contact humain, votre animal aussi.
 
-**Aucune commission sur les gardes.** Guardiens ne prélève aucun pourcentage sur les gardes. Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que nous vous offrons. Vous avez accès à tout, sans limite, sans engagement. Vous serez prévenu à l'avance quand cela changera.
+**Aucune commission sur les gardes.** Guardiens ne prélève aucun pourcentage sur les gardes. L'accès à Guardiens est ouvert pendant la phase de lancement. Vous accédez à l'ensemble des fonctionnalités, et vous restez libre à tout moment. Vous serez prévenu à l'avance en cas d'évolution tarifaire.
 
 **Un accord de garde clair.** Un document optionnel formalise les engagements de chaque partie : dates, responsabilités, contacts d'urgence. Jamais contraignant, toujours rassurant.
 
@@ -242,11 +242,11 @@ Lyon se compose de neuf arrondissements et d'une ceinture de communes limitrophe
  title: "Tarifs Guardiens : transparents et sans surprise",
  content: `Le modèle économique de Guardiens est conçu pour être lisible :
 
-**Propriétaires : sans frais.** Vous publiez votre annonce, vous recevez des candidatures, vous choisissez votre gardien. Tout cela sans débourser un centime, toute l'année 2026.
+**Propriétaires : 0 €.** Vous publiez votre annonce, vous recevez des candidatures, vous choisissez votre gardien. Tout cela sans débourser un centime, toute l'année 2026.
 
-**Gardiens est gratuit aujourd'hui**, sans engagement, pour les propriétaires comme pour les gardiens. Vous serez prévenu à l'avance en cas d'évolution tarifaire. [Consultez le détail des formules sur la page tarifs](/tarifs).
+**0 € pour les propriétaires**, et accès gardien ouvert pendant la phase de lancement. Vous serez prévenu à l'avance en cas d'évolution tarifaire. [Consultez le détail des formules sur la page tarifs](/tarifs).
 
-**Aucune commission par garde.** Guardiens ne touche rien sur les gardes elles-mêmes. Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que nous vous offrons. Vous avez accès à tout, sans limite, sans engagement. Vous serez prévenu à l'avance quand cela changera.`,
+**Aucune commission par garde.** Guardiens ne touche rien sur les gardes elles-mêmes. L'accès à Guardiens est ouvert pendant la phase de lancement. Vous accédez à l'ensemble des fonctionnalités, et vous restez libre à tout moment. Vous serez prévenu à l'avance en cas d'évolution tarifaire.`,
  },
  {
  id: "histoire",
@@ -295,7 +295,7 @@ Que vous viviez dans le Vieux-Lyon, à la Croix-Rousse, à Monplaisir ou à Vill
 
 Le réseau s'étend progressivement à toute la France : [Annecy](/actualites/house-sitting-annecy), Grenoble, Chambéry, et bien au-delà. Mais Lyon reste le pilier, la ville de référence, celle où tout a commencé.
 
-[Publiez votre première annonce](/inscription?role=owner), c'est sans frais pour les propriétaires.
+[Publiez votre première annonce](/inscription?role=owner), c'est 0 € pour les propriétaires.
 
 [Devenez gardien à Lyon](/inscription?role=guardian), rejoignez le réseau de confiance.
 
@@ -347,7 +347,7 @@ Consultez également le [guide complet du gardien à Lyon](/guides/lyon), la pag
  title: "Pourquoi le house-sitting à Grenoble ?",
  content: `Grenoble, ceinturée par trois massifs montagneux, Chartreuse, Vercors, Belledonne, attire des passionnés d'outdoor. Mais quand on part randonner, skier ou voyager, qui garde la maison et les animaux ?
 
-Le house-sitting (parfois appelé home sitting en français) à Grenoble, c'est la réponse locale : un home sitter du coin s'installe chez vous, s'occupe de vos animaux dans leur environnement, et veille sur votre logement. **Gratuit pour le propriétaire.**
+Le house-sitting (parfois appelé home sitting en français) à Grenoble, c'est la réponse locale : un home sitter du coin s'installe chez vous, s'occupe de vos animaux dans leur environnement, et veille sur votre logement. **0 € pour le propriétaire.**
 
 La cuvette grenobloise crée des contraintes spécifiques : pics de pollution en hiver, chaleur estivale concentrée, et quartiers en pente parfois difficiles d'accès par temps de neige. Un home sitter local connaît ces réalités.`,
  },
@@ -371,7 +371,7 @@ En été, la cuvette concentre la chaleur : un bon gardien maintient les volets 
 
 | | Pension | Guardiens |
 |---|---|---|
-| **Coût** | 25-40 €/jour | Gratuit |
+| **Coût** | 25-40 €/jour | 0 € |
 | **Environnement** | Cage / box | Chez vous |
 | **Stress animal** | Élevé | Minimal |
 | **Maison surveillée** | Non | Oui |

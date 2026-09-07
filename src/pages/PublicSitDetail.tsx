@@ -463,7 +463,7 @@ const PublicSitDetail = () => {
 
  // SEO description (≤160 char), distincte de og:description
  const ownerFirstName = publicFirstName(owner?.first_name);
- const seoDescription = `Garde à ${cityForTitle} ${datesShort}. ${petsSummary}. ${ownerFirstName || "Un membre"} cherche un gardien du coin sur Guardiens, inscription gratuite pour les propriétaires.`;
+ const seoDescription = `Garde à ${cityForTitle} ${datesShort}. ${petsSummary}. ${ownerFirstName || "Un membre"} cherche un gardien du coin sur Guardiens, inscription : 0 € pour les propriétaires.`;
  const truncatedSeoDesc = seoDescription.length > 160 ? seoDescription.slice(0, 157) + "…" : seoDescription;
 
   // Canonical TOUJOURS sur le domaine de prod : sur preview/lovableproject,
@@ -510,7 +510,7 @@ const PublicSitDetail = () => {
  price: "0",
  priceCurrency: "EUR",
  eligibleCustomerType: "Owner",
-  description: "Gratuit pour les propriétaires, sans abonnement requis.",
+  description: "0 € pour les propriétaires.",
  availability: hideDates ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
  // Aucune date exposée sur une garde pourvue ou terminée.
  ...(!hideDates && sit.start_date && { validFrom: sit.start_date }),

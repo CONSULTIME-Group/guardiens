@@ -104,7 +104,7 @@ export function AnalysisRequestForm({ contextCity }: { contextCity?: string }) {
           Demandez une analyse personnalisée
         </p>
         <p className="text-sm text-muted-foreground">
-          Ville, race, lieu, pro : dites-nous ce qui vous manque. C'est gratuit et lu par l'équipe.
+          Ville, race, lieu, pro : dites-nous ce qui vous manque. C'est 0 € et lu par l'équipe.
         </p>
       </div>
 

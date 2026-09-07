@@ -1404,7 +1404,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  // ─── Render ───
   // Visiteurs non connectés : annonces visibles (consultation libre pour conversion).
   // Sitters connectés sans abo : overlay premium maintenu.
-  // Overlay neutralisé tant que PRICING_IS_ACTIVE = false (promesse "sans limite").
+  // Overlay neutralisé tant que PRICING_IS_ACTIVE = false (promesse d'accès complet).
   const isSitterLocked = PRICING_IS_ACTIVE && !!user && !hasAccess && tab === "sits";
 
  return (

@@ -999,7 +999,7 @@ const SmallMissionDetail = () => {
           )}
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
             <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Un service contre un service</span>
-            <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Sans engagement</span>
+            <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Résiliable à tout moment</span>
           </div>
         </div>
       );
@@ -1032,7 +1032,7 @@ const SmallMissionDetail = () => {
           const parts = [
             `${catMeta.label} à ${cityLabel}`,
             mission.exchange_offer ? `En échange : ${mission.exchange_offer}` : null,
-            "Coup de main entre particuliers : un service contre un service, sans engagement.",
+            "Coup de main entre particuliers : un service contre un service, 0 €.",
           ].filter(Boolean);
           return parts.join(". ").slice(0, 155);
         })()}

@@ -583,8 +583,8 @@ export default function AlmaTips() {
                 Confier votre animal ou votre maison en toute confiance
               </h2>
               <p className="text-muted-foreground mb-4 max-w-2xl">
-                Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service
-                que nous vous offrons. Rejoignez les propriétaires qui trouvent leur gardien
+                L'accès à Guardiens est ouvert pendant la phase de lancement
+                Rejoignez les propriétaires qui trouvent leur gardien
                 parmi les gens du coin.
               </p>
               <div className="flex flex-wrap gap-3">

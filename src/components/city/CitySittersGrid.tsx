@@ -199,7 +199,7 @@ const CitySittersGrid = ({ city, citySlug, aggregateCities, departmentCode, city
             ? "Profils publics. L'écusson « Identité vérifiée » apparaît sur les profils dont la pièce d'identité a été validée."
             : nearby.length > 0
               ? `Ces gardiens n'habitent pas ${city} mais leur rayon d'intervention la couvre.`
-              : "Le réseau se construit. Rejoignez les premiers gardiens, l'accès est gratuit aujourd'hui, sans engagement."}
+              : "Le réseau se construit. Rejoignez les premiers gardiens, l'accès est ouvert pendant la phase de lancement."}
         </p>
       </div>
 

@@ -161,7 +161,7 @@ const BreedPage = () => {
     {
       q: `Combien coûte la garde d'un ${breedCap} sur Guardiens ?`,
       a:
-        "Pour les propriétaires, Guardiens est gratuit : aucun frais, aucune commission. L'accès gardien est également gratuit aujourd'hui, sans engagement.",
+        "Pour les propriétaires, Guardiens coûte 0 €, et aucune commission n'est prélevée. L'accès gardien est ouvert pendant la phase de lancement.",
     },
   ];
 

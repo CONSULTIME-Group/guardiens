@@ -21,7 +21,7 @@ const SearchOwner = lazyWithRetry(
 const CANONICAL = "https://guardiens.fr/annonces";
 const TITLE = "Annonces de garde d'animaux à domicile en France · Guardiens";
 const DESCRIPTION =
-  "Découvrez toutes les annonces de garde de chats, chiens et NAC à domicile, partout en France. Consultation libre, inscription gratuite pour postuler.";
+  "Découvrez toutes les annonces de garde de chats, chiens et NAC à domicile, partout en France. Consultation libre, inscription : 0 € pour postuler.";
 
 const SearchPage = () => {
   const { user, activeRole } = useAuth();
@@ -95,7 +95,7 @@ const SearchPage = () => {
             </div>
             <div className="flex items-center gap-1.5 shrink-0">
               <Button asChild size="sm" className="h-8">
-                <Link to="/inscription">Inscription gratuite</Link>
+                <Link to="/inscription">Inscription : 0 €</Link>
               </Button>
               <Button asChild size="sm" variant="ghost" className="h-8">
                 <Link to="/login">Se connecter</Link>

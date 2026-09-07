@@ -24,7 +24,7 @@ const STEPS = [
   {
     n: "2",
     title: "Inscrivez-vous et postulez",
-    text: "Créez votre profil gardien gratuitement, présentez votre expérience et postulez aux annonces qui correspondent à votre disponibilité.",
+    text: "Créez votre profil gardien, 0 €, présentez votre expérience et postulez aux annonces qui correspondent à votre disponibilité.",
   },
   {
     n: "3",
@@ -122,12 +122,12 @@ const SearchHowItWorksAnon = () => (
             Prêt à postuler à votre première garde ?
           </p>
           <p className="text-sm text-muted-foreground mt-1">
-            Inscription gratuite. L'espace gardien est également gratuit aujourd'hui, sans engagement.
+            Inscription : 0 €. L'espace gardien est ouvert pendant la phase de lancement.
           </p>
         </div>
         <div className="flex gap-2 shrink-0">
           <Button asChild size="lg">
-            <Link to="/inscription">Inscription gratuite</Link>
+            <Link to="/inscription">Inscription : 0 €</Link>
           </Button>
           <Button asChild size="lg" variant="outline">
             <Link to="/tarifs">Voir les tarifs</Link>

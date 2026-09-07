@@ -387,7 +387,7 @@ export default function ArticleDetail() {
   "@type": "Service",
   "serviceType": "Abonnement plateforme de gardiennage entre particuliers",
   "name": "Abonnement Gardien Guardiens",
-  "description": "Abonnement pour devenir gardien de maison et d'animaux sur Guardiens. Sans engagement, résiliable à tout moment.",
+  "description": "Abonnement pour devenir gardien de maison et d'animaux sur Guardiens. Résiliable à tout moment.",
   "provider": { "@type": "Organization", "name": "Guardiens", "url": "https://guardiens.fr" },
   "areaServed": { "@type": "Country", "name": "France" },
  "offers": {
@@ -396,7 +396,7 @@ export default function ArticleDetail() {
  "price": "0",
  "priceCurrency": "EUR",
  "eligibleCustomerType": "Sitter",
- "description": "Accès gardien gratuit aujourd'hui, sans engagement.",
+ "description": "Accès gardien ouvert pendant la phase de lancement.",
  "availability": "https://schema.org/InStock"
  }
  }) }} />
@@ -416,7 +416,7 @@ export default function ArticleDetail() {
 ...(article.region ? { "addressRegion": article.region } : {}),
  "addressCountry": "FR"
  },
- "priceRange": "Gratuit pour les propriétaires",
+ "priceRange": "0 € pour les propriétaires",
  }) }} />
  )}
 

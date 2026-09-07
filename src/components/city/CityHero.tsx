@@ -23,7 +23,7 @@ export const CITY_HERO_IMAGES: Record<string, string> = {
 const trustSignals = [
   { icon: BadgeCheck, label: "Identité vérifiable" },
   { icon: Siren, label: "Gardiens d'urgence" },
-  { icon: ShieldCheck, label: "Zéro frais propriétaire" },
+  { icon: ShieldCheck, label: "Propriétaires : 0 €" },
   { icon: Mountain, label: "Esprit de proximité" },
 ];
 

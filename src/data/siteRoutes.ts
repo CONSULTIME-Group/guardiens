@@ -138,7 +138,7 @@ export const staticRoutes: SiteRoute[] = [
  {
  path: "/tarifs",
 		title: "Tarifs Guardiens : nos engagements de service | Guardiens",
-		metaDescription: "Guardiens est gratuit aujourd'hui pour les propriétaires comme pour les gardiens, sans engagement, sans commission, sans frais cachés.",
+		metaDescription: "0 € pour les propriétaires, accès gardien ouvert pendant la phase de lancement, aucune commission prélevée sur les gardes.",
 		h1: "Tarifs Guardiens : nos engagements de service",
  sitemapPriority: "0.8",
  changeFreq: "weekly",
@@ -170,7 +170,7 @@ export const staticRoutes: SiteRoute[] = [
  {
  path: "/petites-missions",
  title: "Petites missions, entraide communautaire | Guardiens",
- metaDescription: "Petites missions d'entraide entre gens du coin. Sans frais, sans argent qui circule. Arrosage du jardin, promenade de chien, courses, partage de compétences.",
+ metaDescription: "Petites missions d'entraide entre gens du coin. Un service contre un service, 0 €. Arrosage du jardin, promenade de chien, courses, partage de compétences.",
  h1: "Petites missions",
  sitemapPriority: "0.8",
  changeFreq: "weekly",
@@ -210,7 +210,7 @@ export const staticRoutes: SiteRoute[] = [
   {
    path: "/annonces",
    title: "Annonces de garde d'animaux à domicile en France | Guardiens",
-   metaDescription: "Toutes les annonces de garde de chats, chiens et NAC à domicile, partout en France. Filtres par ville, département et critères. Consultation libre, inscription gratuite pour postuler.",
+   metaDescription: "Toutes les annonces de garde de chats, chiens et NAC à domicile, partout en France. Filtres par ville, département et critères. Consultation libre, inscription : 0 € pour postuler.",
    h1: "Annonces de garde d'animaux à domicile",
    sitemapPriority: "0.9",
    changeFreq: "daily",
@@ -219,7 +219,7 @@ export const staticRoutes: SiteRoute[] = [
   {
    path: "/recherche",
    title: "Annonces de garde d'animaux à domicile près de chez vous | Guardiens",
-   metaDescription: "Découvrez les gardes d'animaux à domicile près de chez vous : chats, chiens, NAC. Consultez les annonces en libre accès, postulez après inscription gratuite.",
+   metaDescription: "Découvrez les gardes d'animaux à domicile près de chez vous : chats, chiens, NAC. Consultez les annonces en libre accès, postulez après une inscription : 0 €.",
    h1: "Annonces de garde d'animaux à domicile",
    sitemapPriority: "0.4",
    changeFreq: "daily",
@@ -255,8 +255,8 @@ export const staticRoutes: SiteRoute[] = [
  },
  {
  path: "/inscription",
- title: "Inscription, créer un compte gratuit | Guardiens",
- metaDescription: "Rejoignez la communauté Guardiens. Inscription gratuite pour tous, aujourd'hui et sans deadline. Ni carte bancaire, ni engagement.",
+ title: "Inscription, créer un compte 0 € | Guardiens",
+ metaDescription: "Rejoignez la communauté Guardiens. Inscription : 0 € pour tous. L'accès est ouvert pendant la phase de lancement.",
  h1: "Créer un compte",
  sitemapPriority: "0.6",
  changeFreq: "monthly",

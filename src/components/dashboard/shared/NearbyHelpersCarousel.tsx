@@ -521,7 +521,7 @@ const NearbyHelpersCarousel = memo(({ hideHeader = false }: { hideHeader?: boole
           aider, différent de la section « Missions ouvertes » qui liste des
           besoins et offres publiés. */}
       <p className="text-xs sm:text-sm text-foreground/75 leading-relaxed max-w-prose">
-        Les personnes prêtes à donner un coup de main près de chez vous. Cliquez sur «&nbsp;Lui écrire&nbsp;» pour proposer un échange, c'est gratuit.
+        Les personnes prêtes à donner un coup de main près de chez vous. Cliquez sur «&nbsp;Lui écrire&nbsp;» pour proposer un échange, c'est 0 €.
         {hasGeo && radiusUsed > 0 && (
           <>
             {" "}
