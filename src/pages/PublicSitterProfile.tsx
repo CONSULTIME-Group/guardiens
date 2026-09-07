@@ -116,6 +116,13 @@ export default function PublicSitterProfile() {
     window.prerenderReady = false;
     prerenderMetaDeclared.current = true;
   }
+  // Relâchement du verrou au démontage : couvre une navigation rapide qui
+  // quitte la fiche avant que PageMeta ait pu monter et rendre la main.
+  useEffect(() => {
+    return () => {
+      if (typeof window !== "undefined") window.prerenderMetaPending = false;
+    };
+  }, []);
   const { id } = useParams<{ id: string }>();
   const auth = useAuth();
   const { sitter: viewerSitter } = useViewerSitterForAffinity();
