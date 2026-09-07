@@ -79,8 +79,9 @@ import { avatarImageUrl, storageImageUrl } from "@/lib/storageImage";
 import { petSpeciesLabel } from "@/lib/petLabels";
 import { isRadiusDeclared } from "@/lib/searchRadius";
 
-const capitalize = (name: string) =>
-  name ? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase() : "";
+// Capitalise chaque mot, pour ne pas abîmer les prénoms composés
+// (« JEAN CLAUDE » devient « Jean Claude », pas « Jean claude »).
+const capitalize = (name: string) => capitalizeFirstName(name);
 
 const ANIMAL_LABELS: Record<string, string> = {
   dog: "Chiens", cat: "Chats", bird: "Oiseaux", fish: "Poissons",
