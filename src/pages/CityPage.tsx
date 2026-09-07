@@ -47,6 +47,8 @@ import { buildNearbyMention } from "@/lib/cityProximity";
 import { trackEvent } from "@/lib/analytics";
 import { useContentStats } from "@/hooks/useContentStats";
 import { interpolatePlaceholders } from "@/lib/contentPlaceholders";
+import { slugify } from "@/lib/normalize";
+import { useDepartmentPageExists } from "@/hooks/useDepartmentPageExists";
 
 const CityPage = () => {
  const { slug } = useParams<{ slug: string }>();
@@ -54,6 +56,11 @@ const CityPage = () => {
 
  // Try static city data first
  const cityData = CITIES.find((c) => c.slug === slug);
+
+ // Lien département : slug normalisé via slugify (accents retirés), rendu
+ // uniquement si la page département publiée existe (sinon 404 crawlable).
+ const departmentSlug = cityData?.department ? slugify(cityData.department) : null;
+ const departmentPageExists = useDepartmentPageExists(departmentSlug);
 
  // Fallback: fetch from seo_city_pages if not in static data
  const { data: dbPage, isLoading: dbLoading } = useQuery({
