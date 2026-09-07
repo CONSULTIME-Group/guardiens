@@ -2245,6 +2245,36 @@ export type Database = {
         }
         Relationships: []
       }
+      deploy_fingerprints: {
+        Row: {
+          fingerprint: string
+          first_seen_at: string
+          id: string
+          last_seen_at: string
+          marked_at: string | null
+          marked_rows: number | null
+          seen_count: number
+        }
+        Insert: {
+          fingerprint: string
+          first_seen_at?: string
+          id?: string
+          last_seen_at?: string
+          marked_at?: string | null
+          marked_rows?: number | null
+          seen_count?: number
+        }
+        Update: {
+          fingerprint?: string
+          first_seen_at?: string
+          id?: string
+          last_seen_at?: string
+          marked_at?: string | null
+          marked_rows?: number | null
+          seen_count?: number
+        }
+        Relationships: []
+      }
       email_campaign_events: {
         Row: {
           created_at: string
