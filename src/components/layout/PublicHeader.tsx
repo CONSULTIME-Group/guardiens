@@ -195,11 +195,11 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
           )}
         </nav>
 
-        {/* Mobile : barre strictement allégée. Sous le breakpoint sm, seuls
+        {/* Vue compacte : barre strictement allégée. Sous 1400 px, seuls
             le logo et le burger (plus l'avatar d'un connecté) restent dans
             l'en tête. Connexion et création de compte vivent dans le
             panneau du menu, sinon le cluster déborde du viewport. */}
-        <div className="flex sm:hidden shrink-0 items-center gap-1">
+        <div className="flex min-[1400px]:hidden shrink-0 items-center gap-1">
           {!authChecked ? (
             <div className="h-9 w-9 rounded-md bg-muted/40 animate-pulse" aria-hidden="true" />
           ) : hasSession ? (
