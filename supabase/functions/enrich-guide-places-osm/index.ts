@@ -29,6 +29,15 @@ const json = (body: unknown, status = 200) =>
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+// Miroirs Overpass essayés dans l'ordre, bascule au premier échec.
+const OVERPASS_MIRRORS = [
+  "https://overpass-api.de/api/interpreter",
+  "https://overpass.kumi.systems/api/interpreter",
+  "https://overpass.private.coffee/api/interpreter",
+];
+// Délai par miroir : la requête porte [timeout:25], on laisse une marge.
+const OVERPASS_TIMEOUT_MS = 30_000;
+
 const norm = (s: string) =>
   (s ?? "")
     .toString()
@@ -320,7 +329,7 @@ Deno.serve(async (req) => {
     } else {
       const { data: allGuides, error } = await supabase
         .from("city_guides")
-        .select("id, slug, city, postal_code, department, osm_enrich_attempted_at")
+        .select("id, slug, city, postal_code, department, osm_enrich_attempted_at, osm_enrich_last_result")
         .order("slug", { ascending: true });
       if (error) return json({ error: error.message }, 500);
       const { data: done } = await supabase
@@ -332,10 +341,19 @@ Deno.serve(async (req) => {
       // Rotation de la file : un guide qui ne produit aucun lieu est un
       // résultat normal, pas une erreur. Il est marqué `osm_enrich_attempted_at`
       // et repasse en fin de file au lieu de geler les suivants.
-      // Ordre : jamais tentés d'abord, puis plus anciennement tentés, puis slug.
+      // Ordre : pannes Overpass d'abord (jamais réellement interrogés), puis
+      // jamais tentés, puis plus anciennement tentés, puis slug.
+      const priorite = (g: any): number => {
+        if (g.osm_enrich_last_result === "overpass_indisponible") return 0;
+        if (!g.osm_enrich_attempted_at) return 1;
+        return 2;
+      };
       guides = (allGuides ?? [])
         .filter((g: any) => !doneSet.has(g.id))
         .sort((a: any, b: any) => {
+          const pa = priorite(a);
+          const pb = priorite(b);
+          if (pa !== pb) return pa - pb;
           const ta = a.osm_enrich_attempted_at ? Date.parse(a.osm_enrich_attempted_at) : null;
           const tb = b.osm_enrich_attempted_at ? Date.parse(b.osm_enrich_attempted_at) : null;
           if (ta === null && tb === null) return String(a.slug).localeCompare(String(b.slug));
@@ -363,6 +381,8 @@ Deno.serve(async (req) => {
     let rejetes_doublon = 0;
     let sans_coordonnees = 0;
     let overpass_indisponible = 0;
+    // Nom d'hôte du dernier miroir Overpass ayant répondu, null si aucun.
+    let miroirUtilise: string | null = null;
     const details: any[] = [];
     const dryRows: any[] = [];
 
@@ -370,12 +390,18 @@ Deno.serve(async (req) => {
     // Overpass indisponible ou tous les candidats rejetés). Un guide sans
     // vétérinaire ni animalerie dans son rayon est un résultat normal :
     // sans ce marquage, il gèle la file éternellement.
+    // L'issue réelle est écrite dans `osm_enrich_last_result` : une panne
+    // d'infrastructure n'est plus confondue avec une absence de donnée.
     // En dry_run on n'écrit rien : c'est une simulation.
-    const markAttempted = async (guideId: string) => {
+    const markAttempted = async (guideId: string, result: string | null) => {
       if (dryRun) return;
+      const payload: Record<string, unknown> = {
+        osm_enrich_attempted_at: new Date().toISOString(),
+      };
+      if (result !== null) payload.osm_enrich_last_result = result;
       await supabase
         .from("city_guides")
-        .update({ osm_enrich_attempted_at: new Date().toISOString() })
+        .update(payload)
         .eq("id", guideId);
     };
 
@@ -384,6 +410,9 @@ Deno.serve(async (req) => {
       if (!first) await sleep(1000);
       first = false;
       guides_traites++;
+      // Issue réelle du guide, écrite dans `osm_enrich_last_result`.
+      // null = ne pas écraser la valeur existante (ex. insert en échec).
+      let guideResult: string | null = null;
       try {
 
       const guideDept = deptFromPostal(guide.postal_code) ??
@@ -429,6 +458,7 @@ Deno.serve(async (req) => {
 
       if (lat == null || lon == null || Number.isNaN(lat) || Number.isNaN(lon)) {
         sans_coordonnees++;
+        guideResult = "sans_coordonnees";
         details.push({ slug: guide.slug, inseres: 0, rejetes: 0 });
         continue;
       }
@@ -438,29 +468,39 @@ Deno.serve(async (req) => {
         const query =
           `[out:json][timeout:25];(nwr["amenity"="veterinary"](around:${radius},${lat},${lon});` +
           `nwr["shop"="pet"](around:${radius},${lat},${lon}););out center tags;`;
-        try {
-          const r = await fetch("https://overpass-api.de/api/interpreter", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-              "User-Agent": "Guardiens/1.0 (enrich-guide-places-osm)",
-            },
-            body: `data=${encodeURIComponent(query)}`,
-          });
-          if (!r.ok) return null;
-          const text = await r.text();
-          if (!text.trim().startsWith("{")) return null;
-          const data = JSON.parse(text);
-          const els: OsmElement[] = Array.isArray(data?.elements) ? data.elements : [];
-          return els.filter((e) => e.tags?.name);
-        } catch {
-          return null;
+        // L'IP de sortie des Edge Functions est mutualisée et le miroir
+        // principal la limite à 2 créneaux simultanés : on essaie les
+        // miroirs dans l'ordre et on bascule au premier échec (statut non
+        // 200, corps non analysable ou délai dépassé).
+        for (const miroir of OVERPASS_MIRRORS) {
+          try {
+            const r = await fetch(miroir, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "User-Agent": "Guardiens/1.0 (enrich-guide-places-osm)",
+              },
+              body: `data=${encodeURIComponent(query)}`,
+              signal: AbortSignal.timeout(OVERPASS_TIMEOUT_MS),
+            });
+            if (!r.ok) continue;
+            const text = await r.text();
+            if (!text.trim().startsWith("{")) continue;
+            const data = JSON.parse(text);
+            const els: OsmElement[] = Array.isArray(data?.elements) ? data.elements : [];
+            miroirUtilise = new URL(miroir).hostname;
+            return els.filter((e) => e.tags?.name);
+          } catch {
+            continue;
+          }
         }
+        return null;
       };
 
       let elements = await runOverpass(5000);
       if (elements === null) {
         overpass_indisponible++;
+        guideResult = "overpass_indisponible";
         details.push({ slug: guide.slug, inseres: 0, rejetes: 0 });
         continue;
       }
@@ -586,11 +626,14 @@ Deno.serve(async (req) => {
           }
         }
         lieux_inseres += rows.length;
+        guideResult = "ok";
+      } else {
+        guideResult = "aucun_resultat";
       }
 
       details.push({ slug: guide.slug, inseres: rows.length, rejetes: rejetesGuide });
       } finally {
-        await markAttempted(guide.id);
+        await markAttempted(guide.id, guideResult);
       }
     }
 
@@ -613,6 +656,7 @@ Deno.serve(async (req) => {
       rejetes_doublon,
       sans_coordonnees,
       overpass_indisponible,
+      miroir_utilise: miroirUtilise,
       details,
       ...(dryRun ? { dry_run: true, lignes: dryRows } : {}),
     });
