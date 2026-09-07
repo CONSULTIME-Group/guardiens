@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { getMemberAvatarUrl, getMemberDisplayName, getMemberPublicFirstName, getMemberInitial, isMemberLinkable } from "@/lib/memberUtils";
+import { getMemberAvatarUrl, getMemberPublicFirstName, getMemberInitial, isMemberLinkable } from "@/lib/memberUtils";
 import { publicFirstName } from "@/lib/displayName";
 import { logger } from "@/lib/logger";
 import { trackEvent } from "@/lib/analytics";
@@ -233,7 +233,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
     if (accepting) return;
     setAccepting(true);
     try {
-      const sitterName = getMemberDisplayName(app.sitter, "Ce gardien");
+      const sitterName = getMemberPublicFirstName(app.sitter, "Ce gardien");
       const sitterId = app.sitter_id;
 
       // 1) Appel RPC atomique côté serveur.
@@ -666,7 +666,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
                   sitsCount={completedSits}
                 >
                   {getMemberAvatarUrl(sitter) ? (
-                    <img src={avatarImageUrl(getMemberAvatarUrl(sitter)!, 48)} alt={`Photo de ${getMemberDisplayName(sitter, "gardien")}`} className="w-full h-full object-cover" />
+                    <img src={avatarImageUrl(getMemberAvatarUrl(sitter)!, 48)} alt={`Photo de ${getMemberPublicFirstName(sitter, "gardien")}`} className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium text-lg">
                       {getMemberInitial(sitter)}
@@ -677,7 +677,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
               </>
             );
             return isMemberLinkable(sitter) ? (
-              <Link to={`/gardiens/${app.sitter_id}`} className="shrink-0 relative block" aria-label={`Voir le profil de ${getMemberDisplayName(sitter, "ce gardien")}`}>
+              <Link to={`/gardiens/${app.sitter_id}`} className="shrink-0 relative block" aria-label={`Voir le profil de ${getMemberPublicFirstName(sitter, "ce gardien")}`}>
                 {avatarInner}
               </Link>
             ) : (
@@ -688,11 +688,11 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
             <div className="flex items-center gap-2 flex-wrap">
               {isMemberLinkable(sitter) ? (
                 <Link to={`/gardiens/${app.sitter_id}`} className="text-base font-semibold text-foreground hover:underline">
-                  {getMemberDisplayName(sitter, "Gardien")}
+                  {getMemberPublicFirstName(sitter, "Gardien")}
                 </Link>
               ) : (
                 <span className="text-base font-semibold text-foreground">
-                  {getMemberDisplayName(sitter, "Gardien")}
+                  {getMemberPublicFirstName(sitter, "Gardien")}
                 </span>
               )}
 
