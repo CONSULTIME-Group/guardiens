@@ -695,9 +695,9 @@ export default function PublicSitterProfile() {
 
       setActiveTab(defaultTab);
 
-      // debug removed
+      // Pas de `prerenderReady` ici : à cet instant `loading` vaut encore true
+      // et le DOM ne porte que le squelette. PageMeta est seul maître du drapeau.
 
-      window.prerenderReady = true;
       } catch (e: any) {
         console.error('[PublicSitterProfile] load failed', e);
         setLoadError('error');
