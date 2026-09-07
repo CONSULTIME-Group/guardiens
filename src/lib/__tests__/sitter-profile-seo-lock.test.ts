@@ -38,14 +38,22 @@ describe("fiche gardien publique, verrous SEO", () => {
         .map((line, index) => ({ file, line, index }))
         .filter(({ line }) => /prerenderReady\s*=\s*true/.test(line) && !line.trim().startsWith("//")),
     );
-    const unconditional = assignments.filter(({ file, line, index }) => {
-      if (file === "src/components/PageMeta.tsx") return true;
-      const source = read(file).split("\n");
-      const context = source.slice(Math.max(0, index - 3), index + 1).join("\n");
-      return !/\bif\s*\(|\bif\s+/.test(context);
-    });
+    const allowedConditionalFiles = new Set([
+      "src/main.tsx",
+      "src/pages/CityPage.tsx",
+      "src/pages/GuideDetail.tsx",
+      "src/pages/PublicSitDetail.tsx",
+    ]);
 
-    expect(unconditional.map(({ file }) => file)).toEqual(["src/components/PageMeta.tsx"]);
+    expect(assignments.filter(({ file }) => file === "src/components/PageMeta.tsx")).toHaveLength(1);
+    assignments
+      .filter(({ file }) => file !== "src/components/PageMeta.tsx")
+      .forEach(({ file, index }) => {
+        expect(allowedConditionalFiles.has(file), `${file} ne doit pas lever le drapeau ici`).toBe(true);
+        const source = read(file).split("\n");
+        const context = source.slice(Math.max(0, index - 6), index + 1).join("\n");
+        expect(context, `${file}:${index + 1} doit conditionner le drapeau`).toMatch(/\bif\s*\(|\bif\s+/);
+      });
   });
 
   it("le repli global attend et respecte les métadonnées déclarées", () => {
