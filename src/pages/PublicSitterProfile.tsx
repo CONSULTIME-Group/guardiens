@@ -566,12 +566,15 @@ export default function PublicSitterProfile() {
       if (fetchedPublicProfile) setProfile(fetchedPublicProfile);
       if (fetchedSitterProfile) setSitterProfile(fetchedSitterProfile);
       if (galleryRes.data) setGallery(galleryRes.data);
-      // Visiteur anonyme : seul le NOMBRE de photos est exposé (fonction
-      // security definer), pour l'encart « photos réservées aux membres ».
-      if (!auth?.hasSession) {
+      // Le NOMBRE de photos est toujours chargé, y compris pour un visiteur
+      // anonyme (fonction security definer), car il sert deux usages : l'encart
+      // « photos réservées aux membres » et le calcul d'indexabilité SEO. Les
+      // URLs des photos, elles, ne sont jamais servies à un anonyme.
+      {
         const { data: cnt } = await (supabase as any).rpc("gallery_photo_count", { p_user_id: id });
         setGalleryCount(typeof cnt === "number" ? cnt : 0);
       }
+
       if (fetchedEmergencyProfile) setEmergencyActive(fetchedEmergencyProfile.is_active);
       setHasActiveSubscription(Boolean((subRes as any)?.data));
       setOwnerProfile(fetchedOwnerProfile);
@@ -695,9 +698,9 @@ export default function PublicSitterProfile() {
 
       setActiveTab(defaultTab);
 
-      // debug removed
+      // Pas de `prerenderReady` ici : à cet instant `loading` vaut encore true
+      // et le DOM ne porte que le squelette. PageMeta est seul maître du drapeau.
 
-      window.prerenderReady = true;
       } catch (e: any) {
         console.error('[PublicSitterProfile] load failed', e);
         setLoadError('error');
@@ -1116,7 +1119,10 @@ export default function PublicSitterProfile() {
     bio,
     motivation,
     identityVerified: profile?.identity_verified,
-    galleryCount: gallery.length,
+    // Compte anonyme (RPC gallery_photo_count), jamais gallery.length : la
+    // galerie n'est chargée que pour un membre connecté, donc un bot verrait
+    // toujours 0 et la fiche passerait en noindex à tort.
+    galleryCount,
   });
   const shouldNoindex = !isRichProfile;
 
