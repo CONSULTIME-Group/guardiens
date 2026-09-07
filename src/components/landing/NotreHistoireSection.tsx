@@ -2,6 +2,9 @@ import { useTranslation } from "react-i18next";
 import { RevealSection } from "@/components/ui/RevealSection";
 import notreHistoirePanoramaAvif from "@/assets/story-photo-1104.avif";
 import notreHistoirePanorama from "@/assets/story-photo.webp";
+import notreHistoireMobileAvif from "@/assets/story-photo-736.avif";
+import notreHistoireMobileWebp from "@/assets/story-photo-736.webp";
+
 
 export function NotreHistoireSection() {
   const { t } = useTranslation();
@@ -49,18 +52,21 @@ export function NotreHistoireSection() {
 
         <div className="w-full mt-10 rounded-2xl overflow-hidden">
           <picture>
+            <source media="(max-width: 767px)" type="image/avif" srcSet={notreHistoireMobileAvif} />
+            <source media="(max-width: 767px)" type="image/webp" srcSet={notreHistoireMobileWebp} />
             <source type="image/avif" srcSet={notreHistoirePanoramaAvif} />
             <img
               src={notreHistoirePanorama}
               alt="Photographie panoramique d'une maison de campagne aux volets bleus, illustrant l'esprit du house-sitting Guardiens : on confie ses clés, on est invité dans une vie."
               className="w-full h-48 md:h-64 object-cover object-center"
               loading="lazy"
-              width={1920}
-              height={600}
+              width={1104}
+              height={735}
               decoding="async"
             />
           </picture>
         </div>
+
       </div>
     </section>
   );
