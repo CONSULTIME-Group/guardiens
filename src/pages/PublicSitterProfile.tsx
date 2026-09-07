@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { getMemberAvatarUrl, getMemberDisplayName, getMemberPublicFirstName, getMemberInitial } from "@/lib/memberUtils";
-import { publicFirstName } from "@/lib/displayName";
+import { publicFirstName, capitalizeFirstName } from "@/lib/displayName";
 
 import ProBadge from "@/components/badges/ProBadge";
 import { useParams, Link, useSearchParams, useNavigate } from "react-router-dom";
