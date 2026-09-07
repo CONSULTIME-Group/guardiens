@@ -64,7 +64,7 @@ export function lazyWithRetry<T extends ComponentType<any>>(
   chunkName?: string,
 ) {
   return lazy(async () => {
-    const reloadKey = getReloadKey(chunkName, factory.toString().slice(0, 50));
+    const reloadKey = getReloadKey(chunkName, hashSource(factory.toString()));
 
     try {
       const module = await factory();
