@@ -3,6 +3,13 @@ import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { useAuth } from "@/contexts/AuthContext";
 import { useInAppShell } from "./AppShellContext";
 import UserMenu from "./UserMenu";
@@ -146,23 +153,21 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
   return (
     <>
     <header className="sticky top-0 z-50 max-w-[100vw] overflow-x-clip bg-background/80 backdrop-blur-md border-b border-border/50">
-      <div ref={fixedBarRef} className="flex items-center justify-between gap-2 px-[5%] md:px-[8%] py-4">
-        <Link to="/" aria-label="Guardiens, accueil" className="inline-flex min-h-[44px] items-center min-w-0 shrink font-heading text-xl md:text-2xl font-bold">
+      <div ref={fixedBarRef} className="flex items-center justify-between gap-2 px-4 py-4 sm:px-6 lg:grid lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:gap-x-8 lg:px-6 xl:px-8 2xl:px-[5%]">
+        <Link to="/" aria-label="Guardiens, accueil" className="inline-flex min-h-[44px] items-center min-w-0 shrink-0 font-heading text-xl md:text-2xl font-bold">
           <span aria-hidden="true"><span className="text-primary">g</span>uardiens</span>
         </Link>
 
 
-        {/* Navigation complète, visible à partir de 1400 px : en dessous,
-            la marque et les liens se touchaient (mesuré à 1254 px, huit
-            pixels d'écart), on passe au menu burger. */}
-        <nav className="hidden min-[1400px]:flex gap-1 items-center">
+        {/* Les trois zones gardent chacune leur place dès le format ordinateur. */}
+        <nav aria-label="Navigation principale" className="hidden lg:flex min-w-0 items-center justify-self-center gap-0 xl:gap-1">
           {NAV_DEFS.map((l) => (
             <Button
               key={l.to}
               variant="ghost"
               size="sm"
               onClick={() => navigate(l.to)}
-              className={`min-h-11 ${isActive(l.to) ? "text-primary font-semibold" : ""}`}
+              className={`min-h-11 whitespace-nowrap px-1.5 text-xs xl:px-2 xl:text-sm 2xl:px-3 ${isActive(l.to) ? "text-primary font-semibold" : ""}`}
               aria-current={isActive(l.to) ? "page" : undefined}
             >
               {t(`nav.${l.key}`)}
@@ -173,11 +178,14 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
               )}
             </Button>
           ))}
+        </nav>
+
+        <div className="hidden lg:flex shrink-0 items-center justify-self-end gap-0 xl:gap-1">
           {!authChecked ? (
-            <div className="h-8 w-40 rounded-md bg-muted/40 animate-pulse" aria-hidden="true" />
+            <div className="h-8 w-36 rounded-md bg-muted/40 animate-pulse" aria-hidden="true" />
           ) : hasSession ? (
             <>
-              <Button size="sm" className="min-h-11" onClick={() => navigate("/dashboard")}>
+              <Button size="sm" className="min-h-11 whitespace-nowrap px-2 xl:px-3" onClick={() => navigate("/dashboard")}>
                 {t("nav.my_space")}
               </Button>
               {!isCompact && bells}
@@ -185,117 +193,100 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
             </>
           ) : (
             <>
-              <Button variant="ghost" size="sm" className="min-h-11" onClick={() => navigate("/login")}>
+              <Button variant="ghost" size="sm" className="min-h-11 whitespace-nowrap px-2 text-xs xl:px-3 xl:text-sm" onClick={() => navigate("/login")}>
                 {t("nav.login")}
               </Button>
-              <Button size="sm" className="min-h-11" onClick={() => navigate("/inscription")}>
+              <Button size="sm" className="min-h-11 whitespace-nowrap px-2 text-xs xl:px-3 xl:text-sm" onClick={() => navigate("/inscription")}>
                 {t("nav.register")}
               </Button>
             </>
           )}
-        </nav>
+        </div>
 
-        {/* Vue compacte : barre strictement allégée. Sous 1400 px, seuls
-            le logo et le burger (plus l'avatar d'un connecté) restent dans
-            l'en tête. Connexion et création de compte vivent dans le
-            panneau du menu, sinon le cluster déborde du viewport. */}
-        <div className="flex min-[1400px]:hidden shrink-0 items-center gap-1">
+        <div className="flex lg:hidden shrink-0 items-center gap-1">
           {!authChecked ? (
             <div className="h-9 w-9 rounded-md bg-muted/40 animate-pulse" aria-hidden="true" />
           ) : hasSession ? (
             <UserMenu compact />
           ) : null}
 
-          <Button
-            size="icon"
-            variant="ghost"
-            onClick={() => setOpen(!open)}
-            aria-label={
-              hasSession && hasUnread
-                ? `${t("nav.menu")}, ${t("nav.unread_items")}`
-                : t("nav.menu")
-            }
-            aria-expanded={open}
-            className="relative min-h-11 min-w-11"
-          >
-            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            {hasSession && hasUnread && !open && (
-              <span
-                aria-hidden="true"
-                className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-primary"
-              />
-            )}
-          </Button>
+          <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild>
+              <Button
+                size="icon"
+                variant="ghost"
+                aria-label={hasSession && hasUnread ? `${t("nav.menu")}, ${t("nav.unread_items")}` : `${t("nav.menu")}, ouvrir la navigation`}
+                aria-expanded={open}
+                className="relative h-11 w-11 min-h-11 min-w-11"
+              >
+                <Menu className="h-5 w-5" />
+                {hasSession && hasUnread && (
+                  <span aria-hidden="true" className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-primary" />
+                )}
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[min(88vw,24rem)] border-primary/20 bg-background p-0 [&>button]:hidden">
+              <div className="flex min-h-full flex-col px-6 pb-8 pt-6">
+                <div className="flex min-h-11 items-center justify-between border-b border-border pb-4">
+                  <SheetTitle className="font-heading text-2xl font-bold">Navigation</SheetTitle>
+                  <SheetClose asChild>
+                    <Button variant="ghost" size="icon" className="h-11 w-11" aria-label="Fermer la navigation">
+                      <X className="h-5 w-5" />
+                    </Button>
+                  </SheetClose>
+                </div>
+
+                <nav aria-label="Navigation mobile" className="flex flex-1 flex-col py-5 font-body">
+                  {NAV_DEFS.map((l) => (
+                    <SheetClose asChild key={l.to}>
+                      <Link
+                        to={l.to}
+                        aria-current={isActive(l.to) ? "page" : undefined}
+                        className={`flex min-h-12 items-center rounded-md px-3 text-base font-medium transition-colors ${
+                          isActive(l.to) ? "bg-primary/10 text-primary font-semibold" : "text-foreground hover:bg-accent"
+                        }`}
+                      >
+                        {t(`nav.${l.key}`)}
+                        {l.beta && (
+                          <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-amber-800">
+                            {t("nav.beta")}
+                          </span>
+                        )}
+                      </Link>
+                    </SheetClose>
+                  ))}
+
+                  <div className="mt-auto border-t border-border pt-5">
+                    {!authChecked ? (
+                      <div className="h-12 w-full rounded-md bg-muted/40 animate-pulse" aria-hidden="true" />
+                    ) : hasSession ? (
+                      <SheetClose asChild>
+                        <Button className="min-h-12 w-full" onClick={() => navigate("/dashboard")}>
+                          {t("nav.my_space")}
+                        </Button>
+                      </SheetClose>
+                    ) : (
+                      <div className="space-y-3">
+                        <SheetClose asChild>
+                          <Button variant="outline" className="min-h-12 w-full" onClick={() => navigate("/login")}>
+                            {t("nav.login")}
+                          </Button>
+                        </SheetClose>
+                        <SheetClose asChild>
+                          <Button className="min-h-12 w-full" onClick={() => navigate("/inscription")}>
+                            {t("nav.register")}
+                          </Button>
+                        </SheetClose>
+                      </div>
+                    )}
+                    {isCompact && showBells && <div className="mt-4 flex items-center justify-center gap-2">{bells}</div>}
+                  </div>
+                </nav>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
-
-      {/* Panneau du menu burger, ouvert uniquement sous 1400 px. */}
-      {open && (
-        <nav className="min-[1400px]:hidden border-t border-border bg-background px-[5%] py-4 space-y-1 animate-in slide-in-from-top-2 duration-200">
-          {/* Actions de compte remontées en haut du panneau : elles ont quitté
-              l'en tête mobile, qui ne peut plus les accueillir. */}
-          {!authChecked ? (
-            <div className="h-9 w-full rounded-md bg-muted/40 animate-pulse" aria-hidden="true" />
-          ) : !hasSession ? (
-            <div className="pb-3 mb-2 border-b border-border space-y-2">
-              <Button
-                className="w-full min-h-11"
-                size="sm"
-                onClick={() => { setOpen(false); navigate("/inscription"); }}
-              >
-                {t("nav.register")}
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full min-h-11"
-                size="sm"
-                onClick={() => { setOpen(false); navigate("/login"); }}
-              >
-                {t("nav.login")}
-              </Button>
-            </div>
-          ) : null}
-          {NAV_DEFS.map((l) => (
-            <Link
-              key={l.to}
-              to={l.to}
-              onClick={() => setOpen(false)}
-              aria-current={isActive(l.to) ? "page" : undefined}
-              className={`block py-2.5 px-3 rounded-lg text-sm font-medium transition-colors min-h-[44px] ${
-                isActive(l.to)
-                  ? "text-primary bg-primary/5 font-semibold"
-                  : "text-foreground hover:bg-accent"
-              }`}
-            >
-              {t(`nav.${l.key}`)}
-              {l.beta && (
-                <span className="ml-1.5 text-[9px] uppercase tracking-wider font-bold bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded">
-                  {t("nav.beta")}
-                </span>
-              )}
-            </Link>
-          ))}
-          {authChecked && hasSession && (
-            <div className="pt-2 border-t border-border space-y-2">
-              <Button className="w-full" size="sm" onClick={() => { setOpen(false); navigate("/dashboard"); }}>
-                {t("nav.my_space")}
-              </Button>
-            </div>
-          )}
-        </nav>
-      )}
-
-
-      {/* Messagerie et notifications sur mobile : montées en
-          permanence (une seule instance dans tout le composant) pour
-          alimenter la pastille du burger, visibles uniquement menu ouvert. */}
-      {isCompact && showBells && (
-        <div
-          className={`min-[1400px]:hidden items-center gap-1 border-t border-border bg-background px-[5%] py-3 ${open ? "flex" : "hidden"}`}
-        >
-          {bells}
-        </div>
-      )}
     </header>
     </>
   );
