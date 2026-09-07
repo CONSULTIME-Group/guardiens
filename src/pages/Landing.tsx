@@ -369,8 +369,8 @@ const Landing = () => {
         aria-label={t("landing.toc.aria")}
         className="border-b border-border/60 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60"
       >
-        <div className="lp-wide">
-          <ul className="flex flex-wrap items-center justify-center gap-1 py-2.5">
+        <div className="overflow-x-auto px-4 md:px-0">
+          <ul className="mx-auto flex w-max items-center justify-center gap-1 py-2.5 md:w-auto">
             {(() => {
               const items = [
                 { href: "#usages", label: t("landing.toc.care_aid") },

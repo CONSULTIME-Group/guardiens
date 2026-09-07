@@ -28,9 +28,9 @@ export default function AffinityDemoCard() {
   ];
 
   return (
-    <div id="matching" ref={ref} className="scroll-mt-24 mt-12 md:mt-20 grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+    <div id="matching" ref={ref} className="scroll-mt-24 mt-7 md:mt-9">
       <div>
-        <ul className="space-y-3">
+        <ul className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {bullets.map((b, i) => (
             <li key={i} className="flex gap-3 text-foreground/85">
               <CheckCircle2 className="w-5 h-5 mt-0.5 text-primary shrink-0" aria-hidden="true" />
@@ -38,7 +38,7 @@ export default function AffinityDemoCard() {
             </li>
           ))}
         </ul>
-        <div className="mt-8">
+        <div className="mt-5">
           <Link
             to="/a-propos#affinite"
             onClick={() =>
@@ -46,14 +46,14 @@ export default function AffinityDemoCard() {
                 metadata: { destination: "/a-propos#affinite" },
               })
             }
-            className="inline-flex items-center gap-2 rounded-full px-6 py-3 border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-colors font-body text-sm"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-full px-6 py-3 border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-colors font-body text-sm"
           >
             {t("landing.affinity.cta")}
           </Link>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-border bg-card p-6 md:p-8 shadow-sm">
+      <div className="mt-7 w-full rounded-2xl border border-border bg-card p-6 md:p-8 shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <span className="font-body text-xs uppercase tracking-widest text-foreground/75">
             {t("landing.affinity.demo_label")}

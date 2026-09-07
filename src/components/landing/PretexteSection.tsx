@@ -71,20 +71,19 @@ export function PretexteSection() {
         </RevealSection>
       </div>
 
-      {/* Illustration peinte des toits du quartier : frise hors colonne de
-          lecture, posée à ras du bord bas comme ligne d'horizon du bloc,
-          plafonnée à 1280px sur grand écran. */}
-      <div className="relative mx-auto mt-[52px] md:mt-16 w-full max-w-[1280px]">
+      {/* Illustration peinte des toits du quartier : accent fondu dans le
+          fond, posé à ras du bord bas. */}
+      <div className="relative mx-auto mt-7 md:mt-9 w-full max-w-[820px]">
         <img
           src={rooftops1600}
           srcSet={`${rooftops800} 800w, ${rooftops1600} 1600w`}
-          sizes="(max-width: 1280px) 100vw, 1280px"
+          sizes="(max-width: 819px) 100vw, 820px"
           alt="Illustration à la gouache d'une rangée de maisons de village aux toits de tuiles, quelques fenêtres allumées et un arbre."
           width={1600}
           height={415}
           loading="lazy"
           decoding="async"
-          className="block w-full h-auto"
+          className="block w-full h-auto opacity-55 [mask-image:linear-gradient(to_right,transparent_0%,black_14%,black_86%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_right,transparent_0%,black_14%,black_86%,transparent_100%)]"
         />
       </div>
     </section>

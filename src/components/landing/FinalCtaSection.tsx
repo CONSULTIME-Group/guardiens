@@ -17,13 +17,13 @@ export function FinalCtaSection() {
         <img
           src={maison900}
           srcSet={`${maison450} 450w, ${maison900} 900w`}
-          sizes="(max-width: 767px) 200px, 260px"
+          sizes="(max-width: 767px) 110px, 140px"
           alt="Illustration à la gouache d'une maison de village aux volets clairs, une fenêtre allumée et un buisson près de la porte."
           width={900}
           height={773}
           loading="lazy"
           decoding="async"
-          className="mx-auto mb-10 md:mb-12 block w-[200px] md:w-[260px] h-auto"
+          className="mx-auto mb-5 md:mb-6 block w-[110px] md:w-[140px] h-auto opacity-85 [mask-image:linear-gradient(to_bottom,black_78%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_bottom,black_78%,transparent_100%)]"
         />
         <h2 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-6">
           {t("landing.final.title")}
