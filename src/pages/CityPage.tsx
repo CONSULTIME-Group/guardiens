@@ -47,6 +47,8 @@ import { buildNearbyMention } from "@/lib/cityProximity";
 import { trackEvent } from "@/lib/analytics";
 import { useContentStats } from "@/hooks/useContentStats";
 import { interpolatePlaceholders } from "@/lib/contentPlaceholders";
+import { slugify } from "@/lib/normalize";
+import { useDepartmentPageExists } from "@/hooks/useDepartmentPageExists";
 
 const CityPage = () => {
  const { slug } = useParams<{ slug: string }>();
@@ -54,6 +56,11 @@ const CityPage = () => {
 
  // Try static city data first
  const cityData = CITIES.find((c) => c.slug === slug);
+
+ // Lien département : slug normalisé via slugify (accents retirés), rendu
+ // uniquement si la page département publiée existe (sinon 404 crawlable).
+ const departmentSlug = cityData?.department ? slugify(cityData.department) : null;
+ const departmentPageExists = useDepartmentPageExists(departmentSlug);
 
  // Fallback: fetch from seo_city_pages if not in static data
  const { data: dbPage, isLoading: dbLoading } = useQuery({
@@ -295,7 +302,7 @@ const CityPage = () => {
  return (
  <>
   <CityPageMeta city={cityData} ready={!contentStatsLoading} />
-  <CitySchemaOrg city={cityData} stats={stats} />
+  <CitySchemaOrg city={cityData} stats={stats} departmentSlug={departmentPageExists ? departmentSlug : null} />
 
  {(() => {
  const cityKey = cityData.slug;
@@ -312,9 +319,10 @@ const CityPage = () => {
   ? `${stats.guardiansCount} gardien${stats.guardiansCount > 1 ? "s" : ""} inscrit${stats.guardiansCount > 1 ? "s" : ""} ${departmentIn(cityData.department)} · Gratuit pour les propriétaires`
   : `Gardiens inscrits ${departmentIn(cityData.department)} · Gratuit pour les propriétaires`)
  }
- heroAlt={cityData.heroImageAlt || `House-sitting à ${cityData.name}`}
- department={cityData.department}
- />
+  heroAlt={cityData.heroImageAlt || `House-sitting à ${cityData.name}`}
+  department={cityData.department}
+  departmentSlug={departmentPageExists ? departmentSlug ?? undefined : undefined}
+  />
  );
  }
 
@@ -555,12 +563,14 @@ const CityPage = () => {
  <Link to={`/guides/${cityData.slug}`} className="text-primary hover:underline">
  Guide local de {cityData.name} →
  </Link>
- <Link
- to={`/departement/${cityData.department.toLowerCase().replace(/\s+/g, "-").replace(/'/g, "")}`}
- className="text-primary hover:underline"
- >
- House-sitting {departmentIn(cityData.department)} →
- </Link>
+  {departmentPageExists && departmentSlug && (
+  <Link
+  to={`/departement/${departmentSlug}`}
+  className="text-primary hover:underline"
+  >
+  House-sitting {departmentIn(cityData.department)} →
+  </Link>
+  )}
  <Link to="/guides" className="text-primary hover:underline">Tous les guides locaux →</Link>
  <Link to="/tarifs" className="text-primary hover:underline">Voir les tarifs →</Link>
  <Link to="/gardien-urgence" className="text-primary hover:underline">Gardiens d'urgence →</Link>

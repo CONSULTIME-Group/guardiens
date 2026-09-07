@@ -1,10 +1,12 @@
 import type { CityData } from "@/data/cities";
 import type { CityStats } from "@/hooks/useCityStats";
-import { slugify } from "@/lib/normalize";
 
 interface Props {
  city: CityData;
  stats: CityStats;
+ // Slug département vérifié (page publiée existante). Si absent, l'élément
+ // département est omis du BreadcrumbList pour éviter une URL en 404.
+ departmentSlug?: string | null;
 }
 
 const LYON_FAQ = [
@@ -141,7 +143,7 @@ const FAQ_BY_SLUG: Record<string, Array<{ q: string; a: string }>> = {
  chambery: CHAMBERY_FAQ,
 };
 
-const CitySchemaOrg = ({ city }: Props) => {
+const CitySchemaOrg = ({ city, departmentSlug }: Props) => {
  const isLyon = city.slug === "lyon";
  const faqItems = FAQ_BY_SLUG[city.slug] || DEFAULT_FAQ(city.name);
 
@@ -183,17 +185,17 @@ const CitySchemaOrg = ({ city }: Props) => {
  name: "Accueil",
  item: "https://guardiens.fr",
  },
- {
- "@type": "ListItem",
- position: 2,
- name: city.department,
- // Slug département dérivé du nom (ex: "Haute-Savoie" → "haute-savoie",
- // "Puy-de-Dôme" → "puy-de-dome"). Cohérent avec /departement/:slug.
- item: `https://guardiens.fr/departement/${slugify(city.department)}`,
- },
- {
- "@type": "ListItem",
- position: 3,
+  ...(departmentSlug
+  ? [{
+  "@type": "ListItem",
+  position: 2,
+  name: city.department,
+  item: `https://guardiens.fr/departement/${departmentSlug}`,
+  }]
+  : []),
+  {
+  "@type": "ListItem",
+  position: departmentSlug ? 3 : 2,
  name: isLyon
  ? "Garde chien et chat Lyon"
  : `House-sitting à ${city.name}`,
