@@ -28,7 +28,7 @@ export function PretexteSection() {
     >
       {/* Grain de papier à 4 % sur le grand aplat sombre. */}
       <GrainOverlay />
-      <div className="relative lp-read py-[52px] md:py-24">
+      <div className="relative lp-read pt-[52px] pb-0 md:pt-24">
         <RevealSection>
           <p className="flex items-center justify-center gap-2 font-body text-xs tracking-[0.2em] uppercase text-terra-soft mb-6">
             <span className="inline-block w-5 h-0.5 bg-terra align-middle" aria-hidden="true" />
@@ -68,21 +68,24 @@ export function PretexteSection() {
               {t("landing.pretexte.cta")} <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
-
-          {/* Illustration peinte des toits du quartier : frise large et
-              discrète posée en bas du bloc, jamais devant le texte. */}
-          <img
-            src={rooftops1600}
-            srcSet={`${rooftops800} 800w, ${rooftops1600} 1600w`}
-            sizes="(max-width: 767px) 100vw, 1024px"
-            alt="Illustration à la gouache d'une rangée de maisons de village aux toits de tuiles, quelques fenêtres allumées et un arbre."
-            width={1600}
-            height={415}
-            loading="lazy"
-            decoding="async"
-            className="mt-[52px] md:mt-16 block w-full h-auto"
-          />
         </RevealSection>
+      </div>
+
+      {/* Illustration peinte des toits du quartier : frise hors colonne de
+          lecture, posée à ras du bord bas comme ligne d'horizon du bloc,
+          plafonnée à 1280px sur grand écran. */}
+      <div className="relative mx-auto mt-[52px] md:mt-16 w-full max-w-[1280px]">
+        <img
+          src={rooftops1600}
+          srcSet={`${rooftops800} 800w, ${rooftops1600} 1600w`}
+          sizes="(max-width: 1280px) 100vw, 1280px"
+          alt="Illustration à la gouache d'une rangée de maisons de village aux toits de tuiles, quelques fenêtres allumées et un arbre."
+          width={1600}
+          height={415}
+          loading="lazy"
+          decoding="async"
+          className="block w-full h-auto"
+        />
       </div>
     </section>
   );
