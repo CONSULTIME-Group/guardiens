@@ -60,11 +60,41 @@ describe("fiche gardien publique, verrous SEO", () => {
     const main = read("src/main.tsx");
     expect(main).toMatch(/if\s*\(window\.prerenderMetaPending\)\s*return/);
     expect(main).toMatch(/setTimeout\(markPrerenderReady,\s*10000\)/);
+    expect(main).toContain("LATE_META_PATH_PREFIXES");
+    expect(main).toMatch(/LATE_META_PATH_PREFIXES\s*=\s*\[[\s\S]{0,300}"\/gardiens\/"/);
     expect(read(PAGE)).toContain("window.prerenderMetaPending = true");
     expect(read("src/components/PageMeta.tsx")).toMatch(
       /prerenderMetaPending\s*=\s*false;[\s\S]{0,100}prerenderReady\s*=\s*true/,
     );
   });
+
+  it("le verrou est posé avant tout return conditionnel du composant", () => {
+    const src = read(PAGE);
+    const componentStart = src.indexOf("export default function PublicSitterProfile()");
+    expect(componentStart).toBeGreaterThan(-1);
+    const body = src.slice(componentStart);
+    const lockIndex = body.indexOf("window.prerenderMetaPending = true");
+    const firstReturn = body.search(/\n\s{2}return\s*\(/);
+    expect(lockIndex).toBeGreaterThan(-1);
+    expect(firstReturn).toBeGreaterThan(-1);
+    expect(
+      lockIndex,
+      "le verrou doit être posé au premier rendu, avant le squelette",
+    ).toBeLessThan(firstReturn);
+  });
+
+  it("le verrou est relâché sur la branche d'erreur et au démontage", () => {
+    const src = read(PAGE);
+    const errorBranch = src.slice(src.indexOf("if (loadError === 'error')"));
+    const block = errorBranch.slice(0, errorBranch.indexOf("if (!profile"));
+    expect(block, "la branche d'erreur doit monter un PageMeta en noindex").toContain("<PageMeta");
+    expect(block).toContain("noindex");
+    expect(
+      src,
+      "le démontage doit relâcher le verrou",
+    ).toMatch(/return\s*\(\)\s*=>\s*\{[\s\S]{0,200}prerenderMetaPending\s*=\s*false/);
+  });
+
 
   it("l'indexabilité ne lit pas la galerie chargée sous condition de session", () => {
     const src = read(PAGE);

@@ -37,6 +37,22 @@ if (!container) {
   throw new Error("Élément #root introuvable dans le DOM");
 }
 
+// Routes lazy qui écrivent leurs métadonnées tardivement (après un chargement
+// de données). Le verrou est posé ici, avant le rendu, car le chunk de la
+// route peut arriver après le délai du repli global sur réseau dégradé.
+// Liste volontairement courte et explicite, à compléter route par route.
+const LATE_META_PATH_PREFIXES = [
+  "/gardiens/", // fiche gardien publique, PublicSitterProfile
+];
+
+if (typeof window !== "undefined") {
+  const path = window.location.pathname;
+  if (LATE_META_PATH_PREFIXES.some((prefix) => path.startsWith(prefix))) {
+    window.prerenderMetaPending = true;
+    window.prerenderReady = false;
+  }
+}
+
 // Guardiens est monolingue français : le seul dictionnaire (fr) est importé
 // statiquement par i18next à l'init, il n'y a plus rien à précharger avant le
 // premier rendu. Le repli des anciennes URL `?lang=xx` est géré par
