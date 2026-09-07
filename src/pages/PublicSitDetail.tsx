@@ -36,6 +36,7 @@ import {
   TYPE_LABELS as typeLabels,
 } from "@/components/sits/shared/sitConstants";
 import { petSpeciesLabelLower } from "@/lib/petLabels";
+import { publicFirstName } from "@/lib/displayName";
 
 type ViewerType = "anonymous" | "gardien" | "proprio" | "owner_of_sit" | "admin";
 
@@ -461,7 +462,8 @@ const PublicSitDetail = () => {
  const truncatedDesc = ogDescription.length > 200 ? ogDescription.slice(0, 197) + "…" : ogDescription;
 
  // SEO description (≤160 char), distincte de og:description
-  const seoDescription = `Garde à ${cityForTitle} ${datesShort}. ${petsSummary}. ${owner?.first_name || "Un membre"} cherche un gardien du coin sur Guardiens, inscription gratuite pour les propriétaires.`;
+ const ownerFirstName = publicFirstName(owner?.first_name);
+ const seoDescription = `Garde à ${cityForTitle} ${datesShort}. ${petsSummary}. ${ownerFirstName || "Un membre"} cherche un gardien du coin sur Guardiens, inscription gratuite pour les propriétaires.`;
  const truncatedSeoDesc = seoDescription.length > 160 ? seoDescription.slice(0, 157) + "…" : seoDescription;
 
   // Canonical TOUJOURS sur le domaine de prod : sur preview/lovableproject,
@@ -488,7 +490,7 @@ const PublicSitDetail = () => {
  serviceType: ["House Sitting", "Pet Sitting"],
  provider: {
  "@type": "Person",
- name: owner?.first_name || "Membre Guardiens",
+ name: ownerFirstName || "Membre Guardiens",
  ...(owner?.identity_verified && {
    hasCredential: {
      "@type": "EducationalOccupationalCredential",
@@ -717,7 +719,7 @@ const PublicSitDetail = () => {
           onOpenChange={setApplyOpen}
           sitId={sit.id}
           ownerId={sit.user_id}
-          ownerFirstName={owner?.first_name || ""}
+          ownerFirstName={ownerFirstName}
           petNames={pets.map((p: any) => p.name)}
           city={sitCity}
           startDate={formatDate(sit.start_date)}
