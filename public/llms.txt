@@ -1,8 +1,8 @@
 # Guardiens
 
-> Plateforme de garde d'animaux à domicile, de maison et de jardin en France. Mise en relation entre propriétaires d'animaux et gardiens de confiance habitant près de chez vous, sans frais cachés et sans transaction financière entre membres.
+> Plateforme de garde d'animaux à domicile, de maison et de jardin en France. Mise en relation entre propriétaires d'animaux et gardiens de confiance habitant près de chez vous, avec un prix affiché et un échange de services entre membres, sans flux d'argent.
 
-L'accès à Guardiens est ouvert pendant la phase de lancement : vous accédez à tout, sans limite, sans engagement. Toute évolution tarifaire sera annoncée à l'avance. L'entraide entre membres (petites missions du quotidien : promenade, visite, dépannage) repose sur un service rendu en échange d'un autre service, et n'inclut jamais de nuitée.
+L'accès à Guardiens est ouvert pendant la phase de lancement : vous accédez à l'ensemble des fonctionnalités, et vous restez libre à tout moment. Toute évolution tarifaire sera annoncée à l'avance. L'entraide entre membres (petites missions du quotidien : promenade, visite, dépannage) repose sur un service rendu en échange d'un autre service, et n'inclut jamais de nuitée.
 
 ## Pages principales
 
@@ -44,7 +44,7 @@ L'accès à Guardiens est ouvert pendant la phase de lancement : vous accédez �
 
 - Plateforme : Guardiens, garde d'animaux à domicile, de maison et de jardin en France.
 - Éditeur : Jérémie Martinot, SIRET 894 864 040 00015.
-- Modèle : accès ouvert à tous les membres pendant la phase de lancement, sans commission ni frais cachés.
+- Modèle : accès ouvert à tous les membres pendant la phase de lancement, avec un prix affiché et aucune commission prélevée sur les gardes.
 - Engagement de service : l'accès reste ouvert tant que nous ne sommes pas satisfaits du service que nous vous offrons. Toute évolution tarifaire sera annoncée à l'avance.
 - Préavis : chaque membre sera informé par email 30 jours à l'avance si le modèle change.
 - Entraide entre membres (petites missions du quotidien) : un service contre un service, ni tarif ni facture, sans nuitée.

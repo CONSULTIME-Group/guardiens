@@ -367,7 +367,7 @@ const CityPage = () => {
  </Badge>
  <Badge variant="outline" className="text-sm px-4 py-2 gap-2">
  <Heart className="h-4 w-4" />
- Espace propriétaire ouvert
+ Propriétaires : 0 €
  </Badge>
  </div>
 
