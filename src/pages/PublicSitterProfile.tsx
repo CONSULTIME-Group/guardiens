@@ -566,12 +566,15 @@ export default function PublicSitterProfile() {
       if (fetchedPublicProfile) setProfile(fetchedPublicProfile);
       if (fetchedSitterProfile) setSitterProfile(fetchedSitterProfile);
       if (galleryRes.data) setGallery(galleryRes.data);
-      // Visiteur anonyme : seul le NOMBRE de photos est exposé (fonction
-      // security definer), pour l'encart « photos réservées aux membres ».
-      if (!auth?.hasSession) {
+      // Le NOMBRE de photos est toujours chargé, y compris pour un visiteur
+      // anonyme (fonction security definer), car il sert deux usages : l'encart
+      // « photos réservées aux membres » et le calcul d'indexabilité SEO. Les
+      // URLs des photos, elles, ne sont jamais servies à un anonyme.
+      {
         const { data: cnt } = await (supabase as any).rpc("gallery_photo_count", { p_user_id: id });
         setGalleryCount(typeof cnt === "number" ? cnt : 0);
       }
+
       if (fetchedEmergencyProfile) setEmergencyActive(fetchedEmergencyProfile.is_active);
       setHasActiveSubscription(Boolean((subRes as any)?.data));
       setOwnerProfile(fetchedOwnerProfile);
