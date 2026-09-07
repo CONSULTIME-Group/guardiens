@@ -338,8 +338,27 @@ Deno.serve(async (req) => {
     const clearedIds: string[] = [];
     let urlsOk = 0;
     let urlsFailed = 0;
+    let articlesDeferred = 0;
+
+    // Priorité 1 à 3 : pages villes, guides, départements. Elles passent avant
+    // les articles et les fiches gardien quand la file est pleine.
+    const programmaticMetrics: Record<string, unknown> = {};
+    for (const source of PROGRAMMATIC_SOURCES) {
+      const m = await processProgrammatic(sb, PRERENDER_TOKEN, source, logRows);
+      urlsOk += m.recached;
+      urlsFailed += m.failed;
+      programmaticMetrics[`${source.key}_scanned`] = m.scanned;
+      programmaticMetrics[`${source.key}_recached`] = m.recached;
+      programmaticMetrics[`${source.key}_skipped_noindex`] = m.skipped_noindex;
+      programmaticMetrics[`${source.key}_failed`] = m.failed;
+      programmaticMetrics[`${source.key}_deferred`] = m.deferred;
+    }
 
     for (const a of articles) {
+      if (urlsOk >= 0 && clearedIds.length >= ARTICLE_RENDER_BUDGET) {
+        articlesDeferred += 1;
+        continue;
+      }
       const base = a.canonical_url && a.canonical_url.startsWith("http")
         ? a.canonical_url
         : `${SITE}/actualites/${a.slug}`;
@@ -371,6 +390,7 @@ Deno.serve(async (req) => {
     const sitterMetrics = await processSitters(sb, PRERENDER_TOKEN, logRows);
     urlsFailed += sitterMetrics.sitters_failed;
     urlsOk += sitterMetrics.sitters_recached;
+
 
     if (logRows.length > 0) {
       await sb.from("prerender_recache_log").insert(logRows);
