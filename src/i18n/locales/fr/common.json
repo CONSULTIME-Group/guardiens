@@ -171,18 +171,13 @@
     "story": {
       "eyebrow": "Notre histoire",
       "title": "Tout a commencé avec un visa.",
-      "p1": "Elisa est arrivée d'Argentine avec un visa qui ne lui permettait pas de travailler.",
-      "p2": "Elle gardait des animaux. Elle rentrait avec des histoires. Des gens qui ouvraient leur porte sans calcul, leur vie sans condition.",
+      "p1": "Elisa est arrivée d'Argentine avec un visa qui ne lui permettait pas de travailler. Elle a commencé à garder des animaux. Elle rentrait avec des histoires : des gens qui ouvraient leur porte sans calcul, leur vie sans condition.",
       "quote_lead": "Un soir un propriétaire lui a dit :",
       "quote": "\"Et si tu restais chez nous pendant qu'on part ?\"",
-      "p3": "On a gardé 37 maisons en cinq ans.",
-      "p4": "Géraldine, l'irlandaise de 77 ans aux cheveux rouge fluo à Passy, avec son perroquet Coco et ses deux chiens sur le pas de la porte.",
-      "p5": "Rio à Collonges, le chien joueur infatigable chez qui on est retournés six fois.",
-      "p6": "Et puis Briord. Les clés de la maison. Les clés de la Triumph. Les clés du bateau. Les clés de la BM. Des gens qu'on ne connaissait pas trois semaines avant.",
-      "p7": "On ne gardait pas des maisons. On collectionnait des vies.",
-      "p8": "Un soir chez Helen, Stanley qui aboyait, Rafa couché sur nos pieds, la vue sur le Mont-Blanc. On s'est dit : pourquoi il n'y a pas plus de monde qui fait ça ?",
-      "p9": "C'est pour ça qu'on a construit Guardiens.",
-      "p10": "Votre jardin contre un repas. Vos clés contre une histoire. Des gens du coin qui se font confiance, et parfois des amis pour la vie.",
+      "p2": "On a gardé 37 maisons en cinq ans. Géraldine et son perroquet Coco à Passy. Rio le chien infatigable à Collonges. Briord, avec les clés de la maison, de la Triumph, du bateau, de la BM.",
+      "p3": "On ne gardait pas des maisons. On collectionnait des vies.",
+      "p4": "Un soir chez Helen, Stanley qui aboyait, Rafa couché sur nos pieds, la vue sur le Mont-Blanc. On s'est dit : pourquoi il n'y a pas plus de monde qui fait ça ?",
+      "p5": "C'est pour ça qu'on a construit Guardiens. Votre jardin contre un repas. Vos clés contre une histoire. Des gens du coin qui se font confiance, et parfois des amis pour la vie.",
       "signature": "Jérémie et Elisa"
     },
     "cities": {
