@@ -7,6 +7,7 @@ import type {
   AffinityOwnerInput,
   AffinitySitterInput,
 } from "@/lib/affinityScore";
+import { publicFirstName } from "@/lib/displayName";
 
 interface Sitter {
   id: string;
@@ -23,7 +24,8 @@ interface SitterCardProps {
 }
 
 const SitterCard = ({ sitter, fallbackLabel, viewerOwnerContext }: SitterCardProps) => {
-  const initials = (sitter.first_name ?? fallbackLabel)[0]?.toUpperCase() ?? "?";
+  const firstName = publicFirstName(sitter.first_name) || fallbackLabel;
+  const initials = firstName[0]?.toUpperCase() ?? "?";
 
   const { full: affinity, displayed: affinityDisplayed } = useAffinityWithShadow(
     viewerOwnerContext ?? null,
@@ -56,7 +58,7 @@ const SitterCard = ({ sitter, fallbackLabel, viewerOwnerContext }: SitterCardPro
           to={`/gardiens/${sitter.id}`}
           className="block text-sm font-medium text-foreground hover:text-primary transition-colors truncate leading-snug"
         >
-          <span className="capitalize">{sitter.first_name ?? fallbackLabel}</span>
+          <span className="capitalize">{firstName}</span>
         </Link>
         {sitter.city && (
           <p className="text-xs text-muted-foreground truncate mt-0.5">{sitter.city}</p>

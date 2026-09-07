@@ -30,6 +30,7 @@ import AlmaBubble from "@/components/ai/alma/AlmaBubble";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
 import { detectRestrictionInText } from "@/lib/detectRestriction";
+import { publicFirstName } from "@/lib/displayName";
 import AffinityBadge from "@/components/matching/AffinityBadge";
 import { computeAffinityResultFull, type AffinityOwnerInput, type AffinitySitterInput, type AffinityResult } from "@/lib/affinityScore";
 
@@ -564,12 +565,12 @@ const ApplicationModal = ({
                 <Avatar className="h-11 w-11">
                   <AvatarImage src={p?.avatar_url} />
                   <AvatarFallback className="font-semibold bg-primary/10 text-primary">
-                    {p?.first_name?.charAt(0) || "?"}
+                    {publicFirstName(p?.first_name).charAt(0) || "?"}
                   </AvatarFallback>
                 </Avatar>
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <span className="font-medium text-sm">{p?.first_name}</span>
+                    <span className="font-medium text-sm">{publicFirstName(p?.first_name)}</span>
                     {p?.identity_verified && (
                       <Shield className="h-3.5 w-3.5 text-primary" />
                     )}

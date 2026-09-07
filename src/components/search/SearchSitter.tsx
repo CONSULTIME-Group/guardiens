@@ -16,6 +16,7 @@ import AffinityMissingCTA from "@/components/matching/AffinityMissingCTA";
 
 import { DEMO_SITS, DEMO_MISSIONS, DEMO_MEMBERS, interleaveDemos, auditInterleave } from "@/data/demoListings";
 import { normalize } from "@/lib/normalize";
+import { publicFirstName } from "@/lib/displayName";
 import { normalizeSkillKey, tokenizeSkillPhrases } from "@/lib/skills/tokenize";
 import { supabase } from "@/integrations/supabase/client";
 import { pickPlaceCover } from "@/lib/coverPriority";
@@ -1406,6 +1407,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
   // Overlay neutralisé tant que PRICING_IS_ACTIVE = false (promesse "sans limite").
   const isSitterLocked = PRICING_IS_ACTIVE && !!user && !hasAccess && tab === "sits";
 
+ const memberFirstName = publicFirstName(member.first_name) || "Membre";
  return (
  <>
  {/* Réserve basse : la barre de navigation est déjà compensée par le body,
@@ -2148,12 +2150,12 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  <img src={avatarImageUrl(member.avatar_url, 96)} alt="" className="w-12 h-12 rounded-full object-cover shrink-0" loading="lazy" />
  ) : (
  <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center text-sm font-bold shrink-0 text-foreground">
- {member.first_name?.charAt(0) || "?"}
+ {memberFirstName.charAt(0) || "?"}
  </div>
  )}
  <div className="flex-1 min-w-0">
  <div className="flex items-center gap-2 flex-wrap">
- <p className="text-base font-heading font-semibold text-foreground">{member.first_name || "Membre"}</p>
+ <p className="text-base font-heading font-semibold text-foreground">{memberFirstName}</p>
  
  {member.has_published_offre && (
  <span className="text-[10px] font-semibold uppercase tracking-wider bg-primary/15 text-primary rounded-full px-2 py-0.5">
@@ -2215,7 +2217,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  <FavoriteButton targetType="sitter" targetId={member.id} size="sm" />
  </span>
  <span onClick={(e) => e.stopPropagation()}>
- <InviteToMySitButton sitter={{ id: member.id, first_name: member.first_name }} />
+ <InviteToMySitButton sitter={{ id: member.id, first_name: memberFirstName }} />
  </span>
  <Link
  to={`/gardiens/${member.id}`}

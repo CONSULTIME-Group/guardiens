@@ -26,6 +26,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import InviteSitterDialog from "./InviteSitterDialog";
 import { formatSitPeriod } from "@/lib/dateRange";
 import { Calendar, MapPin } from "lucide-react";
+import { publicFirstName } from "@/lib/displayName";
 
 interface PublishedSit {
   id: string;
@@ -70,6 +71,7 @@ const InviteToMySitButton = ({
     (user.role === "owner" ||
       (user.role === "both" && activeRole === "owner"));
   const isSelf = ownerId && sitter?.id === ownerId;
+  const sitterFirstName = publicFirstName(sitter?.first_name) || "ce gardien";
 
   const [open, setOpen] = useState(false);
   // null = inconnu (préflight en cours), number = compté
@@ -193,7 +195,7 @@ const InviteToMySitButton = ({
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>
-              Proposer une annonce à {sitter.first_name || "ce gardien"}
+              Proposer une annonce à {sitterFirstName}
             </DialogTitle>
             <DialogDescription>
               Choisissez l'annonce que vous souhaitez lui proposer. Le gardien

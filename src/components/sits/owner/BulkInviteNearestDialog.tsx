@@ -29,6 +29,7 @@ import { geocodeCity, haversineDistance } from "@/lib/geocode";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { formatSitPeriod } from "@/lib/dateRange";
+import { publicFirstName } from "@/lib/displayName";
 
 interface Candidate {
   id: string;
@@ -281,21 +282,24 @@ const BulkInviteNearestDialog = ({
         ) : (
           <div className="space-y-3">
             <div className="max-h-48 overflow-y-auto rounded-lg border border-border bg-muted/30 p-2 space-y-1.5">
-              {candidates.map((c) => (
+              {candidates.map((c) => {
+                const firstName = publicFirstName(c.first_name) || "Gardien";
+                return (
                 <div key={c.id} className="flex items-center gap-2 text-sm">
                   <Avatar className="h-7 w-7">
-                    <AvatarImage src={c.avatar_url || undefined} alt={c.first_name || "Gardien"} />
+                    <AvatarImage src={c.avatar_url || undefined} alt={firstName} />
                     <AvatarFallback className="text-[10px]">
-                      {(c.first_name || "?").slice(0, 1).toUpperCase()}
+                      {firstName.slice(0, 1).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
-                  <span className="font-medium truncate flex-1">{c.first_name || "Gardien"}</span>
+                  <span className="font-medium truncate flex-1">{firstName}</span>
                   <span className="text-xs text-muted-foreground truncate">{c.city}</span>
                   {c.distance_km !== null && (
                     <span className="text-xs font-medium text-primary tabular-nums shrink-0">{c.distance_km} km</span>
                   )}
                 </div>
-              ))}
+                );
+              })}
             </div>
 
             <div>

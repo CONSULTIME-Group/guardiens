@@ -34,6 +34,7 @@ import { geocodeCity, haversineDistance } from "@/lib/geocode";
 import InviteSitterDialog from "./InviteSitterDialog";
 import PostPublishRecapDialog from "./PostPublishRecapDialog";
 import BulkInviteNearestDialog from "./BulkInviteNearestDialog";
+import { publicFirstName } from "@/lib/displayName";
 
 const ANIMAL_OPTIONS: { label: string; value: string }[] = [
   { label: "Chiens", value: "dog" },
@@ -263,21 +264,22 @@ const InviteSittersBlock = ({
 
   const renderCard = (s: SitterRow) => {
     const status = invitedById.get(s.id);
+    const firstName = publicFirstName(s.first_name) || "Gardien";
     return (
       <div
         key={s.id}
         className="flex items-center gap-3 p-3 rounded-xl border border-border bg-card hover:border-primary/40 transition"
       >
         <Avatar className="h-10 w-10 shrink-0">
-          <AvatarImage src={s.avatar_url || undefined} alt={s.first_name || "Gardien"} />
-          <AvatarFallback>{(s.first_name || "?").slice(0, 1).toUpperCase()}</AvatarFallback>
+          <AvatarImage src={s.avatar_url || undefined} alt={firstName} />
+          <AvatarFallback>{firstName.slice(0, 1).toUpperCase()}</AvatarFallback>
         </Avatar>
         <div className="min-w-0 flex-1">
           <Link
             to={`/gardiens/${s.id}`}
             className="font-medium text-sm hover:underline truncate block"
           >
-            {s.first_name || "Gardien"}
+            {firstName}
           </Link>
           {s.city && (
             <p className="text-xs text-muted-foreground truncate">

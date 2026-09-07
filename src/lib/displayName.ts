@@ -5,10 +5,11 @@
  * « Anne Sophie », avec ou sans trait d'union, s'affichent entiers.
  *
  * Certains membres saisissent en revanche leur nom de famille dans le champ
- * prénom, par exemple « Heiarii FAUA » ou « A .KH.BARRO ». On retire donc
- * uniquement les segments qui portent une marque de nom de famille :
- *   - un mot entièrement en capitales (au moins deux lettres),
- *   - un mot contenant un point (initiales collées).
+ * prénom, par exemple « Heiarii FAUA » ou « A .KH.BARRO ». Quand la casse
+ * permet de distinguer le prénom du nom, on retire les segments qui portent
+ * une marque de nom de famille : capitales ou initiales collées.
+ * Un champ saisi entièrement en capitales reste entier car sa casse ne permet
+ * pas cette distinction.
  * Tout le reste est conservé, dans la limite de trois mots.
  *
  * Les données en base ne sont jamais réécrites, seul l'affichage change.
@@ -28,9 +29,10 @@ export function publicFirstName(value: string | null | undefined): string {
   const words = value.trim().split(/\s+/).filter(Boolean);
   if (words.length === 0) return "";
 
+  const hasNonSurnameWord = words.some((word) => !looksLikeSurname(word));
   const kept: string[] = [];
   for (const word of words) {
-    if (looksLikeSurname(word)) break;
+    if (hasNonSurnameWord && looksLikeSurname(word)) break;
     kept.push(word);
     if (kept.length === MAX_WORDS) break;
   }

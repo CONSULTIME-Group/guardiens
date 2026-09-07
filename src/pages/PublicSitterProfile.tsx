@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { getMemberAvatarUrl, getMemberDisplayName, getMemberPublicFirstName, getMemberInitial } from "@/lib/memberUtils";
-import { publicFirstName, capitalizeFirstName } from "@/lib/displayName";
+import { capitalizeFirstName } from "@/lib/displayName";
+import { buildPublicSitterProfilePresentation } from "@/lib/publicSitterProfilePresentation";
 
 import ProBadge from "@/components/badges/ProBadge";
 import { useParams, Link, useSearchParams, useNavigate } from "react-router-dom";
@@ -1025,7 +1026,6 @@ export default function PublicSitterProfile() {
 
   // Prénom complet, prénoms composés inclus. Seuls les segments qui portent
   // une marque de nom de famille (capitales, initiales) sont retirés.
-  const firstName = capitalize(publicFirstName(profile?.first_name));
   const city = profile?.city || "";
   // RGPD : masquage présentationnel des coordonnées (jamais de modification en base).
   const bio = sanitizeBioForPublic(profile?.bio);
@@ -1111,10 +1111,11 @@ export default function PublicSitterProfile() {
   const trustSignals: string[] = [];
   if (profile?.identity_verified) trustSignals.push("identité vérifiée");
   if (avgRating > 0 && reviewCount > 0) trustSignals.push(`${avgRating.toFixed(1)} ★`);
-  const trustPart = trustSignals.length ? `, ${trustSignals.join(" · ")}` : "";
-  const baseTitle = city ? `${firstName}, gardien à ${city}` : `${firstName}, gardien d'animaux`;
-  const candidateTitle = `${baseTitle}${trustPart}`;
-  const pageTitle = candidateTitle.length <= 60 ? candidateTitle : baseTitle;
+  const { firstName, pageTitle } = buildPublicSitterProfilePresentation({
+    firstName: profile?.first_name,
+    city,
+    trustSignals,
+  });
   // Meta description structurée : promesse + animaux + zone + signaux de confiance.
   const animalsForDesc = animalLabels || "animaux";
   const cityForDesc = city ? `à ${city}${radius ? ` (rayon ${radius} km)` : ''}` : "près de chez vous";
@@ -2565,8 +2566,8 @@ export default function PublicSitterProfile() {
               )}
               alt={
                 lightboxItems[lightboxIdx]?.kind === "avatar"
-                  ? `Photo de profil de ${profile?.first_name || "ce gardien"}`
-                  : lightboxItems[lightboxIdx]?.caption || `Photo ${lightboxIdx + 1} du profil de ${profile?.first_name || "ce gardien"}`
+                  ? `Photo de profil de ${firstName || "ce gardien"}`
+                  : lightboxItems[lightboxIdx]?.caption || `Photo ${lightboxIdx + 1} du profil de ${firstName || "ce gardien"}`
               }
               className="max-h-[85vh] max-w-[90vw] object-contain rounded-lg"
             />
