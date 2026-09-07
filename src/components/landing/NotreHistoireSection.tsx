@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { RevealSection } from "@/components/ui/RevealSection";
+import { PaintedKey } from "@/components/landing/painted/PaintedKey";
 import notreHistoirePanoramaAvif from "@/assets/story-photo-1104.avif";
 import notreHistoirePanorama from "@/assets/story-photo.webp";
 import notreHistoireMobileAvif from "@/assets/story-photo-736.avif";
@@ -16,9 +17,13 @@ export function NotreHistoireSection() {
           <span className="text-xs tracking-widest uppercase text-primary font-body mb-3 block">
             {t("landing.story.eyebrow")}
           </span>
-          <h2 id="commence-avec-un-visa" className="text-2xl md:text-5xl font-heading font-semibold leading-snug text-foreground mb-8 scroll-mt-24">
-            {t("landing.story.title")}
-          </h2>
+          {/* Clé peinte en ouverture du récit, à côté du titre. */}
+          <div className="flex items-center gap-4 md:gap-5 mb-8">
+            <PaintedKey className="h-16 w-16 md:h-24 md:w-24" />
+            <h2 id="commence-avec-un-visa" className="text-2xl md:text-5xl font-heading font-semibold leading-snug text-foreground scroll-mt-24">
+              {t("landing.story.title")}
+            </h2>
+          </div>
         </RevealSection>
 
         <RevealSection delay={0.1}>

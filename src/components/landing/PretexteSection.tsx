@@ -2,6 +2,8 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { RevealSection } from "@/components/ui/RevealSection";
+import { GrainOverlay } from "@/components/ui/GrainOverlay";
+import { PaintedRooftops } from "@/components/landing/painted/PaintedRooftops";
 import { trackEvent } from "@/lib/analytics";
 
 /**
@@ -21,9 +23,11 @@ export function PretexteSection() {
     <section
       id="entraide"
       aria-labelledby="pretexte-title"
-      className="scroll-mt-24 bg-gradient-to-br from-pine-deep to-pine text-pine-foreground"
+      className="relative overflow-hidden scroll-mt-24 bg-gradient-to-br from-pine-deep to-pine text-pine-foreground"
     >
-      <div className="lp-read py-[52px] md:py-24">
+      {/* Grain de papier à 4 % sur le grand aplat sombre. */}
+      <GrainOverlay />
+      <div className="relative lp-read py-[52px] md:py-24">
         <RevealSection>
           <p className="flex items-center justify-center gap-2 font-body text-xs tracking-[0.2em] uppercase text-terra-soft mb-6">
             <span className="inline-block w-5 h-0.5 bg-terra align-middle" aria-hidden="true" />
@@ -63,6 +67,10 @@ export function PretexteSection() {
               {t("landing.pretexte.cta")} <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
+
+          {/* Illustration peinte des toits du quartier : frise large et
+              discrète posée en bas du bloc, jamais devant le texte. */}
+          <PaintedRooftops className="mt-[52px] md:mt-16" />
         </RevealSection>
       </div>
     </section>
