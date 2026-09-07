@@ -137,13 +137,28 @@ Deno.serve(async (req) => {
         });
       }
 
-      const { data: rows, error: selErr } = await supabase
+      // Sélection de la file rating : lieux vérifiés OSM sans note Google.
+      // Un lieu sans coordonnées ne peut pas passer le garde-fou des 200 m :
+      // on l'écarte dès la sélection pour ne pas consommer d'appel inutile.
+      const { count: fileSansCoordCount, error: countErr } = await supabase
         .from("city_guide_places")
-        .select("id, name, address, latitude, longitude")
+        .select("id", { count: "exact", head: true })
         .not("verified_at", "is", null)
         .like("source_url", "https://www.openstreetmap.org/%")
         .is("google_place_id", null)
-        .order("verified_at", { ascending: true })
+        .or("latitude.is.null,longitude.is.null");
+      if (countErr) return json({ error: countErr.message }, 500);
+
+      const { data: rows, error: selErr } = await supabase
+        .from("city_guide_places")
+        .select("id, name, address, latitude, longitude, google_rating_attempted_at")
+        .not("verified_at", "is", null)
+        .like("source_url", "https://www.openstreetmap.org/%")
+        .is("google_place_id", null)
+        .not("latitude", "is", null)
+        .not("longitude", "is", null)
+        .order("google_rating_attempted_at", { ascending: true, nullsFirst: true })
+        .order("id", { ascending: true })
         .limit(ratingLimit);
       if (selErr) return json({ error: selErr.message }, 500);
 
@@ -153,6 +168,9 @@ Deno.serve(async (req) => {
       let premier_statut_http: number | null = null;
       let premier_message_erreur: string | null = null;
       let requete_exemple: string | null = null;
+      const deja_tentes = (rows ?? []).filter((r: any) =>
+        r.google_rating_attempted_at != null
+      ).length;
 
       const haversine = (
         lat1: number, lon1: number, lat2: number, lon2: number,
@@ -167,92 +185,105 @@ Deno.serve(async (req) => {
         return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
       };
 
+      const markRatingAttempted = async (placeId: string) => {
+        await supabase
+          .from("city_guide_places")
+          .update({ google_rating_attempted_at: new Date().toISOString() })
+          .eq("id", placeId);
+      };
+
       let firstCall = true;
       for (const row of rows ?? []) {
         if (!firstCall) await sleep(120);
         firstCall = false;
 
-        const textQuery = `${row.name} ${row.address ?? ""}`.trim();
-        if (requete_exemple === null) requete_exemple = textQuery;
-
-        let place: any = null;
-        let responseStatus: number | null = null;
-        let responseBody: string | null = null;
-        const fieldMask = sansNote
-          ? "places.id,places.displayName,places.formattedAddress,places.location"
-          : "places.id,places.rating,places.userRatingCount,places.displayName,places.formattedAddress,places.location";
-
         try {
-          const r = await fetch("https://places.googleapis.com/v1/places:searchText", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "X-Goog-Api-Key": googleKey,
-              "X-Goog-FieldMask": fieldMask,
-            },
-            body: JSON.stringify({
-              textQuery,
-              languageCode: "fr",
-              regionCode: "FR",
-              maxResultCount: 1,
-              locationBias: {
-                circle: {
-                  center: { latitude: row.latitude, longitude: row.longitude },
-                  radius: 300.0,
-                },
+          const textQuery = `${row.name} ${row.address ?? ""}`.trim();
+          if (requete_exemple === null) requete_exemple = textQuery;
+
+          let place: any = null;
+          let responseStatus: number | null = null;
+          let responseBody: string | null = null;
+          const fieldMask = sansNote
+            ? "places.id,places.displayName,places.formattedAddress,places.location"
+            : "places.id,places.rating,places.userRatingCount,places.displayName,places.formattedAddress,places.location";
+
+          try {
+            const r = await fetch("https://places.googleapis.com/v1/places:searchText", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "X-Goog-Api-Key": googleKey,
+                "X-Goog-FieldMask": fieldMask,
               },
-            }),
-          });
-          responseStatus = r.status;
-          if (r.ok) {
-            const data = await r.json();
-            place = Array.isArray(data?.places) ? data.places[0] ?? null : null;
-          } else {
-            responseBody = (await r.text()).slice(0, 300);
+              body: JSON.stringify({
+                textQuery,
+                languageCode: "fr",
+                regionCode: "FR",
+                maxResultCount: 1,
+                locationBias: {
+                  circle: {
+                    center: { latitude: row.latitude, longitude: row.longitude },
+                    radius: 300.0,
+                  },
+                },
+              }),
+            });
+            responseStatus = r.status;
+            if (r.ok) {
+              const data = await r.json();
+              place = Array.isArray(data?.places) ? data.places[0] ?? null : null;
+            } else {
+              responseBody = (await r.text()).slice(0, 300);
+            }
+          } catch {
+            place = null;
           }
-        } catch {
-          place = null;
-        }
 
-        if (!place || !place.id) {
-          sans_resultat++;
-          if (
-            premier_statut_http === null &&
-            (responseStatus !== null || responseBody !== null)
-          ) {
-            premier_statut_http = responseStatus ?? 0;
-            premier_message_erreur = responseBody ?? "erreur réseau";
+          if (!place || !place.id) {
+            sans_resultat++;
+            if (
+              premier_statut_http === null &&
+              (responseStatus !== null || responseBody !== null)
+            ) {
+              premier_statut_http = responseStatus ?? 0;
+              premier_message_erreur = responseBody ?? "erreur réseau";
+            }
+            continue;
           }
-          continue;
-        }
 
-        // Garde-fou d'appariement : moins de 200 mètres entre les
-        // coordonnées Google et celles en base, sinon on n'écrit rien.
-        const gLat = Number(place.location?.latitude);
-        const gLon = Number(place.location?.longitude);
-        const dist = Number.isFinite(gLat) && Number.isFinite(gLon)
-          ? haversine(row.latitude, row.longitude, gLat, gLon)
-          : Number.POSITIVE_INFINITY;
-        if (dist >= 200) {
-          rejetes_appariement++;
-          continue;
-        }
+          // Garde-fou d'appariement : moins de 200 mètres entre les
+          // coordonnées Google et celles en base, sinon on n'écrit rien.
+          const gLat = Number(place.location?.latitude);
+          const gLon = Number(place.location?.longitude);
+          const dist = Number.isFinite(gLat) && Number.isFinite(gLon)
+            ? haversine(row.latitude, row.longitude, gLat, gLon)
+            : Number.POSITIVE_INFINITY;
+          if (dist >= 200) {
+            rejetes_appariement++;
+            continue;
+          }
 
-        // name et address ne sont jamais écrasés : OSM et la BAN font foi.
-        const updatePayload: Record<string, unknown> = {
-          google_place_id: String(place.id),
-        };
-        if (!sansNote) {
-          updatePayload.google_rating = typeof place.rating === "number" ? place.rating : null;
-          updatePayload.google_rating_count = typeof place.userRatingCount === "number"
-            ? place.userRatingCount
-            : null;
+          // name et address ne sont jamais écrasés : OSM et la BAN font foi.
+          const updatePayload: Record<string, unknown> = {
+            google_place_id: String(place.id),
+          };
+          if (!sansNote) {
+            updatePayload.google_rating = typeof place.rating === "number" ? place.rating : null;
+            updatePayload.google_rating_count = typeof place.userRatingCount === "number"
+              ? place.userRatingCount
+              : null;
+          }
+          const { error: upErr } = await supabase
+            .from("city_guide_places")
+            .update(updatePayload)
+            .eq("id", row.id);
+          if (!upErr) notes_ecrites++;
+        } finally {
+          // Rotation de file : marquer la tentative quelle que soit
+          // l'issue, y compris en cas d'erreur inattendue.
+          await markRatingAttempted(row.id);
         }
-        const { error: upErr } = await supabase
-          .from("city_guide_places")
-          .update(updatePayload)
-          .eq("id", row.id);
-        if (!upErr) notes_ecrites++;
       }
 
       return json({
@@ -261,6 +292,8 @@ Deno.serve(async (req) => {
         notes_ecrites,
         sans_resultat,
         rejetes_appariement,
+        sans_coordonnees_exclus: fileSansCoordCount ?? 0,
+        deja_tentes,
         premier_statut_http,
         premier_message_erreur,
         requete_exemple,
