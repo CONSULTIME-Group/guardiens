@@ -12,6 +12,44 @@
  *         ou `npx wrangler deploy`
  * Route:  guardiens.fr/* + *guardiens.fr/*
  *
+ * ══ v7.3 (2026-09-07) — 404 RELAYÉES, JSON-LD BOTS SEULS, 304 SANS CORPS ══
+ *
+ *  1. LES 404 DE PRERENDER SONT RELAYÉES. Jusqu'ici un 404 Prerender partait
+ *     en repli origine : le crawler recevait un shell React en 200, donc un
+ *     soft-404 indexable pour une URL inexistante. La règle Ignored URL
+ *     `/gardiens/` qui justifiait ce repli n'existe pas : vérifié le
+ *     07/09/2026 dans le dashboard Prerender (Cache Manager > Ignored URLs),
+ *     les 8 règles portent toutes sur des paramètres de query string
+ *     (`lang=`, `?q=`, `?profil=`, `?focus=`, `?filter=`, `?ville=`, `utm_`,
+ *     `fbclid=`), aucune sur un chemin. CORRIGÉ : cas 404 dédié
+ *     (`notfound-passthrough`), le repli origine ne concerne plus que 403,
+ *     429 et 5xx.
+ *
+ *  2. LE JSON-LD N'EST INJECTÉ QUE POUR LES BOTS. `serveOrigin` sert aussi le
+ *     chemin `bypass`, donc chaque visite humaine d'une fiche gardien lisait
+ *     tout le HTML en mémoire et ajoutait un aller-retour vers la fonction
+ *     profile-jsonld pour un balisage qu'aucun navigateur n'exploite.
+ *     CORRIGÉ : `profileMatch` n'est calculé que si `isBot`.
+ *
+ *  3. `withDiagHeaders` NE PEUT PLUS LEVER D'ERREUR 1101. `fetchOrigin`
+ *     retransmet les en-têtes conditionnels de la requête (If-None-Match,
+ *     If-Modified-Since), l'origine peut donc répondre 304. Construire une
+ *     Response avec un corps sur 204/205/304 lève une TypeError, page perdue.
+ *     CORRIGÉ : `NO_BODY_STATUSES`, le corps est remplacé par `null` sur ces
+ *     statuts.
+ *
+ *  4. `isImmutableAsset` TESTE LE CHEMIN EFFONDRÉ. `//assets/index.js` ne
+ *     commence pas par `/assets/` et ratait le cache edge, donc repartait en
+ *     transit origine à chaque hit.
+ *     CORRIGÉ : `canonicalPath` appliqué dans `isImmutableAsset`, et dans
+ *     `serveImmutableAsset` pour l'URL d'origine comme pour la clé de cache.
+ *
+ *  TESTS DE VALIDATION passés le 07/09/2026 sur le Worker déployé :
+ *  `/departement/06` avec user-agent Googlebot renvoie 404, là où il
+ *  renvoyait 200 avec le shell React vide ; `/gardiens/{uuid}` renvoie 200
+ *  avec son contenu prérendu réel et sa canonique auto-référente ;
+ *  `/house-sitting/lyon` renvoie 200 en `index, follow`.
+ *
  * ══ v7.2 (2026-09-05) — CACHE EDGE DES FICHIERS À NOM HACHÉ ══
  *
  *  MESURE du 05/09/2026 sur la page d'accueil : les 44 fichiers statiques
