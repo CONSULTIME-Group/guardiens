@@ -43,6 +43,10 @@ const ALLOWED = new Set([
   // desktop le fondu de scroll des pilules (le masque vit dans index.css).
   "src/components/search/SearchOwner.tsx",
   "src/components/search/SearchSitter.tsx",
+  // Illustrations éditoriales de la landing, fondu local volontaire sur
+  // l'image elle-même (pas un EmptyState, aucun token de fond codé en dur).
+  "src/components/landing/FinalCtaSection.tsx",
+  "src/components/landing/PretexteSection.tsx",
 ]);
 
 function walk(dir: string, acc: string[] = []): string[] {
