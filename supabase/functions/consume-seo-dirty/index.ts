@@ -203,13 +203,6 @@ Deno.serve(async (req) => {
     }
 
     const articles = (data ?? []) as ArticleRow[];
-    if (articles.length === 0) {
-      await run.finish("success", { dirty_before: 0, cleared: 0, urls_ok: 0, urls_failed: 0 });
-      return new Response(
-        JSON.stringify({ dirty_before: 0, cleared: 0, urls_ok: 0, urls_failed: 0 }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
-    }
 
     const logRows: Array<Record<string, unknown>> = [];
     const clearedIds: string[] = [];
@@ -243,6 +236,12 @@ Deno.serve(async (req) => {
       if (allOk) clearedIds.push(a.id);
     }
 
+    // Fiches gardien : même token, même journalisation, budget de renders
+    // propre pour ne pas entamer le quota partagé du compte Prerender.
+    const sitterMetrics = await processSitters(sb, PRERENDER_TOKEN, logRows);
+    urlsFailed += sitterMetrics.sitters_failed;
+    urlsOk += sitterMetrics.sitters_recached;
+
     if (logRows.length > 0) {
       await sb.from("prerender_recache_log").insert(logRows);
     }
@@ -255,7 +254,9 @@ Deno.serve(async (req) => {
       cleared: clearedIds.length,
       urls_ok: urlsOk,
       urls_failed: urlsFailed,
+      ...sitterMetrics,
     };
+
 
     if (urlsFailed > 0) {
       if (urlsOk > 0) await run.finish("partial", payload);
