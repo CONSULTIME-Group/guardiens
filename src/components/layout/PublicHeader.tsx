@@ -160,7 +160,7 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
               variant="ghost"
               size="sm"
               onClick={() => navigate(l.to)}
-              className={isActive(l.to) ? "text-primary font-semibold" : ""}
+              className={`min-h-11 ${isActive(l.to) ? "text-primary font-semibold" : ""}`}
               aria-current={isActive(l.to) ? "page" : undefined}
             >
               {t(`nav.${l.key}`)}
@@ -175,7 +175,7 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
             <div className="h-8 w-40 rounded-md bg-muted/40 animate-pulse" aria-hidden="true" />
           ) : hasSession ? (
             <>
-              <Button size="sm" onClick={() => navigate("/dashboard")}>
+              <Button size="sm" className="min-h-11" onClick={() => navigate("/dashboard")}>
                 {t("nav.my_space")}
               </Button>
               {!isCompact && bells}
@@ -183,10 +183,10 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
             </>
           ) : (
             <>
-              <Button variant="ghost" size="sm" onClick={() => navigate("/login")}>
+              <Button variant="ghost" size="sm" className="min-h-11" onClick={() => navigate("/login")}>
                 {t("nav.login")}
               </Button>
-              <Button size="sm" onClick={() => navigate("/inscription")}>
+              <Button size="sm" className="min-h-11" onClick={() => navigate("/inscription")}>
                 {t("nav.register")}
               </Button>
             </>

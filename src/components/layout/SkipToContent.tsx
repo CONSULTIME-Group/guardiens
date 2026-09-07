@@ -5,7 +5,7 @@ const SkipToContent = () => {
   return (
     <a
       href="#main-content"
-      className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[9999] focus:px-4 focus:py-2 focus:rounded-md focus:bg-primary focus:text-primary-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+      className="fixed -top-14 left-2 z-[9999] inline-flex min-h-11 min-w-11 items-center px-4 py-2 rounded-md bg-primary text-primary-foreground outline-none ring-2 ring-ring focus:top-2"
     >
       {t("a11y.skip_to_content")}
     </a>

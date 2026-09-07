@@ -119,7 +119,7 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
             href={PRESS_ARTICLE_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2.5 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40"
+            className="inline-flex min-h-[44px] items-center gap-2.5 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40"
           >
             <span className="font-body text-[11px] uppercase tracking-[0.16em] text-white/50">Vu dans</span>
             <img
