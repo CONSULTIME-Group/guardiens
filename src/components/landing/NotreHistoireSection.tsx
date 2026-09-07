@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { RevealSection } from "@/components/ui/RevealSection";
-import { PaintedKey } from "@/components/landing/painted/PaintedKey";
+import cle720 from "@/assets/landing/cle-ancienne-720.webp";
+import cle360 from "@/assets/landing/cle-ancienne-360.webp";
 import notreHistoirePanoramaAvif from "@/assets/story-photo-1104.avif";
 import notreHistoirePanorama from "@/assets/story-photo.webp";
 import notreHistoireMobileAvif from "@/assets/story-photo-736.avif";
@@ -14,7 +15,19 @@ export function NotreHistoireSection() {
     <section id="notre-histoire" className="bg-muted/30 scroll-mt-24">
       <div className="lp-read py-[52px] md:py-20">
         <RevealSection>
-          <PaintedKey className="h-16 w-16 md:h-24 md:w-24 mb-[22px]" />
+          {/* Clé sortie du flux du titre : bloc autonome centré, sans
+              influence sur la ligne de base de l'eyebrow ni du h2. */}
+          <img
+            src={cle720}
+            srcSet={`${cle360} 360w, ${cle720} 720w`}
+            sizes="(max-width: 767px) 96px, 128px"
+            alt="Illustration à la gouache d'une clé ancienne en laiton patiné, posée légèrement de biais."
+            width={720}
+            height={558}
+            loading="lazy"
+            decoding="async"
+            className="mx-auto mb-[22px] block w-24 md:w-32 h-auto"
+          />
           <span className="text-xs tracking-widest uppercase text-primary font-body mb-3 block">
             {t("landing.story.eyebrow")}
           </span>

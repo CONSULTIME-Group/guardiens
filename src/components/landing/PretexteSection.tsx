@@ -3,7 +3,8 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { RevealSection } from "@/components/ui/RevealSection";
 import { GrainOverlay } from "@/components/ui/GrainOverlay";
-import { PaintedRooftops } from "@/components/landing/painted/PaintedRooftops";
+import rooftops1600 from "@/assets/landing/village-rooftops-1600.webp";
+import rooftops800 from "@/assets/landing/village-rooftops-800.webp";
 import { trackEvent } from "@/lib/analytics";
 
 /**
@@ -70,7 +71,17 @@ export function PretexteSection() {
 
           {/* Illustration peinte des toits du quartier : frise large et
               discrète posée en bas du bloc, jamais devant le texte. */}
-          <PaintedRooftops className="mt-[52px] md:mt-16" />
+          <img
+            src={rooftops1600}
+            srcSet={`${rooftops800} 800w, ${rooftops1600} 1600w`}
+            sizes="(max-width: 767px) 100vw, 1024px"
+            alt="Illustration à la gouache d'une rangée de maisons de village aux toits de tuiles, quelques fenêtres allumées et un arbre."
+            width={1600}
+            height={415}
+            loading="lazy"
+            decoding="async"
+            className="mt-[52px] md:mt-16 block w-full h-auto"
+          />
         </RevealSection>
       </div>
     </section>
