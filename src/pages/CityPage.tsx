@@ -316,8 +316,8 @@ const CityPage = () => {
  subtitle={
  content?.subtitle ||
  (stats.guardiansCount > 0
-  ? `${stats.guardiansCount} gardien${stats.guardiansCount > 1 ? "s" : ""} inscrit${stats.guardiansCount > 1 ? "s" : ""} ${departmentIn(cityData.department)} · Espace propriétaire ouvert pendant la phase de lancement`
-  : `Gardiens inscrits ${departmentIn(cityData.department)} · Espace propriétaire ouvert pendant la phase de lancement`)
+  ? `${stats.guardiansCount} gardien${stats.guardiansCount > 1 ? "s" : ""} inscrit${stats.guardiansCount > 1 ? "s" : ""} ${departmentIn(cityData.department)} · 0 € pour les propriétaires`
+  : `Gardiens inscrits ${departmentIn(cityData.department)} · 0 € pour les propriétaires`)
  }
   heroAlt={cityData.heroImageAlt || `House-sitting à ${cityData.name}`}
   department={cityData.department}
@@ -352,7 +352,7 @@ const CityPage = () => {
  {stats.guardiansCount > 0
   ? `${stats.guardiansCount} gardien${stats.guardiansCount > 1 ? "s" : ""} inscrit${stats.guardiansCount > 1 ? "s" : ""} ${departmentIn(cityData.department)}`
    : `Gardiens inscrits ${departmentIn(cityData.department)}`}
-  {" · Espace propriétaire ouvert pendant la phase de lancement"}
+  {" · 0 € pour les propriétaires"}
   </p>
   {staticNearbyMention && (
   <p className="text-muted-foreground max-w-3xl leading-relaxed mb-6 -mt-3">
@@ -432,7 +432,7 @@ const CityPage = () => {
  </div>
  <div className="space-y-3">
  <Heart className="h-6 w-6 text-primary" />
- <h3 className="font-semibold text-foreground">Espace propriétaire ouvert</h3>
+ <h3 className="font-semibold text-foreground">0 € pour les propriétaires</h3>
  <p className="text-sm text-muted-foreground">
  Aucun frais, aucune commission. Le gardien vit chez vous et s'occupe de vos animaux dans leur environnement.
  </p>
@@ -724,7 +724,7 @@ const CityPage = () => {
             price: "0",
             priceCurrency: "EUR",
             eligibleCustomerType: "Owner",
-            description: "Espace propriétaire ouvert pendant la phase de lancement.",
+            description: "Espace propriétaire à 0 €.",
           },
         },
         {
