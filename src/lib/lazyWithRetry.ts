@@ -2,8 +2,27 @@ import { lazy, type ComponentType } from "react";
 
 const RELOAD_TTL_MS = 30_000;
 
+/**
+ * Empreinte stable d'une fabrique d'import.
+ *
+ * Le repli historique gardait les 50 premiers caractères de la source de la
+ * fabrique. Après minification, toutes les routes commencent par la même
+ * séquence, donc toutes partageaient la même clé de rechargement : dès qu'une
+ * route avait rechargé, les autres se voyaient refuser leur unique tentative
+ * et remontaient l'erreur brute à l'ErrorBoundary. Un hash de la source
+ * complète redonne une clé par route.
+ */
+const hashSource = (source: string) => {
+  let hash = 0;
+  for (let i = 0; i < source.length; i += 1) {
+    hash = (hash * 31 + source.charCodeAt(i)) | 0;
+  }
+  return `f${(hash >>> 0).toString(36)}`;
+};
+
 const getReloadKey = (chunkName?: string, fallbackId?: string) =>
   `chunk-reload-${chunkName ?? fallbackId ?? "anonymous-chunk"}`;
+
 
 const getLastReloadAt = (reloadKey: string) => {
   try {
