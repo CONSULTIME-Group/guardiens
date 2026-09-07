@@ -153,14 +153,14 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
   return (
     <>
     <header className="sticky top-0 z-50 max-w-[100vw] overflow-x-clip bg-background/80 backdrop-blur-md border-b border-border/50">
-      <div ref={fixedBarRef} className="flex items-center justify-between gap-2 px-4 py-4 sm:px-6 lg:grid lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:gap-x-8 lg:px-6 xl:px-8 2xl:px-[5%]">
+      <div ref={fixedBarRef} className="flex items-center justify-between gap-2 px-4 py-4 sm:px-6 min-[1120px]:grid min-[1120px]:grid-cols-[auto_minmax(0,1fr)_auto] min-[1120px]:gap-x-8 min-[1120px]:px-6 xl:px-8 2xl:px-[5%]">
         <Link to="/" aria-label="Guardiens, accueil" className="inline-flex min-h-[44px] items-center min-w-0 shrink-0 font-heading text-xl md:text-2xl font-bold">
           <span aria-hidden="true"><span className="text-primary">g</span>uardiens</span>
         </Link>
 
 
         {/* Les trois zones gardent chacune leur place dès le format ordinateur. */}
-        <nav aria-label="Navigation principale" className="hidden lg:flex min-w-0 items-center justify-self-center gap-0 xl:gap-1">
+        <nav aria-label="Navigation principale" className="hidden min-[1120px]:flex min-w-0 items-center justify-self-center gap-0 xl:gap-1">
           {NAV_DEFS.map((l) => (
             <Button
               key={l.to}
@@ -180,7 +180,7 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
           ))}
         </nav>
 
-        <div className="hidden lg:flex shrink-0 items-center justify-self-end gap-0 xl:gap-1">
+        <div className="hidden min-[1120px]:flex shrink-0 items-center justify-self-end gap-0 xl:gap-1">
           {!authChecked ? (
             <div className="h-8 w-36 rounded-md bg-muted/40 animate-pulse" aria-hidden="true" />
           ) : hasSession ? (
@@ -203,7 +203,7 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
           )}
         </div>
 
-        <div className="flex lg:hidden shrink-0 items-center gap-1">
+        <div className="flex min-[1120px]:hidden shrink-0 items-center gap-1">
           {!authChecked ? (
             <div className="h-9 w-9 rounded-md bg-muted/40 animate-pulse" aria-hidden="true" />
           ) : hasSession ? (
