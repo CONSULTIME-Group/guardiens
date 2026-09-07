@@ -132,7 +132,7 @@ export default function ProsListing() {
             <h1 className="text-2xl md:text-4xl font-display font-bold">
               {t("pros_listing.h1")}
             </h1>
-            <span className="text-[9px] md:text-[10px] uppercase tracking-wider font-bold bg-amber-100 text-amber-800 px-1.5 py-0.5 md:px-2 md:py-1 rounded align-middle">
+            <span className="text-[11px] uppercase tracking-wider font-bold bg-amber-200 text-amber-900 px-1.5 py-0.5 md:px-2 md:py-1 rounded align-middle">
               {t("pros_listing.beta")}
             </span>
           </div>
