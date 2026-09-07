@@ -229,9 +229,9 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
         </div>
       </div>
 
-      {/* Mobile dropdown */}
+      {/* Panneau du menu burger, ouvert uniquement sous 1400 px. */}
       {open && (
-        <nav className="sm:hidden border-t border-border bg-background px-[5%] py-4 space-y-1 animate-in slide-in-from-top-2 duration-200">
+        <nav className="min-[1400px]:hidden border-t border-border bg-background px-[5%] py-4 space-y-1 animate-in slide-in-from-top-2 duration-200">
           {/* Actions de compte remontées en haut du panneau : elles ont quitté
               l'en tête mobile, qui ne peut plus les accueillir. */}
           {!authChecked ? (
@@ -291,7 +291,7 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
           alimenter la pastille du burger, visibles uniquement menu ouvert. */}
       {isCompact && showBells && (
         <div
-          className={`sm:hidden items-center gap-1 border-t border-border bg-background px-[5%] py-3 ${open ? "flex" : "hidden"}`}
+          className={`min-[1400px]:hidden items-center gap-1 border-t border-border bg-background px-[5%] py-3 ${open ? "flex" : "hidden"}`}
         >
           {bells}
         </div>
