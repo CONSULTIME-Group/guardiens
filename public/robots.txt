@@ -1,4 +1,4 @@
-# AUTO-GÉNÉRÉ par scripts/generate-robots.mjs — NE PAS ÉDITER À LA MAIN.
+# AUTO-GÉNÉRÉ par scripts/generate-robots.mjs, NE PAS ÉDITER À LA MAIN.
 # Source de vérité : src/data/siteRoutes.ts (privateDisallowPaths + index:false).
 # Politique AI/GEO juillet 2026 : visibilité LLM ouverte (GPTBot, ClaudeBot,
 # PerplexityBot, Google-Extended, Applebot-Extended, Bingbot… tous Allow).
@@ -25,7 +25,7 @@ User-agent: Yandex
 Allow: /
 
 # ------------------------------------------------------------
-# Bots IA (training + retrieval) — Allow (visibilité générative)
+# Bots IA (training + retrieval), Allow (visibilité générative)
 # ------------------------------------------------------------
 User-agent: GPTBot
 Allow: /
@@ -76,7 +76,7 @@ User-agent: FacebookBot
 Allow: /
 
 # ------------------------------------------------------------
-# Scrapers sans valeur SEO/GEO — Disallow
+# Scrapers sans valeur SEO/GEO, Disallow
 # ------------------------------------------------------------
 User-agent: ByteSpider
 Disallow: /
@@ -85,7 +85,7 @@ User-agent: cohere-ai
 Disallow: /
 
 # ------------------------------------------------------------
-# Outils SEO / analytics — Allow
+# Outils SEO / analytics, Allow
 # ------------------------------------------------------------
 User-agent: DataForSeoBot
 Allow: /
@@ -125,7 +125,7 @@ Disallow: /test-accord
 Disallow: /auth/
 
 # Routes publiques marquées index:false dans staticRoutes
-# (outils internes / pages d'auth — cohérent avec <meta robots> + sitemap)
+# (outils internes / pages d'auth, cohérent avec <meta robots> + sitemap)
 
 # Profils publics : /gardiens/:id reste crawlable. Une fiche est indexable
 # et listee au sitemap si et seulement si elle passe la regle de substance

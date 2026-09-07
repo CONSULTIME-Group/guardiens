@@ -32,7 +32,14 @@ describe("Pricing helpers (PRICING_IS_ACTIVE = false)", () => {
     );
   });
 
-  it("getPricingBaselineShort() est concis et sans engagement", () => {
-    expect(getPricingBaselineShort().toLowerCase()).toContain("sans engagement");
+  // La formulation « sans engagement » a été proscrite le 07/09/2026 (voir
+  // src/__tests__/no-forbidden-marketing-copy.test.ts) : on dit ce que la
+  // chose EST. Le verrou porte désormais sur la liberté de partir, énoncée
+  // positivement, et sur la concision de la phrase.
+  it("getPricingBaselineShort() est concis et énonce la liberté de partir", () => {
+    const short = getPricingBaselineShort();
+    expect(short.toLowerCase()).toContain("vous restez libre à tout moment");
+    expect(short.length).toBeLessThanOrEqual(120);
   });
 });
+
