@@ -144,7 +144,7 @@ const FAQ_BY_SLUG: Record<string, Array<{ q: string; a: string }>> = {
  chambery: CHAMBERY_FAQ,
 };
 
-const CitySchemaOrg = ({ city }: Props) => {
+const CitySchemaOrg = ({ city, departmentSlug }: Props) => {
  const isLyon = city.slug === "lyon";
  const faqItems = FAQ_BY_SLUG[city.slug] || DEFAULT_FAQ(city.name);
 

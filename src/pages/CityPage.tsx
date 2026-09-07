@@ -302,7 +302,7 @@ const CityPage = () => {
  return (
  <>
   <CityPageMeta city={cityData} ready={!contentStatsLoading} />
-  <CitySchemaOrg city={cityData} stats={stats} />
+  <CitySchemaOrg city={cityData} stats={stats} departmentSlug={departmentPageExists ? departmentSlug : null} />
 
  {(() => {
  const cityKey = cityData.slug;
