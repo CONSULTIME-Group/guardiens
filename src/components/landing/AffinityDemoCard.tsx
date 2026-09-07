@@ -77,10 +77,10 @@ export default function AffinityDemoCard() {
               )}
               <div className="flex-1 min-w-0">
                 <div className="flex items-baseline justify-between gap-2">
-                  <span className={b.matched ? "text-foreground" : "text-foreground/55"}>{b.criterion}</span>
-                  <span className="text-xs text-foreground/45 tabular-nums shrink-0">{b.weight}&nbsp;%</span>
+                  <span className={b.matched ? "text-foreground" : "text-foreground/70"}>{b.criterion}</span>
+                  <span className="text-xs text-foreground/70 tabular-nums shrink-0">{b.weight}&nbsp;%</span>
                 </div>
-                <div className="text-xs text-foreground/55">{b.note}</div>
+                <div className="text-xs text-foreground/70">{b.note}</div>
               </div>
             </li>
           ))}

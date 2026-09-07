@@ -180,7 +180,7 @@ const DemoListingCard = React.forwardRef<HTMLAnchorElement, typeof DEMO_LISTINGS
   >
     <div className="relative">
       <img src={photo} alt={title} className="w-full h-48 object-cover group-hover:scale-[1.02] transition-transform duration-300" loading="lazy" width={700} height={467} />
-      <span className="absolute top-3 left-3 bg-white/90 text-foreground/50 text-xs font-body font-medium px-3 py-1 rounded-full border border-border/60">
+      <span className="absolute top-3 left-3 bg-white/90 text-foreground/70 text-xs font-body font-medium px-3 py-1 rounded-full border border-border/60">
         Bientôt disponible
       </span>
       <div className="absolute bottom-3 left-3 flex gap-1 flex-wrap">
@@ -195,7 +195,7 @@ const DemoListingCard = React.forwardRef<HTMLAnchorElement, typeof DEMO_LISTINGS
     <div className="p-5 flex flex-col gap-3 flex-1">
       <div className="flex items-center justify-between">
         <span className="text-sm font-body font-medium text-foreground/80">{city}</span>
-        <span className="text-xs font-body text-foreground/50">{dates}</span>
+        <span className="text-xs font-body text-foreground/70">{dates}</span>
       </div>
 
       <h3 className="text-xl font-heading font-semibold leading-snug group-hover:text-primary transition-colors">{title}</h3>

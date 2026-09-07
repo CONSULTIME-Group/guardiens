@@ -290,7 +290,7 @@ const Landing = () => {
                 rel="noopener noreferrer"
                  className="mt-[14px] inline-flex min-h-[44px] items-center gap-2.5 opacity-90 hover:opacity-100 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40 rounded-sm animate-hero-fade-up animation-delay-1100"
               >
-                <span className="font-body text-[11px] uppercase tracking-[0.16em] text-white/70">
+                <span className="font-body text-[11px] uppercase tracking-[0.16em] text-white/85">
                   Vu dans
                 </span>
                 <img
@@ -302,7 +302,7 @@ const Landing = () => {
                   loading="lazy"
                   decoding="async"
                 />
-                <span className="font-body text-xs text-white/70">
+                <span className="font-body text-xs text-white/85">
                   6 septembre 2026
                 </span>
               </a>

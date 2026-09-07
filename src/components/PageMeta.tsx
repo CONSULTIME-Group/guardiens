@@ -103,7 +103,17 @@ const PageMeta = ({
     .replace(/\s*\|\s*Guardiens\s*$/i, "")
     .replace(/\s*,\s*Guardiens\s*$/i, "")
     .replace(/\s*·\s*Guardiens\s*$/i, "");
-  const fullTitle = currentPath === "/" ? titleWithoutSuffix : `${titleWithoutSuffix} | ${SITE_NAME}`;
+  // Le titre rendu porte TOUJOURS la marque, home comprise : sans cela le
+  // runtime écrasait le title du HTML statique et supprimait « | Guardiens »
+  // de la page indexée. Le suffixe est retiré en amont puis réappliqué une
+  // seule fois, donc jamais dupliqué si la page le portait déjà.
+  const fullTitle = `${titleWithoutSuffix} | ${SITE_NAME}`;
+
+  // Le domaine de preview reste hors index : index.html pose déjà
+  // « noindex, nofollow » sur googlebot, on ne le contredit pas en écrivant
+  // « index, follow » dans la meta robots générique.
+  const isPreviewHost =
+    typeof window !== "undefined" && /\.lovable\.app$/i.test(window.location.hostname);
   const jsonLdKey = jsonLd ? JSON.stringify(jsonLd) : "";
   const extraMetaKey = extraMeta ? JSON.stringify(extraMeta) : "";
 
@@ -161,11 +171,13 @@ const PageMeta = ({
     upsertMetaTag({
       attr: "name",
       key: "robots",
-      content: nofollow
+      content: isPreviewHost
         ? "noindex, nofollow"
-        : noindex
-          ? "noindex, follow"
-          : "index, follow",
+        : nofollow
+          ? "noindex, nofollow"
+          : noindex
+            ? "noindex, follow"
+            : "index, follow",
     });
 
     // Écrase la meta description statique (index.html) qui sinon reste en
@@ -240,7 +252,7 @@ const PageMeta = ({
       window.prerenderMetaPending = false;
       (window as any).prerenderReady = true;
     }
-  }, [author, canonical, canonicalUrl, currentPath, currentUrl, extraMetaKey, fullTitle, jsonLdKey, metaDescription, noindex, nofollow, noCanonical, statusCode, prerenderHeader, publishedAt, ready, resolvedImage, type]);
+  }, [author, canonical, isPreviewHost, canonicalUrl, currentPath, currentUrl, extraMetaKey, fullTitle, jsonLdKey, metaDescription, noindex, nofollow, noCanonical, statusCode, prerenderHeader, publishedAt, ready, resolvedImage, type]);
 
   // Toutes les balises sont écrites impérativement dans le useEffect ci-dessus,
   // react-helmet-async n'atteignant pas le DOM sur ce projet.

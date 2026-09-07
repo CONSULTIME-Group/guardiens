@@ -63,7 +63,7 @@ export function NotreHistoireSection() {
           <p className="text-base md:text-lg font-body leading-relaxed text-foreground/85 mb-5">
             {t("landing.story.p5")}
           </p>
-          <span className="text-sm font-body italic text-foreground/50 mt-6 block">
+          <span className="text-sm font-body italic text-foreground/70 mt-6 block">
             {t("landing.story.signature")}
           </span>
         </RevealSection>
