@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { getMemberAvatarUrl, getMemberDisplayName, getMemberPublicFirstName, getMemberInitial } from "@/lib/memberUtils";
-import { publicFirstName } from "@/lib/displayName";
+import { publicFirstName, capitalizeFirstName } from "@/lib/displayName";
 
 import ProBadge from "@/components/badges/ProBadge";
 import { useParams, Link, useSearchParams, useNavigate } from "react-router-dom";
@@ -79,8 +79,9 @@ import { avatarImageUrl, storageImageUrl } from "@/lib/storageImage";
 import { petSpeciesLabel } from "@/lib/petLabels";
 import { isRadiusDeclared } from "@/lib/searchRadius";
 
-const capitalize = (name: string) =>
-  name ? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase() : "";
+// Capitalise chaque mot, pour ne pas abîmer les prénoms composés
+// (« JEAN CLAUDE » devient « Jean Claude », pas « Jean claude »).
+const capitalize = (name: string) => capitalizeFirstName(name);
 
 const ANIMAL_LABELS: Record<string, string> = {
   dog: "Chiens", cat: "Chats", bird: "Oiseaux", fish: "Poissons",
@@ -1022,8 +1023,8 @@ export default function PublicSitterProfile() {
   }
 
 
-  // Certains membres saisissent leur nom complet dans le champ prénom,
-  // seul le premier mot est affiché publiquement.
+  // Prénom complet, prénoms composés inclus. Seuls les segments qui portent
+  // une marque de nom de famille (capitales, initiales) sont retirés.
   const firstName = capitalize(publicFirstName(profile?.first_name));
   const city = profile?.city || "";
   // RGPD : masquage présentationnel des coordonnées (jamais de modification en base).

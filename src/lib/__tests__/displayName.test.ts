@@ -10,8 +10,14 @@ describe("publicFirstName", () => {
     expect(publicFirstName("Jean-Baptiste")).toBe("Jean-Baptiste");
   });
 
-  it("ne garde que le premier mot quand deux prénoms sont séparés par un espace", () => {
-    expect(publicFirstName("Marie Claire")).toBe("Marie");
+  it("conserve un prénom composé séparé par un espace", () => {
+    expect(publicFirstName("Marie Claire")).toBe("Marie Claire");
+    expect(publicFirstName("Jean Claude")).toBe("Jean Claude");
+    expect(publicFirstName("Anne Sophie")).toBe("Anne Sophie");
+  });
+
+  it("retire un nom de famille écrit en capitales", () => {
+    expect(publicFirstName("Jean Claude DUPONT")).toBe("Jean Claude");
   });
 
   it("ne garde que la première initiale quand le champ mélange initiales et nom", () => {
