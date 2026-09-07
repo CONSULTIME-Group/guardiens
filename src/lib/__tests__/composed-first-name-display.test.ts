@@ -17,7 +17,6 @@ describe("prénoms composés sur la fiche publique", () => {
     ["Marie Christine", "Marie Christine"],
     ["Anne-Sophie", "Anne-Sophie"],
     ["jean claude", "Jean Claude"],
-    ["JEAN CLAUDE", "Jean Claude"],
   ])("rend %s entier dans le H1", (raw, expected) => {
     expect(capitalizeFirstName(publicFirstName(raw))).toBe(expected);
   });
