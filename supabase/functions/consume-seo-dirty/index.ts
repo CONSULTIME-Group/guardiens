@@ -408,8 +408,11 @@ Deno.serve(async (req) => {
       cleared: clearedIds.length,
       urls_ok: urlsOk,
       urls_failed: urlsFailed,
+      articles_deferred: articlesDeferred,
+      ...programmaticMetrics,
       ...sitterMetrics,
     };
+
 
 
     if (urlsFailed > 0) {
