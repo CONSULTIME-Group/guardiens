@@ -287,7 +287,7 @@ const Landing = () => {
                 href={PRESS_ARTICLE_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                 className="mt-[14px] inline-flex items-center gap-2.5 opacity-90 hover:opacity-100 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40 rounded-sm animate-hero-fade-up animation-delay-1100"
+                 className="mt-[14px] inline-flex min-h-[44px] items-center gap-2.5 opacity-90 hover:opacity-100 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40 rounded-sm animate-hero-fade-up animation-delay-1100"
               >
                 <span className="font-body text-[11px] uppercase tracking-[0.16em] text-white/70">
                   Vu dans
@@ -295,8 +295,8 @@ const Landing = () => {
                 <img
                   src={LE_PROGRES_LOGO}
                   alt="Le Progrès"
-                  width={597}
-                  height={80}
+                  width={300}
+                  height={40}
                   className="h-5 w-auto object-contain opacity-90"
                   loading="lazy"
                   decoding="async"
@@ -387,7 +387,7 @@ const Landing = () => {
                 <li key={item.href} className={item.mobile ? "shrink-0" : "shrink-0 hidden md:list-item"}>
                 <a
                   href={item.href}
-                  className="inline-flex items-center px-3 py-1.5 rounded-full text-[11px] tracking-[0.14em] uppercase font-body text-foreground/75 hover:text-primary hover:bg-primary/5 transition-colors whitespace-nowrap"
+                  className="inline-flex items-center min-h-[44px] px-3 py-1.5 rounded-full text-[11px] tracking-[0.14em] uppercase font-body text-foreground/75 hover:text-primary hover:bg-primary/5 transition-colors whitespace-nowrap"
                 >
                   {item.label}
                 </a>

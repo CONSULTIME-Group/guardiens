@@ -62,7 +62,7 @@ const TestimonialsSection = () => {
         >
           <button
             onClick={() => goToTestimonialPage(selectedIndex - 1)}
-            className="absolute -left-2 md:-left-6 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full border border-foreground/20 flex items-center justify-center hover:bg-foreground/5 transition-colors text-foreground/40 hover:text-foreground/70 disabled:opacity-40 disabled:hover:bg-transparent"
+            className="absolute -left-2 md:-left-6 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full border border-foreground/20 flex items-center justify-center hover:bg-foreground/5 transition-colors text-foreground/40 hover:text-foreground/70 disabled:opacity-40 disabled:hover:bg-transparent"
             aria-label={t("landing.testimonials.prev_aria")}
             disabled={testimonialPages.length <= 1}
           >
@@ -70,7 +70,7 @@ const TestimonialsSection = () => {
           </button>
           <button
             onClick={() => goToTestimonialPage(selectedIndex + 1)}
-            className="absolute -right-2 md:-right-6 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full border border-foreground/20 flex items-center justify-center hover:bg-foreground/5 transition-colors text-foreground/40 hover:text-foreground/70 disabled:opacity-40 disabled:hover:bg-transparent"
+            className="absolute -right-2 md:-right-6 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full border border-foreground/20 flex items-center justify-center hover:bg-foreground/5 transition-colors text-foreground/40 hover:text-foreground/70 disabled:opacity-40 disabled:hover:bg-transparent"
             aria-label={t("landing.testimonials.next_aria")}
             disabled={testimonialPages.length <= 1}
           >

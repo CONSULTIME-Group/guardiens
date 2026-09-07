@@ -21,60 +21,60 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
           <div>
             <h3 className="font-body text-xs uppercase tracking-widest text-white/80 mb-4">{t("footer.sections.by_city")}</h3>
             <ul className="space-y-0">
-              <li><Link to="/house-sitting" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.all_cities")}</Link></li>
-              <li><Link to="/house-sitting/lyon" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.house_sitting_city", { city: "Lyon" })}</Link></li>
-              <li><Link to="/house-sitting/annecy" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.house_sitting_city", { city: "Annecy" })}</Link></li>
-              <li><Link to="/house-sitting/grenoble" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.house_sitting_city", { city: "Grenoble" })}</Link></li>
-              <li><Link to="/house-sitting/chambery" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.house_sitting_city", { city: "Chambéry" })}</Link></li>
+              <li><Link to="/house-sitting" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.all_cities")}</Link></li>
+              <li><Link to="/house-sitting/lyon" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.house_sitting_city", { city: "Lyon" })}</Link></li>
+              <li><Link to="/house-sitting/annecy" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.house_sitting_city", { city: "Annecy" })}</Link></li>
+              <li><Link to="/house-sitting/grenoble" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.house_sitting_city", { city: "Grenoble" })}</Link></li>
+              <li><Link to="/house-sitting/chambery" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.house_sitting_city", { city: "Chambéry" })}</Link></li>
             </ul>
           </div>
           <div>
             <h3 className="font-body text-xs uppercase tracking-widest text-white/80 mb-4">{t("footer.sections.by_department")}</h3>
             <ul className="space-y-0">
-              <li><Link to="/departement" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.all_departments")}</Link></li>
-              <li><Link to="/departement/rhone" className="font-body text-sm text-white/75 hover:text-white transition-colors">Rhône (69)</Link></li>
-              <li><Link to="/departement/haute-savoie" className="font-body text-sm text-white/75 hover:text-white transition-colors">Haute-Savoie (74)</Link></li>
-              <li><Link to="/departement/gironde" className="font-body text-sm text-white/75 hover:text-white transition-colors">Gironde (33)</Link></li>
-              <li><Link to="/departement/herault" className="font-body text-sm text-white/75 hover:text-white transition-colors">Hérault (34)</Link></li>
-              <li><Link to="/departement/loire-atlantique" className="font-body text-sm text-white/75 hover:text-white transition-colors">Loire-Atlantique (44)</Link></li>
-              <li><Link to="/departement/bouches-du-rhone" className="font-body text-sm text-white/75 hover:text-white transition-colors">Bouches-du-Rhône (13)</Link></li>
-              <li><Link to="/departement/paris" className="font-body text-sm text-white/75 hover:text-white transition-colors">Paris (75)</Link></li>
+              <li><Link to="/departement" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.all_departments")}</Link></li>
+              <li><Link to="/departement/rhone" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">Rhône (69)</Link></li>
+              <li><Link to="/departement/haute-savoie" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">Haute-Savoie (74)</Link></li>
+              <li><Link to="/departement/gironde" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">Gironde (33)</Link></li>
+              <li><Link to="/departement/herault" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">Hérault (34)</Link></li>
+              <li><Link to="/departement/loire-atlantique" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">Loire-Atlantique (44)</Link></li>
+              <li><Link to="/departement/bouches-du-rhone" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">Bouches-du-Rhône (13)</Link></li>
+              <li><Link to="/departement/paris" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">Paris (75)</Link></li>
             </ul>
           </div>
 
           <div>
             <h3 className="font-body text-xs uppercase tracking-widest text-white/80 mb-4">{t("footer.sections.local_guides")}</h3>
             <ul className="space-y-0">
-              <li><Link to="/guides" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.all_guides")}</Link></li>
-              <li><Link to="/guides/lyon" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.guide_city", { city: "Lyon" })}</Link></li>
-              <li><Link to="/guides/annecy" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.guide_city", { city: "Annecy" })}</Link></li>
-              <li><Link to="/guides/grenoble" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.guide_city", { city: "Grenoble" })}</Link></li>
-              <li><Link to="/guides/chambery" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.guide_city", { city: "Chambéry" })}</Link></li>
-              <li><Link to="/guides/aix-les-bains" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.guide_city", { city: "Aix-les-Bains" })}</Link></li>
+              <li><Link to="/guides" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.all_guides")}</Link></li>
+              <li><Link to="/guides/lyon" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.guide_city", { city: "Lyon" })}</Link></li>
+              <li><Link to="/guides/annecy" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.guide_city", { city: "Annecy" })}</Link></li>
+              <li><Link to="/guides/grenoble" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.guide_city", { city: "Grenoble" })}</Link></li>
+              <li><Link to="/guides/chambery" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.guide_city", { city: "Chambéry" })}</Link></li>
+              <li><Link to="/guides/aix-les-bains" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.guide_city", { city: "Aix-les-Bains" })}</Link></li>
             </ul>
           </div>
           <div>
             <h3 className="font-body text-xs uppercase tracking-widest text-white/80 mb-4">{t("footer.sections.resources")}</h3>
             <ul className="space-y-0">
-              <li><Link to="/actualites" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.articles")}</Link></li>
-              <li><Link to="/actualites/house-sitting-aura-guide-complet" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.house_sitting_guide")}</Link></li>
-              <li><Link to="/faq" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.faq")}</Link></li>
-              <li><Link to="/tarifs" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.pricing")}</Link></li>
-              <li><Link to="/observatoire-garde-animaux" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.observatory")}</Link></li>
-              <li><Link to="/actualites/c-est-quoi-le-house-sitting" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.what_is_house_sitting")}</Link></li>
+              <li><Link to="/actualites" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.articles")}</Link></li>
+              <li><Link to="/actualites/house-sitting-aura-guide-complet" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.house_sitting_guide")}</Link></li>
+              <li><Link to="/faq" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.faq")}</Link></li>
+              <li><Link to="/tarifs" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.pricing")}</Link></li>
+              <li><Link to="/observatoire-garde-animaux" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.observatory")}</Link></li>
+              <li><Link to="/actualites/c-est-quoi-le-house-sitting" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.what_is_house_sitting")}</Link></li>
             </ul>
           </div>
           <div>
             <h3 className="font-body text-xs uppercase tracking-widest text-white/80 mb-4">{t("footer.sections.guardiens")}</h3>
             <ul className="space-y-0">
-              <li><Link to="/a-propos" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.about")}</Link></li>
-              <li><Link to="/contact" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.contact")}</Link></li>
-              <li><Link to="/inscription" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.register")}</Link></li>
-              <li><Link to="/devenir-home-sitter" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.become_home_sitter")}</Link></li>
-              <li><Link to="/petites-missions" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.small_missions")}</Link></li>
+              <li><Link to="/a-propos" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.about")}</Link></li>
+              <li><Link to="/contact" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.contact")}</Link></li>
+              <li><Link to="/inscription" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.register")}</Link></li>
+              <li><Link to="/devenir-home-sitter" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.become_home_sitter")}</Link></li>
+              <li><Link to="/petites-missions" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.small_missions")}</Link></li>
 
-              <li><Link to="/gardien-urgence" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.emergency_sitter")}</Link></li>
-              <li><Link to="/pros" className="font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.pet_pros")} <span className="ml-1 text-[9px] uppercase tracking-wider font-bold bg-amber-200/90 text-amber-900 px-1.5 py-0.5 rounded">{t("nav.beta")}</span></Link></li>
+              <li><Link to="/gardien-urgence" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.emergency_sitter")}</Link></li>
+              <li><Link to="/pros" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.pet_pros")} <span className="ml-1 text-[9px] uppercase tracking-wider font-bold bg-amber-200/90 text-amber-900 px-1.5 py-0.5 rounded">{t("nav.beta")}</span></Link></li>
             </ul>
           </div>
         </div>
@@ -125,8 +125,8 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
             <img
               src={LE_PROGRES_LOGO}
               alt="Le Progrès"
-              width={597}
-              height={80}
+              width={300}
+              height={40}
               className="h-4 w-auto object-contain"
               style={{ opacity: 0.6 }}
               loading="lazy"

@@ -147,7 +147,7 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
     <>
     <header className="sticky top-0 z-50 max-w-[100vw] overflow-x-clip bg-background/80 backdrop-blur-md border-b border-border/50">
       <div ref={fixedBarRef} className="flex items-center justify-between gap-2 px-[5%] md:px-[8%] py-4">
-        <Link to="/" aria-label="Guardiens, accueil" className="min-w-0 shrink font-heading text-xl md:text-2xl font-bold">
+        <Link to="/" aria-label="Guardiens, accueil" className="inline-flex min-h-[44px] items-center min-w-0 shrink font-heading text-xl md:text-2xl font-bold">
           <span aria-hidden="true"><span className="text-primary">g</span>uardiens</span>
         </Link>
 
