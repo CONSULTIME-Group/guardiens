@@ -3,7 +3,8 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { RevealSection } from "@/components/ui/RevealSection";
 import { GrainOverlay } from "@/components/ui/GrainOverlay";
-import { PaintedRooftops } from "@/components/landing/painted/PaintedRooftops";
+import rooftops1600 from "@/assets/landing/village-rooftops-1600.webp";
+import rooftops800 from "@/assets/landing/village-rooftops-800.webp";
 import { trackEvent } from "@/lib/analytics";
 
 /**
