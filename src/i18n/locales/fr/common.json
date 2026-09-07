@@ -393,7 +393,7 @@
           "label": "Garde par un proche",
           "pet_home": "Variable",
           "house_lived": "Variable",
-          "cost": "Sans frais en général",
+          "cost": "0 € en général",
           "human": "Connaît déjà vos habitudes, mais rien de formalisé"
         }
       }
@@ -552,7 +552,7 @@
       "per_month_short": "le mois",
       "from": "à partir de",
       "per_month": "/mois",
-      "note_monthly": "Sans engagement · Résiliable à tout moment",
+      "note_monthly": "Résiliable à tout moment",
       "note_annual": "Soit {{equiv}} €/mois équivalent · Résiliable à tout moment",
       "note_oneshot": "Paiement unique · Sans renouvellement",
       "features": [
@@ -569,7 +569,7 @@
       "oneshot_sub": "Paiement immédiat · Sans renouvellement",
       "monthly_title": "Mensuel",
       "monthly_tag": "Le plus choisi",
-      "monthly_sub": "Sans engagement · Résiliable à tout moment",
+      "monthly_sub": "Résiliable à tout moment",
       "annual_title": "Annuel",
       "annual_sub": "Un paiement par an · Renouvellement annuel · Résiliable à tout moment",
       "annual_equiv": "Soit ~{{equiv}} €/mois équivalent · Économie de {{savings}} €/an",
@@ -580,7 +580,7 @@
       "opening_checkout": "Ouverture du paiement…",
       "note_before": "Aucune carte bancaire demandée.",
       "note_visitor": "Inscription gratuite. Aucune carte bancaire avant la souscription d'une formule.",
-      "note_after_monthly": "Sans engagement. Résiliable à tout moment.",
+      "note_after_monthly": "Résiliable à tout moment.",
       "note_after_annual": "Renouvellement annuel automatique. Résiliable à tout moment.",
       "note_after_oneshot": "Paiement unique pour un mois d'accès, sans renouvellement."
     },
@@ -627,7 +627,7 @@
     "final_cta": {
       "title_before": "Rejoignez Guardiens dès maintenant",
       "title_after": "Prêt à rejoindre Guardiens ?",
-      "lede": "Sans carte bancaire à l'inscription. Vous décidez ensuite.",
+      "lede": "Une adresse email suffit à l'inscription. Vous décidez ensuite.",
       "cta_sitter": "Devenir gardien",
       "cta_owner": "Publier une annonce"
     }
@@ -1082,7 +1082,7 @@
     "most_popular": "Le plus choisi",
     "role_change_hint": "Vous changerez d'avis ? Le rôle reste modifiable à tout moment depuis vos paramètres.",
     "trust_no_spam": "Pas de spam, désinscription en 1 clic",
-    "trust_no_commitment": "Sans engagement",
+    "trust_no_commitment": "Résiliable à tout moment",
     "trust_france": "Données hébergées en France",
     "change_role": "Changer de rôle",
     "after_owner": "Vous pourrez <1>publier vos premières annonces</1> juste après.",
@@ -1788,8 +1788,8 @@
     "cta_body": "Rejoignez la communauté Guardiens : des gardiens du coin, un cadre clair, et la liberté de partir sans inquiétude.",
     "cta_see_open": "Voir les annonces ouvertes",
     "cta_signup": "S'inscrire et postuler",
-    "no_card": "Sans carte bancaire",
-    "no_commitment": "Sans engagement",
+    "no_card": "Inscription par email",
+    "no_commitment": "Résiliable à tout moment",
     "two_minutes": "2 minutes",
     "cadre_title": "Le cadre proposé par {{name}}",
     "cadre_presence": "Présence prévue",
@@ -1847,7 +1847,7 @@
     "cta_body": "Une heure offerte aujourd'hui, et c'est parfois une rencontre, une amitié, une saison qui s'invente. Inscrivez-vous pour entrer en contact.",
     "cta_signup": "Créer mon compte et proposer mon aide",
     "no_card": "Ni tarif ni facture",
-    "no_commitment": "Sans engagement",
+    "no_commitment": "Résiliable à tout moment",
     "two_minutes": "2 minutes",
     "sticky_cta": "Proposer mon aide",
     "meta_title": "{{title}} · Coup de main à {{city}}",

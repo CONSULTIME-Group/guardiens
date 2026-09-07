@@ -387,7 +387,7 @@ export default function ArticleDetail() {
   "@type": "Service",
   "serviceType": "Abonnement plateforme de gardiennage entre particuliers",
   "name": "Abonnement Gardien Guardiens",
-  "description": "Abonnement pour devenir gardien de maison et d'animaux sur Guardiens. Sans engagement, résiliable à tout moment.",
+  "description": "Abonnement pour devenir gardien de maison et d'animaux sur Guardiens. Résiliable à tout moment.",
   "provider": { "@type": "Organization", "name": "Guardiens", "url": "https://guardiens.fr" },
   "areaServed": { "@type": "Country", "name": "France" },
  "offers": {

@@ -585,7 +585,7 @@ const CityPage = () => {
  Prêt à partir l'esprit libre ?
  </h2>
  <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
- Publiez votre annonce en 5 minutes. Sans frais.
+ Publiez votre annonce en 5 minutes, à 0 €.
  </p>
  <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
  <Link to="/inscription?role=owner">
@@ -937,7 +937,7 @@ const CityPage = () => {
  </Button>
  </Link>
  <p className="text-xs text-muted-foreground mt-3">
- Inscription en 2 minutes · Sans carte bancaire
+ Inscription en 2 minutes · Une adresse email suffit
  </p>
  </section>
  </div>

@@ -422,7 +422,7 @@ const DepartmentPage = () => {
  <Card>
  <CardContent className="p-4 md:p-6">
  <Heart className="h-8 w-8 text-primary mb-3" />
- <h3 className="font-semibold text-foreground mb-2">Sans frais pour les propriétaires</h3>
+ <h3 className="font-semibold text-foreground mb-2">0 € pour les propriétaires</h3>
  <p className="text-sm text-muted-foreground">
  Inscription avec une adresse email. Aucune commission prélevée sur les gardes.
  </p>
@@ -447,7 +447,7 @@ const DepartmentPage = () => {
  </Button>
  </Link>
  <p className="text-xs text-muted-foreground mt-3">
- Inscription en 2 minutes · Sans carte bancaire
+ Inscription en 2 minutes · Une adresse email suffit
  </p>
  </section>
 

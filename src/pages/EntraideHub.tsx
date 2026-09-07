@@ -592,7 +592,7 @@ const EntraideHub = () => {
                     Entraide
                   </h1>
                   <span className="text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-primary/10 text-primary shrink-0">
-                    Sans engagement
+                    Résiliable à tout moment
                   </span>
                 </div>
                 <p className="text-sm text-muted-foreground mt-1.5 md:max-w-xl">
