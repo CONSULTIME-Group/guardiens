@@ -12,7 +12,7 @@
  *         ou `npx wrangler deploy`
  * Route:  guardiens.fr/* + *guardiens.fr/*
  *
- * ══ v7.3 (2026-09-07) — 404 RELAYÉES, JSON-LD BOTS SEULS, 304 SANS CORPS ══
+ * ══ v7.3 (2026-09-07) : 404 RELAYÉES, JSON-LD BOTS SEULS, 304 SANS CORPS ══
  *
  *  1. LES 404 DE PRERENDER SONT RELAYÉES. Jusqu'ici un 404 Prerender partait
  *     en repli origine : le crawler recevait un shell React en 200, donc un
@@ -599,7 +599,7 @@ export default {
         'cache-control': 'public, max-age=3600',
       };
       if (debug) {
-        headers['x-prerender-worker'] = 'guardiens-prerender-v7.2';
+        headers['x-prerender-worker'] = 'guardiens-prerender-v7.3';
         headers['x-prerender-status'] = 'www-to-apex-308';
       }
       return new Response(null, { status: 308, headers });
@@ -627,7 +627,7 @@ export default {
 
     const baseDiag = debug
       ? {
-          'X-Prerender-Worker': 'guardiens-prerender-v7.2',
+          'X-Prerender-Worker': 'guardiens-prerender-v7.3',
           'X-Prerender-Bot-Detected': String(isBot),
           'X-Prerender-UA': ua || '(empty)',
           'X-Prerender-Skip-Reasons': reasons.join(',') || 'none',
