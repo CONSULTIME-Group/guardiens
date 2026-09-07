@@ -187,6 +187,114 @@ async function processSitters(
   return metrics;
 }
 
+interface ProgrammaticSource {
+  /** Clé de métriques et suffixe de source dans le journal. */
+  key: "city" | "guide" | "department";
+  table: string;
+  /** Préfixe d'URL publique, le slug est concaténé. */
+  pathPrefix: string;
+  /** La table porte-t-elle une colonne `noindex` ? */
+  hasNoindex: boolean;
+  budget: number;
+}
+
+const PROGRAMMATIC_SOURCES: ProgrammaticSource[] = [
+  { key: "city", table: "seo_city_pages", pathPrefix: "/house-sitting/", hasNoindex: true, budget: CITY_RENDER_BUDGET },
+  { key: "guide", table: "city_guides", pathPrefix: "/guides/", hasNoindex: false, budget: GUIDE_RENDER_BUDGET },
+  { key: "department", table: "seo_department_pages", pathPrefix: "/departement/", hasNoindex: true, budget: DEPARTMENT_RENDER_BUDGET },
+];
+
+interface ProgrammaticMetrics {
+  scanned: number;
+  recached: number;
+  skipped_noindex: number;
+  failed: number;
+  deferred: number;
+}
+
+/**
+ * Consomme `seo_dirty_at` pour une famille de pages programmatiques.
+ *
+ * Même contrat que les fiches gardien :
+ *  - lecture plafonnée, les plus anciennes d'abord ;
+ *  - budget de renders propre par passage ;
+ *  - règle d'indexabilité reprise du plan du site (publiée et non noindex) :
+ *    une page non indexable voit son flag effacé sans dépenser de render ;
+ *  - flag effacé seulement en cas de succès.
+ */
+async function processProgrammatic(
+  // deno-lint-ignore no-explicit-any
+  sb: any,
+  token: string,
+  source: ProgrammaticSource,
+  logRows: Array<Record<string, unknown>>,
+): Promise<ProgrammaticMetrics> {
+  const metrics: ProgrammaticMetrics = {
+    scanned: 0,
+    recached: 0,
+    skipped_noindex: 0,
+    failed: 0,
+    deferred: 0,
+  };
+
+  const columns = source.hasNoindex ? "id, slug, published, noindex" : "id, slug, published";
+  const { data, error } = await sb
+    .from(source.table)
+    .select(columns)
+    .not("seo_dirty_at", "is", null)
+    .order("seo_dirty_at", { ascending: true })
+    .limit(PROGRAMMATIC_SCAN_BATCH);
+  if (error) throw error;
+
+  const rows = (data ?? []) as Array<{
+    id: string;
+    slug: string | null;
+    published: boolean | null;
+    noindex?: boolean | null;
+  }>;
+  metrics.scanned = rows.length;
+  if (rows.length === 0) return metrics;
+
+  const skipIds: string[] = [];
+  const toRecache: Array<{ id: string; url: string }> = [];
+
+  for (const r of rows) {
+    const indexable = !!r.slug && r.published === true && !(source.hasNoindex && r.noindex === true);
+    if (!indexable) skipIds.push(r.id);
+    else if (toRecache.length < source.budget) {
+      toRecache.push({ id: r.id, url: `${SITE}${source.pathPrefix}${r.slug}` });
+    } else metrics.deferred += 1;
+  }
+
+  metrics.skipped_noindex = skipIds.length;
+  const clearedIds = [...skipIds];
+
+  for (const t of toRecache) {
+    const res = await recache(t.url, token);
+    if (res.ok) {
+      metrics.recached += 1;
+      clearedIds.push(t.id);
+    } else {
+      metrics.failed += 1;
+    }
+    logRows.push({
+      article_id: null,
+      url: t.url,
+      status_code: res.status,
+      ok: res.ok,
+      detail: res.detail,
+      source: `consume-seo-dirty:${source.key}`,
+    });
+    console.log(`[consume-seo-dirty] ${t.url} -> ${res.status ?? "network_error"}`);
+  }
+
+  if (clearedIds.length > 0) {
+    await sb.from(source.table).update({ seo_dirty_at: null }).in("id", clearedIds);
+  }
+
+  return metrics;
+}
+
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
