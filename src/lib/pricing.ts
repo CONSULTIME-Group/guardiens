@@ -39,7 +39,7 @@ export function getOwnerPriceLabel(): string {
 }
 
 export function getPricingBaseline(): string {
-  return "Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que nous vous offrons. Vous avez accès à tout, sans limite, sans engagement. Vous serez prévenu à l'avance quand cela changera.";
+  return "Guardiens met en relation des propriétaires et des gardiens pour la garde de maison et d'animaux, partout en France. Vous publiez votre annonce, vous recevez des candidatures, vous choisissez après une rencontre. L'accès à la plateforme est ouvert pendant la phase de lancement, toute évolution sera annoncée à l'avance.";
 }
 
 export function getPricingBaselineShort(): string {
@@ -82,7 +82,7 @@ export const FOUNDER_DEADLINE = "à une date ultérieure";
 // NB: littéraux string (pas d'appel de fonction) pour que le script
 // scripts/sync-index-html.mjs puisse les extraire par regex.
 export const PRICING_LONG =
-  "Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service que nous vous offrons. Vous avez accès à tout, sans limite, sans engagement. Vous serez prévenu à l'avance quand cela changera.";
+  "Guardiens met en relation des propriétaires et des gardiens pour la garde de maison et d'animaux, partout en France. Vous publiez votre annonce, vous recevez des candidatures, vous choisissez après une rencontre. L'accès à la plateforme est ouvert pendant la phase de lancement, toute évolution sera annoncée à l'avance.";
 export const PRICING_SHORT = "Sans engagement, sans carte bancaire.";
 export const PRICING_VERY_SHORT = "Sans engagement, sans carte bancaire.";
 
