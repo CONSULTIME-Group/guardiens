@@ -197,7 +197,7 @@
     "faq": {
       "title": "Questions fréquentes",
       "q1": "Qu'est-ce que le house-sitting ?",
-      "a1": "Le house-sitting est un échange de services : un gardien habite à 0 € dans votre maison pendant votre absence et prend soin de vos animaux. L'échange n'implique aucune transaction financière entre les deux parties.",
+      "a1": "Le house-sitting est un échange de services : un gardien habite dans votre maison pendant votre absence et prend soin de vos animaux. L'échange n'implique aucune transaction financière entre les deux parties.",
       "q2": "Comment fonctionne l'accès à Guardiens ?",
       "a2": "L'accès à Guardiens est ouvert pendant la phase de lancement : vous accédez à l'ensemble des fonctionnalités, et vous restez libre à tout moment. Toute évolution tarifaire vous sera annoncée à l'avance.",
       "q3": "Comment trouver un pet sitter près de chez moi ?",
@@ -1263,7 +1263,7 @@
     "faq3_q": "Mon chien est réactif ou anxieux, est-ce possible quand même ?",
     "faq3_a": "Oui, c'est même un cas typique d'urgence. Quand vous activez l'alerte, vous précisez le profil de votre animal (réactif, anxieux, soin particulier, etc.). Seuls les gardiens d'urgence ayant l'expérience et la compétence requises sont notifiés. Aucun gardien ne prend une garde sans rencontrer l'animal d'abord, c'est la règle.",
     "faq4_q": "Combien ça coûte une garde d'urgence ?",
-    "faq4_a": "Pour les propriétaires, l'inscription et l'utilisation de Guardiens (y compris l'alerte d'urgence) sont à 0 €. Aucun supplément n'est appliqué pour une garde d'urgence par rapport à une garde classique. La logique reste celle du house-sitting : pas d'argent qui circule entre vous et le gardien.",
+    "faq4_a": "Pour les propriétaires, l'inscription et l'utilisation de Guardiens (y compris l'alerte d'urgence) coûtent 0 €. Aucun supplément n'est appliqué pour une garde d'urgence par rapport à une garde classique. La logique reste celle du house-sitting : pas d'argent qui circule entre vous et le gardien.",
     "faq5_q": "Quelle différence avec une garde classique ?",
     "faq5_a": "Une garde classique se prépare à l'avance : vous publiez votre annonce, recevez plusieurs candidatures, choisissez. Une garde d'urgence suit un chemin plus court : un gardien éligible (5 gardes minimum, note 4.7+, 0 annulation, identité vérifiée) est notifié en priorité, vous le rencontrez, puis la garde peut démarrer dès que vous êtes d'accord tous les deux.",
     "faq6_q": "Et si je suis hospitalisé(e), comment ça se passe ?",
@@ -1851,7 +1851,7 @@
     "two_minutes": "2 minutes",
     "sticky_cta": "Proposer mon aide",
     "meta_title": "{{title}} · Coup de main à {{city}}",
-    "meta_fallback": "Coup de main entre particuliers : un service contre un service, à 0 €.",
+    "meta_fallback": "Coup de main entre particuliers : un service contre un service, 0 €.",
     "meta_exchange": "En échange : {{offer}}"
   },
   "search_results": {

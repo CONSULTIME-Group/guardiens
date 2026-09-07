@@ -63,7 +63,7 @@ const ANNECY_FAQ = [
  },
  {
  q: "Combien coûte une garde de maison à Annecy ?",
- a: "Pour les propriétaires, Guardiens est à 0 €, et aucune commission n'est prélevée. L'accès gardien est ouvert pendant la phase de lancement.",
+ a: "Pour les propriétaires, Guardiens coûte 0 €, et aucune commission n'est prélevée. L'accès gardien est ouvert pendant la phase de lancement.",
  },
  {
  q: "Combien de temps à l'avance publier mon annonce pour les vacances d'été ?",

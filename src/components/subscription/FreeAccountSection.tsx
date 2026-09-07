@@ -38,7 +38,7 @@ const accesGratuits: Array<{ titre: string; detail: string }> = [
  {
  titre: "Recherche et favoris",
  detail:
- "Parcourir les annonces, consulter les profils gardiens, ajouter des favoris, accessible à 0 €.",
+ "Parcourir les annonces, consulter les profils gardiens, ajouter des favoris, accessible, 0 €.",
  },
 ];
 

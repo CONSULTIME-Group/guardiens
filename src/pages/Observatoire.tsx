@@ -484,7 +484,7 @@ const Observatoire = () => {
  Vous voulez tester ?
  </h2>
  <p className="text-muted-foreground mb-6">
- Publication d'annonce à 0 €, candidatures sous quelques jours.
+ Publication d'annonce, 0 €, candidatures sous quelques jours.
  </p>
  <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
  <Link to="/inscription?role=owner">

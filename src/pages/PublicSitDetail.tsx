@@ -463,7 +463,7 @@ const PublicSitDetail = () => {
 
  // SEO description (≤160 char), distincte de og:description
  const ownerFirstName = publicFirstName(owner?.first_name);
- const seoDescription = `Garde à ${cityForTitle} ${datesShort}. ${petsSummary}. ${ownerFirstName || "Un membre"} cherche un gardien du coin sur Guardiens, inscription à 0 € pour les propriétaires.`;
+ const seoDescription = `Garde à ${cityForTitle} ${datesShort}. ${petsSummary}. ${ownerFirstName || "Un membre"} cherche un gardien du coin sur Guardiens, inscription : 0 € pour les propriétaires.`;
  const truncatedSeoDesc = seoDescription.length > 160 ? seoDescription.slice(0, 157) + "…" : seoDescription;
 
   // Canonical TOUJOURS sur le domaine de prod : sur preview/lovableproject,

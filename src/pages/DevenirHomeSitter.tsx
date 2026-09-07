@@ -19,7 +19,7 @@ const jsonLd = {
         "Guide complet pour devenir home-sitter : créer votre profil, gagner la confiance des propriétaires, décrocher vos premières gardes à domicile.",
       url: URL,
       step: [
-        { "@type": "HowToStep", position: 1, name: "Créer votre profil gardien", text: "Inscrivez-vous à 0 €, complétez votre bio, ajoutez vos expériences avec les animaux et vérifiez votre identité." },
+        { "@type": "HowToStep", position: 1, name: "Créer votre profil gardien", text: "Inscrivez-vous, 0 €, complétez votre bio, ajoutez vos expériences avec les animaux et vérifiez votre identité." },
         { "@type": "HowToStep", position: 2, name: "Renseigner votre zone et vos disponibilités", text: "Indiquez la ville où vous pouvez garder, votre rayon d'intervention et vos créneaux disponibles." },
         { "@type": "HowToStep", position: 3, name: "Candidater aux annonces", text: "Parcourez les gardes proposées près de chez vous. Personnalisez chaque message pour convaincre le propriétaire." },
         { "@type": "HowToStep", position: 4, name: "Échanger et rencontrer", text: "Discutez via la messagerie sécurisée, organisez une rencontre préalable avec l'animal et les propriétaires." },
@@ -42,7 +42,7 @@ const jsonLd = {
           name: "Combien gagne un home-sitter ?",
           acceptedAnswer: {
             "@type": "Answer",
-            text: "Sur Guardiens, les gardes à domicile s'organisent comme des échanges de services entre particuliers, sans transaction financière directe via la plateforme. Vous êtes logé à 0 € et vous gagnez la confiance des propriétaires, eux d'une garde de qualité pour leurs animaux.",
+            text: "Sur Guardiens, les gardes à domicile s'organisent comme des échanges de services entre particuliers, sans transaction financière directe via la plateforme. Vous êtes logé et vous gagnez la confiance des propriétaires, eux d'une garde de qualité pour leurs animaux.",
           },
         },
         {
@@ -131,7 +131,7 @@ export default function DevenirHomeSitter() {
             </h2>
             <ol>
               <li>
-                <strong>Créer votre profil.</strong> Inscription à 0 €. Photo
+                <strong>Créer votre profil.</strong> Inscription : 0 €. Photo
                 claire, bio honnête, expériences animales détaillées.
               </li>
               <li>
@@ -215,7 +215,7 @@ export default function DevenirHomeSitter() {
                 Prêt à devenir home-sitter ?
               </h2>
               <p className="text-muted-foreground m-0">
-                Créez votre profil à 0 € et candidatez aux gardes près
+                Créez votre profil, 0 €, et candidatez aux gardes près
                 de chez vous. Accès gardien ouvert pendant la phase de lancement.
               </p>
               <div className="flex flex-wrap gap-3">

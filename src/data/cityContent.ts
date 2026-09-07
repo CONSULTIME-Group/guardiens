@@ -164,7 +164,7 @@ Le home sitting existe depuis des décennies dans les pays anglo-saxons. Le prin
 
 ### Etape 1, Publiez votre annonce
 
-Décrivez votre maison, vos animaux, les dates de votre absence et vos attentes. La publication est à 0 € pour les propriétaires. Précisez votre arrondissement ou votre commune pour que les gardiens de proximité vous trouvent. [Voir les tarifs](/tarifs).
+Décrivez votre maison, vos animaux, les dates de votre absence et vos attentes. La publication coûte 0 € aux propriétaires. Précisez votre arrondissement ou votre commune pour que les gardiens de proximité vous trouvent. [Voir les tarifs](/tarifs).
 
 ### Etape 2, Rencontrez les gardiens intéressés
 

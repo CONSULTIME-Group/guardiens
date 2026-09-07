@@ -122,12 +122,12 @@ const SearchHowItWorksAnon = () => (
             Prêt à postuler à votre première garde ?
           </p>
           <p className="text-sm text-muted-foreground mt-1">
-            Inscription à 0 €. L'espace gardien est ouvert pendant la phase de lancement.
+            Inscription : 0 €. L'espace gardien est ouvert pendant la phase de lancement.
           </p>
         </div>
         <div className="flex gap-2 shrink-0">
           <Button asChild size="lg">
-            <Link to="/inscription">Inscription à 0 €</Link>
+            <Link to="/inscription">Inscription : 0 €</Link>
           </Button>
           <Button asChild size="lg" variant="outline">
             <Link to="/tarifs">Voir les tarifs</Link>

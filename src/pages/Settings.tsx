@@ -1130,7 +1130,7 @@ const BillingSection = ({ user }: { user: any }) => {
       <div className="space-y-4">
         <div className="rounded-lg border border-border bg-muted/30 p-4">
           <p className="text-sm font-medium">Espace propriétaire</p>
-          <p className="text-xs text-muted-foreground mt-1">L'espace propriétaire est à 0 €.</p>
+          <p className="text-xs text-muted-foreground mt-1">L'espace propriétaire coûte 0 €.</p>
         </div>
 
         {isSitter && (
@@ -1144,7 +1144,7 @@ const BillingSection = ({ user }: { user: any }) => {
 
         <div className="rounded-lg border border-border bg-muted/30 p-4">
           <p className="text-sm font-medium">Petites missions d'entraide</p>
-          <p className="text-xs text-muted-foreground mt-1">L'entraide est à 0 €, aucune commission prélevée.</p>
+          <p className="text-xs text-muted-foreground mt-1">L'entraide coûte 0 €, aucune commission prélevée.</p>
         </div>
 
         <div className="flex flex-wrap gap-2 pt-2">

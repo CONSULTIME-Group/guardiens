@@ -293,9 +293,9 @@ const CityPage = () => {
  ]
  : [
  { q: `Comment trouver un gardien de maison à ${cityData.name} ?`, a: `Sur Guardiens, vous publiez une annonce et les gardiens disponibles à ${cityData.name} et ses environs postulent directement. La vérification d'identité est ouverte à tous les membres : la pièce envoyée est analysée automatiquement, les dossiers qui ne passent pas sont revus par l'équipe, et les profils validés affichent l'écusson « Identité vérifiée ». Regardez cet écusson sur les profils avant de choisir.` },
- { q: `Y a-t-il des frais pour les propriétaires à ${cityData.name} ?`, a: "Non. L'espace propriétaire est à 0 €, et aucune commission n'est prélevée sur les gardes. L'espace gardien est ouvert pendant la phase de lancement." },
+ { q: `Y a-t-il des frais pour les propriétaires à ${cityData.name} ?`, a: "Non. L'espace propriétaire coûte 0 €, et aucune commission n'est prélevée sur les gardes. L'espace gardien est ouvert pendant la phase de lancement." },
  { q: `Que se passe-t-il en cas d'urgence pendant la garde à ${cityData.name} ?`, a: `Guardiens dispose d'un réseau de Gardiens d'Urgence dans chaque zone. En cas d'imprévu, animal malade, problème technique, le gardien en poste peut déclencher une alerte.` },
- { q: `Combien coûte une pension pour animaux à ${cityData.name} ?`, a: `Les pensions autour de ${cityData.name} facturent en moyenne 25 à 45 euros par nuit et par animal. Ordres de grandeur constatés en 2026, variables selon la ville, la saison et la taille de l'animal. Sur Guardiens, la garde à domicile est à 0 € pour le propriétaire : le gardien s'installe chez vous et s'occupe de vos animaux dans leur environnement habituel.` },
+ { q: `Combien coûte une pension pour animaux à ${cityData.name} ?`, a: `Les pensions autour de ${cityData.name} facturent en moyenne 25 à 45 euros par nuit et par animal. Ordres de grandeur constatés en 2026, variables selon la ville, la saison et la taille de l'animal. Sur Guardiens, la garde à domicile coûte 0 € au propriétaire : le gardien s'installe chez vous et s'occupe de vos animaux dans leur environnement habituel.` },
  { q: `Comment devenir gardien à ${cityData.name} ?`, a: `Inscrivez-vous, complétez votre profil et faites vérifier votre identité. Vous pourrez ensuite postuler aux gardes disponibles ${departmentIn(cityData.department)}. L'accès gardien est ouvert pendant la phase de lancement.` },
  ];
 
@@ -585,7 +585,7 @@ const CityPage = () => {
  Prêt à partir l'esprit libre ?
  </h2>
  <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
- Publiez votre annonce en 5 minutes, à 0 €.
+ Publiez votre annonce en 5 minutes, 0 €.
  </p>
  <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
  <Link to="/inscription?role=owner">
@@ -686,7 +686,7 @@ const CityPage = () => {
     },
     {
       q: `Y a-t-il des frais pour les propriétaires à ${dbPage.city} ?`,
-      a: "Non. L'espace propriétaire est à 0 €, et aucune commission n'est prélevée sur les gardes. L'espace gardien est ouvert pendant la phase de lancement.",
+      a: "Non. L'espace propriétaire coûte 0 €, et aucune commission n'est prélevée sur les gardes. L'espace gardien est ouvert pendant la phase de lancement.",
     },
     {
       q: `Que se passe-t-il en cas d'urgence pendant la garde à ${dbPage.city} ?`,
@@ -694,7 +694,7 @@ const CityPage = () => {
     },
     {
       q: `Combien coûte une pension pour animaux à ${dbPage.city} ?`,
-      a: `Les pensions autour de ${dbPage.city} facturent en moyenne 25 à 45 euros par nuit et par animal. Ordres de grandeur constatés en 2026, variables selon la ville, la saison et la taille de l'animal. Sur Guardiens, la garde à domicile est à 0 € pour le propriétaire : le gardien s'installe chez vous et s'occupe de vos animaux dans leur environnement habituel.`,
+      a: `Les pensions autour de ${dbPage.city} facturent en moyenne 25 à 45 euros par nuit et par animal. Ordres de grandeur constatés en 2026, variables selon la ville, la saison et la taille de l'animal. Sur Guardiens, la garde à domicile coûte 0 € au propriétaire : le gardien s'installe chez vous et s'occupe de vos animaux dans leur environnement habituel.`,
     },
     {
       q: `Comment devenir gardien à ${dbPage.city} ?`,
