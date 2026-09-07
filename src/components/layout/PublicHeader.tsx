@@ -152,8 +152,10 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
         </Link>
 
 
-        {/* Desktop nav, visible à partir du breakpoint sm (640 px). */}
-        <nav className="hidden sm:flex gap-1 items-center">
+        {/* Navigation complète, visible à partir de 1400 px : en dessous,
+            la marque et les liens se touchaient (mesuré à 1254 px, huit
+            pixels d'écart), on passe au menu burger. */}
+        <nav className="hidden min-[1400px]:flex gap-1 items-center">
           {NAV_DEFS.map((l) => (
             <Button
               key={l.to}
