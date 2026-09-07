@@ -243,12 +243,7 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
                           isActive(l.to) ? "bg-primary/10 text-primary font-semibold" : "text-foreground hover:bg-accent"
                         }`}
                       >
-                        {t(`nav.${l.key}`)}
-                        {l.beta && (
-                          <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-amber-800">
-                            {t("nav.beta")}
-                          </span>
-                        )}
+                        {t(`nav.${l.shortKey ?? l.key}`)}
                       </Link>
                     </SheetClose>
                   ))}
