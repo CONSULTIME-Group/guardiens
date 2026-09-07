@@ -416,7 +416,7 @@ export default function ArticleDetail() {
 ...(article.region ? { "addressRegion": article.region } : {}),
  "addressCountry": "FR"
  },
- "priceRange": "Gratuit pour les propriétaires",
+ "priceRange": "0 € pour les propriétaires",
  }) }} />
  )}
 

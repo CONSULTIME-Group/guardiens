@@ -47,7 +47,7 @@ const LYON_FAQ = [
 const ANNECY_FAQ = [
  {
  q: "Comment trouver un gardien de confiance à Annecy ?",
- a: "Vous publiez votre annonce gratuitement et les gardiens disponibles à Annecy et en Haute-Savoie postulent. La vérification d'identité est ouverte à tous les membres. La pièce envoyée est analysée automatiquement, et les dossiers qui ne passent pas ce contrôle sont revus par l'équipe. Les profils validés affichent l'écusson « Identité vérifiée ». Les avis croisés et les badges de fiabilité complètent ces informations. Vous échangez avec les candidats via la messagerie et organisez une rencontre avant de confier vos clés.",
+ a: "Vous publiez votre annonce à 0 € et les gardiens disponibles à Annecy et en Haute-Savoie postulent. La vérification d'identité est ouverte à tous les membres. La pièce envoyée est analysée automatiquement, et les dossiers qui ne passent pas ce contrôle sont revus par l'équipe. Les profils validés affichent l'écusson « Identité vérifiée ». Les avis croisés et les badges de fiabilité complètent ces informations. Vous échangez avec les candidats via la messagerie et organisez une rencontre avant de confier vos clés.",
  },
  {
  q: "Les gardiens à Annecy sont-ils habitués aux logements de montagne ?",
@@ -63,7 +63,7 @@ const ANNECY_FAQ = [
  },
  {
  q: "Combien coûte une garde de maison à Annecy ?",
- a: "Pour les propriétaires, Guardiens est gratuit : aucun frais, aucune commission. L'accès gardien est ouvert pendant la phase de lancement.",
+ a: "Pour les propriétaires, Guardiens est à 0 €, et aucune commission n'est prélevée. L'accès gardien est ouvert pendant la phase de lancement.",
  },
  {
  q: "Combien de temps à l'avance publier mon annonce pour les vacances d'été ?",
@@ -74,7 +74,7 @@ const ANNECY_FAQ = [
 const GRENOBLE_FAQ = [
  {
  q: "Comment trouver un home sitter à Grenoble et en Isère ?",
- a: "Vous publiez gratuitement votre annonce sur Guardiens et les gardiens disponibles à Grenoble et dans le bassin grenoblois postulent. La vérification d'identité est ouverte à tous les membres : la pièce envoyée est analysée automatiquement, les dossiers qui ne passent pas sont revus par l'équipe, et les profils validés affichent l'écusson « Identité vérifiée ». Regardez cet écusson, puis choisissez après échange et rencontre.",
+ a: "Vous publiez votre annonce à 0 € sur Guardiens et les gardiens disponibles à Grenoble et dans le bassin grenoblois postulent. La vérification d'identité est ouverte à tous les membres : la pièce envoyée est analysée automatiquement, les dossiers qui ne passent pas sont revus par l'équipe, et les profils validés affichent l'écusson « Identité vérifiée ». Regardez cet écusson, puis choisissez après échange et rencontre.",
  },
  {
  q: "Les gardiens à Grenoble connaissent-ils les sorties chien adaptées en montagne ?",
@@ -94,14 +94,14 @@ const GRENOBLE_FAQ = [
  },
  {
  q: "À combien revient une garde de chien à Grenoble ?",
- a: "Pour les propriétaires, c'est gratuit : aucun frais ni commission sur la plateforme. L'accès gardien est ouvert pendant la phase de lancement.",
+ a: "Pour les propriétaires, c'est 0 €, et aucune commission n'est prélevée. L'accès gardien est ouvert pendant la phase de lancement.",
  },
 ];
 
 const CHAMBERY_FAQ = [
  {
  q: "Comment trouver un gardien de confiance à Chambéry ?",
- a: "Vous publiez votre annonce gratuitement sur Guardiens, les gardiens disponibles à Chambéry et en Savoie postulent. La vérification d'identité est ouverte à tous les membres : la pièce envoyée est analysée automatiquement, les dossiers qui ne passent pas sont revus par l'équipe, et les profils validés affichent l'écusson « Identité vérifiée ». Regardez cet écusson, échangez avec les gardiens et organisez une rencontre avant la garde.",
+ a: "Vous publiez votre annonce à 0 € sur Guardiens, les gardiens disponibles à Chambéry et en Savoie postulent. La vérification d'identité est ouverte à tous les membres : la pièce envoyée est analysée automatiquement, les dossiers qui ne passent pas sont revus par l'équipe, et les profils validés affichent l'écusson « Identité vérifiée ». Regardez cet écusson, échangez avec les gardiens et organisez une rencontre avant la garde.",
  },
  {
  q: "Les gardiens à Chambéry connaissent-ils les contraintes saisonnières ?",
@@ -117,18 +117,18 @@ const CHAMBERY_FAQ = [
  },
  {
  q: "Combien coûte Guardiens à Chambéry ?",
- a: "Pour les propriétaires, c'est entièrement gratuit. L'accès gardien est ouvert pendant la phase de lancement.",
+ a: "Pour les propriétaires, c'est 0 €. L'accès gardien est ouvert pendant la phase de lancement.",
  },
 ];
 
 const DEFAULT_FAQ = (cityName: string) => [
  {
  q: `Comment trouver un gardien de maison à ${cityName} ?`,
- a: `Sur Guardiens, vous publiez une annonce gratuite et les gardiens disponibles à ${cityName} et ses environs postulent directement. La vérification d'identité est ouverte à tous les membres : la pièce envoyée est analysée automatiquement, les dossiers qui ne passent pas sont revus par l'équipe, et les profils validés affichent l'écusson « Identité vérifiée ». Regardez cet écusson sur les profils avant de choisir.`,
+ a: `Sur Guardiens, vous publiez une annonce à 0 € et les gardiens disponibles à ${cityName} et ses environs postulent directement. La vérification d'identité est ouverte à tous les membres : la pièce envoyée est analysée automatiquement, les dossiers qui ne passent pas sont revus par l'équipe, et les profils validés affichent l'écusson « Identité vérifiée ». Regardez cet écusson sur les profils avant de choisir.`,
  },
  {
- q: `Est-ce vraiment gratuit pour les propriétaires à ${cityName} ?`,
- a: "Oui. Guardiens est gratuit pour tous les propriétaires : aucun frais, aucune commission. L'accès gardien est ouvert pendant la phase de lancement.",
+ q: `Combien un propriétaire paie-t-il à ${cityName} ?`,
+ a: "Guardiens est à 0 € pour tous les propriétaires, et aucune commission n'est prélevée. L'accès gardien est ouvert pendant la phase de lancement.",
  },
  {
  q: `Que se passe-t-il en cas d'urgence pendant la garde à ${cityName} ?`,
@@ -173,7 +173,7 @@ const CitySchemaOrg = ({ city, departmentSlug }: Props) => {
  price: "0",
  priceCurrency: "EUR",
  eligibleCustomerType: "Owner",
- description: "Gratuit pour les propriétaires, sans abonnement requis.",
+ description: "0 € pour les propriétaires.",
  },
  },
  {
@@ -241,7 +241,7 @@ const CitySchemaOrg = ({ city, departmentSlug }: Props) => {
  "@type": "City",
  name: city.name,
  },
- priceRange: "Gratuit pour les propriétaires",
+ priceRange: "0 € pour les propriétaires",
  });
  }
 

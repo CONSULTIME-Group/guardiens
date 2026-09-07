@@ -494,7 +494,7 @@ const DepartmentPage = () => {
  price: "0",
  priceCurrency: "EUR",
  eligibleCustomerType: "Owner",
- description: "Gratuit pour les propriétaires, sans abonnement requis.",
+ description: "0 € pour les propriétaires.",
  },
  }),
  }}

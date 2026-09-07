@@ -111,7 +111,7 @@ const ParrainagePage = () => {
     <div className="animate-fade-in">
       <PageMeta
         title="Parrainage Guardiens, invitez vos proches"
-        description="Invitez vos proches à rejoindre Guardiens. Inscription gratuite, accès offert pour vous et votre filleul à l'activation de l'abonnement gardien."
+        description="Invitez vos proches à rejoindre Guardiens. Inscription à 0 €, accès offert pour vous et votre filleul à l'activation de l'abonnement gardien."
       />
       <PageBreadcrumb items={[{ label: "Parrainage" }]} />
 
@@ -264,7 +264,7 @@ const ParrainagePage = () => {
           <CardContent>
             <ol className="space-y-2 text-sm text-muted-foreground font-body list-decimal pl-5">
               <li>Vous partagez votre lien personnel à un proche.</li>
-              <li>Votre filleul crée son compte gratuitement via votre lien.</li>
+              <li>Votre filleul crée son compte à 0 € via votre lien.</li>
               <li>Dès qu'il active son espace, son inscription compte dans vos filleuls.</li>
               <li>Au moment du passage à l'abonnement payant, vous recevez tous les deux un mois offert.</li>
             </ol>

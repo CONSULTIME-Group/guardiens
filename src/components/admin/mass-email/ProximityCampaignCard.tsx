@@ -145,7 +145,7 @@ const ProximityCampaignCard = ({
   const subject = preview
     ? (preview.subject
         ?? (missionType === "offre"
-          ? `Près de chez vous, ${preview.author_first_name || "un membre"} propose son aide, gratuitement`
+          ? `Près de chez vous, ${preview.author_first_name || "un membre"} propose son aide, à 0 €`
           : `Près de chez vous, ${preview.author_first_name || "un membre"} cherche un coup de main`))
     : "";
 

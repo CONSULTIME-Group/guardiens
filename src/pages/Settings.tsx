@@ -1130,7 +1130,7 @@ const BillingSection = ({ user }: { user: any }) => {
       <div className="space-y-4">
         <div className="rounded-lg border border-border bg-muted/30 p-4">
           <p className="text-sm font-medium">Espace propriétaire</p>
-          <p className="text-xs text-muted-foreground mt-1">L'espace propriétaire est gratuit.</p>
+          <p className="text-xs text-muted-foreground mt-1">L'espace propriétaire est à 0 €.</p>
         </div>
 
         {isSitter && (

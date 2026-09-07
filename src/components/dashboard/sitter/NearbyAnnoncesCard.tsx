@@ -133,7 +133,7 @@ const NearbyAnnoncesCard = ({ nearbyListings, nearbyError = null, nearbyListings
                 </div>
                 <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-border/60">
                   <p className="text-xs text-muted-foreground">
-                    Faites venir un propriétaire&nbsp;: votre filleul rejoint gratuitement, lui aussi.
+                    Faites venir un propriétaire&nbsp;: votre filleul rejoint à 0 €, lui aussi.
                   </p>
                   <Link
                     to="/mon-abonnement#parrainage"

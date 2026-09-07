@@ -584,7 +584,7 @@ export default function AlmaTips() {
               </h2>
               <p className="text-muted-foreground mb-4 max-w-2xl">
                 L'accès à Guardiens est ouvert pendant la phase de lancement
-                que nous vous offrons. Rejoignez les propriétaires qui trouvent leur gardien
+                Rejoignez les propriétaires qui trouvent leur gardien
                 parmi les gens du coin.
               </p>
               <div className="flex flex-wrap gap-3">
