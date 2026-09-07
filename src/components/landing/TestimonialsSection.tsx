@@ -82,7 +82,7 @@ const TestimonialsSection = () => {
               {(testimonialPages[selectedIndex] ?? []).map((quote) => (
                 <figure key={quote.name} className="min-w-0">
                   <blockquote className="rounded-2xl p-10 h-full bg-card border border-border shadow-sm flex flex-col">
-                    <span aria-hidden className="block font-heading text-7xl leading-none mb-3 select-none text-primary/40">
+                    <span aria-hidden className="block font-heading text-7xl leading-none mb-3 select-none text-primary/70">
                       "
                     </span>
                     {/* Le verbatim est traduit par clé. Prénoms et villes
