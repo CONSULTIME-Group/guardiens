@@ -200,7 +200,7 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
           )}
         </div>
 
-        <div className="flex min-[1120px]:hidden shrink-0 items-center gap-1">
+        <div className="flex min-[960px]:hidden shrink-0 items-center gap-1">
           {!authChecked ? (
             <div className="h-9 w-9 rounded-md bg-muted/40 animate-pulse" aria-hidden="true" />
           ) : hasSession ? (
