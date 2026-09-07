@@ -1,4 +1,5 @@
 // MIROIR DE DOCUMENTATION, CE FICHIER NE DÉPLOIE RIEN.
+// (ligne 1 conservée pour ancrage)
 // La source de vérité est l'éditeur Cloudflare (Workers & Pages >
 // guardiens-prerender > Edit code). Ce fichier reflète la version active
 // 1f3bf743 (v7.3 du 07/09/2026), capturée le 07/09/2026. Toute modification
