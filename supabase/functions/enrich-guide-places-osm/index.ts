@@ -379,12 +379,18 @@ Deno.serve(async (req) => {
     // Overpass indisponible ou tous les candidats rejetés). Un guide sans
     // vétérinaire ni animalerie dans son rayon est un résultat normal :
     // sans ce marquage, il gèle la file éternellement.
+    // L'issue réelle est écrite dans `osm_enrich_last_result` : une panne
+    // d'infrastructure n'est plus confondue avec une absence de donnée.
     // En dry_run on n'écrit rien : c'est une simulation.
-    const markAttempted = async (guideId: string) => {
+    const markAttempted = async (guideId: string, result: string | null) => {
       if (dryRun) return;
+      const payload: Record<string, unknown> = {
+        osm_enrich_attempted_at: new Date().toISOString(),
+      };
+      if (result !== null) payload.osm_enrich_last_result = result;
       await supabase
         .from("city_guides")
-        .update({ osm_enrich_attempted_at: new Date().toISOString() })
+        .update(payload)
         .eq("id", guideId);
     };
 
