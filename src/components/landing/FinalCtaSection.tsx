@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { trackEvent } from "@/lib/analytics";
 import { RevealSection } from "@/components/ui/RevealSection";
+import { PaintedHouse } from "@/components/landing/painted/PaintedHouse";
 
 export function FinalCtaSection() {
   const { t } = useTranslation();
@@ -11,6 +12,8 @@ export function FinalCtaSection() {
     <section id="commencer" className="py-[52px] md:py-20 bg-primary scroll-mt-24">
       <RevealSection className="lp-read text-center">
         {/* Chips "Programme Fondateur" retirés (signal de deadline implicite). */}
+        {/* Maison peinte au-dessus du titre : le foyer confié. */}
+        <PaintedHouse className="mx-auto mb-6" />
         <h2 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-6">
           {t("landing.final.title")}
         </h2>

@@ -38,6 +38,7 @@ import PublicFooter from "@/components/layout/PublicFooter";
 import { staticRoutes, DEFAULT_OG_IMAGE } from "@/data/siteRoutes";
 // Pricing pivot : plus d'Offer JSON-LD tant que PRICING_IS_ACTIVE = false.
 import { RevealSection } from "@/components/ui/RevealSection";
+import { GrainOverlay } from "@/components/ui/GrainOverlay";
 
 
 
@@ -316,8 +317,10 @@ const Landing = () => {
            deux), inscrits, missions d'entraide. Le lien entraide, sorti du
            hero, vit à droite de cette bande. */}
         {(kpiMaisons > 0 || kpiAnimaux >= 10 || kpiInscrits > 0 || kpiMissions > 0) && (
-          <section className="bg-accent border-b border-border/60">
-            <div className="lp-wide py-4 md:py-5 flex flex-wrap items-center justify-between gap-x-10 gap-y-3">
+           <section className="relative overflow-hidden bg-accent border-b border-border/60">
+             {/* Grain de papier à 4 % sur le grand aplat crème. */}
+             <GrainOverlay />
+             <div className="relative lp-wide py-4 md:py-5 flex flex-wrap items-center justify-between gap-x-10 gap-y-3">
               <dl className="flex flex-wrap items-center gap-x-8 md:gap-x-14 gap-y-2">
                 {kpiMaisons > 0 && (
                   <div>
