@@ -1,10 +1,9 @@
 // MIROIR DE DOCUMENTATION, CE FICHIER NE DÉPLOIE RIEN.
 // La source de vérité est l'éditeur Cloudflare (Workers & Pages >
 // guardiens-prerender > Edit code). Ce fichier reflète la version active
-// 415a7bc4 (v7.2 du 05/09/2026), capturée le 05/09/2026 et vérifiée identique
-// au déployé par empreinte SHA-256. Toute modification faite ici reste sans
-// effet sur la production tant qu'elle n'est pas reportée dans l'éditeur
-// Cloudflare, ou déployée par `npx wrangler deploy`.
+// 1f3bf743 (v7.3 du 07/09/2026), capturée le 07/09/2026. Toute modification
+// faite ici reste sans effet sur la production tant qu'elle n'est pas
+// reportée dans l'éditeur Cloudflare, ou déployée par `npx wrangler deploy`.
 
 /**
  * Cloudflare Worker — Prerender.io proxy for guardiens.fr
