@@ -14,16 +14,13 @@ export function NotreHistoireSection() {
     <section id="notre-histoire" className="bg-muted/30 scroll-mt-24">
       <div className="lp-read py-[52px] md:py-20">
         <RevealSection>
+          <PaintedKey className="h-16 w-16 md:h-24 md:w-24 mb-[22px]" />
           <span className="text-xs tracking-widest uppercase text-primary font-body mb-3 block">
             {t("landing.story.eyebrow")}
           </span>
-          {/* Clé peinte en ouverture du récit, à côté du titre. */}
-          <div className="flex items-center gap-4 md:gap-5 mb-8">
-            <PaintedKey className="h-16 w-16 md:h-24 md:w-24" />
-            <h2 id="commence-avec-un-visa" className="text-2xl md:text-5xl font-heading font-semibold leading-snug text-foreground scroll-mt-24">
-              {t("landing.story.title")}
-            </h2>
-          </div>
+          <h2 id="commence-avec-un-visa" className="text-2xl md:text-5xl font-heading font-semibold leading-snug text-foreground scroll-mt-24 mb-8">
+            {t("landing.story.title")}
+          </h2>
         </RevealSection>
 
         <RevealSection delay={0.1}>

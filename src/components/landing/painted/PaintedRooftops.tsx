@@ -1,215 +1,62 @@
 import { useId } from "react";
 import { cn } from "@/lib/utils";
 
-/**
- * PaintedRooftops : les toits du quartier, maisons serrées vues de loin.
- * Illustration peinte pour le bloc sombre Prétexte : format large, discret,
- * posé en bas du bloc, jamais devant le texte. Tons clairs sur vert profond.
- *
- * Technique peinture : feTurbulence + feDisplacementMap pour des bords qui
- * respirent (aucun contour net), grain de papier interne à faible opacité,
- * double passe de couleur décalée pour les coups de pinceau superposés.
- * Palette : crème, bleu gris de toit, terracotta. Pas d'or (signature
- * réservée au ring d'affinité).
- */
 export function PaintedRooftops({ className }: { className?: string }) {
   const uid = useId().replace(/:/g, "");
   const wobbleId = `toits-wobble-${uid}`;
   const grainId = `toits-grain-${uid}`;
-  const fadeId = `toits-fade-${uid}`;
 
   return (
     <svg
-      viewBox="0 0 1200 230"
+      viewBox="0 0 460 150"
       role="img"
-      aria-label="Illustration peinte des toits du quartier : quelques maisons serrées vues de loin."
+      aria-label="Illustration peinte de quatre maisons aux toits de terre cuite."
       className={cn("block w-full h-auto", className)}
       preserveAspectRatio="xMidYMax meet"
     >
       <defs>
-        {/* Bords irréguliers : déplacement de quelques pixels sur chaque forme. */}
         <filter id={wobbleId} x="-8%" y="-8%" width="116%" height="116%">
-          <feTurbulence
-            type="fractalNoise"
-            baseFrequency="0.02"
-            numOctaves="2"
-            seed="7"
-            result="noise"
-          />
-          <feDisplacementMap in="SourceGraphic" in2="noise" scale="9" />
+          <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="3" seed="4" result="noise" />
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="2.4" />
         </filter>
-        {/* Grain de papier interne à l'illustration. */}
-        {/* Grain confiné aux formes, fusionné par-dessus les passes. */}
         <filter id={grainId} x="-5%" y="-5%" width="110%" height="110%">
-          <feTurbulence
-            type="fractalNoise"
-            baseFrequency="0.75"
-            numOctaves="2"
-            seed="3"
-            stitchTiles="stitch"
-            result="n"
-          />
-          <feColorMatrix
-            in="n"
-            type="matrix"
-            values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.8 0.8 0.8 0 -1.7"
-            result="speck"
-          />
+          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" seed="12" stitchTiles="stitch" result="n" />
+          <feColorMatrix in="n" type="matrix" values="0 0 0 0 0.06  0 0 0 0 0.05  0 0 0 0 0.04  0.9 0.9 0.9 0 -1.5" result="speck" />
           <feComposite in="speck" in2="SourceAlpha" operator="in" result="clipped" />
           <feMerge>
             <feMergeNode in="SourceGraphic" />
             <feMergeNode in="clipped" />
           </feMerge>
         </filter>
-        {/* Fondu vers le haut pour que la frise s'efface dans le fond. */}
-        <linearGradient id={fadeId} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#fff" stopOpacity="0" />
-          <stop offset="0.35" stopColor="#fff" stopOpacity="0.85" />
-          <stop offset="1" stopColor="#fff" stopOpacity="1" />
-        </linearGradient>
-        <mask id={`${fadeId}-mask`}>
-          <rect width="1200" height="230" fill={`url(#${fadeId})`} />
-        </mask>
       </defs>
 
-      <g mask={`url(#${fadeId}-mask)`}>
-       <g filter={`url(#${grainId})`}>
-        {/* Passe fantôme décalée : superposition de touches, matière. */}
-        <g filter={`url(#${wobbleId})`} opacity="0.28" transform="translate(7 3)">
-          <path
-            fill="#9A6A44"
-            d="M64,182 C63,158 65,132 68,112 C94,107 128,106 152,110 C155,134 157,160 155,182 C124,187 94,187 64,182 Z"
-          />
-          <path
-            fill="#9A6A44"
-            d="M300,186 C298,150 300,110 304,76 C336,70 374,70 400,77 C404,112 405,152 403,186 C368,191 334,191 300,186 Z"
-          />
-          <path
-            fill="#9A6A44"
-            d="M560,180 C559,152 561,124 565,102 C596,96 634,96 660,102 C664,128 665,156 663,180 C628,185 594,185 560,180 Z"
-          />
-          <path
-            fill="#9A6A44"
-            d="M830,184 C829,156 831,128 834,106 C862,101 896,101 920,107 C923,132 924,160 922,184 C890,189 860,189 830,184 Z"
-          />
-          <path
-            fill="#9A6A44"
-            d="M1046,178 C1045,154 1047,130 1050,112 C1076,107 1108,107 1130,112 C1133,134 1134,158 1132,178 C1102,183 1074,183 1046,178 Z"
-          />
+      <g filter={`url(#${grainId})`}>
+        <path opacity="0.22" filter={`url(#${wobbleId})`} fill="#E8E2D6" d="M26,136 C96,133 200,132 292,134 C330,135 358,136 380,138 C350,140 306,140 260,139 C186,138 96,139 26,140 Z" />
+
+        <g opacity="0.2" transform="translate(4 4)" filter={`url(#${wobbleId})`}>
+          <path fill="#E8E2D6" d="M120,133 C118,104 119,80 122,56 C148,52 176,52 202,56 C205,80 205,106 203,134 C174,136 148,136 120,133 Z" />
+          <path fill="#C4714E" d="M104,60 C132,34 155,16 162,11 C171,17 197,38 218,61 C182,52 142,53 104,60 Z" />
         </g>
 
-        {/* Passe principale : murs crème, toits bleu gris. */}
         <g filter={`url(#${wobbleId})`}>
-          {/* Maison 1 */}
-          <path
-            fill="#FAF8F5"
-            opacity="0.92"
-            d="M64,182 C63,158 65,132 68,112 C94,107 128,106 152,110 C155,134 157,160 155,182 C124,187 94,187 64,182 Z"
-          />
-          <path
-            fill="#7C93A0"
-            opacity="0.95"
-            d="M54,114 C74,94 98,78 112,68 C128,78 148,96 164,112 C130,106 92,107 54,114 Z"
-          />
-          <path
-            fill="#7C93A0"
-            opacity="0.9"
-            d="M132,84 C132,76 132,68 133,62 C137,60 141,60 144,62 C145,70 145,78 144,86 Z"
-          />
-          {/* Maison 2, la plus haute */}
-          <path
-            fill="#FAF8F5"
-            opacity="0.9"
-            d="M300,186 C298,150 300,110 304,76 C336,70 374,70 400,77 C404,112 405,152 403,186 C368,191 334,191 300,186 Z"
-          />
-          <path
-            fill="#7C93A0"
-            opacity="0.95"
-            d="M292,79 C314,58 340,44 354,36 C370,46 394,62 412,78 C374,71 332,72 292,79 Z"
-          />
-          {/* Maison 3 */}
-          <path
-            fill="#FAF8F5"
-            opacity="0.88"
-            d="M560,180 C559,152 561,124 565,102 C596,96 634,96 660,102 C664,128 665,156 663,180 C628,185 594,185 560,180 Z"
-          />
-          <path
-            fill="#7C93A0"
-            opacity="0.92"
-            d="M552,104 C576,88 604,76 616,70 C630,78 650,90 668,102 C630,97 590,98 552,104 Z"
-          />
-          {/* Maison 4 */}
-          <path
-            fill="#FAF8F5"
-            opacity="0.9"
-            d="M830,184 C829,156 831,128 834,106 C862,101 896,101 920,107 C923,132 924,160 922,184 C890,189 860,189 830,184 Z"
-          />
-          <path
-            fill="#7C93A0"
-            opacity="0.94"
-            d="M822,108 C844,90 868,76 880,68 C894,78 914,92 930,106 C896,100 858,101 822,108 Z"
-          />
-          {/* Maison 5 */}
-          <path
-            fill="#FAF8F5"
-            opacity="0.88"
-            d="M1046,178 C1045,154 1047,130 1050,112 C1076,107 1108,107 1130,112 C1133,134 1134,158 1132,178 C1102,183 1074,183 1046,178 Z"
-          />
-          <path
-            fill="#7C93A0"
-            opacity="0.92"
-            d="M1038,114 C1058,96 1080,82 1092,74 C1106,84 1124,98 1138,112 C1106,107 1072,108 1038,114 Z"
-          />
+          <path fill="#F2ECE0" d="M30,133 C28,114 29,98 32,84 C50,80 68,80 84,84 C87,100 87,116 85,134 C66,136 48,136 30,133 Z" />
+          <path fill="#C4714E" d="M18,88 C36,68 50,56 58,50 C66,56 82,70 98,89 C72,81 44,82 18,88 Z" />
+          <path fill="#D9A04E" d="M48,102 C48,110 48,116 49,122 C55,123 62,123 66,122 C67,115 67,108 66,101 C60,99 53,99 48,102 Z" />
 
-          {/* Fenêtres : touches de terracotta posées au pinceau. */}
-          <path
-            fill="#9A6A44"
-            opacity="0.8"
-            d="M86,132 C86,126 87,122 89,119 C93,118 98,118 101,120 C102,125 102,130 101,134 C96,136 91,136 86,132 Z"
-          />
-          <path
-            fill="#9A6A44"
-            opacity="0.75"
-            d="M120,128 C120,123 121,119 123,116 C127,115 131,115 134,117 C135,122 135,127 134,131 C129,133 124,132 120,128 Z"
-          />
-          <path
-            fill="#9A6A44"
-            opacity="0.8"
-            d="M330,104 C330,98 331,93 333,89 C338,88 343,88 347,90 C348,96 348,102 347,107 C341,109 335,108 330,104 Z"
-          />
-          <path
-            fill="#9A6A44"
-            opacity="0.75"
-            d="M362,100 C362,95 363,90 365,87 C369,86 374,86 377,88 C378,93 378,99 377,103 C372,105 366,104 362,100 Z"
-          />
-          <path
-            fill="#9A6A44"
-            opacity="0.78"
-            d="M596,126 C596,121 597,116 599,113 C603,112 608,112 611,114 C612,119 612,124 611,128 C606,130 600,130 596,126 Z"
-          />
-          <path
-            fill="#9A6A44"
-            opacity="0.75"
-            d="M866,130 C866,124 867,120 869,117 C873,116 878,116 881,118 C882,123 882,128 881,132 C876,134 870,134 866,130 Z"
-          />
-          <path
-            fill="#9A6A44"
-            opacity="0.78"
-            d="M1080,132 C1080,127 1081,122 1083,119 C1087,118 1092,118 1095,120 C1096,125 1096,130 1095,134 C1090,136 1084,136 1080,132 Z"
-          />
+          <path fill="#F2ECE0" d="M120,133 C118,104 119,80 122,56 C148,52 176,52 202,56 C205,80 205,106 203,134 C174,136 148,136 120,133 Z" />
+          <path fill="#C4714E" d="M104,60 C132,34 155,16 162,11 C171,17 197,38 218,61 C182,52 142,53 104,60 Z" />
+          <path fill="#9E5B3B" d="M186,30 C186,23 186,17 187,11 C192,9 197,10 200,12 C200,20 200,28 199,35 Z" />
+          <path fill="#D9A04E" d="M136,80 C136,90 136,98 137,105 C146,106 155,106 161,105 C162,96 162,88 161,79 C152,77 143,77 136,80 Z" />
+          <path fill="#D9A04E" opacity="0.7" d="M174,86 C174,94 174,101 175,107 C181,108 188,108 192,107 C193,100 193,93 192,85 C186,83 179,83 174,86 Z" />
+
+          <path fill="#F2ECE0" d="M232,134 C230,112 231,94 234,78 C256,74 280,74 300,78 C303,96 303,116 301,134 C280,136 254,136 232,134 Z" />
+          <path fill="#B3684A" d="M220,82 C242,60 259,45 266,41 C275,47 294,63 312,83 C282,75 250,76 220,82 Z" />
+          <path fill="#D9A04E" opacity="0.9" d="M250,100 C250,108 250,114 251,120 C258,121 265,121 270,120 C271,113 271,106 270,99 C263,97 256,97 250,100 Z" />
+
+          <path fill="#F2ECE0" d="M330,134 C329,120 330,109 332,98 C348,94 364,94 378,98 C380,111 380,123 379,134 C363,136 346,136 330,134 Z" />
+          <path fill="#C4714E" d="M318,102 C334,86 347,76 354,72 C362,78 374,88 388,103 C366,96 340,97 318,102 Z" />
+          <path fill="#D9A04E" opacity="0.8" d="M346,112 C346,118 346,123 347,128 C352,129 358,129 362,128 C363,122 363,116 362,111 C356,109 351,109 346,112 Z" />
         </g>
-
-        {/* Ligne de sol tracée à main levée. */}
-        <path
-          fill="none"
-          stroke="#FAF8F5"
-          strokeOpacity="0.35"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          filter={`url(#${wobbleId})`}
-          d="M20,196 C120,190 260,198 400,194 C560,189 700,199 860,195 C980,192 1100,197 1180,193"
-        />
-       </g>
       </g>
     </svg>
   );
