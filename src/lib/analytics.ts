@@ -1,7 +1,7 @@
 /**
- * Lightweight analytics — fire-and-forget.
+ * Lightweight analytics, fire-and-forget.
  * Tous les événements sont insérés dans `analytics_events` sans bloquer l'UI.
- * Échec silencieux (RLS, réseau, etc.) — jamais d'exception remontée.
+ * Échec silencieux (RLS, réseau, etc.), jamais d'exception remontée.
  */
 import { supabase } from "@/integrations/supabase/client";
 import { getDeviceContext } from "@/lib/deviceContext";
@@ -253,7 +253,7 @@ export type EventType =
   | "alma_whisper_action_clicked"               // Action d'un whisper cliquée (whisper_type, action_id)
  | "alma_frequency_changed"                    // Slider fréquence Alma modifié (from, to)
  | "alma_blacklisted_type"                     // Whisper type blacklisté 30j après 3 dismiss (whisper_type)
- // Pass 3 — republish + welcome cross-canal ----------------------------------
+ // Pass 3, republish + welcome cross-canal ----------------------------------
  | "alma_republish_bubble_seen"                // Bandeau Alma republication affiché (sit_id)
  | "alma_republish_mode_selected"              // Mode choisi dans la modale republish (mode: copy|adapt, sit_id)
  | "alma_republish_published"                  // Nouvelle annonce publiée à partir d'une republication (original_sit_id, new_sit_id, mode)
@@ -273,7 +273,7 @@ export type EventType =
   | "admin_mutual_aid_dashboard_seen"           // Dashboard admin entraide affiché (1x par montage)
   | "admin_alma_dashboard_seen"                 // Dashboard admin Alma affiché (1x par montage)
   | "admin_alma_export_csv_clicked"             // Export CSV depuis dashboard admin Alma
-  // Alma Pass 5 — compagnon culturel -----------------------------------------
+  // Alma Pass 5, compagnon culturel -----------------------------------------
   | "alma_cultural_fact_seen"                   // Fait culturel affiché (fact_id, fact_type, surface)
   | "alma_cultural_fact_action_clicked"         // Clic action "En savoir plus" (fact_id, source_url)
   | "alma_cultural_fact_dismissed"              // Fait culturel fermé (fact_id, reason)
@@ -281,7 +281,7 @@ export type EventType =
   | "admin_alma_cultural_fact_toggled"          // Désactivation/réactivation d'un fait (fact_id, active)
   | "admin_alma_matching_diagnosis_run"         // Simulation diagnostic matching depuis admin (surface, role)
 
-  // Alma évolution étape 1 — usage_nudge + next tip ------------------------
+  // Alma évolution étape 1, usage_nudge + next tip ------------------------
   | "alma_next_tip_delivered"                   // Conseil "un autre" tiré (fact_id, kind, surface)
   | "alma_next_tip_empty"                       // Pool épuisé pour cette surface (surface)
   | "alma_usage_nudge_seen"                     // Usage nudge affiché (fact_id, surface, cta_action)
@@ -297,7 +297,7 @@ export type EventType =
   | "sits_create_setup_quit"                    // Mise en route quittée vers le tableau de bord (missing)
   | "application_submitted"                     // Candidature envoyée (source, used_alma_draft, message_length)
   | "application_sent_unedited_draft"           // Candidature envoyée avec brouillon Alma non modifié (sit_id)
-  // Vague 14 — tracking des sections vedettes des dashboards ---------------
+  // Vague 14, tracking des sections vedettes des dashboards ---------------
   | "dashboard_star_seen"                        // Impression 1×/session d'une section vedette (surface, variant, ...)
   | "dashboard_star_cta_clicked"                 // Clic CTA principal d'une section vedette (surface, variant, ...)
   // Parcours vérification d'identité ---------------------------------------

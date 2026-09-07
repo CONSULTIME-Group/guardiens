@@ -1,5 +1,5 @@
 /**
- * Types partagés Alma — narratrice cross-page + compagnon.
+ * Types partagés Alma, narratrice cross-page + compagnon.
  *
  * Étape 1 évolution produit :
  *  - Nouveau niveau de fréquence "low" (peu bavarde). AlmaFrequency = silent | low | balanced | talkative.
@@ -21,9 +21,9 @@ export type AlmaWhisperType =
   | "owner_conversation_stagnant"
   // Cross
   | "long_absence_return"
-  // Pass 5 — compagnon culturel (P3, ambiance)
+  // Pass 5, compagnon culturel (P3, ambiance)
   | "cultural_fact"
-  // Étape 1 — incitations contextuelles (P2, actionnables)
+  // Étape 1, incitations contextuelles (P2, actionnables)
   | "usage_nudge";
 
 export type AlmaWhisperPriority = "P0" | "P1" | "P2" | "P3";
@@ -89,7 +89,7 @@ export const FREQUENCY_CONFIG: Record<
 };
 
 /**
- * Quotas dédiés au compagnon culturel (P3) — indépendants du quota général.
+ * Quotas dédiés au compagnon culturel (P3), indépendants du quota général.
  * Modèle validé fondateur : le réglage de fréquence est le SEUL levier.
  *  - silent    : rien.
  *  - low       : pas de timer, déclenchement uniquement contextuel (le filtrage

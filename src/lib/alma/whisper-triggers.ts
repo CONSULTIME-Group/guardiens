@@ -1,5 +1,5 @@
 /**
- * Alma Pass 4 — bibliothèque de messages narratifs (8 triggers matching).
+ * Alma Pass 4, bibliothèque de messages narratifs (8 triggers matching).
  *
  * Chaque helper construit un objet AlmaWhisper prêt à être queué via
  * AlmaContext.queueWhisper. Messages < 140 caractères, vouvoiement absolu
@@ -159,7 +159,7 @@ export function buildLongAbsenceReturnWhisper(params: {
   };
 }
 
-/* ---------------- Pass 5 — Compagnon culturel ---------------- */
+/* ---------------- Pass 5, Compagnon culturel ---------------- */
 
 export interface CulturalFactPayload {
   id: string;
@@ -205,7 +205,7 @@ export function buildCulturalFactWhisper(params: {
   };
 }
 
-/* ---------------- Étape 1 — usage_nudge ---------------- */
+/* ---------------- Étape 1, usage_nudge ---------------- */
 
 export interface UsageNudgePayload {
   id: string;

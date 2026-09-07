@@ -1,5 +1,5 @@
 /**
- * useRailFitsViewport — mesure si le contenu du rail tient dans la hauteur
+ * useRailFitsViewport, mesure si le contenu du rail tient dans la hauteur
  * de la fenêtre (correctif « rail à double défilement », août 2026).
  *
  * Règle d'or : le rail n'a JAMAIS son propre défilement.

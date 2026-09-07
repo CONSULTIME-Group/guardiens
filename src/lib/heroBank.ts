@@ -3,12 +3,12 @@
  * Assignation déterministe : un même sitter.id voit toujours la même image.
  *
  * Composition thématique :
- *   - 01–70  : animaux & plantes (chiens, chats, NAC, jardins, intérieurs habités)
- *   - 71–80  : maison / lieu de vie (cuisine, véranda, entrée, fauteuil, bureau…)
- *   - 81–90  : entraide / coup de main (panier déposé, plante passée, clés transmises…)
- *   - 91–100 : village / quartier / partage (place, marché, tablée, jardin partagé…)
+ *   - 01-70  : animaux & plantes (chiens, chats, NAC, jardins, intérieurs habités)
+ *   - 71-80  : maison / lieu de vie (cuisine, véranda, entrée, fauteuil, bureau…)
+ *   - 81-90  : entraide / coup de main (panier déposé, plante passée, clés transmises…)
+ *   - 91-100 : village / quartier / partage (place, marché, tablée, jardin partagé…)
  *
- * 3 palettes mixées : terre automnal, vert/crème, or/sépia — style sketchbook plume + lavis.
+ * 3 palettes mixées : terre automnal, vert/crème, or/sépia, style sketchbook plume + lavis.
  */
 
 import { getMobileByIndex } from "./heroBankMobile";
@@ -262,7 +262,7 @@ export function getCategoryFallbackImage(category: HeroCategoryName): string {
   return HERO_BANK[getCategoryFallbackIndex(category)];
 }
 
-/** Résultat complet de la sélection — exposé pour QA et monitoring. */
+/** Résultat complet de la sélection, exposé pour QA et monitoring. */
 export type HeroSelection = {
   index: number;
   category: HeroCategoryName;
@@ -342,7 +342,7 @@ function resolveSelection(
 }
 
 /**
- * API publique de la sélection complète — utile pour les pages de QA et le
+ * API publique de la sélection complète, utile pour les pages de QA et le
  * monitoring (savoir si on a dû fallback).
  */
 export function getSitterHeroSelection(
@@ -527,7 +527,7 @@ export function validateHeroBank(
         category: cat.name,
         code: "out_of_bounds",
         count,
-        message: `Catégorie « ${label} » : plage [${start}–${endExclusive - 1}] invalide (banque de ${totalBankSize} images).`,
+        message: `Catégorie « ${label} » : plage [${start}-${endExclusive - 1}] invalide (banque de ${totalBankSize} images).`,
       });
       continue;
     }

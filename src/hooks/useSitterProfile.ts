@@ -196,7 +196,7 @@ export function useSitterProfile() {
       // Tri-état : null = jamais répondu, jamais un « non » implicite.
       demanding_breeds_ok: s?.demanding_breeds_ok ?? null,
       indoor_cats_only: s?.indoor_cats_only ?? null,
-      // Step 3 — Animaux (nouveaux champs persistés)
+      // Step 3, Animaux (nouveaux champs persistés)
       ...( {
         dog_sizes_accepted: (s as any)?.dog_sizes_accepted || [],
         own_animals: (s as any)?.own_animals || [],
@@ -262,7 +262,7 @@ export function useSitterProfile() {
           setData((prev) => ({ ...prev, latitude: lat, longitude: lng }));
         }
       } catch {
-        // silencieux — on retentera au prochain chargement
+        // silencieux, on retentera au prochain chargement
       }
     })();
     return () => {
@@ -345,7 +345,7 @@ export function useSitterProfile() {
         "life_pace", "household_composition",
         "special_animal_skills", "work_during_sit", "sensitivities",
         "min_stay_duration", "preferred_frequency", "min_notice", "preferred_periods", "preferred_environments",
-        // Step 3 — Animaux (étaient dans le formulaire mais perdus à la sauvegarde)
+        // Step 3, Animaux (étaient dans le formulaire mais perdus à la sauvegarde)
         "dog_sizes_accepted", "demanding_breeds_ok", "indoor_cats_only", "own_animals", "guard_experience",
         // Accompagnants
         "travels_with_children", "travels_with_own_animals",
@@ -392,7 +392,7 @@ export function useSitterProfile() {
   const addPastAnimal = useCallback(async (animal: PastAnimal) => {
     if (!user) return;
 
-    // Auto-create sitter_profiles row if missing — sinon le bouton "Ajouter
+    // Auto-create sitter_profiles row if missing, sinon le bouton "Ajouter
     // cet animal" échouait silencieusement pour les nouveaux comptes qui
     // n'avaient pas encore sauvegardé l'onglet "Profil gardien".
     let profileId = sitterProfileId;

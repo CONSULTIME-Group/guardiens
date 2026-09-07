@@ -41,7 +41,7 @@ export const getDeptCode = (cp: string | null): string | null => {
 
 export const getDeptLabel = (cp: string | null): string => {
   const code = getDeptCode(cp);
-  if (!code) return "—";
+  if (!code) return "-";
   return `${code} ${DEPT_NAMES[code] || ""}`.trim();
 };
 

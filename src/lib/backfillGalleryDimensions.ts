@@ -7,7 +7,7 @@
  * publiques `/annonces/:id` se réévalue automatiquement au prochain rendu.
  *
  * Déclenché silencieusement quand l'owner consulte sa galerie ou sa fiche
- * annonce — pas d'impact UX, pas de toast, pas de re-render bloquant.
+ * annonce, pas d'impact UX, pas de toast, pas de re-render bloquant.
  */
 import { supabase } from "@/integrations/supabase/client";
 
@@ -22,7 +22,7 @@ const measureFromUrl = (url: string): Promise<{ width: number; height: number } 
   new Promise((resolve) => {
     try {
       const img = new Image();
-      // Photos servies depuis le bucket public — pas besoin de credentials.
+      // Photos servies depuis le bucket public, pas besoin de credentials.
       img.crossOrigin = "anonymous";
       img.onload = () => {
         const w = img.naturalWidth || img.width || 0;

@@ -1,5 +1,5 @@
 /**
- * Structured logger — logs to console in dev, can be extended to
+ * Structured logger, logs to console in dev, can be extended to
  * ship to an external service (Sentry, LogRocket, etc.) in prod.
  */
 
@@ -37,7 +37,7 @@ export const logger = {
 };
 
 /**
- * Global unhandled error catcher — attach once in main.tsx.
+ * Global unhandled error catcher, attach once in main.tsx.
  */
 export function installGlobalErrorHandlers() {
   window.addEventListener("error", (event) => {

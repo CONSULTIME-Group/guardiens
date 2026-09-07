@@ -3,7 +3,7 @@
  *
  * - Toujours la même image pour un sit donné (bon pour les caches Facebook/LinkedIn).
  * - Répartition uniforme sur les 5 visuels grâce à un hash simple (FNV-1a 32 bits).
- * - 5 photos chaleureuses + bande typographique « Guardiens — La confiance entre gens du coin ».
+ * - 5 photos chaleureuses + bande typographique « Guardiens, La confiance entre gens du coin ».
  */
 
 const OG_SIT_IMAGES = [
@@ -14,7 +14,7 @@ const OG_SIT_IMAGES = [
   "/og/og-sit-5.jpg",
 ] as const;
 
-/** Hash FNV-1a 32 bits — déterministe, rapide, sans dépendance. */
+/** Hash FNV-1a 32 bits, déterministe, rapide, sans dépendance. */
 const fnv1a32 = (s: string): number => {
   let hash = 0x811c9dc5;
   for (let i = 0; i < s.length; i++) {

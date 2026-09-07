@@ -1,5 +1,5 @@
 /**
- * useFirstNearbyMission — récupère la première mission d'entraide ouverte
+ * useFirstNearbyMission, récupère la première mission d'entraide ouverte
  * du département de l'utilisateur (exclut ses propres missions).
  * Partagé entre dashboards gardien et propriétaire pour le volet DONNER
  * de la section entraide bidimensionnelle.

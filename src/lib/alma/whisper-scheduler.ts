@@ -1,5 +1,5 @@
 /**
- * Alma Pass 4 — scheduler des whispers narratifs.
+ * Alma Pass 4, scheduler des whispers narratifs.
  *
  * Rôles :
  *  - Vérifier si un whisper peut être émis (canEmit) selon fréquence user,

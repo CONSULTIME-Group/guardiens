@@ -49,7 +49,7 @@ export function useSendSitInvitation(sitId: string, ownerId: string) {
       });
       if (error) throw error;
 
-      // Email transactionnel — best effort, ne bloque pas l'UX
+      // Email transactionnel, best effort, ne bloque pas l'UX
       try {
         const [{ data: sitRow }, { data: ownerRow }, { data: sitterRow }] = await Promise.all([
           supabase.from("sits").select("title, start_date, end_date").eq("id", sitId).single(),

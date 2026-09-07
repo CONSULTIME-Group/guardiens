@@ -121,7 +121,7 @@ export function useSitterDashboardData(userId: string | undefined) {
 
   useEffect(() => {
     if (!userId) return;
-    // Reset to initial state when userId changes — prevents the unread badge
+    // Reset to initial state when userId changes, prevents the unread badge
     // (and other counters) from flickering with the previous user's values
     // while the new fetch is in flight.
     let cancelled = false;
@@ -153,13 +153,13 @@ export function useSitterDashboardData(userId: string | undefined) {
           .eq("published", true).eq("category", "conseil_gardien")
           .order("published_at", { ascending: false }).limit(3),
         (supabase as any).rpc("get_unread_messages_count", { _user_id: userId }),
-        // Single badge query — replaces both badgeDetailsRes AND useUserBadges
+        // Single badge query, replaces both badgeDetailsRes AND useUserBadges
         supabase.from("badge_attributions")
           .select("badge_id, created_at").eq("user_id", userId)
           .order("created_at", { ascending: false }),
         supabase.from("emergency_sitter_profiles")
           .select("id").eq("user_id", userId).maybeSingle(),
-        // Reputation — replaces useProfileReputation
+        // Reputation, replaces useProfileReputation
         (supabase as any).from("profile_reputation")
           .select("*").eq("user_id", userId).maybeSingle(),
         // Coordonnées approximatives de l'utilisateur : lancées toujours, mais
@@ -243,7 +243,7 @@ export function useSitterDashboardData(userId: string | undefined) {
       // Reputation (replaces useProfileReputation)
       const reputation: ReputationData | null = reputationRes.data ?? null;
 
-      // Nearby listings — tri purement géodésique (haversine) sur la position
+      // Nearby listings, tri purement géodésique (haversine) sur la position
       // approximative du propriétaire. Plus de filtre département : la promesse
       // « près de chez vous » s'aligne sur la distance réelle, pas sur un
       // découpage administratif. Fallback de rayon 30 → 50 → 100 km (mêmes
@@ -384,7 +384,7 @@ export function useSitterDashboardData(userId: string | undefined) {
         }
       }
 
-      // Nearby missions — conserve la logique département (entraide locale,
+      // Nearby missions, conserve la logique département (entraide locale,
       // pas de trajets longs). À migrer séparément si besoin.
       let nearbyMissions: any[] = [];
       let nearbyMissionsError: string | null = null;
@@ -417,7 +417,7 @@ export function useSitterDashboardData(userId: string | undefined) {
         }
       }
 
-      // My missions — published by the sitter (open + completed),
+      // My missions, published by the sitter (open + completed),
       // with response counts. Chargées en vague 1.
       let myMissions: any[] = [];
       let myMissionsError: string | null = null;
@@ -559,7 +559,7 @@ export function useSitterDashboardData(userId: string | undefined) {
     return () => { supabase.removeChannel(channel); };
   }, [userId, setPartial]);
 
-  // Manual refetch of the unread counter — exposed for retry on error.
+  // Manual refetch of the unread counter, exposed for retry on error.
   const refetchUnread = useCallback(async () => {
     if (!userId) return;
     setPartial({ unreadLoading: true, unreadError: null });

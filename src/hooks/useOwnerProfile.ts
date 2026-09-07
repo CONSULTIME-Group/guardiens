@@ -55,7 +55,7 @@ export interface OwnerProfileData {
   owner_competences: string[];
   owner_competences_disponible: boolean;
   owner_skill_categories: string[];
-  // À propos de moi (matching) — owner_profiles
+  // À propos de moi (matching), owner_profiles
   languages: string[];
   interests: string[];
   life_pace: string;

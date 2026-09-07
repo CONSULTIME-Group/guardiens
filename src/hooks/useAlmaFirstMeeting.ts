@@ -1,5 +1,5 @@
 /**
- * useAlmaFirstMeeting — état "premier contact" avec Alma.
+ * useAlmaFirstMeeting, état "premier contact" avec Alma.
  *
  * Vérité serveur : colonne `profiles.alma_first_meeting_seen`. Si false,
  * on affiche l'accueil unique. `markSeen()` bascule le flag côté DB (et

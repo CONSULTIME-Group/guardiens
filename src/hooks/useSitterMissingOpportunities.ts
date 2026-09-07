@@ -1,5 +1,5 @@
 /**
- * useSitterMissingOpportunities — charge les compteurs du bloc « occasions
+ * useSitterMissingOpportunities, charge les compteurs du bloc « occasions
  * manquées » via la RPC `sitter_missing_opportunities` (compteurs recalculés
  * à chaque appel sur les annonces publiées).
  *

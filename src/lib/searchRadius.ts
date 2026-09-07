@@ -1,5 +1,5 @@
 /**
- * searchRadius — ré-exportation.
+ * searchRadius, ré-exportation.
  *
  * La logique vit dans `supabase/functions/_shared/search-radius.ts`, partagée
  * entre le client (formulaires, affichages) et les fonctions edge. Une seule

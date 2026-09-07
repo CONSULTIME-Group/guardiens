@@ -12,7 +12,7 @@
  *
  * Confirmation en isolation : plusieurs gardes-fous sont des scans statiques
  * (comptage de fichiers, lecture disque) sensibles à la charge I/O du run
- * complet — ils peuvent y échouer de façon non reproductible (constaté le
+ * complet, ils peuvent y échouer de façon non reproductible (constaté le
  * 14/08/2026 sur global-bottom-nav, i18n-single-storage-key,
  * llms-txt-coverage, no-unconsumed-supabase-call : rouges en run complet,
  * verts en isolation). Tout écart est donc rejoué fichier par fichier,

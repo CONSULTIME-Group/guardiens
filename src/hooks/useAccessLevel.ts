@@ -10,12 +10,12 @@ export const MIN_COMPLETION_TO_APPLY = 40;
 
 /**
  * Access levels:
- * 0 — Not logged in
- * 1 — Connecté, profil incomplet (moins de 40 pour cent) : ne peut pas postuler
- * 2 — Connecté, identité non vérifiée (NON-BLOQUANT, recommandation seulement)
- * 3A — Gardien, identité vérifiée, sans abonnement
- * 3B — Propriétaire, identité vérifiée (gratuit)
- * 4 — Gardien abonné + identité vérifiée
+ * 0, Not logged in
+ * 1, Connecté, profil incomplet (moins de 40 pour cent) : ne peut pas postuler
+ * 2, Connecté, identité non vérifiée (NON-BLOQUANT, recommandation seulement)
+ * 3A, Gardien, identité vérifiée, sans abonnement
+ * 3B, Propriétaire, identité vérifiée (gratuit)
+ * 4, Gardien abonné + identité vérifiée
  *
  * Politique : ni la vérification d'identité ni un pourcentage de complétion de
  * profil ne bloquent la publication. Les prérequis concrets d'une annonce sont
@@ -75,7 +75,7 @@ export const useAccessLevel = (): AccessInfo => {
 
 
 
-  // ID non vérifié — NON-BLOQUANT : on autorise les candidatures et la publication.
+  // ID non vérifié, NON-BLOQUANT : on autorise les candidatures et la publication.
   // Côté sitter, on traite comme 3A (peut postuler aux missions, garde nécessite abonnement).
   // Côté owner, on traite comme 3B (peut publier librement).
   if (!identityVerified) {

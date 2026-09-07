@@ -35,7 +35,7 @@ export const RADIUS_STEPS = [30, 50, 100];
 const MAX_RESULTS = 8;
 const MAX_RADIUS_KM = 100;
 
-/** Zone « ultra-proche » — bonus custom_skills réservé à ce périmètre. */
+/** Zone « ultra-proche », bonus custom_skills réservé à ce périmètre. */
 export const NEAR_RADIUS_KM = 5;
 
 export function prioritizeHelpers(list: NearbyHelper[]): NearbyHelper[] {

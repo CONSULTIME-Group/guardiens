@@ -1,5 +1,5 @@
 /**
- * missingOpportunities — ré-exportation.
+ * missingOpportunities, ré-exportation.
  *
  * La logique vit dans `supabase/functions/_shared/missing-opportunities/`,
  * partagée entre le client (bloc dashboard gardien) et la fonction edge

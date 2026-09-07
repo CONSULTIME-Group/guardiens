@@ -13,7 +13,7 @@ import { haversineDistance } from "@/utils/geo";
  * Définition « helper » : `available_for_help = true` ET au moins une compétence
  * renseignée (même règle que useNearbyHelpers, pour cohérence).
  *
- * Rayon local : 30 km (verrouillé — pas de fallback ici, on veut une vérité
+ * Rayon local : 30 km (verrouillé, pas de fallback ici, on veut une vérité
  * locale binaire « oui/non, il y a du monde près de vous »).
  */
 

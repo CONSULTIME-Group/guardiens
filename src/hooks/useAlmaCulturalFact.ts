@@ -1,5 +1,5 @@
 /**
- * useAlmaCulturalFact — Alma Pass 5, compagnon culturel.
+ * useAlmaCulturalFact, Alma Pass 5, compagnon culturel.
  *
  * Appelle la RPC `get_alma_cultural_fact` et queue un whisper P3
  * ("cultural_fact") si un fait est éligible. La RPC gère elle-même le

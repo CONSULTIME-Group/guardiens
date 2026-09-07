@@ -68,7 +68,7 @@ async function checkUrl(url) {
   console.log(`  <title>  : ${titleMatch ? titleMatch[1] : "(non trouvé)"}`);
 
   if (missing.length === 0 && forbidden.length === 0) {
-    console.log("  ✅ OK — nouvelles balises servies");
+    console.log("  ✅ OK, nouvelles balises servies");
     return true;
   }
   if (missing.length) console.log(`  ❌ manquant   : ${missing.join(" | ")}`);
@@ -100,7 +100,7 @@ async function recache() {
   const allOk = results.every(Boolean);
 
   console.log(
-    `\n${allOk ? "✅ TOUT EST OK" : "🔴 ÉCHEC"} — ${results.filter(Boolean).length}/${results.length} URLs valides`,
+    `\n${allOk ? "✅ TOUT EST OK" : "🔴 ÉCHEC"}, ${results.filter(Boolean).length}/${results.length} URLs valides`,
   );
   if (!allOk) {
     console.log("\nSi guardiens.lovable.app KO  → recliquer Publier → Update");

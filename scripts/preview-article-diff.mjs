@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Preview éditorial — affiche le diff d'une modification d'article AVANT UPDATE.
+ * Preview éditorial, affiche le diff d'une modification d'article AVANT UPDATE.
  *
  * Usage :
  *   node scripts/preview-article-diff.mjs <slug> <patch.json>
@@ -17,7 +17,7 @@
  *   1) Charge la version actuelle depuis Postgres (psql)
  *   2) Applique les replace en mémoire
  *   3) Affiche un diff unifié + le JSON-LD FAQPage simulé
- *   4) N'écrit JAMAIS en base — la décision revient à l'humain
+ *   4) N'écrit JAMAIS en base, la décision revient à l'humain
  */
 import { execSync } from "node:child_process";
 import { readFileSync } from "node:fs";
@@ -52,7 +52,7 @@ for (const k of ["meta_title", "meta_description", "canonical_url"]) {
   if (patch[k] !== undefined) next[k] = patch[k];
 }
 
-console.log(`\n=== DIFF — ${slug} ===\n`);
+console.log(`\n=== DIFF, ${slug} ===\n`);
 for (const k of ["meta_title", "meta_description", "canonical_url"]) {
   if (current[k] !== next[k]) {
     console.log(`• ${k}: "${current[k] ?? ""}" → "${next[k] ?? ""}" (${(next[k] ?? "").length} chars)`);
@@ -79,4 +79,4 @@ const hits = banned.flatMap((re) => {
 });
 if (hits.length) console.log(`\n⚠️ Mots proscrits détectés : ${hits.join(", ")}`);
 
-console.log(`\n=== ATTENTE VALIDATION HUMAINE — aucune écriture en base ===`);
+console.log(`\n=== ATTENTE VALIDATION HUMAINE, aucune écriture en base ===`);

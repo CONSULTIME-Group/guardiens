@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
  * Sélection intelligente de la photo de couverture.
  * Appelle l'edge function `analyze-photo-quality` pour scorer les URLs fournies
  * et retourne la mieux notée. En cas d'erreur, quota ou rate-limit, retombe
- * silencieusement sur `fallback` — ne jette jamais, ne bloque jamais.
+ * silencieusement sur `fallback`, ne jette jamais, ne bloque jamais.
  *
  * Cache en mémoire (module-level) par signature de galerie pour éviter
  * de rescorer les mêmes photos plusieurs fois dans la même session.

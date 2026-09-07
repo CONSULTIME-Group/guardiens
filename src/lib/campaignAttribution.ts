@@ -30,7 +30,7 @@ function readStored(): ActiveCampaign | null {
   if (typeof window === "undefined") return null;
   try {
     // localStorage : partagé entre onglets de la même origine, survit à la fermeture
-    // d'onglet — robuste aux bascules in-app browser → Safari/Chrome sur mobile.
+    // d'onglet, robuste aux bascules in-app browser → Safari/Chrome sur mobile.
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as ActiveCampaign;

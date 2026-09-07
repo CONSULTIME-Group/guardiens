@@ -18,7 +18,7 @@ export type ConversationContext =
   | "sitter_inquiry"    // proprio sonde un gardien (pas d'annonce)
   | "mission_help"      // gardien/voisin se propose sur une mission précise (small_mission_id requis)
   | "helper_inquiry"    // proprio sonde un aidant entraide hors mission précise
-  | "owner_pitch";      // gardien démarche un proprio (pitch spontané — bloqué par défaut)
+  | "owner_pitch";      // gardien démarche un proprio (pitch spontané, bloqué par défaut)
 
 interface StartConversationOptions {
   otherUserId: string;
@@ -33,7 +33,7 @@ interface StartConversationResult {
 }
 
 /**
- * Crée ou récupère une conversation. NE crée PAS de message —
+ * Crée ou récupère une conversation. NE crée PAS de message -
  * c'est l'envoi du premier message qui marquera la conv comme "active".
  */
 export async function startConversation(
@@ -109,7 +109,7 @@ export function buildFirstMessageDraft(args: {
     case "sitter_inquiry":
       return `${greet}\n\nJ'aurai prochainement besoin d'un(e) gardien(ne)${
         args.city ? ` à ${args.city}` : ""
-      }. Votre profil m'a beaucoup plu — seriez-vous disponible pour en discuter ?\n\nMerci d'avance.`;
+      }. Votre profil m'a beaucoup plu, seriez-vous disponible pour en discuter ?\n\nMerci d'avance.`;
 
     case "mission_help":
       return `${greet}\n\nJe peux vous aider pour${
@@ -119,7 +119,7 @@ export function buildFirstMessageDraft(args: {
     case "helper_inquiry":
       return `${greet}\n\nJ'ai vu que vous étiez disponible pour donner un coup de main${
         args.city ? ` à ${args.city}` : ""
-      }. J'aurais peut-être besoin de votre aide bientôt — pourrait-on en discuter ?\n\nMerci !`;
+      }. J'aurais peut-être besoin de votre aide bientôt, pourrait-on en discuter ?\n\nMerci !`;
 
     case "owner_pitch":
       return `${greet}\n\nJe suis gardien(ne)${
