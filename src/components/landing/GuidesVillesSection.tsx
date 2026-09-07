@@ -39,7 +39,7 @@ export function GuidesVillesSection() {
                   <li key={e.to}>
                     <Link
                       to={e.to}
-                      className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
+                      className="group flex min-h-[44px] items-start gap-2 py-2.5 text-foreground hover:text-primary transition-colors"
                     >
                       <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
                       <span className="text-sm leading-relaxed">{t(e.labelKey)}</span>
@@ -48,10 +48,10 @@ export function GuidesVillesSection() {
                 ))}
               </ul>
               <div className="mt-6 pt-6 border-t border-border flex flex-col sm:flex-row gap-3">
-                <Button asChild variant="outline" size="sm" className="rounded-full">
+                <Button asChild variant="outline" size="sm" className="rounded-full min-h-[44px]">
                   <Link to="/actualites">{t("landing.cities.all_articles")}</Link>
                 </Button>
-                <Button asChild variant="outline" size="sm" className="rounded-full">
+                <Button asChild variant="outline" size="sm" className="rounded-full min-h-[44px]">
                   <Link to="/guides">{t("landing.cities.all_guides")}</Link>
                 </Button>
               </div>
@@ -70,7 +70,7 @@ export function GuidesVillesSection() {
                   <li key={e.to}>
                     <Link
                       to={e.to}
-                      className="group flex items-start gap-2 text-foreground hover:text-primary transition-colors"
+                      className="group flex min-h-[44px] items-start gap-2 py-2.5 text-foreground hover:text-primary transition-colors"
                     >
                       <ArrowRight className="h-4 w-4 mt-1 shrink-0 text-primary/60 group-hover:translate-x-0.5 transition-transform" />
                       <span className="text-sm leading-relaxed">
@@ -81,7 +81,7 @@ export function GuidesVillesSection() {
                 ))}
               </ul>
               <div className="mt-6 pt-6 border-t border-border flex flex-col sm:flex-row gap-3 items-start">
-                <Button asChild variant="outline" size="sm" className="rounded-full">
+                <Button asChild variant="outline" size="sm" className="rounded-full min-h-[44px]">
                   <Link to="/annonces">{t("landing.guides_cities.all_listings")}</Link>
                 </Button>
                 <p className="text-xs text-foreground/60 leading-relaxed flex-1">
