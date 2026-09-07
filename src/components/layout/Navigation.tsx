@@ -55,7 +55,7 @@ const SidebarItem = ({
     <Icon className="h-[18px] w-[18px]" strokeWidth={1.8} />
     <span className="flex-1 truncate">{label}</span>
     {beta && (
-      <span className="text-[9px] uppercase tracking-wider font-bold bg-warning/15 text-warning-foreground px-1.5 py-0.5 rounded">
+      <span className="text-[11px] leading-none uppercase tracking-wider font-bold bg-warning/15 text-warning-foreground px-1.5 py-0.5 rounded">
         Bêta
       </span>
     )}
@@ -582,7 +582,7 @@ export const BottomNav = () => {
                       <entry.icon className="h-5 w-5" strokeWidth={1.8} aria-hidden="true" />
                       <span className="flex-1 truncate text-left">{entry.label}</span>
                       {entry.beta && (
-                        <span className="text-[9px] uppercase tracking-wider font-bold bg-warning/15 text-warning-foreground px-1.5 py-0.5 rounded">
+                        <span className="text-[11px] leading-none uppercase tracking-wider font-bold bg-warning/15 text-warning-foreground px-1.5 py-0.5 rounded">
                           Bêta
                         </span>
                       )}
