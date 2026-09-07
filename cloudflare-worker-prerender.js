@@ -1,10 +1,9 @@
 // MIROIR DE DOCUMENTATION, CE FICHIER NE DÉPLOIE RIEN.
 // La source de vérité est l'éditeur Cloudflare (Workers & Pages >
 // guardiens-prerender > Edit code). Ce fichier reflète la version active
-// 415a7bc4 (v7.2 du 05/09/2026), capturée le 05/09/2026 et vérifiée identique
-// au déployé par empreinte SHA-256. Toute modification faite ici reste sans
-// effet sur la production tant qu'elle n'est pas reportée dans l'éditeur
-// Cloudflare, ou déployée par `npx wrangler deploy`.
+// 1f3bf743 (v7.3 du 07/09/2026), capturée le 07/09/2026. Toute modification
+// faite ici reste sans effet sur la production tant qu'elle n'est pas
+// reportée dans l'éditeur Cloudflare, ou déployée par `npx wrangler deploy`.
 
 /**
  * Cloudflare Worker — Prerender.io proxy for guardiens.fr
@@ -12,6 +11,44 @@
  * Deploy: Cloudflare Dashboard > Workers & Pages > guardiens-prerender > Edit code
  *         ou `npx wrangler deploy`
  * Route:  guardiens.fr/* + *guardiens.fr/*
+ *
+ * ══ v7.3 (2026-09-07) : 404 RELAYÉES, JSON-LD BOTS SEULS, 304 SANS CORPS ══
+ *
+ *  1. LES 404 DE PRERENDER SONT RELAYÉES. Jusqu'ici un 404 Prerender partait
+ *     en repli origine : le crawler recevait un shell React en 200, donc un
+ *     soft-404 indexable pour une URL inexistante. La règle Ignored URL
+ *     `/gardiens/` qui justifiait ce repli n'existe pas : vérifié le
+ *     07/09/2026 dans le dashboard Prerender (Cache Manager > Ignored URLs),
+ *     les 8 règles portent toutes sur des paramètres de query string
+ *     (`lang=`, `?q=`, `?profil=`, `?focus=`, `?filter=`, `?ville=`, `utm_`,
+ *     `fbclid=`), aucune sur un chemin. CORRIGÉ : cas 404 dédié
+ *     (`notfound-passthrough`), le repli origine ne concerne plus que 403,
+ *     429 et 5xx.
+ *
+ *  2. LE JSON-LD N'EST INJECTÉ QUE POUR LES BOTS. `serveOrigin` sert aussi le
+ *     chemin `bypass`, donc chaque visite humaine d'une fiche gardien lisait
+ *     tout le HTML en mémoire et ajoutait un aller-retour vers la fonction
+ *     profile-jsonld pour un balisage qu'aucun navigateur n'exploite.
+ *     CORRIGÉ : `profileMatch` n'est calculé que si `isBot`.
+ *
+ *  3. `withDiagHeaders` NE PEUT PLUS LEVER D'ERREUR 1101. `fetchOrigin`
+ *     retransmet les en-têtes conditionnels de la requête (If-None-Match,
+ *     If-Modified-Since), l'origine peut donc répondre 304. Construire une
+ *     Response avec un corps sur 204/205/304 lève une TypeError, page perdue.
+ *     CORRIGÉ : `NO_BODY_STATUSES`, le corps est remplacé par `null` sur ces
+ *     statuts.
+ *
+ *  4. `isImmutableAsset` TESTE LE CHEMIN EFFONDRÉ. `//assets/index.js` ne
+ *     commence pas par `/assets/` et ratait le cache edge, donc repartait en
+ *     transit origine à chaque hit.
+ *     CORRIGÉ : `canonicalPath` appliqué dans `isImmutableAsset`, et dans
+ *     `serveImmutableAsset` pour l'URL d'origine comme pour la clé de cache.
+ *
+ *  TESTS DE VALIDATION passés le 07/09/2026 sur le Worker déployé :
+ *  `/departement/06` avec user-agent Googlebot renvoie 404, là où il
+ *  renvoyait 200 avec le shell React vide ; `/gardiens/{uuid}` renvoie 200
+ *  avec son contenu prérendu réel et sa canonique auto-référente ;
+ *  `/house-sitting/lyon` renvoie 200 en `index, follow`.
  *
  * ══ v7.2 (2026-09-05) — CACHE EDGE DES FICHIERS À NOM HACHÉ ══
  *
@@ -58,10 +95,12 @@
  *      ajoutée, et le crawler recevait un shell React en 200 au lieu d'une
  *      redirection. Soft-404 et double coût.
  *      CORRIGÉ : les 3xx sont relayés tels quels.
- *      NON CORRIGÉ VOLONTAIREMENT pour les 4xx : tant que la règle Ignored URL
- *      `/gardiens/` existe côté Prerender, relayer les 404 transformerait les
- *      261 fiches gardien du sitemap en 404 durs pour les crawlers. À rouvrir
- *      une fois cette règle tranchée.
+ *      CORRIGÉ EN v7.3 pour les 404 : la règle Ignored URL `/gardiens/` qui
+ *      justifiait le repli n'existe pas côté Prerender (vérifié le
+ *      07/09/2026, Cache Manager > Ignored URLs : les 8 règles portent
+ *      uniquement sur des paramètres de query string). Les fiches gardien
+ *      sont bien rendues et en cache. Voir l'entrée v7.3 ci-dessus. Le repli
+ *      origine ne concerne plus que 403, 429 et 5xx.
  *
  *  A3. `replace(/\/+$/, '')` ne traitait que les slashs finaux. `//admin`
  *      contournait `isNeverPrerendered`, et `/guides//mon-guide` créait une
@@ -375,6 +414,11 @@ async function fetchPrerender(url, token, ua, clientIp) {
   }
 }
 
+// Statuts sans corps. `fetchOrigin` retransmet les en-têtes conditionnels de
+// la requête, l'origine peut donc répondre 304. Attacher un corps à 204, 205
+// ou 304 lève une TypeError : erreur 1101, page perdue.
+const NO_BODY_STATUSES = new Set([204, 205, 304]);
+
 function withDiagHeaders(response, diag, debug) {
   if (!debug) return response;
   const headers = new Headers(response.headers);
@@ -386,7 +430,7 @@ function withDiagHeaders(response, diag, debug) {
       headers.set(k, safe);
     } catch (_e) { /* en-tête invalide, on l'omet */ }
   }
-  return new Response(response.body, {
+  return new Response(NO_BODY_STATUSES.has(response.status) ? null : response.body, {
     status: response.status,
     statusText: response.statusText,
     headers,
@@ -429,7 +473,10 @@ const IMMUTABLE_PREFIXES = ['/assets/', '/lovable-uploads/'];
 const IMMUTABLE_TTL = 31536000; // 1 an
 
 function isImmutableAsset(pathname) {
-  return IMMUTABLE_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+  // Chemin effondré : `//assets/index.js` ne commence pas par `/assets/` et
+  // ratait le cache edge.
+  const p = canonicalPath(pathname);
+  return IMMUTABLE_PREFIXES.some((prefix) => p.startsWith(prefix));
 }
 
 /**
@@ -441,7 +488,7 @@ async function serveImmutableAsset(request, ctx) {
   const url = new URL(request.url);
   // Nom haché : la query string ne change jamais le contenu. On la retire pour
   // qu'un `?v=123` ne crée pas une entrée de cache distincte.
-  const originUrl = `https://${LOVABLE_ORIGIN_HOST}${url.pathname}`;
+  const originUrl = `https://${LOVABLE_ORIGIN_HOST}${canonicalPath(url.pathname)}`;
   const cacheKey = new Request(originUrl, { method: 'GET' });
   const cache = caches.default;
 
@@ -552,7 +599,7 @@ export default {
         'cache-control': 'public, max-age=3600',
       };
       if (debug) {
-        headers['x-prerender-worker'] = 'guardiens-prerender-v7.2';
+        headers['x-prerender-worker'] = 'guardiens-prerender-v7.3';
         headers['x-prerender-status'] = 'www-to-apex-308';
       }
       return new Response(null, { status: 308, headers });
@@ -580,7 +627,7 @@ export default {
 
     const baseDiag = debug
       ? {
-          'X-Prerender-Worker': 'guardiens-prerender-v7.2',
+          'X-Prerender-Worker': 'guardiens-prerender-v7.3',
           'X-Prerender-Bot-Detected': String(isBot),
           'X-Prerender-UA': ua || '(empty)',
           'X-Prerender-Skip-Reasons': reasons.join(',') || 'none',
@@ -595,7 +642,10 @@ export default {
      */
     const serveOrigin = async (status, extra = {}) => {
       const originResp = await fetchOrigin(request);
-      const profileMatch = pathname.match(PROFILE_PATH_RE);
+      // JSON-LD réservé aux bots : `serveOrigin` sert aussi le chemin `bypass`,
+      // et l'injection lit tout le HTML en mémoire plus un aller-retour réseau
+      // pour un balisage qu'aucun navigateur n'exploite.
+      const profileMatch = isBot ? canonicalPath(pathname).match(PROFILE_PATH_RE) : null;
       const finalResp = profileMatch
         ? await injectProfileJsonLd(originResp, profileMatch[1])
         : originResp;
@@ -647,10 +697,20 @@ export default {
         );
       }
 
-      // 4xx et 5xx : repli sur l'origine, comportement du v6 conservé
-      // volontairement. Relayer les 404 transformerait les 261 fiches gardien
-      // du sitemap en 404 durs tant que la règle Ignored URL `/gardiens/`
-      // existe côté Prerender. À rouvrir une fois cette règle tranchée.
+      // 404 : relayer tel quel. La règle Ignored URL `/gardiens/` qui
+      // justifiait le repli n'existe pas côté Prerender (vérifié le
+      // 07/09/2026). Servir l'origine en 200 sur une URL inexistante crée un
+      // soft-404 indexable, pire qu'un 404 franc.
+      if (prerenderResponse.status === 404) {
+        return withDiagHeaders(
+          prerenderResponse,
+          { ...baseDiag, 'X-Prerender-Status': 'notfound-passthrough', 'X-Prerender-Upstream-Status': 404 },
+          debug,
+        );
+      }
+
+      // 403, 429 et 5xx seulement : repli sur l'origine, comportement du v6
+      // conservé volontairement pour ces statuts transitoires ou bloquants.
       if (debug) console.log('[Prerender] Erreur ' + prerenderResponse.status + ' sur ' + url);
       return serveOrigin('fallback-upstream-error', {
         'X-Prerender-Upstream-Status': prerenderResponse.status,
