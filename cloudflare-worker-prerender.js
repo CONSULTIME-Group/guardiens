@@ -642,7 +642,10 @@ export default {
      */
     const serveOrigin = async (status, extra = {}) => {
       const originResp = await fetchOrigin(request);
-      const profileMatch = pathname.match(PROFILE_PATH_RE);
+      // JSON-LD réservé aux bots : `serveOrigin` sert aussi le chemin `bypass`,
+      // et l'injection lit tout le HTML en mémoire plus un aller-retour réseau
+      // pour un balisage qu'aucun navigateur n'exploite.
+      const profileMatch = isBot ? canonicalPath(pathname).match(PROFILE_PATH_RE) : null;
       const finalResp = profileMatch
         ? await injectProfileJsonLd(originResp, profileMatch[1])
         : originResp;
@@ -694,10 +697,20 @@ export default {
         );
       }
 
-      // 4xx et 5xx : repli sur l'origine, comportement du v6 conservé
-      // volontairement. Relayer les 404 transformerait les 261 fiches gardien
-      // du sitemap en 404 durs tant que la règle Ignored URL `/gardiens/`
-      // existe côté Prerender. À rouvrir une fois cette règle tranchée.
+      // 404 : relayer tel quel. La règle Ignored URL `/gardiens/` qui
+      // justifiait le repli n'existe pas côté Prerender (vérifié le
+      // 07/09/2026). Servir l'origine en 200 sur une URL inexistante crée un
+      // soft-404 indexable, pire qu'un 404 franc.
+      if (prerenderResponse.status === 404) {
+        return withDiagHeaders(
+          prerenderResponse,
+          { ...baseDiag, 'X-Prerender-Status': 'notfound-passthrough', 'X-Prerender-Upstream-Status': 404 },
+          debug,
+        );
+      }
+
+      // 403, 429 et 5xx seulement : repli sur l'origine, comportement du v6
+      // conservé volontairement pour ces statuts transitoires ou bloquants.
       if (debug) console.log('[Prerender] Erreur ' + prerenderResponse.status + ' sur ' + url);
       return serveOrigin('fallback-upstream-error', {
         'X-Prerender-Upstream-Status': prerenderResponse.status,
