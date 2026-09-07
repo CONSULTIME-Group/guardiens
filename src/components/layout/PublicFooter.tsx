@@ -95,17 +95,17 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
           <div className="w-full sm:w-auto flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:gap-4 text-sm text-white/75 font-body">
             <span className="text-xs text-white/80 font-body py-2 sm:py-0">{t("footer.version", { year: new Date().getFullYear() })}</span>
             <span aria-hidden="true" className="hidden sm:inline text-white/40">·</span>
-            <Link to="/cgu" className="hover:text-white transition-colors">{t("footer.legal.cgu")}</Link>
+            <Link to="/cgu" className="inline-flex min-h-[44px] min-w-[44px] items-center hover:text-white transition-colors">{t("footer.legal.cgu")}</Link>
             <span aria-hidden="true" className="hidden sm:inline text-white/40">·</span>
-            <Link to="/confidentialite" className="hover:text-white transition-colors">{t("footer.legal.privacy")}</Link>
+            <Link to="/confidentialite" className="inline-flex min-h-[44px] min-w-[44px] items-center hover:text-white transition-colors">{t("footer.legal.privacy")}</Link>
             <span aria-hidden="true" className="hidden sm:inline text-white/40">·</span>
-            <Link to="/cgs" className="hover:text-white transition-colors">{t("footer.legal.cgs")}</Link>
+            <Link to="/cgs" className="inline-flex min-h-[44px] min-w-[44px] items-center hover:text-white transition-colors">{t("footer.legal.cgs")}</Link>
             <span aria-hidden="true" className="hidden sm:inline text-white/40">·</span>
-            <Link to="/cookies" className="hover:text-white transition-colors">{t("footer.legal.cookies")}</Link>
+            <Link to="/cookies" className="inline-flex min-h-[44px] min-w-[44px] items-center hover:text-white transition-colors">{t("footer.legal.cookies")}</Link>
             <span aria-hidden="true" className="hidden sm:inline text-white/40">·</span>
-            <Link to="/mentions-legales" className="hover:text-white transition-colors">{t("footer.legal.legal_notice")}</Link>
+            <Link to="/mentions-legales" className="inline-flex min-h-[44px] min-w-[44px] items-center hover:text-white transition-colors">{t("footer.legal.legal_notice")}</Link>
             <span aria-hidden="true" className="hidden sm:inline text-white/40">·</span>
-            <Link to="/contact" className="hover:text-white transition-colors">{t("footer.legal.contact")}</Link>
+            <Link to="/contact" className="inline-flex min-h-[44px] min-w-[44px] items-center hover:text-white transition-colors">{t("footer.legal.contact")}</Link>
           </div>
         </div>
 
@@ -119,7 +119,7 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
             href={PRESS_ARTICLE_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2.5 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40"
+            className="inline-flex min-h-[44px] items-center gap-2.5 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40"
           >
             <span className="font-body text-[11px] uppercase tracking-[0.16em] text-white/50">Vu dans</span>
             <img

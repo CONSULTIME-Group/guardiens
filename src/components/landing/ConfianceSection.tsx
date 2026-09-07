@@ -22,16 +22,16 @@ export function ConfianceSection() {
 
         <RevealSection delay={0.1}>
           <article className="rounded-2xl border border-primary/25 bg-primary/5 p-[22px] md:p-[34px]">
-            <div className="max-w-3xl">
+            <div>
               <div className="flex items-center gap-3">
                 <span aria-hidden="true" className="block h-6 w-[3px] rounded-full bg-terra" />
                 <p className="text-[10px] md:text-xs tracking-[0.2em] uppercase text-terra font-body font-medium">{t("landing.trust.main_label")}</p>
               </div>
               <h3 className="mt-[14px] font-heading text-2xl md:text-3xl font-semibold text-foreground">{t("landing.trust.p1_title")}</h3>
               <p className="mt-[14px] text-foreground/75 leading-relaxed">{t("landing.trust.p1_text")}</p>
-              <div className="mt-[22px] flex flex-wrap gap-2" aria-label={t("landing.trust.examples_label")}>
+              <div className="mt-[22px] grid grid-cols-2 md:grid-cols-3 gap-2" aria-label={t("landing.trust.examples_label")}>
                 {["couple", "retiree", "family", "active", "home", "vehicle"].map((example) => (
-                  <span key={example} className="rounded-full border border-primary/20 bg-background px-3 py-2 text-sm text-foreground/80">
+                  <span key={example} className="flex min-h-[44px] items-center justify-center rounded-full border border-primary/20 bg-background px-3 py-2 text-center text-sm text-foreground/80">
                     {t(`landing.trust.examples.${example}`)}
                   </span>
                 ))}

@@ -4,6 +4,8 @@ import cle720 from "@/assets/landing/cle-ancienne-720.webp";
 import cle360 from "@/assets/landing/cle-ancienne-360.webp";
 import notreHistoirePanoramaAvif from "@/assets/story-photo-1104.avif";
 import notreHistoirePanorama from "@/assets/story-photo.webp";
+import notreHistoireSmallAvif from "@/assets/story-photo-368.avif";
+import notreHistoireSmallWebp from "@/assets/story-photo-368.webp";
 import notreHistoireMobileAvif from "@/assets/story-photo-736.avif";
 import notreHistoireMobileWebp from "@/assets/story-photo-736.webp";
 
@@ -68,6 +70,8 @@ export function NotreHistoireSection() {
 
         <div className="w-full mt-10 rounded-2xl overflow-hidden">
           <picture>
+            <source media="(max-width: 399px)" type="image/avif" srcSet={notreHistoireSmallAvif} />
+            <source media="(max-width: 399px)" type="image/webp" srcSet={notreHistoireSmallWebp} />
             <source media="(max-width: 767px)" type="image/avif" srcSet={notreHistoireMobileAvif} />
             <source media="(max-width: 767px)" type="image/webp" srcSet={notreHistoireMobileWebp} />
             <source type="image/avif" srcSet={notreHistoirePanoramaAvif} />
