@@ -155,34 +155,29 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
   return (
     <>
     <header className="sticky top-0 z-50 max-w-[100vw] overflow-x-clip bg-background/80 backdrop-blur-md border-b border-border/50">
-      <div ref={fixedBarRef} className="flex items-center justify-between gap-2 px-4 py-4 sm:px-6 min-[1120px]:grid min-[1120px]:grid-cols-[auto_minmax(0,1fr)_auto] min-[1120px]:gap-x-8 min-[1120px]:px-6 xl:px-8 2xl:px-[5%]">
+      <div ref={fixedBarRef} className="flex items-center justify-between gap-2 px-4 py-4 sm:px-6 min-[960px]:grid min-[960px]:grid-cols-[auto_minmax(0,1fr)_auto] min-[960px]:gap-x-6 min-[960px]:px-4 xl:gap-x-8 xl:px-8 2xl:px-[5%]">
         <Link to="/" aria-label="Guardiens, accueil" className="inline-flex min-h-[44px] items-center min-w-0 shrink-0 font-heading text-xl md:text-2xl font-bold">
           <span aria-hidden="true"><span className="text-primary">g</span>uardiens</span>
         </Link>
 
 
         {/* Les trois zones gardent chacune leur place dès le format ordinateur. */}
-        <nav aria-label="Navigation principale" className="hidden min-[1120px]:flex min-w-0 items-center justify-self-center gap-0 xl:gap-1">
+        <nav aria-label="Navigation principale" className="hidden min-[960px]:flex min-w-0 items-center justify-self-center gap-0 xl:gap-1">
           {NAV_DEFS.map((l) => (
             <Button
               key={l.to}
               variant="ghost"
               size="sm"
               onClick={() => navigate(l.to)}
-              className={`min-h-11 whitespace-nowrap px-1.5 text-xs xl:px-2 xl:text-sm 2xl:px-3 ${isActive(l.to) ? "text-primary font-semibold" : ""}`}
+              className={`min-h-11 whitespace-nowrap px-1.5 text-sm xl:px-2 2xl:px-3 ${isActive(l.to) ? "text-primary font-semibold" : ""}`}
               aria-current={isActive(l.to) ? "page" : undefined}
             >
-              {t(`nav.${l.key}`)}
-              {l.beta && (
-                <span className="ml-1.5 text-[11px] leading-none uppercase tracking-wider font-bold bg-amber-200 text-amber-900 px-1.5 py-0.5 rounded">
-                  {t("nav.beta")}
-                </span>
-              )}
+              {t(`nav.${l.shortKey ?? l.key}`)}
             </Button>
           ))}
         </nav>
 
-        <div className="hidden min-[1120px]:flex shrink-0 items-center justify-self-end gap-0 xl:gap-1">
+        <div className="hidden min-[960px]:flex shrink-0 items-center justify-self-end gap-0 xl:gap-1">
           {!authChecked ? (
             <div className="h-8 w-36 rounded-md bg-muted/40 animate-pulse" aria-hidden="true" />
           ) : hasSession ? (
