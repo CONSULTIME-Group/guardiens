@@ -46,8 +46,8 @@ const isForeign = (country: string | null) => {
 
 const listingTitleWithoutDates = (title: string): string => {
   const month = "janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre";
-  const writtenPeriod = new RegExp(`\\s*(?:,|\\||-)?\\s*(?:du\\s+)?\\d{1,2}(?:er)?\\s+(?:${month})(?:\\s+\\d{4})?\\s+(?:au|à|-)\\s+\\d{1,2}(?:er)?(?:\\s+(?:${month}))?(?:\\s+\\d{4})?.*$`, "iu");
-  const numericPeriod = /\s*(?:,|\||-)?\s*(?:du\s+)?\d{1,2}[/.]\d{1,2}(?:[/.]\d{2,4})?\s+(?:au|à|-)\s+\d{1,2}[/.]\d{1,2}(?:[/.]\d{2,4})?.*$/iu;
+  const writtenPeriod = new RegExp(`\\s*(?:,|\\||-)?\\s*(?:du\\s+)?\\d{1,2}(?:er)?\\s+(?:${month})(?:\\s+\\d{4})?\\s*(?:au|à|-)\\s*\\d{1,2}(?:er)?(?:\\s+(?:${month}))?(?:\\s+\\d{4})?.*$`, "iu");
+  const numericPeriod = /\s*(?:,|\||-)?\s*(?:du\s+)?\d{1,2}[/.]\d{1,2}(?:[/.]\d{2,4})?\s*(?:au|à|-)\s*\d{1,2}[/.]\d{1,2}(?:[/.]\d{2,4})?.*$/iu;
   const cleaned = title.replace(writtenPeriod, "").replace(numericPeriod, "").trim();
   const concise = cleaned || title;
   return concise.length > 72 ? `${concise.slice(0, 69).trimEnd()}...` : concise;
