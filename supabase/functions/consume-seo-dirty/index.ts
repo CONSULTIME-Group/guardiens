@@ -29,11 +29,33 @@ const corsHeaders = {
 };
 
 const SITE = "https://guardiens.fr";
+/** Articles lus par passage. Le budget de renders articles vaut ARTICLE_RENDER_BUDGET. */
 const BATCH = 50;
 /** Fiches gardien examinées par passage (lecture seule, non facturée). */
 const SITTER_SCAN_BATCH = 300;
 /** Renders Prerender réellement dépensés par passage pour les fiches gardien. */
 const SITTER_RENDER_BUDGET = 25;
+
+/**
+ * Budgets de renders par passage, cron toutes les 15 minutes.
+ * Ordre de priorité quand la file est pleine : villes, guides, départements,
+ * articles, puis fiches gardien.
+ *
+ * Villes 20 : la famille la plus nombreuse (161) et la plus rentable en SEO,
+ *   vidée en 9 passages soit environ 2 h 15.
+ * Guides 12 : 87 lignes, vidées en 8 passages, même horizon que les villes.
+ * Départements 10 : 98 lignes, pages d'agrégation moins prioritaires, 10 passages.
+ * Articles 8 : 90 lignes, contenu déjà bien indexé, 12 passages soit 3 h.
+ * Total hors gardiens : 50 renders par passage au maximum, soit une file
+ * complète de 436 pages vidée en 3 h après une mise en ligne.
+ */
+const CITY_RENDER_BUDGET = 20;
+const GUIDE_RENDER_BUDGET = 12;
+const DEPARTMENT_RENDER_BUDGET = 10;
+const ARTICLE_RENDER_BUDGET = 8;
+/** Lignes examinées par passage et par famille programmatique (lecture non facturée). */
+const PROGRAMMATIC_SCAN_BATCH = 200;
+
 
 interface ArticleRow {
   id: string;
