@@ -95,10 +95,12 @@
  *      ajoutée, et le crawler recevait un shell React en 200 au lieu d'une
  *      redirection. Soft-404 et double coût.
  *      CORRIGÉ : les 3xx sont relayés tels quels.
- *      NON CORRIGÉ VOLONTAIREMENT pour les 4xx : tant que la règle Ignored URL
- *      `/gardiens/` existe côté Prerender, relayer les 404 transformerait les
- *      261 fiches gardien du sitemap en 404 durs pour les crawlers. À rouvrir
- *      une fois cette règle tranchée.
+ *      CORRIGÉ EN v7.3 pour les 404 : la règle Ignored URL `/gardiens/` qui
+ *      justifiait le repli n'existe pas côté Prerender (vérifié le
+ *      07/09/2026, Cache Manager > Ignored URLs : les 8 règles portent
+ *      uniquement sur des paramètres de query string). Les fiches gardien
+ *      sont bien rendues et en cache. Voir l'entrée v7.3 ci-dessus. Le repli
+ *      origine ne concerne plus que 403, 429 et 5xx.
  *
  *  A3. `replace(/\/+$/, '')` ne traitait que les slashs finaux. `//admin`
  *      contournait `isNeverPrerendered`, et `/guides//mon-guide` créait une
