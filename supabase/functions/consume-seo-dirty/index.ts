@@ -339,6 +339,8 @@ Deno.serve(async (req) => {
     let urlsOk = 0;
     let urlsFailed = 0;
     let articlesDeferred = 0;
+    let articlesAttempted = 0;
+
 
     // Priorité 1 à 3 : pages villes, guides, départements. Elles passent avant
     // les articles et les fiches gardien quand la file est pleine.
