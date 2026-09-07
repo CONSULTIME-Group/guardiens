@@ -23,7 +23,10 @@ export function ConfianceSection() {
         <RevealSection delay={0.1}>
           <article className="rounded-2xl border border-primary/25 bg-primary/5 p-[22px] md:p-[34px]">
             <div className="max-w-3xl">
-              <p className="text-xs tracking-widest uppercase text-primary font-body font-medium">{t("landing.trust.main_label")}</p>
+              <div className="flex items-center gap-3">
+                <span aria-hidden="true" className="block h-6 w-[3px] rounded-full bg-terra" />
+                <p className="text-[10px] md:text-xs tracking-[0.2em] uppercase text-terra font-body font-medium">{t("landing.trust.main_label")}</p>
+              </div>
               <h3 className="mt-[14px] font-heading text-2xl md:text-3xl font-semibold text-foreground">{t("landing.trust.p1_title")}</h3>
               <p className="mt-[14px] text-foreground/75 leading-relaxed">{t("landing.trust.p1_text")}</p>
               <div className="mt-[22px] flex flex-wrap gap-2" aria-label={t("landing.trust.examples_label")}>
