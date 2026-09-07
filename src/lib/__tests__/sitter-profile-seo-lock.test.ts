@@ -40,7 +40,12 @@ describe("fiche gardien publique, verrous SEO", () => {
     const call = src.slice(src.indexOf("isSitterProfileIndexable({"));
     const block = call.slice(0, call.indexOf("});") + 3);
     expect(block).toContain("galleryCount");
-    expect(block).not.toContain("gallery.length");
+    const code = block
+      .split("\n")
+      .filter((l) => !l.trim().startsWith("//"))
+      .join("\n");
+    expect(code).not.toContain("gallery.length");
+
   });
 
   it("le compte de photos est chargé sans condition de session", () => {
