@@ -393,7 +393,7 @@ const ProfileHero = ({
               {/* La ville est portée par le H1 : ici on ne répète que le rôle. */}
               <p className="text-sm sm:text-base text-foreground/80 flex items-center gap-1 font-medium min-w-0 max-w-full break-words">
                 <MapPin className="w-3.5 h-3.5 shrink-0" />
-                <span className="min-w-0 break-words">{city ? roleLabel : `${roleLabel} en France`}</span>
+                <span className="min-w-0 break-words">{roleLabel}</span>
               </p>
 
 
