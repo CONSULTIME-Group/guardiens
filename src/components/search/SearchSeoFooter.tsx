@@ -25,7 +25,7 @@ export const SEARCH_FAQ = [
   },
   {
     q: "Combien coûte la consultation des annonces ?",
-    a: "La consultation est libre, même sans compte. L'inscription pour postuler à une annonce est à 0 €. L'espace propriétaire coûte 0 €. L'espace gardien est ouvert pendant la phase de lancement.",
+    a: "La consultation est libre, même sans compte. L'inscription pour postuler à une annonce coûte 0 €. L'espace propriétaire coûte 0 €. L'espace gardien est ouvert pendant la phase de lancement.",
   },
   {
     q: "Quels animaux peut-on faire garder ?",

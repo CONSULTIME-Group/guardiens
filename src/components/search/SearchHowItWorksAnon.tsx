@@ -24,7 +24,7 @@ const STEPS = [
   {
     n: "2",
     title: "Inscrivez-vous et postulez",
-    text: "Créez votre profil gardien à 0 €, présentez votre expérience et postulez aux annonces qui correspondent à votre disponibilité.",
+    text: "Créez votre profil gardien, 0 €, présentez votre expérience et postulez aux annonces qui correspondent à votre disponibilité.",
   },
   {
     n: "3",
