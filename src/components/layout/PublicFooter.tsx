@@ -83,7 +83,7 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
           <div>
             <h3 className="font-heading text-lg font-semibold text-white/90">
               <Link to="/" aria-label="Guardiens, accueil" className="hover:opacity-80 transition-opacity">
-                <span className="text-primary">g</span>uardiens
+                <span className="text-primary-on-dark">g</span>uardiens
               </Link>
             </h3>
             <p className="font-body text-sm text-white/70">

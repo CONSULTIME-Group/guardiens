@@ -43,7 +43,7 @@ export function getPricingBaseline(): string {
 }
 
 export function getPricingBaselineShort(): string {
-  return "Sans engagement, sans carte bancaire.";
+  return "Une adresse email et un mot de passe suffisent pour commencer, vous restez libre à tout moment.";
 }
 
 // ── Constantes conservées pour compatibilité (call-sites existants) ─────────
@@ -83,6 +83,7 @@ export const FOUNDER_DEADLINE = "à une date ultérieure";
 // scripts/sync-index-html.mjs puisse les extraire par regex.
 export const PRICING_LONG =
   "L'accès à Guardiens est ouvert pendant la phase de lancement. Les propriétaires publient leur annonce et échangent avec les gardiens, les gardiens candidatent et construisent leur profil. Toute évolution tarifaire sera annoncée à l'avance.";
-export const PRICING_SHORT = "Sans engagement, sans carte bancaire.";
-export const PRICING_VERY_SHORT = "Sans engagement, sans carte bancaire.";
+export const PRICING_SHORT =
+  "Une adresse email et un mot de passe suffisent pour commencer, vous restez libre à tout moment.";
+export const PRICING_VERY_SHORT = "Une adresse email et un mot de passe suffisent pour commencer.";
 
