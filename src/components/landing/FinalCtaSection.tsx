@@ -2,7 +2,8 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { trackEvent } from "@/lib/analytics";
 import { RevealSection } from "@/components/ui/RevealSection";
-import { PaintedHouse } from "@/components/landing/painted/PaintedHouse";
+import maison900 from "@/assets/landing/maison-seule-900.webp";
+import maison450 from "@/assets/landing/maison-seule-450.webp";
 
 export function FinalCtaSection() {
   const { t } = useTranslation();
