@@ -1023,8 +1023,8 @@ export default function PublicSitterProfile() {
   }
 
 
-  // Certains membres saisissent leur nom complet dans le champ prénom,
-  // seul le premier mot est affiché publiquement.
+  // Prénom complet, prénoms composés inclus. Seuls les segments qui portent
+  // une marque de nom de famille (capitales, initiales) sont retirés.
   const firstName = capitalize(publicFirstName(profile?.first_name));
   const city = profile?.city || "";
   // RGPD : masquage présentationnel des coordonnées (jamais de modification en base).
