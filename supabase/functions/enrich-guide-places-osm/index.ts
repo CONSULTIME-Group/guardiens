@@ -626,11 +626,14 @@ Deno.serve(async (req) => {
           }
         }
         lieux_inseres += rows.length;
+        guideResult = "ok";
+      } else {
+        guideResult = "aucun_resultat";
       }
 
       details.push({ slug: guide.slug, inseres: rows.length, rejetes: rejetesGuide });
       } finally {
-        await markAttempted(guide.id);
+        await markAttempted(guide.id, guideResult);
       }
     }
 
