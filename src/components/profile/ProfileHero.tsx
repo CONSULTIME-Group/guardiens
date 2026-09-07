@@ -390,14 +390,12 @@ const ProfileHero = ({
               {/* Réactivité calculée (90 jours), identique gardien et propriétaire. */}
               <ResponsivenessBadge userId={id} className="self-start mt-1" />
 
-              {city && (
-                <p className="text-sm sm:text-base text-foreground/80 flex items-center gap-1 font-medium min-w-0 max-w-full break-words">
-                  <MapPin className="w-3.5 h-3.5 shrink-0" />
-                  <span className="min-w-0 break-words">
-                    {roleLabel} à {city}
-                  </span>
-                </p>
-              )}
+              {/* La ville est portée par le H1 : ici on ne répète que le rôle. */}
+              <p className="text-sm sm:text-base text-foreground/80 flex items-center gap-1 font-medium min-w-0 max-w-full break-words">
+                <MapPin className="w-3.5 h-3.5 shrink-0" />
+                <span className="min-w-0 break-words">{city ? roleLabel : `${roleLabel} en France`}</span>
+              </p>
+
 
               {proSpecialtyLabel && (
                 <p className="text-sm text-foreground/85 font-medium mt-0.5 break-words">
