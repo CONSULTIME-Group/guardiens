@@ -237,6 +237,7 @@ const PageMeta = ({
     // Signal à Prerender.io que le contenu SEO est prêt, une fois toutes les
     // balises effectivement écrites, et seulement si la page le permet.
     if (ready !== false) {
+      window.prerenderMetaPending = false;
       (window as any).prerenderReady = true;
     }
   }, [author, canonical, canonicalUrl, currentPath, currentUrl, extraMetaKey, fullTitle, jsonLdKey, metaDescription, noindex, nofollow, noCanonical, statusCode, prerenderHeader, publishedAt, ready, resolvedImage, type]);

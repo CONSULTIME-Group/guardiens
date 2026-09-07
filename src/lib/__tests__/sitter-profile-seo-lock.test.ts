@@ -1,10 +1,9 @@
 /**
  * Verrous SEO des fiches gardien publiques `/gardiens/:id` (07/09/2026).
  *
- * 1. `window.prerenderReady = true` ne doit jamais être posé par la page :
- *    au moment où l'effet de chargement se termine, `loading` vaut encore true
- *    et le DOM ne porte que le squelette (ni H1, ni bio, ni title, ni
- *    canonical). PageMeta est seul maître du drapeau, il le lève une fois monté.
+ * 1. PageMeta est le seul endroit qui lève le drapeau sans condition. La fiche
+ *    déclare ses métadonnées en attente avant son chargement, et le repli global
+ *    respecte ce verrou.
  *
  * 2. L'indexabilité ne doit jamais dépendre d'une donnée chargée sous
  *    condition d'authentification. La galerie (`gallery`) n'est chargée que
@@ -22,17 +21,41 @@ const read = (p: string) => fs.readFileSync(path.resolve(root, p), "utf-8");
 const PAGE = "src/pages/PublicSitterProfile.tsx";
 const SITEMAP = "scripts/generate-sitemap.mjs";
 
-describe("fiche gardien publique, verrous SEO", () => {
-  it("ne pose jamais prerenderReady, PageMeta en est seul maître", () => {
-    const src = read(PAGE);
-    const hits = src
-      .split("\n")
-      .filter((l) => /prerenderReady\s*=\s*true/.test(l) && !l.trim().startsWith("//"));
-    expect(hits).toEqual([]);
+const sourceFiles = (directory: string): string[] =>
+  fs.readdirSync(path.resolve(root, directory), { withFileTypes: true }).flatMap((entry) => {
+    const relative = path.join(directory, entry.name);
+    if (entry.isDirectory()) return sourceFiles(relative);
+    return /\.(ts|tsx)$/.test(entry.name) && !entry.name.includes(".test.")
+      ? [relative]
+      : [];
   });
 
-  it("PageMeta reste bien le porteur du drapeau", () => {
-    expect(read("src/components/PageMeta.tsx")).toMatch(/prerenderReady\s*=\s*true/);
+describe("fiche gardien publique, verrous SEO", () => {
+  it("PageMeta est le seul endroit qui lève le drapeau sans condition", () => {
+    const assignments = sourceFiles("src").flatMap((file) =>
+      read(file)
+        .split("\n")
+        .map((line, index) => ({ file, line, index }))
+        .filter(({ line }) => /prerenderReady\s*=\s*true/.test(line) && !line.trim().startsWith("//")),
+    );
+    const unconditional = assignments.filter(({ file, line, index }) => {
+      if (file === "src/components/PageMeta.tsx") return true;
+      const source = read(file).split("\n");
+      const context = source.slice(Math.max(0, index - 3), index + 1).join("\n");
+      return !/\bif\s*\(|\bif\s+/.test(context);
+    });
+
+    expect(unconditional.map(({ file }) => file)).toEqual(["src/components/PageMeta.tsx"]);
+  });
+
+  it("le repli global attend et respecte les métadonnées déclarées", () => {
+    const main = read("src/main.tsx");
+    expect(main).toMatch(/if\s*\(window\.prerenderMetaPending\)\s*return/);
+    expect(main).toMatch(/setTimeout\(markPrerenderReady,\s*10000\)/);
+    expect(read(PAGE)).toContain("window.prerenderMetaPending = true");
+    expect(read("src/components/PageMeta.tsx")).toMatch(
+      /prerenderMetaPending\s*=\s*false;[\s\S]{0,100}prerenderReady\s*=\s*true/,
+    );
   });
 
   it("l'indexabilité ne lit pas la galerie chargée sous condition de session", () => {

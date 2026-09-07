@@ -110,6 +110,12 @@ interface OwnerProfileData {
 }
 
 export default function PublicSitterProfile() {
+  const prerenderMetaDeclared = useRef(false);
+  if (!prerenderMetaDeclared.current && typeof window !== "undefined") {
+    window.prerenderMetaPending = true;
+    window.prerenderReady = false;
+    prerenderMetaDeclared.current = true;
+  }
   const { id } = useParams<{ id: string }>();
   const auth = useAuth();
   const { sitter: viewerSitter } = useViewerSitterForAffinity();

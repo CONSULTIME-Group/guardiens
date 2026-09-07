@@ -11,7 +11,7 @@ import { execSync } from 'child_process';
  * Tests, logs techniques et fichiers utilitaires non-visibles sont exclus.
  */
 
-const SCAN_PATHS = 'src/pages src/components src/data src/i18n/locales index.html';
+const SCAN_PATHS = 'src/pages src/components src/data src/i18n/locales src/lib src/hooks scripts index.html';
 
 const EXCLUDE = [
   '--glob=!**/*.test.*',
