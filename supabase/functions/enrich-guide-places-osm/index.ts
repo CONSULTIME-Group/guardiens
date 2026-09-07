@@ -453,29 +453,39 @@ Deno.serve(async (req) => {
         const query =
           `[out:json][timeout:25];(nwr["amenity"="veterinary"](around:${radius},${lat},${lon});` +
           `nwr["shop"="pet"](around:${radius},${lat},${lon}););out center tags;`;
-        try {
-          const r = await fetch("https://overpass-api.de/api/interpreter", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-              "User-Agent": "Guardiens/1.0 (enrich-guide-places-osm)",
-            },
-            body: `data=${encodeURIComponent(query)}`,
-          });
-          if (!r.ok) return null;
-          const text = await r.text();
-          if (!text.trim().startsWith("{")) return null;
-          const data = JSON.parse(text);
-          const els: OsmElement[] = Array.isArray(data?.elements) ? data.elements : [];
-          return els.filter((e) => e.tags?.name);
-        } catch {
-          return null;
+        // L'IP de sortie des Edge Functions est mutualisée et le miroir
+        // principal la limite à 2 créneaux simultanés : on essaie les
+        // miroirs dans l'ordre et on bascule au premier échec (statut non
+        // 200, corps non analysable ou délai dépassé).
+        for (const miroir of OVERPASS_MIRRORS) {
+          try {
+            const r = await fetch(miroir, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "User-Agent": "Guardiens/1.0 (enrich-guide-places-osm)",
+              },
+              body: `data=${encodeURIComponent(query)}`,
+              signal: AbortSignal.timeout(OVERPASS_TIMEOUT_MS),
+            });
+            if (!r.ok) continue;
+            const text = await r.text();
+            if (!text.trim().startsWith("{")) continue;
+            const data = JSON.parse(text);
+            const els: OsmElement[] = Array.isArray(data?.elements) ? data.elements : [];
+            miroirUtilise = new URL(miroir).hostname;
+            return els.filter((e) => e.tags?.name);
+          } catch {
+            continue;
+          }
         }
+        return null;
       };
 
       let elements = await runOverpass(5000);
       if (elements === null) {
         overpass_indisponible++;
+        guideResult = "overpass_indisponible";
         details.push({ slug: guide.slug, inseres: 0, rejetes: 0 });
         continue;
       }
