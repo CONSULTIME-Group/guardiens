@@ -316,12 +316,14 @@ const AdminContactMessages = () => {
 
       {/* View / Reply modal */}
       <Dialog open={viewModal.open} onOpenChange={(o) => !o && setViewModal({ open: false, msg: null })}>
-        <DialogContent className="max-w-xl">
-          <DialogHeader><DialogTitle>Message de {viewModal.msg?.name}</DialogTitle></DialogHeader>
+        <DialogContent className="max-w-xl p-0 gap-0 max-h-[95vh] sm:max-h-[85vh] flex flex-col overflow-hidden">
+          <DialogHeader className="px-6 pt-6 pb-3 shrink-0"><DialogTitle>Message de {viewModal.msg?.name}</DialogTitle></DialogHeader>
           {viewModal.msg && (() => {
             const recipientFirstName = viewModal.msg.name?.split(' ')[0]?.trim() || null;
             return (
-              <div className="space-y-4">
+              <>
+              <div className="flex-1 overflow-y-auto min-h-0 px-6 pb-4 space-y-4">
+
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div><span className="text-muted-foreground">Email :</span> <a href={`mailto:${viewModal.msg.email}`} className="text-primary hover:underline">{viewModal.msg.email}</a></div>
                   <div><span className="text-muted-foreground">Date :</span> {format(new Date(viewModal.msg.created_at), "d MMMM yyyy à HH:mm", { locale: fr })}</div>
