@@ -32,6 +32,8 @@ interface ProfileHeroProps {
   id: string;
   firstName: string;
   city: string | null;
+  /** Nom du département, affiché après la ville quand il est connu. */
+  departmentName?: string | null;
   avatarUrl: string | null;
   heroDesktop: string;
   heroMobile: string;
