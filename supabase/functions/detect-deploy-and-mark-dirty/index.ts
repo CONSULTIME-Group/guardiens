@@ -404,9 +404,12 @@ Deno.serve(async (req) => {
           family: d.family,
           last_hash: d.new_hash ?? st?.last_hash ?? null,
           last_global_hash: globalHash ?? st?.last_global_hash ?? null,
+          // Au bootstrap d'une famille, l'horloge du filet temporel demarre
+          // maintenant : sinon le passage suivant declencherait aussitot une
+          // vague complete au motif "jamais rafraichie".
           last_marked_at: markedRowsByFamily[d.family] !== undefined
             ? nowIso
-            : st?.last_marked_at ?? null,
+            : st?.last_marked_at ?? nowIso,
           updated_at: nowIso,
         };
       });
