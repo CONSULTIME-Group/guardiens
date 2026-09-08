@@ -1812,13 +1812,24 @@ export default function PublicSitterProfile() {
         const almaNode = !isOwn ? <AlmaWhisperCard phrase={almaPhrase} /> : null;
         // Pouls : chiffres RÉELS. Local via useCityStats trop coûteux ici ; on
         // sert les chiffres globaux depuis useCommunityPulse (déjà en cache).
+        // Pouls local : à partir de LOCAL_PULSE_MIN_SITTERS gardiens actifs
+        // dans le département, le chiffre réel remplace le chiffre national.
+        const pulseLocal =
+          geoInfo.deptName && deptSitterCount != null && deptSitterCount >= LOCAL_PULSE_MIN_SITTERS
+            ? [
+                {
+                  value: deptSitterCount,
+                  label: `gardiens actifs, ${geoInfo.deptName}${geoInfo.deptCode ? ` (${geoInfo.deptCode})` : ""}`,
+                },
+              ]
+            : [];
         const pulseGlobal = communityPulse
           ? [
               { value: communityPulse.maisonsGardees, label: "maisons gardées avec Guardiens" },
               { value: communityPulse.totalInscrits, label: "membres actifs" },
             ]
           : [];
-        const pulseNode = <CommunityPulseCard city={city || null} global={pulseGlobal} />;
+        const pulseNode = <CommunityPulseCard city={city || null} local={pulseLocal} global={pulseGlobal} />;
         const railChildren = (
           <>
             {affinityNode}
@@ -2184,6 +2195,17 @@ export default function PublicSitterProfile() {
           proprioAlmaPhrase = `L'identité de ${firstName} a été vérifiée à partir d'une pièce officielle.`;
         }
         const proprioAlmaNode = !isOwn ? <AlmaWhisperCard phrase={proprioAlmaPhrase} /> : null;
+        // Pouls local : à partir de LOCAL_PULSE_MIN_SITTERS gardiens actifs
+        // dans le département, le chiffre réel remplace le chiffre national.
+        const pulseLocal =
+          geoInfo.deptName && deptSitterCount != null && deptSitterCount >= LOCAL_PULSE_MIN_SITTERS
+            ? [
+                {
+                  value: deptSitterCount,
+                  label: `gardiens actifs, ${geoInfo.deptName}${geoInfo.deptCode ? ` (${geoInfo.deptCode})` : ""}`,
+                },
+              ]
+            : [];
         const pulseGlobal = communityPulse
           ? [
               { value: communityPulse.maisonsGardees, label: "maisons gardées avec Guardiens" },
@@ -2194,7 +2216,7 @@ export default function PublicSitterProfile() {
           <>
             {proprioAffinityNode}
             {proprioAlmaNode}
-            <CommunityPulseCard city={city || null} global={pulseGlobal} />
+            <CommunityPulseCard city={city || null} local={pulseLocal} global={pulseGlobal} />
             {reportNode}
           </>
         );
