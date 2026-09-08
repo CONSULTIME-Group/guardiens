@@ -381,17 +381,20 @@ const AdminContactMessages = () => {
                   </p>
                 </div>
 
-                <div className="flex gap-2 pt-2">
-                  <Button variant="outline" onClick={() => setViewModal({ open: false, msg: null })} className="flex-1" disabled={sendLoading}>Fermer</Button>
-                  <Button variant="outline" onClick={handleMarkReplied} disabled={sendLoading} className="shrink-0 text-muted-foreground" title="Marquer comme répondu sans envoyer d'email">Marquer répondu</Button>
-                  <Button onClick={handleSendReply} disabled={!replyText.trim() || sendLoading} className="flex-1">
-                    {sendLoading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Envoi…</> : <><Send className="w-4 h-4 mr-2" />Envoyer</>}
-                  </Button>
-                </div>
               </div>
+
+              <DialogFooter className="px-6 py-4 border-t border-border bg-background gap-2 shrink-0 sm:justify-between">
+                <Button variant="outline" onClick={() => setViewModal({ open: false, msg: null })} className="flex-1" disabled={sendLoading}>Fermer</Button>
+                <Button variant="outline" onClick={handleMarkReplied} disabled={sendLoading} className="shrink-0 text-muted-foreground" title="Marquer comme répondu sans envoyer d'email">Marquer répondu</Button>
+                <Button onClick={handleSendReply} disabled={!replyText.trim() || sendLoading} className="flex-1">
+                  {sendLoading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Envoi…</> : <><Send className="w-4 h-4 mr-2" />Envoyer</>}
+                </Button>
+              </DialogFooter>
+              </>
             );
           })()}
         </DialogContent>
+
       </Dialog>
     </div>
   );
