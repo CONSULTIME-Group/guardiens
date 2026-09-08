@@ -943,6 +943,49 @@ export default function PublicSitterProfile() {
       setGeoInfo({ deptName, deptCode: code, regionName, deptSlug, citySlug });
     };
 
+      setGeoInfo({ deptName, deptCode: code, regionName, deptSlug, citySlug });
+
+      if (!deptName) return;
+
+      // Villes du département ayant une page publiée, quatre au maximum,
+      // triées par nombre de gardiens décroissant.
+      const { data: cityPages } = await (supabase as any)
+        .from("seo_city_pages")
+        .select("city, slug, sitter_count")
+        .eq("department", deptName)
+        .eq("published", true)
+        .not("slug", "like", "test-%")
+        .order("sitter_count", { ascending: false, nullsFirst: false })
+        .limit(4);
+
+      // Guides publiés du même département.
+      const { data: guidePages } = await (supabase as any)
+        .from("city_guides")
+        .select("city, slug")
+        .eq("department", deptName)
+        .eq("published", true)
+        .order("city")
+        .limit(4);
+
+      // Gardiens actifs du département, comptés directement (la colonne
+      // sitter_count des pages SEO sert au tri, pas à ce chiffre).
+      const { count } = await (supabase as any)
+        .from("public_profiles")
+        .select("id", { count: "exact", head: true })
+        .eq("departement_code", code)
+        .in("role", ["sitter", "both"]);
+
+      if (cancelled) return;
+      setDeptSitterCount(typeof count === "number" ? count : null);
+      setFooterLocal({
+        departmentName: deptName,
+        departmentCode: code,
+        departmentSlug: deptSlug,
+        cities: (cityPages || []).map((c: any) => ({ city: c.city, slug: c.slug })),
+        guides: (guidePages || []).map((g: any) => ({ city: g.city, slug: g.slug })),
+      });
+    };
+
     loadGeo();
     return () => { cancelled = true; };
   }, [profile?.departement_code, profile?.city]);
