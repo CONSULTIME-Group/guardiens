@@ -2632,6 +2632,8 @@ export default function PublicSitterProfile() {
       })()}
 
 
+      <PublicFooter />
+
       {/* ── Lightbox ── */}
       {lightboxIdx !== null && lightboxIdx < lightboxItems.length && (
         <div
