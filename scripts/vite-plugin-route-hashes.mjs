@@ -27,11 +27,13 @@ export function routeHashesPlugin({ outFile = "route-hashes.json", debug = false
       const root = process.cwd();
       const abs = (p) => path.resolve(root, p).replace(/\\/g, "/");
 
-      // module id -> chunk fileName
-      const moduleToChunk = new Map();
-      for (const [fileName, out] of Object.entries(bundle)) {
+      // module id -> code reellement emis pour ce module
+      const moduleCode = new Map();
+      for (const out of Object.values(bundle)) {
         if (out.type !== "chunk") continue;
-        for (const id of Object.keys(out.modules)) moduleToChunk.set(id, fileName);
+        for (const [id, mod] of Object.entries(out.modules)) {
+          moduleCode.set(id, mod.code ?? "");
+        }
       }
 
       const closure = (rootId) => {
@@ -60,15 +62,17 @@ export function routeHashesPlugin({ outFile = "route-hashes.json", debug = false
               `Mettre a jour FAMILY_ROOTS dans scripts/vite-plugin-route-hashes.mjs.`,
           );
         }
-        const chunks = new Set();
-        for (const id of closure(rootId)) {
-          const c = moduleToChunk.get(id);
-          if (c) chunks.add(c);
+        const parts = [];
+        for (const id of [...closure(rootId)].sort()) {
+          const code = moduleCode.get(id);
+          if (code === undefined) continue; // module elimine par tree-shaking
+          const rel2 = id.startsWith(root) ? id.slice(root.length + 1) : id;
+          parts.push(`${rel2}:${createHash("sha1").update(code).digest("hex")}`);
         }
-        const sorted = [...chunks].sort();
-        families[family] = createHash("sha256").update(sorted.join("\n")).digest("hex").slice(0, 16);
-        detail[family] = { chunk_count: sorted.length, chunks: sorted };
+        families[family] = createHash("sha256").update(parts.join("\n")).digest("hex").slice(0, 16);
+        detail[family] = { module_count: parts.length };
       }
+
 
       this.emitFile({
         type: "asset",
