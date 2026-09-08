@@ -16,6 +16,8 @@ interface BadgeSceauProps {
   className?: string
   obtainedAt?: string
   showObtainedMonth?: boolean
+  /** Autorise le libellé sur plusieurs lignes (fiche gardien). Par défaut, une seule ligne tronquée. */
+  wrapLabel?: boolean
 }
 
 const TIER_COLORS: Record<BadgeTier, { stroke: string; width: number; glow?: string }> = {
