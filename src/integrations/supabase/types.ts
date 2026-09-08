@@ -1297,6 +1297,30 @@ export type Database = {
         }
         Relationships: []
       }
+      backup_qualite_20260908: {
+        Row: {
+          champ: string | null
+          sauvegarde_le: string | null
+          slug: string | null
+          source_table: string | null
+          valeur: string | null
+        }
+        Insert: {
+          champ?: string | null
+          sauvegarde_le?: string | null
+          slug?: string | null
+          source_table?: string | null
+          valeur?: string | null
+        }
+        Update: {
+          champ?: string | null
+          sauvegarde_le?: string | null
+          slug?: string | null
+          source_table?: string | null
+          valeur?: string | null
+        }
+        Relationships: []
+      }
       badge_attributions: {
         Row: {
           badge_id: string
