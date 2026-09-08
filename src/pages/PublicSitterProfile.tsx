@@ -1461,6 +1461,7 @@ export default function PublicSitterProfile() {
             id={id}
             firstName={firstName}
             city={city || null}
+            departmentName={geoInfo.deptName}
             avatarUrl={profile.avatar_url || null}
             heroDesktop={heroDesktop}
             heroMobile={heroMobile}
