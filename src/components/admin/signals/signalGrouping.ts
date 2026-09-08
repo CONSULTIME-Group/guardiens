@@ -46,6 +46,7 @@ export const SIGNAL_TYPE_LABELS: Record<string, string> = {
   sit_published_zero_reach: "Annonce publiée sans aucun gardien touché",
   email_recipient_address_invalid: "Adresse email refusée par le fournisseur",
   pro_pending_review: "Fiche pro en attente de validation",
+  prerender_monthly_budget_reached: "Plafond mensuel de renders atteint",
 
 
 };

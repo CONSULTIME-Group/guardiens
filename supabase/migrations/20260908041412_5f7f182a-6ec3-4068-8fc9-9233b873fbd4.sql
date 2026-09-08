@@ -1,0 +1,1 @@
+GRANT EXECUTE ON FUNCTION public.prerender_render_budget_status(integer) TO postgres;

@@ -36,12 +36,40 @@ const corsHeaders = {
 const SITE = "https://guardiens.fr";
 
 /**
- * Intervalle minimal entre deux marquages massifs. A 436 pages indexables,
- * un marquage coute 436 renders : une fois par 24 h plafonne le poste
- * "deploiement" a environ 13 000 renders par mois, soit la moitie du quota
- * partage.
+ * Intervalle minimal entre deux vagues de marquage, en heures.
+ *
+ * Valeur retenue le 08/09/2026 : 12 h. A 24 h, une journee comportant deux
+ * mises en ligne ne rafraichissait le cache qu'une seule fois, la seconde
+ * version restait servie perimee aux robots jusqu'au lendemain. A 12 h, une
+ * journee chargee obtient bien ses deux vagues.
+ *
+ * Pour changer la valeur : modifier la constante ci-dessous, rien d'autre.
+ * Descendre sous 12 h n'a de sens que si MONTHLY_RENDER_BUDGET est revu en
+ * meme temps, sinon le plafond mensuel sera atteint en milieu de mois et le
+ * rafraichissement sera suspendu.
  */
-const MIN_MARK_INTERVAL_HOURS = 24;
+const MIN_MARK_INTERVAL_HOURS = 12;
+
+/**
+ * Plafond mensuel de renders Prerender inities par nous, toutes sources
+ * confondues (vagues de deploiement, triggers de contenu, fiches gardien).
+ *
+ * Le quota du compte Prerender est de 25 000 renders par mois et il est
+ * partage avec un autre domaine. Les robots declenchent en plus leurs propres
+ * renders a l'expiration naturelle du cache, de l'ordre de 2 800 par mois pour
+ * 646 URLs a 7 jours. Plafonner nos propres renders a 18 000 laisse environ
+ * 7 000 renders de marge pour ces deux postes, tout en autorisant environ
+ * 41 vagues de 436 pages par mois, soit plus d'une par jour.
+ *
+ * Pour changer la valeur : modifier la constante ci-dessous. Le detecteur
+ * compte les lignes de public.prerender_recache_log du mois calendaire en
+ * cours et refuse de marquer une vague qui ferait franchir ce plafond.
+ */
+const MONTHLY_RENDER_BUDGET = 18_000;
+
+/** Identifiant d'entite fixe du signal admin "plafond mensuel atteint". */
+const BUDGET_SIGNAL_ENTITY_ID = "9e0b6f2a-7c41-4d2e-9a55-5b1f2c3d4e5f";
+
 
 /** Extrait le nom de fichier du bundle d'entree du HTML servi. */
 export function extractBundleFingerprint(html: string): string | null {
@@ -66,16 +94,26 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
 
-    // Option de test : forcer une empreinte donnee sans dependre du reseau.
+    // Option de test : forcer une empreinte donnee sans dependre du reseau,
+    // et abaisser temporairement le plafond mensuel pour verifier le refus.
     let forced: string | null = null;
+    let budgetOverride: number | null = null;
+    let ignoreDebounce = false;
     if (req.method === "POST") {
       try {
         const body = await req.json();
         if (typeof body?.fingerprint === "string" && body.fingerprint.length > 0) {
           forced = body.fingerprint;
         }
+        if (typeof body?.monthly_budget_override === "number" && body.monthly_budget_override >= 0) {
+          budgetOverride = body.monthly_budget_override;
+        }
+        // Test uniquement : ignorer le delai minimal entre deux vagues.
+        if (body?.ignore_debounce === true) ignoreDebounce = true;
       } catch { /* corps absent ou invalide, comportement normal */ }
     }
+    const monthlyBudget = budgetOverride ?? MONTHLY_RENDER_BUDGET;
+
 
     let fingerprint = forced;
     if (!fingerprint) {
@@ -133,20 +171,54 @@ Deno.serve(async (req) => {
 
     let reason = "deploy_detected";
     if (isFirstEverRun) reason = "bootstrap";
-    else if (hoursSinceLastMark < MIN_MARK_INTERVAL_HOURS) reason = "debounced";
+    else if (!ignoreDebounce && hoursSinceLastMark < MIN_MARK_INTERVAL_HOURS) reason = "debounced";
 
     let marked = 0;
     const perTable: Record<string, number> = {};
 
+    const targets: Array<{ table: string; indexable: boolean }> = [
+      { table: "seo_city_pages", indexable: true },
+      { table: "city_guides", indexable: false },
+      { table: "seo_department_pages", indexable: true },
+      { table: "articles", indexable: true },
+    ];
+
+    // Compte des renders deja inities ce mois calendaire, toutes sources
+    // confondues, et taille de la vague a venir. On ne marque que si la somme
+    // tient sous le plafond.
+    let monthlyUsed = 0;
+    let waveSize = 0;
+    if (reason === "deploy_detected") {
+      const monthStart = new Date();
+      monthStart.setUTCDate(1);
+      monthStart.setUTCHours(0, 0, 0, 0);
+
+      const { count: usedCount, error: usedError } = await sb
+        .from("prerender_recache_log")
+        .select("id", { count: "exact", head: true })
+        .gte("created_at", monthStart.toISOString());
+      if (usedError) throw usedError;
+      monthlyUsed = usedCount ?? 0;
+
+      for (const t of targets) {
+        let q = sb
+          .from(t.table)
+          .select("id", { count: "exact", head: true })
+          .eq("published", true)
+          .is("seo_dirty_at", null);
+        if (t.indexable) q = q.or("noindex.is.null,noindex.eq.false");
+        const { count, error } = await q;
+        if (error) throw error;
+        waveSize += count ?? 0;
+      }
+
+      if (monthlyUsed + waveSize > monthlyBudget) {
+        reason = "monthly_budget_exceeded";
+      }
+    }
+
     if (reason === "deploy_detected") {
       const now = new Date().toISOString();
-      const targets: Array<{ table: string; indexable: boolean }> = [
-        { table: "seo_city_pages", indexable: true },
-        { table: "city_guides", indexable: false },
-        { table: "seo_department_pages", indexable: true },
-        { table: "articles", indexable: true },
-      ];
-
       for (const t of targets) {
         let q = sb
           .from(t.table)
@@ -161,6 +233,46 @@ Deno.serve(async (req) => {
       }
     }
 
+    if (reason === "monthly_budget_exceeded") {
+      const monthTag = new Date().toISOString().slice(0, 7);
+      // Un seul signal ouvert par mois : le cron passe toutes les 10 minutes.
+      const { data: openSignal } = await sb
+        .from("admin_signals")
+        .select("id, metadata")
+        .eq("signal_type", "prerender_monthly_budget_reached")
+        .is("resolved_at", null)
+        .limit(20);
+      const already = (openSignal ?? []).some(
+        (s) => ((s.metadata ?? {}) as { month?: string }).month === monthTag,
+      );
+      if (!already) {
+        const { error: signalError } = await sb.from("admin_signals").insert({
+          signal_type: "prerender_monthly_budget_reached",
+          severity: "critical",
+          entity_type: "system",
+          // admin_signals.entity_id est obligatoire : identifiant fixe du
+          // poste "budget Prerender", la deduplication se fait sur le mois.
+          entity_id: BUDGET_SIGNAL_ENTITY_ID,
+          metadata: {
+            nature: "seo",
+            month: monthTag,
+            renders_used: monthlyUsed,
+            monthly_budget: monthlyBudget,
+            wave_size: waveSize,
+            detail:
+              "Plafond mensuel de renders atteint, le rafraichissement du cache est suspendu jusqu'au mois prochain, guardiens.fr peut servir du contenu perime aux robots.",
+          },
+        });
+        if (signalError && signalError.code !== "23505") {
+          console.error("admin_signals insert failed", signalError);
+        }
+      }
+      console.warn(
+        `[detect-deploy-and-mark-dirty] refus de marquage : ${monthlyUsed}/${monthlyBudget} renders ce mois, vague de ${waveSize} pages refusee`,
+      );
+    }
+
+
     const { data: inserted, error: insertError } = await sb
       .from("deploy_fingerprints")
       .insert({
@@ -172,12 +284,16 @@ Deno.serve(async (req) => {
       .maybeSingle();
     if (insertError) throw insertError;
 
+
     await sb.from("prerender_recache_log").insert({
       article_id: null,
       url: `${SITE}/?fingerprint=${fingerprint}`,
       status_code: null,
-      ok: true,
-      detail: `${reason}, ${marked} lignes marquees ${JSON.stringify(perTable)}`,
+      ok: reason !== "monthly_budget_exceeded",
+      detail:
+        reason === "monthly_budget_exceeded"
+          ? `monthly_budget_exceeded, ${monthlyUsed}/${monthlyBudget} renders ce mois, vague de ${waveSize} pages refusee`
+          : `${reason}, ${marked} lignes marquees ${JSON.stringify(perTable)}`,
       source: "deploy-detector",
     });
 
@@ -188,7 +304,11 @@ Deno.serve(async (req) => {
       reason,
       marked,
       per_table: perTable,
+      monthly_used: monthlyUsed,
+      monthly_budget: monthlyBudget,
+      wave_size: waveSize,
     };
+
     console.log(`[detect-deploy-and-mark-dirty] ${JSON.stringify(payload)}`);
     await run.finish("success", payload);
     return json(200, payload);
