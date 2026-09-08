@@ -53,6 +53,7 @@ export function BadgeSceau({
   className = '',
   obtainedAt,
   showObtainedMonth = false,
+  wrapLabel = false,
 }: BadgeSceauProps) {
   const [dialogOpen, setDialogOpen] = useState(false)
   const def = BADGE_DEFINITIONS[id]
