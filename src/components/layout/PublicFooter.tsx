@@ -6,7 +6,29 @@ import { useAuth } from "@/contexts/AuthContext";
 import { PRESS_ARTICLE_URL } from "@/components/shared/PressQuote";
 import { LE_PROGRES_LOGO } from "@/assets/pressLogos";
 
-const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
+export interface FooterLocalContext {
+  /** Nom du département de la page consultée, par exemple « Var ». */
+  departmentName: string;
+  /** Code du département, par exemple « 83 ». */
+  departmentCode: string | null;
+  /** Slug de la page département publiée, sinon null. */
+  departmentSlug: string | null;
+  /** Villes du département ayant une page publiée, au maximum quatre. */
+  cities: { city: string; slug: string }[];
+  /** Guides publiés du département. */
+  guides: { city: string; slug: string }[];
+}
+
+interface PublicFooterProps {
+  /**
+   * Ancrage local optionnel : quand le département de la page est connu, les
+   * trois colonnes locales pointent vers ce département. Sans cet ancrage, le
+   * pied de page reste strictement identique à sa version générique.
+   */
+  local?: FooterLocalContext | null;
+}
+
+const PublicFooter = React.forwardRef<HTMLElement, PublicFooterProps>(({ local }, ref) => {
   const { t } = useTranslation();
   // Garde alignée sur PublicHeader : le pied de page public n'est retiré que
   // pour un utilisateur porteur d'une session dans la coquille applicative.
@@ -14,6 +36,11 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
   const inAppShell = useInAppShell();
   const { hasSession } = useAuth();
   if (hasSession && inAppShell) return null;
+  const linkCls =
+    "inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors";
+  const hasLocalCities = !!local && local.cities.length > 0;
+  const hasLocalDept = !!local && !!local.departmentSlug;
+  const hasLocalGuides = !!local && local.guides.length > 0;
   return (
     <footer ref={ref} className="public-footer bg-footer border-t border-white/10">
       <div className="max-w-6xl mx-auto px-6 md:px-12 py-10">
