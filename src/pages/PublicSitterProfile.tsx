@@ -1821,18 +1821,27 @@ export default function PublicSitterProfile() {
                     </div>
                   )}
                   {id && <MissionBadgesReceived profileId={id} />}
-                  <TrustTimeline
-                    memberSince={profile?.created_at}
-                    reviews={reviews}
-                    badges={(userBadges || []).map((b: any) => ({
-                      badge_id: b.badge_id,
-                      created_at: b.created_at,
-                      count: b.count ?? 1,
-                    }))}
-                    completedSits={completedSits}
-                    lastActivity={profile?.last_seen_at ?? null}
-                    firstName={firstName}
-                  />
+                  {reviews.length === 0 && (userBadges || []).length === 0 && completedSits === 0 ? (
+                    <FreshStartStory
+                      firstName={firstName}
+                      createdAt={profile?.created_at}
+                      lastSeenAt={profile?.last_seen_at ?? null}
+                      identityVerified={!!profile?.identity_verified}
+                    />
+                  ) : (
+                    <TrustTimeline
+                      memberSince={profile?.created_at}
+                      reviews={reviews}
+                      badges={(userBadges || []).map((b: any) => ({
+                        badge_id: b.badge_id,
+                        created_at: b.created_at,
+                        count: b.count ?? 1,
+                      }))}
+                      completedSits={completedSits}
+                      lastActivity={profile?.last_seen_at ?? null}
+                      firstName={firstName}
+                    />
+                  )}
                 </div>
               </TrustStory>
             )}
