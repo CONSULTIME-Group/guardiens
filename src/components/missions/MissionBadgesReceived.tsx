@@ -68,9 +68,12 @@ interface Props {
   ownerNote?: string;
   className?: string;
   variant?: "default" | "compact";
+  /** Affiche le mois de dernière obtention sous chaque pilule (opt-in). */
+  showObtainedMonth?: boolean;
 }
 
-const MissionBadgesReceived = ({ profileId, ownerNote, className = "", variant = "default" }: Props) => {
+const MissionBadgesReceived = ({ profileId, ownerNote, className = "", variant = "default", showObtainedMonth = false }: Props) => {
+
   const { data, isLoading } = useQuery({
     queryKey: ["profile_mission_badges", profileId],
     queryFn: async () => {
@@ -144,6 +147,7 @@ const MissionBadgesReceived = ({ profileId, ownerNote, className = "", variant =
             <li key={b.badge_key} className="flex flex-col items-center gap-1">
               <span
                 className={`flex min-h-11 items-center gap-2 rounded-full border px-3 py-1.5 ${meta.bgColor} ${meta.borderColor}`}
+                title={meta.description}
                 aria-label={`${meta.label}, ${meta.description}`}
               >
                 <Icon className={`h-3.5 w-3.5 ${meta.iconColor}`} aria-hidden="true" />
@@ -154,12 +158,13 @@ const MissionBadgesReceived = ({ profileId, ownerNote, className = "", variant =
                   </span>
                 )}
               </span>
-              {b.last_earned_at && (
+              {showObtainedMonth && b.last_earned_at && (
                 <span className="text-[10px] text-muted-foreground capitalize">
                   {format(new Date(b.last_earned_at), "MMMM yyyy", { locale: fr })}
                 </span>
               )}
             </li>
+
           );
         })}
       </ul>

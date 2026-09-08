@@ -9,7 +9,6 @@
  *  - Aucun bloc affinité, aucun bloc Alma, aucune ligne stats, pas de TrustScore.
  *    Ces éléments passent dans le rail droit (desktop) ou dans le flux (mobile).
  */
-import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { MapPin, Shield, BadgeCheck, Image as ImageIcon } from "lucide-react";
 import ProBadge from "@/components/badges/ProBadge";
@@ -60,14 +59,8 @@ interface ProfileHeroProps {
   hasActiveSubscription: boolean;
   emergencyActive: boolean;
 
-  hasSitterProfile: boolean;
-  hasOwnerProfile: boolean;
-  roleTabActive: "gardien" | "proprio" | "entraide";
-
   cta: HeroCtaVariant;
   ctaReassurance?: string;
-  /** Ligne factuelle rendue sous le bouton de contact (délai de réponse ou dernière visite). */
-  belowCta?: ReactNode;
 }
 
 
@@ -97,12 +90,8 @@ const ProfileHero = ({
   identityVerified,
   hasActiveSubscription,
   emergencyActive,
-  hasSitterProfile,
-  hasOwnerProfile,
-  roleTabActive,
   cta,
   ctaReassurance,
-  belowCta,
 }: ProfileHeroProps) => {
 
   // Chips : cap à 3, priorité ID > Abonné > Urgence.
@@ -161,12 +150,8 @@ const ProfileHero = ({
   }
   const visibleChips = chips.slice(0, 3);
 
-  const isDual = hasSitterProfile && hasOwnerProfile;
-  const roleLabel = isDual
-    ? "Gardien et propriétaire"
-    : roleTabActive === "proprio" || (!hasSitterProfile && hasOwnerProfile)
-      ? "Propriétaire"
-      : "Gardien";
+
+
 
   // Le bloc pro s'ouvre dès le statut déclaré ; le badge distingue déclaré et vérifié.
   const isPro = proStatus === "verified" || proStatus === "declared";
@@ -425,7 +410,6 @@ const ProfileHero = ({
                 {reassurance}
               </p>
             </div>
-            {belowCta ? <div className="mt-1.5 self-stretch">{belowCta}</div> : null}
           </div>
         </div>
       </div>

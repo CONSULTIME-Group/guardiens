@@ -38,8 +38,64 @@ const PublicFooter = React.forwardRef<HTMLElement, PublicFooterProps>(({ local }
   if (hasSession && inAppShell) return null;
   const linkCls =
     "inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors";
-  const hasLocalDept = !!local && !!local.departmentSlug;
-  const hasLocalGuides = !!local && local.guides.length > 0;
+
+  // La localisation COMPLETE une colonne, elle ne la vide jamais : sous deux
+  // entrées locales, les entrées génériques prennent le relais jusqu'à quatre,
+  // sans jamais répéter un lien déjà posé.
+  const GENERIC_CITIES = [
+    { city: "Lyon", slug: "lyon" },
+    { city: "Annecy", slug: "annecy" },
+    { city: "Grenoble", slug: "grenoble" },
+    { city: "Chambéry", slug: "chambery" },
+  ];
+  const GENERIC_DEPARTMENTS = [
+    { name: "Rhône (69)", slug: "rhone" },
+    { name: "Haute-Savoie (74)", slug: "haute-savoie" },
+    { name: "Gironde (33)", slug: "gironde" },
+    { name: "Hérault (34)", slug: "herault" },
+    { name: "Loire-Atlantique (44)", slug: "loire-atlantique" },
+    { name: "Bouches-du-Rhône (13)", slug: "bouches-du-rhone" },
+    { name: "Paris (75)", slug: "paris" },
+  ];
+  const GENERIC_GUIDES = [
+    { city: "Lyon", slug: "lyon" },
+    { city: "Annecy", slug: "annecy" },
+    { city: "Grenoble", slug: "grenoble" },
+    { city: "Chambéry", slug: "chambery" },
+    { city: "Aix-les-Bains", slug: "aix-les-bains" },
+  ];
+  const MIN_LOCAL_ENTRIES = 2;
+  const TARGET_ENTRIES = 4;
+
+  const completeWith = <T extends { slug: string }>(localEntries: T[], generic: T[]): T[] => {
+    if (localEntries.length >= MIN_LOCAL_ENTRIES) return localEntries;
+    const seen = new Set(localEntries.map((e) => e.slug));
+    const out = [...localEntries];
+    for (const g of generic) {
+      if (out.length >= TARGET_ENTRIES) break;
+      if (seen.has(g.slug)) continue;
+      seen.add(g.slug);
+      out.push(g);
+    }
+    return out;
+  };
+
+  const localDepartments =
+    local && local.departmentSlug
+      ? [
+          {
+            name: `${local.departmentName}${local.departmentCode ? ` (${local.departmentCode})` : ""}`,
+            slug: local.departmentSlug,
+          },
+        ]
+      : [];
+
+  const cityEntries = local ? completeWith(local.cities, GENERIC_CITIES) : GENERIC_CITIES;
+  const departmentEntries = local
+    ? completeWith(localDepartments, GENERIC_DEPARTMENTS)
+    : GENERIC_DEPARTMENTS;
+  const guideEntries = local ? completeWith(local.guides, GENERIC_GUIDES) : GENERIC_GUIDES;
+
   return (
     <footer ref={ref} className="public-footer bg-footer border-t border-white/10">
       <div className="max-w-6xl mx-auto px-6 md:px-12 py-10">
@@ -48,46 +104,24 @@ const PublicFooter = React.forwardRef<HTMLElement, PublicFooterProps>(({ local }
             <h3 className="font-body text-xs uppercase tracking-widest text-white/80 mb-4">{t("footer.sections.by_city")}</h3>
             <ul className="space-y-0">
               <li><Link to="/house-sitting" className={linkCls}>{t("footer.links.all_cities")}</Link></li>
-              {local ? (
-                local.cities.map((c) => (
-                  <li key={c.slug}>
-                    <Link to={`/house-sitting/${c.slug}`} className={linkCls}>
-                      {t("footer.links.house_sitting_city", { city: c.city })}
-                    </Link>
-                  </li>
-                ))
-              ) : (
-                <>
-                  <li><Link to="/house-sitting/lyon" className={linkCls}>{t("footer.links.house_sitting_city", { city: "Lyon" })}</Link></li>
-                  <li><Link to="/house-sitting/annecy" className={linkCls}>{t("footer.links.house_sitting_city", { city: "Annecy" })}</Link></li>
-                  <li><Link to="/house-sitting/grenoble" className={linkCls}>{t("footer.links.house_sitting_city", { city: "Grenoble" })}</Link></li>
-                  <li><Link to="/house-sitting/chambery" className={linkCls}>{t("footer.links.house_sitting_city", { city: "Chambéry" })}</Link></li>
-                </>
-              )}
+              {cityEntries.map((c) => (
+                <li key={c.slug}>
+                  <Link to={`/house-sitting/${c.slug}`} className={linkCls}>
+                    {t("footer.links.house_sitting_city", { city: c.city })}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
           <div>
             <h3 className="font-body text-xs uppercase tracking-widest text-white/80 mb-4">{t("footer.sections.by_department")}</h3>
             <ul className="space-y-0">
               <li><Link to="/departement" className={linkCls}>{t("footer.links.all_departments")}</Link></li>
-              {hasLocalDept ? (
-                <li>
-                  <Link to={`/departement/${local!.departmentSlug}`} className={linkCls}>
-                    {local!.departmentName}
-                    {local!.departmentCode ? ` (${local!.departmentCode})` : ""}
-                  </Link>
+              {departmentEntries.map((d) => (
+                <li key={d.slug}>
+                  <Link to={`/departement/${d.slug}`} className={linkCls}>{d.name}</Link>
                 </li>
-              ) : (
-                <>
-                  <li><Link to="/departement/rhone" className={linkCls}>Rhône (69)</Link></li>
-                  <li><Link to="/departement/haute-savoie" className={linkCls}>Haute-Savoie (74)</Link></li>
-                  <li><Link to="/departement/gironde" className={linkCls}>Gironde (33)</Link></li>
-                  <li><Link to="/departement/herault" className={linkCls}>Hérault (34)</Link></li>
-                  <li><Link to="/departement/loire-atlantique" className={linkCls}>Loire-Atlantique (44)</Link></li>
-                  <li><Link to="/departement/bouches-du-rhone" className={linkCls}>Bouches-du-Rhône (13)</Link></li>
-                  <li><Link to="/departement/paris" className={linkCls}>Paris (75)</Link></li>
-                </>
-              )}
+              ))}
             </ul>
           </div>
 
@@ -95,26 +129,16 @@ const PublicFooter = React.forwardRef<HTMLElement, PublicFooterProps>(({ local }
             <h3 className="font-body text-xs uppercase tracking-widest text-white/80 mb-4">{t("footer.sections.local_guides")}</h3>
             <ul className="space-y-0">
               <li><Link to="/guides" className={linkCls}>{t("footer.links.all_guides")}</Link></li>
-              {local ? (
-                hasLocalGuides &&
-                local.guides.map((g) => (
-                  <li key={g.slug}>
-                    <Link to={`/guides/${g.slug}`} className={linkCls}>
-                      {t("footer.links.guide_city", { city: g.city })}
-                    </Link>
-                  </li>
-                ))
-              ) : (
-                <>
-                  <li><Link to="/guides/lyon" className={linkCls}>{t("footer.links.guide_city", { city: "Lyon" })}</Link></li>
-                  <li><Link to="/guides/annecy" className={linkCls}>{t("footer.links.guide_city", { city: "Annecy" })}</Link></li>
-                  <li><Link to="/guides/grenoble" className={linkCls}>{t("footer.links.guide_city", { city: "Grenoble" })}</Link></li>
-                  <li><Link to="/guides/chambery" className={linkCls}>{t("footer.links.guide_city", { city: "Chambéry" })}</Link></li>
-                  <li><Link to="/guides/aix-les-bains" className={linkCls}>{t("footer.links.guide_city", { city: "Aix-les-Bains" })}</Link></li>
-                </>
-              )}
+              {guideEntries.map((g) => (
+                <li key={g.slug}>
+                  <Link to={`/guides/${g.slug}`} className={linkCls}>
+                    {t("footer.links.guide_city", { city: g.city })}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
+
           <div>
             <h3 className="font-body text-xs uppercase tracking-widest text-white/80 mb-4">{t("footer.sections.resources")}</h3>
             <ul className="space-y-0">

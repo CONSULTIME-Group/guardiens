@@ -135,11 +135,13 @@ export function BadgeSceau({
           {showLabel && (
         <span
           aria-hidden="true"
+          title={wrapLabel ? undefined : def.label}
           className={`text-[10px] font-medium ${wrapLabel ? '' : 'w-full truncate'}`}
           style={{ color: isActive ? 'hsl(var(--foreground))' : 'hsl(var(--muted-foreground))' }}
         >
           {def.label}
         </span>
+
           )}
           {showObtainedMonth && monthLabel && (
             <span className="mt-0.5 text-[10px] text-muted-foreground capitalize">

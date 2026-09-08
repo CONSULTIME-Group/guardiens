@@ -14,13 +14,19 @@ interface PulseStat {
 
 interface CommunityPulseCardProps {
   city?: string | null;
+  /**
+   * Libellé du périmètre réellement mesuré par les chiffres locaux, par
+   * exemple « Var (83) ». Le titre et le chiffre désignent ainsi la même
+   * zone. Formulation sans article, valable pour tous les départements.
+   */
+  areaLabel?: string | null;
   /** Chiffres locaux (préférés). */
   local?: PulseStat[];
   /** Chiffres globaux (fallback si local vide). */
   global?: PulseStat[];
 }
 
-const CommunityPulseCard = ({ city, local = [], global = [] }: CommunityPulseCardProps) => {
+const CommunityPulseCard = ({ city, areaLabel, local = [], global = [] }: CommunityPulseCardProps) => {
   const localFiltered = local.filter((s) => s.value > 0).slice(0, 2);
   const globalFiltered = global.filter((s) => s.value > 0).slice(0, 2);
   const useLocal = localFiltered.length > 0;
@@ -28,9 +34,12 @@ const CommunityPulseCard = ({ city, local = [], global = [] }: CommunityPulseCar
 
   if (stats.length === 0) return null;
 
-  const title = useLocal && city
-    ? `Autour de ${city}, ça vit déjà.`
+  const localName = useLocal ? (areaLabel || city) : null;
+  const title = localName
+    ? `${localName}, ça vit déjà.`
     : "Sur Guardiens, ça vit déjà.";
+
+
 
   return (
     <aside

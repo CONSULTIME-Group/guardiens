@@ -1,9 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import { getMemberAvatarUrl, getMemberDisplayName, getMemberPublicFirstName, getMemberInitial } from "@/lib/memberUtils";
+import { getMemberAvatarUrl, getMemberPublicFirstName, getMemberInitial } from "@/lib/memberUtils";
 import { capitalizeFirstName } from "@/lib/displayName";
 import { buildPublicSitterProfilePresentation } from "@/lib/publicSitterProfilePresentation";
 
-import ProBadge from "@/components/badges/ProBadge";
 import { useParams, Link, useSearchParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -16,8 +15,6 @@ import BadgeRow from "@/components/badges/BadgeRow";
 import MissionBadgesReceived from "@/components/missions/MissionBadgesReceived";
 import SpecialBadgeHighlight from "@/components/badges/SpecialBadgeHighlight";
 import { BadgeSceau } from "@/components/badges/BadgeSceau";
-import StatutGardienBadge from "@/components/profile/StatutGardienBadge";
-import ReplyTimeBadge from "@/components/sitters/ReplyTimeBadge";
 import { useProfileReputation, useUserBadges } from "@/hooks/useProfileReputation";
 // Tabs Radix supprimés (vague 38) : les onglets facettes sont des boutons.
 import { format } from "date-fns";
@@ -29,22 +26,17 @@ import { galleryPhotoAlt } from "@/lib/galleryPhotoAlt";
 import {
   MapPin, X,
   ChevronLeft, ChevronRight,
-  Shield, Star, PawPrint,
+  PawPrint,
   Home, KeyRound, Handshake, Heart,
-  Image as ImageIcon,
-  CalendarClock, Clock, Zap,
+  CalendarClock,
 } from "lucide-react";
 import ReportButton from "@/components/reports/ReportButton";
 import { HeroPickerModal } from "@/components/profile/HeroPickerModal";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import PublicExperiences from "@/components/profile/PublicExperiences";
-import TrustScore from "@/components/profile/TrustScore";
-import FavoriteButton from "@/components/shared/FavoriteButton";
 import OwnerToSitterAffinity from "@/components/matching/OwnerToSitterAffinity";
 import AffinitySection from "@/components/matching/AffinitySection";
-import AffinityTeaser from "@/components/matching/AffinityTeaser";
 import { useViewerSitterForAffinity } from "@/hooks/useViewerSitterForAffinity";
-import AlmaFitGardien from "@/components/ai/alma/AlmaFitGardien";
 import { sanitizeBioForPublic } from "@/lib/sanitizeBio";
 import { publishableMotivation } from "@/lib/motivation";
 import {
@@ -62,13 +54,11 @@ import {
   wrapIndex,
 } from "@/lib/profileLightbox";
 
-import { AlmaReciprocityWhisper } from "@/components/ai/alma/wiring/AlmaReciprocityWhisper";
-import { AlmaOwnerActiveSitterWhisper } from "@/components/ai/alma/wiring/AlmaOwnerActiveSitterWhisper";
 import ProfileSchemaOrg from "@/components/seo/ProfileSchemaOrg";
 import TrustTimeline from "@/components/profile/TrustTimeline";
 
 import { hydrateReviewers } from "@/lib/hydrateReviewers";
-import { getSitterHeroImage, getSitterHeroAnchor, getSitterHeroSources } from "@/lib/heroBank";
+import { getSitterHeroAnchor, getSitterHeroSources } from "@/lib/heroBank";
 import { useHeroWeights } from "@/hooks/useHeroWeights";
 import ActivateRoleDialog, { type ContactIntentContext } from "@/components/premium/ActivateRoleDialog";
 import ProfileHero, { type HeroCtaVariant } from "@/components/profile/ProfileHero";
@@ -113,56 +103,9 @@ function lastVisitLabel(iso: string | null | undefined): string | null {
   return `en ${format(d, "MMMM yyyy", { locale: fr })}`;
 }
 
-/** Seuil d'affichage du délai de réponse : sous ce nombre de conversations
- *  répondues, la ligne cède la place à la dernière visite. */
-const RESPONSE_STATS_MIN_ANSWERED = 5;
-
 /** Seuil de bascule du pouls de la communauté vers le chiffre départemental. */
 const LOCAL_PULSE_MIN_SITTERS = 5;
 
-/** Formulation du délai médian : minutes sous l'heure, heures sous le jour,
- *  jours au-delà, arrondis au plus proche. */
-function responseDelayPhrase(minutes: number): { text: string; fast: boolean } {
-  if (minutes < 60) return { text: `Répond en général en ${Math.max(1, Math.round(minutes))} min`, fast: true };
-  if (minutes < 1440) return { text: `Répond en général en ${Math.max(1, Math.round(minutes / 60))} h`, fast: false };
-  const days = Math.max(1, Math.round(minutes / 1440));
-  return { text: `Répond en général en ${days} ${days > 1 ? "jours" : "jour"}`, fast: false };
-}
-
-type ResponseStats = { answered_conversations: number; median_first_response_minutes: number };
-
-/** Ligne sous le bouton de contact : délai médian réel, sinon dernière visite. */
-const ContactResponseLine = ({
-  stats,
-  lastSeenAt,
-}: {
-  stats: ResponseStats | null;
-  lastSeenAt?: string | null;
-}) => {
-  if (stats && stats.answered_conversations >= RESPONSE_STATS_MIN_ANSWERED) {
-    const { text, fast } = responseDelayPhrase(stats.median_first_response_minutes);
-    const truth = `Durée médiane de sa première réponse, mesurée sur ses ${stats.answered_conversations} conversations reçues.`;
-    const Icon = fast ? Zap : Clock;
-    return (
-      <p
-        title={truth}
-        aria-label={truth}
-        className={`inline-flex items-center gap-1.5 text-xs sm:text-[13px] font-medium ${fast ? "text-primary" : "text-foreground/80"}`}
-      >
-        <Icon className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-        <span>{text}</span>
-      </p>
-    );
-  }
-  const visit = lastVisitLabel(lastSeenAt);
-  if (!visit) return null;
-  return (
-    <p className="inline-flex items-center gap-1.5 text-xs sm:text-[13px] text-foreground/80">
-      <Clock className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-      <span>Dernière visite {visit}</span>
-    </p>
-  );
-};
 
 /**
  * Bloc « premier parcours » : remplace la chronologie et sa heatmap vide
@@ -264,7 +207,7 @@ export default function PublicSitterProfile() {
     deptSlug: string | null;
     citySlug: string | null;
   }>({ deptName: null, deptCode: null, regionName: null, deptSlug: null, citySlug: null });
-  const [responseStats, setResponseStats] = useState<ResponseStats | null>(null);
+  
   // Ancrage local : pied de page et pouls de la communauté pointent vers le
   // département de la personne consultée quand il est connu et documenté.
   const [footerLocal, setFooterLocal] = useState<FooterLocalContext | null>(null);
@@ -283,7 +226,7 @@ export default function PublicSitterProfile() {
   const [targetOwnerAffinity, setTargetOwnerAffinity] = useState<any | null>(null);
   const [targetPets, setTargetPets] = useState<{ species: string | null; special_needs: string | null }[]>([]);
   const [missionCount, setMissionCount] = useState<number>(0);
-  const [badges, setBadges] = useState<{ badge_key: string; count: number }[]>([]);
+  
   const [reviews, setReviews] = useState<any[]>([]);
   const [reviewCount, setReviewCount] = useState(0);
   const [gallery, setGallery] = useState<any[]>([]);
@@ -469,9 +412,10 @@ export default function PublicSitterProfile() {
               <p>
                 <Link
                   to={`/departement/${props.deptSlug}`}
-                  className="text-primary hover:underline"
+                  className="inline-flex min-h-11 items-center text-primary hover:underline"
                 >
-                  Voir les gardiens du {props.deptName}
+                  Voir les gardiens de ce département
+
                 </Link>
               </p>
             )}
@@ -672,12 +616,12 @@ export default function PublicSitterProfile() {
       // du 23/08/2026), sauf sensitivities (donnée de santé, jamais exposée).
       const PUBLIC_SITTER_COLS =
         "user_id, motivation, sitter_type, accompanied_by, lifestyle, animal_types, has_vehicle, has_license, geographic_radius, min_stay_duration, is_available, competences, special_animal_skills, preferred_frequency, min_notice, preferred_environments, farm_animals_ok, own_animals, reply_median_minutes, travels_with_children, travels_with_own_animals, work_during_sit, availability_during, experience_years, languages, interests, life_pace";
-      const [profileRes, baseProfileRes, sitterRes, badgesRes, reviewsRes, galleryRes, emergencyRes, subRes, ownerRes, missionsRes, extExpRes] =
+      const [profileRes, baseProfileRes, sitterRes, reviewsRes, galleryRes, emergencyRes, subRes, ownerRes, missionsRes, extExpRes] =
         await Promise.all([
           supabase.from("public_profiles").select(PUBLIC_PROFILE_COLS).eq("id", id).maybeSingle(),
           supabase.from("profiles").select(BASE_PROFILE_COLS).eq("id", id).maybeSingle(),
           (supabase as any).from("public_sitter_profiles").select(PUBLIC_SITTER_COLS).eq("user_id", id).maybeSingle(),
-          supabase.from("badge_attributions").select("badge_id").eq("user_id", id),
+
           supabase
             .from("reviews")
             .select("*")
@@ -783,13 +727,8 @@ export default function PublicSitterProfile() {
       setMissionCount(fetchedMissionCount);
       setExternalExperiences(extExpRes?.data || []);
 
-      if (badgesRes.data) {
-        const map: Record<string, number> = {};
-        badgesRes.data.forEach((b: any) => {
-          map[b.badge_id] = (map[b.badge_id] || 0) + 1;
-        });
-        setBadges(Object.entries(map).map(([badge_key, count]) => ({ badge_key, count })));
-      }
+
+
 
       if (reviewsRes.data) {
         const enrichedReviews = await hydrateReviewers(reviewsRes.data as any[]);
@@ -882,20 +821,8 @@ export default function PublicSitterProfile() {
     load();
   }, [id, loadNonce, auth?.hasSession]);
 
-  // Délai médian de première réponse : agrégat public, jamais de contenu.
-  useEffect(() => {
-    if (!id) return;
-    let cancelled = false;
-    (supabase as any)
-      .from("public_sitter_response_stats")
-      .select("answered_conversations, median_first_response_minutes")
-      .eq("profile_id", id)
-      .maybeSingle()
-      .then(({ data }: { data: ResponseStats | null }) => {
-        if (!cancelled) setResponseStats(data ?? null);
-      });
-    return () => { cancelled = true; };
-  }, [id]);
+
+
 
   // Département, région et liens : chargés une fois le profil connu.
   // Un slug n'est retenu que si la page correspondante existe et est publiée.
@@ -933,14 +860,20 @@ export default function PublicSitterProfile() {
       }
 
       if (cityName) {
-        const { data: cityPage } = await (supabase as any)
+        // Le nom de ville seul reste ambigu (deux pages « Saint-Denis »
+        // publiées) : le département départage quand il est connu. Un
+        // résultat multiple laisse le libellé en texte simple.
+        let cityQuery = (supabase as any)
           .from("seo_city_pages")
           .select("slug")
           .eq("city", cityName)
           .eq("published", true)
-          .maybeSingle();
-        citySlug = cityPage?.slug ?? null;
+          .limit(2);
+        if (deptName) cityQuery = cityQuery.eq("department", deptName);
+        const { data: cityPages } = await cityQuery;
+        citySlug = Array.isArray(cityPages) && cityPages.length === 1 ? cityPages[0].slug : null;
       }
+
 
       if (cancelled) return;
       setGeoInfo({ deptName, deptCode: code, regionName, deptSlug, citySlug });
@@ -1337,7 +1270,7 @@ export default function PublicSitterProfile() {
   const frequencyLabel = mobilityPublicLabel(FREQUENCY_OPTIONS, preferredFrequency);
   const noticeLabel = mobilityPublicLabel(NOTICE_OPTIONS, minNotice);
 
-  const totalBadgeCount = badges.reduce((s: any, b: any) => s + b.count, 0);
+
 
   // Ségrégation par rôle : un avis avec sit_id compte comme "garde" (côté gardien)
   //   uniquement si le reviewer était le propriétaire de l'annonce (sit.user_id).
@@ -1428,11 +1361,8 @@ export default function PublicSitterProfile() {
       ? "A le permis de conduire"
       : "";
 
-  // Stats line
-  const statsItems: string[] = [];
-  statsItems.push(`${completedSits} garde${completedSits !== 1 ? "s" : ""}`);
-  statsItems.push(avgRating > 0 ? `${avgRating} ★` : "Pas encore noté");
-  statsItems.push(`${totalBadgeCount} écusson${totalBadgeCount !== 1 ? "s" : ""}`);
+
+
 
   // Relative date helper
   const anciennete = (dateStr: string) => {
@@ -1582,6 +1512,13 @@ export default function PublicSitterProfile() {
     />
   ) : null;
 
+  // Périmètre du pouls local : le titre et le chiffre désignent la même zone,
+  // le département. Formulation sans article, valable pour tous les noms.
+  const pulseAreaLabel = geoInfo.deptName
+    ? `${geoInfo.deptName}${geoInfo.deptCode ? ` (${geoInfo.deptCode})` : ""}`
+    : null;
+
+
 
   return (
     <div id="main-content" className="min-h-screen bg-background">
@@ -1690,17 +1627,10 @@ export default function PublicSitterProfile() {
             identityVerified={!!profile?.identity_verified}
             hasActiveSubscription={hasActiveSubscription}
             emergencyActive={emergencyActive}
-            hasSitterProfile={hasSitterProfile}
-            hasOwnerProfile={hasOwnerProfile}
-            roleTabActive={activeTab}
             cta={heroCta}
             ctaReassurance={heroCtaReassurance}
-            belowCta={
-              isOwn ? null : (
-                <ContactResponseLine stats={responseStats} lastSeenAt={profile?.last_seen_at ?? null} />
-              )
-            }
           />
+
         );
 
       })()}
@@ -1819,12 +1749,7 @@ export default function PublicSitterProfile() {
         // dans le département, le chiffre réel remplace le chiffre national.
         const pulseLocal =
           geoInfo.deptName && deptSitterCount != null && deptSitterCount >= LOCAL_PULSE_MIN_SITTERS
-            ? [
-                {
-                  value: deptSitterCount,
-                  label: `gardiens actifs, ${geoInfo.deptName}${geoInfo.deptCode ? ` (${geoInfo.deptCode})` : ""}`,
-                },
-              ]
+            ? [{ value: deptSitterCount, label: "gardiens actifs" }]
             : [];
         const pulseGlobal = communityPulse
           ? [
@@ -1832,7 +1757,8 @@ export default function PublicSitterProfile() {
               { value: communityPulse.totalInscrits, label: "membres actifs" },
             ]
           : [];
-        const pulseNode = <CommunityPulseCard city={city || null} local={pulseLocal} global={pulseGlobal} />;
+        const pulseNode = <CommunityPulseCard city={city || null} areaLabel={pulseAreaLabel} local={pulseLocal} global={pulseGlobal} />;
+
         const railChildren = (
           <>
             {affinityNode}
@@ -1924,7 +1850,7 @@ export default function PublicSitterProfile() {
                   </div>
                 ) : (
                   <p className="text-sm text-muted-foreground italic font-body">
-                    {firstName} n'a pas encore rédigé sa présentation.
+                    La présentation de {firstName} arrive bientôt.
                   </p>
                 )}
                 <PracticalGrid
@@ -2059,7 +1985,7 @@ export default function PublicSitterProfile() {
                     </div>
                     {filtered.length === 0 ? (
                       <p className="text-sm text-muted-foreground italic font-body">
-                        Aucun avis dans cette catégorie.
+                        Les avis de cette catégorie apparaîtront ici.
                       </p>
                     ) : (
                       <ReviewGrid
@@ -2202,12 +2128,7 @@ export default function PublicSitterProfile() {
         // dans le département, le chiffre réel remplace le chiffre national.
         const pulseLocal =
           geoInfo.deptName && deptSitterCount != null && deptSitterCount >= LOCAL_PULSE_MIN_SITTERS
-            ? [
-                {
-                  value: deptSitterCount,
-                  label: `gardiens actifs, ${geoInfo.deptName}${geoInfo.deptCode ? ` (${geoInfo.deptCode})` : ""}`,
-                },
-              ]
+            ? [{ value: deptSitterCount, label: "gardiens actifs" }]
             : [];
         const pulseGlobal = communityPulse
           ? [
@@ -2219,7 +2140,8 @@ export default function PublicSitterProfile() {
           <>
             {proprioAffinityNode}
             {proprioAlmaNode}
-            <CommunityPulseCard city={city || null} local={pulseLocal} global={pulseGlobal} />
+            <CommunityPulseCard city={city || null} areaLabel={pulseAreaLabel} local={pulseLocal} global={pulseGlobal} />
+
             {reportNode}
           </>
         );
@@ -2292,7 +2214,7 @@ export default function PublicSitterProfile() {
                   </div>
                 ) : (
                   <p className="text-sm text-muted-foreground italic font-body">
-                    {firstName} n'a pas encore rédigé son mot d'accueil.
+                    Le mot d'accueil de {firstName} arrive bientôt.
                   </p>
                 )}
                 {(ownerProfile?.competences?.length ?? 0) > 0 && (
@@ -2679,7 +2601,11 @@ export default function PublicSitterProfile() {
 
       {/* ── ONGLET ENTRAIDE ── */}
       {activeTab === 'entraide' && (
-        <div className="max-w-4xl mx-auto px-4 py-8 space-y-10">
+        <div data-profile-content className="max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-8 pb-[calc(10.5rem+env(safe-area-inset-bottom))] md:pb-8">
+          <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-8">
+          <div className="min-w-0 space-y-10">
+
+
 
           {entraideLoading && (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3" aria-busy="true">
@@ -2745,7 +2671,7 @@ export default function PublicSitterProfile() {
                 <ShowMoreBtn items={missionsPublished} showAll={showAllMissionsPublished} setShowAll={setShowAllMissionsPublished} />
               </div>
             ) : (
-              <p className="text-sm text-foreground/50 font-body italic">Aucune mission publiée pour l'instant.</p>
+              <p className="text-sm text-foreground/50 font-body italic">Les missions publiées apparaîtront ici.</p>
             )}
           </div>
 
@@ -2776,7 +2702,7 @@ export default function PublicSitterProfile() {
                 <ShowMoreBtn items={missionsHelped} showAll={showAllMissionsHelped} setShowAll={setShowAllMissionsHelped} />
               </div>
             ) : (
-              <p className="text-sm text-foreground/50 font-body italic">Aucun coup de main enregistré pour l'instant.</p>
+              <p className="text-sm text-foreground/50 font-body italic">Les coups de main donnés apparaîtront ici.</p>
             )}
           </div>
 
@@ -2815,13 +2741,23 @@ export default function PublicSitterProfile() {
 
           {!entraideLoading && missionsPublished.length === 0 && missionsHelped.length === 0 && missionFeedbacks.length === 0 && (
             <div className="text-center py-12 space-y-2">
-              <p className="text-base text-foreground/50 font-body">Pas encore de missions d'entraide.</p>
+              <p className="text-base text-foreground/50 font-body">L'entraide de {firstName} démarre ici.</p>
               <p className="text-sm text-foreground/40 font-body italic">Les échanges de services apparaîtront ici après la première mission.</p>
             </div>
           )}
 
+            {/* Rail INLINE (mobile) : mêmes cartes que le rail sticky. */}
+            <div className="lg:hidden">
+              <ProfileRail inline>{reportNode}</ProfileRail>
+            </div>
+          </div>
+
+          {/* Rail STICKY (desktop ≥ lg). */}
+          <ProfileRail>{reportNode}</ProfileRail>
+          </div>
         </div>
       )}
+
 
       {/* ── CTA sticky mobile UNIFIÉ (vague 38) ──
           Mirroir strict du CTA hero courant (facette active), gaté par
