@@ -131,11 +131,11 @@ export function BadgeSceau({
       </div>
 
       {(showLabel || showObtainedMonth) && (
-        <span className="mt-1 flex max-w-[92px] flex-col items-center text-center leading-tight">
+        <span className={`mt-1 flex flex-col items-center text-center leading-tight ${wrapLabel ? 'max-w-[92px]' : 'max-w-[56px]'}`}>
           {showLabel && (
         <span
           aria-hidden="true"
-          className="text-[10px] font-medium"
+          className={`text-[10px] font-medium ${wrapLabel ? '' : 'w-full truncate'}`}
           style={{ color: isActive ? 'hsl(var(--foreground))' : 'hsl(var(--muted-foreground))' }}
         >
           {def.label}
