@@ -308,11 +308,11 @@ const Landing = () => {
                   alt="Le Progrès"
                   width={300}
                   height={40}
-                  className="h-5 w-auto object-contain opacity-90"
+                  className="relative h-5 w-auto object-contain"
                   loading="lazy"
                   decoding="async"
                 />
-                <span className="font-body text-xs text-white/85">
+                <span className="relative font-body text-xs text-white">
                   6 septembre 2026
                 </span>
               </a>
