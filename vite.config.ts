@@ -2,6 +2,8 @@ import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
+// @ts-expect-error greffon JS sans types
+import { routeHashesPlugin } from "./scripts/vite-plugin-route-hashes.mjs";
 
 /**
  * Post-build hook: after a successful production build, ping the
@@ -97,6 +99,7 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     mode === "development" && componentTagger(),
+    mode === "production" && routeHashesPlugin(),
     mode === "production" && prerenderFlushPlugin(),
   ].filter(Boolean) as Plugin[],
   resolve: {
