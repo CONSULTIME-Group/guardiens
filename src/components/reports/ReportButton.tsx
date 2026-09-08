@@ -94,6 +94,9 @@ const ReportButton = ({
   const detailsRequired = isProfileLink && reason === "other";
   const canSubmit = !!reason && !submitting && (!detailsRequired || details.trim().length > 0);
 
+  /** Le brouillon survit à une fermeture : la remise à zéro suit un envoi abouti. */
+  const closeKeepingDraft = () => setOpen(false);
+
   const resetAndClose = () => {
     setOpen(false);
     setReason("");
