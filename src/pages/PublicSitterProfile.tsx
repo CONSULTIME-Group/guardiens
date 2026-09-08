@@ -74,6 +74,8 @@ import { useCommunityPulse } from "@/hooks/useCommunityPulse";
 import { avatarImageUrl, storageImageUrl } from "@/lib/storageImage";
 import { petSpeciesLabel } from "@/lib/petLabels";
 import { isRadiusDeclared } from "@/lib/searchRadius";
+import { countLabel } from "@/lib/pluralizeFr";
+
 
 // Capitalise chaque mot, pour ne pas abîmer les prénoms composés
 // (« JEAN CLAUDE » devient « Jean Claude », pas « Jean claude »).
@@ -2156,7 +2158,7 @@ export default function PublicSitterProfile() {
           tiles.push({
             key: 'animaux',
             Icon: PawPrint,
-            title: `${pets.length} animal${pets.length > 1 ? 'x' : ''} au foyer`,
+            title: `${countLabel(pets.length, "animal")} au foyer`,
             detail: speciesLabel || null,
           });
         }

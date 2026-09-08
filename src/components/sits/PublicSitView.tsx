@@ -876,12 +876,12 @@ const CadreSection = ({
     return typeof b.value === "string" && b.value.trim().length > 0;
   });
 
-  const competences =
-    ownerProfile.competences_disponible && Array.isArray(ownerProfile.competences)
-      ? ownerProfile.competences.filter(Boolean)
-      : [];
+  // Les compétences d'entraide du propriétaire restent sur sa fiche profil,
+  // section « Savoir-faire ». La table `sits` ne porte aucun champ décrivant
+  // ce que le propriétaire offre au gardien pendant le séjour (vérifié le
+  // 08/09/2026), donc aucun bloc de ce type n'est affiché ici.
+  if (filled.length === 0) return null;
 
-  if (filled.length === 0 && competences.length === 0) return null;
 
   return (
     <section>
@@ -914,23 +914,7 @@ const CadreSection = ({
         ))}
       </div>
 
-      {competences.length > 0 && (
-        <div className="mt-8 pt-6 border-t border-border">
-          <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-muted-foreground mb-3">
-            {t("sit_detail.cadre_competences")}
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {competences.map((c) => (
-              <span
-                key={c}
-                className="px-3 py-1.5 rounded-full bg-primary/10 text-primary border border-primary/20 text-sm font-medium"
-              >
-                {c}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
+
     </section>
   );
 };

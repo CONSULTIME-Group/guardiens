@@ -1804,8 +1804,7 @@
     "cadre_expectations": "Attentes spécifiques",
     "cadre_news_freq": "Fréquence des nouvelles",
     "cadre_news_format": "Format des nouvelles",
-    "cadre_comm": "Précisions de communication",
-    "cadre_competences": "Petits coups de main proposés sur place"
+    "cadre_comm": "Précisions de communication"
   },
   "mission_detail": {
     "not_found_title": "Mission introuvable",
