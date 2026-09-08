@@ -141,6 +141,16 @@ export default function PublicSitterProfile() {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<any>(null);
   const [sitterProfile, setSitterProfile] = useState<any>(null);
+  // Localisation lisible : nom du département, région, et slugs de pages
+  // réellement publiées. Aucun slug n'est fabriqué : sans ligne publiée,
+  // le libellé reste du texte simple.
+  const [geoInfo, setGeoInfo] = useState<{
+    deptName: string | null;
+    deptCode: string | null;
+    regionName: string | null;
+    deptSlug: string | null;
+    citySlug: string | null;
+  }>({ deptName: null, deptCode: null, regionName: null, deptSlug: null, citySlug: null });
 
   // Pass 5, compagnon culturel : fait race si l'un des animaux du gardien matche.
   useAlmaCulturalFact({
