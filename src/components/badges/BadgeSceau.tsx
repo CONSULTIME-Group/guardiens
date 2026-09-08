@@ -87,7 +87,6 @@ export function BadgeSceau({
     <button
       type="button"
       aria-label={accessibleLabel}
-      title={def.label}
       aria-haspopup="dialog"
       className={`relative inline-flex flex-col items-center cursor-pointer group bg-transparent border-0 p-0 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${className}`}
       style={{ width: showLabel ? undefined : sz }}
