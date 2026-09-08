@@ -44,7 +44,11 @@ const UserMenu = ({ compact = false, className }: UserMenuProps) => {
   });
 
   return (
-    <DropdownMenu>
+    // modal={false} : un menu modal verrouille le défilement du body, et ses
+    // entrées naviguent vers des routes hors coquille applicative, ce qui le
+    // démonte pendant qu'il est ouvert et laisse le verrou en place.
+    <DropdownMenu modal={false}>
+
       <DropdownMenuTrigger asChild>
         <button
           type="button"
