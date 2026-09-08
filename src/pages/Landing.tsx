@@ -365,34 +365,7 @@ const Landing = () => {
       <LiveListingsStrip />
 
       {/* ═══════════════ SOMMAIRE DE PAGE, maillage interne ═══════════════ */}
-      <nav
-        aria-label={t("landing.toc.aria")}
-        className="border-b border-border/60 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60"
-      >
-        <div className="overflow-x-auto px-4 md:px-0">
-          <ul className="mx-auto flex w-max items-center justify-center gap-1 py-2.5 md:w-auto">
-            {(() => {
-              const items = [
-                { href: "#usages", label: t("landing.toc.care_aid") },
-                { href: "#comment-ca-marche", label: t("landing.toc.how") },
-                { href: "#confiance", label: t("landing.toc.trust") },
-                { href: "#notre-histoire", label: t("landing.toc.story") },
-                { href: "#faq", label: t("landing.toc.faq") },
-              ];
-              return items.map((item) => (
-                <li key={item.href} className="shrink-0">
-                <a
-                  href={item.href}
-                  className="inline-flex items-center min-h-[44px] px-3 py-1.5 rounded-full text-[11px] tracking-[0.14em] uppercase font-body text-foreground/75 hover:text-primary hover:bg-primary/5 transition-colors whitespace-nowrap"
-                >
-                  {item.label}
-                </a>
-              </li>
-              ));
-            })()}
-          </ul>
-        </div>
-      </nav>
+      <LandingTocBar />
 
 
       {/* ═══════════════ LE PRÉTEXTE (bloc sombre signature,
