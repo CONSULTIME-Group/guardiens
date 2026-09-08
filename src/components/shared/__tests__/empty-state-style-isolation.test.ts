@@ -47,6 +47,10 @@ const ALLOWED = new Set([
   // l'image elle-même (pas un EmptyState, aucun token de fond codé en dur).
   "src/components/landing/FinalCtaSection.tsx",
   "src/components/landing/PretexteSection.tsx",
+  // Lettrage décoratif de marge : fondu vertical local sur le texte lui-même,
+  // aucun token de fond codé en dur, hors périmètre EmptyState.
+  "src/components/profile/MarginLettering.tsx",
+
 ]);
 
 function walk(dir: string, acc: string[] = []): string[] {
