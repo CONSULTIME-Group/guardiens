@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { BADGE_DEFINITIONS, isBadgeActive } from './badge-definitions'
 import { BadgeSceau } from './BadgeSceau'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 
 interface BadgeRowProps {
   badges: Array<{
@@ -69,7 +70,29 @@ export function BadgeRow({ badges, size = 'normal', maxVisible = 6, showExpired 
         )}
       </div>
 
-      {showExpired && expired.length > 0 ? null : null}
+      {showExpired && expired.length > 0 && (
+        <Accordion type="single" collapsible className="w-full">
+          <AccordionItem value="heritage" className="border-none">
+            <AccordionTrigger className="py-1 text-xs text-muted-foreground hover:no-underline">
+              {expired.length} badge{expired.length > 1 ? 's' : ''} obtenu{expired.length > 1 ? 's' : ''} par le passé
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                {expired.map(b => (
+                  <BadgeSceau
+                    key={b.badge_id}
+                    id={b.badge_id}
+                    count={b.count}
+                    active={false}
+                    size="compact"
+                    obtainedAt={b.created_at}
+                  />
+                ))}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      )}
 
       <Dialog open={showAll} onOpenChange={setShowAll}>
         <DialogContent className="max-w-sm">

@@ -3,6 +3,8 @@ import { Star, Heart, RotateCcw, Award, type LucideIcon } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { trackEvent } from "@/lib/analytics";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 /**
  * Section « Écussons reçus en entraide » affichée sur les profils publics.
@@ -134,21 +136,29 @@ const MissionBadgesReceived = ({ profileId, ownerNote, className = "", variant =
       {ownerNote && (
         <p className="text-xs text-muted-foreground mb-3">{ownerNote}</p>
       )}
-      <ul className="flex flex-wrap gap-2">
+      <ul className="flex flex-wrap gap-3">
         {badges.map((b) => {
           const meta = BADGE_META[b.badge_key];
           const Icon = meta.icon;
           return (
-            <li
-              key={b.badge_key}
-              className={`flex items-center gap-2 rounded-full border px-3 py-1.5 ${meta.bgColor} ${meta.borderColor}`}
-              title={meta.description}
-            >
-              <Icon className={`h-3.5 w-3.5 ${meta.iconColor}`} aria-hidden="true" />
-              <span className="text-xs font-medium text-foreground">{meta.label}</span>
-              {b.earned_count > 1 && (
-                <span className="text-[11px] font-semibold text-muted-foreground tabular-nums">
-                  ×{b.earned_count}
+            <li key={b.badge_key} className="flex flex-col items-center gap-1">
+              <span
+                className={`flex min-h-11 items-center gap-2 rounded-full border px-3 py-1.5 ${meta.bgColor} ${meta.borderColor}`}
+                title={meta.label}
+                aria-label={`${meta.label}, ${meta.description}`}
+                tabIndex={0}
+              >
+                <Icon className={`h-3.5 w-3.5 ${meta.iconColor}`} aria-hidden="true" />
+                <span className="text-xs font-medium text-foreground">{meta.label}</span>
+                {b.earned_count > 1 && (
+                  <span className="text-[11px] font-semibold text-muted-foreground tabular-nums">
+                    ×{b.earned_count}
+                  </span>
+                )}
+              </span>
+              {b.last_earned_at && (
+                <span className="text-[10px] text-muted-foreground capitalize">
+                  {format(new Date(b.last_earned_at), "MMMM yyyy", { locale: fr })}
                 </span>
               )}
             </li>
