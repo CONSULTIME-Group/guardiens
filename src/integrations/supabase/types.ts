@@ -8062,6 +8062,7 @@ export type Database = {
           completed_sits_count: number | null
           created_at: string | null
           custom_skills: Json | null
+          departement_code: string | null
           first_name: string | null
           id: string | null
           identity_verified: boolean | null
@@ -8089,6 +8090,7 @@ export type Database = {
           completed_sits_count?: number | null
           created_at?: string | null
           custom_skills?: Json | null
+          departement_code?: string | null
           first_name?: string | null
           id?: string | null
           identity_verified?: boolean | null
@@ -8116,6 +8118,7 @@ export type Database = {
           completed_sits_count?: number | null
           created_at?: string | null
           custom_skills?: Json | null
+          departement_code?: string | null
           first_name?: string | null
           id?: string | null
           identity_verified?: boolean | null
