@@ -259,6 +259,7 @@ export default function PublicSitterProfile() {
     deptSlug: string | null;
     citySlug: string | null;
   }>({ deptName: null, deptCode: null, regionName: null, deptSlug: null, citySlug: null });
+  const [responseStats, setResponseStats] = useState<ResponseStats | null>(null);
 
   // Pass 5, compagnon culturel : fait race si l'un des animaux du gardien matche.
   useAlmaCulturalFact({
@@ -871,6 +872,21 @@ export default function PublicSitterProfile() {
     };
     load();
   }, [id, loadNonce, auth?.hasSession]);
+
+  // Délai médian de première réponse : agrégat public, jamais de contenu.
+  useEffect(() => {
+    if (!id) return;
+    let cancelled = false;
+    (supabase as any)
+      .from("public_sitter_response_stats")
+      .select("answered_conversations, median_first_response_minutes")
+      .eq("profile_id", id)
+      .maybeSingle()
+      .then(({ data }: { data: ResponseStats | null }) => {
+        if (!cancelled) setResponseStats(data ?? null);
+      });
+    return () => { cancelled = true; };
+  }, [id]);
 
   // Département, région et liens : chargés une fois le profil connu.
   // Un slug n'est retenu que si la page correspondante existe et est publiée.
@@ -1619,6 +1635,11 @@ export default function PublicSitterProfile() {
             roleTabActive={activeTab}
             cta={heroCta}
             ctaReassurance={heroCtaReassurance}
+            belowCta={
+              isOwn ? null : (
+                <ContactResponseLine stats={responseStats} lastSeenAt={profile?.last_seen_at ?? null} />
+              )
+            }
           />
         );
 
@@ -1746,6 +1767,7 @@ export default function PublicSitterProfile() {
             {affinityNode}
             {almaNode}
             {pulseNode}
+            {reportNode}
           </>
         );
 
@@ -2116,6 +2138,7 @@ export default function PublicSitterProfile() {
             {proprioAffinityNode}
             {proprioAlmaNode}
             <CommunityPulseCard city={city || null} global={pulseGlobal} />
+            {reportNode}
           </>
         );
 
