@@ -92,8 +92,67 @@ const ANIMAL_LABELS: Record<string, string> = {
   rodent: "Rongeurs", nac: "NAC", farm: "Animaux de ferme",
 };
 
+// Indexée sur les valeurs réellement stockées en base (vérifiées par requête
+// distincte le 08/09/2026 : Solo, Couple, Famille, Retraité, chaîne vide).
 const SITTER_TYPE_LABELS: Record<string, string> = {
-  solo: "Solo", couple: "Couple", family: "Famille", retired: "Retraité(e)",
+  Solo: "Solo", Couple: "Couple", Famille: "Famille", "Retraité": "Retraité(e)",
+};
+
+/** Formulation simple de la dernière visite : "cette semaine", "ce mois-ci", sinon le mois. */
+function lastVisitLabel(iso: string | null | undefined): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  const now = new Date();
+  const diffDays = Math.floor((now.getTime() - d.getTime()) / 86400000);
+  if (diffDays <= 7) return "cette semaine";
+  if (d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()) return "ce mois-ci";
+  return `en ${format(d, "MMMM yyyy", { locale: fr })}`;
+}
+
+/**
+ * Bloc « premier parcours » : remplace la chronologie et sa heatmap vide
+ * (douze barres grises) quand le membre n'a encore ni avis, ni badge, ni
+ * garde. N'affiche que des faits réels déjà chargés.
+ */
+const FreshStartStory = ({
+  firstName,
+  createdAt,
+  lastSeenAt,
+  identityVerified,
+}: {
+  firstName: string;
+  createdAt?: string | null;
+  lastSeenAt?: string | null;
+  identityVerified: boolean;
+}) => {
+  const visit = lastVisitLabel(lastSeenAt);
+  return (
+    <section
+      aria-label={`Début du parcours de ${firstName}`}
+      className="rounded-2xl border border-border bg-card p-5 md:p-6"
+    >
+      <header className="mb-4">
+        <p className="text-xs uppercase tracking-[2px] text-muted-foreground font-sans mb-1.5">
+          Parcours sur Guardiens
+        </p>
+        <h3 className="text-lg font-heading font-semibold text-foreground">
+          Son histoire commence tout juste
+        </h3>
+      </header>
+      <ul className="space-y-2 text-sm text-foreground/80 font-body">
+        {createdAt && (
+          <li>Membre depuis {format(new Date(createdAt), "MMMM yyyy", { locale: fr })}.</li>
+        )}
+        {visit && <li>Dernière visite {visit}.</li>}
+        <li>
+          {identityVerified
+            ? `${firstName} a vérifié son identité et rempli son profil.`
+            : `${firstName} a rempli son profil.`}
+        </li>
+      </ul>
+    </section>
+  );
 };
 
 
@@ -1518,6 +1577,15 @@ export default function PublicSitterProfile() {
 
       {/* ── BARRE D'ONGLETS, visible si ≥ 2 onglets ── */}
       {availableTabs > 1 && (
+        <p className="max-w-5xl mx-auto px-4 pt-4 text-sm text-muted-foreground font-body">
+          {hasSitterProfile && hasOwnerProfile
+            ? `${firstName} garde chez les autres et fait garder à la maison.`
+            : hasSitterProfile
+              ? `${firstName} garde chez les autres et participe à l'entraide.`
+              : `${firstName} fait garder à la maison et participe à l'entraide.`}
+        </p>
+      )}
+      {availableTabs > 1 && (
         <div className="flex border-b border-border bg-card sticky z-40 max-w-5xl mx-auto" style={{ top: "var(--public-header-h, 0px)" }}>
           {hasSitterProfile && (
             <button
@@ -1534,7 +1602,7 @@ export default function PublicSitterProfile() {
               ].join(' ')}
             >
               <Home className="w-4 h-4" aria-hidden="true" />
-              Gardien
+              Côté gardien
               {completedSits > 0 && (
                 <span className="ml-1 text-xs font-normal opacity-70">({completedSits})</span>
               )}
@@ -1555,7 +1623,7 @@ export default function PublicSitterProfile() {
               ].join(' ')}
             >
               <KeyRound className="w-4 h-4" aria-hidden="true" />
-              Propriétaire
+              Côté propriétaire
             </button>
           )}
           {hasEntraide && (
@@ -1573,7 +1641,7 @@ export default function PublicSitterProfile() {
               ].join(' ')}
             >
               <Handshake className="w-4 h-4" aria-hidden="true" />
-              Entraide
+              Côté entraide
               {missionCount > 0 && (
                 <span className="ml-1 text-xs font-normal opacity-70">({missionCount})</span>
               )}
@@ -1762,18 +1830,27 @@ export default function PublicSitterProfile() {
                     </div>
                   )}
                   {id && <MissionBadgesReceived profileId={id} />}
-                  <TrustTimeline
-                    memberSince={profile?.created_at}
-                    reviews={reviews}
-                    badges={(userBadges || []).map((b: any) => ({
-                      badge_id: b.badge_id,
-                      created_at: b.created_at,
-                      count: b.count ?? 1,
-                    }))}
-                    completedSits={completedSits}
-                    lastActivity={profile?.last_seen_at ?? null}
-                    firstName={firstName}
-                  />
+                  {reviews.length === 0 && (userBadges || []).length === 0 && completedSits === 0 ? (
+                    <FreshStartStory
+                      firstName={firstName}
+                      createdAt={profile?.created_at}
+                      lastSeenAt={profile?.last_seen_at ?? null}
+                      identityVerified={!!profile?.identity_verified}
+                    />
+                  ) : (
+                    <TrustTimeline
+                      memberSince={profile?.created_at}
+                      reviews={reviews}
+                      badges={(userBadges || []).map((b: any) => ({
+                        badge_id: b.badge_id,
+                        created_at: b.created_at,
+                        count: b.count ?? 1,
+                      }))}
+                      completedSits={completedSits}
+                      lastActivity={profile?.last_seen_at ?? null}
+                      firstName={firstName}
+                    />
+                  )}
                 </div>
               </TrustStory>
             )}
@@ -2285,18 +2362,27 @@ export default function PublicSitterProfile() {
                       </div>
                     )}
                     {id && <MissionBadgesReceived profileId={id} />}
-                    <TrustTimeline
-                      memberSince={profile?.created_at}
-                      reviews={ownerReviews as any}
-                      badges={(userBadges || []).map((b: any) => ({
-                        badge_id: b.badge_id,
-                        created_at: b.created_at,
-                        count: b.count ?? 1,
-                      }))}
-                      completedSits={ownerSitsTotal}
-                      lastActivity={null}
-                      firstName={firstName}
-                    />
+                    {(ownerReviews || []).length === 0 && (userBadges || []).length === 0 && ownerSitsTotal === 0 ? (
+                      <FreshStartStory
+                        firstName={firstName}
+                        createdAt={profile?.created_at}
+                        lastSeenAt={profile?.last_seen_at ?? null}
+                        identityVerified={!!profile?.identity_verified}
+                      />
+                    ) : (
+                      <TrustTimeline
+                        memberSince={profile?.created_at}
+                        reviews={ownerReviews as any}
+                        badges={(userBadges || []).map((b: any) => ({
+                          badge_id: b.badge_id,
+                          created_at: b.created_at,
+                          count: b.count ?? 1,
+                        }))}
+                        completedSits={ownerSitsTotal}
+                        lastActivity={null}
+                        firstName={firstName}
+                      />
+                    )}
                   </div>
                 </TrustStory>
               )}
