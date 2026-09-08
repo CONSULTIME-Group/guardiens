@@ -9,6 +9,8 @@ interface SpecialBadgeHighlightProps {
   specialBadgeIds?: string[]
   /** Titre encadrant le bloc */
   title?: string
+  /** Affiche le mois d'obtention sous le sceau (opt-in, fiche gardien). */
+  showObtainedMonth?: boolean
 }
 
 /**
