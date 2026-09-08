@@ -324,16 +324,41 @@ export default function PublicSitterProfile() {
           </ul>
         </div>
       )}
-      <div>
-        <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Zone d'intervention</h3>
-        <p className="text-sm text-foreground/70 font-body">
-          {props.mobilityLabel
-            ? `${props.mobilityLabel}${props.radius ? `, jusqu'à ${props.radius} km${props.city ? ` autour de ${props.city}` : ''}` : ''}`
-            : props.radius
-              ? `Jusqu'à ${props.radius} km${props.city ? ` autour de ${props.city}` : ''}`
-              : 'Zone d\'intervention non précisée'}
-        </p>
-      </div>
+      {(props.city || props.deptName) && (
+        <div>
+          <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Sa zone</h3>
+          <div className="text-sm text-foreground/70 font-body space-y-1">
+            {props.city && (
+              <p className="text-foreground">
+                {props.city}
+                {props.deptName
+                  ? `, ${props.deptName}${props.deptCode ? ` (${props.deptCode})` : ""}`
+                  : ""}
+              </p>
+            )}
+            {props.regionName && (
+              <p className="text-muted-foreground">{props.regionName}</p>
+            )}
+            {props.radius && (
+              <p>
+                Jusqu'à {props.radius} km
+                {props.city ? ` autour de ${props.city}` : ""}
+              </p>
+            )}
+            {props.mobilityLabel && <p>{props.mobilityLabel}</p>}
+            {props.deptSlug && props.deptName && (
+              <p>
+                <Link
+                  to={`/departement/${props.deptSlug}`}
+                  className="text-primary hover:underline"
+                >
+                  Voir les gardiens du {props.deptName}
+                </Link>
+              </p>
+            )}
+          </div>
+        </div>
+      )}
       {props.competences.length > 0 && (
         <div>
           <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Savoir-faire</h3>
