@@ -38,17 +38,18 @@ const SITE = "https://guardiens.fr";
 /**
  * Intervalle minimal entre deux vagues de marquage, en heures.
  *
- * Valeur retenue le 08/09/2026 : 12 h. A 24 h, une journee comportant deux
- * mises en ligne ne rafraichissait le cache qu'une seule fois, la seconde
- * version restait servie perimee aux robots jusqu'au lendemain. A 12 h, une
- * journee chargee obtient bien ses deux vagues.
+ * Valeur retenue le 08/09/2026 : 24 h. Seuls les robots lisent la version en
+ * cache, jamais les visiteurs, qui recoivent toujours l'application. Google
+ * repasse sur une page ville toutes les quelques jours, pas toutes les douze
+ * heures. Descendre a 12 h doublait donc la consommation de renders sans
+ * avancer la date a laquelle un robot voit le changement.
  *
  * Pour changer la valeur : modifier la constante ci-dessous, rien d'autre.
- * Descendre sous 12 h n'a de sens que si MONTHLY_RENDER_BUDGET est revu en
- * meme temps, sinon le plafond mensuel sera atteint en milieu de mois et le
- * rafraichissement sera suspendu.
+ * La baisser augmente proportionnellement la consommation mensuelle, elle doit
+ * donc etre revue avec MONTHLY_RENDER_BUDGET.
  */
-const MIN_MARK_INTERVAL_HOURS = 12;
+const MIN_MARK_INTERVAL_HOURS = 24;
+
 
 /**
  * Plafond mensuel de renders Prerender inities par nous, toutes sources
