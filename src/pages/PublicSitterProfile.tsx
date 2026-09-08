@@ -262,6 +262,10 @@ export default function PublicSitterProfile() {
     citySlug: string | null;
   }>({ deptName: null, deptCode: null, regionName: null, deptSlug: null, citySlug: null });
   const [responseStats, setResponseStats] = useState<ResponseStats | null>(null);
+  // Ancrage local : pied de page et pouls de la communauté pointent vers le
+  // département de la personne consultée quand il est connu et documenté.
+  const [footerLocal, setFooterLocal] = useState<FooterLocalContext | null>(null);
+  const [deptSitterCount, setDeptSitterCount] = useState<number | null>(null);
 
   // Pass 5, compagnon culturel : fait race si l'un des animaux du gardien matche.
   useAlmaCulturalFact({
