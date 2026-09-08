@@ -738,6 +738,59 @@ export default function PublicSitterProfile() {
     load();
   }, [id, loadNonce, auth?.hasSession]);
 
+  // Département, région et liens : chargés une fois le profil connu.
+  // Un slug n'est retenu que si la page correspondante existe et est publiée.
+  useEffect(() => {
+    let cancelled = false;
+    const code = profile?.departement_code ?? null;
+    const cityName = profile?.city ?? null;
+    if (!code && !cityName) return;
+
+    const loadGeo = async () => {
+      let deptName: string | null = null;
+      let regionName: string | null = null;
+      let deptSlug: string | null = null;
+      let citySlug: string | null = null;
+
+      if (code) {
+        const { data: dept } = await (supabase as any)
+          .from("departements")
+          .select("nom, nom_region")
+          .eq("code", code)
+          .maybeSingle();
+        if (dept) {
+          deptName = dept.nom ?? null;
+          regionName = dept.nom_region ?? null;
+        }
+        if (deptName) {
+          const { data: deptPage } = await (supabase as any)
+            .from("seo_department_pages")
+            .select("slug")
+            .eq("department", deptName)
+            .eq("published", true)
+            .maybeSingle();
+          deptSlug = deptPage?.slug ?? null;
+        }
+      }
+
+      if (cityName) {
+        const { data: cityPage } = await (supabase as any)
+          .from("seo_city_pages")
+          .select("slug")
+          .eq("city", cityName)
+          .eq("published", true)
+          .maybeSingle();
+        citySlug = cityPage?.slug ?? null;
+      }
+
+      if (cancelled) return;
+      setGeoInfo({ deptName, deptCode: code, regionName, deptSlug, citySlug });
+    };
+
+    loadGeo();
+    return () => { cancelled = true; };
+  }, [profile?.departement_code, profile?.city]);
+
   // Complément d'affinité réservé aux membres connectés (la vue publique
   // `public_sitter_profiles` ne porte pas les colonnes d'affinité). Le user_id
   // déclenche ce chargement lorsque le profil public est prêt, sans rejouer le
