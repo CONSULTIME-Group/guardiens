@@ -25,6 +25,7 @@ export function SpecialBadgeHighlight({
   userBadges,
   specialBadgeIds = SPECIAL_BADGE_IDS,
   title = "Badge spécial",
+  showObtainedMonth = false,
 }: SpecialBadgeHighlightProps) {
   const specials = useMemo(
     () =>
