@@ -1543,8 +1543,9 @@ export default function PublicSitterProfile() {
       )}
       {/* Fil d'Ariane : niveau département inséré quand il est connu.
           Un lien n'est posé que si la page cible existe et est publiée. */}
-      <PageBreadcrumb
-        items={[
+      <div className="[&_nav_a]:inline-flex [&_nav_a]:min-h-11 [&_nav_a]:items-center">
+        <PageBreadcrumb
+          items={[
           { label: "Gardiens", href: "/recherche-gardiens" },
           ...(geoInfo.deptName
             ? [{
@@ -1559,8 +1560,9 @@ export default function PublicSitterProfile() {
               }]
             : []),
           { label: firstName },
-        ]}
-      />
+          ]}
+        />
+      </div>
 
       {/* JSON-LD */}
       {profile && (

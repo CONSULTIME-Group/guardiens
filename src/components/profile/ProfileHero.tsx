@@ -298,7 +298,7 @@ const ProfileHero = ({
         <div className="flex justify-end mb-4">
           <Link
             to="/recherche-gardiens"
-            className="inline-flex items-center gap-1 text-sm text-foreground font-medium px-3 py-1.5 rounded-full bg-background/90 backdrop-blur-md border border-border/60 shadow-md hover:bg-background hover:shadow-lg transition-all"
+            className="inline-flex min-h-11 items-center gap-1 text-sm text-foreground font-medium px-3 py-1.5 rounded-full bg-background/90 backdrop-blur-md border border-border/60 shadow-md hover:bg-background hover:shadow-lg transition-all"
           >
             ← Retour aux gardiens
           </Link>
