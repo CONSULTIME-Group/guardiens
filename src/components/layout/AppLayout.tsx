@@ -100,10 +100,11 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
         {children ?? <Outlet />}
       </ShellMain>
 
-      {showOnboarding && (
+      {onboardingMounted && (
         <Suspense fallback={null}>
           <OnboardingModal
-            open
+            open={showOnboarding}
+
             onClose={() => {
               setDismissed(true);
               setSearchParams({});
