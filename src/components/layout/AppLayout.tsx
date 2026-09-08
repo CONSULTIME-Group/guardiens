@@ -76,6 +76,15 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
 
   const showOnboarding = !dismissed && !isProContext && !isSitCreateTunnel && (isTour || needsMinimal || needsOnboarding);
 
+  // La modale reste montée une fois qu'elle a été nécessaire, même après
+  // fermeture. Démonter l'arbre du dialogue alors que Radix le croit encore
+  // ouvert laissait le verrou de défilement sur le body (plus aucun scroll).
+  const [onboardingMounted, setOnboardingMounted] = useState(false);
+  useLayoutEffect(() => {
+    if (showOnboarding) setOnboardingMounted(true);
+  }, [showOnboarding]);
+
+
 
   return (
     <AppShellProvider value={true}>
