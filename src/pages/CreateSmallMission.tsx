@@ -48,7 +48,7 @@ import {
 import { durationMismatch, DURATION_LABEL } from "@/lib/missionDurationCoherence";
 
 /** Longueurs minimales pour éviter les annonces vides ou illisibles. */
-const MIN_TITLE_LEN = 15;
+const MIN_TITLE_LEN = 10;
 const MIN_DESC_LEN = 60;
 
 /* ── Stepper progress bar ── */
@@ -158,7 +158,11 @@ const CreateSmallMission = () => {
       window.removeEventListener("resize", apply);
       document.documentElement.style.removeProperty("--mission-action-bar-h");
     };
-  });
+    // L'élément référencé est stable dès le montage : une seule mesure,
+    // l'observateur fait le reste. Sans dépendances, l'effet se
+    // réenregistrait à chaque frappe dans le formulaire.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Le titre reçoit le focus à l'ouverture, sauf sur mobile où le clavier
   // masquerait aussitôt la question posée.
@@ -177,11 +181,19 @@ const CreateSmallMission = () => {
 
   // Attrition composer : 5 events (opened / step1_completed / field_abandoned / submitted / abandoned)
   const submittedRef = useRef(false);
+  // Miroirs par ref : le nettoyage de l'effet ne lit jamais les valeurs
+  // capturées au montage (étape 1, titre vide), toujours l'état réel au
+  // moment de l'abandon.
+  const stepRef = useRef(step);
+  stepRef.current = step;
+  const titleLenRef = useRef(title.trim().length);
+  titleLenRef.current = title.trim().length;
   useEffect(() => {
     try { trackEvent("mission_composer_opened", { metadata: { type: missionType } }); } catch {}
     return () => {
       if (!submittedRef.current) {
-        try { trackEvent("mission_composer_abandoned", { metadata: { last_step: step, has_title: title.trim().length > 0 } }); } catch {}
+        const titleLen = titleLenRef.current;
+        try { trackEvent("mission_composer_abandoned", { metadata: { last_step: stepRef.current, has_title: titleLen > 0, title_len: titleLen } }); } catch {}
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -270,6 +282,19 @@ const CreateSmallMission = () => {
       if (step1Valid) {
         setStep(2);
         try { trackEvent("mission_composer_step1_completed"); } catch {}
+        return;
+      }
+      // Titre présent mais trop court : le problème n'est pas un champ
+      // manquant, c'est la longueur. Le toast le dit explicitement.
+      if (title.trim().length > 0) {
+        toast({
+          title: "Titre trop court",
+          description: `Votre titre fait ${title.trim().length} caractères sur les ${MIN_TITLE_LEN} attendus. Précisez l'objet ou le moment.`,
+          variant: "destructive",
+        });
+        window.setTimeout(() => {
+          document.getElementById("mission-field-title")?.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 50);
         return;
       }
       reportMissing(requiredFields().filter((f) => f.step === 1 && f.invalid));
@@ -586,7 +611,8 @@ const CreateSmallMission = () => {
                     maxLength={120}
                     className="h-12 text-base"
                   />
-                  {titleTouched && title.trim().length < MIN_TITLE_LEN && (
+                  {/* Indication dès la première frappe, sans attendre la sortie du champ. */}
+                  {(titleTouched || title.trim().length > 0) && title.trim().length < MIN_TITLE_LEN && (
                     <p className="text-xs text-destructive flex items-center gap-1">
                       <AlertCircle className="h-3 w-3 shrink-0" />
                       Titre trop court ({title.trim().length}/{MIN_TITLE_LEN} caractères). Ex&nbsp;: « Garder mon chien pendant le week-end ».
