@@ -112,6 +112,7 @@ export function BadgeRow({ badges, size = 'normal', maxVisible = 6, showExpired 
                 size="normal"
                 obtainedAt={b.created_at}
                 showLabel
+                wrapLabel
                 showObtainedMonth={showObtainedMonth}
               />
             ))}
