@@ -70,7 +70,7 @@ export function routeHashesPlugin({ outFile = "route-hashes.json", debug = false
           parts.push(`${rel2}:${createHash("sha1").update(code).digest("hex")}`);
         }
         families[family] = createHash("sha256").update(parts.join("\n")).digest("hex").slice(0, 16);
-        detail[family] = { module_count: parts.length, modules: parts.map((x) => x.split(":")[0]) };
+        detail[family] = { module_count: parts.length };
       }
 
 
