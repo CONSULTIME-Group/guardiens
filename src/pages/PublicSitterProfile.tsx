@@ -412,9 +412,10 @@ export default function PublicSitterProfile() {
               <p>
                 <Link
                   to={`/departement/${props.deptSlug}`}
-                  className="text-primary hover:underline"
+                  className="inline-flex min-h-11 items-center text-primary hover:underline"
                 >
-                  Voir les gardiens du {props.deptName}
+                  Voir les gardiens de ce département
+
                 </Link>
               </p>
             )}
