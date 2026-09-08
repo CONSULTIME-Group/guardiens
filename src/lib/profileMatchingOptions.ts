@@ -119,11 +119,11 @@ export const SPECIAL_ANIMAL_SKILLS_OPTIONS = [
  * de propriétaires : un animal anxieux ne supporte pas d'être seul 8h.
  */
 export const WORK_DURING_SIT_OPTIONS: { value: string; label: string }[] = [
-  { value: "full_remote", label: "Télétravail 100 %, présent toute la journée" },
-  { value: "partial_remote", label: "Télétravail partiel, quelques sorties" },
-  { value: "on_site", label: "Sur place, congés ou retraite" },
-  { value: "out_daytime", label: "Absences en journée (travail extérieur)" },
-  { value: "flexible", label: "Variable selon la garde" },
+  { value: "full_remote", label: "En télétravail chez vous, présent toute la journée" },
+  { value: "partial_remote", label: "En télétravail une partie de la journée" },
+  { value: "on_site", label: "Présent à votre domicile toute la journée" },
+  { value: "out_daytime", label: "En activité la journée, présent le soir et la nuit" },
+  { value: "flexible", label: "S'adapte au rythme de votre maison" },
 ];
 
 export function workDuringSitLabel(value: string | null | undefined): string {

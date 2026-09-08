@@ -92,8 +92,10 @@ const ANIMAL_LABELS: Record<string, string> = {
   rodent: "Rongeurs", nac: "NAC", farm: "Animaux de ferme",
 };
 
+// Indexée sur les valeurs réellement stockées en base (vérifiées par requête
+// distincte le 08/09/2026 : Solo, Couple, Famille, Retraité, chaîne vide).
 const SITTER_TYPE_LABELS: Record<string, string> = {
-  solo: "Solo", couple: "Couple", family: "Famille", retired: "Retraité(e)",
+  Solo: "Solo", Couple: "Couple", Famille: "Famille", "Retraité": "Retraité(e)",
 };
 
 
