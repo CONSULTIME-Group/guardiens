@@ -15,7 +15,7 @@ import path from "node:path";
 const FAMILY_ROOTS = {
   cities: "src/pages/CityPage.tsx",
   departments: "src/pages/DepartmentPage.tsx",
-  guides: "src/pages/CityGuidePage.tsx",
+  guides: "src/pages/GuideDetail.tsx",
   articles: "src/pages/ArticleDetail.tsx",
 };
 
