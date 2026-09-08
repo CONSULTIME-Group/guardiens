@@ -44,7 +44,11 @@ const UserMenu = ({ compact = false, className }: UserMenuProps) => {
   });
 
   return (
-    <DropdownMenu>
+    // modal={false} : un menu modal verrouille le défilement du body, et ses
+    // entrées naviguent vers des routes hors coquille applicative, ce qui le
+    // démonte pendant qu'il est ouvert et laisse le verrou en place.
+    <DropdownMenu modal={false}>
+
       <DropdownMenuTrigger asChild>
         <button
           type="button"
@@ -76,9 +80,13 @@ const UserMenu = ({ compact = false, className }: UserMenuProps) => {
                 if (entry.action === "logout") {
                   void Promise.resolve(logout()).catch(() => {});
                 } else if (entry.to) {
-                  navigate(entry.to);
+                  // Navigation différée d'un tour : le menu doit finir de se
+                  // fermer avant le changement de route.
+                  const to = entry.to;
+                  requestAnimationFrame(() => navigate(to));
                 }
               }}
+
               className={cn("gap-2 min-h-11", entry.danger && "text-destructive focus:text-destructive")}
             >
               <entry.icon className="h-4 w-4" aria-hidden="true" />

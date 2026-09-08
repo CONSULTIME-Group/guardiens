@@ -439,7 +439,10 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
       } catch {}
     }
     onClose();
-    navigate(destination);
+    // Navigation différée d'une frame : la fermeture du dialogue doit se jouer
+    // avant que la route change, sinon Radix laisse son verrou de défilement
+    // sur le body et la page ne défile plus.
+    requestAnimationFrame(() => navigate(destination));
   };
 
   const leaveToLogin = async () => {
@@ -457,8 +460,9 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
       try { sessionStorage.clear(); } catch {}
     } catch {}
     await logout();
-    navigate("/login", { replace: true });
+    requestAnimationFrame(() => navigate("/login", { replace: true }));
   };
+
 
   const [confirmLogout, setConfirmLogout] = useState(false);
 

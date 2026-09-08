@@ -216,7 +216,7 @@ const Dashboard = () => {
   }, [activeRole]);
 
   return (
-    <div className="overflow-x-hidden">
+    <div className="overflow-x-clip">
       <Head><meta name="robots" content="noindex, nofollow" /></Head>
 
       <div
