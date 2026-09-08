@@ -9643,6 +9643,17 @@ export type Database = {
         Args: { p_token: string }
         Returns: Json
       }
+      prerender_render_budget_status: {
+        Args: { p_monthly_budget?: number }
+        Returns: {
+          last_wave_at: string
+          last_wave_rows: number
+          month_start: string
+          monthly_budget: number
+          percent_used: number
+          renders_used: number
+        }[]
+      }
       publish_stale_reviews: { Args: { p_days?: number }; Returns: number }
       purge_cron_run_details: {
         Args: { p_batch?: number; p_retention?: string }

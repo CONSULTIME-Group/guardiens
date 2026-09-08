@@ -37,6 +37,7 @@ const ADMIN_LINKS: Record<string, string> = {
   notification_delivery_failed: 'https://guardiens.fr/admin/emails',
   nurturing_run_anomaly: 'https://guardiens.fr/admin/emails',
   email_delivery_anomaly: 'https://guardiens.fr/admin/emails',
+  prerender_monthly_budget_reached: 'https://guardiens.fr/admin',
 }
 
 const linkFor = (type: string) => ADMIN_LINKS[type] ?? 'https://guardiens.fr/admin'
