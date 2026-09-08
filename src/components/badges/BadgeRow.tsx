@@ -47,7 +47,7 @@ export function BadgeRow({ badges, size = 'normal', maxVisible = 6, showExpired 
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-4 sm:flex sm:flex-wrap items-start gap-2">
+      <div className={`grid ${showLabel ? 'grid-cols-3' : 'grid-cols-4'} sm:flex sm:flex-wrap items-start gap-2`}>
         {visible.map(b => (
           <BadgeSceau
             key={b.badge_id}
@@ -56,7 +56,8 @@ export function BadgeRow({ badges, size = 'normal', maxVisible = 6, showExpired 
             active
             size={size}
             obtainedAt={b.created_at}
-            showLabel
+            showLabel={showLabel}
+            wrapLabel={showLabel}
             showObtainedMonth={showObtainedMonth}
           />
         ))}
