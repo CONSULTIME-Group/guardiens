@@ -1297,6 +1297,30 @@ export type Database = {
         }
         Relationships: []
       }
+      backup_qualite_20260908: {
+        Row: {
+          champ: string | null
+          sauvegarde_le: string | null
+          slug: string | null
+          source_table: string | null
+          valeur: string | null
+        }
+        Insert: {
+          champ?: string | null
+          sauvegarde_le?: string | null
+          slug?: string | null
+          source_table?: string | null
+          valeur?: string | null
+        }
+        Update: {
+          champ?: string | null
+          sauvegarde_le?: string | null
+          slug?: string | null
+          source_table?: string | null
+          valeur?: string | null
+        }
+        Relationships: []
+      }
       badge_attributions: {
         Row: {
           badge_id: string
@@ -8038,6 +8062,7 @@ export type Database = {
           completed_sits_count: number | null
           created_at: string | null
           custom_skills: Json | null
+          departement_code: string | null
           first_name: string | null
           id: string | null
           identity_verified: boolean | null
@@ -8065,6 +8090,7 @@ export type Database = {
           completed_sits_count?: number | null
           created_at?: string | null
           custom_skills?: Json | null
+          departement_code?: string | null
           first_name?: string | null
           id?: string | null
           identity_verified?: boolean | null
@@ -8092,6 +8118,7 @@ export type Database = {
           completed_sits_count?: number | null
           created_at?: string | null
           custom_skills?: Json | null
+          departement_code?: string | null
           first_name?: string | null
           id?: string | null
           identity_verified?: boolean | null

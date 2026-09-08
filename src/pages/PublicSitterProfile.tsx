@@ -10,6 +10,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useAlmaCulturalFact } from "@/hooks/useAlmaCulturalFact";
 import PageMeta from "@/components/PageMeta";
 import PublicHeader from "@/components/layout/PublicHeader";
+import PublicFooter from "@/components/layout/PublicFooter";
+import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import BadgeRow from "@/components/badges/BadgeRow";
 import MissionBadgesReceived from "@/components/missions/MissionBadgesReceived";
 import SpecialBadgeHighlight from "@/components/badges/SpecialBadgeHighlight";
@@ -139,6 +141,16 @@ export default function PublicSitterProfile() {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<any>(null);
   const [sitterProfile, setSitterProfile] = useState<any>(null);
+  // Localisation lisible : nom du département, région, et slugs de pages
+  // réellement publiées. Aucun slug n'est fabriqué : sans ligne publiée,
+  // le libellé reste du texte simple.
+  const [geoInfo, setGeoInfo] = useState<{
+    deptName: string | null;
+    deptCode: string | null;
+    regionName: string | null;
+    deptSlug: string | null;
+    citySlug: string | null;
+  }>({ deptName: null, deptCode: null, regionName: null, deptSlug: null, citySlug: null });
 
   // Pass 5, compagnon culturel : fait race si l'un des animaux du gardien matche.
   useAlmaCulturalFact({
@@ -276,6 +288,7 @@ export default function PublicSitterProfile() {
     preferredEnvironments: string[]; languages: string[]; interests: string[];
     typeLine: string; durationLabel: string; frequencyLabel: string; noticeLabel: string;
     mobilityLabel: string; presenceLabel: string; experienceLabel: string;
+    deptName: string | null; deptCode: string | null; regionName: string | null; deptSlug: string | null;
   }) => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
       {props.animalTypes.length > 0 && (
@@ -312,16 +325,41 @@ export default function PublicSitterProfile() {
           </ul>
         </div>
       )}
-      <div>
-        <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Zone d'intervention</h3>
-        <p className="text-sm text-foreground/70 font-body">
-          {props.mobilityLabel
-            ? `${props.mobilityLabel}${props.radius ? `, jusqu'à ${props.radius} km${props.city ? ` autour de ${props.city}` : ''}` : ''}`
-            : props.radius
-              ? `Jusqu'à ${props.radius} km${props.city ? ` autour de ${props.city}` : ''}`
-              : 'Zone d\'intervention non précisée'}
-        </p>
-      </div>
+      {(props.city || props.deptName) && (
+        <div>
+          <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Sa zone</h3>
+          <div className="text-sm text-foreground/70 font-body space-y-1">
+            {props.city && (
+              <p className="text-foreground">
+                {props.city}
+                {props.deptName
+                  ? `, ${props.deptName}${props.deptCode ? ` (${props.deptCode})` : ""}`
+                  : ""}
+              </p>
+            )}
+            {props.regionName && (
+              <p className="text-muted-foreground">{props.regionName}</p>
+            )}
+            {props.radius && (
+              <p>
+                Jusqu'à {props.radius} km
+                {props.city ? ` autour de ${props.city}` : ""}
+              </p>
+            )}
+            {props.mobilityLabel && <p>{props.mobilityLabel}</p>}
+            {props.deptSlug && props.deptName && (
+              <p>
+                <Link
+                  to={`/departement/${props.deptSlug}`}
+                  className="text-primary hover:underline"
+                >
+                  Voir les gardiens du {props.deptName}
+                </Link>
+              </p>
+            )}
+          </div>
+        </div>
+      )}
       {props.competences.length > 0 && (
         <div>
           <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Savoir-faire</h3>
@@ -507,7 +545,7 @@ export default function PublicSitterProfile() {
       // Les champs pro_* viennent de la vue publique `public_profiles`, lisible
       // par tout visiteur ; `profiles` reste réservé au propriétaire du profil.
       const PUBLIC_PROFILE_COLS =
-        "id, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, completed_sits_count, last_seen_at, pro_status, pro_specialty, pro_tagline, pro_pricing_note, pro_business_name";
+        "id, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, completed_sits_count, last_seen_at, pro_status, pro_specialty, pro_tagline, pro_pricing_note, pro_business_name, departement_code";
       // `last_name` retiré du select, jamais rendu publiquement.
       const BASE_PROFILE_COLS =
         "id, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, profile_completion, completed_sits_count, cancellation_count, hero_image_index";
@@ -725,6 +763,59 @@ export default function PublicSitterProfile() {
     };
     load();
   }, [id, loadNonce, auth?.hasSession]);
+
+  // Département, région et liens : chargés une fois le profil connu.
+  // Un slug n'est retenu que si la page correspondante existe et est publiée.
+  useEffect(() => {
+    let cancelled = false;
+    const code = profile?.departement_code ?? null;
+    const cityName = profile?.city ?? null;
+    if (!code && !cityName) return;
+
+    const loadGeo = async () => {
+      let deptName: string | null = null;
+      let regionName: string | null = null;
+      let deptSlug: string | null = null;
+      let citySlug: string | null = null;
+
+      if (code) {
+        const { data: dept } = await (supabase as any)
+          .from("departements")
+          .select("nom, nom_region")
+          .eq("code", code)
+          .maybeSingle();
+        if (dept) {
+          deptName = dept.nom ?? null;
+          regionName = dept.nom_region ?? null;
+        }
+        if (deptName) {
+          const { data: deptPage } = await (supabase as any)
+            .from("seo_department_pages")
+            .select("slug")
+            .eq("department", deptName)
+            .eq("published", true)
+            .maybeSingle();
+          deptSlug = deptPage?.slug ?? null;
+        }
+      }
+
+      if (cityName) {
+        const { data: cityPage } = await (supabase as any)
+          .from("seo_city_pages")
+          .select("slug")
+          .eq("city", cityName)
+          .eq("published", true)
+          .maybeSingle();
+        citySlug = cityPage?.slug ?? null;
+      }
+
+      if (cancelled) return;
+      setGeoInfo({ deptName, deptCode: code, regionName, deptSlug, citySlug });
+    };
+
+    loadGeo();
+    return () => { cancelled = true; };
+  }, [profile?.departement_code, profile?.city]);
 
   // Complément d'affinité réservé aux membres connectés (la vue publique
   // `public_sitter_profiles` ne porte pas les colonnes d'affinité). Le user_id
@@ -1309,6 +1400,27 @@ export default function PublicSitterProfile() {
       {hasSession && (
         <PublicHeader authedVariant />
       )}
+      {/* Fil d'Ariane : niveau département inséré quand il est connu.
+          Un lien n'est posé que si la page cible existe et est publiée. */}
+      <PageBreadcrumb
+        items={[
+          { label: "Gardiens", href: "/recherche-gardiens" },
+          ...(geoInfo.deptName
+            ? [{
+                label: geoInfo.deptName,
+                ...(geoInfo.deptSlug ? { href: `/departement/${geoInfo.deptSlug}` } : {}),
+              }]
+            : []),
+          ...(city
+            ? [{
+                label: city,
+                ...(geoInfo.citySlug ? { href: `/house-sitting/${geoInfo.citySlug}` } : {}),
+              }]
+            : []),
+          { label: firstName },
+        ]}
+      />
+
       {/* JSON-LD */}
       {profile && (
         <ProfileSchemaOrg
@@ -1370,6 +1482,7 @@ export default function PublicSitterProfile() {
             id={id}
             firstName={firstName}
             city={city || null}
+            departmentName={geoInfo.deptName}
             avatarUrl={profile.avatar_url || null}
             heroDesktop={heroDesktop}
             heroMobile={heroMobile}
@@ -1623,6 +1736,10 @@ export default function PublicSitterProfile() {
                   mobilityLabel={mobilityLabel}
                   presenceLabel={presenceLabel}
                   experienceLabel={experienceLabel}
+                  deptName={geoInfo.deptName}
+                  deptCode={geoInfo.deptCode}
+                  regionName={geoInfo.regionName}
+                  deptSlug={geoInfo.deptSlug}
                 />
                 <PublicExperiences experiences={externalExperiences} />
               </div>
@@ -2514,6 +2631,8 @@ export default function PublicSitterProfile() {
         );
       })()}
 
+
+      <PublicFooter />
 
       {/* ── Lightbox ── */}
       {lightboxIdx !== null && lightboxIdx < lightboxItems.length && (

@@ -32,6 +32,8 @@ interface ProfileHeroProps {
   id: string;
   firstName: string;
   city: string | null;
+  /** Nom du département, affiché après la ville quand il est connu. */
+  departmentName?: string | null;
   avatarUrl: string | null;
   heroDesktop: string;
   heroMobile: string;
@@ -70,6 +72,7 @@ const ProfileHero = ({
   id,
   firstName,
   city,
+  departmentName = null,
   avatarUrl,
   heroDesktop,
   heroMobile,
@@ -368,6 +371,7 @@ const ProfileHero = ({
                   {city && (
                     <span className="text-base sm:text-lg md:text-xl font-medium text-foreground/75">
                       , {roleLabel.toLowerCase()} à {city}
+                      {departmentName ? `, ${departmentName}` : ""}
                     </span>
                   )}
                 </h1>
