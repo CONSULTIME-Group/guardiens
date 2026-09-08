@@ -7,6 +7,14 @@
  * `consume-seo-dirty` la vide a budget plafonne, ce qui protege le quota
  * mensuel de 25 000 renders du compte partage.
  *
+ * Marquage PAR FAMILLE depuis le 08/09/2026 : le detecteur lit
+ * /route-hashes.json (emis au build par scripts/vite-plugin-route-hashes.mjs)
+ * et ne marque que les familles (villes, departements, guides, articles) dont
+ * l'empreinte a change, plus toutes les familles si l'empreinte GLOBALE
+ * (index.html, siteRoutes.ts, sync-index-html.mjs, dictionnaire fr) a change,
+ * plus toute famille non rafraichie depuis FAMILY_MAX_AGE_DAYS.
+ * Chaque decision est journalisee dans public.prerender_mark_decisions.
+ *
  * Principe :
  *  1. recuperer le HTML de https://guardiens.fr/ ;
  *  2. en extraire l'empreinte du bundle d'entree (`/assets/index-XXXX.js`) ;
@@ -258,6 +266,12 @@ Deno.serve(async (req) => {
     let globalReason = bundleChanged ? "deploy_detected" : "no_new_bundle";
     if (isFirstEverRun) {
       globalReason = "bootstrap";
+      toMark = [];
+    } else if (!hashes && !bundleChanged) {
+      // Sans fichier d'empreintes lisible, on retombe sur l'ancien comportement
+      // (marquage complet), mais uniquement quand un nouveau bundle apparait :
+      // sinon le repli marquerait 436 pages a chaque fenetre de 24 h.
+      globalReason = "no_new_bundle";
       toMark = [];
     } else if (!ignoreDebounce && hoursSinceLastMark < MIN_MARK_INTERVAL_HOURS && toMark.length > 0) {
       globalReason = "debounced";
