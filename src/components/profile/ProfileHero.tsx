@@ -72,6 +72,7 @@ const ProfileHero = ({
   id,
   firstName,
   city,
+  departmentName = null,
   avatarUrl,
   heroDesktop,
   heroMobile,
