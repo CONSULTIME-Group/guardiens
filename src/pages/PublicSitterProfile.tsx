@@ -1400,6 +1400,27 @@ export default function PublicSitterProfile() {
       {hasSession && (
         <PublicHeader authedVariant />
       )}
+      {/* Fil d'Ariane : niveau département inséré quand il est connu.
+          Un lien n'est posé que si la page cible existe et est publiée. */}
+      <PageBreadcrumb
+        items={[
+          { label: "Gardiens", href: "/recherche-gardiens" },
+          ...(geoInfo.deptName
+            ? [{
+                label: geoInfo.deptName,
+                ...(geoInfo.deptSlug ? { href: `/departement/${geoInfo.deptSlug}` } : {}),
+              }]
+            : []),
+          ...(city
+            ? [{
+                label: city,
+                ...(geoInfo.citySlug ? { href: `/house-sitting/${geoInfo.citySlug}` } : {}),
+              }]
+            : []),
+          { label: firstName },
+        ]}
+      />
+
       {/* JSON-LD */}
       {profile && (
         <ProfileSchemaOrg
