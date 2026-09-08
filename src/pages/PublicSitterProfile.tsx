@@ -941,9 +941,6 @@ export default function PublicSitterProfile() {
 
       if (cancelled) return;
       setGeoInfo({ deptName, deptCode: code, regionName, deptSlug, citySlug });
-    };
-
-      setGeoInfo({ deptName, deptCode: code, regionName, deptSlug, citySlug });
 
       if (!deptName) return;
 
