@@ -444,6 +444,7 @@ const ProfileHero = ({
                 {reassurance}
               </p>
             </div>
+            {belowCta ? <div className="mt-1.5 self-stretch">{belowCta}</div> : null}
           </div>
         </div>
       </div>
