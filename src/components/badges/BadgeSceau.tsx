@@ -15,6 +15,7 @@ interface BadgeSceauProps {
   showLabel?: boolean
   className?: string
   obtainedAt?: string
+  showObtainedMonth?: boolean
 }
 
 const TIER_COLORS: Record<BadgeTier, { stroke: string; width: number; glow?: string }> = {
@@ -49,6 +50,7 @@ export function BadgeSceau({
   showLabel = false,
   className = '',
   obtainedAt,
+  showObtainedMonth = false,
 }: BadgeSceauProps) {
   const [dialogOpen, setDialogOpen] = useState(false)
   const def = BADGE_DEFINITIONS[id]
@@ -73,6 +75,9 @@ export function BadgeSceau({
   const dateLabel = obtainedAt
     ? format(new Date(obtainedAt), "d MMMM yyyy", { locale: fr })
     : null
+  const monthLabel = obtainedAt
+    ? format(new Date(obtainedAt), "MMMM yyyy", { locale: fr })
+    : null
 
   const accessibleLabel = `${def.label}${count > 1 ? `, obtenu ${count} fois` : ''}${isActive ? '' : ' (expiré)'}`
 
@@ -80,6 +85,7 @@ export function BadgeSceau({
     <button
       type="button"
       aria-label={accessibleLabel}
+      title={def.label}
       aria-haspopup="dialog"
       className={`relative inline-flex flex-col items-center cursor-pointer group bg-transparent border-0 p-0 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${className}`}
       style={{ width: showLabel ? undefined : sz }}
@@ -122,14 +128,22 @@ export function BadgeSceau({
         )}
       </div>
 
-      {showLabel && (
+      {(showLabel || showObtainedMonth) && (
+        <span className="mt-1 flex max-w-[92px] flex-col items-center text-center leading-tight">
+          {showLabel && (
         <span
           aria-hidden="true"
-          className="mt-1 text-[10px] leading-tight text-center font-medium max-w-[56px] truncate"
+          className="text-[10px] font-medium"
           style={{ color: isActive ? 'hsl(var(--foreground))' : 'hsl(var(--muted-foreground))' }}
-          title={def.label}
         >
           {def.label}
+        </span>
+          )}
+          {showObtainedMonth && monthLabel && (
+            <span className="mt-0.5 text-[10px] text-muted-foreground capitalize">
+              {monthLabel}
+            </span>
+          )}
         </span>
       )}
     </button>

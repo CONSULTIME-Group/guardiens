@@ -1580,16 +1580,13 @@ export default function PublicSitterProfile() {
           url={`https://guardiens.fr/gardiens/${id}`}
         />
       )}
-      {/* Bandes latérales décoratives, desktop ≥ lg uniquement (sinon traversent le contenu en mobile) */}
-      <div className="hidden lg:block" style={{ position: 'fixed', left: 0, top: 0, bottom: 0, width: '56px', background: 'linear-gradient(to right, hsl(var(--primary) / 0.06), transparent)', pointerEvents: 'none', zIndex: 0 }} aria-hidden="true" />
-      <div className="hidden lg:block" style={{ position: 'fixed', right: 0, top: 0, bottom: 0, width: '56px', background: 'linear-gradient(to left, hsl(var(--primary) / 0.06), transparent)', pointerEvents: 'none', zIndex: 0 }} aria-hidden="true" />
-      {/* Texte vertical gauche, desktop ≥ lg uniquement */}
-      <div className="hidden lg:block" style={{ position: 'fixed', left: '10px', top: '50%', transform: 'translateY(-50%) rotate(-90deg)', fontSize: '9px', letterSpacing: '4px', textTransform: 'uppercase' as const, color: 'hsl(var(--primary) / 0.28)', whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 0, fontFamily: 'sans-serif' }} aria-hidden="true">
-        Guardiens · House-sitting de proximité
+      <div className="pointer-events-none fixed inset-y-0 left-[max(24px,calc((100vw-1024px)/4-15px))] z-0 hidden min-[1440px]:flex flex-col items-center justify-around py-[12vh] font-heading text-[30px] text-[#9A6A44]/40 [writing-mode:vertical-rl] [transform:rotate(180deg)] [mask-image:linear-gradient(to_bottom,transparent,black_15%,black_85%,transparent)]" aria-hidden="true">
+        <span>L'entraide</span>
+        <span className="text-[#2C6D50]/40">La proximité</span>
+        <span className="italic">La rencontre</span>
       </div>
-      {/* Texte vertical droit, desktop ≥ lg uniquement */}
-      <div className="hidden lg:block" style={{ position: 'fixed', right: '10px', top: '50%', transform: 'translateY(-50%) rotate(90deg)', fontSize: '9px', letterSpacing: '4px', textTransform: 'uppercase' as const, color: 'hsl(var(--primary) / 0.28)', whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 0, fontFamily: 'sans-serif' }} aria-hidden="true">
-        Gardiens de confiance · Gens du coin
+      <div className="pointer-events-none fixed inset-y-0 right-[max(24px,calc((100vw-1024px)/4-15px))] z-0 hidden min-[1440px]:flex items-center pt-[30px] font-heading text-[30px] italic text-[#2C6D50]/40 [writing-mode:vertical-rl] [mask-image:linear-gradient(to_bottom,transparent,black_15%,black_85%,transparent)] motion-safe:translate-y-[30px]" aria-hidden="true">
+        Un service rendu, un service reçu
       </div>
       <PageMeta
         title={pageTitle}
@@ -1914,7 +1911,7 @@ export default function PublicSitterProfile() {
                   {userBadges && userBadges.length > 0 && (
                     <div id="badges" className="scroll-mt-24 space-y-6">
                       <SpecialBadgeHighlight userBadges={userBadges} />
-                      <BadgeRow badges={userBadges} />
+                      <BadgeRow badges={userBadges} maxVisible={4} showExpired={false} showObtainedMonth />
                     </div>
                   )}
                   {id && <MissionBadgesReceived profileId={id} />}
@@ -2447,7 +2444,7 @@ export default function PublicSitterProfile() {
                     {userBadges && userBadges.length > 0 && (
                       <div id="badges" className="scroll-mt-24 space-y-6">
                         <SpecialBadgeHighlight userBadges={userBadges} />
-                        <BadgeRow badges={userBadges} />
+                        <BadgeRow badges={userBadges} maxVisible={4} showExpired={false} showObtainedMonth />
                       </div>
                     )}
                     {id && <MissionBadgesReceived profileId={id} />}

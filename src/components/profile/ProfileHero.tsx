@@ -251,11 +251,11 @@ const ProfileHero = ({
   return (
     <div className="relative overflow-hidden w-full flex items-end bg-[hsl(var(--hero-paper))] md:max-h-[520px] md:[aspect-ratio:1536/544]">
       {/* Illustration */}
-      <div className="absolute inset-0 z-0 pointer-events-none">
+      <div className="absolute right-0 bottom-0 z-0 h-1/2 w-1/2 min-w-[195px] pointer-events-none md:top-0 md:h-full md:w-[40%] md:min-w-[380px]">
         <img
           src={heroDesktop}
           srcSet={`${heroMobile} 768w, ${heroDesktop} 1536w`}
-          sizes="(max-width: 767px) 100vw, 1536px"
+          sizes="(max-width: 767px) 50vw, 40vw"
           alt=""
           aria-hidden="true"
           data-hero-anchor={heroAnchor}
@@ -269,7 +269,7 @@ const ProfileHero = ({
             transform: "translateZ(0)",
             backfaceVisibility: "hidden",
           }}
-          className="w-full h-full object-contain object-center"
+          className="w-full h-full object-cover object-right"
         />
       </div>
 
@@ -285,26 +285,12 @@ const ProfileHero = ({
         </button>
       )}
 
-      {/* Vignettage discret via token hero-paper (tolère un rgba doux). */}
+      {/* Le papier protège la lisibilité à gauche et révèle entièrement la gouache à droite. */}
       <div
         className="absolute inset-0 z-[1] pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse at center, transparent 55%, hsl(var(--foreground) / 0.06) 100%)",
-        }}
-      />
-      <div
-        className="absolute inset-x-0 bottom-0 h-[75%] z-[1] pointer-events-none"
-        style={{
-          background:
-            "linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background) / 0.85) 30%, hsl(var(--background) / 0.45) 65%, transparent 100%)",
-        }}
-      />
-      <div
-        className="absolute inset-x-0 top-0 h-24 z-[1] pointer-events-none"
-        style={{
-          background:
-            "linear-gradient(to bottom, hsl(var(--background) / 0.55) 0%, transparent 100%)",
+            "linear-gradient(to right, hsl(var(--hero-paper)) 0%, hsl(var(--hero-paper) / 0.98) 46%, hsl(var(--hero-paper) / 0.72) 56%, transparent 66%)",
         }}
       />
 
