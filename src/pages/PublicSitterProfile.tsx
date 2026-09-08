@@ -1843,7 +1843,7 @@ export default function PublicSitterProfile() {
         );
 
         return (
-        <div className="max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-8 pb-[calc(10.5rem+env(safe-area-inset-bottom))] md:pb-8">
+        <div data-profile-content className="max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-8 pb-[calc(10.5rem+env(safe-area-inset-bottom))] md:pb-8">
           <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-8">
           {/* ── FLUX NARRATIF UNIFIÉ (vague 37) ────────────────────────────
               Mobile et desktop partagent le même flux vertical. Les onglets
@@ -2261,7 +2261,7 @@ export default function PublicSitterProfile() {
         }
 
         return (
-        <div className="max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-8 pb-[calc(10.5rem+env(safe-area-inset-bottom))] md:pb-8">
+        <div data-profile-content className="max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-8 pb-[calc(10.5rem+env(safe-area-inset-bottom))] md:pb-8">
           <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-8">
             <div className="space-y-[52px] min-w-0">
 
@@ -2872,7 +2872,7 @@ export default function PublicSitterProfile() {
       })()}
 
 
-      <PublicFooter />
+      <PublicFooter local={footerLocal} />
 
       {/* ── Lightbox ── */}
       {lightboxIdx !== null && lightboxIdx < lightboxItems.length && (
