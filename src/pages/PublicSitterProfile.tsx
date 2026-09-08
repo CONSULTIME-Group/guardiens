@@ -1543,7 +1543,7 @@ export default function PublicSitterProfile() {
       )}
       {/* Fil d'Ariane : niveau département inséré quand il est connu.
           Un lien n'est posé que si la page cible existe et est publiée. */}
-      <div className="[&_nav_a]:inline-flex [&_nav_a]:min-h-11 [&_nav_a]:items-center">
+      <div className="[&_nav_a]:inline-flex [&_nav_a]:min-h-11 [&_nav_a]:min-w-11 [&_nav_a]:items-center [&_nav_a]:justify-center">
         <PageBreadcrumb
           items={[
           { label: "Gardiens", href: "/recherche-gardiens" },
