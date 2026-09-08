@@ -126,9 +126,9 @@ const ProfileHero = ({
             if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
           }}
           aria-label="Voir les détails de confiance et vérifications"
-          className="inline-flex items-center gap-1 text-xs text-foreground/85 border border-border/60 rounded-full px-2 py-0.5 bg-background/85 backdrop-blur-sm hover:bg-background hover:border-primary/40 transition-colors cursor-pointer"
+          className="inline-flex min-h-11 items-center gap-1.5 text-xs bg-primary text-primary-foreground px-3 py-1 rounded-full font-semibold shadow-md border border-primary/40 hover:bg-primary/90 transition-colors cursor-pointer"
         >
-          <Shield size={11} className="text-primary" /> ID vérifiée
+          <Shield size={12} className="text-primary-foreground" /> Identité vérifiée
         </button>
             </TooltipTrigger>
             <TooltipContent side="bottom" className="max-w-xs text-xs leading-relaxed">
@@ -296,15 +296,6 @@ const ProfileHero = ({
       />
 
       <div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 pb-5 sm:pb-8 pt-4 sm:pt-6">
-        <div className="flex justify-end mb-4">
-          <Link
-            to="/recherche-gardiens"
-            className="inline-flex min-h-11 items-center gap-1 text-sm text-foreground font-medium px-3 py-1.5 rounded-full bg-background/90 backdrop-blur-md border border-border/60 shadow-md hover:bg-background hover:shadow-lg transition-all"
-          >
-            ← Retour aux gardiens
-          </Link>
-        </div>
-
         <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-6 min-w-0">
           <div className="shrink-0 relative">
             <button
@@ -425,10 +416,12 @@ const ProfileHero = ({
             {/* CTA unique + réassurance */}
             <div
               data-hero-cta
-              className="mt-3 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 self-stretch"
+              className="mt-3 flex flex-col items-stretch gap-2 self-start max-w-full"
             >
               {renderCta()}
-              <p className="text-[11px] sm:text-xs text-muted-foreground font-body sm:ml-2 self-center text-center sm:text-left leading-snug break-words">
+              {/* La réassurance reste sous le bouton, donc sur la zone de
+                  papier opaque du dégradé, avec son propre fond discret. */}
+              <p className="self-start max-w-full rounded-lg bg-background/85 backdrop-blur-sm px-2.5 py-1 text-[11px] sm:text-xs text-foreground/80 font-body text-left leading-snug break-words">
                 {reassurance}
               </p>
             </div>
