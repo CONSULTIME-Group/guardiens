@@ -38,7 +38,6 @@ const PublicFooter = React.forwardRef<HTMLElement, PublicFooterProps>(({ local }
   if (hasSession && inAppShell) return null;
   const linkCls =
     "inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors";
-  const hasLocalCities = !!local && local.cities.length > 0;
   const hasLocalDept = !!local && !!local.departmentSlug;
   const hasLocalGuides = !!local && local.guides.length > 0;
   return (
@@ -49,8 +48,8 @@ const PublicFooter = React.forwardRef<HTMLElement, PublicFooterProps>(({ local }
             <h3 className="font-body text-xs uppercase tracking-widest text-white/80 mb-4">{t("footer.sections.by_city")}</h3>
             <ul className="space-y-0">
               <li><Link to="/house-sitting" className={linkCls}>{t("footer.links.all_cities")}</Link></li>
-              {hasLocalCities ? (
-                local!.cities.map((c) => (
+              {local ? (
+                local.cities.map((c) => (
                   <li key={c.slug}>
                     <Link to={`/house-sitting/${c.slug}`} className={linkCls}>
                       {t("footer.links.house_sitting_city", { city: c.city })}
