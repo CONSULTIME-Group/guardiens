@@ -117,6 +117,9 @@ function lastVisitLabel(iso: string | null | undefined): string | null {
  *  répondues, la ligne cède la place à la dernière visite. */
 const RESPONSE_STATS_MIN_ANSWERED = 5;
 
+/** Seuil de bascule du pouls de la communauté vers le chiffre départemental. */
+const LOCAL_PULSE_MIN_SITTERS = 5;
+
 /** Formulation du délai médian : minutes sous l'heure, heures sous le jour,
  *  jours au-delà, arrondis au plus proche. */
 function responseDelayPhrase(minutes: number): { text: string; fast: boolean } {
