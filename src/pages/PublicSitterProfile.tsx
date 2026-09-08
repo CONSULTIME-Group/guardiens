@@ -98,6 +98,63 @@ const SITTER_TYPE_LABELS: Record<string, string> = {
   Solo: "Solo", Couple: "Couple", Famille: "Famille", "Retraité": "Retraité(e)",
 };
 
+/** Formulation simple de la dernière visite : "cette semaine", "ce mois-ci", sinon le mois. */
+function lastVisitLabel(iso: string | null | undefined): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  const now = new Date();
+  const diffDays = Math.floor((now.getTime() - d.getTime()) / 86400000);
+  if (diffDays <= 7) return "cette semaine";
+  if (d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()) return "ce mois-ci";
+  return `en ${format(d, "MMMM yyyy", { locale: fr })}`;
+}
+
+/**
+ * Bloc « premier parcours » : remplace la chronologie et sa heatmap vide
+ * (douze barres grises) quand le membre n'a encore ni avis, ni badge, ni
+ * garde. N'affiche que des faits réels déjà chargés.
+ */
+const FreshStartStory = ({
+  firstName,
+  createdAt,
+  lastSeenAt,
+  identityVerified,
+}: {
+  firstName: string;
+  createdAt?: string | null;
+  lastSeenAt?: string | null;
+  identityVerified: boolean;
+}) => {
+  const visit = lastVisitLabel(lastSeenAt);
+  return (
+    <section
+      aria-label={`Début du parcours de ${firstName}`}
+      className="rounded-2xl border border-border bg-card p-5 md:p-6"
+    >
+      <header className="mb-4">
+        <p className="text-xs uppercase tracking-[2px] text-muted-foreground font-sans mb-1.5">
+          Parcours sur Guardiens
+        </p>
+        <h3 className="text-lg font-heading font-semibold text-foreground">
+          Son histoire commence tout juste
+        </h3>
+      </header>
+      <ul className="space-y-2 text-sm text-foreground/80 font-body">
+        {createdAt && (
+          <li>Membre depuis {format(new Date(createdAt), "MMMM yyyy", { locale: fr })}.</li>
+        )}
+        {visit && <li>Dernière visite {visit}.</li>}
+        <li>
+          {identityVerified
+            ? `${firstName} a vérifié son identité et rempli son profil.`
+            : `${firstName} a rempli son profil.`}
+        </li>
+      </ul>
+    </section>
+  );
+};
+
 
 const ENV_LABELS: Record<string, string> = {
   city: "Ville", countryside: "Campagne", mountain: "Montagne",
