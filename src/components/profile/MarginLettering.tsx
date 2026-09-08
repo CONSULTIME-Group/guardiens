@@ -39,15 +39,18 @@ const MarginLettering = () => {
     update();
     const raf = window.requestAnimationFrame(update);
     window.addEventListener("resize", update);
+    // Le conteneur de contenu est remonté à chaque changement d'onglet :
+    // on observe aussi le corps du document pour rester juste après bascule.
     const ro = new ResizeObserver(update);
     const el = document.querySelector("[data-profile-content]");
     if (el) ro.observe(el);
+    ro.observe(document.body);
     return () => {
       window.cancelAnimationFrame(raf);
       window.removeEventListener("resize", update);
       ro.disconnect();
     };
-  });
+  }, []);
 
   // Le lettrage reste confiné à la zone de contenu : il s'efface dès que le
   // pied de page entre dans la fenêtre.
@@ -60,7 +63,8 @@ const MarginLettering = () => {
     );
     io.observe(footer);
     return () => io.disconnect();
-  });
+  }, []);
+
 
   if (!visible || footerVisible || typeof document === "undefined") return null;
 
