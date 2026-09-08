@@ -94,6 +94,9 @@ const ReportButton = ({
   const detailsRequired = isProfileLink && reason === "other";
   const canSubmit = !!reason && !submitting && (!detailsRequired || details.trim().length > 0);
 
+  /** Le brouillon survit à une fermeture : la remise à zéro suit un envoi abouti. */
+  const closeKeepingDraft = () => setOpen(false);
+
   const resetAndClose = () => {
     setOpen(false);
     setReason("");
@@ -118,7 +121,7 @@ const ReportButton = ({
       if (recent && recent.length > 0) {
         setSubmitting(false);
         toast.info("Votre signalement des dernières 24 heures est déjà entre les mains de l'équipe.");
-        resetAndClose();
+        closeKeepingDraft();
         return;
       }
     }
@@ -180,7 +183,7 @@ const ReportButton = ({
         </button>
       )}
 
-      <Dialog open={open} onOpenChange={(o) => (o ? setOpen(true) : resetAndClose())}>
+      <Dialog open={open} onOpenChange={(o) => (o ? setOpen(true) : closeKeepingDraft())}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>{dialogTitle}</DialogTitle>
@@ -245,7 +248,7 @@ const ReportButton = ({
               <>
                 <button
                   type="button"
-                  onClick={resetAndClose}
+                  onClick={closeKeepingDraft}
                   className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground min-h-[44px] px-2"
                 >
                   Annuler
@@ -256,7 +259,7 @@ const ReportButton = ({
               </>
             ) : (
               <>
-                <Button variant="outline" onClick={resetAndClose}>
+                <Button variant="outline" onClick={closeKeepingDraft}>
                   Annuler
                 </Button>
                 <Button onClick={handleSubmit} disabled={!canSubmit}>

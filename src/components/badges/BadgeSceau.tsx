@@ -16,6 +16,8 @@ interface BadgeSceauProps {
   className?: string
   obtainedAt?: string
   showObtainedMonth?: boolean
+  /** Autorise le libellé sur plusieurs lignes (fiche gardien). Par défaut, une seule ligne tronquée. */
+  wrapLabel?: boolean
 }
 
 const TIER_COLORS: Record<BadgeTier, { stroke: string; width: number; glow?: string }> = {
@@ -51,6 +53,7 @@ export function BadgeSceau({
   className = '',
   obtainedAt,
   showObtainedMonth = false,
+  wrapLabel = false,
 }: BadgeSceauProps) {
   const [dialogOpen, setDialogOpen] = useState(false)
   const def = BADGE_DEFINITIONS[id]
@@ -85,7 +88,6 @@ export function BadgeSceau({
     <button
       type="button"
       aria-label={accessibleLabel}
-      title={def.label}
       aria-haspopup="dialog"
       className={`relative inline-flex flex-col items-center cursor-pointer group bg-transparent border-0 p-0 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${className}`}
       style={{ width: showLabel ? undefined : sz }}
@@ -129,11 +131,11 @@ export function BadgeSceau({
       </div>
 
       {(showLabel || showObtainedMonth) && (
-        <span className="mt-1 flex max-w-[92px] flex-col items-center text-center leading-tight">
+        <span className={`mt-1 flex flex-col items-center text-center leading-tight ${wrapLabel ? 'max-w-[92px]' : 'max-w-[56px]'}`}>
           {showLabel && (
         <span
           aria-hidden="true"
-          className="text-[10px] font-medium"
+          className={`text-[10px] font-medium ${wrapLabel ? '' : 'w-full truncate'}`}
           style={{ color: isActive ? 'hsl(var(--foreground))' : 'hsl(var(--muted-foreground))' }}
         >
           {def.label}

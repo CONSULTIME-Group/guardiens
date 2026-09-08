@@ -14,11 +14,13 @@ interface BadgeRowProps {
   maxVisible?: number
   showExpired?: boolean
   showObtainedMonth?: boolean
+  /** Affiche le libellé sous chaque sceau (opt-in, fiche gardien). */
+  showLabel?: boolean
 }
 
 const PRIORITY_ORDER = ['id_verifiee']
 
-export function BadgeRow({ badges, size = 'normal', maxVisible = 6, showExpired = true, showObtainedMonth = false }: BadgeRowProps) {
+export function BadgeRow({ badges, size = 'normal', maxVisible = 6, showExpired = true, showObtainedMonth = false, showLabel = false }: BadgeRowProps) {
   const [showAll, setShowAll] = useState(false)
 
   // Filtre les badges dont la définition n'existe plus (ex. badge retiré
@@ -45,7 +47,7 @@ export function BadgeRow({ badges, size = 'normal', maxVisible = 6, showExpired 
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-4 sm:flex sm:flex-wrap items-start gap-2">
+      <div className={`grid ${showLabel ? 'grid-cols-3' : 'grid-cols-4'} sm:flex sm:flex-wrap items-start gap-2`}>
         {visible.map(b => (
           <BadgeSceau
             key={b.badge_id}
@@ -54,7 +56,8 @@ export function BadgeRow({ badges, size = 'normal', maxVisible = 6, showExpired 
             active
             size={size}
             obtainedAt={b.created_at}
-            showLabel
+            showLabel={showLabel}
+            wrapLabel={showLabel}
             showObtainedMonth={showObtainedMonth}
           />
         ))}
@@ -109,6 +112,7 @@ export function BadgeRow({ badges, size = 'normal', maxVisible = 6, showExpired 
                 size="normal"
                 obtainedAt={b.created_at}
                 showLabel
+                wrapLabel
                 showObtainedMonth={showObtainedMonth}
               />
             ))}

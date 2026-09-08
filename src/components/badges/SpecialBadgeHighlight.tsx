@@ -9,6 +9,8 @@ interface SpecialBadgeHighlightProps {
   specialBadgeIds?: string[]
   /** Titre encadrant le bloc */
   title?: string
+  /** Affiche le mois d'obtention sous le sceau (opt-in, fiche gardien). */
+  showObtainedMonth?: boolean
 }
 
 /**
@@ -23,6 +25,7 @@ export function SpecialBadgeHighlight({
   userBadges,
   specialBadgeIds = SPECIAL_BADGE_IDS,
   title = "Badge spécial",
+  showObtainedMonth = false,
 }: SpecialBadgeHighlightProps) {
   const specials = useMemo(
     () =>
@@ -57,7 +60,7 @@ export function SpecialBadgeHighlight({
                 active
                 size="normal"
                 obtainedAt={b.created_at}
-                showObtainedMonth
+                showObtainedMonth={showObtainedMonth}
               />
               <p className="text-xs font-medium text-foreground leading-tight">
                 {def.label}
