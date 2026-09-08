@@ -102,6 +102,7 @@ const ProfileHero = ({
   roleTabActive,
   cta,
   ctaReassurance,
+  belowCta,
 }: ProfileHeroProps) => {
 
   // Chips : cap à 3, priorité ID > Abonné > Urgence.
