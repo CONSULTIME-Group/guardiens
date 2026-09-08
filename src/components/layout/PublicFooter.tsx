@@ -6,7 +6,29 @@ import { useAuth } from "@/contexts/AuthContext";
 import { PRESS_ARTICLE_URL } from "@/components/shared/PressQuote";
 import { LE_PROGRES_LOGO } from "@/assets/pressLogos";
 
-const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
+export interface FooterLocalContext {
+  /** Nom du département de la page consultée, par exemple « Var ». */
+  departmentName: string;
+  /** Code du département, par exemple « 83 ». */
+  departmentCode: string | null;
+  /** Slug de la page département publiée, sinon null. */
+  departmentSlug: string | null;
+  /** Villes du département ayant une page publiée, au maximum quatre. */
+  cities: { city: string; slug: string }[];
+  /** Guides publiés du département. */
+  guides: { city: string; slug: string }[];
+}
+
+interface PublicFooterProps {
+  /**
+   * Ancrage local optionnel : quand le département de la page est connu, les
+   * trois colonnes locales pointent vers ce département. Sans cet ancrage, le
+   * pied de page reste strictement identique à sa version générique.
+   */
+  local?: FooterLocalContext | null;
+}
+
+const PublicFooter = React.forwardRef<HTMLElement, PublicFooterProps>(({ local }, ref) => {
   const { t } = useTranslation();
   // Garde alignée sur PublicHeader : le pied de page public n'est retiré que
   // pour un utilisateur porteur d'une session dans la coquille applicative.
@@ -14,6 +36,10 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
   const inAppShell = useInAppShell();
   const { hasSession } = useAuth();
   if (hasSession && inAppShell) return null;
+  const linkCls =
+    "inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors";
+  const hasLocalDept = !!local && !!local.departmentSlug;
+  const hasLocalGuides = !!local && local.guides.length > 0;
   return (
     <footer ref={ref} className="public-footer bg-footer border-t border-white/10">
       <div className="max-w-6xl mx-auto px-6 md:px-12 py-10">
@@ -21,36 +47,72 @@ const PublicFooter = React.forwardRef<HTMLElement>((_props, ref) => {
           <div>
             <h3 className="font-body text-xs uppercase tracking-widest text-white/80 mb-4">{t("footer.sections.by_city")}</h3>
             <ul className="space-y-0">
-              <li><Link to="/house-sitting" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.all_cities")}</Link></li>
-              <li><Link to="/house-sitting/lyon" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.house_sitting_city", { city: "Lyon" })}</Link></li>
-              <li><Link to="/house-sitting/annecy" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.house_sitting_city", { city: "Annecy" })}</Link></li>
-              <li><Link to="/house-sitting/grenoble" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.house_sitting_city", { city: "Grenoble" })}</Link></li>
-              <li><Link to="/house-sitting/chambery" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.house_sitting_city", { city: "Chambéry" })}</Link></li>
+              <li><Link to="/house-sitting" className={linkCls}>{t("footer.links.all_cities")}</Link></li>
+              {local ? (
+                local.cities.map((c) => (
+                  <li key={c.slug}>
+                    <Link to={`/house-sitting/${c.slug}`} className={linkCls}>
+                      {t("footer.links.house_sitting_city", { city: c.city })}
+                    </Link>
+                  </li>
+                ))
+              ) : (
+                <>
+                  <li><Link to="/house-sitting/lyon" className={linkCls}>{t("footer.links.house_sitting_city", { city: "Lyon" })}</Link></li>
+                  <li><Link to="/house-sitting/annecy" className={linkCls}>{t("footer.links.house_sitting_city", { city: "Annecy" })}</Link></li>
+                  <li><Link to="/house-sitting/grenoble" className={linkCls}>{t("footer.links.house_sitting_city", { city: "Grenoble" })}</Link></li>
+                  <li><Link to="/house-sitting/chambery" className={linkCls}>{t("footer.links.house_sitting_city", { city: "Chambéry" })}</Link></li>
+                </>
+              )}
             </ul>
           </div>
           <div>
             <h3 className="font-body text-xs uppercase tracking-widest text-white/80 mb-4">{t("footer.sections.by_department")}</h3>
             <ul className="space-y-0">
-              <li><Link to="/departement" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.all_departments")}</Link></li>
-              <li><Link to="/departement/rhone" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">Rhône (69)</Link></li>
-              <li><Link to="/departement/haute-savoie" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">Haute-Savoie (74)</Link></li>
-              <li><Link to="/departement/gironde" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">Gironde (33)</Link></li>
-              <li><Link to="/departement/herault" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">Hérault (34)</Link></li>
-              <li><Link to="/departement/loire-atlantique" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">Loire-Atlantique (44)</Link></li>
-              <li><Link to="/departement/bouches-du-rhone" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">Bouches-du-Rhône (13)</Link></li>
-              <li><Link to="/departement/paris" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">Paris (75)</Link></li>
+              <li><Link to="/departement" className={linkCls}>{t("footer.links.all_departments")}</Link></li>
+              {hasLocalDept ? (
+                <li>
+                  <Link to={`/departement/${local!.departmentSlug}`} className={linkCls}>
+                    {local!.departmentName}
+                    {local!.departmentCode ? ` (${local!.departmentCode})` : ""}
+                  </Link>
+                </li>
+              ) : (
+                <>
+                  <li><Link to="/departement/rhone" className={linkCls}>Rhône (69)</Link></li>
+                  <li><Link to="/departement/haute-savoie" className={linkCls}>Haute-Savoie (74)</Link></li>
+                  <li><Link to="/departement/gironde" className={linkCls}>Gironde (33)</Link></li>
+                  <li><Link to="/departement/herault" className={linkCls}>Hérault (34)</Link></li>
+                  <li><Link to="/departement/loire-atlantique" className={linkCls}>Loire-Atlantique (44)</Link></li>
+                  <li><Link to="/departement/bouches-du-rhone" className={linkCls}>Bouches-du-Rhône (13)</Link></li>
+                  <li><Link to="/departement/paris" className={linkCls}>Paris (75)</Link></li>
+                </>
+              )}
             </ul>
           </div>
 
           <div>
             <h3 className="font-body text-xs uppercase tracking-widest text-white/80 mb-4">{t("footer.sections.local_guides")}</h3>
             <ul className="space-y-0">
-              <li><Link to="/guides" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.all_guides")}</Link></li>
-              <li><Link to="/guides/lyon" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.guide_city", { city: "Lyon" })}</Link></li>
-              <li><Link to="/guides/annecy" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.guide_city", { city: "Annecy" })}</Link></li>
-              <li><Link to="/guides/grenoble" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.guide_city", { city: "Grenoble" })}</Link></li>
-              <li><Link to="/guides/chambery" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.guide_city", { city: "Chambéry" })}</Link></li>
-              <li><Link to="/guides/aix-les-bains" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.guide_city", { city: "Aix-les-Bains" })}</Link></li>
+              <li><Link to="/guides" className={linkCls}>{t("footer.links.all_guides")}</Link></li>
+              {local ? (
+                hasLocalGuides &&
+                local.guides.map((g) => (
+                  <li key={g.slug}>
+                    <Link to={`/guides/${g.slug}`} className={linkCls}>
+                      {t("footer.links.guide_city", { city: g.city })}
+                    </Link>
+                  </li>
+                ))
+              ) : (
+                <>
+                  <li><Link to="/guides/lyon" className={linkCls}>{t("footer.links.guide_city", { city: "Lyon" })}</Link></li>
+                  <li><Link to="/guides/annecy" className={linkCls}>{t("footer.links.guide_city", { city: "Annecy" })}</Link></li>
+                  <li><Link to="/guides/grenoble" className={linkCls}>{t("footer.links.guide_city", { city: "Grenoble" })}</Link></li>
+                  <li><Link to="/guides/chambery" className={linkCls}>{t("footer.links.guide_city", { city: "Chambéry" })}</Link></li>
+                  <li><Link to="/guides/aix-les-bains" className={linkCls}>{t("footer.links.guide_city", { city: "Aix-les-Bains" })}</Link></li>
+                </>
+              )}
             </ul>
           </div>
           <div>

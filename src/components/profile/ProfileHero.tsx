@@ -244,7 +244,7 @@ const ProfileHero = ({
         ? (cta.hint ?? "")
         : cta.kind === "unauthenticated"
           ? "L'inscription est ouverte pendant la phase de lancement."
-          : "Contact direct, sans intermédiaire.";
+          : `Vous échangez directement avec ${firstName}.`;
   const reassurance = ctaReassurance ?? defaultReassurance;
 
 
@@ -358,12 +358,6 @@ const ProfileHero = ({
               <div className="flex flex-wrap items-center gap-x-2 sm:gap-x-3 gap-y-1.5 min-w-0 max-w-full">
                 <h1 className="text-2xl sm:text-3xl md:text-4xl font-heading font-bold text-foreground leading-tight break-words [overflow-wrap:anywhere] hyphens-auto min-w-0">
                   <span className="capitalize">{firstName}</span>
-                  {city && (
-                    <span className="text-base sm:text-lg md:text-xl font-medium text-foreground/75">
-                      , {roleLabel.toLowerCase()} à {city}
-                      {departmentName ? `, ${departmentName}` : ""}
-                    </span>
-                  )}
                 </h1>
 
                 <ProBadge status={proStatus as any} size="sm" />
@@ -384,11 +378,17 @@ const ProfileHero = ({
               {/* Réactivité calculée (90 jours), identique gardien et propriétaire. */}
               <ResponsivenessBadge userId={id} className="self-start mt-1" />
 
-              {/* La ville est portée par le H1 : ici on ne répète que le rôle. */}
-              <p className="text-sm sm:text-base text-foreground/80 flex items-center gap-1 font-medium min-w-0 max-w-full break-words">
-                <MapPin className="w-3.5 h-3.5 shrink-0" />
-                <span className="min-w-0 break-words">{roleLabel}</span>
-              </p>
+              {/* Localisation seule : le rôle est déjà porté par les onglets
+                  et par la balise title de la page. */}
+              {city && (
+                <p className="text-sm sm:text-base text-foreground/80 flex items-center gap-1 font-medium min-w-0 max-w-full break-words">
+                  <MapPin className="w-3.5 h-3.5 shrink-0" />
+                  <span className="min-w-0 break-words">
+                    {city}
+                    {departmentName ? `, ${departmentName}` : ""}
+                  </span>
+                </p>
+              )}
 
 
               {proSpecialtyLabel && (

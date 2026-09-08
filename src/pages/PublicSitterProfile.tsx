@@ -78,6 +78,8 @@ import ProfileRail from "@/components/profile/ProfileRail";
 import AffinityTeaserCard from "@/components/profile/AffinityTeaserCard";
 import AlmaWhisperCard from "@/components/profile/AlmaWhisperCard";
 import CommunityPulseCard from "@/components/profile/CommunityPulseCard";
+import MarginLettering from "@/components/profile/MarginLettering";
+import type { FooterLocalContext } from "@/components/layout/PublicFooter";
 import { useCommunityPulse } from "@/hooks/useCommunityPulse";
 import { avatarImageUrl, storageImageUrl } from "@/lib/storageImage";
 import { petSpeciesLabel } from "@/lib/petLabels";
@@ -114,6 +116,9 @@ function lastVisitLabel(iso: string | null | undefined): string | null {
 /** Seuil d'affichage du délai de réponse : sous ce nombre de conversations
  *  répondues, la ligne cède la place à la dernière visite. */
 const RESPONSE_STATS_MIN_ANSWERED = 5;
+
+/** Seuil de bascule du pouls de la communauté vers le chiffre départemental. */
+const LOCAL_PULSE_MIN_SITTERS = 5;
 
 /** Formulation du délai médian : minutes sous l'heure, heures sous le jour,
  *  jours au-delà, arrondis au plus proche. */
@@ -260,6 +265,10 @@ export default function PublicSitterProfile() {
     citySlug: string | null;
   }>({ deptName: null, deptCode: null, regionName: null, deptSlug: null, citySlug: null });
   const [responseStats, setResponseStats] = useState<ResponseStats | null>(null);
+  // Ancrage local : pied de page et pouls de la communauté pointent vers le
+  // département de la personne consultée quand il est connu et documenté.
+  const [footerLocal, setFooterLocal] = useState<FooterLocalContext | null>(null);
+  const [deptSitterCount, setDeptSitterCount] = useState<number | null>(null);
 
   // Pass 5, compagnon culturel : fait race si l'un des animaux du gardien matche.
   useAlmaCulturalFact({
@@ -935,6 +944,46 @@ export default function PublicSitterProfile() {
 
       if (cancelled) return;
       setGeoInfo({ deptName, deptCode: code, regionName, deptSlug, citySlug });
+
+      if (!deptName) return;
+
+      // Villes du département ayant une page publiée, quatre au maximum,
+      // triées par nombre de gardiens décroissant.
+      const { data: cityPages } = await (supabase as any)
+        .from("seo_city_pages")
+        .select("city, slug, sitter_count")
+        .eq("department", deptName)
+        .eq("published", true)
+        .not("slug", "like", "test-%")
+        .order("sitter_count", { ascending: false, nullsFirst: false })
+        .limit(4);
+
+      // Guides publiés du même département.
+      const { data: guidePages } = await (supabase as any)
+        .from("city_guides")
+        .select("city, slug")
+        .eq("department", deptName)
+        .eq("published", true)
+        .order("city")
+        .limit(4);
+
+      // Gardiens actifs du département, comptés directement (la colonne
+      // sitter_count des pages SEO sert au tri, pas à ce chiffre).
+      const { count } = await (supabase as any)
+        .from("public_profiles")
+        .select("id", { count: "exact", head: true })
+        .eq("departement_code", code)
+        .in("role", ["sitter", "both"]);
+
+      if (cancelled) return;
+      setDeptSitterCount(typeof count === "number" ? count : null);
+      setFooterLocal({
+        departmentName: deptName,
+        departmentCode: code,
+        departmentSlug: deptSlug,
+        cities: (cityPages || []).map((c: any) => ({ city: c.city, slug: c.slug })),
+        guides: (guidePages || []).map((g: any) => ({ city: g.city, slug: g.slug })),
+      });
     };
 
     loadGeo();
@@ -1582,14 +1631,9 @@ export default function PublicSitterProfile() {
           url={`https://guardiens.fr/gardiens/${id}`}
         />
       )}
-      <div className="pointer-events-none fixed inset-y-0 left-[max(24px,calc((100vw-1024px)/4-15px))] z-0 hidden min-[1440px]:flex flex-col items-center justify-around py-[12vh] font-heading text-[30px] text-[#9A6A44]/40 [writing-mode:vertical-rl] [transform:rotate(180deg)] [mask-image:linear-gradient(to_bottom,transparent,black_15%,black_85%,transparent)]" aria-hidden="true">
-        <span>L'entraide</span>
-        <span className="text-[#2C6D50]/40">La proximité</span>
-        <span className="italic">La rencontre</span>
-      </div>
-      <div className="pointer-events-none fixed inset-y-0 right-[max(24px,calc((100vw-1024px)/4-15px))] z-0 hidden min-[1440px]:flex items-center pt-[30px] font-heading text-[30px] italic text-[#2C6D50]/40 [writing-mode:vertical-rl] [mask-image:linear-gradient(to_bottom,transparent,black_15%,black_85%,transparent)] motion-safe:translate-y-[30px]" aria-hidden="true">
-        Un service rendu, un service reçu
-      </div>
+      {/* Lettrage décoratif des marges : conditions de largeur et de marge
+          libre mesurées, rendu par portail pour rester fixe à la fenêtre. */}
+      <MarginLettering />
       <PageMeta
         title={pageTitle}
         description={pageDesc}
@@ -1771,13 +1815,24 @@ export default function PublicSitterProfile() {
         const almaNode = !isOwn ? <AlmaWhisperCard phrase={almaPhrase} /> : null;
         // Pouls : chiffres RÉELS. Local via useCityStats trop coûteux ici ; on
         // sert les chiffres globaux depuis useCommunityPulse (déjà en cache).
+        // Pouls local : à partir de LOCAL_PULSE_MIN_SITTERS gardiens actifs
+        // dans le département, le chiffre réel remplace le chiffre national.
+        const pulseLocal =
+          geoInfo.deptName && deptSitterCount != null && deptSitterCount >= LOCAL_PULSE_MIN_SITTERS
+            ? [
+                {
+                  value: deptSitterCount,
+                  label: `gardiens actifs, ${geoInfo.deptName}${geoInfo.deptCode ? ` (${geoInfo.deptCode})` : ""}`,
+                },
+              ]
+            : [];
         const pulseGlobal = communityPulse
           ? [
               { value: communityPulse.maisonsGardees, label: "maisons gardées avec Guardiens" },
               { value: communityPulse.totalInscrits, label: "membres actifs" },
             ]
           : [];
-        const pulseNode = <CommunityPulseCard city={city || null} global={pulseGlobal} />;
+        const pulseNode = <CommunityPulseCard city={city || null} local={pulseLocal} global={pulseGlobal} />;
         const railChildren = (
           <>
             {affinityNode}
@@ -1788,7 +1843,7 @@ export default function PublicSitterProfile() {
         );
 
         return (
-        <div className="max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-8 pb-[calc(10.5rem+env(safe-area-inset-bottom))] md:pb-8">
+        <div data-profile-content className="max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-8 pb-[calc(10.5rem+env(safe-area-inset-bottom))] md:pb-8">
           <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-8">
           {/* ── FLUX NARRATIF UNIFIÉ (vague 37) ────────────────────────────
               Mobile et desktop partagent le même flux vertical. Les onglets
@@ -2143,6 +2198,17 @@ export default function PublicSitterProfile() {
           proprioAlmaPhrase = `L'identité de ${firstName} a été vérifiée à partir d'une pièce officielle.`;
         }
         const proprioAlmaNode = !isOwn ? <AlmaWhisperCard phrase={proprioAlmaPhrase} /> : null;
+        // Pouls local : à partir de LOCAL_PULSE_MIN_SITTERS gardiens actifs
+        // dans le département, le chiffre réel remplace le chiffre national.
+        const pulseLocal =
+          geoInfo.deptName && deptSitterCount != null && deptSitterCount >= LOCAL_PULSE_MIN_SITTERS
+            ? [
+                {
+                  value: deptSitterCount,
+                  label: `gardiens actifs, ${geoInfo.deptName}${geoInfo.deptCode ? ` (${geoInfo.deptCode})` : ""}`,
+                },
+              ]
+            : [];
         const pulseGlobal = communityPulse
           ? [
               { value: communityPulse.maisonsGardees, label: "maisons gardées avec Guardiens" },
@@ -2153,7 +2219,7 @@ export default function PublicSitterProfile() {
           <>
             {proprioAffinityNode}
             {proprioAlmaNode}
-            <CommunityPulseCard city={city || null} global={pulseGlobal} />
+            <CommunityPulseCard city={city || null} local={pulseLocal} global={pulseGlobal} />
             {reportNode}
           </>
         );
@@ -2195,7 +2261,7 @@ export default function PublicSitterProfile() {
         }
 
         return (
-        <div className="max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-8 pb-[calc(10.5rem+env(safe-area-inset-bottom))] md:pb-8">
+        <div data-profile-content className="max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-8 pb-[calc(10.5rem+env(safe-area-inset-bottom))] md:pb-8">
           <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-8">
             <div className="space-y-[52px] min-w-0">
 
@@ -2806,7 +2872,7 @@ export default function PublicSitterProfile() {
       })()}
 
 
-      <PublicFooter />
+      <PublicFooter local={footerLocal} />
 
       {/* ── Lightbox ── */}
       {lightboxIdx !== null && lightboxIdx < lightboxItems.length && (
