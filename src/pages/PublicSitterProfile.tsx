@@ -1577,6 +1577,15 @@ export default function PublicSitterProfile() {
 
       {/* ── BARRE D'ONGLETS, visible si ≥ 2 onglets ── */}
       {availableTabs > 1 && (
+        <p className="max-w-5xl mx-auto px-4 pt-4 text-sm text-muted-foreground font-body">
+          {hasSitterProfile && hasOwnerProfile
+            ? `${firstName} garde chez les autres et fait garder à la maison.`
+            : hasSitterProfile
+              ? `${firstName} garde chez les autres et participe à l'entraide.`
+              : `${firstName} fait garder à la maison et participe à l'entraide.`}
+        </p>
+      )}
+      {availableTabs > 1 && (
         <div className="flex border-b border-border bg-card sticky z-40 max-w-5xl mx-auto" style={{ top: "var(--public-header-h, 0px)" }}>
           {hasSitterProfile && (
             <button
@@ -1593,7 +1602,7 @@ export default function PublicSitterProfile() {
               ].join(' ')}
             >
               <Home className="w-4 h-4" aria-hidden="true" />
-              Gardien
+              Côté gardien
               {completedSits > 0 && (
                 <span className="ml-1 text-xs font-normal opacity-70">({completedSits})</span>
               )}
@@ -1614,7 +1623,7 @@ export default function PublicSitterProfile() {
               ].join(' ')}
             >
               <KeyRound className="w-4 h-4" aria-hidden="true" />
-              Propriétaire
+              Côté propriétaire
             </button>
           )}
           {hasEntraide && (
@@ -1632,7 +1641,7 @@ export default function PublicSitterProfile() {
               ].join(' ')}
             >
               <Handshake className="w-4 h-4" aria-hidden="true" />
-              Entraide
+              Côté entraide
               {missionCount > 0 && (
                 <span className="ml-1 text-xs font-normal opacity-70">({missionCount})</span>
               )}
