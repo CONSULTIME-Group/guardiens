@@ -371,6 +371,7 @@ const ProfileHero = ({
                   {city && (
                     <span className="text-base sm:text-lg md:text-xl font-medium text-foreground/75">
                       , {roleLabel.toLowerCase()} à {city}
+                      {departmentName ? `, ${departmentName}` : ""}
                     </span>
                   )}
                 </h1>
