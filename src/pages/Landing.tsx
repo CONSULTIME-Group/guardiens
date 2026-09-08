@@ -18,6 +18,7 @@ import { LE_PROGRES_LOGO } from "@/assets/pressLogos";
 
 import { UsagesSection } from "@/components/landing/UsagesSection";
 import { PretexteSection } from "@/components/landing/PretexteSection";
+import { LandingTocBar } from "@/components/landing/LandingTocBar";
 import HomeJsonLd from "@/components/landing/HomeJsonLd";
 import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
 import { ConfianceSection } from "@/components/landing/ConfianceSection";
@@ -288,9 +289,18 @@ const Landing = () => {
                 href={PRESS_ARTICLE_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                 className="mt-[14px] inline-flex min-h-[44px] items-center gap-2.5 opacity-90 hover:opacity-100 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40 rounded-sm animate-hero-fade-up animation-delay-1100"
+                 className="relative mt-[14px] inline-flex min-h-[44px] items-center gap-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40 rounded-sm animate-hero-fade-up animation-delay-1100"
               >
-                <span className="font-body text-[11px] uppercase tracking-[0.16em] text-white/85">
+                {/* Voile sombre local et flouté (donc sans bord visible) :
+                    la ligne est posée sur une photo dont la zone claire
+                    faisait tomber le contraste de la date à 4,42, sous le
+                    seuil AA de 4,5. Le voile plus le blanc plein le
+                    remontent au dessus du seuil sans cadre ni fond franc. */}
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -inset-x-3 -inset-y-0.5 rounded-full bg-black/40 blur-md"
+                />
+                <span className="relative font-body text-[11px] uppercase tracking-[0.16em] text-white">
                   Vu dans
                 </span>
                 <img
@@ -298,11 +308,11 @@ const Landing = () => {
                   alt="Le Progrès"
                   width={300}
                   height={40}
-                  className="h-5 w-auto object-contain opacity-90"
+                  className="relative h-5 w-auto object-contain"
                   loading="lazy"
                   decoding="async"
                 />
-                <span className="font-body text-xs text-white/85">
+                <span className="relative font-body text-xs text-white">
                   6 septembre 2026
                 </span>
               </a>
@@ -365,34 +375,7 @@ const Landing = () => {
       <LiveListingsStrip />
 
       {/* ═══════════════ SOMMAIRE DE PAGE, maillage interne ═══════════════ */}
-      <nav
-        aria-label={t("landing.toc.aria")}
-        className="border-b border-border/60 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60"
-      >
-        <div className="overflow-x-auto px-4 md:px-0">
-          <ul className="mx-auto flex w-max items-center justify-center gap-1 py-2.5 md:w-auto">
-            {(() => {
-              const items = [
-                { href: "#usages", label: t("landing.toc.care_aid") },
-                { href: "#comment-ca-marche", label: t("landing.toc.how") },
-                { href: "#confiance", label: t("landing.toc.trust") },
-                { href: "#notre-histoire", label: t("landing.toc.story") },
-                { href: "#faq", label: t("landing.toc.faq") },
-              ];
-              return items.map((item) => (
-                <li key={item.href} className="shrink-0">
-                <a
-                  href={item.href}
-                  className="inline-flex items-center min-h-[44px] px-3 py-1.5 rounded-full text-[11px] tracking-[0.14em] uppercase font-body text-foreground/75 hover:text-primary hover:bg-primary/5 transition-colors whitespace-nowrap"
-                >
-                  {item.label}
-                </a>
-              </li>
-              ));
-            })()}
-          </ul>
-        </div>
-      </nav>
+      <LandingTocBar />
 
 
       {/* ═══════════════ LE PRÉTEXTE (bloc sombre signature,
