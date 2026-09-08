@@ -289,9 +289,18 @@ const Landing = () => {
                 href={PRESS_ARTICLE_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                 className="mt-[14px] inline-flex min-h-[44px] items-center gap-2.5 opacity-90 hover:opacity-100 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40 rounded-sm animate-hero-fade-up animation-delay-1100"
+                 className="relative mt-[14px] inline-flex min-h-[44px] items-center gap-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40 rounded-sm animate-hero-fade-up animation-delay-1100"
               >
-                <span className="font-body text-[11px] uppercase tracking-[0.16em] text-white/85">
+                {/* Voile sombre local et flouté (donc sans bord visible) :
+                    la ligne est posée sur une photo dont la zone claire
+                    faisait tomber le contraste de la date à 4,42, sous le
+                    seuil AA de 4,5. Le voile plus le blanc plein le
+                    remontent au dessus du seuil sans cadre ni fond franc. */}
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -inset-x-3 -inset-y-0.5 rounded-full bg-black/40 blur-md"
+                />
+                <span className="relative font-body text-[11px] uppercase tracking-[0.16em] text-white">
                   Vu dans
                 </span>
                 <img
