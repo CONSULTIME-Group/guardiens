@@ -288,6 +288,7 @@ export default function PublicSitterProfile() {
     preferredEnvironments: string[]; languages: string[]; interests: string[];
     typeLine: string; durationLabel: string; frequencyLabel: string; noticeLabel: string;
     mobilityLabel: string; presenceLabel: string; experienceLabel: string;
+    deptName: string | null; deptCode: string | null; regionName: string | null; deptSlug: string | null;
   }) => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
       {props.animalTypes.length > 0 && (
