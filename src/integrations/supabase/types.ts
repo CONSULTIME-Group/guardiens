@@ -8244,6 +8244,14 @@ export type Database = {
           },
         ]
       }
+      public_sitter_response_stats: {
+        Row: {
+          answered_conversations: number | null
+          median_first_response_minutes: number | null
+          profile_id: string | null
+        }
+        Relationships: []
+      }
       public_small_missions: {
         Row: {
           category: Database["public"]["Enums"]["small_mission_category"] | null
