@@ -78,6 +78,8 @@ import ProfileRail from "@/components/profile/ProfileRail";
 import AffinityTeaserCard from "@/components/profile/AffinityTeaserCard";
 import AlmaWhisperCard from "@/components/profile/AlmaWhisperCard";
 import CommunityPulseCard from "@/components/profile/CommunityPulseCard";
+import MarginLettering from "@/components/profile/MarginLettering";
+import type { FooterLocalContext } from "@/components/layout/PublicFooter";
 import { useCommunityPulse } from "@/hooks/useCommunityPulse";
 import { avatarImageUrl, storageImageUrl } from "@/lib/storageImage";
 import { petSpeciesLabel } from "@/lib/petLabels";
