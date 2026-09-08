@@ -2353,18 +2353,27 @@ export default function PublicSitterProfile() {
                       </div>
                     )}
                     {id && <MissionBadgesReceived profileId={id} />}
-                    <TrustTimeline
-                      memberSince={profile?.created_at}
-                      reviews={ownerReviews as any}
-                      badges={(userBadges || []).map((b: any) => ({
-                        badge_id: b.badge_id,
-                        created_at: b.created_at,
-                        count: b.count ?? 1,
-                      }))}
-                      completedSits={ownerSitsTotal}
-                      lastActivity={null}
-                      firstName={firstName}
-                    />
+                    {(ownerReviews || []).length === 0 && (userBadges || []).length === 0 && ownerSitsTotal === 0 ? (
+                      <FreshStartStory
+                        firstName={firstName}
+                        createdAt={profile?.created_at}
+                        lastSeenAt={profile?.last_seen_at ?? null}
+                        identityVerified={!!profile?.identity_verified}
+                      />
+                    ) : (
+                      <TrustTimeline
+                        memberSince={profile?.created_at}
+                        reviews={ownerReviews as any}
+                        badges={(userBadges || []).map((b: any) => ({
+                          badge_id: b.badge_id,
+                          created_at: b.created_at,
+                          count: b.count ?? 1,
+                        }))}
+                        completedSits={ownerSitsTotal}
+                        lastActivity={null}
+                        firstName={firstName}
+                      />
+                    )}
                   </div>
                 </TrustStory>
               )}
