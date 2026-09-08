@@ -1912,8 +1912,8 @@ export default function PublicSitterProfile() {
                 <div className="space-y-6">
                   {userBadges && userBadges.length > 0 && (
                     <div id="badges" className="scroll-mt-24 space-y-6">
-                      <SpecialBadgeHighlight userBadges={userBadges} />
-                      <BadgeRow badges={userBadges} maxVisible={4} showExpired={false} showObtainedMonth />
+                      <SpecialBadgeHighlight userBadges={userBadges} showObtainedMonth />
+                      <BadgeRow badges={userBadges} showLabel showObtainedMonth />
                     </div>
                   )}
                   {id && <MissionBadgesReceived profileId={id} />}
@@ -2445,8 +2445,8 @@ export default function PublicSitterProfile() {
                   <div className="space-y-6">
                     {userBadges && userBadges.length > 0 && (
                       <div id="badges" className="scroll-mt-24 space-y-6">
-                        <SpecialBadgeHighlight userBadges={userBadges} />
-                        <BadgeRow badges={userBadges} maxVisible={4} showExpired={false} showObtainedMonth />
+                        <SpecialBadgeHighlight userBadges={userBadges} showObtainedMonth />
+                        <BadgeRow badges={userBadges} showLabel showObtainedMonth />
                       </div>
                     )}
                     {id && <MissionBadgesReceived profileId={id} />}
