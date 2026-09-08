@@ -144,9 +144,7 @@ const MissionBadgesReceived = ({ profileId, ownerNote, className = "", variant =
             <li key={b.badge_key} className="flex flex-col items-center gap-1">
               <span
                 className={`flex min-h-11 items-center gap-2 rounded-full border px-3 py-1.5 ${meta.bgColor} ${meta.borderColor}`}
-                title={meta.label}
                 aria-label={`${meta.label}, ${meta.description}`}
-                tabIndex={0}
               >
                 <Icon className={`h-3.5 w-3.5 ${meta.iconColor}`} aria-hidden="true" />
                 <span className="text-xs font-medium text-foreground">{meta.label}</span>
