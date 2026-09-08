@@ -1714,6 +1714,10 @@ export default function PublicSitterProfile() {
                   mobilityLabel={mobilityLabel}
                   presenceLabel={presenceLabel}
                   experienceLabel={experienceLabel}
+                  deptName={geoInfo.deptName}
+                  deptCode={geoInfo.deptCode}
+                  regionName={geoInfo.regionName}
+                  deptSlug={geoInfo.deptSlug}
                 />
                 <PublicExperiences experiences={externalExperiences} />
               </div>
