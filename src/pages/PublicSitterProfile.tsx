@@ -1516,6 +1516,23 @@ export default function PublicSitterProfile() {
   };
   const { cta: heroCta, reassurance: heroCtaReassurance } = heroCtaFor(activeTab);
 
+  // Signalement : lien discret en bas du rail, jamais sur sa propre fiche.
+  // Valeurs `reason` alignées sur les conventions existantes de la table reports.
+  const reportNode = !isOwn && id ? (
+    <ReportButton
+      targetId={id}
+      targetType="profile"
+      variant="profile-link"
+      targetFirstName={firstName}
+      reasons={[
+        { value: "fake", label: "Le profil semble faux ou usurpé" },
+        { value: "inappropriate", label: "Le contenu est déplacé ou offensant" },
+        { value: "scam", label: "Cette personne cherche à sortir du site ou à obtenir de l'argent" },
+        { value: "other", label: "Autre" },
+      ]}
+    />
+  ) : null;
+
 
   return (
     <div id="main-content" className="min-h-screen bg-background">
