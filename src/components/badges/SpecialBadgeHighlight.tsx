@@ -60,7 +60,7 @@ export function SpecialBadgeHighlight({
                 active
                 size="normal"
                 obtainedAt={b.created_at}
-                showObtainedMonth
+                showObtainedMonth={showObtainedMonth}
               />
               <p className="text-xs font-medium text-foreground leading-tight">
                 {def.label}
