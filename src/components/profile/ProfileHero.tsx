@@ -9,6 +9,7 @@
  *  - Aucun bloc affinité, aucun bloc Alma, aucune ligne stats, pas de TrustScore.
  *    Ces éléments passent dans le rail droit (desktop) ou dans le flux (mobile).
  */
+import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { MapPin, Shield, BadgeCheck, Image as ImageIcon } from "lucide-react";
 import ProBadge from "@/components/badges/ProBadge";
@@ -65,6 +66,8 @@ interface ProfileHeroProps {
 
   cta: HeroCtaVariant;
   ctaReassurance?: string;
+  /** Ligne factuelle rendue sous le bouton de contact (délai de réponse ou dernière visite). */
+  belowCta?: ReactNode;
 }
 
 
@@ -99,6 +102,7 @@ const ProfileHero = ({
   roleTabActive,
   cta,
   ctaReassurance,
+  belowCta,
 }: ProfileHeroProps) => {
 
   // Chips : cap à 3, priorité ID > Abonné > Urgence.
@@ -441,6 +445,7 @@ const ProfileHero = ({
                 {reassurance}
               </p>
             </div>
+            {belowCta ? <div className="mt-1.5 self-stretch">{belowCta}</div> : null}
           </div>
         </div>
       </div>

@@ -32,8 +32,9 @@ import {
   Shield, Star, PawPrint,
   Home, KeyRound, Handshake, Heart,
   Image as ImageIcon,
-  CalendarClock,
+  CalendarClock, Clock, Zap,
 } from "lucide-react";
+import ReportButton from "@/components/reports/ReportButton";
 import { HeroPickerModal } from "@/components/profile/HeroPickerModal";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import PublicExperiences from "@/components/profile/PublicExperiences";
@@ -109,6 +110,54 @@ function lastVisitLabel(iso: string | null | undefined): string | null {
   if (d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()) return "ce mois-ci";
   return `en ${format(d, "MMMM yyyy", { locale: fr })}`;
 }
+
+/** Seuil d'affichage du délai de réponse : sous ce nombre de conversations
+ *  répondues, la ligne cède la place à la dernière visite. */
+const RESPONSE_STATS_MIN_ANSWERED = 5;
+
+/** Formulation du délai médian : minutes sous l'heure, heures sous le jour,
+ *  jours au-delà, arrondis au plus proche. */
+function responseDelayPhrase(minutes: number): { text: string; fast: boolean } {
+  if (minutes < 60) return { text: `Répond en général en ${Math.max(1, Math.round(minutes))} min`, fast: true };
+  if (minutes < 1440) return { text: `Répond en général en ${Math.max(1, Math.round(minutes / 60))} h`, fast: false };
+  const days = Math.max(1, Math.round(minutes / 1440));
+  return { text: `Répond en général en ${days} ${days > 1 ? "jours" : "jour"}`, fast: false };
+}
+
+type ResponseStats = { answered_conversations: number; median_first_response_minutes: number };
+
+/** Ligne sous le bouton de contact : délai médian réel, sinon dernière visite. */
+const ContactResponseLine = ({
+  stats,
+  lastSeenAt,
+}: {
+  stats: ResponseStats | null;
+  lastSeenAt?: string | null;
+}) => {
+  if (stats && stats.answered_conversations >= RESPONSE_STATS_MIN_ANSWERED) {
+    const { text, fast } = responseDelayPhrase(stats.median_first_response_minutes);
+    const truth = `Durée médiane de sa première réponse, mesurée sur ses ${stats.answered_conversations} conversations reçues.`;
+    const Icon = fast ? Zap : Clock;
+    return (
+      <p
+        title={truth}
+        aria-label={truth}
+        className={`inline-flex items-center gap-1.5 text-xs sm:text-[13px] font-medium ${fast ? "text-primary" : "text-foreground/80"}`}
+      >
+        <Icon className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+        <span>{text}</span>
+      </p>
+    );
+  }
+  const visit = lastVisitLabel(lastSeenAt);
+  if (!visit) return null;
+  return (
+    <p className="inline-flex items-center gap-1.5 text-xs sm:text-[13px] text-foreground/80">
+      <Clock className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+      <span>Dernière visite {visit}</span>
+    </p>
+  );
+};
 
 /**
  * Bloc « premier parcours » : remplace la chronologie et sa heatmap vide
@@ -210,6 +259,7 @@ export default function PublicSitterProfile() {
     deptSlug: string | null;
     citySlug: string | null;
   }>({ deptName: null, deptCode: null, regionName: null, deptSlug: null, citySlug: null });
+  const [responseStats, setResponseStats] = useState<ResponseStats | null>(null);
 
   // Pass 5, compagnon culturel : fait race si l'un des animaux du gardien matche.
   useAlmaCulturalFact({
@@ -822,6 +872,21 @@ export default function PublicSitterProfile() {
     };
     load();
   }, [id, loadNonce, auth?.hasSession]);
+
+  // Délai médian de première réponse : agrégat public, jamais de contenu.
+  useEffect(() => {
+    if (!id) return;
+    let cancelled = false;
+    (supabase as any)
+      .from("public_sitter_response_stats")
+      .select("answered_conversations, median_first_response_minutes")
+      .eq("profile_id", id)
+      .maybeSingle()
+      .then(({ data }: { data: ResponseStats | null }) => {
+        if (!cancelled) setResponseStats(data ?? null);
+      });
+    return () => { cancelled = true; };
+  }, [id]);
 
   // Département, région et liens : chargés une fois le profil connu.
   // Un slug n'est retenu que si la page correspondante existe et est publiée.
@@ -1451,6 +1516,23 @@ export default function PublicSitterProfile() {
   };
   const { cta: heroCta, reassurance: heroCtaReassurance } = heroCtaFor(activeTab);
 
+  // Signalement : lien discret en bas du rail, jamais sur sa propre fiche.
+  // Valeurs `reason` alignées sur les conventions existantes de la table reports.
+  const reportNode = !isOwn && id ? (
+    <ReportButton
+      targetId={id}
+      targetType="profile"
+      variant="profile-link"
+      targetFirstName={firstName}
+      reasons={[
+        { value: "fake", label: "Le profil semble faux ou usurpé" },
+        { value: "inappropriate", label: "Le contenu est déplacé ou offensant" },
+        { value: "scam", label: "Cette personne cherche à sortir du site ou à obtenir de l'argent" },
+        { value: "other", label: "Autre" },
+      ]}
+    />
+  ) : null;
+
 
   return (
     <div id="main-content" className="min-h-screen bg-background">
@@ -1570,6 +1652,11 @@ export default function PublicSitterProfile() {
             roleTabActive={activeTab}
             cta={heroCta}
             ctaReassurance={heroCtaReassurance}
+            belowCta={
+              isOwn ? null : (
+                <ContactResponseLine stats={responseStats} lastSeenAt={profile?.last_seen_at ?? null} />
+              )
+            }
           />
         );
 
@@ -1697,6 +1784,7 @@ export default function PublicSitterProfile() {
             {affinityNode}
             {almaNode}
             {pulseNode}
+            {reportNode}
           </>
         );
 
@@ -2067,6 +2155,7 @@ export default function PublicSitterProfile() {
             {proprioAffinityNode}
             {proprioAlmaNode}
             <CommunityPulseCard city={city || null} global={pulseGlobal} />
+            {reportNode}
           </>
         );
 
