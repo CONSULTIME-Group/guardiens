@@ -12,11 +12,13 @@ interface BadgeRowProps {
   }>
   size?: 'normal' | 'compact'
   maxVisible?: number
+  showExpired?: boolean
+  showObtainedMonth?: boolean
 }
 
 const PRIORITY_ORDER = ['id_verifiee']
 
-export function BadgeRow({ badges, size = 'normal', maxVisible = 6 }: BadgeRowProps) {
+export function BadgeRow({ badges, size = 'normal', maxVisible = 6, showExpired = true, showObtainedMonth = false }: BadgeRowProps) {
   const [showAll, setShowAll] = useState(false)
 
   // Filtre les badges dont la définition n'existe plus (ex. badge retiré
@@ -39,11 +41,11 @@ export function BadgeRow({ badges, size = 'normal', maxVisible = 6 }: BadgeRowPr
   const visible = active.slice(0, maxVisible)
   const overflow = active.length - maxVisible
 
-  if (active.length === 0 && expired.length === 0) return null
+  if (active.length === 0 && (!showExpired || expired.length === 0)) return null
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-4 sm:flex sm:flex-wrap items-center gap-2">
+      <div className="grid grid-cols-4 sm:flex sm:flex-wrap items-start gap-2">
         {visible.map(b => (
           <BadgeSceau
             key={b.badge_id}
@@ -52,20 +54,23 @@ export function BadgeRow({ badges, size = 'normal', maxVisible = 6 }: BadgeRowPr
             active
             size={size}
             obtainedAt={b.created_at}
+            showLabel
+            showObtainedMonth={showObtainedMonth}
           />
         ))}
         {overflow > 0 && (
           <button
             onClick={() => setShowAll(true)}
-            className="flex items-center justify-center rounded-full text-xs font-semibold text-muted-foreground bg-muted hover:bg-muted/80 transition-colors"
-            style={{ width: size === 'normal' ? 52 : 34, height: size === 'normal' ? 52 : 34 }}
+            aria-label={`Afficher les ${active.length} écussons`}
+            className="flex min-h-11 min-w-11 items-center justify-center rounded-full text-xs font-semibold text-muted-foreground bg-muted hover:bg-muted/80 transition-colors"
+            style={{ width: size === 'normal' ? 52 : 44, height: size === 'normal' ? 52 : 44 }}
           >
             +{overflow}
           </button>
         )}
       </div>
 
-      {expired.length > 0 && (
+      {showExpired && expired.length > 0 && (
         <Accordion type="single" collapsible className="w-full">
           <AccordionItem value="heritage" className="border-none">
             <AccordionTrigger className="py-1 text-xs text-muted-foreground hover:no-underline">
@@ -103,6 +108,8 @@ export function BadgeRow({ badges, size = 'normal', maxVisible = 6 }: BadgeRowPr
                 active
                 size="normal"
                 obtainedAt={b.created_at}
+                showLabel
+                showObtainedMonth={showObtainedMonth}
               />
             ))}
           </div>

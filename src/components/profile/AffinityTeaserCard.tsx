@@ -56,7 +56,7 @@ const AffinityTeaserCard = ({ sitterFirstName, redirectTo }: AffinityTeaserCardP
       </p>
       <Link
         to={href}
-        className="inline-flex items-center gap-1 mt-3 text-primary text-[13px] font-bold hover:underline underline-offset-4"
+        className="inline-flex min-h-11 items-center gap-1 mt-3 text-primary text-[13px] font-bold hover:underline underline-offset-4"
       >
         Créer mon compte pour la découvrir
         <span aria-hidden="true">→</span>
