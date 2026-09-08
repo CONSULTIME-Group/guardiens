@@ -250,12 +250,12 @@ const ProfileHero = ({
 
   return (
     <div className="relative overflow-hidden w-full flex items-end bg-[hsl(var(--hero-paper))] md:max-h-[520px] md:[aspect-ratio:1536/544]">
-      {/* Illustration */}
-      <div className="absolute right-0 bottom-0 z-0 h-1/2 w-1/2 min-w-[195px] pointer-events-none md:top-0 md:h-full md:w-[40%] md:min-w-[380px]">
+      {/* Illustration plein hero : gouache composée, sujet central, jamais rognée. */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
         <img
           src={heroDesktop}
           srcSet={`${heroMobile} 768w, ${heroDesktop} 1536w`}
-          sizes="(max-width: 767px) 50vw, 40vw"
+          sizes="100vw"
           alt=""
           aria-hidden="true"
           data-hero-anchor={heroAnchor}
@@ -269,7 +269,7 @@ const ProfileHero = ({
             transform: "translateZ(0)",
             backfaceVisibility: "hidden",
           }}
-          className="w-full h-full object-cover object-right"
+          className="w-full h-full object-contain object-center"
         />
       </div>
 
@@ -285,12 +285,13 @@ const ProfileHero = ({
         </button>
       )}
 
-      {/* Le papier protège la lisibilité à gauche et révèle entièrement la gouache à droite. */}
+      {/* Voile unique, horizontal : le papier protège la lisibilité à gauche
+          et laisse la moitié droite de la gouache pleinement visible. */}
       <div
         className="absolute inset-0 z-[1] pointer-events-none"
         style={{
           background:
-            "linear-gradient(to right, hsl(var(--hero-paper)) 0%, hsl(var(--hero-paper) / 0.98) 46%, hsl(var(--hero-paper) / 0.72) 56%, transparent 66%)",
+            "linear-gradient(to right, hsl(var(--hero-paper)) 0%, hsl(var(--hero-paper) / 0.95) 34%, hsl(var(--hero-paper) / 0.6) 50%, hsl(var(--hero-paper) / 0.05) 66%, transparent 100%)",
         }}
       />
 
