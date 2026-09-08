@@ -80,9 +80,13 @@ const UserMenu = ({ compact = false, className }: UserMenuProps) => {
                 if (entry.action === "logout") {
                   void Promise.resolve(logout()).catch(() => {});
                 } else if (entry.to) {
-                  navigate(entry.to);
+                  // Navigation différée d'un tour : le menu doit finir de se
+                  // fermer avant le changement de route.
+                  const to = entry.to;
+                  requestAnimationFrame(() => navigate(to));
                 }
               }}
+
               className={cn("gap-2 min-h-11", entry.danger && "text-destructive focus:text-destructive")}
             >
               <entry.icon className="h-4 w-4" aria-hidden="true" />
