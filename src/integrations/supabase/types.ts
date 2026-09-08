@@ -4641,6 +4641,75 @@ export type Database = {
           },
         ]
       }
+      prerender_family_state: {
+        Row: {
+          family: string
+          last_global_hash: string | null
+          last_hash: string | null
+          last_marked_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          family: string
+          last_global_hash?: string | null
+          last_hash?: string | null
+          last_marked_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          family?: string
+          last_global_hash?: string | null
+          last_hash?: string | null
+          last_marked_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      prerender_mark_decisions: {
+        Row: {
+          bundle_fingerprint: string | null
+          days_since_last_mark: number | null
+          decided_at: string
+          detail: string | null
+          family: string
+          id: string
+          marked_rows: number
+          new_global_hash: string | null
+          new_hash: string | null
+          previous_global_hash: string | null
+          previous_hash: string | null
+          reason: string
+        }
+        Insert: {
+          bundle_fingerprint?: string | null
+          days_since_last_mark?: number | null
+          decided_at?: string
+          detail?: string | null
+          family: string
+          id?: string
+          marked_rows?: number
+          new_global_hash?: string | null
+          new_hash?: string | null
+          previous_global_hash?: string | null
+          previous_hash?: string | null
+          reason: string
+        }
+        Update: {
+          bundle_fingerprint?: string | null
+          days_since_last_mark?: number | null
+          decided_at?: string
+          detail?: string | null
+          family?: string
+          id?: string
+          marked_rows?: number
+          new_global_hash?: string | null
+          new_hash?: string | null
+          previous_global_hash?: string | null
+          previous_hash?: string | null
+          reason?: string
+        }
+        Relationships: []
+      }
       prerender_recache_log: {
         Row: {
           article_id: string | null
