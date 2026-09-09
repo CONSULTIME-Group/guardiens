@@ -49,6 +49,13 @@ export interface CompletionItem {
   points: number;
   ok: boolean;
   hint?: string;
+  /**
+   * Lien profond vers la section du formulaire qui porte ce critère.
+   * Conventions distinctes selon l'espace :
+   *  - propriétaire : /owner-profile?section=<id brut de SECTIONS_BASE>
+   *  - gardien : /profile?section=<clé française de SECTION_PARAM_MAP>
+   */
+  href: string;
 }
 
 export interface CompletionResult {
@@ -56,6 +63,12 @@ export interface CompletionResult {
   items: CompletionItem[];
   missing: CompletionItem[];
 }
+
+/** Item manquant qui rapporte le plus de points, pour cibler un CTA. */
+export function topMissingItem(result: CompletionResult): CompletionItem | null {
+  return [...result.missing].sort((a, b) => b.points - a.points)[0] ?? null;
+}
+
 
 const affinityPoints = (count: number): number =>
   count >= 3 ? 10 : count === 2 ? 6 : count === 1 ? 3 : 0;
