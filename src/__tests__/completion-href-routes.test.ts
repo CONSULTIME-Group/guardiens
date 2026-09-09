@@ -37,7 +37,21 @@ const sources: Array<[string, string]> = [
     "missing-opportunities",
     read("../../supabase/functions/_shared/missing-opportunities/index.ts"),
   ],
+  ["profileCompletion", read("../lib/profileCompletion.ts")],
 ];
+
+/** Sections acceptées par la page profil propriétaire (ids bruts). */
+const ownerSections = new Set<string>(
+  [
+    ...(read("../pages/OwnerProfile.tsx").match(
+      /const SECTIONS_BASE: Array<\{[^}]*\}> = \[([\s\S]*?)\];/,
+    )?.[1] ?? ""),
+  ]
+    .join("")
+    .match(/id: "([a-z]+)"/g)
+    ?.map((m) => m.replace(/id: "|"/g, "")) ?? [],
+);
+
 
 describe("liens de complétion (emails et dashboard)", () => {
   it("SECTION_PARAM_MAP est lisible et non vide", () => {
