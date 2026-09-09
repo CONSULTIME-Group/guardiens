@@ -101,15 +101,16 @@ export function computeSitterCompletion(d: ProfileCompletionInput): CompletionRe
   // Le rayon d'intervention ne rapporte plus de points depuis le barème du
   // 30/08/2026. Le champ reste utilisé par la recherche et l'entraide.
   const items: CompletionItem[] = [
-    { key: "location", label: "Nom et localisation", points: 15, ok: locationOk(d) },
-    { key: "avatar", label: "Photo de profil", points: 20, ok: !!d.avatar_url },
-    { key: "bio", label: "Bio d'au moins 50 caractères", points: 15, ok: (d.bio?.length ?? 0) >= 50 },
-    { key: "competences", label: "Compétences", points: 15, ok: (d.competences?.length ?? 0) > 0 },
-    { key: "lifestyle", label: "Style de vie", points: 10, ok: (d.lifestyle?.length ?? 0) > 0 },
-    { key: "gallery", label: "Galerie de 3 photos ou plus", points: 10, ok: galleryOk, hint: galleryCount > 0 && !galleryOk ? `${galleryCount} photo${galleryCount > 1 ? "s" : ""} pour l'instant.` : undefined },
-    { key: "identity", label: "Vérification d'identité", points: 5, ok: !!d.identity_verified, hint: "Traitée par notre équipe après envoi de vos documents." },
-    { key: "affinity", label: "Profil d'affinité (au moins 3 signaux)", points: 10, ok: affinityOk, hint: `Complété à ${affinityCount}/4.` },
+    { key: "location", label: "Nom et localisation", points: 15, ok: locationOk(d), href: "/profile?section=identite" },
+    { key: "avatar", label: "Photo de profil", points: 20, ok: !!d.avatar_url, href: "/profile?section=identite" },
+    { key: "bio", label: "Bio d'au moins 50 caractères", points: 15, ok: (d.bio?.length ?? 0) >= 50, href: "/profile?section=identite" },
+    { key: "competences", label: "Compétences", points: 15, ok: (d.competences?.length ?? 0) > 0, href: "/profile?section=competences" },
+    { key: "lifestyle", label: "Style de vie", points: 10, ok: (d.lifestyle?.length ?? 0) > 0, href: "/profile?section=profil" },
+    { key: "gallery", label: "Galerie de 3 photos ou plus", points: 10, ok: galleryOk, hint: galleryCount > 0 && !galleryOk ? `${galleryCount} photo${galleryCount > 1 ? "s" : ""} pour l'instant.` : undefined, href: "/profile?section=galerie" },
+    { key: "identity", label: "Vérification d'identité", points: 5, ok: !!d.identity_verified, hint: "Traitée par notre équipe après envoi de vos documents.", href: "/profile?section=identite" },
+    { key: "affinity", label: "Profil d'affinité (au moins 3 signaux)", points: 10, ok: affinityOk, hint: `Complété à ${affinityCount}/4.`, href: "/profile?section=profil" },
   ];
+
   const baseScore = items.reduce((s, i) => s + (i.ok ? i.points : 0), 0);
   // Parité SQL : affinity partiel donne 3/6 points même sous le seuil,
   // galerie partielle donne 4 points dès la première photo.
