@@ -198,22 +198,23 @@ export const sitterNextStep = (input: SitterNextStepInput): RailNextStep | null 
     };
   }
   if (pct < 100) {
+    const deepLink = topMissingHref(missing) ?? "/profile?tab=profil";
     if (pct >= 90) {
       return {
         eyebrow: "Votre prochain pas",
-        title: "Une dernière touche à votre profil.",
+        title: "Une dernière touche à votre profil gardien.",
         phrase: remainingTouchesPhrase(missing),
         ctaLabel: "Compléter mon profil",
-        ctaTo: "/profile?tab=profil",
+        ctaTo: deepLink,
         progressPct: pct,
       };
     }
     return {
       eyebrow: "Votre prochain pas",
-      title: "Votre profil se complète en quelques minutes.",
+      title: "Votre profil gardien se complète en quelques minutes.",
       phrase: "Chaque détail aide une maison à vous choisir.",
       ctaLabel: "Compléter mon profil",
-      ctaTo: "/profile?tab=profil",
+      ctaTo: deepLink,
       progressPct: pct,
     };
   }
@@ -229,22 +230,24 @@ export interface OwnerNextStepInput {
 export const ownerNextStep = (input: OwnerNextStepInput): RailNextStep | null => {
   const pct = clampPct(input.profileCompletion);
   if (pct >= 100) return null;
+  const deepLink = topMissingHref(input.missing) ?? "/owner-profile";
   if (pct >= 90) {
     return {
       eyebrow: "Votre prochain pas",
-      title: "Une dernière touche à votre profil.",
+      title: "Une dernière touche à votre profil propriétaire.",
       phrase: remainingTouchesPhrase(input.missing),
       ctaLabel: "Compléter mon profil",
-      ctaTo: "/owner-profile",
+      ctaTo: deepLink,
       progressPct: pct,
     };
   }
   return {
     eyebrow: "Votre prochain pas",
-    title: "Votre profil se complète en quelques minutes.",
+    title: "Votre profil propriétaire se complète en quelques minutes.",
     phrase: "Chaque détail aide un gardien à se projeter chez vous.",
     ctaLabel: "Compléter mon profil",
-    ctaTo: "/owner-profile",
+    ctaTo: deepLink,
     progressPct: pct,
   };
 };
+
