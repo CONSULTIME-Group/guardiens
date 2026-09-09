@@ -24,7 +24,21 @@ export interface RailNextStep {
 export interface RailMissingItem {
   label: string;
   hint?: string;
+  /** Points du barème, sert à cibler le CTA sur la touche la plus rentable. */
+  points?: number;
+  /** Lien profond vers la section du formulaire qui porte ce critère. */
+  href?: string;
 }
+
+/** Lien profond de la touche manquante la plus rentable, si connue. */
+export const topMissingHref = (
+  missing?: RailMissingItem[] | null,
+): string | null => {
+  if (!missing || missing.length === 0) return null;
+  const sorted = [...missing].sort((a, b) => (b.points ?? 0) - (a.points ?? 0));
+  return sorted[0]?.href ?? null;
+};
+
 
 const lowerFirst = (s: string): string =>
   s.charAt(0).toLocaleLowerCase("fr-FR") + s.slice(1);
