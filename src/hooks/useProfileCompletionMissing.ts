@@ -19,15 +19,24 @@ import {
 const PROFILE_FIELDS =
   "first_name, postal_code, city, country, avatar_url, bio, identity_verified";
 
+export interface CompletionSnapshot {
+  /** Score de l'espace demandé, null tant que le calcul n'a pas abouti. */
+  score: number | null;
+  missing: CompletionItem[];
+}
+
 export const useProfileCompletionMissing = (
   role: ProfileRole,
   userId?: string,
-): CompletionItem[] => {
-  const [missing, setMissing] = useState<CompletionItem[]>([]);
+): CompletionSnapshot => {
+  const [snapshot, setSnapshot] = useState<CompletionSnapshot>({
+    score: null,
+    missing: [],
+  });
 
   useEffect(() => {
     if (!userId) {
-      setMissing([]);
+      setSnapshot({ score: null, missing: [] });
       return;
     }
     let cancelled = false;
@@ -40,9 +49,10 @@ export const useProfileCompletionMissing = (
           .eq("id", userId)
           .maybeSingle();
         if (!profile) {
-          if (!cancelled) setMissing([]);
+          if (!cancelled) setSnapshot({ score: null, missing: [] });
           return;
         }
+
 
         if (role === "sitter") {
           const [{ data: sp }, { count: galleryCount }] = await Promise.all([
