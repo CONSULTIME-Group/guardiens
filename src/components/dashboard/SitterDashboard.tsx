@@ -162,8 +162,10 @@ const SitterDashboard = () => {
     identityAction: identityRailAction
       ? { title: identityRailAction.title, cta: identityRailAction.ctaLabel, href: identityRailAction.ctaTo }
       : null,
-    profileCompletion: profileCompletion ?? 0,
-    missing: completionMissing,
+    // Le pourcentage et les items viennent du MEME calcul (barème gardien),
+    // jamais de profiles.profile_completion qui stocke le max des deux espaces.
+    profileCompletion: completionMissing.score ?? profileCompletion ?? 0,
+    missing: completionMissing.missing,
   });
 
   /* Contexte des conseils compagnons, tiré des données déjà chargées, sans

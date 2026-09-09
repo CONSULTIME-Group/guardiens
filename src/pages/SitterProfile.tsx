@@ -27,6 +27,7 @@ import ProfileProgressStrip from "@/components/profile/ProfileProgressStrip";
 import TrustProfile from "@/components/profile/TrustProfile";
 import SitterAffinityBanner from "@/components/matching/SitterAffinityBanner";
 import { isRadiusDeclared } from "@/lib/searchRadius";
+import { computeSitterCompletion } from "@/lib/profileCompletion";
 
 const SECTIONS_BASE: Array<{ id: string; num: number; optional?: boolean }> = [
   { id: "identity", num: 1 },
@@ -47,7 +48,11 @@ type ScoredCriterion = ScoreCriterion & { section: string; kind: "essential" | "
 
 function sectionComplete(sectionId: string, criteria: ScoredCriterion[]): boolean {
   const essentialsForSection = criteria.filter(c => c.section === sectionId && c.kind === "essential");
-  if (essentialsForSection.length === 0) return false;
+  // Une section sans critère du barème (Mobilité depuis le 30/08/2026) n'a
+  // plus rien à réclamer : elle est considérée comme faite.
+  if (essentialsForSection.length === 0) {
+    return criteria.filter(c => c.section === sectionId).every(c => c.ok);
+  }
   return essentialsForSection.every(c => c.ok);
 }
 
@@ -91,7 +96,7 @@ const SitterProfile = () => {
   const [localData, setLocalData] = useState<Partial<SitterProfileData>>({});
   const [activeSection, setActiveSection] = useState("identity");
   const [isFounder, setIsFounder] = useState(false);
-  const [hasGalleryPhoto, setHasGalleryPhoto] = useState(false);
+  const [galleryCount, setGalleryCount] = useState(0);
   const [dirty, setDirty] = useState(false);
   const [saved, setSaved] = useState(false);
   const draftKey = user ? `guardiens_sitter_profile_draft_${user.id}` : null;
@@ -155,7 +160,7 @@ const SitterProfile = () => {
       }
     });
     supabase.from("sitter_gallery").select("id", { count: "exact", head: true }).eq("user_id", user.id).then(({ count }) => {
-      setHasGalleryPhoto((count ?? 0) > 0);
+      setGalleryCount(count ?? 0);
     });
   }, [user]);
 
@@ -277,50 +282,57 @@ const SitterProfile = () => {
     return url;
   }, [uploadAvatar]);
 
-  // Source UNIQUE pour la jauge ET la sidebar : un seul set de critères pondérés.
-  // ALIGNÉ au SQL `calculate_profile_completion` (rôle sitter) :
-  //   location_ok 15 + avatar 15 + bio 10 + competences 15 + lifestyle 10
-  //   + radius 15 + gallery 5 + identity 5 + affinity 10 (0/3/6/10 selon count)
-  //   = 100.
-  // La règle location_ok respecte le pays : hors France, ville suffit.
-  const isFrance = (mergedData.country || "FR") === "FR";
-  const locationOk = !!mergedData.first_name && (isFrance ? !!mergedData.postal_code : !!mergedData.city);
+  // Source UNIQUE pour la jauge ET la sidebar : le barème partagé de
+  // src/lib/profileCompletion.ts (miroir du SQL `calculate_profile_completion`).
+  // Aucun barème local, la page ne fait qu'habiller les items du module.
+  // Le rayon d'intervention reste éditable en section Mobilité, il ne rapporte
+  // simplement plus de points depuis le barème du 30/08/2026.
+  const completionResult = computeSitterCompletion({
+    role: "sitter",
+    first_name: mergedData.first_name,
+    postal_code: mergedData.postal_code,
+    city: mergedData.city,
+    country: mergedData.country,
+    avatar_url: mergedData.avatar_url || user?.avatarUrl,
+    bio: mergedData.bio,
+    identity_verified: !!user?.identityVerified,
+    competences: mergedData.competences,
+    lifestyle: mergedData.lifestyle,
+    geographic_radius: mergedData.geographic_radius,
+    interests: mergedData.interests,
+    languages: mergedData.languages,
+    life_pace: mergedData.life_pace,
+    animal_types: mergedData.animal_types,
+    sitter_gallery_count: galleryCount,
+  });
 
-  const affinityChecks = [
-    (mergedData.interests?.length ?? 0) >= 3,
-    (mergedData.languages?.length ?? 0) > 0,
-    !!mergedData.life_pace,
-    (mergedData.animal_types?.length ?? 0) > 0,
-  ];
-  const affinityCount = affinityChecks.filter(Boolean).length;
-  const affinityPoints = affinityCount >= 3 ? 10 : affinityCount === 2 ? 6 : affinityCount === 1 ? 3 : 0;
+  /** Habillage local : section du formulaire, nature et libellé traduit. */
+  const SITTER_ITEM_META: Record<string, { section: string; kind: "essential" | "bonus"; labelKey: string; hint?: string }> = {
+    location: { section: "identity", kind: "essential", labelKey: "criteria.name_postal" },
+    avatar: { section: "identity", kind: "essential", labelKey: "criteria.avatar", hint: tp("hints.add_avatar_identity") },
+    competences: { section: "skills", kind: "essential", labelKey: "criteria.skill", hint: tp("hints.tab_skills") },
+    lifestyle: { section: "sitter", kind: "essential", labelKey: "criteria.lifestyle", hint: tp("hints.tab_sitter") },
+    bio: { section: "identity", kind: "bonus", labelKey: "criteria.bio_50", hint: tp("hints.chars_50", { count: mergedData.bio?.length ?? 0 }) },
+    affinity: { section: "sitter", kind: "bonus", labelKey: "criteria.affinity" },
+    gallery: { section: "gallery", kind: "bonus", labelKey: "criteria.sitter_gallery_one", hint: tp("hints.tab_gallery") },
+    identity: { section: "identity", kind: "bonus", labelKey: "criteria.identity_verified", hint: tp("hints.settings_verif") },
+  };
 
-  const scoredCriteria: ScoredCriterion[] = [
-    { section: "identity", kind: "essential", label: tp("criteria.name_postal"), points: 15,
-      ok: locationOk },
-    { section: "identity", kind: "essential", label: tp("criteria.avatar"), points: 15,
-      ok: !!mergedData.avatar_url, hint: tp("hints.add_avatar_identity") },
-    { section: "skills", kind: "essential", label: tp("criteria.skill"), points: 15,
-      ok: (mergedData.competences?.length ?? 0) > 0, hint: tp("hints.tab_skills") },
-    { section: "sitter", kind: "essential", label: tp("criteria.lifestyle"), points: 10,
-      ok: (mergedData.lifestyle?.length ?? 0) > 0, hint: tp("hints.tab_sitter") },
-    { section: "mobility", kind: "essential", label: tp("criteria.radius"), points: 15,
-      ok: isRadiusDeclared(mergedData.geographic_radius), hint: tp("hints.tab_mobility") },
-    { section: "identity", kind: "bonus", label: tp("criteria.bio_50"), points: 10,
-      ok: (mergedData.bio?.length ?? 0) >= 50, hint: tp("hints.chars_50", { count: mergedData.bio?.length ?? 0 }) },
-    { section: "sitter", kind: "bonus", label: tp("criteria.affinity"), points: 10,
-      ok: affinityCount >= 3, hint: tp("hints.affinity_count", { count: affinityCount }) },
-    { section: "gallery", kind: "bonus", label: tp("criteria.sitter_gallery_one"), points: 5,
-      ok: hasGalleryPhoto, hint: tp("hints.tab_gallery") },
-    { section: "identity", kind: "bonus", label: tp("criteria.identity_verified"), points: 5,
-      ok: !!user?.identityVerified, hint: tp("hints.settings_verif") },
-  ];
+  const scoredCriteria: ScoredCriterion[] = completionResult.items.map(item => {
+    const meta = SITTER_ITEM_META[item.key];
+    return {
+      section: meta.section,
+      kind: meta.kind,
+      label: tp(meta.labelKey),
+      points: item.points,
+      ok: item.ok,
+      hint: meta.hint ?? item.hint,
+    };
+  });
 
   const sitterEssentials = scoredCriteria.filter(c => c.kind === "essential");
   const sitterBonuses = scoredCriteria.filter(c => c.kind === "bonus");
-  // Bonus affinité partiel (parité serveur : 0/3/6 avant d'atteindre 10 à count>=3).
-  const partialAffinity = affinityCount >= 3 ? 0 : affinityPoints;
-  const liveScore = Math.min(100, scoredCriteria.reduce((s, c) => s + (c.ok ? c.points : 0), 0) + partialAffinity);
+  const liveScore = completionResult.score;
 
   const sidebarSections: SidebarSection[] = SECTIONS_META.map(s => {
     const labels = missingLabelsFor(s.id, scoredCriteria);

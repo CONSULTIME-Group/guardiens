@@ -90,7 +90,7 @@ describe("sitterNextStep", () => {
 
   it("profil complet mais < 100 : invitation à compléter avec progression", () => {
     const step = sitterNextStep({ ...base, profileCompletion: 60 });
-    expect(step?.title).toBe("Votre profil se complète en quelques minutes.");
+    expect(step?.title).toBe("Votre profil gardien se complète en quelques minutes.");
     expect(step?.progressPct).toBe(60);
   });
 
@@ -100,7 +100,7 @@ describe("sitterNextStep", () => {
       profileCompletion: 97,
       missing: [{ label: "Galerie de 3 photos ou plus", hint: "1 photo pour l'instant." }],
     });
-    expect(step?.title).toBe("Une dernière touche à votre profil.");
+    expect(step?.title).toBe("Une dernière touche à votre profil gardien.");
     expect(step?.phrase).toBe("Reste à faire : galerie de 3 photos ou plus (1 photo pour l'instant).");
     expect(step?.progressPct).toBe(97);
     expectNoDash(step);
@@ -108,7 +108,7 @@ describe("sitterNextStep", () => {
 
   it(">= 90 % sans détail disponible : repli honnête, une touche et pas quelques minutes", () => {
     const step = sitterNextStep({ ...base, profileCompletion: 95 });
-    expect(step?.title).toBe("Une dernière touche à votre profil.");
+    expect(step?.title).toBe("Une dernière touche à votre profil gardien.");
     expect(step?.phrase).toBe("Il ne reste qu'une touche pour compléter votre profil.");
     expectNoDash(step);
   });
@@ -126,7 +126,7 @@ describe("ownerNextStep", () => {
   it("propose de compléter le profil sous 100 %, avec progression", () => {
     const step = ownerNextStep({ profileCompletion: 40 });
     expect(step?.eyebrow).toBe("Votre prochain pas");
-    expect(step?.title).toBe("Votre profil se complète en quelques minutes.");
+    expect(step?.title).toBe("Votre profil propriétaire se complète en quelques minutes.");
     expect(step?.ctaLabel).toBe("Compléter mon profil");
     expect(step?.ctaTo).toBe("/owner-profile");
     expect(step?.progressPct).toBe(40);
@@ -142,7 +142,7 @@ describe("ownerNextStep", () => {
       profileCompletion: 90,
       missing: [{ label: "Vérification d'identité" }, { label: "Une photo de galerie" }],
     });
-    expect(step?.title).toBe("Une dernière touche à votre profil.");
+    expect(step?.title).toBe("Une dernière touche à votre profil propriétaire.");
     expect(step?.phrase).toBe("Reste à faire : vérification d'identité, une photo de galerie.");
     expect(step?.ctaTo).toBe("/owner-profile");
     expectNoDash(step);
@@ -150,7 +150,7 @@ describe("ownerNextStep", () => {
 
   it("sous 90 %, l'invitation générique est conservée", () => {
     expect(ownerNextStep({ profileCompletion: 60 })?.title).toBe(
-      "Votre profil se complète en quelques minutes.",
+      "Votre profil propriétaire se complète en quelques minutes.",
     );
   });
 });

@@ -24,7 +24,21 @@ export interface RailNextStep {
 export interface RailMissingItem {
   label: string;
   hint?: string;
+  /** Points du barème, sert à cibler le CTA sur la touche la plus rentable. */
+  points?: number;
+  /** Lien profond vers la section du formulaire qui porte ce critère. */
+  href?: string;
 }
+
+/** Lien profond de la touche manquante la plus rentable, si connue. */
+export const topMissingHref = (
+  missing?: RailMissingItem[] | null,
+): string | null => {
+  if (!missing || missing.length === 0) return null;
+  const sorted = [...missing].sort((a, b) => (b.points ?? 0) - (a.points ?? 0));
+  return sorted[0]?.href ?? null;
+};
+
 
 const lowerFirst = (s: string): string =>
   s.charAt(0).toLocaleLowerCase("fr-FR") + s.slice(1);
@@ -184,22 +198,23 @@ export const sitterNextStep = (input: SitterNextStepInput): RailNextStep | null 
     };
   }
   if (pct < 100) {
+    const deepLink = topMissingHref(missing) ?? "/profile?tab=profil";
     if (pct >= 90) {
       return {
         eyebrow: "Votre prochain pas",
-        title: "Une dernière touche à votre profil.",
+        title: "Une dernière touche à votre profil gardien.",
         phrase: remainingTouchesPhrase(missing),
         ctaLabel: "Compléter mon profil",
-        ctaTo: "/profile?tab=profil",
+        ctaTo: deepLink,
         progressPct: pct,
       };
     }
     return {
       eyebrow: "Votre prochain pas",
-      title: "Votre profil se complète en quelques minutes.",
+      title: "Votre profil gardien se complète en quelques minutes.",
       phrase: "Chaque détail aide une maison à vous choisir.",
       ctaLabel: "Compléter mon profil",
-      ctaTo: "/profile?tab=profil",
+      ctaTo: deepLink,
       progressPct: pct,
     };
   }
@@ -215,22 +230,24 @@ export interface OwnerNextStepInput {
 export const ownerNextStep = (input: OwnerNextStepInput): RailNextStep | null => {
   const pct = clampPct(input.profileCompletion);
   if (pct >= 100) return null;
+  const deepLink = topMissingHref(input.missing) ?? "/owner-profile";
   if (pct >= 90) {
     return {
       eyebrow: "Votre prochain pas",
-      title: "Une dernière touche à votre profil.",
+      title: "Une dernière touche à votre profil propriétaire.",
       phrase: remainingTouchesPhrase(input.missing),
       ctaLabel: "Compléter mon profil",
-      ctaTo: "/owner-profile",
+      ctaTo: deepLink,
       progressPct: pct,
     };
   }
   return {
     eyebrow: "Votre prochain pas",
-    title: "Votre profil se complète en quelques minutes.",
+    title: "Votre profil propriétaire se complète en quelques minutes.",
     phrase: "Chaque détail aide un gardien à se projeter chez vous.",
     ctaLabel: "Compléter mon profil",
-    ctaTo: "/owner-profile",
+    ctaTo: deepLink,
     progressPct: pct,
   };
 };
+

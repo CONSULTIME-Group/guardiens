@@ -24,6 +24,7 @@ import { useOwnerProfile, sanitizeOwnerDraft, type OwnerProfileData } from "@/ho
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { computeOwnerCompletion } from "@/lib/profileCompletion";
 
 const SECTIONS_BASE: Array<{ id: string; num: number; optional?: boolean }> = [
   { id: "identity", num: 1 },
@@ -213,11 +214,28 @@ const OwnerProfilePage = () => {
     return url;
   }, [uploadPhoto]);
 
-  // Source UNIQUE pour la jauge ET la sidebar. ALIGNÉ au SQL `calculate_profile_completion` (rôle owner) :
-  //   location_ok 10 + avatar 10 + bio 10 + owner_competences 10 + pet 20
-  //   + property_desc 10 + gallery 15 + identity 5 + affinity 10 = 100.
-  const isFrance = (mergedData.country || "FR") === "FR";
-  const locationOk = !!mergedData.first_name && (isFrance ? !!mergedData.postal_code : !!mergedData.city);
+  // Source UNIQUE pour la jauge ET la sidebar : le barème partagé de
+  // src/lib/profileCompletion.ts (miroir du SQL `calculate_profile_completion`).
+  // Aucun barème local, la page ne fait qu'habiller les items du module.
+  const completionResult = computeOwnerCompletion({
+    role: "owner",
+    first_name: mergedData.first_name,
+    postal_code: mergedData.postal_code,
+    city: mergedData.city,
+    country: mergedData.country,
+    avatar_url: mergedData.avatar_url || user?.avatarUrl,
+    bio: mergedData.bio,
+    identity_verified: !!user?.identityVerified,
+    owner_competences: mergedData.owner_competences,
+    has_pet: pets.length > 0,
+    property_description: mergedData.description,
+    has_owner_gallery: galleryCount > 0,
+    interests: mergedData.interests,
+    languages: mergedData.languages,
+    life_pace: mergedData.life_pace,
+    home_ambiance: mergedData.home_ambiance,
+    preferred_sitter_types: mergedData.preferred_sitter_types,
+  });
 
   const affinityChecks = [
     (mergedData.interests?.length ?? 0) >= 3,
@@ -227,46 +245,47 @@ const OwnerProfilePage = () => {
     (mergedData.preferred_sitter_types?.length ?? 0) > 0,
   ];
   const affinityCount = affinityChecks.filter(Boolean).length;
-  const affinityPoints = affinityCount >= 3 ? 10 : affinityCount === 2 ? 6 : affinityCount === 1 ? 3 : 0;
-
   // Affinité côté Identité : intérêts, langues, rythme de vie (édités dans Identity).
-  const identityAffinityOk =
-    affinityChecks[0] && affinityChecks[1] && affinityChecks[2];
+  const identityAffinityOk = affinityChecks[0] && affinityChecks[1] && affinityChecks[2];
   // Affinité côté Attentes & règles : ambiance du foyer, gardien idéal (édités dans Rules).
   const rulesAffinityOk = affinityChecks[3] && affinityChecks[4];
 
+  /** Habillage local : section du formulaire, nature et libellé traduit. */
+  const OWNER_ITEM_META: Record<string, { section: string; kind: "essential" | "bonus"; labelKey: string; hint?: string }> = {
+    location: { section: "identity", kind: "essential", labelKey: "criteria.name_postal" },
+    avatar: { section: "identity", kind: "essential", labelKey: "criteria.avatar", hint: tp("hints.tab_identity") },
+    pet: { section: "animals", kind: "essential", labelKey: "criteria.pet", hint: tp("hints.tab_animals") },
+    property_desc: { section: "housing", kind: "essential", labelKey: "criteria.housing_desc", hint: tp("hints.chars_50", { count: mergedData.description?.length ?? 0 }) },
+    gallery: { section: "gallery", kind: "essential", labelKey: "criteria.gallery_one", hint: tp("hints.tab_gallery") },
+    bio: { section: "identity", kind: "bonus", labelKey: "criteria.bio_50", hint: tp("hints.chars_50", { count: mergedData.bio?.length ?? 0 }) },
+    owner_competences: { section: "skills", kind: "bonus", labelKey: "criteria.owner_skill", hint: tp("hints.tab_skills") },
+    // section "_score" volontairement hors SECTIONS_META : porte les points,
+    // les deux lignes à 0 point ci-dessous portent l'attribution par section.
+    affinity: { section: "_score", kind: "bonus", labelKey: "criteria.affinity" },
+    identity: { section: "identity", kind: "bonus", labelKey: "criteria.identity_verified", hint: tp("hints.settings_verif") },
+  };
+
   const scoredCriteria: ScoredCriterion[] = [
-    { section: "identity", kind: "essential", label: tp("criteria.name_postal"), points: 10,
-      ok: locationOk },
-    { section: "identity", kind: "essential", label: tp("criteria.avatar"), points: 10,
-      ok: !!mergedData.avatar_url, hint: tp("hints.tab_identity") },
-    { section: "animals", kind: "essential", label: tp("criteria.pet"), points: 20,
-      ok: pets.length > 0, hint: tp("hints.tab_animals") },
-    { section: "housing", kind: "essential", label: tp("criteria.housing_desc"), points: 10,
-      ok: (mergedData.description?.length ?? 0) >= 50, hint: tp("hints.chars_50", { count: mergedData.description?.length ?? 0 }) },
-    { section: "gallery", kind: "essential", label: tp("criteria.gallery_one"), points: 15,
-      ok: galleryCount > 0, hint: tp("hints.tab_gallery") },
-    { section: "identity", kind: "bonus", label: tp("criteria.bio_50"), points: 10,
-      ok: (mergedData.bio?.length ?? 0) >= 50, hint: tp("hints.chars_50", { count: mergedData.bio?.length ?? 0 }) },
-    { section: "skills", kind: "bonus", label: tp("criteria.owner_skill"), points: 10,
-      ok: (mergedData.owner_competences?.length ?? 0) > 0, hint: tp("hints.tab_skills") },
-    // Ligne de scoring d'affinité, source unique des points (barème inchangé, aligné SQL).
-    // section "_score" volontairement hors SECTIONS_META : non affichée en sidebar,
-    // les deux lignes ci-dessous (0 point) portent l'attribution par section.
-    { section: "_score", kind: "bonus", label: tp("criteria.affinity"), points: 10,
-      ok: affinityCount >= 3, hint: tp("hints.affinity_count", { count: affinityCount }) },
-    { section: "identity", kind: "bonus", label: tp("criteria.affinity_identity"), points: 0,
+    ...completionResult.items.map(item => {
+      const meta = OWNER_ITEM_META[item.key];
+      return {
+        section: meta.section,
+        kind: meta.kind,
+        label: tp(meta.labelKey),
+        points: item.points,
+        ok: item.ok,
+        hint: meta.hint ?? item.hint,
+      };
+    }),
+    { section: "identity", kind: "bonus" as const, label: tp("criteria.affinity_identity"), points: 0,
       ok: identityAffinityOk, hint: tp("hints.tab_identity") },
-    { section: "rules", kind: "bonus", label: tp("criteria.affinity_rules"), points: 0,
+    { section: "rules", kind: "bonus" as const, label: tp("criteria.affinity_rules"), points: 0,
       ok: rulesAffinityOk },
-    { section: "identity", kind: "bonus", label: tp("criteria.identity_verified"), points: 5,
-      ok: !!user?.identityVerified, hint: tp("hints.settings_verif") },
   ];
 
   const ownerEssentials = scoredCriteria.filter(c => c.kind === "essential");
   const ownerBonuses = scoredCriteria.filter(c => c.kind === "bonus");
-  const partialAffinity = affinityCount >= 3 ? 0 : affinityPoints;
-  const liveScore = Math.min(100, scoredCriteria.reduce((s, c) => s + (c.ok ? c.points : 0), 0) + partialAffinity);
+  const liveScore = completionResult.score;
 
   const sidebarSections: SidebarSection[] = SECTIONS_META.map(s => {
     const labels = missingLabelsFor(s.id, scoredCriteria);

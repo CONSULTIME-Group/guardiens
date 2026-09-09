@@ -37,7 +37,21 @@ const sources: Array<[string, string]> = [
     "missing-opportunities",
     read("../../supabase/functions/_shared/missing-opportunities/index.ts"),
   ],
+  ["profileCompletion", read("../lib/profileCompletion.ts")],
 ];
+
+/** Sections acceptées par la page profil propriétaire (ids bruts). */
+const ownerSections = new Set<string>(
+  [
+    ...(read("../pages/OwnerProfile.tsx").match(
+      /const SECTIONS_BASE: Array<\{[^}]*\}> = \[([\s\S]*?)\];/,
+    )?.[1] ?? ""),
+  ]
+    .join("")
+    .match(/id: "([a-z]+)"/g)
+    ?.map((m) => m.replace(/id: "|"/g, "")) ?? [],
+);
+
 
 describe("liens de complétion (emails et dashboard)", () => {
   it("SECTION_PARAM_MAP est lisible et non vide", () => {
@@ -61,11 +75,15 @@ describe("liens de complétion (emails et dashboard)", () => {
 
       const section = query.match(/section=([^&]+)/)?.[1];
       if (section && !section.startsWith("$") && !section.startsWith("{")) {
+        // Deux conventions distinctes : ids bruts côté propriétaire,
+        // clés françaises côté gardien (SECTION_PARAM_MAP).
+        const allowed = path === "/owner-profile" ? ownerSections : acceptedSections;
         expect(
-          acceptedSections.has(section),
-          `Section "${section}" refusée par SECTION_PARAM_MAP (href "${href}").`,
+          allowed.has(section),
+          `Section "${section}" refusée par la page ${path} (href "${href}").`,
         ).toBe(true);
       }
+
     });
   }
 

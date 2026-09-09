@@ -19,15 +19,24 @@ import {
 const PROFILE_FIELDS =
   "first_name, postal_code, city, country, avatar_url, bio, identity_verified";
 
+export interface CompletionSnapshot {
+  /** Score de l'espace demandé, null tant que le calcul n'a pas abouti. */
+  score: number | null;
+  missing: CompletionItem[];
+}
+
 export const useProfileCompletionMissing = (
   role: ProfileRole,
   userId?: string,
-): CompletionItem[] => {
-  const [missing, setMissing] = useState<CompletionItem[]>([]);
+): CompletionSnapshot => {
+  const [snapshot, setSnapshot] = useState<CompletionSnapshot>({
+    score: null,
+    missing: [],
+  });
 
   useEffect(() => {
     if (!userId) {
-      setMissing([]);
+      setSnapshot({ score: null, missing: [] });
       return;
     }
     let cancelled = false;
@@ -40,9 +49,10 @@ export const useProfileCompletionMissing = (
           .eq("id", userId)
           .maybeSingle();
         if (!profile) {
-          if (!cancelled) setMissing([]);
+          if (!cancelled) setSnapshot({ score: null, missing: [] });
           return;
         }
+
 
         if (role === "sitter") {
           const [{ data: sp }, { count: galleryCount }] = await Promise.all([
@@ -70,7 +80,8 @@ export const useProfileCompletionMissing = (
             animal_types: sp?.animal_types ?? null,
             sitter_gallery_count: galleryCount ?? 0,
           });
-          if (!cancelled) setMissing(result.missing);
+          if (!cancelled) setSnapshot({ score: result.score, missing: result.missing });
+
           return;
         }
 
@@ -115,7 +126,7 @@ export const useProfileCompletionMissing = (
               ?.description ?? null,
           has_owner_gallery: (galleryCount ?? 0) > 0,
         });
-        if (!cancelled) setMissing(result.missing);
+        if (!cancelled) setSnapshot({ score: result.score, missing: result.missing });
       } catch {
         // Silencieux : la phrase de repli prend le relais.
       }
@@ -127,5 +138,6 @@ export const useProfileCompletionMissing = (
     };
   }, [role, userId]);
 
-  return missing;
+  return snapshot;
 };
+
