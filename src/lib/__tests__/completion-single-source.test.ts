@@ -28,7 +28,7 @@ const divergent: ProfileCompletionInput = {
   bio: "x".repeat(60),
   competences: ["chats"],
   lifestyle: ["actif"],
-  sitter_gallery_count: 3,
+  sitter_gallery_count: 1,
   identity_verified: true,
   interests: ["a", "b", "c"],
   languages: ["fr"],
@@ -47,6 +47,8 @@ describe("cohérence du score de complétion", () => {
     const owner = computeOwnerCompletion({ ...divergent, role: "owner" });
     const sitter = computeSitterCompletion({ ...divergent, role: "sitter" });
     expect(owner.score).not.toBe(sitter.score);
+    expect(owner.score).toBeLessThan(100);
+    expect(sitter.score).toBeLessThan(100);
   });
 
   it("la carte gardien affiche le score gardien et les items gardien", () => {
@@ -59,7 +61,6 @@ describe("cohérence du score de complétion", () => {
       profileCompletion: sitter.score,
       missing: sitter.missing,
     });
-    if (sitter.score >= 100) throw new Error("Jeu de données invalide : score plein.");
     expect(step?.progressPct).toBe(sitter.score);
     expect(step?.title).toContain("gardien");
     expect(step?.ctaTo).toBe(topMissingItem(sitter)?.href);
