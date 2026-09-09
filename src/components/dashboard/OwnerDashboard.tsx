@@ -284,8 +284,10 @@ const OwnerDashboard = () => {
 
   // Bloc (b) du rail : compléter son profil, tant qu'il reste du chemin.
   const ownerNextStepRail = ownerNextStep({
-    profileCompletion: accessProfileCompletion ?? 0,
-    missing: completionMissing,
+    // Le pourcentage et les items viennent du MEME calcul (barème propriétaire),
+    // jamais de profiles.profile_completion qui stocke le max des deux espaces.
+    profileCompletion: completionMissing.score ?? accessProfileCompletion ?? 0,
+    missing: completionMissing.missing,
   });
 
   return (
