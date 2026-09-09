@@ -80,7 +80,8 @@ export const useProfileCompletionMissing = (
             animal_types: sp?.animal_types ?? null,
             sitter_gallery_count: galleryCount ?? 0,
           });
-          if (!cancelled) setMissing(result.missing);
+          if (!cancelled) setSnapshot({ score: result.score, missing: result.missing });
+
           return;
         }
 
@@ -125,7 +126,7 @@ export const useProfileCompletionMissing = (
               ?.description ?? null,
           has_owner_gallery: (galleryCount ?? 0) > 0,
         });
-        if (!cancelled) setMissing(result.missing);
+        if (!cancelled) setSnapshot({ score: result.score, missing: result.missing });
       } catch {
         // Silencieux : la phrase de repli prend le relais.
       }
@@ -137,5 +138,6 @@ export const useProfileCompletionMissing = (
     };
   }, [role, userId]);
 
-  return missing;
+  return snapshot;
 };
+
