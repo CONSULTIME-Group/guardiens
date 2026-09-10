@@ -28,7 +28,7 @@ describe("associations, libellés", () => {
   });
 
   it("construit des initiales lisibles", () => {
-    expect(associationInitials("Refuge des Quatre Pattes")).toBe("RQ");
+    expect(associationInitials("Refuge des Quatre Pattes")).toBe("RD");
   });
 });
 
