@@ -16,7 +16,7 @@ export const buildAssociationConsentText = ({ name, ficheUrl }: AssociationConse
 
 Je m'appelle Jérémie. Avec ma femme Elisa, on a lancé Guardiens.fr au printemps. L'idée vient de notre propre histoire : en cinq ans, on a gardé 37 maisons et 234 animaux chez des gens qui nous ont fait confiance.
 
-Guardiens met en relation des gens du coin pour garder une maison et des animaux pendant une absence, et pour se donner des coups de main au quotidien. Ce qui nous tient à cœur, c'est de créer des réseaux d'entraide, du lien social et de la proximité. On compte déjà plus de 1 300 inscrits partout en France, et pour l'instant, tout le site est à 0 €. Si vous voulez voir à quoi ça ressemble : https://guardiens.fr
+Guardiens met en relation des gens du coin pour garder une maison et des animaux pendant une absence, et pour se donner des coups de main au quotidien. Ce qui nous tient à cœur, c'est de créer des réseaux d'entraide, du lien social et de la proximité. On compte déjà plus de 1 300 inscrits partout en France, et pour l'instant, l'accès au site est offert. Si vous voulez voir à quoi ça ressemble : https://guardiens.fr
 
 Les associations comme la vôtre font vivre cette entraide tous les jours. On a donc ouvert une page qui les présente à nos membres, avec leurs besoins du moment : dons, bénévolat, familles d'accueil. ${name} y figure déjà : ${ficheUrl}
 
