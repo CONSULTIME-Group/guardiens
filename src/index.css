@@ -940,3 +940,141 @@
   align-items: center;
   min-height: 44px;
 }
+
+/* ───────────────────────────────────────────────────────────────
+   Alma : traitement « voix incarnée » de la charte Guardiens.
+   Panneau, fil de conversation et composeur. Tokens uniquement.
+   ─────────────────────────────────────────────────────────────── */
+@layer components {
+  /* Panneau replié : papier blanc, liseré pointillé crème, ombre chaude. */
+  .alma-panel {
+    background-color: hsl(var(--card));
+    border: 1px dashed hsl(var(--border));
+    border-radius: 1rem;
+    padding: 15px 18px;
+    box-shadow:
+      0 2px 6px hsl(30 25% 20% / 0.06),
+      0 14px 34px hsl(30 25% 20% / 0.12);
+  }
+
+  /* Pastille de l'avatar : dégradé radial du blanc vers le vert pin très doux. */
+  .alma-badge {
+    width: 38px;
+    height: 38px;
+    border-radius: 9999px;
+    border: 1px solid hsl(var(--border));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    overflow: hidden;
+    background: radial-gradient(
+      circle at 35% 30%,
+      hsl(var(--card)) 0%,
+      hsl(var(--primary) / 0.08) 70%,
+      hsl(var(--primary) / 0.14) 100%
+    );
+  }
+
+  /* La phrase d'Alma : Playfair italique, c'est elle qui donne le ton. */
+  .alma-voice {
+    font-family: var(--font-heading);
+    font-style: italic;
+    font-size: 14px;
+    line-height: 1.5;
+    color: hsl(var(--foreground));
+  }
+
+  /* Fil de conversation : carte papier, ombre chaude, rayon de base. */
+  .alma-thread-card {
+    background-color: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-radius: 1rem;
+    box-shadow:
+      0 2px 6px hsl(30 25% 20% / 0.06),
+      0 14px 34px hsl(30 25% 20% / 0.12);
+  }
+
+  /* Bulle d'Alma : papier crème, angle haut gauche resserré vers l'avatar. */
+  .alma-bubble-alma {
+    background-color: hsl(var(--hero-paper));
+    border: 1px solid hsl(var(--border));
+    color: hsl(var(--foreground) / 0.88);
+    border-radius: 1rem;
+    border-top-left-radius: 0.375rem;
+    padding: 10px 14px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* Bulle de la personne : vert pin plein, angle bas droit resserré. */
+  .alma-bubble-user {
+    background-color: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    border-radius: 1rem;
+    border-bottom-right-radius: 0.375rem;
+    padding: 10px 14px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* Composeur : pilule crème sourde, anneau de focus vert pin. */
+  .alma-field {
+    background-color: hsl(var(--muted));
+    border: 1px solid hsl(var(--border));
+    border-radius: 9999px;
+    padding: 10px 16px;
+    font-size: 14px;
+    line-height: 1.4;
+    color: hsl(var(--foreground));
+  }
+  .alma-field::placeholder {
+    color: hsl(var(--muted-foreground));
+  }
+  .alma-field:focus,
+  .alma-field:focus-visible {
+    outline: none;
+    border-color: hsl(var(--primary) / 0.5);
+    box-shadow: 0 0 0 3px hsl(var(--primary) / 0.18);
+  }
+
+  /* Bouton d'envoi et bouton d'action : vert pin plein, ombre colorée douce. */
+  .alma-primary-shadow {
+    box-shadow: 0 4px 14px hsl(var(--primary) / 0.28);
+  }
+
+  /* Trois points qui respirent pendant la préparation de la réponse. */
+  .alma-typing-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
+    background-color: hsl(var(--muted-foreground));
+    opacity: 0.4;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .alma-typing-dot {
+      animation: alma-typing 1.2s ease-in-out infinite;
+    }
+    .alma-typing-dot:nth-child(2) {
+      animation-delay: 0.18s;
+    }
+    .alma-typing-dot:nth-child(3) {
+      animation-delay: 0.36s;
+    }
+  }
+}
+
+@keyframes alma-typing {
+  0%,
+  60%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
