@@ -513,7 +513,7 @@ function AlmaDockInner() {
       )}
 
       {/* Panneau de proposition permanente (aucun whisper actif) */}
-      {expanded && !whisper && proposition && (
+      {expanded && !conversation.open && !whisper && proposition && (
         <div
           role="status"
           className={cn(
@@ -548,6 +548,13 @@ function AlmaDockInner() {
               className="min-h-11 rounded-full px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               Un conseil ?
+            </button>
+            <button
+              type="button"
+              onClick={() => startConversation()}
+              className="min-h-11 rounded-full px-3 py-1.5 text-xs font-medium text-primary hover:bg-muted transition focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              Parler à Alma
             </button>
           </div>
         </div>
