@@ -420,8 +420,16 @@ function AlmaDockInner() {
         "bottom-[calc(env(safe-area-inset-bottom,0px)+5.5rem)] md:bottom-6",
       )}
     >
+      {/* Fil de conversation, prioritaire sur les panneaux d'un seul message */}
+      {expanded && conversation.open && (
+        <AlmaConversation
+          surface={surfaceFromPath(location.pathname, activeRole)}
+          activeRole={activeRole === "owner" ? "owner" : "sitter"}
+        />
+      )}
+
       {/* Panneau déplié */}
-      {expanded && whisper && (
+      {expanded && !conversation.open && whisper && (
         <div
           role="status"
           aria-live="polite"
