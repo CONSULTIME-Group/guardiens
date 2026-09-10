@@ -7,6 +7,13 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.45.0'
 import { requireCronCaller } from '../_shared/require-cron-caller.ts'
 import { startCronRun } from '../_shared/cron-run-log.ts'
+import {
+  clampInt,
+  filterToFrozenCohort,
+  isRateLimitFailure,
+  runInBatches,
+  type CohortRow,
+} from './cohort.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -17,7 +24,12 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
 const TEMPLATE = 'seasonal-nurture'
-const BATCH_SIZE = 20
+const DEFAULT_BATCH_SIZE = 5
+const DEFAULT_BATCH_DELAY_MS = 1200
+const RETRY_DELAY_MS = 3000
+const TIME_BUDGET_MS = 100000
+
+const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms))
 
 interface PlanRow {
   user_id: string
