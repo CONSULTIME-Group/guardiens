@@ -1,0 +1,2 @@
+ALTER TABLE public.alma_conversations ALTER COLUMN question DROP NOT NULL;
+COMMENT ON COLUMN public.alma_conversations.question IS 'Question de la personne. Reste vide pour les lignes de dictée en échec (input_mode = voice, refusal_reason renseigné).';
