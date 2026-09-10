@@ -1088,6 +1088,8 @@ export type Database = {
           adoption_url: string | null
           association_type: string
           city: string
+          consent_email_resend_id: string | null
+          consent_email_sent_to: string | null
           consent_granted_at: string | null
           consent_note: string | null
           consent_requested_at: string | null
@@ -1123,6 +1125,8 @@ export type Database = {
           adoption_url?: string | null
           association_type: string
           city: string
+          consent_email_resend_id?: string | null
+          consent_email_sent_to?: string | null
           consent_granted_at?: string | null
           consent_note?: string | null
           consent_requested_at?: string | null
@@ -1158,6 +1162,8 @@ export type Database = {
           adoption_url?: string | null
           association_type?: string
           city?: string
+          consent_email_resend_id?: string | null
+          consent_email_sent_to?: string | null
           consent_granted_at?: string | null
           consent_note?: string | null
           consent_requested_at?: string | null
