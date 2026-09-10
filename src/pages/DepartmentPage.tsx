@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { MapPin, Users, ClipboardList, ShieldCheck, Heart, ArrowRight, Compass, Building2 } from "lucide-react";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import NeighborDepartments from "@/components/seo/NeighborDepartments";
+import DepartmentAssociations from "@/components/associations/DepartmentAssociations";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useContentStats } from "@/hooks/useContentStats";
 import { interpolatePlaceholders } from "@/lib/contentPlaceholders";
