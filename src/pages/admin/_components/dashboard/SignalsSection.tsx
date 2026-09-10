@@ -12,6 +12,7 @@ import { DormantSitterCard } from "@/components/admin/signals/DormantSitterCard"
 import { StaleVerificationCard } from "@/components/admin/signals/StaleVerificationCard";
 import { AffinityStaleCard } from "@/components/admin/signals/AffinityStaleCard";
 import { UntappedCityCard } from "@/components/admin/signals/UntappedCityCard";
+import { CityCoverageCard } from "@/components/admin/signals/CityCoverageCard";
 import { DormantTopSitterCard } from "@/components/admin/signals/DormantTopSitterCard";
 import { SuspiciousAccountCard } from "@/components/admin/signals/SuspiciousAccountCard";
 import { RepeatedCancellationsCard } from "@/components/admin/signals/RepeatedCancellationsCard";
@@ -54,6 +55,9 @@ function renderSignal(s: AdminSignalBase) {
   }
   if (s.signal_type === "untapped_city") {
     return <UntappedCityCard signal={s as unknown as import("@/components/admin/signals/UntappedCityCard").UntappedCitySignal} />;
+  }
+  if (s.signal_type === "city_coverage_gap" || s.signal_type === "city_seo_tension") {
+    return <CityCoverageCard signal={s as unknown as import("@/components/admin/signals/CityCoverageCard").CityCoverageSignal} />;
   }
   if (s.signal_type === "dormant_top_sitter") {
     return <DormantTopSitterCard signal={s as unknown as import("@/components/admin/signals/DormantTopSitterCard").DormantTopSitterSignal} />;
