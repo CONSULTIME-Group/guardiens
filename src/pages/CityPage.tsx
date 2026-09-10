@@ -40,6 +40,7 @@ import CityArticleBody from "@/components/city/CityArticleBody";
 import StickyCTA from "@/components/seo/StickyCTA";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import { departmentIn } from "@/lib/departmentGrammar";
+import DepartmentAssociations from "@/components/associations/DepartmentAssociations";
 import CityHero, { CITY_HERO_IMAGES } from "@/components/city/CityHero";
 import CitySittersGrid from "@/components/city/CitySittersGrid";
 import { useAlmaCulturalFact } from "@/hooks/useAlmaCulturalFact";
@@ -510,6 +511,8 @@ const CityPage = () => {
  <LocalNetworkGrid current={cityData} allCities={CITIES} />
 
  <NearbyCityLinks department={cityData.department} currentSlug={cityData.slug} />
+
+ <DepartmentAssociations departementName={cityData.department} />
 
  {/* FAQ */}
  <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">

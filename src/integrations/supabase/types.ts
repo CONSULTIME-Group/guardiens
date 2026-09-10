@@ -1083,6 +1083,122 @@ export type Database = {
         }
         Relationships: []
       }
+      animal_associations: {
+        Row: {
+          adoption_url: string | null
+          association_type: string
+          city: string
+          consent_granted_at: string | null
+          consent_note: string | null
+          consent_requested_at: string | null
+          consent_status: string
+          contact_email: string | null
+          contact_page_url: string | null
+          created_at: string
+          departement_code: string
+          description: string
+          donation_url: string | null
+          facebook_url: string | null
+          id: string
+          instagram_url: string | null
+          internal_note: string | null
+          legal_form: string | null
+          name: string
+          needs: string[]
+          photo_credit: string | null
+          photos: Json
+          postal_code: string | null
+          rna: string | null
+          siren: string | null
+          slug: string
+          sources: Json
+          species: string[]
+          status: string
+          updated_at: string
+          verified_at: string
+          volunteer_url: string | null
+          website_url: string | null
+        }
+        Insert: {
+          adoption_url?: string | null
+          association_type: string
+          city: string
+          consent_granted_at?: string | null
+          consent_note?: string | null
+          consent_requested_at?: string | null
+          consent_status?: string
+          contact_email?: string | null
+          contact_page_url?: string | null
+          created_at?: string
+          departement_code: string
+          description: string
+          donation_url?: string | null
+          facebook_url?: string | null
+          id?: string
+          instagram_url?: string | null
+          internal_note?: string | null
+          legal_form?: string | null
+          name: string
+          needs?: string[]
+          photo_credit?: string | null
+          photos?: Json
+          postal_code?: string | null
+          rna?: string | null
+          siren?: string | null
+          slug: string
+          sources?: Json
+          species?: string[]
+          status?: string
+          updated_at?: string
+          verified_at: string
+          volunteer_url?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          adoption_url?: string | null
+          association_type?: string
+          city?: string
+          consent_granted_at?: string | null
+          consent_note?: string | null
+          consent_requested_at?: string | null
+          consent_status?: string
+          contact_email?: string | null
+          contact_page_url?: string | null
+          created_at?: string
+          departement_code?: string
+          description?: string
+          donation_url?: string | null
+          facebook_url?: string | null
+          id?: string
+          instagram_url?: string | null
+          internal_note?: string | null
+          legal_form?: string | null
+          name?: string
+          needs?: string[]
+          photo_credit?: string | null
+          photos?: Json
+          postal_code?: string | null
+          rna?: string | null
+          siren?: string | null
+          slug?: string
+          sources?: Json
+          species?: string[]
+          status?: string
+          updated_at?: string
+          verified_at?: string
+          volunteer_url?: string | null
+          website_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "animal_associations_departement_code_fkey"
+            columns: ["departement_code"]
+            isOneToOne: false
+            referencedRelation: "departements"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
       anon_insert_throttle: {
         Row: {
           bucket_minute: string
@@ -7927,6 +8043,42 @@ export type Database = {
           user_id: string | null
         }
         Relationships: []
+      }
+      public_animal_associations: {
+        Row: {
+          adoption_url: string | null
+          association_type: string | null
+          city: string | null
+          departement_code: string | null
+          departement_name: string | null
+          departement_slug: string | null
+          description: string | null
+          donation_url: string | null
+          facebook_url: string | null
+          id: string | null
+          instagram_url: string | null
+          name: string | null
+          needs: string[] | null
+          photo_credit: string | null
+          photos: Json | null
+          photos_authorized: boolean | null
+          postal_code: string | null
+          slug: string | null
+          species: string[] | null
+          updated_at: string | null
+          verified_at: string | null
+          volunteer_url: string | null
+          website_url: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "animal_associations_departement_code_fkey"
+            columns: ["departement_code"]
+            isOneToOne: false
+            referencedRelation: "departements"
+            referencedColumns: ["code"]
+          },
+        ]
       }
       public_closed_sits: {
         Row: {

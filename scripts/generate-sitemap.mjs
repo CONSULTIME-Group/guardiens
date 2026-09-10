@@ -15,6 +15,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { sitRichnessRejectionReason } from "../src/lib/sitIndexability.js";
 import { isDemoPro } from "../src/lib/proIndexability.js";
+import { isAssociationIndexable } from "../src/lib/associationIndexability.js";
 import { isSitterProfileIndexable } from "../src/lib/sitterProfileIndexability.js";
 import { mergedBreedTarget } from "../src/lib/breedFicheMerges.js";
 import { fetchOrCache as sharedFetchOrCache } from "./lib/sitemapCache.mjs";
@@ -359,6 +360,19 @@ async function main() {
         priority: "0.7",
         _category: p.category,
         _city: p.city,
+      }))
+    ),
+
+    // Fiches associations publiées : /associations/:slug
+    fetchOrCache(
+      "public_animal_associations", cache,
+      () => maxUpdatedAtWithCount("public_animal_associations", "updated_at"),
+      async () => (await supabase.from("public_animal_associations").select("slug, description, updated_at")).data,
+      rows => rows.filter(a => isAssociationIndexable(a)).map(a => ({
+        loc: `/associations/${a.slug}`,
+        lastmod: (a.updated_at || today).split("T")[0],
+        changefreq: "monthly",
+        priority: "0.7",
       }))
     ),
   ]);

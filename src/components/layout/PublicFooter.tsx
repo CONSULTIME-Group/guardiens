@@ -161,6 +161,7 @@ const PublicFooter = React.forwardRef<HTMLElement, PublicFooterProps>(({ local }
 
               <li><Link to="/gardien-urgence" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.emergency_sitter")}</Link></li>
               <li><Link to="/pros" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.pet_pros")} <span className="ml-1 text-[11px] leading-none uppercase tracking-wider font-bold bg-amber-200 text-amber-900 px-1.5 py-0.5 rounded">{t("nav.beta")}</span></Link></li>
+              <li><Link to="/associations" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">Associations et refuges</Link></li>
             </ul>
           </div>
         </div>

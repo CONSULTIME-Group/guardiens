@@ -103,6 +103,9 @@ const OnboardingAffinity = lazy(() => import("./pages/OnboardingAffinity"), "Onb
 const MyProProfile = lazy(() => import("./pages/MyProProfile"), "MyProProfile");
 const ProCategoryListing = lazy(() => import("./pages/ProCategoryListing"), "ProCategoryListing");
 const AdminProDirectory = lazy(() => import("./pages/admin/AdminProDirectory"), "AdminProDirectory");
+const AssociationsListing = lazy(() => import("./pages/AssociationsListing"), "AssociationsListing");
+const AssociationDetail = lazy(() => import("./pages/AssociationDetail"), "AssociationDetail");
+const AdminAssociations = lazy(() => import("./pages/admin/AdminAssociations"), "AdminAssociations");
 const ArticleEditor = lazy(() => import("./pages/ArticleEditor"), "ArticleEditor");
 const AdminOverview = lazy(() => import("./pages/admin/AdminOverview"), "AdminOverview");
 const AdminAffinity = lazy(() => import("./pages/admin/AdminAffinity"), "AdminAffinity");
@@ -506,6 +509,8 @@ const AppRoutes = () => {
       <Route path="/pros/categorie/:catSlug" element={<PublicShellRoute><ProCategoryListing /></PublicShellRoute>} />
       <Route path="/pros/categorie/:catSlug/:villeSlug" element={<PublicShellRoute><ProCategoryListing /></PublicShellRoute>} />
       <Route path="/pros/:slug" element={<PublicShellRoute><ProDetail /></PublicShellRoute>} />
+      <Route path="/associations" element={<PublicShellRoute><AssociationsListing /></PublicShellRoute>} />
+      <Route path="/associations/:slug" element={<PublicShellRoute><AssociationDetail /></PublicShellRoute>} />
       <Route element={<AdminLayout />}>
         <Route path="/admin/seo-debug" element={<SeoDebug />} />
         <Route path="/admin/build-info" element={<BuildInfo />} />
@@ -525,6 +530,7 @@ const AppRoutes = () => {
         <Route path="/admin/verifications" element={<AdminVerifications />} />
         <Route path="/admin/pros" element={<AdminPros />} />
         <Route path="/admin/pros-annuaire" element={<AdminProDirectory />} />
+        <Route path="/admin/associations" element={<AdminAssociations />} />
         <Route path="/admin/emails" element={<AdminEmailHealth />} />
         <Route path="/admin/emails-transactionnels" element={<AdminEmails />} />
         <Route path="/admin/alma" element={<AdminAlma />} />

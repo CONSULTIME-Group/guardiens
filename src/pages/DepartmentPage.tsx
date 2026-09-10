@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { MapPin, Users, ClipboardList, ShieldCheck, Heart, ArrowRight, Compass, Building2 } from "lucide-react";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import NeighborDepartments from "@/components/seo/NeighborDepartments";
+import DepartmentAssociations from "@/components/associations/DepartmentAssociations";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useContentStats } from "@/hooks/useContentStats";
 import { interpolatePlaceholders } from "@/lib/contentPlaceholders";
@@ -312,10 +313,12 @@ const DepartmentPage = () => {
  </Link>
  ))}
  </div>
- </section>
-  )}
+  </section>
+   )}
 
-  {/* Combien coûte */}
+   <DepartmentAssociations departementName={page.department} />
+
+   {/* Combien coûte */}
   <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">
     <h2 className="font-heading text-2xl font-bold text-foreground mb-4">
       Combien coûte une garde d'animaux {deptIn} ?
