@@ -243,13 +243,20 @@ function AlmaDockInner() {
 
 
   // Auto-dismiss timer (20s défaut, ou whisper.autoDismissMs).
+  // Une conversation ouverte suspend ce timer : le message reste à l'écran,
+  // il est devenu le premier message du fil.
   useEffect(() => {
-    if (!currentWhisper) {
+    if (
+      !shouldScheduleAutoDismiss({
+        hasWhisper: !!currentWhisper,
+        conversationOpen: conversation.open,
+      })
+    ) {
       if (timerRef.current) window.clearTimeout(timerRef.current);
       timerRef.current = null;
       return;
     }
-    const total = currentWhisper.autoDismissMs ?? 20_000;
+    const total = autoDismissDelay(currentWhisper?.autoDismissMs);
     pausedRef.current = false;
     remainingRef.current = total;
     startedAtRef.current = Date.now();
@@ -259,7 +266,7 @@ function AlmaDockInner() {
       if (timerRef.current) window.clearTimeout(timerRef.current);
       timerRef.current = null;
     };
-  }, [currentWhisper?.id, doDismiss]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [currentWhisper?.id, conversation.open, doDismiss]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const pauseTimer = () => {
     if (pausedRef.current || !timerRef.current) return;
