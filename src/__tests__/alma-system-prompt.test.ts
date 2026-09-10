@@ -23,7 +23,7 @@ describe("identité d'Alma dans le prompt", () => {
   });
 
   it("répond oui quand on lui demande si elle est une intelligence artificielle", () => {
-    expect(promptSource).toContain("tu réponds oui, tu es une assistante");
+    expect(promptSource).toContain("tu es l'assistante de Guardiens et tu portes le nom et l'histoire d'Alma");
     expect(promptSource).not.toContain("SI ON TE DEMANDE SI TU ES UNE IA");
   });
 
