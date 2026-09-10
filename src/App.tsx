@@ -103,6 +103,9 @@ const OnboardingAffinity = lazy(() => import("./pages/OnboardingAffinity"), "Onb
 const MyProProfile = lazy(() => import("./pages/MyProProfile"), "MyProProfile");
 const ProCategoryListing = lazy(() => import("./pages/ProCategoryListing"), "ProCategoryListing");
 const AdminProDirectory = lazy(() => import("./pages/admin/AdminProDirectory"), "AdminProDirectory");
+const AssociationsListing = lazy(() => import("./pages/AssociationsListing"), "AssociationsListing");
+const AssociationDetail = lazy(() => import("./pages/AssociationDetail"), "AssociationDetail");
+const AdminAssociations = lazy(() => import("./pages/admin/AdminAssociations"), "AdminAssociations");
 const ArticleEditor = lazy(() => import("./pages/ArticleEditor"), "ArticleEditor");
 const AdminOverview = lazy(() => import("./pages/admin/AdminOverview"), "AdminOverview");
 const AdminAffinity = lazy(() => import("./pages/admin/AdminAffinity"), "AdminAffinity");
