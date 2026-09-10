@@ -157,9 +157,6 @@ export type EventType =
   | "pros_filter_verified_toggled"       // Toggle filtre "Vérifiés uniquement" (enabled, category, ville)
   | "pro_admin_verification_toggled"     // Admin toggle SIRET vérifié (pro_id, verified, admin_id)
   | "pro_verification_request_clicked"    // Pro demande la vérification depuis son espace (pro_id)
-  // Landing InventoryStrip (chiffres du réseau) -----------------------------
-  | "inventory_strip_seen"                // Impression bandeau chiffres du réseau (1x/session)
-  | "inventory_strip_cta_clicked"         // Clic CTA "Voir l'observatoire complet" (destination)
   // Landing sections stratégiques pass 2 ------------------------------------
   | "affinity_showcase_seen"              // Impression vitrine score d'affinité (1x/session)
   | "affinity_showcase_cta_clicked"       // Clic CTA "Comprendre le score" (destination)
