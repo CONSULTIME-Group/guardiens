@@ -102,6 +102,7 @@ export default function AdminAssociations() {
   const [editing, setEditing] = useState<AssociationRow | null>(null);
   const [saving, setSaving] = useState(false);
   const [copying, setCopying] = useState(false);
+  const [sendingSlug, setSendingSlug] = useState<string | null>(null);
 
   const load = async () => {
     setLoading(true);
