@@ -96,7 +96,7 @@ Deno.serve(async (req) => {
           input_mode: "voice",
           question: null,
           answer: null,
-          refusal_reason: `transcribe_gateway_${res.status}`,
+          refusal_reason: reason,
         });
 
       } catch (logError) {
