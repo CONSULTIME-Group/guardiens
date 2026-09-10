@@ -82,6 +82,8 @@ export interface SendAlmaMessageArgs {
   text: string;
   surface: string;
   activeRole: "owner" | "sitter";
+  /** Voix ou clavier, journalisé pour le pilotage admin. */
+  inputMode?: "voice" | "keyboard";
   /** Injection pour les tests. */
   invoke?: typeof supabase.functions.invoke;
 }
@@ -91,6 +93,7 @@ export async function sendAlmaMessage({
   text,
   surface,
   activeRole,
+  inputMode = "keyboard",
   invoke,
 }: SendAlmaMessageArgs): Promise<void> {
   const message = text.trim();
@@ -112,7 +115,7 @@ export async function sendAlmaMessage({
 
   try {
     const { data, error } = await call("alma-chat", {
-      body: { message, history, surface, active_role: activeRole },
+      body: { message, history, surface, active_role: activeRole, input_mode: inputMode },
     });
 
     if (error) {

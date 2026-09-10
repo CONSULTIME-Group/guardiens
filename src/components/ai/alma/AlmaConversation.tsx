@@ -54,7 +54,10 @@ export function AlmaConversation({ surface, activeRole }: AlmaConversationProps)
   const threadRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
 
+  const dictatedRef = useRef(false);
+
   const voice = useAlmaVoiceInput((text) => {
+    dictatedRef.current = true;
     setDraft((d) => (d ? `${d} ${text}` : text));
     inputRef.current?.focus();
   });
@@ -69,8 +72,10 @@ export function AlmaConversation({ surface, activeRole }: AlmaConversationProps)
   const submit = () => {
     const text = draft.trim();
     if (!text || state.sending) return;
+    const inputMode = dictatedRef.current ? "voice" : "keyboard";
+    dictatedRef.current = false;
     setDraft("");
-    void sendAlmaMessage({ text, surface, activeRole });
+    void sendAlmaMessage({ text, surface, activeRole, inputMode });
   };
 
   return (
