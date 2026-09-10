@@ -44,12 +44,13 @@ export const buildAssociationConsentHtml = ({ name, ficheUrl }: AssociationConse
   const safeFicheUrl = escapeHtml(ficheUrl);
   const safeGuardiensUrl = escapeHtml("https://guardiens.fr");
 
-  let body = escapeHtml(text)
-    .replace(/guardiens\.fr/g, "§SIGNATURE_LINK§")
-    .replace(new RegExp(`https://§SIGNATURE_LINK§`, "g"), safeGuardiensUrl)
-    .replace(new RegExp(safeFicheUrl.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g"), `<a href="${safeFicheUrl}" style="${linkStyle}">${safeFicheUrl}</a>`)
-    .replace(new RegExp(safeGuardiensUrl.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g"), `<a href="${safeGuardiensUrl}" style="${linkStyle}">${safeGuardiensUrl}</a>`)
-    .replace(/§SIGNATURE_LINK§/g, `<a href="${safeGuardiensUrl}" style="${linkStyle}">guardiens.fr</a>`);
+  const body = escapeHtml(text)
+    .replace(new RegExp(safeFicheUrl.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g"), "§FICHE_URL§")
+    .replace(new RegExp(safeGuardiensUrl.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g"), "§GUARDIENS_URL§")
+    .replace(/guardiens\.fr/g, "§SIGNATURE_URL§")
+    .replace(/§FICHE_URL§/g, `<a href="${safeFicheUrl}" style="${linkStyle}">${safeFicheUrl}</a>`)
+    .replace(/§GUARDIENS_URL§/g, `<a href="${safeGuardiensUrl}" style="${linkStyle}">${safeGuardiensUrl}</a>`)
+    .replace(/§SIGNATURE_URL§/g, `<a href="${safeGuardiensUrl}" style="${linkStyle}">guardiens.fr</a>`);
 
   const paragraphs = body
     .split("\n\n")
