@@ -752,6 +752,45 @@ export type Database = {
           },
         ]
       }
+      alma_conversations: {
+        Row: {
+          active_role: string
+          answer: string | null
+          created_at: string
+          id: string
+          latency_ms: number | null
+          question: string
+          refusal_reason: string | null
+          register: string | null
+          surface: string
+          user_id: string
+        }
+        Insert: {
+          active_role: string
+          answer?: string | null
+          created_at?: string
+          id?: string
+          latency_ms?: number | null
+          question: string
+          refusal_reason?: string | null
+          register?: string | null
+          surface: string
+          user_id: string
+        }
+        Update: {
+          active_role?: string
+          answer?: string | null
+          created_at?: string
+          id?: string
+          latency_ms?: number | null
+          question?: string
+          refusal_reason?: string | null
+          register?: string | null
+          surface?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       alma_cultural_facts: {
         Row: {
           active: boolean

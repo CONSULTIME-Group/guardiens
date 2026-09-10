@@ -39,6 +39,7 @@ import {
   SchedulerState,
 } from "@/lib/alma/whisper-scheduler";
 import { buildCulturalFactWhisper, buildUsageNudgeWhisper } from "@/lib/alma/whisper-triggers";
+import { buildHistoryInsert, buildHistoryPatch } from "@/lib/alma/whisper-history";
 
 /**
  * Routes sur lesquelles Alma NE DOIT PAS afficher de whisper flottant proactif.
@@ -190,6 +191,32 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
   const inputFocusedRef = useRef<boolean>(false);
   const pathnameRef = useRef(location.pathname);
   pathnameRef.current = location.pathname;
+
+  // Ligne `alma_whisper_history` du whisper actuellement affiché. Permet de
+  // renseigner `action_taken` sur la bonne ligne, y compris pour un whisper
+  // demandé par la personne.
+  const historyRowRef = useRef<{ whisperId: string; rowId: string } | null>(null);
+
+  const recordEmission = useCallback(
+    async (w: AlmaWhisper) => {
+      historyRowRef.current = null;
+      if (!user?.id) return;
+      const { data, error } = await supabase
+        .from("alma_whisper_history" as any)
+        .insert(buildHistoryInsert({ userId: user.id, whisper: w, sessionId: sessionId() }) as any)
+        .select("id")
+        .maybeSingle();
+      if (error) {
+        // eslint-disable-next-line no-console
+        console.error("[Alma] insert alma_whisper_history a échoué", error);
+        return;
+      }
+      const rowId = (data as any)?.id;
+      if (rowId) historyRowRef.current = { whisperId: w.id, rowId: String(rowId) };
+    },
+    [user?.id],
+  );
+
 
   // Verbose mode : query param ?alma=verbose OU flag session (persiste après refresh)
   const [verboseMode, setVerboseMode] = useState<boolean>(() => {
@@ -374,24 +401,8 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
       },
     });
 
-    if (user?.id) {
-      void supabase
-        .from("alma_whisper_history" as any)
-        .insert({
-          user_id: user.id,
-          whisper_type: next.type,
-          surface: next.surface,
-          session_id: sessionId(),
-          metadata: next.metadata ?? null,
-        } as any)
-        .then(({ error }) => {
-          if (error) {
-            // eslint-disable-next-line no-console
-            console.error("[Alma] insert alma_whisper_history a échoué", error);
-          }
-        });
-    }
-  }, [current, queue, user?.id, isProactiveMuted, verboseMode, claimProactiveSurface, activeProactiveSurface]);
+    void recordEmission(next);
+  }, [current, queue, user?.id, isProactiveMuted, verboseMode, claimProactiveSurface, activeProactiveSurface, recordEmission]);
 
   const dismissCurrent = useCallback(
     (reason: AlmaDismissReason, actionId?: string) => {
@@ -410,25 +421,26 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
       });
 
       if (user?.id) {
-        const patch: Record<string, unknown> = { dismissed_reason: reason };
-        // Ne renseigne action_taken QUE pour un clic volontaire, jamais pour
-        // un auto-dismiss ou une fermeture manuelle : le dashboard admin
-        // compte les actions via cette colonne.
-        if (reason === "action_clicked" && actionId) {
-          patch.action_taken = actionId;
-        }
-        void supabase
-          .from("alma_whisper_history" as any)
-          .update(patch as any)
-          .eq("user_id", user.id)
-          .eq("whisper_type", w.type)
-          .is("dismissed_reason", null)
-          .then(({ error }) => {
-            if (error) {
-              // eslint-disable-next-line no-console
-              console.error("[Alma] update alma_whisper_history a échoué", error);
-            }
-          });
+        const patch = buildHistoryPatch(reason, reason === "action_clicked" ? actionId : undefined);
+        const rowId =
+          historyRowRef.current && historyRowRef.current.whisperId === w.id
+            ? historyRowRef.current.rowId
+            : null;
+        historyRowRef.current = null;
+
+        // La ligne créée à l'affichage est visée par son identifiant. Un
+        // repli par type reste en place pour les lignes créées avant ce lot.
+        let query = supabase.from("alma_whisper_history" as any).update(patch as any);
+        query = rowId
+          ? query.eq("id", rowId)
+          : query.eq("user_id", user.id).eq("whisper_type", w.type).is("dismissed_reason", null);
+
+        void query.then(({ error }: { error: unknown }) => {
+          if (error) {
+            // eslint-disable-next-line no-console
+            console.error("[Alma] update alma_whisper_history a échoué", error);
+          }
+        });
       }
     },
     [current, user?.id],
@@ -457,6 +469,7 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
           if (data && (data as any).id) {
             const nudge = buildUsageNudgeWhisper({ payload: data as any, audience, surface });
             setCurrent(nudge);
+            void recordEmission(nudge);
             pushSeenId(String((data as any).id));
             trackEvent("alma_next_tip_delivered", {
               metadata: { fact_id: (data as any).id, kind: "usage_nudge", surface },
@@ -493,6 +506,7 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
             },
           });
           setCurrent(whisper);
+          void recordEmission(whisper);
           pushSeenId(String(fact.id));
           trackEvent("alma_next_tip_delivered", {
             metadata: { fact_id: fact.id, kind: "cultural_fact", surface },
@@ -504,7 +518,7 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
       }
 
       // 3) Rien de neuf.
-      setCurrent({
+      const empty: AlmaWhisper = {
         id: `alma-empty-${Date.now()}`,
         type: "cultural_fact",
         audience,
@@ -513,10 +527,12 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
         allowNextTip: false,
         message: emptyMessage ?? "Rien de neuf pour l'instant, revenez un peu plus tard.",
         autoDismissMs: 6_000,
-      });
+      };
+      setCurrent(empty);
+      void recordEmission(empty);
       trackEvent("alma_next_tip_empty", { metadata: { surface } });
     },
-    [user?.id, activeRole],
+    [user?.id, activeRole, recordEmission],
   );
 
   const value = useMemo<AlmaContextValue>(

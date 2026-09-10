@@ -16,9 +16,16 @@
  * Ne change AUCUNE logique du scheduler (canEmit, queue, dismissCurrent).
  * Ne rend jamais AlmaAvatarLottie.
  */
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ChevronDown, Sparkles, X, MoreHorizontal, Check, EyeOff, Lightbulb, Route } from "lucide-react";
+import { ChevronDown, Sparkles, X, MoreHorizontal, Check, EyeOff, Lightbulb, Route, MessageCircle } from "lucide-react";
+import { AlmaConversation } from "./AlmaConversation";
+import {
+  getAlmaConversationState,
+  openAlmaConversation,
+  subscribeAlmaConversation,
+} from "@/lib/alma/conversation-store";
+import { autoDismissDelay, shouldScheduleAutoDismiss } from "@/lib/alma/auto-dismiss";
 import { cn } from "@/lib/utils";
 import { AlmaAvatarAnimated } from "./AlmaAvatarAnimated";
 import { useAlma } from "@/contexts/AlmaContext";
@@ -196,6 +203,13 @@ function AlmaDockInner() {
   const [expanded, setExpanded] = useState(false);
   const [userCollapsed, setUserCollapsed] = useState(false);
 
+  // Fil de conversation, stocké hors React pour survivre au démontage du
+  // dock provoqué par une modale Radix.
+  const conversation = useSyncExternalStore(
+    subscribeAlmaConversation,
+    getAlmaConversationState,
+  );
+
 
   // Auto-timer d'auto-dismiss pour le whisper courant.
   const timerRef = useRef<number | null>(null);
@@ -237,13 +251,20 @@ function AlmaDockInner() {
 
 
   // Auto-dismiss timer (20s défaut, ou whisper.autoDismissMs).
+  // Une conversation ouverte suspend ce timer : le message reste à l'écran,
+  // il est devenu le premier message du fil.
   useEffect(() => {
-    if (!currentWhisper) {
+    if (
+      !shouldScheduleAutoDismiss({
+        hasWhisper: !!currentWhisper,
+        conversationOpen: conversation.open,
+      })
+    ) {
       if (timerRef.current) window.clearTimeout(timerRef.current);
       timerRef.current = null;
       return;
     }
-    const total = currentWhisper.autoDismissMs ?? 20_000;
+    const total = autoDismissDelay(currentWhisper?.autoDismissMs);
     pausedRef.current = false;
     remainingRef.current = total;
     startedAtRef.current = Date.now();
@@ -253,7 +274,7 @@ function AlmaDockInner() {
       if (timerRef.current) window.clearTimeout(timerRef.current);
       timerRef.current = null;
     };
-  }, [currentWhisper?.id, doDismiss]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [currentWhisper?.id, conversation.open, doDismiss]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const pauseTimer = () => {
     if (pausedRef.current || !timerRef.current) return;
@@ -382,6 +403,21 @@ function AlmaDockInner() {
     [location.pathname, activeRole, requestNextTip],
   );
 
+  // Ouvre le fil. Le whisper courant devient le premier message, sinon
+  // c'est la proposition contextuelle déjà calculée qui sert d'amorce.
+  const startConversation = () => {
+    const seed =
+      whisper?.message ??
+      proposition?.message ??
+      "Je vous écoute. Dites-moi ce que vous cherchez.";
+    openAlmaConversation(seed);
+    trackEvent("alma_conversation_opened" as any, {
+      metadata: { surface: surfaceFromPath(location.pathname, activeRole) },
+    });
+    setExpanded(true);
+    setUserCollapsed(false);
+  };
+
   if (isModalOpen) return null;
   if (hidden) return null;
 
@@ -399,8 +435,16 @@ function AlmaDockInner() {
         "bottom-[calc(env(safe-area-inset-bottom,0px)+5.5rem)] md:bottom-6",
       )}
     >
+      {/* Fil de conversation, prioritaire sur les panneaux d'un seul message */}
+      {expanded && conversation.open && (
+        <AlmaConversation
+          surface={surfaceFromPath(location.pathname, activeRole)}
+          activeRole={activeRole === "owner" ? "owner" : "sitter"}
+        />
+      )}
+
       {/* Panneau déplié */}
-      {expanded && whisper && (
+      {expanded && !conversation.open && whisper && (
         <div
           role="status"
           aria-live="polite"
@@ -427,7 +471,7 @@ function AlmaDockInner() {
           <p className="text-[13px] leading-snug text-foreground/90 whitespace-pre-line">
             {whisper.message}
           </p>
-          {(whisper.primaryAction || whisper.secondaryAction || whisper.allowNextTip) && (
+          {(
             <div className="mt-2 flex flex-wrap items-center gap-2">
               {whisper.primaryAction && (
                 <button
@@ -471,13 +515,20 @@ function AlmaDockInner() {
                   Un autre conseil
                 </button>
               )}
+              <button
+                type="button"
+                onClick={() => startConversation()}
+                className="text-xs font-medium text-primary hover:underline underline-offset-2"
+              >
+                Répondre à Alma
+              </button>
             </div>
           )}
         </div>
       )}
 
       {/* Panneau de proposition permanente (aucun whisper actif) */}
-      {expanded && !whisper && proposition && (
+      {expanded && !conversation.open && !whisper && proposition && (
         <div
           role="status"
           className={cn(
@@ -512,6 +563,13 @@ function AlmaDockInner() {
               className="min-h-11 rounded-full px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               Un conseil ?
+            </button>
+            <button
+              type="button"
+              onClick={() => startConversation()}
+              className="min-h-11 rounded-full px-3 py-1.5 text-xs font-medium text-primary hover:bg-muted transition focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              Parler à Alma
             </button>
           </div>
         </div>
@@ -667,6 +725,16 @@ function AlmaDockInner() {
             >
               <Lightbulb className="mr-2 h-4 w-4" aria-hidden />
               <span>Un conseil ?</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="min-h-11 cursor-pointer"
+              onSelect={(e) => {
+                e.preventDefault();
+                startConversation();
+              }}
+            >
+              <MessageCircle className="mr-2 h-4 w-4" aria-hidden />
+              <span>Parler à Alma</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">

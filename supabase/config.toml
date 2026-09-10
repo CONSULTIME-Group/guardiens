@@ -55,6 +55,10 @@ project_id = "erhccyqevdyevpyctsjj"
     verify_jwt = true
   [functions.draft-sit-from-prompt]
     verify_jwt = true
+  [functions.alma-chat]
+    verify_jwt = true
+  [functions.alma-transcribe]
+    verify_jwt = true
   [functions.draft-conversation-opener]
     verify_jwt = true
   [functions.draft-application-letter]
