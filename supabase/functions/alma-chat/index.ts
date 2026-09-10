@@ -1,5 +1,5 @@
 // Alma conversationnelle (lot 1).
-// Entrée : { message, history: [{role, content}], active_role, surface }
+// Entrée : { message, history: [{role, content}], active_role, surface, input_mode }
 // Sortie : { answer } ou { limited: true, message } ou { error }
 //
 // Modèle : Gemini 2.5 Flash via le gateway Lovable (LOVABLE_API_KEY).
@@ -36,6 +36,8 @@ Deno.serve(async (req) => {
       return json({ error: "Message invalide (1 à 2000 caractères)." }, 400);
     }
     const activeRole = body?.active_role === "owner" ? "owner" : "sitter";
+    // Voix ou clavier, renseigne la répartition suivie dans /admin/alma.
+    const inputMode = body?.input_mode === "voice" ? "voice" : "keyboard";
     const surface = typeof body?.surface === "string" ? body.surface.slice(0, 60) : "unknown";
     const history = Array.isArray(body?.history)
       ? body.history
@@ -82,6 +84,7 @@ Deno.serve(async (req) => {
         user_id: userId,
         surface,
         active_role: activeRole,
+        input_mode: inputMode,
         question: message,
         answer: ALMA_CHAT_LIMIT_MESSAGE,
         register: detectRegister(message),
@@ -185,6 +188,7 @@ Deno.serve(async (req) => {
         user_id: userId,
         surface,
         active_role: activeRole,
+        input_mode: inputMode,
         question: message,
         answer: null,
         register: detectRegister(message),
@@ -200,6 +204,7 @@ Deno.serve(async (req) => {
         user_id: userId,
         surface,
         active_role: activeRole,
+        input_mode: inputMode,
         question: message,
         answer: null,
         register: detectRegister(message),
@@ -213,6 +218,7 @@ Deno.serve(async (req) => {
       user_id: userId,
       surface,
       active_role: activeRole,
+      input_mode: inputMode,
       question: message,
       answer,
       register: detectRegister(message),
