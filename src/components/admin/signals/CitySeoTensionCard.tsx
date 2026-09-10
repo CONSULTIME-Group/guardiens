@@ -7,11 +7,11 @@ import { Button } from "@/components/ui/button";
 import { SignalPriorityBadge } from "./PriorityBadge";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  buildCoverageGapMessage,
   buildSeoTensionMessage,
+  buildVerifiedFragment,
 } from "@/lib/admin/cityCoverage";
 
-export interface CityCoverageSignal {
+export interface CitySeoTensionSignal {
   id: string;
   signal_type: string;
   severity: "critical" | "warning" | "info";
@@ -21,42 +21,33 @@ export interface CityCoverageSignal {
   metadata: {
     city?: string;
     slug?: string;
+    city_page_id?: string;
     radius_km?: number;
-    local_sitters_count?: number;
+    sitters_count?: number;
     verified_sitters_count?: number;
     active_sits_count?: number;
     gsc_impressions?: number;
     gsc_clicks?: number;
     tension_ratio?: number;
+    tension_threshold?: number;
+    sample_size?: number;
   };
 }
 
-interface Props { signal: CityCoverageSignal; }
+interface Props { signal: CitySeoTensionSignal; }
 
-export const CityCoverageCard = ({ signal }: Props) => {
+export const CitySeoTensionCard = ({ signal }: Props) => {
   const qc = useQueryClient();
   const [busy, setBusy] = useState(false);
   const m = signal.metadata ?? {};
-  const city = m.city ?? "Ville inconnue";
   const metrics = {
-    city,
-    sittersCount: m.local_sitters_count ?? 0,
+    city: m.city ?? "Ville inconnue",
+    sittersCount: m.sitters_count ?? 0,
     verifiedSittersCount: m.verified_sitters_count ?? 0,
     radiusKm: m.radius_km ?? 30,
-    activeSitsCount: m.active_sits_count ?? 0,
   };
-  const isTension = signal.signal_type === "city_seo_tension";
-  const title = isTension
-    ? `Tension SEO, ${city}`
-    : `Trou de couverture, ${city}`;
-  const message = isTension
-    ? buildSeoTensionMessage({
-        ...metrics,
-        impressions: m.gsc_impressions ?? 0,
-        ratio: m.tension_ratio ?? 0,
-      })
-    : buildCoverageGapMessage(metrics);
-  const gscUrl = `https://search.google.com/search-console?resource_id=sc-domain%3Aguardiens.fr&query=${encodeURIComponent(city)}`;
+  const secondary = buildVerifiedFragment(metrics);
+  const gscUrl = `https://search.google.com/search-console?resource_id=sc-domain%3Aguardiens.fr&query=${encodeURIComponent(metrics.city)}`;
 
   const handleIgnore = async () => {
     setBusy(true);
@@ -81,15 +72,22 @@ export const CityCoverageCard = ({ signal }: Props) => {
           </div>
           <div className="flex-1 min-w-0 space-y-2">
             <div className="flex flex-wrap items-center gap-2">
-              <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+              <h3 className="text-sm font-semibold text-foreground">
+                Tension SEO, {metrics.city}
+              </h3>
               <SignalPriorityBadge severity={signal.severity} />
             </div>
-            <div className="text-sm text-foreground">{message}</div>
+            <div className="text-sm text-foreground">
+              {buildSeoTensionMessage({ ...metrics, impressions: m.gsc_impressions ?? 0 })}
+            </div>
+            {secondary && (
+              <div className="text-xs text-muted-foreground">{secondary}</div>
+            )}
             <div className="flex flex-wrap gap-2 pt-1">
               <Button size="sm" variant="ghost" asChild>
                 <a href={gscUrl} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className="h-4 w-4 mr-2" />
-                  Voir GSC
+                  Voir Search Console
                 </a>
               </Button>
               <Button size="sm" variant="ghost" onClick={handleIgnore} disabled={busy}>

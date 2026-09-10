@@ -9441,16 +9441,6 @@ export type Database = {
         }[]
       }
       detect_unsourced_stats: { Args: { p_content: string }; Returns: string[] }
-      detect_untapped_cities: {
-        Args: never
-        Returns: {
-          active_sits_count: number
-          city: string
-          gsc_clicks: number
-          gsc_impressions: number
-          local_sitters_count: number
-        }[]
-      }
       effective_search_radius: { Args: { declared: number }; Returns: number }
       email_cap_bypass_counts: {
         Args: { p_days?: number }

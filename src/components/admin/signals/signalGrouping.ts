@@ -26,7 +26,7 @@ export const SIGNAL_TYPE_LABELS: Record<string, string> = {
   owner_sit_unconfirmed: "Annonce non confirmée par le propriétaire",
   pending_application: "Candidature en attente",
   stale_draft: "Brouillon dormant",
-  untapped_city: "Ville sans activité",
+  
   city_coverage_gap: "Trou de couverture gardiens",
   city_seo_tension: "Tension SEO ville",
   undeclared_pricing: "Mention de tarif non déclarée",
@@ -167,7 +167,7 @@ export const SIGNAL_TOPIC: Record<string, string> = {
   pending_application: "candidatures_sans_reponse",
   no_applications: "liquidite_annonces",
   stale_draft: "liquidite_annonces",
-  untapped_city: "liquidite_annonces",
+  
   city_coverage_gap: "liquidite_annonces",
   city_seo_tension: "liquidite_annonces",
   email_delivery_low: "deliverabilite_email",
