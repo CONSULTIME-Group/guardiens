@@ -469,6 +469,7 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
           if (data && (data as any).id) {
             const nudge = buildUsageNudgeWhisper({ payload: data as any, audience, surface });
             setCurrent(nudge);
+            void recordEmission(nudge);
             pushSeenId(String((data as any).id));
             trackEvent("alma_next_tip_delivered", {
               metadata: { fact_id: (data as any).id, kind: "usage_nudge", surface },
@@ -505,6 +506,7 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
             },
           });
           setCurrent(whisper);
+          void recordEmission(whisper);
           pushSeenId(String(fact.id));
           trackEvent("alma_next_tip_delivered", {
             metadata: { fact_id: fact.id, kind: "cultural_fact", surface },
@@ -516,7 +518,7 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
       }
 
       // 3) Rien de neuf.
-      setCurrent({
+      const empty: AlmaWhisper = {
         id: `alma-empty-${Date.now()}`,
         type: "cultural_fact",
         audience,
@@ -525,10 +527,12 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
         allowNextTip: false,
         message: emptyMessage ?? "Rien de neuf pour l'instant, revenez un peu plus tard.",
         autoDismissMs: 6_000,
-      });
+      };
+      setCurrent(empty);
+      void recordEmission(empty);
       trackEvent("alma_next_tip_empty", { metadata: { surface } });
     },
-    [user?.id, activeRole],
+    [user?.id, activeRole, recordEmission],
   );
 
   const value = useMemo<AlmaContextValue>(
