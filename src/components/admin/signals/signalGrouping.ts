@@ -168,6 +168,8 @@ export const SIGNAL_TOPIC: Record<string, string> = {
   no_applications: "liquidite_annonces",
   stale_draft: "liquidite_annonces",
   untapped_city: "liquidite_annonces",
+  city_coverage_gap: "liquidite_annonces",
+  city_seo_tension: "liquidite_annonces",
   email_delivery_low: "deliverabilite_email",
   digest_queue_stalled: "deliverabilite_email",
   digest_queue_morning_backlog: "deliverabilite_email",
