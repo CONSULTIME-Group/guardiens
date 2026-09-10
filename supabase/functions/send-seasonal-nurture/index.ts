@@ -127,10 +127,21 @@ Deno.serve(async (req) => {
       planRows = planRows.slice(0, body.limit)
     }
 
+    const batchSize = clampInt(body.batch_size, 1, 20, DEFAULT_BATCH_SIZE)
+    const batchDelayMs = clampInt(body.batch_delay_ms, 0, 10000, DEFAULT_BATCH_DELAY_MS)
+    const startedAt = Date.now()
+
     const planned = planRows.length
     if (planned === 0) {
-      await run.finish('success', { planned: 0, sent: 0, skipped: 0, failed: 0, period_key: periodKey, dry_run: !!body.dry_run })
-      return json({ ok: true, planned: 0, sent: 0, skipped: 0, failed: 0, reason: 'no_plan' })
+      await run.finish('success', {
+        planned: 0, sent: 0, skipped: 0, failed: 0, period_key: periodKey, dry_run: !!body.dry_run,
+        plan_brut: planBrut, cible_retenue: cibleRetenue, ecartes_hors_cible: ecartesHorsCible,
+      })
+      return json({
+        ok: true, planned: 0, sent: 0, skipped: 0, failed: 0, retried: 0, reason: 'no_plan',
+        plan_brut: planBrut, cible_retenue: cibleRetenue, ecartes_hors_cible: ecartesHorsCible,
+        period_key: periodKey,
+      })
     }
 
     let sent = 0
@@ -138,7 +149,9 @@ Deno.serve(async (req) => {
     let failed = 0
     const errors: Array<{ user_id: string; reason: string }> = []
 
-    async function processOne(row: PlanRow): Promise<'sent' | 'skipped' | 'failed'> {
+    type Outcome = 'sent' | 'skipped' | 'failed'
+
+    async function processOne(row: PlanRow): Promise<Outcome> {
       const email = (row.email ?? '').trim()
       if (!email) return 'skipped'
 
