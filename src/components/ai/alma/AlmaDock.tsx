@@ -25,6 +25,7 @@ import {
   openAlmaConversation,
   subscribeAlmaConversation,
 } from "@/lib/alma/conversation-store";
+import { autoDismissDelay, shouldScheduleAutoDismiss } from "@/lib/alma/auto-dismiss";
 import { cn } from "@/lib/utils";
 import { AlmaAvatarAnimated } from "./AlmaAvatarAnimated";
 import { useAlma } from "@/contexts/AlmaContext";
@@ -201,6 +202,13 @@ function AlmaDockInner() {
 
   const [expanded, setExpanded] = useState(false);
   const [userCollapsed, setUserCollapsed] = useState(false);
+
+  // Fil de conversation, stocké hors React pour survivre au démontage du
+  // dock provoqué par une modale Radix.
+  const conversation = useSyncExternalStore(
+    subscribeAlmaConversation,
+    getAlmaConversationState,
+  );
 
 
   // Auto-timer d'auto-dismiss pour le whisper courant.
