@@ -6,7 +6,13 @@ import { CORS_HEADERS } from "../_shared/ai-gateway.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const MAX_BYTES = 10 * 1024 * 1024;
-const MODEL = "google/gemini-3.5-transcribe";
+
+// Identifiants de transcription servis par le gateway Lovable.
+// Source : GET https://ai.gateway.lovable.dev/v1/models (listing authentifié),
+// vérifié le 10/09/2026, et documentation Lovable AI, section speech to text.
+// Modèle principal, puis repli si le workspace ne sert que l'autre.
+const PRIMARY_MODEL = "openai/gpt-4o-mini-transcribe";
+const FALLBACK_MODEL = "openai/gpt-4o-transcribe";
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -54,19 +60,28 @@ Deno.serve(async (req) => {
         "audio/x-wav": "wav",
       } as Record<string, string>)[(file.type || "").split(";")[0]] ?? "webm";
 
-    const upstream = new FormData();
-    upstream.append("model", MODEL);
-    upstream.append("file", file, `dictee.${ext}`);
+    const callGateway = async (model: string) => {
+      const upstream = new FormData();
+      upstream.append("model", model);
+      upstream.append("file", file, `dictee.${ext}`);
+      return await fetch("https://ai.gateway.lovable.dev/v1/audio/transcriptions", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${key}` },
+        body: upstream,
+      });
+    };
 
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/audio/transcriptions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${key}` },
-      body: upstream,
-    });
+    let res = await callGateway(PRIMARY_MODEL);
+    let detail = res.ok ? "" : await res.text().catch(() => "");
+    // Repli unique : le workspace peut ne servir que le second modèle.
+    if (!res.ok && (res.status === 400 || res.status === 404)) {
+      res = await callGateway(FALLBACK_MODEL);
+      detail = res.ok ? "" : await res.text().catch(() => "");
+    }
 
     if (!res.ok) {
-      const detail = await res.text().catch(() => "");
       console.error("alma-transcribe gateway error", res.status, detail);
+      const reason = `transcribe_gateway_${res.status} ${detail.replace(/[\r\n]+/g, " ").trim()}`.slice(0, 180);
       // Journalisation du pilotage : la dictée en échec reste visible en admin.
       try {
         const service = createClient(
@@ -81,7 +96,7 @@ Deno.serve(async (req) => {
           input_mode: "voice",
           question: null,
           answer: null,
-          refusal_reason: `transcribe_gateway_${res.status}`,
+          refusal_reason: reason,
         });
 
       } catch (logError) {
