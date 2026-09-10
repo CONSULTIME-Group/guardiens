@@ -403,6 +403,21 @@ function AlmaDockInner() {
     [location.pathname, activeRole, requestNextTip],
   );
 
+  // Ouvre le fil. Le whisper courant devient le premier message, sinon
+  // c'est la proposition contextuelle déjà calculée qui sert d'amorce.
+  const startConversation = () => {
+    const seed =
+      whisper?.message ??
+      proposition?.message ??
+      "Je vous écoute. Dites-moi ce que vous cherchez.";
+    openAlmaConversation(seed);
+    trackEvent("alma_conversation_opened" as any, {
+      metadata: { surface: surfaceFromPath(location.pathname, activeRole) },
+    });
+    setExpanded(true);
+    setUserCollapsed(false);
+  };
+
   if (isModalOpen) return null;
   if (hidden) return null;
 
