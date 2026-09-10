@@ -6048,6 +6048,33 @@ export type Database = {
         }
         Relationships: []
       }
+      seasonal_nurture_incidents: {
+        Row: {
+          constate_le: string
+          groupe: string
+          id: number
+          motif: string
+          period_key: string
+          user_id: string
+        }
+        Insert: {
+          constate_le?: string
+          groupe: string
+          id?: number
+          motif: string
+          period_key: string
+          user_id: string
+        }
+        Update: {
+          constate_le?: string
+          groupe?: string
+          id?: number
+          motif?: string
+          period_key?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       seasonal_periods: {
         Row: {
           active: boolean
@@ -9223,6 +9250,41 @@ export type Database = {
           first_name: string
           hours_since_started: number
           profile_id: string
+        }[]
+      }
+      detect_city_coverage_gaps: {
+        Args: { p_min_sitters?: number; p_radius_km?: number }
+        Returns: {
+          active_sits_count: number
+          city: string
+          city_page_id: string
+          gsc_clicks: number
+          gsc_impressions: number
+          radius_km: number
+          sitters_count: number
+          slug: string
+          verified_sitters_count: number
+        }[]
+      }
+      detect_city_seo_tension: {
+        Args: {
+          p_min_impressions?: number
+          p_min_sample?: number
+          p_percentile?: number
+          p_radius_km?: number
+        }
+        Returns: {
+          city: string
+          city_page_id: string
+          gsc_clicks: number
+          gsc_impressions: number
+          radius_km: number
+          sample_size: number
+          sitters_count: number
+          slug: string
+          tension_ratio: number
+          tension_threshold: number
+          verified_sitters_count: number
         }[]
       }
       detect_content_defects: {
