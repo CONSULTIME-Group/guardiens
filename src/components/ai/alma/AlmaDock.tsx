@@ -16,9 +16,15 @@
  * Ne change AUCUNE logique du scheduler (canEmit, queue, dismissCurrent).
  * Ne rend jamais AlmaAvatarLottie.
  */
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ChevronDown, Sparkles, X, MoreHorizontal, Check, EyeOff, Lightbulb, Route } from "lucide-react";
+import { ChevronDown, Sparkles, X, MoreHorizontal, Check, EyeOff, Lightbulb, Route, MessageCircle } from "lucide-react";
+import { AlmaConversation } from "./AlmaConversation";
+import {
+  getAlmaConversationState,
+  openAlmaConversation,
+  subscribeAlmaConversation,
+} from "@/lib/alma/conversation-store";
 import { cn } from "@/lib/utils";
 import { AlmaAvatarAnimated } from "./AlmaAvatarAnimated";
 import { useAlma } from "@/contexts/AlmaContext";
