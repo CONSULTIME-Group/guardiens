@@ -33,7 +33,6 @@ const FORBIDDEN: Record<Lang, RegExp[]> = {
 
 /** Clés exemptées, avec la raison. Toute nouvelle entrée doit être arbitrée. */
 const EXCEPTIONS: Record<string, string> = {
-  "landing.cities.all_guides": "silo « Guides locaux » conservé (lien vers /guides)",
   "landing.what_is.body_5": "mention du nom du silo « Guides locaux »",
   "emergency_page.further2_title": "silo « Guides locaux » conservé (carte lien)",
   "emergency_page.owner_title": "h2, bloqué par le garde-fou SEO, arbitrage en attente",

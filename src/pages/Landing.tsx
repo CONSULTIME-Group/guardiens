@@ -24,7 +24,6 @@ import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
 import { ConfianceSection } from "@/components/landing/ConfianceSection";
 import { ComparatifSection } from "@/components/landing/ComparatifSection";
 import { NotreHistoireSection } from "@/components/landing/NotreHistoireSection";
-import { GuidesVillesSection } from "@/components/landing/GuidesVillesSection";
 import { FaqSection } from "@/components/landing/FaqSection";
 import { FinalCtaSection } from "@/components/landing/FinalCtaSection";
 import { MidJourneyCta } from "@/components/landing/MidJourneyCta";
@@ -410,9 +409,6 @@ const Landing = () => {
 
       {/* ═══════════════ SECTION COMPARATIF (extractible, GEO) ═══════════════ */}
       <ComparatifSection />
-
-      {/* ═══════════════ GUIDES + VILLES + INVENTAIRE ═══════════════ */}
-      <GuidesVillesSection />
 
       {/* ═══════════════ SECTION 9bis, FAQ (section dédiée, miroir du JSON-LD FAQPage) ═══════════════ */}
       <FaqSection />
