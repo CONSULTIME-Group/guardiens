@@ -21,6 +21,7 @@ import { trackEvent } from "@/lib/analytics";
 import { readFormDraft, writeFormDraft, clearFormDraft, listFormDraftKeys, getFormDraftSavedAt } from "@/lib/formDraft";
 import DraftStatus, { type DraftState } from "@/components/shared/DraftStatus";
 import type { Pet } from "@/hooks/useOwnerProfile";
+import { useAlmaPetSuggestion } from "@/hooks/useAlmaPetSuggestion";
 
 const SPECIES = [
   { value: "dog", label: "Chien" }, { value: "cat", label: "Chat" },
@@ -61,6 +62,7 @@ const DRAFT_PREFIX = "owner-pet:";
 const draftKeyFor = (isNew: boolean, id?: string | null) => `${DRAFT_PREFIX}${isNew ? "new" : id ?? "new"}`;
 
 const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) => {
+  const suggestBreedGuide = useAlmaPetSuggestion();
   const { t } = useTranslation();
   const [editingPet, setEditingPet] = useState<Pet | null>(null);
   const [isNew, setIsNew] = useState(false);
@@ -221,6 +223,10 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
       }
       discardDraft(pet, wasNew);
       setEditingPet(null);
+      if (wasNew) {
+        // Alma réagit à l'ajout, sans jamais bloquer l'enregistrement.
+        void suggestBreedGuide({ name: pet.name, species: pet.species, breed: pet.breed });
+      }
     } catch (err) {
       logger.error("Owner pet save failed", { error: String(err) });
       toast.error("Échec de l'enregistrement. Votre saisie est conservée, réessayez.");
