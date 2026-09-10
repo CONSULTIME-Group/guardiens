@@ -27,6 +27,8 @@ export const SIGNAL_TYPE_LABELS: Record<string, string> = {
   pending_application: "Candidature en attente",
   stale_draft: "Brouillon dormant",
   untapped_city: "Ville sans activité",
+  city_coverage_gap: "Trou de couverture gardiens",
+  city_seo_tension: "Tension SEO ville",
   undeclared_pricing: "Mention de tarif non déclarée",
   contact_details_in_public_content: "Coordonnées dans un contenu public",
   no_applications: "Annonce sans candidature",
