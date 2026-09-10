@@ -17,7 +17,8 @@ import {
   associationTypeLabel,
 } from "@/lib/associationLabels";
 import type { AssociationPhoto } from "@/components/associations/types";
-import { buildConsentEmail } from "@/lib/associationConsentEmail";
+import { ASSOCIATION_CONSENT_SUBJECT, buildConsentEmail } from "@/lib/associationConsentEmail";
+import ConfirmDialog from "@/components/admin/ConfirmDialog";
 
 type AssociationRow = {
   id: string;
@@ -102,6 +103,7 @@ export default function AdminAssociations() {
   const [editing, setEditing] = useState<AssociationRow | null>(null);
   const [saving, setSaving] = useState(false);
   const [copying, setCopying] = useState(false);
+  const [sendingSlug, setSendingSlug] = useState<string | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -149,6 +151,39 @@ export default function AdminAssociations() {
       toast.success("Fiche enregistrée");
       setEditing(null);
     }
+  };
+
+  const recentlyRequested = (row: AssociationRow): boolean => {
+    if (!row.consent_requested_at) return false;
+    const ageMs = Date.now() - new Date(row.consent_requested_at).getTime();
+    return ageMs < 30 * 24 * 60 * 60 * 1000;
+  };
+
+  const invokeConsentEmail = async (
+    row: AssociationRow,
+    payload: Record<string, unknown>,
+  ) => {
+    setSendingSlug(row.slug);
+    const { data, error } = await supabase.functions.invoke("send-association-consent-email", {
+      body: { slug: row.slug, ...payload },
+    });
+    setSendingSlug(null);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success(`Envoyé à ${(data as any)?.to ?? ""}`);
+    await load();
+  };
+
+  const sendTest = async (row: AssociationRow) => {
+    const { data: userData } = await supabase.auth.getUser();
+    const adminEmail = userData?.user?.email;
+    if (!adminEmail) {
+      toast.error("Adresse de l'administrateur introuvable");
+      return;
+    }
+    await invokeConsentEmail(row, { mode: "test", test_to: adminEmail });
   };
 
   const copyConsentEmail = async (row: AssociationRow) => {
@@ -271,6 +306,45 @@ export default function AdminAssociations() {
                   <Button size="sm" variant="outline" onClick={() => copyConsentEmail(row)}>
                     Copier l'email de demande
                   </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={sendingSlug === row.slug}
+                    onClick={() => sendTest(row)}
+                  >
+                    M'envoyer un test
+                  </Button>
+                  <ConfirmDialog
+                    trigger={
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={
+                          !row.contact_email ||
+                          recentlyRequested(row) ||
+                          sendingSlug === row.slug
+                        }
+                      >
+                        Envoyer la demande
+                      </Button>
+                    }
+                    title="Envoyer la demande d'accord ?"
+                    description={
+                      <>
+                        Destinataire : {row.contact_email ?? ""}
+                        <br />
+                        Objet : {ASSOCIATION_CONSENT_SUBJECT}
+                        {recentlyRequested(row) && (
+                          <>
+                            <br />
+                            Demande déjà envoyée le {shortDate(row.consent_requested_at)}
+                          </>
+                        )}
+                      </>
+                    }
+                    confirmLabel="Envoyer"
+                    onConfirm={() => invokeConsentEmail(row, { mode: "send" })}
+                  />
                   <Button
                     size="sm"
                     variant="outline"
