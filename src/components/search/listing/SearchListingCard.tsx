@@ -7,6 +7,8 @@ import EnvironmentPills from "@/components/shared/EnvironmentPills";
 import FavoriteButton from "@/components/shared/FavoriteButton";
 import AffinityBadge from "@/components/matching/AffinityBadge";
 import { useAffinityWithShadow } from "@/hooks/useAffinityWithShadow";
+import { useDepartementNames } from "@/hooks/useDepartementNames";
+import { departementNameFromCode, formatCityDepartement } from "@/lib/locationLabel";
 
 
 import { PawPrint, Cat, Bird } from "lucide-react";
