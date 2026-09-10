@@ -184,7 +184,7 @@ async function main() {
 
   console.log("🗺️  Sitemap incremental build…");
 
-  const [articles, seoCity, guides, depts, breeds, profiles, sits, profiles_pros] = await Promise.all([
+  const [articles, seoCity, guides, depts, breeds, profiles, sits, profiles_pros, associations] = await Promise.all([
     fetchOrCache(
       "articles", cache,
       // Sonde composite (date + nombre) : sur une requête filtrée, la sortie
