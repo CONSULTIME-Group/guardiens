@@ -92,6 +92,8 @@ describe("detectRegister", () => {
     expect(detectRegister("Mon chien convulse, urgence")).toBe("sensible");
     expect(detectRegister("Où en est ma candidature ?")).toBe("dossier");
     expect(detectRegister("Comment fonctionne le guide de la maison ?")).toBe("reassurance");
+    expect(detectRegister("Depuis quand mon annonce est en ligne ?")).not.toBe("perso");
+    expect(detectRegister("Quel âge a mon chien ?")).not.toBe("perso");
   });
 });
 
