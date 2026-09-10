@@ -23,7 +23,7 @@ describe("identité d'Alma dans le prompt", () => {
   });
 
   it("répond oui quand on lui demande si elle est une intelligence artificielle", () => {
-    expect(promptSource).toContain("tu réponds oui, tu es une assistante");
+    expect(promptSource).toContain("tu es l'assistante de Guardiens et tu portes le nom et l'histoire d'Alma");
     expect(promptSource).not.toContain("SI ON TE DEMANDE SI TU ES UNE IA");
   });
 
@@ -34,7 +34,32 @@ describe("identité d'Alma dans le prompt", () => {
 
   it("ajoute la petite conversation en quatrième registre", () => {
     expect(promptSource).toContain("QUATRE REGISTRES");
-    expect(promptSource).toContain("La petite conversation");
+    expect(promptSource).toContain("Ce qui te concerne");
+  });
+
+  it("porte la biographie exacte d'Alma", () => {
+    expect(promptSource).toContain("Córdoba");
+    expect(promptSource).toContain("2018");
+    expect(promptSource).toContain("2020");
+    expect(promptSource).toContain("TON CARNET");
+  });
+
+  it("bannit les formules de centre d'appel", () => {
+    expect(promptSource).toContain("Formules bannies, elles sonnent centre d'appel");
+    const bannedLineStart = promptSource.indexOf("Formules bannies, elles sonnent centre d'appel");
+    const bannedLineEnd = promptSource.indexOf("\n", bannedLineStart);
+    const sourceWithoutBannedLine =
+      promptSource.slice(0, bannedLineStart) + promptSource.slice(bannedLineEnd + 1);
+    const banned = [
+      "Que puis-je faire pour vous",
+      "Comment puis-je vous aider",
+      "En quoi puis-je vous aider",
+      "Je suis là pour vous aider",
+      "N'hésitez pas",
+    ];
+    for (const phrase of banned) {
+      expect(sourceWithoutBannedLine).not.toContain(phrase);
+    }
   });
 
   it("verrouille la variation des ouvertures", () => {
