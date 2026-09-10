@@ -456,7 +456,7 @@ function AlmaDockInner() {
           <p className="text-[13px] leading-snug text-foreground/90 whitespace-pre-line">
             {whisper.message}
           </p>
-          {(whisper.primaryAction || whisper.secondaryAction || whisper.allowNextTip) && (
+          {(
             <div className="mt-2 flex flex-wrap items-center gap-2">
               {whisper.primaryAction && (
                 <button
