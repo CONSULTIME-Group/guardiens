@@ -39,6 +39,7 @@ import {
   SchedulerState,
 } from "@/lib/alma/whisper-scheduler";
 import { buildCulturalFactWhisper, buildUsageNudgeWhisper } from "@/lib/alma/whisper-triggers";
+import { buildHistoryInsert, buildHistoryPatch } from "@/lib/alma/whisper-history";
 
 /**
  * Routes sur lesquelles Alma NE DOIT PAS afficher de whisper flottant proactif.
