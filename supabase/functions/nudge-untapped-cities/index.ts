@@ -1,15 +1,15 @@
 // Cron hebdomadaire des signaux villes (mercredi 08:00 UTC).
 //
-// Deux signaux distincts, tous deux fondés sur un comptage geographique :
+// Deux signaux distincts, tous deux fondes sur un comptage geographique :
 //  A. city_coverage_gap : moins de 3 gardiens dans 30 km autour du point de la
 //     page ville, sans condition de trafic Google.
-//  B. city_seo_tension : demande Google rapportee a l'offre locale, seuil
-//     relatif. Desactive par defaut (drapeau admin_signal_city_seo_tension),
-//     et la fonction SQL ne renvoie rien tant que l'echantillon GSC est trop
-//     mince pour un seuil credible.
+//  B. city_seo_tension : demande Google rapportee a l'offre locale.
 //
 // Le comptage ignore volontairement identity_verified : la verification est
 // une information affichee a cote, jamais un filtre.
+//
+// L'ancienne detection detect_untapped_cities n'est plus appelee : elle
+// comptait par nom de ville exact et filtrait sur identity_verified.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 
@@ -21,6 +21,9 @@ const corsHeaders = {
 
 const COVERAGE_RADIUS_KM = 30;
 const COVERAGE_MIN_SITTERS = 3;
+const TENSION_MIN_IMPRESSIONS = 100;
+const TENSION_PERCENTILE = 0.75;
+const TENSION_MIN_SAMPLE = 5;
 
 /** Etiquette de semaine ISO, utilisee pour l'idempotence hebdomadaire. */
 function isoWeekTag(d: Date): string {
@@ -90,54 +93,52 @@ Deno.serve(async (req) => {
         metadata: {
           city: g.city,
           slug: g.slug,
+          city_page_id: g.city_page_id,
           radius_km: g.radius_km,
-          local_sitters_count: g.sitters_count,
+          sitters_count: g.sitters_count,
           verified_sitters_count: g.verified_sitters_count,
           active_sits_count: g.active_sits_count,
-          gsc_impressions: g.gsc_impressions,
-          gsc_clicks: g.gsc_clicks,
           week,
         },
       });
     }
 
-    const { data: tensionFlag } = await supabase
-      .from("feature_flags")
-      .select("enabled")
-      .eq("key", "admin_signal_city_seo_tension")
-      .maybeSingle();
+    const { data: tension, error: tErr } = await supabase.rpc(
+      "detect_city_seo_tension",
+      {
+        p_radius_km: COVERAGE_RADIUS_KM,
+        p_min_impressions: TENSION_MIN_IMPRESSIONS,
+        p_percentile: TENSION_PERCENTILE,
+        p_min_sample: TENSION_MIN_SAMPLE,
+      },
+    );
+    if (tErr) throw tErr;
 
     let tensionCount = 0;
-    if (tensionFlag?.enabled === true) {
-      const { data: tension, error: tErr } = await supabase.rpc(
-        "detect_city_seo_tension",
-        { p_radius_km: COVERAGE_RADIUS_KM },
-      );
-      if (tErr) throw tErr;
-      for (const t of tension ?? []) {
-        const key = `city_seo_tension:${t.city}:${week}`;
-        if (alreadyOpen.has(key)) continue;
-        tensionCount += 1;
-        rows.push({
-          signal_type: "city_seo_tension",
-          severity: "warning",
-          entity_type: "city",
-          entity_id: t.city_page_id,
-          metadata: {
-            city: t.city,
-            slug: t.slug,
-            radius_km: t.radius_km,
-            local_sitters_count: t.sitters_count,
-            verified_sitters_count: t.verified_sitters_count,
-            gsc_impressions: t.gsc_impressions,
-            gsc_clicks: t.gsc_clicks,
-            tension_ratio: t.tension_ratio,
-            tension_threshold: t.tension_threshold,
-            sample_size: t.sample_size,
-            week,
-          },
-        });
-      }
+    for (const t of tension ?? []) {
+      const key = `city_seo_tension:${t.city}:${week}`;
+      if (alreadyOpen.has(key)) continue;
+      tensionCount += 1;
+      rows.push({
+        signal_type: "city_seo_tension",
+        severity: "warning",
+        entity_type: "city",
+        entity_id: t.city_page_id,
+        metadata: {
+          city: t.city,
+          slug: t.slug,
+          city_page_id: t.city_page_id,
+          radius_km: t.radius_km,
+          sitters_count: t.sitters_count,
+          verified_sitters_count: t.verified_sitters_count,
+          gsc_impressions: t.gsc_impressions,
+          gsc_clicks: t.gsc_clicks,
+          tension_ratio: t.tension_ratio,
+          tension_threshold: t.tension_threshold,
+          sample_size: t.sample_size,
+          week,
+        },
+      });
     }
 
     if (rows.length > 0) {
@@ -150,7 +151,6 @@ Deno.serve(async (req) => {
         week,
         coverage_gaps: rows.length - tensionCount,
         seo_tension: tensionCount,
-        tension_enabled: tensionFlag?.enabled === true,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
