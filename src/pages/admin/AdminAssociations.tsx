@@ -151,6 +151,39 @@ export default function AdminAssociations() {
     }
   };
 
+  const recentlyRequested = (row: AssociationRow): boolean => {
+    if (!row.consent_requested_at) return false;
+    const ageMs = Date.now() - new Date(row.consent_requested_at).getTime();
+    return ageMs < 30 * 24 * 60 * 60 * 1000;
+  };
+
+  const invokeConsentEmail = async (
+    row: AssociationRow,
+    payload: Record<string, unknown>,
+  ) => {
+    setSendingSlug(row.slug);
+    const { data, error } = await supabase.functions.invoke("send-association-consent-email", {
+      body: { slug: row.slug, ...payload },
+    });
+    setSendingSlug(null);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success(`Envoyé à ${(data as any)?.to ?? ""}`);
+    await load();
+  };
+
+  const sendTest = async (row: AssociationRow) => {
+    const { data: userData } = await supabase.auth.getUser();
+    const adminEmail = userData?.user?.email;
+    if (!adminEmail) {
+      toast.error("Adresse de l'administrateur introuvable");
+      return;
+    }
+    await invokeConsentEmail(row, { mode: "test", test_to: adminEmail });
+  };
+
   const copyConsentEmail = async (row: AssociationRow) => {
     const text = buildConsentEmail(row.name, `https://guardiens.fr/associations/${row.slug}`);
     try {
