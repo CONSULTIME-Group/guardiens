@@ -511,6 +511,8 @@ const CityPage = () => {
 
  <NearbyCityLinks department={cityData.department} currentSlug={cityData.slug} />
 
+ <DepartmentAssociations departementName={cityData.department} />
+
  {/* FAQ */}
  <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">
  <h2 className="font-heading text-2xl font-bold text-foreground mb-6">
