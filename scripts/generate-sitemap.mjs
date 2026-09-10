@@ -184,7 +184,7 @@ async function main() {
 
   console.log("🗺️  Sitemap incremental build…");
 
-  const [articles, seoCity, guides, depts, breeds, profiles, sits, profiles_pros] = await Promise.all([
+  const [articles, seoCity, guides, depts, breeds, profiles, sits, profiles_pros, associations] = await Promise.all([
     fetchOrCache(
       "articles", cache,
       // Sonde composite (date + nombre) : sur une requête filtrée, la sortie
@@ -436,6 +436,7 @@ async function main() {
   for (const e of profiles) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
   for (const e of sits) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
   for (const e of profiles_pros || []) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
+  for (const e of associations || []) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
   for (const e of proSiloEntries) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
   // Pages légales (/cgu, /confidentialite, /mentions-legales) déjà incluses
   // dans staticPages via staticRoutes. Ne pas les ré-ajouter ici.

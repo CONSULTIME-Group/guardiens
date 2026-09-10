@@ -160,7 +160,7 @@ export default function AssociationDetail() {
                   <>Photos : {data.photo_credit}, avec l'accord de l'association.</>
                 ) : (
                   <>
-                    Photos : {data.photo_credit}, publiées sur{" "}
+                    Photos : {data.photo_credit},{" "}
                     {firstSourcePage ? (
                       <a
                         href={firstSourcePage}
@@ -168,10 +168,10 @@ export default function AssociationDetail() {
                         rel="noopener"
                         className="underline"
                       >
-                        le site de l'association
+                        publiées par l'association
                       </a>
                     ) : (
-                      <>le site de l'association</>
+                      <>publiées par l'association</>
                     )}
                     .
                   </>
