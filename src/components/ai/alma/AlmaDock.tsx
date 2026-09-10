@@ -205,32 +205,43 @@ function DockComposer({
   };
 
   return (
-    <div className="mt-2 flex items-end gap-2">
-      <textarea
-        value={draft}
-        onChange={(e) => setDraft(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault();
-            submit();
-          }
-        }}
-        rows={1}
-        maxLength={2000}
-        placeholder={composerPlaceholder(surface)}
-        aria-label="Votre message pour Alma"
-        autoFocus={false}
-        className="flex-1 resize-none rounded-xl border border-input bg-background px-3 py-2 text-[13px] leading-snug max-h-24 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      />
-      {voice.supported && (
+    <div className="mt-2">
+      <div className="flex items-end gap-2">
+        <textarea
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              submit();
+            }
+          }}
+          rows={1}
+          maxLength={2000}
+          placeholder={composerPlaceholder(surface)}
+          aria-label="Votre message pour Alma"
+          autoFocus={false}
+          className="flex-1 resize-none rounded-xl border border-input bg-background px-3 py-2 text-[13px] leading-snug max-h-24 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        />
         <button
           type="button"
-          onClick={voice.toggle}
-          disabled={voice.status === "transcribing"}
-          aria-label={voice.status === "recording" ? "Arrêter la dictée" : "Dicter votre message"}
+          onClick={voice.supported ? voice.toggle : undefined}
+          disabled={!voice.supported || voice.status === "transcribing"}
+          title={
+            voice.supported
+              ? undefined
+              : "La dictée arrive sur les navigateurs qui la prennent en charge."
+          }
+          aria-label={
+            voice.supported
+              ? voice.status === "recording"
+                ? "Arrêter la dictée"
+                : "Dicter votre message"
+              : "Dictée disponible sur les navigateurs qui la prennent en charge"
+          }
           aria-pressed={voice.status === "recording"}
           className={cn(
-            "flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition",
+            "flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition disabled:opacity-50",
             voice.status === "recording"
               ? "bg-destructive text-destructive-foreground"
               : "text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -242,19 +253,50 @@ function DockComposer({
             <Mic className="h-4 w-4" />
           )}
         </button>
-      )}
-      <button
-        type="button"
-        onClick={submit}
-        disabled={draft.trim().length === 0}
-        aria-label="Envoyer à Alma"
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground disabled:opacity-50 transition"
-      >
-        <Send className="h-4 w-4" />
-      </button>
+        <button
+          type="button"
+          onClick={submit}
+          disabled={draft.trim().length === 0}
+          aria-label="Envoyer à Alma"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground disabled:opacity-50 transition"
+        >
+          <Send className="h-4 w-4" />
+        </button>
+      </div>
+      <VoiceStatusLine status={voice.status} error={voice.error} />
     </div>
   );
 }
+
+/**
+ * Retour visible de la dictée : écoute en cours, transcription en cours,
+ * et message d'échec renvoyé par la fonction quand il existe.
+ */
+export function VoiceStatusLine({
+  status,
+  error,
+}: {
+  status: "idle" | "recording" | "transcribing";
+  error: string | null;
+}) {
+  return (
+    <div aria-live="polite" className="mt-1 min-h-[16px] px-1">
+      {status === "recording" && (
+        <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+          <span className="h-2 w-2 rounded-full bg-destructive animate-pulse" />
+          Je vous écoute
+        </p>
+      )}
+      {status === "transcribing" && (
+        <p className="text-[11px] text-muted-foreground">Je transcris</p>
+      )}
+      {status === "idle" && error && (
+        <p className="text-[11px] text-muted-foreground">{error}</p>
+      )}
+    </div>
+  );
+}
+
 
 export function AlmaDock() {
   // Défense en profondeur : ne rien monter pour un visiteur anonyme, même
