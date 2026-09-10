@@ -530,6 +530,7 @@ const AppRoutes = () => {
         <Route path="/admin/verifications" element={<AdminVerifications />} />
         <Route path="/admin/pros" element={<AdminPros />} />
         <Route path="/admin/pros-annuaire" element={<AdminProDirectory />} />
+        <Route path="/admin/associations" element={<AdminAssociations />} />
         <Route path="/admin/emails" element={<AdminEmailHealth />} />
         <Route path="/admin/emails-transactionnels" element={<AdminEmails />} />
         <Route path="/admin/alma" element={<AdminAlma />} />
