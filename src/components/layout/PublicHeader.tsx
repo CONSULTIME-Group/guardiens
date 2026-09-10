@@ -63,6 +63,7 @@ const useIsCompactViewport = () => {
 export const NAV_DEFS: ReadonlyArray<{ key: string; shortKey?: string; to: string }> = [
   { key: "listings", shortKey: "listings_short", to: "/annonces" },
   { key: "small_missions", to: "/petites-missions" },
+  { key: "associations", to: "/associations" },
   { key: "pros", to: "/pros" },
   { key: "guides", shortKey: "guides_short", to: "/guides" },
   { key: "pricing", to: "/tarifs" },

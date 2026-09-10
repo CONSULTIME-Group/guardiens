@@ -6,6 +6,7 @@ import { GrainOverlay } from "@/components/ui/GrainOverlay";
 import rooftops1600 from "@/assets/landing/village-rooftops-1600.webp";
 import rooftops800 from "@/assets/landing/village-rooftops-800.webp";
 import { trackEvent } from "@/lib/analytics";
+import { AssociationsTeaser } from "@/components/associations/AssociationsTeaser";
 
 /**
  * PretexteSection, fusion des anciennes sections Rencontre et Entraide
@@ -67,6 +68,14 @@ export function PretexteSection() {
             >
               {t("landing.pretexte.cta")} <ArrowRight className="h-4 w-4" />
             </Link>
+          </div>
+
+          <div className="mx-auto mt-[52px] max-w-2xl">
+            <AssociationsTeaser
+              tone="dark"
+              title="Soutenir une association près de chez vous"
+              text="Refuges, sanctuaires, familles d'accueil : découvrez ce dont elles ont besoin aujourd'hui."
+            />
           </div>
         </RevealSection>
       </div>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,7 +16,20 @@ import PublicFooter from "@/components/layout/PublicFooter";
 const Contact = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
+  const [searchParams] = useSearchParams();
+
+  // Renvoi depuis la section associations : sujet présélectionné et message
+  // amorcé, avec le slug de la fiche quand la personne vient d'une fiche.
+  const associationSlug = searchParams.get("association");
+  const fromAssociations = searchParams.get("sujet") === "association";
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    subject: fromAssociations ? "Présenter une association" : "",
+    message: fromAssociations
+      ? `Bonjour, je souhaite présenter l'association : ${associationSlug ?? ""}`.trimEnd()
+      : "",
+  });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);

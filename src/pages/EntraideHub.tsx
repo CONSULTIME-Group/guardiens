@@ -23,6 +23,7 @@ import MissionCardCover from "@/components/missions/MissionCardCover";
 import MissionBadgesReceived from "@/components/missions/MissionBadgesReceived";
 import ProximityFilter from "@/components/missions/ProximityFilter";
 import EntraideGeolocBanner from "@/components/missions/EntraideGeolocBanner";
+import { AssociationsTeaser } from "@/components/associations/AssociationsTeaser";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { useMissionDistance } from "@/hooks/useMissionDistance";
 import { trackEvent } from "@/lib/analytics";
@@ -612,6 +613,13 @@ const EntraideHub = () => {
               onUseMyLocation={proximity.useMyLocation}
             />
           )}
+
+          <div className="mb-4">
+            <AssociationsTeaser
+              title="L'entraide, les associations la vivent tous les jours"
+              text="Bénévolat, familles d'accueil, dons : voyez comment aider une association près de chez vous."
+            />
+          </div>
 
           {/* Fil unifié mobile. */}
           <MobileEntraideFeed

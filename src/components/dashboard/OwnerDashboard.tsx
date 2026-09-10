@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 
+import { NearbyAssociationCard } from "@/components/associations/NearbyAssociationCard";
 import { useAuth } from "@/contexts/AuthContext";
 
 import OnboardingWelcome from "./OnboardingWelcome";
@@ -384,6 +385,11 @@ const OwnerDashboard = () => {
                 myActiveMission={myActiveMission}
                 nearbyHelpersCount={nearbyHelpersCount}
               />
+            </div>
+
+            {/* Association du département : carte discrète après les blocs principaux */}
+            <div className="px-4 sm:px-5 md:px-8">
+              <NearbyAssociationCard />
             </div>
 
             {/* Historique candidatures : accordéon discret tout en bas */}
