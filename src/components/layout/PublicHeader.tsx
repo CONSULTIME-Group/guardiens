@@ -38,9 +38,9 @@ const useIsMobileShell = () => {
 const NotificationBell = lazy(() => import("./NotificationBell"));
 const MessageBell = lazy(() => import("./MessageBell"));
 
-/** Vrai sous le point de rupture sm de Tailwind (640 px). */
+/** Vrai sous le point de rupture du header (960 px), la ou le burger est actif. */
 const useIsCompactViewport = () => {
-  const query = "(max-width: 639.98px)";
+  const query = "(max-width: 959.98px)";
   const [compact, setCompact] = useState(() =>
     typeof window !== "undefined" && typeof window.matchMedia === "function"
       ? window.matchMedia(query).matches
