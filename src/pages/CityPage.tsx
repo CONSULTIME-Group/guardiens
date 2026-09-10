@@ -40,6 +40,7 @@ import CityArticleBody from "@/components/city/CityArticleBody";
 import StickyCTA from "@/components/seo/StickyCTA";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import { departmentIn } from "@/lib/departmentGrammar";
+import DepartmentAssociations from "@/components/associations/DepartmentAssociations";
 import CityHero, { CITY_HERO_IMAGES } from "@/components/city/CityHero";
 import CitySittersGrid from "@/components/city/CitySittersGrid";
 import { useAlmaCulturalFact } from "@/hooks/useAlmaCulturalFact";
