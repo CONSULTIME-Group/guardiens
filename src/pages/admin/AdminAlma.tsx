@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ALMA_SURFACES } from "@/lib/alma/surfaces";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -73,9 +74,9 @@ export default function AdminAlma() {
   const [range, setRange] = useState<Range>("30d");
   const [searchParams, setSearchParams] = useSearchParams();
   const rawTab = searchParams.get("tab");
-  const tab = ["cultural-facts", "whispers", "conversations", "moods"].includes(rawTab ?? "")
+  const tab = ["cultural-facts", "whispers", "bubbles", "moods"].includes(rawTab ?? "")
     ? (rawTab as string)
-    : "bubbles";
+    : "conversations";
 
   useEffect(() => {
     if (seenRef.current) return;
@@ -87,7 +88,7 @@ export default function AdminAlma() {
 
   const handleTabChange = (next: string) => {
     const params = new URLSearchParams(searchParams);
-    if (next === "bubbles") params.delete("tab");
+    if (next === "conversations") params.delete("tab");
     else params.set("tab", next);
     setSearchParams(params, { replace: true });
   };
@@ -96,7 +97,7 @@ export default function AdminAlma() {
     <div className="space-y-6">
       <AdminPageHeader
         title="Alma"
-        description="Adoption des bulles Alma, engagement sur les whispers Pass 4, et pilotage du compagnon culturel Pass 5."
+        description="Conversations avec Alma, humeurs, whispers, bulles et pilotage du compagnon culturel."
       />
 
       <div className="flex items-center gap-3">
@@ -214,8 +215,8 @@ function BubblesTab({ since, range }: { since: string; range: Range }) {
     <div className="space-y-6">
       {truncated && <TruncationBanner />}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <KpiCard label="Users uniques (7j)" value={kpis.uniqueUsers7d} />
-        <KpiCard label="Users uniques (30j)" value={kpis.uniqueUsers30d} />
+        <KpiCard label="Personnes uniques (7j)" value={kpis.uniqueUsers7d} />
+        <KpiCard label="Personnes uniques (30j)" value={kpis.uniqueUsers30d} />
         <KpiCard label="Vues totales" value={kpis.totalViews} />
         <KpiCard label="Taux d'engagement" value={fmtPct(kpis.engagementRate)} />
       </div>
@@ -384,13 +385,13 @@ function WhispersTab({ since, range }: { since: string; range: Range }) {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <KpiCard label="Whispers émis" value={totals.emitted} />
         <KpiCard label="Taux d'action" value={fmtPct(totals.actionRate)} />
-        <KpiCard label="Taux de dismiss" value={fmtPct(totals.dismissRate)} />
-        <KpiCard label="Users blacklistés" value={totals.blacklisted} />
+        <KpiCard label="Taux de rejet" value={fmtPct(totals.dismissRate)} />
+        <KpiCard label="Personnes qui ont coupé ce type" value={totals.blacklisted} />
       </div>
 
       <Card>
         <CardContent className="p-6 space-y-3">
-          <h3 className="text-sm font-semibold">Répartition frequency setting</h3>
+          <h3 className="text-sm font-semibold">Répartition des fréquences choisies</h3>
           {(["silent", "low", "balanced", "talkative"] as const).map((k) => {
             const c = freqBreakdown.counts[k] ?? 0;
             const pct = (c / freqBreakdown.total) * 100;
@@ -426,11 +427,11 @@ function WhispersTab({ since, range }: { since: string; range: Range }) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Whisper type</TableHead>
+                <TableHead>Type de whisper</TableHead>
                 <TableHead>Priorité</TableHead>
                 <TableHead className="text-right">Émis</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
-                <TableHead className="text-right">Dismiss</TableHead>
+                <TableHead className="text-right">Rejets</TableHead>
                 <TableHead className="text-right">Taux action</TableHead>
                 <TableHead className="text-right">Taux dismiss</TableHead>
                 <TableHead className="text-right">Blacklistés</TableHead>
@@ -504,8 +505,8 @@ function WhispersTab({ since, range }: { since: string; range: Range }) {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Whisper type</TableHead>
-                  <TableHead className="text-right">Users concernés</TableHead>
+                  <TableHead>Type de whisper</TableHead>
+                  <TableHead className="text-right">Personnes concernées</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -541,14 +542,44 @@ function KpiCard({ label, value }: { label: string; value: string | number }) {
 
 /* ══════════════════════════ Onglet Faits culturels ══════════════════════════ */
 
-const FACT_TYPES = [
-  { value: "all", label: "Tous" },
-  { value: "breed_did_you_know", label: "Race" },
-  { value: "city_did_you_know", label: "Ville" },
-  { value: "social_stat", label: "Stat sociale" },
-  { value: "seasonal_advice", label: "Conseil saisonnier" },
-  { value: "founder_anecdote", label: "Anecdote fondatrice" },
-] as const;
+/**
+ * Libellés connus. La liste du filtre se construit dynamiquement à partir des
+ * `fact_type` réellement présents en base : un type seedé sans libellé reste
+ * filtrable, sous sa clé technique.
+ */
+const FACT_TYPE_LABELS: Record<string, string> = {
+  breed_did_you_know: "Race",
+  city_did_you_know: "Ville",
+  seasonal_advice: "Conseil saisonnier",
+  founder_anecdote: "Anecdote fondatrice",
+  home_care_tip: "Entretien de la maison",
+  pet_care_tip: "Soin des animaux",
+  animal_humor: "Humour animalier",
+  usage_nudge: "Invitation d'usage",
+  dog_behavior_tip: "Comportement chien",
+  cat_behavior_tip: "Comportement chat",
+  mutual_aid_tip: "Entraide",
+  social_stat: "Stat sociale",
+};
+
+export function buildFactTypeOptions(
+  facts: Array<{ fact_type: string }>,
+): Array<{ value: string; label: string; count: number }> {
+  const counts = new Map<string, number>();
+  for (const f of facts) {
+    const key = f.fact_type ?? "";
+    if (!key) continue;
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+  const options = Array.from(counts.entries())
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .map(([value, count]) => ({
+      value,
+      label: FACT_TYPE_LABELS[value] ?? value,
+      count,
+    }));
+  return [{ value: "all", label: "Tous", count: facts.length }, ...options];
+}
 
 const EMPTY_CULTURAL_STATS: { rows: Array<{ id: string; views: number; clicks: number }>; truncated: boolean } = {
   rows: [],
@@ -644,6 +675,8 @@ function CulturalFactsTab({ since }: { since: string }) {
   const stats = statsResult.rows;
   const statsTruncated = statsResult.truncated;
 
+  const factTypeOptions = useMemo(() => buildFactTypeOptions(facts), [facts]);
+
   const statsById = useMemo(() => {
     const m = new Map<string, { views: number; clicks: number }>();
     for (const s of stats) m.set(s.id, { views: s.views, clicks: s.clicks });
@@ -710,9 +743,9 @@ function CulturalFactsTab({ since }: { since: string }) {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {FACT_TYPES.map((t) => (
+            {factTypeOptions.map((t) => (
               <SelectItem key={t.value} value={t.value}>
-                {t.label}
+                {t.label} ({t.count})
               </SelectItem>
             ))}
           </SelectContent>
@@ -809,17 +842,8 @@ function CulturalFactsTab({ since }: { since: string }) {
 
 /* ══════════════════════════ Diagnostic matching ══════════════════════════ */
 
-const DIAG_SURFACES = [
-  "owner_dashboard",
-  "sitter_dashboard",
-  "breed_page",
-  "city_page",
-  "house_guide",
-  "listings",
-  "search_page",
-  "missions",
-  "mutual_aid",
-] as const;
+// Même source que `surfaceFromPath` du dock : toute surface câblée est simulable.
+const DIAG_SURFACES = ALMA_SURFACES;
 
 interface DiagRow {
   fact_type: string;
