@@ -124,35 +124,45 @@ export function AlmaConversation({ surface, activeRole }: AlmaConversationProps)
           <p className="text-xs text-muted-foreground">Alma prépare sa réponse.</p>
         )}
         {state.error && <p className="text-xs text-destructive">{state.error}</p>}
-        {voice.error && <p className="text-xs text-muted-foreground">{voice.error}</p>}
       </div>
 
-      <div className="border-t border-border p-2 flex items-end gap-2">
-        <textarea
-          ref={inputRef}
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              submit();
-            }
-          }}
-          rows={1}
-          maxLength={2000}
-          placeholder="Posez votre question à Alma"
-          aria-label="Votre message pour Alma"
-          className="flex-1 resize-none rounded-xl border border-input bg-background px-3 py-2 text-[13px] leading-snug max-h-24 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        />
-        {voice.supported && (
+      <div className="border-t border-border p-2">
+        <div className="flex items-end gap-2">
+          <textarea
+            ref={inputRef}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                submit();
+              }
+            }}
+            rows={1}
+            maxLength={2000}
+            placeholder="Posez votre question à Alma"
+            aria-label="Votre message pour Alma"
+            className="flex-1 resize-none rounded-xl border border-input bg-background px-3 py-2 text-[13px] leading-snug max-h-24 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          />
           <button
             type="button"
-            onClick={voice.toggle}
-            disabled={voice.status === "transcribing"}
-            aria-label={voice.status === "recording" ? "Arrêter la dictée" : "Dicter votre message"}
+            onClick={voice.supported ? voice.toggle : undefined}
+            disabled={!voice.supported || voice.status === "transcribing"}
+            title={
+              voice.supported
+                ? undefined
+                : "La dictée arrive sur les navigateurs qui la prennent en charge."
+            }
+            aria-label={
+              voice.supported
+                ? voice.status === "recording"
+                  ? "Arrêter la dictée"
+                  : "Dicter votre message"
+                : "Dictée disponible sur les navigateurs qui la prennent en charge"
+            }
             aria-pressed={voice.status === "recording"}
             className={cn(
-              "flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition",
+              "flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition disabled:opacity-50",
               voice.status === "recording"
                 ? "bg-destructive text-destructive-foreground"
                 : "text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -164,17 +174,19 @@ export function AlmaConversation({ surface, activeRole }: AlmaConversationProps)
               <Mic className="h-5 w-5" />
             )}
           </button>
-        )}
-        <button
-          type="button"
-          onClick={submit}
-          disabled={state.sending || draft.trim().length === 0}
-          aria-label="Envoyer à Alma"
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground disabled:opacity-50 transition"
-        >
-          <Send className="h-4 w-4" />
-        </button>
+          <button
+            type="button"
+            onClick={submit}
+            disabled={state.sending || draft.trim().length === 0}
+            aria-label="Envoyer à Alma"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground disabled:opacity-50 transition"
+          >
+            <Send className="h-4 w-4" />
+          </button>
+        </div>
+        <VoiceStatusLine status={voice.status} error={voice.error} />
       </div>
+
     </div>
   );
 }
