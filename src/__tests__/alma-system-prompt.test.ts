@@ -34,7 +34,27 @@ describe("identité d'Alma dans le prompt", () => {
 
   it("ajoute la petite conversation en quatrième registre", () => {
     expect(promptSource).toContain("QUATRE REGISTRES");
-    expect(promptSource).toContain("La petite conversation");
+    expect(promptSource).toContain("Ce qui te concerne");
+  });
+
+  it("porte la biographie exacte d'Alma", () => {
+    expect(promptSource).toContain("Córdoba");
+    expect(promptSource).toContain("2018");
+    expect(promptSource).toContain("2020");
+    expect(promptSource).toContain("TON CARNET");
+  });
+
+  it("bannit les formules de centre d'appel", () => {
+    const banned = [
+      "Que puis-je faire pour vous",
+      "Comment puis-je vous aider",
+      "En quoi puis-je vous aider",
+      "Je suis là pour vous aider",
+      "N'hésitez pas",
+    ];
+    for (const phrase of banned) {
+      expect(promptSource).not.toContain(phrase);
+    }
   });
 
   it("verrouille la variation des ouvertures", () => {
