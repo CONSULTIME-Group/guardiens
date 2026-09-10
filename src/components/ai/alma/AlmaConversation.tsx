@@ -8,6 +8,8 @@
  * - l'état vit dans conversation-store, donc il survit au démontage du dock
  *
  * Entrée vocale seulement, aucune synthèse vocale.
+ * Habillage : charte Guardiens (papier crème, encre, vert pin, Playfair pour
+ * la voix d'Alma, Outfit pour le fonctionnel). Classes dans src/index.css.
  */
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { Mic, Send, Square, X } from "lucide-react";
@@ -47,9 +49,11 @@ function useVisualViewportHeight(): number {
 interface AlmaConversationProps {
   surface: string;
   activeRole: "owner" | "sitter";
+  /** Libellé du stade de relation, affiché sous le nom dans l'en tête. */
+  stageLabel?: string;
 }
 
-export function AlmaConversation({ surface, activeRole }: AlmaConversationProps) {
+export function AlmaConversation({ surface, activeRole, stageLabel }: AlmaConversationProps) {
   const state = useSyncExternalStore(subscribeAlmaConversation, getAlmaConversationState);
   const [draft, setDraft] = useState("");
   const viewportHeight = useVisualViewportHeight();
@@ -85,18 +89,26 @@ export function AlmaConversation({ surface, activeRole }: AlmaConversationProps)
       data-testid="alma-conversation"
       className={cn(
         "pointer-events-auto mb-2 w-full md:w-96 flex flex-col",
-        "rounded-2xl border border-primary/20 bg-card text-card-foreground shadow-xl",
+        "alma-thread-card text-card-foreground",
         "animate-in slide-in-from-bottom-2 fade-in duration-200",
       )}
       style={{ maxHeight }}
     >
-      <div className="flex items-center gap-2 border-b border-border px-3 py-2">
-        <AlmaAvatar size={24} mood={state.sending ? "thinking" : "idle"} />
-        <span className="text-xs font-semibold text-primary">Alma</span>
+      {/* En tête : trio signature en version courte, pastille, nom, stade. */}
+      <div className="flex items-center gap-3 border-b border-border px-[18px] py-3">
+        <span className="alma-badge" style={{ width: 32, height: 32 }}>
+          <AlmaAvatar size={24} mood={state.sending ? "thinking" : "idle"} />
+        </span>
+        <span className="flex flex-col leading-tight">
+          <span className="font-heading text-base font-semibold text-foreground">Alma</span>
+          <span className="text-[11px] font-medium text-muted-foreground">
+            {stageLabel ?? "votre assistante"}
+          </span>
+        </span>
         <button
           type="button"
           onClick={closeAlmaConversation}
-          className="ml-auto flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition"
+          className="ml-auto flex h-11 w-11 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
           aria-label="Fermer la conversation avec Alma"
         >
           <X className="h-4 w-4" />
@@ -105,30 +117,41 @@ export function AlmaConversation({ surface, activeRole }: AlmaConversationProps)
 
       <div
         ref={threadRef}
-        className="flex-1 overflow-y-auto overscroll-contain px-3 py-3 space-y-2"
+        className="flex-1 overflow-y-auto overscroll-contain px-[18px] py-[14px] flex flex-col gap-[14px]"
         role="log"
         aria-live="polite"
       >
-        {state.messages.map((m) => (
-          <div
-            key={m.id}
-            className={cn(
-              "max-w-[85%] rounded-2xl px-3 py-2 text-[13px] leading-snug whitespace-pre-line",
-              m.role === "alma"
-                ? "bg-muted text-foreground"
-                : "ml-auto bg-primary text-primary-foreground",
-            )}
-          >
-            {m.content}
-          </div>
-        ))}
+        {state.messages.map((m, index) => {
+          const previous = state.messages[index - 1];
+          const startsAlmaRun = m.role === "alma" && previous?.role !== "alma";
+          if (m.role === "alma") {
+            return (
+              <div key={m.id} className="flex items-start gap-2">
+                <span className="w-6 shrink-0">
+                  {startsAlmaRun && <AlmaAvatar size={24} mood="idle" />}
+                </span>
+                <div className="alma-bubble-alma max-w-[85%] whitespace-pre-line">{m.content}</div>
+              </div>
+            );
+          }
+          return (
+            <div key={m.id} className="alma-bubble-user ml-auto max-w-[85%] whitespace-pre-line">
+              {m.content}
+            </div>
+          );
+        })}
         {state.sending && (
-          <p className="text-xs text-muted-foreground">Alma prépare sa réponse.</p>
+          <div className="flex items-center gap-1.5 pl-8" aria-live="polite">
+            <span className="alma-typing-dot" aria-hidden />
+            <span className="alma-typing-dot" aria-hidden />
+            <span className="alma-typing-dot" aria-hidden />
+            <span className="sr-only">Alma prépare sa réponse.</span>
+          </div>
         )}
         {state.error && <p className="text-xs text-destructive">{state.error}</p>}
       </div>
 
-      <div className="border-t border-border p-2">
+      <div className="border-t border-border px-[18px] py-3">
         <div className="flex items-end gap-2">
           <textarea
             ref={inputRef}
@@ -144,7 +167,7 @@ export function AlmaConversation({ surface, activeRole }: AlmaConversationProps)
             maxLength={2000}
             placeholder="Posez votre question à Alma"
             aria-label="Votre message pour Alma"
-            className="flex-1 resize-none rounded-xl border border-input bg-background px-3 py-2 text-[13px] leading-snug max-h-24 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="alma-field flex-1 resize-none max-h-24"
           />
           <button
             type="button"
@@ -165,6 +188,7 @@ export function AlmaConversation({ surface, activeRole }: AlmaConversationProps)
             aria-pressed={voice.status === "recording"}
             className={cn(
               "flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition disabled:opacity-50",
+              "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
               voice.status === "recording"
                 ? "bg-destructive text-destructive-foreground"
                 : "text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -181,7 +205,7 @@ export function AlmaConversation({ surface, activeRole }: AlmaConversationProps)
             onClick={submit}
             disabled={state.sending || draft.trim().length === 0}
             aria-label="Envoyer à Alma"
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground disabled:opacity-50 transition"
+            className="alma-primary-shadow flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground disabled:opacity-50 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
           >
             <Send className="h-4 w-4" />
           </button>
