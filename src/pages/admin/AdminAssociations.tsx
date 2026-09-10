@@ -17,7 +17,8 @@ import {
   associationTypeLabel,
 } from "@/lib/associationLabels";
 import type { AssociationPhoto } from "@/components/associations/types";
-import { buildConsentEmail } from "@/lib/associationConsentEmail";
+import { ASSOCIATION_CONSENT_SUBJECT, buildConsentEmail } from "@/lib/associationConsentEmail";
+import ConfirmDialog from "@/components/admin/ConfirmDialog";
 
 type AssociationRow = {
   id: string;
