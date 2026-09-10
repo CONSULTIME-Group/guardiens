@@ -10,17 +10,17 @@ export const ASSOCIATION_CONSENT_SUBJECT = "Une page pour {name} sur Guardiens";
 export const buildConsentText = (name: string, ficheUrl: string): string =>
   `Bonjour,
 
-Je m'appelle Jérémie. Avec ma femme Elisa, on a lancé Guardiens.fr au printemps. L'idée vient de notre propre histoire : en cinq ans, on a gardé 37 maisons et 234 animaux chez des gens qui nous ont fait confiance.
+Je me permets de vous contacter car, avec ma femme Elisa, nous avons créé une plateforme qui a pour objectif de favoriser l'entraide de proximité, autour des animaux mais pas seulement. La plateforme est 100 % gratuite : nous souhaitons avant tout créer un réseau et du lien social.
 
-Guardiens met en relation des gens du coin pour garder une maison et des animaux pendant une absence, et pour se donner des coups de main au quotidien. Ce qui nous tient à cœur, c'est de créer des réseaux d'entraide, du lien social et de la proximité. On compte déjà plus de 1 300 inscrits partout en France, et pour l'instant, l'accès au site est offert. Si vous voulez voir à quoi ça ressemble : https://guardiens.fr
+Nous sommes très contents du démarrage, puisque nous avons déjà plus de 1 300 inscrits en quelques mois. Nous aimerions en profiter pour donner de la visibilité à des associations comme la vôtre, afin que vous puissiez vous présenter et peut-être obtenir ce dont vous avez besoin : des dons, du bénévolat ou quoi que ce soit d'autre. On se dit simplement que pour nous, le coût est nul, et que cela peut aider.
 
-Les associations comme la vôtre font vivre cette entraide tous les jours. On a donc ouvert une page qui les présente à nos membres, avec leurs besoins du moment : dons, bénévolat, familles d'accueil. ${name} y figure déjà : ${ficheUrl}
+Nous aimerions simplement avoir votre accord. Vous pouvez voir ce que nous avons fait pour ${name} ici : ${ficheUrl}
+Et découvrir Guardiens ici : https://guardiens.fr
 
-Pour nous, c'est simple à faire. Pour vous, ça peut compter : un don, un bénévole de plus, une famille d'accueil.
+Et évidemment, si vous souhaitez nous donner des informations supplémentaires sur votre association (photos, présentation, logo, lien vers vos dons…), n'hésitez pas !
 
-On aimerait simplement avoir votre accord pour continuer. Pour illustrer la fiche, on a repris quelques photos publiées sur vos pages, en citant la source. Si vous avez des photos, des liens ou une présentation à nous envoyer, on met la fiche à jour avec plaisir. Et si vous voulez la modifier ou la retirer, un petit mot suffit.
-
-Merci pour tout ce que vous faites pour les animaux. Au plaisir de vous lire,
+En attendant votre retour,
+Merci à vous,
 
 Jérémie et Elisa
 guardiens.fr`;
