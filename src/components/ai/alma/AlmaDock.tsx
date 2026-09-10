@@ -205,7 +205,7 @@ function DockComposer({
   };
 
   return (
-    <div className="mt-2">
+    <div className="mt-[14px]">
       <div className="flex items-end gap-2">
         <textarea
           value={draft}
@@ -221,7 +221,7 @@ function DockComposer({
           placeholder={composerPlaceholder(surface)}
           aria-label="Votre message pour Alma"
           autoFocus={false}
-          className="flex-1 resize-none rounded-xl border border-input bg-background px-3 py-2 text-[13px] leading-snug max-h-24 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="alma-field flex-1 resize-none max-h-24"
         />
         <button
           type="button"
@@ -241,7 +241,8 @@ function DockComposer({
           }
           aria-pressed={voice.status === "recording"}
           className={cn(
-            "flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition disabled:opacity-50",
+            "flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition disabled:opacity-50",
+            "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
             voice.status === "recording"
               ? "bg-destructive text-destructive-foreground"
               : "text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -258,7 +259,7 @@ function DockComposer({
           onClick={submit}
           disabled={draft.trim().length === 0}
           aria-label="Envoyer à Alma"
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground disabled:opacity-50 transition"
+          className="alma-primary-shadow flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground disabled:opacity-50 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
         >
           <Send className="h-4 w-4" />
         </button>
@@ -611,6 +612,7 @@ function AlmaDockInner() {
         <AlmaConversation
           surface={surfaceFromPath(location.pathname, activeRole)}
           activeRole={activeRole === "owner" ? "owner" : "sitter"}
+          stageLabel={stage ? STAGE_SHORT_LABEL[stage] : undefined}
         />
       )}
 
@@ -630,8 +632,8 @@ function AlmaDockInner() {
           onBlurCapture={whisper ? resumeTimer : undefined}
           className={cn(
             "pointer-events-auto mb-2 w-full md:w-96 relative",
-            "rounded-2xl border bg-card text-card-foreground shadow-xl",
-            whisper ? "border-primary/20 p-3 pr-9" : "border-border p-3",
+            "alma-panel text-card-foreground",
+            whisper ? "pr-10" : "",
             "animate-in slide-in-from-bottom-2 fade-in duration-300",
           )}
         >
@@ -639,33 +641,32 @@ function AlmaDockInner() {
             <button
               type="button"
               onClick={() => doDismiss("closed_manually")}
-              className="absolute right-1 top-1 flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition"
+              className="absolute right-1 top-1 flex h-11 w-11 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition"
               aria-label="Fermer le message d'Alma"
             >
               <X className="h-3.5 w-3.5" />
             </button>
           )}
-          <div className="flex items-start gap-2">
-            <AlmaAvatarAnimated
-              size={28}
-              mood={panelAvatarMood}
-              stage={stage ?? undefined}
-              aria-hidden
-              className="shrink-0"
-            />
-            <p className="flex-1 min-w-0 text-[13px] leading-snug text-foreground/90 whitespace-pre-line">
-              {panelLine}
-            </p>
+          <div className="flex items-start gap-[14px]">
+            <span className="alma-badge">
+              <AlmaAvatarAnimated
+                size={28}
+                mood={panelAvatarMood}
+                stage={stage ?? undefined}
+                aria-hidden
+              />
+            </span>
+            <p className="alma-voice flex-1 min-w-0 whitespace-pre-line">{panelLine}</p>
           </div>
           {whisper?.primaryAction && (
-            <div className="mt-2">
+            <div className="mt-[14px]">
               <button
                 type="button"
                 data-testid="alma-panel-action"
                 onClick={() =>
                   handleAction(whisper.primaryAction!.onClick, whisper.primaryAction!.actionId)
                 }
-                className="rounded-full bg-primary text-primary-foreground text-xs font-semibold px-3 py-1.5 hover:bg-primary/90 transition"
+                className="alma-primary-shadow rounded-full bg-primary text-primary-foreground font-body text-xs font-bold px-4 py-2 hover:bg-primary/90 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
               >
                 {whisper.primaryAction.label}
               </button>
@@ -677,7 +678,7 @@ function AlmaDockInner() {
             seed={panelLine}
           />
           {!whisper && proposition && (
-            <div className="mt-2">
+            <div className="mt-[14px]">
               <button
                 type="button"
                 data-testid="alma-panel-action"
