@@ -106,15 +106,29 @@ export function useAlmaVoiceInput(onText: (text: string) => void) {
           const { data, error: fnError } = await supabase.functions.invoke("alma-transcribe", {
             body: form,
           });
-          if (fnError) throw fnError;
+          if (fnError) {
+            let detail = "";
+            try {
+              const ctx = (fnError as any)?.context;
+              const payload = typeof ctx?.json === "function" ? await ctx.json() : null;
+              if (typeof payload?.error === "string") detail = payload.error.trim();
+            } catch {
+              /* silent */
+            }
+            setError(detail || "La dictée reste disponible un peu plus tard.");
+            return;
+          }
           const text = typeof (data as any)?.text === "string" ? (data as any).text.trim() : "";
           if (text) onText(text);
+          else if (typeof (data as any)?.error === "string" && (data as any).error.trim())
+            setError((data as any).error.trim());
           else setError("La dictée reste disponible un peu plus tard.");
         } catch {
           setError("La dictée reste disponible un peu plus tard.");
         } finally {
           setStatus("idle");
         }
+
       };
       recorder.start();
       setStatus("recording");
