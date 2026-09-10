@@ -13,7 +13,9 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { Mic, Send, Square, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AlmaAvatar } from "./AlmaAvatar";
+import { VoiceStatusLine } from "./AlmaDock";
 import { useAlmaVoiceInput } from "@/hooks/useAlmaVoiceInput";
+
 import {
   closeAlmaConversation,
   getAlmaConversationState,

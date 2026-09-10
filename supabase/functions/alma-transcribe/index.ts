@@ -67,11 +67,29 @@ Deno.serve(async (req) => {
     if (!res.ok) {
       const detail = await res.text().catch(() => "");
       console.error("alma-transcribe gateway error", res.status, detail);
+      // Journalisation du pilotage : la dictée en échec reste visible en admin.
+      try {
+        const service = createClient(
+          Deno.env.get("SUPABASE_URL")!,
+          Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+          { auth: { persistSession: false, autoRefreshToken: false } },
+        );
+        await service.from("alma_conversations").insert({
+          user_id: u.user.id,
+          input_mode: "voice",
+          question: null,
+          answer: null,
+          refusal_reason: `transcribe_gateway_${res.status}`,
+        });
+      } catch (logError) {
+        console.error("alma-transcribe log error", logError);
+      }
       if (res.status === 429 || res.status === 402) {
         return json({ error: "Dictée indisponible pour l'instant, réessayez plus tard." }, res.status);
       }
       return json({ error: "Dictée indisponible pour l'instant." }, 502);
     }
+
 
     const data = await res.json().catch(() => null);
     const text = typeof data?.text === "string" ? data.text.trim() : "";
