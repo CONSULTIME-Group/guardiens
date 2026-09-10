@@ -8,8 +8,8 @@
 // Le comptage ignore volontairement identity_verified : la verification est
 // une information affichee a cote, jamais un filtre.
 //
-// L'ancienne detection detect_untapped_cities n'est plus appelee : elle
-// comptait par nom de ville exact et filtrait sur identity_verified.
+// L'ancienne detection par nom de ville exact, qui filtrait aussi sur la
+// verification d'identite, est supprimee de la base et n'est plus appelee.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 
