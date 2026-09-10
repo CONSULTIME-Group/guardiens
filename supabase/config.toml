@@ -59,6 +59,8 @@ project_id = "erhccyqevdyevpyctsjj"
     verify_jwt = true
   [functions.alma-transcribe]
     verify_jwt = true
+  [functions.alma-weather]
+    verify_jwt = true
   [functions.draft-conversation-opener]
     verify_jwt = true
   [functions.draft-application-letter]
