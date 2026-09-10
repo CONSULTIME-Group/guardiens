@@ -21,6 +21,7 @@ L'accès à Guardiens est ouvert pendant la phase de lancement : vous accédez �
 - [House-sitting par département](/departement): Pages département, chacune recense villes couvertes, gardiens inscrits et guides locaux, 98 départements couverts.
 - [Annonces de garde](/annonces): Toutes les annonces de garde à domicile, partout en France.
 - [Pros animaliers](/pros): Annuaire de vétérinaires, éducateurs, toiletteurs, ostéopathes, transporteurs vérifiés.
+- [Associations et refuges](/associations): Refuges, sanctuaires, réseaux de familles d'accueil et centres de soins faune sauvage, présentés par l'équipe Guardiens, avec leurs besoins et leur page de dons.
 - [Races d'animaux](/races): Guides de garde par race (chiens, chats, NAC, équidés), conseils gardien.
 - [Contact](/contact): Nous écrire.
 
