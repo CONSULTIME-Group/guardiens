@@ -9,6 +9,7 @@ import { getEmailCategory, type EmailCategory } from '../_shared/email-categorie
 import { bypassesSuppression } from '../_shared/email-suppression.ts'
 import { evaluateSitAlert, isSitStatusGuardedTemplate } from '../_shared/sit-alert-guard.ts'
 import { REPLY_TO_ADDRESS } from '../_shared/sender-address.ts'
+import { wrapEmailLink } from '../_shared/email-link-wrap.ts'
 
 const SITE_URL = 'https://guardiens.fr'
 
@@ -1135,23 +1136,10 @@ Deno.serve(async (req) => {
     const pixelUrl = `${trackBase}/track-email-pixel?mid=${messageId}`
     const pixelHtml = `<img src="${pixelUrl}" width="1" height="1" alt="" style="display:none;width:1px;height:1px;border:0;" />`
 
-    const b64url = (s: string) =>
-      btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
-
-    const wrap = (href: string): string => {
-      try {
-        const u = new URL(href)
-        const allowed = new Set(['guardiens.fr', 'www.guardiens.fr', 'guardiens.lovable.app'])
-        if (!allowed.has(u.hostname)) return href
-        if (u.pathname.startsWith('/unsubscribe') || u.pathname.startsWith('/email-preferences')) return href
-        if (u.pathname.startsWith('/go')) return href
-        return `${SITE_URL}/go?mid=${messageId}&u=${b64url(u.toString())}`
-      } catch {
-        return href
-      }
-    }
-
-    html = html.replace(/href="([^"]+)"/g, (_m, href) => `href="${wrap(href)}"`)
+    html = html.replace(
+      /href="([^"]+)"/g,
+      (_m, href) => `href="${wrapEmailLink(href, messageId, SITE_URL)}"`,
+    )
 
     if (html.includes('</body>')) {
       html = html.replace('</body>', `${pixelHtml}</body>`)
