@@ -500,6 +500,13 @@ function AlmaDockInner() {
                   Un autre conseil
                 </button>
               )}
+              <button
+                type="button"
+                onClick={() => startConversation()}
+                className="text-xs font-medium text-primary hover:underline underline-offset-2"
+              >
+                Répondre à Alma
+              </button>
             </div>
           )}
         </div>
