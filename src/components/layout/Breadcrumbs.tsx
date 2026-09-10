@@ -37,6 +37,7 @@ const SEGMENT_LABELS: Record<string, string> = {
   pros: "Pros animaliers",
   inscription: "Inscription",
   "mon-espace": "Mon espace pro",
+  associations: "Associations et refuges",
 };
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
