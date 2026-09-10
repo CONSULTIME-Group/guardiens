@@ -68,7 +68,7 @@ export function MoodsTab() {
         .select("mood_id")
         .gte("created_at", since)
         .limit(20000);
-      return (data ?? []) as Array<{ mood_id: string }>;
+      return (data ?? []) as unknown as Array<{ mood_id: string }>;
     },
     staleTime: 60_000,
     refetchOnWindowFocus: false,
