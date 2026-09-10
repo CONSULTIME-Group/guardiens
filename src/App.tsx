@@ -509,6 +509,8 @@ const AppRoutes = () => {
       <Route path="/pros/categorie/:catSlug" element={<PublicShellRoute><ProCategoryListing /></PublicShellRoute>} />
       <Route path="/pros/categorie/:catSlug/:villeSlug" element={<PublicShellRoute><ProCategoryListing /></PublicShellRoute>} />
       <Route path="/pros/:slug" element={<PublicShellRoute><ProDetail /></PublicShellRoute>} />
+      <Route path="/associations" element={<PublicShellRoute><AssociationsListing /></PublicShellRoute>} />
+      <Route path="/associations/:slug" element={<PublicShellRoute><AssociationDetail /></PublicShellRoute>} />
       <Route element={<AdminLayout />}>
         <Route path="/admin/seo-debug" element={<SeoDebug />} />
         <Route path="/admin/build-info" element={<BuildInfo />} />
