@@ -6,7 +6,13 @@ import { CORS_HEADERS } from "../_shared/ai-gateway.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const MAX_BYTES = 10 * 1024 * 1024;
-const MODEL = "google/gemini-3.5-transcribe";
+
+// Identifiants de transcription servis par le gateway Lovable.
+// Source : GET https://ai.gateway.lovable.dev/v1/models (listing authentifié),
+// vérifié le 10/09/2026, et documentation Lovable AI, section speech to text.
+// Modèle principal, puis repli si le workspace ne sert que l'autre.
+const PRIMARY_MODEL = "openai/gpt-4o-mini-transcribe";
+const FALLBACK_MODEL = "openai/gpt-4o-transcribe";
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
