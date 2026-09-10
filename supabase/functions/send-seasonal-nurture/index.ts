@@ -60,6 +60,8 @@ Deno.serve(async (req) => {
     dry_run?: boolean
     recipient_id?: string
     limit?: number
+    batch_size?: number
+    batch_delay_ms?: number
   } = {}
   try { if (req.body) body = await req.json() } catch { /* noop */ }
 
@@ -80,6 +82,43 @@ Deno.serve(async (req) => {
     if (planErr) throw planErr
 
     let planRows = (planData ?? []) as unknown as PlanRow[]
+
+    // Croisement avec la cohorte figee AVANT tout autre filtrage : le groupe
+    // temoin ne recoit jamais la campagne, meme s'il est revenu depuis le gel.
+    const { data: cohortData, error: cohortErr } = await admin
+      .from('seasonal_nurture_cohorts')
+      .select('user_id, groupe')
+      .eq('period_key', periodKey)
+      .limit(10000)
+    if (cohortErr) throw cohortErr
+
+    const cohortFilter = filterToFrozenCohort(planRows, (cohortData ?? []) as CohortRow[])
+    planRows = cohortFilter.rows
+    const planBrut = cohortFilter.planBrut
+    const cibleRetenue = cohortFilter.cibleRetenue
+    const ecartesHorsCible = cohortFilter.ecartesHorsCible
+
+    // Un croisement vide sur un plan non vide signale une erreur de donnees :
+    // on refuse, on n'elargit jamais.
+    if (cohortFilter.cohortPresent && planBrut > 0 && cibleRetenue === 0) {
+      const reason = `cohorte figée présente pour ${periodKey} mais croisement vide, envoi refusé`
+      await run.finish('failed', {
+        period_key: periodKey,
+        plan_brut: planBrut,
+        cible_retenue: 0,
+        ecartes_hors_cible: ecartesHorsCible,
+        reason,
+      })
+      return json({
+        ok: false,
+        error: reason,
+        plan_brut: planBrut,
+        cible_retenue: 0,
+        ecartes_hors_cible: ecartesHorsCible,
+        period_key: periodKey,
+      }, 409)
+    }
+
     if (body.recipient_id) {
       planRows = planRows.filter((r) => r.user_id === body.recipient_id)
     }
