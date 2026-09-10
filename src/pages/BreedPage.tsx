@@ -277,7 +277,7 @@ const BreedPage = () => {
             Trouver un gardien pour votre {breedCap}
           </h2>
           <p className="text-muted-foreground mb-4">
-            Guardiens couvre la France entière. Voici quelques hubs où nos gardiens sont actifs :
+            Le réseau Guardiens s'étend dans toute la France. Voici quelques secteurs où des gardiens sont déjà actifs :
           </p>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {CITIES.map((c) => (
