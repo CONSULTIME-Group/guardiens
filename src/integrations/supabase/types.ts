@@ -6048,6 +6048,33 @@ export type Database = {
         }
         Relationships: []
       }
+      seasonal_nurture_incidents: {
+        Row: {
+          constate_le: string
+          groupe: string
+          id: number
+          motif: string
+          period_key: string
+          user_id: string
+        }
+        Insert: {
+          constate_le?: string
+          groupe: string
+          id?: number
+          motif: string
+          period_key: string
+          user_id: string
+        }
+        Update: {
+          constate_le?: string
+          groupe?: string
+          id?: number
+          motif?: string
+          period_key?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       seasonal_periods: {
         Row: {
           active: boolean
