@@ -26,7 +26,7 @@ export { buildBreedEditorialHref };
 /** Cache module : une seule requête par espèce pour toute la session. */
 const candidatesBySpecies = new Map<string, Promise<BreedFicheCandidate[]>>();
 
-const loadSpeciesCandidates = (species: string): Promise<BreedFicheCandidate[]> => {
+export const loadSpeciesCandidates = (species: string): Promise<BreedFicheCandidate[]> => {
   let pending = candidatesBySpecies.get(species);
   if (!pending) {
     pending = (async () => {

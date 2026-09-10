@@ -758,6 +758,7 @@ export type Database = {
           answer: string | null
           created_at: string
           id: string
+          input_mode: string | null
           latency_ms: number | null
           question: string
           refusal_reason: string | null
@@ -770,6 +771,7 @@ export type Database = {
           answer?: string | null
           created_at?: string
           id?: string
+          input_mode?: string | null
           latency_ms?: number | null
           question: string
           refusal_reason?: string | null
@@ -782,6 +784,7 @@ export type Database = {
           answer?: string | null
           created_at?: string
           id?: string
+          input_mode?: string | null
           latency_ms?: number | null
           question?: string
           refusal_reason?: string | null
@@ -845,6 +848,98 @@ export type Database = {
           target_role?: string
           target_state?: string
           weight?: number
+        }
+        Relationships: []
+      }
+      alma_mood_views: {
+        Row: {
+          created_at: string
+          id: string
+          mood: string
+          mood_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mood: string
+          mood_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mood?: string
+          mood_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alma_mood_views_mood_id_fkey"
+            columns: ["mood_id"]
+            isOneToOne: false
+            referencedRelation: "alma_moods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      alma_moods: {
+        Row: {
+          active: boolean
+          content: string
+          created_at: string
+          id: string
+          mood: string
+          season: string | null
+          time_of_day: string | null
+          weather_condition: string | null
+          weight: number
+        }
+        Insert: {
+          active?: boolean
+          content: string
+          created_at?: string
+          id?: string
+          mood: string
+          season?: string | null
+          time_of_day?: string | null
+          weather_condition?: string | null
+          weight?: number
+        }
+        Update: {
+          active?: boolean
+          content?: string
+          created_at?: string
+          id?: string
+          mood?: string
+          season?: string | null
+          time_of_day?: string | null
+          weather_condition?: string | null
+          weight?: number
+        }
+        Relationships: []
+      }
+      alma_weather_cache: {
+        Row: {
+          condition: string
+          fetched_at: string
+          id: string
+          temperature: number | null
+          zone_key: string
+        }
+        Insert: {
+          condition: string
+          fetched_at?: string
+          id?: string
+          temperature?: number | null
+          zone_key: string
+        }
+        Update: {
+          condition?: string
+          fetched_at?: string
+          id?: string
+          temperature?: number | null
+          zone_key?: string
         }
         Relationships: []
       }
@@ -9372,6 +9467,16 @@ export type Database = {
           p_on_demand?: boolean
           p_surface: string
           p_user_id: string
+        }
+        Returns: Json
+      }
+      get_alma_mood: {
+        Args: {
+          p_mood?: string
+          p_season?: string
+          p_time_of_day?: string
+          p_user_id: string
+          p_weather?: string
         }
         Returns: Json
       }

@@ -28,6 +28,8 @@ import {
 import { autoDismissDelay, shouldScheduleAutoDismiss } from "@/lib/alma/auto-dismiss";
 import { cn } from "@/lib/utils";
 import { AlmaAvatarAnimated } from "./AlmaAvatarAnimated";
+import { useAlmaMood } from "@/hooks/useAlmaMood";
+import { MOOD_STATUS_LABEL } from "@/lib/alma/mood";
 import { useAlma } from "@/contexts/AlmaContext";
 import { useAlmaFrequency, type AlmaFrequency } from "@/hooks/useAlmaFrequency";
 import { useAlmaHidden } from "@/hooks/useAlmaHidden";
@@ -209,6 +211,13 @@ function AlmaDockInner() {
     subscribeAlmaConversation,
     getAlmaConversationState,
   );
+
+  // Humeur du jour. Elle vit uniquement dans la ligne de statut et dans la
+  // phrase d'ouverture, jamais dans une réponse à une question.
+  const almaMood = useAlmaMood({
+    silent: frequency === "silent",
+    conversationOpen: conversation.open,
+  });
 
 
   // Auto-timer d'auto-dismiss pour le whisper courant.
@@ -527,6 +536,22 @@ function AlmaDockInner() {
         </div>
       )}
 
+      {/* Phrase d'ouverture d'humeur, quand aucune proposition n'est calculée */}
+      {expanded && !conversation.open && !whisper && !proposition && almaMood.line && (
+        <div
+          role="status"
+          data-testid="alma-mood-line"
+          className={cn(
+            "pointer-events-auto mb-2 w-full md:w-80",
+            "rounded-2xl border border-border bg-card text-card-foreground shadow-lg",
+            "p-3 relative",
+            "animate-in slide-in-from-bottom-2 fade-in duration-300",
+          )}
+        >
+          <p className="text-[13px] leading-snug text-foreground/90">{almaMood.line}</p>
+        </div>
+      )}
+
       {/* Panneau de proposition permanente (aucun whisper actif) */}
       {expanded && !conversation.open && !whisper && proposition && (
         <div
@@ -546,6 +571,11 @@ function AlmaDockInner() {
           >
             <X className="h-3.5 w-3.5" />
           </button>
+          {almaMood.line && (
+            <p className="mb-1.5 text-[13px] leading-snug text-muted-foreground">
+              {almaMood.line}
+            </p>
+          )}
           <p className="text-[13px] leading-snug text-foreground/90">
             {proposition.message}
           </p>
@@ -616,7 +646,7 @@ function AlmaDockInner() {
             )}
             <AlmaAvatarAnimated
               size={avatarSize}
-              mood={isSilent ? "sleepy" : (mood === "attentive" ? "attentive" : "idle")}
+              mood={isSilent ? "sleepy" : (mood === "attentive" ? "attentive" : almaMood.avatar)}
               stage={stage ?? undefined}
             />
             {!isSilent && (
@@ -667,7 +697,11 @@ function AlmaDockInner() {
           aria-hidden
         >
           <span className="text-xs font-semibold text-foreground/80">Alma</span>
-          {stage && STAGE_SHORT_LABEL[stage] ? (
+          {almaMood.mood ? (
+            <span className="text-[10px] font-medium text-muted-foreground">
+              {MOOD_STATUS_LABEL[almaMood.mood]}
+            </span>
+          ) : stage && STAGE_SHORT_LABEL[stage] ? (
             <span className="text-[10px] font-medium text-muted-foreground">
               {STAGE_SHORT_LABEL[stage]}
             </span>
