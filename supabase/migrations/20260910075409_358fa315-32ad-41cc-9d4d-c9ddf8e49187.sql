@@ -1,0 +1,1 @@
+DROP FUNCTION IF EXISTS public.detect_untapped_cities();

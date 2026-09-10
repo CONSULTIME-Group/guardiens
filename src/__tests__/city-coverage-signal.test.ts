@@ -5,6 +5,7 @@ import {
   buildCoverageGapMessage,
   buildSeoTensionMessage,
   buildSittersFragment,
+  buildVerifiedFragment,
 } from "@/lib/admin/cityCoverage";
 
 /** SQL de la derniere migration definissant la detection par coordonnees. */
