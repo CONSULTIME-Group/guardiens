@@ -362,6 +362,19 @@ async function main() {
         _city: p.city,
       }))
     ),
+
+    // Fiches associations publiées : /associations/:slug
+    fetchOrCache(
+      "public_animal_associations", cache,
+      () => maxUpdatedAtWithCount("public_animal_associations", "updated_at"),
+      async () => (await supabase.from("public_animal_associations").select("slug, description, updated_at")).data,
+      rows => rows.filter(a => isAssociationIndexable(a)).map(a => ({
+        loc: `/associations/${a.slug}`,
+        lastmod: (a.updated_at || today).split("T")[0],
+        changefreq: "monthly",
+        priority: "0.7",
+      }))
+    ),
   ]);
 
   // Slugs des catégories pros (alignés sur src/lib/proCategories.ts)
