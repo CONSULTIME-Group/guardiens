@@ -760,7 +760,7 @@ export type Database = {
           id: string
           input_mode: string | null
           latency_ms: number | null
-          question: string
+          question: string | null
           refusal_reason: string | null
           register: string | null
           surface: string
@@ -773,7 +773,7 @@ export type Database = {
           id?: string
           input_mode?: string | null
           latency_ms?: number | null
-          question: string
+          question?: string | null
           refusal_reason?: string | null
           register?: string | null
           surface: string
@@ -786,7 +786,7 @@ export type Database = {
           id?: string
           input_mode?: string | null
           latency_ms?: number | null
-          question?: string
+          question?: string | null
           refusal_reason?: string | null
           register?: string | null
           surface?: string
