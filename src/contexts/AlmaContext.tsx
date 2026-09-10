@@ -374,24 +374,8 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
       },
     });
 
-    if (user?.id) {
-      void supabase
-        .from("alma_whisper_history" as any)
-        .insert({
-          user_id: user.id,
-          whisper_type: next.type,
-          surface: next.surface,
-          session_id: sessionId(),
-          metadata: next.metadata ?? null,
-        } as any)
-        .then(({ error }) => {
-          if (error) {
-            // eslint-disable-next-line no-console
-            console.error("[Alma] insert alma_whisper_history a échoué", error);
-          }
-        });
-    }
-  }, [current, queue, user?.id, isProactiveMuted, verboseMode, claimProactiveSurface, activeProactiveSurface]);
+    void recordEmission(next);
+  }, [current, queue, user?.id, isProactiveMuted, verboseMode, claimProactiveSurface, activeProactiveSurface, recordEmission]);
 
   const dismissCurrent = useCallback(
     (reason: AlmaDismissReason, actionId?: string) => {
@@ -410,25 +394,26 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
       });
 
       if (user?.id) {
-        const patch: Record<string, unknown> = { dismissed_reason: reason };
-        // Ne renseigne action_taken QUE pour un clic volontaire, jamais pour
-        // un auto-dismiss ou une fermeture manuelle : le dashboard admin
-        // compte les actions via cette colonne.
-        if (reason === "action_clicked" && actionId) {
-          patch.action_taken = actionId;
-        }
-        void supabase
-          .from("alma_whisper_history" as any)
-          .update(patch as any)
-          .eq("user_id", user.id)
-          .eq("whisper_type", w.type)
-          .is("dismissed_reason", null)
-          .then(({ error }) => {
-            if (error) {
-              // eslint-disable-next-line no-console
-              console.error("[Alma] update alma_whisper_history a échoué", error);
-            }
-          });
+        const patch = buildHistoryPatch(reason, reason === "action_clicked" ? actionId : undefined);
+        const rowId =
+          historyRowRef.current && historyRowRef.current.whisperId === w.id
+            ? historyRowRef.current.rowId
+            : null;
+        historyRowRef.current = null;
+
+        // La ligne créée à l'affichage est visée par son identifiant. Un
+        // repli par type reste en place pour les lignes créées avant ce lot.
+        let query = supabase.from("alma_whisper_history" as any).update(patch as any);
+        query = rowId
+          ? query.eq("id", rowId)
+          : query.eq("user_id", user.id).eq("whisper_type", w.type).is("dismissed_reason", null);
+
+        void query.then(({ error }: { error: unknown }) => {
+          if (error) {
+            // eslint-disable-next-line no-console
+            console.error("[Alma] update alma_whisper_history a échoué", error);
+          }
+        });
       }
     },
     [current, user?.id],
