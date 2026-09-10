@@ -105,7 +105,7 @@ Deno.serve(async (req) => {
         .maybeSingle(),
       adminClient
         .from("owner_profiles")
-        .select("owner_competences, presence_expected")
+        .select("competences, competences_disponible, presence_expected")
         .eq("user_id", userId)
         .maybeSingle(),
     ]);
@@ -114,22 +114,30 @@ Deno.serve(async (req) => {
     let applications: unknown[] = [];
     let pets: unknown[] = [];
     if (activeRole === "owner") {
-      const [sitsRes, petsRes] = await Promise.all([
+      const [sitsRes, propsRes] = await Promise.all([
         adminClient
           .from("sits")
           .select("id, title, status, city, start_date, end_date")
           .eq("user_id", userId)
           .order("created_at", { ascending: false })
           .limit(3),
-        adminClient.from("pets").select("name, type, age").eq("user_id", userId).limit(8),
+        adminClient.from("properties").select("id").eq("user_id", userId).limit(5),
       ]);
       sits = sitsRes.data ?? [];
-      pets = petsRes.data ?? [];
+      const propertyIds = (propsRes.data ?? []).map((p: any) => p.id);
+      if (propertyIds.length > 0) {
+        const { data } = await adminClient
+          .from("pets")
+          .select("name, species, age")
+          .in("property_id", propertyIds)
+          .limit(10);
+        pets = data ?? [];
+      }
       const sitIds = (sits as any[]).map((s) => s.id);
       if (sitIds.length > 0) {
         const { data } = await adminClient
           .from("applications")
-          .select("sit_id, status, affinity_score")
+          .select("sit_id, status, created_at")
           .in("sit_id", sitIds)
           .limit(20);
         applications = data ?? [];
@@ -137,7 +145,7 @@ Deno.serve(async (req) => {
     } else {
       const { data } = await adminClient
         .from("applications")
-        .select("sit_id, status, affinity_score, created_at")
+        .select("sit_id, status, created_at")
         .eq("sitter_id", userId)
         .order("created_at", { ascending: false })
         .limit(10);
