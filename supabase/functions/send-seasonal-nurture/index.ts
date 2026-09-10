@@ -193,23 +193,29 @@ Deno.serve(async (req) => {
       if (!res.ok) {
         const txt = await res.text().catch(() => '')
         console.error('send-transactional-email failed', res.status, txt)
-        errors.push({ user_id: row.user_id, reason: `send-transactional-email ${res.status}: ${txt}` })
+        const reason = `send-transactional-email ${res.status}: ${txt}`
+        errors.push({ user_id: row.user_id, reason })
+        if (res.status === 429 || isRateLimitFailure(reason)) rateLimited.push(row)
         return 'failed'
       }
       return 'sent'
     }
 
-    for (let i = 0; i < planRows.length; i += BATCH_SIZE) {
-      const batch = planRows.slice(i, i + BATCH_SIZE)
-      const outcomes = await Promise.all(batch.map(async (row) => {
-        try {
-          return await processOne(row)
-        } catch (e) {
-          console.error('[send-seasonal-nurture] recipient failed', row.user_id, e)
-          errors.push({ user_id: row.user_id, reason: String(e) })
-          return 'failed' as const
-        }
-      }))
+    const rateLimited: PlanRow[] = []
+
+    const guarded = async (row: PlanRow): Promise<Outcome> => {
+      try {
+        return await processOne(row)
+      } catch (e) {
+        console.error('[send-seasonal-nurture] recipient failed', row.user_id, e)
+        const reason = String(e)
+        errors.push({ user_id: row.user_id, reason })
+        if (isRateLimitFailure(reason)) rateLimited.push(row)
+        return 'failed'
+      }
+    }
+
+    const tally = (outcomes: Outcome[]) => {
       for (const outcome of outcomes) {
         if (outcome === 'sent') sent++
         else if (outcome === 'skipped') skipped++
@@ -217,15 +223,53 @@ Deno.serve(async (req) => {
       }
     }
 
-    const status = !body.dry_run && sent < planned * 0.8 ? 'partial' : 'success'
+    const firstPass = await runInBatches(planRows, {
+      batchSize,
+      delayMs: batchDelayMs,
+      handler: guarded,
+      sleep,
+      shouldStop: () => Date.now() - startedAt > TIME_BUDGET_MS,
+    })
+    tally(firstPass.results)
+
+    // Seconde passe, uniquement sur les echecs de debit Resend.
+    let retried = 0
+    const toRetry = rateLimited.splice(0, rateLimited.length)
+    if (!firstPass.stopped && toRetry.length > 0 && !body.dry_run) {
+      await sleep(RETRY_DELAY_MS)
+      failed -= toRetry.length
+      retried = toRetry.length
+      const secondPass = await runInBatches(toRetry, {
+        batchSize,
+        delayMs: batchDelayMs,
+        handler: guarded,
+        sleep,
+        shouldStop: () => Date.now() - startedAt > TIME_BUDGET_MS,
+      })
+      tally(secondPass.results)
+      // Ce que la garde de temps a empeche de rejouer reste un echec.
+      failed += secondPass.remaining.length
+    }
+
+    const remaining = firstPass.remaining.length
+    const status = firstPass.stopped
+      ? 'partial'
+      : (!body.dry_run && sent < planned * 0.8 ? 'partial' : 'success')
 
     await run.finish(status, {
       planned,
       sent,
       skipped,
       failed,
+      retried,
+      remaining,
       period_key: periodKey,
       dry_run: !!body.dry_run,
+      plan_brut: planBrut,
+      cible_retenue: cibleRetenue,
+      ecartes_hors_cible: ecartesHorsCible,
+      batch_size: batchSize,
+      batch_delay_ms: batchDelayMs,
       shortfall_ratio: planned > 0 ? Number((1 - sent / planned).toFixed(2)) : 0,
     })
 
@@ -235,6 +279,16 @@ Deno.serve(async (req) => {
       sent,
       skipped,
       failed,
+      retried,
+      remaining,
+      resume_hint: firstPass.stopped
+        ? 'Garde de temps atteinte. Un second appel identique reprend le reste, la déduplication par période évite tout doublon.'
+        : undefined,
+      plan_brut: planBrut,
+      cible_retenue: cibleRetenue,
+      ecartes_hors_cible: ecartesHorsCible,
+      batch_size: batchSize,
+      batch_delay_ms: batchDelayMs,
       period_key: periodKey,
       dry_run: !!body.dry_run,
       errors: errors.slice(0, 20),
