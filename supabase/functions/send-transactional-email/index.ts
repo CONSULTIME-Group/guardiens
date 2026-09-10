@@ -1304,12 +1304,17 @@ Deno.serve(async (req) => {
       error: logResendErr.message, code: logResendErr.code,
     })
   }
+      // Un refus definitif du fournisseur ou de la barriere de securite (4xx,
+      // hors 429) doit rester definitif : le renvoyer en 500 ferait rejouer
+      // indefiniment le meme envoi cote parcours et file differee.
+      const isPermanentClientError =
+        resendRes.status >= 400 && resendRes.status < 500 && resendRes.status !== 429
       return new Response(JSON.stringify({
         error: 'Failed to send email',
         providerStatus: resendRes.status,
         details: resendData?.message ?? null,
       }), {
-        status: resendRes.status === 429 ? 429 : 500,
+        status: resendRes.status === 429 ? 429 : (isPermanentClientError ? resendRes.status : 500),
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }

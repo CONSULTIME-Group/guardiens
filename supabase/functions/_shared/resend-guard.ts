@@ -37,7 +37,12 @@ export function isReservedTestRecipient(address: string): boolean {
   if (at < 0) return true; // adresse malformée : on refuse plutôt que d'essayer
   const domain = email.slice(at + 1);
   if (!domain) return true;
-  return RESERVED_SUFFIXES.some((s) => domain === s.replace(/^\./, "") || domain.endsWith(s));
+  // Correspondance sur frontiere d'etiquette : "example.com" et
+  // "a.example.com" sont refuses, "monexample.com" ne l'est pas.
+  return RESERVED_SUFFIXES.some((s) => {
+    const bare = s.replace(/^\./, "");
+    return domain === bare || domain.endsWith(`.${bare}`);
+  });
 }
 
 /** Extrait les destinataires d'un corps de requête Resend (unitaire ou batch). */
