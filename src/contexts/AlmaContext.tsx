@@ -191,6 +191,32 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
   const pathnameRef = useRef(location.pathname);
   pathnameRef.current = location.pathname;
 
+  // Ligne `alma_whisper_history` du whisper actuellement affiché. Permet de
+  // renseigner `action_taken` sur la bonne ligne, y compris pour un whisper
+  // demandé par la personne.
+  const historyRowRef = useRef<{ whisperId: string; rowId: string } | null>(null);
+
+  const recordEmission = useCallback(
+    async (w: AlmaWhisper) => {
+      historyRowRef.current = null;
+      if (!user?.id) return;
+      const { data, error } = await supabase
+        .from("alma_whisper_history" as any)
+        .insert(buildHistoryInsert({ userId: user.id, whisper: w, sessionId: sessionId() }) as any)
+        .select("id")
+        .maybeSingle();
+      if (error) {
+        // eslint-disable-next-line no-console
+        console.error("[Alma] insert alma_whisper_history a échoué", error);
+        return;
+      }
+      const rowId = (data as any)?.id;
+      if (rowId) historyRowRef.current = { whisperId: w.id, rowId: String(rowId) };
+    },
+    [user?.id],
+  );
+
+
   // Verbose mode : query param ?alma=verbose OU flag session (persiste après refresh)
   const [verboseMode, setVerboseMode] = useState<boolean>(() => {
     try {
