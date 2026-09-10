@@ -855,6 +855,15 @@
     padding-bottom: 18rem;
   }
 
+  /* Réserve globale : le panneau déplié du dock Alma ne chevauche plus le
+     contenu de la page, il pousse le bas du contenu principal. Mobile
+     uniquement : sur desktop le panneau est une carte latérale étroite. */
+  @media (max-width: 767px) {
+    body[data-alma-dock-expanded="true"] #main-content {
+      padding-bottom: 19rem;
+    }
+  }
+
   /* Fond d'attente aquarelle des bandeaux photo : appliqué SOUS l'image,
      jamais conditionnellement, pour éviter le rectangle blanc au chargement.
      Classe (et non style inline) pour rester testable et thémé via token. */

@@ -18,18 +18,20 @@
  */
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ChevronDown, Sparkles, X, MoreHorizontal, Check, EyeOff, Lightbulb, Route, MessageCircle } from "lucide-react";
+import { ChevronDown, Sparkles, X, MoreHorizontal, Check, EyeOff, Lightbulb, Route, MessageCircle, Mic, Send, Square } from "lucide-react";
 import { AlmaConversation } from "./AlmaConversation";
 import {
   getAlmaConversationState,
   openAlmaConversation,
+  sendAlmaMessage,
   subscribeAlmaConversation,
 } from "@/lib/alma/conversation-store";
 import { autoDismissDelay, shouldScheduleAutoDismiss } from "@/lib/alma/auto-dismiss";
+import { composerPlaceholder, resolvePanelLine } from "@/lib/alma/dock-panel";
+import { useAlmaVoiceInput } from "@/hooks/useAlmaVoiceInput";
 import { cn } from "@/lib/utils";
 import { AlmaAvatarAnimated } from "./AlmaAvatarAnimated";
 import { useAlmaMood } from "@/hooks/useAlmaMood";
-import { MOOD_STATUS_LABEL } from "@/lib/alma/mood";
 import { useAlma } from "@/contexts/AlmaContext";
 import { useAlmaFrequency, type AlmaFrequency } from "@/hooks/useAlmaFrequency";
 import { useAlmaHidden } from "@/hooks/useAlmaHidden";
@@ -120,11 +122,9 @@ function buildProposition(
       };
     }
   }
-  return {
-    message: "Vous êtes bien lancé. Envie d'un conseil du jour\u00A0?",
-    ctaLabel: "Explorer les conseils",
-    ctaTo: "/conseils",
-  };
+  // Aucune proposition de repli : l'ancien CTA vers /conseils doublonnait
+  // avec « Un conseil ? » du menu. Sans signal, le panneau affiche l'humeur.
+  return null;
 }
 
 
@@ -182,6 +182,90 @@ const FREQUENCY_CHOICES: { value: AlmaFrequency; label: string }[] = [
   { value: "balanced", label: "Modérée (recommandée)" },
   { value: "talkative", label: "Bavarde" },
 ];
+
+/**
+ * Composeur du panneau déplié : champ + micro, toujours visibles.
+ * Le premier envoi ouvre le fil (semé de la ligne affichée) puis transmet
+ * le message. Jamais d'autofocus : le clavier ne s'ouvre qu'au tap
+ * volontaire de la personne.
+ */
+function DockComposer({
+  surface,
+  activeRole,
+  seed,
+}: {
+  surface: string;
+  activeRole: "owner" | "sitter";
+  seed: string;
+}) {
+  const [draft, setDraft] = useState("");
+  const dictatedRef = useRef(false);
+  const voice = useAlmaVoiceInput((text) => {
+    dictatedRef.current = true;
+    setDraft((d) => (d ? `${d} ${text}` : text));
+  });
+
+  const submit = () => {
+    const text = draft.trim();
+    if (!text) return;
+    const inputMode = dictatedRef.current ? "voice" : "keyboard";
+    dictatedRef.current = false;
+    setDraft("");
+    openAlmaConversation(seed);
+    void sendAlmaMessage({ text, surface, activeRole, inputMode });
+  };
+
+  return (
+    <div className="mt-2 flex items-end gap-2">
+      <textarea
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            submit();
+          }
+        }}
+        rows={1}
+        maxLength={2000}
+        placeholder={composerPlaceholder(surface)}
+        aria-label="Votre message pour Alma"
+        autoFocus={false}
+        className="flex-1 resize-none rounded-xl border border-input bg-background px-3 py-2 text-[13px] leading-snug max-h-24 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      />
+      {voice.supported && (
+        <button
+          type="button"
+          onClick={voice.toggle}
+          disabled={voice.status === "transcribing"}
+          aria-label={voice.status === "recording" ? "Arrêter la dictée" : "Dicter votre message"}
+          aria-pressed={voice.status === "recording"}
+          className={cn(
+            "flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition",
+            voice.status === "recording"
+              ? "bg-destructive text-destructive-foreground"
+              : "text-muted-foreground hover:bg-muted hover:text-foreground",
+          )}
+        >
+          {voice.status === "recording" ? (
+            <Square className="h-4 w-4" />
+          ) : (
+            <Mic className="h-4 w-4" />
+          )}
+        </button>
+      )}
+      <button
+        type="button"
+        onClick={submit}
+        disabled={draft.trim().length === 0}
+        aria-label="Envoyer à Alma"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground disabled:opacity-50 transition"
+      >
+        <Send className="h-4 w-4" />
+      </button>
+    </div>
+  );
+}
 
 export function AlmaDock() {
   // Défense en profondeur : ne rien monter pour un visiteur anonyme, même
@@ -375,13 +459,21 @@ function AlmaDockInner() {
     ? ({ nouvelle: 36, eveillee: 40, complice: 42, fidele: 44 } as const)[stage]
     : 36;
 
-  // Expose l'état déplié via un attribut body, pour permettre aux surfaces
-  // (ex. /messages) d'ajouter un padding-bottom réservant l'espace du panneau
-  // Alma sans repositionner le dock.
+  const surface = surfaceFromPath(location.pathname, activeRole);
+  // Une seule ligne de texte dans le panneau : le whisper prime, puis la
+  // proposition contextuelle, puis l'humeur du jour.
+  const panelLine = resolvePanelLine({
+    whisperMessage: whisper?.message ?? null,
+    propositionMessage: proposition?.message ?? null,
+    moodLine: isSilent ? null : almaMood.line,
+  });
+
+  // Expose l'état déplié via un attribut body : le panneau réserve son
+  // espace au lieu de chevaucher le contenu (règle globale sur #main-content
+  // dans index.css, plus le opt-in [data-alma-safe-area] de /messages).
   useEffect(() => {
     if (typeof document === "undefined") return;
-    const active = expanded && (!!whisper || !!proposition);
-    if (active) {
+    if (expanded) {
       document.body.dataset.almaDockExpanded = "true";
     } else {
       delete document.body.dataset.almaDockExpanded;
@@ -389,7 +481,7 @@ function AlmaDockInner() {
     return () => {
       delete document.body.dataset.almaDockExpanded;
     };
-  }, [expanded, whisper, proposition]);
+  }, [expanded]);
 
   // Action utilisateur : demande explicite d'un conseil. Contourne le quota
   // de session proactif et le verrou de surface (initiée par l'utilisateur),
@@ -452,156 +544,71 @@ function AlmaDockInner() {
         />
       )}
 
-      {/* Panneau déplié */}
-      {expanded && !conversation.open && whisper && (
+      {/* Panneau déplié : une seule ligne de texte, le composeur toujours
+          visible, au maximum une action. Le whisper prime sur l'humeur, qui
+          se tait. La croix n'existe que sur un whisper, jamais sur une
+          humeur. */}
+      {expanded && !conversation.open && (
         <div
           role="status"
           aria-live="polite"
-          data-whisper-type={whisper.type}
-          onPointerEnter={pauseTimer}
-          onPointerLeave={resumeTimer}
-          onFocusCapture={pauseTimer}
-          onBlurCapture={resumeTimer}
+          data-testid="alma-dock-panel"
+          data-whisper-type={whisper?.type}
+          onPointerEnter={whisper ? pauseTimer : undefined}
+          onPointerLeave={whisper ? resumeTimer : undefined}
+          onFocusCapture={whisper ? pauseTimer : undefined}
+          onBlurCapture={whisper ? resumeTimer : undefined}
           className={cn(
-            "pointer-events-auto mb-2 w-full md:w-80",
-            "rounded-2xl border border-primary/20 bg-card text-card-foreground shadow-xl",
-            "p-3 pr-9 relative",
+            "pointer-events-auto mb-2 w-full md:w-96 relative",
+            "rounded-2xl border bg-card text-card-foreground shadow-xl",
+            whisper ? "border-primary/20 p-3 pr-9" : "border-border p-3",
             "animate-in slide-in-from-bottom-2 fade-in duration-300",
           )}
         >
-          <button
-            type="button"
-            onClick={() => doDismiss("closed_manually")}
-            className="absolute right-1 top-1 flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition"
-            aria-label="Fermer le message d'Alma"
-          >
-            <X className="h-3.5 w-3.5" />
-          </button>
+          {whisper && (
+            <button
+              type="button"
+              onClick={() => doDismiss("closed_manually")}
+              className="absolute right-1 top-1 flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition"
+              aria-label="Fermer le message d'Alma"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
           <p className="text-[13px] leading-snug text-foreground/90 whitespace-pre-line">
-            {whisper.message}
+            {panelLine}
           </p>
-          {(
-            <div className="mt-2 flex flex-wrap items-center gap-2">
-              {whisper.primaryAction && (
-                <button
-                  type="button"
-                  onClick={() =>
-                    handleAction(whisper.primaryAction!.onClick, whisper.primaryAction!.actionId)
-                  }
-                  className="rounded-full bg-primary text-primary-foreground text-xs font-semibold px-3 py-1.5 hover:bg-primary/90 transition"
-                >
-                  {whisper.primaryAction.label}
-                </button>
-              )}
-              {whisper.secondaryAction && (
-                <button
-                  type="button"
-                  onClick={() =>
-                    handleAction(
-                      whisper.secondaryAction!.onClick,
-                      whisper.secondaryAction!.actionId,
-                    )
-                  }
-                  className="text-xs font-medium text-muted-foreground hover:text-foreground transition"
-                >
-                  {whisper.secondaryAction.label}
-                </button>
-              )}
-              {whisper.allowNextTip && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    trackEvent("alma_whisper_action_clicked", {
-                      metadata: { whisper_type: whisper.type, action_id: "next_tip" },
-                    });
-                    void requestNextTip({
-                      surface: surfaceFromPath(location.pathname, activeRole),
-                      preferNudge: false,
-                    });
-                  }}
-                  className="text-xs font-medium text-muted-foreground hover:text-foreground transition underline decoration-dotted underline-offset-2"
-                >
-                  Un autre conseil
-                </button>
-              )}
+          {whisper?.primaryAction && (
+            <div className="mt-2">
               <button
                 type="button"
-                onClick={() => startConversation()}
-                className="text-xs font-medium text-primary hover:underline underline-offset-2"
+                data-testid="alma-panel-action"
+                onClick={() =>
+                  handleAction(whisper.primaryAction!.onClick, whisper.primaryAction!.actionId)
+                }
+                className="rounded-full bg-primary text-primary-foreground text-xs font-semibold px-3 py-1.5 hover:bg-primary/90 transition"
               >
-                Répondre à Alma
+                {whisper.primaryAction.label}
               </button>
             </div>
           )}
-        </div>
-      )}
-
-      {/* Phrase d'ouverture d'humeur, quand aucune proposition n'est calculée */}
-      {expanded && !conversation.open && !whisper && !proposition && almaMood.line && (
-        <div
-          role="status"
-          data-testid="alma-mood-line"
-          className={cn(
-            "pointer-events-auto mb-2 w-full md:w-80",
-            "rounded-2xl border border-border bg-card text-card-foreground shadow-lg",
-            "p-3 relative",
-            "animate-in slide-in-from-bottom-2 fade-in duration-300",
+          <DockComposer
+            surface={surface}
+            activeRole={activeRole === "owner" ? "owner" : "sitter"}
+            seed={panelLine}
+          />
+          {!whisper && proposition && (
+            <div className="mt-2">
+              <button
+                type="button"
+                data-testid="alma-panel-action"
+                onClick={() => { navigate(proposition.ctaTo); setExpanded(false); }}
+                className="rounded-full border border-border bg-muted/50 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition"
+              >
+                {proposition.ctaLabel}
+              </button>
+            </div>
           )}
-        >
-          <p className="text-[13px] leading-snug text-foreground/90">{almaMood.line}</p>
-        </div>
-      )}
-
-      {/* Panneau de proposition permanente (aucun whisper actif) */}
-      {expanded && !conversation.open && !whisper && proposition && (
-        <div
-          role="status"
-          className={cn(
-            "pointer-events-auto mb-2 w-full md:w-80",
-            "rounded-2xl border border-border bg-card text-card-foreground shadow-lg",
-            "p-3 pr-9 relative",
-            "animate-in slide-in-from-bottom-2 fade-in duration-300",
-          )}
-        >
-          <button
-            type="button"
-            onClick={() => { setExpanded(false); setUserCollapsed(true); }}
-            className="absolute right-1 top-1 flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition"
-            aria-label="Fermer la proposition d'Alma"
-          >
-            <X className="h-3.5 w-3.5" />
-          </button>
-          {almaMood.line && (
-            <p className="mb-1.5 text-[13px] leading-snug text-muted-foreground">
-              {almaMood.line}
-            </p>
-          )}
-          <p className="text-[13px] leading-snug text-foreground/90">
-            {proposition.message}
-          </p>
-          <div className="mt-2 flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={() => { navigate(proposition.ctaTo); setExpanded(false); }}
-              className="rounded-full bg-primary text-primary-foreground text-xs font-semibold px-3 py-1.5 hover:bg-primary/90 transition"
-            >
-              {proposition.ctaLabel}
-            </button>
-            <button
-              type="button"
-              onClick={() => askForTip("proposition")}
-              className="min-h-11 rounded-full px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              Un conseil ?
-            </button>
-            <button
-              type="button"
-              onClick={() => startConversation()}
-              className="min-h-11 rounded-full px-3 py-1.5 text-xs font-medium text-primary hover:bg-muted transition focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              Parler à Alma
-            </button>
-          </div>
         </div>
       )}
 
@@ -697,17 +704,15 @@ function AlmaDockInner() {
           aria-hidden
         >
           <span className="text-xs font-semibold text-foreground/80">Alma</span>
-          {almaMood.mood ? (
-            <span className="text-[10px] font-medium text-muted-foreground">
-              {MOOD_STATUS_LABEL[almaMood.mood]}
-            </span>
-          ) : stage && STAGE_SHORT_LABEL[stage] ? (
+          {/* Sous le nom : le stade de relation, jamais l'humeur. L'humeur
+              se lit dans le texte du panneau et dans l'avatar. */}
+          {stage && STAGE_SHORT_LABEL[stage] ? (
             <span className="text-[10px] font-medium text-muted-foreground">
               {STAGE_SHORT_LABEL[stage]}
             </span>
-          ) : !stage ? (
+          ) : (
             <span className="text-[10px] font-medium text-muted-foreground">votre assistante</span>
-          ) : null}
+          )}
         </button>
 
         <div className="h-6 w-px bg-border/70" aria-hidden />
