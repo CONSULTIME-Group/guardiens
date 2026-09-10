@@ -27,6 +27,8 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { AffinityOnboardingFunnelCard } from "@/components/admin/AffinityOnboardingFunnelCard";
+import { ConversationsTab } from "./_components/alma/ConversationsTab";
+import { MoodsTab } from "./_components/alma/MoodsTab";
 import { trackEvent } from "@/lib/analytics";
 import { WHISPER_PRIORITY } from "@/lib/alma/whisper-types";
 import {
@@ -70,11 +72,10 @@ export default function AdminAlma() {
   const seenRef = useRef(false);
   const [range, setRange] = useState<Range>("30d");
   const [searchParams, setSearchParams] = useSearchParams();
-  const tab = searchParams.get("tab") === "cultural-facts"
-    ? "cultural-facts"
-    : searchParams.get("tab") === "whispers"
-      ? "whispers"
-      : "bubbles";
+  const rawTab = searchParams.get("tab");
+  const tab = ["cultural-facts", "whispers", "conversations", "moods"].includes(rawTab ?? "")
+    ? (rawTab as string)
+    : "bubbles";
 
   useEffect(() => {
     if (seenRef.current) return;
@@ -127,6 +128,12 @@ export default function AdminAlma() {
           <TabsTrigger value="cultural-facts">
             <BookOpen className="h-4 w-4 mr-2" aria-hidden="true" /> Faits culturels
           </TabsTrigger>
+          <TabsTrigger value="conversations">
+            <MessageCircle className="h-4 w-4 mr-2" aria-hidden="true" /> Conversations
+          </TabsTrigger>
+          <TabsTrigger value="moods">
+            <Sparkles className="h-4 w-4 mr-2" aria-hidden="true" /> Humeurs
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="bubbles" className="mt-4">
@@ -139,6 +146,14 @@ export default function AdminAlma() {
 
         <TabsContent value="cultural-facts" className="mt-4">
           <CulturalFactsTab since={since} />
+        </TabsContent>
+
+        <TabsContent value="conversations" className="mt-4">
+          <ConversationsTab since={since} />
+        </TabsContent>
+
+        <TabsContent value="moods" className="mt-4">
+          <MoodsTab />
         </TabsContent>
       </Tabs>
     </div>
