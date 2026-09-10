@@ -1,13 +1,14 @@
 /**
  * Humeurs d'Alma (lot 2), logique pure.
  *
- * Alma assume d'être une chienne : son registre vit dans les marges, la
- * ligne de statut du dock et sa phrase d'ouverture quand la personne ouvre
- * le dock elle-même. JAMAIS dans une réponse à une question : la
- * conversation ne lit rien de ce module.
+ * Alma assume d'être une chienne : son humeur vit dans la ligne du dock,
+ * dans sa phrase d'ouverture, et désormais dans la conversation. Le dock
+ * pose l'humeur affichée dans `setAlmaMoodContext`, et `alma-chat` la
+ * reçoit pour que la voix du personnage tienne aussi quand on lui pose
+ * une question personnelle.
  *
- * Les six humeurs se réduisent aux trois moods déjà acceptés par
- * <AlmaAvatarAnimated /> : aucun nouvel état visuel.
+ * Chaque humeur pointe vers l'animation qui lui correspond parmi les sept
+ * déjà écrites dans <AlmaAvatarAnimated />.
  */
 
 export type AlmaMoodKey =
@@ -18,7 +19,13 @@ export type AlmaMoodKey =
   | "attentive"
   | "endormie";
 
-export type AlmaMoodAvatar = "idle" | "attentive" | "sleepy";
+export type AlmaMoodAvatar =
+  | "idle"
+  | "attentive"
+  | "thinking"
+  | "gentle"
+  | "playful"
+  | "sleepy";
 
 export const ALMA_MOOD_KEYS: AlmaMoodKey[] = [
   "petillante",
@@ -30,10 +37,10 @@ export const ALMA_MOOD_KEYS: AlmaMoodKey[] = [
 ];
 
 export const MOOD_AVATAR: Record<AlmaMoodKey, AlmaMoodAvatar> = {
-  petillante: "idle",
+  petillante: "playful",
   pelotonnee: "idle",
-  reveuse: "idle",
-  chiffonnee: "idle",
+  reveuse: "gentle",
+  chiffonnee: "thinking",
   attentive: "attentive",
   endormie: "sleepy",
 };

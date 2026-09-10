@@ -17,7 +17,7 @@
  * ALMA_STAGE_ASSETS). Si une illustration dédiée est branchée pour un
  * stade dans ALMA_STAGE_ASSETS, elle prime sur le SVG.
  */
-import { CSSProperties, ReactNode, useId } from "react";
+import { CSSProperties, ReactNode, useEffect, useId, useState } from "react";
 import { cn } from "@/lib/utils";
 import type { AlmaStage } from "@/hooks/useAlmaEvolution";
 
@@ -128,6 +128,7 @@ const STYLE = `
 [data-alma-animated] .alma-tongue     { transform-origin: 50% 0%; transform: scaleY(0); opacity: 0; }
 [data-alma-animated] .alma-shadow     { transform-origin: 50% 50%; }
 [data-alma-animated] .alma-aura-ray   { transform-origin: 50% 50%; }
+[data-alma-animated] .alma-burst      { transform-origin: 50% 75%; }
 
 @media (prefers-reduced-motion: no-preference) {
   [data-alma-animated] .alma-body-breath { animation: alma-breathe 4.2s ease-in-out infinite; }
@@ -198,6 +199,29 @@ const STYLE = `
 @keyframes alma-eyes-scan  { 0%,100% { transform: translateX(-0.8px); } 50% { transform: translateX(0.8px); } }
 @keyframes alma-tongue     { 0% { transform: scaleY(0); opacity: 0; } 40%,70% { transform: scaleY(1); opacity: 1; } 100% { transform: scaleY(0); opacity: 0; } }
 @keyframes alma-ray        { 0%,100% { transform: scale(1); opacity: 0.55; } 50% { transform: scale(1.08); opacity: 0.9; } }
+
+/* Vie non linéaire : pirouette et pounce, jouées une fois, à intervalle
+   aléatoire. La classe est posée puis retirée par le composant. */
+@media (prefers-reduced-motion: no-preference) {
+  [data-alma-animated][data-burst="pirouette"] .alma-burst { animation: alma-pirouette 1.1s cubic-bezier(0.34, 1.56, 0.64, 1) 1; }
+  [data-alma-animated][data-burst="pounce"]    .alma-burst { animation: alma-pounce 0.6s ease-out 1; }
+}
+
+@keyframes alma-pirouette {
+  0%   { transform: rotate(0deg) translateY(0) scale(1, 1); }
+  20%  { transform: rotate(90deg) translateY(-4px) scale(0.97, 1.05); }
+  55%  { transform: rotate(230deg) translateY(-6px) scale(0.96, 1.06); }
+  85%  { transform: rotate(360deg) translateY(0) scale(1.1, 0.9); }
+  100% { transform: rotate(360deg) translateY(0) scale(1, 1); }
+}
+
+@keyframes alma-pounce {
+  0%   { transform: translate(0, 0) rotate(0deg); }
+  25%  { transform: translate(2.5px, 1.5px) rotate(3deg); }
+  50%  { transform: translate(0, 0) rotate(0deg); }
+  75%  { transform: translate(2.5px, 1.5px) rotate(3deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
 `;
 
 /* ------------------------------------------------------------------ */
@@ -709,6 +733,36 @@ export function AlmaAvatarAnimated({
   // useId conservé pour compat future (gradients, clipPaths…).
   useId();
 
+  /* Vie non linéaire : une pirouette ou un pounce à intervalle aléatoire
+     entre 25 et 50 secondes. Jamais de boucle, jamais de rythme constant.
+     Le rendu reste immobile pour qui a réduit les animations. */
+  const [burst, setBurst] = useState<"pirouette" | "pounce" | null>(null);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    let playTimer: ReturnType<typeof setTimeout> | undefined;
+    let nextTimer: ReturnType<typeof setTimeout> | undefined;
+    const schedule = () => {
+      const delay = 25000 + Math.random() * 25000;
+      nextTimer = setTimeout(() => {
+        const kind = Math.random() < 0.5 ? "pirouette" : "pounce";
+        setBurst(kind);
+        playTimer = setTimeout(
+          () => {
+            setBurst(null);
+            schedule();
+          },
+          kind === "pirouette" ? 1150 : 650,
+        );
+      }, delay);
+    };
+    schedule();
+    return () => {
+      if (playTimer) clearTimeout(playTimer);
+      if (nextTimer) clearTimeout(nextTimer);
+    };
+  }, []);
+
   const style: CSSProperties = {
     width: size,
     height: size,
@@ -765,6 +819,7 @@ export function AlmaAvatarAnimated({
       data-alma-animated=""
       data-mood={mood}
       data-stage={stage}
+      data-burst={burst ?? undefined}
       aria-label={ariaHidden ? undefined : "Alma"}
       role={ariaHidden ? undefined : "img"}
       aria-hidden={ariaHidden}
@@ -789,7 +844,7 @@ export function AlmaAvatarAnimated({
         xmlns="http://www.w3.org/2000/svg"
         shapeRendering="geometricPrecision"
       >
-        {renderStage(stage)}
+        <g className="alma-burst">{renderStage(stage)}</g>
       </svg>
     </span>
   );

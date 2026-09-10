@@ -24,6 +24,7 @@ import {
   getAlmaConversationState,
   openAlmaConversation,
   sendAlmaMessage,
+  setAlmaMoodContext,
   subscribeAlmaConversation,
 } from "@/lib/alma/conversation-store";
 import { autoDismissDelay, shouldScheduleAutoDismiss } from "@/lib/alma/auto-dismiss";
@@ -284,12 +285,38 @@ function AlmaDockInner() {
     getAlmaConversationState,
   );
 
-  // Humeur du jour. Elle vit uniquement dans la ligne de statut et dans la
-  // phrase d'ouverture, jamais dans une réponse à une question.
+  // Humeur du jour. Elle colore la ligne du panneau, l'avatar, et elle est
+  // transmise à la conversation pour qu'Alma parle de l'humeur affichée.
   const almaMood = useAlmaMood({
     silent: frequency === "silent",
     conversationOpen: conversation.open,
   });
+
+  useEffect(() => {
+    setAlmaMoodContext({ mood: almaMood.mood, line: almaMood.line });
+  }, [almaMood.mood, almaMood.line]);
+
+  // Réactions ponctuelles de l'avatar, toutes brèves, puis retour à
+  // l'humeur du moment.
+  const [reaction, setReaction] = useState<"happy" | "playful" | null>(null);
+  const lastAlmaCountRef = useRef(0);
+  useEffect(() => {
+    const almaCount = conversation.messages.filter((m) => m.role === "alma").length;
+    if (almaCount > lastAlmaCountRef.current) {
+      lastAlmaCountRef.current = almaCount;
+      setReaction("happy");
+      const t = setTimeout(() => setReaction(null), 2500);
+      return () => clearTimeout(t);
+    }
+    lastAlmaCountRef.current = almaCount;
+  }, [conversation.messages]);
+
+  const playPlayful = useCallback(() => {
+    setReaction("playful");
+    setTimeout(() => setReaction((r) => (r === "playful" ? null : r)), 1500);
+  }, []);
+
+
 
 
   // Auto-timer d'auto-dismiss pour le whisper courant.
@@ -448,6 +475,19 @@ function AlmaDockInner() {
     : 36;
 
   const surface = surfaceFromPath(location.pathname, activeRole);
+
+  // Humeur affichée par l'avatar : le silence prime, puis la réflexion
+  // pendant qu'une réponse charge, puis la réaction brève, puis
+  // l'attention d'un whisper, puis l'humeur du jour.
+  const panelAvatarMood = isSilent
+    ? "sleepy"
+    : conversation.sending
+      ? "thinking"
+      : reaction
+        ? reaction
+        : mood === "attentive"
+          ? "attentive"
+          : almaMood.avatar;
   // Une seule ligne de texte dans le panneau : le whisper prime, puis la
   // proposition contextuelle, puis l'humeur du jour.
   const panelLine = resolvePanelLine({
@@ -563,9 +603,18 @@ function AlmaDockInner() {
               <X className="h-3.5 w-3.5" />
             </button>
           )}
-          <p className="text-[13px] leading-snug text-foreground/90 whitespace-pre-line">
-            {panelLine}
-          </p>
+          <div className="flex items-start gap-2">
+            <AlmaAvatarAnimated
+              size={28}
+              mood={panelAvatarMood}
+              stage={stage ?? undefined}
+              aria-hidden
+              className="shrink-0"
+            />
+            <p className="flex-1 min-w-0 text-[13px] leading-snug text-foreground/90 whitespace-pre-line">
+              {panelLine}
+            </p>
+          </div>
           {whisper?.primaryAction && (
             <div className="mt-2">
               <button
@@ -618,6 +667,8 @@ function AlmaDockInner() {
               if (expanded) setUserCollapsed(true);
               else setUserCollapsed(false);
             }}
+            onPointerEnter={playPlayful}
+            onTouchStart={playPlayful}
             className="relative inline-flex flex-col items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             aria-label={
               whisper
@@ -641,7 +692,7 @@ function AlmaDockInner() {
             )}
             <AlmaAvatarAnimated
               size={avatarSize}
-              mood={isSilent ? "sleepy" : (mood === "attentive" ? "attentive" : almaMood.avatar)}
+              mood={panelAvatarMood}
               stage={stage ?? undefined}
             />
             {!isSilent && (

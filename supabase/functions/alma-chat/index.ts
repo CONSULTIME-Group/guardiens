@@ -39,6 +39,18 @@ Deno.serve(async (req) => {
     // Voix ou clavier, renseigne la répartition suivie dans /admin/alma.
     const inputMode = body?.input_mode === "voice" ? "voice" : "keyboard";
     const surface = typeof body?.surface === "string" ? body.surface.slice(0, 60) : "unknown";
+    // Humeur du moment, exactement celle affichée à l'écran. Facultative :
+    // sans elle, la fonction répond normalement.
+    const mood = typeof body?.mood === "string" ? body.mood.slice(0, 40) : "";
+    const moodLine = typeof body?.mood_line === "string" ? body.mood_line.slice(0, 300) : "";
+    const moodMessages = mood
+      ? [
+          {
+            role: "system" as const,
+            content: `Votre humeur en ce moment : ${mood}. Ce que vous vivez aujourd'hui : ${moodLine}`,
+          },
+        ]
+      : [];
     const history = Array.isArray(body?.history)
       ? body.history
           .filter(
@@ -171,9 +183,11 @@ Deno.serve(async (req) => {
 
     const r = await callLovableAI({
       model: "google/gemini-2.5-flash",
-      temperature: 0.6,
+      // 0.85 : à 0.6 le modèle retombe sur les mêmes ouvertures.
+      temperature: 0.85,
       messages: [
         { role: "system", content: ALMA_SYSTEM_PROMPT },
+        ...moodMessages,
         {
           role: "system",
           content: `Dossier de la personne qui vous parle (ses données, vous pouvez les citer). Les champs null sont simplement absents :\n${JSON.stringify(dossier, null, 2)}`,
