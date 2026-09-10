@@ -726,6 +726,16 @@ function AlmaDockInner() {
               <Lightbulb className="mr-2 h-4 w-4" aria-hidden />
               <span>Un conseil ?</span>
             </DropdownMenuItem>
+            <DropdownMenuItem
+              className="min-h-11 cursor-pointer"
+              onSelect={(e) => {
+                e.preventDefault();
+                startConversation();
+              }}
+            >
+              <MessageCircle className="mr-2 h-4 w-4" aria-hidden />
+              <span>Parler à Alma</span>
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">
               Fréquence
