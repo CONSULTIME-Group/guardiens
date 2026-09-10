@@ -7,6 +7,13 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.45.0'
 import { requireCronCaller } from '../_shared/require-cron-caller.ts'
 import { startCronRun } from '../_shared/cron-run-log.ts'
+import {
+  clampInt,
+  filterToFrozenCohort,
+  isRateLimitFailure,
+  runInBatches,
+  type CohortRow,
+} from './cohort.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -17,7 +24,12 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
 const TEMPLATE = 'seasonal-nurture'
-const BATCH_SIZE = 20
+const DEFAULT_BATCH_SIZE = 5
+const DEFAULT_BATCH_DELAY_MS = 1200
+const RETRY_DELAY_MS = 3000
+const TIME_BUDGET_MS = 100000
+
+const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms))
 
 interface PlanRow {
   user_id: string
@@ -48,6 +60,8 @@ Deno.serve(async (req) => {
     dry_run?: boolean
     recipient_id?: string
     limit?: number
+    batch_size?: number
+    batch_delay_ms?: number
   } = {}
   try { if (req.body) body = await req.json() } catch { /* noop */ }
 
@@ -68,6 +82,43 @@ Deno.serve(async (req) => {
     if (planErr) throw planErr
 
     let planRows = (planData ?? []) as unknown as PlanRow[]
+
+    // Croisement avec la cohorte figee AVANT tout autre filtrage : le groupe
+    // temoin ne recoit jamais la campagne, meme s'il est revenu depuis le gel.
+    const { data: cohortData, error: cohortErr } = await admin
+      .from('seasonal_nurture_cohorts')
+      .select('user_id, groupe')
+      .eq('period_key', periodKey)
+      .limit(10000)
+    if (cohortErr) throw cohortErr
+
+    const cohortFilter = filterToFrozenCohort(planRows, (cohortData ?? []) as CohortRow[])
+    planRows = cohortFilter.rows
+    const planBrut = cohortFilter.planBrut
+    const cibleRetenue = cohortFilter.cibleRetenue
+    const ecartesHorsCible = cohortFilter.ecartesHorsCible
+
+    // Un croisement vide sur un plan non vide signale une erreur de donnees :
+    // on refuse, on n'elargit jamais.
+    if (cohortFilter.cohortPresent && planBrut > 0 && cibleRetenue === 0) {
+      const reason = `cohorte figée présente pour ${periodKey} mais croisement vide, envoi refusé`
+      await run.finish('failed', {
+        period_key: periodKey,
+        plan_brut: planBrut,
+        cible_retenue: 0,
+        ecartes_hors_cible: ecartesHorsCible,
+        reason,
+      })
+      return json({
+        ok: false,
+        error: reason,
+        plan_brut: planBrut,
+        cible_retenue: 0,
+        ecartes_hors_cible: ecartesHorsCible,
+        period_key: periodKey,
+      }, 409)
+    }
+
     if (body.recipient_id) {
       planRows = planRows.filter((r) => r.user_id === body.recipient_id)
     }
@@ -76,10 +127,21 @@ Deno.serve(async (req) => {
       planRows = planRows.slice(0, body.limit)
     }
 
+    const batchSize = clampInt(body.batch_size, 1, 20, DEFAULT_BATCH_SIZE)
+    const batchDelayMs = clampInt(body.batch_delay_ms, 0, 10000, DEFAULT_BATCH_DELAY_MS)
+    const startedAt = Date.now()
+
     const planned = planRows.length
     if (planned === 0) {
-      await run.finish('success', { planned: 0, sent: 0, skipped: 0, failed: 0, period_key: periodKey, dry_run: !!body.dry_run })
-      return json({ ok: true, planned: 0, sent: 0, skipped: 0, failed: 0, reason: 'no_plan' })
+      await run.finish('success', {
+        planned: 0, sent: 0, skipped: 0, failed: 0, period_key: periodKey, dry_run: !!body.dry_run,
+        plan_brut: planBrut, cible_retenue: cibleRetenue, ecartes_hors_cible: ecartesHorsCible,
+      })
+      return json({
+        ok: true, planned: 0, sent: 0, skipped: 0, failed: 0, retried: 0, reason: 'no_plan',
+        plan_brut: planBrut, cible_retenue: cibleRetenue, ecartes_hors_cible: ecartesHorsCible,
+        period_key: periodKey,
+      })
     }
 
     let sent = 0
@@ -87,7 +149,9 @@ Deno.serve(async (req) => {
     let failed = 0
     const errors: Array<{ user_id: string; reason: string }> = []
 
-    async function processOne(row: PlanRow): Promise<'sent' | 'skipped' | 'failed'> {
+    type Outcome = 'sent' | 'skipped' | 'failed'
+
+    async function processOne(row: PlanRow): Promise<Outcome> {
       const email = (row.email ?? '').trim()
       if (!email) return 'skipped'
 
@@ -129,23 +193,29 @@ Deno.serve(async (req) => {
       if (!res.ok) {
         const txt = await res.text().catch(() => '')
         console.error('send-transactional-email failed', res.status, txt)
-        errors.push({ user_id: row.user_id, reason: `send-transactional-email ${res.status}: ${txt}` })
+        const reason = `send-transactional-email ${res.status}: ${txt}`
+        errors.push({ user_id: row.user_id, reason })
+        if (res.status === 429 || isRateLimitFailure(reason)) rateLimited.push(row)
         return 'failed'
       }
       return 'sent'
     }
 
-    for (let i = 0; i < planRows.length; i += BATCH_SIZE) {
-      const batch = planRows.slice(i, i + BATCH_SIZE)
-      const outcomes = await Promise.all(batch.map(async (row) => {
-        try {
-          return await processOne(row)
-        } catch (e) {
-          console.error('[send-seasonal-nurture] recipient failed', row.user_id, e)
-          errors.push({ user_id: row.user_id, reason: String(e) })
-          return 'failed' as const
-        }
-      }))
+    const rateLimited: PlanRow[] = []
+
+    const guarded = async (row: PlanRow): Promise<Outcome> => {
+      try {
+        return await processOne(row)
+      } catch (e) {
+        console.error('[send-seasonal-nurture] recipient failed', row.user_id, e)
+        const reason = String(e)
+        errors.push({ user_id: row.user_id, reason })
+        if (isRateLimitFailure(reason)) rateLimited.push(row)
+        return 'failed'
+      }
+    }
+
+    const tally = (outcomes: Outcome[]) => {
       for (const outcome of outcomes) {
         if (outcome === 'sent') sent++
         else if (outcome === 'skipped') skipped++
@@ -153,15 +223,53 @@ Deno.serve(async (req) => {
       }
     }
 
-    const status = !body.dry_run && sent < planned * 0.8 ? 'partial' : 'success'
+    const firstPass = await runInBatches(planRows, {
+      batchSize,
+      delayMs: batchDelayMs,
+      handler: guarded,
+      sleep,
+      shouldStop: () => Date.now() - startedAt > TIME_BUDGET_MS,
+    })
+    tally(firstPass.results)
+
+    // Seconde passe, uniquement sur les echecs de debit Resend.
+    let retried = 0
+    const toRetry = rateLimited.splice(0, rateLimited.length)
+    if (!firstPass.stopped && toRetry.length > 0 && !body.dry_run) {
+      await sleep(RETRY_DELAY_MS)
+      failed -= toRetry.length
+      retried = toRetry.length
+      const secondPass = await runInBatches(toRetry, {
+        batchSize,
+        delayMs: batchDelayMs,
+        handler: guarded,
+        sleep,
+        shouldStop: () => Date.now() - startedAt > TIME_BUDGET_MS,
+      })
+      tally(secondPass.results)
+      // Ce que la garde de temps a empeche de rejouer reste un echec.
+      failed += secondPass.remaining.length
+    }
+
+    const remaining = firstPass.remaining.length
+    const status = firstPass.stopped
+      ? 'partial'
+      : (!body.dry_run && sent < planned * 0.8 ? 'partial' : 'success')
 
     await run.finish(status, {
       planned,
       sent,
       skipped,
       failed,
+      retried,
+      remaining,
       period_key: periodKey,
       dry_run: !!body.dry_run,
+      plan_brut: planBrut,
+      cible_retenue: cibleRetenue,
+      ecartes_hors_cible: ecartesHorsCible,
+      batch_size: batchSize,
+      batch_delay_ms: batchDelayMs,
       shortfall_ratio: planned > 0 ? Number((1 - sent / planned).toFixed(2)) : 0,
     })
 
@@ -171,6 +279,16 @@ Deno.serve(async (req) => {
       sent,
       skipped,
       failed,
+      retried,
+      remaining,
+      resume_hint: firstPass.stopped
+        ? 'Garde de temps atteinte. Un second appel identique reprend le reste, la déduplication par période évite tout doublon.'
+        : undefined,
+      plan_brut: planBrut,
+      cible_retenue: cibleRetenue,
+      ecartes_hors_cible: ecartesHorsCible,
+      batch_size: batchSize,
+      batch_delay_ms: batchDelayMs,
       period_key: periodKey,
       dry_run: !!body.dry_run,
       errors: errors.slice(0, 20),
