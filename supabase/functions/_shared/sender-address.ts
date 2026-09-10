@@ -15,3 +15,8 @@ export const SENDER_ADDRESS = "contact@guardiens.fr";
 export const SENDER_NAME = "Guardiens";
 export const SENDER_FROM = `${SENDER_NAME} <${SENDER_ADDRESS}>`;
 export const REPLY_TO_ADDRESS = SENDER_ADDRESS;
+
+// Expéditeur des messages écrits à la première personne, adressés à des
+// organisations et non à des membres (demandes d'accord aux associations).
+export const PERSONAL_SENDER_NAME = "Jérémie et Elisa de Guardiens";
+export const PERSONAL_SENDER_FROM = `${PERSONAL_SENDER_NAME} <${SENDER_ADDRESS}>`;
