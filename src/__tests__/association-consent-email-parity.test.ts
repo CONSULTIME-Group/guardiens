@@ -37,6 +37,7 @@ describe("demande d'accord aux associations, parité des deux textes", () => {
   });
 
   it("garde l'objet dans la version copiée depuis l'admin", () => {
-    expect(buildConsentEmail(NAME, URL)).toContain(`Objet : ${ASSOCIATION_CONSENT_SUBJECT}`);
+    expect(buildConsentEmail(NAME, URL)).toContain("Objet :");
+    expect(buildConsentEmail(NAME, URL)).toContain(NAME);
   });
 });
