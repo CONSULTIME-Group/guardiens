@@ -308,6 +308,45 @@ export default function AdminAssociations() {
                   <Button
                     size="sm"
                     variant="outline"
+                    disabled={sendingSlug === row.slug}
+                    onClick={() => sendTest(row)}
+                  >
+                    M'envoyer un test
+                  </Button>
+                  <ConfirmDialog
+                    trigger={
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={
+                          !row.contact_email ||
+                          recentlyRequested(row) ||
+                          sendingSlug === row.slug
+                        }
+                      >
+                        Envoyer la demande
+                      </Button>
+                    }
+                    title="Envoyer la demande d'accord ?"
+                    description={
+                      <>
+                        Destinataire : {row.contact_email ?? ""}
+                        <br />
+                        Objet : {ASSOCIATION_CONSENT_SUBJECT}
+                        {recentlyRequested(row) && (
+                          <>
+                            <br />
+                            Demande déjà envoyée le {shortDate(row.consent_requested_at)}
+                          </>
+                        )}
+                      </>
+                    }
+                    confirmLabel="Envoyer"
+                    onConfirm={() => invokeConsentEmail(row, { mode: "send" })}
+                  />
+                  <Button
+                    size="sm"
+                    variant="outline"
                     disabled={row.consent_status !== "granted" || copying}
                     onClick={() => copyPhotos(row)}
                   >
