@@ -192,6 +192,14 @@ export const staticRoutes: SiteRoute[] = [
  changeFreq: "weekly",
  },
  {
+ path: "/associations",
+ title: "Associations et refuges de protection animale | Guardiens",
+ metaDescription: "Refuges, sanctuaires, réseaux de familles d'accueil et centres de soins faune sauvage, présentés par l'équipe Guardiens, avec leurs besoins et leur page de dons.",
+ h1: "Associations et refuges de protection animale",
+ sitemapPriority: "0.8",
+ changeFreq: "weekly",
+ },
+ {
  path: "/pros",
  title: "Annuaire des pros animaliers près de chez vous | Guardiens",
  metaDescription: "Vétérinaires, éducateurs, toiletteurs, ostéopathes, transporteurs, photographes animaliers vérifiés. Trouvez le bon pro pour vos animaux, partout en France.",
