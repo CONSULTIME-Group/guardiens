@@ -9,22 +9,31 @@ import { PUBLIC_ASSOCIATION_COLUMNS, type PublicAssociation } from "@/components
  * Bloc de maillage : associations publiées du département.
  * Rendu uniquement quand au moins une fiche existe.
  */
-const DepartmentAssociations = ({ departementCode }: { departementCode?: string | null }) => {
+const DepartmentAssociations = ({
+  departementCode,
+  departementName,
+}: {
+  departementCode?: string | null;
+  departementName?: string | null;
+}) => {
+  const key = departementCode || departementName || null;
   const { data = [] } = useQuery<PublicAssociation[]>({
-    queryKey: ["department-associations", departementCode],
-    enabled: !!departementCode,
+    queryKey: ["department-associations", departementCode, departementName],
+    enabled: !!key,
     staleTime: 10 * 60 * 1000,
     queryFn: async () => {
-      const { data } = await supabase
+      let query = supabase
         .from("public_animal_associations" as any)
-        .select(PUBLIC_ASSOCIATION_COLUMNS)
-        .eq("departement_code", departementCode!)
-        .order("name");
+        .select(PUBLIC_ASSOCIATION_COLUMNS);
+      query = departementCode
+        ? query.eq("departement_code", departementCode)
+        : query.eq("departement_name", departementName!);
+      const { data } = await query.order("name");
       return ((data as any) ?? []) as PublicAssociation[];
     },
   });
 
-  if (!departementCode || data.length === 0) return null;
+  if (!key || data.length === 0) return null;
 
   return (
     <section className="max-w-5xl mx-auto px-4 py-8 border-t border-border">
