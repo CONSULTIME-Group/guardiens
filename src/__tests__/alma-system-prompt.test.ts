@@ -46,6 +46,10 @@ describe("identité d'Alma dans le prompt", () => {
 
   it("bannit les formules de centre d'appel", () => {
     expect(promptSource).toContain("Formules bannies, elles sonnent centre d'appel");
+    const bannedLineStart = promptSource.indexOf("Formules bannies, elles sonnent centre d'appel");
+    const bannedLineEnd = promptSource.indexOf("\n", bannedLineStart);
+    const sourceWithoutBannedLine =
+      promptSource.slice(0, bannedLineStart) + promptSource.slice(bannedLineEnd + 1);
     const banned = [
       "Que puis-je faire pour vous",
       "Comment puis-je vous aider",
@@ -54,7 +58,7 @@ describe("identité d'Alma dans le prompt", () => {
       "N'hésitez pas",
     ];
     for (const phrase of banned) {
-      expect(promptSource).toContain(phrase);
+      expect(sourceWithoutBannedLine).not.toContain(phrase);
     }
   });
 
