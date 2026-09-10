@@ -333,7 +333,7 @@ export default function AdminAssociations() {
                       <>
                         Destinataire : {row.contact_email ?? ""}
                         <br />
-                        Objet : {ASSOCIATION_CONSENT_SUBJECT}
+                        Objet : {ASSOCIATION_CONSENT_SUBJECT.replace("{name}", row.name)}
                         {recentlyRequested(row) && (
                           <>
                             <br />
