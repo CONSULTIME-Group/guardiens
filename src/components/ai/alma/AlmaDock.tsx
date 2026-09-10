@@ -160,21 +160,9 @@ function useIsRadixModalOpen(): boolean {
   return isOpen;
 }
 
-function surfaceFromPath(
-  pathname: string,
-  activeRole?: "owner" | "sitter",
-): string {
-  if (pathname.startsWith("/dashboard")) {
-    return activeRole === "sitter" ? "sitter_dashboard" : "owner_dashboard";
-  }
-  if (pathname === "/sits" || pathname === "/sits/") return "sits_list";
-  if (pathname.startsWith("/sits/")) return "sit_detail";
-  if (pathname === "/favoris") return "favorites";
-  if (pathname.startsWith("/recherche-gardiens")) return "search_page";
-  if (pathname.startsWith("/gardiens/")) return "sitter_profile";
-  if (pathname.startsWith("/petites-missions")) return "mutual_aid";
-  return "listings";
-}
+// Source unique : `src/lib/alma/surfaces.ts`, partagée avec le diagnostic admin.
+export { surfaceFromPath } from "@/lib/alma/surfaces";
+import { surfaceFromPath } from "@/lib/alma/surfaces";
 
 const FREQUENCY_CHOICES: { value: AlmaFrequency; label: string }[] = [
   { value: "silent", label: "Silencieuse" },
