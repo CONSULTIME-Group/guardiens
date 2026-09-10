@@ -386,9 +386,6 @@ function PuppySilhouette() {
   const headCurls = ellipseCurls(headCx, headCy, headRx + 0.5, headRy + 0.5, 16, 5);
   return (
     <>
-      {/* Ombre au sol */}
-      <ellipse className="alma-part alma-shadow" cx="50" cy="96" rx="22" ry="2.6" fill={SHADOW} />
-
       {/* Corps assis (arrière-plan) */}
       <g className="alma-part alma-body-breath">
         <g className="alma-part alma-body-mood">
@@ -444,8 +441,6 @@ function YoungSilhouette() {
   const headCurls = ellipseCurls(headCx, headCy, headRx + 0.5, headRy + 0.5, 14, 4.4);
   return (
     <>
-      <ellipse className="alma-part alma-shadow" cx="50" cy="96" rx="30" ry="2.6" fill={SHADOW} />
-
       <g className="alma-part alma-body-breath">
         <g className="alma-part alma-body-mood">
           {/* Queue dressée (petite) */}
@@ -521,8 +516,6 @@ function AdultSilhouette({ withAccessories = true }: { withAccessories?: boolean
   const headCurls = ellipseCurls(headCx, headCy, headRx + 0.6, headRy + 0.6, 16, 4.8);
   return (
     <>
-      <ellipse className="alma-part alma-shadow" cx="50" cy="96" rx="33" ry="2.8" fill={SHADOW} />
-
       <g className="alma-part alma-body-breath">
         <g className="alma-part alma-body-mood">
           {/* Queue en panache dressée et recourbée (arrière droit) */}
@@ -618,8 +611,6 @@ function ElderSilhouette() {
         ))}
       </g>
 
-      <ellipse className="alma-part alma-shadow" cx="50" cy="96" rx="37" ry="3" fill={SHADOW} />
-
       <g className="alma-part alma-body-breath">
         <g className="alma-part alma-body-mood">
           {/* Grande queue en panache portée haut */}
@@ -702,6 +693,20 @@ function ElderSilhouette() {
 /* ------------------------------------------------------------------ */
 /* Sélecteur de silhouette                                             */
 /* ------------------------------------------------------------------ */
+/** Ombre au sol, rendue hors du groupe anime pour ne jamais pivoter. */
+function renderStageShadow(stage?: AlmaStage): ReactNode {
+  switch (stage) {
+    case "nouvelle":
+      return <ellipse className="alma-part alma-shadow" cx="50" cy="96" rx="22" ry="2.6" fill={SHADOW} />;
+    case "eveillee":
+      return <ellipse className="alma-part alma-shadow" cx="50" cy="96" rx="30" ry="2.6" fill={SHADOW} />;
+    case "fidele":
+      return <ellipse className="alma-part alma-shadow" cx="50" cy="96" rx="37" ry="3" fill={SHADOW} />;
+    default:
+      return <ellipse className="alma-part alma-shadow" cx="50" cy="96" rx="33" ry="2.8" fill={SHADOW} />;
+  }
+}
+
 function renderStage(stage?: AlmaStage): ReactNode {
   switch (stage) {
     case "nouvelle":
@@ -844,6 +849,7 @@ export function AlmaAvatarAnimated({
         xmlns="http://www.w3.org/2000/svg"
         shapeRendering="geometricPrecision"
       >
+        {renderStageShadow(stage)}
         <g className="alma-burst">{renderStage(stage)}</g>
       </svg>
     </span>
