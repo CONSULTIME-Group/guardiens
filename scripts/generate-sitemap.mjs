@@ -365,14 +365,27 @@ async function main() {
 
     // Fiches associations publiées : /associations/:slug
     fetchOrCache(
-      "public_animal_associations", cache,
+      // Clé versionnée : les champs enrichis (nom, accroche, ville) sont
+      // apparus après la première mise en cache, la nouvelle clé force un
+      // rechargement au lieu de servir des entrées incomplètes.
+      "public_animal_associations_v2", cache,
       () => maxUpdatedAtWithCount("public_animal_associations", "updated_at"),
-      async () => (await supabase.from("public_animal_associations").select("slug, description, updated_at")).data,
+      async () => (await supabase.from("public_animal_associations").select("slug, name, tagline, description, city, departement_name, updated_at")).data,
       rows => rows.filter(a => isAssociationIndexable(a)).map(a => ({
         loc: `/associations/${a.slug}`,
         lastmod: (a.updated_at || today).split("T")[0],
         changefreq: "monthly",
         priority: "0.7",
+        _name: a.name,
+        _summary: (() => {
+          const clean = (a.tagline || a.description || "").trim().replace(/\s+/g, " ");
+          if (clean.length <= 140) return clean;
+          const cut = clean.slice(0, 140);
+          const stop = cut.lastIndexOf(" ");
+          return `${(stop > 60 ? cut.slice(0, stop) : cut).replace(/[,;:.]$/, "")}…`;
+        })(),
+        _city: a.city,
+        _dept: a.departement_name,
       }))
     ),
   ]);
@@ -436,6 +449,19 @@ async function main() {
   for (const e of profiles) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
   for (const e of sits) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
   for (const e of profiles_pros || []) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
+  // Garde-fou durable : si la base publie des fiches indexables et que la
+  // génération n'en produit aucune, le sitemap partirait amputé en silence.
+  {
+    const { data: liveAssocs } = await supabase
+      .from("public_animal_associations")
+      .select("slug, description");
+    const liveIndexable = (liveAssocs || []).filter(a => isAssociationIndexable(a)).length;
+    if (liveIndexable > 0 && (associations || []).length === 0) {
+      throw new Error(
+        `Sitemap : ${liveIndexable} fiches associations indexables en base, 0 URL générée.`,
+      );
+    }
+  }
   for (const e of associations || []) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
   for (const e of proSiloEntries) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
   // Pages légales (/cgu, /confidentialite, /mentions-legales) déjà incluses
@@ -484,8 +510,19 @@ ${dedupedEntries.join("\n")}
         /^(- \[House-sitting par département\]\(\/departement\): .*?)\d+ départements couverts\.$/m,
         `$1${deptCount} départements couverts.`,
       );
+    // Section associations, régénérée entre marqueurs à chaque build.
+    const assocLines = (associations || [])
+      .map(a => `- [${a._name}](${a.loc}) : ${a._summary}, ${a._city} (${a._dept}).`)
+      .join("\n");
+    const assocBlock = `<!-- associations:start -->\n## Associations et refuges\n\n${assocLines}\n<!-- associations:end -->`;
+    if (/<!-- associations:start -->[\s\S]*?<!-- associations:end -->/.test(llms)) {
+      llms = llms.replace(/<!-- associations:start -->[\s\S]*?<!-- associations:end -->/, assocBlock);
+    } else {
+      llms = `${llms.trimEnd()}\n\n${assocBlock}\n`;
+    }
+
     fs.writeFileSync(llmsPath, llms, "utf-8");
-    console.log(`   llms.txt: ${cityCount} villes, ${deptCount} départements`);
+    console.log(`   llms.txt: ${cityCount} villes, ${deptCount} départements, ${(associations || []).length} associations`);
   }
 
   console.log(`\n✅ Sitemap generated: ${entries.length} URLs → ${outPath}`);

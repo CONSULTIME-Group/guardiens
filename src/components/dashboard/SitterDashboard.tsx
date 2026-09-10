@@ -1,5 +1,6 @@
 import { useAlmaCulturalFact } from "@/hooks/useAlmaCulturalFact";
 
+import { NearbyAssociationCard } from "@/components/associations/NearbyAssociationCard";
 import { useAlmaUsageNudge } from "@/hooks/useAlmaUsageNudge";
 import { useAlmaFirstMeeting } from "@/hooks/useAlmaFirstMeeting";
 import { AlmaFirstMeeting } from "@/components/ai/alma/AlmaFirstMeeting";
@@ -533,6 +534,9 @@ const SitterDashboard = () => {
                   badgeCount={badgeCount ?? 0}
                 />
               </div>
+
+              {/* Association du département : carte discrète après les blocs principaux */}
+              <NearbyAssociationCard />
 
               {ChecklistBlock}
 

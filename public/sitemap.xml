@@ -763,6 +763,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/house-sitting/arles</loc>
+    <lastmod>2026-09-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/house-sitting/meaux</loc>
     <lastmod>2026-09-08</lastmod>
     <changefreq>weekly</changefreq>
@@ -901,13 +907,13 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/house-sitting/noumea</loc>
+    <loc>https://guardiens.fr/house-sitting/aubagne</loc>
     <lastmod>2026-09-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/house-sitting/aubagne</loc>
+    <loc>https://guardiens.fr/house-sitting/noumea</loc>
     <lastmod>2026-09-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -950,12 +956,6 @@
   </url>
   <url>
     <loc>https://guardiens.fr/house-sitting/la-seyne-sur-mer</loc>
-    <lastmod>2026-09-10</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/house-sitting/arles</loc>
     <lastmod>2026-09-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -3253,12 +3253,6 @@
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/gardiens/7bf29905-d372-4669-93b1-ec7def9b06d5</loc>
-    <lastmod>2026-09-10</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://guardiens.fr/gardiens/5cebd098-3f25-48fe-9c60-af6083883f98</loc>
     <lastmod>2026-09-08</lastmod>
     <changefreq>monthly</changefreq>
@@ -3429,6 +3423,12 @@
   <url>
     <loc>https://guardiens.fr/gardiens/68595f16-adb9-4d12-9ed3-c43e1c300e05</loc>
     <lastmod>2026-08-07</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/gardiens/7bf29905-d372-4669-93b1-ec7def9b06d5</loc>
+    <lastmod>2026-09-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>

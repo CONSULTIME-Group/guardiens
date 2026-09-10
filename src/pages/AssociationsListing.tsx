@@ -12,9 +12,12 @@ import {
   ASSOCIATION_SPECIES_VALUES,
   ASSOCIATION_TYPE_VALUES,
   associationInitials,
+  associationNeedChipLabel,
   associationSpeciesLabel,
   associationTypeLabel,
 } from "@/lib/associationLabels";
+import { ASSOCIATIONS_FAQ, faqPageJsonLd } from "@/lib/associationFaq";
+import { AssociationFaq } from "@/components/associations/AssociationFaq";
 import { isAssociationIndexable } from "@/lib/associationIndexability";
 import {
   PUBLIC_ASSOCIATION_COLUMNS,
@@ -28,13 +31,16 @@ const META_DESCRIPTION =
 
 const AssociationCard = ({ association }: { association: PublicAssociation }) => {
   const [photoFailed, setPhotoFailed] = useState(false);
+  const [logoFailed, setLogoFailed] = useState(false);
   const photos = normalizePhotos(association.photos);
   const cover = photos[0];
+  const firstNeed = association.needs?.[0];
+  const needChip = firstNeed ? associationNeedChipLabel(firstNeed) : "";
 
   return (
     <Link to={`/associations/${association.slug}`} className="block group">
       <Card className="h-full overflow-hidden transition-shadow group-hover:shadow-md">
-        <div className="aspect-[16/9] w-full bg-muted overflow-hidden flex items-center justify-center">
+        <div className="relative aspect-[16/9] w-full bg-muted overflow-hidden flex items-center justify-center">
           {cover && !photoFailed ? (
             <img
               src={cover.url}
@@ -50,6 +56,25 @@ const AssociationCard = ({ association }: { association: PublicAssociation }) =>
               {associationInitials(association.name)}
             </span>
           )}
+          <span className="absolute bottom-2 left-2 flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-background shadow-sm">
+            {association.logo_url && !logoFailed ? (
+              <img
+                src={association.logo_url}
+                alt={`Logo de ${association.name}`}
+                width={40}
+                height={40}
+                loading="lazy"
+                decoding="async"
+                referrerPolicy="no-referrer"
+                onError={() => setLogoFailed(true)}
+                className="h-full w-full object-contain"
+              />
+            ) : (
+              <span className="text-[11px] font-semibold text-muted-foreground">
+                {associationInitials(association.name)}
+              </span>
+            )}
+          </span>
         </div>
         <CardContent className="p-4">
           <h2 className="font-heading text-base font-semibold text-foreground">{association.name}</h2>
@@ -59,6 +84,11 @@ const AssociationCard = ({ association }: { association: PublicAssociation }) =>
           <p className="text-sm text-muted-foreground">
             {association.city}, {association.departement_name}
           </p>
+          {needChip && (
+            <p className="mt-2 inline-flex rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground">
+              {needChip}
+            </p>
+          )}
           {association.species.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-1.5">
               {association.species.map((s) => (
@@ -110,6 +140,19 @@ export default function AssociationsListing() {
 
   const indexable = associations.filter((a) => isAssociationIndexable(a));
 
+  const noFilter = departement === "all" && type === "all" && species === "all";
+
+  /** Groupes par département, triés sur le nom du département. */
+  const grouped = useMemo(() => {
+    const map = new Map<string, PublicAssociation[]>();
+    filtered.forEach((a) => {
+      const list = map.get(a.departement_name) ?? [];
+      list.push(a);
+      map.set(a.departement_name, list);
+    });
+    return Array.from(map.entries()).sort((a, b) => a[0].localeCompare(b[0], "fr"));
+  }, [filtered]);
+
   const jsonLd = [
     {
       "@context": "https://schema.org",
@@ -127,10 +170,21 @@ export default function AssociationsListing() {
           "@type": "ListItem",
           position: i + 1,
           url: `${SITE_URL}/associations/${a.slug}`,
-          name: a.name,
+          item: {
+            "@type": "NGO",
+            name: a.name,
+            url: `${SITE_URL}/associations/${a.slug}`,
+            address: {
+              "@type": "PostalAddress",
+              addressLocality: a.city,
+              ...(a.postal_code ? { postalCode: a.postal_code } : {}),
+              addressCountry: "FR",
+            },
+          },
         })),
       },
     },
+    faqPageJsonLd(ASSOCIATIONS_FAQ),
     {
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
@@ -166,10 +220,14 @@ export default function AssociationsListing() {
             Associations et refuges pour animaux
           </h1>
           <p className="mt-3 text-base md:text-lg text-muted-foreground max-w-3xl">
-            Partout en France, des bénévoles recueillent, soignent et accompagnent des animaux toute
-            l'année. Cette page présente leur travail, leurs besoins du moment et les moyens de les
-            aider : un don, du temps, une place en famille d'accueil.
+            Cet espace fait connaître des associations de protection animale auprès des membres de
+            Guardiens. Pour chacune, vous trouvez son activité et ce dont elle a besoin
+            aujourd'hui : des bénévoles, des dons, des familles d'accueil. Vous êtes une
+            association ? Présentez la vôtre, l'espace est ouvert à toutes.
           </p>
+          <Button asChild size="sm" className="mt-4">
+            <Link to="/contact?sujet=association">Présenter mon association</Link>
+          </Button>
         </header>
 
         <div className="mb-6 flex flex-col gap-2 md:flex-row">
@@ -221,17 +279,36 @@ export default function AssociationsListing() {
             ))}
           </div>
         ) : filtered.length > 0 ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((a) => (
-              <AssociationCard key={a.id} association={a} />
-            ))}
-          </div>
+          noFilter ? (
+            <div className="space-y-10">
+              {grouped.map(([departementName, list]) => (
+                <section key={departementName}>
+                  <h2 className="mb-4 font-heading text-lg md:text-xl font-semibold text-foreground">
+                    Associations de protection animale : {departementName}
+                  </h2>
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {list.map((a) => (
+                      <AssociationCard key={a.id} association={a} />
+                    ))}
+                  </div>
+                </section>
+              ))}
+            </div>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {filtered.map((a) => (
+                <AssociationCard key={a.id} association={a} />
+              ))}
+            </div>
+          )
         ) : (
           <p className="rounded-xl border border-border bg-card p-6 text-sm text-muted-foreground">
             Les premières fiches arrivent. Revenez bientôt pour découvrir les associations
             présentées ici.
           </p>
         )}
+
+        <AssociationFaq items={ASSOCIATIONS_FAQ} />
 
         <section className="mt-10 rounded-2xl border border-border bg-card p-5 md:p-6">
           <h2 className="font-heading text-lg md:text-xl font-semibold text-foreground">
@@ -241,7 +318,7 @@ export default function AssociationsListing() {
             Écrivez-nous : nous prenons contact avec elle et rédigeons sa fiche.
           </p>
           <Button asChild size="sm" className="mt-4">
-            <Link to="/contact">Nous la signaler</Link>
+            <Link to="/contact?sujet=association">Présenter mon association</Link>
           </Button>
         </section>
       </div>

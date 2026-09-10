@@ -13,9 +13,9 @@ describe("modèle de navigation de l'espace connecté", () => {
     expect(groups.map((g) => g.label)).toEqual(["Mon espace", "Trouver", "Apprendre"]);
   });
 
-  it("porte exactement 10 entrées au total", () => {
-    expect(flattenNavGroups(buildNavGroups("owner", false))).toHaveLength(10);
-    expect(flattenNavGroups(buildNavGroups("sitter", false))).toHaveLength(10);
+  it("porte exactement 11 entrées au total", () => {
+    expect(flattenNavGroups(buildNavGroups("owner", false))).toHaveLength(11);
+    expect(flattenNavGroups(buildNavGroups("sitter", false))).toHaveLength(11);
   });
 
   it("Mon espace : Accueil, annonces ou candidatures, Messages, Entraide", () => {

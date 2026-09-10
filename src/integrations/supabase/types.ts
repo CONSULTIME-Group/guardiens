@@ -1101,21 +1101,27 @@ export type Database = {
           description: string
           donation_url: string | null
           facebook_url: string | null
+          founded_year: number | null
           id: string
           instagram_url: string | null
           internal_note: string | null
+          key_figures: Json
           legal_form: string | null
+          logo_url: string | null
           name: string
           needs: string[]
+          needs_details: Json
           photo_credit: string | null
           photos: Json
           postal_code: string | null
+          press: Json
           rna: string | null
           siren: string | null
           slug: string
           sources: Json
           species: string[]
           status: string
+          tagline: string | null
           updated_at: string
           verified_at: string
           volunteer_url: string | null
@@ -1138,21 +1144,27 @@ export type Database = {
           description: string
           donation_url?: string | null
           facebook_url?: string | null
+          founded_year?: number | null
           id?: string
           instagram_url?: string | null
           internal_note?: string | null
+          key_figures?: Json
           legal_form?: string | null
+          logo_url?: string | null
           name: string
           needs?: string[]
+          needs_details?: Json
           photo_credit?: string | null
           photos?: Json
           postal_code?: string | null
+          press?: Json
           rna?: string | null
           siren?: string | null
           slug: string
           sources?: Json
           species?: string[]
           status?: string
+          tagline?: string | null
           updated_at?: string
           verified_at: string
           volunteer_url?: string | null
@@ -1175,21 +1187,27 @@ export type Database = {
           description?: string
           donation_url?: string | null
           facebook_url?: string | null
+          founded_year?: number | null
           id?: string
           instagram_url?: string | null
           internal_note?: string | null
+          key_figures?: Json
           legal_form?: string | null
+          logo_url?: string | null
           name?: string
           needs?: string[]
+          needs_details?: Json
           photo_credit?: string | null
           photos?: Json
           postal_code?: string | null
+          press?: Json
           rna?: string | null
           siren?: string | null
           slug?: string
           sources?: Json
           species?: string[]
           status?: string
+          tagline?: string | null
           updated_at?: string
           verified_at?: string
           volunteer_url?: string | null
@@ -8061,16 +8079,24 @@ export type Database = {
           description: string | null
           donation_url: string | null
           facebook_url: string | null
+          founded_year: number | null
           id: string | null
           instagram_url: string | null
+          key_figures: Json | null
+          legal_form: string | null
+          logo_url: string | null
           name: string | null
           needs: string[] | null
+          needs_details: Json | null
           photo_credit: string | null
           photos: Json | null
           photos_authorized: boolean | null
           postal_code: string | null
+          press: Json | null
+          siren: string | null
           slug: string | null
           species: string[] | null
+          tagline: string | null
           updated_at: string | null
           verified_at: string | null
           volunteer_url: string | null

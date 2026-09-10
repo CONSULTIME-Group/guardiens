@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 import PageMeta from "@/components/PageMeta";
 import NotFound from "@/pages/NotFound";
 import { SITE_URL } from "@/lib/seo";
@@ -10,17 +11,27 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { isAssociationIndexable } from "@/lib/associationIndexability";
 import {
+  associationInitials,
+  associationNeedCtaLabel,
+  associationNeedDetailLabel,
   associationNeedLabel,
   associationSpeciesLabel,
   associationTypeLabel,
 } from "@/lib/associationLabels";
+import { AssociationFaq } from "@/components/associations/AssociationFaq";
+import { faqPageJsonLd, type AssociationFaqItem } from "@/lib/associationFaq";
 import {
   PUBLIC_ASSOCIATION_COLUMNS,
+  normalizeJsonArray,
   normalizePhotos,
+  type AssociationKeyFigure,
+  type AssociationNeedDetail,
+  type AssociationPressItem,
   type PublicAssociation,
 } from "@/components/associations/types";
 
 const MAX_PHOTOS = 5;
+const MAX_KEY_FIGURES = 3;
 
 const truncate = (text: string, max: number): string => {
   const clean = text.trim().replace(/\s+/g, " ");
@@ -40,9 +51,60 @@ const longFrenchDate = (value: string): string => {
   }).format(d);
 };
 
+/** SIREN lisible, par groupes de 3 chiffres. */
+export const formatSiren = (siren: string): string =>
+  siren.replace(/\D/g, "").replace(/(\d{3})(?=\d)/g, "$1 ").trim();
+
+/** Questions fréquentes construites depuis les données de la fiche. */
+export const buildAssociationFaq = (
+  association: Pick<
+    PublicAssociation,
+    "name" | "city" | "departement_name" | "species" | "needs" | "donation_url"
+  > & { needs_details?: AssociationNeedDetail[] },
+): AssociationFaqItem[] => {
+  const items: AssociationFaqItem[] = [];
+  const details = (association.needs_details ?? []).filter((d) => d && d.need);
+
+  let helpAnswer = "";
+  if (details.length > 0) {
+    helpAnswer = details
+      .map((d) => {
+        const label = associationNeedDetailLabel(String(d.need));
+        return d.detail ? `${label} : ${d.detail}` : label;
+      })
+      .join(" ");
+  } else if (association.needs.length > 0) {
+    const labels = association.needs.map((n) => associationNeedLabel(n).toLowerCase()).join(", ");
+    helpAnswer = `${association.name} recherche aujourd'hui : ${labels}.`;
+    if (association.donation_url) {
+      helpAnswer += " Le don se fait directement sur sa propre page.";
+    }
+  }
+  if (helpAnswer) {
+    items.push({ question: `Comment aider ${association.name} ?`, answer: helpAnswer });
+  }
+
+  items.push({
+    question: `Où se trouve ${association.name} ?`,
+    answer: `${association.name} est basée à ${association.city}, dans le département ${association.departement_name}.`,
+  });
+
+  if (association.species.length > 0) {
+    items.push({
+      question: `Quels animaux accueille ${association.name} ?`,
+      answer: `${association.name} accueille : ${association.species
+        .map((s) => associationSpeciesLabel(s).toLowerCase())
+        .join(", ")}.`,
+    });
+  }
+
+  return items;
+};
+
 export default function AssociationDetail() {
   const { slug } = useParams<{ slug: string }>();
   const [failedPhotos, setFailedPhotos] = useState<Record<number, boolean>>({});
+  const [logoFailed, setLogoFailed] = useState(false);
 
   const { data, isLoading } = useQuery<PublicAssociation | null>({
     queryKey: ["public-association", slug],
@@ -78,6 +140,24 @@ export default function AssociationDetail() {
   const sameAs = [data.facebook_url, data.instagram_url].filter(Boolean) as string[];
   const storedImages = photos.filter((p) => p.hosting === "storage").map((p) => p.url);
 
+  const keyFigures = normalizeJsonArray<AssociationKeyFigure>(data.key_figures).slice(
+    0,
+    MAX_KEY_FIGURES,
+  );
+  const press = normalizeJsonArray<AssociationPressItem>(data.press);
+  const needsDetails = normalizeJsonArray<AssociationNeedDetail>(data.needs_details).filter(
+    (d) => d && d.need,
+  );
+
+  const faqItems = buildAssociationFaq({ ...data, needs_details: needsDetails });
+
+  const needsSummary = data.needs.map((n) => associationNeedLabel(n).toLowerCase()).join(", ");
+  const baseDescription = data.tagline?.trim() || data.description;
+  const metaDescription = truncate(
+    needsSummary ? `${baseDescription} Besoins : ${needsSummary}.` : baseDescription,
+    155,
+  );
+
   const ngoJsonLd: Record<string, any> = {
     "@context": "https://schema.org",
     "@type": "NGO",
@@ -85,6 +165,18 @@ export default function AssociationDetail() {
     description: data.description,
     ...(data.website_url ? { url: data.website_url } : {}),
     ...(sameAs.length > 0 ? { sameAs } : {}),
+    ...(data.logo_url ? { logo: data.logo_url } : {}),
+    ...(data.founded_year ? { foundingDate: String(data.founded_year) } : {}),
+    ...(data.siren
+      ? {
+          identifier: {
+            "@type": "PropertyValue",
+            propertyID: "SIREN",
+            value: data.siren,
+          },
+        }
+      : {}),
+    areaServed: { "@type": "AdministrativeArea", name: data.departement_name },
     address: {
       "@type": "PostalAddress",
       addressLocality: data.city,
@@ -111,27 +203,108 @@ export default function AssociationDetail() {
 
   const firstSourcePage = photos.find((p) => p.source_page_url)?.source_page_url ?? null;
 
+  const shareText = `${data.name}, ${typeLabel.toLowerCase()} à ${data.city}`;
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(canonical);
+      toast.success("Lien copié");
+    } catch {
+      toast.error("Copie impossible");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background pb-16">
       <PageMeta
-        title={`${data.name}, ${typeLabel.toLowerCase()} à ${data.city} | Guardiens`}
-        description={truncate(data.description, 155)}
+        title={`${data.name} : ${typeLabel.toLowerCase()} à ${data.city} (${data.departement_name}) | Guardiens`}
+        description={metaDescription}
         path={`/associations/${data.slug}`}
         canonical={canonical}
         image={ogImage}
         noindex={!indexable}
-        jsonLd={[ngoJsonLd, breadcrumbJsonLd]}
+        jsonLd={[ngoJsonLd, breadcrumbJsonLd, faqPageJsonLd(faqItems)]}
         ready={!isLoading}
       />
 
       <div className="container mx-auto px-4 py-6 md:py-10 max-w-4xl min-w-0">
-        <header className="mb-6">
-          <h1 className="text-2xl md:text-4xl font-display font-bold">{data.name}</h1>
-          <p className="mt-2 text-muted-foreground">
-            {typeLabel} · {data.city}, {data.departement_name}
-          </p>
+        {/* 1. En tête */}
+        <header className="mb-6 flex items-start gap-4">
+          <span className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white shadow-sm">
+            {data.logo_url && !logoFailed ? (
+              <img
+                src={data.logo_url}
+                alt={`Logo de ${data.name}`}
+                width={64}
+                height={64}
+                decoding="async"
+                referrerPolicy="no-referrer"
+                onError={() => setLogoFailed(true)}
+                className="h-full w-full object-contain"
+              />
+            ) : (
+              <span className="text-sm font-semibold text-muted-foreground">
+                {associationInitials(data.name)}
+              </span>
+            )}
+          </span>
+          <div className="min-w-0">
+            <h1 className="text-2xl md:text-4xl font-display font-bold">{data.name}</h1>
+            {data.tagline && (
+              <p className="mt-1 text-base text-foreground/80">{data.tagline}</p>
+            )}
+            <p className="mt-2 text-muted-foreground">
+              {typeLabel} · {data.city}, {data.departement_name}
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {data.siren && (
+                <a
+                  href={`https://annuaire-entreprises.data.gouv.fr/entreprise/${data.siren}`}
+                  target="_blank"
+                  rel="noopener"
+                  title={`SIREN ${formatSiren(data.siren)}`}
+                  className="inline-flex rounded-full border border-border bg-muted/40 px-3 py-1 text-xs text-muted-foreground hover:bg-muted"
+                >
+                  Association déclarée
+                </a>
+              )}
+              {data.photos_authorized && (
+                <span className="inline-flex rounded-full border border-border bg-muted/40 px-3 py-1 text-xs text-muted-foreground">
+                  Fiche validée par l'association
+                </span>
+              )}
+            </div>
+          </div>
         </header>
 
+        {/* 2. Chiffres clés */}
+        {keyFigures.length > 0 && (
+          <section className="mb-6 grid gap-3 sm:grid-cols-3">
+            {keyFigures.map((figure, i) => (
+              <div
+                key={`${figure.label ?? "figure"}-${i}`}
+                className="rounded-xl border border-border bg-card p-4"
+              >
+                <p className="font-display text-2xl font-bold text-foreground">{figure.value}</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {figure.label}
+                  {figure.year ? ` (${figure.year})` : ""}
+                </p>
+                {figure.source_url && (
+                  <a
+                    href={figure.source_url}
+                    target="_blank"
+                    rel="noopener"
+                    className="mt-1 inline-block text-xs text-primary underline underline-offset-4"
+                  >
+                    source
+                  </a>
+                )}
+              </div>
+            ))}
+          </section>
+        )}
+
+        {/* 3. Galerie */}
         {visiblePhotos.length > 0 && (
           <section className="mb-4">
             <div className="grid gap-2 sm:grid-cols-2">
@@ -181,8 +354,9 @@ export default function AssociationDetail() {
           </section>
         )}
 
+        {/* 4. Leur histoire */}
         <section className="mt-8">
-          <h2 className="font-heading text-xl font-semibold text-foreground">L'association</h2>
+          <h2 className="font-heading text-xl font-semibold text-foreground">Leur histoire</h2>
           <p className="mt-2 whitespace-pre-line leading-relaxed text-foreground">
             {data.description}
           </p>
@@ -199,19 +373,82 @@ export default function AssociationDetail() {
           </section>
         )}
 
-        {data.needs.length > 0 && (
+        {/* 5. Ce dont elle a besoin */}
+        {needsDetails.length > 0 ? (
           <section className="mt-8">
             <h2 className="font-heading text-xl font-semibold text-foreground">
-              Ses besoins du moment
+              Ce dont elle a besoin
             </h2>
-            <ul className="mt-2 list-disc pl-5 text-foreground">
-              {data.needs.map((n) => (
-                <li key={n}>{associationNeedLabel(n)}</li>
+            <div className="mt-3 space-y-3">
+              {needsDetails.map((need, i) => (
+                <div
+                  key={`${need.need}-${i}`}
+                  className="rounded-xl border border-border bg-card p-4"
+                >
+                  <p className="text-sm font-semibold text-foreground">
+                    {associationNeedDetailLabel(String(need.need))}
+                  </p>
+                  {need.detail && (
+                    <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                      {need.detail}
+                    </p>
+                  )}
+                  {need.url && (
+                    <Button asChild size="sm" variant="outline" className="mt-3">
+                      <a href={need.url} target="_blank" rel="noopener">
+                        {associationNeedCtaLabel(String(need.need))}
+                      </a>
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+        ) : (
+          data.needs.length > 0 && (
+            <section className="mt-8">
+              <h2 className="font-heading text-xl font-semibold text-foreground">
+                Ce dont elle a besoin
+              </h2>
+              <ul className="mt-2 list-disc pl-5 text-foreground">
+                {data.needs.map((n) => (
+                  <li key={n}>{associationNeedLabel(n)}</li>
+                ))}
+              </ul>
+            </section>
+          )
+        )}
+
+        {/* 6. Ils en parlent */}
+        {press.length > 0 && (
+          <section className="mt-8">
+            <h2 className="font-heading text-xl font-semibold text-foreground">Ils en parlent</h2>
+            <ul className="mt-3 space-y-3">
+              {press.map((article, i) => (
+                <li key={`${article.url ?? article.title}-${i}`}>
+                  <p className="text-xs text-muted-foreground">
+                    {article.media}
+                    {article.date ? ` · ${longFrenchDate(article.date)}` : ""}
+                  </p>
+                  {article.url ? (
+                    <a
+                      href={article.url}
+                      target="_blank"
+                      rel="noopener"
+                      className="text-sm text-primary underline underline-offset-4"
+                    >
+                      {article.title}
+                    </a>
+                  ) : (
+                    <p className="text-sm text-foreground">{article.title}</p>
+                  )}
+                </li>
               ))}
             </ul>
           </section>
         )}
 
+        {/* 7. Soutenir */}
         <section className="mt-8 rounded-2xl border border-border bg-card p-5 md:p-6">
           <h2 className="font-heading text-xl font-semibold text-foreground">
             Soutenir {data.name}
@@ -259,8 +496,38 @@ export default function AssociationDetail() {
           <p className="mt-4 text-xs text-muted-foreground">
             Le don se fait directement auprès de l'association, sur sa propre page.
           </p>
+
+          <div className="mt-5 border-t border-border pt-4">
+            <p className="text-sm text-muted-foreground">
+              Partager cette fiche aide l'association à se faire connaître.
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Button asChild size="sm" variant="outline">
+                <a
+                  href={`https://wa.me/?text=${encodeURIComponent(`${shareText} ${canonical}`)}`}
+                  target="_blank"
+                  rel="noopener"
+                >
+                  Partager sur WhatsApp
+                </a>
+              </Button>
+              <Button asChild size="sm" variant="outline">
+                <a
+                  href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(canonical)}`}
+                  target="_blank"
+                  rel="noopener"
+                >
+                  Partager sur Facebook
+                </a>
+              </Button>
+              <Button size="sm" variant="outline" onClick={copyLink}>
+                Copier le lien
+              </Button>
+            </div>
+          </div>
         </section>
 
+        {/* 8. Maillage gardiens */}
         {data.departement_slug && (
           <section className="mt-8 rounded-2xl border border-border bg-muted/40 p-5 md:p-6">
             <h2 className="font-heading text-xl font-semibold text-foreground">
@@ -278,6 +545,10 @@ export default function AssociationDetail() {
           </section>
         )}
 
+        {/* 9. Questions fréquentes */}
+        <AssociationFaq items={faqItems} />
+
+        {/* 10. Pied de fiche */}
         <p className="mt-8 text-xs text-muted-foreground">
           Fiche rédigée par Guardiens à partir des informations publiées par l'association,
           vérifiées le {longFrenchDate(data.verified_at)}. Une information à corriger :{" "}
@@ -285,6 +556,11 @@ export default function AssociationDetail() {
             écrivez-nous
           </Link>
           .
+        </p>
+        <p className="mt-2 text-xs text-muted-foreground">
+          <Link to={`/contact?sujet=association&association=${data.slug}`} className="underline">
+            Vous êtes cette association ? Mettez à jour votre fiche
+          </Link>
         </p>
       </div>
     </div>

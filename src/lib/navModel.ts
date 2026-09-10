@@ -9,6 +9,7 @@ import {
   Compass,
   Sparkles,
   Newspaper,
+  HeartHandshake,
   type LucideIcon,
 } from "lucide-react";
 
@@ -74,6 +75,7 @@ export const buildNavGroups = (role: NavRole, sitterSearchLocked: boolean): NavG
           : {}),
       },
       { to: "/pros", icon: Briefcase, label: "Pros animaliers", beta: true },
+      { to: "/associations", icon: HeartHandshake, label: "Associations" },
     ],
   },
   {

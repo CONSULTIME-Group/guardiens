@@ -16,7 +16,16 @@ import {
   associationSpeciesLabel,
   associationTypeLabel,
 } from "@/lib/associationLabels";
-import type { AssociationPhoto } from "@/components/associations/types";
+import {
+  ASSOCIATION_NEED_DETAIL_VALUES,
+  associationNeedDetailLabel,
+} from "@/lib/associationLabels";
+import type {
+  AssociationKeyFigure,
+  AssociationNeedDetail,
+  AssociationPhoto,
+  AssociationPressItem,
+} from "@/components/associations/types";
 import { ASSOCIATION_CONSENT_SUBJECT, buildConsentEmail } from "@/lib/associationConsentEmail";
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
 
@@ -42,6 +51,12 @@ type AssociationRow = {
   volunteer_url: string | null;
   contact_email: string | null;
   contact_page_url: string | null;
+  logo_url: string | null;
+  tagline: string | null;
+  founded_year: number | null;
+  key_figures: AssociationKeyFigure[];
+  press: AssociationPressItem[];
+  needs_details: AssociationNeedDetail[];
   photos: AssociationPhoto[];
   photo_credit: string | null;
   sources: Array<{ fact?: string; url?: string }>;
@@ -93,6 +108,9 @@ const TEXT_FIELDS: Array<{ key: keyof AssociationRow; label: string }> = [
   { key: "volunteer_url", label: "Page bénévolat" },
   { key: "contact_email", label: "Email de contact" },
   { key: "contact_page_url", label: "Page de contact" },
+  { key: "logo_url", label: "URL du logo" },
+  { key: "tagline", label: "Accroche (120 caractères maximum)" },
+  { key: "founded_year", label: "Année de création" },
   { key: "photo_credit", label: "Crédit photo" },
   { key: "verified_at", label: "Vérifiée le (AAAA-MM-JJ)" },
 ];
@@ -145,6 +163,10 @@ export default function AdminAssociations() {
     if (!editing) return;
     setSaving(true);
     const { id, ...values } = editing;
+    // Le champ année est saisi en texte : la colonne attend un entier ou rien.
+    const raw = (values as any).founded_year;
+    (values as any).founded_year =
+      raw === "" || raw === null || raw === undefined ? null : Number(raw) || null;
     const ok = await persist(id, values as any);
     setSaving(false);
     if (ok) {
@@ -212,6 +234,14 @@ export default function AdminAssociations() {
 
   const toggleInArray = (list: string[], value: string): string[] =>
     list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
+
+  const editingFigures: AssociationKeyFigure[] = Array.isArray(editing?.key_figures)
+    ? editing!.key_figures
+    : [];
+  const editingPress: AssociationPressItem[] = Array.isArray(editing?.press) ? editing!.press : [];
+  const editingNeeds: AssociationNeedDetail[] = Array.isArray(editing?.needs_details)
+    ? editing!.needs_details
+    : [];
 
   const updatePhoto = (index: number, values: Partial<AssociationPhoto>) =>
     patch({
@@ -487,6 +517,220 @@ export default function AdminAssociations() {
                 }
               >
                 Ajouter une photo
+              </Button>
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">Chiffres clés</p>
+              {editingFigures.map((figure, index) => (
+                <div key={index} className="rounded-lg border border-border p-3 space-y-2">
+                  <Input
+                    value={figure.value ?? ""}
+                    placeholder="Valeur"
+                    onChange={(e) =>
+                      patch({
+                        key_figures: editingFigures.map((f, i) =>
+                          i === index ? { ...f, value: e.target.value } : f,
+                        ),
+                      })
+                    }
+                  />
+                  <Input
+                    value={figure.label ?? ""}
+                    placeholder="Libellé"
+                    onChange={(e) =>
+                      patch({
+                        key_figures: editingFigures.map((f, i) =>
+                          i === index ? { ...f, label: e.target.value } : f,
+                        ),
+                      })
+                    }
+                  />
+                  <Input
+                    value={figure.year ?? ""}
+                    placeholder="Année"
+                    onChange={(e) =>
+                      patch({
+                        key_figures: editingFigures.map((f, i) =>
+                          i === index ? { ...f, year: e.target.value } : f,
+                        ),
+                      })
+                    }
+                  />
+                  <Input
+                    value={figure.source_url ?? ""}
+                    placeholder="URL de la source"
+                    onChange={(e) =>
+                      patch({
+                        key_figures: editingFigures.map((f, i) =>
+                          i === index ? { ...f, source_url: e.target.value } : f,
+                        ),
+                      })
+                    }
+                  />
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() =>
+                      patch({ key_figures: editingFigures.filter((_, i) => i !== index) })
+                    }
+                  >
+                    Retirer
+                  </Button>
+                </div>
+              ))}
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() =>
+                  patch({
+                    key_figures: [
+                      ...editingFigures,
+                      { value: "", label: "", year: "", source_url: "" },
+                    ],
+                  })
+                }
+              >
+                Ajouter un chiffre clé
+              </Button>
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">Revue de presse</p>
+              {editingPress.map((article, index) => (
+                <div key={index} className="rounded-lg border border-border p-3 space-y-2">
+                  <Input
+                    value={article.media ?? ""}
+                    placeholder="Média"
+                    onChange={(e) =>
+                      patch({
+                        press: editingPress.map((a, i) =>
+                          i === index ? { ...a, media: e.target.value } : a,
+                        ),
+                      })
+                    }
+                  />
+                  <Input
+                    value={article.title ?? ""}
+                    placeholder="Titre"
+                    onChange={(e) =>
+                      patch({
+                        press: editingPress.map((a, i) =>
+                          i === index ? { ...a, title: e.target.value } : a,
+                        ),
+                      })
+                    }
+                  />
+                  <Input
+                    value={article.date ?? ""}
+                    placeholder="Date (AAAA-MM-JJ)"
+                    onChange={(e) =>
+                      patch({
+                        press: editingPress.map((a, i) =>
+                          i === index ? { ...a, date: e.target.value } : a,
+                        ),
+                      })
+                    }
+                  />
+                  <Input
+                    value={article.url ?? ""}
+                    placeholder="URL de l'article"
+                    onChange={(e) =>
+                      patch({
+                        press: editingPress.map((a, i) =>
+                          i === index ? { ...a, url: e.target.value } : a,
+                        ),
+                      })
+                    }
+                  />
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => patch({ press: editingPress.filter((_, i) => i !== index) })}
+                  >
+                    Retirer
+                  </Button>
+                </div>
+              ))}
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() =>
+                  patch({ press: [...editingPress, { media: "", title: "", date: "", url: "" }] })
+                }
+              >
+                Ajouter un article
+              </Button>
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">Détail des besoins</p>
+              {editingNeeds.map((need, index) => (
+                <div key={index} className="rounded-lg border border-border p-3 space-y-2">
+                  <select
+                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                    value={need.need ?? "benevoles"}
+                    onChange={(e) =>
+                      patch({
+                        needs_details: editingNeeds.map((n, i) =>
+                          i === index ? { ...n, need: e.target.value } : n,
+                        ),
+                      })
+                    }
+                  >
+                    {ASSOCIATION_NEED_DETAIL_VALUES.map((v) => (
+                      <option key={v} value={v}>
+                        {associationNeedDetailLabel(v)}
+                      </option>
+                    ))}
+                  </select>
+                  <Textarea
+                    rows={2}
+                    value={need.detail ?? ""}
+                    placeholder="Détail du besoin"
+                    onChange={(e) =>
+                      patch({
+                        needs_details: editingNeeds.map((n, i) =>
+                          i === index ? { ...n, detail: e.target.value } : n,
+                        ),
+                      })
+                    }
+                  />
+                  <Input
+                    value={need.url ?? ""}
+                    placeholder="URL de l'association"
+                    onChange={(e) =>
+                      patch({
+                        needs_details: editingNeeds.map((n, i) =>
+                          i === index ? { ...n, url: e.target.value } : n,
+                        ),
+                      })
+                    }
+                  />
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() =>
+                      patch({ needs_details: editingNeeds.filter((_, i) => i !== index) })
+                    }
+                  >
+                    Retirer
+                  </Button>
+                </div>
+              ))}
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() =>
+                  patch({
+                    needs_details: [
+                      ...editingNeeds,
+                      { need: "benevoles", detail: "", url: "" },
+                    ],
+                  })
+                }
+              >
+                Ajouter un besoin détaillé
               </Button>
             </div>
 
