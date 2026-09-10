@@ -76,11 +76,14 @@ Deno.serve(async (req) => {
         );
         await service.from("alma_conversations").insert({
           user_id: u.user.id,
+          surface: String(form.get("surface") ?? "dictaphone"),
+          active_role: String(form.get("active_role") ?? "owner"),
           input_mode: "voice",
           question: null,
           answer: null,
           refusal_reason: `transcribe_gateway_${res.status}`,
         });
+
       } catch (logError) {
         console.error("alma-transcribe log error", logError);
       }
