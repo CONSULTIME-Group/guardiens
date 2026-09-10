@@ -7,6 +7,8 @@ import EnvironmentPills from "@/components/shared/EnvironmentPills";
 import FavoriteButton from "@/components/shared/FavoriteButton";
 import AffinityBadge from "@/components/matching/AffinityBadge";
 import { useAffinityWithShadow } from "@/hooks/useAffinityWithShadow";
+import { useDepartementNames } from "@/hooks/useDepartementNames";
+import { departementNameFromCode, formatCityDepartement } from "@/lib/locationLabel";
 
 
 import { PawPrint, Cat, Bird } from "lucide-react";
@@ -39,6 +41,16 @@ const SearchListingCard = ({
   viewerSitterProfile,
 }: SearchListingCardProps) => {
   const { t } = useTranslation();
+  // Ville affichée : profil public du propriétaire (public_profiles.city).
+  // Le département suit le MÊME enregistrement, avec repli sur l'annonce.
+  const departementNames = useDepartementNames();
+  const locationLabel = formatCityDepartement(
+    item.owner?.city,
+    departementNameFromCode(
+      item.owner?.departement_code || (item as any).departement_code,
+      departementNames,
+    ),
+  );
 
   const missionPhotos = Array.isArray((item as any).photos) ? (item as any).photos.filter(Boolean) : [];
   const photos: string[] = item.property?.photos || missionPhotos;
@@ -289,7 +301,7 @@ const SearchListingCard = ({
       <div className="mt-4 px-0.5 flex flex-col flex-1">
         {/* Ligne 1 : ville · distance, en eyebrow sauge discret */}
         <p className={`text-[11px] uppercase tracking-[0.16em] font-medium truncate ${isOutOfZone ? "text-primary" : "text-primary/70"}`}>
-          <span className="truncate">{item.owner?.city || "France"}</span>
+          <span className="truncate">{locationLabel || "France"}</span>
           {item.distance != null && (
             <span className="ml-1 opacity-70">
               · {item.distance < 1 ? "< 1" : Math.round(item.distance).toLocaleString("fr-FR").replace(/\s/g, "\u202F")} km

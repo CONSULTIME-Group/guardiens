@@ -876,7 +876,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
    const [ownersRes, galleryRes] = await Promise.all([
      supabase
 .from("public_profiles")
-.select("id, first_name, avatar_url, city, postal_code, identity_verified, is_founder")
+.select("id, first_name, avatar_url, city, postal_code, departement_code, identity_verified, is_founder")
 .in("id", ownerIds),
      supabase
 .from("owner_gallery")
