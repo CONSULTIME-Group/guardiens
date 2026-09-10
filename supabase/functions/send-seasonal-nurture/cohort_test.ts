@@ -69,18 +69,18 @@ Deno.test('le decoupage respecte batch_size et ne pause pas apres le dernier lot
 })
 
 Deno.test('la garde de temps arrete la boucle et rend le reste', async () => {
+  let checks = 0
   const res = await runInBatches([1, 2, 3, 4], {
     batchSize: 2,
     delayMs: 0,
     sleep: () => Promise.resolve(),
     handler: (n) => Promise.resolve(n),
-    shouldStop: () => res0.count++ > 0,
+    shouldStop: () => checks++ > 0,
   })
   assertEquals(res.stopped, true)
   assertEquals(res.processed, 2)
   assertEquals(res.remaining, [3, 4])
 })
-const res0 = { count: 0 }
 
 Deno.test('bornes des options de lot', () => {
   assertEquals(clampInt(undefined, 1, 20, 5), 5)
