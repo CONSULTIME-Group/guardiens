@@ -32,10 +32,12 @@ const base = {
 };
 
 describe("humeurs d'Alma, logique pure", () => {
-  it("les six humeurs se réduisent aux trois moods de l'avatar", () => {
+  it("chaque humeur pointe vers une animation déjà écrite dans l'avatar", () => {
     expect(ALMA_MOOD_KEYS).toHaveLength(6);
     for (const key of ALMA_MOOD_KEYS) {
-      expect(["idle", "attentive", "sleepy"]).toContain(MOOD_AVATAR[key]);
+      expect(["idle", "attentive", "thinking", "gentle", "playful", "sleepy"]).toContain(
+        MOOD_AVATAR[key],
+      );
     }
   });
 

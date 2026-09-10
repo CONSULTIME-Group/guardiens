@@ -55,6 +55,21 @@ export function resetAlmaConversation() {
   listeners.forEach((l) => l());
 }
 
+/**
+ * Humeur du moment, posée par le dock à chaque changement. Elle part avec
+ * la requête pour que le modèle parle de l'humeur exactement affichée à
+ * l'écran.
+ */
+let almaMoodContext: { mood: string | null; line: string | null } = { mood: null, line: null };
+
+export function setAlmaMoodContext(next: { mood: string | null; line: string | null }) {
+  almaMoodContext = { mood: next.mood ?? null, line: next.line ?? null };
+}
+
+export function getAlmaMoodContext() {
+  return almaMoodContext;
+}
+
 let counter = 0;
 function nextId() {
   counter += 1;
@@ -115,7 +130,15 @@ export async function sendAlmaMessage({
 
   try {
     const { data, error } = await call("alma-chat", {
-      body: { message, history, surface, active_role: activeRole, input_mode: inputMode },
+      body: {
+        message,
+        history,
+        surface,
+        active_role: activeRole,
+        input_mode: inputMode,
+        mood: almaMoodContext.mood,
+        mood_line: almaMoodContext.line,
+      },
     });
 
     if (error) {
