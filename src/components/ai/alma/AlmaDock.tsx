@@ -293,8 +293,8 @@ function AlmaDockInner() {
   });
 
   useEffect(() => {
-    setAlmaMoodContext({ mood: almaMood.mood, line: almaMood.line });
-  }, [almaMood.mood, almaMood.line]);
+    setAlmaMoodContext({ mood: almaMood.chatMood, line: almaMood.chatLine });
+  }, [almaMood.chatMood, almaMood.chatLine]);
 
   // Réactions ponctuelles de l'avatar, toutes brèves, puis retour à
   // l'humeur du moment.

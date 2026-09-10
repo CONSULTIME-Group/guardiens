@@ -7,8 +7,10 @@
  * degré) : si l'appel échoue, l'humeur se calcule sur l'heure et la saison
  * seules et le dock continue de fonctionner.
  *
- * Ce hook n'alimente QUE la ligne de statut du dock et la phrase
- * d'ouverture. Il n'est jamais lu par la conversation.
+ * `mood` et `line` alimentent l'affichage, ligne de statut du dock et
+ * phrase d'ouverture : ils restent nuls quand l'humeur doit se taire.
+ * `chatMood` et `chatLine` exposent l'humeur tirée en permanence, pour que
+ * la conversation reçoive exactement l'humeur du moment.
  */
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -33,6 +35,8 @@ interface UseAlmaMoodParams {
 interface UseAlmaMoodResult {
   mood: AlmaMoodKey | null;
   line: string | null;
+  chatMood: AlmaMoodKey | null;
+  chatLine: string | null;
   avatar: AlmaMoodAvatar;
 }
 
@@ -170,6 +174,8 @@ export function useAlmaMood({ silent, conversationOpen }: UseAlmaMoodParams): Us
   return {
     mood: express ? row?.mood ?? null : null,
     line: express ? row?.content ?? null : null,
+    chatMood: row?.mood ?? null,
+    chatLine: row?.content ?? null,
     avatar,
   };
 }
