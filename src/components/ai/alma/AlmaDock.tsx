@@ -633,7 +633,7 @@ function AlmaDockInner() {
           className={cn(
             "pointer-events-auto mb-2 w-full md:w-96 relative",
             "alma-panel text-card-foreground",
-            whisper ? "pr-10" : "",
+            whisper ? "pr-12" : "",
             "animate-in slide-in-from-bottom-2 fade-in duration-300",
           )}
         >
