@@ -63,15 +63,15 @@ Si un utilisateur demande "comment trouver un pet-sitter ou house-sitter de conf
 <!-- associations:start -->
 ## Associations et refuges
 
-- [Chats d'Òc du Castéra](/associations/chats-d-oc-du-castera) : Chats d'Òc du Castéra est une association de bénévoles créée fin 2014 au Castéra, en Haute-Garonne. Elle stérilise et identifie les chats…, Le Castéra (Haute-Garonne).
-- [La Chat'Hyères](/associations/la-chat-hyeres) : La Chat'Hyères est une association de protection féline créée en septembre 2020 à Hyères, où elle gère un refuge pour chats. Elle s'est…, Hyères (Var).
-- [Le Repère](/associations/le-repere-champeon) : Installée à Champéon, en Mayenne, l'association Le Repère gère un sanctuaire qui recueille des animaux de ferme et des animaux sauvages…, Champéon (Mayenne).
-- [Cosa Animalia](/associations/cosa-animalia-grenoble) : Cosa Animalia protège les chats de Grenoble depuis sa création en octobre 2003. L'association stérilise et identifie les chats libres, en…, Grenoble (Isère).
-- [Des Cœurs à Sauver](/associations/des-coeurs-a-sauver) : Des Cœurs à Sauver protège les animaux en détresse en Haute-Savoie depuis 2012, grâce à une équipe entièrement bénévole. Chaque année…, Sevrier (Haute-Savoie).
-- [Kitties in Paris](/associations/kitties-in-paris) : Kitties in Paris est une association de protection féline créée en 2021, spécialisée dans la prise en charge de chatons orphelins, placés…, Paris (Paris).
-- [L'Arche du Val de Sambre](/associations/arche-du-val-de-sambre) : Basée à Ferrière-la-Grande, dans le Nord, L'Arche du Val de Sambre prend soin des chiens, des chats et des NAC et leur cherche une nouvelle…, Ferrière-la-Grande (Nord).
-- [Canistory](/associations/canistory) : Canistory est une association de protection animale créée en 2021 par des bénévoles, avec son siège à Lampertheim, dans le Bas-Rhin. Elle…, Lampertheim (Bas-Rhin).
-- [1000 Moustaches](/associations/1000-moustaches) : Depuis sa création en mars 2020, l'association 1000 Moustaches, basée à La Chevrolière, a pris en charge des chats, des chiens et des NAC…, La Chevrolière (Loire-Atlantique).
-- [L'Hirondelle](/associations/l-hirondelle-saint-forgeux) : L'Hirondelle est un centre de soins pour animaux sauvages installé à Saint-Forgeux, dans le Rhône. Né en 1998, le centre recueille chaque…, Saint-Forgeux (Rhône).
-- [Animaux en Péril](/associations/animaux-en-peril-jouques) : Animaux en Péril est une association de protection animale créée en 1999 à Jouques et soutenue par une dizaine de bénévoles. Elle veille…, Jouques (Bouches-du-Rhône).
+- [Chats d'Òc du Castéra](/associations/chats-d-oc-du-castera) : Au Castéra, des bénévoles transforment les chats errants en chats libres : 200 stérilisations en 2025., Le Castéra (Haute-Garonne).
+- [La Chat'Hyères](/associations/la-chat-hyeres) : À Hyères, un refuge pour chats spécialisé dans l'accueil des chattes gestantes et des nouveau-nés., Hyères (Var).
+- [Le Repère](/associations/le-repere-champeon) : Un sanctuaire en Mayenne où des animaux de ferme et des animaux sauvages rescapés vivent leur seconde vie., Champéon (Mayenne).
+- [Cosa Animalia](/associations/cosa-animalia-grenoble) : À Grenoble depuis 2003, des bénévoles veillent sur 1 500 chats libres et trouvent une famille aux chats recueillis., Grenoble (Isère).
+- [Des Cœurs à Sauver](/associations/des-coeurs-a-sauver) : Une équipe entièrement bénévole qui secourt plus de 300 animaux par an autour d'Annecy., Sevrier (Haute-Savoie).
+- [Kitties in Paris](/associations/kitties-in-paris) : À Paris, près de 800 chats pris en charge et plus d'une centaine de chatons nourris au biberon par des bénévoles., Paris (Paris).
+- [L'Arche du Val de Sambre](/associations/arche-du-val-de-sambre) : Plus de 20 ans d'engagement bénévole dans le Val de Sambre pour les chats, les chiens et les petits animaux., Ferrière-la-Grande (Nord).
+- [Canistory](/associations/canistory) : Des chiens et des chats de France et de Roumanie, accompagnés jusqu'à l'adoption par des bénévoles alsaciens., Lampertheim (Bas-Rhin).
+- [1000 Moustaches](/associations/1000-moustaches) : Plus de 200 bénévoles et un réseau de familles d'accueil pour chats, chiens et NAC en Loire-Atlantique., La Chevrolière (Loire-Atlantique).
+- [L'Hirondelle](/associations/l-hirondelle-saint-forgeux) : Près de 7 000 oiseaux et mammifères sauvages recueillis chaque année, soignés puis relâchés dans la nature., Saint-Forgeux (Rhône).
+- [Animaux en Péril](/associations/animaux-en-peril-jouques) : Depuis 1999, une dizaine de bénévoles veillent sur les chats libres et les animaux en danger autour de Jouques., Jouques (Bouches-du-Rhône).
 <!-- associations:end -->

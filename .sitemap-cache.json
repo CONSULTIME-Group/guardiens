@@ -21,8 +21,8 @@
       "fetchedAt": "2026-09-10T12:28:44.709Z"
     },
     "public_animal_associations_v2": {
-      "head": "2026-09-10T09:51:55.788892+00:00|11",
-      "fetchedAt": "2026-09-10T12:28:44.711Z"
+      "head": "2026-09-10T12:29:42.432295+00:00|11",
+      "fetchedAt": "2026-09-10T12:31:35.784Z"
     },
     "breed_profiles": {
       "head": "2026-08-19T19:06:57.126227+00:00|81",
@@ -2719,7 +2719,7 @@
         "changefreq": "monthly",
         "priority": "0.7",
         "_name": "Chats d'Òc du Castéra",
-        "_summary": "Chats d'Òc du Castéra est une association de bénévoles créée fin 2014 au Castéra, en Haute-Garonne. Elle stérilise et identifie les chats…",
+        "_summary": "Au Castéra, des bénévoles transforment les chats errants en chats libres : 200 stérilisations en 2025.",
         "_city": "Le Castéra",
         "_dept": "Haute-Garonne"
       },
@@ -2729,7 +2729,7 @@
         "changefreq": "monthly",
         "priority": "0.7",
         "_name": "La Chat'Hyères",
-        "_summary": "La Chat'Hyères est une association de protection féline créée en septembre 2020 à Hyères, où elle gère un refuge pour chats. Elle s'est…",
+        "_summary": "À Hyères, un refuge pour chats spécialisé dans l'accueil des chattes gestantes et des nouveau-nés.",
         "_city": "Hyères",
         "_dept": "Var"
       },
@@ -2739,7 +2739,7 @@
         "changefreq": "monthly",
         "priority": "0.7",
         "_name": "Le Repère",
-        "_summary": "Installée à Champéon, en Mayenne, l'association Le Repère gère un sanctuaire qui recueille des animaux de ferme et des animaux sauvages…",
+        "_summary": "Un sanctuaire en Mayenne où des animaux de ferme et des animaux sauvages rescapés vivent leur seconde vie.",
         "_city": "Champéon",
         "_dept": "Mayenne"
       },
@@ -2749,7 +2749,7 @@
         "changefreq": "monthly",
         "priority": "0.7",
         "_name": "Cosa Animalia",
-        "_summary": "Cosa Animalia protège les chats de Grenoble depuis sa création en octobre 2003. L'association stérilise et identifie les chats libres, en…",
+        "_summary": "À Grenoble depuis 2003, des bénévoles veillent sur 1 500 chats libres et trouvent une famille aux chats recueillis.",
         "_city": "Grenoble",
         "_dept": "Isère"
       },
@@ -2759,7 +2759,7 @@
         "changefreq": "monthly",
         "priority": "0.7",
         "_name": "Des Cœurs à Sauver",
-        "_summary": "Des Cœurs à Sauver protège les animaux en détresse en Haute-Savoie depuis 2012, grâce à une équipe entièrement bénévole. Chaque année…",
+        "_summary": "Une équipe entièrement bénévole qui secourt plus de 300 animaux par an autour d'Annecy.",
         "_city": "Sevrier",
         "_dept": "Haute-Savoie"
       },
@@ -2769,7 +2769,7 @@
         "changefreq": "monthly",
         "priority": "0.7",
         "_name": "Kitties in Paris",
-        "_summary": "Kitties in Paris est une association de protection féline créée en 2021, spécialisée dans la prise en charge de chatons orphelins, placés…",
+        "_summary": "À Paris, près de 800 chats pris en charge et plus d'une centaine de chatons nourris au biberon par des bénévoles.",
         "_city": "Paris",
         "_dept": "Paris"
       },
@@ -2779,7 +2779,7 @@
         "changefreq": "monthly",
         "priority": "0.7",
         "_name": "L'Arche du Val de Sambre",
-        "_summary": "Basée à Ferrière-la-Grande, dans le Nord, L'Arche du Val de Sambre prend soin des chiens, des chats et des NAC et leur cherche une nouvelle…",
+        "_summary": "Plus de 20 ans d'engagement bénévole dans le Val de Sambre pour les chats, les chiens et les petits animaux.",
         "_city": "Ferrière-la-Grande",
         "_dept": "Nord"
       },
@@ -2789,7 +2789,7 @@
         "changefreq": "monthly",
         "priority": "0.7",
         "_name": "Canistory",
-        "_summary": "Canistory est une association de protection animale créée en 2021 par des bénévoles, avec son siège à Lampertheim, dans le Bas-Rhin. Elle…",
+        "_summary": "Des chiens et des chats de France et de Roumanie, accompagnés jusqu'à l'adoption par des bénévoles alsaciens.",
         "_city": "Lampertheim",
         "_dept": "Bas-Rhin"
       },
@@ -2799,7 +2799,7 @@
         "changefreq": "monthly",
         "priority": "0.7",
         "_name": "1000 Moustaches",
-        "_summary": "Depuis sa création en mars 2020, l'association 1000 Moustaches, basée à La Chevrolière, a pris en charge des chats, des chiens et des NAC…",
+        "_summary": "Plus de 200 bénévoles et un réseau de familles d'accueil pour chats, chiens et NAC en Loire-Atlantique.",
         "_city": "La Chevrolière",
         "_dept": "Loire-Atlantique"
       },
@@ -2809,7 +2809,7 @@
         "changefreq": "monthly",
         "priority": "0.7",
         "_name": "L'Hirondelle",
-        "_summary": "L'Hirondelle est un centre de soins pour animaux sauvages installé à Saint-Forgeux, dans le Rhône. Né en 1998, le centre recueille chaque…",
+        "_summary": "Près de 7 000 oiseaux et mammifères sauvages recueillis chaque année, soignés puis relâchés dans la nature.",
         "_city": "Saint-Forgeux",
         "_dept": "Rhône"
       },
@@ -2819,7 +2819,7 @@
         "changefreq": "monthly",
         "priority": "0.7",
         "_name": "Animaux en Péril",
-        "_summary": "Animaux en Péril est une association de protection animale créée en 1999 à Jouques et soutenue par une dizaine de bénévoles. Elle veille…",
+        "_summary": "Depuis 1999, une dizaine de bénévoles veillent sur les chats libres et les animaux en danger autour de Jouques.",
         "_city": "Jouques",
         "_dept": "Bouches-du-Rhône"
       }
