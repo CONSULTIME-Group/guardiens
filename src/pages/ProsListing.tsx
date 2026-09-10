@@ -139,6 +139,13 @@ export default function ProsListing() {
           <p className="text-base md:text-lg text-muted-foreground max-w-2xl mt-2">
             {t("pros_listing.intro")}
           </p>
+          <p className="text-sm text-muted-foreground max-w-2xl mt-3">
+            Guardiens présente aussi les associations de protection animale, refuges, sanctuaires,
+            réseaux de familles d'accueil et centres de soins faune sauvage.{" "}
+            <Link to="/associations" className="text-primary hover:underline">
+              Découvrir les associations et refuges
+            </Link>
+          </p>
           <div className="mt-4 flex flex-wrap gap-2">
             <Button asChild size="sm">
               <Link to="/pros/inscription">{t("pros_listing.register_cta")}</Link>
