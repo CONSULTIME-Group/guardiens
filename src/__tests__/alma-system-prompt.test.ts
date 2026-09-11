@@ -42,6 +42,8 @@ describe("identité d'Alma dans le prompt", () => {
     expect(promptSource).toContain("2018");
     expect(promptSource).toContain("2020");
     expect(promptSource).toContain("TON CARNET");
+    expect(promptSource).toContain("dans la maison des parents d'Elisa");
+    expect(promptSource).not.toContain("pendant qu'elle gardait des maisons");
   });
 
   it("bannit les formules de centre d'appel", () => {
