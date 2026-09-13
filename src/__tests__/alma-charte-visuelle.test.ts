@@ -14,18 +14,21 @@ const thread = read("src/components/ai/alma/AlmaConversation.tsx");
 const css = read("src/index.css");
 
 describe("Alma, habillage charte", () => {
-  it("le panneau replié utilise les classes de charte", () => {
-    expect(dock).toContain("alma-panel");
-    expect(dock).toContain("alma-badge");
-    expect(dock).toContain("alma-voice");
+  it("le dock replié conserve son apparence distincte", () => {
+    expect(dock).toContain("bg-card/95");
+    expect(dock).toContain("AlmaAvatarAnimated");
     expect(dock).not.toContain("shadow-xl");
   });
 
-  it("le fil utilise les bulles et la carte de charte", () => {
-    expect(thread).toContain("alma-thread-card");
-    expect(thread).toContain("alma-bubble-alma");
-    expect(thread).toContain("alma-bubble-user");
+  it("le fil utilise du texte nu dans un tiroir papier", () => {
+    expect(thread).toContain("alma-conversation-sheet");
+    expect(thread).toContain("alma-turn-alma");
+    expect(thread).toContain("alma-turn-user");
     expect(thread).toContain("alma-field");
+    expect(thread).not.toContain("alma-bubble-alma");
+    expect(thread).not.toContain("alma-bubble-user");
+    expect(css).not.toContain("alma-bubble-alma");
+    expect(css).not.toContain("alma-bubble-user");
   });
 
   it("la phrase d'Alma passe en Playfair italique", () => {
@@ -38,15 +41,29 @@ describe("Alma, habillage charte", () => {
     expect(block).not.toMatch(/#[0-9a-fA-F]{3,8}\b/);
   });
 
-  it("l'attente se rend en trois points annoncés aux lecteurs d'écran", () => {
-    expect(thread).toContain("alma-typing-dot");
+  it("l'attente utilise six phrases et reste annoncée aux lecteurs d'écran", () => {
+    expect(thread).not.toContain("alma-typing-dot");
+    expect(css).not.toContain("alma-typing-dot");
+    expect(thread).toContain("Je regarde.");
+    expect(thread).toContain("Je cherche dans mes notes.");
+    expect(thread).toContain("Deux secondes, je vérifie.");
+    expect(thread).toContain("Je relis, je veux être sûre.");
+    expect(thread).toContain("Je fouille un peu.");
+    expect(thread).toContain("J'y suis presque.");
     expect(thread).toContain("Alma prépare sa réponse.");
-    expect(css).toMatch(/prefers-reduced-motion: no-preference/);
   });
 
-  it("micro, envoi et fermeture tiennent la cible de 44px", () => {
+  it("le micro et les actions tiennent la cible de 44px", () => {
     expect(thread).not.toContain("h-9 w-9");
     expect(dock).not.toContain("h-9 w-9");
-    expect(thread.match(/h-11 w-11/g)?.length ?? 0).toBeGreaterThanOrEqual(3);
+    expect(thread).toContain("h-[46px] w-[46px]");
+    expect(thread).toContain("min-h-11");
+  });
+
+  it("le panneau est un dialogue et aucun libellé d'action ne montre un chemin", () => {
+    expect(thread).toContain("<SheetContent");
+    expect(thread).toContain("<SheetTitle");
+    expect(thread).toContain("title: menuLabel, kind: \"action\"");
+    expect(thread).not.toMatch(/title:\s*"\//);
   });
 });
