@@ -6,7 +6,11 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { detectRegister } from "../../supabase/functions/_shared/alma-system-prompt";
+import {
+  detectRegister,
+  buildAlmaSystemPrompt,
+  almaRegisterReminder,
+} from "../../supabase/functions/_shared/alma-system-prompt";
 import { ALMA_MOOD_KEYS, MOOD_AVATAR } from "@/lib/alma/mood";
 
 const read = (p: string) => readFileSync(resolve(process.cwd(), p), "utf8");
@@ -122,7 +126,7 @@ describe("humeur transmise à la conversation", () => {
   });
 
   it("la fonction alma-chat pose un message système d'humeur et monte la température", () => {
-    expect(edgeSource).toContain("Votre humeur en ce moment");
+    expect(edgeSource).toContain("Ton humeur en ce moment");
     expect(edgeSource).toContain("temperature: 0.85");
   });
 });
@@ -152,5 +156,40 @@ describe("avatar, humeurs et vie non linéaire", () => {
 
   it("programme un intervalle aléatoire entre 25 et 50 secondes", () => {
     expect(avatarSource).toContain("25000 + Math.random() * 25000");
+  });
+});
+
+describe("assemblage du prompt par registre", () => {
+  it("le registre perso porte le carnet sans la carte du site", () => {
+    const prompt = buildAlmaSystemPrompt("perso");
+    expect(prompt).toContain("TON CARNET");
+    expect(prompt).not.toContain("LA CARTE DU SITE");
+  });
+
+  it("les registres dossier, reassurance et sensible portent la carte du site sans le carnet", () => {
+    for (const register of ["dossier", "reassurance", "sensible"] as const) {
+      const prompt = buildAlmaSystemPrompt(register);
+      expect(prompt).toContain("LA CARTE DU SITE");
+      expect(prompt).not.toContain("TON CARNET");
+    }
+  });
+
+  it("les quatre registres passent tous par le socle", () => {
+    for (const register of ["perso", "dossier", "reassurance", "sensible"] as const) {
+      const prompt = buildAlmaSystemPrompt(register);
+      expect(prompt).toContain("Vouvoiement absolu");
+      expect(prompt).toContain("CE QUE TU SAIS FAIRE");
+      expect(prompt.includes("\u2014")).toBe(false);
+      expect(prompt.includes("\u2013")).toBe(false);
+    }
+  });
+
+  it("almaRegisterReminder rend un texte distinct par registre et l'edge function l'appelle", () => {
+    const reminders = (["perso", "dossier", "reassurance", "sensible"] as const).map(
+      (register) => almaRegisterReminder(register),
+    );
+    expect(new Set(reminders).size).toBe(4);
+    expect(edgeSource).toContain("almaRegisterReminder(register)");
+    expect(edgeSource).toContain("buildAlmaSystemPrompt(register)");
   });
 });
