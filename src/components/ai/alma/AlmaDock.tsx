@@ -182,17 +182,39 @@ function DockComposer({
   surface,
   activeRole,
   seed,
+  focusSignal,
+  onSeen,
+  onFocus,
+  onTyped,
 }: {
   surface: string;
   activeRole: "owner" | "sitter";
   seed: string;
+  /** Incrémenté par le dock pour demander le focus du champ. */
+  focusSignal?: number;
+  onSeen?: () => void;
+  onFocus?: () => void;
+  onTyped?: () => void;
 }) {
   const [draft, setDraft] = useState("");
   const dictatedRef = useRef(false);
+  const fieldRef = useRef<HTMLTextAreaElement | null>(null);
   const voice = useAlmaVoiceInput((text) => {
     dictatedRef.current = true;
     setDraft((d) => (d ? `${d} ${text}` : text));
   });
+
+  // N6 : le composeur est vu dès qu'il est monté.
+  useEffect(() => {
+    onSeen?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Focus demandé par la pilule du dock replié. Jamais d'autofocus sinon.
+  useEffect(() => {
+    if (!focusSignal) return;
+    fieldRef.current?.focus();
+  }, [focusSignal]);
 
   const submit = () => {
     const text = draft.trim();
@@ -208,8 +230,13 @@ function DockComposer({
     <div className="mt-[14px]">
       <div className="flex items-end gap-2">
         <textarea
+          ref={fieldRef}
           value={draft}
-          onChange={(e) => setDraft(e.target.value)}
+          onChange={(e) => {
+            if (e.target.value.length > 0 && draft.length === 0) onTyped?.();
+            setDraft(e.target.value);
+          }}
+          onFocus={() => onFocus?.()}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
@@ -223,6 +250,7 @@ function DockComposer({
           autoFocus={false}
           className="alma-field flex-1 resize-none max-h-24"
         />
+
         <button
           type="button"
           onClick={voice.supported ? voice.toggle : undefined}
@@ -376,10 +404,17 @@ function AlmaDockInner() {
     if (currentWhisper) {
       setExpanded(true);
       setUserCollapsed(false);
+      trackEvent("alma_dock_expanded" as any, {
+        metadata: {
+          surface: surfaceFromPath(location.pathname, activeRole),
+          origin: "whisper",
+        },
+      });
     } else if (userCollapsed) {
       setExpanded(false);
     }
   }, [currentWhisper?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
 
   // Ouverture programmatique depuis n'importe quelle carte du produit
   // (ex. AlmaRailWhisper). Événement fenêtre volontairement minimal pour
@@ -416,8 +451,10 @@ function AlmaDockInner() {
       return;
     }
     const total = autoDismissDelay(currentWhisper?.autoDismissMs);
+    suspendedRef.current = false;
     pausedRef.current = false;
     remainingRef.current = total;
+
     startedAtRef.current = Date.now();
     if (timerRef.current) window.clearTimeout(timerRef.current);
     timerRef.current = window.setTimeout(() => doDismiss("timeout"), total);
@@ -436,6 +473,9 @@ function AlmaDockInner() {
     pausedRef.current = true;
   };
   const resumeTimer = () => {
+    // N5 : dès que la personne a touché le champ, le compte à rebours ne
+    // repart jamais. Elle est en train d'écrire, Alma attend.
+    if (suspendedRef.current) return;
     if (!pausedRef.current || !currentWhisper) return;
     pausedRef.current = false;
     startedAtRef.current = Date.now();
@@ -444,6 +484,23 @@ function AlmaDockInner() {
       remainingRef.current > 0 ? remainingRef.current : 20_000,
     );
   };
+
+  // Suspension définitive du compte à rebours, déclenchée par le focus du
+  // champ ou la première frappe.
+  const suspendedRef = useRef(false);
+  const suspendAutoDismiss = useCallback(() => {
+    suspendedRef.current = true;
+    if (timerRef.current) window.clearTimeout(timerRef.current);
+    timerRef.current = null;
+    pausedRef.current = true;
+  }, []);
+
+  // Entonnoir de découvrabilité (N6). Une mesure par ouverture de panneau.
+  const [focusSignal, setFocusSignal] = useState(0);
+  const composerSeenRef = useRef(false);
+  const composerFocusedRef = useRef(false);
+  const composerTypedRef = useRef(false);
+
 
   
 
@@ -554,7 +611,50 @@ function AlmaDockInner() {
     };
   }, [expanded]);
 
+  // Ouverture du panneau tracée avec son origine (N6).
+  const openPanel = useCallback(
+    (origin: "whisper" | "avatar" | "pill") => {
+      setExpanded(true);
+      setUserCollapsed(false);
+      composerSeenRef.current = false;
+      composerFocusedRef.current = false;
+      composerTypedRef.current = false;
+      trackEvent("alma_dock_expanded" as any, {
+        metadata: { surface: surfaceFromPath(location.pathname, activeRole), origin },
+      });
+    },
+    [location.pathname, activeRole],
+  );
+
+  const openFromPill = useCallback(() => {
+    openPanel("pill");
+    setFocusSignal((v) => v + 1);
+  }, [openPanel]);
+
+  const composerSurface = surfaceFromPath(location.pathname, activeRole);
+
+  const onComposerSeen = useCallback(() => {
+    if (composerSeenRef.current) return;
+    composerSeenRef.current = true;
+    trackEvent("alma_composer_seen" as any, { metadata: { surface: composerSurface } });
+  }, [composerSurface]);
+
+  const onComposerFocused = useCallback(() => {
+    suspendAutoDismiss();
+    if (composerFocusedRef.current) return;
+    composerFocusedRef.current = true;
+    trackEvent("alma_composer_focused" as any, { metadata: { surface: composerSurface } });
+  }, [composerSurface, suspendAutoDismiss]);
+
+  const onComposerTyped = useCallback(() => {
+    suspendAutoDismiss();
+    if (composerTypedRef.current) return;
+    composerTypedRef.current = true;
+    trackEvent("alma_composer_typed" as any, { metadata: { surface: composerSurface } });
+  }, [composerSurface, suspendAutoDismiss]);
+
   // Action utilisateur : demande explicite d'un conseil. Contourne le quota
+
   // de session proactif et le verrou de surface (initiée par l'utilisateur),
   // et affiche un repli bienveillant si tout a déjà été vu.
   const askForTip = useCallback(
@@ -676,7 +776,12 @@ function AlmaDockInner() {
             surface={surface}
             activeRole={activeRole === "owner" ? "owner" : "sitter"}
             seed={panelLine}
+            focusSignal={focusSignal}
+            onSeen={onComposerSeen}
+            onFocus={onComposerFocused}
+            onTyped={onComposerTyped}
           />
+
           {!whisper && proposition && (
             <div className="mt-[14px]">
               <button
@@ -706,10 +811,14 @@ function AlmaDockInner() {
           <button
             type="button"
             onClick={() => {
-              setExpanded((v) => !v);
-              if (expanded) setUserCollapsed(true);
-              else setUserCollapsed(false);
+              if (expanded) {
+                setExpanded(false);
+                setUserCollapsed(true);
+              } else {
+                openPanel("avatar");
+              }
             }}
+
             onPointerEnter={playPlayful}
             onTouchStart={playPlayful}
             className="relative inline-flex flex-col items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -778,10 +887,14 @@ function AlmaDockInner() {
           type="button"
           tabIndex={-1}
           onClick={() => {
-            setExpanded((v) => !v);
-            if (expanded) setUserCollapsed(true);
-            else setUserCollapsed(false);
+            if (expanded) {
+              setExpanded(false);
+              setUserCollapsed(true);
+            } else {
+              openPanel("avatar");
+            }
           }}
+
           className="flex flex-col items-start leading-tight pr-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           aria-hidden
         >
@@ -797,7 +910,21 @@ function AlmaDockInner() {
           )}
         </button>
 
+        {/* N4 : porte d'entrée visible de la conversation. Elle reste
+            affichée en mode silencieux, le silence portant sur les messages
+            spontanés d'Alma, pas sur la possibilité de lui parler. */}
+        <button
+          type="button"
+          data-testid="alma-ask-pill"
+          onClick={openFromPill}
+          className="flex h-11 shrink-0 items-center rounded-full border border-border bg-muted/40 px-3 font-body text-[12px] text-muted-foreground hover:bg-muted hover:text-foreground transition focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <span className="hidden sm:inline">Posez moi une question</span>
+          <span className="sm:hidden">Question</span>
+        </button>
+
         <div className="h-6 w-px bg-border/70" aria-hidden />
+
 
         {/* Menu unique : parcours, conseil, fréquence, masquer. */}
         <DropdownMenu modal={false}>
