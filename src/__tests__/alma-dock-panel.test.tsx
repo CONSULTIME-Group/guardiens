@@ -4,7 +4,7 @@
  * saisie y est toujours présent.
  */
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+import { render, screen, fireEvent, cleanup, act, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -153,20 +153,24 @@ describe("panneau déplié du dock Alma", () => {
     expect(document.activeElement).toBe(trigger);
   });
 
-  it("reprend la promesse et les réponses transmises par une carte", () => {
+  it("reprend la promesse et les réponses transmises par une carte", async () => {
     renderDock();
     const trigger = document.createElement("button");
     document.body.appendChild(trigger);
     trigger.focus();
-    window.dispatchEvent(new CustomEvent("alma:open-dock", {
-      detail: {
-        subject: "raconter la maison",
-        instantLine: "Alors racontez moi. Où est votre maison, et qu'est-ce qui s'y passe quand vous partez ?",
-        readyReplies: ["Je pars bientôt", "Je prépare mon annonce"],
-        trigger,
-      },
-    }));
-    expect(screen.getByTestId("alma-dock-panel")).toHaveTextContent("Alors racontez moi");
+    act(() => {
+      window.dispatchEvent(new CustomEvent("alma:open-dock", {
+        detail: {
+          subject: "raconter la maison",
+          instantLine: "Alors racontez moi. Où est votre maison, et qu'est-ce qui s'y passe quand vous partez ?",
+          readyReplies: ["Je pars bientôt", "Je prépare mon annonce"],
+          trigger,
+        },
+      }));
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId("alma-dock-panel")).toHaveTextContent("Alors racontez moi");
+    });
     expect(screen.getByRole("button", { name: "Je pars bientôt" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Je prépare mon annonce" })).toBeInTheDocument();
     expect(document.activeElement).toBe(screen.getByLabelText("Votre message pour Alma"));
