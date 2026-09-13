@@ -328,6 +328,7 @@ export function AlmaConversation({
               size={compactHeader ? 32 : desktopLayout ? 64 : 46}
               mood={state.sending ? "thinking" : "idle"}
               stage={stage}
+              showHalo
               aria-hidden
             />
             <div className="min-w-0">

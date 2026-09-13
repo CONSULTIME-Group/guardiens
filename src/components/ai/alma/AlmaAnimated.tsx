@@ -19,6 +19,7 @@ interface AlmaAnimatedProps {
   className?: string;
   mood?: AlmaMood;
   stage?: AlmaStage;
+  showHalo?: boolean;
 }
 
 function toAnimatedMood(mood: AlmaMood): AlmaAnimatedMood {
@@ -31,12 +32,14 @@ export function AlmaAnimated({
   className,
   mood = "idle",
   stage,
+  showHalo,
 }: AlmaAnimatedProps) {
   return (
     <AlmaAvatarAnimated
       size={size}
       mood={toAnimatedMood(mood)}
       stage={stage}
+      showHalo={showHalo}
       className={cn(className)}
     />
   );
