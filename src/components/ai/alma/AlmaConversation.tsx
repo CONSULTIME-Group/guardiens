@@ -1,29 +1,98 @@
-/**
- * Fil de conversation d'Alma, rendu dans le panneau déplié du dock.
- *
- * Contraintes tenues ici :
- * - hauteur plafonnée à 60 pour cent de la hauteur visible (visualViewport
- *   sur iOS, sinon innerHeight), fil scrollable, composeur collé en bas
- * - le composeur reste visible quand le clavier logiciel se lève
- * - l'état vit dans conversation-store, donc il survit au démontage du dock
- *
- * Entrée vocale seulement, aucune synthèse vocale.
- * Habillage : charte Guardiens (papier crème, encre, vert pin, Playfair pour
- * la voix d'Alma, Outfit pour le fonctionnel). Classes dans src/index.css.
- */
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { Mic, Send, Square, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { ArrowRight, Mic, Send, Square } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import { AlmaAvatar } from "./AlmaAvatar";
+import { AlmaAvatarAnimated } from "./AlmaAvatarAnimated";
 import { VoiceStatusLine } from "./AlmaDock";
 import { useAlmaVoiceInput } from "@/hooks/useAlmaVoiceInput";
-
 import {
-  closeAlmaConversation,
   getAlmaConversationState,
+  openAlmaConversation,
   sendAlmaMessage,
   subscribeAlmaConversation,
 } from "@/lib/alma/conversation-store";
+
+export const ALMA_THINKING_LINES = [
+  "Je regarde.",
+  "Je cherche dans mes notes.",
+  "Deux secondes, je vérifie.",
+  "Je relis, je veux être sûre.",
+  "Je fouille un peu.",
+  "J'y suis presque.",
+] as const;
+
+const SECTION_LABELS: Record<string, string> = {
+  "/dashboard": "Tableau de bord",
+  "/profile": "Mon profil gardien",
+  "/owner-profile": "Mon profil propriétaire",
+  "/sits": "Mes annonces",
+  "/sits/create": "Créer une annonce",
+  "/annonces": "Les annonces",
+  "/recherche-gardiens": "Rechercher un gardien",
+  "/messages": "Messagerie",
+  "/favorites": "Mes favoris",
+  "/settings": "Réglages",
+  "/alma": "Mon parcours avec Alma",
+  "/petites-missions/creer": "Proposer un coup de main",
+};
+
+interface ExtractedLink {
+  href: string;
+  title: string;
+  kind: "source" | "action";
+  label?: string;
+}
+
+interface ParsedMessage {
+  text: string;
+  links: ExtractedLink[];
+}
+
+function normalizeInternalPath(href: string): string | null {
+  if (href.startsWith("/")) return href;
+  try {
+    const url = new URL(href);
+    if (url.hostname !== "guardiens.fr" && !url.hostname.endsWith(".guardiens.fr")) return null;
+    return `${url.pathname}${url.search}${url.hash}`;
+  } catch {
+    return null;
+  }
+}
+
+function sourceLabel(path: string): string {
+  if (path.includes("faq")) return "Dans la FAQ";
+  if (path.includes("conseil")) return "Conseil";
+  return "Le journal";
+}
+
+export function parseAlmaMessage(content: string): ParsedMessage {
+  const links: ExtractedLink[] = [];
+  const markdownPattern = /\[([^\]]+)\]\((https?:\/\/[^\s)]+|\/[^\s)]+)\)/g;
+  let text = content.replace(markdownPattern, (_match, title: string, href: string) => {
+    const path = normalizeInternalPath(href);
+    if (!path) return title;
+    const basePath = path.split(/[?#]/)[0];
+    const menuLabel = SECTION_LABELS[basePath];
+    links.push(menuLabel
+      ? { href: path, title: menuLabel, kind: "action" }
+      : { href: path, title, kind: "source", label: sourceLabel(basePath) });
+    return "";
+  });
+
+  const rawPattern = /(?:https?:\/\/(?:www\.)?guardiens\.fr)?\/[a-zA-Z0-9À-ÿ_?&=#./-]+/g;
+  text = text.replace(rawPattern, (href) => {
+    const path = normalizeInternalPath(href);
+    if (!path) return "";
+    const basePath = path.split(/[?#]/)[0];
+    const menuLabel = SECTION_LABELS[basePath];
+    if (menuLabel) links.push({ href: path, title: menuLabel, kind: "action" });
+    return "";
+  });
+
+  return { text: text.replace(/\s{2,}/g, " ").trim(), links };
+}
 
 function useVisualViewportHeight(): number {
   const [height, setHeight] = useState(() =>
@@ -31,15 +100,15 @@ function useVisualViewportHeight(): number {
   );
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const vv = window.visualViewport;
-    const update = () => setHeight(vv?.height ?? window.innerHeight);
+    const viewport = window.visualViewport;
+    const update = () => setHeight(viewport?.height ?? window.innerHeight);
     update();
-    vv?.addEventListener("resize", update);
-    vv?.addEventListener("scroll", update);
+    viewport?.addEventListener("resize", update);
+    viewport?.addEventListener("scroll", update);
     window.addEventListener("resize", update);
     return () => {
-      vv?.removeEventListener("resize", update);
-      vv?.removeEventListener("scroll", update);
+      viewport?.removeEventListener("resize", update);
+      viewport?.removeEventListener("scroll", update);
       window.removeEventListener("resize", update);
     };
   }, []);
@@ -47,179 +116,303 @@ function useVisualViewportHeight(): number {
 }
 
 interface AlmaConversationProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   surface: string;
   activeRole: "owner" | "sitter";
-  /** Libellé du stade de relation, affiché sous le nom dans l'en tête. */
+  initialMessage: string;
+  moodLine?: string | null;
   stageLabel?: string;
+  stage?: "nouvelle" | "eveillee" | "complice" | "fidele";
+  subject?: string;
   focusSignal?: number;
+  starters?: string[];
+  showIntro?: boolean;
+  onIntroSeen?: () => void;
+  onStarterClick?: (label: string) => void;
+  onSeen?: () => void;
+  onFocus?: () => void;
+  onTyped?: () => void;
+  action?: { label: string; onClick: () => void } | null;
 }
 
-export function AlmaConversation({ surface, activeRole, stageLabel, focusSignal }: AlmaConversationProps) {
+export function AlmaConversation({
+  open,
+  onOpenChange,
+  surface,
+  activeRole,
+  initialMessage,
+  moodLine,
+  stageLabel,
+  stage,
+  subject,
+  focusSignal,
+  starters,
+  showIntro,
+  onIntroSeen,
+  onStarterClick,
+  onSeen,
+  onFocus,
+  onTyped,
+  action,
+}: AlmaConversationProps) {
   const state = useSyncExternalStore(subscribeAlmaConversation, getAlmaConversationState);
   const [draft, setDraft] = useState("");
+  const [compactHeader, setCompactHeader] = useState(false);
+  const [thinkingLine, setThinkingLine] = useState(ALMA_THINKING_LINES[0]);
+  const previousThinkingRef = useRef(-1);
   const viewportHeight = useVisualViewportHeight();
   const threadRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
-
   const dictatedRef = useRef(false);
+  const navigate = useNavigate();
 
   const voice = useAlmaVoiceInput((text) => {
     dictatedRef.current = true;
-    setDraft((d) => (d ? `${d} ${text}` : text));
-    inputRef.current?.focus();
+    setDraft((current) => (current ? `${current} ${text}` : text));
+    inputRef.current?.focus({ preventScroll: true });
   });
 
   useEffect(() => {
-    const el = threadRef.current;
-    if (el) el.scrollTop = el.scrollHeight;
-  }, [state.messages.length, state.sending]);
+    if (!open) return;
+    onSeen?.();
+    if (showIntro) onIntroSeen?.();
+  }, [open, onIntroSeen, onSeen, showIntro]);
 
   useEffect(() => {
-    if (!focusSignal) return;
+    if (!focusSignal || !open) return;
     inputRef.current?.focus({ preventScroll: true });
-  }, [focusSignal]);
+  }, [focusSignal, open]);
 
-  const maxHeight = Math.round(viewportHeight * 0.6);
+  useEffect(() => {
+    if (!state.sending) return;
+    let next = Math.floor(Math.random() * ALMA_THINKING_LINES.length);
+    if (next === previousThinkingRef.current) next = (next + 1) % ALMA_THINKING_LINES.length;
+    previousThinkingRef.current = next;
+    setThinkingLine(ALMA_THINKING_LINES[next]);
+  }, [state.sending]);
 
-  const submit = () => {
-    const text = draft.trim();
-    if (!text || state.sending) return;
+  useEffect(() => {
+    const thread = threadRef.current;
+    if (thread) thread.scrollTop = thread.scrollHeight;
+  }, [state.messages.length, state.sending]);
+
+  const messages = useMemo(
+    () => state.open ? state.messages : [{ id: "alma-opening", role: "alma" as const, content: initialMessage }],
+    [initialMessage, state.messages, state.open],
+  );
+
+  const placeholder = subject === "raconter la maison"
+    ? "Répondre à Alma"
+    : subject
+      ? `Répondre au sujet : ${subject}`
+      : "Posez votre question à Alma";
+
+  const send = (text: string) => {
+    const message = text.trim();
+    if (!message || state.sending) return;
     const inputMode = dictatedRef.current ? "voice" : "keyboard";
     dictatedRef.current = false;
     setDraft("");
-    void sendAlmaMessage({ text, surface, activeRole, inputMode });
+    openAlmaConversation(initialMessage);
+    void sendAlmaMessage({ text: message, surface, activeRole, inputMode });
+  };
+
+  const submit = () => send(draft);
+
+  const followLink = (href: string) => {
+    const path = normalizeInternalPath(href);
+    if (path) navigate(path);
   };
 
   return (
-    <div
-      data-testid="alma-conversation"
-      className={cn(
-        "pointer-events-auto mb-2 w-full md:w-96 flex flex-col",
-        "alma-thread-card text-card-foreground",
-        "animate-in slide-in-from-bottom-2 fade-in duration-200",
-      )}
-      style={{ maxHeight }}
-    >
-      {/* En tête : trio signature en version courte, pastille, nom, stade. */}
-      <div className="flex items-center gap-3 border-b border-border px-[18px] py-3">
-        <span className="alma-badge" style={{ width: 32, height: 32 }}>
-          <AlmaAvatar size={24} mood={state.sending ? "thinking" : "idle"} />
-        </span>
-        <span className="flex flex-col leading-tight">
-          <span className="font-heading text-base font-semibold text-foreground">Alma</span>
-          <span className="text-[11px] font-medium text-muted-foreground">
-            {stageLabel ?? "votre assistante"}
-          </span>
-        </span>
-        <button
-          type="button"
-          onClick={closeAlmaConversation}
-          className="ml-auto flex h-11 w-11 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
-          aria-label="Fermer la conversation avec Alma"
-        >
-          <X className="h-4 w-4" />
-        </button>
-      </div>
-
-      <div
-        ref={threadRef}
-        className="flex-1 overflow-y-auto overscroll-contain px-[18px] py-[14px] flex flex-col gap-[14px]"
-        role="log"
-        aria-live="polite"
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent
+        side="right"
+        data-alma-conversation-dialog="true"
+        data-testid="alma-dock-panel"
+        className="alma-conversation-sheet flex gap-0 overflow-hidden p-0"
+        style={{ height: viewportHeight }}
+        onOpenAutoFocus={(event) => {
+          event.preventDefault();
+          inputRef.current?.focus({ preventScroll: true });
+        }}
       >
-        {state.messages.map((m, index) => {
-          const previous = state.messages[index - 1];
-          const startsAlmaRun = m.role === "alma" && previous?.role !== "alma";
-          if (m.role === "alma") {
-            return (
-              <div key={m.id} className="flex items-start gap-2">
-                <span className="w-6 shrink-0">
-                  {startsAlmaRun && <AlmaAvatar size={24} mood="idle" />}
-                </span>
-                <div className="alma-bubble-alma max-w-[85%] whitespace-pre-line">{m.content}</div>
-              </div>
-            );
-          }
-          return (
-            <div key={m.id} className="alma-bubble-user ml-auto max-w-[85%] whitespace-pre-line">
-              {m.content}
+        <SheetTitle className="sr-only">Conversation avec Alma</SheetTitle>
+        <SheetDescription className="sr-only">Posez une question à Alma.</SheetDescription>
+
+        <header className={cn("alma-conversation-header shrink-0", compactHeader && "is-compact")}>
+          <div className="alma-sheet-handle md:hidden" aria-hidden="true" />
+          <div className="flex items-center gap-3 pr-12">
+            <AlmaAvatarAnimated
+              size={compactHeader ? 32 : 46}
+              mood={state.sending ? "thinking" : "idle"}
+              stage={stage}
+              className="md:hidden"
+              aria-hidden
+            />
+            <AlmaAvatarAnimated
+              size={64}
+              mood={state.sending ? "thinking" : "idle"}
+              stage={stage}
+              className="hidden md:block"
+              aria-hidden
+            />
+            <div className="min-w-0">
+              <p className="font-heading text-[19px] leading-tight text-foreground">Alma</p>
+              <p className="mt-1 text-[10.5px] font-bold uppercase text-terra [letter-spacing:.16em]">
+                {stageLabel ?? "Votre assistante"}
+              </p>
+              {moodLine && (
+                <p className="alma-header-mood mt-1 font-heading text-[13px] italic text-muted-foreground">
+                  {moodLine}
+                </p>
+              )}
             </div>
-          );
-        })}
-        {state.sending && (
-          <div className="flex items-center gap-1.5 pl-8" aria-live="polite">
-            <span className="alma-typing-dot" aria-hidden />
-            <span className="alma-typing-dot" aria-hidden />
-            <span className="alma-typing-dot" aria-hidden />
-            <span className="sr-only">Alma prépare sa réponse.</span>
           </div>
-        )}
-        {state.error && <p className="text-xs text-destructive">{state.error}</p>}
-      </div>
+          <div className="alma-gold-rule mt-3 h-px w-[85%]" aria-hidden="true" />
+        </header>
 
-      <div className="border-t border-border px-[18px] py-3">
-        <div className="flex items-end gap-2">
-          <textarea
-            ref={inputRef}
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                submit();
-              }
-            }}
-            rows={1}
-            maxLength={2000}
-            placeholder="Posez votre question à Alma"
-            aria-label="Votre message pour Alma"
-            className="alma-field flex-1 resize-none max-h-24"
-          />
-          <button
-            type="button"
-            onClick={voice.supported ? voice.toggle : undefined}
-            disabled={!voice.supported || voice.status === "transcribing"}
-            title={
-              voice.supported
-                ? undefined
-                : "La dictée arrive sur les navigateurs qui la prennent en charge."
+        <div
+          ref={threadRef}
+          className="alma-conversation-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-4 md:px-6"
+          role="log"
+          aria-live="polite"
+          onScroll={(event) => {
+            if (window.matchMedia("(max-width: 767px)").matches) {
+              setCompactHeader(event.currentTarget.scrollTop > 24);
             }
-            aria-label={
-              voice.supported
-                ? voice.status === "recording"
-                  ? "Arrêter la dictée"
-                  : "Dicter votre message"
-                : "Dictée disponible sur les navigateurs qui la prennent en charge"
-            }
-            aria-pressed={voice.status === "recording"}
-            className={cn(
-              "flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition disabled:opacity-50",
-              "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
-              voice.status === "recording"
-                ? "bg-destructive text-destructive-foreground"
-                : "text-muted-foreground hover:bg-muted hover:text-foreground",
-            )}
-          >
-            {voice.status === "recording" ? (
-              <Square className="h-4 w-4" />
-            ) : (
-              <Mic className="h-5 w-5" />
-            )}
-          </button>
-          <button
-            type="button"
-            onClick={submit}
-            disabled={state.sending || draft.trim().length === 0}
-            aria-label="Envoyer à Alma"
-            className="alma-primary-shadow flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground disabled:opacity-50 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
-          >
-            <Send className="h-4 w-4" />
-          </button>
+          }}
+        >
+          {messages.map((message, index) => {
+            const parsed = parseAlmaMessage(message.content);
+            return (
+              <article
+                key={message.id}
+                className={cn("alma-turn", index > 0 && "border-t border-[hsl(var(--line-soft))]")}
+              >
+                {message.role === "alma" ? (
+                  <div>
+                    <div className="mb-2 flex items-center gap-2" aria-hidden="true">
+                      <span className="text-[10.5px] font-bold uppercase text-terra [letter-spacing:.16em]">ALMA</span>
+                      <span className="h-px flex-1 bg-[hsl(var(--line-soft))]" />
+                    </div>
+                    {parsed.text && <p className="alma-turn-alma whitespace-pre-line">{parsed.text}</p>}
+                    {parsed.links.map((link) => link.kind === "source" ? (
+                      <button
+                        key={`${message.id}-${link.href}`}
+                        type="button"
+                        onClick={() => followLink(link.href)}
+                        className="alma-source-card notebook-card mt-3 block w-full bg-card p-4 text-left focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        <span className="block text-[10.5px] font-bold uppercase text-terra [letter-spacing:.16em]">{link.label}</span>
+                        <span className="mt-1 block font-heading text-[15px] text-foreground">{link.title}</span>
+                        <span className="mt-2 inline-block text-xs text-muted-foreground underline underline-offset-4">Lire la source</span>
+                      </button>
+                    ) : (
+                      <button
+                        key={`${message.id}-${link.href}`}
+                        type="button"
+                        onClick={() => followLink(link.href)}
+                        className="alma-action-link mt-3 inline-flex min-h-11 items-center gap-2 text-left text-[13px] font-bold text-pine focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        <span>{link.title}</span><ArrowRight className="h-4 w-4" aria-hidden />
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="alma-turn-user ml-auto whitespace-pre-line">{message.content}</p>
+                )}
+              </article>
+            );
+          })}
+
+          {!state.open && action && (
+            <Button variant="link" onClick={action.onClick} className="alma-action-link mt-2 h-11 px-0 text-[13px] font-bold text-pine">
+              {action.label}<ArrowRight className="h-4 w-4" aria-hidden />
+            </Button>
+          )}
+
+          {state.sending && (
+            <div className="alma-thinking flex items-center gap-3 border-t border-[hsl(var(--line-soft))] py-4" aria-live="polite">
+              <AlmaAvatarAnimated size={32} mood="thinking" stage={stage} aria-hidden />
+              <span className="font-heading text-sm italic text-muted-foreground">{thinkingLine}</span>
+              <span className="sr-only">Alma prépare sa réponse.</span>
+            </div>
+          )}
+          {state.error && <p className="py-3 text-xs text-destructive">{state.error}</p>}
         </div>
-        <VoiceStatusLine status={voice.status} error={voice.error} />
-      </div>
 
-    </div>
+        <footer className="alma-conversation-composer shrink-0 border-t border-[hsl(var(--line-soft))] bg-[hsl(var(--hero-paper))] px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-3 md:px-5 md:pb-5">
+          {showIntro && <p data-testid="alma-composer-intro" className="alma-voice mb-2 text-xs">Je suis Alma. Je connais les maisons, les animaux et les chemins du site.</p>}
+          <div className="flex items-end gap-2">
+            <textarea
+              ref={inputRef}
+              value={draft}
+              onChange={(event) => {
+                if (event.target.value.length > 0 && draft.length === 0) onTyped?.();
+                setDraft(event.target.value);
+              }}
+              onFocus={onFocus}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" && !event.shiftKey) {
+                  event.preventDefault();
+                  submit();
+                }
+              }}
+              rows={1}
+              maxLength={2000}
+              placeholder={placeholder}
+              aria-label="Votre message pour Alma"
+              className="alma-field min-h-11 max-h-24 flex-1 resize-none bg-card"
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={voice.supported ? voice.toggle : undefined}
+              disabled={!voice.supported || voice.status === "transcribing"}
+              aria-label={voice.supported ? (voice.status === "recording" ? "Arrêter la dictée" : "Dicter votre message") : "Dictée disponible sur les navigateurs qui la prennent en charge"}
+              aria-pressed={voice.status === "recording"}
+              className={cn(
+                "h-[46px] w-[46px] shrink-0 rounded-full md:h-11 md:w-11",
+                voice.status === "recording" ? "bg-destructive text-destructive-foreground" : "bg-terra-soft text-terra hover:bg-terra-soft/80",
+              )}
+            >
+              {voice.status === "recording" ? <Square className="h-4 w-4" /> : <Mic className="h-5 w-5" />}
+            </Button>
+            {draft.trim().length > 0 && (
+              <Button
+                type="button"
+                size="icon"
+                onClick={submit}
+                disabled={state.sending}
+                aria-label="Envoyer à Alma"
+                className="alma-primary-shadow h-10 w-10 shrink-0 rounded-full md:h-11 md:w-11"
+              >
+                <Send className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+          {starters && starters.length > 0 && (
+            <div className="no-scrollbar mt-2 flex flex-nowrap gap-2 overflow-x-auto pb-1" data-testid="alma-prompt-starters">
+              {starters.slice(0, 2).map((label) => (
+                <Button
+                  key={label}
+                  type="button"
+                  variant="outline"
+                  onClick={() => { onStarterClick?.(label); send(label); }}
+                  className="h-11 shrink-0 px-3 text-xs font-normal text-muted-foreground"
+                >
+                  {label}
+                </Button>
+              ))}
+            </div>
+          )}
+          <VoiceStatusLine status={voice.status} error={voice.error} />
+        </footer>
+      </SheetContent>
+    </Sheet>
   );
 }
 
