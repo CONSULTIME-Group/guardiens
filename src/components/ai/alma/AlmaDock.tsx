@@ -809,10 +809,14 @@ function AlmaDockInner() {
           <button
             type="button"
             onClick={() => {
-              setExpanded((v) => !v);
-              if (expanded) setUserCollapsed(true);
-              else setUserCollapsed(false);
+              if (expanded) {
+                setExpanded(false);
+                setUserCollapsed(true);
+              } else {
+                openPanel("avatar");
+              }
             }}
+
             onPointerEnter={playPlayful}
             onTouchStart={playPlayful}
             className="relative inline-flex flex-col items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -881,10 +885,14 @@ function AlmaDockInner() {
           type="button"
           tabIndex={-1}
           onClick={() => {
-            setExpanded((v) => !v);
-            if (expanded) setUserCollapsed(true);
-            else setUserCollapsed(false);
+            if (expanded) {
+              setExpanded(false);
+              setUserCollapsed(true);
+            } else {
+              openPanel("avatar");
+            }
           }}
+
           className="flex flex-col items-start leading-tight pr-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           aria-hidden
         >
