@@ -85,7 +85,11 @@ describe("panneau déplié du dock Alma", () => {
     const { container } = renderDock();
     expand();
     const panel = screen.getByTestId("alma-dock-panel");
-    expect(panel.querySelectorAll("p")).toHaveLength(1);
+    // La phrase de présentation, affichée une seule fois par personne, est
+    // exclue du compte : la ligne d'Alma reste unique.
+    expect(
+      panel.querySelectorAll('p:not([data-testid="alma-composer-intro"])'),
+    ).toHaveLength(1);
     expect(panel).toHaveTextContent("Toujours pas sortie en forêt aujourd'hui.");
     expect(screen.getByLabelText("Votre message pour Alma")).toBeInTheDocument();
     expect(container.querySelectorAll('[data-testid="alma-panel-action"]')).toHaveLength(0);
@@ -103,7 +107,11 @@ describe("panneau déplié du dock Alma", () => {
     };
     renderDock();
     const panel = screen.getByTestId("alma-dock-panel");
-    expect(panel.querySelectorAll("p")).toHaveLength(1);
+    // La phrase de présentation, affichée une seule fois par personne, est
+    // exclue du compte : la ligne d'Alma reste unique.
+    expect(
+      panel.querySelectorAll('p:not([data-testid="alma-composer-intro"])'),
+    ).toHaveLength(1);
     expect(panel).toHaveTextContent("Pensez à aerer la maison.");
     expect(panel).not.toHaveTextContent("Humeur qui doit se taire");
     expect(screen.getAllByTestId("alma-panel-action")).toHaveLength(1);
@@ -120,7 +128,11 @@ describe("panneau déplié du dock Alma", () => {
     renderDock();
     expand();
     const panel = screen.getByTestId("alma-dock-panel");
-    expect(panel.querySelectorAll("p")).toHaveLength(1);
+    // La phrase de présentation, affichée une seule fois par personne, est
+    // exclue du compte : la ligne d'Alma reste unique.
+    expect(
+      panel.querySelectorAll('p:not([data-testid="alma-composer-intro"])'),
+    ).toHaveLength(1);
     expect(screen.getAllByTestId("alma-panel-action")).toHaveLength(1);
     expect(screen.getByLabelText("Votre message pour Alma")).toBeInTheDocument();
   });
