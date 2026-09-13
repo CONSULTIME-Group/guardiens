@@ -80,4 +80,15 @@ describe("Alma, habillage charte", () => {
     expect(parsed.links[0].title).toBe(expectedTitle);
     expect(parsed.links.every((link) => !link.title.startsWith("/"))).toBe(true);
   });
+
+  it.each([
+    ["Vous trouverez les réponses ici : /faq.", "Vous trouverez les réponses."],
+    ["Consultez les conseils à l'adresse /conseils", "Consultez les conseils."],
+    ["Découvrez les structures sur cette page : /associations.", "Découvrez les structures."],
+  ])("referme la phrase après extraction du lien dans %s", (message, expectedText) => {
+    const parsed = parseAlmaMessage(message);
+    expect(parsed.text).toBe(expectedText);
+    expect(parsed.text).toMatch(/[^:,.]\.$/u);
+    expect(parsed.links).toHaveLength(1);
+  });
 });

@@ -131,7 +131,18 @@ export function parseAlmaMessage(content: string): ParsedMessage {
     return trailingPunctuation;
   });
 
-  return { text: text.replace(/\s{2,}/g, " ").trim(), links };
+  text = text.replace(/\s{2,}/g, " ").trim();
+  if (links.length > 0 && text) {
+    text = text
+      .replace(/(?:\s*[:,.]\s*)+$/u, "")
+      .replace(/(?:\s|^)(?:ici|à l'adresse(?: suivante)?|à cette adresse|sur cette page)$/iu, "")
+      .replace(/(?:\s*[:,.]\s*)+$/u, "")
+      .trim()
+      .trim();
+    if (text) text = `${text}.`;
+  }
+
+  return { text, links };
 }
 
 function useVisualViewportHeight(): number {
@@ -153,6 +164,20 @@ function useVisualViewportHeight(): number {
     };
   }, []);
   return height;
+}
+
+function useDesktopLayout(): boolean {
+  const [desktop, setDesktop] = useState(() =>
+    typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches,
+  );
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 768px)");
+    const update = () => setDesktop(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+  return desktop;
 }
 
 interface AlmaConversationProps {
@@ -209,6 +234,7 @@ export function AlmaConversation({
   const [thinkingLine, setThinkingLine] = useState<string>(ALMA_THINKING_LINES[0]);
   const previousThinkingRef = useRef(-1);
   const viewportHeight = useVisualViewportHeight();
+  const desktopLayout = useDesktopLayout();
   const threadRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const dictatedRef = useRef(false);
@@ -299,17 +325,9 @@ export function AlmaConversation({
           <div className="alma-sheet-handle md:hidden" aria-hidden="true" />
           <div className="flex items-center gap-3 pr-12">
             <AlmaAvatarAnimated
-              size={compactHeader ? 32 : 46}
+              size={compactHeader ? 32 : desktopLayout ? 64 : 46}
               mood={state.sending ? "thinking" : "idle"}
               stage={stage}
-              className="md:hidden"
-              aria-hidden
-            />
-            <AlmaAvatarAnimated
-              size={64}
-              mood={state.sending ? "thinking" : "idle"}
-              stage={stage}
-              className="hidden md:block"
               aria-hidden
             />
             <div className="min-w-0">

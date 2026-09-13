@@ -92,6 +92,15 @@ describe("panneau déplié du dock Alma", () => {
     expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 
+  it("rend un seul avatar dans l'en tête du panneau", () => {
+    renderDock();
+    expand();
+    const panel = screen.getByTestId("alma-dock-panel");
+    const header = panel.querySelector("header");
+    expect(header).not.toBeNull();
+    expect(header?.querySelectorAll('[data-testid="alma-avatar"]')).toHaveLength(1);
+  });
+
   it("un whisper prime sur l'humeur et garde son action unique", () => {
     moodState.line = "Humeur qui doit se taire";
     almaState.currentWhisper = {
