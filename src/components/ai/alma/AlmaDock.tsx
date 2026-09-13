@@ -716,7 +716,7 @@ function AlmaDockInner() {
           surface={surfaceFromPath(location.pathname, activeRole)}
           activeRole={activeRole === "owner" ? "owner" : "sitter"}
           initialMessage={panelLine}
-          moodLine={isSilent ? null : almaMood.line}
+          moodLine={isSilent || whisper ? null : almaMood.line}
           stageLabel={stage ? STAGE_SHORT_LABEL[stage] : undefined}
           stage={stage ?? undefined}
           subject={entryContext?.subject}
