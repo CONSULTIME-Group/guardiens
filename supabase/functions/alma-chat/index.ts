@@ -136,6 +136,7 @@ Deno.serve(async (req) => {
     try {
       const { data, error } = await adminClient.rpc("profile_completion_missing", {
         p_user_id: userId,
+        p_role: activeRole,
       });
       if (error) throw error;
       const rows = Array.isArray(data) ? data : [];
