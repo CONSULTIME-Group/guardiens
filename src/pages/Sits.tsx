@@ -49,6 +49,15 @@ import {
   needsCreateFormToPublish,
 } from "@/lib/sitPublishRules";
 import { describeSitWriteError, sitWriteErrorNeedsSignal } from "@/lib/sitDbErrors";
+import { trackEvent } from "@/lib/analytics";
+import PublishPhotoPromptDialog from "@/components/sits/owner/PublishPhotoPromptDialog";
+import {
+  countPropertyPhotos,
+  shouldPromptPublishPhotos,
+  shouldShowSurroundingsParagraph,
+  PUBLISH_PHOTO_PROMPT_HREF,
+} from "@/lib/publishPhotoPrompt";
+
 
 
 /* ── Status configs (tokens sémantiques uniquement, compat dark mode) ── */
@@ -185,6 +194,10 @@ const Sits = () => {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [archiveConfirm, setArchiveConfirm] = useState<string | null>(null);
   const [republishDialog, setRepublishDialog] = useState<{ id: string; title?: string | null } | null>(null);
+  const [photoPrompt, setPhotoPrompt] = useState<
+    { sitId: string; photoCount: number; showSurroundings: boolean } | null
+  >(null);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [openGuideId, setOpenGuideId] = useState<string | null>(null);
@@ -526,9 +539,10 @@ const Sits = () => {
    * la base n'est pas appelée, les éléments manquants sont nommés et le chemin
    * de correction est proposé, comme la checklist de la fiche annonce.
    */
-  const handleRepublish = async (sitId: string) => {
+  const handleRepublish = async (sitId: string, opts?: { skipPhotoPrompt?: boolean }) => {
     const sit = sits.find((s) => s.id === sitId);
     if (!sit) return;
+
 
     const needsForm = needsCreateFormToPublish(sit);
     const resumeHref = `/sits/create?resume=${sitId}`;
@@ -568,6 +582,40 @@ const Sits = () => {
       return;
 
     }
+
+    // Recommandation de photos du logement, jamais bloquante
+    // (règle : src/lib/publishPhotoPrompt.ts).
+    if (!opts?.skipPhotoPrompt) {
+      const propertyId = (sit as any).property_id ?? (sit as any).properties?.id ?? null;
+      let photos: unknown = (sit as any).properties?.photos ?? null;
+      let regionHighlights: unknown = (sit as any).properties?.region_highlights ?? null;
+      if (propertyId) {
+        const { data: prop } = await supabase
+          .from("properties")
+          .select("photos, region_highlights")
+          .eq("id", propertyId)
+          .maybeSingle();
+        if (prop) {
+          photos = (prop as any).photos;
+          regionHighlights = (prop as any).region_highlights;
+        }
+      }
+      const photoCount = countPropertyPhotos(photos);
+      if (shouldPromptPublishPhotos(photoCount)) {
+        void trackEvent("sit_publish_photo_prompt_shown", {
+          source: "sits_list_republish",
+          metadata: { sit_id: sitId, photo_count: photoCount },
+        });
+        setPhotoPrompt({
+          sitId,
+          photoCount,
+          showSurroundings: shouldShowSurroundingsParagraph(regionHighlights),
+        });
+        return;
+      }
+    }
+
+
 
     try {
       // On lit les lignes réellement modifiées : en vue gardien, le filtre sur
@@ -1201,7 +1249,43 @@ const Sits = () => {
 
 
 
+      {/* Recommandation de photos avant republication, jamais bloquante. */}
+      <PublishPhotoPromptDialog
+        open={!!photoPrompt}
+        onOpenChange={(open) => { if (!open) setPhotoPrompt(null); }}
+        photoCount={photoPrompt?.photoCount ?? 0}
+        showSurroundings={photoPrompt?.showSurroundings ?? false}
+        onAddPhotos={() => {
+          const current = photoPrompt;
+          setPhotoPrompt(null);
+          void trackEvent("sit_publish_photo_prompt_add_photos", {
+            source: "sits_list_republish",
+            metadata: {
+              sit_id: current?.sitId ?? null,
+              photo_count: current?.photoCount ?? 0,
+              decision: "add_photos",
+            },
+          });
+          navigate(PUBLISH_PHOTO_PROMPT_HREF);
+        }}
+        onPublishAnyway={() => {
+          const current = photoPrompt;
+          setPhotoPrompt(null);
+          if (!current) return;
+          void trackEvent("sit_publish_photo_prompt_publish_anyway", {
+            source: "sits_list_republish",
+            metadata: {
+              sit_id: current.sitId,
+              photo_count: current.photoCount,
+              decision: "publish_anyway",
+            },
+          });
+          void handleRepublish(current.sitId, { skipPhotoPrompt: true });
+        }}
+      />
+
       {/* Confirm dialogs */}
+
       <AlertDialog open={!!deleteConfirm} onOpenChange={() => setDeleteConfirm(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>

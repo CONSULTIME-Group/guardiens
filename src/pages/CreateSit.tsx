@@ -73,6 +73,14 @@ import { describeSitWriteError, sitWriteErrorNeedsSignal } from "@/lib/sitDbErro
 import { isIdentityComplete, resolveSetupState } from "@/lib/setupState";
 import PublishExitDialog from "@/components/sits/owner/PublishExitDialog";
 import AnimalMentionDialog from "@/components/sits/owner/AnimalMentionDialog";
+import PublishPhotoPromptDialog from "@/components/sits/owner/PublishPhotoPromptDialog";
+import {
+  countPropertyPhotos,
+  shouldPromptPublishPhotos,
+  shouldShowSurroundingsParagraph,
+  PUBLISH_PHOTO_PROMPT_HREF,
+} from "@/lib/publishPhotoPrompt";
+
 import { shouldPromptAnimalMention } from "@/lib/sitAnimalMention";
 import { shouldOfferPublishExitChoice, type DraftHoldReason } from "@/lib/draftHoldReasons";
 import { reportError } from "@/lib/errorLogger";
@@ -85,9 +93,11 @@ interface PropertySummary {
   equipments: string[];
   photos: string[];
   description: string | null;
+  region_highlights: string | null;
   rooms_count: number | null;
   bedrooms_count: number | null;
 }
+
 
 interface PetSummary {
   name: string;
@@ -425,6 +435,9 @@ const CreateSit = () => {
   const pendingExitRef = useRef<(() => void) | null>(null);
   const [animalMentionOpen, setAnimalMentionOpen] = useState(false);
   const animalMentionConfirmedRef = useRef(false);
+  const [photoPromptOpen, setPhotoPromptOpen] = useState(false);
+  const photoPromptConfirmedRef = useRef(false);
+
 
   // Analytics : les events d'étape sont émis plus bas, une fois le formulaire
   // réellement affiché, sinon l'étape 0 absorbe le temps de mise en route.
@@ -1002,7 +1015,9 @@ const CreateSit = () => {
         setProperty({
           id: p.id, type: p.type, environment: p.environment,
           equipments: (p as any).equipments || [], photos: (p as any).photos || [],
-          description: p.description, rooms_count: p.rooms_count, bedrooms_count: p.bedrooms_count,
+          description: p.description, region_highlights: (p as any).region_highlights ?? null,
+          rooms_count: p.rooms_count, bedrooms_count: p.bedrooms_count,
+
         });
         const { data: petsData } = await supabase.from("pets").select("*").eq("property_id", p.id);
         setPets(petsData?.map(a => ({
@@ -1344,6 +1359,30 @@ const CreateSit = () => {
     void handlePublish();
   };
 
+  // Photos du logement : la recommandation ne retient personne, elle propose.
+  const propertyPhotoCount = countPropertyPhotos(property?.photos);
+  const photoPromptSurroundings = shouldShowSurroundingsParagraph(property?.region_highlights);
+
+  const handlePhotoPromptAddPhotos = () => {
+    setPhotoPromptOpen(false);
+    void trackEvent("sit_publish_photo_prompt_add_photos", {
+      source: "create_sit_page",
+      metadata: { sit_id: draftId, photo_count: propertyPhotoCount, decision: "add_photos" },
+    });
+    navigate(PUBLISH_PHOTO_PROMPT_HREF);
+  };
+
+  const handlePhotoPromptPublishAnyway = () => {
+    photoPromptConfirmedRef.current = true;
+    setPhotoPromptOpen(false);
+    void trackEvent("sit_publish_photo_prompt_publish_anyway", {
+      source: "create_sit_page",
+      metadata: { sit_id: draftId, photo_count: propertyPhotoCount, decision: "publish_anyway" },
+    });
+    void handlePublish();
+  };
+
+
   // Une photo ajoutée depuis le parcours rejoint immédiatement la galerie
   // locale, sans rechargement, pour que les bloqueurs se lèvent tout de suite.
   const registerUploadedPhoto = (url: string) => {
@@ -1542,7 +1581,18 @@ const CreateSit = () => {
       setAnimalMentionOpen(true);
       return;
     }
+    // Recommandation de photos, jamais bloquante
+    // (règle : src/lib/publishPhotoPrompt.ts).
+    if (!photoPromptConfirmedRef.current && shouldPromptPublishPhotos(propertyPhotoCount)) {
+      void trackEvent("sit_publish_photo_prompt_shown", {
+        source: "create_sit_page",
+        metadata: { sit_id: draftId, photo_count: propertyPhotoCount },
+      });
+      setPhotoPromptOpen(true);
+      return;
+    }
     setPublishing(true);
+
     try {
       // Tous les champs texte libres publiés passent la modération, champ par
       // champ, pour que le refus désigne précisément le passage en cause.
@@ -3040,6 +3090,16 @@ const CreateSit = () => {
         onAddPets={handleAnimalMentionAddPets}
         onPublishAnyway={handleAnimalMentionPublishAnyway}
       />
+
+      <PublishPhotoPromptDialog
+        open={photoPromptOpen}
+        onOpenChange={setPhotoPromptOpen}
+        photoCount={propertyPhotoCount}
+        showSurroundings={photoPromptSurroundings}
+        onAddPhotos={handlePhotoPromptAddPhotos}
+        onPublishAnyway={handlePhotoPromptPublishAnyway}
+      />
+
 
       <AnnouncementPreviewDialog
         blockers={publishBlockers}
