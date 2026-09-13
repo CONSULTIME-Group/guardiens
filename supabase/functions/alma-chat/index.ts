@@ -82,7 +82,7 @@ Deno.serve(async (req) => {
       { auth: { persistSession: false, autoRefreshToken: false } },
     );
 
-    // Plafond anti-boucle : 10 échanges par personne et par jour.
+    // Plafond anti-boucle : ALMA_CHAT_DAILY_LIMIT échanges par personne et par jour.
     const dayStart = new Date();
     dayStart.setUTCHours(0, 0, 0, 0);
     const { count } = await adminClient
