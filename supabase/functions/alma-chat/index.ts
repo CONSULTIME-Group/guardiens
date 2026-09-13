@@ -102,6 +102,7 @@ Deno.serve(async (req) => {
         register: detectRegister(message),
         refusal_reason: "daily_limit",
         latency_ms: Date.now() - startedAt,
+        sources_count: sources.length,
       });
       return json({ limited: true, message: ALMA_CHAT_LIMIT_MESSAGE });
     }
@@ -181,6 +182,29 @@ Deno.serve(async (req) => {
       candidatures: applications,
     };
 
+    // Sources Guardiens : articles, FAQ, conseils et pages de ville.
+    // Sans elles, le prompt ordonne de citer des sources invisibles.
+    let sources: any[] = [];
+    try {
+      const { data } = await adminClient.rpc("search_alma_knowledge", {
+        p_query: message,
+        p_limit: 3,
+      });
+      sources = Array.isArray(data) ? data : [];
+    } catch (_e) {
+      sources = [];
+    }
+
+    const sourcesMessage = {
+      role: "system" as const,
+      content:
+        sources.length > 0
+          ? `Sources Guardiens trouvées pour cette question. Vous pouvez les citer et donner leur lien. Vous ne citez aucun autre lien que ceux de cette liste.\n${sources
+              .map((s: any) => `[${s.source}] ${s.title}, ${s.url}, ${s.snippet ?? ""}`)
+              .join("\n")}`
+          : "Aucune source Guardiens trouvée pour cette question. Répondez de votre voix, sans citer de lien d'article.",
+    };
+
     const r = await callLovableAI({
       model: "google/gemini-2.5-flash",
       // 0.85 : à 0.6 le modèle retombe sur les mêmes ouvertures.
@@ -188,6 +212,7 @@ Deno.serve(async (req) => {
       messages: [
         { role: "system", content: ALMA_SYSTEM_PROMPT },
         ...moodMessages,
+        sourcesMessage,
         {
           role: "system",
           content: `Dossier de la personne qui vous parle (ses données, vous pouvez les citer). Les champs null sont simplement absents :\n${JSON.stringify(dossier, null, 2)}`,
@@ -208,6 +233,7 @@ Deno.serve(async (req) => {
         register: detectRegister(message),
         refusal_reason: r.code ?? `gateway_${r.status}`,
         latency_ms: Date.now() - startedAt,
+        sources_count: sources.length,
       });
       return json({ error: r.error, code: r.code }, r.status === 402 || r.status === 429 ? r.status : 502);
     }
@@ -224,6 +250,7 @@ Deno.serve(async (req) => {
         register: detectRegister(message),
         refusal_reason: "empty_answer",
         latency_ms: Date.now() - startedAt,
+        sources_count: sources.length,
       });
       return json({ error: "Réponse indisponible pour l'instant." }, 502);
     }
@@ -238,6 +265,7 @@ Deno.serve(async (req) => {
       register: detectRegister(message),
       refusal_reason: null,
       latency_ms: Date.now() - startedAt,
+      sources_count: sources.length,
     });
 
     return json({ answer, remaining: Math.max(0, ALMA_CHAT_DAILY_LIMIT - ((count ?? 0) + 1)) });
