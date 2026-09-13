@@ -157,7 +157,7 @@ Deno.serve(async (req) => {
 
       const idempotencyKey = `seasonal-nurture-${row.user_id}-${periodKey}`
 
-      // Dedupplication amont, alignee sur la garde d'idempotence de
+      // Deduplication amont, alignee sur la garde d'idempotence de
       // send-transactional-email. On interroge la cle d'idempotence et non
       // period_key, car la file differee ne transporte pas logMetadata.
       const { data: prev } = await admin
