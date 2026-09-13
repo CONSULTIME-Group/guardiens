@@ -814,28 +814,12 @@ function AlmaDockInner() {
             }
             aria-expanded={expanded}
           >
-            {!isSilent && (
-              <span
-                aria-hidden
-                className={cn(
-                  "absolute inset-0 -m-1 rounded-full bg-primary/25 blur-md",
-                  whisper
-                    ? "motion-safe:animate-alma-aura-fast"
-                    : "motion-safe:animate-alma-aura",
-                )}
-              />
-            )}
             <AlmaAvatarAnimated
               size={avatarSize}
               mood={panelAvatarMood}
               stage={stage ?? undefined}
+              showHalo={!isSilent}
             />
-            {!isSilent && (
-              <Sparkles
-                aria-hidden
-                className="absolute -top-0.5 -right-0.5 h-3 w-3 text-primary drop-shadow-sm motion-safe:animate-alma-aura"
-              />
-            )}
             <span
               aria-hidden
               className="absolute -bottom-0.5 h-1.5 w-8 rounded-full bg-foreground/25 blur-[3px]"
