@@ -862,7 +862,6 @@ function AlmaDockInner() {
           activeRole={activeRole === "owner" ? "owner" : "sitter"}
           stageLabel={stage ? STAGE_SHORT_LABEL[stage] : undefined}
           focusSignal={focusSignal}
-          onClose={restoreTriggerFocus}
         />
       )}
 
