@@ -102,7 +102,7 @@ Deno.serve(async (req) => {
         register: detectRegister(message),
         refusal_reason: "daily_limit",
         latency_ms: Date.now() - startedAt,
-        sources_count: sources.length,
+
       });
       return json({ limited: true, message: ALMA_CHAT_LIMIT_MESSAGE });
     }
