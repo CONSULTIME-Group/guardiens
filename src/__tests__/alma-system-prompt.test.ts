@@ -179,8 +179,8 @@ describe("assemblage du prompt par registre", () => {
       const prompt = buildAlmaSystemPrompt(register);
       expect(prompt).toContain("Vouvoiement absolu");
       expect(prompt).toContain("CE QUE TU SAIS FAIRE");
-      expect(prompt.includes("—")).toBe(false);
-      expect(prompt.includes("–")).toBe(false);
+      expect(prompt.includes("\u2014")).toBe(false);
+      expect(prompt.includes("\u2013")).toBe(false);
     }
   });
 
