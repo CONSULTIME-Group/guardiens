@@ -10220,7 +10220,7 @@ export type Database = {
         }[]
       }
       profile_completion_missing: {
-        Args: { p_user_id: string }
+        Args: { p_role?: string; p_user_id: string }
         Returns: {
           bareme: string
           champ: string

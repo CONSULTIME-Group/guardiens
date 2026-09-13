@@ -115,7 +115,7 @@ export type AlmaRegister = "dossier" | "reassurance" | "sensible" | "perso";
 export function detectRegister(question: string): AlmaRegister {
   const q = (question || "").toLowerCase();
   if (
-    /(comment ([çc]a )?va|[çc]a va|quelle humeur|ton humeur|ta forme|tu fais quoi|que fais[ -]tu|tu es qui|qui es[ -]tu|es[ -]tu une (ia|intelligence)|tu es une (ia|intelligence)|un robot|vraie chienne|un vrai chien|tu dors|tu manges|ta journ[ée]e|ta vie|d['’]o[ùu] tu viens|o[ùu] tu es n[ée]|ton [âa]ge|quel [âa]ge (tu|as[ -]tu)|depuis quand tu|ce que tu aimes|tes journ[ée]es)/.test(
+    /(comment ([çc]a )?va|[çc]a va|quelle humeur|ton humeur|ta forme|tu fais quoi|que fais[ -]tu|tu es qui|qui es[ -]tu|es[ -]tu une (ia|intelligence)|tu es une (ia|intelligence)|un robot|vraie chienne|un vrai chien|tu dors|tu manges|ta journ[ée]e|ta vie|d['’]o[ùu] tu viens|o[ùu] tu es n[ée]|tu as quel [âa]ge|vous avez quel [âa]ge|quel [âa]ge (as[ -]tu|tu as|avez[ -]vous)|ton [âa]ge|depuis quand tu|ce que tu aimes|tes journ[ée]es)/.test(
       q,
     )
   ) {
