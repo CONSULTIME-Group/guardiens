@@ -10219,6 +10219,15 @@ export type Database = {
           renders_used: number
         }[]
       }
+      profile_completion_missing: {
+        Args: { p_user_id: string }
+        Returns: {
+          bareme: string
+          champ: string
+          libelle: string
+          points: number
+        }[]
+      }
       publish_stale_reviews: { Args: { p_days?: number }; Returns: number }
       purge_cron_run_details: {
         Args: { p_batch?: number; p_retention?: string }
