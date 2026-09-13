@@ -64,6 +64,14 @@ import SitPhotoManager from "@/components/sits/owner/SitPhotoManager";
 import DraftChecklist from "@/components/sits/owner/DraftChecklist";
 import InviteSittersBlock from "@/components/sits/owner/InviteSittersBlock";
 import AnimalMentionDialog from "@/components/sits/owner/AnimalMentionDialog";
+import PublishPhotoPromptDialog from "@/components/sits/owner/PublishPhotoPromptDialog";
+import {
+  countPropertyPhotos,
+  shouldPromptPublishPhotos,
+  shouldShowSurroundingsParagraph,
+  PUBLISH_PHOTO_PROMPT_HREF,
+} from "@/lib/publishPhotoPrompt";
+
 import { shouldPromptAnimalMention } from "@/lib/sitAnimalMention";
 import { trackEvent } from "@/lib/analytics";
 import { sendTransactionalEmail } from "@/lib/sendTransactionalEmail";
@@ -575,6 +583,10 @@ const OwnerSitView = ({
    * republication. Signal uniquement, la publication n'est jamais bloquée.
    */
   const [animalMentionOpen, setAnimalMentionOpen] = useState(false);
+  const [photoPromptOpen, setPhotoPromptOpen] = useState(false);
+  const propertyPhotoCount = countPropertyPhotos((property as any)?.photos);
+  const photoPromptSurroundings = shouldShowSurroundingsParagraph((property as any)?.region_highlights);
+
 
   const handlePublish = () => {
     if (!isDraft || publishing) return;
@@ -596,8 +608,19 @@ const OwnerSitView = ({
       setAnimalMentionOpen(true);
       return;
     }
+    // Recommandation de photos du logement, jamais bloquante
+    // (règle : src/lib/publishPhotoPrompt.ts).
+    if (shouldPromptPublishPhotos(propertyPhotoCount)) {
+      void trackEvent("sit_publish_photo_prompt_shown", {
+        source: "republish_owner_view",
+        metadata: { sit_id: sit.id, photo_count: propertyPhotoCount },
+      });
+      setPhotoPromptOpen(true);
+      return;
+    }
     void runPublish();
   };
+
 
   const runPublish = async () => {
     if (!isDraft || publishing) return;
@@ -1171,6 +1194,31 @@ const OwnerSitView = ({
           void runPublish();
         }}
       />
+
+      {/* Recommandation de photos du logement : « Publier ainsi » publie. */}
+      <PublishPhotoPromptDialog
+        open={photoPromptOpen}
+        onOpenChange={setPhotoPromptOpen}
+        photoCount={propertyPhotoCount}
+        showSurroundings={photoPromptSurroundings}
+        onAddPhotos={() => {
+          setPhotoPromptOpen(false);
+          void trackEvent("sit_publish_photo_prompt_add_photos", {
+            source: "republish_owner_view",
+            metadata: { sit_id: sit.id, photo_count: propertyPhotoCount, decision: "add_photos" },
+          });
+          navigate(PUBLISH_PHOTO_PROMPT_HREF);
+        }}
+        onPublishAnyway={() => {
+          setPhotoPromptOpen(false);
+          void trackEvent("sit_publish_photo_prompt_publish_anyway", {
+            source: "republish_owner_view",
+            metadata: { sit_id: sit.id, photo_count: propertyPhotoCount, decision: "publish_anyway" },
+          });
+          void runPublish();
+        }}
+      />
+
     </>
   );
 };
