@@ -8,6 +8,8 @@
  * Ne touche à rien du scheduler de whispers.
  */
 import { supabase } from "@/integrations/supabase/client";
+import { trackEvent } from "@/lib/analytics";
+
 
 export type AlmaChatRole = "alma" | "user";
 
@@ -126,7 +128,13 @@ export async function sendAlmaMessage({
     messages: [...state.messages, { id: nextId(), role: "user", content: message }],
   });
 
+  // Dernière étape de l'entonnoir de découvrabilité (N6).
+  void trackEvent("alma_conversation_message_sent" as any, {
+    metadata: { surface, active_role: activeRole, input_mode: inputMode },
+  });
+
   const call = invoke ?? supabase.functions.invoke.bind(supabase.functions);
+
 
   try {
     const { data, error } = await call("alma-chat", {
