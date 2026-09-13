@@ -69,6 +69,22 @@ describe("identité d'Alma dans le prompt", () => {
     expect(promptSource).toContain('"Je suis Alma"');
   });
 
+  it("porte la carte du site et la règle anti lien inventé", () => {
+    expect(promptSource).toContain("LA CARTE DU SITE");
+    expect(promptSource).toContain("/actualites");
+    expect(promptSource).toContain("/petites-missions");
+    expect(promptSource).toContain(
+      "Tu cites uniquement les liens fournis dans les sources de ce tour, ou les chemins de la carte du site.",
+    );
+  });
+
+  it("branche la recherche de sources dans alma-chat", () => {
+    expect(edgeSource).toContain("search_alma_knowledge");
+    expect(edgeSource).toContain("Sources Guardiens trouvées pour cette question");
+    expect(edgeSource).toContain("Aucune source Guardiens trouvée pour cette question");
+    expect(edgeSource).toContain("sources_count");
+  });
+
   it("garde le vouvoiement et refuse les tirets cadratins", () => {
     expect(promptSource).toContain("Vouvoiement absolu");
     expect(promptSource.includes("\u2014")).toBe(false);

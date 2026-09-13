@@ -763,6 +763,7 @@ export type Database = {
           question: string | null
           refusal_reason: string | null
           register: string | null
+          sources_count: number | null
           surface: string
           user_id: string
         }
@@ -776,6 +777,7 @@ export type Database = {
           question?: string | null
           refusal_reason?: string | null
           register?: string | null
+          sources_count?: number | null
           surface: string
           user_id: string
         }
@@ -789,6 +791,7 @@ export type Database = {
           question?: string | null
           refusal_reason?: string | null
           register?: string | null
+          sources_count?: number | null
           surface?: string
           user_id?: string
         }
@@ -806,6 +809,7 @@ export type Database = {
           id: string
           needs_pro_referral: boolean
           priority: number
+          search_tsv: unknown
           seasonal_end_month: number | null
           seasonal_start_month: number | null
           source_url: string | null
@@ -824,6 +828,7 @@ export type Database = {
           id?: string
           needs_pro_referral?: boolean
           priority?: number
+          search_tsv?: unknown
           seasonal_end_month?: number | null
           seasonal_start_month?: number | null
           source_url?: string | null
@@ -842,6 +847,7 @@ export type Database = {
           id?: string
           needs_pro_referral?: boolean
           priority?: number
+          search_tsv?: unknown
           seasonal_end_month?: number | null
           seasonal_start_month?: number | null
           source_url?: string | null
@@ -1483,6 +1489,7 @@ export type Database = {
           region: string | null
           related_breed: string | null
           related_city: string | null
+          search_tsv: unknown
           seo_dirty_at: string | null
           slug: string
           tags: string[] | null
@@ -1511,6 +1518,7 @@ export type Database = {
           region?: string | null
           related_breed?: string | null
           related_city?: string | null
+          search_tsv?: unknown
           seo_dirty_at?: string | null
           slug: string
           tags?: string[] | null
@@ -1539,6 +1547,7 @@ export type Database = {
           region?: string | null
           related_breed?: string | null
           related_city?: string | null
+          search_tsv?: unknown
           seo_dirty_at?: string | null
           slug?: string
           tags?: string[] | null
@@ -3295,6 +3304,7 @@ export type Database = {
           id: string
           published: boolean
           question: string
+          search_tsv: unknown
           sort_order: number
           updated_at: string
         }
@@ -3305,6 +3315,7 @@ export type Database = {
           id?: string
           published?: boolean
           question: string
+          search_tsv?: unknown
           sort_order?: number
           updated_at?: string
         }
@@ -3315,6 +3326,7 @@ export type Database = {
           id?: string
           published?: boolean
           question?: string
+          search_tsv?: unknown
           sort_order?: number
           updated_at?: string
         }
@@ -6300,6 +6312,7 @@ export type Database = {
           nearby_sitter_count: number
           noindex: boolean | null
           published: boolean
+          search_tsv: unknown
           seo_dirty_at: string | null
           sitter_count: number
           slug: string
@@ -6329,6 +6342,7 @@ export type Database = {
           nearby_sitter_count?: number
           noindex?: boolean | null
           published?: boolean
+          search_tsv?: unknown
           seo_dirty_at?: string | null
           sitter_count?: number
           slug: string
@@ -6358,6 +6372,7 @@ export type Database = {
           nearby_sitter_count?: number
           noindex?: boolean | null
           published?: boolean
+          search_tsv?: unknown
           seo_dirty_at?: string | null
           sitter_count?: number
           slug?: string
@@ -9991,6 +10006,7 @@ export type Database = {
         Args: { lat1: number; lat2: number; lng1: number; lng2: number }
         Returns: number
       }
+      immutable_unaccent: { Args: { "": string }; Returns: string }
       increment_cp_relance: { Args: { user_ids: string[] }; Returns: undefined }
       increment_photo_analysis_quota: {
         Args: { _user_id: string }
@@ -10249,6 +10265,16 @@ export type Database = {
       }
       retry_missing_geocoding: { Args: never; Returns: Json }
       school_zone_from_postal_code: { Args: { p_cp: string }; Returns: string }
+      search_alma_knowledge: {
+        Args: { p_limit?: number; p_query: string }
+        Returns: {
+          rank: number
+          snippet: string
+          source: string
+          title: string
+          url: string
+        }[]
+      }
       seasonal_nurture_plan: {
         Args: { p_active_days?: number; p_period_key: string }
         Returns: {
