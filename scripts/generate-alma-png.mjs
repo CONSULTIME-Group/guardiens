@@ -5,10 +5,14 @@
  * le SVG, ni inline ni en <img src="...svg">. Sans PNG, Alma est invisible
  * pour la majorite des destinataires.
  *
- * Le dessin est repris trait pour trait de la silhouette adulte de
- * src/components/ai/alma/AlmaAvatarAnimated.tsx (bichon frise, bandana
- * vert, medaille doree), recadre en portrait dans un medaillon creme
- * cercle de vert pin.
+ * Le dessin reprend la geometrie de la silhouette du stade complice de
+ * src/components/ai/alma/AlmaAvatarAnimated.tsx : un seul chemin festonne
+ * par piece, trait fin, museau en relief avec sa barbe, yeux construits,
+ * collier vert et medaille doree. Recadre en portrait dans un medaillon
+ * creme cercle de vert pin.
+ *
+ * Pas de halo ici : le halo est le signal d'etat de l'assistante, il n'a
+ * aucun sens sur une image fixe. Le cercle vert du medaillon joue ce role.
  *
  * Relancer apres toute evolution du personnage :
  *   node scripts/generate-alma-png.mjs
@@ -16,81 +20,122 @@
 import sharp from 'sharp'
 import { writeFileSync, mkdirSync } from 'node:fs'
 
-const FUR = '#FFFFFF', FUR_LINE = '#E6DDCB', EAR = '#EFE6D5', EYE = '#2B2B2B'
-const NOSE = '#20201F', MOUTH = '#7A6E5C', CHEEK = 'rgba(240,180,180,0.35)'
+const FUR = '#FFFFFF', FUR_LINE = '#E6DDCB', FUR_SHADOW = '#EFE6D5', EAR = '#FBF6EC'
+const INK = '#221F19', NOSE = '#1A1712', CHEEK = '#D99B72'
 const SHADOW = 'rgba(20,15,10,0.18)', GREEN = '#2D6A4F', GOLD = '#E4A62A', GOLD_DARK = '#B9821A'
 
-const curl = (x, y, r) =>
-  `<circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${r.toFixed(2)}" fill="${FUR}" stroke="${FUR_LINE}" stroke-width="0.4"/>`
+/* Geometrie du stade complice, identique au composant React. */
+const HR = 27.5, BR = 22.5, EYE = 5.4, EYE_Y = 45.5, EYE_X = 11.2, NOSE_R = 3.9
+const HEAD_Y = 39, BODY_Y = 75, B = 24, S = 1.05
 
-function ellipseCurls(cx, cy, rx, ry, count, r, startDeg = -90, spanDeg = 360) {
-  const out = []
-  const start = (startDeg * Math.PI) / 180
-  const span = (spanDeg * Math.PI) / 180
-  for (let i = 0; i < count; i++) {
-    const t = count === 1 ? 0.5 : i / (count - 1)
-    const a = start + span * t
-    out.push([cx + Math.cos(a) * rx, cy + Math.sin(a) * ry, r])
+/** Contour boucle ferme : petites bosses regulieres posees sur un cercle. */
+function scallop(cx, cy, r, bumps, amp, phase = 0) {
+  const pts = []
+  for (let i = 0; i < bumps; i++) {
+    const a = phase + (i / bumps) * Math.PI * 2
+    pts.push([cx + Math.cos(a) * r, cy + Math.sin(a) * r])
   }
-  return out
+  const chord = 2 * r * Math.sin(Math.PI / bumps)
+  const R = ((chord * chord) / 4 + amp * amp) / (2 * amp)
+  let d = `M ${pts[0][0].toFixed(2)} ${pts[0][1].toFixed(2)}`
+  for (let i = 1; i <= bumps; i++) {
+    const q = pts[i % bumps]
+    d += ` A ${R.toFixed(2)} ${R.toFixed(2)} 0 0 1 ${q[0].toFixed(2)} ${q[1].toFixed(2)}`
+  }
+  return `${d} Z`
 }
 
-function face(f) {
-  return `
-  <circle cx="${f.cx - f.eyeDx - 2.5}" cy="${f.eyeY + 5}" r="2.6" fill="${CHEEK}"/>
-  <circle cx="${f.cx + f.eyeDx + 2.5}" cy="${f.eyeY + 5}" r="2.6" fill="${CHEEK}"/>
-  <ellipse cx="${f.cx - f.eyeDx}" cy="${f.eyeY}" rx="${f.eyeRx}" ry="${f.eyeRy}" fill="${EYE}"/>
-  <ellipse cx="${f.cx + f.eyeDx}" cy="${f.eyeY}" rx="${f.eyeRx}" ry="${f.eyeRy}" fill="${EYE}"/>
-  <circle cx="${f.cx - f.eyeDx + f.eyeRx * 0.35}" cy="${f.eyeY - f.eyeRy * 0.4}" r="${f.eyeRx * 0.32}" fill="#FFFFFF"/>
-  <circle cx="${f.cx + f.eyeDx + f.eyeRx * 0.35}" cy="${f.eyeY - f.eyeRy * 0.4}" r="${f.eyeRx * 0.32}" fill="#FFFFFF"/>
-  <ellipse cx="${f.cx}" cy="${f.noseCy}" rx="${f.noseRx}" ry="${f.noseRy}" fill="${NOSE}"/>
-  <ellipse cx="${f.cx - f.noseRx * 0.35}" cy="${f.noseCy - f.noseRy * 0.4}" rx="${f.noseRx * 0.35}" ry="${f.noseRy * 0.3}" fill="#FFFFFF" opacity="0.55"/>
-  <path d="M${f.cx} ${f.noseCy + f.noseRy} L${f.cx} ${f.mouthY - 0.4}" stroke="${MOUTH}" stroke-width="0.9" stroke-linecap="round"/>
-  <path d="M${f.cx - f.mouthSpread} ${f.mouthY} q${f.mouthSpread * 0.55} ${f.mouthSpread * 0.6} ${f.mouthSpread} ${f.mouthSpread * 0.6} q${f.mouthSpread * 0.45} 0 ${f.mouthSpread} -${f.mouthSpread * 0.6}"
-    fill="none" stroke="${MOUTH}" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/>`
+/** Portion ouverte du meme contour : la barbe sous le museau. */
+function scallopArc(cx, cy, r, bumps, amp, phase, i0, i1) {
+  const pt = (i) => {
+    const a = phase + (i / bumps) * Math.PI * 2
+    return [cx + Math.cos(a) * r, cy + Math.sin(a) * r]
+  }
+  const chord = 2 * r * Math.sin(Math.PI / bumps)
+  const R = ((chord * chord) / 4 + amp * amp) / (2 * amp)
+  const s0 = pt(i0)
+  let d = `M ${s0[0].toFixed(2)} ${s0[1].toFixed(2)}`
+  for (let i = i0 + 1; i <= i1; i++) {
+    const q = pt(i)
+    d += ` A ${R.toFixed(2)} ${R.toFixed(2)} 0 0 1 ${q[0].toFixed(2)} ${q[1].toFixed(2)}`
+  }
+  return d
 }
 
-function ear(side, cx, cy, rx, ry) {
-  const inward = side === 'l' ? -1 : 1
-  return `<g>
-  <ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="${EAR}" stroke="${FUR_LINE}" stroke-width="0.5"/>
-  ${curl(cx + inward * rx * 0.2, cy - ry * 0.6, rx * 0.55)}
-  ${curl(cx - inward * rx * 0.3, cy - ry * 0.3, rx * 0.6)}
-  ${curl(cx + inward * rx * 0.35, cy + ry * 0.1, rx * 0.55)}
-  ${curl(cx - inward * rx * 0.15, cy + ry * 0.4, rx * 0.55)}
-  ${curl(cx + inward * rx * 0.2, cy + ry * 0.7, rx * 0.5)}
+const squash = (cx, cy, sx, sy) =>
+  `translate(${cx} ${cy}) scale(${sx} ${sy}) translate(${-cx} ${-cy})`
+
+/** Une piece de fourrure : aplat, volume, lumiere, puis le trait. */
+function piece(d, tr, fill, sw, volume) {
+  const t = tr ? ` transform="${tr}"` : ''
+  return `<g${t}>
+  <path d="${d}" fill="${fill}"/>
+  ${volume ? `<path d="${d}" fill="url(#volume)"/><path d="${d}" fill="url(#lumiere)"/>` : ''}
+  <path d="${d}" fill="none" stroke="${INK}" stroke-width="${sw.toFixed(2)}" stroke-linejoin="round"/>
   </g>`
 }
 
-const headCx = 50, headCy = 32, headRx = 22, headRy = 21
-const f = { cx: headCx, cy: headCy, eyeDx: 7, eyeRx: 3.6, eyeRy: 4, eyeY: 33, noseCy: 42, noseRx: 2.5, noseRy: 2, mouthY: 46, mouthSpread: 4.2 }
-const bodyCx = 50, bodyCy = 68, bodyRx = 32, bodyRy = 14
+const head = scallop(50, HEAD_Y, HR, B, HR * 0.075, 0.12)
+const body = scallop(50, BODY_Y, BR, B - 3, BR * 0.08, 0.3)
+const earRx = 50 - HR * 0.92, earLx = 50 + HR * 0.92
+const earR = scallop(earRx, HEAD_Y + 8, HR * 0.48, B - 10, HR * 0.06, 0.85)
+const earL = scallop(earLx, HEAD_Y + 7, HR * 0.48, B - 10, HR * 0.06, 0.25)
+const toupY = HEAD_Y - HR * 0.88
+const toup = scallop(50, toupY, HR * 0.4, B - 12, HR * 0.058, 1.05)
+
+const noseY = HEAD_Y + HR * 0.655
+const muzR = HR * 0.31, muzY = noseY + HR * 0.062
+const muzB = 2 * Math.round((B - 10) / 2), muzPh = Math.PI / muzB
+const muz = scallop(50, muzY, muzR, muzB, muzR * 0.15, muzPh)
+const barbe = scallopArc(50, muzY, muzR, muzB, muzR * 0.15, muzPh, 0, muzB / 2 - 1)
+const muzTr = squash(50, muzY, 1.5, 0.86)
+
+const pawY = BODY_Y + BR - 3.2, pawX = BR * 0.44
+const pawR = scallop(50 - pawX, pawY, 5.5, 7, 0.8, 0.4)
+const pawL = scallop(50 + pawX, pawY, 5.5, 7, 0.8, 0.9)
+
+const mouthY = noseY + NOSE_R * 0.78
+const collarY = HEAD_Y + HR + 1.5
+
+const oeil = (cx) => `
+  <circle cx="${cx.toFixed(2)}" cy="${EYE_Y}" r="${EYE}" fill="url(#iris)"/>
+  <circle cx="${cx.toFixed(2)}" cy="${(EYE_Y + EYE * 0.06).toFixed(2)}" r="${(EYE * 0.52).toFixed(2)}" fill="#100D09"/>
+  <circle cx="${(cx - EYE * 0.33).toFixed(2)}" cy="${(EYE_Y - EYE * 0.36).toFixed(2)}" r="${(EYE * 0.33).toFixed(2)}" fill="#FFFFFF"/>
+  <circle cx="${(cx + EYE * 0.4).toFixed(2)}" cy="${(EYE_Y + EYE * 0.4).toFixed(2)}" r="${(EYE * 0.155).toFixed(2)}" fill="#FFFFFF" opacity="0.72"/>`
+
+const paupiere = (cx) => `
+  <path d="M ${(cx - EYE * 1.06).toFixed(2)} ${(EYE_Y + EYE * 0.72).toFixed(2)} q ${(EYE * 1.06).toFixed(2)} ${(EYE * 0.72).toFixed(2)} ${(EYE * 2.12).toFixed(2)} 0"
+    fill="none" stroke="${INK}" stroke-width="${(S * 0.5).toFixed(2)}" stroke-linecap="round" opacity="0.34"/>`
 
 const alma = `
-<ellipse cx="50" cy="96" rx="33" ry="2.8" fill="${SHADOW}"/>
-<rect x="28" y="78" width="6" height="14" rx="2.6" fill="${FUR}" stroke="${FUR_LINE}" stroke-width="0.4"/>
-<rect x="42" y="78" width="6" height="14" rx="2.6" fill="${FUR}" stroke="${FUR_LINE}" stroke-width="0.4"/>
-<rect x="56" y="78" width="6" height="14" rx="2.6" fill="${FUR}" stroke="${FUR_LINE}" stroke-width="0.4"/>
-<rect x="70" y="78" width="6" height="14" rx="2.6" fill="${FUR}" stroke="${FUR_LINE}" stroke-width="0.4"/>
-${curl(31, 78, 3.4)}${curl(45, 78, 3.4)}${curl(59, 78, 3.4)}${curl(73, 78, 3.4)}
-<ellipse cx="${bodyCx}" cy="${bodyCy}" rx="${bodyRx}" ry="${bodyRy}" fill="${FUR}" stroke="${FUR_LINE}" stroke-width="0.5"/>
-${ellipseCurls(bodyCx, bodyCy, bodyRx, bodyRy, 16, 4.8).map(([x, y, r]) => curl(x, y, r)).join('')}
-${curl(38, 62, 5)}${curl(44, 64, 5.4)}${curl(50, 62, 5.6)}${curl(56, 64, 5.4)}${curl(62, 62, 5)}
-<path d="M28 54 q22 10 44 0 l-4 8 q-18 6 -36 0 z" fill="${GREEN}"/>
-<path d="M45 60 l5 10 l5 -10 z" fill="${GREEN}"/>
-<circle cx="50" cy="65" r="2.8" fill="${GOLD}" stroke="${GOLD_DARK}" stroke-width="0.5"/>
-<circle cx="50" cy="65" r="1" fill="${GOLD_DARK}" opacity="0.7"/>
-${ear('r', headCx - 19, 36, 8, 16)}
-${ear('l', headCx + 19, 36, 8, 16)}
-<g>
-  <ellipse cx="${headCx}" cy="${headCy}" rx="${headRx}" ry="${headRy}" fill="${FUR}" stroke="${FUR_LINE}" stroke-width="0.5"/>
-  ${ellipseCurls(headCx, headCy, headRx + 0.6, headRy + 0.6, 16, 4.8).map(([x, y, r]) => curl(x, y, r)).join('')}
-  ${curl(headCx - 4, headCy - headRy * 0.75, 3.4)}
-  ${curl(headCx + 4, headCy - headRy * 0.75, 3.4)}
-  ${curl(headCx, headCy - headRy * 0.9, 3.6)}
-  <ellipse cx="${headCx}" cy="44" rx="9.5" ry="7.4" fill="#FFFDFA" stroke="${FUR_LINE}" stroke-width="0.6"/>
-  ${face(f)}
-</g>`
+<ellipse cx="50" cy="99.5" rx="24" ry="2.4" fill="${SHADOW}"/>
+${piece(body, null, FUR, S, true)}
+${piece(pawR, squash(50 - pawX, pawY, 1.06, 0.84), FUR, S * 0.8, false)}
+${piece(pawL, squash(50 + pawX, pawY, 1.06, 0.84), FUR, S * 0.8, false)}
+<g stroke="${INK}" stroke-width="${(S * 0.46).toFixed(2)}" stroke-linecap="round" opacity="0.42" fill="none">
+  <path d="M${(50 - pawX - 1.7).toFixed(2)} ${(pawY + 1.1).toFixed(2)} v1.8"/>
+  <path d="M${(50 - pawX + 1.7).toFixed(2)} ${(pawY + 1.1).toFixed(2)} v1.8"/>
+  <path d="M${(50 + pawX - 1.7).toFixed(2)} ${(pawY + 1.1).toFixed(2)} v1.8"/>
+  <path d="M${(50 + pawX + 1.7).toFixed(2)} ${(pawY + 1.1).toFixed(2)} v1.8"/>
+</g>
+<path d="M ${(50 - BR * 0.62).toFixed(2)} ${collarY.toFixed(2)} Q 50 ${(collarY + 5.5).toFixed(2)} ${(50 + BR * 0.62).toFixed(2)} ${collarY.toFixed(2)}"
+  fill="none" stroke="${GREEN}" stroke-width="${(S * 1.5).toFixed(2)}" stroke-linecap="round"/>
+<circle cx="50" cy="${(collarY + 6.4).toFixed(2)}" r="2.9" fill="${GOLD}" stroke="${GOLD_DARK}" stroke-width="${(S * 0.35).toFixed(2)}"/>
+<circle cx="49" cy="${(collarY + 5.6).toFixed(2)}" r="0.9" fill="#FFFFFF" opacity="0.5"/>
+${piece(earR, squash(earRx, HEAD_Y + 8, 0.9, 1.26), EAR, S * 0.9, true)}
+${piece(earL, squash(earLx, HEAD_Y + 7, 0.9, 1.26), EAR, S * 0.9, true)}
+${piece(toup, squash(50, toupY, 1.3, 0.94), FUR, S * 0.9, true)}
+${piece(head, null, FUR, S * 1.04, true)}
+<ellipse cx="${(50 - HR * 0.74).toFixed(2)}" cy="${(noseY - HR * 0.2).toFixed(2)}" rx="4.3" ry="3" fill="${CHEEK}" opacity="0.17"/>
+<ellipse cx="${(50 + HR * 0.74).toFixed(2)}" cy="${(noseY - HR * 0.2).toFixed(2)}" rx="4.3" ry="3" fill="${CHEEK}" opacity="0.17"/>
+<g transform="${muzTr}"><path d="${muz}" fill="url(#museau)"/></g>
+<g transform="${muzTr}"><path d="${barbe}" fill="none" stroke="${INK}" stroke-width="${(S * 0.66).toFixed(2)}" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"/></g>
+${oeil(50 - EYE_X)}${oeil(50 + EYE_X)}
+${paupiere(50 - EYE_X)}${paupiere(50 + EYE_X)}
+<ellipse cx="50" cy="${noseY.toFixed(2)}" rx="${(NOSE_R * 1.12).toFixed(2)}" ry="${(NOSE_R * 0.82).toFixed(2)}" fill="${NOSE}"/>
+<ellipse cx="${(50 - NOSE_R * 0.3).toFixed(2)}" cy="${(noseY - NOSE_R * 0.32).toFixed(2)}" rx="${(NOSE_R * 0.3).toFixed(2)}" ry="${(NOSE_R * 0.17).toFixed(2)}" fill="#FFFFFF" opacity="0.5"/>
+<path d="M50 ${mouthY.toFixed(2)} v${(NOSE_R * 0.5).toFixed(2)} M50 ${(mouthY + NOSE_R * 0.5).toFixed(2)} q${(-NOSE_R * 0.62).toFixed(2)} ${(NOSE_R * 0.62).toFixed(2)} ${(-NOSE_R * 1.12).toFixed(2)} 0 M50 ${(mouthY + NOSE_R * 0.5).toFixed(2)} q${(NOSE_R * 0.62).toFixed(2)} ${(NOSE_R * 0.62).toFixed(2)} ${(NOSE_R * 1.12).toFixed(2)} 0"
+  stroke="${INK}" stroke-width="${(S * 0.62).toFixed(2)}" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`
 
 const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="480" height="480">
 <defs>
@@ -98,11 +143,28 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width
     <stop offset="0%" stop-color="#FFFDF9"/>
     <stop offset="100%" stop-color="#EFE8DC"/>
   </radialGradient>
+  <linearGradient id="volume" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="40%" stop-color="#DED3BE" stop-opacity="0"/>
+    <stop offset="100%" stop-color="#DED3BE" stop-opacity="0.42"/>
+  </linearGradient>
+  <radialGradient id="lumiere" cx="33%" cy="24%" r="70%">
+    <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.95"/>
+    <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="iris" cx="36%" cy="28%" r="80%">
+    <stop offset="0%" stop-color="#5B4634"/>
+    <stop offset="52%" stop-color="#32261B"/>
+    <stop offset="100%" stop-color="#13100B"/>
+  </radialGradient>
+  <radialGradient id="museau" cx="46%" cy="34%" r="74%">
+    <stop offset="0%" stop-color="#FFFFFF"/>
+    <stop offset="100%" stop-color="${FUR_SHADOW}"/>
+  </radialGradient>
   <clipPath id="clip"><circle cx="60" cy="60" r="57.2"/></clipPath>
 </defs>
 <circle cx="60" cy="60" r="60" fill="url(#bg)"/>
 <g clip-path="url(#clip)">
-  <g transform="translate(-11.5,4) scale(1.42)">${alma}</g>
+  <g transform="translate(-12.5,-2) scale(1.45)">${alma}</g>
 </g>
 <circle cx="60" cy="60" r="58.4" fill="none" stroke="#2C6D50" stroke-width="2.4" opacity="0.9"/>
 </svg>`

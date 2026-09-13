@@ -211,7 +211,7 @@ export default function SitDraftFromPrompt({ secondary = false, demoted = false,
         <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4">
           <div className="shrink-0 self-start flex flex-col items-center">
             <div className="relative">
-              <AlmaAnimated size={72} mood="attention" stage={almaStage} />
+              <AlmaAnimated size={72} mood="attention" stage={almaStage} showHalo />
               <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-14 h-2.5 bg-foreground/10 rounded-full blur-sm pointer-events-none" />
             </div>
             <span className="mt-1 text-[10px] font-medium text-muted-foreground">Alma</span>
@@ -255,7 +255,7 @@ export default function SitDraftFromPrompt({ secondary = false, demoted = false,
       <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4 mb-3">
         <div className="shrink-0 self-start flex flex-col items-center">
           <div className="relative">
-            <AlmaAnimated size={72} mood={almaMood} stage={almaStage} />
+            <AlmaAnimated size={72} mood={almaMood} stage={almaStage} showHalo />
             <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-14 h-2.5 bg-foreground/10 rounded-full blur-sm pointer-events-none" />
           </div>
           <span className="mt-1 text-[10px] font-medium text-muted-foreground">Alma</span>
