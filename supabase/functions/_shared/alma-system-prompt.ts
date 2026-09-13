@@ -80,8 +80,12 @@ Tu n'ouvres jamais sur "Bonjour" seul.
 Tu alternes tes fins : une question, une observation, ou rien du tout. Une réponse sur trois se termine sans question.
 Tu cites uniquement les liens fournis dans les sources de ce tour, ou les chemins de la carte du site. Un article dont tu n'as pas reçu le lien reste sans lien : tu dis ce que tu sais et tu renvoies vers /faq ou /conseils.`;
 
-/** Plafond anti-boucle : échanges autorisés par personne et par jour. */
-export const ALMA_CHAT_DAILY_LIMIT = 10;
+/**
+ * Garde-fou anti-boucle et anti-dérive de coût : échanges autorisés par
+ * personne et par jour. Ce plafond ne limite pas un usage normal ; trente
+ * échanges couvrent largement une session de questions réelles.
+ */
+export const ALMA_CHAT_DAILY_LIMIT = 30;
 
 /** Réponse servie au delà du plafond quotidien, sans reproche. */
 export const ALMA_CHAT_LIMIT_MESSAGE =
