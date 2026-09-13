@@ -857,6 +857,62 @@ export type Database = {
         }
         Relationships: []
       }
+      alma_journal_shown: {
+        Row: {
+          acted_at: string | null
+          created_at: string
+          id: string
+          rule_key: string
+          shown_on: string
+          user_id: string
+        }
+        Insert: {
+          acted_at?: string | null
+          created_at?: string
+          id?: string
+          rule_key: string
+          shown_on?: string
+          user_id: string
+        }
+        Update: {
+          acted_at?: string | null
+          created_at?: string
+          id?: string
+          rule_key?: string
+          shown_on?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alma_journal_shown_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profile_reputation"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "alma_journal_shown_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alma_journal_shown_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alma_journal_shown_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
+          },
+        ]
+      }
       alma_mood_views: {
         Row: {
           created_at: string
