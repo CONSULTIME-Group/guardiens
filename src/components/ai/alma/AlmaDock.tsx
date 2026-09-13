@@ -477,8 +477,8 @@ function AlmaDockInner() {
   const proposition = rawProposition && rawProposition.ctaTo.split(/[?#]/)[0] === location.pathname ? null : rawProposition;
   const stage = evolution?.stage ?? null;
   const avatarSize = stage
-    ? ({ nouvelle: 36, eveillee: 40, complice: 42, fidele: 44 } as const)[stage]
-    : 36;
+    ? ({ nouvelle: 40, eveillee: 44, complice: 46, fidele: 48 } as const)[stage]
+    : 40;
 
   const surface = surfaceFromPath(location.pathname, activeRole);
 
