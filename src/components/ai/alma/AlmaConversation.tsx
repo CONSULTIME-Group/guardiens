@@ -134,10 +134,10 @@ export function parseAlmaMessage(content: string): ParsedMessage {
   text = text.replace(/\s{2,}/g, " ").trim();
   if (links.length > 0 && text) {
     text = text
-      .replace(/(?:\s|^)(?:ici|à l'adresse(?: suivante)?|à cette adresse|sur cette page)\s*[:;,!.?]*$/iu, "")
-      .replace(/\s+[:,.]+$/u, "")
+      .replace(/(?:\s*[:,.]\s*)+$/u, "")
+      .replace(/(?:\s|^)(?:ici|à l'adresse(?: suivante)?|à cette adresse|sur cette page)$/iu, "")
+      .replace(/(?:\s*[:,.]\s*)+$/u, "")
       .trim()
-      .replace(/[.:,;!?]+$/u, "")
       .trim();
     if (text) text = `${text}.`;
   }
