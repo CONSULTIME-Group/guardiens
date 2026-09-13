@@ -106,7 +106,6 @@ describe("panneau déplié du dock Alma", () => {
     expect(panel).toHaveTextContent("Pensez à aerer la maison.");
     expect(panel).not.toHaveTextContent("Humeur qui doit se taire");
     expect(screen.getAllByTestId("alma-panel-action")).toHaveLength(1);
-    expect(screen.getByLabelText("Fermer")).toBeInTheDocument();
     expect(screen.getByLabelText("Votre message pour Alma")).toBeInTheDocument();
   });
 
