@@ -11,6 +11,8 @@ import { CronHealthCard } from "./_components/dashboard/CronHealthCard";
 import { CollapsibleSection } from "./_components/dashboard/CollapsibleSection";
 import { PilotageLinks } from "./_components/dashboard/PilotageLinks";
 import { LiquidityBlock } from "./_components/dashboard/LiquidityBlock";
+import { VolunteerAvailabilityCard } from "./_components/dashboard/VolunteerAvailabilityCard";
+
 
 /**
  * Vue d'ensemble admin, six blocs :
