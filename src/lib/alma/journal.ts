@@ -108,10 +108,9 @@ const spell = (n: number): string => (n < NUMBER_WORDS.length ? NUMBER_WORDS[n] 
 const WRITERS: Record<AlmaJournalRuleKey, Writer> = {
   candidatures_non_lues: (f) => {
     const n = f.unreadApplications ?? 0;
-    const attend = plural(n, "attend", "attendent");
     const lue = plural(n, "candidature", "candidatures");
     return [
-      `${spell(n)} ${lue} ${attend} que vous les ouvriez.`,
+      `${spell(n)} ${lue} ${plural(n, "attend", "attendent")} que vous ${plural(n, "l'ouvriez", "les ouvriez")}.`,
       `${spell(n)} ${lue} ${plural(n, "est arrivée", "sont arrivées")} et ${plural(n, "reste fermée", "restent fermées")}.`,
       `Vous avez ${spell(n).toLocaleLowerCase("fr-FR")} ${lue} à découvrir.`,
     ];
@@ -123,10 +122,11 @@ const WRITERS: Record<AlmaJournalRuleKey, Writer> = {
   ],
   annonce_sans_candidature: (f) => {
     const d = f.publishedSitWithoutApplicationDays ?? 0;
+    const jour = plural(d, "jour", "jours");
     return [
-      `Votre annonce est en ligne depuis ${spell(d).toLocaleLowerCase("fr-FR")} jours et personne n'a encore écrit.`,
-      `${spell(d)} jours en ligne, et votre annonce attend toujours sa première candidature.`,
-      `Votre annonce vit sa ${spell(d).toLocaleLowerCase("fr-FR")}ème journée en ligne, sans candidature pour l'instant.`,
+      `Votre annonce est en ligne depuis ${spell(d).toLocaleLowerCase("fr-FR")} ${jour} et personne n'a encore écrit.`,
+      `${spell(d)} ${jour} en ligne, et votre annonce attend toujours sa première candidature.`,
+      "Votre annonce est en ligne depuis plus d'une semaine, et sa première candidature se fait attendre.",
     ];
   },
   alentours: () => [
@@ -146,33 +146,37 @@ const WRITERS: Record<AlmaJournalRuleKey, Writer> = {
   candidature_en_attente: (f) => {
     const p = f.pendingApplication;
     const days = p?.days ?? 0;
+    const jour = plural(days, "jour", "jours");
     const where = p?.city ? `pour la garde à ${p.city}` : "pour une garde";
     return [
-      `Votre candidature ${where} attend depuis ${spell(days).toLocaleLowerCase("fr-FR")} jours.`,
-      `${spell(days)} jours que votre candidature ${where} est posée, sans réponse pour l'instant.`,
-      `La personne qui a reçu votre candidature ${where} ne l'a pas encore traitée, cela fait ${spell(days).toLocaleLowerCase("fr-FR")} jours.`,
+      `Votre candidature ${where} attend depuis ${spell(days).toLocaleLowerCase("fr-FR")} ${jour}.`,
+      `${spell(days)} ${jour} que votre candidature ${where} est posée, sans réponse pour l'instant.`,
+      `La personne qui a reçu votre candidature ${where} ne l'a pas encore traitée, cela fait ${spell(days).toLocaleLowerCase("fr-FR")} ${jour}.`,
     ];
   },
   profil_gardien: (f) => profilLines(f),
   envie_benevolat: (f) => {
     const name = f.association?.name ?? "un refuge";
     return [
-      `Il y a ${name} à vingt minutes de chez vous. J'irais bien voir, même de loin.`,
-      `${name} existe tout près. J'aime savoir que ces endroits sont là.`,
+      `Il y a ${name} tout près de chez vous. J'irais bien voir, même de loin.`,
+      `${name} existe dans votre secteur. J'aime savoir que ces endroits sont là.`,
       `${name} accueille des animaux dans votre département. Je regarde leur page de temps en temps.`,
     ];
   },
 };
 
 function profilLines(f: AlmaJournalFacts): string[] {
-  const label = (f.topMissing?.label ?? "").toLocaleLowerCase("fr-FR");
+  const label = f.topMissing?.label ?? "";
   const points = f.topMissing?.points ?? 0;
+  const point = plural(points, "point", "points");
+  const separe = plural(points, "vous sépare", "vous séparent");
   return [
-    `Il ne vous manque que ${label}. ${spell(points)} points, et vous êtes au bout.`,
-    `${spell(points)} points vous séparent du profil complet, il s'agit de ${label}.`,
-    `Votre profil tient debout, ${label} reste à renseigner pour ${spell(points).toLocaleLowerCase("fr-FR")} points.`,
+    `Il vous reste une chose à renseigner : ${label}. ${spell(points)} ${point}, et vous êtes au bout.`,
+    `${spell(points)} ${point} ${separe} du profil complet : ${label}.`,
+    `Une ligne manque encore à votre profil : ${label}. Elle vaut ${spell(points).toLocaleLowerCase("fr-FR")} ${point}.`,
   ];
 }
+
 
 const TYPE_LABELS: Record<AlmaJournalRuleKey, string> = {
   candidatures_non_lues: "CANDIDATURES REÇUES",
