@@ -6,6 +6,7 @@
 import { describe, it, expect } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
+import { parseAlmaMessage } from "@/components/ai/alma/AlmaConversation";
 
 const read = (p: string) => fs.readFileSync(path.resolve(process.cwd(), p), "utf-8");
 
@@ -65,5 +66,18 @@ describe("Alma, habillage charte", () => {
     expect(thread).toContain("<SheetTitle");
     expect(thread).toContain("title: menuLabel, kind: \"action\"");
     expect(thread).not.toMatch(/title:\s*"\//);
+  });
+
+  it.each([
+    ["/favoris", "Mes favoris"],
+    ["/mes-candidatures", "Mes candidatures"],
+    ["/faq", "La FAQ"],
+    ["/conseils", "Les conseils d'Alma"],
+    ["/une-page-inconnue", "Une page inconnue"],
+  ])("conserve une contrepartie lisible pour le chemin %s", (internalPath, expectedTitle) => {
+    const parsed = parseAlmaMessage(`Consultez ${internalPath}.`);
+    expect(parsed.links.length).toBeGreaterThanOrEqual(1);
+    expect(parsed.links[0].title).toBe(expectedTitle);
+    expect(parsed.links.every((link) => !link.title.startsWith("/"))).toBe(true);
   });
 });
