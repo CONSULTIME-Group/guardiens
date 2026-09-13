@@ -451,8 +451,10 @@ function AlmaDockInner() {
       return;
     }
     const total = autoDismissDelay(currentWhisper?.autoDismissMs);
+    suspendedRef.current = false;
     pausedRef.current = false;
     remainingRef.current = total;
+
     startedAtRef.current = Date.now();
     if (timerRef.current) window.clearTimeout(timerRef.current);
     timerRef.current = window.setTimeout(() => doDismiss("timeout"), total);
