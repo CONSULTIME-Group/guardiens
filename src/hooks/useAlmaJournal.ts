@@ -4,7 +4,7 @@
  * Tout est déterministe et lu en base, aucun appel au modèle. Le calcul des
  * entrées vit dans `src/lib/alma/journal.ts`, testé à part.
  */
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { getDeptCode } from "@/lib/departments";
 import {
@@ -13,11 +13,7 @@ import {
   type AlmaJournalPage,
   type AlmaJournalRuleKey,
 } from "@/lib/alma/journal";
-import {
-  computeOwnerCompletion,
-  computeSitterCompletion,
-  topMissingItem,
-} from "@/lib/profileCompletion";
+import { useProfileCompletionMissing } from "@/hooks/useProfileCompletionMissing";
 
 const EMPTY_PAGE: AlmaJournalPage = { entries: [], invitation: null };
 
@@ -49,6 +45,11 @@ export function useAlmaJournal(
   enabled: boolean,
 ): UseAlmaJournalResult {
   const [page, setPage] = useState<AlmaJournalPage>(EMPTY_PAGE);
+  const completion = useProfileCompletionMissing(activeRole, enabled ? userId : undefined);
+  const topMissing = useMemo(() => {
+    const item = [...completion.missing].sort((a, b) => b.points - a.points)[0];
+    return item ? { label: item.label, points: item.points, href: item.href } : null;
+  }, [completion.missing]);
 
   useEffect(() => {
     if (!enabled || !userId) {
@@ -59,7 +60,7 @@ export function useAlmaJournal(
 
     const load = async () => {
       try {
-        const facts: AlmaJournalFacts = { activeRole };
+        const facts: AlmaJournalFacts = { activeRole, topMissing };
 
         // Historique d'affichage : fraîcheur et actions suivies.
         const { data: history } = await supabase
@@ -91,9 +92,7 @@ export function useAlmaJournal(
 
         const { data: profile } = await supabase
           .from("profiles")
-          .select(
-            "first_name, postal_code, city, country, avatar_url, bio, identity_verified",
-          )
+          .select("postal_code")
           .eq("id", userId)
           .maybeSingle();
 
@@ -108,7 +107,7 @@ export function useAlmaJournal(
               .limit(20),
             supabase
               .from("properties")
-              .select("id, photos, region_highlights, description")
+              .select("id, photos, region_highlights")
               .eq("user_id", userId),
           ]);
 
@@ -150,19 +149,6 @@ export function useAlmaJournal(
             ? WEEKDAYS[new Date(draft.created_at).getDay()]
             : null;
 
-          if (profile) {
-            const completion = computeOwnerCompletion({
-              role: "owner",
-              ...profile,
-              property_description:
-                (properties ?? []).find((p) => (p.description?.length ?? 0) >= 50)
-                  ?.description ?? null,
-            });
-            const top = topMissingItem(completion);
-            facts.topMissing = top
-              ? { label: top.label, points: top.points, href: top.href }
-              : null;
-          }
         } else {
           const { data: applications } = await supabase
             .from("applications")
@@ -179,13 +165,6 @@ export function useAlmaJournal(
             .sort((a, b) => b.days - a.days)[0];
           facts.pendingApplication = waiting ?? null;
 
-          if (profile) {
-            const completion = computeSitterCompletion({ role: "sitter", ...profile });
-            const top = topMissingItem(completion);
-            facts.topMissing = top
-              ? { label: top.label, points: top.points, href: top.href }
-              : null;
-          }
         }
 
         // Envie d'Alma : une association publiée dans le département, et
@@ -235,7 +214,7 @@ export function useAlmaJournal(
     return () => {
       cancelled = true;
     };
-  }, [activeRole, enabled, userId]);
+  }, [activeRole, enabled, topMissing, userId]);
 
   const markActed = useCallback(
     (ruleKey: AlmaJournalRuleKey) => {
