@@ -237,6 +237,8 @@ Deno.serve(async (req) => {
       ville: (profileRes.data as any)?.city ?? null,
       completion_profil: (profileRes.data as any)?.profile_completion ?? null,
       identite_verifiee: (profileRes.data as any)?.identity_verified ?? null,
+      bareme_profil: baremeProfil,
+      profil_a_completer: profilACompleter,
       role_actif: activeRole,
       ecran_courant: surface,
       profil_gardien: sitterRes.data ?? null,
