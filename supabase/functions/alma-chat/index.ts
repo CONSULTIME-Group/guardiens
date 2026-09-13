@@ -281,7 +281,7 @@ Deno.serve(async (req) => {
               role: "system" as const,
               content:
                 sources.length > 0
-                  ? `Sources Guardiens trouvées pour cette question. Tu peux les citer et donner leur lien. Tu ne cites aucun autre lien que ceux de cette liste.\nCes sources viennent d'une recherche automatique, elles ne répondent pas toujours à la question posée. Cite celle qui répond, ignore les autres, et n'en cite aucune si aucune ne répond.\n${sources
+                  ? `Ces sources viennent d'une recherche automatique, elles ne répondent pas toujours à la question posée. Cite celle qui répond, ignore les autres, et n'en cite aucune si aucune ne répond.\nSources Guardiens trouvées pour cette question. Tu peux les citer et donner leur lien. Tu ne cites aucun autre lien que ceux de cette liste.\n${sources
                       .map((s: any) => `[${s.source}] ${s.title}, ${s.url}, ${s.snippet ?? ""}`)
                       .join("\n")}`
                   : "Aucune source Guardiens trouvée pour cette question. Réponds de ta voix, sans citer de lien d'article.",
