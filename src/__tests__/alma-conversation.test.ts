@@ -42,8 +42,8 @@ describe("prompt système d'Alma", () => {
     expect(promptSource.includes("\u2013")).toBe(false);
   });
 
-  it("plafonne les échanges à dix par jour, avec une réponse affirmative", () => {
-    expect(promptSource).toContain("ALMA_CHAT_DAILY_LIMIT = 10");
+  it("plafonne les échanges à trente par jour, avec une réponse affirmative", () => {
+    expect(promptSource).toContain("ALMA_CHAT_DAILY_LIMIT = 30");
     expect(promptSource).toContain("Je reprends la conversation demain");
     expect(edgeSource).toContain("ALMA_CHAT_DAILY_LIMIT");
     expect(edgeSource).toContain("limited: true");
