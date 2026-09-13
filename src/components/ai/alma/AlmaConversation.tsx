@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { AlmaAvatarAnimated } from "./AlmaAvatarAnimated";
 import { VoiceStatusLine } from "./AlmaDock";
 import { useAlmaVoiceInput } from "@/hooks/useAlmaVoiceInput";
+import { ALMA_COMPOSER_INTRO } from "@/lib/alma/prompt-starters";
 import {
   getAlmaConversationState,
   openAlmaConversation,
@@ -159,7 +160,7 @@ export function AlmaConversation({
   const state = useSyncExternalStore(subscribeAlmaConversation, getAlmaConversationState);
   const [draft, setDraft] = useState("");
   const [compactHeader, setCompactHeader] = useState(false);
-  const [thinkingLine, setThinkingLine] = useState(ALMA_THINKING_LINES[0]);
+  const [thinkingLine, setThinkingLine] = useState<string>(ALMA_THINKING_LINES[0]);
   const previousThinkingRef = useRef(-1);
   const viewportHeight = useVisualViewportHeight();
   const threadRef = useRef<HTMLDivElement | null>(null);
@@ -328,7 +329,7 @@ export function AlmaConversation({
           })}
 
           {!state.open && action && (
-            <Button variant="link" onClick={action.onClick} className="alma-action-link mt-2 h-11 px-0 text-[13px] font-bold text-pine">
+              <Button data-testid="alma-panel-action" variant="link" onClick={action.onClick} className="alma-action-link mt-2 h-11 px-0 text-[13px] font-bold text-pine">
               {action.label}<ArrowRight className="h-4 w-4" aria-hidden />
             </Button>
           )}
@@ -344,7 +345,7 @@ export function AlmaConversation({
         </div>
 
         <footer className="alma-conversation-composer shrink-0 border-t border-[hsl(var(--line-soft))] bg-[hsl(var(--hero-paper))] px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-3 md:px-5 md:pb-5">
-          {showIntro && <p data-testid="alma-composer-intro" className="alma-voice mb-2 text-xs">Je suis Alma. Je connais les maisons, les animaux et les chemins du site.</p>}
+          {showIntro && <p data-testid="alma-composer-intro" className="alma-voice mb-2 text-xs">{ALMA_COMPOSER_INTRO}</p>}
           <div className="flex items-end gap-2">
             <textarea
               ref={inputRef}

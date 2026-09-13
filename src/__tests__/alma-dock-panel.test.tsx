@@ -80,24 +80,19 @@ describe("panneau déplié du dock Alma", () => {
     delete document.body.dataset.almaDockExpanded;
   });
 
-  it("rend un seul paragraphe, aucune action, et le champ de saisie", () => {
+  it("rend un seul tour d'Alma, aucune action, et le champ de saisie", () => {
     moodState.line = "Toujours pas sortie en forêt aujourd'hui.";
     const { container } = renderDock();
     expand();
     const panel = screen.getByTestId("alma-dock-panel");
-    // La phrase de présentation, affichée une seule fois par personne, est
-    // exclue du compte : la ligne d'Alma reste unique.
-    expect(
-      panel.querySelectorAll('p:not([data-testid="alma-composer-intro"])'),
-    ).toHaveLength(1);
+    expect(panel.querySelectorAll(".alma-turn-alma")).toHaveLength(1);
     expect(panel).toHaveTextContent("Toujours pas sortie en forêt aujourd'hui.");
     expect(screen.getByLabelText("Votre message pour Alma")).toBeInTheDocument();
     expect(container.querySelectorAll('[data-testid="alma-panel-action"]')).toHaveLength(0);
-    // Aucune croix sur une humeur.
-    expect(screen.queryByLabelText("Fermer le message d'Alma")).toBeNull();
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 
-  it("un whisper prime sur l'humeur et garde sa croix et son action unique", () => {
+  it("un whisper prime sur l'humeur et garde son action unique", () => {
     moodState.line = "Humeur qui doit se taire";
     almaState.currentWhisper = {
       id: "w1",
@@ -107,15 +102,11 @@ describe("panneau déplié du dock Alma", () => {
     };
     renderDock();
     const panel = screen.getByTestId("alma-dock-panel");
-    // La phrase de présentation, affichée une seule fois par personne, est
-    // exclue du compte : la ligne d'Alma reste unique.
-    expect(
-      panel.querySelectorAll('p:not([data-testid="alma-composer-intro"])'),
-    ).toHaveLength(1);
+    expect(panel.querySelectorAll(".alma-turn-alma")).toHaveLength(1);
     expect(panel).toHaveTextContent("Pensez à aerer la maison.");
     expect(panel).not.toHaveTextContent("Humeur qui doit se taire");
     expect(screen.getAllByTestId("alma-panel-action")).toHaveLength(1);
-    expect(screen.getByLabelText("Fermer le message d'Alma")).toBeInTheDocument();
+    expect(screen.getByLabelText("Fermer")).toBeInTheDocument();
     expect(screen.getByLabelText("Votre message pour Alma")).toBeInTheDocument();
   });
 
@@ -128,11 +119,7 @@ describe("panneau déplié du dock Alma", () => {
     renderDock();
     expand();
     const panel = screen.getByTestId("alma-dock-panel");
-    // La phrase de présentation, affichée une seule fois par personne, est
-    // exclue du compte : la ligne d'Alma reste unique.
-    expect(
-      panel.querySelectorAll('p:not([data-testid="alma-composer-intro"])'),
-    ).toHaveLength(1);
+    expect(panel.querySelectorAll(".alma-turn-alma")).toHaveLength(1);
     expect(screen.getAllByTestId("alma-panel-action")).toHaveLength(1);
     expect(screen.getByLabelText("Votre message pour Alma")).toBeInTheDocument();
   });
@@ -149,6 +136,17 @@ describe("panneau déplié du dock Alma", () => {
     const trigger = screen.getByRole("button", { name: /Ouvrir Alma/ });
     fireEvent.click(trigger);
     fireEvent.click(trigger);
+    await new Promise((resolve) => window.requestAnimationFrame(resolve));
+    expect(document.activeElement).toBe(trigger);
+  });
+
+  it("Échap ferme le dialogue et rend le focus au déclencheur", async () => {
+    renderDock();
+    const trigger = screen.getByRole("button", { name: /Ouvrir Alma/ });
+    fireEvent.click(trigger);
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    fireEvent.keyDown(document, { key: "Escape" });
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
     await new Promise((resolve) => window.requestAnimationFrame(resolve));
     expect(document.activeElement).toBe(trigger);
   });
