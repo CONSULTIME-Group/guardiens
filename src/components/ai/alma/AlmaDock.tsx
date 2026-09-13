@@ -17,7 +17,9 @@
  * Ne rend jamais AlmaAvatarLottie.
  */
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { useLocation, useNavigate } from "react-router-dom";
+
 import { ChevronDown, Sparkles, X, MoreHorizontal, Check, EyeOff, Lightbulb, Route, MessageCircle, Mic, Send, Square } from "lucide-react";
 import { AlmaConversation } from "./AlmaConversation";
 import {
@@ -29,6 +31,14 @@ import {
 } from "@/lib/alma/conversation-store";
 import { autoDismissDelay, shouldScheduleAutoDismiss } from "@/lib/alma/auto-dismiss";
 import { composerPlaceholder, resolvePanelLine } from "@/lib/alma/dock-panel";
+import {
+  ALMA_COMPOSER_INTRO,
+  ALMA_COMPOSER_INTRO_STORAGE_KEY,
+  promptSurfaceFromPath,
+  resolvePromptStarters,
+  shouldShowComposerIntro,
+} from "@/lib/alma/prompt-starters";
+
 import { useAlmaVoiceInput } from "@/hooks/useAlmaVoiceInput";
 import { cn } from "@/lib/utils";
 import { AlmaAvatarAnimated } from "./AlmaAvatarAnimated";
@@ -183,6 +193,10 @@ function DockComposer({
   activeRole,
   seed,
   focusSignal,
+  starters,
+  showIntro,
+  onIntroSeen,
+  onStarterClick,
   onSeen,
   onFocus,
   onTyped,
@@ -192,6 +206,10 @@ function DockComposer({
   seed: string;
   /** Incrémenté par le dock pour demander le focus du champ. */
   focusSignal?: number;
+  starters?: string[];
+  showIntro?: boolean;
+  onIntroSeen?: () => void;
+  onStarterClick?: (label: string) => void;
   onSeen?: () => void;
   onFocus?: () => void;
   onTyped?: () => void;
@@ -207,6 +225,7 @@ function DockComposer({
   // N6 : le composeur est vu dès qu'il est monté.
   useEffect(() => {
     onSeen?.();
+    if (showIntro) onIntroSeen?.();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -216,9 +235,7 @@ function DockComposer({
     fieldRef.current?.focus();
   }, [focusSignal]);
 
-  const submit = () => {
-    const text = draft.trim();
-    if (!text) return;
+  const send = (text: string) => {
     const inputMode = dictatedRef.current ? "voice" : "keyboard";
     dictatedRef.current = false;
     setDraft("");
@@ -226,9 +243,21 @@ function DockComposer({
     void sendAlmaMessage({ text, surface, activeRole, inputMode });
   };
 
+  const submit = () => {
+    const text = draft.trim();
+    if (!text) return;
+    send(text);
+  };
+
   return (
     <div className="mt-[14px]">
+      {showIntro && (
+        <p data-testid="alma-composer-intro" className="alma-voice mb-2 text-xs italic" style={{ fontFamily: "var(--font-heading)" }}>
+          {ALMA_COMPOSER_INTRO}
+        </p>
+      )}
       <div className="flex items-end gap-2">
+
         <textarea
           ref={fieldRef}
           value={draft}
@@ -292,7 +321,25 @@ function DockComposer({
           <Send className="h-4 w-4" />
         </button>
       </div>
+      {starters && starters.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-2" data-testid="alma-prompt-starters">
+          {starters.map((label) => (
+            <button
+              key={label}
+              type="button"
+              onClick={() => {
+                onStarterClick?.(label);
+                send(label);
+              }}
+              className="flex min-h-11 items-center rounded-full border border-border bg-muted/40 px-3 font-body text-[12px] text-muted-foreground hover:bg-muted hover:text-foreground transition focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
       <VoiceStatusLine status={voice.status} error={voice.error} />
+
     </div>
   );
 }
@@ -339,7 +386,9 @@ function AlmaDockInner() {
   const { currentWhisper, dismissCurrent, requestNextTip } = useAlma();
   const { frequency, setFrequency } = useAlmaFrequency();
   const { hidden, setHidden } = useAlmaHidden();
-  const { activeRole } = useAuth();
+  const { activeRole, user } = useAuth();
+  const userId = user?.id ?? null;
+
   const { data: evolution } = useAlmaEvolution();
   const isModalOpen = useIsRadixModalOpen();
   const location = useLocation();
@@ -633,11 +682,76 @@ function AlmaDockInner() {
 
   const composerSurface = surfaceFromPath(location.pathname, activeRole);
 
+  // Amorces contextuelles (N2 B). La surface d'amorces est distincte de la
+  // surface du scheduler : elle couvre la messagerie, les réglages et le
+  // guide de la maison.
+  const promptSurface = promptSurfaceFromPath(location.pathname);
+  const [listingWithoutApplication, setListingWithoutApplication] = useState(false);
+  useEffect(() => {
+    if (!userId || !expanded || promptSurface !== "my_sits" || activeRole !== "owner") return;
+    let alive = true;
+    void (async () => {
+      try {
+        const { data: sits } = await supabase
+          .from("sits")
+          .select("id")
+          .eq("user_id", userId)
+          .eq("status", "published");
+        const ids = (sits ?? []).map((s) => s.id);
+        if (ids.length === 0) return;
+        const { data: apps } = await supabase
+          .from("applications")
+          .select("id")
+          .in("sit_id", ids)
+          .limit(1);
+        if (alive) setListingWithoutApplication((apps?.length ?? 0) === 0);
+      } catch {
+        // Signal absent : les amorces restent celles de la surface.
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [userId, expanded, promptSurface, activeRole]);
+
+
+  const starters = resolvePromptStarters({
+    surface: promptSurface,
+    ctx: {
+      hasDraftSit: evolution?.signals.hasDraftSit ?? false,
+      hasPublishedSitWithoutApplication: listingWithoutApplication,
+    },
+    whisperType: currentWhisper?.type ?? null,
+  });
+
+  // Phrase de présentation, une seule fois par personne.
+  const introKey = userId
+    ? `${ALMA_COMPOSER_INTRO_STORAGE_KEY}:${userId}`
+    : ALMA_COMPOSER_INTRO_STORAGE_KEY;
+  const [showIntro, setShowIntro] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    setShowIntro(shouldShowComposerIntro(window.localStorage.getItem(introKey)));
+  }, [introKey]);
+  const onIntroSeen = useCallback(() => {
+    if (typeof window !== "undefined") window.localStorage.setItem(introKey, "true");
+  }, [introKey]);
+
+  const onStarterClick = useCallback(
+    (label: string) => {
+      trackEvent("alma_prompt_suggestion_clicked" as any, {
+        metadata: { surface: composerSurface, label },
+      });
+    },
+    [composerSurface],
+  );
+
   const onComposerSeen = useCallback(() => {
     if (composerSeenRef.current) return;
     composerSeenRef.current = true;
     trackEvent("alma_composer_seen" as any, { metadata: { surface: composerSurface } });
   }, [composerSurface]);
+
 
   const onComposerFocused = useCallback(() => {
     suspendAutoDismiss();
@@ -777,6 +891,11 @@ function AlmaDockInner() {
             activeRole={activeRole === "owner" ? "owner" : "sitter"}
             seed={panelLine}
             focusSignal={focusSignal}
+            starters={starters}
+            showIntro={showIntro}
+            onIntroSeen={onIntroSeen}
+            onStarterClick={onStarterClick}
+
             onSeen={onComposerSeen}
             onFocus={onComposerFocused}
             onTyped={onComposerTyped}

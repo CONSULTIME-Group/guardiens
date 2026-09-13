@@ -13,10 +13,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 export const ALMA_FUNNEL_STEPS: { event: string; label: string }[] = [
   { event: "alma_dock_expanded", label: "Panneau ouvert" },
   { event: "alma_composer_seen", label: "Composeur vu" },
+  { event: "alma_prompt_suggestion_clicked", label: "Amorce cliquée" },
   { event: "alma_composer_focused", label: "Champ focalisé" },
   { event: "alma_composer_typed", label: "Premier caractère" },
   { event: "alma_conversation_message_sent", label: "Message envoyé" },
 ];
+
 
 export function DiscoveryFunnelCard({ since }: { since: string }) {
   const { data: rows = [], isLoading } = useQuery({
