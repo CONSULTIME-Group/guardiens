@@ -137,11 +137,40 @@ describe("panneau déplié du dock Alma", () => {
     expect(screen.getByLabelText("Votre message pour Alma")).toBeInTheDocument();
   });
 
-  it("n'applique aucun autofocus au champ à l'ouverture", () => {
+  it("place le focus dans le champ à l'ouverture volontaire", () => {
     renderDock();
     expand();
     const field = screen.getByLabelText("Votre message pour Alma");
-    expect(document.activeElement).not.toBe(field);
+    expect(document.activeElement).toBe(field);
+  });
+
+  it("rend le focus au déclencheur à la fermeture", async () => {
+    renderDock();
+    const trigger = screen.getByRole("button", { name: /Ouvrir Alma/ });
+    fireEvent.click(trigger);
+    fireEvent.click(trigger);
+    await new Promise((resolve) => window.requestAnimationFrame(resolve));
+    expect(document.activeElement).toBe(trigger);
+  });
+
+  it("reprend la promesse et les réponses transmises par une carte", () => {
+    renderDock();
+    const trigger = document.createElement("button");
+    document.body.appendChild(trigger);
+    trigger.focus();
+    window.dispatchEvent(new CustomEvent("alma:open-dock", {
+      detail: {
+        subject: "raconter la maison",
+        instantLine: "Alors racontez moi. Où est votre maison, et qu'est-ce qui s'y passe quand vous partez ?",
+        readyReplies: ["Je pars bientôt", "Je prépare mon annonce"],
+        trigger,
+      },
+    }));
+    expect(screen.getByTestId("alma-dock-panel")).toHaveTextContent("Alors racontez moi");
+    expect(screen.getByRole("button", { name: "Je pars bientôt" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Je prépare mon annonce" })).toBeInTheDocument();
+    expect(document.activeElement).toBe(screen.getByLabelText("Votre message pour Alma"));
+    trigger.remove();
   });
 
   it("expose l'attribut body qui réserve l'espace du panneau", () => {
