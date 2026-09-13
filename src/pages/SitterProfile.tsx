@@ -13,6 +13,8 @@ import StepPreferences from "@/components/profile/StepPreferences";
 import StepSkills from "@/components/profile/StepSkills";
 import SitterGallery from "@/components/profile/SitterGallery";
 import ExternalExperiences from "@/components/profile/ExternalExperiences";
+import VolunteerAvailabilityBlock from "@/components/profile/VolunteerAvailabilityBlock";
+
 import ProfileSidebar, { type SidebarSection } from "@/components/profile/ProfileSidebar";
 import ProfileSkeleton from "@/components/profile/ProfileSkeleton";
 import ScoreBreakdown, { type ScoreCriterion } from "@/components/profile/ScoreBreakdown";
