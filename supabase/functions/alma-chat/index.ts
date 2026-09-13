@@ -82,7 +82,7 @@ Deno.serve(async (req) => {
       { auth: { persistSession: false, autoRefreshToken: false } },
     );
 
-    // Plafond anti-boucle : 10 échanges par personne et par jour.
+    // Plafond anti-boucle : ALMA_CHAT_DAILY_LIMIT échanges par personne et par jour.
     const dayStart = new Date();
     dayStart.setUTCHours(0, 0, 0, 0);
     const { count } = await adminClient
@@ -126,6 +126,29 @@ Deno.serve(async (req) => {
         .maybeSingle(),
     ]);
 
+    // Ce qui manque au profil, selon le barème officiel de complétion.
+    // Sans lui, l'amorce « Qu'est-ce qui manque à mon profil ? » reste sans réponse.
+    let baremeProfil: string | null = null;
+    let profilACompleter: Array<{ champ: string; libelle: string; points: number }> = [];
+    try {
+      const { data } = await adminClient.rpc("profile_completion_missing", {
+        p_user_id: userId,
+      });
+      const rows = Array.isArray(data) ? data : [];
+      baremeProfil = rows.length > 0 ? (rows[0] as any).bareme ?? null : null;
+      profilACompleter = rows.map((r: any) => ({
+        champ: r.champ,
+        libelle: r.libelle,
+        points: r.points,
+      }));
+    } catch (_e) {
+      profilACompleter = [];
+    }
+
+    /** Les textes longs saturent le contexte, six cents caractères suffisent à relire une annonce. */
+    const cut = (v: unknown): string | null =>
+      typeof v === "string" && v.length > 0 ? v.slice(0, 600) : null;
+
     let sits: unknown[] = [];
     let applications: unknown[] = [];
     let pets: unknown[] = [];
@@ -133,14 +156,17 @@ Deno.serve(async (req) => {
       const [sitsRes, propsRes] = await Promise.all([
         adminClient
           .from("sits")
-          .select("id, title, status, city, start_date, end_date")
+          .select(
+            "id, title, status, city, start_date, end_date, owner_message, daily_routine, sitter_expectations, specific_expectations, flexibility_notes, is_urgent, accepting_applications, cover_photo_url, published_at, property_id",
+          )
           .eq("user_id", userId)
           .order("created_at", { ascending: false })
           .limit(3),
-        adminClient.from("properties").select("id").eq("user_id", userId).limit(5),
+        adminClient.from("properties").select("id, description").eq("user_id", userId).limit(5),
       ]);
-      sits = sitsRes.data ?? [];
-      const propertyIds = (propsRes.data ?? []).map((p: any) => p.id);
+      const rawSits = (sitsRes.data ?? []) as any[];
+      const properties = (propsRes.data ?? []) as any[];
+      const propertyIds = properties.map((p) => p.id);
       if (propertyIds.length > 0) {
         const { data } = await adminClient
           .from("pets")
@@ -149,23 +175,61 @@ Deno.serve(async (req) => {
           .limit(10);
         pets = data ?? [];
       }
-      const sitIds = (sits as any[]).map((s) => s.id);
+
+      const sitIds = rawSits.map((s) => s.id);
+      let rawApplications: any[] = [];
       if (sitIds.length > 0) {
         const { data } = await adminClient
           .from("applications")
-          .select("sit_id, status, created_at")
+          .select("sit_id, status, created_at, viewed_at")
           .in("sit_id", sitIds)
-          .limit(20);
-        applications = data ?? [];
+          .limit(50);
+        rawApplications = (data ?? []) as any[];
       }
+      applications = rawApplications;
+
+      sits = rawSits.map((s) => {
+        const mine = rawApplications.filter((a) => a.sit_id === s.id);
+        return {
+          id: s.id,
+          title: s.title,
+          status: s.status,
+          city: s.city,
+          start_date: s.start_date,
+          end_date: s.end_date,
+          owner_message: cut(s.owner_message),
+          daily_routine: cut(s.daily_routine),
+          sitter_expectations: cut(s.sitter_expectations),
+          specific_expectations: cut(s.specific_expectations),
+          flexibility_notes: cut(s.flexibility_notes),
+          is_urgent: s.is_urgent,
+          accepting_applications: s.accepting_applications,
+          a_une_photo: Boolean(s.cover_photo_url),
+          published_at: s.published_at,
+          logement_description: cut(
+            properties.find((p) => p.id === s.property_id)?.description,
+          ),
+          candidatures_recues: mine.length,
+          candidatures_non_lues: mine.filter((a) => a.viewed_at === null).length,
+          candidatures_en_attente: mine.filter((a) => a.status === "pending").length,
+        };
+      });
     } else {
       const { data } = await adminClient
         .from("applications")
-        .select("sit_id, status, created_at")
+        .select("sit_id, status, created_at, sits(title, city, start_date, end_date)")
         .eq("sitter_id", userId)
         .order("created_at", { ascending: false })
         .limit(10);
-      applications = data ?? [];
+      applications = ((data ?? []) as any[]).map((a) => ({
+        sit_id: a.sit_id,
+        status: a.status,
+        created_at: a.created_at,
+        annonce_titre: a.sits?.title ?? null,
+        annonce_ville: a.sits?.city ?? null,
+        annonce_debut: a.sits?.start_date ?? null,
+        annonce_fin: a.sits?.end_date ?? null,
+      }));
     }
 
     const dossier = {
@@ -173,6 +237,8 @@ Deno.serve(async (req) => {
       ville: (profileRes.data as any)?.city ?? null,
       completion_profil: (profileRes.data as any)?.profile_completion ?? null,
       identite_verifiee: (profileRes.data as any)?.identity_verified ?? null,
+      bareme_profil: baremeProfil,
+      profil_a_completer: profilACompleter,
       role_actif: activeRole,
       ecran_courant: surface,
       profil_gardien: sitterRes.data ?? null,
