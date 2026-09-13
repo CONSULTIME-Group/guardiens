@@ -10316,6 +10316,8 @@ export type Database = {
         }
         Returns: boolean
       }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
       signal_sit_publish_error: {
         Args: { _code: string; _message: string; _sit_id: string }
         Returns: undefined
