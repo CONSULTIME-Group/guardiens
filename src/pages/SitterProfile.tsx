@@ -13,6 +13,8 @@ import StepPreferences from "@/components/profile/StepPreferences";
 import StepSkills from "@/components/profile/StepSkills";
 import SitterGallery from "@/components/profile/SitterGallery";
 import ExternalExperiences from "@/components/profile/ExternalExperiences";
+import VolunteerAvailabilityBlock from "@/components/profile/VolunteerAvailabilityBlock";
+
 import ProfileSidebar, { type SidebarSection } from "@/components/profile/ProfileSidebar";
 import ProfileSkeleton from "@/components/profile/ProfileSkeleton";
 import ScoreBreakdown, { type ScoreCriterion } from "@/components/profile/ScoreBreakdown";
@@ -462,13 +464,21 @@ const SitterProfile = () => {
               {activeSection === "gallery" && <SitterGallery />}
               {activeSection === "experiences" && <ExternalExperiences />}
               {activeSection === "skills" && (
-                <StepSkills
-                  skillCategories={mergedData.skill_categories || []}
-                  availableForHelp={mergedData.available_for_help || false}
-                  competences={mergedData.competences || []}
-                  onChange={(partial) => handleChange(partial as any)}
-                />
+                <>
+                  <StepSkills
+                    skillCategories={mergedData.skill_categories || []}
+                    availableForHelp={mergedData.available_for_help || false}
+                    competences={mergedData.competences || []}
+                    onChange={(partial) => handleChange(partial as any)}
+                  />
+                  <VolunteerAvailabilityBlock
+                    userId={user?.id}
+                    postalCode={mergedData.postal_code}
+                    activeRole="sitter"
+                  />
+                </>
               )}
+
 
               {/* Bouton « Suivant », auto-sauvegarde puis avance. */}
               {nextSection && (

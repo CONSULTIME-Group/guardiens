@@ -7696,6 +7696,71 @@ export type Database = {
         }
         Relationships: []
       }
+      volunteer_availability: {
+        Row: {
+          available: boolean
+          created_at: string
+          current_association: string | null
+          departments: string[]
+          frequency: string | null
+          skills: string[]
+          structure_types: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          available?: boolean
+          created_at?: string
+          current_association?: string | null
+          departments?: string[]
+          frequency?: string | null
+          skills?: string[]
+          structure_types?: string[]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          available?: boolean
+          created_at?: string
+          current_association?: string | null
+          departments?: string[]
+          frequency?: string | null
+          skills?: string[]
+          structure_types?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "volunteer_availability_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profile_reputation"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "volunteer_availability_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "volunteer_availability_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "volunteer_availability_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
+          },
+        ]
+      }
       worker_locks: {
         Row: {
           lock_key: string

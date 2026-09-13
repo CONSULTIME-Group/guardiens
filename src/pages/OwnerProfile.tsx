@@ -15,6 +15,8 @@ import OwnerAffinityBanner from "@/components/matching/OwnerAffinityBanner";
 
 import OwnerHouseGuideForm from "@/components/owner-profile/OwnerHouseGuideForm";
 import OwnerStepSkills from "@/components/owner-profile/OwnerStepSkills";
+import VolunteerAvailabilityBlock from "@/components/profile/VolunteerAvailabilityBlock";
+
 import ProfileSidebar, { type SidebarSection } from "@/components/profile/ProfileSidebar";
 import ProfileSkeleton from "@/components/profile/ProfileSkeleton";
 import ScoreBreakdown, { type ScoreCriterion } from "@/components/profile/ScoreBreakdown";
@@ -403,13 +405,21 @@ const OwnerProfilePage = () => {
                 </div>
               )}
               {activeSection === "skills" && (
-                <OwnerStepSkills
-                  competences={mergedData.owner_competences || []}
-                  competencesDisponible={mergedData.owner_competences_disponible || false}
-                  skillCategories={mergedData.owner_skill_categories || []}
-                  onChange={(partial) => handleChange(partial as any)}
-                />
+                <>
+                  <OwnerStepSkills
+                    competences={mergedData.owner_competences || []}
+                    competencesDisponible={mergedData.owner_competences_disponible || false}
+                    skillCategories={mergedData.owner_skill_categories || []}
+                    onChange={(partial) => handleChange(partial as any)}
+                  />
+                  <VolunteerAvailabilityBlock
+                    userId={user?.id}
+                    postalCode={mergedData.postal_code}
+                    activeRole="owner"
+                  />
+                </>
               )}
+
               {activeSection === "gallery" && <OwnerGallery />}
 
               {/* Bouton « Suivant », auto-sauvegarde puis avance dans la liste. */}
