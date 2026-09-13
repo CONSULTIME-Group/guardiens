@@ -177,6 +177,8 @@
     --pine: 153 42% 30%;
     --pine-deep: 153 48% 14%;
     --pine-foreground: 40 33% 97%;
+    --pine-soft: 153 32% 72%;
+    --line-soft: 37 22% 82%;
   }
 
 
@@ -267,6 +269,8 @@
     --pine: 153 42% 30%;
     --pine-deep: 153 48% 14%;
     --pine-foreground: 40 33% 97%;
+    --pine-soft: 153 22% 38%;
+    --line-soft: 160 8% 26%;
 
     /* Papier sketchbook en dark mode — teinte chaude suffisamment soutenue pour le contraste */
     --hero-paper: 40 15% 18%;
@@ -1003,39 +1007,79 @@
     color: hsl(var(--foreground));
   }
 
-  /* Fil de conversation : carte papier, ombre chaude, rayon de base. */
-  .alma-thread-card {
-    background-color: hsl(var(--card));
-    border: 1px solid hsl(var(--border));
-    border-radius: 1rem;
-    box-shadow:
-      0 2px 6px hsl(30 25% 20% / 0.06),
-      0 14px 34px hsl(30 25% 20% / 0.12);
-  }
-
-  /* Bulle d'Alma : papier crème, angle haut gauche resserré vers l'avatar. */
-  .alma-bubble-alma {
+  .alma-conversation-sheet {
+    width: 100%;
+    max-width: none;
+    flex-direction: column;
     background-color: hsl(var(--hero-paper));
-    border: 1px solid hsl(var(--border));
-    color: hsl(var(--foreground) / 0.88);
-    border-radius: 1rem;
-    border-top-left-radius: 0.375rem;
-    padding: 10px 14px;
-    font-family: var(--font-body);
-    font-size: 14px;
-    line-height: 1.5;
+    color: hsl(var(--foreground));
   }
 
-  /* Bulle de la personne : vert pin plein, angle bas droit resserré. */
-  .alma-bubble-user {
-    background-color: hsl(var(--primary));
-    color: hsl(var(--primary-foreground));
-    border-radius: 1rem;
-    border-bottom-right-radius: 0.375rem;
-    padding: 10px 14px;
+  .alma-conversation-header {
+    padding: 14px 20px 12px;
+    background-color: hsl(var(--hero-paper));
+    transition: padding 180ms ease;
+  }
+
+  .alma-sheet-handle {
+    width: 42px;
+    height: 4px;
+    margin: 0 auto 12px;
+    border-radius: 9999px;
+    background-color: hsl(var(--muted-foreground) / 0.45);
+  }
+
+  .alma-conversation-header.is-compact {
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+
+  .alma-conversation-header.is-compact .alma-header-mood {
+    display: none;
+  }
+
+  .alma-gold-rule {
+    background: linear-gradient(to right, hsl(var(--founder)), transparent);
+  }
+
+  .alma-turn {
+    padding-block: 1rem;
+  }
+
+  .alma-turn:first-child {
+    padding-top: 0;
+  }
+
+  .alma-turn-alma {
     font-family: var(--font-body);
-    font-size: 14px;
-    line-height: 1.5;
+    font-size: 15px;
+    line-height: 1.68;
+    color: hsl(var(--foreground));
+  }
+
+  .alma-turn-user {
+    width: fit-content;
+    max-width: 78%;
+    border-left: 2px solid hsl(var(--pine));
+    padding-left: 14px;
+    font-family: var(--font-body);
+    font-size: 13.5px;
+    font-weight: 500;
+    line-height: 1.6;
+    color: hsl(var(--pine-deep));
+  }
+
+  .alma-source-card {
+    filter:
+      drop-shadow(0 1px 2px hsl(var(--foreground) / 0.06))
+      drop-shadow(0 7px 16px hsl(var(--foreground) / 0.1));
+  }
+
+  .alma-action-link > span:first-child {
+    text-decoration-line: underline;
+    text-decoration-color: hsl(var(--pine-soft));
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 5px;
   }
 
   /* Composeur : pilule crème sourde, anneau de focus vert pin. */
@@ -1063,36 +1107,9 @@
     box-shadow: 0 4px 14px hsl(var(--primary) / 0.28);
   }
 
-  /* Trois points qui respirent pendant la préparation de la réponse. */
-  .alma-typing-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 9999px;
-    background-color: hsl(var(--muted-foreground));
-    opacity: 0.4;
-  }
-  @media (prefers-reduced-motion: no-preference) {
-    .alma-typing-dot {
-      animation: alma-typing 1.2s ease-in-out infinite;
+  @media (min-width: 768px) {
+    .alma-conversation-sheet {
+      width: 420px;
     }
-    .alma-typing-dot:nth-child(2) {
-      animation-delay: 0.18s;
-    }
-    .alma-typing-dot:nth-child(3) {
-      animation-delay: 0.36s;
-    }
-  }
-}
-
-@keyframes alma-typing {
-  0%,
-  60%,
-  100% {
-    opacity: 0.35;
-    transform: translateY(0);
-  }
-  30% {
-    opacity: 1;
-    transform: translateY(-3px);
   }
 }
