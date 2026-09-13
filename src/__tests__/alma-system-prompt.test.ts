@@ -158,3 +158,38 @@ describe("avatar, humeurs et vie non linéaire", () => {
     expect(avatarSource).toContain("25000 + Math.random() * 25000");
   });
 });
+
+describe("assemblage du prompt par registre", () => {
+  it("le registre perso porte le carnet sans la carte du site", () => {
+    const prompt = buildAlmaSystemPrompt("perso");
+    expect(prompt).toContain("TON CARNET");
+    expect(prompt).not.toContain("LA CARTE DU SITE");
+  });
+
+  it("les registres dossier, reassurance et sensible portent la carte du site sans le carnet", () => {
+    for (const register of ["dossier", "reassurance", "sensible"] as const) {
+      const prompt = buildAlmaSystemPrompt(register);
+      expect(prompt).toContain("LA CARTE DU SITE");
+      expect(prompt).not.toContain("TON CARNET");
+    }
+  });
+
+  it("les quatre registres passent tous par le socle", () => {
+    for (const register of ["perso", "dossier", "reassurance", "sensible"] as const) {
+      const prompt = buildAlmaSystemPrompt(register);
+      expect(prompt).toContain("Vouvoiement absolu");
+      expect(prompt).toContain("CE QUE TU SAIS FAIRE");
+      expect(prompt.includes("—")).toBe(false);
+      expect(prompt.includes("–")).toBe(false);
+    }
+  });
+
+  it("almaRegisterReminder rend un texte distinct par registre et l'edge function l'appelle", () => {
+    const reminders = (["perso", "dossier", "reassurance", "sensible"] as const).map(
+      (register) => almaRegisterReminder(register),
+    );
+    expect(new Set(reminders).size).toBe(4);
+    expect(edgeSource).toContain("almaRegisterReminder(register)");
+    expect(edgeSource).toContain("buildAlmaSystemPrompt(register)");
+  });
+});
