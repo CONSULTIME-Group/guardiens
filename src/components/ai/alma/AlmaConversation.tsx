@@ -8,6 +8,7 @@ import { AlmaAvatarAnimated } from "./AlmaAvatarAnimated";
 import { VoiceStatusLine } from "./AlmaDock";
 import { useAlmaVoiceInput } from "@/hooks/useAlmaVoiceInput";
 import { ALMA_COMPOSER_INTRO } from "@/lib/alma/prompt-starters";
+import type { AlmaJournalEntry, AlmaJournalPage } from "@/lib/alma/journal";
 import {
   getAlmaConversationState,
   openAlmaConversation,
@@ -173,6 +174,10 @@ interface AlmaConversationProps {
   onFocus?: () => void;
   onTyped?: () => void;
   action?: { label: string; onClick: () => void } | null;
+  /** Page du jour d'Alma (lot Y), affichée avant toute conversation. */
+  journal?: AlmaJournalPage | null;
+  onJournalAction?: (entry: AlmaJournalEntry) => void;
+  onJournalReply?: (reply: string, ruleKey: string) => void;
 }
 
 export function AlmaConversation({
@@ -194,6 +199,9 @@ export function AlmaConversation({
   onFocus,
   onTyped,
   action,
+  journal,
+  onJournalAction,
+  onJournalReply,
 }: AlmaConversationProps) {
   const state = useSyncExternalStore(subscribeAlmaConversation, getAlmaConversationState);
   const [draft, setDraft] = useState("");
@@ -236,9 +244,16 @@ export function AlmaConversation({
     if (thread) thread.scrollTop = thread.scrollHeight;
   }, [state.messages.length, state.sending]);
 
+  const journalEntries = journal?.entries ?? [];
+  const hasJournal = journalEntries.length > 0;
+
   const messages = useMemo(
-    () => state.open ? state.messages : [{ id: "alma-opening", role: "alma" as const, content: initialMessage }],
-    [initialMessage, state.messages, state.open],
+    () => state.open
+      ? state.messages
+      : hasJournal
+        ? []
+        : [{ id: "alma-opening", role: "alma" as const, content: initialMessage }],
+    [hasJournal, initialMessage, state.messages, state.open],
   );
 
   const placeholder = subject === "raconter la maison"
@@ -323,12 +338,49 @@ export function AlmaConversation({
             }
           }}
         >
+          {journalEntries.map((entry, index) => (
+            <article
+              key={entry.ruleKey}
+              data-testid="alma-journal-entry"
+              data-rule-key={entry.ruleKey}
+              className={cn("alma-turn", index > 0 && "border-t border-[hsl(var(--line-soft))]")}
+            >
+              <div className="mb-2 flex items-center gap-2" aria-hidden="true">
+                <span className="text-[10.5px] font-bold uppercase text-terra [letter-spacing:.16em]">{entry.typeLabel}</span>
+                <span className="h-px flex-1 bg-[hsl(var(--line-soft))]" />
+              </div>
+              <p className="alma-turn-alma whitespace-pre-line">{entry.text}</p>
+              {entry.action && (
+                <button
+                  type="button"
+                  data-testid="alma-journal-action"
+                  onClick={() => {
+                    onJournalAction?.(entry);
+                    followLink(entry.action!.href);
+                  }}
+                  className="alma-action-link mt-3 inline-flex min-h-11 items-center gap-2 text-left text-[13px] font-bold text-pine focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <span>{entry.action.label}</span><ArrowRight className="h-4 w-4" aria-hidden />
+                </button>
+              )}
+            </article>
+          ))}
+
+          {hasJournal && journal?.invitation && (
+            <p
+              data-testid="alma-journal-invitation"
+              className="alma-turn alma-turn-alma border-t border-[hsl(var(--line-soft))]"
+            >
+              {journal.invitation.question}
+            </p>
+          )}
+
           {messages.map((message, index) => {
             const parsed = parseAlmaMessage(message.content);
             return (
               <article
                 key={message.id}
-                className={cn("alma-turn", index > 0 && "border-t border-[hsl(var(--line-soft))]")}
+                className={cn("alma-turn", (index > 0 || hasJournal) && "border-t border-[hsl(var(--line-soft))]")}
               >
                 {message.role === "alma" ? (
                   <div>
@@ -433,7 +485,25 @@ export function AlmaConversation({
               </Button>
             )}
           </div>
-          {starters && starters.length > 0 && (
+          {!state.open && journal?.invitation && (
+            <div className="no-scrollbar mt-2 flex flex-nowrap gap-2 overflow-x-auto pb-1" data-testid="alma-journal-replies">
+              {journal.invitation.replies.map((reply) => (
+                <Button
+                  key={reply}
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    onJournalReply?.(reply, journalEntries[0]?.ruleKey ?? "");
+                    send(reply);
+                  }}
+                  className="h-11 shrink-0 px-3 text-xs font-normal text-muted-foreground"
+                >
+                  {reply}
+                </Button>
+              ))}
+            </div>
+          )}
+          {!(journal?.invitation && !state.open) && starters && starters.length > 0 && (
             <div className="no-scrollbar mt-2 flex flex-nowrap gap-2 overflow-x-auto pb-1" data-testid="alma-prompt-starters">
               {starters.slice(0, 2).map((label) => (
                 <Button
