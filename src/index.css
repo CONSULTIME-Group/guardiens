@@ -1015,6 +1015,15 @@
     color: hsl(var(--foreground));
   }
 
+  .alma-conversation-sheet > button[data-radix-collection-item],
+  .alma-conversation-sheet > button:last-child {
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   .alma-conversation-header {
     padding: 14px 20px 12px;
     background-color: hsl(var(--hero-paper));

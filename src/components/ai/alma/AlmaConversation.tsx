@@ -229,7 +229,7 @@ export function AlmaConversation({
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
-        side="right"
+        side="alma"
         data-alma-conversation-dialog="true"
         data-testid="alma-dock-panel"
         className="alma-conversation-sheet flex gap-0 overflow-hidden p-0"
