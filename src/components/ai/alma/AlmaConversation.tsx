@@ -33,10 +33,24 @@ const SECTION_LABELS: Record<string, string> = {
   "/annonces": "Les annonces",
   "/recherche-gardiens": "Rechercher un gardien",
   "/messages": "Messagerie",
-  "/favorites": "Mes favoris",
+  "/favoris": "Mes favoris",
+  "/mes-candidatures": "Mes candidatures",
+  "/mes-avis": "Mes avis",
+  "/mon-secteur": "Mon secteur",
+  "/notifications": "Mes notifications",
   "/settings": "Réglages",
   "/alma": "Mon parcours avec Alma",
   "/petites-missions/creer": "Proposer un coup de main",
+};
+
+const PUBLIC_SOURCE_TITLES: Record<string, string> = {
+  "/faq": "La FAQ",
+  "/conseils": "Les conseils d'Alma",
+  "/actualites": "Le journal",
+  "/associations": "Les associations",
+  "/petites-missions": "L'entraide",
+  "/guides": "Les guides locaux",
+  "/races": "Les fiches de race",
 };
 
 interface ExtractedLink {
@@ -68,28 +82,52 @@ function sourceLabel(path: string): string {
   return "Le journal";
 }
 
+function readableSourceTitle(path: string): string {
+  const knownTitle = PUBLIC_SOURCE_TITLES[path];
+  if (knownTitle) return knownTitle;
+  const segments = path.split("/").filter(Boolean);
+  const lastSegment = segments.at(-1) ?? "Page";
+  let decoded = lastSegment;
+  try {
+    decoded = decodeURIComponent(lastSegment);
+  } catch {
+    decoded = lastSegment;
+  }
+  const words = decoded.replace(/[-_]+/g, " ").trim() || "Page";
+  return `${words.charAt(0).toLocaleUpperCase("fr-FR")}${words.slice(1)}`;
+}
+
+function extractedLink(path: string): ExtractedLink {
+  const basePath = path.split(/[?#]/)[0];
+  const menuLabel = SECTION_LABELS[basePath];
+  return menuLabel
+    ? { href: path, title: menuLabel, kind: "action" }
+    : {
+        href: path,
+        title: readableSourceTitle(basePath),
+        kind: "source",
+        label: sourceLabel(basePath),
+      };
+}
+
 export function parseAlmaMessage(content: string): ParsedMessage {
   const links: ExtractedLink[] = [];
   const markdownPattern = /\[([^\]]+)\]\((https?:\/\/[^\s)]+|\/[^\s)]+)\)/g;
   let text = content.replace(markdownPattern, (_match, title: string, href: string) => {
     const path = normalizeInternalPath(href);
     if (!path) return title;
-    const basePath = path.split(/[?#]/)[0];
-    const menuLabel = SECTION_LABELS[basePath];
-    links.push(menuLabel
-      ? { href: path, title: menuLabel, kind: "action" }
-      : { href: path, title, kind: "source", label: sourceLabel(basePath) });
+    links.push(extractedLink(path));
     return "";
   });
 
   const rawPattern = /(?:https?:\/\/(?:www\.)?guardiens\.fr)?\/[a-zA-Z0-9À-ÿ_?&=#./-]+/g;
   text = text.replace(rawPattern, (href) => {
-    const path = normalizeInternalPath(href);
-    if (!path) return "";
-    const basePath = path.split(/[?#]/)[0];
-    const menuLabel = SECTION_LABELS[basePath];
-    if (menuLabel) links.push({ href: path, title: menuLabel, kind: "action" });
-    return "";
+    const trailingPunctuation = href.match(/[.,;:!?]+$/)?.[0] ?? "";
+    const cleanHref = trailingPunctuation ? href.slice(0, -trailingPunctuation.length) : href;
+    const path = normalizeInternalPath(cleanHref);
+    if (!path) return href;
+    links.push(extractedLink(path));
+    return trailingPunctuation;
   });
 
   return { text: text.replace(/\s{2,}/g, " ").trim(), links };
