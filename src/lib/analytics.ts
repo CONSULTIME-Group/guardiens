@@ -112,6 +112,11 @@ export type EventType =
 
   | "sit_animal_mention_add_pets"      // Signal animaux : choix d'ajouter les animaux (sit_id)
   | "sit_animal_mention_publish_anyway" // Signal animaux : publication maintenue sans animal (sit_id)
+  // Recommandation de photos du logement au moment de publier ----------------
+  | "sit_publish_photo_prompt_shown"        // Recommandation affichée (sit_id, photo_count)
+  | "sit_publish_photo_prompt_add_photos"   // Choix d'ajouter des photos (decision: add_photos)
+  | "sit_publish_photo_prompt_publish_anyway" // Publication maintenue (decision: publish_anyway)
+
   // Hygiène ré-audit : events émis en prod, désormais typés -------------------
   | "signup_terms_checked"             // CGU cochées (metadata.step: 1 | 2)
   | "dashboard_error"                  // Erreur boundary dashboard (metadata.error_type, component?)
