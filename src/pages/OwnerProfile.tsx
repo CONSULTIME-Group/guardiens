@@ -403,13 +403,21 @@ const OwnerProfilePage = () => {
                 </div>
               )}
               {activeSection === "skills" && (
-                <OwnerStepSkills
-                  competences={mergedData.owner_competences || []}
-                  competencesDisponible={mergedData.owner_competences_disponible || false}
-                  skillCategories={mergedData.owner_skill_categories || []}
-                  onChange={(partial) => handleChange(partial as any)}
-                />
+                <>
+                  <OwnerStepSkills
+                    competences={mergedData.owner_competences || []}
+                    competencesDisponible={mergedData.owner_competences_disponible || false}
+                    skillCategories={mergedData.owner_skill_categories || []}
+                    onChange={(partial) => handleChange(partial as any)}
+                  />
+                  <VolunteerAvailabilityBlock
+                    userId={user?.id}
+                    postalCode={mergedData.postal_code}
+                    activeRole="owner"
+                  />
+                </>
               )}
+
               {activeSection === "gallery" && <OwnerGallery />}
 
               {/* Bouton « Suivant », auto-sauvegarde puis avance dans la liste. */}
