@@ -30,6 +30,8 @@ import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { AffinityOnboardingFunnelCard } from "@/components/admin/AffinityOnboardingFunnelCard";
 import { ConversationsTab } from "./_components/alma/ConversationsTab";
 import { MoodsTab } from "./_components/alma/MoodsTab";
+import { DiscoveryFunnelCard } from "./_components/alma/DiscoveryFunnelCard";
+
 import { trackEvent } from "@/lib/analytics";
 import { WHISPER_PRIORITY } from "@/lib/alma/whisper-types";
 import {
@@ -117,6 +119,9 @@ export default function AdminAlma() {
       </div>
 
       <AffinityOnboardingFunnelCard since={since} />
+
+      <DiscoveryFunnelCard since={since} />
+
 
       <Tabs value={tab} onValueChange={handleTabChange}>
         <TabsList>
