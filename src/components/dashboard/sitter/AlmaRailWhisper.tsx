@@ -11,6 +11,7 @@ import AlmaAvatar from "@/components/ai/alma/AlmaAvatar";
 import { useAlmaHidden } from "@/hooks/useAlmaHidden";
 import { toast } from "sonner";
 import { pickAlmaRailPhrase } from "@/lib/almaRailPhrase";
+import { openAlmaDock } from "@/lib/alma/dock-events";
 
 interface AlmaRailWhisperProps {
   profileCompletion?: number;
@@ -47,7 +48,7 @@ const AlmaRailWhisper = ({
     ownerState,
   });
 
-  const handleActivate = () => {
+  const handleActivate = (trigger?: HTMLElement | null) => {
     if (hidden) {
       void (async () => {
         try {
@@ -60,7 +61,18 @@ const AlmaRailWhisper = ({
       return;
     }
     try {
-      window.dispatchEvent(new CustomEvent("alma:open-dock"));
+      const tellsHouseStory =
+        variant === "owner" && ownerState?.noActiveSit && !ownerState.pendingApps && !ownerState.ongoingSit;
+      openAlmaDock({
+        subject: tellsHouseStory ? "raconter la maison" : phrase,
+        instantLine: tellsHouseStory
+          ? "Alors racontez moi. Où est votre maison, et qu'est-ce qui s'y passe quand vous partez ?"
+          : phrase,
+        readyReplies: tellsHouseStory
+          ? ["Je pars bientôt", "Je prépare mon annonce"]
+          : undefined,
+        trigger,
+      });
     } catch {
       /* silent */
     }
@@ -69,7 +81,7 @@ const AlmaRailWhisper = ({
   const onKeyDown = (e: KeyboardEvent<HTMLElement>) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
-      handleActivate();
+      handleActivate(e.currentTarget);
     }
   };
 
@@ -81,7 +93,7 @@ const AlmaRailWhisper = ({
       role="button"
       tabIndex={0}
       aria-label={ariaLabel}
-      onClick={handleActivate}
+      onClick={(e) => handleActivate(e.currentTarget)}
       onKeyDown={onKeyDown}
       className="bg-card flex items-start cursor-pointer transition-shadow duration-200 hover:shadow-[0_2px_4px_rgba(29,27,22,.05),0_18px_40px_rgba(29,27,22,.09)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
       style={{

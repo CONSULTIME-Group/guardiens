@@ -120,4 +120,17 @@ describe("WelcomeBackDigest - getCopy", () => {
     expect(copy.body).toContain("7");
     expect(copy.actionHref).toBe("/annonces/international");
   });
+
+  it("owner_intl accorde le titre et la phrase au singulier", () => {
+    const copy = getCopy("owner_intl", { ...empty, new_intl_sitters: 1 });
+    expect(copy.title).toBe("Un nouveau gardien a rejoint la communauté");
+    expect(copy.body).toContain("1 nouvelle personne s'est inscrite");
+    expect(copy.body).not.toContain("vivier");
+  });
+
+  it("owner_intl accorde le titre et la phrase au pluriel", () => {
+    const copy = getCopy("owner_intl", { ...empty, new_intl_sitters: 4 });
+    expect(copy.title).toBe("De nouveaux gardiens ont rejoint la communauté");
+    expect(copy.body).toContain("4 nouvelles personnes se sont inscrites");
+  });
 });

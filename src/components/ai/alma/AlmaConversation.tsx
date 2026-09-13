@@ -51,9 +51,11 @@ interface AlmaConversationProps {
   activeRole: "owner" | "sitter";
   /** Libellé du stade de relation, affiché sous le nom dans l'en tête. */
   stageLabel?: string;
+  focusSignal?: number;
+  onClose?: () => void;
 }
 
-export function AlmaConversation({ surface, activeRole, stageLabel }: AlmaConversationProps) {
+export function AlmaConversation({ surface, activeRole, stageLabel, focusSignal, onClose }: AlmaConversationProps) {
   const state = useSyncExternalStore(subscribeAlmaConversation, getAlmaConversationState);
   const [draft, setDraft] = useState("");
   const viewportHeight = useVisualViewportHeight();
@@ -72,6 +74,11 @@ export function AlmaConversation({ surface, activeRole, stageLabel }: AlmaConver
     const el = threadRef.current;
     if (el) el.scrollTop = el.scrollHeight;
   }, [state.messages.length, state.sending]);
+
+  useEffect(() => {
+    if (!focusSignal) return;
+    inputRef.current?.focus({ preventScroll: true });
+  }, [focusSignal]);
 
   const maxHeight = Math.round(viewportHeight * 0.6);
 
@@ -107,7 +114,10 @@ export function AlmaConversation({ surface, activeRole, stageLabel }: AlmaConver
         </span>
         <button
           type="button"
-          onClick={closeAlmaConversation}
+          onClick={() => {
+            closeAlmaConversation();
+            onClose?.();
+          }}
           className="ml-auto flex h-11 w-11 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
           aria-label="Fermer la conversation avec Alma"
         >

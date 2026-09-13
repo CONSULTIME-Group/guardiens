@@ -7,6 +7,7 @@
  * lucide dans le contenu (icône Alma OK car elle EST l'identité de l'agent).
  */
 import AlmaAvatar from "@/components/ai/alma/AlmaAvatar";
+import { openAlmaDock } from "@/lib/alma/dock-events";
 
 interface AlmaWhisperCardProps {
   /** Phrase à afficher. Si vide, le composant ne rend rien. */
@@ -23,10 +24,10 @@ const AlmaWhisperCard = ({
 }: AlmaWhisperCardProps) => {
   if (!phrase) return null;
 
-  const handleActivate = () => {
+  const handleActivate = (trigger?: HTMLElement | null) => {
     if (onAction) return onAction();
     try {
-      window.dispatchEvent(new CustomEvent("alma:open-dock"));
+      openAlmaDock({ subject: phrase, instantLine: phrase, trigger });
     } catch {
       /* silent */
     }
@@ -36,11 +37,11 @@ const AlmaWhisperCard = ({
     <aside
       role="button"
       tabIndex={0}
-      onClick={handleActivate}
+      onClick={(e) => handleActivate(e.currentTarget)}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          handleActivate();
+          handleActivate(e.currentTarget);
         }
       }}
       aria-label={actionLabel}
