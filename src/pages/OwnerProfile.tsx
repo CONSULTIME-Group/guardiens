@@ -15,6 +15,8 @@ import OwnerAffinityBanner from "@/components/matching/OwnerAffinityBanner";
 
 import OwnerHouseGuideForm from "@/components/owner-profile/OwnerHouseGuideForm";
 import OwnerStepSkills from "@/components/owner-profile/OwnerStepSkills";
+import VolunteerAvailabilityBlock from "@/components/profile/VolunteerAvailabilityBlock";
+
 import ProfileSidebar, { type SidebarSection } from "@/components/profile/ProfileSidebar";
 import ProfileSkeleton from "@/components/profile/ProfileSkeleton";
 import ScoreBreakdown, { type ScoreCriterion } from "@/components/profile/ScoreBreakdown";
