@@ -57,6 +57,8 @@ const AdminOverview = () => {
       {/* 3. État du service */}
       <KpiCards stats={stats} />
       <CronHealthCard />
+      <VolunteerAvailabilityCard />
+
 
       {/* 4. Activité récente (repliée) */}
       <RecentActivity activity={activity} />
