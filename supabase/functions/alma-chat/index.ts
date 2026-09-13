@@ -10,7 +10,8 @@ import { callLovableAI, CORS_HEADERS } from "../_shared/ai-gateway.ts";
 import {
   ALMA_CHAT_DAILY_LIMIT,
   ALMA_CHAT_LIMIT_MESSAGE,
-  ALMA_SYSTEM_PROMPT,
+  almaRegisterReminder,
+  buildAlmaSystemPrompt,
   detectRegister,
   normalizeAlmaOutput,
 } from "../_shared/alma-system-prompt.ts";
@@ -35,6 +36,7 @@ Deno.serve(async (req) => {
     if (!message || message.length > 2000) {
       return json({ error: "Message invalide (1 à 2000 caractères)." }, 400);
     }
+    const register = detectRegister(message);
     const activeRole = body?.active_role === "owner" ? "owner" : "sitter";
     // Voix ou clavier, renseigne la répartition suivie dans /admin/alma.
     const inputMode = body?.input_mode === "voice" ? "voice" : "keyboard";
@@ -47,7 +49,7 @@ Deno.serve(async (req) => {
       ? [
           {
             role: "system" as const,
-            content: `Votre humeur en ce moment : ${mood}. Ce que vous vivez aujourd'hui : ${moodLine}`,
+            content: `Ton humeur en ce moment : ${mood}. Ce que tu vis aujourd'hui : ${moodLine}`,
           },
         ]
       : [];
@@ -99,7 +101,7 @@ Deno.serve(async (req) => {
         input_mode: inputMode,
         question: message,
         answer: ALMA_CHAT_LIMIT_MESSAGE,
-        register: detectRegister(message),
+        register,
         refusal_reason: "daily_limit",
         latency_ms: Date.now() - startedAt,
 
@@ -130,11 +132,14 @@ Deno.serve(async (req) => {
     // Sans lui, l'amorce « Qu'est-ce qui manque à mon profil ? » reste sans réponse.
     let baremeProfil: string | null = null;
     let profilACompleter: Array<{ champ: string; libelle: string; points: number }> = [];
+    let profilACompleterCharge = false;
     try {
-      const { data } = await adminClient.rpc("profile_completion_missing", {
+      const { data, error } = await adminClient.rpc("profile_completion_missing", {
         p_user_id: userId,
       });
+      if (error) throw error;
       const rows = Array.isArray(data) ? data : [];
+      profilACompleterCharge = true;
       baremeProfil = rows.length > 0 ? (rows[0] as any).bareme ?? null : null;
       profilACompleter = rows.map((r: any) => ({
         champ: r.champ,
@@ -235,7 +240,9 @@ Deno.serve(async (req) => {
     const dossier = {
       prenom: (profileRes.data as any)?.first_name ?? null,
       ville: (profileRes.data as any)?.city ?? null,
-      completion_profil: (profileRes.data as any)?.profile_completion ?? null,
+      completion_profil: profilACompleterCharge
+        ? 100 - profilACompleter.reduce((total, item) => total + item.points, 0)
+        : (profileRes.data as any)?.profile_completion ?? null,
       identite_verifiee: (profileRes.data as any)?.identity_verified ?? null,
       bareme_profil: baremeProfil,
       profil_a_completer: profilACompleter,
@@ -265,10 +272,10 @@ Deno.serve(async (req) => {
       role: "system" as const,
       content:
         sources.length > 0
-          ? `Sources Guardiens trouvées pour cette question. Vous pouvez les citer et donner leur lien. Vous ne citez aucun autre lien que ceux de cette liste.\n${sources
+          ? `Sources Guardiens trouvées pour cette question. Tu peux les citer et donner leur lien. Tu ne cites aucun autre lien que ceux de cette liste.\n${sources
               .map((s: any) => `[${s.source}] ${s.title}, ${s.url}, ${s.snippet ?? ""}`)
               .join("\n")}`
-          : "Aucune source Guardiens trouvée pour cette question. Répondez de votre voix, sans citer de lien d'article.",
+          : "Aucune source Guardiens trouvée pour cette question. Réponds de ta voix, sans citer de lien d'article.",
     };
 
     const r = await callLovableAI({
@@ -276,14 +283,15 @@ Deno.serve(async (req) => {
       // 0.85 : à 0.6 le modèle retombe sur les mêmes ouvertures.
       temperature: 0.85,
       messages: [
-        { role: "system", content: ALMA_SYSTEM_PROMPT },
+        { role: "system", content: buildAlmaSystemPrompt(register) },
         ...moodMessages,
         sourcesMessage,
         {
           role: "system",
-          content: `Dossier de la personne qui vous parle (ses données, vous pouvez les citer). Les champs null sont simplement absents :\n${JSON.stringify(dossier, null, 2)}`,
+          content: `Dossier de la personne qui te parle, ce sont ses données, tu peux les citer. Les champs null sont simplement absents :\n${JSON.stringify(dossier, null, 2)}`,
         },
         ...history,
+        { role: "system", content: almaRegisterReminder(register) },
         { role: "user", content: message },
       ],
     });
@@ -296,7 +304,7 @@ Deno.serve(async (req) => {
         input_mode: inputMode,
         question: message,
         answer: null,
-        register: detectRegister(message),
+        register,
         refusal_reason: r.code ?? `gateway_${r.status}`,
         latency_ms: Date.now() - startedAt,
         sources_count: sources.length,
@@ -313,7 +321,7 @@ Deno.serve(async (req) => {
         input_mode: inputMode,
         question: message,
         answer: null,
-        register: detectRegister(message),
+        register,
         refusal_reason: "empty_answer",
         latency_ms: Date.now() - startedAt,
         sources_count: sources.length,
@@ -328,7 +336,7 @@ Deno.serve(async (req) => {
       input_mode: inputMode,
       question: message,
       answer,
-      register: detectRegister(message),
+      register,
       refusal_reason: null,
       latency_ms: Date.now() - startedAt,
       sources_count: sources.length,
