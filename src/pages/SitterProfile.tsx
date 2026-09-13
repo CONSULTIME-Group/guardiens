@@ -462,13 +462,21 @@ const SitterProfile = () => {
               {activeSection === "gallery" && <SitterGallery />}
               {activeSection === "experiences" && <ExternalExperiences />}
               {activeSection === "skills" && (
-                <StepSkills
-                  skillCategories={mergedData.skill_categories || []}
-                  availableForHelp={mergedData.available_for_help || false}
-                  competences={mergedData.competences || []}
-                  onChange={(partial) => handleChange(partial as any)}
-                />
+                <>
+                  <StepSkills
+                    skillCategories={mergedData.skill_categories || []}
+                    availableForHelp={mergedData.available_for_help || false}
+                    competences={mergedData.competences || []}
+                    onChange={(partial) => handleChange(partial as any)}
+                  />
+                  <VolunteerAvailabilityBlock
+                    userId={user?.id}
+                    postalCode={mergedData.postal_code}
+                    activeRole="sitter"
+                  />
+                </>
               )}
+
 
               {/* Bouton « Suivant », auto-sauvegarde puis avance. */}
               {nextSection && (
