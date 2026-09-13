@@ -101,14 +101,20 @@ export function getCopy(variant: WelcomeBackVariant, s: DigestSignals): CopyBloc
         actionId: s.new_applications > 0 ? "open_applications" : "open_messages",
       };
     }
-    case "owner_intl":
+    case "owner_intl": {
+      const people = s.new_intl_sitters === 1
+        ? "1 nouvelle personne s'est inscrite"
+        : `${s.new_intl_sitters} nouvelles personnes se sont inscrites`;
       return {
-        title: "De nouveaux gardiens ont rejoint la communauté",
-        body: `${s.new_intl_sitters} nouvelles personnes se sont inscrites depuis votre dernière visite. Votre annonce touche un vivier grandissant.`,
+        title: s.new_intl_sitters === 1
+          ? "Un nouveau gardien a rejoint la communauté"
+          : "De nouveaux gardiens ont rejoint la communauté",
+        body: `${people} depuis votre dernière visite. Votre annonce peut maintenant être découverte par ces nouvelles personnes.`,
         actionLabel: "Voir les gardiens à l'international",
         actionHref: "/annonces/international",
         actionId: "view_intl_sitters",
       };
+    }
     case "owner_empty_positive":
       return {
         title: "Tout est calme pour le moment",

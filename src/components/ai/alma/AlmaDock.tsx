@@ -63,6 +63,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { AlmaWhisper as AlmaWhisperT, AlmaDismissReason } from "@/lib/alma/whisper-types";
+import {
+  ALMA_OPEN_DOCK_EVENT,
+  type AlmaDockOpenDetail,
+} from "@/lib/alma/dock-events";
 
 
 const STAGE_DOT_CLASS: Record<AlmaStage, string> = {
@@ -229,10 +233,10 @@ function DockComposer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Focus demandé par la pilule du dock replié. Jamais d'autofocus sinon.
+  // Focus demandé par une ouverture volontaire du dock.
   useEffect(() => {
     if (!focusSignal) return;
-    fieldRef.current?.focus();
+    fieldRef.current?.focus({ preventScroll: true });
   }, [focusSignal]);
 
   const send = (text: string) => {
@@ -397,6 +401,8 @@ function AlmaDockInner() {
 
   const [expanded, setExpanded] = useState(false);
   const [userCollapsed, setUserCollapsed] = useState(false);
+  const [entryContext, setEntryContext] = useState<AlmaDockOpenDetail | null>(null);
+  const triggerRef = useRef<HTMLElement | null>(null);
 
   // Fil de conversation, stocké hors React pour survivre au démontage du
   // dock provoqué par une modale Radix.
@@ -451,6 +457,7 @@ function AlmaDockInner() {
   // a explicitement replié et qu'aucun nouveau whisper n'est venu depuis).
   useEffect(() => {
     if (currentWhisper) {
+      setEntryContext(null);
       setExpanded(true);
       setUserCollapsed(false);
       trackEvent("alma_dock_expanded" as any, {
@@ -465,16 +472,21 @@ function AlmaDockInner() {
   }, [currentWhisper?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
 
-  // Ouverture programmatique depuis n'importe quelle carte du produit
-  // (ex. AlmaRailWhisper). Événement fenêtre volontairement minimal pour
-  // éviter un refactor du dock ou l'ajout d'une nouvelle API de contexte.
+  // Ouverture programmatique depuis une carte du produit. Le détail reste
+  // optionnel pour préserver les appels existants sans sujet explicite.
   useEffect(() => {
-    const onOpen = () => {
+    const onOpen = (event: Event) => {
+      const detail = (event as CustomEvent<AlmaDockOpenDetail>).detail ?? {};
+      triggerRef.current = detail.trigger ?? (
+        document.activeElement instanceof HTMLElement ? document.activeElement : null
+      );
+      setEntryContext(detail);
       setExpanded(true);
       setUserCollapsed(false);
+      setFocusSignal((value) => value + 1);
     };
-    window.addEventListener("alma:open-dock", onOpen);
-    return () => window.removeEventListener("alma:open-dock", onOpen);
+    window.addEventListener(ALMA_OPEN_DOCK_EVENT, onOpen);
+    return () => window.removeEventListener(ALMA_OPEN_DOCK_EVENT, onOpen);
   }, []);
 
   const doDismiss = useCallback(
@@ -607,10 +619,19 @@ function AlmaDockInner() {
     });
   }, [setHidden, toast]);
 
+  const restoreTriggerFocus = useCallback(() => {
+    const trigger = triggerRef.current;
+    triggerRef.current = null;
+    window.requestAnimationFrame(() => {
+      if (trigger?.isConnected) trigger.focus({ preventScroll: true });
+    });
+  }, []);
+
   const collapse = () => {
     setExpanded(false);
     setUserCollapsed(true);
     if (whisper) doDismiss("closed_manually");
+    restoreTriggerFocus();
   };
 
 
@@ -640,7 +661,7 @@ function AlmaDockInner() {
   // Une seule ligne de texte dans le panneau : le whisper prime, puis la
   // proposition contextuelle, puis l'humeur du jour.
   const panelLine = resolvePanelLine({
-    whisperMessage: whisper?.message ?? null,
+    whisperMessage: entryContext?.instantLine ?? whisper?.message ?? null,
     propositionMessage: proposition?.message ?? null,
     moodLine: isSilent ? null : almaMood.line,
   });
@@ -662,7 +683,11 @@ function AlmaDockInner() {
 
   // Ouverture du panneau tracée avec son origine (N6).
   const openPanel = useCallback(
-    (origin: "whisper" | "avatar" | "pill") => {
+    (origin: "whisper" | "avatar" | "pill", trigger?: HTMLElement | null) => {
+      triggerRef.current = trigger ?? (
+        document.activeElement instanceof HTMLElement ? document.activeElement : null
+      );
+      setEntryContext(null);
       setExpanded(true);
       setUserCollapsed(false);
       composerSeenRef.current = false;
@@ -671,13 +696,13 @@ function AlmaDockInner() {
       trackEvent("alma_dock_expanded" as any, {
         metadata: { surface: surfaceFromPath(location.pathname, activeRole), origin },
       });
+      setFocusSignal((value) => value + 1);
     },
     [location.pathname, activeRole],
   );
 
-  const openFromPill = useCallback(() => {
-    openPanel("pill");
-    setFocusSignal((v) => v + 1);
+  const openFromPill = useCallback((trigger: HTMLElement) => {
+    openPanel("pill", trigger);
   }, [openPanel]);
 
   const composerSurface = surfaceFromPath(location.pathname, activeRole);
@@ -715,7 +740,7 @@ function AlmaDockInner() {
   }, [userId, expanded, promptSurface, activeRole]);
 
 
-  const starters = resolvePromptStarters({
+  const defaultStarters = resolvePromptStarters({
     surface: promptSurface,
     ctx: {
       hasDraftSit: evolution?.signals.hasDraftSit ?? false,
@@ -723,6 +748,7 @@ function AlmaDockInner() {
     },
     whisperType: currentWhisper?.type ?? null,
   });
+  const starters = entryContext?.readyReplies?.slice(0, 2) ?? defaultStarters;
 
   // Phrase de présentation, une seule fois par personne.
   const introKey = userId
@@ -782,9 +808,13 @@ function AlmaDockInner() {
         onDemand: true,
         emptyMessage: "Rien de neuf pour l'instant, revenez un peu plus tard.",
       });
+      triggerRef.current = document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+      setEntryContext(null);
       setExpanded(true);
-
       setUserCollapsed(false);
+      setFocusSignal((value) => value + 1);
     },
     [location.pathname, activeRole, requestNextTip],
   );
@@ -800,8 +830,12 @@ function AlmaDockInner() {
     trackEvent("alma_conversation_opened" as any, {
       metadata: { surface: surfaceFromPath(location.pathname, activeRole) },
     });
+    triggerRef.current = document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null;
     setExpanded(true);
     setUserCollapsed(false);
+    setFocusSignal((value) => value + 1);
   };
 
   if (isModalOpen) return null;
@@ -827,6 +861,8 @@ function AlmaDockInner() {
           surface={surfaceFromPath(location.pathname, activeRole)}
           activeRole={activeRole === "owner" ? "owner" : "sitter"}
           stageLabel={stage ? STAGE_SHORT_LABEL[stage] : undefined}
+          focusSignal={focusSignal}
+          onClose={restoreTriggerFocus}
         />
       )}
 
@@ -929,12 +965,13 @@ function AlmaDockInner() {
         <div className="relative">
           <button
             type="button"
-            onClick={() => {
+            onClick={(e) => {
               if (expanded) {
                 setExpanded(false);
                 setUserCollapsed(true);
+                restoreTriggerFocus();
               } else {
-                openPanel("avatar");
+                openPanel("avatar", e.currentTarget);
               }
             }}
 
@@ -1005,12 +1042,13 @@ function AlmaDockInner() {
         <button
           type="button"
           tabIndex={-1}
-          onClick={() => {
+          onClick={(e) => {
             if (expanded) {
               setExpanded(false);
               setUserCollapsed(true);
+              restoreTriggerFocus();
             } else {
-              openPanel("avatar");
+              openPanel("avatar", e.currentTarget);
             }
           }}
 
@@ -1035,7 +1073,7 @@ function AlmaDockInner() {
         <button
           type="button"
           data-testid="alma-ask-pill"
-          onClick={openFromPill}
+          onClick={(e) => openFromPill(e.currentTarget)}
           className="flex h-11 shrink-0 items-center rounded-full border border-border bg-muted/40 px-3 font-body text-[12px] text-muted-foreground hover:bg-muted hover:text-foreground transition focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <span className="hidden sm:inline">Posez moi une question</span>
