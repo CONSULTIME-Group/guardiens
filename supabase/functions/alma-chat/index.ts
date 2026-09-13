@@ -258,26 +258,35 @@ Deno.serve(async (req) => {
 
     // Sources Guardiens : articles, FAQ, conseils et pages de ville.
     // Sans elles, le prompt ordonne de citer des sources invisibles.
+    // Sur le registre perso, aucune recherche : la biographie d'Alma n'est pas
+    // dans le corpus, la recherche ne rendrait que du hors sujet.
     let sources: any[] = [];
-    try {
-      const { data } = await adminClient.rpc("search_alma_knowledge", {
-        p_query: message,
-        p_limit: 3,
-      });
-      sources = Array.isArray(data) ? data : [];
-    } catch (_e) {
-      sources = [];
+    if (register !== "perso") {
+      try {
+        const { data } = await adminClient.rpc("search_alma_knowledge", {
+          p_query: message,
+          p_limit: 3,
+        });
+        sources = Array.isArray(data) ? data : [];
+      } catch (_e) {
+        sources = [];
+      }
     }
 
-    const sourcesMessage = {
-      role: "system" as const,
-      content:
-        sources.length > 0
-          ? `Sources Guardiens trouvées pour cette question. Tu peux les citer et donner leur lien. Tu ne cites aucun autre lien que ceux de cette liste.\n${sources
-              .map((s: any) => `[${s.source}] ${s.title}, ${s.url}, ${s.snippet ?? ""}`)
-              .join("\n")}`
-          : "Aucune source Guardiens trouvée pour cette question. Réponds de ta voix, sans citer de lien d'article.",
-    };
+    const sourcesMessages =
+      register === "perso"
+        ? []
+        : [
+            {
+              role: "system" as const,
+              content:
+                sources.length > 0
+                  ? `Sources Guardiens trouvées pour cette question. Tu peux les citer et donner leur lien. Tu ne cites aucun autre lien que ceux de cette liste.\nCes sources viennent d'une recherche automatique, elles ne répondent pas toujours à la question posée. Cite celle qui répond, ignore les autres, et n'en cite aucune si aucune ne répond.\n${sources
+                      .map((s: any) => `[${s.source}] ${s.title}, ${s.url}, ${s.snippet ?? ""}`)
+                      .join("\n")}`
+                  : "Aucune source Guardiens trouvée pour cette question. Réponds de ta voix, sans citer de lien d'article.",
+            },
+          ];
 
     const r = await callLovableAI({
       model: "google/gemini-2.5-flash",
@@ -286,7 +295,7 @@ Deno.serve(async (req) => {
       messages: [
         { role: "system", content: buildAlmaSystemPrompt(register) },
         ...moodMessages,
-        sourcesMessage,
+        ...sourcesMessages,
         {
           role: "system",
           content: `Dossier de la personne qui te parle, ce sont ses données, tu peux les citer. Les champs null sont simplement absents :\n${JSON.stringify(dossier, null, 2)}`,
