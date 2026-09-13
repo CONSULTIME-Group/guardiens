@@ -63,7 +63,7 @@ describe("Alma, habillage charte", () => {
   it("le panneau est un dialogue et aucun libellé d'action ne montre un chemin", () => {
     expect(thread).toContain("<SheetContent");
     expect(thread).toContain("<SheetTitle");
-    expect(thread).toMatch(/title:\s*"[^"]+",\s*kind:\s*"action"/);
+    expect(thread).toContain("title: menuLabel, kind: \"action\"");
     expect(thread).not.toMatch(/title:\s*"\//);
   });
 });

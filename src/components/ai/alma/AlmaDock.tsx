@@ -462,6 +462,13 @@ function AlmaDockInner() {
     });
   }, []);
 
+  const collapse = () => {
+    setExpanded(false);
+    setUserCollapsed(true);
+    if (whisper) doDismiss("closed_manually");
+    restoreTriggerFocus();
+  };
+
   const mood = whisper?.primaryAction ? "attentive" : "idle";
   const rawProposition = !whisper && !isSilent ? buildProposition(evolution, activeRole) : null;
   // Ne jamais proposer une action qui pointe vers la page courante.
