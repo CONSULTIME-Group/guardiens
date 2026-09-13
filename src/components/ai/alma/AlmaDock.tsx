@@ -153,9 +153,12 @@ function useIsRadixModalOpen(): boolean {
       // alertdialog Radix. Les DropdownMenu / Popover (role="menu") ne
       // doivent PAS démonter le dock, sinon le menu d'Alma se ferme
       // instantanément à l'ouverture et ses items deviennent incliquables.
-      const hasOpenDialog =
-        document.querySelector('[role="dialog"][data-state="open"]') !== null ||
-        document.querySelector('[role="alertdialog"][data-state="open"]') !== null;
+      const openDialogs = Array.from(
+        document.querySelectorAll<HTMLElement>('[role="dialog"][data-state="open"], [role="alertdialog"][data-state="open"]'),
+      );
+      const hasOpenDialog = openDialogs.some(
+        (dialog) => dialog.dataset.almaConversationDialog !== "true",
+      );
       const hasOpenOverlay =
         document.querySelector('[data-radix-dialog-overlay][data-state="open"]') !== null ||
         document.querySelector('[data-radix-alert-dialog-overlay][data-state="open"]') !== null;
@@ -749,6 +752,20 @@ function AlmaDockInner() {
     whisperType: currentWhisper?.type ?? null,
   });
   const starters = entryContext?.readyReplies?.slice(0, 2) ?? defaultStarters;
+  const conversationAction = whisper?.primaryAction
+    ? {
+        label: whisper.primaryAction.label,
+        onClick: () => handleAction(whisper.primaryAction.onClick, whisper.primaryAction.actionId),
+      }
+    : proposition
+      ? {
+          label: proposition.ctaLabel,
+          onClick: () => {
+            navigate(proposition.ctaTo);
+            setExpanded(false);
+          },
+        }
+      : null;
 
   // Phrase de présentation, une seule fois par personne.
   const introKey = userId
@@ -855,100 +872,33 @@ function AlmaDockInner() {
         "bottom-[calc(env(safe-area-inset-bottom,0px)+5.5rem)] md:bottom-6",
       )}
     >
-      {/* Fil de conversation, prioritaire sur les panneaux d'un seul message */}
-      {expanded && conversation.open && (
+      {expanded && (
         <AlmaConversation
+          open={expanded}
+          onOpenChange={(open) => {
+            if (open) return;
+            setExpanded(false);
+            setUserCollapsed(true);
+            if (whisper) doDismiss("closed_manually");
+            restoreTriggerFocus();
+          }}
           surface={surfaceFromPath(location.pathname, activeRole)}
           activeRole={activeRole === "owner" ? "owner" : "sitter"}
+          initialMessage={panelLine}
+          moodLine={isSilent ? null : almaMood.line}
           stageLabel={stage ? STAGE_SHORT_LABEL[stage] : undefined}
+          stage={stage ?? undefined}
+          subject={entryContext?.subject}
           focusSignal={focusSignal}
+          starters={starters}
+          showIntro={showIntro}
+          onIntroSeen={onIntroSeen}
+          onStarterClick={onStarterClick}
+          onSeen={onComposerSeen}
+          onFocus={onComposerFocused}
+          onTyped={onComposerTyped}
+          action={conversationAction}
         />
-      )}
-
-      {/* Panneau déplié : une seule ligne de texte, le composeur toujours
-          visible, au maximum une action. Le whisper prime sur l'humeur, qui
-          se tait. La croix n'existe que sur un whisper, jamais sur une
-          humeur. */}
-      {expanded && !conversation.open && (
-        <div
-          role="status"
-          aria-live="polite"
-          data-testid="alma-dock-panel"
-          data-whisper-type={whisper?.type}
-          onPointerEnter={whisper ? pauseTimer : undefined}
-          onPointerLeave={whisper ? resumeTimer : undefined}
-          onFocusCapture={whisper ? pauseTimer : undefined}
-          onBlurCapture={whisper ? resumeTimer : undefined}
-          className={cn(
-            "pointer-events-auto mb-2 w-full md:w-96 relative",
-            "alma-panel text-card-foreground",
-            whisper ? "pr-12" : "",
-            "animate-in slide-in-from-bottom-2 fade-in duration-300",
-          )}
-        >
-          {whisper && (
-            <button
-              type="button"
-              onClick={() => doDismiss("closed_manually")}
-              className="absolute right-1 top-1 flex h-11 w-11 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition"
-              aria-label="Fermer le message d'Alma"
-            >
-              <X className="h-3.5 w-3.5" />
-            </button>
-          )}
-          <div className="flex items-start gap-[14px]">
-            <span className="alma-badge">
-              <AlmaAvatarAnimated
-                size={28}
-                mood={panelAvatarMood}
-                stage={stage ?? undefined}
-                aria-hidden
-              />
-            </span>
-            <p className="alma-voice flex-1 min-w-0 whitespace-pre-line">{panelLine}</p>
-          </div>
-          {whisper?.primaryAction && (
-            <div className="mt-[14px]">
-              <button
-                type="button"
-                data-testid="alma-panel-action"
-                onClick={() =>
-                  handleAction(whisper.primaryAction!.onClick, whisper.primaryAction!.actionId)
-                }
-                className="alma-primary-shadow rounded-full bg-primary text-primary-foreground font-body text-xs font-bold px-4 py-2 hover:bg-primary/90 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
-              >
-                {whisper.primaryAction.label}
-              </button>
-            </div>
-          )}
-          <DockComposer
-            surface={surface}
-            activeRole={activeRole === "owner" ? "owner" : "sitter"}
-            seed={panelLine}
-            focusSignal={focusSignal}
-            starters={starters}
-            showIntro={showIntro}
-            onIntroSeen={onIntroSeen}
-            onStarterClick={onStarterClick}
-
-            onSeen={onComposerSeen}
-            onFocus={onComposerFocused}
-            onTyped={onComposerTyped}
-          />
-
-          {!whisper && proposition && (
-            <div className="mt-[14px]">
-              <button
-                type="button"
-                data-testid="alma-panel-action"
-                onClick={() => { navigate(proposition.ctaTo); setExpanded(false); }}
-                className="rounded-full border border-border bg-muted/50 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition"
-              >
-                {proposition.ctaLabel}
-              </button>
-            </div>
-          )}
-        </div>
       )}
 
       {/* Dock replié (avatar + label + contrôles) */}
