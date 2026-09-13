@@ -155,15 +155,18 @@ Deno.serve(async (req) => {
       const email = (row.email ?? '').trim()
       if (!email) return 'skipped'
 
-      // Deduplication definitive : jamais deux fois la meme periode a la meme
-      // adresse, quelle que soit l'anciennete de l'envoi.
+      const idempotencyKey = `seasonal-nurture-${row.user_id}-${periodKey}`
+
+      // Deduplication amont, alignee sur la garde d'idempotence de
+      // send-transactional-email. On interroge la cle d'idempotence et non
+      // period_key, car la file differee ne transporte pas logMetadata.
       const { data: prev } = await admin
         .from('email_send_log')
         .select('id')
         .eq('template_name', TEMPLATE)
         .eq('recipient_email', email)
         .in('status', ['sent', 'pending', 'deferred'])
-        .eq('metadata->>period_key', periodKey)
+        .eq('metadata->>idempotency_key', idempotencyKey)
         .limit(1)
       if (prev && prev.length > 0) return 'skipped'
 
@@ -175,7 +178,7 @@ Deno.serve(async (req) => {
         body: JSON.stringify({
           templateName: TEMPLATE,
           recipientEmail: email,
-          idempotencyKey: `seasonal-nurture-${row.user_id}-${periodKey}`,
+          idempotencyKey,
           templateData: {
             firstName: row.first_name ?? undefined,
             city: row.city ?? null,
