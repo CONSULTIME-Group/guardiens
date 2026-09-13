@@ -38,6 +38,7 @@ describe("VolunteerAvailabilityBlock", () => {
     expect(screen.getByText(VOLUNTEER_WAITING_SENTENCE)).toBeInTheDocument();
     expect(screen.queryByText("Ce que je peux apporter")).toBeNull();
 
+    await waitFor(() => expect(screen.getByRole("checkbox")).not.toBeDisabled());
     fireEvent.click(screen.getByRole("checkbox"));
 
     expect(screen.getByText("Le type de structure que j'aimerais aider")).toBeInTheDocument();
@@ -50,6 +51,7 @@ describe("VolunteerAvailabilityBlock", () => {
   it("enregistre la déclaration et émet la mesure", async () => {
     render(<VolunteerAvailabilityBlock userId="u1" postalCode="74000" activeRole="owner" />);
 
+    await waitFor(() => expect(screen.getByRole("checkbox")).not.toBeDisabled());
     fireEvent.click(screen.getByRole("checkbox"));
     fireEvent.click(screen.getByRole("button", { name: "Refuge et fourrière" }));
     fireEvent.click(screen.getByRole("button", { name: "Bricolage" }));
