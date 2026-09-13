@@ -93,7 +93,7 @@ interface PropertySummary {
   equipments: string[];
   photos: string[];
   description: string | null;
-  region_highlights: string | null;
+  region_highlights?: string | null;
   rooms_count: number | null;
   bedrooms_count: number | null;
 }
