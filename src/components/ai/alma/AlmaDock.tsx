@@ -22,6 +22,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 import { ChevronDown, Sparkles, X, MoreHorizontal, Check, EyeOff, Lightbulb, Route, MessageCircle } from "lucide-react";
 import { AlmaConversation } from "./AlmaConversation";
+import { useAlmaJournal } from "@/hooks/useAlmaJournal";
+import type { AlmaJournalEntry } from "@/lib/alma/journal";
 import {
   getAlmaConversationState,
   openAlmaConversation,
@@ -611,6 +613,48 @@ function AlmaDockInner() {
     if (typeof window !== "undefined") window.localStorage.setItem(introKey, "true");
   }, [introKey]);
 
+  // Page du jour d'Alma (lot Y) : entrées déterministes lues à l'ouverture.
+  const { page: journal, markActed } = useAlmaJournal(
+    userId ?? undefined,
+    activeRole === "owner" ? "owner" : "sitter",
+    expanded,
+  );
+  const journalShownRef = useRef(false);
+  useEffect(() => {
+    if (!expanded) {
+      journalShownRef.current = false;
+      return;
+    }
+    if (journalShownRef.current || journal.entries.length === 0) return;
+    journalShownRef.current = true;
+    trackEvent("alma_journal_page_shown" as any, {
+      metadata: {
+        surface: composerSurface,
+        rule_keys: journal.entries.map((entry) => entry.ruleKey).join(","),
+        entries_count: journal.entries.length,
+      },
+    });
+  }, [composerSurface, expanded, journal.entries]);
+
+  const onJournalAction = useCallback(
+    (entry: AlmaJournalEntry) => {
+      markActed(entry.ruleKey);
+      trackEvent("alma_journal_action_clicked" as any, {
+        metadata: { surface: composerSurface, rule_key: entry.ruleKey },
+      });
+    },
+    [composerSurface, markActed],
+  );
+
+  const onJournalReply = useCallback(
+    (reply: string, ruleKey: string) => {
+      trackEvent("alma_journal_reply_clicked" as any, {
+        metadata: { surface: composerSurface, rule_key: ruleKey, label: reply },
+      });
+    },
+    [composerSurface],
+  );
+
   const onStarterClick = useCallback(
     (label: string) => {
       trackEvent("alma_prompt_suggestion_clicked" as any, {
@@ -729,6 +773,9 @@ function AlmaDockInner() {
           onFocus={onComposerFocused}
           onTyped={onComposerTyped}
           action={conversationAction}
+          journal={journal}
+          onJournalAction={onJournalAction}
+          onJournalReply={onJournalReply}
         />
       )}
 
