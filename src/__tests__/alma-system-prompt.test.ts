@@ -6,7 +6,11 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { detectRegister } from "../../supabase/functions/_shared/alma-system-prompt";
+import {
+  detectRegister,
+  buildAlmaSystemPrompt,
+  almaRegisterReminder,
+} from "../../supabase/functions/_shared/alma-system-prompt";
 import { ALMA_MOOD_KEYS, MOOD_AVATAR } from "@/lib/alma/mood";
 
 const read = (p: string) => readFileSync(resolve(process.cwd(), p), "utf8");
@@ -122,7 +126,7 @@ describe("humeur transmise à la conversation", () => {
   });
 
   it("la fonction alma-chat pose un message système d'humeur et monte la température", () => {
-    expect(edgeSource).toContain("Votre humeur en ce moment");
+    expect(edgeSource).toContain("Ton humeur en ce moment");
     expect(edgeSource).toContain("temperature: 0.85");
   });
 });
