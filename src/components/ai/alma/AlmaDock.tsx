@@ -20,7 +20,7 @@ import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "
 import { supabase } from "@/integrations/supabase/client";
 import { useLocation, useNavigate } from "react-router-dom";
 
-import { ChevronDown, Sparkles, X, MoreHorizontal, Check, EyeOff, Lightbulb, Route, MessageCircle } from "lucide-react";
+import { ChevronDown, X, MoreHorizontal, Check, EyeOff, Lightbulb, Route, MessageCircle } from "lucide-react";
 import { AlmaConversation } from "./AlmaConversation";
 import { useAlmaJournal } from "@/hooks/useAlmaJournal";
 import type { AlmaJournalEntry } from "@/lib/alma/journal";
