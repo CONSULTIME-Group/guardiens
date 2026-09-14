@@ -1906,29 +1906,6 @@ export default function PublicSitterProfile() {
               </div>
             </section>
 
-            {/* 2 bis. Formations déclarées, liste fermée, trois au plus.
-                Le mot « déclarées » figure une seule fois, dans le titre. */}
-            {declaredCertifications.length > 0 && (
-              <section
-                aria-label="Formations et certifications déclarées"
-                className="rounded-2xl border border-border bg-muted/30 p-5"
-              >
-                <h2 className="font-heading text-lg font-semibold text-foreground">
-                  Formations et certifications déclarées
-                </h2>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {declaredCertifications.map((label) => (
-                    <span
-                      key={label}
-                      className="inline-flex items-center rounded-full border border-border bg-background px-3 py-1.5 text-sm text-foreground"
-                    >
-                      {label}
-                    </span>
-                  ))}
-                </div>
-              </section>
-            )}
-
             {/* 3. Confiance : timeline + badges. Ancre unique #confiance,
                 également ciblée par le fallback #confiance-mobile du hero. */}
             {((userBadges && userBadges.length > 0) || profile?.created_at) && (
