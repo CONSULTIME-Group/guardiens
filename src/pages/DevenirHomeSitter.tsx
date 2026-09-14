@@ -86,7 +86,7 @@ export default function DevenirHomeSitter() {
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       </Head>
 
-      <div className="mx-auto max-w-3xl px-4 py-8">
+      <main id="main-content" className="mx-auto max-w-3xl px-4 py-8">
         <PageBreadcrumb items={[{ label: "Devenir home-sitter" }]} />
 
         <article className="prose prose-stone max-w-none font-body">
@@ -238,7 +238,7 @@ export default function DevenirHomeSitter() {
             </ul>
           </nav>
         </article>
-      </div>
+      </main>
     </>
   );
 }
