@@ -298,6 +298,7 @@ function AlmaDockInner() {
   useEffect(() => {
     if (currentWhisper) {
       setEntryContext(null);
+      setSpontaneous(true);
       setExpanded(true);
       setUserCollapsed(false);
       trackEvent("alma_dock_expanded" as any, {
@@ -321,6 +322,7 @@ function AlmaDockInner() {
         document.activeElement instanceof HTMLElement ? document.activeElement : null
       );
       setEntryContext(detail);
+      setSpontaneous(false);
       setExpanded(true);
       setUserCollapsed(false);
       setFocusSignal((value) => value + 1);
@@ -527,6 +529,7 @@ function AlmaDockInner() {
         document.activeElement instanceof HTMLElement ? document.activeElement : null
       );
       setEntryContext(null);
+      setSpontaneous(false);
       setExpanded(true);
       setUserCollapsed(false);
       composerSeenRef.current = false;
@@ -707,6 +710,7 @@ function AlmaDockInner() {
         ? document.activeElement
         : null;
       setEntryContext(null);
+      setSpontaneous(false);
       setExpanded(true);
       setUserCollapsed(false);
       setFocusSignal((value) => value + 1);
@@ -728,6 +732,7 @@ function AlmaDockInner() {
     triggerRef.current = document.activeElement instanceof HTMLElement
       ? document.activeElement
       : null;
+    setSpontaneous(false);
     setExpanded(true);
     setUserCollapsed(false);
     setFocusSignal((value) => value + 1);
