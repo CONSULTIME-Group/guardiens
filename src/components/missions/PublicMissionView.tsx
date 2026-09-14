@@ -103,6 +103,8 @@ const PublicMissionView = ({
   onApply,
   hasApplied = false,
   applying = false,
+  applyMessage = "",
+  onApplyMessageChange,
 }: Props) => {
   const { t } = useTranslation();
   const heroImage = mission.photos?.[0] || null;
