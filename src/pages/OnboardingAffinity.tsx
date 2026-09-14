@@ -376,14 +376,14 @@ const OnboardingAffinity = () => {
 
   if (!user || flagLoading || status.loading) {
     return (
-      <div className="min-h-[100svh] flex items-center justify-center text-muted-foreground">
+      <main id="main-content" className="min-h-[100svh] flex items-center justify-center text-muted-foreground">
         Chargement...
-      </div>
+      </main>
     );
   }
 
   return (
-    <div className="min-h-[100svh] bg-background flex items-start md:items-center justify-center px-4 py-8">
+    <main id="main-content" className="min-h-[100svh] bg-background flex items-start md:items-center justify-center px-4 py-8">
       <Head>
         <title>Bienvenue, une dernière étape | Guardiens</title>
         <meta name="robots" content="noindex, nofollow" />
@@ -651,7 +651,7 @@ const OnboardingAffinity = () => {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </main>
   );
 };
 
