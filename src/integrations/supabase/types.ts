@@ -5109,333 +5109,6 @@ export type Database = {
         }
         Relationships: []
       }
-      pro_google_reviews_cache: {
-        Row: {
-          created_at: string
-          fetched_at: string
-          id: string
-          place_id: string
-          pro_id: string
-          rating_avg: number | null
-          rating_count: number | null
-          reviews: Json
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          fetched_at?: string
-          id?: string
-          place_id: string
-          pro_id: string
-          rating_avg?: number | null
-          rating_count?: number | null
-          reviews?: Json
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          fetched_at?: string
-          id?: string
-          place_id?: string
-          pro_id?: string
-          rating_avg?: number | null
-          rating_count?: number | null
-          reviews?: Json
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "pro_google_reviews_cache_pro_id_fkey"
-            columns: ["pro_id"]
-            isOneToOne: true
-            referencedRelation: "pro_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      pro_profiles: {
-        Row: {
-          approved_at: string | null
-          approved_by: string | null
-          category: Database["public"]["Enums"]["pro_category"]
-          city: string | null
-          cover_url: string | null
-          created_at: string
-          decided_by: string | null
-          description: string | null
-          diplomes: string[]
-          email_contact: string | null
-          google_place_id: string | null
-          horaires: Json
-          id: string
-          is_paused: boolean
-          latitude: number | null
-          logo_url: string | null
-          longitude: number | null
-          ordre_number: string | null
-          phone: string | null
-          postal_code: string | null
-          pricing_tier: Database["public"]["Enums"]["pro_pricing_tier"]
-          raison_sociale: string
-          rating_avg: number | null
-          rating_count: number
-          rejection_reason: string | null
-          siret: string | null
-          siret_verified: boolean
-          siret_verified_at: string | null
-          siret_verified_by: string | null
-          slug: string
-          social_links: Json
-          status: Database["public"]["Enums"]["pro_moderation_status"]
-          sub_categories: string[]
-          tarif_max: number | null
-          tarif_min: number | null
-          tarif_note: string | null
-          updated_at: string
-          urgences_24_7: boolean
-          user_id: string
-          view_count: number
-          website: string | null
-          zone_cities: string[]
-          zone_radius_km: number | null
-        }
-        Insert: {
-          approved_at?: string | null
-          approved_by?: string | null
-          category: Database["public"]["Enums"]["pro_category"]
-          city?: string | null
-          cover_url?: string | null
-          created_at?: string
-          decided_by?: string | null
-          description?: string | null
-          diplomes?: string[]
-          email_contact?: string | null
-          google_place_id?: string | null
-          horaires?: Json
-          id?: string
-          is_paused?: boolean
-          latitude?: number | null
-          logo_url?: string | null
-          longitude?: number | null
-          ordre_number?: string | null
-          phone?: string | null
-          postal_code?: string | null
-          pricing_tier?: Database["public"]["Enums"]["pro_pricing_tier"]
-          raison_sociale: string
-          rating_avg?: number | null
-          rating_count?: number
-          rejection_reason?: string | null
-          siret?: string | null
-          siret_verified?: boolean
-          siret_verified_at?: string | null
-          siret_verified_by?: string | null
-          slug: string
-          social_links?: Json
-          status?: Database["public"]["Enums"]["pro_moderation_status"]
-          sub_categories?: string[]
-          tarif_max?: number | null
-          tarif_min?: number | null
-          tarif_note?: string | null
-          updated_at?: string
-          urgences_24_7?: boolean
-          user_id: string
-          view_count?: number
-          website?: string | null
-          zone_cities?: string[]
-          zone_radius_km?: number | null
-        }
-        Update: {
-          approved_at?: string | null
-          approved_by?: string | null
-          category?: Database["public"]["Enums"]["pro_category"]
-          city?: string | null
-          cover_url?: string | null
-          created_at?: string
-          decided_by?: string | null
-          description?: string | null
-          diplomes?: string[]
-          email_contact?: string | null
-          google_place_id?: string | null
-          horaires?: Json
-          id?: string
-          is_paused?: boolean
-          latitude?: number | null
-          logo_url?: string | null
-          longitude?: number | null
-          ordre_number?: string | null
-          phone?: string | null
-          postal_code?: string | null
-          pricing_tier?: Database["public"]["Enums"]["pro_pricing_tier"]
-          raison_sociale?: string
-          rating_avg?: number | null
-          rating_count?: number
-          rejection_reason?: string | null
-          siret?: string | null
-          siret_verified?: boolean
-          siret_verified_at?: string | null
-          siret_verified_by?: string | null
-          slug?: string
-          social_links?: Json
-          status?: Database["public"]["Enums"]["pro_moderation_status"]
-          sub_categories?: string[]
-          tarif_max?: number | null
-          tarif_min?: number | null
-          tarif_note?: string | null
-          updated_at?: string
-          urgences_24_7?: boolean
-          user_id?: string
-          view_count?: number
-          website?: string | null
-          zone_cities?: string[]
-          zone_radius_km?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "pro_profiles_siret_verified_by_fkey"
-            columns: ["siret_verified_by"]
-            isOneToOne: false
-            referencedRelation: "profile_reputation"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "pro_profiles_siret_verified_by_fkey"
-            columns: ["siret_verified_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pro_profiles_siret_verified_by_fkey"
-            columns: ["siret_verified_by"]
-            isOneToOne: false
-            referencedRelation: "public_profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pro_profiles_siret_verified_by_fkey"
-            columns: ["siret_verified_by"]
-            isOneToOne: false
-            referencedRelation: "seo_couverture_manquante"
-            referencedColumns: ["profil_id"]
-          },
-        ]
-      }
-      pro_reviews: {
-        Row: {
-          comment: string | null
-          created_at: string
-          id: string
-          pro_id: string
-          rating: number
-          status: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          comment?: string | null
-          created_at?: string
-          id?: string
-          pro_id: string
-          rating: number
-          status?: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          comment?: string | null
-          created_at?: string
-          id?: string
-          pro_id?: string
-          rating?: number
-          status?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "pro_reviews_pro_id_fkey"
-            columns: ["pro_id"]
-            isOneToOne: false
-            referencedRelation: "pro_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      pro_verifications: {
-        Row: {
-          admin_decision: string | null
-          admin_notes: string | null
-          ai_analysis: Json | null
-          ai_analyzed_at: string | null
-          ai_confidence: number | null
-          ai_red_flags: Json | null
-          ai_status: string | null
-          created_at: string
-          decided_at: string | null
-          decided_by: string | null
-          declared_business_name: string | null
-          declared_siret: string | null
-          declared_specialty: string | null
-          doc_type: Database["public"]["Enums"]["pro_doc_type_enum"]
-          file_name: string | null
-          file_path: string
-          file_size_bytes: number | null
-          id: string
-          mime_type: string | null
-          status: Database["public"]["Enums"]["pro_verification_status_enum"]
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          admin_decision?: string | null
-          admin_notes?: string | null
-          ai_analysis?: Json | null
-          ai_analyzed_at?: string | null
-          ai_confidence?: number | null
-          ai_red_flags?: Json | null
-          ai_status?: string | null
-          created_at?: string
-          decided_at?: string | null
-          decided_by?: string | null
-          declared_business_name?: string | null
-          declared_siret?: string | null
-          declared_specialty?: string | null
-          doc_type: Database["public"]["Enums"]["pro_doc_type_enum"]
-          file_name?: string | null
-          file_path: string
-          file_size_bytes?: number | null
-          id?: string
-          mime_type?: string | null
-          status?: Database["public"]["Enums"]["pro_verification_status_enum"]
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          admin_decision?: string | null
-          admin_notes?: string | null
-          ai_analysis?: Json | null
-          ai_analyzed_at?: string | null
-          ai_confidence?: number | null
-          ai_red_flags?: Json | null
-          ai_status?: string | null
-          created_at?: string
-          decided_at?: string | null
-          decided_by?: string | null
-          declared_business_name?: string | null
-          declared_siret?: string | null
-          declared_specialty?: string | null
-          doc_type?: Database["public"]["Enums"]["pro_doc_type_enum"]
-          file_name?: string | null
-          file_path?: string
-          file_size_bytes?: number | null
-          id?: string
-          mime_type?: string | null
-          status?: Database["public"]["Enums"]["pro_verification_status_enum"]
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       profile_moderation: {
         Row: {
           admin_notes: string | null
@@ -5537,13 +5210,8 @@ export type Database = {
           onboarding_dismissed_at: string | null
           onboarding_minimal_completed: boolean
           postal_code: string | null
-          pro_approved_at: string | null
-          pro_business_name: string | null
-          pro_pricing_note: string | null
-          pro_siret: string | null
           pro_specialty: string | null
           pro_status: Database["public"]["Enums"]["pro_profile_status_enum"]
-          pro_tagline: string | null
           profile_completion: number | null
           referral_code: string | null
           referred_by: string | null
@@ -5600,13 +5268,8 @@ export type Database = {
           onboarding_dismissed_at?: string | null
           onboarding_minimal_completed?: boolean
           postal_code?: string | null
-          pro_approved_at?: string | null
-          pro_business_name?: string | null
-          pro_pricing_note?: string | null
-          pro_siret?: string | null
           pro_specialty?: string | null
           pro_status?: Database["public"]["Enums"]["pro_profile_status_enum"]
-          pro_tagline?: string | null
           profile_completion?: number | null
           referral_code?: string | null
           referred_by?: string | null
@@ -5663,13 +5326,8 @@ export type Database = {
           onboarding_dismissed_at?: string | null
           onboarding_minimal_completed?: boolean
           postal_code?: string | null
-          pro_approved_at?: string | null
-          pro_business_name?: string | null
-          pro_pricing_note?: string | null
-          pro_siret?: string | null
           pro_specialty?: string | null
           pro_status?: Database["public"]["Enums"]["pro_profile_status_enum"]
-          pro_tagline?: string | null
           profile_completion?: number | null
           referral_code?: string | null
           referred_by?: string | null
@@ -8573,13 +8231,6 @@ export type Database = {
           latitude_approx: number | null
           longitude_approx: number | null
           postal_code: string | null
-          pro_business_name: string | null
-          pro_pricing_note: string | null
-          pro_specialty: string | null
-          pro_status:
-            | Database["public"]["Enums"]["pro_profile_status_enum"]
-            | null
-          pro_tagline: string | null
           profile_completion: number | null
           role: Database["public"]["Enums"]["user_role"] | null
           skill_categories: string[] | null
@@ -8601,13 +8252,6 @@ export type Database = {
           latitude_approx?: never
           longitude_approx?: never
           postal_code?: string | null
-          pro_business_name?: string | null
-          pro_pricing_note?: string | null
-          pro_specialty?: string | null
-          pro_status?:
-            | Database["public"]["Enums"]["pro_profile_status_enum"]
-            | null
-          pro_tagline?: string | null
           profile_completion?: number | null
           role?: Database["public"]["Enums"]["user_role"] | null
           skill_categories?: string[] | null
@@ -8629,13 +8273,6 @@ export type Database = {
           latitude_approx?: never
           longitude_approx?: never
           postal_code?: string | null
-          pro_business_name?: string | null
-          pro_pricing_note?: string | null
-          pro_specialty?: string | null
-          pro_status?:
-            | Database["public"]["Enums"]["pro_profile_status_enum"]
-            | null
-          pro_tagline?: string | null
           profile_completion?: number | null
           role?: Database["public"]["Enums"]["user_role"] | null
           skill_categories?: string[] | null
@@ -9512,12 +9149,6 @@ export type Database = {
         }
         Returns: boolean
       }
-      clear_my_pro_status: {
-        Args: never
-        Returns: {
-          deleted_file_paths: string[]
-        }[]
-      }
       close_orphan_applications: {
         Args: { p_grace_hours?: number }
         Returns: {
@@ -10050,21 +9681,6 @@ export type Database = {
           distance_km: number
           first_name: string
           sitter_id: string
-        }[]
-      }
-      get_pro_map_points: {
-        Args: never
-        Returns: {
-          category: string
-          city: string
-          id: string
-          lat: number
-          lng: number
-          raison_sociale: string
-          rating_avg: number
-          rating_count: number
-          slug: string
-          urgences_24_7: boolean
         }[]
       }
       get_public_content_stats: { Args: never; Returns: Json }
