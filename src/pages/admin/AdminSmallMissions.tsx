@@ -58,6 +58,18 @@ const moneyPattern = /(\d+\s*€|€\s*\d+|\beuros?\b|\brémunér|\brémuner|\br
 
 type SortKey = "created_at" | "view_count" | "response_count";
 
+/** Indicateurs des projets participatifs, calculés par `admin_projet_kpis`. */
+type ProjetKpis = {
+  published: number;
+  open: number;
+  median_responses: number | null;
+  median_days_first_response: number | null;
+  zero_response_14d: { id: string; title: string; slug: string | null; created_at: string }[];
+  closed_count: number;
+  closed_filled: number;
+  cross_members: number;
+};
+
 async function logAdminAction(action: string, targetId: string, metadata?: Record<string, unknown>) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
@@ -99,40 +111,81 @@ const AdminSmallMissions = () => {
     totalNotified: 0,
     zeroReach: 0,
   });
+  // Onglet courant. Les projets participatifs ont leurs propres indicateurs,
+  // et la liste est la même, filtrée sur la catégorie côté serveur.
+  const [tab, setTab] = useState<"entraide" | "projets">("entraide");
+  const [projetKpis, setProjetKpis] = useState<ProjetKpis | null>(null);
   // Destinataires réellement prévenus, par publication. C'est ce qui explique
   // les zéro réponse : sans notifiés, il n'y a rien à convertir.
   const [notifiedCounts, setNotifiedCounts] = useState<Record<string, number>>({});
 
-  // Global KPIs (independent of pagination/filters)
+  // Indicateurs globaux de l'entraide (hors pagination et filtres).
+  // Les projets participatifs sont exclus de bout en bout : ils ont leurs
+  // propres indicateurs dans l'onglet Projets, et les mélanger rendrait les
+  // deux mesures illisibles dès le premier projet publié.
   useEffect(() => {
     (async () => {
+      const projetIdsRes = await supabase
+        .from("small_missions")
+        .select("id")
+        .eq("category", "projet" as any)
+        .limit(20000);
+      const projetIds = new Set((projetIdsRes.data || []).map((r: any) => r.id));
       const [{ count: total }, { count: open }, viewsRes, respRes, notifRes] = await Promise.all([
-        supabase.from("small_missions").select("*", { count: "exact", head: true }),
-        supabase.from("small_missions").select("*", { count: "exact", head: true }).eq("status", "open" as any),
-        supabase.from("small_missions").select("view_count"),
-        supabase.from("small_mission_responses").select("*", { count: "exact", head: true }),
+        supabase.from("small_missions").select("*", { count: "exact", head: true }).neq("category", "projet" as any),
+        supabase.from("small_missions").select("*", { count: "exact", head: true }).eq("status", "open" as any).neq("category", "projet" as any),
+        supabase.from("small_missions").select("view_count").neq("category", "projet" as any),
+        supabase.from("small_mission_responses").select("mission_id").limit(50000),
         supabase.from("mission_notification_queue").select("mission_id").eq("status", "sent").limit(20000),
       ]);
+      const entraideResponses = (respRes.data || []).filter(
+        (r: any) => !projetIds.has(r.mission_id),
+      ).length;
       const totalViews = (viewsRes.data || []).reduce((s: number, r: any) => s + (r.view_count || 0), 0);
       const counts: Record<string, number> = {};
       (notifRes.data || []).forEach((r: any) => {
         counts[r.mission_id] = (counts[r.mission_id] || 0) + 1;
       });
       setNotifiedCounts(counts);
-      const totalNotified = (notifRes.data || []).length;
-      const zeroReach = Math.max(0, (total || 0) - Object.keys(counts).length);
+      const totalNotified = (notifRes.data || []).filter(
+        (r: any) => !projetIds.has(r.mission_id),
+      ).length;
+      const reachedEntraide = Object.keys(counts).filter((id) => !projetIds.has(id)).length;
+      const zeroReach = Math.max(0, (total || 0) - reachedEntraide);
       setKpis(k => ({
         ...k,
         total: total || 0,
         open: open || 0,
         totalViews,
-        totalResponses: respRes.count || 0,
+        totalResponses: entraideResponses,
         totalNotified,
         zeroReach,
       }));
     })();
   }, []);
 
+  // Indicateurs des projets, calculés en base : les candidatures aux gardes
+  // vivent dans `applications`, table que l'administration ne lit pas en
+  // direct, le croisement passe donc par une fonction réservée aux admins.
+  useEffect(() => {
+    if (tab !== "projets") return;
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await (supabase as any).rpc("admin_projet_kpis");
+      if (error) {
+        toast.error("Indicateurs projets indisponibles");
+        return;
+      }
+      if (!cancelled) setProjetKpis(data as ProjetKpis);
+    })();
+    return () => { cancelled = true; };
+  }, [tab]);
+
+  const switchTab = (next: "entraide" | "projets") => {
+    setTab(next);
+    setPage(0);
+    setFilterCategory(next === "projets" ? "projet" : "all");
+  };
 
   const fetchMissions = useCallback(async () => {
     setLoading(true);
@@ -349,16 +402,104 @@ const AdminSmallMissions = () => {
     ? ((kpis.totalResponses / kpis.totalNotified) * 100).toFixed(1)
     : "0";
 
+  const projetFilled = projetKpis && projetKpis.closed_count > 0
+    ? Math.round((projetKpis.closed_filled / projetKpis.closed_count) * 100)
+    : null;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Entraide</h1>
+        <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">
+          {tab === "projets" ? "Projets participatifs" : "Entraide"}
+        </h1>
         <Button variant="outline" size="sm" onClick={exportCsv}>
           <Download className="h-4 w-4 mr-2" /> Exporter CSV
         </Button>
       </div>
 
-      {/* KPIs */}
+      <div className="flex gap-2" role="tablist">
+        {([["entraide", "Entraide"], ["projets", "Projets"]] as const).map(([key, label]) => (
+          <button
+            key={key}
+            type="button"
+            role="tab"
+            aria-selected={tab === key}
+            onClick={() => switchTab(key)}
+            className={`px-3 py-1.5 rounded-full text-sm font-semibold border transition-colors ${
+              tab === key
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-card text-muted-foreground border-border hover:bg-accent"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {tab === "projets" && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3">
+            <Card><CardContent className="p-4">
+              <p className="text-xs text-muted-foreground">Projets publiés</p>
+              <p className="text-2xl font-bold tabular-nums">{projetKpis?.published ?? 0}</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">{projetKpis?.open ?? 0} ouverts</p>
+            </CardContent></Card>
+            <Card><CardContent className="p-4">
+              <p className="text-xs text-muted-foreground" title="Médiane des candidatures reçues par projet">Candidatures par projet, médiane</p>
+              <p className="text-2xl font-bold tabular-nums">
+                {projetKpis?.median_responses != null ? Number(projetKpis.median_responses).toFixed(1) : "·"}
+              </p>
+            </CardContent></Card>
+            <Card><CardContent className="p-4">
+              <p className="text-xs text-muted-foreground">Délai jusqu'à la première candidature, médiane</p>
+              <p className="text-2xl font-bold tabular-nums">
+                {projetKpis?.median_days_first_response != null
+                  ? `${Number(projetKpis.median_days_first_response).toFixed(1)} j`
+                  : "·"}
+              </p>
+            </CardContent></Card>
+            <Card><CardContent className="p-4">
+              <p className="text-xs text-muted-foreground" title="Projets clôturés avec au moins une candidature acceptée">Taux de projets pourvus</p>
+              <p className="text-2xl font-bold tabular-nums">{projetFilled != null ? `${projetFilled}%` : "·"}</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">
+                {projetKpis?.closed_filled ?? 0} sur {projetKpis?.closed_count ?? 0} clôturés
+              </p>
+            </CardContent></Card>
+            <Card className="border-primary/40"><CardContent className="p-4">
+              <p className="text-xs text-muted-foreground" title="Membres ayant candidaté à une garde et à un projet">Gardes et projets, mêmes membres</p>
+              <p className="text-2xl font-bold tabular-nums">{projetKpis?.cross_members ?? 0}</p>
+            </CardContent></Card>
+          </div>
+
+          <Card className={((projetKpis?.zero_response_14d?.length ?? 0) > 0) ? "border-warning-border bg-warning-soft" : undefined}>
+            <CardContent className="p-4 space-y-2">
+              <p className="text-xs text-muted-foreground">Projets sans candidature après 14 jours</p>
+              {(projetKpis?.zero_response_14d?.length ?? 0) === 0 ? (
+                <p className="text-sm text-muted-foreground">Tous les projets ouverts ont reçu au moins une candidature.</p>
+              ) : (
+                <ul className="space-y-1">
+                  {projetKpis!.zero_response_14d.map((p) => (
+                    <li key={p.id}>
+                      <button
+                        type="button"
+                        className="text-sm font-medium text-primary hover:underline text-left"
+                        onClick={() => navigate(`/projets/${p.slug || p.id}`)}
+                      >
+                        {p.title}
+                      </button>
+                      <span className="text-xs text-muted-foreground ml-2">
+                        publié le {format(new Date(p.created_at), "d MMM yyyy", { locale: fr })}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </CardContent></Card>
+        </div>
+      )}
+
+      {/* KPIs entraide */}
+      {tab === "entraide" && (
       <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-3">
         <Card className="border-primary/40"><CardContent className="p-4">
           <p className="text-xs text-muted-foreground" title="Réponses ÷ notifications envoyées">Conversion notif. → réponse</p>
@@ -390,7 +531,7 @@ const AdminSmallMissions = () => {
           <p className="text-2xl font-bold tabular-nums">{ratioGlobal}%</p>
         </CardContent></Card>
       </div>
-
+      )}
 
       {suspectMissions.length > 0 && (
         <Card className="border-warning-border bg-warning-soft">

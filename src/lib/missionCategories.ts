@@ -37,6 +37,16 @@ export function missionCategoryLabel(value: string | null | undefined): string {
 }
 
 
+/**
+ * Catégories proposées en filtre dans le fil d'entraide.
+ * Le fil exclut les projets participatifs par construction, la catégorie
+ * `projet` resterait donc à zéro. L'administration, elle, continue de lire
+ * MISSION_CATEGORIES pour filtrer sur la valeur réelle.
+ */
+export const ENTRAIDE_FILTER_CATEGORIES = MISSION_CATEGORIES.filter(
+  (c) => c.key !== "projet",
+);
+
 export function isMissionCategory(value: unknown): value is MissionCategory {
   return MISSION_CATEGORIES.some((c) => c.key === value);
 }
