@@ -17,13 +17,11 @@ const EXCLUDED_ROUTES = [
   "/questions/nouvelle",
   "/profile",
   "/onboarding/affinity",
-  "/pros/inscription",
   "/review/abc-123",
   "/annonces/abc-123",
   "/sits/abc-123",
   "/petites-missions/abc-123",
   "/gardiens/abc-123",
-  "/pros/mon-pro",
   "/settings",
   "/mon-abonnement",
 ];
