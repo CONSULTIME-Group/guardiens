@@ -1660,6 +1660,33 @@ export type Database = {
         }
         Relationships: []
       }
+      backup_sourcage_20260914: {
+        Row: {
+          champ: string
+          id: number
+          row_id: string
+          sauvegarde_le: string
+          source_table: string
+          valeur_origine: string | null
+        }
+        Insert: {
+          champ: string
+          id?: number
+          row_id: string
+          sauvegarde_le?: string
+          source_table: string
+          valeur_origine?: string | null
+        }
+        Update: {
+          champ?: string
+          id?: number
+          row_id?: string
+          sauvegarde_le?: string
+          source_table?: string
+          valeur_origine?: string | null
+        }
+        Relationships: []
+      }
       badge_attributions: {
         Row: {
           badge_id: string
