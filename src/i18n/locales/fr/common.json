@@ -263,24 +263,6 @@
         "n_distance": "À 68 km, au-delà de votre zone préférée"
       }
     },
-    "pros": {
-      "title": "Vétérinaires, toiletteurs, éducateurs, vérifiés Guardiens",
-      "subtitle": "Un annuaire de professionnels animaliers. Les justificatifs SIRET sont analysés automatiquement, et les dossiers qui ne passent pas ce premier contrôle sont revus par l'équipe. Le badge signale un SIRET validé.",
-      "card1": {
-        "title": "Vétérinaires",
-        "cta": "Trouver un véto près de chez moi"
-      },
-      "card2": {
-        "title": "Toiletteurs et éducateurs",
-        "cta": "Voir l'annuaire"
-      },
-      "card3": {
-        "title": "Transporteurs et ostéopathes",
-        "cta": "Explorer"
-      },
-      "counter": "{{total}} pros animaliers référencés, {{verified}} vérifiés SIRET",
-      "cta_all": "Voir tous les pros"
-    },
     "alma_tips": {
       "eyebrow": "Conseils",
       "title": "Les conseils d'Alma",
