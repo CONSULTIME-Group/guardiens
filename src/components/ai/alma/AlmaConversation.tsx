@@ -112,19 +112,15 @@ function extractedLink(path: string): ExtractedLink {
 }
 
 /**
- * Racines de chemin reconnues comme des liens internes. Sans cette liste, une
- * simple barre oblique dans une phrase (« et/ou », « 24h/24 », une date) serait
- * prise pour une adresse, retirée du texte et transformée en carte cliquable.
+ * Un chemin ne compte comme adresse que s'il ouvre un mot, donc précédé d'un
+ * début de texte, d'une espace ou d'une ouverture de citation, et s'il porte
+ * au moins une lettre. Cela laisse intacts « et/ou », « 24h/24 » et les dates
+ * du type 13/09/2026, qui étaient jusqu'ici retirés de la phrase et changés en
+ * carte cliquable menant nulle part.
  */
-const KNOWN_PATH_ROOTS = new Set(
-  [...Object.keys(SECTION_LABELS), ...Object.keys(PUBLIC_SOURCE_TITLES)].map(
-    (path) => path.split("/")[1],
-  ),
-);
-
-function isKnownPath(path: string): boolean {
-  const root = path.split(/[?#]/)[0].split("/")[1] ?? "";
-  return KNOWN_PATH_ROOTS.has(root);
+function looksLikePath(path: string): boolean {
+  const firstSegment = path.split(/[?#]/)[0].split("/")[1] ?? "";
+  return /[a-zA-ZÀ-ÿ]/.test(firstSegment);
 }
 
 export function parseAlmaMessage(content: string): ParsedMessage {
@@ -153,7 +149,7 @@ export function parseAlmaMessage(content: string): ParsedMessage {
   text = text.replace(pathPattern, (match, prefix: string, href: string) => {
     const trailing = href.match(/[.,;:!?]+$/)?.[0] ?? "";
     const cleanHref = trailing ? href.slice(0, -trailing.length) : href;
-    if (!isKnownPath(cleanHref)) return match;
+    if (!looksLikePath(cleanHref)) return match;
     const result = consume(href);
     return result === null ? match : `${prefix}${result}`;
   });
