@@ -112,11 +112,17 @@ const ProjetsListing = () => {
                 Le cadre, les précautions à prendre et la manière d'accueillir des participants chez soi sont
                 détaillés dans notre journal.
               </p>
-              <Link to={ARTICLE_URL}>
-                <Button size="lg" variant="secondary" className="rounded-full font-bold">
+              <div className="flex flex-wrap items-center gap-4">
+                <Link to="/projets/publier">
+                  <Button size="lg" variant="secondary" className="rounded-full font-bold">
+                    Publier mon projet
+                  </Button>
+                </Link>
+                <Link to={ARTICLE_URL} className="text-sm font-medium underline underline-offset-4 opacity-90">
                   Lire l'article
-                </Button>
-              </Link>
+                </Link>
+              </div>
+
             </div>
           </section>
         )}
