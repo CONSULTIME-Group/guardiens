@@ -9,7 +9,8 @@ import { Progress } from "@/components/ui/progress";
 import { safeUUID } from "@/lib/uuid";
 
 const ACCEPTED = ".jpg,.jpeg,.png,.webp";
-const MAX_PHOTOS = 3;
+/** Plafond par défaut. Le formulaire projet le relève explicitement. */
+const DEFAULT_MAX_PHOTOS = 3;
 
 interface MissionPhotoUploadProps {
   userId: string;
@@ -19,9 +20,12 @@ interface MissionPhotoUploadProps {
   onUploadingChange?: (uploading: boolean) => void;
   /** Au moins un envoi a échoué : le formulaire propose alors une échappatoire. */
   onUploadError?: () => void;
+  /** Nombre de photos autorisées. Vaut 3 quand la propriété est absente. */
+  maxPhotos?: number;
 }
 
-const MissionPhotoUpload = ({ userId, photos, onChange, onUploadingChange, onUploadError }: MissionPhotoUploadProps) => {
+const MissionPhotoUpload = ({ userId, photos, onChange, onUploadingChange, onUploadError, maxPhotos }: MissionPhotoUploadProps) => {
+  const MAX_PHOTOS = maxPhotos ?? DEFAULT_MAX_PHOTOS;
   const { toast } = useToast();
   const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
