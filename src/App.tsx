@@ -104,6 +104,8 @@ const MyProProfile = lazy(() => import("./pages/MyProProfile"), "MyProProfile");
 const ProCategoryListing = lazy(() => import("./pages/ProCategoryListing"), "ProCategoryListing");
 const AdminProDirectory = lazy(() => import("./pages/admin/AdminProDirectory"), "AdminProDirectory");
 const AssociationsListing = lazy(() => import("./pages/AssociationsListing"), "AssociationsListing");
+const ProjetsListing = lazy(() => import("./pages/ProjetsListing"), "ProjetsListing");
+const ProjetDetail = lazy(() => import("./pages/ProjetDetail"), "ProjetDetail");
 const AssociationDetail = lazy(() => import("./pages/AssociationDetail"), "AssociationDetail");
 const AdminAssociations = lazy(() => import("./pages/admin/AdminAssociations"), "AdminAssociations");
 const ArticleEditor = lazy(() => import("./pages/ArticleEditor"), "ArticleEditor");
@@ -509,6 +511,8 @@ const AppRoutes = () => {
       <Route path="/pros/categorie/:catSlug" element={<PublicShellRoute><ProCategoryListing /></PublicShellRoute>} />
       <Route path="/pros/categorie/:catSlug/:villeSlug" element={<PublicShellRoute><ProCategoryListing /></PublicShellRoute>} />
       <Route path="/pros/:slug" element={<PublicShellRoute><ProDetail /></PublicShellRoute>} />
+      <Route path="/projets" element={<PublicShellRoute><ProjetsListing /></PublicShellRoute>} />
+      <Route path="/projets/:slug" element={<PublicShellRoute><ProjetDetail /></PublicShellRoute>} />
       <Route path="/associations" element={<PublicShellRoute><AssociationsListing /></PublicShellRoute>} />
       <Route path="/associations/:slug" element={<PublicShellRoute><AssociationDetail /></PublicShellRoute>} />
       <Route element={<AdminLayout />}>

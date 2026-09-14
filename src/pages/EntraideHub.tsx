@@ -203,6 +203,9 @@ const EntraideHub = () => {
           "id, slug, title, description, exchange_offer, category, city, postal_code, created_at, date_needed, end_date, duration_estimate, status, mission_type, user_id, photos",
         )
         .in("status", ["open", "in_progress", "completed"] as any)
+        // Un projet participatif se lit comme une annonce, jamais comme une
+        // petite mission : il sort du fil d'entraide et vit sous /projets.
+        .neq("category", "projet")
         .order("created_at", { ascending: false })
         .limit(120);
       const baseRows = (data || []) as any[];
