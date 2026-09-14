@@ -73,13 +73,14 @@ const EmergencySitter = () => {
   };
 
   return (
-    <main id="main-content" className="min-h-screen bg-background">
+    <>
       <PageMeta title={tp("meta_title")} description={tp("meta_description")} path="/gardien-urgence" />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceJsonLd) }} />
       <PublicHeader />
 
-      <section className="bg-warning/15 border-b border-warning/25 py-3">
+      <main id="main-content" className="min-h-screen bg-background">
+        <section className="bg-warning/15 border-b border-warning/25 py-3">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <p className="text-sm font-medium text-warning-foreground">{tp("soon_title")}</p>
           <p className="text-xs text-muted-foreground mt-1">{tp("soon_subtitle")}</p>
