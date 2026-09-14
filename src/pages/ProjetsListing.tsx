@@ -32,6 +32,8 @@ const ProjetsListing = () => {
       <PageMeta
         title="Projets participatifs, apprendre en donnant un coup de main"
         description="Des particuliers ouvrent leur terrain ou leur maison pour un chantier. Vous venez participer quelques jours et vous repartez avec un savoir-faire."
+        noindex={!loading && projets.length === 0}
+        ready={!loading}
       />
 
       <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
