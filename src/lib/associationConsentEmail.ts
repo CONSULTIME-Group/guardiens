@@ -10,7 +10,7 @@ export const ASSOCIATION_CONSENT_SUBJECT = "Une page pour {name} sur Guardiens";
 export const buildConsentText = (name: string, ficheUrl: string): string =>
   `Bonjour,
 
-Je me permets de vous contacter car, avec ma femme Elisa, nous avons créé une plateforme qui a pour objectif de favoriser l'entraide de proximité, autour des animaux mais pas seulement. La plateforme est 100 % gratuite : nous souhaitons avant tout créer un réseau et du lien social.
+Je me permets de vous contacter car, avec ma femme Elisa, nous avons créé une plateforme qui a pour objectif de favoriser l'entraide de proximité, autour des animaux mais pas seulement. L'inscription et la mise en relation ne coûtent rien : nous cherchons avant tout à créer un réseau et du lien.
 
 Nous sommes très contents du démarrage, puisque nous avons déjà plus de 1 300 inscrits en quelques mois. Nous aimerions en profiter pour donner de la visibilité à des associations comme la vôtre, afin que vous puissiez vous présenter et peut-être obtenir ce dont vous avez besoin : des dons, du bénévolat ou quoi que ce soit d'autre. On se dit simplement que pour nous, le coût est nul, et que cela peut aider.
 
