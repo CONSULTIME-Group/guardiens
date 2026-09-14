@@ -61,7 +61,9 @@ const { siteUrl: SITE_URL, routes: STATIC_ROUTES } = loadStaticRoutes();
 // Filtrage automatique : on ne garde que les routes marquées indexables.
 // Pas de SITEMAP_EXCLUDE en doublon, la décision est prise dans siteRoutes.ts
 // via le flag `index`. Toute incohérence est impossible par construction.
-const staticPages = STATIC_ROUTES.filter((r) => r.indexable);
+// Exception temporaire : /pros reste accessible par URL directe mais n'est pas
+// soumise au crawl, car l'annuaire ne liste aucune fiche professionnelle.
+const staticPages = STATIC_ROUTES.filter((r) => r.indexable && r.loc !== "/pros");
 
 // Villes "statiques" (src/data/cities.ts) : pages riches garanties, toujours servies.
 // Ne jamais ajouter un slug sans page réelle : toute entrée doit être servie par

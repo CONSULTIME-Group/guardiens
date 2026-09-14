@@ -14,7 +14,7 @@ export const VOLUNTEER_CHECKBOX_LABEL =
   "J'aimerais donner un coup de main à une association animalière près de chez moi";
 
 export const VOLUNTEER_WAITING_SENTENCE =
-  "Nous vous préviendrons dès qu'une association de votre secteur cherche un coup de main.";
+  "Cette déclaration nous aide à savoir où se trouvent les personnes prêtes à donner un coup de main.";
 
 export const VOLUNTEER_STRUCTURE_TYPES: readonly string[] = [
   "Centre de soins et faune sauvage",
