@@ -39,6 +39,7 @@ import AffinitySection from "@/components/matching/AffinitySection";
 import { useViewerSitterForAffinity } from "@/hooks/useViewerSitterForAffinity";
 import { sanitizeBioForPublic } from "@/lib/sanitizeBio";
 import { publishableMotivation } from "@/lib/motivation";
+import { certificationLabels } from "@/lib/certifications";
 import {
   mobilityPublicLabel,
   MIN_STAY_DURATION_OPTIONS,
@@ -610,7 +611,7 @@ export default function PublicSitterProfile() {
       // La vue publique `public_profiles` est lisible par tout visiteur ;
       // `profiles` reste réservé au propriétaire du profil.
       const PUBLIC_PROFILE_COLS =
-        "id, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, completed_sits_count, last_seen_at, departement_code";
+        "id, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, completed_sits_count, last_seen_at, departement_code, certifications";
       // `last_name` retiré du select, jamais rendu publiquement.
       const BASE_PROFILE_COLS =
         "id, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, profile_completion, completed_sits_count, cancellation_count, hero_image_index";
