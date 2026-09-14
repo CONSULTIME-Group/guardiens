@@ -37,11 +37,17 @@ const normalize = (s: string) => s.toLowerCase().replace(/[’]/g, "'");
  * Détecte une mission qui ressemble à une garde d'animaux.
  * Règle : vocabulaire de garde + espèce animale. La présence d'une durée
  * renforce le signal et le rend plus explicable.
+ *
+ * `options.disabled` neutralise la règle. Réservé aux projets participatifs :
+ * un abri pour les poules est un chantier, pas une garde. L'entraide appelle
+ * la fonction sans option, son comportement reste identique.
  */
 export function sitLikeSignals(
   title: string | null | undefined,
   description: string | null | undefined,
+  options?: { disabled?: boolean },
 ): ContentGuardSignals | null {
+  if (options?.disabled) return null;
   const text = normalize(`${title ?? ""} ${description ?? ""}`);
   if (!text.trim()) return null;
   const hasGuard = GUARD_VOCAB_RX.test(text);
@@ -52,6 +58,7 @@ export function sitLikeSignals(
   if (hasDuration) matched.push("durée en jours ou semaines");
   return { matched };
 }
+
 
 /**
  * Détecte une annonce de cession ou d'adoption d'animaux.

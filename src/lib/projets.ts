@@ -22,7 +22,29 @@ export function projetDurationLabel(duration?: string | null): string | null {
   return PROJET_DURATION_LABELS[duration] || duration;
 }
 
+/**
+ * Nature du projet, liste fermée. Elle qualifie le chantier en un mot,
+ * elle est stockée dans small_missions.nature_projet.
+ */
+export const PROJET_NATURE_LABELS: Record<string, string> = {
+  jardin: "Jardin et potager",
+  construction: "Construction et bricolage",
+  lowtech: "Low tech et récupération",
+  renovation: "Rénovation écologique",
+  animaux: "Abris et aménagements pour animaux",
+  evenement: "Événement",
+  autre: "Autre",
+};
+
+export const PROJET_NATURE_VALUES = Object.keys(PROJET_NATURE_LABELS);
+
+export function projetNatureLabel(value?: string | null): string | null {
+  if (!value) return null;
+  return PROJET_NATURE_LABELS[value] || null;
+}
+
 /** Hébergement proposé sur place. */
+
 export const HEBERGEMENT_LABELS: Record<string, string> = {
   chambre: "Une chambre sur place",
   dortoir: "Un couchage en dortoir",

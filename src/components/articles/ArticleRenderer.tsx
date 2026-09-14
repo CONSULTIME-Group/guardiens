@@ -110,14 +110,15 @@ const CTA_DEFAUT: CtaCopy = {
  */
 const CTA_PAR_SLUG: Record<string, CtaCopy> = {
   "chantier-participatif-projet-collectif-cadre-legal": {
-    midText: "Vous avez un projet collectif qui demande des bras ?",
-    midPrimary: { label: "Partager mon projet", href: "/petites-missions", role: "projet" },
+    midText: "Vous avez un chantier chez vous qui demande des bras ?",
+    midPrimary: { label: "Publier mon projet", href: "/projets/publier", role: "projet" },
     midSecondary: { label: "Aider une association", href: "/associations", role: "projet" },
-    endHeading: "Un projet à monter, ou des bras à offrir ?",
-    endText: "Publiez votre projet pour trouver des bénévoles, ou rejoignez une association qui cherche de l'aide près de chez vous.",
-    endPrimary: { label: "Partager mon projet et trouver des bénévoles", href: "/petites-missions", role: "projet" },
+    endHeading: "Un chantier à mener, ou du temps à donner ?",
+    endText: "Publiez votre projet pour trouver des participants, ou rejoignez une association qui cherche un coup de main près de chez vous.",
+    endPrimary: { label: "Publier mon projet", href: "/projets/publier", role: "projet" },
     endSecondary: { label: "Aider une association", href: "/associations", role: "projet" },
   },
+
 };
 
 function ctaCopyPour(slug?: string): CtaCopy {

@@ -9,7 +9,7 @@ import AffinityBadge from "@/components/matching/AffinityBadge";
 import { useAffinityWithShadow } from "@/hooks/useAffinityWithShadow";
 import { useDepartementNames } from "@/hooks/useDepartementNames";
 import { departementNameFromCode, formatCityDepartement } from "@/lib/locationLabel";
-import { projetMetaLine } from "@/lib/projets";
+import { projetMetaLine, projetNatureLabel } from "@/lib/projets";
 
 
 import { PawPrint, Cat, Bird } from "lucide-react";
@@ -147,7 +147,7 @@ const SearchListingCard = ({
   if (isProjet) {
     const projetLink = `/projets/${item.slug || item.id}`;
     const projetMeta = projetMetaLine(item.date_needed, item.end_date, item.duration_estimate);
-    const natureLabel = (item as any).nature_category_label || (item as any).nature_category || null;
+    const natureLabel = projetNatureLabel((item as any).nature_projet);
 
     const projetCard = (
       <article

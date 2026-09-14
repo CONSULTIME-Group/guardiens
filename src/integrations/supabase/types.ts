@@ -7508,6 +7508,7 @@ export type Database = {
           mission_type: Database["public"]["Enums"]["mission_type_enum"]
           moderation_hidden_at: string | null
           moderation_hidden_by: string | null
+          nature_projet: string | null
           pet_size: string | null
           pet_species: string | null
           photos: string[]
@@ -7544,6 +7545,7 @@ export type Database = {
           mission_type?: Database["public"]["Enums"]["mission_type_enum"]
           moderation_hidden_at?: string | null
           moderation_hidden_by?: string | null
+          nature_projet?: string | null
           pet_size?: string | null
           pet_species?: string | null
           photos?: string[]
@@ -7580,6 +7582,7 @@ export type Database = {
           mission_type?: Database["public"]["Enums"]["mission_type_enum"]
           moderation_hidden_at?: string | null
           moderation_hidden_by?: string | null
+          nature_projet?: string | null
           pet_size?: string | null
           pet_species?: string | null
           photos?: string[]
@@ -8769,6 +8772,7 @@ export type Database = {
           longitude: number | null
           max_participants: number | null
           mission_type: Database["public"]["Enums"]["mission_type_enum"] | null
+          nature_projet: string | null
           pet_size: string | null
           pet_species: string | null
           photos: string[] | null
@@ -8798,6 +8802,7 @@ export type Database = {
           longitude?: never
           max_participants?: number | null
           mission_type?: Database["public"]["Enums"]["mission_type_enum"] | null
+          nature_projet?: string | null
           pet_size?: string | null
           pet_species?: string | null
           photos?: string[] | null
@@ -8827,6 +8832,7 @@ export type Database = {
           longitude?: never
           max_participants?: number | null
           mission_type?: Database["public"]["Enums"]["mission_type_enum"] | null
+          nature_projet?: string | null
           pet_size?: string | null
           pet_species?: string | null
           photos?: string[] | null

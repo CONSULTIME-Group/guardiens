@@ -350,7 +350,11 @@ const PublicMissionView = ({
                   )}
                 </div>
 
-                {onApply ? (
+                {p.accepting_applications === false ? (
+                  <p className="rounded-2xl border border-border bg-muted/60 px-4 py-4 text-center text-sm text-foreground">
+                    Ce projet a fermé ses candidatures.
+                  </p>
+                ) : onApply ? (
                   hasApplied ? (
                     <div className="rounded-full border border-primary/30 bg-primary/10 px-4 py-4 text-center text-sm font-semibold text-foreground">
                       Votre candidature est partie
@@ -385,11 +389,12 @@ const PublicMissionView = ({
                     </Button>
                   </Link>
                 )}
-                {!hasApplied && (
+                {!hasApplied && p.accepting_applications !== false && (
                   <p className="mt-5 text-xs text-center text-muted-foreground px-2 leading-relaxed">
                     Votre message part directement au porteur du projet.
                   </p>
                 )}
+
               </div>
 
               <div className="bg-card rounded-[2rem] overflow-hidden shadow-sm border border-border">
