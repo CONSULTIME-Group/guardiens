@@ -5179,6 +5179,7 @@ export type Database = {
           boosted_until: string | null
           cancellation_count: number
           cancellations_as_proprio: number
+          certifications: string[] | null
           city: string | null
           completed_sits_count: number
           country: string
@@ -5237,6 +5238,7 @@ export type Database = {
           boosted_until?: string | null
           cancellation_count?: number
           cancellations_as_proprio?: number
+          certifications?: string[] | null
           city?: string | null
           completed_sits_count?: number
           country?: string
@@ -5295,6 +5297,7 @@ export type Database = {
           boosted_until?: string | null
           cancellation_count?: number
           cancellations_as_proprio?: number
+          certifications?: string[] | null
           city?: string | null
           completed_sits_count?: number
           country?: string
@@ -8218,6 +8221,7 @@ export type Database = {
           available_for_help: boolean | null
           avatar_url: string | null
           bio: string | null
+          certifications: string[] | null
           city: string | null
           completed_sits_count: number | null
           created_at: string | null
@@ -8239,6 +8243,7 @@ export type Database = {
           available_for_help?: boolean | null
           avatar_url?: string | null
           bio?: string | null
+          certifications?: string[] | null
           city?: string | null
           completed_sits_count?: number | null
           created_at?: string | null
@@ -8260,6 +8265,7 @@ export type Database = {
           available_for_help?: boolean | null
           avatar_url?: string | null
           bio?: string | null
+          certifications?: string[] | null
           city?: string | null
           completed_sits_count?: number | null
           created_at?: string | null
