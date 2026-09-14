@@ -20,6 +20,7 @@ export const MISSION_CATEGORIES = [
   { key: "transport", label: "Transport et accompagnement" },
   { key: "company", label: "Présence et compagnie" },
   { key: "skills", label: "Savoir-faire et démarches" },
+  { key: "projet", label: "Projet participatif" },
   { key: "other", label: "Autre" },
 ] as { key: MissionCategory; label: string }[];
 

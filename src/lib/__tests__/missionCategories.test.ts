@@ -16,6 +16,7 @@ const smallMissionCategoryEnum = z.enum([
   "errand",
   "transport",
   "company",
+  "projet",
   "other",
 ]);
 
