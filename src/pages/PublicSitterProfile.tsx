@@ -607,10 +607,10 @@ export default function PublicSitterProfile() {
       try {
       // Colonnes explicites : évite un select("*") qui exposerait/rapatrierait
       // des colonnes non utilisées côté client (privacy + payload).
-      // Les champs pro_* viennent de la vue publique `public_profiles`, lisible
-      // par tout visiteur ; `profiles` reste réservé au propriétaire du profil.
+      // La vue publique `public_profiles` est lisible par tout visiteur ;
+      // `profiles` reste réservé au propriétaire du profil.
       const PUBLIC_PROFILE_COLS =
-        "id, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, completed_sits_count, last_seen_at, pro_status, pro_specialty, pro_tagline, pro_pricing_note, pro_business_name, departement_code";
+        "id, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, completed_sits_count, last_seen_at, departement_code";
       // `last_name` retiré du select, jamais rendu publiquement.
       const BASE_PROFILE_COLS =
         "id, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, profile_completion, completed_sits_count, cancellation_count, hero_image_index";
@@ -1617,11 +1617,6 @@ export default function PublicSitterProfile() {
             // mieux vaut rien qu'une visionneuse ouverte sur autre chose.
             onOpenAvatarLightbox={() => hasAvatar && setLightboxIdx(0)}
             hasAvatarLightbox={hasAvatar}
-            proStatus={(profile as any)?.pro_status ?? null}
-            proSpecialty={(profile as any)?.pro_specialty ?? null}
-            proBusinessName={(profile as any)?.pro_business_name ?? null}
-            proTagline={(profile as any)?.pro_tagline ?? null}
-            proPricingNote={(profile as any)?.pro_pricing_note ?? null}
             isAvailable={isAvailable}
             avgRating={heroAvg}
             reviewCount={heroCount}

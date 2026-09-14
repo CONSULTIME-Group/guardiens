@@ -3,7 +3,6 @@
  *
  * Contrat :
  *  - N'affiche que des données réelles. Pas de "Non renseigné" ni d'accroche fictive.
- *  - Sous-tagline pro affichée seulement si `pro_tagline` réel.
  *  - Max 3 chips (priorité : ID vérifiée, Abonné, Gardien d'urgence).
  *  - UN SEUL CTA primaire, 4 variantes exclusives, + une ligne de réassurance.
  *  - Aucun bloc affinité, aucun bloc Alma, aucune ligne stats, pas de TrustScore.
@@ -11,9 +10,6 @@
  */
 import { Link } from "react-router-dom";
 import { MapPin, Shield, BadgeCheck, Image as ImageIcon } from "lucide-react";
-import ProBadge from "@/components/badges/ProBadge";
-import ProAvatarBadge from "@/components/badges/ProAvatarBadge";
-import { specialtyLabel } from "@/lib/proSpecialties";
 import StatutGardienBadge from "@/components/profile/StatutGardienBadge";
 import FavoriteButton from "@/components/shared/FavoriteButton";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -43,12 +39,6 @@ interface ProfileHeroProps {
   onOpenAvatarLightbox: () => void;
   hasAvatarLightbox: boolean;
 
-  proStatus: string | null;
-  proSpecialty?: string | null;
-  proBusinessName?: string | null;
-  proTagline: string | null;
-  proPricingNote: string | null;
-
   isAvailable: boolean;
   avgRating: number;
   reviewCount: number;
@@ -77,11 +67,6 @@ const ProfileHero = ({
   onOpenHeroPicker,
   onOpenAvatarLightbox,
   hasAvatarLightbox,
-  proStatus,
-  proSpecialty,
-  proBusinessName,
-  proTagline,
-  proPricingNote,
   isAvailable,
   avgRating,
   reviewCount,
@@ -153,12 +138,6 @@ const ProfileHero = ({
 
 
 
-  // Le bloc pro s'ouvre dès le statut déclaré ; le badge distingue déclaré et vérifié.
-  const isPro = proStatus === "verified" || proStatus === "declared";
-  const proSpecialtyLabel = isPro ? specialtyLabel(proSpecialty) : null;
-  const showBusinessName = isPro && !!proBusinessName;
-  const showTagline = isPro && !!proTagline;
-  const showPricingNote = isPro && !!proPricingNote;
 
   // CTA
   const renderCta = () => {
@@ -307,14 +286,6 @@ const ProfileHero = ({
                 <StatutGardienBadge statut={statutGardien as any} />
               </div>
             )}
-            <ProAvatarBadge
-              status={proStatus}
-              className={
-                statutGardien && statutGardien !== "novice"
-                  ? "left-0 right-auto bottom-1"
-                  : undefined
-              }
-            />
           </div>
 
           <div className="flex flex-col gap-1.5 pb-1 min-w-0 flex-1">
@@ -337,7 +308,6 @@ const ProfileHero = ({
                   <span className="capitalize">{firstName}</span>
                 </h1>
 
-                <ProBadge status={proStatus as any} size="sm" />
                 {id && <FavoriteButton targetType="sitter" targetId={id} size="md" />}
                 {avgRating > 0 && reviewCount > 0 && (
                   <span className="inline-flex items-baseline gap-1 text-sm font-medium text-foreground/85">
@@ -368,26 +338,6 @@ const ProfileHero = ({
               )}
 
 
-              {proSpecialtyLabel && (
-                <p className="text-sm text-foreground/85 font-medium mt-0.5 break-words">
-                  {proSpecialtyLabel}
-                </p>
-              )}
-              {showBusinessName && (
-                <p className="text-[13px] sm:text-sm text-foreground/80 break-words">
-                  {proBusinessName}
-                </p>
-              )}
-              {showTagline && (
-                <p className="font-heading italic text-foreground/85 mt-1 text-[13.5px] sm:text-sm max-w-full break-words">
-                  «&nbsp;{proTagline}&nbsp;»
-                </p>
-              )}
-              {showPricingNote && (
-                <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">
-                  Tarif indicatif : {proPricingNote}
-                </p>
-              )}
             </div>
 
             {visibleChips.length > 0 && (
