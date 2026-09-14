@@ -392,52 +392,8 @@ async function main() {
     ),
   ]);
 
-  // Slugs des catégories pros (alignés sur src/lib/proCategories.ts)
-  const PRO_CATEGORY_SLUGS = {
-    veterinaire: "veterinaires",
-    pet_sitter_pro: "pet-sitters-pro",
-    educateur: "educateurs-canins",
-    toiletteur: "toiletteurs",
-    osteopathe: "osteopathes",
-    dresseur_sportif: "dresseurs-sportifs",
-    transporteur: "transporteurs",
-    photographe: "photographes",
-  };
-  const slugifyCity = (s) =>
-    s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 
-  // Pages silos catégorie + (catégorie, ville) dérivées des fiches pros existantes
-  const proSiloEntries = [];
-  // Les pages silo suivent les fiches : un annuaire sans fiche ne produit
-  // aucune page de catégorie. Quand des fiches pros existeront, les pages
-  // de catégorie reviendront automatiquement sans modification ici.
-  if ((profiles_pros || []).length > 0) {
-    for (const catSlug of Object.values(PRO_CATEGORY_SLUGS)) {
-      proSiloEntries.push({
-        loc: `/pros/categorie/${catSlug}`,
-        lastmod: today,
-        changefreq: "weekly",
-        priority: "0.7",
-      });
-    }
-  }
 
-  // Combinaisons (catégorie, ville) effectivement peuplées
-  const siloSeen = new Set();
-  for (const p of profiles_pros || []) {
-    const catSlug = PRO_CATEGORY_SLUGS[p._category];
-    if (!catSlug || !p._city) continue;
-    const key = `${catSlug}/${slugifyCity(p._city)}`;
-    if (siloSeen.has(key)) continue;
-    siloSeen.add(key);
-    proSiloEntries.push({
-      loc: `/pros/categorie/${key}`,
-      lastmod: p.lastmod,
-      changefreq: "weekly",
-      priority: "0.7",
-    });
-  }
 
 
   const entries = [];
