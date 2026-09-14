@@ -573,7 +573,7 @@ export const BottomNav = () => {
                 </div>
               </div>
 
-              {/* Les 10 entrées de la barre latérale, même ordre, mêmes libellés */}
+              {/* Les entrées de la barre latérale, même ordre, mêmes libellés */}
               <div className="space-y-1">
                 {sheetEntries.map((entry) => {
                   const badge = entryBadge(entry, navBadges);

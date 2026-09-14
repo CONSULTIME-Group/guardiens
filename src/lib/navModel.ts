@@ -9,6 +9,7 @@ import {
   Sparkles,
   Newspaper,
   HeartHandshake,
+  Hammer,
   type LucideIcon,
 } from "lucide-react";
 
@@ -74,6 +75,7 @@ export const buildNavGroups = (role: NavRole, sitterSearchLocked: boolean): NavG
           : {}),
       },
       { to: "/associations", icon: HeartHandshake, label: "Associations" },
+      { to: "/projets", icon: Hammer, label: "Projets", beta: true },
     ],
   },
   {

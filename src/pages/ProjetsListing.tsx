@@ -32,6 +32,8 @@ const ProjetsListing = () => {
       <PageMeta
         title="Projets participatifs, apprendre en donnant un coup de main"
         description="Des particuliers ouvrent leur terrain ou leur maison pour un chantier. Vous venez participer quelques jours et vous repartez avec un savoir-faire."
+        noindex={!loading && projets.length === 0}
+        ready={!loading}
       />
 
       <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
@@ -63,6 +65,35 @@ const ProjetsListing = () => {
             </p>
           </div>
         </header>
+
+        {/* Adresse au lecteur, affichée dans les deux états de la page. */}
+        <section className="max-w-3xl mb-[52px]">
+          <h2 className="font-heading text-2xl md:text-3xl font-bold mb-6 text-foreground">
+            Pourquoi les projets ont leur place ici
+          </h2>
+          <div className="space-y-4 text-base md:text-lg leading-relaxed text-foreground/85">
+            <p>
+              Guardiens est un réseau de proximité. Ce qui s'y joue depuis le début, c'est l'entraide entre
+              des gens qui habitent au même endroit : veiller sur une maison, nourrir un chat, arroser un
+              jardin. Des choses qui représentent un vrai besoin pour l'un, et qui coûtent presque rien à
+              l'autre. Un projet participatif, c'est la même chose avec les mains.
+            </p>
+            <p>
+              Ce qu'on y gagne dépasse le chantier. On se sent utile, on passe une journée avec des gens
+              rencontrés le matin même, et on repart en sachant faire quelque chose qu'on ignorait la veille.
+              C'est le genre d'expérience que seule la proximité fabrique. Pour porter un projet, il suffit
+              d'un lieu, d'une envie, et de quelqu'un pour tenir l'autre bout de la planche.
+            </p>
+            <p>
+              Nous commençons tout juste. Les premiers projets seront les nôtres et ceux de membres que nous
+              accompagnons un par un, et nous les alimenterons à la main le temps qu'il faudra. Si vous avez
+              un chantier en tête, c'est le bon moment : vous serez parmi les premiers, et nous serons
+              derrière vous.
+            </p>
+          </div>
+        </section>
+
+
 
         {loading ? (
           <div className="h-40" aria-busy="true" />
