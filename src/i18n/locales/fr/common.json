@@ -129,8 +129,10 @@
       "p1": "Vous partez l'esprit léger, quelqu'un veille sur votre maison. Vous gardez une maison, vous découvrez une ville de l'intérieur, un jardin, un chien qui vous adopte en trois jours. Des deux côtés, la garde est le prétexte.",
       "p2": "Ce qui reste, c'est autre chose. Connaître la mami du quartier et son histoire parce que vous l'avez aidée à ramasser ses fruits. Échanger avec Gerardo pendant qu'il vous donne un coup de main pour bricoler, et lui proposer un repas fait maison en retour.",
       "p3": "Avant, il y avait quelqu'un qui passait arroser le jardin, qui gardait le chien, qui venait fixer un volet. Quelqu'un à qui on offrait une part de gâteau en retour. Cette habitude existe toujours, il suffit d'oser la demander.",
+      "p4": "Certains vont plus loin et ouvrent un chantier chez eux, un potager à créer, un mur à remonter. On y arrive le matin sans connaître personne, on repart le soir en sachant faire quelque chose de nouveau. C'est la même entraide, avec les mains.",
       "closing": "Osez demander. Osez proposer.",
-      "cta": "Découvrir les petites missions"
+      "cta": "Découvrir les petites missions",
+      "cta_project": "Voir les projets participatifs"
     },
     "trust": {
       "eyebrow": "Ce qui compte vraiment",
@@ -312,11 +314,12 @@
       "title": "Qu'est-ce que Guardiens ?",
       "body_1": "Guardiens est un réseau d'entraide entre particuliers, organisé par affinité autant que par proximité. On y garde des maisons, on s'y rend des services, on y rencontre des gens. À un kilomètre comme à mille.",
       "body_2": "La garde de maison et la garde d'animaux à domicile en sont l'usage principal. Un gardien s'installe chez vous pendant votre absence et veille sur ce que vous laissez : votre maison, votre jardin, vos animaux.",
-      "body_3": "À côté des gardes, les membres se rendent des coups de main : arrosage, courses, compagnie. L'échange se décide entre vous.",
-      "body_4": "La mise en relation s'appuie sur un score d'affinité calculé sur plusieurs critères pondérés, propres à chaque couple, où le mode de vie compte autant que la distance. Les membres documentent leur profil et peuvent faire vérifier leur identité. Les avis sont croisés, et un statut de gardien d'urgence répond aux imprévus.",
-      "body_5": "Guardiens publie aussi des guides de race et des guides locaux ville par ville. S'y ajoutent un annuaire de professionnels animaliers dont le SIRET est contrôlé, et un journal de conseils pratiques.",
-      "body_6": "Le réseau couvre la France entière, et met en relation les Français de l'étranger avec des gardiens sur place. Vous accédez à l'ensemble des fonctionnalités."
-    },
+        "body_3": "À côté des gardes, les membres se rendent des coups de main : arrosage, courses, compagnie, un meuble à déplacer, un colis à réceptionner. Des choses qui représentent un vrai besoin pour l'un, et qui coûtent presque rien à l'autre. L'échange se décide entre vous.",
+        "body_4": "La mise en relation s'appuie sur un score d'affinité calculé sur plusieurs critères pondérés, propres à chaque couple, où le mode de vie compte autant que la distance. Les membres documentent leur profil et peuvent faire vérifier leur identité. Les avis sont croisés, et un statut de gardien d'urgence répond aux imprévus.",
+        "body_5": "Guardiens publie aussi des guides de race et des guides locaux ville par ville, une sélection d'associations et de refuges présentés avec leurs besoins du moment, et un journal de conseils pratiques.",
+        "body_6": "Les membres peuvent aussi ouvrir un chantier chez eux, un potager, un abri, un mur en pierre sèche. Des gens viennent participer quelques jours et repartent avec un savoir-faire appris sur place. Cette partie du réseau commence tout juste, et nous l'alimentons à la main.",
+        "body_7": "Le réseau couvre la France entière, et met en relation les Français de l'étranger avec des gardiens sur place. Vous accédez à l'ensemble des fonctionnalités."
+      },
     "compare": {
       "title": "House-sitting, pension, pet-sitter : que choisir ?",
       "intro": "Quatre solutions pour faire garder vos animaux pendant votre absence. Comparaison factuelle, sans jugement.",

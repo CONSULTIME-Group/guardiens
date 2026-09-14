@@ -52,13 +52,16 @@ export function PretexteSection() {
             <p className="font-body text-lg md:text-xl leading-relaxed text-pine-foreground/90">
               {t("landing.pretexte.p3")}
             </p>
+            <p className="font-body text-lg md:text-xl leading-relaxed text-pine-foreground/90">
+              {t("landing.pretexte.p4")}
+            </p>
           </div>
 
           <p className="font-heading text-xl md:text-2xl italic text-center leading-snug mt-[52px] mb-8">
             {t("landing.pretexte.closing")}
           </p>
 
-          <div className="text-center">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-center">
             <Link
               to="/petites-missions"
               onClick={() => {
@@ -67,6 +70,15 @@ export function PretexteSection() {
               className="inline-flex items-center gap-2 rounded-full border border-pine-foreground/60 px-8 py-4 font-body font-medium text-sm text-pine-foreground hover:bg-pine-foreground/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pine-foreground/70"
             >
               {t("landing.pretexte.cta")} <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              to="/projets"
+              onClick={() => {
+                trackEvent("cta_projet_clicked", { metadata: { location: "pretexte_section" } });
+              }}
+              className="inline-flex items-center gap-2 font-body font-medium text-sm text-pine-foreground underline underline-offset-4 hover:text-pine-foreground/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pine-foreground/70"
+            >
+              {t("landing.pretexte.cta_project")}
             </Link>
           </div>
 
