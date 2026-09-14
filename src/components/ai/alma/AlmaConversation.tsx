@@ -336,22 +336,26 @@ export function AlmaConversation({
 
   const submit = () => send(draft);
 
+  // Suivre un lien ferme le panneau : la page d'arrivée reste utilisable.
   const followLink = (href: string) => {
     const path = normalizeInternalPath(href);
-    if (path) navigate(path);
+    if (!path) return;
+    onOpenChange(false);
+    navigate(path);
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} onOpenChange={onOpenChange} modal={modal}>
       <SheetContent
         side="alma"
+        hideOverlay={!modal}
         data-alma-conversation-dialog="true"
         data-testid="alma-dock-panel"
         className="alma-conversation-sheet flex gap-0 overflow-hidden p-0"
         style={{ height: viewportHeight }}
         onOpenAutoFocus={(event) => {
           event.preventDefault();
-          inputRef.current?.focus({ preventScroll: true });
+          if (autoFocusInput) inputRef.current?.focus({ preventScroll: true });
         }}
       >
         <SheetTitle className="sr-only">Conversation avec Alma</SheetTitle>
