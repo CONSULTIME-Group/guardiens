@@ -4,9 +4,9 @@
  * un des champs requis.
  *
  * Monté à l'intérieur d'AppLayout : ne touche pas les pages publiques
- * (Landing, /gardiens/:id, /annonces/:id, /pros/:slug, /login, /inscription…)
+ * (Landing, /gardiens/:id, /annonces/:id, /login, /inscription…)
  * qui utilisent d'autres layouts. Pas de boucle : ignore la route
- * /onboarding/affinity elle-même et /pros/inscription (parcours pro dédié).
+ * /onboarding/affinity elle-même.
  */
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -35,7 +35,6 @@ const OnboardingGate = () => {
     // Routes à ne jamais interrompre.
     if (
       path.startsWith("/onboarding/affinity") ||
-      path.startsWith("/pros/inscription") ||
       path.startsWith("/logout") ||
       path.startsWith("/reset-password")
     ) return;

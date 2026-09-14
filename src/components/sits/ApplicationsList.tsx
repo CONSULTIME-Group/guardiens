@@ -704,11 +704,9 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
               )}
             </div>
             {(sitter?.pro_status === "declared" || sitter?.pro_status === "verified") &&
-              (specialtyLabel(sitter?.pro_specialty) || sitter?.pro_business_name) && (
+              specialtyLabel(sitter?.pro_specialty) && (
                 <p className="text-sm text-muted-foreground mt-0.5">
-                  Professionnel : {[specialtyLabel(sitter?.pro_specialty), sitter?.pro_business_name]
-                    .filter(Boolean)
-                    .join(", ")}
+                  Professionnel : {specialtyLabel(sitter?.pro_specialty)}
                 </p>
               )}
             {app.pricing_flag && <PricingRecipientNotice className="mt-1.5" />}

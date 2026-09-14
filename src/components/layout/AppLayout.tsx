@@ -66,8 +66,7 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
   const needsOnboarding = user && !user.onboardingCompleted && !user.onboardingDismissedAt;
 
   // Le parcours pro a son propre formulaire dédié : on n'affiche pas
-  // la modale d'onboarding propriétaire/gardien sur /pros/*.
-  const isProContext = location.pathname.startsWith("/pros/");
+  const isProContext = false;
 
   // Tunnel de création d'annonce (lot 1, 16/08/2026) : la modale d'onboarding
   // ne doit pas s'interposer pour un propriétaire fraîchement inscrit. Elle
