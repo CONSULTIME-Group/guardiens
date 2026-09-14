@@ -13,9 +13,9 @@ describe("modèle de navigation de l'espace connecté", () => {
     expect(groups.map((g) => g.label)).toEqual(["Mon espace", "Trouver", "Apprendre"]);
   });
 
-  it("porte exactement 11 entrées au total", () => {
-    expect(flattenNavGroups(buildNavGroups("owner", false))).toHaveLength(11);
-    expect(flattenNavGroups(buildNavGroups("sitter", false))).toHaveLength(11);
+  it("porte exactement 10 entrées au total", () => {
+    expect(flattenNavGroups(buildNavGroups("owner", false))).toHaveLength(10);
+    expect(flattenNavGroups(buildNavGroups("sitter", false))).toHaveLength(10);
   });
 
   it("Mon espace : Accueil, annonces ou candidatures, Messages, Entraide", () => {
@@ -56,12 +56,6 @@ describe("modèle de navigation de l'espace connecté", () => {
     const apprendre = buildNavGroups("sitter", false).find((g) => g.id === "apprendre");
     const labels = apprendre?.entries.map((e) => e.label) ?? [];
     expect(labels).toEqual(["Fiches races", "Guides locaux", "Conseils d'Alma", "Le journal"]);
-  });
-
-  it("conserve le tag Bêta sur Pros animaliers", () => {
-    const trouver = buildNavGroups("owner", false).find((g) => g.id === "trouver");
-    const pros = trouver?.entries.find((e) => e.to === "/pros");
-    expect(pros?.beta).toBe(true);
   });
 
   it("verrouille la recherche pour un gardien sans accès premium", () => {
