@@ -160,13 +160,6 @@ const ENV_LABELS: Record<string, string> = {
   sea: "Bord de mer", suburb: "Banlieue",
 };
 
-/** Savoir-faire déclarés, en toutes lettres, dans une phrase. */
-const ENTRAIDE_SKILL_WORDS: Record<string, string> = {
-  animaux: 'animaux',
-  jardin: 'jardin',
-  competences: 'savoir-faire',
-  coups_de_main: 'coups de main',
-};
 
 type ProfileTab = 'gardien' | 'proprio' | 'entraide';
 
@@ -617,7 +610,7 @@ export default function PublicSitterProfile() {
       // Les champs pro_* viennent de la vue publique `public_profiles`, lisible
       // par tout visiteur ; `profiles` reste réservé au propriétaire du profil.
       const PUBLIC_PROFILE_COLS =
-        "id, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, completed_sits_count, last_seen_at, pro_status, pro_specialty, pro_tagline, pro_pricing_note, pro_business_name, departement_code, available_for_help, skill_categories";
+        "id, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, completed_sits_count, last_seen_at, pro_status, pro_specialty, pro_tagline, pro_pricing_note, pro_business_name, departement_code";
       // `last_name` retiré du select, jamais rendu publiquement.
       const BASE_PROFILE_COLS =
         "id, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, profile_completion, completed_sits_count, cancellation_count, hero_image_index";
@@ -1236,11 +1229,6 @@ export default function PublicSitterProfile() {
   const city = profile?.city || "";
   // RGPD : masquage présentationnel des coordonnées (jamais de modification en base).
   const bio = sanitizeBioForPublic(profile?.bio);
-  // Savoir-faire déclarés, lus depuis `skill_categories` de la vue publique.
-  const entraideSkillsLine = ((profile as any)?.skill_categories as string[] | null | undefined)
-    ?.map((k) => ENTRAIDE_SKILL_WORDS[k])
-    .filter(Boolean)
-    .join(', ') || '';
   // Une motivation sous le seuil (50 car.) reste un brouillon : jamais publiée.
   const motivation = sanitizeBioForPublic(publishableMotivation(sitterProfile?.motivation));
   const animalTypes: string[] = sitterProfile?.animal_types || [];
@@ -2620,15 +2608,6 @@ export default function PublicSitterProfile() {
           <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-8">
           <div className="min-w-0 space-y-10">
 
-          {/* Disponibilité déclarée pour l'entraide entre membres. La donnée a
-              été recueillie pour ce périmètre, entraide et projets, elle n'est
-              jamais présentée comme une disponibilité associative. */}
-          {(profile as any)?.available_for_help === true && (
-            <p className="text-sm text-foreground/70 font-body">
-              Disponible pour donner un coup de main dans son secteur
-              {entraideSkillsLine ? ` : ${entraideSkillsLine}.` : '.'}
-            </p>
-          )}
 
 
 
