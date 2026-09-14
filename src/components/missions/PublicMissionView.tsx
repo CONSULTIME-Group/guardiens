@@ -69,6 +69,12 @@ interface Props {
   onShare: () => void;
   viewCount?: number;
   responsesCount?: number;
+  /** Branche projet seulement : action de candidature d'un membre connecté. */
+  onApply?: () => void;
+  /** Branche projet seulement : la candidature est déjà partie. */
+  hasApplied?: boolean;
+  /** Branche projet seulement : envoi en cours. */
+  applying?: boolean;
 }
 
 const CATEGORY_ICON: Record<string, typeof Dog> = {
@@ -90,6 +96,9 @@ const PublicMissionView = ({
   onShare,
   viewCount = 0,
   responsesCount = 0,
+  onApply,
+  hasApplied = false,
+  applying = false,
 }: Props) => {
   const { t } = useTranslation();
   const heroImage = mission.photos?.[0] || null;

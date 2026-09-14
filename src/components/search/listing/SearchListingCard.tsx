@@ -175,7 +175,7 @@ const SearchListingCard = ({
 
           {natureLabel && (
             <span
-              className="absolute top-3 left-3 bg-warning/95 text-warning-foreground text-[10px] font-semibold uppercase tracking-[0.16em] px-2 py-0.5 rounded-full shadow-sm"
+              className="absolute top-3 left-3 bg-background/85 backdrop-blur-sm text-foreground border border-black/[0.06] text-[10px] font-semibold uppercase tracking-[0.16em] px-2 py-0.5 rounded-full shadow-sm"
               data-testid="projet-nature-badge"
             >
               {natureLabel}

@@ -96,21 +96,24 @@ const ProjetsListing = () => {
           </section>
         )}
 
-        {/* Pied de page : vous avez un projet */}
-        <section className="mt-[52px] rounded-[2rem] bg-primary text-primary-foreground p-10 md:p-14">
-          <div className="max-w-2xl space-y-5">
-            <h2 className="font-heading text-3xl md:text-4xl font-bold">Vous avez un projet</h2>
-            <p className="text-lg opacity-90 leading-relaxed">
-              Le cadre, les précautions à prendre et la manière d'accueillir des participants chez soi sont
-              détaillés dans notre journal.
-            </p>
-            <Link to={ARTICLE_URL}>
-              <Button size="lg" variant="secondary" className="rounded-full font-bold">
-                Lire l'article
-              </Button>
-            </Link>
-          </div>
-        </section>
+        {/* Pied de page : affiché seulement quand des projets existent, pour
+            ne pas répéter l'invitation déjà portée par l'état vide. */}
+        {!loading && projets.length > 0 && (
+          <section className="mt-[52px] rounded-[2rem] bg-primary text-primary-foreground p-10 md:p-14">
+            <div className="max-w-2xl space-y-5">
+              <h2 className="font-heading text-3xl md:text-4xl font-bold">Vous avez un projet</h2>
+              <p className="text-lg opacity-90 leading-relaxed">
+                Le cadre, les précautions à prendre et la manière d'accueillir des participants chez soi sont
+                détaillés dans notre journal.
+              </p>
+              <Link to={ARTICLE_URL}>
+                <Button size="lg" variant="secondary" className="rounded-full font-bold">
+                  Lire l'article
+                </Button>
+              </Link>
+            </div>
+          </section>
+        )}
       </div>
     </div>
   );
