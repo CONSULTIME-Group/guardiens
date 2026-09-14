@@ -249,17 +249,21 @@ const CreateProjet = () => {
         description="Décrivez votre chantier, la période d'accueil et ce que vous transmettrez aux personnes qui viendront participer."
       />
 
-      <div className="sticky top-12 md:top-0 z-30 bg-background/95 backdrop-blur border-b border-border px-4 py-3">
-        <div className="max-w-2xl mx-auto">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-muted-foreground">Étape {step} / 3</span>
-            <span className="text-xs text-muted-foreground">{STEP_LABELS[step - 1]}</span>
-          </div>
-          <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-            <div className="h-full bg-primary rounded-full transition-all duration-300" style={{ width: `${(step / 3) * 100}%` }} />
+      <main id="main-content">
+        <div className="sticky top-12 md:top-0 z-30 bg-background/95 backdrop-blur border-b border-border px-4 py-3">
+          <div className="max-w-2xl mx-auto">
+            <h1 className="font-heading text-2xl md:text-3xl font-bold text-foreground mb-3">
+              Publier un projet participatif
+            </h1>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-medium text-muted-foreground">Étape {step} / 3</span>
+              <span className="text-xs text-muted-foreground">{STEP_LABELS[step - 1]}</span>
+            </div>
+            <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+              <div className="h-full bg-primary rounded-full transition-all duration-300" style={{ width: `${(step / 3) * 100}%` }} />
+            </div>
           </div>
         </div>
-      </div>
 
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-6 pb-24">
         <button
