@@ -99,6 +99,10 @@ const AdminSmallMissions = () => {
     totalNotified: 0,
     zeroReach: 0,
   });
+  // Onglet courant. Les projets participatifs ont leurs propres indicateurs,
+  // et la liste est la même, filtrée sur la catégorie côté serveur.
+  const [tab, setTab] = useState<"entraide" | "projets">("entraide");
+  const [projetKpis, setProjetKpis] = useState<ProjetKpis | null>(null);
   // Destinataires réellement prévenus, par publication. C'est ce qui explique
   // les zéro réponse : sans notifiés, il n'y a rien à convertir.
   const [notifiedCounts, setNotifiedCounts] = useState<Record<string, number>>({});
