@@ -99,31 +99,37 @@ interface Props {
 /* ------------------------------------------------------------------ */
 /* Couleurs du personnage (en dur, aucune inversion dark mode).        */
 /* ------------------------------------------------------------------ */
-const FUR = "#FFFFFF";
-const FUR_LINE = "#E6DDCB";
-const FUR_SHADOW = "#EFE6D5";
-const EAR = "#FBF6EC";
-const INK = "#221F19";
+/* Gouache à plat : aucun contour. Chaque pièce porte trois plans de valeur,
+   ombre, base, lumière, et la pièce du dessus projette sur celle du dessous.
+   C'est ce qui rend l'empilement lisible sans un seul trait. */
+const FUR_OMBRE = "#DCC9A6";
+const FUR = "#F2EADA";
+const FUR_CLAIR = "#FDF9F0";
+const EAR_OMBRE = "#C9B492";
+const EAR = "#E0D0B2";
+const EAR_CLAIR = "#F0E5D0";
+const CONTACT = "#BBA687";
+const MUSEAU = "#FDF9F0";
+const IRIS = "#3E3225";
+const PUPILLE = "#241A11";
 const EYE_HI = "#FFFFFF";
-const NOSE = "#1A1712";
-const MOUTH = "#221F19";
+const NOSE = "#3E3225";
+const MOUTH = "#3E3225";
+const LANGUE = "#EE9AA6";
 const CHEEK = "#D99B72";
-const SHADOW = "rgba(20, 15, 10, 0.18)";
+const SHADOW = "rgba(20, 15, 10, 0.16)";
 
-/* Accessoires et halo (teintes stades, en dur pour cohérence illustration). */
+/* À petite taille, les valeurs se creusent : sans contour, c'est le seul
+   moyen de tenir la silhouette sur une pastille de 24 pixels. */
+const FUR_OMBRE_MINI = "#CFB98F";
+const EAR_OMBRE_MINI = "#B9A176";
+const CONTACT_MINI = "#A88F6A";
+
+/* Accessoires et étincelle. */
 const SKY = "#4FA3D8";
 const GREEN = "#2D6A4F";
 const GOLD = "#E4A62A";
 const GOLD_DARK = "#B9821A";
-const GREY = "#8A8377";
-
-/** Teinte de l'anneau du halo selon le stade de la relation. */
-const STAGE_RING_STROKE: Record<AlmaStage, string> = {
-  nouvelle: GREY,
-  eveillee: SKY,
-  complice: GREEN,
-  fidele: GOLD,
-};
 
 /* ------------------------------------------------------------------ */
 /* Feuille de style, mêmes classes que la version précédente pour     */
@@ -147,12 +153,10 @@ const STYLE = `
 [data-alma-animated] .alma-aura-ray   { transform-origin: 50% 50%; }
 [data-alma-animated] .alma-burst      { transform-origin: 50% 75%; }
 
-/* Halo : posé derrière elle. Origine en coordonnées du viewBox, jamais en
-   fill-box, sinon l'arc en pointillé tournerait autour de son propre
-   rectangle englobant et partirait en vrille. */
-[data-alma-animated] .alma-halo     { transform-box: view-box; transform-origin: 50px 55px; }
-[data-alma-animated] .alma-halo-arc { transform-box: view-box; transform-origin: 50px 55px; }
-[data-alma-animated] .alma-halo-arc-c { opacity: 0; transition: opacity 0.35s ease; }
+/* L'étincelle bleue : couche d'interface posée DEVANT elle, en haut à
+   droite, hors de sa silhouette. Elle scintille plus vite quand Alma
+   cherche, et s'éteint quand elle dort. */
+[data-alma-animated] .alma-etincelle { transform-box: view-box; transform-origin: 87px 13px; opacity: 0.85; transition: opacity 0.4s ease; }
 
 @media (prefers-reduced-motion: no-preference) {
   [data-alma-animated] .alma-body-breath { animation: alma-breathe 4.2s ease-in-out infinite; }
@@ -166,8 +170,7 @@ const STYLE = `
   [data-alma-animated] .alma-tail-base   { animation: alma-tail-slow 3.4s ease-in-out infinite; }
   [data-alma-animated] .alma-aura-ray    { animation: alma-ray 5s ease-in-out infinite; }
 
-  [data-alma-animated] .alma-halo        { animation: alma-halo-pulse 4.2s cubic-bezier(0.37, 0, 0.63, 1) infinite; }
-  [data-alma-animated] .alma-halo-arc    { animation: alma-halo-turn 11s linear infinite; }
+  [data-alma-animated] .alma-etincelle   { animation: alma-scintille 3.6s ease-in-out infinite; }
 
   [data-alma-animated][data-mood="gentle"]    .alma-body-breath { animation-duration: 6.5s; }
   [data-alma-animated][data-mood="gentle"]    .alma-head-sway   { animation-duration: 7.5s; }
@@ -176,30 +179,28 @@ const STYLE = `
   [data-alma-animated][data-mood="attentive"] .alma-ear-l       { animation: alma-ear-perk-l 2.4s ease-in-out infinite; }
   [data-alma-animated][data-mood="attentive"] .alma-ear-r       { animation: alma-ear-perk-r 2.4s ease-in-out infinite; }
   [data-alma-animated][data-mood="attentive"] .alma-tail-mood   { animation: alma-tail-wag 0.7s ease-in-out infinite; }
-  [data-alma-animated][data-mood="attentive"] .alma-halo-arc-c  { opacity: 0.5; }
+  [data-alma-animated][data-mood="attentive"] .alma-etincelle   { animation-duration: 2.2s; }
 
   [data-alma-animated][data-mood="thinking"]  .alma-head-mood   { animation: alma-tilt-slow 3.2s ease-in-out infinite; }
   [data-alma-animated][data-mood="thinking"]  .alma-eyes        { animation: alma-eyes-scan 3.2s ease-in-out infinite; }
-  [data-alma-animated][data-mood="thinking"]  .alma-halo-arc-c  { opacity: 1; }
-  [data-alma-animated][data-mood="thinking"]  .alma-halo-arc    { animation-duration: 3.4s; }
+  [data-alma-animated][data-mood="thinking"]  .alma-etincelle   { animation-duration: 1.1s; }
 
   [data-alma-animated][data-mood="happy"]     .alma-body-mood   { animation: alma-bounce 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) infinite; }
   [data-alma-animated][data-mood="happy"]     .alma-head-mood   { animation: alma-head-happy 0.55s ease-out infinite; }
   [data-alma-animated][data-mood="happy"]     .alma-tail-mood   { animation: alma-tail-wag 0.32s ease-in-out infinite; }
   [data-alma-animated][data-mood="happy"]     .alma-tongue      { animation: alma-tongue 1.1s ease-in-out infinite; }
-  [data-alma-animated][data-mood="happy"]     .alma-halo-arc-c  { opacity: 0.7; }
+  [data-alma-animated][data-mood="happy"]     .alma-etincelle   { animation-duration: 1.6s; }
 
   [data-alma-animated][data-mood="playful"]   .alma-body-mood   { animation: alma-wiggle 0.7s ease-in-out infinite; }
   [data-alma-animated][data-mood="playful"]   .alma-tail-mood   { animation: alma-tail-wag 0.3s ease-in-out infinite; }
   [data-alma-animated][data-mood="playful"]   .alma-head-mood   { animation: alma-head-happy 0.95s ease-in-out infinite; }
   [data-alma-animated][data-mood="playful"]   .alma-tongue      { animation: alma-tongue 0.95s ease-in-out infinite; }
-  [data-alma-animated][data-mood="playful"]   .alma-halo-arc-c  { opacity: 0.7; }
+  [data-alma-animated][data-mood="playful"]   .alma-etincelle   { animation-duration: 1.4s; }
 
   [data-alma-animated][data-mood="sleepy"]    .alma-body-breath { animation-duration: 7.5s; }
   [data-alma-animated][data-mood="sleepy"]    .alma-eyelid      { transform: scaleY(0.7); animation: none; }
   [data-alma-animated][data-mood="sleepy"]                      { opacity: 0.88; }
-  [data-alma-animated][data-mood="sleepy"]    .alma-halo        { animation: none; opacity: 0.4; }
-  [data-alma-animated][data-mood="sleepy"]    .alma-halo-arc-c  { opacity: 0; }
+  [data-alma-animated][data-mood="sleepy"]    .alma-etincelle   { animation: none; opacity: 0.18; }
 
   /* Intensité par stade */
   [data-alma-animated][data-stage="nouvelle"] .alma-body-breath { animation-duration: 5.2s; }
@@ -235,8 +236,7 @@ const STYLE = `
 @keyframes alma-eyes-scan  { 0%,100% { transform: translateX(-0.8px); } 50% { transform: translateX(0.8px); } }
 @keyframes alma-tongue     { 0% { transform: scaleY(0); opacity: 0; } 40%,70% { transform: scaleY(1); opacity: 1; } 100% { transform: scaleY(0); opacity: 0; } }
 @keyframes alma-ray        { 0%,100% { transform: scale(1); opacity: 0.55; } 50% { transform: scale(1.08); opacity: 0.9; } }
-@keyframes alma-halo-pulse { 0%,100% { transform: scale(1); opacity: 0.9; } 50% { transform: scale(1.04); opacity: 1; } }
-@keyframes alma-halo-turn  { to { transform: rotate(360deg); } }
+@keyframes alma-scintille  { 0%,100% { transform: scale(1) rotate(0deg); opacity: 0.8; } 50% { transform: scale(1.18) rotate(12deg); opacity: 1; } }
 
 /* Vie non linéaire : pirouette et pounce, jouées une fois, à intervalle
    aléatoire. La classe est posée puis retirée par le composant. */
@@ -295,31 +295,6 @@ function scallop(
   return `${d} Z`;
 }
 
-/** Portion ouverte du même contour : sert à tracer la barbe sous le museau. */
-function scallopArc(
-  cx: number,
-  cy: number,
-  r: number,
-  bumps: number,
-  amp: number,
-  phase: number,
-  i0: number,
-  i1: number,
-): string {
-  const pt = (i: number): [number, number] => {
-    const a = phase + (i / bumps) * Math.PI * 2;
-    return [cx + Math.cos(a) * r, cy + Math.sin(a) * r];
-  };
-  const chord = 2 * r * Math.sin(Math.PI / bumps);
-  const R = ((chord * chord) / 4 + amp * amp) / (2 * amp);
-  const s0 = pt(i0);
-  let d = `M ${s0[0].toFixed(2)} ${s0[1].toFixed(2)}`;
-  for (let i = i0 + 1; i <= i1; i++) {
-    const q = pt(i);
-    d += ` A ${R.toFixed(2)} ${R.toFixed(2)} 0 0 1 ${q[0].toFixed(2)} ${q[1].toFixed(2)}`;
-  }
-  return d;
-}
 
 /** Écrasement local d'une pièce, pour l'ovaliser sans déformer le trait. */
 function squash(cx: number, cy: number, sx: number, sy: number): string {
@@ -382,40 +357,105 @@ function bumpsFor(size: number, max: number): number {
 }
 
 /* ------------------------------------------------------------------ */
-/* Une pièce de fourrure : aplat, volume, lumière, puis le trait.     */
+/* Une pièce de fourrure : trois plans de valeur, aucun contour.       */
 /* ------------------------------------------------------------------ */
 function Piece({
   d,
   transform,
-  fill,
-  strokeWidth,
-  volume,
+  quelle,
+  cx,
+  cy,
+  r,
+  mini,
   ids,
 }: {
   d: string;
   transform?: string;
-  fill: string;
-  strokeWidth: number;
-  volume?: boolean;
-  ids: { volume: string; lumiere: string };
+  quelle: "fur" | "ear";
+  cx?: number;
+  cy?: number;
+  r?: number;
+  mini: boolean;
+  ids: { n: () => string };
 }) {
+  const est = quelle === "ear";
+  const ombre = est ? (mini ? EAR_OMBRE_MINI : EAR_OMBRE) : mini ? FUR_OMBRE_MINI : FUR_OMBRE;
+  const base = est ? EAR : FUR;
+  const clair = est ? EAR_CLAIR : FUR_CLAIR;
+  const plans = cx !== undefined && cy !== undefined && r !== undefined;
+  const id = plans ? ids.n() : "";
   return (
     <g transform={transform}>
-      <path d={d} fill={fill} />
-      {volume && (
+      {/* La pièce entière part dans le ton d'ombre. */}
+      <path d={d} fill={ombre} />
+      {plans && (
         <>
-          <path d={d} fill={`url(#${ids.volume})`} />
-          <path d={d} fill={`url(#${ids.lumiere})`} />
+          <clipPath id={id}>
+            <path d={d} />
+          </clipPath>
+          <g clipPath={`url(#${id})`}>
+            {/* La lumière est posée par dessus, décalée vers le haut à
+                gauche. Le croissant d'ombre qui subsiste en bas à droite
+                est ce qui donne le volume. */}
+            <circle cx={cx! - r! * 0.24} cy={cy! - r! * 0.26} r={r! * 1.02} fill={base} />
+            <circle cx={cx! - r! * 0.46} cy={cy! - r! * 0.5} r={r! * 0.72} fill={clair} />
+          </g>
         </>
       )}
-      <path
-        d={d}
-        fill="none"
-        stroke={INK}
-        strokeWidth={strokeWidth}
-        strokeLinejoin="round"
-      />
     </g>
+  );
+}
+
+/**
+ * Ombre de contact : la pièce du DESSUS projette sur celle du dessous.
+ * On découpe au receveur, on peint le chemin du projeteur décalé vers le
+ * bas à droite, et on masque la zone que le projeteur couvre lui-même.
+ * Sans ce masquage, une grande pièce badigeonne tout son receveur au lieu
+ * de n'y laisser qu'un croissant.
+ */
+function Contact({
+  receveurs,
+  casters,
+  dx,
+  dy,
+  mini,
+  ids,
+}: {
+  receveurs: Array<{ d: string; tr?: string }>;
+  casters: Array<{ d: string; tr?: string }>;
+  dx: number;
+  dy: number;
+  mini: boolean;
+  ids: { n: () => string; flou: string };
+}) {
+  const idClip = ids.n();
+  const idMask = ids.n();
+  return (
+    <>
+      <clipPath id={idClip}>
+        {receveurs.map((rc, i) => (
+          <path key={i} d={rc.d} transform={rc.tr} />
+        ))}
+      </clipPath>
+      <mask id={idMask}>
+        <rect x="-9" y="-7" width="118" height="118" fill="#FFFFFF" />
+        {casters.map((c, i) => (
+          <path key={i} d={c.d} transform={c.tr} fill="#000000" />
+        ))}
+      </mask>
+      <g
+        clipPath={`url(#${idClip})`}
+        mask={`url(#${idMask})`}
+        filter={`url(#${ids.flou})`}
+        opacity={0.5}
+      >
+        <g transform={`translate(${dx} ${dy})`}>
+          {casters.map((c, i) => (
+            <path key={i} d={c.d} transform={c.tr} fill={mini ? CONTACT_MINI : CONTACT} />
+          ))}
+        </g>
+      </g>
+    </>
   );
 }
 
@@ -427,22 +467,31 @@ function renderAlma(
   S: number,
   b: number,
   size: number,
-  ids: { volume: string; lumiere: string; iris: string; museau: string },
+  ids: { n: () => string; flou: string },
 ): ReactNode {
   const detail = size >= 46;
-  const mini = size < 34;
+  const mini = size < 40;
   const { HR, BR, eye, eyeY, eyeX, nose } = geo;
 
   const head = scallop(50, HEAD_Y, HR, b, HR * 0.075, 0.12);
   const body = scallop(50, BODY_Y, BR, Math.max(8, b - 3), BR * 0.08, 0.3);
 
+  /* Asymétrie : une oreille un peu plus haute et un peu plus petite que
+     l'autre. La symétrie parfaite est ce qui fait lire un logo. */
   const earRx = 50 - HR * 0.92;
   const earLx = 50 + HR * 0.92;
-  const earR = scallop(earRx, HEAD_Y + 8, HR * 0.48, Math.max(8, b - 10), HR * 0.06, 0.85);
-  const earL = scallop(earLx, HEAD_Y + 7, HR * 0.48, Math.max(8, b - 10), HR * 0.06, 0.25);
+  const earRy = HEAD_Y + 10.2;
+  const earLy = HEAD_Y + 5.4;
+  const earRr = HR * 0.465;
+  const earLr = HR * 0.5;
+  const earR = scallop(earRx, earRy, earRr, Math.max(8, b - 10), HR * 0.06, 0.85);
+  const earL = scallop(earLx, earLy, earLr, Math.max(8, b - 10), HR * 0.06, 0.25);
+  const earRtr = squash(earRx, earRy, 0.9, 1.26);
+  const earLtr = squash(earLx, earLy, 0.9, 1.3);
 
   const toupY = HEAD_Y - HR * 0.88;
   const toup = scallop(50, toupY, HR * 0.4, Math.max(7, b - 12), HR * 0.058, 1.05);
+  const toupTr = squash(50, toupY, 1.3, 0.94);
 
   const tailX = 50 - BR - 2.5;
   const tailY = BODY_Y - 9;
@@ -454,7 +503,6 @@ function renderAlma(
   const muzB = Math.max(8, 2 * Math.round((b - 10) / 2));
   const muzPh = Math.PI / muzB;
   const muz = scallop(50, muzY, muzR, muzB, muzR * 0.15, muzPh);
-  const barbe = scallopArc(50, muzY, muzR, muzB, muzR * 0.15, muzPh, 0, muzB / 2 - 1);
   const muzTr = squash(50, muzY, 1.5, 0.86);
 
   const pawY = BODY_Y + BR - 3.2;
@@ -465,41 +513,24 @@ function renderAlma(
   const mouthY = noseY + nose * 0.78;
   const collarY = HEAD_Y + HR + 1.5;
 
-  const oneEye = (cx: number) => (
-    <g key={`eye-${cx}`}>
-      <circle cx={cx} cy={eyeY} r={eye} fill={`url(#${ids.iris})`} />
-      <circle cx={cx} cy={eyeY + eye * 0.06} r={eye * 0.52} fill="#100D09" />
-      <circle
-        cx={cx - eye * 0.33}
-        cy={eyeY - eye * 0.36}
-        r={eye * 0.33}
-        fill={EYE_HI}
-      />
-      {detail && (
-        <circle
-          cx={cx + eye * 0.4}
-          cy={eyeY + eye * 0.4}
-          r={eye * 0.155}
-          fill={EYE_HI}
-          opacity={0.72}
-        />
-      )}
-    </g>
-  );
+  /* Le regard : la pupille remonte et rentre vers l'axe, donc Alma lève les
+     yeux vers la personne au lieu de fixer le vide. */
+  const oneEye = (cx: number) => {
+    const dx = cx < 50 ? eye * 0.17 : -eye * 0.17;
+    const px = cx + dx;
+    const py = eyeY - eye * 0.2;
+    return (
+      <g key={`eye-${cx}`}>
+        <circle cx={cx} cy={eyeY} r={eye} fill={IRIS} />
+        <circle cx={px} cy={py + eye * 0.06} r={eye * 0.52} fill={PUPILLE} />
+        <circle cx={px - eye * 0.33} cy={py - eye * 0.36} r={eye * 0.33} fill={EYE_HI} />
+        {detail && (
+          <circle cx={px + eye * 0.4} cy={py + eye * 0.4} r={eye * 0.155} fill={EYE_HI} opacity={0.72} />
+        )}
+      </g>
+    );
+  };
 
-  const lowerLid = (cx: number) => (
-    <path
-      key={`lid-${cx}`}
-      d={`M ${(cx - eye * 1.06).toFixed(2)} ${(eyeY + eye * 0.72).toFixed(2)} q ${(eye * 1.06).toFixed(2)} ${(eye * 0.72).toFixed(2)} ${(eye * 2.12).toFixed(2)} 0`}
-      fill="none"
-      stroke={INK}
-      strokeWidth={S * 0.5}
-      strokeLinecap="round"
-      opacity={0.34}
-    />
-  );
-
-  /** Paupière mobile : le clignement la fait descendre du haut de l'oeil. */
   const eyelid = (cx: number, side: "l" | "r") => (
     <rect
       key={`blink-${side}`}
@@ -509,64 +540,56 @@ function renderAlma(
       width={eye * 2 + 0.8}
       height={eye * 2 + 0.8}
       rx={eye}
-      fill={FUR}
-      stroke={FUR_LINE}
-      strokeWidth={0.4}
+      fill={FUR_CLAIR}
     />
   );
 
   return (
     <g className="alma-part alma-body-breath">
       <g className="alma-part alma-body-mood">
-        {/* Queue en panache, derrière le corps */}
         <g className="alma-part alma-tail-base">
           <g className="alma-part alma-tail-mood">
             <Piece
               d={tail}
               transform={squash(tailX, tailY, 0.94, 1.14)}
-              fill={FUR}
-              strokeWidth={S * 0.85}
-              volume
+              quelle="fur"
+              cx={tailX}
+              cy={tailY}
+              r={9}
+              mini={mini}
               ids={ids}
             />
           </g>
         </g>
 
-        <Piece d={body} fill={FUR} strokeWidth={S} volume ids={ids} />
+        <Piece d={body} quelle="fur" cx={50} cy={BODY_Y} r={BR} mini={mini} ids={ids} />
 
-        {/* Pattes avant, mêmes boucles que le corps */}
+        {/* La tête est devant le corps, donc elle projette sur le poitrail. */}
+        <Contact receveurs={[{ d: body }]} casters={[{ d: head }]} dx={2.2} dy={3.6} mini={mini} ids={ids} />
+
         <Piece
           d={pawR}
           transform={squash(50 - pawX, pawY, 1.06, 0.84)}
-          fill={FUR}
-          strokeWidth={S * 0.8}
+          quelle="fur"
+          cx={50 - pawX}
+          cy={pawY}
+          r={5.5}
+          mini={mini}
           ids={ids}
         />
         <Piece
           d={pawL}
           transform={squash(50 + pawX, pawY, 1.06, 0.84)}
-          fill={FUR}
-          strokeWidth={S * 0.8}
+          quelle="fur"
+          cx={50 + pawX}
+          cy={pawY}
+          r={5.5}
+          mini={mini}
           ids={ids}
         />
-        {detail && (
-          <g
-            stroke={INK}
-            strokeWidth={S * 0.46}
-            strokeLinecap="round"
-            opacity={0.42}
-            fill="none"
-          >
-            <path d={`M${(50 - pawX - 1.7).toFixed(2)} ${(pawY + 1.1).toFixed(2)} v1.8`} />
-            <path d={`M${(50 - pawX + 1.7).toFixed(2)} ${(pawY + 1.1).toFixed(2)} v1.8`} />
-            <path d={`M${(50 + pawX - 1.7).toFixed(2)} ${(pawY + 1.1).toFixed(2)} v1.8`} />
-            <path d={`M${(50 + pawX + 1.7).toFixed(2)} ${(pawY + 1.1).toFixed(2)} v1.8`} />
-          </g>
-        )}
 
-        {/* Collier fin et médaille, marque des stades avancés */}
         {geo.collier && !mini && (
-          <g aria-hidden>
+          <g aria-hidden transform="rotate(-7 50 63)">
             <path
               d={`M ${(50 - BR * 0.62).toFixed(2)} ${collarY.toFixed(2)} Q 50 ${(collarY + 5.5).toFixed(2)} ${(50 + BR * 0.62).toFixed(2)} ${collarY.toFixed(2)}`}
               fill="none"
@@ -574,112 +597,60 @@ function renderAlma(
               strokeWidth={S * 1.5}
               strokeLinecap="round"
             />
-            <circle
-              cx={50}
-              cy={collarY + 6.4}
-              r={2.9}
-              fill={GOLD}
-              stroke={GOLD_DARK}
-              strokeWidth={S * 0.35}
-            />
-            {detail && (
-              <circle cx={49} cy={collarY + 5.6} r={0.9} fill="#FFFFFF" opacity={0.5} />
-            )}
+            <circle cx={50} cy={collarY + 6.4} r={2.9} fill={GOLD} stroke={GOLD_DARK} strokeWidth={S * 0.35} />
+            {detail && <circle cx={49} cy={collarY + 5.6} r={0.9} fill={EYE_HI} opacity={0.5} />}
           </g>
         )}
 
-        <g className="alma-part alma-head-sway">
+        {/* La tête penchée en permanence : la posture du chien qui écoute. */}
+        <g className="alma-part alma-head-sway" transform="rotate(-7 50 63)">
           <g className="alma-part alma-head-mood">
-            {/* Oreilles tombantes, derrière la tête, avec leur propre retard */}
             <g className="alma-part alma-ear-r">
-              <Piece
-                d={earR}
-                transform={squash(earRx, HEAD_Y + 8, 0.9, 1.26)}
-                fill={EAR}
-                strokeWidth={S * 0.9}
-                volume
-                ids={ids}
-              />
+              <Piece d={earR} transform={earRtr} quelle="ear" cx={earRx} cy={earRy} r={earRr} mini={mini} ids={ids} />
             </g>
             <g className="alma-part alma-ear-l">
-              <Piece
-                d={earL}
-                transform={squash(earLx, HEAD_Y + 7, 0.9, 1.26)}
-                fill={EAR}
-                strokeWidth={S * 0.9}
-                volume
-                ids={ids}
-              />
+              <Piece d={earL} transform={earLtr} quelle="ear" cx={earLx} cy={earLy} r={earLr} mini={mini} ids={ids} />
             </g>
-
-            {/* Toupet */}
             <g className="alma-part alma-toupet">
-              <Piece
-                d={toup}
-                transform={squash(50, toupY, 1.3, 0.94)}
-                fill={FUR}
-                strokeWidth={S * 0.9}
-                volume
-                ids={ids}
-              />
+              <Piece d={toup} transform={toupTr} quelle="fur" cx={50} cy={toupY} r={HR * 0.4} mini={mini} ids={ids} />
             </g>
 
-            <Piece d={head} fill={FUR} strokeWidth={S * 1.04} volume ids={ids} />
+            {/* La tête est devant les oreilles et le toupet. */}
+            <Contact
+              receveurs={[
+                { d: earR, tr: earRtr },
+                { d: earL, tr: earLtr },
+                { d: toup, tr: toupTr },
+              ]}
+              casters={[{ d: head }]}
+              dx={1.8}
+              dy={2.8}
+              mini={mini}
+              ids={ids}
+            />
 
-            {/* Joues rosées */}
+            <Piece d={head} quelle="fur" cx={50} cy={HEAD_Y} r={HR} mini={mini} ids={ids} />
+
             {detail && (
               <g aria-hidden>
-                <ellipse
-                  cx={50 - HR * 0.74}
-                  cy={noseY - HR * 0.2}
-                  rx={4.3}
-                  ry={3}
-                  fill={CHEEK}
-                  opacity={0.17}
-                />
-                <ellipse
-                  cx={50 + HR * 0.74}
-                  cy={noseY - HR * 0.2}
-                  rx={4.3}
-                  ry={3}
-                  fill={CHEEK}
-                  opacity={0.17}
-                />
+                <ellipse cx={50 - HR * 0.74} cy={noseY - HR * 0.2} rx={4.3} ry={3} fill={CHEEK} opacity={0.17} />
+                <ellipse cx={50 + HR * 0.74} cy={noseY - HR * 0.2} rx={4.3} ry={3} fill={CHEEK} opacity={0.17} />
               </g>
             )}
 
-            {/* Museau en relief, sans contour en haut : la barbe suffit */}
+            {/* Le museau est devant le visage. */}
+            <Contact receveurs={[{ d: head }]} casters={[{ d: muz, tr: muzTr }]} dx={1.1} dy={1.9} mini={mini} ids={ids} />
             <g transform={muzTr}>
-              <path d={muz} fill={`url(#${ids.museau})`} />
+              <path d={muz} fill={MUSEAU} />
             </g>
-            {!mini && (
-              <g transform={muzTr}>
-                <path
-                  d={barbe}
-                  fill="none"
-                  stroke={INK}
-                  strokeWidth={S * 0.66}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  opacity={0.8}
-                />
-              </g>
-            )}
 
             <g className="alma-part alma-eyes">
               {oneEye(50 - eyeX)}
               {oneEye(50 + eyeX)}
             </g>
-            {detail && (
-              <>
-                {lowerLid(50 - eyeX)}
-                {lowerLid(50 + eyeX)}
-              </>
-            )}
             {eyelid(50 - eyeX, "l")}
             {eyelid(50 + eyeX, "r")}
 
-            {/* Truffe */}
             <ellipse cx={50} cy={noseY} rx={nose * 1.12} ry={nose * 0.82} fill={NOSE} />
             {detail && (
               <ellipse
@@ -688,11 +659,10 @@ function renderAlma(
                 rx={nose * 0.3}
                 ry={nose * 0.17}
                 fill={EYE_HI}
-                opacity={0.5}
+                opacity={0.45}
               />
             )}
 
-            {/* Bouche */}
             {!mini && (
               <path
                 d={`M50 ${mouthY.toFixed(2)} v${(nose * 0.5).toFixed(2)} M50 ${(mouthY + nose * 0.5).toFixed(2)} q${(-nose * 0.62).toFixed(2)} ${(nose * 0.62).toFixed(2)} ${(-nose * 1.12).toFixed(2)} 0 M50 ${(mouthY + nose * 0.5).toFixed(2)} q${(nose * 0.62).toFixed(2)} ${(nose * 0.62).toFixed(2)} ${(nose * 1.12).toFixed(2)} 0`}
@@ -704,7 +674,14 @@ function renderAlma(
               />
             )}
 
-            {/* Langue, visible via l'animation happy et playful */}
+            {/* Le bout de langue, visible au repos. */}
+            {!mini && (
+              <path
+                d={`M ${(50 - nose * 0.52).toFixed(2)} ${(noseY + nose * 2.1).toFixed(2)} q ${(nose * 0.52).toFixed(2)} ${(nose * 1.05).toFixed(2)} ${(nose * 1.04).toFixed(2)} 0 Z`}
+                fill={LANGUE}
+              />
+            )}
+
             <g className="alma-part alma-tongue">
               <ellipse cx={50} cy={mouthY + nose * 1.5} rx={1.8} ry={1.5} fill="#F2A6AD" />
             </g>
@@ -713,6 +690,12 @@ function renderAlma(
       </g>
     </g>
   );
+}
+
+/** L'étincelle bleue : quatre branches douces, posées hors de sa silhouette. */
+function etoile(cx: number, cy: number, r: number, op: number, k: number): ReactNode {
+  const d = `M ${cx} ${cy - r} Q ${cx} ${cy} ${cx + r} ${cy} Q ${cx} ${cy} ${cx} ${cy + r} Q ${cx} ${cy} ${cx - r} ${cy} Q ${cx} ${cy} ${cx} ${cy - r} Z`;
+  return <path key={k} d={d} fill={SKY} opacity={op} />;
 }
 
 /** Ombre au sol, rendue hors du groupe animé pour ne jamais pivoter. */
@@ -743,11 +726,13 @@ export function AlmaAvatarAnimated({
 }: Props) {
   const ariaHidden = rest["aria-hidden"];
   const uid = useId().replace(/[^a-zA-Z0-9]/g, "");
+  /* Compteur local : chaque découpe et chaque masque a besoin d'un
+     identifiant unique dans le document, sinon deux Alma sur la même page
+     se voleraient leurs ombres. */
+  let compteur = 0;
   const ids = {
-    volume: `alma-vol-${uid}`,
-    lumiere: `alma-lum-${uid}`,
-    iris: `alma-iris-${uid}`,
-    museau: `alma-muz-${uid}`,
+    n: () => `alma-${uid}-${++compteur}`,
+    flou: `alma-flou-${uid}`,
   };
 
   /* Vie non linéaire : une pirouette ou un pounce à intervalle aléatoire
@@ -834,10 +819,6 @@ export function AlmaAvatarAnimated({
   const geo = stage ? STAGE_GEO[stage] : DEFAULT_GEO;
   const S = strokeFor(size);
   const b = bumpsFor(size, geo.bumps);
-  const ringStroke = stage ? STAGE_RING_STROKE[stage] : GREEN;
-  const haloR = 47;
-  const haloC = 2 * Math.PI * haloR;
-
   return (
     <span
       data-alma-animated=""
@@ -859,59 +840,30 @@ export function AlmaAvatarAnimated({
         shapeRendering="geometricPrecision"
       >
         <defs>
-          <linearGradient id={ids.volume} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="40%" stopColor="#DED3BE" stopOpacity="0" />
-            <stop offset="100%" stopColor="#DED3BE" stopOpacity="0.42" />
-          </linearGradient>
-          <radialGradient id={ids.lumiere} cx="33%" cy="24%" r="70%">
-            <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.95" />
-            <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
-          </radialGradient>
-          <radialGradient id={ids.iris} cx="36%" cy="28%" r="80%">
-            <stop offset="0%" stopColor="#5B4634" />
-            <stop offset="52%" stopColor="#32261B" />
-            <stop offset="100%" stopColor="#13100B" />
-          </radialGradient>
-          <radialGradient id={ids.museau} cx="46%" cy="34%" r="74%">
-            <stop offset="0%" stopColor="#FFFFFF" />
-            <stop offset="100%" stopColor={FUR_SHADOW} />
-          </radialGradient>
+          <filter id={ids.flou} x="-40%" y="-40%" width="180%" height="180%">
+            <feGaussianBlur stdDeviation="1.5" />
+          </filter>
         </defs>
-
-        {/* Le signal assistante : derrière elle, jamais sur elle. L'arc doré
-            n'apparaît que lorsqu'elle est attentive ou qu'elle cherche. */}
-        {showHalo && (
-          <g className="alma-halo" aria-hidden>
-            <circle
-              cx={50}
-              cy={55}
-              r={haloR}
-              fill="none"
-              stroke={ringStroke}
-              strokeWidth={Math.max(0.85, S * 0.6)}
-              opacity={0.3}
-            />
-            <g className="alma-halo-arc">
-              <circle
-                className="alma-halo-arc-c"
-                cx={50}
-                cy={55}
-                r={haloR}
-                fill="none"
-                stroke={GOLD}
-                strokeWidth={Math.max(1.2, S * 0.9)}
-                strokeLinecap="round"
-                strokeDasharray={`${(haloC * 0.17).toFixed(1)} ${(haloC * 0.83).toFixed(1)}`}
-              />
-            </g>
-          </g>
-        )}
 
         {renderStageShadow(stage)}
         <g className="alma-burst">{renderAlma(geo, S, b, size, ids)}</g>
+
+        {/* Le signal assistante : une étincelle bleue posée DEVANT elle, en
+            haut à droite et hors de sa silhouette. Le bleu sort de la
+            palette Guardiens, donc elle se lit comme une couche assistante
+            plutôt que comme un ornement de marque. Elle scintille plus vite
+            quand Alma cherche, et s'éteint quand elle dort. */}
+        {showHalo && (
+          <g className="alma-etincelle" aria-hidden>
+            {etoile(87, 13, 11.5, 1, 1)}
+            {etoile(100, 27, 5.4, 0.8, 2)}
+            {etoile(75, 3, 3.8, 0.6, 3)}
+          </g>
+        )}
       </svg>
     </span>
   );
 }
+
 
 export default AlmaAvatarAnimated;
