@@ -40,9 +40,39 @@ interface Props {
 const StepSkills = ({
   availableForHelp,
   competences = [],
+  proSpecialty = "",
+  certifications = [],
   onChange,
 }: Props) => {
   const [validatedLabels, setValidatedLabels] = useState<string[]>([]);
+  const [isPro, setIsPro] = useState<boolean>(!!proSpecialty);
+  const [openDomains, setOpenDomains] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (proSpecialty) setIsPro(true);
+  }, [proSpecialty]);
+
+  const certCount = certifications.length;
+  const certCapReached = certCount >= MAX_CERTIFICATIONS;
+
+  const toggleCertification = useCallback(
+    (value: string) => {
+      const has = certifications.includes(value);
+      if (!has && certifications.length >= MAX_CERTIFICATIONS) return;
+      onChange({
+        certifications: has
+          ? certifications.filter((c) => c !== value)
+          : [...certifications, value],
+      });
+    },
+    [certifications, onChange],
+  );
+
+  const toggleDomain = useCallback((key: string) => {
+    setOpenDomains((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key],
+    );
+  }, []);
 
   useEffect(() => {
     supabase
