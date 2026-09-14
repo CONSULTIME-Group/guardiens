@@ -311,7 +311,7 @@ const PublicMissionView = ({
                   La participation est libre : chaque participant vient pour apprendre et donner un coup de main.
                 </p>
                 <p className="text-base leading-relaxed text-foreground/85">
-                  Les échanges se font sans transaction financière, dans les deux sens.
+                  Les échanges se font en temps et en savoir-faire, dans les deux sens.
                 </p>
                 <p className="text-base leading-relaxed text-foreground/85">
                   Le porteur du projet accueille chez lui, il reste responsable de son chantier et de sa sécurité.

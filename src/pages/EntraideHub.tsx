@@ -28,7 +28,7 @@ import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { useMissionDistance } from "@/hooks/useMissionDistance";
 import { trackEvent } from "@/lib/analytics";
 import MobileEntraideFeed from "@/components/community/MobileEntraideFeed";
-import { MISSION_CATEGORIES, MISSION_CATEGORY_LABEL } from "@/lib/missionCategories";
+import { MISSION_CATEGORIES, MISSION_CATEGORY_LABEL, ENTRAIDE_FILTER_CATEGORIES } from "@/lib/missionCategories";
 import { questionCategoryToMissionCategory } from "@/lib/communityCategories";
 import { publicFirstName } from "@/lib/displayName";
 
@@ -332,7 +332,7 @@ const EntraideHub = () => {
       () => nature === "all" || nature === "question",
     );
     const counts: Record<string, number> = { all: natMissions.length + natQuestions.length };
-    for (const c of MISSION_CATEGORIES) {
+    for (const c of ENTRAIDE_FILTER_CATEGORIES) {
       const mCount = natMissions.filter((m) => m.category === c.key).length;
       const qCount = natQuestions.filter(
         (q) => questionCategoryToMissionCategory(q.category) === c.key,
@@ -702,7 +702,7 @@ const EntraideHub = () => {
                   {categoryCounts.all}
                 </span>
               </button>
-              {MISSION_CATEGORIES.map((c) => (
+              {ENTRAIDE_FILTER_CATEGORIES.map((c) => (
                 <button
                   key={c.key}
                   type="button"

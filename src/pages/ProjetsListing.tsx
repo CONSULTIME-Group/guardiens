@@ -58,8 +58,8 @@ const ProjetsListing = () => {
               savoir-faire appris sur place.
             </p>
             <p>
-              Les échanges se font sans transaction financière : chacun donne de son temps, le porteur du projet
-              transmet ce qu'il sait.
+              Les échanges se font en temps et en savoir-faire, dans les deux sens : chacun donne de son
+              temps, le porteur du projet transmet ce qu'il sait.
             </p>
           </div>
         </header>
