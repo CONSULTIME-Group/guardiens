@@ -39,6 +39,7 @@ import AffinitySection from "@/components/matching/AffinitySection";
 import { useViewerSitterForAffinity } from "@/hooks/useViewerSitterForAffinity";
 import { sanitizeBioForPublic } from "@/lib/sanitizeBio";
 import { publishableMotivation } from "@/lib/motivation";
+import { certificationLabels } from "@/lib/certifications";
 import {
   mobilityPublicLabel,
   MIN_STAY_DURATION_OPTIONS,
@@ -610,7 +611,7 @@ export default function PublicSitterProfile() {
       // La vue publique `public_profiles` est lisible par tout visiteur ;
       // `profiles` reste réservé au propriétaire du profil.
       const PUBLIC_PROFILE_COLS =
-        "id, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, completed_sits_count, last_seen_at, departement_code";
+        "id, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, completed_sits_count, last_seen_at, departement_code, certifications";
       // `last_name` retiré du select, jamais rendu publiquement.
       const BASE_PROFILE_COLS =
         "id, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, profile_completion, completed_sits_count, cancellation_count, hero_image_index";
@@ -1231,6 +1232,8 @@ export default function PublicSitterProfile() {
   const bio = sanitizeBioForPublic(profile?.bio);
   // Une motivation sous le seuil (50 car.) reste un brouillon : jamais publiée.
   const motivation = sanitizeBioForPublic(publishableMotivation(sitterProfile?.motivation));
+  // Formations déclarées : intitulés de la liste fermée uniquement.
+  const declaredCertifications = certificationLabels((profile as any)?.certifications);
   const animalTypes: string[] = sitterProfile?.animal_types || [];
   const hasVehicle = sitterProfile?.has_vehicle || false;
   const rawRadius = sitterProfile?.geographic_radius;
@@ -1878,6 +1881,29 @@ export default function PublicSitterProfile() {
                 <PublicExperiences experiences={externalExperiences} />
               </div>
             </section>
+
+            {/* 2 bis. Formations déclarées, liste fermée, trois au plus.
+                Le mot « déclarées » figure une seule fois, dans le titre. */}
+            {declaredCertifications.length > 0 && (
+              <section
+                aria-label="Formations et certifications déclarées"
+                className="rounded-2xl border border-border bg-muted/30 p-5"
+              >
+                <h2 className="font-heading text-lg font-semibold text-foreground">
+                  Formations et certifications déclarées
+                </h2>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {declaredCertifications.map((label) => (
+                    <span
+                      key={label}
+                      className="inline-flex items-center rounded-full border border-border bg-background px-3 py-1.5 text-sm text-foreground"
+                    >
+                      {label}
+                    </span>
+                  ))}
+                </div>
+              </section>
+            )}
 
             {/* 3. Confiance : timeline + badges. Ancre unique #confiance,
                 également ciblée par le fallback #confiance-mobile du hero. */}

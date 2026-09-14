@@ -469,6 +469,8 @@ const SitterProfile = () => {
                     skillCategories={mergedData.skill_categories || []}
                     availableForHelp={mergedData.available_for_help || false}
                     competences={mergedData.competences || []}
+                    proSpecialty={mergedData.pro_specialty || ""}
+                    certifications={mergedData.certifications || []}
                     onChange={(partial) => handleChange(partial as any)}
                   />
                   <VolunteerAvailabilityBlock

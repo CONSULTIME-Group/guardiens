@@ -68,6 +68,9 @@ export interface SitterProfileData {
   // Skills
   skill_categories: string[];
   available_for_help: boolean;
+  // Déclaration professionnelle et formations déclarées (table profiles)
+  pro_specialty: string;
+  certifications: string[];
   // Competences
   competences: string[];
   // Accompagnants pendant les gardes
@@ -98,6 +101,7 @@ const defaultData: SitterProfileData = {
   life_pace: "", household_composition: [],
   special_animal_skills: [], work_during_sit: "", sensitivities: [],
   skill_categories: [], available_for_help: false,
+  pro_specialty: "", certifications: [],
   competences: [],
   travels_with_children: null,
   travels_with_own_animals: null,
@@ -190,6 +194,8 @@ export function useSitterProfile() {
       sensitivities: (s as any)?.sensitivities || [],
       skill_categories: (p as any)?.skill_categories || [],
       available_for_help: (p as any)?.available_for_help || false,
+      pro_specialty: (p as any)?.pro_specialty || "",
+      certifications: (p as any)?.certifications || [],
       competences: (s as any)?.competences || [],
       travels_with_children: (s as any)?.travels_with_children ?? null,
       travels_with_own_animals: (s as any)?.travels_with_own_animals ?? null,
@@ -321,7 +327,9 @@ export function useSitterProfile() {
 
     try {
       // Save profile fields
-      const profileFields = ["first_name", "last_name", "city", "postal_code", "country", "latitude", "longitude", "bio", "avatar_url", "skill_categories", "available_for_help"] as const;
+      // `pro_specialty` est écrit ici, `pro_status` jamais : il est dérivé
+      // côté base par le déclencheur, toute écriture directe serait rejetée.
+      const profileFields = ["first_name", "last_name", "city", "postal_code", "country", "latitude", "longitude", "bio", "avatar_url", "skill_categories", "available_for_help", "pro_specialty", "certifications"] as const;
       const profileUpdate: any = {};
       profileFields.forEach(f => { if (f in stepData) profileUpdate[f] = (stepData as any)[f]; });
       // Un pays vide ne s'écrit jamais : NULL ou code réel (parité du score client/serveur).
