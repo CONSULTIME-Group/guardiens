@@ -62,6 +62,8 @@ const useIsCompactViewport = () => {
 // est le libellé court réservé à la navigation principale, en tête et burger.
 export const NAV_DEFS: ReadonlyArray<{ key: string; shortKey?: string; to: string }> = [
   { key: "listings", shortKey: "listings_short", to: "/annonces" },
+  // Un projet se lit comme une annonce, d'où sa place juste après.
+  { key: "projets", to: "/projets" },
   { key: "small_missions", to: "/petites-missions" },
   { key: "associations", to: "/associations" },
   { key: "guides", shortKey: "guides_short", to: "/guides" },
