@@ -28,6 +28,8 @@ import type {
 } from "@/components/associations/types";
 import { ASSOCIATION_CONSENT_SUBJECT, buildConsentEmail } from "@/lib/associationConsentEmail";
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import VolunteersTab from "./_components/associations/VolunteersTab";
 
 type AssociationRow = {
   id: string;
@@ -263,6 +265,17 @@ export default function AdminAssociations() {
         description="Fiches rédigées par l'équipe Guardiens, publiées sur la page publique des associations."
       />
 
+      <Tabs defaultValue="fiches" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="fiches">Fiches</TabsTrigger>
+          <TabsTrigger value="benevoles">Bénévoles</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="benevoles">
+          <VolunteersTab />
+        </TabsContent>
+
+        <TabsContent value="fiches" className="space-y-6">
       {loading ? (
         <p className="text-sm text-muted-foreground">Chargement…</p>
       ) : rows.length === 0 ? (
@@ -763,6 +776,8 @@ export default function AdminAssociations() {
           </CardContent>
         </Card>
       )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

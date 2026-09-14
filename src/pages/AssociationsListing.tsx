@@ -18,6 +18,8 @@ import {
 } from "@/lib/associationLabels";
 import { ASSOCIATIONS_FAQ, faqPageJsonLd } from "@/lib/associationFaq";
 import { AssociationFaq } from "@/components/associations/AssociationFaq";
+import VolunteerCountByDepartment from "@/components/associations/VolunteerCountByDepartment";
+import VolunteerInviteBlock from "@/components/associations/VolunteerInviteBlock";
 import { isAssociationIndexable } from "@/lib/associationIndexability";
 import {
   PUBLIC_ASSOCIATION_COLUMNS,
@@ -283,9 +285,13 @@ export default function AssociationsListing() {
             <div className="space-y-10">
               {grouped.map(([departementName, list]) => (
                 <section key={departementName}>
-                  <h2 className="mb-4 font-heading text-lg md:text-xl font-semibold text-foreground">
+                  <h2 className="mb-2 font-heading text-lg md:text-xl font-semibold text-foreground">
                     Associations de protection animale : {departementName}
                   </h2>
+                  <VolunteerCountByDepartment
+                    departementCode={list[0]?.departement_code}
+                    className="mb-4"
+                  />
                   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     {list.map((a) => (
                       <AssociationCard key={a.id} association={a} />
@@ -309,6 +315,8 @@ export default function AssociationsListing() {
         )}
 
         <AssociationFaq items={ASSOCIATIONS_FAQ} />
+
+        <VolunteerInviteBlock />
 
         <section className="mt-10 rounded-2xl border border-border bg-card p-5 md:p-6">
           <h2 className="font-heading text-lg md:text-xl font-semibold text-foreground">
