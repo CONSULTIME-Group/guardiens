@@ -183,6 +183,125 @@ const StepSkills = ({
           onCheckedChange={(v) => onChange({ available_for_help: v })}
         />
       </div>
+
+      {/* Déclaration professionnelle : écrit pro_specialty, le statut est
+          dérivé côté base par déclencheur, jamais écrit depuis ici. */}
+      <div className="border-t border-border pt-4 space-y-3">
+        <div className="flex items-start gap-3">
+          <Checkbox
+            id="pro-declaration"
+            checked={isPro}
+            onCheckedChange={(v) => {
+              const next = v === true;
+              setIsPro(next);
+              if (!next) onChange({ pro_specialty: null });
+            }}
+          />
+          <div className="flex-1">
+            <Label htmlFor="pro-declaration" className="text-sm">
+              Je suis un professionnel de l'animalier
+            </Label>
+            <p className="text-xs text-muted-foreground mt-1">{PRO_DECLARATION_NOTICE}</p>
+          </div>
+        </div>
+
+        {isPro && (
+          <div className="space-y-1.5 sm:max-w-md">
+            <Label className="text-sm">Spécialité</Label>
+            <Select
+              value={proSpecialty || undefined}
+              onValueChange={(v) => onChange({ pro_specialty: v })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Sélectionner" />
+              </SelectTrigger>
+              <SelectContent>
+                {PRO_DECLARATION_OPTIONS.map((o) => (
+                  <SelectItem key={o.value} value={o.value}>
+                    {o.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+      </div>
+
+      {/* Formations et certifications déclarées, liste fermée, trois au plus. */}
+      <div className="border-t border-border pt-4 space-y-3">
+        <div>
+          <h3 className="text-sm font-heading font-semibold uppercase tracking-widest text-muted-foreground">
+            Formations et certifications
+          </h3>
+          <p className="text-sm text-muted-foreground mt-1">
+            Ce que vous cochez ici apparaît sur votre fiche publique, sous la mention
+            « déclarées ». Vous pouvez en afficher trois au maximum.
+          </p>
+        </div>
+
+        {certCapReached && (
+          <p className="text-xs text-muted-foreground">
+            Vous avez atteint le maximum de trois. Décochez-en une pour en choisir une autre.
+          </p>
+        )}
+
+        <div className="space-y-2">
+          {CERTIFICATION_DOMAINS.map((domain) => {
+            const open = openDomains.includes(domain.key);
+            const selectedHere = domain.options.filter((o) =>
+              certifications.includes(o.value),
+            ).length;
+            return (
+              <div key={domain.key} className="rounded-xl border border-border">
+                <button
+                  type="button"
+                  onClick={() => toggleDomain(domain.key)}
+                  aria-expanded={open}
+                  className="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-medium"
+                >
+                  <span>
+                    {domain.label}
+                    {selectedHere > 0 && (
+                      <span className="ml-2 text-xs text-primary">{selectedHere}</span>
+                    )}
+                  </span>
+                  <ChevronDown
+                    className={cn("h-4 w-4 transition-transform", open && "rotate-180")}
+                    aria-hidden="true"
+                  />
+                </button>
+                {open && (
+                  <div className="space-y-2 border-t border-border px-4 py-3">
+                    {domain.options.map((o) => {
+                      const checked = certifications.includes(o.value);
+                      const locked = !checked && certCapReached;
+                      return (
+                        <div key={o.value} className="flex items-start gap-3">
+                          <Checkbox
+                            id={`cert-${o.value}`}
+                            checked={checked}
+                            disabled={locked}
+                            onCheckedChange={() => toggleCertification(o.value)}
+                          />
+                          <Label
+                            htmlFor={`cert-${o.value}`}
+                            className={cn(
+                              "text-sm font-normal leading-snug",
+                              locked && "text-muted-foreground",
+                            )}
+                          >
+                            {o.label}
+                          </Label>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 };
