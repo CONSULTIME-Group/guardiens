@@ -147,7 +147,7 @@ const SearchListingCard = ({
   if (isProjet) {
     const projetLink = `/projets/${item.slug || item.id}`;
     const projetMeta = projetMetaLine(item.date_needed, item.end_date, item.duration_estimate);
-    const natureLabel = (item as any).nature_category_label || (item as any).nature_category || null;
+    const natureLabel = projetNatureLabel((item as any).nature_projet);
 
     const projetCard = (
       <article
