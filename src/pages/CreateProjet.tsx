@@ -250,12 +250,6 @@ const CreateProjet = () => {
       />
 
       <main id="main-content">
-      <PageMeta
-        title="Publier un projet participatif"
-        description="Décrivez votre chantier, la période d'accueil et ce que vous transmettrez aux personnes qui viendront participer."
-      />
-
-      <main id="main-content">
         <div className="sticky top-12 md:top-0 z-30 bg-background/95 backdrop-blur border-b border-border px-4 py-3">
           <div className="max-w-2xl mx-auto">
             <h1 className="font-heading text-2xl md:text-3xl font-bold text-foreground mb-3">
