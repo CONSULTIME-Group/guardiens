@@ -174,7 +174,7 @@ const FAQ = () => {
  </div>
  </header>
 
- <main className="max-w-3xl mx-auto px-4 py-10 sm:py-14">
+ <main id="main-content" className="max-w-3xl mx-auto px-4 py-10 sm:py-14">
  {isLoading ? (
  <div className="space-y-4">
  {[1, 2, 3].map((i) => (
