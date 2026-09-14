@@ -76,16 +76,65 @@ function resolveArticleImages(html: string): string {
   });
 }
 
+/**
+ * Surcharge des blocs d'appel à l'action, par slug d'article.
+ *
+ * Par défaut tous les articles reçoivent les blocs orientés garde d'animaux.
+ * Certains articles portent un autre sujet, et un bloc hors sujet y coûte
+ * plus qu'il ne rapporte. Ajouter une entrée ici suffit à les réorienter.
+ */
+type CtaCopy = {
+  midText: string;
+  midPrimary: { label: string; href: string; role: string };
+  midSecondary: { label: string; href: string; role: string };
+  endHeading: string;
+  endText: string;
+  endPrimary: { label: string; href: string; role: string };
+  endSecondary: { label: string; href: string; role: string };
+};
+
+const CTA_DEFAUT: CtaCopy = {
+  midText: "Vous êtes propriétaire d'animaux ou vous aimez les animaux ?",
+  midPrimary: { label: "Rejoindre la communauté", href: "/inscription?role=owner", role: "owner" },
+  midSecondary: { label: "Devenir gardien", href: "/inscription?role=sitter", role: "sitter" },
+  endHeading: "Prêt à rejoindre la communauté ?",
+  endText: "Créez votre profil et rejoignez les gardiens de votre secteur.",
+  endPrimary: { label: "Créer mon profil propriétaire", href: "/inscription?role=owner", role: "owner" },
+  endSecondary: { label: "Devenir gardien", href: "/inscription?role=sitter", role: "sitter" },
+};
+
+/**
+ * Le rôle "projet" est volontairement hors de la liste traitée par
+ * adaptEndCTAsForRole : ces libellés survivent tels quels, y compris pour
+ * une personne connectée, parce qu'ils portent le sujet de l'article.
+ */
+const CTA_PAR_SLUG: Record<string, CtaCopy> = {
+  "chantier-participatif-projet-collectif-cadre-legal": {
+    midText: "Vous avez un projet collectif qui demande des bras ?",
+    midPrimary: { label: "Partager mon projet", href: "/petites-missions", role: "projet" },
+    midSecondary: { label: "Aider une association", href: "/associations", role: "projet" },
+    endHeading: "Un projet à monter, ou des bras à offrir ?",
+    endText: "Publiez votre projet pour trouver des bénévoles, ou rejoignez une association qui cherche de l'aide près de chez vous.",
+    endPrimary: { label: "Partager mon projet et trouver des bénévoles", href: "/petites-missions", role: "projet" },
+    endSecondary: { label: "Aider une association", href: "/associations", role: "projet" },
+  },
+};
+
+function ctaCopyPour(slug?: string): CtaCopy {
+  return (slug && CTA_PAR_SLUG[slug]) || CTA_DEFAUT;
+}
+
 /** Inject mid-article CTA after the 2nd <h2> */
 function injectCTA(html: string, slug?: string): string {
   let h2Count = 0;
   const slugAttr = slug ? ` data-article-slug="${slug}"` : "";
+  const copy = ctaCopyPour(slug);
   return html.replace(/<h2/g, (match) => {
     h2Count++;
     if (h2Count === 3) {
       // `data-cta-block="mid"` permet de masquer le bloc côté CSS pour les
       // utilisateurs logués (cf. .article-rich-content [data-cta-block="mid"]).
-      return `<div class="article-cta-block" data-cta-block="mid"><div class="article-cta-inner"><p class="article-cta-text">Vous êtes propriétaire d'animaux ou vous aimez les animaux ?</p><div class="article-cta-buttons"><a href="/inscription?role=owner" class="article-cta-btn article-cta-btn-primary" data-article-cta="true" data-cta-position="mid" data-cta-role="owner"${slugAttr}>Rejoindre la communauté</a><a href="/inscription?role=sitter" class="article-cta-btn article-cta-btn-secondary" data-article-cta="true" data-cta-position="mid" data-cta-role="sitter"${slugAttr}>Devenir gardien</a></div></div></div>\n${match}`;
+      return `<div class="article-cta-block" data-cta-block="mid"><div class="article-cta-inner"><p class="article-cta-text">${copy.midText}</p><div class="article-cta-buttons"><a href="${copy.midPrimary.href}" class="article-cta-btn article-cta-btn-primary" data-article-cta="true" data-cta-position="mid" data-cta-role="${copy.midPrimary.role}"${slugAttr}>${copy.midPrimary.label}</a><a href="${copy.midSecondary.href}" class="article-cta-btn article-cta-btn-secondary" data-article-cta="true" data-cta-position="mid" data-cta-role="${copy.midSecondary.role}"${slugAttr}>${copy.midSecondary.label}</a></div></div></div>\n${match}`;
     }
     return match;
   });
@@ -148,7 +197,8 @@ function addBandedSections(html: string): string {
 /** Add end-of-article CTA */
 function addEndCTA(html: string, slug?: string): string {
   const slugAttr = slug ? ` data-article-slug="${slug}"` : "";
-  return html + `<div class="article-cta-block article-cta-end"><div class="article-cta-inner"><p class="article-cta-heading">Prêt à rejoindre la communauté ?</p><p class="article-cta-text">Créez votre profil, 0 €, et rejoignez les gardiens de votre quartier.</p><div class="article-cta-buttons"><a href="/inscription?role=owner" class="article-cta-btn article-cta-btn-primary" data-article-cta="true" data-cta-position="end" data-cta-role="owner"${slugAttr}>Créer mon profil propriétaire</a><a href="/inscription?role=sitter" class="article-cta-btn article-cta-btn-secondary" data-article-cta="true" data-cta-position="end" data-cta-role="sitter"${slugAttr}>Devenir gardien</a></div></div></div>`;
+  const copy = ctaCopyPour(slug);
+  return html + `<div class="article-cta-block article-cta-end"><div class="article-cta-inner"><p class="article-cta-heading">${copy.endHeading}</p><p class="article-cta-text">${copy.endText}</p><div class="article-cta-buttons"><a href="${copy.endPrimary.href}" class="article-cta-btn article-cta-btn-primary" data-article-cta="true" data-cta-position="end" data-cta-role="${copy.endPrimary.role}"${slugAttr}>${copy.endPrimary.label}</a><a href="${copy.endSecondary.href}" class="article-cta-btn article-cta-btn-secondary" data-article-cta="true" data-cta-position="end" data-cta-role="${copy.endSecondary.role}"${slugAttr}>${copy.endSecondary.label}</a></div></div></div>`;
 }
 
 interface ArticleRendererProps {
