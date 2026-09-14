@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { reportError } from "@/lib/errorLogger";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import { Button } from "@/components/ui/button";
@@ -14,15 +15,21 @@ const ProjetsListing = () => {
 
   useEffect(() => {
     const load = async () => {
-      const { data } = await (supabase as any)
-        .from("public_small_missions")
-        .select("*")
-        .eq("category", "projet")
-        .eq("status", "open")
-        .order("created_at", { ascending: false })
-        .limit(60);
-      setProjets((data || []) as any[]);
-      setLoading(false);
+      try {
+        const { data } = await (supabase as any)
+          .from("public_small_missions")
+          .select("*")
+          .eq("category", "projet")
+          .eq("status", "open")
+          .order("created_at", { ascending: false })
+          .limit(60);
+        setProjets((data || []) as any[]);
+      } catch (e) {
+        reportError(e, { component: "ProjetsListing", source: "load" });
+        setProjets([]);
+      } finally {
+        setLoading(false);
+      }
     };
     void load();
   }, []);
