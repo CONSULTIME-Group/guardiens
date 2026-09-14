@@ -96,13 +96,7 @@ const Cgs = lazy(() => import("./pages/Cgs"), "Cgs");
 const CookiesPage = lazy(() => import("./pages/Cookies"), "Cookies");
 const Privacy = lazy(() => import("./pages/Privacy"), "Privacy");
 const AdminArticles = lazy(() => import("./pages/AdminArticles"), "AdminArticles");
-const ProsListing = lazy(() => import("./pages/ProsListing"), "ProsListing");
-const ProDetail = lazy(() => import("./pages/ProDetail"), "ProDetail");
-const ProOnboarding = lazy(() => import("./pages/ProOnboarding"), "ProOnboarding");
 const OnboardingAffinity = lazy(() => import("./pages/OnboardingAffinity"), "OnboardingAffinity");
-const MyProProfile = lazy(() => import("./pages/MyProProfile"), "MyProProfile");
-const ProCategoryListing = lazy(() => import("./pages/ProCategoryListing"), "ProCategoryListing");
-const AdminProDirectory = lazy(() => import("./pages/admin/AdminProDirectory"), "AdminProDirectory");
 const AssociationsListing = lazy(() => import("./pages/AssociationsListing"), "AssociationsListing");
 const ProjetsListing = lazy(() => import("./pages/ProjetsListing"), "ProjetsListing");
 const ProjetDetail = lazy(() => import("./pages/ProjetDetail"), "ProjetDetail");
@@ -122,7 +116,6 @@ const AdminReviews = lazy(() => import("./pages/admin/AdminReviews"), "AdminRevi
 const AdminReviewDisputes = lazy(() => import("./pages/admin/AdminReviewDisputes"), "AdminReviewDisputes");
 const AdminReports = lazy(() => import("./pages/admin/AdminReports"), "AdminReports");
 const AdminVerifications = lazy(() => import("./pages/admin/AdminVerifications"), "AdminVerifications");
-const AdminPros = lazy(() => import("./pages/admin/AdminPros"), "AdminPros");
 const AdminEmails = lazy(() => import("./pages/admin/AdminEmails"), "AdminEmails");
 const AdminEmailHealth = lazy(() => import("./pages/admin/AdminEmailHealth"), "AdminEmailHealth");
 const AdminAlma = lazy(() => import("./pages/admin/AdminAlma"), "AdminAlma");
@@ -463,7 +456,13 @@ const AppRoutes = () => {
 
       {/* Legacy footer/marketing redirects — évite les 404 issus d'anciens liens indexés */}
       <Route path="/observatoire" element={<Navigate to="/observatoire-garde-animaux" replace />} />
-      <Route path="/pros-animaliers" element={<Navigate to="/pros" replace />} />
+      {/* Annuaire des professionnels retiré : ces URL ont été soumises au crawl,
+          elles pointent vers la recherche, qui porte l'intention la plus proche. */}
+      <Route path="/pros-animaliers" element={<Navigate to="/search" replace />} />
+      <Route path="/pros" element={<Navigate to="/search" replace />} />
+      <Route path="/pros/categorie/:catSlug" element={<Navigate to="/search" replace />} />
+      <Route path="/pros/categorie/:catSlug/:villeSlug" element={<Navigate to="/search" replace />} />
+      <Route path="/pros/:slug" element={<Navigate to="/search" replace />} />
       <Route path="/mon-profil" element={<Navigate to="/profile" replace />} />
       <Route path="/a-propos" element={<About />} />
       <Route path="/observatoire-garde-animaux" element={<PublicShellRoute><Observatoire /></PublicShellRoute>} />
@@ -505,14 +504,8 @@ const AppRoutes = () => {
       <Route path="/annonces/demo/:slug" element={<DemoSitDetail />} />
       <Route path="/annonces/:id" element={<PublicSitDetail />} />
       <Route path="/gardiens/:id" element={<PublicSitterProfile />} />
-      <Route path="/pros" element={<PublicShellRoute><ProsListing /></PublicShellRoute>} />
-      <Route path="/pros/inscription" element={<AppLayout><ProOnboarding /></AppLayout>} />
       <Route path="/onboarding/affinity" element={<ProtectedRoute><OnboardingAffinity /></ProtectedRoute>} />
-      <Route path="/pros/mon-espace" element={<AppLayout><MyProProfile /></AppLayout>} />
 
-      <Route path="/pros/categorie/:catSlug" element={<PublicShellRoute><ProCategoryListing /></PublicShellRoute>} />
-      <Route path="/pros/categorie/:catSlug/:villeSlug" element={<PublicShellRoute><ProCategoryListing /></PublicShellRoute>} />
-      <Route path="/pros/:slug" element={<PublicShellRoute><ProDetail /></PublicShellRoute>} />
       <Route path="/projets" element={<PublicShellRoute><ProjetsListing /></PublicShellRoute>} />
       <Route path="/projets/publier" element={<ProtectedRoute><CreateProjet /></ProtectedRoute>} />
 
@@ -536,8 +529,6 @@ const AppRoutes = () => {
         <Route path="/admin/review-disputes" element={<AdminReviewDisputes />} />
         <Route path="/admin/reports" element={<AdminReports />} />
         <Route path="/admin/verifications" element={<AdminVerifications />} />
-        <Route path="/admin/pros" element={<AdminPros />} />
-        <Route path="/admin/pros-annuaire" element={<AdminProDirectory />} />
         <Route path="/admin/associations" element={<AdminAssociations />} />
         <Route path="/admin/emails" element={<AdminEmailHealth />} />
         <Route path="/admin/emails-transactionnels" element={<AdminEmails />} />
