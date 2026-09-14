@@ -364,16 +364,104 @@ const AdminSmallMissions = () => {
     ? ((kpis.totalResponses / kpis.totalNotified) * 100).toFixed(1)
     : "0";
 
+  const projetFilled = projetKpis && projetKpis.closed_count > 0
+    ? Math.round((projetKpis.closed_filled / projetKpis.closed_count) * 100)
+    : null;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Entraide</h1>
+        <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">
+          {tab === "projets" ? "Projets participatifs" : "Entraide"}
+        </h1>
         <Button variant="outline" size="sm" onClick={exportCsv}>
           <Download className="h-4 w-4 mr-2" /> Exporter CSV
         </Button>
       </div>
 
-      {/* KPIs */}
+      <div className="flex gap-2" role="tablist">
+        {([["entraide", "Entraide"], ["projets", "Projets"]] as const).map(([key, label]) => (
+          <button
+            key={key}
+            type="button"
+            role="tab"
+            aria-selected={tab === key}
+            onClick={() => switchTab(key)}
+            className={`px-3 py-1.5 rounded-full text-sm font-semibold border transition-colors ${
+              tab === key
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-card text-muted-foreground border-border hover:bg-accent"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {tab === "projets" && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3">
+            <Card><CardContent className="p-4">
+              <p className="text-xs text-muted-foreground">Projets publiés</p>
+              <p className="text-2xl font-bold tabular-nums">{projetKpis?.published ?? 0}</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">{projetKpis?.open ?? 0} ouverts</p>
+            </CardContent></Card>
+            <Card><CardContent className="p-4">
+              <p className="text-xs text-muted-foreground" title="Médiane des candidatures reçues par projet">Candidatures par projet, médiane</p>
+              <p className="text-2xl font-bold tabular-nums">
+                {projetKpis?.median_responses != null ? Number(projetKpis.median_responses).toFixed(1) : "·"}
+              </p>
+            </CardContent></Card>
+            <Card><CardContent className="p-4">
+              <p className="text-xs text-muted-foreground">Délai jusqu'à la première candidature, médiane</p>
+              <p className="text-2xl font-bold tabular-nums">
+                {projetKpis?.median_days_first_response != null
+                  ? `${Number(projetKpis.median_days_first_response).toFixed(1)} j`
+                  : "·"}
+              </p>
+            </CardContent></Card>
+            <Card><CardContent className="p-4">
+              <p className="text-xs text-muted-foreground" title="Projets clôturés avec au moins une candidature acceptée">Taux de projets pourvus</p>
+              <p className="text-2xl font-bold tabular-nums">{projetFilled != null ? `${projetFilled}%` : "·"}</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">
+                {projetKpis?.closed_filled ?? 0} sur {projetKpis?.closed_count ?? 0} clôturés
+              </p>
+            </CardContent></Card>
+            <Card className="border-primary/40"><CardContent className="p-4">
+              <p className="text-xs text-muted-foreground" title="Membres ayant candidaté à une garde et à un projet">Gardes et projets, mêmes membres</p>
+              <p className="text-2xl font-bold tabular-nums">{projetKpis?.cross_members ?? 0}</p>
+            </CardContent></Card>
+          </div>
+
+          <Card className={((projetKpis?.zero_response_14d?.length ?? 0) > 0) ? "border-warning-border bg-warning-soft" : undefined}>
+            <CardContent className="p-4 space-y-2">
+              <p className="text-xs text-muted-foreground">Projets sans candidature après 14 jours</p>
+              {(projetKpis?.zero_response_14d?.length ?? 0) === 0 ? (
+                <p className="text-sm text-muted-foreground">Tous les projets ouverts ont reçu au moins une candidature.</p>
+              ) : (
+                <ul className="space-y-1">
+                  {projetKpis!.zero_response_14d.map((p) => (
+                    <li key={p.id}>
+                      <button
+                        type="button"
+                        className="text-sm font-medium text-primary hover:underline text-left"
+                        onClick={() => navigate(`/projets/${p.slug || p.id}`)}
+                      >
+                        {p.title}
+                      </button>
+                      <span className="text-xs text-muted-foreground ml-2">
+                        publié le {format(new Date(p.created_at), "d MMM yyyy", { locale: fr })}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </CardContent></Card>
+        </div>
+      )}
+
+      {/* KPIs entraide */}
+      {tab === "entraide" && (
       <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-3">
         <Card className="border-primary/40"><CardContent className="p-4">
           <p className="text-xs text-muted-foreground" title="Réponses ÷ notifications envoyées">Conversion notif. → réponse</p>
