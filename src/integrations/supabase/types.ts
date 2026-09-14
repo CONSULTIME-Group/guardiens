@@ -10647,6 +10647,7 @@ export type Database = {
         | "transport"
         | "company"
         | "other"
+        | "projet"
       small_mission_response_status:
         | "pending"
         | "accepted"
@@ -10920,6 +10921,7 @@ export const Constants = {
         "transport",
         "company",
         "other",
+        "projet",
       ],
       small_mission_response_status: [
         "pending",
