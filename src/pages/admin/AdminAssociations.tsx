@@ -776,6 +776,8 @@ export default function AdminAssociations() {
           </CardContent>
         </Card>
       )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
