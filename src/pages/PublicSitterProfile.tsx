@@ -1232,6 +1232,8 @@ export default function PublicSitterProfile() {
   const bio = sanitizeBioForPublic(profile?.bio);
   // Une motivation sous le seuil (50 car.) reste un brouillon : jamais publiée.
   const motivation = sanitizeBioForPublic(publishableMotivation(sitterProfile?.motivation));
+  // Formations déclarées : intitulés de la liste fermée uniquement.
+  const declaredCertifications = certificationLabels((profile as any)?.certifications);
   const animalTypes: string[] = sitterProfile?.animal_types || [];
   const hasVehicle = sitterProfile?.has_vehicle || false;
   const rawRadius = sitterProfile?.geographic_radius;
