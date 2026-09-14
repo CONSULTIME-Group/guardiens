@@ -409,15 +409,20 @@ async function main() {
 
   // Pages silos catégorie + (catégorie, ville) dérivées des fiches pros existantes
   const proSiloEntries = [];
-  // Index par catégorie (toujours, même si vide)
-  for (const catSlug of Object.values(PRO_CATEGORY_SLUGS)) {
-    proSiloEntries.push({
-      loc: `/pros/categorie/${catSlug}`,
-      lastmod: today,
-      changefreq: "weekly",
-      priority: "0.7",
-    });
+  // Les pages silo suivent les fiches : un annuaire sans fiche ne produit
+  // aucune page de catégorie. Quand des fiches pros existeront, les pages
+  // de catégorie reviendront automatiquement sans modification ici.
+  if ((profiles_pros || []).length > 0) {
+    for (const catSlug of Object.values(PRO_CATEGORY_SLUGS)) {
+      proSiloEntries.push({
+        loc: `/pros/categorie/${catSlug}`,
+        lastmod: today,
+        changefreq: "weekly",
+        priority: "0.7",
+      });
+    }
   }
+
   // Combinaisons (catégorie, ville) effectivement peuplées
   const siloSeen = new Set();
   for (const p of profiles_pros || []) {
