@@ -148,23 +148,23 @@ const MesCandidatures = () => {
 
   const { active, closed } = useMemo(() => groupApplications(apps), [apps]);
 
-  // Rappel de statut professionnel (declared ou verified) et lien annuaire.
-  const [proInfo, setProInfo] = useState<{ status: string; specialty: string | null; slug: string | null } | null>(null);
+  // Rappel de statut professionnel déclaré (visible par les propriétaires).
+  const [proInfo, setProInfo] = useState<{ status: string; specialty: string | null } | null>(null);
   useEffect(() => {
     if (!user?.id) return;
     let cancelled = false;
     (async () => {
-      const [profRes, proRes] = await Promise.all([
-        supabase.from("profiles").select("pro_status, pro_specialty").eq("id", user.id).maybeSingle(),
-        supabase.from("pro_profiles").select("slug").eq("user_id", user.id).eq("status", "approved").maybeSingle(),
-      ]);
+      const profRes = await supabase
+        .from("profiles")
+        .select("pro_status, pro_specialty")
+        .eq("id", user.id)
+        .maybeSingle();
       if (cancelled) return;
       const status = (profRes.data as any)?.pro_status;
       if (status === "declared" || status === "verified") {
         setProInfo({
           status,
           specialty: (profRes.data as any)?.pro_specialty ?? null,
-          slug: (proRes.data as any)?.slug ?? null,
         });
       } else {
         setProInfo(null);
@@ -331,12 +331,6 @@ const MesCandidatures = () => {
                 {specialtyLabel(proInfo.specialty) ? ` (${specialtyLabel(proInfo.specialty)})` : ""}.
               </p>
             </div>
-            <Link
-              to={proInfo.slug ? `/pros/${proInfo.slug}` : "/pros/inscription"}
-              className="mt-2 inline-block text-sm font-medium text-primary hover:underline"
-            >
-              {proInfo.slug ? "Voir ma fiche dans l'annuaire des pros" : "Créer ma fiche dans l'annuaire des pros"}
-            </Link>
           </div>
         )}
 
