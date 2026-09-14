@@ -758,6 +758,8 @@ function AlmaDockInner() {
       {expanded && (
         <AlmaConversation
           open={expanded}
+          modal={!spontaneous}
+          autoFocusInput={!spontaneous}
           onOpenChange={(open) => {
             if (open) return;
             setExpanded(false);
