@@ -230,6 +230,13 @@ interface AlmaConversationProps {
   journal?: AlmaJournalPage | null;
   onJournalAction?: (entry: AlmaJournalEntry) => void;
   onJournalReply?: (reply: string, ruleKey: string) => void;
+  /**
+   * Panneau bloquant (voile sombre, page inerte). Faux quand Alma s'ouvre
+   * d'elle-même : la personne garde la main sur la page et le clavier.
+   */
+  modal?: boolean;
+  /** Place le curseur dans la zone de saisie à l'ouverture. */
+  autoFocusInput?: boolean;
 }
 
 export function AlmaConversation({
@@ -254,6 +261,8 @@ export function AlmaConversation({
   journal,
   onJournalAction,
   onJournalReply,
+  modal = true,
+  autoFocusInput = true,
 }: AlmaConversationProps) {
   const state = useSyncExternalStore(subscribeAlmaConversation, getAlmaConversationState);
   const [draft, setDraft] = useState("");
