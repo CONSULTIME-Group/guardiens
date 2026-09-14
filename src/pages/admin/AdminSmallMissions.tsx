@@ -131,14 +131,17 @@ const AdminSmallMissions = () => {
         counts[r.mission_id] = (counts[r.mission_id] || 0) + 1;
       });
       setNotifiedCounts(counts);
-      const totalNotified = (notifRes.data || []).length;
-      const zeroReach = Math.max(0, (total || 0) - Object.keys(counts).length);
+      const totalNotified = (notifRes.data || []).filter(
+        (r: any) => !projetIds.has(r.mission_id),
+      ).length;
+      const reachedEntraide = Object.keys(counts).filter((id) => !projetIds.has(id)).length;
+      const zeroReach = Math.max(0, (total || 0) - reachedEntraide);
       setKpis(k => ({
         ...k,
         total: total || 0,
         open: open || 0,
         totalViews,
-        totalResponses: respRes.count || 0,
+        totalResponses: entraideResponses,
         totalNotified,
         zeroReach,
       }));
