@@ -177,6 +177,11 @@ const ProjetDetail = () => {
       timeAgoFr={timeAgoFr}
       memberSinceLong={memberSinceLong}
       onShare={onShare}
+      onApply={user ? handleApply : undefined}
+      hasApplied={hasApplied}
+      applying={applying}
+      applyMessage={applyMessage}
+      onApplyMessageChange={setApplyMessage}
     />
   );
 };
