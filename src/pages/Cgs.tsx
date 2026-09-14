@@ -12,7 +12,7 @@ const Cgs = () => {
       />
       <PublicHeader />
 
-      <main className="px-6 md:px-12 py-16 max-w-3xl mx-auto">
+      <main id="main-content" className="px-6 md:px-12 py-16 max-w-3xl mx-auto">
         <h1 className="font-heading text-3xl md:text-4xl font-bold mb-2">Conditions Générales de Services</h1>
         <p className="text-sm text-muted-foreground mb-8">Version 1, dernière mise à jour : 13 juillet 2026</p>
 

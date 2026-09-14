@@ -74,7 +74,7 @@ const Pricing = () => {
         <PublicHeader />
         <PageBreadcrumb items={[{ label: "Nos engagements" }]} />
 
-        <main className="max-w-3xl mx-auto px-4 min-w-0">
+        <main id="main-content" className="max-w-3xl mx-auto px-4 min-w-0">
           <section className="py-10 md:py-14 text-center">
             <h1 className="font-heading text-3xl md:text-5xl font-bold text-foreground leading-tight mb-4">
               Tarifs Guardiens : nos engagements de service

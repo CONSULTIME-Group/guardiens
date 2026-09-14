@@ -73,7 +73,7 @@ const EmergencySitter = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <main id="main-content" className="min-h-screen bg-background">
       <PageMeta title={tp("meta_title")} description={tp("meta_description")} path="/gardien-urgence" />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceJsonLd) }} />
@@ -314,7 +314,7 @@ const EmergencySitter = () => {
       </section>
 
       <PublicFooter />
-    </div>
+    </main>
   );
 };
 

@@ -12,7 +12,7 @@ const MentionsLegales = () => {
       />
       <PublicHeader />
 
-      <main className="px-6 md:px-12 py-8 md:py-16 max-w-3xl mx-auto">
+      <main id="main-content" className="px-6 md:px-12 py-8 md:py-16 max-w-3xl mx-auto">
 
         <h1 className="font-heading text-2xl md:text-4xl font-bold mb-5 md:mb-8">Mentions légales</h1>
 

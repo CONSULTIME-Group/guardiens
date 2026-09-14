@@ -24,7 +24,7 @@ import { trackEvent } from "@/lib/analytics";
 import { sanitizeRedirect } from "@/lib/safeRedirect";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -376,14 +376,14 @@ const OnboardingAffinity = () => {
 
   if (!user || flagLoading || status.loading) {
     return (
-      <div className="min-h-[100svh] flex items-center justify-center text-muted-foreground">
+      <main id="main-content" className="min-h-[100svh] flex items-center justify-center text-muted-foreground">
         Chargement...
-      </div>
+      </main>
     );
   }
 
   return (
-    <div className="min-h-[100svh] bg-background flex items-start md:items-center justify-center px-4 py-8">
+    <main id="main-content" className="min-h-[100svh] bg-background flex items-start md:items-center justify-center px-4 py-8">
       <Head>
         <title>Bienvenue, une dernière étape | Guardiens</title>
         <meta name="robots" content="noindex, nofollow" />
@@ -391,7 +391,11 @@ const OnboardingAffinity = () => {
       <div className="w-full max-w-2xl">
         <Card>
           <CardHeader className="space-y-2">
-            <CardTitle className="font-heading text-2xl">Une dernière étape avant de commencer</CardTitle>
+            {/* Le titre de la carte est aussi le titre de la page : rendu en h1
+                avec les classes de CardTitle pour un rendu identique. */}
+            <h1 className="font-heading text-2xl font-semibold leading-none tracking-tight">
+              Une dernière étape avant de commencer
+            </h1>
             {showAffinityFields ? (
               <p className="text-sm text-muted-foreground">
                 Ces informations nous servent uniquement à calculer votre score d'affinité et à vous proposer les meilleures correspondances. Aucune saisie libre, moins d'une minute.
@@ -651,7 +655,7 @@ const OnboardingAffinity = () => {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </main>
   );
 };
 
