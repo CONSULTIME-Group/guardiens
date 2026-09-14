@@ -112,7 +112,7 @@ export function useAdminBadges(): AdminBadges {
       adminMessageFailed: results[9].count || 0,
       reportsSit: results[10].count || 0,
       reportsMission: results[11].count || 0,
-      analysisRequests: results[13].count || 0,
+      analysisRequests: results[12].count || 0,
       sitsToStaff,
     });
   }, []);
