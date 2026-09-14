@@ -19,6 +19,7 @@ import {
   associationTypeLabel,
 } from "@/lib/associationLabels";
 import { AssociationFaq } from "@/components/associations/AssociationFaq";
+import VolunteerCountByDepartment from "@/components/associations/VolunteerCountByDepartment";
 import { faqPageJsonLd, type AssociationFaqItem } from "@/lib/associationFaq";
 import {
   PUBLIC_ASSOCIATION_COLUMNS,
@@ -537,6 +538,10 @@ export default function AssociationDetail() {
               Bénévoles et familles d'accueil partent aussi en vacances. Sur Guardiens, un gardien du
               coin veille sur votre maison et vos animaux pendant votre absence.
             </p>
+            <VolunteerCountByDepartment
+              departementCode={data.departement_code}
+              className="mt-3"
+            />
             <Button asChild size="sm" className="mt-4">
               <Link to={`/departement/${data.departement_slug}`}>
                 Trouver un gardien : {data.departement_name}

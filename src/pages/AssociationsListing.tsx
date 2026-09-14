@@ -314,9 +314,9 @@ export default function AssociationsListing() {
           </p>
         )}
 
-        <VolunteerInviteBlock />
-
         <AssociationFaq items={ASSOCIATIONS_FAQ} />
+
+        <VolunteerInviteBlock />
 
         <section className="mt-10 rounded-2xl border border-border bg-card p-5 md:p-6">
           <h2 className="font-heading text-lg md:text-xl font-semibold text-foreground">
