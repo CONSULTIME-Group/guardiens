@@ -18,6 +18,8 @@ import {
 } from "@/lib/associationLabels";
 import { ASSOCIATIONS_FAQ, faqPageJsonLd } from "@/lib/associationFaq";
 import { AssociationFaq } from "@/components/associations/AssociationFaq";
+import VolunteerCountByDepartment from "@/components/associations/VolunteerCountByDepartment";
+import VolunteerInviteBlock from "@/components/associations/VolunteerInviteBlock";
 import { isAssociationIndexable } from "@/lib/associationIndexability";
 import {
   PUBLIC_ASSOCIATION_COLUMNS,
@@ -311,6 +313,8 @@ export default function AssociationsListing() {
             présentées ici.
           </p>
         )}
+
+        <VolunteerInviteBlock />
 
         <AssociationFaq items={ASSOCIATIONS_FAQ} />
 
