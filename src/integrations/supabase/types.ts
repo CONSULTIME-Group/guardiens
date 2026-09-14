@@ -9796,7 +9796,6 @@ export type Database = {
         Args: { _user_id: string }
         Returns: number
       }
-      increment_pro_view: { Args: { _slug: string }; Returns: undefined }
       increment_redirect_hit:
         | { Args: { p_slug_from: string }; Returns: undefined }
         | { Args: { p_scope: string; p_slug_from: string }; Returns: undefined }
@@ -10011,7 +10010,6 @@ export type Database = {
         Returns: undefined
       }
       refresh_all_sitter_reply_stats: { Args: never; Returns: number }
-      refresh_pro_rating: { Args: { _pro_id: string }; Returns: undefined }
       refresh_sitter_reply_stats: {
         Args: { p_user_id: string }
         Returns: undefined
