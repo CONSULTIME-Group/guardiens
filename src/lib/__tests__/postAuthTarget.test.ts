@@ -24,11 +24,6 @@ describe("resolvePostAuthTarget", () => {
     expect(resolvePostAuthTarget(null, null)).toBe("/dashboard");
   });
 
-  it("envoie toujours un pro vers sa fiche dédiée", () => {
-    expect(resolvePostAuthTarget("pro", null)).toBe("/pros/inscription");
-    expect(resolvePostAuthTarget("pro", "/gardiens/abc")).toBe("/pros/inscription");
-  });
-
   it("respecte une redirection explicite, prioritaire sur le tunnel", () => {
     expect(resolvePostAuthTarget("owner", "/gardiens/abc-123")).toBe("/gardiens/abc-123");
     expect(resolvePostAuthTarget("both", "/gardiens/abc-123")).toBe("/gardiens/abc-123");

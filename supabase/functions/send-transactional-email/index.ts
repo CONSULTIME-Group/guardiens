@@ -292,8 +292,6 @@ Deno.serve(async (req) => {
   const SENSITIVE_TEMPLATES = new Set([
     'identity-verified',
     'identity-rejected',
-    'pro-profile-approved',
-    'pro-profile-rejected',
     'contact-reply',
     'subscription-expired',
     'dispute-resolved',

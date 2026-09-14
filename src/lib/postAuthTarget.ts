@@ -21,7 +21,6 @@ export function resolvePostAuthTarget(
   role: SignupRole | null,
   redirectTarget: string | null,
 ): string {
-  if (role === "pro") return "/pros/inscription";
   if (redirectTarget) return redirectTarget;
   // Un polyvalent (both) est aussi un propriétaire : 93 comptes concernés
   // en base au 16/08/2026. Le tunnel de création d'annonce s'impose à lui
