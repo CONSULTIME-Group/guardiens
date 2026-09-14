@@ -103,16 +103,28 @@ const AdminSmallMissions = () => {
   // les zéro réponse : sans notifiés, il n'y a rien à convertir.
   const [notifiedCounts, setNotifiedCounts] = useState<Record<string, number>>({});
 
-  // Global KPIs (independent of pagination/filters)
+  // Indicateurs globaux de l'entraide (hors pagination et filtres).
+  // Les projets participatifs sont exclus de bout en bout : ils ont leurs
+  // propres indicateurs dans l'onglet Projets, et les mélanger rendrait les
+  // deux mesures illisibles dès le premier projet publié.
   useEffect(() => {
     (async () => {
+      const projetIdsRes = await supabase
+        .from("small_missions")
+        .select("id")
+        .eq("category", "projet" as any)
+        .limit(20000);
+      const projetIds = new Set((projetIdsRes.data || []).map((r: any) => r.id));
       const [{ count: total }, { count: open }, viewsRes, respRes, notifRes] = await Promise.all([
-        supabase.from("small_missions").select("*", { count: "exact", head: true }),
-        supabase.from("small_missions").select("*", { count: "exact", head: true }).eq("status", "open" as any),
-        supabase.from("small_missions").select("view_count"),
-        supabase.from("small_mission_responses").select("*", { count: "exact", head: true }),
+        supabase.from("small_missions").select("*", { count: "exact", head: true }).neq("category", "projet" as any),
+        supabase.from("small_missions").select("*", { count: "exact", head: true }).eq("status", "open" as any).neq("category", "projet" as any),
+        supabase.from("small_missions").select("view_count").neq("category", "projet" as any),
+        supabase.from("small_mission_responses").select("mission_id").limit(50000),
         supabase.from("mission_notification_queue").select("mission_id").eq("status", "sent").limit(20000),
       ]);
+      const entraideResponses = (respRes.data || []).filter(
+        (r: any) => !projetIds.has(r.mission_id),
+      ).length;
       const totalViews = (viewsRes.data || []).reduce((s: number, r: any) => s + (r.view_count || 0), 0);
       const counts: Record<string, number> = {};
       (notifRes.data || []).forEach((r: any) => {
