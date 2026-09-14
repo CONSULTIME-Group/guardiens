@@ -523,7 +523,8 @@ const CreateSmallMission = () => {
         <StepperBar current={step} total={3} />
       )}
 
-      <div
+      <main
+        id="main-content"
         className="max-w-2xl mx-auto px-4 py-6 space-y-5 md:pb-36"
         style={{
           // Réserve la hauteur cumulée des couches fixes, plus une marge de

@@ -391,7 +391,11 @@ const OnboardingAffinity = () => {
       <div className="w-full max-w-2xl">
         <Card>
           <CardHeader className="space-y-2">
-            <CardTitle className="font-heading text-2xl">Une dernière étape avant de commencer</CardTitle>
+            {/* Le titre de la carte est aussi le titre de la page : rendu en h1
+                avec les classes de CardTitle pour un rendu identique. */}
+            <h1 className="font-heading text-2xl font-semibold leading-none tracking-tight">
+              Une dernière étape avant de commencer
+            </h1>
             {showAffinityFields ? (
               <p className="text-sm text-muted-foreground">
                 Ces informations nous servent uniquement à calculer votre score d'affinité et à vous proposer les meilleures correspondances. Aucune saisie libre, moins d'une minute.
