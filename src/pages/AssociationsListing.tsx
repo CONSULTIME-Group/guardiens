@@ -283,9 +283,13 @@ export default function AssociationsListing() {
             <div className="space-y-10">
               {grouped.map(([departementName, list]) => (
                 <section key={departementName}>
-                  <h2 className="mb-4 font-heading text-lg md:text-xl font-semibold text-foreground">
+                  <h2 className="mb-2 font-heading text-lg md:text-xl font-semibold text-foreground">
                     Associations de protection animale : {departementName}
                   </h2>
+                  <VolunteerCountByDepartment
+                    departementCode={list[0]?.departement_code}
+                    className="mb-4"
+                  />
                   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     {list.map((a) => (
                       <AssociationCard key={a.id} association={a} />
