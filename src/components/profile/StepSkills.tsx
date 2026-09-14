@@ -1,6 +1,10 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ChevronDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import CompetenceAutocomplete from "./CompetenceAutocomplete";
 import {
@@ -8,15 +12,22 @@ import {
   deriveCategoriesFromCompetences,
   groupByCategory,
 } from "@/lib/skills/categories";
+import { CERTIFICATION_DOMAINS, MAX_CERTIFICATIONS } from "@/lib/certifications";
+import { PRO_DECLARATION_OPTIONS, PRO_DECLARATION_NOTICE } from "@/lib/proDeclaration";
 
 interface Props {
   skillCategories: string[]; // conservé pour compat, désormais dérivé auto
   availableForHelp: boolean;
   competences?: string[];
+  /** Spécialité professionnelle déclarée ("" si aucune). */
+  proSpecialty?: string;
+  certifications?: string[];
   onChange: (partial: {
     skill_categories?: string[];
     available_for_help?: boolean;
     competences?: string[];
+    pro_specialty?: string | null;
+    certifications?: string[];
   }) => void;
 }
 
