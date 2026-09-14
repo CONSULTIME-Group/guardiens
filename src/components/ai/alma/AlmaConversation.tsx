@@ -111,6 +111,18 @@ function extractedLink(path: string): ExtractedLink {
       };
 }
 
+/**
+ * Un chemin ne compte comme adresse que s'il ouvre un mot, donc précédé d'un
+ * début de texte, d'une espace ou d'une ouverture de citation, et s'il porte
+ * au moins une lettre. Cela laisse intacts « et/ou », « 24h/24 » et les dates
+ * du type 13/09/2026, qui étaient jusqu'ici retirés de la phrase et changés en
+ * carte cliquable menant nulle part.
+ */
+function looksLikePath(path: string): boolean {
+  const firstSegment = path.split(/[?#]/)[0].split("/")[1] ?? "";
+  return /[a-zA-ZÀ-ÿ]/.test(firstSegment);
+}
+
 export function parseAlmaMessage(content: string): ParsedMessage {
   const links: ExtractedLink[] = [];
   const markdownPattern = /\[([^\]]+)\]\((https?:\/\/[^\s)]+|\/[^\s)]+)\)/g;
@@ -121,14 +133,25 @@ export function parseAlmaMessage(content: string): ParsedMessage {
     return "";
   });
 
-  const rawPattern = /(?:https?:\/\/(?:www\.)?guardiens\.fr)?\/[a-zA-Z0-9À-ÿ_?&=#./-]+/g;
-  text = text.replace(rawPattern, (href) => {
+  const absolutePattern = /https?:\/\/(?:www\.)?guardiens\.fr\/[a-zA-Z0-9À-ÿ_?&=#./-]+/g;
+  const pathPattern = /(^|[\s("'«])(\/[a-zA-Z0-9À-ÿ_?&=#./-]+)/gu;
+
+  const consume = (href: string): string | null => {
     const trailingPunctuation = href.match(/[.,;:!?]+$/)?.[0] ?? "";
     const cleanHref = trailingPunctuation ? href.slice(0, -trailingPunctuation.length) : href;
     const path = normalizeInternalPath(cleanHref);
-    if (!path) return href;
+    if (!path) return null;
     links.push(extractedLink(path));
     return trailingPunctuation;
+  };
+
+  text = text.replace(absolutePattern, (href) => consume(href) ?? href);
+  text = text.replace(pathPattern, (match, prefix: string, href: string) => {
+    const trailing = href.match(/[.,;:!?]+$/)?.[0] ?? "";
+    const cleanHref = trailing ? href.slice(0, -trailing.length) : href;
+    if (!looksLikePath(cleanHref)) return match;
+    const result = consume(href);
+    return result === null ? match : `${prefix}${result}`;
   });
 
   text = text.replace(/\s{2,}/g, " ").trim();
@@ -203,6 +226,13 @@ interface AlmaConversationProps {
   journal?: AlmaJournalPage | null;
   onJournalAction?: (entry: AlmaJournalEntry) => void;
   onJournalReply?: (reply: string, ruleKey: string) => void;
+  /**
+   * Panneau bloquant (voile sombre, page inerte). Faux quand Alma s'ouvre
+   * d'elle-même : la personne garde la main sur la page et le clavier.
+   */
+  modal?: boolean;
+  /** Place le curseur dans la zone de saisie à l'ouverture. */
+  autoFocusInput?: boolean;
 }
 
 export function AlmaConversation({
@@ -227,6 +257,8 @@ export function AlmaConversation({
   journal,
   onJournalAction,
   onJournalReply,
+  modal = true,
+  autoFocusInput = true,
 }: AlmaConversationProps) {
   const state = useSyncExternalStore(subscribeAlmaConversation, getAlmaConversationState);
   const [draft, setDraft] = useState("");
@@ -300,22 +332,26 @@ export function AlmaConversation({
 
   const submit = () => send(draft);
 
+  // Suivre un lien ferme le panneau : la page d'arrivée reste utilisable.
   const followLink = (href: string) => {
     const path = normalizeInternalPath(href);
-    if (path) navigate(path);
+    if (!path) return;
+    onOpenChange(false);
+    navigate(path);
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} onOpenChange={onOpenChange} modal={modal}>
       <SheetContent
         side="alma"
+        hideOverlay={!modal}
         data-alma-conversation-dialog="true"
         data-testid="alma-dock-panel"
         className="alma-conversation-sheet flex gap-0 overflow-hidden p-0"
         style={{ height: viewportHeight }}
         onOpenAutoFocus={(event) => {
           event.preventDefault();
-          inputRef.current?.focus({ preventScroll: true });
+          if (autoFocusInput) inputRef.current?.focus({ preventScroll: true });
         }}
       >
         <SheetTitle className="sr-only">Conversation avec Alma</SheetTitle>
