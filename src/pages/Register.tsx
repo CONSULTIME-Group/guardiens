@@ -30,7 +30,7 @@ import {
  DialogDescription,
 } from "@/components/ui/dialog";
 
-type Role = "owner" | "sitter" | "both" | "pro";
+type Role = "owner" | "sitter" | "both";
 
 const STRENGTH_KEYS = ["", "weak", "medium", "good", "strong"] as const;
 
@@ -100,10 +100,12 @@ const generateSuggestedPassword = (): string => {
 const Register = () => {
  const { t } = useTranslation();
  const [searchParams] = useSearchParams();
- const asPro = searchParams.get("as") === "pro";
- const presetRoleRaw = searchParams.get("role") as Role | null;
- // Si on arrive avec ?as=pro, on force le rôle "pro" même si role=owner est dans l'URL (héritage des anciens liens).
- const presetRole: Role | null = asPro ? "pro" : presetRoleRaw;
+ // Les anciens liens ?role=pro et ?as=pro restent valides : ils retombent
+ // sur le choix normal entre gardien, propriétaire et polyvalent.
+ const rawRole = searchParams.get("role");
+ const presetRoleRaw: Role | null =
+  rawRole === "owner" || rawRole === "sitter" || rawRole === "both" ? rawRole : null;
+ const presetRole: Role | null = presetRoleRaw;
  const presetEmail = (searchParams.get("email") || "").trim().toLowerCase();
  const redirectTarget = sanitizeRedirect(searchParams.get("redirect"));
 
@@ -111,7 +113,7 @@ const Register = () => {
  // /annonces/… => visiteur = gardien. Un ?role= ou ?as=pro explicite gagne
  // toujours. On n'écrase jamais un choix utilisateur.
  const detectedIntent: "owner" | "sitter" | null = (() => {
-  if (asPro || presetRoleRaw) return null;
+  if (presetRoleRaw) return null;
   if (!redirectTarget) return null;
   if (redirectTarget.startsWith("/gardiens/")) return "owner";
   if (redirectTarget.startsWith("/annonces/")) return "sitter";
@@ -157,7 +159,6 @@ const Register = () => {
   { value: "owner", label: t("register_page.roles.owner_label"), description: t("register_page.roles.owner_desc") },
   { value: "sitter", label: t("register_page.roles.sitter_label"), description: t("register_page.roles.sitter_desc") },
   { value: "both", label: t("register_page.roles.both_label"), description: t("register_page.roles.both_desc") },
-  { value: "pro", label: t("register_page.roles.pro_label"), description: t("register_page.roles.pro_desc") },
  ], [t]);
 
   const emailBlurredRef = useRef(false);
@@ -273,7 +274,7 @@ const Register = () => {
 
  try {
  const result = await Promise.race([
- register(cleanEmail, password, selectedRole === "pro" ? "owner" : selectedRole, postAuthTarget),
+ register(cleanEmail, password, selectedRole, postAuthTarget),
  timeoutPromise,
  ]) as any;
 
@@ -283,7 +284,6 @@ const Register = () => {
   if (typeof window !== "undefined") {
   localStorage.setItem("first_dashboard_seen", "pending");
   if (newUserId) localStorage.setItem("first_dashboard_role", selectedRole);
-  if (selectedRole === "pro") localStorage.setItem("pending_pro_onboarding", "1");
   }
   } catch {}
 
@@ -406,11 +406,6 @@ const Register = () => {
  metadata: { role: selectedRole, method: "google" },
  });
  } catch {}
-  try {
-    if (typeof window !== "undefined" && selectedRole === "pro") {
-      localStorage.setItem("pending_pro_onboarding", "1");
-    }
-  } catch {}
   const googleRedirectUrl = `${window.location.origin}${postAuthTarget}`;
 
   logOAuthStage("sdk_called", "/inscription", {
@@ -637,11 +632,6 @@ const Register = () => {
   selectedRole === role.value ? "border-primary bg-primary/5" : "border-border"
   )}
   >
-  {role.value === "pro" && (
-  <span className="absolute -top-2 right-3 inline-flex items-center rounded-full bg-accent px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent-foreground shadow-sm">
-  Pro
-  </span>
-  )}
   <div className="font-semibold text-sm lg:text-base mb-0.5">{role.label}</div>
   <div className="text-xs lg:text-sm text-muted-foreground leading-snug">{role.description}</div>
   </button>
