@@ -265,6 +265,17 @@ export default function AdminAssociations() {
         description="Fiches rédigées par l'équipe Guardiens, publiées sur la page publique des associations."
       />
 
+      <Tabs defaultValue="fiches" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="fiches">Fiches</TabsTrigger>
+          <TabsTrigger value="benevoles">Bénévoles</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="benevoles">
+          <VolunteersTab />
+        </TabsContent>
+
+        <TabsContent value="fiches" className="space-y-6">
       {loading ? (
         <p className="text-sm text-muted-foreground">Chargement…</p>
       ) : rows.length === 0 ? (
