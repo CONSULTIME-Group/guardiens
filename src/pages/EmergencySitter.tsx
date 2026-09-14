@@ -314,8 +314,10 @@ const EmergencySitter = () => {
         </div>
       </section>
 
+      </main>
+
       <PublicFooter />
-    </main>
+    </>
   );
 };
 
