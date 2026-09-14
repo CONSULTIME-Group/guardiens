@@ -28,6 +28,8 @@ import type {
 } from "@/components/associations/types";
 import { ASSOCIATION_CONSENT_SUBJECT, buildConsentEmail } from "@/lib/associationConsentEmail";
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import VolunteersTab from "./_components/associations/VolunteersTab";
 
 type AssociationRow = {
   id: string;
