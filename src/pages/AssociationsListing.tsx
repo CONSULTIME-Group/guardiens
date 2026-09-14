@@ -20,6 +20,7 @@ import { ASSOCIATIONS_FAQ, faqPageJsonLd } from "@/lib/associationFaq";
 import { AssociationFaq } from "@/components/associations/AssociationFaq";
 import VolunteerCountByDepartment from "@/components/associations/VolunteerCountByDepartment";
 import VolunteerInviteBlock from "@/components/associations/VolunteerInviteBlock";
+import AssociationNeedsHighlight from "@/components/associations/AssociationNeedsHighlight";
 import { isAssociationIndexable } from "@/lib/associationIndexability";
 import {
   PUBLIC_ASSOCIATION_COLUMNS,
@@ -273,6 +274,8 @@ export default function AssociationsListing() {
             ))}
           </select>
         </div>
+
+        {!isLoading && <AssociationNeedsHighlight associations={associations} />}
 
         {isLoading ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
