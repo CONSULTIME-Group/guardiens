@@ -57,8 +57,6 @@ import { template as ownerNoSitJ3 } from './owner-no-sit-j3.tsx'
 import { template as ownerNoSitJ10 } from './owner-no-sit-j10.tsx'
 import { template as ownerNoSitJ21 } from './owner-no-sit-j21.tsx'
 import { template as referralBoostMonthly } from './referral-boost-monthly.tsx'
-import { template as proProfileApproved } from './pro-profile-approved.tsx'
-import { template as proProfileRejected } from './pro-profile-rejected.tsx'
 import { template as summerListingReminder } from './summer-listing-reminder.tsx'
 import { template as sitterMutualAidInvite } from './sitter-mutual-aid-invite.tsx'
 import { template as analysisRequestsDigest } from './analysis-requests-digest.tsx'
@@ -157,8 +155,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'owner-no-sit-j10': ownerNoSitJ10,
   'owner-no-sit-j21': ownerNoSitJ21,
   'referral-boost-monthly': referralBoostMonthly,
-  'pro-profile-approved': proProfileApproved,
-  'pro-profile-rejected': proProfileRejected,
   'summer-listing-reminder': summerListingReminder,
   'sitter-mutual-aid-invite': sitterMutualAidInvite,
   'analysis-requests-digest': analysisRequestsDigest,
