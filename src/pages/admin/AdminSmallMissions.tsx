@@ -58,6 +58,18 @@ const moneyPattern = /(\d+\s*€|€\s*\d+|\beuros?\b|\brémunér|\brémuner|\br
 
 type SortKey = "created_at" | "view_count" | "response_count";
 
+/** Indicateurs des projets participatifs, calculés par `admin_projet_kpis`. */
+type ProjetKpis = {
+  published: number;
+  open: number;
+  median_responses: number | null;
+  median_days_first_response: number | null;
+  zero_response_14d: { id: string; title: string; slug: string | null; created_at: string }[];
+  closed_count: number;
+  closed_filled: number;
+  cross_members: number;
+};
+
 async function logAdminAction(action: string, targetId: string, metadata?: Record<string, unknown>) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
