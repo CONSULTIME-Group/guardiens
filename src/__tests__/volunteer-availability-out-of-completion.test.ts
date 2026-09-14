@@ -81,7 +81,7 @@ describe("bénévolat en association, libellés au mot près", () => {
       "J'aimerais donner un coup de main à une association animalière près de chez moi",
     );
     expect(VOLUNTEER_WAITING_SENTENCE).toBe(
-      "Nous vous préviendrons dès qu'une association de votre secteur cherche un coup de main.",
+      "Cette déclaration nous aide à savoir où se trouvent les personnes prêtes à donner un coup de main.",
     );
   });
 
