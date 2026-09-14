@@ -556,11 +556,11 @@ const CreateSmallMission = () => {
                 <div className="rounded-xl p-4 border border-primary/20 bg-primary/5 space-y-1">
                   {/* Le titre suit le mode choisi : une personne qui propose son
                       aide ne doit pas lire un titre qui parle de demander. */}
-                  <h2 className="font-heading font-bold text-foreground text-base">
+                  <h1 className="font-heading font-bold text-foreground text-base">
                     {missionType === "offre"
                       ? tp("encouragement_title_offer")
                       : tp("encouragement_title_need")}
-                  </h2>
+                  </h1>
                   <p className="text-sm text-muted-foreground">
                     {missionType === "offre" ? tp("encouragement_offer") : tp("encouragement_need")}
                   </p>
@@ -1024,7 +1024,7 @@ const CreateSmallMission = () => {
             )}
           </form>
         )}
-      </div>
+      </main>
 
       {/* CTA sticky au-dessus de la BottomNav */}
       {(accessLoading || canApplyMissions) && (
