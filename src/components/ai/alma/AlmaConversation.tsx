@@ -111,6 +111,22 @@ function extractedLink(path: string): ExtractedLink {
       };
 }
 
+/**
+ * Racines de chemin reconnues comme des liens internes. Sans cette liste, une
+ * simple barre oblique dans une phrase (« et/ou », « 24h/24 », une date) serait
+ * prise pour une adresse, retirée du texte et transformée en carte cliquable.
+ */
+const KNOWN_PATH_ROOTS = new Set(
+  [...Object.keys(SECTION_LABELS), ...Object.keys(PUBLIC_SOURCE_TITLES)].map(
+    (path) => path.split("/")[1],
+  ),
+);
+
+function isKnownPath(path: string): boolean {
+  const root = path.split(/[?#]/)[0].split("/")[1] ?? "";
+  return KNOWN_PATH_ROOTS.has(root);
+}
+
 export function parseAlmaMessage(content: string): ParsedMessage {
   const links: ExtractedLink[] = [];
   const markdownPattern = /\[([^\]]+)\]\((https?:\/\/[^\s)]+|\/[^\s)]+)\)/g;
@@ -121,14 +137,25 @@ export function parseAlmaMessage(content: string): ParsedMessage {
     return "";
   });
 
-  const rawPattern = /(?:https?:\/\/(?:www\.)?guardiens\.fr)?\/[a-zA-Z0-9À-ÿ_?&=#./-]+/g;
-  text = text.replace(rawPattern, (href) => {
+  const absolutePattern = /https?:\/\/(?:www\.)?guardiens\.fr\/[a-zA-Z0-9À-ÿ_?&=#./-]+/g;
+  const pathPattern = /(^|[\s("'«])(\/[a-zA-Z0-9À-ÿ_?&=#./-]+)/gu;
+
+  const consume = (href: string): string | null => {
     const trailingPunctuation = href.match(/[.,;:!?]+$/)?.[0] ?? "";
     const cleanHref = trailingPunctuation ? href.slice(0, -trailingPunctuation.length) : href;
     const path = normalizeInternalPath(cleanHref);
-    if (!path) return href;
+    if (!path) return null;
     links.push(extractedLink(path));
     return trailingPunctuation;
+  };
+
+  text = text.replace(absolutePattern, (href) => consume(href) ?? href);
+  text = text.replace(pathPattern, (match, prefix: string, href: string) => {
+    const trailing = href.match(/[.,;:!?]+$/)?.[0] ?? "";
+    const cleanHref = trailing ? href.slice(0, -trailing.length) : href;
+    if (!isKnownPath(cleanHref)) return match;
+    const result = consume(href);
+    return result === null ? match : `${prefix}${result}`;
   });
 
   text = text.replace(/\s{2,}/g, " ").trim();
