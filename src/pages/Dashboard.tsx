@@ -29,40 +29,6 @@ const Dashboard = () => {
   const welcomeShown = useRef(false);
   const activationFired = useRef(false);
   const profileCheckFired = useRef(false);
-  const proRedirectFired = useRef(false);
-
-  // Filet de sécurité parcours pro : si l'utilisateur s'est inscrit avec
-  // role=pro mais a atterri sur /dashboard (retour OAuth Google, lien de
-  // confirmation email, refresh…), on le renvoie une seule fois vers son
-  // espace pro pour qu'il finisse la configuration de sa fiche.
-  useEffect(() => {
-    if (proRedirectFired.current) return;
-    if (!user?.id) return;
-    let cancelled = false;
-    try {
-      const flag = typeof window !== "undefined"
-        ? localStorage.getItem("pending_pro_onboarding")
-        : null;
-      if (flag !== "1") return;
-      proRedirectFired.current = true;
-      (async () => {
-        const { data } = await supabase
-          .from("pro_profiles")
-          .select("id")
-          .eq("user_id", user.id)
-          .limit(1)
-          .maybeSingle();
-        if (cancelled) return;
-        try { localStorage.removeItem("pending_pro_onboarding"); } catch {}
-        navigate(data ? "/pros/mon-espace" : "/pros/inscription", { replace: true });
-      })();
-    } catch {
-      // silencieux
-    }
-    return () => { cancelled = true; };
-  }, [user?.id, navigate]);
-
-
   // Émettre user_activated UNE fois lors du premier affichage du dashboard
   // après inscription (flag posé dans Register.tsx).
   useEffect(() => {

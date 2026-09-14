@@ -97,8 +97,6 @@ export const entityNoun = (signals: AdminSignalBase[]): string => {
 };
 
 export function signalAdminLink(s: AdminSignalBase): string {
-  // L'annuaire pro a son propre écran de modération, quel que soit entity_type.
-  if (s.signal_type === "pro_pending_review") return "/admin/pros-annuaire";
   switch (s.entity_type) {
     case "sit":
       return "/admin/listings";

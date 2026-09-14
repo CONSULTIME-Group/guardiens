@@ -1,5 +1,11 @@
 {
+  "redirects": [
+    { "source": "/pros", "destination": "/search", "permanent": true },
+    { "source": "/pros-animaliers", "destination": "/search", "permanent": true },
+    { "source": "/pros/:path*", "destination": "/search", "permanent": true }
+  ],
   "rewrites": [
+
     {
       "source": "/(.*)",
       "has": [

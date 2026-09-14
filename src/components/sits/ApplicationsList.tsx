@@ -116,7 +116,7 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
     // NOTE: `last_name` n'est pas exposé par public_profiles, on l'omet (non consommé en aval).
     const { data: sitterProfs } = await supabase
       .from("public_profiles")
-      .select("id, first_name, city, avatar_url, bio, identity_verified, completed_sits_count, is_founder, pro_status, pro_specialty, pro_business_name")
+      .select("id, first_name, city, avatar_url, bio, identity_verified, completed_sits_count, is_founder, pro_status, pro_specialty")
       .in("id", sitterIds);
     const sitterProfMap = new Map<string, any>();
     (sitterProfs ?? []).forEach((p: any) => sitterProfMap.set(p.id, p));
@@ -704,11 +704,9 @@ const ApplicationsList = ({ sitId, sitTitle, petNames, startDate, endDate, prope
               )}
             </div>
             {(sitter?.pro_status === "declared" || sitter?.pro_status === "verified") &&
-              (specialtyLabel(sitter?.pro_specialty) || sitter?.pro_business_name) && (
+              specialtyLabel(sitter?.pro_specialty) && (
                 <p className="text-sm text-muted-foreground mt-0.5">
-                  Professionnel : {[specialtyLabel(sitter?.pro_specialty), sitter?.pro_business_name]
-                    .filter(Boolean)
-                    .join(", ")}
+                  Professionnel : {specialtyLabel(sitter?.pro_specialty)}
                 </p>
               )}
             {app.pricing_flag && <PricingRecipientNotice className="mt-1.5" />}

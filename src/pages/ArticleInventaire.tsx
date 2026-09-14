@@ -31,15 +31,6 @@ const PLACE_LABELS: Record<string, string> = {
   vet: "vétérinaires",
 };
 
-const PRO_LABELS: Record<string, string> = {
-  veterinaire: "vétérinaires",
-  educateur: "éducateurs canins",
-  comportementaliste: "comportementalistes",
-  toiletteur: "toiletteurs",
-  pension: "pensions",
-  ostheopathe: "ostéopathes animaliers",
-};
-
 function fmt(n: number) {
   return new Intl.NumberFormat("fr-FR").format(n || 0);
 }
@@ -53,14 +44,11 @@ export default function ArticleInventaire() {
     places_by_category: {},
     breeds_total: 0,
     breeds_by_species: {},
-    pros_total: 0,
-    pros_by_category: {},
     generated_at: new Date().toISOString(),
   };
 
   const speciesEntries = Object.entries(c.breeds_by_species).sort((a, b) => b[1] - a[1]);
   const placesEntries = Object.entries(c.places_by_category).sort((a, b) => b[1] - a[1]);
-  const prosEntries = Object.entries(c.pros_by_category).sort((a, b) => b[1] - a[1]);
 
   const articleSchema: Record<string, unknown> = {
     "@context": "https://schema.org",
@@ -178,11 +166,10 @@ export default function ArticleInventaire() {
             <p className="text-foreground leading-relaxed mb-5">
               Ces compteurs sont recalculés à chaque visite. Ils reflètent ce que nous avons publié, pas des estimations. Quand une ligne monte, c'est du travail éditorial réel.
             </p>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <StatCard value={fmt(c.cities_total)} label="Villes couvertes" detail="Guides locaux publiés." />
               <StatCard value={fmt(c.breeds_total)} label="Races documentées" detail="Fiches complètes avec conseils de garde." />
               <StatCard value={fmt(c.places_total)} label="Lieux dog-friendly" detail="Parcs, cafés, sentiers, animaleries, vétérinaires." />
-              <StatCard value={fmt(c.pros_total)} label="Professionnels" detail="Fiches vérifiées, référencées dans l'annuaire." />
             </div>
             <p className="mt-4 text-xs text-muted-foreground">
               Compteurs mis à jour en direct. Dernière lecture :{" "}
@@ -252,32 +239,6 @@ export default function ArticleInventaire() {
               {placesEntries.length === 0 && (
                 <p className="text-sm text-muted-foreground">Aucun lieu recensé pour le moment.</p>
               )}
-            </div>
-          </section>
-
-          {/* Section 5 : pros */}
-          <section className="mb-12">
-            <h2 className="font-heading text-2xl font-semibold text-foreground mb-4">
-              Les professionnels référencés
-            </h2>
-            <p className="text-foreground leading-relaxed mb-5">
-              Vétérinaires, éducateurs, comportementalistes, toiletteurs : quand vous confiez votre maison à un gardien, savoir vers qui il peut se tourner en cas d'imprévu compte. Nous référençons des fiches vérifiées, jamais achetées.
-            </p>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {prosEntries.map(([cat, n]) => (
-                <div key={cat} className="rounded-lg border border-border bg-card p-4">
-                  <p className="text-2xl font-bold text-primary leading-none">{fmt(n)}</p>
-                  <p className="text-sm text-foreground mt-1">{PRO_LABELS[cat] || cat}</p>
-                </div>
-              ))}
-              {prosEntries.length === 0 && (
-                <p className="text-sm text-muted-foreground">Aucun professionnel référencé pour le moment.</p>
-              )}
-            </div>
-            <div className="mt-5">
-              <Link to="/pros" className="text-primary hover:underline text-sm font-medium">
-                Voir l'annuaire complet →
-              </Link>
             </div>
           </section>
 

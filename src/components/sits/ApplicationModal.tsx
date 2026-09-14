@@ -628,14 +628,8 @@ const ApplicationModal = ({
         {(sitterInfo?.profile?.pro_status === "declared" || sitterInfo?.profile?.pro_status === "verified") && (
           <div className="mt-2 rounded-xl border border-border bg-accent/40 p-4">
             <p className="text-sm text-foreground">
-              Votre statut professionnel sera visible par le propriétaire. Une garde sur Guardiens se fait sans échange d'argent, la maison contre la présence. Vos prestations rémunérées passent par votre fiche dans l'annuaire des pros.
+              Votre statut professionnel sera visible par le propriétaire. Une garde sur Guardiens se fait sans échange d'argent, la maison contre la présence, et vos prestations rémunérées se traitent en dehors de la plateforme.
             </p>
-            <Link
-              to="/pros/inscription"
-              className="mt-2 inline-block text-sm font-medium text-primary hover:underline"
-            >
-              Créer ou compléter ma fiche dans l'annuaire des pros
-            </Link>
           </div>
         )}
 

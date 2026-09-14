@@ -18,7 +18,6 @@ const NO_FAB_EXACT = new Set([
   "/profile",
   "/settings",
   "/mon-abonnement",
-  "/pros/inscription",
 ]);
 
 /** Préfixes sans bouton flottant. */
@@ -31,17 +30,15 @@ const NO_FAB_PATTERNS: RegExp[] = [
   /^\/annonces\/[^/]+$/,
   /^\/petites-missions\/[^/]+$/,
   /^\/gardiens\/[^/]+$/,
-  /^\/pros\/[^/]+$/,
 ];
 
 /** Sous chemins qui restent des pages de liste ou de navigation. */
 const KEEP_FAB_EXACT = new Set([
   "/annonces/international",
   "/petites-missions/lyon",
-  "/pros/mon-espace",
 ]);
 
-const KEEP_FAB_PREFIXES = ["/pros/categorie"];
+const KEEP_FAB_PREFIXES: string[] = [];
 
 export const isFabHidden = (pathname: string): boolean => {
   const path = pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;

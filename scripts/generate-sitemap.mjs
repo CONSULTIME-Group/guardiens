@@ -14,7 +14,6 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { sitRichnessRejectionReason } from "../src/lib/sitIndexability.js";
-import { isDemoPro } from "../src/lib/proIndexability.js";
 import { isAssociationIndexable } from "../src/lib/associationIndexability.js";
 import { isSitterProfileIndexable } from "../src/lib/sitterProfileIndexability.js";
 import { mergedBreedTarget } from "../src/lib/breedFicheMerges.js";
@@ -61,9 +60,7 @@ const { siteUrl: SITE_URL, routes: STATIC_ROUTES } = loadStaticRoutes();
 // Filtrage automatique : on ne garde que les routes marquées indexables.
 // Pas de SITEMAP_EXCLUDE en doublon, la décision est prise dans siteRoutes.ts
 // via le flag `index`. Toute incohérence est impossible par construction.
-// Exception temporaire : /pros reste accessible par URL directe mais n'est pas
-// soumise au crawl, car l'annuaire ne liste aucune fiche professionnelle.
-const staticPages = STATIC_ROUTES.filter((r) => r.indexable && r.loc !== "/pros");
+const staticPages = STATIC_ROUTES.filter((r) => r.indexable);
 
 // Villes "statiques" (src/data/cities.ts) : pages riches garanties, toujours servies.
 // Ne jamais ajouter un slug sans page réelle : toute entrée doit être servie par
@@ -186,7 +183,7 @@ async function main() {
 
   console.log("🗺️  Sitemap incremental build…");
 
-  const [articles, seoCity, guides, depts, breeds, profiles, sits, profiles_pros, associations] = await Promise.all([
+  const [articles, seoCity, guides, depts, breeds, profiles, sits, associations] = await Promise.all([
     fetchOrCache(
       "articles", cache,
       // Sonde composite (date + nombre) : sur une requête filtrée, la sortie
@@ -347,24 +344,6 @@ async function main() {
       }
     ),
 
-    // Fiches pros animaliers approuvées : /pros/:slug
-    fetchOrCache(
-      "pro_profiles", cache,
-      () => maxUpdatedAtWithCount("pro_profiles", "updated_at", q => q.eq("status", "approved").eq("is_paused", false)),
-      async () => (await supabase.from("pro_profiles").select("slug, raison_sociale, category, city, updated_at").eq("status", "approved").eq("is_paused", false)).data,
-      // Les fiches de démonstration de l'annuaire (slug `demo-`) ne sont
-      // jamais soumises au crawl : règle partagée avec ProDetail.tsx via
-      // src/lib/proIndexability.js.
-      rows => rows.filter(p => !isDemoPro(p)).map(p => ({
-        loc: `/pros/${p.slug}`,
-        lastmod: (p.updated_at || today).split("T")[0],
-        changefreq: "monthly",
-        priority: "0.7",
-        _category: p.category,
-        _city: p.city,
-      }))
-    ),
-
     // Fiches associations publiées : /associations/:slug
     fetchOrCache(
       // Clé versionnée : les champs enrichis (nom, accroche, ville) sont
@@ -392,52 +371,8 @@ async function main() {
     ),
   ]);
 
-  // Slugs des catégories pros (alignés sur src/lib/proCategories.ts)
-  const PRO_CATEGORY_SLUGS = {
-    veterinaire: "veterinaires",
-    pet_sitter_pro: "pet-sitters-pro",
-    educateur: "educateurs-canins",
-    toiletteur: "toiletteurs",
-    osteopathe: "osteopathes",
-    dresseur_sportif: "dresseurs-sportifs",
-    transporteur: "transporteurs",
-    photographe: "photographes",
-  };
-  const slugifyCity = (s) =>
-    s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 
-  // Pages silos catégorie + (catégorie, ville) dérivées des fiches pros existantes
-  const proSiloEntries = [];
-  // Les pages silo suivent les fiches : un annuaire sans fiche ne produit
-  // aucune page de catégorie. Quand des fiches pros existeront, les pages
-  // de catégorie reviendront automatiquement sans modification ici.
-  if ((profiles_pros || []).length > 0) {
-    for (const catSlug of Object.values(PRO_CATEGORY_SLUGS)) {
-      proSiloEntries.push({
-        loc: `/pros/categorie/${catSlug}`,
-        lastmod: today,
-        changefreq: "weekly",
-        priority: "0.7",
-      });
-    }
-  }
 
-  // Combinaisons (catégorie, ville) effectivement peuplées
-  const siloSeen = new Set();
-  for (const p of profiles_pros || []) {
-    const catSlug = PRO_CATEGORY_SLUGS[p._category];
-    if (!catSlug || !p._city) continue;
-    const key = `${catSlug}/${slugifyCity(p._city)}`;
-    if (siloSeen.has(key)) continue;
-    siloSeen.add(key);
-    proSiloEntries.push({
-      loc: `/pros/categorie/${key}`,
-      lastmod: p.lastmod,
-      changefreq: "weekly",
-      priority: "0.7",
-    });
-  }
 
 
   const entries = [];
@@ -455,7 +390,6 @@ async function main() {
   for (const e of breeds) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
   for (const e of profiles) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
   for (const e of sits) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
-  for (const e of profiles_pros || []) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
   // Garde-fou durable : si la base publie des fiches indexables et que la
   // génération n'en produit aucune, le sitemap partirait amputé en silence.
   {
@@ -470,7 +404,6 @@ async function main() {
     }
   }
   for (const e of associations || []) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
-  for (const e of proSiloEntries) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
   // Pages légales (/cgu, /confidentialite, /mentions-legales) déjà incluses
   // dans staticPages via staticRoutes. Ne pas les ré-ajouter ici.
 

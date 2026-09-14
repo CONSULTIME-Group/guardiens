@@ -34,7 +34,6 @@ const SEGMENT_LABELS: Record<string, string> = {
   settings: "Paramètres",
   "house-guide": "Guide de la maison",
   review: "Laisser un avis",
-  pros: "Pros animaliers",
   inscription: "Inscription",
   "mon-espace": "Mon espace pro",
   associations: "Associations et refuges",

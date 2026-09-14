@@ -22,7 +22,6 @@ interface NavItem {
 
 export const BADGE_TITLES: Record<string, string> = {
   verifications: "vérifications d'identité en attente",
-  pros: "dossiers Gardien Pro à modérer",
   experiences: "expériences externes à vérifier",
   skills: "compétences proposées à valider",
   reviewsModeration: "avis en attente de modération",
@@ -60,8 +59,6 @@ const adminNavGroups: NavGroup[] = [
     items: [
       { to: "/admin/users", icon: Users, label: "Utilisateurs" },
       { to: "/admin/verifications", icon: ShieldCheck, label: "Vérifications ID", badgeKey: "verifications" },
-      { to: "/admin/pros", icon: Briefcase, label: "Vérifications Pro", badgeKey: "pros" },
-      { to: "/admin/pros-annuaire", icon: Briefcase, label: "Annuaire pros" },
       { to: "/admin/associations", icon: Briefcase, label: "Associations" },
       { to: "/admin/experiences", icon: Briefcase, label: "Expériences", badgeKey: "experiences" },
       { to: "/admin/skills", icon: Lightbulb, label: "Compétences", badgeKey: "skills" },

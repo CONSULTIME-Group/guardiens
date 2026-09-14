@@ -12,7 +12,7 @@
  * le 16/08/2026 : un polyvalent est aussi un propriétaire.
  */
 
-export type SignupRole = "owner" | "sitter" | "both" | "pro";
+export type SignupRole = "owner" | "sitter" | "both";
 
 /** Cible du tunnel de création pour un propriétaire fraîchement inscrit. */
 export const OWNER_SIGNUP_TUNNEL_TARGET = "/sits/create?source=signup";

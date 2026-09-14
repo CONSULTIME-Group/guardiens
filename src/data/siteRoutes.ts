@@ -200,14 +200,6 @@ export const staticRoutes: SiteRoute[] = [
  changeFreq: "weekly",
  },
  {
- path: "/pros",
- title: "Annuaire des pros animaliers près de chez vous | Guardiens",
- metaDescription: "Vétérinaires, éducateurs, toiletteurs, ostéopathes, transporteurs, photographes animaliers vérifiés. Trouvez le bon pro pour vos animaux, partout en France.",
- h1: "Pros animaliers près de chez vous",
- sitemapPriority: "0.8",
- changeFreq: "weekly",
- },
- {
  path: "/guides",
  title: "Guides locaux, villes dog-friendly | Guardiens",
  metaDescription: "Guides locaux Guardiens : parcs à chien, vétérinaires, cafés dog-friendly et bonnes adresses dans chaque ville.",

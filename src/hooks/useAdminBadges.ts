@@ -14,7 +14,6 @@ export interface AdminBadges {
   adminMessageFailed: number;
   reportsSit: number;
   reportsMission: number;
-  pros: number;
   analysisRequests: number;
   sitsToStaff: number;
 }
@@ -32,7 +31,6 @@ const EMPTY: AdminBadges = {
   adminMessageFailed: 0,
   reportsSit: 0,
   reportsMission: 0,
-  pros: 0,
   analysisRequests: 0,
   sitsToStaff: 0,
 };
@@ -54,7 +52,6 @@ export function useAdminBadges(): AdminBadges {
       supabase.from("admin_message_logs").select("id", { count: "exact", head: true }).eq("status", "failed"),
       supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "new").eq("target_type", "sit"),
       supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "new").eq("target_type", "small_mission"),
-      supabase.from("pro_verifications").select("id", { count: "exact", head: true }).in("status", ["needs_review", "pending"]),
       (supabase.from("analysis_requests" as any) as any).select("id", { count: "exact", head: true }).eq("status", "new"),
     ]);
 
@@ -115,7 +112,6 @@ export function useAdminBadges(): AdminBadges {
       adminMessageFailed: results[9].count || 0,
       reportsSit: results[10].count || 0,
       reportsMission: results[11].count || 0,
-      pros: results[12].count || 0,
       analysisRequests: results[13].count || 0,
       sitsToStaff,
     });

@@ -7,9 +7,6 @@ export interface InventaireCounts {
   places_by_category: Record<string, number>;
   breeds_total: number;
   breeds_by_species: Record<string, number>;
-  pros_total: number;
-  pros_verified: number;
-  pros_by_category: Record<string, number>;
   generated_at: string;
 }
 
@@ -19,9 +16,6 @@ const EMPTY: InventaireCounts = {
   places_by_category: {},
   breeds_total: 0,
   breeds_by_species: {},
-  pros_total: 0,
-  pros_verified: 0,
-  pros_by_category: {},
   generated_at: new Date().toISOString(),
 };
 

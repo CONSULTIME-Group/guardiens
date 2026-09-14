@@ -341,7 +341,6 @@ const Observatoire = () => {
     <Card><CardContent className="p-5"><p className="text-3xl font-bold text-primary leading-none mb-2">{fmt(counts?.cities_total || 0)}</p><p className="text-sm font-semibold text-foreground mb-1">Villes couvertes</p><p className="text-xs text-muted-foreground">Guides locaux publiés.</p></CardContent></Card>
     <Card><CardContent className="p-5"><p className="text-3xl font-bold text-primary leading-none mb-2">{fmt(counts?.breeds_total || 0)}</p><p className="text-sm font-semibold text-foreground mb-1">Races documentées</p><p className="text-xs text-muted-foreground">Fiches complètes avec conseils de garde.</p></CardContent></Card>
     <Card><CardContent className="p-5"><p className="text-3xl font-bold text-primary leading-none mb-2">{fmt(counts?.places_total || 0)}</p><p className="text-sm font-semibold text-foreground mb-1">Lieux dog-friendly</p><p className="text-xs text-muted-foreground">Parcs, cafés, sentiers, vétérinaires…</p></CardContent></Card>
-    <Card><CardContent className="p-5"><p className="text-3xl font-bold text-primary leading-none mb-2">{fmt(counts?.pros_total || 0)}</p><p className="text-sm font-semibold text-foreground mb-1">Professionnels</p><p className="text-xs text-muted-foreground">Fiches vérifiées de l'annuaire.</p></CardContent></Card>
   </div>
  </section>
 
