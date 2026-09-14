@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { Share2, CheckCircle2, ShieldCheck, Eye, Users, Dog, Flower2, Home as HomeIcon, Sparkles, BedDouble, UtensilsCrossed, GraduationCap } from "lucide-react";
 import { formatProjetPeriod, projetDurationLabel, hebergementLabel } from "@/lib/projets";
@@ -75,6 +76,9 @@ interface Props {
   hasApplied?: boolean;
   /** Branche projet seulement : envoi en cours. */
   applying?: boolean;
+  /** Branche projet seulement : contenu du message de candidature. */
+  applyMessage?: string;
+  onApplyMessageChange?: (value: string) => void;
 }
 
 const CATEGORY_ICON: Record<string, typeof Dog> = {
