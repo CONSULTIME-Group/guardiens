@@ -106,9 +106,36 @@ const VolunteerAvailabilityBlock = ({
   const handleSave = async () => {
     if (!userId) return;
     setSaving(true);
+
+    // La ligne appartient à la personne connectée : on écrit toujours avec
+    // l'identifiant porté par la session en cours. Une session expirée est
+    // rafraîchie avant l'écriture, sinon la base refuse la ligne.
+    let ownerId = userId;
+    try {
+      const sessionResult = await (supabase as any).auth?.getSession?.();
+      let session = sessionResult?.data?.session ?? null;
+      if (!session?.user?.id) {
+        const refreshed = await (supabase as any).auth?.refreshSession?.();
+        session = refreshed?.data?.session ?? null;
+      }
+      if (session?.user?.id) {
+        ownerId = session.user.id as string;
+      } else if (sessionResult) {
+        setSaving(false);
+        toast({
+          title: "Session expirée",
+          description: "Reconnectez vous, puis enregistrez à nouveau, votre saisie reste affichée.",
+          variant: "destructive",
+        });
+        return;
+      }
+    } catch {
+      /* on tente l'écriture avec l'identifiant fourni */
+    }
+
     const { error } = await supabase.from("volunteer_availability").upsert(
       {
-        user_id: userId,
+        user_id: ownerId,
         available: row.available,
         structure_types: row.structure_types,
         skills: row.skills,
