@@ -1,21 +1,25 @@
 /**
  * <AlmaAvatarAnimated />, Alma, bichon frisé qui évolue physiquement.
  *
- * Refonte du dessin (septembre 2026) : le contour n'est plus un chapelet de
- * cercles superposés mais UN SEUL chemin festonné par pièce, construit à
- * partir d'arcs. Le trait est fin et d'épaisseur constante, la fourrure est
- * faite de nombreuses petites boucles plutôt que de quelques grosses, et le
- * visage gagne un museau en relief, des yeux construits et une barbe.
+ * Gouache à plat (septembre 2026) : aucun contour. Chaque pièce de fourrure
+ * est un seul chemin festonné, peint en trois plans de valeur, ombre puis
+ * base puis lumière, la lumière venant du haut à gauche. La pièce du dessus
+ * projette une ombre de contact sur celle du dessous, et c'est cela, bien
+ * plus que la quantité d'ombre, qui rend l'empilement lisible sans trait.
  *
- * Le signal « assistante » est un halo posé DERRIÈRE elle, jamais sur elle :
- * un anneau fin teinté par le stade, plus un arc doré qui n'apparaît que
- * lorsqu'elle cherche et qui accélère pendant la recherche. Il remplace à la
- * fois l'étincelle générique et les points de saisie.
+ * Le signal « assistante » est une étincelle bleue posée DEVANT elle, en
+ * haut à droite et hors de sa silhouette. Le bleu sort de la palette
+ * Guardiens, donc elle se lit comme une couche assistante plutôt que comme
+ * un ornement de marque. Elle scintille plus vite quand Alma cherche.
  *
- * Chaque stade garde SA géométrie : proportions de chiot au début
- * (grosse tête, grands yeux bas dans le visage), proportions adultes à la
- * fin, avec un collier et une médaille à partir du stade complice. La
- * croissance perçue vient de ces proportions plus de ALMA_STAGE_SCALE.
+ * Quatre leviers de tendresse sont acquis et permanents : le regard qui
+ * remonte vers la personne, la tête penchée de sept degrés, l'asymétrie des
+ * oreilles, et le bout de langue visible au repos.
+ *
+ * Chaque stade garde SA géométrie : proportions de chiot au début, grosse
+ * tête et grands yeux bas dans le visage, proportions adultes à la fin, avec
+ * un collier et une médaille à partir du stade complice. La croissance
+ * perçue vient de ces proportions plus de ALMA_STAGE_SCALE.
  *
  * Couleurs du personnage : en dur (exception admise à la règle tokens),
  * pour que le bichon reste blanc en dark mode et ne s'inverse jamais.
@@ -150,7 +154,6 @@ const STYLE = `
 [data-alma-animated] .alma-eyelid     { transform-origin: 50% 0%; transform: scaleY(0); }
 [data-alma-animated] .alma-tongue     { transform-origin: 50% 0%; transform: scaleY(0); opacity: 0; }
 [data-alma-animated] .alma-shadow     { transform-origin: 50% 50%; }
-[data-alma-animated] .alma-aura-ray   { transform-origin: 50% 50%; }
 [data-alma-animated] .alma-burst      { transform-origin: 50% 75%; }
 
 /* L'étincelle bleue : couche d'interface posée DEVANT elle, en haut à
@@ -168,7 +171,6 @@ const STYLE = `
   [data-alma-animated] .alma-ear-r       { animation: alma-ear-idle-r 6.5s ease-in-out infinite; }
   [data-alma-animated] .alma-toupet      { animation: alma-toupet 6s ease-in-out infinite; }
   [data-alma-animated] .alma-tail-base   { animation: alma-tail-slow 3.4s ease-in-out infinite; }
-  [data-alma-animated] .alma-aura-ray    { animation: alma-ray 5s ease-in-out infinite; }
 
   [data-alma-animated] .alma-etincelle   { animation: alma-scintille 3.6s ease-in-out infinite; }
 
@@ -235,7 +237,6 @@ const STYLE = `
 @keyframes alma-blink-r    { 0%,91.5%,100% { transform: scaleY(0); } 93.5%,95% { transform: scaleY(1); } }
 @keyframes alma-eyes-scan  { 0%,100% { transform: translateX(-0.8px); } 50% { transform: translateX(0.8px); } }
 @keyframes alma-tongue     { 0% { transform: scaleY(0); opacity: 0; } 40%,70% { transform: scaleY(1); opacity: 1; } 100% { transform: scaleY(0); opacity: 0; } }
-@keyframes alma-ray        { 0%,100% { transform: scale(1); opacity: 0.55; } 50% { transform: scale(1.08); opacity: 0.9; } }
 @keyframes alma-scintille  { 0%,100% { transform: scale(1) rotate(0deg); opacity: 0.8; } 50% { transform: scale(1.18) rotate(12deg); opacity: 1; } }
 
 /* Vie non linéaire : pirouette et pounce, jouées une fois, à intervalle
@@ -342,9 +343,8 @@ const HEAD_Y = 39;
 const BODY_Y = 75;
 
 /**
- * Le trait s'épaissit quand la pastille rétrécit, sinon il disparaît sous
- * 32 pixels. Calé sur l'échelle validée en maquette : 2,9 à 24 px,
- * 1,35 à 96 px.
+ * Épaisseur de référence des quelques traits restants : le collier, la
+ * médaille et la bouche. Il n'y a plus aucun contour de silhouette.
  */
 function strokeFor(size: number): number {
   const raw = 2.9 * Math.pow(24 / Math.max(12, size), 0.55);
@@ -683,7 +683,7 @@ function renderAlma(
             )}
 
             <g className="alma-part alma-tongue">
-              <ellipse cx={50} cy={mouthY + nose * 1.5} rx={1.8} ry={1.5} fill="#F2A6AD" />
+              <ellipse cx={50} cy={mouthY + nose * 1.5} rx={1.8} ry={1.5} fill={LANGUE} />
             </g>
           </g>
         </g>
@@ -789,15 +789,6 @@ export function AlmaAvatarAnimated({
         )}
         style={style}
       >
-        {showHalo && stage && (
-          <span
-            aria-hidden
-            className={cn(
-              "absolute inset-0 rounded-full blur-xl motion-safe:animate-alma-aura",
-              STAGE_HALO_CLASS[stage],
-            )}
-          />
-        )}
         <img
           src={stageAsset}
           alt=""
