@@ -40,9 +40,13 @@ function memberSinceLong(iso?: string | null): string | null {
 const ProjetDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [projet, setProjet] = useState<any | null>(null);
   const [author, setAuthor] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
+  const [applyMessage, setApplyMessage] = useState("");
+  const [applying, setApplying] = useState(false);
+  const [hasApplied, setHasApplied] = useState(false);
 
   useEffect(() => {
     const load = async () => {
