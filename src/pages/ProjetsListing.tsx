@@ -90,9 +90,15 @@ const ProjetsListing = () => {
               Vous avez un chantier en tête chez vous, et l'envie de le mener avec quelques personnes : racontez
               ce que vous voulez construire, ce que vous transmettrez, et ce que vous pouvez proposer sur place.
             </p>
-            <Link to={ARTICLE_URL}>
-              <Button className="rounded-full">Lire comment se prépare un projet participatif</Button>
-            </Link>
+            <div className="flex flex-wrap items-center gap-4">
+              <Link to="/projets/publier">
+                <Button className="rounded-full">Publier mon projet</Button>
+              </Link>
+              <Link to={ARTICLE_URL} className="text-sm font-medium underline underline-offset-4 text-foreground/80">
+                Lire comment se prépare un projet participatif
+              </Link>
+            </div>
+
           </section>
         )}
 
