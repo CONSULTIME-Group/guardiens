@@ -9,7 +9,7 @@ import AffinityBadge from "@/components/matching/AffinityBadge";
 import { useAffinityWithShadow } from "@/hooks/useAffinityWithShadow";
 import { useDepartementNames } from "@/hooks/useDepartementNames";
 import { departementNameFromCode, formatCityDepartement } from "@/lib/locationLabel";
-import { projetMetaLine } from "@/lib/projets";
+import { projetMetaLine, projetNatureLabel } from "@/lib/projets";
 
 
 import { PawPrint, Cat, Bird } from "lucide-react";
