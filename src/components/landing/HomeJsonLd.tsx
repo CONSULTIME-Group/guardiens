@@ -6,7 +6,8 @@ import howtoStep1 from "@/assets/illustrations/howto-step-1-annonce-448.webp";
 import howtoStep2 from "@/assets/illustrations/howto-step-2-rencontre-448.webp";
 import howtoStep3 from "@/assets/illustrations/howto-step-3-depart-448.webp";
 
-const HOME_CONTENT_LAST_MODIFIED = "2026-08-14";
+// Mise à jour manuelle à chaque retouche du contenu de la home.
+const HOME_CONTENT_LAST_MODIFIED = "2026-09-14";
 
 const HOME_ROUTE = staticRoutes.find((route) => route.path === "/");
 const HOME_OG_IMAGE = HOME_ROUTE?.ogImage ?? DEFAULT_OG_IMAGE;
@@ -65,7 +66,7 @@ export default function HomeJsonLd() {
                 "Petites missions de proximité",
                 "Matching par affinité",
                 "Guides de race et de ville",
-                "Annuaire de professionnels vérifiés",
+                "Chantiers participatifs entre particuliers",
               ],
               slogan: "Proches de chez vous.",
               foundingDate: "2026-05-13",
