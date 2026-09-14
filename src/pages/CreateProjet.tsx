@@ -232,7 +232,7 @@ const CreateProjet = () => {
         toast({ title: "Compte non actif", description: "Contactez le support pour rétablir la publication.", variant: "destructive" });
         return;
       }
-      logger.error("[CreateProjet.handleSubmit]", error);
+      logger.error("[CreateProjet.handleSubmit]", { message: msg, hint });
       toast({ title: "Publication impossible", description: error.message, variant: "destructive" });
       return;
     }
