@@ -237,6 +237,9 @@ function AlmaDockInner() {
   const { toast } = useToast();
 
   const [expanded, setExpanded] = useState(false);
+  // Vrai quand Alma s'ouvre d'elle-même : le panneau reste alors non bloquant
+  // et ne prend pas le curseur de saisie.
+  const [spontaneous, setSpontaneous] = useState(false);
   const [userCollapsed, setUserCollapsed] = useState(false);
   const [entryContext, setEntryContext] = useState<AlmaDockOpenDetail | null>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
