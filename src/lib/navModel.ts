@@ -4,7 +4,6 @@ import {
   MessageCircle,
   Handshake,
   Search,
-  Briefcase,
   PawPrint,
   Compass,
   Sparkles,
@@ -74,7 +73,6 @@ export const buildNavGroups = (role: NavRole, sitterSearchLocked: boolean): NavG
           ? { premiumLock: "la recherche d'annonces" }
           : {}),
       },
-      { to: "/pros", icon: Briefcase, label: "Pros animaliers", beta: true },
       { to: "/associations", icon: HeartHandshake, label: "Associations" },
     ],
   },
