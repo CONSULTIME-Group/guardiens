@@ -493,7 +493,7 @@ const AdminSmallMissions = () => {
           <p className="text-2xl font-bold tabular-nums">{ratioGlobal}%</p>
         </CardContent></Card>
       </div>
-
+      )}
 
       {suspectMissions.length > 0 && (
         <Card className="border-warning-border bg-warning-soft">
