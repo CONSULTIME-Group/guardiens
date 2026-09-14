@@ -2,8 +2,13 @@ import { useCallback, useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { logger } from "@/lib/logger";
 import PublicMissionView from "@/components/missions/PublicMissionView";
 import { Button } from "@/components/ui/button";
+
+/** Même minimum de caractères que l'entraide (SmallMissionDetail). */
+const MIN_MESSAGE_LEN = 10;
 
 /** Titlecase pour une ville saisie en majuscules. */
 function titlecaseCity(s?: string | null): string {
