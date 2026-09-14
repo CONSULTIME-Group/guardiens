@@ -197,7 +197,8 @@ function addBandedSections(html: string): string {
 /** Add end-of-article CTA */
 function addEndCTA(html: string, slug?: string): string {
   const slugAttr = slug ? ` data-article-slug="${slug}"` : "";
-  return html + `<div class="article-cta-block article-cta-end"><div class="article-cta-inner"><p class="article-cta-heading">Prêt à rejoindre la communauté ?</p><p class="article-cta-text">Créez votre profil, 0 €, et rejoignez les gardiens de votre quartier.</p><div class="article-cta-buttons"><a href="/inscription?role=owner" class="article-cta-btn article-cta-btn-primary" data-article-cta="true" data-cta-position="end" data-cta-role="owner"${slugAttr}>Créer mon profil propriétaire</a><a href="/inscription?role=sitter" class="article-cta-btn article-cta-btn-secondary" data-article-cta="true" data-cta-position="end" data-cta-role="sitter"${slugAttr}>Devenir gardien</a></div></div></div>`;
+  const copy = ctaCopyPour(slug);
+  return html + `<div class="article-cta-block article-cta-end"><div class="article-cta-inner"><p class="article-cta-heading">${copy.endHeading}</p><p class="article-cta-text">${copy.endText}</p><div class="article-cta-buttons"><a href="${copy.endPrimary.href}" class="article-cta-btn article-cta-btn-primary" data-article-cta="true" data-cta-position="end" data-cta-role="${copy.endPrimary.role}"${slugAttr}>${copy.endPrimary.label}</a><a href="${copy.endSecondary.href}" class="article-cta-btn article-cta-btn-secondary" data-article-cta="true" data-cta-position="end" data-cta-role="${copy.endSecondary.role}"${slugAttr}>${copy.endSecondary.label}</a></div></div></div>`;
 }
 
 interface ArticleRendererProps {
