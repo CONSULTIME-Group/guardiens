@@ -68,6 +68,9 @@ export interface SitterProfileData {
   // Skills
   skill_categories: string[];
   available_for_help: boolean;
+  // Déclaration professionnelle et formations déclarées (table profiles)
+  pro_specialty: string;
+  certifications: string[];
   // Competences
   competences: string[];
   // Accompagnants pendant les gardes
