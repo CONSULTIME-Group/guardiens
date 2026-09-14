@@ -344,14 +344,46 @@ const PublicMissionView = ({
                   )}
                 </div>
 
-                <Link to={`/inscription?redirect=${encodeURIComponent(projetRedirect)}`} className="block">
-                  <Button className="w-full py-6 rounded-full font-bold text-base shadow-lg shadow-primary/20">
-                    Participer à ce projet
-                  </Button>
-                </Link>
-                <p className="mt-5 text-xs text-center text-muted-foreground px-2 leading-relaxed">
-                  Votre message part directement au porteur du projet.
-                </p>
+                {onApply ? (
+                  hasApplied ? (
+                    <div className="rounded-full border border-primary/30 bg-primary/10 px-4 py-4 text-center text-sm font-semibold text-foreground">
+                      Votre candidature est partie
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <label htmlFor="projet-apply-message" className="block text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                        Votre message
+                      </label>
+                      <Textarea
+                        id="projet-apply-message"
+                        value={applyMessage}
+                        onChange={(e) => onApplyMessageChange?.(e.target.value)}
+                        rows={4}
+                        placeholder="Dites en quelques mots ce que vous venez chercher et ce que vous pouvez apporter sur place."
+                        className="rounded-2xl"
+                      />
+                      <Button
+                        type="button"
+                        onClick={onApply}
+                        disabled={applying}
+                        className="w-full py-6 rounded-full font-bold text-base shadow-lg shadow-primary/20"
+                      >
+                        {applying ? "Envoi en cours" : "Participer à ce projet"}
+                      </Button>
+                    </div>
+                  )
+                ) : (
+                  <Link to={`/inscription?redirect=${encodeURIComponent(projetRedirect)}`} className="block">
+                    <Button className="w-full py-6 rounded-full font-bold text-base shadow-lg shadow-primary/20">
+                      Participer à ce projet
+                    </Button>
+                  </Link>
+                )}
+                {!hasApplied && (
+                  <p className="mt-5 text-xs text-center text-muted-foreground px-2 leading-relaxed">
+                    Votre message part directement au porteur du projet.
+                  </p>
+                )}
               </div>
 
               <div className="bg-card rounded-[2rem] overflow-hidden shadow-sm border border-border">
