@@ -28,7 +28,7 @@ import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { useMissionDistance } from "@/hooks/useMissionDistance";
 import { trackEvent } from "@/lib/analytics";
 import MobileEntraideFeed from "@/components/community/MobileEntraideFeed";
-import { MISSION_CATEGORIES, MISSION_CATEGORY_LABEL, ENTRAIDE_FILTER_CATEGORIES } from "@/lib/missionCategories";
+import { MISSION_CATEGORY_LABEL, ENTRAIDE_FILTER_CATEGORIES } from "@/lib/missionCategories";
 import { questionCategoryToMissionCategory } from "@/lib/communityCategories";
 import { publicFirstName } from "@/lib/displayName";
 
@@ -149,7 +149,7 @@ const EntraideHub = () => {
   const [mLoading, setMLoading] = useState(true);
   const initialMCat = params.get("cat") || "all";
   const [category, setCategory] = useState<string>(
-    initialMCat === "all" || MISSION_CATEGORIES.some((c) => c.key === initialMCat)
+    initialMCat === "all" || ENTRAIDE_FILTER_CATEGORIES.some((c) => c.key === initialMCat)
       ? initialMCat
       : "all",
   );
