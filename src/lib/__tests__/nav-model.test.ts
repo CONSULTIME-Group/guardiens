@@ -13,9 +13,15 @@ describe("modèle de navigation de l'espace connecté", () => {
     expect(groups.map((g) => g.label)).toEqual(["Mon espace", "Trouver", "Apprendre"]);
   });
 
-  it("porte exactement 10 entrées au total", () => {
-    expect(flattenNavGroups(buildNavGroups("owner", false))).toHaveLength(10);
-    expect(flattenNavGroups(buildNavGroups("sitter", false))).toHaveLength(10);
+  it("porte exactement 11 entrées au total", () => {
+    expect(flattenNavGroups(buildNavGroups("owner", false))).toHaveLength(11);
+    expect(flattenNavGroups(buildNavGroups("sitter", false))).toHaveLength(11);
+  });
+
+  it("place Projets dans le groupe Trouver, avec la pastille Bêta", () => {
+    const trouver = buildNavGroups("owner", false).find((g) => g.id === "trouver");
+    expect(trouver?.entries.map((e) => e.to)).toEqual(["/search", "/associations", "/projets"]);
+    expect(trouver?.entries.find((e) => e.to === "/projets")?.beta).toBe(true);
   });
 
   it("Mon espace : Accueil, annonces ou candidatures, Messages, Entraide", () => {
