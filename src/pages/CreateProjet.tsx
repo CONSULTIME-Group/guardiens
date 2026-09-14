@@ -452,7 +452,7 @@ const CreateProjet = () => {
           </section>
         )}
       </div>
-    </>
+    </main>
   );
 };
 
