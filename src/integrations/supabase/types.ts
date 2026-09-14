@@ -8844,6 +8844,13 @@ export type Database = {
         }
         Relationships: []
       }
+      public_volunteer_counts: {
+        Row: {
+          departement_code: string | null
+          nb_disponibles: number | null
+        }
+        Relationships: []
+      }
       seo_couverture_manquante: {
         Row: {
           code_departement: string | null
