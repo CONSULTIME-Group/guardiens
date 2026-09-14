@@ -9,6 +9,7 @@ import AffinityBadge from "@/components/matching/AffinityBadge";
 import { useAffinityWithShadow } from "@/hooks/useAffinityWithShadow";
 import { useDepartementNames } from "@/hooks/useDepartementNames";
 import { departementNameFromCode, formatCityDepartement } from "@/lib/locationLabel";
+import { projetMetaLine } from "@/lib/projets";
 
 
 import { PawPrint, Cat, Bird } from "lucide-react";
@@ -61,6 +62,9 @@ const SearchListingCard = ({
     petGroups[p.species].push(p.name);
   });
   const isMission = tab === "missions";
+  // Un projet participatif garde son habillage d'annonce dans tous les flux :
+  // le discriminant est la catégorie, pas l'onglet.
+  const isProjet = (item as any).category === "projet";
   const isDemo = !!item.is_demo;
   const isAssigned = !isMission && !!item.isAssigned;
   const isCompleted = !isMission && !!item.isCompleted;
@@ -135,6 +139,74 @@ const SearchListingCard = ({
     home: "Maison",
     other: "Autre",
   };
+
+  // ─── Card « projet participatif » ───
+  // Un projet vit en base dans small_missions, mais il se lit comme une
+  // annonce : même habillage que la carte sit, quel que soit le flux qui
+  // l'affiche. Le test passe donc AVANT celui de l'onglet missions.
+  if (isProjet) {
+    const projetLink = `/projets/${item.slug || item.id}`;
+    const projetMeta = projetMetaLine(item.date_needed, item.end_date, item.duration_estimate);
+    const natureLabel = (item as any).nature_category_label || (item as any).nature_category || null;
+
+    const projetCard = (
+      <article
+        className={`group relative flex h-full flex-col ${isClickable ? "cursor-pointer" : ""}`}
+        data-testid="search-card-projet"
+        data-list-index={typeof listIndex === "number" ? listIndex + 1 : undefined}
+      >
+        <div
+          className={`relative aspect-[4/3] overflow-hidden rounded-2xl bg-muted border border-black/[0.06] shadow-[0_1px_3px_rgba(11,31,26,0.05),0_4px_16px_-4px_rgba(11,31,26,0.06)] transition-all duration-500 ease-out ${
+            isClickable ? "group-hover:shadow-[0_4px_12px_rgba(11,31,26,0.08),0_16px_40px_-8px_rgba(11,31,26,0.10)]" : ""
+          }`}
+        >
+          {coverPhoto ? (
+            <img
+              src={storageImageUrl(coverPhoto, { width: 880, height: 660 })}
+              alt=""
+              className={`w-full h-full object-cover transition-transform duration-[900ms] ease-out ${isClickable ? "group-hover:scale-[1.03]" : ""}`}
+              loading="lazy"
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center text-muted-foreground/40">
+              <PawPrint className="h-10 w-10" />
+            </div>
+          )}
+
+          {natureLabel && (
+            <span
+              className="absolute top-3 left-3 bg-warning/95 text-warning-foreground text-[10px] font-semibold uppercase tracking-[0.16em] px-2 py-0.5 rounded-full shadow-sm"
+              data-testid="projet-nature-badge"
+            >
+              {natureLabel}
+            </span>
+          )}
+        </div>
+
+        <div className="mt-4 px-0.5 flex flex-col flex-1">
+          <p className="text-[11px] uppercase tracking-[0.16em] font-medium truncate text-primary/70">
+            <span className="truncate">{locationLabel || item.city || "France"}</span>
+          </p>
+
+          <div className="mt-1.5 flex items-start justify-between gap-2">
+            <h3 className="font-sans text-[15px] sm:text-[16px] font-medium leading-snug text-foreground line-clamp-2">
+              {item.title || "Sans titre"}
+            </h3>
+          </div>
+
+          {projetMeta && (
+            <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-muted-foreground">
+              <span>{projetMeta}</span>
+            </div>
+          )}
+
+          <div className="mt-auto" />
+        </div>
+      </article>
+    );
+
+    return isClickable ? <Link to={projetLink}>{projetCard}</Link> : <>{projetCard}</>;
+  }
 
   if (isMission) {
     const categoryGradient: Record<string, string> = {

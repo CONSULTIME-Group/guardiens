@@ -2,7 +2,8 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
-import { Share2, CheckCircle2, ShieldCheck, Eye, Users, Dog, Flower2, Home as HomeIcon, Sparkles } from "lucide-react";
+import { Share2, CheckCircle2, ShieldCheck, Eye, Users, Dog, Flower2, Home as HomeIcon, Sparkles, BedDouble, UtensilsCrossed, GraduationCap } from "lucide-react";
+import { formatProjetPeriod, projetDurationLabel, hebergementLabel } from "@/lib/projets";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import ApproximateLocationMap from "@/components/shared/ApproximateLocationMap";
@@ -126,6 +127,244 @@ const PublicMissionView = ({
   const h1Class = isShortMission
     ? "font-heading text-3xl md:text-4xl font-bold leading-[1.15] mb-6 text-foreground"
     : "font-heading text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] mb-6 text-foreground";
+
+  // ─── Projet participatif ───
+  // Même ossature (grille 12, article 8, aside 4 collant, rayons 2rem, JSON-LD
+  // WebPage non marchand), ordre narratif propre au projet : le lieu d'abord,
+  // le porteur, le projet, ce que l'on apprend, ce qui est proposé, le cadre.
+  if (mission.category === "projet") {
+    const p = mission as any;
+    const projetPhotos: string[] = Array.isArray(mission.photos) ? mission.photos.filter(Boolean) : [];
+    const period = formatProjetPeriod(mission.date_needed, mission.end_date);
+    const projetDuration = projetDurationLabel(mission.duration_estimate);
+    const hebergement = hebergementLabel(p.hebergement);
+    const projetRedirect = `/projets/${p.slug || mission.id}`;
+    const metaLine = [cityLabel, period, projetDuration].filter(Boolean).join(" · ");
+
+    return (
+      <div className="min-h-screen bg-background text-foreground animate-fade-in">
+        <PageMeta
+          title={`${displayTitle}, projet participatif à ${cityLabel}`}
+          description={metaDescription}
+          image={ogImage}
+        />
+        <Head>
+          <script type="application/ld+json">{JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            name: displayTitle,
+            description: mission.description?.slice(0, 300) || metaDescription,
+            inLanguage: "fr-FR",
+            about: { "@type": "Thing", name: "Projet participatif" },
+            contentLocation: { "@type": "Place", name: cityLabel },
+            datePublished: mission.created_at,
+          })}</script>
+        </Head>
+
+        <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+          <div className="mb-8">
+            <PageBreadcrumb
+              items={[
+                { label: "Projets participatifs", href: "/projets" },
+                { label: displayTitle },
+              ]}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
+            <article className="lg:col-span-8 min-w-0 space-y-[52px]">
+              {/* 1. Le lieu et le projet */}
+              <header>
+                <p className="inline-flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-terra mb-4">
+                  <span className="inline-block h-px w-5 bg-terra" aria-hidden />
+                  Projet participatif
+                </p>
+                <h1 className="font-heading text-4xl md:text-5xl font-bold leading-[1.1] mb-4 text-foreground">
+                  {displayTitle}
+                </h1>
+                {metaLine && <p className="text-base text-muted-foreground">{metaLine}</p>}
+              </header>
+
+              {/* 2. La galerie : le lieu décide de venir, il passe avant la tâche */}
+              {projetPhotos.length > 0 && (
+                <section>
+                  <div className="rounded-[2rem] overflow-hidden shadow-2xl shadow-foreground/10 bg-muted">
+                    <img
+                      src={projetPhotos[0]}
+                      alt={`Le lieu du projet ${displayTitle}`}
+                      className="w-full aspect-[16/9] object-cover"
+                      loading="eager"
+                      width={1200}
+                      height={675}
+                    />
+                  </div>
+                  {projetPhotos.length > 1 && (
+                    <div className="mt-4 grid grid-cols-3 gap-3">
+                      {projetPhotos.slice(1, 4).map((src) => (
+                        <img
+                          key={src}
+                          src={src}
+                          alt=""
+                          className="w-full aspect-[4/3] object-cover rounded-2xl border border-border"
+                          loading="lazy"
+                        />
+                      ))}
+                    </div>
+                  )}
+                </section>
+              )}
+
+              {/* 3. Le porteur du projet */}
+              {author && (
+                <section className="flex items-center gap-5">
+                  {author.avatar_url ? (
+                    <img
+                      src={avatarImageUrl(author.avatar_url, 64)}
+                      alt={authorFirstName || "Le porteur du projet"}
+                      className="w-16 h-16 rounded-full object-cover border-2 border-background shadow-sm"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center font-heading text-xl font-bold text-foreground">
+                      {authorFirstName?.charAt(0) || "?"}
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <p className="text-lg font-semibold text-foreground">
+                      {authorFirstName ? `${authorFirstName} porte ce projet` : "Un membre porte ce projet"}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {[memberSinceLong(author.created_at), titlecaseCity(author.city) || null].filter(Boolean).join(" · ")}
+                    </p>
+                  </div>
+                </section>
+              )}
+
+              {/* 4. Le projet */}
+              {mission.description && (
+                <section>
+                  <h2 className="font-heading text-2xl md:text-3xl font-bold mb-5 text-foreground">Le projet</h2>
+                  <div className="space-y-5 text-lg leading-relaxed text-foreground/85 whitespace-pre-wrap">
+                    {mission.description}
+                  </div>
+                </section>
+              )}
+
+              {/* 5. Ce que vous allez apprendre */}
+              {p.ce_que_vous_apprendrez && (
+                <section className="rounded-[2rem] border border-terra/25 bg-terra/[0.06] p-8 md:p-10">
+                  <h2 className="font-heading text-2xl md:text-3xl font-bold mb-4 text-foreground">
+                    Ce que vous allez apprendre
+                  </h2>
+                  <div className="text-lg leading-relaxed text-foreground/85 whitespace-pre-wrap">
+                    {p.ce_que_vous_apprendrez}
+                  </div>
+                </section>
+              )}
+
+              {/* 6. Ce qui est proposé, en pictogrammes décomposés */}
+              <section>
+                <h2 className="font-heading text-2xl md:text-3xl font-bold mb-5 text-foreground">Ce qui est proposé</h2>
+                <ul className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <li className="rounded-2xl border border-border bg-card p-5">
+                    <BedDouble className="h-5 w-5 text-primary mb-3" aria-hidden />
+                    <p className="text-sm font-semibold text-foreground">Hébergement</p>
+                    <p className="text-sm text-muted-foreground">
+                      {hebergement || "À préciser avec le porteur du projet"}
+                    </p>
+                  </li>
+                  <li className="rounded-2xl border border-border bg-card p-5">
+                    <UtensilsCrossed className="h-5 w-5 text-primary mb-3" aria-hidden />
+                    <p className="text-sm font-semibold text-foreground">Repas</p>
+                    <p className="text-sm text-muted-foreground">
+                      {p.repas ? "Les repas sont partagés sur place" : "Chacun apporte ses repas"}
+                    </p>
+                  </li>
+                  <li className="rounded-2xl border border-border bg-card p-5">
+                    <GraduationCap className="h-5 w-5 text-primary mb-3" aria-hidden />
+                    <p className="text-sm font-semibold text-foreground">Transmission</p>
+                    <p className="text-sm text-muted-foreground">
+                      Le savoir-faire se transmet en faisant, aux côtés du porteur du projet.
+                    </p>
+                  </li>
+                </ul>
+              </section>
+
+              {/* 7. Le cadre */}
+              <section className="rounded-[2rem] border border-border bg-muted/50 p-8 md:p-10 space-y-3">
+                <h2 className="font-heading text-2xl font-bold text-foreground">Le cadre</h2>
+                <p className="text-base leading-relaxed text-foreground/85">
+                  La participation est libre : chaque participant vient pour apprendre et donner un coup de main.
+                </p>
+                <p className="text-base leading-relaxed text-foreground/85">
+                  Les échanges se font sans transaction financière, dans les deux sens.
+                </p>
+                <p className="text-base leading-relaxed text-foreground/85">
+                  Le porteur du projet accueille chez lui, il reste responsable de son chantier et de sa sécurité.
+                </p>
+                <Link
+                  to="/actualites/chantier-participatif-projet-collectif-cadre-legal"
+                  className="inline-block text-sm font-semibold text-primary underline underline-offset-4"
+                >
+                  Lire le cadre légal du chantier participatif
+                </Link>
+              </section>
+            </article>
+
+            <aside className="lg:col-span-4 lg:sticky lg:top-8 space-y-6">
+              <div className="bg-card p-8 rounded-[2rem] shadow-xl shadow-foreground/5 border border-border">
+                <div className="mb-8 space-y-4">
+                  {period && (
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Période</p>
+                      <p className="text-base font-semibold text-foreground">{period}</p>
+                    </div>
+                  )}
+                  {projetDuration && (
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Durée</p>
+                      <p className="text-base font-semibold text-foreground">{projetDuration}</p>
+                    </div>
+                  )}
+                  {typeof p.max_participants === "number" && (
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Places</p>
+                      <p className="text-base font-semibold text-foreground">
+                        {p.max_participants} participants au maximum
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <Link to={`/inscription?redirect=${encodeURIComponent(projetRedirect)}`} className="block">
+                  <Button className="w-full py-6 rounded-full font-bold text-base shadow-lg shadow-primary/20">
+                    Participer à ce projet
+                  </Button>
+                </Link>
+                <p className="mt-5 text-xs text-center text-muted-foreground px-2 leading-relaxed">
+                  Votre message part directement au porteur du projet.
+                </p>
+              </div>
+
+              <div className="bg-card rounded-[2rem] overflow-hidden shadow-sm border border-border">
+                <ApproximateLocationMap
+                  city={mission.city}
+                  postalCode={mission.postal_code}
+                  lat={mission.latitude}
+                  lng={mission.longitude}
+                  className="h-40"
+                />
+                <div className="p-4">
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    {t("mission_detail.location_note")}
+                  </p>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

@@ -130,13 +130,20 @@ const MobileEntraideFeed = ({ missions, questions, loading, onPublish, proximity
     });
   };
 
+  // Un projet participatif se lit comme une annonce et vit sous /projets :
+  // il reste hors du fil d'entraide, même si la source en fournit.
+  const feedMissions = useMemo(
+    () => missions.filter((m) => m.category !== "projet"),
+    [missions],
+  );
+
   const counts = useMemo(() => {
     const c: Record<FeedType, number> = { question: questions.length, besoin: 0, offre: 0 };
-    for (const m of missions) {
+    for (const m of feedMissions) {
       c[(m.mission_type ?? "besoin") as "besoin" | "offre"] += 1;
     }
     return c;
-  }, [missions, questions]);
+  }, [feedMissions, questions]);
 
   const items = useMemo(() => {
     const list: Array<
@@ -146,7 +153,7 @@ const MobileEntraideFeed = ({ missions, questions, loading, onPublish, proximity
     if (active.includes("question")) {
       for (const q of questions) list.push({ kind: "question", date: q.created_at, data: q });
     }
-    for (const m of missions) {
+    for (const m of feedMissions) {
       const t = (m.mission_type ?? "besoin") as "besoin" | "offre";
       if (active.includes(t)) list.push({ kind: t, date: m.created_at, data: m });
     }
@@ -162,7 +169,7 @@ const MobileEntraideFeed = ({ missions, questions, loading, onPublish, proximity
       }
       return a.date < b.date ? 1 : a.date > b.date ? -1 : 0;
     });
-  }, [active, missions, questions, proximityActive, getDistance]);
+  }, [active, feedMissions, questions, proximityActive, getDistance]);
 
   return (
     <div className="md:hidden">
