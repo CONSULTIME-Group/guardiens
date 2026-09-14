@@ -2,8 +2,13 @@ import { useCallback, useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { logger } from "@/lib/logger";
 import PublicMissionView from "@/components/missions/PublicMissionView";
 import { Button } from "@/components/ui/button";
+
+/** Même minimum de caractères que l'entraide (SmallMissionDetail). */
+const MIN_MESSAGE_LEN = 10;
 
 /** Titlecase pour une ville saisie en majuscules. */
 function titlecaseCity(s?: string | null): string {
@@ -35,9 +40,13 @@ function memberSinceLong(iso?: string | null): string | null {
 const ProjetDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [projet, setProjet] = useState<any | null>(null);
   const [author, setAuthor] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
+  const [applyMessage, setApplyMessage] = useState("");
+  const [applying, setApplying] = useState(false);
+  const [hasApplied, setHasApplied] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -70,6 +79,73 @@ const ProjetDetail = () => {
     toast({ title: "Lien copié", description: "Vous pouvez le partager." });
   }, [toast]);
 
+  /** Candidature d'un membre connecté, même mécanique que handleRespond de l'entraide. */
+  const handleApply = useCallback(async () => {
+    if (!user || !projet || applying || hasApplied) return;
+    const msg = applyMessage.trim();
+    if (!msg) {
+      toast({ variant: "destructive", title: "Message vide", description: "Écrivez un mot avant d'envoyer votre candidature." });
+      return;
+    }
+    if (msg.length < MIN_MESSAGE_LEN) {
+      toast({
+        variant: "destructive",
+        title: "Message trop court",
+        description: `Ajoutez au moins ${MIN_MESSAGE_LEN} caractères pour que le porteur du projet comprenne votre proposition.`,
+      });
+      return;
+    }
+    setApplying(true);
+    try {
+      const { data: fresh } = await supabase
+        .from("small_missions")
+        .select("status, user_id")
+        .eq("id", projet.id)
+        .single();
+      if (!fresh) throw new Error("Projet introuvable.");
+      if (fresh.status !== "open") {
+        toast({ variant: "destructive", title: "Projet clôturé", description: "Ce projet accepte les candidatures jusqu'à sa clôture, qui est passée." });
+        return;
+      }
+      if (fresh.user_id === user.id) {
+        toast({ variant: "destructive", title: "Action impossible", description: "Vous portez ce projet, la candidature est réservée aux participants." });
+        return;
+      }
+
+      const { error } = await supabase
+        .from("small_mission_responses")
+        .insert({ mission_id: projet.id, responder_id: user.id, message: msg });
+
+      if (error) {
+        const hint = (error as any)?.hint || "";
+        const raw = String(error.message || "");
+        if (error.code === "23505") {
+          toast({ variant: "destructive", title: "Déjà envoyé", description: "Vous avez déjà candidaté à ce projet." });
+          setHasApplied(true);
+        } else if (hint === "account_not_active" || raw.includes("account_not_active")) {
+          toast({ variant: "destructive", title: "Compte non actif", description: "Contactez le support pour rétablir l'accès." });
+        } else if (hint === "mission_response_cap_reached" || raw.includes("mission_response_cap_reached")) {
+          toast({
+            variant: "destructive",
+            title: "Projet temporairement fermé",
+            description: "Le nombre de candidatures en attente est atteint. Une place se libérera si le porteur du projet en décline une.",
+          });
+        } else {
+          throw error;
+        }
+      } else {
+        setHasApplied(true);
+        setApplyMessage("");
+        toast({ title: "Candidature envoyée", description: "Le porteur du projet va être prévenu." });
+      }
+    } catch (err: any) {
+      logger.error("[ProjetDetail.handleApply]", { err: String(err) });
+      toast({ variant: "destructive", title: "Erreur", description: err?.message || "Impossible d'envoyer votre candidature." });
+    } finally {
+      setApplying(false);
+    }
+  }, [user, projet, applying, hasApplied, applyMessage, toast]);
+
   if (loading) {
     return <div className="min-h-screen bg-background" aria-busy="true" />;
   }
@@ -101,6 +177,11 @@ const ProjetDetail = () => {
       timeAgoFr={timeAgoFr}
       memberSinceLong={memberSinceLong}
       onShare={onShare}
+      onApply={user ? handleApply : undefined}
+      hasApplied={hasApplied}
+      applying={applying}
+      applyMessage={applyMessage}
+      onApplyMessageChange={setApplyMessage}
     />
   );
 };
