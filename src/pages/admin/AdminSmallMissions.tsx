@@ -164,6 +164,28 @@ const AdminSmallMissions = () => {
     })();
   }, []);
 
+  // Indicateurs des projets, calculés en base : les candidatures aux gardes
+  // vivent dans `applications`, table que l'administration ne lit pas en
+  // direct, le croisement passe donc par une fonction réservée aux admins.
+  useEffect(() => {
+    if (tab !== "projets") return;
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await (supabase as any).rpc("admin_projet_kpis");
+      if (error) {
+        toast.error("Indicateurs projets indisponibles");
+        return;
+      }
+      if (!cancelled) setProjetKpis(data as ProjetKpis);
+    })();
+    return () => { cancelled = true; };
+  }, [tab]);
+
+  const switchTab = (next: "entraide" | "projets") => {
+    setTab(next);
+    setPage(0);
+    setFilterCategory(next === "projets" ? "projet" : "all");
+  };
 
   const fetchMissions = useCallback(async () => {
     setLoading(true);
