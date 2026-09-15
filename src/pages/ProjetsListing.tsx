@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { reportError } from "@/lib/errorLogger";
@@ -6,12 +6,40 @@ import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import { Button } from "@/components/ui/button";
 import SearchListingCard from "@/components/search/listing/SearchListingCard";
+import ProximityFilter, { type RadiusChoice } from "@/components/missions/ProximityFilter";
+import { useMissionDistance, type RadiusKm } from "@/hooks/useMissionDistance";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const ARTICLE_URL = "/actualites/chantier-participatif-projet-collectif-cadre-legal";
+
+/**
+ * Un projet participatif se rejoint en se déplaçant, parfois loin : les rayons
+ * vont donc plus loin que ceux de l'entraide, et « Toute la France » existe.
+ */
+const PROJET_RADIUS_CHOICES: RadiusChoice[] = [
+  { value: 25, label: "25 km" },
+  { value: 50, label: "50 km" },
+  { value: 100, label: "100 km" },
+  { value: 250, label: "250 km" },
+  { value: 500, label: "500 km" },
+  { value: Number.POSITIVE_INFINITY, label: "Toute la France" },
+];
+const PROJET_RADIUS_VALUES = PROJET_RADIUS_CHOICES.map((c) => c.value);
+const PROJET_DEFAULT_RADIUS: RadiusKm = 250;
+
+const radiusLabel = (value: number) =>
+  PROJET_RADIUS_CHOICES.find((c) => c.value === value)?.label ?? `${value} km`;
 
 const ProjetsListing = () => {
   const [projets, setProjets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sort, setSort] = useState<"distance" | "recent">("distance");
 
   useEffect(() => {
     const load = async () => {
@@ -33,6 +61,57 @@ const ProjetsListing = () => {
     };
     void load();
   }, []);
+
+  // Liste stable passée au calcul de distance : coordonnées du projet quand
+  // elles existent, repli sur le code postal ou la ville sinon.
+  const geoItems = useMemo(
+    () =>
+      projets.map((p) => ({
+        id: p.id as string,
+        postal_code: (p.postal_code ?? null) as string | null,
+        city: (p.city ?? null) as string | null,
+        latitude: typeof p.latitude === "number" ? p.latitude : null,
+        longitude: typeof p.longitude === "number" ? p.longitude : null,
+      })),
+    [projets],
+  );
+
+  const proximity = useMissionDistance(geoItems, {
+    storageKeys: { postal: "projets.postal", radius: "projets.radius" },
+    radiusOptions: PROJET_RADIUS_VALUES,
+    defaultRadius: PROJET_DEFAULT_RADIUS,
+    useCoords: true,
+  });
+
+  const { active, radius, getDistance } = proximity;
+
+  // Projets enrichis de leur distance, filtrés au rayon, puis triés.
+  const visibleProjets = useMemo(() => {
+    const withDistance = projets.map((p) => {
+      const d = active ? getDistance(p.id) : null;
+      return d == null ? p : { ...p, distance: d };
+    });
+    const inRadius =
+      active && isFinite(radius)
+        ? withDistance.filter((p) => typeof p.distance === "number" && p.distance <= radius)
+        : withDistance;
+    if (!active || sort === "recent") return inRadius;
+    return [...inRadius].sort((a, b) => {
+      const da = typeof a.distance === "number" ? a.distance : Number.POSITIVE_INFINITY;
+      const db = typeof b.distance === "number" ? b.distance : Number.POSITIVE_INFINITY;
+      return da - db;
+    });
+  }, [projets, active, radius, getDistance, sort]);
+
+  // Aucun projet dans le rayon alors qu'il en existe : on propose le palier
+  // suivant, jusqu'à « Toute la France ». Jamais de page vide sans issue.
+  const nextRadius = useMemo(() => {
+    const idx = PROJET_RADIUS_VALUES.indexOf(radius);
+    return idx >= 0 && idx < PROJET_RADIUS_VALUES.length - 1 ? PROJET_RADIUS_VALUES[idx + 1] : null;
+  }, [radius]);
+
+  const emptyByRadius = !loading && projets.length > 0 && visibleProjets.length === 0;
+
 
   return (
     <div className="min-h-screen bg-background text-foreground">
