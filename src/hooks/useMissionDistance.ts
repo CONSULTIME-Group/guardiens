@@ -14,7 +14,8 @@ const LS_POSTAL = "entraide.postal";
 const LS_RADIUS = "entraide.radius";
 
 export const RADIUS_OPTIONS = [15, 30, 50, 100] as const;
-export type RadiusKm = (typeof RADIUS_OPTIONS)[number];
+/** Un rayon est un nombre de kilomètres, Infinity valant « Toute la France ». */
+export type RadiusKm = number;
 export const DEFAULT_RADIUS: RadiusKm = 30;
 
 export type GeolocationErrorReason = "denied" | "timeout" | "unavailable" | "unsupported";
@@ -24,7 +25,27 @@ export interface MissionLike {
   id: string;
   postal_code: string | null;
   city: string | null;
+  /** Utilisées seulement si l'appelant demande `useCoords`. */
+  latitude?: number | null;
+  longitude?: number | null;
 }
+
+/**
+ * Options d'appel. Sans options, le comportement est celui de l'entraide,
+ * strictement inchangé : mêmes clés de stockage, mêmes rayons, géocodage du
+ * code postal ou de la ville.
+ */
+export interface MissionDistanceOptions {
+  storageKeys?: { postal: string; radius: string };
+  radiusOptions?: readonly number[];
+  defaultRadius?: RadiusKm;
+  /**
+   * Calcule la distance sur latitude et longitude quand elles existent, et
+   * ne géocode qu'en repli. Réservé aux listes qui exposent des coordonnées.
+   */
+  useCoords?: boolean;
+}
+
 
 const isValidFrPostal = (v: string) => /^\d{5}$/.test(v.trim());
 
