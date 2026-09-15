@@ -179,19 +179,67 @@ const ProjetsListing = () => {
           </div>
         </section>
 
-
+        {/* Barre de proximité : origine, rayon, et ordre d'affichage. */}
+        {!loading && projets.length > 0 && (
+          <div className="mb-8 flex flex-wrap items-center gap-3">
+            <ProximityFilter
+              postal={proximity.postal}
+              onPostalChange={proximity.setPostal}
+              radius={proximity.radius}
+              onRadiusChange={proximity.setRadius}
+              active={proximity.active}
+              resolving={proximity.resolving}
+              isValidPostal={proximity.isValidPostal}
+              onUseMyLocation={proximity.useMyLocation}
+              onClear={() => proximity.setPostal("")}
+              originError={proximity.originError}
+              radiusChoices={PROJET_RADIUS_CHOICES}
+              radiusAlwaysEnabled
+            />
+            {proximity.active && (
+              <Select value={sort} onValueChange={(v) => setSort(v as "distance" | "recent")}>
+                <SelectTrigger className="h-9 w-auto min-w-[140px] text-xs" aria-label="Ordre d'affichage">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="distance" className="text-xs">Plus proches</SelectItem>
+                  <SelectItem value="recent" className="text-xs">Plus récents</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          </div>
+        )}
 
         {loading ? (
           <div className="h-40" aria-busy="true" />
-        ) : projets.length > 0 ? (
+        ) : emptyByRadius ? (
+          <section className="rounded-[2rem] border border-border bg-muted/50 p-8 md:p-12 max-w-3xl">
+            <h2 className="font-heading text-2xl md:text-3xl font-bold mb-4 text-foreground">
+              Aucun projet à moins de {isFinite(radius) ? `${radius} km` : "cette distance"}
+            </h2>
+            <p className="text-base leading-relaxed text-foreground/85 mb-6">
+              Les projets participatifs se rejoignent souvent de plus loin qu'un coup de main. Élargissez la
+              zone pour voir ce qui se prépare ailleurs.
+            </p>
+            <div className="flex flex-wrap items-center gap-4">
+              {nextRadius !== null && (
+                <Button className="rounded-full" onClick={() => proximity.setRadius(nextRadius)}>
+                  Élargir à {radiusLabel(nextRadius)}
+                </Button>
+              )}
+              <Link to="/projets/publier" className="text-sm font-medium underline underline-offset-4 text-foreground/80">
+                Publier mon projet
+              </Link>
+            </div>
+          </section>
+        ) : visibleProjets.length > 0 ? (
           <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
-            {projets.map((p, i) => (
+            {visibleProjets.map((p, i) => (
               <SearchListingCard
                 key={p.id}
                 item={p}
                 listIndex={i}
                 tab="missions"
-                radius={100}
                 hasAccess
                 testDemoMode={false}
                 formatDate={(d) => (d ? new Date(d).toLocaleDateString("fr-FR", { day: "numeric", month: "short" }) : "")}
