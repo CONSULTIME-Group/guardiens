@@ -3,8 +3,8 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
-import { Share2, CheckCircle2, ShieldCheck, Eye, Users, Dog, Flower2, Home as HomeIcon, Sparkles, BedDouble, UtensilsCrossed, GraduationCap } from "lucide-react";
-import { formatProjetPeriod, projetDurationLabel, hebergementLabel } from "@/lib/projets";
+import { Share2, CheckCircle2, ShieldCheck, Eye, Users, Dog, Flower2, Home as HomeIcon, Sparkles } from "lucide-react";
+import { formatProjetPeriod, formatProjetMonths, projetDurationLabel, hebergementLabel, projetNatureLabel, savoirFaireLabel, offreLabel } from "@/lib/projets";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import ApproximateLocationMap from "@/components/shared/ApproximateLocationMap";
@@ -150,9 +150,22 @@ const PublicMissionView = ({
   if (mission.category === "projet") {
     const p = mission as any;
     const projetPhotos: string[] = Array.isArray(mission.photos) ? mission.photos.filter(Boolean) : [];
-    const period = formatProjetPeriod(mission.date_needed, mission.end_date);
+    const period = formatProjetMonths(p.mois_accueil) || formatProjetPeriod(mission.date_needed, mission.end_date);
     const projetDuration = projetDurationLabel(mission.duration_estimate);
     const hebergement = hebergementLabel(p.hebergement);
+    const natureLabel = projetNatureLabel(p.nature_projet);
+    const transmisLabels: string[] = (Array.isArray(p.savoir_faire_transmis) ? p.savoir_faire_transmis : [])
+      .map((k: string) => savoirFaireLabel(k))
+      .filter(Boolean) as string[];
+    const attendusLabels: string[] = (Array.isArray(p.savoir_faire_attendus) ? p.savoir_faire_attendus : [])
+      .map((k: string) => savoirFaireLabel(k))
+      .filter(Boolean) as string[];
+    // Ce qui est proposé : plus aucune carte en dur, la liste suit les données.
+    const offreItems: string[] = [
+      hebergement,
+      p.repas ? "Les repas sont partagés sur place" : null,
+      ...(Array.isArray(p.offre) ? p.offre.map((k: string) => offreLabel(k)) : []),
+    ].filter(Boolean) as string[];
     const projetRedirect = `/projets/${p.slug || mission.id}`;
     const metaLine = [cityLabel, period, projetDuration].filter(Boolean).join(" · ");
 
@@ -190,9 +203,14 @@ const PublicMissionView = ({
             <article className="lg:col-span-8 min-w-0 space-y-[52px]">
               {/* 1. Le lieu et le projet */}
               <header>
-                <p className="inline-flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-terra mb-4">
+                <p className="inline-flex flex-wrap items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-terra mb-4">
                   <span className="inline-block h-px w-5 bg-terra" aria-hidden />
                   Projet participatif
+                  {natureLabel && (
+                    <span className="rounded-full border border-terra/30 bg-terra/10 px-3 py-1 normal-case tracking-normal text-[12px] font-semibold text-foreground">
+                      {natureLabel}
+                    </span>
+                  )}
                 </p>
                 <h1 className="font-heading text-4xl md:text-5xl font-bold leading-[1.1] mb-4 text-foreground">
                   {displayTitle}
@@ -215,7 +233,7 @@ const PublicMissionView = ({
                   </div>
                   {projetPhotos.length > 1 && (
                     <div className="mt-4 grid grid-cols-3 gap-3">
-                      {projetPhotos.slice(1, 4).map((src) => (
+                      {projetPhotos.slice(1).map((src) => (
                         <img
                           key={src}
                           src={src}
@@ -265,44 +283,68 @@ const PublicMissionView = ({
               )}
 
               {/* 5. Ce que vous allez apprendre */}
-              {p.ce_que_vous_apprendrez && (
+              {(transmisLabels.length > 0 || p.ce_que_vous_apprendrez) && (
                 <section className="rounded-[2rem] border border-terra/25 bg-terra/[0.06] p-8 md:p-10">
                   <h2 className="font-heading text-2xl md:text-3xl font-bold mb-4 text-foreground">
                     Ce que vous allez apprendre
                   </h2>
-                  <div className="text-lg leading-relaxed text-foreground/85 whitespace-pre-wrap">
-                    {p.ce_que_vous_apprendrez}
-                  </div>
+                  {transmisLabels.length > 0 && (
+                    <ul className="flex flex-wrap gap-2 mb-5">
+                      {transmisLabels.map((label) => (
+                        <li
+                          key={label}
+                          className="rounded-full border border-terra/30 bg-background px-4 py-2 text-sm font-medium text-foreground"
+                        >
+                          {label}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {p.ce_que_vous_apprendrez && (
+                    <div className="text-lg leading-relaxed text-foreground/85 whitespace-pre-wrap">
+                      {p.ce_que_vous_apprendrez}
+                    </div>
+                  )}
                 </section>
               )}
 
-              {/* 6. Ce qui est proposé, en pictogrammes décomposés */}
+              {/* 6. Pour participer */}
               <section>
-                <h2 className="font-heading text-2xl md:text-3xl font-bold mb-5 text-foreground">Ce qui est proposé</h2>
-                <ul className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <li className="rounded-2xl border border-border bg-card p-5">
-                    <BedDouble className="h-5 w-5 text-primary mb-3" aria-hidden />
-                    <p className="text-sm font-semibold text-foreground">Hébergement</p>
-                    <p className="text-sm text-muted-foreground">
-                      {hebergement || "À préciser avec le porteur du projet"}
-                    </p>
-                  </li>
-                  <li className="rounded-2xl border border-border bg-card p-5">
-                    <UtensilsCrossed className="h-5 w-5 text-primary mb-3" aria-hidden />
-                    <p className="text-sm font-semibold text-foreground">Repas</p>
-                    <p className="text-sm text-muted-foreground">
-                      {p.repas ? "Les repas sont partagés sur place" : "Chacun apporte ses repas"}
-                    </p>
-                  </li>
-                  <li className="rounded-2xl border border-border bg-card p-5">
-                    <GraduationCap className="h-5 w-5 text-primary mb-3" aria-hidden />
-                    <p className="text-sm font-semibold text-foreground">Transmission</p>
-                    <p className="text-sm text-muted-foreground">
-                      Le savoir-faire se transmet en faisant, aux côtés du porteur du projet.
-                    </p>
-                  </li>
-                </ul>
+                <h2 className="font-heading text-2xl md:text-3xl font-bold mb-4 text-foreground">Pour participer</h2>
+                {attendusLabels.length === 0 ? (
+                  <p className="text-lg leading-relaxed text-foreground/85">
+                    Aucun prérequis, tout s'apprend sur place
+                  </p>
+                ) : (
+                  <>
+                    <p className="text-lg leading-relaxed text-foreground/85 mb-4">Il faut savoir faire</p>
+                    <ul className="flex flex-wrap gap-2">
+                      {attendusLabels.map((label) => (
+                        <li
+                          key={label}
+                          className="rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-foreground"
+                        >
+                          {label}
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                )}
               </section>
+
+              {/* 7. Ce qui est proposé, strictement ce qui a été déclaré */}
+              {offreItems.length > 0 && (
+                <section>
+                  <h2 className="font-heading text-2xl md:text-3xl font-bold mb-5 text-foreground">Ce qui est proposé</h2>
+                  <ul className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    {offreItems.map((label) => (
+                      <li key={label} className="rounded-2xl border border-border bg-card p-5">
+                        <p className="text-sm font-semibold text-foreground">{label}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              )}
 
               {/* 7. Le cadre */}
               <section className="rounded-[2rem] border border-border bg-muted/50 p-8 md:p-10 space-y-3">

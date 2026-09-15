@@ -7196,13 +7196,17 @@ export type Database = {
           mission_type: Database["public"]["Enums"]["mission_type_enum"]
           moderation_hidden_at: string | null
           moderation_hidden_by: string | null
+          mois_accueil: string[]
           nature_projet: string | null
           notify_after: string | null
+          offre: string[]
           pet_size: string | null
           pet_species: string | null
           photos: string[]
           postal_code: string
           repas: boolean
+          savoir_faire_attendus: string[]
+          savoir_faire_transmis: string[]
           slug: string
           status: Database["public"]["Enums"]["small_mission_status"]
           title: string
@@ -7234,13 +7238,17 @@ export type Database = {
           mission_type?: Database["public"]["Enums"]["mission_type_enum"]
           moderation_hidden_at?: string | null
           moderation_hidden_by?: string | null
+          mois_accueil?: string[]
           nature_projet?: string | null
           notify_after?: string | null
+          offre?: string[]
           pet_size?: string | null
           pet_species?: string | null
           photos?: string[]
           postal_code?: string
           repas?: boolean
+          savoir_faire_attendus?: string[]
+          savoir_faire_transmis?: string[]
           slug: string
           status?: Database["public"]["Enums"]["small_mission_status"]
           title?: string
@@ -7272,13 +7280,17 @@ export type Database = {
           mission_type?: Database["public"]["Enums"]["mission_type_enum"]
           moderation_hidden_at?: string | null
           moderation_hidden_by?: string | null
+          mois_accueil?: string[]
           nature_projet?: string | null
           notify_after?: string | null
+          offre?: string[]
           pet_size?: string | null
           pet_species?: string | null
           photos?: string[]
           postal_code?: string
           repas?: boolean
+          savoir_faire_attendus?: string[]
+          savoir_faire_transmis?: string[]
           slug?: string
           status?: Database["public"]["Enums"]["small_mission_status"]
           title?: string
@@ -8445,12 +8457,16 @@ export type Database = {
           longitude: number | null
           max_participants: number | null
           mission_type: Database["public"]["Enums"]["mission_type_enum"] | null
+          mois_accueil: string[] | null
           nature_projet: string | null
+          offre: string[] | null
           pet_size: string | null
           pet_species: string | null
           photos: string[] | null
           postal_code: string | null
           repas: boolean | null
+          savoir_faire_attendus: string[] | null
+          savoir_faire_transmis: string[] | null
           slug: string | null
           status: Database["public"]["Enums"]["small_mission_status"] | null
           title: string | null
@@ -8475,12 +8491,16 @@ export type Database = {
           longitude?: never
           max_participants?: number | null
           mission_type?: Database["public"]["Enums"]["mission_type_enum"] | null
+          mois_accueil?: string[] | null
           nature_projet?: string | null
+          offre?: string[] | null
           pet_size?: string | null
           pet_species?: string | null
           photos?: string[] | null
           postal_code?: string | null
           repas?: boolean | null
+          savoir_faire_attendus?: string[] | null
+          savoir_faire_transmis?: string[] | null
           slug?: string | null
           status?: Database["public"]["Enums"]["small_mission_status"] | null
           title?: string | null
@@ -8505,12 +8525,16 @@ export type Database = {
           longitude?: never
           max_participants?: number | null
           mission_type?: Database["public"]["Enums"]["mission_type_enum"] | null
+          mois_accueil?: string[] | null
           nature_projet?: string | null
+          offre?: string[] | null
           pet_size?: string | null
           pet_species?: string | null
           photos?: string[] | null
           postal_code?: string | null
           repas?: boolean | null
+          savoir_faire_attendus?: string[] | null
+          savoir_faire_transmis?: string[] | null
           slug?: string | null
           status?: Database["public"]["Enums"]["small_mission_status"] | null
           title?: string | null
