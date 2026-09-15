@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, useMap, ZoomControl } from "react-leaflet";
 import L from "leaflet";
 import { LeafletUnmountGuard } from "@/components/shared/LeafletUnmountGuard";
+import { MAP_TILE_URL, MAP_TILE_ATTRIBUTION, MAP_TILE_MAX_ZOOM } from "@/lib/mapTiles";
 import { Link } from "react-router-dom";
 import { MapPin, PawPrint, Cat, Bird, X } from "lucide-react";
 import "leaflet/dist/leaflet.css";
@@ -127,24 +128,31 @@ const SearchMapView = ({
 
   return (
     <div className="flex flex-col md:flex-row h-[calc(100dvh-180px)] md:h-[calc(100dvh-200px)]">
-      <div className="hidden md:block md:w-1/2 overflow-y-auto p-4 space-y-3 border-r border-border">
-        {results.map(renderCard)}
+      <div className="hidden md:block md:w-1/2 overflow-y-auto p-4 border-r border-border">
+        {/* Colonne liste : les cartes gardent leur largeur de grille, sinon la
+            photo s'étire sur toute la demi largeur de l'écran. */}
+        <div className="mx-auto w-full max-w-sm space-y-3">
+          {results.map(renderCard)}
+        </div>
       </div>
 
-      <div className="w-full md:w-1/2 relative flex-1 min-h-0">
+      {/* Coin bas droite empilé à l'envers : le zoom passe au dessus de
+          l'attribution IGN, qui reste lisible en petite police sur mobile. */}
+      <div className="w-full md:w-1/2 relative flex-1 min-h-0 [&_.leaflet-bottom.leaflet-right]:flex [&_.leaflet-bottom.leaflet-right]:flex-col-reverse [&_.leaflet-bottom.leaflet-right]:items-end [&_.leaflet-control-attribution]:text-[10px]">
         <MapContainer
           center={center}
           zoom={userCoords ? 11 : 6}
           className="w-full h-full"
-          zoomControl={true}
-          attributionControl={false}
+          zoomControl={false}
+          attributionControl={true}
         >
           <LeafletUnmountGuard />
+          <ZoomControl position="bottomright" />
           <MapCenterController center={center} zoom={userCoords ? 11 : 6} bounds={bounds} />
           <TileLayer
-            url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-            subdomains="abcd"
-            maxZoom={19}
+            url={MAP_TILE_URL}
+            attribution={MAP_TILE_ATTRIBUTION}
+            maxZoom={MAP_TILE_MAX_ZOOM}
           />
           {results
             .filter((item) => showAll || (!item?.is_demo && !item?.isAssigned && !item?.isCompleted && !item?.isPast))

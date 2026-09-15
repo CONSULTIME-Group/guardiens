@@ -2,6 +2,7 @@ import "leaflet/dist/leaflet.css";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import { LeafletUnmountGuard } from "@/components/shared/LeafletUnmountGuard";
+import { MAP_TILE_URL, MAP_TILE_ATTRIBUTION, MAP_TILE_MAX_ZOOM } from "@/lib/mapTiles";
 
 // Fix default marker icons
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -68,8 +69,9 @@ const GuideMap = ({ places, categories }: GuideMapProps) => {
         >
           <LeafletUnmountGuard />
           <TileLayer
-            attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a>'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution={MAP_TILE_ATTRIBUTION}
+            url={MAP_TILE_URL}
+            maxZoom={MAP_TILE_MAX_ZOOM}
           />
           {places.map((place) => {
             const config = CATEGORY_CONFIG[place.category];

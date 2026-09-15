@@ -13,6 +13,7 @@ import L from "leaflet";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { geocodeCity } from "@/lib/geocode";
+import { MAP_TILE_URL, MAP_TILE_ATTRIBUTION, MAP_TILE_MAX_ZOOM } from "@/lib/mapTiles";
 import fallbackMarrakech from "@/assets/fallback-marrakech.webp";
 
 const CANONICAL = "https://guardiens.fr/annonces/international";
@@ -56,10 +57,10 @@ function InternationalMap({ sits }: { sits: IntlSitWithCoords[] }) {
 
   return (
     <div className="rounded-2xl overflow-hidden border border-border bg-card shadow-sm h-[320px] md:h-[420px]">
-      <MapContainer center={center} zoom={points.length > 1 ? 3 : 11} className="h-full w-full" attributionControl={false} scrollWheelZoom={false}>
+      <MapContainer center={center} zoom={points.length > 1 ? 3 : 11} className="h-full w-full" attributionControl={true} scrollWheelZoom={false}>
         <LeafletUnmountGuard />
         <FitBounds />
-        <TileLayer url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" subdomains="abcd" maxZoom={19} />
+        <TileLayer url={MAP_TILE_URL} attribution={MAP_TILE_ATTRIBUTION} maxZoom={MAP_TILE_MAX_ZOOM} />
         {points.map((s) => (
           <Marker key={s.id} position={[s.coords.lat, s.coords.lng]} icon={pinIcon} />
         ))}
