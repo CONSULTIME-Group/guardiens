@@ -234,7 +234,7 @@ export function useMissionDistance(missions: MissionLike[], options?: MissionDis
         done({ ok: false, reason: "unavailable" });
       }
     });
-  }, []);
+  }, [keyPostal]);
 
   const active = Boolean(origin);
 
