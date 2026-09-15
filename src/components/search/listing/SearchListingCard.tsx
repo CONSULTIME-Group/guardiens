@@ -150,7 +150,12 @@ const SearchListingCard = ({
   // l'affiche. Le test passe donc AVANT celui de l'onglet missions.
   if (isProjet) {
     const projetLink = `/projets/${item.slug || item.id}`;
-    const projetMeta = projetMetaLine(item.date_needed, item.end_date, item.duration_estimate);
+    const projetMeta = projetMetaLine(
+      item.date_needed,
+      item.end_date,
+      item.duration_estimate,
+      (item as any).mois_accueil,
+    );
     const natureLabel = projetNatureLabel((item as any).nature_projet);
 
     const projetCard = (

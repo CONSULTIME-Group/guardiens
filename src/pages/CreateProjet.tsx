@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,14 +17,20 @@ import { detectContactDetails, contactDetailsMessage } from "@/lib/contactDetail
 import { hasMoneyMention, sitLikeSignals } from "@/lib/missionContentGuards";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { stripEmojis } from "@/lib/stripEmojis";
-import { PROJET_NATURE_LABELS, PROJET_DURATION_LABELS, HEBERGEMENT_LABELS } from "@/lib/projets";
+import {
+  PROJET_NATURE_LABELS,
+  PROJET_DURATION_LABELS,
+  HEBERGEMENT_LABELS,
+  PROJET_SAVOIR_FAIRE,
+  PROJET_OFFRE_LABELS,
+} from "@/lib/projets";
+import { trackEvent } from "@/lib/analytics";
 import { logger } from "@/lib/logger";
 import { ChevronLeft } from "lucide-react";
 
 /** Longueurs minimales, elles tiennent le sérieux d'une annonce de chantier. */
 const MIN_TITLE_LEN = 10;
-const MIN_DESC_LEN = 300;
-const MIN_APPRENTISSAGE_LEN = 200;
+const MIN_DESC_LEN = 150;
 const MAX_PHOTOS = 6;
 
 /** Durées retenues pour un projet, toutes acceptées côté base. */
@@ -61,7 +67,14 @@ const DECLARATIONS: Array<{ key: string; label: string }> = [
   },
 ];
 
-const STEP_LABELS = ["Le projet", "Le cadre", "Ce qui est proposé"];
+const STEP_LABELS = ["Le projet", "Le cadre", "Ce qui se passe sur place"];
+
+/** Clés de champ suivies pour l'abandon, dans l'ordre du formulaire. */
+type ProjetField =
+  | "title" | "description" | "photos" | "nature"
+  | "city" | "months" | "fixed_date" | "duration" | "places"
+  | "savoir_faire_attendus" | "savoir_faire_transmis" | "hebergement" | "repas" | "offre"
+  | "free_text" | "declarations";
 
 /**
  * Les douze mois à venir, en clair, pour cocher une période d'accueil sans
@@ -124,8 +137,11 @@ const CreateProjet = () => {
   const [places, setPlaces] = useState("6");
 
   // Étape 3
+  const [attendus, setAttendus] = useState<string[]>([]);
+  const [transmis, setTransmis] = useState<string[]>([]);
   const [hebergement, setHebergement] = useState("");
   const [repas, setRepas] = useState(false);
+  const [offre, setOffre] = useState<string[]>([]);
   const [apprentissage, setApprentissage] = useState("");
   const [declarations, setDeclarations] = useState<Record<string, string>>({});
 
@@ -145,19 +161,97 @@ const CreateProjet = () => {
     Boolean(duration) &&
     Number(places) >= 1;
 
-  const step3Ready =
-    Boolean(hebergement) && apprentissage.trim().length >= MIN_APPRENTISSAGE_LEN && allDeclared;
+  const step3Ready = Boolean(hebergement) && transmis.length >= 1 && allDeclared;
 
-  const toggleMonth = (value: string) =>
+  // ─── Instrumentation, mêmes règles que le composeur d'entraide ───
+  // Miroirs par ref : l'abandon lit l'état réel au moment du départ, jamais
+  // les valeurs capturées au montage.
+  const submittedRef = useRef(false);
+  const abandonSentRef = useRef(false);
+  const stepRef = useRef(step);
+  stepRef.current = step;
+  const titleLenRef = useRef(title.trim().length);
+  titleLenRef.current = title.trim().length;
+  const lastFieldRef = useRef<ProjetField | null>(null);
+  const touchField = (field: ProjetField) => { lastFieldRef.current = field; };
+
+  useEffect(() => {
+    try { trackEvent("projet_composer_opened"); } catch { /* ignore */ }
+    const emitAbandon = () => {
+      if (submittedRef.current || abandonSentRef.current) return;
+      abandonSentRef.current = true;
+      const titleLen = titleLenRef.current;
+      try {
+        trackEvent("projet_composer_abandoned", {
+          metadata: {
+            last_step: stepRef.current,
+            last_field: lastFieldRef.current,
+            has_title: titleLen > 0,
+            title_len: titleLen,
+          },
+        });
+      } catch { /* ignore */ }
+    };
+    // Fermeture d'onglet ou passage en arrière-plan sur mobile : le démontage
+    // n'a pas lieu, pagehide prend le relais. Le garde évite le doublon.
+    window.addEventListener("pagehide", emitAbandon);
+    return () => {
+      window.removeEventListener("pagehide", emitAbandon);
+      emitAbandon();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleTitleBlur = () => {
+    const len = title.trim().length;
+    if (len > 0 && len < MIN_TITLE_LEN) {
+      try { trackEvent("projet_composer_field_abandoned", { metadata: { field: "title", length: len } }); } catch { /* ignore */ }
+    }
+  };
+  const handleDescBlur = () => {
+    const len = description.trim().length;
+    if (len > 0 && len < MIN_DESC_LEN) {
+      try { trackEvent("projet_composer_field_abandoned", { metadata: { field: "description", length: len } }); } catch { /* ignore */ }
+    }
+  };
+
+  const goStep2 = () => {
+    setStep(2);
+    try { trackEvent("projet_composer_step1_completed"); } catch { /* ignore */ }
+  };
+  const goStep3 = () => {
+    setStep(3);
+    try { trackEvent("projet_composer_step2_completed"); } catch { /* ignore */ }
+  };
+
+  const toggleMonth = (value: string) => {
+    touchField("months");
     setMonths((prev) => (prev.includes(value) ? prev.filter((m) => m !== value) : [...prev, value]));
+  };
 
-  const toggleDeclaration = (key: string, checked: boolean) =>
+  const toggleDeclaration = (key: string, checked: boolean) => {
+    touchField("declarations");
     setDeclarations((prev) => {
       const next = { ...prev };
       if (checked) next[key] = new Date().toISOString();
       else delete next[key];
       return next;
     });
+  };
+
+  /** Cocher un savoir-faire attendu décoche « Rien », décocher revient à « Rien ». */
+  const toggleAttendu = (key: string) => {
+    touchField("savoir_faire_attendus");
+    setAttendus((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
+  };
+  const toggleTransmis = (key: string) => {
+    touchField("savoir_faire_transmis");
+    setTransmis((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
+  };
+  const toggleOffre = (key: string) => {
+    touchField("offre");
+    setOffre((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
+  };
 
   const handleSubmit = async () => {
     if (!user || submitting) return;
@@ -217,11 +311,15 @@ const CreateProjet = () => {
         postal_code: postalCode.trim(),
         date_needed: dateNeeded,
         end_date: derived.endDate,
+        mois_accueil: [...months].sort(),
         duration_estimate: duration,
         max_participants: Number(places),
         accepting_applications: true,
         hebergement,
         repas,
+        offre,
+        savoir_faire_attendus: attendus,
+        savoir_faire_transmis: transmis,
         ce_que_vous_apprendrez: stripEmojis(apprentissage),
         declarations,
         photos,
@@ -245,10 +343,54 @@ const CreateProjet = () => {
       return;
     }
 
-    toast({ title: "Votre projet est en ligne", description: "Les personnes du secteur peuvent désormais le découvrir." });
+    submittedRef.current = true;
     const row = inserted as any;
+    try {
+      trackEvent("projet_composer_submitted", {
+        metadata: {
+          mission_id: row?.id ?? null,
+          nature_projet: nature,
+          nb_transmis: transmis.length,
+          nb_attendus: attendus.length,
+          has_free_text: apprentissage.trim().length > 0,
+        },
+      });
+    } catch { /* ignore */ }
+
+    toast({ title: "Votre projet est en ligne", description: "Les personnes du secteur peuvent désormais le découvrir." });
     navigate(row?.id ? `/projets/${row.slug || row.id}` : "/projets");
   };
+
+  /** Cases de savoir-faire, groupées par famille, lisibles sur un téléphone. */
+  const renderSavoirFaire = (
+    selected: string[],
+    onToggle: (key: string) => void,
+    idPrefix: string,
+  ) => (
+    <div className="space-y-4">
+      {PROJET_SAVOIR_FAIRE.map((group) => (
+        <div key={group.family} className="space-y-2">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{group.family}</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {group.items.map((item) => (
+              <label
+                key={item.key}
+                htmlFor={`${idPrefix}-${item.key}`}
+                className="flex items-center gap-3 rounded-xl border border-border px-3 py-2 text-sm min-h-[44px] cursor-pointer"
+              >
+                <Checkbox
+                  id={`${idPrefix}-${item.key}`}
+                  checked={selected.includes(item.key)}
+                  onCheckedChange={() => onToggle(item.key)}
+                />
+                <span>{item.label}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 
   return (
     <>
@@ -290,7 +432,9 @@ const CreateProjet = () => {
               <Input
                 id="projet-title"
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onFocus={() => touchField("title")}
+                onChange={(e) => { touchField("title"); setTitle(e.target.value); }}
+                onBlur={handleTitleBlur}
                 placeholder="Monter un mur en pierre sèche dans le jardin"
               />
               <p className="text-xs text-muted-foreground">{title.trim().length} caractères, {MIN_TITLE_LEN} au minimum.</p>
@@ -301,7 +445,9 @@ const CreateProjet = () => {
               <Textarea
                 id="projet-description"
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                onFocus={() => touchField("description")}
+                onChange={(e) => { touchField("description"); setDescription(e.target.value); }}
+                onBlur={handleDescBlur}
                 rows={8}
                 placeholder="Racontez le chantier, son état d'avancement, les gestes qui seront faits et l'ambiance sur place."
               />
@@ -314,7 +460,7 @@ const CreateProjet = () => {
                 <MissionPhotoUpload
                   userId={user.id}
                   photos={photos}
-                  onChange={setPhotos}
+                  onChange={(next: string[]) => { touchField("photos"); setPhotos(next); }}
                   maxPhotos={MAX_PHOTOS}
                 />
               )}
@@ -323,7 +469,7 @@ const CreateProjet = () => {
 
             <div className="space-y-2">
               <Label>Nature du projet</Label>
-              <Select value={nature} onValueChange={setNature}>
+              <Select value={nature} onValueChange={(v) => { touchField("nature"); setNature(v); }}>
                 <SelectTrigger><SelectValue placeholder="Choisissez la nature du chantier" /></SelectTrigger>
                 <SelectContent>
                   {Object.entries(PROJET_NATURE_LABELS).map(([value, label]) => (
@@ -333,7 +479,7 @@ const CreateProjet = () => {
               </Select>
             </div>
 
-            <Button type="button" className="w-full rounded-full" disabled={!step1Ready} onClick={() => setStep(2)}>
+            <Button type="button" className="w-full rounded-full" disabled={!step1Ready} onClick={goStep2}>
               Continuer
             </Button>
           </section>
@@ -345,6 +491,7 @@ const CreateProjet = () => {
               city={city}
               postalCode={postalCode}
               onChange={(partial: any) => {
+                touchField("city");
                 if (partial.city !== undefined) setCity(partial.city);
                 if (partial.postal_code !== undefined) setPostalCode(partial.postal_code);
               }}
@@ -356,7 +503,7 @@ const CreateProjet = () => {
               <Label>Mois d'accueil</Label>
               <div className="grid grid-cols-2 gap-2">
                 {monthOptions.map((m) => (
-                  <label key={m.value} className="flex items-center gap-2 rounded-xl border border-border px-3 py-2 text-sm">
+                  <label key={m.value} className="flex items-center gap-2 rounded-xl border border-border px-3 py-2 text-sm min-h-[44px]">
                     <Checkbox checked={months.includes(m.value)} onCheckedChange={() => toggleMonth(m.value)} />
                     <span className="capitalize">{m.label}</span>
                   </label>
@@ -366,12 +513,18 @@ const CreateProjet = () => {
 
             <div className="space-y-2">
               <Label htmlFor="projet-date">Date ferme, si vous en avez une</Label>
-              <Input id="projet-date" type="date" value={fixedDate} onChange={(e) => setFixedDate(e.target.value)} />
+              <Input
+                id="projet-date"
+                type="date"
+                value={fixedDate}
+                onFocus={() => touchField("fixed_date")}
+                onChange={(e) => { touchField("fixed_date"); setFixedDate(e.target.value); }}
+              />
             </div>
 
             <div className="space-y-2">
               <Label>Durée du chantier</Label>
-              <Select value={duration} onValueChange={setDuration}>
+              <Select value={duration} onValueChange={(v) => { touchField("duration"); setDuration(v); }}>
                 <SelectTrigger><SelectValue placeholder="Choisissez une durée" /></SelectTrigger>
                 <SelectContent>
                   {PROJET_DURATIONS.map((value) => (
@@ -389,47 +542,101 @@ const CreateProjet = () => {
                 min={1}
                 max={30}
                 value={places}
-                onChange={(e) => setPlaces(e.target.value)}
+                onFocus={() => touchField("places")}
+                onChange={(e) => { touchField("places"); setPlaces(e.target.value); }}
               />
             </div>
 
-            <Button type="button" className="w-full rounded-full" disabled={!step2Ready} onClick={() => setStep(3)}>
+            <Button type="button" className="w-full rounded-full" disabled={!step2Ready} onClick={goStep3}>
               Continuer
             </Button>
           </section>
         )}
 
         {step === 3 && (
-          <section className="space-y-5">
-            <div className="space-y-2">
-              <Label>Hébergement sur place</Label>
-              <Select value={hebergement} onValueChange={setHebergement}>
-                <SelectTrigger><SelectValue placeholder="Choisissez ce que vous proposez" /></SelectTrigger>
-                <SelectContent>
-                  {HEBERGEMENTS.map((value) => (
-                    <SelectItem key={value} value={value}>{HEBERGEMENT_LABELS[value]}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          <section className="space-y-8">
+            <div className="space-y-3">
+              <Label>Ce qu'il faut savoir faire</Label>
+              <label
+                htmlFor="projet-attendus-rien"
+                className="flex items-center gap-3 rounded-xl border border-border px-3 py-3 text-sm min-h-[44px] cursor-pointer"
+              >
+                <Checkbox
+                  id="projet-attendus-rien"
+                  checked={attendus.length === 0}
+                  onCheckedChange={() => { touchField("savoir_faire_attendus"); setAttendus([]); }}
+                />
+                <span>Rien, tout s'apprend sur place</span>
+              </label>
+              {renderSavoirFaire(attendus, toggleAttendu, "projet-attendus")}
             </div>
 
-            <label className="flex items-center gap-3 rounded-xl border border-border px-3 py-3 text-sm">
-              <Checkbox checked={repas} onCheckedChange={(v) => setRepas(v === true)} />
-              <span>Les repas sont partagés sur place</span>
-            </label>
+            <div className="space-y-3">
+              <Label>Ce que vous transmettez</Label>
+              <p className="text-xs text-muted-foreground">Choisissez au moins un savoir-faire.</p>
+              {renderSavoirFaire(transmis, toggleTransmis, "projet-transmis")}
+            </div>
+
+            <div className="space-y-3">
+              <Label>Ce que vous offrez</Label>
+              <div className="space-y-2">
+                {HEBERGEMENTS.map((value) => (
+                  <label
+                    key={value}
+                    className="flex items-center gap-3 rounded-xl border border-border px-3 py-2 text-sm min-h-[44px] cursor-pointer"
+                  >
+                    <input
+                      type="radio"
+                      name="projet-hebergement"
+                      value={value}
+                      checked={hebergement === value}
+                      onChange={() => { touchField("hebergement"); setHebergement(value); }}
+                      className="h-4 w-4 accent-primary"
+                    />
+                    <span>{HEBERGEMENT_LABELS[value]}</span>
+                  </label>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <label
+                  htmlFor="projet-repas"
+                  className="flex items-center gap-3 rounded-xl border border-border px-3 py-2 text-sm min-h-[44px] cursor-pointer"
+                >
+                  <Checkbox
+                    id="projet-repas"
+                    checked={repas}
+                    onCheckedChange={(v) => { touchField("repas"); setRepas(v === true); }}
+                  />
+                  <span>Les repas sont partagés sur place</span>
+                </label>
+                {Object.entries(PROJET_OFFRE_LABELS).map(([value, label]) => (
+                  <label
+                    key={value}
+                    htmlFor={`projet-offre-${value}`}
+                    className="flex items-center gap-3 rounded-xl border border-border px-3 py-2 text-sm min-h-[44px] cursor-pointer"
+                  >
+                    <Checkbox
+                      id={`projet-offre-${value}`}
+                      checked={offre.includes(value)}
+                      onCheckedChange={() => toggleOffre(value)}
+                    />
+                    <span>{label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
 
             <div className="space-y-2">
-              <Label htmlFor="projet-apprentissage">Ce que la personne va apprendre</Label>
+              <Label htmlFor="projet-apprentissage">En quelques mots</Label>
               <Textarea
                 id="projet-apprentissage"
                 value={apprentissage}
-                onChange={(e) => setApprentissage(e.target.value)}
+                onFocus={() => touchField("free_text")}
+                onChange={(e) => { touchField("free_text"); setApprentissage(e.target.value); }}
                 rows={6}
-                placeholder="Décrivez les gestes, les outils et le savoir-faire que vous transmettrez pendant le chantier."
+                placeholder="Ce que vous voulez ajouter sur l'ambiance, le rythme, ce que l'on apprend en faisant."
               />
-              <p className="text-xs text-muted-foreground">
-                {apprentissage.trim().length} caractères, {MIN_APPRENTISSAGE_LEN} au minimum.
-              </p>
             </div>
 
             <div className="rounded-[1.5rem] border border-border bg-muted/40 p-5 space-y-4">
