@@ -82,6 +82,8 @@ const ProximityFilter = ({
   originError = false,
   filterEnabled = false,
   onFilterEnabledChange,
+  radiusChoices = DEFAULT_RADIUS_CHOICES,
+  radiusAlwaysEnabled = false,
 }: Props) => {
   const [locating, setLocating] = useState(false);
   const [geoError, setGeoError] = useState<GeolocationErrorReason | null>(null);
