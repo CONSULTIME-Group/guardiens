@@ -5,6 +5,7 @@ import { LeafletUnmountGuard } from "@/components/shared/LeafletUnmountGuard";
 import { Link } from "react-router-dom";
 import { Star, MapPin, X } from "lucide-react";
 import { storageImageUrl } from "@/lib/storageImage";
+import { MAP_TILE_URL, MAP_TILE_ATTRIBUTION, MAP_TILE_MAX_ZOOM } from "@/lib/mapTiles";
 import "leaflet/dist/leaflet.css";
 
 interface SitterPin {
@@ -76,14 +77,14 @@ const SearchOwnerMapView = ({ sitters, centerCoords, onContact, contactingId }: 
         zoom={centerCoords ? 11 : 6}
         className="w-full h-full"
         zoomControl
-        attributionControl={false}
+        attributionControl={true}
       >
         <LeafletUnmountGuard />
         <Centerer bounds={bounds} fallback={center} />
         <TileLayer
-          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-          subdomains="abcd"
-          maxZoom={19}
+          url={MAP_TILE_URL}
+          attribution={MAP_TILE_ATTRIBUTION}
+          maxZoom={MAP_TILE_MAX_ZOOM}
         />
         {sitters.map((s) => (
           <Marker

@@ -727,7 +727,7 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  getCityFn: (item: any) => string | undefined,
  searchCoords: { lat: number; lng: number } | null,
  getPostalCodeFn?: (item: any) => string | undefined,
- alwaysIncludeFn?: (item: any) => boolean,
+ isInternationalFn?: (item: any) => boolean,
  densityFilterFn?: (item: any) => boolean,
  franceCountOverride?: number | null,
  ) => {
@@ -742,17 +742,21 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  // Density est calculée sur les items « actionnables » (open/publiés/non expirés)
  // pour rester aligné avec les compteurs SEO/eyebrow des pages publiques.
  const densityItems = densityFilterFn ? items.filter(densityFilterFn) : items;
+ // Les annonces hors France ne comptent dans aucune densité de zone française
+ // (rayon, département, région) : elles ont leur page dédiée.
+ const isIntl = (s: any) => isInternationalFn ? isInternationalFn(s) : false;
+ const frenchDensityItems = densityItems.filter((s) => !isIntl(s));
  const refDept = getDeptCode(getZoneRefPostalCode());
  const refRegion = getRegionCode(refDept);
- const radiusCount = searchCoords ? densityItems.filter((s) => {
+ const radiusCount = searchCoords ? frenchDensityItems.filter((s) => {
  const c = getCityFn(s); if (!c) return false;
  const co = cityCoords.get(c); if (!co) return false;
  return haversineDistance(searchCoords.lat, searchCoords.lng, co.lat, co.lng) <= radius[0];
  }).length : 0;
- const deptCount = refDept ? densityItems.filter((s) => {
+ const deptCount = refDept ? frenchDensityItems.filter((s) => {
  const cp = getPostalCodeFn?.(s); return cp ? getDeptCode(cp) === refDept : false;
  }).length : 0;
- const regionCount = refRegion ? densityItems.filter((s) => {
+ const regionCount = refRegion ? frenchDensityItems.filter((s) => {
  const cp = getPostalCodeFn?.(s); return cp ? getRegionCode(getDeptCode(cp)) === refRegion : false;
  }).length : 0;
  setDensityCounts({
@@ -765,13 +769,15 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  });
 
 
- // Apply the selected zone filter (international items always pass through)
- const passThrough = (s: any) => alwaysIncludeFn ? alwaysIncludeFn(s) : false;
+ // Filtre de zone. Les annonces hors France sont écartées des zones françaises
+ // (rayon, département, région) : une annonce à 16 000 km n'est pas « près de
+ // vous ». Elles restent visibles en mode « Toute la France » et sur la page
+ // dédiée /annonces/international.
  let filtered = items;
  if (zoneMode === "radius") {
  if (!searchCoords) return { items, cityCoords };
  filtered = items.filter((s) => {
- if (passThrough(s)) return true;
+ if (isIntl(s)) return false;
   const ownerCity = getCityFn(s); if (!ownerCity) return false;
   const coords = cityCoords.get(ownerCity);
   // Repli département : une ville non géocodable ne doit pas faire disparaître une annonce du rayon. On retombe sur le code postal, seule donnée fiable. Ne pas revenir à un return false sec.
@@ -784,12 +790,12 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  });
  } else if (zoneMode === "dept" && refDept) {
  filtered = items.filter((s) => {
- if (passThrough(s)) return true;
+ if (isIntl(s)) return false;
  const cp = getPostalCodeFn?.(s); return cp ? getDeptCode(cp) === refDept : false;
  });
  } else if (zoneMode === "region" && refRegion) {
  filtered = items.filter((s) => {
- if (passThrough(s)) return true;
+ if (isIntl(s)) return false;
  const cp = getPostalCodeFn?.(s); return cp ? getRegionCode(getDeptCode(cp)) === refRegion : false;
  });
  }
@@ -802,9 +808,9 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
    // ainsi que les annonces dépubliées (draft + unpublished_at) pour la
    // transparence côté membre connecté : elles s'affichent grisées avec un
    // libellé explicite et ne sont pas actionnables.
-    // On inclut les annonces internationales : elles apparaissent comme bonus
-    // sur la carte et dans la grille, même quand un filtre géographique français
-    // est actif (rayon / dept / région). Elles bypassent le filtre dans filterByLocation.
+    // On rapatrie aussi les annonces internationales, mais filterByLocation les
+    // écarte des zones françaises (rayon / dept / région). Elles s'affichent en
+    // mode « Toute la France » et sur la page dédiée /annonces/international.
     const SIT_COLUMNS = "id, user_id, property_id, title, slug, status, city, country, start_date, end_date, created_at, unpublished_at, environments, is_urgent, cover_photo_url, accepting_applications, max_applications, property:properties!sits_property_id_fkey(type, environment, photos, cover_photo_url)";
 
     // Lignes ouvertes (publiées, plus les dépubliées pour les membres) : ce sont
@@ -1761,7 +1767,9 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
 
     {(() => {
       const widenBannerVisible = !!autoWidened && tab === "sits" && zoneMode === autoWidened.to;
-      const showOutOfZone = !widenBannerVisible && tab === "sits" && !loading && zoneMode !== "france" && densityCounts.france > densityCounts.radius;
+      // En vue carte, ce bandeau pousse la carte hors du viewport : il reste
+      // réservé à la vue liste.
+      const showOutOfZone = viewMode !== "map" && !widenBannerVisible && tab === "sits" && !loading && zoneMode !== "france" && densityCounts.france > densityCounts.radius;
       return showOutOfZone ? (
         <OutOfZoneBanner
           zoneMode={zoneMode}
@@ -2454,8 +2462,12 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
   {/* ─── FAB mobile toggle carte/liste ─── */}
    {/* FAB masqué en état vide : rien à afficher sur la carte, il ne ferait que
         chevaucher les CTA de l'empty state. */}
+   {/* En vue carte, le dock d'Alma occupe le bas de l'écran : le bouton monte
+       au dessus de lui plutôt que de masquer le dock, car le dock n'est pas
+       piloté par ChromeVisibility et le masquer toucherait un comportement
+       partagé aux autres pages. */}
    {isMobile && tab === "sits" && availableSitsCount > 0 && (
-    <div className="fixed bottom-[calc(var(--bottom-nav-h,0px)+14px+env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 z-[1200] sm:hidden">
+    <div className={`fixed left-1/2 -translate-x-1/2 z-[1200] sm:hidden ${viewMode === "map" ? "bottom-[calc(var(--bottom-nav-h,0px)+9.5rem+env(safe-area-inset-bottom))]" : "bottom-[calc(var(--bottom-nav-h,0px)+14px+env(safe-area-inset-bottom))]"}`}>
       <button
         onClick={() => setViewMode(viewMode === "list" ? "map" : "list")}
         className="inline-flex items-center gap-2 rounded-full bg-foreground text-background shadow-xl px-5 py-3 text-sm font-semibold transition-transform active:scale-95"

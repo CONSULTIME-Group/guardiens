@@ -1,4 +1,4 @@
-// Carte "localisation approximative" : Leaflet + OSM tiles.
+// Carte "localisation approximative" : Leaflet + Plan IGN Géoplateforme.
 // Aucune clé API. Géocode FR via geo.api.gouv.fr, fallback Nominatim.
 // Affiche un cercle flou (rayon ~1.5 km) au lieu du point exact pour préserver
 // la vie privée tant que la mise en relation n'a pas eu lieu.
@@ -8,6 +8,7 @@ import { MapContainer, TileLayer, Circle } from "react-leaflet";
 import L from "leaflet";
 import { LeafletUnmountGuard } from "@/components/shared/LeafletUnmountGuard";
 import { supabase } from "@/integrations/supabase/client";
+import { MAP_TILE_URL, MAP_TILE_ATTRIBUTION, MAP_TILE_MAX_ZOOM } from "@/lib/mapTiles";
 
 interface Props {
   city?: string | null;
@@ -155,14 +156,15 @@ const ApproximateLocationMap = ({
         zoomControl={true}
         dragging={true}
         doubleClickZoom={true}
-        attributionControl={false}
+        attributionControl={true}
         className="h-full w-full"
         style={{ background: "hsl(var(--muted))" }}
       >
         <LeafletUnmountGuard />
         <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution=""
+          url={MAP_TILE_URL}
+          attribution={MAP_TILE_ATTRIBUTION}
+          maxZoom={MAP_TILE_MAX_ZOOM}
         />
         <Circle
           center={[coords.lat, coords.lng]}
