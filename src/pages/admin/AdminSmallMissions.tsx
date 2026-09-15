@@ -538,6 +538,40 @@ const AdminSmallMissions = () => {
                 </ul>
               )}
             </CardContent></Card>
+
+          {pendingProjets.length > 0 && (
+            <Card>
+              <CardContent className="p-4 space-y-2">
+                <p className="text-xs text-muted-foreground">
+                  Projets en attente de diffusion aux membres. Ils sont déjà visibles sur le site.
+                </p>
+                <ul className="space-y-2">
+                  {pendingProjets.map((p) => (
+                    <li key={p.id} className="flex items-center gap-3 flex-wrap">
+                      <button
+                        type="button"
+                        className="text-sm font-medium text-primary hover:underline text-left"
+                        onClick={() => navigate(`/projets/${p.slug || p.id}`)}
+                      >
+                        {p.title}
+                      </button>
+                      <Badge variant="secondary">
+                        Diffusion le {format(new Date(p.notify_after), "d MMM yyyy à HH:mm", { locale: fr })}
+                      </Badge>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={releasingId === p.id}
+                        onClick={() => releaseProjet(p.id)}
+                      >
+                        <Send className="h-4 w-4 mr-2" /> Valider et diffuser
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
         </div>
       )}
 
