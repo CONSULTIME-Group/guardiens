@@ -137,6 +137,7 @@ function resolveNavActive(
 export const AdminSidebar = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const badges = useAdminBadges() as unknown as Record<string, number>;
   const [collapsed, setCollapsed] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
@@ -199,7 +200,7 @@ export const AdminSidebar = () => {
                       cn(
                         "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                         collapsed && "justify-center",
-                        isActive
+                        resolveNavActive(item, location, isActive)
                           ? "bg-primary/10 text-primary"
                           : "text-muted-foreground hover:bg-accent hover:text-foreground"
                       )
