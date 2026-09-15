@@ -7197,6 +7197,7 @@ export type Database = {
           moderation_hidden_at: string | null
           moderation_hidden_by: string | null
           nature_projet: string | null
+          notify_after: string | null
           pet_size: string | null
           pet_species: string | null
           photos: string[]
@@ -7234,6 +7235,7 @@ export type Database = {
           moderation_hidden_at?: string | null
           moderation_hidden_by?: string | null
           nature_projet?: string | null
+          notify_after?: string | null
           pet_size?: string | null
           pet_species?: string | null
           photos?: string[]
@@ -7271,6 +7273,7 @@ export type Database = {
           moderation_hidden_at?: string | null
           moderation_hidden_by?: string | null
           nature_projet?: string | null
+          notify_after?: string | null
           pet_size?: string | null
           pet_species?: string | null
           photos?: string[]
@@ -9071,6 +9074,10 @@ export type Database = {
       admin_reject_competence_label: {
         Args: { p_label: string }
         Returns: number
+      }
+      admin_release_projet: {
+        Args: { _mission_id: string }
+        Returns: undefined
       }
       admin_send_message_to_user: {
         Args: { p_content: string; p_target_user_id: string }
