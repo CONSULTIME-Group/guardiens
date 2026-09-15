@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { MapContainer, TileLayer, Marker, useMap, ZoomControl } from "react-leaflet";
 import L from "leaflet";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { LeafletUnmountGuard } from "@/components/shared/LeafletUnmountGuard";
 import { MAP_TILE_URL, MAP_TILE_ATTRIBUTION, MAP_TILE_MAX_ZOOM } from "@/lib/mapTiles";
 import { Link } from "react-router-dom";
