@@ -288,6 +288,31 @@ const AdminSmallMissions = () => {
 
   const paginated = useMemo(() => filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE), [filtered, page]);
 
+  // Projets publiés mais dont l'annonce aux membres attend encore.
+  const pendingProjets = useMemo(
+    () =>
+      missions.filter(
+        (m) =>
+          m.category === "projet" &&
+          m.notify_after &&
+          new Date(m.notify_after).getTime() > Date.now(),
+      ),
+    [missions],
+  );
+
+  const releaseProjet = async (id: string) => {
+    setReleasingId(id);
+    const { error } = await (supabase as any).rpc("admin_release_projet", { _mission_id: id });
+    setReleasingId(null);
+    if (error) {
+      toast.error("Diffusion impossible");
+      return;
+    }
+    await logAdminAction("release_projet", id);
+    toast.success("Projet diffusé");
+    fetchMissions();
+  };
+
   // Une publication annulée, masquée ou terminée n'est plus visible de
   // personne : elle ne doit plus allumer l'alerte, sinon le bandeau reste
   // allumé en permanence et on cesse de le regarder.
