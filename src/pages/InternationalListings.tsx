@@ -64,7 +64,13 @@ function InternationalMap({ sits }: { sits: IntlSitWithCoords[] }) {
       <MapContainer center={center} zoom={points.length > 1 ? 3 : 11} className="h-full w-full" attributionControl={true} scrollWheelZoom={false}>
         <LeafletUnmountGuard />
         <FitBounds />
-        <TileLayer url={MAP_TILE_URL} attribution={MAP_TILE_ATTRIBUTION} maxZoom={MAP_TILE_MAX_ZOOM} />
+        {/* Annonces hors France : le Plan IGN est vide au-delà du territoire,
+            fond OpenStreetMap standard pour cette page uniquement. */}
+        <TileLayer
+          url={MAP_TILE_WORLD_URL}
+          attribution={MAP_TILE_WORLD_ATTRIBUTION}
+          maxZoom={MAP_TILE_WORLD_MAX_ZOOM}
+        />
         {points.map((s) => (
           <Marker key={s.id} position={[s.coords.lat, s.coords.lng]} icon={pinIcon} />
         ))}
