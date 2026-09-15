@@ -71,9 +71,30 @@ Deno.serve(async (req) => {
       return json({ ok: true, helpers_processed: 0, reason: 'empty_queue' })
     }
 
+    // 1 bis) Diffusion différée. Le premier projet d'un porteur attend son
+    // échéance `notify_after` avant d'être annoncé. Les lignes concernées
+    // restent `queued` et partiront au premier passage suivant l'échéance :
+    // elles sont écartées avant le tri distance et avant le plafond de trois.
+    const missionIds = Array.from(new Set((queued as QueueRow[]).map(r => r.mission_id)))
+    const heldMissionIds = new Set<string>()
+    for (let i = 0; i < missionIds.length; i += 200) {
+      const chunk = missionIds.slice(i, i + 200)
+      const { data: held, error: heldErr } = await supabase
+        .from('small_missions')
+        .select('id, notify_after')
+        .in('id', chunk)
+        .gt('notify_after', new Date().toISOString())
+      if (heldErr) throw heldErr
+      for (const row of held ?? []) heldMissionIds.add(row.id as string)
+    }
+    const eligible = (queued as QueueRow[]).filter(r => !heldMissionIds.has(r.mission_id))
+    if (eligible.length === 0) {
+      return json({ ok: true, helpers_processed: 0, reason: 'all_missions_held', held: heldMissionIds.size })
+    }
+
     // 2) Regroupe par helper
     const byHelper = new Map<string, QueueRow[]>()
-    for (const row of queued as QueueRow[]) {
+    for (const row of eligible) {
       const arr = byHelper.get(row.helper_id) ?? []
       arr.push(row)
       byHelper.set(row.helper_id, arr)

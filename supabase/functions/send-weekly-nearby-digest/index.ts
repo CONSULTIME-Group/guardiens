@@ -124,7 +124,10 @@ Deno.serve(async (req) => {
         .from("small_missions")
         .select("id, title, city, mission_type, latitude, longitude, user_id, status, created_at")
         .eq("status", "open")
-        .gte("created_at", since),
+        .gte("created_at", since)
+        // Diffusion différée : le premier projet d'un porteur attend son
+        // échéance avant d'être annoncé aux membres.
+        .or(`notify_after.is.null,notify_after.lte.${new Date().toISOString()}`),
       supabase
         .from("community_questions")
         .select("id, title, city, latitude, longitude, author_id, status, accepted_answer_id, answers_count, is_hidden, created_at")

@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, Users, Megaphone, CalendarCheck, Star, Flag,
   ShieldCheck, Mail, FileText, LogOut, ArrowLeft, MapPin, HelpCircle,
   Compass, Handshake, Briefcase, CreditCard, MessageSquare, ScrollText, Settings,
   Lightbulb, AlertTriangle, Bug, Stethoscope, Sprout, BarChart3, Send,
-  Sparkles, UserX, HeartHandshake,
+  Sparkles, UserX, HeartHandshake, Hammer,
   ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -18,6 +18,12 @@ interface NavItem {
   label: string;
   end?: boolean;
   badgeKey?: string;
+  /** Valeur du paramètre `tab` que cette entrée représente, quand plusieurs
+   *  entrées pointent vers la même page. Sans cela les deux entrées seraient
+   *  actives en même temps, le paramètre de recherche étant ignoré. */
+  tabParam?: string;
+  /** Onglet affiché par la page quand le paramètre `tab` est absent. */
+  defaultTab?: string;
 }
 
 export const BADGE_TITLES: Record<string, string> = {
@@ -69,7 +75,8 @@ const adminNavGroups: NavGroup[] = [
     items: [
       { to: "/admin/listings", icon: Megaphone, label: "Annonces", badgeKey: "sitsToStaff" },
       { to: "/admin/sits-management", icon: CalendarCheck, label: "Gardes" },
-      { to: "/admin/small-missions", icon: Handshake, label: "Entraide", badgeKey: "reportsMission" },
+      { to: "/admin/small-missions", icon: Handshake, label: "Entraide", badgeKey: "reportsMission", tabParam: "entraide", defaultTab: "entraide" },
+      { to: "/admin/small-missions?tab=projets", icon: Hammer, label: "Projets", tabParam: "projets", defaultTab: "entraide" },
       // Pilotage produit de l'entraide, jusqu'ici accessible seulement depuis
       // un onglet de la page Emails, donc introuvable.
       { to: "/admin/emails?tab=mutual-aid", icon: Handshake, label: "Pilotage entraide" },
@@ -113,9 +120,24 @@ const adminNavGroups: NavGroup[] = [
 
 const STORAGE_KEY = "admin.sidebar.collapsed";
 
+/** Deux entrées peuvent viser la même page avec un onglet différent : l'état
+ *  actif se lit alors sur le paramètre `tab` et non sur le seul chemin. */
+function resolveNavActive(
+  item: NavItem,
+  location: { pathname: string; search: string },
+  navActive: boolean,
+): boolean {
+  if (!item.tabParam) return navActive;
+  const path = item.to.split("?")[0];
+  if (location.pathname !== path) return false;
+  const current = new URLSearchParams(location.search).get("tab") || item.defaultTab || "";
+  return current === item.tabParam;
+}
+
 export const AdminSidebar = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const badges = useAdminBadges() as unknown as Record<string, number>;
   const [collapsed, setCollapsed] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
@@ -178,7 +200,7 @@ export const AdminSidebar = () => {
                       cn(
                         "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                         collapsed && "justify-center",
-                        isActive
+                        resolveNavActive(item, location, isActive)
                           ? "bg-primary/10 text-primary"
                           : "text-muted-foreground hover:bg-accent hover:text-foreground"
                       )

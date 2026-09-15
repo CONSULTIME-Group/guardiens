@@ -24,7 +24,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Search, Archive, Trash2, Eye, RotateCcw, Mail, AlertTriangle, ArrowUpDown, Download, Send } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import ProximityCampaignCard from "@/components/admin/mass-email/ProximityCampaignCard";
 import { avatarImageUrl } from "@/lib/storageImage";
 
@@ -111,10 +111,15 @@ const AdminSmallMissions = () => {
     totalNotified: 0,
     zeroReach: 0,
   });
-  // Onglet courant. Les projets participatifs ont leurs propres indicateurs,
-  // et la liste est la même, filtrée sur la catégorie côté serveur.
-  const [tab, setTab] = useState<"entraide" | "projets">("entraide");
+  // Onglet courant, lu dans l'URL pour que le menu latéral puisse pointer
+  // directement sur les projets. Les projets participatifs ont leurs propres
+  // indicateurs, et la liste est la même, filtrée sur la catégorie côté serveur.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tab: "entraide" | "projets" = searchParams.get("tab") === "projets" ? "projets" : "entraide";
   const [projetKpis, setProjetKpis] = useState<ProjetKpis | null>(null);
+  // Diffusion différée : le premier projet d'un porteur attend douze heures
+  // avant d'être annoncé aux membres. L'administration peut l'avancer.
+  const [releasingId, setReleasingId] = useState<string | null>(null);
   // Destinataires réellement prévenus, par publication. C'est ce qui explique
   // les zéro réponse : sans notifiés, il n'y a rien à convertir.
   const [notifiedCounts, setNotifiedCounts] = useState<Record<string, number>>({});
@@ -182,10 +187,20 @@ const AdminSmallMissions = () => {
   }, [tab]);
 
   const switchTab = (next: "entraide" | "projets") => {
-    setTab(next);
     setPage(0);
     setFilterCategory(next === "projets" ? "projet" : "all");
+    const params = new URLSearchParams(searchParams);
+    if (next === "projets") params.set("tab", "projets");
+    else params.delete("tab");
+    setSearchParams(params, { replace: true });
   };
+
+  // Arrivée directe par l'URL, par exemple depuis le menu latéral : la
+  // catégorie suit l'onglet demandé.
+  useEffect(() => {
+    setFilterCategory(tab === "projets" ? "projet" : "all");
+    setPage(0);
+  }, [tab]);
 
   const fetchMissions = useCallback(async () => {
     setLoading(true);
@@ -195,6 +210,9 @@ const AdminSmallMissions = () => {
 
     if (filterStatus !== "all") query = query.eq("status", filterStatus as any);
     if (filterCategory !== "all") query = query.eq("category", filterCategory as any);
+    // Sans filtre de catégorie, l'onglet Entraide laissait remonter les projets
+    // participatifs, qui ont leur propre onglet.
+    else if (tab === "entraide") query = query.neq("category", "projet" as any);
     if (filterPeriod !== "all") {
       const days = filterPeriod === "7d" ? 7 : filterPeriod === "30d" ? 30 : 90;
       const since = new Date(Date.now() - days * 86400000).toISOString();
@@ -217,7 +235,7 @@ const AdminSmallMissions = () => {
       setTotalCount(count || 0);
     }
     setLoading(false);
-  }, [filterStatus, filterCategory, filterPeriod, sortBy, sortDir]);
+  }, [filterStatus, filterCategory, filterPeriod, sortBy, sortDir, tab]);
 
   useEffect(() => { fetchMissions(); }, [fetchMissions]);
   useEffect(() => { setPage(0); }, [filterStatus, filterCategory, filterPeriod, search]);
@@ -269,6 +287,31 @@ const AdminSmallMissions = () => {
   }, [missions, search, sortBy, sortDir, responseCounts]);
 
   const paginated = useMemo(() => filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE), [filtered, page]);
+
+  // Projets publiés mais dont l'annonce aux membres attend encore.
+  const pendingProjets = useMemo(
+    () =>
+      missions.filter(
+        (m) =>
+          m.category === "projet" &&
+          m.notify_after &&
+          new Date(m.notify_after).getTime() > Date.now(),
+      ),
+    [missions],
+  );
+
+  const releaseProjet = async (id: string) => {
+    setReleasingId(id);
+    const { error } = await (supabase as any).rpc("admin_release_projet", { _mission_id: id });
+    setReleasingId(null);
+    if (error) {
+      toast.error("Diffusion impossible");
+      return;
+    }
+    await logAdminAction("release_projet", id);
+    toast.success("Projet diffusé");
+    fetchMissions();
+  };
 
   // Une publication annulée, masquée ou terminée n'est plus visible de
   // personne : elle ne doit plus allumer l'alerte, sinon le bandeau reste
@@ -495,6 +538,40 @@ const AdminSmallMissions = () => {
                 </ul>
               )}
             </CardContent></Card>
+
+          {pendingProjets.length > 0 && (
+            <Card>
+              <CardContent className="p-4 space-y-2">
+                <p className="text-xs text-muted-foreground">
+                  Projets en attente de diffusion aux membres. Ils sont déjà visibles sur le site.
+                </p>
+                <ul className="space-y-2">
+                  {pendingProjets.map((p) => (
+                    <li key={p.id} className="flex items-center gap-3 flex-wrap">
+                      <button
+                        type="button"
+                        className="text-sm font-medium text-primary hover:underline text-left"
+                        onClick={() => navigate(`/projets/${p.slug || p.id}`)}
+                      >
+                        {p.title}
+                      </button>
+                      <Badge variant="secondary">
+                        Diffusion le {format(new Date(p.notify_after), "d MMM yyyy à HH:mm", { locale: fr })}
+                      </Badge>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={releasingId === p.id}
+                        onClick={() => releaseProjet(p.id)}
+                      >
+                        <Send className="h-4 w-4 mr-2" /> Valider et diffuser
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
         </div>
       )}
 

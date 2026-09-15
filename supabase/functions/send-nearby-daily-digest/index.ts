@@ -101,7 +101,10 @@ Deno.serve(async (req) => {
         .from('small_missions')
         .select('id, slug, title, description, mission_type, city, category, date_needed, latitude, longitude, postal_code, user_id, status, created_at, photos')
         .gte('created_at', since)
-        .eq('status', 'open'),
+        .eq('status', 'open')
+        // Diffusion différée : le premier projet d'un porteur attend son
+        // échéance avant d'être annoncé aux membres. Il reste visible sur le site.
+        .or(`notify_after.is.null,notify_after.lte.${new Date().toISOString()}`),
     ])
     if (sitsErr) throw new Error('sits query: ' + JSON.stringify(sitsErr))
     if (missionsErr) throw new Error('missions query: ' + JSON.stringify(missionsErr))
