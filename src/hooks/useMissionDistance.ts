@@ -171,6 +171,10 @@ export function useMissionDistance(missions: MissionLike[], options?: MissionDis
     (async () => {
       const results = await Promise.all(
         missions.map(async (m) => {
+          // Coordonnées disponibles : calcul direct, aucun appel réseau.
+          if (useCoords && typeof m.latitude === "number" && typeof m.longitude === "number") {
+            return [m.id, haversineDistance(origin.lat, origin.lng, m.latitude, m.longitude)] as const;
+          }
           const key = (m.postal_code && isValidFrPostal(m.postal_code) ? m.postal_code : m.city) || "";
           if (!key) return [m.id, Number.POSITIVE_INFINITY] as const;
           const g = await geocodeCity(key, "France");
@@ -185,7 +189,8 @@ export function useMissionDistance(missions: MissionLike[], options?: MissionDis
     return () => {
       cancelled = true;
     };
-  }, [origin, missions]);
+  }, [origin, missions, useCoords]);
+
 
   /* Géoloc navigateur → pose l'origine {lat,lng} directement.
      Le CP reste vide en UI (pas de reverse-geocode), mais tri et filtre marchent.
