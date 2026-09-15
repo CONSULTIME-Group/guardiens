@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, Users, Megaphone, CalendarCheck, Star, Flag,
   ShieldCheck, Mail, FileText, LogOut, ArrowLeft, MapPin, HelpCircle,
   Compass, Handshake, Briefcase, CreditCard, MessageSquare, ScrollText, Settings,
   Lightbulb, AlertTriangle, Bug, Stethoscope, Sprout, BarChart3, Send,
-  Sparkles, UserX, HeartHandshake,
+  Sparkles, UserX, HeartHandshake, Hammer,
   ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -18,6 +18,12 @@ interface NavItem {
   label: string;
   end?: boolean;
   badgeKey?: string;
+  /** Valeur du paramètre `tab` que cette entrée représente, quand plusieurs
+   *  entrées pointent vers la même page. Sans cela les deux entrées seraient
+   *  actives en même temps, le paramètre de recherche étant ignoré. */
+  tabParam?: string;
+  /** Onglet affiché par la page quand le paramètre `tab` est absent. */
+  defaultTab?: string;
 }
 
 export const BADGE_TITLES: Record<string, string> = {
