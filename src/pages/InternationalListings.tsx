@@ -13,7 +13,11 @@ import L from "leaflet";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { geocodeCity } from "@/lib/geocode";
-import { MAP_TILE_URL, MAP_TILE_ATTRIBUTION, MAP_TILE_MAX_ZOOM } from "@/lib/mapTiles";
+import {
+  MAP_TILE_WORLD_URL,
+  MAP_TILE_WORLD_ATTRIBUTION,
+  MAP_TILE_WORLD_MAX_ZOOM,
+} from "@/lib/mapTiles";
 import fallbackMarrakech from "@/assets/fallback-marrakech.webp";
 
 const CANONICAL = "https://guardiens.fr/annonces/international";
