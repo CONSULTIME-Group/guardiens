@@ -187,9 +187,10 @@ const SearchMapView = ({
         </div>
       </div>
 
-      {/* Coin bas droite empilé à l'envers : le zoom passe au dessus de
-          l'attribution IGN, qui reste lisible en petite police sur mobile. */}
-      <div className="w-full md:w-1/2 relative flex-1 min-h-0 [&_.leaflet-bottom.leaflet-right]:flex [&_.leaflet-bottom.leaflet-right]:flex-col-reverse [&_.leaflet-bottom.leaflet-right]:items-end [&_.leaflet-control-attribution]:text-[10px]">
+      {/* Attribution IGN en bas à droite, en petite police. Le zoom vit en
+          haut à droite sur grand écran, et disparaît sur mobile où le
+          pincement suffit et où le coin bas est déjà occupé. */}
+      <div className="w-full md:w-1/2 relative flex-1 min-h-0 [&_.leaflet-control-attribution]:text-[10px]">
         <MapContainer
           center={center}
           zoom={userCoords ? 11 : 6}
@@ -198,7 +199,8 @@ const SearchMapView = ({
           attributionControl={true}
         >
           <LeafletUnmountGuard />
-          <ZoomControl position="bottomright" />
+          <MapSizeSync height={mapHeight} />
+          {!isMobile && <ZoomControl position="topright" />}
           <MapCenterController center={center} zoom={userCoords ? 11 : 6} bounds={bounds} />
           <TileLayer
             url={MAP_TILE_URL}
