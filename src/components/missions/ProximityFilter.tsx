@@ -161,7 +161,7 @@ const ProximityFilter = ({
       <Select
         value={String(radius)}
         onValueChange={(v) => onRadiusChange(Number(v) as RadiusKm)}
-        disabled={!active}
+        disabled={!active && !radiusAlwaysEnabled}
       >
         <SelectTrigger
           className="h-9 w-auto min-w-[100px] text-xs"
@@ -170,13 +170,14 @@ const ProximityFilter = ({
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          {RADIUS_OPTIONS.map((r) => (
-            <SelectItem key={r} value={String(r)} className="text-xs">
-              {r} km
+          {radiusChoices.map((r) => (
+            <SelectItem key={r.value} value={String(r.value)} className="text-xs">
+              {r.label}
             </SelectItem>
           ))}
         </SelectContent>
       </Select>
+
 
       {active && onFilterEnabledChange && (
         <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer select-none">
