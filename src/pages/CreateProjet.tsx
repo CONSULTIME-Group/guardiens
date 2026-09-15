@@ -175,29 +175,38 @@ const CreateProjet = () => {
   const lastFieldRef = useRef<ProjetField | null>(null);
   const touchField = (field: ProjetField) => { lastFieldRef.current = field; };
 
+  const userIdRef = useRef<string | null>(user?.id ?? null);
+  userIdRef.current = user?.id ?? null;
+
   useEffect(() => {
     try { trackEvent("projet_composer_opened"); } catch { /* ignore */ }
-    const emitAbandon = () => {
+    const emitAbandon = (viaBeacon: boolean) => {
       if (submittedRef.current || abandonSentRef.current) return;
       abandonSentRef.current = true;
       const titleLen = titleLenRef.current;
       try {
         trackEvent("projet_composer_abandoned", {
+          // Sur pagehide, la page meurt avant la lecture de session et
+          // l'insertion : seul un envoi par balise passe, d'où l'identifiant
+          // transmis en métadonnée.
+          transport: viaBeacon ? "beacon" : undefined,
           metadata: {
             last_step: stepRef.current,
             last_field: lastFieldRef.current,
             has_title: titleLen > 0,
             title_len: titleLen,
+            ...(viaBeacon ? { user_id_hint: userIdRef.current } : {}),
           },
         });
       } catch { /* ignore */ }
     };
     // Fermeture d'onglet ou passage en arrière-plan sur mobile : le démontage
     // n'a pas lieu, pagehide prend le relais. Le garde évite le doublon.
-    window.addEventListener("pagehide", emitAbandon);
+    const onPageHide = () => emitAbandon(true);
+    window.addEventListener("pagehide", onPageHide);
     return () => {
-      window.removeEventListener("pagehide", emitAbandon);
-      emitAbandon();
+      window.removeEventListener("pagehide", onPageHide);
+      emitAbandon(false);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
