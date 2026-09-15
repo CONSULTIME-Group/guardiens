@@ -232,7 +232,7 @@ const AdminSmallMissions = () => {
       setTotalCount(count || 0);
     }
     setLoading(false);
-  }, [filterStatus, filterCategory, filterPeriod, sortBy, sortDir]);
+  }, [filterStatus, filterCategory, filterPeriod, sortBy, sortDir, tab]);
 
   useEffect(() => { fetchMissions(); }, [fetchMissions]);
   useEffect(() => { setPage(0); }, [filterStatus, filterCategory, filterPeriod, search]);
