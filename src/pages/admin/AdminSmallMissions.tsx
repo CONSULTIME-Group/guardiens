@@ -117,6 +117,9 @@ const AdminSmallMissions = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const tab: "entraide" | "projets" = searchParams.get("tab") === "projets" ? "projets" : "entraide";
   const [projetKpis, setProjetKpis] = useState<ProjetKpis | null>(null);
+  // Diffusion différée : le premier projet d'un porteur attend douze heures
+  // avant d'être annoncé aux membres. L'administration peut l'avancer.
+  const [releasingId, setReleasingId] = useState<string | null>(null);
   // Destinataires réellement prévenus, par publication. C'est ce qui explique
   // les zéro réponse : sans notifiés, il n'y a rien à convertir.
   const [notifiedCounts, setNotifiedCounts] = useState<Record<string, number>>({});
