@@ -111,6 +111,30 @@ const SearchMapView = ({
   const [activePin, setActivePin] = useState<string | null>(null);
   const [showAll, setShowAll] = useState(false);
   const popoverRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
+
+  // Hauteur mesurée : la hauteur fixe en calc(100dvh - 180px) ignorait tout
+  // ce qui précède la carte, donc la carte débordait sous l'écran.
+  const shellRef = useRef<HTMLDivElement>(null);
+  const [mapHeight, setMapHeight] = useState(320);
+
+  useLayoutEffect(() => {
+    const measure = () => {
+      const node = shellRef.current;
+      if (!node) return;
+      const top = node.getBoundingClientRect().top;
+      const available = window.innerHeight - top - bottomReserve(isMobile);
+      setMapHeight(Math.max(320, Math.round(available)));
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    window.addEventListener("orientationchange", measure);
+    return () => {
+      window.removeEventListener("resize", measure);
+      window.removeEventListener("orientationchange", measure);
+    };
+  }, [isMobile]);
+
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
