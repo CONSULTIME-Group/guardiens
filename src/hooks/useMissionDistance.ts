@@ -214,7 +214,7 @@ export function useMissionDistance(missions: MissionLike[], options?: MissionDis
         navigator.geolocation.getCurrentPosition(
           (pos) => {
             setPostalState("");
-            writeLS(LS_POSTAL, null);
+            writeLS(keyPostal, null);
             setOrigin({ lat: pos.coords.latitude, lng: pos.coords.longitude });
             setOriginError(false);
             done({ ok: true });
