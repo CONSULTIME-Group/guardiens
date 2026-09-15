@@ -140,21 +140,34 @@ const MutualAidDashboardTab = () => {
     const dormantThreshold = new Date();
     dormantThreshold.setDate(dormantThreshold.getDate() - 30);
 
+    // Les projets participatifs sortent de l'entraide partout : ils ont leur
+    // propre onglet d'administration et leurs propres indicateurs.
+    const projetIdsRes = await supabase
+      .from("small_missions")
+      .select("id")
+      .eq("category", "projet" as any)
+      .limit(20000);
+    const projetIds = (projetIdsRes.data || []).map((r: any) => r.id);
+    const excludeProjets = <T extends { in: (c: string, v: string[]) => T }>(q: T): T =>
+      projetIds.length > 0 ? q.in("mission_id", projetIds) : q;
+
     const [
       { count: newMissions },
-      { count: responses },
-      { count: feedbacks },
-      { count: thanks },
+      responsesRes,
+      feedbacksRes,
+      thanksRes,
       logsRes,
       dormantRes,
       autoRes,
     ] = await Promise.all([
-      supabase.from("small_missions").select("id", { count: "exact", head: true }).gte("created_at", start),
-      supabase.from("small_mission_responses").select("id", { count: "exact", head: true }).gte("created_at", start),
-      supabase.from("mission_feedbacks").select("id", { count: "exact", head: true }).gte("created_at", start),
+      supabase.from("small_missions").select("id", { count: "exact", head: true }).gte("created_at", start).neq("category", "projet" as any),
+      supabase.from("small_mission_responses").select("mission_id").gte("created_at", start).limit(50000),
+      supabase.from("mission_feedbacks").select("mission_id").gte("created_at", start).limit(50000),
       // Cette table n'a pas de colonne `id` : la clé est `response_id`.
       // Le `select("id")` renvoyait un 400 et faisait échouer tout l'écran.
-      supabase.from("small_mission_response_thanks").select("response_id", { count: "exact", head: true }).gte("created_at", start),
+      // Les remerciements ne portent pas de mission_id : ils sont rattachés
+      // via les réponses, donc filtrés côté client plus bas.
+      supabase.from("small_mission_response_thanks").select("response_id").gte("created_at", start).limit(50000),
       supabase
         .from("email_send_log")
         .select("template_name,status,message_id,delivered_at,open_count,click_count,created_at")
@@ -165,6 +178,7 @@ const MutualAidDashboardTab = () => {
         .from("small_missions")
         .select("id,title,city,created_at,user_id,category")
         .eq("status", "open")
+        .neq("category", "projet" as any)
         .lte("created_at", dormantThreshold.toISOString())
         .order("created_at", { ascending: true })
         .limit(200),
@@ -173,10 +187,29 @@ const MutualAidDashboardTab = () => {
         .select("id,title,city,closed_at,close_reason,category")
         .not("closed_at", "is", null)
         .not("close_reason", "is", null)
+        .neq("category", "projet" as any)
         .gte("closed_at", startOfMonth.toISOString())
         .order("closed_at", { ascending: false })
         .limit(200),
     ]);
+
+    const projetIdSet = new Set(projetIds);
+    const responseRows = (responsesRes.data || []).filter((r: any) => !projetIdSet.has(r.mission_id));
+    const feedbackRows = (feedbacksRes.data || []).filter((r: any) => !projetIdSet.has(r.mission_id));
+    // Remerciements : on écarte ceux qui portent sur une réponse de projet.
+    let projetResponseIds = new Set<string>();
+    if (projetIds.length > 0) {
+      const { data: projetResponses } = await supabase
+        .from("small_mission_responses")
+        .select("id")
+        .in("mission_id", projetIds)
+        .limit(50000);
+      projetResponseIds = new Set((projetResponses || []).map((r: any) => r.id));
+    }
+    const thanksRows = (thanksRes.data || []).filter((r: any) => !projetResponseIds.has(r.response_id));
+    const responses = responseRows.length;
+    const feedbacks = feedbackRows.length;
+    const thanks = thanksRows.length;
 
     setKpis({
       newMissions: newMissions ?? 0,
