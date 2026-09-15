@@ -184,10 +184,20 @@ const AdminSmallMissions = () => {
   }, [tab]);
 
   const switchTab = (next: "entraide" | "projets") => {
-    setTab(next);
     setPage(0);
     setFilterCategory(next === "projets" ? "projet" : "all");
+    const params = new URLSearchParams(searchParams);
+    if (next === "projets") params.set("tab", "projets");
+    else params.delete("tab");
+    setSearchParams(params, { replace: true });
   };
+
+  // Arrivée directe par l'URL, par exemple depuis le menu latéral : la
+  // catégorie suit l'onglet demandé.
+  useEffect(() => {
+    setFilterCategory(tab === "projets" ? "projet" : "all");
+    setPage(0);
+  }, [tab]);
 
   const fetchMissions = useCallback(async () => {
     setLoading(true);
@@ -197,6 +207,9 @@ const AdminSmallMissions = () => {
 
     if (filterStatus !== "all") query = query.eq("status", filterStatus as any);
     if (filterCategory !== "all") query = query.eq("category", filterCategory as any);
+    // Sans filtre de catégorie, l'onglet Entraide laissait remonter les projets
+    // participatifs, qui ont leur propre onglet.
+    else if (tab === "entraide") query = query.neq("category", "projet" as any);
     if (filterPeriod !== "all") {
       const days = filterPeriod === "7d" ? 7 : filterPeriod === "30d" ? 30 : 90;
       const since = new Date(Date.now() - days * 86400000).toISOString();
