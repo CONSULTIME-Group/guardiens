@@ -17,6 +17,11 @@ import {
   type GeolocationErrorReason,
 } from "@/hooks/useMissionDistance";
 
+export interface RadiusChoice {
+  value: number;
+  label: string;
+}
+
 interface Props {
   postal: string;
   onPostalChange: (v: string) => void;
@@ -35,7 +40,20 @@ interface Props {
    */
   filterEnabled?: boolean;
   onFilterEnabledChange?: (v: boolean) => void;
+  /**
+   * Rayons proposés. Par défaut ceux de l'entraide. Les projets participatifs
+   * se rejoignent de plus loin et fournissent donc leur propre liste.
+   */
+  radiusChoices?: RadiusChoice[];
+  /** Le sélecteur de rayon reste utilisable même sans origine connue. */
+  radiusAlwaysEnabled?: boolean;
 }
+
+const DEFAULT_RADIUS_CHOICES: RadiusChoice[] = RADIUS_OPTIONS.map((r) => ({
+  value: r,
+  label: `${r} km`,
+}));
+
 
 const GEO_ERROR_MESSAGES: Record<GeolocationErrorReason, string> = {
   denied:
@@ -64,6 +82,8 @@ const ProximityFilter = ({
   originError = false,
   filterEnabled = false,
   onFilterEnabledChange,
+  radiusChoices = DEFAULT_RADIUS_CHOICES,
+  radiusAlwaysEnabled = false,
 }: Props) => {
   const [locating, setLocating] = useState(false);
   const [geoError, setGeoError] = useState<GeolocationErrorReason | null>(null);
@@ -141,7 +161,7 @@ const ProximityFilter = ({
       <Select
         value={String(radius)}
         onValueChange={(v) => onRadiusChange(Number(v) as RadiusKm)}
-        disabled={!active}
+        disabled={!active && !radiusAlwaysEnabled}
       >
         <SelectTrigger
           className="h-9 w-auto min-w-[100px] text-xs"
@@ -150,13 +170,14 @@ const ProximityFilter = ({
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          {RADIUS_OPTIONS.map((r) => (
-            <SelectItem key={r} value={String(r)} className="text-xs">
-              {r} km
+          {radiusChoices.map((r) => (
+            <SelectItem key={r.value} value={String(r.value)} className="text-xs">
+              {r.label}
             </SelectItem>
           ))}
         </SelectContent>
       </Select>
+
 
       {active && onFilterEnabledChange && (
         <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer select-none">

@@ -23,7 +23,11 @@ export interface SearchListingCardProps {
   item: any;
   listIndex?: number;
   tab: "sits" | "missions";
-  radius: number;
+  /**
+   * Rayon de recherche, utilisé uniquement pour signaler une garde hors zone.
+   * Sans valeur, aucune annonce n'est marquée hors zone.
+   */
+  radius?: number;
   hasAccess: boolean;
   testDemoMode: boolean;
   formatDate: (d: string | null) => string;
@@ -35,7 +39,7 @@ const SearchListingCard = ({
   item,
   listIndex,
   tab,
-  radius,
+  radius = Number.POSITIVE_INFINITY,
   hasAccess,
   testDemoMode,
   formatDate,

@@ -14,7 +14,8 @@ const LS_POSTAL = "entraide.postal";
 const LS_RADIUS = "entraide.radius";
 
 export const RADIUS_OPTIONS = [15, 30, 50, 100] as const;
-export type RadiusKm = (typeof RADIUS_OPTIONS)[number];
+/** Un rayon est un nombre de kilomètres, Infinity valant « Toute la France ». */
+export type RadiusKm = number;
 export const DEFAULT_RADIUS: RadiusKm = 30;
 
 export type GeolocationErrorReason = "denied" | "timeout" | "unavailable" | "unsupported";
@@ -24,7 +25,27 @@ export interface MissionLike {
   id: string;
   postal_code: string | null;
   city: string | null;
+  /** Utilisées seulement si l'appelant demande `useCoords`. */
+  latitude?: number | null;
+  longitude?: number | null;
 }
+
+/**
+ * Options d'appel. Sans options, le comportement est celui de l'entraide,
+ * strictement inchangé : mêmes clés de stockage, mêmes rayons, géocodage du
+ * code postal ou de la ville.
+ */
+export interface MissionDistanceOptions {
+  storageKeys?: { postal: string; radius: string };
+  radiusOptions?: readonly number[];
+  defaultRadius?: RadiusKm;
+  /**
+   * Calcule la distance sur latitude et longitude quand elles existent, et
+   * ne géocode qu'en repli. Réservé aux listes qui exposent des coordonnées.
+   */
+  useCoords?: boolean;
+}
+
 
 const isValidFrPostal = (v: string) => /^\d{5}$/.test(v.trim());
 
@@ -46,12 +67,18 @@ const writeLS = (key: string, value: string | null) => {
   }
 };
 
-export function useMissionDistance(missions: MissionLike[]) {
-  const [postal, setPostalState] = useState<string>(() => readLS(LS_POSTAL) || "");
+export function useMissionDistance(missions: MissionLike[], options?: MissionDistanceOptions) {
+  const keyPostal = options?.storageKeys?.postal ?? LS_POSTAL;
+  const keyRadius = options?.storageKeys?.radius ?? LS_RADIUS;
+  const allowedRadius: readonly number[] = options?.radiusOptions ?? RADIUS_OPTIONS;
+  const fallbackRadius: RadiusKm = options?.defaultRadius ?? DEFAULT_RADIUS;
+  const useCoords = options?.useCoords === true;
+
+  const [postal, setPostalState] = useState<string>(() => readLS(keyPostal) || "");
   const [radius, setRadiusState] = useState<RadiusKm>(() => {
-    const raw = readLS(LS_RADIUS);
+    const raw = readLS(keyRadius);
     const n = raw ? Number(raw) : NaN;
-    return (RADIUS_OPTIONS as readonly number[]).includes(n) ? (n as RadiusKm) : DEFAULT_RADIUS;
+    return allowedRadius.includes(n) ? (n as RadiusKm) : fallbackRadius;
   });
   const [origin, setOrigin] = useState<{ lat: number; lng: number } | null>(null);
   const [originError, setOriginError] = useState(false);
@@ -69,13 +96,14 @@ export function useMissionDistance(missions: MissionLike[]) {
   const setPostal = useCallback((v: string) => {
     const clean = v.trim();
     setPostalState(clean);
-    writeLS(LS_POSTAL, clean || null);
-  }, []);
+    writeLS(keyPostal, clean || null);
+  }, [keyPostal]);
 
   const setRadius = useCallback((v: RadiusKm) => {
     setRadiusState(v);
-    writeLS(LS_RADIUS, String(v));
-  }, []);
+    writeLS(keyRadius, String(v));
+  }, [keyRadius]);
+
 
   /* Pré-remplissage depuis le profil connecté (une seule fois) */
   useEffect(() => {
@@ -143,6 +171,10 @@ export function useMissionDistance(missions: MissionLike[]) {
     (async () => {
       const results = await Promise.all(
         missions.map(async (m) => {
+          // Coordonnées disponibles : calcul direct, aucun appel réseau.
+          if (useCoords && typeof m.latitude === "number" && typeof m.longitude === "number") {
+            return [m.id, haversineDistance(origin.lat, origin.lng, m.latitude, m.longitude)] as const;
+          }
           const key = (m.postal_code && isValidFrPostal(m.postal_code) ? m.postal_code : m.city) || "";
           if (!key) return [m.id, Number.POSITIVE_INFINITY] as const;
           const g = await geocodeCity(key, "France");
@@ -157,7 +189,8 @@ export function useMissionDistance(missions: MissionLike[]) {
     return () => {
       cancelled = true;
     };
-  }, [origin, missions]);
+  }, [origin, missions, useCoords]);
+
 
   /* Géoloc navigateur → pose l'origine {lat,lng} directement.
      Le CP reste vide en UI (pas de reverse-geocode), mais tri et filtre marchent.
@@ -181,7 +214,7 @@ export function useMissionDistance(missions: MissionLike[]) {
         navigator.geolocation.getCurrentPosition(
           (pos) => {
             setPostalState("");
-            writeLS(LS_POSTAL, null);
+            writeLS(keyPostal, null);
             setOrigin({ lat: pos.coords.latitude, lng: pos.coords.longitude });
             setOriginError(false);
             done({ ok: true });
@@ -201,7 +234,7 @@ export function useMissionDistance(missions: MissionLike[]) {
         done({ ok: false, reason: "unavailable" });
       }
     });
-  }, []);
+  }, [keyPostal]);
 
   const active = Boolean(origin);
 
