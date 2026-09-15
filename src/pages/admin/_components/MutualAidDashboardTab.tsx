@@ -148,8 +148,7 @@ const MutualAidDashboardTab = () => {
       .eq("category", "projet" as any)
       .limit(20000);
     const projetIds = (projetIdsRes.data || []).map((r: any) => r.id);
-    const excludeProjets = <T extends { in: (c: string, v: string[]) => T }>(q: T): T =>
-      projetIds.length > 0 ? q.in("mission_id", projetIds) : q;
+
 
     const [
       { count: newMissions },
