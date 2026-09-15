@@ -61,6 +61,32 @@ const MapCenterController = ({ center, zoom, bounds }: MapCenterProps) => {
   return null;
 };
 
+/**
+ * Recalcule la taille interne de Leaflet quand la hauteur mesurée du
+ * conteneur change, sinon la carte garde les tuiles de son ancienne taille.
+ */
+const MapSizeSync = ({ height }: { height: number }) => {
+  const map = useMap();
+  useEffect(() => {
+    const id = window.setTimeout(() => map.invalidateSize(), 0);
+    return () => window.clearTimeout(id);
+  }, [height, map]);
+  return null;
+};
+
+/** Réserve basse en pixels, sous la carte, selon la disposition. */
+const bottomReserve = (isMobile: boolean): number => {
+  if (!isMobile) return 16;
+  let navHeight = 0;
+  if (typeof window !== "undefined") {
+    const raw = getComputedStyle(document.documentElement).getPropertyValue("--bottom-nav-h");
+    const parsed = parseFloat(raw);
+    if (Number.isFinite(parsed)) navHeight = parsed;
+  }
+  // 88 px couvrent le dock d'Alma et le bouton de bascule vers la liste.
+  return navHeight + 88;
+};
+
 interface SearchMapViewProps {
   results: any[];
   resultCoords: Map<string, { lat: number; lng: number }>;
