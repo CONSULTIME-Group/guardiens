@@ -10,3 +10,16 @@ export const MAP_TILE_ATTRIBUTION =
   '&copy; <a href="https://www.ign.fr/" target="_blank" rel="noopener">IGN</a> Géoplateforme';
 
 export const MAP_TILE_MAX_ZOOM = 19;
+
+/**
+ * Deux fonds coexistent : le Plan IGN ne couvre que la France, les tuiles y
+ * sont vides au-delà (vérifié sur Marrakech, Lisbonne, Tahiti). Les cartes
+ * affichant des annonces hors France (page internationale) utilisent donc
+ * OpenStreetMap standard ; toutes les autres cartes restent sur le Plan IGN.
+ */
+export const MAP_TILE_WORLD_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
+
+export const MAP_TILE_WORLD_ATTRIBUTION =
+  '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>';
+
+export const MAP_TILE_WORLD_MAX_ZOOM = 19;
