@@ -24,7 +24,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Search, Archive, Trash2, Eye, RotateCcw, Mail, AlertTriangle, ArrowUpDown, Download, Send } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import ProximityCampaignCard from "@/components/admin/mass-email/ProximityCampaignCard";
 import { avatarImageUrl } from "@/lib/storageImage";
 
@@ -111,9 +111,11 @@ const AdminSmallMissions = () => {
     totalNotified: 0,
     zeroReach: 0,
   });
-  // Onglet courant. Les projets participatifs ont leurs propres indicateurs,
-  // et la liste est la même, filtrée sur la catégorie côté serveur.
-  const [tab, setTab] = useState<"entraide" | "projets">("entraide");
+  // Onglet courant, lu dans l'URL pour que le menu latéral puisse pointer
+  // directement sur les projets. Les projets participatifs ont leurs propres
+  // indicateurs, et la liste est la même, filtrée sur la catégorie côté serveur.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tab: "entraide" | "projets" = searchParams.get("tab") === "projets" ? "projets" : "entraide";
   const [projetKpis, setProjetKpis] = useState<ProjetKpis | null>(null);
   // Destinataires réellement prévenus, par publication. C'est ce qui explique
   // les zéro réponse : sans notifiés, il n'y a rien à convertir.
