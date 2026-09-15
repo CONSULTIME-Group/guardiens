@@ -17,6 +17,11 @@ import {
   type GeolocationErrorReason,
 } from "@/hooks/useMissionDistance";
 
+export interface RadiusChoice {
+  value: number;
+  label: string;
+}
+
 interface Props {
   postal: string;
   onPostalChange: (v: string) => void;
@@ -35,7 +40,20 @@ interface Props {
    */
   filterEnabled?: boolean;
   onFilterEnabledChange?: (v: boolean) => void;
+  /**
+   * Rayons proposés. Par défaut ceux de l'entraide. Les projets participatifs
+   * se rejoignent de plus loin et fournissent donc leur propre liste.
+   */
+  radiusChoices?: RadiusChoice[];
+  /** Le sélecteur de rayon reste utilisable même sans origine connue. */
+  radiusAlwaysEnabled?: boolean;
 }
+
+const DEFAULT_RADIUS_CHOICES: RadiusChoice[] = RADIUS_OPTIONS.map((r) => ({
+  value: r,
+  label: `${r} km`,
+}));
+
 
 const GEO_ERROR_MESSAGES: Record<GeolocationErrorReason, string> = {
   denied:
