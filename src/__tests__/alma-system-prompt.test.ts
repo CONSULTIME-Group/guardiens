@@ -184,6 +184,21 @@ describe("assemblage du prompt par registre", () => {
     }
   });
 
+  it("porte les nouveaux blocs de positionnement et d'action", () => {
+    expect(promptSource).toContain("POURQUOI GUARDIENS EXISTE");
+    expect(promptSource).toContain("L'ACTION SUIVANTE, ORDRE DE PRIORITÉ");
+    expect(promptSource).toContain("QUAND LA PERSONNE TOUCHE LE VIDE");
+    expect(promptSource).not.toContain("Jamais d'aveu de petitesse");
+  });
+
+  it("ouvre la carte aux petites missions, aux projets et à leurs publications, sans /tarifs", () => {
+    const carte = buildAlmaSystemPrompt("reassurance");
+    expect(carte).toContain("/projets");
+    expect(carte).toContain("/projets/publier");
+    expect(carte).toContain("/petites-missions/creer");
+    expect(carte).not.toContain("/tarifs");
+  });
+
   it("almaRegisterReminder rend un texte distinct par registre et l'edge function l'appelle", () => {
     const reminders = (["perso", "dossier", "reassurance", "sensible"] as const).map(
       (register) => almaRegisterReminder(register),
