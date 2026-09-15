@@ -5,6 +5,7 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 import { getDeviceContext } from "@/lib/deviceContext";
+import { getSafeLocalStorage } from "@/lib/storageFallback";
 
 export type EventType =
   | "page_view"
