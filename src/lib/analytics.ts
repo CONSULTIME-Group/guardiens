@@ -212,6 +212,13 @@ export type EventType =
   | "mission_composer_abandoned"                // Unmount avec step >= 1 sans submit (last_step, has_title)
   | "mission_composer_published_unchanged_template" // Publie une mission mot pour mot depuis un modèle (template_id)
   | "mission_to_sit_redirect"                     // Mission ressemblant à une garde redirigée vers le formulaire d'annonce
+  // Composeur de projet participatif (/projets/publier) ----------------------
+  | "projet_composer_opened"                    // Ouverture du formulaire de projet
+  | "projet_composer_step1_completed"           // Passage étape 1 vers étape 2
+  | "projet_composer_step2_completed"           // Passage étape 2 vers étape 3
+  | "projet_composer_field_abandoned"           // Blur du titre ou de la description sous le minimum (field, length)
+  | "projet_composer_submitted"                 // Publication réussie (mission_id, nature_projet, nb_transmis, nb_attendus, has_free_text)
+  | "projet_composer_abandoned"                 // Départ sans publication (last_step, last_field, has_title, title_len)
   // Alma Pass 1 (assistant incarné sur 6 moments transactionnels) --------------
   | "alma_message_opener_seen"                  // Bulle brise-glace Messages affichée (audience, has_sit, has_mission)
   | "alma_message_opener_generated"             // Brouillon premier message généré (audience, has_sit, has_mission)
