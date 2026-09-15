@@ -13,7 +13,11 @@ import L from "leaflet";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { geocodeCity } from "@/lib/geocode";
-import { MAP_TILE_URL, MAP_TILE_ATTRIBUTION, MAP_TILE_MAX_ZOOM } from "@/lib/mapTiles";
+import {
+  MAP_TILE_WORLD_URL,
+  MAP_TILE_WORLD_ATTRIBUTION,
+  MAP_TILE_WORLD_MAX_ZOOM,
+} from "@/lib/mapTiles";
 import fallbackMarrakech from "@/assets/fallback-marrakech.webp";
 
 const CANONICAL = "https://guardiens.fr/annonces/international";
@@ -60,7 +64,13 @@ function InternationalMap({ sits }: { sits: IntlSitWithCoords[] }) {
       <MapContainer center={center} zoom={points.length > 1 ? 3 : 11} className="h-full w-full" attributionControl={true} scrollWheelZoom={false}>
         <LeafletUnmountGuard />
         <FitBounds />
-        <TileLayer url={MAP_TILE_URL} attribution={MAP_TILE_ATTRIBUTION} maxZoom={MAP_TILE_MAX_ZOOM} />
+        {/* Annonces hors France : le Plan IGN est vide au-delà du territoire,
+            fond OpenStreetMap standard pour cette page uniquement. */}
+        <TileLayer
+          url={MAP_TILE_WORLD_URL}
+          attribution={MAP_TILE_WORLD_ATTRIBUTION}
+          maxZoom={MAP_TILE_WORLD_MAX_ZOOM}
+        />
         {points.map((s) => (
           <Marker key={s.id} position={[s.coords.lat, s.coords.lng]} icon={pinIcon} />
         ))}
