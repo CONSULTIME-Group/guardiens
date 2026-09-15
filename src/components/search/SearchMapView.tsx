@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { MapContainer, TileLayer, Marker, useMap, ZoomControl } from "react-leaflet";
 import L from "leaflet";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { LeafletUnmountGuard } from "@/components/shared/LeafletUnmountGuard";
 import { MAP_TILE_URL, MAP_TILE_ATTRIBUTION, MAP_TILE_MAX_ZOOM } from "@/lib/mapTiles";
 import { Link } from "react-router-dom";
@@ -60,6 +61,32 @@ const MapCenterController = ({ center, zoom, bounds }: MapCenterProps) => {
   return null;
 };
 
+/**
+ * Recalcule la taille interne de Leaflet quand la hauteur mesurée du
+ * conteneur change, sinon la carte garde les tuiles de son ancienne taille.
+ */
+const MapSizeSync = ({ height }: { height: number }) => {
+  const map = useMap();
+  useEffect(() => {
+    const id = window.setTimeout(() => map.invalidateSize(), 0);
+    return () => window.clearTimeout(id);
+  }, [height, map]);
+  return null;
+};
+
+/** Réserve basse en pixels, sous la carte, selon la disposition. */
+const bottomReserve = (isMobile: boolean): number => {
+  if (!isMobile) return 16;
+  let navHeight = 0;
+  if (typeof window !== "undefined") {
+    const raw = getComputedStyle(document.documentElement).getPropertyValue("--bottom-nav-h");
+    const parsed = parseFloat(raw);
+    if (Number.isFinite(parsed)) navHeight = parsed;
+  }
+  // 88 px couvrent le dock d'Alma et le bouton de bascule vers la liste.
+  return navHeight + 88;
+};
+
 interface SearchMapViewProps {
   results: any[];
   resultCoords: Map<string, { lat: number; lng: number }>;
@@ -84,6 +111,30 @@ const SearchMapView = ({
   const [activePin, setActivePin] = useState<string | null>(null);
   const [showAll, setShowAll] = useState(false);
   const popoverRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
+
+  // Hauteur mesurée : la hauteur fixe en calc(100dvh - 180px) ignorait tout
+  // ce qui précède la carte, donc la carte débordait sous l'écran.
+  const shellRef = useRef<HTMLDivElement>(null);
+  const [mapHeight, setMapHeight] = useState(320);
+
+  useLayoutEffect(() => {
+    const measure = () => {
+      const node = shellRef.current;
+      if (!node) return;
+      const top = node.getBoundingClientRect().top;
+      const available = window.innerHeight - top - bottomReserve(isMobile);
+      setMapHeight(Math.max(320, Math.round(available)));
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    window.addEventListener("orientationchange", measure);
+    return () => {
+      window.removeEventListener("resize", measure);
+      window.removeEventListener("orientationchange", measure);
+    };
+  }, [isMobile]);
+
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -127,7 +178,7 @@ const SearchMapView = ({
   const activeItem = results.find((r) => r.id === activePin);
 
   return (
-    <div className="flex flex-col md:flex-row h-[calc(100dvh-180px)] md:h-[calc(100dvh-200px)]">
+    <div ref={shellRef} className="flex flex-col md:flex-row" style={{ height: mapHeight }}>
       <div className="hidden md:block md:w-1/2 overflow-y-auto p-4 border-r border-border">
         {/* Colonne liste : les cartes gardent leur largeur de grille, sinon la
             photo s'étire sur toute la demi largeur de l'écran. */}
@@ -136,9 +187,10 @@ const SearchMapView = ({
         </div>
       </div>
 
-      {/* Coin bas droite empilé à l'envers : le zoom passe au dessus de
-          l'attribution IGN, qui reste lisible en petite police sur mobile. */}
-      <div className="w-full md:w-1/2 relative flex-1 min-h-0 [&_.leaflet-bottom.leaflet-right]:flex [&_.leaflet-bottom.leaflet-right]:flex-col-reverse [&_.leaflet-bottom.leaflet-right]:items-end [&_.leaflet-control-attribution]:text-[10px]">
+      {/* Attribution IGN en bas à droite, en petite police. Le zoom vit en
+          haut à droite sur grand écran, et disparaît sur mobile où le
+          pincement suffit et où le coin bas est déjà occupé. */}
+      <div className="w-full md:w-1/2 relative flex-1 min-h-0 [&_.leaflet-control-attribution]:text-[10px]">
         <MapContainer
           center={center}
           zoom={userCoords ? 11 : 6}
@@ -147,7 +199,8 @@ const SearchMapView = ({
           attributionControl={true}
         >
           <LeafletUnmountGuard />
-          <ZoomControl position="bottomright" />
+          <MapSizeSync height={mapHeight} />
+          {!isMobile && <ZoomControl position="topright" />}
           <MapCenterController center={center} zoom={userCoords ? 11 : 6} bounds={bounds} />
           <TileLayer
             url={MAP_TILE_URL}
