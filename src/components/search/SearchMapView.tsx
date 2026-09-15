@@ -178,7 +178,7 @@ const SearchMapView = ({
   const activeItem = results.find((r) => r.id === activePin);
 
   return (
-    <div className="flex flex-col md:flex-row h-[calc(100dvh-180px)] md:h-[calc(100dvh-200px)]">
+    <div ref={shellRef} className="flex flex-col md:flex-row" style={{ height: mapHeight }}>
       <div className="hidden md:block md:w-1/2 overflow-y-auto p-4 border-r border-border">
         {/* Colonne liste : les cartes gardent leur largeur de grille, sinon la
             photo s'étire sur toute la demi largeur de l'écran. */}
