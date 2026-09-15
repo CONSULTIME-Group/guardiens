@@ -178,6 +178,14 @@ const CreateProjet = () => {
 
     const contactKinds = detectContactDetails(`${title}\n${description}\n${apprentissage}`);
     if (contactKinds.length > 0) {
+      // Signal non bloquant, en tâche de fond : l'essentiel reste le refus.
+      void supabase
+        .rpc("report_contact_details_attempt" as any, {
+          _context: "projet_create",
+          _kinds: contactKinds,
+          _excerpt: `${title}\n${description}\n${apprentissage}`.slice(0, 500),
+        })
+        .then(undefined, () => { /* ignore */ });
       toast({ title: "Coordonnées détectées", description: contactDetailsMessage(contactKinds), variant: "destructive" });
       setStep(1);
       return;

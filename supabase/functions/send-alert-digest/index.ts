@@ -349,6 +349,9 @@ Deno.serve(async (req) => {
           .select("id, title, description, city, postal_code, latitude, longitude, category, date_needed, photos, exchange_offer, mission_type")
           .eq("status", "open")
           .gte("created_at", sinceISO)
+          // Diffusion différée : le premier projet d'un porteur attend son
+          // échéance avant d'être annoncé aux membres.
+          .or(`notify_after.is.null,notify_after.lte.${new Date().toISOString()}`)
           .order("created_at", { ascending: false })
           .limit(200);
 
