@@ -361,12 +361,39 @@ function withDeviceContext(metadata?: Record<string, any>): Record<string, any> 
 
 
 /**
- * Envoi synchrone survivant à la fermeture de page, via `navigator.sendBeacon`.
- * Le beacon ne peut pas porter d'en-tête Authorization : l'insertion se fait
- * donc en rôle anonyme, ce qui impose `user_id` nul par politique d'accès.
- * C'est à l'appelant de placer un indice d'identité dans les métadonnées
- * (par exemple `user_id_hint`) s'il dispose d'un identifiant utilisateur.
- * Repli sur `fetch(..., { keepalive: true })` si le beacon est indisponible.
+ * Lit la session Supabase de façon purement synchrone, sans réseau ni
+ * promesse : la clé de stockage du client est recalculée depuis l'URL
+ * (`sb-<ref>-auth-token`) et le jeton en est extrait. Renvoie null hors
+ * navigateur, sans session, ou sur donnée corrompue.
+ */
+function readSyncSession(): { accessToken: string; userId: string } | null {
+  try {
+    if (typeof window === "undefined") return null;
+    const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+    if (!url) return null;
+    const ref = new URL(url).hostname.split(".")[0];
+    if (!ref) return null;
+    const raw = getSafeLocalStorage()?.getItem(`sb-${ref}-auth-token`);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    const accessToken = typeof parsed?.access_token === "string" ? parsed.access_token : null;
+    const userId = typeof parsed?.user?.id === "string" ? parsed.user.id : null;
+    if (!accessToken || !userId) return null;
+    return { accessToken, userId };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Envoi synchrone survivant à la fermeture de page.
+ * `navigator.sendBeacon` a été abandonné : mesuré en production, le service
+ * REST répond 503 à ses POST (apikey en paramètre d'URL, Content-Type de
+ * Blob), et toutes les balises étaient perdues. `fetch` avec
+ * `keepalive: true` offre la même survie à la fermeture et renvoie 201.
+ * Si une session est lisible de façon synchrone, l'événement est rattaché
+ * au membre (Authorization + user_id) ; sinon il reste anonyme, avec
+ * Authorization portant la clé publique. La fonction reste synchrone.
  */
 export function trackEventBeacon(eventType: EventType, opts: TrackOptions = {}): boolean {
   try {
@@ -375,23 +402,24 @@ export function trackEventBeacon(eventType: EventType, opts: TrackOptions = {}):
     const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
     if (!url || !key) return false;
 
-    const endpoint = `${url}/rest/v1/analytics_events?apikey=${encodeURIComponent(key)}`;
+    const session = readSyncSession();
+    const endpoint = `${url}/rest/v1/analytics_events`;
     const body = JSON.stringify({
-      user_id: null,
+      user_id: session?.userId ?? null,
       event_type: eventType,
       source: opts.source ?? null,
       metadata: withDeviceContext(opts.metadata),
     });
 
-    if (typeof navigator !== "undefined" && typeof navigator.sendBeacon === "function") {
-      const blob = new Blob([body], { type: "application/json" });
-      if (navigator.sendBeacon(endpoint, blob)) return true;
-    }
-
     void fetch(endpoint, {
       method: "POST",
       keepalive: true,
-      headers: { "Content-Type": "application/json", apikey: key },
+      headers: {
+        "Content-Type": "application/json",
+        apikey: key,
+        Prefer: "return=minimal",
+        Authorization: `Bearer ${session?.accessToken ?? key}`,
+      },
       body,
     }).catch(() => undefined);
     return true;
