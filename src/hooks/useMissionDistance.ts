@@ -67,12 +67,18 @@ const writeLS = (key: string, value: string | null) => {
   }
 };
 
-export function useMissionDistance(missions: MissionLike[]) {
-  const [postal, setPostalState] = useState<string>(() => readLS(LS_POSTAL) || "");
+export function useMissionDistance(missions: MissionLike[], options?: MissionDistanceOptions) {
+  const keyPostal = options?.storageKeys?.postal ?? LS_POSTAL;
+  const keyRadius = options?.storageKeys?.radius ?? LS_RADIUS;
+  const allowedRadius: readonly number[] = options?.radiusOptions ?? RADIUS_OPTIONS;
+  const fallbackRadius: RadiusKm = options?.defaultRadius ?? DEFAULT_RADIUS;
+  const useCoords = options?.useCoords === true;
+
+  const [postal, setPostalState] = useState<string>(() => readLS(keyPostal) || "");
   const [radius, setRadiusState] = useState<RadiusKm>(() => {
-    const raw = readLS(LS_RADIUS);
+    const raw = readLS(keyRadius);
     const n = raw ? Number(raw) : NaN;
-    return (RADIUS_OPTIONS as readonly number[]).includes(n) ? (n as RadiusKm) : DEFAULT_RADIUS;
+    return allowedRadius.includes(n) ? (n as RadiusKm) : fallbackRadius;
   });
   const [origin, setOrigin] = useState<{ lat: number; lng: number } | null>(null);
   const [originError, setOriginError] = useState(false);
@@ -90,13 +96,14 @@ export function useMissionDistance(missions: MissionLike[]) {
   const setPostal = useCallback((v: string) => {
     const clean = v.trim();
     setPostalState(clean);
-    writeLS(LS_POSTAL, clean || null);
-  }, []);
+    writeLS(keyPostal, clean || null);
+  }, [keyPostal]);
 
   const setRadius = useCallback((v: RadiusKm) => {
     setRadiusState(v);
-    writeLS(LS_RADIUS, String(v));
-  }, []);
+    writeLS(keyRadius, String(v));
+  }, [keyRadius]);
+
 
   /* Pré-remplissage depuis le profil connecté (une seule fois) */
   useEffect(() => {
