@@ -75,7 +75,8 @@ const adminNavGroups: NavGroup[] = [
     items: [
       { to: "/admin/listings", icon: Megaphone, label: "Annonces", badgeKey: "sitsToStaff" },
       { to: "/admin/sits-management", icon: CalendarCheck, label: "Gardes" },
-      { to: "/admin/small-missions", icon: Handshake, label: "Entraide", badgeKey: "reportsMission" },
+      { to: "/admin/small-missions", icon: Handshake, label: "Entraide", badgeKey: "reportsMission", tabParam: "entraide", defaultTab: "entraide" },
+      { to: "/admin/small-missions?tab=projets", icon: Hammer, label: "Projets", tabParam: "projets", defaultTab: "entraide" },
       // Pilotage produit de l'entraide, jusqu'ici accessible seulement depuis
       // un onglet de la page Emails, donc introuvable.
       { to: "/admin/emails?tab=mutual-aid", icon: Handshake, label: "Pilotage entraide" },
@@ -118,6 +119,20 @@ const adminNavGroups: NavGroup[] = [
 ];
 
 const STORAGE_KEY = "admin.sidebar.collapsed";
+
+/** Deux entrées peuvent viser la même page avec un onglet différent : l'état
+ *  actif se lit alors sur le paramètre `tab` et non sur le seul chemin. */
+function resolveNavActive(
+  item: NavItem,
+  location: { pathname: string; search: string },
+  navActive: boolean,
+): boolean {
+  if (!item.tabParam) return navActive;
+  const path = item.to.split("?")[0];
+  if (location.pathname !== path) return false;
+  const current = new URLSearchParams(location.search).get("tab") || item.defaultTab || "";
+  return current === item.tabParam;
+}
 
 export const AdminSidebar = () => {
   const { logout } = useAuth();
