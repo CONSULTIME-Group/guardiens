@@ -2463,10 +2463,6 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
    {/* FAB masqué en état vide : rien à afficher sur la carte, il ne ferait que
         chevaucher les CTA de l'empty state. */}
    {isMobile && tab === "sits" && availableSitsCount > 0 && (
-    {/* En vue carte, le dock d'Alma occupe le bas de l'écran : le bouton monte
-        au dessus de lui plutôt que de masquer le dock, car le dock n'est pas
-        piloté par ChromeVisibility et le masquer toucherait un comportement
-        partagé avec les autres pages. */}
     <div className={`fixed left-1/2 -translate-x-1/2 z-[1200] sm:hidden ${viewMode === "map" ? "bottom-[calc(var(--bottom-nav-h,0px)+9.5rem+env(safe-area-inset-bottom))]" : "bottom-[calc(var(--bottom-nav-h,0px)+14px+env(safe-area-inset-bottom))]"}`}>
       <button
         onClick={() => setViewMode(viewMode === "list" ? "map" : "list")}
