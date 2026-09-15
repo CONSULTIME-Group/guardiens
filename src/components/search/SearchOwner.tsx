@@ -615,10 +615,17 @@ const SearchOwner = () => {
       rawSitters.map((s: any) => s.user_id).filter(Boolean),
     )) as string[];
     if (sitterUserIds.length > 0) {
-      const { data: sitterProfs } = await supabase
+      const { data: sitterProfs, error: profilesError } = await supabase
         .from("public_profiles")
-        .select("id, first_name, avatar_url, city, postal_code, profile_completion, identity_verified, completed_sits_count, bio, pro_status, pro_specialty, last_seen_at, latitude_approx, longitude_approx")
+        .select("id, first_name, avatar_url, city, postal_code, profile_completion, identity_verified, completed_sits_count, bio, last_seen_at, latitude_approx, longitude_approx")
         .in("id", sitterUserIds);
+
+      if (profilesError) {
+        console.error("[SearchOwner] Erreur hydratation profils:", profilesError);
+        setSearchError("Impossible de charger les gardiens.");
+        setLoading(false);
+        return;
+      }
 
       const sitterProfMap = new Map<string, any>();
       (sitterProfs ?? []).forEach((p: any) => sitterProfMap.set(p.id, p));
