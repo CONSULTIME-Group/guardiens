@@ -3,7 +3,15 @@ import { MapContainer, TileLayer, Marker, useMap, ZoomControl } from "react-leaf
 import L from "leaflet";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { LeafletUnmountGuard } from "@/components/shared/LeafletUnmountGuard";
-import { MAP_TILE_URL, MAP_TILE_ATTRIBUTION, MAP_TILE_MAX_ZOOM } from "@/lib/mapTiles";
+import {
+  MAP_TILE_URL,
+  MAP_TILE_ATTRIBUTION,
+  MAP_TILE_MAX_ZOOM,
+  MAP_TILE_WORLD_URL,
+  MAP_TILE_WORLD_ATTRIBUTION,
+  MAP_TILE_WORLD_MAX_ZOOM,
+} from "@/lib/mapTiles";
+
 import { Link } from "react-router-dom";
 import { MapPin, PawPrint, Cat, Bird, X } from "lucide-react";
 import "leaflet/dist/leaflet.css";
@@ -175,7 +183,14 @@ const SearchMapView = ({
     ] as L.LatLngBoundsExpression;
   }
 
+  // Le Plan IGN est blanc hors métropole : dès qu'un marqueur sort de la
+  // boîte métropolitaine, on bascule sur le fond monde.
+  const useWorldTiles = visibleCoords.some(
+    (c) => c.lat < 41 || c.lat > 51.5 || c.lng < -5.5 || c.lng > 10,
+  );
+
   const activeItem = results.find((r) => r.id === activePin);
+
 
   return (
     <div ref={shellRef} className="flex flex-col md:flex-row" style={{ height: mapHeight }}>
@@ -203,10 +218,12 @@ const SearchMapView = ({
           {!isMobile && <ZoomControl position="topright" />}
           <MapCenterController center={center} zoom={userCoords ? 11 : 6} bounds={bounds} />
           <TileLayer
-            url={MAP_TILE_URL}
-            attribution={MAP_TILE_ATTRIBUTION}
-            maxZoom={MAP_TILE_MAX_ZOOM}
+            key={useWorldTiles ? "world" : "ign"}
+            url={useWorldTiles ? MAP_TILE_WORLD_URL : MAP_TILE_URL}
+            attribution={useWorldTiles ? MAP_TILE_WORLD_ATTRIBUTION : MAP_TILE_ATTRIBUTION}
+            maxZoom={useWorldTiles ? MAP_TILE_WORLD_MAX_ZOOM : MAP_TILE_MAX_ZOOM}
           />
+
           {results
             .filter((item) => showAll || (!item?.is_demo && !item?.isAssigned && !item?.isCompleted && !item?.isPast))
             .map((item) => {

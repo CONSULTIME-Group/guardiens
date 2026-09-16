@@ -1,4 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { cityQueryVariants, countryQueryVariants } from "../_shared/geocode-variants.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -131,60 +133,105 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Call Nominatim (OpenStreetMap) — free, no API key needed.
-    // France reste bornée à FR, mais les annonces internationales doivent sortir
-    // du filtre FR, sinon "Marrakech" tombe sur un quartier parisien ou rien.
-    const params = new URLSearchParams({
-      format: "json",
-      limit: "1",
-      country: isFrPostal ? "France" : resolvedCountry.label,
-    });
-    if (isFrPostal) {
-      params.set("postalcode", cityName.trim());
-      params.set("countrycodes", "fr");
-    } else {
-      params.set("city", cityName.trim());
-      if (resolvedCountry.code) params.set("countrycodes", resolvedCountry.code);
+    // Recherche tolérante : la ville exacte d'abord, puis les variantes
+    // obtenues en retirant les mots de tête ("Hauteur de Taravao" puis
+    // "Taravao"), et pour l'outre-mer le rattachement à la France.
+    const cityCandidates = isFrPostal ? [cityName.trim()] : cityQueryVariants(cityName);
+    const countryCandidates = isFrPostal
+      ? [inferredCountry]
+      : countryQueryVariants(inferredCountry);
+
+    type Attempt = { city: string; country: ReturnType<typeof normalizeCountry> };
+    const attempts: Attempt[] = [];
+    for (const c of cityCandidates) {
+      for (const co of countryCandidates) {
+        const resolved = co ? normalizeCountry(co) : resolvedCountry;
+        if (attempts.some((a) => a.city === c && a.country.label === resolved.label)) continue;
+        attempts.push({ city: c, country: resolved });
+      }
     }
-    const url = `https://nominatim.openstreetmap.org/search?${params}`;
-    // Timeout explicite : sans borne, un pic de requêtes simultanées sur
-    // Nominatim (rate limité) fait traîner les workers jusqu'à saturation et
-    // la plateforme répond alors 502 avant que le handler ne rende sa réponse.
-    const res = await fetch(url, {
-      headers: { "User-Agent": "Guardiens-App/1.0" },
-      signal: AbortSignal.timeout(6000),
-    });
 
+    const keyFor = (attempt: Attempt) =>
+      isFrPostal ? `cp:${attempt.city}|fr` : `city:${normalize(attempt.city)}|${normalize(attempt.country.label)}`;
 
-    if (!res.ok) {
+    const cacheAndRespond = async (lat: number, lng: number, attempt: Attempt) => {
+      // Mise en cache sous la clé d'origine, pour ne pas refaire le détour.
+      await supabase.from("geocode_cache").upsert(
+        { city_name: `${cityName.trim()}, ${resolvedCountry.label}`, normalized_name: normalized, lat, lng },
+        { onConflict: "normalized_name" },
+      );
+      return new Response(
+        JSON.stringify({ lat, lng, city: attempt.city, country: attempt.country.label }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    };
+
+    // 1) Le cache porte peut-être déjà une des variantes.
+    const altKeys = attempts.map(keyFor).filter((k) => k !== normalized);
+    if (altKeys.length > 0) {
+      const { data: altRows } = await supabase
+        .from("geocode_cache")
+        .select("normalized_name, lat, lng")
+        .in("normalized_name", altKeys);
+      if (altRows && altRows.length > 0) {
+        for (const attempt of attempts) {
+          const row = altRows.find((r: any) => r.normalized_name === keyFor(attempt));
+          if (row && row.lat != null && row.lng != null) {
+            return await cacheAndRespond(Number(row.lat), Number(row.lng), attempt);
+          }
+        }
+      }
+    }
+
+    // 2) Nominatim, variante par variante, au plus quatre requêtes.
+    let unavailable = false;
+    for (const attempt of attempts.slice(0, 4)) {
+      const params = new URLSearchParams({
+        format: "json",
+        limit: "1",
+        country: isFrPostal ? "France" : attempt.country.label,
+      });
+      if (isFrPostal) {
+        params.set("postalcode", attempt.city);
+        params.set("countrycodes", "fr");
+      } else {
+        params.set("city", attempt.city);
+        if (attempt.country.code) params.set("countrycodes", attempt.country.code);
+      }
+      const url = `https://nominatim.openstreetmap.org/search?${params}`;
+      // Timeout explicite : sans borne, un pic de requêtes simultanées sur
+      // Nominatim (rate limité) fait traîner les workers jusqu'à saturation et
+      // la plateforme répond alors 502 avant que le handler ne rende sa réponse.
+      const res = await fetch(url, {
+        headers: { "User-Agent": "Guardiens-App/1.0" },
+        signal: AbortSignal.timeout(6000),
+      });
+
+      if (!res.ok) {
+        console.warn(`Nominatim returned ${res.status} for "${attempt.city}, ${attempt.country.label}"`);
+        unavailable = true;
+        break;
+      }
+
+      const results = await res.json();
+      if (results && results.length > 0) {
+        return await cacheAndRespond(parseFloat(results[0].lat), parseFloat(results[0].lon), attempt);
+      }
+    }
+
+    if (unavailable) {
       // Rate limit ou indisponibilité, on dégrade proprement, pas de 500.
-      console.warn(`Nominatim returned ${res.status} for "${cityName}, ${resolvedCountry.label}"`);
       return new Response(
         JSON.stringify({ error: "GEOCODING_UNAVAILABLE", fallback: true, lat: null, lng: null }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
-    const results = await res.json();
-    if (!results || results.length === 0) {
-      return new Response(JSON.stringify({ error: "City not found", lat: null, lng: null }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const lat = parseFloat(results[0].lat);
-    const lng = parseFloat(results[0].lon);
-
-    // Cache the result (ignore errors — cache is optional)
-    await supabase.from("geocode_cache").upsert(
-      { city_name: `${cityName.trim()}, ${resolvedCountry.label}`, normalized_name: normalized, lat, lng },
-      { onConflict: "normalized_name" }
-    );
-
-    return new Response(JSON.stringify({ lat, lng, city: cityName.trim(), country: resolvedCountry.label }), {
+    return new Response(JSON.stringify({ error: "City not found", lat: null, lng: null }), {
+      status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
+
   } catch (error) {
     console.error("Geocode error:", error);
     // Toujours 200 + fallback, le front gère l'absence de coords.
