@@ -3,7 +3,15 @@ import { MapContainer, TileLayer, Marker, useMap, ZoomControl } from "react-leaf
 import L from "leaflet";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { LeafletUnmountGuard } from "@/components/shared/LeafletUnmountGuard";
-import { MAP_TILE_URL, MAP_TILE_ATTRIBUTION, MAP_TILE_MAX_ZOOM } from "@/lib/mapTiles";
+import {
+  MAP_TILE_URL,
+  MAP_TILE_ATTRIBUTION,
+  MAP_TILE_MAX_ZOOM,
+  MAP_TILE_WORLD_URL,
+  MAP_TILE_WORLD_ATTRIBUTION,
+  MAP_TILE_WORLD_MAX_ZOOM,
+} from "@/lib/mapTiles";
+
 import { Link } from "react-router-dom";
 import { MapPin, PawPrint, Cat, Bird, X } from "lucide-react";
 import "leaflet/dist/leaflet.css";
