@@ -19,7 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import PageMeta from "@/components/PageMeta";
 import { useAccessLevel, MIN_COMPLETION_TO_APPLY } from "@/hooks/useAccessLevel";
-import AccessGateBanner from "@/components/access/AccessGateBanner";
+import { canPublishSmallMission, shouldNudgeProfileCompletion } from "@/lib/missionPublishAccess";
 import MissionPhotoUpload from "@/components/missions/MissionPhotoUpload";
 import { geocodeCity } from "@/lib/geocode";
 import { trackFirstAction, trackEvent } from "@/lib/analytics";
@@ -523,7 +523,7 @@ const CreateSmallMission = () => {
         description={tp("meta_description")}
       />
 
-      {(accessLoading || canApplyMissions) && (
+      {(accessLoading || canPublish) && (
         <StepperBar current={step} total={3} />
       )}
 
@@ -547,11 +547,18 @@ const CreateSmallMission = () => {
         </button>
 
 
-        {!accessLoading && !canApplyMissions && (
-          <AccessGateBanner level={accessLevel} profileCompletion={profileCompletion} context="mission" />
+        {showCompletionNudge && (
+          <div className="rounded-xl border border-border bg-muted/40 p-4 text-sm text-muted-foreground">
+            <p>
+              Un profil complet reçoit plus de réponses : ajoutez une photo et quelques mots sur vous.
+            </p>
+            <Link to="/profile" className="mt-1 inline-block font-medium text-primary hover:underline">
+              Compléter mon profil
+            </Link>
+          </div>
         )}
 
-        {(accessLoading || canApplyMissions) && (
+        {(accessLoading || canPublish) && (
           <form onSubmit={handleSubmit} className="space-y-5">
 
             {/* ── ÉTAPE 1 : une seule question ── */}
@@ -1031,7 +1038,7 @@ const CreateSmallMission = () => {
       </main>
 
       {/* CTA sticky au-dessus de la BottomNav */}
-      {(accessLoading || canApplyMissions) && (
+      {(accessLoading || canPublish) && (
         <div ref={actionBarRef} className="fixed bottom-[var(--bottom-nav-h,0px)] inset-x-0 bg-card/95 backdrop-blur border-t border-border px-4 py-3 z-40 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
           <div className="max-w-2xl mx-auto space-y-2">
             {step === 3 && identityRecommended && <IdentityRecommendedHint compact />}
