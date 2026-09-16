@@ -84,10 +84,14 @@ const CreateSmallMission = () => {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
   const tp = (k: string, opts?: any) => t(`create_mission_page.${k}`, opts) as string;
-  const { level: accessLevel, profileCompletion, identityRecommended, loading: accessLoading } = useAccessLevel();
-  // Chantier 1 EntraideHub Pass 1 : plus de gate 40 %, tout profil connecté peut publier.
-  // L'ID vérification devient un soft-nudge (badge auteur uniquement) sur SitDetail.
-  const canApplyMissions = true;
+  const { profileCompletion, identityRecommended, loading: accessLoading } = useAccessLevel();
+  // Décision produit : publier une demande ou une offre ne dépend d'aucun taux
+  // de complétion. Seul prérequis, être connecté. Le seuil de 40 % reste exigé
+  // pour répondre au coup de main de quelqu'un d'autre (SmallMissionDetail).
+  const canPublish = canPublishSmallMission(!!user);
+  const showCompletionNudge =
+    !accessLoading && canPublish && shouldNudgeProfileCompletion(profileCompletion);
+
   
 
   // Les huit catégories viennent de la source unique : un seul libellé partout.
