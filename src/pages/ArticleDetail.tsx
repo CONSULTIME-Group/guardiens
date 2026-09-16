@@ -73,6 +73,7 @@ const CATEGORY_LABELS: Record<string, string> = {
  guide_pratique: "Guide pratique",
   saisonnier: "Saisonnier",
   guide_central: "Guide central",
+  thematique: "Thématique",
 };
 
 /** Generate alt text from article data when hero_image_alt is empty */
