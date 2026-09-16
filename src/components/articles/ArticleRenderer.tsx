@@ -135,11 +135,58 @@ const CTA_PAR_SLUG: Record<string, CtaCopy> = {
     endText: "Publiez-le en quelques minutes : cochez ce que vous transmettez, ce que vous proposez, et les participants vous écrivent.",
     endPrimary: { label: "Publier mon projet", href: "/projets/publier", role: "projet" },
   },
+
+  "apprendre-menuiserie-permaculture-ecoconstruction-gratuitement": {
+    midText: "Apprendre sur un vrai chantier, près de chez vous ?",
+    midPrimary: { label: "Recevoir les projets près de chez moi", href: "/inscription?redirect=/projets", role: "projet" },
+    midSecondary: { label: "Voir les coups de main", href: "/petites-missions", role: "projet" },
+    endHeading: "Le prochain chantier est peut-être à côté de chez vous",
+    endText: "Créez votre compte, indiquez votre ville, et recevez chaque matin les projets et coups de main publiés près de chez vous.",
+    endPrimary: { label: "Créer mon compte", href: "/inscription?redirect=/projets", role: "projet" },
+    endSecondary: { label: "Publier mon projet", href: "/projets/publier", role: "projet" },
+  },
 };
 
-function ctaCopyPour(slug?: string): CtaCopy {
-  return (slug && CTA_PAR_SLUG[slug]) || CTA_DEFAUT;
+/**
+ * Routes réservées aux membres : un visiteur anonyme qui clique tombe sur un
+ * mur. On passe par la page d'inscription, qui renvoie vers la cible après
+ * création du compte. Un membre déjà connecté est envoyé directement vers la
+ * cible par PublicOnlyRoute, qui lit le paramètre redirect.
+ */
+const ROUTES_MEMBRES = ["/projets/publier", "/petites-missions/creer", "/sits/create", "/dashboard"];
+
+/** Réécrit une destination réservée aux membres en passage par l'inscription. */
+export function rewriteMemberHref(href: string): string {
+  if (!href.startsWith("/")) return href;
+  const path = href.split(/[?#]/)[0];
+  if (!ROUTES_MEMBRES.includes(path)) return href;
+  return `/inscription?redirect=${encodeURIComponent(href)}`;
 }
+
+/** Applique la réécriture aux liens internes du contenu markdown rendu. */
+export function rewriteMemberLinksInHtml(html: string): string {
+  return html.replace(/href="(\/[^"]*)"/g, (full, href: string) => {
+    const rewritten = rewriteMemberHref(href);
+    return rewritten === href ? full : `href="${rewritten}"`;
+  });
+}
+
+function withRewrittenHrefs(copy: CtaCopy): CtaCopy {
+  const link = <T extends { label: string; href: string; role: string } | undefined>(btn: T): T =>
+    (btn ? { ...btn, href: rewriteMemberHref(btn.href) } : btn) as T;
+  return {
+    ...copy,
+    midPrimary: link(copy.midPrimary),
+    midSecondary: link(copy.midSecondary),
+    endPrimary: link(copy.endPrimary),
+    endSecondary: link(copy.endSecondary),
+  };
+}
+
+function ctaCopyPour(slug?: string): CtaCopy {
+  return withRewrittenHrefs((slug && CTA_PAR_SLUG[slug]) || CTA_DEFAUT);
+}
+
 
 /** Inject mid-article CTA after the 2nd <h2> */
 function injectCTA(html: string, slug?: string): string {
