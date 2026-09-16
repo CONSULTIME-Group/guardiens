@@ -175,7 +175,14 @@ const SearchMapView = ({
     ] as L.LatLngBoundsExpression;
   }
 
+  // Le Plan IGN est blanc hors métropole : dès qu'un marqueur sort de la
+  // boîte métropolitaine, on bascule sur le fond monde.
+  const useWorldTiles = visibleCoords.some(
+    (c) => c.lat < 41 || c.lat > 51.5 || c.lng < -5.5 || c.lng > 10,
+  );
+
   const activeItem = results.find((r) => r.id === activePin);
+
 
   return (
     <div ref={shellRef} className="flex flex-col md:flex-row" style={{ height: mapHeight }}>
