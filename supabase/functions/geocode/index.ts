@@ -1,4 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { cityQueryVariants, countryQueryVariants } from "../_shared/geocode-variants.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
