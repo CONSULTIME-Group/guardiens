@@ -22,6 +22,7 @@ import { AuthIllustrationPanel } from "@/components/auth/AuthIllustrationPanel";
 import { PasswordStrengthMeter } from "@/components/auth/PasswordStrengthMeter";
 import { lovable } from "@/integrations/lovable";
 import { startOAuthFlow, logOAuthStage, endOAuthFlow } from "@/lib/oauthLogger";
+import { detectSignupIntent, roleForSignupIntent, signupIntentBannerKey } from "@/lib/signupIntent";
 import {
  Dialog,
  DialogContent,
@@ -109,19 +110,16 @@ const Register = () => {
  const presetEmail = (searchParams.get("email") || "").trim().toLowerCase();
  const redirectTarget = sanitizeRedirect(searchParams.get("redirect"));
 
- // Intention déduite du redirect : /gardiens/… => visiteur = propriétaire,
- // /annonces/… => visiteur = gardien. Un ?role= ou ?as=pro explicite gagne
- // toujours. On n'écrase jamais un choix utilisateur.
- const detectedIntent: "owner" | "sitter" | null = (() => {
-  if (presetRoleRaw) return null;
-  if (!redirectTarget) return null;
-  if (redirectTarget.startsWith("/gardiens/")) return "owner";
-  if (redirectTarget.startsWith("/annonces/")) return "sitter";
-  return null;
- })();
+  // Intention déduite du redirect : /gardiens/… => visiteur = propriétaire,
+  // /annonces/… => visiteur = gardien, /projets ou /petites-missions =>
+  // entraide (rôle polyvalent). Un ?role= ou ?as=pro explicite gagne
+  // toujours. On n'écrase jamais un choix utilisateur.
+  const detectedIntent = detectSignupIntent(redirectTarget, presetRoleRaw);
+  const intentBannerKey = signupIntentBannerKey(detectedIntent, redirectTarget);
 
- // Rôle initial : preset explicite > intention déduite > null.
- const initialRole: Role | null = presetRole ?? detectedIntent;
+  // Rôle initial : preset explicite > intention déduite > null.
+  const initialRole: Role | null = presetRole ?? (roleForSignupIntent(detectedIntent) as Role | null);
+
  const initialStep: 1 | 2 = initialRole ? 2 : 1;
 
  const [step, setStep] = useState<1 | 2 | "confirmation">(initialStep);
@@ -660,9 +658,9 @@ const Register = () => {
 
   {step === 2 && (
   <form onSubmit={handleSubmit} className="space-y-5 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
-  {detectedIntent && (
+  {intentBannerKey && (
    <div className="rounded-lg border border-terra-border/60 bg-terra-soft/60 px-4 py-3 text-sm text-foreground">
-    {t(`register_page.intent_banner.${detectedIntent}`)}
+    {t(`register_page.intent_banner.${intentBannerKey}`)}
    </div>
   )}
   <div className="text-center mb-4">
