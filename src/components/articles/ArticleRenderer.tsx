@@ -118,7 +118,25 @@ const CTA_PAR_SLUG: Record<string, CtaCopy> = {
     endPrimary: { label: "Publier mon projet", href: "/projets/publier", role: "projet" },
     endSecondary: { label: "Aider une association", href: "/associations", role: "projet" },
   },
+  "technologie-recreer-lien-pres-de-chez-soi": {
+    midText: "Un coup de main à demander, ou du temps à donner ?",
+    midPrimary: { label: "Voir l'entraide près de chez moi", href: "/petites-missions", role: "projet" },
+    midSecondary: { label: "Voir les projets", href: "/projets", role: "projet" },
+    endHeading: "Et si vous commenciez par un petit service ?",
+    endText: "Demandez un coup de main ou proposez le vôtre, à quelques kilomètres de chez vous.",
+    endPrimary: { label: "Voir l'entraide près de chez moi", href: "/petites-missions", role: "projet" },
+    endSecondary: { label: "Voir les projets", href: "/projets", role: "projet" },
+  },
 
+  "chantier-participatif-low-tech-participer-lancer-projet": {
+    midText: "Un projet à mener chez vous, ou envie d'apprendre en participant ?",
+    midPrimary: { label: "Publier mon projet", href: "/projets/publier", role: "projet" },
+    midSecondary: { label: "Voir les projets", href: "/projets", role: "projet" },
+    endHeading: "Votre projet mérite du monde",
+    endText: "Publiez-le en quelques minutes : cochez ce que vous transmettez, ce que vous proposez, et les participants vous écrivent.",
+    endPrimary: { label: "Publier mon projet", href: "/projets/publier", role: "projet" },
+    endSecondary: { label: "Voir les projets", href: "/projets", role: "projet" },
+  },
 };
 
 function ctaCopyPour(slug?: string): CtaCopy {
