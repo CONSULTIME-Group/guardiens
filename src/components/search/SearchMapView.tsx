@@ -203,10 +203,12 @@ const SearchMapView = ({
           {!isMobile && <ZoomControl position="topright" />}
           <MapCenterController center={center} zoom={userCoords ? 11 : 6} bounds={bounds} />
           <TileLayer
-            url={MAP_TILE_URL}
-            attribution={MAP_TILE_ATTRIBUTION}
-            maxZoom={MAP_TILE_MAX_ZOOM}
+            key={useWorldTiles ? "world" : "ign"}
+            url={useWorldTiles ? MAP_TILE_WORLD_URL : MAP_TILE_URL}
+            attribution={useWorldTiles ? MAP_TILE_WORLD_ATTRIBUTION : MAP_TILE_ATTRIBUTION}
+            maxZoom={useWorldTiles ? MAP_TILE_WORLD_MAX_ZOOM : MAP_TILE_MAX_ZOOM}
           />
+
           {results
             .filter((item) => showAll || (!item?.is_demo && !item?.isAssigned && !item?.isCompleted && !item?.isPast))
             .map((item) => {
