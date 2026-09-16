@@ -189,13 +189,17 @@ export const rewriteDepartmentMention = (
   const forms = lookup(name);
   if (!forms || !name) return text;
   const loc = forms.in;
+  // Pas de lookbehind : Safari iOS avant 16.4 refuse d'analyser « (?<= » et
+  // « (?<! », ce qui casse le module entier au chargement. La limite de gauche
+  // est donc capturée (début de chaîne ou caractère non alphabétique) puis
+  // réinjectée telle quelle dans le remplacement.
   const re = new RegExp(
-    `(?<![${BOUNDARY_CHARS}])(?:${MENTION_PREFIX})?(${escapeRegExp(name.trim())})(?![${BOUNDARY_CHARS}])`,
+    `(^|[^${BOUNDARY_CHARS}])(?:${MENTION_PREFIX})?(${escapeRegExp(name.trim())})(?![${BOUNDARY_CHARS}])`,
     "g"
   );
-  return text.replace(re, (match, prefix: string | undefined) => {
-    if (!prefix) return loc;
+  return text.replace(re, (match, left: string, prefix: string | undefined) => {
+    if (!prefix) return left + loc;
     const key = prefix.toLowerCase().replace(/’/g, "'").replace(/\s+/g, " ").trim();
-    return KEEP_PREFIXES.has(key) ? match : loc;
+    return KEEP_PREFIXES.has(key) ? match : left + loc;
   });
 };
