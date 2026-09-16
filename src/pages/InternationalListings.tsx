@@ -45,23 +45,31 @@ const pinIcon = L.divIcon({
 
 function InternationalMap({ sits }: { sits: IntlSitWithCoords[] }) {
   const points = sits.filter((s): s is IntlSitWithCoords & { coords: { lat: number; lng: number } } => !!s.coords);
-  const center: [number, number] = points[0] ? [points[0].coords.lat, points[0].coords.lng] : [31.6, -8];
+  // Sans point géocodé, vue monde plutôt qu'un centre codé en dur sur une
+  // ville, qui donnait une carte de Marrakech sans aucune annonce.
+  const hasPoints = points.length > 0;
+  const center: [number, number] = hasPoints ? [points[0].coords.lat, points[0].coords.lng] : [20, 0];
+  const initialZoom = hasPoints ? 9 : 2;
 
   const FitBounds = () => {
     const map = useMap();
     useEffect(() => {
-      if (points.length === 1) {
-        map.setView([points[0].coords.lat, points[0].coords.lng], 11, { animate: false });
-      } else if (points.length > 1) {
-        map.fitBounds(points.map((p) => [p.coords.lat, p.coords.lng]) as [number, number][], { padding: [34, 34], maxZoom: 10 });
+      if (!hasPoints) {
+        map.setView([20, 0], 2, { animate: false });
+        return;
       }
+      map.fitBounds(points.map((p) => [p.coords.lat, p.coords.lng]) as [number, number][], {
+        padding: [34, 34],
+        maxZoom: 9,
+      });
     }, [map]);
     return null;
   };
 
   return (
     <div className="rounded-2xl overflow-hidden border border-border bg-card shadow-sm h-[320px] md:h-[420px]">
-      <MapContainer center={center} zoom={points.length > 1 ? 3 : 11} className="h-full w-full" attributionControl={true} scrollWheelZoom={false}>
+      <MapContainer center={center} zoom={initialZoom} className="h-full w-full" attributionControl={true} scrollWheelZoom={false}>
+
         <LeafletUnmountGuard />
         <FitBounds />
         {/* Annonces hors France : le Plan IGN est vide au-delà du territoire,
