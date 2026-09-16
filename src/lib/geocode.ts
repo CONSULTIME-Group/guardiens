@@ -1,4 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
+import { cityQueryVariants, countryQueryVariants } from "@/lib/geocodeVariants";
+
 
 interface GeoResult {
   lat: number;
