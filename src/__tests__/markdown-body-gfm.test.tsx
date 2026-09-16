@@ -15,4 +15,13 @@ describe("MarkdownBody", () => {
     expect(screen.getByRole("columnheader", { name: /Ville/ })).toBeInTheDocument();
     expect(screen.getByRole("cell", { name: /Tahiti/ })).toBeInTheDocument();
   });
+
+  it("rend un lien markdown classique et le texte barré", () => {
+    render(<MarkdownBody>{"[Guardiens](https://guardiens.fr) et ~~barré~~"}</MarkdownBody>);
+    expect(screen.getByRole("link", { name: "Guardiens" })).toHaveAttribute(
+      "href",
+      "https://guardiens.fr",
+    );
+    expect(screen.getByText("barré").tagName.toLowerCase()).toBe("del");
+  });
 });
