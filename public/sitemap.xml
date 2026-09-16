@@ -943,6 +943,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/house-sitting/dijon</loc>
+    <lastmod>2026-09-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/house-sitting/valence</loc>
     <lastmod>2026-09-16</lastmod>
     <changefreq>weekly</changefreq>
@@ -951,12 +957,6 @@
   <url>
     <loc>https://guardiens.fr/house-sitting/saint-didier-au-mont-d-or</loc>
     <lastmod>2026-09-16</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/house-sitting/dijon</loc>
-    <lastmod>2026-09-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1459,12 +1459,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/house-sitting/beaujolais</loc>
-    <lastmod>2026-09-16</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://guardiens.fr/house-sitting/chateauroux</loc>
     <lastmod>2026-08-27</lastmod>
     <changefreq>weekly</changefreq>
@@ -1539,6 +1533,12 @@
   <url>
     <loc>https://guardiens.fr/house-sitting/poitiers</loc>
     <lastmod>2026-08-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/house-sitting/beaujolais</loc>
+    <lastmod>2026-09-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
