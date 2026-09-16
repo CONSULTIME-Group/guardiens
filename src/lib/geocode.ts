@@ -61,16 +61,24 @@ export async function geocodeCity(city: string, country?: string | null): Promis
   const promise = (async () => {
     await acquire();
     try {
-      const { data, error } = await supabase.functions.invoke("geocode", {
-        body: { city: city.trim(), country: country?.trim() || undefined },
-      });
-      if (error || !data?.lat || !data?.lng) {
-        memoryCache.set(key, null);
-        return null;
+      // Recherche tolérante : la ville exacte, puis les variantes obtenues en
+      // retirant les mots de tête, et pour l'outre-mer le rattachement à la
+      // France. Le résultat est mémorisé sous la clé d'origine.
+      const cities = cityQueryVariants(city.trim());
+      const countries = countryQueryVariants(country);
+      for (const cityVariant of cities) {
+        for (const countryVariant of countries) {
+          const { data, error } = await supabase.functions.invoke("geocode", {
+            body: { city: cityVariant, country: countryVariant?.trim() || undefined },
+          });
+          if (error || !data?.lat || !data?.lng) continue;
+          const result: GeoResult = { lat: data.lat, lng: data.lng, city: data.city };
+          memoryCache.set(key, result);
+          return result;
+        }
       }
-      const result: GeoResult = { lat: data.lat, lng: data.lng, city: data.city };
-      memoryCache.set(key, result);
-      return result;
+      memoryCache.set(key, null);
+      return null;
     } catch {
       memoryCache.set(key, null);
       return null;
@@ -79,6 +87,7 @@ export async function geocodeCity(city: string, country?: string | null): Promis
       inflight.delete(key);
     }
   })();
+
 
   inflight.set(key, promise);
   return promise;
