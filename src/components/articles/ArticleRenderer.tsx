@@ -350,6 +350,7 @@ export default function ArticleRenderer({ content, userRole, slug, placeholderVa
   let html = marked.parse(preprocessed, { async: false }) as string;
 
   html = resolveArticleImages(html);
+  html = rewriteMemberLinksInHtml(html);
   html = injectCTA(html, slug);
   html = addBandedSections(html);
   html = addEndCTA(html, slug);
