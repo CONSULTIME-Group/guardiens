@@ -86,11 +86,11 @@ function resolveArticleImages(html: string): string {
 type CtaCopy = {
   midText: string;
   midPrimary: { label: string; href: string; role: string };
-  midSecondary: { label: string; href: string; role: string };
+  midSecondary?: { label: string; href: string; role: string };
   endHeading: string;
   endText: string;
   endPrimary: { label: string; href: string; role: string };
-  endSecondary: { label: string; href: string; role: string };
+  endSecondary?: { label: string; href: string; role: string };
 };
 
 const CTA_DEFAUT: CtaCopy = {
@@ -121,21 +121,19 @@ const CTA_PAR_SLUG: Record<string, CtaCopy> = {
   "technologie-recreer-lien-pres-de-chez-soi": {
     midText: "Un coup de main à demander, ou du temps à donner ?",
     midPrimary: { label: "Voir l'entraide près de chez moi", href: "/petites-missions", role: "projet" },
-    midSecondary: { label: "Voir les projets", href: "/projets", role: "projet" },
+    midSecondary: { label: "Lire le guide des projets", href: "/actualites/chantier-participatif-low-tech-participer-lancer-projet", role: "projet" },
     endHeading: "Et si vous commenciez par un petit service ?",
     endText: "Demandez un coup de main ou proposez le vôtre, à quelques kilomètres de chez vous.",
     endPrimary: { label: "Voir l'entraide près de chez moi", href: "/petites-missions", role: "projet" },
-    endSecondary: { label: "Voir les projets", href: "/projets", role: "projet" },
+    endSecondary: { label: "Lire le guide des projets", href: "/actualites/chantier-participatif-low-tech-participer-lancer-projet", role: "projet" },
   },
 
   "chantier-participatif-low-tech-participer-lancer-projet": {
     midText: "Un projet à mener chez vous, ou envie d'apprendre en participant ?",
     midPrimary: { label: "Publier mon projet", href: "/projets/publier", role: "projet" },
-    midSecondary: { label: "Voir les projets", href: "/projets", role: "projet" },
     endHeading: "Votre projet mérite du monde",
     endText: "Publiez-le en quelques minutes : cochez ce que vous transmettez, ce que vous proposez, et les participants vous écrivent.",
     endPrimary: { label: "Publier mon projet", href: "/projets/publier", role: "projet" },
-    endSecondary: { label: "Voir les projets", href: "/projets", role: "projet" },
   },
 };
 
@@ -153,7 +151,7 @@ function injectCTA(html: string, slug?: string): string {
     if (h2Count === 3) {
       // `data-cta-block="mid"` permet de masquer le bloc côté CSS pour les
       // utilisateurs logués (cf. .article-rich-content [data-cta-block="mid"]).
-      return `<div class="article-cta-block" data-cta-block="mid"><div class="article-cta-inner"><p class="article-cta-text">${copy.midText}</p><div class="article-cta-buttons"><a href="${copy.midPrimary.href}" class="article-cta-btn article-cta-btn-primary" data-article-cta="true" data-cta-position="mid" data-cta-role="${copy.midPrimary.role}"${slugAttr}>${copy.midPrimary.label}</a><a href="${copy.midSecondary.href}" class="article-cta-btn article-cta-btn-secondary" data-article-cta="true" data-cta-position="mid" data-cta-role="${copy.midSecondary.role}"${slugAttr}>${copy.midSecondary.label}</a></div></div></div>\n${match}`;
+      return `<div class="article-cta-block" data-cta-block="mid"><div class="article-cta-inner"><p class="article-cta-text">${copy.midText}</p><div class="article-cta-buttons"><a href="${copy.midPrimary.href}" class="article-cta-btn article-cta-btn-primary" data-article-cta="true" data-cta-position="mid" data-cta-role="${copy.midPrimary.role}"${slugAttr}>${copy.midPrimary.label}</a>${copy.midSecondary ? `<a href="${copy.midSecondary.href}" class="article-cta-btn article-cta-btn-secondary" data-article-cta="true" data-cta-position="mid" data-cta-role="${copy.midSecondary.role}"${slugAttr}>${copy.midSecondary.label}</a>` : ""}</div></div></div>\n${match}`;
     }
     return match;
   });
@@ -217,7 +215,7 @@ function addBandedSections(html: string): string {
 function addEndCTA(html: string, slug?: string): string {
   const slugAttr = slug ? ` data-article-slug="${slug}"` : "";
   const copy = ctaCopyPour(slug);
-  return html + `<div class="article-cta-block article-cta-end"><div class="article-cta-inner"><p class="article-cta-heading">${copy.endHeading}</p><p class="article-cta-text">${copy.endText}</p><div class="article-cta-buttons"><a href="${copy.endPrimary.href}" class="article-cta-btn article-cta-btn-primary" data-article-cta="true" data-cta-position="end" data-cta-role="${copy.endPrimary.role}"${slugAttr}>${copy.endPrimary.label}</a><a href="${copy.endSecondary.href}" class="article-cta-btn article-cta-btn-secondary" data-article-cta="true" data-cta-position="end" data-cta-role="${copy.endSecondary.role}"${slugAttr}>${copy.endSecondary.label}</a></div></div></div>`;
+  return html + `<div class="article-cta-block article-cta-end"><div class="article-cta-inner"><p class="article-cta-heading">${copy.endHeading}</p><p class="article-cta-text">${copy.endText}</p><div class="article-cta-buttons"><a href="${copy.endPrimary.href}" class="article-cta-btn article-cta-btn-primary" data-article-cta="true" data-cta-position="end" data-cta-role="${copy.endPrimary.role}"${slugAttr}>${copy.endPrimary.label}</a>${copy.endSecondary ? `<a href="${copy.endSecondary.href}" class="article-cta-btn article-cta-btn-secondary" data-article-cta="true" data-cta-position="end" data-cta-role="${copy.endSecondary.role}"${slugAttr}>${copy.endSecondary.label}</a>` : ""}</div></div></div>`;
 }
 
 interface ArticleRendererProps {

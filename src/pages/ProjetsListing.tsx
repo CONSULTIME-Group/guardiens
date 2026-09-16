@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select";
 
 const ARTICLE_URL = "/actualites/chantier-participatif-projet-collectif-cadre-legal";
+const GUIDE_URL = "/actualites/chantier-participatif-low-tech-participer-lancer-projet";
 
 /**
  * Un projet participatif se rejoint en se déplaçant, parfois loin : les rayons
@@ -259,7 +260,7 @@ const ProjetsListing = () => {
               <Link to="/projets/publier">
                 <Button className="rounded-full">Publier mon projet</Button>
               </Link>
-              <Link to={ARTICLE_URL} className="text-sm font-medium underline underline-offset-4 text-foreground/80">
+              <Link to={GUIDE_URL} className="text-sm font-medium underline underline-offset-4 text-foreground/80">
                 Lire comment se prépare un projet participatif
               </Link>
             </div>
