@@ -22,6 +22,7 @@ import { AuthIllustrationPanel } from "@/components/auth/AuthIllustrationPanel";
 import { PasswordStrengthMeter } from "@/components/auth/PasswordStrengthMeter";
 import { lovable } from "@/integrations/lovable";
 import { startOAuthFlow, logOAuthStage, endOAuthFlow } from "@/lib/oauthLogger";
+import { detectSignupIntent, roleForSignupIntent, signupIntentBannerKey } from "@/lib/signupIntent";
 import {
  Dialog,
  DialogContent,
@@ -657,9 +658,9 @@ const Register = () => {
 
   {step === 2 && (
   <form onSubmit={handleSubmit} className="space-y-5 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
-  {detectedIntent && (
+  {intentBannerKey && (
    <div className="rounded-lg border border-terra-border/60 bg-terra-soft/60 px-4 py-3 text-sm text-foreground">
-    {t(`register_page.intent_banner.${detectedIntent}`)}
+    {t(`register_page.intent_banner.${intentBannerKey}`)}
    </div>
   )}
   <div className="text-center mb-4">

@@ -1031,7 +1031,10 @@
     "terms_accepted_edit": "Modifier",
     "intent_banner": {
       "owner": "Encore un pas, et vous pourrez contacter ce gardien.",
-      "sitter": "Encore un pas, et vous pourrez proposer vos services."
+      "sitter": "Encore un pas, et vous pourrez proposer vos services.",
+      "entraide": "Encore un pas, et vous pourrez demander ou proposer un coup de main pr\u00e8s de chez vous.",
+      "entraide_projet": "Encore un pas, et vous pourrez publier votre projet participatif.",
+      "projets": "Encore un pas, et vous recevrez les projets publi\u00e9s pr\u00e8s de chez vous."
     },
     "footer_trust": "Pas de spam · Désinscription en 1 clic · Vos données restent en France",
     "have_account": "Déjà un compte ?",
