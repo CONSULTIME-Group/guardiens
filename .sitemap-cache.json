@@ -17,8 +17,8 @@
       "fetchedAt": "2026-09-16T11:15:10.484Z"
     },
     "articles": {
-      "head": "2026-09-16T11:15:01.590078+00:00|128",
-      "fetchedAt": "2026-09-16T11:15:10.489Z"
+      "head": "2026-09-16T12:31:14.033503+00:00|131",
+      "fetchedAt": "2026-09-16T12:34:24.226Z"
     },
     "public_sits": {
       "head": "2026-09-12T09:47:28.6571+00:00|6",
@@ -29,8 +29,8 @@
       "fetchedAt": "2026-09-16T11:15:10.517Z"
     },
     "public_profiles": {
-      "head": "2026-09-16T07:05:21.469004+00:00|1201",
-      "fetchedAt": "2026-09-16T11:15:10.641Z"
+      "head": "2026-09-16T12:32:40.198955+00:00|1202",
+      "fetchedAt": "2026-09-16T12:34:25.683Z"
     }
   },
   "entries": {
@@ -2894,12 +2894,6 @@
         "priority": "0.6"
       },
       {
-        "loc": "/actualites/jardinage-entraide-locale-grenoble",
-        "lastmod": "2026-09-16",
-        "changefreq": "monthly",
-        "priority": "0.7"
-      },
-      {
         "loc": "/actualites/faire-garder-animal-pendant-hospitalisation",
         "lastmod": "2026-09-16",
         "changefreq": "monthly",
@@ -2910,6 +2904,12 @@
         "lastmod": "2026-09-16",
         "changefreq": "monthly",
         "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/jardinage-entraide-locale-grenoble",
+        "lastmod": "2026-09-16",
+        "changefreq": "monthly",
+        "priority": "0.7"
       },
       {
         "loc": "/actualites/garde-chat-domicile-lyon",
@@ -2942,19 +2942,13 @@
         "priority": "0.8"
       },
       {
-        "loc": "/actualites/jardinage-entraide-quartier-annecy",
-        "lastmod": "2026-09-16",
-        "changefreq": "monthly",
-        "priority": "0.7"
-      },
-      {
         "loc": "/actualites/garde-maison-animaux-tahiti",
         "lastmod": "2026-09-16",
         "changefreq": "monthly",
         "priority": "0.6"
       },
       {
-        "loc": "/actualites/jardinage-entraide-quartier-lyon",
+        "loc": "/actualites/courses-aide-domicile-entraide-senior-lyon",
         "lastmod": "2026-09-16",
         "changefreq": "monthly",
         "priority": "0.7"
@@ -3026,12 +3020,6 @@
         "priority": "0.6"
       },
       {
-        "loc": "/actualites/petites-missions-entraide-guardiens",
-        "lastmod": "2026-09-16",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
         "loc": "/actualites/entretenir-jardin-pendant-absence",
         "lastmod": "2026-09-16",
         "changefreq": "monthly",
@@ -3062,6 +3050,12 @@
         "priority": "0.7"
       },
       {
+        "loc": "/actualites/oser-demander-coup-de-main-pres-de-chez-soi",
+        "lastmod": "2026-09-16",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
         "loc": "/actualites/devenir-gardien-urgence-guardiens",
         "lastmod": "2026-09-16",
         "changefreq": "monthly",
@@ -3074,10 +3068,58 @@
         "priority": "0.6"
       },
       {
+        "loc": "/actualites/jardinage-entraide-quartier-annecy",
+        "lastmod": "2026-09-16",
+        "changefreq": "monthly",
+        "priority": "0.7"
+      },
+      {
         "loc": "/actualites/devenir-gardien-maison-etranger",
         "lastmod": "2026-09-16",
         "changefreq": "monthly",
         "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/reseau-entraide-quartier-lyon-aura",
+        "lastmod": "2026-09-16",
+        "changefreq": "monthly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/actualites/jardinage-entraide-quartier-lyon",
+        "lastmod": "2026-09-16",
+        "changefreq": "monthly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/actualites/bricolage-montage-meubles-entraide-grenoble-lyon",
+        "lastmod": "2026-09-16",
+        "changefreq": "monthly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/actualites/idees-coups-de-main-entraide-pres-de-chez-soi",
+        "lastmod": "2026-09-16",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/se-sentir-utile-pres-de-chez-soi",
+        "lastmod": "2026-09-16",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/petites-missions-entraide-guardiens",
+        "lastmod": "2026-09-16",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/demenagement-entraide-locale-france",
+        "lastmod": "2026-09-16",
+        "changefreq": "monthly",
+        "priority": "0.7"
       },
       {
         "loc": "/actualites/arroser-plantes-vacances-grenoble",

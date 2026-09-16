@@ -469,12 +469,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/actualites/jardinage-entraide-locale-grenoble</loc>
-    <lastmod>2026-09-16</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://guardiens.fr/actualites/faire-garder-animal-pendant-hospitalisation</loc>
     <lastmod>2026-09-16</lastmod>
     <changefreq>monthly</changefreq>
@@ -485,6 +479,12 @@
     <lastmod>2026-09-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/jardinage-entraide-locale-grenoble</loc>
+    <lastmod>2026-09-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/actualites/garde-chat-domicile-lyon</loc>
@@ -517,19 +517,13 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/actualites/jardinage-entraide-quartier-annecy</loc>
-    <lastmod>2026-09-16</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://guardiens.fr/actualites/garde-maison-animaux-tahiti</loc>
     <lastmod>2026-09-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/actualites/jardinage-entraide-quartier-lyon</loc>
+    <loc>https://guardiens.fr/actualites/courses-aide-domicile-entraide-senior-lyon</loc>
     <lastmod>2026-09-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -601,12 +595,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/actualites/petites-missions-entraide-guardiens</loc>
-    <lastmod>2026-09-16</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://guardiens.fr/actualites/entretenir-jardin-pendant-absence</loc>
     <lastmod>2026-09-16</lastmod>
     <changefreq>monthly</changefreq>
@@ -637,6 +625,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/actualites/oser-demander-coup-de-main-pres-de-chez-soi</loc>
+    <lastmod>2026-09-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/actualites/devenir-gardien-urgence-guardiens</loc>
     <lastmod>2026-09-16</lastmod>
     <changefreq>monthly</changefreq>
@@ -649,10 +643,58 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/actualites/jardinage-entraide-quartier-annecy</loc>
+    <lastmod>2026-09-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/actualites/devenir-gardien-maison-etranger</loc>
     <lastmod>2026-09-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/reseau-entraide-quartier-lyon-aura</loc>
+    <lastmod>2026-09-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/jardinage-entraide-quartier-lyon</loc>
+    <lastmod>2026-09-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/bricolage-montage-meubles-entraide-grenoble-lyon</loc>
+    <lastmod>2026-09-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/idees-coups-de-main-entraide-pres-de-chez-soi</loc>
+    <lastmod>2026-09-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/se-sentir-utile-pres-de-chez-soi</loc>
+    <lastmod>2026-09-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/petites-missions-entraide-guardiens</loc>
+    <lastmod>2026-09-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/demenagement-entraide-locale-france</loc>
+    <lastmod>2026-09-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/actualites/arroser-plantes-vacances-grenoble</loc>
