@@ -66,7 +66,9 @@ export function detectContactDetails(input: string | null | undefined): ContactD
   const raw = input;
   const normalized = normalizeObfuscatedContact(input);
   // Variante compactée : « 0 6 1 2 ... » issu des chiffres en lettres.
-  const compacted = normalized.replace(/(?<=\d)[\s.\-]+(?=\d)/g, "");
+  // Pas de lookbehind (Safari iOS avant 16.4 rejette « (?<= ») : le chiffre de
+  // gauche est capturé puis réinjecté, comportement identique.
+  const compacted = normalized.replace(/(\d)[\s.\-]+(?=\d)/g, "$1");
 
   const found: ContactDetailKind[] = [];
   const candidates = [raw, normalized, compacted];
