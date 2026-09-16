@@ -5,8 +5,8 @@
       "fetchedAt": "2026-09-16T12:38:12.607Z"
     },
     "seo_city_pages": {
-      "head": "2026-09-16T08:00:02.687994+00:00|164",
-      "fetchedAt": "2026-09-16T12:38:12.615Z"
+      "head": "2026-09-16T12:40:03.732457+00:00|164",
+      "fetchedAt": "2026-09-16T12:41:04.943Z"
     },
     "city_guides": {
       "head": "2026-09-16T10:00:18.139452+00:00|89",
@@ -818,6 +818,12 @@
         "priority": "0.8"
       },
       {
+        "loc": "/house-sitting/dijon",
+        "lastmod": "2026-09-16",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
         "loc": "/house-sitting/valence",
         "lastmod": "2026-09-16",
         "changefreq": "weekly",
@@ -826,12 +832,6 @@
       {
         "loc": "/house-sitting/saint-didier-au-mont-d-or",
         "lastmod": "2026-09-16",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/dijon",
-        "lastmod": "2026-09-04",
         "changefreq": "weekly",
         "priority": "0.8"
       },
@@ -1346,12 +1346,6 @@
         "priority": "0.8"
       },
       {
-        "loc": "/house-sitting/beaujolais",
-        "lastmod": "2026-09-16",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
         "loc": "/house-sitting/chateauroux",
         "lastmod": "2026-08-27",
         "changefreq": "weekly",
@@ -1432,6 +1426,12 @@
       {
         "loc": "/house-sitting/poitiers",
         "lastmod": "2026-08-27",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/beaujolais",
+        "lastmod": "2026-09-16",
         "changefreq": "weekly",
         "priority": "0.8"
       },
