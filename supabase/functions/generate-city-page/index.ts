@@ -384,7 +384,7 @@ Structure EXACTE :
       h1_title: generated.h1_title || existing?.h1_title || `House-sitting à ${city}, gardiens de confiance près de chez vous`,
       intro_text: generated.intro_text || existing?.intro_text || "",
       meta_title: generated.meta_title || existing?.meta_title || `House-sitting ${city}, garde maison et animaux | Guardiens`,
-      meta_description: generated.meta_description || existing?.meta_description || `Trouvez un gardien de confiance à ${city}. Inscription gratuite, gardiens vérifiés.`,
+      meta_description: generated.meta_description || existing?.meta_description || `Trouvez un gardien de confiance à ${city}. Profils détaillés, avis croisés et échange direct entre membres.`,
       excerpt: generated.excerpt || existing?.excerpt || null,
       content: generated.content || existing?.content || null,
       cover_image_url: finalCover,
