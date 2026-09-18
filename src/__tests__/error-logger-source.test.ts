@@ -26,7 +26,7 @@ vi.mock("@/lib/inAppBrowser", () => ({
 
 import { reportError, extractLogicalSource } from "@/lib/errorLogger";
 
-const rpcPayload = (callIndex: number) => mocks.rpc.mock.calls[callIndex][0] as {
+const rpcPayload = (callIndex: number) => mocks.rpc.mock.calls[callIndex][1] as {
   _fingerprint: string;
   _message: string;
   _source: string | null;
