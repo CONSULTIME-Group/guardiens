@@ -1331,7 +1331,8 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({
         error: 'Failed to send email',
         providerStatus: resendRes.status,
-        details: resendData?.message ?? null,
+        // Provider errors can contain the resolved address. Keep it server-side.
+        details: recipientReference ? null : (resendData?.message ?? null),
       }), {
         status: resendRes.status === 429 ? 429 : (isPermanentClientError ? resendRes.status : 500),
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
