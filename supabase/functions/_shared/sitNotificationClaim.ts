@@ -102,12 +102,38 @@ export async function raiseClaimErrorSignal(
 // Seuils de bruit volontairement bas : une famine de créneau est invisible
 // autrement. Un passage qui se voit refuser au moins 10 réservations avec un
 // taux de refus d'au moins 50 pour cent est anormal, on le signale.
+// Les seuils ne portent que sur les refus INATTENDUS : un refus dont le
+// créneau est détenu par un pipeline frère est nominal (le gardien a reçu sa
+// notification du jour par un autre pipeline) et ne doit pas alarmer.
 const REFUSAL_MIN_COUNT = 10;
 const REFUSAL_MIN_RATE = 0.5;
 
+// Pipelines dont la détention d'un créneau est un comportement attendu.
+const EXPECTED_CLAIM_HOLDERS = new Set([
+  "alert-digest",
+  "nearby-daily-digest",
+  "sitter-daily-digest",
+  "notify-sitters-on-publish",
+]);
+
+/**
+ * Part des refus qui ne s'expliquent pas par un détenteur attendu : erreurs
+ * de réservation, détenteur inconnu, null ou source non reconnue.
+ */
+export function unexpectedRefusals(
+  refused: number,
+  heldBy: Record<string, number> = {},
+): number {
+  let expected = 0;
+  for (const [holder, count] of Object.entries(heldBy)) {
+    if (EXPECTED_CLAIM_HOLDERS.has(holder) && count > 0) expected += count;
+  }
+  return Math.max(0, refused - expected);
+}
+
 /**
  * Enregistre le résultat des réservations d'un passage (obtenues, refusées,
- * détenteurs) et lève un signal admin au delà du seuil de refus.
+ * détenteurs) et lève un signal admin au delà du seuil de refus inattendu.
  */
 export async function reportClaimOutcome(
   supabase: any,
@@ -127,7 +153,8 @@ export async function reportClaimOutcome(
   if (error) console.error("record_claim_outcome failed", source, error.message ?? error);
 
   const total = granted + refused;
-  if (refused >= REFUSAL_MIN_COUNT && refused / total >= REFUSAL_MIN_RATE) {
+  const unexpected = unexpectedRefusals(refused, heldBy);
+  if (unexpected >= REFUSAL_MIN_COUNT && unexpected / total >= REFUSAL_MIN_RATE) {
     await raiseSignal(supabase, {
       signalType: "sit_notification_claim_starvation",
       key: `sit_notification_claim_starvation_${source}`,
@@ -136,9 +163,10 @@ export async function reportClaimOutcome(
         source,
         granted,
         refused,
+        refused_unexpected: unexpected,
         held_by: heldBy,
         title: `Famine de créneau de notification, ${source}`,
-        detail: `${refused} réservations refusées sur ${total} sur un même passage.`,
+        detail: `${unexpected} réservations refusées sans détenteur attendu sur ${total} sur un même passage.`,
       },
     });
   }
