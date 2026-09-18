@@ -31,8 +31,6 @@ const FORBIDDEN_SNIPPETS = [
 
 const PRERENDER_RECACHE_URL =
   "https://erhccyqevdyevpyctsjj.supabase.co/functions/v1/prerender-recache";
-const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVyaGNjeXFldmR5ZXZweWN0c2pqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MjMzMzQsImV4cCI6MjA4OTk5OTMzNH0.ltBQtcouoqd5tuv_wQXb92x5Q5YYa9mkEQvZUx0wLTY";
 
 const args = process.argv.slice(2);
 const customUrl = args.find((a) => a.startsWith("--url="))?.slice(6);
