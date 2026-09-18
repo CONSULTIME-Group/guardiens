@@ -142,6 +142,14 @@ const Messages = () => {
 
   const isInitialMessagesLoad = useRef(true);
 
+  // Copie mutable de la liste courante : lue dans le callback Realtime pour que
+  // le canal `messages-list-${user.id}` ne soit pas détruit et recréé à chaque
+  // mise à jour de `conversations`.
+  const conversationsRef = useRef<Conversation[]>([]);
+  useEffect(() => {
+    conversationsRef.current = conversations;
+  }, [conversations]);
+
   const loadConversations = useCallback(async () => {
     if (!user) return;
     const { data: convs } = await supabase
@@ -366,7 +374,7 @@ const Messages = () => {
         (payload) => {
           const msg = payload.new as Message;
           // Ne déclenche que si le message concerne une de nos conversations connues
-          if (conversations.some((c) => c.id === msg.conversation_id)) {
+          if (conversationsRef.current.some((c) => c.id === msg.conversation_id)) {
             debouncedReload();
           }
         }
@@ -376,7 +384,7 @@ const Messages = () => {
       if (timer) window.clearTimeout(timer);
       supabase.removeChannel(channel);
     };
-  }, [user, conversations, loadConversations]);
+  }, [user, loadConversations]);
 
   // ── Chargement messages avec pagination (50 derniers d'abord) ──
   const loadMessages = useCallback(async (convId: string) => {
