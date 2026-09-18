@@ -16,6 +16,7 @@
 // Body : { manual?: boolean, dry_run?: boolean, user_id?: string }
 import { createClient } from "npm:@supabase/supabase-js@2.45.0";
 import { startCronRun } from "../_shared/cron-run-log.ts";
+import { requireAdminOrServiceRole } from "../_shared/require-admin.ts";
 import { parisWindowVerdict } from "../_shared/paris-hour.ts";
 import { claimSitNotification, releaseSitNotification } from "../_shared/sitNotificationClaim.ts";
 import { recordDeliveryFailure } from "../_shared/delivery-failure.ts";
@@ -63,6 +64,11 @@ function json(body: unknown, status = 200) {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+
+  const denied = await requireAdminOrServiceRole(req, corsHeaders);
+  if (denied) return denied;
+
+
 
   let body: { manual?: boolean; dry_run?: boolean; user_id?: string } = {};
   try {

@@ -142,3 +142,12 @@ project_id = "erhccyqevdyevpyctsjj"
 
   [functions.flush-prerender-cache]
     verify_jwt = true
+
+  [functions.consume-seo-dirty]
+    verify_jwt = true
+
+  [functions.detect-deploy-and-mark-dirty]
+    verify_jwt = true
+
+  [functions.send-weekly-nearby-digest]
+    verify_jwt = true
