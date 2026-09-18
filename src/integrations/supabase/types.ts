@@ -77,6 +77,30 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_cron_auth_20260918: {
+        Row: {
+          active: boolean | null
+          command: string | null
+          jobid: number | null
+          jobname: string | null
+          schedule: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          command?: string | null
+          jobid?: number | null
+          jobname?: string | null
+          schedule?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          command?: string | null
+          jobid?: number | null
+          jobname?: string | null
+          schedule?: string | null
+        }
+        Relationships: []
+      }
       _backup_email_send_log_mirror_20260824: {
         Row: {
           created_at: string | null
