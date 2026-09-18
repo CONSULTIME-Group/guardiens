@@ -217,9 +217,9 @@ ${sitterCountLine}
 
     const brandContext = `CONTEXTE MARQUE Guardiens (plateforme de house-sitting de proximité, sans transaction financière directe) :
 - Fondée par Jérémie et Elisa après 5 ans de house-sitting en France (37 maisons gardées, 234 animaux accompagnés).
-- Rencontre physique obligatoire propriétaire/gardien avant chaque garde.
-- Propriétaires : gratuit. Gardiens : gratuit aujourd'hui, sans engagement. Aucune commission par garde. Service gratuit jusqu'à nouvel ordre.
-- L'animal reste chez lui, la maison reste vivante (courrier, plantes, lumières). Vérification d'identité + avis croisés.
+- Guardiens recommande une rencontre préalable entre propriétaire et gardien avant la garde, afin d'échanger sur le logement, les animaux et les consignes.
+- Propriétaires : gratuit. Gardiens : gratuit aujourd'hui, sans engagement. Aucune commission par garde. Décrire uniquement la tarification actuelle, sans promesse sur son évolution future.
+- L'animal reste chez lui, la maison reste vivante (courrier, plantes, lumières). Possibilité de vérifier son identité, signalée par un écusson sur les profils concernés, et avis croisés entre membres.
 
 RÈGLES STRICTES :
 - Vouvoiement systématique.
