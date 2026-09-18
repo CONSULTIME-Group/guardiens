@@ -252,7 +252,7 @@ Deno.serve(async (req) => {
   // on refuse proprement en 400 plutot que de laisser passer un 500.
   const rawRecipient = String(template.to || recipientEmail || '').trim()
   const bracketed = rawRecipient.match(/<\s*([^<>\s]+@[^<>\s]+)\s*>/)
-  const effectiveRecipient = (bracketed ? bracketed[1] : rawRecipient).trim()
+  let effectiveRecipient = (bracketed ? bracketed[1] : rawRecipient).trim()
 
   if (!effectiveRecipient) {
     return new Response(
@@ -266,6 +266,44 @@ Deno.serve(async (req) => {
     )
   }
 
+  // Create Supabase client with service role (bypasses RLS)
+  const supabase = createClient(supabaseUrl, supabaseServiceKey)
+
+  const authHeader = req.headers.get('Authorization') ?? ''
+  const callerToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : ''
+  const isServiceRole = !!callerToken && callerToken === supabaseServiceKey
+
+  // Legacy clients still expect a string from the notification RPC. Its
+  // reference contains only a public user ID, never the member's address.
+  const recipientReference = effectiveRecipient.match(
+    /^user-([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})@notification\.guardiens\.invalid$/i,
+  )
+  let verifiedReferenceCaller: { id: string; email?: string } | null = null
+  if (recipientReference) {
+    if (!isServiceRole) {
+      if (callerToken) {
+        const { data } = await supabase.auth.getUser(callerToken)
+        verifiedReferenceCaller = data?.user ?? null
+      }
+      if (!verifiedReferenceCaller) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+    }
+    // Only the service-role client can resolve this reference to an address.
+    const { data: address, error: resolveError } = await supabase.rpc(
+      'get_user_email_for_notification', { target_user_id: recipientReference[1] },
+    )
+    if (resolveError || typeof address !== 'string' || !address.trim()) {
+      return new Response(JSON.stringify({ error: 'Recipient unavailable' }), {
+        status: resolveError ? 500 : 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+    effectiveRecipient = address.trim()
+  }
+
   if (!/^[^\s@,;<>]+@[^\s@,;<>]+\.[^\s@,;<>]{2,}$/.test(effectiveRecipient)) {
     console.error('recipient rejected before send', { templateName })
     return new Response(
@@ -273,9 +311,6 @@ Deno.serve(async (req) => {
       { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
-
-  // Create Supabase client with service role (bypasses RLS)
-  const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
   // === Caller authorization ===
   // verify_jwt = true ensures a valid JWT, but without this check ANY
