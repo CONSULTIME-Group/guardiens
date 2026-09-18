@@ -109,6 +109,8 @@ project_id = "erhccyqevdyevpyctsjj"
     verify_jwt = true
   [functions.normalize-skill]
     verify_jwt = true
+  [functions.generate-article]
+    verify_jwt = true
 
 
 
