@@ -334,16 +334,14 @@ Deno.serve(async (req) => {
     'relance-piece-identite',
   ])
 
-  const authHeader = req.headers.get('Authorization') ?? ''
-  const callerToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : ''
-  const isServiceRole = !!callerToken && callerToken === supabaseServiceKey
-
   if (!isServiceRole) {
     let callerUserId: string | null = null
     let callerEmail: string | null = null
     let callerIsAdmin = false
     if (callerToken) {
-      const { data: userData } = await supabase.auth.getUser(callerToken)
+      const { data: userData } = verifiedReferenceCaller
+        ? { data: { user: verifiedReferenceCaller } }
+        : await supabase.auth.getUser(callerToken)
       if (userData?.user) {
         callerUserId = userData.user.id
         callerEmail = (userData.user.email ?? '').toLowerCase() || null
