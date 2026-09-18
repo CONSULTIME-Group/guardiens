@@ -1,7 +1,7 @@
 // Remontée hebdomadaire des signaux de qualité de contenu.
 //
-// Lit les admin_signals non résolus de entity_type = 'content' (déposés par
-// public.check_content_quality le lundi à 07h00 UTC), et envoie un email
+// Lit directement l'état ACTUEL du détecteur via public.v_content_defects,
+// public.content_freeze et public.v_detector_selftest, et envoie un email
 // récapitulatif court à l'adresse d'administration via l'infrastructure
 // d'envoi existante (send-transactional-email).
 import { createClient } from 'npm:@supabase/supabase-js@2'
@@ -30,13 +30,6 @@ const isServiceRoleRequest = (req: Request): boolean => {
   }
 }
 
-interface Signal {
-  signal_type: string
-  severity: string
-  detected_at: string
-  metadata: Record<string, unknown> | null
-}
-
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
@@ -50,13 +43,19 @@ Deno.serve(async (req) => {
   const dryRun = body?.dry_run === true
 
   try {
-    const { data, error } = await admin
-      .from('admin_signals')
-      .select('signal_type, severity, detected_at, metadata')
-      .eq('entity_type', 'content')
-      .is('resolved_at', null)
-      .order('detected_at', { ascending: false })
-    if (error) throw error
+    // Trois lectures directes en parallèle : défauts détectés, gels actifs,
+    // résultats du test interne du détecteur.
+    const [defectsRes, freezeRes, selftestRes] = await Promise.all([
+      admin.from('v_content_defects').select('source_table, label, rule_code, excerpt'),
+      admin.from('content_freeze').select('slug, source_table, frozen_until'),
+      admin.from('v_detector_selftest').select('verdict'),
+    ])
+    if (defectsRes.error) throw defectsRes.error
+    if (freezeRes.error) throw freezeRes.error
+    if (selftestRes.error) throw selftestRes.error
+
+    const defects = (defectsRes.data ?? []) as Array<{ source_table: string | null; label: string | null; rule_code: string | null; excerpt: unknown }>
+    const freezeRows = (freezeRes.data ?? []) as Array<{ slug: string | null; source_table: string | null; frozen_until: string | null }>
 
     // Quatrième cas : vérification d'absence. Si check_content_quality n'a pas
     // tourné depuis plus de 8 jours (une semaine plus un jour de marge), aucun
@@ -83,45 +82,55 @@ Deno.serve(async (req) => {
       ? String(lastRun?.error_message ?? 'erreur sans message')
       : undefined
 
-    const signals = (data ?? []) as Signal[]
-    if (signals.length === 0 && !controleArrete && !runEnErreur) {
-      return new Response(JSON.stringify({ ok: true, sent: false, reason: 'no_content_signal' }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
-    }
+    // Gels actifs : frozen_until >= aujourd'hui.
+    const today = new Date().toISOString().slice(0, 10)
+    const activeFreezes = new Set(
+      freezeRows
+        .filter((f) => f.frozen_until !== null && f.frozen_until >= today)
+        .map((f) => `${f.source_table ?? ''}::${f.slug ?? ''}`),
+    )
 
-    const broken = signals.find((s) => s.signal_type === 'content_detector_broken')
-    const outside = signals.find((s) => s.signal_type === 'content_defect_outside_freeze')
-    const drift = signals.find((s) => s.signal_type === 'content_quality_drift')
+    const alertesOuvertes = defects.length
 
-    const testsKo = Number(broken?.metadata?.tests_ko ?? 0)
-    const testsTotal = Number(broken?.metadata?.tests_total ?? 0)
-    const selftest = broken
+    const outsideDefects = defects.filter(
+      (d) => !activeFreezes.has(`${d.source_table ?? ''}::${d.label ?? ''}`),
+    )
+    const horsGel = outsideDefects.length
+
+    const cibles = outsideDefects.slice(0, 25).map((d) => ({
+      cible: String(d.label ?? 'cible inconnue'),
+      regle: String(d.rule_code ?? 'règle inconnue'),
+      table: d.source_table ? String(d.source_table) : undefined,
+    }))
+
+    const selftestRows = (selftestRes.data ?? []) as Array<{ verdict: string | null }>
+    const testsTotal = selftestRows.length
+    const testsKo = selftestRows.filter((r) => r.verdict === 'FAIL').length
+    const selftest = testsKo > 0
       ? `${testsTotal} cas, ${testsKo} en échec`
       : 'aucun cas en échec'
 
-    const horsGel = Number(outside?.metadata?.nombre ?? 0)
-    const alertesOuvertes = Number(drift?.metadata?.alertes ?? horsGel)
-
-    const details = (outside?.metadata?.details ?? []) as Array<Record<string, unknown>>
-    const cibles = details.slice(0, 25).map((d) => ({
-      cible: String(d.cible ?? 'cible inconnue'),
-      regle: String(d.regle ?? 'règle inconnue'),
-      table: d.table ? String(d.table) : undefined,
-    }))
+    const detecteurCasse = testsKo > 0
+    const derive = horsGel > 0
 
     const templateData = {
       alertesOuvertes,
       horsGel,
       selftest,
-      detecteurCasse: Boolean(broken),
-      derive: Boolean(drift),
+      detecteurCasse,
+      derive,
       cibles,
       controleArrete,
       joursDepuisRun,
       derniereExecution,
       runEnErreur,
       runErreurMessage,
+    }
+
+    if (horsGel === 0 && testsKo === 0 && !controleArrete && !runEnErreur) {
+      return new Response(JSON.stringify({ ok: true, sent: false, reason: 'no_content_signal' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
     }
 
     if (dryRun) {
@@ -144,9 +153,14 @@ Deno.serve(async (req) => {
     })
     if (!res.ok) console.error('send-transactional-email failed', res.status, await res.text().catch(() => ''))
 
+    // Signaux reconstruits en direct depuis les conditions actuelles.
+    const signals: string[] = []
+    if (testsKo > 0) signals.push('content_detector_broken')
+    if (horsGel > 0) signals.push('content_defect_outside_freeze', 'content_quality_drift')
+
     return new Response(JSON.stringify({
       ok: res.ok, sent: res.ok, recipient: RECIPIENT,
-      signals: signals.map((s) => s.signal_type), ...templateData,
+      signals, ...templateData,
     }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
   } catch (e) {
     console.error('alert-content-quality error', e)
