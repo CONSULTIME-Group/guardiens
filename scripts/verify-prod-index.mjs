@@ -18,9 +18,9 @@ const TARGETS = [
 
 // Marqueurs attendus (présence obligatoire)
 const REQUIRED_SNIPPETS = [
-  "Home sitting", // title + og:title + twitter:title
-  "petites missions d'entraide", // description
-  "gens du coin", // og:description / twitter:description
+  "Garde de maison et d'animaux entre particuliers", // title + og:title + twitter:title
+  "House-sitting en France", // description
+  "Vous choisissez après une rencontre", // og:description / twitter:description
 ];
 
 // Marqueurs interdits (anciennes versions, doivent être absents)
