@@ -378,6 +378,18 @@ async function send(payload: {
   }
 }
 
+/**
+ * Extrait une source logique éventuelle du contexte d'appel
+ * (ex: { source: "NetworkErrorMonitor" }) pour alimenter la colonne
+ * top-level error_logs.source, utilisée par NetworkErrorsSection.
+ */
+export function extractLogicalSource(
+  context?: Record<string, any> | null,
+): string | null {
+  const source = context?.source;
+  return typeof source === "string" && source.trim() !== "" ? source : null;
+}
+
 export function reportError(error: unknown, context?: Record<string, any>) {
   const err = error instanceof Error ? error : new Error(String(error));
   const fp = fingerprint(err.message, err.stack?.split("\n")[1]);
@@ -385,6 +397,9 @@ export function reportError(error: unknown, context?: Record<string, any>) {
     fingerprint: fp,
     message: err.message,
     stack: err.stack ?? null,
+    // Source logique (ex: "NetworkErrorMonitor") en colonne top-level ;
+    // le context d'origine reste transmis tel quel, y compris context.source.
+    source: extractLogicalSource(context),
     severity: "error",
     context,
   });
