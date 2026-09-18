@@ -136,3 +136,9 @@ project_id = "erhccyqevdyevpyctsjj"
 
   [functions.enrich-guide-places-osm]
     verify_jwt = false
+
+  [functions.prerender-recache]
+    verify_jwt = true
+
+  [functions.flush-prerender-cache]
+    verify_jwt = true

@@ -31,8 +31,6 @@ const FORBIDDEN_SNIPPETS = [
 
 const PRERENDER_RECACHE_URL =
   "https://erhccyqevdyevpyctsjj.supabase.co/functions/v1/prerender-recache";
-const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVyaGNjeXFldmR5ZXZweWN0c2pqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MjMzMzQsImV4cCI6MjA4OTk5OTMzNH0.ltBQtcouoqd5tuv_wQXb92x5Q5YYa9mkEQvZUx0wLTY";
 
 const args = process.argv.slice(2);
 const customUrl = args.find((a) => a.startsWith("--url="))?.slice(6);
@@ -77,20 +75,30 @@ async function checkUrl(url) {
 }
 
 async function recache() {
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!serviceKey) {
+    console.log(
+      "\n⟳ Recache impossible : la variable d'environnement SUPABASE_SERVICE_ROLE_KEY est requise.",
+    );
+    console.log(
+      "  Relancez avec SUPABASE_SERVICE_ROLE_KEY=... node scripts/verify-prod-index.mjs --recache",
+    );
+    return false;
+  }
   console.log("\n⟳ Recache Prerender.io…");
   const res = await fetch(PRERENDER_RECACHE_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${serviceKey}`,
     },
     body: JSON.stringify({
-      urls: ["https://guardiens.fr/", "https://guardiens.fr"],
+      urls: ["https://guardiens.fr/"],
     }),
   });
   console.log(`  recache status: ${res.status}`);
   console.log(`  ${(await res.text()).slice(0, 200)}`);
+  return res.ok;
 }
 
 (async () => {

@@ -2,6 +2,8 @@
 // Triggered by Postgres triggers on articles / seo_city_pages / city_guides
 // when canonical_url, noindex, meta_title or meta_description changes.
 
+import { requireAdminOrServiceRole } from "../_shared/require-admin.ts";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -11,19 +13,32 @@ const corsHeaders = {
 const PRERENDER_TOKEN = Deno.env.get("PRERENDER_TOKEN");
 const PRERENDER_RECACHE_URL = "https://api.prerender.io/recache";
 
+const ALLOWED_HOSTS = new Set(["guardiens.fr", "www.guardiens.fr"]);
+const CANONICAL_ORIGIN = "https://guardiens.fr";
+
 interface RecacheRequest {
   urls: string[];
 }
 
-function isValidUrl(u: unknown): u is string {
-  if (typeof u !== "string") return false;
+/**
+ * N'accepte que les URLs HTTPS du domaine canonique, et renvoie la forme
+ * normalisée (origine canonique + pathname, sans query ni hash) afin de
+ * recacher exactement la clé servie par le Worker. Renvoie null sinon.
+ */
+export function normalizeRecacheUrl(u: unknown): string | null {
+  if (typeof u !== "string") return null;
+  let parsed: URL;
   try {
-    const parsed = new URL(u);
-    return parsed.protocol === "https:" || parsed.protocol === "http:";
+    parsed = new URL(u);
   } catch {
-    return false;
+    return null;
   }
+  if (parsed.protocol !== "https:") return null;
+  if (!ALLOWED_HOSTS.has(parsed.hostname)) return null;
+  const path = parsed.pathname.replace(/\/{2,}/g, "/");
+  return `${CANONICAL_ORIGIN}${path}`;
 }
+
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -36,6 +51,9 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
+
+  const denied = await requireAdminOrServiceRole(req, corsHeaders);
+  if (denied) return denied;
 
   if (!PRERENDER_TOKEN) {
     return new Response(
@@ -58,7 +76,13 @@ Deno.serve(async (req) => {
   }
 
   const urls = Array.isArray(body?.urls)
-    ? body.urls.filter(isValidUrl).slice(0, 50)
+    ? [
+        ...new Set(
+          body.urls
+            .map(normalizeRecacheUrl)
+            .filter((u): u is string => u !== null),
+        ),
+      ].slice(0, 50)
     : [];
 
   if (urls.length === 0) {
