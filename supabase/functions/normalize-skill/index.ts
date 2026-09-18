@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { requireAdminOrServiceRole } from "../_shared/require-admin.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -22,6 +23,10 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+
+  // Réservé aux admins et au service role : aucun appelant frontend n'existe.
+  const guardResponse = await requireAdminOrServiceRole(req, corsHeaders);
+  if (guardResponse) return guardResponse;
 
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
