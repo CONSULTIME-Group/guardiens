@@ -202,6 +202,46 @@ function isThirdPartySource(source?: string | null, stack?: string | null): bool
 
 
 
+/**
+ * Sanitisation des chaînes URL-like avant stockage dans error_logs.
+ * Remplace la VALEUR des paramètres sensibles (jetons magic-link Supabase,
+ * code OAuth…) par "[redacted]", dans la query string comme dans le hash
+ * ou les fragments multiples (ex: "#/candidatures#access_token=...").
+ * Idempotente : une chaîne déjà sanitisée reste inchangée.
+ */
+const SENSITIVE_URL_PARAMS =
+  /([?&#])((?:access_token|refresh_token|id_token|token_type|expires_at|expires_in|token|code))=[^&#]*/gi;
+
+export function sanitizeUrlSecrets(input: string | null | undefined): string | null {
+  if (typeof input !== "string") return input ?? null;
+  return input.replace(SENSITIVE_URL_PARAMS, "$1$2=[redacted]");
+}
+
+const URL_LIKE_CONTEXT_KEYS = new Set(["url", "referrer", "hash", "search"]);
+
+/**
+ * Sanitise les clés URL-like connues d'un contexte explicite.
+ * Non récursif : seules les valeurs string des clés listées sont traitées.
+ */
+function sanitizeExplicitContext(
+  context?: Record<string, any> | null,
+): Record<string, any> | null {
+  if (!context) return null;
+  let changed = false;
+  const out: Record<string, any> = { ...context };
+  for (const key of Object.keys(out)) {
+    if (!URL_LIKE_CONTEXT_KEYS.has(key)) continue;
+    const value = out[key];
+    if (typeof value !== "string") continue;
+    const sanitized = sanitizeUrlSecrets(value);
+    if (sanitized !== value) {
+      out[key] = sanitized;
+      changed = true;
+    }
+  }
+  return changed ? out : context;
+}
+
 function fingerprint(message: string, source?: string, line?: number): string {
   const base = `${message}|${source ?? ""}|${line ?? ""}`.slice(0, 500);
   let hash = 0;
@@ -225,9 +265,9 @@ function collectRuntimeContext(): Record<string, unknown> {
 
   try {
     ctx.pathname = window.location.pathname;
-    ctx.search = window.location.search || null;
-    ctx.hash = window.location.hash || null;
-    ctx.referrer = document.referrer || null;
+    ctx.search = sanitizeUrlSecrets(window.location.search) || null;
+    ctx.hash = sanitizeUrlSecrets(window.location.hash) || null;
+    ctx.referrer = sanitizeUrlSecrets(document.referrer) || null;
   } catch { /* noop */ }
 
   try {
@@ -237,7 +277,9 @@ function collectRuntimeContext(): Record<string, unknown> {
       // On ne sérialise que les clés sûres pour éviter les payloads énormes
       const safe: Record<string, unknown> = {};
       for (const [k, v] of Object.entries(hs as Record<string, unknown>)) {
-        if (typeof v === "string" || typeof v === "number" || typeof v === "boolean" || v === null) {
+        if (typeof v === "string") {
+          safe[k] = sanitizeUrlSecrets(v);
+        } else if (typeof v === "number" || typeof v === "boolean" || v === null) {
           safe[k] = v;
         } else if (v && typeof v === "object") {
           safe[k] = "[object]";
@@ -328,7 +370,9 @@ async function send(payload: {
     : sourceReason;
 
   let severity = payload.severity ?? "error";
-  let context: Record<string, unknown> | null = payload.context ?? null;
+  // Sanitise les clés URL-like du contexte explicite (url, referrer, hash,
+  // search) pour ne jamais stocker de jeton magic-link ou code OAuth.
+  let context: Record<string, unknown> | null = sanitizeExplicitContext(payload.context);
   if (thirdPartyReason) {
     severity = "ignored_third_party";
     context = {
@@ -367,7 +411,7 @@ async function send(payload: {
       _source: payload.source ?? null,
       _line_no: payload.line_no ?? null,
       _col_no: payload.col_no ?? null,
-      _url: typeof window !== "undefined" ? window.location.href.slice(0, 500) : null,
+      _url: typeof window !== "undefined" ? sanitizeUrlSecrets(window.location.href)?.slice(0, 500) ?? null : null,
       _user_agent: typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 300) : null,
       _severity: severity,
       _context: context as any,
