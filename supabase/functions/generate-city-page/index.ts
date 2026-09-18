@@ -217,9 +217,9 @@ ${sitterCountLine}
 
     const brandContext = `CONTEXTE MARQUE Guardiens (plateforme de house-sitting de proximité, sans transaction financière directe) :
 - Fondée par Jérémie et Elisa après 5 ans de house-sitting en France (37 maisons gardées, 234 animaux accompagnés).
-- Rencontre physique obligatoire propriétaire/gardien avant chaque garde.
-- Propriétaires : gratuit. Gardiens : gratuit aujourd'hui, sans engagement. Aucune commission par garde. Service gratuit jusqu'à nouvel ordre.
-- L'animal reste chez lui, la maison reste vivante (courrier, plantes, lumières). Vérification d'identité + avis croisés.
+- Guardiens recommande une rencontre préalable entre propriétaire et gardien avant la garde, afin d'échanger sur le logement, les animaux et les consignes.
+- Propriétaires : gratuit. Gardiens : gratuit aujourd'hui, sans engagement. Aucune commission par garde. Décrire uniquement la tarification actuelle, sans promesse sur son évolution future.
+- L'animal reste chez lui, la maison reste vivante (courrier, plantes, lumières). Possibilité de vérifier son identité, signalée par un écusson sur les profils concernés, et avis croisés entre membres.
 
 RÈGLES STRICTES :
 - Vouvoiement systématique.
@@ -285,10 +285,10 @@ Structure EXACTE :
 
 
 ## Propriétaires à ${city}, ce que Guardiens vous offre
-(5 à 6 bénéfices en **gras** suivis de 1-2 phrases : animal chez lui, maison vivante, rencontre préalable obligatoire, aucune commission, accord de garde clair, gardiens vérifiés)
+(5 à 6 bénéfices en **gras** suivis de 1-2 phrases : animal chez lui, maison vivante, rencontre préalable recommandée, aucune commission, accord de garde clair, profils détaillés et avis croisés)
 
 ## Qui sont les gardiens à ${city}
-(intro + 4 profils en **gras** : retraités actifs, jeunes actifs en télétravail, familles, étudiants vérifiés. Mentionnez les [petites missions](/petites-missions) pour les gardes courtes. Si aucun gardien n'est encore actif, présentez les profils recherchés et invitez à rejoindre les premiers, sans jamais écrire un nombre nul.)
+(intro + 4 profils en **gras** : retraités actifs, jeunes actifs en télétravail, familles, étudiants. Mentionnez les [petites missions](/petites-missions) pour les gardes courtes. Si aucun gardien n'est encore actif, présentez les profils recherchés et invitez à rejoindre les premiers, sans jamais écrire un nombre nul.)
 
 ## Combien ça coûte à ${city}
 (un paragraphe factuel : Guardiens est gratuit pour les propriétaires et pour les gardiens aujourd'hui, sans engagement, aucune commission par garde. Lien [tarifs](/tarifs). AUCUN montant, AUCUNE date.)
@@ -384,7 +384,7 @@ Structure EXACTE :
       h1_title: generated.h1_title || existing?.h1_title || `House-sitting à ${city}, gardiens de confiance près de chez vous`,
       intro_text: generated.intro_text || existing?.intro_text || "",
       meta_title: generated.meta_title || existing?.meta_title || `House-sitting ${city}, garde maison et animaux | Guardiens`,
-      meta_description: generated.meta_description || existing?.meta_description || `Trouvez un gardien de confiance à ${city}. Inscription gratuite, gardiens vérifiés.`,
+      meta_description: generated.meta_description || existing?.meta_description || `Trouvez un gardien de confiance à ${city}. Profils détaillés, avis croisés et échange direct entre membres.`,
       excerpt: generated.excerpt || existing?.excerpt || null,
       content: generated.content || existing?.content || null,
       cover_image_url: finalCover,
