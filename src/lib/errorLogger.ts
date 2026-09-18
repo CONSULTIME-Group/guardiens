@@ -370,7 +370,9 @@ async function send(payload: {
     : sourceReason;
 
   let severity = payload.severity ?? "error";
-  let context: Record<string, unknown> | null = payload.context ?? null;
+  // Sanitise les clés URL-like du contexte explicite (url, referrer, hash,
+  // search) pour ne jamais stocker de jeton magic-link ou code OAuth.
+  let context: Record<string, unknown> | null = sanitizeExplicitContext(payload.context);
   if (thirdPartyReason) {
     severity = "ignored_third_party";
     context = {
@@ -409,7 +411,7 @@ async function send(payload: {
       _source: payload.source ?? null,
       _line_no: payload.line_no ?? null,
       _col_no: payload.col_no ?? null,
-      _url: typeof window !== "undefined" ? window.location.href.slice(0, 500) : null,
+      _url: typeof window !== "undefined" ? sanitizeUrlSecrets(window.location.href)?.slice(0, 500) ?? null : null,
       _user_agent: typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 300) : null,
       _severity: severity,
       _context: context as any,
