@@ -285,7 +285,7 @@ Structure EXACTE :
 
 
 ## Propriétaires à ${city}, ce que Guardiens vous offre
-(5 à 6 bénéfices en **gras** suivis de 1-2 phrases : animal chez lui, maison vivante, rencontre préalable obligatoire, aucune commission, accord de garde clair, gardiens vérifiés)
+(5 à 6 bénéfices en **gras** suivis de 1-2 phrases : animal chez lui, maison vivante, rencontre préalable recommandée, aucune commission, accord de garde clair, profils détaillés et avis croisés)
 
 ## Qui sont les gardiens à ${city}
 (intro + 4 profils en **gras** : retraités actifs, jeunes actifs en télétravail, familles, étudiants vérifiés. Mentionnez les [petites missions](/petites-missions) pour les gardes courtes. Si aucun gardien n'est encore actif, présentez les profils recherchés et invitez à rejoindre les premiers, sans jamais écrire un nombre nul.)
