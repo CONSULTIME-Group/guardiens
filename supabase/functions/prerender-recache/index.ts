@@ -52,6 +52,9 @@ Deno.serve(async (req) => {
     });
   }
 
+  const denied = await requireAdminOrServiceRole(req, corsHeaders);
+  if (denied) return denied;
+
   if (!PRERENDER_TOKEN) {
     return new Response(
       JSON.stringify({ error: "PRERENDER_TOKEN not configured" }),
@@ -73,7 +76,13 @@ Deno.serve(async (req) => {
   }
 
   const urls = Array.isArray(body?.urls)
-    ? body.urls.filter(isValidUrl).slice(0, 50)
+    ? [
+        ...new Set(
+          body.urls
+            .map(normalizeRecacheUrl)
+            .filter((u): u is string => u !== null),
+        ),
+      ].slice(0, 50)
     : [];
 
   if (urls.length === 0) {
