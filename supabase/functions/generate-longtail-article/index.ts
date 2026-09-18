@@ -3,6 +3,7 @@
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { z } from 'npm:zod@3';
+import { requireAdminOrServiceRole } from '../_shared/require-admin.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -75,6 +76,10 @@ Faire garder ${article} ${breed} à ${city} est tout à fait possible dans un ca
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
+
+  // Outil de redaction interne : admin connecte ou service role uniquement.
+  const denied = await requireAdminOrServiceRole(req, corsHeaders);
+  if (denied) return denied;
 
   try {
     const parsed = BodySchema.safeParse(await req.json());
