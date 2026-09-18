@@ -1,3 +1,0 @@
-REVOKE ALL PRIVILEGES ON TABLE public.backup_sourcage_20260914 FROM anon;
-REVOKE ALL PRIVILEGES ON TABLE public.backup_sourcage_20260914 FROM authenticated;
-ALTER TABLE public.backup_sourcage_20260914 ENABLE ROW LEVEL SECURITY;
