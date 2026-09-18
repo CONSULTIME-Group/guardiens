@@ -216,7 +216,7 @@ ${sitterCountLine}
 
 
     const brandContext = `CONTEXTE MARQUE Guardiens (plateforme de house-sitting de proximité, sans transaction financière directe) :
-- Fondée par Jérémie et Elisa après 5 ans de house-sitting en France (37 maisons gardées, 234 animaux accompagnés).
+- Fondée par Jérémie et Elisa, qui pratiquent et défendent le house-sitting en France.
 - Guardiens recommande une rencontre préalable entre propriétaire et gardien avant la garde, afin d'échanger sur le logement, les animaux et les consignes.
 - Propriétaires : gratuit. Gardiens : gratuit aujourd'hui, sans engagement. Aucune commission par garde. Décrire uniquement la tarification actuelle, sans promesse sur son évolution future.
 - L'animal reste chez lui, la maison reste vivante (courrier, plantes, lumières). Possibilité de vérifier son identité, signalée par un écusson sur les profils concernés, et avis croisés entre membres.
@@ -294,7 +294,7 @@ Structure EXACTE :
 (un paragraphe factuel : Guardiens est gratuit pour les propriétaires et pour les gardiens aujourd'hui, sans engagement, aucune commission par garde. Lien [tarifs](/tarifs). AUCUN montant, AUCUNE date.)
 
 ## Notre histoire et notre engagement à ${city}
-(2-3 paragraphes : fondation Jérémie & Elisa, 37 maisons et 234 animaux en 5 ans, déploiement en France, ${city} intégrée au maillage. AUCUNE date de lancement inventée.)
+(2-3 paragraphes : fondation Jérémie & Elisa, leur passion du house-sitting, déploiement en France, ${city} intégrée au maillage. AUCUNE date de lancement inventée, AUCUN chiffre de maisons ou d'animaux.)
 
 ## Questions fréquentes des propriétaires à ${city}
 (5 à 6 questions au format **Question ?** + réponse 2-3 phrases : rencontre préalable, urgence, animaux à besoins spécifiques, durée min/max, vérification d'identité, sécurité du logement. Aucune question sur les prix d'abonnement ou une date de fin de gratuité.)`;
