@@ -107,6 +107,8 @@ project_id = "erhccyqevdyevpyctsjj"
     verify_jwt = true
   [functions.generate-longtail-article]
     verify_jwt = true
+  [functions.normalize-skill]
+    verify_jwt = true
 
 
 
