@@ -8,7 +8,10 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
  */
 
 const mocks = vi.hoisted(() => ({
-  rpc: vi.fn(async () => ({ data: null, error: null })),
+  rpc: vi.fn(
+    async (_fn: string, _args: Record<string, unknown>) =>
+      ({ data: null, error: null }) as { data: unknown; error: unknown },
+  ),
   getUser: vi.fn(async () => ({ data: { user: null }, error: null })),
   isInAppBrowser: vi.fn(() => false),
 }));
