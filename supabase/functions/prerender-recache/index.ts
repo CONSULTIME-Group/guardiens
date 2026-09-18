@@ -35,7 +35,8 @@ export function normalizeRecacheUrl(u: unknown): string | null {
   }
   if (parsed.protocol !== "https:") return null;
   if (!ALLOWED_HOSTS.has(parsed.hostname)) return null;
-  const path = parsed.pathname.replace(/\/{2,}/g, "/");
+  let path = parsed.pathname.replace(/\/{2,}/g, "/").replace(/\/+$/, "");
+  if (path === "") path = "/";
   return `${CANONICAL_ORIGIN}${path}`;
 }
 
