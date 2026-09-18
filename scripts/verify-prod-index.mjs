@@ -75,20 +75,30 @@ async function checkUrl(url) {
 }
 
 async function recache() {
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!serviceKey) {
+    console.log(
+      "\n⟳ Recache impossible : la variable d'environnement SUPABASE_SERVICE_ROLE_KEY est requise.",
+    );
+    console.log(
+      "  Relancez avec SUPABASE_SERVICE_ROLE_KEY=... node scripts/verify-prod-index.mjs --recache",
+    );
+    return false;
+  }
   console.log("\n⟳ Recache Prerender.io…");
   const res = await fetch(PRERENDER_RECACHE_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${serviceKey}`,
     },
     body: JSON.stringify({
-      urls: ["https://guardiens.fr/", "https://guardiens.fr"],
+      urls: ["https://guardiens.fr/"],
     }),
   });
   console.log(`  recache status: ${res.status}`);
   console.log(`  ${(await res.text()).slice(0, 200)}`);
+  return res.ok;
 }
 
 (async () => {
