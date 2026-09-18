@@ -18,6 +18,7 @@
 import { recordDeliveryFailure } from "../_shared/delivery-failure.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { startCronRun } from "../_shared/cron-run-log.ts";
+import { requireAdminOrServiceRole } from "../_shared/require-admin.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -27,6 +28,9 @@ const corsHeaders = {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+
+  const unauthorized = await requireAdminOrServiceRole(req, corsHeaders);
+  if (unauthorized) return unauthorized;
 
   const run = await startCronRun("remind-unread-messages");
   const supabase = createClient(
