@@ -246,7 +246,7 @@ Répondez UNIQUEMENT en JSON strict :
 {
   "h1_title": "H1 60-80 caractères avec ${city}, sur house-sitting / garde maison animaux",
   "meta_title": "50-60 caractères avec ${city} et Guardiens",
-  "meta_description": "140-160 caractères, incite à l'inscription gratuite",
+  "meta_description": "140-160 caractères, incite à découvrir les profils et à échanger avec les membres",
   "excerpt": "1-2 phrases résumé, max 200 caractères",
   "intro_text": "5 à 7 phrases : ${city} comme cadre de vie pour les animaux, profils utilisateurs (familles, retraités actifs, télétravailleurs, voyageurs), ancrage local concret. AUCUN chiffre inventé."
 }`;
