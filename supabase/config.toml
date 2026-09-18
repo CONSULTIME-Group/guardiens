@@ -102,7 +102,7 @@ project_id = "erhccyqevdyevpyctsjj"
   [functions.admin-send-test-email]
     verify_jwt = true
   [functions.remind-unread-messages]
-    verify_jwt = false
+    verify_jwt = true
   [functions.admin-resend-domain-tracking]
     verify_jwt = true
   [functions.generate-longtail-article]
