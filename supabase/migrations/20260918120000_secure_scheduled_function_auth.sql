@@ -12,7 +12,7 @@ BEGIN
   END IF;
 
   -- Preserve the exact previous commands before altering cron metadata.
-  CREATE TABLE public._backup_cron_auth_20260918 AS
+  CREATE TABLE IF NOT EXISTS public._backup_cron_auth_20260918 AS
     SELECT jobid, jobname, schedule, active, command
     FROM cron.job
     WHERE jobname IN (
