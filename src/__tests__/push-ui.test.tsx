@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import PushNotificationsSection from '@/components/settings/PushNotificationsSection';
 const mocks = vi.hoisted(() => ({ support: 'supported', config: vi.fn(), state: vi.fn(), enable: vi.fn(), disable: vi.fn(), update: vi.fn() }));
@@ -13,7 +13,38 @@ beforeEach(() => {
   vi.stubGlobal('Notification',{permission:'default'});
 });
 const show=()=>render(<MemoryRouter><PushNotificationsSection /></MemoryRouter>);
+afterEach(() => vi.useRealTimers());
 describe('Push settings',()=>{
+  it.each(['config', 'state'] as const)('exits loading when %s never settles and allows a successful retry', async (source) => {
+    vi.useFakeTimers();
+    mocks[source].mockImplementationOnce(() => new Promise(() => {}));
+    show();
+    await act(async () => { await vi.advanceTimersByTimeAsync(12000); });
+    expect(screen.queryByText('Vérification des notifications…')).toBeNull();
+    expect(screen.getByText(/momentanément indisponible/)).toBeInTheDocument();
+    expect(mocks.enable).not.toHaveBeenCalled();
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Réessayer' })); });
+    expect(screen.getByRole('button', { name: 'Activer sur cet appareil' })).toBeEnabled();
+    expect(mocks.enable).not.toHaveBeenCalled();
+  });
+  it('ignores an old response that arrives after timeout and a successful retry', async () => {
+    vi.useFakeTimers();
+    let resolveOld!: (value: unknown) => void;
+    mocks.state.mockImplementationOnce(() => new Promise(resolve => { resolveOld = resolve; }));
+    show();
+    await act(async () => { await vi.advanceTimersByTimeAsync(12000); });
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Réessayer' })); });
+    await act(async () => { resolveOld({ subscribed: true, messages: false, applications: false }); });
+    expect(screen.getByRole('button', { name: 'Activer sur cet appareil' })).toBeEnabled();
+    expect(screen.queryByRole('button', { name: 'Désactiver sur cet appareil' })).toBeNull();
+  });
+  it('offers retry on config failure while preserving device disable', async () => {
+    mocks.config.mockRejectedValueOnce(new Error('offline'));
+    mocks.state.mockResolvedValue({subscribed:true,messages:true,applications:true});
+    show();
+    expect(await screen.findByRole('button',{name:'Réessayer'})).toBeEnabled();
+    expect(screen.getByRole('button',{name:'Désactiver sur cet appareil'})).toBeEnabled();
+  });
   it('never prompts automatically and enables only on click',async()=>{
     show(); const button=await screen.findByRole('button',{name:'Activer sur cet appareil'});
     expect(mocks.enable).not.toHaveBeenCalled();fireEvent.click(button);

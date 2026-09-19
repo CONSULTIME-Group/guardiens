@@ -27,13 +27,13 @@ async function bounded<T>(promise: Promise<T>): Promise<T> {
 }
 
 async function api<T>(userId: string, body: Record<string, unknown>): Promise<T> {
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { session } } = await bounded(supabase.auth.getSession());
   if (!session || session.user.id !== userId) throw new Error('push_session_changed');
   const { data, error } = await bounded(supabase.functions.invoke('push-subscription', {
     body, headers: { Authorization: `Bearer ${session.access_token}` },
   }));
   if (error || !data || data.error) throw new Error('push_request_failed');
-  const current = await supabase.auth.getSession();
+  const current = await bounded(supabase.auth.getSession());
   if (current.data.session?.user.id !== userId) throw new Error('push_session_changed');
   return data as T;
 }
@@ -57,11 +57,11 @@ async function registration(): Promise<ServiceWorkerRegistration | undefined> {
 
 export async function getPushState(userId: string): Promise<{ subscribed: boolean } & PushPreferences> {
   const reg = await registration();
-  const sub = await reg?.pushManager.getSubscription();
+  const sub = reg ? await bounded(reg.pushManager.getSubscription()) : null;
   if (!sub) return { subscribed: false, messages: true, applications: true };
   if (localStorage.getItem(PUSH_OWNER_KEY) !== userId) {
-    await sub.unsubscribe();
-    for (const item of await reg!.getNotifications()) item.close();
+    await bounded(sub.unsubscribe());
+    for (const item of await bounded(reg!.getNotifications())) item.close();
     localStorage.removeItem(PUSH_OWNER_KEY);
     return { subscribed: false, messages: true, applications: true };
   }

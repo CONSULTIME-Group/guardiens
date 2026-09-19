@@ -18,20 +18,39 @@ export default function PushNotificationsSection() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
+  const [attempt, setAttempt] = useState(0);
+  const [canRetry, setCanRetry] = useState(false);
   const support = pushSupport();
   const denied = typeof Notification !== 'undefined' && Notification.permission === 'denied';
 
   useEffect(() => {
     let current = true;
-    setConfig({ enabled: false }); setSubscribed(false); setMessage(''); setLoading(true);
+    setConfig({ enabled: false }); setSubscribed(false); setMessage(''); setLoading(true); setCanRetry(false);
     if (!user || support !== 'supported') { setLoading(false); return; }
-    Promise.all([getPushConfig(user.id).catch(() => ({ enabled: false })), getPushState(user.id)]).then(([settings, state]) => {
+    let configFailed = false;
+    let timer: ReturnType<typeof setTimeout>;
+    // Bound the entire read, including session and browser calls. A late
+    // response cannot replace the result of a retry or another account.
+    const read = Promise.all([getPushConfig(user.id).catch(() => {
+      configFailed = true;
+      return { enabled: false };
+    }), getPushState(user.id)]);
+    Promise.race([read, new Promise<never>((_, reject) => {
+      timer = setTimeout(() => reject(new Error('push_load_timeout')), 12000);
+    })]).then(([settings, state]) => {
       if (!current) return;
       setConfig(settings); setSubscribed(state.subscribed); setPrefs({ messages: state.messages, applications: state.applications });
-    }).catch(() => { if (current) setMessage('Le service de notifications est momentanément indisponible. Vos emails restent inchangés.'); })
-      .finally(() => { if (current) setLoading(false); });
-    return () => { current = false; };
-  }, [user?.id, support]);
+      if (configFailed) {
+        setMessage('Le service de notifications est momentanément indisponible. Vos emails restent inchangés.');
+        setCanRetry(true);
+      }
+    }).catch(() => { if (current) {
+      setMessage('Le service de notifications est momentanément indisponible. Vos emails restent inchangés.');
+      setCanRetry(true);
+    } })
+      .finally(() => { clearTimeout(timer); if (current) setLoading(false); });
+    return () => { current = false; clearTimeout(timer); };
+  }, [user?.id, support, attempt]);
 
   async function toggle() {
     if (!user || busy) return;
@@ -73,6 +92,7 @@ export default function PushNotificationsSection() {
       </>}
     {loading && <p role="status" className="text-sm">Vérification des notifications…</p>}
     {message && <p role="status" className="text-sm">{message}</p>}
+    {!loading && canRetry && <Button variant="outline" disabled={busy} onClick={() => setAttempt(value => value + 1)}>Réessayer</Button>}
     <p className="text-xs text-muted-foreground">Ce choix concerne uniquement cet appareil. Vos préférences email ci-dessous restent indépendantes.</p>
   </section>;
 }
