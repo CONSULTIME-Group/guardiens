@@ -128,17 +128,15 @@ BEGIN
 
   -- Assertion finale : les quatre jobid exacts sont toujours là, avec leur
   -- nom, leur horaire et leur activation d'origine.
-  IF EXISTS (
-    SELECT 1
+  IF (
+    SELECT count(*)
     FROM public._backup_digest_cron_20260919 b
-    FULL JOIN cron.job j
-      ON j.jobid = b.jobid AND j.jobid IN (12, 13, 14, 109)
-    WHERE b.jobid IS NULL
-       OR j.jobid IS NULL
-       OR j.jobname IS DISTINCT FROM b.jobname
-       OR j.schedule IS DISTINCT FROM b.schedule
-       OR j.active IS DISTINCT FROM b.active
-  ) THEN
+    JOIN cron.job j ON j.jobid = b.jobid
+    WHERE b.jobid IN (12, 13, 14, 109)
+      AND j.jobname IS NOT DISTINCT FROM b.jobname
+      AND j.schedule IS NOT DISTINCT FROM b.schedule
+      AND j.active IS NOT DISTINCT FROM b.active
+  ) <> 4 THEN
     RAISE EXCEPTION 'Jobid, nom, horaire ou activation modifié, annulation complète';
   END IF;
 END;
