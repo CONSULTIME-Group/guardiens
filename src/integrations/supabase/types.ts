@@ -5795,6 +5795,44 @@ export type Database = {
         }
         Relationships: []
       }
+      push_test_attempts: {
+        Row: {
+          created_at: string
+          finished_at: string | null
+          outcome: string
+          provider_status: number | null
+          request_id: string
+          subscription_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          finished_at?: string | null
+          outcome?: string
+          provider_status?: number | null
+          request_id: string
+          subscription_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          finished_at?: string | null
+          outcome?: string
+          provider_status?: number | null
+          request_id?: string
+          subscription_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_test_attempts_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "push_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       redirects: {
         Row: {
           created_at: string
@@ -10336,6 +10374,14 @@ export type Database = {
           p256dh_key: string
           subscription_id: string
         }[]
+      }
+      push_claim_test: {
+        Args: {
+          p_request_id: string
+          p_subscription_id: string
+          p_user_id: string
+        }
+        Returns: boolean
       }
       push_close_job: {
         Args: { p_error_code?: string; p_job_id: string; p_outcome: string }

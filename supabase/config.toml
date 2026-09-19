@@ -163,3 +163,6 @@ project_id = "erhccyqevdyevpyctsjj"
 
   [functions.dispatch-web-push]
     verify_jwt = false
+
+  [functions.send-web-push-test]
+    verify_jwt = true
