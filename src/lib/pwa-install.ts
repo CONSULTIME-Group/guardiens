@@ -91,6 +91,12 @@ export function markInstallSuggestion(now = Date.now()) {
   try { count = Number(JSON.parse(read(REMINDER_KEY) ?? "{}").count) || 0; } catch { /* reset */ }
   write(REMINDER_KEY, JSON.stringify({ last: now, count: count + 1 }));
 }
+export const firstInstallVisitDue = (userId: string) => read(`guardiens_pwa_welcome:${userId}`) !== "1";
+export function markInstallWelcome(userId: string) {
+  write(`guardiens_pwa_welcome:${userId}`, "1");
+  markInstallSuggestion();
+  void trackEvent("pwa_install_suggestion_shown", { source: "first_mobile_visit" });
+}
 export function declareInstalled() {
   write(KNOWN_KEY, "1");
   update({ knownInstalled: true });

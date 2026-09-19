@@ -16,6 +16,7 @@ import { usePresenceHeartbeat } from "@/hooks/usePresenceHeartbeat";
 import { AppShellProvider } from "./AppShellContext";
 import { useChromeVisibility } from "./ChromeVisibility";
 import AppTopBar from "./AppTopBar";
+import InstallAppWelcome from "@/components/settings/InstallAppWelcome";
 
 /**
  * Zone principale du shell. Quand un ecran plein cadre (fil de messagerie)
@@ -92,6 +93,7 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
     <div className="flex min-h-screen bg-background">
       <Sidebar showHeaderBells={!mobileHeader} />
       <ShellMain>
+        <InstallAppWelcome key={user?.id ?? "signed-out"} paused={!!showOnboarding} />
         <div className="hidden md:block">
           <Breadcrumbs />
         </div>
