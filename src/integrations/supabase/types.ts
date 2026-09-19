@@ -122,6 +122,30 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_digest_cron_20260919: {
+        Row: {
+          active: boolean | null
+          command: string | null
+          jobid: number | null
+          jobname: string | null
+          schedule: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          command?: string | null
+          jobid?: number | null
+          jobname?: string | null
+          schedule?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          command?: string | null
+          jobid?: number | null
+          jobname?: string | null
+          schedule?: string | null
+        }
+        Relationships: []
+      }
       _backup_email_prefs_rpc_20260919: {
         Row: {
           acl: unknown[] | null
