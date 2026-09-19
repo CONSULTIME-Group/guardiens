@@ -8,7 +8,7 @@ import { CRON_TRACE_HEADER, digestRunStatus, readCronTraceId } from "../../supab
 const ALERT = readFileSync("supabase/functions/send-alert-digest/index.ts", "utf8");
 const NEARBY = readFileSync("supabase/functions/send-nearby-daily-digest/index.ts", "utf8");
 const MIGRATION = readFileSync(
-  "supabase/migrations/20260919113000_digest_cron_trace_correlation.sql",
+  "supabase/sql/pending/20260919113000_digest_cron_trace_correlation.sql",
   "utf8",
 );
 
