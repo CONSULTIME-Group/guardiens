@@ -1,8 +1,9 @@
 # Notifications push, premier lot
 
 Code backend et parcours mobile prepares et testes le 19 septembre 2026.
-Application SQL, secrets, fonctions et publication a verifier dans la section
-deploiement avant de considerer le service actif.
+SQL applique a 14:55 UTC, secrets installes a 15:06 UTC, deux fonctions
+deployees a 15:07 UTC, cron installe a 15:08 UTC. La publication du frontend
+et la reception reelle sur appareil restent en cours.
 
 ## Perimetre fonctionnel
 
@@ -17,7 +18,9 @@ n'existe pas.
 
 ## Fichiers
 
-- `supabase/sql/pending/20260919_web_push.sql` : SQL **prepare, non applique**.
+- `supabase/sql/pending/20260919_web_push.sql` : SQL applique en production le
+  19 septembre 2026 a 14:55 UTC (empreinte sha256 fbe071b0..., RLS forcee,
+  zero abonnement, zero job, 19 triggers existants preserves).
 - `supabase/functions/_shared/web-push/` : helpers purs et testables
   (`auth.ts`, `config.ts`, `endpoint.ts`, `keys.ts`, `payload.ts`,
   `request.ts`, `transport.ts`).
@@ -31,7 +34,7 @@ n'existe pas.
   fixtures artificielles uniquement. Lancer avec `@electric-sql/pglite` disponible
   dans NODE_PATH, sans ajouter de dependance a l'application.
 
-## Objets SQL a appliquer plus tard
+## Objets SQL appliques le 19 septembre 2026 a 14:55 UTC
 
 Tables `public.push_subscriptions` et `public.push_delivery_jobs` : RLS activee
 et forcee, aucune policy pour `anon` ni `authenticated`, droits reserves a
@@ -71,16 +74,18 @@ trois essais avec attente croissante. Duree de vie des jobs : une heure. Histori
 terminal conserve sept jours. Les erreurs de journalisation donnent une reponse
 HTTP 500 au dispatcher ; une acceptation fournisseur ne prouve jamais la remise.
 
-## Configuration restant a creer
+## Configuration installee
 
-Variables backend, absentes du depot, a ajouter dans les secrets du projet :
+Variables backend, absentes du depot, installees dans les secrets du projet le
+19 septembre 2026 a 15:06 UTC (presence booleenne, aucune valeur affichee) :
 
 - `VAPID_PUBLIC_KEY`
 - `VAPID_PRIVATE_KEY`
-- `VAPID_SUBJECT` (forme `mailto:` ou `https:`)
+- `VAPID_SUBJECT` (forme `mailto:` ou `https:`, valeur choisie `https://guardiens.fr`)
 
-Sans ces trois valeurs, l'action `config` renvoie `enabled: false` et aucune
-permission navigateur n'est demandee ; `subscribe` et l'envoi sont refuses.
+Sans ces trois valeurs, l'action `config` renverrait `enabled: false` et aucune
+permission navigateur ne serait demandee ; `subscribe` et l'envoi seraient
+refuses. Avec les trois installees, `config` repond `enabled: true`.
 
 ## Validation du code
 
@@ -101,23 +106,41 @@ Sources : [WebKit](https://webkit.org/blog/13878/web-push-for-web-apps-on-ios-an
 
 ## Deploiement
 
-Au 19 septembre 2026 a 12:32:52 UTC, lecture DB : aucune des deux tables push
-n'existe et aucun cron push n'est configure. Le code n'est pas active en
-production. La revue automatique a refuse la publication directe sur main,
-car le GO de developpement ne couvre pas clairement cette publication.
-Le lot complet doit etre relu dans la PR avant approbation explicite de la
-fusion, du SQL, des cles, des fonctions et de la publication frontend.
+Historique conserve : au 19 septembre 2026 a 12:32:52 UTC, lecture DB, aucune
+des deux tables push n'existait et aucun cron push n'etait configure. La revue
+automatique avait refuse la publication directe sur main, le GO de
+developpement ne couvrant pas clairement cette publication. Le lot complet a
+ete relu puis approuve par GO explicite.
+
+Etats successifs du 19 septembre 2026 :
+
+1. 14:55 UTC : SQL applique en production, empreinte sha256 fbe071b0 conforme,
+   RLS forcee, zero abonnement, zero job, 19 triggers existants preserves.
+2. 15:06 UTC : trois secrets VAPID generes localement puis installes (presence
+   booleenne seulement), aucune paire existante ecrasee, aucune valeur affichee.
+3. 15:07 UTC : fonctions `push-subscription` et `dispatch-web-push` deployees,
+   aucune autre fonction. Verifications HTTP sans effet metier : action
+   `config` publique HTTP 200, `enabled: true`, cle publique de 87 caracteres,
+   reponse limitee a `enabled` et `publicKey` ; `status` sans authentification
+   refuse HTTP 401 ; `dispatch-web-push` sans authentification refuse HTTP 401.
+4. 15:08:05 UTC : cron `dispatch-web-push` installe, job 1224 actif, un passage
+   par minute, cinq jobs maximum, timeout HTTP 50 secondes, cle lue dans Vault,
+   jamais dans le SQL en clair, aucun appel immediat. Desactivation possible
+   par `cron.unschedule` sur ce seul nom.
+5. Frontend : publication du service worker et des reglages en cours, pas encore
+   faite. Aucun compte n'est abonne automatiquement.
+
+`verify_jwt = false` est desormais fixe dans `supabase/config.toml` pour
+`push-subscription` et `dispatch-web-push` : les deux handlers assurent eux
+memes leur authentification (JWT membre ou cle de service stricte). Sans ces
+entrees, un redeploiement ulterieur pourrait retablir le rejet JWT par defaut.
+
+Limites conservees : le dispatcher n'a pas ete appele avec la cle de service,
+aucun appareil inscrit, aucun message, candidature ni envoi declenche. La
+reception reelle sur telephone physique n'est pas encore testee et reste a
+verifier apres activation volontaire par un membre. Une acceptation par le
+service de push du navigateur ne prouve jamais la remise.
 
 Le controle visuel sur navigateur reel n'a pas pu etre execute dans cet
 environnement : Chromium absent, telechargement termine en timeout. Les tests
-de rendu et d'interaction mentionnes plus haut utilisent jsdom. La reception
-sur telephone physique reste a verifier apres activation volontaire.
-
-1. Appliquer le SQL prepare, sur GO explicite.
-2. Deployer les deux fonctions, sur GO explicite.
-3. Appliquer `supabase/sql/pending/20260919_web_push_cron.sql` : un passage par
-   minute, cinq jobs maximum, timeout HTTP 50 secondes. Cle lue dans Vault,
-   jamais dans le SQL en clair. Aucun job existant remplace et aucun appel
-   immediat. Desactivation possible par `cron.unschedule` sur ce seul nom.
-4. Publier le service worker et les reglages, puis verifier une inscription sur
-   appareil physique. Aucun compte n'est abonne automatiquement.
+de rendu et d'interaction mentionnes plus haut utilisent jsdom.
