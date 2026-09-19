@@ -87,6 +87,8 @@ project_id = "erhccyqevdyevpyctsjj"
     verify_jwt = true
   [functions.alert-content-quality]
     verify_jwt = true
+  [functions.alert-admin-signals]
+    verify_jwt = true
   [functions.nudge-affinity-onboarding]
     verify_jwt = true
   [functions.process-mass-email-queue]
