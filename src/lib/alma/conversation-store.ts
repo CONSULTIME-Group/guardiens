@@ -36,6 +36,7 @@ const initialState: AlmaConversationState = {
 };
 
 let state: AlmaConversationState = initialState;
+let conversationGeneration = 0;
 const listeners = new Set<() => void>();
 
 function setState(patch: Partial<AlmaConversationState>) {
@@ -53,6 +54,8 @@ export function subscribeAlmaConversation(listener: () => void): () => void {
 }
 
 export function resetAlmaConversation() {
+  conversationGeneration += 1;
+  almaMoodContext = { mood: null, line: null };
   state = initialState;
   listeners.forEach((l) => l());
 }
@@ -115,6 +118,7 @@ export async function sendAlmaMessage({
 }: SendAlmaMessageArgs): Promise<void> {
   const message = text.trim();
   if (!message || state.sending) return;
+  const requestGeneration = conversationGeneration;
 
   const history = state.messages.map((m) => ({
     role: m.role === "alma" ? ("assistant" as const) : ("user" as const),
@@ -149,6 +153,9 @@ export async function sendAlmaMessage({
       },
     });
 
+    // Une réponse d'une session terminée ne doit jamais rejoindre le nouveau fil.
+    if (requestGeneration !== conversationGeneration) return;
+
     if (error) {
       setState({ sending: false, error: "Alma reste joignable dans un instant, réessayez." });
       return;
@@ -174,6 +181,22 @@ export async function sendAlmaMessage({
       messages: [...state.messages, { id: nextId(), role: "alma", content: answer }],
     });
   } catch {
+    if (requestGeneration !== conversationGeneration) return;
     setState({ sending: false, error: "Alma reste joignable dans un instant, réessayez." });
   }
+}
+
+// Le store survit au dock : écouter l'auth même quand celui-ci est démonté.
+// Un rafraîchissement de jeton du même compte conserve la conversation.
+let conversationUserId: string | null = null;
+const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange((event, session) => {
+  const nextUserId = session?.user.id ?? null;
+  if (event === "SIGNED_OUT" || nextUserId !== conversationUserId) {
+    conversationUserId = nextUserId;
+    resetAlmaConversation();
+  }
+});
+
+if (import.meta.hot) {
+  import.meta.hot.dispose(() => authSubscription.unsubscribe());
 }
