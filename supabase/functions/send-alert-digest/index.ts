@@ -18,7 +18,7 @@ import { publicationWindowOrClause } from "../_shared/sit-publication-window.ts"
 import { geocodeKeyCandidates } from "../_shared/geocode-lookup.ts";
 import { recordDeliveryFailure } from "../_shared/delivery-failure.ts";
 import { startCronRun, type CronRun } from "../_shared/cron-run-log.ts";
-import { digestRunStatus, readCronTraceId } from "../_shared/cron-trace.ts";
+import { ALERT_DIGEST_CRON_JOB_IDS, digestRunStatus, readCronJobId, readCronTraceId } from "../_shared/cron-trace.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -118,6 +118,7 @@ function haversine(lat1: number, lng1: number, lat2: number, lng2: number): numb
 Deno.serve(async (req) => {
   let nominalRun: CronRun | null = null;
   let traceId: string | null = null;
+  let cronJobId: number | null = null;
   try {
     const url = new URL(req.url);
     const forceMode = url.searchParams.get("force") === "true";
@@ -146,6 +147,7 @@ Deno.serve(async (req) => {
 
     // Corrélation formelle cron, réponse HTTP, cron_run_log.
     traceId = readCronTraceId(req.headers, parsedBody);
+    cronJobId = readCronJobId(req.headers, parsedBody, ALERT_DIGEST_CRON_JOB_IDS);
 
     // Passage nominal seulement : le forçage, le dry run et le ciblage d'un
     // membre restent hors journal métier.
@@ -167,10 +169,10 @@ Deno.serve(async (req) => {
           reason: verdict.reason,
           skipped: true,
           sent: 0,
-          trace_id: traceId,
+          trace_id: traceId, cron_job_id: cronJobId,
         });
         return new Response(
-          JSON.stringify({ ok: true, skipped: true, reason: verdict.reason, paris_hour: verdict.parisHour, trace_id: traceId }),
+          JSON.stringify({ ok: true, skipped: true, reason: verdict.reason, paris_hour: verdict.parisHour, trace_id: traceId, cron_job_id: cronJobId }),
           { headers: { "Content-Type": "application/json" } },
         );
       }
@@ -200,9 +202,9 @@ Deno.serve(async (req) => {
         reason: "no_prefs",
         prefs_evaluated: 0,
         sent: 0,
-        trace_id: traceId,
+        trace_id: traceId, cron_job_id: cronJobId,
       });
-      return new Response(JSON.stringify({ sent: 0, skipped: 0, reason: "no_prefs", trace_id: traceId }), {
+      return new Response(JSON.stringify({ sent: 0, skipped: 0, reason: "no_prefs", trace_id: traceId, cron_job_id: cronJobId }), {
         status: 200, headers: { "Content-Type": "application/json" },
       });
     }
@@ -554,7 +556,7 @@ Deno.serve(async (req) => {
       rayon_fallback_dept: rayonFallbackDept,
       errors_count: errors.length,
       hour: currentHourStr,
-      trace_id: traceId,
+      trace_id: traceId, cron_job_id: cronJobId,
     });
 
     return new Response(
@@ -568,14 +570,14 @@ Deno.serve(async (req) => {
         rayon_fallback_dept: rayonFallbackDept,
         errors,
         hour: currentHourStr,
-        trace_id: traceId,
+        trace_id: traceId, cron_job_id: cronJobId,
         ...(dryRun ? { preview: dry } : {}),
       }),
       { status: 200, headers: { "Content-Type": "application/json" } },
     );
   } catch (err) {
     console.error("send-alert-digest fatal", err);
-    await nominalRun?.fail(err, { trace_id: traceId });
-    return new Response(JSON.stringify({ error: String(err), trace_id: traceId }), { status: 500 });
+    await nominalRun?.fail(err, { trace_id: traceId, cron_job_id: cronJobId });
+    return new Response(JSON.stringify({ error: String(err), trace_id: traceId, cron_job_id: cronJobId }), { status: 500 });
   }
 });

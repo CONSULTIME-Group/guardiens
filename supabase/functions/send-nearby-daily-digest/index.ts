@@ -20,7 +20,7 @@ import { parisWindowVerdict } from '../_shared/paris-hour.ts'
 import { publicationWindowOrClause } from '../_shared/sit-publication-window.ts'
 import { recordDeliveryFailure } from '../_shared/delivery-failure.ts'
 import { startCronRun, type CronRun } from '../_shared/cron-run-log.ts'
-import { digestRunStatus, readCronTraceId } from '../_shared/cron-trace.ts'
+import { digestRunStatus, NEARBY_DAILY_DIGEST_CRON_JOB_IDS, readCronJobId, readCronTraceId } from '../_shared/cron-trace.ts'
 
 const TARGET_PARIS_HOUR = 9
 
@@ -62,6 +62,7 @@ Deno.serve(async (req) => {
 
   // Corrélation formelle cron, réponse HTTP, cron_run_log.
   const traceId = readCronTraceId(req.headers, body)
+  const cronJobId = readCronJobId(req.headers, body, NEARBY_DAILY_DIGEST_CRON_JOB_IDS)
 
   // Passage nominal seulement : le mode manuel, le dry run et le ciblage d'un
   // membre restent hors journal métier.
@@ -76,10 +77,10 @@ Deno.serve(async (req) => {
         reason: verdict.reason,
         skipped: true,
         users_sent: 0,
-        trace_id: traceId,
+        trace_id: traceId, cron_job_id: cronJobId,
       })
       return new Response(
-        JSON.stringify({ ok: true, skipped: true, reason: verdict.reason, paris_hour: verdict.parisHour, trace_id: traceId }),
+        JSON.stringify({ ok: true, skipped: true, reason: verdict.reason, paris_hour: verdict.parisHour, trace_id: traceId, cron_job_id: cronJobId }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
       )
     }
@@ -135,8 +136,8 @@ Deno.serve(async (req) => {
     const allMissions = missions ?? []
 
     if (allSits.length === 0 && allMissions.length === 0) {
-      await nominalRun?.finish('success', { reason: 'no_new_listings', users_sent: 0, trace_id: traceId })
-      return json({ ok: true, reason: 'no_new_listings', users_sent: 0, trace_id: traceId })
+      await nominalRun?.finish('success', { reason: 'no_new_listings', users_sent: 0, trace_id: traceId, cron_job_id: cronJobId })
+      return json({ ok: true, reason: 'no_new_listings', users_sent: 0, trace_id: traceId, cron_job_id: cronJobId })
     }
 
     // 2) Enrichit avec prénom du propriétaire.
@@ -217,8 +218,8 @@ Deno.serve(async (req) => {
     }
 
     if (optedInIds.size === 0) {
-      await nominalRun?.finish('success', { reason: 'no_recipients', users_sent: 0, trace_id: traceId })
-      return json({ ok: true, reason: 'no_recipients', users_sent: 0, trace_id: traceId })
+      await nominalRun?.finish('success', { reason: 'no_recipients', users_sent: 0, trace_id: traceId, cron_job_id: cronJobId })
+      return json({ ok: true, reason: 'no_recipients', users_sent: 0, trace_id: traceId, cron_job_id: cronJobId })
     }
 
     // La liste des destinataires dépasse le millier : on découpe le `in` par
@@ -444,7 +445,7 @@ Deno.serve(async (req) => {
       claim_skipped_by: claimSkippedBy,
       dept_fallback_users: deptFallbackUsers,
       errors_count: errors.length,
-      trace_id: traceId,
+      trace_id: traceId, cron_job_id: cronJobId,
     })
 
     return json({
@@ -457,12 +458,12 @@ Deno.serve(async (req) => {
       dept_fallback_users: deptFallbackUsers,
       errors,
       dry_run: !!body.dry_run,
-      trace_id: traceId,
+      trace_id: traceId, cron_job_id: cronJobId,
     })
   } catch (err) {
     console.error('send-nearby-daily-digest fatal', err)
-    await nominalRun?.fail(err, { trace_id: traceId })
-    return json({ error: String(err), trace_id: traceId }, 500)
+    await nominalRun?.fail(err, { trace_id: traceId, cron_job_id: cronJobId })
+    return json({ error: String(err), trace_id: traceId, cron_job_id: cronJobId }, 500)
   }
 })
 
