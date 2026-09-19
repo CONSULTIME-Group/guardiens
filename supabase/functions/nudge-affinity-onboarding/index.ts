@@ -32,6 +32,9 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
+  const authError = await requireAdminOrServiceRole(req, corsHeaders);
+  if (authError) return authError;
+
   const run = await startCronRun("nudge-affinity-onboarding");
   try {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
