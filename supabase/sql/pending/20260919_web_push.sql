@@ -434,13 +434,23 @@ AS $$
 DECLARE
   v_limit integer := least(greatest(coalesce(p_limit, 20), 1), 20);
 BEGIN
+  -- A timed-out claim may already have reached a provider. Never replay it.
+  UPDATE public.push_delivery_jobs j
+    SET status='failed', last_error_code='claim_ambiguous', updated_at=now()
+    WHERE j.status='claimed' AND j.claim_expires_at < now();
+  UPDATE public.push_delivery_jobs j
+    SET status='skipped', last_error_code='expired_or_irrelevant', updated_at=now()
+    WHERE j.status='pending' AND (j.expires_at <= now() OR NOT public.push_job_eligible(j.id));
+  DELETE FROM public.push_delivery_jobs WHERE created_at < now() - interval '7 days'
+    AND status IN ('accepted','failed','skipped');
   RETURN QUERY
   WITH claimable AS (
     SELECT j.id
     FROM public.push_delivery_jobs j
-    WHERE j.status IN ('pending', 'claimed')
+    WHERE j.status = 'pending'
       AND j.expires_at > now()
-      AND (j.status = 'pending' OR j.claim_expires_at < now())
+      AND j.available_at <= now() AND j.attempts < 3
+      AND public.push_job_eligible(j.id)
     ORDER BY j.created_at
     LIMIT v_limit
     FOR UPDATE SKIP LOCKED
