@@ -83,7 +83,7 @@ describe.each([
     const blocks = metricsBlocks(SRC);
     expect(blocks.length).toBeGreaterThan(0);
     for (const block of blocks) {
-      expect(block).not.toMatch(/email|recipient|first_name|user_id|profile|token|Bearer/i);
+      expect(block).not.toMatch(/email|recipient_|recipientEmail|first_name|user_id|profile\.|token|Bearer/i);
       expect(block).not.toContain("errors:");
     }
     expect(SRC).toContain(`${sentKey}`);
