@@ -1,32 +1,34 @@
-# Fermer la fonction generate-longtail-article
+# Diagnostic lecture seule, nudge-affinity-onboarding
 
-## Résultat des tests (sans Authorization ni apikey, production)
+Aucune modification, aucun déploiement, aucune invocation de fonction, aucun email, aucune écriture. Uniquement des lectures (code du dépôt, cron_run_log, email_send_log, logs analytiques).
 
-| Appel | Statut | Ce que cela prouve |
-|---|---|---|
-| OPTIONS generate-longtail-article | 200 | Préflight ouvert, normal |
-| POST generate-longtail-article, charge invalide | 400 avec le détail de validation zod | **Aucune authentification.** La requête a traversé la passerelle et atteint le code métier : seule la validation du contenu l'a arrêtée. Une charge valide aurait inséré un article en base sous la clé de service. |
-| OPTIONS generate-article | 200 | Préflight ouvert, normal |
-| POST generate-article, charge invalide | 401 Unauthorized | Authentification effective, la vérification du jeton précède le code métier |
+## Verdict
 
-Aucune écriture n'a été faite : les charges envoyées ne peuvent pas insérer.
+L'échec vient de l'appel sortant `fetch(SUPABASE_URL + "/functions/v1/send-transactional-email")` dans la boucle par destinataire, qui est **rejeté** (promesse en erreur), pas retourné en réponse 429. Le rejet remonte au `catch` du handler, qui appelle `run.fail`, d'où le statut `failed` avec `metrics` vide.
 
-## Gravité
+Ce n'est donc pas Resend, et ce n'est pas le compteur `skipped` du code : un 429 HTTP de `send-transactional-email` produirait `emails_skipped` et un run `success`. Ici la boucle est interrompue avant `run.finish`.
 
-Critique. `generate-longtail-article` est un endpoint d'écriture anonyme : n'importe qui peut créer autant de brouillons d'articles qu'il veut dans la table `articles`, avec titre, contenu et slug de son choix par le biais des paramètres ville et race. Les brouillons ne sont pas publiés, mais la table peut être noyée, et tout automatisme de publication ou de relecture derrière devient un vecteur.
+## Preuves
 
-## Cause
+1. `cron_run_log` (lecture) : 11 exécutions `failed` depuis le 08/09, la dernière le 18/09 18:00:08 → 18:00:45, `metrics` vide à chaque fois. Dernier `success` le 07/09 18:00 (detected 31, emails_sent 25).
+2. `email_send_log` entre 17:59 et 18:02 le 18/09 : exactement 2 lignes `affinity-onboarding-nudge`, statut `deferred`, à 18:00:20 et 18:00:25, sans message d'erreur. Le travail progressait donc, puis s'est arrêté net environ 20 secondes plus tard, cohérent avec un rejet à l'appel suivant et non avec une erreur de détection ou de RPC.
+3. Même signature d'erreur dans `cron_run_log` pour deux autres fonctions qui invoquaient `send-transactional-email` en boucle : `nudge-sitter-dormant` (dernier échec 06/09) et `send-mutual-aid-weekly-digest` (dernier échec 25/08). Les deux ont cessé d'échouer après avoir été outillées contre ce cas.
+4. Le code de `nudge-sitter-dormant` documente et traite explicitement ce rejet : `postWithBackoff` intercepte l'erreur levée par `fetch`, lit `err.retryAfterMs` et `err.name === "RateLimitError"`, puis interrompt proprement le lot. La forme de l'erreur attendue correspond exactement au message observé, « Rate limit exceeded for trace ... Retry after NNNNNms. ». `nudge-affinity-onboarding` ne possède aucun équivalent : son `fetch` est nu, donc tout rejet fait tomber l'exécution entière.
+5. `send-sitter-daily-digest` et `send-seasonal-nurture` contiennent la même reconnaissance (`parseRetryAfterMs`, `isRateLimitFailure`, lots espacés) et n'apparaissent pas dans les échecs.
 
-`supabase/functions/generate-longtail-article/index.ts` n'a aucune vérification d'identité, contrairement à `generate-article` (l. 13-29) qui refuse sans jeton. La fonction n'est pas déclarée dans `supabase/config.toml`, son `verify_jwt` est donc réglé hors fichier, et il est à faux.
+Étage exact : couche d'invocation de fonction à fonction (passerelle Edge), au niveau de l'appel sortant vers `send-transactional-email`, hôte `<projet>.supabase.co`, chemin `/functions/v1/send-transactional-email`, sans query. L'identifiant « trace » du message est propre à cette passerelle, il n'apparaît dans aucun message Resend du dépôt.
 
-## Correction proposée
+## Limites de rétention, ce qui n'est pas disponible
 
-1. Ajouter en tête de `generate-longtail-article/index.ts` le contrôle admin partagé déjà utilisé ailleurs, `requireAdminOrServiceRole` de `supabase/functions/_shared/require-admin.ts` : la fonction est un outil de rédaction interne, elle n'a aucune raison d'être ouverte.
-2. Déclarer la fonction dans `supabase/config.toml` avec `verify_jwt = true`, pour que la configuration versionnée corresponde à la réalité.
-3. Vérifier, après déploiement, qu'un appel anonyme répond 401 et qu'un appel admin fonctionne toujours.
+Les logs Edge accessibles à Lovable ne couvrent pas le 17 ni le 18 septembre. Fenêtre réellement interrogeable au moment du diagnostic : environ 10 minutes, du 19/09 05:40 au 19/09 05:50 UTC, toutes sources confondues (`function_logs`, `function_edge_logs`, `edge_logs`, `postgres_logs`). Une requête explicite du 17/09 00:00 au 19/09 06:00 ne retourne que des lignes du 19/09 à partir de 05:40.
 
-## Contrôle complémentaire recommandé
+Conséquence : aucune stack trace, aucun numéro de ligne, aucun message de runtime du 18/09 18:00 ne peut être produit. Le diagnostic ci-dessus repose sur `cron_run_log`, `email_send_log` et le code, pas sur les logs Edge de l'incident, qui sont expirés. Les seules lignes Edge visibles pour cette fonction aujourd'hui sont des OPTIONS 200 et des POST 401 de contrôle d'authentification, sans rapport avec l'incident.
 
-Le même test mérite d'être passé sur les autres fonctions d'écriture absentes de `config.toml`, en particulier `generate-breed-profile`, `generate-city-page`, `generate-department-page`, `generate-location-profile`, `auto-internal-links`, `copy-association-photos`, `backfill-profile-coordinates` et `normalize-skill`. Je peux le faire en lecture seule, avec des charges invalides, et vous donner la liste de celles qui sont ouvertes.
+## Ce que ce diagnostic n'affirme pas
 
-Rien n'est modifié tant que vous n'avez pas validé.
+- La valeur exacte du quota et son échelle (par trace, par worker, par projet) n'est pas lisible depuis les données accessibles.
+- La raison de la bascule du 07/09 au 08/09 n'est pas établie ici. Piste à confirmer de votre côté sur vos agrégats : volume simultané d'envois à 18:00 UTC et concurrence avec d'autres pipelines d'emails à la même minute.
+
+## Suite proposée, si vous la demandez
+
+Aucune refonte. Une seule fonction touchée, `nudge-affinity-onboarding` : entourer l'appel sortant d'un équivalent de `postWithBackoff` déjà éprouvé dans `nudge-sitter-dormant`, afin que la saturation interrompe proprement le lot, reporte les destinataires restants et termine le run en `partial` avec métriques, au lieu de perdre l'exécution entière. À faire seulement sur votre GO explicite.
