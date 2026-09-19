@@ -18,16 +18,7 @@ const isServiceRoleRequest = (req: Request): boolean => {
   const raw = req.headers.get('Authorization') ?? ''
   if (!raw.startsWith('Bearer ')) return false
   const token = raw.slice(7)
-  if (token && token === SERVICE_ROLE) return true
-  try {
-    const parts = token.split('.')
-    if (parts.length !== 3) return false
-    const pad = parts[1].length % 4 === 0 ? '' : '='.repeat(4 - (parts[1].length % 4))
-    const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/') + pad
-    return JSON.parse(atob(b64))?.role === 'service_role'
-  } catch {
-    return false
-  }
+  return Boolean(SERVICE_ROLE) && token === SERVICE_ROLE
 }
 
 Deno.serve(async (req) => {
