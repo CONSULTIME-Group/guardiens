@@ -14,7 +14,8 @@ beforeEach(async () => {
   Object.defineProperty(navigator, "userAgent", { configurable: true, value: "Mozilla/5.0 (Linux; Android 14) AppleWebKit Chrome/140 Mobile Safari" });
   media = {};
   vi.stubGlobal("matchMedia", (query: string) => {
-    const item = media[query] = { matches: false };
+    const item: { matches: boolean; change?: () => void } = { matches: false };
+    media[query] = item;
     return Object.assign(item, { addEventListener: (_: string, cb: () => void) => { item.change = cb; }, removeEventListener: vi.fn() });
   });
   handlers = [];
