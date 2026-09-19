@@ -38,3 +38,47 @@ export function readCronTraceId(headers: Headers, body: unknown): string | null 
 export function digestRunStatus(errorCount: number): "success" | "partial" {
   return errorCount > 0 ? "partial" : "success";
 }
+
+// Identifiant technique du job pg_cron appelant.
+//
+// Chaque commande transmet son jobid réel (12, 13, 14 pour send-alert-digest,
+// 109 pour send-nearby-daily-digest) en en-tête et dans le corps JSON. C'est
+// un entier de planification, jamais un identifiant de membre. L'Edge ne fait
+// confiance à aucune valeur arbitraire : elle n'est retenue que si elle
+// figure dans la liste autorisée de la fonction appelée, sinon elle vaut null
+// et le digest se poursuit normalement.
+
+export const CRON_JOB_ID_HEADER = "x-guardiens-cron-job-id";
+
+export const ALERT_DIGEST_CRON_JOB_IDS = [12, 13, 14] as const;
+export const NEARBY_DAILY_DIGEST_CRON_JOB_IDS = [109] as const;
+
+function toJobId(value: unknown): number | null {
+  if (typeof value === "number") return Number.isInteger(value) ? value : null;
+  if (typeof value === "string" && /^[0-9]{1,9}$/.test(value.trim())) {
+    return Number.parseInt(value.trim(), 10);
+  }
+  return null;
+}
+
+/**
+ * Lit le jobid pg_cron, en-tête prioritaire puis corps JSON, et le valide
+ * contre la liste autorisée de la fonction. Toute valeur absente, non
+ * entière ou hors liste devient null sans jamais bloquer le passage.
+ */
+export function readCronJobId(
+  headers: Headers,
+  body: unknown,
+  allowed: readonly number[],
+): number | null {
+  const candidates: unknown[] = [headers?.get?.(CRON_JOB_ID_HEADER)];
+  if (body && typeof body === "object") {
+    const b = body as Record<string, unknown>;
+    candidates.push(b.cron_job_id, b.job_id);
+  }
+  for (const candidate of candidates) {
+    const parsed = toJobId(candidate);
+    if (parsed !== null && allowed.includes(parsed)) return parsed;
+  }
+  return null;
+}
