@@ -371,6 +371,27 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_release_claim_rpc_20260918: {
+        Row: {
+          acl: unknown[] | null
+          captured_at: string | null
+          definition: string | null
+          signature: string | null
+        }
+        Insert: {
+          acl?: unknown[] | null
+          captured_at?: string | null
+          definition?: string | null
+          signature?: string | null
+        }
+        Update: {
+          acl?: unknown[] | null
+          captured_at?: string | null
+          definition?: string | null
+          signature?: string | null
+        }
+        Relationships: []
+      }
       _backup_sitter_booleans_20260820: {
         Row: {
           demanding_breeds_ok: boolean | null
