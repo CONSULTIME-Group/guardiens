@@ -493,11 +493,13 @@ BEGIN
   END IF;
 
   UPDATE public.push_delivery_jobs
-  SET status = CASE WHEN p_outcome = 'retry' THEN 'pending' ELSE p_outcome END,
+  SET status = CASE WHEN p_outcome = 'retry' AND attempts < 3 AND expires_at > now()
+                   THEN 'pending' WHEN p_outcome = 'retry' THEN 'failed' ELSE p_outcome END,
+      available_at = CASE WHEN p_outcome = 'retry' THEN now() + interval '1 minute' * greatest(attempts, 1) ELSE available_at END,
       claim_expires_at = CASE WHEN p_outcome = 'retry' THEN now() ELSE claim_expires_at END,
       last_error_code = p_error_code,
       updated_at = now()
-  WHERE id = p_job_id;
+  WHERE id = p_job_id AND status = 'claimed';
 
   RETURN FOUND;
 END;
