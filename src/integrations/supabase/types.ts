@@ -101,6 +101,27 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_email_prefs_rpc_20260919: {
+        Row: {
+          acl: unknown[] | null
+          captured_at: string | null
+          definition: string | null
+          signature: string | null
+        }
+        Insert: {
+          acl?: unknown[] | null
+          captured_at?: string | null
+          definition?: string | null
+          signature?: string | null
+        }
+        Update: {
+          acl?: unknown[] | null
+          captured_at?: string | null
+          definition?: string | null
+          signature?: string | null
+        }
+        Relationships: []
+      }
       _backup_email_queue_rpc_acl_20260918: {
         Row: {
           acl: unknown[] | null
