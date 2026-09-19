@@ -85,6 +85,8 @@ project_id = "erhccyqevdyevpyctsjj"
     verify_jwt = true
   [functions.email-pipeline-watchdog]
     verify_jwt = true
+  [functions.nudge-affinity-onboarding]
+    verify_jwt = true
   [functions.process-mass-email-queue]
     verify_jwt = true
   [functions.cancel-mass-email]

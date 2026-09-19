@@ -51,6 +51,7 @@ describe.each([
   "detect-deploy-and-mark-dirty",
   "send-weekly-nearby-digest",
   "auto-close-small-missions",
+  "nudge-affinity-onboarding",
 ])("%s authorization", (name) => {
   it.each([
     ["missing credentials", {}],
