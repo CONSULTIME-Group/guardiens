@@ -50,6 +50,7 @@ describe.each([
   "consume-seo-dirty",
   "detect-deploy-and-mark-dirty",
   "send-weekly-nearby-digest",
+  "auto-close-small-missions",
 ])("%s authorization", (name) => {
   it.each([
     ["missing credentials", {}],
