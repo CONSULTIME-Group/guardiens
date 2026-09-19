@@ -153,6 +153,9 @@ export async function sendAlmaMessage({
       },
     });
 
+    // Une réponse d'une session terminée ne doit jamais rejoindre le nouveau fil.
+    if (requestGeneration !== conversationGeneration) return;
+
     if (error) {
       setState({ sending: false, error: "Alma reste joignable dans un instant, réessayez." });
       return;
