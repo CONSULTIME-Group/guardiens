@@ -63,15 +63,15 @@ describe("humeurs d'Alma, logique pure", () => {
   });
 });
 
-describe("aucune humeur ne peut apparaître dans une réponse à une question", () => {
-  it("la conversation ne lit jamais le module d'humeur", () => {
+describe("la conversation ne déclenche pas un nouveau tirage d'humeur", () => {
+  it("ne dépend pas du hook ni de la RPC de tirage", () => {
     for (const file of [
       "src/lib/alma/conversation-store.ts",
       "src/components/ai/alma/AlmaConversation.tsx",
       "supabase/functions/alma-chat/index.ts",
     ]) {
       const src = read(file);
-      expect(src).not.toMatch(/alma\/mood|useAlmaMood|alma_moods|get_alma_mood/);
+      expect(src).not.toMatch(/alma\/mood|useAlmaMood|get_alma_mood/);
     }
   });
 });
