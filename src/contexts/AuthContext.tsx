@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 import { getSignupRedirectUrl } from "@/lib/authRedirect";
 import { getOAuthTraceId, logOAuthStage, endOAuthFlow } from "@/lib/oauthLogger";
+import { cleanupPushOnLogout, reconcilePushSession } from "@/lib/web-push";
 
 type Role = "owner" | "sitter" | "both";
 type ActiveRole = "owner" | "sitter";
@@ -259,6 +260,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (session?.user) {
+          reconcilePushSession(session.user.id);
           markChecked(true);
           // Si un flux OAuth est en cours, on trace la pose de session.
           if (getOAuthTraceId()) {
@@ -298,6 +300,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             return;
           }
           markChecked(false);
+          reconcilePushSession();
           userRef.current = null;
           setUser(null);
           setProfileError(false);
@@ -456,6 +459,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const logout = useCallback(async () => {
+    await cleanupPushOnLogout(userRef.current?.id);
     try {
       localStorage.removeItem('guardiens_active_role');
     } catch {}

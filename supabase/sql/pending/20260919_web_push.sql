@@ -44,6 +44,7 @@ CREATE TABLE IF NOT EXISTS public.push_delivery_jobs (
   status text NOT NULL DEFAULT 'pending'
     CHECK (status IN ('pending', 'claimed', 'accepted', 'failed', 'skipped')),
   attempts integer NOT NULL DEFAULT 0,
+  available_at timestamptz NOT NULL DEFAULT now(),
   claimed_at timestamptz,
   claim_expires_at timestamptz,
   expires_at timestamptz NOT NULL DEFAULT now() + interval '1 hour',
@@ -104,6 +105,8 @@ DECLARE
   v_active integer;
   v_id uuid;
 BEGIN
+  -- Serialize registrations for this member, including reactivation.
+  PERFORM pg_advisory_xact_lock(hashtextextended('push_devices:' || p_user_id::text, 0));
   IF p_user_id IS NULL OR coalesce(p_endpoint, '') = ''
      OR coalesce(p_auth_key, '') = '' OR coalesce(p_p256dh_key, '') = '' THEN
     RAISE EXCEPTION 'push_invalid_input' USING ERRCODE = '22023';
@@ -118,7 +121,7 @@ BEGIN
     RAISE EXCEPTION 'push_endpoint_owned_by_other_account' USING ERRCODE = '42501';
   END IF;
 
-  IF v_owner IS NULL THEN
+  IF NOT EXISTS (SELECT 1 FROM public.push_subscriptions WHERE endpoint = p_endpoint AND enabled) THEN
     SELECT count(*) INTO v_active
     FROM public.push_subscriptions
     WHERE user_id = p_user_id AND enabled;
@@ -293,8 +296,7 @@ BEGIN
     -- verrou consultatif transactionnel : deux messages simultanes ne peuvent
     -- pas produire deux notifications.
     IF NOT pg_try_advisory_xact_lock(
-         hashtextextended('push_msg_cooldown', 0),
-         hashtextextended(v_recipient::text || ':' || NEW.conversation_id::text, 0)
+         hashtextextended('push_msg:' || v_recipient::text || ':' || NEW.conversation_id::text, 0)
        ) THEN
       RETURN NEW;
     END IF;
@@ -380,6 +382,40 @@ FOR EACH ROW EXECUTE FUNCTION public.push_enqueue_on_application();
 -- 6. Claim atomique et cloture, service_role uniquement
 -- ---------------------------------------------------------------------------
 
+CREATE OR REPLACE FUNCTION public.push_job_eligible(p_job_id uuid)
+RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path TO 'public'
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.push_delivery_jobs j
+    JOIN public.push_subscriptions s ON s.id = j.subscription_id AND s.user_id = j.user_id
+    WHERE j.id = p_job_id AND s.enabled AND j.expires_at > now()
+    AND (j.status='pending' OR (j.status='claimed' AND j.claim_expires_at > now()))
+    AND (
+      (j.event_kind = 'message' AND s.opt_in_messages AND EXISTS (
+        SELECT 1 FROM public.messages m
+        JOIN public.conversations c ON c.id = m.conversation_id
+        WHERE m.id = j.source_id AND m.read_at IS NULL
+          AND m.is_system IS FALSE AND m.moderation_hidden_at IS NULL
+          AND m.sender_id IN (c.owner_id, c.sitter_id)
+          AND j.user_id IN (c.owner_id, c.sitter_id) AND m.sender_id <> j.user_id
+          AND NOT EXISTS (SELECT 1 FROM public.blocked_users b
+            WHERE (b.blocker_id=m.sender_id AND b.blocked_id=j.user_id)
+               OR (b.blocker_id=j.user_id AND b.blocked_id=m.sender_id))
+      ))
+      OR (j.event_kind = 'application' AND s.opt_in_applications AND EXISTS (
+        SELECT 1 FROM public.applications a JOIN public.sits si ON si.id=a.sit_id
+        WHERE a.id=j.source_id AND a.status='pending'::application_status
+          AND a.viewed_at IS NULL AND si.user_id=j.user_id AND a.sitter_id<>j.user_id
+          AND NOT EXISTS (SELECT 1 FROM public.blocked_users b
+            WHERE (b.blocker_id=a.sitter_id AND b.blocked_id=j.user_id)
+               OR (b.blocker_id=j.user_id AND b.blocked_id=a.sitter_id))
+      ))
+    )
+  );
+$$;
+REVOKE ALL ON FUNCTION public.push_job_eligible(uuid) FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION public.push_job_eligible(uuid) TO service_role;
+
 CREATE OR REPLACE FUNCTION public.push_claim_jobs(p_limit integer DEFAULT 20)
 RETURNS TABLE (
   job_id uuid,
@@ -398,13 +434,23 @@ AS $$
 DECLARE
   v_limit integer := least(greatest(coalesce(p_limit, 20), 1), 20);
 BEGIN
+  -- A timed-out claim may already have reached a provider. Never replay it.
+  UPDATE public.push_delivery_jobs j
+    SET status='failed', last_error_code='claim_ambiguous', updated_at=now()
+    WHERE j.status='claimed' AND j.claim_expires_at < now();
+  UPDATE public.push_delivery_jobs j
+    SET status='skipped', last_error_code='expired_or_irrelevant', updated_at=now()
+    WHERE j.status='pending' AND (j.expires_at <= now() OR NOT public.push_job_eligible(j.id));
+  DELETE FROM public.push_delivery_jobs WHERE created_at < now() - interval '7 days'
+    AND status IN ('accepted','failed','skipped');
   RETURN QUERY
   WITH claimable AS (
     SELECT j.id
     FROM public.push_delivery_jobs j
-    WHERE j.status IN ('pending', 'claimed')
+    WHERE j.status = 'pending'
       AND j.expires_at > now()
-      AND (j.status = 'pending' OR j.claim_expires_at < now())
+      AND j.available_at <= now() AND j.attempts < 3
+      AND public.push_job_eligible(j.id)
     ORDER BY j.created_at
     LIMIT v_limit
     FOR UPDATE SKIP LOCKED
@@ -424,31 +470,7 @@ BEGIN
          s.endpoint, s.endpoint_host, s.auth_key, s.p256dh_key, cl.attempts
   FROM claimed cl
   JOIN public.push_subscriptions s ON s.id = cl.subscription_id
-  WHERE s.enabled
-    -- Verification a l'envoi : le destinataire est toujours le bon et
-    -- l'evenement est toujours pertinent.
-    AND (
-      (cl.event_kind = 'message' AND EXISTS (
-        SELECT 1
-        FROM public.messages m
-        JOIN public.conversations c ON c.id = m.conversation_id
-        WHERE m.id = cl.source_id
-          AND m.read_at IS NULL
-          AND m.is_system IS NOT TRUE
-          AND m.moderation_hidden_at IS NULL
-          AND m.sender_id <> cl.user_id
-          AND cl.user_id IN (c.owner_id, c.sitter_id)
-      ))
-      OR (cl.event_kind = 'application' AND EXISTS (
-        SELECT 1
-        FROM public.applications a
-        JOIN public.sits si ON si.id = a.sit_id
-        WHERE a.id = cl.source_id
-          AND a.status = 'pending'::application_status
-          AND a.viewed_at IS NULL
-          AND si.user_id = cl.user_id
-      ))
-    );
+  WHERE s.enabled;
 END;
 $$;
 
@@ -471,11 +493,13 @@ BEGIN
   END IF;
 
   UPDATE public.push_delivery_jobs
-  SET status = CASE WHEN p_outcome = 'retry' THEN 'pending' ELSE p_outcome END,
+  SET status = CASE WHEN p_outcome = 'retry' AND attempts < 3 AND expires_at > now()
+                   THEN 'pending' WHEN p_outcome = 'retry' THEN 'failed' ELSE p_outcome END,
+      available_at = CASE WHEN p_outcome = 'retry' THEN now() + interval '1 minute' * greatest(attempts, 1) ELSE available_at END,
       claim_expires_at = CASE WHEN p_outcome = 'retry' THEN now() ELSE claim_expires_at END,
       last_error_code = p_error_code,
       updated_at = now()
-  WHERE id = p_job_id;
+  WHERE id = p_job_id AND status = 'claimed';
 
   RETURN FOUND;
 END;

@@ -45,7 +45,7 @@ export function classifyNetworkFailure(): PushDecision {
   return { outcome: 'failed', errorCode: 'network_ambiguous', disableSubscription: false };
 }
 
-/** Un claim expire n'est pas rejoue en aveugle, il repart par la file. */
+/** Freshness check only. Expired claims are terminal, never replayed. */
 export function isJobStillFresh(createdAtIso: string, nowMs: number): boolean {
   const created = Date.parse(createdAtIso);
   if (Number.isNaN(created)) return false;

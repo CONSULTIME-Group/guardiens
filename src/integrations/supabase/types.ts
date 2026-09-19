@@ -5682,6 +5682,119 @@ export type Database = {
           },
         ]
       }
+      push_delivery_jobs: {
+        Row: {
+          attempts: number
+          available_at: string
+          claim_expires_at: string | null
+          claimed_at: string | null
+          context_id: string | null
+          created_at: string
+          event_kind: string
+          expires_at: string
+          id: string
+          last_error_code: string | null
+          source_id: string
+          status: string
+          subscription_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attempts?: number
+          available_at?: string
+          claim_expires_at?: string | null
+          claimed_at?: string | null
+          context_id?: string | null
+          created_at?: string
+          event_kind: string
+          expires_at?: string
+          id?: string
+          last_error_code?: string | null
+          source_id: string
+          status?: string
+          subscription_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attempts?: number
+          available_at?: string
+          claim_expires_at?: string | null
+          claimed_at?: string | null
+          context_id?: string | null
+          created_at?: string
+          event_kind?: string
+          expires_at?: string
+          id?: string
+          last_error_code?: string | null
+          source_id?: string
+          status?: string
+          subscription_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_delivery_jobs_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "push_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      push_subscriptions: {
+        Row: {
+          auth_key: string
+          created_at: string
+          disabled_at: string | null
+          disabled_reason: string | null
+          enabled: boolean
+          endpoint: string
+          endpoint_host: string
+          id: string
+          last_success_at: string | null
+          opt_in_applications: boolean
+          opt_in_messages: boolean
+          p256dh_key: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auth_key: string
+          created_at?: string
+          disabled_at?: string | null
+          disabled_reason?: string | null
+          enabled?: boolean
+          endpoint: string
+          endpoint_host: string
+          id?: string
+          last_success_at?: string | null
+          opt_in_applications?: boolean
+          opt_in_messages?: boolean
+          p256dh_key: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          auth_key?: string
+          created_at?: string
+          disabled_at?: string | null
+          disabled_reason?: string | null
+          enabled?: boolean
+          endpoint?: string
+          endpoint_host?: string
+          id?: string
+          last_success_at?: string | null
+          opt_in_applications?: boolean
+          opt_in_messages?: boolean
+          p256dh_key?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       redirects: {
         Row: {
           created_at: string
@@ -10211,6 +10324,63 @@ export type Database = {
         Returns: number
       }
       purge_email_queue: { Args: { queue_name: string }; Returns: number }
+      push_claim_jobs: {
+        Args: { p_limit?: number }
+        Returns: {
+          attempts: number
+          auth_key: string
+          endpoint: string
+          endpoint_host: string
+          event_kind: string
+          job_id: string
+          p256dh_key: string
+          subscription_id: string
+        }[]
+      }
+      push_close_job: {
+        Args: { p_error_code?: string; p_job_id: string; p_outcome: string }
+        Returns: boolean
+      }
+      push_delete_my_subscription: {
+        Args: { p_subscription_id: string }
+        Returns: boolean
+      }
+      push_disable_subscription: {
+        Args: { p_reason: string; p_subscription_id: string }
+        Returns: boolean
+      }
+      push_job_eligible: { Args: { p_job_id: string }; Returns: boolean }
+      push_my_subscriptions: {
+        Args: never
+        Returns: {
+          created_at: string
+          enabled: boolean
+          endpoint_host: string
+          id: string
+          opt_in_applications: boolean
+          opt_in_messages: boolean
+        }[]
+      }
+      push_set_my_preferences: {
+        Args: {
+          p_opt_in_applications: boolean
+          p_opt_in_messages: boolean
+          p_subscription_id: string
+        }
+        Returns: boolean
+      }
+      push_upsert_subscription: {
+        Args: {
+          p_auth_key: string
+          p_endpoint: string
+          p_endpoint_host: string
+          p_opt_in_applications: boolean
+          p_opt_in_messages: boolean
+          p_p256dh_key: string
+          p_user_id: string
+        }
+        Returns: string
+      }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {

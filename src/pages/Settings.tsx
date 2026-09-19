@@ -37,6 +37,7 @@ import { Link } from "react-router-dom";
 import { useAlmaFrequency, type AlmaFrequency } from "@/hooks/useAlmaFrequency";
 import { useAlmaHidden } from "@/hooks/useAlmaHidden";
 import InstallAppSection from "@/components/settings/InstallAppSection";
+import PushNotificationsSection from "@/components/settings/PushNotificationsSection";
 
 
 interface NotifPrefs {
@@ -752,6 +753,7 @@ const SecuritySection = ({
 
 const NotificationsSection = ({ prefs, savingKey, allNotifsOn, onMasterToggle, onSave }: any) => (
   <section>
+    <PushNotificationsSection />
     <SectionHeader icon={Bell} title="Notifications email" description="Choisissez les emails que vous souhaitez recevoir." />
 
     <div className="space-y-4">
