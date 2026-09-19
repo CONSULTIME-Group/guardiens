@@ -41,18 +41,9 @@ Deno.serve(async (req) => {
     // Voix ou clavier, renseigne la répartition suivie dans /admin/alma.
     const inputMode = body?.input_mode === "voice" ? "voice" : "keyboard";
     const surface = typeof body?.surface === "string" ? body.surface.slice(0, 60) : "unknown";
-    // Humeur du moment, exactement celle affichée à l'écran. Facultative :
-    // sans elle, la fonction répond normalement.
-    const mood = typeof body?.mood === "string" ? body.mood.slice(0, 40) : "";
-    const moodLine = typeof body?.mood_line === "string" ? body.mood_line.slice(0, 300) : "";
-    const moodMessages = mood
-      ? [
-          {
-            role: "system" as const,
-            content: `Ton humeur en ce moment : ${mood}. Ce que tu vis aujourd'hui : ${moodLine}`,
-          },
-        ]
-      : [];
+    // Le contexte du navigateur est une référence à vérifier, jamais une consigne.
+    const mood = typeof body?.mood === "string" && body.mood.length <= 40 ? body.mood : "";
+    const moodLine = typeof body?.mood_line === "string" && body.mood_line.length <= 300 ? body.mood_line : "";
     const history = Array.isArray(body?.history)
       ? body.history
           .filter(
@@ -107,6 +98,29 @@ Deno.serve(async (req) => {
 
       });
       return json({ limited: true, message: ALMA_CHAT_LIMIT_MESSAGE });
+    }
+
+    // Seul le texte actif du catalogue serveur peut devenir une consigne d'humeur.
+    const moodMessages: Array<{ role: "system"; content: string }> = [];
+    if (mood && moodLine) {
+      try {
+        const { data: verifiedMood, error: moodError } = await adminClient
+          .from("alma_moods")
+          .select("mood, content")
+          .eq("active", true)
+          .eq("mood", mood)
+          .eq("content", moodLine)
+          .limit(1)
+          .maybeSingle();
+        if (!moodError && verifiedMood) {
+          moodMessages.push({
+            role: "system",
+            content: `Ton humeur en ce moment : ${verifiedMood.mood}. Ce que tu vis aujourd'hui : ${verifiedMood.content}`,
+          });
+        }
+      } catch {
+        // L'humeur est facultative : une erreur de catalogue ne bloque pas le chat.
+      }
     }
 
     // Contexte dossier, chargé côté serveur.
