@@ -470,31 +470,7 @@ BEGIN
          s.endpoint, s.endpoint_host, s.auth_key, s.p256dh_key, cl.attempts
   FROM claimed cl
   JOIN public.push_subscriptions s ON s.id = cl.subscription_id
-  WHERE s.enabled
-    -- Verification a l'envoi : le destinataire est toujours le bon et
-    -- l'evenement est toujours pertinent.
-    AND (
-      (cl.event_kind = 'message' AND EXISTS (
-        SELECT 1
-        FROM public.messages m
-        JOIN public.conversations c ON c.id = m.conversation_id
-        WHERE m.id = cl.source_id
-          AND m.read_at IS NULL
-          AND m.is_system IS NOT TRUE
-          AND m.moderation_hidden_at IS NULL
-          AND m.sender_id <> cl.user_id
-          AND cl.user_id IN (c.owner_id, c.sitter_id)
-      ))
-      OR (cl.event_kind = 'application' AND EXISTS (
-        SELECT 1
-        FROM public.applications a
-        JOIN public.sits si ON si.id = a.sit_id
-        WHERE a.id = cl.source_id
-          AND a.status = 'pending'::application_status
-          AND a.viewed_at IS NULL
-          AND si.user_id = cl.user_id
-      ))
-    );
+  WHERE s.enabled;
 END;
 $$;
 
