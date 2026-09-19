@@ -36,6 +36,7 @@ const initialState: AlmaConversationState = {
 };
 
 let state: AlmaConversationState = initialState;
+let conversationGeneration = 0;
 const listeners = new Set<() => void>();
 
 function setState(patch: Partial<AlmaConversationState>) {
@@ -53,6 +54,8 @@ export function subscribeAlmaConversation(listener: () => void): () => void {
 }
 
 export function resetAlmaConversation() {
+  conversationGeneration += 1;
+  almaMoodContext = { mood: null, line: null };
   state = initialState;
   listeners.forEach((l) => l());
 }
