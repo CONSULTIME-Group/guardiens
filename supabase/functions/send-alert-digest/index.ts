@@ -17,6 +17,8 @@ import { ALERT_DIGEST_TARGET_PARIS_HOURS, parisDateKey, parisHourSlot, parisWind
 import { publicationWindowOrClause } from "../_shared/sit-publication-window.ts";
 import { geocodeKeyCandidates } from "../_shared/geocode-lookup.ts";
 import { recordDeliveryFailure } from "../_shared/delivery-failure.ts";
+import { startCronRun, type CronRun } from "../_shared/cron-run-log.ts";
+import { digestRunStatus, readCronTraceId } from "../_shared/cron-trace.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -114,6 +116,8 @@ function haversine(lat1: number, lng1: number, lat2: number, lng2: number): numb
 }
 
 Deno.serve(async (req) => {
+  let nominalRun: CronRun | null = null;
+  let traceId: string | null = null;
   try {
     const url = new URL(req.url);
     const forceMode = url.searchParams.get("force") === "true";
@@ -123,8 +127,10 @@ Deno.serve(async (req) => {
     let dryRun = false;
     let sinceHours = 24;
     let userId: string | null = null;
+    let parsedBody: unknown = null;
     try {
       const body = await req.json();
+      parsedBody = body;
       if (body && typeof body === "object") {
         dryRun = body.dry_run === true;
         if (typeof body.user_id === "string" && /^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(body.user_id)) {
@@ -138,6 +144,14 @@ Deno.serve(async (req) => {
       }
     } catch { /* pas de body JSON : mode normal */ }
 
+    // Corrélation formelle cron, réponse HTTP, cron_run_log.
+    traceId = readCronTraceId(req.headers, parsedBody);
+
+    // Passage nominal seulement : le forçage, le dry run et le ciblage d'un
+    // membre restent hors journal métier.
+    const isNominal = !forceMode && !dryRun && !userId;
+    if (isNominal) nominalRun = await startCronRun("send-alert-digest");
+
     const now = new Date();
 
     // Règle heure de Paris : ce digest travaille aux créneaux réels de
@@ -145,12 +159,18 @@ Deno.serve(async (req) => {
     // forçage et le dry run restent possibles. Le filtre heure_envoi suit
     // l'heure du passage courant (parisHourSlot) : la cohérence entre le
     // créneau servi et les préférences filtrées est structurelle.
-    if (!forceMode && !dryRun && !userId) {
+    if (isNominal) {
       const verdict = parisWindowVerdictForHours(now, ALERT_DIGEST_TARGET_PARIS_HOURS);
       if (!verdict.run) {
         console.log(JSON.stringify({ event: "digest_skipped_paris_window", source: "send-alert-digest", ...verdict }));
+        await nominalRun?.finish("success", {
+          reason: verdict.reason,
+          skipped: true,
+          sent: 0,
+          trace_id: traceId,
+        });
         return new Response(
-          JSON.stringify({ ok: true, skipped: true, reason: verdict.reason, paris_hour: verdict.parisHour }),
+          JSON.stringify({ ok: true, skipped: true, reason: verdict.reason, paris_hour: verdict.parisHour, trace_id: traceId }),
           { headers: { "Content-Type": "application/json" } },
         );
       }
@@ -176,7 +196,13 @@ Deno.serve(async (req) => {
     const { data: prefs, error: prefsError } = await prefsQuery;
     if (prefsError) throw prefsError;
     if (!prefs || prefs.length === 0) {
-      return new Response(JSON.stringify({ sent: 0, skipped: 0, reason: "no_prefs" }), {
+      await nominalRun?.finish("success", {
+        reason: "no_prefs",
+        prefs_evaluated: 0,
+        sent: 0,
+        trace_id: traceId,
+      });
+      return new Response(JSON.stringify({ sent: 0, skipped: 0, reason: "no_prefs", trace_id: traceId }), {
         status: 200, headers: { "Content-Type": "application/json" },
       });
     }
@@ -516,6 +542,21 @@ Deno.serve(async (req) => {
     await raiseClaimErrorSignal(supabase, "alert-digest", claimSkippedBy.claim_error ?? 0);
     await reportClaimOutcome(supabase, "alert-digest", claimGranted, claimSkipped, claimSkippedBy);
 
+    // Métriques agrégées uniquement : aucun email, aucun identifiant de
+    // membre, aucun jeton, aucun contenu personnel.
+    await nominalRun?.finish(digestRunStatus(errors.length), {
+      prefs_evaluated: prefs.length,
+      sent,
+      skipped,
+      claim_granted: claimGranted,
+      claim_skipped: claimSkipped,
+      claim_skipped_by: claimSkippedBy,
+      rayon_fallback_dept: rayonFallbackDept,
+      errors_count: errors.length,
+      hour: currentHourStr,
+      trace_id: traceId,
+    });
+
     return new Response(
       JSON.stringify({
         dry_run: dryRun,
@@ -527,12 +568,14 @@ Deno.serve(async (req) => {
         rayon_fallback_dept: rayonFallbackDept,
         errors,
         hour: currentHourStr,
+        trace_id: traceId,
         ...(dryRun ? { preview: dry } : {}),
       }),
       { status: 200, headers: { "Content-Type": "application/json" } },
     );
   } catch (err) {
     console.error("send-alert-digest fatal", err);
-    return new Response(JSON.stringify({ error: String(err) }), { status: 500 });
+    await nominalRun?.fail(err, { trace_id: traceId });
+    return new Response(JSON.stringify({ error: String(err), trace_id: traceId }), { status: 500 });
   }
 });
