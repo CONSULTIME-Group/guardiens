@@ -13,7 +13,7 @@ const MIGRATION = readFileSync(
 );
 
 function metricsBlocks(src: string): string[] {
-  return src.match(/nominalRun\?\.(finish|fail)\([\s\S]*?\n\s*\}?\)/g) ?? [];
+  return src.match(/nominalRun\?\.(?:finish|fail)\([\s\S]*?\}\)/g) ?? [];
 }
 
 describe("trace_id, corrélation des trois couches", () => {
