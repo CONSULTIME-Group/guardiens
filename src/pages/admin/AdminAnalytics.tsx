@@ -54,6 +54,7 @@ const AdminAnalytics = () => {
   const [loading, setLoading] = useState(true);
   const [daily, setDaily] = useState<DailyStat[]>([]);
   const [funnelCounts, setFunnelCounts] = useState<FunnelCounts>({});
+  const [installCounts, setInstallCounts] = useState<FunnelCounts>({});
   const [previousFunnel, setPreviousFunnel] = useState<FunnelCounts>({});
   const [pageViews, setPageViews] = useState(0);
   const [previousPageViews, setPreviousPageViews] = useState(0);
@@ -187,6 +188,7 @@ const AdminAnalytics = () => {
         (countsRole || []).forEach((r: any) => roleMap.set(r.event_type, Number(r.cnt)));
         const allMap = new Map<string, number>();
         (countsAll || []).forEach((r: any) => allMap.set(r.event_type, Number(r.cnt)));
+        setInstallCounts(Object.fromEntries([...allMap].filter(([key]) => key.startsWith("pwa_"))));
         const prevRoleMap = new Map<string, number>();
         (prevCounts || []).forEach((r: any) => prevRoleMap.set(r.event_type, Number(r.cnt)));
         const prevAllMap = new Map<string, number>();
@@ -574,6 +576,24 @@ const AdminAnalytics = () => {
           </Card>
 
           <FacebookReferralCard rangeDays={range} />
+          <Card>
+            <CardHeader><CardTitle>Installation de Guardiens</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-muted-foreground">Période sélectionnée, tous rôles. Événements observés depuis la mise en place du suivi, historique antérieur inconnu.</p>
+              <dl className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {[
+                  ["pwa_install_suggestion_shown", "Propositions d'Alma"],
+                  ["pwa_install_guide_viewed", "Consultations du guide"],
+                  ["pwa_installed", "Installations confirmées par le navigateur"],
+                  ["pwa_app_open", "Ouvertures en mode app"],
+                ].map(([event, label]) => <div key={event}>
+                  <dt className="text-sm text-muted-foreground">{label}</dt>
+                  <dd className="text-2xl font-semibold">{installCounts[event] ?? 0}</dd>
+                </div>)}
+              </dl>
+              <p className="text-xs text-muted-foreground">Les confirmations dépendent du navigateur et ne couvrent pas l'installation manuelle sur iPhone. Les ouvertures sont comptées une fois par session et par compte connecté, pas en utilisateurs uniques. Un clic ou « Je l'ai déjà installée » n'est pas une installation confirmée.</p>
+            </CardContent>
+          </Card>
         </>
       )}
     </div>

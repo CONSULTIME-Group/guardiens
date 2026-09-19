@@ -8,6 +8,13 @@ import { getDeviceContext } from "@/lib/deviceContext";
 import { getSafeLocalStorage } from "@/lib/storageFallback";
 
 export type EventType =
+  | "pwa_install_guide_viewed"
+  | "pwa_install_clicked"
+  | "pwa_install_choice"
+  | "pwa_install_suggestion_shown"
+  | "pwa_install_declared"
+  | "pwa_installed"
+  | "pwa_app_open"
   | "page_view"
   | "city_page_viewed"                        // Vue page ville SEO (slug, residents, proximite)
   | "signup_started"
