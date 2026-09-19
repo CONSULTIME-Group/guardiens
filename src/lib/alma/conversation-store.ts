@@ -118,6 +118,7 @@ export async function sendAlmaMessage({
 }: SendAlmaMessageArgs): Promise<void> {
   const message = text.trim();
   if (!message || state.sending) return;
+  const requestGeneration = conversationGeneration;
 
   const history = state.messages.map((m) => ({
     role: m.role === "alma" ? ("assistant" as const) : ("user" as const),
