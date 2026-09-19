@@ -3,7 +3,7 @@ import {handlePushTest,type TestDependencies} from '../../supabase/functions/_sh
 const target={request_id:'11111111-1111-4111-8111-111111111111',user_id:'22222222-2222-4222-8222-222222222222',subscription_id:'33333333-3333-4333-8333-333333333333'};
 const key=(bytes:number[])=>btoa(String.fromCharCode(...bytes)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 const sub={endpoint:'https://fcm.googleapis.com/fcm/send/fixture',auth_key:key(Array(16).fill(1)),p256dh_key:key([4,...Array(64).fill(1)])};
-const setup=()=>({serviceKey:'fixture-service',configured:true,claim:vi.fn().mockResolvedValue(true),subscription:vi.fn().mockResolvedValue(sub),send:vi.fn().mockResolvedValue(201),finish:vi.fn().mockResolvedValue(true)} satisfies TestDependencies);
+const setup=()=>({serviceKey:'fixture-service',configured:true as boolean,claim:vi.fn().mockResolvedValue(true),subscription:vi.fn().mockResolvedValue(sub),send:vi.fn().mockResolvedValue(201),finish:vi.fn().mockResolvedValue(true)} satisfies TestDependencies);
 const req=(body:unknown=target,token='fixture-service')=>new Request('https://example.test',{method:'POST',headers:{Authorization:`Bearer ${token}`},body:JSON.stringify(body)});
 describe('Operator-only targeted push test',()=>{
   it.each(['','member-token','anonymous-token'])('rejects unprivileged caller %s before all data access',async token=>{
