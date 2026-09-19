@@ -100,7 +100,8 @@ Deno.serve(async (req) => {
         p_opt_in_applications: parsed.value.optInApplications,
       });
       if (error) {
-        const code = sanitizeForLog(error.message.slice(0, 40));
+        const code = error.message.includes('max_active') ? 'max_active_endpoints'
+          : error.message.includes('owned_by_other') ? 'endpoint_unavailable' : 'registration_failed';
         console.warn('push-subscription upsert refuse', code);
         const status = error.message.includes('max_active') ? 409 : 400;
         return json({ error: 'subscribe_refused', code }, status);

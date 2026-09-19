@@ -52,16 +52,25 @@ Deno.serve(async (req) => {
     return json({ error: 'claim_failed' }, 500);
   }
 
-  const counters = { claimed: 0, accepted: 0, failed: 0, retry: 0, skipped: 0, disabled: 0 };
+  const counters = { claimed: 0, accepted: 0, failed: 0, retry: 0, skipped: 0, disabled: 0, persistence_errors: 0 };
+  const finalize = async (id: unknown, outcome: string, code: string | null) => {
+    const result = await admin.rpc('push_close_job', { p_job_id: id, p_outcome: outcome, p_error_code: code });
+    if (result.error || result.data !== true) counters.persistence_errors += 1;
+  };
 
   for (const job of (jobs ?? []) as Array<Record<string, unknown>>) {
     counters.claimed += 1;
+    // Recheck just before transmission, after any time spent on earlier jobs.
+    const ready = await admin.rpc('push_job_eligible', { p_job_id: job.job_id });
+    if (ready.error || ready.data !== true) {
+      await finalize(job.job_id, 'skipped', 'no_longer_eligible');
+      counters.skipped += 1;
+      continue;
+    }
 
     const kind = job.event_kind;
     if (!isPushEventKind(kind)) {
-      await admin.rpc('push_close_job', {
-        p_job_id: job.job_id, p_outcome: 'skipped', p_error_code: 'bad_kind',
-      });
+      await finalize(job.job_id, 'skipped', 'bad_kind');
       counters.skipped += 1;
       continue;
     }
@@ -69,12 +78,11 @@ Deno.serve(async (req) => {
     // Deuxieme controle de l'endpoint, au moment meme de l'envoi.
     const endpointCheck = validatePushEndpoint(job.endpoint);
     if (!endpointCheck.ok) {
-      await admin.rpc('push_disable_subscription', {
+      const disabled = await admin.rpc('push_disable_subscription', {
         p_subscription_id: job.subscription_id, p_reason: endpointCheck.reason,
       });
-      await admin.rpc('push_close_job', {
-        p_job_id: job.job_id, p_outcome: 'skipped', p_error_code: endpointCheck.reason,
-      });
+      if (disabled.error || disabled.data !== true) counters.persistence_errors += 1;
+      await finalize(job.job_id, 'skipped', endpointCheck.reason);
       counters.skipped += 1;
       counters.disabled += 1;
       continue;
@@ -85,7 +93,7 @@ Deno.serve(async (req) => {
 
     let decision;
     try {
-      await webpush.sendNotification(
+      const response = await webpush.sendNotification(
         {
           endpoint: job.endpoint as string,
           keys: { auth: job.auth_key as string, p256dh: job.p256dh_key as string },
@@ -93,7 +101,7 @@ Deno.serve(async (req) => {
         payload,
         { TTL: 3600, timeout: PUSH_NETWORK_TIMEOUT_MS },
       );
-      decision = classifyPushResponse(201, attempts);
+      decision = classifyPushResponse(response.statusCode, attempts);
     } catch (err) {
       const status = (err as { statusCode?: number })?.statusCode;
       decision = typeof status === 'number'
@@ -102,17 +110,14 @@ Deno.serve(async (req) => {
     }
 
     if (decision.disableSubscription) {
-      await admin.rpc('push_disable_subscription', {
+      const disabled = await admin.rpc('push_disable_subscription', {
         p_subscription_id: job.subscription_id, p_reason: decision.errorCode ?? 'gone',
       });
+      if (disabled.error || disabled.data !== true) counters.persistence_errors += 1;
       counters.disabled += 1;
     }
 
-    await admin.rpc('push_close_job', {
-      p_job_id: job.job_id,
-      p_outcome: decision.outcome,
-      p_error_code: decision.errorCode,
-    });
+    await finalize(job.job_id, decision.outcome, decision.errorCode);
 
     // 'accepted' signifie pris en charge par le service de push, jamais remis.
     counters[decision.outcome] += 1;
@@ -120,5 +125,5 @@ Deno.serve(async (req) => {
 
   // Journal agrege uniquement : aucun endpoint, aucune cle, aucun membre.
   console.log('dispatch-web-push', JSON.stringify(counters));
-  return json({ ok: true, ...counters });
+  return json({ ok: counters.persistence_errors === 0, ...counters }, counters.persistence_errors ? 500 : 200);
 });
