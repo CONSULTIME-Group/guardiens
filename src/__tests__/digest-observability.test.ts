@@ -160,8 +160,9 @@ describe("migration des quatre jobs cron", () => {
   });
 
   it("n'approche jamais les jobs hors périmètre, notamment 64 et 653", () => {
-    expect(MIGRATION).not.toMatch(/\b64\b/);
-    expect(MIGRATION).not.toMatch(/\b653\b/);
+    const executable = MIGRATION.split("\n").filter((l) => !l.trimStart().startsWith("--")).join("\n");
+    expect(executable).not.toMatch(/\b64\b/);
+    expect(executable).not.toMatch(/\b653\b/);
     expect(MIGRATION).not.toContain("daily-admin-activity-analysis");
     const jobIds = new Set((MIGRATION.match(/\b\d+::bigint\b/g) ?? []).map((v) => v.replace("::bigint", "")));
     expect([...jobIds].sort()).toEqual(["109", "12", "13", "14"]);
