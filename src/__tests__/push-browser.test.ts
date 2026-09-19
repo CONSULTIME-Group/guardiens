@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanupPushOnLogout, decodePublicKey, disablePush, enablePush, getPushState, PUSH_ID_KEY, PUSH_OWNER_KEY, pushSupport, updatePushPreferences } from '@/lib/web-push';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { cleanupPushOnLogout, decodePublicKey, disablePush, enablePush, getPushConfig, getPushState, PUSH_ID_KEY, PUSH_OWNER_KEY, pushSupport, updatePushPreferences } from '@/lib/web-push';
 const mocks=vi.hoisted(()=>({session:vi.fn(),invoke:vi.fn()}));
 vi.mock('@/integrations/supabase/client',()=>({supabase:{auth:{getSession:mocks.session},functions:{invoke:mocks.invoke}}}));
 const publicKey=btoa(String.fromCharCode(4,...Array(64).fill(1))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
@@ -15,7 +15,27 @@ beforeEach(()=>{
   Object.defineProperty(window,'isSecureContext',{configurable:true,value:true});
   Object.defineProperty(navigator,'serviceWorker',{configurable:true,value:{register,ready:Promise.resolve(reg),getRegistration:vi.fn().mockResolvedValue(reg)}});
 });
+afterEach(() => vi.useRealTimers());
 describe('Push browser lifecycle',()=>{
+  it.each([1, 2])('bounds session read %s during configuration', async (call) => {
+    vi.useFakeTimers();
+    if (call === 2) mocks.session.mockResolvedValueOnce({data:{session:{user:{id:'owner'},access_token:'fixture-token'}}});
+    mocks.session.mockImplementationOnce(() => new Promise(() => {}));
+    mocks.invoke.mockResolvedValue({data:{enabled:true,publicKey},error:null});
+    const result = getPushConfig('owner').catch(error => error.message);
+    await vi.advanceTimersByTimeAsync(10000);
+    expect(await Promise.race([result, Promise.resolve('still_pending')])).toBe('push_timeout');
+    expect(permission).not.toHaveBeenCalled();
+    if (call === 1) expect(mocks.invoke).not.toHaveBeenCalled();
+  });
+  it('bounds a browser subscription lookup that never settles', async () => {
+    vi.useFakeTimers();
+    reg.pushManager.getSubscription.mockImplementationOnce(() => new Promise(() => {}));
+    const result = getPushState('owner').catch(error => error.message);
+    await vi.advanceTimersByTimeAsync(10000);
+    expect(await Promise.race([result, Promise.resolve('still_pending')])).toBe('push_timeout');
+    expect(permission).not.toHaveBeenCalled();
+  });
   it('decodes valid public key and rejects malformed key',()=>{expect(decodePublicKey(publicKey).length).toBe(65);expect(()=>decodePublicKey('bad')).toThrow();});
   it('does not prompt when service is disabled',async()=>{await expect(enablePush('owner',{enabled:false},{messages:true,applications:true})).rejects.toThrow();expect(permission).not.toHaveBeenCalled();});
   it('requests permission before registering worker and submits the exact API shape',async()=>{
