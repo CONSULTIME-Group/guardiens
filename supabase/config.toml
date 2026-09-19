@@ -157,3 +157,9 @@ project_id = "erhccyqevdyevpyctsjj"
 
   [functions.send-weekly-nearby-digest]
     verify_jwt = true
+
+  [functions.push-subscription]
+    verify_jwt = false
+
+  [functions.dispatch-web-push]
+    verify_jwt = false
