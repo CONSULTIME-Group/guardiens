@@ -39,6 +39,14 @@ function promptEvent(outcome: "accepted" | "dismissed" = "accepted") {
 }
 
 describe("installation PWA, états navigateur et mesures", () => {
+  it("mémorise la première visite mobile par compte sans compter une installation", () => {
+    expect(pwa.firstInstallVisitDue("A")).toBe(true);
+    pwa.markInstallWelcome("A");
+    expect(pwa.firstInstallVisitDue("A")).toBe(false);
+    expect(pwa.firstInstallVisitDue("B")).toBe(true);
+    expect(pwa.reminderDue()).toBe(false);
+    expect(track).not.toHaveBeenCalledWith("pwa_installed", expect.anything());
+  });
   it("attend le signal natif, sans appeler prompt automatiquement", async () => {
     expect(await pwa.requestInstall()).toBe("unavailable");
     const prompt = promptEvent();

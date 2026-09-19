@@ -582,7 +582,7 @@ const AdminAnalytics = () => {
               <p className="text-sm text-muted-foreground">Période sélectionnée, tous rôles. Événements observés depuis la mise en place du suivi, historique antérieur inconnu.</p>
               <dl className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
-                  ["pwa_install_suggestion_shown", "Propositions d'Alma"],
+                  ["pwa_install_suggestion_shown", "Propositions d'installation"],
                   ["pwa_install_guide_viewed", "Consultations du guide"],
                   ["pwa_installed", "Installations confirmées par le navigateur"],
                   ["pwa_app_open", "Ouvertures en mode app"],
