@@ -130,7 +130,9 @@ Deno.serve(async (req) => {
       const { data: dup } = await service
         .from("email_send_log")
         .select("id")
-        .eq("message_id", messageId)
+        // Legacy sends used message_id; the central sender stores the stable
+        // key in metadata and generates its own random message_id.
+        .or(`message_id.eq.${messageId},and(template_name.eq.affinity-onboarding-nudge,status.in.(sent,pending,deferred),metadata->>idempotency_key.eq.${messageId})`)
         .limit(1)
         .maybeSingle();
       if (dup) { emailsSkipped += 1; continue; }
