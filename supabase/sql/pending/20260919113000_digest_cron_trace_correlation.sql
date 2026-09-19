@@ -1,6 +1,6 @@
--- NON APPLIQUÉE. À exécuter seulement sur GO explicite.
--- Le dossier supabase/migrations est géré par l'outil de migration, ce fichier
--- est donc déposé ici en attente d'application.
+-- APPLIQUÉE EN PRODUCTION après GO le 19/09/2026 vers 11:30 UTC.
+-- Le dossier supabase/migrations était verrouillé pendant la préparation,
+-- ce fichier est donc conservé ici pour traçabilité.
 --
 -- Corrélation formelle entre la commande pg_cron, la réponse de l'Edge et
 -- public.cron_run_log pour les deux digests.
