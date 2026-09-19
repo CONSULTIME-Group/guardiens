@@ -9,6 +9,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { resendFetch } from "../_shared/resend-guard.ts";
 import { EMAIL_CATEGORY_MAP } from "../_shared/email-categories.ts";
+import { requireAdminOrServiceRole } from "../_shared/require-admin.ts";
 
 // Liste des templates transactionnels, transmise en SQL pour que le compteur
 // transactionnel en retard soit calcule sur toute la file, pas sur la liste
@@ -42,6 +43,9 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
+
+  const authError = await requireAdminOrServiceRole(req, corsHeaders);
+  if (authError) return authError;
 
   try {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
