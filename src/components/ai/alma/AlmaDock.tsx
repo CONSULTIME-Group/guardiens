@@ -45,6 +45,7 @@ import { useAlmaMood } from "@/hooks/useAlmaMood";
 import { useAlma } from "@/contexts/AlmaContext";
 import { useAlmaFrequency, type AlmaFrequency } from "@/hooks/useAlmaFrequency";
 import { useAlmaHidden } from "@/hooks/useAlmaHidden";
+import { useAlmaInstallSuggestion } from "@/hooks/usePwaInstall";
 import { useAlmaEvolution, type AlmaStage } from "@/hooks/useAlmaEvolution";
 import { MIN_COMPLETION_TO_APPLY } from "@/hooks/useAccessLevel";
 import { useAuth } from "@/contexts/AuthContext";
@@ -225,8 +226,8 @@ export function AlmaDock() {
 
 function AlmaDockInner() {
   const { currentWhisper, dismissCurrent, requestNextTip } = useAlma();
-  const { frequency, setFrequency } = useAlmaFrequency();
-  const { hidden, setHidden } = useAlmaHidden();
+  const { frequency, setFrequency, loading: frequencyLoading } = useAlmaFrequency();
+  const { hidden, setHidden, loading: hiddenLoading } = useAlmaHidden();
   const { activeRole, user } = useAuth();
   const userId = user?.id ?? null;
 
@@ -250,6 +251,7 @@ function AlmaDockInner() {
     subscribeAlmaConversation,
     getAlmaConversationState,
   );
+  useAlmaInstallSuggestion(!frequencyLoading && !hiddenLoading && !hidden && frequency !== "silent" && !isModalOpen && !conversation.open);
 
   // Humeur du jour. Elle colore la ligne du panneau, l'avatar, et elle est
   // transmise à la conversation pour qu'Alma parle de l'humeur affichée.

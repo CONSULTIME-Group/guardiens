@@ -8,9 +8,11 @@ import { initConsent } from "./lib/cookieConsent";
 import { installStorageFallback } from "./lib/storageFallback";
 import { installOAuthDebugHelper } from "./lib/oauthLogger";
 import { installDomTranslationGuard } from "./lib/domTranslationGuard";
+import { initPwaInstall } from "./lib/pwa-install";
 
 installDomTranslationGuard();
 installStorageFallback();
+initPwaInstall();
 installOAuthDebugHelper();
 
 // RGPD : en production, forcer un loglevel restrictif pour éviter que des

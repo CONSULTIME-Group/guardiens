@@ -36,6 +36,7 @@ import { getPasswordStrength, validateStrongPassword } from "@/lib/passwordStren
 import { Link } from "react-router-dom";
 import { useAlmaFrequency, type AlmaFrequency } from "@/hooks/useAlmaFrequency";
 import { useAlmaHidden } from "@/hooks/useAlmaHidden";
+import InstallAppSection from "@/components/settings/InstallAppSection";
 
 
 interface NotifPrefs {
@@ -61,7 +62,7 @@ const defaultPrefs: NotifPrefs = {
 };
 
 type SectionId =
-  | "account" | "security" | "spaces" | "notifications" | "alerts"
+  | "account" | "security" | "spaces" | "notifications" | "alerts" | "installation"
   | "privacy" | "owner-pitch" | "emergency" | "appearance" | "alma" | "billing" | "data" | "help" | "danger";
 
 interface SectionDef {
@@ -81,6 +82,7 @@ const SECTIONS: SectionDef[] = [
   { id: "alerts", label: "Alertes annonces", icon: Bell, group: "Préférences" },
   { id: "privacy", label: "Confidentialité", icon: EyeOff, group: "Préférences" },
   { id: "appearance", label: "Apparence", icon: Sun, group: "Préférences" },
+  { id: "installation", label: "Installer Guardiens", icon: Download, group: "Préférences" },
   { id: "alma", label: "Fréquence d'Alma", icon: MessageCircle, group: "Préférences" },
   { id: "billing", label: "Abonnement", icon: CreditCard, group: "Mes espaces" },
   { id: "data", label: "Mes données", icon: Download, group: "Aide & données" },
@@ -404,6 +406,7 @@ const Settings = () => {
       case "alerts": return <AlertsSection user={user} />;
       case "privacy": return <PrivacySection prefs={prefs} onSave={savePrefs} />;
       case "appearance": return <ThemeSection />;
+      case "installation": return <InstallAppSection />;
       case "alma": return <AlmaFrequencySection />;
       case "billing": return <BillingSection user={user} />;
       case "data": return <DataSection onExport={handleExport} exporting={exporting} />;

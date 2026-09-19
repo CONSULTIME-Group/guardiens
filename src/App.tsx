@@ -22,6 +22,7 @@ import { useShellMode } from "@/components/layout/useShellMode";
 import GlobalBottomNav from "@/components/layout/GlobalBottomNav";
 import { ChromeVisibilityProvider } from "@/components/layout/ChromeVisibility";
 import DeferredTrackers from "@/components/analytics/DeferredTrackers";
+import { PwaInstallTracking } from "@/hooks/usePwaInstall";
 // CookieConsent retiré (mesure d'audience exemptée CNIL)
 import { toast } from "sonner";
 import { reportError } from "@/lib/errorLogger";
@@ -626,6 +627,7 @@ const App = () => (
       <ThemeProvider>
         <TooltipProvider>
           <AuthProvider>
+            <PwaInstallTracking />
             <SkipToContent />
             <Toaster />
             <Sonner />
