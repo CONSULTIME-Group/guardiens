@@ -1,6 +1,7 @@
 # Protection de la relance des propriétaires
 
-Statut : **préparé, non déployé**. Base distante relue :
+Statut : **déployé en production le 19 septembre 2026 à 20:19:29 UTC**, sur la
+seule Edge `nudge-owner-pending-application`. Base distante relue :
 `0ef9c881f22fc3a588cceccf703d708e9aaca588`.
 
 ## Défaut et périmètre
