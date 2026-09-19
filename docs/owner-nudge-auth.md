@@ -38,16 +38,21 @@ Les tests ne valident pas la délivrabilité email et n'envoient rien.
 npx vitest run src/__tests__/owner-nudge-auth.test.ts src/__tests__/scheduled-functions-auth.test.ts
 ```
 
-## Déploiement après GO explicite sur cette seule Edge
+## Déploiement effectué sur cette seule Edge
 
-Intégrer ces fichiers, déployer uniquement `nudge-owner-pending-application`,
-puis vérifier les refus publics sans traitement métier et les métadonnées
-disponibles. Ne pas effectuer d'appel service/admin de test : aucun mode sec
-fiable n'est établi ici. Observer le prochain passage naturel pour la preuve
-métier. Cron 142 relu le 19 septembre à 20:09:07 UTC : actif,
+Intégration des fichiers, puis déploiement de la seule fonction
+`nudge-owner-pending-application` le 19 septembre 2026 à 20:19:29 UTC. Aucun
+appel service ou admin de test n'a été effectué : aucun mode sec fiable n'est
+établi ici. Contrôles publics relevés juste après déploiement, sans traitement
+métier : OPTIONS 200, POST sans identifiants 401, POST avec clé publique seule
+401, POST avec jeton public légitime 401, POST avec faux jeton de rôle service
+(signature invalide) 401. Aucune ligne `cron_run_log` créée par ces contrôles
+(vérification à 20:20 UTC, 0 ligne depuis 20:15 UTC). Aucun email, aucun
+signal, aucun envoi. La preuve métier reste attendue au prochain passage
+naturel. Cron 142 relu le 19 septembre à 20:09:07 UTC : actif,
 `0 9,17 * * *`, clé service Vault référencée, empreinte
 `c25454c33f090cb7970d75e63216e548`. Prochain passage connu : 20 septembre
-09:00 UTC / 11:00 Paris. Ne pas publier le frontend ni modifier les crons.
+09:00 UTC / 11:00 Paris. Frontend non publié, crons non modifiés.
 
 ## Deux autres constats, non corrigés par ce lot
 
