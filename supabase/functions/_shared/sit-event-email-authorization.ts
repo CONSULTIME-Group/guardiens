@@ -25,6 +25,8 @@ const literalPattern = (value: string) => value.replace(/[\\%_]/g, '\\$&')
 export async function authorizeSitEventEmail(db: Client, input: {
   templateName: string; idempotencyKey: unknown; callerId: string; recipientId: string;
   templateData?: Record<string, unknown> | null;
+  // Server-only locator on deferred retries; never populated from browser fields.
+  expectedMessageId?: string;
 }): Promise<Decision> {
   const denied: Decision = { ok: false, status: 403 }
   const { templateName: name, callerId: caller, recipientId: recipient } = input
@@ -113,10 +115,11 @@ export async function authorizeSitEventEmail(db: Client, input: {
       const conversation = await one(db.from('conversations').select('id,owner_id,sitter_id,sit_id').eq('id', path[1].toLowerCase()))
       const sitterId = sit.user_id === caller ? recipient : caller
       if (!conversation || conversation.sit_id !== sit.id || conversation.owner_id !== sit.user_id || conversation.sitter_id !== sitterId) return denied
-      const message = await one(db.from('messages').select('id,content,created_at')
+      let messageQuery = db.from('messages').select('id,content,created_at')
         .eq('conversation_id', conversation.id).eq('sender_id', caller).eq('is_system', false)
         .like('content', `${literalPattern('[URGENCE] ' + data.messageExcerpt)}%`)
-        .order('created_at', { ascending: false }).limit(1))
+      if (input.expectedMessageId) messageQuery = messageQuery.eq('id', input.expectedMessageId)
+      const message = await one(messageQuery.order('created_at', { ascending: false }).limit(1))
       if (!message || typeof message.content !== 'string'
         || !message.content.startsWith('[URGENCE] ')
         || message.content.slice('[URGENCE] '.length).trim().slice(0, 240) !== data.messageExcerpt) return denied
