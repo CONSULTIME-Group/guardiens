@@ -1,5 +1,56 @@
 # Autorisations du point d'envoi transactionnel — 20 septembre 2026
 
+## Deuxième lot : candidatures et confirmation
+
+Base : `350c33969dfb49e71371dc990ede2daa8af7e998`. Ce complément remplace le
+statut « autorisation métier à faire » pour les trois modèles ci-dessous au
+moment de l'appel navigateur. Les six autres modèles restent à traiter.
+
+| Modèle | Conditions lues en base |
+| --- | --- |
+| application-accepted | Appelant propriétaire réel, destinataire gardien de la candidature, candidature accepted ; garde published, confirmed ou in_progress |
+| application-declined | Appelant propriétaire réel, destinataire gardien de la candidature, candidature rejected |
+| sit-confirmed | Appelant et destinataire propriétaires de la garde, garde confirmed ou in_progress, une seule candidature accepted |
+
+Les formats de clé existants (candidature, conversation, refus automatique et
+confirmation) servent uniquement à retrouver l'événement. Aucune clé déclarée
+ni donnée de présentation ne constitue une preuve d'autorisation. Un format
+inconnu, une ligne absente, un autre acteur/destinataire ou un état incompatible
+est refusé en403. Une lecture impossible/ambiguë est refusée en503, sans détail
+privé et avant écriture ou envoi. Admin et service conservent leur chemin dédié.
+
+Le payload des trois modèles est entièrement reconstruit depuis la base :
+titre, prénoms, motif/variante du refus, ville, dates, animaux et lien de garde.
+Les champs supplémentaires fournis par le navigateur sont écartés. La clé
+canonique repose sur la candidature ou la garde réelle. La déduplication cherche
+aussi les anciennes clés de conversation et de refus automatique ; elle échoue
+sans envoi si cette lecture est indisponible. Les adresses sont normalisées et
+la recherche historique tolère la casse. La vérification de destinataire exige
+l'égalité réelle d'adresse ; les caractères SQL `%` et `_` restent littéraux.
+
+Validation locale : huit régressions du handler reproduites avant intégration,
+puis deux cas de confusion d'adresse reproduits avant correction.59 cas pour
+le module réel et57 pour le handler réel/confidentialité, avec DB et fournisseur
+inertes. Aucun appel métier réel pour tester. Le module n'offre aucune écriture.
+Les contrôles voisins et le typecheck sont consignés dans l'audit central.
+
+Lecture seule du20septembre08:15:50.432654UTC : aucune entrée différée en attente
+pour ces trois modèles (deux anciennes acceptations et un refus déjà sent).
+Aucune migration de file, aucune modification de schéma ou de parcours frontend.
+
+Limites explicites :
+- L'autorisation est vérifiée à l'appel ; ce lot ne crée pas une transaction
+  atomique avec une décision métier concurrente ni une nouvelle vérification
+  de statut dans le worker qui envoie plus tard un email différé.
+- La déduplication par lecture conserve ses limites face aux appels simultanés.
+  Aucun verrou/claim atomique ajouté dans ce lot.
+- Les six modèles invitations, annulations (deux), avis, aide pendant la garde
+  et retour de dépublication restent à sécuriser au niveau événement.
+- Le helper navigateur doit encore mieux distinguer refus métier HTTP200,
+  différé et envoi. Aucun envoi ou affichage réel n'est prouvé par ces tests.
+
+## Premier lot : historique conservé
+
 Lot borné : modèles appelables par un membre et paramètres réservés aux workers.
 Base relue : `33140078493129839a6802b2557fb44fdecbda11`.
 

@@ -10,6 +10,7 @@ import { bypassesSuppression } from '../_shared/email-suppression.ts'
 import { evaluateSitAlert, isSitStatusGuardedTemplate } from '../_shared/sit-alert-guard.ts'
 import { REPLY_TO_ADDRESS } from '../_shared/sender-address.ts'
 import { wrapEmailLink } from '../_shared/email-link-wrap.ts'
+import { authorizeApplicationEmail, isApplicationEmail } from '../_shared/application-email-authorization.ts'
 
 const SITE_URL = 'https://guardiens.fr'
 
@@ -312,12 +313,15 @@ Deno.serve(async (req) => {
     )
   }
 
+  let applicationDedupeKeys: string[] = []
+
   // === Caller authorization ===
   // Only the nine existing browser notification paths may be called by an
   // ordinary member. Every other registered template (including future ones)
   // requires a verified admin or the actual service key, even for self-send.
-  // Membership of the recipient is checked below. Event ownership for these
-  // legacy browser paths remains a separate authorization requirement.
+  // Membership of the recipient is checked below. Application emails also
+  // verify the event and rebuild their payload; the other six paths remain
+  // subject to a separate event-authorization audit.
   const MEMBER_TEMPLATES = new Set([
     'application-accepted',
     'application-declined',
@@ -379,14 +383,20 @@ Deno.serve(async (req) => {
     // être sa propre adresse, ou celle d'un compte Guardiens existant (les
     // notifications inter-membres légitimes visent toujours un membre réel).
     if (!callerIsAdmin) {
+      let recipientUserId = callerUserId
       const target = effectiveRecipient.toLowerCase()
       if (!callerEmail || target !== callerEmail) {
-        const { data: recipientProfile } = await supabase
+        const { data: recipientProfile, error: recipientError } = await supabase
           .from('profiles')
-          .select('id')
-          .ilike('email', target)
+          .select('id,email')
+          .ilike('email', target.replace(/[\\%_]/g, '\\$&'))
           .maybeSingle()
-        if (!recipientProfile) {
+        if (recipientError && isApplicationEmail(templateName)) {
+          return new Response(JSON.stringify({ error: 'Notification authorization unavailable' }), {
+            status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          })
+        }
+        if (!recipientProfile || recipientProfile.email?.toLowerCase() !== target) {
           console.warn('[security] Non-admin caller attempted to send to a non-member address', {
             callerUserId,
             templateName,
@@ -396,6 +406,23 @@ Deno.serve(async (req) => {
             { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
           )
         }
+        recipientUserId = recipientProfile.id
+      }
+      if (isApplicationEmail(templateName)) {
+        const decision = await authorizeApplicationEmail(supabase, {
+          templateName, idempotencyKey, callerId: callerUserId, recipientId: recipientUserId,
+        })
+        if (!decision.ok) {
+          return new Response(JSON.stringify({ error: decision.status === 403
+            ? 'Forbidden: notification not authorized for this event'
+            : 'Notification authorization unavailable' }), {
+            status: decision.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          })
+        }
+        effectiveRecipient = target
+        idempotencyKey = decision.idempotencyKey
+        applicationDedupeKeys = decision.dedupeKeys
+        templateData = decision.templateData
       }
     }
   }
@@ -410,14 +437,22 @@ Deno.serve(async (req) => {
     const statusFilter = sourceQueueId
       ? 'status.eq.sent,status.eq.pending'
       : 'status.eq.sent,status.eq.pending,status.eq.deferred'
-    const { data: existingSend } = await supabase
+    let existingSendQuery = supabase
       .from('email_send_log')
       .select('id')
       .eq('template_name', templateName)
-      .eq('recipient_email', effectiveRecipient)
       .or(statusFilter)
-      .filter('metadata->>idempotency_key', 'eq', idempotencyKey)
-      .limit(1)
+    existingSendQuery = applicationDedupeKeys.length
+      ? existingSendQuery.ilike('recipient_email', effectiveRecipient.replace(/[\\%_]/g, '\\$&'))
+        .in('metadata->>idempotency_key', applicationDedupeKeys)
+      : existingSendQuery.eq('recipient_email', effectiveRecipient)
+        .filter('metadata->>idempotency_key', 'eq', idempotencyKey)
+    const { data: existingSend, error: idempotencyError } = await existingSendQuery.limit(1)
+    if (applicationDedupeKeys.length && idempotencyError) {
+      return new Response(JSON.stringify({ error: 'Notification deduplication unavailable' }), {
+        status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
 
 
     if (existingSend && existingSend.length > 0) {
