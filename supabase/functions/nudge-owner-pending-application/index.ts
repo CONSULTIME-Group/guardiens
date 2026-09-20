@@ -536,7 +536,10 @@ Deno.serve(async (req) => {
       if (result.outcome === "sent") stalledEmailsSent += 1;
       else if (result.outcome === "deferred") stalledEmailsDeferred += 1;
       else if (result.outcome === "skipped") stalledEmailsSkipped += 1;
-      else errors.push({ application_id: disc.application_id, error: result.error ?? "send_failed" });
+      else {
+        recordStalledError("send", result.error?.match(/^send_failed_(\d{3})$/)?.[1]);
+        errors.push({ application_id: disc.application_id, error: result.error ?? "send_failed" });
+      }
     }
 
     if (run) {
@@ -552,6 +555,7 @@ Deno.serve(async (req) => {
         stalled_emails_sent: stalledEmailsSent,
         stalled_emails_deferred: stalledEmailsDeferred,
         stalled_emails_skipped: stalledEmailsSkipped,
+        stalled_error_counts: stalledErrorCounts,
         errors_count: errors.length,
       });
     }
