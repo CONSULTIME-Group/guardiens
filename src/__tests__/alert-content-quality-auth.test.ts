@@ -7,14 +7,14 @@ import { describe, expect, it, vi } from "vitest";
 const serviceKey = "fixture-service-secret";
 const forgedJwt = `eyJhbGciOiJIUzI1NiJ9.${Buffer.from(JSON.stringify({ role: "service_role" })).toString("base64url")}.invalid`;
 
-function harness(options: { signal?: boolean; noServiceKey?: boolean; readError?: boolean } = {}) {
+function harness(options: { signal?: boolean; noServiceKey?: boolean; readError?: boolean; runStatus?: string } = {}) {
   let handler: (request: Request) => Promise<Response>;
   const from = vi.fn((table: string) => {
     const tables: Record<string, unknown[]> = {
       v_content_defects: options.signal ? [{ source_table: "city_pages", label: "fixture-city", rule_code: "fixture-rule", excerpt: "fixture" }] : [],
       content_freeze: [],
       v_detector_selftest: [{ verdict: "PASS" }],
-      cron_run_log: [{ started_at: new Date().toISOString(), finished_at: new Date().toISOString(), status: "success", error_message: null }],
+      cron_run_log: [{ started_at: new Date().toISOString(), finished_at: new Date().toISOString(), status: options.runStatus ?? "success", error_message: null }],
     };
     if (!(table in tables)) throw new Error(`Unexpected table ${table}`);
     const result = { data: tables[table], error: options.readError ? { message: "fixture read failure" } : null };
@@ -42,6 +42,20 @@ function harness(options: { signal?: boolean; noServiceKey?: boolean; readError?
 }
 
 describe("alert-content-quality service authorization", () => {
+  it.each(["failed", "partial", "error"])("reports a %s detector even without content defects", async (runStatus) => {
+    const h = harness({ runStatus });
+    const response = await h.invoke(new Request("https://fixture.invalid", { method: "POST", headers: { authorization: `Bearer ${serviceKey}` }, body: '{"dry_run":true}' }));
+    expect(await response.json()).toMatchObject({ ok: true, sent: false, dry_run: true, templateData: { runEnErreur: true } });
+    expect(h.fetch).not.toHaveBeenCalled();
+  });
+
+  it.each(["success", "running"])("does not report a fresh %s detector as failed", async (runStatus) => {
+    const h = harness({ runStatus });
+    const response = await h.invoke(new Request("https://fixture.invalid", { method: "POST", headers: { authorization: `Bearer ${serviceKey}` }, body: '{"dry_run":true}' }));
+    expect(await response.json()).toMatchObject({ reason: "no_content_signal", sent: false });
+    expect(h.fetch).not.toHaveBeenCalled();
+  });
+
   it.each([
     ["missing credentials", {}],
     ["public apikey only", { apikey: "public-key" }],

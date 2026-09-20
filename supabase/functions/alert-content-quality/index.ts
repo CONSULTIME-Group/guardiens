@@ -68,7 +68,7 @@ Deno.serve(async (req) => {
     const derniereExecution = lastRunAt
       ? new Date(lastRunAt).toLocaleDateString('fr-FR', { timeZone: 'Europe/Paris' })
       : null
-    const runEnErreur = lastRun?.status === 'error'
+    const runEnErreur = ['failed', 'partial', 'error'].includes(lastRun?.status)
     const runErreurMessage = runEnErreur
       ? String(lastRun?.error_message ?? 'erreur sans message')
       : undefined
