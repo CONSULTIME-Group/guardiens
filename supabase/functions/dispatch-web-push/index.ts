@@ -1,10 +1,11 @@
 // Edge dispatch-web-push : envoi des notifications en attente.
 // Appelable uniquement avec la cle service_role, jamais par un client.
-// Aucun cron n'est installe a cette etape.
+// Cron installe : job 1224 dispatch-web-push, toutes les cinq minutes.
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 import webpush from 'npm:web-push@3.6.7';
 
+import { digestRunStatus } from '../_shared/cron-trace.ts';
 import { isServiceRoleCaller } from '../_shared/web-push/auth.ts';
 import { readVapidConfig } from '../_shared/web-push/config.ts';
 import { validatePushEndpoint } from '../_shared/web-push/endpoint.ts';
