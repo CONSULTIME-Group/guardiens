@@ -517,7 +517,11 @@ const AdminAnalytics = () => {
                     />
                     <YAxis className="text-xs" />
                     <Tooltip
-                      labelFormatter={(v) => format(new Date(v), "dd MMMM yyyy", { locale: fr })}
+                      labelFormatter={(v) => {
+                        if (typeof v !== "string" && typeof v !== "number") return "";
+                        const date = new Date(v);
+                        return Number.isNaN(date.getTime()) ? "" : format(date, "dd MMMM yyyy", { locale: fr });
+                      }}
                       contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }}
                     />
                     <Bar dataKey="inscrits" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />

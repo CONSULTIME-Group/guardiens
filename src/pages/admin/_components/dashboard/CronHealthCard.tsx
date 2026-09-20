@@ -42,6 +42,7 @@ interface CronHealth {
   age_minutes: number | null;
   runs_7d: number;
   failed_7d: number;
+  partial_7d?: number;
   failed_in_last_3: number;
   state: CronState;
 }
@@ -88,6 +89,7 @@ const CronRow = ({ r }: { r: CronHealth }) => (
         Dernière exécution : {formatAge(r.age_minutes)} ·
         {" "}Statut : {r.last_status ?? "inconnu"} ·
         {" "}Échecs 7 j : {r.failed_7d}/{r.runs_7d}
+        {" "}· Partiels 7 j : {r.partial_7d ?? 0}/{r.runs_7d}
       </p>
       {r.last_error ? (
         <p className="text-xs text-destructive mt-1 truncate">
