@@ -94,6 +94,8 @@ describe("send-alert-digest, priorité du digest gardien", () => {
       alert_types: ["gardes"], heure_envoi: "08:00",
       profiles: { id, first_name: "Test", email: `${id}@fixture.test`, city: "Lyon" },
     });
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.setSystemTime(NOW);
     const { handler, claimed } = loadHandler("supabase/functions/send-alert-digest/index.ts", {
       alert_preferences: [pref(A), pref(B), pref(C)],
       geocode_cache: [],
@@ -107,10 +109,9 @@ describe("send-alert-digest, priorité du digest gardien", () => {
       email_preferences: [],
       sitter_digest_queue: QUEUE,
     });
-    vi.setSystemTime(NOW);
     const response = await handler(new Request("https://fixture.invalid/?force=true", { method: "POST", body: "{}" }));
     vi.useRealTimers();
-    const payload = await response.json(); console.log("PAYLOAD", JSON.stringify(payload));
+    const payload = await response.json();
 
     expect(response.status).toBe(200);
     expect(payload.skipped_by_reason.sitter_digest_pending).toBe(1);
@@ -126,6 +127,8 @@ describe("send-nearby-daily-digest, priorité du digest gardien", () => {
       id, first_name: "Test", email: `${id}@fixture.test`, city: "Lyon",
       latitude: 45.75, longitude: 4.85, postal_code: "69001", departement_code: "69", account_status: "active",
     });
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.setSystemTime(NOW);
     const { handler, claimed } = loadHandler("supabase/functions/send-nearby-daily-digest/index.ts", {
       email_preferences: [A, B, C].map((id) => ({ user_id: id, nearby_daily_radius_km: 100, product_emails: true, new_mission_digest: false, sit_alert_frequency: "daily" })),
       profiles: [profile(A), profile(B), profile(C)],
@@ -142,10 +145,9 @@ describe("send-nearby-daily-digest, priorité du digest gardien", () => {
       email_send_log: [],
       sitter_digest_queue: QUEUE,
     });
-    vi.setSystemTime(NOW);
     const response = await handler(new Request("https://fixture.invalid/", { method: "POST", body: "{}" }));
     vi.useRealTimers();
-    const payload = await response.json(); console.log("PAYLOAD", JSON.stringify(payload));
+    const payload = await response.json();
 
     expect(response.status).toBe(200);
     expect(payload.skipped_by_reason.sitter_digest_pending).toBe(1);
