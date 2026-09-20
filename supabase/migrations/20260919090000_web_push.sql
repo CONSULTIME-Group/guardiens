@@ -1,6 +1,5 @@
 -- ============================================================================
--- Lot push utilisateur, etape 1/3, SQL PREPARE, NON APPLIQUE.
--- A appliquer uniquement apres GO explicite. Aucun cron, aucun secret ici.
+-- Appliqué en production le 19/09/2026. Fichier déplacé depuis supabase/sql/pending/ le 20/09/2026, corps SQL inchangé.
 -- Perimetre : abonnements push, file de livraison, RPC de gestion,
 -- triggers ADDITIFS sur public.messages et public.applications.
 -- Les emails existants et leurs delais ne sont pas touches par ce fichier.

@@ -1,4 +1,4 @@
--- Prepared activation only. Run after reviewed schema, VAPID and Edge deploys.
+-- Appliqué en production le 19/09/2026. Fichier déplacé depuis supabase/sql/pending/ le 20/09/2026, corps SQL inchangé.
 -- No inline secret. No immediate Edge invocation. No existing job changed.
 DO $activation$
 BEGIN
