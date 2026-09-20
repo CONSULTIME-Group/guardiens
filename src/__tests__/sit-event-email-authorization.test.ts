@@ -117,8 +117,8 @@ describe('six sit event authorizations', () => {
     h.rows.reviews[0].reviewer_id = sitter; h.rows.reviews[0].reviewee_id = owner;
     expect((await authorizeSitEventEmail(h.db, h.input)).ok).toBe(true);
   });
-  it.each(['rejete', 'rejected'])('refuses a moderated-away review %s', async (status) => {
-    const h = fixture('review-received'); h.rows.reviews[0].moderation_status = status;
+  it('refuses a moderated-away review (refuse, the enum value in use)', async () => {
+    const h = fixture('review-received'); h.rows.reviews[0].moderation_status = 'refuse';
     expect(await authorizeSitEventEmail(h.db, h.input)).toEqual({ ok: false, status: 403 });
   });
   it('refuses a hidden review', async () => {
