@@ -12,6 +12,8 @@
 // verification d'identite, est supprimee de la base et n'est plus appelee.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
+import { requireAdminOrServiceRole } from "../_shared/require-admin.ts";
+import { startCronRun, type CronRun } from "../_shared/cron-run-log.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
