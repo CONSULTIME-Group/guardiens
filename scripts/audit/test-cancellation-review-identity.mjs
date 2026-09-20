@@ -73,8 +73,17 @@ try {
     check(label + ': cancellation recorded', () => assert.deepEqual(state, { status:'cancelled',cancelled_by:actor,dated:true }));
     const duplicate = await call([sit,actor,recipient,role,reason], actor);
     check(label + ': duplicate rejected', () => assert.ok(duplicate.error));
+    check(label + ': duplicate message', () => assert.match(String(duplicate.error?.message ?? duplicate.error), /déjà annulée/));
     const count = (await db.query('SELECT count(*)::int AS n FROM reviews')).rows[0].n;
     check(label + ': one review', () => assert.equal(count,1));
+    let directDuplicate = null;
+    try {
+      await db.query("INSERT INTO reviews(sit_id,reviewer_id,reviewee_id,review_type,cancelled_by_role,cancellation_reason,moderation_status,overall_rating,created_at) VALUES ($1,$2,$3,'annulation',$4,$5,'en_attente',1,now())", [sit,actor,recipient,role,reason]);
+    } catch (error) { directDuplicate = error; }
+    check(label + ': unique index blocks direct insert', () => assert.ok(directDuplicate));
+    const afterDirect = (await db.query('SELECT count(*)::int AS n FROM reviews')).rows[0].n;
+    check(label + ': still one review', () => assert.equal(afterDirect,1));
+
     for (const badRole of [role === 'proprio' ? 'gardien' : 'proprio', 'admin', null, 'invalid']) {
       await reject(label + ' wrong role ' + badRole, [sit,actor,recipient,badRole,reason],actor);
     }
