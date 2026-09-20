@@ -146,5 +146,8 @@ Deno.serve(async (req) => {
 
   // Journal agrege uniquement : aucun endpoint, aucune cle, aucun membre.
   console.log('dispatch-web-push', JSON.stringify(counters));
+  if (counters.claimed > 0 || counters.persistence_errors > 0) {
+    await recordRun(digestRunStatus(counters.persistence_errors), counters);
+  }
   return json({ ok: counters.persistence_errors === 0, ...counters }, counters.persistence_errors ? 500 : 200);
 });
