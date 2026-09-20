@@ -13,6 +13,7 @@ import { wrapEmailLink } from '../_shared/email-link-wrap.ts'
 import { authorizeApplicationEmail, isApplicationEmail } from '../_shared/application-email-authorization.ts'
 import { authorizeSitEventEmail } from '../_shared/sit-event-email-authorization.ts'
 import { authorizeDeferredMemberEmail, EMAIL_ORIGIN_FIELD, MEMBER_EMAIL_TEMPLATES, type EmailOrigin } from '../_shared/deferred-member-email-authorization.ts'
+import { acquireMemberSendClaim, finishMemberSendClaim, memberSendOutcome, type SendClaim } from '../_shared/member-email-send-claim.ts'
 
 const SITE_URL = 'https://guardiens.fr'
 
@@ -459,7 +460,7 @@ Deno.serve(async (req) => {
       : 'status.eq.sent,status.eq.pending,status.eq.deferred'
     let existingSendQuery = supabase
       .from('email_send_log')
-      .select('id')
+      .select('id,status')
       .eq('template_name', templateName)
       .or(statusFilter)
     existingSendQuery = memberDedupeKeys.length
@@ -476,6 +477,11 @@ Deno.serve(async (req) => {
 
 
     if (existingSend && existingSend.length > 0) {
+      if (memberDedupeKeys.length && existingSend[0].status === 'pending') {
+        return new Response(JSON.stringify({ error: 'Notification send in progress' }), {
+          status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
       console.warn('[ALERT] Duplicate idempotency hit (duplicate_send)', { idempotencyKey, templateName, effectiveRecipient })
       // Métrique : insertion best-effort (n'échoue jamais l'appel)
       void supabase.from('email_idempotency_hits').insert({
@@ -1269,6 +1275,26 @@ Deno.serve(async (req) => {
     })
   }
 
+  let providerClaim: SendClaim | null = null
+  if (emailOrigin.kind === 'member') {
+    const acquisition = await acquireMemberSendClaim(supabase, { templateName, recipientEmail: effectiveRecipient, idempotencyKey })
+    if (acquisition.status !== 'acquired') {
+      return new Response(JSON.stringify(acquisition.status === 'sent'
+        ? { success: true, skipped: true, reason: 'duplicate_idempotency_key' }
+        : { error: acquisition.status === 'uncertain' ? 'Notification send outcome unknown' : 'Notification send unavailable' }), {
+        status: acquisition.status === 'sent' ? 200 : 503,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+    providerClaim = acquisition.claim
+  }
+  const finishClaim = async (outcome: 'sent' | 'retryable' | 'uncertain') => {
+    if (providerClaim && !await finishMemberSendClaim(supabase, providerClaim, outcome)) {
+      // Leave the reservation held on write failure; never unlock an unknown send.
+      console.error('Member send claim finalization unavailable', { templateName, outcome })
+    }
+  }
+
   // Log pending — on capture l'id pour faire évoluer CETTE ligne vers
   // 'sent' ou 'failed' (UPDATE), au lieu d'insérer une seconde ligne.
   // Fix double-logging (vague 45) : ~1 pending orphelin par envoi historiquement.
@@ -1289,6 +1315,12 @@ Deno.serve(async (req) => {
     })
   }
   const pendingRowId: string | null = (pendingRow as { id?: string } | null)?.id ?? null
+  if (providerClaim && (pendingErr || !pendingRowId)) {
+    await finishClaim('retryable') // Provider has not been called.
+    return new Response(JSON.stringify({ error: 'Notification send logging unavailable' }), {
+      status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
+  }
 
   // RFC 8058 List-Unsubscribe headers — Gmail/Apple Mail one-click unsubscribe.
   // Only meaningful for non-transactional emails. The unsubscribe handler accepts
@@ -1357,6 +1389,7 @@ Deno.serve(async (req) => {
     const resendData = await resendRes.json()
 
     if (!resendRes.ok) {
+      await finishClaim(memberSendOutcome(resendRes.status))
       console.error('Resend API error', { status: resendRes.status, data: resendData })
       // Fait évoluer la ligne pending -> failed (une seule ligne par envoi).
       let logResendErr: { message: string; code?: string } | null = null
@@ -1398,6 +1431,11 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
+
+    if (providerClaim && (typeof resendData?.id !== 'string' || !resendData.id)) {
+      throw new Error('Provider acceptance could not be confirmed')
+    }
+    await finishClaim('sent')
 
     // Fait évoluer la ligne pending -> sent (une seule ligne par envoi).
     // Le throttle de notify-new-message lit WHERE status='sent' AND
@@ -1446,6 +1484,7 @@ Deno.serve(async (req) => {
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (sendError) {
+    await finishClaim('uncertain')
     console.error('Resend fetch error', sendError)
     const errMsg = (sendError instanceof Error ? sendError.message : String(sendError)) || 'Network error sending via Resend'
     let logCatchErr: { message: string; code?: string } | null = null

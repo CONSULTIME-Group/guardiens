@@ -1,5 +1,67 @@
 # Autorisations du point d'envoi transactionnel — 20 septembre 2026
 
+## Cinquième lot : réservation atomique des envois initiés par un membre
+
+Base : `01ef5d5c8533e134bf66668a9ed633cac0f91cb2`. Périmètre : les neuf modèles
+initiés par un membre, appels directs et reprises différées dont l'origine
+membre est vérifiée. Les appels initialement admin/service restent hors de
+cette réservation ; ne pas annoncer une protection globale de tous les emails.
+
+Une table dédiée porte une clé SHA-256 du tuple version/modèle/adresse normalisée/
+clé canonique. Elle ne contient ni adresse, ni membre, ni contenu d'email.
+Deux RPC réservées au service acquièrent puis terminent la réservation. La clé
+primaire et l'INSERT ON CONFLICT conditionnel garantissent un seul propriétaire.
+Seul le propriétaire actif peut terminer ; un ancien propriétaire ne peut pas
+libérer la réservation d'une tentative suivante. RLS activée, aucun accès public
+ou membre, aucun changement des tables ou données métier existantes.
+
+Le sender réserve juste avant le journal pending et l'appel fournisseur. Une
+réservation déjà sent retourne duplicate_idempotency_key sans renvoi ; busy,
+uncertain ou erreur de lecture retournent503 sans appel fournisseur. Un ancien
+pending ne suffit plus à annoncer un succès de déduplication. Si le journal
+pending ne peut pas être créé, le fournisseur n'est pas appelé et la réservation
+est rendue réessayable. Un succès fournisseur n'est accepté qu'avec son identifiant.
+
+Les refus explicites4xx hors408/409 rendent la réservation retryable (le429 suit
+d'abord ses reprises internes existantes). Une exception réseau, un5xx ou une
+réponse illisible/incomplète laisse uncertain ; aucune reprise automatique ne
+vole une réservation après expiration. Un échec de finalisation laisse également
+la réservation tenue. Le résultat inconnu nécessite une vérification opérateur.
+Un crash avant même l'appel fournisseur peut donc nécessiter cette vérification :
+c'est la limite volontaire de disponibilité de ce lot, pas une livraison garantie.
+
+La documentation Resend confirme une idempotence fournisseur de24heures et exige
+une même requête. Elle ne remplace pas ici la réservation durable en base ; le
+rendu actuel varie notamment par ses identifiants de suivi. Aucun header Resend
+ni contrat fournisseur n'est modifié dans ce lot.
+Source : https://resend.com/docs/dashboard/emails/idempotency-keys (relu20septembre2026).
+
+Validation locale :27 contrôles de la migration sur PGlite, dont droits anon/
+authenticated/service, unicité, reprise après refus et protection contre un
+ancien propriétaire ; les32 demandes SQL sont sérialisées sur une connexion,
+pas un test de charge multi-session PostgreSQL. Le vrai handler est testé avec
+deux appels concurrents, lectures anti-doublon vides et réservation partagée :
+un seul appel au faux fournisseur. Dix cas de régression échouaient avant
+branchement. Au total426 tests ciblés (120 handler,27 helper,279 voisins), plus
+les27 contrôles SQL. Tests sans réseau ni envoi ; détails et déploiement dans
+l'audit central. Script SQL local : scripts/audit/test-member-email-claims.mjs,
+variable GUARDIENS_PGLITE_MODULE vers le module PGlite installé hors du projet.
+
+Restent : supervision/réconciliation des réservations incertaines ou bloquées,
+protection des modèles initialement serveur, éventuels doublons de lignes de file
+(la réservation empêche leur double soumission membre), annulations SQL et gestion
+des résultats navigateur. Aucun « exactement une livraison » n'est garanti.
+
+Migration appliquée le20septembre à09:48UTC :
+`drizzle/migrations/0001_member_email_send_claims.sql`, générée par l'outil.
+Le fichier sous `supabase/sql/pending` est conservé comme fixture locale,
+**déjà appliqué : ne pas le rejouer**. À09:50:08UTC : sources des deux RPC
+identiques au SQL testé, droits anon/authenticated refusés, service autorisé,
+RLS et clé primaire vérifiées, zéro ligne. Les types Supabase et métadonnées
+de migration ont été générés automatiquement, sans changement métier.
+
+## Historique du quatrième lot
+
 ## Quatrième lot : revalidation des notifications membres différées
 
 Base : `71848b1ae77fd339c20e4d5100e97dc7c12e0a28`. Ce complément ferme la
