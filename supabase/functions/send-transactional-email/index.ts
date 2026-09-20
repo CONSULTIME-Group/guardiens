@@ -313,25 +313,21 @@ Deno.serve(async (req) => {
   }
 
   // === Caller authorization ===
-  // verify_jwt = true ensures a valid JWT, but without this check ANY
-  // authenticated user could spam arbitrary recipients with platform-branded
-  // templates. Trusted callers bypass: service_role and admin users.
-  //
-  // For non-admin authenticated callers, we apply a two-tier policy:
-  //   - SENSITIVE_TEMPLATES (account / identity / platform-branded messages
-  //     that could be used for phishing): must be sent to the caller's OWN
-  //     email address.
-  //   - All other templates (cross-user notifications: application-accepted,
-  //     new-message, mission-response, etc.): allowed — abuse is constrained
-  //     by per-recipient frequency caps and by business validation upstream.
-  const SENSITIVE_TEMPLATES = new Set([
-    'identity-verified',
-    'identity-rejected',
-    'contact-reply',
-    'subscription-expired',
-    'dispute-resolved',
-    'report-resolved',
-    'relance-piece-identite',
+  // Only the nine existing browser notification paths may be called by an
+  // ordinary member. Every other registered template (including future ones)
+  // requires a verified admin or the actual service key, even for self-send.
+  // Membership of the recipient is checked below. Event ownership for these
+  // legacy browser paths remains a separate authorization requirement.
+  const MEMBER_TEMPLATES = new Set([
+    'application-accepted',
+    'application-declined',
+    'sit-confirmed',
+    'cancellation-by-owner',
+    'cancellation-by-sitter',
+    'sit-invitation',
+    'review-received',
+    'help-during-sit',
+    'listing-unpublished-feedback',
   ])
 
   if (!isServiceRole) {
@@ -345,11 +341,11 @@ Deno.serve(async (req) => {
       if (userData?.user) {
         callerUserId = userData.user.id
         callerEmail = (userData.user.email ?? '').toLowerCase() || null
-        const { data: adminCheck } = await supabase.rpc('has_role', {
+        const { data: adminCheck, error: adminError } = await supabase.rpc('has_role', {
           _user_id: callerUserId,
           _role: 'admin',
         })
-        callerIsAdmin = adminCheck === true
+        callerIsAdmin = !adminError && adminCheck === true
       }
     }
 
@@ -360,17 +356,22 @@ Deno.serve(async (req) => {
       )
     }
 
-    if (!callerIsAdmin && SENSITIVE_TEMPLATES.has(templateName)) {
-      if (!callerEmail || effectiveRecipient.toLowerCase() !== callerEmail) {
-        console.warn('[security] Non-admin caller attempted to send sensitive template to another recipient', {
-          callerUserId,
-          templateName,
-        })
-        return new Response(
-          JSON.stringify({ error: 'Forbidden: this template can only be sent to your own account' }),
-          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        )
-      }
+    // Queue identity and log attribution belong to trusted server workers.
+    // Accepting them from a browser can bypass deferred-send deduplication,
+    // update another queue entry, or overwrite server-generated metadata.
+    if (sourceQueueId || Object.keys(logMetadata ?? {}).length > 0) {
+      return new Response(
+        JSON.stringify({ error: 'Forbidden: worker fields require service role' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    if (!callerIsAdmin && !MEMBER_TEMPLATES.has(templateName)) {
+      console.warn('[security] Non-admin caller attempted a restricted template', { templateName })
+      return new Response(
+        JSON.stringify({ error: 'Forbidden: this template requires a trusted caller' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     }
 
     // Anti open-relay : un membre non admin ne peut jamais adresser un email
