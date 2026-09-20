@@ -24,7 +24,7 @@ function fakeClient(rows: Rows) {
       maybeSingle: async () => ({ data: (rows[table] ?? [])[0] ?? null, error: null }),
       single: async () => ({ data: (rows[table] ?? [])[0] ?? null, error: null }),
     };
-    for (const method of ["select", "eq", "neq", "gte", "lte", "lt", "gt", "in", "or", "order", "limit", "range", "filter", "not", "is", "insert", "update", "upsert", "delete"]) {
+    for (const method of ["select", "eq", "neq", "gte", "lte", "lt", "gt", "in", "or", "order", "limit", "range", "filter", "not", "is", "ilike", "like", "contains", "overlaps", "insert", "update", "upsert", "delete"]) {
       chain[method] = () => chain;
     }
     return chain;
