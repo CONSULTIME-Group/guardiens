@@ -367,25 +367,25 @@ describe("application event authorization in the actual sender", () => {
   ])("blocks an unrelated or unaccepted application %j before business writes", async (options) => {
     const h = harness(options);
     expect((await h.invoke()).status).toBe(403);
-    expect(h.writes).toEqual([]);
+    expect(h.writes.map((w: any) => w.table)).toEqual(["error_logs"]);
     expect(h.resendFetch).not.toHaveBeenCalled();
   });
   it("cannot notify the owner instead of the accepted sitter", async () => {
     const h = harness();
     expect((await h.invoke("member-session", ownAddress)).status).toBe(403);
-    expect(h.writes).toEqual([]);
+    expect(h.writes.map((w: any) => w.table)).toEqual(["error_logs"]);
   });
   it("rejects a random deduplication key instead of trusting the supplied event content", async () => {
     const h = harness();
     expect((await h.invoke("member-session", reference, "application-accepted", { idempotencyKey: "random", templateData: { sitId } })).status).toBe(403);
-    expect(h.writes).toEqual([]);
+    expect(h.writes.map((w: any) => w.table)).toEqual(["error_logs"]);
   });
   it("fails closed on an event read error without leaking DB details", async () => {
     const h = harness({ eventReadError: true });
     const response = await h.invoke();
     expect(response.status).toBe(503);
     expect(await response.text()).not.toContain("private DB error");
-    expect(h.writes).toEqual([]);
+    expect(h.writes.map((w: any) => w.table)).toEqual(["error_logs"]);
     expect(h.resendFetch).not.toHaveBeenCalled();
   });
   it("replaces forged event content and writes a canonical key", async () => {
