@@ -42,18 +42,23 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const authError = await requireAdminOrServiceRole(req, corsHeaders);
+  if (authError) return authError;
+
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
   );
 
+  let run: CronRun | null = null;
   try {
-    const { data: signalsFlag } = await supabase
+    const { data: signalsFlag, error: flagError } = await supabase
       .from("feature_flags")
       .select("enabled")
       .eq("key", "admin_signals_active")
       .maybeSingle();
 
+    if (flagError) throw flagError;
     if (signalsFlag && signalsFlag.enabled === false) {
       return new Response(
         JSON.stringify({ skipped: "admin_signals_active off" }),
