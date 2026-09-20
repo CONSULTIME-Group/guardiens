@@ -17,6 +17,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:guard": "node scripts/test-guard/diff-guard.mjs",
+    "test:sql": "node scripts/test-web-push-db.mjs && node scripts/test-web-push-targeted-db.mjs && node scripts/test-digest-backlog-recovery.mjs && node scripts/test-admin-signals-finish.mjs && node scripts/test-pending-applications-privacy.mjs && node scripts/test-stale-draft-rpc-privacy.mjs && node scripts/test-admin-cron-health-partial.mjs && node scripts/audit/test-member-email-claims.mjs && node scripts/audit/test-cancellation-review-identity.mjs",
     "test:data": "vitest run src/__tests__/article-internal-links.test.ts src/__tests__/article-pricing-content.test.ts",
     "test:e2e:badges": "playwright test tests/badges-long-labels.spec.ts",
     "test:e2e:badges:update": "playwright test tests/badges-long-labels.spec.ts --update-snapshots",
@@ -105,6 +106,7 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
     "@eslint/js": "^9.32.0",
     "@lovable.dev/vite-plugin-dev-server-bridge": "^1.0.2",
     "@lovable.dev/vite-plugin-hmr-gate": "^1.8.0",

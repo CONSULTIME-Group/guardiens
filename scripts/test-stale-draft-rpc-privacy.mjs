@@ -4,7 +4,7 @@ const { PGlite } = await import(process.env.PGLITE_MODULE || '@electric-sql/pgli
 const db = new PGlite();
 const root = new URL('../', import.meta.url);
 const baseline = readFileSync(new URL('scripts/fixtures/detect-stale-drafts-before.sql', root), 'utf8');
-const migration = readFileSync(new URL('supabase/sql/pending/20260919_stale_draft_rpc_privacy.sql', root), 'utf8');
+const migration = readFileSync(new URL('supabase/migrations/20260919150000_stale_draft_rpc_privacy.sql', root), 'utf8');
 const passed = [];
 await db.exec(`
   CREATE ROLE anon; CREATE ROLE authenticated; CREATE ROLE service_role;

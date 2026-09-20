@@ -5,14 +5,14 @@ import { readFileSync } from 'node:fs';
 import { randomUUID } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
 const modulePath = process.env.GUARDIENS_PGLITE_MODULE;
-if (!modulePath?.startsWith('/')) throw new Error('Provide the absolute local PGlite module path');
-const { PGlite } = await import(pathToFileURL(modulePath).href);
+if (modulePath && !modulePath.startsWith('/')) throw new Error('Provide the absolute local PGlite module path');
+const { PGlite } = await import(modulePath ? pathToFileURL(modulePath).href : '@electric-sql/pglite');
 const db = new PGlite();
 let checks = 0;
 const equal = (a, b) => { assert.deepEqual(a, b); checks++; };
 try {
   await db.exec('CREATE ROLE anon; CREATE ROLE authenticated; CREATE ROLE service_role;');
-  await db.exec(readFileSync('supabase/sql/pending/20260920094000_member_email_send_claims.sql', 'utf8'));
+  await db.exec(readFileSync('supabase/migrations/20260920094000_member_email_send_claims.sql', 'utf8'));
   const acquire = async (key, token) => (await db.query('SELECT public.acquire_member_email_send_claim($1,$2) AS result', [key, token])).rows[0].result;
   const finish = async (key, token, outcome) => (await db.query('SELECT public.finish_member_email_send_claim($1,$2,$3) AS result', [key, token, outcome])).rows[0].result;
   const key = 'a'.repeat(64), token = randomUUID();

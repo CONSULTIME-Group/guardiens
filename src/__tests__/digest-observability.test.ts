@@ -18,7 +18,7 @@ const CRON_RUN_LOG = readFileSync("supabase/functions/_shared/cron-run-log.ts", 
 const ALERT = readFileSync("supabase/functions/send-alert-digest/index.ts", "utf8");
 const NEARBY = readFileSync("supabase/functions/send-nearby-daily-digest/index.ts", "utf8");
 const MIGRATION = readFileSync(
-  "supabase/sql/pending/20260919113000_digest_cron_trace_correlation.sql",
+  "supabase/migrations/20260919113000_digest_cron_trace_correlation.sql",
   "utf8",
 );
 
