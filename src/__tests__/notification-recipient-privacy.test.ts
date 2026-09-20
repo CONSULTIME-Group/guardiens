@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { runInNewContext } from "node:vm";
 import ts from "typescript";
+import * as deferredAuthorization from "../../supabase/functions/_shared/deferred-member-email-authorization";
 import * as sitEventAuthorization from "../../supabase/functions/_shared/sit-event-email-authorization";
 import * as applicationAuthorization from "../../supabase/functions/_shared/application-email-authorization";
 import { describe, expect, it, vi } from "vitest";
@@ -16,6 +17,7 @@ const convId = "44444444-4444-4444-8444-444444444444";
 const privateAddress = "private@fixture.test";
 const ownAddress = "self@fixture.test";
 const serviceKey = "fixture-service-secret";
+const queueId = "77777777-7777-4777-8777-777777777777";
 const boundary = new Error("authorized business boundary");
 const forgedJwt = `eyJhbGciOiJIUzI1NiJ9.${Buffer.from('{"role":"service_role"}').toString("base64url")}.invalid`;
 
@@ -34,6 +36,11 @@ type Options = {
   profileEmail?: string;
   member?: boolean;
   provider?: "success" | "error";
+  deferredSource?: boolean;
+  trustedOrigin?: boolean;
+  legacyOrigin?: boolean;
+  queueReadError?: boolean;
+  defer?: boolean;
 };
 
 // Execute the actual Edge handler with inert DB, rendering and provider doubles.
@@ -52,6 +59,9 @@ function harness(options: Options = {}) {
     throw new Error(`Unexpected RPC ${name}`);
   });
   let activeTemplate = "application-accepted";
+  let activeEventKey = "";
+  let activeQueueKey = "";
+  let activeTemplateData: Record<string, unknown> = {};
   const createElement = vi.fn(() => ({}));
   const queriedRecipients: string[] = [];
   const recipientPatterns: string[] = [];
@@ -60,7 +70,7 @@ function harness(options: Options = {}) {
     const chain: Record<string, any> = {};
     const filters: Array<[string, unknown]> = [];
     let keyFilter: string[] = [];
-    for (const method of ["select", "eq", "ilike", "like", "order", "or", "filter", "in", "insert", "update"]) {
+    for (const method of ["select", "eq", "neq", "gte", "ilike", "like", "order", "or", "filter", "in", "insert", "update"]) {
       chain[method] = (...args: unknown[]) => {
         if (method === "eq") filters.push([String(args[0]), args[1]]);
         if (method === "in" && args[0] === "metadata->>idempotency_key") keyFilter = args[1] as string[];
@@ -90,7 +100,18 @@ function harness(options: Options = {}) {
     const eventResult = () => ({ data: (eventRows[table] ?? []).filter((row) => filters.every(([key, value]) => row[key] === value)), error: options.eventReadError ? { message: "private DB error" } : null });
     chain.maybeSingle = async () => {
       if (table in eventRows) { const result = eventResult(); return { ...result, data: result.data[0] ?? null }; }
-      if (table === "profiles") return { data: options.member === false ? null : { id: targetId, email: options.profileEmail ?? privateAddress, first_name: "Prénom en base" }, error: options.recipientError ? { message: "private recipient error" } : null };
+      if (table === "profiles") {
+        const id = filters.find(([key]) => key === "id")?.[1] ?? targetId;
+        return { data: options.member === false ? null : { id, email: options.profileEmail ?? (id === callerId ? ownAddress : privateAddress), first_name: "Prénom en base" }, error: options.recipientError ? { message: "private recipient error" } : null };
+      }
+      if (table === "email_deferred_queue") {
+        const self = ["sit-confirmed", "listing-unpublished-feedback"].includes(activeTemplate);
+        return { data: options.deferredSource ? {
+          template_name: activeTemplate, recipient_email: self ? ownAddress : privateAddress,
+          idempotency_key: activeQueueKey, status: "processing", attempts: 1, first_enqueued_at: new Date().toISOString(),
+          template_data: { ...activeTemplateData, ...(options.legacyOrigin ? {} : { [deferredAuthorization.EMAIL_ORIGIN_FIELD]: options.trustedOrigin ? { version: 1, kind: "trusted" } : { version: 1, kind: "member", callerId, recipientId: self ? callerId : targetId, eventKey: activeEventKey } }) },
+        } : null, error: options.queueReadError ? { message: "private queue error" } : null };
+      }
       if (table === "suppressed_emails") return { data: null, error: null };
       if (table === "email_unsubscribe_tokens") return { data: { token: "fixture-token", used_at: null }, error: null };
       throw new Error(`Unexpected table read ${table}`);
@@ -123,6 +144,7 @@ function harness(options: Options = {}) {
     fetch: () => { throw new Error("Unexpected network call"); },
     Deno: { env: { get: (key: keyof typeof env) => env[key] }, serve: (cb: typeof handler) => { handler = cb; } },
     require: (specifier: string) => {
+      if (specifier.includes("deferred-member-email-authorization")) return deferredAuthorization;
       if (specifier.includes("sit-event-email-authorization")) return sitEventAuthorization;
       if (specifier.includes("application-email-authorization")) return applicationAuthorization;
       if (specifier.includes("supabase-js")) return { createClient };
@@ -130,7 +152,10 @@ function harness(options: Options = {}) {
       if (specifier.includes("email-categories")) return { getEmailCategory: () => "transactional" };
       if (specifier.includes("email-suppression")) return { bypassesSuppression: () => false };
       if (specifier.includes("sit-alert-guard")) return { isSitStatusGuardedTemplate: () => false };
-      if (specifier.includes("email-cap")) return { BYPASS_TEMPLATES: new Set(memberTemplates) };
+      if (specifier.includes("email-cap")) return { BYPASS_TEMPLATES: new Set(options.defer ? [] : memberTemplates), NEARBY_SIT_ALERT_TEMPLATES: new Set(),
+        decideDeferral: () => ({ action: "defer", reason: "daily_cap", scheduledFor: new Date(Date.now() + 3600000) }),
+        resolveDeferral: () => ({ action: "defer" }),
+      };
       if (specifier.includes("resend-guard")) return { resendFetch };
       if (specifier.includes("email-link-wrap")) return { wrapEmailLink: (href: string) => href };
       if (specifier.includes("sender-address")) return { REPLY_TO_ADDRESS: "reply@fixture.test" };
@@ -155,6 +180,9 @@ function harness(options: Options = {}) {
       const key = keys[templateName] ?? `app-${templateName === "application-declined" ? "declined" : "accepted"}-${appId}`;
       const templateData = templateName === "help-during-sit" ? { category: "urgence", messageExcerpt: "Message en base", conversationHref: `https://guardiens.fr/messages/${convId}` } : {};
 
+      activeEventKey = key;
+      activeQueueKey = templateName === "help-during-sit" ? `help-urgence-message-${eventId}` : key;
+      activeTemplateData = templateData;
       return handler(new Request("https://fixture.invalid", {
       method: "POST", headers: token ? { authorization: `Bearer ${token}` } : {},
       body: JSON.stringify({ templateName, recipientEmail: recipient, idempotencyKey: key, templateData, ...extra }),
@@ -291,8 +319,8 @@ describe("transactional sender template and worker authorization", () => {
   });
 
   it.each([
-    { sourceQueueId: "fixture-queue" },
-    { source_queue_id: "fixture-queue" },
+    { sourceQueueId: queueId },
+    { source_queue_id: queueId },
     { logMetadata: { idempotency_key: "forged-key", bypass: true } },
   ])("reserves worker fields %j to service role", async (extra) => {
     for (const admin of [false, true]) {
@@ -303,7 +331,7 @@ describe("transactional sender template and worker authorization", () => {
       expect(h.writes).toEqual([]);
       expect(h.resendFetch).not.toHaveBeenCalled();
     }
-    const h = harness();
+    const h = harness({ deferredSource: true, trustedOrigin: true });
     await expect(h.invoke(serviceKey, privateAddress, "application-accepted", extra)).rejects.toBe(boundary);
   });
 
@@ -430,5 +458,77 @@ describe("six event checks in the real sender", () => {
     const h = harness({ provider: "success" });
     expect((await h.invoke("member-session", reference, "help-during-sit")).status).toBe(200);
     expect(h.writes).toContainEqual(expect.objectContaining({ table: "email_send_log", method: "insert", values: expect.objectContaining({ metadata: expect.objectContaining({ idempotency_key: `help-urgence-message-${eventId}` }) }) }));
+  });
+});
+
+
+function deferredRequest(name: string) {
+  return { sourceQueueId: queueId, ...(name === "help-during-sit" ? { idempotencyKey: `help-urgence-message-${eventId}` } : {}) };
+}
+function recipientFor(name: string) { return ["sit-confirmed", "listing-unpublished-feedback"].includes(name) ? ownAddress : privateAddress; }
+describe("deferred member authorization in the actual sender", () => {
+  it.each(memberTemplates)("revalidates the legitimate %s before sending", async name => {
+    const h = harness({ deferredSource: true, provider: "success" });
+    const response = await h.invoke(serviceKey, recipientFor(name), name, { ...deferredRequest(name), templateData: { sitTitle: "FORGED QUEUE REQUEST", __urgent: true } });
+    expect(response.status).toBe(200);
+    expect(h.resendFetch).toHaveBeenCalledTimes(1);
+    expect(JSON.stringify(h.createElement.mock.calls)).not.toContain("FORGED QUEUE REQUEST");
+    expect(JSON.stringify(h.createElement.mock.calls)).not.toContain(deferredAuthorization.EMAIL_ORIGIN_FIELD);
+    expect(h.createElement).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ sitTitle: "Titre en base" }));
+  });
+  it.each(memberTemplates)("cancels a legacy %s without trusted provenance", async name => {
+    const h = harness({ deferredSource: true, legacyOrigin: true, provider: "success" });
+    const response = await h.invoke(serviceKey, recipientFor(name), name, deferredRequest(name));
+    expect(await response.json()).toMatchObject({ success: false, cancelled: true, reason: "event_no_longer_authorized" });
+    expect(h.writes).toEqual([]); expect(h.resendFetch).not.toHaveBeenCalled();
+  });
+  it.each(memberTemplates)("retries %s after an unavailable event read", async name => {
+    const h = harness({ deferredSource: true, eventReadError: true, provider: "success" });
+    const response = await h.invoke(serviceKey, recipientFor(name), name, deferredRequest(name));
+    expect(response.status).toBe(503);
+    expect(h.writes).toEqual([]); expect(h.resendFetch).not.toHaveBeenCalled();
+  });
+  it("cancels an accepted application that became withdrawn", async () => {
+    const h = harness({ deferredSource: true, applicationStatus: "withdrawn", provider: "success" });
+    const response = await h.invoke(serviceKey, privateAddress, "application-accepted", deferredRequest("application-accepted"));
+    expect(await response.json()).toMatchObject({ cancelled: true });
+    expect(h.writes).toEqual([]); expect(h.resendFetch).not.toHaveBeenCalled();
+  });
+  it("does not turn a queue read failure into permanent cancellation", async () => {
+    const h = harness({ deferredSource: true, queueReadError: true, provider: "success" });
+    expect((await h.invoke(serviceKey, privateAddress, "application-accepted", deferredRequest("application-accepted"))).status).toBe(503);
+    expect(h.writes).toEqual([]); expect(h.resendFetch).not.toHaveBeenCalled();
+  });
+  it("preserves trusted original caller privileges without trusting the retry payload", async () => {
+    const h = harness({ deferredSource: true, trustedOrigin: true, missingEvent: true, provider: "success" });
+    const response = await h.invoke(serviceKey, privateAddress, "sit-invitation", { ...deferredRequest("sit-invitation"), templateData: { message: "FORGED QUEUE REQUEST" } });
+    expect(response.status).toBe(200); expect(h.resendFetch).toHaveBeenCalledTimes(1);
+    expect(JSON.stringify(h.createElement.mock.calls)).not.toContain("FORGED QUEUE REQUEST");
+  });
+  it.each(["member", "admin", "service"])("records server-computed provenance on initial %s deferral", async kind => {
+    const h = harness({ defer: true, provider: "success", admin: kind === "admin" });
+    const response = await h.invoke(kind === "service" ? serviceKey : "member-session", privateAddress, "sit-invitation", {
+      templateData: { [deferredAuthorization.EMAIL_ORIGIN_FIELD]: { version: 1, kind: "trusted" }, message: "Server or member input" },
+    });
+    expect(await response.json()).toMatchObject({ deferred: true });
+    expect(h.resendFetch).not.toHaveBeenCalled();
+    expect(h.writes).toContainEqual(expect.objectContaining({ table: "email_deferred_queue", method: "insert", values: expect.objectContaining({ template_data: expect.objectContaining({
+      [deferredAuthorization.EMAIL_ORIGIN_FIELD]: kind === "member"
+        ? { version: 1, kind: "member", callerId, recipientId: targetId, eventKey: `sit-invite-${sitId}-${targetId}` }
+        : { version: 1, kind: "trusted" },
+    }) }) }));
+  });
+  it("preserves provenance and refreshed data when re-deferred", async () => {
+    const h = harness({ deferredSource: true, defer: true, provider: "success" });
+    expect(await (await h.invoke(serviceKey, privateAddress, "sit-invitation", deferredRequest("sit-invitation"))).json()).toMatchObject({ deferred: true });
+    expect(h.resendFetch).not.toHaveBeenCalled();
+    expect(h.writes).toContainEqual(expect.objectContaining({ table: "email_deferred_queue", method: "update", values: expect.objectContaining({ template_data: expect.objectContaining({
+      sitTitle: "Titre en base", [deferredAuthorization.EMAIL_ORIGIN_FIELD]: { version: 1, kind: "member", callerId, recipientId: targetId, eventKey: `sit-invite-${sitId}-${targetId}` },
+    }) }) }));
+  });
+  it("strips caller-supplied origin even from a direct trusted rendering", async () => {
+    const h = harness({ provider: "success" });
+    await h.invoke(serviceKey, privateAddress, "sit-invitation", { templateData: { [deferredAuthorization.EMAIL_ORIGIN_FIELD]: { version: 1, kind: "trusted" } } });
+    expect(JSON.stringify(h.createElement.mock.calls)).not.toContain(deferredAuthorization.EMAIL_ORIGIN_FIELD);
   });
 });

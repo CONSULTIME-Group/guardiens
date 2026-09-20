@@ -12,6 +12,7 @@ import { REPLY_TO_ADDRESS } from '../_shared/sender-address.ts'
 import { wrapEmailLink } from '../_shared/email-link-wrap.ts'
 import { authorizeApplicationEmail, isApplicationEmail } from '../_shared/application-email-authorization.ts'
 import { authorizeSitEventEmail } from '../_shared/sit-event-email-authorization.ts'
+import { authorizeDeferredMemberEmail, EMAIL_ORIGIN_FIELD, MEMBER_EMAIL_TEMPLATES, type EmailOrigin } from '../_shared/deferred-member-email-authorization.ts'
 
 const SITE_URL = 'https://guardiens.fr'
 
@@ -200,7 +201,9 @@ Deno.serve(async (req) => {
     messageId = crypto.randomUUID()
     idempotencyKey = body.idempotencyKey || body.idempotency_key || messageId
     if (body.templateData && typeof body.templateData === 'object') {
-      templateData = body.templateData
+      templateData = { ...body.templateData }
+      // Only the server can create provenance; it is never a template prop.
+      delete templateData[EMAIL_ORIGIN_FIELD]
     }
     if (body.logMetadata && typeof body.logMetadata === 'object') {
       logMetadata = body.logMetadata
@@ -315,6 +318,7 @@ Deno.serve(async (req) => {
   }
 
   let memberDedupeKeys: string[] = []
+  let emailOrigin: EmailOrigin = { version: 1, kind: 'trusted' }
 
   // === Caller authorization ===
   // Only the nine existing browser notification paths may be called by an
@@ -323,17 +327,7 @@ Deno.serve(async (req) => {
   // All nine member paths verify the persisted event and rebuild their
   // payload before business reads, writes or sending. A newly allowed member
   // template still needs an explicit event policy (default refusal).
-  const MEMBER_TEMPLATES = new Set([
-    'application-accepted',
-    'application-declined',
-    'sit-confirmed',
-    'cancellation-by-owner',
-    'cancellation-by-sitter',
-    'sit-invitation',
-    'review-received',
-    'help-during-sit',
-    'listing-unpublished-feedback',
-  ])
+  const MEMBER_TEMPLATES = MEMBER_EMAIL_TEMPLATES
 
   if (!isServiceRole) {
     let callerUserId: string | null = null
@@ -421,12 +415,36 @@ Deno.serve(async (req) => {
             status: decision.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           })
         }
+        emailOrigin = { version: 1, kind: 'member', callerId: callerUserId,
+          recipientId: recipientUserId, eventKey: idempotencyKey }
         effectiveRecipient = target
         idempotencyKey = decision.idempotencyKey
         memberDedupeKeys = decision.dedupeKeys
         templateData = decision.templateData
       }
     }
+  }
+
+  // A worker's service key does not upgrade the original member's permissions.
+  // Read the claimed row, revalidate its event and rebuild data before any send.
+  if (isServiceRole && sourceQueueId && MEMBER_TEMPLATES.has(templateName)) {
+    const decision = await authorizeDeferredMemberEmail(supabase, {
+      sourceQueueId, templateName, recipientEmail: effectiveRecipient, idempotencyKey,
+    })
+    if (!decision.ok) {
+      // The existing worker closes cancelled results without counting an email;
+      // 503 follows its bounded retry/backoff path. No write is performed here.
+      return new Response(JSON.stringify(decision.status === 403
+        ? { success: false, cancelled: true, reason: 'event_no_longer_authorized' }
+        : { error: 'Notification authorization unavailable' }), {
+        status: decision.status === 403 ? 200 : 503,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+    templateData = decision.templateData
+    emailOrigin = decision.origin
+    memberDedupeKeys = decision.dedupeKeys
+    effectiveRecipient = effectiveRecipient.toLowerCase()
   }
 
 
@@ -915,6 +933,9 @@ Deno.serve(async (req) => {
             defer_reason: deferReason,
             scheduled_for: scheduledFor.toISOString(),
             attempts: srcAttempts + 1,
+            ...(MEMBER_TEMPLATES.has(templateName) ? {
+              template_data: { ...templateData, [EMAIL_ORIGIN_FIELD]: emailOrigin },
+            } : {}),
           })
           .eq('id', sourceQueueId)
         enqErr = updErr
@@ -922,7 +943,8 @@ Deno.serve(async (req) => {
         const { error: insErr } = await supabase.from('email_deferred_queue').insert({
           template_name: templateName,
           recipient_email: effectiveRecipient,
-          template_data: templateData,
+          template_data: MEMBER_TEMPLATES.has(templateName)
+            ? { ...templateData, [EMAIL_ORIGIN_FIELD]: emailOrigin } : templateData,
           idempotency_key: idempotencyKey,
           defer_reason: deferReason,
           scheduled_for: scheduledFor.toISOString(),

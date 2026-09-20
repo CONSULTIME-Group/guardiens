@@ -1,5 +1,59 @@
 # Autorisations du point d'envoi transactionnel — 20 septembre 2026
 
+## Quatrième lot : revalidation des notifications membres différées
+
+Base : `71848b1ae77fd339c20e4d5100e97dc7c12e0a28`. Ce complément ferme la
+revalidation des neuf notifications **initiées par un membre** lorsqu'elles
+repassent par le sender avec une ligne source de la file différée. Les privilèges
+des appels initialement admin/service restent ceux des lots précédents.
+
+À la première mise en file, le sender conserve une origine versionnée dans
+`template_data.__guardiens_email_origin` : acteur et destinataire vérifiés,
+localisateur de l'événement avant canonicalisation, ou origine trusted pour
+un admin/service déjà vérifié. Une origine reçue dans le corps de requête est
+supprimée ; elle n'est jamais une preuve ni une propriété de rendu.
+
+À la reprise, le sender lit la ligne réelle (état processing, modèle, adresse et
+clé exacts), puis son origine persistée. Pour un membre, il contrôle l'existence
+des deux profils, l'adresse actuelle du destinataire, les relations et l'état
+réel de l'événement en réutilisant les deux modules d'autorisation. Le contenu
+est reconstruit. Un nouveau report conserve cette origine et le contenu actualisé.
+La clé canonique doit rester celle de l'événement initial ; une dépublication
+datée d'un autre jour ne remplace pas l'intention antérieure. Une urgence reste liée à
+l'identifiant du message initial, même si un autre message identique arrive.
+
+Un état invalidé ou une provenance manquante rend HTTP200 avec success:false,
+cancelled:true, reason:event_no_longer_authorized. Le worker existant ferme
+la ligne et annule son miroir sans compter un email. Une erreur de lecture
+rend HTTP503 et utilise les tentatives bornées et le délai de reprise existants.
+Le sender ne fait aucune écriture avant ces décisions d'autorisation.
+
+Compatibilité historique : à09:10:57 UTC le20septembre, aucune ligne pending
+ou processing pour ces neuf modèles (deux acceptations et un refus historiques
+sont déjà sent). Les autres modèles de file ne changent pas. Une ancienne
+ligne de ces neuf modèles sans origine prouvée serait annulée, sans déduire
+son acteur du contenu. Aucun rattrapage, aucune migration ni réécriture de file.
+RLS active, écriture de la file réservée au service, lecture admin seulement.
+
+Validation :67 tests du module différé,106 du vrai handler,88 des événements
+de garde,59 des candidatures,3 du worker inchangé ; avec sept suites voisines,
+385 réussites. Les33 nouveaux échecs observés avant branchement sont corrigés.
+Toutes les DB, rendus et fonctions d'envoi sont inertes dans ces tests.
+Les preuves TypeScript et de déploiement sont dans l'audit central.
+
+Limites restantes : aucune transaction commune entre lecture d'autorisation et
+mutation métier ; identité historique de dépublication limitée au jour UTC
+(deux événements du même jour ne sont pas distingués) ; déduplication par
+lecture non atomique ; revalidation métier
+des modèles initialement serveur hors de ce lot ; gestion des résultats côté
+navigateur et validation SQL du couple rôle/destinataire à l'annulation.
+Le worker possède déjà une transition conditionnelle pending vers processing,
+mais sa branche générique success/skipped et son ancienne lecture de claim
+JWT méritent un lot distinct. La configuration garde verify_jwt=true ; aucun
+contournement public n'est déduit du seul décodage présent dans son code.
+
+## Historique du troisième lot
+
 ## Troisième lot : les six autres modèles membres
 
 Base : `f6ac88d6c4d60f47ade9592fe37b2699f0896b5a`. Les neuf modèles membres ont
