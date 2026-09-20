@@ -1,3 +1,4 @@
+-- Appliqué via drizzle (voir drizzle/migrations) ou via SQL direct ; ne pas rejouer.
 BEGIN;
 -- Operator-only test audit. No source events or production queue jobs created.
 CREATE TABLE public.push_test_attempts (

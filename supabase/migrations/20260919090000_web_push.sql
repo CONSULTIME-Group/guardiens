@@ -1,3 +1,4 @@
+-- Appliqué via drizzle (voir drizzle/migrations) ou via SQL direct ; ne pas rejouer.
 -- ============================================================================
 -- Appliqué en production le 19/09/2026. Fichier déplacé depuis supabase/sql/pending/ le 20/09/2026, corps SQL inchangé.
 -- Perimetre : abonnements push, file de livraison, RPC de gestion,

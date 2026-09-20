@@ -1,3 +1,4 @@
+-- Appliqué via drizzle (voir drizzle/migrations) ou via SQL direct ; ne pas rejouer.
 -- Applied after explicit GO on 2026-09-19 at 19:27 UTC; kept here as the reviewed SQL.
 -- Do not replay: baseline guard rejects an already-applied or divergent definition.
 -- Do not invoke the reconciliation or any Edge/cron here.

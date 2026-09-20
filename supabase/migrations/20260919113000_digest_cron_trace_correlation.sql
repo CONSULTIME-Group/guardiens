@@ -1,3 +1,4 @@
+-- Appliqué via drizzle (voir drizzle/migrations) ou via SQL direct ; ne pas rejouer.
 -- APPLIQUÉE EN PRODUCTION après GO le 19/09/2026 vers 11:30 UTC.
 -- Le dossier supabase/migrations était verrouillé pendant la préparation,
 -- ce fichier est donc conservé ici pour traçabilité.

@@ -1,3 +1,4 @@
+-- Appliqué via drizzle (voir drizzle/migrations) ou via SQL direct ; ne pas rejouer.
 -- One provider submission owner per canonical member email intent.
 -- No lease stealing: after an ambiguous provider result, retrying could duplicate mail.
 CREATE TABLE public.member_email_send_claims (
