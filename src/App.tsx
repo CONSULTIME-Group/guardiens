@@ -594,16 +594,19 @@ const AppRoutes = () => {
         <Route path="/mon-secteur" element={<MonSecteur />} />
       </Route>
       <Route path="/planche-badges" element={<PlancheBadges />} />
-      <Route path="/test/badges-long-labels" element={<TestBadgesLongLabels />} />
-      <Route path="/test/hero-gallery" element={<TestHeroGallery />} />
-      <Route path="/test/hero-distribution" element={<TestHeroDistribution />} />
       <Route path="/admin/hero-weights" element={<AdminHeroWeights />} />
-      <Route path="/test/error-boundary" element={<TestErrorBoundary />} />
-      <Route path="/test/empty-states" element={<TestEmptyStates />} />
-      
-      <Route path="/dev/preview/ongoing-sit-hero" element={<PreviewOngoingSitHero />} />
-      <Route path="/dev/preview/mission-cards" element={<PreviewMissionCards />} />
-      <Route path="/dev/preview/cockpits" element={<PreviewCockpits />} />
+      {import.meta.env.DEV && (
+        <>
+          <Route path="/test/badges-long-labels" element={<TestBadgesLongLabels />} />
+          <Route path="/test/hero-gallery" element={<TestHeroGallery />} />
+          <Route path="/test/hero-distribution" element={<TestHeroDistribution />} />
+          <Route path="/test/error-boundary" element={<TestErrorBoundary />} />
+          <Route path="/test/empty-states" element={<TestEmptyStates />} />
+          <Route path="/dev/preview/ongoing-sit-hero" element={<PreviewOngoingSitHero />} />
+          <Route path="/dev/preview/mission-cards" element={<PreviewMissionCards />} />
+          <Route path="/dev/preview/cockpits" element={<PreviewCockpits />} />
+        </>
+      )}
       <Route path="/unsubscribe" element={<Unsubscribe />} />
       <Route path="/go" element={<EmailClickRedirect />} />
       <Route path="/acces" element={<EmailDeepLink />} />
