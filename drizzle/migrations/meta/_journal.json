@@ -15,6 +15,13 @@
       "when": 1789897737443,
       "tag": "0001_member_email_send_claims",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789910838880,
+      "tag": "0002_cancellation_review_identity",
+      "breakpoints": true
     }
   ]
 }
