@@ -1,5 +1,63 @@
 # Autorisations du point d'envoi transactionnel — 20 septembre 2026
 
+## Troisième lot : les six autres modèles membres
+
+Base : `f6ac88d6c4d60f47ade9592fe37b2699f0896b5a`. Les neuf modèles membres ont
+désormais une vérification d'événement à l'entrée du sender. Les sections
+précédentes ci-dessous sont conservées comme historique et ne doivent pas être
+lues comme le statut actuel des six modèles.
+
+| Modèle | Événement et participants vérifiés |
+| --- | --- |
+| sit-invitation | Garde publiée du propriétaire appelant, invitation persistée sent/viewed vers le gardien destinataire |
+| review-received | Garde completed, candidature accepted du participant, avis garde de l'appelant vers l'autre partie ; avis masqué/rejeté refusé |
+| cancellation-by-owner | Propriétaire appelant, candidature cancelled du destinataire, garde cancelled par l'appelant, avis d'annulation avec rôle proprio |
+| cancellation-by-sitter | Gardien appelant et propriétaire destinataire, candidature cancelled, annulation enregistrée par l'appelant, avis avec rôle gardien ; garde cancelled ou déjà republished/published |
+| help-during-sit | Garde in_progress, participant accepté, conversation de cette garde entre les deux parties, message d'urgence réel écrit par l'appelant |
+| listing-unpublished-feedback | Propriétaire appelant et destinataire, garde draft avec événement de dépublication daté |
+
+Les payloads sont reconstruits depuis les lignes vérifiées. Un avis non encore
+publié reste un événement valide ; son texte et sa note ne sont jamais lus ni
+injectés dans la notification. Le motif libre de dépublication produit la
+variante neutre other ; plans_changed conserve sa variante de changement de
+projet. Les liens renvoient uniquement vers les routes canoniques reconstruites.
+
+L'urgence conserve l'ancien appel navigateur (clé datée, extrait et URL du fil).
+L'URL et l'extrait servent de localisateurs : le serveur exige une conversation
+réelle autorisée et un message non système de l'appelant commençant par
+[URGENCE]. Les caractères SQL de l'extrait sont traités littéralement. Parmi
+les messages correspondant à l'extrait, le plus récent est retenu ; sa clé
+canonique repose sur l'ID du message, jamais sur l'horloge du client. Deux textes
+identiques postés rapidement peuvent donc se rattacher au même événement récent.
+Une évolution vers un ID de message explicite évitera cette ambiguïté du client
+historique. Aucune modification frontend ni deuxième écriture de message ici.
+
+Le jour de la dépublication est dérivé du timestamp enregistré : changer la
+date de la clé cliente ne crée pas une nouvelle intention d'envoi. Les autres
+clés historiques sont préservées, et la déduplication conserve leur alias.
+Les défauts de relation/état rendent403 ; les lectures indisponibles/ambiguës
+rendent503, sans détail privé et avant toute écriture/envoi. Les chemins admin
+et service gardent leurs permissions existantes.
+
+Tests :14 nouveaux cas du vrai handler échouaient avant branchement ; les57
+anciens passaient. Après correction :88 cas du nouveau module +71 du handler
++59 du module candidatures =218 réussites. Les suites utilisent exclusivement
+des doubles DB/rendu/fournisseur sans réseau. Les résultats avec les suites
+voisines, le typecheck et la preuve de déploiement sont dans l'audit central.
+
+Lecture du20septembre : aucune entrée différée pour ces six modèles. L'historique
+email contient huit invitations, cinq notifications d'avis, deux retours de
+dépublication marqués sent ; aucune urgence ni notification d'annulation. Ces
+comptages ne prouvent ni la livraison ni un envoi métier après ce correctif.
+
+Restent transversaux : revalidation à l'envoi différé, verrou atomique de
+déduplication, gestion des résultats métier par le client. Le helper SQL
+create_avis_annulation vérifie l'acteur participant mais ne valide pas lui-même
+le couple rôle/reviewee : ce point DB reste à auditer séparément ; le sender
+ajoute ses propres vérifications du couple réel avant tout email.
+
+## Historique du deuxième lot
+
 ## Deuxième lot : candidatures et confirmation
 
 Base : `350c33969dfb49e71371dc990ede2daa8af7e998`. Ce complément remplace le

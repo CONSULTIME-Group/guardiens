@@ -11,6 +11,7 @@ import { evaluateSitAlert, isSitStatusGuardedTemplate } from '../_shared/sit-ale
 import { REPLY_TO_ADDRESS } from '../_shared/sender-address.ts'
 import { wrapEmailLink } from '../_shared/email-link-wrap.ts'
 import { authorizeApplicationEmail, isApplicationEmail } from '../_shared/application-email-authorization.ts'
+import { authorizeSitEventEmail } from '../_shared/sit-event-email-authorization.ts'
 
 const SITE_URL = 'https://guardiens.fr'
 
@@ -313,15 +314,15 @@ Deno.serve(async (req) => {
     )
   }
 
-  let applicationDedupeKeys: string[] = []
+  let memberDedupeKeys: string[] = []
 
   // === Caller authorization ===
   // Only the nine existing browser notification paths may be called by an
   // ordinary member. Every other registered template (including future ones)
   // requires a verified admin or the actual service key, even for self-send.
-  // Membership of the recipient is checked below. Application emails also
-  // verify the event and rebuild their payload; the other six paths remain
-  // subject to a separate event-authorization audit.
+  // All nine member paths verify the persisted event and rebuild their
+  // payload before business reads, writes or sending. A newly allowed member
+  // template still needs an explicit event policy (default refusal).
   const MEMBER_TEMPLATES = new Set([
     'application-accepted',
     'application-declined',
@@ -391,7 +392,7 @@ Deno.serve(async (req) => {
           .select('id,email')
           .ilike('email', target.replace(/[\\%_]/g, '\\$&'))
           .maybeSingle()
-        if (recipientError && isApplicationEmail(templateName)) {
+        if (recipientError) {
           return new Response(JSON.stringify({ error: 'Notification authorization unavailable' }), {
             status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           })
@@ -408,10 +409,11 @@ Deno.serve(async (req) => {
         }
         recipientUserId = recipientProfile.id
       }
-      if (isApplicationEmail(templateName)) {
-        const decision = await authorizeApplicationEmail(supabase, {
-          templateName, idempotencyKey, callerId: callerUserId, recipientId: recipientUserId,
-        })
+      if (MEMBER_TEMPLATES.has(templateName)) {
+        const eventInput = { templateName, idempotencyKey, callerId: callerUserId, recipientId: recipientUserId }
+        const decision = isApplicationEmail(templateName)
+          ? await authorizeApplicationEmail(supabase, eventInput)
+          : await authorizeSitEventEmail(supabase, { ...eventInput, templateData })
         if (!decision.ok) {
           return new Response(JSON.stringify({ error: decision.status === 403
             ? 'Forbidden: notification not authorized for this event'
@@ -421,7 +423,7 @@ Deno.serve(async (req) => {
         }
         effectiveRecipient = target
         idempotencyKey = decision.idempotencyKey
-        applicationDedupeKeys = decision.dedupeKeys
+        memberDedupeKeys = decision.dedupeKeys
         templateData = decision.templateData
       }
     }
@@ -442,13 +444,13 @@ Deno.serve(async (req) => {
       .select('id')
       .eq('template_name', templateName)
       .or(statusFilter)
-    existingSendQuery = applicationDedupeKeys.length
+    existingSendQuery = memberDedupeKeys.length
       ? existingSendQuery.ilike('recipient_email', effectiveRecipient.replace(/[\\%_]/g, '\\$&'))
-        .in('metadata->>idempotency_key', applicationDedupeKeys)
+        .in('metadata->>idempotency_key', memberDedupeKeys)
       : existingSendQuery.eq('recipient_email', effectiveRecipient)
         .filter('metadata->>idempotency_key', 'eq', idempotencyKey)
     const { data: existingSend, error: idempotencyError } = await existingSendQuery.limit(1)
-    if (applicationDedupeKeys.length && idempotencyError) {
+    if (memberDedupeKeys.length && idempotencyError) {
       return new Response(JSON.stringify({ error: 'Notification deduplication unavailable' }), {
         status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })

@@ -2,9 +2,12 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { runInNewContext } from "node:vm";
 import ts from "typescript";
+import * as sitEventAuthorization from "../../supabase/functions/_shared/sit-event-email-authorization";
 import * as applicationAuthorization from "../../supabase/functions/_shared/application-email-authorization";
 import { describe, expect, it, vi } from "vitest";
 
+const callerId = "88888888-8888-4888-8888-888888888888";
+const eventId = "55555555-5555-4555-8555-555555555555";
 const targetId = "11111111-1111-4111-8111-111111111111";
 const reference = `user-${targetId}@notification.guardiens.invalid`;
 const appId = "33333333-3333-4333-8333-333333333333";
@@ -22,6 +25,7 @@ type Options = {
   admin?: boolean;
   roleError?: boolean;
   foreignOwner?: boolean;
+  missingEvent?: boolean;
   applicationStatus?: string;
   eventReadError?: boolean;
   duplicateKey?: string;
@@ -37,7 +41,7 @@ type Options = {
 function harness(options: Options = {}) {
   let handler!: (request: Request) => Promise<Response>;
   const getUser = vi.fn(async (token: string) => ({
-    data: { user: token === "member-session" ? { id: "fixture-caller", email: ownAddress } : null },
+    data: { user: token === "member-session" ? { id: callerId, email: ownAddress } : null },
   }));
   const rpc = vi.fn(async (name: string) => {
     if (name === "has_role") return { data: options.admin === true, error: options.roleError ? { message: "fixture role failure" } : null };
@@ -56,7 +60,7 @@ function harness(options: Options = {}) {
     const chain: Record<string, any> = {};
     const filters: Array<[string, unknown]> = [];
     let keyFilter: string[] = [];
-    for (const method of ["select", "eq", "ilike", "or", "filter", "in", "insert", "update"]) {
+    for (const method of ["select", "eq", "ilike", "like", "order", "or", "filter", "in", "insert", "update"]) {
       chain[method] = (...args: unknown[]) => {
         if (method === "eq") filters.push([String(args[0]), args[1]]);
         if (method === "in" && args[0] === "metadata->>idempotency_key") keyFilter = args[1] as string[];
@@ -67,16 +71,20 @@ function harness(options: Options = {}) {
         return chain;
       };
     }
-    chain.limit = async () => {
+    chain.limit = () => {
+      if (table === "messages") return chain;
       if (options.idempotencyError) return { data: null, error: { message: "private dedup error" } };
       if (options.duplicateKey && keyFilter.includes(options.duplicateKey)) return { data: [{ id: "fixture-existing" }], error: null };
       if (!options.provider) throw boundary;
       return { data: [], error: null };
     };
     const eventRows: Record<string, Array<Record<string, unknown>>> = {
-      applications: [{ id: appId, sit_id: sitId, sitter_id: targetId, status: options.applicationStatus ?? (activeTemplate === "application-declined" ? "rejected" : "accepted") }],
-      sits: [{ id: sitId, user_id: options.foreignOwner ? "other-owner" : "fixture-caller", status: "confirmed", title: "Titre en base", property_id: "fixture-property", start_date: "2026-10-01", end_date: "2026-10-05" }],
-      conversations: [{ id: convId, sit_id: sitId, sitter_id: targetId, owner_id: "fixture-caller" }],
+      applications: [{ id: appId, sit_id: sitId, sitter_id: activeTemplate === "cancellation-by-sitter" ? callerId : targetId, status: options.applicationStatus ?? (activeTemplate.startsWith("cancellation-") ? "cancelled" : activeTemplate === "application-declined" ? "rejected" : "accepted") }],
+      sits: [{ id: sitId, user_id: options.foreignOwner ? "other-owner" : activeTemplate === "cancellation-by-sitter" ? targetId : callerId, status: ({ "sit-invitation": "published", "review-received": "completed", "cancellation-by-owner": "cancelled", "cancellation-by-sitter": "published", "help-during-sit": "in_progress", "listing-unpublished-feedback": "draft" } as Record<string, string>)[activeTemplate] ?? "confirmed", cancelled_by: callerId, cancelled_at: "2026-09-20T10:00:00Z", unpublished_at: options.missingEvent ? null : "2026-09-20T10:00:00Z", last_unpublished_reason: "plans_changed", title: "Titre en base", property_id: "fixture-property", start_date: "2026-10-01", end_date: "2026-10-05" }],
+      conversations: [{ id: convId, sit_id: sitId, sitter_id: targetId, owner_id: callerId }],
+      sit_invitations: options.missingEvent ? [] : [{ id: eventId, sit_id: sitId, owner_id: callerId, sitter_id: targetId, status: "sent", message: "Invitation en base" }],
+      reviews: options.missingEvent ? [] : [{ id: eventId, sit_id: sitId, reviewer_id: callerId, reviewee_id: targetId, review_type: activeTemplate.startsWith("cancellation-") ? "annulation" : "garde", cancelled_by_role: activeTemplate === "cancellation-by-sitter" ? "gardien" : "proprio", cancellation_reason: "Motif en base", moderation_status: "en_attente", moderation_hidden_at: null }],
+      messages: options.missingEvent ? [] : [{ id: eventId, conversation_id: convId, sender_id: callerId, is_system: false, content: "[URGENCE] Message en base" }],
       pets: [{ property_id: "fixture-property", name: "Animal en base" }],
     };
     const eventResult = () => ({ data: (eventRows[table] ?? []).filter((row) => filters.every(([key, value]) => row[key] === value)), error: options.eventReadError ? { message: "private DB error" } : null });
@@ -115,13 +123,14 @@ function harness(options: Options = {}) {
     fetch: () => { throw new Error("Unexpected network call"); },
     Deno: { env: { get: (key: keyof typeof env) => env[key] }, serve: (cb: typeof handler) => { handler = cb; } },
     require: (specifier: string) => {
+      if (specifier.includes("sit-event-email-authorization")) return sitEventAuthorization;
       if (specifier.includes("application-email-authorization")) return applicationAuthorization;
       if (specifier.includes("supabase-js")) return { createClient };
       if (specifier.includes("registry")) return { TEMPLATES };
       if (specifier.includes("email-categories")) return { getEmailCategory: () => "transactional" };
       if (specifier.includes("email-suppression")) return { bypassesSuppression: () => false };
       if (specifier.includes("sit-alert-guard")) return { isSitStatusGuardedTemplate: () => false };
-      if (specifier.includes("email-cap")) return { BYPASS_TEMPLATES: new Set(["application-accepted"]) };
+      if (specifier.includes("email-cap")) return { BYPASS_TEMPLATES: new Set(memberTemplates) };
       if (specifier.includes("resend-guard")) return { resendFetch };
       if (specifier.includes("email-link-wrap")) return { wrapEmailLink: (href: string) => href };
       if (specifier.includes("sender-address")) return { REPLY_TO_ADDRESS: "reply@fixture.test" };
@@ -134,10 +143,21 @@ function harness(options: Options = {}) {
     getUser, rpc, createClient, queriedRecipients, writes, resendFetch, templateNames, createElement, recipientPatterns,
     invoke: (token: string | null = "member-session", recipient = reference, templateName = "application-accepted", extra: Record<string, unknown> = {}) => {
       activeTemplate = templateName;
-      const key = templateName === "sit-confirmed" ? `sit-confirmed-${sitId}` : `app-${templateName === "application-declined" ? "declined" : "accepted"}-${appId}`;
+      const keys: Record<string, string> = {
+        "sit-confirmed": `sit-confirmed-${sitId}`,
+        "sit-invitation": `sit-invite-${sitId}-${targetId}`,
+        "review-received": `review-received-${sitId}-${targetId}`,
+        "cancellation-by-owner": `cancellation-by-owner-${sitId}-${callerId}`,
+        "cancellation-by-sitter": `cancellation-by-sitter-${sitId}-${callerId}`,
+        "help-during-sit": `help-urgence-${sitId}-1790000000000`,
+        "listing-unpublished-feedback": `unpublished-feedback-${sitId}-2026-09-20`,
+      };
+      const key = keys[templateName] ?? `app-${templateName === "application-declined" ? "declined" : "accepted"}-${appId}`;
+      const templateData = templateName === "help-during-sit" ? { category: "urgence", messageExcerpt: "Message en base", conversationHref: `https://guardiens.fr/messages/${convId}` } : {};
+
       return handler(new Request("https://fixture.invalid", {
       method: "POST", headers: token ? { authorization: `Bearer ${token}` } : {},
-      body: JSON.stringify({ templateName, recipientEmail: recipient, idempotencyKey: key, templateData: {}, ...extra }),
+      body: JSON.stringify({ templateName, recipientEmail: recipient, idempotencyKey: key, templateData, ...extra }),
     })); },
     options: () => handler(new Request("https://fixture.invalid", { method: "OPTIONS" })),
   };
@@ -250,8 +270,8 @@ describe("transactional sender template and worker authorization", () => {
 
   it.each(memberTemplates)("preserves the existing member template %s", async (templateName) => {
     const h = harness();
-    await expect(h.invoke("member-session", templateName === "sit-confirmed" ? ownAddress : reference, templateName)).rejects.toBe(boundary);
-    expect(h.queriedRecipients).toEqual([templateName === "sit-confirmed" ? ownAddress : privateAddress]);
+    await expect(h.invoke("member-session", ["sit-confirmed", "listing-unpublished-feedback"].includes(templateName) ? ownAddress : reference, templateName)).rejects.toBe(boundary);
+    expect(h.queriedRecipients).toEqual([["sit-confirmed", "listing-unpublished-feedback"].includes(templateName) ? ownAddress : privateAddress]);
     expect(h.writes).toEqual([]);
   });
 
@@ -378,5 +398,37 @@ describe("application recipient normalization", () => {
     const escaped = recipient.replace(/[%_]/g, (character) => String.fromCharCode(92) + character);
     expect(h.recipientPatterns).toEqual([escaped]);
     expect(h.queriedRecipients).toEqual([escaped]);
+  });
+});
+
+
+const sitEventTemplates = ["sit-invitation", "review-received", "cancellation-by-owner", "cancellation-by-sitter", "help-during-sit", "listing-unpublished-feedback"];
+describe("six event checks in the real sender", () => {
+  it.each(sitEventTemplates)("refuses a %s request without the real event", async (templateName) => {
+    const h = harness({ missingEvent: true });
+    const response = await h.invoke("member-session", templateName === "listing-unpublished-feedback" ? ownAddress : reference, templateName);
+    expect(response.status).toBe(403);
+    expect(h.writes).toEqual([]);
+    expect(h.resendFetch).not.toHaveBeenCalled();
+  });
+  it.each(sitEventTemplates)("fails closed on a %s event read failure", async (templateName) => {
+    const h = harness({ eventReadError: true });
+    const response = await h.invoke("member-session", templateName === "listing-unpublished-feedback" ? ownAddress : reference, templateName);
+    expect(response.status).toBe(503);
+    expect(h.writes).toEqual([]);
+    expect(h.resendFetch).not.toHaveBeenCalled();
+  });
+  it("removes forged invitation content before rendering", async () => {
+    const h = harness({ provider: "success" });
+    const response = await h.invoke("member-session", reference, "sit-invitation", { templateData: { message: "FORGED", ownerFirstName: "FORGED", sitId: "FORGED", isUrgent: true } });
+    expect(response.status).toBe(200);
+    expect(h.createElement).toHaveBeenCalled();
+    expect(JSON.stringify(h.createElement.mock.calls)).not.toContain("FORGED");
+    expect(h.createElement).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ message: "Invitation en base", sitId }));
+  });
+  it("canonicalizes the urgency timestamp to the persisted message ID", async () => {
+    const h = harness({ provider: "success" });
+    expect((await h.invoke("member-session", reference, "help-during-sit")).status).toBe(200);
+    expect(h.writes).toContainEqual(expect.objectContaining({ table: "email_send_log", method: "insert", values: expect.objectContaining({ metadata: expect.objectContaining({ idempotency_key: `help-urgence-message-${eventId}` }) }) }));
   });
 });
