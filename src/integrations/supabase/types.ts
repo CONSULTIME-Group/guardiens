@@ -248,6 +248,30 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_fn_acl_20260920: {
+        Row: {
+          acl: string | null
+          args: string | null
+          fn_oid: string | null
+          proname: unknown
+          saved_at: string | null
+        }
+        Insert: {
+          acl?: string | null
+          args?: string | null
+          fn_oid?: string | null
+          proname?: unknown
+          saved_at?: string | null
+        }
+        Update: {
+          acl?: string | null
+          args?: string | null
+          fn_oid?: string | null
+          proname?: unknown
+          saved_at?: string | null
+        }
+        Relationships: []
+      }
       _backup_fusion_conv_20260802: {
         Row: {
           archived_by: string[] | null
@@ -521,6 +545,27 @@ export type Database = {
           travels_with_children?: boolean | null
           travels_with_own_animals?: boolean | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      _backup_view_grants_20260920: {
+        Row: {
+          grantee: unknown
+          privilege_type: string | null
+          saved_at: string | null
+          table_name: unknown
+        }
+        Insert: {
+          grantee?: unknown
+          privilege_type?: string | null
+          saved_at?: string | null
+          table_name?: unknown
+        }
+        Update: {
+          grantee?: unknown
+          privilege_type?: string | null
+          saved_at?: string | null
+          table_name?: unknown
         }
         Relationships: []
       }
