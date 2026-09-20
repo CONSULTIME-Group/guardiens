@@ -46,9 +46,30 @@ Deno.serve(async (req) => {
     limit = 20;
   }
 
+  // Une ligne de journal seulement quand il s'est passe quelque chose : la
+  // file est vide la plupart du temps, inutile d'ecrire 288 lignes par jour.
+  const startedAt = new Date().toISOString();
+  const recordRun = async (
+    status: 'success' | 'partial' | 'failed',
+    metrics: Record<string, unknown>,
+    errorMessage?: string,
+  ) => {
+    const row: Record<string, unknown> = {
+      edge_name: 'dispatch-web-push',
+      started_at: startedAt,
+      finished_at: new Date().toISOString(),
+      status,
+      metrics,
+    };
+    if (errorMessage) row.error_message = errorMessage.slice(0, 2000);
+    const result = await admin.from('cron_run_log').insert(row);
+    if (result?.error) console.error('dispatch-web-push journal indisponible');
+  };
+
   const { data: jobs, error } = await admin.rpc('push_claim_jobs', { p_limit: limit });
   if (error) {
     console.error('dispatch-web-push claim erreur');
+    await recordRun('failed', { claimed: 0 }, 'push_claim_jobs failed');
     return json({ error: 'claim_failed' }, 500);
   }
 
