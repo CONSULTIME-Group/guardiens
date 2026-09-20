@@ -71,3 +71,23 @@ Une alerte backlog reste ouverte, zéro ligne queued. Aucun appel de
 réconciliation, cron/Edge, email ou push effectué. Le fichier SQL reste dans
 `sql/pending` pour conserver son chemin de revue et de test ; ce chemin ne
 signifie plus que l’application de production est en attente. Ne pas le rejouer.
+
+## Priorité du digest gardien
+
+Le créneau `claim_sit_notification` est unique par gardien et par jour Paris.
+Le digest gardien (cron 64, passages horaires) perdait structurellement ce
+créneau face au digest de veille (8h, 12h, 18h) et au récapitulatif de
+proximité (9h). Le 18 septembre 2026, 16 gardiens restants sur 16 ont été
+refusés à 08:05 UTC.
+
+Depuis le lot 4, `send-alert-digest` et `send-nearby-daily-digest` lisent en
+une seule requête par passage les lignes `sitter_digest_queue` encore en
+attente (`status = queued`, `sent_at` nul) mises en file depuis moins de
+6 heures. Un gardien présent dans cet ensemble n'est pas réclamé : il est
+compté dans `skipped_by_reason` sous le motif `sitter_digest_pending` et
+reçoit son digest gardien au passage horaire suivant.
+
+Au delà de 6 heures d'attente la priorité tombe et les deux digests
+reprennent leur comportement habituel : une panne du digest gardien ne doit
+jamais laisser un gardien sans rien. `claim_sit_notification` et les horaires
+des crons restent inchangés.

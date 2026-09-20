@@ -213,6 +213,35 @@ Deno.serve(async (req) => {
     since.setHours(since.getHours() - sinceHours);
     const sinceISO = since.toISOString();
 
+    // Priorité du digest gardien (lot 4). Le créneau de notification est
+    // unique par gardien et par jour Paris : quand un gardien attend encore
+    // son digest gardien, ce digest de veille lui laisse le créneau et le
+    // compte sous le motif `sitter_digest_pending`. Au delà de 6 heures
+    // d'attente la priorité tombe, pour qu'une panne du digest gardien ne
+    // prive personne de tout. Une seule requête par passage, jamais une par
+    // gardien.
+    const SITTER_DIGEST_PRIORITY_WINDOW_MS = 6 * 60 * 60 * 1000;
+    const sitterDigestPending = new Set<string>();
+    {
+      const pendingCutoffISO = new Date(Date.now() - SITTER_DIGEST_PRIORITY_WINDOW_MS).toISOString();
+      const { data: queuedRows } = await supabase
+        .from("sitter_digest_queue")
+        .select("sitter_id, queued_at")
+        .eq("status", "queued")
+        .is("sent_at", null)
+        .gte("queued_at", pendingCutoffISO);
+      for (const row of (queuedRows ?? []) as Array<{ sitter_id?: string | null; queued_at?: string | null }>) {
+        if (!row?.sitter_id) continue;
+        // Contrôle local en plus du filtre SQL : une date absente ou plus
+        // ancienne que la fenêtre ne donne aucune priorité.
+        const queuedAt = row.queued_at ? Date.parse(row.queued_at) : NaN;
+        if (!Number.isFinite(queuedAt)) continue;
+        if (Date.now() - queuedAt > SITTER_DIGEST_PRIORITY_WINDOW_MS) continue;
+        sitterDigestPending.add(String(row.sitter_id));
+      }
+    }
+
+
     // Le cache de géocodage tient en mémoire (moins de 2000 lignes) : une
     // seule lecture, puis résolution locale, sinon le nombre de requêtes
     // explose avec la population.
@@ -425,6 +454,12 @@ Deno.serve(async (req) => {
         .eq("user_id", profile.id)
         .maybeSingle();
       if (emailPrefs?.product_emails === false) { skipped++; mark("desabonne", pref); continue; }
+
+      // Le digest gardien passe en premier : on ne réclame pas le créneau de
+      // ce gardien, il recevra son digest gardien au passage horaire suivant.
+      if (sitterDigestPending.has(profile.id)) { skipped++; mark("sitter_digest_pending", pref); continue; }
+
+
 
       // Payload template
       const sitsPayload = sits.slice(0, 6).map((s: any) => ({
