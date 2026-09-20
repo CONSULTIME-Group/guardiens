@@ -1,3 +1,5 @@
+import { webcrypto } from "node:crypto";
+import * as memberClaim from "../../supabase/functions/_shared/member-email-send-claim";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { runInNewContext } from "node:vm";
@@ -7,6 +9,7 @@ import * as sitEventAuthorization from "../../supabase/functions/_shared/sit-eve
 import * as applicationAuthorization from "../../supabase/functions/_shared/application-email-authorization";
 import { describe, expect, it, vi } from "vitest";
 
+vi.stubGlobal("crypto", webcrypto);
 const callerId = "88888888-8888-4888-8888-888888888888";
 const eventId = "55555555-5555-4555-8555-555555555555";
 const targetId = "11111111-1111-4111-8111-111111111111";
@@ -31,6 +34,7 @@ type Options = {
   applicationStatus?: string;
   eventReadError?: boolean;
   duplicateKey?: string;
+  duplicateStatus?: string;
   idempotencyError?: boolean;
   recipientError?: boolean;
   profileEmail?: string;
@@ -41,6 +45,11 @@ type Options = {
   legacyOrigin?: boolean;
   queueReadError?: boolean;
   defer?: boolean;
+  claimRpc?: (name: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: unknown }>;
+  providerStatus?: number;
+  providerThrow?: boolean;
+  providerMissingId?: boolean;
+  pendingError?: boolean;
 };
 
 // Execute the actual Edge handler with inert DB, rendering and provider doubles.
@@ -50,7 +59,11 @@ function harness(options: Options = {}) {
   const getUser = vi.fn(async (token: string) => ({
     data: { user: token === "member-session" ? { id: callerId, email: ownAddress } : null },
   }));
-  const rpc = vi.fn(async (name: string) => {
+  const rpc = vi.fn(async (name: string, args?: Record<string, unknown>) => {
+    if (name === "acquire_member_email_send_claim" || name === "finish_member_email_send_claim") {
+      if (options.claimRpc) return options.claimRpc(name, args!);
+      return { data: name.startsWith("acquire_") ? "acquired" : true, error: null };
+    }
     if (name === "has_role") return { data: options.admin === true, error: options.roleError ? { message: "fixture role failure" } : null };
     if (name === "get_user_email_for_notification") return {
       data: options.address === undefined ? privateAddress : options.address,
@@ -84,7 +97,7 @@ function harness(options: Options = {}) {
     chain.limit = () => {
       if (table === "messages") return chain;
       if (options.idempotencyError) return { data: null, error: { message: "private dedup error" } };
-      if (options.duplicateKey && keyFilter.includes(options.duplicateKey)) return { data: [{ id: "fixture-existing" }], error: null };
+      if (options.duplicateKey && keyFilter.includes(options.duplicateKey)) return { data: [{ id: "fixture-existing", status: options.duplicateStatus }], error: null };
       if (!options.provider) throw boundary;
       return { data: [], error: null };
     };
@@ -116,14 +129,17 @@ function harness(options: Options = {}) {
       if (table === "email_unsubscribe_tokens") return { data: { token: "fixture-token", used_at: null }, error: null };
       throw new Error(`Unexpected table read ${table}`);
     };
-    chain.single = async () => ({ data: { id: "fixture-log" }, error: null });
+    chain.single = async () => ({ data: options.pendingError ? null : { id: "fixture-log" }, error: options.pendingError ? { message: "pending log unavailable" } : null });
     chain.then = (callback: (value: unknown) => unknown) => Promise.resolve(table in eventRows ? eventResult() : { data: null, error: null }).then(callback);
     return chain;
   });
   const createClient = vi.fn(() => ({ auth: { getUser }, rpc, from }));
-  const resendFetch = vi.fn(async () => new Response(JSON.stringify(options.provider === "success"
-    ? { id: "fixture-resend" } : { message: `Rejected recipient ${privateAddress}` }),
-  { status: options.provider === "success" ? 200 : 422 }));
+  const resendFetch = vi.fn(async () => {
+    if (options.providerThrow) throw new Error("Unknown provider outcome");
+    return new Response(JSON.stringify(options.provider === "success"
+      ? (options.providerMissingId ? {} : { id: "fixture-resend" }) : { message: `Rejected recipient ${privateAddress}` }),
+      { status: options.providerStatus ?? (options.provider === "success" ? 200 : 422) });
+  });
   const template = { component: () => null, subject: "Fixture" };
   const registrySource = readFileSync(resolve("supabase/functions/_shared/transactional-email-templates/registry.ts"), "utf8");
   const templateNames = Array.from(registrySource.matchAll(/^  '([^']+)':/gm), (match) => match[1]);
@@ -144,6 +160,7 @@ function harness(options: Options = {}) {
     fetch: () => { throw new Error("Unexpected network call"); },
     Deno: { env: { get: (key: keyof typeof env) => env[key] }, serve: (cb: typeof handler) => { handler = cb; } },
     require: (specifier: string) => {
+      if (specifier.includes("member-email-send-claim")) return memberClaim;
       if (specifier.includes("deferred-member-email-authorization")) return deferredAuthorization;
       if (specifier.includes("sit-event-email-authorization")) return sitEventAuthorization;
       if (specifier.includes("application-email-authorization")) return applicationAuthorization;
@@ -530,5 +547,93 @@ describe("deferred member authorization in the actual sender", () => {
     const h = harness({ provider: "success" });
     await h.invoke(serviceKey, privateAddress, "sit-invitation", { templateData: { [deferredAuthorization.EMAIL_ORIGIN_FIELD]: { version: 1, kind: "trusted" } } });
     expect(JSON.stringify(h.createElement.mock.calls)).not.toContain(deferredAuthorization.EMAIL_ORIGIN_FIELD);
+  });
+});
+
+
+function claimLedger() {
+  const state = new Map<string, { token: unknown; outcome: string }>();
+  const rpc = vi.fn(async (name: string, args: Record<string, unknown>) => {
+    const key = String(args.p_claim_key); const current = state.get(key);
+    if (name.startsWith("acquire_")) {
+      if (!current || current.outcome === "retryable") {
+        state.set(key, { token: args.p_owner_token, outcome: "sending" });
+        return { data: "acquired", error: null };
+      }
+      return { data: current.outcome === "sent" ? "sent" : current.outcome === "uncertain" ? "uncertain" : "busy", error: null };
+    }
+    if (current?.token !== args.p_owner_token || current?.outcome !== "sending") return { data: false, error: null };
+    current.outcome = String(args.p_outcome); return { data: true, error: null };
+  });
+  return { state, rpc };
+}
+describe("atomic provider submission ownership in the actual sender", () => {
+  it("submits once across simultaneous requests even when both duplicate reads return empty", async () => {
+    const ledger = claimLedger();
+    const a = harness({ provider: "success", claimRpc: ledger.rpc });
+    const b = harness({ provider: "success", claimRpc: ledger.rpc });
+    const responses = await Promise.all([a.invoke(), b.invoke()]);
+    expect(a.resendFetch.mock.calls.length + b.resendFetch.mock.calls.length).toBe(1);
+    const bodies = await Promise.all(responses.map(r => r.json()));
+    expect(bodies.filter(b => b.sent === true)).toHaveLength(1);
+    expect([...ledger.state.values()].map(x => x.outcome)).toEqual(["sent"]);
+  });
+  it.each(["busy", "uncertain", "unavailable"])("does not send when reservation is %s", async state => {
+    const h = harness({ provider: "success", claimRpc: async () => ({ data: state === "unavailable" ? null : state, error: state === "unavailable" ? {} : null }) });
+    expect((await h.invoke()).status).toBe(503);
+    expect(h.resendFetch).not.toHaveBeenCalled();
+    expect(h.writes.filter((w: any) => w.table === "email_send_log" && w.values.status === "pending")).toEqual([]);
+  });
+  it("recognizes the completed reservation even when send-log reads return empty", async () => {
+    const h = harness({ provider: "success", claimRpc: async () => ({ data: "sent", error: null }) });
+    expect(await (await h.invoke()).json()).toMatchObject({ skipped: true, reason: "duplicate_idempotency_key" });
+    expect(h.resendFetch).not.toHaveBeenCalled();
+  });
+  it("releases a definite provider rejection for a later legitimate retry", async () => {
+    const ledger = claimLedger(); const first = harness({ provider: "error", claimRpc: ledger.rpc });
+    expect((await first.invoke()).status).toBe(422);
+    expect([...ledger.state.values()][0].outcome).toBe("retryable");
+    const retry = harness({ provider: "success", claimRpc: ledger.rpc });
+    expect(await (await retry.invoke()).json()).toMatchObject({ sent: true });
+    expect(retry.resendFetch).toHaveBeenCalledTimes(1);
+  });
+  it.each(["network", "5xx", "malformed"])("blocks replay after an ambiguous %s outcome", async outcome => {
+    const ledger = claimLedger(); const first = harness({ provider: "success", claimRpc: ledger.rpc,
+      providerThrow: outcome === "network", providerStatus: outcome === "5xx" ? 500 : 200, providerMissingId: outcome === "malformed" });
+    const response = await first.invoke(); expect(response.status).toBeGreaterThanOrEqual(500);
+    expect([...ledger.state.values()][0].outcome).toBe("uncertain");
+    const retry = harness({ provider: "success", claimRpc: ledger.rpc });
+    expect((await retry.invoke()).status).toBe(503); expect(retry.resendFetch).not.toHaveBeenCalled();
+  });
+  it("does not call the provider without a durable pending log and releases the unsent reservation", async () => {
+    const ledger = claimLedger(); const h = harness({ provider: "success", claimRpc: ledger.rpc, pendingError: true });
+    expect((await h.invoke()).status).toBe(503); expect(h.resendFetch).not.toHaveBeenCalled();
+    expect([...ledger.state.values()][0].outcome).toBe("retryable");
+  });
+  it("preserves the direct trusted path outside member-origin reservations", async () => {
+    const ledger = claimLedger(); const h = harness({ provider: "success", claimRpc: ledger.rpc });
+    expect((await h.invoke(serviceKey)).status).toBe(200);
+    expect(ledger.rpc).not.toHaveBeenCalled();
+  });
+});
+
+
+describe("claim recovery boundaries", () => {
+  it("does not report an existing pending attempt as a successful duplicate", async () => {
+    const h = harness({ provider: "success", duplicateKey: `app-accepted-${appId}`, duplicateStatus: "pending" });
+    expect((await h.invoke()).status).toBe(503); expect(h.resendFetch).not.toHaveBeenCalled();
+  });
+  it("keeps a confirmed historical send deduplicated", async () => {
+    const h = harness({ provider: "success", duplicateKey: `app-accepted-${appId}`, duplicateStatus: "sent" });
+    expect(await (await h.invoke()).json()).toMatchObject({ skipped: true, reason: "duplicate_idempotency_key" });
+    expect(h.resendFetch).not.toHaveBeenCalled();
+  });
+  it("keeps the reservation held when finalization fails after provider success", async () => {
+    const ledger = claimLedger();
+    const claimRpc = async (name: string, args: Record<string, unknown>) => name.startsWith("finish_") ? { data: false, error: {} } : ledger.rpc(name, args);
+    const first = harness({ provider: "success", claimRpc });
+    expect(await (await first.invoke()).json()).toMatchObject({ sent: true });
+    const retry = harness({ provider: "success", claimRpc });
+    expect((await retry.invoke()).status).toBe(503); expect(retry.resendFetch).not.toHaveBeenCalled();
   });
 });
