@@ -1,5 +1,15 @@
 # Identité des avis d'annulation — 20 septembre 2026
 
+## Application effective
+
+Migration appliquée le 2026-09-20 à 13:27:29 UTC via l'outil officiel de migration
+du projet. Migration générée : drizzle/migrations/0002_cancellation_review_identity.sql
+(historique Drizzle : 0000 nurturing, 0001 claims, 0002 présente). Déjà appliquée :
+ne pas rejouer le fichier supabase/sql/pending/20260920103000_cancellation_review_identity.sql,
+conservé comme référence. Relecture après application : md5(prosrc) =
+c84333b1af8db8535969da36343ec0f3, SECURITY DEFINER, search_path public,pg_temp,
+droits EXECUTE anon = false, authenticated = true, service_role = true.
+
 Périmètre : public.create_avis_annulation(uuid,uuid,uuid,text,text).
 La signature, le retour UUID, la modération en_attente, l'index unique existant
 (sit_id, reviewer_id) pour les annulations et la mise à jour cancelled sont conservés.
