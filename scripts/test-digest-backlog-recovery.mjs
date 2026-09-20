@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 const { PGlite } = await import(process.env.PGLITE_MODULE || '@electric-sql/pglite');
 const db = new PGlite();
 const root = new URL('../', import.meta.url);
-const baseline = readFileSync(new URL('scripts/fixtures/auto-resolve-admin-signals-before-20260919.sql', root), 'utf8');
+const baseline = readFileSync(new URL('drizzle/migrations/0000_resolve_recovered_nurturing_signal.sql', root), 'utf8');
 const migration = readFileSync(new URL('supabase/migrations/20260919120000_digest_backlog_recovery.sql', root), 'utf8');
 const passed = [];
 await db.exec(`

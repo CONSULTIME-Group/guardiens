@@ -1,3 +1,4 @@
+-- Appliqué via drizzle (voir drizzle/migrations) ou via SQL direct ; ne pas rejouer.
 -- Supervision: partial runs degrade health without inflating failed counters.
 -- APPLIED in production 2026-09-20 07:16:26 UTC. Archive only; do not replay.
 -- Definition-only change; never invokes a job or modifies run history.

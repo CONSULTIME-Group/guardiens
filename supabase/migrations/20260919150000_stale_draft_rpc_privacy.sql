@@ -1,3 +1,4 @@
+-- Appliqué via drizzle (voir drizzle/migrations) ou via SQL direct ; ne pas rejouer.
 -- Applied after explicit GO on 2026-09-19 at 19:48 UTC.
 -- Restrict the admin-only detector to server callers; retained as reviewed SQL.
 -- Its body, signature, owner, SECURITY DEFINER, search_path and data stay intact.

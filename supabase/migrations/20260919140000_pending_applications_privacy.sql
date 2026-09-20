@@ -1,3 +1,4 @@
+-- Appliqué via drizzle (voir drizzle/migrations) ou via SQL direct ; ne pas rejouer.
 -- APPLIED after user instruction to finish, 2026-09-19 20:38 UTC. Do not replay.
 -- Restrict the private pending-application detector to its existing server callers.
 BEGIN;
