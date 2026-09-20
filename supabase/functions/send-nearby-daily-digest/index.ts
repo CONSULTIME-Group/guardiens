@@ -238,6 +238,12 @@ Deno.serve(async (req) => {
     const today = new Date().toISOString().slice(0, 10)
     let usersSent = 0
     let usersSkipped = 0
+    // Ventilation des exclusions : le compteur global ne disait pas pourquoi.
+    const skippedBy: Record<string, number> = {}
+    const skip = (reason: string) => {
+      usersSkipped++
+      skippedBy[reason] = (skippedBy[reason] ?? 0) + 1
+    }
     let claimSkipped = 0
     let claimGranted = 0
     let deptFallbackUsers = 0
@@ -247,18 +253,18 @@ Deno.serve(async (req) => {
 
     for (const p of profiles ?? []) {
       try {
-        if (p.account_status && p.account_status !== 'active') { usersSkipped++; continue }
+        if (p.account_status && p.account_status !== 'active') { skip('compte_inactif'); continue }
         const pref = (prefs ?? []).find((x: any) => x.user_id === p.id)
         const radiusKm = pref?.nearby_daily_radius_km ?? 100
         // product_emails=false ne coupe PAS ce digest (opt-in dédié), mais on
         // respecte quand même si l'utilisateur a explicitement tout coupé côté
         // produit — cohérent avec les autres digests.
-        if (pref?.product_emails === false) { usersSkipped++; continue }
+        if (pref?.product_emails === false) { skip('emails_produit_coupes'); continue }
 
         const origin = { lat: Number(p.latitude), lng: Number(p.longitude) }
         const hasOrigin = Number.isFinite(origin.lat) && Number.isFinite(origin.lng)
         const userDept = deptOf(p.departement_code, p.postal_code)
-        if (!hasOrigin && !userDept) { usersSkipped++; continue }
+        if (!hasOrigin && !userDept) { skip('localisation_absente'); continue }
         if (!hasOrigin) deptFallbackUsers++
 
         // Rapproche une annonce du gardien : distance si les deux points sont
@@ -332,7 +338,7 @@ Deno.serve(async (req) => {
           })
         }
 
-        if (items.length === 0) { usersSkipped++; continue }
+        if (items.length === 0) { skip('aucune_annonce_proche'); continue }
 
         items.sort((a, b) => a._sort - b._sort)
         const top = items.slice(0, MAX_ITEMS).map(({ _sort, ...rest }) => rest)
@@ -351,7 +357,7 @@ Deno.serve(async (req) => {
           .select('email')
           .ilike('email', email)
           .maybeSingle()
-        if (sup) { usersSkipped++; continue }
+        if (sup) { skip('adresse_supprimee'); continue }
 
         // Anti-doublon 20h
         if (!body.manual) {
@@ -364,7 +370,7 @@ Deno.serve(async (req) => {
             .in('status', ['sent', 'pending', 'deferred'])
             .gte('created_at', cutoff)
             .limit(1)
-          if (recent && recent.length > 0) { usersSkipped++; continue }
+          if (recent && recent.length > 0) { skip('deja_envoye_20h'); continue }
         }
 
         if (body.dry_run) { usersSent++; continue }
@@ -440,6 +446,7 @@ Deno.serve(async (req) => {
       users_considered: (profiles ?? []).length,
       users_sent: usersSent,
       users_skipped: usersSkipped,
+      skipped_by_reason: skippedBy,
       claim_granted: claimGranted,
       claim_skipped: claimSkipped,
       claim_skipped_by: claimSkippedBy,
@@ -453,6 +460,7 @@ Deno.serve(async (req) => {
       users_considered: (profiles ?? []).length,
       users_sent: usersSent,
       users_skipped: usersSkipped,
+      skipped_by_reason: skippedBy,
       claim_skipped: claimSkipped,
       claim_skipped_by: claimSkippedBy,
       dept_fallback_users: deptFallbackUsers,

@@ -550,6 +550,9 @@ Deno.serve(async (req) => {
       prefs_evaluated: prefs.length,
       sent,
       skipped,
+      // Motifs d'exclusion en nominal : un digest qui saute tous ses
+      // destinataires doit dire pourquoi, pas seulement combien.
+      skipped_by_reason: dry.excluded,
       claim_granted: claimGranted,
       claim_skipped: claimSkipped,
       claim_skipped_by: claimSkippedBy,
@@ -565,6 +568,7 @@ Deno.serve(async (req) => {
         since_hours: sinceHours,
         prefs_evaluated: prefs.length,
         sent, skipped,
+        skipped_by_reason: dry.excluded,
         claim_skipped: claimSkipped,
         claim_skipped_by: claimSkippedBy,
         rayon_fallback_dept: rayonFallbackDept,
