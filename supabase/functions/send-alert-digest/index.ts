@@ -455,6 +455,12 @@ Deno.serve(async (req) => {
         .maybeSingle();
       if (emailPrefs?.product_emails === false) { skipped++; mark("desabonne", pref); continue; }
 
+      // Le digest gardien passe en premier : on ne réclame pas le créneau de
+      // ce gardien, il recevra son digest gardien au passage horaire suivant.
+      if (sitterDigestPending.has(profile.id)) { skipped++; mark("sitter_digest_pending", pref); continue; }
+
+
+
       // Payload template
       const sitsPayload = sits.slice(0, 6).map((s: any) => ({
         id: s.id,
