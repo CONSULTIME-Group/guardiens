@@ -62,8 +62,10 @@ Deno.serve(async (req) => {
   const dryRun = body?.dry_run === true
 
   try {
-    // 1) Referme d'abord les signaux dont la cause a disparu
-    const { data: autoResolved, error: arErr } = await admin.rpc('auto_resolve_admin_signals')
+    // 1) Réconcilie uniquement hors simulation ; dry_run reste en lecture seule.
+    const { data: autoResolved, error: arErr } = dryRun
+      ? { data: [], error: null }
+      : await admin.rpc('auto_resolve_admin_signals')
     if (arErr) console.error('auto_resolve_admin_signals error', arErr)
 
     // 2) Signaux restants

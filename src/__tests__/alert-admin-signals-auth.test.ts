@@ -56,13 +56,13 @@ describe("alert-admin-signals service authorization", () => {
     expect(h.fetch).not.toHaveBeenCalled();
   });
 
-  it("preserves authorized dry-run behavior, including the existing auto-resolution RPC", async () => {
+  it("keeps an authorized dry run read-only", async () => {
     const h = harness({ signal: true });
     const response = await h.invoke(new Request("https://fixture.invalid", { method: "POST", headers: { authorization: `Bearer ${serviceKey}` }, body: '{"dry_run":true}' }));
     expect(response.status).toBe(200);
     expect(await response.json()).toMatchObject({ ok: true, sent: false, dry_run: true, critical_open: 1, warning_open: 0 });
     expect(h.from).toHaveBeenCalledTimes(1);
-    expect(h.rpc).toHaveBeenCalledWith("auto_resolve_admin_signals");
+    expect(h.rpc).not.toHaveBeenCalled();
     expect(h.fetch).not.toHaveBeenCalled();
   });
 
@@ -71,6 +71,22 @@ describe("alert-admin-signals service authorization", () => {
     const response = await h.invoke(new Request("https://fixture.invalid", { method: "POST", headers: { authorization: `Bearer ${serviceKey}` }, body: "{}" }));
     expect(await response.json()).toMatchObject({ ok: true, sent: false, reason: "no_critical_signal", warning_open: 0 });
     expect(h.fetch).not.toHaveBeenCalled();
+    expect(h.rpc).toHaveBeenCalledWith("auto_resolve_admin_signals");
+  });
+
+  it("does not reconcile even when a dry run finds no critical signal", async () => {
+    const h = harness();
+    const response = await h.invoke(new Request("https://fixture.invalid", { method: "POST", headers: { authorization: `Bearer ${serviceKey}` }, body: '{"dry_run":true}' }));
+    expect(await response.json()).toMatchObject({ sent: false, reason: "no_critical_signal", auto_resolved: [] });
+    expect(h.rpc).not.toHaveBeenCalled();
+    expect(h.fetch).not.toHaveBeenCalled();
+  });
+
+  it.each([false, "true", 1])("preserves normal reconciliation for dry_run=%s", async (dry_run) => {
+    const h = harness();
+    await h.invoke(new Request("https://fixture.invalid", { method: "POST", headers: { authorization: `Bearer ${serviceKey}` }, body: JSON.stringify({ dry_run }) }));
+    expect(h.rpc).toHaveBeenCalledTimes(1);
+    expect(h.rpc).toHaveBeenCalledWith("auto_resolve_admin_signals");
   });
 
   it("preserves the authorized alert request using an inert sender", async () => {
