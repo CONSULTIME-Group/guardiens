@@ -76,7 +76,7 @@ export async function authorizeSitEventEmail(db: Client, input: {
       if (sit.status !== 'completed' || !await pair('accepted')) return denied
       const review = await one(db.from('reviews').select('id,review_type,moderation_status,moderation_hidden_at')
         .eq('sit_id', sit.id).eq('reviewer_id', caller).eq('reviewee_id', recipient).eq('review_type', 'garde'))
-      if (!review || review.moderation_hidden_at || ['rejete', 'rejected'].includes(review.moderation_status)) return denied
+      if (!review || review.moderation_hidden_at || review.moderation_status === 'refuse') return denied
       // An unpublished double-blind review is a real event. Never select its text/rating.
       const author = await profile(caller), target = await profile(recipient)
       payload = { firstName: target?.first_name ?? '', reviewerName: author?.first_name ?? '', sitTitle: sit.title, sitId: sit.id }

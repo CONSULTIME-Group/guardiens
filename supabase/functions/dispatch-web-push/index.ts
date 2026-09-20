@@ -1,10 +1,11 @@
 // Edge dispatch-web-push : envoi des notifications en attente.
 // Appelable uniquement avec la cle service_role, jamais par un client.
-// Aucun cron n'est installe a cette etape.
+// Cron installe : job 1224 dispatch-web-push, toutes les cinq minutes.
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 import webpush from 'npm:web-push@3.6.7';
 
+import { digestRunStatus } from '../_shared/cron-trace.ts';
 import { isServiceRoleCaller } from '../_shared/web-push/auth.ts';
 import { readVapidConfig } from '../_shared/web-push/config.ts';
 import { validatePushEndpoint } from '../_shared/web-push/endpoint.ts';
@@ -46,9 +47,30 @@ Deno.serve(async (req) => {
     limit = 20;
   }
 
+  // Une ligne de journal seulement quand il s'est passe quelque chose : la
+  // file est vide la plupart du temps, inutile d'ecrire 288 lignes par jour.
+  const startedAt = new Date().toISOString();
+  const recordRun = async (
+    status: 'success' | 'partial' | 'failed',
+    metrics: Record<string, unknown>,
+    errorMessage?: string,
+  ) => {
+    const row: Record<string, unknown> = {
+      edge_name: 'dispatch-web-push',
+      started_at: startedAt,
+      finished_at: new Date().toISOString(),
+      status,
+      metrics,
+    };
+    if (errorMessage) row.error_message = errorMessage.slice(0, 2000);
+    const result = await admin.from('cron_run_log').insert(row);
+    if (result?.error) console.error('dispatch-web-push journal indisponible');
+  };
+
   const { data: jobs, error } = await admin.rpc('push_claim_jobs', { p_limit: limit });
   if (error) {
     console.error('dispatch-web-push claim erreur');
+    await recordRun('failed', { claimed: 0 }, 'push_claim_jobs failed');
     return json({ error: 'claim_failed' }, 500);
   }
 
@@ -125,5 +147,8 @@ Deno.serve(async (req) => {
 
   // Journal agrege uniquement : aucun endpoint, aucune cle, aucun membre.
   console.log('dispatch-web-push', JSON.stringify(counters));
+  if (counters.claimed > 0 || counters.persistence_errors > 0) {
+    await recordRun(digestRunStatus(counters.persistence_errors), counters);
+  }
   return json({ ok: counters.persistence_errors === 0, ...counters }, counters.persistence_errors ? 500 : 200);
 });

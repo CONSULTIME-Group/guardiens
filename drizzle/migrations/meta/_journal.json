@@ -22,6 +22,27 @@
       "when": 1789910838880,
       "tag": "0002_cancellation_review_identity",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1789922550912,
+      "tag": "0003_member_email_claim_release",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1789922592456,
+      "tag": "0004_push_and_digest_cron_timeouts",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1789922638562,
+      "tag": "0005_admin_cron_health_push_dispatch",
+      "breakpoints": true
     }
   ]
 }

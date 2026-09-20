@@ -13,6 +13,8 @@ const equal = (a, b) => { assert.deepEqual(a, b); checks++; };
 try {
   await db.exec('CREATE ROLE anon; CREATE ROLE authenticated; CREATE ROLE service_role;');
   await db.exec(readFileSync('supabase/migrations/20260920094000_member_email_send_claims.sql', 'utf8'));
+  // Libération bornée appliquée le 20/09/2026 : la fonction en base est celle-ci.
+  await db.exec(readFileSync('drizzle/migrations/0003_member_email_claim_release.sql', 'utf8'));
   const acquire = async (key, token) => (await db.query('SELECT public.acquire_member_email_send_claim($1,$2) AS result', [key, token])).rows[0].result;
   const finish = async (key, token, outcome) => (await db.query('SELECT public.finish_member_email_send_claim($1,$2,$3) AS result', [key, token, outcome])).rows[0].result;
   const key = 'a'.repeat(64), token = randomUUID();
@@ -30,12 +32,21 @@ try {
   equal(await acquire(uncertain, second), 'acquired');
   equal(await finish(uncertain, second, 'uncertain'), true);
   equal(await acquire(uncertain, randomUUID()), 'uncertain');
-  await db.exec("UPDATE public.member_email_send_claims SET updated_at = now() - interval '48 hours'");
+  // Libération bornée : un incertain de sept heures redevient acquérable, un
+  // envoi en cours de vingt minutes aussi, un envoi en cours récent reste tenu.
+  await db.query("UPDATE public.member_email_send_claims SET updated_at = now() - interval '5 hours' WHERE claim_key = $1", [uncertain]);
   equal(await acquire(uncertain, randomUUID()), 'uncertain');
+  await db.query("UPDATE public.member_email_send_claims SET updated_at = now() - interval '7 hours' WHERE claim_key = $1", [uncertain]);
+  equal(await acquire(uncertain, randomUUID()), 'acquired');
+  const stalled = 'f'.repeat(64);
+  equal(await acquire(stalled, randomUUID()), 'acquired');
+  equal(await acquire(stalled, randomUUID()), 'busy');
+  await db.query("UPDATE public.member_email_send_claims SET updated_at = now() - interval '20 minutes' WHERE claim_key = $1", [stalled]);
+  equal(await acquire(stalled, randomUUID()), 'acquired');
   const concurrent = await Promise.all(Array.from({ length: 32 }, () => acquire('c'.repeat(64), randomUUID())));
   equal(concurrent.filter(x => x === 'acquired').length, 1);
   equal(concurrent.filter(x => x === 'busy').length, 31);
-  equal((await db.query('SELECT count(*)::int AS count FROM public.member_email_send_claims')).rows[0].count, 3);
+  equal((await db.query('SELECT count(*)::int AS count FROM public.member_email_send_claims')).rows[0].count, 4);
   // PGlite executes these requests on one connection. This verifies the actual
   // unique-key/upsert SQL, not contention between multiple PostgreSQL sessions.
   for (const role of ['anon', 'authenticated']) {

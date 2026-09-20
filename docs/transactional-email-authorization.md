@@ -1,5 +1,31 @@
 # Autorisations du point d'envoi transactionnel — 20 septembre 2026
 
+## Septième lot : libération bornée des réservations bloquées
+
+Correction de la règle « aucune libération automatique » posée aux cinquième et
+sixième lots. Une réservation restée en `sending` parce que le runtime a été
+interrompu avant sa finalisation, ou passée en `uncertain` après un résultat
+fournisseur illisible, bloquait sa clé définitivement : l'email transactionnel
+correspondant (candidature acceptée, garde confirmée) était perdu sans recours.
+
+`public.acquire_member_email_send_claim` accepte désormais trois cas de
+ré-acquisition : `retryable` immédiatement, `sending` dont `updated_at` est
+antérieur à quinze minutes, `uncertain` dont `updated_at` est antérieur à six
+heures. `sent` reste définitif. La décision est assumée : un email perdu coûte
+plus cher qu'un doublon rare après expiration du délai.
+
+La supervision du sixième lot est inchangée et garde tout son sens : elle
+signale les réservations incertaines et les envois en cours de plus de dix
+minutes, donc avant toute libération, pour qu'un rapprochement opérateur reste
+possible pendant la fenêtre d'attente. Aucune reprise automatique n'est ajoutée
+ici : la libération rend la clé acquérable par une tentative ultérieure
+légitime, elle ne renvoie rien d'elle-même.
+
+Validation : trois cas ajoutés au script PGlite local (envoi en cours récent
+refusé, envoi en cours de vingt minutes ré-acquis, incertain de sept heures
+ré-acquis), sans réseau ni email.
+
+
 ## Sixième lot : supervision des réservations membres
 
 Le watchdog existant (job122, toutes les cinq minutes, relu le20septembre à
