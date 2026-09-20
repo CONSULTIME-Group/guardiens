@@ -133,20 +133,45 @@ Deno.serve(async (req) => {
       });
     }
 
-    if (rows.length > 0) {
-      const { error: insErr } = await supabase.from("admin_signals").insert(rows);
-      if (insErr) throw insErr;
+    let inserted = 0;
+    let refreshed = 0;
+    // The unique index is (signal_type, entity_id) WHERE resolved_at IS NULL.
+    // Refresh that same open incident across weeks; never reset detected_at.
+    for (const row of rows) {
+      const { error: insErr } = await supabase.from("admin_signals").insert(row);
+      if (!insErr) { inserted += 1; continue; }
+      if (insErr.code !== "23505") throw insErr;
+      const { data: updated, error: updateErr } = await supabase
+        .from("admin_signals")
+        .update({ severity: row.severity, metadata: row.metadata })
+        .eq("signal_type", row.signal_type)
+        .eq("entity_id", row.entity_id)
+        .is("resolved_at", null)
+        .select("id");
+      if (updateErr) throw updateErr;
+      if (updated?.length) { refreshed += updated.length; continue; }
+      // A concurrent reconciliation may have closed it between insert/update.
+      const { error: retryErr } = await supabase.from("admin_signals").insert(row);
+      if (retryErr) throw retryErr;
+      inserted += 1;
     }
+    const metrics = {
+      coverage_gaps: rows.length - tensionCount,
+      seo_tension: tensionCount,
+      signals_inserted: inserted,
+      signals_refreshed: refreshed,
+    };
+    await run.finish("success", metrics);
 
     return new Response(
       JSON.stringify({
         week,
-        coverage_gaps: rows.length - tensionCount,
-        seo_tension: tensionCount,
+        ...metrics,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (e) {
+    if (run) await run.fail(e);
     return new Response(
       JSON.stringify({ error: e instanceof Error ? e.message : String(e) }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
