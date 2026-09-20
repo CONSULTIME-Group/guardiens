@@ -6,6 +6,9 @@ import { resolve } from "node:path";
 import { runInNewContext } from "node:vm";
 import ts from "typescript";
 import { describe, expect, it, vi } from "vitest";
+import * as parisHour from "../../supabase/functions/_shared/paris-hour";
+import * as publicationWindow from "../../supabase/functions/_shared/sit-publication-window";
+import * as cronTrace from "../../supabase/functions/_shared/cron-trace";
 
 type Rows = Record<string, unknown[]>;
 
@@ -54,7 +57,10 @@ function loadHandler(path: string, rows: Rows) {
       if (specifier.includes("delivery-failure")) return { recordDeliveryFailure: inert };
       if (specifier.includes("cron-run-log")) return { startCronRun: async () => null };
       if (specifier.includes("geocode-lookup")) return { geocodeKeyCandidates: () => [] };
-      return require(specifier.replace(/^\.\.\//, "../../supabase/functions/").replace(/\.ts$/, ""));
+      if (specifier.includes("paris-hour")) return parisHour;
+      if (specifier.includes("sit-publication-window")) return publicationWindow;
+      if (specifier.includes("cron-trace")) return cronTrace;
+      throw new Error(`Unexpected import ${specifier}`);
     },
   });
   return { handler, client };
