@@ -1,5 +1,62 @@
 # Autorisations du point d'envoi transactionnel — 20 septembre 2026
 
+## Sixième lot : supervision des réservations membres
+
+Le watchdog existant (job122, toutes les cinq minutes, relu le20septembre à
+10:05:35UTC) contrôle deux agrégats : toutes les réservations uncertain et les
+sending dont updated_at est strictement antérieur à dix minutes. Les états sent
+et retryable, ainsi que les sending récents, ne constituent pas une anomalie.
+Deux requêtes exact/head ne rapportent aucune ligne, empreinte ni jeton.
+
+Les diagnostics sont visibles dans Administration → Erreurs, source
+email-pipeline-watchdog, empreintes email_pipeline:member_email_claims_uncertain,
+stale_sending ou unavailable. Le message reste stable ; les compteurs courants
+et la date du contrôle figurent dans le contexte (le logger existant actualise
+le contexte, mais conserve son message initial).
+
+Aucun email d'alerte supplémentaire. La réponse du watchdog ajoute member_claims
+avec checked_at, uncertain et stale_sending. Le champ anomalies reste celui du
+pipeline historique ; il ne faut pas l'utiliser seul pour les réservations.
+Le contrôle est indépendant de la présence d'une ligne de santé du pipeline auth.
+Lecture échouée ou compteur absent/invalide : diagnostic unavailable et HTTP500,
+sans clôture des alertes existantes. Le contrôle historique du pipeline et ses
+alertes continuent même si cette supervision est indisponible ; ok reste false
+et member_claims vaut null. Écriture/clôture du diagnostic échouée :
+HTTP500, jamais un faux succès. Les erreurs de cette supervision sont génériques.
+
+Après une lecture complète, seul un compteur redevenu zéro clôture son propre
+diagnostic. Source, empreinte exacte, état non résolu et last_seen_at antérieur
+au début du contrôle limitent la clôture ; une occurrence plus récente est
+préservée. Les deux lectures ne constituent pas un snapshot transactionnel :
+une transition concurrente peut apparaître au passage suivant. Aucune clôture
+n'agit sur la réservation elle-même. Aucun cron ajouté, aucun schéma modifié.
+
+### Procédure opérateur avant une éventuelle reprise
+
+1. Lire les compteurs et l'heure dans Administration → Erreurs. Une indisponibilité
+   signifie « état inconnu », jamais « aucune réservation bloquée ».
+2. Pour une intention identifiée via les journaux métier autorisés, recalculer en
+   environnement privilégié la clé canonique et son empreinte selon le sender ;
+   rapprocher chronologie, journal pending/sent et identifiant fournisseur.
+   Le registre agrégé seul ne permet pas de retrouver une adresse ou un événement.
+3. Vérifier le résultat auprès du fournisseur par ses accès habituels, sans renvoyer
+   le message. sent/accepté ne prouve pas une livraison. L'absence de journal sent
+   ne prouve pas que le fournisseur a refusé la requête.
+4. Si l'acceptation ou la non-acceptation ne peut pas être établie, conserver la
+   réservation. Ne jamais remplacer uncertain par retryable sur la seule ancienneté.
+5. Toute correction manuelle éventuelle doit être préparée séparément, justifiée
+   par les preuves, limitée à l'intention et au propriétaire encore observés, puis
+   autorisée explicitement avant application. Aucun outil de reprise n'est ajouté ici.
+
+Validation :36 tests de supervision et27 du module de réservation, sans réseau ni
+email. Les cas couvrent seuil exact, états exclus, compteurs supérieurs à1000,
+lectures incomplètes, indisponibilité, écritures refusées, diagnostic sans santé auth,
+confidentialité, clôture ciblée et conservation des contrôles d'accès.
+Le détail final du déploiement et des contrôles naturels est dans l'audit central.
+Restent : interface de rapprochement opérateur, protection des modèles serveur,
+doublons de file, annulations SQL et interprétation des résultats côté navigateur.
+
+
 ## Cinquième lot : réservation atomique des envois initiés par un membre
 
 Base : `01ef5d5c8533e134bf66668a9ed633cac0f91cb2`. Périmètre : les neuf modèles
