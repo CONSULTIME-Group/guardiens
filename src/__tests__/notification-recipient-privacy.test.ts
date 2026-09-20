@@ -453,14 +453,15 @@ describe("six event checks in the real sender", () => {
     const h = harness({ missingEvent: true });
     const response = await h.invoke("member-session", templateName === "listing-unpublished-feedback" ? ownAddress : reference, templateName);
     expect(response.status).toBe(403);
-    expect(h.writes).toEqual([]);
+    // Seule la trace d'observabilité est écrite, jamais un envoi ni un journal métier.
+    expect(h.writes.map((w: any) => w.table)).toEqual(["error_logs"]);
     expect(h.resendFetch).not.toHaveBeenCalled();
   });
   it.each(sitEventTemplates)("fails closed on a %s event read failure", async (templateName) => {
     const h = harness({ eventReadError: true });
     const response = await h.invoke("member-session", templateName === "listing-unpublished-feedback" ? ownAddress : reference, templateName);
     expect(response.status).toBe(503);
-    expect(h.writes).toEqual([]);
+    expect(h.writes.map((w: any) => w.table)).toEqual(["error_logs"]);
     expect(h.resendFetch).not.toHaveBeenCalled();
   });
   it("removes forged invitation content before rendering", async () => {
@@ -635,5 +636,34 @@ describe("claim recovery boundaries", () => {
     expect(await (await first.invoke()).json()).toMatchObject({ sent: true });
     const retry = harness({ provider: "success", claimRpc });
     expect((await retry.invoke()).status).toBe(503); expect(retry.resendFetch).not.toHaveBeenCalled();
+  });
+});
+
+// Point 2 du lot observabilité : un refus d'autorisation laissait le serveur
+// muet. Il écrit désormais une occurrence agrégeable, sans adresse email.
+describe("authorization refusal trace", () => {
+  it("logs a refused application email with a stable fingerprint and no address", async () => {
+    const h = harness({ missingEvent: true, applicationStatus: "pending" });
+    const response = await h.invoke("member-session", reference, "application-accepted");
+    expect(response.status).toBe(403);
+    const traces = h.writes.filter((w: any) => w.table === "error_logs");
+    expect(traces).toHaveLength(1);
+    const row = (traces[0] as any).values;
+    expect(row.source).toBe("send-transactional-email/authorization");
+    expect(row.severity).toBe("warning");
+    expect(row.fingerprint).toBe("send-transactional-email/authorization:application-accepted:event_not_authorized");
+    expect(row.context).toMatchObject({ template: "application-accepted", status: 403, reason: "event_not_authorized", entity_id: appId });
+    const serialized = JSON.stringify(row);
+    expect(serialized).not.toContain(privateAddress);
+    expect(serialized).not.toContain(ownAddress);
+    expect(h.resendFetch).not.toHaveBeenCalled();
+  });
+  it("separates an unavailable read from a refusal in the fingerprint", async () => {
+    const h = harness({ eventReadError: true });
+    const response = await h.invoke("member-session", reference, "review-received");
+    expect(response.status).toBe(503);
+    const row = (h.writes.filter((w: any) => w.table === "error_logs")[0] as any).values;
+    expect(row.fingerprint).toBe("send-transactional-email/authorization:review-received:authorization_read_unavailable");
+    expect(row.context.status).toBe(503);
   });
 });
