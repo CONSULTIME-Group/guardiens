@@ -56,6 +56,13 @@ try {
     GRANT EXECUTE ON FUNCTION public.create_avis_annulation(uuid,uuid,uuid,text,text) TO authenticated,service_role;
   `);
   await db.exec(readFileSync(process.env.GUARDIENS_CANCELLATION_SQL ?? 'supabase/migrations/20260920103000_cancellation_review_identity.sql', 'utf8'));
+  // Lot 5 : garde "deja annulee" + cible explicite du ON CONFLICT.
+  // Le bloc de garde md5 et la creation d'index sont hors perimetre PGlite (index deja pose dans le fixture).
+  const unicitySql = readFileSync(process.env.GUARDIENS_CANCELLATION_UNICITY_SQL ?? 'drizzle/migrations/0007_cancellation_review_unicity.sql', 'utf8');
+  const unicityStart = unicitySql.indexOf('CREATE OR REPLACE FUNCTION');
+  if (unicityStart < 0) throw new Error('Migration 0007 introuvable ou inattendue');
+  await db.exec(unicitySql.slice(unicityStart));
+
   for (const [label, actor, recipient, role] of [['owner',owner,sitter,'proprio'], ['sitter',sitter,owner,'gardien']]) {
     await reset();
     const result = await call([sit,actor,recipient,role,reason], actor);
