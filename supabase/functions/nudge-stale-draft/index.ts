@@ -16,6 +16,7 @@
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { startCronRun, type CronRun } from "../_shared/cron-run-log.ts";
+import { requireAdminOrServiceRole } from "../_shared/require-admin.ts";
 import { loadMissingDraftItems } from "../_shared/sit-draft-missing.ts";
 
 const corsHeaders = {
@@ -125,6 +126,9 @@ Deno.serve(async (req) => {
 
   let run: CronRun | null = null;
   try {
+    const authError = await requireAdminOrServiceRole(req, corsHeaders);
+    if (authError) return authError;
+
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
