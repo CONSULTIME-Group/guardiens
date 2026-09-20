@@ -29,6 +29,13 @@
       "when": 1789922550912,
       "tag": "0003_member_email_claim_release",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1789922592456,
+      "tag": "0004_push_and_digest_cron_timeouts",
+      "breakpoints": true
     }
   ]
 }
