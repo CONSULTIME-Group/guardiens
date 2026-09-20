@@ -4356,6 +4356,30 @@ export type Database = {
           },
         ]
       }
+      member_email_send_claims: {
+        Row: {
+          claim_key: string
+          created_at: string
+          owner_token: string
+          state: string
+          updated_at: string
+        }
+        Insert: {
+          claim_key: string
+          created_at?: string
+          owner_token: string
+          state: string
+          updated_at?: string
+        }
+        Update: {
+          claim_key?: string
+          created_at?: string
+          owner_token?: string
+          state?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           content: string
@@ -9120,6 +9144,10 @@ export type Database = {
         Args: { p_decline_others?: boolean; p_response_id: string }
         Returns: Json
       }
+      acquire_member_email_send_claim: {
+        Args: { p_claim_key: string; p_owner_token: string }
+        Returns: string
+      }
       admin_alma_matching_diagnosis: {
         Args: {
           p_context?: Json
@@ -9897,6 +9925,10 @@ export type Database = {
           canonical_email: string
           canonical_user_id: string
         }[]
+      }
+      finish_member_email_send_claim: {
+        Args: { p_claim_key: string; p_outcome: string; p_owner_token: string }
+        Returns: boolean
       }
       freeze_seasonal_cohorts: {
         Args: { p_active_days?: number; p_period_key: string }
