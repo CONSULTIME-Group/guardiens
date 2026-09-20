@@ -34,14 +34,14 @@ try {
   equal(await acquire(uncertain, randomUUID()), 'uncertain');
   // Libération bornée : un incertain de sept heures redevient acquérable, un
   // envoi en cours de vingt minutes aussi, un envoi en cours récent reste tenu.
-  await db.exec("UPDATE public.member_email_send_claims SET updated_at = now() - interval '5 hours' WHERE claim_key = $1", [uncertain]);
+  await db.query("UPDATE public.member_email_send_claims SET updated_at = now() - interval '5 hours' WHERE claim_key = $1", [uncertain]);
   equal(await acquire(uncertain, randomUUID()), 'uncertain');
-  await db.exec("UPDATE public.member_email_send_claims SET updated_at = now() - interval '7 hours' WHERE claim_key = $1", [uncertain]);
+  await db.query("UPDATE public.member_email_send_claims SET updated_at = now() - interval '7 hours' WHERE claim_key = $1", [uncertain]);
   equal(await acquire(uncertain, randomUUID()), 'acquired');
   const stalled = 'f'.repeat(64);
   equal(await acquire(stalled, randomUUID()), 'acquired');
   equal(await acquire(stalled, randomUUID()), 'busy');
-  await db.exec("UPDATE public.member_email_send_claims SET updated_at = now() - interval '20 minutes' WHERE claim_key = $1", [stalled]);
+  await db.query("UPDATE public.member_email_send_claims SET updated_at = now() - interval '20 minutes' WHERE claim_key = $1", [stalled]);
   equal(await acquire(stalled, randomUUID()), 'acquired');
   const concurrent = await Promise.all(Array.from({ length: 32 }, () => acquire('c'.repeat(64), randomUUID())));
   equal(concurrent.filter(x => x === 'acquired').length, 1);
