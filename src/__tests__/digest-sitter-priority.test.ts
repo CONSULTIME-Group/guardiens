@@ -110,7 +110,7 @@ describe("send-alert-digest, priorité du digest gardien", () => {
     vi.setSystemTime(NOW);
     const response = await handler(new Request("https://fixture.invalid/?force=true", { method: "POST", body: "{}" }));
     vi.useRealTimers();
-    const payload = await response.json(); if (response.status !== 200) console.log("PAYLOAD", payload);
+    const payload = await response.json(); console.log("PAYLOAD", JSON.stringify(payload));
 
     expect(response.status).toBe(200);
     expect(payload.skipped_by_reason.sitter_digest_pending).toBe(1);
@@ -145,7 +145,7 @@ describe("send-nearby-daily-digest, priorité du digest gardien", () => {
     vi.setSystemTime(NOW);
     const response = await handler(new Request("https://fixture.invalid/", { method: "POST", body: "{}" }));
     vi.useRealTimers();
-    const payload = await response.json(); if (response.status !== 200) console.log("PAYLOAD", payload);
+    const payload = await response.json(); console.log("PAYLOAD", JSON.stringify(payload));
 
     expect(response.status).toBe(200);
     expect(payload.skipped_by_reason.sitter_digest_pending).toBe(1);
