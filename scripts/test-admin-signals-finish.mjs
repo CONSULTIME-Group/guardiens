@@ -24,6 +24,8 @@ await db.exec(`INSERT INTO admin_signals(signal_type,entity_type,entity_id) VALU
 assert.deepEqual((await call()).rows,[]);passed.push('Reproduces stale signal after its draft has disappeared');
 const beforeRows=(await db.query('SELECT * FROM admin_signals')).rows;
 await db.exec(migration);assert.deepEqual(await meta(),before);assert.deepEqual((await db.query('SELECT * FROM admin_signals')).rows,beforeRows);passed.push('Migration preserves rights and does not reconcile any row by itself');
+await db.exec(lot3);assert.deepEqual(await meta(),before);assert.deepEqual((await db.query('SELECT * FROM admin_signals')).rows,beforeRows);passed.push('Business-recovery migration preserves rights and reconciles nothing by itself');
+
 await db.exec('TRUNCATE admin_signals');
 async function scenario(name,type,entity,setup='',resolved=false,severity='critical'){
  await db.exec('BEGIN');try{
