@@ -402,7 +402,12 @@ Deno.serve(async (req) => {
           if (recent && recent.length > 0) { skip('deja_envoye_20h'); continue }
         }
 
+        // Le digest gardien passe en premier : on ne réclame pas le créneau
+        // de ce gardien, il recevra son digest gardien au passage suivant.
+        if (sitterDigestPending.has(p.id)) { skip('sitter_digest_pending'); continue }
+
         if (body.dry_run) { usersSent++; continue }
+
 
         // Idempotence inter-pipelines : réservation posée seulement ici, une
         // fois le contenu établi et le destinataire éligible. Le mode manuel
