@@ -89,6 +89,7 @@ const CronRow = ({ r }: { r: CronHealth }) => (
         Dernière exécution : {formatAge(r.age_minutes)} ·
         {" "}Statut : {r.last_status ?? "inconnu"} ·
         {" "}Échecs 7 j : {r.failed_7d}/{r.runs_7d}
+        {" "}· Partiels 7 j : {r.partial_7d ?? 0}/{r.runs_7d}
       </p>
       {r.last_error ? (
         <p className="text-xs text-destructive mt-1 truncate">
