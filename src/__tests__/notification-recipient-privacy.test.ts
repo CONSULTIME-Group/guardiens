@@ -2,10 +2,14 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { runInNewContext } from "node:vm";
 import ts from "typescript";
+import * as applicationAuthorization from "../../supabase/functions/_shared/application-email-authorization";
 import { describe, expect, it, vi } from "vitest";
 
 const targetId = "11111111-1111-4111-8111-111111111111";
 const reference = `user-${targetId}@notification.guardiens.invalid`;
+const appId = "33333333-3333-4333-8333-333333333333";
+const sitId = "22222222-2222-4222-8222-222222222222";
+const convId = "44444444-4444-4444-8444-444444444444";
 const privateAddress = "private@fixture.test";
 const ownAddress = "self@fixture.test";
 const serviceKey = "fixture-service-secret";
@@ -17,6 +21,13 @@ type Options = {
   resolutionError?: boolean;
   admin?: boolean;
   roleError?: boolean;
+  foreignOwner?: boolean;
+  applicationStatus?: string;
+  eventReadError?: boolean;
+  duplicateKey?: string;
+  idempotencyError?: boolean;
+  recipientError?: boolean;
+  profileEmail?: string;
   member?: boolean;
   provider?: "success" | "error";
 };
@@ -36,29 +47,48 @@ function harness(options: Options = {}) {
     };
     throw new Error(`Unexpected RPC ${name}`);
   });
+  let activeTemplate = "application-accepted";
+  const createElement = vi.fn(() => ({}));
   const queriedRecipients: string[] = [];
+  const recipientPatterns: string[] = [];
   const writes: unknown[] = [];
   const from = vi.fn((table: string) => {
     const chain: Record<string, any> = {};
-    for (const method of ["select", "eq", "ilike", "or", "filter", "insert", "update"]) {
+    const filters: Array<[string, unknown]> = [];
+    let keyFilter: string[] = [];
+    for (const method of ["select", "eq", "ilike", "or", "filter", "in", "insert", "update"]) {
       chain[method] = (...args: unknown[]) => {
-        if (method === "eq" && args[0] === "recipient_email") queriedRecipients.push(String(args[1]));
+        if (method === "eq") filters.push([String(args[0]), args[1]]);
+        if (method === "in" && args[0] === "metadata->>idempotency_key") keyFilter = args[1] as string[];
+        if (method === "filter" && args[0] === "metadata->>idempotency_key") keyFilter = [String(args[2])];
+        if (method === "ilike" && args[0] === "email") recipientPatterns.push(String(args[1]));
+        if (["eq", "ilike"].includes(method) && args[0] === "recipient_email") queriedRecipients.push(String(args[1]));
         if (method === "insert" || method === "update") writes.push({ table, method, values: args[0] });
         return chain;
       };
     }
     chain.limit = async () => {
+      if (options.idempotencyError) return { data: null, error: { message: "private dedup error" } };
+      if (options.duplicateKey && keyFilter.includes(options.duplicateKey)) return { data: [{ id: "fixture-existing" }], error: null };
       if (!options.provider) throw boundary;
       return { data: [], error: null };
     };
+    const eventRows: Record<string, Array<Record<string, unknown>>> = {
+      applications: [{ id: appId, sit_id: sitId, sitter_id: targetId, status: options.applicationStatus ?? (activeTemplate === "application-declined" ? "rejected" : "accepted") }],
+      sits: [{ id: sitId, user_id: options.foreignOwner ? "other-owner" : "fixture-caller", status: "confirmed", title: "Titre en base", property_id: "fixture-property", start_date: "2026-10-01", end_date: "2026-10-05" }],
+      conversations: [{ id: convId, sit_id: sitId, sitter_id: targetId, owner_id: "fixture-caller" }],
+      pets: [{ property_id: "fixture-property", name: "Animal en base" }],
+    };
+    const eventResult = () => ({ data: (eventRows[table] ?? []).filter((row) => filters.every(([key, value]) => row[key] === value)), error: options.eventReadError ? { message: "private DB error" } : null });
     chain.maybeSingle = async () => {
-      if (table === "profiles") return { data: options.member === false ? null : { id: targetId }, error: null };
+      if (table in eventRows) { const result = eventResult(); return { ...result, data: result.data[0] ?? null }; }
+      if (table === "profiles") return { data: options.member === false ? null : { id: targetId, email: options.profileEmail ?? privateAddress, first_name: "Prénom en base" }, error: options.recipientError ? { message: "private recipient error" } : null };
       if (table === "suppressed_emails") return { data: null, error: null };
       if (table === "email_unsubscribe_tokens") return { data: { token: "fixture-token", used_at: null }, error: null };
       throw new Error(`Unexpected table read ${table}`);
     };
     chain.single = async () => ({ data: { id: "fixture-log" }, error: null });
-    chain.then = (callback: (value: unknown) => unknown) => Promise.resolve({ data: null, error: null }).then(callback);
+    chain.then = (callback: (value: unknown) => unknown) => Promise.resolve(table in eventRows ? eventResult() : { data: null, error: null }).then(callback);
     return chain;
   });
   const createClient = vi.fn(() => ({ auth: { getUser }, rpc, from }));
@@ -85,6 +115,7 @@ function harness(options: Options = {}) {
     fetch: () => { throw new Error("Unexpected network call"); },
     Deno: { env: { get: (key: keyof typeof env) => env[key] }, serve: (cb: typeof handler) => { handler = cb; } },
     require: (specifier: string) => {
+      if (specifier.includes("application-email-authorization")) return applicationAuthorization;
       if (specifier.includes("supabase-js")) return { createClient };
       if (specifier.includes("registry")) return { TEMPLATES };
       if (specifier.includes("email-categories")) return { getEmailCategory: () => "transactional" };
@@ -95,16 +126,19 @@ function harness(options: Options = {}) {
       if (specifier.includes("email-link-wrap")) return { wrapEmailLink: (href: string) => href };
       if (specifier.includes("sender-address")) return { REPLY_TO_ADDRESS: "reply@fixture.test" };
       if (specifier.includes("@react-email")) return { render: () => "<body>Fixture</body>" };
-      if (specifier.startsWith("npm:react@")) return { createElement: () => ({}) };
+      if (specifier.startsWith("npm:react@")) return { createElement };
       throw new Error(`Unexpected import ${specifier}`);
     },
   });
   return {
-    getUser, rpc, createClient, queriedRecipients, writes, resendFetch, templateNames,
-    invoke: (token: string | null = "member-session", recipient = reference, templateName = "application-accepted", extra: Record<string, unknown> = {}) => handler(new Request("https://fixture.invalid", {
+    getUser, rpc, createClient, queriedRecipients, writes, resendFetch, templateNames, createElement, recipientPatterns,
+    invoke: (token: string | null = "member-session", recipient = reference, templateName = "application-accepted", extra: Record<string, unknown> = {}) => {
+      activeTemplate = templateName;
+      const key = templateName === "sit-confirmed" ? `sit-confirmed-${sitId}` : `app-${templateName === "application-declined" ? "declined" : "accepted"}-${appId}`;
+      return handler(new Request("https://fixture.invalid", {
       method: "POST", headers: token ? { authorization: `Bearer ${token}` } : {},
-      body: JSON.stringify({ templateName, recipientEmail: recipient, idempotencyKey: "fixture-key", templateData: {}, ...extra }),
-    })),
+      body: JSON.stringify({ templateName, recipientEmail: recipient, idempotencyKey: key, templateData: {}, ...extra }),
+    })); },
     options: () => handler(new Request("https://fixture.invalid", { method: "OPTIONS" })),
   };
 }
@@ -216,8 +250,8 @@ describe("transactional sender template and worker authorization", () => {
 
   it.each(memberTemplates)("preserves the existing member template %s", async (templateName) => {
     const h = harness();
-    await expect(h.invoke("member-session", reference, templateName)).rejects.toBe(boundary);
-    expect(h.queriedRecipients).toEqual([privateAddress]);
+    await expect(h.invoke("member-session", templateName === "sit-confirmed" ? ownAddress : reference, templateName)).rejects.toBe(boundary);
+    expect(h.queriedRecipients).toEqual([templateName === "sit-confirmed" ? ownAddress : privateAddress]);
     expect(h.writes).toEqual([]);
   });
 
@@ -258,5 +292,91 @@ describe("transactional sender template and worker authorization", () => {
     await expect(h.invoke("member-session", privateAddress, "application-accepted", {
       sourceQueueId: "", source_queue_id: "", logMetadata: {},
     })).rejects.toBe(boundary);
+  });
+});
+
+
+describe("application event authorization in the actual sender", () => {
+  it.each([
+    { foreignOwner: true }, { applicationStatus: "pending" }, { applicationStatus: "rejected" },
+  ])("blocks an unrelated or unaccepted application %j before business writes", async (options) => {
+    const h = harness(options);
+    expect((await h.invoke()).status).toBe(403);
+    expect(h.writes).toEqual([]);
+    expect(h.resendFetch).not.toHaveBeenCalled();
+  });
+  it("cannot notify the owner instead of the accepted sitter", async () => {
+    const h = harness();
+    expect((await h.invoke("member-session", ownAddress)).status).toBe(403);
+    expect(h.writes).toEqual([]);
+  });
+  it("rejects a random deduplication key instead of trusting the supplied event content", async () => {
+    const h = harness();
+    expect((await h.invoke("member-session", reference, "application-accepted", { idempotencyKey: "random", templateData: { sitId } })).status).toBe(403);
+    expect(h.writes).toEqual([]);
+  });
+  it("fails closed on an event read error without leaking DB details", async () => {
+    const h = harness({ eventReadError: true });
+    const response = await h.invoke();
+    expect(response.status).toBe(503);
+    expect(await response.text()).not.toContain("private DB error");
+    expect(h.writes).toEqual([]);
+    expect(h.resendFetch).not.toHaveBeenCalled();
+  });
+  it("replaces forged event content and writes a canonical key", async () => {
+    const h = harness({ provider: "success" });
+    const response = await h.invoke("member-session", reference, "application-accepted", {
+      idempotencyKey: `app-accepted-conv-${convId}-${targetId}`,
+      templateData: { sitTitle: "FORGED", ownerFirstName: "FORGED", isUrgent: true, deepLinkUrl: "https://fixture.invalid/forged" },
+    });
+    expect(response.status).toBe(200);
+    expect(h.createElement).toHaveBeenCalledWith(expect.anything(), { sitTitle: "Titre en base", ownerFirstName: "Prénom en base" });
+    expect(h.writes).toContainEqual(expect.objectContaining({ table: "email_send_log", method: "insert", values: expect.objectContaining({ metadata: expect.objectContaining({ idempotency_key: `app-accepted-${appId}` }) }) }));
+  });
+  it("recognizes a previously sent legacy conversation key", async () => {
+    const h = harness({ duplicateKey: `app-accepted-conv-${convId}-${targetId}` });
+    const response = await h.invoke();
+    expect(await response.json()).toMatchObject({ success: true, skipped: true, reason: "duplicate_idempotency_key" });
+    expect(h.resendFetch).not.toHaveBeenCalled();
+    expect(h.writes.every((entry: any) => entry.table === "email_idempotency_hits")).toBe(true);
+  });
+});
+
+
+describe("application sender unavailable verification", () => {
+  it.each([{ idempotencyError: true }, { recipientError: true }])("refuses unavailable checks %j without sending", async (options) => {
+    const h = harness(options);
+    const response = await h.invoke();
+    expect(response.status).toBe(503);
+    expect(await response.text()).not.toContain("private");
+    expect(h.writes).toEqual([]);
+    expect(h.resendFetch).not.toHaveBeenCalled();
+  });
+});
+
+
+describe("recipient address binding", () => {
+  it.each(["private%@fixture.test", "priv_te@fixture.test"])("does not confuse the SQL pattern %s with a member address", async (recipient) => {
+    const h = harness();
+    expect((await h.invoke("member-session", recipient)).status).toBe(403);
+    expect(h.writes).toEqual([]);
+    expect(h.resendFetch).not.toHaveBeenCalled();
+  });
+});
+
+
+describe("application recipient normalization", () => {
+  it("uses a canonical recipient even when the request capitalizes it", async () => {
+    const h = harness({ duplicateKey: `app-accepted-conv-${convId}-${targetId}` });
+    const response = await h.invoke("member-session", privateAddress.toUpperCase());
+    expect(await response.json()).toMatchObject({ skipped: true, reason: "duplicate_idempotency_key" });
+    expect(h.queriedRecipients).toEqual([privateAddress]);
+  });
+  it.each(["private_name@fixture.test", "private%name@fixture.test"])("preserves a real member's literal address %s", async (recipient) => {
+    const h = harness({ profileEmail: recipient });
+    await expect(h.invoke("member-session", recipient)).rejects.toBe(boundary);
+    const escaped = recipient.replace(/[%_]/g, (character) => String.fromCharCode(92) + character);
+    expect(h.recipientPatterns).toEqual([escaped]);
+    expect(h.queriedRecipients).toEqual([escaped]);
   });
 });
