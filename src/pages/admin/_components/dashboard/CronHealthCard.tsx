@@ -42,6 +42,7 @@ interface CronHealth {
   age_minutes: number | null;
   runs_7d: number;
   failed_7d: number;
+  partial_7d?: number;
   failed_in_last_3: number;
   state: CronState;
 }

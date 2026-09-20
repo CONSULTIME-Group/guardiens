@@ -32,7 +32,7 @@ const CONTENTS = FILES.map((file) => ({
 }));
 
 const importsBareLazyFromReact = (code: string): boolean => {
-  const matches = code.match(/import\s*\{([^}]*)\}\s*from\s*["']react["']/g) ?? [];
+  const matches: string[] = code.match(/import\s*\{([^}]*)\}\s*from\s*["']react["']/g) ?? [];
   return matches.some((stmt) => {
     const inner = stmt.slice(stmt.indexOf("{") + 1, stmt.lastIndexOf("}"));
     return inner
