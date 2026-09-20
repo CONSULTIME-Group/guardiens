@@ -236,7 +236,36 @@ Deno.serve(async (req) => {
     }
 
     const today = new Date().toISOString().slice(0, 10)
+
+    // Priorité du digest gardien (lot 4). Le créneau de notification est
+    // unique par gardien et par jour Paris : quand un gardien attend encore
+    // son digest gardien, ce récapitulatif lui laisse le créneau et le compte
+    // sous le motif `sitter_digest_pending`. Au delà de 6 heures d'attente la
+    // priorité tombe, pour qu'une panne du digest gardien ne prive personne
+    // de tout. Une seule requête par passage, jamais une par gardien.
+    const SITTER_DIGEST_PRIORITY_WINDOW_MS = 6 * 60 * 60 * 1000
+    const sitterDigestPending = new Set<string>()
+    {
+      const pendingCutoffISO = new Date(Date.now() - SITTER_DIGEST_PRIORITY_WINDOW_MS).toISOString()
+      const { data: queuedRows } = await supabase
+        .from('sitter_digest_queue')
+        .select('sitter_id, queued_at')
+        .eq('status', 'queued')
+        .is('sent_at', null)
+        .gte('queued_at', pendingCutoffISO)
+      for (const row of (queuedRows ?? []) as Array<{ sitter_id?: string | null; queued_at?: string | null }>) {
+        if (!row?.sitter_id) continue
+        // Contrôle local en plus du filtre SQL : une date absente ou plus
+        // ancienne que la fenêtre ne donne aucune priorité.
+        const queuedAt = row.queued_at ? Date.parse(row.queued_at) : NaN
+        if (!Number.isFinite(queuedAt)) continue
+        if (Date.now() - queuedAt > SITTER_DIGEST_PRIORITY_WINDOW_MS) continue
+        sitterDigestPending.add(String(row.sitter_id))
+      }
+    }
+
     let usersSent = 0
+
     let usersSkipped = 0
     // Ventilation des exclusions : le compteur global ne disait pas pourquoi.
     const skippedBy: Record<string, number> = {}
