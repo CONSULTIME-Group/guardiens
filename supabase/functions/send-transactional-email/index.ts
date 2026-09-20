@@ -17,6 +17,49 @@ import { acquireMemberSendClaim, finishMemberSendClaim, memberSendOutcome, type 
 
 const SITE_URL = 'https://guardiens.fr'
 
+// Trace d'un refus d'autorisation : sans elle, un 403 ou un 503 disparaissait
+// sans laisser d'occurrence agrégeable. Aucune adresse email n'est écrite,
+// seulement le modèle, le motif, la clé canonique et l'entité visée.
+const AUTHORIZATION_LOG_SOURCE = 'send-transactional-email/authorization'
+
+function authorizationRefusalReason(status: 403 | 503): string {
+  return status === 403 ? 'event_not_authorized' : 'authorization_read_unavailable'
+}
+
+function locatorEntityId(idempotencyKey: unknown): string | null {
+  if (typeof idempotencyKey !== 'string') return null
+  const match = idempotencyKey.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i)
+  return match ? match[0] : null
+}
+
+async function traceAuthorizationRefusal(
+  db: { from: (table: string) => any },
+  input: { templateName: string; status: 403 | 503; idempotencyKey: unknown; callerUserId: string | null },
+): Promise<void> {
+  const reason = authorizationRefusalReason(input.status)
+  const entityId = locatorEntityId(input.idempotencyKey)
+  const context = {
+    template: input.templateName,
+    status: input.status,
+    reason,
+    idempotency_key: typeof input.idempotencyKey === 'string' ? input.idempotencyKey : null,
+    entity_id: entityId,
+    caller_id: input.callerUserId,
+  }
+  console.warn(JSON.stringify({ event: 'transactional_email_authorization_refused', ...context }))
+  try {
+    await db.from('error_logs').insert({
+      source: AUTHORIZATION_LOG_SOURCE,
+      severity: 'warning',
+      message: `Notification refusée à l'autorisation (${input.templateName}, ${reason}).`,
+      fingerprint: `${AUTHORIZATION_LOG_SOURCE}:${input.templateName}:${reason}`,
+      context,
+    })
+  } catch {
+    // Une trace manquante ne doit jamais changer la décision d'autorisation.
+  }
+}
+
 function publicFirstName(value: unknown): unknown {
   if (typeof value !== 'string') return value
   const words = value.trim().split(/\s+/).filter(Boolean)
