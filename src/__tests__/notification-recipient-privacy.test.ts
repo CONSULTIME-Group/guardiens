@@ -16,6 +16,7 @@ type Options = {
   address?: string | null;
   resolutionError?: boolean;
   admin?: boolean;
+  roleError?: boolean;
   member?: boolean;
   provider?: "success" | "error";
 };
@@ -28,7 +29,7 @@ function harness(options: Options = {}) {
     data: { user: token === "member-session" ? { id: "fixture-caller", email: ownAddress } : null },
   }));
   const rpc = vi.fn(async (name: string) => {
-    if (name === "has_role") return { data: options.admin === true, error: null };
+    if (name === "has_role") return { data: options.admin === true, error: options.roleError ? { message: "fixture role failure" } : null };
     if (name === "get_user_email_for_notification") return {
       data: options.address === undefined ? privateAddress : options.address,
       error: options.resolutionError ? { message: `DB error ${privateAddress}` } : null,
@@ -65,9 +66,12 @@ function harness(options: Options = {}) {
     ? { id: "fixture-resend" } : { message: `Rejected recipient ${privateAddress}` }),
   { status: options.provider === "success" ? 200 : 422 }));
   const template = { component: () => null, subject: "Fixture" };
+  const registrySource = readFileSync(resolve("supabase/functions/_shared/transactional-email-templates/registry.ts"), "utf8");
+  const templateNames = Array.from(registrySource.matchAll(/^  '([^']+)':/gm), (match) => match[1]);
   const TEMPLATES = {
-    "application-accepted": template, "review-received": template,
-    "identity-verified": template, "contact-reply": { ...template, to: ownAddress },
+    ...Object.fromEntries(templateNames.map((name) => [name, template])),
+    "fixture-future-server-template": template,
+    "contact-reply": { ...template, to: ownAddress },
   };
   const env = { SUPABASE_URL: "https://fixture.invalid", SUPABASE_SERVICE_ROLE_KEY: serviceKey, RESEND_API_KEY: "fixture-resend-key" };
   const source = readFileSync(resolve("supabase/functions/send-transactional-email/index.ts"), "utf8");
@@ -96,10 +100,10 @@ function harness(options: Options = {}) {
     },
   });
   return {
-    getUser, rpc, createClient, queriedRecipients, writes, resendFetch,
-    invoke: (token: string | null = "member-session", recipient = reference, templateName = "application-accepted") => handler(new Request("https://fixture.invalid", {
+    getUser, rpc, createClient, queriedRecipients, writes, resendFetch, templateNames,
+    invoke: (token: string | null = "member-session", recipient = reference, templateName = "application-accepted", extra: Record<string, unknown> = {}) => handler(new Request("https://fixture.invalid", {
       method: "POST", headers: token ? { authorization: `Bearer ${token}` } : {},
-      body: JSON.stringify({ templateName, recipientEmail: recipient, idempotencyKey: "fixture-key", templateData: {} }),
+      body: JSON.stringify({ templateName, recipientEmail: recipient, idempotencyKey: "fixture-key", templateData: {}, ...extra }),
     })),
     options: () => handler(new Request("https://fixture.invalid", { method: "OPTIONS" })),
   };
@@ -128,21 +132,21 @@ describe("notification recipient privacy", () => {
     expect(h.queriedRecipients).toEqual([privateAddress]);
   });
   it("preserves fixed template recipient precedence", async () => {
-    const h = harness();
+    const h = harness({ admin: true });
     await expect(h.invoke("member-session", reference, "contact-reply")).rejects.toBe(boundary);
     expect(h.rpc.mock.calls.map(([name]) => name)).toEqual(["has_role"]);
     expect(h.queriedRecipients).toEqual([ownAddress]);
   });
-  it("keeps sensitive templates restricted to self for ordinary members", async () => {
+  it("refuses sensitive templates for ordinary members", async () => {
     const h = harness();
     const response = await h.invoke("member-session", reference, "identity-verified");
     expect(response.status).toBe(403);
     expect(await response.text()).not.toContain(privateAddress);
     expect(h.writes).toEqual([]);
   });
-  it.each(["self", "admin"])("preserves sensitive template access for %s", async (kind) => {
-    const h = harness({ address: kind === "self" ? ownAddress : privateAddress, admin: kind === "admin" });
-    await expect(h.invoke("member-session", reference, "identity-verified")).rejects.toBe(boundary);
+  it.each(["admin", "service"])("preserves sensitive template access for %s", async (kind) => {
+    const h = harness({ admin: kind === "admin" });
+    await expect(h.invoke(kind === "service" ? serviceKey : "member-session", reference, "identity-verified")).rejects.toBe(boundary);
   });
   it("still refuses a non-member resolved recipient", async () => {
     const h = harness({ member: false });
@@ -175,5 +179,84 @@ describe("notification recipient privacy", () => {
     expect(body).not.toContain(privateAddress);
     expect(body).not.toContain(reference);
     if (provider === "error") expect(JSON.parse(body).details).toBeNull();
+  });
+});
+
+
+// Current browser callsites, including both cancellation templates selected at runtime.
+const memberTemplates = [
+  "application-accepted", "application-declined", "sit-confirmed",
+  "cancellation-by-owner", "cancellation-by-sitter", "sit-invitation",
+  "review-received", "help-during-sit", "listing-unpublished-feedback",
+];
+
+describe("transactional sender template and worker authorization", () => {
+  it.each(["identity-verified", "subscription-expired", "contact-reply", "admin-signals-digest", "new-message", "account-deleted", "fixture-future-server-template"])("refuses server template %s even to self", async (templateName) => {
+    const h = harness();
+    const response = await h.invoke("member-session", ownAddress, templateName);
+    expect(response.status).toBe(403);
+    expect(h.queriedRecipients).toEqual([]);
+    expect(h.writes).toEqual([]);
+    expect(h.resendFetch).not.toHaveBeenCalled();
+    expect(await response.text()).not.toContain(ownAddress);
+  });
+
+  it("refuses every registered non-member template to another member", async () => {
+    const h = harness();
+    const restricted = h.templateNames.filter((name) => !memberTemplates.includes(name));
+    expect(restricted.length).toBeGreaterThan(70);
+    for (const templateName of restricted) {
+      const response = await h.invoke("member-session", privateAddress, templateName);
+      expect(response.status, templateName).toBe(403);
+    }
+    expect(h.queriedRecipients).toEqual([]);
+    expect(h.writes).toEqual([]);
+    expect(h.resendFetch).not.toHaveBeenCalled();
+  });
+
+  it.each(memberTemplates)("preserves the existing member template %s", async (templateName) => {
+    const h = harness();
+    await expect(h.invoke("member-session", reference, templateName)).rejects.toBe(boundary);
+    expect(h.queriedRecipients).toEqual([privateAddress]);
+    expect(h.writes).toEqual([]);
+  });
+
+  it.each(["admin", "service"])("preserves all registered templates for %s", async (kind) => {
+    const h = harness({ admin: kind === "admin" });
+    for (const templateName of h.templateNames) {
+      await expect(h.invoke(kind === "service" ? serviceKey : "member-session", privateAddress, templateName), templateName).rejects.toBe(boundary);
+    }
+    expect(h.writes).toEqual([]);
+    expect(h.resendFetch).not.toHaveBeenCalled();
+  });
+
+  it("does not grant admin access on a role lookup error", async () => {
+    const h = harness({ admin: true, roleError: true });
+    expect((await h.invoke("member-session", ownAddress, "identity-verified")).status).toBe(403);
+    expect(h.writes).toEqual([]);
+  });
+
+  it.each([
+    { sourceQueueId: "fixture-queue" },
+    { source_queue_id: "fixture-queue" },
+    { logMetadata: { idempotency_key: "forged-key", bypass: true } },
+  ])("reserves worker fields %j to service role", async (extra) => {
+    for (const admin of [false, true]) {
+      const h = harness({ admin });
+      const response = await h.invoke("member-session", privateAddress, "application-accepted", extra);
+      expect(response.status).toBe(403);
+      expect(h.queriedRecipients).toEqual([]);
+      expect(h.writes).toEqual([]);
+      expect(h.resendFetch).not.toHaveBeenCalled();
+    }
+    const h = harness();
+    await expect(h.invoke(serviceKey, privateAddress, "application-accepted", extra)).rejects.toBe(boundary);
+  });
+
+  it("accepts harmless empty optional worker fields from a member", async () => {
+    const h = harness();
+    await expect(h.invoke("member-session", privateAddress, "application-accepted", {
+      sourceQueueId: "", source_queue_id: "", logMetadata: {},
+    })).rejects.toBe(boundary);
   });
 });
