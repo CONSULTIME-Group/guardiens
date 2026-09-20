@@ -410,6 +410,9 @@ Deno.serve(async (req) => {
           ? await authorizeApplicationEmail(supabase, eventInput)
           : await authorizeSitEventEmail(supabase, { ...eventInput, templateData })
         if (!decision.ok) {
+          await traceAuthorizationRefusal(supabase, {
+            templateName, status: decision.status, idempotencyKey, callerUserId,
+          })
           return new Response(JSON.stringify({ error: decision.status === 403
             ? 'Forbidden: notification not authorized for this event'
             : 'Notification authorization unavailable' }), {
