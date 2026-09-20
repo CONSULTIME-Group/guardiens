@@ -56,6 +56,13 @@ try {
     GRANT EXECUTE ON FUNCTION public.create_avis_annulation(uuid,uuid,uuid,text,text) TO authenticated,service_role;
   `);
   await db.exec(readFileSync(process.env.GUARDIENS_CANCELLATION_SQL ?? 'supabase/migrations/20260920103000_cancellation_review_identity.sql', 'utf8'));
+  // Lot 5 : garde "deja annulee" + cible explicite du ON CONFLICT.
+  // Le bloc de garde md5 et la creation d'index sont hors perimetre PGlite (index deja pose dans le fixture).
+  const unicitySql = readFileSync(process.env.GUARDIENS_CANCELLATION_UNICITY_SQL ?? 'drizzle/migrations/0007_cancellation_review_unicity.sql', 'utf8');
+  const unicityStart = unicitySql.indexOf('CREATE OR REPLACE FUNCTION');
+  if (unicityStart < 0) throw new Error('Migration 0007 introuvable ou inattendue');
+  await db.exec(unicitySql.slice(unicityStart));
+
   for (const [label, actor, recipient, role] of [['owner',owner,sitter,'proprio'], ['sitter',sitter,owner,'gardien']]) {
     await reset();
     const result = await call([sit,actor,recipient,role,reason], actor);
@@ -66,8 +73,17 @@ try {
     check(label + ': cancellation recorded', () => assert.deepEqual(state, { status:'cancelled',cancelled_by:actor,dated:true }));
     const duplicate = await call([sit,actor,recipient,role,reason], actor);
     check(label + ': duplicate rejected', () => assert.ok(duplicate.error));
+    check(label + ': duplicate message', () => assert.match(String(duplicate.error?.message ?? duplicate.error), /déjà annulée/));
     const count = (await db.query('SELECT count(*)::int AS n FROM reviews')).rows[0].n;
     check(label + ': one review', () => assert.equal(count,1));
+    let directDuplicate = null;
+    try {
+      await db.query("INSERT INTO reviews(sit_id,reviewer_id,reviewee_id,review_type,cancelled_by_role,cancellation_reason,moderation_status,overall_rating,created_at) VALUES ($1,$2,$3,'annulation',$4,$5,'en_attente',1,now())", [sit,actor,recipient,role,reason]);
+    } catch (error) { directDuplicate = error; }
+    check(label + ': unique index blocks direct insert', () => assert.ok(directDuplicate));
+    const afterDirect = (await db.query('SELECT count(*)::int AS n FROM reviews')).rows[0].n;
+    check(label + ': still one review', () => assert.equal(afterDirect,1));
+
     for (const badRole of [role === 'proprio' ? 'gardien' : 'proprio', 'admin', null, 'invalid']) {
       await reject(label + ' wrong role ' + badRole, [sit,actor,recipient,badRole,reason],actor);
     }

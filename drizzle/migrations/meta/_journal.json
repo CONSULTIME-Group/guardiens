@@ -50,6 +50,13 @@
       "when": 1789936872956,
       "tag": "0006_admin_signal_business_recovery",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1789938685729,
+      "tag": "0007_cancellation_review_unicity",
+      "breakpoints": true
     }
   ]
 }
