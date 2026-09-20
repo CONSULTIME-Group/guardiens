@@ -1,3 +1,4 @@
+import { monitorMemberEmailClaims } from '../_shared/member-email-claim-monitor.ts';
 // Watchdog du pipeline d'emails d'authentification.
 // Lit la vue v_email_pipeline_health. Si un seuil est dépassé :
 //   - insère une ligne dans error_logs (fingerprint stable par type d'anomalie),
@@ -53,6 +54,23 @@ Deno.serve(async (req) => {
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
     const service = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
+    // Independent admin diagnostics, including when the auth pipeline has no health row.
+    // No extra alert email and no reservation mutation.
+    let memberClaims: Awaited<ReturnType<typeof monitorMemberEmailClaims>> | null = null;
+    let memberClaimMonitoringFailed = false;
+    try {
+      memberClaims = await monitorMemberEmailClaims(service);
+    } catch {
+      memberClaimMonitoringFailed = true;
+      console.error("member email claim monitoring incomplete");
+    }
+    // A claim diagnostic failure must not hide existing pipeline anomalies.
+    const monitoredResponse = (body: Record<string, unknown>) => new Response(
+      JSON.stringify({ ...body, ok: !memberClaimMonitoringFailed, member_claims: memberClaims,
+        ...(memberClaimMonitoringFailed ? { monitoring_error: "member_email_claims_unavailable" } : {}) }),
+      { status: memberClaimMonitoringFailed ? 500 : 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+
     const { data: healthRows, error: healthErr } = await service
       .rpc("get_email_pipeline_health", {
         p_transactional_templates: TRANSACTIONAL_TEMPLATES,
@@ -61,10 +79,7 @@ Deno.serve(async (req) => {
     if (healthErr) throw new Error(`health read failed: ${healthErr.message}`);
     const health = (healthRows || [])[0];
     if (!health) {
-      return new Response(JSON.stringify({ ok: true, health: null }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return monitoredResponse({ health: null });
     }
 
     const anomalies: Anomaly[] = [];
@@ -199,10 +214,7 @@ Deno.serve(async (req) => {
     }
 
     if (anomalies.length === 0) {
-      return new Response(JSON.stringify({ ok: true, anomalies: 0 }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return monitoredResponse({ anomalies: 0 });
     }
 
     // Anti-spam : au plus 1 alerte par code par heure
@@ -239,15 +251,11 @@ Deno.serve(async (req) => {
     }
 
     if (fresh.length === 0 || !RESEND_API_KEY) {
-      return new Response(
-        JSON.stringify({
-          ok: true,
-          anomalies: anomalies.length,
-          alerted: 0,
-          reason: !RESEND_API_KEY ? "no_resend_key" : "throttled",
-        }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
+      return monitoredResponse({
+        anomalies: anomalies.length,
+        alerted: 0,
+        reason: !RESEND_API_KEY ? "no_resend_key" : "throttled",
+      });
     }
 
     // Envoi de UN seul email regroupant les anomalies fraîches
@@ -294,15 +302,11 @@ Deno.serve(async (req) => {
       console.error("Resend alert failed", resendRes.status, errText);
     }
 
-    return new Response(
-      JSON.stringify({
-        ok: true,
-        anomalies: anomalies.length,
-        alerted: fresh.length,
-        resend_status: resendRes.status,
-      }),
-      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-    );
+    return monitoredResponse({
+      anomalies: anomalies.length,
+      alerted: fresh.length,
+      resend_status: resendRes.status,
+    });
   } catch (err) {
     console.error("email-pipeline-watchdog error:", err);
     return new Response(JSON.stringify({ error: String(err) }), {
