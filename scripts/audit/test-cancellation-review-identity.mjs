@@ -55,7 +55,7 @@ try {
     REVOKE ALL ON FUNCTION public.create_avis_annulation(uuid,uuid,uuid,text,text) FROM PUBLIC,anon;
     GRANT EXECUTE ON FUNCTION public.create_avis_annulation(uuid,uuid,uuid,text,text) TO authenticated,service_role;
   `);
-  await db.exec(readFileSync(process.env.GUARDIENS_CANCELLATION_SQL ?? 'supabase/sql/pending/20260920103000_cancellation_review_identity.sql', 'utf8'));
+  await db.exec(readFileSync(process.env.GUARDIENS_CANCELLATION_SQL ?? 'supabase/migrations/20260920103000_cancellation_review_identity.sql', 'utf8'));
   for (const [label, actor, recipient, role] of [['owner',owner,sitter,'proprio'], ['sitter',sitter,owner,'gardien']]) {
     await reset();
     const result = await call([sit,actor,recipient,role,reason], actor);

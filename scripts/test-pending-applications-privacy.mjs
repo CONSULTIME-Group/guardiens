@@ -1,6 +1,6 @@
 import {readFileSync} from 'node:fs';import assert from 'node:assert/strict';
 const {PGlite}=await import(process.env.PGLITE_MODULE||'@electric-sql/pglite');const db=new PGlite();const root=new URL('../',import.meta.url);const passed=[];
-const baseline=readFileSync(new URL('scripts/fixtures/detect-pending-applications-before.sql',root),'utf8');const sql=readFileSync(new URL('supabase/sql/pending/20260919_pending_applications_privacy.sql',root),'utf8');
+const baseline=readFileSync(new URL('scripts/fixtures/detect-pending-applications-before.sql',root),'utf8');const sql=readFileSync(new URL('supabase/migrations/20260919140000_pending_applications_privacy.sql',root),'utf8');
 await db.exec(`CREATE ROLE anon;CREATE ROLE authenticated;CREATE ROLE service_role;GRANT USAGE ON SCHEMA public TO anon,authenticated,service_role;
 CREATE TYPE application_status AS ENUM('pending','viewed','discussing','accepted','rejected','cancelled');CREATE TYPE sit_status AS ENUM('draft','published','confirmed','in_progress','completed');
 CREATE TABLE profiles(id uuid,first_name text,email text);CREATE TABLE sits(id uuid,title text,user_id uuid,start_date date,end_date date,status sit_status);

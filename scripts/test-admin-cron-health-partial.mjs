@@ -4,7 +4,7 @@ const { PGlite } = await import(process.env.PGLITE_MODULE || '@electric-sql/pgli
 const db = new PGlite();
 const root = new URL('../', import.meta.url);
 const before = readFileSync(new URL('scripts/fixtures/admin-cron-health-before-20260920.sql', root), 'utf8');
-const migration = readFileSync(new URL('supabase/sql/pending/20260920_admin_cron_health_partial.sql', root), 'utf8');
+const migration = readFileSync(new URL('supabase/migrations/20260920110000_admin_cron_health_partial.sql', root), 'utf8');
 const passed = [];
 const check = (name, fn) => { fn(); passed.push(name); };
 await db.exec(`CREATE SCHEMA auth; CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql AS $$ SELECT NULL::uuid $$;

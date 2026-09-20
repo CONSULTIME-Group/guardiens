@@ -24,7 +24,7 @@ CREATE TABLE blocked_users(blocker_id uuid,blocked_id uuid);
 INSERT INTO auth.users VALUES ('${owner}'),('${sitter}'),('${outsider}');
 INSERT INTO conversations VALUES ('${conv}','${owner}','${sitter}');
 INSERT INTO sits VALUES ('${sit}','${owner}');`);
-const sql=readFileSync(new URL('../supabase/sql/pending/20260919_web_push.sql',import.meta.url),'utf8');
+const sql=readFileSync(new URL('../supabase/migrations/20260919090000_web_push.sql',import.meta.url),'utf8');
 await db.exec(sql);
 async function q(sql,params=[]) { return (await db.query(sql,params)).rows; }
 const register=async (user=owner,endpoint='https://fcm.googleapis.com/fcm/send/fixture') => (await q(`SELECT push_upsert_subscription($1,$2,'fcm.googleapis.com','fixture-auth','fixture-key',true,true) AS id`,[user,endpoint]))[0].id;

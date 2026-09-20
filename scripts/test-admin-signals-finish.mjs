@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 const {PGlite}=await import(process.env.PGLITE_MODULE||'@electric-sql/pglite');
 const db=new PGlite();const root=new URL('../',import.meta.url);const passed=[];
 const baseline=readFileSync(new URL('scripts/fixtures/admin-signals-before-finish.sql',root),'utf8');
-const migration=readFileSync(new URL('supabase/sql/pending/20260919_finish_admin_signal_recovery.sql',root),'utf8');
+const migration=readFileSync(new URL('supabase/migrations/20260919130000_finish_admin_signal_recovery.sql',root),'utf8');
 await db.exec(`CREATE ROLE anon;CREATE ROLE authenticated;CREATE ROLE service_role;GRANT USAGE ON SCHEMA public TO anon,authenticated,service_role;
 CREATE TABLE admin_signals(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),signal_type text,entity_type text,entity_id uuid,metadata jsonb DEFAULT '{}',severity text DEFAULT 'critical',detected_at timestamptz DEFAULT now()-interval '3 days',resolved_at timestamptz,action_taken text);
 CREATE TABLE profiles(id uuid DEFAULT gen_random_uuid(),identity_document_url text,latitude double precision,longitude double precision,role text,identity_verified boolean DEFAULT false);
