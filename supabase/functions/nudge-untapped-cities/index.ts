@@ -79,8 +79,6 @@ Deno.serve(async (req) => {
     if (gapErr) throw gapErr;
 
     for (const g of gaps ?? []) {
-      const key = `city_coverage_gap:${g.city}:${week}`;
-      if (alreadyOpen.has(key)) continue;
       rows.push({
         signal_type: "city_coverage_gap",
         severity: g.sitters_count === 0 ? "critical" : "warning",
@@ -112,8 +110,6 @@ Deno.serve(async (req) => {
 
     let tensionCount = 0;
     for (const t of tension ?? []) {
-      const key = `city_seo_tension:${t.city}:${week}`;
-      if (alreadyOpen.has(key)) continue;
       tensionCount += 1;
       rows.push({
         signal_type: "city_seo_tension",
