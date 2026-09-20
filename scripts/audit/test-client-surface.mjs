@@ -75,7 +75,8 @@ try {
   equal(stillReadable.rows[0].count, 2, 'lecture des vues preservee');
 
   for (const [name, args] of LOCKED_FUNCTIONS) {
-    const signature = `public.${name}(${args.replace(/ DEFAULT [^,]+/g, '')})`;
+    const types = args.replace(/ DEFAULT [^,]+/g, '').split(',').map(a => a.trim().split(/\s+/).slice(1).join(' ')).filter(Boolean).join(', ');
+    const signature = `public.${name}(${types})`;
     for (const role of ['anon', 'authenticated']) {
       const res = await db.query(`SELECT has_function_privilege($1, $2, 'EXECUTE') AS allowed`, [role, signature]);
       equal(res.rows[0].allowed, false, `${signature} refusee a ${role}`);
