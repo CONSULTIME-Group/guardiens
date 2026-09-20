@@ -68,18 +68,7 @@ Deno.serve(async (req) => {
 
     const week = isoWeekTag(new Date());
 
-    // Signaux villes deja ouverts cette semaine : on ne redouble jamais.
-    const { data: existing } = await supabase
-      .from("admin_signals")
-      .select("signal_type, metadata")
-      .in("signal_type", ["city_coverage_gap", "city_seo_tension"])
-      .is("resolved_at", null);
-
-    const alreadyOpen = new Set(
-      (existing ?? []).map((s: { signal_type: string; metadata: Record<string, unknown> | null }) =>
-        `${s.signal_type}:${(s.metadata?.city as string) ?? ""}:${(s.metadata?.week as string) ?? ""}`,
-      ),
-    );
+    run = await startCronRun("nudge-untapped-cities");
 
     const rows: Record<string, unknown>[] = [];
 
