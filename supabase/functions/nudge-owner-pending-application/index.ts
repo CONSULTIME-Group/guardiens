@@ -69,7 +69,7 @@ async function sendReminderEmail(params: {
   const { data: existing } = await serviceClient
     .from("email_send_log")
     .select("id")
-    .eq("message_id", messageId)
+    .or(`message_id.eq.${messageId},and(metadata->>idempotency_key.eq.${messageId},template_name.eq.owner-pending-application-nudge,status.in.(sent,pending,deferred))`)
     .limit(1)
     .maybeSingle();
   if (existing) return { ok: false, outcome: "skipped", error: "already_sent" };
@@ -196,7 +196,7 @@ async function sendStalledDiscussionEmail(params: {
   const { data: existing } = await serviceClient
     .from("email_send_log")
     .select("id")
-    .eq("message_id", messageId)
+    .or(`message_id.eq.${messageId},and(metadata->>idempotency_key.eq.${messageId},template_name.eq.discussion-stalled-nudge,status.in.(sent,pending,deferred))`)
     .limit(1)
     .maybeSingle();
   if (existing) return { ok: false, outcome: "skipped", error: "already_sent" };
@@ -472,10 +472,17 @@ Deno.serve(async (req) => {
     // ── Balayage 2 : discussions engagées mais candidature non confirmée ──
     // Le nudge pending ignore toute candidature où le propriétaire a écrit :
     // ce second balayage couvre exactement ce trou (numéro échangé puis rien).
+    const stalledErrorCounts: Record<string, number> = {};
+    const recordStalledError = (stage: string, code: unknown) => {
+      const safeCode = typeof code === "string" && /^[A-Z0-9]{3,5}$/.test(code) ? code : "unknown";
+      const key = `${stage}:${safeCode}`;
+      stalledErrorCounts[key] = (stalledErrorCounts[key] ?? 0) + 1;
+    };
     const { data: stalledData, error: stalledErr } = await serviceClient.rpc(
       "detect_stalled_discussions",
     );
     if (stalledErr) {
+      recordStalledError("detect", stalledErr.code);
       errors.push({ application_id: "stalled_sweep", error: stalledErr.message });
     }
     const stalled: StalledDiscussion[] = (stalledData as StalledDiscussion[]) ?? [];
@@ -508,6 +515,7 @@ Deno.serve(async (req) => {
 
       if (insErr) {
         if (!(insErr.code === "23505" || insErr.message?.includes("idx_admin_signals_idempotent"))) {
+          recordStalledError("signal_insert", insErr.code);
           errors.push({ application_id: disc.application_id, error: insErr.message });
           continue;
         }
