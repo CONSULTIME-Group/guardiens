@@ -12,6 +12,8 @@
 // verification d'identite, est supprimee de la base et n'est plus appelee.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
+import { requireAdminOrServiceRole } from "../_shared/require-admin.ts";
+import { startCronRun, type CronRun } from "../_shared/cron-run-log.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -40,18 +42,23 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const authError = await requireAdminOrServiceRole(req, corsHeaders);
+  if (authError) return authError;
+
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
   );
 
+  let run: CronRun | null = null;
   try {
-    const { data: signalsFlag } = await supabase
+    const { data: signalsFlag, error: flagError } = await supabase
       .from("feature_flags")
       .select("enabled")
       .eq("key", "admin_signals_active")
       .maybeSingle();
 
+    if (flagError) throw flagError;
     if (signalsFlag && signalsFlag.enabled === false) {
       return new Response(
         JSON.stringify({ skipped: "admin_signals_active off" }),
@@ -61,18 +68,7 @@ Deno.serve(async (req) => {
 
     const week = isoWeekTag(new Date());
 
-    // Signaux villes deja ouverts cette semaine : on ne redouble jamais.
-    const { data: existing } = await supabase
-      .from("admin_signals")
-      .select("signal_type, metadata")
-      .in("signal_type", ["city_coverage_gap", "city_seo_tension"])
-      .is("resolved_at", null);
-
-    const alreadyOpen = new Set(
-      (existing ?? []).map((s: { signal_type: string; metadata: Record<string, unknown> | null }) =>
-        `${s.signal_type}:${(s.metadata?.city as string) ?? ""}:${(s.metadata?.week as string) ?? ""}`,
-      ),
-    );
+    run = await startCronRun("nudge-untapped-cities");
 
     const rows: Record<string, unknown>[] = [];
 
@@ -83,8 +79,6 @@ Deno.serve(async (req) => {
     if (gapErr) throw gapErr;
 
     for (const g of gaps ?? []) {
-      const key = `city_coverage_gap:${g.city}:${week}`;
-      if (alreadyOpen.has(key)) continue;
       rows.push({
         signal_type: "city_coverage_gap",
         severity: g.sitters_count === 0 ? "critical" : "warning",
@@ -116,8 +110,6 @@ Deno.serve(async (req) => {
 
     let tensionCount = 0;
     for (const t of tension ?? []) {
-      const key = `city_seo_tension:${t.city}:${week}`;
-      if (alreadyOpen.has(key)) continue;
       tensionCount += 1;
       rows.push({
         signal_type: "city_seo_tension",
@@ -141,20 +133,45 @@ Deno.serve(async (req) => {
       });
     }
 
-    if (rows.length > 0) {
-      const { error: insErr } = await supabase.from("admin_signals").insert(rows);
-      if (insErr) throw insErr;
+    let inserted = 0;
+    let refreshed = 0;
+    // The unique index is (signal_type, entity_id) WHERE resolved_at IS NULL.
+    // Refresh that same open incident across weeks; never reset detected_at.
+    for (const row of rows) {
+      const { error: insErr } = await supabase.from("admin_signals").insert(row);
+      if (!insErr) { inserted += 1; continue; }
+      if (insErr.code !== "23505") throw insErr;
+      const { data: updated, error: updateErr } = await supabase
+        .from("admin_signals")
+        .update({ severity: row.severity, metadata: row.metadata })
+        .eq("signal_type", row.signal_type)
+        .eq("entity_id", row.entity_id)
+        .is("resolved_at", null)
+        .select("id");
+      if (updateErr) throw updateErr;
+      if (updated?.length) { refreshed += updated.length; continue; }
+      // A concurrent reconciliation may have closed it between insert/update.
+      const { error: retryErr } = await supabase.from("admin_signals").insert(row);
+      if (retryErr) throw retryErr;
+      inserted += 1;
     }
+    const metrics = {
+      coverage_gaps: rows.length - tensionCount,
+      seo_tension: tensionCount,
+      signals_inserted: inserted,
+      signals_refreshed: refreshed,
+    };
+    await run.finish("success", metrics);
 
     return new Response(
       JSON.stringify({
         week,
-        coverage_gaps: rows.length - tensionCount,
-        seo_tension: tensionCount,
+        ...metrics,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (e) {
+    if (run) await run.fail(e);
     return new Response(
       JSON.stringify({ error: e instanceof Error ? e.message : String(e) }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
