@@ -112,8 +112,8 @@ try {
   await db.exec(`
     INSERT INTO public.profiles (id, first_name, city, latitude, longitude, helps_with, account_status, available_for_help)
     VALUES ('00000000-0000-0000-0000-000000000001', 'Camille', 'Lyon', 45.764043, 4.835659, 'Arroser les plantes', 'active', true),
-           ('00000000-0000-0000-0000-000000000002', 'Nadia', 'Lyon', 45.764043, 4.835659, null, 'active', true),
-           ('00000000-0000-0000-0000-000000000003', 'Espion', 'Lyon', null, null, 'Je garde tout', 'active', true);
+           ('00000000-0000-0000-0000-000000000015', 'Nadia', 'Lyon', 45.764043, 4.835659, null, 'active', true),
+           ('00000000-0000-0000-0000-000000000016', 'Espion', 'Lyon', null, null, 'Je garde tout', 'active', true);
     SET ROLE anon;
   `);
   const anonHelpers = await db.query('SELECT first_name, city, helps_with FROM public.public_helpers');
