@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
-import ExchangeHowItWorks from "@/components/missions/ExchangeHowItWorks";
 import { NeedCard, HelperCard, type EntraideNeed, type PublicHelper } from "@/components/entraide/EntraideCards";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,7 +19,7 @@ const FAQ = [
   { question: "Comment trouver un coup de main près de chez vous ?", answer: "Indiquez votre ville pour classer les besoins et les personnes disponibles par proximité." },
   { question: "Que faire quand le fil est calme aujourd'hui ?", answer: "Décrivez votre besoin. Il reste visible dans le fil et les personnes disponibles près de chez vous le reçoivent." },
   { question: "Faut-il payer pour utiliser l'Entraide ?", answer: "L'Entraide est ouverte à tous les membres, pour 0 €. Vous convenez ensemble d'un service ou d'une attention." },
-  { question: "Quelle différence avec une garde de maison ?", answer: "L'Entraide répond à un besoin ponctuel et court, sans nuitée. Une garde de maison couvre un séjour de plusieurs jours sur place." },
+  { question: "Quelle différence avec une garde de maison ?", answer: "L'Entraide répond à un besoin ponctuel et court dans la journée. Une garde de maison couvre un séjour de plusieurs jours sur place." },
 ] as const;
 
 const faqSchema = {
@@ -59,7 +58,17 @@ export const EntraideHubIntro = ({ isAuthenticated, onNeed, onHelp }: {
         Vous dites ce dont vous avez besoin. Dix personnes du coin le reçoivent. L'une d'elles dit « Je peux » et vous échangez ensemble.
       </p>
     </section>
-    {!isAuthenticated && <ExchangeHowItWorks variant="public" className="mt-8" />}
+    {!isAuthenticated && (
+      <section className="mt-8 rounded-lg border border-primary/20 bg-primary/5 p-5 sm:p-6" aria-label="Comment ça marche">
+        <p className="text-xs font-semibold uppercase text-primary">Coups de main</p>
+        <h2 className="mt-1 font-heading text-xl font-semibold text-foreground">Comment ça marche ?</h2>
+        <ol className="mt-4 grid gap-3 sm:grid-cols-3">
+          <li className="rounded-lg border border-border bg-card p-4"><strong className="text-sm text-foreground">1. Vous dites</strong><p className="mt-1 text-xs leading-relaxed text-muted-foreground">Décrivez le coup de main et le moment qui vous conviendrait.</p></li>
+          <li className="rounded-lg border border-border bg-card p-4"><strong className="text-sm text-foreground">2. Dix personnes le reçoivent</strong><p className="mt-1 text-xs leading-relaxed text-muted-foreground">Les personnes disponibles les plus proches découvrent votre besoin.</p></li>
+          <li className="rounded-lg border border-border bg-card p-4"><strong className="text-sm text-foreground">3. L'une dit « Je peux »</strong><p className="mt-1 text-xs leading-relaxed text-muted-foreground">Vous échangez directement et choisissez ensemble le coup de main.</p></li>
+        </ol>
+      </section>
+    )}
   </>
 );
 

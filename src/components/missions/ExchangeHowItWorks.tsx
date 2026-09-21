@@ -59,13 +59,13 @@ const ExchangeHowItWorks = ({
       : [
           {
             icon: HandHeart,
-            title: "1. Décrivez votre besoin",
-            text: "Une visite d'animal, une promenade, du jardinage, des courses ou une présence rassurante.",
+            title: "1. Publiez un besoin ou une offre",
+            text: "Un coup de main ponctuel : visite d'animal, promenade, jardinage, courses, présence rassurante.",
           },
           {
             icon: MessageCircle,
             title: "2. Convenez d'un petit échange",
-            text: "Un café, des œufs ou un service en retour : vous choisissez ensemble.",
+            text: "Ni tarif ni facture. Un café, des œufs, un service en retour : c'est vous qui décidez.",
           },
           {
             icon: Sparkles,
@@ -77,7 +77,7 @@ const ExchangeHowItWorks = ({
   const primaryCta =
     variant === "sitter"
       ? { label: "Proposer mon aide", to: "/petites-missions/creer?type=offre" }
-      : { label: "J'ai besoin d'un coup de main", to: "/petites-missions/creer" };
+      : { label: "Publier un besoin", to: "/petites-missions/creer?type=besoin" };
 
   return (
     <section
@@ -95,7 +95,7 @@ const ExchangeHowItWorks = ({
           {title}
         </h3>
         <p className="text-sm text-foreground/70 mt-1">
-          Un coup de main rapproche les gens du coin. Vous choisissez ensemble une attention ou un service en retour.
+          Un coup de main, c'est un échange. Un service contre un service, ni tarif ni facture.
         </p>
       </header>
 
@@ -131,7 +131,7 @@ const ExchangeHowItWorks = ({
           to="/petites-missions"
           className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-4 py-2 text-xs font-semibold text-foreground hover:bg-accent transition-colors"
         >
-          Découvrir les besoins
+          Parcourir les échanges
         </Link>
       </div>
     </section>

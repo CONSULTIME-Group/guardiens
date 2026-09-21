@@ -7,5 +7,5 @@
 - [x] Ajouter le parcours d'inscription entraide et le rappel tableau de bord pour `helps_with`.
 - [x] Conserver FAQ et SEO, ajouter JSON-LD Person minimal et la statistique CRÉDOC.
 - [x] Étendre les tests Vitest et PGlite, vérifier TypeScript et compilation.
-- [ ] Capturer mobile et ordinateur pour Besoins, Autour de vous et Carte.
+- [x] Capturer mobile et ordinateur pour Besoins, Autour de vous et Carte.
 - [ ] Ne pas publier.
