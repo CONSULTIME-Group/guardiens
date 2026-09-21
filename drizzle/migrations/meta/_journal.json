@@ -85,6 +85,13 @@
       "when": 1789965708108,
       "tag": "0011_fix_entraide_raise_messages",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1789967407031,
+      "tag": "0012_entraide_public_helpers",
+      "breakpoints": true
     }
   ]
 }
