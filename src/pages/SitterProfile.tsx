@@ -468,6 +468,7 @@ const SitterProfile = () => {
                   <StepSkills
                     skillCategories={mergedData.skill_categories || []}
                     availableForHelp={mergedData.available_for_help || false}
+                    helpsWith={mergedData.helps_with || ""}
                     competences={mergedData.competences || []}
                     proSpecialty={mergedData.pro_specialty || ""}
                     certifications={mergedData.certifications || []}

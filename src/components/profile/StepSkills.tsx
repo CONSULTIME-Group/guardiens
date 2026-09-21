@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ChevronDown } from "lucide-react";
@@ -18,6 +19,8 @@ import { PRO_DECLARATION_OPTIONS, PRO_DECLARATION_NOTICE } from "@/lib/proDeclar
 interface Props {
   skillCategories: string[]; // conservé pour compat, désormais dérivé auto
   availableForHelp: boolean;
+  /** Phrase libre : ce que la personne aime faire pour les gens du coin. */
+  helpsWith?: string;
   competences?: string[];
   /** Spécialité professionnelle déclarée ("" si aucune). */
   proSpecialty?: string;
@@ -25,6 +28,7 @@ interface Props {
   onChange: (partial: {
     skill_categories?: string[];
     available_for_help?: boolean;
+    helps_with?: string | null;
     competences?: string[];
     pro_specialty?: string | null;
     certifications?: string[];
@@ -39,6 +43,7 @@ interface Props {
  */
 const StepSkills = ({
   availableForHelp,
+  helpsWith = "",
   competences = [],
   proSpecialty = "",
   certifications = [],
@@ -168,6 +173,24 @@ const StepSkills = ({
         onAdd={handleAddCompetence}
         onRemove={handleRemoveCompetence}
       />
+
+      {/* Entraide : une phrase simple vaut mieux qu'une liste de compétences. */}
+      <div className="border-t border-border pt-4 space-y-2">
+        <Label htmlFor="profile-helps-with" className="text-sm">Ce que je propose volontiers</Label>
+        <p className="text-xs text-muted-foreground">
+          Ce que vous aimez faire pour les gens du coin, en échange d'un merci ou d'un service.
+        </p>
+        <Textarea
+          id="profile-helps-with"
+          value={helpsWith}
+          maxLength={200}
+          rows={3}
+          placeholder="Ex : promener un chien, dépanner en bricolage, arroser des plantes."
+          onChange={(e) => onChange({ helps_with: e.target.value.slice(0, 200) })}
+          className="resize-none"
+        />
+        <p className="text-xs text-muted-foreground tabular-nums">{helpsWith.length}/200</p>
+      </div>
 
       <div className="flex items-center justify-between py-2 border-t border-border pt-4">
         <div className="flex-1 pr-4">
