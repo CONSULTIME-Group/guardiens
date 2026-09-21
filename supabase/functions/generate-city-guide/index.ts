@@ -58,11 +58,53 @@ async function callAI(apiKey: string, prompt: string, maxTokens = 1000) {
   return JSON.parse(match[0]);
 }
 
+/**
+ * Géocodage en arrière-plan, hors du chemin critique de la réponse HTTP.
+ * Une requête Nominatim par seconde au maximum, comme avant.
+ */
+async function geocodePlacesInBackground(
+  supabase: ReturnType<typeof createClient>,
+  city: string,
+  rows: Array<{ id: string; name: string; address: string | null }>,
+) {
+  const started = Date.now();
+  let geocoded = 0;
+  for (const row of rows) {
+    const queries = [
+      row.address ? `${row.address}, ${city}, France` : null,
+      `${row.name}, ${city}, France`,
+    ].filter(Boolean) as string[];
+
+    let coords: { lat: number; lng: number } | null = null;
+    for (const q of queries) {
+      await new Promise((r) => setTimeout(r, 1100));
+      coords = await geocodeAddress(q);
+      if (coords) break;
+    }
+
+    if (coords) {
+      const { error } = await supabase
+        .from("city_guide_places")
+        .update({ latitude: coords.lat, longitude: coords.lng })
+        .eq("id", row.id);
+      if (error) {
+        console.error("[generate-city-guide] update coords error", row.id, error.message);
+      } else {
+        geocoded++;
+      }
+    }
+  }
+  console.log(
+    `[generate-city-guide] géocodage terminé pour ${city}: ${geocoded}/${rows.length} lieux en ${Date.now() - started} ms`,
+  );
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const t0 = Date.now();
   try {
     const authFail = await requireAdminOrServiceRole(req, corsHeaders);
     if (authFail) return authFail;
@@ -106,9 +148,12 @@ Deno.serve(async (req) => {
     const introPrompt = `Tu es un guide local expert. Génère une introduction de 3-4 phrases pour un guide destiné aux gardiens de maison et d'animaux qui vont séjourner à ${city}. Ton chaleureux et pratique. Mentionne l'ambiance du coin, ce qui le rend agréable pour se balader avec un chien. Termine par "Idéal pour les gardiens qui..." en une phrase.
 Réponds UNIQUEMENT en JSON valide : {"intro": "...", "ideal_for": "Idéal pour les gardiens qui..."}`;
 
+    const tIntro = Date.now();
     const introData = await callAI(LOVABLE_API_KEY, introPrompt, 400);
+    console.log(`[generate-city-guide] intro ${city}: ${Date.now() - tIntro} ms`);
 
     // Insert guide
+    const tInsert = Date.now();
     const { data: guide, error: guideErr } = await supabase
       .from("city_guides")
       .insert({
@@ -124,8 +169,9 @@ Réponds UNIQUEMENT en JSON valide : {"intro": "...", "ideal_for": "Idéal pour 
       .single();
 
     if (guideErr) throw guideErr;
+    console.log(`[generate-city-guide] insertion guide: ${Date.now() - tInsert} ms`);
 
-    // 2. Generate places for each category
+    // 2. Generate places for each category, en parallèle
     const categoryLabels: Record<string, string> = {
       dog_park: "parcs à chiens et espaces verts dog-friendly",
       walk_trail: "sentiers de balade, chemins de promenade et bords de rivière",
@@ -134,10 +180,9 @@ Réponds UNIQUEMENT en JSON valide : {"intro": "...", "ideal_for": "Idéal pour 
       pet_shop: "animaleries et boutiques pour animaux",
     };
 
-    const allPlaces: any[] = [];
-
-    for (const cat of CATEGORIES) {
-      try {
+    const tPlaces = Date.now();
+    const results = await Promise.allSettled(
+      CATEGORIES.map(async (cat) => {
         const placesPrompt = `Tu es un guide local expert de ${city} en France. Liste les ${categoryLabels[cat]} les plus connus et recommandés de ${city} et ses environs immédiats. Pour chaque lieu, donne le nom réel, l'adresse approximative, et une description courte du point de vue d'un gardien qui promène un chien.
 
 Catégorie : ${cat}
@@ -157,58 +202,62 @@ En français. Maximum 5 lieux. Privilégie les lieux réels et connus.`;
 
         const places = await callAI(LOVABLE_API_KEY, placesPrompt, 1200);
         const placeArray = Array.isArray(places) ? places : [places];
+        return placeArray.slice(0, 5).map((p: any) => ({
+          city_guide_id: guide.id,
+          category: cat,
+          name: p.name || "Lieu",
+          address: p.address || "",
+          description: p.description || "",
+          tips: p.tips || null,
+          dogs_welcome: p.dogs_welcome !== false,
+          leash_required: p.leash_required ?? null,
+          latitude: null as number | null,
+          longitude: null as number | null,
+        }));
+      }),
+    );
 
-        for (const p of placeArray.slice(0, 5)) {
-          // Geocode the place
-          let latitude: number | null = null;
-          let longitude: number | null = null;
-          const queries = [
-            p.address ? `${p.address}, ${city}, France` : null,
-            `${p.name}, ${city}, France`,
-          ].filter(Boolean) as string[];
-          for (const q of queries) {
-            const coords = await geocodeAddress(q);
-            if (coords) {
-              latitude = coords.lat;
-              longitude = coords.lng;
-              break;
-            }
-            await new Promise((r) => setTimeout(r, 1100));
-          }
-          // Rate limit between places
-          await new Promise((r) => setTimeout(r, 1100));
+    const allPlaces: any[] = [];
+    results.forEach((r, i) => {
+      if (r.status === "fulfilled") {
+        allPlaces.push(...r.value);
+      } else {
+        console.error(`[generate-city-guide] catégorie ${CATEGORIES[i]} ignorée pour ${city}:`, r.reason);
+      }
+    });
+    console.log(
+      `[generate-city-guide] ${allPlaces.length} lieux générés (${results.filter((r) => r.status === "fulfilled").length}/${CATEGORIES.length} catégories) en ${Date.now() - tPlaces} ms`,
+    );
 
-          allPlaces.push({
-            city_guide_id: guide.id,
-            category: cat,
-            name: p.name || "Lieu",
-            address: p.address || "",
-            description: p.description || "",
-            tips: p.tips || null,
-            dogs_welcome: p.dogs_welcome !== false,
-            leash_required: p.leash_required ?? null,
-            latitude,
-            longitude,
-          });
-        }
-      } catch (catErr) {
-        console.error(`Error generating ${cat} for ${city}:`, catErr);
+    let inserted: Array<{ id: string; name: string; address: string | null }> = [];
+    if (allPlaces.length > 0) {
+      const { data: insertedRows, error: placesErr } = await supabase
+        .from("city_guide_places")
+        .insert(allPlaces)
+        .select("id, name, address");
+      if (placesErr) console.error("Places insert error:", placesErr);
+      inserted = (insertedRows || []) as typeof inserted;
+    }
+
+    // 3. Géocodage en arrière-plan, la réponse ne l'attend pas
+    if (inserted.length > 0) {
+      const task = geocodePlacesInBackground(supabase, city, inserted);
+      const runtime = (globalThis as any).EdgeRuntime;
+      if (runtime?.waitUntil) {
+        runtime.waitUntil(task);
+      } else {
+        task.catch((e) => console.error("[generate-city-guide] géocodage:", e));
       }
     }
 
-    if (allPlaces.length > 0) {
-      const { error: placesErr } = await supabase
-        .from("city_guide_places")
-        .insert(allPlaces);
-      if (placesErr) console.error("Places insert error:", placesErr);
-    }
+    console.log(`[generate-city-guide] réponse pour ${city} en ${Date.now() - t0} ms (géocodage en arrière-plan)`);
 
     return new Response(
-      JSON.stringify({ ...guide, places_count: allPlaces.length }),
+      JSON.stringify({ ...guide, places_count: allPlaces.length, geocoding: "pending" }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
-    console.error("City guide generation error:", error);
+    console.error(`City guide generation error (après ${Date.now() - t0} ms):`, error);
     const isGateway = error instanceof AiGatewayError;
     const status = isGateway ? error.status : 500;
     const message = error instanceof Error ? error.message : String(error);
