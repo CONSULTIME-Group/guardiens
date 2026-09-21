@@ -8,9 +8,9 @@
 - [x] Conserver FAQ et SEO, ajouter JSON-LD Person minimal et la statistique CRÉDOC.
 - [x] Étendre les tests Vitest et PGlite, vérifier TypeScript et compilation.
 - [x] Capturer mobile et ordinateur pour Besoins, Autour de vous et Carte.
-- [ ] Construire le registre `MISSIONS_CITIES` et le gabarit unique Lyon, Marseille, Strasbourg.
-- [ ] Ajouter le compteur direct, la carte, les besoins, les personnes et les preuves à 30 km.
-- [ ] Ajouter les liens hub et pied de page, les routes et les trois entrées sitemap.
-- [ ] Ajouter les tests de rendu, SEO, sitemap, rayon et contenu éditorial sans chiffre.
-- [ ] Exécuter Vitest complet, `test:sql`, TypeScript et vérifier le journal de compilation.
-- [ ] Ne pas publier ni déployer.
+- [x] Construire le registre `MISSIONS_CITIES` et le gabarit unique Lyon, Marseille, Strasbourg.
+- [x] Ajouter le compteur direct, la carte, les besoins, les personnes et les preuves à 30 km.
+- [x] Ajouter les liens hub et pied de page, les routes et les trois entrées sitemap.
+- [x] Ajouter les tests de rendu, SEO, sitemap, rayon et contenu éditorial sans chiffre.
+- [x] Exécuter Vitest complet, `test:sql`, TypeScript et vérifier le journal de compilation.
+- [x] Ne pas publier ni déployer.
