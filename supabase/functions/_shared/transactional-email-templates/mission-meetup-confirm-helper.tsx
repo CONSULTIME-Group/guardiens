@@ -59,7 +59,7 @@ const MissionMeetupConfirmHelperEmail = ({
         {noToken && (
           <Section style={ctaSection}>
             <Button style={buttonGhost} href={`${SITE_URL}/entraide/je-peux?a=rencontre&t=${noToken}`}>
-              Ça ne s'est pas fait
+              À reprogrammer
             </Button>
           </Section>
         )}
