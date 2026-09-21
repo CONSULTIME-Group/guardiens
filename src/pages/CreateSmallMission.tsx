@@ -312,8 +312,8 @@ const CreateSmallMission = () => {
   const sitLike = useMemo(() => sitLikeSignals(title, description), [title, description]);
   const rehoming = useMemo(() => rehomingSignals(title, description), [title, description]);
   const moneyWording = useMemo(
-    () => moneyWordingSignals(title, description, exchangeOffer),
-    [title, description, exchangeOffer],
+    () => moneyWordingSignals(title, description),
+    [title, description],
   );
 
   /**
@@ -372,21 +372,21 @@ const CreateSmallMission = () => {
 
     // L'entraide s'échange service contre service : aucune mention d'argent,
     // sur aucun des trois champs libres. Miroir du trigger base.
-    if (hasMoneyMention(title, description, exchangeOffer)) {
+    if (hasMoneyMention(title, description)) {
       toast({
         title: "Ici, on s'échange des services",
         description:
-          "Votre annonce mentionne de l'argent. Sur l'entraide, on propose un service en retour, jamais un paiement. Reformulez votre contrepartie.",
+          "Votre annonce mentionne de l'argent. Sur l'entraide, on s'échange un service, jamais un paiement. Reformulez votre texte.",
         variant: "destructive",
       });
       setStep(2);
-      setExchangeTouched(true);
+      setDescTouched(true);
       return;
     }
 
     // Une annonce d'entraide est une page publique indexable : les coordonnées
     // personnelles y sont bloquantes, contrairement à la messagerie privée.
-    const contactKinds = detectContactDetails(`${title}\n${description}\n${exchangeOffer}`);
+    const contactKinds = detectContactDetails(`${title}\n${description}`);
     if (contactKinds.length > 0) {
       toast({
         title: "Coordonnées détectées",
@@ -413,7 +413,7 @@ const CreateSmallMission = () => {
 
     const cleanTitle = stripEmojis(sanitizeUserTitle(title) || title.trim());
     const cleanDescription = stripEmojis(description);
-    const cleanExchange = stripEmojis(exchangeOffer);
+    const cleanExchange = FIXED_EXCHANGE_OFFER;
 
     const { data: inserted, error } = await supabase.from("small_missions").insert({
       user_id: user.id,
