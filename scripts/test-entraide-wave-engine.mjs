@@ -8,6 +8,7 @@ const { PGlite } = await import(process.env.PGLITE_MODULE || '@electric-sql/pgli
 const db = new PGlite();
 const root = new URL('../', import.meta.url);
 const migration = readFileSync(new URL('drizzle/migrations/0009_entraide_wave_engine.sql', root), 'utf8');
+const fixRaise = readFileSync(new URL('drizzle/migrations/0011_fix_entraide_raise_messages.sql', root), 'utf8');
 const passed = [];
 
 // Schema minimal, limite aux colonnes lues par le moteur.
@@ -43,6 +44,7 @@ CREATE FUNCTION mutual_aid_money_mention(t text) RETURNS boolean LANGUAGE sql IM
 // Seules les parties du lot applicables hors production : on rejoue le fichier
 // de migration en entier, il ne depend que du schema ci-dessus.
 await db.exec(migration);
+await db.exec(fixRaise);
 passed.push('La migration du moteur s\'applique sur un schema minimal');
 
 // Le declencheur existe deja en production, on le recree ici pour le tester.
@@ -140,15 +142,12 @@ passed.push('Besoin pourvu : les jetons restants ne creent plus de reponse');
 
 // Fin des offres.
 let refused = false;
-console.log('DEBUG mt', (await db.query("SELECT mission_type FROM small_missions")).rows);
-console.log('DEBUG triggers', (await db.query("SELECT tgname,tgenabled FROM pg_trigger WHERE NOT tgisinternal")).rows);
 try {
   await db.query(
     `INSERT INTO small_missions(user_id,title,description,city,mission_type,latitude,longitude) VALUES($1,'Je propose mon aide','Description assez longue pour passer les regles de saisie du formulaire.','Lyon','offre',45.75,4.85)`,
     [owner],
   );
 } catch (e) {
-  console.log('DEBUG err', e.message, '| hint:', e.hint);
   refused = e.hint === 'offer_creation_disabled' || /ne se publient plus/.test(e.message);
 }
 assert.ok(refused, 'la creation d\'offre doit etre refusee');
