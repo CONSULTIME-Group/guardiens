@@ -67,7 +67,7 @@ describe("phrases envoyees", () => {
 
   it("reste lisible sans distance ni date connues", () => {
     expect(waveHeadline("Paul", null, "promener un chien", null)).toBe(
-      "Paul, a besoin de quelqu'un pour promener un chien.",
+      "Paul a besoin de quelqu'un pour promener un chien.",
     );
   });
 
