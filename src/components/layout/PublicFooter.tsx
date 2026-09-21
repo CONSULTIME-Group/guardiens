@@ -158,7 +158,9 @@ const PublicFooter = React.forwardRef<HTMLElement, PublicFooterProps>(({ local }
               <li><Link to="/inscription" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.register")}</Link></li>
               <li><Link to="/devenir-home-sitter" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.become_home_sitter")}</Link></li>
               <li><Link to="/petites-missions" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.small_missions")}</Link></li>
-
+              <li><Link to="/petites-missions/lyon" className={linkCls}>Entraide à Lyon</Link></li>
+              <li><Link to="/petites-missions/marseille" className={linkCls}>Entraide à Marseille</Link></li>
+              <li><Link to="/petites-missions/strasbourg" className={linkCls}>Entraide à Strasbourg</Link></li>
               <li><Link to="/gardien-urgence" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.emergency_sitter")}</Link></li>
               <li><Link to="/associations" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">Associations et refuges</Link></li>
             </ul>

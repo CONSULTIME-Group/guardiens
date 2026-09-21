@@ -1,245 +1,214 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import Head from "@/components/seo/Head";
+import { Suspense, useEffect, useMemo, useState } from "react";
+import { Link, Navigate } from "react-router-dom";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { NeedCard, HelperCard, type EntraideNeed, type PublicHelper } from "@/components/entraide/EntraideCards";
+import EntraideProofs from "@/components/entraide/EntraideProofs";
 import { supabase } from "@/integrations/supabase/client";
 import { haversineDistance } from "@/lib/geocode";
-import { MISSIONS_LYON } from "@/data/missionsCityContent";
-import MissionCardCover from "@/components/missions/MissionCardCover";
-import EntraideProofs from "@/components/entraide/EntraideProofs";
+import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
+import { MISSIONS_CITIES } from "@/data/missionsCityContent";
 
-const SITE_URL = "https://guardiens.fr";
+const EntraideMap = lazy(() => import("@/components/entraide/EntraideMap"), "EntraideMap");
 
-const CATEGORY_LABEL: Record<string, string> = {
-  animals: "Animaux",
-  garden: "Jardin",
-  errand: "Courses",
-  tech: "Technique",
-  company: "Compagnie",
-  home: "Maison",
-  other: "Autre",
-};
-
-interface MissionRow {
+interface AvailableProfile {
   id: string;
-  slug?: string | null;
-  title: string;
-  category: string;
-  city: string | null;
-  latitude: number | null;
-  longitude: number | null;
-  created_at: string;
-  photos: string[] | null;
+  latitude_approx: number | null;
+  longitude_approx: number | null;
 }
 
-const MissionsCityPage = () => {
-  const c = MISSIONS_LYON;
-  const [missions, setMissions] = useState<MissionRow[]>([]);
+const isInsideRadius = (
+  center: { lat: number; lng: number },
+  radiusKm: number,
+  latitude: number | null,
+  longitude: number | null,
+) => latitude !== null && longitude !== null
+  && haversineDistance(center.lat, center.lng, latitude, longitude) <= radiusKm;
+
+const fetchAvailableProfiles = async (): Promise<AvailableProfile[]> => {
+  const rows: AvailableProfile[] = [];
+  const pageSize = 1000;
+  for (let from = 0; ; from += pageSize) {
+    const { data } = await (supabase as any)
+      .from("public_profiles")
+      .select("id, latitude_approx, longitude_approx")
+      .eq("available_for_help", true)
+      .not("latitude_approx", "is", null)
+      .not("longitude_approx", "is", null)
+      .range(from, from + pageSize - 1);
+    const page = (data || []) as AvailableProfile[];
+    rows.push(...page);
+    if (page.length < pageSize) break;
+  }
+  return rows;
+};
+
+export const cityAvailabilityLabel = (count: number, cityName: string) => count >= 5
+  ? `${count} personnes disponibles autour de ${cityName}`
+  : "La carte se remplit avec les coups de main du coin.";
+
+export interface MissionsCityPageProps {
+  citySlug: string;
+}
+
+const MissionsCityPage = ({ citySlug }: MissionsCityPageProps) => {
+  const c = MISSIONS_CITIES[citySlug];
+  const [needs, setNeeds] = useState<EntraideNeed[]>([]);
+  const [helpers, setHelpers] = useState<PublicHelper[]>([]);
+  const [availableCount, setAvailableCount] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!c) return;
+    let active = true;
     const load = async () => {
-      const { data } = await (supabase as any)
-        .from("public_small_missions")
-        .select("id, slug, title, category, city, latitude, longitude, created_at, photos")
-        .eq("status", "open")
-        .order("created_at", { ascending: false })
-        .limit(100);
+      const [profiles, needsResult, helpersResult, countsResult] = await Promise.all([
+        fetchAvailableProfiles(),
+        supabase.from("public_small_missions").select("id, slug, title, city, date_needed, end_date, latitude, longitude").eq("status", "open").eq("mission_type", "besoin").order("created_at", { ascending: false }),
+        supabase.from("public_helpers").select("id, first_name, avatar_url, city, latitude_approx, longitude_approx, helps_with"),
+        supabase.from("public_mission_response_counts").select("mission_id, response_count"),
+      ]);
+      if (!active) return;
 
-      if (!data) return;
-      const filtered = (data as MissionRow[])
-        .filter((m) => m.latitude != null && m.longitude != null)
-        .map((m) => ({
-          m,
-          d: haversineDistance(c.coordinates.lat, c.coordinates.lng, Number(m.latitude), Number(m.longitude)),
-        }))
-        .filter((x) => x.d <= c.radiusKm)
-        .sort((a, b) => a.d - b.d)
-        .slice(0, 12)
-        .map((x) => x.m);
+      const counts = new Map((countsResult.data || []).map((row) => [row.mission_id, row.response_count || 0]));
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
 
-      setMissions(filtered);
+      const localNeeds = (needsResult.data || [])
+        .filter((row) => {
+          const date = row.end_date || row.date_needed;
+          return (!date || new Date(date) >= today)
+            && isInsideRadius(c.coordinates, c.radiusKm, row.latitude, row.longitude);
+        })
+        .map((row) => ({ ...row, response_count: counts.get(row.id) || 0 })) as EntraideNeed[];
+      localNeeds.sort((a, b) => {
+        const aDistance = haversineDistance(c.coordinates.lat, c.coordinates.lng, Number(a.latitude), Number(a.longitude));
+        const bDistance = haversineDistance(c.coordinates.lat, c.coordinates.lng, Number(b.latitude), Number(b.longitude));
+        return aDistance - bDistance;
+      });
+
+      const localHelpers = (helpersResult.data || [])
+        .flatMap((row) => row.id && row.first_name && row.helps_with ? [{ ...row, id: row.id, first_name: row.first_name, helps_with: row.helps_with }] : [])
+        .filter((row) => isInsideRadius(c.coordinates, c.radiusKm, row.latitude_approx, row.longitude_approx)) as PublicHelper[];
+      localHelpers.sort((a, b) => {
+        const aDistance = haversineDistance(c.coordinates.lat, c.coordinates.lng, Number(a.latitude_approx), Number(a.longitude_approx));
+        const bDistance = haversineDistance(c.coordinates.lat, c.coordinates.lng, Number(b.latitude_approx), Number(b.longitude_approx));
+        return aDistance - bDistance;
+      });
+
+      setAvailableCount(profiles.filter((profile) => isInsideRadius(c.coordinates, c.radiusKm, profile.latitude_approx, profile.longitude_approx)).length);
+      setNeeds(localNeeds);
+      setHelpers(localHelpers);
+      setLoading(false);
     };
     void load();
-  }, [c.coordinates.lat, c.coordinates.lng, c.radiusKm]);
+    return () => { active = false; };
+  }, [c]);
+
+  const origin = useMemo<[number, number] | null>(() => c ? [c.coordinates.lat, c.coordinates.lng] : null, [c]);
+
+  if (!c) return <Navigate to="/petites-missions" replace />;
 
   const path = `/petites-missions/${c.slug}`;
-  const url = `${SITE_URL}${path}`;
-
+  const distanceFromCity = (latitude: number | null, longitude: number | null) => latitude !== null && longitude !== null
+    ? haversineDistance(c.coordinates.lat, c.coordinates.lng, latitude, longitude)
+    : null;
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: c.faq.map((item) => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: { "@type": "Answer", text: item.a },
+    })),
+  };
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Accueil", item: `${SITE_URL}/` },
-      { "@type": "ListItem", position: 2, name: "Entraide", item: `${SITE_URL}/petites-missions` },
-      { "@type": "ListItem", position: 3, name: c.cityName, item: url },
+      { "@type": "ListItem", position: 1, name: "Accueil", item: "https://guardiens.fr/" },
+      { "@type": "ListItem", position: 2, name: "Entraide", item: "https://guardiens.fr/petites-missions" },
+      { "@type": "ListItem", position: 3, name: c.cityName, item: `https://guardiens.fr${path}` },
     ],
-  };
-
-  const faqSchema = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: c.faq.map((f) => ({
-      "@type": "Question",
-      name: f.q,
-      acceptedAnswer: { "@type": "Answer", text: f.a },
-    })),
   };
 
   return (
     <>
-      <PageMeta title={c.metaTitle} description={c.metaDescription} path={path} />
-      <Head>
-        <script type="application/ld+json">{JSON.stringify(breadcrumbSchema)}</script>
-        <script type="application/ld+json">{JSON.stringify(faqSchema)}</script>
-      </Head>
-
+      <PageMeta title={c.metaTitle} description={c.metaDescription} path={path} jsonLd={[breadcrumbSchema, faqSchema]} />
       <div className="min-h-screen bg-background font-body">
         <PublicHeader />
-        <PageBreadcrumb
-          items={[
-            { label: "Entraide", href: "/petites-missions" },
-            { label: c.cityName },
-          ]}
-        />
-
-        <section className="bg-background">
-          <div className="max-w-3xl mx-auto px-6 py-8 md:py-24">
-            <p className="hidden md:block text-xs font-body font-semibold tracking-widest uppercase text-primary/60 mb-4">
-              Entraide à domicile · {c.cityName}
-            </p>
-            <h1 className="font-heading text-2xl md:text-5xl font-bold text-foreground leading-tight">
-              {c.h1}
-            </h1>
-            <p className="font-body text-lg text-foreground/75 leading-relaxed mt-6">
-              {c.intro}
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 mt-8">
-              <Link to="/inscription?redirect=/petites-missions/creer">
-                <Button className="rounded-full px-8 py-4 h-auto text-sm font-semibold tracking-wide">
-                  Publier dans l'Entraide à {c.cityName}
-                </Button>
-              </Link>
-              <Link to="/petites-missions">
-                <Button variant="outline" className="rounded-full px-8 py-4 h-auto text-sm font-semibold tracking-wide">
-                  Voir toute l'Entraide
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        <section className="bg-muted/30 border-t border-border/40">
-          <div className="max-w-3xl mx-auto px-6 py-8 md:py-20 space-y-10">
-            {c.sections.map((s) => (
-              <article key={s.heading}>
-                <h2 className="font-heading text-xl md:text-3xl font-semibold text-foreground mb-4 leading-snug">
-                  {s.heading}
-                </h2>
-                <p className="font-body text-base md:text-lg text-foreground/80 leading-relaxed">
-                  {s.body}
-                </p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="bg-background border-t border-border/40">
-          <div className="max-w-3xl mx-auto px-6 py-8 md:py-20">
-            <h2 className="font-heading text-xl md:text-3xl font-semibold text-foreground mb-6 md:mb-8 leading-snug">
-              Entraide ouverte près de {c.cityName}
-            </h2>
-
-            {missions.length > 0 ? (
-              <ul className="space-y-3">
-                {missions.map((m) => {
-                  const hasPhoto = Array.isArray(m.photos) && m.photos.length > 0;
-                  return (
-                    <li key={m.id}>
-                      <Link
-                        to={`/petites-missions/${m.slug || m.id}`}
-                        className="flex gap-4 p-4 rounded-xl border border-border bg-card hover:bg-accent/50 transition-colors"
-                      >
-                        {hasPhoto && (
-                          <MissionCardCover
-                            photo={m.photos![0]}
-                            category={m.category}
-                            title={m.title}
-                            className="w-24 sm:w-32 shrink-0 aspect-[4/3] rounded-lg"
-                          />
-                        )}
-                        <div className="flex items-center justify-between gap-4 flex-1 min-w-0">
-                          <div className="min-w-0">
-                            <p className="font-heading text-base font-semibold text-foreground truncate">
-                              {m.title}
-                            </p>
-                            <p className="text-xs text-foreground/60 mt-1">
-                              {m.city ? `${m.city} · ` : ""}{CATEGORY_LABEL[m.category] || m.category}
-                            </p>
-                          </div>
-                          <span className="text-xs text-primary font-semibold shrink-0">Voir →</span>
-                        </div>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            ) : (
-              <div className="p-8 rounded-2xl border border-dashed border-border bg-accent/20 text-center">
-                <p className="font-heading text-lg text-foreground/85 leading-relaxed">
-                  Le prochain besoin à {c.cityName} apparaîtra ici.
-                </p>
-                <p className="font-body text-base text-foreground/65 leading-relaxed mt-3 max-w-xl mx-auto">
-                  La communauté lyonnaise grandit chaque semaine. Publiez la première demande ou offre de votre quartier.
-                </p>
-                <Link to="/inscription?redirect=/petites-missions/creer" className="inline-block mt-6">
-                  <Button className="rounded-full px-8 py-3 h-auto text-sm font-semibold">
-                    Publier dans l'Entraide
-                  </Button>
-                </Link>
+        <PageBreadcrumb items={[{ label: "Entraide", href: "/petites-missions" }, { label: c.cityName }]} />
+        <main className="min-w-0">
+          <section className="border-b border-border bg-background">
+            <div className={`mx-auto grid max-w-6xl gap-8 px-4 py-[52px] sm:px-6 lg:px-8 ${c.heroImage ? "md:grid-cols-[1fr_0.72fr] md:items-center" : ""}`}>
+              <div>
+                <p className="text-sm font-semibold text-primary">Entraide à {c.cityName}</p>
+                <h1 className="mt-2 max-w-4xl font-heading text-3xl font-bold leading-tight text-foreground sm:text-5xl">{c.h1}</h1>
+                <p className="mt-5 max-w-3xl text-base leading-relaxed text-muted-foreground sm:text-lg">{c.intro}</p>
+                <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                  <Button asChild><Link to="/inscription?redirect=/petites-missions/creer">J'ai besoin d'un coup de main</Link></Button>
+                  <Button asChild variant="outline"><Link to="/inscription?redirect=/petites-missions?vue=autour">Je veux bien aider</Link></Button>
+                </div>
               </div>
-            )}
+              {c.heroImage && <img src={c.heroImage} alt={c.heroAlt || ""} width={720} height={480} className="aspect-[3/2] w-full rounded-lg object-cover" />}
+            </div>
+          </section>
 
-            <p className="text-sm text-foreground/60 mt-8">
-              Vous cherchez plutôt un gardien pour une absence de plusieurs jours à {c.cityName} ?{" "}
-              <Link to="/house-sitting/lyon" className="text-primary font-semibold hover:underline">
-                Découvrez le house-sitting à Lyon
-              </Link>
-              .
-            </p>
+          <div className="mx-auto max-w-6xl space-y-[52px] px-4 py-[52px] sm:px-6 lg:px-8">
+            <section aria-labelledby="city-map-title">
+              <p className="text-sm font-semibold text-primary">Autour de {c.cityName}</p>
+              <h2 id="city-map-title" className="mt-1 font-heading text-2xl font-semibold text-foreground">{cityAvailabilityLabel(availableCount, c.cityName)}</h2>
+              <div className="mt-5">
+                <Suspense fallback={<div className="h-[360px] animate-pulse rounded-lg bg-muted sm:h-[520px]" />}>
+                  <EntraideMap needs={needs} helpers={helpers} focus={origin} />
+                </Suspense>
+              </div>
+            </section>
+
+            <section aria-labelledby="city-needs-title">
+              <h2 id="city-needs-title" className="font-heading text-2xl font-semibold text-foreground">Besoins ouverts près de {c.cityName}</h2>
+              {loading ? <div className="mt-5 grid gap-4 md:grid-cols-2" aria-busy="true"><div className="h-40 animate-pulse rounded-lg bg-muted" /><div className="h-40 animate-pulse rounded-lg bg-muted" /></div>
+                : needs.length > 0 ? <div className="mt-5 grid gap-4 md:grid-cols-2">{needs.map((need) => <NeedCard key={need.id} need={need} distance={distanceFromCity(need.latitude, need.longitude)} showDistance />)}</div>
+                  : <p className="mt-5 rounded-lg border border-border p-5 text-sm text-muted-foreground">Le prochain besoin apparaîtra ici. Vous pouvez décrire le vôtre dès maintenant.</p>}
+            </section>
+
+            <section aria-labelledby="city-helpers-title">
+              <h2 id="city-helpers-title" className="font-heading text-2xl font-semibold text-foreground">Autour de vous</h2>
+              {loading ? <div className="mt-5 grid gap-4 md:grid-cols-2" aria-busy="true"><div className="h-40 animate-pulse rounded-lg bg-muted" /><div className="h-40 animate-pulse rounded-lg bg-muted" /></div>
+                : helpers.length > 0 ? <div className="mt-5 grid gap-4 md:grid-cols-2">{helpers.map((helper) => <HelperCard key={helper.id} helper={helper} distance={distanceFromCity(helper.latitude_approx, helper.longitude_approx)} showDistance />)}</div>
+                  : <p className="mt-5 rounded-lg border border-border p-5 text-sm text-muted-foreground">Les premières personnes qui décrivent leurs coups de main apparaîtront ici.</p>}
+            </section>
+
+            <EntraideProofs origin={origin} title={`Ça s'est passé près de ${c.cityName}`} />
           </div>
-        </section>
 
-        <section className="bg-background border-t border-border/40">
-          <div className="max-w-5xl mx-auto px-6 pb-4">
-            <EntraideProofs origin={[c.coordinates.lat, c.coordinates.lng]} title={`Ça s'est passé près de ${c.cityName}`} />
-          </div>
-        </section>
+          <section className="border-y border-border bg-muted/30">
+            <div className="mx-auto max-w-3xl space-y-[52px] px-4 py-[52px] sm:px-6">
+              {c.sections.map((section) => (
+                <article key={section.heading}>
+                  <h2 className="font-heading text-2xl font-semibold leading-snug text-foreground">{section.heading}</h2>
+                  <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">{section.body}</p>
+                </article>
+              ))}
+            </div>
+          </section>
 
-        <section className="bg-muted/30 border-t border-border/40">
-          <div className="max-w-3xl mx-auto px-6 py-8 md:py-20">
-            <h2 className="font-heading text-xl md:text-3xl font-semibold text-foreground mb-6 md:mb-8 leading-snug">
-              Questions fréquentes, Lyon
-            </h2>
-            <Accordion type="single" collapsible className="space-y-3">
-              {c.faq.map((f, i) => (
-                <AccordionItem key={i} value={`q-${i}`} className="border border-border rounded-xl px-4 bg-card">
-                  <AccordionTrigger className="text-left font-heading text-base font-semibold">
-                    {f.q}
-                  </AccordionTrigger>
-                  <AccordionContent className="font-body text-base text-foreground/75 leading-relaxed">
-                    {f.a}
-                  </AccordionContent>
+          <section className="mx-auto max-w-3xl px-4 py-[52px] sm:px-6" aria-labelledby="city-faq-title">
+            <h2 id="city-faq-title" className="font-heading text-2xl font-semibold text-foreground">Questions fréquentes, {c.cityName}</h2>
+            <Accordion type="single" collapsible className="mt-5 space-y-3">
+              {c.faq.map((item, index) => (
+                <AccordionItem key={item.q} value={`faq-${index}`} className="rounded-lg border border-border bg-card px-4">
+                  <AccordionTrigger className="text-left font-semibold">{item.q}</AccordionTrigger>
+                  <AccordionContent className="leading-relaxed text-muted-foreground">{item.a}</AccordionContent>
                 </AccordionItem>
               ))}
             </Accordion>
-          </div>
-        </section>
-
+          </section>
+        </main>
         <PublicFooter />
       </div>
     </>
