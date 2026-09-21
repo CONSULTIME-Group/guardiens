@@ -493,7 +493,9 @@ const AppRoutes = () => {
       <Route path="/petites-missions" element={<PublicShellRoute><EntraideHub /></PublicShellRoute>} />
       <Route path="/petites-missions/creer" element={<ProtectedRoute><CreateSmallMission /></ProtectedRoute>} />
       <Route path="/petites-missions/nouveau" element={<Navigate to="/petites-missions/creer" replace />} />
-      <Route path="/petites-missions/lyon" element={<MissionsCityPage />} />
+      <Route path="/petites-missions/lyon" element={<MissionsCityPage citySlug="lyon" />} />
+      <Route path="/petites-missions/marseille" element={<MissionsCityPage citySlug="marseille" />} />
+      <Route path="/petites-missions/strasbourg" element={<MissionsCityPage citySlug="strasbourg" />} />
       <Route path="/petites-missions/:id" element={<SmallMissionDetail />} />
       <Route path="/questions" element={<Navigate to="/petites-missions?tab=questions" replace />} />
       <Route path="/questions/nouvelle" element={<ProtectedRoute><AppLayout><QuestionCreate /></AppLayout></ProtectedRoute>} />

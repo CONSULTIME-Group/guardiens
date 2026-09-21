@@ -1,5 +1,5 @@
 import { Suspense, useEffect, useMemo, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -186,6 +186,15 @@ const EntraideHub = () => {
       <div className="min-w-0 bg-background pb-24">
         <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
           <EntraideHubIntro isAuthenticated={isAuthenticated} onNeed={goNeed} onHelp={goHelp} />
+
+          <nav className="border-y border-border py-4 text-sm text-muted-foreground" aria-label="Entraide dans votre ville">
+            <span>Dans votre ville : </span>
+            <Link to="/petites-missions/lyon" className="font-semibold text-primary underline-offset-4 hover:underline">Lyon</Link>
+            <span>, </span>
+            <Link to="/petites-missions/marseille" className="font-semibold text-primary underline-offset-4 hover:underline">Marseille</Link>
+            <span>, </span>
+            <Link to="/petites-missions/strasbourg" className="font-semibold text-primary underline-offset-4 hover:underline">Strasbourg</Link>
+          </nav>
 
           <EntraideProofs origin={origin} />
 
