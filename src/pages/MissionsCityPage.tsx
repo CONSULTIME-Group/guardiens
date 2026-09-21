@@ -190,7 +190,7 @@ const MissionsCityPage = () => {
             ) : (
               <div className="p-8 rounded-2xl border border-dashed border-border bg-accent/20 text-center">
                 <p className="font-heading text-lg text-foreground/85 leading-relaxed">
-                  Aucune publication ouverte à {c.cityName} pour le moment.
+                  Le prochain besoin à {c.cityName} apparaîtra ici.
                 </p>
                 <p className="font-body text-base text-foreground/65 leading-relaxed mt-3 max-w-xl mx-auto">
                   La communauté lyonnaise grandit chaque semaine. Publiez la première demande ou offre de votre quartier.

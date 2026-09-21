@@ -52,7 +52,7 @@ export const MISSIONS_LYON: MissionsCityContent = {
     {
       heading: "Une logique d'échange, pas de prestation",
       body:
-        "L'Entraide à Lyon ne repose pas sur des micro-jobs rémunérés. Aucune somme d'argent ne circule entre les participants : c'est une règle fondamentale. Cette absence de contrepartie financière protège l'esprit de l'échange et place chacun sur un pied d'égalité. Vous donnez parce que vous le pouvez, vous recevez parce que vous en avez besoin, et l'équilibre se trouve dans la durée. À Lyon comme ailleurs, c'est cette mécanique qui fait fonctionner la confiance : on aide quelqu'un aujourd'hui, on est aidé demain, pas forcément par la même personne.",
+        "À Lyon, l'Entraide repose sur l'échange de services entre gens du coin. Chacun donne un coup de main, une attention ou un savoir-faire, et tout le monde se retrouve sur un pied d'égalité. Vous donnez parce que vous le pouvez, vous recevez parce que vous en avez besoin, et l'équilibre se trouve dans la durée. À Lyon comme ailleurs, c'est cette mécanique qui fait fonctionner la confiance : on aide quelqu'un aujourd'hui, on est aidé demain, pas forcément par la même personne.",
     },
   ],
   faq: [

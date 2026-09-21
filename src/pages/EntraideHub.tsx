@@ -19,7 +19,7 @@ type HubView = "needs" | "helpers";
 const FAQ = [
   { question: "Comment trouver un coup de main près de chez vous ?", answer: "Indiquez votre ville pour classer les besoins et les personnes disponibles par proximité." },
   { question: "Que faire quand le fil est calme aujourd'hui ?", answer: "Décrivez votre besoin. Il reste visible dans le fil et les personnes disponibles près de chez vous le reçoivent." },
-  { question: "Faut-il payer pour utiliser l'Entraide ?", answer: "L'Entraide est ouverte à tous les membres, pour 0 €. Vous convenez ensemble d'un service ou d'une attention." },
+  { question: "Faut-il payer pour utiliser l'Entraide ?", answer: "L'Entraide est ouverte à tous les membres. Vous convenez ensemble d'un service ou d'une attention en retour." },
   { question: "Quelle différence avec une garde de maison ?", answer: "L'Entraide répond à un besoin ponctuel et court dans la journée. Une garde de maison couvre un séjour de plusieurs jours sur place." },
 ] as const;
 
