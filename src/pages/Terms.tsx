@@ -83,7 +83,7 @@ const Terms = () => {
             <li><strong className="text-foreground">Propriétaire</strong> : utilisateur publiant des annonces de garde de logement et/ou d'animaux.</li>
             <li><strong className="text-foreground">Gardien</strong> : utilisateur postulant pour effectuer une garde.</li>
             <li><strong className="text-foreground">Garde</strong> : période durant laquelle un gardien occupe le logement d'un propriétaire et prend soin de ses animaux.</li>
-            <li><strong className="text-foreground">Petite mission</strong> : entraide ponctuelle entre membres, sans nuitée et sans contrepartie financière.</li>
+            <li><strong className="text-foreground">Entraide</strong> : échange ponctuel entre membres, sans nuitée et sans contrepartie financière.</li>
             <li><strong className="text-foreground">Avis</strong> : évaluation publiée par un utilisateur après une garde ou une mission.</li>
             <li><strong className="text-foreground">Contenu utilisateur</strong> : tout élément publié par un utilisateur sur la Plateforme (annonce, profil, photo, message, avis, candidature).</li>
           </ul>
@@ -131,8 +131,8 @@ const Terms = () => {
           <p>Guardiens met à disposition un guide pratique non contractuel ainsi qu'un dispositif d'accord de garde optionnel et non bloquant.</p>
 
           {/* 7 */}
-          <h2 className="font-heading text-xl font-bold text-foreground pt-4">7. Petites missions (entraide)</h2>
-          <p>Les petites missions sont des échanges d'entraide ponctuels entre membres, sans nuitée. Elles fonctionnent exclusivement sur le principe de l'<strong className="text-foreground">échange en nature</strong> (repas, produits du jardin, service réciproque). Tout échange d'argent est strictement interdit et expose le compte à une suspension immédiate.</p>
+          <h2 className="font-heading text-xl font-bold text-foreground pt-4">7. Entraide</h2>
+          <p>L'Entraide repose sur des échanges ponctuels entre membres, sans nuitée. Elle fonctionne exclusivement sur le principe de l'<strong className="text-foreground">échange en nature</strong> (repas, produits du jardin, service réciproque). Tout échange d'argent est strictement interdit et expose le compte à une suspension immédiate.</p>
           <p>Ces échanges entre particuliers, à titre non lucratif et sans recherche de profit, ne constituent pas, en principe, des revenus imposables (cf. BOI-IR-BASE-10-10-10-10 et instruction fiscale du 30 août 2016 relative aux revenus issus de l'économie collaborative). Chaque utilisateur reste néanmoins seul responsable de ses obligations déclaratives au titre de la solidarité et de l'entraide entre particuliers.</p>
 
           {/* 8 */}

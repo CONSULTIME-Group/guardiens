@@ -31,6 +31,8 @@ import MobileEntraideFeed from "@/components/community/MobileEntraideFeed";
 import { MISSION_CATEGORY_LABEL, ENTRAIDE_FILTER_CATEGORIES } from "@/lib/missionCategories";
 import { questionCategoryToMissionCategory } from "@/lib/communityCategories";
 import { publicFirstName } from "@/lib/displayName";
+import ExchangeHowItWorks from "@/components/missions/ExchangeHowItWorks";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 /**
  * EntraideHub, fil unique de l'entraide.
@@ -84,6 +86,103 @@ const NATURE_CHIPS: { key: NatureFilter; label: string }[] = [
   { key: "demande", label: "Demandes" },
   { key: "offre", label: "Offres" },
 ];
+
+const CONCRETE_EXAMPLES = [
+  { label: "Promener un chien", category: "animals" },
+  { label: "Arroser pendant un week-end", category: "garden" },
+  { label: "Réceptionner un colis", category: "errand" },
+  { label: "Monter un meuble", category: "house" },
+  { label: "Faire les courses", category: "errand" },
+  { label: "Tenir compagnie", category: "company" },
+] as const;
+
+const ENTRAIDE_FAQ = [
+  {
+    question: "Comment trouver un coup de main près de chez vous ?",
+    answer: "Indiquez votre code postal ou utilisez votre position pour afficher les publications les plus proches. Vous choisissez ensuite le rayon qui vous convient.",
+  },
+  {
+    question: "Que faire s'il n'y a aucune publication aujourd'hui ?",
+    answer: "La fréquence dépend de l'activité des membres près de chez vous. Vous pouvez publier votre propre demande ou votre offre, elle restera visible jusqu'à ce qu'une personne vous réponde.",
+  },
+  {
+    question: "Faut-il payer pour utiliser l'Entraide ?",
+    answer: "Non. L'Entraide est accessible à tous les membres pour 0 €. Vous convenez ensemble d'un service ou d'une attention, sans échange d'argent.",
+  },
+  {
+    question: "Quelle différence avec une garde de maison ?",
+    answer: "L'Entraide concerne un coup de main ponctuel et court, sans nuitée. Une garde de maison est un séjour de plusieurs jours pendant lequel un gardien dort sur place et prend soin du logement et des animaux.",
+  },
+] as const;
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: ENTRAIDE_FAQ.map((item) => ({
+    "@type": "Question",
+    name: item.question,
+    acceptedAnswer: { "@type": "Answer", text: item.answer },
+  })),
+};
+
+export const EntraideHubIntro = ({
+  isAuthenticated,
+  onPublish,
+  category,
+  onCategoryChange,
+}: {
+  isAuthenticated: boolean;
+  onPublish: () => void;
+  category: string;
+  onCategoryChange: (category: string) => void;
+}) => (
+  <>
+    <div className="mb-5">
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <h1 className="font-heading text-2xl sm:text-3xl font-bold text-foreground">Entraide</h1>
+          <p className="text-sm text-muted-foreground mt-1.5 md:max-w-xl">
+            Un coup de main près de chez vous, contre un coup de main en retour. Promenade, arrosage, colis, montage d'un meuble, courses, présence : vous demandez ou vous proposez, et vous convenez de l'échange entre vous. 0 €, toujours.
+          </p>
+        </div>
+        <Button onClick={onPublish} size="sm" className="hidden md:inline-flex shrink-0 h-9">
+          {isAuthenticated ? "Publier" : "Demander ou proposer un coup de main"}
+        </Button>
+      </div>
+    </div>
+    <section className="mb-5" aria-labelledby="concrete-title">
+      <h2 id="concrete-title" className="font-heading text-lg font-semibold text-foreground mb-3">Concrètement</h2>
+      <div className="flex flex-wrap gap-2" role="group" aria-label="Exemples de coups de main">
+        {CONCRETE_EXAMPLES.map((example) => (
+          <button
+            key={example.label}
+            type="button"
+            onClick={() => onCategoryChange(example.category)}
+            aria-pressed={category === example.category}
+            className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${category === example.category ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground border-border hover:bg-accent"}`}
+          >
+            {example.label}
+          </button>
+        ))}
+      </div>
+    </section>
+    {!isAuthenticated && <ExchangeHowItWorks variant="public" />}
+  </>
+);
+
+export const EntraideFaq = () => (
+  <section className="mt-10 border-t border-border pt-8" aria-labelledby="entraide-faq-title">
+    <h2 id="entraide-faq-title" className="font-heading text-xl sm:text-2xl font-semibold text-foreground mb-5">Questions fréquentes</h2>
+    <Accordion type="single" collapsible className="space-y-3">
+      {ENTRAIDE_FAQ.map((item, index) => (
+        <AccordionItem key={item.question} value={`entraide-faq-${index}`} className="rounded-lg border border-border bg-card px-4">
+          <AccordionTrigger className="text-left font-heading text-sm sm:text-base font-semibold">{item.question}</AccordionTrigger>
+          <AccordionContent className="text-sm text-muted-foreground leading-relaxed">{item.answer}</AccordionContent>
+        </AccordionItem>
+      ))}
+    </Accordion>
+  </section>
+);
 
 // Retourne une période lisible :
 //  - start + end : « Du 5 juil. au 12 sept. 2026 »
@@ -583,31 +682,21 @@ const EntraideHub = () => {
         title="Entraide, questions et coups de main entre gens du coin, Guardiens"
         description="Posez une question, demandez un coup de main (garde animaux, jardin, promenade) ou proposez votre aide près de chez vous, pour 0 €."
         path="/petites-missions"
+        jsonLd={faqSchema}
       />
       <div className="bg-background">
         <PageBreadcrumb items={[{ label: t("nav.small_missions", "Entraide") }]} />
 
         <section className="max-w-3xl mx-auto px-4 sm:px-6 pt-4 pb-28 sm:pt-6 sm:pb-8 min-w-0">
-          <div className="mb-5">
-            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-col items-start gap-2 md:flex-row md:items-center md:flex-wrap">
-                  <h1 className="font-heading text-2xl sm:text-3xl font-bold text-foreground">
-                    Entraide
-                  </h1>
-                  <span className="text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-primary/10 text-primary shrink-0">
-                    Résiliable à tout moment
-                  </span>
-                </div>
-                <p className="text-sm text-muted-foreground mt-1.5 md:max-w-xl">
-                  Questions, demandes et offres de coup de main entre gens du coin, du plus récent au plus ancien. Un service contre un service, ni tarif ni facture.
-                </p>
-              </div>
-              <Button onClick={goPublish} size="sm" className="hidden md:inline-flex shrink-0 h-9">
-                Publier
-              </Button>
-            </div>
-          </div>
+          <EntraideHubIntro
+            isAuthenticated={isAuthenticated}
+            onPublish={goPublish}
+            category={category}
+            onCategoryChange={(nextCategory) => {
+              setCategory(nextCategory);
+              setNature("all");
+            }}
+          />
 
           {/* Position : proposée aux membres seulement, et jamais avant le titre. */}
           {isAuthenticated && (
@@ -617,22 +706,18 @@ const EntraideHub = () => {
             />
           )}
 
-          <div className="mb-4">
-            <AssociationsTeaser
-              title="L'entraide, les associations la vivent tous les jours"
-              text="Bénévolat, familles d'accueil, dons : voyez comment aider une association près de chez vous."
+          {/* Fil unifié mobile. */}
+          <div id="entraide-feed" className="mt-6">
+            <MobileEntraideFeed
+              missions={mobileMissions}
+              questions={baseQuestions as any}
+              loading={mLoading || qLoading}
+              onPublish={goPublish}
+              proximityActive={proximity.active}
+              getDistance={proximity.getDistance}
+              categoryFilter={category}
             />
           </div>
-
-          {/* Fil unifié mobile. */}
-          <MobileEntraideFeed
-            missions={mobileMissions}
-            questions={baseQuestions as any}
-            loading={mLoading || qLoading}
-            onPublish={goPublish}
-            proximityActive={proximity.active}
-            getDistance={proximity.getDistance}
-          />
 
           {/* Desktop : fil unique. */}
           <div className="hidden md:block">
@@ -849,6 +934,15 @@ const EntraideHub = () => {
               />
             )}
           </div>
+
+          <div className="mt-8">
+            <AssociationsTeaser
+              title="L'entraide, les associations la vivent tous les jours"
+              text="Bénévolat, familles d'accueil, dons : voyez comment aider une association près de chez vous."
+            />
+          </div>
+
+          <EntraideFaq />
         </section>
       </div>
     </>

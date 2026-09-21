@@ -736,6 +736,9 @@ const CreateSmallMission = () => {
                     placeholder={missionType === "offre" ? tp("exchange_ph_offer") : tp("exchange_ph_need")}
                     className="h-12 text-base"
                   />
+                   <p className="text-xs text-muted-foreground leading-relaxed">
+                     La contrepartie est un service ou une attention. L'argent reste en dehors de l'entraide.
+                   </p>
                   {exchangeError && (
                     <p className="text-sm text-destructive bg-destructive/10 rounded-md px-3 py-2">
                       {exchangeError}

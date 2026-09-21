@@ -11,7 +11,7 @@
  */
 const accesGratuits: Array<{ titre: string; detail: string }> = [
  {
- titre: "Entraide & petites missions",
+ titre: "Entraide",
  detail:
  "Arroser un potager, sortir un chien le weekend, garder des poules le temps d'un marché… Demander ou proposer un coup de main près de chez vous reste gratuit, pour préserver ce lien indépendamment de toute monétisation.",
  },
@@ -33,7 +33,7 @@ const accesGratuits: Array<{ titre: string; detail: string }> = [
  {
  titre: "Messagerie liée à l'entraide",
  detail:
- "Échanger avec les membres dans le cadre des petites missions et des demandes d'entraide reste offert.",
+ "Échanger avec les membres dans le cadre de l'Entraide reste offert.",
  },
  {
  titre: "Recherche et favoris",

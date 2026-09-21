@@ -70,6 +70,7 @@ interface Props {
   onShare: () => void;
   viewCount?: number;
   responsesCount?: number;
+  noindex?: boolean;
   /** Branche projet seulement : action de candidature d'un membre connecté. */
   onApply?: () => void;
   /** Branche projet seulement : la candidature est déjà partie. */
@@ -100,6 +101,7 @@ const PublicMissionView = ({
   onShare,
   viewCount = 0,
   responsesCount = 0,
+  noindex = false,
   onApply,
   hasApplied = false,
   applying = false,
@@ -467,6 +469,7 @@ const PublicMissionView = ({
         title={t("mission_detail.meta_title", { title: displayTitle, city: cityLabel })}
         description={metaDescription}
         image={ogImage}
+        noindex={noindex}
       />
       <Head>
         {/* Balisage non marchand : une annonce d'entraide n'est ni un service

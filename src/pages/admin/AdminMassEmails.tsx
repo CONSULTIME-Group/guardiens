@@ -80,7 +80,7 @@ La seule chose qui manque encore ? <strong>Votre demande à vous.</strong>
 
 Trois minutes suffisent pour la publier. Et très souvent, c'est la première réponse reçue qui change tout, qui prouve qu'on n'est pas seul, que ça marche, qu'on peut compter sur les autres.
 
-Pour comprendre comment ça fonctionne concrètement, <a href="https://guardiens.fr/actualites/petites-missions-entraide-guardiens?utm_source=mass_email&utm_campaign=oser-2026-05&utm_content=article" style="color:#2C6E49;font-weight:600;text-decoration:underline">lisez notre article dédié aux petites missions d'entraide</a>.
+Pour comprendre comment ça fonctionne concrètement, <a href="https://guardiens.fr/actualites/petites-missions-entraide-guardiens?utm_source=mass_email&utm_campaign=oser-2026-05&utm_content=article" style="color:#2C6E49;font-weight:600;text-decoration:underline">lisez notre article dédié à l'Entraide</a>.
 
 Et si c'était aujourd'hui ?
 
@@ -131,7 +131,7 @@ const CAMPAIGN_PRESETS: CampaignPreset[] = [
     subject: OSER_SUBJECT,
     body: OSER_BODY,
     ctaEnabled: true,
-    ctaLabel: "Publier une mission",
+    ctaLabel: "Publier dans l'Entraide",
     ctaUrl: "https://guardiens.fr/entraide/nouvelle",
     utmEnabled: true,
     utmCampaign: "oser-2026-05",
@@ -160,7 +160,7 @@ const AdminMassEmails = () => {
   const [subject, setSubject] = useState(OSER_SUBJECT);
   const [body, setBody] = useState(OSER_BODY);
   const [ctaEnabled, setCtaEnabled] = useState(true);
-  const [ctaLabel, setCtaLabel] = useState("Publier une mission");
+  const [ctaLabel, setCtaLabel] = useState("Publier dans l'Entraide");
   const [ctaUrl, setCtaUrl] = useState("https://guardiens.fr/entraide/nouvelle");
   const [utmEnabled, setUtmEnabled] = useState(true);
   const [utmCampaign, setUtmCampaign] = useState("oser-2026-05");

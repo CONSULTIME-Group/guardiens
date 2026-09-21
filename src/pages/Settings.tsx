@@ -959,7 +959,7 @@ const ALMA_CATEGORY_GROUPS: AlmaCategoryGroup[] = [
   {
     label: "Entraide & communauté",
     types: [
-      { id: "mutual_aid_tip", label: "Petites missions" },
+      { id: "mutual_aid_tip", label: "Entraide" },
       { id: "city_did_you_know", label: "Le saviez-vous, ville" },
     ],
   },
@@ -1148,7 +1148,7 @@ const BillingSection = ({ user }: { user: any }) => {
         )}
 
         <div className="rounded-lg border border-border bg-muted/30 p-4">
-          <p className="text-sm font-medium">Petites missions d'entraide</p>
+          <p className="text-sm font-medium">Entraide</p>
           <p className="text-xs text-muted-foreground mt-1">L'entraide coûte 0 €, aucune commission prélevée.</p>
         </div>
 

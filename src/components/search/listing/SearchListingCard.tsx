@@ -229,7 +229,7 @@ const SearchListingCard = ({
       company: "from-[hsl(340_40%_92%)] to-[hsl(340_35%_84%)]",
       other: "from-muted to-muted",
     };
-    const catLabel = missionCategoryLabel[item.category] || "Petite mission";
+    const catLabel = missionCategoryLabel[item.category] || "Entraide";
 
     const missionCard = (
       <article

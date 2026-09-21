@@ -37,7 +37,7 @@ const targetTypeLabels: Record<string, string> = {
   listing: "Annonce",
   review: "Avis",
   message: "Message",
-  small_mission: "Petite mission",
+  small_mission: "Entraide",
 };
 
 type ActionKey = "warn" | "hide" | "suspend" | "delete" | "none";

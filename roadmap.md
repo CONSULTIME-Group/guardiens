@@ -1,5 +1,10 @@
 # Roadmap
 
+- [ ] Lot 8 : expliciter l'espace Entraide, harmoniser les libellés et compléter le sitemap
+- [ ] Lot 8 : ajouter les tests du hub et du sitemap
+- [ ] Lot 8 : vérifier types, tests complets, compilation automatique et trois captures
+- [ ] Lot 8 : ne pas publier
+
 - [ ] Implémenter le Lot X du panneau de conversation Alma sans nouvelle dépendance
 - [ ] Compléter les tests du Lot X
 - [ ] Vérifier tests ciblés, types, suite complète et build

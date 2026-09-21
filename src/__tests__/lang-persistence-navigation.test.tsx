@@ -13,7 +13,7 @@ import { getStoredLang } from "@/lib/lang";
  */
 const NAV_DEFS = [
   { to: "/annonces", label: "Voir les annonces" },
-  { to: "/petites-missions", label: "Voir les petites missions" },
+  { to: "/petites-missions", label: "Voir l'entraide" },
   { to: "/", label: "Retour accueil" },
 ] as const;
 
@@ -33,7 +33,7 @@ const renderAt = (initial: string) =>
       <LangUrlSync />
       <Routes>
         <Route path="/" element={<Page to="/annonces" label="Voir les annonces" />} />
-        <Route path="/annonces" element={<Page to="/petites-missions" label="Voir les petites missions" />} />
+        <Route path="/annonces" element={<Page to="/petites-missions" label="Voir l'entraide" />} />
         <Route path="/petites-missions" element={<Page to="/" label="Retour accueil" />} />
       </Routes>
     </MemoryRouter>,

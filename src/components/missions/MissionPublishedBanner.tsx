@@ -85,7 +85,7 @@ export function MissionPublishedBanner({
         Votre mission est en ligne.
       </h2>
       <p className="mt-2 text-sm text-muted-foreground">
-        Elle est visible dès maintenant pour les membres qui consultent les petites missions près de chez eux. Les membres ayant activé une alerte dans votre zone seront prévenus au prochain envoi quotidien.
+        Elle est visible dès maintenant pour les membres qui consultent l'entraide près de chez eux. Les membres ayant activé une alerte dans votre zone seront prévenus au prochain envoi quotidien.
       </p>
       <div className="mt-4 flex flex-wrap items-center gap-3">
         <Button type="button" size="sm" onClick={handleShare}>

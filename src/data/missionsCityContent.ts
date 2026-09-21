@@ -27,17 +27,17 @@ export const MISSIONS_LYON: MissionsCityContent = {
   cityName: "Lyon",
   coordinates: { lat: 45.764, lng: 4.8357 },
   radiusKm: 25,
-  metaTitle: "Petites missions d'entraide à domicile à Lyon | Guardiens",
+  metaTitle: "L'entraide à domicile à Lyon | Guardiens",
   metaDescription:
-    "Petites missions d'entraide à domicile à Lyon : garde animaux, jardin, courses. Un service contre un service, entre gens du coin. Publiez ou aidez.",
-  h1: "Petites missions d'entraide à domicile à Lyon",
+    "L'entraide à domicile à Lyon : garde animaux, jardin, courses. Un service contre un service, entre gens du coin. Publiez ou aidez.",
+  h1: "L'entraide à domicile à Lyon",
   intro:
-    "À Lyon, les petites missions d'entraide rassemblent des gens du coin qui rendent service à domicile sans contrepartie financière. Une promenade de chien à la Croix-Rousse, un arrosage de plantes à Villeurbanne, un coup de main pour réceptionner un colis à Vaise : autant d'échanges concrets qui se nouent entre habitants des 9 arrondissements lyonnais et des communes proches comme Caluire-et-Cuire, Tassin-la-Demi-Lune, Bron, Vénissieux ou Écully.",
+    "À Lyon, l'Entraide rassemble des gens du coin qui rendent service à domicile sans contrepartie financière. Une promenade de chien à la Croix-Rousse, un arrosage de plantes à Villeurbanne, un coup de main pour réceptionner un colis à Vaise : autant d'échanges concrets qui se nouent entre habitants des 9 arrondissements lyonnais et des communes proches comme Caluire-et-Cuire, Tassin-la-Demi-Lune, Bron, Vénissieux ou Écully.",
   sections: [
     {
       heading: "Pourquoi l'entraide à domicile prend tout son sens à Lyon",
       body:
-        "Lyon est une ville dense où la vie de quartier reste forte malgré la taille de la métropole. Entre les pentes de la Croix-Rousse, les traboules du Vieux-Lyon, les immeubles haussmanniens de la Presqu'île et les maisons de Monchat ou de Saint-Just, on croise des personnes de palier sans jamais leur parler. Les petites missions inversent cette logique. Elles donnent un prétexte simple, un service ponctuel à domicile, pour entrer en relation avec quelqu'un qui habite à quelques rues. Pas besoin d'attendre une panne de courant ou un déménagement pour faire connaissance.",
+        "Lyon est une ville dense où la vie de quartier reste forte malgré la taille de la métropole. Entre les pentes de la Croix-Rousse, les traboules du Vieux-Lyon, les immeubles haussmanniens de la Presqu'île et les maisons de Monchat ou de Saint-Just, on croise des personnes de palier sans jamais leur parler. L'Entraide inverse cette logique. Elle donne un prétexte simple, un service ponctuel à domicile, pour entrer en relation avec quelqu'un qui habite à quelques rues. Pas besoin d'attendre une panne de courant ou un déménagement pour faire connaissance.",
     },
     {
       heading: "Quelles missions s'échangent à Lyon et autour",
@@ -52,7 +52,7 @@ export const MISSIONS_LYON: MissionsCityContent = {
     {
       heading: "Une logique d'échange, pas de prestation",
       body:
-        "Les petites missions d'entraide à Lyon ne sont pas des micro-jobs rémunérés. Aucune somme d'argent ne circule entre les participants : c'est une règle fondamentale. Cette absence de contrepartie financière protège l'esprit de l'échange et place chacun sur un pied d'égalité. Vous donnez parce que vous le pouvez, vous recevez parce que vous en avez besoin, et l'équilibre se trouve dans la durée. À Lyon comme ailleurs, c'est cette mécanique qui fait fonctionner la confiance : on aide quelqu'un aujourd'hui, on est aidé demain, pas forcément par la même personne.",
+        "L'Entraide à Lyon ne repose pas sur des micro-jobs rémunérés. Aucune somme d'argent ne circule entre les participants : c'est une règle fondamentale. Cette absence de contrepartie financière protège l'esprit de l'échange et place chacun sur un pied d'égalité. Vous donnez parce que vous le pouvez, vous recevez parce que vous en avez besoin, et l'équilibre se trouve dans la durée. À Lyon comme ailleurs, c'est cette mécanique qui fait fonctionner la confiance : on aide quelqu'un aujourd'hui, on est aidé demain, pas forcément par la même personne.",
     },
   ],
   faq: [
@@ -62,11 +62,11 @@ export const MISSIONS_LYON: MissionsCityContent = {
     },
     {
       q: "Y a-t-il des missions disponibles tous les jours à Lyon ?",
-      a: "La fréquence dépend de l'activité de la communauté locale. Lyon est l'une des premières villes où Guardiens développe les petites missions, donc le volume augmente régulièrement. Si aucune mission ne correspond à votre besoin aujourd'hui, vous pouvez publier votre propre demande : elle restera visible jusqu'à ce qu'une personne du coin y réponde.",
+      a: "La fréquence dépend de l'activité de la communauté locale. Lyon est l'une des premières villes où Guardiens développe l'Entraide, donc le volume augmente régulièrement. Si aucune publication ne correspond à votre besoin aujourd'hui, vous pouvez publier votre propre demande : elle restera visible jusqu'à ce qu'une personne du coin y réponde.",
     },
     {
       q: "Faut-il un abonnement pour publier une mission à Lyon ?",
-      a: "Non. Les petites missions d'entraide sont accessibles à tous les membres inscrits sur Guardiens : un service contre un service, ni tarif ni facture. L'espace gardien, pour les longues gardes à domicile, est ouvert pendant la phase de lancement.",
+      a: "Non. L'Entraide est accessible à tous les membres inscrits sur Guardiens : un service contre un service, ni tarif ni facture. L'espace gardien, pour les longues gardes à domicile, est ouvert pendant la phase de lancement.",
     },
     {
       q: "Quelle différence avec une garde de maison à Lyon ?",

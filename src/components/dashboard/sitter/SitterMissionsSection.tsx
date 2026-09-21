@@ -123,7 +123,7 @@ const SitterMissionsSection = memo(({
   return (
     <div className="bg-card border border-border rounded-2xl p-4 sm:p-5 transition-shadow duration-300 hover:shadow-sm">
       <div className="flex items-center justify-between gap-2 mb-3">
-        <h3 className="text-sm font-semibold text-foreground">Petites missions</h3>
+        <h3 className="text-sm font-semibold text-foreground">Entraide</h3>
         <Link to="/petites-missions" className="text-xs text-primary font-sans hover:underline shrink-0">
           Voir tout →
         </Link>
@@ -133,7 +133,7 @@ const SitterMissionsSection = memo(({
       <div
         className="flex gap-1 p-1 bg-muted/50 rounded-xl mb-4"
         role="tablist"
-        aria-label="Filtre des petites missions"
+        aria-label="Filtre de l'entraide"
       >
         {tabBtn("mine", "Les miennes", openCount)}
         {tabBtn("nearby", "Autour de vous", nearbyMissions.length)}

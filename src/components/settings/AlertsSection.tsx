@@ -207,7 +207,7 @@ const AlertsSection = ({ user }: { user: any }) => {
                     <div className="flex gap-1 mt-1 flex-wrap">
                       {alerte.alert_types.map((t) => (
                         <Badge key={t} variant="secondary" className="text-xs">
-                          {t === "gardes" ? "Gardes" : "Petites missions"}
+                          {t === "gardes" ? "Gardes" : "Entraide"}
                         </Badge>
                       ))}
                     </div>
@@ -312,7 +312,7 @@ const AlertsSection = ({ user }: { user: any }) => {
                 <div className="flex items-center gap-2">
                   <Checkbox id="alert-missions" checked={formAlertTypes.includes("missions")}
                     onCheckedChange={(checked) => setFormAlertTypes((prev) => checked ? [...prev, "missions"] : prev.filter((t) => t !== "missions"))} />
-                  <Label htmlFor="alert-missions" className="text-sm font-normal">Petites missions</Label>
+                  <Label htmlFor="alert-missions" className="text-sm font-normal">Entraide</Label>
                 </div>
               </div>
             </div>

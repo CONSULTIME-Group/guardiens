@@ -994,7 +994,7 @@ const EntraideSlide = () => (
       conseil sur une race que vous connaissez bien.
     </p>
     <p className="text-base text-foreground/80 leading-relaxed">
-      Les petites missions d'entraide, c'est l'échange au quotidien, vos
+      L'entraide, c'est l'échange au quotidien, vos
       compétences contre un repas, un service rendu, une connexion qui dure.
       Jamais d'argent. Juste du concret.
     </p>

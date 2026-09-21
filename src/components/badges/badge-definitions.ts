@@ -360,7 +360,7 @@ export const BADGE_DEFINITIONS: Record<string, BadgeDefinition> = {
     label: "Mission récurrente",
     labelArc: "MISSION RÉCURRENTE",
     category: 'mission', expirable: false, fixedTier: 'bronze',
-    tooltip: "Utilisateur ayant effectué plusieurs petites missions avec succès.",
+    tooltip: "Utilisateur ayant effectué plusieurs missions d'entraide avec succès.",
     bg: '#2F2F2F', iconColor: '#FDF0CC',
     svgIcon: `<path d="M13 18a8 8 0 0 1 12.5-4.2" fill="none" stroke="#FDF0CC" stroke-width="1.5" stroke-linecap="round"/><path d="M25.5 13.8l.5 5-5 .5" fill="none" stroke="#FDF0CC" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M27 22a8 8 0 0 1-12.5 4.2" fill="none" stroke="#FDF0CC" stroke-width="1.5" stroke-linecap="round"/><path d="M14.5 26.2l-.5-5 5-.5" fill="none" stroke="#FDF0CC" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>`,
   },

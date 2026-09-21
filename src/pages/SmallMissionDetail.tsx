@@ -741,6 +741,7 @@ const SmallMissionDetail = () => {
   // Une OFFRE (disponibilité) n'a pas d'échéance : pas de bannière "date dépassée".
   const isOfferMission = (mission as any).mission_type === "offre";
   const isDatePassed = !isOfferMission && mission.date_needed && new Date(mission.date_needed) < new Date();
+  const shouldNoindex = mission.status !== "open" || Boolean(isDatePassed);
 
   const handleSharePublishedLink = async () => {
     const cleanUrl = window.location.href.split("?")[0];
@@ -775,6 +776,7 @@ const SmallMissionDetail = () => {
           onShare={handleSharePublishedLink}
           viewCount={(mission as any).view_count ?? 0}
           responsesCount={responses.length}
+          noindex={shouldNoindex}
         />
         <PublicFooter />
       </>
@@ -1039,6 +1041,7 @@ const SmallMissionDetail = () => {
         image={mission.photos?.[0]}
         type="article"
         publishedAt={mission.created_at}
+        noindex={shouldNoindex}
       />
       <Head>
         {/* Balisage non marchand : ni Service, ni Offer, ni prix, ni provider.
@@ -1058,7 +1061,7 @@ const SmallMissionDetail = () => {
       <div className="max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
         {/* Breadcrumb */}
         <div className="mb-6">
-          <PageBreadcrumb items={[{ label: "Coups de main", href: "/petites-missions" }, { label: displayTitle }]} />
+          <PageBreadcrumb items={[{ label: "Entraide", href: "/petites-missions" }, { label: displayTitle }]} />
         </div>
 
         {/* Banner publication */}
