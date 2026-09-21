@@ -96,7 +96,7 @@ const FAQ = () => {
  "Pendant la garde": t("faq.categories.during_sit"),
  "Confiance et sécurité": t("faq.categories.trust_safety"),
  "Gardien d'urgence": t("faq.categories.emergency_sitter"),
- "Petites missions": t("faq.categories.small_missions"),
+ "Entraide": t("faq.categories.small_missions"),
  "Mon compte": t("faq.categories.my_account"),
  };
 

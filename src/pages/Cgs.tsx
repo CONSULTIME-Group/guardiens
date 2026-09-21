@@ -38,7 +38,7 @@ const Cgs = () => {
             <li>Publication d'annonces de garde sans limitation</li>
             <li>Consultation des annonces et candidatures sans limitation</li>
             <li>Messagerie interne entre membres</li>
-            <li>Publication et réponse aux petites missions d'entraide</li>
+            <li>Publication et réponse aux demandes d'entraide</li>
             <li>Consultation des guides locaux et articles</li>
             <li>Accès au dispositif Gardien d'urgence</li>
             <li>Publication d'avis après une garde ou une mission</li>

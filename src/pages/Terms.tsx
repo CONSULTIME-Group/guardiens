@@ -131,7 +131,7 @@ const Terms = () => {
           <p>Guardiens met à disposition un guide pratique non contractuel ainsi qu'un dispositif d'accord de garde optionnel et non bloquant.</p>
 
           {/* 7 */}
-          <h2 className="font-heading text-xl font-bold text-foreground pt-4">7. Petites missions (entraide)</h2>
+          <h2 className="font-heading text-xl font-bold text-foreground pt-4">7. Entraide</h2>
           <p>Les petites missions sont des échanges d'entraide ponctuels entre membres, sans nuitée. Elles fonctionnent exclusivement sur le principe de l'<strong className="text-foreground">échange en nature</strong> (repas, produits du jardin, service réciproque). Tout échange d'argent est strictement interdit et expose le compte à une suspension immédiate.</p>
           <p>Ces échanges entre particuliers, à titre non lucratif et sans recherche de profit, ne constituent pas, en principe, des revenus imposables (cf. BOI-IR-BASE-10-10-10-10 et instruction fiscale du 30 août 2016 relative aux revenus issus de l'économie collaborative). Chaque utilisateur reste néanmoins seul responsable de ses obligations déclaratives au titre de la solidarité et de l'entraide entre particuliers.</p>
 

@@ -74,7 +74,7 @@ const MissionsCityPage = () => {
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Accueil", item: `${SITE_URL}/` },
-      { "@type": "ListItem", position: 2, name: "Petites missions", item: `${SITE_URL}/petites-missions` },
+      { "@type": "ListItem", position: 2, name: "Entraide", item: `${SITE_URL}/petites-missions` },
       { "@type": "ListItem", position: 3, name: c.cityName, item: url },
     ],
   };
@@ -101,7 +101,7 @@ const MissionsCityPage = () => {
         <PublicHeader />
         <PageBreadcrumb
           items={[
-            { label: "Petites missions", href: "/petites-missions" },
+            { label: "Entraide", href: "/petites-missions" },
             { label: c.cityName },
           ]}
         />

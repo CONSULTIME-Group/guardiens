@@ -6,7 +6,7 @@ const SECTIONS = [
   { title: 'Écussons Gardien', ids: GARDIEN_BADGE_IDS },
   { title: 'Écussons Propriétaire', ids: PROPRIO_BADGE_IDS },
   { title: 'Badges spéciaux', ids: SPECIAL_BADGE_IDS },
-  { title: 'Petites missions', ids: MISSION_BADGE_IDS },
+  { title: 'Entraide', ids: MISSION_BADGE_IDS },
 ]
 
 export default function PlancheBadges() {
