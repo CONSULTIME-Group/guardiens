@@ -59,10 +59,14 @@ Deno.serve(async (req) => {
 
   try {
     // 1) Récupère toutes les paires queued
+    // Les lignes portant un numéro de vague appartiennent au moteur
+    // notify-mission-wave, qui envoie lui-même, tout de suite et une seule
+    // fois. Le digest ne traite donc que les lignes historiques.
     let q = supabase
       .from('mission_notification_queue')
       .select('id, helper_id, mission_id, distance_km, queued_at')
       .eq('status', 'queued')
+      .is('wave', null)
     if (body.helper_id) q = q.eq('helper_id', body.helper_id)
 
     const { data: queued, error: qErr } = await q
