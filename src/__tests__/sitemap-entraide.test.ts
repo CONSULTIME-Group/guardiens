@@ -4,11 +4,14 @@ import { resolve } from "node:path";
 import { isIndexableEntraideMission } from "../../supabase/functions/sitemap/mission-entries";
 
 describe("sitemap Entraide", () => {
-  const source = readFileSync(resolve(process.cwd(), "supabase/functions/sitemap/index.ts"), "utf8");
+  const edgeSource = readFileSync(resolve(process.cwd(), "supabase/functions/sitemap/index.ts"), "utf8");
+  const buildSource = readFileSync(resolve(process.cwd(), "scripts/generate-sitemap.mjs"), "utf8");
   const description = "Une description publique suffisamment détaillée pour expliquer précisément le besoin, le contexte, le moment souhaité et le service proposé en retour, sans argent. ".repeat(2);
 
   it("ajoute la page Entraide de Lyon", () => {
-    expect(source).toContain('{ loc: "/petites-missions/lyon", priority: "0.7", changefreq: "weekly" }');
+    expect(edgeSource).toContain('{ loc: "/petites-missions/lyon", priority: "0.7", changefreq: "weekly" }');
+    expect(buildSource).toContain('isIndexableEntraideMission(m)');
+    expect(buildSource).toContain('loc: `/petites-missions/${m.slug}`');
   });
 
   it("retient une fiche ouverte et écarte une fiche fermée", () => {
