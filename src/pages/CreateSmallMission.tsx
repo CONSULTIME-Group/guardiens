@@ -461,6 +461,15 @@ const CreateSmallMission = () => {
       try { await trackEvent("mission_created_incomplete_profile", { metadata: { profile_completion: profileCompletion, mission_id: inserted?.id ?? null } }); } catch {}
     }
     if (inserted?.id) { try { await recordMissionCreatedAttribution(inserted.id); } catch {} }
+    // Première vague : les dix personnes disponibles les plus proches sont
+    // prévenues tout de suite, sauf la nuit où l'envoi part au matin.
+    if (inserted?.id) {
+      try {
+        await supabase.functions.invoke("notify-mission-wave", { body: { mission_id: inserted.id } });
+      } catch {
+        // L'envoi est repris au passage horaire suivant : jamais bloquant.
+      }
+    }
     // Signaux admin éditoriaux : non bloquants, idempotents côté base.
     if (inserted?.id && (sitLike || rehoming)) {
       const mid = inserted.id;
