@@ -13,6 +13,7 @@ import PublicFooter from "@/components/layout/PublicFooter";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import BadgeRow from "@/components/badges/BadgeRow";
 import MissionBadgesReceived from "@/components/missions/MissionBadgesReceived";
+import HelpCounts from "@/components/entraide/HelpCounts";
 import SpecialBadgeHighlight from "@/components/badges/SpecialBadgeHighlight";
 import { BadgeSceau } from "@/components/badges/BadgeSceau";
 import { useProfileReputation, useUserBadges } from "@/hooks/useProfileReputation";
@@ -1923,6 +1924,7 @@ export default function PublicSitterProfile() {
                     </div>
                   )}
                   {id && <MissionBadgesReceived profileId={id} />}
+                  {id && <HelpCounts userId={id} className="mt-2" />}
                   {reviews.length === 0 && (userBadges || []).length === 0 && completedSits === 0 ? (
                     <FreshStartStory
                       firstName={firstName}
@@ -2463,6 +2465,7 @@ export default function PublicSitterProfile() {
                       </div>
                     )}
                     {id && <MissionBadgesReceived profileId={id} />}
+                  {id && <HelpCounts userId={id} className="mt-2" />}
                     {(ownerReviews || []).length === 0 && (userBadges || []).length === 0 && ownerSitsTotal === 0 ? (
                       <FreshStartStory
                         firstName={firstName}

@@ -122,6 +122,73 @@ try {
   `);
   equal(helperWrites.rows, [], 'public_helpers reste en lecture seule cote client');
 
+  // Lot 3 : les vues de preuve, prenoms et ville seulement, lecture seule.
+  await db.exec(`
+    ALTER TABLE public.small_missions ADD COLUMN user_id uuid;
+    ALTER TABLE public.small_missions ADD COLUMN city text;
+    ALTER TABLE public.small_missions ADD COLUMN latitude double precision;
+    ALTER TABLE public.small_missions ADD COLUMN longitude double precision;
+    ALTER TABLE public.small_missions ADD COLUMN close_reason text;
+    ALTER TABLE public.small_mission_responses ADD COLUMN responder_id uuid;
+    ALTER TABLE public.small_mission_responses ADD COLUMN status text;
+    CREATE TABLE public.mission_feedbacks (
+      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      mission_id uuid,
+      giver_id uuid,
+      receiver_id uuid,
+      positive boolean,
+      comment text,
+      public_ok boolean DEFAULT true,
+      created_at timestamptz DEFAULT now()
+    );
+  `);
+  const lot3 = readFileSync('drizzle/migrations/0013_entraide_meetup_and_proof.sql', 'utf8');
+  const proofSql = lot3.slice(lot3.indexOf('CREATE OR REPLACE VIEW public.public_entraide_proofs'));
+  await db.exec(proofSql);
+
+  const proofColumns = await db.query(`
+    SELECT column_name FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'public_entraide_proofs'
+    ORDER BY ordinal_position
+  `);
+  equal(
+    proofColumns.rows.map((row) => row.column_name),
+    ['mission_id', 'helper_first_name', 'owner_first_name', 'city', 'latitude_approx', 'longitude_approx', 'word', 'happened_at'],
+    'public_entraide_proofs expose uniquement prenoms, ville, mot et date',
+  );
+
+  const proofWrites = await db.query(`
+    SELECT privilege_type FROM information_schema.role_table_grants
+    WHERE table_schema = 'public' AND table_name IN ('public_entraide_proofs', 'public_help_counts')
+      AND grantee IN ('anon', 'authenticated') AND privilege_type <> 'SELECT'
+  `);
+  equal(proofWrites.rows, [], 'les vues de preuve restent en lecture seule cote client');
+
+  await db.exec(`
+    INSERT INTO public.profiles (id, first_name, account_status)
+    VALUES ('00000000-0000-0000-0000-000000000002', 'Laurence', 'active');
+    INSERT INTO public.small_missions (id, status, mission_type, user_id, city, latitude, longitude, close_reason)
+    VALUES ('00000000-0000-0000-0000-0000000000aa', 'completed', 'besoin', '00000000-0000-0000-0000-000000000002', 'Annecy', 45.9, 6.13, 'meetup_confirmed');
+    INSERT INTO public.small_mission_responses (id, mission_id, responder_id, status)
+    VALUES ('00000000-0000-0000-0000-0000000000bb', '00000000-0000-0000-0000-0000000000aa', '00000000-0000-0000-0000-000000000001', 'accepted');
+    INSERT INTO public.mission_feedbacks (mission_id, giver_id, receiver_id, positive, comment, public_ok)
+    VALUES ('00000000-0000-0000-0000-0000000000aa', '00000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000001', true, 'Un vrai plaisir.', true);
+    SET ROLE anon;
+  `);
+  const anonProofs = await db.query('SELECT helper_first_name, owner_first_name, city, word FROM public.public_entraide_proofs');
+  equal(anonProofs.rows.length, 1, 'anon lit une rencontre confirmee');
+  equal(anonProofs.rows[0].helper_first_name, 'Camille', 'la preuve porte le prenom de la personne qui a aide');
+  equal(anonProofs.rows[0].word, 'Un vrai plaisir.', 'le mot autorise est visible');
+  const anonCounts = await db.query('SELECT user_id, given_count, received_count FROM public.public_help_counts ORDER BY given_count DESC');
+  equal(anonCounts.rows[0].given_count, 1, 'le compteur de coups de main donnes est juste');
+  equal(anonCounts.rows[1].received_count, 1, 'le compteur de coups de main recus est juste');
+  await db.exec('RESET ROLE;');
+
+  await db.exec('UPDATE public.mission_feedbacks SET public_ok = false;');
+  const hiddenWord = await db.query('SELECT word FROM public.public_entraide_proofs');
+  equal(hiddenWord.rows[0].word, null, 'un mot non autorise reste hors de la preuve publique');
+
+
   for (const [name, args] of LOCKED_FUNCTIONS) {
     const types = args.replace(/ DEFAULT [^,]+/g, '').split(',').map(a => a.trim().split(/\s+/).slice(1).join(' ')).filter(Boolean).join(', ');
     const signature = `public.${name}(${types})`;

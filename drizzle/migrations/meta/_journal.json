@@ -92,6 +92,20 @@
       "when": 1789967407031,
       "tag": "0012_entraide_public_helpers",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1790013970674,
+      "tag": "0013_entraide_meetup_and_proof",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1790014246172,
+      "tag": "0014_entraide_meetup_self_tokens",
+      "breakpoints": true
     }
   ]
 }

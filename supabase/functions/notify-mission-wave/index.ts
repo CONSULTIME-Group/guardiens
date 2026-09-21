@@ -30,6 +30,7 @@ import {
   WAVE_RELAUNCH_MESSAGE,
   WAVE_EMPTY_MESSAGE,
 } from "../_shared/mission-wave.ts";
+import { pickNearestProof, proofEmailLine, proofWeekLabel, type ProofRow } from "../_shared/mission-meetup.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -72,7 +73,7 @@ interface WaveHelper {
 async function runWave(supabase: any, missionId: string): Promise<{ sent: number; wave: number; empty: boolean }> {
   const { data: mission } = await supabase
     .from("small_missions")
-    .select("id, title, city, user_id, status, date_needed, end_date, wave_count")
+    .select("id, title, city, user_id, status, date_needed, end_date, wave_count, latitude, longitude")
     .eq("id", missionId)
     .maybeSingle();
 
@@ -120,6 +121,25 @@ async function runWave(supabase: any, missionId: string): Promise<{ sent: number
   }
 
   const dateLabel = frenchDateLabel(mission.date_needed ?? mission.end_date);
+
+  // Une seule ligne de preuve, quand une rencontre confirmée existe à moins de
+  // cinquante kilomètres du besoin.
+  let proofLine = "";
+  const { data: proofRows } = await supabase
+    .from("public_entraide_proofs")
+    .select("mission_id, owner_first_name, helper_first_name, city, latitude_approx, longitude_approx, word, happened_at")
+    .order("happened_at", { ascending: false })
+    .limit(200);
+  const nearest = pickNearestProof((proofRows ?? []) as ProofRow[], mission.latitude, mission.longitude);
+  if (nearest) {
+    proofLine = proofEmailLine({
+      owner_first_name: nearest.proof.owner_first_name,
+      helper_first_name: nearest.proof.helper_first_name,
+      distance_km: nearest.distance_km,
+      week_label: proofWeekLabel(nearest.proof.happened_at),
+    });
+  }
+
   let sent = 0;
 
   for (const h of helpers) {
@@ -148,6 +168,7 @@ async function runWave(supabase: any, missionId: string): Promise<{ sent: number
         missionCity: mission.city ?? "",
         missionId,
         canHelpToken: h.token,
+        proofLine,
       },
       logMetadata: { mission_id: missionId, wave, source: "mission_wave" },
     });

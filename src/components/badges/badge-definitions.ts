@@ -342,7 +342,7 @@ export const BADGE_DEFINITIONS: Record<string, BadgeDefinition> = {
     label: "Coup de main",
     labelArc: "COUP DE MAIN",
     category: 'mission', expirable: false, fixedTier: 'bronze',
-    tooltip: "Réussite d'une micro-mission de service ou d'entraide.",
+    tooltip: "Premier coup de main donné à une personne du coin.",
     bg: '#2F2F2F', iconColor: '#FDF0CC',
     svgIcon: `<path d="M20 11l1.6 5H27l-4.2 3 1.6 5-4.2-3-4.2 3 1.6-5L13.5 16h5.3z" fill="#D4AF37"/><path d="M15 28V22h1.5v-3h1V22h1v-4h1V22h1v-3.5h1V22h2v4c0 1.5-1.5 2.5-4 2.5s-3.5-1-3.5-1" fill="#FDF0CC"/>`,
   },
