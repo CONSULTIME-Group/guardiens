@@ -140,6 +140,7 @@ passed.push('Besoin pourvu : les jetons restants ne creent plus de reponse');
 
 // Fin des offres.
 let refused = false;
+console.log('DEBUG triggers', (await db.query("SELECT tgname,tgenabled FROM pg_trigger WHERE NOT tgisinternal")).rows);
 try {
   await db.query(
     `INSERT INTO small_missions(user_id,title,description,city,mission_type,latitude,longitude) VALUES($1,'Je propose mon aide','Description assez longue pour passer les regles de saisie du formulaire.','Lyon','offre',45.75,4.85)`,
