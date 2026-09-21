@@ -1,18 +1,11 @@
 # Roadmap
 
-- [ ] Lot 8 : expliciter l'espace Entraide, harmoniser les libellés et compléter le sitemap
-- [ ] Lot 8 : ajouter les tests du hub et du sitemap
-- [ ] Lot 8 : vérifier types, tests complets, compilation automatique et trois captures
-- [ ] Lot 8 : ne pas publier
-
-- [ ] Implémenter le Lot X du panneau de conversation Alma sans nouvelle dépendance
-- [ ] Compléter les tests du Lot X
-- [ ] Vérifier tests ciblés, types, suite complète et build
-- [ ] Ne pas publier
-
-## Lots du 16/09/2026
-- [ ] Lot 1 : trigger + rattrapage email_preferences (migration)
-- [ ] Lot 2 : intentions entraide/projets dans Register.tsx + bandeaux + test
-- [ ] Lot 3 : reecriture des CTA vers /inscription?redirect= + nouvelle entree CTA + test
-- [ ] Lot 4 : verifier les portraits auteurs (gouache)
-- [ ] Portraits : decouper l'image en trois visuels (Elisa, duo, Jeremie) et les affecter selon les cas
+- [ ] Créer et appliquer la vue publique `public_helpers` sans `security_invoker`, lecture seule anon/authenticated, colonnes explicites.
+- [ ] Ajouter l'agrégat public du nombre de réponses aux besoins.
+- [ ] Refaire `/petites-missions` avec les vues Besoins et Autour de vous, cartes partagées et textes validés.
+- [ ] Ajouter la carte dédiée, décalage déterministe, regroupement par grille et recherche synchronisée.
+- [ ] Ajouter le parcours d'inscription entraide et le rappel tableau de bord pour `helps_with`.
+- [ ] Conserver FAQ et SEO, ajouter JSON-LD Person minimal et la statistique CRÉDOC.
+- [ ] Étendre les tests Vitest et PGlite, vérifier TypeScript et compilation.
+- [ ] Capturer mobile et ordinateur pour Besoins, Autour de vous et Carte.
+- [ ] Ne pas publier.
