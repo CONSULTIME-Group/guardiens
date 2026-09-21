@@ -11167,6 +11167,10 @@ export type Database = {
           user_id: string
         }[]
       }
+      my_mission_meetup_tokens: {
+        Args: { p_mission_id: string }
+        Returns: Json
+      }
       normalize_analytics_source: { Args: { raw: string }; Returns: string }
       normalize_city_name: { Args: { txt: string }; Returns: string }
       notify_owner_of_new_application: {
