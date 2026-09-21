@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { isIndexableEntraideMission } from "./mission-entries.ts";
 
 const SITE_URL = "https://guardiens.fr";
 
@@ -8,6 +9,7 @@ const staticPages = [
   { loc: "/faq", priority: "0.8", changefreq: "weekly" },
   { loc: "/contact", priority: "0.8", changefreq: "weekly" },
   { loc: "/petites-missions", priority: "0.8", changefreq: "weekly" },
+  { loc: "/petites-missions/lyon", priority: "0.7", changefreq: "weekly" },
   { loc: "/gardien-urgence", priority: "0.8", changefreq: "weekly" },
   { loc: "/guides", priority: "0.8", changefreq: "weekly" },
   { loc: "/conseils", priority: "0.7", changefreq: "weekly" },
@@ -93,6 +95,7 @@ Deno.serve(async () => {
     { data: cityGuides },
     { data: departmentPages },
     { data: breedProfiles },
+    { data: entraideMissions },
   ] = await Promise.all([
     supabase
       .from("articles")
@@ -122,6 +125,13 @@ Deno.serve(async () => {
       .from("breed_profiles")
       .select("breed, species, generated_at")
       .order("breed"),
+    supabase
+      .from("small_missions")
+      .select("slug, description, status, mission_type, date_needed, end_date, updated_at, created_at")
+      .eq("status", "open")
+      .not("slug", "is", null)
+      .neq("category", "projet")
+      .order("created_at", { ascending: false }),
   ]);
 
   const today = new Date().toISOString().split("T")[0];
@@ -203,6 +213,20 @@ Deno.serve(async () => {
       const slug = `${bp.species.toLowerCase()}-${slugifyBreed(bp.breed)}`;
       if (MERGED_BREED_SLUGS.has(slug)) continue;
       entries.push(urlEntry(`/races/${slug}`, (bp.generated_at || today).split("T")[0], "monthly", "0.6"));
+    }
+  }
+
+  // Fiches Entraide publiques et suffisamment détaillées. Les demandes dont
+  // la date est passée restent consultables mais sont exclues du sitemap.
+  if (entraideMissions) {
+    for (const mission of entraideMissions) {
+      if (!isIndexableEntraideMission(mission)) continue;
+      entries.push(urlEntry(
+        `/petites-missions/${mission.slug}`,
+        (mission.updated_at || mission.created_at || today).split("T")[0],
+        "weekly",
+        "0.5",
+      ));
     }
   }
 
