@@ -92,7 +92,7 @@ const MissionsCityPage = ({ citySlug }: MissionsCityPageProps) => {
       });
 
       const localHelpers = (helpersResult.data || [])
-        .flatMap((row) => row.id && row.first_name && row.helps_with ? [{ ...row, id: row.id, first_name: row.first_name, helps_with: row.helps_with }] : [])
+        .flatMap((row) => row.id && row.first_name ? [{ ...row, id: row.id, first_name: row.first_name }] : [])
         .filter((row) => isInsideRadius(c.coordinates, c.radiusKm, row.latitude_approx, row.longitude_approx)) as PublicHelper[];
       localHelpers.sort((a, b) => {
         const aDistance = haversineDistance(c.coordinates.lat, c.coordinates.lng, Number(a.latitude_approx), Number(a.longitude_approx));

@@ -5,6 +5,7 @@ import { useInAppShell } from "./AppShellContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { PRESS_ARTICLE_URL } from "@/components/shared/PressQuote";
 import { LE_PROGRES_LOGO } from "@/assets/pressLogos";
+import { MISSIONS_CITIES, MISSIONS_CITY_SLUGS } from "@/data/missionsCityContent";
 
 export interface FooterLocalContext {
   /** Nom du département de la page consultée, par exemple « Var ». */
@@ -158,9 +159,9 @@ const PublicFooter = React.forwardRef<HTMLElement, PublicFooterProps>(({ local }
               <li><Link to="/inscription" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.register")}</Link></li>
               <li><Link to="/devenir-home-sitter" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.become_home_sitter")}</Link></li>
               <li><Link to="/petites-missions" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.small_missions")}</Link></li>
-              <li><Link to="/petites-missions/lyon" className={linkCls}>Entraide à Lyon</Link></li>
-              <li><Link to="/petites-missions/marseille" className={linkCls}>Entraide à Marseille</Link></li>
-              <li><Link to="/petites-missions/strasbourg" className={linkCls}>Entraide à Strasbourg</Link></li>
+              {MISSIONS_CITY_SLUGS.map((slug) => (
+                <li key={slug}><Link to={`/petites-missions/${slug}`} className={linkCls}>Entraide à {MISSIONS_CITIES[slug].cityName}</Link></li>
+              ))}
               <li><Link to="/gardien-urgence" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.emergency_sitter")}</Link></li>
               <li><Link to="/associations" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">Associations et refuges</Link></li>
             </ul>

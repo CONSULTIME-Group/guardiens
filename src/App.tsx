@@ -496,6 +496,17 @@ const AppRoutes = () => {
       <Route path="/petites-missions/lyon" element={<MissionsCityPage citySlug="lyon" />} />
       <Route path="/petites-missions/marseille" element={<MissionsCityPage citySlug="marseille" />} />
       <Route path="/petites-missions/strasbourg" element={<MissionsCityPage citySlug="strasbourg" />} />
+      <Route path="/petites-missions/paris" element={<MissionsCityPage citySlug="paris" />} />
+      <Route path="/petites-missions/toulouse" element={<MissionsCityPage citySlug="toulouse" />} />
+      <Route path="/petites-missions/lille" element={<MissionsCityPage citySlug="lille" />} />
+      <Route path="/petites-missions/annecy" element={<MissionsCityPage citySlug="annecy" />} />
+      <Route path="/petites-missions/nice" element={<MissionsCityPage citySlug="nice" />} />
+      <Route path="/petites-missions/nantes" element={<MissionsCityPage citySlug="nantes" />} />
+      <Route path="/petites-missions/saint-etienne" element={<MissionsCityPage citySlug="saint-etienne" />} />
+      <Route path="/petites-missions/rennes" element={<MissionsCityPage citySlug="rennes" />} />
+      <Route path="/petites-missions/montpellier" element={<MissionsCityPage citySlug="montpellier" />} />
+      <Route path="/petites-missions/grenoble" element={<MissionsCityPage citySlug="grenoble" />} />
+      <Route path="/petites-missions/bordeaux" element={<MissionsCityPage citySlug="bordeaux" />} />
       <Route path="/petites-missions/:id" element={<SmallMissionDetail />} />
       <Route path="/questions" element={<Navigate to="/petites-missions?tab=questions" replace />} />
       <Route path="/questions/nouvelle" element={<ProtectedRoute><AppLayout><QuestionCreate /></AppLayout></ProtectedRoute>} />
