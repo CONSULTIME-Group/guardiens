@@ -104,12 +104,12 @@ const CreateSmallMission = () => {
     { value: "weekend", label: tp("dur_weekend") },
   ], [t]);
 
-  const typeParam = searchParams.get("type");
   const [step, setStep] = useState(1);
-  const [missionType, setMissionType] = useState<"besoin" | "offre">(typeParam === "offre" ? "offre" : "besoin");
-  // Aucune catégorie présélectionnée : la personne choisit, le formulaire suit.
-  const [category, setCategory] = useState("");
-  const [categoryTouched, setCategoryTouched] = useState(false);
+  // Nouveau modèle d'entraide : un besoin, dix personnes du coin, un « je peux ».
+  // Les offres ne se publient plus, elles vivent sur le profil.
+  const missionType = "besoin" as const;
+  // Plus de catégorie choisie : le besoin s'écrit en clair, la proximité fait le reste.
+  const category = "other";
   const [photoTouched, setPhotoTouched] = useState(false);
   const [photoUploading, setPhotoUploading] = useState(false);
   const [photoFailed, setPhotoFailed] = useState(false);
@@ -120,10 +120,9 @@ const CreateSmallMission = () => {
   const [titleTouched, setTitleTouched] = useState(false);
   const [description, setDescription] = useState("");
   const [descTouched, setDescTouched] = useState(false);
-  const [exchangeOffer, setExchangeOffer] = useState("");
-  const [exchangeTouched, setExchangeTouched] = useState(false);
+  // Contrepartie : phrase unique, la même pour tout le monde. Plus rien à saisir.
+  const exchangeOffer = FIXED_EXCHANGE_OFFER;
   const [placeTouched, setPlaceTouched] = useState(false);
-  const [exchangeError, setExchangeError] = useState("");
   const [city, setCity] = useState("");
   const [postalCode, setPostalCode] = useState("");
   const [dateNeeded, setDateNeeded] = useState("");
@@ -217,26 +216,15 @@ const CreateSmallMission = () => {
   };
 
   const handleExchangeChange = (val: string) => {
-    setExchangeOffer(val);
-    setExchangeError(hasMoneyMention(val) ? tp("exchange_error_euros") : "");
-  };
-
-  /**
-   * Photo jamais exigée sur une offre (la photo de profil illustre déjà),
-   * attendue seulement sur une demande dont l'objet se montre.
-   */
-  const photoRequiredByRule = isPhotoRequiredByRule(missionType, category);
+  /** La photo illustre le besoin, elle ne conditionne jamais sa publication. */
+  const photoRequiredByRule = false;
   const photoRequired = photoRequiredByRule && !photoWaived;
 
   /** Étape 1 : une seule question, le titre. */
   const step1Valid = title.trim().length >= MIN_TITLE_LEN;
 
-  /** Étape 2 : le détail, description, contrepartie, puis catégorie. */
-  const step2Valid =
-    description.trim().length >= MIN_DESC_LEN &&
-    exchangeOffer.trim().length >= 2 &&
-    !exchangeError &&
-    !!category;
+  /** Étape 2 : le détail, une seule question, la description. */
+  const step2Valid = description.trim().length >= MIN_DESC_LEN;
 
   /**
    * Champs obligatoires, avec l'étape qui les porte. Source unique du toast,
@@ -245,8 +233,6 @@ const CreateSmallMission = () => {
   const requiredFields = (): { id: string; label: string; step: number; invalid: boolean }[] => [
     { id: "mission-field-title", label: "Titre", step: 1, invalid: title.trim().length < MIN_TITLE_LEN },
     { id: "mission-field-description", label: "Description", step: 2, invalid: description.trim().length < MIN_DESC_LEN },
-    { id: "mission-field-exchange", label: "Contrepartie", step: 2, invalid: exchangeOffer.trim().length < 2 || !!exchangeError },
-    { id: "mission-field-category", label: "Catégorie", step: 2, invalid: !category },
     { id: "mission-field-photo", label: "Photo", step: 3, invalid: photoRequired && photos.length === 0 },
     { id: "mission-field-place", label: "Ville", step: 3, invalid: !city.trim() },
     { id: "mission-field-place", label: "Code postal", step: 3, invalid: !postalCode.trim() },
@@ -255,7 +241,7 @@ const CreateSmallMission = () => {
 
   const touchStep = (s: number) => {
     if (s === 1) setTitleTouched(true);
-    if (s === 2) { setDescTouched(true); setExchangeTouched(true); setCategoryTouched(true); }
+    if (s === 2) { setDescTouched(true); }
     if (s === 3) { setPhotoTouched(true); setPlaceTouched(true); }
   };
 
