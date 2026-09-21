@@ -1,3 +1,4 @@
+-- Appliqué le 21/09/2026 (job cron 1246, 25 * * * *, actif), ne pas rejouer.
 -- Planification horaire du moteur de vagues de l'Entraide.
 -- A exécuter dans l'éditeur SQL du backend : la référence au coffre-fort
 -- n'est pas applicable par l'outil de migration.
