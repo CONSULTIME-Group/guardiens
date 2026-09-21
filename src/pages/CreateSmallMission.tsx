@@ -418,8 +418,8 @@ const CreateSmallMission = () => {
       date_needed: dateNeeded || null,
       end_date: endDate || null,
       duration_estimate: duration,
-      pet_species: category === "animals" ? (petSpecies || null) : null,
-      pet_size: category === "animals" ? (petSize || null) : null,
+      pet_species: petSpecies || null,
+      pet_size: petSize || null,
       photos,
       latitude: coords?.lat ?? null,
       longitude: coords?.lng ?? null,
@@ -496,7 +496,7 @@ const CreateSmallMission = () => {
   return (
     <>
       <PageMeta
-        title={missionType === "offre" ? tp("meta_title_offer") : tp("meta_title_need")}
+        title={tp("meta_title_need")}
         description={tp("meta_description")}
       />
 
@@ -542,15 +542,11 @@ const CreateSmallMission = () => {
             {step === 1 && (
               <>
                 <div className="rounded-xl p-4 border border-primary/20 bg-primary/5 space-y-1">
-                  {/* Le titre suit le mode choisi : une personne qui propose son
-                      aide ne doit pas lire un titre qui parle de demander. */}
                   <h1 className="font-heading font-bold text-foreground text-base">
-                    {missionType === "offre"
-                      ? tp("encouragement_title_offer")
-                      : tp("encouragement_title_need")}
+                    {tp("encouragement_title_need")}
                   </h1>
                   <p className="text-sm text-muted-foreground">
-                    {missionType === "offre" ? tp("encouragement_offer") : tp("encouragement_need")}
+                    {tp("encouragement_need")}
                   </p>
                 </div>
 
@@ -558,7 +554,7 @@ const CreateSmallMission = () => {
                 {/* La seule question de l'étape 1 */}
                 <div id="mission-field-title" className="space-y-2">
                   <Label htmlFor="mission-title-input" className="text-base font-medium">
-                    {missionType === "offre" ? tp("title_question_offer") : tp("title_question_need")}
+                    {tp("title_question_need")}
                   </Label>
                   <Input
                     id="mission-title-input"
@@ -636,7 +632,7 @@ const CreateSmallMission = () => {
                 {/* Description */}
                 <div id="mission-field-description" className="space-y-2">
                   <Label htmlFor="mission-description-input" className="text-sm font-medium">
-                    {missionType === "offre" ? tp("desc_label_offer") : tp("desc_label_need")}
+                    {tp("desc_label_need")}
                   </Label>
                   <Textarea
                     id="mission-description-input"
@@ -687,22 +683,8 @@ const CreateSmallMission = () => {
                   <Label className="text-sm font-medium">
                     {photoRequired ? tp("photo_label") : tp("photo_label_optional")}
                   </Label>
-                  {missionType === "offre" && user?.avatarUrl && (
-                    <div className="flex items-center gap-3 rounded-xl border border-border bg-muted/30 p-3">
-                      <img
-                        src={avatarImageUrl(user.avatarUrl, 48)}
-                        alt="Votre photo de profil"
-                        className="h-12 w-12 rounded-full object-cover"
-                      />
-                      <p className="text-xs text-muted-foreground">{tp("photo_profile_note")}</p>
-                    </div>
-                  )}
                   <p className="text-xs text-muted-foreground">
-                    {missionType === "offre" && !user?.avatarUrl
-                      ? tp("photo_profile_missing")
-                      : photoRequired
-                        ? tp("photo_help_required")
-                        : tp("photo_help_optional")}
+                    {photoRequired ? tp("photo_help_required") : tp("photo_help_optional")}
                   </p>
                   <MissionPhotoUpload
                     userId={user!.id}
@@ -853,50 +835,6 @@ const CreateSmallMission = () => {
                   </Drawer>
                 </div>
 
-                {/* Profil animal, uniquement si catégorie animaux */}
-                {category === "animals" && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 rounded-2xl border border-border p-4 bg-muted/30">
-                    <div className="sm:col-span-2">
-                      <p className="text-sm font-semibold mb-0.5">
-                        {missionType === "offre" ? "Les animaux que vous savez garder" : "L'animal concerné"}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {missionType === "offre"
-                          ? "Précisez avec quels animaux vous êtes à l'aise."
-                          : "Aide les gens à savoir s'ils peuvent proposer leur aide."}
-                      </p>
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label className="text-xs font-medium">
-                        {missionType === "offre" ? "Espèces" : "Espèce"}
-                      </Label>
-                      <Select value={petSpecies} onValueChange={setPetSpecies}>
-                        <SelectTrigger className="h-11"><SelectValue placeholder="Chien, chat…" /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="chien">Chien</SelectItem>
-                          <SelectItem value="chat">Chat</SelectItem>
-                          <SelectItem value="cheval">Cheval</SelectItem>
-                          <SelectItem value="rongeur">Rongeur</SelectItem>
-                          <SelectItem value="oiseau">Oiseau</SelectItem>
-                          <SelectItem value="poisson">Poisson</SelectItem>
-                          <SelectItem value="reptile">Reptile</SelectItem>
-                          <SelectItem value="autre">Autre</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label className="text-xs font-medium">Taille</Label>
-                      <Select value={petSize} onValueChange={setPetSize}>
-                        <SelectTrigger className="h-11"><SelectValue placeholder="Petit, moyen…" /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="petit">Petit</SelectItem>
-                          <SelectItem value="moyen">Moyen</SelectItem>
-                          <SelectItem value="grand">Grand</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                )}
 
                 <div id="mission-field-duration" className="space-y-2">
 
@@ -993,7 +931,7 @@ const CreateSmallMission = () => {
               >
                 {submitting
                   ? tp("submit_publishing")
-                  : missionType === "offre" ? tp("submit_offer") : tp("submit_need")}
+                  : tp("submit_need")}
               </Button>
             )}
           </div>
