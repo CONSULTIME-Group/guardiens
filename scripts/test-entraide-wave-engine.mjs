@@ -37,6 +37,7 @@ CREATE FUNCTION gen_random_bytes(n integer) RETURNS bytea LANGUAGE sql VOLATILE
   AS $$ SELECT decode(md5(random()::text||clock_timestamp()::text),'hex') $$;
 CREATE FUNCTION strip_emojis(t text) RETURNS text LANGUAGE sql IMMUTABLE AS $$ SELECT t $$;
 CREATE FUNCTION money_in_mutual_aid(t text) RETURNS boolean LANGUAGE sql IMMUTABLE AS $$ SELECT false $$;
+CREATE FUNCTION mutual_aid_money_mention(t text) RETURNS boolean LANGUAGE sql IMMUTABLE AS $$ SELECT false $$;
 `);
 
 // Seules les parties du lot applicables hors production : on rejoue le fichier
