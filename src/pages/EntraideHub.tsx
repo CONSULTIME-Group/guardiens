@@ -28,10 +28,9 @@ const faqSchema = {
   mainEntity: FAQ.map((item) => ({ "@type": "Question", name: item.question, acceptedAnswer: { "@type": "Answer", text: item.answer } })),
 };
 
-const personSchema = {
-  "@context": "https://schema.org",
-  "@type": "ItemList",
-  name: "Gens du coin disponibles pour un coup de main",
+export const filterPublicHelpers = (helpers: PublicHelper[], query: string): PublicHelper[] => {
+  const normalized = query.trim().toLocaleLowerCase("fr");
+  return helpers.filter((helper) => `${helper.first_name} ${helper.city || ""} ${helper.helps_with}`.toLocaleLowerCase("fr").includes(normalized));
 };
 
 export const EntraideHubIntro = ({ isAuthenticated, onNeed, onHelp }: {
@@ -135,7 +134,7 @@ const EntraideHub = () => {
     if (bDistance === null) return -1;
     return aDistance - bDistance;
   }), [needs, origin]);
-  const filteredHelpers = useMemo(() => helpers.filter((helper) => `${helper.first_name} ${helper.city || ""} ${helper.helps_with}`.toLocaleLowerCase("fr").includes(query.trim().toLocaleLowerCase("fr"))).sort((a, b) => {
+  const filteredHelpers = useMemo(() => filterPublicHelpers(helpers, query).sort((a, b) => {
     const aDistance = helperDistance(a); const bDistance = helperDistance(b);
     if (aDistance === null) return bDistance === null ? 0 : 1;
     if (bDistance === null) return -1;
@@ -150,12 +149,19 @@ const EntraideHub = () => {
     }
     await supabase.from("profiles").update({ available_for_help: true }).eq("id", user.id);
     setHubView("helpers");
-    void trackEvent("entraide_helper_enabled", { metadata: { source: "hub" } });
+    void trackEvent("mission_can_help", { metadata: { source: "hub", action: "helper_enabled" } });
   };
+
+  const helperPersonSchemas = helpers.map((helper) => ({
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: helper.first_name,
+    description: helper.helps_with,
+  }));
 
   return (
     <>
-      <PageMeta title="Entraide près de chez vous, Guardiens" description="Découvrez les besoins et les gens du coin disponibles pour un coup de main." path="/petites-missions" jsonLd={[faqSchema, personSchema]} />
+      <PageMeta title="Entraide près de chez vous, Guardiens" description="Découvrez les besoins et les gens du coin disponibles pour un coup de main." path="/petites-missions" jsonLd={[faqSchema, ...helperPersonSchemas]} />
       <PageBreadcrumb items={[{ label: "Entraide" }]} />
       <main className="min-w-0 bg-background pb-24">
         <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
