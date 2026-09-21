@@ -107,7 +107,7 @@ const ENTRAIDE_FAQ = [
   },
   {
     question: "Faut-il payer pour utiliser l'Entraide ?",
-    answer: "Non. L'Entraide est accessible à tous les membres pour 0 €. Vous convenez ensemble d'un service ou d'une attention, sans échange d'argent.",
+    answer: "L'Entraide est ouverte à tous les membres, pour 0 €. Vous convenez ensemble d'un service ou d'une attention.",
   },
   {
     question: "Quelle différence avec une garde de maison ?",
