@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import { NeedCard, HelperCard, type EntraideNeed, type PublicHelper } from "@/components/entraide/EntraideCards";
+import EntraideProofs from "@/components/entraide/EntraideProofs";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
@@ -185,6 +186,8 @@ const EntraideHub = () => {
       <div className="min-w-0 bg-background pb-24">
         <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
           <EntraideHubIntro isAuthenticated={isAuthenticated} onNeed={goNeed} onHelp={goHelp} />
+
+          <EntraideProofs origin={origin} />
 
           <section className="pt-8" aria-labelledby="entraide-discovery-title">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">

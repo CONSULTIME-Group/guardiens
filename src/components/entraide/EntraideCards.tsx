@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import MissionBadgesReceived from "@/components/missions/MissionBadgesReceived";
+import HelpCounts from "@/components/entraide/HelpCounts";
 import { startConversationAndNavigate } from "@/lib/conversation";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -99,6 +100,7 @@ export const HelperCard = ({ helper, distance, showDistance, compact = false }: 
         <div className="min-w-0 flex-1">
           <h3 className="font-heading text-lg font-semibold text-foreground">{firstName}</h3>
           <p className="text-xs text-muted-foreground">{locationLabel(helper.city, distance, showDistance)}</p>
+          <HelpCounts userId={helper.id} className="mt-1" />
         </div>
         <MissionBadgesReceived profileId={helper.id} variant="compact" />
       </div>
