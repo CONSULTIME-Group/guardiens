@@ -40,7 +40,6 @@ Deno.serve(async (req) => {
   const nowIso = now.toISOString()
   const today = nowIso.slice(0, 10)
   const yesterday = new Date(now.getTime() - 86400_000).toISOString().slice(0, 10)
-  const dateNeededCutoff = new Date(now.getTime() - 3 * 86400_000).toISOString().slice(0, 10)
   const createdAtCutoff = new Date(now.getTime() - 45 * 86400_000).toISOString()
   const acceptedFallbackCutoff = new Date(now.getTime() - 7 * 86400_000).toISOString()
 
