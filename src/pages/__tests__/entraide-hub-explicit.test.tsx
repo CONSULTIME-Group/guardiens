@@ -8,36 +8,36 @@ vi.mock("@/components/missions/ExchangeHowItWorks", () => ({
 }));
 
 const renderContent = (isAuthenticated: boolean) => {
-  const onPublish = vi.fn();
-  const onCategoryChange = vi.fn();
+  const onNeed = vi.fn();
+  const onHelp = vi.fn();
   render(
     <MemoryRouter>
-      <EntraideHubIntro isAuthenticated={isAuthenticated} onPublish={onPublish} category="all" onCategoryChange={onCategoryChange} />
+      <EntraideHubIntro isAuthenticated={isAuthenticated} onNeed={onNeed} onHelp={onHelp} />
       <EntraideFaq />
     </MemoryRouter>,
   );
-  return { onPublish, onCategoryChange };
+  return { onNeed, onHelp };
 };
 
 describe("EntraideHub, contenu explicite", () => {
   it("présente le modèle complet aux visiteurs sans compte", () => {
-    const { onPublish, onCategoryChange } = renderContent(false);
-    expect(screen.getByText(/Un coup de main près de chez vous, contre un coup de main en retour/)).toBeInTheDocument();
+    const { onNeed, onHelp } = renderContent(false);
+    expect(screen.getByRole("heading", { name: /Et si, à quelques kilomètres/ })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Concrètement" })).toBeInTheDocument();
     expect(screen.getByRole("region", { name: "Comment ça marche" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Questions fréquentes" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Faut-il payer pour utiliser l'Entraide ?" }));
     expect(screen.getByText("L'Entraide est ouverte à tous les membres, pour 0 €. Vous convenez ensemble d'un service ou d'une attention.")).toBeInTheDocument();
     expect(screen.queryByText("Résiliable à tout moment")).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Promener un chien" }));
-    expect(onCategoryChange).toHaveBeenCalledWith("animals");
-    fireEvent.click(screen.getByRole("button", { name: "Demander ou proposer un coup de main" }));
-    expect(onPublish).toHaveBeenCalledOnce();
+    fireEvent.click(screen.getByRole("button", { name: "J'ai besoin d'un coup de main" }));
+    fireEvent.click(screen.getByRole("button", { name: "Je veux bien donner un coup de main" }));
+    expect(onNeed).toHaveBeenCalledOnce();
+    expect(onHelp).toHaveBeenCalledOnce();
   });
 
   it("conserve le bouton membre et masque Comment ça marche", () => {
     renderContent(true);
-    expect(screen.getByRole("button", { name: "Publier" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "J'ai besoin d'un coup de main" })).toBeInTheDocument();
     expect(screen.queryByRole("region", { name: "Comment ça marche" })).not.toBeInTheDocument();
   });
 });

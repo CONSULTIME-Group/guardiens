@@ -1,8 +1,8 @@
-import { useEffect, useMemo } from "react";
-import { Circle, MapContainer, TileLayer, Tooltip, useMap } from "react-leaflet";
+import { useEffect, useMemo, useState } from "react";
+import { Circle, MapContainer, TileLayer, Tooltip, useMap, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import LeafletUnmountGuard from "@/components/shared/LeafletUnmountGuard";
-import { MAP_TILE_ATTRIBUTION, MAP_TILE_URL, MAP_TILE_URL_WORLD } from "@/lib/mapTiles";
+import { MAP_TILE_ATTRIBUTION, MAP_TILE_URL } from "@/lib/mapTiles";
 import { offsetApproximatePoint } from "@/lib/entraideMap";
 import type { EntraideNeed, PublicHelper } from "./EntraideCards";
 
@@ -50,7 +50,9 @@ const FitPoints = ({ points, focus }: { points: Point[]; focus: [number, number]
 
 const HubCircles = ({ points }: { points: Point[] }) => {
   const map = useMap();
-  const clusters = useMemo(() => clusterPoints(points, map.getZoom()), [map, points]);
+  const [zoom, setZoom] = useState(map.getZoom());
+  useMapEvents({ zoomend: () => setZoom(map.getZoom()) });
+  const clusters = useMemo(() => clusterPoints(points, zoom), [points, zoom]);
   return (
     <>
       {clusters.map((cluster) => (
@@ -100,7 +102,7 @@ const EntraideMap = ({ needs, helpers, focus }: {
     <div className="h-[360px] overflow-hidden rounded-lg border border-border sm:h-[520px]" aria-label="Carte des besoins et des personnes disponibles">
       <MapContainer center={focus || [46.6, 2.4]} zoom={focus ? 11 : 6} className="h-full w-full" scrollWheelZoom>
         <LeafletUnmountGuard />
-        <TileLayer url={focus ? MAP_TILE_URL : MAP_TILE_URL_WORLD} attribution={MAP_TILE_ATTRIBUTION} />
+        <TileLayer url={MAP_TILE_URL} attribution={MAP_TILE_ATTRIBUTION} />
         <FitPoints points={points} focus={focus} />
         <HubCircles points={points} />
       </MapContainer>

@@ -47,6 +47,7 @@ import { useOwnerPrimaryAction } from "@/hooks/useOwnerPrimaryAction";
 import type { Pet } from "./owner/types";
 import { useOwnerDashboardData } from "@/hooks/useOwnerDashboardData";
 import DashboardLoadError from "./DashboardLoadError";
+import HelpsWithReminder from "./HelpsWithReminder";
 
 import { useNearbyOwnerSitters } from "@/hooks/useNearbyOwnerSitters";
 import { useNearbyHelpers } from "@/hooks/useNearbyHelpers";
@@ -303,6 +304,7 @@ const OwnerDashboard = () => {
       <div className="px-4 sm:px-5 md:px-8 mb-4">
         <RoleActivationBanner userRole={user?.role || "owner"} />
       </div>
+      <HelpsWithReminder />
 
       {/* ═══ Grille 12 colonnes : flux (8) + rail (4) ═══ */}
       <div className="min-w-0">
