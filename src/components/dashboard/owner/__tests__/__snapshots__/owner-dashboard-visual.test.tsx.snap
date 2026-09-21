@@ -10,7 +10,7 @@ exports[`Owner Dashboard — visual snapshots > MissionsTabsCard > matches snaps
     <h3
       class="text-sm font-semibold text-foreground"
     >
-      Petites missions
+      Entraide
     </h3>
     <a
       class="text-xs text-primary font-sans hover:underline shrink-0"
@@ -402,7 +402,7 @@ exports[`Owner Dashboard — visual snapshots > MissionsTabsCard > matches snaps
     <h3
       class="text-sm font-semibold text-foreground"
     >
-      Petites missions
+      Entraide
     </h3>
     <a
       class="text-xs text-primary font-sans hover:underline shrink-0"
