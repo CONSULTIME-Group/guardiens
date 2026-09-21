@@ -985,9 +985,29 @@ const SmallMissionDetail = () => {
             </div>
           ) : (
             <>
+              {/* Un besoin, dix personnes du coin, un « je peux ». Un seul
+                  geste suffit, le détail se règle ensuite en conversation. */}
+              {!isOffer && (
+                <Button
+                  className="w-full rounded-full font-bold text-base"
+                  size="lg"
+                  disabled={submitting}
+                  onClick={async () => {
+                    try {
+                      trackEvent("mission_can_help", {
+                        metadata: { mission_id: mission.id, source: "page" },
+                      });
+                    } catch { /* mesure non bloquante */ }
+                    await handleRespond("Je peux vous aider.");
+                  }}
+                >
+                  Je peux
+                </Button>
+              )}
               <Button
                 className="w-full rounded-full font-bold text-base"
                 size="lg"
+                variant={isOffer ? "default" : "outline"}
                 onClick={() => {
                   setResponseModalOpen(true);
                   trackEvent("mission_response_modal_opened", {
@@ -995,7 +1015,7 @@ const SmallMissionDetail = () => {
                   });
                 }}
               >
-                {ctaLabel}
+                {isOffer ? ctaLabel : "Répondre avec un mot"}
               </Button>
             </>
           )}
