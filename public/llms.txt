@@ -14,6 +14,8 @@ L'accès à Guardiens est ouvert pendant la phase de lancement : vous accédez �
 - [Actualités](/actualites): Articles de fond sur la garde d'animaux, le house-sitting et la vie de la plateforme.
 - [Petites missions](/petites-missions): Coups de main entre membres (promenade, visite, dépannage), un service contre un service, sans nuitée.
 - [Petites missions à Lyon](/petites-missions/lyon): Hub local des coups de main entre membres à Lyon.
+- [Petites missions à Marseille](/petites-missions/marseille): Hub local des coups de main entre membres à Marseille.
+- [Petites missions à Strasbourg](/petites-missions/strasbourg): Hub local des coups de main entre membres à Strasbourg.
 - [Gardien d'urgence](/gardien-urgence): Trouver un gardien rapidement en cas d'imprévu.
 - [Devenir home-sitter](/devenir-home-sitter): Guide pour devenir gardien à domicile sur Guardiens.
 - [Guides de villes](/guides): Guides locaux indépendants des annonces de garde.
