@@ -26,6 +26,7 @@ describe("EntraideHub, contenu explicite", () => {
     expect(screen.getByRole("heading", { name: "Concrètement" })).toBeInTheDocument();
     expect(screen.getByRole("region", { name: "Comment ça marche" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Questions fréquentes" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Faut-il payer pour utiliser l'Entraide ?" }));
     expect(screen.getByText("L'Entraide est ouverte à tous les membres, pour 0 €. Vous convenez ensemble d'un service ou d'une attention.")).toBeInTheDocument();
     expect(screen.queryByText("Résiliable à tout moment")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Promener un chien" }));

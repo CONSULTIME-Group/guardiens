@@ -77,6 +77,7 @@ describe("send-alert-digest, ventilation des exclusions", () => {
       alert_preferences: prefs, geocode_cache: [], sits: [], small_missions: [],
     });
     // Dimanche : le rythme hebdomadaire ne passe pas, motif distinct.
+    vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-09-20T10:00:00Z"));
     const response = await handler(new Request("https://fixture.invalid/?force=true", { method: "POST", body: "{}" }));
     vi.useRealTimers();
