@@ -170,7 +170,7 @@ export const staticRoutes: SiteRoute[] = [
  {
  path: "/petites-missions",
  title: "Entraide communautaire | Guardiens",
- metaDescription: "Entraide entre gens du coin. Un service contre un service, 0 €. Arrosage du jardin, promenade de chien, courses, partage de compétences.",
+ metaDescription: "Entraide entre gens du coin : un service contre un service. Arrosage du jardin, promenade de chien, courses, partage de savoir-faire.",
  h1: "Entraide",
  sitemapPriority: "0.8",
  changeFreq: "weekly",
