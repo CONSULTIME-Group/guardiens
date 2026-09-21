@@ -140,6 +140,7 @@ passed.push('Besoin pourvu : les jetons restants ne creent plus de reponse');
 
 // Fin des offres.
 let refused = false;
+console.log('DEBUG mt', (await db.query("SELECT mission_type FROM small_missions")).rows);
 console.log('DEBUG triggers', (await db.query("SELECT tgname,tgenabled FROM pg_trigger WHERE NOT tgisinternal")).rows);
 try {
   await db.query(
@@ -147,6 +148,7 @@ try {
     [owner],
   );
 } catch (e) {
+  console.log('DEBUG err', e.message, '| hint:', e.hint);
   refused = e.hint === 'offer_creation_disabled' || /ne se publient plus/.test(e.message);
 }
 assert.ok(refused, 'la creation d\'offre doit etre refusee');
