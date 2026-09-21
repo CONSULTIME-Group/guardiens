@@ -8,7 +8,7 @@ import { trackEvent } from "@/lib/analytics";
 import { publicFirstName } from "@/lib/displayName";
 import MissionCardCover from "@/components/missions/MissionCardCover";
 import { MISSION_CATEGORY_LABEL } from "@/lib/missionCategories";
-import { questionCategoryLabel } from "@/lib/communityCategories";
+import { questionCategoryLabel, questionCategoryToMissionCategory } from "@/lib/communityCategories";
 
 /**
  * MobileEntraideFeed, fil unique de l'entraide sur mobile.
@@ -94,9 +94,10 @@ interface Props {
   /** Tri par proximité : actif seulement si la position est connue. */
   proximityActive?: boolean;
   getDistance?: (id: string) => number | null;
+  categoryFilter?: string;
 }
 
-const MobileEntraideFeed = ({ missions, questions, loading, onPublish, proximityActive, getDistance }: Props) => {
+const MobileEntraideFeed = ({ missions, questions, loading, onPublish, proximityActive, getDistance, categoryFilter = "all" }: Props) => {
   const [active, setActive] = useState<FeedType[]>(() => readChips());
   const viewFiredRef = useRef(false);
 
@@ -133,17 +134,22 @@ const MobileEntraideFeed = ({ missions, questions, loading, onPublish, proximity
   // Un projet participatif se lit comme une annonce et vit sous /projets :
   // il reste hors du fil d'entraide, même si la source en fournit.
   const feedMissions = useMemo(
-    () => missions.filter((m) => m.category !== "projet"),
-    [missions],
+    () => missions.filter((m) => m.category !== "projet" && (categoryFilter === "all" || m.category === categoryFilter)),
+    [missions, categoryFilter],
+  );
+
+  const feedQuestions = useMemo(
+    () => questions.filter((q) => categoryFilter === "all" || questionCategoryToMissionCategory(q.category) === categoryFilter),
+    [questions, categoryFilter],
   );
 
   const counts = useMemo(() => {
-    const c: Record<FeedType, number> = { question: questions.length, besoin: 0, offre: 0 };
+    const c: Record<FeedType, number> = { question: feedQuestions.length, besoin: 0, offre: 0 };
     for (const m of feedMissions) {
       c[(m.mission_type ?? "besoin") as "besoin" | "offre"] += 1;
     }
     return c;
-  }, [feedMissions, questions]);
+  }, [feedMissions, feedQuestions]);
 
   const items = useMemo(() => {
     const list: Array<
@@ -151,7 +157,7 @@ const MobileEntraideFeed = ({ missions, questions, loading, onPublish, proximity
       | { kind: FeedType & ("besoin" | "offre"); date: string; data: FeedMission }
     > = [];
     if (active.includes("question")) {
-      for (const q of questions) list.push({ kind: "question", date: q.created_at, data: q });
+      for (const q of feedQuestions) list.push({ kind: "question", date: q.created_at, data: q });
     }
     for (const m of feedMissions) {
       const t = (m.mission_type ?? "besoin") as "besoin" | "offre";
@@ -169,7 +175,7 @@ const MobileEntraideFeed = ({ missions, questions, loading, onPublish, proximity
       }
       return a.date < b.date ? 1 : a.date > b.date ? -1 : 0;
     });
-  }, [active, feedMissions, questions, proximityActive, getDistance]);
+  }, [active, feedMissions, feedQuestions, proximityActive, getDistance]);
 
   return (
     <div className="md:hidden">

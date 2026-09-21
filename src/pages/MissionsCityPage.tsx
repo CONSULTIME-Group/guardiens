@@ -120,12 +120,12 @@ const MissionsCityPage = () => {
             <div className="flex flex-col sm:flex-row gap-4 mt-8">
               <Link to="/inscription?redirect=/petites-missions/creer">
                 <Button className="rounded-full px-8 py-4 h-auto text-sm font-semibold tracking-wide">
-                  Publier une mission à {c.cityName}
+                  Publier dans l'Entraide à {c.cityName}
                 </Button>
               </Link>
               <Link to="/petites-missions">
                 <Button variant="outline" className="rounded-full px-8 py-4 h-auto text-sm font-semibold tracking-wide">
-                  Voir toutes les missions
+                  Voir toute l'Entraide
                 </Button>
               </Link>
             </div>
@@ -150,7 +150,7 @@ const MissionsCityPage = () => {
         <section className="bg-background border-t border-border/40">
           <div className="max-w-3xl mx-auto px-6 py-8 md:py-20">
             <h2 className="font-heading text-xl md:text-3xl font-semibold text-foreground mb-6 md:mb-8 leading-snug">
-              Missions ouvertes près de {c.cityName}
+              Entraide ouverte près de {c.cityName}
             </h2>
 
             {missions.length > 0 ? (
@@ -190,14 +190,14 @@ const MissionsCityPage = () => {
             ) : (
               <div className="p-8 rounded-2xl border border-dashed border-border bg-accent/20 text-center">
                 <p className="font-heading text-lg text-foreground/85 leading-relaxed">
-                  Aucune mission ouverte à {c.cityName} pour le moment.
+                  Aucune publication ouverte à {c.cityName} pour le moment.
                 </p>
                 <p className="font-body text-base text-foreground/65 leading-relaxed mt-3 max-w-xl mx-auto">
-                  La communauté lyonnaise grandit chaque semaine. Publiez la première mission de votre quartier, quelqu'un, près de chez vous, n'attend que ça.
+                  La communauté lyonnaise grandit chaque semaine. Publiez la première demande ou offre de votre quartier.
                 </p>
                 <Link to="/inscription?redirect=/petites-missions/creer" className="inline-block mt-6">
                   <Button className="rounded-full px-8 py-3 h-auto text-sm font-semibold">
-                    Publier une mission
+                    Publier dans l'Entraide
                   </Button>
                 </Link>
               </div>

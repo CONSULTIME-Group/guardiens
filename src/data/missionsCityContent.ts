@@ -27,10 +27,10 @@ export const MISSIONS_LYON: MissionsCityContent = {
   cityName: "Lyon",
   coordinates: { lat: 45.764, lng: 4.8357 },
   radiusKm: 25,
-  metaTitle: "Entraide à domicile à Lyon | Guardiens",
+  metaTitle: "L'entraide à domicile à Lyon | Guardiens",
   metaDescription:
-    "Petites missions d'entraide à domicile à Lyon : garde animaux, jardin, courses. Un service contre un service, entre gens du coin. Publiez ou aidez.",
-  h1: "Entraide à domicile à Lyon",
+    "L'entraide à domicile à Lyon : garde animaux, jardin, courses. Un service contre un service, entre gens du coin. Publiez ou aidez.",
+  h1: "L'entraide à domicile à Lyon",
   intro:
     "À Lyon, les petites missions d'entraide rassemblent des gens du coin qui rendent service à domicile sans contrepartie financière. Une promenade de chien à la Croix-Rousse, un arrosage de plantes à Villeurbanne, un coup de main pour réceptionner un colis à Vaise : autant d'échanges concrets qui se nouent entre habitants des 9 arrondissements lyonnais et des communes proches comme Caluire-et-Cuire, Tassin-la-Demi-Lune, Bron, Vénissieux ou Écully.",
   sections: [
