@@ -27,7 +27,6 @@ import {
   shouldSendNextWave,
   waveHeadline,
   frenchDateLabel,
-  roundDistanceKm,
   WAVE_RELAUNCH_MESSAGE,
   WAVE_EMPTY_MESSAGE,
 } from "../_shared/mission-wave.ts";
@@ -281,5 +280,3 @@ Deno.serve(async (req) => {
     return json({ ok: false, error: String(e) }, 500);
   }
 });
-
-export { roundDistanceKm };
