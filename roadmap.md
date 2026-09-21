@@ -14,3 +14,8 @@
 - [x] Ajouter les tests de rendu, SEO, sitemap, rayon et contenu éditorial sans chiffre.
 - [x] Exécuter Vitest complet, `test:sql`, TypeScript et vérifier le journal de compilation.
 - [x] Ne pas publier ni déployer.
+- [ ] Lot 4b : migration 0015 `public_helpers` (CREATE OR REPLACE, sans filtre helps_with) + copie documentaire.
+- [ ] Lot 4b : retirer le filtre JS `helps_with` (hub + pages villes), HelperCard « Disponible pour un coup de main ».
+- [ ] Lot 4b : onze villes (Paris, Toulouse, Lille, Annecy, Nice, Nantes, Saint-Étienne, Rennes, Montpellier, Grenoble, Bordeaux) dans le registre, routes, sitemaps, hub, footer, llms.txt, tests.
+- [ ] Lot 4b : copier les textes dans .lovable/plan/lot4b-textes.md (Paris : « se croisent souvent en silence »).
+- [ ] Lot 4b : Vitest complet, test:sql, tsgo. Ne pas publier ni déployer.

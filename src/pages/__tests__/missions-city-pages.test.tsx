@@ -66,7 +66,7 @@ describe("pages villes Entraide", () => {
   });
   afterEach(cleanup);
 
-  for (const citySlug of ["lyon", "marseille", "strasbourg"]) {
+  for (const citySlug of Object.keys(MISSIONS_CITIES)) {
     it(`rend le gabarit, la FAQ, le JSON-LD et la canonique de ${citySlug}`, async () => {
       const city = MISSIONS_CITIES[citySlug];
       rows.public_profiles = nearbyProfiles(citySlug, 5);
@@ -93,6 +93,7 @@ describe("pages villes Entraide", () => {
     ];
     rows.public_helpers = [
       { id: "helper-near", first_name: "Camille", avatar_url: null, city: "Lyon", latitude_approx: city.coordinates.lat, longitude_approx: city.coordinates.lng, helps_with: "Arroser les plantes" },
+      { id: "helper-near-open", first_name: "Nadia", avatar_url: null, city: "Lyon", latitude_approx: city.coordinates.lat, longitude_approx: city.coordinates.lng, helps_with: null },
       { id: "helper-far", first_name: "Alex", avatar_url: null, city: "Paris", latitude_approx: 48.8566, longitude_approx: 2.3522, helps_with: "Porter un colis" },
     ];
     rows.public_mission_response_counts = [{ mission_id: "near", response_count: 2 }];
@@ -101,10 +102,11 @@ describe("pages villes Entraide", () => {
     await waitFor(() => expect(screen.getByText("Besoin proche")).toBeInTheDocument());
     expect(screen.queryByText("Besoin lointain")).not.toBeInTheDocument();
     expect(screen.getByText("Camille")).toBeInTheDocument();
+    expect(screen.getByText("Nadia")).toBeInTheDocument();
     expect(screen.queryByText("Alex")).not.toBeInTheDocument();
     expect(screen.getByText("La carte se remplit avec les coups de main du coin.")).toBeInTheDocument();
     expect(screen.queryByText("Preuve locale")).not.toBeInTheDocument();
-    expect(screen.getByTestId("city-map")).toHaveTextContent("1:1");
+    expect(screen.getByTestId("city-map")).toHaveTextContent("1:2");
   });
 
   it("garde le seuil du compteur explicite", () => {

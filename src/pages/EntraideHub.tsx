@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
 import { trackEvent } from "@/lib/analytics";
 import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
+import { MISSIONS_CITIES, MISSIONS_CITY_SLUGS } from "@/data/missionsCityContent";
 import { toast } from "sonner";
 
 const EntraideMap = lazy(() => import("@/components/entraide/EntraideMap"), "EntraideMap");
@@ -32,7 +33,7 @@ const faqSchema = {
 
 export const filterPublicHelpers = (helpers: PublicHelper[], query: string): PublicHelper[] => {
   const normalized = query.trim().toLocaleLowerCase("fr");
-  return helpers.filter((helper) => `${helper.first_name} ${helper.city || ""} ${helper.helps_with}`.toLocaleLowerCase("fr").includes(normalized));
+  return helpers.filter((helper) => `${helper.first_name} ${helper.city || ""} ${helper.helps_with || ""}`.toLocaleLowerCase("fr").includes(normalized));
 };
 
 export const EntraideHubIntro = ({ isAuthenticated, onNeed, onHelp }: {
@@ -116,7 +117,7 @@ const EntraideHub = () => {
         const date = row.end_date || row.date_needed;
         return !date || new Date(date) >= today;
       }).map((row) => ({ ...row, response_count: counts.get(row.id) || 0 })) as EntraideNeed[]);
-      setHelpers((helpersResult.data || []).flatMap((row) => row.id && row.first_name && row.helps_with ? [{ ...row, id: row.id, first_name: row.first_name, helps_with: row.helps_with }] : []) as PublicHelper[]);
+      setHelpers((helpersResult.data || []).flatMap((row) => row.id && row.first_name ? [{ ...row, id: row.id, first_name: row.first_name }] : []) as PublicHelper[]);
       setLoading(false);
     };
     void load();
@@ -175,7 +176,7 @@ const EntraideHub = () => {
     "@context": "https://schema.org",
     "@type": "Person",
     name: helper.first_name,
-    description: helper.helps_with,
+    description: helper.helps_with || undefined,
     address: helper.city ? { "@type": "PostalAddress", addressLocality: helper.city } : undefined,
   }));
 
@@ -189,11 +190,12 @@ const EntraideHub = () => {
 
           <nav className="border-y border-border py-4 text-sm text-muted-foreground" aria-label="Entraide dans votre ville">
             <span>Dans votre ville : </span>
-            <Link to="/petites-missions/lyon" className="font-semibold text-primary underline-offset-4 hover:underline">Lyon</Link>
-            <span>, </span>
-            <Link to="/petites-missions/marseille" className="font-semibold text-primary underline-offset-4 hover:underline">Marseille</Link>
-            <span>, </span>
-            <Link to="/petites-missions/strasbourg" className="font-semibold text-primary underline-offset-4 hover:underline">Strasbourg</Link>
+            {MISSIONS_CITY_SLUGS.map((slug, index) => (
+              <span key={slug}>
+                {index > 0 && ", "}
+                <Link to={`/petites-missions/${slug}`} className="font-semibold text-primary underline-offset-4 hover:underline">{MISSIONS_CITIES[slug].cityName}</Link>
+              </span>
+            ))}
           </nav>
 
           <EntraideProofs origin={origin} />

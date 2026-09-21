@@ -78,6 +78,8 @@ try {
   await db.exec(helpersMigration);
   // Idempotence : un second passage ne doit rien casser.
   await db.exec(migration);
+  const helpersOpenMigration = readFileSync('drizzle/migrations/0015_entraide_public_helpers_open.sql', 'utf8');
+  await db.exec(helpersOpenMigration);
 
   const viewWrites = await db.query(`
     SELECT g.table_name, g.grantee, g.privilege_type
@@ -109,11 +111,14 @@ try {
   );
   await db.exec(`
     INSERT INTO public.profiles (id, first_name, city, latitude, longitude, helps_with, account_status, available_for_help)
-    VALUES ('00000000-0000-0000-0000-000000000001', 'Camille', 'Lyon', 45.764043, 4.835659, 'Arroser les plantes', 'active', true);
+    VALUES ('00000000-0000-0000-0000-000000000001', 'Camille', 'Lyon', 45.764043, 4.835659, 'Arroser les plantes', 'active', true),
+           ('00000000-0000-0000-0000-000000000015', 'Nadia', 'Lyon', 45.764043, 4.835659, null, 'active', true),
+           ('00000000-0000-0000-0000-000000000016', 'Espion', 'Lyon', null, null, 'Je garde tout', 'active', true);
     SET ROLE anon;
   `);
   const anonHelpers = await db.query('SELECT first_name, city, helps_with FROM public.public_helpers');
-  equal(anonHelpers.rows.length, 1, 'anon lit les membres disponibles');
+  equal(anonHelpers.rows.length, 2, 'anon lit les membres disponibles, helps_with vide inclus, sans coordonnées exclu');
+  assert.ok(anonHelpers.rows.some((row) => row.first_name === 'Nadia' && row.helps_with === null), 'un membre sans helps_with reste visible'); checks++;
   await db.exec('RESET ROLE;');
   const helperWrites = await db.query(`
     SELECT privilege_type FROM information_schema.role_table_grants

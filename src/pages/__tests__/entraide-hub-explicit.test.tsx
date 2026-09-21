@@ -46,9 +46,17 @@ describe("EntraideHub, contenu explicite", () => {
     const helpers = [
       { id: "1", first_name: "Camille", avatar_url: null, city: "Lyon", latitude_approx: null, longitude_approx: null, helps_with: "Arroser les plantes" },
       { id: "2", first_name: "Alex", avatar_url: null, city: "Annecy", latitude_approx: null, longitude_approx: null, helps_with: "Monter un meuble" },
+      { id: "3", first_name: "Nadia", avatar_url: null, city: "Rennes", latitude_approx: null, longitude_approx: null, helps_with: null },
     ];
     expect(filterPublicHelpers(helpers, "plantes").map((helper) => helper.id)).toEqual(["1"]);
     expect(filterPublicHelpers(helpers, "annecy").map((helper) => helper.id)).toEqual(["2"]);
+    expect(filterPublicHelpers(helpers, "nadia").map((helper) => helper.id)).toEqual(["3"]);
+    expect(filterPublicHelpers(helpers, "").map((helper) => helper.id)).toEqual(["1", "2", "3"]);
+  });
+
+  it("affiche « Disponible pour un coup de main » quand la phrase est absente", async () => {
+    const source = await import("@/components/entraide/EntraideCards?raw");
+    expect(source.default).toContain('helps_with?.trim() || "Disponible pour un coup de main"');
   });
 
   it("garde un JSON-LD Person sans coordonnées", async () => {

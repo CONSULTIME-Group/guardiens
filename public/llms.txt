@@ -16,6 +16,17 @@ L'accès à Guardiens est ouvert pendant la phase de lancement : vous accédez �
 - [Petites missions à Lyon](/petites-missions/lyon): Hub local des coups de main entre membres à Lyon.
 - [Petites missions à Marseille](/petites-missions/marseille): Hub local des coups de main entre membres à Marseille.
 - [Petites missions à Strasbourg](/petites-missions/strasbourg): Hub local des coups de main entre membres à Strasbourg.
+- [Petites missions à Paris](/petites-missions/paris): Hub local des coups de main entre membres à Paris.
+- [Petites missions à Toulouse](/petites-missions/toulouse): Hub local des coups de main entre membres à Toulouse.
+- [Petites missions à Lille](/petites-missions/lille): Hub local des coups de main entre membres à Lille.
+- [Petites missions à Annecy](/petites-missions/annecy): Hub local des coups de main entre membres à Annecy.
+- [Petites missions à Nice](/petites-missions/nice): Hub local des coups de main entre membres à Nice.
+- [Petites missions à Nantes](/petites-missions/nantes): Hub local des coups de main entre membres à Nantes.
+- [Petites missions à Saint-Étienne](/petites-missions/saint-etienne): Hub local des coups de main entre membres à Saint-Étienne.
+- [Petites missions à Rennes](/petites-missions/rennes): Hub local des coups de main entre membres à Rennes.
+- [Petites missions à Montpellier](/petites-missions/montpellier): Hub local des coups de main entre membres à Montpellier.
+- [Petites missions à Grenoble](/petites-missions/grenoble): Hub local des coups de main entre membres à Grenoble.
+- [Petites missions à Bordeaux](/petites-missions/bordeaux): Hub local des coups de main entre membres à Bordeaux.
 - [Gardien d'urgence](/gardien-urgence): Trouver un gardien rapidement en cas d'imprévu.
 - [Devenir home-sitter](/devenir-home-sitter): Guide pour devenir gardien à domicile sur Guardiens.
 - [Guides de villes](/guides): Guides locaux indépendants des annonces de garde.
