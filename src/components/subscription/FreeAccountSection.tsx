@@ -33,7 +33,7 @@ const accesGratuits: Array<{ titre: string; detail: string }> = [
  {
  titre: "Messagerie liée à l'entraide",
  detail:
- "Échanger avec les membres dans le cadre des petites missions et des demandes d'entraide reste offert.",
+ "Échanger avec les membres dans le cadre de l'Entraide reste offert.",
  },
  {
  titre: "Recherche et favoris",
