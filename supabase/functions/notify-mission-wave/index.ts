@@ -20,7 +20,8 @@
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { isParisQuietHour } from "../_shared/paris-hour.ts";
-import { startCronRun } from "../_shared/cron-run-log.ts";
+import { startCronRun, logCronRejection } from "../_shared/cron-run-log.ts";
+import { authorizeWaveCaller } from "../_shared/wave-caller.ts";
 import {
   WAVE_SIZE,
   WAVE_INTERVAL_HOURS,
@@ -222,7 +223,34 @@ Deno.serve(async (req) => {
   try { if (req.body) body = await req.json(); } catch { /* corps vide */ }
 
   const supabase = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
+
+  // Accès réservé au planificateur (clé de service) et, à la publication, à
+  // l'auteur du besoin concerné depuis son navigateur.
+  const decision = await authorizeWaveCaller({
+    authHeader: req.headers.get("Authorization"),
+    serviceKey: SERVICE_KEY,
+    missionId: body.mission_id ?? null,
+    getUserId: async (token) => {
+      const { data, error } = await supabase.auth.getUser(token);
+      if (error || !data?.user) return null;
+      return data.user.id;
+    },
+    getMissionOwnerId: async (missionId) => {
+      const { data } = await supabase
+        .from("small_missions")
+        .select("user_id")
+        .eq("id", missionId)
+        .maybeSingle();
+      return (data?.user_id as string | undefined) ?? null;
+    },
+  });
+  if (!decision.allowed) {
+    try { await logCronRejection("notify-mission-wave", `auth refusee, ${decision.reason} (HTTP ${decision.status})`); } catch { /* la journalisation ne masque jamais le rejet */ }
+    return json({ error: decision.error }, decision.status);
+  }
+
   const now = new Date();
+
 
   try {
     // 1) Publication d'un besoin : vague 1 immédiate, hors heures calmes.
