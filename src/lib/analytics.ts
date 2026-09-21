@@ -204,6 +204,7 @@ export type EventType =
   | "mission_response_source"                   // Réponse envoyée (mission_id, source: feed|digest_email|invitation|direct, utm_campaign?)
   // EntraideHub Pass 1, vagues 2-3 (modale réponse + workflow) ---------------
 
+  | "mission_can_help"                          // « Je peux » sur un besoin d'entraide (source: email | page)
   | "mission_response_modal_opened"             // Ouverture modale de réponse depuis sidebar (mission_id, mission_type)
   | "mission_response_submitted_from_modal"     // Envoi depuis la modale (mission_id, has_template)
   | "mission_accept_response_cascade_choice"    // Mode choisi lors de l'acceptation (mode: keep|decline_others, pending_count)
