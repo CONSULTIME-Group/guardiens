@@ -8,8 +8,10 @@ describe("sitemap Entraide", () => {
   const buildSource = readFileSync(resolve(process.cwd(), "scripts/generate-sitemap.mjs"), "utf8");
   const description = "Une description publique suffisamment détaillée pour expliquer précisément le besoin, le contexte, le moment souhaité et le service proposé en retour, sans argent. ".repeat(2);
 
-  it("ajoute la page Entraide de Lyon", () => {
-    expect(edgeSource).toContain('{ loc: "/petites-missions/lyon", priority: "0.7", changefreq: "weekly" }');
+  it("ajoute les trois pages villes Entraide", () => {
+    for (const city of ["lyon", "marseille", "strasbourg"]) {
+      expect(edgeSource).toContain(`{ loc: "/petites-missions/${city}", priority: "0.7", changefreq: "weekly" }`);
+    }
     expect(buildSource).toContain('isIndexableEntraideMission(m)');
     expect(buildSource).toContain('loc: `/petites-missions/${m.slug}`');
   });
