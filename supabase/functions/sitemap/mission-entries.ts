@@ -1,4 +1,4 @@
-import { isIndexableEntraideMission as sharedIsIndexableEntraideMission } from "../../../src/lib/entraideMissionIndexability.js";
+import { isIndexableEntraideMission as sharedIsIndexableEntraideMission } from "../_shared/entraideMissionIndexability.js";
 
 export interface SitemapMission {
   slug?: string | null;

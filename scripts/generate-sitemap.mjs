@@ -17,7 +17,7 @@ import { sitRichnessRejectionReason } from "../src/lib/sitIndexability.js";
 import { isAssociationIndexable } from "../src/lib/associationIndexability.js";
 import { isSitterProfileIndexable } from "../src/lib/sitterProfileIndexability.js";
 import { mergedBreedTarget } from "../src/lib/breedFicheMerges.js";
-import { isIndexableEntraideMission } from "../src/lib/entraideMissionIndexability.js";
+import { isIndexableEntraideMission } from "../supabase/functions/_shared/entraideMissionIndexability.js";
 import { fetchOrCache as sharedFetchOrCache } from "./lib/sitemapCache.mjs";
 
 
