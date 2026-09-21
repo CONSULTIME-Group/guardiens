@@ -1,20 +1,20 @@
 {
   "sources": {
     "city_guides": {
-      "head": "2026-09-20T03:21:07.707585+00:00|92",
-      "fetchedAt": "2026-09-21T02:26:42.961Z"
+      "head": "2026-09-21T09:36:37.345986+00:00|93",
+      "fetchedAt": "2026-09-21T09:50:51.962Z"
     },
     "articles": {
-      "head": "2026-09-19T10:00:26.38143+00:00|131",
-      "fetchedAt": "2026-09-21T02:26:42.963Z"
+      "head": "2026-09-21T09:10:04.859269+00:00|131",
+      "fetchedAt": "2026-09-21T09:50:51.949Z"
     },
     "seo_city_pages": {
-      "head": "2026-09-20T22:30:06.640233+00:00|164",
-      "fetchedAt": "2026-09-21T02:26:42.975Z"
+      "head": "2026-09-21T06:30:04.09083+00:00|164",
+      "fetchedAt": "2026-09-21T09:50:51.945Z"
     },
     "small_missions_entraide_v1": {
-      "head": "2026-09-17T08:06:13.05136+00:00|11",
-      "fetchedAt": "2026-09-21T02:26:42.976Z"
+      "head": "2026-09-17T08:06:13.05136+00:00|3",
+      "fetchedAt": "2026-09-21T09:50:52.017Z"
     },
     "breed_profiles": {
       "head": "2026-08-19T19:06:57.126227+00:00|81",
@@ -25,569 +25,575 @@
       "fetchedAt": "2026-09-21T02:26:42.993Z"
     },
     "seo_department_pages": {
-      "head": "2026-09-20T04:07:00.229401+00:00|102",
-      "fetchedAt": "2026-09-21T02:26:43.003Z"
+      "head": "2026-09-21T04:07:00.188278+00:00|102",
+      "fetchedAt": "2026-09-21T09:50:51.998Z"
     },
     "public_sits": {
       "head": "2026-09-18T08:24:18.780206+00:00|9",
       "fetchedAt": "2026-09-21T02:26:43.047Z"
     },
     "public_profiles": {
-      "head": "2026-09-20T22:22:29.350981+00:00|1257",
-      "fetchedAt": "2026-09-21T02:26:43.117Z"
+      "head": "2026-09-21T06:52:09.211333+00:00|1259",
+      "fetchedAt": "2026-09-21T09:50:52.099Z"
     }
   },
   "entries": {
     "city_guides": [
       {
         "loc": "/guides/nantes",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/caluire-et-cuire",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/rillieux-la-pape",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/lyon",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/vanves",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/isturits",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/saint-marcel-les-valence",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/gourdon",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/bron",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/echirolles",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/le-puy-en-velay",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/annecy",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/clermont-ferrand",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/saint-denis-reunion",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/troyes",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/venissieux",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/conquereuil-44290",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/reims",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/megeve",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/montaigu-de-quercy",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/noumea",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/decines-charpieu",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/rennes",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/ecully",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/marseille",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/sonchamp",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/tassin-la-demi-lune",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/chassenard",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/roanne",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/montelimar",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/aurillac",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/chambery",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/grenoble",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
-        "loc": "/guides/oullins",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/quimper",
-        "lastmod": "2026-09-19",
+        "loc": "/guides/colmar",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/beaujolais",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/rillieux-la-pape",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/lyon",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/vanves",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/isturits",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/schweighouse-sur-moder",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/saint-marcel-les-valence",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/bron",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/punaauia",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/saint-etienne",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/valence",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/blauzac",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/cezy",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/st-cyr-sur-mer",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/tence",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/cogny",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/noyal-pontivy",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
-        "loc": "/guides/saint-vulbas",
-        "lastmod": "2026-09-19",
+        "loc": "/guides/st-cyr-sur-mer",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
-        "loc": "/guides/plumelec",
-        "lastmod": "2026-09-19",
+        "loc": "/guides/gourdon",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
-        "loc": "/guides/meyzieu",
-        "lastmod": "2026-09-19",
+        "loc": "/guides/noumea",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/bourg-en-bresse",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/saint-pierre",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/monts-du-lyonnais",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/belley",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/vaulx-en-velin",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/annonay",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/sarry",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/villefranche-sur-saone",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/oyonnax",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/aubenas",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/champlemy",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/pau",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
-        "loc": "/guides/saint-priest",
-        "lastmod": "2026-09-19",
+        "loc": "/guides/echirolles",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
-        "loc": "/guides/st-etienne",
-        "lastmod": "2026-09-19",
+        "loc": "/guides/le-puy-en-velay",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
-        "loc": "/guides/taravao",
-        "lastmod": "2026-09-19",
+        "loc": "/guides/annecy",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
-        "loc": "/guides/gex",
-        "lastmod": "2026-09-19",
+        "loc": "/guides/clermont-ferrand",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/saint-denis-reunion",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/st-die-des-vosges",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/saint-chamond",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/papeete",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/carhaix-plouguer",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/vichy",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/montreuil",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/bourgoin-jallieu",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/troyes",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/venissieux",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/conquereuil-44290",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/montaigu-de-quercy",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/decines-charpieu",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/rennes",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/ecully",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/marseille",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/tassin-la-demi-lune",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/chassenard",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/roanne",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/montelimar",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/oullins",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/quimper",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/saint-etienne",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/valence",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/blauzac",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/cezy",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/tence",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/cogny",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/saint-vulbas",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/plumelec",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/meyzieu",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/monts-du-lyonnais",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/belley",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/vaulx-en-velin",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/annonay",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/sarry",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/villefranche-sur-saone",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/oyonnax",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/aubenas",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/champlemy",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/saint-priest",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/st-etienne",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/taravao",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/gex",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/papeete",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/carhaix-plouguer",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/vichy",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/montreuil",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/saint-chef",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/annemasse",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/st-caprais-de-bordeaux",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/moulins",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/vienne",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/montlucon",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/thonon-les-bains",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/saint-martin-d-heres",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/romans-sur-isere",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/saint-didier-au-mont-d-or",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/mouvaux",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/villeurbanne",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/marrakech",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/monteleger",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/rouans",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/upaix",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/voiron",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/speracedes",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/aix-les-bains",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
         "loc": "/guides/paris",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.7"
       }
@@ -595,612 +601,684 @@
     "articles": [
       {
         "loc": "/actualites/parcs-balades-chiens-grenoble-guide",
-        "lastmod": "2026-09-19",
-        "changefreq": "monthly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/actualites/gerer-imprevu-pendant-garde",
-        "lastmod": "2026-09-19",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/bengal-guide-race",
-        "lastmod": "2026-09-19",
-        "changefreq": "monthly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/actualites/securiser-maison-absence-prolongee",
-        "lastmod": "2026-09-19",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/apprendre-menuiserie-permaculture-ecoconstruction-gratuitement",
-        "lastmod": "2026-09-19",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/arroser-plantes-vacances-lyon",
-        "lastmod": "2026-09-19",
-        "changefreq": "monthly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/actualites/arroser-plantes-pendant-vacances-guide",
-        "lastmod": "2026-09-19",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/checklist-partir-vacances-animaux",
-        "lastmod": "2026-09-19",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/rediger-bonne-annonce-house-sitting",
-        "lastmod": "2026-09-19",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/malinois-guide-race-complet",
-        "lastmod": "2026-09-19",
-        "changefreq": "monthly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/actualites/comment-devenir-home-sitter-france-guide-debutant",
-        "lastmod": "2026-09-19",
-        "changefreq": "monthly",
-        "priority": "0.9"
-      },
-      {
-        "loc": "/actualites/pet-sitting-venissieux",
-        "lastmod": "2026-09-19",
-        "changefreq": "monthly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/actualites/jardinage-entraide-locale-grenoble",
-        "lastmod": "2026-09-19",
-        "changefreq": "monthly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/actualites/pet-sitting-saint-etienne-loire",
-        "lastmod": "2026-09-19",
-        "changefreq": "monthly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/actualites/courses-aide-domicile-entraide-senior-lyon",
-        "lastmod": "2026-09-19",
-        "changefreq": "monthly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/actualites/garde-animaux-haute-savoie-guide",
-        "lastmod": "2026-09-19",
-        "changefreq": "monthly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/actualites/maine-coon-guide-race",
-        "lastmod": "2026-09-19",
-        "changefreq": "monthly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/actualites/persan-guide-race",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.8"
       },
       {
         "loc": "/actualites/house-sitting-hiver-montagne-savoie",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.6"
       },
       {
-        "loc": "/actualites/technologie-recreer-lien-pres-de-chez-soi",
-        "lastmod": "2026-09-19",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/s-absenter-avec-animal-guide-solutions-2026",
-        "lastmod": "2026-09-19",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/chien-reactif-agressif-garde-solutions",
-        "lastmod": "2026-09-19",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/comment-fonctionne-guardiens-et-le-house-sitting-entre-particuliers",
-        "lastmod": "2026-09-19",
-        "changefreq": "monthly",
-        "priority": "0.9"
-      },
-      {
-        "loc": "/actualites/chantier-participatif-projet-collectif-cadre-legal",
-        "lastmod": "2026-09-19",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/garde-chat-domicile-house-sitting",
-        "lastmod": "2026-09-19",
+        "loc": "/actualites/notre-histoire-pet-sitting-argentine-lyon",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.6"
       },
       {
         "loc": "/actualites/garde-kaz-house-sitting-la-reunion",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.6"
       },
       {
-        "loc": "/actualites/parcs-balades-chiens-annecy-guide",
-        "lastmod": "2026-09-19",
-        "changefreq": "monthly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/actualites/se-sentir-utile-pres-de-chez-soi",
-        "lastmod": "2026-09-19",
+        "loc": "/actualites/gerer-imprevu-pendant-garde",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.6"
       },
       {
-        "loc": "/actualites/parcs-chiens-lyon-guide-complet",
-        "lastmod": "2026-09-19",
+        "loc": "/actualites/bengal-guide-race",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.8"
       },
       {
-        "loc": "/actualites/securite-confiance-house-sitting",
-        "lastmod": "2026-09-19",
+        "loc": "/actualites/securiser-maison-absence-prolongee",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.6"
       },
       {
         "loc": "/actualites/berger-allemand-guide-race",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
+        "changefreq": "monthly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/actualites/petites-missions-entraide-guardiens",
+        "lastmod": "2026-09-21",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/malinois-guide-race-complet",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.8"
       },
       {
         "loc": "/actualites/arroser-plantes-vacances-annecy",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.7"
-      },
-      {
-        "loc": "/actualites/petites-missions-entraide-guardiens",
-        "lastmod": "2026-09-19",
-        "changefreq": "monthly",
-        "priority": "0.6"
       },
       {
         "loc": "/actualites/house-sitting-cadre-juridique-france",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.6"
       },
       {
-        "loc": "/actualites/devenir-gardien-urgence-guardiens",
-        "lastmod": "2026-09-19",
+        "loc": "/actualites/pet-sitting-saint-etienne-loire",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/garde-chat-presquile-lyon",
-        "lastmod": "2026-09-19",
-        "changefreq": "monthly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/actualites/ou-faire-garder-chien-lyon-vacances",
-        "lastmod": "2026-09-19",
-        "changefreq": "monthly",
-        "priority": "0.6"
+        "priority": "0.8"
       },
       {
         "loc": "/actualites/entretenir-jardin-pendant-absence",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.6"
       },
       {
-        "loc": "/actualites/jardinage-entraide-quartier-annecy",
-        "lastmod": "2026-09-19",
+        "loc": "/actualites/garde-animaux-haute-savoie-guide",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
-        "priority": "0.7"
+        "priority": "0.8"
       },
       {
         "loc": "/actualites/house-sitting-week-end-court-sejour-aura",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.6"
       },
       {
         "loc": "/actualites/pet-sitting-grenoble-chartreuse",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.8"
       },
       {
         "loc": "/actualites/demenagement-entraide-locale-france",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.7"
       },
       {
-        "loc": "/actualites/abandon-animaux-france-chiffres-causes",
-        "lastmod": "2026-09-19",
+        "loc": "/actualites/apprendre-menuiserie-permaculture-ecoconstruction-gratuitement",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.6"
       },
       {
-        "loc": "/actualites/garde-ferme-animaux-monts-du-lyonnais",
-        "lastmod": "2026-09-19",
+        "loc": "/actualites/arroser-plantes-vacances-lyon",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
-        "priority": "0.8"
+        "priority": "0.7"
       },
       {
         "loc": "/actualites/echange-reciproque-garde-maison-expatries",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/arroser-plantes-pendant-vacances-guide",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.6"
       },
       {
         "loc": "/actualites/bien-etre-animal-pendant-absence",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.6"
       },
       {
         "loc": "/actualites/berger-australien-guide-race",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.8"
       },
       {
         "loc": "/actualites/garde-animaux-savoie-guide",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.8"
-      },
-      {
-        "loc": "/actualites/house-sitting-noel-fetes-fin-annee",
-        "lastmod": "2026-09-19",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/pension-chien-alternatives-guide",
-        "lastmod": "2026-09-19",
-        "changefreq": "monthly",
-        "priority": "0.6"
       },
       {
         "loc": "/actualites/pet-sitting-lyon-ouest-lyonnais",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.8"
       },
       {
-        "loc": "/actualites/reussir-premiere-garde-house-sitting",
-        "lastmod": "2026-09-19",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/premiers-pas-sur-guardiens",
-        "lastmod": "2026-09-19",
+        "loc": "/actualites/checklist-partir-vacances-animaux",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.6"
       },
       {
         "loc": "/actualites/francais-etranger-garde-maison-france",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.6"
       },
       {
-        "loc": "/actualites/labrador-retriever-guide-race",
-        "lastmod": "2026-09-19",
-        "changefreq": "monthly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/actualites/house-sitting-auvergne-rhone-alpes",
-        "lastmod": "2026-09-19",
-        "changefreq": "monthly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/actualites/c-est-quoi-le-house-sitting",
-        "lastmod": "2026-09-19",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/temoignage-premiere-garde-auvergne",
-        "lastmod": "2026-09-19",
+        "loc": "/actualites/rediger-bonne-annonce-house-sitting",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.6"
       },
       {
         "loc": "/actualites/devenir-gardien-pro-animalier",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.6"
       },
       {
         "loc": "/actualites/jardinage-entraide-quartier-lyon",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.7"
       },
       {
-        "loc": "/actualites/meilleures-villes-vivre-chien-autour-lyon",
-        "lastmod": "2026-09-19",
-        "changefreq": "monthly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/actualites/idees-coups-de-main-entraide-pres-de-chez-soi",
-        "lastmod": "2026-09-19",
+        "loc": "/actualites/devenir-gardien-urgence-guardiens",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.6"
       },
       {
+        "loc": "/actualites/meilleures-villes-vivre-chien-autour-lyon",
+        "lastmod": "2026-09-21",
+        "changefreq": "monthly",
+        "priority": "0.7"
+      },
+      {
         "loc": "/actualites/voyager-gratuitement-france-house-sitting",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.6"
       },
       {
         "loc": "/actualites/confier-sa-maison-absence-risques",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.6"
       },
       {
-        "loc": "/actualites/preparer-maison-avant-garde",
-        "lastmod": "2026-09-19",
+        "loc": "/actualites/comment-devenir-home-sitter-france-guide-debutant",
+        "lastmod": "2026-09-21",
+        "changefreq": "monthly",
+        "priority": "0.9"
+      },
+      {
+        "loc": "/actualites/abandon-animaux-france-chiffres-causes",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.6"
       },
       {
-        "loc": "/actualites/house-sitting-aix-les-bains",
-        "lastmod": "2026-09-19",
+        "loc": "/actualites/expat-proprietaire-faire-garder-maison-etranger",
+        "lastmod": "2026-09-21",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/pet-sitting-venissieux",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.8"
       },
       {
-        "loc": "/actualites/expat-proprietaire-faire-garder-maison-etranger",
-        "lastmod": "2026-09-19",
+        "loc": "/actualites/jardinage-entraide-locale-grenoble",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
-        "priority": "0.6"
+        "priority": "0.7"
       },
       {
         "loc": "/actualites/house-sitting-ete-aura-guide",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.6"
       },
       {
         "loc": "/actualites/pet-sitting-lyon-guide-complet",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.7"
       },
       {
         "loc": "/actualites/choisir-gardien-bons-criteres",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.6"
       },
       {
         "loc": "/actualites/pet-sitting-villeurbanne",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.8"
-      },
-      {
-        "loc": "/actualites/notre-histoire-pet-sitting-argentine-lyon",
-        "lastmod": "2026-09-19",
-        "changefreq": "monthly",
-        "priority": "0.6"
       },
       {
         "loc": "/actualites/garde-maison-animaux-nouvelle-caledonie",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/courses-aide-domicile-entraide-senior-lyon",
+        "lastmod": "2026-09-21",
+        "changefreq": "monthly",
+        "priority": "0.7"
       },
       {
         "loc": "/actualites/veterinaire-urgence-grenoble-isere",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.8"
       },
       {
-        "loc": "/actualites/gerer-animaux-difficiles-garde",
-        "lastmod": "2026-09-19",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/garder-une-maison-ce-n-est-pas-garder-un-animal",
-        "lastmod": "2026-09-19",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/bouledogue-francais-guide-race-complet",
-        "lastmod": "2026-09-19",
+        "loc": "/actualites/maine-coon-guide-race",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.8"
       },
       {
-        "loc": "/actualites/accueillir-gardien-bonnes-pratiques",
-        "lastmod": "2026-09-19",
+        "loc": "/actualites/persan-guide-race",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
-        "priority": "0.6"
+        "priority": "0.8"
       },
       {
         "loc": "/actualites/faire-garder-animal-pendant-hospitalisation",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.6"
       },
       {
         "loc": "/actualites/commodat-garde-guardiens",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.6"
       },
       {
-        "loc": "/actualites/garde-animaux-croix-rousse-lyon",
-        "lastmod": "2026-09-19",
-        "changefreq": "monthly",
-        "priority": "0.7"
-      },
-      {
         "loc": "/actualites/siamois-guide-race",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.8"
       },
       {
         "loc": "/actualites/boom-pet-sitting-lyon-2026",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.9"
       },
       {
         "loc": "/actualites/garde-chat-domicile-lyon",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.6"
       },
       {
         "loc": "/actualites/creer-profil-gardien-attractif",
-        "lastmod": "2026-09-19",
-        "changefreq": "monthly",
-        "priority": "0.6"
-      },
-      {
-        "loc": "/actualites/vacances-longues-garde-animal-2-semaines",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.6"
       },
       {
         "loc": "/actualites/oser-demander-coup-de-main-pres-de-chez-soi",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.6"
       },
       {
         "loc": "/actualites/garde-maison-animaux-tahiti",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.6"
       },
       {
-        "loc": "/actualites/reseau-entraide-quartier-lyon-aura",
-        "lastmod": "2026-09-19",
+        "loc": "/actualites/border-collie-guide-race-complet",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
-        "priority": "0.7"
+        "priority": "0.8"
+      },
+      {
+        "loc": "/actualites/technologie-recreer-lien-pres-de-chez-soi",
+        "lastmod": "2026-09-21",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/preparer-maison-avant-garde",
+        "lastmod": "2026-09-21",
+        "changefreq": "monthly",
+        "priority": "0.6"
       },
       {
         "loc": "/actualites/bricolage-montage-meubles-entraide-grenoble-lyon",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.7"
       },
       {
         "loc": "/actualites/veterinaire-urgence-annecy-haute-savoie",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.8"
       },
       {
+        "loc": "/actualites/s-absenter-avec-animal-guide-solutions-2026",
+        "lastmod": "2026-09-21",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
         "loc": "/actualites/arroser-plantes-vacances-grenoble",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.7"
       },
       {
-        "loc": "/actualites/pet-sitting-clermont-ferrand",
-        "lastmod": "2026-09-19",
+        "loc": "/actualites/veterinaire-urgence-lyon-guide",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.8"
       },
       {
-        "loc": "/actualites/veterinaire-urgence-lyon-guide",
-        "lastmod": "2026-09-19",
+        "loc": "/actualites/chien-reactif-agressif-garde-solutions",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
-        "priority": "0.8"
+        "priority": "0.6"
       },
       {
         "loc": "/actualites/cavalier-king-charles-guide-race",
-        "lastmod": "2026-09-19",
-        "changefreq": "monthly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/actualites/border-collie-guide-race-complet",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.8"
       },
       {
         "loc": "/actualites/house-sitting-haute-savoie-annecy-megeve",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.8"
       },
       {
         "loc": "/actualites/golden-retriever-guide-race-complet",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
+        "changefreq": "monthly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/actualites/comment-fonctionne-guardiens-et-le-house-sitting-entre-particuliers",
+        "lastmod": "2026-09-21",
+        "changefreq": "monthly",
+        "priority": "0.9"
+      },
+      {
+        "loc": "/actualites/chantier-participatif-projet-collectif-cadre-legal",
+        "lastmod": "2026-09-21",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/garde-chat-domicile-house-sitting",
+        "lastmod": "2026-09-21",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/parcs-balades-chiens-annecy-guide",
+        "lastmod": "2026-09-21",
+        "changefreq": "monthly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/actualites/se-sentir-utile-pres-de-chez-soi",
+        "lastmod": "2026-09-21",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/parcs-chiens-lyon-guide-complet",
+        "lastmod": "2026-09-21",
+        "changefreq": "monthly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/actualites/securite-confiance-house-sitting",
+        "lastmod": "2026-09-21",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/garde-chat-presquile-lyon",
+        "lastmod": "2026-09-21",
+        "changefreq": "monthly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/actualites/ou-faire-garder-chien-lyon-vacances",
+        "lastmod": "2026-09-21",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/jardinage-entraide-quartier-annecy",
+        "lastmod": "2026-09-21",
+        "changefreq": "monthly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/actualites/garde-ferme-animaux-monts-du-lyonnais",
+        "lastmod": "2026-09-21",
+        "changefreq": "monthly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/actualites/house-sitting-noel-fetes-fin-annee",
+        "lastmod": "2026-09-21",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/pension-chien-alternatives-guide",
+        "lastmod": "2026-09-21",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/reussir-premiere-garde-house-sitting",
+        "lastmod": "2026-09-21",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/premiers-pas-sur-guardiens",
+        "lastmod": "2026-09-21",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/labrador-retriever-guide-race",
+        "lastmod": "2026-09-21",
+        "changefreq": "monthly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/actualites/house-sitting-auvergne-rhone-alpes",
+        "lastmod": "2026-09-21",
+        "changefreq": "monthly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/actualites/c-est-quoi-le-house-sitting",
+        "lastmod": "2026-09-21",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/temoignage-premiere-garde-auvergne",
+        "lastmod": "2026-09-21",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/idees-coups-de-main-entraide-pres-de-chez-soi",
+        "lastmod": "2026-09-21",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/house-sitting-aix-les-bains",
+        "lastmod": "2026-09-21",
+        "changefreq": "monthly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/actualites/gerer-animaux-difficiles-garde",
+        "lastmod": "2026-09-21",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/garder-une-maison-ce-n-est-pas-garder-un-animal",
+        "lastmod": "2026-09-21",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/bouledogue-francais-guide-race-complet",
+        "lastmod": "2026-09-21",
+        "changefreq": "monthly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/actualites/accueillir-gardien-bonnes-pratiques",
+        "lastmod": "2026-09-21",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/garde-animaux-croix-rousse-lyon",
+        "lastmod": "2026-09-21",
+        "changefreq": "monthly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/actualites/vacances-longues-garde-animal-2-semaines",
+        "lastmod": "2026-09-21",
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/reseau-entraide-quartier-lyon-aura",
+        "lastmod": "2026-09-21",
+        "changefreq": "monthly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/actualites/pet-sitting-clermont-ferrand",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.8"
       },
       {
         "loc": "/actualites/chantier-participatif-low-tech-participer-lancer-projet",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.6"
       },
       {
         "loc": "/actualites/devenir-gardien-maison-etranger",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.6"
       },
       {
         "loc": "/actualites/pet-sitting-valence-drome",
-        "lastmod": "2026-09-19",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.8"
       }
     ],
     "seo_city_pages": [
+      {
+        "loc": "/house-sitting/saint-brieuc",
+        "lastmod": "2026-09-19",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/chambery",
+        "lastmod": "2026-09-20",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/noumea",
+        "lastmod": "2026-09-20",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/saint-nazaire",
+        "lastmod": "2026-09-20",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/saint-etienne",
+        "lastmod": "2026-09-20",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/la-seyne-sur-mer",
+        "lastmod": "2026-09-18",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/amiens",
+        "lastmod": "2026-09-17",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/charleville-mezieres",
+        "lastmod": "2026-08-30",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/vannes",
+        "lastmod": "2026-09-20",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/cherbourg-en-cotentin",
+        "lastmod": "2026-08-10",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/chateauroux",
+        "lastmod": "2026-08-27",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/dijon",
+        "lastmod": "2026-09-19",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
       {
         "loc": "/house-sitting/grenoble",
         "lastmod": "2026-09-19",
@@ -1208,8 +1286,20 @@
         "priority": "0.8"
       },
       {
-        "loc": "/house-sitting/rueil-malmaison",
+        "loc": "/house-sitting/saint-denis-reunion",
         "lastmod": "2026-09-20",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/lille",
+        "lastmod": "2026-09-20",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/salon-de-provence",
+        "lastmod": "2026-09-18",
         "changefreq": "weekly",
         "priority": "0.8"
       },
@@ -1220,8 +1310,68 @@
         "priority": "0.8"
       },
       {
-        "loc": "/house-sitting/saint-pierre",
+        "loc": "/house-sitting/venissieux",
         "lastmod": "2026-09-20",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/poitiers",
+        "lastmod": "2026-08-27",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/megeve",
+        "lastmod": "2026-09-10",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/le-tampon",
+        "lastmod": "2026-09-20",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/brest",
+        "lastmod": "2026-08-23",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/roubaix",
+        "lastmod": "2026-09-20",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/aix-en-provence",
+        "lastmod": "2026-09-18",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/tahiti",
+        "lastmod": "2026-09-09",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/pessac",
+        "lastmod": "2026-09-20",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/valence",
+        "lastmod": "2026-09-19",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/saint-pierre",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.8"
       },
@@ -1232,14 +1382,62 @@
         "priority": "0.8"
       },
       {
+        "loc": "/house-sitting/laval",
+        "lastmod": "2026-09-10",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/alfortville",
+        "lastmod": "2026-09-20",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/tassin-la-demi-lune",
+        "lastmod": "2026-09-20",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/tours",
+        "lastmod": "2026-09-10",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
         "loc": "/house-sitting/cagnes-sur-mer",
         "lastmod": "2026-09-18",
         "changefreq": "weekly",
         "priority": "0.8"
       },
       {
+        "loc": "/house-sitting/montpellier",
+        "lastmod": "2026-09-17",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/chamonix",
+        "lastmod": "2026-09-10",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/bordeaux",
+        "lastmod": "2026-09-08",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
         "loc": "/house-sitting/villeurbanne",
         "lastmod": "2026-09-20",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/massy",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.8"
       },
@@ -1262,12 +1460,6 @@
         "priority": "0.8"
       },
       {
-        "loc": "/house-sitting/vannes",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
         "loc": "/house-sitting/pau",
         "lastmod": "2026-09-20",
         "changefreq": "weekly",
@@ -1280,14 +1472,14 @@
         "priority": "0.8"
       },
       {
-        "loc": "/house-sitting/antibes",
+        "loc": "/house-sitting/aubagne",
         "lastmod": "2026-09-18",
         "changefreq": "weekly",
         "priority": "0.8"
       },
       {
-        "loc": "/house-sitting/saint-brieuc",
-        "lastmod": "2026-09-19",
+        "loc": "/house-sitting/antibes",
+        "lastmod": "2026-09-18",
         "changefreq": "weekly",
         "priority": "0.8"
       },
@@ -1322,8 +1514,26 @@
         "priority": "0.8"
       },
       {
-        "loc": "/house-sitting/venissieux",
-        "lastmod": "2026-09-20",
+        "loc": "/house-sitting/toulon",
+        "lastmod": "2026-09-18",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/perpignan",
+        "lastmod": "2026-09-01",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/rennes",
+        "lastmod": "2026-09-19",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/angers",
+        "lastmod": "2026-09-18",
         "changefreq": "weekly",
         "priority": "0.8"
       },
@@ -1334,43 +1544,49 @@
         "priority": "0.8"
       },
       {
+        "loc": "/house-sitting/saint-quentin",
+        "lastmod": "2026-09-20",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/saint-herblain",
+        "lastmod": "2026-09-20",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/villeneuve-d-ascq",
+        "lastmod": "2026-09-20",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
         "loc": "/house-sitting/avignon",
         "lastmod": "2026-09-18",
         "changefreq": "weekly",
         "priority": "0.8"
       },
       {
-        "loc": "/house-sitting/gennevilliers",
+        "loc": "/house-sitting/tourcoing",
         "lastmod": "2026-09-20",
         "changefreq": "weekly",
         "priority": "0.8"
       },
       {
-        "loc": "/house-sitting/la-seyne-sur-mer",
-        "lastmod": "2026-09-18",
+        "loc": "/house-sitting/carcassonne",
+        "lastmod": "2026-09-04",
         "changefreq": "weekly",
         "priority": "0.8"
       },
       {
-        "loc": "/house-sitting/amiens",
-        "lastmod": "2026-09-17",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/charleville-mezieres",
-        "lastmod": "2026-08-30",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/roubaix",
+        "loc": "/house-sitting/nantes",
         "lastmod": "2026-09-20",
         "changefreq": "weekly",
         "priority": "0.8"
       },
       {
-        "loc": "/house-sitting/suresnes",
+        "loc": "/house-sitting/lyon",
         "lastmod": "2026-09-20",
         "changefreq": "weekly",
         "priority": "0.8"
@@ -1382,14 +1598,32 @@
         "priority": "0.8"
       },
       {
+        "loc": "/house-sitting/besancon",
+        "lastmod": "2026-09-19",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
         "loc": "/house-sitting/beaujolais",
         "lastmod": "2026-09-20",
         "changefreq": "weekly",
         "priority": "0.8"
       },
       {
-        "loc": "/house-sitting/strasbourg",
+        "loc": "/house-sitting/nice",
         "lastmod": "2026-09-18",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/orleans",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/strasbourg",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.8"
       },
@@ -1406,8 +1640,32 @@
         "priority": "0.8"
       },
       {
-        "loc": "/house-sitting/montpellier",
-        "lastmod": "2026-09-17",
+        "loc": "/house-sitting/gennevilliers",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/suresnes",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/nanterre",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/montreuil",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/rueil-malmaison",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.8"
       },
@@ -1430,6 +1688,30 @@
         "priority": "0.8"
       },
       {
+        "loc": "/house-sitting/cergy",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/clamart",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/aulnay-sous-bois",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/drancy",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
         "loc": "/house-sitting/lorient",
         "lastmod": "2026-09-19",
         "changefreq": "weekly",
@@ -1442,338 +1724,56 @@
         "priority": "0.8"
       },
       {
+        "loc": "/house-sitting/creteil",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/courbevoie",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/ivry-sur-seine",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
         "loc": "/house-sitting/fort-de-france",
         "lastmod": "2026-09-17",
         "changefreq": "weekly",
         "priority": "0.8"
       },
       {
-        "loc": "/house-sitting/cherbourg-en-cotentin",
-        "lastmod": "2026-08-10",
+        "loc": "/house-sitting/antony",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.8"
       },
       {
-        "loc": "/house-sitting/le-havre",
-        "lastmod": "2026-09-10",
+        "loc": "/house-sitting/aubervilliers",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.8"
       },
       {
-        "loc": "/house-sitting/rouen",
-        "lastmod": "2026-09-10",
+        "loc": "/house-sitting/le-blanc-mesnil",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.8"
       },
       {
-        "loc": "/house-sitting/chateauroux",
-        "lastmod": "2026-08-27",
+        "loc": "/house-sitting/asnieres-sur-seine",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.8"
       },
       {
-        "loc": "/house-sitting/reims",
-        "lastmod": "2026-09-17",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/clermont-ferrand",
-        "lastmod": "2026-09-07",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/montreuil",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/salon-de-provence",
-        "lastmod": "2026-09-18",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/bastia",
-        "lastmod": "2026-08-23",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/monts-du-lyonnais",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/poitiers",
-        "lastmod": "2026-08-27",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/megeve",
-        "lastmod": "2026-09-10",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/arles",
-        "lastmod": "2026-09-18",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/ecully",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/brest",
-        "lastmod": "2026-08-23",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/sevran",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/chalons-en-champagne",
-        "lastmod": "2026-09-17",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/saint-louis",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/aix-en-provence",
-        "lastmod": "2026-09-18",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/tahiti",
-        "lastmod": "2026-09-09",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/caluire-et-cuire",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/laval",
-        "lastmod": "2026-09-10",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/clamart",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/vitry-sur-seine",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/saint-quentin",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/villeneuve-d-ascq",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/orleans",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/tassin-la-demi-lune",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/tourcoing",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/tours",
-        "lastmod": "2026-09-10",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/sartrouville",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/albi",
-        "lastmod": "2026-08-28",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/chamonix",
-        "lastmod": "2026-09-10",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/drancy",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/nice",
-        "lastmod": "2026-09-18",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/nancy",
-        "lastmod": "2026-09-18",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/vaulx-en-velin",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/bordeaux",
-        "lastmod": "2026-09-08",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/neuilly-sur-seine",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/caen",
-        "lastmod": "2026-08-23",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/chambery",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/annecy",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/noumea",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/saint-nazaire",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/saint-etienne",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/dijon",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/paris",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/saint-denis-reunion",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/lille",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/cergy",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/le-tampon",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/bayonne",
-        "lastmod": "2026-09-12",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/alfortville",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/aulnay-sous-bois",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/noisy-le-sec",
-        "lastmod": "2026-09-20",
+        "loc": "/house-sitting/bagneux",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.8"
       },
@@ -1784,152 +1784,140 @@
         "priority": "0.8"
       },
       {
-        "loc": "/house-sitting/massy",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/creteil",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/courbevoie",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/limoges",
-        "lastmod": "2026-08-29",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/ivry-sur-seine",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/livry-gargan",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/issy-les-moulineaux",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/antony",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/aubervilliers",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/le-blanc-mesnil",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/meaux",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/choisy-le-roi",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/asnieres-sur-seine",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/bagneux",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/bourges",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/mantes-la-jolie",
-        "lastmod": "2026-09-20",
+        "loc": "/house-sitting/versailles",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.8"
       },
       {
         "loc": "/house-sitting/clichy",
-        "lastmod": "2026-09-20",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.8"
       },
       {
         "loc": "/house-sitting/pantin",
-        "lastmod": "2026-09-20",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.8"
       },
       {
         "loc": "/house-sitting/champigny-sur-marne",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/aubagne",
-        "lastmod": "2026-09-18",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.8"
       },
       {
         "loc": "/house-sitting/fontenay-sous-bois",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/bobigny",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/epinay-sur-seine",
-        "lastmod": "2026-09-20",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.8"
       },
       {
         "loc": "/house-sitting/sarcelles",
-        "lastmod": "2026-09-20",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.8"
       },
       {
-        "loc": "/house-sitting/saint-andre",
-        "lastmod": "2026-09-20",
+        "loc": "/house-sitting/saint-denis",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/vitry-sur-seine",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/beauvais",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/argenteuil",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/compiegne",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/saint-maur-des-fosses",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/maisons-alfort",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/bondy",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/evreux",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/rosny-sous-bois",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/chelles",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/vincennes",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/noisy-le-sec",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/livry-gargan",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/meaux",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/evry-courcouronnes",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/bobigny",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.8"
       },
@@ -1946,32 +1934,188 @@
         "priority": "0.8"
       },
       {
-        "loc": "/house-sitting/la-rochelle",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
         "loc": "/house-sitting/noisy-le-grand",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/le-havre",
+        "lastmod": "2026-09-10",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/rouen",
+        "lastmod": "2026-09-10",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/reims",
+        "lastmod": "2026-09-17",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/clermont-ferrand",
+        "lastmod": "2026-09-07",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/bastia",
+        "lastmod": "2026-08-23",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/monts-du-lyonnais",
         "lastmod": "2026-09-20",
         "changefreq": "weekly",
         "priority": "0.8"
       },
       {
-        "loc": "/house-sitting/toulon",
+        "loc": "/house-sitting/arles",
         "lastmod": "2026-09-18",
         "changefreq": "weekly",
         "priority": "0.8"
       },
       {
-        "loc": "/house-sitting/nanterre",
+        "loc": "/house-sitting/sevran",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/ecully",
         "lastmod": "2026-09-20",
         "changefreq": "weekly",
         "priority": "0.8"
       },
       {
-        "loc": "/house-sitting/perpignan",
-        "lastmod": "2026-09-01",
+        "loc": "/house-sitting/villejuif",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/chalons-en-champagne",
+        "lastmod": "2026-09-17",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/saint-louis",
+        "lastmod": "2026-09-20",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/caluire-et-cuire",
+        "lastmod": "2026-09-20",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/albi",
+        "lastmod": "2026-08-28",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/sartrouville",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/nancy",
+        "lastmod": "2026-09-18",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/caen",
+        "lastmod": "2026-08-23",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/vaulx-en-velin",
+        "lastmod": "2026-09-20",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/neuilly-sur-seine",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/annecy",
+        "lastmod": "2026-09-20",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/paris",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/bayonne",
+        "lastmod": "2026-09-12",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/limoges",
+        "lastmod": "2026-08-29",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/issy-les-moulineaux",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/choisy-le-roi",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/bourges",
+        "lastmod": "2026-09-20",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/mantes-la-jolie",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/epinay-sur-seine",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/saint-andre",
+        "lastmod": "2026-09-20",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/la-rochelle",
+        "lastmod": "2026-09-20",
         "changefreq": "weekly",
         "priority": "0.8"
       },
@@ -1983,115 +2127,13 @@
       },
       {
         "loc": "/house-sitting/boulogne-billancourt",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/evry-courcouronnes",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/villejuif",
-        "lastmod": "2026-09-20",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.8"
       },
       {
         "loc": "/house-sitting/levallois-perret",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/pessac",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/rennes",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/angers",
-        "lastmod": "2026-09-18",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/beauvais",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/compiegne",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/saint-herblain",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/carcassonne",
-        "lastmod": "2026-09-04",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/nantes",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/valence",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/saint-maur-des-fosses",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/versailles",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/maisons-alfort",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/saint-denis",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/bondy",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/colombes",
-        "lastmod": "2026-09-20",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.8"
       },
@@ -2102,55 +2144,19 @@
         "priority": "0.8"
       },
       {
-        "loc": "/house-sitting/evreux",
-        "lastmod": "2026-09-19",
+        "loc": "/house-sitting/colombes",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.8"
       },
       {
         "loc": "/house-sitting/garges-les-gonesse",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/chelles",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/argenteuil",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/rosny-sous-bois",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/vincennes",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/lyon",
-        "lastmod": "2026-09-20",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.8"
       },
       {
         "loc": "/house-sitting/blois",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/puteaux",
         "lastmod": "2026-09-20",
         "changefreq": "weekly",
         "priority": "0.8"
@@ -2162,28 +2168,16 @@
         "priority": "0.8"
       },
       {
-        "loc": "/house-sitting/besancon",
-        "lastmod": "2026-09-19",
+        "loc": "/house-sitting/puteaux",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.8"
       }
     ],
     "small_missions_entraide_v1": [
       {
-        "loc": "/petites-missions/entretien-et-soins-des-reptiles-et-terrariums",
-        "lastmod": "2026-07-17",
-        "changefreq": "weekly",
-        "priority": "0.5"
-      },
-      {
         "loc": "/petites-missions/un-coup-de-main-pour-monter-une-coiffeuse-avec-des-tiroirs-il-y-a-pour-trois-heu",
         "lastmod": "2026-09-17",
-        "changefreq": "weekly",
-        "priority": "0.5"
-      },
-      {
-        "loc": "/petites-missions/cours-de-maths-physique-svt-jusqu-en-premiere-annee-de-superieur-francais-jusqu",
-        "lastmod": "2026-08-02",
         "changefreq": "weekly",
         "priority": "0.5"
       },
@@ -2790,6 +2784,30 @@
         "priority": "0.8"
       },
       {
+        "loc": "/departement/savoie",
+        "lastmod": "2026-09-08",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/cotes-d-armor",
+        "lastmod": "2026-09-20",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/loir-et-cher",
+        "lastmod": "2026-08-16",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/charente",
+        "lastmod": "2026-08-16",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
         "loc": "/departement/nord",
         "lastmod": "2026-09-10",
         "changefreq": "weekly",
@@ -2814,8 +2832,20 @@
         "priority": "0.8"
       },
       {
-        "loc": "/departement/savoie",
-        "lastmod": "2026-09-08",
+        "loc": "/departement/somme",
+        "lastmod": "2026-08-20",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/cantal",
+        "lastmod": "2026-08-16",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/cher",
+        "lastmod": "2026-08-27",
         "changefreq": "weekly",
         "priority": "0.8"
       },
@@ -2832,6 +2862,18 @@
         "priority": "0.8"
       },
       {
+        "loc": "/departement/val-d-oise",
+        "lastmod": "2026-09-20",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/haute-saone",
+        "lastmod": "2026-08-16",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
         "loc": "/departement/meuse",
         "lastmod": "2026-08-16",
         "changefreq": "weekly",
@@ -2844,7 +2886,19 @@
         "priority": "0.8"
       },
       {
-        "loc": "/departement/cantal",
+        "loc": "/departement/orne",
+        "lastmod": "2026-08-16",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/var",
+        "lastmod": "2026-09-19",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/vienne",
         "lastmod": "2026-08-16",
         "changefreq": "weekly",
         "priority": "0.8"
@@ -2862,20 +2916,44 @@
         "priority": "0.8"
       },
       {
-        "loc": "/departement/orne",
+        "loc": "/departement/ille-et-vilaine",
+        "lastmod": "2026-08-19",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/drome",
+        "lastmod": "2026-09-15",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/essonne",
         "lastmod": "2026-08-16",
         "changefreq": "weekly",
         "priority": "0.8"
       },
       {
-        "loc": "/departement/cher",
-        "lastmod": "2026-08-27",
+        "loc": "/departement/yonne",
+        "lastmod": "2026-09-13",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/lot-et-garonne",
+        "lastmod": "2026-08-16",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/bas-rhin",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.8"
       },
       {
         "loc": "/departement/la-reunion",
-        "lastmod": "2026-09-20",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.8"
       },
@@ -2892,8 +2970,26 @@
         "priority": "0.8"
       },
       {
+        "loc": "/departement/ain",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
         "loc": "/departement/sarthe",
         "lastmod": "2026-09-11",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/gard",
+        "lastmod": "2026-09-18",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/hauts-de-seine",
+        "lastmod": "2026-08-16",
         "changefreq": "weekly",
         "priority": "0.8"
       },
@@ -2916,19 +3012,13 @@
         "priority": "0.8"
       },
       {
-        "loc": "/departement/ain",
-        "lastmod": "2026-09-15",
+        "loc": "/departement/alpes-de-haute-provence",
+        "lastmod": "2026-09-11",
         "changefreq": "weekly",
         "priority": "0.8"
       },
       {
-        "loc": "/departement/var",
-        "lastmod": "2026-09-19",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/departement/vienne",
+        "loc": "/departement/manche",
         "lastmod": "2026-08-16",
         "changefreq": "weekly",
         "priority": "0.8"
@@ -2946,14 +3036,14 @@
         "priority": "0.8"
       },
       {
-        "loc": "/departement/loire",
-        "lastmod": "2026-09-13",
+        "loc": "/departement/saone-et-loire",
+        "lastmod": "2026-09-17",
         "changefreq": "weekly",
         "priority": "0.8"
       },
       {
-        "loc": "/departement/saone-et-loire",
-        "lastmod": "2026-09-17",
+        "loc": "/departement/loire",
+        "lastmod": "2026-09-13",
         "changefreq": "weekly",
         "priority": "0.8"
       },
@@ -2988,6 +3078,18 @@
         "priority": "0.8"
       },
       {
+        "loc": "/departement/territoire-de-belfort",
+        "lastmod": "2026-08-16",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/morbihan",
+        "lastmod": "2026-09-18",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
         "loc": "/departement/charente-maritime",
         "lastmod": "2026-09-01",
         "changefreq": "weekly",
@@ -3006,24 +3108,6 @@
         "priority": "0.8"
       },
       {
-        "loc": "/departement/ille-et-vilaine",
-        "lastmod": "2026-08-19",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/departement/bas-rhin",
-        "lastmod": "2026-09-14",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/departement/essonne",
-        "lastmod": "2026-08-16",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
         "loc": "/departement/herault",
         "lastmod": "2026-09-11",
         "changefreq": "weekly",
@@ -3037,7 +3121,13 @@
       },
       {
         "loc": "/departement/loiret",
-        "lastmod": "2026-08-16",
+        "lastmod": "2026-09-21",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/pyrenees-atlantiques",
+        "lastmod": "2026-09-13",
         "changefreq": "weekly",
         "priority": "0.8"
       },
@@ -3072,24 +3162,6 @@
         "priority": "0.8"
       },
       {
-        "loc": "/departement/territoire-de-belfort",
-        "lastmod": "2026-08-16",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/departement/morbihan",
-        "lastmod": "2026-09-18",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/departement/gard",
-        "lastmod": "2026-09-18",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
         "loc": "/departement/nouvelle-caledonie",
         "lastmod": "2026-09-20",
         "changefreq": "weekly",
@@ -3103,19 +3175,13 @@
       },
       {
         "loc": "/departement/seine-et-marne",
-        "lastmod": "2026-09-09",
+        "lastmod": "2026-09-21",
         "changefreq": "weekly",
         "priority": "0.8"
       },
       {
         "loc": "/departement/deux-sevres",
         "lastmod": "2026-08-16",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/departement/pyrenees-atlantiques",
-        "lastmod": "2026-09-13",
         "changefreq": "weekly",
         "priority": "0.8"
       },
@@ -3144,12 +3210,6 @@
         "priority": "0.8"
       },
       {
-        "loc": "/departement/hauts-de-seine",
-        "lastmod": "2026-08-16",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
         "loc": "/departement/paris",
         "lastmod": "2026-09-19",
         "changefreq": "weekly",
@@ -3158,12 +3218,6 @@
       {
         "loc": "/departement/alpes-maritimes",
         "lastmod": "2026-09-13",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/departement/cotes-d-armor",
-        "lastmod": "2026-09-20",
         "changefreq": "weekly",
         "priority": "0.8"
       },
@@ -3186,74 +3240,14 @@
         "priority": "0.8"
       },
       {
-        "loc": "/departement/somme",
-        "lastmod": "2026-08-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
         "loc": "/departement/indre",
         "lastmod": "2026-08-28",
         "changefreq": "weekly",
         "priority": "0.8"
       },
       {
-        "loc": "/departement/alpes-de-haute-provence",
-        "lastmod": "2026-09-11",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
         "loc": "/departement/pyrenees-orientales",
         "lastmod": "2026-09-02",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/departement/manche",
-        "lastmod": "2026-08-16",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/departement/val-d-oise",
-        "lastmod": "2026-09-20",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/departement/haute-saone",
-        "lastmod": "2026-08-16",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/departement/drome",
-        "lastmod": "2026-09-15",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/departement/yvelines",
-        "lastmod": "2026-09-14",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/departement/yonne",
-        "lastmod": "2026-09-13",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/departement/vosges",
-        "lastmod": "2026-08-23",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/departement/lot-et-garonne",
-        "lastmod": "2026-08-16",
         "changefreq": "weekly",
         "priority": "0.8"
       },
@@ -3276,14 +3270,20 @@
         "priority": "0.8"
       },
       {
-        "loc": "/departement/marne",
-        "lastmod": "2026-09-18",
+        "loc": "/departement/yvelines",
+        "lastmod": "2026-09-14",
         "changefreq": "weekly",
         "priority": "0.8"
       },
       {
-        "loc": "/departement/aisne",
-        "lastmod": "2026-09-04",
+        "loc": "/departement/vosges",
+        "lastmod": "2026-08-23",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/marne",
+        "lastmod": "2026-09-18",
         "changefreq": "weekly",
         "priority": "0.8"
       },
@@ -3306,20 +3306,8 @@
         "priority": "0.8"
       },
       {
-        "loc": "/departement/loir-et-cher",
-        "lastmod": "2026-08-16",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/departement/charente",
-        "lastmod": "2026-08-16",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/departement/indre-et-loire",
-        "lastmod": "2026-08-28",
+        "loc": "/departement/aisne",
+        "lastmod": "2026-09-04",
         "changefreq": "weekly",
         "priority": "0.8"
       },
@@ -3332,6 +3320,12 @@
       {
         "loc": "/departement/rhone",
         "lastmod": "2026-09-20",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/departement/indre-et-loire",
+        "lastmod": "2026-08-28",
         "changefreq": "weekly",
         "priority": "0.8"
       },
@@ -3443,7 +3437,7 @@
       },
       {
         "loc": "/gardiens/e0ff2a5e-e946-421a-bf84-908906461f49",
-        "lastmod": "2026-09-20",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.5"
       },
@@ -3504,6 +3498,12 @@
       {
         "loc": "/gardiens/ac48fc69-2088-47a6-864b-e451909dd428",
         "lastmod": "2026-09-17",
+        "changefreq": "monthly",
+        "priority": "0.5"
+      },
+      {
+        "loc": "/gardiens/50131a8b-f35f-476d-b124-00eaf4c1c5b1",
+        "lastmod": "2026-09-21",
         "changefreq": "monthly",
         "priority": "0.5"
       },
@@ -3594,12 +3594,6 @@
       {
         "loc": "/gardiens/76be30ab-4e70-4deb-893d-30a31dc311e1",
         "lastmod": "2026-09-14",
-        "changefreq": "monthly",
-        "priority": "0.5"
-      },
-      {
-        "loc": "/gardiens/50131a8b-f35f-476d-b124-00eaf4c1c5b1",
-        "lastmod": "2026-09-20",
         "changefreq": "monthly",
         "priority": "0.5"
       },
