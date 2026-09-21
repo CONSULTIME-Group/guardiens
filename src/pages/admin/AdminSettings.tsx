@@ -674,7 +674,7 @@ const AdminSettings = () => {
               <div>
                 <p className="text-sm font-medium">Entraide entre membres</p>
                 <p className="text-xs text-muted-foreground">
-                  L'entraide est gratuite pour tous, sans limite.
+                  L'Entraide est ouverte à tous les membres, en illimité.
                 </p>
               </div>
               <Badge variant="default" className="text-xs">Gratuit</Badge>

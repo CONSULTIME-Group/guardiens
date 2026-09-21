@@ -60,8 +60,8 @@ export default function PushNotificationsSection() {
       else { await enablePush(user.id, config, prefs); setSubscribed(true); setMessage('Notifications activées sur cet appareil.'); }
     } catch (error) {
       setMessage(error instanceof Error && error.message === 'push_permission_denied'
-        ? 'Autorisation non accordée. Vous pouvez la modifier dans les réglages de votre navigateur.'
-        : 'La modification n’a pas abouti. Réessayez dans un instant. Vos emails restent inchangés.');
+        ? 'Autorisez Guardiens dans les réglages de votre navigateur pour recevoir les notifications.'
+        : 'La modification reste à confirmer. Réessayez dans un instant. Vos emails restent inchangés.');
     } finally { setBusy(false); }
   }
 
@@ -70,18 +70,18 @@ export default function PushNotificationsSection() {
     if (!subscribed) { setPrefs(next); return; }
     setBusy(true); setMessage('');
     try { await updatePushPreferences(user.id, next); setPrefs(next); setMessage('Préférences enregistrées pour cet appareil.'); }
-    catch { setMessage('Préférences non enregistrées. Réessayez dans un instant.'); }
+    catch { setMessage('Les préférences restent à enregistrer. Réessayez dans un instant.'); }
     finally { setBusy(false); }
   }
 
   return <section className="mb-8 rounded-xl border border-border p-4 space-y-4" aria-labelledby="push-heading">
     <div className="flex items-center gap-2"><BellRing className="h-5 w-5" aria-hidden="true" /><h2 id="push-heading" className="font-semibold">Notifications sur cet appareil</h2></div>
-    <p className="text-sm text-muted-foreground">Soyez prévenu d’un nouveau message ou d’une candidature, même lorsque Guardiens est fermé. Aucun nom ni contenu privé n’apparaît dans l’alerte.</p>
+    <p className="text-sm text-muted-foreground">Soyez prévenu d’un nouveau message ou d’une candidature, même lorsque Guardiens est fermé. La notification affiche seulement le type d’événement, un nouveau message ou une candidature reçue, et le détail reste dans Guardiens.</p>
     {support === 'ios-install' ? <p className="text-sm">Sur iPhone ou iPad, ajoutez d’abord Guardiens à l’écran d’accueil, puis ouvrez-le depuis son icône. <Link className="underline" to="/settings?section=installation">Voir les étapes d’installation</Link></p>
-      : support === 'unsupported' ? <p className="text-sm">Ce navigateur ne permet pas les notifications sur cet appareil. Vos emails restent disponibles.</p>
+      : support === 'unsupported' ? <p className="text-sm">Sur cet appareil, vos alertes arrivent par email.</p>
       : <>
         {denied && <p className="text-sm">Les notifications sont bloquées dans les réglages de votre navigateur. Vous pouvez y autoriser Guardiens, puis revenir ici.</p>}
-        {!loading && !config.enabled && !message && <p className="text-sm">Les notifications sur cet appareil ne sont pas encore disponibles. Vos emails restent inchangés.</p>}
+        {!loading && !config.enabled && !message && <p className="text-sm">Les notifications sur cet appareil arrivent bientôt. D’ici là, vos alertes arrivent par email.</p>}
         {(config.enabled || subscribed) && <>
           <div className="flex items-center justify-between gap-4"><Label htmlFor="push-messages">Nouveaux messages</Label><Switch id="push-messages" checked={prefs.messages} disabled={busy} onCheckedChange={(messages) => void save({ ...prefs, messages })} /></div>
           <div className="flex items-center justify-between gap-4"><Label htmlFor="push-applications">Candidatures reçues</Label><Switch id="push-applications" checked={prefs.applications} disabled={busy} onCheckedChange={(applications) => void save({ ...prefs, applications })} /></div>
