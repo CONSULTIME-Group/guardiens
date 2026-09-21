@@ -32,16 +32,14 @@ import {
   writeSitPrefill,
 } from "@/lib/missionContentGuards";
 import { AlertCircle, ChevronLeft, CalendarIcon } from "lucide-react";
-import { isPhotoRequiredByRule } from "@/lib/missionPhotoRule";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { stripEmojis } from "@/lib/stripEmojis";
+import { FIXED_EXCHANGE_OFFER } from "@/lib/entraideExchange";
 import { avatarImageUrl } from "@/lib/storageImage";
 
 import IdentityRecommendedHint from "@/components/missions/IdentityRecommendedHint";
-import { MISSION_CATEGORIES } from "@/lib/missionCategories";
 import {
   categoryDescHelp,
-  categoryExchangeHint,
   categoryTitleExample,
 
 } from "@/lib/missionCategoryCopy";
@@ -79,7 +77,6 @@ const StepperBar = ({ current, total }: { current: number; total: number }) => (
 const CreateSmallMission = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { t } = useTranslation();
@@ -95,7 +92,6 @@ const CreateSmallMission = () => {
   
 
   // Les huit catégories viennent de la source unique : un seul libellé partout.
-  const CATEGORIES = MISSION_CATEGORIES;
 
   const DURATIONS = useMemo(() => [
     { value: "1-2h", label: tp("dur_1_2h") },
@@ -992,7 +988,7 @@ const CreateSmallMission = () => {
                 type="submit"
                 form=""
                 onClick={handleSubmit as any}
-                disabled={submitting || !!exchangeError}
+                disabled={submitting}
                 className="w-full h-12 text-base font-semibold"
               >
                 {submitting
