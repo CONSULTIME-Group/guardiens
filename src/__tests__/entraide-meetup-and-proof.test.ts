@@ -30,7 +30,7 @@ describe("relance de fin d'échange", () => {
 
   it("préfère la date de fin quand elle existe", () => {
     expect(meetupReferenceDate({ date_needed: "2026-10-01", end_date: "2026-10-03" })?.toISOString())
-      .toBe(new Date("2026-10-03T12:00:00Z").toISOString());
+      .toBe(new Date("2026-10-03T00:00:00Z").toISOString());
   });
 
   it("part trois jours après l'acceptation quand aucune date n'est indiquée", () => {
@@ -143,7 +143,7 @@ describe("cartes de preuve du hub", () => {
   });
 
   it("dit la date en semaine", () => {
-    expect(weekLabel("2026-10-02T10:00:00Z", now)).toBe("Il y a 3 jours");
+    expect(weekLabel("2026-10-02T09:00:00Z", now)).toBe("Il y a 3 jours");
     expect(weekLabel(null, now)).toBe("Récemment");
   });
 });

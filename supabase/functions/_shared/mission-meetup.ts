@@ -30,7 +30,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 
 const parse = (value?: string | null): Date | null => {
   if (!value) return null;
-  const d = new Date(value.length === 10 ? `${value}T12:00:00Z` : value);
+  const d = new Date(value.length === 10 ? `${value}T00:00:00Z` : value);
   return Number.isNaN(d.getTime()) ? null : d;
 };
 
