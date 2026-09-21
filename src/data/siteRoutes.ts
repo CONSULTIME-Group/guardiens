@@ -170,7 +170,7 @@ export const staticRoutes: SiteRoute[] = [
  {
  path: "/petites-missions",
  title: "Entraide communautaire | Guardiens",
- metaDescription: "Petites missions d'entraide entre gens du coin. Un service contre un service, 0 €. Arrosage du jardin, promenade de chien, courses, partage de compétences.",
+ metaDescription: "Entraide entre gens du coin. Un service contre un service, 0 €. Arrosage du jardin, promenade de chien, courses, partage de compétences.",
  h1: "Entraide",
  sitemapPriority: "0.8",
  changeFreq: "weekly",
@@ -178,7 +178,7 @@ export const staticRoutes: SiteRoute[] = [
  {
  path: "/petites-missions/lyon",
  title: "Entraide à domicile à Lyon | Guardiens",
- metaDescription: "Petites missions d'entraide à domicile à Lyon : garde animaux, jardin, courses. Sans contrepartie financière, entre gens du coin. Publiez ou aidez.",
+ metaDescription: "Entraide à domicile à Lyon : garde animaux, jardin, courses. Sans contrepartie financière, entre gens du coin. Publiez ou aidez.",
  h1: "Entraide à domicile à Lyon",
  sitemapPriority: "0.7",
  changeFreq: "weekly",
