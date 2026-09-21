@@ -17,6 +17,7 @@ import { sitRichnessRejectionReason } from "../src/lib/sitIndexability.js";
 import { isAssociationIndexable } from "../src/lib/associationIndexability.js";
 import { isSitterProfileIndexable } from "../src/lib/sitterProfileIndexability.js";
 import { mergedBreedTarget } from "../src/lib/breedFicheMerges.js";
+import { isIndexableEntraideMission } from "../supabase/functions/_shared/entraideMissionIndexability.js";
 import { fetchOrCache as sharedFetchOrCache } from "./lib/sitemapCache.mjs";
 
 
@@ -183,7 +184,7 @@ async function main() {
 
   console.log("🗺️  Sitemap incremental build…");
 
-  const [articles, seoCity, guides, depts, breeds, profiles, sits, associations] = await Promise.all([
+  const [articles, seoCity, guides, depts, breeds, profiles, sits, associations, entraideMissions] = await Promise.all([
     fetchOrCache(
       "articles", cache,
       // Sonde composite (date + nombre) : sur une requête filtrée, la sortie
@@ -369,6 +370,23 @@ async function main() {
         _dept: a.departement_name,
       }))
     ),
+    fetchOrCache(
+      "small_missions_entraide_v1", cache,
+      () => maxUpdatedAtWithCount("public_small_missions", "created_at", q => q.eq("status", "open").neq("category", "projet")),
+      async () => (await supabase
+        .from("public_small_missions")
+        .select("slug, description, status, mission_type, date_needed, end_date, created_at")
+        .eq("status", "open")
+        .not("slug", "is", null)
+        .neq("category", "projet")
+        .limit(2000)).data,
+      rows => rows.filter(m => isIndexableEntraideMission(m)).map(m => ({
+        loc: `/petites-missions/${m.slug}`,
+        lastmod: (m.updated_at || m.created_at || today).split("T")[0],
+        changefreq: "weekly",
+        priority: "0.5",
+      }))
+    ),
   ]);
 
 
@@ -390,6 +408,7 @@ async function main() {
   for (const e of breeds) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
   for (const e of profiles) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
   for (const e of sits) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
+  for (const e of entraideMissions) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
   // Garde-fou durable : si la base publie des fiches indexables et que la
   // génération n'en produit aucune, le sitemap partirait amputé en silence.
   {

@@ -68,6 +68,9 @@ function loadHandler(path: string, rows: Rows) {
 
 describe("send-alert-digest, ventilation des exclusions", () => {
   it("nomme chaque motif au lieu d'un compteur muet", async () => {
+    // Figer l'horloge avant de charger le gestionnaire dans son contexte VM.
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-09-20T10:00:00Z"));
     const prefs = [
       { user_id: "u1", active: true, frequence: "quotidien", zone_type: "rayon", profiles: { id: "u1", email: null } },
       { user_id: "u2", active: true, frequence: "quotidien", zone_type: "rayon", profiles: { id: "u2", email: null } },
@@ -77,7 +80,6 @@ describe("send-alert-digest, ventilation des exclusions", () => {
       alert_preferences: prefs, geocode_cache: [], sits: [], small_missions: [],
     });
     // Dimanche : le rythme hebdomadaire ne passe pas, motif distinct.
-    vi.setSystemTime(new Date("2026-09-20T10:00:00Z"));
     const response = await handler(new Request("https://fixture.invalid/?force=true", { method: "POST", body: "{}" }));
     vi.useRealTimers();
     const payload = await response.json();
