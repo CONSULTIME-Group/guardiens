@@ -101,6 +101,8 @@ import { template as ownerSitUnconfirmed } from './owner-sit-unconfirmed.tsx'
 import { template as discussionStalledNudge } from './discussion-stalled-nudge.tsx'
 import { template as founderPersonalNotice } from './founder-personal-notice.tsx'
 import { template as seasonalNurture } from './seasonal-nurture.tsx'
+import { template as missionHelpNeeded } from './mission-help-needed.tsx'
+import { template as missionWaveStatus } from './mission-wave-status.tsx'
 
 
 
@@ -147,6 +149,8 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'sit-invitation': sitInvitation,
   'listing-unpublished-feedback': listingUnpublishedFeedback,
   'mission-invitation': missionInvitation,
+  'mission-help-needed': missionHelpNeeded,
+  'mission-wave-status': missionWaveStatus,
   'unread-messages-reminder': unreadMessagesReminder,
   'mission-proposal-accepted': missionProposalAccepted,
   'mission-proposal-declined': missionProposalDeclined,
