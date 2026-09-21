@@ -36,7 +36,28 @@ try {
   // Surface de depart : les droits par defaut heritables qui rendaient les vues
   // modifiables via PostgREST, et les fonctions executables par le navigateur.
   await db.exec(`
-    CREATE TABLE public.profiles (id uuid PRIMARY KEY, full_name text);
+    CREATE TABLE public.profiles (
+      id uuid PRIMARY KEY,
+      full_name text,
+      first_name text,
+      avatar_url text,
+      city text,
+      latitude double precision,
+      longitude double precision,
+      helps_with text,
+      account_status text,
+      available_for_help boolean
+    );
+    CREATE TYPE public.small_mission_status AS ENUM ('open', 'in_progress', 'completed', 'cancelled');
+    CREATE TYPE public.mission_type_enum AS ENUM ('besoin', 'offre', 'projet');
+    CREATE TABLE public.small_missions (
+      id uuid PRIMARY KEY,
+      status public.small_mission_status,
+      mission_type public.mission_type_enum,
+      moderation_hidden_at timestamptz,
+      hidden_at timestamptz
+    );
+    CREATE TABLE public.small_mission_responses (id uuid PRIMARY KEY, mission_id uuid REFERENCES public.small_missions(id));
     CREATE VIEW public.public_profiles AS SELECT id, full_name FROM public.profiles;
     CREATE VIEW public.owner_gallery AS SELECT id FROM public.profiles;
     GRANT SELECT, INSERT, UPDATE, DELETE ON public.public_profiles TO anon, authenticated;
@@ -53,6 +74,8 @@ try {
 
   const migration = readFileSync('drizzle/migrations/0008_client_surface_lockdown.sql', 'utf8');
   await db.exec(migration);
+  const helpersMigration = readFileSync('drizzle/migrations/0012_entraide_public_helpers.sql', 'utf8');
+  await db.exec(helpersMigration);
   // Idempotence : un second passage ne doit rien casser.
   await db.exec(migration);
 
@@ -73,6 +96,31 @@ try {
       AND grantee IN ('anon', 'authenticated') AND privilege_type = 'SELECT'
   `);
   equal(stillReadable.rows[0].count, 2, 'lecture des vues preservee');
+
+  const helperColumns = await db.query(`
+    SELECT column_name FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'public_helpers'
+    ORDER BY ordinal_position
+  `);
+  equal(
+    helperColumns.rows.map((row) => row.column_name),
+    ['id', 'first_name', 'avatar_url', 'city', 'latitude_approx', 'longitude_approx', 'helps_with'],
+    'public_helpers expose uniquement les colonnes autorisees',
+  );
+  await db.exec(`
+    INSERT INTO public.profiles (id, first_name, city, latitude, longitude, helps_with, account_status, available_for_help)
+    VALUES ('00000000-0000-0000-0000-000000000001', 'Camille', 'Lyon', 45.764043, 4.835659, 'Arroser les plantes', 'active', true);
+    SET ROLE anon;
+  `);
+  const anonHelpers = await db.query('SELECT first_name, city, helps_with FROM public.public_helpers');
+  equal(anonHelpers.rows.length, 1, 'anon lit les membres disponibles');
+  await db.exec('RESET ROLE;');
+  const helperWrites = await db.query(`
+    SELECT privilege_type FROM information_schema.role_table_grants
+    WHERE table_schema = 'public' AND table_name = 'public_helpers'
+      AND grantee IN ('anon', 'authenticated') AND privilege_type <> 'SELECT'
+  `);
+  equal(helperWrites.rows, [], 'public_helpers reste en lecture seule cote client');
 
   for (const [name, args] of LOCKED_FUNCTIONS) {
     const types = args.replace(/ DEFAULT [^,]+/g, '').split(',').map(a => a.trim().split(/\s+/).slice(1).join(' ')).filter(Boolean).join(', ');
