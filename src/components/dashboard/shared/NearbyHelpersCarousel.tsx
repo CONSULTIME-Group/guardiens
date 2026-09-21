@@ -173,7 +173,7 @@ const EmptyHelpersState = ({ hideHeader, userId }: { hideHeader: boolean; userId
             to="/petites-missions"
             className="inline-flex items-center gap-1 text-muted-foreground hover:text-primary font-semibold transition-colors"
           >
-            Voir les petites missions
+            Voir l'entraide
             <ArrowRight className="h-3 w-3" aria-hidden="true" />
           </Link>
           <Link

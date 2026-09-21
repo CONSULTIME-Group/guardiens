@@ -390,7 +390,7 @@
     "pricing_cta_text": "Une adresse email et un mot de passe suffisent pour commencer.",
     "pricing_cta_link": "Lire l'article tarifs 2026",
     "meta_title": "FAQ Guardiens, Toutes vos questions",
-    "meta_description": "Toutes vos questions sur Guardiens, accès gardien, espace propriétaire, parrainage et petites missions d'entraide.",
+    "meta_description": "Toutes vos questions sur Guardiens, accès gardien, espace propriétaire, parrainage et l'entraide.",
     "categories": {
       "general": "Questions générales",
       "owner": "Pour les propriétaires",
@@ -491,7 +491,7 @@
       "free_tag": "Un service contre un service",
       "p1": "Les petites missions n'ont pas besoin d'animaux pour exister. Nadine cherche un coup de main pour ramasser ses légumes. Jacques passe une heure dans son jardin et repart avec un plat maison. Aucune garde, aucun argent : juste un service contre un service, entre gens du coin.",
       "p2": "Cours de cuisine, arrosage de plantes, montage de meuble, prêt d'une perceuse, trajet partagé jusqu'à la gare : tout passe par l'entraide, sans abonnement.",
-      "cta": "Découvrir les petites missions →"
+      "cta": "Découvrir l'entraide →"
     },
     "promise": {
       "title": "Notre engagement tarifaire",
@@ -501,7 +501,7 @@
         "commission_val": "Jamais",
         "verification": "Vérification d'identité",
         "verification_val": "Incluse",
-        "mutual": "Entraide & petites missions",
+        "mutual": "Entraide",
         "mutual_val": "Un service contre un service",
         "card": "Carte bancaire à l'inscription",
         "card_val": "Jamais",
