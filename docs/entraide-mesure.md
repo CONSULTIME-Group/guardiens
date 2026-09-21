@@ -36,3 +36,29 @@ ORDER BY q.mission_id, q.wave;
 ```
 
 Repères de départ : 716 membres visibles dans l'entraide, dont 712 localisés.
+
+## Rencontres confirmées par semaine
+
+C'est le chiffre qu'on raconte : le nombre de coups de main dont les personnes
+ont confirmé qu'ils ont bien eu lieu.
+
+```sql
+SELECT date_trunc('week', m.closed_at)::date AS semaine,
+       count(*) AS rencontres_confirmees
+FROM public.small_missions m
+WHERE m.close_reason = 'meetup_confirmed'
+GROUP BY 1
+ORDER BY 1 DESC
+LIMIT 12;
+```
+
+Taux de confirmation (« je peux » accepté qui aboutit à une rencontre) :
+
+```sql
+SELECT count(*) FILTER (WHERE m.close_reason = 'meetup_confirmed') AS confirmees,
+       count(*) AS coups_de_main_retenus,
+       round(100.0 * count(*) FILTER (WHERE m.close_reason = 'meetup_confirmed') / nullif(count(*), 0), 1) AS taux_pct
+FROM public.small_missions m
+JOIN public.small_mission_responses r ON r.mission_id = m.id AND r.status = 'accepted'
+WHERE m.meetup_prompt_sent_at IS NOT NULL;
+```

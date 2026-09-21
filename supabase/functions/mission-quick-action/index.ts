@@ -62,6 +62,24 @@ Deno.serve(async (req) => {
         console.error("[mission-quick-action] meetup confirm failed", error.message);
         return json({ ok: false, reason: "error" }, 200);
       }
+
+      const result = (data ?? {}) as { ok?: boolean; badge_awarded?: boolean; helper_id?: string };
+      if (result.ok && result.badge_awarded && result.helper_id) {
+        const { data: helper } = await service
+          .from("profiles")
+          .select("first_name")
+          .eq("id", result.helper_id)
+          .maybeSingle();
+        const who = helper?.first_name?.trim();
+        await service.from("notifications").insert({
+          user_id: result.helper_id,
+          type: "mission_first_help_badge",
+          title: "Votre premier coup de main",
+          body: `${who ? `${who}, v` : "V"}otre premier coup de main est noté. Merci.`,
+          link: "/tableau-de-bord",
+        });
+      }
+
       return json(data ?? { ok: false, reason: "error" });
     }
 
