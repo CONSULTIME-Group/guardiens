@@ -44,6 +44,10 @@ CREATE FUNCTION money_in_mutual_aid(t text) RETURNS boolean LANGUAGE sql IMMUTAB
 await db.exec(migration);
 passed.push('La migration du moteur s\'applique sur un schema minimal');
 
+// Le declencheur existe deja en production, on le recree ici pour le tester.
+await db.exec(`CREATE TRIGGER trg_validate_small_mission BEFORE INSERT OR UPDATE ON small_missions
+  FOR EACH ROW EXECUTE FUNCTION validate_small_mission();`);
+
 const owner = '11111111-1111-4111-8111-111111111111';
 const mission = '22222222-2222-4222-8222-222222222222';
 await db.query('INSERT INTO profiles(id,email,first_name,available_for_help) VALUES($1,$2,$3,false)', [owner, 'owner@test.fr', 'Jeanne']);
