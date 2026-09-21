@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { haversineDistance } from "@/lib/geocode";
 import { MISSIONS_LYON } from "@/data/missionsCityContent";
 import MissionCardCover from "@/components/missions/MissionCardCover";
+import EntraideProofs from "@/components/entraide/EntraideProofs";
 
 const SITE_URL = "https://guardiens.fr";
 
@@ -210,6 +211,12 @@ const MissionsCityPage = () => {
               </Link>
               .
             </p>
+          </div>
+        </section>
+
+        <section className="bg-background border-t border-border/40">
+          <div className="max-w-5xl mx-auto px-6 pb-4">
+            <EntraideProofs origin={[c.coordinates.lat, c.coordinates.lng]} title={`Ça s'est passé près de ${c.cityName}`} />
           </div>
         </section>
 
