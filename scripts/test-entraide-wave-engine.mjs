@@ -146,7 +146,7 @@ try {
     [owner],
   );
 } catch (e) {
-  refused = /offer_creation_disabled/.test(e.message);
+  refused = e.hint === 'offer_creation_disabled' || /ne se publient plus/.test(e.message);
 }
 assert.ok(refused, 'la creation d\'offre doit etre refusee');
 await db.query(
