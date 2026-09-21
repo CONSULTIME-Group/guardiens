@@ -177,10 +177,6 @@ const CreateSmallMission = () => {
   }, []);
 
 
-  useEffect(() => {
-    const tParam = searchParams.get("type");
-    if (tParam === "besoin" || tParam === "offre") setMissionType(tParam);
-  }, []);
 
   // Attrition composer : 5 events (opened / step1_completed / field_abandoned / submitted / abandoned)
   const submittedRef = useRef(false);
@@ -215,7 +211,6 @@ const CreateSmallMission = () => {
     }
   };
 
-  const handleExchangeChange = (val: string) => {
   /** La photo illustre le besoin, elle ne conditionne jamais sa publication. */
   const photoRequiredByRule = false;
   const photoRequired = photoRequiredByRule && !photoWaived;
@@ -563,36 +558,6 @@ const CreateSmallMission = () => {
                   </p>
                 </div>
 
-                {/* Type besoin / offre */}
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">{tp("publishing_label")}</Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setMissionType("besoin")}
-                      className={cn(
-                        "h-12 rounded-xl border text-sm font-medium transition-colors",
-                        missionType === "besoin"
-                          ? "bg-primary text-primary-foreground border-primary"
-                          : "bg-background border-border text-foreground hover:border-primary/40"
-                      )}
-                    >
-                      {tp("type_need")}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setMissionType("offre")}
-                      className={cn(
-                        "h-12 rounded-xl border text-sm font-medium transition-colors",
-                        missionType === "offre"
-                          ? "bg-primary text-primary-foreground border-primary"
-                          : "bg-background border-border text-foreground hover:border-primary/40"
-                      )}
-                    >
-                      {tp("type_offer")}
-                    </button>
-                  </div>
-                </div>
 
                 {/* La seule question de l'étape 1 */}
                 <div id="mission-field-title" className="space-y-2">
@@ -705,57 +670,14 @@ const CreateSmallMission = () => {
                   </div>
                 </div>
 
-                {/* Échange proposé */}
-                <div id="mission-field-exchange" className="space-y-2">
-                  <Label htmlFor="mission-exchange-input" className="text-sm font-medium">
-                    {missionType === "offre" ? tp("exchange_label_offer") : tp("exchange_label_need")}
-                  </Label>
-                  <p className="text-xs text-muted-foreground -mt-1 leading-relaxed">
-                    Un coup de main, c'est un échange, jamais d'argent. {categoryExchangeHint(category, missionType)}
+                {/* Contrepartie : phrase unique, identique pour tout le monde. */}
+                <div className="rounded-xl border border-border bg-muted/30 p-4">
+                  <p className="text-sm text-foreground">{FIXED_EXCHANGE_OFFER}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    L'entraide s'échange en services et en attentions. L'argent reste en dehors.
                   </p>
-
-                  <Input
-                    id="mission-exchange-input"
-                    value={exchangeOffer}
-                    onChange={(e) => handleExchangeChange(e.target.value)}
-                    onBlur={() => setExchangeTouched(true)}
-                    placeholder={missionType === "offre" ? tp("exchange_ph_offer") : tp("exchange_ph_need")}
-                    className="h-12 text-base"
-                  />
-                   <p className="text-xs text-muted-foreground leading-relaxed">
-                     La contrepartie est un service ou une attention. L'argent reste en dehors de l'entraide.
-                   </p>
-                  {exchangeError && (
-                    <p className="text-sm text-destructive bg-destructive/10 rounded-md px-3 py-2">
-                      {exchangeError}
-                    </p>
-                  )}
-                  {exchangeTouched && !exchangeError && exchangeOffer.trim().length < 2 && (
-                    <p className="text-xs text-destructive flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3 shrink-0" /> Précisez votre contrepartie.
-                    </p>
-                  )}
                 </div>
 
-                {/* Catégorie, après la description : on écrit d'abord, on classe ensuite. */}
-                <div id="mission-field-category" className="space-y-2">
-                  <Label className="text-sm font-medium">{tp("category_label")}</Label>
-                  <Select value={category} onValueChange={setCategory}>
-                    <SelectTrigger className={cn("h-12 text-base", categoryTouched && !category && "border-destructive")}>
-                      <SelectValue placeholder="Choisissez une catégorie" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {CATEGORIES.map((c) => (
-                        <SelectItem key={c.key} value={c.key}>{c.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {categoryTouched && !category && (
-                    <p className="text-xs text-destructive flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3 shrink-0" /> Choisissez une catégorie.
-                    </p>
-                  )}
-                </div>
               </>
             )}
 
