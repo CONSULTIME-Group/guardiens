@@ -12,6 +12,7 @@ import { useNearbyHelpers } from "@/hooks/useNearbyHelpers";
 import { useHelpersProximityCount } from "@/hooks/useHelpersProximityCount";
 import DashboardLoadError from "./DashboardLoadError";
 import HelpsWithReminder from "./HelpsWithReminder";
+import MesCoupsDeMain from "./MesCoupsDeMain";
 
 import RoleActivationBanner from "./RoleActivationBanner";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
@@ -352,6 +353,7 @@ const SitterDashboard = () => {
         <RoleActivationBanner userRole={user?.role || "sitter"} />
       </div>
       <HelpsWithReminder />
+      <MesCoupsDeMain />
 
       {/* ═══ FLUX VERTICAL UNIQUE, plus de colonne aside isolée ═══
           Ordre cockpit : Header + Action prioritaire → KPI strip Mon activité
