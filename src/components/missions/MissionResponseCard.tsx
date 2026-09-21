@@ -94,6 +94,27 @@ const MissionResponseCard = ({
 
   const isWithdrawn = r.status === "withdrawn";
 
+  /**
+   * « Ce que je propose volontiers » : la phrase libre du profil de la
+   * personne. Lue seulement par l'auteur de la demande, au moment où il
+   * choisit, jamais affichée publiquement.
+   */
+  const [helpsWith, setHelpsWith] = useState<string | null>(null);
+  useEffect(() => {
+    if (!isAuthor || !r.responder_id) return;
+    let cancelled = false;
+    supabase
+      .from("profiles")
+      .select("helps_with")
+      .eq("id", r.responder_id)
+      .maybeSingle()
+      .then(({ data }) => { if (!cancelled) setHelpsWith((data as any)?.helps_with ?? null); });
+    return () => { cancelled = true; };
+  }, [isAuthor, r.responder_id]);
+
+  const distanceKm =
+    typeof r.distance_km === "number" ? Math.round(r.distance_km) : null;
+
   return (
     <article
       className={cn(
@@ -131,7 +152,19 @@ const MissionResponseCard = ({
               {format(new Date(r.created_at), "d MMM à HH:mm", { locale: fr })}
             </p>
           </div>
+          {distanceKm !== null && (
+            <p className="text-xs text-muted-foreground mb-1">À {distanceKm} km de vous</p>
+          )}
           <p className="text-sm text-foreground/85 leading-relaxed whitespace-pre-wrap">{r.message}</p>
+          {helpsWith && (
+            <div className="mt-2 rounded-xl border border-border bg-muted/30 p-3">
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                Ce que je propose volontiers
+              </p>
+              <p className="mt-0.5 text-sm text-foreground/85">{helpsWith}</p>
+            </div>
+          )}
+
 
           <div className="flex items-center gap-2 mt-3 flex-wrap">
             {/* Merci : réservé à l'auteur de la mission */}
@@ -174,7 +207,7 @@ const MissionResponseCard = ({
                       className="rounded-full ml-auto min-h-11"
                     >
                       <CheckCircle2 aria-hidden="true" className="h-3.5 w-3.5 mr-1" />
-                      <span>{processing ? "…" : "Retenir cette personne"}</span>
+                      <span>{processing ? "…" : "C'est parti"}</span>
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
