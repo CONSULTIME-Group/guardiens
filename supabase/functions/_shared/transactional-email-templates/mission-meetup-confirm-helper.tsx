@@ -11,34 +11,35 @@ const SITE_URL = 'https://guardiens.fr'
 
 interface Props {
   helperFirstName?: string
-  headline?: string
+  ownerFirstName?: string
   missionTitle?: string
   missionCity?: string
-  missionId?: string
-  canHelpToken?: string
-  proofLine?: string
+  yesToken?: string
+  noToken?: string
 }
 
-const MissionHelpNeededEmail = ({
+const MissionMeetupConfirmHelperEmail = ({
   helperFirstName,
-  headline,
+  ownerFirstName,
   missionTitle,
   missionCity,
-  missionId,
-  canHelpToken,
-  proofLine,
+  yesToken,
+  noToken,
 }: Props) => (
   <Html lang="fr" dir="ltr">
     <BrandedHead />
-    <Preview>{headline || 'Quelqu\u2019un du coin a besoin d\u2019un coup de main'}</Preview>
+    <Preview>Vous vous êtes rencontrés ?</Preview>
     <Body style={main}>
       <Container style={container}>
         <BrandHeader />
-        <Heading style={h1}>Un besoin près de chez vous</Heading>
+        <Heading style={h1}>Vous vous êtes rencontrés ?</Heading>
 
         <Text style={text}>Bonjour{helperFirstName ? ` ${helperFirstName}` : ''},</Text>
 
-        <Text style={text}>{headline}</Text>
+        <Text style={text}>
+          Vous avez dit « Je peux » à {ownerFirstName || 'une personne du coin'}. Dites-nous en un
+          clic comment cela s'est passé.
+        </Text>
 
         {missionTitle && (
           <Section style={card}>
@@ -47,35 +48,33 @@ const MissionHelpNeededEmail = ({
           </Section>
         )}
 
-        {proofLine && <Text style={proof}>{proofLine}</Text>}
-
-        {canHelpToken && (
+        {yesToken && (
           <Section style={ctaSection}>
-            <Button style={button} href={`${SITE_URL}/entraide/je-peux?t=${canHelpToken}`}>
-              Je peux
+            <Button style={button} href={`${SITE_URL}/entraide/je-peux?a=rencontre&t=${yesToken}`}>
+              Oui, c'est fait
             </Button>
           </Section>
         )}
 
-        {missionId && (
+        {noToken && (
           <Section style={ctaSection}>
-            <Button style={buttonGhost} href={`${SITE_URL}/petites-missions/${missionId}`}>
-              Voir le détail
+            <Button style={buttonGhost} href={`${SITE_URL}/entraide/je-peux?a=rencontre&t=${noToken}`}>
+              Ça ne s'est pas fait
             </Button>
           </Section>
         )}
 
         <Text style={muted}>
-          En retour : un merci, un café, ou un coup de main quand ce sera votre tour. Vous voyez
-          ça ensemble. Si ce n'est pas possible pour vous, laissez simplement passer.
+          Votre réponse tient en un clic. Vous pourrez y ajouter un mot sur{' '}
+          {ownerFirstName || 'la personne'}, si vous le souhaitez.
         </Text>
 
         <Hr style={hr} />
 
         <LegalFooter
-          purpose="la mise en relation pour l'entraide entre membres"
+          purpose="le suivi des coups de main entre membres"
           basis="6.1.b"
-          extra="Vous recevez ce message car vous vous êtes déclaré disponible pour donner un coup de main près de chez vous."
+          extra="Vous recevez ce message car vous avez répondu « Je peux » à un besoin d'entraide."
         />
       </Container>
     </Body>
@@ -89,7 +88,7 @@ const text = { fontSize: '14px', color: '#524E47', lineHeight: '1.6', margin: '0
 const card = { backgroundColor: '#F8F6F1', padding: '16px', borderRadius: '10px', margin: '16px 0' }
 const cardLine = { color: '#524E47', fontSize: '15px', lineHeight: '22px', fontWeight: 600 as const }
 const cardCity = { color: '#888277', fontSize: '13px', lineHeight: '20px', margin: '6px 0 0' }
-const ctaSection = { textAlign: 'center' as const, margin: '16px 0' }
+const ctaSection = { textAlign: 'center' as const, margin: '12px 0' }
 const button = {
   backgroundColor: '#2C6D50',
   color: '#ffffff',
@@ -100,29 +99,20 @@ const button = {
   textDecoration: 'none',
   display: 'inline-block',
 }
-const buttonGhost = {
-  ...button,
-  backgroundColor: '#F8F6F1',
-  color: '#2C6D50',
-}
-const proof = { color: '#2C6D50', fontSize: '13px', lineHeight: '20px', margin: '0 0 16px', fontStyle: 'italic' as const }
+const buttonGhost = { ...button, backgroundColor: '#F8F6F1', color: '#2C6D50' }
 const muted = { color: '#888277', fontSize: '13px', lineHeight: '20px', marginTop: '20px' }
 const hr = { borderColor: '#E9E4DD', margin: '20px 0' }
 
 export const template: TemplateEntry = {
-  component: MissionHelpNeededEmail,
-  subject: (data: Record<string, any>) =>
-    data.missionCity
-      ? `Un coup de main demandé à ${data.missionCity}`
-      : 'Un coup de main demandé près de chez vous',
-  displayName: 'Entraide, un besoin près de chez vous (vague)',
+  component: MissionMeetupConfirmHelperEmail,
+  subject: 'Vous vous êtes rencontrés ?',
+  displayName: 'Entraide, fin d\u2019échange (personne qui aide)',
   previewData: {
-    helperFirstName: 'Camille',
-    headline: "Marie, à 3 km, a besoin de quelqu'un pour promener Filou, samedi 4 octobre.",
-    missionTitle: 'Promener Filou samedi après-midi',
-    missionCity: 'Lyon',
-    missionId: 'demo',
-    canHelpToken: 'demo-token',
-    proofLine: "La semaine dernière, à 6 km : Laurence a reçu un coup de main de Karim.",
+    helperFirstName: 'Karim',
+    ownerFirstName: 'Laurence',
+    missionTitle: 'Nourrir les poules ce week-end',
+    missionCity: 'Annecy',
+    yesToken: 'demo-oui',
+    noToken: 'demo-non',
   },
 }

@@ -2153,6 +2153,7 @@ export type Database = {
           giver_id: string | null
           id: string
           is_manual: boolean | null
+          mission_id: string | null
           sit_id: string | null
           user_id: string
         }
@@ -2162,6 +2163,7 @@ export type Database = {
           giver_id?: string | null
           id?: string
           is_manual?: boolean | null
+          mission_id?: string | null
           sit_id?: string | null
           user_id: string
         }
@@ -2171,6 +2173,7 @@ export type Database = {
           giver_id?: string | null
           id?: string
           is_manual?: boolean | null
+          mission_id?: string | null
           sit_id?: string | null
           user_id?: string
         }
@@ -2209,6 +2212,27 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "seo_couverture_manquante"
             referencedColumns: ["profil_id"]
+          },
+          {
+            foreignKeyName: "badge_attributions_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "public_entraide_proofs"
+            referencedColumns: ["mission_id"]
+          },
+          {
+            foreignKeyName: "badge_attributions_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "public_small_missions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "badge_attributions_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "small_missions"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "badge_attributions_sit_id_fkey"
@@ -3051,6 +3075,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "seo_couverture_manquante"
             referencedColumns: ["profil_id"]
+          },
+          {
+            foreignKeyName: "conversations_small_mission_id_fkey"
+            columns: ["small_mission_id"]
+            isOneToOne: false
+            referencedRelation: "public_entraide_proofs"
+            referencedColumns: ["mission_id"]
           },
           {
             foreignKeyName: "conversations_small_mission_id_fkey"
@@ -4835,6 +4866,13 @@ export type Database = {
             foreignKeyName: "mission_action_tokens_mission_id_fkey"
             columns: ["mission_id"]
             isOneToOne: false
+            referencedRelation: "public_entraide_proofs"
+            referencedColumns: ["mission_id"]
+          },
+          {
+            foreignKeyName: "mission_action_tokens_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
             referencedRelation: "public_small_missions"
             referencedColumns: ["id"]
           },
@@ -4880,6 +4918,7 @@ export type Database = {
           id: string
           mission_id: string
           positive: boolean
+          public_ok: boolean
           receiver_id: string
         }
         Insert: {
@@ -4890,6 +4929,7 @@ export type Database = {
           id?: string
           mission_id: string
           positive: boolean
+          public_ok?: boolean
           receiver_id: string
         }
         Update: {
@@ -4900,6 +4940,7 @@ export type Database = {
           id?: string
           mission_id?: string
           positive?: boolean
+          public_ok?: boolean
           receiver_id?: string
         }
         Relationships: [
@@ -4937,6 +4978,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "seo_couverture_manquante"
             referencedColumns: ["profil_id"]
+          },
+          {
+            foreignKeyName: "mission_feedbacks_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "public_entraide_proofs"
+            referencedColumns: ["mission_id"]
           },
           {
             foreignKeyName: "mission_feedbacks_mission_id_fkey"
@@ -5058,6 +5106,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "seo_couverture_manquante"
             referencedColumns: ["profil_id"]
+          },
+          {
+            foreignKeyName: "mission_notification_queue_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "public_entraide_proofs"
+            referencedColumns: ["mission_id"]
           },
           {
             foreignKeyName: "mission_notification_queue_mission_id_fkey"
@@ -6681,6 +6736,13 @@ export type Database = {
             foreignKeyName: "reviews_mission_id_fkey"
             columns: ["mission_id"]
             isOneToOne: false
+            referencedRelation: "public_entraide_proofs"
+            referencedColumns: ["mission_id"]
+          },
+          {
+            foreignKeyName: "reviews_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
             referencedRelation: "public_small_missions"
             referencedColumns: ["id"]
           },
@@ -7986,6 +8048,7 @@ export type Database = {
       }
       small_mission_responses: {
         Row: {
+          accepted_at: string | null
           conversation_id: string | null
           created_at: string
           exchange_date: string | null
@@ -7999,6 +8062,7 @@ export type Database = {
           status: Database["public"]["Enums"]["small_mission_response_status"]
         }
         Insert: {
+          accepted_at?: string | null
           conversation_id?: string | null
           created_at?: string
           exchange_date?: string | null
@@ -8012,6 +8076,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["small_mission_response_status"]
         }
         Update: {
+          accepted_at?: string | null
           conversation_id?: string | null
           created_at?: string
           exchange_date?: string | null
@@ -8031,6 +8096,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "conversations"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "small_mission_responses_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "public_entraide_proofs"
+            referencedColumns: ["mission_id"]
           },
           {
             foreignKeyName: "small_mission_responses_mission_id_fkey"
@@ -8106,6 +8178,7 @@ export type Database = {
           latitude: number | null
           longitude: number | null
           max_participants: number | null
+          meetup_prompt_sent_at: string | null
           mission_type: Database["public"]["Enums"]["mission_type_enum"]
           moderation_hidden_at: string | null
           moderation_hidden_by: string | null
@@ -8150,6 +8223,7 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           max_participants?: number | null
+          meetup_prompt_sent_at?: string | null
           mission_type?: Database["public"]["Enums"]["mission_type_enum"]
           moderation_hidden_at?: string | null
           moderation_hidden_by?: string | null
@@ -8194,6 +8268,7 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           max_participants?: number | null
+          meetup_prompt_sent_at?: string | null
           mission_type?: Database["public"]["Enums"]["mission_type_enum"]
           moderation_hidden_at?: string | null
           moderation_hidden_by?: string | null
@@ -9049,6 +9124,27 @@ export type Database = {
           },
         ]
       }
+      public_entraide_proofs: {
+        Row: {
+          city: string | null
+          happened_at: string | null
+          helper_first_name: string | null
+          latitude_approx: number | null
+          longitude_approx: number | null
+          mission_id: string | null
+          owner_first_name: string | null
+          word: string | null
+        }
+        Relationships: []
+      }
+      public_help_counts: {
+        Row: {
+          given_count: number | null
+          received_count: number | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
       public_helpers: {
         Row: {
           avatar_url: string | null
@@ -9148,6 +9244,13 @@ export type Database = {
           response_count: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "small_mission_responses_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "public_entraide_proofs"
+            referencedColumns: ["mission_id"]
+          },
           {
             foreignKeyName: "small_mission_responses_mission_id_fkey"
             columns: ["mission_id"]
@@ -10310,6 +10413,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      confirm_mission_meetup: {
+        Args: { p_public_ok?: boolean; p_token: string; p_word?: string }
+        Returns: Json
+      }
       consume_application_action_token: {
         Args: { p_reason?: string; p_token: string }
         Returns: Json
@@ -10602,6 +10709,10 @@ export type Database = {
       email_mirror_drift_count: { Args: never; Returns: number }
       email_queue_dispatch: { Args: never; Returns: undefined }
       email_tracking_start: { Args: never; Returns: string }
+      emit_mission_meetup_tokens: {
+        Args: { p_mission_id: string }
+        Returns: Json
+      }
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
         Returns: number
@@ -11079,6 +11190,7 @@ export type Database = {
         Returns: Json
       }
       peek_mission_action_token: { Args: { p_token: string }; Returns: Json }
+      peek_mission_meetup_token: { Args: { p_token: string }; Returns: Json }
       prerender_render_budget_status: {
         Args: { p_monthly_budget?: number }
         Returns: {
