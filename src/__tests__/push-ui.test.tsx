@@ -53,7 +53,7 @@ describe('Push settings',()=>{
   });
   it('configuration absent does not offer permission',async()=>{
     mocks.config.mockResolvedValue({enabled:false});show();
-    expect(await screen.findByText(/ne sont pas encore disponibles/)).toBeInTheDocument();
+    expect(await screen.findByText(/arrivent bientôt/)).toBeInTheDocument();
     expect(screen.queryByRole('button',{name:'Activer sur cet appareil'})).toBeNull();
   });
   it('shows home-screen instructions on iOS before installation',()=>{
@@ -69,7 +69,7 @@ describe('Push settings',()=>{
   it('failed preference write retains the old choice',async()=>{
     mocks.state.mockResolvedValue({subscribed:true,messages:true,applications:false});mocks.update.mockRejectedValue(new Error());show();
     const control=await screen.findByRole('switch',{name:'Nouveaux messages'});fireEvent.click(control);
-    await screen.findByText(/Préférences non enregistrées/);expect(control).toHaveAttribute('aria-checked','true');
+    await screen.findByText(/préférences restent à enregistrer/);expect(control).toHaveAttribute('aria-checked','true');
   });
   it('keeps device disable available if configuration fetch fails',async()=>{
     mocks.config.mockRejectedValue(new Error());mocks.state.mockResolvedValue({subscribed:true,messages:true,applications:true});show();expect(await screen.findByRole('button',{name:'Désactiver sur cet appareil'})).toBeEnabled();

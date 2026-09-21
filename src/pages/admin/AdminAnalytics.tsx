@@ -342,7 +342,7 @@ const AdminAnalytics = () => {
               <p className="text-muted-foreground mt-0.5">
                 {trackingHealth.lastEvent
                   ? `Dernier événement reçu il y a ${formatRelative(trackingHealth.lastEvent)}.`
-                  : "Aucun événement enregistré."}
+                  : "Les événements apparaîtront ici."}
               </p>
             </div>
           </CardContent>
@@ -595,7 +595,7 @@ const AdminAnalytics = () => {
                   <dd className="text-2xl font-semibold">{installCounts[event] ?? 0}</dd>
                 </div>)}
               </dl>
-              <p className="text-xs text-muted-foreground">Les confirmations dépendent du navigateur et ne couvrent pas l'installation manuelle sur iPhone. Les ouvertures sont comptées une fois par session et par compte connecté, pas en utilisateurs uniques. Un clic ou « Je l'ai déjà installée » n'est pas une installation confirmée.</p>
+              <p className="text-xs text-muted-foreground">Les confirmations dépendent du navigateur : les installations manuelles sur iPhone s'ajoutent à part. Les ouvertures sont comptées une fois par session et par compte connecté, en sessions plutôt qu'en utilisateurs uniques. Un clic ou « Je l'ai déjà installée » compte comme une déclaration, la confirmation vient du navigateur.</p>
             </CardContent>
           </Card>
         </>
