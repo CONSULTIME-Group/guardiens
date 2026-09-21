@@ -11,6 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
 import { trackEvent } from "@/lib/analytics";
+import { toast } from "sonner";
 
 const EntraideMap = lazy(() => import("@/components/entraide/EntraideMap"));
 type HubView = "needs" | "helpers";
@@ -45,7 +46,7 @@ export const EntraideHubIntro = ({ isAuthenticated, onNeed, onHelp }: {
         Et si, à quelques kilomètres de chez vous, quelqu'un avait besoin d'un petit coup de main ?
       </h1>
       <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-        Des besoins qu'on reçoit, des gens qu'on découvre, une carte qui montre que le coin est vivant.
+        Arroser quelques plantes. Nourrir un chat. Réceptionner un colis. Aider à déplacer un meuble. Des choses qui, pour l'un, sont un vrai besoin, et qui, pour l'autre, coûtent très peu. Et parfois, font plaisir.
       </p>
       <div className="mt-6 flex flex-col gap-3 sm:flex-row">
         <Button onClick={onNeed}>J'ai besoin d'un coup de main</Button>
@@ -55,7 +56,7 @@ export const EntraideHubIntro = ({ isAuthenticated, onNeed, onHelp }: {
     <section className="border-y border-border py-6" aria-labelledby="concretement-title">
       <h2 id="concretement-title" className="font-heading text-xl font-semibold text-foreground">Concrètement</h2>
       <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-        Arroser des plantes, promener un chien, réceptionner un colis, monter un meuble, faire quelques courses ou tenir compagnie.
+        Vous dites ce dont vous avez besoin. Dix personnes du coin le reçoivent. L'une d'elles dit « Je peux » et vous échangez ensemble.
       </p>
     </section>
     {!isAuthenticated && <ExchangeHowItWorks variant="public" className="mt-8" />}
@@ -98,7 +99,12 @@ const EntraideHub = () => {
         supabase.from("public_mission_response_counts").select("mission_id, response_count"),
       ]);
       const counts = new Map((countsResult.data || []).map((row) => [row.mission_id, row.response_count || 0]));
-      setNeeds((needsResult.data || []).map((row) => ({ ...row, response_count: counts.get(row.id) || 0 })) as EntraideNeed[]);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      setNeeds((needsResult.data || []).filter((row) => {
+        const date = row.end_date || row.date_needed;
+        return !date || new Date(date) >= today;
+      }).map((row) => ({ ...row, response_count: counts.get(row.id) || 0 })) as EntraideNeed[]);
       setHelpers((helpersResult.data || []).flatMap((row) => row.id && row.first_name && row.helps_with ? [{ ...row, id: row.id, first_name: row.first_name, helps_with: row.helps_with }] : []) as PublicHelper[]);
       setLoading(false);
     };
@@ -110,6 +116,7 @@ const EntraideHub = () => {
     const copy = new URLSearchParams(params);
     if (next === "helpers") copy.set("vue", "autour"); else copy.delete("vue");
     setParams(copy, { replace: true });
+    if (next === "helpers") setMapOpen(window.matchMedia("(min-width: 768px)").matches);
   };
 
   const locateCity = async () => {
@@ -149,6 +156,7 @@ const EntraideHub = () => {
     }
     await supabase.from("profiles").update({ available_for_help: true }).eq("id", user.id);
     setHubView("helpers");
+    toast.success("Vous serez prévenu quand quelqu'un près de chez vous aura besoin. Vous direz oui ou non à chaque fois.");
     void trackEvent("mission_can_help", { metadata: { source: "hub", action: "helper_enabled" } });
   };
 
@@ -157,6 +165,7 @@ const EntraideHub = () => {
     "@type": "Person",
     name: helper.first_name,
     description: helper.helps_with,
+    address: helper.city ? { "@type": "PostalAddress", addressLocality: helper.city } : undefined,
   }));
 
   return (
@@ -188,7 +197,10 @@ const EntraideHub = () => {
             </div>
 
             <div className="mt-5 flex justify-end">
-              <Button type="button" variant="ghost" size="sm" onClick={() => setMapOpen((open) => !open)}>{mapOpen ? "Masquer la carte" : "Voir la carte"}</Button>
+              <div className="inline-grid grid-cols-2 rounded-lg border border-border bg-muted p-1" role="group" aria-label="Affichage des résultats">
+                <Button type="button" variant={!mapOpen ? "default" : "ghost"} size="sm" onClick={() => setMapOpen(false)}>Liste</Button>
+                <Button type="button" variant={mapOpen ? "default" : "ghost"} size="sm" onClick={() => setMapOpen(true)}>Carte</Button>
+              </div>
             </div>
             {mapOpen && (
               <div className="mt-3">
@@ -200,7 +212,7 @@ const EntraideHub = () => {
 
             {loading ? (
               <div className="mt-5 grid gap-4 md:grid-cols-2" aria-busy="true">{[0, 1, 2, 3].map((item) => <div key={item} className="h-40 animate-pulse rounded-lg bg-muted" />)}</div>
-            ) : view === "needs" ? (
+            ) : mapOpen ? null : view === "needs" ? (
               <div className="mt-5 grid gap-4 md:grid-cols-2">{sortedNeeds.map((need) => <NeedCard key={need.id} need={need} distance={needDistance(need)} showDistance={origin !== null} />)}</div>
             ) : (
               <div className="mt-5 grid gap-4 md:grid-cols-2">{filteredHelpers.map((helper) => <HelperCard key={helper.id} helper={helper} distance={helperDistance(helper)} showDistance={origin !== null} />)}</div>
@@ -212,8 +224,8 @@ const EntraideHub = () => {
 
           <section className="mt-14 border-y border-border py-8" aria-labelledby="credoc-title">
             <p className="text-sm font-semibold text-primary">54 %</p>
-            <h2 id="credoc-title" className="mt-1 font-heading text-xl font-semibold text-foreground">Plus d'un Français sur deux aspire à davantage d'entraide dans son quotidien.</h2>
-            <a className="mt-3 inline-block text-sm font-semibold text-primary underline underline-offset-4" href="https://www.credoc.fr/publications" target="_blank" rel="noreferrer">Source : CRÉDOC</a>
+            <h2 id="credoc-title" className="mt-1 font-heading text-xl font-semibold text-foreground">54 % des Français échangent régulièrement avec les gens qui habitent près de chez eux (CRÉDOC, Solitudes 2025).</h2>
+            <a className="mt-3 inline-block text-sm font-semibold text-primary underline underline-offset-4" href="/actualites/technologie-recreer-lien-pres-de-chez-soi">Lire l'article</a>
           </section>
           <EntraideFaq />
         </div>

@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { Circle, MapContainer, TileLayer, Tooltip, useMap, useMapEvents } from "react-leaflet";
+import { Circle, MapContainer, Popup, TileLayer, Tooltip, useMap, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import LeafletUnmountGuard from "@/components/shared/LeafletUnmountGuard";
-import { MAP_TILE_ATTRIBUTION, MAP_TILE_URL } from "@/lib/mapTiles";
+import { MAP_TILE_WORLD_ATTRIBUTION, MAP_TILE_WORLD_URL } from "@/lib/mapTiles";
 import { offsetApproximatePoint } from "@/lib/entraideMap";
-import type { EntraideNeed, PublicHelper } from "./EntraideCards";
+import { HelperCard, NeedCard, type EntraideNeed, type PublicHelper } from "./EntraideCards";
 
 interface Point {
   id: string;
@@ -12,6 +12,8 @@ interface Point {
   lng: number;
   label: string;
   kind: "need" | "helper";
+  need?: EntraideNeed;
+  helper?: PublicHelper;
 }
 
 interface Cluster extends Point {
@@ -68,6 +70,12 @@ const HubCircles = ({ points }: { points: Point[] }) => {
           }}
         >
           <Tooltip>{cluster.count > 1 ? `${cluster.count} coups de main dans ce secteur` : cluster.label}</Tooltip>
+          {cluster.count === 1 && (
+            <Popup minWidth={280}>
+              {cluster.need && <NeedCard need={cluster.need} distance={null} showDistance={false} compact />}
+              {cluster.helper && <HelperCard helper={cluster.helper} distance={null} showDistance={false} compact />}
+            </Popup>
+          )}
         </Circle>
       ))}
     </>
@@ -85,12 +93,14 @@ const EntraideMap = ({ needs, helpers, focus }: {
       ...offsetApproximatePoint(need.id, need.latitude, need.longitude),
       label: need.title,
       kind: "need" as const,
+      need,
     }]),
     ...helpers.flatMap((helper) => helper.latitude_approx === null || helper.longitude_approx === null ? [] : [{
       id: helper.id,
       ...offsetApproximatePoint(helper.id, helper.latitude_approx, helper.longitude_approx),
       label: helper.first_name,
       kind: "helper" as const,
+      helper,
     }]),
   ], [helpers, needs]);
 
@@ -102,7 +112,7 @@ const EntraideMap = ({ needs, helpers, focus }: {
     <div className="h-[360px] overflow-hidden rounded-lg border border-border sm:h-[520px]" aria-label="Carte des besoins et des personnes disponibles">
       <MapContainer center={focus || [46.6, 2.4]} zoom={focus ? 11 : 6} className="h-full w-full" scrollWheelZoom>
         <LeafletUnmountGuard />
-        <TileLayer url={MAP_TILE_URL} attribution={MAP_TILE_ATTRIBUTION} />
+        <TileLayer url={MAP_TILE_WORLD_URL} attribution={MAP_TILE_WORLD_ATTRIBUTION} />
         <FitPoints points={points} focus={focus} />
         <HubCircles points={points} />
       </MapContainer>

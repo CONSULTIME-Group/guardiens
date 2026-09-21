@@ -23,6 +23,7 @@ describe("EntraideHub, contenu explicite", () => {
   it("présente le modèle complet aux visiteurs sans compte", () => {
     const { onNeed, onHelp } = renderContent(false);
     expect(screen.getByRole("heading", { name: /Et si, à quelques kilomètres/ })).toBeInTheDocument();
+    expect(screen.getByText(/Arroser quelques plantes. Nourrir un chat./)).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Concrètement" })).toBeInTheDocument();
     expect(screen.getByRole("region", { name: "Comment ça marche" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Questions fréquentes" })).toBeInTheDocument();
