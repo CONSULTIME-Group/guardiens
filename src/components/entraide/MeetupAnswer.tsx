@@ -25,7 +25,7 @@ const MeetupAnswer = ({ otherFirstName, onYes, onNo, busy = false }: {
     return (
       <div className="flex flex-col gap-2 sm:flex-row">
         <Button type="button" onClick={() => setOpen(true)} disabled={busy}>Oui, c'est fait</Button>
-        <Button type="button" variant="outline" onClick={onNo} disabled={busy}>Ça ne s'est pas fait</Button>
+        <Button type="button" variant="outline" onClick={onNo} disabled={busy}>À reprogrammer</Button>
       </div>
     );
   }
