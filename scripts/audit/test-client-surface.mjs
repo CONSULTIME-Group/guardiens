@@ -184,10 +184,8 @@ try {
   equal(anonCounts.rows[1].received_count, 1, 'le compteur de coups de main recus est juste');
   await db.exec('RESET ROLE;');
 
-  const hiddenWord = await db.query(`
-    UPDATE public.mission_feedbacks SET public_ok = false;
-    SELECT word FROM public.public_entraide_proofs
-  `);
+  await db.exec('UPDATE public.mission_feedbacks SET public_ok = false;');
+  const hiddenWord = await db.query('SELECT word FROM public.public_entraide_proofs');
   equal(hiddenWord.rows[0].word, null, 'un mot non autorise reste hors de la preuve publique');
 
 
