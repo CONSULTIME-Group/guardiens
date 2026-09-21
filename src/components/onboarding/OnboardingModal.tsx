@@ -32,6 +32,7 @@ import ChipSelect from "@/components/profile/ChipSelect";
 import { compressAvatarFile } from "@/lib/compressImage";
 import { trackEvent } from "@/lib/analytics";
 import { COUNTRIES } from "@/lib/countries";
+import { hasMoneyMention } from "@/lib/missionContentGuards";
 import gouacheEntraide from "@/assets/onboarding/gouache-entraide.png";
 import gouacheGarde from "@/assets/onboarding/gouache-garde.png";
 import gouacheWelcome from "@/assets/onboarding/gouache-welcome.png";
@@ -92,6 +93,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
   // ── Slide 2: compétences + lifestyle ──
   const [lifestyle, setLifestyle] = useState<string[]>([]);
   const [pickedCompetences, setPickedCompetences] = useState<string[]>([]);
+  const [helpsWith, setHelpsWith] = useState("");
 
   // ── Live completion ──
   const [liveCompletion, setLiveCompletion] = useState(0);
@@ -125,7 +127,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
     const load = async () => {
       const { data: p } = await supabase
         .from("profiles")
-        .select("first_name, postal_code, city, avatar_url, bio, onboarding_minimal_completed, skill_categories, country")
+        .select("first_name, postal_code, city, avatar_url, bio, onboarding_minimal_completed, skill_categories, country, helps_with")
         .eq("id", user.id)
         .single();
       if (p) {
@@ -142,6 +144,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
         }
         if (p.avatar_url) setAvatarUrl(p.avatar_url);
         if (p.bio) setBio(p.bio);
+        if (p.helps_with) setHelpsWith(p.helps_with);
         if (p.onboarding_minimal_completed) setMinimalSaved(true);
         // Note : on n'hydrate plus depuis p.skill_categories (legacy générique).
         // Les vraies compétences vivent dans sitter_profiles.competences ou
@@ -247,6 +250,11 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
 
   const saveCompetencesAndLifestyle = async () => {
     if (!user) return;
+    const cleanHelpsWith = helpsWith.trim();
+    if (cleanHelpsWith && hasMoneyMention(cleanHelpsWith)) {
+      toast.error("Décrivez un coup de main sans mention d'argent.");
+      return;
+    }
 
     // 2026 : on stocke des compétences SPÉCIFIQUES (« promenade chiens »…),
     // pas les 4 catégories génériques. Les catégories DB sont DÉRIVÉES
@@ -271,8 +279,9 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
       .maybeSingle();
     const profileUpdates: Record<string, any> = {
       skill_categories: derivedCategories,
+      helps_with: cleanHelpsWith || null,
     };
-    if (safeCompetences.length > 0 && !(existing as any)?.available_for_help) {
+    if ((safeCompetences.length > 0 || cleanHelpsWith) && !(existing as any)?.available_for_help) {
       profileUpdates.available_for_help = true;
     }
     await supabase.from("profiles").update(profileUpdates as any).eq("id", user.id);
@@ -790,6 +799,18 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
                     </div>
                   ))}
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="onboarding-helps-with">Une chose que vous aimez faire pour les gens du coin</Label>
+                <Textarea
+                  id="onboarding-helps-with"
+                  value={helpsWith}
+                  onChange={(event) => setHelpsWith(event.target.value)}
+                  maxLength={200}
+                  placeholder="Arroser des plantes, faire quelques courses, monter une étagère..."
+                />
+                <p className="text-xs text-muted-foreground">En échange d'un merci ou d'un service. {helpsWith.length}/200</p>
               </div>
 
               {usesSitterScoring && (
