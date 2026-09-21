@@ -4527,6 +4527,54 @@ export type Database = {
           },
         ]
       }
+      mission_action_tokens: {
+        Row: {
+          action: string
+          created_at: string
+          expires_at: string
+          helper_id: string
+          id: string
+          mission_id: string
+          token: string
+          used_at: string | null
+        }
+        Insert: {
+          action?: string
+          created_at?: string
+          expires_at?: string
+          helper_id: string
+          id?: string
+          mission_id: string
+          token: string
+          used_at?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          expires_at?: string
+          helper_id?: string
+          id?: string
+          mission_id?: string
+          token?: string
+          used_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_action_tokens_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "public_small_missions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mission_action_tokens_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "small_missions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mission_event_idempotency: {
         Row: {
           created_at: string
@@ -4665,6 +4713,7 @@ export type Database = {
           sent_at: string | null
           skip_reason: string | null
           status: string
+          wave: number | null
         }
         Insert: {
           distance_km?: number | null
@@ -4675,6 +4724,7 @@ export type Database = {
           sent_at?: string | null
           skip_reason?: string | null
           status?: string
+          wave?: number | null
         }
         Update: {
           distance_km?: number | null
@@ -4685,6 +4735,7 @@ export type Database = {
           sent_at?: string | null
           skip_reason?: string | null
           status?: string
+          wave?: number | null
         }
         Relationships: [
           {
@@ -5509,6 +5560,7 @@ export type Database = {
           first_sit_email_sent_at: string | null
           free_months_credit: number | null
           geocode_attempts: number
+          helps_with: string | null
           hero_image_index: number | null
           id: string
           identity_document_url: string | null
@@ -5568,6 +5620,7 @@ export type Database = {
           first_sit_email_sent_at?: string | null
           free_months_credit?: number | null
           geocode_attempts?: number
+          helps_with?: string | null
           hero_image_index?: number | null
           id: string
           identity_document_url?: string | null
@@ -5627,6 +5680,7 @@ export type Database = {
           first_sit_email_sent_at?: string | null
           free_months_credit?: number | null
           geocode_attempts?: number
+          helps_with?: string | null
           hero_image_index?: number | null
           id?: string
           identity_document_url?: string | null
@@ -7629,6 +7683,7 @@ export type Database = {
           hidden_at: string | null
           hidden_by: string | null
           id: string
+          last_wave_at: string | null
           latitude: number | null
           longitude: number | null
           max_participants: number | null
@@ -7652,6 +7707,7 @@ export type Database = {
           updated_at: string
           user_id: string
           view_count: number
+          wave_count: number
         }
         Insert: {
           accepting_applications?: boolean
@@ -7671,6 +7727,7 @@ export type Database = {
           hidden_at?: string | null
           hidden_by?: string | null
           id?: string
+          last_wave_at?: string | null
           latitude?: number | null
           longitude?: number | null
           max_participants?: number | null
@@ -7694,6 +7751,7 @@ export type Database = {
           updated_at?: string
           user_id: string
           view_count?: number
+          wave_count?: number
         }
         Update: {
           accepting_applications?: boolean
@@ -7713,6 +7771,7 @@ export type Database = {
           hidden_at?: string | null
           hidden_by?: string | null
           id?: string
+          last_wave_at?: string | null
           latitude?: number | null
           longitude?: number | null
           max_participants?: number | null
@@ -7736,6 +7795,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
           view_count?: number
+          wave_count?: number
         }
         Relationships: [
           {
@@ -9686,6 +9746,7 @@ export type Database = {
         Returns: Json
       }
       consume_email_deep_link: { Args: { p_token: string }; Returns: Json }
+      consume_mission_action_token: { Args: { p_token: string }; Returns: Json }
       count_eligible_sitters: {
         Args: { p_lat: number; p_lng: number; p_radius_km?: number }
         Returns: number
@@ -9975,6 +10036,10 @@ export type Database = {
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
         Returns: number
+      }
+      enqueue_mission_wave: {
+        Args: { p_mission_id: string; p_size?: number }
+        Returns: Json
       }
       filter_blocked_partners: {
         Args: { p_other_ids: string[] }
@@ -10385,6 +10450,13 @@ export type Database = {
         }[]
       }
       mission_category_to_skill: { Args: { p_cat: string }; Returns: string }
+      mission_wave_audience: {
+        Args: { p_limit?: number; p_mission_id: string; p_offset?: number }
+        Returns: {
+          distance_km: number
+          helper_id: string
+        }[]
+      }
       move_to_dlq: {
         Args: {
           dlq_name: string
@@ -10437,6 +10509,7 @@ export type Database = {
         Args: { p_token: string }
         Returns: Json
       }
+      peek_mission_action_token: { Args: { p_token: string }; Returns: Json }
       prerender_render_budget_status: {
         Args: { p_monthly_budget?: number }
         Returns: {

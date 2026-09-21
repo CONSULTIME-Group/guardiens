@@ -64,6 +64,13 @@
       "when": 1789940341703,
       "tag": "0008_client_surface_lockdown",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1789964970655,
+      "tag": "0009_entraide_wave_engine",
+      "breakpoints": true
     }
   ]
 }
