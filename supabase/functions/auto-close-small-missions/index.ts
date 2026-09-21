@@ -40,7 +40,6 @@ Deno.serve(async (req) => {
   const nowIso = now.toISOString()
   const today = nowIso.slice(0, 10)
   const yesterday = new Date(now.getTime() - 86400_000).toISOString().slice(0, 10)
-  const dateNeededCutoff = new Date(now.getTime() - 3 * 86400_000).toISOString().slice(0, 10)
   const createdAtCutoff = new Date(now.getTime() - 45 * 86400_000).toISOString()
   const acceptedFallbackCutoff = new Date(now.getTime() - 7 * 86400_000).toISOString()
 
@@ -153,7 +152,7 @@ Deno.serve(async (req) => {
       .from('small_missions')
       .select('id, user_id, title, mission_type, date_needed, end_date, created_at')
       .eq('status', 'open')
-      .or(`end_date.lt.${today},date_needed.lt.${dateNeededCutoff},created_at.lt.${createdAtCutoff}`)
+      .or(`end_date.lt.${today},date_needed.lt.${today},created_at.lt.${createdAtCutoff}`)
       .order('created_at', { ascending: true })
       .limit(500)
 
@@ -173,7 +172,9 @@ Deno.serve(async (req) => {
       })
 
       if (m.end_date && m.end_date < today) { push('end_date_past'); continue }
-      if (!m.end_date && m.date_needed && m.date_needed < dateNeededCutoff) { push('date_needed_past'); continue }
+      // Nouveau modèle : un besoin dont la date est passée disparaît du fil
+      // le jour même, sans délai de grâce.
+      if (!m.end_date && m.date_needed && m.date_needed < today) { push('date_needed_past'); continue }
 
       if (m.created_at < createdAtCutoff) {
         const { count } = await admin

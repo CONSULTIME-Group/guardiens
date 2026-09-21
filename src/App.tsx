@@ -138,6 +138,7 @@ const Unsubscribe = lazy(() => import("./pages/Unsubscribe"), "Unsubscribe");
 const EmailClickRedirect = lazy(() => import("./pages/EmailClickRedirect"), "EmailClickRedirect");
 const EmailDeepLink = lazy(() => import("./pages/EmailDeepLink"), "EmailDeepLink");
 const ApplicationQuickAction = lazy(() => import("./pages/ApplicationQuickAction"), "ApplicationQuickAction");
+const MissionQuickCanHelp = lazy(() => import("./pages/MissionQuickCanHelp"), "MissionQuickCanHelp");
 const EmailPreferences = lazy(() => import("./pages/EmailPreferences"), "EmailPreferences");
 const CityPage = lazy(() => import("./pages/CityPage"), "CityPage");
 const HouseSittingHub = lazy(() => import("./pages/HouseSittingHub"), "HouseSittingHub");
@@ -611,6 +612,7 @@ const AppRoutes = () => {
       <Route path="/go" element={<EmailClickRedirect />} />
       <Route path="/acces" element={<EmailDeepLink />} />
       <Route path="/candidature/reponse" element={<ApplicationQuickAction />} />
+      <Route path="/entraide/je-peux" element={<MissionQuickCanHelp />} />
 
       <Route path="/email-preferences" element={<EmailPreferences />} />
       {/* Compatibilité: les emails déjà envoyés contiennent /preferences-email (chemin inversé). */}

@@ -64,6 +64,27 @@
       "when": 1789940341703,
       "tag": "0008_client_surface_lockdown",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1789964970655,
+      "tag": "0009_entraide_wave_engine",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1789965495961,
+      "tag": "0010_entraide_offers_backup_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1789965708108,
+      "tag": "0011_fix_entraide_raise_messages",
+      "breakpoints": true
     }
   ]
 }

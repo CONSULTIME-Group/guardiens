@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,16 +32,14 @@ import {
   writeSitPrefill,
 } from "@/lib/missionContentGuards";
 import { AlertCircle, ChevronLeft, CalendarIcon } from "lucide-react";
-import { isPhotoRequiredByRule } from "@/lib/missionPhotoRule";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { stripEmojis } from "@/lib/stripEmojis";
+import { FIXED_EXCHANGE_OFFER } from "@/lib/entraideExchange";
 import { avatarImageUrl } from "@/lib/storageImage";
 
 import IdentityRecommendedHint from "@/components/missions/IdentityRecommendedHint";
-import { MISSION_CATEGORIES } from "@/lib/missionCategories";
 import {
   categoryDescHelp,
-  categoryExchangeHint,
   categoryTitleExample,
 
 } from "@/lib/missionCategoryCopy";
@@ -79,7 +77,6 @@ const StepperBar = ({ current, total }: { current: number; total: number }) => (
 const CreateSmallMission = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { t } = useTranslation();
@@ -95,7 +92,6 @@ const CreateSmallMission = () => {
   
 
   // Les huit catégories viennent de la source unique : un seul libellé partout.
-  const CATEGORIES = MISSION_CATEGORIES;
 
   const DURATIONS = useMemo(() => [
     { value: "1-2h", label: tp("dur_1_2h") },
@@ -104,12 +100,12 @@ const CreateSmallMission = () => {
     { value: "weekend", label: tp("dur_weekend") },
   ], [t]);
 
-  const typeParam = searchParams.get("type");
   const [step, setStep] = useState(1);
-  const [missionType, setMissionType] = useState<"besoin" | "offre">(typeParam === "offre" ? "offre" : "besoin");
-  // Aucune catégorie présélectionnée : la personne choisit, le formulaire suit.
-  const [category, setCategory] = useState("");
-  const [categoryTouched, setCategoryTouched] = useState(false);
+  // Nouveau modèle d'entraide : un besoin, dix personnes du coin, un « je peux ».
+  // Les offres ne se publient plus, elles vivent sur le profil.
+  const missionType = "besoin" as const;
+  // Plus de catégorie choisie : le besoin s'écrit en clair, la proximité fait le reste.
+  const category = "other";
   const [photoTouched, setPhotoTouched] = useState(false);
   const [photoUploading, setPhotoUploading] = useState(false);
   const [photoFailed, setPhotoFailed] = useState(false);
@@ -120,10 +116,9 @@ const CreateSmallMission = () => {
   const [titleTouched, setTitleTouched] = useState(false);
   const [description, setDescription] = useState("");
   const [descTouched, setDescTouched] = useState(false);
-  const [exchangeOffer, setExchangeOffer] = useState("");
-  const [exchangeTouched, setExchangeTouched] = useState(false);
+  // Contrepartie : phrase unique, la même pour tout le monde. Plus rien à saisir.
+  const exchangeOffer = FIXED_EXCHANGE_OFFER;
   const [placeTouched, setPlaceTouched] = useState(false);
-  const [exchangeError, setExchangeError] = useState("");
   const [city, setCity] = useState("");
   const [postalCode, setPostalCode] = useState("");
   const [dateNeeded, setDateNeeded] = useState("");
@@ -178,10 +173,6 @@ const CreateSmallMission = () => {
   }, []);
 
 
-  useEffect(() => {
-    const tParam = searchParams.get("type");
-    if (tParam === "besoin" || tParam === "offre") setMissionType(tParam);
-  }, []);
 
   // Attrition composer : 5 events (opened / step1_completed / field_abandoned / submitted / abandoned)
   const submittedRef = useRef(false);
@@ -216,27 +207,15 @@ const CreateSmallMission = () => {
     }
   };
 
-  const handleExchangeChange = (val: string) => {
-    setExchangeOffer(val);
-    setExchangeError(hasMoneyMention(val) ? tp("exchange_error_euros") : "");
-  };
-
-  /**
-   * Photo jamais exigée sur une offre (la photo de profil illustre déjà),
-   * attendue seulement sur une demande dont l'objet se montre.
-   */
-  const photoRequiredByRule = isPhotoRequiredByRule(missionType, category);
+  /** La photo illustre le besoin, elle ne conditionne jamais sa publication. */
+  const photoRequiredByRule = false;
   const photoRequired = photoRequiredByRule && !photoWaived;
 
   /** Étape 1 : une seule question, le titre. */
   const step1Valid = title.trim().length >= MIN_TITLE_LEN;
 
-  /** Étape 2 : le détail, description, contrepartie, puis catégorie. */
-  const step2Valid =
-    description.trim().length >= MIN_DESC_LEN &&
-    exchangeOffer.trim().length >= 2 &&
-    !exchangeError &&
-    !!category;
+  /** Étape 2 : le détail, une seule question, la description. */
+  const step2Valid = description.trim().length >= MIN_DESC_LEN;
 
   /**
    * Champs obligatoires, avec l'étape qui les porte. Source unique du toast,
@@ -245,8 +224,6 @@ const CreateSmallMission = () => {
   const requiredFields = (): { id: string; label: string; step: number; invalid: boolean }[] => [
     { id: "mission-field-title", label: "Titre", step: 1, invalid: title.trim().length < MIN_TITLE_LEN },
     { id: "mission-field-description", label: "Description", step: 2, invalid: description.trim().length < MIN_DESC_LEN },
-    { id: "mission-field-exchange", label: "Contrepartie", step: 2, invalid: exchangeOffer.trim().length < 2 || !!exchangeError },
-    { id: "mission-field-category", label: "Catégorie", step: 2, invalid: !category },
     { id: "mission-field-photo", label: "Photo", step: 3, invalid: photoRequired && photos.length === 0 },
     { id: "mission-field-place", label: "Ville", step: 3, invalid: !city.trim() },
     { id: "mission-field-place", label: "Code postal", step: 3, invalid: !postalCode.trim() },
@@ -255,7 +232,7 @@ const CreateSmallMission = () => {
 
   const touchStep = (s: number) => {
     if (s === 1) setTitleTouched(true);
-    if (s === 2) { setDescTouched(true); setExchangeTouched(true); setCategoryTouched(true); }
+    if (s === 2) { setDescTouched(true); }
     if (s === 3) { setPhotoTouched(true); setPlaceTouched(true); }
   };
 
@@ -326,8 +303,8 @@ const CreateSmallMission = () => {
   const sitLike = useMemo(() => sitLikeSignals(title, description), [title, description]);
   const rehoming = useMemo(() => rehomingSignals(title, description), [title, description]);
   const moneyWording = useMemo(
-    () => moneyWordingSignals(title, description, exchangeOffer),
-    [title, description, exchangeOffer],
+    () => moneyWordingSignals(title, description),
+    [title, description],
   );
 
   /**
@@ -386,21 +363,21 @@ const CreateSmallMission = () => {
 
     // L'entraide s'échange service contre service : aucune mention d'argent,
     // sur aucun des trois champs libres. Miroir du trigger base.
-    if (hasMoneyMention(title, description, exchangeOffer)) {
+    if (hasMoneyMention(title, description)) {
       toast({
         title: "Ici, on s'échange des services",
         description:
-          "Votre annonce mentionne de l'argent. Sur l'entraide, on propose un service en retour, jamais un paiement. Reformulez votre contrepartie.",
+          "Votre annonce mentionne de l'argent. Sur l'entraide, on s'échange un service, jamais un paiement. Reformulez votre texte.",
         variant: "destructive",
       });
       setStep(2);
-      setExchangeTouched(true);
+      setDescTouched(true);
       return;
     }
 
     // Une annonce d'entraide est une page publique indexable : les coordonnées
     // personnelles y sont bloquantes, contrairement à la messagerie privée.
-    const contactKinds = detectContactDetails(`${title}\n${description}\n${exchangeOffer}`);
+    const contactKinds = detectContactDetails(`${title}\n${description}`);
     if (contactKinds.length > 0) {
       toast({
         title: "Coordonnées détectées",
@@ -427,7 +404,7 @@ const CreateSmallMission = () => {
 
     const cleanTitle = stripEmojis(sanitizeUserTitle(title) || title.trim());
     const cleanDescription = stripEmojis(description);
-    const cleanExchange = stripEmojis(exchangeOffer);
+    const cleanExchange = FIXED_EXCHANGE_OFFER;
 
     const { data: inserted, error } = await supabase.from("small_missions").insert({
       user_id: user.id,
@@ -441,8 +418,8 @@ const CreateSmallMission = () => {
       date_needed: dateNeeded || null,
       end_date: endDate || null,
       duration_estimate: duration,
-      pet_species: category === "animals" ? (petSpecies || null) : null,
-      pet_size: category === "animals" ? (petSize || null) : null,
+      pet_species: petSpecies || null,
+      pet_size: petSize || null,
       photos,
       latitude: coords?.lat ?? null,
       longitude: coords?.lng ?? null,
@@ -484,6 +461,15 @@ const CreateSmallMission = () => {
       try { await trackEvent("mission_created_incomplete_profile", { metadata: { profile_completion: profileCompletion, mission_id: inserted?.id ?? null } }); } catch {}
     }
     if (inserted?.id) { try { await recordMissionCreatedAttribution(inserted.id); } catch {} }
+    // Première vague : les dix personnes disponibles les plus proches sont
+    // prévenues tout de suite, sauf la nuit où l'envoi part au matin.
+    if (inserted?.id) {
+      try {
+        await supabase.functions.invoke("notify-mission-wave", { body: { mission_id: inserted.id } });
+      } catch {
+        // L'envoi est repris au passage horaire suivant : jamais bloquant.
+      }
+    }
     // Signaux admin éditoriaux : non bloquants, idempotents côté base.
     if (inserted?.id && (sitLike || rehoming)) {
       const mid = inserted.id;
@@ -519,7 +505,7 @@ const CreateSmallMission = () => {
   return (
     <>
       <PageMeta
-        title={missionType === "offre" ? tp("meta_title_offer") : tp("meta_title_need")}
+        title={tp("meta_title_need")}
         description={tp("meta_description")}
       />
 
@@ -565,53 +551,19 @@ const CreateSmallMission = () => {
             {step === 1 && (
               <>
                 <div className="rounded-xl p-4 border border-primary/20 bg-primary/5 space-y-1">
-                  {/* Le titre suit le mode choisi : une personne qui propose son
-                      aide ne doit pas lire un titre qui parle de demander. */}
                   <h1 className="font-heading font-bold text-foreground text-base">
-                    {missionType === "offre"
-                      ? tp("encouragement_title_offer")
-                      : tp("encouragement_title_need")}
+                    {tp("encouragement_title_need")}
                   </h1>
                   <p className="text-sm text-muted-foreground">
-                    {missionType === "offre" ? tp("encouragement_offer") : tp("encouragement_need")}
+                    {tp("encouragement_need")}
                   </p>
                 </div>
 
-                {/* Type besoin / offre */}
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">{tp("publishing_label")}</Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setMissionType("besoin")}
-                      className={cn(
-                        "h-12 rounded-xl border text-sm font-medium transition-colors",
-                        missionType === "besoin"
-                          ? "bg-primary text-primary-foreground border-primary"
-                          : "bg-background border-border text-foreground hover:border-primary/40"
-                      )}
-                    >
-                      {tp("type_need")}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setMissionType("offre")}
-                      className={cn(
-                        "h-12 rounded-xl border text-sm font-medium transition-colors",
-                        missionType === "offre"
-                          ? "bg-primary text-primary-foreground border-primary"
-                          : "bg-background border-border text-foreground hover:border-primary/40"
-                      )}
-                    >
-                      {tp("type_offer")}
-                    </button>
-                  </div>
-                </div>
 
                 {/* La seule question de l'étape 1 */}
                 <div id="mission-field-title" className="space-y-2">
                   <Label htmlFor="mission-title-input" className="text-base font-medium">
-                    {missionType === "offre" ? tp("title_question_offer") : tp("title_question_need")}
+                    {tp("title_question_need")}
                   </Label>
                   <Input
                     id="mission-title-input"
@@ -689,7 +641,7 @@ const CreateSmallMission = () => {
                 {/* Description */}
                 <div id="mission-field-description" className="space-y-2">
                   <Label htmlFor="mission-description-input" className="text-sm font-medium">
-                    {missionType === "offre" ? tp("desc_label_offer") : tp("desc_label_need")}
+                    {tp("desc_label_need")}
                   </Label>
                   <Textarea
                     id="mission-description-input"
@@ -719,57 +671,14 @@ const CreateSmallMission = () => {
                   </div>
                 </div>
 
-                {/* Échange proposé */}
-                <div id="mission-field-exchange" className="space-y-2">
-                  <Label htmlFor="mission-exchange-input" className="text-sm font-medium">
-                    {missionType === "offre" ? tp("exchange_label_offer") : tp("exchange_label_need")}
-                  </Label>
-                  <p className="text-xs text-muted-foreground -mt-1 leading-relaxed">
-                    Un coup de main, c'est un échange, jamais d'argent. {categoryExchangeHint(category, missionType)}
+                {/* Contrepartie : phrase unique, identique pour tout le monde. */}
+                <div className="rounded-xl border border-border bg-muted/30 p-4">
+                  <p className="text-sm text-foreground">{FIXED_EXCHANGE_OFFER}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    L'entraide s'échange en services et en attentions. L'argent reste en dehors.
                   </p>
-
-                  <Input
-                    id="mission-exchange-input"
-                    value={exchangeOffer}
-                    onChange={(e) => handleExchangeChange(e.target.value)}
-                    onBlur={() => setExchangeTouched(true)}
-                    placeholder={missionType === "offre" ? tp("exchange_ph_offer") : tp("exchange_ph_need")}
-                    className="h-12 text-base"
-                  />
-                   <p className="text-xs text-muted-foreground leading-relaxed">
-                     La contrepartie est un service ou une attention. L'argent reste en dehors de l'entraide.
-                   </p>
-                  {exchangeError && (
-                    <p className="text-sm text-destructive bg-destructive/10 rounded-md px-3 py-2">
-                      {exchangeError}
-                    </p>
-                  )}
-                  {exchangeTouched && !exchangeError && exchangeOffer.trim().length < 2 && (
-                    <p className="text-xs text-destructive flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3 shrink-0" /> Précisez votre contrepartie.
-                    </p>
-                  )}
                 </div>
 
-                {/* Catégorie, après la description : on écrit d'abord, on classe ensuite. */}
-                <div id="mission-field-category" className="space-y-2">
-                  <Label className="text-sm font-medium">{tp("category_label")}</Label>
-                  <Select value={category} onValueChange={setCategory}>
-                    <SelectTrigger className={cn("h-12 text-base", categoryTouched && !category && "border-destructive")}>
-                      <SelectValue placeholder="Choisissez une catégorie" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {CATEGORIES.map((c) => (
-                        <SelectItem key={c.key} value={c.key}>{c.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {categoryTouched && !category && (
-                    <p className="text-xs text-destructive flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3 shrink-0" /> Choisissez une catégorie.
-                    </p>
-                  )}
-                </div>
               </>
             )}
 
@@ -783,22 +692,8 @@ const CreateSmallMission = () => {
                   <Label className="text-sm font-medium">
                     {photoRequired ? tp("photo_label") : tp("photo_label_optional")}
                   </Label>
-                  {missionType === "offre" && user?.avatarUrl && (
-                    <div className="flex items-center gap-3 rounded-xl border border-border bg-muted/30 p-3">
-                      <img
-                        src={avatarImageUrl(user.avatarUrl, 48)}
-                        alt="Votre photo de profil"
-                        className="h-12 w-12 rounded-full object-cover"
-                      />
-                      <p className="text-xs text-muted-foreground">{tp("photo_profile_note")}</p>
-                    </div>
-                  )}
                   <p className="text-xs text-muted-foreground">
-                    {missionType === "offre" && !user?.avatarUrl
-                      ? tp("photo_profile_missing")
-                      : photoRequired
-                        ? tp("photo_help_required")
-                        : tp("photo_help_optional")}
+                    {photoRequired ? tp("photo_help_required") : tp("photo_help_optional")}
                   </p>
                   <MissionPhotoUpload
                     userId={user!.id}
@@ -949,50 +844,6 @@ const CreateSmallMission = () => {
                   </Drawer>
                 </div>
 
-                {/* Profil animal, uniquement si catégorie animaux */}
-                {category === "animals" && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 rounded-2xl border border-border p-4 bg-muted/30">
-                    <div className="sm:col-span-2">
-                      <p className="text-sm font-semibold mb-0.5">
-                        {missionType === "offre" ? "Les animaux que vous savez garder" : "L'animal concerné"}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {missionType === "offre"
-                          ? "Précisez avec quels animaux vous êtes à l'aise."
-                          : "Aide les gens à savoir s'ils peuvent proposer leur aide."}
-                      </p>
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label className="text-xs font-medium">
-                        {missionType === "offre" ? "Espèces" : "Espèce"}
-                      </Label>
-                      <Select value={petSpecies} onValueChange={setPetSpecies}>
-                        <SelectTrigger className="h-11"><SelectValue placeholder="Chien, chat…" /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="chien">Chien</SelectItem>
-                          <SelectItem value="chat">Chat</SelectItem>
-                          <SelectItem value="cheval">Cheval</SelectItem>
-                          <SelectItem value="rongeur">Rongeur</SelectItem>
-                          <SelectItem value="oiseau">Oiseau</SelectItem>
-                          <SelectItem value="poisson">Poisson</SelectItem>
-                          <SelectItem value="reptile">Reptile</SelectItem>
-                          <SelectItem value="autre">Autre</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label className="text-xs font-medium">Taille</Label>
-                      <Select value={petSize} onValueChange={setPetSize}>
-                        <SelectTrigger className="h-11"><SelectValue placeholder="Petit, moyen…" /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="petit">Petit</SelectItem>
-                          <SelectItem value="moyen">Moyen</SelectItem>
-                          <SelectItem value="grand">Grand</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                )}
 
                 <div id="mission-field-duration" className="space-y-2">
 
@@ -1084,12 +935,12 @@ const CreateSmallMission = () => {
                 type="submit"
                 form=""
                 onClick={handleSubmit as any}
-                disabled={submitting || !!exchangeError}
+                disabled={submitting}
                 className="w-full h-12 text-base font-semibold"
               >
                 {submitting
                   ? tp("submit_publishing")
-                  : missionType === "offre" ? tp("submit_offer") : tp("submit_need")}
+                  : tp("submit_need")}
               </Button>
             )}
           </div>

@@ -517,6 +517,20 @@ const SmallMissionDetail = () => {
         return r;
       }));
 
+      // Premier message pré-écrit : la conversation démarre déjà engagée,
+      // personne n'a la page blanche à remplir.
+      if (convId) {
+        const firstName = resp.responder?.first_name || "";
+        const greeting = firstName ? `Bonjour ${firstName}, merci !` : "Bonjour, merci !";
+        supabase.from("messages").insert({
+          conversation_id: convId,
+          sender_id: user!.id,
+          content: `${greeting} On se cale quand pour « ${mission.title} » ?`,
+        }).then(({ error: msgErr }) => {
+          if (msgErr) logger.error("[handleAcceptResponse] premier message", { err: msgErr.message });
+        });
+      }
+
       // Notifications (idempotence côté fonction edge par event_type + target).
       supabase.functions.invoke("notify-mission-event", {
         body: {
@@ -985,9 +999,29 @@ const SmallMissionDetail = () => {
             </div>
           ) : (
             <>
+              {/* Un besoin, dix personnes du coin, un « je peux ». Un seul
+                  geste suffit, le détail se règle ensuite en conversation. */}
+              {!isOffer && (
+                <Button
+                  className="w-full rounded-full font-bold text-base"
+                  size="lg"
+                  disabled={submitting}
+                  onClick={async () => {
+                    try {
+                      trackEvent("mission_can_help", {
+                        metadata: { mission_id: mission.id, source: "page" },
+                      });
+                    } catch { /* mesure non bloquante */ }
+                    await handleRespond("Je peux vous aider.");
+                  }}
+                >
+                  Je peux
+                </Button>
+              )}
               <Button
                 className="w-full rounded-full font-bold text-base"
                 size="lg"
+                variant={isOffer ? "default" : "outline"}
                 onClick={() => {
                   setResponseModalOpen(true);
                   trackEvent("mission_response_modal_opened", {
@@ -995,7 +1029,7 @@ const SmallMissionDetail = () => {
                   });
                 }}
               >
-                {ctaLabel}
+                {isOffer ? ctaLabel : "Répondre avec un mot"}
               </Button>
             </>
           )}

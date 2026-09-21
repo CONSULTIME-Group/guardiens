@@ -548,6 +548,145 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_small_missions_offres_20260921: {
+        Row: {
+          accepting_applications: boolean | null
+          category: Database["public"]["Enums"]["small_mission_category"] | null
+          ce_que_vous_apprendrez: string | null
+          city: string | null
+          close_reason: string | null
+          closed_at: string | null
+          created_at: string | null
+          date_needed: string | null
+          declarations: Json | null
+          description: string | null
+          duration_estimate: string | null
+          end_date: string | null
+          exchange_offer: string | null
+          hebergement: string | null
+          hidden_at: string | null
+          hidden_by: string | null
+          id: string | null
+          last_wave_at: string | null
+          latitude: number | null
+          longitude: number | null
+          max_participants: number | null
+          mission_type: Database["public"]["Enums"]["mission_type_enum"] | null
+          moderation_hidden_at: string | null
+          moderation_hidden_by: string | null
+          mois_accueil: string[] | null
+          nature_projet: string | null
+          notify_after: string | null
+          offre: string[] | null
+          pet_size: string | null
+          pet_species: string | null
+          photos: string[] | null
+          postal_code: string | null
+          repas: boolean | null
+          savoir_faire_attendus: string[] | null
+          savoir_faire_transmis: string[] | null
+          slug: string | null
+          status: Database["public"]["Enums"]["small_mission_status"] | null
+          title: string | null
+          updated_at: string | null
+          user_id: string | null
+          view_count: number | null
+          wave_count: number | null
+        }
+        Insert: {
+          accepting_applications?: boolean | null
+          category?:
+            | Database["public"]["Enums"]["small_mission_category"]
+            | null
+          ce_que_vous_apprendrez?: string | null
+          city?: string | null
+          close_reason?: string | null
+          closed_at?: string | null
+          created_at?: string | null
+          date_needed?: string | null
+          declarations?: Json | null
+          description?: string | null
+          duration_estimate?: string | null
+          end_date?: string | null
+          exchange_offer?: string | null
+          hebergement?: string | null
+          hidden_at?: string | null
+          hidden_by?: string | null
+          id?: string | null
+          last_wave_at?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          max_participants?: number | null
+          mission_type?: Database["public"]["Enums"]["mission_type_enum"] | null
+          moderation_hidden_at?: string | null
+          moderation_hidden_by?: string | null
+          mois_accueil?: string[] | null
+          nature_projet?: string | null
+          notify_after?: string | null
+          offre?: string[] | null
+          pet_size?: string | null
+          pet_species?: string | null
+          photos?: string[] | null
+          postal_code?: string | null
+          repas?: boolean | null
+          savoir_faire_attendus?: string[] | null
+          savoir_faire_transmis?: string[] | null
+          slug?: string | null
+          status?: Database["public"]["Enums"]["small_mission_status"] | null
+          title?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          view_count?: number | null
+          wave_count?: number | null
+        }
+        Update: {
+          accepting_applications?: boolean | null
+          category?:
+            | Database["public"]["Enums"]["small_mission_category"]
+            | null
+          ce_que_vous_apprendrez?: string | null
+          city?: string | null
+          close_reason?: string | null
+          closed_at?: string | null
+          created_at?: string | null
+          date_needed?: string | null
+          declarations?: Json | null
+          description?: string | null
+          duration_estimate?: string | null
+          end_date?: string | null
+          exchange_offer?: string | null
+          hebergement?: string | null
+          hidden_at?: string | null
+          hidden_by?: string | null
+          id?: string | null
+          last_wave_at?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          max_participants?: number | null
+          mission_type?: Database["public"]["Enums"]["mission_type_enum"] | null
+          moderation_hidden_at?: string | null
+          moderation_hidden_by?: string | null
+          mois_accueil?: string[] | null
+          nature_projet?: string | null
+          notify_after?: string | null
+          offre?: string[] | null
+          pet_size?: string | null
+          pet_species?: string | null
+          photos?: string[] | null
+          postal_code?: string | null
+          repas?: boolean | null
+          savoir_faire_attendus?: string[] | null
+          savoir_faire_transmis?: string[] | null
+          slug?: string | null
+          status?: Database["public"]["Enums"]["small_mission_status"] | null
+          title?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          view_count?: number | null
+          wave_count?: number | null
+        }
+        Relationships: []
+      }
       _backup_view_grants_20260920: {
         Row: {
           grantee: unknown
@@ -4527,6 +4666,54 @@ export type Database = {
           },
         ]
       }
+      mission_action_tokens: {
+        Row: {
+          action: string
+          created_at: string
+          expires_at: string
+          helper_id: string
+          id: string
+          mission_id: string
+          token: string
+          used_at: string | null
+        }
+        Insert: {
+          action?: string
+          created_at?: string
+          expires_at?: string
+          helper_id: string
+          id?: string
+          mission_id: string
+          token: string
+          used_at?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          expires_at?: string
+          helper_id?: string
+          id?: string
+          mission_id?: string
+          token?: string
+          used_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_action_tokens_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "public_small_missions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mission_action_tokens_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "small_missions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mission_event_idempotency: {
         Row: {
           created_at: string
@@ -4665,6 +4852,7 @@ export type Database = {
           sent_at: string | null
           skip_reason: string | null
           status: string
+          wave: number | null
         }
         Insert: {
           distance_km?: number | null
@@ -4675,6 +4863,7 @@ export type Database = {
           sent_at?: string | null
           skip_reason?: string | null
           status?: string
+          wave?: number | null
         }
         Update: {
           distance_km?: number | null
@@ -4685,6 +4874,7 @@ export type Database = {
           sent_at?: string | null
           skip_reason?: string | null
           status?: string
+          wave?: number | null
         }
         Relationships: [
           {
@@ -5509,6 +5699,7 @@ export type Database = {
           first_sit_email_sent_at: string | null
           free_months_credit: number | null
           geocode_attempts: number
+          helps_with: string | null
           hero_image_index: number | null
           id: string
           identity_document_url: string | null
@@ -5568,6 +5759,7 @@ export type Database = {
           first_sit_email_sent_at?: string | null
           free_months_credit?: number | null
           geocode_attempts?: number
+          helps_with?: string | null
           hero_image_index?: number | null
           id: string
           identity_document_url?: string | null
@@ -5627,6 +5819,7 @@ export type Database = {
           first_sit_email_sent_at?: string | null
           free_months_credit?: number | null
           geocode_attempts?: number
+          helps_with?: string | null
           hero_image_index?: number | null
           id?: string
           identity_document_url?: string | null
@@ -7629,6 +7822,7 @@ export type Database = {
           hidden_at: string | null
           hidden_by: string | null
           id: string
+          last_wave_at: string | null
           latitude: number | null
           longitude: number | null
           max_participants: number | null
@@ -7652,6 +7846,7 @@ export type Database = {
           updated_at: string
           user_id: string
           view_count: number
+          wave_count: number
         }
         Insert: {
           accepting_applications?: boolean
@@ -7671,6 +7866,7 @@ export type Database = {
           hidden_at?: string | null
           hidden_by?: string | null
           id?: string
+          last_wave_at?: string | null
           latitude?: number | null
           longitude?: number | null
           max_participants?: number | null
@@ -7694,6 +7890,7 @@ export type Database = {
           updated_at?: string
           user_id: string
           view_count?: number
+          wave_count?: number
         }
         Update: {
           accepting_applications?: boolean
@@ -7713,6 +7910,7 @@ export type Database = {
           hidden_at?: string | null
           hidden_by?: string | null
           id?: string
+          last_wave_at?: string | null
           latitude?: number | null
           longitude?: number | null
           max_participants?: number | null
@@ -7736,6 +7934,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
           view_count?: number
+          wave_count?: number
         }
         Relationships: [
           {
@@ -9686,6 +9885,7 @@ export type Database = {
         Returns: Json
       }
       consume_email_deep_link: { Args: { p_token: string }; Returns: Json }
+      consume_mission_action_token: { Args: { p_token: string }; Returns: Json }
       count_eligible_sitters: {
         Args: { p_lat: number; p_lng: number; p_radius_km?: number }
         Returns: number
@@ -9975,6 +10175,10 @@ export type Database = {
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
         Returns: number
+      }
+      enqueue_mission_wave: {
+        Args: { p_mission_id: string; p_size?: number }
+        Returns: Json
       }
       filter_blocked_partners: {
         Args: { p_other_ids: string[] }
@@ -10385,6 +10589,13 @@ export type Database = {
         }[]
       }
       mission_category_to_skill: { Args: { p_cat: string }; Returns: string }
+      mission_wave_audience: {
+        Args: { p_limit?: number; p_mission_id: string; p_offset?: number }
+        Returns: {
+          distance_km: number
+          helper_id: string
+        }[]
+      }
       move_to_dlq: {
         Args: {
           dlq_name: string
@@ -10437,6 +10648,7 @@ export type Database = {
         Args: { p_token: string }
         Returns: Json
       }
+      peek_mission_action_token: { Args: { p_token: string }; Returns: Json }
       prerender_render_budget_status: {
         Args: { p_monthly_budget?: number }
         Returns: {

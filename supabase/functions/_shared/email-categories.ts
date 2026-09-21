@@ -51,6 +51,7 @@ const TRANSACTIONAL: ReadonlyArray<string> = [
   'mission-response-waiting',
   'mission-response-withdrawn',
   'mission-invitation',
+  'mission-wave-status',
   'mission-proposal-accepted',
   'mission-proposal-declined',
   'mission-feedback-received',
@@ -145,6 +146,8 @@ const DIGEST: ReadonlyArray<string> = [
 // ne consomment plus le quota des emails produit.
 const ALERT: ReadonlyArray<string> = [
   'nearby-sit-alert',
+  // Vague d'entraide : sollicitation de proximite, desinscription obligatoire.
+  'mission-help-needed',
   'sitter-daily-digest',
   'alert-digest',
 ]

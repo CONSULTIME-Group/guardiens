@@ -68,6 +68,8 @@ export interface SitterProfileData {
   // Skills
   skill_categories: string[];
   available_for_help: boolean;
+  /** Phrase libre d'entraide, 200 caractères au plus. */
+  helps_with: string;
   // Déclaration professionnelle et formations déclarées (table profiles)
   pro_specialty: string;
   certifications: string[];
@@ -100,7 +102,7 @@ const defaultData: SitterProfileData = {
   meeting_preference: [], handover_preference: "", languages: [], bonus_skills: [], interests: [],
   life_pace: "", household_composition: [],
   special_animal_skills: [], work_during_sit: "", sensitivities: [],
-  skill_categories: [], available_for_help: false,
+  skill_categories: [], available_for_help: false, helps_with: "",
   pro_specialty: "", certifications: [],
   competences: [],
   travels_with_children: null,
@@ -194,6 +196,7 @@ export function useSitterProfile() {
       sensitivities: (s as any)?.sensitivities || [],
       skill_categories: (p as any)?.skill_categories || [],
       available_for_help: (p as any)?.available_for_help || false,
+      helps_with: (p as any)?.helps_with || "",
       pro_specialty: (p as any)?.pro_specialty || "",
       certifications: (p as any)?.certifications || [],
       competences: (s as any)?.competences || [],
@@ -329,7 +332,7 @@ export function useSitterProfile() {
       // Save profile fields
       // `pro_specialty` est écrit ici, `pro_status` jamais : il est dérivé
       // côté base par le déclencheur, toute écriture directe serait rejetée.
-      const profileFields = ["first_name", "last_name", "city", "postal_code", "country", "latitude", "longitude", "bio", "avatar_url", "skill_categories", "available_for_help", "pro_specialty", "certifications"] as const;
+      const profileFields = ["first_name", "last_name", "city", "postal_code", "country", "latitude", "longitude", "bio", "avatar_url", "skill_categories", "available_for_help", "helps_with", "pro_specialty", "certifications"] as const;
       const profileUpdate: any = {};
       profileFields.forEach(f => { if (f in stepData) profileUpdate[f] = (stepData as any)[f]; });
       // Un pays vide ne s'écrit jamais : NULL ou code réel (parité du score client/serveur).
