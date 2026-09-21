@@ -372,10 +372,10 @@ async function main() {
     ),
     fetchOrCache(
       "small_missions_entraide_v1", cache,
-      () => maxUpdatedAtWithCount("small_missions", "updated_at", q => q.eq("status", "open").neq("category", "projet")),
+      () => maxUpdatedAtWithCount("public_small_missions", "created_at", q => q.eq("status", "open").neq("category", "projet")),
       async () => (await supabase
-        .from("small_missions")
-        .select("slug, description, status, mission_type, date_needed, end_date, updated_at, created_at")
+        .from("public_small_missions")
+        .select("slug, description, status, mission_type, date_needed, end_date, created_at")
         .eq("status", "open")
         .not("slug", "is", null)
         .neq("category", "projet")
