@@ -548,6 +548,145 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_small_missions_offres_20260921: {
+        Row: {
+          accepting_applications: boolean | null
+          category: Database["public"]["Enums"]["small_mission_category"] | null
+          ce_que_vous_apprendrez: string | null
+          city: string | null
+          close_reason: string | null
+          closed_at: string | null
+          created_at: string | null
+          date_needed: string | null
+          declarations: Json | null
+          description: string | null
+          duration_estimate: string | null
+          end_date: string | null
+          exchange_offer: string | null
+          hebergement: string | null
+          hidden_at: string | null
+          hidden_by: string | null
+          id: string | null
+          last_wave_at: string | null
+          latitude: number | null
+          longitude: number | null
+          max_participants: number | null
+          mission_type: Database["public"]["Enums"]["mission_type_enum"] | null
+          moderation_hidden_at: string | null
+          moderation_hidden_by: string | null
+          mois_accueil: string[] | null
+          nature_projet: string | null
+          notify_after: string | null
+          offre: string[] | null
+          pet_size: string | null
+          pet_species: string | null
+          photos: string[] | null
+          postal_code: string | null
+          repas: boolean | null
+          savoir_faire_attendus: string[] | null
+          savoir_faire_transmis: string[] | null
+          slug: string | null
+          status: Database["public"]["Enums"]["small_mission_status"] | null
+          title: string | null
+          updated_at: string | null
+          user_id: string | null
+          view_count: number | null
+          wave_count: number | null
+        }
+        Insert: {
+          accepting_applications?: boolean | null
+          category?:
+            | Database["public"]["Enums"]["small_mission_category"]
+            | null
+          ce_que_vous_apprendrez?: string | null
+          city?: string | null
+          close_reason?: string | null
+          closed_at?: string | null
+          created_at?: string | null
+          date_needed?: string | null
+          declarations?: Json | null
+          description?: string | null
+          duration_estimate?: string | null
+          end_date?: string | null
+          exchange_offer?: string | null
+          hebergement?: string | null
+          hidden_at?: string | null
+          hidden_by?: string | null
+          id?: string | null
+          last_wave_at?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          max_participants?: number | null
+          mission_type?: Database["public"]["Enums"]["mission_type_enum"] | null
+          moderation_hidden_at?: string | null
+          moderation_hidden_by?: string | null
+          mois_accueil?: string[] | null
+          nature_projet?: string | null
+          notify_after?: string | null
+          offre?: string[] | null
+          pet_size?: string | null
+          pet_species?: string | null
+          photos?: string[] | null
+          postal_code?: string | null
+          repas?: boolean | null
+          savoir_faire_attendus?: string[] | null
+          savoir_faire_transmis?: string[] | null
+          slug?: string | null
+          status?: Database["public"]["Enums"]["small_mission_status"] | null
+          title?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          view_count?: number | null
+          wave_count?: number | null
+        }
+        Update: {
+          accepting_applications?: boolean | null
+          category?:
+            | Database["public"]["Enums"]["small_mission_category"]
+            | null
+          ce_que_vous_apprendrez?: string | null
+          city?: string | null
+          close_reason?: string | null
+          closed_at?: string | null
+          created_at?: string | null
+          date_needed?: string | null
+          declarations?: Json | null
+          description?: string | null
+          duration_estimate?: string | null
+          end_date?: string | null
+          exchange_offer?: string | null
+          hebergement?: string | null
+          hidden_at?: string | null
+          hidden_by?: string | null
+          id?: string | null
+          last_wave_at?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          max_participants?: number | null
+          mission_type?: Database["public"]["Enums"]["mission_type_enum"] | null
+          moderation_hidden_at?: string | null
+          moderation_hidden_by?: string | null
+          mois_accueil?: string[] | null
+          nature_projet?: string | null
+          notify_after?: string | null
+          offre?: string[] | null
+          pet_size?: string | null
+          pet_species?: string | null
+          photos?: string[] | null
+          postal_code?: string | null
+          repas?: boolean | null
+          savoir_faire_attendus?: string[] | null
+          savoir_faire_transmis?: string[] | null
+          slug?: string | null
+          status?: Database["public"]["Enums"]["small_mission_status"] | null
+          title?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          view_count?: number | null
+          wave_count?: number | null
+        }
+        Relationships: []
+      }
       _backup_view_grants_20260920: {
         Row: {
           grantee: unknown

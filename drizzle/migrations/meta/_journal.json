@@ -71,6 +71,13 @@
       "when": 1789964970655,
       "tag": "0009_entraide_wave_engine",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1789965495961,
+      "tag": "0010_entraide_offers_backup_table",
+      "breakpoints": true
     }
   ]
 }
