@@ -1,34 +1,49 @@
-# Diagnostic lecture seule, nudge-affinity-onboarding
+# Lot 8, rendre l'espace Entraide explicite
 
-Aucune modification, aucun déploiement, aucune invocation de fonction, aucun email, aucune écriture. Uniquement des lectures (code du dépôt, cron_run_log, email_send_log, logs analytiques).
+## Résultat attendu
 
-## Verdict
+Clarifier immédiatement le fonctionnement de l'Entraide, harmoniser son nom, améliorer la contrepartie du formulaire et compléter le sitemap, sans refonte visuelle, sans modifier les articles et sans publication.
 
-L'échec vient de l'appel sortant `fetch(SUPABASE_URL + "/functions/v1/send-transactional-email")` dans la boucle par destinataire, qui est **rejeté** (promesse en erreur), pas retourné en réponse 429. Le rejet remonte au `catch` du handler, qui appelle `run.fail`, d'où le statut `failed` avec `metrics` vide.
+## Modifications prévues
 
-Ce n'est donc pas Resend, et ce n'est pas le compteur `skipped` du code : un 429 HTTP de `send-transactional-email` produirait `emails_skipped` et un run `success`. Ici la boucle est interrompue avant `run.finish`.
+1. **Accueil Entraide**
+   - Retirer le badge d'abonnement hors sujet.
+   - Remplacer le sous-titre par le texte validé.
+   - Conserver « Publier » pour les membres.
+   - Afficher « Demander ou proposer un coup de main » pour les visiteurs, vers l'inscription avec retour au formulaire.
+   - Ajouter le bloc « Concrètement » avec six chips utilisant les styles du fil et appliquant les catégories existantes.
+   - Afficher `ExchangeHowItWorks` uniquement sans session, après les exemples.
+   - Déplacer l'encart Associations après le fil pour les visiteurs.
+   - Ajouter en bas une FAQ de quatre questions, pour tous, avec l'accordéon existant et un balisage `FAQPage`, sans offre ni prix structuré.
 
-## Preuves
+2. **Nom unique visible**
+   - Renommer en « Entraide » les intitulés qui désignent cet espace dans les pages visiteur, la page Lyon, les fils d'Ariane, les titres d'onglet et le back-office.
+   - Mettre le H1 et les métadonnées de Lyon sous la forme « L'entraide à domicile à Lyon ».
+   - Conserver l'URL `/petites-missions` et tous les identifiants techniques.
+   - Ne pas modifier les textes éditoriaux des articles ni les occurrences descriptives qui ne nomment pas l'espace.
 
-1. `cron_run_log` (lecture) : 11 exécutions `failed` depuis le 08/09, la dernière le 18/09 18:00:08 → 18:00:45, `metrics` vide à chaque fois. Dernier `success` le 07/09 18:00 (detected 31, emails_sent 25).
-2. `email_send_log` entre 17:59 et 18:02 le 18/09 : exactement 2 lignes `affinity-onboarding-nudge`, statut `deferred`, à 18:00:20 et 18:00:25, sans message d'erreur. Le travail progressait donc, puis s'est arrêté net environ 20 secondes plus tard, cohérent avec un rejet à l'appel suivant et non avec une erreur de détection ou de RPC.
-3. Même signature d'erreur dans `cron_run_log` pour deux autres fonctions qui invoquaient `send-transactional-email` en boucle : `nudge-sitter-dormant` (dernier échec 06/09) et `send-mutual-aid-weekly-digest` (dernier échec 25/08). Les deux ont cessé d'échouer après avoir été outillées contre ce cas.
-4. Le code de `nudge-sitter-dormant` documente et traite explicitement ce rejet : `postWithBackoff` intercepte l'erreur levée par `fetch`, lit `err.retryAfterMs` et `err.name === "RateLimitError"`, puis interrompt proprement le lot. La forme de l'erreur attendue correspond exactement au message observé, « Rate limit exceeded for trace ... Retry after NNNNNms. ». `nudge-affinity-onboarding` ne possède aucun équivalent : son `fetch` est nu, donc tout rejet fait tomber l'exécution entière.
-5. `send-sitter-daily-digest` et `send-seasonal-nurture` contiennent la même reconnaissance (`parseRetryAfterMs`, `isRateLimitFailure`, lots espacés) et n'apparaissent pas dans les échecs.
+3. **Formulaire**
+   - Remplacer les deux exemples de contrepartie par les formulations validées.
+   - Ajouter sous le champ la phrase permanente sur le service, l'attention et l'absence d'argent.
+   - Conserver strictement le garde-fou anti-argent existant.
 
-Étage exact : couche d'invocation de fonction à fonction (passerelle Edge), au niveau de l'appel sortant vers `send-transactional-email`, hôte `<projet>.supabase.co`, chemin `/functions/v1/send-transactional-email`, sans query. L'identifiant « trace » du message est propre à cette passerelle, il n'apparaît dans aucun message Resend du dépôt.
+4. **Sitemap**
+   - Confirmer dans le code et par test que la fiche est publique sans compte et porte `noindex` lorsqu'elle est fermée ou expirée.
+   - Ajouter `/petites-missions/lyon` avec fréquence hebdomadaire et priorité 0.7.
+   - Ajouter les fiches ouvertes ayant un slug et une description d'au moins 200 caractères, avec fréquence hebdomadaire et priorité 0.5.
+   - N'ajouter aucune fiche si le contrôle public ou `noindex` échoue.
 
-## Limites de rétention, ce qui n'est pas disponible
+## Tests et preuves
 
-Les logs Edge accessibles à Lovable ne couvrent pas le 17 ni le 18 septembre. Fenêtre réellement interrogeable au moment du diagnostic : environ 10 minutes, du 19/09 05:40 au 19/09 05:50 UTC, toutes sources confondues (`function_logs`, `function_edge_logs`, `edge_logs`, `postgres_logs`). Une requête explicite du 17/09 00:00 au 19/09 06:00 ne retourne que des lignes du 19/09 à partir de 05:40.
+- Ajouter un test Vitest du hub pour les états visiteur et membre, incluant textes, sections, boutons et absence du badge retiré.
+- Ajouter un test du sitemap avec une mission ouverte admissible et une mission fermée exclue.
+- Exécuter les tests ciblés, la suite Vitest complète et `tsc -b`, puis distinguer clairement toute erreur préexistante.
+- Vérifier la preview en desktop et mobile, puis capturer le hub anonyme dans les deux formats et l'étape 2 du formulaire.
+- Contrôler le dernier état de compilation automatique.
 
-Conséquence : aucune stack trace, aucun numéro de ligne, aucun message de runtime du 18/09 18:00 ne peut être produit. Le diagnostic ci-dessus repose sur `cron_run_log`, `email_send_log` et le code, pas sur les logs Edge de l'incident, qui sont expirés. Les seules lignes Edge visibles pour cette fonction aujourd'hui sont des OPTIONS 200 et des POST 401 de contrôle d'authentification, sans rapport avec l'incident.
+## Portée volontairement inchangée
 
-## Ce que ce diagnostic n'affirme pas
-
-- La valeur exacte du quota et son échelle (par trace, par worker, par projet) n'est pas lisible depuis les données accessibles.
-- La raison de la bascule du 07/09 au 08/09 n'est pas établie ici. Piste à confirmer de votre côté sur vos agrégats : volume simultané d'envois à 18:00 UTC et concurrence avec d'autres pipelines d'emails à la même minute.
-
-## Suite proposée, si vous la demandez
-
-Aucune refonte. Une seule fonction touchée, `nudge-affinity-onboarding` : entourer l'appel sortant d'un équivalent de `postWithBackoff` déjà éprouvé dans `nudge-sitter-dormant`, afin que la saturation interrompe proprement le lot, reporte les destinataires restants et termine le run en `partial` avec métriques, au lieu de perdre l'exécution entière. À faire seulement sur votre GO explicite.
+- Aucun article éditorial modifié.
+- Aucun comportement partagé hors Entraide modifié.
+- Aucune migration ni écriture en base.
+- Aucune publication ni aucun déploiement de fonction.
