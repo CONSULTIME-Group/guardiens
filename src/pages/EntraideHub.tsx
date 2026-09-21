@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
@@ -10,9 +10,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
 import { trackEvent } from "@/lib/analytics";
+import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
 import { toast } from "sonner";
 
-const EntraideMap = lazy(() => import("@/components/entraide/EntraideMap"));
+const EntraideMap = lazy(() => import("@/components/entraide/EntraideMap"), "EntraideMap");
 type HubView = "needs" | "helpers";
 
 const FAQ = [
@@ -181,7 +182,7 @@ const EntraideHub = () => {
     <>
       <PageMeta title="Entraide près de chez vous, Guardiens" description="Découvrez les besoins et les gens du coin disponibles pour un coup de main." path="/petites-missions" jsonLd={[faqSchema, ...helperPersonSchemas]} />
       <PageBreadcrumb items={[{ label: "Entraide" }]} />
-      <main className="min-w-0 bg-background pb-24">
+      <div className="min-w-0 bg-background pb-24">
         <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
           <EntraideHubIntro isAuthenticated={isAuthenticated} onNeed={goNeed} onHelp={goHelp} />
 
@@ -238,7 +239,7 @@ const EntraideHub = () => {
           </section>
           <EntraideFaq />
         </div>
-      </main>
+      </div>
     </>
   );
 };
