@@ -57,6 +57,10 @@ const TRANSACTIONAL: ReadonlyArray<string> = [
   'mission-feedback-received',
   'mission-thanks-received',
   'mission-auto-closed',
+  // Fin d'echange : relance nominative adressee aux deux membres d'un coup de
+  // main accepte, declenchee par la date de ce besoin precis.
+  'mission-meetup-confirm-owner',
+  'mission-meetup-confirm-helper',
   'question-answer-received',
   // Identity / trust / safety
   'identity-verified',
