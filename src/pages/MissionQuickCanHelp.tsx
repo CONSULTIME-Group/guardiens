@@ -100,7 +100,7 @@ export default function MissionQuickCanHelp() {
     if (done.happened) return "C'est noté, merci. Votre coup de main compte pour le coin.";
     return done.reopened
       ? "C'est noté. Le besoin redevient visible et d'autres personnes du coin le recevront."
-      : "C'est noté, merci de nous l'avoir dit.";
+      : "C'est noté. Vous pouvez convenir d'un autre moment directement dans la conversation.";
   };
 
   return (
