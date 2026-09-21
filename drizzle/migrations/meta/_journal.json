@@ -78,6 +78,13 @@
       "when": 1789965495961,
       "tag": "0010_entraide_offers_backup_table",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1789965708108,
+      "tag": "0011_fix_entraide_raise_messages",
+      "breakpoints": true
     }
   ]
 }
