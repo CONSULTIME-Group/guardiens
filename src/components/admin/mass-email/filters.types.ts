@@ -38,7 +38,16 @@ export interface MassEmailFilters {
 
   // Exclusions explicites, ex: ne pas envoyer au propriétaire d'une annonce mise en avant
   exclude_user_ids?: string[];
+
+  // Entraide (lot « deux emails Entraide »)
+  comptes_actifs?: boolean;          // account_status = 'active'
+  available_for_help?: boolean;      // a coché « je veux bien donner un coup de main »
+  helps_with_empty?: boolean;        // ligne d'entraide vide
+  exclude_admins?: boolean;          // exclut les comptes administrateurs
+  min_helps_with_profiles?: number;  // garde : refuse l'envoi sous ce vivier
+  template_name?: string;            // gabarit transactionnel de référence
 }
+
 
 
 /** Présets rapides "dormants", un clic pour appliquer un combo de filtres. */
@@ -140,6 +149,13 @@ export function countActiveFilters(f: MassEmailFilters): number {
   if (f.no_mission_ever) n++;
   if (f.respect_product_optout) n++;
   if (f.exclude_user_ids && f.exclude_user_ids.length > 0) n++;
+  if (f.comptes_actifs) n++;
+  if (f.available_for_help) n++;
+  if (f.helps_with_empty) n++;
+  if (f.exclude_admins) n++;
+  if (f.min_helps_with_profiles) n++;
+
+
 
   return n;
 }
