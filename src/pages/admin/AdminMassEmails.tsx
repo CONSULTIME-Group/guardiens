@@ -845,6 +845,14 @@ const AdminMassEmails = () => {
                 </p>
               </div>
             </div>
+            {helpsWithBlocked && (
+              <p className="text-xs font-medium text-warning-foreground bg-warning-soft rounded-lg p-3">
+                Envoi bloqué : {helpsWithCount} profils ont renseigné leur ligne d'entraide,
+                le minimum requis est {helpsWithRequired}. Lancez d'abord le segment A,
+                « écrire sa ligne », puis revenez ici.
+              </p>
+            )}
+
             <Button
               type="button"
               variant="outline"
