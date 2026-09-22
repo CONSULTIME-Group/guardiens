@@ -107,6 +107,56 @@ N'hésitez pas : une question est souvent le début d'une belle rencontre.
 À très vite,
 L'équipe Guardiens`;
 
+// === Lot « deux emails Entraide » ==========================================
+// Texte identique aux gabarits transactionnels
+// `entraide-ligne-helps-with` et `entraide-demander-coup-de-main`.
+
+const ENTRAIDE_LIGNE_SUBJECT = "Et si la technologie servait à se rencontrer ?";
+const ENTRAIDE_LIGNE_BODY = `Bonjour {prénom},
+
+Une journée devant un ordinateur, une pause sur le téléphone, une soirée sur les réseaux. Nous avons mille façons de communiquer, et si peu d'occasions de nous rencontrer vraiment.
+
+Alors nous nous sommes posé une question : et si la technologie servait justement à l'inverse ? À découvrir qu'à quelques kilomètres de chez soi, quelqu'un a besoin d'un petit coup de main.
+
+Vous avez coché « je veux bien donner un coup de main » sur Guardiens. Il reste une ligne à écrire : ce que vous aimez faire pour les gens du coin.
+
+Cueillir les pommes d'une dame pour qui l'échelle est devenue compliquée. Aider quelqu'un de votre rue à remplir un dossier en ligne. Changer une ampoule au plafond. Ramasser des noix avant la pluie. Pour l'un, c'est un vrai besoin. Pour l'autre, c'est une heure, et souvent un bon moment.
+
+Votre ligne apparaît avec votre prénom et votre ville sur la page Entraide. Quand quelqu'un près de chez vous cherche de l'aide, il vous voit et peut vous écrire.
+
+Se sentir utile, échanger quelques mots, rencontrer quelqu'un : c'est aussi une façon de se faire du bien.
+
+À très vite,
+Elisa et Jérémie`;
+
+const ENTRAIDE_DEMANDER_SUBJECT = "Les pommes du jardin d'à côté, et d'autres petits coups de main";
+const ENTRAIDE_DEMANDER_BODY = `Bonjour {prénom},
+
+Près de chez vous, il se passe des choses toutes simples.
+
+<strong>Un pommier qui déborde.</strong> Chaque automne, les branches ploient sous les fruits. Monter à l'échelle devient compliqué à 80 ans. Une heure à deux, un panier chacun, et souvent une tarte au bout.
+
+<strong>Un potager à préparer.</strong> Des années à bêcher son jardin, et un dos qui demande un peu d'aide ce printemps. Une matinée ensemble, et tous ses conseils sur les tomates en prime.
+
+<strong>Un dossier en ligne.</strong> Un formulaire pour la retraite, une démarche sur internet. Pour l'un, une montagne. Pour l'autre, vingt minutes autour d'un café.
+
+<strong>Une ampoule au plafond.</strong> Quelqu'un qui préfère garder les pieds au sol, et quelqu'un qui a un escabeau.
+
+<strong>Un colis lourd au troisième étage</strong>, un chat à nourrir un soir de retard, des noix à ramasser avant la pluie.
+
+Des choses qui, pour l'un, sont un vrai besoin, et qui, pour l'autre, coûtent très peu. Et qui, souvent, finissent par une vraie rencontre.
+
+Vous avez un besoin de ce genre ? Décrivez-le en une phrase, avec une date. Les dix personnes disponibles les plus proches le reçoivent. Chaque « Je peux » arrive sur votre tableau de bord : vous choisissez, et la conversation s'ouvre.
+
+Et si quelqu'un autour de vous en a besoin, un parent, une personne âgée de votre rue, vous pouvez publier pour elle, à son adresse, et faire le lien.
+
+En retour : un merci, un café, ou un coup de main quand ce sera votre tour.
+
+La technologie, pour une fois, au service de la rencontre.
+
+Elisa et Jérémie`;
+
+
 interface CampaignPreset {
   key: string;
   label: string;
