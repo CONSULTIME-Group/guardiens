@@ -371,7 +371,7 @@ const CreateSmallMission = () => {
       toast({
         title: "Ici, on s'échange des services",
         description:
-          "Votre annonce mentionne de l'argent. Sur l'entraide, on s'échange un service, jamais un paiement. Reformulez votre texte.",
+          "Votre texte mentionne de l'argent. Sur l'entraide, on s'échange des services : reformulez en proposant un coup de main en retour.",
         variant: "destructive",
       });
       setStep(2);
