@@ -176,6 +176,7 @@ function harness(options: Options = {}) {
       if (specifier.includes("resend-guard")) return { resendFetch };
       if (specifier.includes("email-link-wrap")) return { wrapEmailLink: (href: string) => href };
       if (specifier.includes("sender-address")) return { REPLY_TO_ADDRESS: "reply@fixture.test" };
+      if (specifier.includes("email-first-name")) return { normalizeEmailFirstNames: (d: Record<string, unknown>) => d };
       if (specifier.includes("@react-email")) return { render: () => "<body>Fixture</body>" };
       if (specifier.startsWith("npm:react@")) return { createElement };
       throw new Error(`Unexpected import ${specifier}`);
