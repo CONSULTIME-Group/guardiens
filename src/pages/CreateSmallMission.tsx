@@ -328,13 +328,17 @@ const CreateSmallMission = () => {
       try {
         const coords = await geocodeCity(city.trim());
         if (cancelled || !coords) return;
+        // Modèle A : les vagues (mission_wave_audience) retiennent les personnes
+        // disponibles les plus proches, par proximité seule. On passe donc
+        // p_category à null pour neutraliser le filtre de compétence du compteur
+        // et rester aligné sur le moteur, sans le modifier.
         const { data } = await supabase.rpc("count_mission_notification_audience" as any, {
           p_lat: coords.lat,
           p_lng: coords.lng,
           // p_radius_km est conservé pour la signature mais ignoré en base :
           // le rayon retenu est celui déclaré par chaque membre.
           p_radius_km: 30,
-          p_category: category,
+          p_category: null,
         });
         if (!cancelled) setAudienceCount(typeof data === "number" ? data : null);
       } catch {
@@ -342,7 +346,7 @@ const CreateSmallMission = () => {
       }
     }, 600);
     return () => { cancelled = true; window.clearTimeout(timer); };
-  }, [step, city, category]);
+  }, [step, city]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -367,7 +371,7 @@ const CreateSmallMission = () => {
       toast({
         title: "Ici, on s'échange des services",
         description:
-          "Votre annonce mentionne de l'argent. Sur l'entraide, on s'échange un service, jamais un paiement. Reformulez votre texte.",
+          "Votre texte mentionne de l'argent. Sur l'entraide, on s'échange des services : reformulez en proposant un coup de main en retour.",
         variant: "destructive",
       });
       setStep(2);
@@ -490,7 +494,7 @@ const CreateSmallMission = () => {
         }).then(({ error }: any) => { if (error) console.warn("signal animal_rehoming_listing", error); });
         toast({
           title: "Mission transmise pour relecture",
-          description: "La cession ou l'adoption d'animaux n'est pas proposée sur Guardiens. Notre équipe va relire votre publication.",
+          description: "Notre équipe va relire votre besoin : la cession et l'adoption d'animaux passent par les associations.",
         });
       }
     }
@@ -579,7 +583,7 @@ const CreateSmallMission = () => {
                   {(titleTouched || title.trim().length > 0) && title.trim().length < MIN_TITLE_LEN && (
                     <p className="text-xs text-destructive flex items-center gap-1">
                       <AlertCircle className="h-3 w-3 shrink-0" />
-                      Titre trop court ({title.trim().length}/{MIN_TITLE_LEN} caractères). Ex&nbsp;: « Garder mon chien pendant le week-end ».
+                      Titre trop court ({title.trim().length}/{MIN_TITLE_LEN} caractères). Ex&nbsp;: « Ramasser les pommes du jardin samedi matin ».
                     </p>
                   )}
                 </div>
@@ -613,7 +617,7 @@ const CreateSmallMission = () => {
                       >
                         Créer une annonce de garde
                       </Button>
-                      <span className="text-[11px] text-muted-foreground">Ou continuez votre mission, rien ne bloque.</span>
+                      <span className="text-[11px] text-muted-foreground">Ou continuez votre demande, vous restez libre.</span>
                     </div>
                   </div>
                 )}
@@ -623,17 +627,17 @@ const CreateSmallMission = () => {
                       Ici, on s'échange des services
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      L'entraide fonctionne sans argent : ni paiement, ni tarif, ni remboursement. Proposez plutôt un service en retour. Rien ne bloque, c'est une simple relecture.
+                      L'entraide s'échange en services et en attentions : proposez plutôt un coup de main en retour. C'est une simple relecture, vous restez libre de publier.
                     </p>
                   </div>
                 )}
                 {rehoming && (
                   <div className="rounded-xl border border-warning/40 bg-warning/10 p-4 space-y-1" role="note">
                     <p className="text-sm font-semibold text-foreground">
-                      La cession ou l'adoption d'animaux n'a pas sa place dans l'entraide
+                      La cession et l'adoption d'animaux passent par les associations
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      Guardiens ne publie pas d'annonces de vente, don ou adoption d'animaux. Si vous publiez, votre mission sera transmise à notre équipe pour relecture.
+                      Guardiens publie des coups de main et des gardes. Si vous publiez, notre équipe relira votre besoin.
                     </p>
                   </div>
                 )}
@@ -794,7 +798,7 @@ const CreateSmallMission = () => {
                       </div>
                     </DrawerContent>
                   </Drawer>
-                  <p className="text-xs text-muted-foreground">Optionnel si la date n'est pas encore fixée.</p>
+                  <p className="text-xs text-muted-foreground">Facultatif : ajoutez-la dès qu'elle est fixée.</p>
                 </div>
 
                 {/* Date de fin (optionnelle) */}
@@ -900,13 +904,15 @@ const CreateSmallMission = () => {
               <div className="text-center space-y-1">
                 <p className="text-xs text-muted-foreground">
                   {audienceCount === 0
-                    ? "Personne n'est encore disponible dans votre secteur pour cette catégorie. Publiez quand même, votre annonce reste visible et les nouveaux membres la verront."
+                    ? "Votre besoin reste visible sur la page Entraide, et les personnes qui rejoignent votre secteur le découvriront."
                     : audienceCount === 1
-                      ? "1 personne de votre secteur, disponible pour ce type de coup de main, sera prévenue."
-                      : `${audienceCount} personnes de votre secteur, disponibles pour ce type de coup de main, seront prévenues.`}
+                      ? "La personne disponible la plus proche de chez vous sera prévenue."
+                      : audienceCount <= 10
+                        ? `Les ${audienceCount} personnes disponibles les plus proches seront prévenues.`
+                        : "Les 10 personnes disponibles les plus proches seront prévenues tout de suite, puis 10 autres 48 h plus tard si besoin."}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Sont prévenues les personnes du secteur dont les compétences renseignées correspondent à votre catégorie.
+                  Ce sont les personnes disponibles les plus proches du lieu indiqué.
                 </p>
               </div>
             )}
