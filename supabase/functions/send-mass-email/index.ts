@@ -583,6 +583,22 @@ Deno.serve(async (req) => {
 
     const recipients = [...new Set(profiles.map((p) => p.email))];
 
+    const expectedRecipientCount = Number(payload.expected_recipient_count);
+    const maxRecipients = Number(payload.max_recipients);
+    if (
+      (Number.isFinite(expectedRecipientCount) && recipients.length !== expectedRecipientCount)
+      || (Number.isFinite(maxRecipients) && recipients.length > maxRecipients)
+    ) {
+      return new Response(JSON.stringify({
+        error: "Recipient safety check failed",
+        count: recipients.length,
+        expected_recipient_count: Number.isFinite(expectedRecipientCount) ? expectedRecipientCount : null,
+        max_recipients: Number.isFinite(maxRecipients) ? maxRecipients : null,
+      }), {
+        status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     if (recipients.length === 0) {
       return new Response(JSON.stringify({ error: "No recipients found" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -732,11 +748,25 @@ Deno.serve(async (req) => {
         if (error) console.error(`queued upsert error (chunk ${i}):`, error);
       }
 
+      const firstNameByEmail = new Map<string, string>();
+      for (const profile of profiles) {
+        firstNameByEmail.set(profile.email.toLowerCase(), (profile.first_name ?? "").trim());
+      }
+
       let enqueued = 0;
       for (const email of remainingRecipients) {
+        const templateName = filters.template_name;
         const { error } = await serviceClient.rpc("enqueue_email", {
           queue_name: "mass_emails",
-          payload: { campaign_id: campaignId, recipient_email: email } as any,
+          payload: {
+            campaign_id: campaignId,
+            recipient_email: email,
+            template_name: templateName,
+            idempotency_key: `mass-${campaignId}-${email.toLowerCase()}`,
+            template_data: templateName
+              ? { firstName: firstNameByEmail.get(email.toLowerCase()) ?? "" }
+              : {},
+          } as any,
         });
         if (error) {
           console.error("enqueue_email failed:", error, { email });
