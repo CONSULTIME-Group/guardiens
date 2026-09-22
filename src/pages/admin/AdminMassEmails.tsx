@@ -151,7 +151,49 @@ const CAMPAIGN_PRESETS: CampaignPreset[] = [
     utmCampaign: "entraide-gratuite-2025-07",
     utmContent: "cta",
   },
+  {
+    key: "entraide_ligne",
+    label: "Entraide A, écrire sa ligne",
+    segment: "tous",
+    filters: {
+      comptes_actifs: true,
+      available_for_help: true,
+      helps_with_empty: true,
+      exclude_admins: true,
+      respect_product_optout: true,
+      template_name: "entraide-ligne-helps-with",
+    },
+    subject: ENTRAIDE_LIGNE_SUBJECT,
+    body: ENTRAIDE_LIGNE_BODY,
+    ctaEnabled: true,
+    ctaLabel: "J'écris ma ligne",
+    ctaUrl: "https://guardiens.fr/dashboard?utm_source=email&utm_medium=email&utm_campaign=entraide_ligne",
+    utmEnabled: false,
+    utmCampaign: "entraide_ligne",
+    utmContent: "cta",
+  },
+  {
+    key: "entraide_demander",
+    label: "Entraide B, demander un coup de main",
+    segment: "tous",
+    filters: {
+      comptes_actifs: true,
+      exclude_admins: true,
+      respect_product_optout: true,
+      min_helps_with_profiles: 100,
+      template_name: "entraide-demander-coup-de-main",
+    },
+    subject: ENTRAIDE_DEMANDER_SUBJECT,
+    body: ENTRAIDE_DEMANDER_BODY,
+    ctaEnabled: true,
+    ctaLabel: "Demander un coup de main",
+    ctaUrl: "https://guardiens.fr/petites-missions/creer?utm_source=email&utm_medium=email&utm_campaign=entraide_demander",
+    utmEnabled: false,
+    utmCampaign: "entraide_demander",
+    utmContent: "cta",
+  },
 ];
+
 
 const AdminMassEmails = () => {
   // Form state, pré-rempli avec la campagne "Oser demander"
