@@ -7,10 +7,16 @@
 //
 // Décision du 22/09/2026 : au delà de 21 jours après l'échéance de l'étape,
 // le parcours sort sans envoi, avec un motif explicite.
+//
+// Lot N2, 23/09/2026 : le seul report des relances « candidatez » devient
+// `no_open_sit`, zéro annonce ouverte en France. La distance et l'absence de
+// coordonnées ne reportent plus rien, `no_coordinates` reste accepté pour les
+// parcours déjà reportés sous ce motif.
 
 export const MAX_DEFERRAL_DAYS = 21;
 
-export type DeferReason = "no_open_sit_nearby" | "no_coordinates";
+export type DeferReason = "no_open_sit" | "no_open_sit_nearby" | "no_coordinates";
+
 
 export interface DeferDecision {
   /** true : on sort le parcours, false : on reporte simplement. */
