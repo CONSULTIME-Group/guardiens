@@ -492,19 +492,31 @@ const AdminMassEmails = () => {
         });
         if (error) throw error;
         setRecipientCount(data?.count ?? 0);
+        setHelpsWithCount(
+          typeof data?.helps_with_count === "number" ? data.helps_with_count : null,
+        );
       } catch {
         setRecipientCount(null);
+        setHelpsWithCount(null);
       }
       setCountLoading(false);
     }, 500);
     return () => clearTimeout(timer);
   }, [segment, filters]);
 
+  // Garde de vivier : un email qui renvoie vers la page Entraide n'a de sens
+  // que si cette page montre assez de personnes disponibles.
+  const helpsWithRequired = filters.min_helps_with_profiles ?? 0;
+  const helpsWithBlocked =
+    helpsWithRequired > 0 && helpsWithCount !== null && helpsWithCount < helpsWithRequired;
+
   const isValid =
     subject.trim().length > 0 &&
     body.trim().length >= 20 &&
     (recipientCount ?? 0) > 0 &&
+    !helpsWithBlocked &&
     (!ctaEnabled || (ctaLabel.trim().length > 0 && ctaUrl.startsWith("https://")));
+
 
   /** Slugifie l'objet pour générer un utm_campaign par défaut. */
   const autoCampaign = subject
