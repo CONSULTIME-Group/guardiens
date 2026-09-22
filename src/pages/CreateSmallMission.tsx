@@ -634,10 +634,10 @@ const CreateSmallMission = () => {
                 {rehoming && (
                   <div className="rounded-xl border border-warning/40 bg-warning/10 p-4 space-y-1" role="note">
                     <p className="text-sm font-semibold text-foreground">
-                      La cession ou l'adoption d'animaux n'a pas sa place dans l'entraide
+                      La cession et l'adoption d'animaux passent par les associations
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      Guardiens ne publie pas d'annonces de vente, don ou adoption d'animaux. Si vous publiez, votre mission sera transmise à notre équipe pour relecture.
+                      Guardiens publie des coups de main et des gardes. Si vous publiez, notre équipe relira votre besoin.
                     </p>
                   </div>
                 )}
