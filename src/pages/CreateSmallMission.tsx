@@ -798,7 +798,7 @@ const CreateSmallMission = () => {
                       </div>
                     </DrawerContent>
                   </Drawer>
-                  <p className="text-xs text-muted-foreground">Optionnel si la date n'est pas encore fixée.</p>
+                  <p className="text-xs text-muted-foreground">Facultatif : ajoutez-la dès qu'elle est fixée.</p>
                 </div>
 
                 {/* Date de fin (optionnelle) */}
