@@ -72,8 +72,8 @@ const Email = ({
 
           <Text style={p}>
             {certain
-              ? `Les propriétaires qui trouvent quelqu'un publient leur annonce trois à quatre semaines avant le départ. C'est le temps qu'il faut pour recevoir des candidatures, échanger, et choisir sans se presser. Pour un départ le ${startFr}, c'est maintenant.`
-              : "Les propriétaires qui trouvent quelqu'un publient leur annonce trois à quatre semaines avant le départ. C'est le temps qu'il faut pour recevoir des candidatures, échanger, et choisir sans se presser."}
+              ? `Publier trois à quatre semaines avant le départ laisse le temps de recevoir des candidatures et de rencontrer la personne. Pour un départ le ${startFr}, c'est maintenant.`
+              : "Publier trois à quatre semaines avant le départ laisse le temps de recevoir des candidatures et de rencontrer la personne."}
           </Text>
 
           <Text style={p}>
@@ -87,12 +87,18 @@ const Email = ({
           </Section>
 
           <Text style={pCenter}>
-            Vous ne partez pas cette fois ? Ne faites rien, on se retrouve avant les prochaines vacances.
+            Vous restez chez vous cette fois&nbsp;? Profitez-en, et à bientôt pour les prochaines vacances.
           </Text>
+
 
           <Hr style={hr} />
           <AlmaSignoff />
-          <LegalFooter purpose="l'envoi de rappels saisonniers aux propriétaires inscrits" basis="6.1.f" />
+          <LegalFooter
+            purpose="l'envoi de rappels saisonniers aux propriétaires inscrits"
+            basis="6.1.f"
+            extra="Vous recevez ce message en tant que membre de Guardiens. Vos préférences d'email se règlent depuis votre espace personnel."
+          />
+
         </Container>
       </Body>
     </Html>

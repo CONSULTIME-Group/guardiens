@@ -50,16 +50,17 @@ const ReactivationD30Email = ({ firstName, daysSinceLastSeen }: Props) => {
           </Section>
 
           <Text style={muted}>
-            Pas envie pour l'instant&nbsp;? Aucun souci, votre compte reste ouvert et nous ne
-            vous relancerons pas tout de suite.
+            Envie de faire une pause&nbsp;? Votre compte reste ouvert, et nous reviendrons vers vous
+            plus tard.
           </Text>
+
 
           <Hr style={hr} />
 
           <LegalFooter
             purpose="la réactivation de votre compte"
             basis="6.1.f"
-            extra="Vous recevez ce message car votre compte n'a pas eu d'activité récente. Vous pouvez ajuster vos préférences d'email depuis votre espace personnel."
+            extra="Vous recevez ce message en tant que membre de Guardiens. Vos préférences d'email se règlent depuis votre espace personnel."
           />
         </Container>
       </Body>

@@ -18,17 +18,17 @@ interface Props {
   primarySitUrl?: string
 }
 
-const DormantSitterNudgeEmail = ({ firstName, days, nearbySits, primarySitUrl }: Props) => (
+const DormantSitterNudgeEmail = ({ firstName, nearbySits, primarySitUrl }: Props) => (
   <Html lang="fr" dir="ltr">
     <BrandedHead />
-    <Preview>Il y a peut-être une garde pour vous cette semaine</Preview>
+    <Preview>Nous avons pensé à vous.</Preview>
     <Body style={main}>
       <Container style={container} className="em-container">
         <BrandHeader />
 
         <Section style={hero} className="em-hero">
           <Text style={heroKicker}>Gardes disponibles</Text>
-          <Heading style={h1} className="em-h1">Il y a peut-être une garde pour vous cette semaine.</Heading>
+          <Heading style={h1} className="em-h1">De nouvelles annonces vous attendent.</Heading>
         </Section>
 
         <Text style={text} className="em-text">
@@ -36,28 +36,31 @@ const DormantSitterNudgeEmail = ({ firstName, days, nearbySits, primarySitUrl }:
         </Text>
 
         <Text style={text} className="em-text">
-          Votre profil est prêt{typeof days === 'number' ? ` depuis ${days} jours` : ''}, mais vous n'avez pas
-          encore envoyé de candidature. Peut-être n'avez-vous pas vu passer les bonnes annonces.
-        </Text>
-
-        <Text style={text} className="em-text">
-          Prenez deux minutes pour parcourir les dernières annonces près de chez vous.
+          De nouvelles annonces se sont ouvertes, et nous avons pensé à vous. Voici les plus proches
+          de chez vous.
         </Text>
 
         <NearbySitsBlock sits={nearbySits} />
 
+        <Text style={text} className="em-text">
+          Si les dates vous conviennent, un message suffit pour vous présenter. Pour les suivantes,
+          vos alertes vous préviennent dès qu'une garde s'ouvre.
+        </Text>
+
         <Section style={ctaSection} className="em-cta">
           <Button style={button} className="em-btn" href={primarySitUrl || CTA_URL}>
-            Voir les annonces
+            Voir l'annonce
           </Button>
         </Section>
+
+        <Text style={text} className="em-text">Elisa et Jérémie</Text>
 
         <Hr style={hr} />
 
         <LegalFooter
           purpose="l'accompagnement des gardiens inscrits"
           basis="6.1.f"
-          extra="Vous recevez ce message car votre profil de gardien est actif. Cet email est envoyé depuis une adresse qui ne reçoit pas de réponse."
+          extra="Vous recevez ce message en tant que membre de Guardiens. Vos préférences d'email se règlent depuis votre espace personnel."
         />
       </Container>
     </Body>
@@ -83,12 +86,24 @@ const button = {
 }
 const hr = { borderColor: '#E9E4DD', margin: '24px 0 16px' }
 
+/** Distance de la première annonce, quand elle est connue. */
+function firstDistance(data: Record<string, any>): number | null {
+  const first = Array.isArray(data?.nearbySits) ? data.nearbySits[0] : null
+  return typeof first?.distanceKm === 'number' ? first.distanceKm : null
+}
+
 export const template = {
   component: DormantSitterNudgeEmail,
-  subject: (data: Record<string, any>) =>
-    data?.firstName
-      ? `${data.firstName}, il y a peut-être une garde pour vous cette semaine`
-      : 'Il y a peut-être une garde pour vous cette semaine',
+  subject: (data: Record<string, any>) => {
+    const km = firstDistance(data ?? {})
+    const body = km === null
+      ? 'de nouvelles annonces vous attendent'
+      : `une annonce vous attend à ${km} km`
+    return data?.firstName
+      ? `${data.firstName}, ${body}`
+      : body.charAt(0).toUpperCase() + body.slice(1)
+  },
+
   displayName: 'Gardien dormant, relance annonces',
   previewData: {
     firstName: 'Camille',

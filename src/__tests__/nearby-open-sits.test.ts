@@ -1,12 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import {
-  nearbyRadiusKm,
   selectNearbyOpenSits,
   type OpenSitRow,
 } from '../../supabase/functions/_shared/nearby-open-sits.ts';
 
 // Lyon
-const VIEWER = { latitude: 45.764, longitude: 4.8357, declaredRadiusKm: null };
+const VIEWER = { latitude: 45.764, longitude: 4.8357 };
 const NOW = '2026-09-22T10:00:00.000Z';
 
 // Un degré de latitude vaut environ 111,2 km.
@@ -22,6 +21,7 @@ function sit(over: Partial<OpenSitRow> = {}): OpenSitRow {
     city: 'Lyon',
     start_date: '2026-10-10',
     end_date: '2026-10-17',
+    created_at: '2026-09-01T00:00:00.000Z',
     status: 'published',
     accepting_applications: true,
     hidden_at: null,
@@ -32,28 +32,30 @@ function sit(over: Partial<OpenSitRow> = {}): OpenSitRow {
 }
 
 describe('selectNearbyOpenSits', () => {
-  it('aucune annonce, motif explicite', () => {
+  it('aucune annonce ouverte en France, motif explicite', () => {
     const r = selectNearbyOpenSits([], VIEWER, { nowIso: NOW });
     expect(r.sits).toHaveLength(0);
-    expect(r.reason).toBe('no_open_sit_nearby');
+    expect(r.reason).toBe('no_open_sit');
   });
 
-  it('gardien sans coordonnées, motif distinct', () => {
-    const r = selectNearbyOpenSits([sit()], { latitude: null, longitude: null }, { nowIso: NOW });
-    expect(r.reason).toBe('no_coordinates');
-  });
-
-  it('annonce à 49 km retenue', () => {
-    const r = selectNearbyOpenSits([sit({ ...atKm(49) })], VIEWER, { nowIso: NOW });
+  it('annonce à 300 km retenue, la distance reste affichée', () => {
+    const r = selectNearbyOpenSits([sit({ ...atKm(300) })], VIEWER, { nowIso: NOW });
     expect(r.sits).toHaveLength(1);
-    expect(r.sits[0].distanceKm).toBe(49);
+    expect(r.sits[0].distanceKm).toBe(300);
     expect(r.sits[0].url).toBe('https://guardiens.fr/sits/garde-lyon');
   });
 
-  it('annonce à 51 km écartée', () => {
-    const r = selectNearbyOpenSits([sit({ ...atKm(51) })], VIEWER, { nowIso: NOW });
-    expect(r.sits).toHaveLength(0);
-    expect(r.reason).toBe('no_open_sit_nearby');
+  it('gardien sans coordonnées : les annonces les plus récentes, sans distance', () => {
+    const rows = [
+      sit({ id: 'a', slug: 'a', created_at: '2026-09-01T00:00:00.000Z' }),
+      sit({ id: 'b', slug: 'b', created_at: '2026-09-20T00:00:00.000Z' }),
+      sit({ id: 'c', slug: 'c', created_at: '2026-09-10T00:00:00.000Z' }),
+      sit({ id: 'd', slug: 'd', created_at: '2026-08-01T00:00:00.000Z' }),
+    ];
+    const r = selectNearbyOpenSits(rows, { latitude: null, longitude: null }, { nowIso: NOW });
+    expect(r.reason).toBeNull();
+    expect(r.sits.map((s) => s.id)).toEqual(['b', 'c', 'a']);
+    expect(r.sits.every((s) => s.distanceKm === null)).toBe(true);
   });
 
   it('annonce passée écartée', () => {
@@ -71,25 +73,10 @@ describe('selectNearbyOpenSits', () => {
     expect(r.sits).toHaveLength(0);
   });
 
-  it('rayon déclaré plus petit respecté', () => {
-    const rows = [sit({ id: 'a', ...atKm(20) })];
-    expect(selectNearbyOpenSits(rows, { ...VIEWER, declaredRadiusKm: 10 }, { nowIso: NOW }).sits).toHaveLength(0);
-    expect(selectNearbyOpenSits(rows, { ...VIEWER, declaredRadiusKm: 25 }, { nowIso: NOW }).sits).toHaveLength(1);
-  });
-
-  it('trois annonces au plus, les plus proches d\'abord', () => {
-    const rows = [30, 5, 20, 12].map((km, i) => sit({ id: `s${i}`, slug: `s${i}`, ...atKm(km) }));
+  it('trois annonces au plus, les plus proches d\'abord, même très loin', () => {
+    const rows = [300, 5, 220, 120].map((km, i) => sit({ id: `s${i}`, slug: `s${i}`, ...atKm(km) }));
     const r = selectNearbyOpenSits(rows, VIEWER, { nowIso: NOW });
-    expect(r.sits.map((s) => s.distanceKm)).toEqual([5, 12, 20]);
-  });
-});
-
-describe('nearbyRadiusKm', () => {
-  it('30 km est lu comme un silence et reste plafonné à 50', () => {
-    expect(nearbyRadiusKm(30)).toBe(50);
-    expect(nearbyRadiusKm(null)).toBe(50);
-  });
-  it('un rayon déclaré plus petit est respecté', () => {
-    expect(nearbyRadiusKm(15)).toBe(15);
+    expect(r.sits.map((s) => s.distanceKm)).toEqual([5, 120, 220]);
+    expect(r.nearestKm).toBe(5);
   });
 });

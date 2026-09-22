@@ -8,21 +8,23 @@ const dueDaysAgo = (d: number) => NOW - d * 86400_000;
 
 describe('deferDecision', () => {
   it('reporte une étape en retard de 20 jours', () => {
-    const d = deferDecision('no_open_sit_nearby', dueDaysAgo(20), NOW);
+    const d = deferDecision('no_open_sit', dueDaysAgo(20), NOW);
     expect(d.expired).toBe(false);
-    expect(d.logReason).toBe('skipped_no_open_sit_nearby');
+    expect(d.logReason).toBe('skipped_no_open_sit');
     expect(d.exitReason).toBeNull();
   });
 
   it('sort le parcours au delà de 21 jours', () => {
-    const d = deferDecision('no_open_sit_nearby', dueDaysAgo(22), NOW);
+    const d = deferDecision('no_open_sit', dueDaysAgo(22), NOW);
     expect(d.expired).toBe(true);
-    expect(d.exitReason).toBe('no_open_sit_nearby_expired');
+    expect(d.exitReason).toBe('no_open_sit_expired');
   });
 
-  it('même borne pour un gardien sans coordonnées', () => {
+  it('les motifs hérités restent acceptés avec la même borne', () => {
     expect(deferDecision('no_coordinates', dueDaysAgo(20), NOW).expired).toBe(false);
-    expect(deferDecision('no_coordinates', dueDaysAgo(22), NOW).exitReason).toBe('no_coordinates_expired');
+    expect(deferDecision('no_open_sit_nearby', dueDaysAgo(22), NOW).exitReason).toBe(
+      'no_open_sit_nearby_expired',
+    );
   });
 });
 
