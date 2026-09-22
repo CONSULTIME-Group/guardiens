@@ -904,13 +904,15 @@ const CreateSmallMission = () => {
               <div className="text-center space-y-1">
                 <p className="text-xs text-muted-foreground">
                   {audienceCount === 0
-                    ? "Personne n'est encore disponible dans votre secteur pour cette catégorie. Publiez quand même, votre annonce reste visible et les nouveaux membres la verront."
+                    ? "Votre besoin reste visible sur la page Entraide, et les personnes qui rejoignent votre secteur le découvriront."
                     : audienceCount === 1
-                      ? "1 personne de votre secteur, disponible pour ce type de coup de main, sera prévenue."
-                      : `${audienceCount} personnes de votre secteur, disponibles pour ce type de coup de main, seront prévenues.`}
+                      ? "La personne disponible la plus proche de chez vous sera prévenue."
+                      : audienceCount <= 10
+                        ? `Les ${audienceCount} personnes disponibles les plus proches seront prévenues.`
+                        : "Les 10 personnes disponibles les plus proches seront prévenues tout de suite, puis 10 autres 48 h plus tard si besoin."}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Sont prévenues les personnes du secteur dont les compétences renseignées correspondent à votre catégorie.
+                  Ce sont les personnes disponibles les plus proches du lieu indiqué.
                 </p>
               </div>
             )}
