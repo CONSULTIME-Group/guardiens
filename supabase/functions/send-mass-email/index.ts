@@ -28,6 +28,15 @@ interface MassEmailFilters {
   no_mission_ever?: boolean;
   respect_product_optout?: boolean;
   exclude_user_ids?: string[];
+  // Entraide (lot « deux emails Entraide »)
+  comptes_actifs?: boolean;
+  available_for_help?: boolean;
+  helps_with_empty?: boolean;
+  exclude_admins?: boolean;
+  /** Garde de vivier : refuse l'envoi tant que moins de N profils ont renseigné helps_with. */
+  min_helps_with_profiles?: number;
+  /** Gabarit transactionnel utilisé pour le rendu, sans effet sur le ciblage. */
+  template_name?: string;
 }
 
 
@@ -233,7 +242,13 @@ async function fetchTargetedProfiles(
 ): Promise<{ id: string; email: string; first_name: string | null }[]> {
   let query = serviceClient
     .from("profiles")
-    .select("id, email, first_name, postal_code, city, identity_verified, profile_completion, completed_sits_count, is_founder, created_at, role");
+    .select("id, email, first_name, postal_code, city, identity_verified, profile_completion, completed_sits_count, is_founder, created_at, role, account_status, available_for_help, helps_with");
+
+  // Comptes actifs uniquement
+  if (filters.comptes_actifs) query = query.eq("account_status", "active");
+
+  // Disponible pour un coup de main
+  if (filters.available_for_help) query = query.eq("available_for_help", true);
 
   // Segment
   if (segment === "gardiens") query = query.in("role", ["sitter", "both"]);
@@ -291,7 +306,7 @@ async function fetchTargetedProfiles(
   }
 
   // Pagination — Supabase limite à 1000 par défaut, on récupère tout
-  const all: { id: string; email: string }[] = [];
+  const all: { id: string; email: string; first_name: string | null }[] = [];
   const PAGE = 1000;
   let from = 0;
   while (true) {
@@ -299,14 +314,29 @@ async function fetchTargetedProfiles(
     if (error) throw error;
     if (!data || data.length === 0) break;
     for (const p of data as any[]) {
-      if (p.email) all.push({ id: p.id, email: p.email });
+      if (!p.email) continue;
+      // Ligne d'entraide non renseignée (null, vide ou espaces)
+      if (filters.helps_with_empty && String(p.helps_with ?? "").trim().length > 0) continue;
+      all.push({ id: p.id, email: p.email, first_name: p.first_name ?? null });
     }
     if (data.length < PAGE) break;
     from += PAGE;
   }
 
   // Filtre abonnés actifs (cross-table)
-  let result = all;
+  let result: { id: string; email: string; first_name: string | null }[] = all;
+
+  // Exclusion des comptes administrateurs
+  if (filters.exclude_admins) {
+    const { data: admins, error: adminErr } = await serviceClient
+      .from("user_roles")
+      .select("user_id")
+      .eq("role", "admin");
+    if (adminErr) throw new Error(`Admin exclusion failed: ${adminErr.message}`);
+    const adminIds = new Set((admins || []).map((r: any) => r.user_id));
+    result = result.filter((p) => !adminIds.has(p.id));
+  }
+
   if (filters.abonnes_actifs) {
     const { data: subs } = await serviceClient
       .from("subscriptions")
@@ -409,6 +439,23 @@ async function fetchTargetedProfiles(
   return result;
 }
 
+/**
+ * Nombre de profils ayant renseigné leur ligne d'entraide (`helps_with`).
+ * Sert de garde de vivier : un email qui renvoie vers la page Entraide n'a de
+ * sens que si cette page montre assez de personnes.
+ */
+async function countHelpsWithProfiles(
+  serviceClient: ReturnType<typeof createClient>,
+): Promise<number> {
+  const { count, error } = await serviceClient
+    .from("profiles")
+    .select("id", { count: "exact", head: true })
+    .not("helps_with", "is", null)
+    .neq("helps_with", "");
+  if (error) throw new Error(`helps_with count failed: ${error.message}`);
+  return count ?? 0;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -471,7 +518,19 @@ Deno.serve(async (req) => {
         });
       }
       const uniqueEmails = new Set(compliant.map((p) => p.email));
-      return new Response(JSON.stringify({ count: uniqueEmails.size }), {
+      let helpsWithCount: number | null = null;
+      if (filters.min_helps_with_profiles && filters.min_helps_with_profiles > 0) {
+        try {
+          helpsWithCount = await countHelpsWithProfiles(serviceClient);
+        } catch (e) {
+          console.error("helps_with count failed in count mode:", e);
+        }
+      }
+      return new Response(JSON.stringify({
+        count: uniqueEmails.size,
+        helps_with_count: helpsWithCount,
+        helps_with_required: filters.min_helps_with_profiles ?? null,
+      }), {
         status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -483,6 +542,29 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "Missing subject/body" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    // Garde de vivier : l'envoi refuse de partir tant que la page Entraide
+    // n'affiche pas assez de personnes.
+    if (filters.min_helps_with_profiles && filters.min_helps_with_profiles > 0) {
+      let helpsWithCount: number;
+      try {
+        helpsWithCount = await countHelpsWithProfiles(serviceClient);
+      } catch (e) {
+        console.error("helps_with guard failed:", e);
+        return new Response(JSON.stringify({ error: "Failed to verify the mutual aid pool" }), {
+          status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (helpsWithCount < filters.min_helps_with_profiles) {
+        return new Response(JSON.stringify({
+          error: `Envoi bloqué : ${helpsWithCount} profils ont renseigné leur ligne d'entraide, le minimum requis est ${filters.min_helps_with_profiles}. Relancez le segment A d'abord.`,
+          helps_with_count: helpsWithCount,
+          helps_with_required: filters.min_helps_with_profiles,
+        }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
     }
 
     const rawProfiles = await fetchTargetedProfiles(serviceClient, segment, filters);

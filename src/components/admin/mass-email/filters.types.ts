@@ -38,7 +38,16 @@ export interface MassEmailFilters {
 
   // Exclusions explicites, ex: ne pas envoyer au propriétaire d'une annonce mise en avant
   exclude_user_ids?: string[];
+
+  // Entraide (lot « deux emails Entraide »)
+  comptes_actifs?: boolean;          // account_status = 'active'
+  available_for_help?: boolean;      // a coché « je veux bien donner un coup de main »
+  helps_with_empty?: boolean;        // ligne d'entraide vide
+  exclude_admins?: boolean;          // exclut les comptes administrateurs
+  min_helps_with_profiles?: number;  // garde : refuse l'envoi sous ce vivier
+  template_name?: string;            // gabarit transactionnel de référence
 }
+
 
 
 /** Présets rapides "dormants", un clic pour appliquer un combo de filtres. */
