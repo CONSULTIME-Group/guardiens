@@ -9,7 +9,6 @@ import { AlmaSignoff } from './_alma-signoff.tsx'
 import { LegalFooter } from './_legal-footer.tsx'
 import type { TemplateEntry } from './registry.ts'
 
-const SITE_NAME = "Guardiens"
 const SITE_URL = "https://guardiens.fr"
 
 interface Props {
@@ -27,7 +26,7 @@ const Email = ({ firstName, city, nearby_sitters_count }: Props) => {
   return (
     <Html lang="fr" dir="ltr">
       <BrandedHead />
-      <Preview>Une annonce publiée = première candidature en 48h en moyenne</Preview>
+      <Preview>Plus d'une annonce sur deux reçoit sa première candidature en moins de 48 h.</Preview>
       <Body style={main}>
         <Container style={container}>
           <BrandHeader />
@@ -35,52 +34,47 @@ const Email = ({ firstName, city, nearby_sitters_count }: Props) => {
           <Heading style={h1}>{name ? `Bonjour ${name},` : 'Bonjour,'}</Heading>
 
           <Text style={text}>
-            Il y a 10 jours vous vous êtes inscrit chez nous. Nous ne vous avons pas encore vu
-            publier d'annonce. C'est peut-être que ce n'est pas le bon moment, et c'est OK.
-            Mais on voulait vous dire : vos gardiens locaux vous attendent.
+            Un départ se prépare souvent plusieurs semaines à l'avance. Publier tôt laisse le temps
+            de recevoir des candidatures, d'échanger et de rencontrer la bonne personne.
           </Text>
 
-          {nearby > 0 ? (
-            <Section style={statCard}>
-              <Text style={statBig}>{nearby} gardiens vérifiés autour de {cityLabel}</Text>
-              <Text style={statSmall}>
-                La plupart des propriétaires qui publient reçoivent leur première candidature
-                en moins de 48h.
-              </Text>
-            </Section>
-          ) : (
-            <Text style={text}>
-              La plupart des propriétaires qui publient reçoivent leur première candidature en
-              moins de 48h.
+          <Section style={statCard}>
+            <Text style={statBig}>
+              Plus d'une annonce sur deux reçoit sa première candidature en moins de 48&nbsp;h.
             </Text>
-          )}
+          </Section>
+
+          {nearby > 0 ? (
+            <Text style={text}>
+              Autour de {cityLabel}, {nearby} gardiens sont inscrits.
+            </Text>
+          ) : null}
 
           <Text style={text}>
-            Depuis notre lancement, nos propriétaires reçoivent en moyenne 3 candidatures par
-            annonce. Vous rencontrez chaque candidat avant de choisir. Vous décidez.
+            Vos dates sont encore approximatives&nbsp;? Indiquez-les comme flexibles, vous les
+            ajusterez ensuite. Vous rencontrez chaque candidat avant de choisir, et la décision vous
+            appartient.
           </Text>
 
           <Text style={baseline}>
-            {SITE_NAME} est gratuit pour vous, sans engagement. Nous facturerons peut-être un
-            jour, quand nous serons vraiment au niveau que nous voulons offrir, pas avant.
+            Guardiens est gratuit pour les propriétaires.
           </Text>
 
           <Section style={ctaSection}>
             <Button style={button} href={publishUrl}>
-              Publier mon annonce maintenant
+              Publier mon annonce
             </Button>
           </Section>
 
-          <Text style={textSmall}>
-            Si {SITE_NAME} ne vous intéresse plus, vous pouvez vous désinscrire via le lien en
-            bas de cet email. Aucun jugement.
-          </Text>
-
-          <Text style={sig}>Jérémie et Elisa</Text>
+          <Text style={sig}>Elisa et Jérémie</Text>
 
           <AlmaSignoff />
           <Hr style={hr} />
-          <LegalFooter purpose="l'accompagnement à la prise en main de votre compte" basis="6.1.f" />
+          <LegalFooter
+            purpose="l'accompagnement à la prise en main de votre compte"
+            basis="6.1.f"
+            extra="Vous recevez ce message en tant que membre de Guardiens. Vos préférences d'email se règlent depuis votre espace personnel."
+          />
         </Container>
       </Body>
     </Html>
@@ -89,7 +83,7 @@ const Email = ({ firstName, city, nearby_sitters_count }: Props) => {
 
 export const template = {
   component: Email,
-  subject: 'Vos gardiens locaux vous attendent',
+  subject: 'Et si vous prépariez votre prochain départ ?',
   displayName: 'Propriétaire sans annonce, J+10',
   previewData: { firstName: 'Camille', city: 'Lyon', nearby_sitters_count: 137 },
 } satisfies TemplateEntry
@@ -98,7 +92,6 @@ const main = { backgroundColor: '#ffffff', fontFamily: "'Outfit', Arial, sans-se
 const container = { padding: '24px 28px', maxWidth: '560px', margin: '0 auto' }
 const h1 = { fontSize: '22px', fontWeight: 'bold' as const, color: '#2C6D50', margin: '0 0 20px' }
 const text = { fontSize: '14px', color: '#756F66', lineHeight: '1.6', margin: '0 0 16px' }
-const textSmall = { fontSize: '13px', color: '#756F66', lineHeight: '1.6', margin: '16px 0 8px' }
 const baseline = { fontSize: '13px', color: '#2C6D50', margin: '4px 0 16px', lineHeight: '1.6' }
 const sig = { fontSize: '14px', color: '#524E47', fontStyle: 'italic' as const, margin: '20px 0 0' }
 const hr = { borderColor: '#E9E4DD', margin: '20px 0' }
@@ -113,5 +106,4 @@ const statCard = {
   borderLeft: '3px solid #2C6D50',
   padding: '14px 16px', borderRadius: '6px', margin: '16px 0',
 }
-const statBig = { fontSize: '17px', fontWeight: 'bold' as const, color: '#2C6D50', margin: '0 0 4px' }
-const statSmall = { fontSize: '13px', color: '#756F66', lineHeight: '1.5', margin: 0 }
+const statBig = { fontSize: '15px', fontWeight: 'bold' as const, color: '#2C6D50', margin: 0, lineHeight: '1.5' }

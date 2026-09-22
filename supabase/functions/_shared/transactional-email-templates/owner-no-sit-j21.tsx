@@ -9,7 +9,6 @@ import { AlmaSignoff } from './_alma-signoff.tsx'
 import { LegalFooter } from './_legal-footer.tsx'
 import type { TemplateEntry } from './registry.ts'
 
-const SITE_NAME = "Guardiens"
 const SITE_URL = "https://guardiens.fr"
 
 interface Props {
@@ -28,7 +27,7 @@ const Email = ({ firstName, city, nearby_sitters_count }: Props) => {
   return (
     <Html lang="fr" dir="ltr">
       <BrandedHead />
-      <Preview>Une dernière question de ma part avant de vous laisser tranquille</Preview>
+      <Preview>Votre réponse nous aide à construire Guardiens.</Preview>
       <Body style={main}>
         <Container style={container}>
           <BrandHeader />
@@ -36,41 +35,46 @@ const Email = ({ firstName, city, nearby_sitters_count }: Props) => {
           <Heading style={h1}>{name ? `Bonjour ${name},` : 'Bonjour,'}</Heading>
 
           <Text style={text}>
-            Il y a 21 jours, vous vous êtes inscrit sur {SITE_NAME}. J'ai vu passer votre
-            inscription. On vous a envoyé 2 messages entre-temps, sans nouvelle de vous.
+            Je m'appelle Jérémie. Avec Elisa, nous avons créé Guardiens après avoir gardé
+            37&nbsp;maisons à travers la France. Nous savons ce que représente le fait de confier sa
+            maison et ses animaux.
           </Text>
 
           <Text style={text}>
-            Je m'appelle Jérémie, je co-construis {SITE_NAME} avec ma compagne Elisa. On a
-            lancé la plateforme parce qu'on a nous-mêmes gardé 37 maisons en 5 ans, à travers
-            la France. On sait que faire garder ses animaux quand on part, c'est un vrai
-            casse-tête.
+            Vous vous êtes inscrit il y a trois semaines, et j'aimerais comprendre ce que vous
+            cherchez. Un départ prévu&nbsp;? Une simple curiosité&nbsp;? Un besoin plus ponctuel,
+            comme quelqu'un pour nourrir le chat un soir&nbsp;?
           </Text>
 
           <Text style={text}>
-            Si {SITE_NAME} ne colle pas à ce que vous cherchez, c'est utile pour nous de le
-            savoir. Vous pouvez répondre à cet email, je le lis moi-même.
+            Répondez simplement à cet email, je lis chaque réponse moi-même.
           </Text>
 
-          <Text style={text}>
-            Si vous avez juste manqué de temps, publier votre annonce prend 2 minutes.
-            {nearby > 0 ? ` ${nearby} gardiens vous attendent près de ${cityLabel}.` : ''}
-          </Text>
-
-          <Section style={ctaSection}>
-            <Button style={button} href={publishUrl}>Publier mon annonce</Button>
-          </Section>
+          {nearby > 0 ? (
+            <>
+              <Text style={text}>
+                Au passage, {nearby} gardiens habitent autour de {cityLabel}.
+              </Text>
+              <Section style={ctaSection}>
+                <Button style={button} href={publishUrl}>Publier mon annonce</Button>
+              </Section>
+            </>
+          ) : null}
 
           <Text style={textSmall}>
-            Si vous préférez couper le contact, aucun problème.{' '}
-            <a href={unsubUrl} style={inlineLink}>Je préfère me désinscrire de tous les emails</a>.
+            Et si vous préférez vous arrêter là, un clic suffit&nbsp;:{' '}
+            <a href={unsubUrl} style={inlineLink}>Me désinscrire de ces emails</a>
           </Text>
 
           <Text style={sig}>Jérémie</Text>
 
           <AlmaSignoff />
           <Hr style={hr} />
-          <LegalFooter purpose="l'accompagnement à la prise en main de votre compte" basis="6.1.f" />
+          <LegalFooter
+            purpose="l'accompagnement à la prise en main de votre compte"
+            basis="6.1.f"
+            extra="Vous recevez ce message en tant que membre de Guardiens. Vos préférences d'email se règlent depuis votre espace personnel."
+          />
         </Container>
       </Body>
     </Html>
@@ -79,7 +83,7 @@ const Email = ({ firstName, city, nearby_sitters_count }: Props) => {
 
 export const template = {
   component: Email,
-  subject: 'Une dernière question avant de vous laisser tranquille',
+  subject: 'Une question de Jérémie',
   displayName: 'Propriétaire sans annonce, J+21 (relance personnelle)',
   previewData: { firstName: 'Camille', city: 'Lyon', nearby_sitters_count: 137 },
 } satisfies TemplateEntry

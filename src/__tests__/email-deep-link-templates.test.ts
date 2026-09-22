@@ -100,8 +100,9 @@ describe("lien profond authentifie dans les emails de conversation", () => {
     const src = read("relance-cp-manquant.tsx");
     expect(src).toContain("deepLinkUrl?: string");
     expect(src).toMatch(/deepLinkUrl\s*\|\|/);
-    expect(src).toContain("Indiquer mon secteur");
-    expect(src).toContain("Trente secondes, et vous voyez les gardes autour de vous.");
+    expect(src).toContain("Indiquer mon code postal");
+    expect(src).toContain("Ces rappels s'arrêtent d'un clic, avec le lien en bas de ce message.");
+
     const sender = readFileSync(
       resolve(__dirname, "../../supabase/functions/send-transactional-email/index.ts"),
       "utf8",

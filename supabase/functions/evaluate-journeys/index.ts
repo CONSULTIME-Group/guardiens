@@ -338,23 +338,21 @@ async function runEvaluation(
         continue
       }
 
-      // Relances « candidatez » : aucune annonce ouverte à portée, aucun envoi.
-      // Le parcours est reporté, pas terminé, et il sort au delà de 21 jours
-      // pour ne pas garder indéfiniment le créneau de parcours unique.
+      // Relances « candidatez » : on montre les annonces ouvertes les plus
+      // proches, sans limite de distance. Le report ne survient que lorsque la
+      // France entière est vide, et le parcours sort au delà de 21 jours pour
+      // libérer le créneau de parcours unique.
       let nearbyData: Record<string, unknown> = {}
       if (NEARBY_CONDITIONED_TEMPLATES.has(nextStep.template_name)) {
         const openSits = await loadOpenSits()
-        const sp = Array.isArray((profile as any).sitter_profiles)
-          ? (profile as any).sitter_profiles[0]
-          : (profile as any).sitter_profiles
         const nearby = selectNearbyOpenSits(openSits, {
           latitude: (profile as any).latitude ?? null,
           longitude: (profile as any).longitude ?? null,
-          declaredRadiusKm: sp?.geographic_radius ?? null,
         }, { limit: 3 })
 
         if (nearby.sits.length === 0) {
-          const decision = deferDecision(nearby.reason ?? 'no_open_sit_nearby', dueAt, Date.now())
+          const decision = deferDecision(nearby.reason ?? 'no_open_sit', dueAt, Date.now())
+
           await supabase.from('journey_step_log').insert({
             journey_id: j.id, step_order: nextStep.step_order,
             template_name: nextStep.template_name, sent: false, reason: decision.logReason,

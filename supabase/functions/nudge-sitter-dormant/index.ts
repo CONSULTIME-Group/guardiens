@@ -1,18 +1,23 @@
 /**
  * nudge-sitter-dormant
  *
- * Cron hebdomadaire (lundi 11h UTC) : détecte les gardiens inscrits depuis
- * plus de 30 jours, profil ≥ 60 %, identité vérifiée, ZÉRO candidature envoyée.
- * Insère un signal admin (warning + metadata.nature='nurturing') et envoie un
- * email de nurturing au gardien (une fois par semaine max via message_id
- * `dormant-sitter-<sid>-<YYYYWW>`).
+ * Cron hebdomadaire (lundi 11h UTC) : détecte les gardiens inscrits depuis au
+ * moins 30 jours avec zéro candidature envoyée. Insère un signal admin
+ * (warning + metadata.nature='nurturing') et envoie un email de nurturing au
+ * gardien, avec au plus 3 envois sur la vie du compte, 14 jours au moins entre
+ * deux envois, comptes administrateurs exclus.
+ *
+ * Lissage : premiers envois à partir du lundi 5 octobre 2026, 150 au plus par
+ * passage, priorité à l'annonce ouverte la plus proche puis à la dernière
+ * visite. Le reste attend le passage suivant, ce report est un état normal.
  *
  * Respecte : feature flag admin_signals_active, suppressed_emails,
  * email_preferences.product_emails.
  */
+
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { startCronRun } from "../_shared/cron-run-log.ts";
-import { dormantSendDecision } from "../_shared/dormant-sitter-cap.ts";
+import { dormantRunBatch, dormantSendDecision } from "../_shared/dormant-sitter-cap.ts";
 import {
   fetchOpenSits,
   nearbySitsTemplateData,
@@ -133,50 +138,80 @@ Deno.serve(async (req) => {
       .in("user_id", sitterIds.length ? sitterIds : ["00000000-0000-0000-0000-000000000000"]);
     const adminIds = new Set((adminRows ?? []).map((r: { user_id: string }) => r.user_id));
 
-    // Plafond de trois relances par gardien, tous envois confondus.
+    // Plafond de trois relances par gardien, tous envois confondus, et date du
+    // dernier envoi effectif pour l'espacement de quatorze jours.
     const { data: pastSends } = await service
       .from("email_send_log")
-      .select("message_id")
+      .select("message_id, created_at")
       .like("message_id", "dormant-sitter-%")
       .limit(5000);
     const sentCounts = new Map<string, number>();
-    for (const row of (pastSends ?? []) as Array<{ message_id: string | null }>) {
+    const lastSentAt = new Map<string, string>();
+    for (const row of (pastSends ?? []) as Array<{ message_id: string | null; created_at: string | null }>) {
       const id = (row.message_id ?? "").slice("dormant-sitter-".length, "dormant-sitter-".length + 36);
       if (!id) continue;
       sentCounts.set(id, (sentCounts.get(id) ?? 0) + 1);
+      const prev = lastSentAt.get(id);
+      if (row.created_at && (!prev || row.created_at > prev)) lastSentAt.set(id, row.created_at);
     }
 
-    // Coordonnées des gardiens et rayon déclaré, pour la condition d'annonce
-    // ouverte à portée.
+    // Coordonnées et dernière visite des gardiens, pour les cartes annonce et
+    // pour l'ordre de passage.
     const { data: sitterGeo } = await service
       .from("profiles")
-      .select("id, latitude, longitude, sitter_profiles(geographic_radius)")
+      .select("id, latitude, longitude, last_seen_at")
       .in("id", sitterIds.length ? sitterIds : ["00000000-0000-0000-0000-000000000000"]);
-    const geoById = new Map<string, { latitude: number | null; longitude: number | null; declaredRadiusKm: number | null }>();
+    const geoById = new Map<string, { latitude: number | null; longitude: number | null; lastSeenAt: string | null }>();
     for (const row of (sitterGeo ?? []) as any[]) {
-      const sp = Array.isArray(row.sitter_profiles) ? row.sitter_profiles[0] : row.sitter_profiles;
       geoById.set(row.id, {
         latitude: row.latitude ?? null,
         longitude: row.longitude ?? null,
-        declaredRadiusKm: sp?.geographic_radius ?? null,
+        lastSeenAt: row.last_seen_at ?? null,
       });
     }
 
     const openSits = await fetchOpenSits(service);
 
+    // Lissage : les gardiens éligibles sont ordonnés par annonce ouverte la
+    // plus proche, puis par dernière visite, et 150 au plus partent par
+    // passage. Le reste attend le passage suivant, ce report est normal.
+    const nowMs = now.getTime();
+    const dayMs = 86400_000;
+    type Prepared = {
+      sitter: DormantSitter;
+      nearestSitKm: number | null;
+      lastSeenAt: string | null;
+      nearby: ReturnType<typeof selectNearbyOpenSits>;
+    };
+    const prepared: Prepared[] = [];
+
     for (const s of sitters) {
       if (adminIds.has(s.sitter_id)) { noteSkip("admin_account"); continue; }
 
+      const last = lastSentAt.get(s.sitter_id);
       const decision = dormantSendDecision({
         daysSinceSignup: s.days_since_signup,
         alreadySentCount: sentCounts.get(s.sitter_id) ?? 0,
         isAdmin: false,
+        daysSinceLastSend: last ? (nowMs - Date.parse(last)) / dayMs : null,
+        nowMs,
       });
       if (!decision.send) { noteSkip(decision.reason ?? "not_eligible"); continue; }
 
-      const geo = geoById.get(s.sitter_id) ?? { latitude: null, longitude: null, declaredRadiusKm: null };
+      const geo = geoById.get(s.sitter_id) ?? { latitude: null, longitude: null, lastSeenAt: null };
       const nearby = selectNearbyOpenSits(openSits, geo, { limit: 3 });
-      if (nearby.sits.length === 0) { noteSkip(nearby.reason ?? "no_open_sit_nearby"); continue; }
+      if (nearby.sits.length === 0) { noteSkip(nearby.reason ?? "no_open_sit"); continue; }
+
+      prepared.push({ sitter: s, nearestSitKm: nearby.nearestKm, lastSeenAt: geo.lastSeenAt, nearby });
+    }
+
+    const { batch, deferred } = dormantRunBatch(prepared);
+    const runDeferred = deferred.length;
+
+    for (const item of batch) {
+      const s = item.sitter;
+      const nearby = item.nearby;
+
 
       // Signal admin
       const { error: insErr } = await service.from("admin_signals").insert({
@@ -260,7 +295,7 @@ Deno.serve(async (req) => {
       if (!("ok" in result)) {
         // La passerelle est saturee. Le destinataire courant et tous les
         // suivants restent eligibles a la prochaine execution hebdomadaire.
-        emailsDeferred += sitters.length - emailsSent - emailsSkipped - emailsDeferred;
+        emailsDeferred += batch.length - emailsSent - emailsSkipped - emailsDeferred;
         rateLimitRetryAfterMs = result.retryAfterMs;
         break;
       }
@@ -268,7 +303,7 @@ Deno.serve(async (req) => {
       if (!resp.ok) {
         const responseText = await resp.text();
         if (resp.status === 429 || (resp.status >= 500 && responseText.includes("Rate limit exceeded"))) {
-          emailsDeferred += sitters.length - emailsSent - emailsSkipped - emailsDeferred;
+          emailsDeferred += batch.length - emailsSent - emailsSkipped - emailsDeferred;
           rateLimitRetryAfterMs = Number(resp.headers.get("retry-after") ?? 0) * 1000;
           break;
         }
@@ -286,6 +321,9 @@ Deno.serve(async (req) => {
 
     await run.finish(errors.length > 0 ? "partial" : "success", {
       detected: sitters.length,
+      eligible: prepared.length,
+      run_batch: batch.length,
+      run_deferred: runDeferred,
       signals_inserted: signalsInserted,
       signals_skipped: signalsSkipped,
       emails_sent: emailsSent,
@@ -298,6 +336,9 @@ Deno.serve(async (req) => {
     return new Response(
       JSON.stringify({
         detected: sitters.length,
+        eligible: prepared.length,
+        run_batch: batch.length,
+        run_deferred: runDeferred,
         signals_inserted: signalsInserted,
         signals_skipped: signalsSkipped,
         emails_sent: emailsSent,
@@ -309,6 +350,7 @@ Deno.serve(async (req) => {
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
+
   } catch (err) {
     console.error("[nudge-sitter-dormant]", err);
     await run.fail(err);

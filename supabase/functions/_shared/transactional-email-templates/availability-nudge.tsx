@@ -1,6 +1,6 @@
 import * as React from 'npm:react@18.3.1'
 import {
-  Body, Container, Head, Heading, Html, Preview, Text, Button, Hr, Section,
+  Body, Container, Heading, Html, Preview, Text, Button, Section,
 } from 'npm:@react-email/components@0.0.22'
 import { BrandedHead } from './_branded-head.tsx'
 import { BrandHeader } from './_brand-header.tsx'
@@ -8,7 +8,6 @@ import { LegalFooter } from './_legal-footer.tsx'
 import type { TemplateEntry } from './registry.ts'
 import { NearbySitsBlock, type NearbySitView } from './_nearby-sits.tsx'
 
-const SITE_NAME = 'Guardiens'
 const SITE_URL = 'https://guardiens.fr'
 
 interface Props {
@@ -31,19 +30,19 @@ const AvailabilityNudgeEmail = ({
   return (
     <Html lang="fr" dir="ltr">
       <BrandedHead />
-      <Preview>Une garde près de chez vous cherche encore un gardien</Preview>
+      <Preview>Votre profil peut faire la différence.</Preview>
       <Body style={main}>
         <Container style={container}>
-        <BrandHeader />
-          <Heading style={h1}>Une garde de votre département cherche un gardien</Heading>
+          <BrandHeader />
+          <Heading style={h1}>Une garde attend sa première candidature</Heading>
 
           <Text style={text}>
             Bonjour{sitterFirstName ? ` ${sitterFirstName}` : ''},
           </Text>
 
           <Text style={text}>
-            Une annonce publiée près de chez vous n'a encore reçu aucune candidature.
-            Si vous êtes disponible, votre profil pourrait vraiment aider cette personne.
+            Une annonce attend sa première candidature. Pour ce propriétaire, votre message peut
+            tout changer.
           </Text>
 
           {hasNearby ? <NearbySitsBlock sits={nearbySits} /> : null}
@@ -59,14 +58,16 @@ const AvailabilityNudgeEmail = ({
 
           <Button style={button} href={ctaHref}>Voir l'annonce</Button>
 
+          <Text style={text}>Elisa et Jérémie</Text>
+
           <LegalFooter
             purpose="la bonne marche de votre compte"
             basis="6.1.f"
-            extra="Vous recevez ce message une seule fois pour cette annonce, parce que vous êtes inscrit comme gardien dans le même département. Vous pouvez ajuster vos préférences d'alerte depuis votre espace personnel."
+            extra="Vous recevez ce message en tant que membre de Guardiens. Vos préférences d'email se règlent depuis votre espace personnel."
           />
-          </Container>
-          </Body>
-          </Html>
+        </Container>
+      </Body>
+    </Html>
   )
 }
 
@@ -82,12 +83,16 @@ const button = {
   backgroundColor: '#1a1a1a', color: '#ffffff', padding: '12px 22px', borderRadius: '8px',
   textDecoration: 'none', fontWeight: 600, display: 'inline-block', marginTop: '8px',
 }
-const hr = { borderColor: '#e6e6e6', margin: '24px 0' }
-const legal = { color: '#777', fontSize: '12px', lineHeight: '18px', marginBottom: '6px' }
 
 export const template: TemplateEntry = {
   component: AvailabilityNudgeEmail,
-  subject: (d: Record<string, any>) => `Une garde près de chez vous cherche un gardien${d?.city ? `, ${d.city}` : ''}`,
+  subject: (d: Record<string, any>) => {
+    const city = d?.city
+      ?? (Array.isArray(d?.nearbySits) ? d.nearbySits[0]?.city : null)
+    return city
+      ? `Une garde à ${city} attend sa première candidature`
+      : 'Une garde attend sa première candidature'
+  },
   displayName: 'Garde sans candidature (alerte département)',
   previewData: {
     sitterFirstName: 'Camille',

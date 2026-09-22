@@ -23,12 +23,6 @@ const toTitleCase = (s: string) => {
     .join('')
 }
 
-const CARDS: Array<{ title: string; body: string }> = [
-  { title: 'Arroser vos plantes', body: "Quand vous partez trois jours et qu'il fait chaud." },
-  { title: 'Un œil sur la maison', body: "Le temps d'un week-end à la campagne." },
-  { title: 'Rentrer les volets', body: "Un soir d'orage, pendant que vous êtes coincé au bureau." },
-  { title: 'Sortir votre chien', body: "Une heure quand la journée s'étire." },
-]
 
 const OwnerActivationNudgeEmail = ({ firstName }: Props) => {
   const greeting = firstName
@@ -38,50 +32,49 @@ const OwnerActivationNudgeEmail = ({ firstName }: Props) => {
   return (
     <Html lang="fr" dir="ltr">
       <BrandedHead />
-      <Preview>Guardiens, ce n'est pas que pour partir 15 jours</Preview>
+      <Preview>Le chat à nourrir un soir de retard, le jardin à arroser pendant un week-end.</Preview>
       <Body style={main}>
         <Section style={topStripe}>&nbsp;</Section>
         <Container style={container}>
           <BrandHeader />
 
-          <Heading style={h1}>Guardiens, ce n'est pas que pour partir 15 jours</Heading>
+          <Heading style={h1}>Guardiens sert aussi pour un soir, un week-end, un coup de main</Heading>
 
           <Text style={text}>{greeting}</Text>
           <Text style={text}>
-            Vous vous êtes inscrit sur Guardiens il y a quelques temps, sans encore publier votre première annonce. Peut-être parce que vous attendez le grand départ, celui où vous confiez votre maison quinze jours. C'est une belle raison, mais ce n'est pas la seule.
+            Un grand départ se prépare longtemps à l'avance. D'ici là, la vie apporte ses petits
+            besoins&nbsp;: le chat à nourrir un soir de retard, les tomates à arroser pendant un
+            week-end, un colis à réceptionner.
           </Text>
 
-          <Text style={subTitle}>Sur Guardiens, on couvre aussi tout ce qui vient avant :</Text>
-
-          {CARDS.map((c) => (
-            <Section key={c.title} style={card}>
-              <Text style={cardTitle}>{c.title}</Text>
-              <Text style={cardBody}>{c.body}</Text>
-            </Section>
-          ))}
+          <Text style={text}>
+            Sur Guardiens, ces coups de main se demandent en une phrase. Les dix personnes
+            disponibles les plus proches de chez vous reçoivent votre besoin, et celles qui peuvent
+            vous répondre.
+          </Text>
 
           <Text style={text}>
-            Ce sont ces petits services qui construisent votre réseau de confiance, celui que vous serez heureux de trouver le jour où vous partirez vraiment loin. Vous n'engagez rien, vous ne payez rien, ni pour la garde complète ni pour les coups de main.
+            C'est souvent ainsi que la confiance commence, celle qui vous fera partir l'esprit
+            tranquille le jour du grand départ.
           </Text>
 
           <Section style={ctaWrap}>
-            <Button style={primaryCta} href={`${SITE_URL}/sits/create?${UTM}`}>
-              Publier ma première annonce
+            <Button style={primaryCta} href={`${SITE_URL}/petites-missions/creer`}>
+              Demander un coup de main
             </Button>
           </Section>
           <Section style={ctaWrapSecondary}>
-            <Button style={secondaryCta} href={`${SITE_URL}/petites-missions/creer?${UTM}`}>
-              Découvrir les petites missions
+            <Button style={secondaryCta} href={`${SITE_URL}/sits/create?${UTM}`}>
+              Publier une annonce de garde
             </Button>
           </Section>
 
-          <Text style={signOff}>À bientôt sur la plateforme,</Text>
-          <Text style={signName}>Jérémie et Elisa</Text>
+          <Text style={signName}>Elisa et Jérémie</Text>
 
           <LegalFooter
             purpose="l'accompagnement de votre activation en tant que propriétaire"
             basis="6.1.f"
-            extra="Vous recevez ce message parce que vous êtes inscrit sur Guardiens sans avoir publié d'annonce. Vous pouvez ajuster vos préférences d'email depuis votre espace personnel."
+            extra="Vous recevez ce message en tant que membre de Guardiens. Vos préférences d'email se règlent depuis votre espace personnel."
           />
         </Container>
       </Body>
@@ -89,9 +82,10 @@ const OwnerActivationNudgeEmail = ({ firstName }: Props) => {
   )
 }
 
+
 export const template = {
   component: OwnerActivationNudgeEmail,
-  subject: "Guardiens, ce n'est pas que pour partir 15 jours",
+  subject: "Guardiens sert aussi pour un soir, un week-end, un coup de main",
   displayName: 'Réveil propriétaires dormants (activation)',
   previewData: { firstName: 'Camille' },
 } satisfies TemplateEntry
