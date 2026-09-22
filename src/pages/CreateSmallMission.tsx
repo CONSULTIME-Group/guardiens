@@ -583,7 +583,7 @@ const CreateSmallMission = () => {
                   {(titleTouched || title.trim().length > 0) && title.trim().length < MIN_TITLE_LEN && (
                     <p className="text-xs text-destructive flex items-center gap-1">
                       <AlertCircle className="h-3 w-3 shrink-0" />
-                      Titre trop court ({title.trim().length}/{MIN_TITLE_LEN} caractères). Ex&nbsp;: « Garder mon chien pendant le week-end ».
+                      Titre trop court ({title.trim().length}/{MIN_TITLE_LEN} caractères). Ex&nbsp;: « Ramasser les pommes du jardin samedi matin ».
                     </p>
                   )}
                 </div>
