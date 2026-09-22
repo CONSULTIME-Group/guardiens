@@ -1,9 +1,15 @@
-// Annonces ouvertes à portée d'un gardien.
+// Annonces ouvertes montrées à un gardien dans les relances.
 //
-// Décision du 22/09/2026 : les relances « candidatez » ne partent plus à vide.
-// Elles ne partent que si au moins une annonce réellement ouverte se trouve à
-// portée, et elles montrent cette annonce. Mesuré en production : 9 annonces
-// ouvertes en France, 130 gardiens seulement en ont une à portée.
+// Décision du 23/09/2026 (lot N2), qui corrige le lot N1 : la distance ne
+// commande plus l'envoi. Une garde à 300 km reste une garde possible, et un
+// gardien qui voit une annonce comprend le service. On montre donc les
+// 3 annonces ouvertes les plus proches en France, sans plafond de distance et
+// sans lire le rayon déclaré du gardien.
+//
+// Gardien sans coordonnées : on montre les 3 annonces ouvertes les plus
+// récentes, sans mention de distance.
+//
+// Seul le vide total reporte l'étape : zéro annonce ouverte en France.
 //
 // Annonce ouverte, définition unique :
 //   status = published, début dans le futur, candidatures acceptées,
@@ -12,14 +18,6 @@
 //
 // `sits` ne porte pas de coordonnées : on prend celles du propriétaire, comme
 // le fait déjà send-nearby-daily-digest.
-//
-// Rayon : plafonné à 50 km, et rétréci si le gardien a déclaré plus petit.
-// La lecture du rayon déclaré suit search-radius.ts, donc 30 km reste un
-// marqueur de silence et vaut 100 km avant plafonnement.
-
-import { effectiveSearchRadius } from "./search-radius.ts";
-
-export const MAX_NEARBY_RADIUS_KM = 50;
 
 const SITE_URL = "https://guardiens.fr";
 
@@ -30,6 +28,7 @@ export interface OpenSitRow {
   city?: string | null;
   start_date?: string | null;
   end_date?: string | null;
+  created_at?: string | null;
   status?: string | null;
   accepting_applications?: boolean | null;
   hidden_at?: string | null;
@@ -44,20 +43,18 @@ export interface NearbySit {
   city: string | null;
   startDate: string | null;
   endDate: string | null;
-  distanceKm: number;
+  /** null quand le gardien n'a pas de coordonnées : aucune distance inventée. */
+  distanceKm: number | null;
   url: string;
 }
 
-export type NearbySkipReason = "no_coordinates" | "no_open_sit_nearby";
+export type NearbySkipReason = "no_coordinates" | "no_open_sit";
 
 export interface NearbySitsResult {
   sits: NearbySit[];
   reason: NearbySkipReason | null;
-}
-
-/** Rayon réellement appliqué : le plus petit entre 50 km et le rayon déclaré. */
-export function nearbyRadiusKm(declared: number | null | undefined): number {
-  return Math.min(MAX_NEARBY_RADIUS_KM, effectiveSearchRadius(declared));
+  /** Distance de l'annonce la plus proche, pour le tri des envois. */
+  nearestKm: number | null;
 }
 
 export function haversineKm(
@@ -95,29 +92,56 @@ function frDate(value: string | null | undefined): string | null {
   return Number.isNaN(d.getTime()) ? null : FR_DATE.format(d);
 }
 
+function toSit(row: OpenSitRow, distanceKm: number | null): NearbySit {
+  return {
+    id: row.id,
+    title: row.title ?? "Une garde à découvrir",
+    city: row.city ?? null,
+    startDate: frDate(row.start_date),
+    endDate: frDate(row.end_date),
+    distanceKm,
+    url: `${SITE_URL}/sits/${row.slug || row.id}`,
+  };
+}
+
 /**
- * Filtre pur, testable sans base : annonces ouvertes, dans le rayon, les plus
- * proches d'abord, au plus `limit`.
+ * Filtre pur, testable sans base : annonces ouvertes du pays, les plus proches
+ * d'abord, au plus `limit`. Sans coordonnées côté gardien, les plus récentes.
  */
 export function selectNearbyOpenSits(
   rows: OpenSitRow[],
-  viewer: { latitude?: number | null; longitude?: number | null; declaredRadiusKm?: number | null },
+  viewer: { latitude?: number | null; longitude?: number | null },
   options: { nowIso?: string; limit?: number } = {},
 ): NearbySitsResult {
   const nowIso = options.nowIso ?? new Date().toISOString();
   const limit = options.limit ?? 3;
 
-  if (typeof viewer.latitude !== "number" || typeof viewer.longitude !== "number") {
-    return { sits: [], reason: "no_coordinates" };
-  }
-  const radius = nearbyRadiusKm(viewer.declaredRadiusKm);
-  const here = { lat: viewer.latitude, lng: viewer.longitude };
+  const open = rows.filter((row) => isOpenSit(row, nowIso));
+  if (open.length === 0) return { sits: [], reason: "no_open_sit", nearestKm: null };
 
-  const matches = rows
-    .filter((row) => isOpenSit(row, nowIso))
-    .filter((row) =>
-      typeof row.owner_latitude === "number" && typeof row.owner_longitude === "number"
-    )
+  if (typeof viewer.latitude !== "number" || typeof viewer.longitude !== "number") {
+    const recent = [...open]
+      .sort((a, b) => String(b.created_at ?? "").localeCompare(String(a.created_at ?? "")))
+      .slice(0, limit)
+      .map((row) => toSit(row, null));
+    return { sits: recent, reason: null, nearestKm: null };
+  }
+
+  const here = { lat: viewer.latitude, lng: viewer.longitude };
+  const located = open.filter((row) =>
+    typeof row.owner_latitude === "number" && typeof row.owner_longitude === "number"
+  );
+
+  // Aucune annonce géolocalisée : on montre quand même les plus récentes.
+  if (located.length === 0) {
+    const recent = [...open]
+      .sort((a, b) => String(b.created_at ?? "").localeCompare(String(a.created_at ?? "")))
+      .slice(0, limit)
+      .map((row) => toSit(row, null));
+    return { sits: recent, reason: null, nearestKm: null };
+  }
+
+  const matches = located
     .map((row) => ({
       row,
       distance: haversineKm(here, {
@@ -125,22 +149,11 @@ export function selectNearbyOpenSits(
         lng: row.owner_longitude as number,
       }),
     }))
-    .filter((m) => m.distance <= radius)
     .sort((a, b) => a.distance - b.distance)
     .slice(0, limit)
-    .map(({ row, distance }) => ({
-      id: row.id,
-      title: row.title ?? "Une garde près de chez vous",
-      city: row.city ?? null,
-      startDate: frDate(row.start_date),
-      endDate: frDate(row.end_date),
-      distanceKm: Math.round(distance),
-      url: `${SITE_URL}/sits/${row.slug || row.id}`,
-    }));
+    .map(({ row, distance }) => toSit(row, Math.round(distance)));
 
-  return matches.length > 0
-    ? { sits: matches, reason: null }
-    : { sits: [], reason: "no_open_sit_nearby" };
+  return { sits: matches, reason: null, nearestKm: matches[0].distanceKm };
 }
 
 /** Données passées aux templates. Aucune valeur inventée. */
@@ -155,15 +168,15 @@ interface MinimalClient {
 
 /**
  * Charge une fois les annonces ouvertes du pays, coordonnées propriétaire
- * incluses. Le volume est très faible (9 annonces mesurées), un appel par
- * passage suffit et se partage entre tous les destinataires.
+ * incluses. Le volume est très faible, un appel par passage suffit et se
+ * partage entre tous les destinataires.
  */
 export async function fetchOpenSits(supabase: MinimalClient): Promise<OpenSitRow[]> {
   const today = new Date().toISOString().slice(0, 10);
   const { data, error } = await supabase
     .from("sits")
     .select(
-      "id, slug, title, city, start_date, end_date, status, accepting_applications, hidden_at, moderation_hidden_at, profiles:user_id (latitude, longitude)",
+      "id, slug, title, city, start_date, end_date, created_at, status, accepting_applications, hidden_at, moderation_hidden_at, profiles:user_id (latitude, longitude)",
     )
     .eq("status", "published")
     .gt("start_date", today)
@@ -178,6 +191,7 @@ export async function fetchOpenSits(supabase: MinimalClient): Promise<OpenSitRow
       city: row.city,
       start_date: row.start_date,
       end_date: row.end_date,
+      created_at: row.created_at,
       status: row.status,
       accepting_applications: row.accepting_applications,
       hidden_at: row.hidden_at,
