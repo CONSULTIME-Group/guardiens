@@ -6,6 +6,7 @@ import { BrandedHead } from './_branded-head.tsx'
 import { BrandHeader } from './_brand-header.tsx'
 import { LegalFooter } from './_legal-footer.tsx'
 import type { TemplateEntry } from './registry.ts'
+import { onboardingJ1Subject } from '../onboarding-j1-subject.ts'
 
 const SITE_NAME = 'Guardiens'
 const SITE_URL = 'https://guardiens.fr'
@@ -158,7 +159,7 @@ const OnboardingJ1Email = ({
 
 export const template = {
   component: OnboardingJ1Email,
-  subject: 'Votre première annonce en 2 minutes, Guardiens',
+  subject: (data: Record<string, any>) => onboardingJ1Subject(data),
   displayName: 'Onboarding J+1',
   previewData: {
     firstName: 'Marie',

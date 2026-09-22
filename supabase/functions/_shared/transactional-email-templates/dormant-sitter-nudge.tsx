@@ -6,6 +6,7 @@ import { BrandedHead } from './_branded-head.tsx'
 import { BrandHeader } from './_brand-header.tsx'
 import { LegalFooter } from './_legal-footer.tsx'
 import type { TemplateEntry } from './registry.ts'
+import { NearbySitsBlock, type NearbySitView } from './_nearby-sits.tsx'
 
 const SITE_URL = 'https://guardiens.fr'
 const CTA_URL = `${SITE_URL}/recherche?utm_source=email&utm_medium=email&utm_campaign=dormant_sitter`
@@ -13,9 +14,11 @@ const CTA_URL = `${SITE_URL}/recherche?utm_source=email&utm_medium=email&utm_cam
 interface Props {
   firstName?: string
   days?: number
+  nearbySits?: NearbySitView[]
+  primarySitUrl?: string
 }
 
-const DormantSitterNudgeEmail = ({ firstName, days }: Props) => (
+const DormantSitterNudgeEmail = ({ firstName, days, nearbySits, primarySitUrl }: Props) => (
   <Html lang="fr" dir="ltr">
     <BrandedHead />
     <Preview>Il y a peut-être une garde pour vous cette semaine</Preview>
@@ -41,8 +44,10 @@ const DormantSitterNudgeEmail = ({ firstName, days }: Props) => (
           Prenez deux minutes pour parcourir les dernières annonces près de chez vous.
         </Text>
 
+        <NearbySitsBlock sits={nearbySits} />
+
         <Section style={ctaSection} className="em-cta">
-          <Button style={button} className="em-btn" href={CTA_URL}>
+          <Button style={button} className="em-btn" href={primarySitUrl || CTA_URL}>
             Voir les annonces
           </Button>
         </Section>
@@ -85,5 +90,12 @@ export const template = {
       ? `${data.firstName}, il y a peut-être une garde pour vous cette semaine`
       : 'Il y a peut-être une garde pour vous cette semaine',
   displayName: 'Gardien dormant, relance annonces',
-  previewData: { firstName: 'Camille', days: 34 },
+  previewData: {
+    firstName: 'Camille',
+    days: 34,
+    nearbySits: [
+      { id: 'demo', title: 'Garde de deux chats', city: 'Lyon', startDate: '3 octobre 2026', endDate: '10 octobre 2026', distanceKm: 12, url: 'https://guardiens.fr/sits/demo' },
+    ],
+    primarySitUrl: 'https://guardiens.fr/sits/demo',
+  },
 } satisfies TemplateEntry

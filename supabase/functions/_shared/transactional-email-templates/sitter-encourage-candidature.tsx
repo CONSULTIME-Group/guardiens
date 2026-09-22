@@ -6,14 +6,17 @@ import { BrandedHead } from './_branded-head.tsx'
 import { BrandHeader } from './_brand-header.tsx'
 import { LegalFooter } from './_legal-footer.tsx'
 import type { TemplateEntry } from './registry.ts'
+import { NearbySitsBlock, type NearbySitView } from './_nearby-sits.tsx'
 
 const SITE_URL = 'https://guardiens.fr'
 
 interface Props {
   firstName?: string
+  nearbySits?: NearbySitView[]
+  primarySitUrl?: string
 }
 
-const SitterEncourageCandidatureEmail = ({ firstName }: Props) => (
+const SitterEncourageCandidatureEmail = ({ firstName, nearbySits, primarySitUrl }: Props) => (
   <Html lang="fr" dir="ltr">
     <BrandedHead />
     <Preview>Lancez-vous, la première candidature est la plus dure</Preview>
@@ -39,8 +42,10 @@ const SitterEncourageCandidatureEmail = ({ firstName }: Props) => (
           <Text style={cardLine}>· Précisez vos disponibilités exactes</Text>
         </Section>
 
+        <NearbySitsBlock sits={nearbySits} />
+
         <Section style={ctaSection}>
-          <Button style={button} href={`${SITE_URL}/recherche`}>Trouver une garde</Button>
+          <Button style={button} href={primarySitUrl || `${SITE_URL}/recherche`}>Trouver une garde</Button>
         </Section>
 
         <Text style={muted}>
@@ -84,5 +89,11 @@ export const template: TemplateEntry = {
   component: SitterEncourageCandidatureEmail,
   subject: 'Prêt pour votre première mission',
   displayName: 'Gardien sans candidature, encouragement',
-  previewData: { firstName: 'Camille' },
+  previewData: {
+    firstName: 'Camille',
+    nearbySits: [
+      { id: 'demo', title: 'Garde d\u2019un chien', city: 'Annecy', startDate: '3 octobre 2026', endDate: '10 octobre 2026', distanceKm: 18, url: 'https://guardiens.fr/sits/demo' },
+    ],
+    primarySitUrl: 'https://guardiens.fr/sits/demo',
+  },
 }

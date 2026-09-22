@@ -6,6 +6,7 @@ import { BrandedHead } from './_branded-head.tsx'
 import { BrandHeader } from './_brand-header.tsx'
 import { LegalFooter } from './_legal-footer.tsx'
 import type { TemplateEntry } from './registry.ts'
+import { NearbySitsBlock, type NearbySitView } from './_nearby-sits.tsx'
 
 const SITE_NAME = 'Guardiens'
 const SITE_URL = 'https://guardiens.fr'
@@ -18,12 +19,15 @@ interface Props {
   endDate?: string
   sitId?: string
   ownerFirstName?: string
+  nearbySits?: NearbySitView[]
+  primarySitUrl?: string
 }
 
 const AvailabilityNudgeEmail = ({
-  sitterFirstName, sitTitle, city, startDate, endDate, sitId, ownerFirstName,
+  sitterFirstName, sitTitle, city, startDate, endDate, sitId, ownerFirstName, nearbySits, primarySitUrl,
 }: Props) => {
-  const ctaHref = sitId ? `${SITE_URL}/sits/${sitId}` : `${SITE_URL}/sits`
+  const hasNearby = Array.isArray(nearbySits) && nearbySits.length > 0
+  const ctaHref = primarySitUrl || (sitId ? `${SITE_URL}/sits/${sitId}` : `${SITE_URL}/sits`)
   return (
     <Html lang="fr" dir="ltr">
       <BrandedHead />
@@ -42,7 +46,9 @@ const AvailabilityNudgeEmail = ({
             Si vous êtes disponible, votre profil pourrait vraiment aider cette personne.
           </Text>
 
-          <Section style={card}>
+          {hasNearby ? <NearbySitsBlock sits={nearbySits} /> : null}
+
+          <Section style={hasNearby ? hiddenCard : card}>
             {sitTitle ? <Text style={cardTitle}>{sitTitle}</Text> : null}
             {ownerFirstName ? <Text style={cardLine}>Proposée par {ownerFirstName}</Text> : null}
             {city ? <Text style={cardLine}>À {city}</Text> : null}
@@ -64,6 +70,7 @@ const AvailabilityNudgeEmail = ({
   )
 }
 
+const hiddenCard = { display: 'none' as const }
 const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' as const }
 const container = { margin: '0 auto', padding: '24px', maxWidth: '560px' }
 const h1 = { color: '#1a1a1a', fontSize: '22px', fontWeight: 700, marginBottom: '16px' }
