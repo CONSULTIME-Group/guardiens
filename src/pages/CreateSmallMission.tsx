@@ -617,7 +617,7 @@ const CreateSmallMission = () => {
                       >
                         Créer une annonce de garde
                       </Button>
-                      <span className="text-[11px] text-muted-foreground">Ou continuez votre mission, rien ne bloque.</span>
+                      <span className="text-[11px] text-muted-foreground">Ou continuez votre demande, vous restez libre.</span>
                     </div>
                   </div>
                 )}
