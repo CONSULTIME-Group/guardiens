@@ -5,6 +5,22 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { startCronRun } from '../_shared/cron-run-log.ts'
 import { ageWindow, sequencePriority } from '../_shared/nurturing-rules.ts'
+import {
+  fetchOpenSits,
+  nearbySitsTemplateData,
+  selectNearbyOpenSits,
+  type OpenSitRow,
+} from '../_shared/nearby-open-sits.ts'
+import { deferDecision } from '../_shared/journey-defer.ts'
+import { journeyIsOwner } from '../_shared/journey-audience.ts'
+
+// Étapes dont l'envoi est conditionné à une annonce ouverte à portée.
+const NEARBY_CONDITIONED_TEMPLATES = new Set([
+  'sitter-encourage-candidature',
+  'availability-nudge',
+  'dormant-sitter-nudge',
+])
+
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -226,6 +242,14 @@ async function runEvaluation(
     console.warn('[frequency-cap] lookup failed, proceeding without global cap', freqErr)
   }
 
+  // Les annonces ouvertes sont peu nombreuses : un seul chargement par
+  // passage, partagé entre tous les destinataires.
+  let openSitsCache: OpenSitRow[] | null = null
+  const loadOpenSits = async (): Promise<OpenSitRow[]> => {
+    if (openSitsCache === null) openSitsCache = await fetchOpenSits(supabase)
+    return openSitsCache
+  }
+
   for (const j of activeJourneys ?? []) {
     if (stats.sent >= MAX_SENDS_PER_RUN) { stats.capped = true; break }
     if (Date.now() > DEADLINE_MS) { stats.capped = true; break }
@@ -286,7 +310,7 @@ async function runEvaluation(
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('email, first_name, last_seen_at')
+        .select('email, first_name, last_seen_at, role, latitude, longitude, sitter_profiles(geographic_radius)')
         .eq('id', j.user_id)
         .maybeSingle()
       if (!profile?.email) {
@@ -312,6 +336,44 @@ async function runEvaluation(
         stats.skipped++
         bumpSeq(j.sequence_key, 'skipped')
         continue
+      }
+
+      // Relances « candidatez » : aucune annonce ouverte à portée, aucun envoi.
+      // Le parcours est reporté, pas terminé, et il sort au delà de 21 jours
+      // pour ne pas garder indéfiniment le créneau de parcours unique.
+      let nearbyData: Record<string, unknown> = {}
+      if (NEARBY_CONDITIONED_TEMPLATES.has(nextStep.template_name)) {
+        const openSits = await loadOpenSits()
+        const sp = Array.isArray((profile as any).sitter_profiles)
+          ? (profile as any).sitter_profiles[0]
+          : (profile as any).sitter_profiles
+        const nearby = selectNearbyOpenSits(openSits, {
+          latitude: (profile as any).latitude ?? null,
+          longitude: (profile as any).longitude ?? null,
+          declaredRadiusKm: sp?.geographic_radius ?? null,
+        }, { limit: 3 })
+
+        if (nearby.sits.length === 0) {
+          const decision = deferDecision(nearby.reason ?? 'no_open_sit_nearby', dueAt, Date.now())
+          await supabase.from('journey_step_log').insert({
+            journey_id: j.id, step_order: nextStep.step_order,
+            template_name: nextStep.template_name, sent: false, reason: decision.logReason,
+          })
+          if (decision.expired) {
+            await supabase.from('user_journeys').update({
+              status: 'exited',
+              exit_reason: decision.exitReason,
+              completed_at: new Date().toISOString(),
+            }).eq('id', j.id)
+            stats.exited++
+            bumpSeq(j.sequence_key, 'exited')
+          } else {
+            stats.skipped++
+            bumpSeq(j.sequence_key, 'skipped')
+          }
+          continue
+        }
+        nearbyData = nearbySitsTemplateData(nearby.sits)
       }
 
       const idempotencyKey = `journey-${j.sequence_key}-${j.id}-step-${nextStep.step_order}`
@@ -354,6 +416,10 @@ async function runEvaluation(
             daysSinceLastSeen: profile.last_seen_at
               ? Math.floor((Date.now() - new Date(profile.last_seen_at).getTime()) / 86400_000)
               : undefined,
+            // Rôle du destinataire pour cette séquence : un template dont le
+            // contenu ou le sujet dépend du rôle ne doit jamais se tromper.
+            isOwner: journeyIsOwner(seq.audience, (profile as { role?: string | null }).role ?? null),
+            ...nearbyData,
             ...ownerContext,
           },
           logMetadata: { source: `journey:${j.sequence_key}:${nextStep.step_order}`, user_id: j.user_id },

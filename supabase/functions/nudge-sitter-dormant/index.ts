@@ -12,6 +12,12 @@
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { startCronRun } from "../_shared/cron-run-log.ts";
+import { dormantSendDecision } from "../_shared/dormant-sitter-cap.ts";
+import {
+  fetchOpenSits,
+  nearbySitsTemplateData,
+  selectNearbyOpenSits,
+} from "../_shared/nearby-open-sits.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -111,8 +117,67 @@ Deno.serve(async (req) => {
     let emailsSkipped = 0;
     let rateLimitRetryAfterMs = 0;
     const errors: Array<{ sitter_id: string; error: string }> = [];
+    const skipReasons: Record<string, number> = {};
+    const noteSkip = (reason: string) => {
+      skipReasons[reason] = (skipReasons[reason] ?? 0) + 1;
+      emailsSkipped += 1;
+    };
+
+    const sitterIds = sitters.map((s) => s.sitter_id);
+
+    // Comptes administrateurs : jamais de relance de nurturing.
+    const { data: adminRows } = await service
+      .from("user_roles")
+      .select("user_id")
+      .eq("role", "admin")
+      .in("user_id", sitterIds.length ? sitterIds : ["00000000-0000-0000-0000-000000000000"]);
+    const adminIds = new Set((adminRows ?? []).map((r: { user_id: string }) => r.user_id));
+
+    // Plafond de trois relances par gardien, tous envois confondus.
+    const { data: pastSends } = await service
+      .from("email_send_log")
+      .select("message_id")
+      .like("message_id", "dormant-sitter-%")
+      .limit(5000);
+    const sentCounts = new Map<string, number>();
+    for (const row of (pastSends ?? []) as Array<{ message_id: string | null }>) {
+      const id = (row.message_id ?? "").slice("dormant-sitter-".length, "dormant-sitter-".length + 36);
+      if (!id) continue;
+      sentCounts.set(id, (sentCounts.get(id) ?? 0) + 1);
+    }
+
+    // Coordonnées des gardiens et rayon déclaré, pour la condition d'annonce
+    // ouverte à portée.
+    const { data: sitterGeo } = await service
+      .from("profiles")
+      .select("id, latitude, longitude, sitter_profiles(geographic_radius)")
+      .in("id", sitterIds.length ? sitterIds : ["00000000-0000-0000-0000-000000000000"]);
+    const geoById = new Map<string, { latitude: number | null; longitude: number | null; declaredRadiusKm: number | null }>();
+    for (const row of (sitterGeo ?? []) as any[]) {
+      const sp = Array.isArray(row.sitter_profiles) ? row.sitter_profiles[0] : row.sitter_profiles;
+      geoById.set(row.id, {
+        latitude: row.latitude ?? null,
+        longitude: row.longitude ?? null,
+        declaredRadiusKm: sp?.geographic_radius ?? null,
+      });
+    }
+
+    const openSits = await fetchOpenSits(service);
 
     for (const s of sitters) {
+      if (adminIds.has(s.sitter_id)) { noteSkip("admin_account"); continue; }
+
+      const decision = dormantSendDecision({
+        daysSinceSignup: s.days_since_signup,
+        alreadySentCount: sentCounts.get(s.sitter_id) ?? 0,
+        isAdmin: false,
+      });
+      if (!decision.send) { noteSkip(decision.reason ?? "not_eligible"); continue; }
+
+      const geo = geoById.get(s.sitter_id) ?? { latitude: null, longitude: null, declaredRadiusKm: null };
+      const nearby = selectNearbyOpenSits(openSits, geo, { limit: 3 });
+      if (nearby.sits.length === 0) { noteSkip(nearby.reason ?? "no_open_sit_nearby"); continue; }
+
       // Signal admin
       const { error: insErr } = await service.from("admin_signals").insert({
         signal_type: "dormant_sitter",
@@ -187,6 +252,7 @@ Deno.serve(async (req) => {
           templateData: {
             firstName: s.sitter_first_name || "",
             days: s.days_since_signup,
+            ...nearbySitsTemplateData(nearby.sits),
           },
           logMetadata: { sitter_id: s.sitter_id, days_since_signup: s.days_since_signup },
         }),
@@ -227,6 +293,7 @@ Deno.serve(async (req) => {
       emails_skipped: emailsSkipped,
       errors_count: errors.length,
       rate_limit_retry_after_ms: rateLimitRetryAfterMs,
+      skip_reasons: skipReasons,
     });
     return new Response(
       JSON.stringify({
