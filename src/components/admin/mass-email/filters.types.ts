@@ -149,6 +149,13 @@ export function countActiveFilters(f: MassEmailFilters): number {
   if (f.no_mission_ever) n++;
   if (f.respect_product_optout) n++;
   if (f.exclude_user_ids && f.exclude_user_ids.length > 0) n++;
+  if (f.comptes_actifs) n++;
+  if (f.available_for_help) n++;
+  if (f.helps_with_empty) n++;
+  if (f.exclude_admins) n++;
+  if (f.min_helps_with_profiles) n++;
+
+
 
   return n;
 }
