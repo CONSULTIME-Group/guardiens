@@ -260,6 +260,8 @@ const AdminMassEmails = () => {
 
   // UI state
   const [recipientCount, setRecipientCount] = useState<number | null>(null);
+  const [helpsWithCount, setHelpsWithCount] = useState<number | null>(null);
+
   const [countLoading, setCountLoading] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
