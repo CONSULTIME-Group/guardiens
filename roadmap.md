@@ -23,4 +23,4 @@
 - [x] Lot N1 : plafond de 3 relances gardien dormant, exclusion des comptes admin, prénom capitalisé partagé.
 - [x] Lot N1 : étape propriétaire retirée de la séquence gardien, objet onboarding J+1 dépendant du rôle.
 - [x] Lot N1 : cron 156 désactivé, séquence entraide en pause et 496 parcours sortis en paused_model_a.
-- [ ] Envoi réel Entraide A : vérifier le déploiement, recompter le segment, mettre en file sans dépasser le compte, puis relever les résultats immédiats et à 15 minutes.
+- [x] Envoi réel Entraide A : vérifier le déploiement, recompter le segment, mettre en file sans dépasser le compte, puis relever les résultats immédiats et à 15 minutes.
