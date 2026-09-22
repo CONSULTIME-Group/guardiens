@@ -1,187 +1,229 @@
-# Lot N1, relances gardien conditionnées, bugs de rôle, pause entraide
+# Nurturing, lot N2
 
-Plan de mise en oeuvre. Aucune écriture, aucune migration, aucun déploiement avant votre GO.
+Aucune migration, aucun déploiement et aucune publication avant votre GO.
 
-## Ce que la base dit aujourd'hui (22/09)
+## État vérifié au 22 septembre 2026 à 17:09 UTC
 
-Vérifié par requête, pas estimé.
+- La sélection actuelle des annonces applique encore un plafond de 50 km et le rayon déclaré du gardien.
+- Un gardien sans coordonnées déclenche actuellement le report `skipped_no_coordinates`.
+- La relance dormant repose encore sur les fenêtres J+30, J+45 et J+75.
+- `get_owner_nurturing_context` exclut actuellement les profils sans identité vérifiée, sous 60 % de complétion ou vus depuis plus de 90 jours.
+- Le compteur élargi demandé donne une médiane mesurée de 8,5, soit 9 après arrondi usuel, et 12 propriétaires à zéro dans la base au moment de la vérification. Cette mesure diffère légèrement des 10 annoncés et sera remesurée après migration.
+- Avec la nouvelle règle dormant, 946 gardiens actifs sont éligibles aujourd'hui : inscrits depuis au moins 30 jours, aucune candidature, moins de 3 envois, dernier envoi vieux d'au moins 14 jours, hors administrateurs. Trois autres profils éligibles fonctionnellement ont un compte non actif et restent hors envoi.
+- `get_owner_nurturing_context` est appelé par `evaluate-journeys` et `send-onboarding-j1`.
+- La fonction appartient à `postgres` et son exécution est accordée à `authenticated` et `service_role`.
 
-- Annonces réellement ouvertes (published, début futur, candidatures ouvertes, non masquée) : **9**.
-- Gardiens géolocalisés avec profil gardien : **1007**.
-- Gardiens ayant au moins une de ces 9 annonces à portée (50 km, ou leur rayon déclaré s'il est plus petit) : **130**.
-- Séquence `discover-mutual-aid` : **496** parcours actifs, 3 étapes.
-- Cron 156 `nudge-dormant-top-sitters` : actif, mercredi 11 h UTC, appelle une fonction absente du dépôt.
+## Partie A, annonces nationales et relance dormant
 
-### Volumes attendus avec la nouvelle condition
+### Fichiers modifiés
 
-| Relance | Candidats aujourd'hui | Retenus après condition d'annonce à portée |
-|---|---|---|
-| `dormant-sitter-nudge` (cron lundi) | 50 détectés, 50 géolocalisés | **8**, dont 1 compte admin à exclure et 5 ayant déjà reçu 3 envois ou plus, soit **2 envois réels** |
-| `sitter-encourage-candidature` | 28 parcours actifs, 19 géolocalisés | **10** |
-| `availability-nudge` (onboarding gardien, étape 3) | 15 parcours en attente de l'étape, 9 géolocalisés | **2** |
+- `supabase/functions/_shared/nearby-open-sits.ts`
+- `supabase/functions/_shared/journey-defer.ts`
+- `supabase/functions/_shared/dormant-sitter-cap.ts`
+- `supabase/functions/evaluate-journeys/index.ts`
+- `supabase/functions/nudge-sitter-dormant/index.ts`
+- `src/__tests__/nearby-open-sits.test.ts`
+- `src/__tests__/journey-defer.test.ts`
+- `src/__tests__/dormant-sitter-cap.test.ts`
 
-Un gardien sans coordonnées ne reçoit pas : sans coordonnées la condition ne peut pas être évaluée. Le parcours n'est pas terminé pour autant, il est reporté avec la raison `skipped_no_coordinates`.
+### Comportement
 
-## Partie 1, condition d'annonce à portée
+- Charger les annonces ouvertes en France selon la définition existante : publiée, date de début future, candidatures ouvertes, visible côté propriétaire et modération.
+- Avec coordonnées, sélectionner les 3 annonces les plus proches, sans limite de distance et sans lecture du rayon déclaré. La distance reste arrondie à l'entier et affichée.
+- Sans coordonnées, sélectionner les 3 annonces ouvertes les plus récentes. La carte omet la distance.
+- Reporter uniquement lorsque la France entière ne contient aucune annonce ouverte, avec `skipped_no_open_sit` puis `no_open_sit_expired` après 21 jours.
+- Remplacer les jalons dormant par une décision pure : ancienneté minimale 30 jours, aucune candidature, maximum 3 envois, intervalle minimal 14 jours depuis le dernier envoi effectif, administrateurs exclus.
+- Conserver le contrôle de compte actif déjà appliqué au vivier d'envoi. Retirer les critères de complétion et d'identité de `detect_dormant_sitters`, car tous les gardiens dormants actifs doivent devenir éligibles.
+- Lire dans `email_send_log` le nombre et la date du dernier envoi effectif par gardien, sans compter les lignes différées, supprimées, refusées ou échouées.
 
-### Nouveau module partagé
+## Partie B, compteur et cartes propriétaire
 
-`supabase/functions/_shared/nearby-open-sits.ts`
+### Fichiers créés ou modifiés
 
-- `fetchNearbyOpenSits(supabase, { userId, latitude, longitude, declaredRadiusKm, limit: 3 })`
-- Retourne `{ sits: NearbySit[], reason: null | 'no_coordinates' | 'no_open_sit_nearby' }`.
-- `NearbySit` : `id`, `slug`, `title`, `city`, `startDate` et `endDate` formatées en français, `distanceKm` arrondi à l'entier, `url` absolue vers l'annonce.
-- Rayon appliqué : `min(50, rayon déclaré)`. Le rayon déclaré suit `effective_search_radius`, donc 30 km reste lu comme un silence et vaut 100, puis le plafond de 50 s'applique.
+- `drizzle/migrations/0016_owner_nurturing_context.sql`
+- `supabase/migrations/20260922170900_owner_nurturing_context_ne_pas_rejouer.sql`, copie documentaire uniquement
+- `supabase/functions/_shared/transactional-email-templates/owner-no-sit-j3.tsx`
+- `supabase/functions/evaluate-journeys/index.ts`
+- `supabase/functions/send-onboarding-j1/index.ts`
+- `src/integrations/supabase/types.ts`, régénéré automatiquement par l'outil de migration si nécessaire
+- Un test SQL ciblé dans le dispositif `test:sql` existant, avec vérification du contrat JSON et des droits
 
-Requête de proximité, exécutée via une RPC `get_nearby_open_sits(_user_id uuid, _radius_km numeric, _limit int)` en SECURITY DEFINER, pour que le calcul de distance reste en base :
-
-```sql
-SELECT s.id, s.slug, s.title, s.city, s.start_date, s.end_date,
-       6371 * acos(least(1,
-         cos(radians(u.latitude)) * cos(radians(op.latitude)) *
-         cos(radians(op.longitude) - radians(u.longitude)) +
-         sin(radians(u.latitude)) * sin(radians(op.latitude))
-       )) AS distance_km
-FROM public.sits s
-JOIN public.profiles op ON op.id = s.user_id
-CROSS JOIN (SELECT latitude, longitude FROM public.profiles WHERE id = _user_id) u
-WHERE s.status = 'published'
-  AND s.start_date > now()
-  AND s.accepting_applications IS NOT FALSE
-  AND s.hidden_at IS NULL
-  AND s.moderation_hidden_at IS NULL
-  AND op.latitude IS NOT NULL AND op.longitude IS NOT NULL
-  AND u.latitude IS NOT NULL AND u.longitude IS NOT NULL
-ORDER BY distance_km ASC
-LIMIT _limit;
-```
-
-Le filtre de distance final (`<= _radius_km`) est appliqué dans la RPC après calcul, pour garder une seule expression de distance.
-
-### Points d'appel
-
-1. `supabase/functions/nudge-sitter-dormant/index.ts` : avant l'envoi, appel de `fetchNearbyOpenSits`. Sans annonce, on incrémente `emailsSkipped`, on journalise la raison dans les métriques du run, et aucun signal admin n'est créé pour ce motif.
-2. `supabase/functions/evaluate-journeys/index.ts` : pour les étapes dont le template est `sitter-encourage-candidature` ou `availability-nudge`, même appel. Sans annonce, on écrit dans `journey_step_log` `sent: false, reason: 'skipped_no_open_sit_nearby'` et **on ne fait pas avancer `current_step`** (même traitement que l'échec transitoire), pour que le parcours réessaie plus tard au lieu d'être marqué terminé. Garde-fou : ce report n'incrémente pas `transient_failure_count`, sinon le parcours serait arrêté au bout de 5 reports.
-
-Les annonces trouvées sont passées dans `templateData` sous `nearbySits` (tableau de 1 à 3) et `primarySitUrl`.
-
-### Rendu des templates
-
-Adaptation d'affichage uniquement, aucun texte existant réécrit.
-
-- `supabase/functions/_shared/transactional-email-templates/dormant-sitter-nudge.tsx` : bloc cartes annonces (titre, ville, dates, « à N km »), bouton pointant vers `primarySitUrl` au lieu de `/recherche`.
-- `.../sitter-encourage-candidature.tsx` : même bloc cartes, bouton vers `primarySitUrl`.
-- `.../availability-nudge.tsx` : la carte unique existante devient une liste de 1 à 3 annonces, bouton vers `primarySitUrl`.
-
-### Plafond de 3 et exclusion admin (dormant uniquement)
-
-Dans `nudge-sitter-dormant` :
-
-- Fenêtres d'envoi J+30, J+45, J+75 après inscription (tolérance de 7 jours autour de chaque jalon, le cron est hebdomadaire). Hors fenêtre, pas d'envoi.
-- Comptage des envois déjà réalisés dans `email_send_log` pour `template_name = 'dormant-sitter-nudge'` sur l'email du gardien. À 3 ou plus, arrêt définitif.
-- Exclusion des comptes ayant le rôle `admin` dans `user_roles`.
-
-Aucune purge de l'historique des 247 envois, on ne réécrit pas les données.
-
-### Prénom capitalisé, un seul endroit
-
-`supabase/functions/send-transactional-email/index.ts` contient déjà `normalizeEmailFirstNames`, appliqué à tout `templateData` avant rendu et avant calcul du sujet. Deux corrections dans cette seule fonction :
-
-- capitalisation de chaque mot du prénom après `publicFirstName` (« jeremie » devient « Jeremie », « jean-claude » devient « Jean-Claude ») ;
-- prise en compte des clés en minuscules avec tiret bas (`first_name`, `sitter_first_name`), aujourd'hui ignorées par le motif `/FirstName$/`.
-
-La logique est extraite dans `supabase/functions/_shared/email-first-name.ts` et couverte par tests. Rien d'autre n'appelle cette normalisation, donc tous les templates transactionnels et de nurturing en bénéficient d'un coup.
-
-## Partie 2, bugs de rôle
-
-Relevé complet des étapes, lu en base :
-
-| Séquence | Étape | Template | Verdict |
-|---|---|---|---|
-| onboarding-sitter | 1 | onboarding-j1 | sujet propriétaire, à corriger |
-| onboarding-sitter | 2 | relance-profil-incomplet | neutre, correct |
-| onboarding-sitter | 3 | availability-nudge | correct, conditionné au point 1 |
-| onboarding-sitter | 4 | conseils-annonce-personnalises | **contenu propriétaire, à retirer** |
-| onboarding-owner | 1 à 4 | onboarding-j1, conseils-publication-annonce, conseils-annonce-personnalises, relance-profil-incomplet | cohérents |
-| owner-no-sit-relance | 1 à 3 | owner-no-sit-j3 / j10 / j21 | cohérents |
-| helper-to-guard, reactivation-d30, discover-mutual-aid | | | audience `all`, textes neutres, pas de conflit de rôle |
-
-Aucun autre template n'est envoyé au mauvais rôle.
-
-### Retrait de l'étape 4 gardien
-
-Suppression de la ligne `nurturing_steps` (étape 4 de `onboarding-sitter`) par requête de données, pas par migration.
-
-Ce que je propose en remplacement : **rien dans ce lot**. La séquence gardien se termine alors à l'étape 3. Ajouter une quatrième étape gardien maintenant reviendrait à écrire un texte, ce qui relève du lot N2. Les parcours déjà à `current_step = 3` seront simplement marqués `completed` au prochain passage, comportement normal du moteur.
-
-### Sujet d'onboarding-j1 selon le rôle
-
-- `evaluate-journeys` ne passe **pas** `isOwner` aujourd'hui, donc le corps est bien rendu en version gardien, mais le sujet est statique et parle d'annonce. C'est le seul défaut.
-- Correction 1 : dans `evaluate-journeys`, passer `isOwner: seq.audience === 'owner'` dans `templateData` pour tout envoi, ce qui rend l'intention explicite au lieu de reposer sur une valeur absente.
-- Correction 2 : dans `onboarding-j1.tsx`, sujet dynamique. Propriétaire : « Votre première annonce en 2 minutes, Guardiens ». Gardien : « Bienvenue sur Guardiens, votre profil de gardien en quelques minutes ».
-- `send-onboarding-j1` passe déjà `isOwner` correctement, il n'est pas modifié.
-
-## Partie 3, cron orphelin 156
-
-Constat : `cron_run_log` contient des passages `nudge-dormant-top-sitters` en statut `success` avec `detected: 0` chaque mercredi, donc la fonction **est déployée** hors dépôt et répond, mais ne détecte jamais personne. Aucun code source correspondant dans le dépôt.
-
-Proposition : **désactiver le cron 156** (`active = false`) plutôt que le supprimer, pour garder la trace et pouvoir le réactiver si le code est retrouvé. La suppression ferme du cron et de la fonction déployée, si vous la préférez, se fera sur votre mot. Aucun envoi n'est perdu, la fonction n'envoie rien.
-
-## Partie 4, pause entraide
-
-Requêtes de données, à exécuter après GO :
+### SQL prévu pour la migration 0016
 
 ```sql
--- 1) Pause de la séquence
-UPDATE public.nurturing_sequences
-SET active = false, updated_at = now()
-WHERE key = 'discover-mutual-aid';
+CREATE OR REPLACE FUNCTION public.get_owner_nurturing_context(_owner_id uuid)
+RETURNS jsonb
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $function$
+DECLARE
+  _first_name text;
+  _city text;
+  _postal_code text;
+  _lat double precision;
+  _lng double precision;
+  _profile_completion integer;
+  _radius_km integer := 30;
+  _nearby_count integer := 0;
+  _top_names text[] := ARRAY[]::text[];
+  _top_sitters jsonb := '[]'::jsonb;
+BEGIN
+  SELECT p.first_name, p.city, p.postal_code, p.latitude, p.longitude, p.profile_completion
+    INTO _first_name, _city, _postal_code, _lat, _lng, _profile_completion
+  FROM public.profiles p
+  WHERE p.id = _owner_id;
 
--- 2) Sortie propre des parcours actifs, sans envoi
-UPDATE public.user_journeys
-SET status = 'exited',
-    exit_reason = 'paused_model_a',
-    completed_at = now(),
-    updated_at = now()
-WHERE sequence_key = 'discover-mutual-aid'
-  AND status = 'active';
+  IF _lat IS NOT NULL AND _lng IS NOT NULL THEN
+    WITH nearby AS MATERIALIZED (
+      SELECT
+        p.id,
+        p.first_name,
+        p.city,
+        p.avatar_url,
+        p.identity_verified,
+        p.last_seen_at,
+        public.haversine_km(_lat, _lng, p.latitude, p.longitude) AS distance_km
+      FROM public.profiles p
+      WHERE p.id <> _owner_id
+        AND p.role IN ('sitter', 'both')
+        AND p.account_status = 'active'
+        AND p.latitude IS NOT NULL
+        AND p.longitude IS NOT NULL
+        AND public.haversine_km(_lat, _lng, p.latitude, p.longitude) < _radius_km
+    ), ranked AS MATERIALIZED (
+      SELECT *
+      FROM nearby
+      ORDER BY
+        (identity_verified IS TRUE AND NULLIF(btrim(avatar_url), '') IS NOT NULL) DESC,
+        last_seen_at DESC NULLS LAST,
+        distance_km ASC,
+        id ASC
+      LIMIT 3
+    )
+    SELECT
+      (SELECT count(*) FROM nearby),
+      COALESCE(
+        (SELECT array_agg(
+          r.first_name || CASE WHEN r.city IS NOT NULL THEN ' (' || r.city || ')' ELSE '' END
+          ORDER BY
+            (r.identity_verified IS TRUE AND NULLIF(btrim(r.avatar_url), '') IS NOT NULL) DESC,
+            r.last_seen_at DESC NULLS LAST,
+            r.distance_km ASC,
+            r.id ASC
+        ) FROM ranked r WHERE r.first_name IS NOT NULL),
+        ARRAY[]::text[]
+      ),
+      COALESCE(
+        (SELECT jsonb_agg(
+          jsonb_build_object(
+            'id', r.id,
+            'first_name', r.first_name,
+            'city', r.city,
+            'avatar_url', r.avatar_url,
+            'distance_km', round(r.distance_km::numeric)::integer,
+            'url', 'https://guardiens.fr/gardiens/' || r.id::text
+          )
+          ORDER BY
+            (r.identity_verified IS TRUE AND NULLIF(btrim(r.avatar_url), '') IS NOT NULL) DESC,
+            r.last_seen_at DESC NULLS LAST,
+            r.distance_km ASC,
+            r.id ASC
+        ) FROM ranked r),
+        '[]'::jsonb
+      )
+    INTO _nearby_count, _top_names, _top_sitters;
+  END IF;
+
+  RETURN jsonb_build_object(
+    'first_name', _first_name,
+    'city', _city,
+    'postal_code', _postal_code,
+    'profile_completion', COALESCE(_profile_completion, 0),
+    'nearby_sitters_count', COALESCE(_nearby_count, 0),
+    'radius_km', _radius_km,
+    'top_3_sitter_names', COALESCE(_top_names, ARRAY[]::text[]),
+    'top_3_sitters', COALESCE(_top_sitters, '[]'::jsonb)
+  );
+END;
+$function$;
+
+ALTER FUNCTION public.get_owner_nurturing_context(uuid) OWNER TO postgres;
+REVOKE ALL ON FUNCTION public.get_owner_nurturing_context(uuid) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.get_owner_nurturing_context(uuid) TO authenticated, service_role;
+COMMENT ON FUNCTION public.get_owner_nurturing_context(uuid) IS
+  'Contexte des relances proprietaire. Compte tous les gardiens actifs a moins de 30 km et retourne les trois profils prioritaires.';
 ```
 
-496 parcours concernés au moment de la mesure. Les étapes et les templates sont conservés tels quels, la réécriture viendra plus tard.
+Le compteur inclut tous les profils actifs de rôle `sitter` ou `both` avec coordonnées à moins de 30 km. Aucun seuil de complétion, contrôle d'identité ou activité récente ne filtre le vivier. Le classement des 3 cartes applique uniquement l'ordre demandé. `top_3_sitter_names` reste présent pour compatibilité.
 
-## Migrations drizzle
+## Partie C, textes et rendus
 
-Une seule, `drizzle/migrations/0016_nearby_open_sits_rpc.sql` :
+### Gabarits modifiés
 
-- `CREATE OR REPLACE FUNCTION public.get_nearby_open_sits(...)`, `SECURITY DEFINER`, `SET search_path = public`, `STABLE` ;
-- `REVOKE ALL ... FROM PUBLIC, anon, authenticated` puis `GRANT EXECUTE ... TO service_role` : cette RPC n'est appelée que par les fonctions serveur.
+- `supabase/functions/_shared/transactional-email-templates/sitter-encourage-candidature.tsx`
+- `supabase/functions/_shared/transactional-email-templates/dormant-sitter-nudge.tsx`
+- `supabase/functions/_shared/transactional-email-templates/availability-nudge.tsx`
+- `supabase/functions/_shared/transactional-email-templates/relance-profil-incomplet.tsx`
+- `supabase/functions/_shared/transactional-email-templates/relance-cp-manquant.tsx`
+- `supabase/functions/_shared/transactional-email-templates/owner-no-sit-j3.tsx`
+- `supabase/functions/_shared/transactional-email-templates/owner-no-sit-j10.tsx`
+- `supabase/functions/_shared/transactional-email-templates/owner-no-sit-j21.tsx`
+- `supabase/functions/_shared/transactional-email-templates/owner-activation-nudge.tsx`
+- `supabase/functions/_shared/transactional-email-templates/seasonal-nurture.tsx`
+- `supabase/functions/_shared/transactional-email-templates/reactivation-d30.tsx`
+- `supabase/functions/_shared/transactional-email-templates/_nearby-sits.tsx`
+- `supabase/functions/_shared/transactional-email-templates/_legal-footer.tsx`, seulement si nécessaire pour rendre le nouveau pied commun sans affecter les autres emails
 
-Aucun `DROP`, aucune colonne touchée. Copie documentaire « NE PAS REJOUER » dans `supabase/migrations/20260922xxxxxx_get_nearby_open_sits_ne_pas_rejouer.sql`, comme pour 0015.
+### Appelants vérifiés
 
-Les points 2 (retrait d'étape), 4 (pause) et 3 (cron) sont des données, pas du schéma : ils passent par requêtes, pas par migration.
+- `supabase/functions/evaluate-journeys/index.ts`
+- `supabase/functions/nudge-sitter-dormant/index.ts`
+- `supabase/functions/relance-cp-manquant/index.ts`
+- `supabase/functions/send-relance-profil-incomplet/index.ts`
+- `supabase/functions/send-owner-activation-campaign/index.ts`
+- `supabase/functions/send-seasonal-nurture/index.ts`
+
+Chaque objet, pré-en-tête, paragraphe, liste, bouton, signature, variante et pied fourni sera recopié à l'identique. Les seules opérations autour de ces textes seront l'injection des données entre accolades, les accords singulier et pluriel demandés, la variante « Bonjour, » sans prénom et l'omission visuelle de la distance lorsqu'elle manque.
+
+La règle lexicale est compatible avec les textes finaux fournis. Les mentions « sans distance » et « sans prénom » décrivent des variantes et ne sont pas des chaînes visibles. Les anciennes phrases négatives citées pour remplacement seront supprimées.
 
 ## Tests
 
-Nouveaux fichiers :
+### Tests créés ou modifiés
 
-- `src/__tests__/nearby-open-sits.test.ts` : aucune annonce, annonce à 49 km retenue, annonce à 51 km écartée, annonce dont la date de début est passée, annonce masquée (`hidden_at` et `moderation_hidden_at`), rayon déclaré plus petit que 50 respecté, absence de coordonnées.
-- `src/__tests__/dormant-sitter-cap.test.ts` : plafond de 3 envois, fenêtres J+30 / J+45 / J+75, exclusion des comptes admin.
-- `src/__tests__/email-first-name.test.ts` : « jeremie » devient « Jeremie », « jean-claude » devient « Jean-Claude », « MARTIN » inchangé, `first_name` traité comme `firstName`, valeur vide tolérée.
-- `src/__tests__/onboarding-j1-subject.test.ts` : sujet propriétaire et sujet gardien, et `isOwner` transmis par audience.
+- `src/__tests__/nearby-open-sits.test.ts`
+- `src/__tests__/dormant-sitter-cap.test.ts`
+- `src/__tests__/journey-defer.test.ts`
+- Nouveau test de rendu N2 dans `supabase/functions/_shared/transactional-email-templates/`, au format `*_test.ts`
+- Nouveau test SQL ciblé rattaché à `test:sql`
 
-Suite complète ensuite : Vitest complet, `npm run test:sql`, `tsc`.
+### Matrice couverte
 
-## Fichiers touchés
+- Annonce à 300 km retenue.
+- Tri des 3 annonces par distance avec coordonnées.
+- Sans coordonnées, tri des 3 annonces par date de publication récente et aucune distance rendue.
+- Report uniquement avec zéro annonce ouverte en France, échéance 21 jours conservée.
+- Dormant : 29 et 30 jours, aucune candidature, espacement à 13 et 14 jours, plafond à 3, administrateur exclu.
+- Chaque gabarit réécrit rendu avec prénom et avec salutation neutre.
+- Gabarits annonce rendus avec et sans distance.
+- Compteurs rendus avec 0, 1 et plusieurs.
+- Cartes propriétaire avec photo et avec initiale de remplacement.
+- Présence exacte des textes validés, sujets dynamiques compris.
+- Échec sur toute chaîne visible contenant une construction `ne ... pas`, `n'... pas`, `jamais`, `aucun`, `sans`, `rien`, un tiret cadratin ou un demi-cadratin.
+- Échec si `3 candidatures` ou `en moyenne` réapparaît.
+- Vitest complet, `test:sql` et contrôle TypeScript.
 
-Nouveaux : `supabase/functions/_shared/nearby-open-sits.ts`, `supabase/functions/_shared/email-first-name.ts`, `drizzle/migrations/0016_nearby_open_sits_rpc.sql`, la copie documentaire, les 4 fichiers de tests.
+## Migration, déploiements et portée
 
-Modifiés : `supabase/functions/nudge-sitter-dormant/index.ts`, `supabase/functions/evaluate-journeys/index.ts`, `supabase/functions/send-transactional-email/index.ts`, `supabase/functions/_shared/transactional-email-templates/dormant-sitter-nudge.tsx`, `.../sitter-encourage-candidature.tsx`, `.../availability-nudge.tsx`, `.../onboarding-j1.tsx`.
+Après votre GO uniquement :
 
-Hors périmètre, non touchés : `send-onboarding-j1`, `send-nearby-daily-digest`, toutes les séquences propriétaire, les textes des emails (lot N2).
+1. Implémenter les fichiers ci-dessus.
+2. Exécuter les tests ciblés, Vitest complet, `test:sql` et le contrôle TypeScript.
+3. Appliquer la migration Drizzle 0016 avec l'outil de migration, puis conserver la copie documentaire marquée « NE PAS REJOUER ».
+4. Remesurer le compteur propriétaire et le nombre de gardiens dormant éligibles.
+5. Redéployer `evaluate-journeys`, `nudge-sitter-dormant`, `send-transactional-email` et `send-onboarding-j1`, seul autre appelant vérifié de `get_owner_nurturing_context`.
+6. Fournir la liste exacte des fichiers, le diff, les résultats chiffrés, la migration appliquée, les fonctions redéployées, le hash du commit et la portée réelle.
 
-## Ordre d'exécution après GO
-
-1. Code et tests, suite complète verte.
-2. Migration 0016 appliquée en base.
-3. Requêtes de données : retrait de l'étape 4 gardien, pause entraide et sortie des parcours, désactivation du cron 156.
-4. Rapport : fichiers, diffs, tests, comptages avant et après, hash du commit. Aucun déploiement ni publication sans votre mot.
+`discover-mutual-aid` reste en pause. Aucune séquence de nurturing n'est réactivée ou modifiée hors des règles N2. Aucun email de masse ne part. Le front reste non publié.
