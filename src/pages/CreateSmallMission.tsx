@@ -346,7 +346,7 @@ const CreateSmallMission = () => {
       }
     }, 600);
     return () => { cancelled = true; window.clearTimeout(timer); };
-  }, [step, city, category]);
+  }, [step, city]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
