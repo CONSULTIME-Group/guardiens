@@ -494,7 +494,7 @@ const CreateSmallMission = () => {
         }).then(({ error }: any) => { if (error) console.warn("signal animal_rehoming_listing", error); });
         toast({
           title: "Mission transmise pour relecture",
-          description: "La cession ou l'adoption d'animaux n'est pas proposée sur Guardiens. Notre équipe va relire votre publication.",
+          description: "Notre équipe va relire votre besoin : la cession et l'adoption d'animaux passent par les associations.",
         });
       }
     }
