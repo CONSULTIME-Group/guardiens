@@ -627,7 +627,7 @@ const CreateSmallMission = () => {
                       Ici, on s'échange des services
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      L'entraide fonctionne sans argent : ni paiement, ni tarif, ni remboursement. Proposez plutôt un service en retour. Rien ne bloque, c'est une simple relecture.
+                      L'entraide s'échange en services et en attentions : proposez plutôt un coup de main en retour. C'est une simple relecture, vous restez libre de publier.
                     </p>
                   </div>
                 )}
