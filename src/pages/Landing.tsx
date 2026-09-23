@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { Suspense, lazy, useEffect } from "react";
 import franceLocalNational from "@/assets/illustrations/france-local-national-462.avif";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
