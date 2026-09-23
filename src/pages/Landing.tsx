@@ -34,6 +34,12 @@ import { useAuth } from "@/contexts/AuthContext";
 
 import RecentSitsItemListJsonLd from "@/components/seo/RecentSitsItemListJsonLd";
 
+// Bloc « Autour de vous » : chargé dynamiquement, sous la ligne de flottaison,
+// pour ne jamais toucher au LCP.
+const LazyAroundYouSection = lazy(
+  () => import("@/components/landing/AroundYouSection").then((m) => ({ default: m.LazyAroundYouSection })),
+);
+
 import PublicFooter from "@/components/layout/PublicFooter";
 import { staticRoutes, DEFAULT_OG_IMAGE } from "@/data/siteRoutes";
 // Pricing pivot : plus d'Offer JSON-LD tant que PRICING_IS_ACTIVE = false.
