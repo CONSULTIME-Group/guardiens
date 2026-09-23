@@ -42,10 +42,10 @@ SECURITY DEFINER
 SET search_path = public
 AS $function$
   WITH eligible_reviews AS (
-    SELECT 'avis'::text AS proof_type, reviewed.first_name, reviewed.city,
+    SELECT 'avis'::text AS proof_type, author.first_name, author.city,
       left(btrim(r.comment), 500) AS proof_text, r.created_at AS happened_at
     FROM public.reviews r
-    JOIN public.profiles reviewed ON reviewed.id = r.reviewee_id
+    JOIN public.profiles author ON author.id = r.reviewer_id
     WHERE r.published IS TRUE
       AND r.moderation_status = 'valide'
       AND r.moderation_hidden_at IS NULL
