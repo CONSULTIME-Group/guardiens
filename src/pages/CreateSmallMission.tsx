@@ -439,6 +439,7 @@ const CreateSmallMission = () => {
       date_needed: dateNeeded || null,
       end_date: endDate || null,
       duration_estimate: duration,
+      sit_mode: multiDaySit && sitMode ? sitMode : null,
       pet_species: petSpecies || null,
       pet_size: petSize || null,
       photos,
