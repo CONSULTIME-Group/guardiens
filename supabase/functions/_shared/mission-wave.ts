@@ -105,3 +105,22 @@ export function frenchDateLabel(iso: string | null | undefined): string | null {
     timeZone: "Europe/Paris",
   }).format(d);
 }
+
+/** Déroulement déclaré du besoin, quand la question l'a déterminé. */
+export type MissionSitMode = "at_home" | "visits" | "at_helper";
+
+export const isMissionSitMode = (value: unknown): value is MissionSitMode =>
+  value === "at_home" || value === "visits" || value === "at_helper";
+
+/** Ligne d'affichage du déroulement, email de vague. */
+export function sitModeEmailLine(mode: MissionSitMode, firstName: string | null | undefined): string {
+  const first = (firstName || "").trim();
+  switch (mode) {
+    case "at_home":
+      return first ? `Présence chez ${first} pendant son absence` : "Présence chez vous pendant votre absence";
+    case "visits":
+      return first ? `Passages chez ${first}` : "Passages chez vous";
+    case "at_helper":
+      return "L'animal vient chez vous";
+  }
+}
