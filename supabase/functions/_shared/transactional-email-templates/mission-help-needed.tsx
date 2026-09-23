@@ -17,6 +17,7 @@ interface Props {
   missionId?: string
   canHelpToken?: string
   proofLine?: string
+  sitModeLine?: string
 }
 
 const MissionHelpNeededEmail = ({
@@ -27,6 +28,7 @@ const MissionHelpNeededEmail = ({
   missionId,
   canHelpToken,
   proofLine,
+  sitModeLine,
 }: Props) => (
   <Html lang="fr" dir="ltr">
     <BrandedHead />
@@ -42,6 +44,7 @@ const MissionHelpNeededEmail = ({
 
         {missionTitle && (
           <Section style={card}>
+            {sitModeLine && <Text style={cardCity}>{sitModeLine}</Text>}
             <Text style={cardLine}>{missionTitle}</Text>
             {missionCity && <Text style={cardCity}>{missionCity}</Text>}
           </Section>

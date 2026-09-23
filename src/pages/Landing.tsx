@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import franceLocalNational from "@/assets/illustrations/france-local-national-462.avif";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -31,8 +31,16 @@ import { MidJourneyCta } from "@/components/landing/MidJourneyCta";
 import PublicHeader from "@/components/layout/PublicHeader";
 import { useShellMode } from "@/components/layout/useShellMode";
 import { useAuth } from "@/contexts/AuthContext";
+import { lazyWithRetry } from "@/lib/lazyWithRetry";
 
 import RecentSitsItemListJsonLd from "@/components/seo/RecentSitsItemListJsonLd";
+
+// Bloc « Autour de vous » : chargé dynamiquement, sous la ligne de flottaison,
+// pour ne jamais toucher au LCP.
+const LazyAroundYouSection = lazyWithRetry(
+  () => import("@/components/landing/AroundYouSection").then((m) => ({ default: m.LazyAroundYouSection })),
+  "landing-around-you",
+);
 
 import PublicFooter from "@/components/layout/PublicFooter";
 import { staticRoutes, DEFAULT_OG_IMAGE } from "@/data/siteRoutes";
@@ -415,6 +423,12 @@ const Landing = () => {
 
       {/* ═══════════════ SECTION 10, CTA FINAL (fusion Fondateur + double CTA) ═══════════════ */}
       <FinalCtaSection />
+
+      {/* ═══════════════ AUTOUR DE VOUS (Entraide, sous la ligne de flottaison,
+          import dynamique après idle, aucun impact LCP) ═══════════════ */}
+      <Suspense fallback={<div className="border-t border-border bg-muted/20 py-14" aria-hidden="true" />}>
+        <LazyAroundYouSection />
+      </Suspense>
       </main>
 
       <PublicFooter />

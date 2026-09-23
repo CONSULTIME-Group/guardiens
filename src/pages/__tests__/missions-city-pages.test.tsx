@@ -1,4 +1,4 @@
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import { MISSIONS_CITIES } from "@/data/missionsCityContent";
@@ -101,12 +101,16 @@ describe("pages villes Entraide", () => {
 
     await waitFor(() => expect(screen.getByText("Besoin proche")).toBeInTheDocument());
     expect(screen.queryByText("Besoin lointain")).not.toBeInTheDocument();
-    expect(screen.getByText("Camille")).toBeInTheDocument();
+    // Onglet « Autour de vous » : les personnes seules sont listées.
+    fireEvent.click(screen.getByRole("tab", { name: "Autour de vous" }));
+    await waitFor(() => expect(screen.getByText("Camille")).toBeInTheDocument());
     expect(screen.getByText("Nadia")).toBeInTheDocument();
     expect(screen.queryByText("Alex")).not.toBeInTheDocument();
     expect(screen.getByText("La carte se remplit avec les coups de main du coin.")).toBeInTheDocument();
     expect(screen.queryByText("Preuve locale")).not.toBeInTheDocument();
-    expect(screen.getByTestId("city-map")).toHaveTextContent("1:2");
+    // La carte s'ouvre à la demande dans l'environnement de test.
+    fireEvent.click(screen.getByRole("button", { name: "Carte" }));
+    await waitFor(() => expect(screen.getByTestId("city-map")).toHaveTextContent("1:2"));
   });
 
   it("garde le seuil du compteur explicite", () => {

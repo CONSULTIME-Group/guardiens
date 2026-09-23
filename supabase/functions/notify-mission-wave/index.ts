@@ -31,6 +31,8 @@ import {
   frenchDateLabel,
   WAVE_RELAUNCH_MESSAGE,
   WAVE_EMPTY_MESSAGE,
+  isMissionSitMode,
+  sitModeEmailLine,
 } from "../_shared/mission-wave.ts";
 import { pickNearestProof, proofEmailLine, proofWeekLabel, type ProofRow } from "../_shared/mission-meetup.ts";
 
@@ -75,7 +77,7 @@ interface WaveHelper {
 async function runWave(supabase: any, missionId: string): Promise<{ sent: number; wave: number; empty: boolean }> {
   const { data: mission } = await supabase
     .from("small_missions")
-    .select("id, title, city, user_id, status, date_needed, end_date, wave_count, latitude, longitude")
+    .select("id, title, city, user_id, status, date_needed, end_date, wave_count, sit_mode, latitude, longitude")
     .eq("id", missionId)
     .maybeSingle();
 
@@ -165,6 +167,10 @@ async function runWave(supabase: any, missionId: string): Promise<{ sent: number
       dateLabel,
     );
 
+    const sitLine = isMissionSitMode(mission.sit_mode)
+      ? sitModeEmailLine(mission.sit_mode, owner?.first_name ?? null)
+      : "";
+
     const ok = await sendEmail({
       templateName: "mission-help-needed",
       recipientEmail: helper.email,
@@ -177,6 +183,7 @@ async function runWave(supabase: any, missionId: string): Promise<{ sent: number
         missionId,
         canHelpToken: h.token,
         proofLine,
+        sitModeLine: sitLine,
       },
       logMetadata: { mission_id: missionId, wave, source: "mission_wave" },
     });

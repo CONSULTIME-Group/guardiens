@@ -1,26 +1,12 @@
-# Roadmap
+# Lot E6, plan GO du 23/09
 
-- [x] Créer et appliquer la vue publique `public_helpers` sans `security_invoker`, lecture seule anon/authenticated, colonnes explicites.
-- [x] Ajouter l'agrégat public du nombre de réponses aux besoins.
-- [x] Refaire `/petites-missions` avec les vues Besoins et Autour de vous, cartes partagées et textes validés.
-- [x] Ajouter la carte dédiée, décalage déterministe, regroupement par grille et recherche synchronisée.
-- [x] Ajouter le parcours d'inscription entraide et le rappel tableau de bord pour `helps_with`.
-- [x] Conserver FAQ et SEO, ajouter JSON-LD Person minimal et la statistique CRÉDOC.
-- [x] Étendre les tests Vitest et PGlite, vérifier TypeScript et compilation.
-- [x] Capturer mobile et ordinateur pour Besoins, Autour de vous et Carte.
-- [x] Construire le registre `MISSIONS_CITIES` et le gabarit unique Lyon, Marseille, Strasbourg.
-- [x] Ajouter le compteur direct, la carte, les besoins, les personnes et les preuves à 30 km.
-- [x] Ajouter les liens hub et pied de page, les routes et les trois entrées sitemap.
-- [x] Ajouter les tests de rendu, SEO, sitemap, rayon et contenu éditorial sans chiffre.
-- [x] Exécuter Vitest complet, `test:sql`, TypeScript et vérifier le journal de compilation.
-- [x] Ne pas publier ni déployer.
-- [x] Lot 4b : migration 0015 `public_helpers` (CREATE OR REPLACE, sans filtre helps_with) + copie documentaire.
-- [x] Lot 4b : retirer le filtre JS `helps_with` (hub + pages villes), HelperCard « Disponible pour un coup de main ».
-- [x] Lot 4b : onze villes (Paris, Toulouse, Lille, Annecy, Nice, Nantes, Saint-Étienne, Rennes, Montpellier, Grenoble, Bordeaux) dans le registre, routes, sitemaps, hub, footer, llms.txt, tests.
-- [x] Lot 4b : copier les textes dans .lovable/plan/lot4b-textes.md (Paris : « se croisent souvent en silence »).
-- [x] Lot 4b : Vitest complet, test:sql, tsgo. Ne pas publier ni déployer.
-- [x] Lot N1 : relances gardien conditionnées à une annonce ouverte à moins de 50 km, report borné à 21 jours.
-- [x] Lot N1 : plafond de 3 relances gardien dormant, exclusion des comptes admin, prénom capitalisé partagé.
-- [x] Lot N1 : étape propriétaire retirée de la séquence gardien, objet onboarding J+1 dépendant du rôle.
-- [x] Lot N1 : cron 156 désactivé, séquence entraide en pause et 496 parcours sortis en paused_model_a.
-- [x] Envoi réel Entraide A : vérifier le déploiement, recompter le segment, mettre en file sans dépasser le compte, puis relever les résultats immédiats et à 15 minutes.
+1. Mesure LCP de référence, mobile et ordinateur, cinq chargements, médiane.
+2. Code partie 1 : question « Comment ça se passe ? », sit_mode, fiche, email de vague.
+3. Code partie 2 : carte pilotée par onglet, hub et pages villes.
+4. Code partie 3 : photos des besoins, NeedCard et popup.
+5. Code partie 4 : bloc home post idle, SVG France, compteurs.
+6. Migration 0018 : type, colonne, vue, droits, copie documentaire.
+7. Tests : Vitest complet, test:sql, tsgo, build, scan des textes.
+8. Contrôles de la vue et du LCP après.
+9. Redéploiement notify-mission-wave et send-transactional-email.
+10. Rapport final en 12 lignes.

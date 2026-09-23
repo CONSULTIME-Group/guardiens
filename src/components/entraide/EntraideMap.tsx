@@ -1,10 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
-import { Circle, MapContainer, Popup, TileLayer, Tooltip, useMap, useMapEvents } from "react-leaflet";
+import { Circle, CircleMarker, MapContainer, Popup, TileLayer, Tooltip, useMap, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import LeafletUnmountGuard from "@/components/shared/LeafletUnmountGuard";
 import { MAP_TILE_WORLD_ATTRIBUTION, MAP_TILE_WORLD_URL } from "@/lib/mapTiles";
 import { offsetApproximatePoint } from "@/lib/entraideMap";
 import { HelperCard, NeedCard, type EntraideNeed, type PublicHelper } from "./EntraideCards";
+
+/** Onglet actif : il décide qui est un marqueur principal, qui est en fond. */
+export type EntraideMapTab = "needs" | "helpers";
 
 interface Point {
   id: string;
@@ -50,7 +53,8 @@ const FitPoints = ({ points, focus }: { points: Point[]; focus: [number, number]
   return null;
 };
 
-const HubCircles = ({ points }: { points: Point[] }) => {
+/** Marqueurs principaux de l'onglet actif : cercles regroupés, cliquables. */
+const HubCircles = ({ points, tab }: { points: Point[]; tab: EntraideMapTab }) => {
   const map = useMap();
   const [zoom, setZoom] = useState(map.getZoom());
   useMapEvents({ zoomend: () => setZoom(map.getZoom()) });
@@ -63,17 +67,17 @@ const HubCircles = ({ points }: { points: Point[] }) => {
           center={[cluster.lat, cluster.lng]}
           radius={cluster.count > 1 ? 520 + cluster.count * 35 : 360}
           pathOptions={{
-            color: cluster.kind === "need" ? "hsl(var(--primary))" : "hsl(var(--secondary))",
-            fillColor: cluster.kind === "need" ? "hsl(var(--primary))" : "hsl(var(--secondary))",
+            color: "hsl(var(--primary))",
+            fillColor: "hsl(var(--primary))",
             fillOpacity: 0.24,
             weight: 2,
           }}
         >
-          <Tooltip>{cluster.count > 1 ? `${cluster.count} coups de main dans ce secteur` : cluster.label}</Tooltip>
+          <Tooltip>{cluster.count > 1 ? `${cluster.count} points dans ce secteur` : cluster.label}</Tooltip>
           {cluster.count === 1 && (
             <Popup minWidth={280}>
-              {cluster.need && <NeedCard need={cluster.need} distance={null} showDistance={false} compact />}
-              {cluster.helper && <HelperCard helper={cluster.helper} distance={null} showDistance={false} compact />}
+              {tab === "needs" && cluster.need && <NeedCard need={cluster.need} distance={null} showDistance={false} compact />}
+              {tab === "helpers" && cluster.helper && <HelperCard helper={cluster.helper} distance={null} showDistance={false} compact />}
             </Popup>
           )}
         </Circle>
@@ -82,27 +86,48 @@ const HubCircles = ({ points }: { points: Point[] }) => {
   );
 };
 
-const EntraideMap = ({ needs, helpers, focus }: {
+/** Points de fond de l'autre famille : petits points discrets, non cliquables. */
+const BackgroundDots = ({ points }: { points: Point[] }) => (
+  <>
+    {points.map((point) => (
+      <CircleMarker
+        key={`bg-${point.kind}-${point.id}`}
+        center={[point.lat, point.lng]}
+        radius={4}
+        interactive={false}
+        pathOptions={{ color: "hsl(var(--muted-foreground))", fillColor: "hsl(var(--muted-foreground))", fillOpacity: 0.45, weight: 1 }}
+      />
+    ))}
+  </>
+);
+
+const EntraideMap = ({ needs, helpers, focus, tab = "needs" }: {
   needs: EntraideNeed[];
   helpers: PublicHelper[];
   focus: [number, number] | null;
+  tab?: EntraideMapTab;
 }) => {
-  const points = useMemo<Point[]>(() => [
-    ...needs.flatMap((need) => need.latitude === null || need.longitude === null ? [] : [{
+  const all = useMemo<{ primary: Point[]; background: Point[] }>(() => {
+    const needPoints = needs.flatMap((need) => need.latitude === null || need.longitude === null ? [] : [{
       id: need.id,
       ...offsetApproximatePoint(need.id, need.latitude, need.longitude),
       label: need.title,
       kind: "need" as const,
       need,
-    }]),
-    ...helpers.flatMap((helper) => helper.latitude_approx === null || helper.longitude_approx === null ? [] : [{
+    }]);
+    const helperPoints = helpers.flatMap((helper) => helper.latitude_approx === null || helper.longitude_approx === null ? [] : [{
       id: helper.id,
       ...offsetApproximatePoint(helper.id, helper.latitude_approx, helper.longitude_approx),
       label: helper.first_name,
       kind: "helper" as const,
       helper,
-    }]),
-  ], [helpers, needs]);
+    }]);
+    return tab === "needs"
+      ? { primary: needPoints, background: helperPoints }
+      : { primary: helperPoints, background: needPoints };
+  }, [helpers, needs, tab]);
+
+  const points = useMemo<Point[]>(() => [...all.primary, ...all.background], [all]);
 
   if (points.length === 0 && !focus) {
     return <div className="flex h-[360px] items-center justify-center bg-muted text-sm text-muted-foreground">La carte se remplit avec les coups de main du coin.</div>;
@@ -114,7 +139,8 @@ const EntraideMap = ({ needs, helpers, focus }: {
         <LeafletUnmountGuard />
         <TileLayer url={MAP_TILE_WORLD_URL} attribution={MAP_TILE_WORLD_ATTRIBUTION} />
         <FitPoints points={points} focus={focus} />
-        <HubCircles points={points} />
+        <BackgroundDots points={all.background} />
+        <HubCircles points={all.primary} tab={tab} />
       </MapContainer>
     </div>
   );
