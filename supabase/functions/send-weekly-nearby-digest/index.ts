@@ -130,6 +130,9 @@ Deno.serve(async (req) => {
         .from("small_missions")
         .select("id, title, city, mission_type, latitude, longitude, user_id, status, created_at")
         .eq("status", "open")
+        // Diffusion unique : les besoins partent par vagues, ce digest porte
+        // les offres de coup de main.
+        .eq("mission_type", "offre")
         .gte("created_at", since)
         // Diffusion différée : le premier projet d'un porteur attend son
         // échéance avant d'être annoncé aux membres.

@@ -207,6 +207,12 @@ Deno.serve(async (req) => {
             await markSkipped(supabase, [qr.id], 'mission_not_available', body.dry_run)
             continue
           }
+          // Diffusion unique : les besoins appartiennent au moteur de vagues
+          // notify-mission-wave, qui prévient dix personnes à la fois.
+          if ((m.mission_type ?? 'besoin') === 'besoin') {
+            await markSkipped(supabase, [qr.id], 'besoin_handled_by_wave', body.dry_run)
+            continue
+          }
 
           const { data: owner } = await supabase
             .from('profiles')
