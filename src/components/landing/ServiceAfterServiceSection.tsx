@@ -28,7 +28,7 @@ export function ServiceAfterServiceSection() {
           ))}
         </div>
         <p className="mx-auto mt-10 max-w-2xl text-center font-heading text-xl italic md:text-2xl">La technologie sert à se trouver. Tout le reste se passe en vrai.</p>
-        <p className="mx-auto mt-6 max-w-2xl leading-relaxed text-pine-foreground/90">Nous nous sommes posé une question : et si la technologie servait à se rencontrer ? À découvrir qu'à quelques kilomètres, quelqu'un a besoin d'un coup de main. Pour l'un, c'est un vrai besoin. Pour l'autre, une heure, et souvent un bon moment.</p>
+        <p className="mx-auto mt-6 max-w-2xl leading-relaxed text-pine-foreground/90">Nous nous sommes posé une question : et si la technologie servait à se rencontrer ? À découvrir qu'à quelques kilomètres, quelqu'un a besoin d'un coup de main. Pour l'un, c'est un vrai besoin. Pour l'autre, une heure. Et se sentir utile, échanger quelques mots, rencontrer une personne, c'est aussi une façon de se faire du bien.</p>
         <p className="mx-auto mt-4 max-w-2xl font-semibold">Elisa et Jérémie</p>
         <p className="mx-auto mt-5 max-w-2xl text-sm text-pine-foreground/85">La mami du quartier vous raconte son histoire pendant que vous ramassez ses fruits. Gerardo vous aide à bricoler, puis partage avec vous un repas fait maison.</p>
         <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">

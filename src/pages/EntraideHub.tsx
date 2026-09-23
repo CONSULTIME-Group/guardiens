@@ -54,7 +54,7 @@ export const EntraideHubIntro = ({ isAuthenticated, onNeed, onHelp }: {
         Et si, à quelques kilomètres de chez vous, quelqu'un avait besoin d'un petit coup de main ?
       </h1>
       <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-        Arroser quelques plantes. Nourrir un chat. Réceptionner un colis. Aider à déplacer un meuble. Des choses qui, pour l'un, sont un vrai besoin, et qui, pour l'autre, coûtent très peu. Et parfois, font plaisir.
+        Arroser quelques plantes. Nourrir un chat. Réceptionner un colis. Aider à déplacer un meuble. Des choses qui, pour l'un, sont un vrai besoin, et qui, pour l'autre, coûtent très peu. Se sentir utile, échanger quelques mots, rencontrer une personne : c'est aussi une façon de se faire du bien.
       </p>
       <div className="mt-6 flex flex-col gap-3 sm:flex-row">
         <Button onClick={onNeed}>J'ai besoin d'un coup de main</Button>
@@ -259,7 +259,7 @@ const EntraideHub = () => {
     }
     await supabase.from("profiles").update({ available_for_help: true }).eq("id", user.id);
     setProfile((prev) => (prev ? { ...prev, available_for_help: true } : prev));
-    toast.success("Vous serez prévenu quand quelqu'un près de chez vous aura besoin. Vous direz oui ou non à chaque fois.");
+    toast.success("C'est noté. Vous recevrez les besoins publiés près de chez vous, et vous choisirez ceux qui vous parlent.");
     void trackEvent("mission_can_help", { metadata: { source: "hub", action: "helper_enabled" } });
   };
 
@@ -405,6 +405,7 @@ const EntraideHub = () => {
 
           <section className="mt-14" aria-labelledby="entraide-helpers-title">
             <h2 id="entraide-helpers-title" className="font-heading text-2xl font-semibold text-foreground">Prêts à aider près de chez vous</h2>
+            <p className="mt-2 text-sm text-muted-foreground">Aider, c'est aussi se faire du bien.</p>
             <div className="mt-5 grid gap-4 md:grid-cols-2">
               {visibleHelpers.map((helper) => (
                 <HelperCard
