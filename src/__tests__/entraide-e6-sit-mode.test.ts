@@ -53,7 +53,7 @@ describe("E6 signal de garde de plusieurs jours", () => {
   it("seuil d'écart de dates strictement au-delà de deux jours", () => {
     expect(looksLikeMultiDaySit(null, null, ISO(0), ISO(2))).toBe(false);
     expect(looksLikeMultiDaySit(null, null, ISO(0), ISO(3))).toBe(true);
-média    expect(looksLikeMultiDaySit("Garde", "garder", ISO(0), ISO(3))).toBe(true);
+    expect(looksLikeMultiDaySit("Garde", "garder", ISO(0), ISO(3))).toBe(true);
   });
 
   it("affiche le bloc de garde avec les deux issues", () => {
