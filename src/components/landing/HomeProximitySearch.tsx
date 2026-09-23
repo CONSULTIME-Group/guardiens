@@ -55,7 +55,7 @@ export function HomeProximitySearch({ onLocated }: { onLocated: (origin: HomeOri
           maxLength={100}
           className="h-11 border-primary-foreground/45 bg-background/90 text-foreground placeholder:text-muted-foreground"
         />
-        <Button type="submit" variant="secondary" size="sm" className="h-11 px-5" disabled={loading || city.trim().length < 2}>
+        <Button type="submit" variant="secondary" size="sm" className="h-11 bg-secondary px-5 text-secondary-foreground disabled:bg-secondary disabled:text-secondary-foreground disabled:opacity-60" disabled={loading || city.trim().length < 2}>
           {loading ? "Recherche" : "Voir"}
         </Button>
       </form>

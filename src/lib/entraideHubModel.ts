@@ -51,5 +51,6 @@ export const categoryInitial = (category: string | null | undefined): string =>
 export const memberSubtitle = (city: string | null, nearest: number | null): string | null => {
   if (!city) return null;
   if (nearest === null) return `Autour de ${city}.`;
+  if (nearest < 2) return `Autour de ${city}. Le plus proche est tout près de chez vous.`;
   return `Autour de ${city}. Le plus proche est à ${Math.round(nearest)} km.`;
 };

@@ -21,7 +21,7 @@ describe("Lot E6 partie 4, bloc home Autour de vous", () => {
       <AroundYouSection />
     </MemoryRouter>,
   );
-    expect(html).toContain("Des personnes prêtes à donner un coup de main près de chez vous");
+    expect(html).toContain("Des personnes prêtes à donner un coup de main sur Guardiens");
     expect(html).not.toContain("null");
   });
 
