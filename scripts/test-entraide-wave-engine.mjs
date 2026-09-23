@@ -192,6 +192,59 @@ try {
 assert.ok(tooLong, 'plus de 200 caracteres doit etre refuse');
 passed.push('La phrase de profil est plafonnee a 200 caracteres');
 
+
+// ---- Lot E5 : diffusion unique, promesse du formulaire, search_path ----
+await db.exec(`
+CREATE SCHEMA IF NOT EXISTS auth;
+CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $$ SELECT NULL::uuid $$;
+CREATE OR REPLACE FUNCTION public.mission_audience(p_lat double precision,p_lng double precision,p_category text,p_author uuid)
+  RETURNS TABLE(helper_id uuid, distance_km numeric) LANGUAGE sql STABLE AS $$
+  SELECT id, 1::numeric FROM public.profiles WHERE coalesce(available_for_help,false) AND id IS DISTINCT FROM p_author $$;
+CREATE OR REPLACE TRIGGER trg_notify_helpers_on_new_mission AFTER INSERT ON small_missions
+  FOR EACH ROW EXECUTE FUNCTION public.enqueue_helpers_for_new_mission();
+`);
+await db.exec(readFileSync(new URL('scripts/fixtures/entraide-0017-functions.sql', root), 'utf8'));
+
+// Un besoin cree ne met plus personne en file : il part par vagues.
+const besoinSeul = (await db.query(
+  `INSERT INTO small_missions(user_id,title,description,city,mission_type,status,latitude,longitude)
+   VALUES($1,'Ramasser les pommes du jardin','Description assez longue pour passer les regles de saisie du formulaire.','Lyon','besoin','open',45.75,4.85) RETURNING id`,
+  [owner],
+)).rows[0].id;
+const queued = (await db.query('SELECT count(*)::int AS n FROM mission_notification_queue WHERE mission_id=$1', [besoinSeul])).rows[0].n;
+assert.equal(queued, 0, 'un besoin ne passe plus par la file de diffusion');
+passed.push('Un besoin cree ne met personne en file : seules les vagues le diffusent');
+
+// Le compteur du formulaire lit exactement le vivier des vagues.
+const preview = (await db.query('SELECT mission_wave_audience_preview(45.75,4.85) AS n')).rows[0].n;
+const waveAll = (await db.query('SELECT count(*)::int AS n FROM mission_wave_audience($1,1000,0)', [besoinSeul])).rows[0].n;
+assert.equal(preview, waveAll, 'le compteur du formulaire suit le vivier de la vague');
+passed.push('Le compteur du formulaire renvoie le meme vivier que la vague');
+
+// Les fonctions corrigees s'appellent sans erreur dans une transaction annulee.
+await db.exec('BEGIN');
+for (const call of [
+  ['SELECT enqueue_mission_wave($1,10)', [besoinSeul]],
+  ['SELECT emit_mission_meetup_tokens($1)', [besoinSeul]],
+]) {
+  try { await db.query(call[0], call[1]); } catch (e) {
+    if (!/does not exist/.test(e.message)) throw new Error(`${call[0]} : ${e.message}`);
+  }
+}
+await db.exec('ROLLBACK');
+passed.push('Les fonctions a jeton s\'executent sans erreur, transaction annulee');
+
+// Controle generique : tout tirage de jeton doit porter extensions.
+const risky = (await db.query(`
+  SELECT p.proname, p.proconfig FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+  WHERE n.nspname='public'
+    AND p.prosrc ~* '(^|[^.[:alnum:]_])(gen_random_bytes|digest|crypt)[[:space:]]*\('`)).rows;
+const missing = risky.filter((r) => !(r.proconfig || []).some((c) => /^search_path=.*extensions/.test(c)));
+assert.deepEqual(missing.map((r) => r.proname), [], 'search_path sans extensions');
+assert.ok(risky.length > 0, 'le controle doit examiner au moins une fonction');
+passed.push(`Les ${risky.length} fonctions qui tirent un jeton portent extensions dans leur search_path`);
+
+
 for (const p of passed) console.log('ok -', p);
 console.log(`\n${passed.length} verifications reussies`);
 await db.close();
