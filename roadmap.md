@@ -20,3 +20,8 @@
 - [x] Corriger le compteur national, le hero et le lien réservé aux visiteurs
 - [x] Exclure le membre de la liste Entraide et ajuster distances et capitalisation
 - [x] Adapter les tests et lancer toutes les vérifications demandées
+
+## Régression du voile du hero
+
+- [x] Rétablir le dégradé, les styles des textes et des boutons, et la mention presse temporaire
+- [x] Vérifier le garde-fou, les types, le build et le contraste à 360 px et 1440 px

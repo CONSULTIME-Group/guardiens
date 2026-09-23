@@ -12,6 +12,8 @@ import { useInternationalSitsCount } from "@/hooks/useInternationalSitsCount";
 import { showInternationalSection } from "@/components/landing/internationalPlacement";
 import { usePublicStats } from "@/hooks/usePublicStats";
 import LiveListingsStrip from "@/components/landing/LiveListingsStrip";
+import { PRESS_ARTICLE_URL, PRESS_HIGHLIGHT_UNTIL } from "@/components/shared/PressQuote";
+import { LE_PROGRES_LOGO } from "@/assets/pressLogos";
 
 import { UsagesSection } from "@/components/landing/UsagesSection";
 import { ServiceAfterServiceSection } from "@/components/landing/ServiceAfterServiceSection";
@@ -121,6 +123,7 @@ const Landing = () => {
   const kpiAnimaux = FOUNDER_BASE_ANIMAUX + (publicStats?.animaux_accompagnes ?? 0);
   const kpiInscrits = publicStats?.total_inscrits ?? 0;
   const kpiMissions = publicStats?.missions_entraide ?? 0;
+  const isPressHighlighted = new Date() < PRESS_HIGHLIGHT_UNTIL;
 
 
  /* ── Idle preload of the France illustration (low priority, post-LCP) ── */
@@ -201,7 +204,7 @@ const Landing = () => {
         </picture>
         {/* Voile renforcé sous la colonne (520 px) et qui s'efface vers le
             sujet de la photo : contraste AA sur tous les textes du hero. */}
-        <div className="absolute inset-0 bg-hero-overlay" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/75 via-45% to-black/25" />
 
         <div className="relative z-10 lp-wide pb-8 pt-20 md:py-24">
           {/* Colonne resserrée à 520 px : la maison et le paysage restent
@@ -209,29 +212,29 @@ const Landing = () => {
           <div className="max-w-[520px]">
 
             {/* Une seule star typographique : l'accroche, seule en Playfair. */}
-            <h1 className="font-heading text-[32px] sm:text-4xl md:text-5xl lg:text-6xl font-bold text-primary-foreground leading-[1.1] mb-2 md:mb-[18px] text-balance">
+            <h1 className="font-heading text-[clamp(26px,8.4vw,38px)] sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-2 md:mb-[18px] text-balance">
               {t("landing.hero.title_main")}
             </h1>
 
             {/* La ligne qui porte l'ouverture : ce qu'on trouve sans l'avoir
                 cherché. Playfair italique, taille intermédiaire entre le
                 titre et le paragraphe. */}
-            <p className="font-heading italic text-lg md:text-2xl text-primary-foreground/95 leading-snug mb-2 md:mb-[18px] animate-hero-fade-up animation-delay-400">
+            <p className="font-heading italic text-lg md:text-2xl text-white/95 leading-snug mb-2 md:mb-[18px] animate-hero-fade-up animation-delay-400">
               {t("landing.hero.motto")}
             </p>
 
-            <p className="font-body text-sm md:text-base text-primary-foreground/85 leading-relaxed mb-3 md:mb-5 animate-hero-fade-up animation-delay-700">
+            <p className="font-body text-sm md:text-base text-white/80 leading-relaxed mb-3 md:mb-5 animate-hero-fade-up animation-delay-700">
               {t("landing.hero.lede")}
             </p>
 
             <div className="flex flex-wrap items-center gap-2 animate-hero-fade-up animation-delay-900">
               <Button
-                size="lg"
                 onClick={() => {
                   void trackEvent("cta_proprio_clicked", { metadata: { location: "hero" } });
                   navigate(isMember ? "/sits/create" : `/inscription?redirect=${encodeURIComponent("/sits/create")}`);
                 }}
-                className="min-h-12 px-7 text-sm sm:text-base"
+                style={{ boxShadow: "0 6px 14px rgba(44,109,80,.24)" }}
+                className="font-body text-base font-semibold tracking-wide rounded-full px-8 sm:px-12 py-4 bg-primary text-primary-foreground hover:brightness-95 hover:scale-[1.03] transition-all duration-200 ring-2 ring-primary-foreground/10"
               >
                 {t("landing.hero.cta_owner")}
               </Button>
@@ -241,12 +244,40 @@ const Landing = () => {
                   void trackEvent("cta_aid_clicked", { metadata: { location: "hero" } });
                   navigate(isMember ? "/petites-missions/creer" : `/inscription?redirect=${encodeURIComponent("/petites-missions/creer")}`);
                 }}
-                className="border-primary-foreground/60 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
+                className="font-body text-sm font-medium tracking-wide rounded-full px-7 py-3 bg-transparent text-white border border-white/60 hover:bg-white/10 hover:text-white transition-all duration-200"
               >
                 {t("landing.hero.cta_sitter")}
               </Button>
             </div>
             <HomeProximitySearch onLocated={setHomeOrigin} />
+            {isPressHighlighted && (
+              <a
+                href={PRESS_ARTICLE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="relative mt-[14px] inline-flex min-h-[44px] items-center gap-2.5 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40 animate-hero-fade-up animation-delay-1100"
+              >
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -inset-x-3 -inset-y-0.5 rounded-full bg-black/40 blur-md"
+                />
+                <span className="relative font-body text-[11px] uppercase tracking-[0.16em] text-white">
+                  Vu dans
+                </span>
+                <img
+                  src={LE_PROGRES_LOGO}
+                  alt="Le Progrès"
+                  width={300}
+                  height={40}
+                  className="relative h-5 w-auto object-contain"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <span className="relative font-body text-xs text-white">
+                  6 septembre 2026
+                </span>
+              </a>
+            )}
             {!isAuthenticated && <Link to="/inscription?role=sitter" className="mt-2 inline-block text-xs text-primary-foreground/90 underline underline-offset-4">Vous voulez garder ? Créez votre profil.</Link>}
           </div>
         </div>
