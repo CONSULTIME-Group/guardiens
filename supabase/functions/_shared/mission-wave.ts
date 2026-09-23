@@ -8,6 +8,8 @@
 
 export const WAVE_SIZE = 10;
 export const WAVE_INTERVAL_HOURS = 48;
+/** Au plus trois vagues par besoin, soit trente personnes prévenues. */
+export const WAVE_MAX_COUNT = 3;
 /** En deçà de ce rayon, personne de disponible signifie vraiment personne. */
 export const WAVE_MIN_RADIUS_KM = 30;
 
@@ -60,6 +62,7 @@ export interface WaveMissionState {
 export function shouldSendNextWave(m: WaveMissionState, now: Date): boolean {
   if (m.status !== "open") return false;
   if (m.response_count > 0) return false;
+  if ((m.wave_count ?? 0) >= WAVE_MAX_COUNT) return false;
   if (!m.last_wave_at) return true;
   const elapsed = now.getTime() - new Date(m.last_wave_at).getTime();
   return elapsed >= WAVE_INTERVAL_HOURS * 3600 * 1000;
@@ -81,7 +84,7 @@ export function waveHeadline(
 
 /** Message au demandeur quand une nouvelle vague part. */
 export const WAVE_RELAUNCH_MESSAGE =
-  "Personne n'a encore pu, on prévient dix autres personnes du coin.";
+  "On prévient dix autres personnes du coin.";
 
 /**
  * Message au demandeur quand il n'y a vraiment personne de disponible autour
@@ -89,7 +92,7 @@ export const WAVE_RELAUNCH_MESSAGE =
  * on ne promet rien, on laisse la porte ouverte.
  */
 export const WAVE_EMPTY_MESSAGE =
-  "Pour le moment, personne n'est disponible autour de vous. C'est la vérité du jour, pas celle de demain : votre besoin reste visible, et je préviens dès qu'une personne du coin se rend disponible.";
+  "Votre besoin est visible sur la page Entraide. Dès qu'une personne disponible rejoint votre secteur, elle le découvre et peut vous répondre.";
 
 /** Date lisible, en français, pour l'annonce. */
 export function frenchDateLabel(iso: string | null | undefined): string | null {

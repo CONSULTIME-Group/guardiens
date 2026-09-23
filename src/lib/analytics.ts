@@ -221,6 +221,7 @@ export type EventType =
   | "mission_composer_abandoned"                // Unmount avec step >= 1 sans submit (last_step, has_title)
   | "mission_composer_published_unchanged_template" // Publie une mission mot pour mot depuis un modèle (template_id)
   | "mission_to_sit_redirect"                     // Mission ressemblant à une garde redirigée vers le formulaire d'annonce
+  | "mission_multi_day_sit_redirect"              // Garde de plusieurs jours orientée vers le canal des annonces de garde
   // Composeur de projet participatif (/projets/publier) ----------------------
   | "projet_composer_opened"                    // Ouverture du formulaire de projet
   | "projet_composer_step1_completed"           // Passage étape 1 vers étape 2

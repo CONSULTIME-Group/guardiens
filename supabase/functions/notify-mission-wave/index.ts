@@ -24,6 +24,7 @@ import { startCronRun, logCronRejection } from "../_shared/cron-run-log.ts";
 import { authorizeWaveCaller } from "../_shared/wave-caller.ts";
 import {
   WAVE_SIZE,
+  WAVE_MAX_COUNT,
   WAVE_INTERVAL_HOURS,
   shouldSendNextWave,
   waveHeadline,
@@ -79,6 +80,12 @@ async function runWave(supabase: any, missionId: string): Promise<{ sent: number
     .maybeSingle();
 
   if (!mission || mission.status !== "open") return { sent: 0, wave: 0, empty: false };
+
+  // Plafond de diffusion : au plus trois vagues, soit trente personnes.
+  // Au-delà, le besoin reste visible sur la page Entraide.
+  if (Number(mission.wave_count ?? 0) >= WAVE_MAX_COUNT) {
+    return { sent: 0, wave: Number(mission.wave_count ?? 0), empty: false };
+  }
 
   const { data: owner } = await supabase
     .from("profiles")

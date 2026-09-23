@@ -31,6 +31,14 @@ import {
   hasMoneyMention,
   writeSitPrefill,
 } from "@/lib/missionContentGuards";
+import {
+  looksLikeMultiDaySit,
+  SIT_REDIRECT_TITLE,
+  SIT_REDIRECT_TEXT,
+  SIT_REDIRECT_PRIMARY,
+  SIT_REDIRECT_SECONDARY,
+} from "@/lib/missionSitRedirect";
+import { waveAudienceMessage } from "@/lib/missionAudienceMessage";
 import { AlertCircle, ChevronLeft, CalendarIcon } from "lucide-react";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { stripEmojis } from "@/lib/stripEmojis";
@@ -301,6 +309,12 @@ const CreateSmallMission = () => {
    * signalée à la modération. Jamais bloquant.
    */
   const sitLike = useMemo(() => sitLikeSignals(title, description), [title, description]);
+  /** Garde de plusieurs jours : invitation vers le canal dédié, jamais bloquante. */
+  const multiDaySit = useMemo(
+    () => missionType === "besoin" && looksLikeMultiDaySit(title, description, dateNeeded, endDate),
+    [missionType, title, description, dateNeeded, endDate],
+  );
+  const [sitRedirectDismissed, setSitRedirectDismissed] = useState(false);
   const rehoming = useMemo(() => rehomingSignals(title, description), [title, description]);
   const moneyWording = useMemo(
     () => moneyWordingSignals(title, description),
@@ -328,17 +342,12 @@ const CreateSmallMission = () => {
       try {
         const coords = await geocodeCity(city.trim());
         if (cancelled || !coords) return;
-        // Modèle A : les vagues (mission_wave_audience) retiennent les personnes
-        // disponibles les plus proches, par proximité seule. On passe donc
-        // p_category à null pour neutraliser le filtre de compétence du compteur
-        // et rester aligné sur le moteur, sans le modifier.
-        const { data } = await supabase.rpc("count_mission_notification_audience" as any, {
+        // Même fonction et même rayon que la vague : mission_wave_audience
+        // côté moteur, mission_wave_audience_preview côté formulaire, filtres
+        // identiques (available_for_help, compte actif, opt-in, rayon déclaré).
+        const { data } = await supabase.rpc("mission_wave_audience_preview" as any, {
           p_lat: coords.lat,
           p_lng: coords.lng,
-          // p_radius_km est conservé pour la signature mais ignoré en base :
-          // le rayon retenu est celui déclaré par chaque membre.
-          p_radius_km: 30,
-          p_category: null,
         });
         if (!cancelled) setAudienceCount(typeof data === "number" ? data : null);
       } catch {
@@ -691,6 +700,41 @@ const CreateSmallMission = () => {
               <>
                 <h2 className="font-heading font-semibold text-lg">Où et quand ?</h2>
 
+                {/* Garde de plusieurs jours : le canal dédié est plus efficace. */}
+                {multiDaySit && !sitRedirectDismissed && (
+                  <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-2" role="note">
+                    <p className="text-sm font-semibold text-foreground">{SIT_REDIRECT_TITLE}</p>
+                    <p className="text-xs text-muted-foreground">{SIT_REDIRECT_TEXT}</p>
+                    <div className="flex flex-wrap items-center gap-3">
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => {
+                          writeSitPrefill({ title, description });
+                          try { void trackEvent("mission_multi_day_sit_redirect", { metadata: { city: city.trim() } }); } catch {}
+                          navigate(
+                            `/sits/create?${new URLSearchParams({
+                              ...(city.trim() ? { city: city.trim() } : {}),
+                              ...(dateNeeded ? { start: dateNeeded } : {}),
+                              ...(endDate ? { end: endDate } : {}),
+                            }).toString()}`,
+                          );
+                        }}
+                      >
+                        {SIT_REDIRECT_PRIMARY}
+                      </Button>
+                      <button
+                        type="button"
+                        className="text-xs text-muted-foreground underline"
+                        onClick={() => setSitRedirectDismissed(true)}
+                      >
+                        {SIT_REDIRECT_SECONDARY}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+
                 {/* Photo, ou photo de profil sur une offre */}
                 <div id="mission-field-photo" className="space-y-2">
                   <Label className="text-sm font-medium">
@@ -903,13 +947,7 @@ const CreateSmallMission = () => {
             {step === 3 && audienceCount !== null && (
               <div className="text-center space-y-1">
                 <p className="text-xs text-muted-foreground">
-                  {audienceCount === 0
-                    ? "Votre besoin reste visible sur la page Entraide, et les personnes qui rejoignent votre secteur le découvriront."
-                    : audienceCount === 1
-                      ? "La personne disponible la plus proche de chez vous sera prévenue."
-                      : audienceCount <= 10
-                        ? `Les ${audienceCount} personnes disponibles les plus proches seront prévenues.`
-                        : "Les 10 personnes disponibles les plus proches seront prévenues tout de suite, puis 10 autres 48 h plus tard si besoin."}
+                  {waveAudienceMessage(audienceCount)}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   Ce sont les personnes disponibles les plus proches du lieu indiqué.

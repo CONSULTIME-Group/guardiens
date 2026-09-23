@@ -119,6 +119,9 @@ Deno.serve(async (req) => {
         .select('id, slug, title, description, mission_type, city, category, date_needed, latitude, longitude, postal_code, user_id, status, created_at, photos')
         .gte('created_at', since)
         .eq('status', 'open')
+        // Diffusion unique : les besoins partent par vagues de dix personnes,
+        // ce digest porte les offres de coup de main.
+        .eq('mission_type', 'offre')
         // Diffusion différée : le premier projet d'un porteur attend son
         // échéance avant d'être annoncé aux membres. Il reste visible sur le site.
         .or(`notify_after.is.null,notify_after.lte.${new Date().toISOString()}`),
