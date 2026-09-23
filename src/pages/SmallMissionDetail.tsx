@@ -1220,7 +1220,7 @@ const SmallMissionDetail = () => {
               </h1>
               {isMissionSitMode(mission.sit_mode) && (
                 <p className="mb-3 inline-flex items-center rounded-full border border-border bg-muted/40 px-3 py-1 text-xs sm:text-sm text-foreground">
-                  {sitModeLine(mission.sit_mode, authorFirstName)}
+                  {sitModeLine(mission.sit_mode, author?.first_name)}
                 </p>
               )}
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs sm:text-sm text-muted-foreground">
