@@ -64,5 +64,10 @@ AS $function$
     and coalesce(ep.new_mission_digest, true) = true
     and coalesce(ep.product_emails, true) = true
     and se.email is null
+    and not exists (
+      select 1 from public.blocked_users b
+      where (b.blocker_id = p.id and b.blocked_id = auth.uid())
+         or (b.blocker_id = auth.uid() and b.blocked_id = p.id)
+    )
     and d.dist <= public.mutual_aid_radius_km(p.id);
 $function$;
