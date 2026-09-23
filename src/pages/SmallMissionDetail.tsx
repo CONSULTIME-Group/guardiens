@@ -52,6 +52,8 @@ import { haversineDistance } from "@/utils/geo";
 
 import IdentityRecommendedHint from "@/components/missions/IdentityRecommendedHint";
 import { avatarImageUrl } from "@/lib/storageImage";
+import { MAX_MISSION_MESSAGE_LEN, MIN_MISSION_MESSAGE_LEN, respondToMission } from "@/lib/missionRespond";
+
 
 /** Rayon max (km) pour considérer une mission « près de chez vous ». */
 const NEAR_RADIUS_KM = 100;
@@ -385,97 +387,86 @@ const SmallMissionDetail = () => {
     return () => { supabase.removeChannel(channel); };
   }, [missionUuid, load]);
 
-  const MIN_MESSAGE_LEN = 10;
-  const MAX_MESSAGE_LEN = 500;
+  const MIN_MESSAGE_LEN = MIN_MISSION_MESSAGE_LEN;
+  const MAX_MESSAGE_LEN = MAX_MISSION_MESSAGE_LEN;
 
   const handleRespond = async (overrideMessage?: string) => {
     if (!user || !id || submitting) return;
-    const msg = (overrideMessage ?? "").trim();
-    if (!msg) {
-      toast({ variant: "destructive", title: "Message vide", description: "Écrivez un mot avant d'envoyer votre réponse." });
-      return;
-    }
-    if (msg.length < MIN_MESSAGE_LEN) {
-      toast({ variant: "destructive", title: "Message trop court", description: `Ajoutez au moins ${MIN_MESSAGE_LEN} caractères pour que l'auteur comprenne votre proposition.` });
-      return;
-    }
     setSubmitting(true);
     try {
-      // Pre-check: re-read mission status to avoid responding to a closed mission
-      const { data: fresh } = await supabase
-        .from("small_missions")
-        .select("status, user_id, title")
-        .eq("id", mission.id)
-        .single();
-      if (!fresh) throw new Error("Mission introuvable.");
-      if (fresh.status !== "open") {
-        toast({ variant: "destructive", title: "Mission clôturée", description: "Cette mission n'accepte plus de réponses." });
-        return;
-      }
-      if (fresh.user_id === user.id) {
-        toast({ variant: "destructive", title: "Action impossible", description: "Vous ne pouvez pas répondre à votre propre annonce." });
-        return;
-      }
-
-      const { data: inserted, error } = await supabase
-        .from("small_mission_responses")
-        .insert({ mission_id: missionUuid!, responder_id: user.id, message: msg })
-        .select("*")
-        .single();
-
-      if (error) {
-        // Erreurs métier serveur (triggers) : on traduit en UX douce
-        const hint = (error as any)?.hint || "";
-        const msg = String(error.message || "");
-        if (error.code === "23505") {
+      const outcome = await respondToMission({
+        missionId: missionUuid!,
+        userId: user.id,
+        message: overrideMessage ?? "",
+      });
+      switch (outcome.kind) {
+        case "empty":
+          toast({ variant: "destructive", title: "Message vide", description: "Écrivez un mot avant d'envoyer votre réponse." });
+          return;
+        case "too_short":
+          toast({ variant: "destructive", title: "Message trop court", description: `Ajoutez au moins ${outcome.min} caractères pour que l'auteur comprenne votre proposition.` });
+          return;
+        case "missing":
+          throw new Error("Mission introuvable.");
+        case "closed":
+          toast({ variant: "destructive", title: "Mission clôturée", description: "Cette mission n'accepte plus de réponses." });
+          return;
+        case "own_mission":
+          toast({ variant: "destructive", title: "Action impossible", description: "Vous ne pouvez pas répondre à votre propre annonce." });
+          return;
+        case "duplicate":
           toast({ variant: "destructive", title: "Déjà envoyé", description: "Vous avez déjà proposé votre aide pour cette mission." });
           setHasResponded(true);
-        } else if (hint === "account_not_active" || msg.includes("account_not_active")) {
+          return;
+        case "account_not_active":
           toast({ variant: "destructive", title: "Compte non actif", description: "Contactez le support pour rétablir l'accès à l'entraide." });
-        } else if (hint === "mission_response_cap_reached" || msg.includes("mission_response_cap_reached")) {
+          return;
+        case "cap_reached":
           toast({
             variant: "destructive",
             title: "Mission temporairement fermée",
             description: "5 personnes ont déjà proposé leur aide. Une place se libérera si l'auteur en décline une.",
           });
-        } else {
-          throw error;
-        }
-      } else {
-        // Optimistic UI : afficher la nouvelle réponse tout de suite en tête de liste
-        if (inserted) {
-          // Hydratation RLS-safe du responder pour la ligne insérée.
-          const { data: meProf } = await supabase
-            .from("public_profiles")
-            .select("id, first_name, avatar_url")
-            .eq("id", user.id)
-            .maybeSingle();
-          const insertedRow: any = {
-            ...(inserted as any),
-            responder: meProf ? { first_name: (meProf as any).first_name, avatar_url: (meProf as any).avatar_url } : null,
-          };
-          setResponses((prev) => {
-            if (prev.some((r) => r.id === insertedRow.id)) return prev;
-            return [insertedRow, ...prev];
-          });
-        }
-        setHasResponded(true);
-        const originFeed = readMissionSource(missionUuid!);
-        void trackEvent("mission_response_source", {
-          metadata: {
-            mission_id: missionUuid,
-            source: originFeed.source,
-            utm_campaign: originFeed.utm_campaign,
-            path: "composer",
-          },
-        });
-        toast({ title: "Réponse envoyée !", description: "La personne qui demande va être prévenue." });
-
-        // Note : le fan-out (notif in-app + email) est déclenché côté serveur
-        // par le trigger `notify_new_mission_response` sur l'insertion de la
-        // réponse. On ne dépend plus du client pour ce chemin critique.
+          return;
+        case "failed":
+          throw new Error(outcome.message);
+        default:
+          break;
       }
 
+      // Optimistic UI : afficher la nouvelle réponse tout de suite en tête de liste
+      const inserted = outcome.inserted;
+      if (inserted) {
+        // Hydratation RLS-safe du responder pour la ligne insérée.
+        const { data: meProf } = await supabase
+          .from("public_profiles")
+          .select("id, first_name, avatar_url")
+          .eq("id", user.id)
+          .maybeSingle();
+        const insertedRow: any = {
+          ...(inserted as any),
+          responder: meProf ? { first_name: (meProf as any).first_name, avatar_url: (meProf as any).avatar_url } : null,
+        };
+        setResponses((prev) => {
+          if (prev.some((r) => r.id === insertedRow.id)) return prev;
+          return [insertedRow, ...prev];
+        });
+      }
+      setHasResponded(true);
+      const originFeed = readMissionSource(missionUuid!);
+      void trackEvent("mission_response_source", {
+        metadata: {
+          mission_id: missionUuid,
+          source: originFeed.source,
+          utm_campaign: originFeed.utm_campaign,
+          path: "composer",
+        },
+      });
+      toast({ title: "Réponse envoyée !", description: "La personne qui demande va être prévenue." });
+
+      // Note : le fan-out (notif in-app + email) est déclenché côté serveur
+      // par le trigger `notify_new_mission_response` sur l'insertion de la
+      // réponse. On ne dépend plus du client pour ce chemin critique.
     } catch (err: any) {
       logger.error("[handleRespond]", { err: String(err) });
       toast({ variant: "destructive", title: "Erreur", description: err?.message || "Impossible d'envoyer votre réponse." });
@@ -483,6 +474,7 @@ const SmallMissionDetail = () => {
       setSubmitting(false);
     }
   };
+
 
   const handleAcceptResponse = async (responseId: string, mode: "keep" | "decline_others" = "decline_others") => {
     if (processingResponseId) return;

@@ -56,11 +56,13 @@ const BADGE_META: Record<string, MissionBadgeMeta> = {
   },
 };
 
-interface Row {
+export interface MissionBadgeRow {
   badge_key: string;
   earned_count: number;
   last_earned_at: string;
 }
+
+type Row = MissionBadgeRow;
 
 interface Props {
   profileId: string;
@@ -70,9 +72,12 @@ interface Props {
   variant?: "default" | "compact";
   /** Affiche le mois de dernière obtention sous chaque pilule (opt-in). */
   showObtainedMonth?: boolean;
+  /** Écussons déjà chargés par la page appelante : aucune requête n'est émise. */
+  rows?: MissionBadgeRow[];
 }
 
-const MissionBadgesReceived = ({ profileId, ownerNote, className = "", variant = "default", showObtainedMonth = false }: Props) => {
+const MissionBadgesReceived = ({ profileId, ownerNote, className = "", variant = "default", showObtainedMonth = false, rows }: Props) => {
+  const provided = rows !== undefined;
 
   const { data, isLoading } = useQuery({
     queryKey: ["profile_mission_badges", profileId],
@@ -84,14 +89,15 @@ const MissionBadgesReceived = ({ profileId, ownerNote, className = "", variant =
       if (error) throw error;
       return (data as unknown as Row[]) ?? [];
     },
-    enabled: !!profileId,
+    enabled: !!profileId && !provided,
     staleTime: 60_000,
   });
 
   const badges = useMemo(
-    () => (data ?? []).filter((r) => BADGE_META[r.badge_key]),
-    [data]
+    () => ((provided ? rows : data) ?? []).filter((r) => BADGE_META[r.badge_key]),
+    [data, provided, rows]
   );
+
 
   useEffect(() => {
     if (variant === "default" && badges.length > 0) {
@@ -102,7 +108,7 @@ const MissionBadgesReceived = ({ profileId, ownerNote, className = "", variant =
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [badges.length, profileId, variant]);
 
-  if (isLoading || badges.length === 0) return null;
+  if ((isLoading && !provided) || badges.length === 0) return null;
 
   if (variant === "compact") {
     const total = badges.reduce((n, b) => n + (b.earned_count ?? 0), 0);

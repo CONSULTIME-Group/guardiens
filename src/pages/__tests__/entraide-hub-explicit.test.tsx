@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { EntraideFaq, EntraideHubIntro, filterPublicHelpers } from "../EntraideHub";
+import { EntraideFaq, EntraideHubIntro } from "../EntraideHub";
 
 vi.mock("@/components/missions/ExchangeHowItWorks", () => ({
   default: () => <section aria-label="Comment ça marche">Comment ça marche</section>,
@@ -42,26 +42,14 @@ describe("EntraideHub, contenu explicite", () => {
     expect(screen.queryByRole("region", { name: "Comment ça marche" })).not.toBeInTheDocument();
   });
 
-  it("recherche instantanément dans le prénom, la ville et le coup de main", () => {
-    const helpers = [
-      { id: "1", first_name: "Camille", avatar_url: null, city: "Lyon", latitude_approx: null, longitude_approx: null, helps_with: "Arroser les plantes" },
-      { id: "2", first_name: "Alex", avatar_url: null, city: "Annecy", latitude_approx: null, longitude_approx: null, helps_with: "Monter un meuble" },
-      { id: "3", first_name: "Nadia", avatar_url: null, city: "Rennes", latitude_approx: null, longitude_approx: null, helps_with: null },
-    ];
-    expect(filterPublicHelpers(helpers, "plantes").map((helper) => helper.id)).toEqual(["1"]);
-    expect(filterPublicHelpers(helpers, "annecy").map((helper) => helper.id)).toEqual(["2"]);
-    expect(filterPublicHelpers(helpers, "nadia").map((helper) => helper.id)).toEqual(["3"]);
-    expect(filterPublicHelpers(helpers, "").map((helper) => helper.id)).toEqual(["1", "2", "3"]);
-  });
-
   it("affiche « Disponible pour un coup de main » quand la phrase est absente", async () => {
     const source = await import("@/components/entraide/EntraideCards?raw");
     expect(source.default).toContain('helps_with?.trim() || "Disponible pour un coup de main"');
   });
 
-  it("garde un JSON-LD Person sans coordonnées", async () => {
+  it("publie un JSON-LD limité à la FAQ, sans fiche Person", async () => {
     const source = await import("../EntraideHub?raw");
-    expect(source.default).toContain('"@type": "Person"');
+    expect(source.default).not.toContain('"@type": "Person"');
     expect(source.default).not.toContain('"latitude"');
     expect(source.default).not.toContain('"longitude"');
     expect(source.default).not.toContain('"@type": "Offer"');
