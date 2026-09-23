@@ -33,11 +33,18 @@ import {
 } from "@/lib/missionContentGuards";
 import {
   looksLikeMultiDaySit,
-  SIT_REDIRECT_TITLE,
-  SIT_REDIRECT_TEXT,
-  SIT_REDIRECT_PRIMARY,
-  SIT_REDIRECT_SECONDARY,
 } from "@/lib/missionSitRedirect";
+import {
+  SIT_MODE_QUESTION_TITLE,
+  SIT_MODE_OPTIONS,
+  AT_HELPER_NOTE,
+  SIT_MODE_AT_HOME_TITLE,
+  SIT_MODE_AT_HOME_TEXT,
+  SIT_MODE_PRIMARY,
+  SIT_MODE_SECONDARY,
+  type MissionSitMode,
+  isMissionSitMode,
+} from "@/lib/missionSitMode";
 import { waveAudienceMessage } from "@/lib/missionAudienceMessage";
 import { AlertCircle, ChevronLeft, CalendarIcon } from "lucide-react";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
