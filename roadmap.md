@@ -9,7 +9,7 @@
 - [ ] Refonte `EntraideHub.tsx` : origine profil, en-tête compact, liste par défaut, section 12 personnes, JSON-LD sans Person, meta description
 - [ ] Carte : besoins en `--secondary`, personnes en `--primary`, légende, centrage origine
 - [ ] Adapter `MissionsCityPage.tsx` aux nouvelles props
-- [ ] Tests ciblés E7 + mise à jour `entraide-hub-explicit.test.tsx`
+- [x] Tests ciblés E7 + mise à jour `entraide-hub-explicit.test.tsx`
 - [ ] Vitest complet, tsgo, build, scan des textes
 - [ ] Mesure des requêtes réseau au chargement, membre connecté, avant et après
 - [ ] Rapport final 10 lignes avec hash du commit (aucune publication, aucune migration)
