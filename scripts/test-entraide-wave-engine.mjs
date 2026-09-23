@@ -196,7 +196,7 @@ passed.push('La phrase de profil est plafonnee a 200 caracteres');
 // ---- Lot E5 : diffusion unique, promesse du formulaire, search_path ----
 await db.exec(`
 CREATE SCHEMA IF NOT EXISTS auth;
-CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $$ SELECT NULL::uuid $$;
+CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $$ SELECT '11111111-1111-4111-8111-111111111111'::uuid $$;
 CREATE OR REPLACE FUNCTION public.mission_audience(p_lat double precision,p_lng double precision,p_category text,p_author uuid)
   RETURNS TABLE(helper_id uuid, distance_km numeric) LANGUAGE sql STABLE AS $$
   SELECT id, 1::numeric FROM public.profiles WHERE coalesce(available_for_help,false) AND id IS DISTINCT FROM p_author $$;
