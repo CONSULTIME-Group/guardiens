@@ -7,7 +7,7 @@
 - `LiveListingsStrip` charge uniquement les gardes et complète leurs photos depuis les propriétés et galeries.
 - `public_small_missions` expose les besoins ouverts, leurs photos, leurs dates et leurs coordonnées arrondies.
 - Les données utiles au compteur sont dans `profiles` : rôle, compte actif, disponibilité d'entraide et coordonnées. `count_eligible_sitters` fournit déjà le modèle de calcul géographique, mais aucune fonction publique ne renvoie les deux compteurs H1 ensemble.
-- La base contient actuellement quatre avis publiés et validés avec commentaire, prénom et ville accessibles, ainsi qu'aucune preuve d'entraide publique. Le seuil combiné de trois contenus est donc atteint aujourd'hui grâce aux avis.
+- La base contient actuellement quatre avis publiés et validés avec commentaire, dont deux relient les comptes fondateurs administrateurs, ainsi qu'aucune preuve d'entraide publique. La fonction publique exclura tout contenu impliquant un administrateur. Les deux avis éligibles actuels permettent le seuil validé de deux contenus.
 - Le formulaire de besoin ne lit actuellement aucun paramètre de titre. Le préremplissage H1 sera une exception explicite et limitée aux six exemples demandés.
 - Le menu public ne porte aucune entrée professionnelle. L'entrée demandée se trouve dans `src/lib/userMenuModel.ts`, clé `pro`.
 
@@ -26,11 +26,10 @@
 11. Qu'est-ce que Guardiens ?
 12. Notre histoire, inchangée
 13. Ils l'ont vécu
-14. Comparatif existant
-15. FAQ existante
-16. CTA final à deux portes
-
-Le bloc international quitte la home afin de respecter cette structure. Son composant, ses données et son fonctionnement partagé restent intacts. La FAQ internationale conserve sa règle actuelle.
+14. Bloc international existant, inchangé
+15. Comparatif existant
+16. FAQ existante
+17. CTA final à deux portes
 
 ## 1. Hero orienté publication
 
@@ -119,10 +118,12 @@ La fonction renvoie exactement une ligne et deux entiers. Elle conserve le vivie
 
 ## 5. Demander un coup de main, en un clic
 
-- Afficher les six exemples fournis comme liens vers `/petites-missions/creer?titre=...`.
+- Afficher les six exemples fournis comme liens directs vers `/petites-missions/creer?titre=...` pour un membre connecté.
+- Pour un visiteur, utiliser `/inscription?redirect=` avec l'URL encodée `/petites-missions/creer?titre=...`, afin de revenir au formulaire après inscription.
 - Suivre chaque clic avec le texte choisi et sa position.
 - Dans `CreateSmallMission`, lire une seule fois `titre`, passer la valeur par `sanitizeUserTitle`, respecter la longueur maximale et initialiser uniquement le titre.
 - L'utilisateur garde la main sur la modification et la publication. Aucun autre paramètre ni aucune contrepartie ne se remplit.
+- Vérifier que `sanitizeRedirect` conserve la query string interne et ajouter un test de régression.
 
 ## 6. Comment ça marche
 
@@ -147,7 +148,7 @@ Reformulations proposées :
 
 - `landing.usages.sitter.text` : « Vivez dans des maisons, prenez soin des animaux et découvrez chaque lieu de l'intérieur. Une garde, c'est aussi un voyage. »
 - `landing.usages.mutual.text` : « Arroser un potager, monter une étagère, partager une compétence, rendre visite à une personne isolée : les coups de main créent des échanges entre gens du coin toute l'année. »
-- `landing.what_is.body_3` : « À côté des gardes, les membres se rendent des coups de main : arrosage, courses, compagnie, un meuble à déplacer, un colis à réceptionner. Pour l'un, c'est un vrai besoin. Pour l'autre, cela représente parfois une heure et un bon moment. L'échange se décide entre vous. »
+- `landing.what_is.body_3` : « À côté des gardes, les membres se rendent des coups de main : arrosage, courses, compagnie, un meuble à déplacer, un colis à réceptionner. Pour l'un, c'est un vrai besoin. Pour l'autre, c'est une heure et un bon moment. L'échange se décide entre vous. »
 - `landing.what_is.body_4` : « La mise en relation s'appuie sur un score d'affinité calculé sur plusieurs critères pondérés, propres à chaque couple, où le mode de vie compte autant que la distance. Les membres documentent leur profil, font vérifier leur identité et publient des avis croisés après leurs expériences. Un statut de gardien d'urgence répond aux imprévus. »
 - Les paragraphes 1, 2, 5, 6 et 7 restent identiques, leur formulation est affirmative.
 
@@ -155,17 +156,20 @@ Reformulations proposées :
 
 ## 10. Ils l'ont vécu
 
-- Remplacer les témoignages statiques par une section alimentée par `reviews` et `public_entraide_proofs`.
-- Pour les avis, sélectionner uniquement `published = true`, `moderation_status = valide`, avec commentaire et sans masquage de modération, puis hydrater prénom et ville depuis `public_profiles`.
-- Pour les preuves, conserver prénom, ville, mot public et date fournis par la vue.
+- Remplacer les témoignages statiques par une section alimentée uniquement par `public.home_social_proof()` via `src/lib/homeSocialProof.ts`.
+- Ajouter à la migration 0019 une fonction `STABLE SECURITY DEFINER`, avec `search_path = public`, exécutable par `anon`, `authenticated` et `service_role`.
+- La fonction fusionne les avis publiés, validés et commentés avec les preuves d'entraide publiques, puis exclut tout contenu dont l'auteur ou le destinataire possède le rôle `admin` dans `user_roles`.
+- La sortie contient au plus six lignes et exactement cinq informations publiques : type, prénom, ville, texte et date. Aucun identifiant ni aucune coordonnée ne sort de la fonction.
 - Fusionner et trier par date récente. Afficher prénom, ville et date sur chaque contenu.
-- Masquer toute la section pendant le chargement, en cas d'échec, et lorsque le total éligible est inférieur à trois.
+- Masquer toute la section pendant le chargement, en cas d'échec, et lorsque le total éligible est inférieur à deux.
+- Tester explicitement l'exclusion d'un avis impliquant un administrateur et le seuil d'affichage à deux contenus.
 - Supprimer `src/data/homeTestimonials.ts`, `TestimonialsSection`, `RealMembersStrip` s'ils deviennent sans appelant, les clés `landing.testimonials.items.*` et la phrase de source statique.
 
 ## 11. Fin de page et navigation
 
 - Conserver Notre histoire, le comparatif et la FAQ.
-- Mettre à jour `LandingTocBar` vers : En ce moment, Un service après l'autre, Comment ça marche, Confiance, Autour de vous, Notre histoire, Ils l'ont vécu et FAQ.
+- Conserver le bloc international inchangé, immédiatement après « Ils l'ont vécu » et avant le comparatif.
+- Limiter `LandingTocBar` à six entrées : En ce moment, Un service après l'autre, Comment ça marche, Confiance, Autour de vous et FAQ.
 - Adapter le CTA final aux deux portes demandées et remplacer son lede par le texte exact fourni.
 - Retirer uniquement l'entrée `pro` de `buildUserMenuEntries`. Le profil gardien et `pro_status` restent intacts.
 
@@ -198,12 +202,14 @@ Reformulations proposées :
 - `src/components/landing/LivedItSection.tsx`
 - `src/lib/homeListings.ts`
 - `src/lib/homeSocialProof.ts`
-- `drizzle/migrations/0019_home_proximity_counts.sql`, créé et appliqué par l'outil de migration après validation complète
+- `drizzle/migrations/0019_home_counts_and_social_proof.sql`, créé et appliqué par l'outil de migration après validation complète
 - `src/__tests__/landing-h1-structure.test.tsx`
 - `src/__tests__/landing-h1-proximity.test.tsx`
 - `src/__tests__/landing-h1-social-proof.test.tsx`
 - `src/__tests__/landing-h1-prefill.test.tsx`
+- `src/lib/__tests__/safeRedirect.test.ts`
 - `scripts/test-home-proximity-counts.mjs`
+- `scripts/test-home-social-proof.mjs`
 
 ### Supprimés si aucun appelant ne subsiste
 
@@ -216,10 +222,10 @@ Reformulations proposées :
 
 1. Mesurer la référence LCP avant modification avec cinq chargements à froid, cache désactivé, en 360 px et 1440 px. Relever médiane, minimum, maximum, élément LCP et erreurs réseau.
 2. Implémenter le front et les tests ciblés. Vérifier visuellement le hero à 360 px et 1440 px, son absence de débordement et la visibilité du H1, de l'action principale et du champ ville sans défilement.
-3. Vérifier l'ordre des sections, les deux catégories d'annonces, le tri de proximité, les six préremplissages, le seuil combiné de trois contenus et la disparition des témoignages statiques.
+3. Vérifier l'ordre des sections, le bloc international inchangé à sa nouvelle place, les deux catégories d'annonces, le tri de proximité, les six préremplissages, le retour après inscription, le seuil combiné de deux contenus, l'exclusion des administrateurs et la disparition des témoignages statiques.
 4. Scanner tous les textes H1 pour les constructions négatives, les deux caractères de tiret interdits, les mots proscrits, les accents et le vouvoiement.
 5. Exécuter Vitest complet par tranches si nécessaire, `test:sql`, `tsgo` et le build. Conserver un état compilable avant toute action sur la base.
-6. Une fois tout vert, appliquer la migration 0019. Vérifier la signature, `SECURITY DEFINER`, `search_path`, les droits anon et authenticated, le refus des rôles non autorisés, une seule ligne, exactement deux colonnes entières et la parité des comptes avec des requêtes de contrôle à 30 km.
+6. Une fois tout vert, appliquer la migration 0019. Vérifier les signatures, `SECURITY DEFINER`, `search_path`, les droits anon et authenticated, le refus des rôles non autorisés, une seule ligne et exactement deux colonnes entières pour les compteurs, au plus six lignes et exactement cinq colonnes publiques pour la preuve sociale, la parité des comptes à 30 km et l'exclusion des administrateurs.
 7. Régénérer les types, rejouer les tests et le build, puis mesurer le LCP après modification avec le même protocole. Le champ ville et les sections différées restent hors de l'élément LCP.
 8. Aucun redéploiement de fonction serveur et aucune publication du front. Vous publierez après lecture du rapport final.
 9. Rapport final en douze lignes maximum : fichiers exacts, résumé du diff, tests, contrôles de base, LCP avant et après, hash du commit et portée réelle.

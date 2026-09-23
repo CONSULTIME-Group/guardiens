@@ -178,6 +178,7 @@
     --pine-deep: 153 48% 14%;
     --pine-foreground: 40 33% 97%;
     --pine-soft: 153 32% 72%;
+    --hero-overlay: linear-gradient(90deg, hsl(40 12% 10% / 0.95), hsl(40 12% 10% / 0.76) 45%, hsl(40 12% 10% / 0.25));
     --line-soft: 37 22% 82%;
   }
 

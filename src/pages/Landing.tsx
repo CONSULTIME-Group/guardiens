@@ -1,4 +1,4 @@
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useState } from "react";
 import franceLocalNational from "@/assets/illustrations/france-local-national-462.avif";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -12,12 +12,12 @@ import { useInternationalSitsCount } from "@/hooks/useInternationalSitsCount";
 import { showInternationalSection } from "@/components/landing/internationalPlacement";
 import { usePublicStats } from "@/hooks/usePublicStats";
 import LiveListingsStrip from "@/components/landing/LiveListingsStrip";
-import TestimonialsSection from "@/components/landing/TestimonialsSection";
-import { PRESS_ARTICLE_URL, PRESS_HIGHLIGHT_UNTIL } from "@/components/shared/PressQuote";
-import { LE_PROGRES_LOGO } from "@/assets/pressLogos";
 
 import { UsagesSection } from "@/components/landing/UsagesSection";
-import { PretexteSection } from "@/components/landing/PretexteSection";
+import { ServiceAfterServiceSection } from "@/components/landing/ServiceAfterServiceSection";
+import { QuickHelpSection } from "@/components/landing/QuickHelpSection";
+import { HomeProximitySearch, type HomeOrigin } from "@/components/landing/HomeProximitySearch";
+import { LivedItSection } from "@/components/landing/LivedItSection";
 import { LandingTocBar } from "@/components/landing/LandingTocBar";
 import HomeJsonLd from "@/components/landing/HomeJsonLd";
 import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
@@ -47,6 +47,7 @@ import { staticRoutes, DEFAULT_OG_IMAGE } from "@/data/siteRoutes";
 // Pricing pivot : plus d'Offer JSON-LD tant que PRICING_IS_ACTIVE = false.
 import { RevealSection } from "@/components/ui/RevealSection";
 import { GrainOverlay } from "@/components/ui/GrainOverlay";
+import { Button } from "@/components/ui/button";
 
 
 
@@ -69,15 +70,15 @@ const Landing = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const shellMode = useShellMode();
-  const { user, activeRole } = useAuth();
+  useAuth();
   // Session vérifiée et profil chargé : on ne propose plus de créer un compte
   // à quelqu'un qui en a déjà un, on propose son action principale.
   const isMember = shellMode === "app";
-  const memberIsOwner = (user?.role === "both" ? activeRole : user?.role) === "owner";
   const { data: publicStats } = usePublicStats();
   // Sous le seuil, la vitrine internationale vit dans la FAQ.
   const { count: internationalCount } = useInternationalSitsCount();
   const hasInternationalSection = showInternationalSection(internationalCount);
+  const [homeOrigin, setHomeOrigin] = useState<HomeOrigin | null>(null);
 
   
 
@@ -120,7 +121,6 @@ const Landing = () => {
   const kpiAnimaux = FOUNDER_BASE_ANIMAUX + (publicStats?.animaux_accompagnes ?? 0);
   const kpiInscrits = publicStats?.total_inscrits ?? 0;
   const kpiMissions = publicStats?.missions_entraide ?? 0;
-  const isPressHighlighted = new Date() < PRESS_HIGHLIGHT_UNTIL;
 
 
  /* ── Idle preload of the France illustration (low priority, post-LCP) ── */
@@ -173,9 +173,9 @@ const Landing = () => {
       <PublicHeader authedVariant />
 
       {/* ═══════════════ MAIN LANDMARK (englobe tout le contenu) ═══════════════ */}
-      <main id="main-content">
+      <main id="main-content" className="min-w-0">
       {/* ═══════════════ SECTION 1, HERO (épuré, 3 blocs) ═══════════════ */}
-      <section className="relative w-full min-h-[100svh] flex items-center overflow-hidden">
+      <section className="relative flex min-h-[100svh] w-full items-center overflow-hidden">
         <picture>
           <source
             type="image/avif"
@@ -201,129 +201,53 @@ const Landing = () => {
         </picture>
         {/* Voile renforcé sous la colonne (520 px) et qui s'efface vers le
             sujet de la photo : contraste AA sur tous les textes du hero. */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/75 via-45% to-black/25" />
+        <div className="absolute inset-0 bg-hero-overlay" />
 
-        <div className="relative z-10 lp-wide py-[52px] md:py-24 pb-[calc(9rem+env(safe-area-inset-bottom))] md:pb-24">
+        <div className="relative z-10 lp-wide pb-8 pt-20 md:py-24">
           {/* Colonne resserrée à 520 px : la maison et le paysage restent
               visibles à droite. */}
           <div className="max-w-[520px]">
 
-            <p className="flex items-center gap-2 font-body text-xs text-white/85 tracking-[0.2em] uppercase mb-2 md:mb-[14px]">
-              <span className="inline-block w-5 h-0.5 bg-[#9A6A44] align-middle" aria-hidden="true" />
-              {t("landing.hero.eyebrow")}
-            </p>
-
             {/* Une seule star typographique : l'accroche, seule en Playfair. */}
-            <h1 className="font-heading text-[clamp(26px,8.4vw,38px)] sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-[12px] md:mb-[18px] text-balance">
+            <h1 className="font-heading text-[32px] sm:text-4xl md:text-5xl lg:text-6xl font-bold text-primary-foreground leading-[1.1] mb-2 md:mb-[18px] text-balance">
               {t("landing.hero.title_main")}
             </h1>
 
             {/* La ligne qui porte l'ouverture : ce qu'on trouve sans l'avoir
                 cherché. Playfair italique, taille intermédiaire entre le
                 titre et le paragraphe. */}
-            <p className="font-heading italic text-[clamp(17px,4.8vw,21px)] md:text-2xl text-white/95 leading-snug mb-[12px] md:mb-[18px] animate-hero-fade-up animation-delay-400">
+            <p className="font-heading italic text-lg md:text-2xl text-primary-foreground/95 leading-snug mb-2 md:mb-[18px] animate-hero-fade-up animation-delay-400">
               {t("landing.hero.motto")}
             </p>
 
-            <p className="font-body text-sm md:text-base text-white/80 leading-relaxed mb-[20px] md:mb-[30px] animate-hero-fade-up animation-delay-700">
+            <p className="font-body text-sm md:text-base text-primary-foreground/85 leading-relaxed mb-3 md:mb-5 animate-hero-fade-up animation-delay-700">
               {t("landing.hero.lede")}
             </p>
 
-            <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 sm:gap-3 animate-hero-fade-up animation-delay-900">
-
-              {/* Arbitrage du 16/08/2026 : en session gardien, « Trouver une
-                  garde » est promu en action principale et « Proposer un coup
-                  de main » redescend en secondaire. États visiteur et
-                  propriétaire inchangés, H1 verrouillé sans variante. */}
-              <button
+            <div className="flex flex-wrap items-center gap-2 animate-hero-fade-up animation-delay-900">
+              <Button
+                size="lg"
                 onClick={() => {
-                  const sitterSession = isMember && !memberIsOwner;
-                  trackEvent(sitterSession ? "cta_sitter_clicked" : "cta_proprio_clicked", { metadata: { location: "hero" } });
-                  if (isMember) {
-                    navigate(memberIsOwner ? "/sits/create" : "/search");
-                    return;
-                  }
-                  navigate("/inscription?role=owner");
+                  void trackEvent("cta_proprio_clicked", { metadata: { location: "hero" } });
+                  navigate(isMember ? "/sits/create" : `/inscription?redirect=${encodeURIComponent("/sits/create")}`);
                 }}
-                style={{ boxShadow: "0 6px 14px rgba(44,109,80,.24)" }}
-                className="font-body text-base font-semibold tracking-wide rounded-full px-12 py-4 bg-primary text-primary-foreground hover:brightness-95 hover:scale-[1.03] transition-all duration-200 ring-2 ring-primary-foreground/10"
+                className="min-h-12 px-7 text-sm sm:text-base"
               >
-                {isMember
-                  ? memberIsOwner
-                    ? t("landing.hero.cta_member_owner", "Publier une annonce")
-                    : t("landing.hero.cta_member_search", "Trouver une garde")
-                  : t("landing.hero.cta_owner")}
-              </button>
-              <button
+                {t("landing.hero.cta_owner")}
+              </Button>
+              <Button
+                variant="outline"
                 onClick={() => {
-                  const sitterSession = isMember && !memberIsOwner;
-                  trackEvent(sitterSession ? "cta_aid_clicked" : "cta_sitter_clicked", { metadata: { location: "hero" } });
-                  if (isMember) {
-                    navigate(memberIsOwner ? "/search" : "/petites-missions/creer?type=offre");
-                    return;
-                  }
-                  navigate("/inscription?role=sitter");
+                  void trackEvent("cta_aid_clicked", { metadata: { location: "hero" } });
+                  navigate(isMember ? "/petites-missions/creer" : `/inscription?redirect=${encodeURIComponent("/petites-missions/creer")}`);
                 }}
-                className="font-body text-sm font-medium tracking-wide rounded-full px-7 py-3 bg-transparent text-white border border-white/60 hover:bg-white/10 transition-all duration-200"
+                className="border-primary-foreground/60 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
               >
-                {isMember
-                  ? memberIsOwner
-                    ? t("landing.hero.cta_member_search", "Trouver une garde")
-                    : t("landing.hero.cta_member_sitter", "Proposer un coup de main")
-                  : t("landing.hero.cta_sitter")}
-              </button>
+                {t("landing.hero.cta_sitter")}
+              </Button>
             </div>
-
-            {/* Réassurance en quatre pastilles : contour fin clair, fond
-                légèrement voilé, Outfit 12 px, coins pleinement arrondis.
-                La quatrième porte la promesse des guides de race et de ville. */}
-            <ul className="flex flex-wrap items-center gap-2 mt-[14px] md:mt-[22px] animate-hero-fade-up animation-delay-1000">
-              {(["chip_identity", "chip_reviews", "chip_affinity", "chip_guides"] as const).map((key) => (
-                <li
-                  key={key}
-                  className="inline-flex items-center rounded-full border border-white/55 bg-white/10 px-3 py-1 font-body text-xs text-white/90"
-                >
-                  {t(`landing.hero.${key}`)}
-                </li>
-              ))}
-            </ul>
-
-            {/* Mention presse : ligne discrète posée sur la photo, sans cadre
-                ni fond. Visible uniquement jusqu'à PRESS_HIGHLIGHT_UNTIL,
-                ensuite seule la ligne discrète du pied de page subsiste. */}
-            {isPressHighlighted && (
-              <a
-                href={PRESS_ARTICLE_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                 className="relative mt-[14px] inline-flex min-h-[44px] items-center gap-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40 rounded-sm animate-hero-fade-up animation-delay-1100"
-              >
-                {/* Voile sombre local et flouté (donc sans bord visible) :
-                    la ligne est posée sur une photo dont la zone claire
-                    faisait tomber le contraste de la date à 4,42, sous le
-                    seuil AA de 4,5. Le voile plus le blanc plein le
-                    remontent au dessus du seuil sans cadre ni fond franc. */}
-                <span
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -inset-x-3 -inset-y-0.5 rounded-full bg-black/40 blur-md"
-                />
-                <span className="relative font-body text-[11px] uppercase tracking-[0.16em] text-white">
-                  Vu dans
-                </span>
-                <img
-                  src={LE_PROGRES_LOGO}
-                  alt="Le Progrès"
-                  width={300}
-                  height={40}
-                  className="relative h-5 w-auto object-contain"
-                  loading="lazy"
-                  decoding="async"
-                />
-                <span className="relative font-body text-xs text-white">
-                  6 septembre 2026
-                </span>
-              </a>
-            )}
+            <HomeProximitySearch onLocated={setHomeOrigin} />
+            <Link to="/inscription?role=sitter" className="mt-2 inline-block text-xs text-primary-foreground/90 underline underline-offset-4">Vous voulez garder ? Créez votre profil.</Link>
           </div>
         </div>
       </section>
@@ -379,7 +303,7 @@ const Landing = () => {
 
       {/* ═══════════════ ANNONCES DISPONIBLES (preuve vivante, remontée en
           troisième position le 06/09/2026, agrandie à six annonces) ═══════════════ */}
-      <LiveListingsStrip />
+       <LiveListingsStrip origin={homeOrigin} />
 
       {/* ═══════════════ SOMMAIRE DE PAGE, maillage interne ═══════════════ */}
       <LandingTocBar />
@@ -387,26 +311,29 @@ const Landing = () => {
 
       {/* ═══════════════ LE PRÉTEXTE (bloc sombre signature,
           l'ADN avant les mécaniques) ═══════════════ */}
-      <PretexteSection />
+      <ServiceAfterServiceSection />
+
+      <QuickHelpSection />
+
+      <HowItWorksSection />
 
       {/* ═══════════════ CONFIANCE & PÉRIMÈTRE
           (accueille désormais la démo du score d'affinité) ═══════════════ */}
       <ConfianceSection />
 
-      {/* ═══════════════ COMMENT ÇA MARCHE ═══════════════ */}
-      <HowItWorksSection />
-
-      {/* ═══════════════ NOTRE HISTOIRE ═══════════════ */}
-      <NotreHistoireSection />
-
-      {/* ═══════════════ TÉMOIGNAGES ═══════════════ */}
-      <TestimonialsSection />
-
       {/* ═══════════════ RAPPEL D'ACTION MI-PARCOURS (06/09/2026) ═══════════════ */}
       <MidJourneyCta />
 
+      <Suspense fallback={<div className="border-t border-border bg-muted/20 py-14" aria-hidden="true" />}>
+        <LazyAroundYouSection />
+      </Suspense>
+
       {/* ═══════════════ DÉFINITION ET USAGES, bloc de fond ═══════════════ */}
       <UsagesSection />
+
+      <NotreHistoireSection />
+
+      <LivedItSection />
 
       {/* ═══════════════ SECTION INTERNATIONAL (au-dessus du seuil seulement) ═══════════════ */}
       {hasInternationalSection && (
@@ -424,11 +351,6 @@ const Landing = () => {
       {/* ═══════════════ SECTION 10, CTA FINAL (fusion Fondateur + double CTA) ═══════════════ */}
       <FinalCtaSection />
 
-      {/* ═══════════════ AUTOUR DE VOUS (Entraide, sous la ligne de flottaison,
-          import dynamique après idle, aucun impact LCP) ═══════════════ */}
-      <Suspense fallback={<div className="border-t border-border bg-muted/20 py-14" aria-hidden="true" />}>
-        <LazyAroundYouSection />
-      </Suspense>
       </main>
 
       <PublicFooter />
@@ -443,8 +365,6 @@ const Landing = () => {
         .animation-delay-400 { animation-delay: 0.08s; }
         .animation-delay-700 { animation-delay: 0.18s; }
         .animation-delay-900 { animation-delay: 0.28s; }
-        .animation-delay-1000 { animation-delay: 0.38s; }
-        .animation-delay-1100 { animation-delay: 0.48s; }
         @media (prefers-reduced-motion: reduce) {
           .animate-hero-fade-up { animation: none !important; opacity: 1 !important; transform: none !important; }
         }

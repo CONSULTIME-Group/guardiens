@@ -1,170 +1,38 @@
-import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
-import { trackEvent } from "@/lib/analytics";
 import { RevealSection } from "@/components/ui/RevealSection";
-import { getSeasonalBannerKeys } from "@/lib/seasonalBanner";
-import howtoStep1Avif224 from "@/assets/illustrations/howto-step-1-annonce-224.avif";
-import howtoStep1Avif448 from "@/assets/illustrations/howto-step-1-annonce-448.avif";
-import howtoStep1Webp224 from "@/assets/illustrations/howto-step-1-annonce-224.webp";
 import howtoStep1Webp448 from "@/assets/illustrations/howto-step-1-annonce-448.webp";
-import howtoStep2Avif224 from "@/assets/illustrations/howto-step-2-rencontre-224.avif";
-import howtoStep2Avif448 from "@/assets/illustrations/howto-step-2-rencontre-448.avif";
-import howtoStep2Webp224 from "@/assets/illustrations/howto-step-2-rencontre-224.webp";
 import howtoStep2Webp448 from "@/assets/illustrations/howto-step-2-rencontre-448.webp";
-import howtoStep3Avif224 from "@/assets/illustrations/howto-step-3-depart-224.avif";
-import howtoStep3Avif448 from "@/assets/illustrations/howto-step-3-depart-448.avif";
-import howtoStep3Webp224 from "@/assets/illustrations/howto-step-3-depart-224.webp";
-import howtoStep3Webp448 from "@/assets/illustrations/howto-step-3-depart-448.webp";
 
 export function HowItWorksSection() {
-  const { t } = useTranslation();
-  const navigate = useNavigate();
-  const seasonal = getSeasonalBannerKeys();
+  const columns = [
+    { title: "Garde de maison", image: howtoStep1Webp448, alt: "Maison confiée à un gardien", steps: ["Vous publiez vos dates et vos animaux.", "Des gardiens postulent, vous les rencontrez avant de choisir.", "Vous partez l'esprit léger."] },
+    { title: "Coup de main", image: howtoStep2Webp448, alt: "Deux personnes se rencontrent autour d'un service", steps: ["Vous décrivez votre besoin en une phrase.", "Les dix personnes disponibles les plus proches le reçoivent.", "Quelqu'un vous répond « Je peux », vous vous retrouvez."] },
+  ];
 
   return (
     <section id="comment-ca-marche" className="py-[52px] md:py-20 bg-muted/30 scroll-mt-24">
       <div className="lp-wide">
         <RevealSection>
           <span className="text-xs tracking-widest uppercase text-primary font-body mb-4 block text-center">
-            {t("landing.how.eyebrow")}
+            Deux façons de commencer
           </span>
           <h2 id="how-it-works" className="text-2xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-4 scroll-mt-24">
-            {t("landing.how.title")}
+            Comment ça marche
           </h2>
-          <p className="text-center text-foreground/70 font-body max-w-2xl mx-auto mb-8 md:mb-16">
-            {t(seasonal.descriptionKey)}
-          </p>
         </RevealSection>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <RevealSection delay={0.1}>
-            <div className="text-center">
-              <div className="relative mx-auto mb-4 w-56 h-56">
-                <picture>
-                  <source
-                    type="image/avif"
-                    srcSet={`${howtoStep1Avif224} 224w, ${howtoStep1Avif448} 448w`}
-                    sizes="224px"
-                  />
-                  <source
-                    type="image/webp"
-                    srcSet={`${howtoStep1Webp224} 224w, ${howtoStep1Webp448} 448w`}
-                    sizes="224px"
-                  />
-                  <img
-                    src={howtoStep1Webp448}
-                    alt="Illustration gouache d'un cottage en pierre avec un chat à la fenêtre et un chien à la porte."
-                    width={224}
-                    height={224}
-                    loading="lazy"
-                    decoding="async"
-                    className="w-full h-full object-contain"
-                  />
-                </picture>
-                <div className="absolute top-0 left-0 w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-heading font-bold text-base shadow-md">
-                  1
-                </div>
-              </div>
-              <h3 className="text-xl font-heading font-semibold text-foreground mb-3">{t("landing.how.step1_title")}</h3>
-              <p className="text-base font-body leading-relaxed text-foreground/70">
-                {t("landing.how.step1_text")}
-              </p>
-            </div>
-          </RevealSection>
-
-          <RevealSection delay={0.2}>
-            <div className="text-center">
-              <div className="relative mx-auto mb-4 w-56 h-56">
-                <picture>
-                  <source
-                    type="image/avif"
-                    srcSet={`${howtoStep2Avif224} 224w, ${howtoStep2Avif448} 448w`}
-                    sizes="224px"
-                  />
-                  <source
-                    type="image/webp"
-                    srcSet={`${howtoStep2Webp224} 224w, ${howtoStep2Webp448} 448w`}
-                    sizes="224px"
-                  />
-                  <img
-                    src={howtoStep2Webp448}
-                    alt="Illustration gouache de deux personnes qui se serrent la main autour d'une table, un chat et un chien à leurs côtés."
-                    width={224}
-                    height={224}
-                    loading="lazy"
-                    decoding="async"
-                    className="w-full h-full object-contain"
-                  />
-                </picture>
-                <div className="absolute top-0 left-0 w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-heading font-bold text-base shadow-md">
-                  2
-                </div>
-              </div>
-              <h3 className="text-xl font-heading font-semibold text-foreground mb-3">{t("landing.how.step2_title")}</h3>
-              <p className="text-base font-body leading-relaxed text-foreground/70">
-                {t("landing.how.step2_text")}
-              </p>
-            </div>
-          </RevealSection>
-
-          <RevealSection delay={0.3}>
-            <div className="text-center">
-              <div className="relative mx-auto mb-4 w-56 h-56">
-                <picture>
-                  <source
-                    type="image/avif"
-                    srcSet={`${howtoStep3Avif224} 224w, ${howtoStep3Avif448} 448w`}
-                    sizes="224px"
-                  />
-                  <source
-                    type="image/webp"
-                    srcSet={`${howtoStep3Webp224} 224w, ${howtoStep3Webp448} 448w`}
-                    sizes="224px"
-                  />
-                  <img
-                    src={howtoStep3Webp448}
-                    alt="Illustration gouache d'une valise vintage prête au départ avec un chat et un chien à côté."
-                    width={224}
-                    height={224}
-                    loading="lazy"
-                    decoding="async"
-                    className="w-full h-full object-contain"
-                  />
-                </picture>
-                <div className="absolute top-0 left-0 w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-heading font-bold text-base shadow-md">
-                  3
-                </div>
-              </div>
-              <h3 className="text-xl font-heading font-semibold text-foreground mb-3">{t("landing.how.step3_title")}</h3>
-              <p className="text-base font-body leading-relaxed text-foreground/70">
-                {t("landing.how.step3_text")}
-              </p>
-            </div>
-          </RevealSection>
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+          {columns.map((column, columnIndex) => (
+            <RevealSection key={column.title} delay={0.1 + columnIndex * 0.1}>
+              <article className="h-full rounded-lg border border-border bg-card p-6 md:p-8">
+                <img src={column.image} alt={column.alt} width={224} height={224} loading="lazy" className="mx-auto h-36 w-36 object-contain" />
+                <h3 className="mt-4 font-heading text-2xl font-semibold text-foreground">{column.title}</h3>
+                <ol className="mt-5 space-y-4">
+                  {column.steps.map((step, index) => <li key={step} className="flex gap-3 text-foreground/75"><span className="font-semibold text-primary">{index + 1}.</span><span>{step}</span></li>)}
+                </ol>
+              </article>
+            </RevealSection>
+          ))}
         </div>
-
-        <RevealSection delay={0.4} className="text-center mt-14">
-          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
-            <button
-              onClick={() => {
-                trackEvent("cta_proprio_clicked", { metadata: { location: "how_it_works" } });
-                navigate("/inscription?role=owner");
-              }}
-              className="font-body text-sm font-semibold tracking-wide rounded-full px-10 py-4 bg-primary text-primary-foreground hover:brightness-90 hover:scale-[1.02] transition-all duration-200"
-            >
-              {t("landing.how.cta_owner")}
-            </button>
-            <a
-              href="#entraide"
-              className="font-body text-sm font-medium tracking-wide rounded-full px-8 py-3.5 bg-transparent text-foreground border border-border hover:border-primary/40 hover:text-primary transition-all duration-200"
-            >
-              {t("landing.how.cta_secondary")}
-            </a>
-          </div>
-          <p className="mt-3 text-xs text-muted-foreground font-body">
-            {t("landing.how.footnote")}
-          </p>
-        </RevealSection>
       </div>
     </section>
   );

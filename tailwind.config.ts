@@ -60,6 +60,7 @@ export default {
         hint: "hsl(var(--hint))",
         "sitter-hero": "hsl(var(--sitter-hero))",
         "toggle-active": "hsl(var(--toggle-active))",
+        "hero-overlay": "var(--hero-overlay)",
         warning: {
           DEFAULT: "hsl(var(--warning))",
           foreground: "hsl(var(--warning-foreground))",
