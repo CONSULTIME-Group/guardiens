@@ -77,7 +77,7 @@ interface WaveHelper {
 async function runWave(supabase: any, missionId: string): Promise<{ sent: number; wave: number; empty: boolean }> {
   const { data: mission } = await supabase
     .from("small_missions")
-    .select("id, title, city, user_id, status, date_needed, end_date, wave_count, latitude, longitude")
+    .select("id, title, city, user_id, status, date_needed, end_date, wave_count, sit_mode, latitude, longitude")
     .eq("id", missionId)
     .maybeSingle();
 
