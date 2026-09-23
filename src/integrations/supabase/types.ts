@@ -11052,6 +11052,23 @@ export type Database = {
         Args: { lat1: number; lat2: number; lng1: number; lng2: number }
         Returns: number
       }
+      home_proximity_counts: {
+        Args: { p_lat: number; p_lng: number }
+        Returns: {
+          gardiens_count: number
+          helpers_count: number
+        }[]
+      }
+      home_social_proof: {
+        Args: never
+        Returns: {
+          city: string
+          first_name: string
+          happened_at: string
+          proof_text: string
+          proof_type: string
+        }[]
+      }
       immutable_unaccent: { Args: { "": string }; Returns: string }
       increment_cp_relance: { Args: { user_ids: string[] }; Returns: undefined }
       increment_photo_analysis_quota: {
