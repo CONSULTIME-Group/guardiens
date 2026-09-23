@@ -1218,6 +1218,11 @@ const SmallMissionDetail = () => {
               <h1 className="font-heading text-[1.6rem] leading-[1.15] sm:text-3xl md:text-4xl lg:text-[2.75rem] font-bold mb-3 text-foreground break-words">
                 {displayTitle}
               </h1>
+              {isMissionSitMode(mission.sit_mode) && (
+                <p className="mb-3 inline-flex items-center rounded-full border border-border bg-muted/40 px-3 py-1 text-xs sm:text-sm text-foreground">
+                  {sitModeLine(mission.sit_mode, authorFirstName)}
+                </p>
+              )}
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs sm:text-sm text-muted-foreground">
                 <span className="inline-flex items-center gap-1.5 min-w-0">
                   <MapPin className="h-3.5 w-3.5 shrink-0" />
