@@ -77,7 +77,7 @@ describe("E6 question de déroulement", () => {
     expect(AT_HELPER_NOTE).toBe(
       "Un coup de main entre gens du coin, en échange d'un service ou d'une attention.",
     );
-i    expect(AT_HELPER_NOTE).not.toMatch(/voisin/i);
+    expect(AT_HELPER_NOTE).not.toMatch(/voisin/i);
   });
 
   it("choix reconnu, valeurs hors enum rejetées", () => {
