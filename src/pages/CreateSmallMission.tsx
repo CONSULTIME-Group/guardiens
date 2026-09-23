@@ -370,6 +370,19 @@ const CreateSmallMission = () => {
     if (!user) return;
     if (hasMoneyMention(exchangeOffer)) return;
     if (submitting) return;
+    if (multiDaySit && !isMissionSitMode(sitMode)) {
+      toast({
+        title: SIT_MODE_QUESTION_TITLE,
+        description: "Choisissez le déroulement qui correspond, puis publiez.",
+        variant: "destructive",
+      });
+      if (typeof document !== "undefined") {
+        window.setTimeout(() => {
+          document.getElementById("sit-mode-question")?.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 50);
+      }
+      return;
+    }
     const missing = requiredFields().filter((f) => f.invalid);
     if (missing.length > 0) {
       reportMissing(missing);
