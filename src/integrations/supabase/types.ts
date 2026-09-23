@@ -11137,6 +11137,10 @@ export type Database = {
           helper_id: string
         }[]
       }
+      mission_wave_audience_preview: {
+        Args: { p_lat: number; p_lng: number }
+        Returns: number
+      }
       move_to_dlq: {
         Args: {
           dlq_name: string
