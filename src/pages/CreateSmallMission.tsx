@@ -709,37 +709,70 @@ const CreateSmallMission = () => {
               <>
                 <h2 className="font-heading font-semibold text-lg">Où et quand ?</h2>
 
-                {/* Garde de plusieurs jours : le canal dédié est plus efficace. */}
-                {multiDaySit && !sitRedirectDismissed && (
-                  <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-2" role="note">
-                    <p className="text-sm font-semibold text-foreground">{SIT_REDIRECT_TITLE}</p>
-                    <p className="text-xs text-muted-foreground">{SIT_REDIRECT_TEXT}</p>
-                    <div className="flex flex-wrap items-center gap-3">
-                      <Button
-                        type="button"
-                        size="sm"
-                        onClick={() => {
-                          writeSitPrefill({ title, description });
-                          try { void trackEvent("mission_multi_day_sit_redirect", { metadata: { city: city.trim() } }); } catch {}
-                          navigate(
-                            `/sits/create?${new URLSearchParams({
-                              ...(city.trim() ? { city: city.trim() } : {}),
-                              ...(dateNeeded ? { start: dateNeeded } : {}),
-                              ...(endDate ? { end: endDate } : {}),
-                            }).toString()}`,
-                          );
-                        }}
-                      >
-                        {SIT_REDIRECT_PRIMARY}
-                      </Button>
-                      <button
-                        type="button"
-                        className="text-xs text-muted-foreground underline"
-                        onClick={() => setSitRedirectDismissed(true)}
-                      >
-                        {SIT_REDIRECT_SECONDARY}
-                      </button>
+                {/* Question de déroulement : la personne décide, jamais un blocage. */}
+                {multiDaySit && (
+                  <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-3" role="group" aria-labelledby="sit-mode-question">
+                    <p id="sit-mode-question" className="text-sm font-semibold text-foreground">{SIT_MODE_QUESTION_TITLE}</p>
+                    <div className="space-y-2" role="radiogroup" aria-label={SIT_MODE_QUESTION_TITLE}>
+                      {SIT_MODE_OPTIONS.map((option) => (
+                        <label
+                          key={option.value}
+                          className={cn(
+                            "flex items-start gap-3 rounded-lg border p-3 text-sm cursor-pointer transition-colors",
+                            sitMode === option.value
+                              ? "border-primary bg-primary/10 text-foreground"
+                              : "border-border bg-card text-foreground/80 hover:border-primary/40",
+                          )}
+                        >
+                          <input
+                            type="radio"
+                            name="sit-mode"
+                            className="mt-0.5 accent-[hsl(var(--primary))]"
+                            checked={sitMode === option.value}
+                            onChange={() => {
+                              setSitMode(option.value);
+                              setSitHomeStayConfirmed(false);
+                            }}
+                          />
+                          <span>{option.label}</span>
+                        </label>
+                      ))}
                     </div>
+                    {sitMode === "at_helper" && (
+                      <p className="text-xs text-muted-foreground">{AT_HELPER_NOTE}</p>
+                    )}
+                    {sitMode === "at_home" && !sitHomeStayConfirmed && (
+                      <div className="rounded-lg border border-border bg-card p-3 space-y-2" role="note">
+                        <p className="text-sm font-semibold text-foreground">{SIT_MODE_AT_HOME_TITLE}</p>
+                        <p className="text-xs text-muted-foreground">{SIT_MODE_AT_HOME_TEXT}</p>
+                        <div className="flex flex-wrap items-center gap-3">
+                          <Button
+                            type="button"
+                            size="sm"
+                            onClick={() => {
+                              writeSitPrefill({ title, description });
+                              try { void trackEvent("mission_multi_day_sit_redirect", { metadata: { city: city.trim() } }); } catch {}
+                              navigate(
+                                `/sits/create?${new URLSearchParams({
+                                  ...(city.trim() ? { city: city.trim() } : {}),
+                                  ...(dateNeeded ? { start: dateNeeded } : {}),
+                                  ...(endDate ? { end: endDate } : {}),
+                                }).toString()}`,
+                              );
+                            }}
+                          >
+                            {SIT_MODE_PRIMARY}
+                          </Button>
+                          <button
+                            type="button"
+                            className="text-xs text-muted-foreground underline"
+                            onClick={() => setSitHomeStayConfirmed(true)}
+                          >
+                            {SIT_MODE_SECONDARY}
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
