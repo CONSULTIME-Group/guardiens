@@ -1,22 +1,33 @@
-import { Suspense, useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
-import { NeedCard, HelperCard, type EntraideNeed, type PublicHelper } from "@/components/entraide/EntraideCards";
+import { HelperCard, NeedRow, type EntraideNeed, type NeedRowState, type PublicHelper } from "@/components/entraide/EntraideCards";
+import type { MissionBadgeRow } from "@/components/missions/MissionBadgesReceived";
 import EntraideProofs from "@/components/entraide/EntraideProofs";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAccessLevel } from "@/hooks/useAccessLevel";
 import { supabase } from "@/integrations/supabase/client";
-import { geocodeCity, haversineDistance } from "@/lib/geocode";
+import { geocodeCity } from "@/lib/geocode";
 import { trackEvent } from "@/lib/analytics";
 import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
 import { MISSIONS_CITIES, MISSIONS_CITY_SLUGS } from "@/data/missionsCityContent";
+import {
+  HELPERS_PAGE_SIZE,
+  distanceFrom,
+  isSectorQuiet,
+  memberSubtitle,
+  nearestDistanceKm,
+  sortByDistance,
+  type Origin,
+} from "@/lib/entraideHubModel";
+import { QUICK_CAN_HELP_MESSAGE, respondToMission } from "@/lib/missionRespond";
 import { toast } from "sonner";
 
 const EntraideMap = lazy(() => import("@/components/entraide/EntraideMap"), "EntraideMap");
-type HubView = "needs" | "helpers";
 
 const FAQ = [
   { question: "Comment trouver un coup de main près de chez vous ?", answer: "Indiquez votre ville pour classer les besoins et les personnes disponibles par proximité." },
@@ -29,11 +40,6 @@ const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
   mainEntity: FAQ.map((item) => ({ "@type": "Question", name: item.question, acceptedAnswer: { "@type": "Answer", text: item.answer } })),
-};
-
-export const filterPublicHelpers = (helpers: PublicHelper[], query: string): PublicHelper[] => {
-  const normalized = query.trim().toLocaleLowerCase("fr");
-  return helpers.filter((helper) => `${helper.first_name} ${helper.city || ""} ${helper.helps_with || ""}`.toLocaleLowerCase("fr").includes(normalized));
 };
 
 export const EntraideHubIntro = ({ isAuthenticated, onNeed, onHelp }: {
@@ -75,6 +81,35 @@ export const EntraideHubIntro = ({ isAuthenticated, onNeed, onHelp }: {
   </>
 );
 
+/** En-tête compact du membre : origine automatique, statut d'aide, action principale. */
+export const EntraideMemberHeader = ({ subtitle, availableForHelp, onNeed, onHelp, locationField }: {
+  subtitle: string | null;
+  availableForHelp: boolean;
+  onNeed: () => void;
+  onHelp: () => void;
+  locationField: React.ReactNode;
+}) => (
+  <header className="pb-6 pt-3">
+    <p className="text-sm font-semibold text-primary">Entraide</p>
+    <h1 className="mt-2 font-heading text-3xl font-bold leading-tight text-foreground sm:text-4xl">Besoins près de chez vous</h1>
+    <p className="mt-3 max-w-2xl text-base text-muted-foreground">
+      {subtitle || "Indiquez votre ville pour voir les besoins les plus proches."}
+    </p>
+    {locationField}
+    <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
+      <Button onClick={onNeed}>Demander un coup de main</Button>
+      {availableForHelp ? (
+        <p className="text-sm text-muted-foreground">
+          Vous êtes disponible pour aider. Vous recevez les besoins publiés près de chez vous.{" "}
+          <Link to="/profile?section=skills" className="font-semibold text-primary underline underline-offset-4">Modifier</Link>
+        </p>
+      ) : (
+        <Button variant="outline" onClick={onHelp}>Me rendre disponible pour aider</Button>
+      )}
+    </div>
+  </header>
+);
+
 export const EntraideFaq = () => (
   <section className="mt-12 border-t border-border pt-8" aria-labelledby="entraide-faq-title">
     <h2 id="entraide-faq-title" className="font-heading text-2xl font-semibold text-foreground">Questions fréquentes</h2>
@@ -89,109 +124,302 @@ export const EntraideFaq = () => (
   </section>
 );
 
+interface MemberProfile {
+  city: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  available_for_help: boolean;
+}
+
 const EntraideHub = () => {
   const { isAuthenticated, user } = useAuth();
+  const { canApplyMissions } = useAccessLevel();
   const navigate = useNavigate();
-  const [params, setParams] = useSearchParams();
-  const [view, setView] = useState<HubView>(params.get("vue") === "autour" ? "helpers" : "needs");
   const [needs, setNeeds] = useState<EntraideNeed[]>([]);
   const [helpers, setHelpers] = useState<PublicHelper[]>([]);
   const [loading, setLoading] = useState(true);
-  const [query, setQuery] = useState("");
   const [city, setCity] = useState("");
-  const [origin, setOrigin] = useState<[number, number] | null>(null);
+  const [searchedOrigin, setSearchedOrigin] = useState<Origin>(null);
+  const [searchedCity, setSearchedCity] = useState<string | null>(null);
   const [locating, setLocating] = useState(false);
-  // Onglet « Besoins » : carte par défaut sur ordinateur, liste par défaut sur mobile.
-  const [mapOpen, setMapOpen] = useState(
-    () => params.get("vue") !== "autour" && typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches,
-  );
+  const [showLocationField, setShowLocationField] = useState(false);
+  // Liste par défaut partout, mobile et ordinateur, connecté ou non.
+  const [mapOpen, setMapOpen] = useState(false);
+  const [profile, setProfile] = useState<MemberProfile | null>(null);
+  const [myResponses, setMyResponses] = useState<Set<string>>(new Set());
+  const [responding, setResponding] = useState<string | null>(null);
+  const [helpersShown, setHelpersShown] = useState(HELPERS_PAGE_SIZE);
+  const [counts, setCounts] = useState<Map<string, { given_count: number | null; received_count: number | null }>>(new Map());
+  const [badges, setBadges] = useState<Map<string, MissionBadgeRow[]>>(new Map());
 
   useEffect(() => {
     const load = async () => {
       const [needsResult, helpersResult, countsResult] = await Promise.all([
-        supabase.from("public_small_missions").select("id, slug, title, city, date_needed, end_date, latitude, longitude, photos, sit_mode").eq("status", "open").eq("mission_type", "besoin").order("created_at", { ascending: false }),
+        supabase.from("public_small_missions").select("id, user_id, slug, title, city, category, date_needed, end_date, latitude, longitude, photos, sit_mode").eq("status", "open").eq("mission_type", "besoin").order("created_at", { ascending: false }),
         supabase.from("public_helpers").select("id, first_name, avatar_url, city, latitude_approx, longitude_approx, helps_with"),
         supabase.from("public_mission_response_counts").select("mission_id, response_count"),
       ]);
-      const counts = new Map((countsResult.data || []).map((row) => [row.mission_id, row.response_count || 0]));
+      const responseCounts = new Map((countsResult.data || []).map((row) => [row.mission_id, row.response_count || 0]));
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       setNeeds((needsResult.data || []).filter((row) => {
         const date = row.end_date || row.date_needed;
         return !date || new Date(date) >= today;
-      }).map((row) => ({ ...row, response_count: counts.get(row.id) || 0 })) as EntraideNeed[]);
+      }).map((row) => ({ ...row, response_count: responseCounts.get(row.id) || 0 })) as EntraideNeed[]);
       setHelpers((helpersResult.data || []).flatMap((row) => row.id && row.first_name ? [{ ...row, id: row.id, first_name: row.first_name }] : []) as PublicHelper[]);
       setLoading(false);
     };
     void load();
   }, []);
 
-  const setHubView = (next: HubView) => {
-    setView(next);
-    const copy = new URLSearchParams(params);
-    if (next === "helpers") copy.set("vue", "autour"); else copy.delete("vue");
-    setParams(copy, { replace: true });
-    if (next === "helpers") setMapOpen(window.matchMedia("(min-width: 768px)").matches);
-  };
+  // Membre connecté : origine et réponses déjà données, deux lectures.
+  useEffect(() => {
+    if (!user?.id) return;
+    let cancelled = false;
+    const load = async () => {
+      const [profileResult, responsesResult] = await Promise.all([
+        supabase.from("profiles").select("city, latitude, longitude, available_for_help").eq("id", user.id).maybeSingle(),
+        supabase.from("small_mission_responses").select("mission_id").eq("responder_id", user.id),
+      ]);
+      if (cancelled) return;
+      if (profileResult.data) setProfile(profileResult.data as MemberProfile);
+      setMyResponses(new Set((responsesResult.data || []).map((row) => row.mission_id)));
+    };
+    void load();
+    return () => { cancelled = true; };
+  }, [user?.id]);
 
-  const locateCity = async () => {
+  const origin: Origin = searchedOrigin
+    || (profile?.latitude !== null && profile?.latitude !== undefined && profile?.longitude !== null && profile?.longitude !== undefined
+      ? [profile.latitude, profile.longitude]
+      : null);
+  const originCity = searchedCity || profile?.city || null;
+
+  const needDistance = useCallback((need: EntraideNeed) => distanceFrom(origin, need.latitude, need.longitude), [origin]);
+  const helperDistance = useCallback((helper: PublicHelper) => distanceFrom(origin, helper.latitude_approx, helper.longitude_approx), [origin]);
+
+  const sortedNeeds = useMemo(
+    () => (origin ? sortByDistance(needs, needDistance) : needs),
+    [needs, origin, needDistance],
+  );
+  const sortedHelpers = useMemo(
+    () => (origin ? sortByDistance(helpers, helperDistance) : helpers),
+    [helpers, origin, helperDistance],
+  );
+  const visibleHelpers = useMemo(() => sortedHelpers.slice(0, helpersShown), [sortedHelpers, helpersShown]);
+
+  // Compteurs et écussons des personnes affichées, une requête groupée chacune.
+  useEffect(() => {
+    const ids = visibleHelpers.map((helper) => helper.id);
+    if (ids.length === 0) return;
+    let cancelled = false;
+    const load = async () => {
+      const [countsResult, badgesResult] = await Promise.all([
+        supabase.from("public_help_counts").select("user_id, given_count, received_count").in("user_id", ids),
+        supabase.from("profile_mission_badges" as never).select("user_id, badge_key, earned_count, last_earned_at").in("user_id", ids),
+      ]);
+      if (cancelled) return;
+      setCounts(new Map((countsResult.data || []).map((row) => [row.user_id as string, { given_count: row.given_count, received_count: row.received_count }])));
+      const grouped = new Map<string, MissionBadgeRow[]>();
+      for (const row of (badgesResult.data || []) as unknown as (MissionBadgeRow & { user_id: string })[]) {
+        grouped.set(row.user_id, [...(grouped.get(row.user_id) || []), row]);
+      }
+      setBadges(grouped);
+    };
+    void load();
+    return () => { cancelled = true; };
+  }, [visibleHelpers]);
+
+  const nearest = useMemo(() => nearestDistanceKm(sortedNeeds.map(needDistance)), [sortedNeeds, needDistance]);
+  const sectorQuiet = isSectorQuiet(origin, nearest, sortedNeeds.length);
+
+  const locate = async () => {
     if (city.trim().length < 2 || locating) return;
     setLocating(true);
     const result = await geocodeCity(city, "FR");
     setLocating(false);
     if (result) {
-      setOrigin([result.lat, result.lng]);
-      setMapOpen(true);
+      setSearchedOrigin([result.lat, result.lng]);
+      setSearchedCity(city.trim());
     }
   };
-
-  const needDistance = (need: EntraideNeed) => origin && need.latitude !== null && need.longitude !== null
-    ? haversineDistance(origin[0], origin[1], need.latitude, need.longitude) : null;
-  const helperDistance = (helper: PublicHelper) => origin && helper.latitude_approx !== null && helper.longitude_approx !== null
-    ? haversineDistance(origin[0], origin[1], helper.latitude_approx, helper.longitude_approx) : null;
-
-  const sortedNeeds = useMemo(() => [...needs].sort((a, b) => {
-    const aDistance = needDistance(a); const bDistance = needDistance(b);
-    if (aDistance === null) return bDistance === null ? 0 : 1;
-    if (bDistance === null) return -1;
-    return aDistance - bDistance;
-  }), [needs, origin]);
-  const filteredHelpers = useMemo(() => filterPublicHelpers(helpers, query).sort((a, b) => {
-    const aDistance = helperDistance(a); const bDistance = helperDistance(b);
-    if (aDistance === null) return bDistance === null ? 0 : 1;
-    if (bDistance === null) return -1;
-    return aDistance - bDistance;
-  }), [helpers, origin, query]);
 
   const goNeed = () => navigate(isAuthenticated ? "/petites-missions/creer" : "/inscription?redirect=/petites-missions/creer");
   const goHelp = async () => {
     if (!isAuthenticated || !user?.id) {
-      navigate("/inscription?redirect=/petites-missions?vue=autour");
+      navigate("/inscription?redirect=/petites-missions");
       return;
     }
     await supabase.from("profiles").update({ available_for_help: true }).eq("id", user.id);
-    setHubView("helpers");
+    setProfile((prev) => (prev ? { ...prev, available_for_help: true } : prev));
     toast.success("Vous serez prévenu quand quelqu'un près de chez vous aura besoin. Vous direz oui ou non à chaque fois.");
     void trackEvent("mission_can_help", { metadata: { source: "hub", action: "helper_enabled" } });
   };
 
-  const helperPersonSchemas = helpers.map((helper) => ({
-    "@context": "https://schema.org",
-    "@type": "Person",
-    name: helper.first_name,
-    description: helper.helps_with || undefined,
-    address: helper.city ? { "@type": "PostalAddress", addressLocality: helper.city } : undefined,
-  }));
+  const needState = (need: EntraideNeed): NeedRowState => {
+    if (user?.id && need.user_id === user.id) return "own";
+    if (myResponses.has(need.id)) return "responded";
+    return "default";
+  };
+
+  const detailPath = (need: EntraideNeed) => `/petites-missions/${need.slug || need.id}`;
+
+  const canHelp = async (need: EntraideNeed) => {
+    if (!isAuthenticated || !user?.id) {
+      navigate(`/inscription?redirect=${encodeURIComponent(detailPath(need))}`);
+      return;
+    }
+    if (!canApplyMissions) {
+      navigate(detailPath(need));
+      return;
+    }
+    if (responding) return;
+    setResponding(need.id);
+    void trackEvent("mission_can_help", { metadata: { mission_id: need.id, source: "hub_list" } });
+    const outcome = await respondToMission({ missionId: need.id, userId: user.id, message: QUICK_CAN_HELP_MESSAGE });
+    setResponding(null);
+    switch (outcome.kind) {
+      case "sent":
+        setMyResponses((prev) => new Set(prev).add(need.id));
+        toast.success("Réponse envoyée. La personne qui demande va être prévenue.");
+        break;
+      case "duplicate":
+        setMyResponses((prev) => new Set(prev).add(need.id));
+        toast.info("Vous avez déjà proposé votre aide pour ce besoin.");
+        break;
+      case "closed":
+        toast.error("Ce besoin est clôturé. Il accepte de nouvelles réponses plus tard.");
+        break;
+      case "own_mission":
+        toast.info("Ce besoin est le vôtre.");
+        break;
+      case "account_not_active":
+        toast.error("Contactez le support pour rétablir l'accès à l'entraide.");
+        break;
+      case "cap_reached":
+        toast.info("5 personnes ont déjà proposé leur aide. Une place se libérera si l'auteur en décline une.");
+        break;
+      case "missing":
+        toast.error("Ce besoin est introuvable.");
+        break;
+      default:
+        toast.error("Réessayez dans un instant.");
+    }
+  };
+
+  const locationField = (
+    <div className="mt-4">
+      {showLocationField || !origin ? (
+        <div className="flex max-w-md gap-2">
+          <Input value={city} onChange={(event) => setCity(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") void locate(); }} placeholder="Votre ville" aria-label="Votre ville" className="min-w-0" />
+          <Button type="button" variant="outline" onClick={locate} disabled={locating}>{locating ? "Recherche..." : "Afficher"}</Button>
+        </div>
+      ) : (
+        <button type="button" onClick={() => setShowLocationField(true)} className="text-sm font-semibold text-primary underline underline-offset-4">
+          Changer de lieu
+        </button>
+      )}
+    </div>
+  );
+
+  const viewToggle = (
+    <div className="mt-6 flex justify-end">
+      <div className="inline-grid grid-cols-2 rounded-lg border border-border bg-muted p-1" role="group" aria-label="Affichage des résultats">
+        <Button type="button" variant={!mapOpen ? "default" : "ghost"} size="sm" onClick={() => setMapOpen(false)}>Liste</Button>
+        <Button type="button" variant={mapOpen ? "default" : "ghost"} size="sm" onClick={() => setMapOpen(true)}>Carte</Button>
+      </div>
+    </div>
+  );
 
   return (
     <>
-      <PageMeta title="Entraide près de chez vous, Guardiens" description="Découvrez les besoins et les gens du coin disponibles pour un coup de main." path="/petites-missions" jsonLd={[faqSchema, ...helperPersonSchemas]} />
+      <PageMeta
+        title="Entraide près de chez vous, Guardiens"
+        description="Trouvez un coup de main près de chez vous, ou proposez le vôtre aux membres du coin."
+        path="/petites-missions"
+        jsonLd={[faqSchema]}
+      />
       <PageBreadcrumb items={[{ label: "Entraide" }]} />
       <div className="min-w-0 bg-background pb-24">
         <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
-          <EntraideHubIntro isAuthenticated={isAuthenticated} onNeed={goNeed} onHelp={goHelp} />
+          {isAuthenticated ? (
+            <EntraideMemberHeader
+              subtitle={memberSubtitle(originCity, nearest)}
+              availableForHelp={profile?.available_for_help === true}
+              onNeed={goNeed}
+              onHelp={goHelp}
+              locationField={locationField}
+            />
+          ) : (
+            <>
+              <EntraideHubIntro isAuthenticated={isAuthenticated} onNeed={goNeed} onHelp={goHelp} />
+              {locationField}
+            </>
+          )}
 
-          <nav className="border-y border-border py-4 text-sm text-muted-foreground" aria-label="Entraide dans votre ville">
+          <section className="pt-2" aria-labelledby="entraide-needs-title">
+            <h2 id="entraide-needs-title" className="sr-only">Besoins ouverts</h2>
+            {viewToggle}
+
+            {mapOpen && (
+              <div className="mt-3">
+                <Suspense fallback={<div className="h-[360px] animate-pulse rounded-lg bg-muted" />}>
+                  <EntraideMap needs={sortedNeeds} helpers={sortedHelpers} focus={origin} />
+                </Suspense>
+              </div>
+            )}
+
+            {sectorQuiet && (
+              <div className="mt-5 rounded-lg border border-border bg-card p-5">
+                <p className="text-sm font-semibold text-foreground">Le premier besoin de votre secteur peut être le vôtre.</p>
+                <Button className="mt-3" onClick={goNeed}>Demander un coup de main</Button>
+              </div>
+            )}
+
+            {loading ? (
+              <div className="mt-5 space-y-3" aria-busy="true">{[0, 1, 2, 3].map((item) => <div key={item} className="h-[96px] animate-pulse rounded-lg bg-muted" />)}</div>
+            ) : mapOpen ? null : sortedNeeds.length > 0 ? (
+              <ul className="mt-5 space-y-3">
+                {sortedNeeds.map((need) => (
+                  <NeedRow
+                    key={need.id}
+                    need={need}
+                    distance={needDistance(need)}
+                    state={needState(need)}
+                    pending={responding === need.id}
+                    onCanHelp={() => void canHelp(need)}
+                  />
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-5 rounded-lg border border-border p-5 text-sm text-muted-foreground">Le prochain besoin apparaîtra ici. Les personnes disponibles restent visibles plus bas.</p>
+            )}
+          </section>
+
+          <section className="mt-14" aria-labelledby="entraide-helpers-title">
+            <h2 id="entraide-helpers-title" className="font-heading text-2xl font-semibold text-foreground">Prêts à aider près de chez vous</h2>
+            <div className="mt-5 grid gap-4 md:grid-cols-2">
+              {visibleHelpers.map((helper) => (
+                <HelperCard
+                  key={helper.id}
+                  helper={helper}
+                  distance={helperDistance(helper)}
+                  showDistance={origin !== null}
+                  counts={counts.get(helper.id) ?? null}
+                  badgeRows={badges.get(helper.id) ?? []}
+                />
+              ))}
+            </div>
+            {sortedHelpers.length > visibleHelpers.length && (
+              <Button variant="outline" className="mt-5" onClick={() => setHelpersShown((shown) => shown + HELPERS_PAGE_SIZE)}>
+                Voir {HELPERS_PAGE_SIZE} de plus
+              </Button>
+            )}
+          </section>
+
+          <EntraideProofs origin={origin} />
+
+          <nav className="mt-10 border-y border-border py-4 text-sm text-muted-foreground" aria-label="Entraide dans votre ville">
             <span>Dans votre ville : </span>
             {MISSIONS_CITY_SLUGS.map((slug, index) => (
               <span key={slug}>
@@ -200,54 +428,6 @@ const EntraideHub = () => {
               </span>
             ))}
           </nav>
-
-          <EntraideProofs origin={origin} />
-
-          <section className="pt-8" aria-labelledby="entraide-discovery-title">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <p className="text-sm font-semibold text-primary">Près de chez vous</p>
-                <h2 id="entraide-discovery-title" className="font-heading text-2xl font-semibold text-foreground">Le coin en mouvement</h2>
-              </div>
-              <div className="inline-grid grid-cols-2 rounded-lg border border-border bg-muted p-1" role="tablist" aria-label="Choisir une vue">
-                <Button type="button" variant={view === "needs" ? "default" : "ghost"} size="sm" role="tab" aria-selected={view === "needs"} onClick={() => setHubView("needs")}>Besoins</Button>
-                <Button type="button" variant={view === "helpers" ? "default" : "ghost"} size="sm" role="tab" aria-selected={view === "helpers"} onClick={() => setHubView("helpers")}>Autour de vous</Button>
-              </div>
-            </div>
-
-            <div className="mt-5 grid gap-3 sm:grid-cols-[1fr_auto]">
-              {view === "helpers" ? <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Rechercher un prénom, une ville ou un coup de main" aria-label="Rechercher parmi les gens du coin" /> : <div />}
-              <div className="flex gap-2">
-                <Input value={city} onChange={(event) => setCity(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") void locateCity(); }} placeholder="Votre ville" aria-label="Votre ville" className="min-w-0 sm:w-48" />
-                <Button type="button" variant="outline" onClick={locateCity} disabled={locating}>{locating ? "Recherche..." : "Situer"}</Button>
-              </div>
-            </div>
-
-            <div className="mt-5 flex justify-end">
-              <div className="inline-grid grid-cols-2 rounded-lg border border-border bg-muted p-1" role="group" aria-label="Affichage des résultats">
-                <Button type="button" variant={!mapOpen ? "default" : "ghost"} size="sm" onClick={() => setMapOpen(false)}>Liste</Button>
-                <Button type="button" variant={mapOpen ? "default" : "ghost"} size="sm" onClick={() => setMapOpen(true)}>Carte</Button>
-              </div>
-            </div>
-            {mapOpen && (
-              <div className="mt-3">
-                <Suspense fallback={<div className="h-[360px] animate-pulse rounded-lg bg-muted" />}>
-                  <EntraideMap needs={sortedNeeds} helpers={filteredHelpers} focus={origin} tab={view} />
-                </Suspense>
-              </div>
-            )}
-
-            {loading ? (
-              <div className="mt-5 grid gap-4 md:grid-cols-2" aria-busy="true">{[0, 1, 2, 3].map((item) => <div key={item} className="h-40 animate-pulse rounded-lg bg-muted" />)}</div>
-            ) : mapOpen ? null : view === "needs" ? (
-              <div className="mt-5 grid gap-4 md:grid-cols-2">{sortedNeeds.map((need) => <NeedCard key={need.id} need={need} distance={needDistance(need)} showDistance={origin !== null} />)}</div>
-            ) : (
-              <div className="mt-5 grid gap-4 md:grid-cols-2">{filteredHelpers.map((helper) => <HelperCard key={helper.id} helper={helper} distance={helperDistance(helper)} showDistance={origin !== null} />)}</div>
-            )}
-
-            {!loading && view === "needs" && sortedNeeds.length === 0 && <p className="mt-5 rounded-lg border border-border p-5 text-sm text-muted-foreground">Le prochain besoin apparaîtra ici. Les gens du coin restent visibles dans l'autre vue.</p>}
-            {!loading && view === "helpers" && filteredHelpers.length === 0 && <p className="mt-5 rounded-lg border border-border p-5 text-sm text-muted-foreground">Essayez un autre mot pour découvrir les personnes disponibles.</p>}
-          </section>
 
           <section className="mt-14 border-y border-border py-8" aria-labelledby="credoc-title">
             <p className="text-sm font-semibold text-primary">54 %</p>

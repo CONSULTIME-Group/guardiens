@@ -9,11 +9,32 @@ export const helpCountsLabel = (given: number, received: number): string | null 
   return parts.length > 0 ? parts.join(", ") : null;
 };
 
-/** Compteur public de coups de main, sur la carte de personne et la fiche membre. */
-const HelpCounts = ({ userId, className = "" }: { userId: string; className?: string }) => {
-  const [label, setLabel] = useState<string | null>(null);
+export interface HelpCountsRow {
+  user_id: string;
+  given_count: number | null;
+  received_count: number | null;
+}
+
+/**
+ * Compteur public de coups de main, sur la carte de personne et la fiche
+ * membre. Quand `counts` est fourni, aucune requête n'est émise : la page
+ * appelante a déjà chargé les compteurs en une seule fois.
+ */
+const HelpCounts = ({ userId, className = "", counts }: {
+  userId: string;
+  className?: string;
+  counts?: { given_count: number | null; received_count: number | null } | null;
+}) => {
+  const provided = counts !== undefined;
+  const [label, setLabel] = useState<string | null>(
+    provided ? helpCountsLabel(counts?.given_count || 0, counts?.received_count || 0) : null,
+  );
 
   useEffect(() => {
+    if (provided) {
+      setLabel(helpCountsLabel(counts?.given_count || 0, counts?.received_count || 0));
+      return;
+    }
     let cancelled = false;
     const load = async () => {
       const { data } = await supabase
@@ -26,10 +47,11 @@ const HelpCounts = ({ userId, className = "" }: { userId: string; className?: st
     };
     void load();
     return () => { cancelled = true; };
-  }, [userId]);
+  }, [userId, provided, counts?.given_count, counts?.received_count]);
 
   if (!label) return null;
   return <p className={`text-xs font-semibold text-primary ${className}`}>{label}</p>;
 };
+
 
 export default HelpCounts;

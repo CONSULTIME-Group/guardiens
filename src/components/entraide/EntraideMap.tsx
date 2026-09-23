@@ -44,7 +44,7 @@ const FitPoints = ({ points, focus }: { points: Point[]; focus: [number, number]
   const map = useMap();
   useEffect(() => {
     if (focus) {
-      map.setView(focus, 11);
+      map.setView(focus, 12);
       return;
     }
     if (points.length === 1) map.setView([points[0].lat, points[0].lng], 11);
@@ -53,8 +53,8 @@ const FitPoints = ({ points, focus }: { points: Point[]; focus: [number, number]
   return null;
 };
 
-/** Marqueurs principaux de l'onglet actif : cercles regroupés, cliquables. */
-const HubCircles = ({ points, tab }: { points: Point[]; tab: EntraideMapTab }) => {
+/** Besoins : pastilles terracotta regroupées, cliquables. */
+const NeedCircles = ({ points }: { points: Point[] }) => {
   const map = useMap();
   const [zoom, setZoom] = useState(map.getZoom());
   useMapEvents({ zoomend: () => setZoom(map.getZoom()) });
@@ -63,21 +63,20 @@ const HubCircles = ({ points, tab }: { points: Point[]; tab: EntraideMapTab }) =
     <>
       {clusters.map((cluster) => (
         <Circle
-          key={`${cluster.kind}-${cluster.id}`}
+          key={`need-${cluster.id}`}
           center={[cluster.lat, cluster.lng]}
           radius={cluster.count > 1 ? 520 + cluster.count * 35 : 360}
           pathOptions={{
-            color: "hsl(var(--primary))",
-            fillColor: "hsl(var(--primary))",
+            color: "hsl(var(--secondary))",
+            fillColor: "hsl(var(--secondary))",
             fillOpacity: 0.24,
             weight: 2,
           }}
         >
-          <Tooltip>{cluster.count > 1 ? `${cluster.count} points dans ce secteur` : cluster.label}</Tooltip>
-          {cluster.count === 1 && (
+          <Tooltip>{cluster.count > 1 ? `${cluster.count} besoins dans ce secteur` : cluster.label}</Tooltip>
+          {cluster.count === 1 && cluster.need && (
             <Popup minWidth={280}>
-              {tab === "needs" && cluster.need && <NeedCard need={cluster.need} distance={null} showDistance={false} compact />}
-              {tab === "helpers" && cluster.helper && <HelperCard helper={cluster.helper} distance={null} showDistance={false} compact />}
+              <NeedCard need={cluster.need} distance={null} showDistance={false} compact />
             </Popup>
           )}
         </Circle>
@@ -86,28 +85,48 @@ const HubCircles = ({ points, tab }: { points: Point[]; tab: EntraideMapTab }) =
   );
 };
 
-/** Points de fond de l'autre famille : petits points discrets, non cliquables. */
-const BackgroundDots = ({ points }: { points: Point[] }) => (
+/** Personnes disponibles : petits points verts, cliquables. */
+const HelperDots = ({ points }: { points: Point[] }) => (
   <>
     {points.map((point) => (
       <CircleMarker
-        key={`bg-${point.kind}-${point.id}`}
+        key={`helper-${point.id}`}
         center={[point.lat, point.lng]}
-        radius={4}
-        interactive={false}
-        pathOptions={{ color: "hsl(var(--muted-foreground))", fillColor: "hsl(var(--muted-foreground))", fillOpacity: 0.45, weight: 1 }}
-      />
+        radius={5}
+        pathOptions={{ color: "hsl(var(--primary))", fillColor: "hsl(var(--primary))", fillOpacity: 0.75, weight: 1 }}
+      >
+        <Tooltip>{point.label}</Tooltip>
+        {point.helper && (
+          <Popup minWidth={280}>
+            <HelperCard helper={point.helper} distance={null} showDistance={false} compact />
+          </Popup>
+        )}
+      </CircleMarker>
     ))}
   </>
 );
 
-const EntraideMap = ({ needs, helpers, focus, tab = "needs" }: {
+/** Légende fixe : mêmes couleurs quelle que soit la vue. */
+const MapLegend = () => (
+  <ul className="flex flex-wrap items-center gap-4 border-t border-border bg-card px-3 py-2 text-xs text-muted-foreground">
+    <li className="flex items-center gap-2">
+      <span aria-hidden="true" className="h-3 w-3 rounded-full bg-secondary" />
+      Besoins
+    </li>
+    <li className="flex items-center gap-2">
+      <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-primary" />
+      Personnes disponibles
+    </li>
+  </ul>
+);
+
+const EntraideMap = ({ needs, helpers, focus }: {
   needs: EntraideNeed[];
   helpers: PublicHelper[];
   focus: [number, number] | null;
   tab?: EntraideMapTab;
 }) => {
-  const all = useMemo<{ primary: Point[]; background: Point[] }>(() => {
+  const all = useMemo<{ needPoints: Point[]; helperPoints: Point[] }>(() => {
     const needPoints = needs.flatMap((need) => need.latitude === null || need.longitude === null ? [] : [{
       id: need.id,
       ...offsetApproximatePoint(need.id, need.latitude, need.longitude),
@@ -122,28 +141,30 @@ const EntraideMap = ({ needs, helpers, focus, tab = "needs" }: {
       kind: "helper" as const,
       helper,
     }]);
-    return tab === "needs"
-      ? { primary: needPoints, background: helperPoints }
-      : { primary: helperPoints, background: needPoints };
-  }, [helpers, needs, tab]);
+    return { needPoints, helperPoints };
+  }, [helpers, needs]);
 
-  const points = useMemo<Point[]>(() => [...all.primary, ...all.background], [all]);
+  const points = useMemo<Point[]>(() => [...all.needPoints, ...all.helperPoints], [all]);
 
   if (points.length === 0 && !focus) {
     return <div className="flex h-[360px] items-center justify-center bg-muted text-sm text-muted-foreground">La carte se remplit avec les coups de main du coin.</div>;
   }
 
   return (
-    <div className="h-[360px] overflow-hidden rounded-lg border border-border sm:h-[520px]" aria-label="Carte des besoins et des personnes disponibles">
-      <MapContainer center={focus || [46.6, 2.4]} zoom={focus ? 11 : 6} className="h-full w-full" scrollWheelZoom>
-        <LeafletUnmountGuard />
-        <TileLayer url={MAP_TILE_WORLD_URL} attribution={MAP_TILE_WORLD_ATTRIBUTION} />
-        <FitPoints points={points} focus={focus} />
-        <BackgroundDots points={all.background} />
-        <HubCircles points={all.primary} tab={tab} />
-      </MapContainer>
+    <div className="overflow-hidden rounded-lg border border-border" aria-label="Carte des besoins et des personnes disponibles">
+      <div className="h-[360px] sm:h-[520px]">
+        <MapContainer center={focus || [46.6, 2.4]} zoom={focus ? 12 : 6} className="h-full w-full" scrollWheelZoom>
+          <LeafletUnmountGuard />
+          <TileLayer url={MAP_TILE_WORLD_URL} attribution={MAP_TILE_WORLD_ATTRIBUTION} />
+          <FitPoints points={points} focus={focus} />
+          <HelperDots points={all.helperPoints} />
+          <NeedCircles points={all.needPoints} />
+        </MapContainer>
+      </div>
+      <MapLegend />
     </div>
   );
 };
+
 
 export default EntraideMap;
