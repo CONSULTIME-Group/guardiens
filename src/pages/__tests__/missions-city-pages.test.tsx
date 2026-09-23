@@ -1,4 +1,4 @@
-import { import { fireEvent, cleanup, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import { MISSIONS_CITIES } from "@/data/missionsCityContent";
