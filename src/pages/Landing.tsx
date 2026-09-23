@@ -31,6 +31,7 @@ import { MidJourneyCta } from "@/components/landing/MidJourneyCta";
 import PublicHeader from "@/components/layout/PublicHeader";
 import { useShellMode } from "@/components/layout/useShellMode";
 import { useAuth } from "@/contexts/AuthContext";
+import { lazyWithRetry } from "@/lib/lazyWithRetry";
 
 import RecentSitsItemListJsonLd from "@/components/seo/RecentSitsItemListJsonLd";
 
