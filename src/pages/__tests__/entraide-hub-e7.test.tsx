@@ -190,6 +190,15 @@ describe("Entraide, la page vue d'un membre", () => {
     expect(screen.getByRole("button", { name: "Voir 12 de plus" })).toBeInTheDocument();
   });
 
+  it("charge la page d'un membre en huit requêtes au plus", async () => {
+    renderHub();
+    await waitFor(() => expect(screen.getByText("Membre0")).toBeInTheDocument());
+    await waitFor(() => expect(calls).toContain("public_help_counts"));
+    // eslint-disable-next-line no-console
+    console.log("REQUETES_AU_CHARGEMENT", calls.length, JSON.stringify(calls));
+    expect(calls.length).toBeLessThanOrEqual(8);
+  });
+
   it("publie un JSON-LD sans fiche Person et une description sans mot proscrit", async () => {
     renderHub();
     const meta = await screen.findByTestId("page-meta");
