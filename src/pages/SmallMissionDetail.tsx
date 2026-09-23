@@ -46,6 +46,7 @@ import MissionResponseCard from "@/components/missions/MissionResponseCard";
 import MissionResponseModal from "@/components/missions/MissionResponseModal";
 import ApproximateLocationMap from "@/components/shared/ApproximateLocationMap";
 import { isAuthorOf } from "@/lib/ownership";
+import { isMissionSitMode, sitModeLine } from "@/lib/missionSitMode";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { haversineDistance } from "@/utils/geo";
 
