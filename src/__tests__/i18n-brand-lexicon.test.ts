@@ -6,7 +6,8 @@ import path from "node:path";
  * Garde-fou du lexique de marque dans le dictionnaire (français uniquement
  * depuis le 17/08/2026, les motifs étrangers restent en verrou anti-retour) :
  *
- * 1. l'idée de « voisin » est proscrite,
+ * 1. l'idée de « voisin » en langue étrangère est proscrite (le français
+ *    emploie « voisins » depuis le 23/09/2026),
  * 2. la gratuité présentée comme promesse perpétuelle est proscrite,
  * 3. une notion de marque a une seule formulation.
  */
