@@ -104,8 +104,8 @@ const AroundYouSection = () => {
           <p className="text-sm font-semibold text-primary">Entraide</p>
           <h2 id="around-you-title" className="mt-2 font-heading text-2xl font-bold leading-tight text-foreground sm:text-3xl">
             {count === null
-              ? "Des personnes prêtes à donner un coup de main près de chez vous"
-              : `${count} personnes prêtes à donner un coup de main près de chez vous`}
+              ? "Des personnes prêtes à donner un coup de main sur Guardiens"
+              : `${count} personnes prêtes à donner un coup de main sur Guardiens`}
           </h2>
           <p className="mt-4 max-w-xl text-base leading-relaxed text-muted-foreground">
             Arroser un jardin, nourrir un chat, changer une ampoule : demandez, les gens du coin répondent.

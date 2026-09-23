@@ -43,6 +43,7 @@ describe("logique de la page Entraide", () => {
 
   it("compose le sous-titre du membre", () => {
     expect(memberSubtitle("Lyon", 4.2)).toBe("Autour de Lyon. Le plus proche est à 4 km.");
+    expect(memberSubtitle("Lyon", 1.9)).toBe("Autour de Lyon. Le plus proche est tout près de chez vous.");
     expect(memberSubtitle("Lyon", null)).toBe("Autour de Lyon.");
     expect(memberSubtitle(null, 4)).toBeNull();
   });

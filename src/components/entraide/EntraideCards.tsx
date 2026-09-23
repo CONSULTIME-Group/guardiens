@@ -8,6 +8,7 @@ import { categoryInitial } from "@/lib/entraideHubModel";
 import { startConversationAndNavigate } from "@/lib/conversation";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { capitalizeFirstName, publicFirstName } from "@/lib/displayName";
 
 export interface EntraideNeed {
   id: string;
@@ -43,8 +44,9 @@ const dateLabel = (need: EntraideNeed) => {
 };
 
 const locationLabel = (city: string | null, distance: number | null, showDistance: boolean) => {
-  const place = city || "Près de chez vous";
+  const place = capitalizeFirstName(city) || "Près de chez vous";
   if (!showDistance || distance === null) return place;
+  if (distance < 2) return `${place}, tout près de chez vous`;
   return `${place}, à ${Math.round(distance)} km`;
 };
 
@@ -104,7 +106,12 @@ export const NeedRow = ({ need, distance, state, onCanHelp, pending = false }: {
   pending?: boolean;
 }) => {
   const photo = need.photos?.[0] || null;
-  const place = distance === null ? (need.city || "Près de chez vous") : `à ${Math.round(distance)} km, ${need.city || "près de chez vous"}`;
+  const city = capitalizeFirstName(need.city) || "Près de chez vous";
+  const place = distance === null
+    ? city
+    : distance < 2
+      ? `${city}, tout près de chez vous`
+      : `à ${Math.round(distance)} km, ${city}`;
   const meta = [place, dateLabel(need), need.response_count > 0 ? `${need.response_count} « Je peux »` : null]
     .filter(Boolean).join(" · ");
 
@@ -162,7 +169,7 @@ export const HelperCard = ({ helper, distance, showDistance, compact = false, co
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [opening, setOpening] = useState(false);
-  const firstName = helper.first_name.trim() || "Membre";
+  const firstName = capitalizeFirstName(publicFirstName(helper.first_name)) || "Membre";
 
   const contact = async () => {
     if (!isAuthenticated) {
@@ -194,7 +201,11 @@ export const HelperCard = ({ helper, distance, showDistance, compact = false, co
         </div>
         <MissionBadgesReceived profileId={helper.id} variant="compact" rows={badgeRows} />
       </div>
-      <p className="mt-3 text-sm leading-relaxed text-foreground">{helper.helps_with?.trim() || "Disponible pour un coup de main"}</p>
+      {compact ? (
+        helper.helps_with?.trim() && <p className="mt-3 text-sm leading-relaxed text-foreground">{helper.helps_with.trim()}</p>
+      ) : (
+        <p className="mt-3 text-sm leading-relaxed text-foreground">{helper.helps_with?.trim() || "Disponible pour un coup de main"}</p>
+      )}
       <Button type="button" size="sm" className="mt-4" onClick={contact} disabled={opening}>
         {opening ? "Ouverture..." : `Écrire à ${firstName}`}
       </Button>

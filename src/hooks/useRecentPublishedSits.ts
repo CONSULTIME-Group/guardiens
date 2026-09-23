@@ -21,6 +21,7 @@ export interface RecentPublishedSit {
   property_id: string | null;
   cover_photo_url: string | null;
   is_urgent: boolean | null;
+  owner: { latitude: number | null; longitude: number | null } | null;
 }
 
 export function useRecentPublishedSits() {
@@ -32,7 +33,7 @@ export function useRecentPublishedSits() {
       const { data, error } = await supabase
         .from("sits")
         .select(
-          "id, slug, title, city, country, start_date, end_date, daily_routine, created_at, user_id, property_id, cover_photo_url, is_urgent"
+          "id, slug, title, city, country, start_date, end_date, daily_routine, created_at, user_id, property_id, cover_photo_url, is_urgent, owner:profiles!sits_user_id_fkey(latitude, longitude)"
         )
         .eq("status", "published")
         .eq("accepting_applications", true)

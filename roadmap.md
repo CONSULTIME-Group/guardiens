@@ -13,3 +13,10 @@
 - [x] Vitest complet, tsgo, build, scan des textes
 - [x] Mesure des requêtes réseau au chargement, membre connecté, avant et après
 - [x] Rapport final 10 lignes avec hash du commit (aucune publication, aucune migration)
+
+## Finition H1 et E7
+
+- [x] Composer la home avec 4 gardes et 2 besoins, avec repli et tri local
+- [x] Corriger le compteur national, le hero et le lien réservé aux visiteurs
+- [x] Exclure le membre de la liste Entraide et ajuster distances et capitalisation
+- [x] Adapter les tests et lancer toutes les vérifications demandées

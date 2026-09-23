@@ -26,6 +26,7 @@ import {
 } from "@/lib/entraideHubModel";
 import { QUICK_CAN_HELP_MESSAGE, respondToMission } from "@/lib/missionRespond";
 import { toast } from "sonner";
+import { capitalizeFirstName } from "@/lib/displayName";
 
 const EntraideMap = lazy(() => import("@/components/entraide/EntraideMap"), "EntraideMap");
 
@@ -199,7 +200,7 @@ const EntraideHub = () => {
     return null;
   }, [searchedOrigin, profile?.latitude, profile?.longitude]);
 
-  const originCity = searchedCity || profile?.city || null;
+  const originCity = capitalizeFirstName(searchedCity || profile?.city) || null;
 
   const needDistance = useCallback((need: EntraideNeed) => distanceFrom(origin, need.latitude, need.longitude), [origin]);
   const helperDistance = useCallback((helper: PublicHelper) => distanceFrom(origin, helper.latitude_approx, helper.longitude_approx), [origin]);
@@ -209,8 +210,11 @@ const EntraideHub = () => {
     [needs, origin, needDistance],
   );
   const sortedHelpers = useMemo(
-    () => (origin ? sortByDistance(helpers, helperDistance) : helpers),
-    [helpers, origin, helperDistance],
+    () => {
+      const otherHelpers = user?.id ? helpers.filter((helper) => helper.id !== user.id) : helpers;
+      return origin ? sortByDistance(otherHelpers, helperDistance) : otherHelpers;
+    },
+    [helpers, origin, helperDistance, user?.id],
   );
   const visibleHelpers = useMemo(() => sortedHelpers.slice(0, helpersShown), [sortedHelpers, helpersShown]);
 

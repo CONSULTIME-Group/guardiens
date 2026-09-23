@@ -108,10 +108,10 @@ describe("Entraide, la page vue d'un membre", () => {
         need("proche", "Arroser le potager", 45.76, 4.86),
       ],
       public_helpers: Array.from({ length: 20 }, (_, index) => ({
-        id: `h${index}`,
-        first_name: `Membre${index}`,
+        id: index === 0 ? "me" : `h${index}`,
+        first_name: index === 0 ? "moi" : index === 1 ? "gaston" : `Membre${index}`,
         avatar_url: null,
-        city: "Lyon",
+        city: index === 1 ? "LYON" : "Lyon",
         latitude_approx: 45.75 + index / 100,
         longitude_approx: 4.85,
         helps_with: "Arroser les plantes",
@@ -128,7 +128,7 @@ describe("Entraide, la page vue d'un membre", () => {
   it("prend l'origine dans le profil connecté, sans saisie de ville", async () => {
     renderHub();
     expect(await screen.findByRole("heading", { name: "Besoins près de chez vous" })).toBeInTheDocument();
-    await waitFor(() => expect(screen.getByText(/Autour de Lyon\. Le plus proche est à 1 km\./)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("Autour de Lyon. Le plus proche est tout près de chez vous.")).toBeInTheDocument());
     expect(screen.getByRole("button", { name: "Changer de lieu" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Situer" })).toBeNull();
   });
@@ -182,17 +182,19 @@ describe("Entraide, la page vue d'un membre", () => {
 
   it("charge la section des personnes en trois requêtes au plus", async () => {
     renderHub();
-    await waitFor(() => expect(screen.getByText("Membre0")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("Gaston")).toBeInTheDocument());
     await waitFor(() => expect(calls.filter((table) => table === "public_help_counts").length).toBe(1));
     const helperCalls = calls.filter((table) => ["public_helpers", "public_help_counts", "profile_mission_badges"].includes(table));
     expect(helperCalls.length).toBeLessThanOrEqual(3);
-    expect(screen.getAllByRole("heading", { level: 3 }).filter((node) => node.textContent?.startsWith("Membre")).length).toBe(12);
+    expect(screen.queryByText("Moi")).toBeNull();
+    expect(screen.getByText("Lyon, tout près de chez vous")).toBeInTheDocument();
+    expect(screen.getAllByRole("heading", { level: 3 }).filter((node) => node.textContent === "Gaston" || node.textContent?.startsWith("Membre")).length).toBe(12);
     expect(screen.getByRole("button", { name: "Voir 12 de plus" })).toBeInTheDocument();
   });
 
   it("charge la page d'un membre en huit requêtes au plus", async () => {
     renderHub();
-    await waitFor(() => expect(screen.getByText("Membre0")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("Gaston")).toBeInTheDocument());
     await waitFor(() => expect(calls).toContain("public_help_counts"));
     expect(calls.length).toBeLessThanOrEqual(8);
   });

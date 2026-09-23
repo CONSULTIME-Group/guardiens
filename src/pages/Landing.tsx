@@ -70,7 +70,7 @@ const Landing = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const shellMode = useShellMode();
-  useAuth();
+  const { isAuthenticated } = useAuth();
   // Session vérifiée et profil chargé : on ne propose plus de créer un compte
   // à quelqu'un qui en a déjà un, on propose son action principale.
   const isMember = shellMode === "app";
@@ -247,7 +247,7 @@ const Landing = () => {
               </Button>
             </div>
             <HomeProximitySearch onLocated={setHomeOrigin} />
-            <Link to="/inscription?role=sitter" className="mt-2 inline-block text-xs text-primary-foreground/90 underline underline-offset-4">Vous voulez garder ? Créez votre profil.</Link>
+            {!isAuthenticated && <Link to="/inscription?role=sitter" className="mt-2 inline-block text-xs text-primary-foreground/90 underline underline-offset-4">Vous voulez garder ? Créez votre profil.</Link>}
           </div>
         </div>
       </section>

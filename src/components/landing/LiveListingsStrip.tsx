@@ -21,9 +21,29 @@ interface HomeListing {
 }
 
 const MAX_LISTINGS = 6;
+const GUARD_TARGET = 4;
+const NEED_TARGET = 2;
 
 const distanceFrom = (origin: HomeOrigin | null, lat: number | null, lng: number | null) =>
   origin && lat !== null && lng !== null ? haversineDistance(origin.lat, origin.lng, lat, lng) : null;
+
+const byDistance = (a: HomeListing, b: HomeListing) =>
+  (a.distance ?? Number.MAX_VALUE) - (b.distance ?? Number.MAX_VALUE);
+
+export const composeHomeListings = (guards: HomeListing[], needs: HomeListing[], origin: HomeOrigin | null) => {
+  const rankedGuards = origin ? [...guards].sort(byDistance) : guards;
+  const rankedNeeds = origin ? [...needs].sort(byDistance) : needs;
+  const selected = [
+    ...rankedGuards.slice(0, GUARD_TARGET),
+    ...rankedNeeds.slice(0, NEED_TARGET),
+  ];
+  if (selected.length >= MAX_LISTINGS) return selected;
+  const remaining = [
+    ...rankedGuards.slice(GUARD_TARGET),
+    ...rankedNeeds.slice(NEED_TARGET),
+  ];
+  return [...selected, ...remaining.slice(0, MAX_LISTINGS - selected.length)];
+};
 
 export default function LiveListingsStrip({ origin = null }: { origin?: HomeOrigin | null }) {
   const { data: sits = [], isLoading: sitsLoading } = useRecentPublishedSits();
@@ -69,18 +89,13 @@ export default function LiveListingsStrip({ origin = null }: { origin?: HomeOrig
       endDate: sit.end_date,
       photo: sit.cover_photo_url,
       href: `/annonces/${sit.slug || sit.id}`,
-      latitude: null,
-      longitude: null,
+      latitude: sit.owner?.latitude ?? null,
+      longitude: sit.owner?.longitude ?? null,
       distance: null,
     }));
-    return [...guards, ...missions]
-      .map((listing) => ({ ...listing, distance: distanceFrom(origin, listing.latitude, listing.longitude) }))
-      .sort((a, b) => {
-        if (a.kind !== b.kind) return a.kind === "garde" ? -1 : 1;
-        if (origin) return (a.distance ?? Number.MAX_VALUE) - (b.distance ?? Number.MAX_VALUE);
-        return 0;
-      })
-      .slice(0, MAX_LISTINGS);
+    const locatedGuards = guards.map((listing) => ({ ...listing, distance: distanceFrom(origin, listing.latitude, listing.longitude) }));
+    const locatedNeeds = missions.map((listing) => ({ ...listing, distance: distanceFrom(origin, listing.latitude, listing.longitude) }));
+    return composeHomeListings(locatedGuards, locatedNeeds, origin);
   }, [missions, origin, sits]);
 
   const formatDate = (date: string | null) => date
