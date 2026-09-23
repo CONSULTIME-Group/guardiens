@@ -18,6 +18,8 @@ export interface EntraideNeed {
   latitude: number | null;
   longitude: number | null;
   response_count: number;
+  photos?: string[] | null;
+  sit_mode?: string | null;
 }
 
 export interface PublicHelper {
