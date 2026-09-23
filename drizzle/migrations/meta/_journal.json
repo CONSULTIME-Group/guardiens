@@ -127,6 +127,13 @@
       "when": 1790141978679,
       "tag": "0017_entraide_single_wave",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1790147574521,
+      "tag": "0018_entraide_sit_mode",
+      "breakpoints": true
     }
   ]
 }
