@@ -44,6 +44,7 @@ vi.mock("@/components/PageMeta", () => ({
 vi.mock("@/components/entraide/EntraideMap", () => ({
   default: () => <div data-testid="entraide-map" />,
 }));
+vi.mock("sonner", () => ({ toast: Object.assign(vi.fn(), { success: vi.fn(), error: vi.fn(), info: vi.fn() }) }));
 vi.mock("@/components/entraide/EntraideProofs", () => ({ default: () => null }));
 const { respondMock } = vi.hoisted(() => ({
   respondMock: vi.fn(async () => ({ kind: "sent", inserted: { id: "r1" } })),
