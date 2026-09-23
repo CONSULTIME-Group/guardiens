@@ -3,6 +3,7 @@
  */
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import {
   WAVE_MAX_COUNT,
   shouldSendNextWave,
@@ -14,7 +15,7 @@ import { looksLikeMultiDaySit } from "@/lib/missionSitRedirect";
 import { waveAudienceMessage } from "@/lib/missionAudienceMessage";
 import { HELPS_WITH_ANCHOR } from "@/components/dashboard/HelpsWithReminder";
 
-const read = (p: string) => readFileSync(new URL(`../../${p}`, import.meta.url), "utf8");
+const read = (relativePath: string) => readFileSync(resolve(process.cwd(), relativePath), "utf8");
 
 describe("plafond de trois vagues", () => {
   const base = { status: "open", response_count: 0, last_wave_at: "2026-09-01T10:00:00Z" };
