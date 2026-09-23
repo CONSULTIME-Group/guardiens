@@ -131,7 +131,7 @@ CREATE OR REPLACE FUNCTION public.emit_mission_meetup_tokens(p_mission_id uuid)
 RETURNS jsonb
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path TO 'public'
+SET search_path TO 'public', 'extensions'
 AS $function$
 DECLARE
   m record;

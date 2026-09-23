@@ -88,7 +88,7 @@ CREATE OR REPLACE FUNCTION public.enqueue_mission_wave(
 RETURNS jsonb
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path TO 'public'
+SET search_path TO 'public', 'extensions'
 AS $function$
 DECLARE
   v_wave integer;
