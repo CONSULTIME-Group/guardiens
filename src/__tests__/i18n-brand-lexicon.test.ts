@@ -38,9 +38,11 @@ const FORBIDDEN = [
   /nachbar/i,
   /neighbou?r/i,
   /\bvecin[oa]s?\b/i,
-  // « vicino a lei » (près de chez vous) est légitime : seul le voisinage l'est pas.
+  // « vicino a lei » (près de chez vous) est légitime : seul le voisinage ne l'est pas.
   /tra vicini|vicin[oi] di casa/i,
-  /\bvoisin(e|s|age)?\b/i,
+  // « voisins » est autorisé depuis le 23/09/2026 (consigne produit) : seule
+  // l'expression « gens du coin » reste proscrite dans le bloc landing,
+  // verrouillée par landing-hero-proximity-guard.test.ts.
   /free forever/i,
   /gratis para siempre/i,
   /gratis per sempre/i,
@@ -68,7 +70,7 @@ const LOCKED_GROUPS: Record<string, string[]> = {
 };
 
 describe("lexique de marque", () => {
-  it("aucune langue n'emploie l'idée de voisin ni la gratuité perpétuelle", () => {
+  it("aucune langue n'emploie l'idée de voisin étrangère ni la gratuité perpétuelle", () => {
     const offenders: string[] = [];
     for (const lng of LANGS) {
       for (const [key, value] of Object.entries(dicts[lng])) {

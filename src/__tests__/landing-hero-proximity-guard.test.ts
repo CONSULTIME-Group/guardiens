@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
 
-const HERO_PATH = path.resolve(process.cwd(), "src/i18n/locales/fr/common.json");
+const COMMON_PATH = path.resolve(process.cwd(), "src/i18n/locales/fr/common.json");
 
 const flatten = (obj: Record<string, unknown>, prefix = "", acc: Record<string, string> = {}) => {
   for (const [key, value] of Object.entries(obj)) {
@@ -16,12 +16,22 @@ const flatten = (obj: Record<string, unknown>, prefix = "", acc: Record<string, 
   return acc;
 };
 
-describe("landing.hero, proximité locale H1", () => {
-  const hero = flatten(
-    (JSON.parse(fs.readFileSync(HERO_PATH, "utf8")) as any).landing.hero
+describe("landing.hero, entraide entre voisins", () => {
+  const landing = flatten(
+    (JSON.parse(fs.readFileSync(COMMON_PATH, "utf8")) as any).landing
   );
 
-  it("présente les gens du coin comme second moteur", () => {
-    expect(hero.lede).toContain("les gens du coin se rendent des coups de main");
+  it("présente l'entraide entre voisins comme second moteur", () => {
+    expect(landing["hero.lede"]).toContain("on s'entraide entre voisins");
+  });
+
+  it("n'emploie plus « gens du coin » dans tout le bloc landing", () => {
+    const hits = Object.entries(landing)
+      .filter(([, value]) => value.includes("gens du coin"))
+      .map(([key]) => key);
+    expect(
+      hits,
+      `« gens du coin » résiduel dans landing : ${hits.join(", ")}`
+    ).toEqual([]);
   });
 });
