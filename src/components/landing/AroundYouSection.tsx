@@ -125,7 +125,6 @@ const AroundYouSection = () => {
             role="img"
             aria-label="Carte de France avec les personnes disponibles pour un coup de main"
             className="h-auto w-full"
-            loading="lazy"
           >
             <path d={outlinePath} fill="hsl(var(--muted))" stroke="hsl(var(--border))" strokeWidth="1.5" />
             {dots.map(([x, y], index) => (
