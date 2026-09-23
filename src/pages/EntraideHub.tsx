@@ -189,10 +189,16 @@ const EntraideHub = () => {
     return () => { cancelled = true; };
   }, [user?.id]);
 
-  const origin: Origin = searchedOrigin
-    || (profile?.latitude !== null && profile?.latitude !== undefined && profile?.longitude !== null && profile?.longitude !== undefined
-      ? [profile.latitude, profile.longitude]
-      : null);
+  // Identité stable de l'origine : sans ce useMemo, chaque rendu produit un
+  // nouveau tableau, ce qui relance les tris, les requêtes groupées et boucle.
+  const origin: Origin = useMemo(() => {
+    if (searchedOrigin) return searchedOrigin;
+    if (profile?.latitude !== null && profile?.latitude !== undefined && profile?.longitude !== null && profile?.longitude !== undefined) {
+      return [profile.latitude, profile.longitude];
+    }
+    return null;
+  }, [searchedOrigin, profile?.latitude, profile?.longitude]);
+
   const originCity = searchedCity || profile?.city || null;
 
   const needDistance = useCallback((need: EntraideNeed) => distanceFrom(origin, need.latitude, need.longitude), [origin]);
