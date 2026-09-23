@@ -30,7 +30,7 @@ export function HomeProximitySearch({ onLocated }: { onLocated: (origin: HomeOri
       return;
     }
     const origin = { lat: Number(geo.lat.toFixed(2)), lng: Number(geo.lng.toFixed(2)) };
-    const { data, error } = await (supabase.rpc as any)("home_proximity_counts", {
+    const { data, error } = await supabase.rpc("home_proximity_counts", {
       p_lat: origin.lat,
       p_lng: origin.lng,
     });
