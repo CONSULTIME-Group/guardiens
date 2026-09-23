@@ -24,4 +24,4 @@
 ## Régression du voile du hero
 
 - [x] Rétablir le dégradé, les styles des textes et des boutons, et la mention presse temporaire
-- [ ] Vérifier le garde-fou, les types, le build et le contraste à 360 px et 1440 px
+- [x] Vérifier le garde-fou, les types, le build et le contraste à 360 px et 1440 px
