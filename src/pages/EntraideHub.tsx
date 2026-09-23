@@ -101,12 +101,15 @@ const EntraideHub = () => {
   const [city, setCity] = useState("");
   const [origin, setOrigin] = useState<[number, number] | null>(null);
   const [locating, setLocating] = useState(false);
-  const [mapOpen, setMapOpen] = useState(false);
+  // Onglet « Besoins » : carte par défaut sur ordinateur, liste par défaut sur mobile.
+  const [mapOpen, setMapOpen] = useState(
+    () => params.get("vue") !== "autour" && typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches,
+  );
 
   useEffect(() => {
     const load = async () => {
       const [needsResult, helpersResult, countsResult] = await Promise.all([
-        supabase.from("public_small_missions").select("id, slug, title, city, date_needed, end_date, latitude, longitude").eq("status", "open").eq("mission_type", "besoin").order("created_at", { ascending: false }),
+        supabase.from("public_small_missions").select("id, slug, title, city, date_needed, end_date, latitude, longitude, photos, sit_mode").eq("status", "open").eq("mission_type", "besoin").order("created_at", { ascending: false }),
         supabase.from("public_helpers").select("id, first_name, avatar_url, city, latitude_approx, longitude_approx, helps_with"),
         supabase.from("public_mission_response_counts").select("mission_id, response_count"),
       ]);
