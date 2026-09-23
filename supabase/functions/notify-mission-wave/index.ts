@@ -31,6 +31,8 @@ import {
   frenchDateLabel,
   WAVE_RELAUNCH_MESSAGE,
   WAVE_EMPTY_MESSAGE,
+  isMissionSitMode,
+  sitModeEmailLine,
 } from "../_shared/mission-wave.ts";
 import { pickNearestProof, proofEmailLine, proofWeekLabel, type ProofRow } from "../_shared/mission-meetup.ts";
 
