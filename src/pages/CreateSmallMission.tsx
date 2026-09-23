@@ -898,13 +898,7 @@ const CreateSmallMission = () => {
             {step === 3 && audienceCount !== null && (
               <div className="text-center space-y-1">
                 <p className="text-xs text-muted-foreground">
-                  {audienceCount === 0
-                    ? "Votre besoin reste visible sur la page Entraide, et les personnes qui rejoignent votre secteur le découvriront."
-                    : audienceCount === 1
-                      ? "La personne disponible la plus proche de chez vous sera prévenue."
-                      : audienceCount <= 10
-                        ? `Les ${audienceCount} personnes disponibles les plus proches seront prévenues.`
-                        : "Les 10 personnes disponibles les plus proches seront prévenues tout de suite, puis 10 autres 48 h plus tard si besoin."}
+                  {waveAudienceMessage(audienceCount)}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   Ce sont les personnes disponibles les plus proches du lieu indiqué.
