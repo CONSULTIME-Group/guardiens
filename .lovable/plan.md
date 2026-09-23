@@ -1,115 +1,158 @@
-# Lot E5, Entraide : une seule diffusion par besoin
+# Lot E6, question de déroulement, cartes, photos et bloc d'accueil
 
-## Ce qui est constaté dans le code et la base
+## État vérifié
 
-- Les trois fonctions corrigées à la main portent bien `SET search_path TO 'public', 'extensions'` en base (`enqueue_mission_wave`, `emit_mission_meetup_tokens`, `my_mission_meetup_tokens`), mais les fichiers `drizzle/migrations/0009`, `0013` et `0014` gardent l'ancienne définition : une redéfinition future ramènerait la panne.
-- Chemins qui diffusent un besoin aujourd'hui, hors vagues :
-  1. **Déclencheur base `trg_notify_helpers_on_new_mission`** sur `small_missions`, fonction `enqueue_helpers_for_new_mission()` : à l'insertion, il met en file **toute** l'audience `mission_audience()` (les 72 personnes de Lyon), sans numéro de vague.
-  2. **`send-mission-daily-digest`** (cron 69, `15 * * * *`) : vide cette file et envoie. Il écarte déjà les lignes portant un numéro de vague.
-  3. **`send-nearby-daily-digest`** (cron 109) : inclut les besoins ouverts de moins de 24 h dans le digest de proximité.
-  4. **`send-weekly-nearby-digest`** (cron 653) : inclut les besoins ouverts de la semaine.
-  - Vérifié sans diffusion de besoin : `send-mutual-aid-weekly-digest` (aucune lecture de `small_missions`), `send-mission-nudges` (auteur et répondants seulement), `notify-mission-event`, `dispatch-web-push`, `send-alert-digest`.
-- Compteur du formulaire : `count_mission_notification_audience` s'appuie sur `mission_audience()`, qui accepte aussi `owner_profiles.competences_disponible` et applique un rayon élargi pour la catégorie projet. La vague, elle, passe par `mission_wave_audience()` : `available_for_help` seul. Les deux nombres peuvent donc différer.
-- Bouton de l'email n°1 : `https://guardiens.fr/dashboard?utm_source=email&utm_medium=email&utm_campaign=entraide_ligne`. `HelpsWithReminder` n'a aucune ancre et se monte seulement si `helps_with` est vide.
+- `small_missions` contient 6 besoins ouverts, dont 4 avec au moins une photo.
+- `public_small_missions` expose déjà `photos` et `end_date`, avec lecture publique et connectée. La migration 0018 la recréera uniquement pour y ajouter `sit_mode`.
+- `public_helpers` contient actuellement 726 personnes disponibles, toutes avec des coordonnées publiques arrondies.
+- Le hub charge aujourd'hui besoins et personnes ensemble dans `EntraideMap`. Les pages villes utilisent le même composant, sans onglets.
+- La home charge déjà certaines ressources après une période d'inactivité. Le nouveau bloc suivra ce principe et restera sous la ligne de flottaison.
 
-## Décision sur le cron 69
+## 1. Question « Comment ça se passe ? »
 
-Après suppression de la mise en file automatique, `mission_notification_queue` ne reçoit plus que des lignes de vague, que le digest ignore déjà : il n'aurait plus rien à traiter. **Le cron 69 est désactivé** (`cron.unschedule`), la fonction reste en place pour un rattrapage manuel des lignes historiques.
+1. Conserver `looksLikeMultiDaySit` comme signal d'ouverture de la question, jamais comme décision automatique.
+2. Dans la dernière étape du formulaire, afficher un choix unique obligatoire lorsque le signal est présent :
+   - `at_home` : « Quelqu'un s'installe chez moi pendant mon absence »
+   - `visits` : « Quelqu'un passe chez moi »
+   - `at_helper` : « Mon animal va chez la personne »
+3. Pour `at_home`, afficher le bloc validé avec le bouton vers `/sits/create`, en reprenant titre, description, ville et dates. Le lien « Publier quand même un besoin » autorise ensuite la publication avec `sit_mode = at_home`.
+4. Pour `visits`, poursuivre directement avec `sit_mode = visits`.
+5. Pour `at_helper`, poursuivre avec `sit_mode = at_helper` et la ligne « Un coup de main entre gens du coin, en échange d'un service ou d'une attention. » Le contrôle des mentions d'argent reste actif.
+6. Enregistrer le choix lors de la création. Réinitialiser la réponse si les champs changent au point de faire disparaître puis réapparaître le signal.
+7. Centraliser les libellés d'affichage :
+   - `at_home` : « Présence chez {prénom} pendant son absence »
+   - `visits` : « Passages chez {prénom} »
+   - `at_helper` : « L'animal vient chez vous »
+8. Afficher cette ligne sur la fiche publique et connectée du besoin. La ligne utilise le prénom réel déjà chargé, avec un libellé générique affirmatif lorsque le prénom est absent.
+9. Transmettre `sit_mode` et le prénom réel depuis `notify-mission-wave`, puis afficher la même ligne dans `mission-help-needed`.
 
-## 1. Alignement code et base
+### Fichiers exacts
 
-`drizzle/migrations/0017_entraide_search_path_and_single_wave.sql` :
+- `src/lib/missionSitRedirect.ts`
+- `src/pages/CreateSmallMission.tsx`
+- `src/pages/SmallMissionDetail.tsx`
+- `supabase/functions/notify-mission-wave/index.ts`
+- `supabase/functions/_shared/transactional-email-templates/mission-help-needed.tsx`
+- `src/__tests__/entraide-e5-diffusion-unique.test.ts`
+- `src/pages/__tests__/create-small-mission-sit-mode.test.tsx` (nouveau)
+- `src/pages/__tests__/small-mission-sit-mode.test.tsx` (nouveau)
+
+## 2. Carte pilotée par l'onglet
+
+1. Ajouter à `EntraideMap` une propriété `activeKind: "needs" | "helpers"`.
+2. Produire deux couches et deux regroupements indépendants afin qu'un besoin et une personne au même endroit restent distincts.
+3. Onglet « Besoins » :
+   - besoins en marqueurs principaux, plus grands, couleur principale, cliquables ;
+   - personnes en petits points discrets, sans interaction ;
+   - popup besoin avec première photo éventuelle, titre, ville, date, distance et bouton « Voir le besoin ».
+4. Onglet « Autour de vous » : personnes en marqueurs principaux cliquables, besoins en points de contexte discrets.
+5. Sur ordinateur, ouvrir la carte par défaut dans l'onglet « Besoins ». Sur mobile, ouvrir la liste par défaut. La ville saisie devient le centre, sinon la France reste le cadrage initial.
+6. Sur les 14 pages villes, ajouter les mêmes onglets et la même bascule Liste ou Carte. Le centre et le rayon éditorial propres à chaque ville restent inchangés. La liste suit aussi l'onglet actif.
+7. Conserver le décalage géographique existant des coordonnées publiques.
+
+### Fichiers exacts
+
+- `src/components/entraide/EntraideMap.tsx`
+- `src/lib/entraideMap.ts`
+- `src/pages/EntraideHub.tsx`
+- `src/pages/MissionsCityPage.tsx`
+- `src/pages/__tests__/entraide-hub-explicit.test.tsx`
+- `src/pages/__tests__/missions-city-pages.test.tsx`
+- `src/lib/__tests__/entraideMap.test.ts`
+- `src/components/entraide/__tests__/EntraideMap.test.tsx` (nouveau)
+
+## 3. Photos des besoins
+
+1. Ajouter `photos` aux sélections de `public_small_missions` du hub et des pages villes, puis au type `EntraideNeed`.
+2. Dans `NeedCard`, afficher la première photo en tête, ratio 4:3, `loading="lazy"`, texte alternatif égal au titre nettoyé.
+3. Pour un besoin sans photo, afficher un en-tête typographique sobre avec ville et date, en utilisant les couleurs sémantiques existantes.
+4. Réutiliser cette présentation dans la popup du besoin, avec un bouton libellé « Voir le besoin ».
+
+### Fichier exact supplémentaire
+
+- `src/components/entraide/EntraideCards.tsx`
+
+## 4. Bloc home « Autour de vous »
+
+1. Insérer le bloc immédiatement après `ConfianceSection`, donc sous la ligne de flottaison et avant le pied de page.
+2. Charger dynamiquement le composant après `requestIdleCallback`, avec repli temporisé. La requête démarre uniquement après ce chargement.
+3. Lire directement `public_helpers` avec un comptage exact et des pages de coordonnées arrondies. Le titre utilise ce nombre réel : « {n} personnes prêtes à donner un coup de main près de chez vous ».
+4. Afficher le sous-titre validé : « Arroser un jardin, nourrir un chat, changer une ampoule : demandez, les gens du coin répondent. »
+5. Dessiner une carte statique de France en SVG local, sans Leaflet, et placer les points à partir des coordonnées arrondies. Le SVG aura un libellé accessible et une densité visuelle stable.
+6. Ajouter les boutons « Demander un coup de main » vers `/petites-missions/creer` et « Voir qui est autour de moi » vers `/petites-missions`.
+
+### Fichiers exacts
+
+- `src/pages/Landing.tsx`
+- `src/components/landing/NearbyHelpSection.tsx` (nouveau)
+- `src/components/landing/NearbyHelpFranceMap.tsx` (nouveau)
+- `src/pages/__tests__/landing-nearby-help.test.tsx` (nouveau)
+
+## Migration 0018
+
+Migration officielle : `drizzle/migrations/0018_entraide_sit_mode.sql`.
+
+Copie documentaire : `supabase/migrations/20260923063000_entraide_sit_mode_ne_pas_rejouer.sql`, avec l'en-tête « COPIE DOCUMENTAIRE, NE PAS REJOUER ».
+
+SQL prévu :
 
 ```sql
-ALTER FUNCTION public.enqueue_mission_wave(uuid, integer) SET search_path = public, extensions;
-ALTER FUNCTION public.emit_mission_meetup_tokens(uuid) SET search_path = public, extensions;
-ALTER FUNCTION public.my_mission_meetup_tokens(uuid) SET search_path = public, extensions;
+CREATE TYPE public.mission_sit_mode AS ENUM ('at_home', 'visits', 'at_helper');
 
--- Diffusion unique : le déclencheur historique laisse les besoins aux vagues.
-CREATE OR REPLACE FUNCTION public.enqueue_helpers_for_new_mission()
-RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public' AS $$
-begin
-  if new.status <> 'open' or new.latitude is null or new.longitude is null then
-    return new;
-  end if;
-  if new.mission_type = 'besoin' then
-    return new;
-  end if;
-  insert into public.mission_notification_queue (helper_id, mission_id, distance_km)
-  select a.helper_id, new.id, a.distance_km
-  from public.mission_audience(new.latitude::double precision, new.longitude::double precision,
-                               new.category::text, new.user_id) a
-  on conflict (helper_id, mission_id) do nothing;
-  return new;
-end;
-$$;
+ALTER TABLE public.small_missions
+  ADD COLUMN sit_mode public.mission_sit_mode;
 
--- Compteur du formulaire aligné sur la vague, mêmes filtres, même rayon.
-CREATE OR REPLACE FUNCTION public.mission_wave_audience_preview(p_lat double precision, p_lng double precision)
-RETURNS integer LANGUAGE sql STABLE SECURITY DEFINER SET search_path TO 'public' AS $$
-  select count(*)::integer
-  from public.profiles p
-  left join public.email_preferences ep on ep.user_id = p.id
-  left join public.suppressed_emails se on lower(se.email) = lower(p.email)
-  cross join lateral (select 6371 * acos(least(1.0, greatest(-1.0,
-      cos(radians(p_lat)) * cos(radians(p.latitude::double precision))
-      * cos(radians(p.longitude::double precision) - radians(p_lng))
-      + sin(radians(p_lat)) * sin(radians(p.latitude::double precision))))) as dist) d
-  where p_lat is not null and p_lng is not null
-    and p.id is distinct from auth.uid()
-    and coalesce(p.available_for_help, false)
-    and coalesce(p.account_status, 'active') = 'active'
-    and p.email is not null
-    and p.latitude is not null and p.longitude is not null
-    and coalesce(ep.new_mission_digest, true) = true
-    and coalesce(ep.product_emails, true) = true
-    and se.email is null
-    and d.dist <= public.mutual_aid_radius_km(p.id);
-$$;
+COMMENT ON COLUMN public.small_missions.sit_mode IS
+  'Déroulement déclaré pour un besoin animal détecté comme garde potentielle.';
 
-REVOKE ALL ON FUNCTION public.mission_wave_audience_preview(double precision, double precision) FROM PUBLIC, anon;
-GRANT EXECUTE ON FUNCTION public.mission_wave_audience_preview(double precision, double precision) TO authenticated, service_role;
+CREATE OR REPLACE VIEW public.public_small_missions AS
+SELECT
+  id, user_id, slug, title, description, category, exchange_offer,
+  city, postal_code, round(latitude, 2) AS latitude,
+  round(longitude, 2) AS longitude, date_needed, end_date,
+  duration_estimate, status, mission_type, photos, pet_species, pet_size,
+  created_at, max_participants, accepting_applications, hebergement, repas,
+  ce_que_vous_apprendrez, nature_projet, savoir_faire_attendus,
+  savoir_faire_transmis, offre, mois_accueil, sit_mode
+FROM public.small_missions
+WHERE status = 'open'::public.small_mission_status
+  AND moderation_hidden_at IS NULL
+  AND hidden_at IS NULL;
 
-SELECT cron.unschedule(69);
+GRANT SELECT ON public.public_small_missions TO anon, authenticated;
+GRANT ALL ON public.public_small_missions TO service_role;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER
+  ON public.public_small_missions FROM anon, authenticated, PUBLIC;
 ```
 
-Les définitions d'origine de `0009`, `0013` et `0014` reçoivent le même `SET search_path` (copie de lecture, sans réexécution).
+La colonne reste nullable pour les besoins existants et pour les créations hors signal. Les politiques de `small_missions` et les droits de la vue restent identiques. Les types du client seront régénérés par l'outil de migration.
 
-## 2. Une seule diffusion
+## Mesure du poids et du LCP
 
-- `supabase/functions/_shared/mission-wave.ts` : `WAVE_MAX_COUNT = 3`, `shouldSendNextWave` rend faux au-delà de trois vagues.
-- `supabase/functions/notify-mission-wave/index.ts` : plafond appliqué aussi à la publication, et heures calmes déjà en place (un besoin créé à 23 h part au passage de 8 h 25).
-- `supabase/functions/send-nearby-daily-digest/index.ts` et `send-weekly-nearby-digest/index.ts` : requêtes filtrées sur `mission_type = 'offre'`.
-- `supabase/functions/send-mission-daily-digest/index.ts` : filtre explicite sur les besoins, en plus du filtre de vague.
+1. Avant toute modification, établir la référence sur la home avec cinq chargements à froid en Chromium, en mobile 360 px et ordinateur 1440 px, même profil réseau et processeur, cache désactivé. Relever la médiane LCP via `PerformanceObserver`, l'élément LCP et les erreurs réseau.
+2. Relever la taille gzip du paquet initial de la home et des paquets différés dans le manifeste de production.
+3. Après réalisation, répéter exactement le même protocole. Critères : aucun octet Leaflet dans le paquet initial de la home, nouveau bloc dans un paquet différé, aucune requête `public_helpers` avant la période d'inactivité, médiane LCP stable dans la marge de mesure de 100 ms.
+4. Rapporter les valeurs avant et après, le poids gzip ajouté au paquet initial et au paquet différé.
 
-## 3. Vraie promesse dans le formulaire
+## Tests et ordre d'exécution
 
-`src/pages/CreateSmallMission.tsx` appelle `mission_wave_audience_preview`, affiche `min(n, 10)` et, sous dix : « Les {n} personnes disponibles autour de chez vous seront prévenues. » Au-delà, la phrase actuelle des dix plus proches reste.
+1. Écrire le code et les tests, puis exécuter les tests ciblés.
+2. Vérifier 5 textes qui ouvrent la question et 5 textes qui poursuivent directement, dont « nourrir les poules samedi » et « changer une ampoule ».
+3. Vérifier les trois choix, le bloc `at_home`, la reprise des champs vers `/sits/create`, la publication explicite du besoin, la valeur enregistrée, les trois libellés sur la fiche et dans l'email.
+4. Vérifier chaque onglet sur hub et pages villes, les couches actives et discrètes, l'absence d'interaction sur les points de contexte, les popups, le cadrage France ou ville, et les défauts ordinateur ou mobile.
+5. Vérifier les cartes avec photo et sans photo, le chargement différé des images et les textes alternatifs.
+6. Vérifier le compteur exact, le SVG, les deux liens et le chargement après période d'inactivité sur la home.
+7. Exécuter Vitest complet, `test:sql`, `tsgo` et le build. Scanner les textes E6 pour les deux caractères de tiret interdits et le vocabulaire proscrit.
+8. Une fois tout vert, appliquer la migration 0018, contrôler colonne, type, vue, droits et valeurs existantes nulles, puis redéployer `notify-mission-wave` et `send-transactional-email`.
+9. Vérifier le parcours réel sur mobile 360 px et ordinateur 1440 px. Le front reste sans publication par mes soins.
 
-## 4. Gardes redirigées
+## Rapport final
 
-Nouveau module `src/lib/missionSitRedirect.ts` : `looksLikeMultiDaySit(title, description, dateNeeded, endDate)`, vocabulaire (garde, garder, pendant les vacances, pendant X jours, semaines, mois, Noël, séjour, nourrir pendant mon absence) ou écart de dates supérieur à deux jours. Bloc affiché à l'étape de publication dans `CreateSmallMission.tsx` : titre, texte, bouton « Publier une annonce de garde » vers `/sits/create` avec titre, dates et ville repris via `writeSitPrefill`, lien secondaire « Publier quand même un besoin ». Formulations affirmatives.
-
-## 5. Email n°1 et ancre du tableau de bord
-
-- `entraide-ligne-helps-with.tsx` : `CTA_URL` pointe sur `/dashboard#ce-que-je-propose`, UTM inchangés.
-- `HelpsWithReminder.tsx` : `id="ce-que-je-propose"`, ouverture dépliée et focus sur le champ quand l'ancre est présente.
-- `src/pages/Login` (retour de connexion) : conservation du fragment d'URL pour revenir sur l'ancre.
-
-## 6. Textes
-
-- `WAVE_RELAUNCH_MESSAGE` devient « On prévient dix autres personnes du coin. »
-- Réécritures proposées, mêmes surfaces :
-  - `WAVE_EMPTY_MESSAGE` : « Autour de vous, les personnes disponibles se comptent pour le moment sur zéro. C'est la vérité du jour : votre besoin reste visible, et je préviens dès qu'une personne du coin se rend disponible. »
-  - Notification « Votre demande reste visible » : inchangée, déjà affirmative.
-  - Notification de relance, titre « On prévient dix autres personnes » : inchangé.
-
-## Tests
-
-- Vitest : plafond de trois vagues, heures calmes (création à 23 h, envoi à 8 h), redirection garde (5 cas positifs, 5 négatifs dont « nourrir les poules samedi »), texte de relance, ancre du tableau de bord, compteur du formulaire aligné sur la vague.
-- `test:sql` : ajout dans `scripts/test-entraide-wave-engine.mjs` d'un appel de chaque fonction en transaction annulée, plus un contrôle générique sur `pg_proc` : toute fonction du schéma public appelant `gen_random_bytes`, `digest` ou `crypt` sans préfixe doit porter `extensions` dans son `search_path`.
-- `tsc` et build.
-
-## Après votre GO
-
-Code, tests, migration 0017, puis redéploiement de `notify-mission-wave`, `send-nearby-daily-digest`, `send-weekly-nearby-digest`, `send-mission-daily-digest`, `send-transactional-email`. Aucune publication du site sans votre mot.
+- Fichiers exacts modifiés et créés.
+- Diff synthétique par partie.
+- Tests chiffrés, résultat de `test:sql`, `tsgo`, build et contrôles de texte.
+- Mesures LCP et poids avant et après.
+- État de la migration 0018 et de la vue publique.
+- Fonctions redéployées.
+- Portée réelle, front construit mais jamais publié.
+- Hash du commit disponible après la création du commit par le système.
