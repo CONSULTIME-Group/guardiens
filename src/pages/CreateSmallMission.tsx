@@ -316,12 +316,13 @@ const CreateSmallMission = () => {
    * signalée à la modération. Jamais bloquant.
    */
   const sitLike = useMemo(() => sitLikeSignals(title, description), [title, description]);
-  /** Garde de plusieurs jours : invitation vers le canal dédié, jamais bloquante. */
+  /** Garde de plusieurs jours : la question s'ouvre, la personne décide. */
   const multiDaySit = useMemo(
     () => missionType === "besoin" && looksLikeMultiDaySit(title, description, dateNeeded, endDate),
     [missionType, title, description, dateNeeded, endDate],
   );
-  const [sitRedirectDismissed, setSitRedirectDismissed] = useState(false);
+  const [sitMode, setSitMode] = useState<MissionSitMode | null>(null);
+  const [sitHomeStayConfirmed, setSitHomeStayConfirmed] = useState(false);
   const rehoming = useMemo(() => rehomingSignals(title, description), [title, description]);
   const moneyWording = useMemo(
     () => moneyWordingSignals(title, description),
