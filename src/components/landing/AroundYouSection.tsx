@@ -108,7 +108,7 @@ const AroundYouSection = () => {
               : `${count} personnes prêtes à donner un coup de main près de chez vous`}
           </h2>
           <p className="mt-4 max-w-xl text-base leading-relaxed text-muted-foreground">
-            Arroser un jardin, nourrir un chat, changer une ampoule : demandez, les gens du coin répondent.
+            Arroser un jardin, nourrir un chat, changer une ampoule : demandez, les voisins répondent.
           </p>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
             <Button asChild>
