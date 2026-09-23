@@ -36,8 +36,9 @@ import RecentSitsItemListJsonLd from "@/components/seo/RecentSitsItemListJsonLd"
 
 // Bloc « Autour de vous » : chargé dynamiquement, sous la ligne de flottaison,
 // pour ne jamais toucher au LCP.
-const LazyAroundYouSection = lazy(
+const LazyAroundYouSection = lazyWithRetry(
   () => import("@/components/landing/AroundYouSection").then((m) => ({ default: m.LazyAroundYouSection })),
+  "landing-around-you",
 );
 
 import PublicFooter from "@/components/layout/PublicFooter";
