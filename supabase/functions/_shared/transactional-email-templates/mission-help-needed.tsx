@@ -44,6 +44,7 @@ const MissionHelpNeededEmail = ({
 
         {missionTitle && (
           <Section style={card}>
+            {sitModeLine && <Text style={cardCity}>{sitModeLine}</Text>}
             <Text style={cardLine}>{missionTitle}</Text>
             {missionCity && <Text style={cardCity}>{missionCity}</Text>}
           </Section>
