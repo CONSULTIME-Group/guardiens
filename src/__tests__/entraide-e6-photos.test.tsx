@@ -9,7 +9,7 @@ const baseNeed: EntraideNeed = {
   slug: "besoin-test",
   title: "Nourrir le chat pendant mes vacances",
   city: "Lyon",
-  date_needed: "2026-10-01",
+  date_needed: null,
   end_date: null,
   latitude: 45.75,
   longitude: 4.85,
