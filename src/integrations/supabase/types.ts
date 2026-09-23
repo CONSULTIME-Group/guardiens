@@ -8193,6 +8193,7 @@ export type Database = {
           repas: boolean
           savoir_faire_attendus: string[]
           savoir_faire_transmis: string[]
+          sit_mode: Database["public"]["Enums"]["mission_sit_mode"] | null
           slug: string
           status: Database["public"]["Enums"]["small_mission_status"]
           title: string
@@ -8238,6 +8239,7 @@ export type Database = {
           repas?: boolean
           savoir_faire_attendus?: string[]
           savoir_faire_transmis?: string[]
+          sit_mode?: Database["public"]["Enums"]["mission_sit_mode"] | null
           slug: string
           status?: Database["public"]["Enums"]["small_mission_status"]
           title?: string
@@ -8283,6 +8285,7 @@ export type Database = {
           repas?: boolean
           savoir_faire_attendus?: string[]
           savoir_faire_transmis?: string[]
+          sit_mode?: Database["public"]["Enums"]["mission_sit_mode"] | null
           slug?: string
           status?: Database["public"]["Enums"]["small_mission_status"]
           title?: string
@@ -9624,6 +9627,7 @@ export type Database = {
           repas: boolean | null
           savoir_faire_attendus: string[] | null
           savoir_faire_transmis: string[] | null
+          sit_mode: Database["public"]["Enums"]["mission_sit_mode"] | null
           slug: string | null
           status: Database["public"]["Enums"]["small_mission_status"] | null
           title: string | null
@@ -9658,6 +9662,7 @@ export type Database = {
           repas?: boolean | null
           savoir_faire_attendus?: string[] | null
           savoir_faire_transmis?: string[] | null
+          sit_mode?: Database["public"]["Enums"]["mission_sit_mode"] | null
           slug?: string | null
           status?: Database["public"]["Enums"]["small_mission_status"] | null
           title?: string | null
@@ -9692,6 +9697,7 @@ export type Database = {
           repas?: boolean | null
           savoir_faire_attendus?: string[] | null
           savoir_faire_transmis?: string[] | null
+          sit_mode?: Database["public"]["Enums"]["mission_sit_mode"] | null
           slug?: string | null
           status?: Database["public"]["Enums"]["small_mission_status"] | null
           title?: string | null
@@ -11565,6 +11571,7 @@ export type Database = {
         | "pet_shop"
         | "water_point"
         | "general_park"
+      mission_sit_mode: "at_home" | "visits" | "at_helper"
       mission_type_enum: "besoin" | "offre"
       owner_gallery_category:
         | "home_life"
@@ -11831,6 +11838,7 @@ export const Constants = {
         "water_point",
         "general_park",
       ],
+      mission_sit_mode: ["at_home", "visits", "at_helper"],
       mission_type_enum: ["besoin", "offre"],
       owner_gallery_category: [
         "home_life",
