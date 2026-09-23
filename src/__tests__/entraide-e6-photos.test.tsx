@@ -46,7 +46,6 @@ describe("Lot E6 partie 3, photos des besoins", () => {
     for (const html of [withPhoto, withoutPhoto]) {
       expect(html).toContain("Nourrir le chat pendant mes vacances");
       expect(html).toContain("personnes ont dit je peux");
-edNeedCard from "@/components/entraide/EntraideCards";");
       expect(html).toContain("Voir le détail");
     }
   });
