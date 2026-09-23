@@ -31,6 +31,7 @@
 - `src/lib/missionSitRedirect.ts`
 - `src/pages/CreateSmallMission.tsx`
 - `src/pages/SmallMissionDetail.tsx`
+- `src/integrations/supabase/types.ts` (régénéré automatiquement par la migration)
 - `supabase/functions/notify-mission-wave/index.ts`
 - `supabase/functions/_shared/transactional-email-templates/mission-help-needed.tsx`
 - `src/__tests__/entraide-e5-diffusion-unique.test.ts`
@@ -92,7 +93,7 @@
 
 Migration officielle : `drizzle/migrations/0018_entraide_sit_mode.sql`.
 
-Copie documentaire : `supabase/migrations/20260923063000_entraide_sit_mode_ne_pas_rejouer.sql`, avec l'en-tête « COPIE DOCUMENTAIRE, NE PAS REJOUER ».
+Copie documentaire : `supabase/migrations/20260923061300_entraide_sit_mode_ne_pas_rejouer.sql`, avec l'en-tête « COPIE DOCUMENTAIRE, NE PAS REJOUER ».
 
 SQL prévu :
 
