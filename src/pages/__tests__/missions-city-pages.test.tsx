@@ -108,7 +108,9 @@ describe("pages villes Entraide", () => {
     expect(screen.queryByText("Alex")).not.toBeInTheDocument();
     expect(screen.getByText("La carte se remplit avec les coups de main du coin.")).toBeInTheDocument();
     expect(screen.queryByText("Preuve locale")).not.toBeInTheDocument();
-    expect(screen.getByTestId("city-map")).toHaveTextContent("1:2");
+    // La carte s'ouvre à la demande dans l'environnement de test.
+    fireEvent.click(screen.getByRole("button", { name: "Carte" }));
+    await waitFor(() => expect(screen.getByTestId("city-map")).toHaveTextContent("1:2"));
   });
 
   it("garde le seuil du compteur explicite", () => {
