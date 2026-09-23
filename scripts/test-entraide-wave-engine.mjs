@@ -238,7 +238,7 @@ passed.push('Les fonctions a jeton s\'executent sans erreur, transaction annulee
 const risky = (await db.query(`
   SELECT p.proname, p.proconfig FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
   WHERE n.nspname='public'
-    AND p.prosrc ~* '(^|[^.[:alnum:]_])(gen_random_bytes|digest|crypt)[[:space:]]*\('`)).rows;
+    AND p.prosrc ~* '(^|[^.[:alnum:]_])(gen_random_bytes|digest|crypt)[[:space:]]*\\('`)).rows;
 const missing = risky.filter((r) => !(r.proconfig || []).some((c) => /^search_path=.*extensions/.test(c)));
 assert.deepEqual(missing.map((r) => r.proname), [], 'search_path sans extensions');
 assert.ok(risky.length > 0, 'le controle doit examiner au moins une fonction');
