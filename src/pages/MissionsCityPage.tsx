@@ -68,7 +68,7 @@ const MissionsCityPage = ({ citySlug }: MissionsCityPageProps) => {
     const load = async () => {
       const [profiles, needsResult, helpersResult, countsResult] = await Promise.all([
         fetchAvailableProfiles(),
-        supabase.from("public_small_missions").select("id, slug, title, city, date_needed, end_date, latitude, longitude").eq("status", "open").eq("mission_type", "besoin").order("created_at", { ascending: false }),
+        supabase.from("public_small_missions").select("id, slug, title, city, date_needed, end_date, latitude, longitude, photos, sit_mode").eq("status", "open").eq("mission_type", "besoin").order("created_at", { ascending: false }),
         supabase.from("public_helpers").select("id, first_name, avatar_url, city, latitude_approx, longitude_approx, helps_with"),
         supabase.from("public_mission_response_counts").select("mission_id, response_count"),
       ]);
