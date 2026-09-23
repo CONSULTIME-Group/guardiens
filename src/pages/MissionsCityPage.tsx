@@ -191,19 +191,25 @@ const MissionsCityPage = ({ citySlug }: MissionsCityPageProps) => {
                   : <p className="mt-5 rounded-lg border border-border p-5 text-sm text-muted-foreground">Les premières personnes qui décrivent leurs coups de main apparaîtront ici.</p>))}
             </section>
 
-            <section aria-labelledby="city-needs-title">
-              <h2 id="city-needs-title" className="font-heading text-2xl font-semibold text-foreground">Besoins ouverts près de {c.cityName}</h2>
-              {loading ? <div className="mt-5 grid gap-4 md:grid-cols-2" aria-busy="true"><div className="h-40 animate-pulse rounded-lg bg-muted" /><div className="h-40 animate-pulse rounded-lg bg-muted" /></div>
-                : needs.length > 0 ? <div className="mt-5 grid gap-4 md:grid-cols-2">{needs.map((need) => <NeedCard key={need.id} need={need} distance={distanceFromCity(need.latitude, need.longitude)} showDistance />)}</div>
-                  : <p className="mt-5 rounded-lg border border-border p-5 text-sm text-muted-foreground">Le prochain besoin apparaîtra ici. Vous pouvez décrire le vôtre dès maintenant.</p>}
-            </section>
+            {/* Les deux sections dédiées doublent la liste à onglets : on ne
+                les montre que lorsque la carte remplace la liste. */}
+            {mapOpen && (
+              <section aria-labelledby="city-needs-title">
+                <h2 id="city-needs-title" className="font-heading text-2xl font-semibold text-foreground">Besoins ouverts près de {c.cityName}</h2>
+                {loading ? <div className="mt-5 grid gap-4 md:grid-cols-2" aria-busy="true"><div className="h-40 animate-pulse rounded-lg bg-muted" /><div className="h-40 animate-pulse rounded-lg bg-muted" /></div>
+                  : needs.length > 0 ? <div className="mt-5 grid gap-4 md:grid-cols-2">{needs.map((need) => <NeedCard key={need.id} need={need} distance={distanceFromCity(need.latitude, need.longitude)} showDistance />)}</div>
+                    : <p className="mt-5 rounded-lg border border-border p-5 text-sm text-muted-foreground">Le prochain besoin apparaîtra ici. Vous pouvez décrire le vôtre dès maintenant.</p>}
+              </section>
+            )}
 
-            <section aria-labelledby="city-helpers-title">
-              <h2 id="city-helpers-title" className="font-heading text-2xl font-semibold text-foreground">Autour de vous</h2>
-              {loading ? <div className="mt-5 grid gap-4 md:grid-cols-2" aria-busy="true"><div className="h-40 animate-pulse rounded-lg bg-muted" /><div className="h-40 animate-pulse rounded-lg bg-muted" /></div>
-                : helpers.length > 0 ? <div className="mt-5 grid gap-4 md:grid-cols-2">{helpers.map((helper) => <HelperCard key={helper.id} helper={helper} distance={distanceFromCity(helper.latitude_approx, helper.longitude_approx)} showDistance />)}</div>
-                  : <p className="mt-5 rounded-lg border border-border p-5 text-sm text-muted-foreground">Les premières personnes qui décrivent leurs coups de main apparaîtront ici.</p>}
-            </section>
+            {mapOpen && (
+              <section aria-labelledby="city-helpers-title">
+                <h2 id="city-helpers-title" className="font-heading text-2xl font-semibold text-foreground">Autour de vous</h2>
+                {loading ? <div className="mt-5 grid gap-4 md:grid-cols-2" aria-busy="true"><div className="h-40 animate-pulse rounded-lg bg-muted" /><div className="h-40 animate-pulse rounded-lg bg-muted" /></div>
+                  : helpers.length > 0 ? <div className="mt-5 grid gap-4 md:grid-cols-2">{helpers.map((helper) => <HelperCard key={helper.id} helper={helper} distance={distanceFromCity(helper.latitude_approx, helper.longitude_approx)} showDistance />)}</div>
+                    : <p className="mt-5 rounded-lg border border-border p-5 text-sm text-muted-foreground">Les premières personnes qui décrivent leurs coups de main apparaîtront ici.</p>}
+              </section>
+            )}
 
             <EntraideProofs origin={origin} title={`Ça s'est passé près de ${c.cityName}`} />
           </div>
