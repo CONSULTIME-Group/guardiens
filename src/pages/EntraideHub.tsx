@@ -232,7 +232,7 @@ const EntraideHub = () => {
             {mapOpen && (
               <div className="mt-3">
                 <Suspense fallback={<div className="h-[360px] animate-pulse rounded-lg bg-muted" />}>
-                  <EntraideMap needs={sortedNeeds} helpers={filteredHelpers} focus={origin} />
+                  <EntraideMap needs={sortedNeeds} helpers={filteredHelpers} focus={origin} tab={view} />
                 </Suspense>
               </div>
             )}
