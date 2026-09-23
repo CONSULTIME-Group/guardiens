@@ -61,6 +61,9 @@ const MissionsCityPage = ({ citySlug }: MissionsCityPageProps) => {
   const [helpers, setHelpers] = useState<PublicHelper[]>([]);
   const [availableCount, setAvailableCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [view, setView] = useState<"needs" | "helpers">("needs");
+  // Carte par défaut sur ordinateur, liste par défaut sur mobile.
+  const [mapOpen, setMapOpen] = useState(() => typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches);
 
   useEffect(() => {
     if (!c) return;
