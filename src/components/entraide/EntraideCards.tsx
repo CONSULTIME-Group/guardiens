@@ -53,7 +53,7 @@ export const NeedCard = ({ need, distance, showDistance, compact = false }: {
   const photo = need.photos?.[0] || null;
   return (
     <article className={`border border-border bg-card ${compact ? "p-3" : "p-4 sm:p-5"} rounded-lg`}>
-      {/* Photo réelle en tête de carte, ou en-tête typographique sobre. */}
+      {/* Photo réelle en tête de carte, ou en-tête typographique sobre avec ville et date. */}
       {photo ? (
         <div className={`overflow-hidden rounded-md border border-border bg-muted ${compact ? "mb-3" : "mb-4"}`}>
           <img
@@ -72,10 +72,9 @@ export const NeedCard = ({ need, distance, showDistance, compact = false }: {
           <p className="mt-0.5 text-xs text-muted-foreground">{dateLabel(need)}</p>
         </div>
       )}
-      <p className="text-xs font-semibold text-primary">{locationLabel(need.city, distance, showDistance)}</p>
-      <h3 className="mt-1 font-heading text-lg font-semibold text-foreground">{need.title}</h3>
+      <h3 className="font-heading text-lg font-semibold text-foreground">{need.title}</h3>
       <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
-        <span>{dateLabel(need)}</span>
+        {photo && <span>{dateLabel(need)}</span>}
         {need.response_count > 0 && (
           <span>{need.response_count} personne{need.response_count > 1 ? "s ont" : " a"} dit je peux</span>
         )}
