@@ -39,13 +39,13 @@ const LAT_MAX = 51.4;
 const COS_LAT = Math.cos((46 * Math.PI) / 180);
 
 const project = ([lon, lat]: [number, number]): [number, number] => {
-  const px = ((lon - LON_MIN) / (LON_MAX - LON_MIN)) * COS_LAT;
-  const py = (LAT_MAX - lat) / (LAT_MAX - LAT_MIN);
-  const scale = VIEW_H / ((LAT_MAX - LAT_MIN) * COS_LAT * ((LON_MAX - LON_MIN) / (LON_MAX - LON_MIN)));
   // Échelle commune : le degré de latitude et le degré de longitude corrigé
-  // partagent le même pixel par degré.
+  // par la cosinus partagent le même pixel par degré.
   const k = 32;
-  return [px * k + (VIEW_W - (LON_MAX - LON_MIN) * COS_LAT * k) / 2, py * k + 10];
+  const px = (lon - LON_MIN) * COS_LAT * k;
+  const py = (LAT_MAX - lat) * k;
+  const contentW = (LON_MAX - LON_MIN) * COS_LAT * k;
+  return [px + (VIEW_W - contentW) / 2, py + 10];
 };
 
 const outlinePath = FRANCE_OUTLINE.map((point, index) => {
