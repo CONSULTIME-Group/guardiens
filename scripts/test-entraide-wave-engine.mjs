@@ -200,10 +200,10 @@ CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $$ SEL
 CREATE OR REPLACE FUNCTION public.mission_audience(p_lat double precision,p_lng double precision,p_category text,p_author uuid)
   RETURNS TABLE(helper_id uuid, distance_km numeric) LANGUAGE sql STABLE AS $$
   SELECT id, 1::numeric FROM public.profiles WHERE coalesce(available_for_help,false) AND id IS DISTINCT FROM p_author $$;
-CREATE OR REPLACE TRIGGER trg_notify_helpers_on_new_mission AFTER INSERT ON small_missions
-  FOR EACH ROW EXECUTE FUNCTION public.enqueue_helpers_for_new_mission();
 `);
 await db.exec(readFileSync(new URL('scripts/fixtures/entraide-0017-functions.sql', root), 'utf8'));
+await db.exec(`CREATE OR REPLACE TRIGGER trg_notify_helpers_on_new_mission AFTER INSERT ON small_missions
+  FOR EACH ROW EXECUTE FUNCTION public.enqueue_helpers_for_new_mission();`);
 
 // Un besoin cree ne met plus personne en file : il part par vagues.
 const besoinSeul = (await db.query(
