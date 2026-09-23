@@ -165,11 +165,30 @@ const MissionsCityPage = ({ citySlug }: MissionsCityPageProps) => {
             <section aria-labelledby="city-map-title">
               <p className="text-sm font-semibold text-primary">Autour de {c.cityName}</p>
               <h2 id="city-map-title" className="mt-1 font-heading text-2xl font-semibold text-foreground">{cityAvailabilityLabel(availableCount, c.cityName)}</h2>
-              <div className="mt-5">
-                <Suspense fallback={<div className="h-[360px] animate-pulse rounded-lg bg-muted sm:h-[520px]" />}>
-                  <EntraideMap needs={needs} helpers={helpers} focus={origin} />
-                </Suspense>
+              <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+                <div className="inline-grid grid-cols-2 rounded-lg border border-border bg-muted p-1" role="tablist" aria-label="Choisir une vue">
+                  <Button type="button" variant={view === "needs" ? "default" : "ghost"} size="sm" role="tab" aria-selected={view === "needs"} onClick={() => setView("needs")}>Besoins</Button>
+                  <Button type="button" variant={view === "helpers" ? "default" : "ghost"} size="sm" role="tab" aria-selected={view === "helpers"} onClick={() => setView("helpers")}>Autour de vous</Button>
+                </div>
+                <div className="inline-grid grid-cols-2 rounded-lg border border-border bg-muted p-1" role="group" aria-label="Affichage des résultats">
+                  <Button type="button" variant={!mapOpen ? "default" : "ghost"} size="sm" onClick={() => setMapOpen(false)}>Liste</Button>
+                  <Button type="button" variant={mapOpen ? "default" : "ghost"} size="sm" onClick={() => setMapOpen(true)}>Carte</Button>
+                </div>
               </div>
+              {mapOpen && (
+                <div className="mt-5">
+                  <Suspense fallback={<div className="h-[360px] animate-pulse rounded-lg bg-muted sm:h-[520px]" />}>
+                    <EntraideMap needs={needs} helpers={helpers} focus={origin} tab={view} />
+                  </Suspense>
+                </div>
+              )}
+              {!loading && !mapOpen && (view === "needs"
+                ? (needs.length > 0
+                  ? <div className="mt-5 grid gap-4 md:grid-cols-2">{needs.map((need) => <NeedCard key={need.id} need={need} distance={distanceFromCity(need.latitude, need.longitude)} showDistance />)}</div>
+                  : <p className="mt-5 rounded-lg border border-border p-5 text-sm text-muted-foreground">Le prochain besoin apparaîtra ici. Vous pouvez décrire le vôtre dès maintenant.</p>)
+                : (helpers.length > 0
+                  ? <div className="mt-5 grid gap-4 md:grid-cols-2">{helpers.map((helper) => <HelperCard key={helper.id} helper={helper} distance={distanceFromCity(helper.latitude_approx, helper.longitude_approx)} showDistance />)}</div>
+                  : <p className="mt-5 rounded-lg border border-border p-5 text-sm text-muted-foreground">Les premières personnes qui décrivent leurs coups de main apparaîtront ici.</p>))}
             </section>
 
             <section aria-labelledby="city-needs-title">
