@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -63,6 +63,7 @@ import { durationMismatch, DURATION_LABEL } from "@/lib/missionDurationCoherence
 /** Longueurs minimales pour éviter les annonces vides ou illisibles. */
 const MIN_TITLE_LEN = 10;
 const MIN_DESC_LEN = 60;
+const MAX_TITLE_LEN = 100;
 
 /* ── Stepper progress bar ── */
 const STEP_LABELS = ["Votre annonce", "Le détail", "Où et quand"];
@@ -92,6 +93,7 @@ const StepperBar = ({ current, total }: { current: number; total: number }) => (
 const CreateSmallMission = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { t } = useTranslation();
@@ -127,7 +129,7 @@ const CreateSmallMission = () => {
   // Échappatoire après un échec d'envoi : la photo reste une exigence forte,
   // jamais un cul-de-sac qui rendrait une offre impubliable.
   const [photoWaived, setPhotoWaived] = useState(false);
-  const [title, setTitle] = useState("");
+  const [title, setTitle] = useState(() => sanitizeUserTitle(searchParams.get("titre")).slice(0, MAX_TITLE_LEN));
   const [titleTouched, setTitleTouched] = useState(false);
   const [description, setDescription] = useState("");
   const [descTouched, setDescTouched] = useState(false);
@@ -145,8 +147,8 @@ const CreateSmallMission = () => {
   const [petSize, setPetSize] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [photos, setPhotos] = useState<string[]>([]);
-  // Le titre et la description partent toujours vides : aucune intention
-  // pré-remplie, le membre écrit sa propre demande ou offre.
+  // Les exemples explicites de la home peuvent initialiser le titre. Le membre
+  // conserve la main sur chaque mot et sur la publication.
 
   // Hauteur réelle de la barre d'action fixe, exposée en variable CSS pour que
   // le conteneur défilant réserve exactement l'espace des couches fixes

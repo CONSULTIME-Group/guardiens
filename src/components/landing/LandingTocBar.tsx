@@ -36,10 +36,11 @@ export function LandingTocBar() {
   }, [measure]);
 
   const items = [
-    { href: "#usages", label: t("landing.toc.care_aid") },
+    { href: "#en-ce-moment", label: "En ce moment" },
+    { href: "#service-apres-service", label: "Un service après l'autre" },
     { href: "#comment-ca-marche", label: t("landing.toc.how") },
-    { href: "#confiance", label: t("landing.toc.trust") },
-    { href: "#notre-histoire", label: t("landing.toc.story") },
+    { href: "#confiance", label: "Confiance" },
+    { href: "#autour-de-vous", label: "Autour de vous" },
     { href: "#faq", label: t("landing.toc.faq") },
   ];
 

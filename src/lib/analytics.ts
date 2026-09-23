@@ -219,6 +219,8 @@ export type EventType =
   | "mission_composer_field_abandoned"          // Blur sans valeur suffisante sur un champ obligatoire (field)
   | "mission_composer_submitted"                // Submit form réussi (mission_id, category, mission_type)
   | "mission_composer_abandoned"                // Unmount avec step >= 1 sans submit (last_step, has_title)
+  | "home_city_submitted"                       // Ville saisie dans le hero de la home
+  | "home_quick_help_clicked"                   // Exemple de coup de main choisi sur la home
   | "mission_composer_published_unchanged_template" // Publie une mission mot pour mot depuis un modèle (template_id)
   | "mission_to_sit_redirect"                     // Mission ressemblant à une garde redirigée vers le formulaire d'annonce
   | "mission_multi_day_sit_redirect"              // Garde de plusieurs jours orientée vers le canal des annonces de garde

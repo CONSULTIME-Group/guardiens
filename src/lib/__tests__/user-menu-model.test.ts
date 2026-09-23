@@ -19,7 +19,6 @@ describe("menu déroulant de l'avatar", () => {
       "Mon profil public",
       "Mes favoris",
       "Mes avis",
-      "Je suis un professionnel",
       "Paramètres",
       "Aide & contact",
       "Déconnexion",

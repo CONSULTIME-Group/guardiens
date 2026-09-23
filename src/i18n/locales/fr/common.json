@@ -61,9 +61,9 @@
       "eyebrow": "Gardes · Coups de main · Urgences",
       "title_main": "Vous partez. Guardiens reste.",
       "motto": "Tout commence par un échange, et finit par une rencontre.",
-      "lede": "Un réseau d'entraide entre particuliers. D'un côté, votre maison et vos animaux veillés par quelqu'un de préparé. De l'autre, une maison à habiter, une ville à découvrir de l'intérieur. Partout en France.",
-      "cta_owner": "Publier mon annonce",
-      "cta_sitter": "Je veux garder",
+      "lede": "Un gardien s'installe chez vous et prend soin de votre maison et de vos animaux. Et entre deux départs, les gens du coin se rendent des coups de main.",
+      "cta_owner": "Publier mon annonce de garde",
+      "cta_sitter": "Demander un coup de main",
       "cta_aid": "Je cherche ou je propose un coup de main →",
       "kpi_houses": "maisons gardées",
       "kpi_animals": "animaux accompagnés",
@@ -107,14 +107,14 @@
       "sitter": {
         "tag": "Gardiens",
         "title": "Garder, et découvrir.",
-        "text": "Vivez dans des maisons, avec des animaux, dans des coins que vous n'auriez jamais explorés autrement. Une garde, c'est aussi un voyage.",
+        "text": "Vivez dans des maisons, prenez soin des animaux et découvrez chaque lieu de l'intérieur. Une garde, c'est aussi un voyage.",
         "cta": "Je veux garder →"
       },
       "mutual": {
         "badge": "Entre membres",
         "tag": "Entraide, indépendante de la garde",
         "title": "Un coup de main, un échange.",
-        "text": "Arroser un potager, monter une étagère, partager une compétence, rendre une visite à une personne isolée. Aucune garde, aucun animal nécessaire, juste des gens du coin qui s'entraident.",
+        "text": "Arroser un potager, monter une étagère, partager une compétence, rendre visite à une personne isolée : les coups de main créent des échanges entre gens du coin toute l'année.",
         "cta": "Découvrir l'entraide →"
       },
       "urgency": {
@@ -211,9 +211,9 @@
     },
     "final": {
       "title": "Votre prochaine histoire commence ici.",
-      "lede": "Vous partirez l'esprit léger. Vous rentrerez avec autre chose, un coin découvert, une rencontre, quelqu'un que vous n'auriez jamais croisé.",
-      "cta_owner": "Publier mon annonce",
-      "cta_sitter": "Je veux garder",
+      "lede": "Vous partirez l'esprit léger. Vous rentrerez avec une rencontre en plus.",
+      "cta_owner": "Publier mon annonce de garde",
+      "cta_sitter": "Demander un coup de main",
       "footnote": "Inscription en 2 minutes, avec un email et un mot de passe."
     },
     "mid_cta": {
@@ -315,8 +315,8 @@
       "title": "Qu'est-ce que Guardiens ?",
       "body_1": "Guardiens est un réseau d'entraide entre particuliers, organisé par affinité autant que par proximité. On y garde des maisons, on s'y rend des services, on y rencontre des gens. À un kilomètre comme à mille.",
       "body_2": "La garde de maison et la garde d'animaux à domicile en sont l'usage principal. Un gardien s'installe chez vous pendant votre absence et veille sur ce que vous laissez : votre maison, votre jardin, vos animaux.",
-        "body_3": "À côté des gardes, les membres se rendent des coups de main : arrosage, courses, compagnie, un meuble à déplacer, un colis à réceptionner. Des choses qui représentent un vrai besoin pour l'un, et qui coûtent presque rien à l'autre. L'échange se décide entre vous.",
-        "body_4": "La mise en relation s'appuie sur un score d'affinité calculé sur plusieurs critères pondérés, propres à chaque couple, où le mode de vie compte autant que la distance. Les membres documentent leur profil et peuvent faire vérifier leur identité. Les avis sont croisés, et un statut de gardien d'urgence répond aux imprévus.",
+        "body_3": "À côté des gardes, les membres se rendent des coups de main : arrosage, courses, compagnie, un meuble à déplacer, un colis à réceptionner. Pour l'un, c'est un vrai besoin. Pour l'autre, c'est une heure et un bon moment. L'échange se décide entre vous.",
+        "body_4": "La mise en relation s'appuie sur un score d'affinité calculé sur plusieurs critères pondérés, propres à chaque couple, où le mode de vie compte autant que la distance. Les membres documentent leur profil, font vérifier leur identité et publient des avis croisés après leurs expériences. Un statut de gardien d'urgence répond aux imprévus.",
         "body_5": "Guardiens publie aussi des guides de race et des guides locaux ville par ville, une sélection d'associations et de refuges présentés avec leurs besoins du moment, et un journal de conseils pratiques.",
         "body_6": "Les membres peuvent aussi ouvrir un chantier chez eux, un potager, un abri, un mur en pierre sèche. Des gens viennent participer quelques jours et repartent avec un savoir-faire appris sur place. Cette partie du réseau commence tout juste, et nous l'alimentons à la main.",
         "body_7": "Le réseau couvre la France entière, et met en relation les Français de l'étranger avec des gardiens sur place. Vous accédez à l'ensemble des fonctionnalités."

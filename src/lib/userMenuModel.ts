@@ -3,7 +3,6 @@ import {
   Eye,
   Heart,
   Star,
-  BriefcaseBusiness,
   CreditCard,
   Settings,
   LifeBuoy,
@@ -44,12 +43,6 @@ export const buildUserMenuEntries = (opts: {
     { key: "public", label: "Mon profil public", icon: Eye, to: opts.publicTo },
     { key: "favorites", label: "Mes favoris", icon: Heart, to: "/favoris" },
     { key: "reviews", label: "Mes avis", icon: Star, to: "/mes-avis" },
-    {
-      key: "pro",
-      label: "Je suis un professionnel",
-      icon: BriefcaseBusiness,
-      to: "/settings?section=security&focus=pro",
-    },
     "separator",
   ];
   if (opts.isSitterView) {

@@ -98,7 +98,7 @@ const AroundYouSection = () => {
   }, [helpers]);
 
   return (
-    <section className="border-t border-border bg-muted/30 py-14 sm:py-20" aria-labelledby="around-you-title">
+    <section id="autour-de-vous" className="border-t border-border bg-muted/30 py-14 scroll-mt-24 sm:py-20" aria-labelledby="around-you-title">
       <div className="mx-auto grid w-full max-w-6xl gap-10 px-4 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:px-8">
         <div>
           <p className="text-sm font-semibold text-primary">Entraide</p>
@@ -115,7 +115,7 @@ const AroundYouSection = () => {
               <Link to="/petites-missions/creer">Demander un coup de main</Link>
             </Button>
             <Button asChild variant="outline">
-              <Link to="/petites-missions">Voir l'Entraide</Link>
+              <Link to="/petites-missions">Voir les besoins</Link>
             </Button>
           </div>
         </div>
