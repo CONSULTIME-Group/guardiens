@@ -49,21 +49,43 @@ export const NeedCard = ({ need, distance, showDistance, compact = false }: {
   distance: number | null;
   showDistance: boolean;
   compact?: boolean;
-}) => (
-  <article className={`border border-border bg-card ${compact ? "p-3" : "p-4 sm:p-5"} rounded-lg`}>
-    <p className="text-xs font-semibold text-primary">{locationLabel(need.city, distance, showDistance)}</p>
-    <h3 className="mt-1 font-heading text-lg font-semibold text-foreground">{need.title}</h3>
-    <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
-      <span>{dateLabel(need)}</span>
-      {need.response_count > 0 && (
-        <span>{need.response_count} personne{need.response_count > 1 ? "s ont" : " a"} dit je peux</span>
+}) => {
+  const photo = need.photos?.[0] || null;
+  return (
+    <article className={`border border-border bg-card ${compact ? "p-3" : "p-4 sm:p-5"} rounded-lg`}>
+      {/* Photo réelle en tête de carte, ou en-tête typographique sobre. */}
+      {photo ? (
+        <div className={`overflow-hidden rounded-md border border-border bg-muted ${compact ? "mb-3" : "mb-4"}`}>
+          <img
+            src={photo}
+            alt={need.title}
+            width={640}
+            height={480}
+            loading="lazy"
+            decoding="async"
+            className="aspect-[4/3] w-full object-cover"
+          />
+        </div>
+      ) : (
+        <div className={`rounded-md border border-border bg-muted/40 ${compact ? "mb-3 px-3 py-2.5" : "mb-4 px-4 py-3"}`}>
+          <p className="text-xs font-semibold text-primary">{locationLabel(need.city, distance, showDistance)}</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">{dateLabel(need)}</p>
+        </div>
       )}
-    </div>
-    <Button asChild variant="outline" size="sm" className="mt-4">
-      <Link to={`/petites-missions/${need.slug || need.id}`}>Voir le détail</Link>
-    </Button>
-  </article>
-);
+      <p className="text-xs font-semibold text-primary">{locationLabel(need.city, distance, showDistance)}</p>
+      <h3 className="mt-1 font-heading text-lg font-semibold text-foreground">{need.title}</h3>
+      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
+        <span>{dateLabel(need)}</span>
+        {need.response_count > 0 && (
+          <span>{need.response_count} personne{need.response_count > 1 ? "s ont" : " a"} dit je peux</span>
+        )}
+      </div>
+      <Button asChild variant="outline" size="sm" className="mt-4">
+        <Link to={`/petites-missions/${need.slug || need.id}`}>Voir le détail</Link>
+      </Button>
+    </article>
+  );
+};
 
 export const HelperCard = ({ helper, distance, showDistance, compact = false }: {
   helper: PublicHelper;
