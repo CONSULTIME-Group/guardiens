@@ -194,8 +194,6 @@ describe("Entraide, la page vue d'un membre", () => {
     renderHub();
     await waitFor(() => expect(screen.getByText("Membre0")).toBeInTheDocument());
     await waitFor(() => expect(calls).toContain("public_help_counts"));
-    // eslint-disable-next-line no-console
-    console.log("REQUETES_AU_CHARGEMENT", calls.length, JSON.stringify(calls));
     expect(calls.length).toBeLessThanOrEqual(8);
   });
 
