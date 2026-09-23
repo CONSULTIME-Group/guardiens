@@ -421,6 +421,12 @@ const Landing = () => {
 
       {/* ═══════════════ SECTION 10, CTA FINAL (fusion Fondateur + double CTA) ═══════════════ */}
       <FinalCtaSection />
+
+      {/* ═══════════════ AUTOUR DE VOUS (Entraide, sous la ligne de flottaison,
+          import dynamique après idle, aucun impact LCP) ═══════════════ */}
+      <Suspense fallback={<div className="border-t border-border bg-muted/20 py-14" aria-hidden="true" />}>
+        <LazyAroundYouSection />
+      </Suspense>
       </main>
 
       <PublicFooter />
