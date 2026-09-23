@@ -167,6 +167,10 @@ async function runWave(supabase: any, missionId: string): Promise<{ sent: number
       dateLabel,
     );
 
+    const sitLine = isMissionSitMode(mission.sit_mode)
+      ? sitModeEmailLine(mission.sit_mode, owner?.first_name ?? null)
+      : "";
+
     const ok = await sendEmail({
       templateName: "mission-help-needed",
       recipientEmail: helper.email,
@@ -179,6 +183,7 @@ async function runWave(supabase: any, missionId: string): Promise<{ sent: number
         missionId,
         canHelpToken: h.token,
         proofLine,
+        sitModeLine: sitLine,
       },
       logMetadata: { mission_id: missionId, wave, source: "mission_wave" },
     });
