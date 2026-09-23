@@ -328,17 +328,12 @@ const CreateSmallMission = () => {
       try {
         const coords = await geocodeCity(city.trim());
         if (cancelled || !coords) return;
-        // Modèle A : les vagues (mission_wave_audience) retiennent les personnes
-        // disponibles les plus proches, par proximité seule. On passe donc
-        // p_category à null pour neutraliser le filtre de compétence du compteur
-        // et rester aligné sur le moteur, sans le modifier.
-        const { data } = await supabase.rpc("count_mission_notification_audience" as any, {
+        // Même fonction et même rayon que la vague : mission_wave_audience
+        // côté moteur, mission_wave_audience_preview côté formulaire, filtres
+        // identiques (available_for_help, compte actif, opt-in, rayon déclaré).
+        const { data } = await supabase.rpc("mission_wave_audience_preview" as any, {
           p_lat: coords.lat,
           p_lng: coords.lng,
-          // p_radius_km est conservé pour la signature mais ignoré en base :
-          // le rayon retenu est celui déclaré par chaque membre.
-          p_radius_km: 30,
-          p_category: null,
         });
         if (!cancelled) setAudienceCount(typeof data === "number" ? data : null);
       } catch {
