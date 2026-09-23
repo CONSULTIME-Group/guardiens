@@ -215,8 +215,9 @@ const EntraideHub = () => {
   const visibleHelpers = useMemo(() => sortedHelpers.slice(0, helpersShown), [sortedHelpers, helpersShown]);
 
   // Compteurs et écussons des personnes affichées, une requête groupée chacune.
+  const visibleHelperIds = useMemo(() => visibleHelpers.map((helper) => helper.id).join(","), [visibleHelpers]);
   useEffect(() => {
-    const ids = visibleHelpers.map((helper) => helper.id);
+    const ids = visibleHelperIds ? visibleHelperIds.split(",") : [];
     if (ids.length === 0) return;
     let cancelled = false;
     const load = async () => {
@@ -234,7 +235,7 @@ const EntraideHub = () => {
     };
     void load();
     return () => { cancelled = true; };
-  }, [visibleHelpers]);
+  }, [visibleHelperIds]);
 
   const nearest = useMemo(() => nearestDistanceKm(sortedNeeds.map(needDistance)), [sortedNeeds, needDistance]);
   const sectorQuiet = isSectorQuiet(origin, nearest, sortedNeeds.length);
