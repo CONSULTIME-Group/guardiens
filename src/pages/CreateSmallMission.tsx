@@ -31,6 +31,14 @@ import {
   hasMoneyMention,
   writeSitPrefill,
 } from "@/lib/missionContentGuards";
+import {
+  looksLikeMultiDaySit,
+  SIT_REDIRECT_TITLE,
+  SIT_REDIRECT_TEXT,
+  SIT_REDIRECT_PRIMARY,
+  SIT_REDIRECT_SECONDARY,
+} from "@/lib/missionSitRedirect";
+import { waveAudienceMessage } from "@/lib/missionAudienceMessage";
 import { AlertCircle, ChevronLeft, CalendarIcon } from "lucide-react";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { stripEmojis } from "@/lib/stripEmojis";
@@ -685,6 +693,41 @@ const CreateSmallMission = () => {
             {step === 3 && (
               <>
                 <h2 className="font-heading font-semibold text-lg">Où et quand ?</h2>
+
+                {/* Garde de plusieurs jours : le canal dédié est plus efficace. */}
+                {multiDaySit && !sitRedirectDismissed && (
+                  <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-2" role="note">
+                    <p className="text-sm font-semibold text-foreground">{SIT_REDIRECT_TITLE}</p>
+                    <p className="text-xs text-muted-foreground">{SIT_REDIRECT_TEXT}</p>
+                    <div className="flex flex-wrap items-center gap-3">
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => {
+                          writeSitPrefill({ title, description });
+                          try { void trackEvent("mission_multi_day_sit_redirect", { metadata: { city: city.trim() } }); } catch {}
+                          navigate(
+                            `/sits/create?${new URLSearchParams({
+                              ...(city.trim() ? { city: city.trim() } : {}),
+                              ...(dateNeeded ? { start: dateNeeded } : {}),
+                              ...(endDate ? { end: endDate } : {}),
+                            }).toString()}`,
+                          );
+                        }}
+                      >
+                        {SIT_REDIRECT_PRIMARY}
+                      </Button>
+                      <button
+                        type="button"
+                        className="text-xs text-muted-foreground underline"
+                        onClick={() => setSitRedirectDismissed(true)}
+                      >
+                        {SIT_REDIRECT_SECONDARY}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
 
                 {/* Photo, ou photo de profil sur une offre */}
                 <div id="mission-field-photo" className="space-y-2">
