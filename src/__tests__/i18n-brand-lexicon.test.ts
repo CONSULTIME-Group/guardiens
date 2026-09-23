@@ -41,9 +41,7 @@ const FORBIDDEN = [
   /\bvecin[oa]s?\b/i,
   // « vicino a lei » (près de chez vous) est légitime : seul le voisinage ne l'est pas.
   /tra vicini|vicin[oi] di casa/i,
-  // « voisins » est autorisé depuis le 23/09/2026 (consigne produit) : seule
-  // l'expression « gens du coin » reste proscrite dans le bloc landing,
-  // verrouillée par landing-hero-proximity-guard.test.ts.
+  /\bvoisin(e|s|age)?\b/i,
   /free forever/i,
   /gratis para siempre/i,
   /gratis per sempre/i,

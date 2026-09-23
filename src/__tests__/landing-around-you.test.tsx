@@ -10,7 +10,7 @@ describe("Lot E6 partie 4, bloc home Autour de vous", () => {
       <AroundYouSection />
     </MemoryRouter>,
   );
-    expect(html).toContain("Arroser un jardin, nourrir un chat, changer une ampoule : demandez, les voisins répondent.");
+    expect(html).toContain("Arroser un jardin, nourrir un chat, changer une ampoule : demandez, les gens du coin répondent.");
     expect(html).toContain("/petites-missions/creer");
     expect(html).toContain("/petites-missions");
   });
