@@ -7,8 +7,9 @@ import { BrandHeader } from './_brand-header.tsx'
 import { LegalFooter } from './_legal-footer.tsx'
 import type { TemplateEntry } from './registry.ts'
 
+// L'ancre ouvre directement le bloc « Ce que je propose » du tableau de bord.
 const CTA_URL =
-  'https://guardiens.fr/dashboard?utm_source=email&utm_medium=email&utm_campaign=entraide_ligne'
+  'https://guardiens.fr/dashboard?utm_source=email&utm_medium=email&utm_campaign=entraide_ligne#ce-que-je-propose'
 
 interface Props { firstName?: string }
 
