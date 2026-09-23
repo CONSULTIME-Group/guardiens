@@ -16,22 +16,19 @@ const flatten = (obj: Record<string, unknown>, prefix = "", acc: Record<string, 
   return acc;
 };
 
-describe("landing.hero, entraide entre voisins", () => {
+describe("landing.hero, entraide près de chez soi", () => {
   const landing = flatten(
     (JSON.parse(fs.readFileSync(COMMON_PATH, "utf8")) as any).landing
   );
 
-  it("présente l'entraide entre voisins comme second moteur", () => {
-    expect(landing["hero.lede"]).toContain("on s'entraide entre voisins");
+  it("présente l'entraide près de chez soi comme second moteur", () => {
+    expect(landing["hero.lede"]).toContain("on s'entraide près de chez soi");
   });
 
-  it("n'emploie plus « gens du coin » dans tout le bloc landing", () => {
+  it("n'emploie le mot « voisin » dans aucune clé landing", () => {
     const hits = Object.entries(landing)
-      .filter(([, value]) => value.includes("gens du coin"))
+      .filter(([, value]) => /\bvoisin(e|s|age)?\b/i.test(value))
       .map(([key]) => key);
-    expect(
-      hits,
-      `« gens du coin » résiduel dans landing : ${hits.join(", ")}`
-    ).toEqual([]);
+    expect(hits, `« voisin » résiduel dans landing : ${hits.join(", ")}`).toEqual([]);
   });
 });
