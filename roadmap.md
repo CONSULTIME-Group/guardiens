@@ -16,7 +16,7 @@
 
 ## Finition H1 et E7
 
-- [ ] Composer la home avec 4 gardes et 2 besoins, avec repli et tri local
-- [ ] Corriger le compteur national, le hero et le lien réservé aux visiteurs
-- [ ] Exclure le membre de la liste Entraide et ajuster distances et capitalisation
-- [ ] Adapter les tests et lancer toutes les vérifications demandées
+- [x] Composer la home avec 4 gardes et 2 besoins, avec repli et tri local
+- [x] Corriger le compteur national, le hero et le lien réservé aux visiteurs
+- [x] Exclure le membre de la liste Entraide et ajuster distances et capitalisation
+- [x] Adapter les tests et lancer toutes les vérifications demandées
