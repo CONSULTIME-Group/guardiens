@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import assert from "node:assert/strict";
 
-const sql = readFileSync(".lovable/0019_home_counts_and_social_proof.sql", "utf8");
+const sql = readFileSync("drizzle/migrations/0019_home_counts_and_social_proof.sql", "utf8");
 assert.match(sql, /RETURNS TABLE\(gardiens_count integer, helpers_count integer\)/);
 assert.match(sql, /CREATE OR REPLACE FUNCTION public\.home_social_proof\(\)/);
 assert.match(sql, /JOIN public\.profiles author ON author\.id = r\.reviewer_id/);

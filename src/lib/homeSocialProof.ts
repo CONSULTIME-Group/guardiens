@@ -9,7 +9,7 @@ export interface HomeSocialProof {
 }
 
 export async function getHomeSocialProof(): Promise<HomeSocialProof[]> {
-  const { data, error } = await (supabase.rpc as any)("home_social_proof");
+  const { data, error } = await supabase.rpc("home_social_proof");
   if (error) throw error;
   return (data ?? []) as HomeSocialProof[];
 }
