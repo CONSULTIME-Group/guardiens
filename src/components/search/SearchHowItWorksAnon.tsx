@@ -28,8 +28,8 @@ const STEPS = [
   },
   {
     n: "3",
-    title: "Rencontrez, puis confirmez",
-    text: "Échangez par messagerie, faites connaissance lors d'une rencontre préalable, puis confirmez la garde d'un commun accord.",
+    title: "Échangez, puis confirmez",
+    text: "Échangez par messagerie, faites connaissance et, si vous le souhaitez, organisez une rencontre avant de confirmer la garde d'un commun accord.",
   },
 ];
 
@@ -43,8 +43,8 @@ const TRUST = [
     text: "Chaque garde réalisée donne lieu à un avis croisé propriétaire / gardien, non modifiable.",
   },
   {
-    title: "Rencontre préalable",
-    text: "Une rencontre est encouragée avant toute confirmation pour valider la confiance mutuelle.",
+    title: "Rencontre conseillée",
+    text: "Nous vous conseillons une rencontre avant la confirmation pour valider la confiance mutuelle.",
   },
   {
     title: "Score de confiance",

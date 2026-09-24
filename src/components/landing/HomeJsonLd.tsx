@@ -7,7 +7,7 @@ import howtoStep2 from "@/assets/illustrations/howto-step-2-rencontre-448.webp";
 import howtoStep3 from "@/assets/illustrations/howto-step-3-depart-448.webp";
 
 // Mise à jour manuelle à chaque retouche du contenu de la home.
-const HOME_CONTENT_LAST_MODIFIED = "2026-09-14";
+const HOME_CONTENT_LAST_MODIFIED = "2026-09-24";
 
 const HOME_ROUTE = staticRoutes.find((route) => route.path === "/");
 const HOME_OG_IMAGE = HOME_ROUTE?.ogImage ?? DEFAULT_OG_IMAGE;
@@ -160,7 +160,7 @@ export default function HomeJsonLd() {
                   "@type": "HowToStep",
                   position: 2,
                   name: "Recevez des candidatures",
-                  text: "Des gardiens proches de chez vous postulent. Consultez leurs profils, lisez les avis, échangez par messagerie et rencontrez celui ou celle qui vous correspond.",
+                  text: "Des gardiens proches de chez vous postulent. Consultez leurs profils, lisez les avis, échangez par messagerie et, si vous le souhaitez, rencontrez celui ou celle qui vous correspond.",
                   url: "https://guardiens.fr/#how-it-works",
                   image: `https://guardiens.fr${howtoStep2}`,
                 },

@@ -1,5 +1,4 @@
-import { Suspense, useEffect, useState } from "react";
-import franceLocalNational from "@/assets/illustrations/france-local-national-462.avif";
+import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { trackEvent } from "@/lib/analytics";
@@ -7,9 +6,6 @@ import { supabase } from "@/integrations/supabase/client";
 
 import PageMeta from "@/components/PageMeta";
 
-import InternationalStrip from "@/components/landing/InternationalStrip";
-import { useInternationalSitsCount } from "@/hooks/useInternationalSitsCount";
-import { showInternationalSection } from "@/components/landing/internationalPlacement";
 import { usePublicStats } from "@/hooks/usePublicStats";
 import LiveListingsStrip from "@/components/landing/LiveListingsStrip";
 import { PRESS_ARTICLE_URL, PRESS_HIGHLIGHT_UNTIL } from "@/components/shared/PressQuote";
@@ -17,37 +13,24 @@ import { LE_PROGRES_LOGO } from "@/assets/pressLogos";
 
 import { UsagesSection } from "@/components/landing/UsagesSection";
 import { ServiceAfterServiceSection } from "@/components/landing/ServiceAfterServiceSection";
-import { QuickHelpSection } from "@/components/landing/QuickHelpSection";
 import { HomeProximitySearch, type HomeOrigin } from "@/components/landing/HomeProximitySearch";
 import { LivedItSection } from "@/components/landing/LivedItSection";
 import { LandingTocBar } from "@/components/landing/LandingTocBar";
 import HomeJsonLd from "@/components/landing/HomeJsonLd";
 import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
 import { ConfianceSection } from "@/components/landing/ConfianceSection";
-import { ComparatifSection } from "@/components/landing/ComparatifSection";
-import { NotreHistoireSection } from "@/components/landing/NotreHistoireSection";
 import { FaqSection } from "@/components/landing/FaqSection";
 import { FinalCtaSection } from "@/components/landing/FinalCtaSection";
-import { MidJourneyCta } from "@/components/landing/MidJourneyCta";
 
 import PublicHeader from "@/components/layout/PublicHeader";
 import { useShellMode } from "@/components/layout/useShellMode";
 import { useAuth } from "@/contexts/AuthContext";
-import { lazyWithRetry } from "@/lib/lazyWithRetry";
 
 import RecentSitsItemListJsonLd from "@/components/seo/RecentSitsItemListJsonLd";
-
-// Bloc « Autour de vous » : chargé dynamiquement, sous la ligne de flottaison,
-// pour ne jamais toucher au LCP.
-const LazyAroundYouSection = lazyWithRetry(
-  () => import("@/components/landing/AroundYouSection").then((m) => ({ default: m.LazyAroundYouSection })),
-  "landing-around-you",
-);
 
 import PublicFooter from "@/components/layout/PublicFooter";
 import { staticRoutes, DEFAULT_OG_IMAGE } from "@/data/siteRoutes";
 // Pricing pivot : plus d'Offer JSON-LD tant que PRICING_IS_ACTIVE = false.
-import { RevealSection } from "@/components/ui/RevealSection";
 import { GrainOverlay } from "@/components/ui/GrainOverlay";
 import { Button } from "@/components/ui/button";
 
@@ -77,9 +60,6 @@ const Landing = () => {
   // à quelqu'un qui en a déjà un, on propose son action principale.
   const isMember = shellMode === "app";
   const { data: publicStats } = usePublicStats();
-  // Sous le seuil, la vitrine internationale vit dans la FAQ.
-  const { count: internationalCount } = useInternationalSitsCount();
-  const hasInternationalSection = showInternationalSection(internationalCount);
   const [homeOrigin, setHomeOrigin] = useState<HomeOrigin | null>(null);
 
   
@@ -124,39 +104,6 @@ const Landing = () => {
   const kpiInscrits = publicStats?.total_inscrits ?? 0;
   const kpiMissions = publicStats?.missions_entraide ?? 0;
   const isPressHighlighted = new Date() < PRESS_HIGHLIGHT_UNTIL;
-
-
- /* ── Idle preload of the France illustration (low priority, post-LCP) ── */
- useEffect(() => {
- if (typeof document === "undefined") return;
- // Already preloaded? skip.
- if (document.querySelector('link[data-preload="france-local-national"]')) return;
-
- const schedule: (cb: () => void) => number =
- (window as any).requestIdleCallback
- ? (cb) => (window as any).requestIdleCallback(cb, { timeout: 2500 })
- : (cb) => window.setTimeout(cb, 1500);
-
- const handle = schedule(() => {
- const link = document.createElement("link");
- link.rel = "preload";
- link.as = "image";
- link.href = franceLocalNational;
- link.type = "image/avif";
- // Low priority so it never competes with the hero / LCP resources.
- link.setAttribute("fetchpriority", "low");
- link.dataset.preload = "france-local-national";
- document.head.appendChild(link);
- });
-
- return () => {
- if ((window as any).cancelIdleCallback && (window as any).requestIdleCallback) {
- (window as any).cancelIdleCallback(handle);
- } else {
- window.clearTimeout(handle);
- }
- };
- }, []);
 
 
  return (
@@ -340,41 +287,17 @@ const Landing = () => {
       <LandingTocBar />
 
 
-      {/* ═══════════════ LE PRÉTEXTE (bloc sombre signature,
-          l'ADN avant les mécaniques) ═══════════════ */}
-      <ServiceAfterServiceSection />
-
-      <QuickHelpSection />
-
       <HowItWorksSection />
+
+      <ServiceAfterServiceSection />
 
       {/* ═══════════════ CONFIANCE & PÉRIMÈTRE
           (accueille désormais la démo du score d'affinité) ═══════════════ */}
       <ConfianceSection />
 
-      {/* ═══════════════ RAPPEL D'ACTION MI-PARCOURS (06/09/2026) ═══════════════ */}
-      <MidJourneyCta />
-
-      <Suspense fallback={<div className="border-t border-border bg-muted/20 py-14" aria-hidden="true" />}>
-        <LazyAroundYouSection />
-      </Suspense>
-
-      {/* ═══════════════ DÉFINITION ET USAGES, bloc de fond ═══════════════ */}
-      <UsagesSection />
-
-      <NotreHistoireSection />
-
       <LivedItSection />
 
-      {/* ═══════════════ SECTION INTERNATIONAL (au-dessus du seuil seulement) ═══════════════ */}
-      {hasInternationalSection && (
-        <RevealSection>
-          <InternationalStrip />
-        </RevealSection>
-      )}
-
-      {/* ═══════════════ SECTION COMPARATIF (extractible, GEO) ═══════════════ */}
-      <ComparatifSection />
+      <UsagesSection />
 
       {/* ═══════════════ SECTION 9bis, FAQ (section dédiée, miroir du JSON-LD FAQPage) ═══════════════ */}
       <FaqSection />

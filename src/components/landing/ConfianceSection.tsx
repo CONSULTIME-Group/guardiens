@@ -1,9 +1,7 @@
 import { Link } from "react-router-dom";
-import { useTranslation } from "react-i18next";
 import { RevealSection } from "@/components/ui/RevealSection";
 
 export function ConfianceSection() {
-  const { t } = useTranslation();
   const pillars = [
     ["La proximité réelle", "Les dix personnes les plus proches reçoivent votre besoin, et la carte montre qui vit autour de vous."],
     ["La rencontre en personne", "Nous vous conseillons de vous voir avant une garde, autour d'un café ou d'une visite. Après un coup de main, nous vous demandons si la rencontre a eu lieu."],
