@@ -17,7 +17,7 @@ export const DEFAULT_OG_IMAGE = `${SITE_URL}/og-default.jpg`;
  * la baseline tarifaire vit dans src/lib/pricing.ts (getPricingBaseline).
  */
 export const SITE_DESCRIPTION_LONG =
-  "Guardiens met en relation des propriétaires et des gardiens pour la garde de maison et d'animaux, partout en France. Vous publiez votre annonce, vous recevez des candidatures, vous choisissez après une rencontre. L'accès à la plateforme est ouvert pendant la phase de lancement, toute évolution sera annoncée à l'avance.";
+  "Guardiens met en relation des propriétaires et des gardiens pour la garde de maison et d'animaux, partout en France. Vous publiez votre annonce, vous recevez des candidatures, vous échangez, vous pouvez vous rencontrer, puis vous choisissez. L'accès à la plateforme est ouvert pendant la phase de lancement, toute évolution sera annoncée à l'avance.";
 
 export interface SiteRoute {
  path: string;
@@ -129,7 +129,7 @@ export const staticRoutes: SiteRoute[] = [
  {
  path: "/",
 		title: "Garde de maison et d'animaux entre particuliers | Guardiens",
-		metaDescription: "House-sitting en France : un gardien veille sur votre maison et vos animaux pendant votre absence. Vous choisissez après une rencontre.",
+		metaDescription: "House-sitting en France : un gardien veille sur votre maison et vos animaux pendant votre absence. Vous échangez, vous pouvez vous rencontrer, puis vous choisissez.",
  h1: "Guardiens, comme confier ses clés à quelqu'un du coin",
  sitemapPriority: "1.0",
  changeFreq: "daily",

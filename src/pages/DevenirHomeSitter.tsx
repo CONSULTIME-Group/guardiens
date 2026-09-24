@@ -22,7 +22,7 @@ const jsonLd = {
         { "@type": "HowToStep", position: 1, name: "Créer votre profil gardien", text: "Inscrivez-vous, 0 €, complétez votre bio, ajoutez vos expériences avec les animaux et vérifiez votre identité." },
         { "@type": "HowToStep", position: 2, name: "Renseigner votre zone et vos disponibilités", text: "Indiquez la ville où vous pouvez garder, votre rayon d'intervention et vos créneaux disponibles." },
         { "@type": "HowToStep", position: 3, name: "Candidater aux annonces", text: "Parcourez les gardes proposées près de chez vous. Personnalisez chaque message pour convaincre le propriétaire." },
-        { "@type": "HowToStep", position: 4, name: "Échanger et rencontrer", text: "Discutez via la messagerie sécurisée, organisez une rencontre préalable avec l'animal et les propriétaires." },
+        { "@type": "HowToStep", position: 4, name: "Échanger et faire connaissance", text: "Discutez via la messagerie sécurisée et proposez, si vous le souhaitez, une rencontre avec l'animal et les propriétaires." },
         { "@type": "HowToStep", position: 5, name: "Effectuer la garde et collecter vos avis", text: "Réalisez la garde avec sérieux. Chaque avis positif renforce votre réputation et accélère vos prochaines candidatures." },
       ],
     },
@@ -50,7 +50,7 @@ const jsonLd = {
           name: "Comment décrocher ma première garde ?",
           acceptedAnswer: {
             "@type": "Answer",
-            text: "Soignez votre profil (photo, bio détaillée, expériences), vérifiez votre identité, et candidatez avec un message personnalisé qui montre que vous avez lu l'annonce. La rencontre préalable rassure presque toujours.",
+            text: "Soignez votre profil (photo, bio détaillée, expériences), vérifiez votre identité, et candidatez avec un message personnalisé qui montre que vous avez lu l'annonce. Une rencontre proposée avant la garde renforce la confiance.",
           },
         },
         {
@@ -144,7 +144,7 @@ export default function DevenirHomeSitter() {
               </li>
               <li>
                 <strong>Candidater avec soin.</strong> Lisez l'annonce, citez
-                un détail spécifique, proposez une rencontre préalable.
+                un détail spécifique, proposez une rencontre avant la garde.
               </li>
               <li>
                 <strong>Collecter vos premiers avis.</strong> Un avis positif

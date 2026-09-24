@@ -25,3 +25,12 @@
 
 - [x] Rétablir le dégradé, les styles des textes et des boutons, et la mention presse temporaire
 - [x] Vérifier le garde-fou, les types, le build et le contraste à 360 px et 1440 px
+
+## Lot H2, accueil resserré et vérité sur la rencontre
+
+- [x] Corriger les formulations produit, SEO et structurées sur la rencontre conseillée
+- [x] Resserrer l'accueil à 9 ensembles et intégrer les coups de main au fonctionnement
+- [x] Condenser l'histoire, l'affinité et la définition, puis replier le comparatif
+- [x] Afficher 6 questions et monter les 3 autres dans un accordéon replié
+- [x] Vérifier les textes avant et après, les tests, les types, le build, la hauteur et le LCP
+- [x] Livrer le rapport final avec hash, sans migration ni publication

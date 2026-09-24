@@ -37,10 +37,11 @@ export function LandingTocBar() {
 
   const items = [
     { href: "#en-ce-moment", label: "En ce moment" },
-    { href: "#service-apres-service", label: "Un service après l'autre" },
     { href: "#comment-ca-marche", label: t("landing.toc.how") },
+    { href: "#service-apres-service", label: "Un service après l'autre" },
     { href: "#confiance", label: "Confiance" },
-    { href: "#autour-de-vous", label: "Autour de vous" },
+    { href: "#ils-lont-vecu", label: "Ils l'ont vécu" },
+    { href: "#definition", label: "Guardiens" },
     { href: "#faq", label: t("landing.toc.faq") },
   ];
 

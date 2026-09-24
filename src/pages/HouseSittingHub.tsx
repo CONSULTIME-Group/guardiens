@@ -82,7 +82,7 @@ const HouseSittingHub = () => {
     <>
       <PageMeta
         title="Home sitter en France, home sitting ville par ville | Guardiens"
-        description="Trouvez un home sitter de confiance en France. Le home sitting ville par ville, rencontre avant chaque garde, avis croisés, gardiens près de chez vous."
+        description="Trouvez un home sitter de confiance en France. Le home sitting ville par ville, rencontre conseillée avant une garde, avis croisés, gardiens près de chez vous."
         path="/house-sitting"
         jsonLd={jsonLd}
       />

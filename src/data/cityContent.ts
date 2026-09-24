@@ -119,20 +119,20 @@ Tout est sur la plateforme : messagerie, avis croisés, guide de la maison, et m
 
  lyon: {
   heroAlt: "Garde de chien et de chat à Lyon - Vue panoramique depuis Fourvière au coucher du soleil - Guardiens",
-  subtitle: "Le home sitting à Lyon, c'est un home sitter de confiance qui s'installe chez vous et veille sur votre chien, votre chat et votre maison. Votre animal garde ses repères, et vous rencontrez votre gardien avant de lui confier vos clés.",
+  subtitle: "Le home sitting à Lyon, c'est un home sitter de confiance qui s'installe chez vous et veille sur votre chien, votre chat et votre maison. Votre animal garde ses repères, et vous pouvez rencontrer votre gardien avant de lui confier vos clés.",
   articleSections: [
    {
   id: "introduction",
   title: "Home sitting à Lyon : comment faire garder son chien ou son chat ?",
- content: `Trouver un gardien à Lyon pour son chien ou son chat, à domicile et sans mise en pension, se fait via une plateforme d'entraide entre particuliers. Guardiens réunit des gardiens de confiance dans tous les arrondissements lyonnais, de la Presqu'île à la Croix-Rousse, de Confluence au 3ème et au 6ème. Recommandations par la communauté, rencontre avant chaque garde.
+ content: `Trouver un gardien à Lyon pour son chien ou son chat, à domicile et sans mise en pension, se fait via une plateforme d'entraide entre particuliers. Guardiens réunit des gardiens de confiance dans tous les arrondissements lyonnais, de la Presqu'île à la Croix-Rousse, de Confluence au 3ème et au 6ème. Recommandations par la communauté, rencontre conseillée avant une garde.
 
 Lyon est l'une des villes les plus accueillantes de France pour les animaux de compagnie. Près d'un quart des foyers lyonnais vivent avec un chien ou un chat. Du parc de la Tête d'Or aux quais de Saône, la ville offre un cadre de vie où les animaux ont toute leur place.
 
 Mais quand vient le moment de partir, vacances, déplacement professionnel, week-end en famille, la question se pose : **à qui confier votre animal et votre maison à Lyon ?**
 
-Guardiens est une plateforme de garde d'animaux et de home sitting fondée par Jérémie et Elisa, installés dans le Vieux-Lyon, rue Juiverie. Après cinq ans de house-sitting à travers la France, des dizaines de maisons gardées, des centaines d'animaux accompagnés, ils ont construit un outil pensé pour les propriétaires lyonnais : des gardiens de proximité, une rencontre physique systématique avant chaque garde, et un dispositif de confiance fondé sur les avis croisés.
+Guardiens est une plateforme de garde d'animaux et de home sitting fondée par Jérémie et Elisa, installés dans le Vieux-Lyon, rue Juiverie. Après cinq ans de house-sitting à travers la France, des dizaines de maisons gardées, des centaines d'animaux accompagnés, ils ont construit un outil pensé pour les propriétaires lyonnais : des gardiens de proximité, une rencontre physique conseillée avant une garde, et un dispositif de confiance fondé sur les avis croisés.
 
-Ce que Guardiens propose concrètement : vous publiez votre annonce, des gardiens de votre quartier postulent, vous les rencontrez autour d'un café ou lors d'une visite de votre logement, puis vous confirmez la garde. Votre animal reste chez lui, dans ses repères. Votre maison reste vivante. [Inscrivez-vous pour publier votre annonce](/inscription?role=owner).`,
+Ce que Guardiens propose concrètement : vous publiez votre annonce, des gardiens de votre quartier postulent, vous échangez et vous pouvez les rencontrer autour d'un café ou lors d'une visite de votre logement, puis vous confirmez la garde. Votre animal reste chez lui, dans ses repères. Votre maison reste vivante. [Inscrivez-vous pour publier votre annonce](/inscription?role=owner).`,
  },
   {
  id: "pourquoi-proximite",
@@ -160,15 +160,15 @@ Le home sitting existe depuis des décennies dans les pays anglo-saxons. Le prin
  {
  id: "fonctionnement",
  title: "Comment trouver un gardien fiable à Lyon ?",
- content: `Pour trouver un gardien fiable à Lyon, publiez votre annonce sur Guardiens, recevez des candidatures de gardiens de votre quartier, consultez leurs avis, puis organisez une rencontre avant de confirmer. La vérification d'identité est ouverte à tous les membres : la pièce envoyée est analysée automatiquement, les dossiers qui ne passent pas sont revus par l'équipe, et les profils validés affichent l'écusson « Identité vérifiée ». Regardez cet écusson, et rencontrez toujours la personne avant de confier vos clés.
+ content: `Pour trouver un gardien fiable à Lyon, publiez votre annonce sur Guardiens, recevez des candidatures de gardiens de votre quartier, consultez leurs avis, puis organisez une rencontre si vous le souhaitez avant de confirmer. La vérification d'identité est ouverte à tous les membres : la pièce envoyée est analysée automatiquement, les dossiers qui ne passent pas sont revus par l'équipe, et les profils validés affichent l'écusson « Identité vérifiée ». Regardez cet écusson, échangez avec la personne et envisagez une rencontre avant de confier vos clés.
 
 ### Etape 1, Publiez votre annonce
 
 Décrivez votre maison, vos animaux, les dates de votre absence et vos attentes. La publication coûte 0 € aux propriétaires. Précisez votre arrondissement ou votre commune pour que les gardiens de proximité vous trouvent. [Voir les tarifs](/tarifs).
 
-### Etape 2, Rencontrez les gardiens intéressés
+### Etape 2, Échangez avec les gardiens intéressés
 
-Les gardiens de Lyon et de ses environs consultent votre annonce et postulent avec un message personnalisé. Vous consultez leur profil, leurs avis, leur expérience. Puis vous organisez une rencontre : un café dans votre quartier, une visite de votre logement, une promenade avec votre chien. C'est cette rencontre physique qui fait la différence.
+Les gardiens de Lyon et de ses environs consultent votre annonce et postulent avec un message personnalisé. Vous consultez leur profil, leurs avis, leur expérience. Vous pouvez ensuite organiser une rencontre : un café dans votre quartier, une visite de votre logement, une promenade avec votre chien. Cette rencontre physique peut renforcer la confiance.
 
 ### Etape 3, Confirmez la garde
 
@@ -214,7 +214,7 @@ Lyon se compose de neuf arrondissements et d'une ceinture de communes limitrophe
 
 **Votre maison reste vivante.** Le gardien relève le courrier, arrose les plantes, aère les pièces, allume les lumières le soir. Une maison occupée est une maison protégée. À Lyon, où les absences prolongées sont visibles depuis la rue, cette présence fait la différence.
 
-**Vous rencontrez votre gardien avant de lui confier vos clés.** C'est un principe fondamental de Guardiens : pas de garde sans rencontre préalable. Un café dans votre quartier, une visite de votre logement, une promenade avec votre chien. Vous évaluez le contact humain, votre animal aussi.
+**Vous pouvez rencontrer votre gardien avant de lui confier vos clés.** Guardiens vous conseille cette rencontre avant la garde. Un café dans votre quartier, une visite de votre logement, une promenade avec votre chien. Vous évaluez le contact humain, votre animal aussi.
 
 **Aucune commission sur les gardes.** Guardiens ne prélève aucun pourcentage sur les gardes. L'accès à Guardiens est ouvert pendant la phase de lancement. Vous accédez à l'ensemble des fonctionnalités, et vous restez libre à tout moment. Vous serez prévenu à l'avance en cas d'évolution tarifaire.
 
@@ -235,7 +235,7 @@ Lyon se compose de neuf arrondissements et d'une ceinture de communes limitrophe
 
 **Étudiants**, pour les gardes courtes, les week-ends ou les ponts. Leur disponibilité et leur énergie conviennent parfaitement aux chiens actifs qui ont besoin de longues promenades.
 
-**Vérification d'identité ouverte à tous.** La pièce envoyée est analysée automatiquement, et les dossiers qui ne passent pas ce premier contrôle sont revus par l'équipe. Les profils validés affichent l'écusson « Identité vérifiée ». Consultez aussi le profil détaillé et organisez une rencontre physique avant chaque garde.`,
+**Vérification d'identité ouverte à tous.** La pièce envoyée est analysée automatiquement, et les dossiers qui ne passent pas ce premier contrôle sont revus par l'équipe. Les profils validés affichent l'écusson « Identité vérifiée ». Consultez aussi le profil détaillé et envisagez une rencontre physique avant la garde.`,
  },
  {
  id: "tarifs",
@@ -263,7 +263,7 @@ Guardiens accueille aujourd'hui ses premiers membres, ceux qui rejoignent la pla
  id: "faq",
  title: "Questions fréquentes des propriétaires à Lyon",
  content: `**Comment rencontrer un gardien avant de confier ma maison ?**
-Après avoir accepté une candidature, vous organisez une rencontre directement via la messagerie Guardiens. La plupart des propriétaires à Lyon choisissent un café de quartier ou une visite du logement. Cette étape est systématique et fortement recommandée.
+Après avoir accepté une candidature, vous pouvez organiser une rencontre directement via la messagerie Guardiens. La plupart des propriétaires à Lyon choisissent un café de quartier ou une visite du logement. Guardiens vous recommande cette étape.
 
 **Que se passe-t-il en cas d'urgence ou d'imprévu ?**
 Une alerte prioritaire peut être envoyée aux [gardiens d'urgence à Lyon](/gardien-urgence) qui remplissent les critères. En cas de problème vétérinaire, le gardien contacte la clinique indiquée dans le guide de la maison. En cas de problème technique (fuite, panne), il suit les consignes laissées par le propriétaire.

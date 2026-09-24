@@ -1,18 +1,20 @@
 import { useTranslation } from "react-i18next";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 export function ComparatifSection() {
   const { t } = useTranslation();
 
   return (
-    <section id="comparatif" className="py-[52px] md:py-16 bg-accent/30 border-b border-border/40 scroll-mt-24">
+    <div id="comparatif" className="pt-10 scroll-mt-24">
       <div className="lp-wide">
-        <h2 className="font-heading text-2xl md:text-4xl font-semibold text-foreground mb-3 scroll-mt-24">
-          {t("landing.compare.title")}
-        </h2>
-        <p className="font-body text-sm md:text-base text-foreground/70 leading-relaxed mb-6 max-w-2xl">
-          {t("landing.compare.intro")}
-        </p>
-        <div className="overflow-x-auto rounded-2xl border border-border bg-card">
+        <Accordion type="single" collapsible>
+          <AccordionItem value="comparison" className="rounded-lg border border-border bg-card px-5 [&>[data-state=closed][role=region]]:hidden">
+            <AccordionTrigger className="text-left font-heading text-xl font-semibold text-foreground hover:no-underline md:text-2xl">
+              {t("landing.compare.title")}
+            </AccordionTrigger>
+            <AccordionContent forceMount>
+              <p className="mb-6 max-w-2xl font-body text-sm leading-relaxed text-foreground/70 md:text-base">{t("landing.compare.intro")}</p>
+              <div className="overflow-x-auto rounded-lg border border-border">
           <table className="w-full text-sm font-body min-w-[640px]">
             <caption className="sr-only">{t("landing.compare.caption")}</caption>
             <thead className="bg-muted/60 text-foreground">
@@ -55,8 +57,11 @@ export function ComparatifSection() {
               </tr>
             </tbody>
           </table>
-        </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       </div>
-    </section>
+    </div>
   );
 }

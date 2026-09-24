@@ -324,7 +324,7 @@ const DepartmentPage = () => {
       Combien coûte une garde d'animaux {deptIn} ?
     </h2>
     <p className="text-base text-foreground/90 leading-relaxed mb-3">
-      L'accès à Guardiens est ouvert pendant la phase de lancement. Aucune commission côté propriétaire, aucun frais de mise en relation, une rencontre systématique avant chaque garde.
+      L'accès à Guardiens est ouvert pendant la phase de lancement. Aucune commission côté propriétaire, aucun frais de mise en relation, une rencontre conseillée avant une garde.
     </p>
     <p className="text-base text-foreground/80 leading-relaxed">
       Une pension pour animaux {deptIn} se facture généralement entre 25 et 50 € par nuit et par animal, soit 350 à 700 € pour deux semaines avec un chien. Confier son animal à un gardien à domicile, c'est éviter le stress de la mise en pension, garder votre logement occupé pendant votre absence, et bénéficier d'une relation directe entre particuliers, sans intermédiaire commercial. Les profils dont l'identité a été validée affichent l'écusson « Identité vérifiée ». Consultez aussi les avis publics de la communauté et organisez une rencontre en amont.
