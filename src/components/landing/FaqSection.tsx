@@ -1,7 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { RevealSection } from "@/components/ui/RevealSection";
 import { useInternationalSitsCount } from "@/hooks/useInternationalSitsCount";
-import { showInternationalFaq } from "@/components/landing/internationalPlacement";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 export function FaqSection() {
@@ -20,13 +19,11 @@ export function FaqSection() {
     answer: t(`landing.faq.a${n}`),
   }));
 
-  if (showInternationalFaq(count)) {
-    items.push({
-      key: "q9",
-      question: t("landing.faq.q9"),
-      answer: t("landing.faq.a9", { listings }).trim(),
-    });
-  }
+  items.push({
+    key: "q9",
+    question: t("landing.faq.q9"),
+    answer: t("landing.faq.a9", { listings }).trim(),
+  });
 
   const featuredKeys = new Set(["q1", "q2", "q3", "q5", "q8", "q9"]);
   const featured = items.filter((item) => featuredKeys.has(item.key));

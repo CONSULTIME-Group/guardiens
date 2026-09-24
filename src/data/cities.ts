@@ -88,7 +88,7 @@ export const CITIES: CityData[] = [
   ],
   h1: "Home sitting à Lyon : un home sitter de confiance pour votre chien, votre chat et votre maison",
   metaDescription:
-  "Trouvez un home sitter à Lyon pour garder votre chien, votre chat et votre maison. Rencontre avant chaque garde, avis croisés, tous les arrondissements.",
+  "Trouvez un home sitter à Lyon pour garder votre chien, votre chat et votre maison. Rencontre conseillée avant une garde, avis croisés, tous les arrondissements.",
  localSpots: [
  {
  name: "Parc de la Tête d'Or",

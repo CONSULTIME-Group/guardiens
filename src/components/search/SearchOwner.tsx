@@ -1046,7 +1046,7 @@ const SearchOwner = () => {
           Quelqu'un du coin veille sur eux.
         </h1>
         <p className="text-sm md:text-[15px] text-muted-foreground max-w-2xl leading-relaxed">
-          Des gardiens de confiance près de chez vous, rencontrés avant chaque garde.{" "}
+          Des gardiens de confiance près de chez vous, que vous pouvez rencontrer avant une garde.{" "}
           {viewerOwner
             ? "Classés par affinité avec votre foyer."
             : "Classés du plus proche au plus loin."}
