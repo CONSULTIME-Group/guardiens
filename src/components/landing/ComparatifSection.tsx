@@ -8,11 +8,11 @@ export function ComparatifSection() {
     <div id="comparatif" className="pt-10 scroll-mt-24">
       <div className="lp-wide">
         <Accordion type="single" collapsible>
-          <AccordionItem value="comparison" className="rounded-lg border border-border bg-card px-5">
+          <AccordionItem value="comparison" className="rounded-lg border border-border bg-card px-5 [&>[data-state=closed][role=region]]:hidden">
             <AccordionTrigger className="text-left font-heading text-xl font-semibold text-foreground hover:no-underline md:text-2xl">
               {t("landing.compare.title")}
             </AccordionTrigger>
-            <AccordionContent forceMount className="data-[state=closed]:hidden">
+            <AccordionContent forceMount>
               <p className="mb-6 max-w-2xl font-body text-sm leading-relaxed text-foreground/70 md:text-base">{t("landing.compare.intro")}</p>
               <div className="overflow-x-auto rounded-lg border border-border">
           <table className="w-full text-sm font-body min-w-[640px]">

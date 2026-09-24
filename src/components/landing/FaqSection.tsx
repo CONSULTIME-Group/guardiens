@@ -47,10 +47,10 @@ export function FaqSection() {
           <div className="space-y-4">{featured.map(renderItem)}</div>
           {additional.length > 0 && (
             <Accordion type="single" collapsible className="mt-4">
-              <AccordionItem value="all-questions" className="rounded-lg border border-border bg-card px-5">
+              <AccordionItem value="all-questions" className="rounded-lg border border-border bg-card px-5 [&>[data-state=closed][role=region]]:hidden">
                 <AccordionTrigger className="text-base font-semibold text-foreground hover:no-underline">Voir toutes les questions</AccordionTrigger>
-                <AccordionContent forceMount className="space-y-4 data-[state=closed]:hidden">
-                  {additional.map(renderItem)}
+                <AccordionContent forceMount>
+                  <div className="space-y-4">{additional.map(renderItem)}</div>
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
