@@ -30,7 +30,12 @@ export function ServiceAfterServiceSection() {
         <p className="mx-auto mt-10 max-w-2xl text-center font-heading text-xl italic md:text-2xl">La technologie sert à se trouver. Tout le reste se passe en vrai.</p>
         <p className="mx-auto mt-6 max-w-2xl leading-relaxed text-pine-foreground/90">Nous nous sommes posé une question : et si la technologie servait à se rencontrer ? À découvrir qu'à quelques kilomètres, quelqu'un a besoin d'un coup de main. Pour l'un, c'est un vrai besoin. Pour l'autre, une heure. Et se sentir utile, échanger quelques mots, rencontrer une personne, c'est aussi une façon de se faire du bien.</p>
         <p className="mx-auto mt-4 max-w-2xl font-semibold">Elisa et Jérémie</p>
-        <p className="mx-auto mt-5 max-w-2xl text-sm text-pine-foreground/85">La mami du quartier vous raconte son histoire pendant que vous ramassez ses fruits. Gerardo vous aide à bricoler, puis partage avec vous un repas fait maison.</p>
+        <div className="mx-auto mt-5 max-w-2xl space-y-1 text-sm text-pine-foreground/85">
+          <p>Promenades de chiens à Lyon, puis gardes à la maison.</p>
+          <p>Aujourd'hui, chaque semaine, on reçoit des animaux chez nous.</p>
+          <p>Un réseau local de confiance, ouvert à toute la France.</p>
+        </div>
+        <Link to="/a-propos" className="mx-auto mt-5 block w-fit text-sm underline underline-offset-4">Lire notre histoire</Link>
         <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Button asChild variant="outline" className="border-pine-foreground/60 bg-transparent text-pine-foreground hover:bg-pine-foreground/10 hover:text-pine-foreground">
             <Link to="/petites-missions/creer">Demander un premier coup de main</Link>

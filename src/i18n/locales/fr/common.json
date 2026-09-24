@@ -100,7 +100,7 @@
       "owner": {
         "tag": "Propriétaires",
         "title": "Partir l'esprit léger.",
-        "text": "Un gardien qui vous correspond veille sur votre maison et vos animaux. Vous le rencontrez avant de partir, vous choisissez.",
+        "text": "Un gardien qui vous correspond veille sur votre maison et vos animaux. Vous pouvez le rencontrer avant de partir, puis vous choisissez.",
         "badge": "Entre particuliers",
         "cta": "Je cherche un gardien →"
       },
@@ -138,7 +138,7 @@
     "trust": {
       "eyebrow": "Ce qui compte vraiment",
       "title": "Vos besoins, son savoir-faire. Vous choisissez.",
-      "lede": "Votre rythme, vos habitudes, les besoins de vos animaux, face à son expérience. On vous montre où ça correspond. Vous rencontrez, et vous décidez.",
+      "lede": "Votre rythme, vos habitudes, les besoins de vos animaux, face à son expérience. On vous montre où ça correspond. Vous échangez, vous pouvez vous rencontrer, et vous décidez.",
       "p1_title": "Votre gardien idéal, décrit par vous",
       "p1_text": "Un couple, un retraité, une famille, quelqu'un d'actif ou quelqu'un qui reste à la maison, avec voiture ou sans. Vous décrivez qui vous voulez chez vous, et le score d'affinité classe les candidatures là-dessus, critère par critère. Vous voyez le détail du calcul, vous gardez la main.",
       "main_label": "Le cœur du matching",
@@ -193,11 +193,11 @@
       "q2": "Comment fonctionne l'accès à Guardiens ?",
       "a2": "L'accès à Guardiens est ouvert pendant la phase de lancement : vous accédez à l'ensemble des fonctionnalités, et vous restez libre à tout moment. Toute évolution tarifaire vous sera annoncée à l'avance.",
       "q3": "Comment trouver un pet sitter près de chez moi ?",
-      "a3": "Inscrivez-vous sur Guardiens, publiez votre annonce de garde avec les dates et vos animaux, et recevez des candidatures de gardiens qui habitent près de chez vous. Vous choisissez après une rencontre.",
+      "a3": "Inscrivez-vous sur Guardiens, publiez votre annonce de garde avec les dates et vos animaux, et recevez des candidatures de gardiens qui habitent près de chez vous. Vous échangez, vous pouvez vous rencontrer, puis vous choisissez.",
       "q4": "Qui sont les gardiens sur Guardiens ?",
       "a4": "Des particuliers dont le profil correspond au vôtre : mode de vie, confiance, profil de gardien recherché. Le score d'affinité calcule cette correspondance à chaque candidature. La confiance se construit ensuite sur la rencontre physique préalable à toute garde, les avis croisés publiés après chaque expérience, et l'historique visible sur chaque profil.",
       "q5": "Comment se déroule une garde sur Guardiens ?",
-      "a5": "Vous publiez votre annonce, des gardiens dont le profil correspond postulent, vous choisissez après une rencontre, puis votre gardien s'installe. Un accord de garde optionnel encadre les engagements de chacun pendant la garde.",
+      "a5": "Vous publiez votre annonce, des gardiens dont le profil correspond postulent, vous échangez, vous pouvez vous rencontrer, puis vous choisissez. Votre gardien s'installe ensuite. Un accord de garde optionnel encadre les engagements de chacun pendant la garde.",
       "q6": "Guardiens est-il disponible partout en France ?",
       "a6": "Oui, le service est ouvert dans toute la France : vous pouvez publier votre annonce où que vous habitiez. Le réseau, lui, se construit commune par commune, et sa densité varie encore selon les zones. C'est assumé, parce que la proximité est justement ce qui nous intéresse : un gardien qui habite à côté peut vous rencontrer avant, s'organiser plus simplement, et installer la confiance avant même votre départ. Publier votre annonce est le premier geste utile, elle est visible par les gardiens de votre secteur et au-delà.",
       "q7": "Quel est le modèle économique de Guardiens ?",
@@ -300,7 +300,7 @@
       },
       "spring": {
         "title": "Vous préparez vos vacances ?",
-        "description": "Anticipez : publiez votre annonce maintenant pour trouver le bon gardien avant le pic de l'été. La rencontre se fait toujours avant le départ."
+        "description": "Anticipez : publiez votre annonce maintenant pour trouver le bon gardien avant le pic de l'été. Prévoyez le temps d'une rencontre avant le départ."
       },
       "summer": {
         "title": "Vous partez cet été ?",
@@ -315,7 +315,7 @@
       "title": "Qu'est-ce que Guardiens ?",
       "body_1": "Guardiens est un réseau d'entraide entre particuliers, organisé par affinité autant que par proximité. On y garde des maisons, on s'y rend des services, on y rencontre des gens. À un kilomètre comme à mille.",
       "body_2": "La garde de maison et la garde d'animaux à domicile en sont l'usage principal. Un gardien s'installe chez vous pendant votre absence et veille sur ce que vous laissez : votre maison, votre jardin, vos animaux.",
-        "body_3": "À côté des gardes, les membres se rendent des coups de main : arrosage, courses, compagnie, un meuble à déplacer, un colis à réceptionner. Pour l'un, c'est un vrai besoin. Pour l'autre, c'est une heure, et une façon de se faire du bien. L'échange se décide entre vous.",
+        "body_3": "À côté des gardes, les membres se rendent des coups de main : arrosage, courses, compagnie, un colis à réceptionner. L'échange se décide entre vous. La mise en relation s'appuie sur un score d'affinité calculé sur plusieurs critères pondérés, propres à chaque couple. Les membres font vérifier leur identité et publient des avis croisés après leurs expériences.",
         "body_4": "La mise en relation s'appuie sur un score d'affinité calculé sur plusieurs critères pondérés, propres à chaque couple, où le mode de vie compte autant que la distance. Les membres documentent leur profil, font vérifier leur identité et publient des avis croisés après leurs expériences. Un statut de gardien d'urgence répond aux imprévus.",
         "body_5": "Guardiens publie aussi des guides de race et des guides locaux ville par ville, une sélection d'associations et de refuges présentés avec leurs besoins du moment, et un journal de conseils pratiques.",
         "body_6": "Les membres peuvent aussi ouvrir un chantier chez eux, un potager, un abri, un mur en pierre sèche. Des gens viennent participer quelques jours et repartent avec un savoir-faire appris sur place. Cette partie du réseau commence tout juste, et nous l'alimentons à la main.",
@@ -364,7 +364,7 @@
       }
     },
     "meta_title": "Garde de maison et d'animaux entre particuliers | Guardiens",
-    "meta_description": "House-sitting en France : un gardien veille sur votre maison et vos animaux pendant votre absence. Vous choisissez après une rencontre.",
+    "meta_description": "House-sitting en France : un gardien veille sur votre maison et vos animaux pendant votre absence. Vous échangez, vous pouvez vous rencontrer, puis vous choisissez.",
     "how": {
       "cta_owner": "Publier mon annonce",
       "cta_secondary": "Ou commencer par un coup de main →",
@@ -372,8 +372,8 @@
       "footnote": "Inscription en 2 minutes",
       "step1_text": "Vos dates, vos animaux, votre maison. Quelques minutes suffisent, votre annonce est en ligne.",
       "step1_title": "Publiez votre annonce",
-      "step2_text": "Des gardiens dont le profil correspond à votre besoin postulent. Vous lisez les profils, les avis, vous échangez. Puis vous vous voyez, un café, une visite, avant de décider.",
-      "step2_title": "Choisissez après une rencontre",
+      "step2_text": "Des gardiens dont le profil correspond à votre besoin postulent. Vous lisez les profils, les avis, vous échangez. Et si vous le souhaitez, vous vous voyez, un café, une visite, avant de décider.",
+      "step2_title": "Choisissez en confiance",
       "step3_text": "L'accord de garde signé, votre gardien s'installe. Vous recevez des nouvelles. Vous rentrez chez vous, souvent avec une nouvelle relation.",
       "step3_title": "Partez l'esprit léger",
       "title": "Comment ça marche ?"
