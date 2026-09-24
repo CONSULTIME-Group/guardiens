@@ -246,8 +246,10 @@ const SitDetail = () => {
         }
       }
 
+      // L'URL peut porter un slug : les requêtes par sit_id exigent l'UUID réel.
+      const sitId = (sitData as any).id as string;
       const { data: countRows } = await supabase.rpc("get_sit_application_counts", {
-        p_sit_id: id!,
+        p_sit_id: sitId,
       });
       const counts = countRows?.[0];
       setAppCount(counts?.app_count || 0);
@@ -259,13 +261,13 @@ const SitDetail = () => {
           supabase
             .from("applications")
             .select("id")
-            .eq("sit_id", id!)
+            .eq("sit_id", sitId)
             .eq("sitter_id", user.id)
             .limit(1),
           supabase
             .from("reviews")
             .select("id")
-            .eq("sit_id", id!)
+            .eq("sit_id", sitId)
             .eq("reviewer_id", user.id)
             .limit(1),
         ]);
