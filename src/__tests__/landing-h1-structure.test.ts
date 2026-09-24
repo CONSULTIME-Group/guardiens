@@ -2,6 +2,9 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 
 const source = readFileSync("src/pages/Landing.tsx", "utf8");
+const faqSource = readFileSync("src/components/landing/FaqSection.tsx", "utf8");
+const jsonLdSource = readFileSync("src/components/landing/HomeJsonLd.tsx", "utf8");
+const comparisonSource = readFileSync("src/components/landing/ComparatifSection.tsx", "utf8");
 
 describe("structure H1 de la home", () => {
   it("suit l'ordre éditorial validé", () => {
@@ -23,5 +26,15 @@ describe("structure H1 de la home", () => {
     expect(source).not.toContain("<NotreHistoireSection");
     expect(source).not.toContain("<InternationalStrip");
     expect(source).not.toContain("<ComparatifSection");
+  });
+
+  it("garde neuf questions alignées, dont trois dans un accordéon monté", () => {
+    expect(faqSource).toContain('const featuredKeys = new Set(["q1", "q2", "q3", "q5", "q8", "q9"])');
+    expect(faqSource).toContain("<AccordionContent forceMount");
+    expect(jsonLdSource).toContain("const faqNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9]");
+  });
+
+  it("garde le comparatif monté quand son accordéon est replié", () => {
+    expect(comparisonSource).toContain("<AccordionContent forceMount");
   });
 });

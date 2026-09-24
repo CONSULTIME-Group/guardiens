@@ -15,7 +15,7 @@ export function ConfianceSection() {
           <p className="text-xs md:text-[13px] tracking-[0.2em] uppercase text-primary font-body font-medium">
             Les repères essentiels
           </p>
-          <h2 id="trust-heading" className="font-heading text-4xl md:text-5xl font-semibold text-foreground mt-4 leading-tight">
+          <h2 id="trust-heading" className="mt-4 font-heading text-3xl font-semibold leading-tight text-foreground md:text-5xl">
             Trois conditions pour se faire confiance
           </h2>
         </RevealSection>

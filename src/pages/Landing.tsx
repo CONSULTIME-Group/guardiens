@@ -291,18 +291,17 @@ const Landing = () => {
 
       <ServiceAfterServiceSection />
 
-      {/* ═══════════════ CONFIANCE & PÉRIMÈTRE
-          (accueille désormais la démo du score d'affinité) ═══════════════ */}
+      {/* ═══════════════ CONFIANCE ET AFFINITÉ CONDENSÉE ═══════════════ */}
       <ConfianceSection />
 
       <LivedItSection />
 
       <UsagesSection />
 
-      {/* ═══════════════ SECTION 9bis, FAQ (section dédiée, miroir du JSON-LD FAQPage) ═══════════════ */}
+      {/* ═══════════════ FAQ, MIROIR DU JSON-LD FAQPAGE ═══════════════ */}
       <FaqSection />
 
-      {/* ═══════════════ SECTION 10, CTA FINAL (fusion Fondateur + double CTA) ═══════════════ */}
+      {/* ═══════════════ APPEL FINAL À DEUX PORTES ═══════════════ */}
       <FinalCtaSection />
 
       </main>

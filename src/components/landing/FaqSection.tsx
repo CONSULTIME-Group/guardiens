@@ -41,7 +41,7 @@ export function FaqSection() {
       <div className="lp-read">
         <RevealSection>
           <p className="mb-4 text-center text-xs font-medium uppercase tracking-[0.2em] text-primary">Pour aller plus loin</p>
-          <h2 id="faq-heading" className="font-heading text-3xl md:text-4xl font-semibold text-foreground text-center mb-10 scroll-mt-24">
+          <h2 id="faq-heading" className="mb-10 scroll-mt-24 text-center font-heading text-3xl font-semibold text-foreground md:text-5xl">
             {t("landing.faq.title")}
           </h2>
           <div className="space-y-4">{featured.map(renderItem)}</div>

@@ -20,7 +20,7 @@ export function HowItWorksSection() {
           <span className="text-xs tracking-widest uppercase text-primary font-body mb-4 block text-center">
             Deux façons de commencer
           </span>
-          <h2 id="how-it-works" className="text-2xl md:text-5xl font-heading font-semibold leading-snug text-foreground text-center mb-4 scroll-mt-24">
+          <h2 id="how-it-works" className="mb-4 scroll-mt-24 text-center font-heading text-3xl font-semibold leading-snug text-foreground md:text-5xl">
             Comment ça marche
           </h2>
         </RevealSection>
