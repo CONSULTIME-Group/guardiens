@@ -8,7 +8,7 @@ import { capitalizeFirstName } from "@/lib/displayName";
 interface Peek { valid?: boolean; reason?: string; mission_title?: string; mission_slug?: string; helper_first_name?: string }
 
 const REASON_TEXT: Record<string, string> = {
-  invalid: "Ce lien n'est plus valable. Vous pouvez choisir depuis votre messagerie.",
+  invalid: "Ce lien a expiré. Vous pouvez choisir depuis votre messagerie.",
   expired: "Ce lien a expiré. Vous pouvez choisir depuis votre messagerie.",
   already_used: "Votre choix est déjà enregistré. Merci.",
   mission_closed: "Ce besoin est déjà en cours ou clos.",
