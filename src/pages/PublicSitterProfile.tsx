@@ -982,7 +982,7 @@ export default function PublicSitterProfile() {
 
         // Query 3, Gardes passées (annonces archivées, hors annulées et modération).
         //   Les avis reçus en tant que propriétaire sont désormais dérivés du set principal
-        //   `reviews` via `sitOwnerBySitId` (cf. useMemo `ownerReviewsDerived`), plus de
+        //   `reviews` via `review_role` (fonction public_profile_reviews), plus de
         //   requête dédiée ici, pour garantir la cohérence des compteurs par rôle.
         // Lecture via la vue publique réduite : la table `sits` n'est plus lisible
         // en anonyme hors `published`. La vue n'expose ni date ni texte libre.
