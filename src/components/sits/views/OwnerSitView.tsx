@@ -42,6 +42,9 @@ import {
   type OpenApplication,
 } from "@/lib/declineOpenApplications";
 import { logger } from "@/lib/logger";
+import { avatarImageUrl } from "@/lib/storageImage";
+import { useAcceptApplication } from "@/hooks/useAcceptApplication";
+import { buildPlatformCandidates, type PlatformCandidate } from "@/lib/platformCandidates";
 import { useToast } from "@/hooks/use-toast";
 import { formatSitPeriod } from "@/lib/dateRange";
 import {
@@ -112,6 +115,15 @@ interface OwnerSitViewProps {
 }
 
 
+const CandidateAvatar = ({ c }: { c: PlatformCandidate }) =>
+  c.avatarUrl ? (
+    <img src={avatarImageUrl(c.avatarUrl, 80)} alt="" width={40} height={40} className="h-10 w-10 shrink-0 rounded-full object-cover" loading="lazy" />
+  ) : (
+    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted font-heading text-foreground" aria-hidden="true">
+      {c.firstName.charAt(0).toUpperCase()}
+    </span>
+  );
+
 const OwnerSitView = ({
   sit,
   setSit,
@@ -143,6 +155,10 @@ const OwnerSitView = ({
   // Candidatures ouvertes (pending, viewed) au moment de la dépublication :
   // filet de sécurité, on les nomme et on propose de les décliner d'abord.
   const [openApps, setOpenApps] = useState<OpenApplication[]>([]);
+  // Personnes avec candidature ou conversation, pour le motif « via la plateforme ».
+  const [platformCandidates, setPlatformCandidates] = useState<PlatformCandidate[]>([]);
+  const [acceptingSitterId, setAcceptingSitterId] = useState<string | null>(null);
+  const { acceptApplication, accepting: acceptingFromUnpublish, accordDialog } = useAcceptApplication();
   const [decliningApps, setDecliningApps] = useState(false);
   const [logementOverride, setLogementOverride] = useState(initialLogementOverride);
   const [animauxOverride, setAnimauxOverride] = useState(initialAnimauxOverride);
@@ -302,6 +318,25 @@ const OwnerSitView = ({
   // Les deux requêtes partagent la même définition de « candidature ouverte »,
   // OPEN_APPLICATION_STATUSES (pending, viewed, discussing), qui est aussi
   // l'ensemble annulé par le RPC unpublish_sit.
+  // Motif « via la plateforme » : on accepte la candidature choisie via le
+  // chemin unique, l'annonce passe en confirmed. Rien n'est dépublié ni annulé.
+  const handleConfirmWithCandidate = async (c: PlatformCandidate) => {
+    if (!c.applicationId || acceptingFromUnpublish) return;
+    setAcceptingSitterId(c.sitterId);
+    const ok = await acceptApplication({
+      applicationId: c.applicationId,
+      sitId: sit.id,
+      sitterId: c.sitterId,
+      sitterFirstName: c.firstName,
+    });
+    setAcceptingSitterId(null);
+    if (ok) {
+      void trackEvent("unpublish_redirected_to_accept", { metadata: { sit_id: sit.id } });
+      setSit({ ...sit, status: "confirmed", accepting_applications: false } as any);
+      setUnpublishConfirmOpen(false);
+    }
+  };
+
   const requestUnpublish = async () => {
     const { count } = await supabase
       .from("applications")
@@ -318,15 +353,35 @@ const OwnerSitView = ({
       .order("created_at", { ascending: true });
 
     const rows = (openRows ?? []) as Array<{ id: string; sitter_id: string; created_at: string; status: string }>;
-    const sitterIds = [...new Set(rows.map((r) => r.sitter_id).filter(Boolean))];
+
+    const { data: convRows } = await supabase
+      .from("conversations")
+      .select("sitter_id")
+      .eq("sit_id", sit.id)
+      .eq("owner_id", currentUserId);
+    const convSitterIds = ((convRows ?? []) as Array<{ sitter_id: string | null }>).map((c) => c.sitter_id);
+
+    const sitterIds = [
+      ...new Set([...rows.map((r) => r.sitter_id), ...convSitterIds].filter((x): x is string => !!x)),
+    ];
     const nameById = new Map<string, string>();
+    let profRows: any[] = [];
     if (sitterIds.length > 0) {
       const { data: profs } = await supabase
         .from("public_profiles")
-        .select("id, first_name")
+        .select("id, first_name, city, avatar_url")
         .in("id", sitterIds);
-      (profs ?? []).forEach((p: any) => nameById.set(p.id, p.first_name ?? ""));
+      profRows = (profs ?? []) as any[];
+      profRows.forEach((p: any) => nameById.set(p.id, p.first_name ?? ""));
     }
+    setPlatformCandidates(
+      buildPlatformCandidates({
+        openApplications: rows,
+        conversationSitterIds: convSitterIds,
+        profiles: profRows,
+        ownerId: currentUserId,
+      }),
+    );
     setOpenApps(
       rows.map((r) => ({
         id: r.id,
@@ -349,6 +404,8 @@ const OwnerSitView = ({
   const handleUnpublish = async (declineOpenFirst = false) => {
     if (unpublishing) return;
     if (!unpublishReason) return;
+    // « Via la plateforme » confirme la garde, il ne dépublie jamais.
+    if (unpublishReason === "found_onplatform") return;
     setUnpublishing(true);
 
     // Filet de sécurité : si l'owner a choisi de répondre, on décline les
@@ -801,7 +858,7 @@ const OwnerSitView = ({
                 { v: "plans_changed", l: "Mes dates ou mes plans ont changé" },
                 { v: "no_relevant_apps", l: "Je n'ai pas reçu de candidatures adaptées" },
                 { v: "other", l: "Autre raison" },
-              ].map((opt) => (
+              ].filter((opt) => opt.v !== "found_onplatform" || platformCandidates.length > 0).map((opt) => (
                 <div key={opt.v} className="flex items-center gap-2">
                   <RadioGroupItem id={`unpublish-${opt.v}`} value={opt.v} />
                   <Label htmlFor={`unpublish-${opt.v}`} className="text-sm font-normal cursor-pointer">
@@ -820,13 +877,61 @@ const OwnerSitView = ({
                 disabled={unpublishing}
               />
             )}
+            {unpublishReason === "found_onplatform" && (
+              <div className="space-y-2 rounded-lg border border-border bg-muted/30 p-3" data-testid="found-onplatform-picker">
+                <p className="font-heading text-base text-foreground">Avec qui la garde se fait-elle ?</p>
+                <p className="text-xs text-muted-foreground">
+                  Choisissez la personne retenue : la garde est confirmée et l'annonce reste active.
+                </p>
+                <ul className="space-y-2">
+                  {platformCandidates.map((c) => (
+                    <li key={c.sitterId}>
+                      {c.applicationId ? (
+                        <button
+                          type="button"
+                          disabled={acceptingFromUnpublish}
+                          onClick={() => void handleConfirmWithCandidate(c)}
+                          className="flex w-full items-center gap-3 rounded-lg border border-border bg-card p-2 text-left transition-colors hover:border-primary disabled:opacity-60"
+                        >
+                          <CandidateAvatar c={c} />
+                          <span className="min-w-0 flex-1">
+                            <span className="block text-sm font-medium text-foreground">{c.firstName}</span>
+                            {c.city && <span className="block text-xs text-muted-foreground">{c.city}</span>}
+                          </span>
+                          <span className="text-xs font-medium text-primary">
+                            {acceptingSitterId === c.sitterId ? "Confirmation…" : "Confirmer la garde"}
+                          </span>
+                        </button>
+                      ) : (
+                        <div className="flex w-full items-center gap-3 rounded-lg border border-dashed border-border p-2">
+                          <CandidateAvatar c={c} />
+                          <span className="min-w-0 flex-1">
+                            <span className="block text-sm font-medium text-foreground">{c.firstName}</span>
+                            <span className="block text-xs text-muted-foreground">
+                              Invitez {c.firstName} à candidater depuis la messagerie pour confirmer la garde.
+                            </span>
+                          </span>
+                        </div>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+                <button
+                  type="button"
+                  onClick={() => setUnpublishReason("found_offline")}
+                  className="text-sm text-primary underline underline-offset-2"
+                >
+                  Avec une personne rencontrée ailleurs
+                </button>
+              </div>
+            )}
             <p className="text-xs text-muted-foreground">
               Votre retour nous aide à améliorer la plateforme, il reste confidentiel.
             </p>
           </div>
 
           <AlertDialogFooter className="flex-col sm:flex-col sm:space-x-0 gap-2">
-            {openApps.length > 0 && (
+            {openApps.length > 0 && unpublishReason !== "found_onplatform" && (
               <AlertDialogAction
                 onClick={(e) => {
                   e.preventDefault();
@@ -840,6 +945,7 @@ const OwnerSitView = ({
                   : "Décliner ces candidatures et dépublier"}
               </AlertDialogAction>
             )}
+            {unpublishReason !== "found_onplatform" && (
             <AlertDialogAction
               onClick={(e) => {
                 e.preventDefault();
@@ -854,6 +960,7 @@ const OwnerSitView = ({
                   ? "Dépublier sans les traiter"
                   : "Dépublier"}
             </AlertDialogAction>
+            )}
             <AlertDialogCancel disabled={unpublishing} className="w-full mt-0">
               Annuler
             </AlertDialogCancel>
@@ -861,6 +968,8 @@ const OwnerSitView = ({
 
         </AlertDialogContent>
       </AlertDialog>
+
+      {accordDialog}
 
       {/* Emergency sitter alert, owner only, published sit starting within 15 days */}
       {sit.status === "published" && owner?.city && (

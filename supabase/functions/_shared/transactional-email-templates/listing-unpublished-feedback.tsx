@@ -22,7 +22,7 @@ interface ListingUnpublishedFeedbackProps {
  * Le motif est connu : on ne le redemande jamais.
  */
 const variantFor = (reason?: string): { question: string | null; closing: string } => {
-  if (reason === 'found_offline' || reason === 'found_onplatform') {
+  if (reason === 'found_offline') {
     return {
       question: "Qu'est-ce qui aurait fait que vous trouviez chez nous ?",
       closing: "Votre annonce reste en brouillon, elle se republie en un clic.",
@@ -54,6 +54,9 @@ const ListingUnpublishedFeedbackEmail = ({
   reason,
 }: ListingUnpublishedFeedbackProps) => {
   const variant = variantFor(reason)
+  if (reason === 'found_onplatform') {
+    return <FoundOnPlatformEmail firstName={firstName} sitTitle={sitTitle} sitUrl={sitUrl} />
+  }
   return (
     <Html lang="fr" dir="ltr">
       <BrandedHead />
@@ -109,10 +112,54 @@ const ListingUnpublishedFeedbackEmail = ({
   )
 }
 
+/** Motif « trouvé via Guardiens » : une félicitation courte, aucune question. */
+const FoundOnPlatformEmail = ({ firstName, sitTitle, sitUrl }: ListingUnpublishedFeedbackProps) => (
+  <Html lang="fr" dir="ltr">
+    <BrandedHead />
+    <Preview>Félicitations, votre gardien est trouvé</Preview>
+    <Body style={main}>
+      <Container style={container}>
+        <BrandHeader />
+        <Heading style={h1}>
+          {firstName ? `Bonjour ${firstName},` : 'Bonjour,'}
+        </Heading>
+        <Text style={text}>
+          Félicitations ! Vous avez trouvé votre gardien sur {SITE_NAME} pour
+          {sitTitle ? <> <strong>« {sitTitle} »</strong></> : ' votre annonce'}.
+        </Text>
+        <Text style={text}>
+          Pensez à confirmer la garde depuis votre annonce : l'accord de garde
+          et le guide de la maison vous y attendent, et votre gardien pourra
+          ensuite laisser son avis.
+        </Text>
+        {sitUrl ? (
+          <Button href={sitUrl} style={button}>
+            Voir mon annonce
+          </Button>
+        ) : null}
+        <Text style={text}>
+          Belle garde à vous deux. Une question ? Répondez simplement à cet
+          email, c'est moi qui le recevrai.
+        </Text>
+        <Text style={signature}>
+          Jérémie<br />
+          Fondateur de {SITE_NAME}
+        </Text>
+        <LegalFooter
+          purpose="un échange relatif à votre annonce et à l'amélioration du service"
+          basis="6.1.f"
+        />
+      </Container>
+    </Body>
+  </Html>
+)
+
 export const template = {
   component: ListingUnpublishedFeedbackEmail,
   subject: (data: Record<string, any>) =>
-    data.sitTitle
+    data.reason === 'found_onplatform'
+      ? 'Félicitations, votre gardien est trouvé'
+      : data.sitTitle
       ? `Votre annonce « ${data.sitTitle} », un retour à partager ?`
       : `Votre annonce dépubliée, un retour à partager ?`,
   displayName: 'Annonce dépubliée, demande de feedback',

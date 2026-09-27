@@ -11,6 +11,10 @@ import HelpButton from "./HelpButton";
 import MissionFeedbackModal from "@/components/missions/MissionFeedbackModal";
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/lib/logger";
+import { reportError } from "@/lib/errorLogger";
+import { useAcceptApplication } from "@/hooks/useAcceptApplication";
+import { OPEN_APPLICATION_STATUSES } from "@/lib/declineOpenApplications";
+import { isOpenApplicationStatus } from "@/lib/applicationSitState";
 import { sendTransactionalEmail } from "@/lib/sendTransactionalEmail";
 import { toast } from "sonner";
 import { format, isPast } from "date-fns";
@@ -68,7 +72,9 @@ const ConversationHeader = ({
   const [hasFeedback, setHasFeedback] = useState(false);
 
   const isOwner = conv.owner_id === userId;
-  const isPendingApp = conv.application_status === "pending" || conv.application_status === "discussing";
+  // pending, viewed, discussing : l'ouverture de la conversation passe
+  // pending en viewed (mark_sit_applications_viewed), le bouton doit rester.
+  const isPendingApp = isOpenApplicationStatus(conv.application_status);
   const isConfirmed = conv.sit?.status === "confirmed";
   const isInProgress = conv.sit?.status === "in_progress";
   const isCompleted = conv.sit?.status === "completed";
@@ -214,45 +220,68 @@ const ConversationHeader = ({
     setReportDetails("");
   };
 
+  const { acceptApplication, accepting, accordDialog } = useAcceptApplication({
+    onAccepted: () => onActionDone(),
+    onAccordClosed: () => onActionDone(),
+  });
+  const [acceptConfirmOpen, setAcceptConfirmOpen] = useState(false);
+
+  // Acceptation : chemin unique via useAcceptApplication (RPC accept_application).
   const handleAcceptApplication = async () => {
     if (!conv.sit_id) return;
-    const { error } = await supabase
+    const { data: app, error } = await supabase
       .from("applications")
-      .update({ status: "accepted" })
+      .select("id, status")
       .eq("sit_id", conv.sit_id)
-      .eq("sitter_id", conv.sitter_id);
-    if (error) { toast.error("Erreur"); return; }
-    toast.success(`Candidature de ${sitterName} acceptée`);
-
-    // Email transactionnel, sitter informé de l'acceptation (non-bloquant)
-    sendTransactionalEmail({
-      templateName: "application-accepted",
-      recipientUserId: conv.sitter_id,
-      idempotencyKey: `app-accepted-conv-${conv.id}-${conv.sitter_id}`,
-      templateData: {
-        sitTitle: conv.sit?.title ?? "",
-        ownerFirstName: "", // owner = current user, fallback "Le propriétaire" géré côté template
-      },
-    }).catch(() => {});
-
-    onActionDone();
+      .eq("sitter_id", conv.sitter_id)
+      .maybeSingle();
+    if (error || !app) {
+      logger.error("conversation accept: application lookup failed", { sitId: conv.sit_id, error: error?.message });
+      if (error) reportError(error, { component: "ConversationHeader", sit_id: conv.sit_id });
+      toast.error("Candidature introuvable. Rechargez la page puis réessayez.");
+      setAcceptConfirmOpen(false);
+      return;
+    }
+    const ok = await acceptApplication({
+      applicationId: app.id,
+      sitId: conv.sit_id,
+      sitterId: conv.sitter_id,
+      sitterFirstName: conv.other_user?.first_name ?? null,
+    });
+    setAcceptConfirmOpen(false);
+    if (!ok) onActionDone();
   };
 
+  // Déclin : le trigger autorise le propriétaire à passer une candidature
+  // ouverte en rejected. Le filtre sur les statuts ouverts et le .select
+  // évitent de décliner une candidature déjà acceptée entre-temps.
   const handleDeclineApplication = async () => {
     if (!conv.sit_id) return;
-    const { error } = await supabase
+    const { data: updated, error } = await supabase
       .from("applications")
       .update({ status: "rejected" })
       .eq("sit_id", conv.sit_id)
-      .eq("sitter_id", conv.sitter_id);
-    if (error) { toast.error("Erreur"); return; }
+      .eq("sitter_id", conv.sitter_id)
+      .in("status", [...OPEN_APPLICATION_STATUSES])
+      .select("id");
+    if (error) {
+      logger.error("conversation decline failed", { sitId: conv.sit_id, error: error.message });
+      reportError(error, { component: "ConversationHeader", sit_id: conv.sit_id });
+      toast.error("Le déclin n'a pas abouti. Réessayez dans un instant.");
+      return;
+    }
+    if (!updated || updated.length === 0) {
+      toast.info("Cette candidature a déjà reçu une réponse.");
+      onActionDone();
+      return;
+    }
     toast.success("Candidature déclinée");
 
     // Email transactionnel, sitter informé du refus (non-bloquant)
     sendTransactionalEmail({
       templateName: "application-declined",
       recipientUserId: conv.sitter_id,
-      idempotencyKey: `app-declined-conv-${conv.id}-${conv.sitter_id}`,
+      idempotencyKey: `app-declined-${updated[0].id}`,
       templateData: { sitTitle: conv.sit?.title ?? "" },
     }).catch(() => {});
 
@@ -341,7 +370,7 @@ const ConversationHeader = ({
           )}
           {isOwner && isPendingApp && (
             <>
-              <Button size="sm" className="gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground" onClick={handleAcceptApplication}>
+              <Button size="sm" className="gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground" onClick={() => setAcceptConfirmOpen(true)} disabled={accepting}>
                 <CheckCircle2 className="h-3.5 w-3.5" /> Accepter
               </Button>
               <Button size="sm" variant="outline" onClick={handleDeclineApplication}>
@@ -663,6 +692,26 @@ const ConversationHeader = ({
           }}
         />
       )}
+      <Dialog open={acceptConfirmOpen} onOpenChange={(o) => !accepting && setAcceptConfirmOpen(o)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-heading">
+              Accepter la candidature de {sitterName} ?
+            </DialogTitle>
+            <DialogDescription>
+              Les autres candidats seront automatiquement déclinés. Cette action confirme la garde.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setAcceptConfirmOpen(false)} disabled={accepting}>Annuler</Button>
+            <Button onClick={handleAcceptApplication} disabled={accepting}>
+              {accepting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+              Confirmer l'acceptation
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      {accordDialog}
     </div>
   );
 };

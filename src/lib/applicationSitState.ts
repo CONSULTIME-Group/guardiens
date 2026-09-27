@@ -72,3 +72,11 @@ export function groupApplications<T extends ApplicationLike>(apps: readonly T[])
   }
   return { active, closed };
 }
+
+/**
+ * Candidature encore ouverte, donc acceptable par le propriétaire :
+ * pending, viewed ou discussing (même ensemble que la RPC accept_application).
+ */
+export function isOpenApplicationStatus(status: string | null | undefined): boolean {
+  return status === "pending" || status === "viewed" || status === "discussing";
+}
