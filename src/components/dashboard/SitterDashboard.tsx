@@ -12,6 +12,7 @@ import { useNearbyHelpers } from "@/hooks/useNearbyHelpers";
 import { useHelpersProximityCount } from "@/hooks/useHelpersProximityCount";
 import DashboardLoadError from "./DashboardLoadError";
 import HelpsWithReminder from "./HelpsWithReminder";
+import MutualAidRadiusLine from "@/components/entraide/MutualAidRadiusLine";
 import MesCoupsDeMain from "./MesCoupsDeMain";
 
 import RoleActivationBanner from "./RoleActivationBanner";
@@ -353,6 +354,7 @@ const SitterDashboard = () => {
         <RoleActivationBanner userRole={user?.role || "sitter"} />
       </div>
       <HelpsWithReminder />
+      <MutualAidRadiusLine className="mx-auto mb-5 w-full max-w-6xl px-4 sm:px-5 md:px-8" />
       <MesCoupsDeMain />
 
       {/* ═══ FLUX VERTICAL UNIQUE, plus de colonne aside isolée ═══

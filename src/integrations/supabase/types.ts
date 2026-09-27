@@ -8294,6 +8294,7 @@ export type Database = {
           user_id: string
           view_count: number
           wave_count: number
+          wave_radius_floor: number
         }
         Insert: {
           accepting_applications?: boolean
@@ -8340,6 +8341,7 @@ export type Database = {
           user_id: string
           view_count?: number
           wave_count?: number
+          wave_radius_floor?: number
         }
         Update: {
           accepting_applications?: boolean
@@ -8386,6 +8388,7 @@ export type Database = {
           user_id?: string
           view_count?: number
           wave_count?: number
+          wave_radius_floor?: number
         }
         Relationships: [
           {
@@ -10666,6 +10669,7 @@ export type Database = {
         }[]
       }
       detect_low_email_delivery: { Args: never; Returns: number }
+      detect_missions_without_audience: { Args: never; Returns: number }
       detect_pending_applications: {
         Args: never
         Returns: {
@@ -11273,6 +11277,18 @@ export type Database = {
           helper_id: string
         }[]
       }
+      mission_wave_audience_floor: {
+        Args: {
+          p_floor: number
+          p_limit?: number
+          p_mission_id: string
+          p_offset?: number
+        }
+        Returns: {
+          distance_km: number
+          helper_id: string
+        }[]
+      }
       mission_wave_audience_preview: {
         Args: { p_lat: number; p_lng: number }
         Returns: number
@@ -11287,6 +11303,10 @@ export type Database = {
         Returns: number
       }
       mutual_aid_money_mention: { Args: { p_texte: string }; Returns: boolean }
+      mutual_aid_radius_is_explicit: {
+        Args: { p_user: string }
+        Returns: boolean
+      }
       mutual_aid_radius_km: {
         Args: { p_default?: number; p_max?: number; p_user: string }
         Returns: number
@@ -11311,6 +11331,7 @@ export type Database = {
         Args: { p_mission_id: string }
         Returns: Json
       }
+      my_mutual_aid_radius_km: { Args: never; Returns: number }
       normalize_analytics_source: { Args: { raw: string }; Returns: string }
       normalize_city_name: { Args: { txt: string }; Returns: string }
       notify_owner_of_new_application: {

@@ -1,6 +1,6 @@
 import * as React from 'npm:react@18.3.1'
 import {
-  Body, Container, Heading, Html, Preview, Text, Button, Section, Hr,
+  Body, Container, Heading, Html, Preview, Text, Button, Section, Hr, Link,
 } from 'npm:@react-email/components@0.0.22'
 import { BrandedHead } from './_branded-head.tsx'
 import { BrandHeader } from './_brand-header.tsx'
@@ -18,6 +18,16 @@ interface Props {
   canHelpToken?: string
   proofLine?: string
   sitModeLine?: string
+  distanceKm?: number | null
+}
+
+/** Au-delà de ce seuil, l'email dit la distance réelle et propose de régler son rayon. */
+export const FAR_DISTANCE_KM = 30
+export const ALERT_SETTINGS_URL = `${SITE_URL}/settings?section=alerts`
+
+export function farDistanceLine(distanceKm?: number | null): string | null {
+  if (typeof distanceKm !== 'number' || !Number.isFinite(distanceKm) || distanceKm <= FAR_DISTANCE_KM) return null
+  return `À ${Math.round(distanceKm)} km de chez vous. Personne de plus proche pour le moment.`
 }
 
 const MissionHelpNeededEmail = ({
@@ -29,7 +39,10 @@ const MissionHelpNeededEmail = ({
   canHelpToken,
   proofLine,
   sitModeLine,
-}: Props) => (
+  distanceKm,
+}: Props) => {
+  const farLine = farDistanceLine(distanceKm)
+  return (
   <Html lang="fr" dir="ltr">
     <BrandedHead />
     <Preview>{headline || 'Quelqu\u2019un du coin a besoin d\u2019un coup de main'}</Preview>
@@ -37,6 +50,15 @@ const MissionHelpNeededEmail = ({
       <Container style={container}>
         <BrandHeader />
         <Heading style={h1}>Un besoin près de chez vous</Heading>
+
+        {farLine && (
+          <>
+            <Text style={far}>{farLine}</Text>
+            <Text style={farLink}>
+              <Link href={ALERT_SETTINGS_URL} style={link}>Choisir la distance qui me convient</Link>
+            </Text>
+          </>
+        )}
 
         <Text style={text}>Bonjour{helperFirstName ? ` ${helperFirstName}` : ''},</Text>
 
@@ -83,7 +105,8 @@ const MissionHelpNeededEmail = ({
       </Container>
     </Body>
   </Html>
-)
+  )
+}
 
 const main = { backgroundColor: '#ffffff', fontFamily: "'Outfit', Arial, sans-serif" }
 const container = { padding: '24px 28px', maxWidth: '560px', margin: '0 auto' }
@@ -110,6 +133,9 @@ const buttonGhost = {
 }
 const proof = { color: '#2C6D50', fontSize: '13px', lineHeight: '20px', margin: '0 0 16px', fontStyle: 'italic' as const }
 const muted = { color: '#888277', fontSize: '13px', lineHeight: '20px', marginTop: '20px' }
+const far = { fontSize: '14px', color: '#524E47', lineHeight: '1.6', margin: '0 0 4px', fontWeight: 600 as const }
+const farLink = { fontSize: '13px', lineHeight: '20px', margin: '0 0 16px' }
+const link = { color: '#2C6D50', textDecoration: 'underline' }
 const hr = { borderColor: '#E9E4DD', margin: '20px 0' }
 
 export const template: TemplateEntry = {
