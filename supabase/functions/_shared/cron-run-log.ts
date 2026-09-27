@@ -50,12 +50,17 @@ function getServiceClient(): SupabaseClient | null {
 }
 
 export async function startCronRun(edgeName: string): Promise<CronRun> {
+  // Garde-fou : jamais de sérialisation d'un argument inattendu (ex. client avec clé).
+  const validName = typeof edgeName === "string" && edgeName.trim().length > 0;
+  const row: Record<string, unknown> = validName
+    ? { edge_name: edgeName }
+    : { edge_name: "invalid-edge-name", error_message: "startCronRun appelé sans nom valide" };
   const client = getServiceClient();
   let id: string | null = null;
   if (client) {
     const { data } = await client
       .from("cron_run_log")
-      .insert({ edge_name: edgeName, started_at: new Date().toISOString() })
+      .insert({ ...row, started_at: new Date().toISOString() })
       .select("id")
       .maybeSingle();
     id = (data as { id?: string } | null)?.id ?? null;

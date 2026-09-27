@@ -36,7 +36,7 @@ Deno.serve(async (req) => {
   if (denied) return denied;
 
   const supabase = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
-  const run = await startCronRun(supabase, "send-mission-choose-prompt");
+  const run = await startCronRun("send-mission-choose-prompt");
 
   try {
     const { data: rows, error } = await supabase.rpc("mission_choose_prompt_candidates");
@@ -75,12 +75,12 @@ Deno.serve(async (req) => {
       sent++;
     }
 
-    await run?.ok?.({ sent, candidates: rows?.length ?? 0 });
+    await run.finish("success", { sent, candidates: rows?.length ?? 0 });
     return json({ ok: true, sent, candidates: rows?.length ?? 0 });
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
     console.error("[send-mission-choose-prompt]", message);
-    await run?.fail?.(message);
+    await run.fail(e);
     return json({ ok: false, error: message }, 500);
   }
 });
