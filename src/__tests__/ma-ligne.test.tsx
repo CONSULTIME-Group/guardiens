@@ -22,7 +22,7 @@ const base = { profile_id: "u1", revoked_at: null, expires_at: "2026-10-20T00:00
 
 describe("transparence et table dédiée", () => {
   it("annonce la disponibilité avant le clic, sans label redondant", () => {
-    render(<HelpsWithLineForm firstName="Léa" initialValue="" onSave={async () => ({ ok: true })} source="token" />);
+    renderForm();
     expect(screen.getByText(HELPS_WITH_AVAILABILITY_NOTE)).toBeTruthy();
     expect(screen.queryByText("Ce que vous aimez faire")).toBeNull();
   });
