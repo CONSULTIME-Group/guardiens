@@ -1,4 +1,4 @@
-import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { Fragment, Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
@@ -19,12 +19,14 @@ import {
   HELPERS_PAGE_SIZE,
   distanceFrom,
   isSectorQuiet,
+  NEARBY_THRESHOLD_KM,
   memberSubtitle,
   nearestDistanceKm,
   sortByDistance,
   type Origin,
 } from "@/lib/entraideHubModel";
-import { QUICK_CAN_HELP_MESSAGE, respondToMission } from "@/lib/missionRespond";
+import { respondToMission } from "@/lib/missionRespond";
+import CanHelpDialog from "@/components/entraide/CanHelpDialog";
 import { toast } from "sonner";
 import { capitalizeFirstName } from "@/lib/displayName";
 
@@ -149,6 +151,8 @@ const EntraideHub = () => {
   const [profile, setProfile] = useState<MemberProfile | null>(null);
   const [myResponses, setMyResponses] = useState<Set<string>>(new Set());
   const [responding, setResponding] = useState<string | null>(null);
+  const [confirmNeed, setConfirmNeed] = useState<EntraideNeed | null>(null);
+  const [confirmFirstName, setConfirmFirstName] = useState<string | null>(null);
   const [helpersShown, setHelpersShown] = useState(HELPERS_PAGE_SIZE);
   const [counts, setCounts] = useState<Map<string, { given_count: number | null; received_count: number | null }>>(new Map());
   const [badges, setBadges] = useState<Map<string, MissionBadgeRow[]>>(new Map());
@@ -180,7 +184,7 @@ const EntraideHub = () => {
     const load = async () => {
       const [profileResult, responsesResult] = await Promise.all([
         supabase.from("profiles").select("city, latitude, longitude, available_for_help").eq("id", user.id).maybeSingle(),
-        supabase.from("small_mission_responses").select("mission_id").eq("responder_id", user.id),
+        supabase.from("small_mission_responses").select("mission_id").eq("responder_id", user.id).in("status", ["pending", "accepted"]),
       ]);
       if (cancelled) return;
       if (profileResult.data) setProfile(profileResult.data as MemberProfile);
@@ -284,11 +288,21 @@ const EntraideHub = () => {
       navigate(detailPath(need));
       return;
     }
-    if (responding) return;
+    setConfirmFirstName(null);
+    setConfirmNeed(need);
+    if (need.user_id) {
+      const { data } = await supabase.from("public_profiles").select("first_name").eq("id", need.user_id).maybeSingle();
+      setConfirmFirstName(capitalizeFirstName((data as { first_name?: string | null } | null)?.first_name) || null);
+    }
+  };
+
+  const sendCanHelp = async (need: EntraideNeed, message: string) => {
+    if (!user?.id || responding) return;
     setResponding(need.id);
     void trackEvent("mission_can_help", { metadata: { mission_id: need.id, source: "hub_list" } });
-    const outcome = await respondToMission({ missionId: need.id, userId: user.id, message: QUICK_CAN_HELP_MESSAGE });
+    const outcome = await respondToMission({ missionId: need.id, userId: user.id, message });
     setResponding(null);
+    setConfirmNeed(null);
     switch (outcome.kind) {
       case "sent":
         setMyResponses((prev) => new Set(prev).add(need.id));
@@ -369,7 +383,7 @@ const EntraideHub = () => {
           )}
 
           <section className="pt-2" aria-labelledby="entraide-needs-title">
-            <h2 id="entraide-needs-title" className="sr-only">Besoins ouverts</h2>
+            <h2 id="entraide-needs-title" className="mt-6 font-heading text-2xl font-semibold text-foreground">Besoins ouverts</h2>
             {viewToggle}
 
             {mapOpen && (
@@ -391,7 +405,17 @@ const EntraideHub = () => {
               <div className="mt-5 space-y-3" aria-busy="true">{[0, 1, 2, 3].map((item) => <div key={item} className="h-[96px] animate-pulse rounded-lg bg-muted" />)}</div>
             ) : mapOpen ? null : sortedNeeds.length > 0 ? (
               <ul className="mt-5 space-y-3">
-                {sortedNeeds.map((need) => (
+                {sortedNeeds.map((need, index) => {
+                  const distance = needDistance(need);
+                  const previous = index > 0 ? needDistance(sortedNeeds[index - 1]) : null;
+                  const firstFar = distance !== null && distance > NEARBY_THRESHOLD_KM && (index === 0 || (previous !== null && previous <= NEARBY_THRESHOLD_KM));
+                  return (
+                  <Fragment key={need.id}>
+                  {firstFar && (
+                    <li role="separator" aria-label="Plus loin" className="pt-4 text-sm font-semibold text-muted-foreground">
+                      Plus loin, pour celles et ceux qui voyagent
+                    </li>
+                  )}
                   <NeedRow
                     key={need.id}
                     need={need}
@@ -400,7 +424,9 @@ const EntraideHub = () => {
                     pending={responding === need.id}
                     onCanHelp={() => void canHelp(need)}
                   />
-                ))}
+                  </Fragment>
+                  );
+                })}
               </ul>
             ) : (
               <p className="mt-5 rounded-lg border border-border p-5 text-sm text-muted-foreground">Le prochain besoin apparaîtra ici. Les personnes disponibles restent visibles plus bas.</p>
@@ -447,6 +473,14 @@ const EntraideHub = () => {
             <a className="mt-3 inline-block text-sm font-semibold text-primary underline underline-offset-4" href="/actualites/technologie-recreer-lien-pres-de-chez-soi">Lire l'article</a>
           </section>
           <EntraideFaq />
+          <CanHelpDialog
+            open={confirmNeed !== null}
+            firstName={confirmFirstName}
+            needTitle={confirmNeed?.title || ""}
+            sending={responding !== null}
+            onCancel={() => setConfirmNeed(null)}
+            onSend={(message) => { if (confirmNeed) void sendCanHelp(confirmNeed, message); }}
+          />
         </div>
       </div>
     </>
