@@ -1246,7 +1246,7 @@ function buildPreviewHtml(subject: string, body: string, ctaLabel?: string, ctaU
   const ctaBlock = ctaLabel && ctaUrl
     ? `<tr><td align="center" style="padding:32px 0 8px">
 <a href="${ctaUrl}" style="display:inline-block;padding:14px 32px;background-color:#2C6E49;color:#ffffff;text-decoration:none;border-radius:10px;font-weight:600;font-size:16px;box-shadow:0 4px 12px rgba(44,110,73,0.25)">${ctaLabel.replace(/</g, "&lt;")}</a>
-</td></tr>
+</td></tr>`
     : "";
 
   return `<div style="background-color:#FAF9F6;padding:24px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
