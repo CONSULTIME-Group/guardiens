@@ -1,158 +1,88 @@
-# Lot H2, accueil resserré et vérité sur la rencontre
+# Lots P1 à P3 : Entraide et accueil
 
-## Résultat visé
+Règles : textes repris mot pour mot, aucun tiret cadratin ni demi-cadratin, aucune construction négative, « voisin » et « gratuit » proscrits, vouvoiement. Aucune publication.
 
-Ramener l'accueil à 9 ensembles éditoriaux, avec un parcours plus court et une formulation cohérente : la rencontre est conseillée et reste un choix. Le hero, le bandeau de chiffres et les six annonces restent inchangés.
+## P2 : état actuel du parcours d'acceptation (lu en base et dans le code)
 
-Ordre final :
+- Aujourd'hui, on ne peut choisir quelqu'un qu'à un seul endroit : la page du besoin (`SmallMissionDetail.tsx`), dans la carte de réponse `MissionResponseCard.tsx`, bouton « Retenir cette personne ». Ce bouton appelle `accept_mission_response`.
+- Pourquoi ce choix reste invisible pour le demandeur :
+  1. Les 7 réponses en attente n'ont aucun `conversation_id` et aucune conversation n'est rattachée au besoin (`small_mission_id` vide). Les échanges ont bien lieu, mais dans des conversations `sitter_inquiry` sans lien avec le besoin : 1, 9, 4 et 4 messages. Dans la messagerie, rien ne rappelle donc le besoin et aucun bouton ne permet de choisir.
+  2. Le bouton « Ouvrir la messagerie » de la carte mène à `/messages`, sans conversation précise. Le demandeur quitte ainsi la page du besoin pour ne plus y revenir.
+  3. Aucune relance n'invite à choisir. Le vocabulaire « Retenir » est aussi plus discret que l'action attendue.
+- Correction de votre constat : en base, 7 réponses sont en attente (de 5 à 83 jours) et non 4. Deux concernent des besoins annulés et une un besoin terminé. Les 4 dont vous parlez sont celles des besoins encore ouverts.
 
-1. Hero
-2. Bandeau de chiffres
-3. En ce moment
-4. Comment ça marche, avec les six exemples de coup de main intégrés
-5. Un service après l'autre
-6. Trois conditions pour se faire confiance
-7. Ils l'ont vécu
-8. Qu'est-ce que Guardiens ?, avec le comparatif replié
-9. Questions fréquentes, puis l'appel final
+## P1 : vérité et « Je peux »
 
-Les sections courantes, hors hero, alterneront uniquement `bg-background` et `bg-muted/30`. Le bloc « Un service après l'autre » restera le seul fond vert pin. L'appel final passera sur fond crème foncé. Chaque section éditoriale portera un surtitre et les H2 partageront la même hiérarchie typographique.
+1. `src/components/landing/ConfianceSection.tsx`, 3e condition : « Écusson « Identité vérifiée » et avis croisés publiés après les gardes. Pour les propriétaires, Guardiens est offert. »
+2. Dans `src/i18n/locales/fr/common.json` :
+   - `landing.faq.a1` : la phrase finale devient « Chacun rend service à l'autre : l'échange se fait en temps et en services. »
+   - `landing.faq.a8` : « les dossiers à compléter sont revus par notre équipe ».
+   - Les mêmes textes sont repris dans `HomeJsonLd.tsx`, via `siteRoutes.ts` et la synchronisation de `index.html` si la phrase y figure.
+   - Pendant l'écriture, je relève toutes les autres constructions négatives de la FAQ et de l'accueil (« ne ... pas », « aucun », « sans », « jamais », « rien »), avec la liste avant et après dans le rapport. Je ne réécris aucune d'elles sans votre accord.
+3. « Je peux » sur `/petites-missions` (`EntraideHub.tsx`, `EntraideCards.tsx`) : le clic ouvre un Dialog existant (shadcn).
+   - Texte : « Vous proposez votre aide à {prénom} pour « {titre} ». {Prénom} reçoit votre message et vous répond. »
+   - Un champ Textarea prérempli avec « Je peux vous aider. », modifiable.
+   - Deux boutons : « Envoyer » et « Annuler ».
+   - L'envoi passe par la même fonction `respondToMission`, avec les mêmes contrôles (statut ouvert, garde-fou argent, déjà répondu). Le prénom du demandeur vient de `public_small_missions` ou `public_profiles`, à vérifier pendant l'écriture.
+4. Réponses retirées :
+   - Migration Drizzle `0021_mission_response_counts_active` : `CREATE OR REPLACE VIEW public.public_mission_response_counts` à l'identique, plus `AND r.status IN ('pending','accepted')`. Les grants sont conservés.
+   - `myResponses` dans `EntraideHub.tsx` ajoute `.in("status", ["pending","accepted"])`.
+   - Je vérifie aussi `respondToMission` : l'insertion ne doit pas échouer sur une contrainte d'unicité (mission, membre) quand une ligne `withdrawn` existe. Si elle existe, je vous propose une remise en attente de la ligne retirée plutôt qu'un nouvel insert, sans changer le schéma.
+5. HelperCard : dans `EntraideCards.tsx` ligne 207, la version liste affiche encore « Disponible pour un coup de main ». Elle n'affichera plus cette ligne quand `helps_with` est vide. Je vérifie aussi la version compacte et `NearbyHelpersCarousel`, et j'ajoute un test sur les deux versions.
+6. Liste des besoins :
+   - Une seule liste, triée par distance. Le titre « Besoins ouverts » devient visible (il est aujourd'hui `sr-only`).
+   - Avant le premier besoin situé à plus de 30 km, un séparateur discret : « Plus loin, pour celles et ceux qui voyagent ».
+   - S'il n'existe aucun besoin à 30 km ou moins, l'encart « Le premier besoin de votre secteur peut être le vôtre. » et son bouton restent en tête.
+   - La liste n'est jamais repliée ni vide tant qu'il existe au moins un besoin. Un test couvre ce point.
+7. `LiveListingsStrip.tsx` :
+   - Le titre par défaut est « En ce moment sur Guardiens ».
+   - Il devient « En ce moment près de {ville} » quand une origine est connue : la ville saisie dans le hero (état partagé via le paramètre existant du hero, à vérifier), ou les coordonnées et la ville du profil pour un membre connecté.
+   - Le tri se fait alors automatiquement par distance, avec le tri local existant.
 
-## Textes proposés mot pour mot
+## P2 : fermer la boucle
 
-### Rencontre
+8. Rattacher la conversation au besoin :
+   - Quand un « Je peux » est envoyé, ou quand le demandeur écrit à la personne depuis la carte, la conversation est créée ou réutilisée avec `small_mission_id` et `context_type='mission_help'`, puis enregistrée dans `small_mission_responses.conversation_id`. Tout passe par une fonction serveur SECURITY DEFINER, pour éviter de toucher aux politiques d'accès existantes.
+   - Les conversations `sitter_inquiry` déjà ouvertes entre les deux membres sont retrouvées par paire (demandeur, répondant) pour les 4 cas actuels, sans aucune modification de données tant que vous n'avez pas donné votre GO.
+9. Bouton « Choisir {prénom} » :
+   - Dans `Messages.tsx`, un bandeau en tête de toute conversation liée à un besoin ouvert, visible par le demandeur, rappelle le titre du besoin et porte le bouton « Choisir {prénom} ».
+   - Sur la page du besoin, « Retenir cette personne » devient « Choisir {prénom} ». Le bouton « Ouvrir la messagerie » ouvre la bonne conversation.
+   - Les deux boutons appellent `accept_mission_response`, qui n'est pas modifiée.
+10. Email à 48 h :
+    - Nouveau gabarit `entraide-choisir-aide`, envoyé au demandeur 48 h après le premier échange de messages sans choix.
+    - Texte : « Vous avez échangé avec {prénom} au sujet de « {titre} ». C'est {prénom} qui vous aide ? »
+    - Un seul bouton porte un jeton `mission_action_tokens` (action `choose_helper`, besoin, répondant) et mène à une page qui confirme le choix via `consume_mission_action_token`, étendue pour appeler `accept_mission_response`.
+    - Déclenchement : passage dans `notify-mission-wave`, déjà planifié toutes les heures, pour éviter une nouvelle tâche planifiée. Un seul envoi par couple (idempotence).
+11. Question de rencontre (`confirm_mission_meetup`, existante) : elle part après la date du besoin, ou 7 jours après le choix si le besoin n'a pas de date. Même passage horaire, un seul envoi. Je vérifie d'abord comment elle est déclenchée aujourd'hui.
 
-Les textes fournis seront repris à l'identique :
+## P3 : mise en page de l'accueil
 
-- Condition 2 : « Nous vous conseillons de vous voir avant une garde, autour d'un café ou d'une visite. Après un coup de main, nous vous demandons si la rencontre a eu lieu. »
-- Garde, étape 2 : « Des gardiens postulent. Vous échangez, et vous pouvez les rencontrer avant de choisir. »
-- Titre de l'étape : « Choisissez en confiance »
-- Texte long de l'étape : « Des gardiens dont le profil correspond à votre besoin postulent. Vous lisez les profils, les avis, vous échangez. Et si vous le souhaitez, vous vous voyez, un café, une visite, avant de décider. »
-- Description de l'accueil : « House-sitting en France : un gardien veille sur votre maison et vos animaux pendant votre absence. Vous échangez, vous pouvez vous rencontrer, puis vous choisissez. »
-- FAQ 3 : « Inscrivez-vous sur Guardiens, publiez votre annonce de garde avec les dates et vos animaux, et recevez des candidatures de gardiens qui habitent près de chez vous. Vous échangez, vous pouvez vous rencontrer, puis vous choisissez. »
-- FAQ 5 : « Vous publiez votre annonce, des gardiens dont le profil correspond postulent, vous échangez, vous pouvez vous rencontrer, puis vous choisissez. Votre gardien s'installe ensuite. Un accord de garde optionnel encadre les engagements de chacun pendant la garde. »
-- Saisonnier printemps : « Anticipez : publiez votre annonce maintenant pour trouver le bon gardien avant le pic de l'été. Prévoyez le temps d'une rencontre avant le départ. »
-- Usage propriétaire : « Un gardien qui vous correspond veille sur votre maison et vos animaux. Vous pouvez le rencontrer avant de partir, puis vous choisissez. »
-- Introduction confiance : « Votre rythme, vos habitudes, les besoins de vos animaux, face à son expérience. On vous montre où ça correspond. Vous échangez, vous pouvez vous rencontrer, et vous décidez. »
-- Étape HowTo structurée : « Des gardiens proches de chez vous postulent. Consultez leurs profils, lisez les avis, échangez par messagerie et, si vous le souhaitez, rencontrez celui ou celle qui vous correspond. »
+12. `HowItWorksSection.tsx` :
+    - Deux cartes de même structure : un titre, 3 étapes et un bouton chacune, « Publier mon annonce de garde » et « Demander un coup de main ».
+    - En dessous, les 6 pastilles en pleine largeur, avec le titre « Un coup de main en un clic, par exemple : ». Les illustrations restent dans cette section.
+13. `ServiceAfterServiceSection.tsx` :
+    - Les 3 illustrations sont retirées. Chaque étape affiche le mois en grand, en Playfair, puis la phrase.
+    - Viennent ensuite la citation, le paragraphe, puis la signature « Elisa et Jérémie · Lire notre histoire » (lien `/a-propos`).
+    - Un seul bouton, « Demander un coup de main », puis le lien « Lire l'article ».
+    - Les 3 lignes d'histoire et le bouton de garde sont retirés. L'image des toits reste.
+14. Cohérence :
+    - Le H2 de « En ce moment » prend la classe H2 commune.
+    - L'alternance des fonds est rétablie entre « Qu'est-ce que Guardiens ? » et la FAQ.
+    - Deux styles de bouton seulement : plein arrondi et contour arrondi (`rounded-full`, variants `default` et `outline`). Je relève chaque écart.
+15. Parcours visiteur :
+    - Un petit utilitaire `memberOrSignup(path)` envoie les visiteurs non connectés vers `/inscription?redirect=<chemin>`. Il s'applique à `HowItWorksSection`, aux pastilles, à `ServiceAfterServiceSection` et à `FinalCtaSection`.
+    - La phrase « Inscription en 2 minutes… » du CTA final s'affiche aux visiteurs seulement.
+    - Je vérifie que `/inscription` accepte bien `redirect`. Sinon, je l'ajoute.
 
-### Histoire condensée
+## Migrations prévues
 
-Sous « Elisa et Jérémie » :
+- `0021_mission_response_counts_active` : la vue filtrée.
+- `0022_mission_choose_loop` :
+  - une fonction qui lie la conversation au besoin ;
+  - `consume_mission_action_token` étendue à l'action `choose_helper` ;
+  - une colonne nullable `small_mission_responses.choose_reminder_sent_at` et une colonne `meetup_question_sent_at`, si elle n'existe pas déjà.
+  - Aucune suppression. Une table de sauvegarde datée sera créée si une fonction existante est remplacée.
 
-1. « Promenades de chiens à Lyon, puis gardes à la maison. »
-2. « Aujourd'hui, chaque semaine, on reçoit des animaux chez nous. »
-3. « Un réseau local de confiance, ouvert à toute la France. »
+## Validation
 
-Ces mots proviennent de la page À propos existante. Le lien sera « Lire notre histoire » vers `/a-propos`. Cette page porte bien l'histoire, du retour d'Argentine au lancement de Guardiens. Elle comporte aussi l'explication publique du score à `/a-propos#affinite`.
-
-### Affinité condensée
-
-- « Vous décrivez le gardien recherché : rythme de vie, présence, expérience avec vos animaux et mobilité. »
-- « Le score d'affinité classe chaque candidature critère par critère. »
-- « Vous voyez le détail du calcul et vous choisissez. »
-- Lien : « Comprendre le score d'affinité » vers `/a-propos#affinite`.
-
-La carte de démonstration et ses dix lignes quittent l'accueil. Le moteur, le calcul, le tri et la page explicative restent inchangés.
-
-### Qu'est-ce que Guardiens ?
-
-Paragraphe 1 conservé :
-
-« Guardiens est un réseau d'entraide entre particuliers, organisé par affinité autant que par proximité. On y garde des maisons, on s'y rend des services, on y rencontre des gens. À un kilomètre comme à mille. »
-
-Paragraphe 2 proposé, uniquement par coupe et assemblage des paragraphes actuels 3 et 4 :
-
-« À côté des gardes, les membres se rendent des coups de main : arrosage, courses, compagnie, un colis à réceptionner. L'échange se décide entre vous. La mise en relation s'appuie sur un score d'affinité calculé sur plusieurs critères pondérés, propres à chaque couple. Les membres font vérifier leur identité et publient des avis croisés après leurs expériences. »
-
-### FAQ visible
-
-Les six questions proposées sont :
-
-1. Qu'est-ce que le house-sitting ?
-2. Comment fonctionne l'accès à Guardiens ?
-3. Comment trouver un pet sitter près de chez moi ?
-4. Comment se déroule une garde sur Guardiens ?
-5. Le house-sitting est-il sécurisé ?
-6. Est-ce que ça marche depuis l'étranger ?
-
-Les questions 4, 6 et 7 actuelles resteront dans le JSON-LD selon la demande. Risque documenté : Google demande en principe que tout contenu FAQ structuré soit accessible sur la page. Les conserver uniquement dans le JSON-LD peut donc réduire l'éligibilité aux résultats enrichis, même si Google limite déjà fortement leur affichage.
-
-## Formulations supplémentaires trouvées par le scan
-
-Les occurrences produit suivantes présentent encore la rencontre comme systématique ou préalable imposé. Elles seront alignées sur la règle « conseillée, jamais obligatoire » dans ce lot :
-
-- `src/data/cityContent.ts` : « rencontre avant chaque garde », « rencontre physique systématique avant chaque garde », « pas de garde sans rencontre préalable », « organisez une rencontre physique avant chaque garde », « Cette étape est systématique et fortement recommandée. »
-- `src/components/search/SearchHowItWorksAnon.tsx` : étape « Rencontrez, puis confirmez » et texte séquentiel associé.
-- `src/pages/DevenirHomeSitter.tsx` : le HowTo « organisez une rencontre préalable » sera reformulé comme une possibilité. Les conseils « proposez une rencontre préalable » et « La rencontre préalable rassure presque toujours » restent des recommandations et peuvent être conservés.
-- `src/data/siteRoutes.ts` : la description longue globale et la description de l'accueil utilisent « vous choisissez après une rencontre ».
-- `index.html` : la description statique, `og:description` et `twitter:description` reprennent la même formulation et seront synchronisées pour les robots qui ne rendent pas l'application.
-
-Documents juridiques cités et exclus de ce lot :
-
-- `src/pages/MentionsLegales.tsx` : « Les utilisateurs reconnaissent que la confiance mutuelle repose sur la rencontre physique préalable à toute garde, les avis croisés publiés après chaque expérience, et l'historique visible sur chaque profil. »
-- `src/pages/Terms.tsx` porte une phrase équivalente. Elle restera elle aussi inchangée afin que toute révision juridique soit traitée ensemble.
-
-Les récits d'expériences, les remises de clés « lors de la rencontre préalable ou le jour du départ », les recommandations déjà explicites et le libellé optionnel d'accord de garde restent inchangés. Le motto, `landing.final.lede` et « Tout le reste se passe en vrai. » restent inchangés.
-
-## Modifications prévues
-
-### Composition et présentation
-
-- `src/pages/Landing.tsx` : appliquer le nouvel ordre, retirer de cette page `QuickHelpSection`, `MidJourneyCta`, `LazyAroundYouSection`, `NotreHistoireSection` et `InternationalStrip`, puis supprimer leurs imports, états et chargements devenus inutiles.
-- `src/components/landing/HowItWorksSection.tsx` : intégrer les six pastilles cliquables dans la colonne « Coup de main », avec les mêmes destinations, le même préremplissage et la même distinction visiteur ou membre.
-- `src/components/landing/ServiceAfterServiceSection.tsx` : ajouter les trois lignes d'histoire et le lien `/a-propos` sous la signature.
-- `src/components/landing/ConfianceSection.tsx` : corriger la condition 2, réduire l'affinité à trois lignes et son lien, retirer `AffinityDemoCard` de la composition de l'accueil.
-- `src/components/landing/UsagesSection.tsx` : limiter la définition aux deux paragraphes validés et accueillir le comparatif juste dessous.
-- `src/components/landing/ComparatifSection.tsx` : convertir le tableau en accordéon fermé par défaut avec montage forcé, afin que tout son contenu reste présent dans le DOM.
-- `src/components/landing/FaqSection.tsx` : limiter l'affichage à six questions.
-- `src/components/landing/FinalCtaSection.tsx` : remplacer le fond vert par le fond crème foncé, conserver les deux portes et leurs destinations.
-- `src/components/landing/LandingTocBar.tsx` : ordre et ancres alignés sur les sections conservées.
-- `src/components/landing/LivedItSection.tsx`, `LiveListingsStrip.tsx` et les autres sections conservées : harmoniser uniquement surtitre, H2 et alternance des deux tons, sans modifier leurs données ni leurs comportements.
-
-### Contenu et référencement
-
-- `src/i18n/locales/fr/common.json` : appliquer les textes fournis, la définition courte et les libellés concernés.
-- `src/data/siteRoutes.ts` : synchroniser la description de `/` et la description longue globale.
-- `index.html` : synchroniser description statique, Open Graph et Twitter.
-- `src/components/landing/HomeJsonLd.tsx` : corriger l'étape HowTo, conserver les questions 1 à 9 dans FAQPage, et mettre à jour la date de contenu.
-- `src/data/cityContent.ts`, `src/components/search/SearchHowItWorksAnon.tsx` et `src/pages/DevenirHomeSitter.tsx` : corriger les formulations non juridiques relevées par le scan.
-
-Les composants retirés de l'accueil restent disponibles pour leurs autres usages et leurs tests isolés. Aucun comportement partagé, moteur d'affinité, donnée ou page métier ne sera modifié.
-
-## État mesuré et estimation
-
-Mesure locale, Chromium, hauteur de fenêtre 1 800 px :
-
-- Mobile 360 px : document 21 772 px, 16 balises `section`, LCP `hero-landing-640.avif` à 1 256 ms.
-- Ordinateur 1 440 px : document 14 749 px, 15 balises `section` réellement montées, LCP `hero-landing-1920.avif` à 1 064 ms.
-- `InternationalStrip` ne s'affiche pas aujourd'hui : le compteur courant reste sous son seuil de 5. Sa question de repli apparaît dans la FAQ.
-
-Le hero mesure 1 800 px dans ce protocole, puisqu'il occupe `100svh`. Avec le hero et les six annonces inchangés, une hauteur totale de 6 500 px ne peut pas être garantie à cette hauteur de fenêtre. Estimation prudente après H2 :
-
-- Mobile 360 px : environ 13 000 à 15 000 px.
-- Ordinateur 1 440 px : environ 8 500 à 10 000 px.
-
-La mesure finale sera faite dans les mêmes conditions. Atteindre environ 6 500 px demanderait aussi de compacter le hero ou « En ce moment », explicitement laissés inchangés.
-
-## Risques SEO et protections
-
-- Retrait de l'accueil des paragraphes `body_2`, `body_5`, `body_6`, `body_7` : perte de texte indexable sur la garde, les guides, les chantiers et la couverture. Les pages dédiées restent accessibles, mais cette profondeur supplémentaire peut réduire leur poids depuis l'accueil.
-- Retrait de `NotreHistoireSection` : perte de son texte et de son image sur l'accueil, compensée par trois lignes et un lien direct vers `/a-propos`.
-- Retrait d'`AroundYouSection` : perte de ses deux liens vers l'entraide, compensée par le bandeau, les pastilles de coup de main et les autres portes conservées.
-- Retrait d'`InternationalStrip` : perte de deux liens directs. La question internationale reste visible dans la FAQ et le contenu international reste accessible par ses pages dédiées.
-- Retrait de `AffinityDemoCard` : perte de la démonstration détaillée sur l'accueil, compensée par le lien vers `/a-propos#affinite`.
-- Accordéon comparatif : `forceMount` préservera les lignes dans le DOM. Un contrôle du HTML rendu confirmera leur présence quand le panneau est fermé.
-- FAQ structurée plus large que la FAQ visible : risque d'inéligibilité aux résultats enrichis, signalé ci-dessus.
-- Les anciennes ancres `#autour-de-vous` et `#notre-histoire` disparaissent de l'accueil. Le sommaire et les références internes du projet seront scannés pour éviter les liens morts connus.
-
-## Vérifications et livraison
-
-- Tests ciblés de l'ordre, des six pastilles, des six FAQ visibles, du comparatif fermé mais monté, des textes de rencontre et des composants absents de l'accueil.
-- Scan de tout `src` pour les formulations obligatoires, le mot proscrit et les deux tirets longs.
-- Contrôle visuel et absence de débordement à 360 px et 1 440 px.
-- Nouvelle mesure de hauteur et du LCP dans les mêmes conditions.
-- Suite Vitest complète, tests SQL existants, vérification TypeScript, build et contrôle du diff.
-- Rapport final avec fichiers exacts, diff, tests, commit et portée réelle.
-
-Aucune migration, aucune fonction distante et aucune publication.
+Pour chaque lot : tests ciblés, dont la liste jamais vide, le séparateur à 30 km, la fenêtre « Je peux », la HelperCard, le titre dynamique et les redirections des visiteurs. Puis Vitest complet, tsgo, test:sql, build et un contrôle visuel à 360 et 1 440 px. Je redéploie seulement `notify-mission-wave` et `send-transactional-email`. Aucune publication. Livraison dans l'ordre P1, P2, P3, avec un commit par lot.
