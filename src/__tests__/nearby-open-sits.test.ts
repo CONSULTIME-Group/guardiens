@@ -59,8 +59,13 @@ describe('selectNearbyOpenSits', () => {
   });
 
   it('annonce passée écartée', () => {
-    const r = selectNearbyOpenSits([sit({ start_date: '2026-09-01' })], VIEWER, { nowIso: NOW });
+    const r = selectNearbyOpenSits([sit({ start_date: '2026-09-01', end_date: '2026-09-05' })], VIEWER, { nowIso: NOW });
     expect(r.sits).toHaveLength(0);
+  });
+
+  it('garde longue commencée, fin à venir : reste proposée (lot A2)', () => {
+    const r = selectNearbyOpenSits([sit({ start_date: '2026-09-01', end_date: '2027-12-31' })], VIEWER, { nowIso: NOW });
+    expect(r.sits).toHaveLength(1);
   });
 
   it('annonce masquée écartée, par le propriétaire comme par la modération', () => {
