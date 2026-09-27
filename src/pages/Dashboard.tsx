@@ -196,11 +196,14 @@ const Dashboard = () => {
           }
         >
           {displayedRole === "owner" ? <OwnerDashboard /> : <SitterDashboard />}
-          {/* Alma clôt la page : accueil, émotion, action, contexte, puis voix. */}
-          <div className="mx-auto w-full max-w-6xl px-4 pb-6 md:px-6">
-            <WelcomeBackDigest suppressEmptyVariant={hasPendingAction} />
-            <AlmaDormantReturnWhisper />
-          </div>
+          {/* Alma clôt la page côté gardien. Côté propriétaire (lot D1), le
+              digest passe dans l'accueil et Alma vit dans la colonne de droite. */}
+          {displayedRole !== "owner" && (
+            <div className="mx-auto w-full max-w-6xl px-4 pb-6 md:px-6">
+              <WelcomeBackDigest suppressEmptyVariant={hasPendingAction} />
+              <AlmaDormantReturnWhisper />
+            </div>
+          )}
         </DashboardErrorBoundary>
 
       </div>
