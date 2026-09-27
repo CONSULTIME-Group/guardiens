@@ -354,9 +354,7 @@ const SitterDashboard = () => {
         <RoleActivationBanner userRole={user?.role || "sitter"} />
       </div>
       <HelpsWithReminder />
-      <div className="mx-auto mb-5 w-full max-w-6xl px-4 sm:px-5 md:px-8">
-        <MutualAidRadiusLine />
-      </div>
+      <MutualAidRadiusLine className="mx-auto mb-5 w-full max-w-6xl px-4 sm:px-5 md:px-8" />
       <MesCoupsDeMain />
 
       {/* ═══ FLUX VERTICAL UNIQUE, plus de colonne aside isolée ═══

@@ -307,9 +307,7 @@ const OwnerDashboard = () => {
         <RoleActivationBanner userRole={user?.role || "owner"} />
       </div>
       <HelpsWithReminder />
-      <div className="mx-auto mb-5 w-full max-w-6xl px-4 sm:px-5 md:px-8">
-        <MutualAidRadiusLine />
-      </div>
+      <MutualAidRadiusLine className="mx-auto mb-5 w-full max-w-6xl px-4 sm:px-5 md:px-8" />
       <MesCoupsDeMain />
 
       {/* ═══ Grille 12 colonnes : flux (8) + rail (4) ═══ */}
