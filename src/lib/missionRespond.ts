@@ -53,7 +53,15 @@ export const respondToMission = async ({ missionId, userId, message }: {
     if (error) {
       const hint = (error as { hint?: string }).hint || "";
       const text = String(error.message || "");
-      if (error.code === "23505") return { kind: "duplicate" };
+      if (error.code === "23505") {
+        // Une réponse retirée est réactivée (même ligne, historique conservé).
+        const { data: reactivatedId } = await supabase.rpc("reactivate_my_mission_response", { p_mission_id: missionId, p_message: msg });
+        if (reactivatedId) {
+          const { data: row } = await supabase.from("small_mission_responses").select("*").eq("id", reactivatedId as string).maybeSingle();
+          return { kind: "sent", inserted: (row as Record<string, unknown>) ?? null };
+        }
+        return { kind: "duplicate" };
+      }
       if (hint === "account_not_active" || text.includes("account_not_active")) return { kind: "account_not_active" };
       if (hint === "mission_response_cap_reached" || text.includes("mission_response_cap_reached")) return { kind: "cap_reached" };
       return { kind: "failed", message: text || "Impossible d'envoyer votre réponse." };
