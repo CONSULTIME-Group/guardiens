@@ -13,6 +13,7 @@
  * éditoriales (vouvoiement, pas d'emoji, pas de tiret cadratin).
  */
 import { differenceInDays } from "date-fns";
+import { nearbyRegisteredSentence } from "@/lib/nearbySittersSentence";
 import { Link } from "react-router-dom";
 import { useRef } from "react";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
@@ -454,14 +455,14 @@ const PublishStar = ({
 }) => {
   const localSignal =
     nearbyCount > 0 && nearbyRadius
-      ? `${nearbyCount} gardien${nearbyCount > 1 ? "s" : ""} vérifié${nearbyCount > 1 ? "s" : ""} à ${nearbyRadius} km attendent une annonce.`
+      ? nearbyRegisteredSentence(nearbyCount, nearbyRadius)
       : null;
 
   return (
     <>
       <SectionHeader
         eyebrow="Votre maison a une histoire"
-        title="Confiez-la à quelqu'un qui vous ressemble."
+        title="Confiez-la à quelqu'un de confiance, près de chez vous."
         subtitle={localSignal ?? undefined}
       />
       <div

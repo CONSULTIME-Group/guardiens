@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 
 import { NearbyAssociationCard } from "@/components/associations/NearbyAssociationCard";
+import { nearbyWaitingSentence } from "@/lib/nearbySittersSentence";
 import { useAuth } from "@/contexts/AuthContext";
 
 import OnboardingWelcome from "./OnboardingWelcome";
@@ -200,14 +201,14 @@ const OwnerDashboard = () => {
     if (noActiveSit && sits.length > 0 && !earlyOwner) {
       const hello = "Ravi de vous revoir.";
       if (nearbyCount > 0 && nearbyRadius) {
-        return `${hello} ${nearbyCount} gardien${nearbyCount > 1 ? "s" : ""} vérifié${nearbyCount > 1 ? "s" : ""} à ${nearbyRadius} km attendent votre prochaine annonce.`;
+        return `${hello} ${nearbyWaitingSentence(nearbyCount, nearbyRadius)}`;
       }
       return `${hello} Republiez une annonce quand vous êtes prêt.`;
     }
     if (earlyOwner) {
       const hello = "Bienvenue chez Guardiens.";
       if (nearbyCount > 0 && nearbyRadius) {
-        return `${hello} ${nearbyCount} gardien${nearbyCount > 1 ? "s" : ""} vérifié${nearbyCount > 1 ? "s" : ""} dans un rayon de ${nearbyRadius} km attendent une annonce.`;
+        return `${hello} ${nearbyWaitingSentence(nearbyCount, nearbyRadius)}`;
       }
       return `${hello} Publiez votre première annonce, on vous accompagne.`;
     }
