@@ -1579,7 +1579,7 @@ export default function PublicSitterProfile() {
       )}
       {/* Fil d'Ariane : niveau département inséré quand il est connu.
           Un lien n'est posé que si la page cible existe et est publiée. */}
-      {activeTab !== 'gardien' && breadcrumbNode}
+      {breadcrumbNode}
 
       {/* JSON-LD */}
       {profile && (
