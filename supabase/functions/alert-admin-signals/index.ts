@@ -30,6 +30,7 @@ const ADMIN_LINKS: Record<string, string> = {
   email_delivery_anomaly: 'https://guardiens.fr/admin/emails',
   prerender_monthly_budget_reached: 'https://guardiens.fr/admin',
   cron_consecutive_failures: 'https://guardiens.fr/admin',
+  mission_no_audience: 'https://guardiens.fr/admin',
 }
 
 const linkFor = (type: string) => ADMIN_LINKS[type] ?? 'https://guardiens.fr/admin'

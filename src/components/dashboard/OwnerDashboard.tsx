@@ -48,6 +48,7 @@ import type { Pet } from "./owner/types";
 import { useOwnerDashboardData } from "@/hooks/useOwnerDashboardData";
 import DashboardLoadError from "./DashboardLoadError";
 import HelpsWithReminder from "./HelpsWithReminder";
+import MutualAidRadiusLine from "@/components/entraide/MutualAidRadiusLine";
 import MesCoupsDeMain from "./MesCoupsDeMain";
 
 import { useNearbyOwnerSitters } from "@/hooks/useNearbyOwnerSitters";
@@ -306,6 +307,9 @@ const OwnerDashboard = () => {
         <RoleActivationBanner userRole={user?.role || "owner"} />
       </div>
       <HelpsWithReminder />
+      <div className="mx-auto mb-5 w-full max-w-6xl px-4 sm:px-5 md:px-8">
+        <MutualAidRadiusLine />
+      </div>
       <MesCoupsDeMain />
 
       {/* ═══ Grille 12 colonnes : flux (8) + rail (4) ═══ */}

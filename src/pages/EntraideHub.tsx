@@ -10,6 +10,7 @@ import type { MissionBadgeRow } from "@/components/missions/MissionBadgesReceive
 import EntraideProofs from "@/components/entraide/EntraideProofs";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAccessLevel } from "@/hooks/useAccessLevel";
+import MutualAidRadiusLine from "@/components/entraide/MutualAidRadiusLine";
 import { supabase } from "@/integrations/supabase/client";
 import { geocodeCity } from "@/lib/geocode";
 import { trackEvent } from "@/lib/analytics";
@@ -381,6 +382,8 @@ const EntraideHub = () => {
               {locationField}
             </>
           )}
+
+          {isAuthenticated && <MutualAidRadiusLine className="mb-4" />}
 
           <section className="pt-2" aria-labelledby="entraide-needs-title">
             <h2 id="entraide-needs-title" className="mt-6 font-heading text-2xl font-semibold text-foreground">Besoins ouverts</h2>
