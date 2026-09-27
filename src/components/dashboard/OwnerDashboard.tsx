@@ -304,7 +304,7 @@ const OwnerDashboard = () => {
   // Lot D1 : rangée « À faire » de l'accueil, actions réelles en attente, 3 au plus.
   const todos: CockpitTodo[] = [];
   if (pendingAppCount > 0) todos.push({ key: "apps", label: "Candidatures à traiter", to: "/sits", count: pendingAppCount });
-  if (unreadCount > 0) todos.push({ key: "messages", label: "Messages non lus", to: "/messages", count: unreadCount });
+  if (unreadCount > 0) todos.push({ key: "messages", label: "Messages à lire", to: "/messages", count: unreadCount });
   if (helpsWithMissing) todos.push({ key: "helps", label: "Votre phrase d'entraide", to: "/ma-ligne" });
   // Ancien bloc 2bis : son action passe dans « À faire » si elle est
   // actionnable et distincte de la vedette, sinon dans la colonne de droite.

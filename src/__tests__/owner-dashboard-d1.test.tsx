@@ -77,7 +77,7 @@ describe("Accueil propriétaire", () => {
         hour={9}
         todos={[
           { key: "apps", label: "Candidatures à traiter", to: "/sits", count: 2 },
-          { key: "messages", label: "Messages non lus", to: "/messages", count: 3 },
+          { key: "messages", label: "Messages à lire", to: "/messages", count: 3 },
           { key: "helps", label: "Votre phrase d'entraide", to: "/ma-ligne" },
           { key: "x", label: "En trop", to: "/x" },
         ]}

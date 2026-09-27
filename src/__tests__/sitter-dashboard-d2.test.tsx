@@ -105,7 +105,7 @@ describe("Accueil gardien", () => {
         isAvailable
         todos={[
           { key: "apps", label: "Candidatures en attente de réponse", to: "/sits", count: 2 },
-          { key: "messages", label: "Messages non lus", to: "/messages", count: 1 },
+          { key: "messages", label: "Messages à lire", to: "/messages", count: 1 },
           { key: "postal", label: "Votre code postal", to: "/profile?focus=postal_code" },
           { key: "helps", label: "Votre phrase d'entraide", to: "/ma-ligne" },
         ]}

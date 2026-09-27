@@ -143,7 +143,7 @@ const SitterDashboard = () => {
   // Rangée « À faire » : actions réelles en attente, 3 au plus, dans cet ordre.
   const todos: CockpitTodo[] = [];
   if ((pendingAppsCount ?? 0) > 0) todos.push({ key: "apps", label: "Candidatures en attente de réponse", to: "/sits", count: pendingAppsCount });
-  if ((unreadCount ?? 0) > 0) todos.push({ key: "messages", label: "Messages non lus", to: "/messages", count: unreadCount });
+  if ((unreadCount ?? 0) > 0) todos.push({ key: "messages", label: "Messages à lire", to: "/messages", count: unreadCount });
   if (!postalCode) todos.push({ key: "postal", label: "Votre code postal", to: "/profile?focus=postal_code" });
   if (helpsWithMissing) todos.push({ key: "helps", label: "Votre phrase d'entraide", to: "/ma-ligne" });
 
