@@ -856,7 +856,7 @@ const SmallMissionDetail = () => {
             <p className="text-sm text-muted-foreground leading-relaxed">
               {author?.first_name || "L'auteur"} vous a choisi(e). Organisez la suite en direct.
             </p>
-            <Button onClick={() => navigate("/messages")} className="w-full rounded-full gap-2" size="lg">
+            <Button onClick={() => void openResponseConversation(myResponse)} className="w-full rounded-full gap-2" size="lg">
               <MessageSquare className="h-4 w-4" /> Aller à la messagerie
             </Button>
           </div>
@@ -1534,7 +1534,7 @@ const SmallMissionDetail = () => {
                         pendingCount={pendingResponses.length}
                         onSelect={(mode) => handleAcceptResponse(r.id, mode)}
                         onDecline={() => handleDeclineResponse(r.id)}
-                        onOpenMessages={() => navigate(r.conversation_id ? `/messages?c=${r.conversation_id}` : "/messages")}
+                        onOpenMessages={() => void openResponseConversation(r)}
                       />
                     </li>
                   ))}
