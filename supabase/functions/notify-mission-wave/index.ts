@@ -37,6 +37,16 @@ import {
   isMissionSitMode,
   sitModeEmailLine,
 } from "../_shared/mission-wave.ts";
+import {
+  WAVE_SEND_SPACING_MS,
+  parseRetryAfterMs,
+  isRateLimitText,
+  sendWithRateLimitRetry,
+  selectStaleQueued,
+  queueUpdateFor,
+  waveRunStatus,
+  type SendOutcome,
+} from "../_shared/mission-wave-delivery.ts";
 import { pickNearestProof, proofEmailLine, proofWeekLabel, type ProofRow } from "../_shared/mission-meetup.ts";
 
 const corsHeaders = {
@@ -54,20 +64,40 @@ function json(body: unknown, status = 200) {
   });
 }
 
-async function sendEmail(payload: Record<string, unknown>) {
-  const res = await fetch(`${SUPABASE_URL}/functions/v1/send-transactional-email`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${SERVICE_KEY}`,
-      apikey: SERVICE_KEY,
-    },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) {
-    console.error("[notify-mission-wave] email failed", res.status, await res.text().catch(() => ""));
+const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
+/** Un envoi, sans jamais lever : une limite de débit est signalée, pas jetée. */
+async function sendEmailOutcome(payload: Record<string, unknown>): Promise<SendOutcome> {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/send-transactional-email`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${SERVICE_KEY}`,
+        apikey: SERVICE_KEY,
+      },
+      body: JSON.stringify(payload),
+    });
+    if (res.ok) return { ok: true, rateLimited: false, retryAfterMs: null };
+    const text = await res.text().catch(() => "");
+    console.error("[notify-mission-wave] email failed", res.status, text);
+    const rateLimited = res.status === 429 || isRateLimitText(text);
+    return { ok: false, rateLimited, retryAfterMs: parseRetryAfterMs(text, res.headers.get("Retry-After")) };
+  } catch (e) {
+    const msg = String((e as Error)?.message ?? e);
+    console.error("[notify-mission-wave] email threw", msg);
+    return { ok: false, rateLimited: isRateLimitText(msg), retryAfterMs: parseRetryAfterMs(msg) };
   }
-  return res.ok;
+}
+
+async function sendEmail(payload: Record<string, unknown>) {
+  return (await sendEmailOutcome(payload)).ok;
+}
+
+/** Envoi espacé, avec une seule nouvelle tentative sur limite de débit. */
+async function deliver(payload: Record<string, unknown>) {
+  await sleep(WAVE_SEND_SPACING_MS);
+  return sendWithRateLimitRetry(() => sendEmailOutcome(payload), sleep);
 }
 
 interface WaveHelper {
@@ -77,19 +107,130 @@ interface WaveHelper {
 }
 
 /** Envoie une vague pour un besoin. Retourne le nombre de messages partis. */
-async function runWave(supabase: any, missionId: string): Promise<{ sent: number; wave: number; empty: boolean; radiusFloor?: number }> {
+interface WaveResult {
+  sent: number;
+  wave: number;
+  empty: boolean;
+  radiusFloor?: number;
+  deferred?: number;
+  caughtUp?: number;
+  catchupDeferred?: number;
+}
+
+/**
+ * Rattrapage : personnes mises en file il y a plus de dix minutes, jamais
+ * prévenues (passage interrompu, limite de débit). Leur jeton actif est
+ * réutilisé. wave_count reste inchangé : ce n'est pas une nouvelle vague.
+ */
+async function catchUpQueued(supabase: any, missionId: string, now = new Date()): Promise<{ sent: number; deferred: number; skipped: number }> {
+  const out = { sent: 0, deferred: 0, skipped: 0 };
+  const { data: rows } = await supabase
+    .from("mission_notification_queue")
+    .select("helper_id, status, sent_at, queued_at, wave, distance_km")
+    .eq("mission_id", missionId)
+    .eq("status", "queued")
+    .is("sent_at", null);
+  const stale = selectStaleQueued((rows ?? []) as any[], now);
+  if (stale.length === 0) return out;
+
+  const { data: mission } = await supabase
+    .from("small_missions")
+    .select("id, title, city, user_id, status, date_needed, end_date, sit_mode")
+    .eq("id", missionId)
+    .maybeSingle();
+  if (!mission) return out;
+  const { data: owner } = await supabase
+    .from("profiles")
+    .select("first_name")
+    .eq("id", mission.user_id)
+    .maybeSingle();
+  const dateLabel = frenchDateLabel(mission.date_needed ?? mission.end_date);
+  const sitLine = isMissionSitMode(mission.sit_mode)
+    ? sitModeEmailLine(mission.sit_mode, owner?.first_name ?? null)
+    : "";
+
+  for (const r of stale) {
+    const { data: tok } = await supabase
+      .from("mission_action_tokens")
+      .select("token")
+      .eq("mission_id", missionId)
+      .eq("helper_id", r.helper_id)
+      .eq("action", "can_help")
+      .is("used_at", null)
+      .gt("expires_at", now.toISOString())
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    const { data: helper } = await supabase
+      .from("profiles")
+      .select("first_name, email")
+      .eq("id", r.helper_id)
+      .maybeSingle();
+    if (!tok?.token || !helper?.email) {
+      await supabase
+        .from("mission_notification_queue")
+        .update({ status: "skipped", skip_reason: tok?.token ? "no_email" : "token_missing" })
+        .eq("mission_id", missionId)
+        .eq("helper_id", r.helper_id);
+      out.skipped++;
+      continue;
+    }
+    const headline = waveHeadline(owner?.first_name ?? null, r.distance_km, mission.title ?? "un coup de main", dateLabel);
+    const result = await deliver({
+      templateName: "mission-help-needed",
+      recipientEmail: helper.email,
+      idempotencyKey: `mission-wave-${missionId}-${r.helper_id}-${r.wave}`,
+      templateData: {
+        helperFirstName: helper.first_name ?? "",
+        headline,
+        missionTitle: mission.title ?? "",
+        missionCity: mission.city ?? "",
+        missionId,
+        canHelpToken: tok.token,
+        proofLine: "",
+        sitModeLine: sitLine,
+        distanceKm: r.distance_km,
+      },
+      logMetadata: { mission_id: missionId, wave: r.wave, source: "mission_wave_catchup" },
+    });
+    if (result === "deferred") { out.deferred++; continue; }
+    if (result === "sent") {
+      await supabase.from("notifications").insert({
+        user_id: r.helper_id,
+        type: "mission_help_needed",
+        title: "Un besoin près de chez vous",
+        body: headline,
+        link: `/petites-missions/${missionId}`,
+      });
+      out.sent++;
+    }
+    await supabase
+      .from("mission_notification_queue")
+      .update(queueUpdateFor(result, new Date().toISOString()))
+      .eq("mission_id", missionId)
+      .eq("helper_id", r.helper_id);
+  }
+  return out;
+}
+
+/** Envoie une vague pour un besoin. Retourne le nombre de messages partis. */
+async function runWave(supabase: any, missionId: string): Promise<WaveResult> {
+  // Rattrapage d'abord, sans toucher à wave_count.
+  const catchup = await catchUpQueued(supabase, missionId);
+
   const { data: mission } = await supabase
     .from("small_missions")
     .select("id, title, city, user_id, status, date_needed, end_date, wave_count, sit_mode, latitude, longitude")
     .eq("id", missionId)
     .maybeSingle();
 
-  if (!mission || mission.status !== "open") return { sent: 0, wave: 0, empty: false };
+  const cu = { caughtUp: catchup.sent, catchupDeferred: catchup.deferred };
+  if (!mission || mission.status !== "open") return { sent: 0, wave: 0, empty: false, ...cu };
 
   // Plafond de diffusion : au plus trois vagues, soit trente personnes.
   // Au-delà, le besoin reste visible sur la page Entraide.
   if (Number(mission.wave_count ?? 0) >= WAVE_MAX_COUNT) {
-    return { sent: 0, wave: Number(mission.wave_count ?? 0), empty: false };
+    return { sent: 0, wave: Number(mission.wave_count ?? 0), empty: false, ...cu };
   }
 
   const { data: owner } = await supabase
@@ -131,7 +272,7 @@ async function runWave(supabase: any, missionId: string): Promise<{ sent: number
         link: `/petites-missions/${missionId}`,
       });
     }
-    return { sent: 0, wave, empty: true, radiusFloor };
+    return { sent: 0, wave, empty: true, radiusFloor, ...cu };
   }
 
   const dateLabel = frenchDateLabel(mission.date_needed ?? mission.end_date);
@@ -155,6 +296,7 @@ async function runWave(supabase: any, missionId: string): Promise<{ sent: number
   }
 
   let sent = 0;
+  let deferred = 0;
 
   for (const h of helpers) {
     const { data: helper } = await supabase
@@ -175,7 +317,7 @@ async function runWave(supabase: any, missionId: string): Promise<{ sent: number
       ? sitModeEmailLine(mission.sit_mode, owner?.first_name ?? null)
       : "";
 
-    const ok = await sendEmail({
+    const result = await deliver({
       templateName: "mission-help-needed",
       recipientEmail: helper.email,
       idempotencyKey: `mission-wave-${missionId}-${h.helper_id}-${wave}`,
@@ -193,6 +335,10 @@ async function runWave(supabase: any, missionId: string): Promise<{ sent: number
       logMetadata: { mission_id: missionId, wave, source: "mission_wave" },
     });
 
+    // Limite de débit persistante : la ligne reste queued, sans sent_at, et
+    // le rattrapage du passage suivant la reprend.
+    if (result === "deferred") { deferred++; continue; }
+
     await supabase.from("notifications").insert({
       user_id: h.helper_id,
       type: "mission_help_needed",
@@ -203,11 +349,11 @@ async function runWave(supabase: any, missionId: string): Promise<{ sent: number
 
     await supabase
       .from("mission_notification_queue")
-      .update({ status: ok ? "sent" : "skipped", sent_at: new Date().toISOString(), skip_reason: ok ? null : "send_failed" })
+      .update(queueUpdateFor(result, new Date().toISOString()))
       .eq("mission_id", missionId)
       .eq("helper_id", h.helper_id);
 
-    if (ok) sent++;
+    if (result === "sent") sent++;
   }
 
   // Relance du demandeur à partir de la deuxième vague.
@@ -232,7 +378,7 @@ async function runWave(supabase: any, missionId: string): Promise<{ sent: number
     });
   }
 
-  return { sent, wave, empty: false, radiusFloor };
+  return { sent, wave, empty: false, radiusFloor, deferred, caughtUp: catchup.sent, catchupDeferred: catchup.deferred };
 }
 
 Deno.serve(async (req) => {
