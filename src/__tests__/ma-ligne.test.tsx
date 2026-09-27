@@ -104,7 +104,7 @@ describe("écran à un seul champ", () => {
     for (const ex of HELPS_WITH_EXAMPLES) {
       expect(screen.getByRole("button", { name: `Écrire l'exemple : ${ex}` }).className).toContain("min-h-[44px]");
     }
-    expect(screen.getAllByRole("button", { name: "C'est enregistré" })).toHaveLength(1);
+    expect(screen.getAllByRole("button", { name: "Je l'enregistre" })).toHaveLength(1);
   });
 
   it("un exemple remplit le champ et garde le focus", () => {
@@ -131,7 +131,7 @@ describe("écran à un seul champ", () => {
   it("enregistre une fois, confirme et rafraîchit Autour de vous", async () => {
     const { onSave, spy } = renderForm();
     fireEvent.change(screen.getByLabelText("Une chose que vous aimez faire pour les gens du coin ?"), { target: { value: "Monter un meuble" } });
-    const btn = screen.getByRole("button", { name: "C'est enregistré" });
+    const btn = screen.getByRole("button", { name: "Je l'enregistre" });
     fireEvent.click(btn);
     fireEvent.click(btn);
     await waitFor(() => expect(screen.getByText(HELPS_WITH_CONFIRMATION)).toBeInTheDocument());

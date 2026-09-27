@@ -160,15 +160,17 @@ const HelpsWithLineForm = ({ firstName, initialValue = "", onSave, source }: Pro
             </div>
           </div>
           {error && <p role="alert" className="text-sm text-secondary">{error}</p>}
-          <button
-            type="submit"
-            disabled={saving}
-            aria-busy={saving}
-            className="inline-flex min-h-[48px] w-full items-center justify-center rounded-full bg-primary px-6 font-body text-base font-semibold text-primary-foreground transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-70 motion-reduce:transition-none sm:w-auto sm:self-start"
-          >
-            {saving ? "Enregistrement en cours..." : "C'est enregistré"}
-          </button>
-          <p className="-mt-3 font-body text-sm text-muted-foreground">{HELPS_WITH_AVAILABILITY_NOTE}</p>
+          <div className="flex flex-col gap-3">
+            <button
+              type="submit"
+              disabled={saving}
+              aria-busy={saving}
+              className="inline-flex min-h-[48px] w-full items-center justify-center rounded-full bg-primary px-6 font-body text-base font-semibold text-primary-foreground transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-70 motion-reduce:transition-none sm:w-auto sm:self-start"
+            >
+              {saving ? "Enregistrement en cours..." : "Je l'enregistre"}
+            </button>
+            <p className="font-body text-sm text-muted-foreground">{HELPS_WITH_AVAILABILITY_NOTE}</p>
+          </div>
         </form>
       )}
     </div>
