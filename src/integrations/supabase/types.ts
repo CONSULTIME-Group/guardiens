@@ -11381,6 +11381,40 @@ export type Database = {
           points: number
         }[]
       }
+      public_profile_reviews: {
+        Args: { p_user_id: string }
+        Returns: {
+          animal_care_rating: number
+          cancellation_reason: string
+          cancellation_response: string
+          cancelled_by_role: string
+          comment: string
+          communication_rating: number
+          created_at: string
+          housing_condition_rating: number
+          housing_respect_rating: number
+          id: string
+          instructions_clarity_rating: number
+          listing_accuracy_rating: number
+          mission_id: string
+          moderation_hidden_at: string
+          moderation_hidden_by: string
+          moderation_status: string
+          overall_rating: number
+          published: boolean
+          reliability_rating: number
+          response_status: string
+          response_submitted_at: string
+          review_role: string
+          review_type: string
+          reviewee_id: string
+          reviewer_id: string
+          selected_badges: string[]
+          sit_id: string
+          welcome_rating: number
+          would_recommend: boolean
+        }[]
+      }
       publish_stale_reviews: { Args: { p_days?: number }; Returns: number }
       purge_cron_run_details: {
         Args: { p_batch?: number; p_retention?: string }
