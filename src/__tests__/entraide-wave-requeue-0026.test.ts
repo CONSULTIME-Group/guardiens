@@ -1,6 +1,5 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync, readdirSync } from "node:fs";
-import { template } from "../../supabase/functions/_shared/transactional-email-templates/mission-wave-status";
 
 const read = (p: string) => readFileSync(p, "utf8");
 const NEG = /\b(ne|pas)\b|n'|n’|personne n/i;
@@ -28,7 +27,8 @@ describe("relance au chiffre réel dans notify-mission-wave", () => {
 
 describe("gabarit mission-wave-status", () => {
   it("previewData sans construction négative ni tiret", () => {
-    const m = String((template.previewData as { message: string }).message);
+    const tpl = read("supabase/functions/_shared/transactional-email-templates/mission-wave-status.tsx");
+    const m = tpl.slice(tpl.indexOf("previewData")).match(/message:\s*["'](.*)["']/)![1];
     expect(m).toBe("On prévient 3 autres personnes du coin.");
     expect(m).not.toMatch(NEG);
     expect(m).not.toMatch(/[—–]/);
