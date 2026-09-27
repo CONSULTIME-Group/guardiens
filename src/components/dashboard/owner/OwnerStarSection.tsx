@@ -15,6 +15,7 @@
 import { differenceInDays } from "date-fns";
 import { formatDateRangeFr } from "@/lib/formatDateRangeFr";
 import { nearbyRegisteredSentence } from "@/lib/nearbySittersSentence";
+import { canShowAffinityPercent } from "@/lib/affinityDisplay";
 import { Link } from "react-router-dom";
 import { useRef } from "react";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
@@ -231,6 +232,7 @@ const ApplicationCard = ({
     !!affinityInput &&
     typeof affinity.score === "number" &&
     affinity.scoreReliable &&
+    canShowAffinityPercent(affinity) &&
     !affinity.hasDeclaredIncompatibility;
 
   return (

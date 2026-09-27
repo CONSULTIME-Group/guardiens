@@ -8,8 +8,6 @@
  */
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { format, parseISO } from "date-fns";
-import { fr } from "date-fns/locale";
 import { PawPrint } from "lucide-react";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import AffinityRing from "@/components/affinity/AffinityRing";
@@ -32,14 +30,6 @@ interface Props {
   scopeLabel?: string | null;
 }
 
-function fmt(d: string | null): string {
-  if (!d) return "";
-  try {
-    return format(parseISO(d), "d MMM", { locale: fr });
-  } catch {
-    return d;
-  }
-}
 
 // Libellés d'espèces : mapping partagé (petLabels). Jamais la valeur brute
 // de l'enum en repli : une espèce inconnue est simplement omise.
