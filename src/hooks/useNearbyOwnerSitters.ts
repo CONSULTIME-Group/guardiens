@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { haversineDistance } from "@/utils/geo";
 import type { AffinitySitterInput } from "@/lib/affinityScore";
+import { fetchSitterPool } from "@/lib/fetchSitterPool";
 
 /**
  * « Gardiens près de chez vous » pour le dashboard propriétaire.
@@ -42,8 +43,6 @@ export type NearbyOwnerSitter = {
 
 const RADIUS_STEPS = [30, 50, 100];
 const MAX_RESULTS = 6;
-/** Borne technique de lecture du vivier, tracée si atteinte. */
-const POOL_READ_CAP = 2000;
 /**
  * Nombre de candidats enrichis (notes, compétences, affinité) après tri.
  * Quatre fois MAX_RESULTS : marge confortable pour que le départage par
@@ -117,11 +116,6 @@ export function useNearbyOwnerSitters(currentUserId: string | undefined) {
       const hasGeo = meLat !== null && meLng !== null;
 
       const pool = poolRes.data;
-      if (false as boolean) {
-        console.warn(
-          `[nearby-owner-sitters] plafond de lecture ${POOL_READ_CAP} atteint : vivier tronqué avant tri, augmenter POOL_READ_CAP.`,
-        );
-      }
 
       if (!pool || pool.length === 0) {
         return { sitters: [], radiusUsed: null, hasGeo, totalCount: 0 };
