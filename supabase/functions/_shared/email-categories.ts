@@ -122,6 +122,7 @@ const PRODUCT: ReadonlyArray<string> = [
   'discover-mutual-aid-2',
   'sitter-mutual-aid-invite',
   'entraide-ligne-helps-with',
+  'entraide-ligne-relance',
   'entraide-demander-coup-de-main',
   'helper-to-guard',
   'mission-nudge-no-response',
