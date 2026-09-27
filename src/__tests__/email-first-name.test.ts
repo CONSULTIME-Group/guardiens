@@ -16,8 +16,8 @@ describe('capitalizeFirstName', () => {
     expect(capitalizeFirstName('Élodie')).toBe('Élodie');
     expect(capitalizeFirstName('élodie')).toBe('Élodie');
   });
-  it('laisse une saisie tout en capitales', () => {
-    expect(capitalizeFirstName('MARIE')).toBe('MARIE');
+  it('recapitalise une saisie tout en capitales', () => {
+    expect(capitalizeFirstName('MARIE')).toBe('Marie');
   });
   it('laisse passer les valeurs non textuelles', () => {
     expect(capitalizeFirstName(undefined)).toBe(undefined);
