@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
-import { hasConsecutiveFailures, CRON_ENTITY_IDS } from "../../supabase/functions/_shared/cron-failure-alert";
+import { hasConsecutiveFailures, CRON_ENTITY_IDS } from "../../supabase/functions/_shared/cron-failure-logic";
 
 describe("alerte notify-mission-wave", () => {
   it("déclenche à 2 échecs consécutifs seulement", () => {

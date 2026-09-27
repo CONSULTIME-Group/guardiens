@@ -4,20 +4,13 @@
 // admin-signals-digest à l'adresse admin des signaux critiques.
 import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
-export const CRON_FAILURE_SIGNAL = "cron_consecutive_failures";
-export const CRON_FAILURE_THRESHOLD = 2;
-
-/** Identifiant stable par edge (entity_id NOT NULL, index d'idempotence). */
-export const CRON_ENTITY_IDS: Record<string, string> = {
-  "notify-mission-wave": "00000000-0000-0000-0000-00000000a0e1",
-};
-
-/** Statuts du plus récent au plus ancien. Vrai si les N derniers sont des échecs. */
-export function hasConsecutiveFailures(statuses: Array<string | null>, threshold = CRON_FAILURE_THRESHOLD): boolean {
-  const done = statuses.filter((s): s is string => !!s);
-  if (done.length < threshold) return false;
-  return done.slice(0, threshold).every((s) => s === "failed");
-}
+import {
+  CRON_ENTITY_IDS,
+  CRON_FAILURE_SIGNAL,
+  CRON_FAILURE_THRESHOLD,
+  hasConsecutiveFailures,
+} from "./cron-failure-logic.ts";
+export { CRON_ENTITY_IDS, CRON_FAILURE_SIGNAL, CRON_FAILURE_THRESHOLD, hasConsecutiveFailures };
 
 export async function checkCronFailureAlert(
   client: SupabaseClient,
