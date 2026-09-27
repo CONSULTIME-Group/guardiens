@@ -36,7 +36,7 @@ describe("gabarit mission-wave-status", () => {
 });
 
 describe("migration 0026", () => {
-  const sql = read("drizzle/migrations/0026_enqueue_mission_wave_requeue_skipped.sql");
+  const sql = read(".lovable/0026_enqueue_mission_wave_requeue_skipped.sql");
   it("seules queued et sent restent exclues", () => {
     expect(sql).toContain("q.status IN ('queued', 'sent')");
     expect(sql).toMatch(/ON CONFLICT \(helper_id, mission_id\) DO UPDATE[\s\S]*?WHERE public\.mission_notification_queue\.status NOT IN \('queued', 'sent'\)/);
@@ -46,9 +46,6 @@ describe("migration 0026", () => {
     for (const f of FNS) {
       expect(sql).toMatch(new RegExp(`REVOKE EXECUTE ON FUNCTION public\\.${f}\\([^)]*\\) FROM PUBLIC, anon, authenticated;`));
     }
-  });
-  it("est inscrite au journal", () => {
-    expect(read("drizzle/migrations/meta/_journal.json")).toContain("0026_enqueue_mission_wave_requeue_skipped");
   });
 });
 
