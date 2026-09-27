@@ -1,6 +1,7 @@
 // Envoi d'un email de TEST à l'admin appelant (fidèle au gabarit send-mass-email).
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { requireAdminOrServiceRole } from "../_shared/require-admin.ts";
+import { entraideCardData } from "../_shared/entraide-card-data.ts";
 import { resendFetch } from "../_shared/resend-guard.ts";
 import { SENDER_FROM, REPLY_TO_ADDRESS } from "../_shared/sender-address.ts";
 
@@ -100,13 +101,13 @@ Deno.serve(async (req) => {
     // __urgent franchit le plafond de fréquence (send-transactional-email/index.ts, ligne 670) ;
     // aucune ligne mass_emails n'est créée, le test reste hors statistiques de campagne.
     if (templateName) {
-      const { data: prof } = await admin.from("profiles").select("first_name").eq("id", userData.user.id).maybeSingle();
+      const { data: prof } = await admin.from("profiles").select("first_name, city, avatar_url").eq("id", userData.user.id).maybeSingle();
       const { data: sent, error: sendErr } = await admin.functions.invoke("send-transactional-email", {
         body: {
           templateName,
           recipientEmail: adminEmail,
           idempotencyKey: `admin-test-${templateName}-${Date.now()}`,
-          templateData: { firstName: prof?.first_name ?? "", lineUrl: TEMPLATE_FALLBACK_URLS[templateName], __urgent: true },
+          templateData: { firstName: prof?.first_name ?? "", lineUrl: TEMPLATE_FALLBACK_URLS[templateName], ...(templateName === "entraide-ligne-relance" ? entraideCardData(prof ?? {}) : {}), __urgent: true },
         },
       });
       if (sendErr || sent?.error) {

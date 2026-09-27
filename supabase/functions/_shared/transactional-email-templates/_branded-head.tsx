@@ -42,6 +42,7 @@ const MSO_RESET = `
     .em-cta { margin: 24px 0 8px !important; }
     .em-btn { display: block !important; width: 100% !important; box-sizing: border-box !important; padding: 16px 20px !important; font-size: 16px !important; }
     .em-hint { font-size: 12px !important; }
+    .em-pad { padding-left: 20px !important; padding-right: 20px !important; }
   }
 `
 

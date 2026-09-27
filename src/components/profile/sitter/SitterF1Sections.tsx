@@ -215,7 +215,7 @@ export const SitterIdentityHero = (p: HeroProps) => {
         {p.quote && (
           <figure className="mt-[34px] max-w-[700px] mx-auto md:mx-0 text-center md:text-left">
             <blockquote className="relative font-heading italic text-[23px] md:text-[30px] leading-snug text-foreground">
-              <span aria-hidden="true" className="absolute -left-1 -top-6 md:-left-8 md:-top-4 font-heading text-[64px] leading-none text-secondary/40 not-italic">
+              <span aria-hidden="true" className="block h-[34px] mb-1 md:mb-0 md:h-auto md:absolute md:-left-8 md:-top-4 font-heading text-[64px] leading-none text-secondary/40 not-italic">
                 «
               </span>
               {p.quote}
