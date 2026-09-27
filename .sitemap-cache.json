@@ -9,8 +9,8 @@
       "fetchedAt": "2026-09-27T08:48:56.974Z"
     },
     "seo_city_pages": {
-      "head": "2026-09-27T04:05:00.202205+00:00|164",
-      "fetchedAt": "2026-09-27T08:48:56.997Z"
+      "head": "2026-09-27T13:00:09.139881+00:00|164",
+      "fetchedAt": "2026-09-27T15:46:19.087Z"
     },
     "small_missions_entraide_v1": {
       "head": "2026-09-23T15:48:40.910356+00:00|6",
@@ -33,8 +33,8 @@
       "fetchedAt": "2026-09-27T08:48:56.986Z"
     },
     "public_profiles": {
-      "head": "2026-09-26T22:19:27.350149+00:00|1286",
-      "fetchedAt": "2026-09-27T08:48:57.311Z"
+      "head": "2026-09-27T12:48:59.169051+00:00|1287",
+      "fetchedAt": "2026-09-27T15:46:19.288Z"
     }
   },
   "entries": {
@@ -1640,18 +1640,6 @@
         "priority": "0.8"
       },
       {
-        "loc": "/house-sitting/aubagne",
-        "lastmod": "2026-09-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/avignon",
-        "lastmod": "2026-09-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
         "loc": "/house-sitting/compiegne",
         "lastmod": "2026-09-23",
         "changefreq": "weekly",
@@ -1714,6 +1702,18 @@
       {
         "loc": "/house-sitting/saint-denis-reunion",
         "lastmod": "2026-09-22",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/aubagne",
+        "lastmod": "2026-09-27",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/avignon",
+        "lastmod": "2026-09-27",
         "changefreq": "weekly",
         "priority": "0.8"
       },
@@ -1827,7 +1827,7 @@
       },
       {
         "loc": "/house-sitting/toulon",
-        "lastmod": "2026-09-26",
+        "lastmod": "2026-09-27",
         "changefreq": "weekly",
         "priority": "0.8"
       },
@@ -1953,13 +1953,13 @@
       },
       {
         "loc": "/house-sitting/la-seyne-sur-mer",
-        "lastmod": "2026-09-26",
+        "lastmod": "2026-09-27",
         "changefreq": "weekly",
         "priority": "0.8"
       },
       {
         "loc": "/house-sitting/arles",
-        "lastmod": "2026-09-26",
+        "lastmod": "2026-09-27",
         "changefreq": "weekly",
         "priority": "0.8"
       },
@@ -1970,20 +1970,20 @@
         "priority": "0.8"
       },
       {
-        "loc": "/house-sitting/salon-de-provence",
-        "lastmod": "2026-09-26",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
         "loc": "/house-sitting/villeneuve-d-ascq",
         "lastmod": "2026-09-20",
         "changefreq": "weekly",
         "priority": "0.8"
       },
       {
+        "loc": "/house-sitting/salon-de-provence",
+        "lastmod": "2026-09-27",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
         "loc": "/house-sitting/hyeres",
-        "lastmod": "2026-09-26",
+        "lastmod": "2026-09-27",
         "changefreq": "weekly",
         "priority": "0.8"
       },
@@ -3641,7 +3641,7 @@
       },
       {
         "loc": "/gardiens/f0257aa8-1eb2-422a-8361-c4e7fcc4939f",
-        "lastmod": "2026-09-23",
+        "lastmod": "2026-09-27",
         "changefreq": "monthly",
         "priority": "0.5"
       },
@@ -3708,6 +3708,12 @@
       {
         "loc": "/gardiens/71c5a8b9-0f96-484d-8dee-44a4318a4469",
         "lastmod": "2026-09-21",
+        "changefreq": "monthly",
+        "priority": "0.5"
+      },
+      {
+        "loc": "/gardiens/653882a1-b681-4f42-9dd0-9dbbd1cc0b1e",
+        "lastmod": "2026-09-27",
         "changefreq": "monthly",
         "priority": "0.5"
       },
@@ -3900,12 +3906,6 @@
       {
         "loc": "/gardiens/64a0613c-d782-4ad1-bcc1-50ab69be375d",
         "lastmod": "2026-09-13",
-        "changefreq": "monthly",
-        "priority": "0.5"
-      },
-      {
-        "loc": "/gardiens/8ba5acb7-d341-4ce1-82dc-8ad1755a3618",
-        "lastmod": "2026-09-07",
         "changefreq": "monthly",
         "priority": "0.5"
       }

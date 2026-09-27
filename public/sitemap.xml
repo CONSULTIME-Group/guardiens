@@ -1267,18 +1267,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/house-sitting/aubagne</loc>
-    <lastmod>2026-09-26</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/house-sitting/avignon</loc>
-    <lastmod>2026-09-26</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://guardiens.fr/house-sitting/compiegne</loc>
     <lastmod>2026-09-23</lastmod>
     <changefreq>weekly</changefreq>
@@ -1335,6 +1323,18 @@
   <url>
     <loc>https://guardiens.fr/house-sitting/saint-denis-reunion</loc>
     <lastmod>2026-09-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/house-sitting/aubagne</loc>
+    <lastmod>2026-09-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/house-sitting/avignon</loc>
+    <lastmod>2026-09-27</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1448,7 +1448,7 @@
   </url>
   <url>
     <loc>https://guardiens.fr/house-sitting/toulon</loc>
-    <lastmod>2026-09-26</lastmod>
+    <lastmod>2026-09-27</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1568,13 +1568,13 @@
   </url>
   <url>
     <loc>https://guardiens.fr/house-sitting/la-seyne-sur-mer</loc>
-    <lastmod>2026-09-26</lastmod>
+    <lastmod>2026-09-27</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/house-sitting/arles</loc>
-    <lastmod>2026-09-26</lastmod>
+    <lastmod>2026-09-27</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1585,20 +1585,20 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/house-sitting/salon-de-provence</loc>
-    <lastmod>2026-09-26</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://guardiens.fr/house-sitting/villeneuve-d-ascq</loc>
     <lastmod>2026-09-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/house-sitting/salon-de-provence</loc>
+    <lastmod>2026-09-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/house-sitting/hyeres</loc>
-    <lastmod>2026-09-26</lastmod>
+    <lastmod>2026-09-27</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -3638,7 +3638,7 @@
   </url>
   <url>
     <loc>https://guardiens.fr/gardiens/f0257aa8-1eb2-422a-8361-c4e7fcc4939f</loc>
-    <lastmod>2026-09-23</lastmod>
+    <lastmod>2026-09-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -3705,6 +3705,12 @@
   <url>
     <loc>https://guardiens.fr/gardiens/71c5a8b9-0f96-484d-8dee-44a4318a4469</loc>
     <lastmod>2026-09-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/gardiens/653882a1-b681-4f42-9dd0-9dbbd1cc0b1e</loc>
+    <lastmod>2026-09-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -3897,12 +3903,6 @@
   <url>
     <loc>https://guardiens.fr/gardiens/64a0613c-d782-4ad1-bcc1-50ab69be375d</loc>
     <lastmod>2026-09-13</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/gardiens/8ba5acb7-d341-4ce1-82dc-8ad1755a3618</loc>
-    <lastmod>2026-09-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
