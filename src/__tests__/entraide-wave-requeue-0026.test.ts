@@ -36,7 +36,7 @@ describe("gabarit mission-wave-status", () => {
 });
 
 describe("migration 0026", () => {
-  const sql = read(".lovable/0026_enqueue_mission_wave_requeue_skipped.sql");
+  const sql = read("drizzle/migrations/0026_enqueue_mission_wave_requeue_skipped.sql");
   it("seules queued et sent restent exclues", () => {
     expect(sql).toContain("q.status IN ('queued', 'sent')");
     expect(sql).toMatch(/ON CONFLICT \(helper_id, mission_id\) DO UPDATE[\s\S]*?WHERE public\.mission_notification_queue\.status NOT IN \('queued', 'sent'\)/);
