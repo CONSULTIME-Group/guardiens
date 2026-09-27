@@ -46,6 +46,8 @@ export interface MassEmailFilters {
   exclude_admins?: boolean;          // exclut les comptes administrateurs
   min_helps_with_profiles?: number;  // garde : refuse l'envoi sous ce vivier
   template_name?: string;            // gabarit transactionnel de référence
+  received_mass_email_id?: string;   // relance : destinataires d'une campagne donnée
+  prioritize_opened?: boolean;       // relance : ouvreurs en tête
 }
 
 
