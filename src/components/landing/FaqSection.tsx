@@ -37,7 +37,7 @@ export function FaqSection() {
   );
 
   return (
-    <section id="faq" className="py-[52px] md:py-20 bg-background scroll-mt-24" aria-labelledby="faq-heading">
+    <section id="faq" className="py-[52px] md:py-20 bg-muted/30 scroll-mt-24" aria-labelledby="faq-heading">
       <div className="lp-read">
         <RevealSection>
           <p className="mb-4 text-center text-xs font-medium uppercase tracking-[0.2em] text-primary">Pour aller plus loin</p>
