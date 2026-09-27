@@ -28,6 +28,7 @@ import {
   WAVE_MAX_COUNT,
   WAVE_INTERVAL_HOURS,
   shouldSendNextWave,
+  countFreezingResponses,
   waveHeadline,
   frenchDateLabel,
   waveRelaunchMessage,
@@ -303,17 +304,21 @@ Deno.serve(async (req) => {
     const details: Array<Record<string, unknown>> = [];
 
     for (const m of missions ?? []) {
-      const { count } = await supabase
+      // Seules les réponses qui engagent gèlent la diffusion : accepted, ou pending récente.
+      const { data: responses, error: respErr } = await supabase
         .from("small_mission_responses")
-        .select("id", { count: "exact", head: true })
-        .eq("mission_id", m.id);
+        .select("status, created_at")
+        .eq("mission_id", m.id)
+        .in("status", ["pending", "accepted"]);
+      if (respErr) throw respErr;
+      const freezing = countFreezingResponses(responses ?? [], now);
 
       const due = shouldSendNextWave(
         {
           status: m.status as string,
           wave_count: m.wave_count as number | null,
           last_wave_at: m.last_wave_at as string | null,
-          response_count: count ?? 0,
+          response_count: freezing,
         },
         now,
       );

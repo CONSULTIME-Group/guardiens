@@ -18,19 +18,19 @@ import { HELPS_WITH_ANCHOR } from "@/components/dashboard/HelpsWithReminder";
 
 const read = (relativePath: string) => readFileSync(resolve(process.cwd(), relativePath), "utf8");
 
-describe("plafond de trois vagues", () => {
+describe("plafond de cinq vagues", () => {
   const base = { status: "open", response_count: 0, last_wave_at: "2026-09-01T10:00:00Z" };
   const now = new Date("2026-09-21T10:00:00Z");
 
-  it("laisse partir les trois premières vagues", () => {
-    expect(WAVE_MAX_COUNT).toBe(3);
-    for (const wave_count of [0, 1, 2]) {
+  it("laisse partir les cinq premières vagues", () => {
+    expect(WAVE_MAX_COUNT).toBe(5);
+    for (const wave_count of [0, 1, 2, 3, 4]) {
       expect(shouldSendNextWave({ ...base, wave_count }, now)).toBe(true);
     }
   });
 
-  it("arrête la diffusion après la troisième vague", () => {
-    expect(shouldSendNextWave({ ...base, wave_count: 3 }, now)).toBe(false);
+  it("arrête la diffusion après la cinquième vague", () => {
+    expect(shouldSendNextWave({ ...base, wave_count: 5 }, now)).toBe(false);
     expect(shouldSendNextWave({ ...base, wave_count: 7 }, now)).toBe(false);
   });
 });
