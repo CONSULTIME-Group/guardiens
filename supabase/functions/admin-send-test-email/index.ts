@@ -10,6 +10,12 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+import { ENTRAIDE_LIGNE_RELANCE_FALLBACK_URL } from "../_shared/transactional-email-templates/entraide-ligne-relance.tsx";
+
+const TEMPLATE_FALLBACK_URLS: Record<string, string | undefined> = {
+  "entraide-ligne-relance": ENTRAIDE_LIGNE_RELANCE_FALLBACK_URL,
+};
+
 const UNSUB_TOKEN_PLACEHOLDER = "__UNSUB_TOKEN__";
 
 // Réplique EXACTE de buildHtml() de send-mass-email/index.ts pour un test fidèle.
@@ -87,6 +93,33 @@ Deno.serve(async (req) => {
     const body: string = String(payload?.body ?? "").trim();
     const ctaLabel: string | undefined = payload?.cta_label ? String(payload.cta_label) : undefined;
     const ctaUrl: string | undefined = payload?.cta_url ? String(payload.cta_url) : undefined;
+
+    const templateName: string = typeof payload?.template_name === "string" ? payload.template_name.trim() : "";
+
+    // Test fidèle : même chemin que l'envoi réel (send-transactional-email).
+    // __urgent franchit le plafond de fréquence (send-transactional-email/index.ts, ligne 670) ;
+    // aucune ligne mass_emails n'est créée, le test reste hors statistiques de campagne.
+    if (templateName) {
+      const { data: prof } = await admin.from("profiles").select("first_name").eq("id", userData.user.id).maybeSingle();
+      const { data: sent, error: sendErr } = await admin.functions.invoke("send-transactional-email", {
+        body: {
+          templateName,
+          recipientEmail: adminEmail,
+          idempotencyKey: `admin-test-${templateName}-${Date.now()}`,
+          templateData: { firstName: prof?.first_name ?? "", lineUrl: TEMPLATE_FALLBACK_URLS[templateName], __urgent: true },
+        },
+      });
+      if (sendErr || sent?.error) {
+        return new Response(
+          JSON.stringify({ error: `Envoi du gabarit échoué : ${sent?.error ?? String(sendErr)}` }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+      return new Response(
+        JSON.stringify({ success: true, to: adminEmail, mode: "template", template: templateName }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
 
     if (!subject || !body) {
       return new Response(

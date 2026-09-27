@@ -42,6 +42,9 @@ interface MassEmail {
   skipped_count?: number | null;
 }
 
+export const templatePreviewNotice = (name: string) =>
+  `Cet envoi utilise le gabarit ${name}. Le bouton de test vous l'envoie tel qu'il partira.`;
+
 const SPAM_TRIGGERS = ["gratuit", "urgent", "gagnez", "cliquez ici", "promo", "offre limitée", "100%", "argent facile", "félicitations"];
 
 
