@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from "react";
+import { formatFirstName } from "@/lib/formatFirstName";
 import { Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import AlmaAvatar from "@/components/ai/alma/AlmaAvatar";
@@ -86,7 +87,7 @@ const HelpsWithLineForm = ({ firstName, initialValue = "", onSave, source }: Pro
           Une chose que vous aimez faire pour les gens du coin ?
         </h1>
         <p className="mt-3 font-body text-base text-muted-foreground">
-          {firstName ? `Bonjour ${firstName}, une ligne suffit.` : "Bonjour, une ligne suffit."}
+          {formatFirstName(firstName) ? `Bonjour ${formatFirstName(firstName)}, une ligne suffit.` : "Bonjour, une ligne suffit."}
         </p>
       </header>
 

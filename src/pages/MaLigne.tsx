@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { formatFirstName } from "@/lib/formatFirstName";
 import { Link, Navigate, useLocation, useParams } from "react-router-dom";
 import PageMeta from "@/components/PageMeta";
 import HelpsWithLineForm from "@/components/entraide/HelpsWithLineForm";
@@ -35,7 +36,7 @@ const MaLigne = () => {
     void callMaLigne({ mode: "peek", token: token ?? undefined }).then((res) => {
       if (!active) return;
       if (res?.ok) {
-        setLoad({ status: "ready", firstName: res.first_name ?? "", helpsWith: res.helps_with ?? "" });
+        setLoad({ status: "ready", firstName: formatFirstName(res.first_name ?? ""), helpsWith: res.helps_with ?? "" });
         trackEvent("helps_line_page_viewed", { source, metadata: { mode: source } });
       } else {
         setLoad({ status: "expired" });
