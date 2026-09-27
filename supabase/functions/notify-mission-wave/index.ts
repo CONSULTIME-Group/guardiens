@@ -76,7 +76,7 @@ interface WaveHelper {
 }
 
 /** Envoie une vague pour un besoin. Retourne le nombre de messages partis. */
-async function runWave(supabase: any, missionId: string): Promise<{ sent: number; wave: number; empty: boolean }> {
+async function runWave(supabase: any, missionId: string): Promise<{ sent: number; wave: number; empty: boolean; radiusFloor?: number }> {
   const { data: mission } = await supabase
     .from("small_missions")
     .select("id, title, city, user_id, status, date_needed, end_date, wave_count, sit_mode, latitude, longitude")
@@ -105,6 +105,7 @@ async function runWave(supabase: any, missionId: string): Promise<{ sent: number
 
   const helpers: WaveHelper[] = (waveData?.helpers ?? []) as WaveHelper[];
   const wave = Number(waveData?.wave ?? 0);
+  const radiusFloor = Number(waveData?.radius_floor ?? 30);
 
   if (helpers.length === 0) {
     // Personne à prévenir. Au premier tour seulement, on le dit au demandeur,
@@ -129,7 +130,7 @@ async function runWave(supabase: any, missionId: string): Promise<{ sent: number
         link: `/petites-missions/${missionId}`,
       });
     }
-    return { sent: 0, wave, empty: true };
+    return { sent: 0, wave, empty: true, radiusFloor };
   }
 
   const dateLabel = frenchDateLabel(mission.date_needed ?? mission.end_date);
@@ -186,6 +187,7 @@ async function runWave(supabase: any, missionId: string): Promise<{ sent: number
         canHelpToken: h.token,
         proofLine,
         sitModeLine: sitLine,
+        distanceKm: h.distance_km,
       },
       logMetadata: { mission_id: missionId, wave, source: "mission_wave" },
     });
@@ -229,7 +231,7 @@ async function runWave(supabase: any, missionId: string): Promise<{ sent: number
     });
   }
 
-  return { sent, wave, empty: false };
+  return { sent, wave, empty: false, radiusFloor };
 }
 
 Deno.serve(async (req) => {
@@ -321,9 +323,13 @@ Deno.serve(async (req) => {
       if (r.sent > 0 || r.empty) {
         treated++;
         totalSent += r.sent;
-        details.push({ mission_id: m.id, wave: r.wave, sent: r.sent, empty: r.empty });
+        details.push({ mission_id: m.id, wave: r.wave, sent: r.sent, empty: r.empty, radius_floor: r.radiusFloor });
       }
     }
+
+    // Signal admin : besoin ouvert depuis plus de 72 h, personne joignable même à 100 km.
+    const { error: signalErr } = await supabase.rpc("detect_missions_without_audience");
+    if (signalErr) console.error("[notify-mission-wave] signal sans audience", signalErr.message);
 
     // Journal seulement si le passage a fait quelque chose.
     if (treated > 0) {
