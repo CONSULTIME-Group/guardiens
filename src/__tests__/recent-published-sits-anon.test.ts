@@ -28,23 +28,16 @@ vi.mock("@/integrations/supabase/client", () => {
   };
 });
 
-import { QueryClient } from "@tanstack/react-query";
+let capturedFn: (() => Promise<unknown>) | undefined;
+vi.mock("@tanstack/react-query", () => ({
+  useQuery: (o: { queryFn: () => Promise<unknown> }) => { capturedFn = o.queryFn; return {}; },
+}));
+
 import { useRecentPublishedSits } from "@/hooks/useRecentPublishedSits";
 
 async function run() {
-  // Récupère la queryFn sans monter de composant.
-  const spy = vi.fn();
-  const qc = new QueryClient();
-  const opts = (useRecentPublishedSits as unknown as { toString(): string }) && null;
-  void opts; void spy;
-  const mod = await import("@tanstack/react-query");
-  const original = mod.useQuery;
-  let fn: (() => Promise<unknown>) | undefined;
-  vi.spyOn(mod, "useQuery").mockImplementation(((o: { queryFn: () => Promise<unknown> }) => { fn = o.queryFn; return {} as never; }) as never);
   useRecentPublishedSits();
-  (mod.useQuery as unknown as { mockRestore(): void }).mockRestore();
-  void original; void qc;
-  return fn!();
+  return capturedFn!();
 }
 
 describe("useRecentPublishedSits, visiteur non connecté", () => {
