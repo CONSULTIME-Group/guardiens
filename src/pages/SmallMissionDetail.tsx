@@ -476,6 +476,17 @@ const SmallMissionDetail = () => {
   };
 
 
+  // Ouvre la conversation liée à la réponse, en la créant si besoin.
+  const openResponseConversation = async (r: { id: string; conversation_id?: string | null } | null | undefined) => {
+    if (!r) { navigate("/messages"); return; }
+    let convId = r.conversation_id ?? null;
+    if (!convId) {
+      const { data } = await supabase.rpc("open_mission_response_conversation", { p_response_id: r.id });
+      convId = (data as string | null) ?? null;
+    }
+    navigate(convId ? `/messages/${convId}` : "/messages");
+  };
+
   const handleAcceptResponse = async (responseId: string, mode: "keep" | "decline_others" = "decline_others") => {
     if (processingResponseId) return;
     const resp = responses.find(r => r.id === responseId);
