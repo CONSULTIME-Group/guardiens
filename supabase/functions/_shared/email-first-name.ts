@@ -1,3 +1,4 @@
+import { formatFirstName } from "./format-first-name.ts";
 // Prénom affiché dans les emails, source unique.
 //
 // Appliqué à TOUT templateData par send-transactional-email avant le rendu et
@@ -7,9 +8,8 @@
 // Deux traitements, dans cet ordre :
 //   1. publicFirstName : retire les segments qui portent une marque de nom de
 //      famille (capitales, initiales collées), même règle que src/lib/displayName.ts.
-//   2. capitalizeFirstName : première lettre de chaque mot en majuscule, y
-//      compris après un trait d'union ou une apostrophe. « jeremie » devient
-//      « Jeremie », « jean-claude » devient « Jean-Claude ».
+//   2. capitalizeFirstName : formatFirstName, segment tout minuscules ou tout
+//      majuscules recapitalisé, casse mixte conservée.
 //
 // Les données en base ne sont jamais réécrites, seul l'affichage change.
 
@@ -37,22 +37,11 @@ export function publicFirstName(value: unknown): unknown {
   return (kept.length ? kept : [words[0]]).join(" ");
 }
 
-/**
- * Capitalise chaque mot. Un prénom déjà saisi tout en capitales est laissé
- * tel quel : sa casse est une saisie du membre, pas une erreur d'affichage.
- */
+/** Casse d'affichage, règle partagée avec src/lib/formatFirstName.ts. */
 export function capitalizeFirstName(value: unknown): unknown {
   if (typeof value !== "string") return value;
   if (value.trim().length === 0) return value;
-  const letters = value.replace(/[^\p{L}]/gu, "");
-  const isAllCaps = letters.length >= 2
-    && letters === letters.toLocaleUpperCase("fr-FR")
-    && letters !== letters.toLocaleLowerCase("fr-FR");
-  if (isAllCaps) return value;
-  return value.replace(
-    /(^|[\s\-'’])(\p{L})/gu,
-    (_m, sep: string, letter: string) => sep + letter.toLocaleUpperCase("fr-FR"),
-  );
+  return formatFirstName(value);
 }
 
 /**

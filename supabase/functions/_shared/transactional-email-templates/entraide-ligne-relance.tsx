@@ -5,6 +5,7 @@ import {
 import { BrandedHead } from './_branded-head.tsx'
 import { BrandHeader } from './_brand-header.tsx'
 import { LegalFooter } from './_legal-footer.tsx'
+import { formatFirstName } from '../format-first-name.ts'
 import type { TemplateEntry } from './registry.ts'
 
 // Repli sans jeton : l'écran /ma-ligne demande alors la connexion.
@@ -14,7 +15,7 @@ const FALLBACK_URL =
 interface Props { firstName?: string; lineUrl?: string }
 
 const Email = ({ firstName, lineUrl }: Props) => {
-  const name = (firstName || '').trim()
+  const name = formatFirstName((firstName || '').trim())
   return (
     <Html lang="fr" dir="ltr">
       <BrandedHead />
