@@ -24,7 +24,9 @@ const Email = ({ firstName, lineUrl }: Props) => {
         <Container style={container}>
           <BrandHeader />
           <Heading style={h1}>Une chose que vous aimez faire pour les gens du coin ?</Heading>
-          <Text style={text}>{name ? `Bonjour ${name}, une ligne suffit.` : 'Bonjour, une ligne suffit.'}</Text>
+          <Text style={text}>{name ? `Bonjour ${name},` : 'Bonjour,'}</Text>
+          <Text style={text}>C'est la saison des pommes. Dans les jardins à quelques rues d'ici, des personnes âgées regardent les fruits du haut de l'arbre en espérant une échelle et un bras jeune. D'autres cherchent quelqu'un pour un formulaire en ligne, un carton à porter, un chien à sortir un samedi.</Text>
+          <Text style={text}>Elles vous trouveront le jour où votre ligne existera. Écrivez ce que vous aimez faire, en une phrase.</Text>
           <Section style={ctaSection}>
             <Button style={button} href={lineUrl || FALLBACK_URL}>J'écris ma ligne</Button>
           </Section>
