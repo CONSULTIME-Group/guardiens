@@ -106,7 +106,6 @@ interface WaveHelper {
   token: string;
 }
 
-/** Envoie une vague pour un besoin. Retourne le nombre de messages partis. */
 interface WaveResult {
   sent: number;
   wave: number;
@@ -424,9 +423,14 @@ Deno.serve(async (req) => {
         return json({ ok: true, deferred: true, reason: "quiet_hours" });
       }
       const r = await runWave(supabase, body.mission_id);
-      if (r.sent > 0 || r.empty) {
+      const pubSent = r.sent + (r.caughtUp ?? 0);
+      const pubDeferred = (r.deferred ?? 0) + (r.catchupDeferred ?? 0);
+      if (pubSent > 0 || r.empty || pubDeferred > 0) {
         const run = await startCronRun("notify-mission-wave");
-        await run.finish("success", { mode: "publish", mission_id: body.mission_id, sent: r.sent, empty: r.empty });
+        const st = waveRunStatus(pubSent, pubDeferred, 0);
+        const metrics = { mode: "publish", mission_id: body.mission_id, sent: r.sent, caught_up: r.caughtUp ?? 0, deferred: pubDeferred, empty: r.empty };
+        if (st === "failed") await run.fail(new Error(`aucun envoi, ${pubDeferred} report(s) sur limite de debit`), metrics);
+        else await run.finish(st, metrics);
       }
       return json({ ok: true, ...r });
     }
@@ -447,9 +451,13 @@ Deno.serve(async (req) => {
 
     let treated = 0;
     let totalSent = 0;
+    let totalCaughtUp = 0;
+    let totalDeferred = 0;
+    const errors: Array<{ mission_id: unknown; error: string }> = [];
     const details: Array<Record<string, unknown>> = [];
 
     for (const m of missions ?? []) {
+     try {
       // Seules les réponses qui engagent gèlent la diffusion : accepted, ou pending récente.
       const { data: responses, error: respErr } = await supabase
         .from("small_mission_responses")
@@ -468,14 +476,33 @@ Deno.serve(async (req) => {
         },
         now,
       );
-      if (!due) continue;
+      if (!due) {
+        // Rattrapage même hors vague : les personnes laissées en file sont reprises
+        // à chaque passage, sans attendre les 48 heures.
+        const cu = await catchUpQueued(supabase, m.id as string, now);
+        if (cu.sent > 0 || cu.deferred > 0 || cu.skipped > 0) {
+          treated++;
+          totalCaughtUp += cu.sent;
+          totalDeferred += cu.deferred;
+          details.push({ mission_id: m.id, catchup: true, caught_up: cu.sent, deferred: cu.deferred, token_missing: cu.skipped });
+        }
+        continue;
+      }
 
       const r = await runWave(supabase, m.id as string);
-      if (r.sent > 0 || r.empty) {
+      const deferred = (r.deferred ?? 0) + (r.catchupDeferred ?? 0);
+      if (r.sent > 0 || r.empty || deferred > 0 || (r.caughtUp ?? 0) > 0) {
         treated++;
         totalSent += r.sent;
-        details.push({ mission_id: m.id, wave: r.wave, sent: r.sent, empty: r.empty, radius_floor: r.radiusFloor });
+        totalCaughtUp += r.caughtUp ?? 0;
+        totalDeferred += deferred;
+        details.push({ mission_id: m.id, wave: r.wave, sent: r.sent, caught_up: r.caughtUp ?? 0, deferred, empty: r.empty, radius_floor: r.radiusFloor });
       }
+     } catch (e) {
+      // Une mission en échec ne bloque pas les suivantes.
+      console.error("[notify-mission-wave] mission", m.id, e);
+      errors.push({ mission_id: m.id, error: describeError(e) });
+     }
     }
 
     // Signal admin : besoin ouvert depuis plus de 72 h, personne joignable même à 100 km.
@@ -483,19 +510,33 @@ Deno.serve(async (req) => {
     if (signalErr) console.error("[notify-mission-wave] signal sans audience", signalErr.message);
 
     // Journal seulement si le passage a fait quelque chose.
-    if (treated > 0) {
+    const delivered = totalSent + totalCaughtUp;
+    const runStatus = waveRunStatus(delivered, totalDeferred, errors.length);
+    const metrics = {
+      mode: "cron",
+      missions_treated: treated,
+      emails_sent: totalSent,
+      emails_caught_up: totalCaughtUp,
+      emails_deferred: totalDeferred,
+      errors,
+      wave_interval_hours: WAVE_INTERVAL_HOURS,
+      details,
+    };
+    if (treated > 0 || errors.length > 0) {
       const run = await startCronRun("notify-mission-wave");
-      await run.finish("success", {
-        mode: "cron",
-        missions_treated: treated,
-        emails_sent: totalSent,
-        wave_interval_hours: WAVE_INTERVAL_HOURS,
-        details,
-      });
+      if (runStatus === "failed") {
+        await run.fail(new Error(errors[0]?.error ?? `aucun envoi, ${totalDeferred} report(s)`), metrics);
+      } else {
+        await run.finish(runStatus, metrics);
+      }
     }
 
-    await resolveCronFailureAlert(supabase, "notify-mission-wave").catch(() => {});
-    return json({ ok: true, missions_treated: treated, emails_sent: totalSent, details });
+    if (runStatus === "failed") {
+      await checkCronFailureAlert(supabase, "notify-mission-wave", errors[0]?.error ?? "aucun envoi").catch(() => {});
+    } else {
+      await resolveCronFailureAlert(supabase, "notify-mission-wave").catch(() => {});
+    }
+    return json({ ok: runStatus !== "failed", status: runStatus, ...metrics });
   } catch (e) {
     const run = await startCronRun("notify-mission-wave");
     await run.fail(e);
