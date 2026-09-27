@@ -53,6 +53,7 @@ import {
   getSitPublishRequirements,
   buildSitPublishInput,
   needsCreateFormToPublish,
+  MIN_SUB_DESCRIPTION,
 } from "@/lib/sitPublishRules";
 
 import EmergencyAlertBanner from "@/components/sits/EmergencyAlertBanner";
