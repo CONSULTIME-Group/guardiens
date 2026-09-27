@@ -4,32 +4,28 @@ import { join } from "node:path";
 
 const read = (p: string) => readFileSync(p, "utf8");
 const TPL = read("supabase/functions/_shared/transactional-email-templates/entraide-ligne-relance.tsx");
-const visible = [...TPL.matchAll(/'([^']*)'|"([^"]*)"|>([^<>{}]+)</g)].map((m) => m[1] ?? m[2] ?? m[3]).join("\n");
-const jsxText = TPL.slice(TPL.indexOf("const QUOTES"), TPL.indexOf("const quoteBlock"));
 
-describe("gabarit entraide-ligne-relance", () => {
-  it("objet, preheader, citations, signature", () => {
-    expect(TPL).toContain("subject: 'Se rendre utile, ça fait du bien'");
-    expect(TPL).toContain("<Preview>Une phrase suffit, et elle fait du bien des deux côtés.</Preview>");
-    for (const [q, c] of [
-      ["« Aider et rendre service. Rencontrer des gens et discuter. »", "Champs-sur-Yonne"],
-      ["« Aide administrative et informatique »", "Lyon"],
-      ["« M'occuper des animaux, des plantes, des cultures, du jardin... »", "Fontvieille"],
-    ]) { expect(TPL).toContain(q); expect(TPL).toContain(`city: '${c}'`); }
-    expect(TPL).toContain("<Text style={text}>Elisa et Jérémie</Text>");
-    expect(TPL).toContain("fontStyle: 'italic'");
-    expect(TPL).toContain("borderLeft: '2px solid #E9E4DD'");
-  });
-  it("l'idée centrale précède le bouton", () => {
-    const i = TPL.indexOf("Se rendre utile, c'est aussi se faire du bien.");
-    expect(i).toBeGreaterThan(0);
-    expect(i).toBeLessThan(TPL.indexOf("<Button"));
-  });
-  it("charte : ponctuation, affirmatif, vocabulaire", () => {
+describe("gabarit entraide-ligne-relance (E8)", () => {
+  it("objet, preview, images en JPEG absolues, aucun svg ni webp", () => {
+    expect(TPL).toContain("subject: 'Rendre service fait du bien. À vous aussi.'");
+    expect(TPL).toContain("<Preview>Une partie de belote, un coup de main au potager : dites en une phrase ce que vous aimez faire.</Preview>");
+    expect(TPL).toContain("const IMG = 'https://guardiens.fr/email'");
+    expect(TPL).not.toMatch(/\.webp|<svg/i);
     expect(TPL).not.toMatch(/[\u2013\u2014]/);
-    const words = jsxText.replace(/<[^>]+>|\{[^}]*\}/g, " ");
-    expect(words).not.toMatch(/\b(ne|pas|sans|jamais|rien)\b|\bn'/i);
-    expect(visible.toLowerCase()).not.toMatch(/voisin|gratuit/);
+    expect(TPL.toLowerCase()).not.toMatch(/voisin|gratuit/);
+  });
+  it("les images existent dans public/email", () => {
+    for (const f of ["entraide-mains", "exemple-nadia", "exemple-giulia", "exemple-rania", "elisa", "jeremie"]) {
+      expect(statSync(`public/email/${f}.jpg`).size).toBeGreaterThan(1000);
+    }
+  });
+});
+
+describe("send-mass-email transmet city et avatarUrl", () => {
+  const src = read("supabase/functions/send-mass-email/index.ts");
+  it("avatar_url sélectionné et carte injectée pour ce gabarit", () => {
+    expect(src).toMatch(/\.select\("id, email, first_name, postal_code, city, avatar_url,/);
+    expect(src).toContain('...(templateName === "entraide-ligne-relance" ? (cardByEmail.get(email.toLowerCase()) ?? {}) : {})');
   });
 });
 

@@ -76,7 +76,7 @@ describe("jeton de la ligne d'entraide", () => {
     const mass = read("supabase/functions/send-mass-email/index.ts");
     expect(mass).toContain('"entraide-ligne-relance": "entraide_ligne_relance"');
     expect(mass).toContain("lineUrl:");
-    expect(read("supabase/functions/_shared/transactional-email-templates/entraide-ligne-relance.tsx")).toContain("Se rendre utile, ça fait du bien");
+    expect(read("supabase/functions/_shared/transactional-email-templates/entraide-ligne-relance.tsx")).toContain("Rendre service fait du bien. À vous aussi.");
   });
 });
 
