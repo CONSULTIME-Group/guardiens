@@ -77,14 +77,6 @@ interface HeroProps {
   quote: string | null;
 }
 
-const anchorPosition = (anchor?: string) => {
-  const a = (anchor || "").toLowerCase();
-  if (a.includes("left")) return "left center";
-  if (a.includes("right")) return "right center";
-  if (a.includes("top")) return "center top";
-  if (a.includes("bottom")) return "center bottom";
-  return "center center";
-};
 
 export const SitterIdentityHero = (p: HeroProps) => {
   const place = [p.city, p.departmentName].filter(Boolean).join(", ");

@@ -1644,7 +1644,6 @@ export default function PublicSitterProfile() {
               onOpenHeroPicker={() => setHeroPickerOpen(true)}
               onOpenAvatarLightbox={() => hasAvatar && setLightboxIdx(0)}
               hasAvatarLightbox={hasAvatar}
-              breadcrumb={breadcrumbNode}
               memberSince={profile?.created_at ?? null}
               completedSits={completedSits}
               identityVerified={!!profile?.identity_verified}
