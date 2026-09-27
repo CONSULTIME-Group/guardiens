@@ -1017,6 +1017,8 @@ function AlmaDockInner() {
           </button>
         )}
       </div>
+      </>
+      )}
     </div>
   );
 }
