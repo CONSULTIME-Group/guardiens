@@ -35,7 +35,7 @@ import RailReadingsCard from "./shared/RailReadingsCard";
 import DashboardRail from "./shared/DashboardRail";
 import { useRailReadings } from "@/hooks/useRailReadings";
 import { useProfileCompletionMissing } from "@/hooks/useProfileCompletionMissing";
-import { ownerNextStep } from "@/lib/dashboardNextStep";
+import { ownerNextStep, remainingTouchesPhrase } from "@/lib/dashboardNextStep";
 
 import MobileStickyCTA from "./owner/MobileStickyCTA";
 import { useInView } from "@/hooks/useInView";
@@ -325,7 +325,17 @@ const OwnerDashboard = () => {
   ) : null;
   const railContent = (
     <>
-      {ownerNextStepRail && <NextStepRailCard step={ownerNextStepRail} variant="owner" />}
+      {ownerNextStepRail && (
+        <NextStepRailCard
+          variant="owner"
+          step={{
+            ...ownerNextStepRail,
+            phrase: completionMissing.missing?.length
+              ? remainingTouchesPhrase(completionMissing.missing)
+              : ownerNextStepRail.phrase,
+          }}
+        />
+      )}
       <AlmaRailWhisper
         variant="owner"
         ownerState={{
