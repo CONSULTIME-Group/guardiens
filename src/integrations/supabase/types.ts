@@ -419,6 +419,27 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_mission_conv_link_20260927: {
+        Row: {
+          id: string | null
+          kind: string | null
+          previous_value: string | null
+          saved_at: string | null
+        }
+        Insert: {
+          id?: string | null
+          kind?: string | null
+          previous_value?: string | null
+          saved_at?: string | null
+        }
+        Update: {
+          id?: string | null
+          kind?: string | null
+          previous_value?: string | null
+          saved_at?: string | null
+        }
+        Relationships: []
+      }
       _backup_notification_email_rpc_20260918: {
         Row: {
           acl: unknown[] | null
@@ -8115,6 +8136,7 @@ export type Database = {
       small_mission_responses: {
         Row: {
           accepted_at: string | null
+          choose_prompt_sent_at: string | null
           conversation_id: string | null
           created_at: string
           exchange_date: string | null
@@ -8129,6 +8151,7 @@ export type Database = {
         }
         Insert: {
           accepted_at?: string | null
+          choose_prompt_sent_at?: string | null
           conversation_id?: string | null
           created_at?: string
           exchange_date?: string | null
@@ -8143,6 +8166,7 @@ export type Database = {
         }
         Update: {
           accepted_at?: string | null
+          choose_prompt_sent_at?: string | null
           conversation_id?: string | null
           created_at?: string
           exchange_date?: string | null
@@ -10460,6 +10484,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      clear_my_withdrawn_mission_response: {
+        Args: { p_mission_id: string }
+        Returns: boolean
+      }
       close_orphan_applications: {
         Args: { p_grace_hours?: number }
         Returns: {
@@ -10495,6 +10523,7 @@ export type Database = {
       }
       consume_email_deep_link: { Args: { p_token: string }; Returns: Json }
       consume_mission_action_token: { Args: { p_token: string }; Returns: Json }
+      consume_mission_choose_token: { Args: { p_token: string }; Returns: Json }
       count_eligible_sitters: {
         Args: { p_lat: number; p_lng: number; p_radius_km?: number }
         Returns: number
@@ -10781,6 +10810,10 @@ export type Database = {
       email_mirror_drift_count: { Args: never; Returns: number }
       email_queue_dispatch: { Args: never; Returns: undefined }
       email_tracking_start: { Args: never; Returns: string }
+      emit_mission_choose_token: {
+        Args: { p_response_id: string }
+        Returns: string
+      }
       emit_mission_meetup_tokens: {
         Args: { p_mission_id: string }
         Returns: Json
@@ -11201,6 +11234,10 @@ export type Database = {
         Returns: string
       }
       looks_like_pricing: { Args: { txt: string }; Returns: boolean }
+      mark_mission_choose_prompt_sent: {
+        Args: { p_response_id: string }
+        Returns: boolean
+      }
       mark_sit_applications_viewed: {
         Args: { p_sit_id: string }
         Returns: number
@@ -11219,6 +11256,17 @@ export type Database = {
         }[]
       }
       mission_category_to_skill: { Args: { p_cat: string }; Returns: string }
+      mission_choose_prompt_candidates: {
+        Args: never
+        Returns: {
+          exchanged_at: string
+          mission_id: string
+          mission_title: string
+          owner_id: string
+          responder_id: string
+          response_id: string
+        }[]
+      }
       mission_wave_audience: {
         Args: { p_limit?: number; p_mission_id: string; p_offset?: number }
         Returns: {
@@ -11270,6 +11318,10 @@ export type Database = {
         Args: { _application_id: string }
         Returns: string
       }
+      open_mission_response_conversation: {
+        Args: { p_response_id: string }
+        Returns: string
+      }
       patch_my_email_preferences: {
         Args: {
           p_alert_emails?: boolean
@@ -11287,6 +11339,7 @@ export type Database = {
         Returns: Json
       }
       peek_mission_action_token: { Args: { p_token: string }; Returns: Json }
+      peek_mission_choose_token: { Args: { p_token: string }; Returns: Json }
       peek_mission_meetup_token: { Args: { p_token: string }; Returns: Json }
       prerender_render_budget_status: {
         Args: { p_monthly_budget?: number }
