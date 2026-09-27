@@ -33,7 +33,7 @@ export function useRecentPublishedSits() {
       const { data, error } = await supabase
         .from("sits")
         .select(
-          "id, slug, title, city, country, start_date, end_date, daily_routine, created_at, user_id, property_id, cover_photo_url, is_urgent, owner:profiles!sits_user_id_fkey(latitude, longitude)"
+          "id, slug, title, city, country, start_date, end_date, daily_routine, created_at, user_id, property_id, cover_photo_url, is_urgent"
         )
         .eq("status", "published")
         .eq("accepting_applications", true)
@@ -45,7 +45,27 @@ export function useRecentPublishedSits() {
         console.error("useRecentPublishedSits error", error);
         return [];
       }
-      return (data ?? []) as RecentPublishedSit[];
+      const sits = (data ?? []) as Omit<RecentPublishedSit, "owner">[];
+      // Coordonnées approchées via la vue publique (lisible par un visiteur),
+      // uniquement pour le tri par distance. Un échec laisse la liste intacte.
+      const coords = new Map<string, { latitude: number | null; longitude: number | null }>();
+      const ids = [...new Set(sits.map((s) => s.user_id))];
+      if (ids.length > 0) {
+        try {
+          const { data: owners, error: ownersError } = await supabase
+            .from("public_profiles")
+            .select("id, latitude_approx, longitude_approx")
+            .in("id", ids);
+          if (!ownersError) {
+            for (const o of (owners ?? []) as Array<{ id: string; latitude_approx: number | null; longitude_approx: number | null }>) {
+              coords.set(o.id, { latitude: o.latitude_approx, longitude: o.longitude_approx });
+            }
+          }
+        } catch {
+          /* tri par distance indisponible, annonces conservées */
+        }
+      }
+      return sits.map((s) => ({ ...s, owner: coords.get(s.user_id) ?? null }));
     },
   });
 }

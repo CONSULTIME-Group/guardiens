@@ -434,7 +434,7 @@ const EntraideHub = () => {
           </section>
 
           <section className="mt-14" aria-labelledby="entraide-helpers-title">
-            <h2 id="entraide-helpers-title" className="font-heading text-2xl font-semibold text-foreground">Prêts à aider près de chez vous</h2>
+            <h2 id="entraide-helpers-title" className="font-heading text-2xl font-semibold text-foreground">{origin ? "Prêts à aider près de chez vous" : "Prêts à aider sur Guardiens"}</h2>
             <p className="mt-2 text-sm text-muted-foreground">Aider, c'est aussi se faire du bien.</p>
             <div className="mt-5 grid gap-4 md:grid-cols-2">
               {visibleHelpers.map((helper) => (

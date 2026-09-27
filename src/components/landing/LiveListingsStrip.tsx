@@ -119,12 +119,12 @@ export default function LiveListingsStrip({ origin = null }: { origin?: HomeOrig
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">En direct</p>
         <h2 id="live-listings-title" className="mt-2 font-heading text-3xl font-semibold text-foreground md:text-5xl">{liveListingsTitle(origin)}</h2>
         {listings.length > 0 ? (
-          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="-mx-4 mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 md:mx-0 md:grid md:snap-none md:grid-cols-2 md:gap-5 md:overflow-visible md:px-0 md:pb-0 lg:grid-cols-3" data-testid="live-listings-list">
             {listings.map((listing) => {
               const start = formatDate(listing.date);
               const end = formatDate(listing.endDate);
               return (
-                <Link key={`${listing.kind}-${listing.id}`} to={listing.href} className="group overflow-hidden rounded-lg border border-border bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                <Link key={`${listing.kind}-${listing.id}`} to={listing.href} className="group w-[80%] shrink-0 snap-start overflow-hidden rounded-lg md:w-auto md:shrink border border-border bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   <div className="aspect-[4/3] overflow-hidden bg-muted">
                     {listing.photo ? <img src={storageImageUrl(listing.photo, { width: 480, height: 360 }) || listing.photo} srcSet={storageImageSrcSet(listing.photo, [400, 640], 75, 4 / 3)} sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" alt={listing.title} width={480} height={360} loading="lazy" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" /> : <div className="flex h-full items-center justify-center px-6 text-center font-heading text-xl text-muted-foreground">{listing.kind === "garde" ? "Garde de maison" : "Coup de main"}</div>}
                   </div>
