@@ -2,6 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { resendFetch } from "../_shared/resend-guard.ts";
 import { SENDER_FROM, REPLY_TO_ADDRESS } from "../_shared/sender-address.ts";
 import { HELPS_WITH_TOKEN_DAYS, lineUrlForToken } from "../_shared/ma-ligne-logic.ts";
+import { entraideCardData } from "../_shared/entraide-card-data.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -252,7 +253,7 @@ async function fetchTargetedProfiles(
 ): Promise<{ id: string; email: string; first_name: string | null }[]> {
   let query = serviceClient
     .from("profiles")
-    .select("id, email, first_name, postal_code, city, identity_verified, profile_completion, completed_sits_count, is_founder, created_at, role, account_status, available_for_help, helps_with");
+    .select("id, email, first_name, postal_code, city, avatar_url, identity_verified, profile_completion, completed_sits_count, is_founder, created_at, role, account_status, available_for_help, helps_with");
 
   // Comptes actifs uniquement
   if (filters.comptes_actifs) query = query.eq("account_status", "active");
@@ -785,8 +786,10 @@ Deno.serve(async (req) => {
 
       const firstNameByEmail = new Map<string, string>();
       const idByEmail = new Map<string, string>();
+      const cardByEmail = new Map<string, { city?: string; avatarUrl?: string }>();
       for (const profile of profiles) {
         firstNameByEmail.set(profile.email.toLowerCase(), (profile.first_name ?? "").trim());
+        cardByEmail.set(profile.email.toLowerCase(), entraideCardData(profile as any));
         idByEmail.set(profile.email.toLowerCase(), profile.id);
       }
 
@@ -842,6 +845,7 @@ Deno.serve(async (req) => {
               ? {
                   firstName: firstNameByEmail.get(email.toLowerCase()) ?? "",
                   ...(lineUrlByEmail.has(email.toLowerCase()) ? { lineUrl: lineUrlByEmail.get(email.toLowerCase()) } : {}),
+                  ...(templateName === "entraide-ligne-relance" ? (cardByEmail.get(email.toLowerCase()) ?? {}) : {}),
                 }
               : {},
           } as any,
