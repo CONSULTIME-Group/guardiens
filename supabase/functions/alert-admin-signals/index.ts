@@ -29,6 +29,7 @@ const ADMIN_LINKS: Record<string, string> = {
   nurturing_run_anomaly: 'https://guardiens.fr/admin/emails',
   email_delivery_anomaly: 'https://guardiens.fr/admin/emails',
   prerender_monthly_budget_reached: 'https://guardiens.fr/admin',
+  cron_consecutive_failures: 'https://guardiens.fr/admin',
 }
 
 const linkFor = (type: string) => ADMIN_LINKS[type] ?? 'https://guardiens.fr/admin'
@@ -114,7 +115,9 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         templateName: 'admin-signals-digest',
         recipientEmail: RECIPIENT,
-        idempotencyKey: `admin-signals-${day}`,
+        idempotencyKey: typeof body?.trigger === 'string' && body.trigger
+          ? `admin-signals-${day}-${String(body.trigger).slice(0, 80)}`
+          : `admin-signals-${day}`,
         templateData: {
           criticalCount: criticals.length,
           warningCount,

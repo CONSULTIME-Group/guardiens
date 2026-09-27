@@ -20,7 +20,8 @@
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { isParisQuietHour } from "../_shared/paris-hour.ts";
-import { startCronRun, logCronRejection } from "../_shared/cron-run-log.ts";
+import { startCronRun, logCronRejection, describeError } from "../_shared/cron-run-log.ts";
+import { checkCronFailureAlert, resolveCronFailureAlert } from "../_shared/cron-failure-alert.ts";
 import { authorizeWaveCaller } from "../_shared/wave-caller.ts";
 import {
   WAVE_SIZE,
@@ -335,10 +336,14 @@ Deno.serve(async (req) => {
       });
     }
 
+    await resolveCronFailureAlert(supabase, "notify-mission-wave").catch(() => {});
     return json({ ok: true, missions_treated: treated, emails_sent: totalSent, details });
   } catch (e) {
     const run = await startCronRun("notify-mission-wave");
     await run.fail(e);
+    await checkCronFailureAlert(supabase, "notify-mission-wave", describeError(e)).catch((err) =>
+      console.error("[notify-mission-wave] alerte", err),
+    );
     console.error("[notify-mission-wave] fatal", e);
     return json({ ok: false, error: String(e) }, 500);
   }
