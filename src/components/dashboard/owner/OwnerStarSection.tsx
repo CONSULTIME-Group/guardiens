@@ -14,7 +14,6 @@
  */
 import { differenceInDays } from "date-fns";
 import { formatDateRangeFr } from "@/lib/formatDateRangeFr";
-import { nearbyRegisteredSentence } from "@/lib/nearbySittersSentence";
 import { canShowAffinityPercent } from "@/lib/affinityDisplay";
 import { Link } from "react-router-dom";
 import { useRef } from "react";
@@ -438,47 +437,13 @@ const DraftStar = ({ draft, onCtaClick }: { draft: SitRow; onCtaClick?: () => vo
 /*  D. Aucune annonce active                                          */
 /* ================================================================== */
 const PublishStar = ({
-  nearbyCount,
-  nearbyRadius,
-  showConcierge,
   primaryAction,
-  onCtaClick,
 }: {
-  nearbyCount: number;
-  nearbyRadius: number | null;
-  showConcierge: boolean;
   primaryAction: OwnerPrimaryAction | null;
-  onCtaClick?: () => void;
-}) => {
-  const localSignal =
-    nearbyCount > 0 && nearbyRadius
-      ? nearbyRegisteredSentence(nearbyCount, nearbyRadius)
-      : null;
-
-  return (
-    <>
-      <SectionHeader
-        eyebrow="Votre maison a une histoire"
-        title="Confiez-la à quelqu'un de confiance, près de chez vous."
-        subtitle={localSignal ?? undefined}
-      />
-      <div
-        style={{
-          backgroundColor: "hsl(var(--secondary) / 0.12)",
-          borderRadius: "20px",
-          padding: "22px",
-        }}
-      >
-        <PrimaryCta to="/sits/create" onClick={onCtaClick}>Publier une annonce</PrimaryCta>
-        {showConcierge && (
-          <div className="mt-[22px]">
-            <SitDraftFromPrompt demoted primary={primaryAction} />
-          </div>
-        )}
-      </div>
-    </>
-  );
-};
+}) => (
+  // Lot D1 : état « aucune annonce », le formulaire Alma EST la vedette.
+  <SitDraftFromPrompt layout="star" primary={primaryAction} />
+);
 
 /* ================================================================== */
 /*  Section wrapper                                                   */
@@ -494,6 +459,8 @@ export interface OwnerStarSectionProps {
   nearbyRadius: number | null;
   showConcierge: boolean;
   primaryAction: OwnerPrimaryAction | null;
+  /** Lot D1 : annonce active (OwnerAnnonceSection) devenue contenu de la vedette. */
+  activeAnnonce?: React.ReactNode;
 }
 
 const OwnerStarSection = ({
@@ -505,8 +472,8 @@ const OwnerStarSection = ({
   propertyCoverPhoto,
   nearbyCount,
   nearbyRadius,
-  showConcierge,
   primaryAction,
+  activeAnnonce,
 }: OwnerStarSectionProps) => {
   const variant = selectOwnerStarVariant({
     ongoingSit,
@@ -554,16 +521,10 @@ const OwnerStarSection = ({
     );
   } else if (latestDraft) {
     content = <DraftStar draft={latestDraft} onCtaClick={onCtaClick} />;
+  } else if (activeAnnonce) {
+    content = activeAnnonce;
   } else {
-    content = (
-      <PublishStar
-        nearbyCount={nearbyCount}
-        nearbyRadius={nearbyRadius}
-        showConcierge={showConcierge}
-        primaryAction={primaryAction}
-        onCtaClick={onCtaClick}
-      />
-    );
+    content = <PublishStar primaryAction={primaryAction} />;
   }
 
   return (
@@ -571,7 +532,8 @@ const OwnerStarSection = ({
       ref={sectionRef}
       data-dashboard-star="owner"
       aria-label="Votre priorité du moment"
-      className="px-4 sm:px-5 md:px-8"
+      className="bg-card rounded-[22px] px-[22px] py-[26px] md:px-[34px] md:py-[32px]"
+      style={{ boxShadow: "0 1px 2px rgba(29,27,22,0.04), 0 12px 32px rgba(29,27,22,0.07)" }}
     >
       {content}
     </section>
