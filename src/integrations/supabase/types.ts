@@ -8146,6 +8146,7 @@ export type Database = {
           message: string
           mission_id: string
           need_description: string | null
+          reactivated_at: string | null
           responder_id: string
           status: Database["public"]["Enums"]["small_mission_response_status"]
         }
@@ -8161,6 +8162,7 @@ export type Database = {
           message?: string
           mission_id: string
           need_description?: string | null
+          reactivated_at?: string | null
           responder_id: string
           status?: Database["public"]["Enums"]["small_mission_response_status"]
         }
@@ -8176,6 +8178,7 @@ export type Database = {
           message?: string
           mission_id?: string
           need_description?: string | null
+          reactivated_at?: string | null
           responder_id?: string
           status?: Database["public"]["Enums"]["small_mission_response_status"]
         }
@@ -10484,10 +10487,6 @@ export type Database = {
         }
         Returns: boolean
       }
-      clear_my_withdrawn_mission_response: {
-        Args: { p_mission_id: string }
-        Returns: boolean
-      }
       close_orphan_applications: {
         Args: { p_grace_hours?: number }
         Returns: {
@@ -11430,6 +11429,10 @@ export type Database = {
           p_p256dh_key: string
           p_user_id: string
         }
+        Returns: string
+      }
+      reactivate_my_mission_response: {
+        Args: { p_message: string; p_mission_id: string }
         Returns: string
       }
       read_email_batch: {
