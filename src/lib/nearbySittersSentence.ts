@@ -1,7 +1,7 @@
 /**
  * Phrases de proximité des tableaux de bord propriétaire.
  * Chiffre exact du rayon, sans revendication de vérification : le compteur
- * inclut tous les gardiens du rayon, vérifiés ou non.
+ * inclut tous les gardiens du rayon, avec ou sans écusson d'identité.
  */
 const plural = (n: number) => (n > 1 ? "s" : "");
 
