@@ -5,7 +5,7 @@ import { geocodeCity } from "@/lib/geocode";
 import { supabase } from "@/integrations/supabase/client";
 import { trackEvent } from "@/lib/analytics";
 
-export interface HomeOrigin { lat: number; lng: number }
+export interface HomeOrigin { lat: number; lng: number; city?: string | null }
 
 interface Counts { gardiens_count: number; helpers_count: number }
 
@@ -29,7 +29,7 @@ export function HomeProximitySearch({ onLocated }: { onLocated: (origin: HomeOri
       setLoading(false);
       return;
     }
-    const origin = { lat: Number(geo.lat.toFixed(2)), lng: Number(geo.lng.toFixed(2)) };
+    const origin = { lat: Number(geo.lat.toFixed(2)), lng: Number(geo.lng.toFixed(2)), city: value };
     const { data, error } = await supabase.rpc("home_proximity_counts", {
       p_lat: origin.lat,
       p_lng: origin.lng,

@@ -21,6 +21,13 @@ interface HomeListing {
 }
 
 const MAX_LISTINGS = 6;
+
+/** Titre selon l'origine : ville saisie ou du profil, sinon vue nationale. */
+export const liveListingsTitle = (origin: HomeOrigin | null) => {
+  const city = origin?.city?.trim();
+  if (!city) return "En ce moment sur Guardiens";
+  return `En ce moment près de ${city.charAt(0).toLocaleUpperCase("fr")}${city.slice(1)}`;
+};
 const GUARD_TARGET = 4;
 const NEED_TARGET = 2;
 
@@ -110,7 +117,7 @@ export default function LiveListingsStrip({ origin = null }: { origin?: HomeOrig
     <section id="en-ce-moment" className="border-b border-border/40 bg-background py-[52px] scroll-mt-24 md:py-16" aria-labelledby="live-listings-title">
       <div className="lp-wide">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">En direct</p>
-        <h2 id="live-listings-title" className="mt-2 font-heading text-3xl font-semibold text-foreground md:text-4xl">En ce moment près de chez vous</h2>
+        <h2 id="live-listings-title" className="mt-2 font-heading text-3xl font-semibold text-foreground md:text-5xl">{liveListingsTitle(origin)}</h2>
         {listings.length > 0 ? (
           <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {listings.map((listing) => {
