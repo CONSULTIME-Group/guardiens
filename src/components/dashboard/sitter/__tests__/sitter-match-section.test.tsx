@@ -74,7 +74,7 @@ const renderSection = (props: Partial<Parameters<typeof SitterMatchSection>[0]>)
 describe("SitterMatchSection — libellés et photo de la vedette", () => {
   it("affiche « Chien », jamais la valeur brute « dog »", () => {
     renderSection({ topSits: [scored("a", 80)] });
-    expect(screen.getByText(/Chien · 27 août au 30 septembre/)).toBeInTheDocument();
+    expect(screen.getByText(/Chien · Du 27 août au 30 septembre \d{4}/)).toBeInTheDocument();
     expect(screen.queryByText(/\bdog\b/)).not.toBeInTheDocument();
   });
 
@@ -157,7 +157,7 @@ describe("SitterMatchSection — rangée compacte et sortie recherche", () => {
     });
     const row = screen.getByText("Annonce b").closest("a");
     expect(row?.textContent).toContain("Belley");
-    expect(row?.textContent).toContain("27 août au 30 septembre");
+    expect(row?.textContent).toMatch(/27 août au 30 septembre \d{4}/);
     expect(row?.textContent).toContain("66 km");
     expect(row?.textContent).toContain("62 %");
     expect(row?.textContent).toContain("Campagne");
