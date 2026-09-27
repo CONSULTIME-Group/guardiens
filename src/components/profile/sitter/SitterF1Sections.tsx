@@ -1,3 +1,4 @@
+import { formatRatingFr } from "@/lib/formatRatingFr";
 /**
  * Fiche gardien publique allégée (lot F1), onglet « Côté gardien ».
  * Sections sans cadre, séparées par l'espace. Tokens existants uniquement.
@@ -18,13 +19,13 @@ import { getMemberAvatarUrl, getMemberPublicFirstName } from "@/lib/memberUtils"
 import { capitalizeFirstName } from "@/lib/displayName";
 import type { SkillGroup, SkillSpot } from "@/lib/sitterSkillGroups";
 import { cutLongText, reviewDateLabel } from "@/lib/sitterProfileFacts";
-import spotChat from "@/assets/missions/spot-chat.png";
-import spotChien from "@/assets/missions/spot-chien.png";
-import spotPoules from "@/assets/missions/spot-poules.png";
-import spotBienetre from "@/assets/missions/spot-bienetre.png";
-import spotJardin from "@/assets/missions/spot-jardin.png";
-import spotBricolage from "@/assets/missions/spot-bricolage.png";
-import spotVerger from "@/assets/missions/spot-verger.png";
+import spotChat from "@/assets/missions/spot-chat-160.webp";
+import spotChien from "@/assets/missions/spot-chien-160.webp";
+import spotPoules from "@/assets/missions/spot-poules-160.webp";
+import spotBienetre from "@/assets/missions/spot-bienetre-160.webp";
+import spotJardin from "@/assets/missions/spot-jardin-160.webp";
+import spotBricolage from "@/assets/missions/spot-bricolage-160.webp";
+import spotVerger from "@/assets/missions/spot-verger-160.webp";
 
 const SPOTS: Record<SkillSpot, string> = {
   "spot-chat": spotChat,
@@ -199,15 +200,15 @@ export const SitterIdentityHero = (p: HeroProps) => {
                       </button>
                     </TooltipTrigger>
                     <TooltipContent side="bottom" className="max-w-xs text-xs leading-relaxed">
-                      Une pièce d'identité officielle a été fournie et contrôlée automatiquement. C'est un signal de confiance, pas une garantie absolue.
+                      Une pièce d'identité officielle a été fournie et contrôlée automatiquement. C'est un signal de confiance parmi d'autres : vos échanges et votre rencontre le complètent.
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
               )}
               {p.avgRating > 0 && p.reviewCount > 0 && (
-                <span className="inline-flex items-center gap-1.5" aria-label={`${p.avgRating.toFixed(1)} sur 5, ${p.reviewCount} avis`}>
+                <span className="inline-flex items-center gap-1.5" aria-label={`${formatRatingFr(p.avgRating)} sur 5, ${p.reviewCount} avis`}>
                   <span className="text-founder" aria-hidden="true">★★★★★</span>
-                  <span className="font-semibold">{p.avgRating.toFixed(1)}</span>
+                  <span className="font-semibold">{formatRatingFr(p.avgRating)}</span>
                   <span className="text-muted-foreground">· {p.reviewCount} avis</span>
                 </span>
               )}
@@ -231,7 +232,7 @@ export const SitterIdentityHero = (p: HeroProps) => {
           <figure className="mt-[34px] max-w-[700px] mx-auto md:mx-0 text-center md:text-left">
             <blockquote className="relative font-heading italic text-[23px] md:text-[30px] leading-snug text-foreground">
               <span aria-hidden="true" className="absolute -left-1 -top-6 md:-left-8 md:-top-4 font-heading text-[64px] leading-none text-secondary/40 not-italic">
-                “
+                «
               </span>
               {p.quote}
             </blockquote>
@@ -271,7 +272,7 @@ export const SitterSkillsSection = ({
         {groups.map((g) => (
           <li key={g.key} className="flex items-center gap-[14px] min-w-0">
             {SPOTS[g.spot] ? (
-              <img src={SPOTS[g.spot]} alt="" aria-hidden="true" width={46} height={46} loading="lazy" className="h-[46px] w-[46px] shrink-0 object-contain" />
+              <img src={SPOTS[g.spot]} alt="" aria-hidden="true" width={46} height={46} loading="lazy" decoding="async" className="h-[46px] w-[46px] shrink-0 object-contain" />
             ) : (
               <span aria-hidden="true" className="h-[46px] w-[46px] shrink-0" />
             )}
@@ -439,7 +440,7 @@ export const EntraideBand = ({
     aria-label="Aussi là pour un coup de main"
     className="flex items-start gap-[14px] md:gap-[22px] rounded-[20px] bg-secondary/10 pt-[22px] pr-[28px] pb-[22px] pl-[18px]"
   >
-    <img src={spotVerger} alt="" aria-hidden="true" width={76} height={76} loading="lazy" className="h-[52px] w-[52px] md:h-[76px] md:w-[76px] shrink-0 object-contain" />
+    <img src={spotVerger} alt="" aria-hidden="true" width={76} height={76} loading="lazy" decoding="async" className="h-[52px] w-[52px] md:h-[76px] md:w-[76px] shrink-0 object-contain" />
     <div className="min-w-0">
       <p className="text-[12px] uppercase tracking-[0.16em] text-secondary font-body font-semibold">Aussi là pour un coup de main</p>
       <p className="mt-2 text-[15.5px] leading-relaxed text-foreground font-body whitespace-pre-line break-words">{text}</p>
@@ -587,7 +588,7 @@ export const SitterStickyBar = ({
 }) => {
   if (cta.kind === "own") return null;
   const sub = [
-    avgRating > 0 && reviewCount > 0 ? `★ ${avgRating.toFixed(1)}` : null,
+    avgRating > 0 && reviewCount > 0 ? `★ ${formatRatingFr(avgRating)}` : null,
     isAvailable ? "Disponible" : null,
   ].filter(Boolean).join(" · ");
   return (

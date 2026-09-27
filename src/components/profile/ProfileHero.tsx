@@ -106,7 +106,7 @@ const ProfileHero = ({
         </button>
             </TooltipTrigger>
             <TooltipContent side="bottom" className="max-w-xs text-xs leading-relaxed">
-              Une pièce d'identité officielle a été fournie et contrôlée automatiquement. C'est un signal de confiance, pas une garantie absolue.
+              Une pièce d'identité officielle a été fournie et contrôlée automatiquement. C'est un signal de confiance parmi d'autres : vos échanges et votre rencontre le complètent.
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

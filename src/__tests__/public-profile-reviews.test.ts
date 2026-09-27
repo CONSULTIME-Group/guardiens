@@ -10,7 +10,7 @@ describe("avis visibles aux visiteurs", () => {
     const count = gardeReviews.length + missionReviews.length;
     const h = sitterReviewsHeading(count, averageRating([...gardeReviews, ...missionReviews]), "Krystina");
     expect(h.title).toBe("Ce que les propriétaires racontent.");
-    expect(h.summary).toBe("1 retour · moyenne 5.0★");
+    expect(h.summary).toBe("1 retour · moyenne 5,0★");
   });
   it("sans avis, l'état vide actuel", () => {
     const h = sitterReviewsHeading(0, 0, "Krystina");

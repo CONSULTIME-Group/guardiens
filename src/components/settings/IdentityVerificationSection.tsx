@@ -363,7 +363,7 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
             <p className={`text-sm font-medium ${cfg.color}`}>{cfg.label}</p>
             <p className="text-xs text-muted-foreground mt-0.5">{cfg.desc}</p>
             <p className="text-[11px] text-muted-foreground/80 mt-2 leading-relaxed">
-              Ce que couvre la mention « identité vérifiée » : une pièce d'identité officielle a été fournie et contrôlée automatiquement. C'est un signal de confiance, pas une garantie absolue.
+              Ce que couvre la mention « identité vérifiée » : une pièce d'identité officielle a été fournie et contrôlée automatiquement. C'est un signal de confiance parmi d'autres : vos échanges et votre rencontre le complètent.
             </p>
             <p className="text-[11px] text-muted-foreground/80 mt-2 leading-relaxed">
               Votre document est stocké dans un espace sécurisé et privé, et supprimé automatiquement de nos serveurs 30 jours après la vérification. Seule l'équipe Guardiens peut le consulter pendant l'examen.
