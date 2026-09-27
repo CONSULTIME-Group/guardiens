@@ -75,6 +75,10 @@ export const FORBIDDEN_CLAIMS: RegExp[] = [
   /jamais\s+par\s+un\s+algorithme/iu,
   /des\s+yeux\s+humains/iu,
   /chaque\s+(?:gardien|membre|profil)\s+[^.]{0,40}vérifi/iu,
+  // Gabarits (lot D0, 27/09/2026) : « gardien${...} vérifié${...} » échappait
+  // aux motifs littéraux, l'accord étant interpolé.
+  /gardiens?\$\{[^}]*\}\s*(?:\S+\s+){0,2}vérifi/iu,
+  /vérifiée?\$\{/iu,
 ];
 
 /**
@@ -339,5 +343,20 @@ describe("Motifs du garde-fou", () => {
 
   it.skip("forme minuscule nue dans une énumération (cas HomeJsonLd)", () => {
     expect(isPromiseEnumeration("Mise en relation par affinité, identité vérifiée, avis croisés.")).toBe(true);
+  });
+});
+
+describe("Revendication par gabarit (lot D0)", () => {
+  const OLD_LINE_457 =
+    '? `${nearbyCount} gardien${nearbyCount > 1 ? "s" : ""} vérifié${nearbyCount > 1 ? "s" : ""} à ${nearbyRadius} km attendent une annonce.`';
+  it("attrape l'ancienne phrase construite par gabarit (OwnerStarSection ligne 457)", () => {
+    expect(FORBIDDEN_CLAIMS.some((p) => p.test(OLD_LINE_457))).toBe(true);
+  });
+  it("attrape « gardiens vérifiés » produit par un rendu de chaîne", () => {
+    const rendered = `${88} gardien${"s"} vérifié${"s"} à 30 km`;
+    expect(FORBIDDEN_CLAIMS.some((p) => p.test(rendered))).toBe(true);
+  });
+  it("laisse passer la nouvelle phrase sans revendication", () => {
+    expect(FORBIDDEN_CLAIMS.some((p) => p.test("88 gardiens à 30 km attendent votre prochaine annonce."))).toBe(false);
   });
 });
