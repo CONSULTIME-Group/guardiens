@@ -26,6 +26,7 @@ import { template as identityRejected } from './identity-rejected.tsx'
 import { template as reviewReminder } from './review-reminder.tsx'
 import { template as missionResponse } from './mission-response.tsx'
 import { template as missionMeetupConfirmOwner } from './mission-meetup-confirm-owner.tsx'
+import { template as missionChooseHelper } from './mission-choose-helper.tsx'
 import { template as missionMeetupConfirmHelper } from './mission-meetup-confirm-helper.tsx'
 import { template as cancellationByOwner } from './cancellation-by-owner.tsx'
 import { template as cancellationBySitter } from './cancellation-by-sitter.tsx'
@@ -134,6 +135,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'review-reminder': reviewReminder,
   'mission-response': missionResponse,
   'mission-meetup-confirm-owner': missionMeetupConfirmOwner,
+  'mission-choose-helper': missionChooseHelper,
   'mission-meetup-confirm-helper': missionMeetupConfirmHelper,
   'cancellation-by-owner': cancellationByOwner,
   'cancellation-by-sitter': cancellationBySitter,

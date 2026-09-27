@@ -60,6 +60,7 @@ const TRANSACTIONAL: ReadonlyArray<string> = [
   // Fin d'echange : relance nominative adressee aux deux membres d'un coup de
   // main accepte, declenchee par la date de ce besoin precis.
   'mission-meetup-confirm-owner',
+  'mission-choose-helper',
   'mission-meetup-confirm-helper',
   'question-answer-received',
   // Identity / trust / safety

@@ -138,6 +138,7 @@ const Unsubscribe = lazy(() => import("./pages/Unsubscribe"), "Unsubscribe");
 const EmailClickRedirect = lazy(() => import("./pages/EmailClickRedirect"), "EmailClickRedirect");
 const EmailDeepLink = lazy(() => import("./pages/EmailDeepLink"), "EmailDeepLink");
 const ApplicationQuickAction = lazy(() => import("./pages/ApplicationQuickAction"), "ApplicationQuickAction");
+const MissionChooseHelper = lazy(() => import("./pages/MissionChooseHelper"), "MissionChooseHelper");
 const MissionQuickCanHelp = lazy(() => import("./pages/MissionQuickCanHelp"), "MissionQuickCanHelp");
 const MaLigne = lazy(() => import("./pages/MaLigne"), "MaLigne");
 const EmailPreferences = lazy(() => import("./pages/EmailPreferences"), "EmailPreferences");
@@ -627,6 +628,7 @@ const AppRoutes = () => {
       <Route path="/acces" element={<EmailDeepLink />} />
       <Route path="/candidature/reponse" element={<ApplicationQuickAction />} />
       <Route path="/entraide/je-peux" element={<MissionQuickCanHelp />} />
+      <Route path="/entraide/choisir" element={<MissionChooseHelper />} />
       <Route path="/ma-ligne" element={<MaLigne />} />
       <Route path="/ma-ligne/:token" element={<MaLigne />} />
 
