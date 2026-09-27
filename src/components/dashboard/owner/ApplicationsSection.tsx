@@ -1,7 +1,6 @@
+import { formatDateRangeFr } from "@/lib/formatDateRangeFr";
 import { memo, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Skeleton } from "@/components/ui/skeleton";
 import DashSection from "./DashSection";
@@ -11,6 +10,7 @@ import type { AffinitySitterInput } from "@/lib/affinityScore";
 import TrustHaloAvatar from "@/components/sitters/TrustHaloAvatar";
 import OwnerToSitterAffinity from "@/components/matching/OwnerToSitterAffinity";
 import AffinityRing from "@/components/affinity/AffinityRing";
+import { canShowAffinityPercent } from "@/lib/affinityDisplay";
 import { useViewerOwnerForAffinity } from "@/hooks/useViewerOwnerForAffinity";
 import { useAffinityWithShadow } from "@/hooks/useAffinityWithShadow";
 import { supabase } from "@/integrations/supabase/client";
@@ -61,7 +61,7 @@ const FeaturedAffinityBlock = ({
   // Bloc de mise en avant : ne se monte que si le chiffre est fiable et
   // sans incompatibilité déclarée. La candidature elle-même reste listée
   // quoi qu'il arrive (on trie, on n'élimine jamais).
-  if (loading || !full || !full.scoreReliable || full.hasDeclaredIncompatibility) return null;
+  if (loading || !full || !full.scoreReliable || !canShowAffinityPercent(full) || full.hasDeclaredIncompatibility) return null;
   const matched = Array.isArray(full.matched) ? full.matched.slice(0, 3) : [];
   return (
     <div className="mt-3 flex items-center gap-3 rounded-xl border border-border/60 bg-muted/30 p-2.5">
@@ -86,10 +86,7 @@ const AppCard = memo(({ app, sitterProfiles, sitterAffinityProfiles, featured = 
   const navigate = useNavigate();
   const sitter = (app.sitter?.id && sitterProfiles[app.sitter.id]) || app.sitter;
   const sitTitle = app.sit?.title || "";
-  const dateRange = [
-    app.sit?.start_date ? format(new Date(app.sit.start_date), "d MMM", { locale: fr }) : "",
-    app.sit?.end_date ? format(new Date(app.sit.end_date), "d MMM", { locale: fr }) : "",
-  ].filter(Boolean).join(" → ");
+  const dateRange = formatDateRangeFr(app.sit?.start_date, app.sit?.end_date) ?? "";
 
   const sitLink = app.sit_id ? `/sits/${app.sit_id}#candidatures` : null;
 

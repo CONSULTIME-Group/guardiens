@@ -73,8 +73,10 @@ describe("Viviers gardiens, règle définitive : on trie, on ne filtre jamais", 
     expect(hookSrc).toContain("POOL_SCORING_CAP");
     expect(hookSrc).toContain("poolExcludedByCap");
     expect(hookSrc).toContain("console.info");
-    expect(hookSrc).toContain("POOL_READ_CAP");
-    expect(hookSrc).toContain("console.warn");
+    // Lot D0 : lecture paginée complète (fetchSitterPool) et comptage exact.
+    expect(hookSrc).toContain("fetchSitterPool");
+    expect(hookSrc).toContain("countSitterPool");
+    expect(hookSrc).not.toContain("totalPool: pool.length");
   });
 
   it("un gardien sans ligne sitter_profiles est scoré, pas écarté", () => {
@@ -85,7 +87,7 @@ describe("Viviers gardiens, règle définitive : on trie, on ne filtre jamais", 
   it("« gardiens près de chez vous » ne filtre plus la complétude", () => {
     expect(nearbySrc).not.toContain('.gte("profile_completion"');
     expect(nearbySrc).not.toContain(".limit(500)");
-    expect(nearbySrc).toContain("POOL_READ_CAP");
+    expect(nearbySrc).toContain("fetchSitterPool");
   });
 
   it("l'invitation groupée trie par distance avant de plafonner, et trace", () => {

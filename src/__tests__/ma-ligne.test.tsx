@@ -96,7 +96,7 @@ describe("écran à un seul champ", () => {
 
   it("label réel, aide reliée, cibles 44 px", () => {
     renderForm();
-    const field = screen.getByLabelText("Une chose que vous aimez faire pour les gens du coin ?");
+    const field = screen.getByLabelText("Ce que vous aimez faire, en une phrase");
     const helpId = screen.getByText(HELPS_WITH_HELP_TEXT).id;
     expect(field.getAttribute("aria-describedby")).toContain(helpId);
     expect(field).toHaveAttribute("maxLength", "200");
@@ -110,7 +110,7 @@ describe("écran à un seul champ", () => {
   it("un exemple remplit le champ et garde le focus", () => {
     renderForm();
     fireEvent.click(screen.getByRole("button", { name: `Écrire l'exemple : ${HELPS_WITH_EXAMPLES[0]}` }));
-    const field = screen.getByLabelText("Une chose que vous aimez faire pour les gens du coin ?") as HTMLTextAreaElement;
+    const field = screen.getByLabelText("Ce que vous aimez faire, en une phrase") as HTMLTextAreaElement;
     expect(field.value).toBe(HELPS_WITH_EXAMPLES[0]);
     expect(document.activeElement).toBe(field);
     expect(trackEvent).toHaveBeenCalledWith("helps_line_example_clicked", expect.anything());
@@ -118,7 +118,7 @@ describe("écran à un seul champ", () => {
 
   it("message argent à la sortie du champ, retiré à la frappe", () => {
     const { onSave } = renderForm();
-    const field = screen.getByLabelText("Une chose que vous aimez faire pour les gens du coin ?");
+    const field = screen.getByLabelText("Ce que vous aimez faire, en une phrase");
     fireEvent.change(field, { target: { value: "Jardinage 15 euros" } });
     fireEvent.blur(field);
     expect(screen.getByText(HELPS_WITH_MONEY_MESSAGE)).toBeInTheDocument();
@@ -130,7 +130,7 @@ describe("écran à un seul champ", () => {
 
   it("enregistre une fois, confirme et rafraîchit Autour de vous", async () => {
     const { onSave, spy } = renderForm();
-    fireEvent.change(screen.getByLabelText("Une chose que vous aimez faire pour les gens du coin ?"), { target: { value: "Monter un meuble" } });
+    fireEvent.change(screen.getByLabelText("Ce que vous aimez faire, en une phrase"), { target: { value: "Monter un meuble" } });
     const btn = screen.getByRole("button", { name: "Je l'enregistre" });
     fireEvent.click(btn);
     fireEvent.click(btn);

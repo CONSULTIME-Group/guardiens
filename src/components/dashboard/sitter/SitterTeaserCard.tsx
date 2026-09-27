@@ -4,6 +4,7 @@
  * branche uniquement. CTA secondaire, jamais primaire.
  */
 import { Link } from "react-router-dom";
+import { formatDateRangeFr } from "@/lib/formatDateRangeFr";
 import { useRef } from "react";
 import matchEmptyIllustration from "@/assets/illustrations/sitter-match-empty.webp";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
@@ -30,20 +31,8 @@ const DATE_FMT = new Intl.DateTimeFormat("fr-FR", {
   month: "long",
 });
 
-const formatDateRange = (start: string | null, end: string | null): string | null => {
-  if (!start && !end) return null;
-  try {
-    if (start && end) {
-      const s = new Date(start);
-      const e = new Date(end);
-      return `${DATE_FMT.format(s)} au ${DATE_FMT.format(e)}`;
-    }
-    const single = new Date((start ?? end) as string);
-    return DATE_FMT.format(single);
-  } catch {
-    return null;
-  }
-};
+const formatDateRange = (start?: string | null, end?: string | null): string | null =>
+  formatDateRangeFr(start, end);
 
 const speciesLabel = (species: string[]): string | null => {
   if (!species || species.length === 0) return null;

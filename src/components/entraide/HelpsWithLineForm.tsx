@@ -84,7 +84,7 @@ const HelpsWithLineForm = ({ firstName, initialValue = "", onSave, source }: Pro
           Entraide
         </p>
         <h1 id={ids.title} className="mt-3 font-heading text-[1.75rem] font-semibold leading-tight text-foreground sm:text-4xl">
-          Une chose que vous aimez faire pour les gens du coin ?
+          Ce que vous aimez faire, en une phrase
         </h1>
         <p className="mt-3 font-body text-base text-muted-foreground">
           {formatFirstName(firstName)

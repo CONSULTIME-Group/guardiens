@@ -802,7 +802,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="onboarding-helps-with">Une chose que vous aimez faire pour les gens du coin</Label>
+                <Label htmlFor="onboarding-helps-with">Ce que vous aimez faire pour les gens du coin, en une phrase</Label>
                 <Textarea
                   id="onboarding-helps-with"
                   value={helpsWith}

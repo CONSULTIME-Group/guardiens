@@ -8,6 +8,7 @@
  * Aucun CTA primaire : la star de l'écran garde le seul primaire.
  */
 import { Link } from "react-router-dom";
+import { formatDateFr } from "@/lib/formatDateRangeFr";
 import { SectionHeader } from "./SitterMatchSection";
 
 interface NearbyMission {
@@ -35,18 +36,7 @@ interface SitterEntraideSectionProps {
   nearbyHelpersRadiusKm?: number;
 }
 
-const missionDateFmt = new Intl.DateTimeFormat("fr-FR", {
-  day: "numeric",
-  month: "long",
-});
-const formatMissionDate = (d: string | null | undefined): string | null => {
-  if (!d) return null;
-  try {
-    return missionDateFmt.format(new Date(d));
-  } catch {
-    return null;
-  }
-};
+const formatMissionDate = (d: string | null | undefined): string | null => formatDateFr(d);
 
 const statusLabel = (status?: string | null): string | null => {
   if (!status) return null;
@@ -128,7 +118,7 @@ const SitterEntraideSection = ({
         className="text-muted-foreground"
         style={{ fontSize: "13px", lineHeight: 1.5, marginBottom: "14px" }}
       >
-        Un service contre un service, jamais d'argent : un café, des œufs du jardin, un coup de main en retour.
+        Un service contre un service : un café, des œufs du jardin, un coup de main en retour.
       </p>
 
       {/* Deux volets côte à côte sur desktop (refonte rail, août 2026),

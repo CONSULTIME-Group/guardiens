@@ -1,3 +1,4 @@
+import { formatCityLabel } from "@/lib/cityLabel";
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -67,7 +68,7 @@ const MesCoupsDeMain = () => {
     const { data: profiles } = otherIds.length
       ? await supabase.from("profiles").select("id, first_name").in("id", otherIds)
       : { data: [] as Array<{ id: string; first_name: string | null }> };
-    const nameById = new Map((profiles || []).map((p) => [p.id, p.first_name || "Un membre"]));
+    const nameById = new Map((profiles || []).map((p) => [p.id, p.first_name || "un membre"]));
     const feedbacks = answered.data || [];
 
     setRows((missions || []).flatMap((m) => {
@@ -84,7 +85,7 @@ const MesCoupsDeMain = () => {
         close_reason: m.close_reason,
         role,
         other_id: otherId,
-        other_first_name: otherId ? nameById.get(otherId) || "Un membre" : "Un membre",
+        other_first_name: otherId ? nameById.get(otherId) || "un membre" : "un membre",
         word: received?.comment || null,
         answered: feedbacks.some((f) => f.mission_id === m.id && f.giver_id === user.id),
       }];
@@ -126,7 +127,7 @@ const MesCoupsDeMain = () => {
         {rows.map((row) => (
           <div key={row.id} className="rounded-lg border border-border p-4">
             <p className="text-xs font-semibold text-primary">
-              {row.city || "Près de chez vous"}
+              {formatCityLabel(row.city) || "Près de chez vous"}
               {row.role === "owner" ? ", avec " : ", pour "}
               {row.other_first_name}
             </p>

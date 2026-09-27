@@ -13,6 +13,9 @@
  * éditoriales (vouvoiement, pas d'emoji, pas de tiret cadratin).
  */
 import { differenceInDays } from "date-fns";
+import { formatDateRangeFr } from "@/lib/formatDateRangeFr";
+import { nearbyRegisteredSentence } from "@/lib/nearbySittersSentence";
+import { canShowAffinityPercent } from "@/lib/affinityDisplay";
 import { Link } from "react-router-dom";
 import { useRef } from "react";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
@@ -37,16 +40,10 @@ const DATE_FMT = new Intl.DateTimeFormat("fr-FR", {
   month: "long",
 });
 
+// Plage en tête de ligne : majuscule initiale, année toujours présente.
 const formatDateRange = (start?: string | null, end?: string | null): string | null => {
-  if (!start && !end) return null;
-  try {
-    if (start && end) {
-      return `${DATE_FMT.format(new Date(start))} au ${DATE_FMT.format(new Date(end))}`;
-    }
-    return DATE_FMT.format(new Date((start ?? end) as string));
-  } catch {
-    return null;
-  }
+  const r = formatDateRangeFr(start, end);
+  return r ? r.charAt(0).toUpperCase() + r.slice(1) : null;
 };
 
 // Vague 15 : passe par un token CSS pour s'assombrir en dark.
@@ -235,6 +232,7 @@ const ApplicationCard = ({
     !!affinityInput &&
     typeof affinity.score === "number" &&
     affinity.scoreReliable &&
+    canShowAffinityPercent(affinity) &&
     !affinity.hasDeclaredIncompatibility;
 
   return (
@@ -454,14 +452,14 @@ const PublishStar = ({
 }) => {
   const localSignal =
     nearbyCount > 0 && nearbyRadius
-      ? `${nearbyCount} gardien${nearbyCount > 1 ? "s" : ""} vérifié${nearbyCount > 1 ? "s" : ""} à ${nearbyRadius} km attendent une annonce.`
+      ? nearbyRegisteredSentence(nearbyCount, nearbyRadius)
       : null;
 
   return (
     <>
       <SectionHeader
         eyebrow="Votre maison a une histoire"
-        title="Confiez-la à quelqu'un qui vous ressemble."
+        title="Confiez-la à quelqu'un de confiance, près de chez vous."
         subtitle={localSignal ?? undefined}
       />
       <div

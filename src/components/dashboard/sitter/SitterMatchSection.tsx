@@ -1,3 +1,5 @@
+import { formatDateRangeFr } from "@/lib/formatDateRangeFr";
+import { canShowAffinityPercent } from "@/lib/affinityDisplay";
 import matchEmptyIllustration from "@/assets/illustrations/sitter-match-empty.webp";
 
 import { Link } from "react-router-dom";
@@ -38,20 +40,8 @@ const DATE_FMT = new Intl.DateTimeFormat("fr-FR", {
   month: "long",
 });
 
-const formatDateRange = (start: string | null, end: string | null): string | null => {
-  if (!start && !end) return null;
-  try {
-    if (start && end) {
-      const s = new Date(start);
-      const e = new Date(end);
-      return `${DATE_FMT.format(s)} au ${DATE_FMT.format(e)}`;
-    }
-    const single = new Date((start ?? end) as string);
-    return DATE_FMT.format(single);
-  } catch {
-    return null;
-  }
-};
+const formatDateRange = (start?: string | null, end?: string | null): string | null =>
+  formatDateRangeFr(start, end);
 
 const speciesLabel = (species: string[]): string | null => {
   if (!species || species.length === 0) return null;
@@ -272,7 +262,7 @@ const StarCard = ({ sit, onCtaClick }: { sit: AffinitySitCard; onCtaClick?: () =
         className="relative flex items-start"
         style={{ padding: "22px", paddingRight: "34px", gap: "22px" }}
       >
-        {sit.affinity && <AffinityRing score={sit.affinity.score} result={sit.affinity} />}
+        {sit.affinity && canShowAffinityPercent(sit.affinity) && <AffinityRing score={sit.affinity.score} result={sit.affinity} />}
 
         <div className="min-w-0 flex-1">
           <h3
@@ -387,7 +377,7 @@ const CompactRow = ({
         gap: "14px",
       }}
     >
-      {showScore && sit.affinity && (
+      {showScore && sit.affinity && canShowAffinityPercent(sit.affinity) && (
         <span
           className="rounded-full bg-secondary text-secondary-foreground shrink-0"
           style={{

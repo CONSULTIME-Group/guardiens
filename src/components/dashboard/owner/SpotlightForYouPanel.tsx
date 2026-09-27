@@ -21,10 +21,11 @@ import { useOwnerTopAffinitySitters, type AffinitySitterCard } from "@/hooks/use
 import { useOwnerProfile } from "@/hooks/useOwnerProfile";
 import { pickDiscriminatingChips } from "@/components/dashboard/shared/discriminatingChips";
 import { trackEvent } from "@/lib/analytics";
+import { canShowAffinityPercent, AFFINITY_AFTER_PUBLISH_LINE } from "@/lib/affinityDisplay";
 import { SectionHeader } from "@/components/dashboard/sitter/SitterMatchSection";
 
 export default function SpotlightForYouPanel() {
-  const { topSitters, totalPool, isLoading } = useOwnerTopAffinitySitters();
+  const { topSitters, totalPool, hasPublishedSit, isLoading } = useOwnerTopAffinitySitters();
   const { data: owner } = useOwnerProfile();
   const seenRef = useRef(false);
 
@@ -88,7 +89,11 @@ export default function SpotlightForYouPanel() {
             ? `1 gardien vous correspond${city ? ` à ${city}` : ""}`
             : `${topSitters.length} gardiens qui vous correspondent${city ? ` à ${city}` : ""}`
         }
-        subtitle="Score d'affinité calculé automatiquement. Publiez une annonce pour qu'ils puissent candidater."
+        subtitle={
+          topSitters.some((t) => canShowAffinityPercent(t.affinity))
+            ? "Score d'affinité calculé automatiquement. Publiez une annonce pour qu'ils puissent candidater."
+            : "Publiez une annonce pour qu'ils puissent candidater."
+        }
       />
 
       <ul className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
@@ -98,6 +103,7 @@ export default function SpotlightForYouPanel() {
             sitter={s}
             position={index}
             chips={chipsBySitter.get(s.id) ?? []}
+            hasPublishedSit={hasPublishedSit}
           />
         ))}
       </ul>
@@ -126,7 +132,9 @@ export default function SpotlightForYouPanel() {
   );
 }
 
-function SitterCard({ sitter, position, chips }: { sitter: AffinitySitterCard; position: number; chips: string[] }) {
+function SitterCard({ sitter, position, chips, hasPublishedSit }: { sitter: AffinitySitterCard; position: number; chips: string[]; hasPublishedSit: boolean }) {
+  // Lot D0 : pourcentage seulement sur au moins 4 critères comparés.
+  const showPercent = canShowAffinityPercent(sitter.affinity);
   const initial = (sitter.first_name || "?").slice(0, 1).toUpperCase();
 
   const onClick = () => {
@@ -172,11 +180,15 @@ function SitterCard({ sitter, position, chips }: { sitter: AffinitySitterCard; p
             )}
           </div>
         </div>
-        <Badge variant="secondary" className="mb-2">
-          {/* Alignement chiffre/tri (23/08/2026) : côté propriétaire, le
-              chiffre affiché EST le sortScore qui ordonne la liste. */}
-          {sitter.affinity.sortScore} % d'affinité
-        </Badge>
+        {showPercent ? (
+          <Badge variant="secondary" className="mb-2">
+            {/* Alignement chiffre/tri (23/08/2026) : côté propriétaire, le
+                chiffre affiché EST le sortScore qui ordonne la liste. */}
+            {sitter.affinity.sortScore} % d'affinité
+          </Badge>
+        ) : !hasPublishedSit ? (
+          <p className="mb-2 text-xs text-muted-foreground">{AFFINITY_AFTER_PUBLISH_LINE}</p>
+        ) : null}
         {chips.length > 0 && (
           <ul className="text-xs text-muted-foreground space-y-0.5 mt-1">
             {chips.map((c) => (
