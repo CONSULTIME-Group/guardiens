@@ -9,7 +9,6 @@
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import {
-  HELPS_WITH_TOKEN_ACTION,
   RATE_LIMIT_PER_IP,
   RATE_LIMIT_PER_TOKEN,
   RATE_LIMIT_WINDOW_MINUTES,

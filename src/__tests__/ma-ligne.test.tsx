@@ -18,23 +18,23 @@ import HelpsWithLineForm, {
 
 const read = (p: string) => readFileSync(p, "utf8");
 const now = new Date("2026-09-27T10:00:00Z");
-const base = { action: HELPS_WITH_TOKEN_ACTION, helper_id: "u1", used_at: null, expires_at: "2026-10-20T00:00:00Z" };
+const base = { profile_id: "u1", revoked_at: null, expires_at: "2026-10-20T00:00:00Z" };
 
 describe("jeton de la ligne d'entraide", () => {
   it("valide, expiré, révoqué", () => {
     expect(tokenState(base, now)).toBe("valid");
     expect(tokenState({ ...base, expires_at: "2026-09-01T00:00:00Z" }, now)).toBe("expired");
-    expect(tokenState({ ...base, used_at: "2026-09-20T00:00:00Z" }, now)).toBe("revoked");
+    expect(tokenState({ ...base, revoked_at: "2026-09-20T00:00:00Z" }, now)).toBe("revoked");
   });
   it("refuse un jeton d'une autre portée ou absent", () => {
-    expect(tokenState({ ...base, action: "can_help" }, now)).toBe("invalid");
+    expect(tokenState({ ...base, profile_id: null }, now)).toBe("invalid");
     expect(tokenState(null, now)).toBe("invalid");
     expect(isWellFormedToken("abc")).toBe(false);
     expect(isWellFormedToken("a".repeat(64))).toBe(true);
   });
   it("l'écriture cible le porteur du jeton, jamais un identifiant du client", () => {
     const src = read("supabase/functions/ma-ligne/index.ts");
-    expect(src).toContain('userId = row!.helper_id');
+    expect(src).toContain('userId = row!.profile_id');
     expect(src).not.toMatch(/body\?\.(user_id|userId|helper_id)/);
     expect(src).toContain('.update({ helps_with: check.value');
   });

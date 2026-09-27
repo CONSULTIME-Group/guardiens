@@ -1,7 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { resendFetch } from "../_shared/resend-guard.ts";
 import { SENDER_FROM, REPLY_TO_ADDRESS } from "../_shared/sender-address.ts";
-import { HELPS_WITH_TOKEN_ACTION, HELPS_WITH_TOKEN_DAYS, lineUrlForToken } from "../_shared/ma-ligne-logic.ts";
+import { HELPS_WITH_TOKEN_DAYS, lineUrlForToken } from "../_shared/ma-ligne-logic.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
