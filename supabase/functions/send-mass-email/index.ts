@@ -1,6 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { resendFetch } from "../_shared/resend-guard.ts";
 import { SENDER_FROM, REPLY_TO_ADDRESS } from "../_shared/sender-address.ts";
+import { HELPS_WITH_TOKEN_ACTION, HELPS_WITH_TOKEN_DAYS, lineUrlForToken } from "../_shared/ma-ligne-logic.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -37,7 +38,17 @@ interface MassEmailFilters {
   min_helps_with_profiles?: number;
   /** Gabarit transactionnel utilisé pour le rendu, sans effet sur le ciblage. */
   template_name?: string;
+  /** Relance : seulement les destinataires d'une campagne donnée. */
+  received_mass_email_id?: string;
+  /** Relance : ceux qui ont ouvert la campagne passent en tête. */
+  prioritize_opened?: boolean;
 }
+
+/** Gabarits dont le bouton porte un lien à jeton vers /ma-ligne/:token. */
+const LINE_TOKEN_TEMPLATES: Record<string, string> = {
+  "entraide-ligne-helps-with": "entraide_ligne",
+  "entraide-ligne-relance": "entraide_ligne_relance",
+};
 
 
 const UNSUB_TOKEN_PLACEHOLDER = "__UNSUB_TOKEN__";
@@ -325,6 +336,31 @@ async function fetchTargetedProfiles(
 
   // Filtre abonnés actifs (cross-table)
   let result: { id: string; email: string; first_name: string | null }[] = all;
+
+  // Relance : destinataires d'une campagne précise, ouvreurs en tête.
+  if (filters.received_mass_email_id) {
+    const opened = new Set<string>();
+    const received = new Set<string>();
+    for (let from = 0; ; from += 1000) {
+      const { data, error } = await serviceClient
+        .from("mass_email_sends")
+        .select("recipient_email, first_opened_at")
+        .eq("mass_email_id", filters.received_mass_email_id)
+        .range(from, from + 999);
+      if (error) throw new Error(`received filter failed: ${error.message}`);
+      for (const row of (data ?? []) as any[]) {
+        const e = String(row.recipient_email ?? "").toLowerCase();
+        received.add(e);
+        if (row.first_opened_at) opened.add(e);
+      }
+      if (!data || data.length < 1000) break;
+    }
+    result = result.filter((p) => received.has(p.email.toLowerCase()));
+    if (filters.prioritize_opened) {
+      result = [...result].sort((a, b) =>
+        Number(opened.has(b.email.toLowerCase())) - Number(opened.has(a.email.toLowerCase())));
+    }
+  }
 
   // Exclusion des comptes administrateurs
   if (filters.exclude_admins) {
@@ -749,8 +785,28 @@ Deno.serve(async (req) => {
       }
 
       const firstNameByEmail = new Map<string, string>();
+      const idByEmail = new Map<string, string>();
       for (const profile of profiles) {
         firstNameByEmail.set(profile.email.toLowerCase(), (profile.first_name ?? "").trim());
+        idByEmail.set(profile.email.toLowerCase(), profile.id);
+      }
+
+      // Lien à jeton /ma-ligne/:token, 30 jours, réutilisable, un par destinataire.
+      const lineCampaign = filters.template_name ? LINE_TOKEN_TEMPLATES[filters.template_name] : undefined;
+      const lineUrlByEmail = new Map<string, string>();
+      if (lineCampaign) {
+        const expires = new Date(Date.now() + HELPS_WITH_TOKEN_DAYS * 86400000).toISOString();
+        const rows = remainingRecipients.flatMap((email) => {
+          const helperId = idByEmail.get(email.toLowerCase());
+          if (!helperId) return [];
+          const token = generateToken();
+          lineUrlByEmail.set(email.toLowerCase(), lineUrlForToken(token, lineCampaign));
+          return [{ token, helper_id: helperId, action: HELPS_WITH_TOKEN_ACTION, mission_id: null, expires_at: expires }];
+        });
+        for (let i = 0; i < rows.length; i += 500) {
+          const { error } = await serviceClient.from("mission_action_tokens").insert(rows.slice(i, i + 500));
+          if (error) throw new Error(`line token mint failed: ${error.message}`);
+        }
       }
 
       let enqueued = 0;
@@ -764,7 +820,10 @@ Deno.serve(async (req) => {
             template_name: templateName,
             idempotency_key: `mass-${campaignId}-${email.toLowerCase()}`,
             template_data: templateName
-              ? { firstName: firstNameByEmail.get(email.toLowerCase()) ?? "" }
+              ? {
+                  firstName: firstNameByEmail.get(email.toLowerCase()) ?? "",
+                  ...(lineUrlByEmail.has(email.toLowerCase()) ? { lineUrl: lineUrlByEmail.get(email.toLowerCase()) } : {}),
+                }
               : {},
           } as any,
         });

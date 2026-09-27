@@ -7,13 +7,14 @@ import { BrandHeader } from './_brand-header.tsx'
 import { LegalFooter } from './_legal-footer.tsx'
 import type { TemplateEntry } from './registry.ts'
 
-// L'ancre ouvre directement le bloc « Ce que je propose » du tableau de bord.
-const CTA_URL =
-  'https://guardiens.fr/dashboard?utm_source=email&utm_medium=email&utm_campaign=entraide_ligne#ce-que-je-propose'
+// Le lien à jeton (/ma-ligne/:token) est fourni par l'envoi. Repli : écran
+// /ma-ligne, qui demande la connexion.
+const FALLBACK_URL =
+  'https://guardiens.fr/ma-ligne?utm_source=email&utm_medium=email&utm_campaign=entraide_ligne'
 
-interface Props { firstName?: string }
+interface Props { firstName?: string; lineUrl?: string }
 
-const Email = ({ firstName }: Props) => {
+const Email = ({ firstName, lineUrl }: Props) => {
   const name = (firstName || '').trim()
   return (
     <Html lang="fr" dir="ltr">
@@ -51,7 +52,7 @@ const Email = ({ firstName }: Props) => {
             écrire.
           </Text>
           <Section style={ctaSection}>
-            <Button style={button} href={CTA_URL}>J'écris ma ligne</Button>
+            <Button style={button} href={lineUrl || FALLBACK_URL}>J'écris ma ligne</Button>
           </Section>
           <Text style={text}>
             Se sentir utile, échanger quelques mots, rencontrer quelqu'un : c'est aussi une

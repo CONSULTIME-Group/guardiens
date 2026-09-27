@@ -127,11 +127,11 @@ describe("textes envoyés au demandeur", () => {
 });
 
 describe("ancre du tableau de bord", () => {
-  it("l'email pointe sur l'ancre du bloc", () => {
+  it("l'email pointe sur l'écran à un seul champ", () => {
     expect(HELPS_WITH_ANCHOR).toBe("ce-que-je-propose");
     expect(
       read("supabase/functions/_shared/transactional-email-templates/entraide-ligne-helps-with.tsx"),
-    ).toContain("#ce-que-je-propose");
+    ).toContain("https://guardiens.fr/ma-ligne");
   });
 
   it("la connexion conserve le fragment demandé", () => {
