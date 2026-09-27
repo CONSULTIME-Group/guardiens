@@ -1,3 +1,4 @@
+import { formatRatingFr } from "@/lib/formatRatingFr";
 import { useState, useEffect, useRef } from "react";
 import { splitReviewsByRole, sitterReviewsHeading } from "@/lib/publicProfileReviews";
 import { getMemberAvatarUrl, getMemberPublicFirstName, getMemberInitial } from "@/lib/memberUtils";
@@ -1333,7 +1334,7 @@ export default function PublicSitterProfile() {
   // Title structuré : nom · ville · signaux de confiance, limité à ~60 caractères.
   const trustSignals: string[] = [];
   if (profile?.identity_verified) trustSignals.push("identité vérifiée");
-  if (avgRating > 0 && reviewCount > 0) trustSignals.push(`${avgRating.toFixed(1)} ★`);
+  if (avgRating > 0 && reviewCount > 0) trustSignals.push(`${formatRatingFr(avgRating)} ★`);
   const { firstName, pageTitle } = buildPublicSitterProfilePresentation({
     firstName: profile?.first_name,
     city,
@@ -1345,7 +1346,7 @@ export default function PublicSitterProfile() {
   const trustForDesc = [
     profile?.identity_verified ? "identité vérifiée" : null,
     completedSits > 0 ? `${completedSits} garde${completedSits > 1 ? 's' : ''}` : null,
-    reviewCount > 0 ? `${avgRating.toFixed(1)}/5 (${reviewCount} avis)` : null,
+    reviewCount > 0 ? `${formatRatingFr(avgRating)}/5 (${reviewCount} avis)` : null,
   ].filter(Boolean).join(" · ");
   const descBase = `${firstName} garde vos ${animalsForDesc} ${cityForDesc}.`;
   const pageDesc = (descBase + (trustForDesc ? ` ${trustForDesc}.` : '')).slice(0, 160);
@@ -1766,7 +1767,7 @@ export default function PublicSitterProfile() {
       )}
 
       {/* ── SÉPARATEUR ── */}
-      {availableTabs <= 1 && <hr className="border-border max-w-5xl mx-auto" />}
+      {availableTabs <= 1 && activeTab !== "gardien" && <hr className="border-border max-w-5xl mx-auto" />}
 
       {/* ── ONGLET GARDIEN, fiche allégée (lot F1) ───────────────────── */}
       {activeTab === 'gardien' && (() => {
@@ -1788,7 +1789,7 @@ export default function PublicSitterProfile() {
         // Alma : UNE phrase pertinente, dérivée de données réelles uniquement.
         let almaPhrase: string | null = null;
         if (avgRating >= 4.5 && reviewCount >= 3) {
-          almaPhrase = `${firstName} rassure : ${reviewCount} propriétaires lui donnent ${avgRating.toFixed(1)} sur 5.`;
+          almaPhrase = `${firstName} rassure : ${reviewCount} propriétaires lui donnent ${formatRatingFr(avgRating)} sur 5.`;
         } else if (isAvailable) {
           almaPhrase = `${firstName} est disponible en ce moment, c'est le bon moment pour prendre contact.`;
         } else if (completedSits >= 3) {
@@ -1846,7 +1847,7 @@ export default function PublicSitterProfile() {
           { label: "Durée", value: durationLabel },
           { label: "Avant la garde", value: meetingPreferenceLabel(sitterProfile?.meeting_preference) },
           { label: "Expérience", value: experienceLabel },
-          { label: "Avis", value: sitterRoleCount > 0 ? `★ ${sitterRoleAvg.toFixed(1)} (${sitterRoleCount})` : "" },
+          { label: "Avis", value: sitterRoleCount > 0 ? `★ ${formatRatingFr(sitterRoleAvg)} (${sitterRoleCount})` : "" },
         ].filter((f) => f.value);
 
         const firstSitDate = gardeReviews
@@ -2098,7 +2099,7 @@ export default function PublicSitterProfile() {
         //   (ownerAvg est déjà calculé au niveau composant à partir des avis dérivés.)
         let proprioAlmaPhrase: string | null = null;
         if (ownerAvg >= 4.5 && ownerReviews.length >= 3) {
-          proprioAlmaPhrase = `${firstName} rassure : ${ownerReviews.length} gardiens lui donnent ${ownerAvg.toFixed(1)} sur 5.`;
+          proprioAlmaPhrase = `${firstName} rassure : ${ownerReviews.length} gardiens lui donnent ${formatRatingFr(ownerAvg)} sur 5.`;
         } else if (pets.length > 0 && ownerSitsTotal > 0) {
           proprioAlmaPhrase = `${firstName} a déjà accueilli des gardiens pour ${pets.length > 1 ? 'ses animaux' : 'son animal'}.`;
         } else if (profile?.identity_verified) {
@@ -2458,7 +2459,7 @@ export default function PublicSitterProfile() {
                   </h2>
                   {ownerReviews.length > 0 && (
                     <p className="text-sm text-muted-foreground mt-1">
-                      {ownerReviews.length} retour{ownerReviews.length > 1 ? 's' : ''} · moyenne {ownerAvg.toFixed(1)}★
+                      {ownerReviews.length} retour{ownerReviews.length > 1 ? 's' : ''} · moyenne {formatRatingFr(ownerAvg)}★
                     </p>
                   )}
                 </div>

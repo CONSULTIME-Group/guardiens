@@ -1,3 +1,4 @@
+import { formatRatingFr } from "@/lib/formatRatingFr";
 /**
  * Avis d'une fiche publique : répartition par rôle (fournie par la fonction
  * serveur public_profile_reviews) et titre de la section Avis.
@@ -25,6 +26,6 @@ export function averageRating(reviews: RoleReview[]): number {
 
 export function sitterReviewsHeading(count: number, avg: number, firstName: string) {
   return count > 0
-    ? { title: "Ce que les propriétaires racontent.", summary: `${count} retour${count > 1 ? "s" : ""} · moyenne ${avg.toFixed(1)}★` }
+    ? { title: "Ce que les propriétaires racontent.", summary: `${count} retour${count > 1 ? "s" : ""} · moyenne ${formatRatingFr(avg)}★` }
     : { title: `${firstName} prépare sa première garde.`, summary: null };
 }
