@@ -20,6 +20,7 @@ const MutualAidRadiusLine = ({ className = "" }: { className?: string }) => {
     if (!user?.id) return;
     let active = true;
     void (async () => {
+      try {
       const { data: profile } = await supabase
         .from("profiles")
         .select("available_for_help")
@@ -28,6 +29,9 @@ const MutualAidRadiusLine = ({ className = "" }: { className?: string }) => {
       if (!profile?.available_for_help) return;
       const { data } = await supabase.rpc("my_mutual_aid_radius_km");
       if (active && typeof data === "number") setKm(data);
+      } catch {
+        // Ligne informative : un échec de lecture la laisse simplement absente.
+      }
     })();
     return () => { active = false; };
   }, [user?.id]);
