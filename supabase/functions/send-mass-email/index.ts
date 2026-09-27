@@ -796,15 +796,35 @@ Deno.serve(async (req) => {
       const lineUrlByEmail = new Map<string, string>();
       if (lineCampaign) {
         const expires = new Date(Date.now() + HELPS_WITH_TOKEN_DAYS * 86400000).toISOString();
-        const rows = remainingRecipients.flatMap((email) => {
-          const helperId = idByEmail.get(email.toLowerCase());
-          if (!helperId) return [];
-          const token = generateToken();
+        const profileIds = remainingRecipients
+          .map((email) => idByEmail.get(email.toLowerCase()))
+          .filter((id): id is string => !!id);
+        // Un seul jeton actif par profil : réutiliser le jeton valide existant.
+        const activeByProfile = new Map<string, string>();
+        for (let i = 0; i < profileIds.length; i += 500) {
+          const { data, error } = await serviceClient
+            .from("helps_line_tokens")
+            .select("profile_id, token")
+            .in("profile_id", profileIds.slice(i, i + 500))
+            .is("revoked_at", null)
+            .gt("expires_at", new Date().toISOString());
+          if (error) throw new Error(`line token lookup failed: ${error.message}`);
+          for (const r of data ?? []) activeByProfile.set(r.profile_id as string, r.token as string);
+        }
+        const rows: Array<{ token: string; profile_id: string; expires_at: string }> = [];
+        for (const email of remainingRecipients) {
+          const profileId = idByEmail.get(email.toLowerCase());
+          if (!profileId) continue;
+          let token = activeByProfile.get(profileId);
+          if (!token) {
+            token = generateToken();
+            activeByProfile.set(profileId, token);
+            rows.push({ token, profile_id: profileId, expires_at: expires });
+          }
           lineUrlByEmail.set(email.toLowerCase(), lineUrlForToken(token, lineCampaign));
-          return [{ token, helper_id: helperId, action: HELPS_WITH_TOKEN_ACTION, mission_id: null, expires_at: expires }];
-        });
+        }
         for (let i = 0; i < rows.length; i += 500) {
-          const { error } = await serviceClient.from("mission_action_tokens").insert(rows.slice(i, i + 500));
+          const { error } = await serviceClient.from("helps_line_tokens").insert(rows.slice(i, i + 500));
           if (error) throw new Error(`line token mint failed: ${error.message}`);
         }
       }

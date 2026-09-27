@@ -2,9 +2,9 @@
  * ma-ligne
  *
  * Écriture de `profiles.helps_with` en un écran.
- *  - Avec jeton (`mission_action_tokens`, action « helps_with ») : sans connexion.
+ *  - Avec jeton (`helps_line_tokens`) : sans connexion.
  *  - Sans jeton : membre connecté, identifié par son JWT.
- * Le jeton est réutilisable tant qu'il est valide (30 jours), révocable via used_at.
+ * Le jeton est réutilisable tant qu'il est valide (30 jours), révocable via revoked_at.
  * Seul le prénom est renvoyé au client.
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
@@ -77,14 +77,13 @@ Deno.serve(async (req) => {
         return json({ ok: false, reason: "rate_limited" }, 429);
       }
       const { data: row } = await service
-        .from("mission_action_tokens")
-        .select("action, helper_id, expires_at, used_at")
+        .from("helps_line_tokens")
+        .select("profile_id, expires_at, revoked_at")
         .eq("token", rawToken)
-        .eq("action", HELPS_WITH_TOKEN_ACTION)
         .maybeSingle();
       const state = tokenState(row);
       if (state !== "valid") return json({ ok: false, state });
-      userId = row!.helper_id as string;
+      userId = row!.profile_id as string;
     } else {
       const auth = req.headers.get("Authorization") ?? "";
       const jwt = auth.replace(/^Bearer\s+/i, "");
