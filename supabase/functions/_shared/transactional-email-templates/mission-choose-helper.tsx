@@ -43,7 +43,7 @@ const MissionChooseHelperEmail = ({ ownerFirstName, helperFirstName, missionTitl
               </Button>
             </Section>
           )}
-          <Text style={muted}>Le lien reste valable 7 jours. Vous pouvez aussi choisir depuis votre messagerie.</Text>
+          <Text style={muted}>Le lien reste valable 14 jours. Vous pouvez aussi choisir depuis votre messagerie.</Text>
           <Hr style={hr} />
           <LegalFooter
             purpose="le suivi des coups de main entre membres"
