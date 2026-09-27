@@ -38,7 +38,7 @@ const petSignature = (list: readonly Pet[]): string =>
     list.map((p) => [p.id, p.name, p.species, p.breed ?? null, p.age ?? null, p.photo_url ?? null]),
   );
 
-const OwnerFamilySection = ({ pets, propertyIds, onPetsChanged, getNextSitForPet }: OwnerFamilySectionProps) => {
+const OwnerFamilySection = ({ pets, propertyIds, onPetsChanged }: OwnerFamilySectionProps) => {
   const [editorPropertyId, setEditorPropertyId] = useState<string | null>(null);
   const baselineRef = useRef<string | null>(null);
 
