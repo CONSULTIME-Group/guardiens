@@ -15,6 +15,8 @@ import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import AffinityRing from "@/components/affinity/AffinityRing";
 import { useEffect, useRef } from "react";
 import { trackEvent } from "@/lib/analytics";
+import { formatDateRangeFr } from "@/lib/formatDateRangeFr";
+import { canShowAffinityPercent } from "@/lib/affinityDisplay";
 import { petSpeciesLabel } from "@/lib/petLabels";
 import type { AffinitySitCard } from "@/hooks/useSitterTopAffinitySits";
 
@@ -176,14 +178,14 @@ const SitterFirstNBA = ({ sits, mode = "affinity", scopeLabel }: Props) => {
                             <span aria-hidden className="opacity-40">·</span>
                           )}
                           <span>
-                            {fmt(sit.start_date)} → {fmt(sit.end_date)}
+                            {formatDateRangeFr(sit.start_date, sit.end_date)}
                           </span>
                         </>
                       )}
                     </div>
                     {sit.affinity && typeof sit.affinity.score === "number" ? (
                       <div className="mt-3 flex items-center gap-3">
-                        <AffinityRing score={sit.affinity.score} size={72} />
+                        {canShowAffinityPercent(sit.affinity) && <AffinityRing score={sit.affinity.score} size={72} />}
                         <div className="flex-1 min-w-0">
                           {sit.affinity.matched && sit.affinity.matched.length > 0 ? (
                             <p className="text-[12px] leading-snug text-muted-foreground line-clamp-2">
