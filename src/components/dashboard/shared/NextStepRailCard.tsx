@@ -14,13 +14,15 @@ import type { RailNextStep } from "@/lib/dashboardNextStep";
 
 interface NextStepRailCardProps {
   step: RailNextStep;
+  /** Lot D1 : rayon 18 et titre 19 px côté propriétaire. Défaut inchangé. */
+  variant?: "default" | "owner";
 }
 
-const NextStepRailCard = ({ step }: NextStepRailCardProps) => (
+const NextStepRailCard = ({ step, variant = "default" }: NextStepRailCardProps) => (
   <article
     className="bg-terra-soft border border-terra-border"
     style={{
-      borderRadius: "20px",
+      borderRadius: variant === "owner" ? "18px" : "20px",
       padding: "22px",
       boxShadow: "0 1px 2px rgba(29,27,22,0.04), 0 8px 24px rgba(29,27,22,0.05)",
     }}
@@ -39,7 +41,7 @@ const NextStepRailCard = ({ step }: NextStepRailCardProps) => (
 
     <h3
       className="font-heading text-foreground mt-[10px]"
-      style={{ fontSize: "17px", fontWeight: 600, lineHeight: 1.3 }}
+      style={{ fontSize: variant === "owner" ? "19px" : "17px", fontWeight: 600, lineHeight: 1.3 }}
     >
       {step.title}
     </h3>

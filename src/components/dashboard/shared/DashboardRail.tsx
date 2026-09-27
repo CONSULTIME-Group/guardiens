@@ -13,14 +13,16 @@ import { useRailFitsViewport } from "@/hooks/useRailFitsViewport";
 
 interface DashboardRailProps {
   children: ReactNode;
+  /** Lot D1 (propriétaire) : colonne fixe 328 px, blocs rapprochés. Défaut inchangé. */
+  layout?: "default" | "compact";
 }
 
-const DashboardRail = ({ children }: DashboardRailProps) => {
+const DashboardRail = ({ children, layout = "default" }: DashboardRailProps) => {
   const { ref, fits } = useRailFitsViewport<HTMLElement>();
   return (
     <aside
       ref={ref}
-      className={`mt-[52px] lg:mt-0 space-y-[34px] lg:col-span-4 lg:self-start ${
+      className={`${layout === "compact" ? "space-y-[22px] lg:self-start" : "mt-[52px] lg:mt-0 space-y-[34px] lg:col-span-4 lg:self-start"} ${
         fits ? "lg:sticky lg:top-20" : ""
       }`}
     >
