@@ -48,7 +48,7 @@ describe("test fidèle depuis l'admin", () => {
   });
 });
 
-describe("« 3 minutes, c'est tout » supprimé", () => {
+describe("ligne de réassurance du gabarit générique supprimée", () => {
   const walk = (d: string): string[] => readdirSync(d).flatMap((f) => {
     const p = join(d, f);
     return statSync(p).isDirectory() ? walk(p) : /\.(tsx?|mjs|js)$/.test(p) ? [p] : [];
