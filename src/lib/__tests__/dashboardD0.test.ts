@@ -17,7 +17,7 @@ describe("formatDateRangeFr", () => {
     expect(formatDateRangeFr("2026-10-01", "2026-10-02", today)).toBe("du 1er au 2 octobre 2026");
   });
   it("sans décalage de fuseau, dates seules et vides", () => {
-    expect(formatDateRangeFr("2026-10-01T00:00:00", "2026-10-02", today)).toBe("du 1er octobre au 2 octobre 2026");
+    expect(formatDateRangeFr("2026-10-01T00:00:00", "2026-10-02", today)).toBe("du 1er au 2 octobre 2026");
     expect(formatDateRangeFr("2027-01-05", null, today)).toBe("le 5 janvier 2027");
     expect(formatDateRangeFr(null, null, today)).toBeNull();
     expect(formatDateFr("2026-10-04", today)).toBe("4 octobre");
