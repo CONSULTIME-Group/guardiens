@@ -1,3 +1,4 @@
+import { formatDateRangeFr } from "@/lib/formatDateRangeFr";
 import { memo, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
@@ -86,10 +87,7 @@ const AppCard = memo(({ app, sitterProfiles, sitterAffinityProfiles, featured = 
   const navigate = useNavigate();
   const sitter = (app.sitter?.id && sitterProfiles[app.sitter.id]) || app.sitter;
   const sitTitle = app.sit?.title || "";
-  const dateRange = [
-    app.sit?.start_date ? format(new Date(app.sit.start_date), "d MMM", { locale: fr }) : "",
-    app.sit?.end_date ? format(new Date(app.sit.end_date), "d MMM", { locale: fr }) : "",
-  ].filter(Boolean).join(" → ");
+  const dateRange = formatDateRangeFr(app.sit?.start_date, app.sit?.end_date) ?? "";
 
   const sitLink = app.sit_id ? `/sits/${app.sit_id}#candidatures` : null;
 

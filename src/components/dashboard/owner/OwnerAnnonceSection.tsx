@@ -6,6 +6,7 @@
  * Si aucune annonce active : rien ne s'affiche (la star d'état "publier" couvre déjà).
  */
 import { Link } from "react-router-dom";
+import { formatDateRangeFr } from "@/lib/formatDateRangeFr";
 import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
@@ -28,15 +29,10 @@ const humanStatus = (status: string): string | null => {
   }
 };
 
+// Plage en tête de ligne : majuscule initiale, année toujours présente.
 const formatDateRange = (start?: string | null, end?: string | null): string | null => {
-  if (!start && !end) return null;
-  try {
-    const s = start ? format(new Date(start), "d MMM", { locale: fr }) : "";
-    const e = end ? format(new Date(end), "d MMM yyyy", { locale: fr }) : "";
-    return [s, e].filter(Boolean).join(" au ");
-  } catch {
-    return null;
-  }
+  const r = formatDateRangeFr(start, end);
+  return r ? r.charAt(0).toUpperCase() + r.slice(1) : null;
 };
 
 interface OwnerAnnonceSectionProps {

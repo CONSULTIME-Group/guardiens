@@ -34,15 +34,15 @@ const HelpsWithReminder = () => {
       <div className="flex flex-col gap-3 rounded-lg border border-primary/20 bg-primary/5 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
         <div>
           <h2 id="helps-with-title" className="font-heading text-lg font-semibold text-foreground">
-            Une chose que vous aimez faire pour les gens du coin ?
+            Rendre service fait du bien. À vous aussi.
           </h2>
-          <p className="mt-1 text-sm text-muted-foreground">Une ligne suffit, trente secondes.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Dites en une phrase ce que vous aimez faire : les gens du coin vous trouveront.</p>
         </div>
         <Link
           to="/ma-ligne"
           className="inline-flex min-h-[44px] items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground hover:opacity-90"
         >
-          J'écris ma ligne
+          Je complète ma carte
         </Link>
       </div>
     </section>

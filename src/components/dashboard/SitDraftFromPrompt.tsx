@@ -277,7 +277,7 @@ export default function SitDraftFromPrompt({ secondary = false, demoted = false,
           </p>
           {showCreateFirstAlma && (
             <p className="text-sm text-foreground/90 mt-2 leading-relaxed">
-              Votre annonce est ce qui déclenche tout. Sans elle, les gardiens de votre secteur ne peuvent pas se proposer.
+              Votre annonce est ce qui déclenche tout : c'est elle qui permet aux gardiens de votre secteur de se proposer.
             </p>
           )}
         </div>
