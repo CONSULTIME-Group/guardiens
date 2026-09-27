@@ -12,8 +12,9 @@ describe("formatDateRangeFr", () => {
   it("année sur le début si elle diffère", () => {
     expect(formatDateRangeFr("2026-12-20", "2027-01-03", today)).toBe("du 20 décembre 2026 au 3 janvier 2027");
   });
-  it("garde d'août 2027 : l'année est visible", () => {
-    expect(formatDateRangeFr("2027-08-13", "2027-08-30", today)).toBe("du 13 août au 30 août 2027");
+  it("garde d'août 2027 : même mois, un seul mois écrit, l'année visible (lot D1)", () => {
+    expect(formatDateRangeFr("2027-08-13", "2027-08-30", today)).toBe("du 13 au 30 août 2027");
+    expect(formatDateRangeFr("2026-10-01", "2026-10-02", today)).toBe("du 1er au 2 octobre 2026");
   });
   it("sans décalage de fuseau, dates seules et vides", () => {
     expect(formatDateRangeFr("2026-10-01T00:00:00", "2026-10-02", today)).toBe("du 1er octobre au 2 octobre 2026");

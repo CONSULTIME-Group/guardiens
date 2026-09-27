@@ -45,7 +45,11 @@ export function formatDateRangeFr(
 ): string | null {
   const s = parseYmd(start);
   const e = parseYmd(end);
-  if (s && e) return `du ${s.y === e.y ? dm(s) : dmy(s)} au ${dmy(e)}`;
+  if (s && e) {
+    // Lot D1 : même mois et même année, « du 13 au 30 août 2027 ».
+    if (s.y === e.y && s.m === e.m) return `du ${dayLabel(s.d)} au ${dmy(e)}`;
+    return `du ${s.y === e.y ? dm(s) : dmy(s)} au ${dmy(e)}`;
+  }
   const one = s ?? e;
   if (!one) return null;
   void today;
