@@ -5,7 +5,7 @@ export function ConfianceSection() {
   const pillars = [
     ["La proximité réelle", "Les dix personnes les plus proches reçoivent votre besoin, et la carte montre qui vit autour de vous."],
     ["La rencontre en personne", "Nous vous conseillons de vous voir avant une garde, autour d'un café ou d'une visite. Après un coup de main, nous vous demandons si la rencontre a eu lieu."],
-  ["La confiance vérifiée", "Écusson « Identité vérifiée », avis laissés après chaque échange. Guardiens est gratuit pour les propriétaires."],
+  ["La confiance vérifiée", "Écusson « Identité vérifiée » et avis croisés publiés après les gardes. Pour les propriétaires, Guardiens est offert."],
   ];
 
   return (

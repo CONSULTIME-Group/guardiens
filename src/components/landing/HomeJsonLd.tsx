@@ -131,7 +131,7 @@ export default function HomeJsonLd() {
               "@id": "https://guardiens.fr/#howto",
               name: "Comment trouver un gardien de confiance pour sa maison et ses animaux",
               description:
-                "Trois étapes pour confier votre maison et vos animaux à un gardien du coin sur Guardiens, sans abonnement pour les propriétaires.",
+                "Trois étapes pour confier votre maison et vos animaux à un gardien du coin sur Guardiens, offert aux propriétaires.",
               totalTime: "PT5M",
               estimatedCost: {
                 "@type": "MonetaryAmount",
@@ -186,7 +186,7 @@ export default function HomeJsonLd() {
               "@id": "https://guardiens.fr/#service",
               name: "House-sitting, garde d'animaux, de maison et de jardin, entraide locale entre gens du coin",
               description:
-                "Deux services indépendants : house-sitting, garde d'animaux à domicile, de maison et de jardin d'un côté ; entraide entre gens du coin de l'autre. Avis croisés, vérification d'identité, aucune commission prélevée sur les gardes.",
+                "Deux services indépendants : house-sitting, garde d'animaux à domicile, de maison et de jardin d'un côté ; entraide entre gens du coin de l'autre. Avis croisés, vérification d'identité, gardes entre membres, en temps et en services.",
               provider: { "@id": "https://guardiens.fr/#organization" },
               areaServed: { "@type": "Country", name: "France" },
               serviceType: [
