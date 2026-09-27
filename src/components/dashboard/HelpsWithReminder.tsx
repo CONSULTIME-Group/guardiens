@@ -10,7 +10,8 @@ export const HELPS_WITH_ANCHOR = "ce-que-je-propose";
  * Rappel du tableau de bord : renvoie vers l'écran unique /ma-ligne,
  * seul endroit où la ligne d'entraide s'écrit.
  */
-const HelpsWithReminder = () => {
+/** Vrai si le membre est disponible pour aider sans phrase d'entraide (partagé, lot D1). */
+export function useHelpsWithMissing(): boolean {
   const { user } = useAuth();
   const [visible, setVisible] = useState(false);
 
@@ -22,7 +23,11 @@ const HelpsWithReminder = () => {
     });
     return () => { active = false; };
   }, [user?.id]);
+  return visible;
+}
 
+const HelpsWithReminder = () => {
+  const visible = useHelpsWithMissing();
   if (!visible) return null;
 
   return (

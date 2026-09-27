@@ -12,7 +12,8 @@ export const radiusLineText = (km: number) => `Vous recevez les besoins dans un 
  * Une ligne pour la personne disponible pour un coup de main : son rayon
  * actuel et le lien vers le réglage existant.
  */
-const MutualAidRadiusLine = ({ className = "" }: { className?: string }) => {
+/** Rayon d'entraide du membre disponible pour aider, sinon null (partagé, lot D1). */
+export function useMutualAidRadiusKm(): number | null {
   const { user } = useAuth();
   const [km, setKm] = useState<number | null>(null);
 
@@ -35,7 +36,11 @@ const MutualAidRadiusLine = ({ className = "" }: { className?: string }) => {
     })();
     return () => { active = false; };
   }, [user?.id]);
+  return km;
+}
 
+const MutualAidRadiusLine = ({ className = "" }: { className?: string }) => {
+  const km = useMutualAidRadiusKm();
   if (km === null) return null;
 
   return (
