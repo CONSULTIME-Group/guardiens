@@ -10,7 +10,7 @@
  *    un double saut de ligne dans un texte rédigé par un humain est faux : les
  *    gens sautent des lignes et signent leurs annonces ;
  *  - mode "two-fields" (formulaire à deux zones de saisie) : deux textes
- *    obligatoires, 30 caractères minimum chacun ;
+ *    obligatoires, 15 caractères minimum chacun ;
  *  - mode "single-block" (une seule zone de saisie, texte concaténé) :
  *    50 caractères minimum au total, jamais de découpe ;
  *  - aucun seuil de pourcentage de complétion de profil (non actionnable),
@@ -29,7 +29,12 @@
  * avec animaux attire davantage de candidatures, mais elle n'interdit plus rien.
  */
 
-export const MIN_SUB_DESCRIPTION = 30;
+/**
+ * Seuil par champ en mode deux champs : 15 caractères (lot A2, 27/09/2026).
+ * 15 + 2 (séparateur) + 15 = 32, au-dessus de la contrainte base
+ * `sits_publiee_exige_description` (30 sur le texte joint).
+ */
+export const MIN_SUB_DESCRIPTION = 15;
 export const MIN_SINGLE_DESCRIPTION = 30;
 /** Longueur maximale du titre, appliquée par la création comme par l'édition. */
 export const MAX_TITLE_LENGTH = 120;

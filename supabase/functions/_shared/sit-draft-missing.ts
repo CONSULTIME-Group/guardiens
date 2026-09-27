@@ -4,7 +4,12 @@
 // Règle : on ne liste que ce qui empêche réellement la publication. Les champs
 // facultatifs (une journée type, un mot de vous) ne sont jamais réclamés.
 
-export const MIN_SUB_DESCRIPTION = 30;
+/**
+ * Seuil par champ en mode deux champs : 15 caractères (lot A2, 27/09/2026).
+ * 15 + 2 (séparateur) + 15 = 32, au-dessus de la contrainte base
+ * `sits_publiee_exige_description` (30 sur le texte joint).
+ */
+export const MIN_SUB_DESCRIPTION = 15;
 
 export interface DraftFieldsInput {
   title?: string | null;
