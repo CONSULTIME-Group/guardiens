@@ -743,10 +743,10 @@ function AlmaDockInner() {
   if (isModalOpen) return null;
   if (hidden) return null;
 
-  // Lot D1 : sur /dashboard côté propriétaire, la pastille flottante est
-  // masquée (Alma vit dans la colonne de droite). « Parler à Alma » ouvre
-  // le même panneau, qui reste rendu ici.
-  const hideCollapsedPill = location.pathname === "/dashboard" && activeRole === "owner";
+  // Lots D1 et D2 : sur /dashboard, la pastille flottante est masquée pour
+  // les deux rôles (Alma vit dans la colonne de droite). « Parler à Alma »
+  // ouvre le même panneau, qui reste rendu ici.
+  const hideCollapsedPill = location.pathname === "/dashboard";
   if (hideCollapsedPill && !expanded) return null;
 
 

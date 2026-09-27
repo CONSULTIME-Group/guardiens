@@ -5,9 +5,6 @@ import Head from "@/components/seo/Head";
 import { useToast } from "@/hooks/use-toast";
 import OwnerDashboard from "@/components/dashboard/OwnerDashboard";
 import SitterDashboard from "@/components/dashboard/SitterDashboard";
-import { WelcomeBackDigest } from "@/components/ai/alma/WelcomeBackDigest";
-import { AlmaDormantReturnWhisper } from "@/components/ai/alma/wiring/AlmaDormantReturnWhisper";
-import { useOwnerPrimaryAction } from "@/hooks/useOwnerPrimaryAction";
 
 import { DashboardErrorBoundary } from "@/components/dashboard/DashboardErrorBoundary";
 import { trackEvent } from "@/lib/analytics";
@@ -16,10 +13,6 @@ import { supabase } from "@/integrations/supabase/client";
 
 const Dashboard = () => {
   const { activeRole, user } = useAuth();
-  const { data: ownerPrimaryAction } = useOwnerPrimaryAction(
-    activeRole === "owner" ? user?.id : undefined,
-  );
-  const hasPendingAction = !!ownerPrimaryAction?.action;
   const { toast } = useToast();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -196,14 +189,8 @@ const Dashboard = () => {
           }
         >
           {displayedRole === "owner" ? <OwnerDashboard /> : <SitterDashboard />}
-          {/* Alma clôt la page côté gardien. Côté propriétaire (lot D1), le
-              digest passe dans l'accueil et Alma vit dans la colonne de droite. */}
-          {displayedRole !== "owner" && (
-            <div className="mx-auto w-full max-w-6xl px-4 pb-6 md:px-6">
-              <WelcomeBackDigest suppressEmptyVariant={hasPendingAction} />
-              <AlmaDormantReturnWhisper />
-            </div>
-          )}
+          {/* Lots D1 et D2 : le digest passe dans l'accueil, Alma vit dans la
+              colonne de droite, pour les deux rôles. */}
         </DashboardErrorBoundary>
 
       </div>

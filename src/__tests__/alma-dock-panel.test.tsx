@@ -22,9 +22,10 @@ const almaState = {
 };
 const moodState = { mood: null as any, line: null as string | null, avatar: "idle" as const };
 const evolutionState = { data: null as any };
+const authRole = { current: "owner" as "owner" | "sitter" };
 
 vi.mock("@/contexts/AuthContext", () => ({
-  useAuth: () => ({ isAuthenticated: true, activeRole: "owner" }),
+  useAuth: () => ({ isAuthenticated: true, activeRole: authRole.current }),
 }));
 vi.mock("@/contexts/AlmaContext", () => ({
   useAlma: () => almaState,
@@ -51,6 +52,7 @@ vi.mock("@/components/ai/alma/AlmaAvatarAnimated", () => ({
 }));
 
 import { AlmaDock } from "@/components/ai/alma/AlmaDock";
+
 
 // Lot D1 : sur /dashboard côté propriétaire la pastille est masquée ; le
 // panneau se teste depuis une autre page propriétaire.
@@ -274,7 +276,25 @@ describe("verrous de structure du dock", () => {
   });
 });
 
-describe("pastille flottante, lot D1", () => {
+describe("pastille flottante, lots D1 et D2", () => {
+  it("est masquée sur /dashboard pour le gardien aussi (lot D2)", () => {
+    authRole.current = "sitter";
+    try {
+      renderDock("/dashboard");
+      expect(screen.queryByRole("button", { name: /Ouvrir Alma|Voir la proposition d'Alma|Voir le message d'Alma/ })).toBeNull();
+    } finally {
+      authRole.current = "owner";
+    }
+  });
+  it("reste visible hors /dashboard pour le gardien", () => {
+    authRole.current = "sitter";
+    try {
+      renderDock("/sits");
+      expect(screen.getByRole("button", { name: /Ouvrir Alma|Voir la proposition d'Alma|Voir le message d'Alma/ })).toBeInTheDocument();
+    } finally {
+      authRole.current = "owner";
+    }
+  });
   it("est masquée sur /dashboard pour le propriétaire", () => {
     renderDock("/dashboard");
     expect(screen.queryByRole("button", { name: /Ouvrir Alma|Voir la proposition d'Alma|Voir le message d'Alma/ })).toBeNull();

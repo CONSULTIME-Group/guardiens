@@ -1,5 +1,6 @@
 import { formatDateRangeFr } from "@/lib/formatDateRangeFr";
 import { canShowAffinityPercent } from "@/lib/affinityDisplay";
+import { formatCityLabel } from "@/lib/cityLabel";
 import matchEmptyIllustration from "@/assets/illustrations/sitter-match-empty.webp";
 
 import { Link } from "react-router-dom";
@@ -10,16 +11,18 @@ import AffinityRing from "@/components/matching/AffinityRing";
 import { trackEvent } from "@/lib/analytics";
 import { useImpressionOnce } from "@/hooks/useImpressionOnce";
 import { petSpeciesLabel } from "@/lib/petLabels";
-import { listingRankingSubtitle } from "@/lib/sitterListingRank";
-import { ENV_LABEL_MAP } from "@/components/shared/EnvironmentPills";
+import DashEyebrow from "../owner/DashEyebrow";
 
 /**
- * Vague 2 sur 4, la carte rencontre.
+ * Vedette gardien (lot D2, maquette validée).
  *
- * Star unique de l'écran gardien confirmé. Un seul bouton primaire sur tout
- * le dashboard, un seul ring d'affinité visible, or réservé au ring.
- * Données strictement issues de useSitterTopAffinitySits, aucun score
- * simulé, aucun libellé inventé.
+ * Une seule carte blanche : photo de la garde, anneau d'affinité (règle des
+ * 4 critères du lot D0), titre, méta, raisons existantes du calcul, bouton.
+ * Dessous, « Aussi pour vous » : les deux gardes suivantes en lignes
+ * séparées par un filet, puis le lien catalogue au compte réel.
+ * Variante `layout="rows"` (nouveau gardien, liste d'ouverture visible) :
+ * pas de carte vedette, les trois gardes en lignes.
+ * Données strictement issues de useSitterTopAffinitySits.
  */
 
 interface Props {
@@ -27,35 +30,18 @@ interface Props {
   fallbackSits: AffinitySitCard[];
   rankingSource: ListingRankingSource;
   isLoading: boolean;
-  /** Nombre réel d'annonces publiées visibles par ce gardien, pour le lien
-   * de sortie vers la recherche. Jamais codé en dur. */
+  /** Nombre réel d'annonces publiées visibles par ce gardien. */
   totalPublished?: number;
+  layout?: "star" | "rows";
 }
-
-// Le fond d'attente passe par la classe .photo-placeholder-green (token CSS
-// qui s'assombrit en dark), jamais par un style inline.
-
-const DATE_FMT = new Intl.DateTimeFormat("fr-FR", {
-  day: "numeric",
-  month: "long",
-});
-
-const formatDateRange = (start?: string | null, end?: string | null): string | null =>
-  formatDateRangeFr(start, end);
 
 const speciesLabel = (species: string[]): string | null => {
   if (!species || species.length === 0) return null;
-  // Mapping partagé, jamais la valeur brute de l'enum ("dog" -> "Chien").
   if (species.length === 1) return petSpeciesLabel(species[0]);
   return `${species.length} animaux`;
 };
 
-/**
- * Lien de sortie vers le catalogue national, partagé par les deux branches
- * du dashboard gardien (rencontre + aperçu). Toujours présent dès qu'une
- * annonce est visible à l'écran : c'est le chemin de l'accueil vers la
- * recherche, il ne doit jamais manquer. Compte réel, jamais codé en dur.
- */
+/** Lien de sortie vers le catalogue, compte réel, jamais codé en dur. */
 export const catalogExitLabel = (totalPublished: number): string =>
   totalPublished > 1
     ? `Voir les ${totalPublished} gardes disponibles`
@@ -63,16 +49,7 @@ export const catalogExitLabel = (totalPublished: number): string =>
       ? "Voir la garde disponible"
       : "Voir toutes les annonces";
 
-const environmentLabels = (environments: string[]): string[] =>
-  environments
-    .map((environment) => ENV_LABEL_MAP[environment])
-    .filter((label): label is string => !!label)
-    .slice(0, 2);
-
-/* -------------------------------------------------------------------------- */
-/*  En-tête signature : trait + eyebrow + titre + sous-titre                  */
-/* -------------------------------------------------------------------------- */
-
+/* En-tête signature, conservé pour les autres sections qui l'importent. */
 export const SectionHeader = ({
   eyebrow,
   title,
@@ -86,108 +63,55 @@ export const SectionHeader = ({
 }) => (
   <header className="mb-[22px]">
     <div className="flex items-center gap-[8px]">
-      <span
-        aria-hidden="true"
-        className="inline-block bg-secondary"
-        style={{ width: "20px", height: "2px" }}
-      />
-      <p
-        className="text-secondary uppercase"
-        style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.16em" }}
-      >
+      <span aria-hidden="true" className="inline-block bg-secondary" style={{ width: "20px", height: "2px" }} />
+      <p className="text-secondary uppercase" style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.16em" }}>
         {eyebrow}
       </p>
     </div>
-    <Heading
-      className="font-heading text-foreground mt-[8px]"
-      style={{ fontSize: "20px", fontWeight: 600, lineHeight: 1.25 }}
-    >
+    <Heading className="font-heading text-foreground mt-[8px]" style={{ fontSize: "20px", fontWeight: 600, lineHeight: 1.25 }}>
       {title}
     </Heading>
     {subtitle && (
-      <p
-        className="font-sans text-muted-foreground mt-[8px]"
-        style={{ fontSize: "13px", lineHeight: 1.4 }}
-      >
+      <p className="font-sans text-muted-foreground mt-[8px]" style={{ fontSize: "13px", lineHeight: 1.4 }}>
         {subtitle}
       </p>
     )}
   </header>
 );
 
-/* -------------------------------------------------------------------------- */
-/*  Skeleton (mêmes dimensions, jamais de spinner)                            */
-/* -------------------------------------------------------------------------- */
+const CARD_STYLE = { borderRadius: "22px" } as const;
+const CARD_CLASS = "overflow-hidden bg-card border border-border shadow-[0_12px_32px_-18px_hsl(var(--foreground)/0.25)]";
 
 const StarSkeleton = () => (
-  <div
-    className="overflow-hidden border border-border bg-card animate-pulse"
-    style={{ borderRadius: "20px" }}
-  >
-    {/* Même fond d'attente aquarelle que la carte chargée : jamais de
-        rectangle blanc pendant la cascade de requêtes. */}
-    <div className="w-full photo-placeholder-green" style={{ height: "150px" }} />
-    <div className="flex items-start" style={{ padding: "22px", gap: "22px" }}>
-      <div className="rounded-full bg-muted shrink-0" style={{ width: 70, height: 70 }} />
+  <div className={`${CARD_CLASS} animate-pulse`} style={CARD_STYLE}>
+    <div className="w-full photo-placeholder-green h-[200px] md:h-[280px]" />
+    <div className="flex items-start p-[22px] md:px-[34px] md:py-[32px] gap-[22px]">
+      <div className="rounded-full bg-muted shrink-0" style={{ width: 76, height: 76 }} />
       <div className="flex-1 space-y-[14px]">
         <div className="h-5 bg-muted rounded w-4/5" />
         <div className="h-4 bg-muted rounded w-2/3" />
-        <div className="h-9 bg-muted rounded-full w-48" />
+        <div className="h-11 bg-muted rounded-full w-48" />
       </div>
     </div>
   </div>
 );
 
-/* -------------------------------------------------------------------------- */
-/*  Empty state raconté (pas de rouge, pas de croix, pas de "0 annonce")     */
-/* -------------------------------------------------------------------------- */
-
 const EmptyState = () => (
-  <div
-    className="text-center bg-card"
-    style={{
-      border: "1px dashed hsl(var(--border))",
-      borderRadius: "16px",
-      padding: "34px 22px",
-    }}
-  >
-    <div
-      aria-hidden="true"
-      className="illustration-wrapper mx-auto"
-      style={{ width: 140, height: 140 }}
-    >
-      <img
-        src={matchEmptyIllustration}
-        alt=""
-        width={140}
-        height={140}
-        loading="lazy"
-        decoding="async"
-        className="illustration-blend animate-painted-reveal w-full h-full object-cover"
-      />
+  <div className="text-center bg-card" style={{ border: "1px dashed hsl(var(--border))", borderRadius: "16px", padding: "34px 22px" }}>
+    <div aria-hidden="true" className="mx-auto overflow-hidden" style={{ width: 140, height: 140, borderRadius: 14 }}>
+      <img src={matchEmptyIllustration} alt="" width={140} height={140} loading="lazy" decoding="async" className="w-full h-full object-cover" />
     </div>
-    <h3
-      className="font-heading text-foreground mt-[14px]"
-      style={{ fontSize: "20px", fontWeight: 600 }}
-    >
+    <h3 className="font-heading text-foreground mt-[14px]" style={{ fontSize: "20px", fontWeight: 600 }}>
       Votre prochaine rencontre se prépare.
     </h3>
-
-    <p
-      className="font-sans text-muted-foreground mx-auto mt-[14px]"
-      style={{ fontSize: "13px", maxWidth: "42ch", lineHeight: 1.5 }}
-    >
+    <p className="font-sans text-muted-foreground mx-auto mt-[14px]" style={{ fontSize: "13px", maxWidth: "42ch", lineHeight: 1.5 }}>
       Les annonces qui correspondent à votre profil s'afficheront ici dès qu'un propriétaire du coin publiera son besoin.
     </p>
     <div className="mt-[22px]">
       <Link
         to="/recherche"
         className="inline-flex items-center justify-center rounded-full border border-border bg-card font-semibold text-foreground hover:bg-muted/40 transition-colors"
-        style={{
-          minHeight: "44px",
-          padding: "10px 18px",
-          fontSize: "14px",
-        }}
+        style={{ minHeight: "44px", padding: "10px 18px", fontSize: "14px" }}
       >
         Voir toutes les annonces
       </Link>
@@ -195,39 +119,31 @@ const EmptyState = () => (
   </div>
 );
 
-/* -------------------------------------------------------------------------- */
-/*  Carte star (topSits[0])                                                   */
-/* -------------------------------------------------------------------------- */
-
-const StarCard = ({ sit, onCtaClick }: { sit: AffinitySitCard; onCtaClick?: () => void }) => {
+const StarCard = ({
+  sit,
+  inAlertZone,
+  onCtaClick,
+}: {
+  sit: AffinitySitCard;
+  inAlertZone: boolean;
+  onCtaClick?: () => void;
+}) => {
   const place = [
     sit.owner_first_name ? `Chez ${sit.owner_first_name}` : null,
-    sit.city,
-  ]
-    .filter(Boolean)
-    .join(" · ");
-  const dates = formatDateRange(sit.start_date, sit.end_date);
+    sit.city ? formatCityLabel(sit.city) : null,
+  ].filter(Boolean).join(" · ");
+  const dates = formatDateRangeFr(sit.start_date, sit.end_date);
   const species = speciesLabel(sit.pet_species);
-  const meta = [species, dates].filter(Boolean).join(" · ");
-  const labels = environmentLabels(sit.environments);
-  const matched = sit.affinity?.matched ?? [];
-  const chips = matched.slice(0, 2);
+  const meta = [species, dates, inAlertZone ? "dans votre zone d'alerte" : null].filter(Boolean).join(" · ");
+  const reasons = (sit.affinity?.matched ?? []).slice(0, 3);
+  const showPercent = !!sit.affinity && canShowAffinityPercent(sit.affinity);
   const total = sit.affinity?.total ?? 0;
-  // Photo d'animal d'abord (la garde), couverture du lieu en repli.
   const photoUrl = sit.pet_photo_url ?? sit.cover_photo_url;
-  const cover = photoUrl
-    ? getOptimizedImageUrl(photoUrl, 900, 78)
-    : null;
+  const cover = photoUrl ? getOptimizedImageUrl(photoUrl, 900, 78) : null;
 
   return (
-    <article className="group notebook-card relative">
-      <div className="notebook-card-paper absolute inset-0" aria-hidden="true" />
-      {/* Bandeau photo, hauteur exacte 150px. Fond d'attente aquarelle TOUJOURS
-          présent sous l'image : jamais de rectangle blanc pendant le chargement. */}
-      <div
-        className="relative w-full photo-placeholder-green"
-        style={{ height: "150px" }}
-      >
+    <article className={CARD_CLASS} style={CARD_STYLE} data-testid="sitter-star-card">
+      <div className="relative w-full photo-placeholder-green h-[200px] md:h-[280px]">
         {cover && (
           <img
             src={cover}
@@ -236,199 +152,100 @@ const StarCard = ({ sit, onCtaClick }: { sit: AffinitySitCard; onCtaClick?: () =
             loading="eager"
             decoding="async"
             width={900}
-            height={300}
-            onError={(e) => {
-              // Image cassée : on la masque, le fond aquarelle prend le relais.
-              e.currentTarget.style.display = "none";
-            }}
+            height={280}
+            onError={(e) => { e.currentTarget.style.display = "none"; }}
           />
         )}
         {place && (
           <div
-            className="absolute left-[14px] bottom-[14px] rounded-full bg-background/90 text-foreground"
-            style={{
-              padding: "6px 12px",
-              fontSize: "12px",
-              fontWeight: 700,
-            }}
+            className="absolute left-[14px] bottom-[14px] rounded-full text-foreground text-[12px] font-bold px-[12px] py-[6px]"
+            style={{ backgroundColor: "hsl(var(--hero-paper))" }}
           >
             {place}
           </div>
         )}
       </div>
 
-      {/* Corps : ring + contenu */}
-      <div
-        className="relative flex items-start"
-        style={{ padding: "22px", paddingRight: "34px", gap: "22px" }}
-      >
-        {sit.affinity && canShowAffinityPercent(sit.affinity) && <AffinityRing score={sit.affinity.score} result={sit.affinity} />}
-
+      <div className="flex flex-col md:flex-row md:items-start gap-[22px] p-[22px] md:px-[34px] md:py-[32px]">
+        {showPercent && (
+          <div className="shrink-0" data-testid="sitter-star-ring">
+            <AffinityRing score={sit.affinity!.score} result={sit.affinity} size={76} />
+          </div>
+        )}
         <div className="min-w-0 flex-1">
-          <h3
-            className="font-heading text-foreground"
-            style={{
-              fontSize: "19px",
-              fontWeight: 600,
-              lineHeight: 1.3,
-              display: "-webkit-box",
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
-            }}
-          >
+          <DashEyebrow>Une garde faite pour vous</DashEyebrow>
+          <h2 className="font-heading text-foreground mt-[8px] text-[23px] md:text-[26px] font-semibold leading-tight">
             {sit.title ?? "Une garde à découvrir"}
-          </h3>
+          </h2>
+          {meta && <p className="text-muted-foreground mt-[8px] text-[14px] leading-snug">{meta}</p>}
 
-          {meta && (
-            <p
-              className="text-muted-foreground mt-[8px]"
-              style={{ fontSize: "13.5px", lineHeight: 1.4 }}
-            >
-              {meta}
-            </p>
-          )}
-
-          {chips.length > 0 && (
-            <div className="flex flex-wrap gap-[8px] mt-[14px]">
-              {chips.map((c) => (
-                <span
-                  key={c}
-                  className="rounded-full text-primary"
-                  style={{
-                    backgroundColor: "hsl(var(--primary) / 0.1)",
-                    padding: "4px 12px",
-                    fontSize: "12px",
-                    fontWeight: 600,
-                  }}
+          {reasons.length > 0 && (
+            <ul className="flex flex-wrap gap-[8px] mt-[14px]">
+              {reasons.map((r) => (
+                <li
+                  key={r}
+                  className="rounded-full border border-border text-foreground text-[12.5px] font-semibold px-[12px] py-[4px]"
+                  style={{ backgroundColor: "hsl(var(--hero-paper))" }}
                 >
-                  {c}
-                </span>
+                  {r}
+                </li>
               ))}
-            </div>
+            </ul>
           )}
 
-          {labels.length > 0 && (
-            <div className="flex flex-wrap gap-[6px] mt-[12px]">
-              {labels.map((label) => (
-                <span key={label} className="rounded-full border border-border bg-muted/40 px-2.5 py-1 text-xs text-muted-foreground">
-                  {label}
-                </span>
-              ))}
-            </div>
-          )}
-
-          <div className="mt-[22px]">
+          <div className="mt-[22px] flex flex-col sm:flex-row sm:items-center gap-[14px]">
             <Link
               to={`/sits/${sit.id}`}
               onClick={onCtaClick}
-              className="inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground font-bold transition-colors hover:bg-primary/90"
-              style={{
-                padding: "10px 18px",
-                minHeight: "44px",
-                fontSize: "14px",
-                fontWeight: 700,
-                boxShadow: "0 6px 14px rgba(44,109,80,0.24)",
-              }}
+              className="shrink-0 inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-colors min-h-[48px] px-[22px] text-[14px]"
             >
               Découvrir cette garde
             </Link>
+            {showPercent && total > 0 && (
+              <p className="text-muted-foreground text-[12.5px] leading-snug">
+                Affinité calculée sur {total} critère{total > 1 ? "s" : ""} comparé{total > 1 ? "s" : ""} entre vos deux profils.
+              </p>
+            )}
           </div>
-
-          {total > 0 && (
-            <p
-              className="text-muted-foreground mt-[14px]"
-              style={{ fontSize: "12px", lineHeight: 1.4 }}
-            >
-              Basé sur {total} critère{total > 1 ? "s" : ""} comparé{total > 1 ? "s" : ""} entre vos deux profils.
-            </p>
-          )}
         </div>
       </div>
-      <div className="notebook-card-edge" aria-hidden="true" />
     </article>
   );
 };
 
-/* -------------------------------------------------------------------------- */
-/*  Rangées compactes (topSits[1..2] ou fallback sans chip)                   */
-/* -------------------------------------------------------------------------- */
-
-const CompactRow = ({
-  sit,
-  showScore,
-}: {
-  sit: AffinitySitCard;
-  showScore: boolean;
-}) => {
-  const dates = formatDateRange(sit.start_date, sit.end_date);
-  const species = speciesLabel(sit.pet_species);
+const SitRow = ({ sit }: { sit: AffinitySitCard }) => {
+  const dates = formatDateRangeFr(sit.start_date, sit.end_date);
   const distance = sit.distance_km == null ? null : `${Math.round(sit.distance_km)} km`;
-  const meta = [sit.city, dates, distance].filter(Boolean).join(" · ");
-  const labels = environmentLabels(sit.environments);
-
+  const meta = [sit.city ? formatCityLabel(sit.city) : null, dates, distance].filter(Boolean).join(" · ");
+  const showPercent = !!sit.affinity && canShowAffinityPercent(sit.affinity);
   return (
-    <Link
-      to={`/sits/${sit.id}`}
-      className="flex items-center h-full bg-card border border-border hover:border-primary/40 transition-colors"
-      style={{
-        borderRadius: "16px",
-        padding: "14px 22px",
-        gap: "14px",
-      }}
-    >
-      {showScore && sit.affinity && canShowAffinityPercent(sit.affinity) && (
-        <span
-          className="rounded-full bg-secondary text-secondary-foreground shrink-0"
-          style={{
-            padding: "4px 10px",
-            fontSize: "12px",
-            fontWeight: 600,
-          }}
-        >
-          {Math.round(sit.affinity.score)} %
-        </span>
-      )}
-      <div className="min-w-0 flex-1">
-        <p
-          className="font-heading text-foreground truncate"
-          style={{ fontSize: "15.5px", fontWeight: 600, lineHeight: 1.3 }}
-        >
-          {sit.title ?? "Une garde à découvrir"}
-        </p>
-        {meta && (
-          <p
-            className="text-muted-foreground truncate mt-[4px]"
-            style={{ fontSize: "12.5px" }}
-          >
-            {meta}
-          </p>
+    <li>
+      <Link to={`/sits/${sit.id}`} className="flex items-center gap-[14px] py-[14px] group">
+        {showPercent && (
+          <span className="shrink-0 rounded-full bg-primary/10 text-primary px-[10px] py-[3px] text-[12px] font-semibold tabular-nums">
+            {Math.round(sit.affinity!.score)} %
+          </span>
         )}
-        {labels.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mt-2">
-            {labels.map((label) => (
-              <span key={label} className="rounded-full border border-border bg-muted/40 px-2 py-0.5 text-xs text-muted-foreground">
-                {label}
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
-      <span
-        className="text-primary shrink-0"
-        style={{ fontSize: "13px", fontWeight: 700 }}
-      >
-        Voir
-      </span>
-    </Link>
+        <div className="min-w-0 flex-1">
+          <p className="text-foreground text-[14.5px] font-semibold truncate">{sit.title ?? "Une garde à découvrir"}</p>
+          {meta && <p className="text-muted-foreground text-[12.5px] mt-[2px] truncate">{meta}</p>}
+        </div>
+        <span className="shrink-0 text-primary text-[13px] font-semibold group-hover:underline underline-offset-4">Voir</span>
+      </Link>
+    </li>
   );
 };
 
-/* -------------------------------------------------------------------------- */
-/*  Section principale                                                        */
-/* -------------------------------------------------------------------------- */
+const SitRows = ({ eyebrow, sits }: { eyebrow: string; sits: AffinitySitCard[] }) => (
+  <div data-testid="sitter-sit-rows">
+    <DashEyebrow>{eyebrow}</DashEyebrow>
+    <ul className="mt-[14px] divide-y divide-border border-y border-border">
+      {sits.map((s) => <SitRow key={s.id} sit={s} />)}
+    </ul>
+  </div>
+);
 
-const SitterMatchSection = ({ topSits, fallbackSits, rankingSource, isLoading, totalPublished = 0 }: Props) => {
+const SitterMatchSection = ({ topSits, fallbackSits, rankingSource, isLoading, totalPublished = 0, layout = "star" }: Props) => {
   const sectionRef = useRef<HTMLElement | null>(null);
   const primary = topSits[0] ?? fallbackSits[0] ?? null;
   const impressionKey = primary ? `sitter_star:${primary.id}` : null;
@@ -449,68 +266,45 @@ const SitterMatchSection = ({ topSits, fallbackSits, rankingSource, isLoading, t
 
   if (isLoading) {
     return (
-      <section
-        ref={sectionRef}
-        data-dashboard-star="sitter"
-        aria-label="Rencontre suggérée"
-        className="px-4 sm:px-5 md:px-8 lg:px-0"
-      >
-        <SectionHeader
-          eyebrow="Une rencontre faite pour vous"
-          title="Vous êtes faits pour vous entendre."
-          subtitle="Calculé sur vos animaux, votre présence et votre rythme de vie."
-        />
+      <section ref={sectionRef} data-dashboard-star="sitter" aria-label="Une garde faite pour vous">
         <StarSkeleton />
       </section>
     );
   }
 
-  // Deux rangées compactes sous la vedette, jamais plus de trois annonces au total.
   const shownIds = new Set([primary?.id].filter(Boolean));
-  const rest = [...topSits, ...fallbackSits].filter((sit) => !shownIds.has(sit.id)).filter((sit, index, rows) => rows.findIndex((row) => row.id === sit.id) === index).slice(0, 2);
-
+  const rest = [...topSits, ...fallbackSits]
+    .filter((sit) => !shownIds.has(sit.id))
+    .filter((sit, index, rows) => rows.findIndex((row) => row.id === sit.id) === index)
+    .slice(0, 2);
   const showEmpty = !primary && rest.length === 0;
 
-  const searchLinkLabel = catalogExitLabel(totalPublished);
+  const exit = (
+    <div className="mt-[14px]">
+      <Link to="/search" className="text-primary text-[13px] font-semibold hover:underline underline-offset-4">
+        {catalogExitLabel(totalPublished)}
+      </Link>
+    </div>
+  );
 
   return (
-    <section
-      ref={sectionRef}
-      data-dashboard-star="sitter"
-      aria-label="Rencontre suggérée"
-      className="px-4 sm:px-5 md:px-8 lg:px-0"
-    >
-      <SectionHeader
-        eyebrow="Une rencontre faite pour vous"
-        title="Vous êtes faits pour vous entendre."
-        subtitle={listingRankingSubtitle(rankingSource)}
-      />
-
+    <section ref={sectionRef} data-dashboard-star="sitter" aria-label="Une garde faite pour vous" className="min-w-0">
       {showEmpty ? (
         <EmptyState />
+      ) : layout === "rows" ? (
+        <>
+          <SitRows eyebrow="Des gardes pour vous" sits={[primary, ...rest].filter(Boolean) as AffinitySitCard[]} />
+          {exit}
+        </>
       ) : (
         <>
-          {primary && <StarCard sit={primary} onCtaClick={onCtaClick} />}
-
+          {primary && <StarCard sit={primary} inAlertZone={rankingSource === "alert"} onCtaClick={onCtaClick} />}
           {rest.length > 0 && (
-            // Deux cartes secondaires côte à côte sur desktop, réempilées
-            // sur écran étroit. Jamais plus de trois annonces au total.
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-[10px] mt-[14px]">
-              {rest.map((s) => (
-                <CompactRow key={s.id} sit={s} showScore={!!s.affinity} />
-              ))}
+            <div className="mt-[34px]">
+              <SitRows eyebrow="Aussi pour vous" sits={rest} />
             </div>
           )}
-
-          <div className="mt-[18px]">
-            <Link
-              to="/search"
-              className="text-primary hover:underline underline-offset-4"
-              style={{ fontSize: "13px", fontWeight: 700 }}
-            >
-              {searchLinkLabel}
-            </Link>
-          </div>
+          {exit}
         </>
       )}
     </section>

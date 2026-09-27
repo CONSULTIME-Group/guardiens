@@ -1,39 +1,39 @@
+/**
+ * Tableau de bord gardien (lot D2, maquette validée), même méthode que le
+ * lot D1 côté propriétaire : accueil visible tout de suite, une seule
+ * vedette, peu de blocs, colonne de droite courte, chiffres exacts.
+ */
 import { useAlmaCulturalFact } from "@/hooks/useAlmaCulturalFact";
-
-import { NearbyAssociationCard } from "@/components/associations/NearbyAssociationCard";
 import { useAlmaUsageNudge } from "@/hooks/useAlmaUsageNudge";
 import { useAlmaFirstMeeting } from "@/hooks/useAlmaFirstMeeting";
 import { AlmaFirstMeeting } from "@/components/ai/alma/AlmaFirstMeeting";
 import { useAuth } from "@/contexts/AuthContext";
-import { useSearchParams, Link, useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { useAccessLevel, MIN_COMPLETION_TO_APPLY } from "@/hooks/useAccessLevel";
 import { useSitterDashboardData } from "@/hooks/useSitterDashboardData";
 import { useNearbyHelpers } from "@/hooks/useNearbyHelpers";
 import { useHelpersProximityCount } from "@/hooks/useHelpersProximityCount";
+import { useHelpsWithMissing } from "./HelpsWithReminder";
+import { useSitterDigestLine } from "@/hooks/useOwnerDigestLine";
+import { formatDateRangeFr } from "@/lib/formatDateRangeFr";
+import { formatCityLabel } from "@/lib/cityLabel";
 import DashboardLoadError from "./DashboardLoadError";
-import HelpsWithReminder from "./HelpsWithReminder";
-import MutualAidRadiusLine from "@/components/entraide/MutualAidRadiusLine";
-import MesCoupsDeMain from "./MesCoupsDeMain";
 
 import RoleActivationBanner from "./RoleActivationBanner";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
-import { FreePeriodBanner } from "@/components/marketing/FreePeriodBanner";
 
-import SitterCockpit from "./sitter/SitterCockpit";
+import SitterCockpit, { type SitterCockpitLine } from "./sitter/SitterCockpit";
+import type { CockpitTodo } from "./owner/OwnerCockpit";
 import DashboardSectionState from "./sitter/DashboardSectionState";
 import SitterMobileStickyCTA from "./sitter/SitterMobileStickyCTA";
-import CommunityPulseBanner from "./shared/CommunityPulseBanner";
-// NearbyAnnoncesCard retiré ici (vague 2) : la carte rencontre le remplace.
-import DashSection from "./owner/DashSection";
 import SitterDashboardSkeleton from "./sitter/SitterDashboardSkeleton";
 import SitterMatchSection from "./sitter/SitterMatchSection";
 import SitterMissingOpportunities from "./sitter/SitterMissingOpportunities";
-import SitterStoryTiles from "./sitter/SitterStoryTiles";
 import AlmaRailWhisper from "./sitter/AlmaRailWhisper";
 import SitterOpeningCard from "./sitter/SitterOpeningCard";
+import OwnerEntraideBand from "./owner/OwnerEntraideBand";
+import CommunityPulseLine from "./shared/CommunityPulseLine";
 import { useSitterPriorityAction } from "@/hooks/useSitterPriorityAction";
-import SitterEntraideSection from "./sitter/SitterEntraideSection";
-import PetAdviceSection from "./shared/PetAdviceSection";
 import NextStepRailCard from "./shared/NextStepRailCard";
 import RailReadingsCard from "./shared/RailReadingsCard";
 import DashboardRail from "./shared/DashboardRail";
@@ -44,54 +44,30 @@ import { sitterNextStep } from "@/lib/dashboardNextStep";
 import { useIsNewSitter } from "@/hooks/useIsNewUser";
 import { useSitterTopAffinitySits } from "@/hooks/useSitterTopAffinitySits";
 
-import { CheckCircle, Circle, ChevronRight, AlertCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-
-
-
-
+export const SITTER_ENTRAIDE_HEADLINE = "Entre deux gardes, un coup de main près de chez vous.";
 
 const SitterDashboard = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const { level, profileCompletion: accessProfileCompletion } = useAccessLevel();
   const [searchParams, setSearchParams] = useSearchParams();
-  // Premier contact Alma : bloque les whispers proactifs tant qu'il n'est pas vu.
   const { shouldShow: showAlmaFirstMeeting, markSeen: markAlmaFirstMeetingSeen } = useAlmaFirstMeeting();
-  // Compagnon culturel désactivé sur cet écran : Alma parle une seule fois
-  // par écran, via la carte rail (AlmaRailWhisper). La bulle flottante ne
-  // doit pas ouvrir d'infobulle proactive en parallèle.
+  // Une seule voix Alma par écran, portée par AlmaRailWhisper dans le rail.
   useAlmaCulturalFact({ surface: "dashboard", context: { role: "sitter" }, enabled: false });
-
-
-
-
 
   const {
     loading, error, profileCompletion, identityVerified, identityStatus,
-    completedSits, avgRating, reviewsCount, badgeCount, totalApps,
+    completedSits, totalApps,
     pendingAppsCount, unreadCount, isAvailable, competencesCount, interestsCount,
     postalCode, avatarUrl, bio, hasAnimalExperience,
-    hasEmergencyProfile, hasAcceptedRecent, nextGuard, nextGuardError,
-    nearbyListings, nearbyListingsRadius, nearbyError, articles, nearbyMissions, nearbyMissionsError,
-    myMissions, myMissionsError,
-    
-    reputation, groupedBadges, reload,
+    nextGuard, nextGuardError,
+    nearbyListings, nearbyError, nearbyMissions,
+    myMissions, reload,
   } = useSitterDashboardData(user?.id);
 
-
-  // NBA nouveau gardien : score d'affinité + fallback empty state.
-  // Le hook est appelé inconditionnellement (règle des hooks). Il ne fetche
-  // que si userId présent (cf. `enabled` du useQuery).
   const rawIsNewSitter = useIsNewSitter({ totalApps: totalApps ?? 0, completedSits: completedSits ?? 0 });
-  // Override pour preview design : ?sitterView=confirmed force la branche confirmée,
-  // ?sitterView=new force la branche nouveau gardien. Sinon comportement normal.
+  // Aperçu design : ?sitterView=confirmed ou ?sitterView=new force la branche.
   const sitterViewParam = searchParams.get("sitterView");
   const isNewSitter = sitterViewParam === "new" ? true : sitterViewParam === "confirmed" ? false : rawIsNewSitter;
-  // Murmures proactifs désactivés sur cet écran : une seule voix Alma par
-  // écran, portée par AlmaRailWhisper dans le rail. La logique de ciblage
-  // est conservée pour réactivation éventuelle sur une autre surface.
   useAlmaUsageNudge({
     surface: "sitter_dashboard",
     role: "sitter",
@@ -102,29 +78,17 @@ const SitterDashboard = () => {
         : "any",
     enabled: false,
   });
-  const {
-    topSits,
-    fallbackSits,
-    discoverySit,
-    hasMinimumPool,
-    hasPostalCode,
-    profileIncomplete,
-    rankingSource,
-    totalPublished,
-    isLoading: nbaLoading,
-  } = useSitterTopAffinitySits();
+  const { topSits, fallbackSits, rankingSource, totalPublished, isLoading: nbaLoading } = useSitterTopAffinitySits();
 
-  // Signal helpers proches, partagé entre les deux dashboards.
-  // DOIT rester avant tout early return pour respecter la règle des hooks.
+  // Compteur unique réconcilié (même source que le pouls), jamais la taille d'une liste plafonnée.
   const { data: nearbyHelpersData } = useNearbyHelpers(user?.id);
-  // Compteur unique réconcilié : même source que le bandeau « pouls de la
-  // communauté » (rayon 30 km), jamais la taille d'une liste plafonnée.
   const { data: helpersProximity } = useHelpersProximityCount(user?.id);
   const nearbyHelpersCount = helpersProximity?.localCount ?? nearbyHelpersData?.helpers?.length ?? 0;
 
-  // Prochain pas déterministe. Sert uniquement à savoir si l'invitation à
-  // vérifier l'identité est bien le pas suivant, ou si une action plus
-  // urgente passe devant. Aucun fetch.
+  // Lot D2 : accueil.
+  const helpsWithMissing = useHelpsWithMissing();
+  const digestLine = useSitterDigestLine(!!user?.id);
+
   const sitterPriorityAction = useSitterPriorityAction({
     nextGuard,
     profileCompletion: profileCompletion ?? 0,
@@ -136,28 +100,11 @@ const SitterDashboard = () => {
     identityDone: identityStatus === "verified" || identityStatus === "pending" || !!identityVerified,
     completedSitsCount: completedSits ?? 0,
   });
-  const identityRailAction =
-    sitterPriorityAction.variant === "identity"
-      ? {
-          eyebrow: sitterPriorityAction.eyebrow,
-          title: sitterPriorityAction.title,
-          description: sitterPriorityAction.description,
-          ctaLabel: sitterPriorityAction.ctaLabel,
-          ctaTo: sitterPriorityAction.ctaTo,
-        }
-      : null;
+  const identityRailAction = sitterPriorityAction.variant === "identity" ? sitterPriorityAction : null;
 
-  // Bloc « À lire » du rail : fiche race liée au membre, saison, journal.
-  // Appelé inconditionnellement (règle des hooks), avant tout early return.
   const railReadings = useRailReadings({ role: "sitter", userId: user?.id, upcomingGuard: nextGuard });
-
-  // Touches manquantes du barème : au-dessus de 90 %, le rail nomme
-  // précisément ce qui reste à faire (correctif phrase 97 %, août 2026).
   const completionMissing = useProfileCompletionMissing("sitter", user?.id);
 
-  // Bloc (b) du rail : la garde confirmée à venir prime toujours sur les
-  // étapes de profil. Identique pour les deux variantes (nouveau gardien :
-  // nextGuard est null par construction).
   const nextStepRail = sitterNextStep({
     nextGuard: (nextGuard as any) ?? null,
     postalCode: postalCode ?? null,
@@ -166,453 +113,148 @@ const SitterDashboard = () => {
     identityAction: identityRailAction
       ? { title: identityRailAction.title, cta: identityRailAction.ctaLabel, href: identityRailAction.ctaTo }
       : null,
-    // Le pourcentage et les items viennent du MEME calcul (barème gardien),
-    // jamais de profiles.profile_completion qui stocke le max des deux espaces.
     profileCompletion: completionMissing.score ?? profileCompletion ?? 0,
     missing: completionMissing.missing,
   });
 
-  /* Contexte des conseils compagnons, tiré des données déjà chargées, sans
-     requête supplémentaire. hasDraftSit n'existe pas côté gardien (brouillon
-     d'annonce, notion propre au propriétaire) : il reste absent. */
-  const upcomingBreedReading = railReadings.find((item) => item.key === "breed");
-  const petAdviceContext = {
-    hasUpcomingSit: !!nextGuard,
-    profileIncomplete: (profileCompletion ?? 100) < 100,
-    upcomingBreedHref: upcomingBreedReading?.href,
-    upcomingBreedName: upcomingBreedReading?.title.replace(/^La fiche\s+/, ""),
-  };
-
-
   if (loading) return <SitterDashboardSkeleton />;
   if (error) return <DashboardLoadError onRetry={reload} detail={error} />;
 
+  // Liste d'ouverture (nouveau gardien) : mêmes étapes que l'ancienne checklist.
+  const allChecklistDone =
+    !!avatarUrl &&
+    !!(bio && bio.length >= 50) &&
+    !!postalCode &&
+    !!hasAnimalExperience &&
+    (identityStatus === "verified" || !!identityVerified);
+  const openingVisible = isNewSitter && !allChecklistDone;
 
+  // Ligne sous le titre : prochaine garde, sinon digest réel, sinon rien.
+  const guardRange = nextGuard ? formatDateRangeFr(nextGuard.start_date, nextGuard.end_date) : null;
+  const cockpitLine: SitterCockpitLine | null = nextGuard && guardRange
+    ? {
+        text: `Votre prochaine garde : ${guardRange}${nextGuard.city ? `, à ${formatCityLabel(nextGuard.city)}` : ""}.`,
+        link: { label: "Préparer", to: `/sits/${nextGuard.id}` },
+      }
+    : digestLine
+      ? { text: digestLine }
+      : null;
 
-  // (Sous-titre dynamique supprimé : redondant avec le titre de la
-  // PriorityActionCard du cockpit. Cf. audit dashboard 2026.)
+  // Rangée « À faire » : actions réelles en attente, 3 au plus, dans cet ordre.
+  const todos: CockpitTodo[] = [];
+  if ((pendingAppsCount ?? 0) > 0) todos.push({ key: "apps", label: "Candidatures en attente de réponse", to: "/sits", count: pendingAppsCount });
+  if ((unreadCount ?? 0) > 0) todos.push({ key: "messages", label: "Messages non lus", to: "/messages", count: unreadCount });
+  if (!postalCode) todos.push({ key: "postal", label: "Votre code postal", to: "/profile?focus=postal_code" });
+  if (helpsWithMissing) todos.push({ key: "helps", label: "Votre phrase d'entraide", to: "/ma-ligne" });
 
-  // ── Checklist NEW-SITTER : 3 items décisifs + 2 items secondaires ──
-  // Précepte 2026 : 2-4 étapes visibles max, le reste dans un fold-out.
-  // Les 3 items primaires débloquent "je peux postuler et être choisi" :
-  // photo (rassure), bio ≥ 50 (motivation), code postal (annonces locales).
-  const primaryItems = [
-    { key: "avatar", done: !!avatarUrl, label: "Ajouter une photo de profil", hint: "Rassure les propriétaires en 1 coup d'œil", to: "/profile?section=identite" },
-    { key: "bio", done: !!(bio && bio.length >= 50), label: "Écrire votre bio (50 caractères min)", hint: "Motivation, expérience, ce qui vous rend fiable", to: "/profile?section=profil" },
-    { key: "postal", done: !!postalCode, label: "Renseigner votre code postal", hint: "Pour voir les annonces près de chez vous", to: "/profile?focus=postal_code" },
-  ];
-  const secondaryItems = [
-    { key: "experience", done: hasAnimalExperience, label: "Ajouter une expérience animale", to: "/profile?section=experience" },
-    { key: "identity", done: identityStatus === "verified" || identityVerified, label: "Vérifier votre identité (recommandé)", to: "/settings?section=security&src=sitter_dashboard" },
-  ];
-  const allItems = [...primaryItems, ...secondaryItems];
-  const completedItems = allItems.filter(c => c.done);
-  const allChecklistDone = completedItems.length === allItems.length;
-  const primaryDone = primaryItems.filter(c => c.done).length;
-  const progressPct = Math.round((completedItems.length / allItems.length) * 100);
+  const myActiveMission = myMissions.find((m: any) => m.status !== "completed" && m.status !== "cancelled") ?? null;
+  const firstNearbyMission = nearbyMissions[0] ?? null;
+  const showAccessGate = !(level === 4 || level === "3B");
 
-  // ── Bloc activation unifié ──
-  const ChecklistBlock = (
-    <section aria-labelledby="onboarding-checklist-heading" className="mb-6 md:mb-8">
-      {!postalCode && (
-        <div className="mb-3 flex items-start gap-3 rounded-xl border border-warning/40 bg-warning/10 px-4 py-3" role="alert">
-          <AlertCircle className="h-4 w-4 text-warning shrink-0 mt-0.5" aria-hidden="true" />
-          <div className="flex-1 text-sm">
-            <strong className="text-foreground">Code postal manquant.</strong>{" "}
-            <span className="text-foreground/80">Sans lui, aucune annonce ne s'affiche autour de vous.</span>
-          </div>
-          <Button size="sm" variant="outline" onClick={() => navigate("/profile?focus=postal_code")}>
-            Ajouter
-          </Button>
-        </div>
+  const railContent = (
+    <>
+      {nextStepRail && <NextStepRailCard step={nextStepRail} />}
+      <AlmaRailWhisper
+        profileCompletion={profileCompletion ?? 0}
+        isAvailable={!!isAvailable}
+        {...(isNewSitter
+          ? { variant: "newSitter" as const, openingCardVisible: openingVisible }
+          : { checklistVisible: false })}
+      />
+      {railReadings.length > 0 && <RailReadingsCard items={railReadings} />}
+      {showAccessGate && (
+        <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
       )}
-
-      {allChecklistDone ? null : (
-        <DashSection
-          eyebrow="Activation"
-          title="3 étapes pour débloquer les annonces"
-          description={`${primaryDone}/${primaryItems.length} étapes essentielles, ${progressPct}% du profil`}
-        >
-          <Progress value={progressPct} className="mb-3" />
-
-          <div role="list" className="bg-card border border-border rounded-2xl overflow-hidden">
-            {primaryItems.map((item, i) => (
-              <Link
-                key={item.key}
-                to={item.to}
-                role="listitem"
-                aria-disabled={item.done}
-                className={`group flex items-center justify-between py-3 px-4 border-b border-border last:border-0 transition-all duration-200 ease-out ${
-                  item.done ? "pointer-events-none" : "cursor-pointer hover:bg-muted/40 hover:translate-x-0.5"
-                }`}
-              >
-                <div className="flex items-center min-w-0">
-                  {item.done ? (
-                    <CheckCircle className="h-4 w-4 text-primary shrink-0" aria-hidden="true" />
-                  ) : (
-                    <Circle className="h-4 w-4 text-muted-foreground shrink-0 transition-colors group-hover:text-primary" aria-hidden="true" />
-                  )}
-                  <div className="ml-3 min-w-0">
-                    <span className={`text-sm block ${item.done ? "line-through text-foreground/50" : "text-foreground"}`}>
-                      {item.label}
-                    </span>
-                    {!item.done && item.hint && (
-                      <span className="text-xs text-muted-foreground block mt-0.5">{item.hint}</span>
-                    )}
-                  </div>
-                </div>
-                {!item.done && (
-                  <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary" aria-hidden="true" />
-                )}
-              </Link>
-            ))}
-          </div>
-
-          {/* 2 items secondaires masqués par défaut : « aller plus loin » */}
-          {secondaryItems.some(i => !i.done) && (
-            <details className="mt-3 rounded-2xl bg-card border border-border overflow-hidden">
-              <summary className="cursor-pointer list-none px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted/30 flex items-center justify-between">
-                <span>Aller plus loin, débloquer plus d'annonces</span>
-                <span className="text-xs text-muted-foreground" aria-hidden="true">▾</span>
-              </summary>
-              <div role="list">
-                {secondaryItems.map((item) => (
-                  <Link
-                    key={item.key}
-                    to={item.to}
-                    role="listitem"
-                    aria-disabled={item.done}
-                    className={`group flex items-center justify-between py-3 px-4 border-t border-border transition-all duration-200 ease-out ${
-                      item.done ? "pointer-events-none" : "cursor-pointer hover:bg-muted/40"
-                    }`}
-                  >
-                    <div className="flex items-center">
-                      {item.done ? (
-                        <CheckCircle className="h-4 w-4 text-primary" aria-hidden="true" />
-                      ) : (
-                        <Circle className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-                      )}
-                      <span className={`text-sm ml-3 ${item.done ? "line-through text-foreground/50" : "text-foreground"}`}>
-                        {item.label}
-                      </span>
-                    </div>
-                    {!item.done && <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden="true" />}
-                  </Link>
-                ))}
-              </div>
-            </details>
-          )}
-        </DashSection>
-      )}
-
-    </section>
+    </>
   );
 
-
-
-
-
-
-  // ── Zone Découverte, sections indépendantes (plus d'onglets).
-  // Ordre validé : Annonces → Coup de main → Conseils (replié).
-  // Logique d'emptiness : on évite d'afficher 2 cartes vides côte à côte.
-  // - Annonces : si rien dans 100 km, on remplace la carte par 1 message clair.
-  // - Coup de main : si pas de missions (mienne ni du coin), on masque
-  //   SitterMissionsSection, la carte helpers (qui a son propre empty-state
-  //   premium avec CTA parrainage) reste seule visible et porte le message.
-  const missionsEmpty =
-    !myMissionsError && !nearbyMissionsError &&
-    myMissions.length === 0 && nearbyMissions.length === 0;
-
-
-  // VAGUE 3, L'entraide, invitation calme, une seule mission mise en avant.
-  const firstNearbyMission = nearbyMissions[0];
-  const myActiveMission = myMissions.find((m: any) => m.status !== "completed" && m.status !== "cancelled") ?? null;
-
-
-
-
-
-  // Ancienne DiscoverySections retirée du flux confirmé (vague 3).
-  // NearbyHelpersCarousel, SitterMissionsSection, CommunityQuestionsSection
-  // et ConseilsDiscoveryCard ne sont plus montés côté confirmé, mais restent
-  // disponibles ailleurs (branche isNewSitter, autres écrans).
-
-
-
-
   return (
-    <div className="space-y-0 overflow-hidden lg:overflow-visible pb-24 md:pb-8">
-{/* pb-24 mobile = BottomNav (h-16) + sticky CTA (~32px). h-20 spacer supprimé (doublon). */}
+    <div className="overflow-hidden lg:overflow-visible pb-24 md:pb-8">
       {showAlmaFirstMeeting && (
         <div className="px-4 sm:px-5 md:px-8 pt-2">
           <AlmaFirstMeeting role="sitter" onDone={markAlmaFirstMeetingSeen} />
         </div>
       )}
-      {/* Role activation */}
-      <div className="px-4 sm:px-5 md:px-8 mb-4">
+      <div className="px-4 sm:px-5 md:px-8">
         <RoleActivationBanner userRole={user?.role || "sitter"} />
       </div>
-      <HelpsWithReminder />
-      <MutualAidRadiusLine className="mx-auto mb-5 w-full max-w-6xl px-4 sm:px-5 md:px-8" />
-      <MesCoupsDeMain />
 
-      {/* ═══ FLUX VERTICAL UNIQUE, plus de colonne aside isolée ═══
-          Ordre cockpit : Header + Action prioritaire → KPI strip Mon activité
-          → Activation → Opportunités → Profil (accordéon). */}
+      {/* Grille lots D1 et D2 : colonne principale 720 px, colonne de droite 328 px, écart 48 px */}
       <div className="min-w-0">
-        {isNewSitter ? (
-          <div className="mx-auto w-full max-w-4xl lg:max-w-6xl px-4 sm:px-5 lg:px-8 lg:grid lg:grid-cols-12 lg:gap-6 lg:items-start">
-            {/* ═══ FLUX principal (gauche), rythme vertical 52px ═══ */}
-            <div className="min-w-0 space-y-[52px] lg:col-span-8">
-              {/* 1. ACCUEIL, salutation Bienvenue */}
-              <div className="min-w-0">
-                <SitterCockpit
-                  firstName={user?.firstName}
-                  avatarUrl={avatarUrl}
-                  isFounder={user?.isFounder}
-                  isAvailable={isAvailable}
-                  greeting="Bienvenue"
-                />
+        <div className="mx-auto w-full max-w-[720px] lg:max-w-[1160px] px-4 sm:px-5 lg:px-8 lg:grid lg:grid-cols-[minmax(0,720px)_328px] lg:gap-[48px] lg:justify-center lg:items-start">
+          <div className="min-w-0 space-y-[34px] md:space-y-[52px]">
+            {/* 1. Accueil */}
+            <SitterCockpit
+              firstName={user?.firstName}
+              isAvailable={!!isAvailable}
+              greeting={isNewSitter ? "Bienvenue" : undefined}
+              line={cockpitLine}
+              todos={todos}
+            />
+
+            {(nextGuardError || nearbyError) && (
+              <div className="space-y-2">
+                {nextGuardError && (
+                  <DashboardSectionState variant="error" eyebrow="Prochaine garde" description={nextGuardError} onRetry={() => window.location.reload()} />
+                )}
+                {nearbyError && (
+                  <DashboardSectionState variant="error" eyebrow="Annonces à proximité" description={nearbyError} onRetry={() => window.location.reload()} />
+                )}
               </div>
+            )}
 
-              {/* 2. LA STAR, complétion : SitterOpeningCard (remplace ChecklistBlock
-                  et le bandeau code postal manquant dans cette branche uniquement). */}
-              {!allChecklistDone && (
-                <div className="">
-                  <SitterOpeningCard
-                    hasAvatar={!!avatarUrl}
-                    hasBioMin={!!(bio && bio.length >= 50)}
-                    hasPostalCode={!!postalCode}
-                  />
-                </div>
-              )}
+            {/* 2. Nouveau gardien : la liste d'ouverture est la vedette tant qu'elle n'est pas terminée */}
+            {openingVisible && (
+              <SitterOpeningCard
+                hasAvatar={!!avatarUrl}
+                hasBioMin={!!(bio && bio.length >= 50)}
+                hasPostalCode={!!postalCode}
+              />
+            )}
 
-              {/* 3. ÉMOTION : les trois gardes les plus pertinentes, comme
-                  dans la branche gardien confirmé. */}
+            {/* 3. Vedette unique et « Aussi pour vous », puis l'encart unique */}
+            <div className="min-w-0 space-y-[22px]">
               <SitterMatchSection
                 topSits={topSits}
                 fallbackSits={fallbackSits}
                 rankingSource={rankingSource}
-                totalPublished={totalPublished}
                 isLoading={nbaLoading}
+                totalPublished={totalPublished}
+                layout={openingVisible ? "rows" : "star"}
               />
-
-              {/* Occasions manquées : deux manques max, chiffrés sur les
-                  annonces en ligne. Disparaît quand tout est répondu. */}
-              <SitterMissingOpportunities />
-
-              {/* 4. ENTRAIDE bidimensionnelle (vague 20) */}
-              <div className="">
-                <SitterEntraideSection
-                  firstNearbyMission={firstNearbyMission}
-                  myActiveMission={myActiveMission}
-                  nearbyHelpersCount={nearbyHelpersCount}
-                />
-              </div>
-
+              <SitterMissingOpportunities fallbackTotalPublished={totalPublished} />
             </div>
 
+            {/* 4. Bandeau entraide */}
+            <OwnerEntraideBand
+              helpersCount={nearbyHelpersCount}
+              helpersRadiusKm={helpersProximity?.radiusKm ?? 30}
+              mission={firstNearbyMission}
+              activeMission={myActiveMission}
+              headline={SITTER_ENTRAIDE_HEADLINE}
+            />
 
+            {/* 5. Colonne de droite en mobile : après l'entraide */}
+            <div className="lg:hidden space-y-[22px]">{railContent}</div>
 
-            {/* ═══ RAIL droite, espacement 34px, mt-[52px] mobile. Collant
-                seulement si son contenu tient dans la fenêtre, sinon il
-                défile avec la page : jamais de défilement interne. ═══ */}
-            <DashboardRail>
-              {/* a. Pouls : seul bloc sombre de la page */}
-              <div className="">
-                <CommunityPulseBanner userId={user?.id} />
-              </div>
-
-              {/* b. Prochain pas : terracotta doux, titre Playfair, progression */}
-              {nextStepRail && (
-                <div className="">
-                  <NextStepRailCard step={nextStepRail} />
-                </div>
-              )}
-
-              {/* c. Alma : une seule voix par écran, portée par le rail */}
-              <div className="">
-                <AlmaRailWhisper
-                  profileCompletion={profileCompletion ?? 0}
-                  isAvailable={!!isAvailable}
-                  variant="newSitter"
-                  openingCardVisible={!allChecklistDone}
-                />
-              </div>
-
-              {/* d. À lire : fiche race, saison, journal (3 liens max) */}
-              {railReadings.length > 0 && (
-                <div className="">
-                  <RailReadingsCard items={railReadings} />
-                </div>
-              )}
-
-              {/* e. Conseils compagnons, tuiles pratiques, PAS une voix Alma :
-                  le heading visible ne mentionne pas Alma (déjà portée par
-                  AlmaRailWhisper ci-dessus), le contenu reste inchangé. */}
-              <div className="">
-                <PetAdviceSection role="sitter" variant="rail" context={petAdviceContext} addPetTo="/profile?section=sitter" />
-              </div>
-
-
-
-              {/* 5. Accès (Gate ou Free) : clôt toujours le rail */}
-              <div className="">
-                {!(level === 4 || level === "3B")
-                  ? <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
-                  : <FreePeriodBanner />}
-              </div>
-            </DashboardRail>
+            {/* 6. Pouls */}
+            <CommunityPulseLine testId="sitter-pulse-line" />
           </div>
 
-        ) : (
-          <div className="mx-auto w-full max-w-4xl lg:max-w-6xl px-4 sm:px-5 lg:px-8 lg:grid lg:grid-cols-12 lg:gap-6 lg:items-start">
-            {/* ═══ FLUX principal (gauche) ═══ rythme vertical 52px (vague 3) */}
-            <div className="min-w-0 space-y-[52px] lg:col-span-8">
-              {/* COCKPIT */}
-              <div className="min-w-0">
-                <SitterCockpit
-                  firstName={user?.firstName}
-                  avatarUrl={avatarUrl}
-                  isFounder={user?.isFounder}
-                  isAvailable={isAvailable}
-                  nextGuard={nextGuard}
-                  profileCompletion={profileCompletion}
-                  postalCode={postalCode}
-                  nearbyListings={nearbyListings}
-                  competencesCount={competencesCount}
-                  interestsCount={interestsCount}
-                />
-              </div>
-
-              {(nextGuardError || nearbyError) && (
-                <div className="space-y-2">
-                  {nextGuardError && (
-                    <DashboardSectionState
-                      variant="error"
-                      eyebrow="Prochaine garde"
-                      description={nextGuardError}
-                      onRetry={() => window.location.reload()}
-                    />
-                  )}
-                  {nearbyError && (
-                    <DashboardSectionState
-                      variant="error"
-                      eyebrow="Annonces à proximité"
-                      description={nearbyError}
-                      onRetry={() => window.location.reload()}
-                    />
-                  )}
-                </div>
-              )}
-
-              {/* VAGUE 2, carte rencontre, star unique de l'écran */}
-              <div className="">
-                <SitterMatchSection
-                  topSits={topSits}
-                  fallbackSits={fallbackSits}
-                  rankingSource={rankingSource}
-                  isLoading={nbaLoading}
-                  totalPublished={totalPublished}
-                />
-              </div>
-
-              {/* Occasions manquées : deux manques max, chiffrés sur les
-                  annonces en ligne. Disparaît quand tout est répondu. */}
-              <SitterMissingOpportunities />
-
-              {/* ENTRAIDE : remontée juste après la rencontre (refonte rail,
-                  août 2026). Les deux volets sont côte à côte sur desktop. */}
-              <div className="">
-                <SitterEntraideSection
-                  firstNearbyMission={firstNearbyMission}
-                  myActiveMission={myActiveMission}
-                  nearbyHelpersCount={nearbyHelpersCount}
-                />
-              </div>
-
-              {/* VAGUE 3, tuiles histoire (remplace SitterActivityPanel côté confirmé) */}
-              <div className="">
-                <SitterStoryTiles
-                  pendingAppsCount={pendingAppsCount ?? 0}
-                  unreadCount={unreadCount ?? 0}
-                  badgeCount={badgeCount ?? 0}
-                />
-              </div>
-
-              {/* Association du département : carte discrète après les blocs principaux */}
-              <NearbyAssociationCard />
-
-              {ChecklistBlock}
-
-            </div>
-
-
-
-            {/* ═══ RAIL droite : a. Pouls  b. Prochain pas  c. Alma  d. À lire  + accès.
-                Collant seulement si son contenu tient dans la fenêtre. ═══ */}
-            <DashboardRail>
-              {/* a. Pouls : seul bloc sombre de la page */}
-              <div className="">
-                <CommunityPulseBanner userId={user?.id} />
-              </div>
-
-              {/* b. Prochain pas : terracotta doux, titre Playfair, progression */}
-              {nextStepRail && (
-                <div className="">
-                  <NextStepRailCard step={nextStepRail} />
-                </div>
-              )}
-
-              {/* c. Alma : une seule voix par écran, portée par le rail */}
-              <div className="">
-                <AlmaRailWhisper
-                  profileCompletion={profileCompletion ?? 0}
-                  isAvailable={!!isAvailable}
-                  checklistVisible={!allChecklistDone}
-                />
-              </div>
-
-              {/* d. À lire : fiche race, saison, journal (3 liens max) */}
-              {railReadings.length > 0 && (
-                <div className="">
-                  <RailReadingsCard items={railReadings} />
-                </div>
-              )}
-
-              {/* e. Conseils compagnons, tuiles pratiques, PAS une voix Alma :
-                  le heading visible ne mentionne pas Alma (déjà portée par
-                  AlmaRailWhisper ci-dessus), le contenu reste inchangé. */}
-              <div className="">
-                <PetAdviceSection role="sitter" variant="rail" context={petAdviceContext} addPetTo="/profile?section=sitter" />
-              </div>
-
-
-
-              {/* 5. Accès (Gate ou Free) : clôt toujours le rail */}
-              <div className="">
-                {!(level === 4 || level === "3B")
-                  ? <AccessGateBanner level={level} profileCompletion={accessProfileCompletion} context="guard" />
-                  : <FreePeriodBanner />}
-              </div>
-            </DashboardRail>
+          {/* Colonne de droite, desktop */}
+          <div className="hidden lg:block">
+            <DashboardRail layout="compact">{railContent}</DashboardRail>
           </div>
-        )}
+        </div>
       </div>
 
-
-
-      {/* Lien discret "Revoir la présentation" */}
-      <div className="px-4 sm:px-5 md:px-8 mt-2 mb-4 text-center">
+      <div className="px-4 sm:px-5 md:px-8 mt-[22px] mb-4 text-center">
         <button onClick={() => setSearchParams({ tour: "true" })} className="text-xs text-muted-foreground underline-offset-4 hover:underline">
           Revoir la présentation
         </button>
       </div>
 
-
-      {/* CTA sticky mobile */}
-
+      {/* CTA collant mobile : seulement s'il y a des candidatures en attente ou des messages non lus */}
       <SitterMobileStickyCTA pendingAppsCount={pendingAppsCount} unreadCount={unreadCount} />
     </div>
   );
