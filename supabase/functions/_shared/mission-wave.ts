@@ -8,8 +8,30 @@
 
 export const WAVE_SIZE = 10;
 export const WAVE_INTERVAL_HOURS = 48;
-/** Au plus trois vagues par besoin, soit trente personnes prévenues. */
-export const WAVE_MAX_COUNT = 3;
+/** Au plus cinq vagues par besoin, soit cinquante personnes prévenues. */
+export const WAVE_MAX_COUNT = 5;
+/** Une réponse « pending » plus ancienne que ce délai cesse de geler la diffusion. */
+export const PENDING_RESPONSE_GRACE_DAYS = 5;
+
+export interface WaveResponseRow {
+  status: string;
+  created_at: string;
+}
+
+/**
+ * Réponses qui gèlent la diffusion : toutes les « accepted », plus les
+ * « pending » de moins de PENDING_RESPONSE_GRACE_DAYS jours. Les autres
+ * statuts (withdrawn, declined) sont ignorés.
+ */
+export function countFreezingResponses(rows: WaveResponseRow[], now: Date): number {
+  const graceMs = PENDING_RESPONSE_GRACE_DAYS * 24 * 3600 * 1000;
+  let n = 0;
+  for (const r of rows) {
+    if (r.status === "accepted") n++;
+    else if (r.status === "pending" && now.getTime() - new Date(r.created_at).getTime() < graceMs) n++;
+  }
+  return n;
+}
 /** En deçà de ce rayon, personne de disponible signifie vraiment personne. */
 export const WAVE_MIN_RADIUS_KM = 30;
 
