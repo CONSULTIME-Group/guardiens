@@ -309,7 +309,7 @@ export const canPublishSit = (input: SitPublishInput): boolean =>
 export interface SitPublishRequirementsOptions {
   /**
    * La publication passera par le formulaire de création, qui exige deux
-   * questions de 30 caractères. La checklist doit l'annoncer avant le clic,
+   * questions de MIN_SUB_DESCRIPTION caractères. La checklist doit l'annoncer avant le clic,
    * même quand l'annonce est évaluée en bloc unique.
    */
   viaCreateForm?: boolean;
