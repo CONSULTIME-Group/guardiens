@@ -1,3 +1,4 @@
+import { formatFirstName } from "./formatFirstName";
 /**
  * Prénom public d'un membre.
  *
@@ -43,14 +44,7 @@ export function publicFirstName(value: string | null | undefined): string {
   return kept.join(" ");
 }
 
-/**
- * Capitalise chaque mot d'un prénom, y compris les prénoms composés reliés
- * par un espace ou un trait d'union. « JEAN CLAUDE » devient « Jean Claude ».
- */
+/** Casse d'affichage d'un prénom, délègue à formatFirstName (règle unique). */
 export function capitalizeFirstName(value: string | null | undefined): string {
-  if (!value) return "";
-  return value
-    .toLocaleLowerCase("fr-FR")
-    .replace(/(^|[\s\-'’])(\p{L})/gu, (_m, sep: string, letter: string) =>
-      sep + letter.toLocaleUpperCase("fr-FR"));
+  return formatFirstName(value);
 }
