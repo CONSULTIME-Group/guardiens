@@ -10,7 +10,7 @@ import { trackEvent } from "@/lib/analytics";
 type Load =
   | { status: "loading" }
   | { status: "ready"; firstName: string; helpsWith: string }
-  | { status: "expired" };
+  | { status: "expired" | "invalid" };
 
 const callMaLigne = async (body: Record<string, unknown>) => {
   const { data, error } = await supabase.functions.invoke("ma-ligne", { body });
@@ -39,7 +39,7 @@ const MaLigne = () => {
         setLoad({ status: "ready", firstName: formatFirstName(res.first_name ?? ""), helpsWith: res.helps_with ?? "" });
         trackEvent("helps_line_page_viewed", { source, metadata: { mode: source } });
       } else {
-        setLoad({ status: "expired" });
+        setLoad({ status: res?.state === "expired" ? "expired" : "invalid" });
         if (token) trackEvent("helps_line_token_expired", { source, metadata: { state: res?.state ?? res?.reason ?? "unknown" } });
       }
     });
@@ -59,7 +59,7 @@ const MaLigne = () => {
           <div className="mt-4 h-10 w-full rounded bg-muted" />
         </div>
       )}
-      {load.status === "expired" && (
+      {(load.status === "expired" || load.status === "invalid") && (
         <div className="mx-auto flex max-w-[36rem] flex-col gap-[52px] px-5 py-16">
           <header>
             <p className="flex items-center gap-2.5 text-[11px] font-semibold uppercase tracking-[2px] text-secondary">
@@ -67,7 +67,7 @@ const MaLigne = () => {
               Entraide
             </p>
             <h1 className="mt-3 font-heading text-[1.75rem] font-semibold leading-tight text-foreground sm:text-4xl">
-              Ce lien a fait son temps.
+              {load.status === "expired" ? "Ce lien a fait son temps." : "Ce lien mène ailleurs."}
             </h1>
             <p className="mt-3 text-base text-muted-foreground">
               Connectez-vous pour écrire votre ligne, elle vous attend sur votre tableau de bord.
