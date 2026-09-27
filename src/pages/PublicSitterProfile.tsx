@@ -78,6 +78,34 @@ import { avatarImageUrl, storageImageUrl } from "@/lib/storageImage";
 import { petSpeciesLabel } from "@/lib/petLabels";
 import { isRadiusDeclared } from "@/lib/searchRadius";
 import { countLabel } from "@/lib/pluralizeFr";
+import {
+  SitterIdentityHero,
+  SitterSkillsSection,
+  EditorialReview,
+  SitterAboutSection,
+  EntraideBand,
+  HowItWorksSteps,
+  SitterContactCard,
+  SitterStickyBar,
+  SectionHeading,
+} from "@/components/profile/sitter/SitterF1Sections";
+import { groupSitterSkills, skillsHeadline } from "@/lib/sitterSkillGroups";
+import { pickProfileQuote } from "@/lib/profileQuote";
+import {
+  meetingPreferenceLabel,
+  homeFactLabel,
+  assetsLabel,
+  listLabel,
+  entraideBandText,
+} from "@/lib/sitterProfileFacts";
+
+/** Pages entraide par ville réellement routées (App.tsx). */
+const ENTRAIDE_CITY_SLUGS = new Set([
+  "lyon", "marseille", "strasbourg", "paris", "toulouse", "lille", "annecy", "nice",
+  "nantes", "saint-etienne", "rennes", "montpellier", "grenoble", "bordeaux",
+]);
+const citySlugOf = (c: string) =>
+  c.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
 
 // Capitalise chaque mot, pour ne pas abîmer les prénoms composés
@@ -598,6 +626,22 @@ export default function PublicSitterProfile() {
 
   const { data: communityPulse } = useCommunityPulse();
 
+  // Ligne « ce que je propose » (vue public_helpers, lisible par les visiteurs).
+  const [helpsWith, setHelpsWith] = useState<string | null>(null);
+  useEffect(() => {
+    if (!id) return;
+    let cancelled = false;
+    (supabase as any)
+      .from("public_helpers")
+      .select("helps_with")
+      .eq("id", id)
+      .maybeSingle()
+      .then(({ data }: any) => {
+        if (!cancelled) setHelpsWith((data?.helps_with as string | null) ?? null);
+      }, () => {});
+    return () => { cancelled = true; };
+  }, [id]);
+
 
   const [loadError, setLoadError] = useState<null | 'error'>(null);
   const [loadNonce, setLoadNonce] = useState(0);
@@ -620,7 +664,7 @@ export default function PublicSitterProfile() {
       // Vue publique : alignée sur les entrées scorées du moteur (symétrie
       // du 23/08/2026), sauf sensitivities (donnée de santé, jamais exposée).
       const PUBLIC_SITTER_COLS =
-        "user_id, motivation, sitter_type, accompanied_by, lifestyle, animal_types, has_vehicle, has_license, geographic_radius, min_stay_duration, is_available, competences, special_animal_skills, preferred_frequency, min_notice, preferred_environments, farm_animals_ok, own_animals, reply_median_minutes, travels_with_children, travels_with_own_animals, work_during_sit, availability_during, experience_years, languages, interests, life_pace";
+        "user_id, motivation, sitter_type, accompanied_by, lifestyle, animal_types, has_vehicle, has_license, geographic_radius, min_stay_duration, is_available, competences, special_animal_skills, preferred_frequency, min_notice, preferred_environments, farm_animals_ok, own_animals, reply_median_minutes, travels_with_children, travels_with_own_animals, work_during_sit, availability_during, experience_years, languages, interests, life_pace, meeting_preference";
       const [profileRes, baseProfileRes, sitterRes, reviewsRes, galleryRes, emergencyRes, subRes, ownerRes, missionsRes, extExpRes] =
         await Promise.all([
           supabase.from("public_profiles").select(PUBLIC_PROFILE_COLS).eq("id", id).maybeSingle(),
@@ -1502,16 +1546,8 @@ export default function PublicSitterProfile() {
 
 
 
-  return (
-    <div id="main-content" className="min-h-screen bg-background">
-      {/* Coquille connectée : en tête et pilule de navigation, pour ne pas
-          enfermer l'utilisateur sur cette page. Visiteur : rendu inchangé. */}
-      {hasSession && (
-        <PublicHeader authedVariant />
-      )}
-      {/* Fil d'Ariane : niveau département inséré quand il est connu.
-          Un lien n'est posé que si la page cible existe et est publiée. */}
-      <div className="[&_nav_a]:inline-flex [&_nav_a]:min-h-11 [&_nav_a]:min-w-11 [&_nav_a]:items-center [&_nav_a]:justify-center">
+  const breadcrumbNode = (
+    <div className="[&_nav_a]:inline-flex [&_nav_a]:min-h-11 [&_nav_a]:min-w-11 [&_nav_a]:items-center [&_nav_a]:justify-center">
         <PageBreadcrumb
           items={[
           { label: "Gardiens", href: "/recherche-gardiens" },
@@ -1530,7 +1566,19 @@ export default function PublicSitterProfile() {
           { label: firstName },
           ]}
         />
-      </div>
+    </div>
+  );
+
+  return (
+    <div id="main-content" className="min-h-screen bg-background">
+      {/* Coquille connectée : en tête et pilule de navigation, pour ne pas
+          enfermer l'utilisateur sur cette page. Visiteur : rendu inchangé. */}
+      {hasSession && (
+        <PublicHeader authedVariant />
+      )}
+      {/* Fil d'Ariane : niveau département inséré quand il est connu.
+          Un lien n'est posé que si la page cible existe et est publiée. */}
+      {activeTab !== 'gardien' && breadcrumbNode}
 
       {/* JSON-LD */}
       {profile && (
@@ -1580,6 +1628,36 @@ export default function PublicSitterProfile() {
           heroWeights,
           overrideIndex,
         );
+        if (activeTab === 'gardien') {
+          return (
+            <SitterIdentityHero
+              id={id}
+              firstName={firstName}
+              city={city || null}
+              departmentName={geoInfo.deptName}
+              avatarUrl={profile.avatar_url || null}
+              heroDesktop={heroDesktop}
+              heroMobile={heroMobile}
+              heroAnchor={anchor}
+              isOwnProfile={isOwn}
+              onOpenHeroPicker={() => setHeroPickerOpen(true)}
+              onOpenAvatarLightbox={() => hasAvatar && setLightboxIdx(0)}
+              hasAvatarLightbox={hasAvatar}
+              breadcrumb={breadcrumbNode}
+              memberSince={profile?.created_at ?? null}
+              completedSits={completedSits}
+              identityVerified={!!profile?.identity_verified}
+              avgRating={heroAvg}
+              reviewCount={heroCount}
+              isAvailable={isAvailable}
+              hasActiveSubscription={hasActiveSubscription}
+              emergencyActive={emergencyActive}
+              statutGardien={reputation?.statut_gardien ?? null}
+              replyMedianMinutes={sitterProfile?.reply_median_minutes ?? null}
+              quote={pickProfileQuote(bio, motivation)}
+            />
+          );
+        }
         return (
           <ProfileHero
             id={id}
@@ -1690,9 +1768,8 @@ export default function PublicSitterProfile() {
       {/* ── SÉPARATEUR ── */}
       {availableTabs <= 1 && <hr className="border-border max-w-5xl mx-auto" />}
 
-      {/* ── ONGLET GARDIEN (refonte "outil de décision") ───────────────── */}
+      {/* ── ONGLET GARDIEN, fiche allégée (lot F1) ───────────────────── */}
       {activeTab === 'gardien' && (() => {
-        // ── Rail droit (vague 37 Lot 4) : Affinité, Alma, Pouls ─────────
         const redirectTo = `/gardiens/${id}?tab=gardien`;
         const affinityNode = !isAuthenticated
           ? <AffinityTeaserCard sitterFirstName={firstName} redirectTo={redirectTo} />
@@ -1720,246 +1797,149 @@ export default function PublicSitterProfile() {
           almaPhrase = `L'identité de ${firstName} a été vérifiée à partir d'une pièce officielle.`;
         }
         const almaNode = !isOwn ? <AlmaWhisperCard phrase={almaPhrase} /> : null;
-        // Pouls : chiffres RÉELS. Local via useCityStats trop coûteux ici ; on
-        // sert les chiffres globaux depuis useCommunityPulse (déjà en cache).
-        // Pouls local : à partir de LOCAL_PULSE_MIN_SITTERS gardiens actifs
-        // dans le département, le chiffre réel remplace le chiffre national.
-        const pulseLocal =
-          geoInfo.deptName && deptSitterCount != null && deptSitterCount >= LOCAL_PULSE_MIN_SITTERS
-            ? [{ value: deptSitterCount, label: "gardiens actifs" }]
-            : [];
-        const pulseGlobal = communityPulse
-          ? [
-              { value: communityPulse.maisonsGardees, label: "maisons gardées avec Guardiens" },
-              { value: communityPulse.totalInscrits, label: "membres actifs" },
-            ]
-          : [];
-        const pulseNode = <CommunityPulseCard city={city || null} areaLabel={pulseAreaLabel} local={pulseLocal} global={pulseGlobal} />;
 
-        const railChildren = (
+        // Savoir-faire
+        const { groups: skillGroups, totalCount: skillsTotal } = groupSitterSkills({
+          animalTypes, competences, specialSkills,
+        });
+        const headline = skillsHeadline(animalTypes, skillGroups.some((g) => g.key === 'soins'), firstName);
+
+        // Avis
+        const sortedSitterReviews = [...sitterRoleReviews].sort((a: any, b: any) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        const showReviewChips = gardeReviews.length > 0 && missionReviews.length > 0;
+        const filteredReviews = !showReviewChips || reviewFilter === 'all'
+          ? sortedSitterReviews
+          : reviewFilter === 'gardes' ? gardeReviews : missionReviews;
+        const visibleReviews = showAllGardeReviews ? filteredReviews : filteredReviews.slice(0, 3);
+        const reviewBadgeIds = new Set<string>(
+          sitterRoleReviews.flatMap((r: any) => (r.sit_id ? badgesBySitId[r.sit_id] || [] : [])),
+        );
+        const otherBadges = (userBadges || []).filter((b: any) => !reviewBadgeIds.has(b.badge_id));
+
+        // Qui est
+        const aboutFacts = [
+          { label: "Langues", value: listLabel(sitterLanguages, ["Autre"]) },
+          { label: "Centres d'intérêt", value: listLabel(sitterInterests) },
+          { label: "À la maison", value: homeFactLabel(sitterProfile?.own_animals, sitterProfile?.life_pace) },
+          { label: "Atouts", value: assetsLabel(declaredCertifications, sitterProfile?.has_license, sitterProfile?.has_vehicle) },
+        ].filter((f) => f.value);
+
+        // Bandeau entraide
+        const band = entraideBandText({ firstName, city: city || null, helpsWith, competences });
+        const citySlug = city ? citySlugOf(city) : "";
+        const bandLink = hasEntraide
+          ? { label: `Voir l'entraide de ${firstName}`, onClick: () => handleTabChange('entraide') }
+          : citySlug && ENTRAIDE_CITY_SLUGS.has(citySlug)
+            ? { label: `L'entraide à ${city}`, to: `/petites-missions/${citySlug}` }
+            : null;
+
+        // Carte contact
+        const animalsFact = animalTypes.length > 0
+          ? (animalTypes.some((a) => a.toLowerCase() === 'tous')
+              ? "Tous"
+              : animalTypes.map((a) => ANIMAL_LABELS[a] || a).join(", "))
+          : "";
+        const contactFacts = [
+          { label: "Animaux", value: animalsFact },
+          { label: "Rayon", value: radius ? `${radius} km` : "" },
+          { label: "Durée", value: durationLabel },
+          { label: "Avant la garde", value: meetingPreferenceLabel(sitterProfile?.meeting_preference) },
+          { label: "Expérience", value: experienceLabel },
+          { label: "Avis", value: sitterRoleCount > 0 ? `★ ${sitterRoleAvg.toFixed(1)} (${sitterRoleCount})` : "" },
+        ].filter((f) => f.value);
+
+        const firstSitDate = gardeReviews
+          .map((r: any) => r.sit_start_date as string | null)
+          .filter(Boolean)
+          .sort()[0] ?? null;
+
+        const journeyBlock = (anchorId: string) => (
+          <section id={anchorId} aria-label={`Parcours de ${firstName}`} className="scroll-mt-24 px-1">
+            <p className="flex items-center gap-2 text-[12px] uppercase tracking-[0.16em] text-secondary font-body font-semibold mb-[14px]">
+              <span aria-hidden="true" className="inline-block h-px w-[22px] bg-secondary" />
+              Son parcours
+            </p>
+            {reviews.length === 0 && (userBadges || []).length === 0 && completedSits === 0 ? (
+              <div className="text-sm [&_section]:border-0 [&_section]:bg-transparent [&_section]:p-0">
+                <FreshStartStory
+                  firstName={firstName}
+                  createdAt={profile?.created_at}
+                  lastSeenAt={profile?.last_seen_at ?? null}
+                  identityVerified={!!profile?.identity_verified}
+                />
+              </div>
+            ) : (
+              <TrustTimeline
+                variant="compact"
+                memberSince={profile?.created_at}
+                reviews={sitterRoleReviews}
+                badges={[]}
+                completedSits={completedSits}
+                firstSitDate={firstSitDate}
+                firstName={firstName}
+              />
+            )}
+            <div className="mt-[14px] space-y-2 text-sm">
+              {otherBadges.length > 0 && (
+                <BadgeRow
+                  badges={otherBadges.map((b: any) => ({ badge_id: b.badge_id, created_at: b.created_at, count: b.count ?? 1 }))}
+                  size="compact"
+                />
+              )}
+              {id && <MissionBadgesReceived profileId={id} variant="compact" />}
+              {id && <HelpCounts userId={id} />}
+            </div>
+          </section>
+        );
+
+        const railChildren = (mobile: boolean) => (
           <>
+            <SitterContactCard
+              firstName={firstName}
+              cta={heroCta}
+              reassurance={heroCtaReassurance}
+              facts={contactFacts}
+              showButton={mobile ? "md" : "always"}
+              sticky={!mobile}
+            />
+            {journeyBlock(mobile ? "confiance-mobile" : "confiance")}
             {affinityNode}
             {almaNode}
-            {pulseNode}
             {reportNode}
           </>
         );
 
         return (
-        <div data-profile-content className="max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-8 pb-[calc(10.5rem+env(safe-area-inset-bottom))] md:pb-8">
-          <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-8">
-          {/* ── FLUX NARRATIF UNIFIÉ (vague 37) ────────────────────────────
-              Mobile et desktop partagent le même flux vertical. Les onglets
-              Radix sont supprimés au profit de sections continues séparées de
-              52 px. L'ancre `#confiance` sert désormais aux deux breakpoints. */}
+        <div data-profile-content className="max-w-5xl mx-auto px-4 md:px-6 py-[34px] md:py-[52px] pb-[calc(10.5rem+env(safe-area-inset-bottom))] md:pb-[52px]">
+          <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-[52px]">
           <div className="space-y-[52px] min-w-0">
 
+            <SitterSkillsSection
+              groups={skillGroups}
+              totalCount={skillsTotal}
+              headline={headline}
+              competences={competences}
+              specialSkills={specialSkills}
+            />
 
-            {/* 1. StoryTiles narratives (3 tuiles max, jamais « Non renseigné ») */}
-            {(() => {
-              const tiles: StoryTileInput[] = [];
-              if (animalTypes.length > 0) {
-                tiles.push({
-                  key: 'animaux',
-                  Icon: PawPrint,
-                  title: animalTypes.map((a) => ANIMAL_LABELS[a] || a).join(', '),
-                  detail: 'Animaux acceptés en garde',
-                });
-              }
-              if (radius || city) {
-                const zoneTitle = radius && city
-                  ? `${city}, jusqu'à ${radius} km`
-                  : radius
-                    ? `Jusqu'à ${radius} km autour`
-                    : (city as string);
-                tiles.push({
-                  key: 'zone',
-                  Icon: MapPin,
-                  title: zoneTitle,
-                  detail: hasVehicle ? 'Se déplace avec véhicule' : null,
-                });
-              }
-              const hasAvailabilityHint = Boolean(durationLabel || frequencyLabel || noticeLabel);
-              if (isAvailable) {
-                tiles.push({
-                  key: 'dispo',
-                  Icon: CalendarClock,
-                  title: 'Disponible maintenant',
-                  detail: durationLabel || frequencyLabel || null,
-                });
-              } else if (hasAvailabilityHint) {
-                tiles.push({
-                  key: 'dispo',
-                  Icon: CalendarClock,
-                  title: 'Sur demande',
-                  detail: durationLabel || frequencyLabel || null,
-                });
-              }
-              return <StoryTiles tiles={tiles} />;
-            })()}
-
-            {/* 2. Qui est {prénom}, bio + motivation + grille de faits */}
-            <section aria-label={`À propos de ${firstName}`} className="scroll-mt-20">
-              <div className="mb-5">
-                <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-secondary">
-                  À propos
-                </p>
-                <h2 className="font-heading text-[22px] sm:text-[26px] font-semibold text-foreground mt-1 leading-tight">
-                  Qui est {firstName}.
-                </h2>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Ses mots, ses habitudes, sa manière de faire.
-                </p>
-              </div>
-              <div className="space-y-6">
-                {(motivation || bio) ? (
-                  <div className="space-y-4 max-w-2xl">
-                    {motivation && (
-                      <p className="text-base text-foreground leading-relaxed font-body">
-                        {motivation}
-                      </p>
-                    )}
-                    {bio && (
-                      <p className="text-sm text-foreground/75 leading-relaxed font-body whitespace-pre-line">
-                        {bio}
-                      </p>
-                    )}
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground italic font-body">
-                    La présentation de {firstName} arrive bientôt.
-                  </p>
-                )}
-
-                {/* 2 bis. Formations déclarées, liste fermée, trois au plus.
-                    Le mot « déclarées » figure une seule fois, dans le titre. */}
-                {declaredCertifications.length > 0 && (
-                  <section
-                    aria-label="Formations et certifications déclarées"
-                    className="rounded-2xl border border-border bg-muted/30 p-5"
-                  >
-                    <h2 className="font-heading text-lg font-semibold text-foreground">
-                      Formations et certifications déclarées
-                    </h2>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {declaredCertifications.map((label) => (
-                        <span
-                          key={label}
-                          className="inline-flex items-center rounded-full border border-border bg-background px-3 py-1.5 text-sm text-foreground"
-                        >
-                          {label}
-                        </span>
-                      ))}
-                    </div>
-                  </section>
-                )}
-
-                <PracticalGrid
-                  animalTypes={animalTypes}
-                  sitterProfile={sitterProfile}
-                  radius={radius}
-                  city={city}
-                  competences={competences}
-                  specialSkills={specialSkills}
-                  lifestyle={lifestyle}
-                  lifePace={lifePace}
-                  preferredEnvironments={preferredEnvironments}
-                  languages={sitterLanguages}
-                  interests={sitterInterests}
-                  typeLine={typeLine}
-                  durationLabel={durationLabel}
-                  frequencyLabel={frequencyLabel}
-                  noticeLabel={noticeLabel}
-                  mobilityLabel={mobilityLabel}
-                  presenceLabel={presenceLabel}
-                  experienceLabel={experienceLabel}
-                  deptName={geoInfo.deptName}
-                  deptCode={geoInfo.deptCode}
-                  regionName={geoInfo.regionName}
-                  deptSlug={geoInfo.deptSlug}
-                />
-                <PublicExperiences experiences={externalExperiences} />
-              </div>
-            </section>
-
-            {/* 3. Confiance : timeline + badges. Ancre unique #confiance,
-                également ciblée par le fallback #confiance-mobile du hero. */}
-            {((userBadges && userBadges.length > 0) || profile?.created_at) && (
-              <TrustStory
-                variant="desktop"
-                title={`Ce qui rassure chez ${firstName}.`}
-                eyebrow="Confiance"
-              >
-                <span id="confiance-mobile" aria-hidden="true" />
-                <div className="space-y-6">
-                  {userBadges && userBadges.length > 0 && (
-                    <div id="badges" className="scroll-mt-24 space-y-6">
-                      <SpecialBadgeHighlight userBadges={userBadges} showObtainedMonth />
-                      <BadgeRow badges={userBadges} showLabel showObtainedMonth />
-                    </div>
-                  )}
-                  {id && <MissionBadgesReceived profileId={id} />}
-                  {id && <HelpCounts userId={id} className="mt-2" />}
-                  {reviews.length === 0 && (userBadges || []).length === 0 && completedSits === 0 ? (
-                    <FreshStartStory
-                      firstName={firstName}
-                      createdAt={profile?.created_at}
-                      lastSeenAt={profile?.last_seen_at ?? null}
-                      identityVerified={!!profile?.identity_verified}
-                    />
-                  ) : (
-                    <TrustTimeline
-                      memberSince={profile?.created_at}
-                      reviews={reviews}
-                      badges={(userBadges || []).map((b: any) => ({
-                        badge_id: b.badge_id,
-                        created_at: b.created_at,
-                        count: b.count ?? 1,
-                      }))}
-                      completedSits={completedSits}
-                      lastActivity={profile?.last_seen_at ?? null}
-                      firstName={firstName}
-                    />
-                  )}
-                </div>
-              </TrustStory>
-            )}
-
-            {/* 4. Avis, liste réelle ou empty raconté */}
+            {/* Avis : titre et résumé conservés, blocs éditoriaux */}
             <section aria-label="Avis reçus" className="scroll-mt-20">
-              <div className="mb-5">
-                <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-secondary">
-                  Avis
-                </p>
-                <h2 className="font-heading text-[22px] sm:text-[26px] font-semibold text-foreground mt-1 leading-tight">
-                  {sitterReviewsHeading(sitterRoleCount, sitterRoleAvg, firstName).title}
-                </h2>
-                {sitterRoleCount > 0 ? (
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {sitterReviewsHeading(sitterRoleCount, sitterRoleAvg, firstName).summary}
-                  </p>
-                ) : (
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Les premiers retours des propriétaires apparaîtront ici, tels quels.
-                  </p>
-                )}
-              </div>
-              {sitterRoleCount > 0 && (() => {
-                const filtered = reviewFilter === 'gardes'
-                  ? gardeReviews
-                  : reviewFilter === 'missions'
-                    ? missionReviews
-                    : [...sitterRoleReviews].sort((a: any, b: any) =>
-                        new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-                const chips: Array<{ id: 'all' | 'gardes' | 'missions'; label: string; count: number }> = [
-                  { id: 'all', label: 'Tous', count: sitterRoleCount },
-                  { id: 'gardes', label: 'Gardes', count: gardeReviews.length },
-                  { id: 'missions', label: 'Missions', count: missionReviews.length },
-                ];
-                return (
-                  <>
-                    <div className="flex flex-wrap gap-2 mb-4" role="tablist" aria-label="Filtrer les avis">
-                      {chips.map((c) => {
+              <SectionHeading eyebrow="Avis" title={sitterReviewsHeading(sitterRoleCount, sitterRoleAvg, firstName).title} />
+              <p className="-mt-2 mb-[22px] text-sm text-muted-foreground">
+                {sitterRoleCount > 0
+                  ? sitterReviewsHeading(sitterRoleCount, sitterRoleAvg, firstName).summary
+                  : "Les premiers retours des propriétaires apparaîtront ici, tels quels."}
+              </p>
+              {sitterRoleCount > 0 && (
+                <>
+                  {showReviewChips && (
+                    <div className="flex flex-wrap gap-2 mb-[22px]" role="tablist" aria-label="Filtrer les avis">
+                      {([
+                        { id: 'all', label: 'Tous', count: sitterRoleCount },
+                        { id: 'gardes', label: 'Gardes', count: gardeReviews.length },
+                        { id: 'missions', label: 'Missions', count: missionReviews.length },
+                      ] as const).map((c) => {
                         const active = reviewFilter === c.id;
                         return (
                           <button
@@ -1969,36 +1949,43 @@ export default function PublicSitterProfile() {
                             aria-selected={active}
                             onClick={() => setReviewFilter(c.id)}
                             className={[
-                              'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-body transition-colors',
+                              'inline-flex items-center gap-1.5 rounded-[99px] border px-3 py-1.5 text-xs font-body transition-colors',
                               active
                                 ? 'bg-primary text-primary-foreground border-primary'
                                 : 'bg-card text-foreground/70 border-border hover:border-primary/40 hover:text-foreground',
                             ].join(' ')}
                           >
-                            {c.label}
-                            {c.count > 0 && (
-                              <span className={active ? 'opacity-90' : 'text-muted-foreground'}>({c.count})</span>
-                            )}
+                            {c.label} <span className={active ? 'opacity-90' : 'text-muted-foreground'}>({c.count})</span>
                           </button>
                         );
                       })}
                     </div>
-                    {filtered.length === 0 ? (
-                      <p className="text-sm text-muted-foreground italic font-body">
-                        Les avis de cette catégorie apparaîtront ici.
-                      </p>
-                    ) : (
-                      <ReviewGrid
-                        reviews={filtered}
-                        showAll={showAllGardeReviews}
-                        setShowAll={setShowAllGardeReviews}
-                        badgesBySitId={badgesBySitId}
-                      />
-                    )}
-                  </>
-                );
-              })()}
+                  )}
+                  <div>
+                    {visibleReviews.map((r: any) => (
+                      <EditorialReview key={r.id} review={r} badgeIds={r.sit_id ? badgesBySitId[r.sit_id] || [] : []} />
+                    ))}
+                  </div>
+                  <ShowMoreBtn items={filteredReviews} showAll={showAllGardeReviews} setShowAll={setShowAllGardeReviews} />
+                </>
+              )}
             </section>
+
+            <SitterAboutSection
+              firstName={firstName}
+              motivation={motivation || ""}
+              bio={bio || ""}
+              facts={aboutFacts}
+              deptLink={geoInfo.deptSlug && geoInfo.deptName
+                ? { href: `/departement/${geoInfo.deptSlug}`, label: `Voir les gardiens en ${geoInfo.deptName}` }
+                : null}
+            >
+              {externalExperiences.length > 0 ? <PublicExperiences experiences={externalExperiences} /> : null}
+            </SitterAboutSection>
+
+            {band && <EntraideBand text={band.text} link={bandLink} />}
+
+            {!isOwn && <HowItWorksSteps firstName={firstName} />}
 
             {/* 5. Galerie. Réservée aux membres connectés (décision produit) :
                 un visiteur déconnecté voit un encart sobre avec le nombre réel
@@ -2076,23 +2063,17 @@ export default function PublicSitterProfile() {
                 </div>
               </section>
             ) : null}
-            {/* Rail INLINE (mobile) : les mêmes cartes que le rail sticky
-                desktop, empilées en fin de flux. Masqué en desktop où le rail
-                sticky à droite prend le relais. */}
+            {/* Rail inline (mobile), en fin de flux. */}
             <div className="lg:hidden">
-              <ProfileRail inline>{railChildren}</ProfileRail>
+              <ProfileRail inline>{railChildren(true)}</ProfileRail>
             </div>
           </div>
 
-          {/* Rail STICKY (desktop ≥ lg), 340 px, aligné haut, self-start. */}
-          <ProfileRail>{railChildren}</ProfileRail>
+          <ProfileRail stickyMode="card">{railChildren(false)}</ProfileRail>
           </div>
-          {/* CTA sticky mobile : unifié en dehors des onglets (vague 38). */}
-
         </div>
         );
       })()}
-
 
 
       {/* ── ONGLET PROPRIO, flux narratif miroir vague 37 (vague 38) ── */}
@@ -2765,7 +2746,17 @@ export default function PublicSitterProfile() {
           Mirroir strict du CTA hero courant (facette active), gaté par
           IntersectionObserver : n'apparaît que si le hero est hors écran.
           Un seul bloc, jamais deux CTA concurrents. */}
-      {!heroCtaVisible && (() => {
+      {activeTab === 'gardien' && profile && (
+        <SitterStickyBar
+          firstName={firstName}
+          avatarUrl={hasAvatar ? profile.avatar_url : null}
+          cta={heroCta}
+          avgRating={sitterRoleAvg}
+          reviewCount={sitterRoleCount}
+          isAvailable={isAvailable}
+        />
+      )}
+      {activeTab !== 'gardien' && !heroCtaVisible && (() => {
         const baseCls =
           "md:hidden fixed left-0 right-0 z-40 bg-background border-t border-border px-3 sm:px-4 pt-2.5 sm:pt-3 pb-[calc(env(safe-area-inset-bottom)+0.625rem)] shadow-lg bottom-[var(--bottom-nav-h,0px)]";
         const btnCls =

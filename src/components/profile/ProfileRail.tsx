@@ -12,15 +12,25 @@ interface ProfileRailProps {
   children?: ReactNode;
   /** Si true, rend en flux (mobile) sans sticky ni min-width. */
   inline?: boolean;
+  /** "card" : seule la carte marquée sticky reste collante (fiche gardien F1). */
+  stickyMode?: "rail" | "card";
 }
 
-const ProfileRail = ({ children, inline = false }: ProfileRailProps) => {
+const ProfileRail = ({ children, inline = false, stickyMode = "rail" }: ProfileRailProps) => {
   const hasContent = !!children;
   if (!hasContent) return null;
 
   if (inline) {
     return (
       <aside aria-label="Contexte et affinité" className="space-y-4">
+        {children}
+      </aside>
+    );
+  }
+
+  if (stickyMode === "card") {
+    return (
+      <aside aria-label="Contexte et affinité" className="hidden lg:block space-y-[34px]">
         {children}
       </aside>
     );

@@ -476,6 +476,8 @@ export const SITTER_PUBLIC_DESCRIPTIVE_COLUMNS = [
   "min_notice",
   "preferred_environments",
   "reply_median_minutes",
+  // Fiche gardien F1 (27/09/2026) : ligne « Avant la garde » de la carte contact.
+  "meeting_preference",
 ] as const;
 
 export const OWNER_PUBLIC_DESCRIPTIVE_COLUMNS = [

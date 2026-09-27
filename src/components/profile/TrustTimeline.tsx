@@ -23,7 +23,38 @@ interface Props {
   completedSits: number;
   lastActivity?: string | null;
   firstName: string;
+  /** Variante compacte (fiche gardien F1) : trois jalons, sans graphique. */
+  variant?: "default" | "compact";
+  /** Date de la première garde, quand elle est connue (variante compacte). */
+  firstSitDate?: string | null;
 }
+
+/** Jalons de la variante compacte : Inscription, Première garde, Premier avis. */
+export function compactMilestones(input: {
+  memberSince?: string | null;
+  firstSitDate?: string | null;
+  completedSits: number;
+  reviews: Array<{ created_at: string; overall_rating: number | null }>;
+}): Array<{ key: "join" | "first_sit" | "first_review"; label: string; date: string | null }> {
+  const out: Array<{ key: "join" | "first_sit" | "first_review"; label: string; date: string | null }> = [];
+  if (input.memberSince) out.push({ key: "join", label: "Inscription", date: input.memberSince });
+  if (input.completedSits > 0 || input.firstSitDate) {
+    out.push({ key: "first_sit", label: "Première garde", date: input.firstSitDate ?? null });
+  }
+  const sorted = [...input.reviews].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+  const first = sorted[0];
+  if (first) {
+    const note = first.overall_rating != null ? `, ${first.overall_rating} sur 5` : "";
+    out.push({ key: "first_review", label: `Premier avis${note}`, date: first.created_at });
+  }
+  return out.slice(0, 3);
+}
+
+const COMPACT_DOT: Record<"join" | "first_sit" | "first_review", string> = {
+  join: "border-2 border-primary bg-background",
+  first_sit: "bg-primary",
+  first_review: "bg-founder",
+};
 
 const KIND_DOT_CLASS: Record<TimelineEvent["kind"], string> = {
   join: "bg-muted-foreground/40",
@@ -41,7 +72,31 @@ const TrustTimeline = ({
   completedSits,
   lastActivity,
   firstName,
+  variant = "default",
+  firstSitDate = null,
 }: Props) => {
+  if (variant === "compact") {
+    const items = compactMilestones({ memberSince, firstSitDate, completedSits, reviews });
+    if (items.length === 0) return null;
+    return (
+      <ol aria-label={`Parcours de ${firstName}`} className="relative pl-5 space-y-3.5">
+        <span aria-hidden="true" className="absolute left-[5px] top-1.5 bottom-1.5 w-px bg-border" />
+        {items.map((m) => (
+          <li key={m.key} className="relative">
+            <span aria-hidden="true" className={`absolute -left-5 top-1 h-[11px] w-[11px] rounded-full ${COMPACT_DOT[m.key]}`} />
+            <div className="flex items-baseline justify-between gap-3">
+              <p className="text-sm text-foreground leading-snug">{m.label}</p>
+              {m.date && (
+                <time dateTime={m.date} className="text-xs text-muted-foreground shrink-0">
+                  {format(new Date(m.date), "MMM yyyy", { locale: fr })}
+                </time>
+              )}
+            </div>
+          </li>
+        ))}
+      </ol>
+    );
+  }
   const events = buildTrustTimeline({
     memberSince,
     reviews,

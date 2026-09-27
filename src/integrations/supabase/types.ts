@@ -9635,6 +9635,7 @@ export type Database = {
           languages: string[] | null
           life_pace: string | null
           lifestyle: string[] | null
+          meeting_preference: string[] | null
           min_notice: string | null
           min_stay_duration: string | null
           motivation: string | null
@@ -11410,7 +11411,9 @@ export type Database = {
           reviewee_id: string
           reviewer_id: string
           selected_badges: string[]
+          sit_end_date: string
           sit_id: string
+          sit_start_date: string
           welcome_rating: number
           would_recommend: boolean
         }[]
