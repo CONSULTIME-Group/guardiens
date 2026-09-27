@@ -22,6 +22,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { computeAffinityResultFull, type AffinityResult } from "@/lib/affinityScore";
 import { haversineDistance } from "@/utils/geo";
 import { chunkArray } from "@/lib/chunkArray";
+import { fetchSitterPool, countSitterPool } from "@/lib/fetchSitterPool";
 
 /**
  * Plafond de scoring : au-delà, les gardiens les plus éloignés ne sont pas
@@ -30,12 +31,6 @@ import { chunkArray } from "@/lib/chunkArray";
  */
 export const POOL_SCORING_CAP = 600;
 
-/**
- * Plafond de lecture du vivier (borne technique de requête). Si le vivier
- * grandit jusqu'à l'atteindre, la troncature est journalisée, jamais
- * silencieuse.
- */
-export const POOL_READ_CAP = 2000;
 
 export interface AffinitySitterCard {
   id: string;
@@ -52,6 +47,8 @@ interface Result {
   totalPool: number;
   scoredCount: number;
   hasGeo: boolean;
+  /** Le propriétaire a au moins une annonce publiée, confirmée ou en cours. */
+  hasPublishedSit: boolean;
   isLoading: boolean;
 }
 
@@ -70,7 +67,7 @@ export function useOwnerTopAffinitySitters(): Result {
       // 1. Owner (coordonnées, prefs matching, pets, voiture requise) ET
       // vivier gardiens : cinq lectures qui ne dépendent que de userId,
       // donc une seule vague.
-      const [{ data: me }, { data: ownerPrefs }, { data: pets }, { data: myProperties }, { data: pool }] = await Promise.all([
+      const [{ data: me }, { data: ownerPrefs }, { data: pets }, { data: myProperties }, pool, exactPoolCount, publishedRes] = await Promise.all([
         supabase.from("profiles").select("latitude, longitude, city").eq("id", userId!).maybeSingle(),
         supabase.from("owner_profiles").select("preferred_sitter_types, home_ambiance, languages, interests, life_pace, presence_expected").eq("user_id", userId!).maybeSingle(),
         supabase.from("pets").select("species, special_needs, breed, property_id, properties!inner(user_id)").eq("properties.user_id", userId!),
@@ -79,26 +76,29 @@ export function useOwnerTopAffinitySitters(): Result {
         // (identité vérifiée, complétude). La vue public_profiles ne contient
         // déjà que des comptes actifs avec prénom, c'est la seule hygiène
         // admise. Le plafond de lecture est une borne technique, tracée.
+        fetchSitterPool<any>(
+          "id, first_name, avatar_url, city, latitude_approx, longitude_approx, identity_verified, profile_completion, role",
+          userId!,
+        ),
+        countSitterPool(userId!),
+        // Annonce publiée (ou garde en cours) : sans elle, l'affinité n'a
+        // pas de base de comparaison suffisante, les cartes montrent les
+        // raisons et la ligne « L'affinité se calcule dès votre annonce publiée. ».
         supabase
-          .from("public_profiles")
-          .select("id, first_name, avatar_url, city, latitude_approx, longitude_approx, identity_verified, profile_completion, role")
-          .in("role", ["sitter", "both"])
-          .neq("id", userId!)
-          .limit(POOL_READ_CAP),
+          .from("sits")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", userId!)
+          .in("status", ["published", "confirmed", "in_progress"]),
       ]);
 
       const meLat = (me?.latitude as number | null) ?? null;
       const meLng = (me?.longitude as number | null) ?? null;
       const hasGeo = meLat !== null && meLng !== null;
 
-      if (pool && pool.length === POOL_READ_CAP) {
-        console.warn(
-          `[top3] plafond de lecture ${POOL_READ_CAP} atteint : le vivier est tronqué avant tri, augmenter POOL_READ_CAP.`,
-        );
-      }
+      const hasPublishedSit = (publishedRes.count ?? 0) > 0;
 
       if (!pool || pool.length === 0) {
-        return { topSitters: [] as AffinitySitterCard[], totalPool: 0, scoredCount: 0, hasGeo, poolExcludedByCap: 0 };
+        return { topSitters: [] as AffinitySitterCard[], totalPool: exactPoolCount, scoredCount: 0, hasGeo, poolExcludedByCap: 0, hasPublishedSit };
       }
 
       // 2. Distance, puis plafond de scoring : on garde les plus proches.
@@ -215,12 +215,15 @@ export function useOwnerTopAffinitySitters(): Result {
         // Taille réelle du vivier lu, AVANT le plafond de scoring. C'est le
         // chiffre annoncé dans le lien "Voir les N gardiens" : il doit
         // correspondre à ce que le propriétaire trouve derrière /search.
-        totalPool: pool.length,
+        // Comptage exact côté serveur (lot D0) : la longueur de liste
+        // plafonnait à 1 000.
+        totalPool: exactPoolCount,
         // Nombre réellement scoré (après plafond de calcul). Diagnostic
         // uniquement, jamais affiché.
         scoredCount: scoped.length,
         hasGeo,
         poolExcludedByCap,
+        hasPublishedSit,
       };
     },
   });
@@ -231,6 +234,7 @@ export function useOwnerTopAffinitySitters(): Result {
     totalPool: data?.totalPool ?? 0,
     scoredCount: data?.scoredCount ?? 0,
     hasGeo: data?.hasGeo ?? false,
+    hasPublishedSit: data?.hasPublishedSit ?? false,
     isLoading: q.isLoading,
   };
 }

@@ -99,12 +99,10 @@ export function useNearbyOwnerSitters(currentUserId: string | undefined) {
         // Vivier de gardiens actifs, complet : aucun filtre de complétude
         // ni de confiance (la vue ne retient déjà que les comptes actifs).
         // Plafond de lecture technique, tracé s'il est atteint.
-        supabase
-          .from("public_profiles")
-          .select("id, first_name, avatar_url, city, identity_verified, completed_sits_count, skill_categories, custom_skills, latitude_approx, longitude_approx, role")
-          .in("role", ["sitter", "both"])
-          .neq("id", currentUserId!)
-          .limit(POOL_READ_CAP),
+        fetchSitterPool<any>(
+          "id, first_name, avatar_url, city, identity_verified, completed_sits_count, skill_categories, custom_skills, latitude_approx, longitude_approx, role",
+          currentUserId!,
+        ).then((data) => ({ data })),
       ]);
 
       let meLat: number | null = (meRes.data?.latitude as number | null) ?? null;
@@ -119,7 +117,7 @@ export function useNearbyOwnerSitters(currentUserId: string | undefined) {
       const hasGeo = meLat !== null && meLng !== null;
 
       const pool = poolRes.data;
-      if (pool && pool.length === POOL_READ_CAP) {
+      if (false as boolean) {
         console.warn(
           `[nearby-owner-sitters] plafond de lecture ${POOL_READ_CAP} atteint : vivier tronqué avant tri, augmenter POOL_READ_CAP.`,
         );
