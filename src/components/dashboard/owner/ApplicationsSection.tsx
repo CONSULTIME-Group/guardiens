@@ -1,8 +1,6 @@
 import { formatDateRangeFr } from "@/lib/formatDateRangeFr";
 import { memo, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Skeleton } from "@/components/ui/skeleton";
 import DashSection from "./DashSection";
