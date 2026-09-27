@@ -16,6 +16,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import ReplyTimeBadge from "@/components/sitters/ReplyTimeBadge";
 import ResponsivenessBadge from "@/components/profile/ResponsivenessBadge";
 import { avatarImageUrl } from "@/lib/storageImage";
+import { formatRatingFr } from "@/lib/formatRatingFr";
 
 export type HeroCtaVariant =
   | { kind: "own"; label?: string }
@@ -311,7 +312,7 @@ const ProfileHero = ({
                 {id && <FavoriteButton targetType="sitter" targetId={id} size="md" />}
                 {avgRating > 0 && reviewCount > 0 && (
                   <span className="inline-flex items-baseline gap-1 text-sm font-medium text-foreground/85">
-                    <span className="font-semibold">{avgRating.toFixed(1)}</span>
+                    <span className="font-semibold">{formatRatingFr(avgRating)}</span>
                     <span className="text-primary">★</span>
                     <span className="text-muted-foreground text-xs">({reviewCount})</span>
                   </span>
