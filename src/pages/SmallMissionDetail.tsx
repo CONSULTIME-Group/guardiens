@@ -476,6 +476,17 @@ const SmallMissionDetail = () => {
   };
 
 
+  // Ouvre la conversation liée à la réponse, en la créant si besoin.
+  const openResponseConversation = async (r: { id: string; conversation_id?: string | null } | null | undefined) => {
+    if (!r) { navigate("/messages"); return; }
+    let convId = r.conversation_id ?? null;
+    if (!convId) {
+      const { data } = await supabase.rpc("open_mission_response_conversation", { p_response_id: r.id });
+      convId = (data as string | null) ?? null;
+    }
+    navigate(convId ? `/messages/${convId}` : "/messages");
+  };
+
   const handleAcceptResponse = async (responseId: string, mode: "keep" | "decline_others" = "decline_others") => {
     if (processingResponseId) return;
     const resp = responses.find(r => r.id === responseId);
@@ -856,7 +867,7 @@ const SmallMissionDetail = () => {
             <p className="text-sm text-muted-foreground leading-relaxed">
               {author?.first_name || "L'auteur"} vous a choisi(e). Organisez la suite en direct.
             </p>
-            <Button onClick={() => navigate("/messages")} className="w-full rounded-full gap-2" size="lg">
+            <Button onClick={() => void openResponseConversation(myResponse)} className="w-full rounded-full gap-2" size="lg">
               <MessageSquare className="h-4 w-4" /> Aller à la messagerie
             </Button>
           </div>
@@ -1534,7 +1545,7 @@ const SmallMissionDetail = () => {
                         pendingCount={pendingResponses.length}
                         onSelect={(mode) => handleAcceptResponse(r.id, mode)}
                         onDecline={() => handleDeclineResponse(r.id)}
-                        onOpenMessages={() => navigate(r.conversation_id ? `/messages?c=${r.conversation_id}` : "/messages")}
+                        onOpenMessages={() => void openResponseConversation(r)}
                       />
                     </li>
                   ))}

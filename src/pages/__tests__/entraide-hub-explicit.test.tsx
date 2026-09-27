@@ -42,11 +42,10 @@ describe("EntraideHub, contenu explicite", () => {
     expect(screen.queryByRole("region", { name: "Comment ça marche" })).not.toBeInTheDocument();
   });
 
-  it("masque la phrase de disponibilité vide sur la carte uniquement", async () => {
+  it("masque la phrase de disponibilité vide, liste et carte", async () => {
     const source = await import("@/components/entraide/EntraideCards?raw");
-    expect(source.default).toContain("compact ? (");
     expect(source.default).toContain("helper.helps_with?.trim() &&");
-    expect(source.default).toContain('helper.helps_with?.trim() || "Disponible pour un coup de main"');
+    expect(source.default).not.toContain("Disponible pour un coup de main");
   });
 
   it("publie un JSON-LD limité à la FAQ, sans fiche Person", async () => {

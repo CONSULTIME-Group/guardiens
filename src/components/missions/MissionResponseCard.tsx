@@ -32,7 +32,7 @@ interface Props {
  * Carte "réponse" (esprit commentaire) sur une petite mission.
  * - Lecture privée : seuls l'auteur de la réponse, l'auteur de la mission et les
  *   administrateurs peuvent lire cette réponse (policies de small_mission_responses).
- * - L'auteur de la mission peut « Retenir cette personne » ou décliner.
+ * - L'auteur de la mission peut « Choisir {prénom} » ou décliner.
  * - Seul l'auteur de la mission peut dire « Merci » (helpful_count).
  */
 const MissionResponseCard = ({
@@ -203,16 +203,16 @@ const MissionResponseCard = ({
                       disabled={processing}
                       aria-disabled={processing}
                       aria-busy={processing}
-                      aria-label={`Retenir ${r.responder?.first_name || "cette personne"} pour aider`}
+                      aria-label={`Choisir ${r.responder?.first_name || "cette personne"}`}
                       className="rounded-full ml-auto min-h-11"
                     >
                       <CheckCircle2 aria-hidden="true" className="h-3.5 w-3.5 mr-1" />
-                      <span>{processing ? "…" : "C'est parti"}</span>
+                      <span>{processing ? "Enregistrement en cours..." : `Choisir ${r.responder?.first_name || "cette personne"}`}</span>
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
-                      <AlertDialogTitle>Retenir {r.responder?.first_name || "cette personne"} pour aider ?</AlertDialogTitle>
+                      <AlertDialogTitle>Choisir {r.responder?.first_name || "cette personne"} ?</AlertDialogTitle>
                       <AlertDialogDescription>
                         Vous confirmez publiquement que cette personne vous aide sur cette mission.
                         Elle apparaîtra comme « Personne retenue » ici et sur son profil public.
@@ -245,7 +245,7 @@ const MissionResponseCard = ({
                     )}
                     <AlertDialogFooter>
                       <AlertDialogCancel>Annuler</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => onSelect(acceptMode)}>Confirmer</AlertDialogAction>
+                      <AlertDialogAction onClick={() => onSelect(acceptMode)}>Choisir {r.responder?.first_name || "cette personne"}</AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>

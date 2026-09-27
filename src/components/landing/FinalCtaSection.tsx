@@ -2,15 +2,18 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { trackEvent } from "@/lib/analytics";
 import { RevealSection } from "@/components/ui/RevealSection";
+import { useAuth } from "@/contexts/AuthContext";
+import { HOME_BTN_PRIMARY, HOME_BTN_SECONDARY, homeCtaTarget } from "@/components/landing/homeCta";
 import maison900 from "@/assets/landing/maison-seule-900.webp";
 import maison450 from "@/assets/landing/maison-seule-450.webp";
 
 export function FinalCtaSection() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
   return (
-    <div id="commencer" className="bg-muted/30 py-[52px] scroll-mt-24 md:py-20">
+    <div id="commencer" className="bg-background py-[52px] scroll-mt-24 md:py-20">
       <RevealSection className="lp-read text-center">
         {/* Chips "Programme Fondateur" retirés (signal de deadline implicite). */}
         {/* Maison peinte au-dessus du titre : le foyer confié. */}
@@ -36,25 +39,27 @@ export function FinalCtaSection() {
           <button
             onClick={() => {
               trackEvent("cta_proprio_clicked", { metadata: { location: "final_cta" } });
-              navigate("/sits/create");
+              navigate(homeCtaTarget("/sits/create", isAuthenticated));
             }}
-            className="rounded-full bg-primary px-10 py-4 font-body text-sm font-bold tracking-wide text-primary-foreground transition-all duration-200 hover:scale-[1.02] hover:brightness-95"
+            className={HOME_BTN_PRIMARY}
           >
             {t("landing.final.cta_owner")}
           </button>
           <button
             onClick={() => {
               trackEvent("cta_aid_clicked", { metadata: { location: "final_cta" } });
-              navigate("/petites-missions/creer");
+              navigate(homeCtaTarget("/petites-missions/creer", isAuthenticated));
             }}
-            className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-primary/40 bg-transparent px-6 py-2.5 font-body text-xs font-medium tracking-wide text-primary transition-all duration-200 hover:bg-primary/10"
+            className={HOME_BTN_SECONDARY}
           >
             {t("landing.final.cta_sitter")}
           </button>
         </div>
-        <p className="font-body text-xs text-muted-foreground">
-          {t("landing.final.footnote")}
-        </p>
+        {!isAuthenticated && (
+          <p className="font-body text-xs text-muted-foreground">
+            {t("landing.final.footnote")}
+          </p>
+        )}
       </RevealSection>
     </div>
   );

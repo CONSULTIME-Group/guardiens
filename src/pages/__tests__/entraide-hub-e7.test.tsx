@@ -155,6 +155,8 @@ describe("Entraide, la page vue d'un membre", () => {
     renderHub();
     await waitFor(() => expect(screen.getAllByRole("button", { name: "Je peux" }).length).toBe(2));
     fireEvent.click(screen.getAllByRole("button", { name: "Je peux" })[0]);
+    expect(respondMock).not.toHaveBeenCalled();
+    fireEvent.click(await screen.findByRole("button", { name: "Envoyer ma proposition" }));
     await waitFor(() => expect(respondMock).toHaveBeenCalledWith({
       missionId: "proche",
       userId: "me",

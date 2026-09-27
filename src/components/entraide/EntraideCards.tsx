@@ -201,11 +201,7 @@ export const HelperCard = ({ helper, distance, showDistance, compact = false, co
         </div>
         <MissionBadgesReceived profileId={helper.id} variant="compact" rows={badgeRows} />
       </div>
-      {compact ? (
-        helper.helps_with?.trim() && <p className="mt-3 text-sm leading-relaxed text-foreground">{helper.helps_with.trim()}</p>
-      ) : (
-        <p className="mt-3 text-sm leading-relaxed text-foreground">{helper.helps_with?.trim() || "Disponible pour un coup de main"}</p>
-      )}
+      {helper.helps_with?.trim() && <p className="mt-3 text-sm leading-relaxed text-foreground">{helper.helps_with.trim()}</p>}
       <Button type="button" size="sm" className="mt-4" onClick={contact} disabled={opening}>
         {opening ? "Ouverture..." : `Écrire à ${firstName}`}
       </Button>

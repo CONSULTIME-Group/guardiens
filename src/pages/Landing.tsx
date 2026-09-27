@@ -55,12 +55,24 @@ const Landing = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const shellMode = useShellMode();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   // Session vérifiée et profil chargé : on ne propose plus de créer un compte
   // à quelqu'un qui en a déjà un, on propose son action principale.
   const isMember = shellMode === "app";
   const { data: publicStats } = usePublicStats();
   const [homeOrigin, setHomeOrigin] = useState<HomeOrigin | null>(null);
+  const [profileOrigin, setProfileOrigin] = useState<HomeOrigin | null>(null);
+
+  // Membre connecté : la ville du profil sert d'origine tant qu'aucune ville n'est saisie.
+  useEffect(() => {
+    if (!user?.id) { setProfileOrigin(null); return; }
+    let active = true;
+    void supabase.from("profiles").select("city, latitude, longitude").eq("id", user.id).maybeSingle().then(({ data }) => {
+      if (!active || !data || data.latitude === null || data.longitude === null) return;
+      setProfileOrigin({ lat: Number(data.latitude), lng: Number(data.longitude), city: data.city });
+    });
+    return () => { active = false; };
+  }, [user?.id]);
 
   
 
@@ -281,7 +293,7 @@ const Landing = () => {
 
       {/* ═══════════════ ANNONCES DISPONIBLES (preuve vivante, remontée en
           troisième position le 06/09/2026, agrandie à six annonces) ═══════════════ */}
-       <LiveListingsStrip origin={homeOrigin} />
+       <LiveListingsStrip origin={homeOrigin ?? profileOrigin} />
 
       {/* ═══════════════ SOMMAIRE DE PAGE, maillage interne ═══════════════ */}
       <LandingTocBar />

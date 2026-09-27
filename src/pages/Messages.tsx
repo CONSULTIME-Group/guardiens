@@ -15,6 +15,7 @@ import { useSearchParams, Link, useNavigate, useParams, useLocation } from "reac
 import { useIsMobile } from "@/hooks/use-mobile";
 import HouseGuideBlock from "@/components/messages/HouseGuideBlock";
 import ConversationHeader from "@/components/messages/ConversationHeader";
+import MissionChooseBanner from "@/components/messages/MissionChooseBanner";
 import DaySeparator from "@/components/messages/DaySeparator";
 import MessageBubble from "@/components/messages/MessageBubble";
 import MessageComposer from "@/components/messages/MessageComposer";
@@ -891,6 +892,16 @@ const Messages = () => {
               loadConversations();
             }}
           />
+
+          {activeConv.small_mission_id && user?.id && activeConv.other_user?.id && (
+            <MissionChooseBanner
+              missionId={activeConv.small_mission_id}
+              userId={user.id}
+              otherUserId={activeConv.other_user.id}
+              otherFirstName={activeConv.other_user.first_name}
+              onChosen={() => { loadConversations(); loadMessages(activeConv.id); }}
+            />
+          )}
 
           {/* Messages with day separators */}
           <div
