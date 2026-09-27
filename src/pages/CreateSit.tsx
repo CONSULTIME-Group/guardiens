@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, type MouseEvent as ReactMouseEvent } from "react";
+import ExpectationSuggestions from "@/components/sits/create/ExpectationSuggestions";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -2403,6 +2404,10 @@ const CreateSit = () => {
                         : ""
                   )}
                   rows={3}
+                />
+                <ExpectationSuggestions
+                  value={sitterExpectations}
+                  onChange={(next) => { updateSitterExpectations(next); clearFieldVerdict("sitterExpectations"); touch("descriptionExpectations"); }}
                 />
                 <p className={cn(
                   "text-xs mt-1 flex justify-between",

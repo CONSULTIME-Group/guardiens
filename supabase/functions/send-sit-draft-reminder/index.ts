@@ -1,6 +1,8 @@
 // send-sit-draft-reminder
 // Relance les owners ayant un sit en status='draft' créé il y a plus de 24h
-// et jamais publié. Anti-doublon via email_send_log (template_name + recipient).
+// et jamais publié. Anti-doublon par annonce via email_send_log (template_name +
+// metadata.sit_id, repli sur la clé d'idempotence historique), plus un plafond
+// d'une relance de brouillon par personne et par jour (UTC).
 // Déclenchement : cron quotidien 10h Europe/Paris (à planifier via pg_cron).
 // Plafond : 25 envois max par run, les plus anciens d'abord.
 
@@ -116,6 +118,8 @@ Deno.serve(async (req) => {
   let sent = 0;
   let skipped = 0;
   const errors: Array<{ sit_id: string; reason: string }> = [];
+  const sentToday = new Set<string>();
+  const startOfUtcDay = new Date(new Date().toISOString().slice(0, 10) + "T00:00:00.000Z").toISOString();
 
   for (const draft of drafts) {
     try {
@@ -141,13 +145,32 @@ Deno.serve(async (req) => {
         continue;
       }
 
-      // Anti-doublon : 1 envoi max par sit
-      const { count: alreadySent } = await supabase
+      // Anti-doublon par annonce : une seule relance par brouillon (sit_id).
+      // Les envois antérieurs au 27/09/2026 n'ont pas de metadata.sit_id, on
+      // les retrouve par leur clé d'idempotence, qui porte l'identifiant.
+      const { count: alreadySentForSit } = await supabase
         .from("email_send_log")
         .select("id", { count: "exact", head: true })
         .eq("template_name", TEMPLATE)
-        .eq("recipient_email", profile.email);
-      if ((alreadySent ?? 0) > 0) {
+        .or(`metadata->>sit_id.eq.${draft.id},metadata->>idempotency_key.eq.sit-draft-reminder-${draft.id}`);
+      if ((alreadySentForSit ?? 0) > 0) {
+        skipped++;
+        continue;
+      }
+
+      // Plafond par personne : jamais deux relances de brouillon le même jour.
+      const emailKey = String(profile.email).toLowerCase();
+      if (sentToday.has(emailKey)) {
+        skipped++;
+        continue;
+      }
+      const { count: sentTodayCount } = await supabase
+        .from("email_send_log")
+        .select("id", { count: "exact", head: true })
+        .eq("template_name", TEMPLATE)
+        .eq("recipient_email", profile.email)
+        .gte("created_at", startOfUtcDay);
+      if ((sentTodayCount ?? 0) > 0) {
         skipped++;
         continue;
       }
@@ -187,6 +210,7 @@ Deno.serve(async (req) => {
           templateName: TEMPLATE,
           recipientEmail: profile.email,
           idempotencyKey: `sit-draft-reminder-${draft.id}`,
+          logMetadata: { sit_id: draft.id, owner_id: draft.user_id },
           templateData: {
             firstName: profile.first_name || "",
             sitId: draft.id,
@@ -207,6 +231,7 @@ Deno.serve(async (req) => {
         continue;
       }
       sent++;
+      sentToday.add(emailKey);
       if (sent >= MAX_PER_RUN) break;
     } catch (e: any) {
       errors.push({ sit_id: draft.id, reason: e?.message ?? "unknown" });

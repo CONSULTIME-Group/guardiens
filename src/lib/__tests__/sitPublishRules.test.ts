@@ -103,11 +103,11 @@ describe("règle des dates, toujours bloquante", () => {
 });
 
 describe("mode deux champs, les deux valeurs sont obligatoires", () => {
-  it("exige 30 caractères sur chacun des deux champs", () => {
-    expect(getTwoFieldsDescriptionBlockers(text(29), text(40)).map((b) => b.id)).toEqual([
+  it("exige 15 caractères sur chacun des deux champs", () => {
+    expect(getTwoFieldsDescriptionBlockers(text(14), text(40)).map((b) => b.id)).toEqual([
       "desc-reason",
     ]);
-    expect(getTwoFieldsDescriptionBlockers(text(40), text(29)).map((b) => b.id)).toEqual([
+    expect(getTwoFieldsDescriptionBlockers(text(40), text(14)).map((b) => b.id)).toEqual([
       "desc-expectations",
     ]);
     expect(

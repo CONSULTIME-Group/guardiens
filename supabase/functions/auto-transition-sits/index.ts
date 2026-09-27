@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import { expiryCandidatesOrClause, publishedSitExpiryReason, sitExpiredNotificationBody } from "../_shared/sit-expiry.ts";
 import { startCronRun } from "../_shared/cron-run-log.ts";
 
 
@@ -174,17 +175,15 @@ Deno.serve(async (req) => {
       return true;
     }
 
-    // 0. Annonces publiées dont la date de début est dépassée de plus de 48h
-    // et sans candidature acceptée : bascule en 'expired'.
-    const twoDaysBefore = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
-      .toISOString()
-      .split("T")[0];
-
+    // 0. Annonces publiées sans candidature acceptée : expirées quand la date
+    // de début est dépassée de plus de 2 jours ET qu'il reste 7 jours ou moins
+    // avant la fin, ou dès que la date de fin est passée (lot A2, 27/09/2026).
+    // Règle et clause SQL dans _shared/sit-expiry.ts.
     const { data: stalemates } = await supabase
       .from("sits")
-      .select("id, title, user_id, start_date")
+      .select("id, title, user_id, start_date, end_date")
       .eq("status", "published")
-      .lt("start_date", twoDaysBefore);
+      .or(expiryCandidatesOrClause(today));
 
     for (const sit of stalemates || []) {
       try {
@@ -194,6 +193,8 @@ Deno.serve(async (req) => {
           .eq("sit_id", sit.id)
           .eq("status", "accepted");
         if ((acceptedCount ?? 0) > 0) continue;
+        const reason = publishedSitExpiryReason(sit.start_date, sit.end_date, today);
+        if (!reason) continue;
 
         await supabase.from("sits").update({ status: "expired" as any }).eq("id", sit.id);
 
@@ -201,7 +202,7 @@ Deno.serve(async (req) => {
           user_id: sit.user_id,
           type: "sit_expired",
           title: "Annonce expirée",
-          body: `La date de début de votre annonce « ${sit.title} » est dépassée et aucun gardien n'a été retenu. Deux options s'offrent à vous : republier votre annonce avec de nouvelles dates, ou confirmer que vous avez trouvé une solution.`,
+          body: sitExpiredNotificationBody(sit.title, reason),
           link: `/sits/${sit.id}`,
         });
 

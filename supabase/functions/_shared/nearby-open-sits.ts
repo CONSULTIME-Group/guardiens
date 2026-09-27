@@ -76,7 +76,11 @@ export function isOpenSit(row: OpenSitRow, nowIso: string): boolean {
   if (row.hidden_at) return false;
   if (row.moderation_hidden_at) return false;
   if (!row.start_date) return false;
-  return row.start_date > nowIso.slice(0, 10);
+  const today = nowIso.slice(0, 10);
+  // Lot A2 (27/09/2026) : une garde longue commencée reste ouverte tant que
+  // le cron ne l'a pas expirée. La fin fait foi, le début sert de repli.
+  if (row.end_date) return row.end_date >= today;
+  return row.start_date > today;
 }
 
 const FR_DATE = new Intl.DateTimeFormat("fr-FR", {
@@ -179,7 +183,7 @@ export async function fetchOpenSits(supabase: MinimalClient): Promise<OpenSitRow
       "id, slug, title, city, start_date, end_date, created_at, status, accepting_applications, hidden_at, moderation_hidden_at, profiles:user_id (latitude, longitude)",
     )
     .eq("status", "published")
-    .gt("start_date", today)
+    .or(`end_date.gte.${today},and(end_date.is.null,start_date.gt.${today})`)
     .limit(500);
   if (error) throw error;
   return ((data ?? []) as any[]).map((row) => {

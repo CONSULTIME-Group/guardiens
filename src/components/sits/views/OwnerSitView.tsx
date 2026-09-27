@@ -53,6 +53,7 @@ import {
   getSitPublishRequirements,
   buildSitPublishInput,
   needsCreateFormToPublish,
+  MIN_SUB_DESCRIPTION,
 } from "@/lib/sitPublishRules";
 
 import EmergencyAlertBanner from "@/components/sits/EmergencyAlertBanner";
@@ -725,7 +726,7 @@ const OwnerSitView = ({
           publishLabel={publishNeedsForm ? "Terminer dans le formulaire" : "Publier l'annonce"}
           readyMessage={
             publishNeedsForm
-              ? "Dernière étape : le formulaire vous demandera de répartir votre description en deux questions, la raison de la garde et vos attentes, trente caractères minimum chacune."
+              ? `Dernière étape : le formulaire vous demandera de répartir votre description en deux questions, la raison de la garde et vos attentes, ${MIN_SUB_DESCRIPTION} caractères minimum chacune.`
               : "Tout est prêt. Publiez votre annonce pour qu'elle apparaisse dans la recherche."
           }
           editHref={`/sits/${sit.id}/edit`}
