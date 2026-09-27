@@ -238,7 +238,7 @@ const CAMPAIGN_PRESETS: CampaignPreset[] = [
       prioritize_opened: true,
       template_name: "entraide-ligne-relance",
     },
-    subject: "Votre ligne, en une phrase",
+    subject: "Se rendre utile, ça fait du bien",
     body: "Une chose que vous aimez faire pour les gens du coin ? Une ligne suffit.",
     ctaEnabled: true,
     ctaLabel: "J'écris ma ligne",
@@ -424,6 +424,7 @@ const AdminMassEmails = () => {
           body: body.trim(),
           cta_label: ctaEnabled ? ctaLabel.trim() : undefined,
           cta_url: ctaEnabled ? withUtm(ctaUrl.trim()) : undefined,
+          template_name: filters.template_name || undefined,
         },
       });
       if (error) throw new Error((error as { message?: string }).message || "Erreur d'envoi test");
@@ -1111,10 +1112,16 @@ const AdminMassEmails = () => {
             {/* Colonne rendu HTML */}
             <div className="space-y-2">
               <h3 className="text-sm font-semibold">Rendu de l'email</h3>
-              <div
-                className="border border-border rounded-lg overflow-hidden bg-white max-h-[60vh] overflow-y-auto"
-                dangerouslySetInnerHTML={{ __html: previewHtml }}
-              />
+              {filters.template_name ? (
+                <p className="rounded-lg border border-border p-4 text-sm text-muted-foreground">
+                  {templatePreviewNotice(filters.template_name)}
+                </p>
+              ) : (
+                <div
+                  className="border border-border rounded-lg overflow-hidden bg-white max-h-[60vh] overflow-y-auto"
+                  dangerouslySetInnerHTML={{ __html: previewHtml }}
+                />
+              )}
             </div>
           </div>
 

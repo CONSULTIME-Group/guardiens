@@ -76,7 +76,7 @@ describe("jeton de la ligne d'entraide", () => {
     const mass = read("supabase/functions/send-mass-email/index.ts");
     expect(mass).toContain('"entraide-ligne-relance": "entraide_ligne_relance"');
     expect(mass).toContain("lineUrl:");
-    expect(read("supabase/functions/_shared/transactional-email-templates/entraide-ligne-relance.tsx")).toContain("Votre ligne, en une phrase");
+    expect(read("supabase/functions/_shared/transactional-email-templates/entraide-ligne-relance.tsx")).toContain("Se rendre utile, ça fait du bien");
   });
 });
 
@@ -100,7 +100,7 @@ describe("écran à un seul champ", () => {
     const helpId = screen.getByText(HELPS_WITH_HELP_TEXT).id;
     expect(field.getAttribute("aria-describedby")).toContain(helpId);
     expect(field).toHaveAttribute("maxLength", "200");
-    expect(screen.getByText("Bonjour Jérémie, une ligne suffit.")).toBeInTheDocument();
+    expect(screen.getByText("Bonjour Jérémie. Se rendre utile, c'est aussi se faire du bien : une ligne suffit pour commencer.")).toBeInTheDocument();
     for (const ex of HELPS_WITH_EXAMPLES) {
       expect(screen.getByRole("button", { name: `Écrire l'exemple : ${ex}` }).className).toContain("min-h-[44px]");
     }

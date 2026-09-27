@@ -14,23 +14,37 @@ const FALLBACK_URL =
 
 interface Props { firstName?: string; lineUrl?: string }
 
+const QUOTES: Array<{ text: string; city: string }> = [
+  { text: '« Aider et rendre service. Rencontrer des gens et discuter. »', city: 'Champs-sur-Yonne' },
+  { text: '« Aide administrative et informatique »', city: 'Lyon' },
+  { text: "« M'occuper des animaux, des plantes, des cultures, du jardin... »", city: 'Fontvieille' },
+]
+
 const Email = ({ firstName, lineUrl }: Props) => {
   const name = formatFirstName((firstName || '').trim())
   return (
     <Html lang="fr" dir="ltr">
       <BrandedHead />
-      <Preview>Un champ, trente secondes, et les gens du coin vous voient.</Preview>
+      <Preview>Une phrase suffit, et elle fait du bien des deux côtés.</Preview>
       <Body style={main}>
         <Container style={container}>
           <BrandHeader />
           <Heading style={h1}>Une chose que vous aimez faire pour les gens du coin ?</Heading>
           <Text style={text}>{name ? `Bonjour ${name},` : 'Bonjour,'}</Text>
-          <Text style={text}>C'est la saison des pommes. Dans les jardins à quelques rues d'ici, des personnes âgées regardent les fruits du haut de l'arbre en espérant une échelle et un bras jeune. D'autres cherchent quelqu'un pour un formulaire en ligne, un carton à porter, un chien à sortir un samedi.</Text>
-          <Text style={text}>Elles vous trouveront le jour où votre ligne existera. Écrivez ce que vous aimez faire, en une phrase.</Text>
+          <Text style={text}>Se rendre utile, c'est aussi se faire du bien. Une heure pour quelqu'un d'ici, quelques mots échangés, une rencontre, et l'on repart souvent content de sa journée.</Text>
+          <Text style={text}>D'autres membres ont déjà écrit la leur :</Text>
+          {QUOTES.map((q) => (
+            <Section key={q.city} style={quoteBlock}>
+              <Text style={quoteText}>{q.text}</Text>
+              <Text style={quoteCity}>{q.city}</Text>
+            </Section>
+          ))}
+          <Text style={text}>Écrivez la vôtre, en une phrase. Elle apparaît avec votre prénom et votre ville sur la page Entraide, et les personnes près de chez vous savent à qui demander.</Text>
           <Section style={ctaSection}>
             <Button style={button} href={lineUrl || FALLBACK_URL}>J'écris ma ligne</Button>
           </Section>
-          <Text style={text}>Elle apparaît avec votre prénom et votre ville sur la page Entraide.</Text>
+          <Text style={text}>Ensuite, c'est vous qui choisissez quand aider.</Text>
+          <Text style={text}>Elisa et Jérémie</Text>
           <Hr style={hr} />
           <LegalFooter
             purpose="l'animation de l'entraide entre membres inscrits"
@@ -42,13 +56,18 @@ const Email = ({ firstName, lineUrl }: Props) => {
   )
 }
 
+export const ENTRAIDE_LIGNE_RELANCE_FALLBACK_URL = FALLBACK_URL
+
 export const template = {
   component: Email,
-  subject: 'Votre ligne, en une phrase',
+  subject: 'Se rendre utile, ça fait du bien',
   displayName: 'Entraide, relance de la ligne',
-  previewData: { firstName: 'Jérémie', lineUrl: FALLBACK_URL },
+  previewData: { firstName: 'Jérémie' },
 } satisfies TemplateEntry
 
+const quoteBlock = { borderLeft: '2px solid #E9E4DD', padding: '0 0 0 12px', margin: '0 0 14px' }
+const quoteText = { fontSize: '15px', color: '#756F66', lineHeight: '1.5', margin: '0', fontStyle: 'italic' as const }
+const quoteCity = { fontSize: '13px', color: '#756F66', lineHeight: '1.4', margin: '2px 0 0' }
 const main = { backgroundColor: '#ffffff', fontFamily: "'Outfit', Arial, sans-serif" }
 const container = { padding: '24px 28px', maxWidth: '560px', margin: '0 auto' }
 const h1 = { fontSize: '22px', fontWeight: 'bold' as const, color: '#2C6D50', margin: '0 0 16px', fontFamily: "'Playfair Display', Georgia, serif" }

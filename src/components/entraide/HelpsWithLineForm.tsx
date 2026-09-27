@@ -87,7 +87,9 @@ const HelpsWithLineForm = ({ firstName, initialValue = "", onSave, source }: Pro
           Une chose que vous aimez faire pour les gens du coin ?
         </h1>
         <p className="mt-3 font-body text-base text-muted-foreground">
-          {formatFirstName(firstName) ? `Bonjour ${formatFirstName(firstName)}, une ligne suffit.` : "Bonjour, une ligne suffit."}
+          {formatFirstName(firstName)
+            ? `Bonjour ${formatFirstName(firstName)}. Se rendre utile, c'est aussi se faire du bien : une ligne suffit pour commencer.`
+            : "Se rendre utile, c'est aussi se faire du bien : une ligne suffit pour commencer."}
         </p>
       </header>
 
