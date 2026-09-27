@@ -1,4 +1,5 @@
 import { formatDateRangeFr } from "@/lib/formatDateRangeFr";
+import { canShowAffinityPercent } from "@/lib/affinityDisplay";
 import matchEmptyIllustration from "@/assets/illustrations/sitter-match-empty.webp";
 
 import { Link } from "react-router-dom";
@@ -261,7 +262,7 @@ const StarCard = ({ sit, onCtaClick }: { sit: AffinitySitCard; onCtaClick?: () =
         className="relative flex items-start"
         style={{ padding: "22px", paddingRight: "34px", gap: "22px" }}
       >
-        {sit.affinity && <AffinityRing score={sit.affinity.score} result={sit.affinity} />}
+        {sit.affinity && canShowAffinityPercent(sit.affinity) && <AffinityRing score={sit.affinity.score} result={sit.affinity} />}
 
         <div className="min-w-0 flex-1">
           <h3
@@ -376,7 +377,7 @@ const CompactRow = ({
         gap: "14px",
       }}
     >
-      {showScore && sit.affinity && (
+      {showScore && sit.affinity && canShowAffinityPercent(sit.affinity) && (
         <span
           className="rounded-full bg-secondary text-secondary-foreground shrink-0"
           style={{
