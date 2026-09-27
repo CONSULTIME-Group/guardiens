@@ -44,5 +44,5 @@
 - [ ] Envoi test entraide-ligne-relance (bloqué : droits admin requis)
 - [ ] En attente : plan P1 à P3 (GO requis)
 
-- [ ] 0025 : réactivation des réponses retirées (reactivated_at), suppression retirée
-- [ ] Liste des tournures négatives restantes sur l accueil (sans appliquer)
+- [x] 0025 : réactivation des réponses retirées (reactivated_at), suppression retirée
+- [x] Liste des tournures négatives restantes sur l accueil (sans appliquer)
