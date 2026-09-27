@@ -250,7 +250,6 @@ export default function PublicSitterProfile() {
   const lightboxItems = buildProfileLightboxItems(profile?.avatar_url, visibleGallery);
   const [heroPickerOpen, setHeroPickerOpen] = useState(false);
   const [badgesBySitId, setBadgesBySitId] = useState<Record<string, string[]>>({});
-  const [sitOwnerBySitId, setSitOwnerBySitId] = useState<Record<string, string>>({});
   const [activeTab, setActiveTab] = useState<ProfileTab>('gardien');
   const [pets, setPets] = useState<any[]>([]);
   const [ownerSits, setOwnerSits] = useState<any[]>([]);
@@ -627,14 +626,10 @@ export default function PublicSitterProfile() {
           supabase.from("profiles").select(BASE_PROFILE_COLS).eq("id", id).maybeSingle(),
           (supabase as any).from("public_sitter_profiles").select(PUBLIC_SITTER_COLS).eq("user_id", id).maybeSingle(),
 
-          supabase
-            .from("reviews")
-            .select("*")
-            .eq("reviewee_id", id)
-            .eq("published", true)
-            .eq("moderation_status", "valide")
-            .neq("review_type", "annulation")
-            .order("created_at", { ascending: false }),
+          // Avis publiés + rôle calculé côté serveur : un visiteur ne lit pas
+          // les gardes terminées, l'attribution garde/proprio/entraide vient
+          // donc de la fonction public_profile_reviews (migration 0028).
+          supabase.rpc("public_profile_reviews", { p_user_id: id }),
           // Galerie réservée aux membres connectés (décision produit, août
           // 2026) : un visiteur anonyme ne reçoit jamais les URLs des photos.
           // La policy RLS anon a été supprimée, côté serveur comme côté client.
@@ -748,28 +743,17 @@ export default function PublicSitterProfile() {
           .map((r: any) => r.sit_id)
           .filter((sid: string | null): sid is string => sid !== null);
         if (sitIdsFromReviews.length > 0) {
-          const [{ data: badgeAttrData }, { data: sitOwnersData }] = await Promise.all([
-            supabase
-              .from("badge_attributions")
-              .select("badge_id, sit_id")
-              .in("sit_id", sitIdsFromReviews)
-              .eq("user_id", id),
-            supabase
-              .from("sits")
-              .select("id, user_id")
-              .in("id", sitIdsFromReviews),
-          ]);
+          const { data: badgeAttrData } = await supabase
+            .from("badge_attributions")
+            .select("badge_id, sit_id")
+            .in("sit_id", sitIdsFromReviews)
+            .eq("user_id", id);
           const grouped: Record<string, string[]> = {};
           (badgeAttrData || []).forEach((b: any) => {
             if (!grouped[b.sit_id]) grouped[b.sit_id] = [];
             grouped[b.sit_id].push(b.badge_id);
           });
           setBadgesBySitId(grouped);
-          const ownerMap: Record<string, string> = {};
-          (sitOwnersData || []).forEach((s: any) => {
-            if (s?.id && s?.user_id) ownerMap[s.id] = s.user_id;
-          });
-          setSitOwnerBySitId(ownerMap);
         }
       }
 
@@ -1284,17 +1268,9 @@ export default function PublicSitterProfile() {
   //   Inversement, un avis avec sit_id compte comme "propriétaire" si le reviewer
   //   n'était PAS le propriétaire (donc le gardien laissant un avis au proprio).
   //   Les avis sans sit_id (missions d'entraide) restent côté gardien.
-  const gardeReviews = reviews.filter((r: any) => {
-    if (r.sit_id === null) return false;
-    const ownerId = sitOwnerBySitId[r.sit_id];
-    return ownerId !== undefined && ownerId !== r.reviewee_id;
-  });
-  const missionReviews = reviews.filter((r: any) => r.sit_id === null);
-  const ownerReviews = reviews.filter((r: any) => {
-    if (r.sit_id === null) return false;
-    const ownerId = sitOwnerBySitId[r.sit_id];
-    return ownerId !== undefined && ownerId === r.reviewee_id;
-  });
+  const gardeReviews = reviews.filter((r: any) => r.review_role === 'garde');
+  const missionReviews = reviews.filter((r: any) => r.review_role === 'entraide');
+  const ownerReviews = reviews.filter((r: any) => r.review_role === 'proprio');
   const sitterRoleReviews = [...gardeReviews, ...missionReviews];
   const sitterRoleCount = sitterRoleReviews.length;
   const sitterRoleAvg = sitterRoleCount > 0
