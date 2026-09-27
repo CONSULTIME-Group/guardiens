@@ -18,7 +18,6 @@ import { avatarImageUrl } from "@/lib/storageImage";
 import { Link } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import PetsEditor from "@/components/pets/PetsEditor";
-import BreedEditorialLink from "@/components/breeds/BreedEditorialLink";
 import { SectionHeader } from "../sitter/SitterMatchSection";
 import { SPECIES_LABEL, capitalize, capitalizeWords } from "./helpers";
 import type { Pet, SitRow } from "./types";
@@ -66,13 +65,8 @@ const OwnerFamilySection = ({ pets, propertyIds, onPetsChanged, getNextSitForPet
     <button
       type="button"
       onClick={() => openEditor(propertyIds[0])}
-      className="flex items-center justify-center text-center bg-transparent hover:bg-muted/30 transition-colors h-full w-full cursor-pointer"
-      style={{
-        border: "1px dashed hsl(var(--border))",
-        borderRadius: "16px",
-        padding: "14px 22px",
-        minHeight: "82px",
-      }}
+      className="inline-flex items-center justify-center bg-transparent hover:bg-muted/30 transition-colors cursor-pointer rounded-full"
+      style={{ border: "1px dashed hsl(var(--border))", padding: "0 18px", minHeight: "50px" }}
     >
       <span
         className="text-primary"
@@ -85,13 +79,8 @@ const OwnerFamilySection = ({ pets, propertyIds, onPetsChanged, getNextSitForPet
     // Sans logement déclaré, l'ajout passe par la création du logement.
     <Link
       to="/owner-profile"
-      className="flex items-center justify-center text-center bg-transparent hover:bg-muted/30 transition-colors h-full"
-      style={{
-        border: "1px dashed hsl(var(--border))",
-        borderRadius: "16px",
-        padding: "14px 22px",
-        minHeight: "82px",
-      }}
+      className="inline-flex items-center justify-center bg-transparent hover:bg-muted/30 transition-colors rounded-full"
+      style={{ border: "1px dashed hsl(var(--border))", padding: "0 18px", minHeight: "50px" }}
     >
       <span
         className="text-primary"
@@ -103,7 +92,7 @@ const OwnerFamilySection = ({ pets, propertyIds, onPetsChanged, getNextSitForPet
   );
 
   return (
-    <section aria-label="Votre famille" className="px-4 sm:px-5 md:px-8">
+    <section aria-label="Votre famille">
       <SectionHeader
         eyebrow="Votre famille"
         title="Ceux qu'on garde avec vous."
@@ -171,107 +160,44 @@ const OwnerFamilySection = ({ pets, propertyIds, onPetsChanged, getNextSitForPet
           </Link>
         )
       ) : (
-        <div className="grid grid-cols-1 min-[430px]:grid-cols-2 md:grid-cols-3 gap-[14px] auto-rows-fr">
+        // Lot D1 : pastilles arrondies (photo ou initiale 38 px, nom, race et
+        // âge), puis pastille en pointillés. Les fiches races vivent dans « À lire ».
+        <ul className="flex flex-wrap gap-[8px]" data-testid="owner-family-pills">
           {pets.map((pet) => {
-            const nextSit = getNextSitForPet(pet);
+            const detail = [
+              pet.breed ? capitalizeWords(pet.breed) : SPECIES_LABEL[pet.species] || capitalizeWords(pet.species),
+              pet.age ? `${pet.age} an${pet.age > 1 ? "s" : ""}` : null,
+            ].filter(Boolean).join(", ");
             return (
-              <div
-                key={pet.id}
-                className="bg-card border border-border flex flex-col h-full px-[14px] py-[14px] sm:px-[22px] w-full hover:bg-muted/40 transition-colors"
-                style={{
-                  borderRadius: "16px",
-                }}
-              >
-              <button
-                type="button"
-                onClick={() => openEditor(pet.property_id)}
-                aria-label={`Modifier ${pet.name}`}
-                className="flex items-center gap-[14px] w-full text-left cursor-pointer bg-transparent"
-              >
-
-                <div
-                  className="rounded-full overflow-hidden shrink-0 flex items-center justify-center"
-                  style={{
-                    width: "42px",
-                    height: "42px",
-                    backgroundColor: "hsl(var(--secondary) / 0.16)",
-                  }}
+              <li key={pet.id}>
+                <button
+                  type="button"
+                  onClick={() => openEditor(pet.property_id)}
+                  aria-label={`Modifier ${pet.name}`}
+                  className="inline-flex items-center gap-[10px] rounded-full border border-border bg-card pl-[5px] pr-[16px] py-[5px] text-left hover:bg-muted/40 transition-colors"
                 >
-                  {pet.photo_url ? (
-                    <img
-                      src={avatarImageUrl(pet.photo_url, 42)}
-                      alt=""
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <span
-                      className="font-heading text-secondary"
-                      style={{ fontSize: "18px", fontWeight: 700 }}
-                    >
-                      {pet.name ? pet.name.charAt(0).toUpperCase() : "?"}
-                    </span>
-                  )}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p
-                    className="font-heading text-foreground break-words"
-                    style={{ fontSize: "15px", fontWeight: 600 }}
+                  <span
+                    className="rounded-full overflow-hidden shrink-0 flex items-center justify-center"
+                    style={{ width: "38px", height: "38px", backgroundColor: "hsl(var(--secondary) / 0.16)" }}
                   >
-                    {capitalize(pet.name)}
-                  </p>
-                  <p
-                    className="text-muted-foreground break-words"
-                    style={{ fontSize: "12px" }}
-                  >
-                    {SPECIES_LABEL[pet.species] || capitalizeWords(pet.species)}
-                    {pet.age ? ` · ${pet.age} an${pet.age > 1 ? "s" : ""}` : ""}
-                  </p>
-                  {nextSit?.status === "confirmed" ? (
-                    <span
-                      className="inline-block mt-[8px] rounded-full bg-primary/10 text-primary"
-                      style={{
-                        padding: "2px 10px",
-                        fontSize: "11px",
-                        fontWeight: 600,
-                      }}
-                    >
-                      Garde confirmée
-                    </span>
-                  ) : nextSit?.status === "published" ? (
-                    <span
-                      className="inline-block mt-[8px] rounded-full bg-secondary/15 text-secondary"
-                      style={{
-                        padding: "2px 10px",
-                        fontSize: "11px",
-                        fontWeight: 600,
-                      }}
-                    >
-                      Annonce en cours
-                    </span>
-                  ) : null}
-                </div>
-              </button>
-                {pet.breed ? (
-                  <div className="mt-[8px] pl-[56px]">
-                    {/* Raccourci contextuel vers la fiche de race. Le lien ne
-                        se rend que si la fiche existe vraiment (résolution
-                        partagée avec PetAdviceSection), jamais de lien mort.
-                        Hors du bouton : le clic n'ouvre pas l'éditeur. */}
-                    <BreedEditorialLink
-                      species={pet.species}
-                      breed={pet.breed}
-                      label={`Le guide du ${capitalizeWords(pet.breed)}`}
-                      ariaLabel={`Le guide du ${capitalizeWords(pet.breed)}, la race de ${capitalize(pet.name)}`}
-                    />
-                  </div>
-                ) : null}
-              </div>
+                    {pet.photo_url ? (
+                      <img src={avatarImageUrl(pet.photo_url, 38)} alt="" className="w-full h-full object-cover" loading="lazy" />
+                    ) : (
+                      <span className="font-heading text-secondary" style={{ fontSize: "16px", fontWeight: 700 }}>
+                        {pet.name ? pet.name.charAt(0).toUpperCase() : "?"}
+                      </span>
+                    )}
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block font-heading text-foreground text-[14.5px] font-semibold leading-tight">{capitalize(pet.name)}</span>
+                    {detail && <span className="block text-muted-foreground text-[12px] leading-tight">{detail}</span>}
+                  </span>
+                </button>
+              </li>
             );
           })}
-
-          {addTile}
-        </div>
+          <li>{addTile}</li>
+        </ul>
       )}
 
       <Dialog open={editorPropertyId !== null} onOpenChange={(open) => { if (!open) setEditorPropertyId(null); }}>

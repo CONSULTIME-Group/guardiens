@@ -455,9 +455,10 @@ export interface OwnerStarSectionProps {
   sitterAffinityProfiles?: Record<string, AffinitySitterInput>;
   latestDraft: SitRow | null;
   propertyCoverPhoto?: string | null;
-  nearbyCount: number;
-  nearbyRadius: number | null;
-  showConcierge: boolean;
+  /** Conservés pour compatibilité des appels : plus lus depuis le lot D1. */
+  nearbyCount?: number;
+  nearbyRadius?: number | null;
+  showConcierge?: boolean;
   primaryAction: OwnerPrimaryAction | null;
   /** Lot D1 : annonce active (OwnerAnnonceSection) devenue contenu de la vedette. */
   activeAnnonce?: React.ReactNode;
@@ -470,8 +471,6 @@ const OwnerStarSection = ({
   sitterAffinityProfiles,
   latestDraft,
   propertyCoverPhoto,
-  nearbyCount,
-  nearbyRadius,
   primaryAction,
   activeAnnonce,
 }: OwnerStarSectionProps) => {
