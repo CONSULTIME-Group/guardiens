@@ -1579,7 +1579,7 @@ export default function PublicSitterProfile() {
       )}
       {/* Fil d'Ariane : niveau département inséré quand il est connu.
           Un lien n'est posé que si la page cible existe et est publiée. */}
-      {activeTab !== 'gardien' && breadcrumbNode}
+      {breadcrumbNode}
 
       {/* JSON-LD */}
       {profile && (
@@ -1644,7 +1644,6 @@ export default function PublicSitterProfile() {
               onOpenHeroPicker={() => setHeroPickerOpen(true)}
               onOpenAvatarLightbox={() => hasAvatar && setLightboxIdx(0)}
               hasAvatarLightbox={hasAvatar}
-              breadcrumb={breadcrumbNode}
               memberSince={profile?.created_at ?? null}
               completedSits={completedSits}
               identityVerified={!!profile?.identity_verified}

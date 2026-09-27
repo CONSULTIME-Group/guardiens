@@ -63,7 +63,7 @@ interface HeroProps {
   onOpenHeroPicker: () => void;
   onOpenAvatarLightbox: () => void;
   hasAvatarLightbox: boolean;
-  breadcrumb: ReactNode;
+  breadcrumb?: ReactNode;
   memberSince: string | null;
   completedSits: number;
   identityVerified: boolean;
@@ -77,14 +77,6 @@ interface HeroProps {
   quote: string | null;
 }
 
-const anchorPosition = (anchor?: string) => {
-  const a = (anchor || "").toLowerCase();
-  if (a.includes("left")) return "left center";
-  if (a.includes("right")) return "right center";
-  if (a.includes("top")) return "center top";
-  if (a.includes("bottom")) return "center bottom";
-  return "center center";
-};
 
 export const SitterIdentityHero = (p: HeroProps) => {
   const place = [p.city, p.departmentName].filter(Boolean).join(", ");
@@ -98,48 +90,40 @@ export const SitterIdentityHero = (p: HeroProps) => {
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   };
   return (
-    <header className="relative w-full overflow-hidden" data-sitter-hero>
-      {/* Bandeau d'ambiance */}
-      <div className="absolute inset-x-0 top-0 h-[210px] md:h-[300px] pointer-events-none" aria-hidden="true">
+    <header className="relative w-full" data-sitter-hero>
+      {/* Gouache du hero : entière, pleine intensité, rien par-dessus (lot F1c). */}
+      <div
+        className="relative overflow-hidden w-full bg-[hsl(var(--hero-paper))] [aspect-ratio:1536/544] md:max-h-[520px]"
+        data-sitter-hero-frame
+      >
         <img
           src={p.heroDesktop}
           srcSet={`${p.heroMobile} 768w, ${p.heroDesktop} 1536w`}
           sizes="100vw"
           alt=""
+          aria-hidden="true"
           data-hero-anchor={p.heroAnchor}
           width={1536}
           height={544}
           loading="eager"
           decoding="async"
           fetchPriority="high"
-          className="w-full h-full object-cover opacity-50"
-          style={{ objectPosition: anchorPosition(p.heroAnchor) }}
+          className="w-full h-full object-contain object-center"
         />
-        {/* Fondu vers le fond crème (voile en dégradé, équivalent du masque). */}
-        <div
-          className="absolute inset-0"
-          style={{ background: "linear-gradient(to bottom, transparent 18%, hsl(var(--background)) 92%)" }}
-        />
+        {p.isOwnProfile && (
+          <button
+            type="button"
+            onClick={p.onOpenHeroPicker}
+            className="absolute top-3 right-3 z-20 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-background/95 border border-border text-[13px] font-semibold text-foreground shadow-sm"
+            title="Choisir une autre illustration de carnet"
+          >
+            Changer l'image
+          </button>
+        )}
       </div>
-      {p.isOwnProfile && (
-        <button
-          type="button"
-          onClick={p.onOpenHeroPicker}
-          className="absolute top-3 right-3 z-20 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-background/95 border border-border text-[13px] font-semibold text-foreground shadow-sm"
-          title="Choisir une autre illustration de carnet"
-        >
-          Changer l'image
-        </button>
-      )}
 
-      <div className="relative z-10 max-w-5xl mx-auto px-4 md:px-6">
-        <div className="pt-2">
-          <div className="inline-flex max-w-full rounded-full bg-background/80 backdrop-blur-sm px-3 [&_nav]:py-0 [&_nav]:px-0 [&_nav]:max-w-none">
-            {p.breadcrumb}
-          </div>
-        </div>
-
-        <div className="pt-[90px] md:pt-[150px] flex flex-col items-center text-center md:flex-row md:items-end md:text-left gap-[22px] md:gap-[34px] min-w-0">
+      <div className="relative max-w-5xl mx-auto px-4 md:px-6">
+        <div className="pt-[34px] flex flex-col items-center text-center md:flex-row md:items-end md:text-left gap-[22px] md:gap-[34px] min-w-0">
           {/* Vignette papier déchiré */}
           <button
             type="button"

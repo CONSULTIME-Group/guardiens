@@ -27,3 +27,22 @@ describe("onglet gardien allégé", () => {
     expect(sections).not.toMatch(/[\u2014\u2013]/);
   });
 });
+
+describe("gouache du hero gardien restaurée en plein (lot F1c)", () => {
+  const hs = sections.indexOf("data-sitter-hero>");
+  const he = sections.indexOf("data-sitter-hero-frame", hs);
+  const frameEnd = sections.indexOf("</div>", he);
+  const frame = sections.slice(hs, frameEnd);
+  const img = frame.slice(frame.indexOf("<img"), frame.indexOf("/>", frame.indexOf("<img")));
+  it("image en object-contain, sans opacité ni recadrage", () => {
+    expect(img).toContain("object-contain");
+    expect(img).not.toMatch(/opacity-/);
+    expect(img).not.toContain("object-cover");
+  });
+  it("aucun voile en dégradé superposé", () => {
+    expect(frame).not.toMatch(/linear-gradient|mask-image|maskImage/);
+  });
+  it("conteneur au ratio 1536/544", () => {
+    expect(frame).toContain("[aspect-ratio:1536/544]");
+  });
+});
