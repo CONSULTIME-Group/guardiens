@@ -29,27 +29,46 @@ const anneSophie = {
   interests: ["Lecture", "Cuisine", "Jardinage", "Bricolage"],
 };
 
-describe("sitterDistinctLine", () => {
-  it("trois gardiennes réelles : lignes deux à deux différentes, Ingrid en tête attendue", () => {
-    const lines = sitterDistinctLines([ingrid, apolline, anneSophie]);
-    expect(lines[0].startsWith("En famille · plus de 5 ans d'expérience")).toBe(true);
-    expect(new Set(lines).size).toBe(3);
-    lines.forEach((l) => expect(l.length).toBeGreaterThan(0));
+describe("sitterDistinctLine (D1b)", () => {
+  it("trois gardiennes réelles : lignes exactes de la maquette validée", () => {
+    expect(sitterDistinctLines([ingrid, apolline, anneSophie])).toEqual([
+      "En famille · plus de 5 ans d'expérience · animaux de ferme, chevaux, NAC",
+      "En couple · potager, arrosage des plantes, promenades",
+      "En couple · centres d'intérêt : cuisine, jardinage, bricolage",
+    ]);
   });
 
-  it("déduplication : « En couple » n'est affiché qu'une fois", () => {
-    const lines = sitterDistinctLines([apolline, anneSophie]);
-    expect(lines[0]).toMatch(/^En couple/);
-    expect(lines[1]).not.toMatch(/En couple/);
-  });
-
-  it("jamais plus de 3 fragments, jamais le fragment générique", () => {
-    const line = sitterDistinctLine({ ...ingrid, completed_sits_count: 4, reviews_count: 3, reviews_avg: 4.67 }, new Set());
-    expect(line.split(" · ")).toHaveLength(3);
-    expect(line).toBe("4 gardes réalisées · 3 avis, 4,7 · En famille");
-    for (const s of [ingrid, apolline, anneSophie]) {
-      expect(distinctFragments(s).join(" ")).not.toMatch(/déjà gardé des chiens et des chats/i);
+  it("ce que tous partagent n'apparaît sur aucune ligne (chiens, chats, lecture)", () => {
+    for (const order of [[ingrid, apolline, anneSophie], [anneSophie, apolline, ingrid]]) {
+      const lines = sitterDistinctLines(order);
+      expect(new Set(lines).size).toBe(lines.length);
+      for (const l of lines) {
+        expect(l).not.toMatch(/\bchiens\b|\bchats\b|lecture|déjà gardé/i);
+        expect(l.length).toBeLessThanOrEqual(80);
+      }
     }
+  });
+
+  it("un savoir-faire cité une fois n'est pas répété sur la ligne suivante", () => {
+    const [first, , third] = sitterDistinctLines([ingrid, apolline, anneSophie]);
+    expect(first).toMatch(/chevaux/);
+    expect(third).not.toMatch(/chevaux/);
+  });
+
+  it("confiance réelle en tête, 3 fragments au plus", () => {
+    const line = sitterDistinctLine({ ...ingrid, completed_sits_count: 4, reviews_count: 3, reviews_avg: 4.67 });
+    expect(line).toBe("4 gardes réalisées · 3 avis, moyenne 4,7 · en famille");
+  });
+
+  it("profils sans rien de distinctif : ligne vide, jamais de phrase générique ni de doublon", () => {
+    const bare = { animal_types: ["Chiens", "Chats"] };
+    expect(sitterDistinctLines([bare, bare])).toEqual(["", ""]);
+    const couple = { sitter_type: "Couple", animal_types: ["Chiens", "Chats"] };
+    expect(sitterDistinctLines([couple, couple])).toEqual(["En couple", ""]);
+  });
+
+  it("jamais la simple garde de chiens ou de chats", () => {
+    expect(distinctFragments({ animal_types: ["Chiens", "Chats"] })).toEqual([]);
   });
 
   it("expérience : débutant et vide ne produisent rien, 3-5 ans équivaut à 2 à 5", () => {
