@@ -6,7 +6,8 @@ import {
   shouldSendNextWave,
   waveHeadline,
   roundDistanceKm,
-  WAVE_RELAUNCH_MESSAGE,
+  waveRelaunchMessage,
+  waveRelaunchTitle,
   WAVE_EMPTY_MESSAGE,
 } from "../../supabase/functions/_shared/mission-wave";
 
@@ -77,7 +78,7 @@ describe("phrases envoyees", () => {
   });
 
   it("garde des messages affirmatifs, sans tiret cadratin", () => {
-    for (const m of [WAVE_RELAUNCH_MESSAGE, WAVE_EMPTY_MESSAGE]) {
+    for (const m of [waveRelaunchMessage(1), waveRelaunchMessage(4), WAVE_EMPTY_MESSAGE]) {
       expect(m).not.toMatch(/[—–]/);
       expect(m.length).toBeGreaterThan(20);
     }

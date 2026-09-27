@@ -7,7 +7,8 @@ import { resolve } from "node:path";
 import {
   WAVE_MAX_COUNT,
   shouldSendNextWave,
-  WAVE_RELAUNCH_MESSAGE,
+  waveRelaunchMessage,
+  waveRelaunchTitle,
   WAVE_EMPTY_MESSAGE,
 } from "../../supabase/functions/_shared/mission-wave";
 import { isParisQuietHour } from "../../supabase/functions/_shared/paris-hour";
@@ -114,8 +115,18 @@ describe("gardes de plusieurs jours redirigées", () => {
 
 describe("textes envoyés au demandeur", () => {
   it("relance affirmative, sans tiret cadratin", () => {
-    expect(WAVE_RELAUNCH_MESSAGE).toBe("On prévient dix autres personnes du coin.");
-    expect(WAVE_RELAUNCH_MESSAGE).not.toMatch(/[—–]/);
+    expect(waveRelaunchMessage(1)).toBe("On prévient une autre personne du coin.");
+    expect(waveRelaunchTitle(1)).toBe("On prévient une autre personne");
+    for (let n = 2; n <= 10; n++) {
+      expect(waveRelaunchMessage(n)).toBe(`On prévient ${n} autres personnes du coin.`);
+      expect(waveRelaunchTitle(n)).toBe(`On prévient ${n} autres personnes`);
+    }
+    for (let n = 1; n <= 10; n++) {
+      for (const m of [waveRelaunchMessage(n), waveRelaunchTitle(n)]) {
+        expect(m).not.toMatch(/[—–]/);
+        expect(m).not.toMatch(/\b(ne|pas)\b|n'|n’|personne n/i);
+      }
+    }
   });
 
   it("message d'attente affirmatif", () => {

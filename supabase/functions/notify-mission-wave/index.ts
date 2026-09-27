@@ -30,7 +30,8 @@ import {
   shouldSendNextWave,
   waveHeadline,
   frenchDateLabel,
-  WAVE_RELAUNCH_MESSAGE,
+  waveRelaunchMessage,
+  waveRelaunchTitle,
   WAVE_EMPTY_MESSAGE,
   isMissionSitMode,
   sitModeEmailLine,
@@ -207,7 +208,7 @@ async function runWave(supabase: any, missionId: string): Promise<{ sent: number
   }
 
   // Relance du demandeur à partir de la deuxième vague.
-  if (wave >= 2 && owner?.email) {
+  if (wave >= 2 && sent > 0 && owner?.email) {
     await sendEmail({
       templateName: "mission-wave-status",
       recipientEmail: owner.email,
@@ -216,14 +217,14 @@ async function runWave(supabase: any, missionId: string): Promise<{ sent: number
         ownerFirstName: owner.first_name ?? "",
         missionTitle: mission.title ?? "",
         missionId,
-        message: WAVE_RELAUNCH_MESSAGE,
+        message: waveRelaunchMessage(sent),
       },
     });
     await supabase.from("notifications").insert({
       user_id: mission.user_id,
       type: "mission_wave_relaunch",
-      title: "On prévient dix autres personnes",
-      body: WAVE_RELAUNCH_MESSAGE,
+      title: waveRelaunchTitle(sent),
+      body: waveRelaunchMessage(sent),
       link: `/petites-missions/${missionId}`,
     });
   }

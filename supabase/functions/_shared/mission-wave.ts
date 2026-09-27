@@ -82,9 +82,17 @@ export function waveHeadline(
   return `${who}${where} a besoin de quelqu'un pour ${title}${when}.`;
 }
 
-/** Message au demandeur quand une nouvelle vague part. */
-export const WAVE_RELAUNCH_MESSAGE =
-  "On prévient dix autres personnes du coin.";
+/** Message au demandeur quand une nouvelle vague part, au nombre réel d'emails partis. */
+export function waveRelaunchMessage(count: number): string {
+  return count === 1
+    ? "On prévient une autre personne du coin."
+    : `On prévient ${count} autres personnes du coin.`;
+}
+
+/** Titre de la notification de relance, au nombre réel. */
+export function waveRelaunchTitle(count: number): string {
+  return count === 1 ? "On prévient une autre personne" : `On prévient ${count} autres personnes`;
+}
 
 /**
  * Message au demandeur quand il n'y a vraiment personne de disponible autour

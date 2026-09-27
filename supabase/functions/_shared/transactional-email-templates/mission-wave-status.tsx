@@ -77,6 +77,6 @@ export const template: TemplateEntry = {
     ownerFirstName: 'Marie',
     missionTitle: 'Promener Filou samedi après-midi',
     missionId: 'demo',
-    message: "Personne n'a encore pu, on prévient dix autres personnes du coin.",
+    message: "On prévient 3 autres personnes du coin.",
   },
 }
