@@ -147,7 +147,7 @@ describe("SitterMatchSection — rangée compacte et sortie recherche", () => {
     expect(rowC?.textContent).not.toMatch(/%/);
   });
 
-  it("affiche ville, dates, distance, score et environnement sur une rangée compacte", () => {
+  it("affiche ville, dates, distance et score sur une ligne « Aussi pour vous »", () => {
     renderSection({
       topSits: [
         scored("a", 80),
@@ -160,7 +160,7 @@ describe("SitterMatchSection — rangée compacte et sortie recherche", () => {
     expect(row?.textContent).toMatch(/27 août au 30 septembre \d{4}/);
     expect(row?.textContent).toContain("66 km");
     expect(row?.textContent).toContain("62 %");
-    expect(row?.textContent).toContain("Campagne");
+    expect(row?.textContent).toContain("Voir");
   });
 
   it("plafonne l'ensemble à 3 gardes", () => {
@@ -204,20 +204,15 @@ describe("SitterMatchSection — rangée compacte et sortie recherche", () => {
   });
 });
 
-describe("SitterMatchSection — sous-titre honnête sur le classement", () => {
-  it("nomme la zone d'alerte", () => {
+describe("SitterMatchSection — mention de zone d'alerte (lot D2)", () => {
+  it("nomme la zone d'alerte dans la méta de la vedette quand c'est vrai", () => {
     renderSection({ topSits: [scored("a", 80)], rankingSource: "alert" });
-    expect(screen.getByText("Dans votre zone d'alerte.")).toBeInTheDocument();
+    expect(screen.getByText(/· dans votre zone d'alerte$/)).toBeInTheDocument();
   });
 
-  it("nomme la proximité géographique", () => {
-    renderSection({ topSits: [scored("a", 80)], rankingSource: "distance" });
-    expect(screen.getByText("Autour de chez vous.")).toBeInTheDocument();
-  });
-
-  it("nomme la France entière sans coordonnées", () => {
-    renderSection({ topSits: [scored("a", 80)], rankingSource: "affinity" });
-    expect(screen.getByText("Partout en France, les plus proches de votre profil.")).toBeInTheDocument();
+  it.each(["distance", "affinity"] as const)("ne mentionne aucune zone d'alerte pour le classement %s", (rankingSource) => {
+    renderSection({ topSits: [scored("a", 80)], rankingSource });
+    expect(screen.queryByText(/zone d'alerte/)).toBeNull();
   });
 
   it.each(["alert", "distance", "affinity"] as const)(

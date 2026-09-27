@@ -1,162 +1,123 @@
+/**
+ * Accueil gardien (lot D2, maquette validée), sur le modèle d'OwnerCockpit.
+ *
+ * Carte papier (--hero-paper), rayon 20. Gouache à droite sur 210 px et
+ * toute la hauteur (mobile : en haut, pleine largeur, 150 px), object-cover,
+ * PLEINE : ni masque, ni opacité réduite, ni voile, ni lavis.
+ * sitter-cockpit-morning si disponible, sitter-match-empty sinon.
+ */
 import { Link } from "react-router-dom";
-import { CockpitGreeting } from "@/components/dashboard/CockpitGreeting";
 import cockpitMorning from "@/assets/illustrations/sitter-cockpit-morning.webp";
 import cockpitWaiting from "@/assets/illustrations/sitter-match-empty.webp";
-import { avatarImageUrl } from "@/lib/storageImage";
-
-
-/**
- * Cockpit gardien, vague 1 sur 4, refonte accueil.
- *
- * Accueil calme : aucun bouton d'action fort, aucun CTA prioritaire.
- * La star de l'écran sera la carte rencontre (vague 2). Ici on pose
- * une couverture de carnet, une salutation adressée et un ancrage temporel
- * discret. L'édition du profil, le profil public et la disponibilité vivent
- * dans /profile et le menu profil (redondances retirées, lot navigation).
- */
+import DashEyebrow from "../owner/DashEyebrow";
+import { greetingForHour, type CockpitTodo } from "../owner/OwnerCockpit";
 
 const capitalize = (name: string) =>
   name ? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase() : "";
 
-const DAY_NAMES = [
-  "dimanche",
-  "lundi",
-  "mardi",
-  "mercredi",
-  "jeudi",
-  "vendredi",
-  "samedi",
-];
+/** Réglage de disponibilité existant : section « profil » de /profile. */
+export const AVAILABILITY_SETTINGS_PATH = "/profile?section=profil";
 
-const momentAncrage = (now: Date = new Date()): string => {
-  const day = DAY_NAMES[now.getDay()];
-  const h = now.getHours();
-  const period = h < 12 ? "matin" : h < 18 ? "après-midi" : "soir";
-  return `ce ${day} ${period}`;
-};
+export interface SitterCockpitLine {
+  text: string;
+  link?: { label: string; to: string };
+}
 
 interface SitterCockpitProps {
   firstName?: string;
-  avatarUrl?: string | null;
-  isFounder?: boolean;
   isAvailable: boolean;
-  /** Salutation configurable, "Bonjour" par défaut. La branche nouveau gardien
-   * passe "Bienvenue" pour marquer l'arrivée. */
+  /** Salutation forcée (branche nouveau gardien : « Bienvenue »). */
   greeting?: string;
-  // Props conservées pour compatibilité de l'appelant, non utilisées dans
-  // cette vague : l'accueil ne porte plus d'action prioritaire.
-  nextGuard?: any | null;
-  profileCompletion?: number;
-  postalCode?: string | null;
-  nearbyListings?: any[];
-  competencesCount?: number;
-  interestsCount?: number;
+  line?: SitterCockpitLine | null;
+  todos?: CockpitTodo[];
+  /** Heure forcée (tests). */
+  hour?: number;
 }
 
-const SitterCockpit = ({
-  firstName,
-  avatarUrl,
-  isAvailable,
-  greeting = "Bonjour",
-}: SitterCockpitProps) => {
-
+const SitterCockpit = ({ firstName, isAvailable, greeting, line, todos = [], hour }: SitterCockpitProps) => {
   const displayName = firstName ? capitalize(firstName) : "";
-  const initial = displayName ? displayName.charAt(0) : "?";
-  const ancrage = momentAncrage();
+  const hello = greeting ?? greetingForHour(hour ?? new Date().getHours());
+  const title = displayName ? `${hello}, ${displayName}.` : `${hello}.`;
+  const shown = todos.slice(0, 3);
 
   return (
-    <section
-      aria-label="Espace gardien, accueil"
-      className="pt-4 sm:pt-6 pb-2"
-    >
-      {/* Couverture de carnet : papier hero-paper, lavis aquarelle discret,
-          bord droit déchiré, ombre douce. Wrapper conservé de la vague 0. */}
-      <div className="notebook-card relative p-[18px] pr-[30px] sm:p-[34px] sm:pr-[52px]">
-        <div className="notebook-card-paper absolute inset-0" aria-hidden="true" />
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 opacity-50"
-          style={{
-            backgroundImage: [
-              "radial-gradient(circle at 6% 96%, hsl(var(--secondary) / 0.14), transparent 46%)",
-            ].join(", "),
-          }}
-        />
-        {/* Aquarelle signature Guardiens, choisie selon l'état du gardien :
-            scène "matin du gardien" quand la disponibilité est active, scène
-            d'attente quand elle ne l'est pas. Décorative (aria-hidden, alt
-            vide), masque radial via .illustration-blend qui fond les bords
-            dans le papier. En mobile elle est ancrée en haut à droite pour
-            occuper le vide existant, sans allonger la carte. */}
-        <div
-          aria-hidden="true"
-          className="illustration-wrapper pointer-events-none absolute top-[-14px] right-[-10px] w-[100px] h-[100px] sm:top-auto sm:bottom-[-12px] sm:right-[-16px] sm:w-[150px] sm:h-[150px] min-[1100px]:w-[180px] min-[1100px]:h-[180px]"
-        >
+    <section aria-label="Espace gardien, accueil" className="pt-4 sm:pt-6" data-testid="sitter-cockpit">
+      <div
+        className="relative overflow-hidden flex flex-col-reverse md:flex-row"
+        style={{ backgroundColor: "hsl(var(--hero-paper))", borderRadius: "20px" }}
+      >
+        <div className="min-w-0 flex-1 p-[22px] md:p-[34px]">
+          <DashEyebrow>Espace gardien</DashEyebrow>
+          <h1 className="font-heading text-foreground mt-[14px] text-[34px] md:text-[44px] font-semibold leading-[1.08]">
+            {title}
+          </h1>
+
+          <div className="mt-[14px] flex flex-wrap items-center gap-[14px]" data-testid="sitter-cockpit-availability">
+            <span
+              className={`inline-flex items-center gap-[8px] rounded-full px-[12px] py-[4px] text-[13px] font-semibold ${
+                isAvailable ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+              }`}
+            >
+              {isAvailable && <span aria-hidden="true" className="inline-block h-[8px] w-[8px] rounded-full bg-primary" />}
+              {isAvailable ? "Disponible" : "Indisponible"}
+            </span>
+            <Link
+              to={AVAILABILITY_SETTINGS_PATH}
+              className="text-muted-foreground text-[13px] underline underline-offset-4 hover:text-foreground"
+            >
+              Modifier
+            </Link>
+          </div>
+
+          {line && (
+            <p className="mt-[14px] text-foreground/85 text-[15px] leading-relaxed" data-testid="sitter-cockpit-line">
+              {line.text}
+              {line.link && (
+                <>
+                  {" "}
+                  <Link to={line.link.to} className="font-semibold text-primary hover:underline underline-offset-4">
+                    {line.link.label}
+                  </Link>
+                </>
+              )}
+            </p>
+          )}
+
+          {shown.length > 0 && (
+            <div className="mt-[22px]" data-testid="sitter-cockpit-todos">
+              <p className="text-muted-foreground uppercase text-[11px] font-bold tracking-[0.16em]">À faire</p>
+              <ul className="mt-[8px] flex flex-wrap gap-[8px]">
+                {shown.map((t) => (
+                  <li key={t.key}>
+                    <Link
+                      to={t.to}
+                      className="inline-flex items-center gap-[8px] rounded-full border border-border bg-card px-[14px] min-h-[40px] text-[13px] font-semibold text-foreground hover:bg-muted/40 transition-colors"
+                    >
+                      {t.label}
+                      {typeof t.count === "number" && t.count > 0 && (
+                        <span className="rounded-full bg-primary text-primary-foreground px-[7px] py-[1px] text-[11px] font-bold tabular-nums">
+                          {t.count}
+                        </span>
+                      )}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+        <div className="shrink-0 w-full h-[150px] md:w-[210px] md:h-auto md:self-stretch">
           <img
             src={isAvailable ? cockpitMorning : cockpitWaiting}
             alt=""
-            width={180}
-            height={180}
+            width={210}
+            height={260}
             loading="eager"
             decoding="async"
-            className="illustration-blend animate-painted-reveal w-full h-full object-cover"
+            data-testid="sitter-cockpit-gouache"
+            className="w-full h-full object-cover"
           />
         </div>
-
-
-
-        <div className="relative flex flex-col sm:flex-row sm:items-start sm:justify-between gap-[10px] sm:gap-[22px]">
-          <div className="min-w-0 flex-1">
-            {/* 1. Avatar dans le flux, avec l'eyebrow, côte à côte */}
-            <div className="flex items-center gap-[12px] min-w-0 pr-[56px] sm:pr-0">
-              <Link
-                to="/profile"
-                aria-label="Modifier mon profil"
-                className="shrink-0 flex items-center justify-center w-[48px] h-[48px] rounded-full overflow-hidden border border-border ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-                style={{ backgroundColor: "hsl(var(--primary) / 0.12)" }}
-              >
-                {avatarUrl ? (
-                  <img src={avatarImageUrl(avatarUrl, 48)} alt="" className="w-full h-full object-cover" loading="lazy" />
-                ) : (
-                  <span className="font-heading font-semibold text-lg text-foreground/80">
-                    {initial}
-                  </span>
-                )}
-              </Link>
-              <p
-                className="font-heading italic text-secondary min-w-0 truncate"
-                style={{ fontSize: "13px", lineHeight: 1.2 }}
-              >
-                Espace gardien
-              </p>
-            </div>
-
-            {/* 2. Salutation, pleine largeur */}
-            <CockpitGreeting greeting={greeting} displayName={displayName} className="mt-[10px]" />
-
-            {/* 3. Horodatage */}
-            <p
-              className="font-sans text-muted-foreground mt-[6px]"
-              style={{ fontSize: "13px", lineHeight: 1.3 }}
-            >
-              {ancrage}
-            </p>
-
-            {/* 4. Mention de disponibilité, volontairement non cliquable :
-                l'état reste visible ici, le pilotage vit dans /profile. */}
-            <p
-              className="font-sans text-muted-foreground mt-[4px] flex items-center gap-[6px]"
-              style={{ fontSize: "12px", lineHeight: 1.3 }}
-            >
-              <span
-                aria-hidden="true"
-                className={`inline-block h-[6px] w-[6px] rounded-full ${isAvailable ? "bg-success" : "bg-muted-foreground/40"}`}
-              />
-              {isAvailable ? "Disponible" : "Indisponible"}
-            </p>
-          </div>
-        </div>
-        <div className="notebook-card-edge" aria-hidden="true" />
       </div>
     </section>
   );

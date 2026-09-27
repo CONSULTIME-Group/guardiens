@@ -47,8 +47,10 @@ describe("OwnerDashboard, composition lot D1", () => {
     expect(dash).not.toContain("<OwnerSitterSpotlight");
     expect(dash).toContain("<OwnerNearbySitters");
   });
-  it("Dashboard.tsx ne rend plus le digest ni Alma dormante pour le propriétaire", () => {
-    expect(src("pages/Dashboard.tsx")).toMatch(/displayedRole !== "owner" && \(\s*<div[^]*<WelcomeBackDigest/);
+  it("Dashboard.tsx ne rend plus le digest ni Alma dormante, pour aucun rôle (lot D2)", () => {
+    const page = src("pages/Dashboard.tsx");
+    expect(page).not.toMatch(/<WelcomeBackDigest[\s/>]/);
+    expect(page).not.toMatch(/<AlmaDormantReturnWhisper[\s/>]/);
   });
 });
 

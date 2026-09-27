@@ -7,7 +7,7 @@ import OwnerNearbySitters from "./owner/OwnerNearbySitters";
 import OwnerEntraideBand from "./owner/OwnerEntraideBand";
 import type { CockpitTodo } from "./owner/OwnerCockpit";
 import { useHelpsWithMissing } from "./HelpsWithReminder";
-import { useCommunityPulse } from "@/hooks/useCommunityPulse";
+import CommunityPulseLine from "./shared/CommunityPulseLine";
 import { useNavBadgeCounts } from "@/hooks/useNavBadgeCounts";
 import { useOwnerDigestLine } from "@/hooks/useOwnerDigestLine";
 import { useOwnerProfile } from "@/hooks/useOwnerProfile";
@@ -91,7 +91,6 @@ const OwnerDashboard = () => {
   const helpsWithMissing = useHelpsWithMissing();
   const { unreadCount } = useNavBadgeCounts(user?.id);
   const digestLine = useOwnerDigestLine(!!user?.id);
-  const { data: pulse } = useCommunityPulse();
   const { data: ownerProfile } = useOwnerProfile();
   const ownerCity = ownerProfile?.city ? formatCityLabel(ownerProfile.city) : "";
 
@@ -433,14 +432,7 @@ const OwnerDashboard = () => {
             <div className="lg:hidden space-y-[22px]">{railContent}</div>
 
             {/* 7. Pouls */}
-            {pulse && pulse.maisonsGardees > 0 && (
-              <p className="font-heading italic text-foreground/85 text-[17px] md:text-[19px] leading-relaxed" data-testid="owner-pulse-line">
-                Guardiens, c'est déjà {pulse.maisonsGardees.toLocaleString("fr-FR")} maisons gardées et {pulse.animauxAccompagnes.toLocaleString("fr-FR")} animaux accompagnés.{" "}
-                <Link to="/actualites/inventaire-guardiens-france" className="not-italic font-sans text-[13px] font-semibold text-primary hover:underline underline-offset-4">
-                  Voir l'inventaire
-                </Link>
-              </p>
-            )}
+            <CommunityPulseLine />
 
             {/* 8. Historique des candidatures, accordéon discret */}
             {hasReadApps && (
