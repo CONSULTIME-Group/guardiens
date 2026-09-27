@@ -125,12 +125,12 @@
       }
     },
     "pretexte": {
-      "eyebrow": "Ce qu'on trouve sans l'avoir cherché",
+      "eyebrow": "Ce qu'on trouve en chemin",
       "title": "Le vrai prétexte, c'est ce qui arrive autour.",
       "p1": "Vous partez l'esprit léger, quelqu'un veille sur votre maison. Vous gardez une maison, vous découvrez une ville de l'intérieur, un jardin, un chien qui vous adopte en trois jours. Des deux côtés, la garde est le prétexte.",
       "p2": "Ce qui reste, c'est autre chose. Connaître la mami du quartier et son histoire parce que vous l'avez aidée à ramasser ses fruits. Échanger avec Gerardo pendant qu'il vous donne un coup de main pour bricoler, et lui proposer un repas fait maison en retour.",
       "p3": "Avant, il y avait quelqu'un qui passait arroser le jardin, qui gardait le chien, qui venait fixer un volet. Quelqu'un à qui on offrait une part de gâteau en retour. Cette habitude existe toujours, il suffit d'oser la demander.",
-      "p4": "Certains vont plus loin et ouvrent un chantier chez eux, un potager à créer, un mur à remonter. On y arrive le matin sans connaître personne, on repart le soir en sachant faire quelque chose de nouveau. C'est la même entraide, avec les mains.",
+      "p4": "Certains vont plus loin et ouvrent un chantier chez eux, un potager à créer, un mur à remonter. On y arrive le matin en inconnu, on repart le soir en sachant faire quelque chose de nouveau. C'est la même entraide, avec les mains.",
       "closing": "Osez demander. Osez proposer.",
       "cta": "Découvrir l'entraide",
       "cta_project": "Voir les projets participatifs"
@@ -140,7 +140,7 @@
       "title": "Vos besoins, son savoir-faire. Vous choisissez.",
       "lede": "Votre rythme, vos habitudes, les besoins de vos animaux, face à son expérience. On vous montre où ça correspond. Vous échangez, vous pouvez vous rencontrer, et vous décidez.",
       "p1_title": "Votre gardien idéal, décrit par vous",
-      "p1_text": "Un couple, un retraité, une famille, quelqu'un d'actif ou quelqu'un qui reste à la maison, avec voiture ou sans. Vous décrivez qui vous voulez chez vous, et le score d'affinité classe les candidatures là-dessus, critère par critère. Vous voyez le détail du calcul, vous gardez la main.",
+      "p1_text": "Un couple, un retraité, une famille, quelqu'un d'actif ou quelqu'un qui reste à la maison, avec voiture ou à pied. Vous décrivez qui vous voulez chez vous, et le score d'affinité classe les candidatures là-dessus, critère par critère. Vous voyez le détail du calcul, vous gardez la main.",
       "main_label": "Le cœur du matching",
       "examples_label": "Exemples de préférences",
       "examples": {
@@ -149,7 +149,7 @@
         "family": "Une famille",
         "active": "Quelqu'un d'actif",
         "home": "Quelqu'un qui reste à la maison",
-        "vehicle": "Avec voiture ou sans"
+        "vehicle": "Avec voiture ou à pied"
       },
       "p2_title": "Un gardien qui arrive préparé",
       "p2_text": "Le guide de la race de votre animal et le guide de votre ville, transmis avant la garde. Votre gardien sait déjà ce qui compte avant même d'arriver.",
@@ -189,7 +189,7 @@
     "faq": {
       "title": "Questions fréquentes",
       "q1": "Qu'est-ce que le house-sitting ?",
-      "a1": "Le house-sitting est un échange de services : un gardien habite dans votre maison pendant votre absence et prend soin de vos animaux. L'échange n'implique aucune transaction financière entre les deux parties.",
+      "a1": "Le house-sitting est un échange de services : un gardien habite dans votre maison pendant votre absence et prend soin de vos animaux. Chacun rend service à l'autre : l'échange se fait en temps et en services.",
       "q2": "Comment fonctionne l'accès à Guardiens ?",
       "a2": "L'accès à Guardiens est ouvert pendant la phase de lancement : vous accédez à l'ensemble des fonctionnalités, et vous restez libre à tout moment. Toute évolution tarifaire vous sera annoncée à l'avance.",
       "q3": "Comment trouver un pet sitter près de chez moi ?",
@@ -203,7 +203,7 @@
       "q7": "Quel est le modèle économique de Guardiens ?",
       "a7": "L'accès à Guardiens est ouvert pendant la phase de lancement : vous accédez à l'ensemble des fonctionnalités, et vous restez libre à tout moment. Toute évolution tarifaire vous sera annoncée à l'avance.",
       "q8": "Le house-sitting est-il sécurisé ?",
-      "a8": "La vérification d'identité est ouverte à tous les membres : la pièce envoyée est analysée automatiquement, les dossiers qui ne passent pas ce premier contrôle sont revus par notre équipe, et les profils validés affichent l'écusson « Identité vérifiée ». Une rencontre préalable entre le propriétaire et le gardien est vivement recommandée avant toute garde. Après chaque expérience, les avis croisés publiés sur le profil construisent une réputation vérifiable, visible par tous les membres.",
+      "a8": "La vérification d'identité est ouverte à tous les membres : la pièce envoyée est analysée automatiquement, les dossiers à compléter sont revus par notre équipe, et les profils validés affichent l'écusson « Identité vérifiée ». Une rencontre préalable entre le propriétaire et le gardien est vivement recommandée avant toute garde. Après chaque expérience, les avis croisés publiés sur le profil construisent une réputation vérifiable, visible par tous les membres.",
       "q9": "Est-ce que ça marche depuis l'étranger ?",
       "a9": "Oui, dans les deux sens. Si vous vivez à l'étranger, publiez votre annonce pour faire veiller sur votre résidence en France pendant votre absence. Si vous partez à l'étranger, consultez les annonces internationales et trouvez un gardien de confiance sur place. {{listings}}",
       "a9_count_one": "{{count}} annonce internationale est en cours.",
@@ -237,7 +237,7 @@
     },
     "affinity": {
       "title": "Vous décrivez qui vous voulez chez vous",
-      "subtitle": "Un couple, un retraité, une famille, quelqu'un qui part randonner la journée ou quelqu'un qui reste à la maison, avec voiture ou sans. Vous le dites à l'inscription, et chaque candidature reçoit un score calculé sur ce que vous avez décrit.",
+      "subtitle": "Un couple, un retraité, une famille, quelqu'un qui part randonner la journée ou quelqu'un qui reste à la maison, avec voiture ou à pied. Vous le dites à l'inscription, et chaque candidature reçoit un score calculé sur ce que vous avez décrit.",
       "bullet1": "Vous décrivez votre gardien idéal, votre rythme de vie, l'ambiance de votre foyer et la présence que vous attendez pendant la garde.",
       "bullet2": "Chaque candidature est notée critère par critère, avec le poids de chacun affiché.",
       "bullet3": "Vous voyez le détail, vous décidez.",
@@ -323,7 +323,7 @@
       },
     "compare": {
       "title": "House-sitting, pension, pet-sitter : que choisir ?",
-      "intro": "Quatre solutions pour faire garder vos animaux pendant votre absence. Comparaison factuelle, sans jugement.",
+      "intro": "Quatre solutions pour faire garder vos animaux pendant votre absence. Comparaison factuelle et mesurée.",
       "caption": "Comparatif entre house-sitting Guardiens, pension, pet-sitter à domicile et garde par un proche.",
       "columns": {
         "solution": "Solution",
@@ -337,7 +337,7 @@
           "label": "House-sitting Guardiens",
           "pet_home": "Oui",
           "house_lived": "Oui, en permanence",
-          "cost": "Entre membres, sans transaction",
+          "cost": "Entre membres, en temps et en services",
           "human": "Guide de race, guide de ville, matching par affinité"
         },
         "pension": {
