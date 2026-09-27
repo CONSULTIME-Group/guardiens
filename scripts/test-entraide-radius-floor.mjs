@@ -116,8 +116,11 @@ passed.push('enqueue_mission_wave monte de 30 à 50 puis à 100, et enregistre l
 
 // Vague suivante : repart du plancher enregistré, les plus proches d'abord.
 const r4b = (await db.query('SELECT enqueue_mission_wave($1,10) AS r', [m4])).rows[0].r;
-assert.equal(r4b.radius_floor, 100);
-assert.deepEqual(r4b.helpers.map((h) => h.helper_id), [far]);
+assert.equal(r4b.radius_floor, 50);
+assert.deepEqual(r4b.helpers.map((h) => h.helper_id), [near]);
+const r4c = (await db.query('SELECT enqueue_mission_wave($1,10) AS r', [m4])).rows[0].r;
+assert.equal(r4c.radius_floor, 100);
+assert.deepEqual(r4c.helpers.map((h) => h.helper_id), [far]);
 passed.push('La vague suivante repart du plancher enregistré');
 
 // 4. Signal admin : besoin ouvert depuis plus de 72 h sans personne à 100 km.
