@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { splitReviewsByRole, sitterReviewsHeading } from "@/lib/publicProfileReviews";
 import { getMemberAvatarUrl, getMemberPublicFirstName, getMemberInitial } from "@/lib/memberUtils";
 import { capitalizeFirstName } from "@/lib/displayName";
 import { buildPublicSitterProfilePresentation } from "@/lib/publicSitterProfilePresentation";
@@ -1268,9 +1269,7 @@ export default function PublicSitterProfile() {
   //   Inversement, un avis avec sit_id compte comme "propriétaire" si le reviewer
   //   n'était PAS le propriétaire (donc le gardien laissant un avis au proprio).
   //   Les avis sans sit_id (missions d'entraide) restent côté gardien.
-  const gardeReviews = reviews.filter((r: any) => r.review_role === 'garde');
-  const missionReviews = reviews.filter((r: any) => r.review_role === 'entraide');
-  const ownerReviews = reviews.filter((r: any) => r.review_role === 'proprio');
+  const { gardeReviews, missionReviews, ownerReviews } = splitReviewsByRole(reviews as any[]);
   const sitterRoleReviews = [...gardeReviews, ...missionReviews];
   const sitterRoleCount = sitterRoleReviews.length;
   const sitterRoleAvg = sitterRoleCount > 0
@@ -1933,13 +1932,11 @@ export default function PublicSitterProfile() {
                   Avis
                 </p>
                 <h2 className="font-heading text-[22px] sm:text-[26px] font-semibold text-foreground mt-1 leading-tight">
-                  {sitterRoleCount > 0
-                    ? 'Ce que les propriétaires racontent.'
-                    : `${firstName} prépare sa première garde.`}
+                  {sitterReviewsHeading(sitterRoleCount, sitterRoleAvg, firstName).title}
                 </h2>
                 {sitterRoleCount > 0 ? (
                   <p className="text-sm text-muted-foreground mt-1">
-                    {sitterRoleCount} retour{sitterRoleCount > 1 ? 's' : ''} · moyenne {sitterRoleAvg.toFixed(1)}★
+                    {sitterReviewsHeading(sitterRoleCount, sitterRoleAvg, firstName).summary}
                   </p>
                 ) : (
                   <p className="text-sm text-muted-foreground mt-1">
