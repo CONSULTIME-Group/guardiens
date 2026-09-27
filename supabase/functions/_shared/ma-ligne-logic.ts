@@ -3,7 +3,7 @@
  * Partagée entre l'edge function `ma-ligne` et les tests Vitest.
  */
 
-/** Action portée par le jeton dans `mission_action_tokens`. */
+/** Identifiant logique des liens « ma ligne » (table helps_line_tokens). */
 export const HELPS_WITH_TOKEN_ACTION = "helps_with";
 export const HELPS_WITH_MAX_LENGTH = 200;
 export const HELPS_WITH_TOKEN_DAYS = 30;
@@ -30,21 +30,20 @@ export function validateHelpsWith(raw: unknown): LineValidation {
 }
 
 export interface TokenRow {
-  action: string | null;
-  helper_id: string | null;
+  profile_id: string | null;
   expires_at: string | null;
-  used_at: string | null;
+  revoked_at: string | null;
 }
 
 export type TokenState = "valid" | "expired" | "revoked" | "invalid";
 
 /**
- * Jeton réutilisable : `used_at` renseigné signifie révoqué (le jeton
- * ne se consomme pas à l'écriture, la personne peut revenir corriger).
+ * Jeton réutilisable (table `helps_line_tokens`) : `revoked_at` renseigné
+ * signifie révoqué ; il ne se consomme pas à l'écriture.
  */
 export function tokenState(row: TokenRow | null, now: Date = new Date()): TokenState {
-  if (!row || row.action !== HELPS_WITH_TOKEN_ACTION || !row.helper_id) return "invalid";
-  if (row.used_at) return "revoked";
+  if (!row || !row.profile_id) return "invalid";
+  if (row.revoked_at) return "revoked";
   if (!row.expires_at || new Date(row.expires_at).getTime() <= now.getTime()) return "expired";
   return "valid";
 }

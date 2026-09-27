@@ -34,3 +34,12 @@
 - [x] Afficher 6 questions et monter les 3 autres dans un accordéon replié
 - [x] Vérifier les textes avant et après, les tests, les types, le build, la hauteur et le LCP
 - [x] Livrer le rapport final avec hash, sans migration ni publication
+
+## Ma ligne, jetons dédiés (27/09)
+- [x] Table helps_line_tokens (RLS sans policy), edge ma-ligne + send-mass-email adaptés
+- [x] Phrase de transparence sous le bouton
+- [x] Label retiré (aria-labelledby h1), -mt-10 retiré état expiré
+- [x] Tests, tsgo, build, déploiement edge
+- [x] Lien test Jérémie
+- [ ] Envoi test entraide-ligne-relance (bloqué : droits admin requis)
+- [ ] En attente : plan P1 à P3 (GO requis)

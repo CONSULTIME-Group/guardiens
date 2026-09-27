@@ -78,7 +78,7 @@ const MaLigne = () => {
           >
             Me connecter
           </Link>
-          <Link to="/dashboard" className="-mt-10 inline-flex min-h-[44px] items-center self-start font-medium text-primary underline-offset-4 hover:underline">
+          <Link to="/dashboard" className="inline-flex min-h-[44px] items-center self-start font-medium text-primary underline-offset-4 hover:underline">
             Aller au tableau de bord
           </Link>
         </div>

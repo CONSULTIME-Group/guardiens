@@ -13,6 +13,8 @@ export const HELPS_WITH_EXAMPLES = [
 ] as const;
 
 export const HELPS_WITH_MONEY_MESSAGE = "Ici on s'échange des services : proposez plutôt un coup de main.";
+export const HELPS_WITH_AVAILABILITY_NOTE =
+  "Votre ligne sera visible sur la page Entraide, et vous recevrez les besoins près de chez vous.";
 export const HELPS_WITH_HELP_TEXT = "Elle apparaît avec votre prénom et votre ville sur la page Entraide.";
 export const HELPS_WITH_CONFIRMATION = "Votre ligne est en ligne. Les gens du coin vous voient maintenant.";
 
@@ -35,7 +37,7 @@ const HelpsWithLineForm = ({ firstName, initialValue = "", onSave, source }: Pro
   const [error, setError] = useState<string | null>(null);
   const fieldRef = useRef<HTMLTextAreaElement>(null);
   const savingRef = useRef(false);
-  const ids = { field: useId(), help: useId(), count: useId(), msg: useId() };
+  const ids = { title: useId(), field: useId(), help: useId(), count: useId(), msg: useId() };
 
   useEffect(() => { setValue(initialValue); }, [initialValue]);
 
@@ -80,7 +82,7 @@ const HelpsWithLineForm = ({ firstName, initialValue = "", onSave, source }: Pro
           <span aria-hidden="true" className="block h-px w-5 bg-secondary" />
           Entraide
         </p>
-        <h1 className="mt-3 font-heading text-[1.75rem] font-semibold leading-tight text-foreground sm:text-4xl">
+        <h1 id={ids.title} className="mt-3 font-heading text-[1.75rem] font-semibold leading-tight text-foreground sm:text-4xl">
           Une chose que vous aimez faire pour les gens du coin ?
         </h1>
         <p className="mt-3 font-body text-base text-muted-foreground">
@@ -115,12 +117,10 @@ const HelpsWithLineForm = ({ firstName, initialValue = "", onSave, source }: Pro
       ) : (
         <form onSubmit={submit} noValidate className="flex flex-col gap-6">
           <div>
-            <label htmlFor={ids.field} className="font-body text-base font-semibold text-foreground">
-              Ce que vous aimez faire
-            </label>
             <textarea
               ref={fieldRef}
               id={ids.field}
+              aria-labelledby={ids.title}
               value={value}
               maxLength={200}
               rows={3}
@@ -168,6 +168,7 @@ const HelpsWithLineForm = ({ firstName, initialValue = "", onSave, source }: Pro
           >
             {saving ? "Enregistrement en cours..." : "C'est enregistré"}
           </button>
+          <p className="-mt-3 font-body text-sm text-muted-foreground">{HELPS_WITH_AVAILABILITY_NOTE}</p>
         </form>
       )}
     </div>

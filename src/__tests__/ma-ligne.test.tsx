@@ -4,7 +4,7 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
-  HELPS_WITH_TOKEN_ACTION, RATE_LIMIT_PER_IP, RATE_LIMIT_PER_TOKEN, SERVER_MONEY_RX,
+  RATE_LIMIT_PER_IP, RATE_LIMIT_PER_TOKEN, SERVER_MONEY_RX,
   isRateLimited, isWellFormedToken, tokenState, validateHelpsWith,
 } from "../../supabase/functions/_shared/ma-ligne-logic";
 import { MONEY_RX } from "@/lib/missionContentGuards";
@@ -13,28 +13,41 @@ vi.mock("@/lib/analytics", () => ({ trackEvent: vi.fn() }));
 vi.mock("@/components/ai/alma/AlmaAvatar", () => ({ default: () => null }));
 import { trackEvent } from "@/lib/analytics";
 import HelpsWithLineForm, {
-  HELPS_WITH_CONFIRMATION, HELPS_WITH_EXAMPLES, HELPS_WITH_HELP_TEXT, HELPS_WITH_MONEY_MESSAGE,
+  HELPS_WITH_AVAILABILITY_NOTE, HELPS_WITH_CONFIRMATION, HELPS_WITH_EXAMPLES, HELPS_WITH_HELP_TEXT, HELPS_WITH_MONEY_MESSAGE,
 } from "@/components/entraide/HelpsWithLineForm";
 
 const read = (p: string) => readFileSync(p, "utf8");
 const now = new Date("2026-09-27T10:00:00Z");
-const base = { action: HELPS_WITH_TOKEN_ACTION, helper_id: "u1", used_at: null, expires_at: "2026-10-20T00:00:00Z" };
+const base = { profile_id: "u1", revoked_at: null, expires_at: "2026-10-20T00:00:00Z" };
+
+describe("transparence et table dédiée", () => {
+  it("annonce la disponibilité avant le clic, sans label redondant", () => {
+    renderForm();
+    expect(screen.getByText(HELPS_WITH_AVAILABILITY_NOTE)).toBeTruthy();
+    expect(screen.queryByText("Ce que vous aimez faire")).toBeNull();
+  });
+  it("lit helps_line_tokens, jamais mission_action_tokens", () => {
+    const src = read("supabase/functions/ma-ligne/index.ts") + read("supabase/functions/send-mass-email/index.ts");
+    expect(src).toContain('from("helps_line_tokens")');
+    expect(src).not.toMatch(/HELPS_WITH_TOKEN_ACTION/);
+  });
+});
 
 describe("jeton de la ligne d'entraide", () => {
   it("valide, expiré, révoqué", () => {
     expect(tokenState(base, now)).toBe("valid");
     expect(tokenState({ ...base, expires_at: "2026-09-01T00:00:00Z" }, now)).toBe("expired");
-    expect(tokenState({ ...base, used_at: "2026-09-20T00:00:00Z" }, now)).toBe("revoked");
+    expect(tokenState({ ...base, revoked_at: "2026-09-20T00:00:00Z" }, now)).toBe("revoked");
   });
   it("refuse un jeton d'une autre portée ou absent", () => {
-    expect(tokenState({ ...base, action: "can_help" }, now)).toBe("invalid");
+    expect(tokenState({ ...base, profile_id: null }, now)).toBe("invalid");
     expect(tokenState(null, now)).toBe("invalid");
     expect(isWellFormedToken("abc")).toBe(false);
     expect(isWellFormedToken("a".repeat(64))).toBe(true);
   });
   it("l'écriture cible le porteur du jeton, jamais un identifiant du client", () => {
     const src = read("supabase/functions/ma-ligne/index.ts");
-    expect(src).toContain('userId = row!.helper_id');
+    expect(src).toContain('userId = row!.profile_id');
     expect(src).not.toMatch(/body\?\.(user_id|userId|helper_id)/);
     expect(src).toContain('.update({ helps_with: check.value');
   });
@@ -83,7 +96,7 @@ describe("écran à un seul champ", () => {
 
   it("label réel, aide reliée, cibles 44 px", () => {
     renderForm();
-    const field = screen.getByLabelText("Ce que vous aimez faire");
+    const field = screen.getByLabelText("Une chose que vous aimez faire pour les gens du coin ?");
     const helpId = screen.getByText(HELPS_WITH_HELP_TEXT).id;
     expect(field.getAttribute("aria-describedby")).toContain(helpId);
     expect(field).toHaveAttribute("maxLength", "200");
@@ -97,7 +110,7 @@ describe("écran à un seul champ", () => {
   it("un exemple remplit le champ et garde le focus", () => {
     renderForm();
     fireEvent.click(screen.getByRole("button", { name: `Écrire l'exemple : ${HELPS_WITH_EXAMPLES[0]}` }));
-    const field = screen.getByLabelText("Ce que vous aimez faire") as HTMLTextAreaElement;
+    const field = screen.getByLabelText("Une chose que vous aimez faire pour les gens du coin ?") as HTMLTextAreaElement;
     expect(field.value).toBe(HELPS_WITH_EXAMPLES[0]);
     expect(document.activeElement).toBe(field);
     expect(trackEvent).toHaveBeenCalledWith("helps_line_example_clicked", expect.anything());
@@ -105,7 +118,7 @@ describe("écran à un seul champ", () => {
 
   it("message argent à la sortie du champ, retiré à la frappe", () => {
     const { onSave } = renderForm();
-    const field = screen.getByLabelText("Ce que vous aimez faire");
+    const field = screen.getByLabelText("Une chose que vous aimez faire pour les gens du coin ?");
     fireEvent.change(field, { target: { value: "Jardinage 15 euros" } });
     fireEvent.blur(field);
     expect(screen.getByText(HELPS_WITH_MONEY_MESSAGE)).toBeInTheDocument();
@@ -117,7 +130,7 @@ describe("écran à un seul champ", () => {
 
   it("enregistre une fois, confirme et rafraîchit Autour de vous", async () => {
     const { onSave, spy } = renderForm();
-    fireEvent.change(screen.getByLabelText("Ce que vous aimez faire"), { target: { value: "Monter un meuble" } });
+    fireEvent.change(screen.getByLabelText("Une chose que vous aimez faire pour les gens du coin ?"), { target: { value: "Monter un meuble" } });
     const btn = screen.getByRole("button", { name: "C'est enregistré" });
     fireEvent.click(btn);
     fireEvent.click(btn);
