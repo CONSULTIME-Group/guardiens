@@ -345,7 +345,12 @@ export type EventType =
   | "pet_photo_upload_failed"                    // Photo animal (PetForm, OwnerStepAnimals)
   | "message_photo_upload_failed"                // Photo envoyée en messagerie (Messages)
   | "mission_photo_upload_failed"                // Photo de petite mission (MissionPhotoUpload)
-  | "article_cover_upload_failed";               // Couverture d'article (ArticleEditor)
+  | "article_cover_upload_failed"                // Couverture d'article (ArticleEditor)
+  | "helps_line_page_viewed"                     // Écran /ma-ligne ouvert
+  | "helps_line_example_clicked"                 // Exemple cliqué sous le champ
+  | "helps_line_saved"                           // Ligne enregistrée
+  | "helps_line_money_shown"                     // Message argent affiché
+  | "helps_line_token_expired";                  // Jeton expiré, révoqué ou invalide
 
 
 
