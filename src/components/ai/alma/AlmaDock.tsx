@@ -743,6 +743,12 @@ function AlmaDockInner() {
   if (isModalOpen) return null;
   if (hidden) return null;
 
+  // Lot D1 : sur /dashboard côté propriétaire, la pastille flottante est
+  // masquée (Alma vit dans la colonne de droite). « Parler à Alma » ouvre
+  // le même panneau, qui reste rendu ici.
+  const hideCollapsedPill = location.pathname === "/dashboard" && activeRole === "owner";
+  if (hideCollapsedPill && !expanded) return null;
+
 
 
 
@@ -791,6 +797,8 @@ function AlmaDockInner() {
         />
       )}
 
+      {!hideCollapsedPill && (
+      <>
       {/* Dock replié (avatar + label + contrôles) */}
       <div
         className={cn(
@@ -1009,6 +1017,8 @@ function AlmaDockInner() {
           </button>
         )}
       </div>
+      </>
+      )}
     </div>
   );
 }

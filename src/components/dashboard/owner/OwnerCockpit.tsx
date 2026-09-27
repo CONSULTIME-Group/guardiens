@@ -1,156 +1,110 @@
 /**
- * Cockpit propriétaire (vague 10, refonte accueil).
+ * Accueil propriétaire (lot D1, maquette validée le 27/09/2026).
  *
- * Miroir strict de SitterCockpit : couverture de carnet notebook-card,
- * papier hero-paper, bord droit déchiré, lavis discret, aquarelle
- * signature dans le coin bas droit. Différences avec le cockpit gardien :
- *  - kicker Playfair italique "Espace propriétaire" en terracotta ;
- *  - avatar rond 46 px sur fond terracotta doux ;
- *  - une seule pilule "Mon profil public" (pas de toggle disponibilité,
- *    pas de bouton Publier : le primaire vit dans la star).
+ * Carte papier (--hero-paper), rayon 20. Gouache owner-cockpit-home à
+ * droite sur 210 px et toute la hauteur (mobile : en haut, pleine largeur,
+ * 150 px), object-cover, JAMAIS atténuée : ni opacité réduite, ni voile.
+ * À gauche : eyebrow, H1 « Bonjour, {prénom}. » ou « Bonsoir, {prénom}. »,
+ * lien « Mon profil public », ligne de contexte, rangée « À faire ».
  */
 import { Link } from "react-router-dom";
-import { CockpitGreeting } from "@/components/dashboard/CockpitGreeting";
-import { Eye } from "lucide-react";
 import ownerHome from "@/assets/illustrations/owner-cockpit-home.webp";
-import { avatarImageUrl } from "@/lib/storageImage";
+import DashEyebrow from "./DashEyebrow";
 
 const capitalize = (name: string) =>
   name ? name.charAt(0).toUpperCase() + name.slice(1).toLowerCase() : "";
 
-const DAY_NAMES = [
-  "dimanche",
-  "lundi",
-  "mardi",
-  "mercredi",
-  "jeudi",
-  "vendredi",
-  "samedi",
-];
+export interface CockpitTodo {
+  key: string;
+  label: string;
+  to: string;
+  count?: number;
+}
 
-const momentAncrage = (now: Date = new Date()): string => {
-  const day = DAY_NAMES[now.getDay()];
-  const h = now.getHours();
-  const period = h < 12 ? "matin" : h < 18 ? "après-midi" : "soir";
-  return `ce ${day} ${period}`;
-};
+/** Salutation selon l'heure : « Bonsoir » à partir de 18 h, sinon « Bonjour ». */
+export const greetingForHour = (h: number): string => (h >= 18 || h < 5 ? "Bonsoir" : "Bonjour");
 
 interface OwnerCockpitProps {
   userId?: string;
   firstName?: string;
+  /** Ligne sous le titre (digest réel, sinon compte exact de proximité). */
+  line?: string | null;
+  /** Actions réelles en attente, 3 au plus. Vide : pas de rangée. */
+  todos?: CockpitTodo[];
+  /** Heure forcée (tests). */
+  hour?: number;
+  /** Conservés pour compatibilité des appels existants. */
   avatarUrl?: string | null;
   subtitle?: string;
   greeting?: string;
 }
 
-const OwnerCockpit = ({
-  userId,
-  firstName,
-  avatarUrl,
-  subtitle,
-  greeting = "Bonjour",
-}: OwnerCockpitProps) => {
+const OwnerCockpit = ({ userId, firstName, line, todos = [], hour, subtitle, greeting }: OwnerCockpitProps) => {
   const displayName = firstName ? capitalize(firstName) : "";
-  const initial = displayName ? displayName.charAt(0) : "?";
-  const ancrage = momentAncrage();
+  const hello = greeting ?? greetingForHour(hour ?? new Date().getHours());
+  const title = displayName ? `${hello}, ${displayName}.` : `${hello}.`;
+  const contextLine = line ?? subtitle ?? null;
+  const shown = todos.slice(0, 3);
 
   return (
-    <section
-      aria-label="Espace propriétaire, accueil"
-      className="pt-4 sm:pt-6 pb-2"
-    >
-      <div className="notebook-card relative p-[14px] pr-[22px] sm:p-[34px] sm:pr-[52px]">
-        <div className="notebook-card-paper absolute inset-0" aria-hidden="true" />
-        {/* Lavis discret terracotta, coin bas gauche */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 opacity-50"
-          style={{
-            backgroundImage: [
-              "radial-gradient(circle at 6% 96%, hsl(var(--secondary) / 0.14), transparent 46%)",
-            ].join(", "),
-          }}
-        />
-        {/* Aquarelle signature, fondue à droite, jamais au dessus du texte */}
-        <div
-          aria-hidden="true"
-          className="illustration-wrapper pointer-events-none absolute top-[-10px] right-[-14px] w-[104px] h-[104px] sm:top-auto sm:bottom-[-12px] sm:right-[-16px] sm:w-[150px] sm:h-[150px] min-[1100px]:w-[180px] min-[1100px]:h-[180px]"
-        >
+    <section aria-label="Espace propriétaire, accueil" className="pt-4 sm:pt-6" data-testid="owner-cockpit">
+      <div
+        className="relative overflow-hidden flex flex-col-reverse md:flex-row"
+        style={{ backgroundColor: "hsl(var(--hero-paper))", borderRadius: "20px" }}
+      >
+        <div className="min-w-0 flex-1 p-[22px] md:p-[34px]">
+          <DashEyebrow>Espace propriétaire</DashEyebrow>
+          <h1 className="font-heading text-foreground mt-[14px] text-[34px] md:text-[44px] font-semibold leading-[1.08]">
+            {title}
+          </h1>
+          {userId && (
+            <Link
+              to={`/gardiens/${userId}?tab=proprio`}
+              className="inline-block mt-[8px] text-muted-foreground text-[13px] underline underline-offset-4 hover:text-foreground"
+            >
+              Mon profil public
+            </Link>
+          )}
+          {contextLine && (
+            <p className="mt-[14px] text-foreground/85 text-[15px] leading-relaxed" data-testid="owner-cockpit-line">
+              {contextLine}
+            </p>
+          )}
+          {shown.length > 0 && (
+            <div className="mt-[22px]" data-testid="owner-cockpit-todos">
+              <p className="text-muted-foreground uppercase text-[11px] font-bold tracking-[0.16em]">À faire</p>
+              <ul className="mt-[8px] flex flex-wrap gap-[8px]">
+                {shown.map((t) => (
+                  <li key={t.key}>
+                    <Link
+                      to={t.to}
+                      className="inline-flex items-center gap-[8px] rounded-full border border-border bg-card px-[14px] min-h-[40px] text-[13px] font-semibold text-foreground hover:bg-muted/40 transition-colors"
+                    >
+                      {t.label}
+                      {typeof t.count === "number" && t.count > 0 && (
+                        <span className="rounded-full bg-primary text-primary-foreground px-[7px] py-[1px] text-[11px] font-bold tabular-nums">
+                          {t.count}
+                        </span>
+                      )}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+        <div className="shrink-0 w-full h-[150px] md:w-[210px] md:h-auto md:self-stretch">
           <img
             src={ownerHome}
             alt=""
-            width={180}
-            height={180}
+            width={210}
+            height={260}
             loading="eager"
             decoding="async"
-            className="illustration-blend animate-painted-reveal w-full h-full object-cover"
+            data-testid="owner-cockpit-gouache"
+            className="w-full h-full object-cover"
           />
         </div>
-
-        <div className="relative flex flex-col sm:flex-row sm:items-start sm:justify-between gap-[10px] sm:gap-[22px]">
-          <div className="min-w-0 flex-1">
-            {/* 1. Avatar dans le flux, avec l'eyebrow, côte à côte */}
-            <div className="flex items-center gap-[12px] min-w-0 pr-[56px] sm:pr-0">
-              <Link
-                to="/owner-profile"
-                aria-label="Modifier mon profil"
-                className="shrink-0 flex items-center justify-center w-[48px] h-[48px] rounded-full overflow-hidden border border-border ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-                style={{ backgroundColor: "hsl(var(--secondary) / 0.12)" }}
-              >
-                {avatarUrl ? (
-                  <img src={avatarImageUrl(avatarUrl, 48)} alt="" className="w-full h-full object-cover" loading="lazy" />
-                ) : (
-                  <span className="font-heading font-semibold text-lg text-foreground/80">
-                    {initial}
-                  </span>
-                )}
-              </Link>
-              <p
-                className="font-heading italic text-secondary min-w-0 truncate"
-                style={{ fontSize: "13px", lineHeight: 1.2 }}
-              >
-                Espace propriétaire
-              </p>
-            </div>
-
-            {/* 2. Salutation, une seule ligne, taille fluide bornée */}
-            <CockpitGreeting greeting={greeting} displayName={displayName} className="mt-[10px]" />
-
-            {/* 3. Horodatage */}
-            <p
-              className="font-sans text-muted-foreground mt-[6px]"
-              style={{ fontSize: "13px", lineHeight: 1.3 }}
-            >
-              {ancrage}
-            </p>
-
-            {/* 4. Phrase de contexte, pleine largeur */}
-            {subtitle && (
-              <p
-                className="font-sans text-foreground/80 mt-[6px]"
-                style={{ fontSize: "13.5px", lineHeight: 1.4 }}
-              >
-                {subtitle}
-              </p>
-            )}
-          </div>
-
-          {/* 5. Bouton, libellé complet, aligné à gauche sous 768 px */}
-          <div className="flex items-center gap-[8px] sm:shrink-0 flex-wrap">
-            {userId && (
-              <Link
-                to={`/gardiens/${userId}?tab=proprio`}
-                aria-label="Voir mon profil public"
-                className="inline-flex items-center justify-center gap-1.5 rounded-full border border-border bg-card hover:bg-muted/40 text-foreground font-semibold px-[14px] transition-colors"
-                style={{ minHeight: "44px", fontSize: "12px" }}
-              >
-                <Eye className="w-3.5 h-3.5" aria-hidden="true" />
-                Mon profil public
-              </Link>
-            )}
-          </div>
-        </div>
-        <div className="notebook-card-edge" aria-hidden="true" />
       </div>
     </section>
   );

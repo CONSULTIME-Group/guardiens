@@ -52,9 +52,11 @@ vi.mock("@/components/ai/alma/AlmaAvatarAnimated", () => ({
 
 import { AlmaDock } from "@/components/ai/alma/AlmaDock";
 
-function renderDock() {
+// Lot D1 : sur /dashboard côté propriétaire la pastille est masquée ; le
+// panneau se teste depuis une autre page propriétaire.
+function renderDock(path = "/sits") {
   return render(
-    <MemoryRouter initialEntries={["/dashboard"]}>
+    <MemoryRouter initialEntries={[path]}>
       <AlmaDock />
     </MemoryRouter>,
   );
@@ -269,5 +271,12 @@ describe("verrous de structure du dock", () => {
   it("le panneau réserve son espace partout, pas seulement sur /messages", () => {
     const css = readFileSync(resolve(process.cwd(), "src/index.css"), "utf8");
     expect(css).toContain('body[data-alma-dock-expanded="true"] #main-content');
+  });
+});
+
+describe("pastille flottante, lot D1", () => {
+  it("est masquée sur /dashboard pour le propriétaire", () => {
+    renderDock("/dashboard");
+    expect(screen.queryByRole("button", { name: /Ouvrir Alma|Voir la proposition d'Alma|Voir le message d'Alma/ })).toBeNull();
   });
 });

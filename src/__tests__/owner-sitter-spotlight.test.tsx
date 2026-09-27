@@ -227,13 +227,13 @@ describe("OwnerSitterSpotlight, structure statique", () => {
     expect(spotlightSrc).toContain("nearbyTotal > 0");
   });
 
-  it("OwnerDashboard ne référence plus les deux anciens composants", () => {
+  it("OwnerDashboard ne référence plus les anciens composants", () => {
     expect(dashboardSrc).not.toContain("OwnerFirstNBAGardiens");
     expect(dashboardSrc).not.toContain("NearbySittersSection");
-    expect(dashboardSrc).toContain("OwnerSitterSpotlight");
-    // Une seule occurrence de rendu : la section fusionnée est unique.
-    const renders = dashboardSrc.split("<OwnerSitterSpotlight").length - 1;
-    expect(renders).toBe(1);
+    // Lot D1 (27/09/2026) : « Près de chez vous » (OwnerNearbySitters)
+    // remplace la section à onglets, rendue une seule fois.
+    expect(dashboardSrc).not.toContain("<OwnerSitterSpotlight");
+    expect(dashboardSrc.split("<OwnerNearbySitters").length - 1).toBe(1);
   });
 });
 

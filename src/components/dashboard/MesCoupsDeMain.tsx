@@ -8,7 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-interface HelpRow {
+export interface HelpRow {
   id: string;
   title: string;
   city: string | null;
@@ -22,10 +22,10 @@ interface HelpRow {
 }
 
 /**
- * « Vos coups de main » : ce qui est en cours, ce qui reste à confirmer, et le
- * mot reçu quand la rencontre a eu lieu.
+ * Données et action de « Vos coups de main », partagées avec le bandeau
+ * entraide du tableau de bord propriétaire (lot D1).
  */
-const MesCoupsDeMain = () => {
+export function useMyHelpExchanges() {
   const { user } = useAuth();
   const [rows, setRows] = useState<HelpRow[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
@@ -116,6 +116,15 @@ const MesCoupsDeMain = () => {
     }
   };
 
+  return { rows, busy, answer };
+}
+
+/**
+ * « Vos coups de main » : ce qui est en cours, ce qui reste à confirmer, et le
+ * mot reçu quand la rencontre a eu lieu.
+ */
+const MesCoupsDeMain = () => {
+  const { rows, busy, answer } = useMyHelpExchanges();
   if (rows.length === 0) return null;
 
   return (

@@ -41,9 +41,11 @@ export interface SitDraftFromPromptProps {
    * un CTA direct vers le brouillon concerné.
    */
   primary?: OwnerPrimaryAction | null;
+  /** Lot D1 : « star » = vedette du tableau de bord propriétaire. Défaut inchangé. */
+  layout?: "card" | "star";
 }
 
-export default function SitDraftFromPrompt({ secondary = false, demoted = false, primary = null }: SitDraftFromPromptProps = {}) {
+export default function SitDraftFromPrompt({ secondary = false, demoted = false, primary = null, layout = "card" }: SitDraftFromPromptProps = {}) {
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
   const [almaMood, setAlmaMood] = useState<"idle" | "happy" | "thinking" | "attentive">("attentive");
@@ -243,6 +245,79 @@ export default function SitDraftFromPrompt({ secondary = false, demoted = false,
   }
 
   const showCreateFirstAlma = primary?.action === "create_first_sit";
+
+  // Lot D1 : rendu « vedette » du tableau de bord propriétaire. Le conteneur
+  // (carte blanche) est porté par OwnerStarSection ; la logique est identique.
+  if (layout === "star") {
+    return (
+      <div data-testid="sit-draft-star">
+        <div className="flex items-center gap-[8px]">
+          <span aria-hidden="true" className="inline-block bg-secondary" style={{ width: "20px", height: "2px" }} />
+          <p className="text-secondary uppercase" style={{ fontSize: "11.5px", fontWeight: 700, letterSpacing: "0.16em" }}>
+            Publier une annonce
+          </p>
+        </div>
+        <h2 className="font-heading text-foreground mt-[8px] text-[25px] md:text-[30px] font-semibold leading-tight">
+          Décrivez votre absence en une phrase.
+        </h2>
+        <p className="text-muted-foreground mt-[8px] text-[14px]">
+          Alma prépare le brouillon, vous relisez et publiez en 2 minutes.
+        </p>
+        <label htmlFor="sit-draft-prompt" className="block mt-[22px] text-foreground text-[13px] font-semibold">
+          Votre absence
+        </label>
+        <Textarea
+          id="sit-draft-prompt"
+          ref={textareaRef}
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+          placeholder={PLACEHOLDER}
+          rows={3}
+          maxLength={1500}
+          disabled={loading || transcribing}
+          className="resize-none mt-[8px] rounded-[14px]"
+        />
+        <div className="mt-[14px] flex flex-col md:flex-row md:items-center md:justify-between gap-[14px]">
+          <p className="text-muted-foreground text-[12.5px] leading-snug md:max-w-[44ch]">
+            Dates, ville, animaux, habitudes : plus c'est précis, meilleur est le brouillon.
+          </p>
+          <div className="grid grid-cols-2 md:flex gap-[8px] md:shrink-0">
+            <Button
+              type="button"
+              variant={recording ? "destructive" : "outline"}
+              onClick={recording ? stopRecording : startRecording}
+              disabled={loading || transcribing}
+              className="rounded-full w-full md:w-auto"
+              aria-label={recording ? "Arrêter la dictée vocale" : "Dicter à la voix"}
+              aria-pressed={recording}
+            >
+              {transcribing ? (
+                <><Loader2 className="h-4 w-4 mr-2 animate-spin" aria-hidden="true" />Transcription…</>
+              ) : recording ? (
+                <><Square className="h-4 w-4 mr-2" aria-hidden="true" />Arrêter</>
+              ) : (
+                <><Mic className="h-4 w-4 mr-2" aria-hidden="true" />Dicter</>
+              )}
+            </Button>
+            <Button
+              onClick={handleGenerate}
+              disabled={loading || transcribing || recording || prompt.trim().length < 10}
+              className="rounded-full w-full md:w-auto"
+            >
+              {loading ? (
+                <><Loader2 className="h-4 w-4 mr-2 animate-spin" aria-hidden="true" />Alma prépare…</>
+              ) : (
+                <>
+                  <span className="md:hidden">Générer</span>
+                  <span className="hidden md:inline">Générer mon brouillon</span>
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <section

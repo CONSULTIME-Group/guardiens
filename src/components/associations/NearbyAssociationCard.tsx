@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { associationInitials, associationNeedLabel } from "@/lib/associationLabels";
 
-type NearbyAssociation = {
+export type NearbyAssociation = {
   slug: string;
   name: string;
   logo_url: string | null;
@@ -17,7 +17,8 @@ type NearbyAssociation = {
  * Elle cherche une association publiée dans le département du membre
  * (`profiles.departement_code`) et bascule sur un renvoi générique sinon.
  */
-export function NearbyAssociationCard() {
+/** Association publiée du département du membre (partagé, lot D1). */
+export function useNearbyAssociation(): NearbyAssociation | null {
   const { user } = useAuth();
   const [assoc, setAssoc] = useState<NearbyAssociation | null>(null);
 
@@ -46,7 +47,11 @@ export function NearbyAssociationCard() {
       cancelled = true;
     };
   }, [user?.id]);
+  return assoc;
+}
 
+export function NearbyAssociationCard() {
+  const assoc = useNearbyAssociation();
   const firstNeed = assoc?.needs?.[0];
 
   return (
