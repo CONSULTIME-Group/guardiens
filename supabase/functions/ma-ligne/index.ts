@@ -117,6 +117,15 @@ Deno.serve(async (req) => {
       console.error("[ma-ligne] update failed", updErr.message);
       return json({ ok: false, reason: "error" }, 500);
     }
+    if (rawToken) {
+      // Mesure seulement : premier usage, le jeton reste valide.
+      const { error: useErr } = await service
+        .from("helps_line_tokens")
+        .update({ used_at: new Date().toISOString() })
+        .eq("token", rawToken)
+        .is("used_at", null);
+      if (useErr) console.error("[ma-ligne] used_at failed", useErr.message);
+    }
     return json({ ok: true, state: "valid", first_name: firstName, helps_with: check.value });
   } catch (e) {
     console.error("[ma-ligne] unexpected", e);
