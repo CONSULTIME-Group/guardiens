@@ -33,6 +33,24 @@ export const FOUNDER_CAMPAIGN_TEMPLATES: readonly string[] = [
 ];
 export const FOUNDER_SENDER_NAME = "Elisa et Jérémie, Guardiens";
 
+// Gabarits signés par un fondateur hors campagne : l'expéditeur par défaut
+// est conservé, seule l'adresse de réponse est ajoutée pour que la réponse
+// d'un membre aboutisse dans une boîte relevée.
+export const FOUNDER_SIGNED_TEMPLATES: readonly string[] = [
+  "admin-personal-message",
+  "founder-personal-notice",
+  "application-message-restored",
+  "availability-nudge",
+  "dormant-sitter-nudge",
+  "owner-activation-nudge",
+  "owner-no-sit-j3",
+  "owner-no-sit-j10",
+  "owner-no-sit-j21",
+  "relance-cp-manquant",
+  "relance-profil-incomplet",
+  "sitter-encourage-candidature",
+];
+
 /** Nom affiché et adresse de réponse selon le gabarit. */
 export function transactionalSender(templateName: string, siteName: string, fromDomain: string): { from: string; reply_to?: string } {
   if (FOUNDER_CAMPAIGN_TEMPLATES.includes(templateName)) {
@@ -41,6 +59,9 @@ export function transactionalSender(templateName: string, siteName: string, from
   }
   if (templateName === "contact-reply") {
     return { from: `${siteName} <noreply@${fromDomain}>`, reply_to: CONTACT_REPLY_ADDRESS };
+  }
+  if (FOUNDER_SIGNED_TEMPLATES.includes(templateName)) {
+    return { from: `${siteName} <noreply@${fromDomain}>`, reply_to: REPLY_TO_ADDRESS };
   }
   return { from: `${siteName} <noreply@${fromDomain}>` };
 }
