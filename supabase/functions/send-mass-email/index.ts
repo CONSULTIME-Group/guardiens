@@ -958,7 +958,7 @@ Deno.serve(async (req) => {
                   firstName: firstNameByEmail.get(email.toLowerCase()) ?? "",
                   ...(lineUrlByEmail.has(email.toLowerCase()) ? { lineUrl: lineUrlByEmail.get(email.toLowerCase()) } : {}),
                   ...(templateName === "entraide-ligne-relance" ? (cardByEmail.get(email.toLowerCase()) ?? {}) : {}),
-                  ...(noelByProfile ? (noelByProfile.get(idByEmail.get(email.toLowerCase()) ?? "") ?? { variant: "B" }) : {}),
+                  ...(noelByProfile ? (noelByProfile.get(idByEmail.get(email.toLowerCase()) ?? "") ?? { variant: "B" }) as Record<string, unknown> : {}),
                 }
               : {},
           } as any,
