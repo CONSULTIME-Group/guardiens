@@ -81,7 +81,8 @@ Deno.serve(async (req) => {
     for (const g of gaps ?? []) {
       rows.push({
         signal_type: "city_coverage_gap",
-        severity: g.sitters_count === 0 ? "critical" : "warning",
+        // Lot S1 : manque structurel, jamais critique, jamais dans l'email quotidien.
+        severity: "warning",
         entity_type: "city",
         entity_id: g.city_page_id,
         metadata: {
