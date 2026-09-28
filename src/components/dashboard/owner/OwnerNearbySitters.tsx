@@ -19,6 +19,9 @@ import { sitterDistinctLines, type DistinctSitterInput } from "@/lib/sitterDisti
 import { formatCityLabel } from "@/lib/cityLabel";
 import { avatarImageUrl } from "@/lib/storageImage";
 import DashEyebrow from "./DashEyebrow";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNearbyOwnerSitters } from "@/hooks/useNearbyOwnerSitters";
+import { nearbyPlaceLabel, nearbyExitLabel } from "@/lib/ownerNearbyLabels";
 
 function useDistinctDetails(ids: string[]) {
   return useQuery({
@@ -26,17 +29,21 @@ function useDistinctDetails(ids: string[]) {
     enabled: ids.length > 0,
     staleTime: 5 * 60 * 1000,
     queryFn: async (): Promise<Record<string, DistinctSitterInput>> => {
-      const [sp, pp, rv] = await Promise.all([
+      // Lot D3 : même source que le classement (vivier complet), compétences
+      // fusionnées depuis la vue publique quand la ligne existe.
+      const [sp, pc, pp, rv] = await Promise.all([
         supabase
-          .from("public_sitter_profiles" as any)
-          .select("user_id, sitter_type, experience_years, animal_types, competences, special_animal_skills, interests")
+          .from("sitter_profiles_affinity" as any)
+          .select("user_id, sitter_type, experience_years, animal_types, special_animal_skills, interests")
           .in("user_id", ids),
+        supabase.from("public_sitter_profiles" as any).select("user_id, competences").in("user_id", ids),
         supabase.from("public_profiles" as any).select("id, completed_sits_count").in("id", ids),
         supabase.from("reviews").select("reviewee_id, overall_rating").in("reviewee_id", ids).eq("published", true),
       ]);
       const out: Record<string, DistinctSitterInput> = {};
       for (const id of ids) out[id] = {};
       for (const r of ((sp.data as any[]) ?? [])) Object.assign(out[r.user_id] ?? {}, r);
+      for (const r of ((pc.data as any[]) ?? [])) if (out[r.user_id]) out[r.user_id].competences = r.competences;
       for (const r of ((pp.data as any[]) ?? [])) if (out[r.id]) out[r.id].completed_sits_count = r.completed_sits_count;
       const ratings: Record<string, number[]> = {};
       for (const r of ((rv.data as any[]) ?? [])) {
@@ -53,18 +60,22 @@ function useDistinctDetails(ids: string[]) {
 }
 
 export default function OwnerNearbySitters() {
-  const { topSitters, totalPool, hasPublishedSit, isLoading } = useOwnerTopAffinitySitters();
+  const { topSitters, hasPublishedSit, isLoading } = useOwnerTopAffinitySitters();
+  const { user } = useAuth();
+  const { data: nearby } = useNearbyOwnerSitters(user?.id);
   const { data: owner } = useOwnerProfile();
   const ids = topSitters.map((s) => s.id);
   const { data: details } = useDistinctDetails(ids);
 
   if (isLoading) return <div aria-hidden="true" className="min-h-[320px]" />;
 
-  const city = owner?.city ? formatCityLabel(owner.city) : "";
   const lines = sitterDistinctLines(ids.map((id) => details?.[id] ?? {}));
-  const exitLabel = totalPool > 0
-    ? `Voir les ${totalPool} gardiens${city ? ` près de ${city}` : ""}`
-    : "Voir tous les gardiens";
+  const exitLabel = nearbyExitLabel(nearby && {
+    totalCount: nearby.totalCount,
+    radiusUsed: nearby.radiusUsed,
+    hasGeo: nearby.hasGeo,
+    isBeyond: nearby.sitters.some((x) => x.is_beyond),
+  });
 
   return (
     <section aria-label="Près de chez vous" data-testid="owner-nearby-sitters" className="min-w-0">
@@ -77,10 +88,7 @@ export default function OwnerNearbySitters() {
         <ul className="mt-[22px] divide-y divide-border border-y border-border">
           {topSitters.map((s, i) => {
             const initial = (s.first_name || "?").charAt(0).toUpperCase();
-            const place = [
-              s.city ? formatCityLabel(s.city) : null,
-              s.distance_km != null ? `${Math.round(s.distance_km)} km` : null,
-            ].filter(Boolean).join(", ");
+            const place = nearbyPlaceLabel(s.city ? formatCityLabel(s.city) : null, s.distance_km);
             const showPercent = hasPublishedSit && canShowAffinityPercent(s.affinity);
             return (
               <li key={s.id} className="flex items-center gap-[14px] py-[14px]">
