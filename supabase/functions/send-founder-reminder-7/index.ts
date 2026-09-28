@@ -1,5 +1,6 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { PRICING_IS_ACTIVE } from '../_shared/config-pricing.ts'
+import { requireCronCaller } from '../_shared/require-cron-caller.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -10,6 +11,8 @@ const GATEWAY_URL = 'https://connector-gateway.lovable.dev/resend'
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
+  const guard = await requireCronCaller(req, corsHeaders, 'send-founder-reminder-7')
+  if (guard) return guard
 
   if (!PRICING_IS_ACTIVE) {
     return new Response(

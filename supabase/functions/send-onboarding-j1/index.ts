@@ -1,5 +1,6 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { computeAffinityResultFull } from '../_shared/affinity/score.ts'
+import { requireCronCaller } from '../_shared/require-cron-caller.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -22,6 +23,8 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
+  const guard = await requireCronCaller(req, corsHeaders, 'send-onboarding-j1')
+  if (guard) return guard
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL')!
   const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
