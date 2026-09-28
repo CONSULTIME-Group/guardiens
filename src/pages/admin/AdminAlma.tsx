@@ -400,6 +400,9 @@ function WhispersTab({ since, range }: { since: string; range: Range }) {
       <Card>
         <CardContent className="p-6 space-y-3">
           <h3 className="text-sm font-semibold">Répartition des fréquences choisies</h3>
+          {freqPartial && (
+            <p className="text-xs text-warning">Données partielles : plafond de 50 000 lignes atteint.</p>
+          )}
           {(["silent", "low", "balanced", "talkative"] as const).map((k) => {
             const c = freqBreakdown.counts[k] ?? 0;
             const pct = (c / freqBreakdown.total) * 100;
