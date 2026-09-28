@@ -167,10 +167,10 @@ const Email = ({ firstName, lineUrl, city, avatarUrl }: Props) => {
           </Section>
 
           <Section style={{ ...pad, paddingBottom: '28px' }} className="em-pad">
-            <Hr style={hr} />
             <LegalFooter
               purpose="l'animation de l'entraide entre membres inscrits"
               basis="6.1.f"
+              signoff={false}
             />
           </Section>
         </Container>

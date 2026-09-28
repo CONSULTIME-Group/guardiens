@@ -37,9 +37,11 @@ export interface LegalFooterProps {
   basis?: '6.1.b' | '6.1.f'
   /** Mention complémentaire optionnelle (ex. avis : L. 111-7-2 du Code de la consommation). */
   extra?: React.ReactNode
+  /** Affiche « L'équipe Guardiens ». Défaut true ; false quand le gabarit est déjà signé. */
+  signoff?: boolean
 }
 
-export const LegalFooter = ({ purpose, basis = '6.1.b', extra }: LegalFooterProps) => (
+export const LegalFooter = ({ purpose, basis = '6.1.b', extra, signoff = true }: LegalFooterProps) => (
   <Section>
     <Hr style={hr} />
     <Text style={legal}>
@@ -54,7 +56,7 @@ export const LegalFooter = ({ purpose, basis = '6.1.b', extra }: LegalFooterProp
       exercer ces droits ou pour toute question :{' '}
       <a href="mailto:contact@guardiens.fr" style={link}>contact@guardiens.fr</a>.
     </Text>
-    <Text style={signature}>L'équipe {SITE_NAME}</Text>
+    {signoff ? <Text style={signature}>L'équipe {SITE_NAME}</Text> : null}
   </Section>
 )
 

@@ -8,7 +8,7 @@ import { TEMPLATES } from '../_shared/transactional-email-templates/registry.ts'
 import { getEmailCategory, type EmailCategory } from '../_shared/email-categories.ts'
 import { bypassesSuppression } from '../_shared/email-suppression.ts'
 import { evaluateSitAlert, isSitStatusGuardedTemplate } from '../_shared/sit-alert-guard.ts'
-import { REPLY_TO_ADDRESS } from '../_shared/sender-address.ts'
+import { REPLY_TO_ADDRESS, transactionalSender } from '../_shared/sender-address.ts'
 import { wrapEmailLink } from '../_shared/email-link-wrap.ts'
 // Prénom affiché : nettoyage et capitalisation, source unique partagée.
 import { normalizeEmailFirstNames } from '../_shared/email-first-name.ts'
@@ -1357,8 +1357,9 @@ Deno.serve(async (req) => {
     void oneClickUrl
   }
 
+  const sender = transactionalSender(templateName, SITE_NAME, FROM_DOMAIN)
   const resendPayload: Record<string, unknown> = {
-    from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
+    from: sender.from,
     to: [effectiveRecipient],
     subject: resolvedSubject,
     html,
@@ -1372,8 +1373,9 @@ Deno.serve(async (req) => {
     resendPayload.headers = headers
   }
 
-  if (templateName === 'contact-reply') {
-    resendPayload.reply_to = 'contact.guardiens@gmail.com'
+  // contact-reply et campagnes des fondateurs : réponse vers la boîte relevée.
+  if (sender.reply_to) {
+    resendPayload.reply_to = sender.reply_to
   }
   // Le gabarit d'avis invite explicitement à répondre (mot du fondateur) :
   // la promesse doit aboutir dans une boîte réellement relevée.

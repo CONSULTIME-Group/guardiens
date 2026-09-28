@@ -641,6 +641,24 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Garde-fou gabarit : un template_name part uniquement par la file, qui rend
+    // le gabarit réel. Le chemin synchrone enverrait le corps générique du
+    // préréglage. Vérifié AVANT toute création de ligne mass_emails.
+    if (filters.template_name) {
+      const { data: qState } = await serviceClient
+        .from("email_send_state")
+        .select("mass_email_use_queue")
+        .eq("id", 1)
+        .maybeSingle();
+      if (!(qState as { mass_email_use_queue?: boolean } | null)?.mass_email_use_queue) {
+        return new Response(JSON.stringify({
+          error: "Ce gabarit part uniquement par la file d'envoi. Activez la file avant de lancer.",
+        }), {
+          status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
     // === Anti double-envoi (fingerprint) =====================================
     // Empêche double-clic / rejeu sur timeout : si une campagne équivalente
     // (même auteur + segment + filtres + contenu) a été créée dans les 5
