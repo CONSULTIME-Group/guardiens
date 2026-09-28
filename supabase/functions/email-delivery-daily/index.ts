@@ -147,7 +147,7 @@ Deno.serve(async (req) => {
             openRate: open_rate,
             complaintRate: complaint_rate,
             breaches,
-            dashboardUrl: 'https://guardiens.fr/admin/emails?tab=delivery',
+            dashboardUrl: 'https://guardiens.fr/admin/emails-transactionnels?tab=delivery',
           },
         }),
       });

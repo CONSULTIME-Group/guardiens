@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Outlet, Navigate, NavLink, useNavigate, useLocation } from "react-router-dom";
 import PageMeta from "@/components/PageMeta";
-import { AdminSidebar, adminNavGroups_export, BADGE_TITLES } from "./AdminSidebar";
+import { AdminSidebar, adminNavGroups_export, BADGE_TITLES, resolveNavActive } from "./AdminSidebar";
 import { useAdminBadges } from "@/hooks/useAdminBadges";
 import { useAdmin } from "@/hooks/useAdmin";
 import { useAuth } from "@/contexts/AuthContext";
@@ -103,7 +103,7 @@ export const AdminLayout = () => {
                         className={({ isActive }) =>
                           cn(
                             "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
-                            isActive
+                            resolveNavActive(item, location, isActive)
                               ? "bg-primary/10 text-primary"
                               : "text-muted-foreground hover:bg-accent hover:text-foreground"
                           )
