@@ -225,5 +225,5 @@ export function useDashboardData(): DashboardData {
     fetchAll();
   }, []);
 
-  return { loading, stats, activity, weeklySignups, deptData };
+  return { loading, stats, activity, weeklySignups, deptData, partial };
 }
