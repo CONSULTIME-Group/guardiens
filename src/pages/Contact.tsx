@@ -12,23 +12,7 @@ import { z } from "zod";
 import PageMeta from "@/components/PageMeta";
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
-
-/**
- * Nettoie un message collé depuis un traitement de texte : espaces insécables,
- * tabulations, suites d'espaces, espaces en début et fin de ligne, sauts de
- * ligne répétés. N'altère jamais la saisie affichée, seulement ce qui est
- * validé et enregistré.
- */
-export const normalizeMessage = (raw: string): string =>
-  raw
-    .replace(/\r\n?/g, "\n")
-    .replace(/[\u00A0\u202F\t]/g, " ")
-    .replace(/ {2,}/g, " ")
-    .split("\n")
-    .map((line) => line.trim())
-    .join("\n")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
+import { normalizeContactMessage } from "@/lib/normalizeContactMessage";
 
 const MESSAGE_MAX = 5000;
 
@@ -60,7 +44,7 @@ const Contact = () => {
     message: z.string().trim().min(10, t("contact.errors.message_min")).max(MESSAGE_MAX, t("contact.errors.message_max")),
   });
 
-  const messageLength = normalizeMessage(form.message).length;
+  const messageLength = normalizeContactMessage(form.message).length;
 
   const handleChange = (field: string, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -71,7 +55,7 @@ const Contact = () => {
     e.preventDefault();
     setErrors({});
 
-    const result = contactSchema.safeParse({ ...form, message: normalizeMessage(form.message) });
+    const result = contactSchema.safeParse({ ...form, message: normalizeContactMessage(form.message) });
     if (!result.success) {
       const fieldErrors: Record<string, string> = {};
       result.error.issues.forEach(i => { fieldErrors[i.path[0] as string] = i.message; });
