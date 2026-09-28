@@ -37,7 +37,7 @@ export const FOUNDER_SENDER_NAME = "Elisa et Jérémie, Guardiens";
 export function transactionalSender(templateName: string, siteName: string, fromDomain: string): { from: string; reply_to?: string } {
   if (FOUNDER_CAMPAIGN_TEMPLATES.includes(templateName)) {
     // Nom entre guillemets : la virgule séparerait sinon deux adresses (RFC 5322).
-    return { from: `"${FOUNDER_SENDER_NAME}" <noreply@${fromDomain}>`, reply_to: CONTACT_REPLY_ADDRESS };
+    return { from: `"${FOUNDER_SENDER_NAME}" <noreply@${fromDomain}>`, reply_to: REPLY_TO_ADDRESS };
   }
   if (templateName === "contact-reply") {
     return { from: `${siteName} <noreply@${fromDomain}>`, reply_to: CONTACT_REPLY_ADDRESS };
