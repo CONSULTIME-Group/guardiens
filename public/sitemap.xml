@@ -3577,12 +3577,6 @@
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/gardiens/7bf29905-d372-4669-93b1-ec7def9b06d5</loc>
-    <lastmod>2026-09-28</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://guardiens.fr/gardiens/759cb521-9074-4951-9686-4921e038069d</loc>
     <lastmod>2026-09-25</lastmod>
     <changefreq>monthly</changefreq>
@@ -3597,6 +3591,12 @@
   <url>
     <loc>https://guardiens.fr/gardiens/da7ea9e3-108a-422f-8565-92151a74e1ce</loc>
     <lastmod>2026-09-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/gardiens/7bf29905-d372-4669-93b1-ec7def9b06d5</loc>
+    <lastmod>2026-09-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -3903,12 +3903,6 @@
   <url>
     <loc>https://guardiens.fr/gardiens/6dafb093-03f0-4d79-b79f-b3328cb17307</loc>
     <lastmod>2026-07-22</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/gardiens/67921fbc-607d-4148-9a97-e0cc52164c05</loc>
-    <lastmod>2026-09-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
