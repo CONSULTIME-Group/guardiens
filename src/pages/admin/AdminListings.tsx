@@ -23,6 +23,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { WriteToMemberDialog, type WriteToMemberTarget } from "./_components/users/WriteToMemberDialog";
 import { useNavigate } from "react-router-dom";
 import DraftStatsPanel from "@/components/admin/DraftStatsPanel";
 import ListingDrilldownDialog from "@/components/admin/ListingDrilldownDialog";
@@ -65,6 +66,7 @@ type Stats = {
 };
 
 const AdminListings = () => {
+  const [writeTarget, setWriteTarget] = useState<WriteToMemberTarget | null>(null);
   const navigate = useNavigate();
   const [listings, setListings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -685,6 +687,20 @@ const AdminListings = () => {
                       >
                         <MessageSquare className="h-4 w-4" />
                       </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        title="Écrire à ce membre"
+                        aria-label="Écrire à ce membre"
+                        disabled={!listing.user_id}
+                        onClick={() => setWriteTarget({
+                          userId: listing.user_id,
+                          userName: `${listing.owner?.first_name || ""} ${listing.owner?.last_name || ""}`.trim() || "ce membre",
+                          sitId: listing.id,
+                        })}
+                      >
+                        <Mail className="h-4 w-4" />
+                      </Button>
                       {listing.status === "published" && (
                         <Button
                           variant="ghost"
@@ -1005,6 +1021,7 @@ const AdminListings = () => {
         </DialogContent>
       </Dialog>
 
+      <WriteToMemberDialog target={writeTarget} onClose={() => setWriteTarget(null)} />
     </div>
 
   );
