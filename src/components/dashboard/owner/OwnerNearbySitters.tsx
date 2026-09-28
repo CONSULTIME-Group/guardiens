@@ -13,7 +13,6 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useOwnerTopAffinitySitters } from "@/hooks/useOwnerTopAffinitySitters";
-import { useOwnerProfile } from "@/hooks/useOwnerProfile";
 import { canShowAffinityPercent, AFFINITY_AFTER_PUBLISH_LINE } from "@/lib/affinityDisplay";
 import { sitterDistinctLines, type DistinctSitterInput } from "@/lib/sitterDistinctLine";
 import { formatCityLabel } from "@/lib/cityLabel";
@@ -63,7 +62,6 @@ export default function OwnerNearbySitters() {
   const { topSitters, hasPublishedSit, isLoading } = useOwnerTopAffinitySitters();
   const { user } = useAuth();
   const { data: nearby } = useNearbyOwnerSitters(user?.id);
-  const { data: owner } = useOwnerProfile();
   const ids = topSitters.map((s) => s.id);
   const { data: details } = useDistinctDetails(ids);
 
