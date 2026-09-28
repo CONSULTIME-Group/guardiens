@@ -48,6 +48,11 @@ export interface MassEmailFilters {
   template_name?: string;            // gabarit transactionnel de référence
   received_mass_email_id?: string;   // relance : destinataires d'une campagne donnée
   prioritize_opened?: boolean;       // relance : ouvreurs en tête
+  // Lot N3, Noël 2026
+  exclude_suspended?: boolean;          // comptes suspendus exclus
+  never_published_sit?: boolean;        // aucune annonce hors brouillon
+  exclude_founder_followup?: boolean;   // membres suivis à la main par un fondateur
+  prioritize_recent_openers?: boolean;  // ouvreurs des 90 derniers jours en tête
 }
 
 

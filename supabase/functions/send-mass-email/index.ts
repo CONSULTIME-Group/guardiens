@@ -3,6 +3,13 @@ import { resendFetch } from "../_shared/resend-guard.ts";
 import { SENDER_FROM, REPLY_TO_ADDRESS } from "../_shared/sender-address.ts";
 import { HELPS_WITH_TOKEN_DAYS, lineUrlForToken } from "../_shared/ma-ligne-logic.ts";
 import { entraideCardData } from "../_shared/entraide-card-data.ts";
+import {
+  OWNER_NOEL_TEMPLATE,
+  buildNoelDataFor,
+  loadFounderFollowupIds,
+  loadPublishedOwnerIds,
+  type NoelTemplateData,
+} from "../_shared/owner-noel-audience.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -43,6 +50,15 @@ interface MassEmailFilters {
   received_mass_email_id?: string;
   /** Relance : ceux qui ont ouvert la campagne passent en tête. */
   prioritize_opened?: boolean;
+  // Lot N3, Noël 2026
+  /** Exclut les comptes suspendus (suspended_at posé, sans échéance passée). */
+  exclude_suspended?: boolean;
+  /** Jamais publié : aucune annonce hors brouillon ni published_at renseigné. */
+  never_published_sit?: boolean;
+  /** Exclut les membres suivis à la main par un fondateur (conversation récente ou réponse). */
+  exclude_founder_followup?: boolean;
+  /** Ouvreurs récents (90 jours, toutes campagnes) en tête de file. */
+  prioritize_recent_openers?: boolean;
 }
 
 /** Gabarits dont le bouton porte un lien à jeton vers /ma-ligne/:token. */
@@ -256,7 +272,7 @@ async function fetchTargetedProfiles(
 ): Promise<{ id: string; email: string; first_name: string | null }[]> {
   let query = serviceClient
     .from("profiles")
-    .select("id, email, first_name, postal_code, city, avatar_url, identity_verified, profile_completion, completed_sits_count, is_founder, created_at, role, account_status, available_for_help, helps_with");
+    .select("id, email, first_name, postal_code, city, avatar_url, identity_verified, profile_completion, completed_sits_count, is_founder, created_at, role, account_status, available_for_help, helps_with, suspended_at, suspended_until");
 
   // Comptes actifs uniquement
   if (filters.comptes_actifs) query = query.eq("account_status", "active");
@@ -331,6 +347,9 @@ async function fetchTargetedProfiles(
       if (!p.email) continue;
       // Ligne d'entraide non renseignée (null, vide ou espaces)
       if (filters.helps_with_empty && String(p.helps_with ?? "").trim().length > 0) continue;
+      // Compte suspendu (sans échéance, ou échéance future)
+      if (filters.exclude_suspended && p.suspended_at
+        && (!p.suspended_until || new Date(p.suspended_until).getTime() > Date.now())) continue;
       all.push({ id: p.id, email: p.email, first_name: p.first_name ?? null });
     }
     if (data.length < PAGE) break;
@@ -475,7 +494,59 @@ async function fetchTargetedProfiles(
     result = result.filter((p) => !excluded.has(p.id));
   }
 
+  // Jamais publié (lot N3) : un brouillon seul ne compte pas comme publication.
+  if (filters.never_published_sit) {
+    const published = await loadPublishedOwnerIds(serviceClient);
+    result = result.filter((p) => !published.has(p.id));
+  }
+
+  // Suivi fondateur (lot N3)
+  if (filters.exclude_founder_followup) {
+    const followed = await loadFounderFollowupIds(serviceClient);
+    result = result.filter((p) => !followed.has(p.id));
+  }
+
+  // Ouvreurs récents en tête (lot N3) : ordre de mise en file, rien n'est exclu.
+  if (filters.prioritize_recent_openers) {
+    const since = new Date(Date.now() - 90 * 86400000).toISOString();
+    const lastOpen = new Map<string, number>();
+    for (let from = 0; ; from += 1000) {
+      const { data, error } = await serviceClient
+        .from("mass_email_sends")
+        .select("recipient_email, first_opened_at")
+        .gte("first_opened_at", since)
+        .order("id", { ascending: true })
+        .range(from, from + 999);
+      if (error) throw new Error(`recent openers failed: ${error.message}`);
+      for (const row of (data ?? []) as any[]) {
+        const e = String(row.recipient_email ?? "").toLowerCase();
+        const t = new Date(row.first_opened_at).getTime();
+        if (t > (lastOpen.get(e) ?? 0)) lastOpen.set(e, t);
+      }
+      if (!data || data.length < 1000) break;
+    }
+    result = [...result].sort((a, b) =>
+      (lastOpen.get(b.email.toLowerCase()) ?? 0) - (lastOpen.get(a.email.toLowerCase()) ?? 0));
+  }
+
   return result;
+}
+
+/** Données Noël par destinataire, coordonnées relues côté serveur (jamais transmises). */
+async function noelDataByProfile(
+  serviceClient: ReturnType<typeof createClient>,
+  ids: string[],
+): Promise<Map<string, NoelTemplateData>> {
+  const owners: any[] = [];
+  for (let i = 0; i < ids.length; i += IN_CHUNK) {
+    const { data, error } = await serviceClient
+      .from("profiles")
+      .select("id, first_name, city, latitude, longitude")
+      .in("id", ids.slice(i, i + IN_CHUNK));
+    if (error) throw new Error(`noel owners lookup failed: ${error.message}`);
+    owners.push(...(data ?? []));
+  }
+  return buildNoelDataFor(serviceClient, owners);
 }
 
 /**
@@ -565,8 +636,19 @@ Deno.serve(async (req) => {
           console.error("helps_with count failed in count mode:", e);
         }
       }
+      let variantA: number | null = null;
+      let variantB: number | null = null;
+      if (filters.template_name === OWNER_NOEL_TEMPLATE) {
+        const seen = new Set<string>();
+        const ids = compliant.filter((p) => !seen.has(p.email) && seen.add(p.email)).map((p) => p.id);
+        const noel = await noelDataByProfile(serviceClient, ids);
+        variantA = 0; variantB = 0;
+        for (const id of ids) (noel.get(id)?.variant === "A" ? variantA++ : variantB++);
+      }
       return new Response(JSON.stringify({
         count: uniqueEmails.size,
+        variant_a: variantA,
+        variant_b: variantB,
         helps_with_count: helpsWithCount,
         helps_with_required: filters.min_helps_with_profiles ?? null,
       }), {
@@ -852,6 +934,15 @@ Deno.serve(async (req) => {
         }
       }
 
+      // Noël 2026 : données calculées au lancement, sans coordonnées.
+      let noelByProfile: Map<string, NoelTemplateData> | null = null;
+      if (filters.template_name === OWNER_NOEL_TEMPLATE) {
+        const ids = remainingRecipients
+          .map((email) => idByEmail.get(email.toLowerCase()))
+          .filter((id): id is string => !!id);
+        noelByProfile = await noelDataByProfile(serviceClient, ids);
+      }
+
       let enqueued = 0;
       for (const email of remainingRecipients) {
         const templateName = filters.template_name;
@@ -867,6 +958,7 @@ Deno.serve(async (req) => {
                   firstName: firstNameByEmail.get(email.toLowerCase()) ?? "",
                   ...(lineUrlByEmail.has(email.toLowerCase()) ? { lineUrl: lineUrlByEmail.get(email.toLowerCase()) } : {}),
                   ...(templateName === "entraide-ligne-relance" ? (cardByEmail.get(email.toLowerCase()) ?? {}) : {}),
+                  ...(noelByProfile ? (noelByProfile.get(idByEmail.get(email.toLowerCase()) ?? "") ?? { variant: "B" }) as Record<string, unknown> : {}),
                 }
               : {},
           } as any,

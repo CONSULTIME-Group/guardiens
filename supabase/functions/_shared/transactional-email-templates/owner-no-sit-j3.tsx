@@ -95,7 +95,7 @@ const Email = ({
 
           <Text style={text}>
             Votre annonce leur permet de vous écrire. Vous décrivez vos animaux, vos dates et ce
-            qui compte pour vous, puis vous rencontrez les candidats avant de choisir.
+            qui compte pour vous, puis vous échangez avec les candidats avant de choisir.
           </Text>
 
           <Section style={ctaSection}>

@@ -127,6 +127,8 @@ const PRODUCT: ReadonlyArray<string> = [
   'sitter-mutual-aid-invite',
   'entraide-ligne-helps-with',
   'entraide-ligne-relance',
+  // Campagne saisonnière propriétaires (lot N3)
+  'owner-noel-2026',
   'entraide-demander-coup-de-main',
   'helper-to-guard',
   'mission-nudge-no-response',
