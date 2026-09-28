@@ -26,6 +26,9 @@ vi.mock("@tanstack/react-query", async (orig) => ({
 }));
 vi.mock("@/integrations/supabase/client", () => ({ supabase: {} }));
 vi.mock("@/contexts/AuthContext", () => ({ useAuth: () => ({ user: null }) }));
+vi.mock("@/hooks/useNearbyOwnerSitters", () => ({
+  useNearbyOwnerSitters: () => ({ data: { sitters: [], radiusUsed: 30, hasGeo: true, totalCount: 42 } }),
+}));
 
 import OwnerCockpit from "@/components/dashboard/owner/OwnerCockpit";
 import OwnerNearbySitters from "@/components/dashboard/owner/OwnerNearbySitters";
@@ -94,7 +97,8 @@ describe("Près de chez vous", () => {
     wrap(<OwnerNearbySitters />);
     expect(screen.queryByTestId("affinity-percent")).toBeNull();
     expect(screen.getByText("L'affinité se calcule dès votre annonce publiée.")).toBeTruthy();
-    expect(screen.getByText("Voir les 1326 gardiens près de Lyon")).toBeTruthy();
+    expect(screen.getByText("Voir les 42 gardiens à moins de 30 km")).toBeTruthy();
+    expect(screen.queryByText(/1326/)).toBeNull();
     expect(screen.getByText(/En famille · plus de 5 ans d'expérience/)).toBeTruthy();
   });
 });

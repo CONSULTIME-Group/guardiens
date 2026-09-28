@@ -89,7 +89,7 @@ const AffinityRing = ({ score, result, size = 70 }: Props) => {
           className="font-heading text-primary"
           style={{ fontSize: `${centerFontSize}px`, lineHeight: 1, fontWeight: 600 }}
         >
-          {clamped}%
+          {clamped}{"\u202F"}%
         </span>
         <span
           className="text-muted-foreground uppercase"
