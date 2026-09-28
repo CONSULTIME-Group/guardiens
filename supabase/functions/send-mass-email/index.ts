@@ -144,6 +144,9 @@ ${ctaBlock}
  *   - exclusion des users avec `email_preferences.product_emails = false`
  * Throw si une requête échoue → l'appelant doit ABORTER l'envoi (500).
  */
+/** Taille max des listes passées dans un .in() (URL PostgREST, casse vers 390 UUID). Les insertions en corps POST gardent 500. */
+export const IN_CHUNK = 150;
+
 async function applyMandatoryComplianceFilters<T extends { id: string; email: string }>(
   serviceClient: ReturnType<typeof createClient>,
   profiles: T[],
@@ -153,7 +156,7 @@ async function applyMandatoryComplianceFilters<T extends { id: string; email: st
   const lowerEmails = Array.from(new Set(profiles.map((p) => p.email.toLowerCase())));
   const userIds = Array.from(new Set(profiles.map((p) => p.id)));
   // Chunk agressif : les user_id (UUID 36c) explosent la longueur d'URL PostgREST (>16 Ko => "error sending request").
-  const CHUNK = 150;
+  const CHUNK = IN_CHUNK;
 
   // 1. Suppression list — fail-closed
   const suppressedSet = new Set<string>();
@@ -201,10 +204,10 @@ async function ensureUnsubscribeTokens(
   const lowerEmails = Array.from(new Set(emails.map((e) => e.toLowerCase())));
   if (lowerEmails.length === 0) return map;
 
-  const CHUNK = 500;
+  const INS_CHUNK = 500; // upsert en corps POST uniquement
 
-  for (let i = 0; i < lowerEmails.length; i += CHUNK) {
-    const chunk = lowerEmails.slice(i, i + CHUNK);
+  for (let i = 0; i < lowerEmails.length; i += IN_CHUNK) {
+    const chunk = lowerEmails.slice(i, i + IN_CHUNK);
     const { data, error } = await serviceClient
       .from("email_unsubscribe_tokens")
       .select("email, token")
@@ -218,16 +221,16 @@ async function ensureUnsubscribeTokens(
   const missing = lowerEmails.filter((e) => !map.has(e));
   if (missing.length > 0) {
     const rows = missing.map((email) => ({ email, token: generateToken() }));
-    for (let i = 0; i < rows.length; i += CHUNK) {
-      const chunk = rows.slice(i, i + CHUNK);
+    for (let i = 0; i < rows.length; i += INS_CHUNK) {
+      const chunk = rows.slice(i, i + INS_CHUNK);
       const { error } = await serviceClient
         .from("email_unsubscribe_tokens")
         .upsert(chunk, { onConflict: "email", ignoreDuplicates: true });
       if (error) throw new Error(`Token upsert failed: ${error.message}`);
     }
     // Re-read pour récupérer le token effectif (gère les races concurrentes)
-    for (let i = 0; i < missing.length; i += CHUNK) {
-      const chunk = missing.slice(i, i + CHUNK);
+    for (let i = 0; i < missing.length; i += IN_CHUNK) {
+      const chunk = missing.slice(i, i + IN_CHUNK);
       const { data, error } = await serviceClient
         .from("email_unsubscribe_tokens")
         .select("email, token")
@@ -726,7 +729,7 @@ Deno.serve(async (req) => {
     let remainingRecipients = recipients;
     if (resumed) {
       const alreadySent = new Set<string>();
-      const LOOK_CHUNK = 500;
+      const LOOK_CHUNK = IN_CHUNK;
       for (let i = 0; i < recipients.length; i += LOOK_CHUNK) {
         const chunk = recipients.slice(i, i + LOOK_CHUNK);
         const { data, error } = await serviceClient
@@ -821,11 +824,11 @@ Deno.serve(async (req) => {
           .filter((id): id is string => !!id);
         // Un seul jeton actif par profil : réutiliser le jeton valide existant.
         const activeByProfile = new Map<string, string>();
-        for (let i = 0; i < profileIds.length; i += 500) {
+        for (let i = 0; i < profileIds.length; i += IN_CHUNK) {
           const { data, error } = await serviceClient
             .from("helps_line_tokens")
             .select("profile_id, token")
-            .in("profile_id", profileIds.slice(i, i + 500))
+            .in("profile_id", profileIds.slice(i, i + IN_CHUNK))
             .is("revoked_at", null)
             .gt("expires_at", new Date().toISOString());
           if (error) throw new Error(`line token lookup failed: ${error.message}`);
