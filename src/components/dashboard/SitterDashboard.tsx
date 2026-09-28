@@ -187,7 +187,7 @@ const SitterDashboard = () => {
             <SitterCockpit
               firstName={user?.firstName}
               isAvailable={!!isAvailable}
-              greeting={isNewSitter ? "Bienvenue" : undefined}
+              greeting={openingVisible ? "Bienvenue" : undefined}
               line={cockpitLine}
               todos={todos}
             />

@@ -1,3 +1,4 @@
+import { sitterSideReason } from "@/lib/sitterSideReason";
 import { formatDateRangeFr } from "@/lib/formatDateRangeFr";
 import { canShowAffinityPercent } from "@/lib/affinityDisplay";
 import { formatCityLabel } from "@/lib/cityLabel";
@@ -135,7 +136,7 @@ const StarCard = ({
   const dates = formatDateRangeFr(sit.start_date, sit.end_date);
   const species = speciesLabel(sit.pet_species);
   const meta = [species, dates, inAlertZone ? "dans votre zone d'alerte" : null].filter(Boolean).join(" · ");
-  const reasons = (sit.affinity?.matched ?? []).slice(0, 3);
+  const reasons = (sit.affinity?.matched ?? []).slice(0, 3).map(sitterSideReason);
   const showPercent = !!sit.affinity && canShowAffinityPercent(sit.affinity);
   const total = sit.affinity?.total ?? 0;
   const photoUrl = sit.pet_photo_url ?? sit.cover_photo_url;
