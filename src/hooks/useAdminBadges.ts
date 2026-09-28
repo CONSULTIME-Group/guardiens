@@ -1,4 +1,5 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface AdminBadges {
@@ -35,10 +36,12 @@ const EMPTY: AdminBadges = {
   sitsToStaff: 0,
 };
 
-export function useAdminBadges(): AdminBadges {
-  const [badges, setBadges] = useState<AdminBadges>(EMPTY);
+/** Clé partagée : la barre latérale et le menu mobile lisent le même cache,
+ *  la lecture ne s'exécute qu'une fois par rafraîchissement. */
+export const ADMIN_BADGES_QUERY_KEY = ["admin-badges"] as const;
 
-  const fetchBadges = useCallback(async () => {
+export async function fetchAdminBadges(): Promise<AdminBadges> {
+  {
     const results = await Promise.all([
       supabase.from("profiles").select("id", { count: "exact", head: true }).or("identity_verification_status.eq.pending,and(identity_verification_status.eq.not_submitted,identity_document_url.not.is.null),and(identity_verification_status.eq.not_submitted,identity_selfie_url.not.is.null)"),
       supabase.from("external_experiences").select("id", { count: "exact", head: true }).eq("verification_status", "pending"),
@@ -99,7 +102,7 @@ export function useAdminBadges(): AdminBadges {
       sitsToStaff = 0;
     }
 
-    setBadges({
+    return {
       verifications: results[0].count || 0,
       experiences: results[1].count || 0,
       reports: results[2].count || 0,
@@ -114,15 +117,29 @@ export function useAdminBadges(): AdminBadges {
       reportsMission: results[11].count || 0,
       analysisRequests: results[12].count || 0,
       sitsToStaff,
-    });
-  }, []);
+    };
+  }
+}
+
+export function useAdminBadges(): AdminBadges {
+  const queryClient = useQueryClient();
+  // Même fréquence qu'avant : une lecture au montage du layout, puis à chaque
+  // événement « admin-badges-refresh ». Pas de relecture au focus ni au remontage.
+  const { data } = useQuery({
+    queryKey: ADMIN_BADGES_QUERY_KEY,
+    queryFn: fetchAdminBadges,
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
 
   useEffect(() => {
-    fetchBadges();
-    const handler = () => fetchBadges();
+    const handler = () => {
+      queryClient.invalidateQueries({ queryKey: ADMIN_BADGES_QUERY_KEY });
+    };
     window.addEventListener("admin-badges-refresh", handler);
     return () => window.removeEventListener("admin-badges-refresh", handler);
-  }, [fetchBadges]);
+  }, [queryClient]);
 
-  return badges;
+  return data ?? EMPTY;
 }

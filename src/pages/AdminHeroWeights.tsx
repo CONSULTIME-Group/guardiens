@@ -30,6 +30,10 @@ import {
   DEFAULT_HERO_WEIGHTS,
 } from "@/lib/heroBank";
 import { toast } from "sonner";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const CATEGORY_LABELS: Record<HeroCategoryName, string> = {
   animals: "Animaux & plantes",
@@ -106,6 +110,7 @@ export default function AdminHeroWeights() {
 
   const [draft, setDraft] = useState<HeroWeights>(liveWeights);
   const [saving, setSaving] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   // Synchronise le brouillon quand les poids serveur changent (autre admin
   // ou première hydratation).
@@ -216,12 +221,6 @@ export default function AdminHeroWeights() {
             <h1 className="text-2xl font-heading font-bold">
               Poids des hero, administration
             </h1>
-            <Link
-              to="/test/hero-distribution"
-              className="text-xs underline text-muted-foreground hover:text-foreground"
-            >
-              Voir la page de debug détaillée →
-            </Link>
           </div>
           <p className="text-sm text-muted-foreground">
             Ajustez la répartition cible entre les quatre catégories thématiques.
@@ -396,10 +395,33 @@ export default function AdminHeroWeights() {
           </p>
         </section>
 
+        {/* Confirmation obligatoire : aucune écriture sans « Confirmer ». */}
+        <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Enregistrer les nouveaux poids</AlertDialogTitle>
+              <AlertDialogDescription>
+                Ces nouveaux poids redistribuent le hero des profils existants pour tous les visiteurs. Confirmer ?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Annuler</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => {
+                  setConfirmOpen(false);
+                  void handleSave();
+                }}
+              >
+                Confirmer
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
         {/* Actions */}
         <section className="flex items-center gap-3 pt-4 border-t border-border">
           <button
-            onClick={handleSave}
+            onClick={() => setConfirmOpen(true)}
             disabled={!canSave}
             className="px-5 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium disabled:opacity-50"
           >

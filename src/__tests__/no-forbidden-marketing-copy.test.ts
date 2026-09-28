@@ -28,7 +28,6 @@ const EXCLUDE = [
   // employer un vocabulaire contractuel (engagement, abonnement).
   "--glob=!src/pages/Pricing.tsx",
   "--glob=!src/pages/MySubscription.tsx",
-  "--glob=!src/pages/AuditTarifs.tsx",
   // Documents juridiques : « sans frais ni pénalité » est une formule légale
   // reprise du Code de la consommation, elle ne se paraphrase pas.
   "--glob=!src/pages/Terms.tsx",

@@ -29,8 +29,8 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { invalidateFeatureFlag } from "@/hooks/useFeatureFlag";
 import { toast } from "sonner";
+import { FOUNDER_DEADLINE } from "@/lib/pricing";
 
-const FOUNDER_DATE = "2026-09-30";
 const MANDATORY_ONBOARDING_FLAG = "mandatory_affinity_onboarding";
 const ADMIN_SIGNALS_FLAG = "admin_signals_active";
 
@@ -652,9 +652,8 @@ const AdminSettings = () => {
               <div>
                 <p className="text-sm font-medium">Statut Fondateur</p>
                 <p className="text-xs text-muted-foreground">
-                  Les membres inscrits avant le{" "}
-                  {new Date(FOUNDER_DATE).toLocaleDateString("fr-FR")} obtiennent le statut
-                  Fondateur (gratuit).
+                  Les membres inscrits pendant la phase de lancement obtiennent le statut
+                  Fondateur (gratuit). La fin de cette phase sera fixée {FOUNDER_DEADLINE}.
                 </p>
               </div>
               <Badge variant="default" className="text-xs">Actif</Badge>

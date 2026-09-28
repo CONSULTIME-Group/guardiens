@@ -24,7 +24,6 @@ const EXCLUDED = new Set([
   "src/config/pricing.ts",
   "src/lib/constants.ts",
   "src/hooks/useSubscriptionAccess.ts",
-  "src/pages/AuditTarifs.tsx",
   "src/pages/Pricing.tsx",
   "src/pages/MySubscription.tsx",
   "src/pages/Cgs.tsx", // doc légale, section 3.2 baseline explicite
