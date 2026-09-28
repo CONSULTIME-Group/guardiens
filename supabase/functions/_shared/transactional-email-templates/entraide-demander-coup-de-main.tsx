@@ -78,6 +78,7 @@ const Email = ({ firstName }: Props) => {
           <LegalFooter
             purpose="l'animation de l'entraide entre membres inscrits"
             basis="6.1.f"
+            signoff={false}
           />
         </Container>
       </Body>
