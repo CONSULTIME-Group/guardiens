@@ -12,6 +12,9 @@
 export type EmailCategory = 'transactional' | 'product' | 'digest' | 'alert'
 
 const TRANSACTIONAL: ReadonlyArray<string> = [
+  // Message personnel écrit à la main par un admin à un seul membre (lot M1) :
+  // réponse humaine directe, jamais plafonnée, sans recours à __urgent.
+  'admin-personal-message',
   // Sit lifecycle (time-critical)
   'sit-confirmed',
   'sit-invitation',
