@@ -106,6 +106,7 @@ import { template as entraideLigneRelance } from './entraide-ligne-relance.tsx'
 import { template as entraideDemanderCoupDeMain } from './entraide-demander-coup-de-main.tsx'
 import { template as discussionStalledNudge } from './discussion-stalled-nudge.tsx'
 import { template as founderPersonalNotice } from './founder-personal-notice.tsx'
+import { template as adminPersonalMessage } from './admin-personal-message.tsx'
 import { template as seasonalNurture } from './seasonal-nurture.tsx'
 import { template as missionHelpNeeded } from './mission-help-needed.tsx'
 import { template as missionWaveStatus } from './mission-wave-status.tsx'
@@ -115,6 +116,7 @@ import { template as missionWaveStatus } from './mission-wave-status.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'founder-personal-notice': founderPersonalNotice,
+  'admin-personal-message': adminPersonalMessage,
   'nearby-sit-alert': nearbySitAlert,
   'sit-confirmed': sitConfirmed,
   'dispute-resolved': disputeResolved,
