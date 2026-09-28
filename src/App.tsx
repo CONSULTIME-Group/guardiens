@@ -64,9 +64,7 @@ const DashboardRouteShell = () => (
 const AdminLayout = lazy(() => import("@/components/admin/AdminLayout").then((m) => ({ default: m.AdminLayout })));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"), "ForgotPassword");
 const ResetPassword = lazy(() => import("./pages/ResetPassword"), "ResetPassword");
-const SeoDebug = lazy(() => import("./pages/SeoDebug"), "SeoDebug");
 const BuildInfo = lazy(() => import("./pages/BuildInfo"), "BuildInfo");
-const AuditTarifs = lazy(() => import("./pages/AuditTarifs"), "AuditTarifs");
 const AdminPrerender = lazy(() => import("./pages/AdminPrerender"), "AdminPrerender");
 const Profile = lazy(() => import("./pages/Profile"), "Profile");
 const SearchPage = lazy(() => import("./pages/SearchPage"), "SearchPage");
@@ -154,7 +152,6 @@ const AdminGuides = lazy(() => import("./pages/admin/AdminGuides"), "AdminGuides
 const AdminDepartments = lazy(() => import("./pages/admin/AdminDepartments"), "AdminDepartments");
 const AdminBreeds = lazy(() => import("./pages/admin/AdminBreeds"), "AdminBreeds");
 const AdminLongTailArticles = lazy(() => import("./pages/admin/AdminLongTailArticles"), "AdminLongTailArticles");
-const AdminArticlesRefreshPostPivot = lazy(() => import("./pages/admin/AdminArticlesRefreshPostPivot"), "AdminArticlesRefreshPostPivot");
 const Parrainage = lazy(() => import("./pages/Parrainage"), "Parrainage");
 const DevenirHomeSitter = lazy(() => import("./pages/DevenirHomeSitter"), "DevenirHomeSitter");
 const AlmaTips = lazy(() => import("./pages/AlmaTips"), "AlmaTips");
@@ -175,19 +172,15 @@ const AdminSubscriptions = lazy(() => import("./pages/admin/AdminSubscriptions")
 const AdminLegal = lazy(() => import("./pages/admin/AdminLegal"), "AdminLegal");
 const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"), "AdminSettings");
 const AdminContactMessages = lazy(() => import("./pages/admin/AdminContactMessages"), "AdminContactMessages");
-const AdminSEO = lazy(() => import("./pages/admin/AdminSEO"), "AdminSEO");
 const AdminLifecycle = lazy(() => import("./pages/admin/AdminLifecycle"), "AdminLifecycle");
 const AdminSkills = lazy(() => import("./pages/admin/AdminSkills"), "AdminSkills");
 const AdminMassEmails = lazy(() => import("./pages/admin/AdminMassEmails"), "AdminMassEmails");
 const AdminMassEmailsStats = lazy(() => import("./pages/admin/AdminMassEmailsStats"), "AdminMassEmailsStats");
-const AdminRelanceIncomplet = lazy(() => import("./pages/admin/AdminRelanceIncomplet"), "AdminRelanceIncomplet");
 const AdminNurturing = lazy(() => import("./pages/admin/AdminNurturing"), "AdminNurturing");
 const AdminMessages = lazy(() => import("./pages/admin/AdminMessages"), "AdminMessages");
-const AdminAnalytics = lazy(() => import("./pages/admin/AdminAnalytics"), "AdminAnalytics");
 const AdminTraffic = lazy(() => import("./pages/admin/AdminTraffic"), "AdminTraffic");
 const AdminErrors = lazy(() => import("./pages/admin/AdminErrors"), "AdminErrors");
 const AdminDiagnostics = lazy(() => import("./pages/admin/AdminDiagnostics"), "AdminDiagnostics");
-const AdminTestSitterFields = lazy(() => import("./pages/admin/AdminTestSitterFields"), "AdminTestSitterFields");
 const EmergencySitter = lazy(() => import("./pages/EmergencySitter"), "EmergencySitter");
 const MySubscription = lazy(() => import("./pages/MySubscription"), "MySubscription");
 const Favorites = lazy(() => import("./pages/Favorites"), "Favorites");
@@ -530,9 +523,9 @@ const AppRoutes = () => {
       <Route path="/associations" element={<PublicShellRoute><AssociationsListing /></PublicShellRoute>} />
       <Route path="/associations/:slug" element={<PublicShellRoute><AssociationDetail /></PublicShellRoute>} />
       <Route element={<AdminLayout />}>
-        <Route path="/admin/seo-debug" element={<SeoDebug />} />
+        <Route path="/admin/seo-debug" element={<Navigate to="/admin" replace />} />
         <Route path="/admin/build-info" element={<BuildInfo />} />
-        <Route path="/admin/audit-tarifs" element={<AuditTarifs />} />
+        <Route path="/admin/audit-tarifs" element={<Navigate to="/admin" replace />} />
         <Route path="/admin/prerender" element={<AdminPrerender />} />
         <Route path="/admin" element={<AdminOverview />} />
         <Route path="/admin/dashboard" element={<Navigate to="/admin" replace />} />
@@ -553,7 +546,7 @@ const AppRoutes = () => {
         <Route path="/admin/affinity" element={<AdminAffinity />} />
         <Route path="/admin/experiences" element={<AdminExperienceVerification />} />
         <Route path="/admin/articles" element={<AdminArticles />} />
-        <Route path="/admin/articles/refresh-post-pivot" element={<AdminArticlesRefreshPostPivot />} />
+        <Route path="/admin/articles/refresh-post-pivot" element={<Navigate to="/admin" replace />} />
         <Route path="/admin/articles/:id" element={<ArticleEditor />} />
         <Route path="/admin/city-pages" element={<AdminCityPages />} />
         <Route path="/admin/guides" element={<AdminGuides />} />
@@ -574,12 +567,12 @@ const AppRoutes = () => {
         <Route path="/admin/skills" element={<AdminSkills />} />
         <Route path="/admin/envois-groupes" element={<AdminMassEmails />} />
         <Route path="/admin/envois-groupes/stats" element={<AdminMassEmailsStats />} />
-        <Route path="/admin/relance-incomplet" element={<AdminRelanceIncomplet />} />
+        <Route path="/admin/relance-incomplet" element={<Navigate to="/admin" replace />} />
         <Route path="/admin/nurturing" element={<AdminNurturing />} />
         <Route path="/admin/messages" element={<AdminMessages />} />
         <Route path="/admin/errors" element={<AdminErrors />} />
         <Route path="/admin/diagnostics" element={<AdminDiagnostics />} />
-        <Route path="/admin/test-sitter-fields" element={<AdminTestSitterFields />} />
+        <Route path="/admin/test-sitter-fields" element={<Navigate to="/admin" replace />} />
       </Route>
       {/* App routes */}
       <Route path="/dashboard" element={<DashboardRouteShell />} />

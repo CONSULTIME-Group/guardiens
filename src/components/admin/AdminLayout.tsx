@@ -13,14 +13,9 @@ import { cn } from "@/lib/utils";
  * (outils techniques et pages dynamiques).
  */
 const ADMIN_TITLE_FALLBACKS: Record<string, string> = {
-  "/admin/seo-debug": "SEO Debug",
   "/admin/build-info": "Build Info",
-  "/admin/audit-tarifs": "Audit des tarifs",
   "/admin/prerender": "Prerender",
-  "/admin/articles/refresh-post-pivot": "Actualisation des articles",
   "/admin/lifecycle": "Lifecycle",
-  "/admin/relance-incomplet": "Relance profils incomplets",
-  "/admin/test-sitter-fields": "Test champs gardien",
 };
 
 const resolveAdminTitle = (pathname: string): string => {
