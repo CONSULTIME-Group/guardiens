@@ -16,6 +16,7 @@ import {
   releaseWorkerLock,
   type LockClientLike,
 } from "../_shared/worker-lock.ts";
+import { requireCronCaller } from "../_shared/require-cron-caller.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -88,6 +89,8 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
+  const denied = await requireCronCaller(req, corsHeaders, "process-mass-email-queue");
+  if (denied) return denied;
 
   try {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;

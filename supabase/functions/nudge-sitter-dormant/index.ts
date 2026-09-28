@@ -23,6 +23,7 @@ import {
   nearbySitsTemplateData,
   selectNearbyOpenSits,
 } from "../_shared/nearby-open-sits.ts";
+import { requireCronCaller } from "../_shared/require-cron-caller.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -73,6 +74,8 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
+  const denied = await requireCronCaller(req, corsHeaders, "nudge-sitter-dormant");
+  if (denied) return denied;
   const run = await startCronRun("nudge-sitter-dormant");
   try {
     const requestBody = await req.json().catch(() => ({})) as { sitter_id?: unknown };

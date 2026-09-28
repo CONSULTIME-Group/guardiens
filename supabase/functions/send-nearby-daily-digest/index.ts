@@ -21,6 +21,7 @@ import { publicationWindowOrClause } from '../_shared/sit-publication-window.ts'
 import { recordDeliveryFailure } from '../_shared/delivery-failure.ts'
 import { startCronRun, type CronRun } from '../_shared/cron-run-log.ts'
 import { digestRunStatus, NEARBY_DAILY_DIGEST_CRON_JOB_IDS, readCronJobId, readCronTraceId } from '../_shared/cron-trace.ts'
+import { requireCronCaller } from "../_shared/require-cron-caller.ts";
 
 const TARGET_PARIS_HOUR = 9
 
@@ -50,6 +51,8 @@ function formatFrDate(iso?: string | null): string | undefined {
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
+  const denied = await requireCronCaller(req, corsHeaders, "send-nearby-daily-digest");
+  if (denied) return denied;
 
   let body: { manual?: boolean; dry_run?: boolean; user_id?: string; trace_id?: string } = {}
   try { if (req.body) body = await req.json() } catch { /* empty */ }

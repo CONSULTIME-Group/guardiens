@@ -19,6 +19,7 @@ import { geocodeKeyCandidates } from "../_shared/geocode-lookup.ts";
 import { recordDeliveryFailure } from "../_shared/delivery-failure.ts";
 import { startCronRun, type CronRun } from "../_shared/cron-run-log.ts";
 import { ALERT_DIGEST_CRON_JOB_IDS, digestRunStatus, readCronJobId, readCronTraceId } from "../_shared/cron-trace.ts";
+import { requireCronCaller } from "../_shared/require-cron-caller.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -115,7 +116,12 @@ function haversine(lat1: number, lng1: number, lat2: number, lng2: number): numb
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+// Aucun en-tete CORS historiquement : objet vide, comportement inchange.
+const corsHeaders: Record<string, string> = {};
+
 Deno.serve(async (req) => {
+  const denied = await requireCronCaller(req, corsHeaders, "send-alert-digest");
+  if (denied) return denied;
   let nominalRun: CronRun | null = null;
   let traceId: string | null = null;
   let cronJobId: number | null = null;
