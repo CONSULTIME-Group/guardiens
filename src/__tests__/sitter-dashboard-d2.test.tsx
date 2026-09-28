@@ -205,3 +205,22 @@ describe("Bandeau entraide, variante gardien", () => {
     expect(screen.queryByText(SITTER_ENTRAIDE_HEADLINE)).toBeNull();
   });
 });
+
+describe("Lot D4, encart d'invitation pendant le chargement", () => {
+  it("SitterDashboard ne transmet le compte qu'une fois le chargement terminé", () => {
+    expect(src("components/dashboard/SitterDashboard.tsx")).toContain(
+      "fallbackTotalPublished={nbaLoading ? undefined : totalPublished}",
+    );
+  });
+  it("encart absent pendant le chargement (compte non transmis)", () => {
+    missing.items = [];
+    wrap(<SitterMissingOpportunities fallbackTotalPublished={undefined} />);
+    expect(screen.queryByText("Recevez les nouvelles gardes en premier.")).toBeNull();
+  });
+  it("encart présent avec le compte réel une fois chargé", () => {
+    missing.items = [];
+    wrap(<SitterMissingOpportunities fallbackTotalPublished={8} />);
+    expect(screen.getByText("Recevez les nouvelles gardes en premier.")).toBeInTheDocument();
+    expect(screen.getByText(/8 gardes sont publiées en ce moment\./)).toBeInTheDocument();
+  });
+});
