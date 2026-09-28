@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { format, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Eye, Ban, ShieldCheck, StickyNote, RotateCcw, Trash2, Crown, ChevronLeft, ChevronRight, MessageSquare, FileText, MailCheck, UserCog, Download } from "lucide-react";
+import { Eye, Ban, ShieldCheck, StickyNote, RotateCcw, Trash2, Crown, ChevronLeft, ChevronRight, MessageSquare, FileText, MailCheck, UserCog, Download, Mail } from "lucide-react";
 import { FileSearch } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
@@ -17,6 +17,7 @@ import { SuspendUserDialog } from "./_components/users/SuspendUserDialog";
 import { NoteUserDialog } from "./_components/users/NoteUserDialog";
 import { DeleteUserDialog } from "./_components/users/DeleteUserDialog";
 import { SendMessageDialog, type MessageModalState } from "./_components/users/SendMessageDialog";
+import { WriteToMemberDialog, type WriteToMemberTarget } from "./_components/users/WriteToMemberDialog";
 import { MessageHistoryDialog, type HistoryItem } from "./_components/users/MessageHistoryDialog";
 import { LastMessageDialog, type LastMessageState } from "./_components/users/LastMessageDialog";
 import { ErrorDetailDialog, type ErrorDetailState } from "./_components/users/ErrorDetailDialog";
@@ -82,6 +83,7 @@ const AdminUsers = () => {
     open: false, userId: "", userName: ""
   });
   const [deleting, setDeleting] = useState(false);
+  const [writeTarget, setWriteTarget] = useState<WriteToMemberTarget | null>(null);
   const [messageModal, setMessageModal] = useState<MessageModalState>({
     open: false, userId: "", userName: "", content: "", step: "edit"
   });
@@ -813,6 +815,18 @@ const AdminUsers = () => {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title="Écrire à ce membre"
+                          aria-label="Écrire à ce membre"
+                          onClick={() => setWriteTarget({
+                            userId: user.id,
+                            userName: `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.email || "ce membre",
+                          })}
+                        >
+                          <Mail className="h-4 w-4" />
+                        </Button>
                          <Button
                           variant="ghost"
                           size="icon"
@@ -1013,6 +1027,8 @@ const AdminUsers = () => {
         onClose={() => setDeleteConfirm({ open: false, userId: "", userName: "" })}
         onConfirm={handleDeleteUser}
       />
+
+      <WriteToMemberDialog target={writeTarget} onClose={() => setWriteTarget(null)} />
 
       <SendMessageDialog
         state={messageModal}
