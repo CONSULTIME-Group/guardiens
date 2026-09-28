@@ -9,6 +9,20 @@ const FNS = [
   "prerender-recache-pending",
   "send-founder-reminder-30",
   "send-founder-reminder-7",
+  // Lot A1b : fonctions lancées par cron (clé service du vault).
+  "process-mass-email-queue",
+  "send-alert-digest",
+  "send-nearby-daily-digest",
+  "send-message-reminders",
+  "send-rappel-j48",
+  "send-rappel-j7",
+  "email-delivery-daily",
+  "nudge-owner-unconfirmed-sit",
+  "nudge-sitter-dormant",
+  "relance-cp-manquant",
+  "send-sit-reminders",
+  "nudge-owner-no-applications",
+  "nudge-verification-stale",
 ];
 
 for (const fn of FNS) {
@@ -17,8 +31,12 @@ for (const fn of FNS) {
     assertStringIncludes(src, "import { requireCronCaller } from");
     const call = src.search(new RegExp(`requireCronCaller\\(req, corsHeaders, ['"]${fn}['"]\\)`));
     assert(call > 0, "appel absent ou mauvais nom");
-    const json = src.indexOf("req.json()");
-    const client = src.indexOf("createClient(");
+    // Mesure à partir du handler : un client créé au chargement du module
+    // (send-alert-digest) ne lit aucune requête.
+    const handler = src.search(/(Deno\.)?serve\(async \(req\)/);
+    assert(handler >= 0 && call > handler, "appel hors du handler");
+    const json = src.indexOf("req.json()", handler);
+    const client = src.indexOf("createClient(", handler);
     assert(json === -1 || call < json, "appel après req.json()");
     assert(client === -1 || call < client, "appel après createClient");
   });

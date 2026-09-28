@@ -1,11 +1,13 @@
 // Worker pgmq pour les campagnes d'email de masse (Chantier A Phase 2).
-// Cron toutes les 30 s via pg_cron + net.http_post (voir migration).
+// Cron chaque minute via pg_cron + net.http_post (job 124).
 // Lit un lot de 25 messages de la file `mass_emails` avec VT 60 s, verrouille
 // la ligne mass_email_sends, re-vérifie RGPD, envoie via Resend unitaire avec
 // Idempotency-Key, puis marque sent/failed/skipped et supprime le message.
 //
-// Sécurité : verify_jwt = true. N'accepte que le service_role_key (identique
-// aux autres watchdogs pilotés par cron).
+// Sécurité : verify_jwt = true à la passerelle (qui laisse passer la clé
+// publique), puis requireCronCaller en tête du handler : seuls la clé service
+// (pg_cron, secret vault supabase_service_role_key) et un admin connecté sont
+// acceptés ; tout autre appel reçoit 401/403 et est journalisé dans cron_run_log.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { resendFetch } from "../_shared/resend-guard.ts";
