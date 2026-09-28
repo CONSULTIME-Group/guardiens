@@ -446,7 +446,7 @@ Deno.serve(async (req) => {
     // seulement si la famille a ete marquee.
     if (hashes) {
       const nowIso = new Date().toISOString();
-      const upserts = decisions.map((d) => {
+      const upserts = decisions.filter((d) => d.family !== STATIC_FAMILY).map((d) => {
         const st = state.get(d.family);
         return {
           family: d.family,
