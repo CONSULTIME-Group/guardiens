@@ -17,7 +17,7 @@ describe("lot M1, contrôle admin côté serveur", () => {
   });
   it("le contrôle admin précède la lecture du corps et tout envoi", () => {
     expect(fn.indexOf("isAdmin !== true")).toBeLessThan(fn.indexOf("await req.json()"));
-    expect(fn.indexOf("isAdmin !== true")).toBeLessThan(fn.indexOf("send-transactional-email"));
+    expect(fn.indexOf("isAdmin !== true")).toBeLessThan(fn.indexOf("functions/v1/send-transactional-email"));
   });
   it("n'utilise jamais __urgent et journalise kind admin_personal", () => {
     expect(fn).not.toContain("__urgent");
