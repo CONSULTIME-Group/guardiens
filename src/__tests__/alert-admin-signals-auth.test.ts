@@ -33,7 +33,15 @@ function harness(options: { signal?: boolean; noServiceKey?: boolean; readError?
       if (specifier === "./digest.ts") {
         const digest = ts.transpileModule(readFileSync(resolve("supabase/functions/alert-admin-signals/digest.ts"), "utf8"), { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS } }).outputText;
         const mod = { exports: {} as Record<string, unknown> };
-        runInNewContext(digest, { exports: mod.exports, module: mod, Date, Math, Set, Map });
+        // Lot S2 : digest.ts lit la configuration partagée des types de signaux.
+        const cfgRequire = (spec: string) => {
+          if (spec !== "../_shared/admin-signal-config.ts") throw new Error(`Unexpected import ${spec}`);
+          const cfg = ts.transpileModule(readFileSync(resolve("supabase/functions/_shared/admin-signal-config.ts"), "utf8"), { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS } }).outputText;
+          const cmod = { exports: {} as Record<string, unknown> };
+          runInNewContext(cfg, { exports: cmod.exports, module: cmod, Date, Math, Set, Map, Object, Number });
+          return cmod.exports;
+        };
+        runInNewContext(digest, { exports: mod.exports, module: mod, require: cfgRequire, Date, Math, Set, Map, Object });
         return mod.exports;
       }
       throw new Error(`Unexpected import ${specifier}`);
