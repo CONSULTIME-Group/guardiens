@@ -1,5 +1,8 @@
 // Lot S1 : construction pure de l'email quotidien des signaux admin.
 // Critiques actionnables seulement, une ligne par annonce, tri par échéance.
+// Lot S2 : le routage (quotidien, lundi, À animer) est lu dans
+// _shared/admin-signal-config.ts, seule source des destinations.
+import { hasDestination, sitGroupSummary, SIGNAL_TYPES } from '../_shared/admin-signal-config.ts'
 
 export interface OpenSignal {
   signal_type: string
@@ -23,12 +26,10 @@ export interface DigestLine {
   link: string
 }
 
-// Manques structurels : jamais dans l'email quotidien.
-export const NON_ACTIONABLE_TYPES = new Set([
-  'city_coverage_gap',
-  'city_seo_tension',
-  'untapped_city',
-])
+// Types jamais dans l'email quotidien, dérivés de la configuration.
+export const NON_ACTIONABLE_TYPES = new Set(
+  Object.entries(SIGNAL_TYPES).filter(([, c]) => !c.destinations.includes('daily_email')).map(([t]) => t),
+)
 
 const ACTIONS: Record<string, string> = {
   pending_application: 'Relancer le propriétaire pour qu\'il réponde aux candidatures.',
@@ -77,7 +78,7 @@ export const sitIdOf = (s: OpenSignal): string | null => {
 }
 
 export function isActionableCritical(s: OpenSignal): boolean {
-  return s.severity === 'critical' && !NON_ACTIONABLE_TYPES.has(s.signal_type)
+  return s.severity === 'critical' && hasDestination(s.signal_type, 'daily_email')
 }
 
 export function buildDigestLines(
@@ -88,7 +89,12 @@ export function buildDigestLines(
   const groups = new Map<string, OpenSignal[]>()
   for (const s of signals.filter(isActionableCritical)) {
     const sitId = sitIdOf(s)
-    const key = sitId ? `sit:${sitId}` : `sig:${s.signal_type}:${s.entity_id ?? s.detected_at}`
+    const group = SIGNAL_TYPES[s.signal_type]?.queueGroup
+    const key = sitId
+      ? `sit:${sitId}`
+      : group === 'digest_queue'
+        ? 'group:digest_queue'
+        : `sig:${s.signal_type}:${s.entity_id ?? s.detected_at}`
     const arr = groups.get(key) ?? []
     arr.push(s)
     groups.set(key, arr)
@@ -102,11 +108,14 @@ export function buildDigestLines(
     const sitId = key.startsWith('sit:') ? key.slice(4) : null
     const sit = sitId ? sits.get(sitId) : undefined
     const m = arr[0].metadata ?? {}
-    const title = (sit?.title ?? (m.sit_title as string) ?? (m.title as string) ?? main)
+    const title = (key === 'group:digest_queue' ? 'File des digests' : sit?.title ?? (m.sit_title as string) ?? (m.title as string) ?? main)
       .replace(/[\u2014\u2013]/g, ',')
     const count = arr.length
     let action = actionFor(main)
-    if (main === 'pending_application' && count > 1) {
+    const allTypes = arr.map((x) => x.signal_type)
+    if (main === 'pending_application' && types.includes('stalled_discussion')) {
+      action = `Relancer le propriétaire : ${sitGroupSummary(allTypes)}.`
+    } else if (main === 'pending_application' && count > 1) {
       action = `Relancer le propriétaire : ${count} candidatures attendent sa réponse.`
     }
     lines.push({
@@ -130,12 +139,30 @@ export function buildDigestLines(
   })
 }
 
-// Synthèse hebdomadaire des trous de couverture, le lundi seulement.
+// Synthèse hebdomadaire des trous de couverture et tensions SEO, le lundi seulement.
 export function weeklyCoverageLine(signals: OpenSignal[], now: Date = new Date()): string | null {
   if (now.getUTCDay() !== 1) return null
   const n = signals.filter((s) => s.signal_type === 'city_coverage_gap').length
-  if (n === 0) return null
-  return n === 1
-    ? 'Couverture : 1 ville suivie compte moins de 3 gardiens à 30 km.'
-    : `Couverture : ${n} villes suivies comptent moins de 3 gardiens à 30 km.`
+  const t = signals.filter((s) => s.signal_type === 'city_seo_tension').length
+  if (n === 0 && t === 0) return null
+  const parts: string[] = []
+  if (n) parts.push(n === 1 ? '1 ville suivie compte moins de 3 gardiens à 30 km' : `${n} villes suivies comptent moins de 3 gardiens à 30 km`)
+  if (t) parts.push(t === 1 ? '1 ville en tension SEO' : `${t} villes en tension SEO`)
+  return `Couverture : ${parts.join(', ')}.`
+}
+
+// Synthèse du lundi : couverture, qualité éditoriale, animation.
+export function weeklySummaryLines(signals: OpenSignal[], now: Date = new Date()): string[] {
+  if (now.getUTCDay() !== 1) return []
+  const lines: string[] = []
+  const cov = weeklyCoverageLine(signals, now)
+  if (cov) lines.push(cov)
+  const content = signals.filter((s) => SIGNAL_TYPES[s.signal_type]?.queueGroup === 'content').length
+  if (content) lines.push(`Qualité éditoriale : ${content} signal${content > 1 ? 'aux' : ''} ouvert${content > 1 ? 's' : ''}.`)
+  const dormant = signals.filter((s) => s.signal_type === 'dormant_sitter').length
+  const stale = signals.filter((s) => s.signal_type === 'affinity_onboarding_stale').length
+  if (dormant || stale) {
+    lines.push(`À animer : ${dormant} gardien${dormant > 1 ? 's' : ''} dormant${dormant > 1 ? 's' : ''}, ${stale} onboarding${stale > 1 ? 's' : ''} affinité inachevé${stale > 1 ? 's' : ''}.`)
+  }
+  return lines
 }

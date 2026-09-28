@@ -1,5 +1,5 @@
 import { assertEquals } from 'https://deno.land/std@0.224.0/assert/mod.ts'
-import { buildDigestLines, isActionableCritical, weeklyCoverageLine, type OpenSignal } from './digest.ts'
+import { buildDigestLines, isActionableCritical, weeklyCoverageLine, weeklySummaryLines, type OpenSignal } from './digest.ts'
 
 const NOW = Date.parse('2026-09-28T06:00:00Z')
 const app = (sit: string, title: string, d = '2026-09-19T09:00:00Z'): OpenSignal => ({
@@ -54,4 +54,38 @@ Deno.test('D : aucun tiret cadratin dans les lignes', () => {
   const lines = buildDigestLines([app('zz', 'Garde \u2014 Lyon')], new Map(), NOW)
   assertEquals(lines[0].title, 'Garde , Lyon')
   assertEquals(lines[0].startDate, null)
+})
+
+Deno.test('S2 : candidatures et discussions d\'une annonce en une ligne', () => {
+  const stalled: OpenSignal = { ...app('tahiti', 'T'), signal_type: 'stalled_discussion' }
+  const lines = buildDigestLines([app('tahiti', 'T'), app('tahiti', 'T'), stalled], sits, NOW)
+  assertEquals(lines.length, 1)
+  assertEquals(lines[0].action, 'Relancer le propriétaire : 2 candidatures sans réponse, 1 discussion à l\'arrêt.')
+})
+
+Deno.test('S2 : files de digest regroupées en « File des digests »', () => {
+  const d = (t: string): OpenSignal => ({ signal_type: t, severity: 'critical', detected_at: '2026-09-27T06:00:00Z', entity_type: 'system', entity_id: null, metadata: {} })
+  const lines = buildDigestLines([d('digest_queue_stalled'), d('digest_queue_morning_backlog')], sits, NOW)
+  assertEquals(lines.length, 1)
+  assertEquals(lines[0].title, 'File des digests')
+  assertEquals(lines[0].count, 2)
+})
+
+Deno.test('S2 : éditorial quotidien seulement pour la panne du détecteur', () => {
+  const c = (t: string): OpenSignal => ({ signal_type: t, severity: 'critical', detected_at: '2026-09-27T06:00:00Z', entity_type: 'system', entity_id: t, metadata: {} })
+  assertEquals(isActionableCritical(c('content_detector_broken')), true)
+  assertEquals(isActionableCritical(c('content_defect_outside_freeze')), false)
+  assertEquals(isActionableCritical(c('dormant_sitter')), false)
+  assertEquals(isActionableCritical(c('untapped_city')), false)
+})
+
+Deno.test('S2 : synthèse du lundi, couverture, éditorial, À animer', () => {
+  const w = (t: string): OpenSignal => ({ signal_type: t, severity: 'warning', detected_at: '2026-09-20T00:00:00Z', entity_type: 'x', entity_id: null, metadata: {} })
+  const rows = [w('city_coverage_gap'), w('city_coverage_gap'), w('city_seo_tension'), w('content_quality_drift'), w('dormant_sitter'), w('affinity_onboarding_stale'), w('affinity_onboarding_stale')]
+  assertEquals(weeklySummaryLines(rows, new Date('2026-09-28T06:00:00Z')), [
+    'Couverture : 2 villes suivies comptent moins de 3 gardiens à 30 km, 1 ville en tension SEO.',
+    'Qualité éditoriale : 1 signal ouvert.',
+    'À animer : 1 gardien dormant, 2 onboardings affinité inachevés.',
+  ])
+  assertEquals(weeklySummaryLines(rows, new Date('2026-09-29T06:00:00Z')), [])
 })

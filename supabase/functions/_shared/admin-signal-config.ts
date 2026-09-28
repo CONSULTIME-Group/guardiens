@@ -104,3 +104,32 @@ export const hasDestination = (type: string, d: SignalDestination): boolean => {
 
 export const ANIMATE_TYPES = Object.entries(SIGNAL_TYPES)
   .filter(([, c]) => c.destinations.includes('animate')).map(([t]) => t)
+
+const plural = (n: number, one: string, many: string) => `${n} ${n > 1 ? many : one}`
+
+/** Résumé des signaux d'une annonce : « 3 candidatures sans réponse, 1 discussion à l'arrêt ». */
+export function sitGroupSummary(types: string[]): string {
+  const n = types.filter((t) => t === 'pending_application').length
+  const m = types.filter((t) => t === 'stalled_discussion').length
+  const parts: string[] = []
+  if (n) parts.push(plural(n, 'candidature sans réponse', 'candidatures sans réponse'))
+  if (m) parts.push(plural(m, 'discussion à l\'arrêt', 'discussions à l\'arrêt'))
+  return parts.join(', ')
+}
+
+const frDate = (iso: string | null | undefined): string | null => {
+  if (!iso) return null
+  const d = new Date(`${iso.slice(0, 10)}T12:00:00Z`)
+  if (Number.isNaN(d.getTime())) return null
+  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })
+}
+
+/** « {titre}, {ville}, début le {date} : {n} candidatures sans réponse, {m} discussions à l'arrêt ». */
+export function sitGroupLine(
+  sit: { title?: string | null; city?: string | null; start_date?: string | null },
+  types: string[],
+): string {
+  const head = [sit.title?.trim() || 'Annonce', sit.city?.trim() || null].filter(Boolean).join(', ')
+  const date = frDate(sit.start_date)
+  return `${head}${date ? `, début le ${date}` : ''} : ${sitGroupSummary(types)}`.replace(/[\u2014\u2013]/g, ',')
+}
