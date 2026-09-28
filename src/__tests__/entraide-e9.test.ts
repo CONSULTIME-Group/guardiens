@@ -12,7 +12,7 @@ describe("E9 garde-fou gabarit sans file", () => {
     expect(block).toContain("status: 409");
     expect(block).toContain('.select("mass_email_use_queue")');
     expect(guard).toBeLessThan(src.indexOf('.from("mass_emails")'));
-    expect(guard).toBeLessThan(src.indexOf("buildHtml(subject"));
+    expect(guard).toBeLessThan(src.indexOf("htmlTemplate = buildHtml(subject"));
   });
 });
 
