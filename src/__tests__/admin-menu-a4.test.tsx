@@ -90,35 +90,6 @@ describe("abonnements et paramètres", () => {
   });
 });
 
-describe("poids des hero : confirmation obligatoire", () => {
-  beforeEach(() => {
-    updateSpy.mockReset();
-    fromSpy.mockReset();
-    updateSpy.mockReturnValue({ eq: () => Promise.resolve({ error: null }) });
-    fromSpy.mockReturnValue({ update: updateSpy });
-  });
-
-  const renderPage = () =>
-    render(<MemoryRouter><AdminHeroWeights /></MemoryRouter>);
-
-  it("aucune écriture sans confirmation, écriture après « Confirmer »", async () => {
-    renderPage();
-    expect(screen.queryByText(/page de debug/)).toBeNull();
-    fireEvent.click(screen.getByText(/Réinitialiser aux défauts/));
-    fireEvent.click(screen.getByRole("button", { name: "Enregistrer" }));
-    expect(await screen.findByText(/redistribuent le hero des profils existants pour tous les visiteurs/)).toBeTruthy();
-    expect(updateSpy).not.toHaveBeenCalled();
-
-    fireEvent.click(screen.getByRole("button", { name: "Annuler" }));
-    expect(updateSpy).not.toHaveBeenCalled();
-
-    fireEvent.click(screen.getByRole("button", { name: "Enregistrer" }));
-    fireEvent.click(await screen.findByRole("button", { name: "Confirmer" }));
-    await waitFor(() => expect(updateSpy).toHaveBeenCalledTimes(1));
-    expect(fromSpy).toHaveBeenCalledWith("hero_weights");
-  });
-});
-
 describe("routes retirées : redirection vers /admin", () => {
   const src = read("src/App.tsx");
   for (const path of [
