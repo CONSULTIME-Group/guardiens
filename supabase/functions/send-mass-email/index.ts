@@ -204,7 +204,7 @@ async function ensureUnsubscribeTokens(
   const lowerEmails = Array.from(new Set(emails.map((e) => e.toLowerCase())));
   if (lowerEmails.length === 0) return map;
 
-  const CHUNK = 500;
+  const INS_CHUNK = 500; // upsert en corps POST uniquement
 
   for (let i = 0; i < lowerEmails.length; i += IN_CHUNK) {
     const chunk = lowerEmails.slice(i, i + IN_CHUNK);
@@ -221,8 +221,8 @@ async function ensureUnsubscribeTokens(
   const missing = lowerEmails.filter((e) => !map.has(e));
   if (missing.length > 0) {
     const rows = missing.map((email) => ({ email, token: generateToken() }));
-    for (let i = 0; i < rows.length; i += CHUNK) {
-      const chunk = rows.slice(i, i + CHUNK);
+    for (let i = 0; i < rows.length; i += INS_CHUNK) {
+      const chunk = rows.slice(i, i + INS_CHUNK);
       const { error } = await serviceClient
         .from("email_unsubscribe_tokens")
         .upsert(chunk, { onConflict: "email", ignoreDuplicates: true });
