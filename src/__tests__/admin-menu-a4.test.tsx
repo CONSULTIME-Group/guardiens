@@ -5,10 +5,11 @@ import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { renderHook } from "@testing-library/react";
 
-const { updateSpy, fromSpy } = vi.hoisted(() => {
+const { updateSpy, fromSpy, LIVE } = vi.hoisted(() => {
+  const LIVE = { animals: 25, home: 25, mutual_aid: 25, village: 25 };
   const updateSpy = vi.fn();
   const fromSpy = vi.fn();
-  return { updateSpy, fromSpy };
+  return { updateSpy, fromSpy, LIVE };
 });
 
 vi.mock("@/integrations/supabase/client", () => ({
@@ -19,7 +20,8 @@ vi.mock("@/contexts/AuthContext", () => ({
 }));
 vi.mock("@/hooks/useAdmin", () => ({ useAdmin: () => ({ isAdmin: true, loading: false }) }));
 vi.mock("@/hooks/useHeroWeights", () => ({
-  useHeroWeights: () => ({ animals: 25, home: 25, mutual_aid: 25, village: 25 }),
+  // Objet stable : le composant resynchronise son brouillon à chaque nouvelle référence.
+  useHeroWeights: () => LIVE,
 }));
 vi.mock("@/components/seo/Head", () => ({ default: () => null }));
 
@@ -90,6 +92,35 @@ describe("abonnements et paramètres", () => {
   });
 });
 
+describe("poids des hero : confirmation obligatoire", () => {
+  beforeEach(() => {
+    updateSpy.mockReset();
+    fromSpy.mockReset();
+    updateSpy.mockReturnValue({ eq: () => Promise.resolve({ error: null }) });
+    fromSpy.mockReturnValue({ update: updateSpy });
+  });
+
+  const renderPage = () =>
+    render(<MemoryRouter><AdminHeroWeights /></MemoryRouter>);
+
+  it("aucune écriture sans confirmation, écriture après « Confirmer »", async () => {
+    renderPage();
+    expect(screen.queryByText(/page de debug/)).toBeNull();
+    fireEvent.click(screen.getByText(/Réinitialiser aux défauts/));
+    fireEvent.click(screen.getByRole("button", { name: "Enregistrer" }));
+    expect(await screen.findByText(/redistribuent le hero des profils existants pour tous les visiteurs/)).toBeTruthy();
+    expect(updateSpy).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Annuler" }));
+    expect(updateSpy).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Enregistrer" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Confirmer" }));
+    await waitFor(() => expect(updateSpy).toHaveBeenCalledTimes(1));
+    expect(fromSpy).toHaveBeenCalledWith("hero_weights");
+  });
+});
+
 describe("routes retirées : redirection vers /admin", () => {
   const src = read("src/App.tsx");
   for (const path of [
@@ -122,3 +153,27 @@ describe("routes retirées : redirection vers /admin", () => {
 import { Navigate } from "react-router-dom";
 const NavigateProbe = () => <Navigate to="/admin" replace />;
 
+
+describe("useAdminBadges : une seule lecture partagée", () => {
+  it("deux montages (layout + sidebar) déclenchent une seule exécution", async () => {
+    const counts: string[] = [];
+    const chain: any = new Proxy({}, {
+      get: (_t, prop) => {
+        if (prop === "then") return (r: any) => r({ data: [], count: 0, error: null });
+        return () => chain;
+      },
+    });
+    fromSpy.mockImplementation((t: string) => { counts.push(t); return chain; });
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <QueryClientProvider client={qc}>{children}</QueryClientProvider>
+    );
+    const Both = () => { useAdminBadges(); useAdminBadges(); return null; };
+    render(<Both />, { wrapper });
+    await waitFor(() => expect(counts.length).toBeGreaterThan(0));
+    await new Promise((r) => setTimeout(r, 30));
+    expect(counts.filter((t) => t === "error_logs")).toHaveLength(1);
+    expect(counts.filter((t) => t === "contact_messages")).toHaveLength(1);
+    void renderHook;
+  });
+});
