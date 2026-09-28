@@ -222,7 +222,7 @@ const SitterDashboard = () => {
                 totalPublished={totalPublished}
                 layout={openingVisible ? "rows" : "star"}
               />
-              <SitterMissingOpportunities fallbackTotalPublished={totalPublished} />
+              <SitterMissingOpportunities fallbackTotalPublished={nbaLoading ? undefined : totalPublished} />
             </div>
 
             {/* 4. Bandeau entraide */}

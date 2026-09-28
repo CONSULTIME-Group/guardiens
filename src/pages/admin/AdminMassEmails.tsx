@@ -192,7 +192,7 @@ const CAMPAIGN_PRESETS: CampaignPreset[] = [
   },
   {
     key: "entraide",
-    label: "Entraide gratuite",
+    label: "Entraide, espace conseil",
     segment: "tous",
     filters: { respect_product_optout: true },
     subject: ENTRAIDE_SUBJECT,
