@@ -103,6 +103,7 @@ import { template as ownerPendingApplicationNudge } from './owner-pending-applic
 import { template as ownerSitUnconfirmed } from './owner-sit-unconfirmed.tsx'
 import { template as entraideLigneHelpsWith } from './entraide-ligne-helps-with.tsx'
 import { template as entraideLigneRelance } from './entraide-ligne-relance.tsx'
+import { template as ownerNoel2026 } from './owner-noel-2026.tsx'
 import { template as entraideDemanderCoupDeMain } from './entraide-demander-coup-de-main.tsx'
 import { template as discussionStalledNudge } from './discussion-stalled-nudge.tsx'
 import { template as founderPersonalNotice } from './founder-personal-notice.tsx'
@@ -215,6 +216,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'discussion-stalled-nudge': discussionStalledNudge,
   'entraide-ligne-helps-with': entraideLigneHelpsWith,
   'entraide-ligne-relance': entraideLigneRelance,
+  'owner-noel-2026': ownerNoel2026,
   'entraide-demander-coup-de-main': entraideDemanderCoupDeMain,
 }
 
