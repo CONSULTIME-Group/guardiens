@@ -707,11 +707,11 @@
       "name_required": "Veuillez entrer votre nom",
       "name_max": "100 caractères max",
       "email_invalid": "Adresse email invalide",
-      "email_max": "255 caractères max",
+      "email_max": "200 caractères max",
       "subject_required": "Veuillez entrer un sujet",
       "subject_max": "200 caractères max",
       "message_min": "Minimum 10 caractères",
-      "message_max": "2000 caractères max"
+      "message_max": "Votre message dépasse 5 000 caractères."
     }
   },
   "breeds_listing": {

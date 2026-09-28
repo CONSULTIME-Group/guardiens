@@ -13,6 +13,25 @@ import PageMeta from "@/components/PageMeta";
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
 
+/**
+ * Nettoie un message collé depuis un traitement de texte : espaces insécables,
+ * tabulations, suites d'espaces, espaces en début et fin de ligne, sauts de
+ * ligne répétés. N'altère jamais la saisie affichée, seulement ce qui est
+ * validé et enregistré.
+ */
+export const normalizeMessage = (raw: string): string =>
+  raw
+    .replace(/\r\n?/g, "\n")
+    .replace(/[\u00A0\u202F\t]/g, " ")
+    .replace(/ {2,}/g, " ")
+    .split("\n")
+    .map((line) => line.trim())
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+
+const MESSAGE_MAX = 5000;
+
 const Contact = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -36,10 +55,12 @@ const Contact = () => {
 
   const contactSchema = z.object({
     name: z.string().trim().min(1, t("contact.errors.name_required")).max(100, t("contact.errors.name_max")),
-    email: z.string().trim().email(t("contact.errors.email_invalid")).max(255, t("contact.errors.email_max")),
+    email: z.string().trim().email(t("contact.errors.email_invalid")).max(200, t("contact.errors.email_max")),
     subject: z.string().trim().min(1, t("contact.errors.subject_required")).max(200, t("contact.errors.subject_max")),
-    message: z.string().trim().min(10, t("contact.errors.message_min")).max(2000, t("contact.errors.message_max")),
+    message: z.string().trim().min(10, t("contact.errors.message_min")).max(MESSAGE_MAX, t("contact.errors.message_max")),
   });
+
+  const messageLength = normalizeMessage(form.message).length;
 
   const handleChange = (field: string, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -50,7 +71,7 @@ const Contact = () => {
     e.preventDefault();
     setErrors({});
 
-    const result = contactSchema.safeParse(form);
+    const result = contactSchema.safeParse({ ...form, message: normalizeMessage(form.message) });
     if (!result.success) {
       const fieldErrors: Record<string, string> = {};
       result.error.issues.forEach(i => { fieldErrors[i.path[0] as string] = i.message; });
@@ -145,6 +166,12 @@ const Contact = () => {
               <div className="space-y-1.5">
                 <Label htmlFor="message">{t("contact.message")}</Label>
                 <Textarea id="message" placeholder={t("contact.message_placeholder")} rows={5} value={form.message} onChange={e => handleChange("message", e.target.value)} />
+                <p
+                  className={`text-xs text-right ${messageLength > MESSAGE_MAX ? "text-destructive" : "text-muted-foreground"}`}
+                  aria-live="polite"
+                >
+                  {messageLength.toLocaleString("fr-FR")} / {MESSAGE_MAX.toLocaleString("fr-FR")} caractères
+                </p>
                 {errors.message && <p className="text-sm text-destructive">{errors.message}</p>}
               </div>
 
