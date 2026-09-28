@@ -23,6 +23,12 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { startCronRun } from "../_shared/cron-run-log.ts";
 import { requireAdminOrServiceRole } from "../_shared/require-admin.ts";
 import { isSitterProfileIndexable } from "../_shared/sitterProfileIndexability.js";
+import {
+  pickStaticToRecache,
+  STATIC_FAMILY,
+  STATIC_LOG_SOURCE,
+  STATIC_RENDER_BUDGET,
+} from "../_shared/static-seo-refresh.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -393,6 +399,47 @@ Deno.serve(async (req) => {
       }
 
       if (allOk) clearedIds.push(a.id);
+    }
+
+    // Pages statiques (STATIC_SEO_URLS) : recachées si leur dernier succès
+    // journalisé précède le repère posé par detect-deploy-and-mark-dirty,
+    // au plus STATIC_RENDER_BUDGET renders par passage.
+    const staticMetrics = { static_recached: 0, static_failed: 0, static_deferred: 0 };
+    {
+      const { data: st, error: stErr } = await sb
+        .from("prerender_family_state")
+        .select("last_marked_at")
+        .eq("family", STATIC_FAMILY)
+        .maybeSingle();
+      if (stErr) throw stErr;
+      const markedAt = (st?.last_marked_at as string | null) ?? null;
+      if (markedAt) {
+        const { data: okRows, error: okErr } = await sb
+          .from("prerender_recache_log")
+          .select("url, created_at")
+          .eq("source", STATIC_LOG_SOURCE)
+          .eq("ok", true)
+          .gte("created_at", markedAt)
+          .order("created_at", { ascending: false })
+          .limit(100);
+        if (okErr) throw okErr;
+        const lastOk = new Map<string, string>();
+        for (const r of (okRows ?? []) as Array<{ url: string; created_at: string }>) {
+          if (!lastOk.has(r.url)) lastOk.set(r.url, r.created_at);
+        }
+        const { toRecache, deferred } = pickStaticToRecache(markedAt, lastOk, STATIC_RENDER_BUDGET);
+        staticMetrics.static_deferred = deferred;
+        for (const url of toRecache) {
+          const res = await recache(url, PRERENDER_TOKEN);
+          if (res.ok) { urlsOk += 1; staticMetrics.static_recached += 1; }
+          else { urlsFailed += 1; staticMetrics.static_failed += 1; }
+          logRows.push({
+            article_id: null, url, status_code: res.status, ok: res.ok,
+            detail: res.detail, source: STATIC_LOG_SOURCE,
+          });
+          console.log(`[consume-seo-dirty] ${url} -> ${res.status ?? "network_error"}`);
+        }
+      }
     }
 
     // Fiches gardien : même token, même journalisation, budget de renders
