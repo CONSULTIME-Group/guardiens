@@ -464,6 +464,7 @@ Deno.serve(async (req) => {
       articles_deferred: articlesDeferred,
       ...programmaticMetrics,
       ...sitterMetrics,
+      ...staticMetrics,
     };
 
 

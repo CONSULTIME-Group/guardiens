@@ -42,7 +42,6 @@ export default defineConfig(({ mode }) => ({
     react(),
     mode === "development" && componentTagger(),
     mode === "production" && routeHashesPlugin(),
-    mode === "production" && prerenderFlushPlugin(),
   ].filter(Boolean) as Plugin[],
   resolve: {
     // IMPORTANT : alias sous forme de TABLEAU. Vite évalue dans l'ordre et
