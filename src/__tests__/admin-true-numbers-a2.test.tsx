@@ -103,12 +103,12 @@ describe("badge Avis", () => {
 describe("menu admin : un seul élément actif", () => {
   const items = adminNavGroups_export.flatMap((g) => g.items);
   // Simule NavLink : actif si le chemin correspond (préfixe de segment).
-  const navMatch = (to: string, pathname: string) => {
+  const navMatch = (to: string, pathname: string, end?: boolean) => {
     const p = to.split("?")[0];
-    return pathname === p || pathname.startsWith(p + "/");
+    return pathname === p || (!end && pathname.startsWith(p + "/"));
   };
   const actives = (pathname: string, search: string) =>
-    items.filter((it) => resolveNavActive(it as any, { pathname, search }, navMatch(it.to, pathname))).map((it) => it.label);
+    items.filter((it) => resolveNavActive(it as any, { pathname, search }, navMatch(it.to, pathname, (it as any).end))).map((it) => it.label);
 
   it("?tab=mutual-aid : Pilotage entraide", () => {
     expect(actives("/admin/emails-transactionnels", "?tab=mutual-aid")).toEqual(["Pilotage entraide"]);
