@@ -113,7 +113,7 @@ export function buildDigestLines(
     const count = arr.length
     let action = actionFor(main)
     const allTypes = arr.map((x) => x.signal_type)
-    if (main === 'pending_application' && types.includes('stalled_discussion')) {
+    if (types.includes('pending_application') && types.includes('stalled_discussion') && main !== 'owner_sit_unconfirmed') {
       action = `Relancer le propriétaire : ${sitGroupSummary(allTypes)}.`
     } else if (main === 'pending_application' && count > 1) {
       action = `Relancer le propriétaire : ${count} candidatures attendent sa réponse.`
