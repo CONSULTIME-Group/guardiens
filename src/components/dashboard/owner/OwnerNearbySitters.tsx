@@ -72,7 +72,7 @@ export default function OwnerNearbySitters() {
     totalCount: nearby.totalCount,
     radiusUsed: nearby.radiusUsed,
     hasGeo: nearby.hasGeo,
-    isBeyond: nearby.sitters.some((x) => x.is_beyond),
+    isBeyond: (nearby.sitters ?? []).some((x) => x.is_beyond),
   });
 
   return (

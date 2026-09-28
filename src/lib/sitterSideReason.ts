@@ -5,6 +5,6 @@
  */
 export function sitterSideReason(label: string): string {
   return label
-    .replace(/^Gardien expérimenté\b/, "Expérimenté")
+    .replace(/^Gardien expérimenté(?=,|$)/, "Expérimenté")
     .replace(/, comme vous le (souhaitez|demandez)\s*$/, ", comme demandé");
 }
