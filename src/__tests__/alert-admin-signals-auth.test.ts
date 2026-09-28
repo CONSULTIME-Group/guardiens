@@ -30,6 +30,12 @@ function harness(options: { signal?: boolean; noServiceKey?: boolean; readError?
     require: (specifier: string) => {
       if (specifier.endsWith("/cors")) return { corsHeaders: { "Access-Control-Allow-Origin": "*" } };
       if (specifier.includes("supabase-js")) return { createClient };
+      if (specifier === "./digest.ts") {
+        const digest = ts.transpileModule(readFileSync(resolve("supabase/functions/alert-admin-signals/digest.ts"), "utf8"), { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS } }).outputText;
+        const mod = { exports: {} as Record<string, unknown> };
+        runInNewContext(digest, { exports: mod.exports, module: mod, Date, Math, Set, Map });
+        return mod.exports;
+      }
       throw new Error(`Unexpected import ${specifier}`);
     },
   });
@@ -69,7 +75,7 @@ describe("alert-admin-signals service authorization", () => {
   it("keeps a healthy report silent", async () => {
     const h = harness();
     const response = await h.invoke(new Request("https://fixture.invalid", { method: "POST", headers: { authorization: `Bearer ${serviceKey}` }, body: "{}" }));
-    expect(await response.json()).toMatchObject({ ok: true, sent: false, reason: "no_critical_signal", warning_open: 0 });
+    expect(await response.json()).toMatchObject({ ok: true, sent: false, reason: "no_actionable_critical_signal", warning_open: 0 });
     expect(h.fetch).not.toHaveBeenCalled();
     expect(h.rpc).toHaveBeenCalledWith("auto_resolve_admin_signals");
   });
@@ -77,7 +83,7 @@ describe("alert-admin-signals service authorization", () => {
   it("does not reconcile even when a dry run finds no critical signal", async () => {
     const h = harness();
     const response = await h.invoke(new Request("https://fixture.invalid", { method: "POST", headers: { authorization: `Bearer ${serviceKey}` }, body: '{"dry_run":true}' }));
-    expect(await response.json()).toMatchObject({ sent: false, reason: "no_critical_signal", auto_resolved: [] });
+    expect(await response.json()).toMatchObject({ sent: false, reason: "no_actionable_critical_signal", auto_resolved: [] });
     expect(h.rpc).not.toHaveBeenCalled();
     expect(h.fetch).not.toHaveBeenCalled();
   });
