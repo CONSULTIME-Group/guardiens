@@ -26,7 +26,7 @@ export const KpiCards = ({ stats }: Props) => {
     {
       title: "Inscrits",
       value: stats.totalUsers,
-      subtitle: `${stats.owners} propriétaires · ${stats.sitters} gardiens · ${stats.both} polyvalents`,
+      subtitle: `${stats.owners} propriétaires · ${stats.sitters} gardiens seuls · ${stats.both} polyvalents`,
       icon: Users,
       link: "/admin/users",
     },
@@ -47,7 +47,7 @@ export const KpiCards = ({ stats }: Props) => {
     {
       title: "Gardes en cours",
       value: stats.ongoingSits,
-      subtitle: "Confirmées",
+      subtitle: "Gardes confirmées",
       icon: CalendarCheck,
       link: "/admin/sits-management",
     },
