@@ -25,7 +25,7 @@ import { VolunteerAvailabilityCard } from "./_components/dashboard/VolunteerAvai
  * 6. Pilotage (cartes-liens vers les pages dédiées)
  */
 const AdminOverview = () => {
-  const { loading, stats, activity, weeklySignups, deptData } = useDashboardData();
+  const { loading, stats, activity, weeklySignups, deptData, partial } = useDashboardData();
   const {
     analysis,
     loading: analysisLoading,
@@ -69,6 +69,9 @@ const AdminOverview = () => {
 
       {/* 5. Tendances (repliées) */}
       <CollapsibleSection title="Tendances">
+        {partial && (
+          <p className="text-xs text-warning mb-2">Données partielles : plafond de 50 000 lignes atteint.</p>
+        )}
         <DashboardCharts weeklySignups={weeklySignups} deptData={deptData} />
       </CollapsibleSection>
 

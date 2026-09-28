@@ -24,6 +24,9 @@ interface NavItem {
   tabParam?: string;
   /** Onglet affiché par la page quand le paramètre `tab` est absent. */
   defaultTab?: string;
+  /** Entrée active sur sa page SAUF pour ces onglets, représentés par une
+   *  autre entrée du menu. */
+  excludeTabs?: string[];
 }
 
 export const BADGE_TITLES: Record<string, string> = {
@@ -79,7 +82,7 @@ const adminNavGroups: NavGroup[] = [
       { to: "/admin/small-missions?tab=projets", icon: Hammer, label: "Projets", tabParam: "projets", defaultTab: "entraide" },
       // Pilotage produit de l'entraide, jusqu'ici accessible seulement depuis
       // un onglet de la page Emails, donc introuvable.
-      { to: "/admin/emails?tab=mutual-aid", icon: Handshake, label: "Pilotage entraide" },
+      { to: "/admin/emails-transactionnels?tab=mutual-aid", icon: Handshake, label: "Pilotage entraide", tabParam: "mutual-aid", defaultTab: "templates" },
     ],
   },
   {
@@ -109,7 +112,7 @@ const adminNavGroups: NavGroup[] = [
       { to: "/admin/breeds", icon: MapPin, label: "Fiches de race" },
       { to: "/admin/legal", icon: ScrollText, label: "Pages légales" },
       { to: "/admin/emails", icon: Mail, label: "Santé email" },
-      { to: "/admin/emails-transactionnels", icon: Mail, label: "Emails transactionnels" },
+      { to: "/admin/emails-transactionnels", icon: Mail, label: "Emails transactionnels", excludeTabs: ["mutual-aid"] },
       { to: "/admin/nurturing", icon: Sprout, label: "Nurturing" },
       { to: "/admin/settings", icon: Settings, label: "Paramètres" },
       { to: "/admin/audit", icon: ScrollText, label: "Journal d'audit" },
@@ -122,11 +125,16 @@ const STORAGE_KEY = "admin.sidebar.collapsed";
 
 /** Deux entrées peuvent viser la même page avec un onglet différent : l'état
  *  actif se lit alors sur le paramètre `tab` et non sur le seul chemin. */
-function resolveNavActive(
+export function resolveNavActive(
   item: NavItem,
   location: { pathname: string; search: string },
   navActive: boolean,
 ): boolean {
+  if (item.excludeTabs) {
+    if (!navActive) return false;
+    const tab = new URLSearchParams(location.search).get("tab");
+    return !(tab && item.excludeTabs.includes(tab));
+  }
   if (!item.tabParam) return navActive;
   const path = item.to.split("?")[0];
   if (location.pathname !== path) return false;

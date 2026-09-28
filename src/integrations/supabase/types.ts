@@ -10156,6 +10156,34 @@ export type Database = {
       admin_cron_health: { Args: never; Returns: Json }
       admin_dashboard_snapshot: { Args: never; Returns: Json }
       admin_dashboard_summary: { Args: never; Returns: Json }
+      admin_email_pipeline_health: {
+        Args: never
+        Returns: {
+          attempts_1h: number | null
+          deferred_abandoned_24h: number | null
+          deferred_attempts_ge_3: number | null
+          deferred_expired_24h: number | null
+          deferred_oldest_age_seconds: number | null
+          deferred_pending_over_24h: number | null
+          deferred_pending_over_2h: number | null
+          deferred_pending_total: number | null
+          deferred_stale_rows: Json | null
+          deferred_transactional_overdue_2h: number | null
+          dlq_last_hour: number | null
+          failure_rate_1h: number | null
+          last_run_age_seconds: number | null
+          last_run_at: string | null
+          oldest_pending_age_seconds: number | null
+          retry_after_until: string | null
+          stuck_rate_limit: boolean | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "v_email_pipeline_health"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       admin_get_accepted_sitters: {
         Args: { p_sit_ids: string[] }
         Returns: {

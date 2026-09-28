@@ -1,3 +1,4 @@
+import { fetchAllRows } from "@/lib/admin/fetchAllRows";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
@@ -304,13 +305,12 @@ function WhispersTab({ since, range }: { since: string; range: Range }) {
 
   const historyTruncated = history.length >= ROW_LIMIT;
 
-  const { data: freq = [] } = useQuery({
+  const { data: freqRes } = useQuery({
     queryKey: ["admin-alma-frequency"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("profiles").select("alma_frequency");
-      if (error) throw error;
-      return (data ?? []) as Array<{ alma_frequency: string | null }>;
-    },
+    queryFn: async () =>
+      // Lecture paginée : l'API coupe à 1 000 lignes, il y a plus de profils.
+      fetchAllRows<{ alma_frequency: string | null }>((from, to) =>
+        supabase.from("profiles").select("alma_frequency").order("id").range(from, to)),
     staleTime: 5 * 60_000,
     refetchOnWindowFocus: false,
   });
@@ -333,6 +333,9 @@ function WhispersTab({ since, range }: { since: string; range: Range }) {
       blacklisted,
     };
   }, [stats]);
+
+  const freq = useMemo(() => freqRes?.rows ?? [], [freqRes]);
+  const freqPartial = freqRes?.truncated ?? false;
 
   const freqBreakdown = useMemo(() => {
     const acc = { silent: 0, low: 0, balanced: 0, talkative: 0 } as Record<string, number>;
@@ -397,6 +400,9 @@ function WhispersTab({ since, range }: { since: string; range: Range }) {
       <Card>
         <CardContent className="p-6 space-y-3">
           <h3 className="text-sm font-semibold">Répartition des fréquences choisies</h3>
+          {freqPartial && (
+            <p className="text-xs text-warning">Données partielles : plafond de 50 000 lignes atteint.</p>
+          )}
           {(["silent", "low", "balanced", "talkative"] as const).map((k) => {
             const c = freqBreakdown.counts[k] ?? 0;
             const pct = (c / freqBreakdown.total) * 100;

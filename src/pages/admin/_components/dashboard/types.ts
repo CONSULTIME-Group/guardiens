@@ -5,7 +5,10 @@ export interface Stats {
   both: number;
   newThisWeek: number;
   activeListings: number;
+  /** Gardes en status in_progress. */
   ongoingSits: number;
+  /** Gardes confirmées, pas encore démarrées. */
+  confirmedUpcoming: number;
   totalReviews: number;
   avgRating: number;
   monthRevenue: number;

@@ -1,3 +1,4 @@
+import { fetchAllRows } from "@/lib/admin/fetchAllRows";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -113,18 +114,19 @@ export default function AdminEmailHealth() {
   const [suppressedSearch, setSuppressedSearch] = useState("");
   const [suppressedLoading, setSuppressedLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [partial, setPartial] = useState(false);
 
   // Pipeline health via view
   const fetchHealth = useCallback(async () => {
     setHealthLoading(true);
-    const { data, error } = await supabase
-      .from("v_email_pipeline_health" as any)
-      .select("*")
-      .maybeSingle();
+    // La vue n'est plus lisible par les comptes connectés (migration du
+    // 02/08) : lecture via la fonction réservée aux admins.
+    const { data, error } = await (supabase.rpc as any)("admin_email_pipeline_health");
     if (error) {
       toast.error("Impossible de charger l'état du pipeline");
     } else {
-      setHealth(data as unknown as PipelineHealth);
+      const row = Array.isArray(data) ? data[0] : data;
+      setHealth((row ?? null) as PipelineHealth | null);
     }
     setHealthLoading(false);
   }, []);
@@ -134,13 +136,19 @@ export default function AdminEmailHealth() {
     async (sinceHours: number): Promise<SendCounts> => {
       const since = new Date(Date.now() - sinceHours * 3600 * 1000).toISOString();
       // Fetch minimal cols. Dedupe by message_id keeping latest status.
-      const { data, error } = await supabase
-        .from("email_send_log")
-        .select("message_id, id, status, created_at")
-        .gte("created_at", since)
-        .order("created_at", { ascending: false })
-        .limit(10000);
-      if (error) throw error;
+      // Lecture paginée (l'API coupe à 1 000 lignes), ordre stable
+      // created_at desc puis id : la première ligne vue par message_id
+      // reste la plus récente, comme avant.
+      const { rows: data, truncated } = await fetchAllRows<any>((from, to) =>
+        supabase
+          .from("email_send_log")
+          .select("message_id, id, status, created_at")
+          .gte("created_at", since)
+          .order("created_at", { ascending: false })
+          .order("id", { ascending: false })
+          .range(from, to),
+      );
+      if (truncated) setPartial(true);
       const seen = new Map<string, string>();
       (data || []).forEach((r: any) => {
         const key = r.message_id || r.id;
@@ -165,11 +173,14 @@ export default function AdminEmailHealth() {
   );
 
   const fetchDeferred = useCallback(async (): Promise<DeferredCounts> => {
-    const { data, error } = await supabase
-      .from("email_deferred_queue")
-      .select("status, scheduled_for, created_at")
-      .limit(10000);
-    if (error) throw error;
+    const { rows: data, truncated } = await fetchAllRows<any>((from, to) =>
+      supabase
+        .from("email_deferred_queue")
+        .select("status, scheduled_for, created_at")
+        .order("id", { ascending: true })
+        .range(from, to),
+    );
+    if (truncated) setPartial(true);
     const counts: DeferredCounts = {
       pending: 0,
       sent: 0,
@@ -226,6 +237,7 @@ export default function AdminEmailHealth() {
 
   const refreshAll = useCallback(async () => {
     setRefreshing(true);
+    setPartial(false);
     try {
       const [a, b, def, mp] = await Promise.all([
         fetchSendCounts(24),
@@ -294,6 +306,9 @@ export default function AdminEmailHealth() {
 
   return (
     <div className="space-y-6 p-6 max-w-7xl mx-auto">
+      {partial && (
+        <p className="text-xs text-warning">Données partielles : plafond de 50 000 lignes atteint.</p>
+      )}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold">Santé email</h1>
