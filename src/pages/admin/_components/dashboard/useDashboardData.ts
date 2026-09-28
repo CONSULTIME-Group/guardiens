@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { format, subWeeks, startOfWeek, endOfWeek } from "date-fns";
 import { fr } from "date-fns/locale";
 import { postalToDept } from "@/lib/departments";
+import { fetchAllRows } from "@/lib/admin/fetchAllRows";
 import type {
   Stats, ActivityItem, WeeklySignup, DeptData,
 } from "./types";
@@ -14,6 +15,8 @@ interface DashboardData {
   activity: ActivityItem[];
   weeklySignups: WeeklySignup[];
   deptData: DeptData[];
+  /** Plafond de 50 000 lignes atteint sur une lecture paginée. */
+  partial: boolean;
 }
 
 /**
@@ -26,6 +29,7 @@ export function useDashboardData(): DashboardData {
   const [weeklySignups, setWeeklySignups] = useState<WeeklySignup[]>([]);
   const [deptData, setDeptData] = useState<DeptData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [partial, setPartial] = useState(false);
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -40,8 +44,9 @@ export function useDashboardData(): DashboardData {
         { count: newThisWeek },
         { count: activeListings },
         { count: ongoingSits },
-        { data: reviewsData },
-        { data: profilesData },
+        { count: confirmedUpcoming },
+        reviewsRes,
+        profilesRes,
         { data: recentProfiles },
         { data: recentSits },
         { data: recentReviews },
@@ -56,9 +61,14 @@ export function useDashboardData(): DashboardData {
         supabase.from("profiles").select("id", { count: "exact", head: true }).eq("role", "both"),
         supabase.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", oneWeekAgo.toISOString()),
         supabase.from("sits").select("id", { count: "exact", head: true }).eq("status", "published"),
+        // Une garde démarrée passe en in_progress (auto-transition-sits).
+        supabase.from("sits").select("id", { count: "exact", head: true }).eq("status", "in_progress"),
         supabase.from("sits").select("id", { count: "exact", head: true }).eq("status", "confirmed"),
-        supabase.from("reviews").select("overall_rating"),
-        supabase.from("profiles").select("created_at, city, role, first_name, id, postal_code"),
+        // Lectures paginées : l'API coupe à 1 000 lignes.
+        fetchAllRows<{ overall_rating: number }>((from, to) =>
+          supabase.from("reviews").select("overall_rating").order("id").range(from, to)),
+        fetchAllRows<{ created_at: string; city: string | null; role: string; first_name: string | null; id: string; postal_code: string | null }>((from, to) =>
+          supabase.from("profiles").select("created_at, city, role, first_name, id, postal_code").order("id").range(from, to)),
         supabase.from("profiles").select("id, first_name, role, created_at").order("created_at", { ascending: false }).limit(5),
         supabase.from("sits").select("id, title, created_at, status, property_id, properties!inner(user_id, ...profiles!inner(first_name, city))").order("created_at", { ascending: false }).limit(5),
         supabase.from("reviews").select("id, overall_rating, created_at, reviewer_id, reviewee_id, sit_id, reviewer:profiles!reviews_reviewer_id_fkey(first_name), reviewee:profiles!reviews_reviewee_id_fkey(first_name)").order("created_at", { ascending: false }).limit(5),
@@ -68,6 +78,9 @@ export function useDashboardData(): DashboardData {
         supabase.rpc("admin_get_recent_account_deletions" as any, { p_limit: 5 }),
       ]);
 
+      const reviewsData = reviewsRes.rows;
+      const profilesData = profilesRes.rows;
+      setPartial(reviewsRes.truncated || profilesRes.truncated);
       const totalReviews = reviewsData?.length || 0;
       const avgRating = totalReviews > 0
         ? reviewsData!.reduce((sum, r) => sum + r.overall_rating, 0) / totalReviews
@@ -83,6 +96,7 @@ export function useDashboardData(): DashboardData {
         newThisWeek: newThisWeek || 0,
         activeListings: activeListings || 0,
         ongoingSits: ongoingSits || 0,
+        confirmedUpcoming: confirmedUpcoming || 0,
         totalReviews,
         avgRating: Math.round(avgRating * 10) / 10,
         monthRevenue,

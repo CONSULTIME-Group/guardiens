@@ -48,7 +48,7 @@ export function useAdminBadges(): AdminBadges {
       supabase.from("review_disputes").select("id", { count: "exact", head: true }).eq("status", "pending"),
       supabase.from("error_logs").select("id", { count: "exact", head: true }).is("resolved_at", null).neq("severity", "ignored_third_party"),
       supabase.from("guide_requests" as any).select("id", { count: "exact", head: true }).eq("status", "pending"),
-      supabase.from("reviews").select("id", { count: "exact", head: true }).eq("moderation_status", "pending"),
+      supabase.from("reviews").select("id", { count: "exact", head: true }).eq("moderation_status", "en_attente"),
       supabase.from("admin_message_logs").select("id", { count: "exact", head: true }).eq("status", "failed"),
       supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "new").eq("target_type", "sit"),
       supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "new").eq("target_type", "small_mission"),

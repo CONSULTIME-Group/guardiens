@@ -47,7 +47,7 @@ export const KpiCards = ({ stats }: Props) => {
     {
       title: "Gardes en cours",
       value: stats.ongoingSits,
-      subtitle: "Gardes confirmées",
+      subtitle: `${stats.confirmedUpcoming} ${stats.confirmedUpcoming > 1 ? "confirmées" : "confirmée"} à venir`,
       icon: CalendarCheck,
       link: "/admin/sits-management",
     },
