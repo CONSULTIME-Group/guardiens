@@ -32,7 +32,7 @@ describe("buildActionQueue", () => {
   it("applique une échelle unique : signal critique, IA haute, signal avertissement, IA basse", () => {
     const queue = buildActionQueue(
       [
-        sig({ id: "w1", severity: "warning" }),
+        sig({ id: "w1", severity: "warning", signal_type: "identity_needs_review" }),
         sig({ id: "c1", severity: "critical", signal_type: "suspicious_account" }),
       ],
       [
