@@ -57,6 +57,13 @@ export function ownerNoelPreheader(p: OwnerNoelProps): string {
 }
 
 /** A seulement si les données de la variante A sont réellement présentes. */
+/** « En voici trois / deux / un », adapté au nombre de cartes réellement affichées. */
+export function ownerNoelSubtitle(n: number): string {
+  const tail = "Ils vous envoient leur candidature, et c'est vous qui choisissez."
+  const lead = n >= 3 ? 'En voici trois. ' : n === 2 ? 'En voici deux. ' : n === 1 ? 'En voici un. ' : ''
+  return lead + tail
+}
+
 export function resolveVariant(p: OwnerNoelProps): 'A' | 'B' {
   return p.variant === 'A' && (p.nearbyCount ?? 0) > 0 && !!(p.city || '').trim() ? 'A' : 'B'
 }
@@ -152,7 +159,7 @@ const Email = (props: OwnerNoelProps) => {
               {variant === 'A' ? (
                 <>
                   <Text style={h2}>{props.nearbyCount} gardiens à moins de 50 km de {town}</Text>
-                  <Text style={sub}>En voici trois. Ils vous envoient leur candidature, et c'est vous qui choisissez.</Text>
+                  <Text style={sub}>{ownerNoelSubtitle(sitters.length)}</Text>
                   {sitters.length > 0 ? (
                     <Row style={{ marginTop: '14px' }}>
                       {sitters.map((s, i) => (
@@ -188,7 +195,7 @@ const Email = (props: OwnerNoelProps) => {
             {PROMISES.map((p) => (
               <Row key={p.mark} style={{ marginTop: '14px' }}>
                 <Column style={{ width: '40px', verticalAlign: 'top' }}>
-                  <Round letter={p.mark} size={36} bg="#F3E8DD" color="#8A5C38" />
+                  <Round letter={p.mark} size={36} bg="#F3E8DD" color="#2C6D50" />
                 </Column>
                 <Column style={{ verticalAlign: 'top', paddingLeft: '14px' }}>
                   <Text style={promise}><strong style={{ color: '#1D1B16' }}>{p.title}</strong> {p.text}</Text>

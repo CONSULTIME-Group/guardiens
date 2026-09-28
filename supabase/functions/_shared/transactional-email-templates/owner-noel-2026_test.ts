@@ -63,6 +63,9 @@ Deno.test('variante A : 0, 1 et 3 cartes', () => {
   assert(!h0.includes('Gardien1'))
   const h1 = html({ ...base, sitters: [card(1)] })
   assert(h1.includes('Gardien1')); assert(!h1.includes('Gardien2'))
+  assert(h1.includes('En voici un. Ils vous')); assert(!h1.includes('En voici trois'))
+  assert(html({ ...base, sitters: [card(1), card(2)] }).includes('En voici deux. Ils vous'))
+  assert(!h0.includes('En voici'))
   const h3 = html({ ...base, sitters: [card(1), card(2), card(3)] })
   for (const i of [1, 2, 3]) assert(h3.includes(`Gardien${i}`))
 })
@@ -142,4 +145,10 @@ Deno.test('données : variante, tri, photo et complétion prioritaires, aucune c
   assert(!JSON.stringify(d).includes('latitude'))
   assertEquals(buildNoelData({ id: 'o', city: 'Lyon' }, pool, badges).variant, 'B')
   assertEquals(buildNoelData({ id: 'o', city: 'Brest', latitude: 48.39, longitude: -4.49 }, pool, badges).variant, 'B')
+})
+
+Deno.test('correctif J3 : échange, jamais de rencontre systématique', async () => {
+  const src = await Deno.readTextFile(new URL('./owner-no-sit-j3.tsx', import.meta.url))
+  assert(src.includes('puis vous échangez avec les candidats avant de choisir'))
+  assert(!src.includes('vous rencontrez les candidats'))
 })
