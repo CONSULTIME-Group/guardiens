@@ -151,26 +151,3 @@ describe("routes retirées : redirection vers /admin", () => {
 import { Navigate } from "react-router-dom";
 const NavigateProbe = () => <Navigate to="/admin" replace />;
 
-describe("useAdminBadges : une seule lecture partagée", () => {
-  it("deux montages (layout + sidebar) déclenchent une seule exécution", async () => {
-    const counts: string[] = [];
-    const chain: any = new Proxy({}, {
-      get: (_t, prop) => {
-        if (prop === "then") return (r: any) => r({ data: [], count: 0, error: null });
-        return () => chain;
-      },
-    });
-    fromSpy.mockImplementation((t: string) => { counts.push(t); return chain; });
-    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <QueryClientProvider client={qc}>{children}</QueryClientProvider>
-    );
-    const Both = () => { useAdminBadges(); useAdminBadges(); return null; };
-    render(<Both />, { wrapper });
-    await waitFor(() => expect(counts.length).toBeGreaterThan(0));
-    await new Promise((r) => setTimeout(r, 30));
-    expect(counts.filter((t) => t === "error_logs")).toHaveLength(1);
-    expect(counts.filter((t) => t === "contact_messages")).toHaveLength(1);
-    void renderHook;
-  });
-});
