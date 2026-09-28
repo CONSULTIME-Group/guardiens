@@ -16,6 +16,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAllRows } from "@/lib/admin/fetchAllRows";
 
 interface Stats {
   total: number;
@@ -25,6 +26,7 @@ interface Stats {
   buckets: { label: string; count: number }[];
   byContext: { context: string; count: number }[];
   hiddenReasons: { reason: string; count: number }[];
+  partial: boolean;
 }
 
 const SCORE_BUCKETS = [
@@ -36,6 +38,56 @@ const SCORE_BUCKETS = [
   { label: "90–100", min: 90, max: 100 },
 ];
 
+/** Calcul inchangé, extrait pour être testé sur le jeu complet. */
+export function computeAffinityStats(data: Array<{ metadata: unknown }>): Omit<Stats, "partial"> {
+  let displayed = 0;
+  let hidden = 0;
+  let missing = 0;
+  const bucketCounts = SCORE_BUCKETS.map((b) => ({ label: b.label, count: 0 }));
+  const ctxMap = new Map<string, number>();
+  const reasonMap = new Map<string, number>();
+
+  for (const row of data) {
+    const m: any = row.metadata ?? {};
+    const ctx = String(m.context ?? "unknown");
+    ctxMap.set(ctx, (ctxMap.get(ctx) ?? 0) + 1);
+
+    if (ctx.endsWith("_missing")) {
+      missing++;
+      continue;
+    }
+    if (m.displayed === false) {
+      hidden++;
+      const reason = String(m.hidden_reason ?? "unknown");
+      reasonMap.set(reason, (reasonMap.get(reason) ?? 0) + 1);
+      continue;
+    }
+    displayed++;
+    const score = Number(m.score ?? 0);
+    for (let i = 0; i < SCORE_BUCKETS.length; i++) {
+      const b = SCORE_BUCKETS[i];
+      if (score >= b.min && score <= b.max) {
+        bucketCounts[i].count++;
+        break;
+      }
+    }
+  }
+
+  return {
+    total: data.length,
+    displayed,
+    hidden,
+    missing,
+    buckets: bucketCounts,
+    byContext: Array.from(ctxMap.entries())
+      .map(([context, count]) => ({ context, count }))
+      .sort((a, b) => b.count - a.count),
+    hiddenReasons: Array.from(reasonMap.entries())
+      .map(([reason, count]) => ({ reason, count }))
+      .sort((a, b) => b.count - a.count),
+  };
+}
+
 export const AffinityPilotCard = () => {
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -44,66 +96,22 @@ export const AffinityPilotCard = () => {
     const load = async () => {
       const since = new Date();
       since.setDate(since.getDate() - 30);
-
-      const { data, error } = await supabase
-        .from("analytics_events")
-        .select("metadata")
-        .eq("event_type", "affinity_badge_seen")
-        .gte("created_at", since.toISOString())
-        .limit(10000);
-
-      if (error || !data) {
-        setStats({ total: 0, displayed: 0, hidden: 0, missing: 0, buckets: [], byContext: [], hiddenReasons: [] });
-        setLoading(false);
-        return;
+      try {
+        // Lecture paginée : la limite de 1 000 lignes de l'API tronquait le total.
+        const { rows, truncated } = await fetchAllRows<{ metadata: unknown }>((from, to) =>
+          supabase
+            .from("analytics_events")
+            .select("metadata")
+            .eq("event_type", "affinity_badge_seen")
+            .gte("created_at", since.toISOString())
+            .order("created_at", { ascending: true })
+            .order("id", { ascending: true })
+            .range(from, to),
+        );
+        setStats({ ...computeAffinityStats(rows), partial: truncated });
+      } catch {
+        setStats({ total: 0, displayed: 0, hidden: 0, missing: 0, buckets: [], byContext: [], hiddenReasons: [], partial: false });
       }
-
-      let displayed = 0;
-      let hidden = 0;
-      let missing = 0;
-      const bucketCounts = SCORE_BUCKETS.map((b) => ({ label: b.label, count: 0 }));
-      const ctxMap = new Map<string, number>();
-      const reasonMap = new Map<string, number>();
-
-      for (const row of data) {
-        const m: any = row.metadata ?? {};
-        const ctx = String(m.context ?? "unknown");
-        ctxMap.set(ctx, (ctxMap.get(ctx) ?? 0) + 1);
-
-        if (ctx.endsWith("_missing")) {
-          missing++;
-          continue;
-        }
-        if (m.displayed === false) {
-          hidden++;
-          const reason = String(m.hidden_reason ?? "unknown");
-          reasonMap.set(reason, (reasonMap.get(reason) ?? 0) + 1);
-          continue;
-        }
-        displayed++;
-        const score = Number(m.score ?? 0);
-        for (let i = 0; i < SCORE_BUCKETS.length; i++) {
-          const b = SCORE_BUCKETS[i];
-          if (score >= b.min && score <= b.max) {
-            bucketCounts[i].count++;
-            break;
-          }
-        }
-      }
-
-      setStats({
-        total: data.length,
-        displayed,
-        hidden,
-        missing,
-        buckets: bucketCounts,
-        byContext: Array.from(ctxMap.entries())
-          .map(([context, count]) => ({ context, count }))
-          .sort((a, b) => b.count - a.count),
-        hiddenReasons: Array.from(reasonMap.entries())
-          .map(([reason, count]) => ({ reason, count }))
-          .sort((a, b) => b.count - a.count),
-      });
       setLoading(false);
     };
     void load();
@@ -147,6 +155,9 @@ export const AffinityPilotCard = () => {
         <CardTitle className="text-base">Pilotage du score d'affinité (30 j)</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
+        {stats.partial && (
+          <p className="text-xs text-warning">Données partielles : plafond de 50 000 lignes atteint.</p>
+        )}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <Metric label="Impressions totales" value={stats.total} />
           <Metric label="Badges affichés" value={stats.displayed} hint={`${visibilityRate}% des scores calculés`} />
