@@ -306,6 +306,9 @@ export default function AdminEmailHealth() {
 
   return (
     <div className="space-y-6 p-6 max-w-7xl mx-auto">
+      {partial && (
+        <p className="text-xs text-warning">Données partielles : plafond de 50 000 lignes atteint.</p>
+      )}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold">Santé email</h1>
