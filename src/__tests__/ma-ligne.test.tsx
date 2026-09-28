@@ -100,7 +100,7 @@ describe("écran à un seul champ", () => {
     const helpId = screen.getByText(HELPS_WITH_HELP_TEXT).id;
     expect(field.getAttribute("aria-describedby")).toContain(helpId);
     expect(field).toHaveAttribute("maxLength", "200");
-    expect(screen.getByText("Bonjour Jérémie. Se rendre utile, c'est aussi se faire du bien : une ligne suffit pour commencer.")).toBeInTheDocument();
+    expect(screen.getByText("Bonjour Jérémie. Se rendre utile, c'est aussi se faire du bien : une phrase suffit pour commencer.")).toBeInTheDocument();
     for (const ex of HELPS_WITH_EXAMPLES) {
       expect(screen.getByRole("button", { name: `Écrire l'exemple : ${ex}` }).className).toContain("min-h-[44px]");
     }
@@ -139,6 +139,6 @@ describe("écran à un seul champ", () => {
     expect(onSave).toHaveBeenCalledWith("Monter un meuble");
     expect(spy).toHaveBeenCalledWith({ queryKey: ["nearby-helpers"] });
     expect(screen.getByRole("link", { name: "Voir la page Entraide" })).toHaveAttribute("href", "/petites-missions");
-    expect(screen.getByRole("button", { name: "Modifier ma ligne" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Modifier ma phrase" })).toBeInTheDocument();
   });
 });

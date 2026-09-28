@@ -15,9 +15,9 @@ export const HELPS_WITH_EXAMPLES = [
 
 export const HELPS_WITH_MONEY_MESSAGE = "Ici on s'échange des services : proposez plutôt un coup de main.";
 export const HELPS_WITH_AVAILABILITY_NOTE =
-  "Votre ligne sera visible sur la page Entraide, et vous recevrez les besoins près de chez vous.";
+  "Votre carte sera visible sur la page Entraide, et vous recevrez les besoins près de chez vous.";
 export const HELPS_WITH_HELP_TEXT = "Elle apparaît avec votre prénom et votre ville sur la page Entraide.";
-export const HELPS_WITH_CONFIRMATION = "Votre ligne est en ligne. Les gens du coin vous voient maintenant.";
+export const HELPS_WITH_CONFIRMATION = "Votre carte est complète. Les gens du coin vous voient maintenant.";
 
 export type SaveLine = (text: string) => Promise<{ ok: boolean; reason?: string }>;
 
@@ -88,8 +88,8 @@ const HelpsWithLineForm = ({ firstName, initialValue = "", onSave, source }: Pro
         </h1>
         <p className="mt-3 font-body text-base text-muted-foreground">
           {formatFirstName(firstName)
-            ? `Bonjour ${formatFirstName(firstName)}. Se rendre utile, c'est aussi se faire du bien : une ligne suffit pour commencer.`
-            : "Se rendre utile, c'est aussi se faire du bien : une ligne suffit pour commencer."}
+            ? `Bonjour ${formatFirstName(firstName)}. Se rendre utile, c'est aussi se faire du bien : une phrase suffit pour commencer.`
+            : "Se rendre utile, c'est aussi se faire du bien : une phrase suffit pour commencer."}
         </p>
       </header>
 
@@ -113,7 +113,7 @@ const HelpsWithLineForm = ({ firstName, initialValue = "", onSave, source }: Pro
               onClick={() => { setSaved(false); window.setTimeout(() => fieldRef.current?.focus(), 0); }}
               className="inline-flex min-h-[44px] items-center font-medium text-primary underline-offset-4 hover:underline"
             >
-              Modifier ma ligne
+              Modifier ma phrase
             </button>
           </div>
         </section>

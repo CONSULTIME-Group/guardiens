@@ -52,7 +52,7 @@ const MaLigne = () => {
 
   return (
     <main className="min-h-screen min-w-0 bg-background">
-      <PageMeta title="Ma ligne d'entraide | Guardiens" description="Une ligne sur ce que vous aimez faire pour les gens du coin." noindex />
+      <PageMeta title="Ma carte d'entraide | Guardiens" description="Une phrase sur ce que vous aimez faire pour les gens du coin." noindex />
       {load.status === "loading" && (
         <div className="mx-auto max-w-[36rem] px-5 py-16" aria-busy="true">
           <div className="h-4 w-24 rounded bg-muted" />
@@ -70,7 +70,7 @@ const MaLigne = () => {
               {load.status === "expired" ? "Ce lien a fait son temps." : "Ce lien mène ailleurs."}
             </h1>
             <p className="mt-3 text-base text-muted-foreground">
-              Connectez-vous pour écrire votre ligne, elle vous attend sur votre tableau de bord.
+              Connectez-vous pour compléter votre carte : elle vous attend sur votre tableau de bord.
             </p>
           </header>
           <Link
