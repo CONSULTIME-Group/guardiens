@@ -35,6 +35,7 @@ import { startCronRun } from '../_shared/cron-run-log.ts'
 import { acquireWorkerLock, releaseWorkerLock } from '../_shared/worker-lock.ts'
 import { computeAffinityResultFull } from '../_shared/affinity/score.ts'
 import { APPLY_COMPLETION_THRESHOLD, completionMessageFor, remainingCompletionSteps } from '../_shared/completion-steps/index.ts'
+import { requireCronCaller } from '../_shared/require-cron-caller.ts'
 
 
 // La plateforme coupe actuellement ce traitement vers 150 secondes. Le
@@ -102,6 +103,8 @@ function formatFrDate(iso?: string | null): string | undefined {
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
+  const guard = await requireCronCaller(req, corsHeaders, 'send-sitter-daily-digest')
+  if (guard) return guard
 
   let body: { manual?: boolean; dry_run?: boolean; sitter_id?: string; catchup?: boolean } = {}
   try {

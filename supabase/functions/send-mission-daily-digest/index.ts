@@ -10,6 +10,7 @@
 //
 // Body accepté : { manual?: boolean, dry_run?: boolean, helper_id?: string }
 import { createClient } from 'npm:@supabase/supabase-js@2.45.0'
+import { requireCronCaller } from '../_shared/require-cron-caller.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -47,6 +48,8 @@ function formatFrDate(iso?: string | null): string | undefined {
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
+  const guard = await requireCronCaller(req, corsHeaders, 'send-mission-daily-digest')
+  if (guard) return guard
 
   let body: { manual?: boolean; dry_run?: boolean; helper_id?: string } = {}
   try { if (req.body) body = await req.json() } catch { /* empty */ }

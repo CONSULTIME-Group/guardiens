@@ -4,6 +4,7 @@
 // invalidates Prerender cache for the matching public URLs, then clears the flag.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { requireCronCaller } from "../_shared/require-cron-caller.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -38,6 +39,8 @@ async function recache(url: string): Promise<{ url: string; ok: boolean; status?
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  const guard = await requireCronCaller(req, corsHeaders, "prerender-recache-pending");
+  if (guard) return guard;
   if (req.method !== "POST") return json(405, { error: "Method not allowed" });
   if (!PRERENDER_TOKEN) return json(500, { error: "PRERENDER_TOKEN not configured" });
 
