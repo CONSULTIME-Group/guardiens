@@ -7,10 +7,12 @@ import { BrandHeader } from './_brand-header.tsx'
 import { LegalFooter } from './_legal-footer.tsx'
 import type { TemplateEntry } from './registry.ts'
 
-export interface AdminSignalItem {
-  signalType: string
+export interface AdminSignalLine {
+  title: string
+  action: string
+  startDate: string | null
   ageDays: number
-  detail?: string
+  count: number
   link: string
 }
 
@@ -18,39 +20,49 @@ interface Props {
   criticalCount?: number
   warningCount?: number
   staleCount?: number
-  signals?: AdminSignalItem[]
+  coverageLine?: string | null
+  lines?: AdminSignalLine[]
+}
+
+const fmtDate = (d: string | null) => {
+  if (!d) return null
+  const [y, m, day] = d.slice(0, 10).split('-')
+  return `${day}/${m}/${y}`
 }
 
 const Email = ({
   criticalCount = 0,
   warningCount = 0,
   staleCount = 0,
-  signals = [],
+  coverageLine = null,
+  lines = [],
 }: Props) => (
   <Html lang="fr" dir="ltr">
     <BrandedHead />
-    <Preview>{criticalCount} signal(aux) critique(s) ouvert(s)</Preview>
+    <Preview>{criticalCount} action(s) à mener aujourd'hui</Preview>
     <Body style={main}>
       <Container style={container}>
         <BrandHeader />
-        <Heading style={h1}>Signaux admin, {criticalCount} critique(s) ouvert(s)</Heading>
+        <Heading style={h1}>Signaux admin, {criticalCount} action(s) à mener</Heading>
 
         {staleCount > 0 && (
           <Text style={alert}>
-            {staleCount} signal(aux) critique(s) sont ouverts depuis plus de 3 jours.
+            {staleCount} action(s) attendent depuis plus de 3 jours.
           </Text>
         )}
 
         <Section>
-          {signals.map((s, i) => (
+          {lines.map((l, i) => (
             <Section key={i} style={item}>
-              <Text style={itemTitle}>
-                {s.signalType} , ouvert depuis {s.ageDays} jour{s.ageDays > 1 ? 's' : ''}
-                {s.ageDays > 3 ? ' (non traité)' : ''}
-              </Text>
-              {s.detail ? <Text style={itemDetail}>{s.detail}</Text> : null}
+              <Text style={itemTitle}>{l.title}</Text>
               <Text style={itemDetail}>
-                <Link href={s.link} style={link}>Ouvrir dans l'administration</Link>
+                {fmtDate(l.startDate) ? `Début de garde le ${fmtDate(l.startDate)}` : 'Sans date de garde'}
+                {`, ouvert depuis ${l.ageDays} jour${l.ageDays > 1 ? 's' : ''}`}
+                {l.count > 1 ? `, ${l.count} signaux regroupés` : ''}
+              </Text>
+              <Text style={itemDetail}>{l.action}</Text>
+              <Text style={itemDetail}>
+                <Link href={l.link} style={link}>Ouvrir dans l'administration</Link>
               </Text>
             </Section>
           ))}
@@ -58,6 +70,7 @@ const Email = ({
 
         <Hr style={hr} />
 
+        {coverageLine ? <Text style={text}>{coverageLine}</Text> : null}
         <Text style={text}>
           Signaux warning ouverts : {warningCount}.
         </Text>
@@ -77,18 +90,15 @@ export const template = {
     criticalCount: 2,
     warningCount: 24,
     staleCount: 1,
-    signals: [
+    coverageLine: 'Couverture : 5 villes suivies comptent moins de 3 gardiens à 30 km.',
+    lines: [
       {
-        signalType: 'pending_application',
-        ageDays: 5,
-        detail: 'Annonce : Garde de deux chats, propriétaire : o.etcheverry@outlook.fr',
+        title: 'Garde 2 chats centre ville de Marseille',
+        action: 'Relancer le propriétaire : 4 candidatures attendent sa réponse.',
+        startDate: '2026-10-31',
+        ageDays: 9,
+        count: 4,
         link: 'https://guardiens.fr/admin/listings',
-      },
-      {
-        signalType: 'nurturing_run_anomaly',
-        ageDays: 2,
-        detail: 'Nurturing anormal, errors=198',
-        link: 'https://guardiens.fr/admin/emails',
       },
     ],
   },
