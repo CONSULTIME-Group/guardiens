@@ -44,7 +44,7 @@ export function signalsCountLine(shown: number, total?: number, critical?: numbe
   const crit = critical ?? 0;
   const critTxt = crit === 1 ? "dont 1 critique" : `dont ${crit} critiques`;
   const head = shown >= total
-    ? `${total} signal${total > 1 ? "s" : ""} ouvert${total > 1 ? "s" : ""}`
+    ? `${total} ${total > 1 ? "signaux" : "signal"} ouvert${total > 1 ? "s" : ""}`
     : `${shown} affichés sur ${total}`;
   return `${head}, ${critTxt}.`;
 }
