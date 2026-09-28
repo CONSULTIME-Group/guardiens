@@ -25,6 +25,7 @@ import { GenericSignalCard } from "@/components/admin/signals/GenericSignalCard"
 import { GroupedSignalCard } from "@/components/admin/signals/GroupedSignalCard";
 import type { AdminSignalBase } from "@/components/admin/signals/signalGrouping";
 import { PriorityBadge } from "@/components/admin/signals/PriorityBadge";
+import { SitSignalGroupCard, type SitInfo } from "@/components/admin/signals/SitSignalGroupCard";
 import {
   buildActionQueue,
   type QueueEntry,
@@ -141,15 +142,46 @@ export const SignalsSection = ({ aiActions, aiLoading }: Props) => {
     staleTime: 30_000,
   });
 
-  if (flagLoading) return null;
+  // Lot S2 : la file lit tous les signaux ouverts (hors info) pour que les
+  // regroupements par annonce et par famille soient complets.
+  const { data: openSignals, isLoading: openLoading } = useQuery<AdminSignalBase[]>({
+    queryKey: ["admin_open_signals"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("admin_signals")
+        .select("id, signal_type, severity, entity_type, entity_id, detected_at, metadata")
+        .is("resolved_at", null)
+        .neq("severity", "info")
+        .order("detected_at", { ascending: false })
+        .limit(1000);
+      if (error) throw error;
+      return (data ?? []) as unknown as AdminSignalBase[];
+    },
+    enabled: flagEnabled,
+    staleTime: 30_000,
+  });
 
-  const signals = flagEnabled
-    ? (data?.signals ?? []).filter((s) => s.severity !== "info")
-    : [];
+  const signals = flagEnabled ? (openSignals ?? data?.signals ?? []) : [];
+
+  const sitIds = [...new Set(
+    signals.map((s) => s.metadata?.sit_id).filter((x): x is string => typeof x === "string"),
+  )].sort();
+  const { data: sitMap } = useQuery<Map<string, SitInfo>>({
+    queryKey: ["admin_signal_sits", sitIds],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("sits").select("id, title, city, start_date").in("id", sitIds);
+      if (error) throw error;
+      return new Map((data ?? []).map((r) => [r.id, r as SitInfo]));
+    },
+    enabled: flagEnabled && sitIds.length > 0,
+    staleTime: 60_000,
+  });
+
+  if (flagLoading) return null;
 
   const queue: QueueEntry[] = buildActionQueue(signals, aiActions);
 
-  const loading = (flagEnabled && isLoading) || aiLoading;
+  const loading = (flagEnabled && (isLoading || openLoading)) || aiLoading;
 
   return (
     <Card>
@@ -161,7 +193,8 @@ export const SignalsSection = ({ aiActions, aiLoading }: Props) => {
       </CardHeader>
       <CardContent className="space-y-3">
         {flagEnabled && data && (() => {
-          const line = signalsCountLine(signals.length, data.signals_open_total, data.signals_critical_total);
+          const queued = queue.flatMap((e) => e.kind === "ai" ? [] : e.kind === "signal" ? [e.signal] : e.kind === "sit" ? e.items : e.group.items);
+          const line = signalsCountLine(queued.length, queued.length, queued.filter((s) => s.severity === "critical").length);
           return line ? <p className="text-sm text-muted-foreground" data-testid="signals-count-line">{line}</p> : null;
         })()}
         <OwnerActivationCampaignCard />
@@ -195,6 +228,13 @@ export const SignalsSection = ({ aiActions, aiLoading }: Props) => {
                           severity={entry.group.severity}
                           renderDetail={renderSignal}
                         />
+                      </li>
+                    );
+                  }
+                  if (entry.kind === "sit") {
+                    return (
+                      <li key={`sit-${entry.sitId}`}>
+                        <SitSignalGroupCard sitId={entry.sitId} sit={sitMap?.get(entry.sitId)} items={entry.items} severity={entry.severity} />
                       </li>
                     );
                   }

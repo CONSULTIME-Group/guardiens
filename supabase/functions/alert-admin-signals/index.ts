@@ -1,6 +1,6 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
-import { buildDigestLines, isActionableCritical, sitIdOf, weeklyCoverageLine, type OpenSignal, type SitInfo } from './digest.ts'
+import { buildDigestLines, isActionableCritical, sitIdOf, weeklySummaryLines, type OpenSignal, type SitInfo } from './digest.ts'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_ROLE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -53,7 +53,8 @@ Deno.serve(async (req) => {
       for (const r of sitRows ?? []) sits.set(r.id, r as SitInfo)
     }
     const lines = buildDigestLines(rows, sits)
-    const coverageLine = weeklyCoverageLine(rows)
+    // Lundi : couverture, qualité éditoriale, À animer, dans le paragraphe de synthèse existant.
+    const coverageLine = weeklySummaryLines(rows).join(' ') || null
     const warningCount = rows.filter((r) => r.severity === 'warning').length
     const staleCount = lines.filter((l) => l.ageDays > 3).length
 

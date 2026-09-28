@@ -1,0 +1,1 @@
+COMMENT ON COLUMN public.admin_signals.signal_type IS 'Type de signal. Routage et libelles : supabase/functions/_shared/admin-signal-config.ts (lot S2). DEPRECATED : untapped_city n''est plus cree ni affiche, remplace par city_coverage_gap ; lignes historiques conservees.';

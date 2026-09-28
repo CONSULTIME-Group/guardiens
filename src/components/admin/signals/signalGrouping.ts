@@ -7,6 +7,8 @@
  * supprimée en base.
  */
 
+import { SIGNAL_TYPES, QUEUE_GROUP_LABELS } from "../../../../supabase/functions/_shared/admin-signal-config.ts";
+
 export interface AdminSignalBase {
   id: string;
   signal_type: string;
@@ -17,40 +19,20 @@ export interface AdminSignalBase {
   metadata: Record<string, unknown>;
 }
 
-/** Libellés lisibles par signal_type. Repli sur le type brut si inconnu. */
+/**
+ * Libellés lisibles par signal_type, dérivés de la configuration unique
+ * (supabase/functions/_shared/admin-signal-config.ts). Les types dépréciés
+ * n'ont plus de libellé à l'écran.
+ */
 export const SIGNAL_TYPE_LABELS: Record<string, string> = {
-  affinity_onboarding_stale: "Onboarding affinité inachevé",
-  dormant_sitter: "Gardien dormant",
-  dormant_top_sitter: "Meilleur gardien dormant",
-  suspicious_account: "Compte suspect",
-  owner_sit_unconfirmed: "Annonce non confirmée par le propriétaire",
-  pending_application: "Candidature en attente",
-  stale_draft: "Brouillon dormant",
-  
-  city_coverage_gap: "Trou de couverture gardiens",
-  city_seo_tension: "Tension SEO ville",
-  undeclared_pricing: "Mention de tarif non déclarée",
-  contact_details_in_public_content: "Coordonnées dans un contenu public",
-  no_applications: "Annonce sans candidature",
-  nurturing_run_anomaly: "Anomalie de séquence email",
-  email_delivery_low: "Livraison email dégradée",
-  identity_orphan_documents: "Documents d'identité orphelins",
-  owner_missing_coordinates: "Coordonnées propriétaire manquantes",
-  notification_delivery_failed: "Notification non délivrée",
-  digest_queue_stalled: "File d'attente des digests bloquée",
-  digest_queue_morning_backlog: "File des digests encore chargée après le dernier passage",
-  stale_verification: "Vérification d'identité en retard",
-  repeated_cancellations: "Annulations répétées",
-  repeated_republish: "Republications répétées",
-  identity_needs_review: "Vérification d'identité à contrôler",
-  sit_like_mission: "Mission qui ressemble à une garde",
-  animal_rehoming_listing: "Cession ou adoption d'animal",
-  sit_published_zero_reach: "Annonce publiée sans aucun gardien touché",
-  email_recipient_address_invalid: "Adresse email refusée par le fournisseur",
-  pro_pending_review: "Fiche pro en attente de validation",
-  prerender_monthly_budget_reached: "Plafond mensuel de renders atteint",
-
-
+  ...Object.fromEntries(
+    Object.entries(SIGNAL_TYPES)
+      .filter(([, c]) => !c.deprecated)
+      .map(([t, c]) => [t, c.label]),
+  ),
+  ...Object.fromEntries(
+    Object.entries(QUEUE_GROUP_LABELS).map(([g, l]) => [`group:${g}`, l]),
+  ),
 };
 
 /**
@@ -163,6 +145,9 @@ export const SIGNAL_TOPIC: Record<string, string> = {
   affinity_onboarding_stale: "onboarding_affinite",
   owner_sit_unconfirmed: "gardes_non_confirmees",
   pending_application: "candidatures_sans_reponse",
+  stalled_discussion: "candidatures_sans_reponse",
+  "group:sit": "candidatures_sans_reponse",
+  "group:digest_queue": "deliverabilite_email",
   no_applications: "liquidite_annonces",
   stale_draft: "liquidite_annonces",
   
