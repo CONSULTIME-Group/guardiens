@@ -164,6 +164,27 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_dashboard_snapshot_s1b_20260928: {
+        Row: {
+          definition: string
+          function_name: string
+          id: number
+          saved_at: string
+        }
+        Insert: {
+          definition: string
+          function_name: string
+          id?: number
+          saved_at?: string
+        }
+        Update: {
+          definition?: string
+          function_name?: string
+          id?: number
+          saved_at?: string
+        }
+        Relationships: []
+      }
       _backup_digest_cron_20260919: {
         Row: {
           active: boolean | null
