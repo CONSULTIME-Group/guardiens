@@ -1,5 +1,6 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
+import { buildDigestLines, isActionableCritical, sitIdOf, weeklyCoverageLine, type OpenSignal, type SitInfo } from './digest.ts'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_ROLE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -13,42 +14,6 @@ const isServiceRoleRequest = (req: Request): boolean => {
   if (!raw.startsWith('Bearer ')) return false
   const token = raw.slice(7)
   return Boolean(SERVICE_ROLE) && token === SERVICE_ROLE
-}
-
-const ADMIN_LINKS: Record<string, string> = {
-  identity_orphan_documents: 'https://guardiens.fr/admin/verifications',
-  stale_verification: 'https://guardiens.fr/admin/verifications',
-  identity_needs_review: 'https://guardiens.fr/admin/verifications',
-  stale_draft: 'https://guardiens.fr/admin/listings',
-  no_applications: 'https://guardiens.fr/admin/listings',
-  pending_application: 'https://guardiens.fr/admin/listings',
-  suspicious_account: 'https://guardiens.fr/admin/users',
-  owner_missing_coordinates: 'https://guardiens.fr/admin/users',
-  dormant_sitter: 'https://guardiens.fr/admin/users',
-  notification_delivery_failed: 'https://guardiens.fr/admin/emails',
-  nurturing_run_anomaly: 'https://guardiens.fr/admin/emails',
-  email_delivery_anomaly: 'https://guardiens.fr/admin/emails',
-  prerender_monthly_budget_reached: 'https://guardiens.fr/admin',
-  cron_consecutive_failures: 'https://guardiens.fr/admin',
-  mission_no_audience: 'https://guardiens.fr/admin',
-}
-
-const linkFor = (type: string) => ADMIN_LINKS[type] ?? 'https://guardiens.fr/admin'
-
-const buildDetail = (metadata: Record<string, unknown>): string => {
-  const m = metadata ?? {}
-  const parts: string[] = []
-  const sitTitle = m.sit_title as string | undefined
-  if (sitTitle) parts.push(`Annonce : ${sitTitle}`)
-  const title = m.title as string | undefined
-  if (!sitTitle && title) parts.push(`Objet : ${title}`)
-  const email = (m.owner_email ?? m.email ?? m.recipient_email) as string | undefined
-  if (email) parts.push(`Membre : ${email}`)
-  const err = (m.error ?? m.error_message ?? m.trigger) as string | undefined
-  if (err) parts.push(`Erreur : ${err}`)
-  const detail = m.detail as string | undefined
-  if (!parts.length && detail) parts.push(detail)
-  return parts.join(', ').replace(/[—–]/g, ',')
 }
 
 Deno.serve(async (req) => {
@@ -73,29 +38,29 @@ Deno.serve(async (req) => {
     // 2) Signaux restants
     const { data: open, error: openErr } = await admin
       .from('admin_signals')
-      .select('signal_type, severity, detected_at, metadata')
+      .select('signal_type, severity, detected_at, entity_type, entity_id, metadata')
       .is('resolved_at', null)
     if (openErr) throw openErr
 
-    const rows = open ?? []
-    const now = Date.now()
-    const criticals = rows
-      .filter((r) => r.severity === 'critical')
-      .map((r) => ({
-        signalType: r.signal_type,
-        ageDays: Math.floor((now - new Date(r.detected_at).getTime()) / 86_400_000),
-        detail: buildDetail((r.metadata ?? {}) as Record<string, unknown>),
-        link: linkFor(r.signal_type),
-      }))
-      .sort((a, b) => b.ageDays - a.ageDays)
-
+    const rows = (open ?? []) as OpenSignal[]
+    const actionable = rows.filter(isActionableCritical)
+    const sitIds = [...new Set(actionable.map(sitIdOf).filter((x): x is string => !!x))]
+    const sits = new Map<string, SitInfo>()
+    if (sitIds.length) {
+      const { data: sitRows, error: sitErr } = await admin
+        .from('sits').select('id, title, start_date').in('id', sitIds)
+      if (sitErr) throw sitErr
+      for (const r of sitRows ?? []) sits.set(r.id, r as SitInfo)
+    }
+    const lines = buildDigestLines(rows, sits)
+    const coverageLine = weeklyCoverageLine(rows)
     const warningCount = rows.filter((r) => r.severity === 'warning').length
-    const staleCount = criticals.filter((s) => s.ageDays > 3).length
+    const staleCount = lines.filter((l) => l.ageDays > 3).length
 
-    // 3) Règle centrale : silence total sans signal critique ouvert
-    if (criticals.length === 0) {
+    // 3) Règle centrale : aucun critique actionnable, aucun email.
+    if (lines.length === 0) {
       return new Response(JSON.stringify({
-        ok: true, sent: false, reason: 'no_critical_signal',
+        ok: true, sent: false, reason: 'no_actionable_critical_signal',
         auto_resolved: autoResolved ?? [], warning_open: warningCount,
       }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
@@ -104,8 +69,8 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({
         ok: true, sent: false, dry_run: true,
         auto_resolved: autoResolved ?? [],
-        critical_open: criticals.length, warning_open: warningCount, stale_count: staleCount,
-        signals: criticals,
+        critical_open: lines.length, warning_open: warningCount, stale_count: staleCount,
+        coverage_line: coverageLine, lines,
       }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
 
@@ -120,10 +85,11 @@ Deno.serve(async (req) => {
           ? `admin-signals-${day}-${String(body.trigger).slice(0, 80)}`
           : `admin-signals-${day}`,
         templateData: {
-          criticalCount: criticals.length,
+          criticalCount: lines.length,
           warningCount,
           staleCount,
-          signals: criticals.slice(0, 15),
+          coverageLine,
+          lines: lines.slice(0, 20),
         },
       }),
     })
@@ -133,7 +99,7 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({
       ok: res.ok, sent: res.ok, recipient: RECIPIENT,
       auto_resolved: autoResolved ?? [],
-      critical_open: criticals.length, warning_open: warningCount, stale_count: staleCount,
+      critical_open: lines.length, warning_open: warningCount, stale_count: staleCount,
     }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
   } catch (e) {
     console.error('alert-admin-signals error', e)

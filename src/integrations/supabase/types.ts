@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      _backup_admin_signals_s1_20260928: {
+        Row: {
+          definition: string | null
+          function_name: string | null
+          saved_at: string | null
+        }
+        Insert: {
+          definition?: string | null
+          function_name?: string | null
+          saved_at?: string | null
+        }
+        Update: {
+          definition?: string | null
+          function_name?: string | null
+          saved_at?: string | null
+        }
+        Relationships: []
+      }
       _backup_breed_content_20260825: {
         Row: {
           alimentation: string | null
