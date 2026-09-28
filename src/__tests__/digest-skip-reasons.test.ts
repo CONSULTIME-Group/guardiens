@@ -60,6 +60,8 @@ function loadHandler(path: string, rows: Rows) {
       if (specifier.includes("paris-hour")) return parisHour;
       if (specifier.includes("sit-publication-window")) return publicationWindow;
       if (specifier.includes("cron-trace")) return cronTrace;
+      // Lot A1b : appelant autorisé (clé service), le contrôle est testé ailleurs.
+      if (specifier.includes("require-cron-caller")) return { requireCronCaller: async () => null };
       throw new Error(`Unexpected import ${specifier}`);
     },
   });
