@@ -14,6 +14,7 @@ import { CreditCard, Users, Crown, AlertTriangle, Clock, Gift, Plus, Minus, Shie
 import { useNavigate } from "react-router-dom";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { avatarImageUrl } from "@/lib/storageImage";
+import { PRICING_IS_ACTIVE } from "@/config/pricing";
 
 const planLabels: Record<string, { label: string; color: string }> = {
   founder_free: { label: "Fondateur", color: "bg-warning-soft text-warning-foreground dark:bg-amber-900/30 dark:text-amber-400" },
@@ -187,7 +188,9 @@ const AdminSubscriptions = () => {
     <div className="space-y-6">
       <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Abonnements</h1>
 
-      {/* Founder reminder buttons */}
+      {/* Rappels fondateurs : masqués tant que le pricing est inactif, les
+          fonctions répondent « skipped » et les boutons ne font rien. */}
+      {PRICING_IS_ACTIVE && (
       <Card>
         <CardContent className="p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
           <Crown className="h-5 w-5 text-warning shrink-0" />
@@ -205,6 +208,7 @@ const AdminSubscriptions = () => {
           </div>
         </CardContent>
       </Card>
+      )}
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

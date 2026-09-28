@@ -11,6 +11,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdminBadges } from "@/hooks/useAdminBadges";
+import { PRICING_IS_ACTIVE } from "@/config/pricing";
 
 interface NavItem {
   to: string;
@@ -51,7 +52,7 @@ interface NavGroup {
   items: NavItem[];
 }
 
-// 5 groupes max, dédupliqués, vocabulaire unifié
+// Groupes dédupliqués, vocabulaire unifié
 const adminNavGroups: NavGroup[] = [
   {
     label: "PILOTAGE",
@@ -60,7 +61,6 @@ const adminNavGroups: NavGroup[] = [
       { to: "/admin/traffic", icon: BarChart3, label: "Trafic" },
       { to: "/admin/alma", icon: Sparkles, label: "Alma" },
       { to: "/admin/affinity", icon: HeartHandshake, label: "Affinité" },
-      { to: "/admin/subscriptions", icon: CreditCard, label: "Abonnements" },
     ],
   },
   {
@@ -93,10 +93,19 @@ const adminNavGroups: NavGroup[] = [
       { to: "/admin/reports", icon: Flag, label: "Signalements", badgeKey: "reports" },
       { to: "/admin/contact-messages", icon: MessageSquare, label: "Messages contact", badgeKey: "contactMessages" },
       { to: "/admin/messages", icon: Send, label: "Messagerie", badgeKey: "adminMessageFailed" },
-      { to: "/admin/envois-groupes", icon: Mail, label: "Envois groupés" },
-      { to: "/admin/envois-groupes/stats", icon: BarChart3, label: "Stats campagnes" },
       { to: "/admin/errors", icon: Bug, label: "Erreurs", badgeKey: "errors" },
       { to: "/admin/demandes-suppression", icon: UserX, label: "Demandes RGPD" },
+    ],
+  },
+  {
+    label: "EMAILS",
+    items: [
+      { to: "/admin/emails", icon: Mail, label: "Santé email" },
+      { to: "/admin/emails-transactionnels", icon: Mail, label: "Emails transactionnels", excludeTabs: ["mutual-aid"] },
+      { to: "/admin/nurturing", icon: Sprout, label: "Nurturing" },
+      // end : « Envois groupés » n'est pas actif sur la sous-page des stats.
+      { to: "/admin/envois-groupes", icon: Mail, label: "Envois groupés", end: true },
+      { to: "/admin/envois-groupes/stats", icon: BarChart3, label: "Stats campagnes" },
     ],
   },
   {
@@ -111,15 +120,19 @@ const adminNavGroups: NavGroup[] = [
       { to: "/admin/departments", icon: MapPin, label: "Départements" },
       { to: "/admin/breeds", icon: MapPin, label: "Fiches de race" },
       { to: "/admin/legal", icon: ScrollText, label: "Pages légales" },
-      { to: "/admin/emails", icon: Mail, label: "Santé email" },
-      { to: "/admin/emails-transactionnels", icon: Mail, label: "Emails transactionnels", excludeTabs: ["mutual-aid"] },
-      { to: "/admin/nurturing", icon: Sprout, label: "Nurturing" },
+      { to: "/admin/hero-weights", icon: Sparkles, label: "Poids des hero" },
       { to: "/admin/settings", icon: Settings, label: "Paramètres" },
       { to: "/admin/audit", icon: ScrollText, label: "Journal d'audit" },
       { to: "/admin/diagnostics", icon: Stethoscope, label: "Diagnostic" },
     ],
   },
 ];
+
+// « Abonnements » : masqué du menu tant que le pricing est inactif (la route
+// /admin/subscriptions reste accessible par son URL).
+if (PRICING_IS_ACTIVE) {
+  adminNavGroups[0].items.push({ to: "/admin/subscriptions", icon: CreditCard, label: "Abonnements" });
+}
 
 const STORAGE_KEY = "admin.sidebar.collapsed";
 

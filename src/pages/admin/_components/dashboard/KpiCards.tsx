@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Users, UserPlus, Megaphone, CalendarCheck, Star, CreditCard,
+  Users, UserPlus, CalendarCheck, Star, CreditCard,
 } from "lucide-react";
 import type { Stats } from "./types";
 import { MONTHLY_SUBSCRIPTION_EUR } from "./types";
@@ -16,6 +16,7 @@ const MIN_REVIEWS_FOR_RATING = 10;
 
 /** Largeur de grille selon le nombre de cartes réellement affichées. */
 const GRID_COLS: Record<number, string> = {
+  3: "xl:grid-cols-3",
   4: "xl:grid-cols-4",
   5: "xl:grid-cols-5",
   6: "xl:grid-cols-6",
@@ -37,13 +38,7 @@ export const KpiCards = ({ stats }: Props) => {
       icon: UserPlus,
       link: "/admin/users",
     },
-    {
-      title: "Annonces actives",
-      value: stats.activeListings,
-      subtitle: "Publiées",
-      icon: Megaphone,
-      link: "/admin/listings",
-    },
+    // « Annonces actives » : déjà présent dans le bloc Liquidité.
     {
       title: "Gardes en cours",
       value: stats.ongoingSits,
