@@ -225,6 +225,13 @@
       "when": 1790593058006,
       "tag": "0031_admin_dashboard_snapshot_sort_s1b",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1790593994847,
+      "tag": "0032_deprecate_untapped_city_signal_s2",
+      "breakpoints": true
     }
   ]
 }
