@@ -33,7 +33,20 @@ import {
 
 interface Snapshot {
   signals: AdminSignalBase[];
+  signals_open_total?: number;
+  signals_critical_total?: number;
   generated_at: string;
+}
+
+/** Ligne de compte sous le titre : « 20 affichés sur N, dont X critiques ». */
+export function signalsCountLine(shown: number, total?: number, critical?: number): string | null {
+  if (typeof total !== "number" || total <= 0) return null;
+  const crit = critical ?? 0;
+  const critTxt = crit === 1 ? "dont 1 critique" : `dont ${crit} critiques`;
+  const head = shown >= total
+    ? `${total} ${total > 1 ? "signaux" : "signal"} ouvert${total > 1 ? "s" : ""}`
+    : `${shown} affichés sur ${total}`;
+  return `${head}, ${critTxt}.`;
 }
 
 /** Rendu unitaire d'un signal : carte dédiée si elle existe, générique sinon. */
@@ -147,6 +160,10 @@ export const SignalsSection = ({ aiActions, aiLoading }: Props) => {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
+        {flagEnabled && data && (() => {
+          const line = signalsCountLine(signals.length, data.signals_open_total, data.signals_critical_total);
+          return line ? <p className="text-sm text-muted-foreground" data-testid="signals-count-line">{line}</p> : null;
+        })()}
         <OwnerActivationCampaignCard />
 
         {loading ? (
