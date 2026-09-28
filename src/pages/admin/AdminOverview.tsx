@@ -11,6 +11,7 @@ import { CronHealthCard } from "./_components/dashboard/CronHealthCard";
 import { CollapsibleSection } from "./_components/dashboard/CollapsibleSection";
 import { PilotageLinks } from "./_components/dashboard/PilotageLinks";
 import { LiquidityBlock } from "./_components/dashboard/LiquidityBlock";
+import { AnimateCard } from "./_components/dashboard/AnimateCard";
 import { VolunteerAvailabilityCard } from "./_components/dashboard/VolunteerAvailabilityCard";
 
 
@@ -55,6 +56,7 @@ const AdminOverview = () => {
         aiActions={Array.isArray(analysis?.actions) ? analysis.actions : []}
         aiLoading={analysisLoading}
       />
+      <AnimateCard />
 
       {/* 3. État du service */}
       <KpiCards stats={stats} />
