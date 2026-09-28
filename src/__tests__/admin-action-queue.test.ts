@@ -8,7 +8,7 @@ import type { AdminSignalBase } from "@/components/admin/signals/signalGrouping"
 let seq = 0;
 const sig = (over: Partial<AdminSignalBase> = {}): AdminSignalBase => ({
   id: `s${++seq}`,
-  signal_type: "dormant_sitter",
+  signal_type: "suspicious_account",
   severity: "warning",
   entity_type: "profile",
   entity_id: "x",
@@ -45,7 +45,7 @@ describe("buildActionQueue", () => {
 
   it("écarte une suggestion IA dont le sujet est déjà porté par un signal, même avec un lien différent", () => {
     const queue = buildActionQueue(
-      [sig({ signal_type: "dormant_sitter" })],
+      [sig({ signal_type: "dormant_top_sitter" })],
       [
         ai({
           title: "Réengager les gardiens dormants",
@@ -71,8 +71,8 @@ describe("buildActionQueue", () => {
         }),
       ],
     );
-    expect(queue).toHaveLength(1);
-    expect(queue[0].kind).toBe("signal");
+    // Lot S2 : le signal vit dans la carte « À animer », la suggestion IA reste écartée.
+    expect(queue).toHaveLength(0);
   });
 
   it("écarte une suggestion IA dont le lien correspond à un signal, même sans sujet", () => {

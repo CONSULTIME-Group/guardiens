@@ -108,7 +108,8 @@ export function buildActionQueue(
   signals: AdminSignalBase[],
   aiActions: SuggestedAction[],
 ): QueueEntry[] {
-  signals = signals.filter((s) => hasDestination(s.signal_type, "action_queue"));
+  // Sujets et liens lus sur TOUS les signaux ouverts : un signal routé vers
+  // « À animer » couvre aussi son sujet, l'IA ne le redouble pas.
   const signalPaths = new Set(signals.map((s) => linkPath(signalAdminLink(s))));
   const signalTopics = new Set(
     signals.map((s) => SIGNAL_TOPIC[s.signal_type]).filter((t): t is string => Boolean(t)),
