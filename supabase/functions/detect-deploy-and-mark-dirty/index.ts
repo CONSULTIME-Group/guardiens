@@ -36,6 +36,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { startCronRun } from "../_shared/cron-run-log.ts";
 import { requireAdminOrServiceRole } from "../_shared/require-admin.ts";
+import { shouldMarkStatic, STATIC_FAMILY, STATIC_SEO_URLS } from "../_shared/static-seo-refresh.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -374,6 +375,47 @@ Deno.serve(async (req) => {
       console.warn(
         `[detect-deploy-and-mark-dirty] refus de marquage : ${monthlyUsed}/${monthlyBudget} renders ce mois, vague de ${waveSize} pages refusee`,
       );
+    }
+
+    // 4 bis. Pages statiques (STATIC_SEO_URLS) : repere pose a chaque nouveau
+    // bundle, hors premier passage et hors plafond mensuel. Six renders au
+    // plus, consommes par consume-seo-dirty a budget plafonne. Independant du
+    // debounce des familles, qui protege les vagues de 436 pages.
+    let staticMarked = false;
+    if (bundleChanged && !isFirstEverRun) {
+      let used = monthlyUsed;
+      if (toMark.length === 0) {
+        const monthStart = new Date();
+        monthStart.setUTCDate(1);
+        monthStart.setUTCHours(0, 0, 0, 0);
+        const { count, error: cErr } = await sb
+          .from("prerender_recache_log")
+          .select("id", { count: "exact", head: true })
+          .gte("created_at", monthStart.toISOString());
+        if (cErr) throw cErr;
+        used = count ?? 0;
+      }
+      staticMarked = shouldMarkStatic({
+        bundleChanged, isFirstEverRun, monthlyUsed: used + waveSize, monthlyBudget,
+      });
+      if (staticMarked) {
+        const nowIso = new Date().toISOString();
+        const { error: sErr } = await sb.from("prerender_family_state").upsert(
+          { family: STATIC_FAMILY, last_hash: fingerprint, last_marked_at: nowIso, updated_at: nowIso },
+          { onConflict: "family" },
+        );
+        if (sErr) throw sErr;
+      }
+      decisions.push({
+        family: STATIC_FAMILY,
+        reason: staticMarked ? "deploy_detected" : "monthly_budget_exceeded",
+        previous_hash: state.get(STATIC_FAMILY)?.last_hash ?? null,
+        new_hash: fingerprint,
+        previous_global_hash: null, new_global_hash: null, days_since_last_mark: null,
+        detail: staticMarked
+          ? `${STATIC_SEO_URLS.length} pages statiques mises en file`
+          : "refuse, plafond mensuel, pages statiques non mises en file",
+      });
     }
 
     // 5. Journal des decisions, une ligne par famille et par passage decisif.
