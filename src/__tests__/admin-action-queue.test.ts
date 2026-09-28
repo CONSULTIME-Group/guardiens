@@ -26,7 +26,7 @@ const ai = (over: Partial<SuggestedAction> = {}): SuggestedAction => ({
 });
 
 const keyOf = (e: ReturnType<typeof buildActionQueue>[number]): string =>
-  e.kind === "ai" ? `ai:${e.action.title}` : e.kind === "group" ? `group:${e.group.signalType}` : e.signal.id;
+  e.kind === "ai" ? `ai:${e.action.title}` : e.kind === "group" ? `group:${e.group.signalType}` : e.kind === "sit" ? `sit:${e.sitId}` : e.signal.id;
 
 describe("buildActionQueue", () => {
   it("applique une échelle unique : signal critique, IA haute, signal avertissement, IA basse", () => {
