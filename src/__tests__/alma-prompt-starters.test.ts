@@ -28,8 +28,8 @@ describe("amorces contextuelles d'Alma", () => {
 
   it("rend la table au mot près", () => {
     expect(promptStarters("dashboard")).toEqual([
-      "Par où je commence ?",
-      "Qu'est-ce qui manque à mon profil ?",
+      "Qu'est-ce qui se passe près de chez moi ?",
+      "Un coup de main près de chez moi",
     ]);
     expect(promptStarters("my_sits", { hasDraftSit: true })).toEqual([
       "Relisez mon annonce",
