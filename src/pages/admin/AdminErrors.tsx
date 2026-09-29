@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAllRows } from "@/lib/admin/fetchAllRows";
+import { reportAdminReadError, UNAVAILABLE_LABEL } from "@/lib/admin/readError";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -105,18 +107,29 @@ const AdminErrors = () => {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<ErrorLog | null>(null);
 
+  const [loadError, setLoadError] = useState(false);
   const load = async () => {
     setLoading(true);
-    let q = supabase.from("error_logs").select("*").order("last_seen_at", { ascending: false }).limit(200);
-    if (filter === "unresolved") q = q.is("resolved_at", null);
-    if (filter === "resolved") q = q.not("resolved_at", "is", null);
-    if (severityFilter !== "all") q = q.eq("severity", severityFilter);
-    // Par défaut, on masque les erreurs marquées tierces (autofill WebView FB/IG, extensions…)
-    //, elles polluent le panneau alors qu'elles ne viennent pas de notre bundle.
-    else q = q.neq("severity", "ignored_third_party");
-    const { data, error } = await q;
-    if (error) toast.error("Erreur de chargement");
-    setErrors((data as ErrorLog[]) || []);
+    // Lot A10 : lecture complète paginée, jamais plafonnée à 200.
+    const build = (from: number, to: number) => {
+      let q = supabase.from("error_logs").select("*").order("last_seen_at", { ascending: false }).order("id");
+      if (filter === "unresolved") q = q.is("resolved_at", null);
+      if (filter === "resolved") q = q.not("resolved_at", "is", null);
+      if (severityFilter !== "all") q = q.eq("severity", severityFilter);
+      // Par défaut, on masque les erreurs marquées tierces (autofill WebView FB/IG, extensions),
+      // elles polluent le panneau alors qu'elles ne viennent pas de notre bundle.
+      else q = q.neq("severity", "ignored_third_party");
+      return q.range(from, to);
+    };
+    try {
+      const { rows } = await fetchAllRows<ErrorLog>(build as any);
+      setLoadError(false);
+      setErrors(rows);
+    } catch (e) {
+      setLoadError(true);
+      setErrors([]);
+      reportAdminReadError("Erreurs", e);
+    }
     setLoading(false);
   };
 

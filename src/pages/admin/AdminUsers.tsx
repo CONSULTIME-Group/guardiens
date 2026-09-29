@@ -641,7 +641,7 @@ const AdminUsers = () => {
       </div>
 
       {/* KPI banner */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
         {[
           { label: "Total inscrits", value: kpis?.total },
           { label: "Actifs", value: kpis?.active },
@@ -655,7 +655,7 @@ const AdminUsers = () => {
             <CardContent className="p-4">
               <p className="text-xs text-muted-foreground">{k.label}</p>
               <p className="text-2xl font-bold text-foreground mt-1">
-                {k.value === undefined ? "·" : k.value.toLocaleString("fr-FR")}
+                {kpisError && k.label !== "Hors France" ? UNAVAILABLE_LABEL : k.value === undefined ? "·" : k.value.toLocaleString("fr-FR")}
               </p>
             </CardContent>
           </Card>
