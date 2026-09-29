@@ -70,7 +70,8 @@ export function extractClassification(text: string): { answer: string; classific
 export function classificationFromPatterns(intent: AlmaIntent): AlmaClassification {
   return {
     intent: intent.helpSeeking ? "aide_recherchee" : intent.churn || intent.leaving ? "depart" : "autre",
-    frustration: Math.min(3, intent.frustrationLevel) as 0 | 1 | 2 | 3,
+    // Motifs resserrés au lot J2-B : un motif reconnu est un vrai signal (niveau 2 au moins).
+    frustration: (intent.frustration ? Math.max(2, Math.min(3, intent.frustrationLevel)) : 0) as 0 | 1 | 2 | 3,
     bug_suspected: intent.bugSuspected,
     bug_item: null,
     churn: intent.churn,
