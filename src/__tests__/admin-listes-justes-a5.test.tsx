@@ -6,6 +6,12 @@ import { createSeqGuard, ilikeContains } from "@/lib/admin/requestSeq";
 import { buildCsv, csvCell, CSV_BOM, TRUNCATED_NOTICE } from "@/lib/admin/csv";
 import { dedupeByMessageId } from "@/lib/admin/emailLogStats";
 
+// Cause de l'instabilité : ces écrans admin se chargent par import dynamique
+// (1,3 s mesurées seul). Sous la charge de la suite complète, ce premier rendu
+// dépasse le délai par défaut de 1 s de waitFor/findBy et de 5 s par test.
+configure({ asyncUtilTimeout: 8000 });
+vi.setConfig({ testTimeout: 20000 });
+
 /**
  * Faux client : chaque chaîne de requête enregistre ses appels
  * (table, méthode, arguments) et se résout sur une liste vide.
