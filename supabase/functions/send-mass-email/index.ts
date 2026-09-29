@@ -5,6 +5,7 @@ import { HELPS_WITH_TOKEN_DAYS, lineUrlForToken } from "../_shared/ma-ligne-logi
 import { entraideCardData } from "../_shared/entraide-card-data.ts";
 import { loadAnsweredIds, mintDepartureTokens, periodBaseUrl, splitDepartureAudience } from "../_shared/owner-departure-audience.ts";
 import { DEPARTURE_TEMPLATE } from "../_shared/owner-departure-logic.ts";
+import { buildResponderData, loadLatestIntents, splitNoelV2Audience, type NoelResponderPeriod } from "../_shared/owner-noel-v2.ts";
 import {
   OWNER_NOEL_TEMPLATE,
   buildNoelDataFor,
@@ -66,13 +67,20 @@ interface MassEmailFilters {
   exclude_owner_v2_holdout?: boolean;
   /** Exclut les membres ayant déjà répondu à « Vous partez quand ? ». */
   exclude_departure_answered?: boolean;
+  // Lot N6, Noël 2026 en J+7 de la séquence v2
+  /** Témoin exclu, printemps/été/plus tard exclus, noel et hiver en mode répondant. */
+  noel_v2_split?: boolean;
 }
 
 /** Témoin et déjà répondu (lot N4), avec compteurs pour la confirmation. */
 async function applyDepartureFilters<T extends { id: string }>(
   // deno-lint-ignore no-explicit-any
   serviceClient: any, rows: T[], filters: MassEmailFilters,
-): Promise<{ rows: T[]; holdout: number | null; answered: number | null }> {
+): Promise<{ rows: T[]; holdout: number | null; answered: number | null; otherPeriod?: number; responders?: Map<string, NoelResponderPeriod> }> {
+  if (filters.noel_v2_split) {
+    const split = splitNoelV2Audience(rows, await loadLatestIntents(serviceClient, rows.map((r) => r.id)));
+    return { rows: split.rows, holdout: split.holdoutExcluded, answered: null, otherPeriod: split.otherPeriodExcluded, responders: split.responders };
+  }
   if (!filters.exclude_owner_v2_holdout && !filters.exclude_departure_answered) return { rows, holdout: null, answered: null };
   const answeredIds = filters.exclude_departure_answered ? await loadAnsweredIds(serviceClient, rows.map((r) => r.id)) : new Set<string>();
   if (filters.exclude_owner_v2_holdout) {
@@ -661,12 +669,18 @@ Deno.serve(async (req) => {
       }
       let variantA: number | null = null;
       let variantB: number | null = null;
+      let respondersNoel = 0, respondersHiver = 0;
       if (filters.template_name === OWNER_NOEL_TEMPLATE) {
         const seen = new Set<string>();
         const ids = compliant.filter((p) => !seen.has(p.email) && seen.add(p.email)).map((p) => p.id);
         const noel = await noelDataByProfile(serviceClient, ids);
         variantA = 0; variantB = 0;
-        for (const id of ids) (noel.get(id)?.variant === "A" ? variantA++ : variantB++);
+        for (const id of ids) {
+          const r = departure.responders?.get(id);
+          if (r === "noel") respondersNoel++;
+          else if (r === "hiver") respondersHiver++;
+          else (noel.get(id)?.variant === "A" ? variantA++ : variantB++);
+        }
       }
       return new Response(JSON.stringify({
         count: uniqueEmails.size,
@@ -674,6 +688,11 @@ Deno.serve(async (req) => {
         variant_b: variantB,
         holdout_excluded: departure.holdout,
         already_answered: departure.answered,
+        ...(filters.noel_v2_split ? {
+          responders_noel: respondersNoel,
+          responders_hiver: respondersHiver,
+          other_period_excluded: departure.otherPeriod ?? 0,
+        } : {}),
         helps_with_count: helpsWithCount,
         helps_with_required: filters.min_helps_with_profiles ?? null,
       }), {
@@ -713,7 +732,8 @@ Deno.serve(async (req) => {
       }
     }
 
-    const rawProfiles = (await applyDepartureFilters(serviceClient, await fetchTargetedProfiles(serviceClient, segment, filters), filters)).rows;
+    const departureSend = await applyDepartureFilters(serviceClient, await fetchTargetedProfiles(serviceClient, segment, filters), filters);
+    const rawProfiles = departureSend.rows;
 
     // Filtres RGPD/délivrabilité obligatoires (non désactivables) —
     // fail-closed : si la vérif échoue, on n'envoie RIEN.
@@ -966,6 +986,21 @@ Deno.serve(async (req) => {
           .map((email) => idByEmail.get(email.toLowerCase()))
           .filter((id): id is string => !!id);
         noelByProfile = await noelDataByProfile(serviceClient, ids);
+        // Lot N6 : répondants noel/hiver en mode répondant, les autres reçoivent les boutons de période.
+        if (filters.noel_v2_split) {
+          const responders = departureSend.responders ?? new Map<string, NoelResponderPeriod>();
+          const others = ids.filter((id) => !responders.has(id));
+          const tokens = await mintDepartureTokens(serviceClient, others);
+          for (const id of ids) {
+            const base = noelByProfile.get(id) ?? { firstName: "", variant: "B" as const };
+            const period = responders.get(id);
+            if (period) noelByProfile.set(id, await buildResponderData(serviceClient, id, period, base));
+            else {
+              const t = tokens.get(id);
+              noelByProfile.set(id, { ...base, ...(t ? { periodBaseUrl: periodBaseUrl(t) } : {}) } as NoelTemplateData);
+            }
+          }
+        }
       }
 
       // Question de départ (lot N4) : un lien à jeton /ma-periode par destinataire.
