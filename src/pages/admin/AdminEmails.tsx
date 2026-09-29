@@ -858,7 +858,7 @@ const EngagementTab = () => {
           <div className="text-xs text-muted-foreground">Livraison</div>
         </CardContent></Card>
         <Card><CardContent className="pt-4 pb-3 text-center">
-          <div className="text-2xl font-bold text-success">{pct(totals.opened, totals.delivered)}</div>
+          <div className="text-2xl font-bold text-success">{formatOpenRate(totals.opened, totals.delivered)}</div>
           <div className="text-xs text-muted-foreground">Ouverture</div>
         </CardContent></Card>
         <Card><CardContent className="pt-4 pb-3 text-center">
