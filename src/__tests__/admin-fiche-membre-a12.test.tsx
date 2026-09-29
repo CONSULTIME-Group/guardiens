@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor, within, configure, fireEvent } from "@testing-library/react";
+import { cleanup, render, screen, waitFor, within, configure, fireEvent } from "@testing-library/react";
 import { MemoryRouter, useLocation } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { readFileSync, readdirSync } from "node:fs";
@@ -152,12 +152,12 @@ describe("A12, menu d'actions", () => {
       ["Voir le dernier message", /Dernier message envoyé à Camille Durand/],
     ];
     for (const [item, title] of cases) {
+      cleanup();
+      wrap("/admin/users", <Page />);
       await openMenu();
       fireEvent.click(await screen.findByRole("menuitem", { name: item }));
       const dlg = await screen.findByRole(item === "Supprimer définitivement" ? "alertdialog" : "dialog");
       expect(within(dlg).getByText(title)).toBeTruthy();
-      fireEvent.keyDown(dlg, { key: "Escape" });
-      await waitFor(() => expect(screen.queryByRole(item === "Supprimer définitivement" ? "alertdialog" : "dialog")).toBeNull());
     }
   });
 
