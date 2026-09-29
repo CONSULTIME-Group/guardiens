@@ -19,14 +19,20 @@ export function almaProfileVisibleToModel(completion: number | null, question: s
 /** Reformule les mots proscrits dans la voix d'Alma. */
 export function rewriteForbiddenWords(text: string): string {
   const end = "(?![a-zà-ÿ])";
+  const keepCase = (match: string, repl: string) =>
+    /^[A-ZÀ-Ý]/.test(match) ? repl.charAt(0).toUpperCase() + repl.slice(1) : repl;
   return (text || "")
     .replace(new RegExp(`\\b(du|le|au|un|son|votre) logement gratuitement${end}`, "gi"), (_m, det: string) => `${det} logement sans rien payer`)
     .replace(new RegExp(`\\bgratuitement${end}`, "gi"), "sans rien payer pour le logement")
-    .replace(new RegExp(`\\bla gratuit[ée]${end}`, "gi"), "l'absence de frais")
-    .replace(new RegExp(`\\bgratuit[ée]${end}`, "gi"), "absence de frais")
+    .replace(new RegExp(`\\bla gratuit[ée]s?${end}`, "gi"), (m) => keepCase(m, "l'absence de frais"))
+    .replace(new RegExp(`\\bgratuit[ée]s?${end}`, "gi"), "absence de frais")
     .replace(new RegExp(`\\bgratuit(?:e|es|s)?${end}`, "gi"), "sans frais")
     .replace(new RegExp(`\\bvoisinage${end}`, "gi"), "entourage")
-    .replace(new RegExp(`\\bvoisin(?:e|es|s)?${end}`, "gi"), "personne du coin");
+    .replace(new RegExp(`\\b(?:vos|mes|des|nos|tes|ses|leurs|les|aux|ces) voisin(?:e)?s${end}`, "gi"), (m) =>
+      /^aux/i.test(m) ? keepCase(m, "aux gens du coin") : keepCase(m, "les gens du coin"))
+    .replace(new RegExp(`\\b(?:un|une|votre|mon|ma|son|sa|ce|cette) voisin(?:e)?${end}`, "gi"), (m) => keepCase(m, "une personne du coin"))
+    .replace(new RegExp(`\\bvoisin(?:e)?s${end}`, "gi"), "gens du coin")
+    .replace(new RegExp(`\\bvoisin(?:e)?${end}`, "gi"), "personne du coin");
 }
 
 const ANECDOTE = /(sieste|marche du milieu|escalier|j'ai (pass[ée] la nuit|dormi|r[êe]v[ée]|vu un)|mes pattes|vibrisse|chiffonn|[ée]cureuil|je poursui|courir apr[èe]s un chat|chats? qui m'a|for[êe]t (des|dans les) monts|monts (du )?lyonnais|j'y courr|mon humeur)/i;
