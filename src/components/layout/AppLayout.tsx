@@ -1,4 +1,4 @@
-import { lazy, Suspense, useLayoutEffect, useState, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, useLayoutEffect, useState, type ReactNode } from "react";
 import { Outlet, useSearchParams, useLocation } from "react-router-dom";
 import { Sidebar } from "./Navigation";
 import Breadcrumbs from "./Breadcrumbs";
@@ -16,7 +16,9 @@ import { usePresenceHeartbeat } from "@/hooks/usePresenceHeartbeat";
 import { AppShellProvider } from "./AppShellContext";
 import { useChromeVisibility } from "./ChromeVisibility";
 import AppTopBar from "./AppTopBar";
-import InstallAppWelcome from "@/components/settings/InstallAppWelcome";
+// Lot P1 : chargés après l'affichage, jamais au premier écran.
+const InstallAppWelcome = lazy(() => import("@/components/settings/InstallAppWelcome"));
+import { afterIdle } from "@/lib/alma/weatherCache";
 
 /**
  * Zone principale du shell. Quand un ecran plein cadre (fil de messagerie)
@@ -45,6 +47,14 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
   const [dismissed, setDismissed] = useState(false);
+  // Lot P1 : le dock Alma et l'invitation d'installation se montent une fois
+  // la page affichée (temps libre du navigateur, 2 s au plus).
+  const [idleReady, setIdleReady] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    void afterIdle(2000).then(() => { if (alive) setIdleReady(true); });
+    return () => { alive = false; };
+  }, []);
   const [mobileHeader, setMobileHeader] = useState(() =>
     typeof window !== "undefined" && typeof window.matchMedia === "function"
       ? window.matchMedia("(max-width: 767.98px)").matches
@@ -93,7 +103,11 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
     <div className="flex min-h-screen bg-background">
       <Sidebar showHeaderBells={!mobileHeader} />
       <ShellMain>
-        <InstallAppWelcome key={user?.id ?? "signed-out"} paused={!!showOnboarding} />
+        {idleReady && (
+          <Suspense fallback={null}>
+            <InstallAppWelcome key={user?.id ?? "signed-out"} paused={!!showOnboarding} />
+          </Suspense>
+        )}
         <div className="hidden md:block">
           <Breadcrumbs />
         </div>
@@ -117,9 +131,11 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
           />
         </Suspense>
       )}
-      <Suspense fallback={null}>
-        <AlmaDock />
-      </Suspense>
+      {idleReady && (
+        <Suspense fallback={null}>
+          <AlmaDock />
+        </Suspense>
+      )}
       {/* DuplicateAccountGuard mont\u00e9 globalement dans App.tsx */}
     </div>
     </AlmaProvider>
