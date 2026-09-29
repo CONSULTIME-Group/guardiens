@@ -500,6 +500,45 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_policies_sec1_20260929: {
+        Row: {
+          cmd: string | null
+          kind: string | null
+          name: string | null
+          permissive: string | null
+          qual: string | null
+          roles: string | null
+          saved_at: string | null
+          schemaname: string | null
+          tablename: string | null
+          with_check: string | null
+        }
+        Insert: {
+          cmd?: string | null
+          kind?: string | null
+          name?: string | null
+          permissive?: string | null
+          qual?: string | null
+          roles?: string | null
+          saved_at?: string | null
+          schemaname?: string | null
+          tablename?: string | null
+          with_check?: string | null
+        }
+        Update: {
+          cmd?: string | null
+          kind?: string | null
+          name?: string | null
+          permissive?: string | null
+          qual?: string | null
+          roles?: string | null
+          saved_at?: string | null
+          schemaname?: string | null
+          tablename?: string | null
+          with_check?: string | null
+        }
+        Relationships: []
+      }
       _backup_profile_guard_20260918: {
         Row: {
           acl: unknown[] | null
@@ -9258,6 +9297,117 @@ export type Database = {
         }
         Relationships: []
       }
+      member_owner_profiles: {
+        Row: {
+          competences: string[] | null
+          competences_disponible: boolean | null
+          environments: string[] | null
+          experience_required: boolean | null
+          handover_preference: string | null
+          home_ambiance: string[] | null
+          interests: string[] | null
+          languages: string[] | null
+          life_pace: string | null
+          meeting_preference: string[] | null
+          news_format: string[] | null
+          news_frequency: string | null
+          overnight_guest: string | null
+          preferred_sitter_types: string[] | null
+          presence_expected: string | null
+          rules_notes: string | null
+          smoker_accepted: string | null
+          space_usage: string[] | null
+          specific_expectations: string | null
+          user_id: string | null
+          visits_allowed: string | null
+          welcome_notes: string | null
+        }
+        Insert: {
+          competences?: string[] | null
+          competences_disponible?: boolean | null
+          environments?: string[] | null
+          experience_required?: boolean | null
+          handover_preference?: string | null
+          home_ambiance?: string[] | null
+          interests?: string[] | null
+          languages?: string[] | null
+          life_pace?: string | null
+          meeting_preference?: string[] | null
+          news_format?: string[] | null
+          news_frequency?: string | null
+          overnight_guest?: string | null
+          preferred_sitter_types?: string[] | null
+          presence_expected?: string | null
+          rules_notes?: string | null
+          smoker_accepted?: string | null
+          space_usage?: string[] | null
+          specific_expectations?: string | null
+          user_id?: string | null
+          visits_allowed?: string | null
+          welcome_notes?: string | null
+        }
+        Update: {
+          competences?: string[] | null
+          competences_disponible?: boolean | null
+          environments?: string[] | null
+          experience_required?: boolean | null
+          handover_preference?: string | null
+          home_ambiance?: string[] | null
+          interests?: string[] | null
+          languages?: string[] | null
+          life_pace?: string | null
+          meeting_preference?: string[] | null
+          news_format?: string[] | null
+          news_frequency?: string | null
+          overnight_guest?: string | null
+          preferred_sitter_types?: string[] | null
+          presence_expected?: string | null
+          rules_notes?: string | null
+          smoker_accepted?: string | null
+          space_usage?: string[] | null
+          specific_expectations?: string | null
+          user_id?: string | null
+          visits_allowed?: string | null
+          welcome_notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "owner_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profile_reputation"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "owner_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "public_helpers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
+          },
+        ]
+      }
       profile_mission_badges: {
         Row: {
           badge_key: string | null
@@ -9354,6 +9504,107 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "departements"
             referencedColumns: ["code"]
+          },
+        ]
+      }
+      public_badge_attributions: {
+        Row: {
+          badge_id: string | null
+          created_at: string | null
+          id: string | null
+          is_manual: boolean | null
+          mission_id: string | null
+          sit_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          badge_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_manual?: boolean | null
+          mission_id?: string | null
+          sit_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          badge_id?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_manual?: boolean | null
+          mission_id?: string | null
+          sit_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "badge_attributions_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "public_entraide_proofs"
+            referencedColumns: ["mission_id"]
+          },
+          {
+            foreignKeyName: "badge_attributions_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "public_small_missions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "badge_attributions_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "small_missions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "badge_attributions_sit_id_fkey"
+            columns: ["sit_id"]
+            isOneToOne: false
+            referencedRelation: "public_closed_sits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "badge_attributions_sit_id_fkey"
+            columns: ["sit_id"]
+            isOneToOne: false
+            referencedRelation: "sits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "badge_attributions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profile_reputation"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "badge_attributions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "badge_attributions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_helpers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "badge_attributions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "badge_attributions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
           },
         ]
       }
@@ -10713,6 +10964,10 @@ export type Database = {
         Returns: undefined
       }
       archive_sit: { Args: { p_sit_id: string }; Returns: undefined }
+      association_photos_consented: {
+        Args: { _slug: string }
+        Returns: boolean
+      }
       auto_archive_past_sits: {
         Args: never
         Returns: {
@@ -11485,6 +11740,7 @@ export type Database = {
         Returns: string
       }
       is_account_empty: { Args: { _user_id: string }; Returns: boolean }
+      is_engaged_sitter_of: { Args: { _owner_id: string }; Returns: boolean }
       is_llm_refusal_text: { Args: { _txt: string }; Returns: boolean }
       is_profile_ready_for_action: {
         Args: { p_user_id?: string }
