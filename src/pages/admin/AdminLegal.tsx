@@ -26,6 +26,20 @@ const legalPages = [
     description: "Informations sur l'éditeur (Jérémie Martinot, EI), hébergement, contact.",
     lastUpdate: "Gérée dans le code (MentionsLegales.tsx)",
   },
+  {
+    title: "Conditions Générales de Service",
+    path: "/cgs",
+    icon: ScrollText,
+    description: "Conditions de l'accès gardien et des services associés.",
+    lastUpdate: "Gérée dans le code (Cgs.tsx)",
+  },
+  {
+    title: "Politique cookies",
+    path: "/cookies",
+    icon: Shield,
+    description: "Cookies par finalité, durée, émetteur, et gestion du consentement.",
+    lastUpdate: "Gérée dans le code (Cookies.tsx)",
+  },
 ];
 
 const AdminLegal = () => {
