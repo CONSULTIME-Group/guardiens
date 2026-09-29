@@ -96,7 +96,7 @@ describe("J2-A, base de connaissance", () => {
     expect(text).not.toMatch(/gratuit/i);
     expect(text).not.toMatch(/garde d'enfant/i);
     expect(text).toMatch(/échecs/);
-    expect(text).toMatch(/aucun échange d'argent/);
+    expect(text).toMatch(/échanges en temps et en savoir-faire/);
   });
 
   it("n'envoie que les entrées pertinentes du tour", () => {

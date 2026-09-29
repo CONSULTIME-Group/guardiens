@@ -147,7 +147,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     path: "/projets",
     aliases: ["/projets/:slug"],
     label: "Projets participatifs",
-    purpose: "Chantiers à plusieurs : jardin et potager, construction et bricolage, low tech et récupération, rénovation écologique, abris pour animaux, événement. Charte : participation libre, lieu associatif ou privé, porteur présent, échanges en temps et en savoir-faire, on donne du temps et on transmet un savoir-faire (permaculture, pierre sèche, charpente, réparation, poulailler, cuisine et conserves).",
+    purpose: "Chantiers à plusieurs : jardin et potager, construction et bricolage, low tech et récupération, rénovation écologique, abris pour animaux, événement. Charte : participation libre, lieu associatif ou privé, porteur présent, échanges en temps et en savoir-faire, sans argent : on donne du temps et on transmet un savoir-faire (permaculture, pierre sèche, charpente, réparation, poulailler, cuisine et conserves).",
     audience: "all",
     triggers: ["projet", "chantier", "a plusieurs", "haie", "abri", "poulailler", "potager", "construire", "renovation", "permaculture"],
     opener: "Les chantiers à plusieurs sont sur /projets.",
