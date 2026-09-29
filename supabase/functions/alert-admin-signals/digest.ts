@@ -48,6 +48,7 @@ const ACTIONS: Record<string, string> = {
   suspicious_account: 'Examiner le compte signalé.',
   content_defect_outside_freeze: 'Corriger les contenus signalés.',
   prerender_monthly_budget_reached: 'Vérifier le budget de pré-rendu.',
+  alma_frustration: 'Écrire au membre : il cherchait de l\'aide et Alma ne l\'a pas orienté.',
 }
 
 const LINKS: Record<string, string> = {
@@ -115,6 +116,10 @@ export function buildDigestLines(
     const allTypes = arr.map((x) => x.signal_type)
     if (types.includes('pending_application') && types.includes('stalled_discussion') && main !== 'owner_sit_unconfirmed') {
       action = `Relancer le propriétaire : ${sitGroupSummary(allTypes)}.`
+    } else if (main === 'alma_frustration' && Array.isArray(m.messages)) {
+      // Lot J1 : les messages concernés, dans l'email quotidien.
+      const quotes = (m.messages as { text?: string }[]).map((x) => `« ${String(x.text ?? '').slice(0, 160)} »`).join(' ')
+      action = `${actionFor(main)} Messages : ${quotes}`.replace(/[\u2014\u2013]/g, ',')
     } else if (main === 'pending_application' && count > 1) {
       action = `Relancer le propriétaire : ${count} candidatures attendent sa réponse.`
     }
@@ -126,7 +131,8 @@ export function buildDigestLines(
       ageDays: Math.floor((now - oldest) / 86_400_000),
       count,
       signalTypes: types,
-      link: linkFor(main),
+      // Lot J1 : un signal peut porter son lien exact (fiche membre).
+      link: typeof m.admin_url === 'string' && m.admin_url.startsWith('https://guardiens.fr/admin') ? m.admin_url : linkFor(main),
     })
   }
 

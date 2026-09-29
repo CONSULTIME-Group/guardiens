@@ -1,3 +1,4 @@
+import { clearPublishIntent, readPublishIntent } from "@/lib/postOnboardingIntent";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -429,6 +430,8 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
     onClose();
   }, [user, onClose, canDismiss, refreshProfile, slide, bio, lifestyle, pickedCompetences, avatarUrl, liveCompletion]);
 
+  // Lot J1 : une intention de publication connue devient la destination.
+  const publishIntent = readPublishIntent();
   const completeOnboarding = async (destination: string) => {
     if (user) {
       // Recalculate completion
@@ -448,6 +451,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
       } catch {}
     }
     onClose();
+    if (destination === publishIntent) clearPublishIntent();
     // Navigation différée d'une frame : la fermeture du dialogue doit se jouer
     // avant que la route change, sinon Radix laisse son verrou de défilement
     // sur le body et la page ne défile plus.
@@ -899,17 +903,21 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
               </div>
 
               <div className="flex flex-col gap-2">
-                {userRole === "both" ? (
+                {publishIntent ? (
+                  <Button className="w-full" onClick={() => completeOnboarding(publishIntent)}>
+                    Publier ma demande →
+                  </Button>
+                ) : userRole === "both" ? (
                   <>
                     <Button className="w-full" onClick={() => completeOnboarding("/search")}>
                       Explorer les annonces →
                     </Button>
-                    <Button variant="outline" className="w-full" onClick={() => completeOnboarding("/sits")}>
+                    <Button variant="outline" className="w-full" onClick={() => completeOnboarding("/sits/create")}>
                       Publier une annonce →
                     </Button>
                   </>
                 ) : isOwnerOnly ? (
-                  <Button className="w-full" onClick={() => completeOnboarding("/sits")}>
+                  <Button className="w-full" onClick={() => completeOnboarding("/sits/create")}>
                     Publier une annonce →
                   </Button>
                 ) : (

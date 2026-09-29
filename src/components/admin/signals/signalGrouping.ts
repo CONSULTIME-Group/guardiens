@@ -79,6 +79,8 @@ export const entityNoun = (signals: AdminSignalBase[]): string => {
 };
 
 export function signalAdminLink(s: AdminSignalBase): string {
+  // Lot J1 : lien exact vers la fiche membre quand le signal le porte.
+  if (typeof s.metadata?.profile_id === "string") return `/admin/users?user=${s.metadata.profile_id}`;
   switch (s.entity_type) {
     case "sit":
       return "/admin/listings";

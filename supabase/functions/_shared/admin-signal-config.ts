@@ -19,7 +19,7 @@
 export type SignalDestination = 'action_queue' | 'daily_email' | 'weekly_summary' | 'animate'
 export type SignalFamily =
   | 'candidatures' | 'annonces' | 'emails' | 'editorial' | 'couverture'
-  | 'animation' | 'identite' | 'moderation' | 'technique'
+  | 'animation' | 'identite' | 'moderation' | 'technique' | 'accueil'
 export type SignalQueueGroup = 'sit' | 'digest_queue' | 'content'
 
 export interface SignalTypeConfig {
@@ -83,6 +83,8 @@ export const SIGNAL_TYPES: Record<string, SignalTypeConfig> = {
   contact_details_in_public_content: { label: 'Coordonnées dans un contenu public', family: 'moderation', defaultSeverity: 'warning', destinations: Q, autoResolve: false },
   undeclared_pricing: { label: 'Mention de tarif non déclarée', family: 'moderation', defaultSeverity: 'warning', destinations: Q, autoResolve: false },
   pro_pending_review: { label: 'Fiche pro en attente de validation', family: 'moderation', defaultSeverity: 'warning', destinations: Q, autoResolve: false },
+  // Accueil des membres (lot J1) : résolution manuelle, après contact humain.
+  alma_frustration: { label: 'Membre en difficulté avec Alma', family: 'accueil', defaultSeverity: 'critical', destinations: Q, autoResolve: false },
   // Technique
   prerender_monthly_budget_reached: { label: 'Plafond mensuel de renders atteint', family: 'technique', defaultSeverity: 'critical', destinations: Q, autoResolve: false },
 }
