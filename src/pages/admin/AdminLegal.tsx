@@ -26,6 +26,20 @@ const legalPages = [
     description: "Informations sur l'éditeur (Jérémie Martinot, EI), hébergement, contact.",
     lastUpdate: "Gérée dans le code (MentionsLegales.tsx)",
   },
+  {
+    title: "Conditions Générales de Service",
+    path: "/cgs",
+    icon: ScrollText,
+    description: "Conditions de l'accès gardien et des services associés.",
+    lastUpdate: "Gérée dans le code (Cgs.tsx)",
+  },
+  {
+    title: "Politique cookies",
+    path: "/cookies",
+    icon: Shield,
+    description: "Cookies par finalité, durée, émetteur, et gestion du consentement.",
+    lastUpdate: "Gérée dans le code (Cookies.tsx)",
+  },
 ];
 
 const AdminLegal = () => {
@@ -45,7 +59,7 @@ const AdminLegal = () => {
             <div>
               <p className="text-sm font-medium">Conformité RGPD</p>
               <p className="text-xs text-muted-foreground mt-1">
-                Le site utilise uniquement des cookies strictement nécessaires (pas de bandeau requis selon la CNIL).
+                Bandeau de consentement actif. La mesure d'audience (Google Analytics 4) est soumise à consentement et se charge seulement après « Tout accepter ». Choix conservé 6 mois.
                 Les pages sont conformes pour une EI de droit français (SIRET 894 864 040 00015).
               </p>
             </div>
@@ -90,7 +104,7 @@ const AdminLegal = () => {
               { label: "Mentions légales complètes (éditeur, hébergeur, contact)", done: true },
               { label: "CGU avec conditions d'utilisation et responsabilités", done: true },
               { label: "Politique de confidentialité RGPD", done: true },
-              { label: "Cookies strictement nécessaires uniquement", done: true },
+              { label: "Bandeau cookies : accepter, refuser, personnaliser, choix conservé 6 mois", done: true },
               { label: "Lien de désabonnement dans les emails", done: true },
               { label: "Droit de suppression de compte (RGPD Art. 17)", done: true },
               { label: "Comparaison tarifaire avec clause de bonne foi", done: true },

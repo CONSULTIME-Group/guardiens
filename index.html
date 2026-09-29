@@ -128,6 +128,6 @@
       <p>Guardiens met en relation des propriétaires et des gardiens pour la garde de maison et d'animaux, partout en France. Vous publiez votre annonce, vous recevez des candidatures, vous échangez, vous pouvez vous rencontrer, puis vous choisissez. L'accès à la plateforme est ouvert pendant la phase de lancement, toute évolution sera annoncée à l'avance.</p>
     </noscript>
     <script type="module" src="/src/main.tsx"></script>
-    <!-- GA4 chargé conditionnellement après consentement RGPD via src/lib/cookieConsent.ts -->
+    <!-- GA4 : aucun script ici. Consent Mode v2 à "denied" puis gtag.js chargé seulement après "Tout accepter" dans le bandeau (src/lib/cookieConsent.ts, lot C1). Robots et Prerender : ni bandeau ni mesure. -->
   </body>
 </html>
