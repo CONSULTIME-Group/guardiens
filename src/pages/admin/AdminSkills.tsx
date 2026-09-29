@@ -310,7 +310,7 @@ const AdminSkills = () => {
         {/* Tab: Pending competences from profiles */}
         <TabsContent value="pending" className="space-y-4 mt-4">
           {pendingCompetences.length === 0 ? (
-            <p className="text-muted-foreground text-sm py-8 text-center">Aucune compétence en attente de validation.</p>
+            <p className="text-muted-foreground text-sm py-8 text-center">{pendingError ? "Liste indisponible, la lecture a échoué." : "Aucune compétence en attente de validation."}</p>
           ) : (
             <div className="overflow-x-auto rounded-xl border border-border">
               <table className="w-full text-sm">
