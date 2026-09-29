@@ -42,7 +42,8 @@ function asBool(v: unknown): boolean {
 }
 
 function stripLine(text: string, re: RegExp): string {
-  return text.replace(re, "").replace(/```(?:json)?\s*```/g, "").replace(/\n{3,}/g, "\n\n").trim();
+  const withBreak = new RegExp(`\\n?${re.source}`, re.flags.includes("g") ? re.flags : re.flags + "g");
+  return text.replace(withBreak, "").replace(/```(?:json)?\s*```/g, "").replace(/\n{3,}/g, "\n\n").trim();
 }
 
 /** Lit et retire la ligne CLASSEMENT. Une ligne illisible est retirée quand même, seule. */
