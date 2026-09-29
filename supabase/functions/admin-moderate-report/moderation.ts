@@ -135,7 +135,10 @@ export function buildModerationEmailData(action: Action, targetType: TargetType,
   return { action, targetType, memberMessage: memberMessage ?? undefined }
 }
 
-/** Données du gabarit report-resolved : jamais la note interne. */
-export function buildReporterEmailData(reason: string | null, memberMessage: string | null) {
-  return { reason: reason ?? undefined, status: 'resolved', memberMessage: memberMessage ?? undefined }
+/**
+ * Données du gabarit report-resolved : jamais la note interne, ni le message
+ * rédigé pour la personne signalée (il lui est destiné, pas au signaleur).
+ */
+export function buildReporterEmailData(reason: string | null, _memberMessage?: string | null) {
+  return { reason: reason ?? undefined, status: 'resolved' }
 }
