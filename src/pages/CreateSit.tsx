@@ -1,3 +1,4 @@
+import { clearPublishIntent } from "@/lib/postOnboardingIntent";
 import { useState, useEffect, useRef, useCallback, type MouseEvent as ReactMouseEvent } from "react";
 import ExpectationSuggestions from "@/components/sits/create/ExpectationSuggestions";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -1699,6 +1700,7 @@ const CreateSit = () => {
         if (error) throw error;
         sitId = sit.id;
       }
+      clearPublishIntent();
 
 
       try { await trackFirstAction("sit_created", { sit_id: sitId, is_urgent: isUrgent }); } catch {}
