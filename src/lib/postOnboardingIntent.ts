@@ -39,7 +39,15 @@ export function clearPublishIntent(): void {
  * Destination de fin d'onboarding : `next` explicite, sinon intention de
  * publication connue, sinon repli fourni par l'appelant.
  */
+/** Pages génériques : elles ne portent pas d'intention, une publication en attente passe devant. */
+const GENERIC_TARGETS = new Set(["/profile", "/owner-profile", "/dashboard", "/sits"]);
+
 export function resolvePostOnboardingTarget(next: string | null | undefined, fallback: string, now = Date.now()): string {
-  if (next && /^\/(?!\/)/.test(next)) return next;
-  return readPublishIntent(now) ?? fallback;
+  const intent = readPublishIntent(now);
+  if (next && /^\/(?!\/)/.test(next)) {
+    const bare = next.split(/[?#]/)[0];
+    if (intent && GENERIC_TARGETS.has(bare)) return intent;
+    return next;
+  }
+  return intent ?? fallback;
 }

@@ -103,8 +103,10 @@ const CreateSmallMission = () => {
   // de complétion. Seul prérequis, être connecté. Le seuil de 40 % reste exigé
   // pour répondre au coup de main de quelqu'un d'autre (SmallMissionDetail).
   const canPublish = canPublishSmallMission(!!user);
-  const showCompletionNudge =
-    !accessLoading && canPublish && shouldNudgeProfileCompletion(profileCompletion);
+  // Lot J1 : le lien « Compléter mon profil » affiché pendant la saisie
+  // faisait quitter le formulaire (cas du 28/09). Il n'apparaît plus avant
+  // la publication : l'onboarding est proposé après.
+  const showCompletionNudge = false && !accessLoading && canPublish && shouldNudgeProfileCompletion(profileCompletion);
 
   
 

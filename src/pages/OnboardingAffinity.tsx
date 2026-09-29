@@ -13,6 +13,7 @@
  *
  * Réutilise les listes d'options centralisées dans profileMatchingOptions.
  */
+import { resolvePostOnboardingTarget } from "@/lib/postOnboardingIntent";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Head from "@/components/seo/Head";
@@ -58,7 +59,8 @@ const OnboardingAffinity = () => {
   // existe (tunnel de création d'annonce d'un propriétaire fraîchement
   // inscrit), sinon direction le tableau de bord. sanitizeRedirect bloque
   // les cibles externes et les pages d'authentification.
-  const exitTarget = sanitizeRedirect(searchParams.get("redirect")) ?? "/dashboard";
+  // Lot J1 : une publication en attente passe devant une page générique.
+  const exitTarget = resolvePostOnboardingTarget(sanitizeRedirect(searchParams.get("redirect")), "/dashboard");
 
   const [saving, setSaving] = useState(false);
   const [chosenRole, setChosenRole] = useState<Role | null>(() => (user?.role as Role) ?? null);

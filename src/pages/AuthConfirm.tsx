@@ -1,3 +1,4 @@
+import { rememberPublishIntent } from "@/lib/postOnboardingIntent";
 import { useEffect, useRef, useState } from "react";
 import Head from "@/components/seo/Head";
 import { Link, useNavigate } from "react-router-dom";
@@ -24,6 +25,8 @@ const AuthConfirm = () => {
     const url = new URL(window.location.href);
     const rawNext = url.searchParams.get("next") || "/dashboard";
     const next = /^\/(?!\/)/.test(rawNext) ? rawNext : "/dashboard";
+    // Lot J1 : l'intention de publication survit à tout l'onboarding.
+    rememberPublishIntent(next);
 
     const hashParams = new URLSearchParams(window.location.hash.replace("#", ""));
     const hashError = hashParams.get("error_description") || hashParams.get("error");

@@ -13,6 +13,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { useAffinityOnboardingStatus } from "@/hooks/useAffinityOnboardingStatus";
+import { isPublishPath, rememberPublishIntent } from "@/lib/postOnboardingIntent";
 
 const OnboardingGate = () => {
   const { user, loading } = useAuth();
@@ -36,9 +37,13 @@ const OnboardingGate = () => {
     if (
       path.startsWith("/onboarding/affinity") ||
       path.startsWith("/logout") ||
-      path.startsWith("/reset-password")
+      path.startsWith("/reset-password") ||
+      // Lot J1 : publier une première demande passe avant l'onboarding
+      // affinité ; il est proposé après la publication (page suivante).
+      isPublishPath(path)
     ) return;
     const redirect = `${location.pathname}${location.search}${location.hash}`;
+    rememberPublishIntent(redirect);
     navigate(`/onboarding/affinity?redirect=${encodeURIComponent(redirect)}`, { replace: true });
   }, [loading, flagLoading, status.loading, status.needsOnboarding, status.profileCreatedAt, user, enabled, appliesSince, location, navigate]);
 
