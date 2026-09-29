@@ -1,22 +1,31 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { FOUNDER_START, GRACE_END } from "@/lib/constants";
+import { PRICING_ACTIVATION_DATE } from "@/config/pricing";
 import { isPricingActive } from "@/lib/pricing";
 import { logger } from "@/lib/logger";
 
-const LAUNCH_DATE = FOUNDER_START;
-const GRACE_END_DATE = GRACE_END;
-
 export type SubStatus = "founder_grace" | "founder_expired" | "premium" | "expired" | "never" | "owner" | "pre_launch";
 
+/** Vrai quand le payant est réellement en vigueur (date renseignée et atteinte). */
+export const isPaywallInForce = (
+  activationDate: string | null = PRICING_ACTIVATION_DATE,
+  now: Date = new Date(),
+): boolean => {
+  if (!activationDate) return false;
+  const d = new Date(activationDate);
+  return !Number.isNaN(d.getTime()) && d <= now;
+};
+
 /**
- * Returns whether the current sitter has full access (can message, apply, etc.)
- * Owners always have access.
- * Avant le 14 juin 2026 : pré-lancement, accès libre pour tous.
- * Du 14 juin au 30 septembre 2026 inclus : gratuité pour TOUS (fondateurs ou non).
- * À partir du 1er octobre 2026 : abonnement actif requis. Le statut is_founder
- * (réservé aux inscrits avant le 30 septembre 2026) ne donne plus d'accès, seulement le badge.
+ * Accès complet du gardien (messagerie, candidatures). Aucune date codée en dur.
+ * - PRICING_IS_ACTIVE false : accès complet pour tous.
+ * - PRICING_IS_ACTIVE true :
+ *   propriétaire : accès complet ;
+ *   abonnement actif ou trial : accès complet ;
+ *   PRICING_ACTIVATION_DATE null ou future : accès complet pour tous
+ *   (avertissement journalisé si la date manque) ;
+ *   sinon, sans abonnement : pas d'accès. Le statut fondateur garde son badge.
  */
 export const useSubscriptionAccess = () => {
   const { user, activeRole } = useAuth();
@@ -41,46 +50,37 @@ export const useSubscriptionAccess = () => {
       return;
     }
 
-    // Safety timeout, never stay loading forever
     const timeout = setTimeout(() => setLoading(false), 5000);
 
     const load = async () => {
       try {
         const [profileRes, subRes] = await Promise.all([
-          supabase.from("profiles").select("is_founder, created_at, role").eq("id", user.id).maybeSingle(),
+          supabase.from("profiles").select("is_founder").eq("id", user.id).maybeSingle(),
           supabase.from("subscriptions").select("status, expires_at").eq("user_id", user.id).maybeSingle(),
         ]);
-
-        const p = profileRes.data;
+        const isFounder = profileRes.data?.is_founder === true;
         const now = new Date();
-        const createdDate = p?.created_at ? new Date(p.created_at) : new Date();
-        const isFounder = p?.is_founder || createdDate < LAUNCH_DATE;
-
-        // Check subscription from DB, data can be null (never subscribed)
         const sub = subRes.data;
         const hasActiveSub = sub != null && (
           sub.status === "active" || sub.status === "trial"
-          || (sub.expires_at && new Date(sub.expires_at) > now)
+          || (sub.expires_at != null && new Date(sub.expires_at) > now)
         );
+
+        if (!PRICING_ACTIVATION_DATE) {
+          logger.warn("[useSubscriptionAccess] PRICING_IS_ACTIVE vaut true sans PRICING_ACTIVATION_DATE : accès complet maintenu");
+        }
 
         if (effectiveRole === "owner") {
           setStatus("owner");
           setHasAccess(true);
-        } else if (now < LAUNCH_DATE) {
-          setStatus("pre_launch");
-          setHasAccess(true);
         } else if (hasActiveSub) {
           setStatus("premium");
           setHasAccess(true);
-        } else if (now < GRACE_END_DATE) {
-          // Gratuité pour tous jusqu'au 30 septembre 2026, fondateurs ou non
-          setStatus(isFounder ? "founder_grace" : "founder_grace");
+        } else if (!isPaywallInForce(PRICING_ACTIVATION_DATE, now)) {
+          setStatus("founder_grace");
           setHasAccess(true);
-        } else if (isFounder && !hasActiveSub) {
-          setStatus("founder_expired");
-          setHasAccess(false);
         } else {
-          setStatus("never");
+          setStatus(isFounder ? "founder_expired" : "never");
           setHasAccess(false);
         }
       } catch (err) {

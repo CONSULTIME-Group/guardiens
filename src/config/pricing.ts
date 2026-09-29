@@ -6,6 +6,14 @@
  */
 export const PRICING_IS_ACTIVE = false;
 
+/**
+ * Date d'entrée en vigueur du payant (ISO, ex. "2027-01-15T00:00:00+01:00").
+ * Reste `null` tant que Jérémie n'a pas décidé. Tant qu'elle est null ou
+ * dans le futur, l'accès reste complet pour tous, même si PRICING_IS_ACTIVE
+ * passe à true.
+ */
+export const PRICING_ACTIVATION_DATE: string | null = null;
+
 // Constantes conservées pour une réactivation future
 // (invisibles en public tant que PRICING_IS_ACTIVE = false).
 export const SITTER_PRICE_MONTHLY = 6.99;
