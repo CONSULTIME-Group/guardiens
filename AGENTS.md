@@ -6,3 +6,4 @@
 
 - Alma, classement des échanges : le modèle renvoie une ligne CLASSEMENT dans le même appel (_shared/alma-classify.ts), les motifs de _shared/alma-intent.ts servent de filet ; pourquoi : aucun appel supplémentaire, et les faux positifs des motifs seuls restent bornés.
 - Normalisation des messages de contact : source unique dans supabase/functions/_shared/normalize-contact-message.ts, ré-exportée par src/lib ; pourquoi : le site et alma-chat nettoient à l identique.
+- Lectures d'autrui (profil propriétaire, écussons) : vues member_owner_profiles, public_owner_profiles, public_badge_attributions, tables réservées au titulaire, à l'admin et aux personnes engagées ; pourquoi : SEC1, aucune donnée de foyer ni lien donneur exposé.
