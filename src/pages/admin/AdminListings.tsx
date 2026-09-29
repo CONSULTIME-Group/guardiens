@@ -1,3 +1,5 @@
+import { ListingExitsSection } from "@/components/admin/ListingExitsSection";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { refreshAdminBadges } from "@/hooks/useAdminBadges";
 import { fetchAllRows } from "@/lib/admin/fetchAllRows";
@@ -420,7 +422,7 @@ const AdminListings = () => {
   const paginated = filtered.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
 
   const handleExportCsv = () => {
-    const header = ["Titre", "Proprio", "Ville", "Pays", "Début", "Fin", "Statut", "Vues", "Membres uniques", "Messages", "Candidatures", "Dernière vue", "Dépubliée le", "Motif de dépublication"];
+    const header = ["Titre", "Propriétaire", "Ville", "Pays", "Début", "Fin", "Statut", "Vues", "Membres uniques", "Messages", "Candidatures", "Dernière vue", "Dépubliée le", "Motif de dépublication"];
     const esc = (v: any) => {
       const s = v == null ? "" : String(v);
       return `"${s.replace(/"/g, '""')}"`;
@@ -539,14 +541,11 @@ const AdminListings = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+      <AdminPageHeader title="Annonces" description="Vie de la publication : visibilité, trafic et candidatures." />
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 -mt-3">
         <div>
-          <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Annonces</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Vie de la publication : visibilité, trafic, candidatures. Annonces publiées, brouillons et masquées.
-          </p>
-          <p className="text-sm text-muted-foreground mt-1">
-            Pour le suivi opérationnel post-acceptation (confirmed, completed, cancelled), consultez l'onglet{' '}
+          <p className="text-sm text-muted-foreground">
+            Le suivi après acceptation (gardes confirmées, terminées ou annulées) se trouve dans l'onglet{' '}
             <button
               onClick={() => navigate('/admin/sits-management')}
               className="font-medium text-foreground underline hover:text-primary transition-colors"
@@ -560,6 +559,8 @@ const AdminListings = () => {
           Exporter CSV
         </Button>
       </div>
+
+      <ListingExitsSection />
 
       {/* KPI banner */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
@@ -664,13 +665,13 @@ const AdminListings = () => {
           <TableHeader>
             <TableRow>
               <TableHead>Titre</TableHead>
-              <TableHead>Proprio</TableHead>
+              <TableHead>Propriétaire</TableHead>
               <TableHead>Ville</TableHead>
               <TableHead>Dates</TableHead>
               <TableHead className="text-right" title="Vues totales (public + membres)">Vues</TableHead>
               <TableHead className="text-right" title="Nombre de membres connectés distincts ayant vu l'annonce (chemins /sits et /annonces, identifiant et slug). Les visiteurs non connectés ne sont pas comptés, aucun identifiant de séance n'étant enregistré.">Membres uniques</TableHead>
-              <TableHead className="text-right">Msg</TableHead>
-              <TableHead className="text-right">Cand.</TableHead>
+              <TableHead className="text-right">Messages</TableHead>
+              <TableHead className="text-right">Candidatures</TableHead>
               <TableHead>Dernière vue</TableHead>
               <TableHead>Statut</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -709,19 +710,19 @@ const AdminListings = () => {
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
                     <div className="flex items-center gap-1.5">
-                      <span>{listing.owner?.city || ","}</span>
+                      <span>{listing.owner?.city || "·"}</span>
                       {listing.country && listing.country !== "FR" && (
                         <Badge variant="outline" className="text-[10px] px-1.5 py-0">{getCountryName(listing.country)}</Badge>
                       )}
                     </div>
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
-                    {listing.start_date ? format(new Date(listing.start_date), "d MMM", { locale: fr }) : ","}
+                    {listing.start_date ? format(new Date(listing.start_date), "d MMM", { locale: fr }) : "·"}
                     {" → "}
-                    {listing.end_date ? format(new Date(listing.end_date), "d MMM yy", { locale: fr }) : ","}
+                    {listing.end_date ? format(new Date(listing.end_date), "d MMM yy", { locale: fr }) : "·"}
                   </TableCell>
-                  <TableCell className="text-right text-sm font-medium tabular-nums">{st?.views ?? ","}</TableCell>
-                  <TableCell className="text-right text-sm text-muted-foreground tabular-nums">{st?.uniqueViews ?? ","}</TableCell>
+                  <TableCell className="text-right text-sm font-medium tabular-nums">{st?.views ?? "·"}</TableCell>
+                  <TableCell className="text-right text-sm text-muted-foreground tabular-nums">{st?.uniqueViews ?? "·"}</TableCell>
                   <TableCell className="text-right text-sm tabular-nums">
                     {st && st.messages > 0 ? (
                       <button
@@ -732,7 +733,7 @@ const AdminListings = () => {
                         {st.messages}
                       </button>
                     ) : (
-                      <span className="text-muted-foreground">{st?.messages ?? ","}</span>
+                      <span className="text-muted-foreground">{st?.messages ?? "·"}</span>
                     )}
                   </TableCell>
                   <TableCell className="text-right text-sm tabular-nums">
@@ -745,11 +746,11 @@ const AdminListings = () => {
                         {st.applications}
                       </button>
                     ) : (
-                      <span className="text-muted-foreground">{st?.applications ?? ","}</span>
+                      <span className="text-muted-foreground">{st?.applications ?? "·"}</span>
                     )}
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
-                    {st?.lastViewAt ? formatDistanceToNow(new Date(st.lastViewAt), { addSuffix: true, locale: fr }) : ","}
+                    {st?.lastViewAt ? formatDistanceToNow(new Date(st.lastViewAt), { addSuffix: true, locale: fr }) : "·"}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1 flex-wrap">
@@ -893,7 +894,7 @@ const AdminListings = () => {
               {trafficListing?.title || "Annonce"}
             </SheetTitle>
             <p className="text-xs text-muted-foreground">
-              {trafficListing?.owner?.first_name} {trafficListing?.owner?.last_name} · {trafficListing?.owner?.city || ","}
+              {trafficListing?.owner?.first_name} {trafficListing?.owner?.last_name} · {trafficListing?.owner?.city || "·"}
             </p>
           </SheetHeader>
 

@@ -1,3 +1,4 @@
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useEffect, useState } from "react";
 import Head from "@/components/seo/Head";
 import { BUILD_ID, BUILD_TIME, BUILD_MODE, getCurrentBundleHash } from "@/lib/buildInfo";
@@ -40,15 +41,15 @@ export default function BuildInfo() {
   ];
 
   return (
-    <main className="container mx-auto max-w-3xl px-4 py-10">
+    <div className="max-w-3xl">
       <Head>
         <title>Build info, Admin</title>
         <meta name="robots" content="noindex, nofollow" />
       </Head>
 
-      <h1 className="text-2xl font-semibold mb-2">État du build frontend</h1>
+      <AdminPageHeader title="Version en ligne" breadcrumb={[{ label: "Diagnostic", to: "/admin/diagnostics" }]} description="Version du site servie aux visiteurs, comparée à la dernière mise en ligne." />
       <p className="text-sm text-muted-foreground mb-6">
-        Page de diagnostic, confirme que le bundle servi correspond bien au
+        Cette page confirme que le bundle servi correspond bien au
         dernier déploiement. Recharger ({" "}
         <kbd className="px-1.5 py-0.5 border rounded text-xs">Ctrl+Shift+R</kbd>
         ) si une valeur semble obsolète.
@@ -89,6 +90,6 @@ export default function BuildInfo() {
           Recharger
         </button>
       </div>
-    </main>
+    </div>
   );
 }

@@ -1,3 +1,4 @@
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { UrlFilterNotice } from "@/components/admin/UrlFilterNotice";
@@ -200,7 +201,7 @@ const AdminVerifications = () => {
     try {
       await runIdentityAction("approve", userId);
 
-      toast.success("Identité validée ✅");
+      toast.success("Identité validée");
       refreshAll();
       window.dispatchEvent(new Event("admin-badges-refresh"));
     } catch (error: any) {
@@ -279,7 +280,7 @@ const AdminVerifications = () => {
 
   return (
     <div className="space-y-6">
-      <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Vérifications d'identité</h1>
+      <AdminPageHeader title="Vérifications ID" description="Pièces d'identité envoyées par les membres, à valider ou refuser." />
 
       {/* Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -510,7 +511,7 @@ const AdminVerifications = () => {
             <p className="font-medium">
               {historyFilter === "pending" ? "Aucune vérification en attente" : "Aucune vérification trouvée"}
             </p>
-            {historyFilter === "pending" && <p className="text-sm">Toutes les demandes ont été traitées 🎉</p>}
+            {historyFilter === "pending" && <p className="text-sm">Toutes les demandes ont été traitées.</p>}
           </div>
         ) : (
           <>
@@ -543,7 +544,7 @@ const AdminVerifications = () => {
                       <TableCell className="hidden md:table-cell text-sm">{format(new Date(user.updated_at), "d MMM yyyy", { locale: fr })}</TableCell>
                       <TableCell>{statusBadge(user.identity_verification_status)}</TableCell>
                       <TableCell className="hidden lg:table-cell text-sm text-muted-foreground max-w-[200px] truncate">
-                        {user._rejectionReason || ","}
+                        {user._rejectionReason || "·"}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center justify-end gap-1">

@@ -1,3 +1,4 @@
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useEffect, useMemo, useState } from "react";
 import Head from "@/components/seo/Head";
 import { supabase } from "@/integrations/supabase/client";
@@ -103,13 +104,13 @@ export default function AdminPrerender() {
   };
 
   return (
-    <main className="container mx-auto max-w-5xl px-4 py-10">
+    <div className="max-w-5xl">
       <Head>
         <title>Re-snapshot Prerender, Admin</title>
         <meta name="robots" content="noindex, nofollow" />
       </Head>
 
-      <h1 className="text-2xl font-semibold mb-2">Re-snapshot Prerender</h1>
+      <AdminPageHeader title="Instantanés des pages" breadcrumb={[{ label: "Diagnostic", to: "/admin/diagnostics" }]} description="Mise à jour immédiate de l'instantané servi aux moteurs de recherche." />
       <p className="text-sm text-muted-foreground mb-6">
         Force la mise à jour du cache Prerender pour les pages sélectionnées,
         sans attendre la prochaine publication. Utilisez après une correction
@@ -213,6 +214,6 @@ export default function AdminPrerender() {
           </CardContent>
         </Card>
       )}
-    </main>
+    </div>
   );
 }

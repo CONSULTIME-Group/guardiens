@@ -187,7 +187,7 @@ const AdminReviewDisputes = () => {
       </Head>
 
       <AdminPageHeader
-        title="Contestations d'avis"
+        title="Contestations"
         description="Examinez les demandes de retrait d'avis soumises par les membres."
       />
 

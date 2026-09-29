@@ -175,7 +175,7 @@ const AdminSubscriptions = lazy(() => import("./pages/admin/AdminSubscriptions")
 const AdminLegal = lazy(() => import("./pages/admin/AdminLegal"), "AdminLegal");
 const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"), "AdminSettings");
 const AdminContactMessages = lazy(() => import("./pages/admin/AdminContactMessages"), "AdminContactMessages");
-const AdminLifecycle = lazy(() => import("./pages/admin/AdminLifecycle"), "AdminLifecycle");
+const AdminMutualAidPilot = lazy(() => import("./pages/admin/AdminMutualAidPilot"), "AdminMutualAidPilot");
 const AdminSkills = lazy(() => import("./pages/admin/AdminSkills"), "AdminSkills");
 const AdminMassEmails = lazy(() => import("./pages/admin/AdminMassEmails"), "AdminMassEmails");
 const AdminMassEmailsStats = lazy(() => import("./pages/admin/AdminMassEmailsStats"), "AdminMassEmailsStats");
@@ -528,12 +528,9 @@ const AppRoutes = () => {
       <Route path="/associations" element={<PublicShellRoute><AssociationsListing /></PublicShellRoute>} />
       <Route path="/associations/:slug" element={<PublicShellRoute><AssociationDetail /></PublicShellRoute>} />
       <Route element={<AdminLayout />}>
-        <Route path="/admin/seo-debug" element={<Navigate to="/admin" replace />} />
         <Route path="/admin/build-info" element={<BuildInfo />} />
-        <Route path="/admin/audit-tarifs" element={<Navigate to="/admin" replace />} />
         <Route path="/admin/prerender" element={<AdminPrerender />} />
         <Route path="/admin" element={<AdminOverview />} />
-        <Route path="/admin/dashboard" element={<Navigate to="/admin" replace />} />
         <Route path="/admin/audit" element={<AdminAudit />} />
         <Route path="/admin/demandes-suppression" element={<AdminDeletionRequests />} />
         <Route path="/admin/subscriptions" element={<AdminSubscriptions />} />
@@ -551,7 +548,6 @@ const AppRoutes = () => {
         <Route path="/admin/affinity" element={<AdminAffinity />} />
         <Route path="/admin/experiences" element={<AdminExperienceVerification />} />
         <Route path="/admin/articles" element={<AdminArticles />} />
-        <Route path="/admin/articles/refresh-post-pivot" element={<Navigate to="/admin" replace />} />
         <Route path="/admin/articles/:id" element={<ArticleEditor />} />
         <Route path="/admin/city-pages" element={<AdminCityPages />} />
         <Route path="/admin/guides" element={<AdminGuides />} />
@@ -566,18 +562,16 @@ const AppRoutes = () => {
         <Route path="/admin/settings" element={<AdminSettings />} />
         <Route path="/admin/contact-messages" element={<AdminContactMessages />} />
         <Route path="/admin/traffic" element={<AdminTraffic />} />
-        <Route path="/admin/seo" element={<Navigate to="/admin/traffic?tab=acquisition" replace />} />
-        <Route path="/admin/analytics" element={<Navigate to="/admin/traffic" replace />} />
-        <Route path="/admin/lifecycle" element={<AdminLifecycle />} />
+        <Route path="/admin/lifecycle" element={<Navigate to="/admin/nurturing" replace />} />
+        <Route path="/admin/pilotage-entraide" element={<AdminMutualAidPilot />} />
+        <Route path="/admin/hero-weights" element={<AdminHeroWeights />} />
         <Route path="/admin/skills" element={<AdminSkills />} />
         <Route path="/admin/envois-groupes" element={<AdminMassEmails />} />
         <Route path="/admin/envois-groupes/stats" element={<AdminMassEmailsStats />} />
-        <Route path="/admin/relance-incomplet" element={<Navigate to="/admin" replace />} />
         <Route path="/admin/nurturing" element={<AdminNurturing />} />
         <Route path="/admin/messages" element={<AdminMessages />} />
         <Route path="/admin/errors" element={<AdminErrors />} />
         <Route path="/admin/diagnostics" element={<AdminDiagnostics />} />
-        <Route path="/admin/test-sitter-fields" element={<Navigate to="/admin" replace />} />
       </Route>
       {/* App routes */}
       <Route path="/dashboard" element={<DashboardRouteShell />} />
@@ -608,7 +602,6 @@ const AppRoutes = () => {
         <Route path="/mon-secteur" element={<MonSecteur />} />
       </Route>
       <Route path="/planche-badges" element={<PlancheBadges />} />
-      <Route path="/admin/hero-weights" element={<AdminHeroWeights />} />
       {import.meta.env.DEV && (
         <>
           <Route path="/test/badges-long-labels" element={<TestBadgesLongLabels />} />

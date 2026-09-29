@@ -1,3 +1,5 @@
+import { adminLabel } from "@/lib/admin/labels";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { fetchAllRows } from "@/lib/admin/fetchAllRows";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createSeqGuard, ilikeContains } from "@/lib/admin/requestSeq";
@@ -331,17 +333,13 @@ export default function AdminEmailHealth() {
       {partial && (
         <p className="text-xs text-warning">Données partielles : plafond de 50 000 lignes atteint.</p>
       )}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">Santé email</h1>
-          <p className="text-sm text-muted-foreground">
-            Délivrabilité, différés, campagnes et désabonnés, en un seul écran.
-          </p>
-        </div>
-        <Button variant="outline" size="sm" onClick={refreshAll} disabled={refreshing}>
+      <AdminPageHeader
+        title="Santé email"
+        description="Délivrabilité, différés, campagnes et désabonnés, en un seul écran."
+        actions={<Button variant="outline" size="sm" onClick={refreshAll} disabled={refreshing}>
           {refreshing ? "Rafraîchissement…" : "Rafraîchir"}
-        </Button>
-      </div>
+        </Button>}
+      />
 
       {/* 1. Pipeline */}
       <section className="space-y-3">
@@ -365,7 +363,7 @@ export default function AdminEmailHealth() {
             <StatCard
               label="Plus vieux message en attente"
               value={formatAge(health.oldest_pending_age_seconds)}
-              hint="Queue pgmq (auth + transactionnel)"
+              hint="File d'envoi (connexion et transactionnel)"
               tone={oldestPendingTone}
             />
             <StatCard
@@ -389,7 +387,7 @@ export default function AdminEmailHealth() {
               tone={stuckTone}
             />
             <StatCard
-              label="DLQ dernière heure"
+              label="Abandonnés, dernière heure"
               value={health.dlq_last_hour ?? 0}
               hint="Échecs définitifs après 5 tentatives"
               tone={dlqTone}
@@ -575,7 +573,7 @@ export default function AdminEmailHealth() {
                       <TableCell className="font-mono text-xs">{s.email}</TableCell>
                       <TableCell>
                         <Badge variant="outline" className="text-xs capitalize">
-                          {s.reason}
+                          {adminLabel(s.reason)}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right text-xs text-muted-foreground">

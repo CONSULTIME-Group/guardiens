@@ -1,3 +1,4 @@
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { fetchAllRows } from "@/lib/admin/fetchAllRows";
 import { createSeqGuard } from "@/lib/admin/requestSeq";
@@ -626,9 +627,9 @@ const AdminUsers = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Utilisateurs</h1>
-        <div className="flex items-center gap-2">
+      <div className="space-y-0">
+        <AdminPageHeader title="Utilisateurs" description="Membres inscrits, rôles, vérifications et actions de modération." />
+        <div className="flex flex-wrap items-center justify-end gap-2 -mt-3">
           <Button variant="outline" size="sm" onClick={handleExportCsv} disabled={exporting}>
             <Download className="h-4 w-4 mr-2" />
             {exporting ? "Export…" : "Exporter CSV"}
@@ -1146,7 +1147,7 @@ const AdminUsers = () => {
               disabled={verifying}
               onClick={(e) => { e.preventDefault(); confirmForceVerify(); }}
             >
-              {verifying ? "Validation," : "Confirmer"}
+              {verifying ? "Validation…" : "Confirmer"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -1180,7 +1181,7 @@ const AdminUsers = () => {
               disabled={togglingSuper}
               onClick={(e) => { e.preventDefault(); confirmToggleSuper(); }}
             >
-              {togglingSuper ? "Mise à jour," : "Confirmer"}
+              {togglingSuper ? "Mise à jour…" : "Confirmer"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

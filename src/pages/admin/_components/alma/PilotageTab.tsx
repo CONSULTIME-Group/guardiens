@@ -1,3 +1,4 @@
+import { adminLabel, ALMA_REGISTER_LABELS } from "@/lib/admin/labels";
 /**
  * Lot J2-B : pilotage d'Alma. Taux d'action à 10 minutes, retours utile /
  * pas utile, et rejeu du jeu de non-régression, uniquement au clic.
@@ -98,7 +99,7 @@ export function PilotageTab({ range }: { range: "7d" | "30d" | "90d" }) {
             <tbody>
               {(rates ?? []).map((r) => (
                 <tr key={`${r.action_reason}-${r.register}`}>
-                  <td>{r.action_reason}</td><td>{r.register}</td><td>{r.answers}</td><td>{pct(Number(r.acted), Number(r.answers))}</td>
+                  <td>{adminLabel(r.action_reason)}</td><td>{adminLabel(r.register, ALMA_REGISTER_LABELS)}</td><td>{r.answers}</td><td>{pct(Number(r.acted), Number(r.answers))}</td>
                 </tr>
               ))}
             </tbody>

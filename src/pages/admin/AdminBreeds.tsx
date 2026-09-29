@@ -1,3 +1,5 @@
+import { SPECIES_LABELS } from "@/lib/admin/labels";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -320,13 +322,7 @@ const AdminBreeds = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Fiches de race</h1>
-        <p className="text-muted-foreground text-sm">
-          {rows.length} fiches générées
-          {withoutImage > 0 ? ` · ${withoutImage} sans image` : ""}
-        </p>
-      </div>
+      <AdminPageHeader title="Fiches de race" description={`${rows.length} fiches générées${withoutImage > 0 ? ` · ${withoutImage} sans image` : ""}`} />
 
       <Card ref={formRef}>
         <CardHeader>
@@ -477,7 +473,7 @@ const AdminBreeds = () => {
           if (list.length === 0) return null;
           return (
             <Card key={sp}>
-              <CardHeader><CardTitle className="text-base capitalize">{sp} ({list.length})</CardTitle></CardHeader>
+              <CardHeader><CardTitle className="text-base">{SPECIES_LABELS[sp] ?? PET_SPECIES_LABELS[sp] ?? sp} ({list.length})</CardTitle></CardHeader>
               <CardContent>
                 <ul className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
                   {list.map((r) => {

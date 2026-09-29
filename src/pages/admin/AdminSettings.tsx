@@ -1,3 +1,5 @@
+import { isPricingActive } from "@/lib/pricing";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -29,7 +31,6 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { invalidateFeatureFlag } from "@/hooks/useFeatureFlag";
 import { toast } from "sonner";
-import { FOUNDER_DEADLINE } from "@/lib/pricing";
 
 const MANDATORY_ONBOARDING_FLAG = "mandatory_affinity_onboarding";
 const ADMIN_SIGNALS_FLAG = "admin_signals_active";
@@ -327,14 +328,7 @@ const AdminSettings = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">
-          Paramètres du site
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Configuration générale de la plateforme guardiens.
-        </p>
-      </div>
+      <AdminPageHeader title="Paramètres" description="Réglages généraux de la plateforme Guardiens." />
 
       {/* ============ RÉGLAGES ============ */}
       <section className="space-y-3">
@@ -367,7 +361,7 @@ const AdminSettings = () => {
               <Switch
                 checked={mandatoryOnboarding === true}
                 disabled={mandatoryOnboarding === null || togglingFlag}
-                onCheckedChange={toggleMandatoryOnboarding}
+                onCheckedChange={(v) => { if (window.confirm(v ? "Activer l'étape d'onboarding obligatoire pour les nouveaux membres ?" : "Désactiver l'étape d'onboarding obligatoire ?")) toggleMandatoryOnboarding(v); }}
                 aria-label="Activer l'étape d'onboarding obligatoire"
               />
             </div>
@@ -445,7 +439,7 @@ const AdminSettings = () => {
               <Switch
                 checked={signalsEnabled === true}
                 disabled={signalsEnabled === null || togglingSignals}
-                onCheckedChange={toggleSignalsFlag}
+                onCheckedChange={(v) => { if (window.confirm(v ? "Activer les signaux admin ?" : "Désactiver les signaux admin ? Les relances automatiques s'arrêtent immédiatement.")) toggleSignalsFlag(v); }}
                 aria-label="Activer les signaux admin"
               />
             </div>
@@ -652,8 +646,7 @@ const AdminSettings = () => {
               <div>
                 <p className="text-sm font-medium">Statut Fondateur</p>
                 <p className="text-xs text-muted-foreground">
-                  Les membres inscrits pendant la phase de lancement obtiennent le statut
-                  Fondateur (gratuit). La fin de cette phase sera fixée {FOUNDER_DEADLINE}.
+                  Les membres inscrits pendant la phase de lancement portent le statut Fondateur.
                 </p>
               </div>
               <Badge variant="default" className="text-xs">Actif</Badge>
@@ -683,10 +676,10 @@ const AdminSettings = () => {
               <div>
                 <p className="text-sm font-medium">Abonnement gardien</p>
                 <p className="text-xs text-muted-foreground">
-                  6,99 €/mois pour activer l'espace gardien (hors fondateurs).
+                  {isPricingActive() ? "Abonnement requis pour l'espace gardien." : "Espace gardien ouvert à tous, sans abonnement pour le moment."}
                 </p>
               </div>
-              <Badge variant="secondary" className="text-xs">6,99 €/mois</Badge>
+              <Badge variant="secondary" className="text-xs">{isPricingActive() ? "Actif" : "Inactif"}</Badge>
             </div>
             <Separator />
             <div className="flex items-center justify-between">
@@ -698,18 +691,7 @@ const AdminSettings = () => {
               </div>
               <Badge variant="default" className="text-xs">Actif</Badge>
             </div>
-            <Separator />
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium">Auto-confirmation email</p>
-                <p className="text-xs text-muted-foreground">
-                  Activé temporairement (DNS en attente pour guardiens.fr).
-                </p>
-              </div>
-              <Badge variant="outline" className="text-xs border-warning text-warning">
-                Temporaire
-              </Badge>
-            </div>
+
             <Separator />
             <div className="flex items-center justify-between">
               <div>
@@ -738,7 +720,6 @@ const AdminSettings = () => {
               {[
                 { name: "Google Analytics", id: "G-9JP4VR1RRP", status: "connecté" },
                 { name: "Nominatim (Géocodage)", id: "OpenStreetMap", status: "connecté" },
-                { name: "Domaine email", id: "guardiens.fr", status: "DNS en attente" },
               ].map((service) => (
                 <div key={service.name} className="flex items-center justify-between py-1">
                   <div>

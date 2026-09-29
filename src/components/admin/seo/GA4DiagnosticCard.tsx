@@ -150,7 +150,7 @@ const GA4DiagnosticCard = () => {
     (data?.total_events_30d ?? 0) > 0;
 
   const StatusIcon = ({ ok, warn }: { ok: boolean; warn?: boolean }) =>
-    ok ? <CheckCircle2 className="h-4 w-4 text-emerald-600" /> :
+    ok ? <CheckCircle2 className="h-4 w-4 text-success" /> :
     warn ? <AlertTriangle className="h-4 w-4 text-warning" /> :
     <XCircle className="h-4 w-4 text-destructive" />;
 

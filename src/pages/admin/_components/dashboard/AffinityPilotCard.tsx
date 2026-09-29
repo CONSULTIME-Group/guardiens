@@ -1,3 +1,4 @@
+import { adminLabel, SURFACE_LABELS } from "@/lib/admin/labels";
 /**
  * Carte admin : pilotage du score d'affinité.
  *
@@ -30,12 +31,12 @@ interface Stats {
 }
 
 const SCORE_BUCKETS = [
-  { label: "40–49", min: 40, max: 49 },
-  { label: "50–59", min: 50, max: 59 },
-  { label: "60–69", min: 60, max: 69 },
-  { label: "70–79", min: 70, max: 79 },
-  { label: "80–89", min: 80, max: 89 },
-  { label: "90–100", min: 90, max: 100 },
+  { label: "40 à 49", min: 40, max: 49 },
+  { label: "50 à 59", min: 50, max: 59 },
+  { label: "60 à 69", min: 60, max: 69 },
+  { label: "70 à 79", min: 70, max: 79 },
+  { label: "80 à 89", min: 80, max: 89 },
+  { label: "90 à 100", min: 90, max: 100 },
 ];
 
 /** Calcul inchangé, extrait pour être testé sur le jeu complet. */
@@ -162,7 +163,7 @@ export const AffinityPilotCard = () => {
           <Metric label="Impressions totales" value={stats.total} />
           <Metric label="Badges affichés" value={stats.displayed} hint={`${visibilityRate}% des scores calculés`} />
           <Metric label="Scores masqués" value={stats.hidden} hint="seuil ou critères" />
-          <Metric label="CTA « compléter »" value={stats.missing} hint="profil incomplet" />
+          <Metric label="Bouton « compléter »" value={stats.missing} hint="profil incomplet" />
         </div>
 
         <div>
@@ -189,7 +190,7 @@ export const AffinityPilotCard = () => {
             <ul className="space-y-1 text-xs">
               {stats.byContext.slice(0, 8).map((c) => (
                 <li key={c.context} className="flex justify-between text-muted-foreground">
-                  <span className="truncate">{c.context}</span>
+                  <span className="truncate">{adminLabel(c.context, SURFACE_LABELS)}</span>
                   <span className="tabular-nums">{c.count}</span>
                 </li>
               ))}

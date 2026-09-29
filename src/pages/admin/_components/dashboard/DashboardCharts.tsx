@@ -51,7 +51,7 @@ export const DashboardCharts = ({ weeklySignups, deptData }: Props) => (
                 labelFormatter={(l) => `Semaine du ${l}`}
               />
               <Line type="monotone" dataKey="sitters" name="Gardiens" stroke="hsl(var(--primary))" strokeWidth={2.5} dot={{ fill: "hsl(var(--primary))", r: 3 }} />
-              <Line type="monotone" dataKey="owners" name="Propriétaires" stroke="hsl(45, 93%, 47%)" strokeWidth={2.5} dot={{ fill: "hsl(45, 93%, 47%)", r: 3 }} />
+              <Line type="monotone" dataKey="owners" name="Propriétaires" stroke="hsl(var(--warning))" strokeWidth={2.5} dot={{ fill: "hsl(var(--warning))", r: 3 }} />
             </LineChart>
           </ResponsiveContainer>
         </div>

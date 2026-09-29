@@ -1,3 +1,4 @@
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 /**
  * /admin/hero-weights
  * ----------------------------------------------------------------------------
@@ -50,10 +51,10 @@ const CATEGORY_HINTS: Record<HeroCategoryName, string> = {
 };
 
 const CATEGORY_COLORS: Record<HeroCategoryName, string> = {
-  animals: "bg-emerald-500",
-  home: "bg-amber-500",
-  mutual_aid: "bg-rose-500",
-  village: "bg-sky-500",
+  animals: "bg-success",
+  home: "bg-warning",
+  mutual_aid: "bg-destructive",
+  village: "bg-info",
 };
 
 const PRESETS: Array<{ name: string; w: HeroWeights }> = [
@@ -208,20 +209,11 @@ export default function AdminHeroWeights() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Head>
-        <title>Admin, Poids des hero</title>
-        <meta name="robots" content="noindex,nofollow" />
-      </Head>
-
-      <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
+    <div>
+      <div className="space-y-8">
         {/* En-tête */}
         <header className="space-y-2">
-          <div className="flex items-baseline justify-between gap-4 flex-wrap">
-            <h1 className="text-2xl font-heading font-bold">
-              Poids des hero, administration
-            </h1>
-          </div>
+          <AdminPageHeader title="Poids des hero" description="Répartition cible entre les quatre catégories thématiques de la page d'accueil." />
           <p className="text-sm text-muted-foreground">
             Ajustez la répartition cible entre les quatre catégories thématiques.
             Les modifications prennent effet <strong>immédiatement</strong> pour
@@ -236,19 +228,19 @@ export default function AdminHeroWeights() {
             className={`rounded-lg border p-4 space-y-2 ${
               errors.length > 0
                 ? "border-destructive/40 bg-destructive/5"
-                : "border-amber-500/40 bg-amber-500/5"
+                : "border-warning/40 bg-warning/5"
             }`}
             role={errors.length > 0 ? "alert" : "status"}
           >
             <div className="flex items-center gap-2">
               <span
                 className={`text-sm font-semibold ${
-                  errors.length > 0 ? "text-destructive" : "text-amber-700 dark:text-amber-400"
+                  errors.length > 0 ? "text-destructive" : "text-warning dark:text-warning"
                 }`}
               >
                 {errors.length > 0
-                  ? `❌ ${errors.length} erreur${errors.length > 1 ? "s" : ""} bloquante${errors.length > 1 ? "s" : ""}`
-                  : `⚠️ ${warnings.length} avertissement${warnings.length > 1 ? "s" : ""}`}
+                  ? `${errors.length} erreur${errors.length > 1 ? "s" : ""} bloquante${errors.length > 1 ? "s" : ""}`
+                  : `${warnings.length} avertissement${warnings.length > 1 ? "s" : ""}`}
               </span>
               {errors.length > 0 && (
                 <span className="text-xs text-muted-foreground">
@@ -263,7 +255,7 @@ export default function AdminHeroWeights() {
                 </li>
               ))}
               {warnings.map((issue, i) => (
-                <li key={`warn-${i}`} className="text-amber-700 dark:text-amber-400">
+                <li key={`warn-${i}`} className="text-warning dark:text-warning">
                   {issue.message}
                 </li>
               ))}

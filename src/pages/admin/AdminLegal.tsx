@@ -1,3 +1,4 @@
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -45,12 +46,7 @@ const legalPages = [
 const AdminLegal = () => {
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Pages légales</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Vérifiez et consultez les pages légales du site. Toute modification se fait directement dans le code source.
-        </p>
-      </div>
+      <AdminPageHeader title="Pages légales" description="Consultez les pages légales du site. Toute modification se fait dans le code source." />
 
       <Card className="border-primary/20 bg-primary/5">
         <CardContent className="py-4 px-5">

@@ -1,3 +1,4 @@
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
@@ -67,9 +68,9 @@ interface BackfillResult {
 }
 
 const statusColor: Record<string, string> = {
-  pending: "bg-warning-soft text-warning-foreground dark:bg-amber-950 dark:text-amber-300",
-  accepted: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300",
-  rejected: "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300",
+  pending: "bg-warning-soft text-warning-foreground dark:bg-warning dark:text-warning",
+  accepted: "bg-success/10 text-success dark:bg-success dark:text-success",
+  rejected: "bg-destructive/10 text-destructive dark:bg-destructive dark:text-destructive",
   withdrawn: "bg-muted text-muted-foreground",
 };
 
@@ -187,7 +188,7 @@ const AdminDiagnostics = () => {
       const cur = m.get(r.sit_id) || {
         total: 0,
         pending: 0,
-        title: r.sit?.title || ",",
+        title: r.sit?.title || "·",
       };
       cur.total += 1;
       if (r.status === "pending") cur.pending += 1;
@@ -197,22 +198,19 @@ const AdminDiagnostics = () => {
   }, [rows]);
 
   return (
-    <div className="p-4 md:p-8 space-y-6 max-w-7xl mx-auto">
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Diagnostic, Candidatures</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Liste des candidatures retournées par la requête Supabase{" "}
-            <code className="text-xs bg-muted px-1.5 py-0.5 rounded">applications</code> avec
-            l'<code className="text-xs bg-muted px-1.5 py-0.5 rounded">auth.uid()</code> courant
-            (RLS appliqué).
-          </p>
-        </div>
-        <Button onClick={fetchData} disabled={loading} variant="outline" size="sm">
-          <RefreshCw className={`h-4 w-4 mr-1.5 ${loading ? "animate-spin" : ""}`} />
-          Recharger
-        </Button>
-      </div>
+    <div className="space-y-6">
+      <AdminPageHeader
+        title="Diagnostic"
+        description="Candidatures lisibles par votre compte administrateur, avec les outils techniques de mise en ligne."
+        actions={<>
+          <Button asChild variant="ghost" size="sm"><Link to="/admin/build-info">Version en ligne</Link></Button>
+          <Button asChild variant="ghost" size="sm"><Link to="/admin/prerender">Instantanés des pages</Link></Button>
+          <Button onClick={fetchData} disabled={loading} variant="outline" size="sm">
+            <RefreshCw className={`h-4 w-4 mr-1.5 ${loading ? "animate-spin" : ""}`} />
+            Recharger
+          </Button>
+        </>}
+      />
 
       <Card>
         <CardHeader className="pb-3">
@@ -221,16 +219,16 @@ const AdminDiagnostics = () => {
         <CardContent className="space-y-1.5 text-sm">
           <div className="flex gap-2">
             <span className="text-muted-foreground w-32">auth.uid()</span>
-            <code className="text-xs bg-muted px-2 py-0.5 rounded">{user?.id || ","}</code>
+            <code className="text-xs bg-muted px-2 py-0.5 rounded">{user?.id || "·"}</code>
           </div>
           <div className="flex gap-2">
             <span className="text-muted-foreground w-32">email</span>
-            <span>{user?.email || ","}</span>
+            <span>{user?.email || "·"}</span>
           </div>
           <div className="flex gap-2 items-center">
             <span className="text-muted-foreground w-32">rôle admin</span>
             {isAdmin ? (
-              <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+              <Badge className="bg-success/10 text-success dark:bg-success dark:text-success">
                 <CheckCircle2 className="h-3 w-3 mr-1" /> admin
               </Badge>
             ) : (
@@ -412,20 +410,20 @@ const AdminDiagnostics = () => {
                           to={`/sits/${r.sit_id}`}
                           className="hover:underline text-primary text-sm"
                         >
-                          {r.sit?.title || ","}
+                          {r.sit?.title || "·"}
                         </Link>
                       </TableCell>
                       <TableCell className="text-sm">
                         {r.owner
                           ? `${r.owner.first_name || ""} ${r.owner.last_name || ""}`.trim() ||
-                            ","
-                          : ","}
+                            "·"
+                          : "·"}
                       </TableCell>
                       <TableCell className="text-sm">
                         {r.sitter
                           ? `${r.sitter.first_name || ""} ${r.sitter.last_name || ""}`.trim() ||
-                            ","
-                          : ","}
+                            "·"
+                          : "·"}
                       </TableCell>
                       <TableCell>
                         <Badge className={statusColor[r.status] || ""}>{r.status}</Badge>
@@ -456,7 +454,7 @@ const AdminDiagnostics = () => {
               disabled={geoLoading}
               onClick={(e) => { e.preventDefault(); runCoordinateBackfill(); }}
             >
-              {geoLoading ? "Traitement," : "Confirmer"}
+              {geoLoading ? "Traitement…" : "Confirmer"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -480,9 +478,9 @@ const StatCard = ({
       <p
         className={`text-2xl font-bold tabular-nums mt-1 ${
           tone === "amber"
-            ? "text-warning dark:text-amber-400"
+            ? "text-warning dark:text-warning"
             : tone === "emerald"
-            ? "text-emerald-600 dark:text-emerald-400"
+            ? "text-success dark:text-success"
             : "text-foreground"
         }`}
       >
@@ -506,9 +504,9 @@ const InlineMetric = ({
     <p
       className={`text-xl font-bold tabular-nums mt-1 ${
         tone === "amber"
-          ? "text-warning dark:text-amber-400"
+          ? "text-warning dark:text-warning"
           : tone === "emerald"
-          ? "text-emerald-600 dark:text-emerald-400"
+          ? "text-success dark:text-success"
           : "text-foreground"
       }`}
     >

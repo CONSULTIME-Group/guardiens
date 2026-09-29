@@ -1,3 +1,5 @@
+import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -39,20 +41,18 @@ const STATUSES: { key: Status; label: string; next?: Status; prev?: Status }[] =
   { key: "archived", label: "Archivées", prev: "done" },
 ];
 
-const TYPE_LABELS: Record<ReqType, string> = {
+const TYPE_LABELS: Partial<Record<ReqType, string>> = {
   city: "Ville",
   breed: "Race",
   places: "Lieux",
-  pros: "Pros",
   other: "Autre",
 };
 
-const TYPE_COLORS: Record<ReqType, string> = {
-  city: "bg-blue-50 text-blue-700 border-blue-200",
-  breed: "bg-amber-50 text-amber-700 border-amber-200",
-  places: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  pros: "bg-purple-50 text-purple-700 border-purple-200",
-  other: "bg-slate-50 text-slate-700 border-slate-200",
+const TYPE_COLORS: Partial<Record<ReqType, string>> = {
+  city: "bg-info/10 text-info border-info/30",
+  breed: "bg-warning/10 text-warning border-warning/30",
+  places: "bg-success/10 text-success border-success/30",
+  other: "bg-muted text-muted-foreground border-border",
 };
 
 export default function AdminAnalysisRequests() {
@@ -151,14 +151,7 @@ export default function AdminAnalysisRequests() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-          Demandes d'analyse
-        </h1>
-        <p className="text-muted-foreground text-sm">
-          Formulaire public de l'article « Inventaire vivant » et de l'observatoire.
-        </p>
-      </div>
+      <AdminPageHeader title="Demandes d'analyse" description="Formulaire public de l'article « Inventaire vivant » et de l'observatoire." />
 
       <div className="grid gap-3 sm:grid-cols-3">
         <Card>
@@ -228,7 +221,7 @@ export default function AdminAnalysisRequests() {
               </CardHeader>
               <CardContent className="flex-1 space-y-2 min-h-[100px]">
                 {byStatus[col.key].length === 0 && (
-                  <p className="text-xs text-muted-foreground italic">Rien ici</p>
+                  <p className="text-xs text-muted-foreground italic">Colonne vide pour le moment.</p>
                 )}
                 {byStatus[col.key].map((r) => (
                   <RequestCard
@@ -274,7 +267,7 @@ function RequestCard({
     <div className="rounded-lg border border-border bg-background p-3 text-sm space-y-2">
       <div className="flex items-center gap-2 flex-wrap">
         <Badge className={`text-[10px] border ${TYPE_COLORS[r.request_type]}`} variant="outline">
-          {TYPE_LABELS[r.request_type]}
+          {TYPE_LABELS[r.request_type] ?? "Autre"}
         </Badge>
         <span className="text-[10px] text-muted-foreground">
           {formatDistanceToNow(new Date(r.created_at), { addSuffix: true, locale: fr })}
@@ -346,15 +339,22 @@ function RequestCard({
             <ArrowRight className="h-3.5 w-3.5" />
           </Button>
         )}
-        <Button
-          size="icon"
-          variant="ghost"
-          onClick={onDelete}
-          title="Supprimer"
-          className="ml-auto text-muted-foreground hover:text-destructive"
-        >
-          <Trash2 className="h-3.5 w-3.5" />
-        </Button>
+        <ConfirmDialog
+          trigger={<Button
+            size="icon"
+            variant="ghost"
+            title="Supprimer"
+            aria-label="Supprimer la demande"
+            className="ml-auto text-muted-foreground hover:text-destructive"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </Button>}
+          title="Supprimer cette demande ?"
+          description="La demande disparaît de la liste de façon définitive."
+          confirmLabel="Supprimer"
+          destructive
+          onConfirm={onDelete}
+        />
       </div>
     </div>
   );

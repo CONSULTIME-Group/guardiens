@@ -1,3 +1,5 @@
+import { adminLabel } from "@/lib/admin/labels";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { fetchAllRows } from "@/lib/admin/fetchAllRows";
 import { createSeqGuard } from "@/lib/admin/requestSeq";
@@ -17,10 +19,10 @@ import { Mail, Clock, FileText, Send, ShieldOff, History, Settings2, RefreshCw, 
 import { ConfirmationsTab } from "./_components/ConfirmationsTab";
 import { QueueTab } from "./_components/QueueTab";
 import DeliveryTab from "./_components/DeliveryTab";
-import { useSearchParams } from "react-router-dom";
+import { Navigate, useSearchParams } from "react-router-dom";
+import { EMAIL_SECTIONS, resolveEmailTab } from "@/lib/admin/emailSections";
 import SitterDigestTab from "./_components/SitterDigestTab";
 import MissionDigestTab from "./_components/MissionDigestTab";
-import MutualAidDashboardTab from "./_components/MutualAidDashboardTab";
 import { supabase } from "@/integrations/supabase/client";
 import { formatOpenRate, openRatePct } from "@/lib/admin/openRate";
 import { EMAIL_TRACKING_START, clampToTrackingStart, isUninstrumentedTemplate } from "@/lib/emailTracking";
@@ -137,7 +139,7 @@ const TemplatesTab = () => {
 
       <div>
         <h3 className="font-medium text-sm mb-3 flex items-center gap-2">
-          <SendHorizonal className="h-4 w-4 text-primary" /> Templates transactionnels
+          <SendHorizonal className="h-4 w-4 text-primary" /> Modèles transactionnels
           <Badge variant="secondary" className="text-[10px]">{transactionalTemplates.length}</Badge>
         </h3>
         {loadingTemplates ? (
@@ -173,7 +175,7 @@ const TemplatesTab = () => {
 
       <div>
         <h3 className="font-medium text-sm mb-3 flex items-center gap-2">
-          <Clock className="h-4 w-4 text-muted-foreground" /> Templates d'authentification
+          <Clock className="h-4 w-4 text-muted-foreground" /> Modèles d'authentification
           <Badge variant="outline" className="text-[10px]">Auth</Badge>
         </h3>
         <div className="space-y-2">
@@ -255,7 +257,7 @@ const statusConfig: Record<string, { label: string; variant: "default" | "destru
   pending: { label: "En attente", variant: "secondary" },
   sent: { label: "Envoyé", variant: "default" },
   failed: { label: "Échoué", variant: "destructive" },
-  dlq: { label: "Échoué (DLQ)", variant: "destructive" },
+  dlq: { label: "Abandonné après essais", variant: "destructive" },
   suppressed: { label: "Supprimé", variant: "outline" },
   bounced: { label: "Rebond", variant: "destructive" },
   complained: { label: "Plainte", variant: "destructive" },
@@ -272,7 +274,7 @@ const UrgencyBadge = ({ metadata }: { metadata?: { bypass?: boolean; isUrgent?: 
     return <Badge variant="outline" className="bg-warning-soft text-warning border-warning-border text-[10px]">Urgent</Badge>;
   }
   if (metadata.bypass) {
-    return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 text-[10px]">Bypass</Badge>;
+    return <Badge variant="outline" className="bg-info/10 text-info border-info/30 text-[10px]">Bypass</Badge>;
   }
   return <Badge variant="outline" className="text-muted-foreground text-[10px]">Standard</Badge>;
 };
@@ -359,7 +361,7 @@ const LogsTab = () => {
       {stats.dlq > 0 && (
         <div className="rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm flex items-center justify-between gap-3">
           <span>
-            ⚠️ <strong>{stats.dlq}</strong> email{stats.dlq > 1 ? "s" : ""} en DLQ (échec définitif après 5 tentatives) sur la période sélectionnée.
+            <strong>{stats.dlq}</strong> email{stats.dlq > 1 ? "s" : ""} abandonné{stats.dlq > 1 ? "s" : ""} après 5 tentatives sur la période sélectionnée.
           </span>
           <Button size="sm" variant="outline" onClick={() => setStatusFilter("dlq")}>
             Voir
@@ -390,7 +392,7 @@ const LogsTab = () => {
         >
           <CardContent className="pt-4 pb-3 text-center">
             <div className={`text-2xl font-bold ${stats.dlq > 0 ? "text-destructive" : "text-muted-foreground"}`}>{stats.dlq}</div>
-            <div className="text-xs text-muted-foreground">DLQ</div>
+            <div className="text-xs text-muted-foreground">Abandonnés</div>
           </CardContent>
         </Card>
         <Card><CardContent className="pt-4 pb-3 text-center">
@@ -413,7 +415,7 @@ const LogsTab = () => {
             <SelectItem value="all">Tous les statuts</SelectItem>
             <SelectItem value="sent">Envoyé</SelectItem>
             <SelectItem value="failed">Échoué</SelectItem>
-            <SelectItem value="dlq">DLQ</SelectItem>
+            <SelectItem value="dlq">Abandonnés</SelectItem>
             <SelectItem value="suppressed">Supprimé</SelectItem>
           </SelectContent>
         </Select>
@@ -433,7 +435,7 @@ const LogsTab = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="text-xs">Template</TableHead>
+              <TableHead className="text-xs">Modèle</TableHead>
               <TableHead className="text-xs">Type</TableHead>
               <TableHead className="text-xs">Destinataire</TableHead>
               <TableHead className="text-xs">Statut</TableHead>
@@ -456,7 +458,7 @@ const LogsTab = () => {
                   <TableCell className="text-xs text-muted-foreground">
                     {format(new Date(log.created_at), "dd MMM HH:mm", { locale: fr })}
                   </TableCell>
-                  <TableCell className="text-xs text-destructive max-w-[200px] truncate">{log.error_message || ","}</TableCell>
+                  <TableCell className="text-xs text-destructive max-w-[200px] truncate">{log.error_message || "·"}</TableCell>
                 </TableRow>
               ))
             )}
@@ -530,21 +532,21 @@ const SuppressionsTab = () => {
             {loading ? (
               <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground py-8">Chargement...</TableCell></TableRow>
             ) : suppressions.length === 0 ? (
-              <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground py-8">Aucun email bloqué 🎉</TableCell></TableRow>
+              <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground py-8">Aucune adresse bloquée, tous les envois peuvent partir.</TableCell></TableRow>
             ) : (
               suppressions.map((s) => (
                 <TableRow key={s.id}>
                   <TableCell className="text-sm">{s.email}</TableCell>
                   <TableCell>
                     <Badge variant={s.reason === "bounce" || s.reason === "complaint" ? "destructive" : "secondary"} className="text-xs">
-                      {reasonLabels[s.reason] || s.reason}
+                      {reasonLabels[s.reason] || adminLabel(s.reason)}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-xs text-muted-foreground">
                     {format(new Date(s.created_at), "dd MMM yyyy HH:mm", { locale: fr })}
                   </TableCell>
                   <TableCell>
-                    <Button size="sm" variant="ghost" className="text-xs h-7" onClick={() => setPendingUnblock({ id: s.id, email: s.email })}>
+                    <Button size="sm" variant="ghost" className="text-xs h-7" onClick={() => setPendingUnblock({ id: s.id, email: s.email, reason: s.reason } as any)}>
                       <ShieldOff className="h-3.5 w-3.5 mr-1" /> Débloquer
                     </Button>
                   </TableCell>
@@ -566,7 +568,10 @@ const SuppressionsTab = () => {
           <AlertDialogFooter>
             <AlertDialogCancel>Annuler</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleUnblock}
+              onClick={() => {
+                if ((pendingUnblock as any)?.reason === "complaint" && !window.confirm(`Seconde confirmation : ${pendingUnblock?.email} a signalé un email comme spam. Le débloquer l'expose à de nouveaux envois. Confirmez-vous le déblocage ?`)) return;
+                handleUnblock();
+              }}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Débloquer
@@ -678,7 +683,7 @@ interface TplStats {
   unsubscribed: number;
 }
 
-const pct = (num: number, den: number) => (den > 0 ? `${((num / den) * 100).toFixed(1)}%` : ",");
+const pct = (num: number, den: number) => (den > 0 ? `${((num / den) * 100).toFixed(1)}%` : "·");
 
 const EngagementTab = () => {
   const [rows, setRows] = useState<TplStats[]>([]);
@@ -837,7 +842,7 @@ const EngagementTab = () => {
         <p>
           Période de calcul bornée au {EMAIL_TRACKING_START.toLocaleDateString("fr-FR")}, date de mise en service du
           webhook Resend. Avant cette date, aucun événement de livraison n'était enregistré :
-          les envois existent mais restent sans retour, ce qui ne signifie pas qu'ils n'ont pas été délivrés.
+          ces envois sont bien partis, seul leur retour de livraison manque.
           {truncated ? " La fenêtre demandée a été raccourcie à cette borne." : ""}
         </p>
         <p>
@@ -871,7 +876,7 @@ const EngagementTab = () => {
         </CardContent></Card>
         <Card><CardContent className="pt-4 pb-3 text-center">
           <div className="text-2xl font-bold text-destructive">{pct(totals.bounced, totals.sent)}</div>
-          <div className="text-xs text-muted-foreground">Bounce</div>
+          <div className="text-xs text-muted-foreground">Rejets</div>
         </CardContent></Card>
       </div>
 
@@ -892,13 +897,13 @@ const EngagementTab = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="text-xs">Template</TableHead>
+              <TableHead className="text-xs">Modèle</TableHead>
               <TableHead className="text-xs text-right">Envoyés</TableHead>
               <TableHead className="text-xs text-right">Livrés</TableHead>
-              <TableHead className="text-xs text-right">Open rate</TableHead>
-              <TableHead className="text-xs text-right">Click rate</TableHead>
+              <TableHead className="text-xs text-right">Taux d'ouverture</TableHead>
+              <TableHead className="text-xs text-right">Taux de clic</TableHead>
               <TableHead className="text-xs text-right">Unsub rate</TableHead>
-              <TableHead className="text-xs text-right">Bounce</TableHead>
+              <TableHead className="text-xs text-right">Rejets</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -939,67 +944,63 @@ const EngagementTab = () => {
 };
 
 // ── Main page ──
+const TAB_CONTENT: Record<string, () => JSX.Element> = {
+  templates: () => <TemplatesTab />,
+  confirmations: () => <ConfirmationsTab />,
+  delivery: () => <DeliveryTab />,
+  engagement: () => <EngagementTab />,
+  "sitter-digest": () => <SitterDigestTab />,
+  "mission-digest": () => <MissionDigestTab />,
+  queue: () => <QueueTab />,
+  logs: () => <LogsTab />,
+  suppressions: () => <SuppressionsTab />,
+  config: () => <ConfigTab />,
+};
+
 const AdminEmails = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const tab = searchParams.get("tab") || "templates";
+  const resolved = resolveEmailTab(searchParams.get("tab"));
+  if ("redirect" in resolved) return <Navigate to={resolved.redirect} replace />;
+  const { section, tab } = resolved;
+  const current = EMAIL_SECTIONS.find((s) => s.key === section)!;
   const setTab = (v: string) => {
     const next = new URLSearchParams(searchParams);
     next.set("tab", v);
     setSearchParams(next, { replace: true });
   };
+  const Content = TAB_CONTENT[tab];
   return (
     <div className="space-y-6">
-      <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Emails & Communications</h1>
+      <AdminPageHeader title="Emails transactionnels" description="Modèles, envois, performance et résumés quotidiens des emails automatiques." />
 
-      <Tabs value={tab} onValueChange={setTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3 md:grid-cols-11">
-          <TabsTrigger value="templates" className="text-xs gap-1">
-            <FileText className="h-3.5 w-3.5" /> Templates
-          </TabsTrigger>
-          <TabsTrigger value="confirmations" className="text-xs gap-1">
-            <CheckCircle2 className="h-3.5 w-3.5" /> Confirmations
-          </TabsTrigger>
-          <TabsTrigger value="delivery" className="text-xs gap-1">
-            <AlertCircle className="h-3.5 w-3.5" /> Delivery
-          </TabsTrigger>
-          <TabsTrigger value="engagement" className="text-xs gap-1">
-            <BarChart3 className="h-3.5 w-3.5" /> Engagement
-          </TabsTrigger>
-          <TabsTrigger value="sitter-digest" className="text-xs gap-1">
-            <Bell className="h-3.5 w-3.5" /> Digest gardien
-          </TabsTrigger>
-          <TabsTrigger value="mission-digest" className="text-xs gap-1">
-            <Bell className="h-3.5 w-3.5" /> Digest entraide
-          </TabsTrigger>
-          <TabsTrigger value="mutual-aid" className="text-xs gap-1">
-            <BarChart3 className="h-3.5 w-3.5" /> Entraide
-          </TabsTrigger>
-          <TabsTrigger value="queue" className="text-xs gap-1">
-            <Inbox className="h-3.5 w-3.5" /> File
-          </TabsTrigger>
-          <TabsTrigger value="logs" className="text-xs gap-1">
-            <History className="h-3.5 w-3.5" /> Logs
-          </TabsTrigger>
-          <TabsTrigger value="suppressions" className="text-xs gap-1">
-            <Ban className="h-3.5 w-3.5" /> Suppressions
-          </TabsTrigger>
-          <TabsTrigger value="config" className="text-xs gap-1">
-            <Settings2 className="h-3.5 w-3.5" /> Config
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="templates"><TemplatesTab /></TabsContent>
-        <TabsContent value="confirmations"><ConfirmationsTab /></TabsContent>
-        <TabsContent value="delivery"><DeliveryTab /></TabsContent>
-        <TabsContent value="engagement"><EngagementTab /></TabsContent>
-        <TabsContent value="sitter-digest"><SitterDigestTab /></TabsContent>
-        <TabsContent value="mission-digest"><MissionDigestTab /></TabsContent>
-        <TabsContent value="mutual-aid"><MutualAidDashboardTab /></TabsContent>
-        <TabsContent value="queue"><QueueTab /></TabsContent>
-        <TabsContent value="logs"><LogsTab /></TabsContent>
-        <TabsContent value="suppressions"><SuppressionsTab /></TabsContent>
-        <TabsContent value="config"><ConfigTab /></TabsContent>
+      <Tabs value={section} onValueChange={setTab} className="space-y-4">
+        <div className="overflow-x-auto -mx-1 px-1">
+          <TabsList className="w-max">
+            {EMAIL_SECTIONS.map((s) => (
+              <TabsTrigger key={s.key} value={s.key}>{s.label}</TabsTrigger>
+            ))}
+          </TabsList>
+        </div>
       </Tabs>
+      {current.tabs.length > 1 && (
+        <div className="overflow-x-auto -mx-1 px-1">
+          <div className="flex w-max gap-2" role="tablist" aria-label={`Sous-sections ${current.label}`}>
+            {current.tabs.map((t) => (
+              <Button
+                key={t.key}
+                role="tab"
+                aria-selected={t.key === tab}
+                size="sm"
+                variant={t.key === tab ? "default" : "outline"}
+                onClick={() => setTab(t.key)}
+              >
+                {t.label}
+              </Button>
+            ))}
+          </div>
+        </div>
+      )}
+      <Content />
     </div>
   );
 };

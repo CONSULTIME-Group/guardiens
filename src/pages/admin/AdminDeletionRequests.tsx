@@ -1,3 +1,4 @@
+import { adminLabel } from "@/lib/admin/labels";
 import { useCallback, useEffect, useState } from "react";
 import { refreshAdminBadges } from "@/hooks/useAdminBadges";
 import { supabase } from "@/integrations/supabase/client";
@@ -161,7 +162,7 @@ export default function AdminDeletionRequests() {
   return (
     <div className="space-y-6">
       <AdminPageHeader
-        title="Demandes de suppression / RGPD"
+        title="Demandes RGPD"
         description="Traçabilité des demandes d'effacement, y compris celles reçues par email. Chaque exécution supprime le compte, envoie un accusé de traitement et bloque l'adresse."
       />
 
@@ -266,7 +267,7 @@ export default function AdminDeletionRequests() {
                     <TableRow key={r.id}>
                       <TableCell>
                         <Badge variant={r.status === "completed" ? "secondary" : "outline"}>
-                          {STATUS_LABEL[r.status] ?? r.status}
+                          {STATUS_LABEL[r.status] ?? adminLabel(r.status)}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-sm">

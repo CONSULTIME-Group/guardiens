@@ -1,3 +1,5 @@
+import { adminLabel } from "@/lib/admin/labels";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useEffect, useMemo, useState } from "react";
 import { fetchAllRows } from "@/lib/admin/fetchAllRows";
 import { TRUNCATED_NOTICE } from "@/lib/admin/csv";
@@ -132,7 +134,7 @@ const REASON_LABELS: Record<string, string> = {
   send_failed_400: "Erreur 400 à l'envoi",
   send_failed_500: "Erreur 500 à l'envoi",
   send_failed: "Échec d'envoi",
-  template_not_found: "Template introuvable",
+  template_not_found: "Modèle introuvable",
   user_unsubscribed: "Désinscrit",
   user_not_found: "Utilisateur introuvable",
   unknown: "Raison inconnue",
@@ -158,9 +160,9 @@ const formatDelay = (hours: number): string => {
   return `J+${days}`;
 };
 
-const labelSequence = (key: string) => SEQUENCE_LABELS[key] ?? key;
-const labelTemplate = (key: string) => TEMPLATE_LABELS[key] ?? key;
-const labelReason = (key: string | null) => REASON_LABELS[key ?? "unknown"] ?? (key ?? ",");
+const labelSequence = (key: string) => SEQUENCE_LABELS[key] ?? adminLabel(key);
+const labelTemplate = (key: string) => TEMPLATE_LABELS[key] ?? adminLabel(key);
+const labelReason = (key: string | null) => REASON_LABELS[key ?? "unknown"] ?? adminLabel(key);
 
 const StatCard = ({
   label,
@@ -654,7 +656,7 @@ const AdminNurturing = () => {
   const topSteps = useMemo<StepStat[]>(() => {
     const map = new Map<string, StepStat>();
     for (const l of logs) {
-      const seqKey = l.user_journeys?.sequence_key ?? ",";
+      const seqKey = l.user_journeys?.sequence_key ?? "·";
       const k = `${seqKey}::${l.step_order}::${l.template_name}`;
       const r =
         map.get(k) ??
@@ -764,15 +766,9 @@ const AdminNurturing = () => {
     tone === "ok" ? "bg-success" : tone === "warn" ? "bg-warning" : "bg-destructive";
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* En-tête */}
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-3xl font-heading font-bold">Pilotage du nurturing</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Quels emails automatiques sont envoyés, à qui, et lesquels créent vraiment de l'action.
-          </p>
-        </div>
+    <div className="space-y-6">
+      <AdminPageHeader title="Nurturing" description="Quels emails automatiques partent, à qui, et lesquels créent de l'action." />
+      <div className="flex items-start justify-end gap-4 flex-wrap">
         <div className="flex items-center gap-2 flex-wrap">
           {(["24h", "7d", "30d"] as Range[]).map((r) => (
             <Button key={r} size="sm" variant={range === r ? "default" : "outline"} onClick={() => setRange(r)}>
@@ -797,8 +793,8 @@ const AdminNurturing = () => {
               <p><strong>Séquence</strong> : campagne d'emails automatiques (ex. « Onboarding Propriétaire »). Chaque séquence cible une audience et déclenche selon une règle.</p>
               <p><strong>Étape</strong> : un email donné dans une séquence, envoyé après un délai (J+1, J+3…).</p>
               <p><strong>Parcours</strong> : un utilisateur inscrit dans une séquence. Il avance d'étape en étape, ou « sort » si l'objectif est atteint.</p>
-              <p><strong>Action</strong> : un clic sur le CTA de l'email OU une sortie via objectif atteint dans les 7 jours suivants.</p>
-              <p><strong>Evaluator</strong> : cron qui décide d'envoyer ou non chaque étape (toutes les heures). <strong>Queue</strong> : file d'attente d'envoi des emails.</p>
+              <p><strong>Action</strong> : un clic sur le bouton de l'email ou une sortie via objectif atteint dans les 7 jours suivants.</p>
+              <p><strong>Evaluator</strong> : cron qui décide d'envoyer ou non chaque étape (toutes les heures). <strong>File</strong> : file d'attente d'envoi des emails.</p>
             </PopoverContent>
           </Popover>
         </div>
@@ -817,7 +813,7 @@ const AdminNurturing = () => {
           <div className="flex items-center gap-2">
             <span className={`inline-block h-2.5 w-2.5 rounded-full ${dotClass(queueHealthy ? "ok" : queueStats.failed > 0 ? "err" : "warn")}`} />
             <div>
-              <p className="text-xs text-muted-foreground">Queue d'envoi</p>
+              <p className="text-xs text-muted-foreground">File d'envoi</p>
               <p className="text-sm font-medium">
                 {queueStats.pending} en attente · {queueStats.failed} échec(s)
               </p>
@@ -828,7 +824,7 @@ const AdminNurturing = () => {
             <div>
               <p className="text-xs text-muted-foreground">Délivrabilité (evaluator)</p>
               <p className="text-sm font-medium">
-                {stats.sendable === 0 ? "," : `${stats.successRate}% (${stats.sent}/${stats.sendable})`}
+                {stats.sendable === 0 ? "·" : `${stats.successRate}% (${stats.sent}/${stats.sendable})`}
               </p>
             </div>
           </div>
@@ -848,7 +844,7 @@ const AdminNurturing = () => {
           <CardContent className="p-4 text-sm">
             <strong>Bonne nouvelle :</strong> les {failureBurst.count} échecs de la période sont
             tous concentrés sur le {format(new Date(failureBurst.day), "dd MMMM yyyy", { locale: fr })} (il y a {failureBurst.ageDays} j).
-            Le dernier passage du cron, {cronHealth.label}, s'est terminé par un envoi réussi ,             l'incident est résolu.
+            Le dernier passage du cron, {cronHealth.label}, s'est terminé par un envoi réussi : l'incident est résolu.
           </CardContent>
         </Card>
       )}
@@ -895,13 +891,13 @@ const AdminNurturing = () => {
                     hint={`${engagementStats.opens} ouvertures (sous-estimé : Apple Mail Privacy)`}
                   />
                   <StatCard
-                    label="Taux de clic CTA"
-                    value={engagementStats.sent > 0 ? `${engagementStats.clickRate}%` : ","}
+                    label="Taux de clic sur le bouton"
+                    value={engagementStats.sent > 0 ? `${engagementStats.clickRate}%` : "·"}
                     hint={`${engagementStats.clicks} clics`}
                   />
                   <StatCard
                     label="Taux d'action"
-                    value={engagementStats.sent > 0 ? `${engagementStats.actionRate}%` : ","}
+                    value={engagementStats.sent > 0 ? `${engagementStats.actionRate}%` : "·"}
                     tone="ok"
                     hint={`${engagementStats.actions} actions, clic CTA ou objectif atteint`}
                   />
@@ -985,7 +981,7 @@ const AdminNurturing = () => {
                           <div className="flex items-center gap-4 text-xs">
                             <span><span className="text-muted-foreground">Actifs : </span><span className="font-semibold">{m.activeJourneys}</span></span>
                             <span><span className="text-muted-foreground">Envoyés : </span><span className="font-semibold text-success">{m.sent}</span></span>
-                            <span><span className="text-muted-foreground">Action : </span><span className="font-semibold">{m.sent > 0 ? `${Math.round((m.actions / m.sent) * 100)}%` : ","}</span></span>
+                            <span><span className="text-muted-foreground">Action : </span><span className="font-semibold">{m.sent > 0 ? `${Math.round((m.actions / m.sent) * 100)}%` : "·"}</span></span>
                           </div>
                         </div>
                       );
@@ -1038,7 +1034,7 @@ const AdminNurturing = () => {
                         <TableRow>
                           <TableHead>Étape</TableHead>
                           <TableHead className="text-right">Envoyés</TableHead>
-                          <TableHead className="text-right">Ouv.</TableHead>
+                          <TableHead className="text-right">Ouverture</TableHead>
                           <TableHead className="text-right">Clic</TableHead>
                           <TableHead className="text-right">Action</TableHead>
                         </TableRow>
@@ -1064,9 +1060,9 @@ const AdminNurturing = () => {
                               </TableCell>
                               <TableCell className="text-right text-sm">{s.sent}</TableCell>
                               <TableCell className="text-right text-sm">{engagementError ? UNAVAILABLE_LABEL : formatOpenRate(s.opens, s.delivered)}</TableCell>
-                              <TableCell className="text-right text-sm">{s.sent > 0 ? `${s.clickRate}%` : ","}</TableCell>
+                              <TableCell className="text-right text-sm">{s.sent > 0 ? `${s.clickRate}%` : "·"}</TableCell>
                               <TableCell className={`text-right text-sm ${tone}`}>
-                                {s.sent + s.exited > 0 ? `${s.actionRate}%` : ","}
+                                {s.sent + s.exited > 0 ? `${s.actionRate}%` : "·"}
                                 {!reliable && s.sent > 0 && (
                                   <span className="text-[9px] text-muted-foreground ml-1">(n&lt;10)</span>
                                 )}
@@ -1085,7 +1081,7 @@ const AdminNurturing = () => {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Top CTA, quels liens font cliquer ?</CardTitle>
+                  <CardTitle>Liens les plus cliqués</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {topCtas.length === 0 ? (
@@ -1095,7 +1091,7 @@ const AdminNurturing = () => {
                       <TableHeader>
                         <TableRow>
                           <TableHead>URL cliquée</TableHead>
-                          <TableHead>Templates</TableHead>
+                          <TableHead>Modèles</TableHead>
                           <TableHead className="text-right">Clics</TableHead>
                           <TableHead className="text-right">Uniques</TableHead>
                         </TableRow>
@@ -1114,7 +1110,7 @@ const AdminNurturing = () => {
                               </a>
                             </TableCell>
                             <TableCell className="text-[11px] text-muted-foreground">
-                              {Array.from(c.templates).map(labelTemplate).join(", ") || ","}
+                              {Array.from(c.templates).map(labelTemplate).join(", ") || "·"}
                             </TableCell>
                             <TableCell className="text-right text-sm font-semibold">{c.clicks}</TableCell>
                             <TableCell className="text-right text-sm text-muted-foreground">{c.uniqueSends}</TableCell>
@@ -1141,7 +1137,7 @@ const AdminNurturing = () => {
                   sequences.map((s) => {
                     const m = sequenceMetrics.get(s.key) ?? { sent: 0, delivered: 0, failed: 0, exited: 0, activeJourneys: 0, totalJourneys: 0, opens: 0, clicks: 0, actions: 0 };
                     const steps = stepsBySequence.get(s.key) ?? [];
-                    const ruleType = s.enrollment_rule?.type ?? ",";
+                    const ruleType = s.enrollment_rule?.type ?? "·";
                     const ruleLabel = RULE_TYPE_LABELS[ruleType] ?? ruleType;
                     const ruleDetail =
                       ruleType === "inactivity" && s.enrollment_rule?.days
@@ -1203,16 +1199,16 @@ const AdminNurturing = () => {
                             <p className="text-[10px] text-muted-foreground">{m.opens} ouverts sur {m.delivered} livrés</p>
                           </div>
                           <div className="bg-primary/5 border border-primary/15 rounded px-2 py-1.5">
-                            <p className="text-muted-foreground">Taux de clic CTA</p>
+                            <p className="text-muted-foreground">Taux de clic sur le bouton</p>
                             <p className="font-semibold text-foreground text-base">
-                              {m.sent > 0 ? `${Math.round((m.clicks / m.sent) * 100)}%` : ","}
+                              {m.sent > 0 ? `${Math.round((m.clicks / m.sent) * 100)}%` : "·"}
                             </p>
                             <p className="text-[10px] text-muted-foreground">{m.clicks} / {m.sent}</p>
                           </div>
                           <div className="bg-success/10 border border-success/25 rounded px-2 py-1.5">
                             <p className="text-muted-foreground">Taux d'action</p>
                             <p className="font-semibold text-success text-base">
-                              {m.sent > 0 ? `${Math.round((m.actions / m.sent) * 100)}%` : ","}
+                              {m.sent > 0 ? `${Math.round((m.actions / m.sent) * 100)}%` : "·"}
                             </p>
                             <p className="text-[10px] text-muted-foreground">clic ou objectif</p>
                           </div>
@@ -1263,7 +1259,7 @@ const AdminNurturing = () => {
                         return (
                           <TableRow key={l.id}>
                             <TableCell className="text-xs whitespace-nowrap">{format(new Date(l.created_at), "dd MMM HH:mm", { locale: fr })}</TableCell>
-                            <TableCell className="text-sm">{labelSequence(l.user_journeys?.sequence_key ?? ",")}</TableCell>
+                            <TableCell className="text-sm">{labelSequence(l.user_journeys?.sequence_key ?? "·")}</TableCell>
                             <TableCell className="text-sm">{labelTemplate(l.template_name)} <span className="text-[10px] text-muted-foreground">· étape {l.step_order}</span></TableCell>
                             <TableCell>
                               <div className="flex gap-1">
@@ -1373,7 +1369,7 @@ const AdminNurturing = () => {
 
             <div className="grid gap-4 md:grid-cols-5">
               <StatCard
-                label="Queue, total"
+                label="File, total"
                 value={queueStats.total}
                 hint={
                   nurturingTemplates.length > 0
@@ -1381,14 +1377,14 @@ const AdminNurturing = () => {
                     : "Aucun template configuré"
                 }
               />
-              <StatCard label="Queue, sent" value={queueStats.sent} tone="ok" />
-              <StatCard label="Queue, pending" value={queueStats.pending} tone={queueStats.pending > 0 ? "warn" : "ok"} />
+              <StatCard label="File, envoyés" value={queueStats.sent} tone="ok" />
+              <StatCard label="File, en attente" value={queueStats.pending} tone={queueStats.pending > 0 ? "warn" : "ok"} />
               <StatCard
-                label="Queue, failed/DLQ"
+                label="File, échoués ou abandonnés"
                 value={queueStats.failed}
                 tone={queueStats.failed > 0 ? "err" : "ok"}
               />
-              <StatCard label="Queue, suppressed" value={queueStats.suppressed} />
+              <StatCard label="File, bloqués" value={queueStats.suppressed} />
             </div>
 
             <Card>
@@ -1545,7 +1541,7 @@ const AdminNurturing = () => {
                         <TableHead>Date</TableHead>
                         <TableHead>Séquence</TableHead>
                         <TableHead>Step</TableHead>
-                        <TableHead>Template</TableHead>
+                        <TableHead>Modèle</TableHead>
                         <TableHead>Raison</TableHead>
                         <TableHead>Détail HTTP</TableHead>
                       </TableRow>
@@ -1556,14 +1552,14 @@ const AdminNurturing = () => {
                           <TableCell className="text-xs whitespace-nowrap">
                             {format(new Date(l.created_at), "dd MMM HH:mm", { locale: fr })}
                           </TableCell>
-                          <TableCell className="text-sm" title={l.user_journeys?.sequence_key ?? ""}>{labelSequence(l.user_journeys?.sequence_key ?? ",")}</TableCell>
+                          <TableCell className="text-sm" title={l.user_journeys?.sequence_key ?? ""}>{labelSequence(l.user_journeys?.sequence_key ?? "·")}</TableCell>
                           <TableCell>{l.step_order}</TableCell>
                           <TableCell className="text-sm" title={l.template_name}>{labelTemplate(l.template_name)}</TableCell>
                           <TableCell>
                             <Badge variant="destructive" title={l.reason ?? ""}>{labelReason(l.reason)}</Badge>
                           </TableCell>
                           <TableCell className="font-mono text-[11px] max-w-md truncate" title={l.error_detail?.body_excerpt ?? ""}>
-                            {l.error_detail?.status ? `${l.error_detail.status} · ${l.error_detail.body_excerpt?.slice(0, 80) ?? ""}` : ","}
+                            {l.error_detail?.status ? `${l.error_detail.status} · ${l.error_detail.body_excerpt?.slice(0, 80) ?? ""}` : "·"}
                           </TableCell>
                         </TableRow>
                       ))}
@@ -1626,7 +1622,7 @@ const AdminNurturing = () => {
               onClick={(e) => { e.preventDefault(); confirmEvaluate(); }}
             >
               {triggering ? (
-                <><Loader2 className="h-4 w-4 mr-1 animate-spin" />Envoi en cours,</>
+                <><Loader2 className="h-4 w-4 mr-1 animate-spin" />Envoi en cours…</>
               ) : (
                 <>Envoyer {preview?.sent ?? 0} email{(preview?.sent ?? 0) > 1 ? "s" : ""}</>
               )}

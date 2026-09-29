@@ -1,3 +1,4 @@
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { ENTRAIDE_FILTER_CATEGORIES, MISSION_CATEGORY_LABEL, missionCategoryLabel } from "@/lib/missionCategories";
 import { fetchAllRows } from "@/lib/admin/fetchAllRows";
 import { createSeqGuard } from "@/lib/admin/requestSeq";
@@ -486,14 +487,13 @@ const AdminSmallMissions = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">
-          {tab === "projets" ? "Projets participatifs" : "Entraide"}
-        </h1>
-        <Button variant="outline" size="sm" onClick={exportCsv} disabled={!responseCountsReady}>
+      <AdminPageHeader
+        title={tab === "projets" ? "Projets" : "Entraide"}
+        description={tab === "projets" ? "Projets participatifs publiés par les membres." : "Demandes et offres d'entraide entre membres."}
+        actions={<Button variant="outline" size="sm" onClick={exportCsv} disabled={!responseCountsReady}>
           <Download className="h-4 w-4 mr-2" /> Exporter CSV
-        </Button>
-      </div>
+        </Button>}
+      />
 
       {missionsTruncated && (
         <p role="status" className="text-sm text-warning">{TRUNCATED_NOTICE}</p>
@@ -805,7 +805,7 @@ const AdminSmallMissions = () => {
       {/* Clé de lecture de la colonne Notifiés, sinon le zéro se lit comme un bug. */}
       <p className="text-xs text-muted-foreground">
         Lecture de la colonne Notifiés : un zéro signifie que la publication est antérieure à la mise
-        en service de la file de notification, le 9 juillet 2026. Ce n'est pas un échec de diffusion.
+        en service de la file de notification, le 9 juillet 2026 : la diffusion a fonctionné normalement.
       </p>
 
       {/* Pagination */}

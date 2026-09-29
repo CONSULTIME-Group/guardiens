@@ -1,3 +1,4 @@
+import { memberName } from "@/lib/admin/labels";
 import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -202,7 +203,7 @@ export const ListingDrilldownDialog = ({ open, onOpenChange, sitId, sitTitle, in
                   <ChevronLeft className="h-4 w-4 mr-1" /> Retour aux conversations
                 </Button>
                 <div className="rounded-lg border bg-card p-3 mb-3 text-sm">
-                  <div className="font-medium">{activeConv.owner_name} ↔ {activeConv.sitter_name}</div>
+                  <div className="font-medium">{memberName(activeConv.owner_name)} et {memberName(activeConv.sitter_name)}</div>
                   <div className="text-xs text-muted-foreground">
                     {activeConv.message_count} message{activeConv.message_count > 1 ? "s" : ""}
                   </div>
@@ -218,9 +219,9 @@ export const ListingDrilldownDialog = ({ open, onOpenChange, sitId, sitTitle, in
                         <div className="flex items-center gap-2 mb-1">
                           <Avatar className="h-6 w-6">
                             <AvatarImage src={m.sender_avatar || undefined} />
-                            <AvatarFallback className="text-[10px]">{initials(m.sender_name)}</AvatarFallback>
+                            <AvatarFallback className="text-[10px]">{initials(memberName(m.sender_name))}</AvatarFallback>
                           </Avatar>
-                          <span className="text-xs font-medium">{m.sender_name}</span>
+                          <span className="text-xs font-medium">{memberName(m.sender_name)}</span>
                           <span
                             className="text-[10px] text-muted-foreground ml-auto"
                             title={format(new Date(m.created_at), "dd/MM/yyyy HH:mm", { locale: fr })}
@@ -254,11 +255,11 @@ export const ListingDrilldownDialog = ({ open, onOpenChange, sitId, sitTitle, in
                     <div className="flex items-center gap-2 min-w-0">
                       <Avatar className="h-7 w-7">
                         <AvatarImage src={c.sitter_avatar || undefined} />
-                        <AvatarFallback className="text-[10px]">{initials(c.sitter_name)}</AvatarFallback>
+                        <AvatarFallback className="text-[10px]">{initials(memberName(c.sitter_name))}</AvatarFallback>
                       </Avatar>
                       <div className="min-w-0">
                         <div className="text-sm font-medium truncate">
-                          {c.owner_name} ↔ {c.sitter_name}
+                          {memberName(c.owner_name)} et {memberName(c.sitter_name)}
                         </div>
                         <div className="text-xs text-muted-foreground">
                           {c.message_count} message{c.message_count > 1 ? "s" : ""}

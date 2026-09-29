@@ -7,7 +7,7 @@ import AffinityPilotCard from "./_components/dashboard/AffinityPilotCard";
  * Le titre d'onglet est posé par AdminLayout ("Affinité | Admin Guardiens").
  */
 const AdminAffinity = () => (
-  <div className="space-y-6 p-4 md:p-6 max-w-7xl mx-auto">
+  <div className="space-y-6">
     <AdminPageHeader
       title="Affinité"
       description="Distribution, visibilité et surfaces du score d'affinité sur 30 jours."

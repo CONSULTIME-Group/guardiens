@@ -22,14 +22,14 @@ interface TopArticlesTableProps {
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
-  ville: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
-  guide_race: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200",
-  vie_locale: "bg-warning-soft text-warning-foreground dark:bg-orange-900 dark:text-orange-200",
-  guide_local: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
-  conseil_gardien: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200",
-  conseil_proprio: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200",
-  guide_pratique: "bg-warning-soft text-warning-foreground dark:bg-amber-900 dark:text-amber-200",
-  saisonnier: "bg-sky-100 text-sky-800 dark:bg-sky-900 dark:text-sky-200",
+  ville: "bg-info/10 text-info dark:bg-info dark:text-info",
+  guide_race: "bg-success/10 text-success dark:bg-success dark:text-success",
+  vie_locale: "bg-warning-soft text-warning-foreground dark:bg-warning dark:text-warning",
+  guide_local: "bg-primary/10 text-primary dark:bg-primary dark:text-primary",
+  conseil_gardien: "bg-muted text-muted-foreground dark:bg-foreground dark:text-muted-foreground",
+  conseil_proprio: "bg-muted text-muted-foreground dark:bg-foreground dark:text-muted-foreground",
+  guide_pratique: "bg-warning-soft text-warning-foreground dark:bg-warning dark:text-warning",
+  saisonnier: "bg-info/10 text-info dark:bg-info dark:text-info",
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -128,7 +128,7 @@ const TopArticlesTable = ({ topPages }: TopArticlesTableProps) => {
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg">Top 10 articles par trafic</CardTitle>
           {!hasGSC && (
-            <Badge variant="outline" className="text-warning border-orange-300 gap-1">
+            <Badge variant="outline" className="text-warning border-warning/30 gap-1">
               <AlertCircle className="h-3 w-3" /> GSC en cours de synchronisation
             </Badge>
           )}
@@ -143,7 +143,7 @@ const TopArticlesTable = ({ topPages }: TopArticlesTableProps) => {
               <TableHead>Type</TableHead>
               <TableHead className="text-right">Clics</TableHead>
               <TableHead className="text-right">Impr.</TableHead>
-              <TableHead className="text-right">CTR</TableHead>
+              <TableHead className="text-right">Taux de clic</TableHead>
               <TableHead className="text-center">Pos.</TableHead>
               <TableHead className="w-20">Action</TableHead>
             </TableRow>
@@ -153,7 +153,7 @@ const TopArticlesTable = ({ topPages }: TopArticlesTableProps) => {
               const clicksColor = !row.hasGSC
                 ? "text-muted-foreground"
                 : row.clicks > 50
-                  ? "text-emerald-600 font-bold"
+                  ? "text-success font-bold"
                   : row.clicks >= 10
                     ? "text-warning font-bold"
                     : "text-destructive font-bold";
@@ -161,10 +161,10 @@ const TopArticlesTable = ({ topPages }: TopArticlesTableProps) => {
               const posColor = !row.hasGSC
                 ? ""
                 : row.position <= 3
-                  ? "bg-emerald-600 text-white"
+                  ? "bg-success text-white"
                   : row.position <= 10
-                    ? "bg-orange-500 text-white"
-                    : "bg-red-500 text-white";
+                    ? "bg-warning text-white"
+                    : "bg-destructive text-white";
 
               const catClass = CATEGORY_COLORS[row.article.category] || "bg-muted text-muted-foreground";
               const catLabel = CATEGORY_LABELS[row.article.category] || row.article.category;
@@ -190,13 +190,13 @@ const TopArticlesTable = ({ topPages }: TopArticlesTableProps) => {
                     </span>
                   </TableCell>
                   <TableCell className={`text-right ${clicksColor}`}>
-                    {row.hasGSC ? row.clicks : ","}
+                    {row.hasGSC ? row.clicks : "·"}
                   </TableCell>
                   <TableCell className="text-right text-muted-foreground">
-                    {row.hasGSC ? row.impressions.toLocaleString() : ","}
+                    {row.hasGSC ? row.impressions.toLocaleString() : "·"}
                   </TableCell>
                   <TableCell className="text-right text-muted-foreground">
-                    {row.hasGSC ? `${(row.ctr * 100).toFixed(1)}%` : ","}
+                    {row.hasGSC ? `${(row.ctr * 100).toFixed(1)}%` : "·"}
                   </TableCell>
                   <TableCell className="text-center">
                     {row.hasGSC ? (

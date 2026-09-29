@@ -10,6 +10,8 @@ import { Switch } from "@/components/ui/switch";
 import { ArrowLeft, Sparkles, Loader2, ImagePlus, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
+import { ARTICLE_CATEGORIES, META_DESCRIPTION_MAX, nextPublishedState, type ArticleSaveAction } from "@/lib/admin/articleCategories";
 import { useTranslation } from "react-i18next";
 import { slugify } from "@/lib/normalize";
 import { compressArticleCoverFile } from "@/lib/compressImage";
@@ -81,7 +83,7 @@ const ArticleEditor = () => {
     });
   };
 
-  const handleSave = async (publish?: boolean) => {
+  const handleSave = async (action: ArticleSaveAction) => {
     if (!form.title.trim()) { toast.error("Le titre est obligatoire"); return; }
     if (!form.slug.trim()) { toast.error("Le slug est obligatoire"); return; }
 
@@ -95,7 +97,7 @@ const ArticleEditor = () => {
     }
 
     setSaving(true);
-    const shouldPublish = publish ?? form.published;
+    const shouldPublish = nextPublishedState(action, form.published);
     const record: any = {
       title: form.title,
       slug: form.slug,
@@ -210,12 +212,9 @@ const ArticleEditor = () => {
             <Select value={form.category} onValueChange={v => updateField("category", v)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="guide_race">Guide race</SelectItem>
-                <SelectItem value="guide_lieu">Guide lieu</SelectItem>
-                <SelectItem value="conseil_gardien">Conseil gardien</SelectItem>
-                <SelectItem value="conseil_proprio">Conseil proprio</SelectItem>
-                <SelectItem value="temoignage">Témoignage</SelectItem>
-                <SelectItem value="actualite">Actualité</SelectItem>
+                {Object.entries(ARTICLE_CATEGORIES).map(([k, v]) => (
+                  <SelectItem key={k} value={k}>{v}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -283,7 +282,14 @@ const ArticleEditor = () => {
             <Label>Contenu <span className="text-muted-foreground text-xs">(Markdown)</span></Label>
             <Dialog open={aiOpen} onOpenChange={setAiOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline" size="sm">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  data-confirm="generate-ai"
+                  onClick={(e) => {
+                    if (form.content.trim() && !window.confirm("Le contenu actuel sera remplacé par le texte généré. Confirmez-vous la génération ?")) e.preventDefault();
+                  }}
+                >
                   <Sparkles className="h-4 w-4 mr-2" /> Générer avec l'IA
                 </Button>
               </DialogTrigger>
@@ -377,14 +383,14 @@ const ArticleEditor = () => {
               </div>
             </div>
             <div>
-              <Label>Meta description <span className="text-muted-foreground text-xs">(max 155 car.)</span></Label>
+              <Label>Meta description <span className="text-muted-foreground text-xs">(max {META_DESCRIPTION_MAX} car.)</span></Label>
               <Textarea value={form.meta_description} onChange={e => updateField("meta_description", e.target.value)} placeholder="Auto-généré depuis le résumé si vide" rows={2} />
               <div className="flex items-center justify-between mt-1">
-                <p className={`text-xs ${form.meta_description.length > 155 ? "text-destructive font-medium" : "text-muted-foreground"}`}>
-                  {form.meta_description.length}/155
+                <p className={`text-xs ${form.meta_description.length > META_DESCRIPTION_MAX ? "text-destructive font-medium" : "text-muted-foreground"}`}>
+                  {form.meta_description.length}/{META_DESCRIPTION_MAX}
                 </p>
-                {form.meta_description.length > 155 && (
-                  <p className="text-xs text-destructive">Trop long, Google tronquera à 155 caractères</p>
+                {form.meta_description.length > META_DESCRIPTION_MAX && (
+                  <p className="text-xs text-destructive">Trop long, Google tronquera à {META_DESCRIPTION_MAX} caractères</p>
                 )}
               </div>
             </div>
@@ -392,17 +398,28 @@ const ArticleEditor = () => {
         </details>
 
         <div className="flex items-center gap-3 pt-2">
-          <Switch checked={form.published} onCheckedChange={v => updateField("published", v)} id="published" />
-          <Label htmlFor="published">Publié</Label>
+          <span className="text-sm text-muted-foreground">
+            Statut : <strong className="text-foreground">{form.published ? "Publié" : "Brouillon"}</strong>
+          </span>
         </div>
       </div>
 
       <div className="flex gap-3 justify-end">
-        <Button variant="outline" onClick={() => handleSave(false)} disabled={saving}>
+        {form.published && !isNew && (
+          <ConfirmDialog
+            trigger={<Button variant="ghost" disabled={saving}>Dépublier</Button>}
+            title="Dépublier cet article ?"
+            description="L'article quitte le site public et repasse en brouillon."
+            confirmLabel="Dépublier"
+            destructive
+            onConfirm={() => handleSave("unpublish")}
+          />
+        )}
+        <Button variant="outline" onClick={() => handleSave("draft")} disabled={saving}>
           {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-          Sauvegarder brouillon
+          {form.published ? "Enregistrer" : "Sauvegarder brouillon"}
         </Button>
-        <Button onClick={() => handleSave(true)} disabled={saving}>
+        <Button onClick={() => handleSave("publish")} disabled={saving}>
           {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
           Publier
         </Button>

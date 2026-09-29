@@ -14,9 +14,9 @@ import { cn } from "@/lib/utils";
  * (outils techniques et pages dynamiques).
  */
 const ADMIN_TITLE_FALLBACKS: Record<string, string> = {
-  "/admin/build-info": "Build Info",
-  "/admin/prerender": "Prerender",
-  "/admin/lifecycle": "Lifecycle",
+  "/admin/build-info": "Version en ligne",
+  "/admin/prerender": "Instantanés des pages",
+  "/admin/articles-longue-traine": "Articles longue traîne",
 };
 
 const resolveAdminTitle = (pathname: string): string => {
@@ -65,14 +65,14 @@ export const AdminLayout = () => {
       {/* Mobile top bar */}
       <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-card border-b border-border px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate("/dashboard")} className="p-1.5 rounded-lg hover:bg-accent transition-colors">
+          <button onClick={() => navigate("/dashboard")} aria-label="Retour à l'app" className="p-1.5 rounded-lg hover:bg-accent transition-colors">
             <ArrowLeft className="h-5 w-5 text-muted-foreground" />
           </button>
           <span className="font-body text-sm font-bold text-foreground">
             Guardiens <span className="text-muted-foreground font-normal">Admin</span>
           </span>
         </div>
-        <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-1.5 rounded-lg hover:bg-accent transition-colors">
+        <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label={mobileMenuOpen ? "Fermer le menu" : "Ouvrir le menu"} aria-expanded={mobileMenuOpen} className="p-1.5 rounded-lg hover:bg-accent transition-colors">
           {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </div>
