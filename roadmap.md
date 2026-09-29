@@ -49,3 +49,5 @@
 
 - [ ] Lot C1 Consentement cookies (bandeau CNIL, Consent Mode v2, /cookies, admin Pages légales et Trafic). À traiter après le lot A9.
 - [x] Lot J2-B Filet humain et pilotage Alma (classification, bouton contact, 3 signaux, feedback, mesure, synthèse lundi, rejeu admin).
+
+- [ ] Lot A9 Modération fiable (signalements, contestations, avis, gardes, annonces, entraide, contact)
