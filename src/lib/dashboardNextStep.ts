@@ -152,6 +152,8 @@ export interface SitterNextStepInput {
   profileCompletion: number;
   /** Touches manquantes du barème, pour nommer le reste à faire >= 90 %. */
   missing?: RailMissingItem[] | null;
+  /** Lot J5 : données d'action, utilisées à partir du seuil de 40 %. */
+  action?: Omit<SitterActionInput, "missing"> | null;
 }
 
 export const sitterNextStep = (input: SitterNextStepInput): RailNextStep | null => {
@@ -159,6 +161,9 @@ export const sitterNextStep = (input: SitterNextStepInput): RailNextStep | null 
   const pct = clampPct(profileCompletion);
 
   if (nextGuard) return nextGuardStep(nextGuard);
+  if (input.action && pct >= NEXT_STEP_ACTION_THRESHOLD) {
+    return sitterActionStep({ ...input.action, missing });
+  }
 
   if (!hasAvatar) {
     return {
@@ -228,10 +233,15 @@ export interface OwnerNextStepInput {
   profileCompletion: number;
   /** Touches manquantes du barème, pour nommer le reste à faire >= 90 %. */
   missing?: RailMissingItem[] | null;
+  /** Lot J5 : données d'action, utilisées à partir du seuil de 40 %. */
+  action?: Omit<OwnerActionInput, "missing"> | null;
 }
 
 export const ownerNextStep = (input: OwnerNextStepInput): RailNextStep | null => {
   const pct = clampPct(input.profileCompletion);
+  if (input.action && pct >= NEXT_STEP_ACTION_THRESHOLD) {
+    return ownerActionStep({ ...input.action, missing: input.missing });
+  }
   if (pct >= 100) return null;
   const deepLink = topMissingHref(input.missing) ?? "/owner-profile";
   if (pct >= 90) {

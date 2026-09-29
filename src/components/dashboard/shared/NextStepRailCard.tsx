@@ -76,6 +76,17 @@ const NextStepRailCard = ({ step, variant = "default" }: NextStepRailCardProps) 
       >
         {step.ctaLabel}
       </Link>
+      {step.secondaryLink && (
+        <p className="mt-[10px]">
+          <Link
+            to={step.secondaryLink.to}
+            className="text-muted-foreground underline underline-offset-4 hover:text-foreground"
+            style={{ fontSize: "12.5px" }}
+          >
+            {step.secondaryLink.label}
+          </Link>
+        </p>
+      )}
     </div>
   </article>
 );

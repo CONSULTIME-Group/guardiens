@@ -115,6 +115,11 @@ const SitterDashboard = () => {
       : null,
     profileCompletion: completionMissing.score ?? profileCompletion ?? 0,
     missing: completionMissing.missing,
+    action: {
+      nearbyListings: (nearbyListings ?? []) as any,
+      nearbyMissions: (nearbyMissions ?? []) as any,
+      starSitId: (topSits[0] ?? fallbackSits[0])?.id ?? null,
+    },
   });
 
   if (loading) return <SitterDashboardSkeleton />;
