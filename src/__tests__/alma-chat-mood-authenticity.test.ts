@@ -27,7 +27,7 @@ function harness(options: { rows?: typeof validMood[]; error?: boolean; throws?:
     chain.gte = chain.lte = chain.order = chain.in = chain.or = chain.like = chain.neq = chain.ilike = () => chain;
     chain.limit = (value: number) => { limit = value; return chain; };
     chain.maybeSingle = () => { single = true; return chain; };
-    chain.insert = (row: any) => { writes.push({ table, row }); return Promise.resolve({ error: null }); };
+    chain.insert = (row: any) => { writes.push({ table, row }); const p: any = Promise.resolve({ error: null }); p.select = () => ({ single: () => Promise.resolve({ data: { id: "conv-1" }, error: null }) }); return p; };
     chain.then = (resolve: (value: unknown) => unknown, reject: (reason: unknown) => unknown) => {
       if (table === "alma_moods") {
         if (options.throws) return Promise.reject(new Error("catalog unavailable")).then(resolve, reject);
