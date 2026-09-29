@@ -5,6 +5,7 @@ import {
 import { BrandedHead } from './_branded-head.tsx'
 import { BrandHeader } from './_brand-header.tsx'
 import { LegalFooter } from './_legal-footer.tsx'
+import { ProofCard } from './_proof-card.tsx'
 import { formatFirstName } from '../format-first-name.ts'
 import type { TemplateEntry } from './registry.ts'
 
@@ -47,9 +48,54 @@ export interface OwnerNoelProps {
   variant?: 'A' | 'B'
   createUrl?: string
   profileUrl?: string
+  /** Lot N6 : « responder » si la dernière réponse de départ vaut noel ou hiver. */
+  mode?: 'responder' | 'default'
+  period?: 'noel' | 'hiver'
+  /** Pourcentage ownerReadiness (lot N4). */
+  percent?: number
+  /** Déjà renseigné, ex. « votre maison, Mila et Rex, votre commune ». */
+  done?: string
+  /** Éléments à faire, ex. « une photo de chez vous et vos dates ». */
+  todo?: string
+  /** https://guardiens.fr/ma-periode/{jeton} (non-répondants). */
+  periodBaseUrl?: string
 }
 
+const UTM = 'utm_source=email&utm_medium=email&utm_campaign=owner_noel_2026'
+
+export const isResponder = (p: OwnerNoelProps) => p.mode === 'responder' && (p.period === 'noel' || p.period === 'hiver')
+
+/** Bouton « Terminer mon annonce » du mode répondant. */
+export function responderFinishUrl(period: 'noel' | 'hiver'): string {
+  const dates = period === 'noel' ? '&debut=2026-12-19&fin=2027-01-03' : ''
+  return `${SITE}/sits/create?express=1&periode=${period}${dates}&${UTM}`
+}
+
+const ofPeriod = (p: OwnerNoelProps) => (p.period === 'hiver' ? 'de cet hiver' : 'de Noël')
+const pct = (p: OwnerNoelProps) => Math.max(0, Math.min(100, Math.round(p.percent ?? 0)))
+const todoOf = (p: OwnerNoelProps) => (p.todo || '').trim() || 'à la publier'
+
+export function ownerNoelSubject(p: OwnerNoelProps): string {
+  if (!isResponder(p)) return OWNER_NOEL_SUBJECT
+  if (resolveVariant(p) === 'A') {
+    return `${p.period === 'hiver' ? 'Cet hiver' : 'Pour Noël'}, ${p.nearbyCount} gardiens près de chez vous`
+  }
+  return `Votre annonce ${ofPeriod(p)} est prête à ${pct(p)} %`
+}
+
+export const PERIOD_BUTTONS_NOEL: Array<{ p: string; label: string }> = [
+  { p: 'noel', label: 'Pour Noël' },
+  { p: 'hiver', label: 'Cet hiver' },
+  { p: 'printemps', label: 'Au printemps' },
+  { p: 'ete', label: 'Cet été' },
+  { p: 'plus_tard', label: 'Je verrai plus tard' },
+]
+
+export const noelPeriodHref = (base: string | undefined, p: string) =>
+  `${(base || `${SITE}/ma-periode`).replace(/\/+$/, '')}?p=${p}&${UTM}`
+
 export function ownerNoelPreheader(p: OwnerNoelProps): string {
+  if (isResponder(p)) return `Votre annonce est prête à ${pct(p)} %, il reste ${todoOf(p)}`
   if (resolveVariant(p) === 'A') {
     return `${p.nearbyCount} gardiens à moins de 50 km de ${(p.city || '').trim()}, et c'est vous qui choisissez`
   }
@@ -125,7 +171,103 @@ const SitterCard = ({ s }: { s: NoelSitterCard }) => {
   )
 }
 
+const PeopleBlock = ({ props, profileUrl }: { props: OwnerNoelProps; profileUrl: string }) => {
+  const town = (props.city || '').trim()
+  const sitters = (props.sitters ?? []).slice(0, 3)
+  return (
+    <Section style={card}>
+      <Eyebrow label="PRÈS DE CHEZ VOUS" />
+      {resolveVariant(props) === 'A' ? (
+        <>
+          <Text style={h2}>{props.nearbyCount} gardiens à moins de 50 km de {town}</Text>
+          <Text style={sub}>{ownerNoelSubtitle(sitters.length)}</Text>
+          {sitters.length > 0 ? (
+            <Row style={{ marginTop: '14px' }}>
+              {sitters.map((s, i) => (
+                <Column key={s.id} className="em-stack"
+                  style={{ width: '33%', verticalAlign: 'top', padding: i === 0 ? '0 6px 0 0' : i === sitters.length - 1 ? '0 0 0 6px' : '0 6px' }}>
+                  <SitterCard s={s} />
+                </Column>
+              ))}
+            </Row>
+          ) : null}
+        </>
+      ) : (
+        <>
+          <Text style={h2}>Montrez votre annonce aux gardiens proches</Text>
+          <Text style={{ ...text, fontSize: '15.5px' }}>Ajoutez votre commune sur votre profil : votre annonce apparaît aux gardiens qui habitent près de chez vous, et vous découvrez qui ils sont.</Text>
+          <Button style={buttonSecondary} href={profileUrl}>Ajouter ma commune</Button>
+        </>
+      )}
+    </Section>
+  )
+}
+
+/** Mode répondant (lot N6) : dernière réponse noel ou hiver. */
+const ResponderEmail = (props: OwnerNoelProps) => {
+  const name = formatFirstName((props.firstName || '').trim())
+  const period = props.period === 'hiver' ? 'hiver' : 'noel'
+  const done = (props.done || '').trim()
+  const profileUrl = props.profileUrl || OWNER_NOEL_PROFILE_URL
+  const intro = `${name ? `Bonjour ${name}, ` : 'Bonjour, '}vous nous avez dit partir ${period === 'hiver' ? 'cet hiver' : 'à Noël'}.`
+  const prepared = done ? ` On a préparé votre annonce avec ${done}.` : ' On a préparé votre annonce.'
+  return (
+    <Html lang="fr" dir="ltr">
+      <BrandedHead />
+      <Preview>{ownerNoelPreheader(props)}</Preview>
+      <Body style={main}>
+        <Container style={container}>
+          <Section style={{ padding: '28px 40px 8px' }} className="em-pad"><BrandHeader /></Section>
+          {HERO_IMAGE_URL ? (
+            <Img src={HERO_IMAGE_URL} width="600" alt={HERO_ALT}
+              style={{ display: 'block', width: '100%', maxWidth: '600px', height: 'auto', border: 0 }} />
+          ) : null}
+          <Section style={{ ...pad, paddingTop: '20px' }} className="em-pad">
+            <Eyebrow label={period === 'hiver' ? 'CET HIVER' : 'NOËL 2026'} />
+            <Text style={h1}>Votre annonce {ofPeriod(props)} est prête à {pct(props)} %.</Text>
+            <Text style={text}>{intro}{prepared} Il reste {todoOf(props)}.</Text>
+          </Section>
+
+          <Section style={pad} className="em-pad"><PeopleBlock props={props} profileUrl={profileUrl} /></Section>
+
+          <Section style={{ ...pad, paddingTop: '28px' }} className="em-pad">
+            <Section style={{ textAlign: 'center' }}>
+              <Button className="em-btn" style={button} href={responderFinishUrl(period)}>Terminer mon annonce</Button>
+            </Section>
+            <Text style={{ ...sub, textAlign: 'center', margin: '12px 0 0' }}>Publier et choisir votre gardien : c'est gratuit.</Text>
+          </Section>
+
+          <Section style={{ ...pad, paddingTop: '24px' }} className="em-pad"><ProofCard /></Section>
+
+          <Section style={{ ...pad, paddingTop: '24px' }} className="em-pad">
+            <Row style={{ width: 'auto' }}>
+              <Column style={{ width: '48px' }}>
+                <Img src={`${IMG}/elisa.jpg`} width="48" height="48" alt="Elisa" style={{ borderRadius: '50%', display: 'block', border: '2px solid #F3E8DD' }} />
+              </Column>
+              <Column style={{ width: '48px' }}>
+                <Img src={`${IMG}/jeremie.jpg`} width="48" height="48" alt="Jérémie" style={{ borderRadius: '50%', display: 'block', border: '2px solid #F3E8DD', marginLeft: '-12px' }} />
+              </Column>
+              <Column>&nbsp;</Column>
+            </Row>
+            <Text style={foundersQuote}>On lit chaque nouvelle annonce, et on répond à chaque message.</Text>
+            <Text style={{ fontFamily: serif, fontSize: '17px', color: '#1D1B16', margin: '10px 0 0' }}>Elisa et Jérémie</Text>
+          </Section>
+
+          <Section style={{ ...pad, paddingTop: '16px', paddingBottom: '28px' }} className="em-pad">
+            <LegalFooter
+              purpose="l'accompagnement des propriétaires dans la publication de leur annonce"
+              basis="6.1.f"
+              signoff={false}
+            />
+          </Section>
+        </Container>
+      </Body>
+    </Html>
+  )
+}
+
 const Email = (props: OwnerNoelProps) => {
+  if (isResponder(props)) return <ResponderEmail {...props} />
   const name = formatFirstName((props.firstName || '').trim())
   const town = (props.city || '').trim()
   const variant = resolveVariant(props)
@@ -221,7 +363,12 @@ const Email = (props: OwnerNoelProps) => {
           </Section>
 
           <Section style={{ ...pad, paddingTop: '24px' }} className="em-pad">
-            <Text style={text}>Vous partez à une autre période ? Votre annonce se prépare de la même façon, avec vos dates.</Text>
+            <Section style={periodBox}>
+              <Text style={{ ...text, margin: '0 0 12px' }}>Vous partez à une autre période ? Dites-le-nous en un clic :</Text>
+              {PERIOD_BUTTONS_NOEL.map((b) => (
+                <Button key={b.p} href={noelPeriodHref(props.periodBaseUrl, b.p)} style={periodBtn}>{b.label}</Button>
+              ))}
+            </Section>
           </Section>
 
           <Section style={{ ...pad, paddingBottom: '28px' }} className="em-pad">
@@ -239,7 +386,7 @@ const Email = (props: OwnerNoelProps) => {
 
 export const template = {
   component: Email,
-  subject: OWNER_NOEL_SUBJECT,
+  subject: (d: Record<string, unknown>) => ownerNoelSubject(d as OwnerNoelProps),
   displayName: 'Propriétaires, Noël 2026',
   previewData: {
     firstName: 'Camille', city: 'Lyon', nearbyCount: 42, variant: 'A',
@@ -278,3 +425,8 @@ const sitterWhere = { fontSize: '13px', color: '#6B645A', margin: '2px 0 0', lin
 const chipStyle = { backgroundColor: '#F1E4CF', color: '#7A5A2E', fontSize: '11.5px', padding: '3px 9px', borderRadius: '99px', display: 'inline-block' }
 const founders = { backgroundColor: '#F3E8DD', borderRadius: '16px', padding: '22px 24px' }
 const foundersQuote = { fontFamily: serif, fontStyle: 'italic' as const, fontSize: '18px', lineHeight: '1.45', color: '#1D1B16', margin: '14px 0 0' }
+const periodBox = { backgroundColor: '#FBF6EC', border: '1px solid #E6DCCB', borderRadius: '16px', padding: '18px 20px' }
+const periodBtn = {
+  backgroundColor: '#FFFFFF', color: '#1D1B16', border: '1px solid #D9CFBF', padding: '9px 14px', lineHeight: '18px',
+  borderRadius: '999px', fontSize: '14px', fontWeight: 600, textDecoration: 'none', display: 'inline-block', margin: '0 6px 8px 0',
+}
