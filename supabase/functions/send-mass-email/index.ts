@@ -3,6 +3,8 @@ import { resendFetch } from "../_shared/resend-guard.ts";
 import { SENDER_FROM, REPLY_TO_ADDRESS } from "../_shared/sender-address.ts";
 import { HELPS_WITH_TOKEN_DAYS, lineUrlForToken } from "../_shared/ma-ligne-logic.ts";
 import { entraideCardData } from "../_shared/entraide-card-data.ts";
+import { loadAnsweredIds, mintDepartureTokens, periodBaseUrl, splitDepartureAudience } from "../_shared/owner-departure-audience.ts";
+import { DEPARTURE_TEMPLATE } from "../_shared/owner-departure-logic.ts";
 import {
   OWNER_NOEL_TEMPLATE,
   buildNoelDataFor,
@@ -59,6 +61,25 @@ interface MassEmailFilters {
   exclude_founder_followup?: boolean;
   /** Ouvreurs récents (90 jours, toutes campagnes) en tête de file. */
   prioritize_recent_openers?: boolean;
+  // Lot N4, question de départ
+  /** Exclut le groupe témoin owner v2 (10 %, md5 déterministe). */
+  exclude_owner_v2_holdout?: boolean;
+  /** Exclut les membres ayant déjà répondu à « Vous partez quand ? ». */
+  exclude_departure_answered?: boolean;
+}
+
+/** Témoin et déjà répondu (lot N4), avec compteurs pour la confirmation. */
+async function applyDepartureFilters<T extends { id: string }>(
+  serviceClient: ReturnType<typeof createClient>, rows: T[], filters: MassEmailFilters,
+): Promise<{ rows: T[]; holdout: number | null; answered: number | null }> {
+  if (!filters.exclude_owner_v2_holdout && !filters.exclude_departure_answered) return { rows, holdout: null, answered: null };
+  const answeredIds = filters.exclude_departure_answered ? await loadAnsweredIds(serviceClient, rows.map((r) => r.id)) : new Set<string>();
+  if (filters.exclude_owner_v2_holdout) {
+    const split = splitDepartureAudience(rows, answeredIds);
+    return { rows: split.rows, holdout: split.holdoutExcluded, answered: split.alreadyAnswered };
+  }
+  const kept = rows.filter((r) => !answeredIds.has(r.id));
+  return { rows: kept, holdout: null, answered: rows.length - kept.length };
 }
 
 /** Gabarits dont le bouton porte un lien à jeton vers /ma-ligne/:token. */
@@ -617,7 +638,8 @@ Deno.serve(async (req) => {
     // Mode COUNT — estimation réelle : applique aussi les filtres obligatoires
     // (suppression list + opt-out produit) pour ne pas surestimer.
     if (mode === "count") {
-      const profiles = await fetchTargetedProfiles(serviceClient, segment, filters);
+      const departure = await applyDepartureFilters(serviceClient, await fetchTargetedProfiles(serviceClient, segment, filters), filters);
+      const profiles = departure.rows;
       let compliant: { id: string; email: string }[];
       try {
         compliant = await applyMandatoryComplianceFilters(serviceClient, profiles);
@@ -649,6 +671,8 @@ Deno.serve(async (req) => {
         count: uniqueEmails.size,
         variant_a: variantA,
         variant_b: variantB,
+        holdout_excluded: departure.holdout,
+        already_answered: departure.answered,
         helps_with_count: helpsWithCount,
         helps_with_required: filters.min_helps_with_profiles ?? null,
       }), {
@@ -688,7 +712,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    const rawProfiles = await fetchTargetedProfiles(serviceClient, segment, filters);
+    const rawProfiles = (await applyDepartureFilters(serviceClient, await fetchTargetedProfiles(serviceClient, segment, filters), filters)).rows;
 
     // Filtres RGPD/délivrabilité obligatoires (non désactivables) —
     // fail-closed : si la vérif échoue, on n'envoie RIEN.
@@ -943,6 +967,17 @@ Deno.serve(async (req) => {
         noelByProfile = await noelDataByProfile(serviceClient, ids);
       }
 
+      // Question de départ (lot N4) : un lien à jeton /ma-periode par destinataire.
+      const periodUrlByEmail = new Map<string, string>();
+      if (filters.template_name === DEPARTURE_TEMPLATE) {
+        const ids = remainingRecipients.map((e) => idByEmail.get(e.toLowerCase())).filter((id): id is string => !!id);
+        const tokens = await mintDepartureTokens(serviceClient, ids);
+        for (const e of remainingRecipients) {
+          const t = tokens.get(idByEmail.get(e.toLowerCase()) ?? "");
+          if (t) periodUrlByEmail.set(e.toLowerCase(), periodBaseUrl(t));
+        }
+      }
+
       let enqueued = 0;
       for (const email of remainingRecipients) {
         const templateName = filters.template_name;
@@ -958,6 +993,7 @@ Deno.serve(async (req) => {
                   firstName: firstNameByEmail.get(email.toLowerCase()) ?? "",
                   ...(lineUrlByEmail.has(email.toLowerCase()) ? { lineUrl: lineUrlByEmail.get(email.toLowerCase()) } : {}),
                   ...(templateName === "entraide-ligne-relance" ? (cardByEmail.get(email.toLowerCase()) ?? {}) : {}),
+                  ...(periodUrlByEmail.has(email.toLowerCase()) ? { periodBaseUrl: periodUrlByEmail.get(email.toLowerCase()) } : {}),
                   ...(noelByProfile ? (noelByProfile.get(idByEmail.get(email.toLowerCase()) ?? "") ?? { variant: "B" }) as Record<string, unknown> : {}),
                 }
               : {},
