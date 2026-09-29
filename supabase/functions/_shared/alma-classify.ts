@@ -47,6 +47,7 @@ function asBool(v: unknown): boolean {
 function stripLine(text: string, re: RegExp): string {
   const flags = re.flags.includes("g") ? re.flags : re.flags + "g";
   return text
+    .replace(new RegExp(`\\n${re.source}(?=\\n|$)`, flags), "")
     .replace(new RegExp(re.source, flags), "")
     .replace(/```(?:json)?\s*```/g, "")
     .replace(/[ \t]+\n/g, "\n")
