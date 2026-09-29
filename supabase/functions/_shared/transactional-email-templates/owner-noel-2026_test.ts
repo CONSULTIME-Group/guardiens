@@ -34,7 +34,8 @@ const COMMON = [
   'Vos consignes et vos nouvelles, au bon moment.',
   'On a gardé 37 maisons et 234 animaux avant de créer Guardiens.',
   'Elisa et Jérémie',
-  'Vous partez à une autre période ? Votre annonce se prépare de la même façon, avec vos dates.',
+  'Vous partez à une autre période ? Dites-le-nous en un clic :',
+  'Pour Noël', 'Cet hiver', 'Au printemps', 'Cet été', 'Je verrai plus tard',
 ]
 
 Deno.test('variante A : textes exacts, préheader, 3 cartes', () => {
