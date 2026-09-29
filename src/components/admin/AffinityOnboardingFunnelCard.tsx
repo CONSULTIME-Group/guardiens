@@ -17,6 +17,7 @@ import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
+import { reportAdminReadError, UNAVAILABLE_LABEL } from "@/lib/admin/readError";
 
 const KpiTile = ({ label, value }: { label: string; value: string | number }) => (
   <div className="rounded-lg border border-border bg-card p-3">
@@ -25,7 +26,6 @@ const KpiTile = ({ label, value }: { label: string; value: string | number }) =>
   </div>
 );
 
-const ROW_LIMIT = 20000;
 
 export function AffinityOnboardingFunnelCard({ since }: { since: string }) {
   const { data: flag } = useQuery({
@@ -61,78 +61,30 @@ export function AffinityOnboardingFunnelCard({ since }: { since: string }) {
     refetchOnWindowFocus: false,
   });
 
-  const { data: events = [] } = useQuery({
-    queryKey: ["affinity-funnel-events", since],
+  // Lot A10 : agrégat SQL par personne, sans plafond.
+  const { data: agg, isError } = useQuery({
+    queryKey: ["affinity-funnel-agg", since],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("analytics_events")
-        .select("event_type, user_id, metadata, created_at")
-        .in("event_type", [
-          "onboarding_started",
-          "onboarding_completed",
-          "onboarding_dismissed",
-        ])
-        .gte("created_at", since)
-        .limit(ROW_LIMIT);
-      return (data ?? []) as Array<{
-        event_type: string;
-        user_id: string | null;
-        metadata: Record<string, unknown> | null;
-        created_at: string;
-      }>;
-
+      const { data, error } = await supabase.rpc("admin_a10_affinity_onboarding_stats" as any, { p_since: since });
+      if (error) { reportAdminReadError("Onboarding affinité", error); throw error; }
+      return data as unknown as { started: number; completed: number; avg_duration_s: number | null };
     },
     staleTime: 60_000,
     refetchOnWindowFocus: false,
   });
 
-
-  const truncated = events.length >= ROW_LIMIT;
-
+  const truncated = false;
   const stats = useMemo(() => {
-    const startedUsers = new Set<string>();
-    const completedUsers = new Set<string>();
-    const firstStartedAt = new Map<string, number>();
-    const completedAt = new Map<string, number>();
-
-    for (const e of events) {
-      const uid =
-        e.user_id ||
-        (typeof (e.metadata as { user_id?: unknown } | null)?.user_id === "string"
-          ? ((e.metadata as { user_id: string }).user_id)
-          : null);
-      if (!uid) continue;
-      const ts = new Date(e.created_at).getTime();
-      if (e.event_type === "onboarding_started") {
-        startedUsers.add(uid);
-        const prev = firstStartedAt.get(uid);
-        if (prev === undefined || ts < prev) firstStartedAt.set(uid, ts);
-      } else if (e.event_type === "onboarding_completed") {
-        completedUsers.add(uid);
-        const prev = completedAt.get(uid);
-        if (prev === undefined || ts > prev) completedAt.set(uid, ts);
-      }
-    }
-
-    const started = startedUsers.size;
-    const completed = completedUsers.size;
+    const started = Number(agg?.started) || 0;
+    const completed = Number(agg?.completed) || 0;
     const abandoned = Math.max(0, started - completed);
-    const abandonRate = started > 0 ? abandoned / started : 0;
-
-    const durations: number[] = [];
-    for (const [uid, endMs] of completedAt.entries()) {
-      const startMs = firstStartedAt.get(uid);
-      if (!startMs) continue;
-      const d = (endMs - startMs) / 1000;
-      if (d > 0 && d < 3600) durations.push(d);
-    }
-    const avgDuration =
-      durations.length > 0
-        ? Math.round(durations.reduce((a, b) => a + b, 0) / durations.length)
-        : null;
-
-    return { started, completed, abandonRate, avgDuration };
-  }, [events]);
+    return {
+      started,
+      completed,
+      abandonRate: started > 0 ? abandoned / started : 0,
+      avgDuration: agg?.avg_duration_s == null ? null : Number(agg.avg_duration_s),
+    };
+  }, [agg]);
 
   return (
     <Card>

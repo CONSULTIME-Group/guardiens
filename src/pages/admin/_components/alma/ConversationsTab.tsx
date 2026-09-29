@@ -22,7 +22,6 @@ import {
   averageAnswerLength,
   openingRepetition,
   inputSplit,
-  conversationsFollowedByAction,
   type RawConversation,
 } from "@/lib/admin/alma-conversations";
 import { toCsv } from "@/lib/admin/alma-analytics";
@@ -125,8 +124,8 @@ export function ConversationsTab({ since }: { since: string }) {
         <Card>
           <CardContent className="p-4">
             <p className="text-xs text-muted-foreground">Suivies d'une action sous dix minutes</p>
-            <p className="text-2xl font-semibold">{pct(followed.rate)}</p>
-            <p className="text-xs text-muted-foreground">{followed.count} échanges</p>
+            <p className="text-2xl font-semibold">{followedError ? UNAVAILABLE_LABEL : pct(followed.rate)}</p>
+            <p className="text-xs text-muted-foreground">{followed.count} sur {Number(followedRaw?.total) || 0} échanges</p>
           </CardContent>
         </Card>
         <Card>
