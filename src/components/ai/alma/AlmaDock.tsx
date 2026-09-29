@@ -48,7 +48,7 @@ import { useAlmaFrequency, type AlmaFrequency } from "@/hooks/useAlmaFrequency";
 import { useAlmaHidden } from "@/hooks/useAlmaHidden";
 import { useAlmaInstallSuggestion } from "@/hooks/usePwaInstall";
 import { useAlmaEvolution, type AlmaStage } from "@/hooks/useAlmaEvolution";
-import { MIN_COMPLETION_TO_APPLY } from "@/hooks/useAccessLevel";
+import { profileNudgeAllowed } from "@/lib/alma/profileNudge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { trackEvent } from "@/lib/analytics";
@@ -100,7 +100,7 @@ function buildProposition(
   if (!evolution) return null;
   const { signals } = evolution;
 
-  if (signals.profileCompletion < MIN_COMPLETION_TO_APPLY) {
+  if (profileNudgeAllowed(signals.profileCompletion)) {
     return {
       message: "Complétons votre profil pour qu'Alma vous accompagne mieux.",
       ctaLabel: "Compléter mon profil",
