@@ -21,7 +21,7 @@ const ReviewRefusedEmail = ({ firstName, reason }: ReviewRefusedProps) => (
     <Body style={main}>
       <Container style={container}>
         <BrandHeader />
-        <Heading style={h1}>Votre avis n'a pas été publié</Heading>
+        <Heading style={h1}>Votre avis attend une modification</Heading>
         <Text style={text}>{firstName ? `Bonjour ${firstName},` : 'Bonjour,'}</Text>
         <Text style={text}>
           Merci d'avoir pris le temps de partager votre expérience. Après relecture, votre avis reste hors ligne pour la raison suivante :

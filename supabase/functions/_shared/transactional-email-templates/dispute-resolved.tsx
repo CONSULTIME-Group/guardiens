@@ -13,7 +13,8 @@ interface DisputeResolvedProps {
   firstName?: string
   decision?: 'accepted' | 'rejected'
   category?: string
-  adminNote?: string
+  /** Lot A9 : message rédigé pour le membre, la note interne n'est jamais transmise. */
+  memberMessage?: string
 }
 
 const categoryLabels: Record<string, string> = {
@@ -24,7 +25,7 @@ const categoryLabels: Record<string, string> = {
   autre: "Autre motif",
 }
 
-const DisputeResolvedEmail = ({ firstName, decision, category, adminNote }: DisputeResolvedProps) => {
+const DisputeResolvedEmail = ({ firstName, decision, category, memberMessage }: DisputeResolvedProps) => {
   const accepted = decision === 'accepted'
   return (
     <Html lang="fr" dir="ltr">
@@ -32,13 +33,13 @@ const DisputeResolvedEmail = ({ firstName, decision, category, adminNote }: Disp
       <Preview>
         {accepted
           ? `Votre contestation a été acceptée`
-          : `Votre contestation a été examinée`}
+          : `Votre contestation a été relue`}
         </Preview>
       <Body style={main}>
         <Container style={container}>
         <BrandHeader />
           <Heading style={h1}>
-            {accepted ? 'Votre contestation a été acceptée' : 'Votre contestation a été examinée'}
+            {accepted ? 'Votre contestation a été acceptée' : 'Votre contestation a été relue'}
           </Heading>
           <Text style={text}>
             {firstName ? `Bonjour ${firstName},` : 'Bonjour,'}
@@ -50,22 +51,19 @@ const DisputeResolvedEmail = ({ firstName, decision, category, adminNote }: Disp
 
           {accepted ? (
             <Text style={text}>
-              <strong>Décision : acceptée.</strong> L'avis concerné a été retiré et ne s'affiche
-              plus sur votre profil public.
+              <strong>Décision : acceptée.</strong> Votre contestation a été acceptée : l'avis est retiré de votre profil.
             </Text>
           ) : (
             <Text style={text}>
-              <strong>Décision : refusée.</strong> Après examen, l'avis ne contrevient pas à nos
-              règles et reste publié. Vous gardez la possibilité d'y répondre publiquement depuis
-              la page « Mes avis ».
+              <strong>Décision : l'avis reste en ligne.</strong> Après relecture, l'avis respecte nos règles de publication et reste en ligne. Vous pouvez y répondre publiquement depuis la page « Mes avis ».
             </Text>
           )}
 
-          {adminNote ? (
+          {memberMessage ? (
             <>
               <Hr style={hr} />
               <Text style={noteLabel}>Note de l'équipe :</Text>
-              <Text style={noteText}>{adminNote}</Text>
+              <Text style={noteText}>{memberMessage}</Text>
             </>
           ) : null}
 
@@ -88,9 +86,9 @@ export const template = {
   subject: (data: Record<string, any>) =>
     data?.decision === 'accepted'
       ? 'Votre contestation a été acceptée'
-      : 'Votre contestation a été examinée',
+      : 'Votre contestation a été relue',
   displayName: "Contestation d'avis résolue",
-  previewData: { firstName: 'Camille', decision: 'accepted', category: 'diffamation', adminNote: "Propos jugés excessifs au regard du contexte." },
+  previewData: { firstName: 'Camille', decision: 'accepted', category: 'diffamation', memberMessage: "Propos jugés excessifs au regard du contexte." },
 } satisfies TemplateEntry
 
 const main = { backgroundColor: '#ffffff', fontFamily: "'Outfit', Arial, sans-serif" }

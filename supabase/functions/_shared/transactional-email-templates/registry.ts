@@ -10,6 +10,8 @@ export interface TemplateEntry {
 }
 
 import { template as reportResolved } from './report-resolved.tsx'
+import { template as moderationDecision } from './moderation-decision.tsx'
+import { template as reviewRefused } from './review-refused.tsx'
 import { template as newApplication } from './new-application.tsx'
 import { template as applicationDeclined } from './application-declined.tsx'
 import { template as applicationClosedListingWithdrawn } from './application-closed-listing-withdrawn.tsx'
@@ -123,6 +125,8 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'sit-confirmed': sitConfirmed,
   'dispute-resolved': disputeResolved,
   'report-resolved': reportResolved,
+  'moderation-decision': moderationDecision,
+  'review-refused': reviewRefused,
   'new-application': newApplication,
   'application-declined': applicationDeclined,
   'application-closed-listing-withdrawn': applicationClosedListingWithdrawn,
