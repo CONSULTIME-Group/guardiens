@@ -465,6 +465,32 @@ export function AlmaConversation({
                         <span>{link.title}</span><ArrowRight className="h-4 w-4" aria-hidden />
                       </button>
                     ))}
+                    {/* Lot J2-A : action calculée côté serveur, un bouton sous la bulle. */}
+                    {message.action && !parsed.links.some((l) => l.href === message.action!.path) && (
+                      <Button
+                        type="button"
+                        data-testid="alma-message-action"
+                        onClick={() => followLink(message.action!.path)}
+                        className="mt-3 h-11 max-w-full justify-start gap-2 whitespace-normal text-left text-[13px] font-bold"
+                      >
+                        <span>{message.action.label}</span><ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
+                      </Button>
+                    )}
+                    {message.chips && message.chips.length > 0 && index === messages.length - 1 && (
+                      <div className="no-scrollbar mt-3 flex flex-nowrap gap-2 overflow-x-auto pb-1" data-testid="alma-message-chips">
+                        {message.chips.map((chip) => (
+                          <Button
+                            key={`${message.id}-${chip.label}`}
+                            type="button"
+                            variant="outline"
+                            onClick={() => (chip.path ? followLink(chip.path) : chip.prompt ? send(chip.prompt) : undefined)}
+                            className="h-11 shrink-0 px-3 text-xs font-normal text-muted-foreground"
+                          >
+                            {chip.label}
+                          </Button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <p className="alma-turn-user ml-auto whitespace-pre-line">{message.content}</p>
