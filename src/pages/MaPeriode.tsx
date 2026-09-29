@@ -5,7 +5,6 @@
  */
 import { useEffect, useRef, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import {
   callMaPeriode, finishUrl, isDeparturePeriod, remainingPhrase,
@@ -72,7 +71,7 @@ const MaPeriode = () => {
   const run = async (mode: "peek" | "save", period?: DeparturePeriod) => {
     const res = await callMaPeriode({ mode, token: token || undefined, period });
     if (res.ok) setView({ kind: "ready", data: res });
-    else setView({ kind: "error", state: res.state });
+    else setView({ kind: "error", state: (res as { state?: string }).state });
   };
 
   useEffect(() => {
@@ -90,7 +89,7 @@ const MaPeriode = () => {
 
   return (
     <main className="min-h-screen min-w-0 bg-background px-5 py-10">
-      <Helmet><title>Votre période de départ · Guardiens</title><meta name="robots" content="noindex, nofollow" /></Helmet>
+      <PageMeta title="Votre période de départ | Guardiens" description="Dites-nous quand vous partez, on prépare votre annonce avec vous." noindex />
       <div className="mx-auto w-full max-w-[560px]">
         {view.kind === "loading" && <p className="text-muted-foreground">Un instant…</p>}
         {view.kind === "error" && (
