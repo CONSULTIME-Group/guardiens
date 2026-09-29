@@ -28,7 +28,7 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
   useEffect(() => {
     if (!user) return;
     Promise.all([
-      fetchMyProfile(user.id!),
+      fetchMyProfile(user.id!, { fresh: true }),
       supabase
         .from("identity_verification_logs" as any)
         .select("*")

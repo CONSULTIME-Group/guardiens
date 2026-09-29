@@ -39,7 +39,7 @@ const ActiveRolesSection = () => {
 
   // Charge la disponibilité gardien
   if (sitterActive && isAvailable === null) {
-    fetchMySitterProfile(user.id!)
+    fetchMySitterProfile(user.id!, { fresh: true })
       .then(({ data }) => setIsAvailable(!!data?.is_available));
   }
 

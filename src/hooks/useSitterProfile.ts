@@ -134,8 +134,8 @@ export function useSitterProfile() {
     let sitterRes: any;
     try {
       [profileRes, sitterRes] = await Promise.all([
-        fetchMyProfile(user.id!),
-        fetchMySitterProfile(user.id!),
+        fetchMyProfile(user.id!, { fresh: true }),
+        fetchMySitterProfile(user.id!, { fresh: true }),
       ]);
       if (profileRes.error) throw profileRes.error;
       if (sitterRes.error) throw sitterRes.error;
@@ -286,7 +286,7 @@ export function useSitterProfile() {
   const [completion, setCompletion] = useState<number>(0);
   const refreshCompletion = useCallback(async () => {
     if (!user) return;
-    const { data: row } = await fetchMyProfile(user.id!);
+    const { data: row } = await fetchMyProfile(user.id!, { fresh: true });
     setCompletion(row?.profile_completion || 0);
   }, [user]);
   useEffect(() => { refreshCompletion(); }, [refreshCompletion]);

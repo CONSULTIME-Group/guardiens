@@ -61,7 +61,7 @@ const AlertsSection = ({ user }: { user: any }) => {
 
   useEffect(() => {
     if (!user) return;
-    fetchMyProfile(user.id!)
+    fetchMyProfile(user.id!, { fresh: true })
       .then(({ data }) => {
         const prefs = (data as any)?.email_preferences as any;
         setAutourDeVous(prefs?.autour_de_vous ?? false);
@@ -152,7 +152,7 @@ const AlertsSection = ({ user }: { user: any }) => {
       p_nearby_daily_digest: newValue,
     } as any);
     // Compatibilite lecture : on garde l'ancien JSONB aligne le temps de la transition.
-    const { data: profileData } = await fetchMyProfile(user.id!);
+    const { data: profileData } = await fetchMyProfile(user.id!, { fresh: true });
     const currentPrefs = ((profileData as any)?.email_preferences as any) || {};
     await supabase.from("profiles").update({ email_preferences: { ...currentPrefs, autour_de_vous: newValue } } as any).eq("id", user.id);
     if (error) toast.error("Une erreur est survenue. Veuillez réessayer.");

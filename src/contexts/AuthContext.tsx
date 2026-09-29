@@ -165,7 +165,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchProfile = useCallback(async (supabaseUser: SupabaseUser) => {
     setAuthTimeout(false);
-    const profileRequest = fetchMyProfile(supabaseUser.id!);
+    const profileRequest = fetchMyProfile(supabaseUser.id!, { fresh: true });
 
     let timeoutId: number | undefined;
     const profileTimeout = new Promise<never>((_, reject) => {

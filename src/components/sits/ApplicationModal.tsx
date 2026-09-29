@@ -91,10 +91,10 @@ const ApplicationModal = ({
     if (!user || !open) return;
     const load = async () => {
       const [profileRes, sitterRes, reviewRes, badgeRes, galleryRes, sitRes, ownerAffRes] = await Promise.all([
-        fetchMyProfile(user.id!),
+        fetchMyProfile(user.id!, { fresh: true }),
         // Projection complète des 16 champs d'AffinitySitterInput : parité
         // des entrées verrouillée par affinity-input-parity.test.ts.
-        fetchMySitterProfile(user.id!),
+        fetchMySitterProfile(user.id!, { fresh: true }),
         supabase.from("reviews").select("overall_rating").eq("reviewee_id", user.id).eq("published", true),
         supabase.from("badge_attributions").select("badge_id").eq("user_id", user.id),
         supabase.from("sitter_gallery").select("photo_url").eq("user_id", user.id).limit(4),

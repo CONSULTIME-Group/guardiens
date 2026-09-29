@@ -16,11 +16,11 @@ const OwnerPitchSection = ({ user }: { user: any }) => {
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { data: profile } = await fetchMyProfile(user.id!);
+      const { data: profile } = await fetchMyProfile(user.id!, { fresh: true });
       const ownerRole = profile?.role === "owner" || profile?.role === "both";
       setIsOwner(ownerRole);
       if (ownerRole) {
-        const { data } = await fetchMyOwnerProfile(user.id!);
+        const { data } = await fetchMyOwnerProfile(user.id!, { fresh: true });
         if (data) setAccept(data.accept_unsolicited_pitches ?? false);
       }
       setLoaded(true);

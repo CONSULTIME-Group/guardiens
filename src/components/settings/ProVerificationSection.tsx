@@ -31,7 +31,7 @@ const ProVerificationSection = ({ user }: { user: any }) => {
   const loadAll = async () => {
     if (!user?.id) return;
     setLoading(true);
-    const { data: profile } = await fetchMyProfile(user.id!);
+    const { data: profile } = await fetchMyProfile(user.id!, { fresh: true });
     if (profile) {
       setProStatus(((profile as any).pro_status as ProStatus) ?? "none");
       setSpecialty((profile as any).pro_specialty ?? "");

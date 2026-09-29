@@ -267,8 +267,8 @@ const CompleteProfileToApplyModal = ({
   const loadSnapshot = useCallback(async () => {
     if (!user) return;
     const [profileRes, sitterRes, galleryRes] = await Promise.all([
-      fetchMyProfile(user.id!),
-      fetchMySitterProfile(user.id!),
+      fetchMyProfile(user.id!, { fresh: true }),
+      fetchMySitterProfile(user.id!, { fresh: true }),
       supabase
         .from("sitter_gallery")
         .select("id", { count: "exact", head: true })
@@ -532,7 +532,7 @@ const CompleteProfileToApplyModal = ({
       if (!ok) return null;
     }
 
-    const { data: row } = await fetchMyProfile(user.id!);
+    const { data: row } = await fetchMyProfile(user.id!, { fresh: true });
     return row?.profile_completion ?? 0;
   };
 

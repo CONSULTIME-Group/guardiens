@@ -41,25 +41,29 @@ async function readRaw(kind: Kind, userId: string): Promise<Result> {
   return { data: (data as Row) ?? null, error: null };
 }
 
-async function readCached(kind: Kind, userId: string): Promise<Result> {
+async function readCached(kind: Kind, userId: string, opts?: { fresh?: boolean }): Promise<Result> {
   try {
     const client = qc();
     if (!client) return await readRaw(kind, userId);
     return await client.fetchQuery({
       queryKey: [kind, userId],
       queryFn: () => readRaw(kind, userId),
-      staleTime: MY_PROFILE_STALE_MS,
+      staleTime: opts?.fresh ? 0 : MY_PROFILE_STALE_MS,
     });
   } catch (error) {
     return { data: null, error };
   }
 }
 
-export const fetchMyProfile = (userId: string) => readCached("my-profile", userId);
-export const fetchMySitterProfile = (userId: string) => readCached("my-sitter-profile", userId);
-export const fetchMyOwnerProfile = (userId: string) => readCached("my-owner-profile", userId);
-export const fetchMyPublicProfile = (userId: string) => readCached("my-public-profile", userId);
+export const fetchMyProfile = (userId: string, opts?: { fresh?: boolean }) => readCached("my-profile", userId, opts);
+export const fetchMySitterProfile = (userId: string, opts?: { fresh?: boolean }) => readCached("my-sitter-profile", userId, opts);
+export const fetchMyOwnerProfile = (userId: string, opts?: { fresh?: boolean }) => readCached("my-owner-profile", userId, opts);
+export const fetchMyPublicProfile = (userId: string, opts?: { fresh?: boolean }) => readCached("my-public-profile", userId, opts);
 
+/**
+ * `fresh: true` relit la base (écrans d'édition, AuthContext) et rafraîchit
+ * le cache pour tous les autres lecteurs.
+ */
 /** Met à jour le cache après une écriture, sans relire la base. */
 export function patchMyProfileCache(userId: string, patch: Row, kind: Kind = "my-profile") {
   const client = qc();
