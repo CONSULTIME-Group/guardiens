@@ -105,7 +105,7 @@ const AdminSEO = () => {
   if (!loading && error === "GOOGLE_SERVICE_ACCOUNT_JSON not configured") {
     return (
       <div className="space-y-8">
-        <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Dashboard SEO</h1>
+        <h2 className="font-heading text-2xl font-bold tracking-tight text-foreground">Dashboard SEO</h2>
         <Card className="border-warning">
           <CardContent className="py-6">
             <div className="flex items-start gap-3">
@@ -202,31 +202,7 @@ const AdminSEO = () => {
         <GA4DiagnosticCard />
 
 
-        {/* KPIs GA4 */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <MetricCard
-            title="Profils inscrits"
-            icon={<UserCheck className="h-4 w-4 text-primary" />}
-            value={profileCount !== null ? fmtInt(profileCount) : UNAVAILABLE_LABEL}
-            subtitle="Total"
-          />
-          <MetricCard
-            title="Visiteurs uniques"
-            icon={<Users className="h-4 w-4 text-primary" />}
-            value={ga4 ? fmtInt(ga4.current.activeUsers) : "·"}
-            subtitle={`${ga4Period} · GA4`}
-            change={ga4?.previous ? pctChange(ga4.current.activeUsers, ga4.previous.activeUsers) : undefined}
-          />
-          <MetricCard
-            title="Temps moyen"
-            icon={<Timer className="h-4 w-4 text-primary" />}
-            value={ga4 ? formatDuration(ga4.current.averageSessionDuration) : "·"}
-            subtitle="Par session · GA4"
-            change={ga4?.previous ? pctChange(ga4.current.averageSessionDuration, ga4.previous.averageSessionDuration) : undefined}
-          />
-        </div>
-
-
+        {/* Lot A10 : visiteurs, temps moyen et sources figurent une seule fois, dans la synthèse en tête de page. */}
         {/* Sessions GA4 chart */}
         {ga4 && ga4.current.sessionsByDay.length > 0 && (
           <Card>
@@ -255,8 +231,6 @@ const AdminSEO = () => {
           </Card>
         )}
 
-        {/* Sources de trafic */}
-        <TrafficSources channels={ga4?.channels} loading={loading && !seoData} />
       </section>
 
       {/* ══════════════════════════════════════════ */}

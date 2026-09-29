@@ -299,7 +299,7 @@ const AdminAnalytics = () => {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Analytics</h1>
+          <h2 className="text-2xl font-bold text-foreground">Analytics</h2>
           <p className="text-sm text-muted-foreground">Funnel d'activation, conversions et inscriptions</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
@@ -421,51 +421,10 @@ const AdminAnalytics = () => {
             </CardContent>
           </Card>
 
-          {/* Funnel visuel, entonnoir horizontal */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Entonnoir d'activation</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {funnelChartData.map((step, idx) => {
-                  const max = funnelChartData[0]?.count || 1;
-                  const pct = max > 0 ? (step.count / max) * 100 : 0;
-                  const previousCount = idx > 0 ? funnelChartData[idx - 1].count : step.count;
-                  const dropPct = previousCount > 0 && idx > 0
-                    ? Math.round(((previousCount - step.count) / previousCount) * 100)
-                    : 0;
-                  return (
-                    <div key={step.etape} className="space-y-1">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="font-medium text-foreground">{step.etape}</span>
-                        <div className="flex items-center gap-3">
-                          {idx > 0 && step.count < previousCount && (
-                            <span className="text-xs text-destructive">
-                              −{dropPct}% drop
-                            </span>
-                          )}
-                          <span className="font-bold tabular-nums">{step.count}</span>
-                        </div>
-                      </div>
-                      <div className="h-8 bg-muted rounded-md overflow-hidden">
-                        <div
-                          className="h-full transition-all duration-500 rounded-md"
-                          style={{
-                            width: `${Math.max(pct, 2)}%`,
-                            backgroundColor: step.color,
-                          }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-              <p className="text-xs text-muted-foreground mt-4">
-                L'étape <strong>"Compte créé (réel)"</strong> vient de la table profiles (source fiable). Les autres viennent d'events client : un drop entre étapes peut refléter un sous-comptage (ex. inscriptions Google OAuth ne déclenchent pas <code>signup_form_submitted</code>).
-              </p>
-            </CardContent>
-          </Card>
+          {/* Lot A10 : l'entonnoir d'inscription unique vit dans l'onglet « Funnel signup » (Entonnoir chiffré, 8 étapes, agrégat SQL). */}
+          <p className="text-xs text-muted-foreground">
+            L'entonnoir d'inscription complet, de la page vue à la première action, se trouve dans l'onglet « Funnel signup ».
+          </p>
 
           {/* Comparaison par rôle */}
           {roleFilter === "all" && (
