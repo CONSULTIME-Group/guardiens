@@ -200,7 +200,7 @@ export function formatActionDirective(r: NextActionResult): string {
   }
   const when = r.placement === "after"
     ? "Réponds d'abord pleinement ; l'action vient ensuite, en une phrase, ou pas du tout si elle détonne."
-    : "Termine ta réponse par cette action, en une phrase qui la nomme.";
+    : "Termine ta réponse par cette action, en une phrase qui la nomme par le nom de sa page, sans écrire le chemin.";
   return [
     `PROCHAINE ACTION CALCULÉE : « ${r.action.label} », chemin ${r.action.path.split("?")[0]} (motif : ${r.action.reason}).`,
     when,
