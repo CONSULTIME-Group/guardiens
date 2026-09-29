@@ -1,6 +1,6 @@
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
-import { PRICING_IS_ACTIVE } from "../_shared/config-pricing.ts";
+import { isFreeAccessForAll, PRICING_ACTIVATION_DATE } from "../_shared/config-pricing.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -8,7 +8,8 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const JULY_14_2026_UTC = new Date("2026-09-30T00:00:00Z");
+// Fin de la période offerte aux fondateurs : date d'activation du payant, jamais une date codée en dur.
+const FOUNDER_TRIAL_END: Date | null = PRICING_ACTIVATION_DATE ? new Date(PRICING_ACTIVATION_DATE) : null;
 
 const PRICE_IDS = {
   monthly:  "price_1TPPawIR9gPuLbxmH9vC614f", // 6,99 €/mois récurrent  (prod_UOByEwqFtArM7W)
@@ -21,7 +22,7 @@ Deno.serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
-  if (!PRICING_IS_ACTIVE) {
+  if (isFreeAccessForAll()) {
     return new Response(
       JSON.stringify({
         error: "pricing_not_active",
@@ -171,8 +172,8 @@ Deno.serve(async (req) => {
       // ou crédit de mois offerts (parrainage).
       let trialEnd: number | undefined = undefined;
 
-      if (isFounder && now < JULY_14_2026_UTC) {
-        const endDate = new Date(JULY_14_2026_UTC);
+      if (isFounder && FOUNDER_TRIAL_END && now < FOUNDER_TRIAL_END) {
+        const endDate = new Date(FOUNDER_TRIAL_END);
         if (freeMonths > 0) endDate.setMonth(endDate.getMonth() + freeMonths);
         trialEnd = Math.floor(endDate.getTime() / 1000);
       } else if (freeMonths > 0) {

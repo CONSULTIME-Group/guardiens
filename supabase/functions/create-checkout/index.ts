@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
-import { PRICING_IS_ACTIVE } from "../_shared/config-pricing.ts";
+import { isFreeAccessForAll, PRICING_ACTIVATION_DATE } from "../_shared/config-pricing.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -74,7 +74,7 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  if (!PRICING_IS_ACTIVE) {
+  if (isFreeAccessForAll()) {
     return new Response(
       JSON.stringify({
         error: "pricing_not_active",
