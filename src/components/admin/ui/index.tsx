@@ -1,4 +1,5 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
+import { Input } from "@/components/ui/input";
 import { Loader2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -138,3 +139,22 @@ export const Pager = ({ page, total, onPage }: { page: number; total: number; on
     </div>
   );
 };
+
+/** Recherche insensible à la casse et aux accents, puis pagination par 24. */
+export const normalizeSearch = (s: string) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+export function usePagedSearch<T>(rows: T[], text: (row: T) => string) {
+  const [query, setQueryRaw] = useState("");
+  const [page, setPage] = useState(0);
+  const q = normalizeSearch(query.trim());
+  const filtered = q ? rows.filter((r) => normalizeSearch(text(r)).includes(q)) : rows;
+  const maxPage = Math.max(0, Math.ceil(filtered.length / PAGE_SIZE) - 1);
+  const current = Math.min(page, maxPage);
+  const visible = filtered.slice(current * PAGE_SIZE, (current + 1) * PAGE_SIZE);
+  const setQuery = (v: string) => { setQueryRaw(v); setPage(0); };
+  return { query, setQuery, page: current, setPage, filtered, visible, total: filtered.length };
+}
+
+export const SearchInput = ({ value, onChange, placeholder = "Rechercher", className }: { value: string; onChange: (v: string) => void; placeholder?: string; className?: string }) => (
+  <Input type="search" aria-label={placeholder} placeholder={placeholder} value={value} onChange={(e) => onChange(e.target.value)} className={cn("max-w-xs", className)} />
+);
