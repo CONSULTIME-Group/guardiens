@@ -6,7 +6,7 @@ import { entraideCardData } from "../_shared/entraide-card-data.ts";
 import { loadAnsweredIds, mintDepartureTokens, periodBaseUrl, splitDepartureAudience } from "../_shared/owner-departure-audience.ts";
 import { DEPARTURE_TEMPLATE } from "../_shared/owner-departure-logic.ts";
 import { loadRecentEmailCounts } from "../_shared/owner-campaign-pressure.ts";
-import { loadReceivedForKey, resolveDedupeKey, splitReceived } from "../_shared/mass-email-dedupe.ts";
+import { expectedCountMismatch, loadReceivedForKey, resolveDedupeKey, splitReceived } from "../_shared/mass-email-dedupe.ts";
 import { buildResponderData, loadLatestIntents, splitNoelV2Audience, type NoelResponderPeriod } from "../_shared/owner-noel-v2.ts";
 import {
   OWNER_NOEL_TEMPLATE,
@@ -829,9 +829,8 @@ Deno.serve(async (req) => {
     const recipients = [...new Set(profiles.map((p) => p.email))];
 
     // Lot A8 : le nombre saisi par l'admin à la confirmation doit être exact.
-    if (payload.expected_count !== undefined) {
-      const expectedCount = Number(payload.expected_count);
-      if (!Number.isInteger(expectedCount) || expectedCount !== recipients.length) {
+    {
+      if (expectedCountMismatch(payload.expected_count, recipients.length)) {
         return new Response(JSON.stringify({
           error: `Le nombre confirmé (${payload.expected_count}) ne correspond pas à l'audience réelle (${recipients.length}). Rien n'est parti.`,
           count: recipients.length,

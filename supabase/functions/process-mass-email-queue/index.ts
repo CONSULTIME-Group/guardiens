@@ -193,6 +193,12 @@ Deno.serve(async (req) => {
         skipped++;
         continue;
       }
+      // Campagne en pause : rien ne part, le message reste en file (visible à nouveau après VT).
+      if (campaign.status === "paused") {
+        skipped++;
+        continue;
+      }
+
 
       // Verrou : passe queued|failed → sending si toujours éligible
       const { data: locked, error: lockErr } = await service

@@ -27,3 +27,13 @@ Deno.test("split insensible à la casse", () => {
   assertEquals(r.alreadyReceived, 1);
   assertEquals(r.rows.length, 1);
 });
+Deno.test("expected_count absent (frontend en production) : aucun 409, comportement antérieur", async () => {
+  const { expectedCountMismatch } = await import("./mass-email-dedupe.ts");
+  assertEquals(expectedCountMismatch(undefined, 0), false);
+  assertEquals(expectedCountMismatch(undefined, 595), false);
+  assertEquals(expectedCountMismatch(595, 595), false);
+  assertEquals(expectedCountMismatch("595", 595), false);
+  assertEquals(expectedCountMismatch(594, 595), true);
+  assertEquals(expectedCountMismatch(null, 595), true);
+  assertEquals(expectedCountMismatch("abc", 595), true);
+});
