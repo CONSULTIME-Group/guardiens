@@ -1,3 +1,4 @@
+import { KpiTile } from "@/components/admin/ui";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -357,25 +358,6 @@ export default function AdminMessages() {
 
 }
 
-function KpiCard({
-  icon, label, value, hint, small,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string | number;
-  hint?: string;
-  small?: boolean;
-}) {
-  return (
-    <Card>
-      <CardContent className="p-4">
-        <div className="flex items-center gap-2 mb-1.5">
-          <div className="h-7 w-7 rounded-md bg-muted flex items-center justify-center">{icon}</div>
-          <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-wide">{label}</p>
-        </div>
-        <p className={small ? "text-sm font-semibold text-foreground" : "text-2xl font-bold text-foreground"}>{value}</p>
-        {hint && <p className="text-[11px] text-muted-foreground mt-0.5">{hint}</p>}
-      </CardContent>
-    </Card>
-  );
+function KpiCard({ icon, label, value, hint }: { icon: React.ReactNode; label: string; value: string | number; hint?: string; small?: boolean }) {
+  return <KpiTile icon={icon} label={label} value={value} hint={hint} />;
 }

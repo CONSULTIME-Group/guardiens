@@ -167,7 +167,7 @@ export default function AdminSignupFunnelTab() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <div>
-            <CardTitle>Funnel signup, {period} derniers jours</CardTitle>
+            <CardTitle>Entonnoir d'inscription, {period} derniers jours</CardTitle>
             {data && (
               <p className="text-xs text-muted-foreground mt-1">
                 Du {new Date(data.period_start).toLocaleDateString("fr-FR")} au{" "}

@@ -1,3 +1,4 @@
+import { KpiTile } from "@/components/admin/ui";
 import { adminLabel, CLOSE_REASON_LABELS } from "@/lib/admin/labels";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -531,12 +532,7 @@ const MutualAidDashboardTab = () => {
   );
 };
 
-const KpiCard = ({ label, value }: { label: string; value: number | string }) => (
-  <div className="rounded-xl border border-border bg-card px-4 py-3">
-    <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-semibold">{label}</p>
-    <p className="mt-1 text-2xl font-bold tabular-nums text-foreground">{value}</p>
-  </div>
-);
+const KpiCard = ({ label, value }: { label: string; value: number | string }) => <KpiTile label={label} value={value} />;
 
 const FunnelStep = ({ label, value, rate }: { label: string; value: number; rate: number | null }) => (
   <div className="rounded-xl border border-border bg-card px-3 py-3">

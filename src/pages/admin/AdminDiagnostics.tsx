@@ -1,3 +1,4 @@
+import { KpiTile } from "@/components/admin/ui";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
@@ -463,31 +464,8 @@ const AdminDiagnostics = () => {
   );
 };
 
-const StatCard = ({
-  label,
-  value,
-  tone,
-}: {
-  label: string;
-  value: number;
-  tone?: "amber" | "emerald";
-}) => (
-  <Card>
-    <CardContent className="pt-5 pb-4">
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p
-        className={`text-2xl font-bold tabular-nums mt-1 ${
-          tone === "amber"
-            ? "text-warning dark:text-warning"
-            : tone === "emerald"
-            ? "text-success dark:text-success"
-            : "text-foreground"
-        }`}
-      >
-        {value}
-      </p>
-    </CardContent>
-  </Card>
+const StatCard = ({ label, value, tone }: { label: string; value: number; tone?: "amber" | "emerald" }) => (
+  <KpiTile label={label} value={value} tone={tone === "amber" ? "warning" : tone === "emerald" ? "success" : "default"} />
 );
 
 const InlineMetric = ({

@@ -1,3 +1,4 @@
+import { KpiTile } from "@/components/admin/ui";
 import { adminLabel, ALMA_FACT_TYPE_LABELS } from "@/lib/admin/labels";
 import { fetchAllRows } from "@/lib/admin/fetchAllRows";
 import { reportAdminReadError, UNAVAILABLE_LABEL } from "@/lib/admin/readError";
@@ -35,6 +36,7 @@ import { AffinityOnboardingFunnelCard } from "@/components/admin/AffinityOnboard
 import { ConversationsTab } from "./_components/alma/ConversationsTab";
 import { MoodsTab } from "./_components/alma/MoodsTab";
 import { DiscoveryFunnelCard } from "./_components/alma/DiscoveryFunnelCard";
+import { CollapsibleSection } from "./_components/dashboard/CollapsibleSection";
 
 import { trackEvent } from "@/lib/analytics";
 import { WHISPER_PRIORITY } from "@/lib/alma/whisper-types";
@@ -115,9 +117,13 @@ export default function AdminAlma() {
         </Select>
       </div>
 
-      <AffinityOnboardingFunnelCard since={since} />
+      <CollapsibleSection title="Parcours d'affinité à l'inscription">
+        <AffinityOnboardingFunnelCard since={since} />
+      </CollapsibleSection>
 
-      <DiscoveryFunnelCard since={since} />
+      <CollapsibleSection title="Entonnoir de découverte d'Alma">
+        <DiscoveryFunnelCard since={since} />
+      </CollapsibleSection>
 
 
       <Tabs value={tab} onValueChange={handleTabChange}>
@@ -529,14 +535,7 @@ function WhispersTab({ since, range }: { since: string; range: Range }) {
 /* ══════════════════════════ KPI card ══════════════════════════ */
 
 function KpiCard({ label, value }: { label: string; value: string | number }) {
-  return (
-    <Card>
-      <CardContent className="p-4">
-        <p className="text-xs text-muted-foreground">{label}</p>
-        <p className="text-2xl font-semibold mt-1 tabular-nums">{value}</p>
-      </CardContent>
-    </Card>
-  );
+  return <KpiTile label={label} value={value} />;
 }
 
 /* ══════════════════════════ Onglet Faits culturels ══════════════════════════ */
