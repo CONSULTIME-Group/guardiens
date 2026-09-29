@@ -94,9 +94,9 @@ describe("filtre des faits culturels", () => {
     expect(options).not.toContain("breed_did_you_know");
   });
 
-  it("garde le type technique comme libellé quand il n'est pas traduit", () => {
+  it("type non traduit : forme lisible, jamais la clé brute (A11b)", () => {
     const options = buildFactTypeOptions([{ fact_type: "type_inconnu_seede" }]);
-    expect(options[1].label).toBe("type_inconnu_seede");
+    expect(options[1].label).toBe("Type inconnu seede");
   });
 });
 

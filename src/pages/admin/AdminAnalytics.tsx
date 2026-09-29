@@ -422,7 +422,7 @@ const AdminAnalytics = () => {
                 />
               </div>
               <p className="text-xs text-muted-foreground mt-3">
-                Source de vérité pour "Compte créé" : table profiles. Les events <code>signup_form_submitted</code> et <code>signup_email_confirmed</code> sont indicatifs (sous-comptés sur les inscriptions Google OAuth et les anciens comptes).
+                Source de vérité pour « Compte créé » : les profils. Les événements « Formulaire d'inscription envoyé » et « Email d'inscription confirmé » sont indicatifs (sous-comptés sur les inscriptions via Google et les anciens comptes).
               </p>
             </CardContent>
           </Card>
