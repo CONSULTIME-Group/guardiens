@@ -20,6 +20,7 @@ import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { stripEmojis } from "@/lib/stripEmojis";
 import {
   PROJET_NATURE_LABELS,
+  PROJET_NATURE_VALUES,
   PROJET_DURATION_LABELS,
   HEBERGEMENT_LABELS,
   PROJET_SAVOIR_FAIRE,
