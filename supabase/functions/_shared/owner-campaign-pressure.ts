@@ -72,3 +72,33 @@ export async function loadRecentEmailCounts(client: Client, emails: string[], da
   }
   return countRecentEmails(rows);
 }
+
+/**
+ * Anti-doublon (lot N7) : pour owner-noel-2026 et owner-departure-question,
+ * tout destinataire ayant déjà reçu le même gabarit (sent ou deferred) dans
+ * une campagne précédente est exclu.
+ */
+export const ONCE_PER_RECIPIENT_TEMPLATES: ReadonlySet<string> = new Set(["owner-noel-2026", "owner-departure-question"]);
+
+export function splitAlreadyReceived<T extends { email?: string | null }>(rows: T[], received: Set<string>): { rows: T[]; alreadyReceived: number } {
+  const kept = rows.filter((r) => !received.has((r.email ?? "").trim().toLowerCase()));
+  return { rows: kept, alreadyReceived: rows.length - kept.length };
+}
+
+export async function loadAlreadyReceived(client: Client, emails: string[], template: string): Promise<Set<string>> {
+  const list = [...new Set(emails.map((e) => (e ?? "").trim().toLowerCase()).filter(Boolean))];
+  const out = new Set<string>();
+  for (let i = 0; i < list.length; i += IN_CHUNK) {
+    const chunk = list.slice(i, i + IN_CHUNK);
+    for (let from = 0; ; from += PAGE) {
+      const { data, error } = await client.from("email_send_log")
+        .select("recipient_email").eq("template_name", template)
+        .in("recipient_email", chunk).in("status", ["sent", "deferred"])
+        .order("id", { ascending: true }).range(from, from + PAGE - 1);
+      if (error) throw new Error(`email_send_log lookup failed: ${error.message}`);
+      for (const r of data ?? []) out.add(String((r as { recipient_email: string }).recipient_email ?? "").toLowerCase());
+      if (!data || data.length < PAGE) break;
+    }
+  }
+  return out;
+}

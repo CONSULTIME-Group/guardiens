@@ -30,7 +30,7 @@ export function splitDepartureAudience<T extends { id: string; email?: string | 
 export async function loadAnsweredIds(client: Client, ids: string[]): Promise<Set<string>> {
   const out = new Set<string>();
   for (let i = 0; i < ids.length; i += IN_CHUNK) {
-    const { data, error } = await client.from("owner_departure_intents").select("user_id").in("user_id", ids.slice(i, i + IN_CHUNK));
+    const { data, error } = await client.from("owner_departure_intents").select("user_id").neq("source", "scanner_suspect").in("user_id", ids.slice(i, i + IN_CHUNK));
     if (error) throw new Error(`departure intents lookup failed: ${error.message}`);
     for (const r of data ?? []) out.add(r.user_id as string);
   }

@@ -34,7 +34,7 @@ import {
 import InlinePhotoUpload from "@/components/sits/create/InlinePhotoUpload";
 import CreateSitSetupStep from "@/components/sits/create/CreateSitSetupStep";
 import CreateSitExpress from "@/components/sits/create/CreateSitExpress";
-import { readExpressParams, isExpressActive, proposeExpressTexts, mergeExpressTexts, NOEL_DATE_PRESETS } from "@/lib/sitExpress";
+import { readExpressParams, isExpressActive, proposeExpressTexts, mergeExpressTexts, firstValidPreset } from "@/lib/sitExpress";
 import { computeReadiness } from "@/lib/ownerDeparture";
 import { uploadOwnerGalleryPhoto } from "@/lib/uploadOwnerGalleryPhoto";
 import type { InlineHousingResult } from "@/components/sits/create/InlineHousingBlock";
@@ -547,6 +547,9 @@ const CreateSit = () => {
   const [ownerPlacePhotos, setOwnerPlacePhotos] = useState<string[]>([]);
   const [profileCompletion, setProfileCompletion] = useState(0);
   const [ownerCity, setOwnerCity] = useState<string>("");
+  const [ownerHasCoords, setOwnerHasCoords] = useState(false);
+  // Annonce publiée à venir (lot N7) : le parcours express la signale.
+  const [upcomingPublishedSitId, setUpcomingPublishedSitId] = useState<string | null>(null);
   const [ownerBio, setOwnerBio] = useState<string>("");
   // Identité minimale (prénom, code postal, pays) collectée sur place quand
   // elle manque au profil, et date d'inscription pour sit_first_publish.
@@ -796,7 +799,7 @@ const CreateSit = () => {
       const [propRes, ownerRes, profileRes, galleryRes] = await Promise.all([
         supabase.from("properties").select("*").eq("user_id", user.id).limit(1).maybeSingle(),
         supabase.from("owner_profiles").select("*").eq("user_id", user.id).maybeSingle(),
-        supabase.from("profiles").select("profile_completion, city, bio, first_name, postal_code, country, created_at").eq("id", user.id).single(),
+        supabase.from("profiles").select("profile_completion, city, bio, first_name, postal_code, country, created_at, latitude, longitude").eq("id", user.id).single(),
         supabase.from("owner_gallery").select("photo_url, category").eq("user_id", user.id).order("position", { ascending: true }).limit(30),
       ]);
 
@@ -807,6 +810,7 @@ const CreateSit = () => {
 
       setProfileCompletion(profileRes.data?.profile_completion || 0);
       setOwnerCity(profileRes.data?.city || "");
+      setOwnerHasCoords(typeof (profileRes.data as any)?.latitude === "number" && typeof (profileRes.data as any)?.longitude === "number");
       setOwnerBio((profileRes.data as any)?.bio || "");
       setProfileFirstName((profileRes.data as any)?.first_name || "");
       setProfilePostalCode((profileRes.data as any)?.postal_code || "");
@@ -1591,7 +1595,7 @@ const CreateSit = () => {
     }
     // Recommandation de photos, jamais bloquante
     // (règle : src/lib/publishPhotoPrompt.ts).
-    if (!photoPromptConfirmedRef.current && shouldPromptPublishPhotos(propertyPhotoCount)) {
+    if (!expressActiveRef.current && !photoPromptConfirmedRef.current && shouldPromptPublishPhotos(propertyPhotoCount)) {
       void trackEvent("sit_publish_photo_prompt_shown", {
         source: "create_sit_page",
         metadata: { sit_id: draftId, photo_count: propertyPhotoCount },
@@ -1617,6 +1621,11 @@ const CreateSit = () => {
         failPublish(moderation.blocked.map((key) => `moderation:${key}`));
         const firstKey = moderation.blocked[0];
         const first = MODERATED_FIELDS[firstKey];
+        // En express, le verdict s'affiche sous le champ de l'écran unique.
+        if (expressActiveRef.current) {
+          setPublishing(false);
+          return;
+        }
         toast({
           variant: "destructive",
           title: `À revoir : ${first.label}`,
@@ -1977,6 +1986,14 @@ const CreateSit = () => {
     // resté au défaut : une annonce hors France doit être géocodée dans
     // son pays, sinon elle reste invisible dans la recherche.
     if (country !== "FR") setSitCountry((prev) => (prev === "FR" ? country : prev));
+    // Commune et coordonnées relues après le géocodage du code postal.
+    if (user) {
+      void supabase.from("profiles").select("city, latitude, longitude").eq("id", user.id).maybeSingle().then(({ data }) => {
+        if (!data) return;
+        setOwnerCity((data as any).city || "");
+        setOwnerHasCoords(typeof (data as any).latitude === "number" && typeof (data as any).longitude === "number");
+      });
+    }
   };
 
 
@@ -1988,6 +2005,7 @@ const CreateSit = () => {
   const [expressUploading, setExpressUploading] = useState(false);
   const expressPrefilledRef = useRef(false);
   const expressTextEditedRef = useRef(false);
+  const expressDatesTrackedRef = useRef(false);
   useEffect(() => {
     if (!expressActive || expressPrefilledRef.current) return;
     expressPrefilledRef.current = true;
@@ -2003,9 +2021,16 @@ const CreateSit = () => {
     setAbsenceReason(merged.absenceReason);
     setSitterExpectations(merged.sitterExpectations);
     setSpecificExpectations(joinExpectations(merged.absenceReason, merged.sitterExpectations));
-    if (expressParams.period === "noel" && !startDate && !endDate) {
-      setStartDate(NOEL_DATE_PRESETS[0].start);
-      setEndDate(NOEL_DATE_PRESETS[0].end);
+    const firstPreset = expressParams.period === "noel" ? firstValidPreset(today) : null;
+    if (firstPreset && !startDate && !endDate) {
+      setStartDate(firstPreset.start);
+      setEndDate(firstPreset.end);
+    }
+    // Annonce déjà publiée à venir : bandeau et lien vers elle.
+    if (user) {
+      void supabase.from("sits").select("id").eq("user_id", user.id).eq("status", "published")
+        .gte("end_date", today).order("start_date", { ascending: true }).limit(1)
+        .then(({ data }) => { if (data?.[0]?.id && data[0].id !== draftId) setUpcomingPublishedSitId(data[0].id); });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [expressActive]);
@@ -2021,10 +2046,11 @@ const CreateSit = () => {
       const url = await uploadOwnerGalleryPhoto(user.id, file, ownerPhotos.length);
       registerUploadedPhoto(url);
       setCoverPhotoUrl(url);
+      setProperty((prev) => (prev ? { ...prev, photos: [...(prev.photos || []).filter((x: string) => x !== url), url] } : prev));
       void trackEvent("sits_express_photo_added", { source: "/sits/create", metadata: { period: expressParams.period } });
     } catch (e) {
       console.error("[CreateSit] express photo upload failed", e);
-      toast({ variant: "destructive", title: "Photo non ajoutée", description: "Réessayez dans un instant, votre saisie est conservée." });
+      toast({ variant: "destructive", title: "La photo n'a pas pu être envoyée, réessayez." });
     } finally {
       setExpressUploading(false);
     }
@@ -2078,7 +2104,7 @@ const CreateSit = () => {
               })));
             }}
             onPhotoUploaded={registerUploadedPhoto}
-            photoDone={setupState.photoDone}
+            photoDone={hasPhoto}
             missingLabels={setupState.missingLabels}
             onContinue={handleSetupContinue}
             onBack={setupState.canGoBack ? handleSetupBack : undefined}
@@ -2095,9 +2121,8 @@ const CreateSit = () => {
   if (expressActive) {
     const expressReadiness = computeReadiness({
       city: ownerCity,
-      // Le profil porte ses coordonnées dès que l'identité est complète :
-      // l'écran de prérequis géocode le code postal.
-      latitude: isIdentityComplete(profileFirstName, profilePostalCode, profileCountry) ? 0 : null,
+      // La commune compte seulement avec des coordonnées réelles.
+      latitude: ownerHasCoords ? 0 : null,
       hasProperty: !!property,
       pets,
       galleryPhotoCount: ownerPhotos.length,
@@ -2122,7 +2147,12 @@ const CreateSit = () => {
           onDates={(s, e, method) => {
             setStartDate(s);
             setEndDate(e);
-            void trackEvent("sits_express_dates_picked", { source: "/sits/create", metadata: { period: expressParams.period, method } });
+            // Un seul événement, quand les deux dates sont valides.
+            const valid = !!s && !!e && s >= today && e > s;
+            if (valid && !expressDatesTrackedRef.current) {
+              expressDatesTrackedRef.current = true;
+              void trackEvent("sits_express_dates_picked", { source: "/sits/create", metadata: { period: expressParams.period, method } });
+            }
           }}
           dateError={dateError || null}
           flexibleDates={flexibleDates}
@@ -2136,7 +2166,9 @@ const CreateSit = () => {
           blocking={getBlockingBlockers(publishBlockers)}
           publishing={publishing}
           onPublish={() => { void handlePublish(); }}
-          onBack={() => navigate("/dashboard")}
+          onBack={() => { void saveDraft({ silent: true }).finally(() => navigate("/dashboard")); }}
+          moderationNotice={(key) => <FieldModerationNotice fieldKey={key} />}
+          publishedSitId={upcomingPublishedSitId}
         />
         <AnimalMentionDialog
           open={animalMentionOpen}

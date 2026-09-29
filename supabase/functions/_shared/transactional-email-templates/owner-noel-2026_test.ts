@@ -64,7 +64,7 @@ Deno.test('variante A : 0, 1 et 3 cartes', () => {
   assert(!h0.includes('Gardien1'))
   const h1 = html({ ...base, sitters: [card(1)] })
   assert(h1.includes('Gardien1')); assert(!h1.includes('Gardien2'))
-  assert(h1.includes('En voici un. Ils vous')); assert(!h1.includes('En voici trois'))
+  assert(h1.includes('En voici un. Il vous envoie sa candidature')); assert(!h1.includes('En voici trois'))
   assert(html({ ...base, sitters: [card(1), card(2)] }).includes('En voici deux. Ils vous'))
   assert(!h0.includes('En voici'))
   const h3 = html({ ...base, sitters: [card(1), card(2), card(3)] })

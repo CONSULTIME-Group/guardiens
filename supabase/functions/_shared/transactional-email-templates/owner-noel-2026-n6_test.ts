@@ -53,7 +53,7 @@ Deno.test('répondant hiver : objet, eyebrow, titre, lien sans dates', () => {
   assert(h.includes('CET HIVER'))
   assert(h.includes('Votre annonce de cet hiver est prête à 60 %.'))
   assert(h.includes('vous nous avez dit partir cet hiver.'))
-  assert(h.includes("En voici un. Ils vous envoient"))
+  assert(h.includes("En voici un. Il vous envoie"))
   assertEquals(responderFinishUrl('hiver'), 'https://guardiens.fr/sits/create?express=1&periode=hiver&utm_source=email&utm_medium=email&utm_campaign=owner_noel_2026')
   noDash(h)
 })
@@ -85,7 +85,7 @@ Deno.test('répondant, 0, 2 cartes', () => {
 
 Deno.test('déjà renseigné : noms seuls, appartement, jamais de genre', () => {
   const r = computeReadiness({ city: 'Lyon', latitude: 45, hasProperty: true, pets: [{ name: 'Mila', species: 'dog' }, { name: 'Rex', species: 'dog' }, { name: 'Nala', species: 'cat' }], galleryPhotoCount: 0, propertyPhotoCount: 0, draftStartDates: [] })
-  assertEquals(donePhrase(r, ['Mila', 'Rex', 'Nala'], 'house'), 'votre maison, Mila, Rex et Nala et votre commune')
+  assertEquals(donePhrase(r, ['Mila', 'Rex', 'Nala'], 'house'), 'votre maison, Mila, Rex, Nala et votre commune')
   assertEquals(donePhrase(r, ['Mila'], 'apartment'), 'votre appartement, Mila et votre commune')
   assertEquals(donePhrase(r, [], 'house'), 'votre maison et votre commune')
 })
@@ -127,4 +127,23 @@ Deno.test('audience : témoin exclu, printemps/été/plus tard exclus, noel/hive
 Deno.test('audience : publication exclue (inchangé)', () => {
   const pub = publishedOwnerIds([{ user_id: 'p', status: 'published', published_at: '2026-09-01' }, { user_id: 'd', status: 'draft', published_at: null }])
   assert(pub.has('p')); assert(!pub.has('d'))
+})
+
+Deno.test('N7 : sous 40 %, objet et titre sans pourcentage, sans « On a préparé » si rien', () => {
+  const p = R({ percent: 25, done: '', variant: 'A', city: 'Lyon', nearbyCount: 4, sitters: [card(1)] })
+  assertEquals(subject(p), 'Pour Noël, votre annonce en deux gestes')
+  const h = html(p)
+  assert(h.includes('Votre annonce de Noël, en deux gestes.'))
+  assert(!h.includes('On a préparé votre annonce'))
+  assert(!h.includes('prête à 25'))
+  noDash(h)
+})
+
+Deno.test('N7 : accord au singulier pour 1 gardien', () => {
+  const p = R({ variant: 'A', city: 'Lyon', nearbyCount: 1, sitters: [card(1)] })
+  assertEquals(subject(p), 'Pour Noël, 1 gardien près de chez vous')
+  const h = html(p)
+  assert(h.includes('1 gardien à moins de 50 km de Lyon'))
+  assert(h.includes('En voici un. Il vous envoie sa candidature'))
+  assertEquals(ownerNoelPreheader({ firstName: 'C', city: 'Lyon', nearbyCount: 1, variant: 'A' } as never), "1 gardien à moins de 50 km de Lyon, et c'est vous qui choisissez")
 })

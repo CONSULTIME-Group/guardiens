@@ -5,7 +5,7 @@ import { HELPS_WITH_TOKEN_DAYS, lineUrlForToken } from "../_shared/ma-ligne-logi
 import { entraideCardData } from "../_shared/entraide-card-data.ts";
 import { loadAnsweredIds, mintDepartureTokens, periodBaseUrl, splitDepartureAudience } from "../_shared/owner-departure-audience.ts";
 import { DEPARTURE_TEMPLATE } from "../_shared/owner-departure-logic.ts";
-import { loadRecentEmailCounts } from "../_shared/owner-campaign-pressure.ts";
+import { loadAlreadyReceived, loadRecentEmailCounts, ONCE_PER_RECIPIENT_TEMPLATES, splitAlreadyReceived } from "../_shared/owner-campaign-pressure.ts";
 import { buildResponderData, loadLatestIntents, splitNoelV2Audience, type NoelResponderPeriod } from "../_shared/owner-noel-v2.ts";
 import {
   OWNER_NOEL_TEMPLATE,
@@ -61,6 +61,8 @@ interface MassEmailFilters {
   exclude_suspended?: boolean;
   /** Jamais publié : aucune annonce hors brouillon ni published_at renseigné. */
   never_published_sit?: boolean;
+  /** Lot N7 : a déjà publié au moins une annonce, aucune annonce publiée à venir. */
+  past_published_no_upcoming?: boolean;
   /** Exclut les membres suivis à la main par un fondateur (conversation récente ou réponse). */
   exclude_founder_followup?: boolean;
   /** Ouvreurs récents (90 jours, toutes campagnes) en tête de file. */
@@ -75,8 +77,23 @@ interface MassEmailFilters {
   noel_v2_split?: boolean;
 }
 
-/** Témoin, déjà répondu (lot N4), autre période (lot N6) et pression (lot N4b), avec compteurs. */
+type DepartureFiltered<T> = { rows: T[]; holdout: number | null; answered: number | null; pressure: number | null; otherPeriod?: number; responders?: Map<string, NoelResponderPeriod>; alreadyReceived?: number | null };
+
+/** Filtres propriétaires, puis anti-doublon par gabarit (lot N7). */
 async function applyDepartureFilters<T extends { id: string; email?: string | null }>(
+  // deno-lint-ignore no-explicit-any
+  serviceClient: any, rows: T[], filters: MassEmailFilters,
+): Promise<DepartureFiltered<T>> {
+  const base = await applyDepartureFiltersBase(serviceClient, rows, filters);
+  const tpl = filters.template_name ?? "";
+  if (!ONCE_PER_RECIPIENT_TEMPLATES.has(tpl)) return { ...base, alreadyReceived: null };
+  const received = await loadAlreadyReceived(serviceClient, base.rows.map((r) => r.email ?? ""), tpl);
+  const split = splitAlreadyReceived(base.rows, received);
+  return { ...base, rows: split.rows, alreadyReceived: split.alreadyReceived };
+}
+
+/** Témoin, déjà répondu (lot N4), autre période (lot N6) et pression (lot N4b), avec compteurs. */
+async function applyDepartureFiltersBase<T extends { id: string; email?: string | null }>(
   // deno-lint-ignore no-explicit-any
   serviceClient: any, rows: T[], filters: MassEmailFilters,
 ): Promise<{ rows: T[]; holdout: number | null; answered: number | null; pressure: number | null; otherPeriod?: number; responders?: Map<string, NoelResponderPeriod> }> {
@@ -540,6 +557,22 @@ async function fetchTargetedProfiles(
     result = result.filter((p) => !published.has(p.id));
   }
 
+  // Anciens publiants (lot N7) : déjà publié, rien de publié à venir.
+  if (filters.past_published_no_upcoming) {
+    const published = await loadPublishedOwnerIds(serviceClient);
+    const todayParis = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris" }).format(new Date());
+    const upcoming = new Set<string>();
+    for (let from = 0; ; from += 1000) {
+      const { data, error } = await serviceClient.from("sits").select("user_id")
+        .eq("status", "published").or(`end_date.is.null,end_date.gte.${todayParis}`)
+        .order("id", { ascending: true }).range(from, from + 999);
+      if (error) throw new Error(`upcoming sits lookup failed: ${error.message}`);
+      for (const r of data ?? []) upcoming.add((r as { user_id: string }).user_id);
+      if (!data || data.length < 1000) break;
+    }
+    result = result.filter((p) => published.has(p.id) && !upcoming.has(p.id));
+  }
+
   // Suivi fondateur (lot N3)
   if (filters.exclude_founder_followup) {
     const followed = await loadFounderFollowupIds(serviceClient);
@@ -699,6 +732,7 @@ Deno.serve(async (req) => {
         holdout_excluded: departure.holdout,
         already_answered: departure.answered,
         pressure_excluded: departure.pressure,
+        already_received: departure.alreadyReceived ?? null,
         ...(filters.noel_v2_split ? {
           responders_noel: respondersNoel,
           responders_hiver: respondersHiver,

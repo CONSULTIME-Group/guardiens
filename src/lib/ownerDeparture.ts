@@ -19,6 +19,7 @@ export interface DeparturePayload {
   alma_state: "ask" | "known" | "hidden";
   holdout: boolean;
   has_published: boolean;
+  upcoming_sit_id?: string | null;
 }
 export type DepartureResult = DeparturePayload | { ok: false; state?: string; reason?: string };
 

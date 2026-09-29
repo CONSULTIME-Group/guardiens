@@ -1,4 +1,4 @@
-// Annule une campagne d'email de masse : purge les messages pgmq restants
+// Annule une campagne d'email de masse : retire les messages pgmq de la campagne
 // et passe la campagne en statut `cancelled`. Admin uniquement.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
@@ -58,16 +58,40 @@ Deno.serve(async (req) => {
       .eq("id", campaign_id);
     if (upErr) throw new Error(`campaign update failed: ${upErr.message}`);
 
-    // 2) purge de la file pgmq (draine tous les messages en attente)
-    //    Attention : purge_email_queue vide TOUTE la file mass_emails.
-    //    Comme la file est dédiée aux campagnes de masse et que le worker
-    //    ignore silencieusement les campagnes cancelled, c'est acceptable.
-    //    À défaut, on pourrait consommer et filtrer, mais pgmq n'expose pas
-    //    de purge par prédicat. On reste sur la purge globale.
-    const { data: purged, error: purgeErr } = await service.rpc("purge_email_queue", {
-      queue_name: "mass_emails",
-    });
-    if (purgeErr) console.warn("purge_email_queue error:", purgeErr);
+    // 2) file pgmq : seuls les messages de CETTE campagne sont supprimés
+    //    (lot N7). Lecture par lots avec une visibilité courte : les messages
+    //    des autres campagnes redeviennent visibles à l'expiration, intacts.
+    let purged = 0;
+    const seen = new Set<number>();
+    for (let round = 0; round < 50; round++) {
+      const { data: batch, error: readErr } = await service.rpc("read_email_batch", {
+        queue_name: "mass_emails", batch_size: 100, vt: 30,
+      });
+      if (readErr) { console.warn("read_email_batch error:", readErr); break; }
+      const rows = (batch ?? []) as Array<{ msg_id: number; message: { campaign_id?: string } }>;
+      if (rows.length === 0) break;
+      let fresh = 0;
+      for (const m of rows) {
+        if (seen.has(m.msg_id)) continue;
+        seen.add(m.msg_id);
+        fresh++;
+        if (m.message?.campaign_id === campaign_id) {
+          const { error: delErr } = await service.rpc("delete_email", { queue_name: "mass_emails", message_id: m.msg_id });
+          if (!delErr) purged++;
+        }
+      }
+      if (fresh === 0) break;
+    }
+
+    // 2 bis) reports différés de la campagne : passés en cancelled.
+    const { data: deferredRows, error: defErr } = await service
+      .from("email_deferred_queue")
+      .update({ status: "cancelled", updated_at: new Date().toISOString(), last_error: "campaign cancelled" })
+      .like("idempotency_key", `mass-${campaign_id}-%`)
+      .in("status", ["pending"])
+      .select("id");
+    if (defErr) console.warn("deferred queue cancel error:", defErr);
+    const deferredCancelled = (deferredRows ?? []).length;
 
     // 3) marque les lignes queued/failed comme skipped
     await service
@@ -77,7 +101,7 @@ Deno.serve(async (req) => {
       .in("status", ["queued", "failed"]);
 
     return new Response(
-      JSON.stringify({ ok: true, campaign_id, purged_messages: purged ?? 0 }),
+      JSON.stringify({ ok: true, campaign_id, purged_messages: purged, deferred_cancelled: deferredCancelled }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (err) {

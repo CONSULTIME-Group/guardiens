@@ -746,7 +746,9 @@ function AlmaDockInner() {
   // Lots D1 et D2 : sur /dashboard, la pastille flottante est masquée pour
   // les deux rôles (Alma vit dans la colonne de droite). « Parler à Alma »
   // ouvre le même panneau, qui reste rendu ici.
-  const hideCollapsedPill = location.pathname === "/dashboard";
+  // Lot N7 : parcours express, la pastille recouvrirait le pied « Publier ».
+  const hideCollapsedPill = location.pathname === "/dashboard"
+    || (location.pathname === "/sits/create" && new URLSearchParams(location.search).get("express") === "1");
   if (hideCollapsedPill && !expanded) return null;
 
 
