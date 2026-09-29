@@ -1,4 +1,5 @@
 import { fetchAllRows } from "@/lib/admin/fetchAllRows";
+import { reportAdminReadError, UNAVAILABLE_LABEL } from "@/lib/admin/readError";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
@@ -37,28 +38,15 @@ import { DiscoveryFunnelCard } from "./_components/alma/DiscoveryFunnelCard";
 import { trackEvent } from "@/lib/analytics";
 import { WHISPER_PRIORITY } from "@/lib/alma/whisper-types";
 import {
-  aggregateMoments,
-  aggregateWhispers,
-  computeBubbleKpis,
+  kpisFromCounts,
+  momentsFromCounts,
+  whispersFromCounts,
   rangeSinceISO,
   toCsv,
-  type RawEvent,
-  type RawWhisperHistory,
+  type BubbleStatsPayload,
+  type WhisperCountRow,
 } from "@/lib/admin/alma-analytics";
 
-const ROW_LIMIT = 20000;
-
-/** Bandeau discret affiché quand une agrégation atteint le plafond de lignes. */
-function TruncationBanner() {
-  return (
-    <div className="flex items-start gap-2 rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-xs text-warning-foreground">
-      <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0" aria-hidden="true" />
-      <span>
-        Données tronquées au-delà de {ROW_LIMIT.toLocaleString("fr-FR")} lignes, les chiffres peuvent sous-compter.
-      </span>
-    </div>
-  );
-}
 
 type Range = "7d" | "30d" | "90d";
 
@@ -648,7 +636,6 @@ function CulturalFactsTab({ since }: { since: string }) {
   });
 
   const stats = statsResult.rows;
-  const statsTruncated = statsResult.truncated;
 
   const factTypeOptions = useMemo(() => buildFactTypeOptions(facts), [facts]);
 
@@ -711,7 +698,6 @@ function CulturalFactsTab({ since }: { since: string }) {
 
   return (
     <div className="space-y-4">
-      {statsTruncated && <TruncationBanner />}
       <div className="flex flex-wrap items-center gap-3">
         <Select value={typeFilter} onValueChange={setTypeFilter}>
           <SelectTrigger className="w-56">
