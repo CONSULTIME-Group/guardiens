@@ -31,6 +31,7 @@ export const FOUNDER_CAMPAIGN_TEMPLATES: readonly string[] = [
   "entraide-ligne-helps-with",
   "entraide-demander-coup-de-main",
   "owner-noel-2026",
+  "owner-departure-question",
 ];
 export const FOUNDER_SENDER_NAME = "Elisa et Jérémie, Guardiens";
 
