@@ -1,5 +1,8 @@
-import { MISSION_CATEGORIES, MISSION_CATEGORY_LABEL, missionCategoryLabel } from "@/lib/missionCategories";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { ENTRAIDE_FILTER_CATEGORIES, MISSION_CATEGORY_LABEL, missionCategoryLabel } from "@/lib/missionCategories";
+import { fetchAllRows } from "@/lib/admin/fetchAllRows";
+import { createSeqGuard } from "@/lib/admin/requestSeq";
+import { buildCsv, downloadCsv, TRUNCATED_NOTICE } from "@/lib/admin/csv";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -159,11 +162,11 @@ const AdminSmallMissions = () => {
       ).length;
       const totalViews = viewsRes.rows.reduce((s: number, r: any) => s + (r.view_count || 0), 0);
       const counts: Record<string, number> = {};
-      (notifRes.data || []).forEach((r: any) => {
+      notifRows.forEach((r: any) => {
         counts[r.mission_id] = (counts[r.mission_id] || 0) + 1;
       });
       setNotifiedCounts(counts);
-      const totalNotified = (notifRes.data || []).filter(
+      const totalNotified = notifRows.filter(
         (r: any) => !projetIds.has(r.mission_id),
       ).length;
       const reachedEntraide = Object.keys(counts).filter((id) => !projetIds.has(id)).length;
