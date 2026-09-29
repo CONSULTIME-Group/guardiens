@@ -233,7 +233,7 @@ export function useSitterTopAffinitySits(): Result {
           : Promise.resolve({ data: [] }),
         ownerIds.length > 0
           ? supabase
-              .from("owner_profiles")
+              .from("public_owner_profiles")
               .select(
                 "user_id, preferred_sitter_types, home_ambiance, languages, interests, life_pace, presence_expected",
               )

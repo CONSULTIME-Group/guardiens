@@ -964,10 +964,10 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
     ? supabase.from("reviews").select("overall_rating, reviewee_id").in("reviewee_id", allUserIds).eq("published", true)
     : Promise.resolve({ data: [] as any[], error: null });
   const badgesPromise = allUserIds.length > 0
-    ? supabase.from("badge_attributions").select("badge_id, user_id").in("user_id", allUserIds)
+    ? supabase.from("public_badge_attributions").select("badge_id, user_id").in("user_id", allUserIds)
     : Promise.resolve({ data: [] as any[], error: null });
   const ownerProfPromise = allUserIds.length > 0
-    ? supabase.from("owner_profiles").select("user_id, environments, preferred_sitter_types, home_ambiance, languages, interests, life_pace, presence_expected").in("user_id", allUserIds)
+    ? supabase.from("public_owner_profiles").select("user_id, environments, preferred_sitter_types, home_ambiance, languages, interests, life_pace, presence_expected").in("user_id", allUserIds)
     : Promise.resolve({ data: [] as any[], error: null });
 
   const [petsRes, reviewsRes, badgesRes, ownerProfRes] = await Promise.all([

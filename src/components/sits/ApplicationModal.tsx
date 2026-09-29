@@ -98,7 +98,7 @@ const ApplicationModal = ({
         supabase.from("badge_attributions").select("badge_id").eq("user_id", user.id),
         supabase.from("sitter_gallery").select("photo_url").eq("user_id", user.id).limit(4),
         supabase.from("sits").select("accepts_sitter_pets, accepts_sitter_children, owner_message, specific_expectations, property_id").eq("id", sitId).maybeSingle(),
-        supabase.from("owner_profiles").select("preferred_sitter_types, home_ambiance, languages, interests, life_pace, presence_expected").eq("user_id", ownerId).maybeSingle(),
+        supabase.from("public_owner_profiles").select("preferred_sitter_types, home_ambiance, languages, interests, life_pace, presence_expected").eq("user_id", ownerId).maybeSingle(),
       ]);
 
       const reviews = reviewRes.data || [];

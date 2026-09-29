@@ -790,7 +790,7 @@ export default function PublicSitterProfile() {
           .filter((sid: string | null): sid is string => sid !== null);
         if (sitIdsFromReviews.length > 0) {
           const { data: badgeAttrData } = await supabase
-            .from("badge_attributions")
+            .from("public_badge_attributions")
             .select("badge_id, sit_id")
             .in("sit_id", sitIdsFromReviews)
             .eq("user_id", id);

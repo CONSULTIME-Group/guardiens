@@ -30,7 +30,7 @@ export function useUserBadges(userId: string | undefined) {
     queryKey: ['user_badges', userId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('badge_attributions')
+        .from('public_badge_attributions')
         .select('badge_id, created_at')
         .eq('user_id', userId!)
         .order('created_at', { ascending: false })

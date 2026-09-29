@@ -500,7 +500,8 @@ describe("parité des entrées du moteur d'affinité", () => {
         missing,
         `champs hors table absents du ownerInput d'ApplicationModal : ${missing.join(", ")}`,
       ).toEqual([]);
-      const proj = projectedColumns(path, ["owner_profiles"]);
+      // SEC1 : le profil d'un autre propriétaire se lit par la vue publique.
+      const proj = projectedColumns(path, ["owner_profiles", "public_owner_profiles"]);
       const missingCols = OWNER_TABLE_COLUMNS.filter((c) => !proj.cols.has(c));
       expect(missingCols, `colonnes owner_profiles absentes : ${missingCols.join(", ")}`).toEqual([]);
       const petsProj = projectedColumns(path, ["pets"]);
