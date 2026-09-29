@@ -116,7 +116,8 @@ const AdminTraffic = () => {
           setParams(next, { replace: true });
         }}
       >
-        <TabsList>
+        <div className="overflow-x-auto -mx-1 px-1">
+        <TabsList className="w-max">
           <TabsTrigger value="interne">
             <Eye className="h-4 w-4 mr-2" /> Trafic interne & funnel
           </TabsTrigger>
@@ -124,9 +125,10 @@ const AdminTraffic = () => {
             <MousePointerClick className="h-4 w-4 mr-2" /> Acquisition SEO
           </TabsTrigger>
           <TabsTrigger value="signup-funnel">
-            <Users className="h-4 w-4 mr-2" /> Funnel signup
+            <Users className="h-4 w-4 mr-2" /> Entonnoir d'inscription
           </TabsTrigger>
         </TabsList>
+        </div>
 
         <TabsContent value="interne" className="mt-6">
           <Suspense fallback={<div className="p-8 text-center text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin inline" /></div>}>
