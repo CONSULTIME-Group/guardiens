@@ -53,10 +53,10 @@
 - [x] Lot A9 Modération fiable (signalements, contestations, avis, gardes, annonces, entraide, contact)
 - [x] Lot J2-C Corrections de relecture d'Alma
 
-## Lot A10, chiffres justes (en cours)
+## Lot A10, chiffres justes
 - [x] Tableau de bord, SEO, Trafic, Analytics, santé emails, Membres, Erreurs, Entraide, taux d'ouverture unique, Nurturing
-- [ ] Migration d'agrégats SQL en lecture seule (Alma, entonnoir, lecture admin des murmures)
-- [ ] Alma : événements et historique en agrégats, bandeau de troncature retiré
-- [ ] Compétences : file d'attente complète via agrégat
-- [ ] Statistiques d'annonces : « Membres uniques », parité des routes
-- [ ] Déployer fetch-seo-data (modifiée localement) après GO, contrôle 401
+- [x] Migration d'agrégats SQL en lecture seule (Alma, entonnoir, lecture admin des murmures)
+- [x] Alma : événements et historique en agrégats, bandeau de troncature retiré
+- [x] Compétences : file d'attente complète via agrégat
+- [x] Statistiques d'annonces : « Membres uniques », parité des routes
+- [x] Déployer fetch-seo-data (modifiée localement) après GO, contrôle 401
