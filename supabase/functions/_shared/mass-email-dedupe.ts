@@ -136,3 +136,13 @@ export async function loadReceivedForKey(
   }
   return out;
 }
+
+/**
+ * Lot A8 : contrôle du nombre confirmé. Absent (ancien frontend) = aucun contrôle,
+ * comportement antérieur inchangé. Fourni = doit être un entier égal à l'audience.
+ */
+export function expectedCountMismatch(expected: unknown, actual: number): boolean {
+  if (expected === undefined) return false;
+  const n = Number(expected);
+  return !Number.isInteger(n) || n !== actual;
+}

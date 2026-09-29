@@ -829,9 +829,8 @@ Deno.serve(async (req) => {
     const recipients = [...new Set(profiles.map((p) => p.email))];
 
     // Lot A8 : le nombre saisi par l'admin à la confirmation doit être exact.
-    if (payload.expected_count !== undefined) {
-      const expectedCount = Number(payload.expected_count);
-      if (!Number.isInteger(expectedCount) || expectedCount !== recipients.length) {
+    {
+      if (expectedCountMismatch(payload.expected_count, recipients.length)) {
         return new Response(JSON.stringify({
           error: `Le nombre confirmé (${payload.expected_count}) ne correspond pas à l'audience réelle (${recipients.length}). Rien n'est parti.`,
           count: recipients.length,
