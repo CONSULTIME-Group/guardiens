@@ -297,9 +297,6 @@ const AdminAudit = () => {
                     </TableCell>
                     <TableCell>
                       <div className="text-sm">{actionLabel(r.action)}</div>
-                      {!ACTION_LABELS[r.action] && (
-                        <div className="text-xs text-muted-foreground font-mono">{r.action}</div>
-                      )}
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline">{auditEntityLabel(r.target_type)}</Badge>
