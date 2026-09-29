@@ -1,4 +1,5 @@
 import { adminLabel, ALMA_REGISTER_LABELS } from "@/lib/admin/labels";
+import { measureActionFollowUp } from "@/lib/admin/alma-conversations";
 /**
  * Lot J2-B : pilotage d'Alma. Taux d'action à 10 minutes, retours utile /
  * pas utile, et rejeu du jeu de non-régression, uniquement au clic.
@@ -84,8 +85,7 @@ export function PilotageTab({ range }: { range: "7d" | "30d" | "90d" }) {
   };
 
   const last = runs[0];
-  const totalAnswers = (rates ?? []).reduce((s, r) => s + Number(r.answers), 0);
-  const totalActed = (rates ?? []).reduce((s, r) => s + Number(r.acted), 0);
+  const measure = measureActionFollowUp(rates ?? []);
 
   return (
     <div className="space-y-4">
@@ -93,7 +93,11 @@ export function PilotageTab({ range }: { range: "7d" | "30d" | "90d" }) {
       <Card>
         <CardHeader><CardTitle className="text-base">Action à 10 minutes</CardTitle></CardHeader>
         <CardContent className="space-y-2 text-sm">
-          <p>Toutes réponses : {pct(totalActed, totalAnswers)} ({totalActed} sur {totalAnswers}).</p>
+          <p>
+            {measure.rate === null
+              ? "Non mesurable : aucune réponse de la période ne propose d'action."
+              : `Réponses avec action : ${pct(measure.count, measure.total)} (${measure.count} sur ${measure.total}).`}
+          </p>
           <table className="w-full text-left text-sm">
             <thead><tr className="text-muted-foreground"><th>Action proposée</th><th>Registre</th><th>Réponses</th><th>Taux</th></tr></thead>
             <tbody>

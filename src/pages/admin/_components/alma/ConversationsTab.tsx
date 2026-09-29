@@ -10,6 +10,7 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { measureActionFollowUp, type ActionRateRow } from "@/lib/admin/alma-conversations";
 import { supabase } from "@/integrations/supabase/client";
 import { reportAdminReadError, UNAVAILABLE_LABEL } from "@/lib/admin/readError";
 import { Card, CardContent } from "@/components/ui/card";
@@ -58,9 +59,13 @@ export function ConversationsTab({ since }: { since: string }) {
   const { data: followedRaw, isError: followedError } = useQuery({
     queryKey: ["admin-alma-conversation-followed", since],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("admin_a10_alma_followed_by_action" as any, { p_since: since });
-      if (error) { reportAdminReadError("Alma : conversations suivies d'une action", error); throw error; }
-      return data as unknown as { total: number; followed: number };
+      // Lot J3 : seules les réponses qui proposent une action comptent, et
+      // l'action compte seulement si la personne ouvre ce chemin ou publie,
+      // postule, répond (alma_answer_acted, via admin_alma_action_rate).
+      const days = Math.max(1, Math.ceil((Date.now() - new Date(since).getTime()) / 86_400_000));
+      const { data, error } = await supabase.rpc("admin_alma_action_rate" as any, { p_days: days });
+      if (error) { reportAdminReadError("Alma : réponses suivies d'une action", error); throw error; }
+      return measureActionFollowUp((data ?? []) as ActionRateRow[]);
     },
     staleTime: 60_000,
     refetchOnWindowFocus: false,
@@ -71,11 +76,7 @@ export function ConversationsTab({ since }: { since: string }) {
   const avgLength = useMemo(() => averageAnswerLength(rows), [rows]);
   const openings = useMemo(() => openingRepetition(rows), [rows]);
   const split = useMemo(() => inputSplit(rows), [rows]);
-  const followed = useMemo(() => {
-    const total = Number(followedRaw?.total) || 0;
-    const count = Number(followedRaw?.followed) || 0;
-    return { count, rate: total > 0 ? count / total : 0 };
-  }, [followedRaw]);
+  const followed = followedRaw ?? { total: 0, count: 0, rate: null };
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -124,9 +125,15 @@ export function ConversationsTab({ since }: { since: string }) {
         </Card>
         <Card>
           <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground">Suivies d'une action sous dix minutes</p>
-            <p className="text-2xl font-semibold">{followedError ? UNAVAILABLE_LABEL : pct(followed.rate)}</p>
-            <p className="text-xs text-muted-foreground">{followed.count} sur {Number(followedRaw?.total) || 0} échanges</p>
+            <p className="text-xs text-muted-foreground">Réponses avec action, suivies sous dix minutes</p>
+            <p className="text-2xl font-semibold">
+              {followedError ? UNAVAILABLE_LABEL : followed.rate === null ? "Non mesurable" : pct(followed.rate)}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {followed.rate === null
+                ? "Aucune réponse de la période ne propose d'action."
+                : `${followed.count} sur ${followed.total} réponses avec une action proposée`}
+            </p>
           </CardContent>
         </Card>
         <Card>

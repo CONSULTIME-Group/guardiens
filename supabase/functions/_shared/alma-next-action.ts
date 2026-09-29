@@ -81,6 +81,9 @@ export function suggestSitTitle(question: string): string {
   return "Garde de ma maison et de mes animaux";
 }
 
+/** Lot J3 : un départ ou une absence déclarés, pas seulement des animaux. */
+const DEPARTURE_INTENT = /(je pars|partir|depart|vacances|faire garder|garde de|garder (mes|ma|mon|nos)|absence|absente?|trouver un gardien|week-end|weekend)/;
+
 const withTitle = (path: string, title: string) => `${path}?titre=${encodeURIComponent(title)}`;
 
 function sitIdFromPath(path?: string | null): string | null {
@@ -105,9 +108,11 @@ export function computeNextAction(input: NextActionInput): NextActionResult {
 
   const sitIntent = SIT_INTENT.test(q) || Boolean(input.largeAnimals);
 
-  // Qui cherche de l'aide : publier passe devant tout.
+  // Qui cherche de l'aide : publier passe devant tout. Lot J3 : l'annonce de
+  // garde passe devant seulement si la personne parle d'un départ ; des
+  // animaux seuls (« de l'aide pour mes chevaux ») relèvent d'abord de l'entraide.
   if (input.helpIntent) {
-    if (sitIntent) {
+    if (DEPARTURE_INTENT.test(q)) {
       candidates.push({ label: "Publier mon annonce de garde", path: withTitle("/sits/create", suggestSitTitle(input.question)), reason: "aide_garde" });
       candidates.push({ label: "Demander un coup de main", path: withTitle("/petites-missions/creer", suggestMissionTitle(input.question)), reason: "aide_entraide" });
     } else {
@@ -200,23 +205,43 @@ export function formatActionDirective(r: NextActionResult): string {
 /** Chemins de formulaire qui acceptent un préremplissage. */
 export const PREFILL_FORMS = ["/petites-missions/creer", "/sits/create", "/projets/publier"] as const;
 
+/** Titre proposé dans le texte : « Je vous propose le titre : "…" ». */
+const QUOTED_TITLE_RE = /titre\s*(?:suivant)?\s*:?\s*[«"“]\s*([^»"”\n]{3,100}?)\s*[»"”]/i;
+const DRAFT_LINE_RE = /^[ \t*_]*BROUILLON[ \t*_]*:[ \t]*([^\n|]{3,140})(?:\|([^\n]*))?[ \t]*$/im;
+
+function stripPrefillTitle(path: string): string {
+  const base = path.split("?")[0];
+  if (!(PREFILL_FORMS as readonly string[]).includes(base)) return path;
+  const params = new URLSearchParams(path.split("?")[1] ?? "");
+  params.delete("titre");
+  params.delete("description");
+  const q = params.toString();
+  return q ? `${base}?${q}` : base;
+}
+
 /**
- * Le modèle peut ajouter en dernière ligne « BROUILLON: titre | description ».
- * La ligne est retirée du texte ; si l'action ouvre un formulaire, ses champs
- * rejoignent le lien prérempli.
+ * Lot J3 : le titre du lien prérempli est exactement celui écrit par Alma
+ * (ligne BROUILLON, sinon le titre cité dans la réponse), jamais un titre
+ * inventé par le moteur. Sans titre d'Alma, le formulaire s'ouvre vide.
+ * La ligne BROUILLON est lue où qu'elle soit (avant ou après CLASSEMENT).
  */
-export function applyDraftToAction(answer: string, action: AlmaAction | null): { answer: string; action: AlmaAction | null } {
-  const re = /\n?\s*BROUILLON\s*:\s*([^\n|]{3,140})\|?([^\n]*)\s*$/i;
-  const m = answer.match(re);
-  if (!m) return { answer, action };
-  const cleaned = answer.replace(re, "").trim();
-  if (!action) return { answer: cleaned, action };
+export function applyDraftToAction(
+  answer: string,
+  action: AlmaAction | null,
+  chips: AlmaChip[] = [],
+): { answer: string; action: AlmaAction | null; chips: AlmaChip[]; title: string | null } {
+  const m = answer.match(DRAFT_LINE_RE);
+  const cleaned = m ? answer.replace(DRAFT_LINE_RE, "").replace(/\n{3,}/g, "\n\n").trim() : answer;
+  const quoted = cleaned.match(QUOTED_TITLE_RE);
+  const title = (m ? m[1] : quoted ? quoted[1] : "").trim().replace(/^["«“]\s*|\s*["»”]$/g, "").slice(0, 100) || null;
+  const desc = m ? (m[2] || "").trim().slice(0, 1000) : "";
+  const outChips = chips.map((c) => (c.path ? { ...c, path: stripPrefillTitle(c.path) } : c));
+  if (!action) return { answer: cleaned, action, chips: outChips, title };
   const base = action.path.split("?")[0];
-  if (!(PREFILL_FORMS as readonly string[]).includes(base)) return { answer: cleaned, action };
-  const params = new URLSearchParams(action.path.split("?")[1] ?? "");
-  const title = m[1].trim().slice(0, 100);
-  const desc = (m[2] || "").trim().slice(0, 1000);
+  if (!(PREFILL_FORMS as readonly string[]).includes(base)) return { answer: cleaned, action, chips: outChips, title };
+  const params = new URLSearchParams(stripPrefillTitle(action.path).split("?")[1] ?? "");
   if (title) params.set("titre", title);
   if (desc) params.set("description", desc);
-  return { answer: cleaned, action: { ...action, path: `${base}?${params.toString()}` } };
+  const q = params.toString();
+  return { answer: cleaned, action: { ...action, path: q ? `${base}?${q}` : base }, chips: outChips, title };
 }

@@ -86,7 +86,7 @@ describe("abonnements et paramètres", () => {
   it("paramètres sans date figée", () => {
     const src = read("src/pages/admin/AdminSettings.tsx");
     expect(src).not.toContain("2026-09-30");
-    expect(src).toContain("{FOUNDER_DEADLINE}");
+    expect(src).not.toContain("La fin de cette phase");
   });
   it("carte KPI « Annonces actives » retirée", () => {
     expect(read("src/pages/admin/_components/dashboard/KpiCards.tsx")).not.toContain('title: "Annonces actives"');

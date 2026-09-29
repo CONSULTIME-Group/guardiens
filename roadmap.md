@@ -60,3 +60,5 @@
 - [x] Compétences : file d'attente complète via agrégat
 - [x] Statistiques d'annonces : « Membres uniques », parité des routes
 - [x] Déployer fetch-seo-data (modifiée localement) après GO, contrôle 401
+
+- [ ] Lot J3 : corrections Alma après test réel (action principale, titre, CLASSEMENT, onglets admin Alma, indicateur action, profil <40 %, signal test fondateur, admins exclus)

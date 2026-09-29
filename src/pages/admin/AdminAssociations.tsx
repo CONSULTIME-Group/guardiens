@@ -318,7 +318,7 @@ export default function AdminAssociations() {
                     title="Archiver cette association ?"
                     description="La fiche quitte le site public. Vous pourrez la republier ensuite."
                     confirmLabel="Archiver"
-                    onConfirm={() => persist(row.id, { status: "archived" })}
+                    onConfirm={async () => { await persist(row.id, { status: "archived" }); }}
                   />
                   <Button
                     size="sm"
