@@ -1,4 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { fetchAllRows } from "@/lib/admin/fetchAllRows";
+import { createSeqGuard } from "@/lib/admin/requestSeq";
 import { supabase } from "@/integrations/supabase/client";
 import { sendTransactionalEmail } from "@/lib/sendTransactionalEmail";
 import { Badge } from "@/components/ui/badge";
@@ -39,7 +41,9 @@ const AdminReviews = () => {
   const [rejectReasonModal, setRejectReasonModal] = useState<{ id: string; type: "review" | "response"; review: any } | null>(null);
   const [rejectReason, setRejectReason] = useState("");
 
+  const reviewsSeq = useRef(createSeqGuard());
   const fetchReviews = useCallback(async () => {
+    const token = reviewsSeq.current.next();
     setLoading(true);
     const from = page * PAGE_SIZE;
     const to = from + PAGE_SIZE - 1;
@@ -58,8 +62,10 @@ const AdminReviews = () => {
 
     if (sortBy === "rating") query = query.order("overall_rating", { ascending: true });
     else query = query.order("created_at", { ascending: false });
+    query = query.order("id", { ascending: true });
 
     const { data, error, count } = await query.range(from, to);
+    if (!reviewsSeq.current.isCurrent(token)) return;
     if (error) toast.error("Erreur de chargement");
     else {
       setReviews(data || []);
@@ -68,33 +74,41 @@ const AdminReviews = () => {
       if (sitIds.length) {
         const { data: badges } = await supabase.from("badge_attributions").select("sit_id").in("sit_id", sitIds);
         const counts: Record<string, number> = {};
+        if (!reviewsSeq.current.isCurrent(token)) return;
         badges?.forEach((b: any) => { counts[b.sit_id] = (counts[b.sit_id] || 0) + 1; });
         setBadgeCounts(counts);
+      } else {
+        setBadgeCounts({});
       }
     }
     setLoading(false);
   }, [filterStatus, sortBy, page]);
 
-  useEffect(() => { setPage(0); }, [filterStatus, sortBy]);
 
 
   const fetchCancellationReviews = useCallback(async () => {
     setCancellationLoading(true);
-    const { data } = await supabase
-      .from("reviews")
-      .select(`
-        *,
-        reviewer:profiles!reviews_reviewer_id_fkey(first_name, last_name, avatar_url),
-        reviewee:profiles!reviews_reviewee_id_fkey(first_name, last_name, avatar_url),
-        sit:sits!reviews_sit_id_fkey(title, start_date, end_date)
-      `)
-      .eq("review_type", "annulation")
-      .order("created_at", { ascending: false });
-    setCancellationReviews(data || []);
+    const { rows } = await fetchAllRows<any>((from, to) =>
+      supabase
+        .from("reviews")
+        .select(`
+          *,
+          reviewer:profiles!reviews_reviewer_id_fkey(first_name, last_name, avatar_url),
+          reviewee:profiles!reviews_reviewee_id_fkey(first_name, last_name, avatar_url),
+          sit:sits!reviews_sit_id_fkey(title, start_date, end_date)
+        `)
+        .eq("review_type", "annulation")
+        .order("created_at", { ascending: false })
+        .order("id", { ascending: true })
+        .range(from, to),
+    ).catch(() => ({ rows: [] as any[] }));
+    setCancellationReviews(rows);
     setCancellationLoading(false);
   }, []);
 
-  useEffect(() => { fetchReviews(); fetchCancellationReviews(); }, [fetchReviews, fetchCancellationReviews]);
+  useEffect(() => { fetchReviews(); }, [fetchReviews]);
+  // Les avis d'annulation ne dépendent ni de la page ni des filtres : une seule lecture.
+  useEffect(() => { fetchCancellationReviews(); }, [fetchCancellationReviews]);
 
   const logAdminAction = async (
     action: string,
@@ -276,7 +290,7 @@ const AdminReviews = () => {
           )}
 
           <div className="flex gap-3 flex-wrap">
-            <Select value={filterStatus} onValueChange={setFilterStatus}>
+            <Select value={filterStatus} onValueChange={(v) => { setFilterStatus(v); setPage(0); }}>
               <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Tous</SelectItem>
@@ -285,7 +299,7 @@ const AdminReviews = () => {
                 <SelectItem value="low">Notes ≤ 2</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={sortBy} onValueChange={(v) => setSortBy(v as any)}>
+            <Select value={sortBy} onValueChange={(v) => { setSortBy(v as any); setPage(0); }}>
               <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="date">Plus récents</SelectItem>

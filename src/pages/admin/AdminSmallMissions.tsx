@@ -1,5 +1,8 @@
-import { MISSION_CATEGORIES, MISSION_CATEGORY_LABEL, missionCategoryLabel } from "@/lib/missionCategories";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { ENTRAIDE_FILTER_CATEGORIES, MISSION_CATEGORY_LABEL, missionCategoryLabel } from "@/lib/missionCategories";
+import { fetchAllRows } from "@/lib/admin/fetchAllRows";
+import { createSeqGuard } from "@/lib/admin/requestSeq";
+import { buildCsv, downloadCsv, TRUNCATED_NOTICE } from "@/lib/admin/csv";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -90,13 +93,17 @@ const AdminSmallMissions = () => {
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
-  const [filterCategory, setFilterCategory] = useState("all");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tab: "entraide" | "projets" = searchParams.get("tab") === "projets" ? "projets" : "entraide";
+  const [filterCategory, setFilterCategory] = useState(() => (tab === "projets" ? "projet" : "all"));
   const [filterPeriod, setFilterPeriod] = useState("all");
   const [sortBy, setSortBy] = useState<SortKey>("created_at");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [responseCounts, setResponseCounts] = useState<Record<string, number>>({});
+  const [responseCountsReady, setResponseCountsReady] = useState(false);
+  const [missionsTruncated, setMissionsTruncated] = useState(false);
   const [archiveId, setArchiveId] = useState<string | null>(null);
   const [restoreId, setRestoreId] = useState<string | null>(null);
   const [proximityMission, setProximityMission] = useState<{ id: string; title: string } | null>(null);
@@ -114,8 +121,6 @@ const AdminSmallMissions = () => {
   // Onglet courant, lu dans l'URL pour que le menu latéral puisse pointer
   // directement sur les projets. Les projets participatifs ont leurs propres
   // indicateurs, et la liste est la même, filtrée sur la catégorie côté serveur.
-  const [searchParams, setSearchParams] = useSearchParams();
-  const tab: "entraide" | "projets" = searchParams.get("tab") === "projets" ? "projets" : "entraide";
   const [projetKpis, setProjetKpis] = useState<ProjetKpis | null>(null);
   // Diffusion différée : le premier projet d'un porteur attend douze heures
   // avant d'être annoncé aux membres. L'administration peut l'avancer.
@@ -130,29 +135,40 @@ const AdminSmallMissions = () => {
   // deux mesures illisibles dès le premier projet publié.
   useEffect(() => {
     (async () => {
-      const projetIdsRes = await supabase
-        .from("small_missions")
-        .select("id")
-        .eq("category", "projet" as any)
-        .limit(20000);
-      const projetIds = new Set((projetIdsRes.data || []).map((r: any) => r.id));
+      const projetIdsRes = await fetchAllRows<{ id: string }>((from, to) =>
+        supabase.from("small_missions").select("id").eq("category", "projet" as any)
+          .order("created_at", { ascending: true }).order("id", { ascending: true }).range(from, to),
+      ).catch(() => ({ rows: [] as { id: string }[], truncated: false, pages: 0 }));
+      const projetIds = new Set(projetIdsRes.rows.map((r) => r.id));
+      const empty = { rows: [] as any[], truncated: false, pages: 0 };
       const [{ count: total }, { count: open }, viewsRes, respRes, notifRes] = await Promise.all([
-        supabase.from("small_missions").select("*", { count: "exact", head: true }).neq("category", "projet" as any),
-        supabase.from("small_missions").select("*", { count: "exact", head: true }).eq("status", "open" as any).neq("category", "projet" as any),
-        supabase.from("small_missions").select("view_count").neq("category", "projet" as any),
-        supabase.from("small_mission_responses").select("mission_id").limit(50000),
-        supabase.from("mission_notification_queue").select("mission_id").eq("status", "sent").limit(20000),
+        supabase.from("small_missions").select("id", { count: "exact", head: true }).neq("category", "projet" as any),
+        supabase.from("small_missions").select("id", { count: "exact", head: true }).eq("status", "open" as any).neq("category", "projet" as any),
+        fetchAllRows<any>((from, to) =>
+          supabase.from("small_missions").select("view_count").neq("category", "projet" as any)
+            .order("created_at", { ascending: true }).order("id", { ascending: true }).range(from, to),
+        ).catch(() => empty),
+        fetchAllRows<any>((from, to) =>
+          supabase.from("small_mission_responses").select("mission_id")
+            .order("created_at", { ascending: true }).order("id", { ascending: true }).range(from, to),
+        ).catch(() => empty),
+        fetchAllRows<any>((from, to) =>
+          supabase.from("mission_notification_queue").select("mission_id").eq("status", "sent")
+            .order("id", { ascending: true }).range(from, to),
+        ).catch(() => empty),
       ]);
-      const entraideResponses = (respRes.data || []).filter(
+      const respRows = respRes.rows;
+      const notifRows = notifRes.rows;
+      const entraideResponses = respRows.filter(
         (r: any) => !projetIds.has(r.mission_id),
       ).length;
-      const totalViews = (viewsRes.data || []).reduce((s: number, r: any) => s + (r.view_count || 0), 0);
+      const totalViews = viewsRes.rows.reduce((s: number, r: any) => s + (r.view_count || 0), 0);
       const counts: Record<string, number> = {};
-      (notifRes.data || []).forEach((r: any) => {
+      notifRows.forEach((r: any) => {
         counts[r.mission_id] = (counts[r.mission_id] || 0) + 1;
       });
       setNotifiedCounts(counts);
-      const totalNotified = (notifRes.data || []).filter(
+      const totalNotified = notifRows.filter(
         (r: any) => !projetIds.has(r.mission_id),
       ).length;
       const reachedEntraide = Object.keys(counts).filter((id) => !projetIds.has(id)).length;
@@ -189,50 +205,64 @@ const AdminSmallMissions = () => {
   const switchTab = (next: "entraide" | "projets") => {
     setPage(0);
     setFilterCategory(next === "projets" ? "projet" : "all");
+    setRenderedTab(next);
     const params = new URLSearchParams(searchParams);
     if (next === "projets") params.set("tab", "projets");
     else params.delete("tab");
     setSearchParams(params, { replace: true });
   };
 
-  // Arrivée directe par l'URL, par exemple depuis le menu latéral : la
-  // catégorie suit l'onglet demandé.
-  useEffect(() => {
+  // Changement d'URL externe (menu latéral, historique) : on réaligne la
+  // catégorie dans le même rendu, sans effet ni second fetch.
+  const [renderedTab, setRenderedTab] = useState(tab);
+  if (renderedTab !== tab) {
+    setRenderedTab(tab);
     setFilterCategory(tab === "projets" ? "projet" : "all");
     setPage(0);
-  }, [tab]);
+  }
 
+  const missionsSeq = useRef(createSeqGuard());
   const fetchMissions = useCallback(async () => {
+    const token = missionsSeq.current.next();
     setLoading(true);
-    let query = supabase
-      .from("small_missions")
-      .select("*, poster:profiles!small_missions_user_id_fkey(first_name, last_name, avatar_url)", { count: "exact" });
+    const buildQuery = () => {
+      let query = supabase
+        .from("small_missions")
+        .select("*, poster:profiles!small_missions_user_id_fkey(first_name, last_name, avatar_url)");
 
-    if (filterStatus !== "all") query = query.eq("status", filterStatus as any);
-    if (filterCategory !== "all") query = query.eq("category", filterCategory as any);
-    // Sans filtre de catégorie, l'onglet Entraide laissait remonter les projets
-    // participatifs, qui ont leur propre onglet.
-    else if (tab === "entraide") query = query.neq("category", "projet" as any);
-    if (filterPeriod !== "all") {
-      const days = filterPeriod === "7d" ? 7 : filterPeriod === "30d" ? 30 : 90;
-      const since = new Date(Date.now() - days * 86400000).toISOString();
-      query = query.gte("created_at", since);
-    }
+      if (filterStatus !== "all") query = query.eq("status", filterStatus as any);
+      // L'onglet borne toujours la catégorie, la catégorie choisie s'ajoute.
+      if (tab === "projets") query = query.eq("category", "projet" as any);
+      else {
+        query = query.neq("category", "projet" as any);
+        if (filterCategory !== "all" && filterCategory !== "projet") {
+          query = query.eq("category", filterCategory as any);
+        }
+      }
+      if (filterPeriod !== "all") {
+        const days = filterPeriod === "7d" ? 7 : filterPeriod === "30d" ? 30 : 90;
+        const since = new Date(Date.now() - days * 86400000).toISOString();
+        query = query.gte("created_at", since);
+      }
 
-    const ascending = sortDir === "asc";
-    if (sortBy === "response_count") {
-      query = query.order("created_at", { ascending: false });
-    } else {
-      query = query.order(sortBy, { ascending });
-    }
+      const ascending = sortDir === "asc";
+      if (sortBy === "response_count" || sortBy === "created_at") {
+        query = query.order("created_at", { ascending: sortBy === "created_at" ? ascending : false });
+      } else {
+        query = query.order(sortBy, { ascending }).order("created_at", { ascending: false });
+      }
+      return query.order("id", { ascending: true });
+    };
 
-    query = query.limit(5000);
-
-    const { data, count, error } = await query;
-    if (error) toast.error("Erreur de chargement");
-    else {
-      setMissions(data || []);
-      setTotalCount(count || 0);
+    try {
+      const { rows, truncated } = await fetchAllRows<any>((from, to) => buildQuery().range(from, to));
+      if (!missionsSeq.current.isCurrent(token)) return;
+      setMissions(rows);
+      setTotalCount(rows.length);
+      setMissionsTruncated(truncated);
+    } catch {
+      if (!missionsSeq.current.isCurrent(token)) return;
+      toast.error("Erreur de chargement");
     }
     setLoading(false);
   }, [filterStatus, filterCategory, filterPeriod, sortBy, sortDir, tab]);
@@ -240,11 +270,13 @@ const AdminSmallMissions = () => {
   useEffect(() => { fetchMissions(); }, [fetchMissions]);
   useEffect(() => { setPage(0); }, [filterStatus, filterCategory, filterPeriod, search]);
 
-  // Fetch response counts pour l'ensemble des missions chargées (jusqu'à 5000).
+  // Fetch response counts pour l'ensemble des missions chargées.
   // .in() est chunké par lots de 200 ids pour rester sous les limites de PostgREST.
   useEffect(() => {
+    setResponseCountsReady(false);
     if (!missions.length) {
       setResponseCounts({});
+      setResponseCountsReady(true);
       return;
     }
     let cancelled = false;
@@ -262,7 +294,10 @@ const AdminSmallMissions = () => {
           counts[r.mission_id] = (counts[r.mission_id] || 0) + 1;
         });
       }
-      if (!cancelled) setResponseCounts(counts);
+      if (!cancelled) {
+        setResponseCounts(counts);
+        setResponseCountsReady(true);
+      }
     })();
     return () => { cancelled = true; };
   }, [missions]);
@@ -419,9 +454,10 @@ const AdminSmallMissions = () => {
   };
 
   const exportCsv = () => {
-    const rows = [
+    if (!responseCountsReady) return;
+    const csv = buildCsv(
       ["Titre", "Posteur", "Catégorie", "Ville", "Date", "Statut", "Notifiés", "Réponses", VIEWS_LABEL],
-      ...filtered.map(m => [
+      filtered.map(m => [
         m.title, `${m.poster?.first_name || ""} ${m.poster?.last_name || ""}`.trim(),
         categoryLabels[m.category] || missionCategoryLabel(m.category), m.city || "",
         format(new Date(m.created_at), "yyyy-MM-dd"),
@@ -429,13 +465,8 @@ const AdminSmallMissions = () => {
         String(notifiedCounts[m.id] || 0),
         String(responseCounts[m.id] || 0), String(m.view_count ?? 0),
       ]),
-    ];
-    const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = `missions-${format(new Date(), "yyyy-MM-dd")}.csv`; a.click();
-    URL.revokeObjectURL(url);
+    );
+    downloadCsv(csv, `${tab === "projets" ? "projets" : "entraide"}-${format(new Date(), "yyyy-MM-dd")}.csv`);
   };
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
@@ -455,11 +486,14 @@ const AdminSmallMissions = () => {
         <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">
           {tab === "projets" ? "Projets participatifs" : "Entraide"}
         </h1>
-        <Button variant="outline" size="sm" onClick={exportCsv}>
+        <Button variant="outline" size="sm" onClick={exportCsv} disabled={!responseCountsReady}>
           <Download className="h-4 w-4 mr-2" /> Exporter CSV
         </Button>
       </div>
 
+      {missionsTruncated && (
+        <p role="status" className="text-sm text-warning">{TRUNCATED_NOTICE}</p>
+      )}
       <div className="flex gap-2" role="tablist">
         {([["entraide", "Entraide"], ["projets", "Projets"]] as const).map(([key, label]) => (
           <button
@@ -634,15 +668,17 @@ const AdminSmallMissions = () => {
             <SelectItem value="cancelled">Masquées / annulées</SelectItem>
           </SelectContent>
         </Select>
-        <Select value={filterCategory} onValueChange={setFilterCategory}>
-          <SelectTrigger className="w-[150px]"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Toutes catégories</SelectItem>
-            {MISSION_CATEGORIES.map((c) => (
-              <SelectItem key={c.key} value={c.key}>{c.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {tab === "entraide" && (
+          <Select value={filterCategory} onValueChange={setFilterCategory}>
+            <SelectTrigger className="w-[150px]" aria-label="Catégorie"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Toutes catégories</SelectItem>
+              {ENTRAIDE_FILTER_CATEGORIES.map((c) => (
+                <SelectItem key={c.key} value={c.key}>{c.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
         <Select value={filterPeriod} onValueChange={setFilterPeriod}>
           <SelectTrigger className="w-[150px]"><SelectValue /></SelectTrigger>
           <SelectContent>

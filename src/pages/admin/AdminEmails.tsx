@@ -1,4 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { fetchAllRows } from "@/lib/admin/fetchAllRows";
+import { createSeqGuard } from "@/lib/admin/requestSeq";
+import { TRUNCATED_NOTICE } from "@/lib/admin/csv";
+import { periodStart, dedupeByMessageId } from "@/lib/admin/emailLogStats";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -276,65 +280,73 @@ const UrgencyBadge = ({ metadata }: { metadata?: { bypass?: boolean; isUrgent?: 
 const LogsTab = () => {
   const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [timeRange, setTimeRange] = useState("7d");
+  const [timeRange, setTimeRange] = useState("24h");
   const [statusFilter, setStatusFilter] = useState("all");
   const [templateFilter, setTemplateFilter] = useState("all");
   const [templates, setTemplates] = useState<string[]>([]);
   const [stats, setStats] = useState({ total: 0, sent: 0, failed: 0, dlq: 0, suppressed: 0 });
+  const [statsTruncated, setStatsTruncated] = useState(false);
+  const logsSeq = useRef(createSeqGuard());
 
+  // Les KPI portent sur TOUTE la période affichée (dédupliqués par message_id,
+  // dernier statut connu), le tableau se limite aux 50 derniers envois.
   const fetchLogs = async () => {
+    const token = logsSeq.current.next();
     setLoading(true);
-    const now = new Date();
-    const start = new Date();
-    if (timeRange === "24h") start.setHours(now.getHours() - 24);
-    else if (timeRange === "7d") start.setDate(now.getDate() - 7);
-    else if (timeRange === "30d") start.setDate(now.getDate() - 30);
+    const start = periodStart(timeRange).toISOString();
 
-    let query = supabase
+    const statsPromise = fetchAllRows<any>((from, to) => {
+      let q = supabase
+        .from("email_send_log")
+        .select("id, message_id, status, created_at")
+        .gte("created_at", start)
+        .order("created_at", { ascending: true })
+        .order("id", { ascending: true });
+      if (templateFilter !== "all") q = q.eq("template_name", templateFilter);
+      return q.range(from, to);
+    });
+
+    let tableQuery = supabase
       .from("email_send_log")
       .select("*")
-      .gte("created_at", start.toISOString())
+      .gte("created_at", start)
       .order("created_at", { ascending: false })
-      .limit(500);
+      .order("id", { ascending: true })
+      .limit(200);
+    if (statusFilter !== "all") tableQuery = tableQuery.eq("status", statusFilter);
+    if (templateFilter !== "all") tableQuery = tableQuery.eq("template_name", templateFilter);
 
-    if (statusFilter !== "all") query = query.eq("status", statusFilter);
-    if (templateFilter !== "all") query = query.eq("template_name", templateFilter);
-
-    const { data, error } = await query;
-    if (error) {
+    try {
+      const [statsRes, tableRes] = await Promise.all([statsPromise, tableQuery]);
+      if (!logsSeq.current.isCurrent(token)) return;
+      if (tableRes.error) throw tableRes.error;
+      const latest = dedupeByMessageId(statsRes.rows);
+      setStats({
+        total: latest.length,
+        sent: latest.filter((l) => l.status === "sent").length,
+        failed: latest.filter((l) => l.status === "failed").length,
+        dlq: latest.filter((l) => l.status === "dlq").length,
+        suppressed: latest.filter((l) => l.status === "suppressed").length,
+      });
+      setStatsTruncated(statsRes.truncated);
+      setLogs(dedupeByMessageId(tableRes.data || []).slice(0, 50));
+    } catch {
+      if (!logsSeq.current.isCurrent(token)) return;
       toast.error("Erreur lors du chargement des logs");
-      setLoading(false);
-      return;
     }
-
-    const byMessageId = new Map<string, any>();
-    (data || []).forEach((row) => {
-      const key = row.message_id || row.id;
-      if (!byMessageId.has(key) || new Date(row.created_at) > new Date(byMessageId.get(key).created_at)) {
-        byMessageId.set(key, row);
-      }
-    });
-    const deduped = Array.from(byMessageId.values()).sort(
-      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    );
-
-    setLogs(deduped);
-    setStats({
-      total: deduped.length,
-      sent: deduped.filter((l) => l.status === "sent").length,
-      failed: deduped.filter((l) => l.status === "failed").length,
-      dlq: deduped.filter((l) => l.status === "dlq").length,
-      suppressed: deduped.filter((l) => l.status === "suppressed").length,
-    });
     setLoading(false);
   };
 
   const fetchTemplates = async () => {
-    const { data } = await supabase
-      .from("email_send_log")
-      .select("template_name")
-      .limit(1000);
-    const unique = [...new Set((data || []).map((d) => d.template_name))].sort();
+    const res = await fetchAllRows<{ template_name: string }>((from, to) =>
+      supabase
+        .from("email_send_log")
+        .select("template_name")
+        .order("created_at", { ascending: true })
+        .order("id", { ascending: true })
+        .range(from, to),
+    ).catch(() => ({ rows: [] as { template_name: string }[] }));
+    const unique = [...new Set(res.rows.map((d) => d.template_name).filter(Boolean))].sort();
     setTemplates(unique);
   };
 
@@ -354,6 +366,10 @@ const LogsTab = () => {
         </div>
       )}
 
+      <p className="text-xs text-muted-foreground">
+        Indicateurs calculés sur {timeRange === "24h" ? "les dernières 24 heures" : timeRange === "7d" ? "les 7 derniers jours" : "les 30 derniers jours"}, un envoi compté une fois (dernier statut). Tableau : 50 derniers envois.
+      </p>
+      {statsTruncated && <p role="status" className="text-sm text-warning">{TRUNCATED_NOTICE}</p>}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         <Card><CardContent className="pt-4 pb-3 text-center">
           <div className="text-2xl font-bold">{stats.total}</div>
@@ -458,11 +474,19 @@ const SuppressionsTab = () => {
 
   const fetchSuppressions = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("suppressed_emails")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (!error) setSuppressions(data || []);
+    try {
+      const { rows } = await fetchAllRows<any>((from, to) =>
+        supabase
+          .from("suppressed_emails")
+          .select("*")
+          .order("created_at", { ascending: false })
+          .order("id", { ascending: true })
+          .range(from, to),
+      );
+      setSuppressions(rows);
+    } catch {
+      toast.error("Erreur lors du chargement des suppressions");
+    }
     setLoading(false);
   };
 
@@ -662,8 +686,11 @@ const EngagementTab = () => {
   const [totals, setTotals] = useState({ sent: 0, delivered: 0, opened: 0, clicked: 0, bounced: 0, unsub: 0 });
   const [uninstrumented, setUninstrumented] = useState(0);
   const [truncated, setTruncated] = useState(false);
+  const [rowsTruncated, setRowsTruncated] = useState(false);
+  const engagementSeq = useRef(createSeqGuard());
 
   const fetchStats = async () => {
+    const token = engagementSeq.current.next();
     setLoading(true);
     const now = new Date();
     const start = new Date();
@@ -679,12 +706,25 @@ const EngagementTab = () => {
     setTruncated(effectiveStart.getTime() !== start.getTime());
 
     // 1) Pull sends within window
-    const { data: logs, error: logsErr } = await supabase
-      .from("email_send_log")
-      .select("template_name,recipient_email,status,message_id,created_at,delivered_at,open_count,click_count,bounced_at,complained_at")
-      .gte("created_at", effectiveStart.toISOString())
-      .order("created_at", { ascending: false })
-      .limit(10000);
+    let logs: any[] = [];
+    let logsErr: unknown = null;
+    let logsTruncated = false;
+    try {
+      const res = await fetchAllRows<any>((from, to) =>
+        supabase
+          .from("email_send_log")
+          .select("id,template_name,recipient_email,status,message_id,created_at,delivered_at,open_count,click_count,bounced_at,complained_at")
+          .gte("created_at", effectiveStart.toISOString())
+          .order("created_at", { ascending: false })
+          .order("id", { ascending: true })
+          .range(from, to),
+      );
+      logs = res.rows;
+      logsTruncated = res.truncated;
+    } catch (e) {
+      logsErr = e;
+    }
+    if (!engagementSeq.current.isCurrent(token)) return;
 
     if (logsErr) {
       toast.error("Erreur lors du chargement");
@@ -708,11 +748,20 @@ const EngagementTab = () => {
 
 
     // 2) Pull unsubscribes within window
-    const { data: unsubs } = await supabase
-      .from("suppressed_emails")
-      .select("email,created_at")
-      .eq("reason", "unsubscribe")
-      .gte("created_at", start.toISOString());
+    // Même borne que les envois : effectiveStart.
+    const unsubRes = await fetchAllRows<any>((from, to) =>
+      supabase
+        .from("suppressed_emails")
+        .select("id,email,created_at")
+        .eq("reason", "unsubscribe")
+        .gte("created_at", effectiveStart.toISOString())
+        .order("created_at", { ascending: true })
+        .order("id", { ascending: true })
+        .range(from, to),
+    ).catch(() => ({ rows: [] as any[], truncated: false }));
+    if (!engagementSeq.current.isCurrent(token)) return;
+    const unsubs = unsubRes.rows;
+    setRowsTruncated(logsTruncated || unsubRes.truncated);
 
     // Attribution: pour chaque unsub, trouver le template du dernier email envoyé à cet email AVANT l'unsub (dans la fenêtre)
     const unsubByTpl = new Map<string, number>();
@@ -782,6 +831,7 @@ const EngagementTab = () => {
       <p className="text-sm text-muted-foreground">
         Open rate, click rate, désabonnements et bounces par template. Déduplication par <code className="text-xs bg-muted px-1 rounded">message_id</code>. Les taux d'ouverture/clic sont basés sur les emails <strong>livrés</strong>.
       </p>
+      {rowsTruncated && <p role="status" className="text-sm text-warning">{TRUNCATED_NOTICE}</p>}
       <div className="rounded-md border bg-muted/40 p-3 text-xs text-muted-foreground space-y-1">
         <p>
           Période de calcul bornée au {EMAIL_TRACKING_START.toLocaleDateString("fr-FR")}, date de mise en service du

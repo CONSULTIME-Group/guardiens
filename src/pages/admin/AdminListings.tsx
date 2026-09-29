@@ -1,4 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { fetchAllRows } from "@/lib/admin/fetchAllRows";
+import { createSeqGuard } from "@/lib/admin/requestSeq";
+import { UrlFilterNotice } from "@/components/admin/UrlFilterNotice";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,7 +27,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { WriteToMemberDialog, type WriteToMemberTarget } from "./_components/users/WriteToMemberDialog";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import DraftStatsPanel from "@/components/admin/DraftStatsPanel";
 import ListingDrilldownDialog from "@/components/admin/ListingDrilldownDialog";
 import ListingProximityCard from "@/components/admin/ListingProximityCard";
@@ -72,7 +75,32 @@ const AdminListings = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   // Annonces = vie de la publication. Par défaut : tout ce qui est visible publiquement ou bloqué côté annonce (hors brouillons et hors gardes opérationnelles déjà confirmées)
-  const [filterStatus, setFilterStatus] = useState<"published" | "draft" | "cancelled" | "all" | "no_draft" | "to_staff">("published");
+  // ?filter= (statut), ?sit= (une annonce, tout statut), ?owner= (un propriétaire, tout statut).
+  const [urlParams, setUrlParams] = useSearchParams();
+  const LISTING_FILTERS = ["published", "draft", "cancelled", "all", "no_draft", "to_staff"] as const;
+  type ListingFilter = typeof LISTING_FILTERS[number];
+  const urlFilter = urlParams.get("filter");
+  const focusSitId = urlParams.get("sit");
+  const focusOwnerId = urlParams.get("owner");
+  const [filterStatus, setFilterStatus] = useState<ListingFilter>(() =>
+    (LISTING_FILTERS as readonly string[]).includes(urlFilter ?? "") ? (urlFilter as ListingFilter) : "published",
+  );
+  // Navigation externe (menu latéral) : ?filter= réaligné dans le même rendu.
+  const [seenUrlFilter, setSeenUrlFilter] = useState(urlFilter);
+  if (seenUrlFilter !== urlFilter) {
+    setSeenUrlFilter(urlFilter);
+    if ((LISTING_FILTERS as readonly string[]).includes(urlFilter ?? "")) setFilterStatus(urlFilter as ListingFilter);
+  }
+  const [statsReady, setStatsReady] = useState(false);
+  const [statsError, setStatsError] = useState<string | null>(null);
+  const [listingsTruncated, setListingsTruncated] = useState(false);
+  const listingsSeq = useRef(createSeqGuard());
+  const clearFocus = () => {
+    const next = new URLSearchParams(urlParams);
+    next.delete("sit");
+    next.delete("owner");
+    setUrlParams(next, { replace: true });
+  };
   const [filterCity, setFilterCity] = useState("");
   const [stats, setStats] = useState<Record<string, Stats>>({});
   const [cities, setCities] = useState<string[]>([]);
@@ -125,20 +153,35 @@ const AdminListings = () => {
   const [animalPhotoUrls, setAnimalPhotoUrls] = useState<Set<string>>(new Set());
 
   const fetchListings = useCallback(async () => {
+    const token = listingsSeq.current.next();
     setLoading(true);
-    let q = supabase
-      .from("sits")
-      .select(`*, owner:profiles!sits_user_id_fkey(first_name, last_name, city, avatar_url)`)
-      .order("created_at", { ascending: false })
-      .limit(2000);
-    if (filterStatus === "no_draft") {
-      q = q.neq("status", "draft" as any);
-    } else if (filterStatus === "to_staff") {
-      q = q.eq("status", "published" as any);
-    } else if (filterStatus !== "all") {
-      q = q.eq("status", filterStatus as any);
+    const build = () => {
+      let q = supabase
+        .from("sits")
+        .select(`*, owner:profiles!sits_user_id_fkey(first_name, last_name, city, avatar_url)`)
+        .order("created_at", { ascending: false })
+        .order("id", { ascending: true });
+      if (focusSitId) return q.eq("id", focusSitId);
+      if (focusOwnerId) return q.eq("user_id", focusOwnerId);
+      if (filterStatus === "no_draft") {
+        q = q.neq("status", "draft" as any);
+      } else if (filterStatus === "to_staff") {
+        q = q.eq("status", "published" as any);
+      } else if (filterStatus !== "all") {
+        q = q.eq("status", filterStatus as any);
+      }
+      return q;
+    };
+    let data: any[] | null = null;
+    let error: unknown = null;
+    try {
+      const res = await fetchAllRows<any>((from, to) => build().range(from, to));
+      data = res.rows;
+      if (listingsSeq.current.isCurrent(token)) setListingsTruncated(res.truncated);
+    } catch (e) {
+      error = e;
     }
-    const { data, error } = await q;
+    if (!listingsSeq.current.isCurrent(token)) return;
     if (error) toast.error("Erreur de chargement");
     else {
       setListings(data || []);
@@ -146,7 +189,7 @@ const AdminListings = () => {
       setCities(uniqueCities as string[]);
     }
     setLoading(false);
-  }, [filterStatus]);
+  }, [filterStatus, focusSitId, focusOwnerId]);
 
   useEffect(() => { fetchListings(); }, [fetchListings]);
 
@@ -208,10 +251,18 @@ const AdminListings = () => {
 
   // Batch stats : vues, vues uniques, msg, conversations, candidatures, dernière vue
   useEffect(() => {
-    if (!listings.length) { setStats({}); return; }
+    setStatsReady(false);
+    setStatsError(null);
+    if (!listings.length) { setStats({}); setStatsReady(true); return; }
+    let cancelled = false;
     const ids = listings.map((l) => l.id);
     supabase.rpc("admin_get_listings_stats" as any, { p_sit_ids: ids }).then(({ data, error }) => {
-      if (error) { console.error("admin_get_listings_stats:", error); return; }
+      if (cancelled) return;
+      if (error) {
+        console.error("admin_get_listings_stats:", error);
+        setStatsError("Statistiques des annonces indisponibles : le filtre « À staffer » et les compteurs ne sont pas fiables.");
+        return;
+      }
       const map: Record<string, Stats> = {};
       (data as any[] || []).forEach((r) => {
         map[r.sit_id] = {
@@ -227,7 +278,9 @@ const AdminListings = () => {
         };
       });
       setStats(map);
+      setStatsReady(true);
     });
+    return () => { cancelled = true; };
   }, [listings]);
 
   const openTraffic = async (listing: any) => {
@@ -326,9 +379,11 @@ const AdminListings = () => {
   const filtered = listings.filter((l) => {
     if (search && !l.title?.toLowerCase().includes(search.toLowerCase()) && !l.owner?.first_name?.toLowerCase().includes(search.toLowerCase())) return false;
     if (filterCity && filterCity !== "all_cities" && l.owner?.city !== filterCity) return false;
-    if (filterStatus === "to_staff") {
+    if (filterStatus === "to_staff" && !focusSitId && !focusOwnerId) {
+      // Sans statistiques chargées, on ne sait pas : on n'affiche pas l'annonce.
+      if (!stats[l.id]) return false;
       const today = new Date(); today.setHours(0, 0, 0, 0);
-      const apps = stats[l.id]?.applications || 0;
+      const apps = stats[l.id].applications;
       const notPast = !l.end_date || new Date(l.end_date) >= today;
       if (apps !== 0 || !notPast) return false;
     }
@@ -505,12 +560,35 @@ const AdminListings = () => {
 
       <DraftStatsPanel />
 
+      {(focusSitId || focusOwnerId) && (
+        <UrlFilterNotice
+          label={focusSitId ? "Annonce ciblée, tous statuts confondus" : "Annonces de ce propriétaire, tous statuts confondus"}
+          notFound={!loading && listings.length === 0}
+          notFoundText={focusSitId ? "Aucune annonce ne correspond à cet identifiant." : "Aucune annonce pour ce propriétaire."}
+          onClear={clearFocus}
+        />
+      )}
+      {statsError && (
+        <p role="alert" className="rounded-lg border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+          {statsError}
+        </p>
+      )}
+      {filterStatus === "to_staff" && !statsReady && !statsError && listings.length > 0 && (
+        <p role="status" className="text-sm text-muted-foreground">Chargement des candidatures…</p>
+      )}
+
       <div className="flex flex-col sm:flex-row gap-3 flex-wrap">
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input placeholder="Rechercher titre ou proprio…" value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
         </div>
-        <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as any)}>
+        <Select value={filterStatus} onValueChange={(v) => {
+          setFilterStatus(v as ListingFilter);
+          setPage(0);
+          const next = new URLSearchParams(urlParams);
+          next.set("filter", v);
+          setUrlParams(next, { replace: true });
+        }}>
           <SelectTrigger className="w-[220px]"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="published">En ligne (par défaut)</SelectItem>
@@ -536,9 +614,9 @@ const AdminListings = () => {
       <div className="space-y-2">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <span className="font-medium">Totaux sur les annonces affichées :</span>
-          {listings.length >= 2000 && (
+          {listingsTruncated && (
             <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-              Vue limitée aux 2000 annonces les plus récentes, les totaux sont partiels
+              Vue limitée aux 50 000 annonces les plus récentes, les totaux sont partiels
             </span>
           )}
         </div>

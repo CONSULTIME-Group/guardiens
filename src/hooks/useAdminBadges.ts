@@ -91,11 +91,20 @@ export async function fetchAdminBadges(): Promise<AdminBadges> {
       );
       const ids = upcoming.map((s) => s.id);
       if (ids.length > 0) {
-        const { data: appsRows } = await supabase
-          .from("applications")
-          .select("sit_id")
-          .in("sit_id", ids);
-        const withApps = new Set((appsRows || []).map((r: { sit_id: string }) => r.sit_id));
+        // L'admin ne lit pas `applications` en direct (RLS) : le comptage passe
+        // par la fonction SECURITY DEFINER réservée aux admins. Même règle que
+        // AdminListings : candidatures non rejetées ni annulées.
+        const withApps = new Set<string>();
+        for (let i = 0; i < ids.length; i += 500) {
+          const { data: counts, error } = await supabase.rpc(
+            "admin_get_listings_application_counts" as any,
+            { p_sit_ids: ids.slice(i, i + 500) },
+          );
+          if (error) throw error;
+          ((counts as { sit_id: string; app_count: number }[] | null) || []).forEach((r) => {
+            if ((r.app_count || 0) > 0) withApps.add(r.sit_id);
+          });
+        }
         sitsToStaff = ids.filter((id) => !withApps.has(id)).length;
       }
     } catch {

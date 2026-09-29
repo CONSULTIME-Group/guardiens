@@ -1,4 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { fetchAllRows } from "@/lib/admin/fetchAllRows";
+import { createSeqGuard } from "@/lib/admin/requestSeq";
+import { buildCsv, downloadCsv } from "@/lib/admin/csv";
+import { UrlFilterNotice } from "@/components/admin/UrlFilterNotice";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -12,7 +16,7 @@ import { fr } from "date-fns/locale";
 import { Eye, Ban, ShieldCheck, StickyNote, RotateCcw, Trash2, Crown, ChevronLeft, ChevronRight, MessageSquare, FileText, MailCheck, UserCog, Download, Mail } from "lucide-react";
 import { FileSearch } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { SuspendUserDialog } from "./_components/users/SuspendUserDialog";
 import { NoteUserDialog } from "./_components/users/NoteUserDialog";
 import { DeleteUserDialog } from "./_components/users/DeleteUserDialog";
@@ -68,6 +72,16 @@ const AdminUsers = () => {
   const [filterDept, setFilterDept] = useState("all");
   const [filterCountry, setFilterCountry] = useState("all");
   const [page, setPage] = useState(0);
+  // ?user= ou ?id= : filtre la liste sur ce membre (liens depuis les autres écrans).
+  const [urlParams, setUrlParams] = useSearchParams();
+  const focusUserId = urlParams.get("user") || urlParams.get("id");
+  const clearFocus = () => {
+    const next = new URLSearchParams(urlParams);
+    next.delete("user");
+    next.delete("id");
+    setUrlParams(next, { replace: true });
+  };
+  const usersSeq = useRef(createSeqGuard());
   const [countryStats, setCountryStats] = useState<{ intl: number; codes: string[] }>({ intl: 0, codes: [] });
   const [kpis, setKpis] = useState<{ total: number; active: number; suspended: number; verified: number; newLast7d: number } | null>(null);
   const [exporting, setExporting] = useState(false);
@@ -176,6 +190,7 @@ const AdminUsers = () => {
   };
 
   const fetchUsers = useCallback(async () => {
+    const token = usersSeq.current.next();
     setLoading(true);
     const from = page * PAGE_SIZE;
     const to = from + PAGE_SIZE - 1;
@@ -187,6 +202,7 @@ const AdminUsers = () => {
       )
       .order("created_at", { ascending: false });
 
+    if (focusUserId) query = query.eq("id", focusUserId);
     if (filterRole !== "all") query = query.eq("role", filterRole as any);
     if (filterVerification !== "all") query = query.eq("identity_verification_status", filterVerification);
 
@@ -212,6 +228,7 @@ const AdminUsers = () => {
     }
 
     const { data, error, count } = await query.range(from, to);
+    if (!usersSeq.current.isCurrent(token)) return;
     if (error) {
       toast.error("Erreur de chargement");
       setLoading(false);
@@ -235,6 +252,7 @@ const AdminUsers = () => {
       const modRows = modResAll.flatMap((r: any) => r.data || []);
       modMap = new Map(modRows.map((m: any) => [m.profile_id, { admin_notes: m.admin_notes, is_manual_super: m.is_manual_super, suspension_reason: m.suspension_reason ?? null }]));
     }
+    if (!usersSeq.current.isCurrent(token)) return;
     const enriched = (data || []).map((u: any) => {
       const mod = modMap.get(u.id);
       return {
@@ -248,30 +266,39 @@ const AdminUsers = () => {
     setUsers(enriched);
     setTotal(count ?? 0);
     setLoading(false);
-  }, [filterRole, filterVerification, filterDept, filterCountry, searchDebounced, page]);
+  }, [filterRole, filterVerification, filterDept, filterCountry, searchDebounced, page, focusUserId]);
 
   // Debounce search 300ms
   useEffect(() => {
-    const t = setTimeout(() => setSearchDebounced(search.trim().toLowerCase()), 300);
+    const t = setTimeout(() => {
+      const next = search.trim().toLowerCase();
+      setSearchDebounced((prev) => {
+        if (prev !== next) setPage(0);
+        return next;
+      });
+    }, 300);
     return () => clearTimeout(t);
   }, [search]);
 
-  // Reset page when filters/search change
-  useEffect(() => { setPage(0); }, [searchDebounced, filterRole, filterVerification, filterDept, filterCountry]);
 
   useEffect(() => { fetchUsers(); }, [fetchUsers]);
 
   // Charge une fois : liste des pays présents (hors FR) + total international pour le badge KPI
   useEffect(() => {
     (async () => {
-      const { data, count } = await supabase
-        .from("profiles")
-        .select("country", { count: "exact" })
-        .not("country", "is", null)
-        .neq("country", "FR")
-        .limit(5000);
+      const { rows: data } = await fetchAllRows<any>((from, to) =>
+        supabase
+          .from("profiles")
+          .select("country")
+          .not("country", "is", null)
+          .neq("country", "FR")
+          .order("created_at", { ascending: true })
+          .order("id", { ascending: true })
+          .range(from, to),
+      ).catch(() => ({ rows: [] as any[] }));
+      const count = data.length;
       const codes = Array.from(
-        new Set((data || []).map((r: any) => String(r.country || "").toUpperCase()).filter(Boolean)),
+        new Set(data.map((r: any) => String(r.country || "").toUpperCase()).filter(Boolean)),
       ).sort((a, b) => getCountryName(a).localeCompare(getCountryName(b), "fr"));
       setCountryStats({ intl: count ?? 0, codes });
     })();
@@ -305,7 +332,6 @@ const AdminUsers = () => {
   const availableCountries = countryStats.codes;
   const intlCount = countryStats.intl;
 
-  const EXPORT_MAX = 5000;
   const handleExportCsv = async () => {
     setExporting(true);
     try {
@@ -315,8 +341,9 @@ const AdminUsers = () => {
           "id, first_name, last_name, role, city, postal_code, country, created_at, last_seen_at, identity_verification_status, account_status, is_founder",
         )
         .order("created_at", { ascending: false })
-        .limit(EXPORT_MAX);
+        .order("id", { ascending: true });
 
+      if (focusUserId) query = query.eq("id", focusUserId);
       if (filterRole !== "all") query = query.eq("role", filterRole as any);
       if (filterVerification !== "all") query = query.eq("identity_verification_status", filterVerification);
       if (filterCountry === "FR") query = query.or("country.eq.FR,country.is.null");
@@ -332,8 +359,13 @@ const AdminUsers = () => {
         if (s) query = query.or(`first_name.ilike.%${s}%,last_name.ilike.%${s}%,email.ilike.%${s}%`);
       }
 
-      const { data, error } = await query;
-      if (error || !data) {
+      let data: any[];
+      let truncated = false;
+      try {
+        const res = await fetchAllRows<any>((from, to) => query.range(from, to));
+        data = res.rows;
+        truncated = res.truncated;
+      } catch {
         toast.error("Erreur lors de l'export");
         return;
       }
@@ -346,10 +378,6 @@ const AdminUsers = () => {
         (emails || []).forEach((e: any) => emailMap.set(e.id, e.email));
       }
 
-      const esc = (v: any) => {
-        const s = v === null || v === undefined ? "" : String(v);
-        return `"${s.replace(/"/g, '""')}"`;
-      };
       const headers = ["Nom", "Email", "Rôle", "Ville", "Code postal", "Département", "Pays", "Inscription", "Dernière activité", "Vérification", "Statut", "Fondateur"];
       const rows = data.map((u: any) => {
         const name = `${u.first_name || ""} ${u.last_name || ""}`.trim();
@@ -367,20 +395,11 @@ const AdminUsers = () => {
           verificationLabels[u.identity_verification_status || "not_submitted"]?.label || "",
           statusLabels[u.account_status || "active"]?.label || "",
           u.is_founder ? "oui" : "non",
-        ].map(esc).join(",");
+        ];
       });
-      const csv = "\uFEFF" + [headers.map(esc).join(","), ...rows].join("\n");
-      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `utilisateurs-${format(new Date(), "yyyy-MM-dd")}.csv`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      if (data.length >= EXPORT_MAX) {
-        toast.warning(`Export plafonné à ${EXPORT_MAX} lignes. Affinez les filtres pour tout exporter.`);
+      downloadCsv(buildCsv(headers, rows), `utilisateurs-${format(new Date(), "yyyy-MM-dd")}.csv`);
+      if (truncated) {
+        toast.warning(`Export partiel : ${data.length} lignes, plus de 50 000 correspondent. Affinez les filtres pour tout exporter.`);
       } else {
         toast.success(`${data.length} ligne${data.length > 1 ? "s" : ""} exportée${data.length > 1 ? "s" : ""}`);
       }
@@ -631,6 +650,15 @@ const AdminUsers = () => {
       </div>
 
 
+      {focusUserId && (
+        <UrlFilterNotice
+          label="Filtré sur un membre"
+          notFound={!loading && users.length === 0}
+          notFoundText="Aucun membre ne correspond à cet identifiant."
+          onClear={clearFocus}
+        />
+      )}
+
       <div className="flex flex-col sm:flex-row gap-3">
         <Input
           placeholder="Rechercher par nom ou email…"
@@ -638,7 +666,7 @@ const AdminUsers = () => {
           onChange={(e) => setSearch(e.target.value)}
           className="max-w-xs"
         />
-        <Select value={filterRole} onValueChange={setFilterRole}>
+        <Select value={filterRole} onValueChange={(v) => { setFilterRole(v); setPage(0); }}>
           <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Tous rôles</SelectItem>
@@ -647,7 +675,7 @@ const AdminUsers = () => {
             <SelectItem value="both">Les deux</SelectItem>
           </SelectContent>
         </Select>
-        <Select value={filterVerification} onValueChange={setFilterVerification}>
+        <Select value={filterVerification} onValueChange={(v) => { setFilterVerification(v); setPage(0); }}>
           <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Toutes vérifications</SelectItem>
@@ -657,7 +685,7 @@ const AdminUsers = () => {
             <SelectItem value="rejected">Refusé</SelectItem>
           </SelectContent>
         </Select>
-        <Select value={filterDept} onValueChange={setFilterDept}>
+        <Select value={filterDept} onValueChange={(v) => { setFilterDept(v); setPage(0); }}>
           <SelectTrigger className="w-[200px]"><SelectValue /></SelectTrigger>
           <SelectContent className="max-h-60">
             <SelectItem value="all">Tous départements</SelectItem>
@@ -668,7 +696,7 @@ const AdminUsers = () => {
             ))}
           </SelectContent>
         </Select>
-        <Select value={filterCountry} onValueChange={setFilterCountry}>
+        <Select value={filterCountry} onValueChange={(v) => { setFilterCountry(v); setPage(0); }}>
           <SelectTrigger className="w-[200px]"><SelectValue /></SelectTrigger>
           <SelectContent className="max-h-60">
             <SelectItem value="all">Tous pays</SelectItem>
