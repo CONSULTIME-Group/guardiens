@@ -532,9 +532,11 @@ Deno.serve(async (req) => {
     const classification = mergeClassification(extracted.classification, intent);
     const drafted = applyDraftToAction(normalizeAlmaOutput(extracted.answer), next?.action ?? null, next?.chips ?? []);
     // Lot J4 : mots proscrits reformulés, anecdote déplacée après l'information.
+    const quiet = Boolean(helpDirective) || intent.frustration || classification.frustration >= 2 ||
+      classification.bug_suspected || classification.intent === "aide_recherchee";
     const answer = polishAlmaAnswer(drafted.answer, {
-      moodAllowed: register === "perso" || (isSmallTalk(message) && !helpDirective && (classificationFromPatterns(intent).frustration ?? 0) < 2),
-      quiet: Boolean(helpDirective) || intent.frustration || classification.frustration >= 2 || classification.bug_suspected || classification.intent === "aide_recherchee",
+      moodAllowed: !quiet && (register === "perso" || isSmallTalk(message)),
+      quiet,
     });
     if (!answer) {
       await logConversation({
