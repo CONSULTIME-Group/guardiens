@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Loader2, AlertTriangle, CheckCircle2, XCircle, Clock, Star } from "lucide-react";
-import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
@@ -54,6 +54,7 @@ const AdminReviewDisputes = () => {
   const [tab, setTab] = useState<DisputeStatus>("pending");
   const [resolveTarget, setResolveTarget] = useState<{ dispute: DisputeRow; action: "accepted" | "rejected" } | null>(null);
   const [adminNote, setAdminNote] = useState("");
+  const [memberMessage, setMemberMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const load = async () => {
@@ -113,10 +114,11 @@ const AdminReviewDisputes = () => {
   const handleResolve = async () => {
     if (!resolveTarget) return;
     setSubmitting(true);
-    const { error } = await supabase.rpc("resolve_review_dispute", {
+    const { error } = await supabase.rpc("resolve_review_dispute_v2", {
       p_dispute_id: resolveTarget.dispute.id,
       p_decision: resolveTarget.action,
       p_admin_note: adminNote.trim() || undefined,
+      p_member_message: memberMessage.trim() || undefined,
     });
     setSubmitting(false);
     if (error) {
@@ -139,7 +141,8 @@ const AdminReviewDisputes = () => {
               firstName: resolveTarget.dispute.disputer?.first_name || undefined,
               decision: resolveTarget.action,
               category: resolveTarget.dispute.category,
-              adminNote: adminNote.trim() || undefined,
+              // Lot A9 : seul le message au membre part, la note interne reste interne.
+              memberMessage: memberMessage.trim() || undefined,
             },
           },
         });
@@ -150,11 +153,12 @@ const AdminReviewDisputes = () => {
 
     toast.success(
       resolveTarget.action === "accepted"
-        ? "Contestation acceptée, l'avis a été dépublié"
-        : "Contestation refusée"
+        ? "Contestation acceptée : l'avis est retiré du profil"
+        : "Contestation refusée : l'avis reste en ligne"
     );
     setResolveTarget(null);
     setAdminNote("");
+    setMemberMessage("");
     load();
   };
 
@@ -175,21 +179,16 @@ const AdminReviewDisputes = () => {
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-5xl mx-auto">
+    <div className="space-y-6">
       <Head>
         <title>Contestations d'avis, Admin Guardiens</title>
         <meta name="robots" content="noindex,nofollow" />
       </Head>
 
-      <header className="mb-6">
-        <h1 className="font-heading text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2">
-          <AlertTriangle className="h-6 w-6 text-warning" />
-          Contestations d'avis
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Examinez les demandes de retrait d'avis soumises par les membres.
-        </p>
-      </header>
+      <AdminPageHeader
+        title="Contestations d'avis"
+        description="Examinez les demandes de retrait d'avis soumises par les membres."
+      />
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as DisputeStatus)}>
         <TabsList className="grid w-full grid-cols-3 mb-6">
@@ -215,6 +214,7 @@ const AdminReviewDisputes = () => {
                   dispute={d}
                   onResolve={(action) => {
                     setAdminNote(d.admin_note || "");
+                    setMemberMessage("");
                     setResolveTarget({ dispute: d, action });
                   }}
                 />
@@ -233,22 +233,39 @@ const AdminReviewDisputes = () => {
             </DialogTitle>
             <DialogDescription>
               {resolveTarget?.action === "accepted"
-                ? "L'avis sera dépublié immédiatement et ne s'affichera plus sur le profil public."
-                : "L'avis restera publié. Le membre sera informé du refus."}
+                ? "L'avis est retiré du profil public dès la confirmation. Le membre reçoit une notification et un email."
+                : "L'avis reste en ligne. Le membre reçoit une notification et un email."}
             </DialogDescription>
           </DialogHeader>
 
-          <div className="py-2">
-            <label className="text-sm font-medium mb-1.5 block">
-              Note interne <span className="text-muted-foreground font-normal">(optionnelle)</span>
+          <div className="py-2 space-y-4">
+            <div>
+            <label htmlFor="dispute-member-message" className="text-sm font-medium mb-1.5 block">
+              Message au membre (envoyé par email)
             </label>
             <Textarea
+              id="dispute-member-message"
+              placeholder="Le texte que le membre lira dans l'email."
+              value={memberMessage}
+              onChange={(e) => setMemberMessage(e.target.value)}
+              rows={3}
+              maxLength={2000}
+              className="resize-none"
+            />
+            </div>
+            <div>
+            <label htmlFor="dispute-admin-note" className="text-sm font-medium mb-1.5 block">
+              Note interne (jamais envoyée)
+            </label>
+            <Textarea
+              id="dispute-admin-note"
               placeholder="Justification, contexte ou décision motivée…"
               value={adminNote}
               onChange={(e) => setAdminNote(e.target.value)}
               rows={4}
               className="resize-none"
             />
+            </div>
           </div>
 
           <DialogFooter className="gap-2 sm:gap-0">

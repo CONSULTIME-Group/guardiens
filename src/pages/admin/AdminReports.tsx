@@ -64,7 +64,7 @@ export function targetHref(targetType: string, targetId: string, conversationId?
     case "profile": return `/admin/users?user=${targetId}`;
     case "sit":
     case "listing": return `/admin/listings?sit=${targetId}`;
-    case "small_mission": return `/admin/small-missions?mission=${targetId}`;
+    case "small_mission": return `/admin/small-missions`;
     case "review": return `/admin/reviews`;
     case "message": return conversationId ? `/admin/messages?conversation=${conversationId}` : `/admin/messages`;
     default: return null;
