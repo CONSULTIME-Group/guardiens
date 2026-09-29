@@ -116,6 +116,10 @@ export function buildDigestLines(
     const allTypes = arr.map((x) => x.signal_type)
     if (types.includes('pending_application') && types.includes('stalled_discussion') && main !== 'owner_sit_unconfirmed') {
       action = `Relancer le propriétaire : ${sitGroupSummary(allTypes)}.`
+    } else if (main === 'alma_frustration' && Array.isArray(m.messages)) {
+      // Lot J1 : les messages concernés, dans l'email quotidien.
+      const quotes = (m.messages as { text?: string }[]).map((x) => `« ${String(x.text ?? '').slice(0, 160)} »`).join(' ')
+      action = `${actionFor(main)} Messages : ${quotes}`.replace(/[\u2014\u2013]/g, ',')
     } else if (main === 'pending_application' && count > 1) {
       action = `Relancer le propriétaire : ${count} candidatures attendent sa réponse.`
     }
