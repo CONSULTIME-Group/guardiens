@@ -443,7 +443,9 @@ const AdminReviews = () => {
             <h2 className="font-heading font-semibold text-lg mb-3">
               Avis d'annulation en attente ({pendingCancellations.length})
             </h2>
-            {cancellationLoading ? (
+            {cancellationError ? (
+              <p role="alert" className="text-sm text-destructive py-4">{cancellationError}</p>
+            ) : cancellationLoading ? (
               <p className="text-sm text-muted-foreground">Chargement…</p>
             ) : pendingCancellations.length === 0 ? (
               <p className="text-sm text-muted-foreground italic">Aucun avis d'annulation en attente.</p>
@@ -714,7 +716,7 @@ const AdminReviews = () => {
                 <>
                   Auteur : <strong>{validateConfirm.review.reviewer?.first_name} {validateConfirm.review.reviewer?.last_name}</strong>.
                   {validateConfirm.field === "moderation_status"
-                    ? " L'avis est validé et reste privé : il n'est affiché ni sur le profil public ni dans « Mes avis ». La personne concernée reçoit un email qui le lui explique."
+                    ? " L'avis est validé et reste privé, consultable par l'équipe seule. La personne concernée reçoit un email qui le lui explique."
                     : " La réponse est validée et son auteur reçoit un email."}
                 </>
               )}
