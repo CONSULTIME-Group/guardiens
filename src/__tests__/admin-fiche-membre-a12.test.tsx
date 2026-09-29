@@ -134,7 +134,7 @@ describe("A12, menu d'actions", () => {
   it("« Supprimer définitivement » est séparé, destructif, et chaque entrée ouvre le bon dialogue", async () => {
     const Page = await loadPage();
     wrap("/admin/users", <Page />);
-    const openMenu = async () => { const b = await screen.findByRole("button", { name: "Actions pour Camille Durand" }); b.focus(); fireEvent.keyDown(b, { key: "Enter" }); };
+    const openMenu = async () => { const b = (await screen.findAllByRole("button", { name: "Actions pour Camille Durand", hidden: true }))[0]; b.focus(); fireEvent.keyDown(b, { key: "Enter" }); };
 
     await openMenu();
     const del = await screen.findByRole("menuitem", { name: "Supprimer définitivement" });
