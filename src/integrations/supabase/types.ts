@@ -11890,6 +11890,15 @@ export type Database = {
         }
         Returns: undefined
       }
+      resolve_review_dispute_v2: {
+        Args: {
+          p_admin_note?: string
+          p_decision: string
+          p_dispute_id: string
+          p_member_message?: string
+        }
+        Returns: undefined
+      }
       retry_missing_geocoding: { Args: never; Returns: Json }
       school_zone_from_postal_code: { Args: { p_cp: string }; Returns: string }
       search_alma_knowledge: {
