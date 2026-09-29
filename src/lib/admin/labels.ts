@@ -500,7 +500,7 @@ const WORDS: Array<[RegExp, string]> = [
 export function displayText(v: string | null | undefined): string {
   const c = cellValue(v);
   if (c === EMPTY_TABLE_VALUE) return c;
-  const translated = WORDS.reduce((acc, [re, fr]) => acc.replace(re, fr), c);
+  const translated = WORDS.reduce((acc, [re, fr]) => acc.replace(re, fr), digestToResume(c));
   // Clés techniques glissées dans un texte (« dont animal_types est vide ») :
   // remplacées par leur libellé, en minuscule, entre guillemets français.
   return translated.replace(/\b[a-z]+(?:_[a-z0-9]+)+\b/g, (k) => {
