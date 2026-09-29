@@ -470,3 +470,14 @@ export function displayText(v: string | null | undefined): string {
     return `« ${l.charAt(0).toLocaleLowerCase("fr-FR")}${l.slice(1)} »`;
   });
 }
+
+/** Sujets fixes posés par le code (catégories techniques), seuls traduits sur Messages contact. */
+const CONTACT_SUBJECT_CATEGORIES: Record<string, string> = {
+  "Feedback utilisateur": "Retour utilisateur",
+};
+
+/** Sujet de message contact : catégorie technique traduite, texte de membre laissé tel quel. */
+export function contactSubjectLabel(subject: string | null | undefined): string {
+  if (!subject) return "·";
+  return CONTACT_SUBJECT_CATEGORIES[subject.trim()] ?? subject;
+}
