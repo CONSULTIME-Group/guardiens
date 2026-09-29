@@ -18,6 +18,7 @@ import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
+import { reportAdminReadError, UNAVAILABLE_LABEL } from "@/lib/admin/readError";
 import { OnboardingReminderCard } from "./_components/dashboard/OnboardingReminderCard";
 
 // ---------------------- Types ----------------------
@@ -32,23 +33,61 @@ interface PipelineHealth {
   attempts_1h: number | null;
 }
 
-interface SendCounts {
-  sent: number;
-  failed: number;
-  dlq: number;
-  pending: number;
-  suppressed: number;
-  bounced: number;
-  total: number;
+/** Lot A10 : tous les statuts connus, pour que la somme égale le total. */
+export const SEND_STATUSES = [
+  "sent", "failed", "dlq", "pending", "suppressed", "bounced",
+  "deferred", "unsubscribed_category", "cancelled",
+] as const;
+export const SEND_STATUS_FR: Record<string, string> = {
+  sent: "Envoyé", failed: "Échec", dlq: "Échec définitif", pending: "En attente",
+  suppressed: "Adresse bloquée", bounced: "Rejeté par le serveur", deferred: "Différé",
+  unsubscribed_category: "Catégorie désactivée", cancelled: "Annulé", other: "Autre statut",
+};
+export type SendCounts = Record<string, number> & { total: number };
+
+export const DEFERRED_STATUS_FR: Record<string, string> = {
+  pending: "En attente", sent: "Envoyé", failed: "Échec", expired: "Expiré",
+  abandoned: "Abandonné", superseded: "Remplacé",
+};
+export interface DeferredCounts {
+  byStatus: Record<string, number>;
+  /** En attente dont l'heure prévue (scheduled_for) est dépassée de plus d'une heure. */
+  lateCount: number;
+  oldest_late_seconds: number | null;
 }
 
-interface DeferredCounts {
-  pending: number;
-  sent: number;
-  failed: number;
-  expired: number;
-  oldest_pending_age_seconds: number | null;
+/** Compte par statut, sans perdre de statut inconnu. */
+export function countSendStatuses(statuses: string[]): SendCounts {
+  const c: SendCounts = { total: 0 } as SendCounts;
+  for (const st of SEND_STATUSES) c[st] = 0;
+  c.other = 0;
+  for (const st of statuses) {
+    c.total++;
+    if (st in c && st !== "total") c[st]++;
+    else c.other++;
+  }
+  return c;
 }
+
+/** File différée : tous les statuts, alerte sur scheduled_for dépassé. */
+export function summarizeDeferred(rows: { status: string; scheduled_for: string | null }[], now = Date.now()): DeferredCounts {
+  const byStatus: Record<string, number> = {};
+  let lateCount = 0;
+  let oldest: number | null = null;
+  for (const r of rows) {
+    byStatus[r.status] = (byStatus[r.status] ?? 0) + 1;
+    if (r.status === "pending" && r.scheduled_for) {
+      const late = (now - new Date(r.scheduled_for).getTime()) / 1000;
+      if (late > 3600) {
+        lateCount++;
+        if (oldest == null || late > oldest) oldest = late;
+      }
+    }
+  }
+  return { byStatus, lateCount, oldest_late_seconds: oldest };
+}
+
+interface PausedCampaign { id: string; subject: string; created_at: string; recipients_count: number | null; sent_count: number | null }
 
 // ---------------------- Helpers ----------------------
 const formatAge = (seconds: number | null): string => {
@@ -106,7 +145,9 @@ export default function AdminEmailHealth() {
   const [logs24h, setLogs24h] = useState<SendCounts | null>(null);
   const [logs7d, setLogs7d] = useState<SendCounts | null>(null);
   const [deferred, setDeferred] = useState<DeferredCounts | null>(null);
-  const [massPaused, setMassPaused] = useState<number>(0);
+  const [pausedList, setPausedList] = useState<PausedCampaign[] | null>(null);
+  const [showPaused, setShowPaused] = useState(false);
+  const massPaused = pausedList?.length ?? 0;
   const [suppressedTotal, setSuppressedTotal] = useState<number>(0);
   const [suppressedList, setSuppressedList] = useState<
     { id: string; email: string; reason: string; created_at: string }[]
@@ -155,20 +196,7 @@ export default function AdminEmailHealth() {
         const key = r.message_id || r.id;
         if (!seen.has(key)) seen.set(key, r.status);
       });
-      const counts: SendCounts = {
-        sent: 0,
-        failed: 0,
-        dlq: 0,
-        pending: 0,
-        suppressed: 0,
-        bounced: 0,
-        total: 0,
-      };
-      seen.forEach((status) => {
-        counts.total++;
-        if (status in counts) (counts as any)[status]++;
-      });
-      return counts;
+      return countSendStatuses([...seen.values()]);
     },
     [],
   );
@@ -182,34 +210,17 @@ export default function AdminEmailHealth() {
         .range(from, to),
     );
     if (truncated) setPartial(true);
-    const counts: DeferredCounts = {
-      pending: 0,
-      sent: 0,
-      failed: 0,
-      expired: 0,
-      oldest_pending_age_seconds: null,
-    };
-    const now = Date.now();
-    let oldest: number | null = null;
-    (data || []).forEach((r: any) => {
-      if (r.status in counts) (counts as any)[r.status]++;
-      if (r.status === "pending") {
-        const t = new Date(r.created_at).getTime();
-        const age = (now - t) / 1000;
-        if (oldest == null || age > oldest) oldest = age;
-      }
-    });
-    counts.oldest_pending_age_seconds = oldest;
-    return counts;
+    return summarizeDeferred(data || []);
   }, []);
 
   const fetchMassPaused = useCallback(async () => {
-    const { count, error } = await supabase
+    const { data, error } = await supabase
       .from("mass_emails")
-      .select("id", { count: "exact", head: true })
-      .eq("status", "paused");
-    if (error) return 0;
-    return count ?? 0;
+      .select("id, subject, created_at, recipients_count, sent_count")
+      .eq("status", "paused")
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+    return (data ?? []) as PausedCampaign[];
   }, []);
 
   const suppressedSeq = useRef(createSeqGuard());
@@ -254,10 +265,10 @@ export default function AdminEmailHealth() {
       setLogs24h(a);
       setLogs7d(b);
       setDeferred(def);
-      setMassPaused(mp);
+      setPausedList(mp);
       await fetchHealth();
     } catch (e: any) {
-      toast.error(e?.message || "Erreur de rafraîchissement");
+      reportAdminReadError("Santé email", e);
     } finally {
       setRefreshing(false);
     }
@@ -311,9 +322,7 @@ export default function AdminEmailHealth() {
       ? ((logs7d.failed + logs7d.dlq + logs7d.bounced) / logs7d.total) * 100
       : 0;
 
-  const deferredPendingLate =
-    (deferred?.pending ?? 0) > 0 &&
-    (deferred?.oldest_pending_age_seconds ?? 0) > 3600;
+  const deferredPendingLate = (deferred?.lateCount ?? 0) > 0;
 
   const suppressedPageCount = Math.max(1, Math.ceil(suppressedTotal / PAGE_SIZE));
 
@@ -344,7 +353,7 @@ export default function AdminEmailHealth() {
         ) : health ? (
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             <StatCard
-              label="Dernier passage worker"
+              label="Dernier passage du worker (file d'authentification)"
               value={formatAge(health.last_run_age_seconds)}
               hint={
                 health.last_run_at
@@ -407,10 +416,10 @@ export default function AdminEmailHealth() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {(["sent", "failed", "dlq", "pending", "suppressed", "bounced"] as const).map(
+                {([...SEND_STATUSES, "other"] as string[]).filter((s) => s !== "other" || (logs7d?.other ?? 0) > 0).map(
                   (s) => (
                     <TableRow key={s}>
-                      <TableCell className="capitalize">{s}</TableCell>
+                      <TableCell>{SEND_STATUS_FR[s] ?? s}</TableCell>
                       <TableCell className="text-right tabular-nums">
                         {logs24h ? logs24h[s] : "·"}
                       </TableCell>
@@ -456,25 +465,30 @@ export default function AdminEmailHealth() {
         </h2>
         {deferredPendingLate && (
           <div className="rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm">
-            {deferred!.pending} email{deferred!.pending > 1 ? "s" : ""} en attente depuis plus
-            d'une heure (le plus vieux : {formatAge(deferred!.oldest_pending_age_seconds)}).
+            {deferred!.lateCount} email{deferred!.lateCount > 1 ? "s" : ""} en attente dont l'heure prévue est dépassée
+            de plus d'une heure (le plus en retard : {formatAge(deferred!.oldest_late_seconds)}).
           </div>
         )}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-          <StatCard
-            label="Pending"
-            value={deferred?.pending ?? "·"}
-            tone={deferredPendingLate ? "destructive" : "muted"}
-          />
-          <StatCard label="Sent" value={deferred?.sent ?? "·"} tone="success" />
-          <StatCard label="Failed" value={deferred?.failed ?? "·"} tone="warning" />
-          <StatCard label="Expired" value={deferred?.expired ?? "·"} tone="muted" />
-          <StatCard
-            label="Plus vieux pending"
-            value={formatAge(deferred?.oldest_pending_age_seconds ?? null)}
-            tone={deferredPendingLate ? "destructive" : "muted"}
-          />
-        </div>
+        {!deferred ? (
+          <p className="text-sm text-destructive">{UNAVAILABLE_LABEL}</p>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {Object.entries(deferred.byStatus).sort((a, b) => b[1] - a[1]).map(([st, n]) => (
+              <StatCard
+                key={st}
+                label={DEFERRED_STATUS_FR[st] ?? st}
+                value={n.toLocaleString("fr-FR")}
+                tone={st === "pending" && deferredPendingLate ? "destructive" : st === "sent" ? "success" : st === "failed" ? "warning" : "muted"}
+              />
+            ))}
+            <StatCard
+              label="Retard du plus ancien en attente"
+              value={formatAge(deferred.oldest_late_seconds)}
+              hint="Mesuré depuis l'heure prévue d'envoi"
+              tone={deferredPendingLate ? "destructive" : "muted"}
+            />
+          </div>
+        )}
       </section>
 
       {/* 4. Mass emails paused */}
@@ -486,17 +500,36 @@ export default function AdminEmailHealth() {
           <CardContent className="pt-4 pb-4 flex items-center justify-between gap-3">
             <div>
               <div className="text-sm">
-                <span className="font-medium">{massPaused}</span> campagne
+                <span className="font-medium">{pausedList ? massPaused : UNAVAILABLE_LABEL}</span> campagne
                 {massPaused > 1 ? "s" : ""} en pause.
               </div>
               <div className="text-xs text-muted-foreground">
                 À reprendre ou annuler manuellement.
               </div>
             </div>
-            <Button asChild size="sm" variant="outline">
-              <Link to="/admin/envois-groupes">Voir les campagnes</Link>
-            </Button>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" disabled={massPaused === 0} onClick={() => setShowPaused((v) => !v)}>
+                {showPaused ? "Masquer la liste" : "Voir la liste"}
+              </Button>
+              <Button asChild size="sm" variant="ghost">
+                <Link to="/admin/envois-groupes">Envois groupés</Link>
+              </Button>
+            </div>
           </CardContent>
+          {showPaused && pausedList && pausedList.length > 0 && (
+            <CardContent className="pt-0">
+              <ul className="divide-y divide-border text-sm" data-testid="paused-campaigns">
+                {pausedList.map((c) => (
+                  <li key={c.id} className="flex items-center justify-between gap-3 py-2">
+                    <span className="truncate">{c.subject}</span>
+                    <span className="shrink-0 text-xs text-muted-foreground">
+                      {format(new Date(c.created_at), "d MMM yyyy", { locale: fr })} · {(c.sent_count ?? 0).toLocaleString("fr-FR")} envoyés sur {(c.recipients_count ?? 0).toLocaleString("fr-FR")}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          )}
         </Card>
       </section>
 
