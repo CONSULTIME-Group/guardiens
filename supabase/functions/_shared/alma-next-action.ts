@@ -112,7 +112,7 @@ export function computeNextAction(input: NextActionInput): NextActionResult {
   // garde passe devant seulement si la personne parle d'un départ ; des
   // animaux seuls (« de l'aide pour mes chevaux ») relèvent d'abord de l'entraide.
   if (input.helpIntent) {
-    if (DEPARTURE_INTENT.test(q)) {
+    if (DEPARTURE_INTENT.test(q) || Boolean(input.largeAnimals)) {
       candidates.push({ label: "Publier mon annonce de garde", path: withTitle("/sits/create", suggestSitTitle(input.question)), reason: "aide_garde" });
       candidates.push({ label: "Demander un coup de main", path: withTitle("/petites-missions/creer", suggestMissionTitle(input.question)), reason: "aide_entraide" });
     } else {
