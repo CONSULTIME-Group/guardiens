@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { format, subDays, subMonths, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ConversationsTable from "@/components/admin/messages/ConversationsTable";
 
@@ -58,7 +58,20 @@ const CTX_COLOR: Record<string, string> = {
 
 export default function AdminMessages() {
   const [period, setPeriod] = useState<Period>("30d");
-  const [tab, setTab] = useState<Tab>("stats");
+  // ?conversation= : bascule sur l'onglet Conversations et ouvre ce fil.
+  const [urlParams, setUrlParams] = useSearchParams();
+  const focusConversationId = urlParams.get("conversation");
+  const [tab, setTab] = useState<Tab>(() => (focusConversationId ? "conversations" : "stats"));
+  const [seenConversation, setSeenConversation] = useState(focusConversationId);
+  if (seenConversation !== focusConversationId) {
+    setSeenConversation(focusConversationId);
+    if (focusConversationId) setTab("conversations");
+  }
+  const clearFocusConversation = () => {
+    const next = new URLSearchParams(urlParams);
+    next.delete("conversation");
+    setUrlParams(next, { replace: true });
+  };
   const [focusUserId, setFocusUserId] = useState<string | null>(null);
 
   const [stats, setStats] = useState<Stats | null>(null);
@@ -149,7 +162,12 @@ export default function AdminMessages() {
         </TabsList>
 
         <TabsContent value="conversations" className="mt-4">
-          <ConversationsTable focusUserId={focusUserId} onClearFocusUser={() => setFocusUserId(null)} />
+          <ConversationsTable
+            focusUserId={focusUserId}
+            onClearFocusUser={() => setFocusUserId(null)}
+            focusConversationId={focusConversationId}
+            onClearFocusConversation={clearFocusConversation}
+          />
         </TabsContent>
 
         <TabsContent value="stats" className="mt-4 space-y-6">
