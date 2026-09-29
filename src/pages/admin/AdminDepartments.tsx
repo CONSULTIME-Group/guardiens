@@ -1,3 +1,4 @@
+import { usePagedSearch, SearchInput, Pager } from "@/components/admin/ui";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useState } from "react";
@@ -135,6 +136,8 @@ const AdminDepartments = () => {
     onError: (err: any) => toast.error("Erreur: " + err.message),
   });
 
+  const paged = usePagedSearch(pages ?? [], (p) => `${p.department ?? ""} ${p.region ?? ""}`);
+
   return (
     <div className="space-y-6">
       <AdminPageHeader title="Départements" description={`${pages.length} pages départements`} />
@@ -191,13 +194,18 @@ const AdminDepartments = () => {
         </CardContent>
       </Card>
 
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <SearchInput value={paged.query} onChange={paged.setQuery} placeholder="Rechercher un département" />
+        <span className="text-sm text-muted-foreground">{paged.total} résultats</span>
+      </div>
+      <Pager page={paged.page} total={paged.total} onPage={paged.setPage} />
       {isLoading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => <div key={i} className="h-16 bg-muted animate-pulse rounded-lg" />)}
         </div>
       ) : (
         <div className="space-y-2">
-          {pages.map((p) => (
+          {paged.visible.map((p) => (
             <div key={p.id} className="flex items-center gap-3 p-4 bg-card border border-border rounded-lg">
               <Building2 className="h-4 w-4 text-primary shrink-0" />
               <div className="flex-1 min-w-0">

@@ -1,3 +1,4 @@
+import { usePagedSearch, SearchInput, Pager } from "@/components/admin/ui";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useState } from "react";
@@ -154,6 +155,8 @@ const AdminCityPages = () => {
     }
   };
 
+  const paged = usePagedSearch(pages ?? [], (p: any) => `${p.city ?? ""} ${p.department ?? ""}`);
+
   return (
     <div className="space-y-6">
       <AdminPageHeader title="Pages villes" description="Pages d'accueil par ville, générées pour le référencement." />
@@ -210,8 +213,13 @@ const AdminCityPages = () => {
         </CardContent>
       </Card>
 
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <SearchInput value={paged.query} onChange={paged.setQuery} placeholder="Rechercher une ville" />
+        <span className="text-sm text-muted-foreground">{paged.total} résultats</span>
+      </div>
+      <Pager page={paged.page} total={paged.total} onPage={paged.setPage} />
       <div className="space-y-3">
-        {pages?.map((page: any) => (
+        {paged.visible.map((page: any) => (
           <Card key={page.id}>
             <CardContent className="p-4 flex items-center justify-between gap-4">
               <div className="flex-1 min-w-0">

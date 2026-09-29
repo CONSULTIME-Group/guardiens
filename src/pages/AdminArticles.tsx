@@ -1,3 +1,4 @@
+import { Pager, PAGE_SIZE } from "@/components/admin/ui";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -127,6 +128,8 @@ const AdminArticles = () => {
     else { toast.success("Article supprimé"); fetchArticles(); }
   };
 
+  const [articlePage, setArticlePage] = useState(0);
+  useEffect(() => { setArticlePage(0); }, [search, filterSeo, filterCategory, filterStatus]);
   const filtered = articles.filter(a => {
     if (search && !a.title.toLowerCase().includes(search.toLowerCase())) return false;
     if (filterSeo !== "all") {
@@ -145,6 +148,8 @@ const AdminArticles = () => {
   };
 
   const selectedSeo = selectedArticle ? getSeoScore(selectedArticle) : null;
+
+  const pagedArticles = filtered.slice(articlePage * PAGE_SIZE, (articlePage + 1) * PAGE_SIZE);
 
   return (
     <div className="space-y-6">
@@ -227,7 +232,7 @@ const AdminArticles = () => {
               <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
             ) : filtered.length === 0 ? (
               <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Aucun article</TableCell></TableRow>
-            ) : filtered.map(article => {
+            ) : pagedArticles.map(article => {
               const { score } = getSeoScore(article);
               return (
                 <TableRow key={article.id}>
