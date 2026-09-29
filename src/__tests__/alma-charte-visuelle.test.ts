@@ -81,14 +81,15 @@ describe("Alma, habillage charte", () => {
     expect(parsed.links.every((link) => !link.title.startsWith("/"))).toBe(true);
   });
 
+  // Lot J4 : le chemin devient le nom de sa page dans la phrase, jamais un vide.
   it.each([
-    ["Vous trouverez les réponses ici : /faq.", "Vous trouverez les réponses."],
-    ["Consultez les conseils à l'adresse /conseils", "Consultez les conseils."],
-    ["Découvrez les structures sur cette page : /associations.", "Découvrez les structures."],
-  ])("referme la phrase après extraction du lien dans %s", (message, expectedText) => {
+    ["Vous trouverez les réponses ici : /faq.", "Vous trouverez les réponses ici : La FAQ."],
+    ["Consultez les conseils à l'adresse /conseils", "Consultez les conseils à l'adresse Les conseils d'Alma"],
+    ["Découvrez les structures sur cette page : /associations.", "Découvrez les structures sur cette page : Les associations."],
+  ])("remplace le chemin par le nom de la page dans %s", (message, expectedText) => {
     const parsed = parseAlmaMessage(message);
     expect(parsed.text).toBe(expectedText);
-    expect(parsed.text).toMatch(/[^:,.]\.$/u);
+    expect(parsed.text).not.toMatch(/\s[.:,]\s*$/u);
     expect(parsed.links).toHaveLength(1);
   });
 });
