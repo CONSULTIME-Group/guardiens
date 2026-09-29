@@ -39,7 +39,7 @@ vi.mock("@/integrations/supabase/client", () => ({
     from: (t: string) => chainFor(t),
     rpc: (name: string, args: unknown) => {
       rpcCalls.push([name, args]);
-      return Promise.resolve({ data: [], error: null });
+      return Promise.resolve({ data: name.startsWith("admin_message") ? null : [], error: null });
     },
     functions: { invoke: () => Promise.resolve({ data: null, error: null }) },
     auth: {
