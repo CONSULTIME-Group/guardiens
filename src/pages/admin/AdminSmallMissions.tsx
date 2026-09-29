@@ -154,7 +154,7 @@ const AdminSmallMissions = () => {
         ).catch(() => empty),
         fetchAllRows<any>((from, to) =>
           supabase.from("mission_notification_queue").select("mission_id").eq("status", "sent")
-            .order("created_at", { ascending: true }).order("id", { ascending: true }).range(from, to),
+            .order("id", { ascending: true }).range(from, to),
         ).catch(() => empty),
       ]);
       const respRows = respRes.rows;
