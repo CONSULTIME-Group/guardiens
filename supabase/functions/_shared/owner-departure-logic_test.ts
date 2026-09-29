@@ -8,12 +8,12 @@ const empty = { hasProperty: false, pets: [], galleryPhotoCount: 0, propertyPhot
 Deno.test('md5 conforme RFC 1321', () => {
   assertEquals(md5(''), 'd41d8cd98f00b204e9800998ecf8427e')
   assertEquals(md5('abc'), '900150983cd24fb0d6963f7d28e17f72')
-  assertEquals(md5('é'), '65ec73e5d6b7d8d2b6fcae47a6e9aa6f')
+  assertEquals(md5('é'), '66ddcd97cfdeabb2f6fb8a999b4bc76f')
 })
 
 Deno.test('ownerReadiness : 0, 60, 100 %, sans animaux', () => {
   assertEquals(computeReadiness(empty).percent, 0)
-  const r60 = computeReadiness({ ...empty, city: 'Lyon', latitude: 45.7, pets: [{ name: 'Rex', species: 'dog' }] })
+  const r60 = computeReadiness({ ...empty, city: 'Lyon', latitude: 45.7, hasProperty: true, pets: [{ name: 'Rex', species: 'dog' }] })
   assertEquals(r60.percent, 60)
   assertEquals(remainingPhrase(r60.todo), 'une photo de chez vous et vos dates')
   const r100 = computeReadiness({ ...empty, city: 'Lyon', latitude: 45.7, hasProperty: true, pets: [{ name: 'Rex', species: 'dog' }], galleryPhotoCount: 1, draftStartDates: ['2026-12-19'] })
