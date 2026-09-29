@@ -486,19 +486,24 @@ Deno.serve(async (req) => {
 
     // Recompte + clôture des campagnes qui n'ont plus de travail en cours
     for (const cid of affectedCampaigns) {
-      const [{ count: sentCount }, { count: failedCount }, { count: skippedCount }, { count: openCount }] =
+      // Lot A8 : les webhooks font passer « sent » à delivered, opened, bounced ou
+      // complained. Compter uniquement « sent » ramenait le compteur à quelques
+      // unités. Envoyés = tous les statuts d'un email parti ; destinataires =
+      // toutes les lignes hors ignorés (skipped, suppressed).
+      const [{ count: sentCount }, { count: failedCount }, { count: skippedCount }, { count: openCount }, { count: recipientsCount }] =
         await Promise.all([
-          service.from("mass_email_sends").select("id", { count: "exact", head: true }).eq("mass_email_id", cid).eq("status", "sent"),
+          service.from("mass_email_sends").select("id", { count: "exact", head: true }).eq("mass_email_id", cid).in("status", ["sent", "delivered", "opened", "clicked", "bounced", "complained"]),
           service.from("mass_email_sends").select("id", { count: "exact", head: true }).eq("mass_email_id", cid).eq("status", "failed"),
           service.from("mass_email_sends").select("id", { count: "exact", head: true }).eq("mass_email_id", cid).in("status", ["skipped", "suppressed"]),
           service.from("mass_email_sends").select("id", { count: "exact", head: true }).eq("mass_email_id", cid).in("status", ["queued", "sending"]),
+          service.from("mass_email_sends").select("id", { count: "exact", head: true }).eq("mass_email_id", cid).not("status", "in", "(skipped,suppressed)"),
         ]);
 
       const update: Record<string, unknown> = {
         sent_count: sentCount ?? 0,
         failed_count: failedCount ?? 0,
         skipped_count: skippedCount ?? 0,
-        recipients_count: sentCount ?? 0,
+        recipients_count: recipientsCount ?? 0,
         heartbeat_at: new Date().toISOString(),
       };
       if ((openCount ?? 0) === 0) {

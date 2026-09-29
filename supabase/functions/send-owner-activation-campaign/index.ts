@@ -119,6 +119,9 @@ async function fetchSegment(sc: ReturnType<typeof createClient>): Promise<Recipi
   return out;
 }
 
+/** Lot A8 : verrou permanent, la fonction ne sert plus aucun envoi. */
+export const OWNER_ACTIVATION_RETIRED = true;
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
@@ -156,6 +159,16 @@ Deno.serve(async (req) => {
         status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    // Lot A8 : campagne retirée. Plus aucun envoi (ni réel, ni test, ni aperçu)
+    // depuis cette fonction, même pour un admin : la relance des propriétaires
+    // sans annonce passe par Envois groupés, qui exclut les « déjà reçu ».
+    if (OWNER_ACTIVATION_RETIRED) {
+      return new Response(JSON.stringify({
+        error: "Campagne retirée. La relance des propriétaires sans annonce passe désormais par Envois groupés (/admin/envois-groupes).",
+        retired: true,
+      }), { status: 410, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     const payload = await req.json().catch(() => ({}));

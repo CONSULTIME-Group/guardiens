@@ -17,15 +17,19 @@ interface Props {
   setSegment: (s: Segment) => void;
   filters: MassEmailFilters;
   setFilters: (f: MassEmailFilters) => void;
+  /** Lot A8 : appelé après l'application d'un préréglage de ciblage. */
+  onTargetingPreset?: () => void;
 }
 
-export const MassEmailFiltersPanel = ({ segment, setSegment, filters, setFilters }: Props) => {
+export const MassEmailFiltersPanel = ({ segment, setSegment, filters, setFilters, onTargetingPreset }: Props) => {
   const update = (patch: Partial<MassEmailFilters>) => setFilters({ ...filters, ...patch });
   const activeCount = countActiveFilters(filters);
 
   const applyPreset = (preset: typeof DORMANT_PRESETS[number]) => {
     setSegment(preset.segment);
     setFilters(preset.filters);
+    // Lot A8 : un préréglage de ciblage repart d'une campagne vide.
+    onTargetingPreset?.();
   };
 
   return (

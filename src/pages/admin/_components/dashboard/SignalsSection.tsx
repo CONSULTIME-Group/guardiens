@@ -20,7 +20,6 @@ import { RepeatedRepublishCard } from "@/components/admin/signals/RepeatedRepubl
 import { OwnerMissingCoordinatesCard } from "@/components/admin/signals/OwnerMissingCoordinatesCard";
 import { IdentityNeedsReviewCard } from "@/components/admin/signals/IdentityNeedsReviewCard";
 import { StaleDraftCard } from "@/components/admin/signals/StaleDraftCard";
-import { OwnerActivationCampaignCard } from "@/components/admin/signals/OwnerActivationCampaignCard";
 import { GenericSignalCard } from "@/components/admin/signals/GenericSignalCard";
 import { GroupedSignalCard } from "@/components/admin/signals/GroupedSignalCard";
 import type { AdminSignalBase } from "@/components/admin/signals/signalGrouping";
@@ -197,7 +196,11 @@ export const SignalsSection = ({ aiActions, aiLoading }: Props) => {
           const line = signalsCountLine(queued.length, queued.length, queued.filter((s) => s.severity === "critical").length);
           return line ? <p className="text-sm text-muted-foreground" data-testid="signals-count-line">{line}</p> : null;
         })()}
-        <OwnerActivationCampaignCard />
+        {/* Lot A8 : la campagne d'activation est retirée, les envois passent par Envois groupés. */}
+        <p className="text-xs text-muted-foreground" data-testid="mass-email-redirect">
+          Les campagnes propriétaires partent depuis{" "}
+          <Link to="/admin/envois-groupes" className="underline">Envois groupés</Link>.
+        </p>
 
         {loading ? (
           <div className="space-y-2">

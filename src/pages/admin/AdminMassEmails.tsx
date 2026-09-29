@@ -2,6 +2,9 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { ARCHIVED_PRESET_KEYS, exclusionRecap, internalTextBlocking } from "@/lib/admin/massEmailSafety";
+import { countsByCampaign, type CampaignCounts, type MassSendRow } from "@/lib/admin/massEmailCounts";
+import { fetchAllRows } from "@/lib/admin/fetchAllRows";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -185,7 +188,7 @@ const CAMPAIGN_PRESETS: CampaignPreset[] = [
     body: OSER_BODY,
     ctaEnabled: true,
     ctaLabel: "Publier dans l'Entraide",
-    ctaUrl: "https://guardiens.fr/entraide/nouvelle",
+    ctaUrl: "https://guardiens.fr/petites-missions/creer?type=besoin",
     utmEnabled: true,
     utmCampaign: "oser-2026-05",
     utmContent: "cta",
@@ -350,24 +353,34 @@ const CAMPAIGN_PRESETS: CampaignPreset[] = [
 ];
 
 
+/** utm_campaign saisi, sinon objet slugifié (clé anti-doublon des emails libres). */
+export function campaignKey(utmCampaign: string, subject: string): string {
+  const auto = subject
+    .toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")
+    .slice(0, 40) || "campagne";
+  return utmCampaign.trim() || auto;
+}
+
 const AdminMassEmails = () => {
-  // Form state, pré-rempli avec la campagne "Oser demander"
+  // Lot A8 : page vide au chargement, aucune campagne pré-remplie.
   const [segment, setSegment] = useState<Segment>("tous");
   const [filters, setFilters] = useState<MassEmailFilters>({});
-  const [subject, setSubject] = useState(OSER_SUBJECT);
-  const [body, setBody] = useState(OSER_BODY);
-  const [ctaEnabled, setCtaEnabled] = useState(true);
-  const [ctaLabel, setCtaLabel] = useState("Publier dans l'Entraide");
-  const [ctaUrl, setCtaUrl] = useState("https://guardiens.fr/entraide/nouvelle");
+  const [subject, setSubject] = useState("");
+  const [body, setBody] = useState("");
+  const [ctaEnabled, setCtaEnabled] = useState(false);
+  const [ctaLabel, setCtaLabel] = useState("");
+  const [ctaUrl, setCtaUrl] = useState("");
   const [utmEnabled, setUtmEnabled] = useState(true);
-  const [utmCampaign, setUtmCampaign] = useState("oser-2026-05");
+  const [utmCampaign, setUtmCampaign] = useState("");
   const [utmContent, setUtmContent] = useState("cta");
 
   // UI state
   const [recipientCount, setRecipientCount] = useState<number | null>(null);
   const [helpsWithCount, setHelpsWithCount] = useState<number | null>(null);
   const [variantCounts, setVariantCounts] = useState<{ a: number; b: number } | null>(null);
-  const [departureCounts, setDepartureCounts] = useState<{ holdout: number | null; answered: number | null; pressure?: number | null; received?: number | null } | null>(null);
+  const [departureCounts, setDepartureCounts] = useState<{ holdout: number | null; answered: number | null; pressure?: number | null; received?: number | null; admins?: number | null } | null>(null);
   const [noelV2Counts, setNoelV2Counts] = useState<{ noel: number; hiver: number; other: number } | null>(null);
   const [noelTestMode, setNoelTestMode] = useState<"responder_noel" | "responder_hiver" | "variant_a" | "variant_b">("responder_noel");
 
@@ -376,7 +389,7 @@ const AdminMassEmails = () => {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmInput, setConfirmInput] = useState("");
   const [sending, setSending] = useState(false);
-  const [activePreset, setActivePreset] = useState<string>("oser");
+  const [activePreset, setActivePreset] = useState<string>("");
 
   // Assistant IA
   const [aiObjective, setAiObjective] = useState("");
@@ -524,6 +537,7 @@ const AdminMassEmails = () => {
 
 
   const applyPreset = useCallback((key: string) => {
+    if (ARCHIVED_PRESET_KEYS.has(key)) return;
     const p = CAMPAIGN_PRESETS.find((x) => x.key === key);
     if (!p) return;
     setSegment(p.segment);
@@ -542,6 +556,7 @@ const AdminMassEmails = () => {
   // History
   const [history, setHistory] = useState<MassEmail[]>([]);
   const [historyLoading, setHistoryLoading] = useState(true);
+  const [historyCounts, setHistoryCounts] = useState<Map<string, CampaignCounts> | null>(null);
 
   const loadHistory = useCallback(async () => {
     setHistoryLoading(true);
@@ -550,7 +565,19 @@ const AdminMassEmails = () => {
       .select("id, created_at, segment, subject, body, cta_label, cta_url, recipients_count, status, enqueued_count, sent_count, failed_count, skipped_count")
       .order("created_at", { ascending: false })
       .limit(20);
-    setHistory((data as MassEmail[]) || []);
+    const rows = (data as MassEmail[]) || [];
+    setHistory(rows);
+    // Lot A8 : destinataires et envoyés lus dans mass_email_sends (hors ignorés).
+    try {
+      const ids = rows.map((r) => r.id);
+      const res = ids.length ? await fetchAllRows<MassSendRow>((from, to) =>
+        supabase.from("mass_email_sends").select("mass_email_id,recipient_email,status,first_clicked_at")
+          .in("mass_email_id", ids).order("created_at", { ascending: true }).order("id", { ascending: true }).range(from, to) as any) : { rows: [] as MassSendRow[] };
+      setHistoryCounts(countsByCampaign(res.rows));
+    } catch (e) {
+      console.error("[AdminMassEmails] compteurs d'envoi indisponibles", e);
+      setHistoryCounts(null);
+    }
     setHistoryLoading(false);
   }, []);
 
@@ -578,19 +605,28 @@ const AdminMassEmails = () => {
     }
   };
 
+  // Lot A8 : retour à une campagne vide (préréglage, gabarit, corps, exclusions).
+  const resetCampaign = useCallback(() => {
+    setActivePreset("");
+    setSubject("");
+    setBody("");
+    setCtaEnabled(false);
+    setCtaLabel("");
+    setCtaUrl("");
+    setUtmCampaign("");
+    setUtmContent("cta");
+  }, []);
+
   const handleDuplicate = useCallback((row: MassEmail) => {
+    // Dupliquer ne reprend que l'objet : le corps d'une campagne à gabarit est
+    // une note interne, il ne doit jamais pouvoir repartir.
+    resetCampaign();
     setSegment((row.segment as Segment) || "tous");
     setFilters({});
     setSubject((row.subject || "").slice(0, 100));
-    setBody((row.body || "").slice(0, 2000));
-    const hasCta = !!(row.cta_label && row.cta_url);
-    setCtaEnabled(hasCta);
-    setCtaLabel(row.cta_label || "");
-    setCtaUrl(row.cta_url || "");
-    setActivePreset("");
-    toast.success("Campagne dupliquée, prête à éditer");
+    toast.success("Campagne dupliquée : objet repris, corps à écrire");
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }, []);
+  }, [resetCampaign]);
 
 
 
@@ -601,7 +637,7 @@ const AdminMassEmails = () => {
       setCountLoading(true);
       try {
         const { data, error } = await supabase.functions.invoke("send-mass-email", {
-          body: { mode: "count", segment, filters },
+          body: { mode: "count", segment, filters, utm_campaign: filters.template_name ? undefined : campaignKey(utmCampaign, subject) },
         });
         if (error) throw error;
         setRecipientCount(data?.count ?? 0);
@@ -614,8 +650,8 @@ const AdminMassEmails = () => {
             : null,
         );
         setDepartureCounts(
-          typeof data?.holdout_excluded === "number" || typeof data?.already_answered === "number" || typeof data?.pressure_excluded === "number"
-            ? { holdout: data.holdout_excluded ?? null, answered: data.already_answered ?? null, pressure: data.pressure_excluded ?? null, received: data.already_received ?? null }
+          typeof data?.holdout_excluded === "number" || typeof data?.already_answered === "number" || typeof data?.pressure_excluded === "number" || typeof data?.already_received === "number"
+            ? { holdout: data.holdout_excluded ?? null, answered: data.already_answered ?? null, pressure: data.pressure_excluded ?? null, received: data.already_received ?? null, admins: data.admins_excluded ?? null }
             : null,
         );
         setNoelV2Counts(
@@ -633,7 +669,7 @@ const AdminMassEmails = () => {
       setCountLoading(false);
     }, 500);
     return () => clearTimeout(timer);
-  }, [segment, filters]);
+  }, [segment, filters, utmCampaign, subject]);
 
   // Garde de vivier : un email qui renvoie vers la page Entraide n'a de sens
   // que si cette page montre assez de personnes disponibles.
@@ -641,22 +677,19 @@ const AdminMassEmails = () => {
   const helpsWithBlocked =
     helpsWithRequired > 0 && helpsWithCount !== null && helpsWithCount < helpsWithRequired;
 
+  // Lot A8 : un corps rendu au destinataire ne contient jamais de texte interne.
+  const internalBlock = internalTextBlocking(body, filters.template_name);
+
   const isValid =
     subject.trim().length > 0 &&
     body.trim().length >= 20 &&
     (recipientCount ?? 0) > 0 &&
     !helpsWithBlocked &&
+    internalBlock.length === 0 &&
     (!ctaEnabled || (ctaLabel.trim().length > 0 && ctaUrl.startsWith("https://")));
 
 
-  /** Slugifie l'objet pour générer un utm_campaign par défaut. */
-  const autoCampaign = subject
-    .toLowerCase()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")
-    .slice(0, 40) || "campagne";
-
-  const effectiveCampaign = (utmCampaign.trim() || autoCampaign);
+  const effectiveCampaign = campaignKey(utmCampaign, subject);
 
   /** Ajoute les UTM à une URL guardiens.fr ; laisse intacte une URL externe. */
   const withUtm = (rawUrl: string): string => {
@@ -688,6 +721,9 @@ const AdminMassEmails = () => {
           cta_label: ctaEnabled ? ctaLabel.trim() : undefined,
           cta_url: ctaEnabled ? withUtm(ctaUrl.trim()) : undefined,
           // Garde-fou serveur : refus si l'audience a changé depuis le compte affiché.
+          utm_campaign: filters.template_name ? undefined : effectiveCampaign,
+          // Lot A8 : le nombre saisi à la confirmation, refusé par le serveur s'il diffère.
+          expected_count: Number(confirmInput),
           ...(typeof recipientCount === "number" ? { expected_recipient_count: recipientCount } : {}),
         },
       });
@@ -721,7 +757,7 @@ const AdminMassEmails = () => {
 
 
       <div className="flex flex-wrap gap-2">
-        {CAMPAIGN_PRESETS.map((p) => (
+        {CAMPAIGN_PRESETS.filter((p) => !ARCHIVED_PRESET_KEYS.has(p.key)).map((p) => (
           <Button
             key={p.key}
             variant={activePreset === p.key ? "default" : "outline"}
@@ -732,6 +768,14 @@ const AdminMassEmails = () => {
           </Button>
         ))}
       </div>
+      <details className="text-xs text-muted-foreground" data-testid="archived-presets">
+        <summary className="cursor-pointer">Archivés</summary>
+        <ul className="mt-2 space-y-1 pl-4">
+          {CAMPAIGN_PRESETS.filter((p) => ARCHIVED_PRESET_KEYS.has(p.key)).map((p) => (
+            <li key={p.key}>{p.label} ({p.utmCampaign}), non sélectionnable pour un envoi</li>
+          ))}
+        </ul>
+      </details>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left column */}
@@ -741,6 +785,7 @@ const AdminMassEmails = () => {
             setSegment={setSegment}
             filters={filters}
             setFilters={setFilters}
+            onTargetingPreset={resetCampaign}
           />
 
           <Card>
@@ -936,7 +981,7 @@ const AdminMassEmails = () => {
                           <Label htmlFor="utm-campaign">utm_campaign</Label>
                           <Input
                             id="utm-campaign"
-                            placeholder={autoCampaign}
+                            placeholder={campaignKey("", subject)}
                             value={utmCampaign}
                             onChange={(e) => setUtmCampaign(e.target.value.replace(/[^a-z0-9-]/gi, "-").toLowerCase())}
                           />
@@ -978,6 +1023,11 @@ const AdminMassEmails = () => {
                 </p>
               </div>
             </div>
+            {internalBlock.length > 0 && (
+              <p className="text-xs font-medium text-destructive bg-destructive/10 rounded-lg p-3" data-testid="internal-text-block">
+                Envoi bloqué : le corps contient un texte interne ({internalBlock.join(", ")}). Réécrivez le message avant l'envoi.
+              </p>
+            )}
             {helpsWithBlocked && (
               <p className="text-xs font-medium text-warning-foreground bg-warning-soft rounded-lg p-3">
                 Envoi bloqué : {helpsWithCount} profils ont renseigné leur ligne d'entraide,
@@ -1054,7 +1104,8 @@ const AdminMassEmails = () => {
                   <TableBody>
                     {history.map((row) => {
                       const meta = STATUS_META[row.status] ?? { label: row.status, variant: "outline" as const };
-                      const sent = row.sent_count ?? 0;
+                      const live = historyCounts?.get(row.id);
+                      const sent = live ? live.sent : 0;
                       const enq = row.enqueued_count ?? 0;
                       const failed = row.failed_count ?? 0;
                       const skipped = row.skipped_count ?? 0;
@@ -1067,7 +1118,7 @@ const AdminMassEmails = () => {
                           </TableCell>
                           <TableCell className="text-xs">{SEGMENT_LABELS[row.segment] || row.segment}</TableCell>
                           <TableCell className="text-xs max-w-[120px] truncate">{row.subject}</TableCell>
-                          <TableCell className="text-xs text-right">{row.recipients_count}</TableCell>
+                          <TableCell className="text-xs text-right">{live ? live.recipients : historyCounts ? 0 : "?"}</TableCell>
                           <TableCell className="text-xs">
                             {hasCounters ? (
                               <span className="tabular-nums">
@@ -1199,7 +1250,7 @@ const AdminMassEmails = () => {
                       )}
                       {typeof departureCounts.received === "number" && (
                         <div className="flex items-center justify-between" data-testid="already-received-count">
-                          <span className="text-muted-foreground">Exclus car déjà reçu dans une campagne précédente</span>
+                          <span className="text-muted-foreground">Déjà reçu, exclus</span>
                           <span className="font-medium">{departureCounts.received}</span>
                         </div>
                       )}
@@ -1340,6 +1391,12 @@ const AdminMassEmails = () => {
                   Pour confirmer l'envoi à <strong>{recipientCount ?? 0} destinataires</strong>{" "}
                   ({SEGMENT_LABELS[segment] || segment}), saisissez le nombre exact ci-dessous.
                 </p>
+                <ul className="list-disc pl-5 text-xs text-muted-foreground" data-testid="exclusion-recap">
+                  {exclusionRecap({
+                    received: departureCounts?.received, holdout: departureCounts?.holdout,
+                    pressure: departureCounts?.pressure, answered: departureCounts?.answered, admins: departureCounts?.admins,
+                  }).map((l) => <li key={l}>{l}</li>)}
+                </ul>
                 <Input
                   autoFocus
                   inputMode="numeric"
