@@ -5,6 +5,7 @@ import {
 import { BrandedHead } from './_branded-head.tsx'
 import { BrandHeader } from './_brand-header.tsx'
 import { LegalFooter } from './_legal-footer.tsx'
+import { ProofCard } from './_proof-card.tsx'
 import { formatFirstName } from '../format-first-name.ts'
 import type { TemplateEntry } from './registry.ts'
 
@@ -79,12 +80,7 @@ const Email = ({ firstName, periodBaseUrl }: OwnerDepartureProps) => {
           </Section>
 
           <Section style={{ ...pad, paddingTop: '24px' }} className="em-pad">
-            <Section style={proofCard}>
-              <Text style={proofFigure}>3 sur 4</Text>
-              <Text style={{ ...text, margin: 0 }}>
-                des annonces publiées reçoivent des candidatures. Les premières arrivent en général sous 24 heures.
-              </Text>
-            </Section>
+            <ProofCard />
           </Section>
 
           <Section style={{ ...pad, paddingTop: '24px' }} className="em-pad">
@@ -135,5 +131,3 @@ const btnBase = { display: 'block', width: '100%', boxSizing: 'border-box' as co
 const btnPrimary = { ...btnBase, backgroundColor: '#2C6D50', color: '#FFFFFF', border: '1.5px solid #2C6D50' }
 const btnSecondary = { ...btnBase, backgroundColor: '#FFFFFF', color: '#1D1B16', border: '1.5px solid #D9CFBF' }
 const btnLater = { ...btnBase, backgroundColor: '#FFFFFF', color: '#6B645A', border: '1.5px dashed #C9BFAE', fontWeight: 500 }
-const proofCard = { backgroundColor: '#FBF6EC', border: '1px solid #E6DCCB', borderRadius: '16px', padding: '20px 22px' }
-const proofFigure = { fontFamily: serif, fontSize: '34px', lineHeight: '1.1', color: '#2C6D50', fontWeight: 600, margin: '0 0 6px' }
