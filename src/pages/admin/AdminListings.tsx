@@ -685,7 +685,6 @@ const AdminListings = () => {
               const s = resolveStatusBadge(listing);
               const st = stats[listing.id];
               const isAdminHidden = listing.status === "cancelled" && !!listing.hidden_by;
-              const isAuthorCancelled = listing.status === "cancelled" && !listing.hidden_by;
               const coverUrl = (listing as any).cover_photo_url as string | null;
               const coverNotPlace = !coverUrl || animalPhotoUrls.has(coverUrl);
               return (
