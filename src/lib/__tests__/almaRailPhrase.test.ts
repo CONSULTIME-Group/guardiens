@@ -100,11 +100,11 @@ describe("pickAlmaRailPhrase", () => {
   });
 
   describe("confirmed", () => {
-    it("profile < 100 sans checklist visible : phrase profil", () => {
+    it("profil sous 40 % sans checklist visible : phrase profil (lot J3)", () => {
       const p = pickAlmaRailPhrase({
         variant: "confirmed",
         hidden: false,
-        profileCompletion: 70,
+        profileCompletion: 30,
         checklistVisible: false,
       });
       expect(p).toContain("Quelques touches à votre profil");
@@ -119,7 +119,7 @@ describe("pickAlmaRailPhrase", () => {
         isAvailable: true,
       });
       expect(p).not.toContain("Quelques touches");
-      expect(p).toContain("Votre profil est prêt");
+      expect(p).toContain("je vous montre ce qui bouge autour de vous");
     });
 
     it("profil complet mais non disponible : phrase disponibilité", () => {
@@ -139,7 +139,7 @@ describe("pickAlmaRailPhrase", () => {
         profileCompletion: 100,
         isAvailable: true,
       });
-      expect(p).toContain("Votre profil est prêt");
+      expect(p).toContain("je vous montre ce qui bouge autour de vous");
     });
   });
 });
