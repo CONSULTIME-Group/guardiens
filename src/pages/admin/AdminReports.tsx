@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { createSeqGuard } from "@/lib/admin/requestSeq";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -66,7 +67,9 @@ const AdminReports = () => {
   const [actionModal, setActionModal] = useState<{ open: boolean; reportId: string; action: ActionKey | "" }>({ open: false, reportId: "", action: "" });
   const [confirmDestructive, setConfirmDestructive] = useState<{ open: boolean; action: ActionKey | null }>({ open: false, action: null });
 
+  const reportsSeq = useRef(createSeqGuard());
   const fetchReports = useCallback(async () => {
+    const token = reportsSeq.current.next();
     setLoading(true);
     const from = page * PAGE_SIZE;
     const to = from + PAGE_SIZE - 1;
@@ -74,10 +77,13 @@ const AdminReports = () => {
       .from("reports")
       .select("*", { count: "exact" })
       .order("status", { ascending: true })
-      .order("created_at", { ascending: true });
+      .order("created_at", { ascending: true })
+      .order("id", { ascending: true });
     if (filterStatus === "pending") query = query.in("status", ["new", "in_progress"]);
     else if (filterStatus !== "all") query = query.eq("status", filterStatus);
     const { data, error, count } = await query.range(from, to);
+    // Réponse périmée : une requête plus récente a été lancée entre-temps.
+    if (!reportsSeq.current.isCurrent(token)) return;
     if (error) toast.error("Erreur de chargement");
     else {
       setReports(data || []);
@@ -86,7 +92,6 @@ const AdminReports = () => {
     setLoading(false);
   }, [filterStatus, page]);
 
-  useEffect(() => { setPage(0); }, [filterStatus]);
   useEffect(() => { fetchReports(); }, [fetchReports]);
 
 
@@ -177,7 +182,7 @@ const AdminReports = () => {
         {newCount > 0 && <Badge variant="destructive">{newCount} nouveau{newCount > 1 ? "x" : ""}</Badge>}
       </div>
 
-      <Select value={filterStatus} onValueChange={setFilterStatus}>
+      <Select value={filterStatus} onValueChange={(v) => { setFilterStatus(v); setPage(0); }}>
         <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
         <SelectContent>
           <SelectItem value="pending">Non traités</SelectItem>
