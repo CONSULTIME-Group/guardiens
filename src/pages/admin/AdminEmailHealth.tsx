@@ -417,7 +417,7 @@ export default function AdminEmailHealth() {
                 {([...SEND_STATUSES, "other"] as string[]).filter((s) => s !== "other" || (logs7d?.other ?? 0) > 0).map(
                   (s) => (
                     <TableRow key={s}>
-                      <TableCell>{SEND_STATUS_FR[s] ?? s}</TableCell>
+                      <TableCell>{SEND_STATUS_FR[s] ?? adminLabel(s)}</TableCell>
                       <TableCell className="text-right tabular-nums">
                         {logs24h ? logs24h[s] : "·"}
                       </TableCell>
@@ -474,7 +474,7 @@ export default function AdminEmailHealth() {
             {Object.entries(deferred.byStatus).sort((a, b) => b[1] - a[1]).map(([st, n]) => (
               <StatCard
                 key={st}
-                label={DEFERRED_STATUS_FR[st] ?? st}
+                label={DEFERRED_STATUS_FR[st] ?? adminLabel(st)}
                 value={n.toLocaleString("fr-FR")}
                 tone={st === "pending" && deferredPendingLate ? "destructive" : st === "sent" ? "success" : st === "failed" ? "warning" : "muted"}
               />

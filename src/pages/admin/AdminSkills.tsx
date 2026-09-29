@@ -1,3 +1,4 @@
+import { adminLabel } from "@/lib/admin/labels";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useState, useEffect, useCallback } from "react";
 import { refreshAdminBadges } from "@/hooks/useAdminBadges";
@@ -297,7 +298,7 @@ const AdminSkills = () => {
                     <td className="px-4 py-3">{c.label}</td>
                     <td className="px-4 py-3">
                       <span className="text-xs bg-primary/10 text-primary rounded-full px-2 py-0.5">
-                        {CATEGORY_LABELS[c.categorie] || c.categorie}
+                        {CATEGORY_LABELS[c.categorie] || adminLabel(c.categorie)}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-center">{c.usage_count}</td>
@@ -434,7 +435,7 @@ const AdminSkills = () => {
                       <td className="px-4 py-3">
                         {skill.category ? (
                           <span className="text-xs bg-primary/10 text-primary rounded-full px-2 py-0.5">
-                            {CATEGORY_LABELS[skill.category] || skill.category}
+                            {CATEGORY_LABELS[skill.category] || adminLabel(skill.category)}
                           </span>
                         ) : (
                           <span className="text-xs text-muted-foreground">,</span>

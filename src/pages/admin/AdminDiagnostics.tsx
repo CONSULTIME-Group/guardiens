@@ -321,7 +321,7 @@ const AdminDiagnostics = () => {
                   <TableHead>Annonce</TableHead>
                   <TableHead className="w-24 text-right">Total</TableHead>
                   <TableHead className="w-28 text-right">En attente</TableHead>
-                  <TableHead className="w-32">sit_id</TableHead>
+                  <TableHead className="w-32">Annonce</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

@@ -1,3 +1,4 @@
+import { conversationTypeLabel } from "@/lib/admin/labels";
 import { KpiTile } from "@/components/admin/ui";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useEffect, useState } from "react";
@@ -224,7 +225,7 @@ export default function AdminMessages() {
                   key={k}
                   className={CTX_COLOR[k] || "bg-muted-foreground"}
                   style={{ width: `${(v / ctxTotal) * 100}%` }}
-                  title={`${CTX_LABEL[k] || k}: ${v}`}
+                  title={`${CTX_LABEL[k] || conversationTypeLabel(k)}: ${v}`}
                 />
               ))}
             </div>
@@ -232,7 +233,7 @@ export default function AdminMessages() {
               {ctxEntries.map(([k, v]) => (
                 <div key={k} className="flex items-center gap-1.5">
                   <span className={`inline-block w-2.5 h-2.5 rounded-sm ${CTX_COLOR[k] || "bg-muted-foreground"}`} />
-                  <span className="text-foreground font-medium">{CTX_LABEL[k] || k}</span>
+                  <span className="text-foreground font-medium">{CTX_LABEL[k] || conversationTypeLabel(k)}</span>
                   <span className="text-muted-foreground">{v} ({Math.round((v / ctxTotal) * 100)}%)</span>
                 </div>
               ))}

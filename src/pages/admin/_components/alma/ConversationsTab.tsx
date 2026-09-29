@@ -1,4 +1,4 @@
-import { adminLabel, SURFACE_LABELS, ALMA_REGISTER_LABELS } from "@/lib/admin/labels";
+import { adminLabel, SURFACE_LABELS, ALMA_REGISTER_LABELS, reasonLabel } from "@/lib/admin/labels";
 /**
  * Onglet Conversations de /admin/alma (lot 2).
  *
@@ -228,7 +228,7 @@ export function ConversationsTab({ since }: { since: string }) {
                 </Badge>
                 {r.register && <Badge variant="secondary">{adminLabel(r.register, ALMA_REGISTER_LABELS)}</Badge>}
                 {r.input_mode && <Badge variant="outline">{r.input_mode === "voice" ? "voix" : "clavier"}</Badge>}
-                {r.refusal_reason && <Badge variant="destructive">{r.refusal_reason}</Badge>}
+                {r.refusal_reason && <Badge variant="destructive">{reasonLabel(r.refusal_reason)}</Badge>}
               </div>
               <p className="text-sm font-medium whitespace-pre-wrap">{r.question}</p>
               {r.answer && (

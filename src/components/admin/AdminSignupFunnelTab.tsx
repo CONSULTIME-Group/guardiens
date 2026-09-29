@@ -1,3 +1,4 @@
+import { adminLabel, eventLabel, reasonLabel } from "@/lib/admin/labels";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -270,7 +271,7 @@ export default function AdminSignupFunnelTab() {
               <TableBody>
                 {data?.funnel.map((row) => (
                   <TableRow key={row.step}>
-                    <TableCell className="font-medium">{STEP_LABELS[row.step] ?? row.step}</TableCell>
+                    <TableCell className="font-medium">{STEP_LABELS[row.step] ?? eventLabel(row.step)}</TableCell>
                     <TableCell className="text-right">{row.volume.toLocaleString("fr-FR")}</TableCell>
                     <TableCell className={cn("text-right", convClass(row.conv_prev))}>
                       {pct(row.conv_prev)}
@@ -289,7 +290,7 @@ export default function AdminSignupFunnelTab() {
       {/* Bloc blocked reasons */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Raisons de blocage (signup_form_blocked)</CardTitle>
+          <CardTitle className="text-base">Raisons de blocage du formulaire</CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
@@ -306,7 +307,7 @@ export default function AdminSignupFunnelTab() {
               <TableBody>
                 {data.blocked_reasons.map((r) => (
                   <TableRow key={r.reason}>
-                    <TableCell>{BLOCK_LABELS[r.reason] ?? r.reason}</TableCell>
+                    <TableCell>{BLOCK_LABELS[r.reason] ?? reasonLabel(r.reason)}</TableCell>
                     <TableCell className="text-right">{r.volume.toLocaleString("fr-FR")}</TableCell>
                     <TableCell className="text-right">{pct(r.pct_of_blocked)}</TableCell>
                   </TableRow>
@@ -322,7 +323,7 @@ export default function AdminSignupFunnelTab() {
       {/* Bloc failed */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Erreurs signup (signup_failed)</CardTitle>
+          <CardTitle className="text-base">Échecs d'inscription</CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
@@ -339,7 +340,7 @@ export default function AdminSignupFunnelTab() {
               <TableBody>
                 {data.failed_by_code.map((r) => (
                   <TableRow key={r.code}>
-                    <TableCell>{r.code}</TableCell>
+                    <TableCell>{adminLabel(r.code)}</TableCell>
                     <TableCell className="text-right">{r.volume.toLocaleString("fr-FR")}</TableCell>
                     <TableCell className="text-right">
                       {r.last_seen ? new Date(r.last_seen).toLocaleString("fr-FR") : "·"}

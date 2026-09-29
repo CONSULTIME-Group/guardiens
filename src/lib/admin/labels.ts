@@ -437,3 +437,22 @@ export function memberName(v: string | null | undefined): string {
   const c = cellValue(v);
   return c === EMPTY_TABLE_VALUE ? "Membre" : c;
 }
+
+const WORDS: Array<[RegExp, string]> = [
+  [/\bDigests?\b/g, "Résumé quotidien"],
+  [/\bdigests?\b/g, "résumé quotidien"],
+  [/\bFeedback\b/g, "Retour"],
+  [/\bfeedback\b/g, "retour"],
+  [/\bBounces?\b/g, "Rebond"],
+  [/\bbounces?\b/g, "rebond"],
+  [/\bFunnel\b/g, "Entonnoir"],
+  [/\bfunnel\b/g, "entonnoir"],
+  [/\bCTA\b/g, "bouton d'action"],
+];
+
+/** Texte venu de la base (nom de tâche, sujet prérempli) : mots anglais traduits. */
+export function displayText(v: string | null | undefined): string {
+  const c = cellValue(v);
+  if (c === EMPTY_TABLE_VALUE) return c;
+  return WORDS.reduce((acc, [re, fr]) => acc.replace(re, fr), c);
+}

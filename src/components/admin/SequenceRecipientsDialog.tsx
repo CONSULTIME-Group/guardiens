@@ -1,3 +1,4 @@
+import { adminLabel } from "@/lib/admin/labels";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -211,7 +212,7 @@ export const SequenceRecipientsDialog = ({ open, onOpenChange, sequenceKey, sequ
                     </TableCell>
                     <TableCell>
                       <Badge variant={STATUS_TONE[j.status] ?? "outline"}>
-                        {STATUS_LABEL[j.status] ?? j.status}
+                        {STATUS_LABEL[j.status] ?? adminLabel(j.status)}
                       </Badge>
                       {j.exit_reason && (
                         <p className="text-[10px] text-muted-foreground mt-1">{j.exit_reason}</p>

@@ -49,8 +49,8 @@ describe("menu : groupe EMAILS", () => {
     expect(act.items.map((i) => i.label)).toContain("Pilotage entraide");
   });
 
-  it("Poids des hero dans CONTENU & SYSTÈME", () => {
-    const g = adminNavGroups_export.find((x) => x.label === "CONTENU & SYSTÈME")!;
+  it("Poids des hero dans CONTENU ET SYSTÈME", () => {
+    const g = adminNavGroups_export.find((x) => x.label === "CONTENU ET SYSTÈME")!;
     expect(g.items.find((i) => i.label === "Poids des hero")?.to).toBe("/admin/hero-weights");
   });
 

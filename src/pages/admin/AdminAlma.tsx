@@ -573,7 +573,7 @@ export function buildFactTypeOptions(
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
     .map(([value, count]) => ({
       value,
-      label: FACT_TYPE_LABELS[value] ?? value,
+      label: FACT_TYPE_LABELS[value] ?? adminLabel(value),
       count,
     }));
   return [{ value: "all", label: "Tous", count: facts.length }, ...options];

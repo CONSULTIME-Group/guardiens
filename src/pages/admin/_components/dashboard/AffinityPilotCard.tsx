@@ -1,4 +1,4 @@
-import { adminLabel, SURFACE_LABELS } from "@/lib/admin/labels";
+import { adminLabel, SURFACE_LABELS, reasonLabel } from "@/lib/admin/labels";
 /**
  * Carte admin : pilotage du score d'affinité.
  *
@@ -232,7 +232,7 @@ function labelReason(r: string): string {
     case "disqualified":
       return "Disqualification (allergie, refus)";
     default:
-      return r;
+      return reasonLabel(r);
   }
 }
 

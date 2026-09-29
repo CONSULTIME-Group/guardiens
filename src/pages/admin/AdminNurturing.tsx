@@ -794,7 +794,7 @@ const AdminNurturing = () => {
               <p><strong>Étape</strong> : un email donné dans une séquence, envoyé après un délai (J+1, J+3…).</p>
               <p><strong>Parcours</strong> : un utilisateur inscrit dans une séquence. Il avance d'étape en étape, ou « sort » si l'objectif est atteint.</p>
               <p><strong>Action</strong> : un clic sur le bouton de l'email ou une sortie via objectif atteint dans les 7 jours suivants.</p>
-              <p><strong>Evaluator</strong> : cron qui décide d'envoyer ou non chaque étape (toutes les heures). <strong>File</strong> : file d'attente d'envoi des emails.</p>
+              <p><strong>Évaluateur</strong> : tâche planifiée qui décide d'envoyer ou non chaque étape (toutes les heures). <strong>File</strong> : file d'attente d'envoi des emails.</p>
             </PopoverContent>
           </Popover>
         </div>
@@ -899,7 +899,7 @@ const AdminNurturing = () => {
                     label="Taux d'action"
                     value={engagementStats.sent > 0 ? `${engagementStats.actionRate}%` : "·"}
                     tone="ok"
-                    hint={`${engagementStats.actions} actions, clic CTA ou objectif atteint`}
+                    hint={`${engagementStats.actions} actions, clic sur le bouton d'action ou objectif atteint`}
                   />
                 </div>
               </CardContent>
@@ -976,7 +976,7 @@ const AdminNurturing = () => {
                           <div className="flex items-center gap-2 flex-wrap">
                             <Badge variant={s.active ? "default" : "outline"}>{s.active ? "Active" : "Inactive"}</Badge>
                             <span className="font-medium text-sm">{labelSequence(s.key)}</span>
-                            <span className="text-xs text-muted-foreground">{AUDIENCE_LABELS[s.audience] ?? s.audience}</span>
+                            <span className="text-xs text-muted-foreground">{AUDIENCE_LABELS[s.audience] ?? adminLabel(s.audience)}</span>
                           </div>
                           <div className="flex items-center gap-4 text-xs">
                             <span><span className="text-muted-foreground">Actifs : </span><span className="font-semibold">{m.activeJourneys}</span></span>
@@ -1074,7 +1074,7 @@ const AdminNurturing = () => {
                     </Table>
                   )}
                   <p className="text-[10px] text-muted-foreground mt-2">
-                    Action = clic CTA ou objectif atteint. Surlignage à partir de 10 envois.
+                    Action = clic sur le bouton d'action ou objectif atteint. Surlignage à partir de 10 envois.
                   </p>
                 </CardContent>
               </Card>
@@ -1138,7 +1138,7 @@ const AdminNurturing = () => {
                     const m = sequenceMetrics.get(s.key) ?? { sent: 0, delivered: 0, failed: 0, exited: 0, activeJourneys: 0, totalJourneys: 0, opens: 0, clicks: 0, actions: 0 };
                     const steps = stepsBySequence.get(s.key) ?? [];
                     const ruleType = s.enrollment_rule?.type ?? "·";
-                    const ruleLabel = RULE_TYPE_LABELS[ruleType] ?? ruleType;
+                    const ruleLabel = RULE_TYPE_LABELS[ruleType] ?? adminLabel(ruleType);
                     const ruleDetail =
                       ruleType === "inactivity" && s.enrollment_rule?.days
                         ? ` (après ${s.enrollment_rule.days} j d'inactivité)`
@@ -1154,7 +1154,7 @@ const AdminNurturing = () => {
                           </div>
                           <div className="flex gap-1.5 flex-wrap items-center">
                             <Badge variant={s.active ? "default" : "outline"}>{s.active ? "Active" : "Inactive"}</Badge>
-                            <Badge variant="secondary">{AUDIENCE_LABELS[s.audience] ?? s.audience}</Badge>
+                            <Badge variant="secondary">{AUDIENCE_LABELS[s.audience] ?? adminLabel(s.audience)}</Badge>
                             <Badge variant="outline">{ruleLabel}{ruleDetail}</Badge>
                             <Button
                               size="sm"

@@ -1,3 +1,4 @@
+import { adminLabel } from "@/lib/admin/labels";
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -141,7 +142,7 @@ export const AiAcquisitionCard = () => {
                   {stats.byEngine.map((e) => (
                     <Stat
                       key={e.engine}
-                      label={ENGINE_LABELS[e.engine] ?? e.engine}
+                      label={ENGINE_LABELS[e.engine] ?? adminLabel(e.engine)}
                       value={e.count}
                       hint={`${((e.count / Math.max(stats.total, 1)) * 100).toFixed(0)} % du trafic IA`}
                     />

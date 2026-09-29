@@ -1,4 +1,4 @@
-import { adminLabel, AUDIT_ACTION_LABELS } from "@/lib/admin/labels";
+import { adminLabel, AUDIT_ACTION_LABELS, auditEntityLabel } from "@/lib/admin/labels";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -302,7 +302,7 @@ const AdminAudit = () => {
                       )}
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline">{r.target_type}</Badge>
+                      <Badge variant="outline">{auditEntityLabel(r.target_type)}</Badge>
                     </TableCell>
                     <TableCell className="max-w-md">
                       <div className="text-xs text-muted-foreground truncate" title={metadataSummary(r)}>

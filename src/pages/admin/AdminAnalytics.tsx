@@ -427,9 +427,9 @@ const AdminAnalytics = () => {
             </CardContent>
           </Card>
 
-          {/* Lot A10 : l'entonnoir d'inscription unique vit dans l'onglet « Funnel signup » (Entonnoir chiffré, 8 étapes, agrégat SQL). */}
+          {/* Lot A10 : l'entonnoir d'inscription unique vit dans l'onglet « Entonnoir d'inscription » (Entonnoir chiffré, 8 étapes, agrégat SQL). */}
           <p className="text-xs text-muted-foreground">
-            L'entonnoir d'inscription complet, de la page vue à la première action, se trouve dans l'onglet « Funnel signup ».
+            L'entonnoir d'inscription complet, de la page vue à la première action, se trouve dans l'onglet « Entonnoir d'inscription ».
           </p>
 
           {/* Comparaison par rôle */}

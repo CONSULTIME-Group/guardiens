@@ -106,7 +106,7 @@ const DeliveryTab = () => {
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        Délivrabilité pure : la mécanique d'envoi fonctionne-t-elle ? Bounces, plaintes, pixels de tracking.
+        Délivrabilité pure : la mécanique d'envoi fonctionne-t-elle ? Rebonds, plaintes, pixels de tracking.
         Snapshot quotidien calculé à 9h Paris. Alerte email admin si seuils dépassés.
       </p>
 
@@ -116,7 +116,7 @@ const DeliveryTab = () => {
             <div className="text-sm flex-1 min-w-0">
               <div className="font-medium">Seuils actifs (fenêtre {threshold.window_days} j)</div>
               <div className="text-xs text-muted-foreground mt-1">
-                Bounce &gt; {threshold.bounce_pct_max}% · Ouverture &lt; {threshold.open_pct_min}% (min {threshold.min_sends} envois) · Plainte &gt; {threshold.complaint_pct_max}%
+                Rebond &gt; {threshold.bounce_pct_max}% · Ouverture &lt; {threshold.open_pct_min}% (min {threshold.min_sends} envois) · Plainte &gt; {threshold.complaint_pct_max}%
                 {' · '}Alerte : {threshold.alert_enabled ? "activée" : "désactivée"}
                 {threshold.alert_recipient ? ` (${threshold.alert_recipient})` : " (1er admin)"}
               </div>
