@@ -1,3 +1,4 @@
+import { KpiTile } from "@/components/admin/ui";
 import { adminLabel, ALMA_FACT_TYPE_LABELS } from "@/lib/admin/labels";
 import { fetchAllRows } from "@/lib/admin/fetchAllRows";
 import { reportAdminReadError, UNAVAILABLE_LABEL } from "@/lib/admin/readError";
@@ -534,14 +535,7 @@ function WhispersTab({ since, range }: { since: string; range: Range }) {
 /* ══════════════════════════ KPI card ══════════════════════════ */
 
 function KpiCard({ label, value }: { label: string; value: string | number }) {
-  return (
-    <Card>
-      <CardContent className="p-4">
-        <p className="text-xs text-muted-foreground">{label}</p>
-        <p className="text-2xl font-semibold mt-1 tabular-nums">{value}</p>
-      </CardContent>
-    </Card>
-  );
+  return <KpiTile label={label} value={value} />;
 }
 
 /* ══════════════════════════ Onglet Faits culturels ══════════════════════════ */

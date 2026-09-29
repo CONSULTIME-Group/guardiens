@@ -1,3 +1,4 @@
+import { KpiTile } from "@/components/admin/ui";
 import { useCallback, useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -238,15 +239,9 @@ const DeliveryTab = () => {
   );
 };
 
-const Kpi = ({ label, value, tone = "muted" }: { label: string; value: number | string; tone?: "muted" | "success" | "warning" | "destructive" }) => {
-  const cls = tone === "destructive" ? "text-destructive" : tone === "warning" ? "text-warning" : tone === "success" ? "text-success" : "";
-  return (
-    <Card><CardContent className="pt-4 pb-3 text-center">
-      <div className={`text-2xl font-bold ${cls}`}>{value}</div>
-      <div className="text-xs text-muted-foreground">{label}</div>
-    </CardContent></Card>
-  );
-};
+const Kpi = ({ label, value, tone = "muted" }: { label: string; value: number | string; tone?: "muted" | "success" | "warning" | "destructive" }) => (
+  <KpiTile label={label} value={value} tone={tone === "muted" ? "default" : tone} />
+);
 
 const NumField = ({ label, value, onChange, step }: { label: string; value: number; onChange: (v: number) => void; step: number }) => (
   <div className="space-y-1">

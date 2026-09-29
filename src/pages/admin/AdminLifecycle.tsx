@@ -1,3 +1,4 @@
+import { KpiTile } from "@/components/admin/ui";
 import { useEffect, useState } from "react";
 import { fetchAllRows } from "@/lib/admin/fetchAllRows";
 import { dedupeByMessageId } from "@/lib/admin/emailLogStats";
@@ -323,13 +324,6 @@ const AdminLifecycle = () => {
   );
 };
 
-const Kpi = ({ label, value }: { label: string; value: number | string }) => (
-  <Card>
-    <CardContent className="py-4">
-      <div className="text-xs text-muted-foreground uppercase tracking-wide">{label}</div>
-      <div className="font-heading text-2xl font-semibold mt-1 tabular-nums">{value}</div>
-    </CardContent>
-  </Card>
-);
+const Kpi = ({ label, value }: { label: string; value: number | string }) => <KpiTile label={label} value={value} />;
 
 export default AdminLifecycle;
