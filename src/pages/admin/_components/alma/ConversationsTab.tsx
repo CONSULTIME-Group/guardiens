@@ -6,7 +6,8 @@ import { adminLabel, SURFACE_LABELS, ALMA_REGISTER_LABELS, reasonLabel } from "@
  * précieuse du produit : il est affiché en texte intégral, horodaté, avec
  * la surface et le rôle actif.
  */
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
+import { Pager, SearchInput, usePagedSearch } from "@/components/admin/ui";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -35,7 +36,6 @@ function pct(v: number) {
 }
 
 export function ConversationsTab({ since }: { since: string }) {
-  const [search, setSearch] = useState("");
 
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["admin-alma-conversations", since],
@@ -78,16 +78,9 @@ export function ConversationsTab({ since }: { since: string }) {
   const split = useMemo(() => inputSplit(rows), [rows]);
   const followed = followedRaw ?? { total: 0, count: 0, rate: null };
 
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return rows;
-    return rows.filter(
-      (r) =>
-        r.question.toLowerCase().includes(q) ||
-        (r.answer ?? "").toLowerCase().includes(q) ||
-        r.surface.toLowerCase().includes(q),
-    );
-  }, [rows, search]);
+  // Lot A11b : recherche commune (sans accents, retour à la page 1), 24 par page.
+  const paged = usePagedSearch(rows, (r) => `${r.question} ${r.answer ?? ""} ${r.surface}`);
+  const filtered = paged.filtered;
 
   const exportCsv = () => {
     const csv = toCsv(filtered as unknown as Record<string, unknown>[], [
@@ -201,21 +194,16 @@ export function ConversationsTab({ since }: { since: string }) {
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <Input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Rechercher dans le corpus"
-          className="w-64"
-        />
+        <SearchInput value={paged.query} onChange={paged.setQuery} placeholder="Rechercher dans le corpus" className="w-64" />
         <Button variant="outline" size="sm" onClick={exportCsv}>
           <Download className="h-4 w-4 mr-2" aria-hidden="true" /> Exporter
         </Button>
-        <span className="text-xs text-muted-foreground">{filtered.length} échanges affichés</span>
+        <span className="text-xs text-muted-foreground">{paged.total} trouvé{paged.total > 1 ? "s" : ""}</span>
       </div>
 
       <div className="space-y-2">
         {isLoading && <p className="text-sm text-muted-foreground">Chargement du corpus.</p>}
-        {filtered.slice(0, 300).map((r) => (
+        {paged.visible.map((r) => (
           <Card key={r.id}>
             <CardContent className="p-4 space-y-2">
               <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
@@ -237,6 +225,7 @@ export function ConversationsTab({ since }: { since: string }) {
             </CardContent>
           </Card>
         ))}
+        <Pager page={paged.page} total={paged.total} onPage={paged.setPage} />
       </div>
     </div>
   );

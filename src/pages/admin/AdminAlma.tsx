@@ -731,8 +731,9 @@ function CulturalFactsTab({ since }: { since: string }) {
           onChange={(e) => setSurfaceFilter(e.target.value)}
           className="h-9 px-3 rounded-md border border-input bg-background text-sm w-64"
         />
+        <SearchInput value={pagedFacts.query} onChange={pagedFacts.setQuery} placeholder="Rechercher un fait" />
         <span className="text-xs text-muted-foreground">
-          {filtered.length} fait{filtered.length > 1 ? "s" : ""}
+          {pagedFacts.total} trouvé{pagedFacts.total > 1 ? "s" : ""}
         </span>
       </div>
 
@@ -758,21 +759,21 @@ function CulturalFactsTab({ since }: { since: string }) {
                     Chargement…
                   </TableCell>
                 </TableRow>
-              ) : filtered.length === 0 ? (
+              ) : pagedFacts.total === 0 ? (
                 <TableRow>
                   <TableCell colSpan={8} className="text-center text-muted-foreground py-6">
                     Aucun fait pour ces filtres.
                   </TableCell>
                 </TableRow>
               ) : (
-                filtered.map((f) => {
+                pagedFacts.visible.map((f) => {
                   const s = statsById.get(f.id) ?? { views: 0, clicks: 0 };
                   const clickRate = s.views > 0 ? s.clicks / s.views : 0;
                   return (
                     <TableRow key={f.id} className={!f.active ? "opacity-60" : undefined}>
                       <TableCell>
-                        <Badge variant="secondary" className="font-mono text-[10px]">
-                          {f.fact_type}
+                        <Badge variant="secondary" className="text-[10px]">
+                          {adminLabel(f.fact_type, ALMA_FACT_TYPE_LABELS)}
                         </Badge>
                       </TableCell>
                       <TableCell className="max-w-md">
@@ -783,8 +784,8 @@ function CulturalFactsTab({ since }: { since: string }) {
                           </div>
                         )}
                       </TableCell>
-                      <TableCell className="font-mono text-[10px] max-w-xs truncate">
-                        {JSON.stringify(f.context_filter)}
+                      <TableCell className="text-[11px] max-w-xs truncate">
+                        {contextSummary(f.context_filter)}
                       </TableCell>
                       <TableCell className="text-right tabular-nums">{s.views}</TableCell>
                       <TableCell className="text-right tabular-nums">{s.clicks}</TableCell>
