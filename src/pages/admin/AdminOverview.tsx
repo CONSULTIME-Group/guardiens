@@ -1,6 +1,7 @@
+import { useState } from "react";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import DashboardSkeleton from "@/components/skeletons/DashboardSkeleton";
-import { useDashboardData } from "./_components/dashboard/useDashboardData";
+import { useDashboardData, useDashboardTrends } from "./_components/dashboard/useDashboardData";
 import { useActivityAnalysis } from "./_components/dashboard/useActivityAnalysis";
 import { KpiCards } from "./_components/dashboard/KpiCards";
 import { RecentActivity } from "./_components/dashboard/RecentActivity";
@@ -25,7 +26,9 @@ import { VolunteerAvailabilityCard } from "./_components/dashboard/VolunteerAvai
  * 6. Pilotage (cartes-liens vers les pages dédiées)
  */
 const AdminOverview = () => {
-  const { loading, stats, activity, weeklySignups, deptData, partial } = useDashboardData();
+  const { loading, error, stats, activity } = useDashboardData();
+  const [trendsOpened, setTrendsOpened] = useState(false);
+  const trends = useDashboardTrends(trendsOpened);
   const {
     analysis,
     loading: analysisLoading,
@@ -33,7 +36,7 @@ const AdminOverview = () => {
     refresh: refreshAnalysis,
   } = useActivityAnalysis();
 
-  if (loading || !stats) return <DashboardSkeleton />;
+  if (loading) return <DashboardSkeleton />;
 
   return (
     <div className="space-y-6 p-4 md:p-6 max-w-7xl mx-auto">
@@ -59,7 +62,13 @@ const AdminOverview = () => {
       <AnimateCard />
 
       {/* 3. État du service */}
-      <KpiCards stats={stats} />
+      {stats ? (
+        <KpiCards stats={stats} />
+      ) : (
+        <p role="alert" className="rounded-xl border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">
+          {error ?? "Chiffre indisponible"} : les chiffres clés n'ont pas pu être lus.
+        </p>
+      )}
       <CronHealthCard />
       <VolunteerAvailabilityCard />
 
@@ -68,11 +77,15 @@ const AdminOverview = () => {
       <RecentActivity activity={activity} />
 
       {/* 5. Tendances (repliées) */}
-      <CollapsibleSection title="Tendances">
-        {partial && (
+      <CollapsibleSection title="Tendances" onOpenChange={(o) => o && setTrendsOpened(true)}>
+        {trends.loading && <p className="text-sm text-muted-foreground">Chargement des tendances…</p>}
+        {trends.error && <p role="alert" className="text-sm text-destructive">{trends.error}</p>}
+        {trends.partial && (
           <p className="text-xs text-warning mb-2">Données partielles : plafond de 50 000 lignes atteint.</p>
         )}
-        <DashboardCharts weeklySignups={weeklySignups} deptData={deptData} />
+        {!trends.loading && !trends.error && trendsOpened && (
+          <DashboardCharts weeklySignups={trends.weeklySignups} deptData={trends.deptData} />
+        )}
       </CollapsibleSection>
 
       {/* 6. Pilotage */}

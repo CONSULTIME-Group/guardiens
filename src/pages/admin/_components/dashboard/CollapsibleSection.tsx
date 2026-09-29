@@ -9,14 +9,16 @@ import {
 interface Props {
   title: string;
   children: ReactNode;
+  /** Appelé à l'ouverture et à la fermeture (chargement différé). */
+  onOpenChange?: (open: boolean) => void;
 }
 
 /**
  * Section repliable du tableau de bord admin, fermée par défaut.
  * Conserve l'esthétique Card (bordure, fond, ombre) sans header séparé.
  */
-export const CollapsibleSection = ({ title, children }: Props) => (
-  <Accordion type="single" collapsible>
+export const CollapsibleSection = ({ title, children, onOpenChange }: Props) => (
+  <Accordion type="single" collapsible onValueChange={(v) => onOpenChange?.(v === "section")}>
     <AccordionItem
       value="section"
       className="rounded-xl border border-border bg-card text-card-foreground shadow-sm"
