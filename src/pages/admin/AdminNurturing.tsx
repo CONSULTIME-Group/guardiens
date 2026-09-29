@@ -1198,7 +1198,7 @@ const AdminNurturing = () => {
                           <div className="bg-primary/5 border border-primary/15 rounded px-2 py-1.5">
                             <p className="text-muted-foreground">Taux d'ouverture</p>
                             <p className="font-semibold text-foreground text-base">
-                              {m.sent > 0 ? `${Math.round((m.opens / m.sent) * 100)}%` : ","}
+                              {engagementError ? UNAVAILABLE_LABEL : formatOpenRate(m.opens, m.delivered)}
                             </p>
                             <p className="text-[10px] text-muted-foreground">{m.opens} / {m.sent}</p>
                           </div>
