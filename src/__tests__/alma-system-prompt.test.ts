@@ -79,7 +79,7 @@ describe("identité d'Alma dans le prompt", () => {
     expect(buildAlmaSystemPrompt("reassurance")).toContain("/actualites");
     expect(buildAlmaSystemPrompt("reassurance")).toContain("/petites-missions");
     expect(promptSource).toContain(
-      "Tu cites uniquement les liens fournis dans les sources de ce tour, ou les chemins de la carte du site.",
+      "Tu cites uniquement les liens fournis dans les sources de ce tour, ou les chemins de la carte du site, ou les liens de l'inventaire autour de la personne.",
     );
   });
 
