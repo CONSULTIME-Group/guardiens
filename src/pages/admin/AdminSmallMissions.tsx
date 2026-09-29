@@ -491,6 +491,9 @@ const AdminSmallMissions = () => {
         </Button>
       </div>
 
+      {missionsTruncated && (
+        <p role="status" className="text-sm text-warning">{TRUNCATED_NOTICE}</p>
+      )}
       <div className="flex gap-2" role="tablist">
         {([["entraide", "Entraide"], ["projets", "Projets"]] as const).map(([key, label]) => (
           <button
