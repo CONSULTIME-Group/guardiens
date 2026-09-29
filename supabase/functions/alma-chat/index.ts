@@ -534,10 +534,7 @@ Deno.serve(async (req) => {
     // Lot J4 : mots proscrits reformulés, anecdote déplacée après l'information.
     const quiet = Boolean(helpDirective) || intent.frustration || classification.frustration >= 2 ||
       classification.bug_suspected || classification.intent === "aide_recherchee";
-    const answer = polishAlmaAnswer(drafted.answer, {
-      moodAllowed: !quiet && (register === "perso" || isSmallTalk(message)),
-      quiet,
-    });
+    const answer = polishAlmaAnswer(drafted.answer, { perso: register === "perso", quiet });
     if (!answer) {
       await logConversation({
         user_id: userId,
