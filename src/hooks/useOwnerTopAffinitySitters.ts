@@ -16,6 +16,7 @@
  * - Un gardien sans ligne sitter_profiles est scoré (tous critères non
  *   évaluables), jamais écarté.
  */
+import { fetchMyOwnerProfile, fetchMyProfile } from "@/lib/myProfile";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -68,8 +69,8 @@ export function useOwnerTopAffinitySitters(): Result {
       // vivier gardiens : cinq lectures qui ne dépendent que de userId,
       // donc une seule vague.
       const [{ data: me }, { data: ownerPrefs }, { data: pets }, { data: myProperties }, pool, exactPoolCount, publishedRes] = await Promise.all([
-        supabase.from("profiles").select("latitude, longitude, city").eq("id", userId!).maybeSingle(),
-        supabase.from("owner_profiles").select("preferred_sitter_types, home_ambiance, languages, interests, life_pace, presence_expected").eq("user_id", userId!).maybeSingle(),
+        fetchMyProfile(userId!),
+        fetchMyOwnerProfile(userId!),
         supabase.from("pets").select("species, special_needs, breed, property_id, properties!inner(user_id)").eq("properties.user_id", userId!),
         supabase.from("properties").select("car_required").eq("user_id", userId!),
         // Vivier de gardiens actifs, COMPLET : aucun filtre de confiance

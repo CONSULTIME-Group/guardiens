@@ -21,6 +21,7 @@
  *   - Le garde-fou des 40 pour cent n'est pas supprimé, il devient franchissable
  *     sur place.
  */
+import { fetchMyProfile, fetchMySitterProfile } from "@/lib/myProfile";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Camera, Loader2 } from "lucide-react";
@@ -266,16 +267,8 @@ const CompleteProfileToApplyModal = ({
   const loadSnapshot = useCallback(async () => {
     if (!user) return;
     const [profileRes, sitterRes, galleryRes] = await Promise.all([
-      supabase
-        .from("profiles")
-        .select("first_name, postal_code, city, country, avatar_url, bio, profile_completion")
-        .eq("id", user.id)
-        .maybeSingle(),
-      supabase
-        .from("sitter_profiles")
-        .select("geographic_radius, competences, lifestyle, interests, languages, life_pace, animal_types")
-        .eq("user_id", user.id)
-        .maybeSingle(),
+      fetchMyProfile(user.id!, { fresh: true }),
+      fetchMySitterProfile(user.id!, { fresh: true }),
       supabase
         .from("sitter_gallery")
         .select("id", { count: "exact", head: true })
@@ -539,11 +532,7 @@ const CompleteProfileToApplyModal = ({
       if (!ok) return null;
     }
 
-    const { data: row } = await supabase
-      .from("profiles")
-      .select("profile_completion")
-      .eq("id", user.id)
-      .maybeSingle();
+    const { data: row } = await fetchMyProfile(user.id!, { fresh: true });
     return row?.profile_completion ?? 0;
   };
 

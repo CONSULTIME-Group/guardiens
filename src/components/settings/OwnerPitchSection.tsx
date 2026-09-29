@@ -1,3 +1,4 @@
+import { fetchMyOwnerProfile, fetchMyProfile } from "@/lib/myProfile";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Label } from "@/components/ui/label";
@@ -15,11 +16,11 @@ const OwnerPitchSection = ({ user }: { user: any }) => {
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+      const { data: profile } = await fetchMyProfile(user.id!, { fresh: true });
       const ownerRole = profile?.role === "owner" || profile?.role === "both";
       setIsOwner(ownerRole);
       if (ownerRole) {
-        const { data } = await supabase.from("owner_profiles").select("accept_unsolicited_pitches").eq("user_id", user.id).maybeSingle();
+        const { data } = await fetchMyOwnerProfile(user.id!, { fresh: true });
         if (data) setAccept(data.accept_unsolicited_pitches ?? false);
       }
       setLoaded(true);

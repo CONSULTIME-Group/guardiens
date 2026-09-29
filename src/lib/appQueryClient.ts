@@ -14,3 +14,7 @@ export function registerAppQueryClient(client: QueryClient): void {
 export function clearAppQueryCache(): void {
   appQueryClient?.clear();
 }
+
+export function getAppQueryClient(): QueryClient | null {
+  return appQueryClient;
+}

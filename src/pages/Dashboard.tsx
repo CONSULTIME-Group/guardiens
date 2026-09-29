@@ -1,3 +1,4 @@
+import { fetchMyProfile } from "@/lib/myProfile";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRef, useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -97,11 +98,7 @@ const Dashboard = () => {
     profileCheckFired.current = true;
     (async () => {
       try {
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("id")
-          .eq("id", user.id)
-          .maybeSingle();
+        const { data, error } = await fetchMyProfile(user.id!);
         if (error) return; // erreur réseau / RLS : on ne déclenche pas le filet
         if (!data) {
           try {

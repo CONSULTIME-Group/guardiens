@@ -1,3 +1,4 @@
+import { fetchMyProfile } from "@/lib/myProfile";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -22,11 +23,7 @@ export function useMutualAidRadiusKm(): number | null {
     let active = true;
     void (async () => {
       try {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("available_for_help")
-        .eq("id", user.id)
-        .maybeSingle();
+      const { data: profile } = await fetchMyProfile(user.id!);
       if (!profile?.available_for_help) return;
       const { data } = await supabase.rpc("my_mutual_aid_radius_km");
       if (active && typeof data === "number") setKm(data);

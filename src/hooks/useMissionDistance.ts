@@ -1,3 +1,4 @@
+import { fetchMyProfile } from "@/lib/myProfile";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
 import { supabase } from "@/integrations/supabase/client";
@@ -112,11 +113,7 @@ export function useMissionDistance(missions: MissionLike[], options?: MissionDis
     (async () => {
       const { data: auth } = await supabase.auth.getUser();
       if (!auth.user) return;
-      const { data: p } = await supabase
-        .from("profiles")
-        .select("postal_code")
-        .eq("id", auth.user.id)
-        .maybeSingle();
+      const { data: p } = await fetchMyProfile(auth.user.id!);
       if (cancelled) return;
       const cp = (p?.postal_code || "").trim();
       if (isValidFrPostal(cp)) setPostal(cp);

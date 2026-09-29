@@ -79,13 +79,20 @@ export default defineConfig(({ mode }) => ({
         // recharts sur toutes les pages, y compris les pages ville sans graphique.
         // Sans règle, recharts reste dans le graphe paresseux des pages admin.
         manualChunks(id: string) {
-          if (!id.includes("node_modules")) return;
+          // Lot P1 : les petits composants d'interface partagés forment un seul
+          // fichier au lieu d'une trentaine de fichiers de quelques Ko.
+          if (!id.includes("node_modules")) {
+            if (/\/src\/components\/ui\/(accordion|alert|alert-dialog|avatar|badge|button|card|checkbox|collapsible|dialog|dropdown-menu|input|label|popover|progress|radio-group|select|separator|sheet|skeleton|switch|tabs|textarea|tooltip|toast|toaster|use-toast)\.tsx?$/.test(id)) return "app-ui";
+            return;
+          }
           const p = id.split("node_modules/").pop() ?? "";
           const match = (name: string) => p.startsWith(name + "/") || p.startsWith(".pnpm/") && p.includes("/" + name + "/");
           if (match("use-sync-external-store") || match("react-is") || match("scheduler")) return "vendor-react";
           if (match("@tanstack/react-query")) return "vendor-query";
           if (match("@supabase/supabase-js")) return "vendor-supabase";
           if (p.startsWith("@radix-ui/")) return "vendor-ui";
+          if (match("lucide-react")) return "vendor-icons";
+          if (match("date-fns")) return "vendor-date";
           if (match("react") || match("react-dom") || match("react-router-dom") || match("react-router")) return "vendor-react";
         },
       },

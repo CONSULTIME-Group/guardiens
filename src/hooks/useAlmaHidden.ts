@@ -4,6 +4,7 @@
  * Lit et met à jour la colonne `profiles.alma_hidden`. Quand true, le dock
  * Alma disparaît complètement de l'UI. Réversible depuis Réglages > Alma.
  */
+import { fetchMyProfile, patchMyProfileCache } from "@/lib/myProfile";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -24,11 +25,7 @@ export function useAlmaHidden(): {
     }
     let cancelled = false;
     (async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("alma_hidden" as any)
-        .eq("id", user.id)
-        .maybeSingle();
+      const { data } = await fetchMyProfile(user.id!);
       if (cancelled) return;
       const raw = (data as any)?.alma_hidden;
       setHiddenState(raw === true);
@@ -46,6 +43,7 @@ export function useAlmaHidden(): {
       .from("profiles")
       .update({ alma_hidden: v } as any)
       .eq("id", user.id);
+    patchMyProfileCache(user.id, { alma_hidden: v });
   };
 
   return { hidden, loading, setHidden };

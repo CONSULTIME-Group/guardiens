@@ -9,6 +9,7 @@
  *    Alma persistant en topbar). Bypasse toutes les gates de session côté client
  *    et les cooldowns côté serveur. Respecte le dedup 24h via `p_exclude_ids`.
  */
+import { fetchMyProfile } from "@/lib/myProfile";
 import {
   createContext,
   useCallback,
@@ -288,11 +289,7 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
     (async () => {
       const [{ data: profile }, { data: blacklist }] = await Promise.all([
-        supabase
-          .from("profiles")
-          .select("alma_frequency" as any)
-          .eq("id", user.id)
-          .maybeSingle(),
+        fetchMyProfile(user.id!),
         supabase.rpc("get_alma_blacklisted_types" as any),
       ]);
       if (cancelled) return;

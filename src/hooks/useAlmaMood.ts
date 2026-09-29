@@ -15,6 +15,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { getDailyWeather } from "@/lib/alma/weatherCache";
 import { isMoodLineTruthful, type MoodTruthFacts } from "../../supabase/functions/_shared/alma-facts";
 import {
   resolveMoodPlan,
@@ -140,11 +141,10 @@ export function useAlmaMood({ silent, conversationOpen }: UseAlmaMoodParams): Us
       }
 
       // Météo côté serveur. Un échec laisse simplement la condition à null.
+      // Lot P1 : une fois par jour au plus, lecture différée après l'affichage.
       let weather: string | null = null;
       try {
-        const { data } = await supabase.functions.invoke("alma-weather", { body: {} });
-        const c = (data as any)?.condition;
-        weather = typeof c === "string" ? c : null;
+        weather = await getDailyWeather(user.id);
       } catch {
         weather = null;
       }

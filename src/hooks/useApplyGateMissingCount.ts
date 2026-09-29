@@ -4,6 +4,7 @@
  * jamais afficher un texte figé : le gardien doit lire ce qui manque,
  * nommément, pas un compteur abstrait.
  */
+import { fetchMyProfile, fetchMySitterProfile } from "@/lib/myProfile";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -30,16 +31,8 @@ export function useApplyGateMissingCount(enabled: boolean): ApplyGateMissing | n
     let cancelled = false;
     (async () => {
       const [profileRes, sitterRes] = await Promise.all([
-        supabase
-          .from("profiles")
-          .select("first_name, postal_code, city, country, avatar_url, bio")
-          .eq("id", user.id)
-          .maybeSingle(),
-        supabase
-          .from("sitter_profiles")
-          .select("geographic_radius, competences, lifestyle, interests, languages, life_pace, animal_types")
-          .eq("user_id", user.id)
-          .maybeSingle(),
+        fetchMyProfile(user.id!),
+        fetchMySitterProfile(user.id!),
       ]);
       if (cancelled) return;
       const p: any = profileRes.data || {};

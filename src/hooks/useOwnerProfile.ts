@@ -1,3 +1,4 @@
+import { fetchMyOwnerProfile, fetchMyProfile, fetchMySitterProfile } from "@/lib/myProfile";
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -195,10 +196,10 @@ export function useOwnerProfile() {
     let sitterRes: any;
     try {
       [profileRes, propertyRes, ownerRes, sitterRes] = await Promise.all([
-        supabase.from("profiles").select("*").eq("id", user.id).single(),
+        fetchMyProfile(user.id!, { fresh: true }),
         supabase.from("properties").select("*").eq("user_id", user.id).limit(1).maybeSingle(),
-        supabase.from("owner_profiles").select("*").eq("user_id", user.id).maybeSingle(),
-        supabase.from("sitter_profiles").select("competences").eq("user_id", user.id).maybeSingle(),
+        fetchMyOwnerProfile(user.id!, { fresh: true }),
+        fetchMySitterProfile(user.id!, { fresh: true }),
       ]);
       if (profileRes.error) throw profileRes.error;
       if (propertyRes.error) throw propertyRes.error;
@@ -293,11 +294,7 @@ export function useOwnerProfile() {
   const [completion, setCompletion] = useState<number>(0);
   const refreshCompletion = useCallback(async () => {
     if (!user) return;
-    const { data: row } = await supabase
-      .from("profiles")
-      .select("profile_completion")
-      .eq("id", user.id)
-      .maybeSingle();
+    const { data: row } = await fetchMyProfile(user.id!, { fresh: true });
     setCompletion(row?.profile_completion || 0);
   }, [user]);
   useEffect(() => { refreshCompletion(); }, [refreshCompletion]);

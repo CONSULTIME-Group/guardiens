@@ -114,6 +114,9 @@ describe("panneau déplié du dock Alma", () => {
       primaryAction: { label: "Voir", actionId: "go", onClick: vi.fn() },
     };
     renderDock();
+    // Lot P1 : sous md, le whisper n'ouvre plus le panneau, la bulle le fait.
+    expect(screen.queryByTestId("alma-dock-panel")).toBeNull();
+    fireEvent.click(screen.getByTestId("alma-whisper-peek"));
     const panel = screen.getByTestId("alma-dock-panel");
     expect(panel.querySelectorAll(".alma-turn-alma")).toHaveLength(1);
     expect(panel).toHaveTextContent("Pensez à aerer la maison.");

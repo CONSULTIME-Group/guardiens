@@ -12,6 +12,7 @@
  * Utilisé par le garde-fou global (`OnboardingGate`) et par la page
  * `/onboarding/affinity` pour savoir quels blocs afficher.
  */
+import { fetchMyOwnerProfile, fetchMyProfile, fetchMySitterProfile } from "@/lib/myProfile";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -37,21 +38,9 @@ export interface AffinityOnboardingStatus {
 
 async function loadStatus(userId: string, role: string | null) {
   const [sitterRes, ownerRes, profileRes] = await Promise.all([
-    supabase
-      .from("sitter_profiles")
-      .select("animal_types, work_during_sit, sitter_type")
-      .eq("user_id", userId)
-      .maybeSingle(),
-    supabase
-      .from("owner_profiles")
-      .select("presence_expected, preferred_sitter_types")
-      .eq("user_id", userId)
-      .maybeSingle(),
-    supabase
-      .from("profiles")
-      .select("created_at, postal_code")
-      .eq("id", userId)
-      .maybeSingle(),
+    fetchMySitterProfile(userId!),
+    fetchMyOwnerProfile(userId!),
+    fetchMyProfile(userId!),
   ]);
 
   const sitter = sitterRes.data as { animal_types?: string[] | null; work_during_sit?: string | null; sitter_type?: string | null } | null;

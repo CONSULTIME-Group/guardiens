@@ -1,3 +1,4 @@
+import { fetchMyProfile } from "@/lib/myProfile";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/lib/logger";
@@ -27,11 +28,7 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
   useEffect(() => {
     if (!user) return;
     Promise.all([
-      supabase
-        .from("profiles")
-        .select("identity_verified, identity_verification_status, identity_document_url, identity_selfie_url")
-        .eq("id", user.id)
-        .single(),
+      fetchMyProfile(user.id!, { fresh: true }),
       supabase
         .from("identity_verification_logs" as any)
         .select("*")

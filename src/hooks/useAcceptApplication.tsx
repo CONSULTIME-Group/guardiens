@@ -16,6 +16,7 @@
  *    décliné automatiquement ;
  * 5. ouverture de l'accord de garde `AccordDeGarde` (role="proprio").
  */
+import { fetchMyProfile } from "@/lib/myProfile";
 import { useCallback, useState, type ReactNode } from "react";
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -120,11 +121,7 @@ export function useAcceptApplication(options: Options = {}) {
           .select("id, title, start_date, end_date, city, properties(pets(name, species, breed))")
           .eq("id", sitId)
           .maybeSingle()) as any;
-        const { data: proprio } = (await supabase
-          .from("profiles")
-          .select("first_name, city")
-          .eq("id", user.id)
-          .maybeSingle()) as any;
+        const { data: proprio } = (await fetchMyProfile(user.id!)) as any;
 
         const sitTitle: string = sitFull?.title ?? "";
         const petsRaw: any[] = Array.isArray(sitFull?.properties?.pets) ? sitFull.properties.pets : [];

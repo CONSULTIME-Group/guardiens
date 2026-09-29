@@ -12,6 +12,7 @@
  * Si une source manque, le bloc affiche moins de trois liens. Jamais de
  * remplissage artificiel.
  */
+import { fetchMySitterProfile } from "@/lib/myProfile";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveBreedFiche, type BreedFicheCandidate } from "@/lib/breedFicheMatch";
@@ -106,11 +107,7 @@ export const useRailReadings = ({
             .filter((p) => p.breed && p.species)
             .map((p) => ({ name: p.name, species: p.species, breed: p.breed as string }));
         } else if (!upcomingGuard && userId) {
-          const { data: sp } = await supabase
-            .from("sitter_profiles")
-            .select("id")
-            .eq("user_id", userId)
-            .maybeSingle();
+          const { data: sp } = await fetchMySitterProfile(userId!);
           if (sp?.id) {
             const { data: past } = await supabase
               .from("past_animals")
