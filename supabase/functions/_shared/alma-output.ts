@@ -24,8 +24,8 @@ export function rewriteForbiddenWords(text: string): string {
   return (text || "")
     .replace(new RegExp(`\\b(du|le|au|un|son|votre) logement gratuitement${end}`, "gi"), (_m, det: string) => `${det} logement sans rien payer`)
     .replace(new RegExp(`\\bgratuitement${end}`, "gi"), "sans rien payer pour le logement")
-    .replace(new RegExp(`\\bla gratuit[ée]s?${end}`, "gi"), (m) => keepCase(m, "l'absence de frais"))
-    .replace(new RegExp(`\\bgratuit[ée]s?${end}`, "gi"), "absence de frais")
+    .replace(new RegExp(`\\bla gratuités?${end}`, "gi"), (m) => keepCase(m, "l'absence de frais"))
+    .replace(new RegExp(`\\bgratuités?${end}`, "gi"), "absence de frais")
     .replace(new RegExp(`\\bgratuit(?:e|es|s)?${end}`, "gi"), "sans frais")
     .replace(new RegExp(`\\bvoisinage${end}`, "gi"), "entourage")
     .replace(new RegExp(`\\b(?:vos|mes|des|nos|tes|ses|leurs|les|aux|ces) voisin(?:e)?s${end}`, "gi"), (m) =>
