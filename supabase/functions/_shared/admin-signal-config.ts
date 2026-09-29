@@ -30,6 +30,8 @@ export interface SignalTypeConfig {
   autoResolve: boolean
   queueGroup?: SignalQueueGroup
   deprecated?: boolean
+  /** Lot J2-B : présent dans l'email quotidien même sans gravité critique. */
+  dailyEmailAnySeverity?: boolean
 }
 
 const Q: SignalDestination[] = ['action_queue', 'daily_email']
@@ -85,6 +87,11 @@ export const SIGNAL_TYPES: Record<string, SignalTypeConfig> = {
   pro_pending_review: { label: 'Fiche pro en attente de validation', family: 'moderation', defaultSeverity: 'warning', destinations: Q, autoResolve: false },
   // Accueil des membres (lot J1) : résolution manuelle, après contact humain.
   alma_frustration: { label: 'Membre en difficulté avec Alma', family: 'accueil', defaultSeverity: 'critical', destinations: Q, autoResolve: false },
+  // Lot J2-B : filet humain d'Alma.
+  alma_bug_report: { label: 'Bug supposé signalé à Alma', family: 'accueil', defaultSeverity: 'warning', destinations: Q, autoResolve: false, dailyEmailAnySeverity: true },
+  alma_churn: { label: 'Membre qui veut partir', family: 'accueil', defaultSeverity: 'critical', destinations: Q, autoResolve: false },
+  alma_unanswered: { label: 'Question restée sans réponse d\'Alma', family: 'accueil', defaultSeverity: 'info', destinations: ['weekly_summary'], autoResolve: false },
+  alma_contact_request: { label: 'Membre qui écrit à Jérémie et Elisa depuis Alma', family: 'accueil', defaultSeverity: 'critical', destinations: Q, autoResolve: false },
   // Technique
   prerender_monthly_budget_reached: { label: 'Plafond mensuel de renders atteint', family: 'technique', defaultSeverity: 'critical', destinations: Q, autoResolve: false },
 }

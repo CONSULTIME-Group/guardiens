@@ -330,7 +330,7 @@ describe("J2-A, rétrocompatibilité de la réponse", () => {
   it("le serveur garde answer et remaining, ajoute action et chips seulement s'ils existent", () => {
     const src = read("supabase/functions/alma-chat/index.ts");
     expect(src).toContain("answer,\n      remaining:");
-    expect(src).toContain("...(drafted.action ? { action:");
+    expect(src).toContain("...(action ? { action: { label: action.label, path: action.path } } : {})");
     expect(src).toContain("...(next && next.chips.length ? { chips: next.chips } : {})");
   });
 

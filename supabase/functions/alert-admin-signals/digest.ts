@@ -49,6 +49,9 @@ const ACTIONS: Record<string, string> = {
   content_defect_outside_freeze: 'Corriger les contenus signalés.',
   prerender_monthly_budget_reached: 'Vérifier le budget de pré-rendu.',
   alma_frustration: 'Écrire au membre : il cherchait de l\'aide et Alma ne l\'a pas orienté.',
+  alma_bug_report: 'Reproduire le problème décrit, puis répondre au membre.',
+  alma_churn: 'Écrire à ce membre depuis sa fiche avant son départ.',
+  alma_contact_request: 'Répondre au message reçu depuis Alma (Messages de contact).',
 }
 
 const LINKS: Record<string, string> = {
@@ -79,7 +82,8 @@ export const sitIdOf = (s: OpenSignal): string | null => {
 }
 
 export function isActionableCritical(s: OpenSignal): boolean {
-  return s.severity === 'critical' && hasDestination(s.signal_type, 'daily_email')
+  if (!hasDestination(s.signal_type, 'daily_email')) return false
+  return s.severity === 'critical' || SIGNAL_TYPES[s.signal_type]?.dailyEmailAnySeverity === true
 }
 
 export function buildDigestLines(
@@ -116,7 +120,7 @@ export function buildDigestLines(
     const allTypes = arr.map((x) => x.signal_type)
     if (types.includes('pending_application') && types.includes('stalled_discussion') && main !== 'owner_sit_unconfirmed') {
       action = `Relancer le propriétaire : ${sitGroupSummary(allTypes)}.`
-    } else if (main === 'alma_frustration' && Array.isArray(m.messages)) {
+    } else if (main.startsWith('alma_') && Array.isArray(m.messages)) {
       // Lot J1 : les messages concernés, dans l'email quotidien.
       const quotes = (m.messages as { text?: string }[]).map((x) => `« ${String(x.text ?? '').slice(0, 160)} »`).join(' ')
       action = `${actionFor(main)} Messages : ${quotes}`.replace(/[\u2014\u2013]/g, ',')
@@ -169,6 +173,36 @@ export function weeklySummaryLines(signals: OpenSignal[], now: Date = new Date()
   const stale = signals.filter((s) => s.signal_type === 'affinity_onboarding_stale').length
   if (dormant || stale) {
     lines.push(`À animer : ${dormant} gardien${dormant > 1 ? 's' : ''} dormant${dormant > 1 ? 's' : ''}, ${stale} onboarding${stale > 1 ? 's' : ''} affinité inachevé${stale > 1 ? 's' : ''}.`)
+  }
+  return lines
+}
+
+// Lot J2-B : section Alma de la synthèse du lundi.
+export interface AlmaWeeklyStats {
+  conversations: number
+  chips: number
+  with_action: number
+  acted: number
+  rated: number
+  not_useful: number
+  signals: Record<string, number>
+  unanswered: string[]
+}
+
+const pct = (n: number, d: number) => (d > 0 ? `${Math.round((100 * n) / d)} %` : 'non mesuré')
+
+export function almaWeeklyLines(stats: AlmaWeeklyStats | null, now: Date = new Date()): string[] {
+  if (now.getUTCDay() !== 1 || !stats) return []
+  const s = stats
+  const sig = Object.entries(s.signals ?? {})
+    .map(([t, n]) => `${SIGNAL_TYPES[t]?.label ?? t} ${n}`)
+    .join(', ')
+  const lines = [
+    `Alma, 7 derniers jours : ${s.conversations} conversation${s.conversations > 1 ? 's' : ''} réelle${s.conversations > 1 ? 's' : ''}, pastilles ${pct(s.chips, s.conversations)}, action à 10 minutes ${pct(s.acted, s.with_action)}, pas utile ${pct(s.not_useful, s.rated)}.`,
+    `Signaux Alma : ${sig || 'aucun'}.`,
+  ]
+  if (s.unanswered?.length) {
+    lines.push(`Sans réponse : ${s.unanswered.slice(0, 3).map((q) => `« ${q} »`).join(' ')}`.replace(/[\u2014\u2013]/g, ','))
   }
   return lines
 }

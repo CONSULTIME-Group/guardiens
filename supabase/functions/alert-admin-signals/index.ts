@@ -1,6 +1,6 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
-import { buildDigestLines, isActionableCritical, sitIdOf, weeklySummaryLines, type OpenSignal, type SitInfo } from './digest.ts'
+import { almaWeeklyLines, buildDigestLines, isActionableCritical, sitIdOf, weeklySummaryLines, type AlmaWeeklyStats, type OpenSignal, type SitInfo } from './digest.ts'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_ROLE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -54,7 +54,14 @@ Deno.serve(async (req) => {
     }
     const lines = buildDigestLines(rows, sits)
     // Lundi : couverture, qualité éditoriale, À animer, dans le paragraphe de synthèse existant.
-    const coverageLine = weeklySummaryLines(rows).join(' ') || null
+    // Lot J2-B : section Alma du lundi, lue en lecture seule.
+    let almaStats: AlmaWeeklyStats | null = null
+    if (new Date().getUTCDay() === 1) {
+      const { data: aw, error: awErr } = await admin.rpc('alma_weekly_summary')
+      if (awErr) console.error('alma_weekly_summary error', awErr)
+      else almaStats = aw as AlmaWeeklyStats
+    }
+    const coverageLine = [...weeklySummaryLines(rows), ...almaWeeklyLines(almaStats)].join(' ') || null
     const warningCount = rows.filter((r) => r.severity === 'warning').length
     const staleCount = lines.filter((l) => l.ageDays > 3).length
 
