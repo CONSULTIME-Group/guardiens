@@ -474,11 +474,19 @@ const SuppressionsTab = () => {
 
   const fetchSuppressions = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("suppressed_emails")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (!error) setSuppressions(data || []);
+    try {
+      const { rows } = await fetchAllRows<any>((from, to) =>
+        supabase
+          .from("suppressed_emails")
+          .select("*")
+          .order("created_at", { ascending: false })
+          .order("id", { ascending: true })
+          .range(from, to),
+      );
+      setSuppressions(rows);
+    } catch {
+      toast.error("Erreur lors du chargement des suppressions");
+    }
     setLoading(false);
   };
 
@@ -678,8 +686,11 @@ const EngagementTab = () => {
   const [totals, setTotals] = useState({ sent: 0, delivered: 0, opened: 0, clicked: 0, bounced: 0, unsub: 0 });
   const [uninstrumented, setUninstrumented] = useState(0);
   const [truncated, setTruncated] = useState(false);
+  const [rowsTruncated, setRowsTruncated] = useState(false);
+  const engagementSeq = useRef(createSeqGuard());
 
   const fetchStats = async () => {
+    const token = engagementSeq.current.next();
     setLoading(true);
     const now = new Date();
     const start = new Date();
@@ -695,12 +706,25 @@ const EngagementTab = () => {
     setTruncated(effectiveStart.getTime() !== start.getTime());
 
     // 1) Pull sends within window
-    const { data: logs, error: logsErr } = await supabase
-      .from("email_send_log")
-      .select("template_name,recipient_email,status,message_id,created_at,delivered_at,open_count,click_count,bounced_at,complained_at")
-      .gte("created_at", effectiveStart.toISOString())
-      .order("created_at", { ascending: false })
-      .limit(10000);
+    let logs: any[] = [];
+    let logsErr: unknown = null;
+    let logsTruncated = false;
+    try {
+      const res = await fetchAllRows<any>((from, to) =>
+        supabase
+          .from("email_send_log")
+          .select("id,template_name,recipient_email,status,message_id,created_at,delivered_at,open_count,click_count,bounced_at,complained_at")
+          .gte("created_at", effectiveStart.toISOString())
+          .order("created_at", { ascending: false })
+          .order("id", { ascending: true })
+          .range(from, to),
+      );
+      logs = res.rows;
+      logsTruncated = res.truncated;
+    } catch (e) {
+      logsErr = e;
+    }
+    if (!engagementSeq.current.isCurrent(token)) return;
 
     if (logsErr) {
       toast.error("Erreur lors du chargement");
@@ -724,11 +748,20 @@ const EngagementTab = () => {
 
 
     // 2) Pull unsubscribes within window
-    const { data: unsubs } = await supabase
-      .from("suppressed_emails")
-      .select("email,created_at")
-      .eq("reason", "unsubscribe")
-      .gte("created_at", start.toISOString());
+    // Même borne que les envois : effectiveStart.
+    const unsubRes = await fetchAllRows<any>((from, to) =>
+      supabase
+        .from("suppressed_emails")
+        .select("id,email,created_at")
+        .eq("reason", "unsubscribe")
+        .gte("created_at", effectiveStart.toISOString())
+        .order("created_at", { ascending: true })
+        .order("id", { ascending: true })
+        .range(from, to),
+    ).catch(() => ({ rows: [] as any[], truncated: false }));
+    if (!engagementSeq.current.isCurrent(token)) return;
+    const unsubs = unsubRes.rows;
+    setRowsTruncated(logsTruncated || unsubRes.truncated);
 
     // Attribution: pour chaque unsub, trouver le template du dernier email envoyé à cet email AVANT l'unsub (dans la fenêtre)
     const unsubByTpl = new Map<string, number>();
@@ -798,6 +831,7 @@ const EngagementTab = () => {
       <p className="text-sm text-muted-foreground">
         Open rate, click rate, désabonnements et bounces par template. Déduplication par <code className="text-xs bg-muted px-1 rounded">message_id</code>. Les taux d'ouverture/clic sont basés sur les emails <strong>livrés</strong>.
       </p>
+      {rowsTruncated && <p role="status" className="text-sm text-warning">{TRUNCATED_NOTICE}</p>}
       <div className="rounded-md border bg-muted/40 p-3 text-xs text-muted-foreground space-y-1">
         <p>
           Période de calcul bornée au {EMAIL_TRACKING_START.toLocaleDateString("fr-FR")}, date de mise en service du
