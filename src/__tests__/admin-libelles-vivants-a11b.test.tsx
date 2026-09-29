@@ -177,3 +177,22 @@ describe("A11b, Alma : listes longues par 24", () => {
     expect(screen.queryByRole("button", { name: "Suivante" })).toBeNull();
   });
 });
+
+describe("A11b, Alma : faits culturels par 24", () => {
+  it("24 au plus, page suivante, type en français", async () => {
+    tables.alma_cultural_facts = Array.from({ length: 30 }, (_, i) => ({
+      id: `f${i}`, fact_type: "breed", content: `Fait culturel ${i}`, source_url: null, context_filter: { surface: ["sitter_dashboard"] }, active: true, created_at: "2026-09-01",
+    }));
+    rpcs.admin_a10_cultural_fact_stats = [];
+    const AdminAlma = (await import("@/pages/admin/AdminAlma")).default;
+    const { container } = render(
+      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+        <MemoryRouter initialEntries={["/admin/alma?tab=cultural-facts"]}><AdminAlma /></MemoryRouter>
+      </QueryClientProvider>,
+    );
+    await waitFor(() => expect(screen.getAllByText(/^Fait culturel \d+$/).length).toBe(24), { timeout: 8000 });
+    expect(container.textContent).toMatch(/30 trouvés/);
+    await act(async () => { fireEvent.click(screen.getAllByRole("button", { name: "Suivante" })[0]); });
+    expect(screen.getAllByText(/^Fait culturel \d+$/).length).toBe(6);
+  }, 15000);
+});
