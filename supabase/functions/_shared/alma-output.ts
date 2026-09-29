@@ -28,7 +28,7 @@ export function rewriteForbiddenWords(text: string): string {
     .replace(new RegExp(`\\bgratuités?${end}`, "gi"), "absence de frais")
     .replace(new RegExp(`\\bgratuit(?:e|es|s)?${end}`, "gi"), "sans frais")
     .replace(new RegExp(`\\bvoisinage${end}`, "gi"), "entourage")
-    .replace(new RegExp(`\\b(à|de) (?:vos|mes|nos|tes|ses|leurs|les|ces) voisin(?:e)?s${end}`, "gi"), (m, prep: string) =>
+    .replace(new RegExp(`(?<![a-zà-ÿ])(à|de) (?:vos|mes|nos|tes|ses|leurs|les|ces) voisin(?:e)?s${end}`, "gi"), (m, prep: string) =>
       keepCase(m, prep.toLowerCase() === "à" ? "aux gens du coin" : "des gens du coin"))
     .replace(new RegExp(`\\b(?:vos|mes|des|nos|tes|ses|leurs|les|aux|ces) voisin(?:e)?s${end}`, "gi"), (m) =>
       /^aux/i.test(m) ? keepCase(m, "aux gens du coin") : keepCase(m, "les gens du coin"))
