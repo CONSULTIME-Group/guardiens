@@ -172,18 +172,21 @@ const Landing = () => {
 
             {/* Une seule star typographique : l'accroche, seule en Playfair. */}
             <h1 className="font-heading text-[clamp(26px,8.4vw,38px)] sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-2 md:mb-[18px] text-balance">
-              {t("landing.hero.title_main")}
+              <span className="block font-body text-xs md:text-sm font-semibold uppercase tracking-[0.14em] text-white/90 mb-2 md:mb-3">
+                {t("landing.hero.title_eyebrow")}
+              </span>
+              <span className="block">{t("landing.hero.title_main")}</span>
             </h1>
+
+            <p className="font-body text-sm md:text-base text-white/90 leading-relaxed mb-2 md:mb-[18px] animate-hero-fade-up animation-delay-400">
+              {t("landing.hero.lede")}
+            </p>
 
             {/* La ligne qui porte l'ouverture : ce qu'on trouve sans l'avoir
                 cherché. Playfair italique, taille intermédiaire entre le
                 titre et le paragraphe. */}
-            <p className="font-heading italic text-lg md:text-2xl text-white/95 leading-snug mb-2 md:mb-[18px] animate-hero-fade-up animation-delay-400">
+            <p className="font-heading italic text-lg md:text-2xl text-white/95 leading-snug mb-3 md:mb-5 animate-hero-fade-up animation-delay-700">
               {t("landing.hero.motto")}
-            </p>
-
-            <p className="font-body text-sm md:text-base text-white/80 leading-relaxed mb-3 md:mb-5 animate-hero-fade-up animation-delay-700">
-              {t("landing.hero.lede")}
             </p>
 
             <div className="flex flex-wrap items-center gap-2 animate-hero-fade-up animation-delay-900">
