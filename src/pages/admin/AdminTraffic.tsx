@@ -71,10 +71,10 @@ const AdminTraffic = () => {
     <div className="space-y-6">
       <AdminPageHeader
         title="Trafic"
-        description="Synthèse du trafic entrant, funnel d'activation interne et acquisition SEO."
+        description="Synthèse du trafic entrant, entonnoir d'activation interne et acquisition SEO."
       />
       <p className="text-xs text-muted-foreground rounded-lg border border-border bg-muted/40 px-3 py-2">
-        Depuis le bandeau de consentement (lot C1), les chiffres GA4 couvrent seulement les visiteurs qui ont accepté la mesure d'audience. Le funnel interne et Search Console restent complets.
+        Depuis le bandeau de consentement (lot C1), les chiffres GA4 couvrent seulement les visiteurs qui ont accepté la mesure d'audience. L'entonnoir interne et Search Console restent complets.
       </p>
 
       {/* Bloc synthèse trafic */}
