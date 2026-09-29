@@ -14,7 +14,6 @@
  */
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { reportAdminReadError, UNAVAILABLE_LABEL } from "@/lib/admin/readError";
@@ -73,7 +72,6 @@ export function AffinityOnboardingFunnelCard({ since }: { since: string }) {
     refetchOnWindowFocus: false,
   });
 
-  const truncated = false;
   const stats = useMemo(() => {
     const started = Number(agg?.started) || 0;
     const completed = Number(agg?.completed) || 0;
@@ -95,16 +93,11 @@ export function AffinityOnboardingFunnelCard({ since }: { since: string }) {
         </p>
       </CardHeader>
       <CardContent>
-        {truncated && (
-          <div className="mb-3 flex items-start gap-2 rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-xs text-warning-foreground">
-            <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0" aria-hidden="true" />
-            <span>Données tronquées au-delà de {ROW_LIMIT.toLocaleString("fr-FR")} lignes, les chiffres peuvent sous-compter.</span>
-          </div>
-        )}
+        {isError && <p className="mb-3 text-sm text-destructive">{UNAVAILABLE_LABEL}</p>}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           <KpiTile label="Comptes concernés" value={cohortCount} />
-          <KpiTile label="Started" value={stats.started} />
-          <KpiTile label="Completed" value={stats.completed} />
+          <KpiTile label="Commencés" value={isError ? UNAVAILABLE_LABEL : stats.started} />
+          <KpiTile label="Terminés" value={isError ? UNAVAILABLE_LABEL : stats.completed} />
           <KpiTile
             label="Taux d'abandon"
             value={`${(stats.abandonRate * 100).toFixed(1)} %`}
