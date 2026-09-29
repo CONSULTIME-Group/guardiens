@@ -3213,6 +3213,72 @@ export type Database = {
         }
         Relationships: []
       }
+      departure_tokens: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          profile_id: string
+          revoked_at: string | null
+          token: string
+          used_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          id?: string
+          profile_id: string
+          revoked_at?: string | null
+          token: string
+          used_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          profile_id?: string
+          revoked_at?: string | null
+          token?: string
+          used_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "departure_tokens_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profile_reputation"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "departure_tokens_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "departure_tokens_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "public_helpers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "departure_tokens_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "departure_tokens_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
+          },
+        ]
+      }
       deploy_fingerprints: {
         Row: {
           fingerprint: string
@@ -5447,6 +5513,66 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "nurturing_sequences"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      owner_departure_intents: {
+        Row: {
+          answered_at: string
+          id: string
+          period: string
+          source: string
+          user_id: string
+        }
+        Insert: {
+          answered_at?: string
+          id?: string
+          period: string
+          source: string
+          user_id: string
+        }
+        Update: {
+          answered_at?: string
+          id?: string
+          period?: string
+          source?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "owner_departure_intents_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profile_reputation"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "owner_departure_intents_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_departure_intents_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_helpers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_departure_intents_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_departure_intents_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
           },
         ]
       }

@@ -3,6 +3,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { requireAdminOrServiceRole } from "../_shared/require-admin.ts";
 import { entraideCardData } from "../_shared/entraide-card-data.ts";
 import { OWNER_NOEL_TEMPLATE, buildNoelDataFor } from "../_shared/owner-noel-audience.ts";
+import { mintDepartureTokens, periodBaseUrl } from "../_shared/owner-departure-audience.ts";
+import { DEPARTURE_TEMPLATE } from "../_shared/owner-departure-logic.ts";
 import { resendFetch } from "../_shared/resend-guard.ts";
 import { SENDER_FROM, REPLY_TO_ADDRESS } from "../_shared/sender-address.ts";
 
@@ -112,6 +114,12 @@ Deno.serve(async (req) => {
         const both = await buildNoelDataFor(admin, [self, { ...demo, id: `${self.id}-demo` }]);
         const mine = both.get(self.id);
         noelData = (mine?.variant === "A" ? mine : both.get(`${self.id}-demo`)) as Record<string, unknown> ?? {};
+      }
+      // Question de départ : vrai jeton /ma-periode sur le compte de l'admin.
+      if (templateName === DEPARTURE_TEMPLATE) {
+        const tokens = await mintDepartureTokens(admin, [userData.user.id]);
+        const t = tokens.get(userData.user.id);
+        if (t) noelData = { periodBaseUrl: periodBaseUrl(t) };
       }
       const { data: sent, error: sendErr } = await admin.functions.invoke("send-transactional-email", {
         body: {

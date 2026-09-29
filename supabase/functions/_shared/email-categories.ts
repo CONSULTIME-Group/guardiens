@@ -129,6 +129,8 @@ const PRODUCT: ReadonlyArray<string> = [
   'entraide-ligne-relance',
   // Campagne saisonnière propriétaires (lot N3)
   'owner-noel-2026',
+  // Nurturing propriétaire v2 (lot N4)
+  'owner-departure-question',
   'entraide-demander-coup-de-main',
   'helper-to-guard',
   'mission-nudge-no-response',

@@ -53,6 +53,10 @@ export interface MassEmailFilters {
   never_published_sit?: boolean;        // aucune annonce hors brouillon
   exclude_founder_followup?: boolean;   // membres suivis à la main par un fondateur
   prioritize_recent_openers?: boolean;  // ouvreurs des 90 derniers jours en tête
+  /** Lot N4 : exclut le groupe témoin owner v2 (10 %). */
+  exclude_owner_v2_holdout?: boolean;
+  /** Lot N4 : exclut les membres ayant déjà répondu à la question de départ. */
+  exclude_departure_answered?: boolean;
 }
 
 

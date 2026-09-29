@@ -275,6 +275,32 @@ const CAMPAIGN_PRESETS: CampaignPreset[] = [
     utmContent: "cta",
   },
   {
+    // Lot N4 : aucun envoi automatique. Jérémie lance lui-même la campagne.
+    key: "owner_departure_question",
+    label: "Propriétaires, question de départ",
+    segment: "proprios",
+    filters: {
+      comptes_actifs: true,
+      exclude_suspended: true,
+      exclude_admins: true,
+      respect_product_optout: true,
+      never_published_sit: true,
+      exclude_founder_followup: true,
+      prioritize_recent_openers: true,
+      exclude_owner_v2_holdout: true,
+      exclude_departure_answered: true,
+      template_name: "owner-departure-question",
+    },
+    subject: "Vous partez quand, cette année ?",
+    body: "Gabarit dédié owner-departure-question : cinq boutons à jeton personnel vers /ma-periode, créés pour chaque destinataire au lancement.",
+    ctaEnabled: true,
+    ctaLabel: "Pour Noël",
+    ctaUrl: "https://guardiens.fr/ma-periode?utm_source=email&utm_medium=email&utm_campaign=owner_departure_question",
+    utmEnabled: false,
+    utmCampaign: "owner_departure_question",
+    utmContent: "cta",
+  },
+  {
     key: "entraide_demander",
     label: "Entraide B, demander un coup de main",
     segment: "tous",
@@ -314,6 +340,7 @@ const AdminMassEmails = () => {
   const [recipientCount, setRecipientCount] = useState<number | null>(null);
   const [helpsWithCount, setHelpsWithCount] = useState<number | null>(null);
   const [variantCounts, setVariantCounts] = useState<{ a: number; b: number } | null>(null);
+  const [departureCounts, setDepartureCounts] = useState<{ holdout: number | null; answered: number | null } | null>(null);
 
   const [countLoading, setCountLoading] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -556,7 +583,13 @@ const AdminMassEmails = () => {
             ? { a: data.variant_a, b: data.variant_b }
             : null,
         );
+        setDepartureCounts(
+          typeof data?.holdout_excluded === "number" || typeof data?.already_answered === "number"
+            ? { holdout: data.holdout_excluded ?? null, answered: data.already_answered ?? null }
+            : null,
+        );
       } catch {
+        setDepartureCounts(null);
         setRecipientCount(null);
         setHelpsWithCount(null);
         setVariantCounts(null);
@@ -1074,6 +1107,22 @@ const AdminMassEmails = () => {
                         <span className="text-muted-foreground">Variante B (commune à ajouter)</span>
                         <span className="font-medium">{variantCounts.b}</span>
                       </div>
+                    </>
+                  )}
+                  {departureCounts && (
+                    <>
+                      {departureCounts.holdout !== null && (
+                        <div className="flex items-center justify-between" data-testid="departure-holdout-count">
+                          <span className="text-muted-foreground">Groupe témoin exclu</span>
+                          <span className="font-medium">{departureCounts.holdout}</span>
+                        </div>
+                      )}
+                      {departureCounts.answered !== null && (
+                        <div className="flex items-center justify-between" data-testid="departure-answered-count">
+                          <span className="text-muted-foreground">Déjà répondu</span>
+                          <span className="font-medium">{departureCounts.answered}</span>
+                        </div>
+                      )}
                     </>
                   )}
                 </div>
