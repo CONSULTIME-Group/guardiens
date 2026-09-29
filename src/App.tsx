@@ -139,6 +139,7 @@ const ApplicationQuickAction = lazy(() => import("./pages/ApplicationQuickAction
 const MissionChooseHelper = lazy(() => import("./pages/MissionChooseHelper"), "MissionChooseHelper");
 const MissionQuickCanHelp = lazy(() => import("./pages/MissionQuickCanHelp"), "MissionQuickCanHelp");
 const MaLigne = lazy(() => import("./pages/MaLigne"), "MaLigne");
+const MaPeriode = lazy(() => import("./pages/MaPeriode"), "MaPeriode");
 const EmailPreferences = lazy(() => import("./pages/EmailPreferences"), "EmailPreferences");
 const CityPage = lazy(() => import("./pages/CityPage"), "CityPage");
 const HouseSittingHub = lazy(() => import("./pages/HouseSittingHub"), "HouseSittingHub");
@@ -624,6 +625,8 @@ const AppRoutes = () => {
       <Route path="/entraide/choisir" element={<MissionChooseHelper />} />
       <Route path="/ma-ligne" element={<MaLigne />} />
       <Route path="/ma-ligne/:token" element={<MaLigne />} />
+      <Route path="/ma-periode" element={<MaPeriode />} />
+      <Route path="/ma-periode/:token" element={<MaPeriode />} />
 
       <Route path="/email-preferences" element={<EmailPreferences />} />
       {/* Compatibilité: les emails déjà envoyés contiennent /preferences-email (chemin inversé). */}

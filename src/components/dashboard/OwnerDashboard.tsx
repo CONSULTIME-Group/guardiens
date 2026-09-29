@@ -25,6 +25,8 @@ import { useAccessLevel } from "@/hooks/useAccessLevel";
 /* ── Vague 11 : composants du flux principal ── */
 import ApplicationsSection from "./owner/ApplicationsSection";
 import OwnerCockpit from "./owner/OwnerCockpit";
+import OwnerDepartureAlmaCard from "./owner/OwnerDepartureAlmaCard";
+import { useOwnerDeparture } from "@/hooks/useOwnerDeparture";
 import OwnerStarSection from "./owner/OwnerStarSection";
 import OwnerAnnonceSection from "./owner/OwnerAnnonceSection";
 import ApplicationCapSection from "./owner/ApplicationCapSection";
@@ -146,6 +148,7 @@ const OwnerDashboard = () => {
   });
 
   const isOwnerRole = user?.role === "owner" || user?.role === "both";
+  const departure = useOwnerDeparture(isOwnerRole ? user?.id : undefined);
   const showAlmaProactive = earlyOwner || (noActiveSit && isOwnerRole);
   const nearbyCount = nearbyOwnerSittersData?.totalCount ?? 0;
   const nearbyRadius = nearbyOwnerSittersData?.radiusUsed ?? null;
@@ -383,6 +386,9 @@ const OwnerDashboard = () => {
       <div className="min-w-0">
         <div className="mx-auto w-full max-w-[720px] lg:max-w-[1160px] px-4 sm:px-5 lg:px-8 lg:grid lg:grid-cols-[minmax(0,720px)_328px] lg:gap-[48px] lg:justify-center lg:items-start">
           <div className="min-w-0 space-y-[34px] md:space-y-[52px]">
+            {/* 0. Lot N4 : Alma « Vous partez quand ? », masquée après publication et pour le témoin */}
+            <OwnerDepartureAlmaCard data={departure.data} onPick={departure.pick} busy={departure.busy} />
+
             {/* 1. Accueil */}
             <OwnerCockpit
               userId={user?.id}
