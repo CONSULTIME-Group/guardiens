@@ -6,7 +6,7 @@ import { entraideCardData } from "../_shared/entraide-card-data.ts";
 import { loadAnsweredIds, mintDepartureTokens, periodBaseUrl, splitDepartureAudience } from "../_shared/owner-departure-audience.ts";
 import { DEPARTURE_TEMPLATE } from "../_shared/owner-departure-logic.ts";
 import { loadRecentEmailCounts } from "../_shared/owner-campaign-pressure.ts";
-import { loadReceivedForKey, resolveDedupeKey, splitReceived } from "../_shared/mass-email-dedupe.ts";
+import { expectedCountMismatch, loadReceivedForKey, resolveDedupeKey, splitReceived } from "../_shared/mass-email-dedupe.ts";
 import { buildResponderData, loadLatestIntents, splitNoelV2Audience, type NoelResponderPeriod } from "../_shared/owner-noel-v2.ts";
 import {
   OWNER_NOEL_TEMPLATE,
