@@ -57,9 +57,14 @@ interface MemberHit {
 export const ConversationsTable = ({
   focusUserId,
   onClearFocusUser,
+  focusConversationId,
+  onClearFocusConversation,
 }: {
   focusUserId?: string | null;
   onClearFocusUser?: () => void;
+  /** ?conversation= : ouvre ce fil directement. */
+  focusConversationId?: string | null;
+  onClearFocusConversation?: () => void;
 }) => {
   const [period, setPeriod] = useState<ConversationPeriod>("all");
   const [context, setContext] = useState<string>("all");
@@ -78,6 +83,35 @@ export const ConversationsTable = ({
 
   const [openRow, setOpenRow] = useState<AdminConversationRow | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
+  const [focusMissing, setFocusMissing] = useState(false);
+
+  // Ouverture directe d'un fil passé dans l'URL. La table conversations n'est
+  // pas lisible par l'admin (RLS) : l'existence se vérifie par la fonction
+  // admin de lecture des messages, en lecture seule.
+  useEffect(() => {
+    setFocusMissing(false);
+    if (!focusConversationId) return;
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase.rpc("admin_get_conversation_messages", {
+        p_conversation_id: focusConversationId,
+      });
+      if (cancelled) return;
+      if (error || !Array.isArray(data) || data.length === 0) {
+        setFocusMissing(true);
+        return;
+      }
+      setOpenRow({
+        conversation_id: focusConversationId,
+        context_type: null, sit_id: null, sit_title: null, small_mission_id: null, mission_title: null,
+        owner_id: null, owner_name: null, owner_avatar: null, sitter_id: null, sitter_name: null, sitter_avatar: null,
+        message_count: data.length, human_count: 0, distinct_senders: 0, unread_count: 0, oldest_unread_at: null,
+        last_message_at: null, last_message_excerpt: null, last_sender_id: null, created_at: "", total_count: 0,
+      });
+      setPanelOpen(true);
+    })();
+    return () => { cancelled = true; };
+  }, [focusConversationId]);
 
   const activeUserId = focusUserId || selectedUser?.user_id || null;
 
