@@ -93,13 +93,17 @@ const AdminSmallMissions = () => {
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
-  const [filterCategory, setFilterCategory] = useState("all");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tab: "entraide" | "projets" = searchParams.get("tab") === "projets" ? "projets" : "entraide";
+  const [filterCategory, setFilterCategory] = useState(() => (tab === "projets" ? "projet" : "all"));
   const [filterPeriod, setFilterPeriod] = useState("all");
   const [sortBy, setSortBy] = useState<SortKey>("created_at");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [responseCounts, setResponseCounts] = useState<Record<string, number>>({});
+  const [responseCountsReady, setResponseCountsReady] = useState(false);
+  const [missionsTruncated, setMissionsTruncated] = useState(false);
   const [archiveId, setArchiveId] = useState<string | null>(null);
   const [restoreId, setRestoreId] = useState<string | null>(null);
   const [proximityMission, setProximityMission] = useState<{ id: string; title: string } | null>(null);
@@ -117,8 +121,6 @@ const AdminSmallMissions = () => {
   // Onglet courant, lu dans l'URL pour que le menu latéral puisse pointer
   // directement sur les projets. Les projets participatifs ont leurs propres
   // indicateurs, et la liste est la même, filtrée sur la catégorie côté serveur.
-  const [searchParams, setSearchParams] = useSearchParams();
-  const tab: "entraide" | "projets" = searchParams.get("tab") === "projets" ? "projets" : "entraide";
   const [projetKpis, setProjetKpis] = useState<ProjetKpis | null>(null);
   // Diffusion différée : le premier projet d'un porteur attend douze heures
   // avant d'être annoncé aux membres. L'administration peut l'avancer.
