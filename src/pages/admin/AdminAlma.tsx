@@ -120,7 +120,7 @@ export default function AdminAlma() {
             <Sparkles className="h-4 w-4 mr-2" aria-hidden="true" /> Bulles
           </TabsTrigger>
           <TabsTrigger value="whispers">
-            <MessageCircle className="h-4 w-4 mr-2" aria-hidden="true" /> Whispers
+            <MessageCircle className="h-4 w-4 mr-2" aria-hidden="true" /> Murmures
           </TabsTrigger>
           <TabsTrigger value="cultural-facts">
             <BookOpen className="h-4 w-4 mr-2" aria-hidden="true" /> Faits culturels
