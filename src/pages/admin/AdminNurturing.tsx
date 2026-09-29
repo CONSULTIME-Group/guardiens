@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import { fetchAllRows } from "@/lib/admin/fetchAllRows";
+import { TRUNCATED_NOTICE } from "@/lib/admin/csv";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -197,7 +199,6 @@ const AdminNurturing = () => {
   const fetchData = async () => {
     setLoading(true);
     const since = new Date(Date.now() - RANGE_HOURS[range] * 3600_000).toISOString();
-    const LIMIT = 10000;
 
     // 1) Récupère la liste des templates de nurturing pour cibler email_send_log
     const tplRes = await supabase.from("nurturing_steps").select("template_name");
@@ -206,41 +207,59 @@ const AdminNurturing = () => {
     );
     setNurturingTemplates(templates);
 
+    // Lecture exhaustive par pages de 1 000, ordre stable (date puis id).
+    const wrap = async <T,>(p: Promise<{ rows: T[]; truncated: boolean }>) => {
+      try {
+        const r = await p;
+        return { data: r.rows, truncated: r.truncated, error: null as unknown };
+      } catch (e) {
+        return { data: [] as T[], truncated: false, error: e as unknown };
+      }
+    };
     const [logsRes, journeysRes, queueRes] = await Promise.all([
-      supabase
-        .from("journey_step_log")
-        .select(
-          "id, journey_id, step_order, template_name, sent, reason, error_detail, created_at, message_id, user_journeys!inner(sequence_key)",
-          { count: "exact" }
-        )
-        .gte("created_at", since)
-        .order("created_at", { ascending: false })
-        .limit(LIMIT),
-      supabase
-        .from("user_journeys")
-        .select("status, sequence_key, exit_reason, started_at")
-        .gte("started_at", since)
-        .limit(LIMIT),
+      wrap(fetchAllRows<unknown>((from, to) =>
+        supabase
+          .from("journey_step_log")
+          .select(
+            "id, journey_id, step_order, template_name, sent, reason, error_detail, created_at, message_id, user_journeys!inner(sequence_key)",
+          )
+          .gte("created_at", since)
+          .order("created_at", { ascending: false })
+          .order("id", { ascending: true })
+          .range(from, to),
+      )),
+      wrap(fetchAllRows<unknown>((from, to) =>
+        supabase
+          .from("user_journeys")
+          .select("id, status, sequence_key, exit_reason, started_at")
+          .gte("started_at", since)
+          .order("started_at", { ascending: false })
+          .order("id", { ascending: true })
+          .range(from, to),
+      )),
       templates.length > 0
-        ? supabase
-            .from("email_send_log")
-            .select("message_id, status, created_at, metadata")
-            .gte("created_at", since)
-            .in("template_name", templates)
-            .order("created_at", { ascending: false })
-            .limit(LIMIT)
-        : Promise.resolve({ data: [], error: null } as { data: unknown[]; error: null }),
+        ? wrap(fetchAllRows<unknown>((from, to) =>
+            supabase
+              .from("email_send_log")
+              .select("id, message_id, status, created_at, metadata")
+              .gte("created_at", since)
+              .in("template_name", templates)
+              .order("created_at", { ascending: false })
+              .order("id", { ascending: true })
+              .range(from, to),
+          ))
+        : Promise.resolve({ data: [] as unknown[], truncated: false, error: null as unknown }),
     ]);
+    setLogsTruncated(logsRes.truncated || journeysRes.truncated || queueRes.truncated);
 
     if (!logsRes.error) {
       setLogs((logsRes.data ?? []) as unknown as LogRow[]);
-      setLogsTruncated((logsRes.count ?? 0) > LIMIT);
     }
-    if (!journeysRes.error) setJourneys((journeysRes.data ?? []) as JourneyRow[]);
+    if (!journeysRes.error) setJourneys((journeysRes.data ?? []) as unknown as JourneyRow[]);
     if (!queueRes.error) {
       // Déduplication par message_id (dernier statut connu), un même email
       // génère plusieurs lignes (pending puis sent/failed/dlq).
-      const rows = (queueRes.data ?? []) as Array<{
+      const rows = (queueRes.data ?? []) as unknown as Array<{
         message_id: string | null;
         status: string;
         created_at: string;
@@ -786,7 +805,7 @@ const AdminNurturing = () => {
       {logsTruncated && (
         <Card className="border-warning bg-warning-soft">
           <CardContent className="p-4 text-sm text-warning-foreground">
-            Plus de 10 000 entrées sur la période, les chiffres affichés sont tronqués. Réduisez la fenêtre.
+            {TRUNCATED_NOTICE}. Réduisez la fenêtre.
           </CardContent>
         </Card>
       )}
