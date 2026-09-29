@@ -11,6 +11,7 @@
 // Body accepté : { manual?: boolean, dry_run?: boolean, helper_id?: string }
 import { createClient } from 'npm:@supabase/supabase-js@2.45.0'
 import { requireCronCaller } from '../_shared/require-cron-caller.ts'
+import { digestBypassesGuards } from '../_shared/digest-manual.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -53,6 +54,8 @@ Deno.serve(async (req) => {
 
   let body: { manual?: boolean; dry_run?: boolean; helper_id?: string } = {}
   try { if (req.body) body = await req.json() } catch { /* empty */ }
+  // Lot A8 : seul un envoi manuel ciblé (un membre explicite) contourne l'anti-doublon 24 h.
+  const bypassGuards = digestBypassesGuards(body.manual, body.helper_id)
 
   const supabase = createClient(
     Deno.env.get('SUPABASE_URL')!,
@@ -167,7 +170,7 @@ Deno.serve(async (req) => {
         }
 
         // 2e) Anti-doublon 24h
-        if (!body.manual) {
+        if (!bypassGuards) {
           const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
           const { data: recent } = await supabase
             .from('email_send_log')
@@ -248,7 +251,7 @@ Deno.serve(async (req) => {
 
         if (body.dry_run) continue
 
-        const idem = body.manual
+        const idem = bypassGuards
           ? `mission-digest-${helperId}-${Date.now()}`
           : `mission-digest-${helperId}-${today}`
 

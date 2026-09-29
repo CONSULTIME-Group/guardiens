@@ -33,6 +33,7 @@ import { parisWindowVerdictForHours, SITTER_DAILY_DIGEST_TARGET_PARIS_HOURS } fr
 import { recordDeliveryFailure } from '../_shared/delivery-failure.ts'
 import { startCronRun } from '../_shared/cron-run-log.ts'
 import { acquireWorkerLock, releaseWorkerLock } from '../_shared/worker-lock.ts'
+import { digestBypassesGuards } from '../_shared/digest-manual.ts'
 import { computeAffinityResultFull } from '../_shared/affinity/score.ts'
 import { APPLY_COMPLETION_THRESHOLD, completionMessageFor, remainingCompletionSteps } from '../_shared/completion-steps/index.ts'
 import { requireCronCaller } from '../_shared/require-cron-caller.ts'
@@ -110,6 +111,10 @@ Deno.serve(async (req) => {
   try {
     if (req.body) body = await req.json()
   } catch { /* empty body ok */ }
+  // Lot A8 : seul un envoi manuel ciblé (un gardien explicite) contourne
+  // l'anti-doublon 24 h, la réservation inter-canaux et le verrou. Le manuel
+  // sans identifiant suit exactement les garde-fous du cron.
+  const bypassGuards = digestBypassesGuards(body.manual, body.sitter_id)
 
   const supabase = createClient(
     Deno.env.get('SUPABASE_URL')!,
@@ -139,7 +144,7 @@ Deno.serve(async (req) => {
   // passent outre : le premier est une action délibérée, le second n'écrit
   // rien. Tout passage automatique qui n'obtient pas le bail laisse la main
   // sans erreur, motif explicite dans la réponse et dans cron_run_log.
-  const needsLock = !body.manual && !body.dry_run
+  const needsLock = !bypassGuards && !body.dry_run
   let lockHeld = false
   if (needsLock) {
     lockHeld = await acquireWorkerLock(supabase as any, DIGEST_LOCK_KEY, DIGEST_LOCK_TTL_SECONDS)
@@ -325,7 +330,7 @@ Deno.serve(async (req) => {
 
         // 2d. Anti-spam : déjà envoyé dans les 24h ?
         // Le passage de rattrapage saute ce contrôle, par décision explicite.
-        if (!body.manual && !body.catchup) {
+        if (!bypassGuards && !body.catchup) {
           const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
           const { data: recent } = await supabase
             .from('email_send_log')
@@ -534,7 +539,7 @@ Deno.serve(async (req) => {
         // ici, une fois le contenu établi et le gardien éligible. En cas de
         // refus, les lignes restent `queued` pour un passage ultérieur. Le
         // mode manuel (action admin délibérée) n'est pas soumis à la garde.
-        if (!body.manual && !body.catchup) {
+        if (!bypassGuards && !body.catchup) {
           const claim = await claimSitNotification(
             supabase,
             sitterId,
@@ -620,7 +625,7 @@ Deno.serve(async (req) => {
         // 2h. Envoi digest
         const idemBase = body.catchup
           ? `sitter-digest-catchup-2026-08-05-${sitterId}`
-          : body.manual
+          : bypassGuards
             ? `sitter-digest-${sitterId}-${Date.now()}`
             : `sitter-digest-${sitterId}-${today}`
 
@@ -691,12 +696,12 @@ Deno.serve(async (req) => {
         }
 
         if (quotaExhausted) {
-          if (!body.manual) await releaseSitNotification(supabase, sitterId, 'outbound_rate_limit')
+          if (!bypassGuards) await releaseSitNotification(supabase, sitterId, 'outbound_rate_limit')
           break digestLoop
         }
         if (!_steRes) {
           if (budgetReached) {
-            if (!body.manual) await releaseSitNotification(supabase, sitterId, 'run_budget_reached')
+            if (!bypassGuards) await releaseSitNotification(supabase, sitterId, 'run_budget_reached')
             break digestLoop
           }
           const failure = sendException ?? new Error('send-transactional-email fetch failed')
@@ -710,7 +715,7 @@ Deno.serve(async (req) => {
             errorMessage: failure,
             extra: { idempotency_key: idemBase },
           })
-          if (!body.manual) await releaseSitNotification(supabase, sitterId, 'send_failed')
+          if (!bypassGuards) await releaseSitNotification(supabase, sitterId, 'send_failed')
           errors.push({ sitter_id: sitterId, reason: `send_failed: ${String(failure)}` })
           continue
         }
@@ -743,7 +748,7 @@ Deno.serve(async (req) => {
               providerMessage: _steTxt1,
             })
           }
-          if (!body.manual) await releaseSitNotification(supabase, sitterId, 'invalid_recipient_email')
+          if (!bypassGuards) await releaseSitNotification(supabase, sitterId, 'invalid_recipient_email')
           sittersSkipped++
           errors.push({ sitter_id: sitterId, reason: 'invalid_recipient_email' })
           continue
@@ -763,7 +768,7 @@ Deno.serve(async (req) => {
             errorMessage: `HTTP ${_steRes.status}: ${_steTxt1.slice(0, 500)}`,
             extra: { http_status: _steRes.status, response_body: _steTxt1.slice(0, 1000), idempotency_key: idemBase },
           })
-          if (!body.manual) await releaseSitNotification(supabase, sitterId, 'send_failed')
+          if (!bypassGuards) await releaseSitNotification(supabase, sitterId, 'send_failed')
           // La file ne reste pas nue en `queued` : elle porte le motif du
           // report, la ligne sera reprise au passage suivant.
           if (!body.dry_run) {

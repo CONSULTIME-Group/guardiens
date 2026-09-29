@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAllRows } from "@/lib/admin/fetchAllRows";
+import { campaignCounts, clickRate, type MassSendRow } from "@/lib/admin/massEmailCounts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -20,8 +22,8 @@ type MassEmailRow = {
   id: string;
   subject: string;
   cta_url: string | null;
-  recipients_count: number | null;
   status: string;
+  filters?: { template_name?: string } | null;
   created_at: string;
 };
 
@@ -55,6 +57,7 @@ function extractCampaign(url: string | null): string | null {
 export default function AdminMassEmailsStats() {
   const [events, setEvents] = useState<EventRow[]>([]);
   const [massEmails, setMassEmails] = useState<MassEmailRow[]>([]);
+  const [sends, setSends] = useState<MassSendRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [days, setDays] = useState<number>(30);
 
@@ -73,7 +76,7 @@ export default function AdminMassEmailsStats() {
 
       let meQ = supabase
         .from("mass_emails")
-        .select("id,subject,cta_url,recipients_count,status,created_at")
+        .select("id,subject,cta_url,status,created_at,filters")
         .order("created_at", { ascending: false })
         .limit(500);
       if (since) meQ = meQ.gte("created_at", since);
@@ -83,7 +86,22 @@ export default function AdminMassEmailsStats() {
       if (evErr) console.error(evErr);
       if (meErr) console.error(meErr);
       setEvents((ev ?? []) as EventRow[]);
-      setMassEmails((me ?? []) as MassEmailRow[]);
+      const list = (me ?? []) as MassEmailRow[];
+      setMassEmails(list);
+      // Lot A8 : destinataires, envoyés et cliqueurs lus dans mass_email_sends.
+      const ids = list.map((m) => m.id);
+      const rows: MassSendRow[] = [];
+      for (let i = 0; i < ids.length; i += 100) {
+        const chunk = ids.slice(i, i + 100);
+        try {
+          const res = await fetchAllRows<MassSendRow>((from, to) =>
+            supabase.from("mass_email_sends").select("mass_email_id,recipient_email,status,first_clicked_at")
+              .in("mass_email_id", chunk).order("created_at", { ascending: true }).order("id", { ascending: true }).range(from, to) as any);
+          rows.push(...res.rows);
+        } catch (e) { console.error(e); }
+      }
+      if (cancelled) return;
+      setSends(rows);
       setLoading(false);
     })();
     return () => {
@@ -92,44 +110,36 @@ export default function AdminMassEmailsStats() {
   }, [days]);
 
   const stats: CampaignStats[] = useMemo(() => {
-    const map = new Map<
-      string,
-      { sent: number; clicks: number; visitors: Set<string>; missions: number }
-    >();
-
-    // 1) Envois (sent), agrégation depuis mass_emails (utm_campaign extrait du cta_url)
+    // Lot A8 : une campagne = utm_campaign du CTA, sinon gabarit. Destinataires
+    // et cliqueurs uniques par adresse, depuis mass_email_sends.
+    const keyOf = (m: MassEmailRow) => extractCampaign(m.cta_url) ?? m.filters?.template_name ?? null;
+    const idsByKey = new Map<string, Set<string>>();
     for (const m of massEmails) {
-      const c = extractCampaign(m.cta_url);
-      if (!c) continue;
-      if (!map.has(c)) map.set(c, { sent: 0, clicks: 0, visitors: new Set(), missions: 0 });
-      map.get(c)!.sent += m.recipients_count ?? 0;
+      const k = keyOf(m);
+      if (!k) continue;
+      if (!idsByKey.has(k)) idsByKey.set(k, new Set());
+      idsByKey.get(k)!.add(m.id);
     }
-
-    // 2) Clics et conversions
+    const missions = new Map<string, number>();
     for (const r of events) {
-      const key = r.utm_campaign;
-      if (!map.has(key)) map.set(key, { sent: 0, clicks: 0, visitors: new Set(), missions: 0 });
-      const s = map.get(key)!;
-      if (r.event_type === "click") {
-        s.clicks++;
-        s.visitors.add(r.user_id ?? `anon-${r.created_at}`);
-      } else if (r.event_type === "mission_created") {
-        s.missions++;
-      }
+      if (r.event_type === "mission_created") missions.set(r.utm_campaign, (missions.get(r.utm_campaign) ?? 0) + 1);
     }
-
-    return Array.from(map.entries())
-      .map(([campaign, s]) => ({
-        campaign,
-        sent: s.sent,
-        clicks: s.clicks,
-        uniqueVisitors: s.visitors.size,
-        missions: s.missions,
-        ctr: s.sent > 0 ? (s.visitors.size / s.sent) * 100 : 0,
-        conversionRate: s.visitors.size > 0 ? (s.missions / s.visitors.size) * 100 : 0,
-      }))
+    return Array.from(idsByKey.entries())
+      .map(([campaign, ids]) => {
+        const c = campaignCounts(sends.filter((s) => ids.has(s.mass_email_id)));
+        const m = missions.get(campaign) ?? 0;
+        return {
+          campaign,
+          sent: c.recipients,
+          clicks: c.clickers,
+          uniqueVisitors: c.clickers,
+          missions: m,
+          ctr: clickRate(c.clickers, c.recipients),
+          conversionRate: c.clickers > 0 ? (m / c.clickers) * 100 : 0,
+        };
+      })
       .sort((a, b) => b.sent - a.sent || b.clicks - a.clicks);
-  }, [events, massEmails]);
+  }, [events, massEmails, sends]);
 
   const totals = useMemo(
     () => ({
@@ -140,8 +150,6 @@ export default function AdminMassEmailsStats() {
     }),
     [stats],
   );
-
-  const oser = stats.find((s) => s.campaign === "oser-2026-05");
 
   return (
     <div className="space-y-6 p-6">
@@ -171,36 +179,11 @@ export default function AdminMassEmailsStats() {
         </div>
       </div>
 
-      {/* Carte dédiée à la campagne phare oser-2026-05 */}
-      <Card className="border-primary/30">
-        <CardHeader>
-          <CardTitle className="text-lg">Campagne phare : oser-2026-05</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {oser ? (
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-              <Metric label="Envoyés" value={oser.sent} />
-              <Metric label="Clics uniques" value={oser.uniqueVisitors} />
-              <Metric label="Missions créées" value={oser.missions} />
-              <Metric label="CTR" value={oser.sent > 0 ? `${oser.ctr.toFixed(1)} %` : ","} />
-              <Metric
-                label="Taux de conversion"
-                value={oser.uniqueVisitors > 0 ? `${oser.conversionRate.toFixed(1)} %` : ","}
-              />
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              Aucun envoi détecté pour <code>oser-2026-05</code> sur cette période.
-            </p>
-          )}
-        </CardContent>
-      </Card>
-
       {/* Totaux globaux */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <Metric label="Campagnes" value={totals.campaigns} card />
         <Metric label="Envoyés" value={totals.sent} card />
-        <Metric label="Clics totaux" value={totals.clicks} card />
+        <Metric label="Clics uniques" value={totals.clicks} card />
         <Metric label="Missions attribuées" value={totals.missions} card />
       </div>
 
@@ -247,9 +230,9 @@ export default function AdminMassEmailsStats() {
       </Card>
 
       <p className="text-xs text-muted-foreground">
-        Méthodologie : <strong>Envoyés</strong> = somme des destinataires des envois groupés dont le CTA porte
-        l'<code>utm_campaign</code>. <strong>Clics uniques</strong> = visiteurs distincts ayant ouvert un lien UTM
-        (anonymes inclus). <strong>CTR</strong> = clics uniques ÷ envoyés. <strong>Conversion</strong> = missions
+        Méthodologie : <strong>Envoyés</strong> = destinataires distincts des envois groupés (hors ignorés), lus
+        dans le détail des envois. <strong>Clics uniques</strong> = destinataires distincts ayant cliqué, jamais un
+        visiteur anonyme. <strong>CTR</strong> = clics uniques ÷ envoyés, au plus 100 %. <strong>Conversion</strong> = missions
         créées ÷ clics uniques. Attribution conservée 7 jours en localStorage.
       </p>
     </div>

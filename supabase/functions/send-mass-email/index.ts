@@ -5,7 +5,8 @@ import { HELPS_WITH_TOKEN_DAYS, lineUrlForToken } from "../_shared/ma-ligne-logi
 import { entraideCardData } from "../_shared/entraide-card-data.ts";
 import { loadAnsweredIds, mintDepartureTokens, periodBaseUrl, splitDepartureAudience } from "../_shared/owner-departure-audience.ts";
 import { DEPARTURE_TEMPLATE } from "../_shared/owner-departure-logic.ts";
-import { loadAlreadyReceived, loadRecentEmailCounts, ONCE_PER_RECIPIENT_TEMPLATES, splitAlreadyReceived } from "../_shared/owner-campaign-pressure.ts";
+import { loadRecentEmailCounts } from "../_shared/owner-campaign-pressure.ts";
+import { loadReceivedForKey, resolveDedupeKey, splitReceived } from "../_shared/mass-email-dedupe.ts";
 import { buildResponderData, loadLatestIntents, splitNoelV2Audience, type NoelResponderPeriod } from "../_shared/owner-noel-v2.ts";
 import {
   OWNER_NOEL_TEMPLATE,
@@ -48,6 +49,10 @@ interface MassEmailFilters {
   available_for_help?: boolean;
   helps_with_empty?: boolean;
   exclude_admins?: boolean;
+  /** Lot A8 : fenêtre de répétition, admise seulement si le préréglage la déclare. */
+  repeat_after_days?: number;
+  /** Lot A8 : clé anti-doublon des emails libres, persistée avec la campagne. */
+  utm_campaign?: string;
   /** Garde de vivier : refuse l'envoi tant que moins de N profils ont renseigné helps_with. */
   min_helps_with_profiles?: number;
   /** Gabarit transactionnel utilisé pour le rendu, sans effet sur le ciblage. */
@@ -77,19 +82,31 @@ interface MassEmailFilters {
   noel_v2_split?: boolean;
 }
 
-type DepartureFiltered<T> = { rows: T[]; holdout: number | null; answered: number | null; pressure: number | null; otherPeriod?: number; responders?: Map<string, NoelResponderPeriod>; alreadyReceived?: number | null };
+type DepartureFiltered<T> = { rows: T[]; holdout: number | null; answered: number | null; pressure: number | null; otherPeriod?: number; responders?: Map<string, NoelResponderPeriod>; alreadyReceived?: number | null; admins?: number };
 
-/** Filtres propriétaires, puis anti-doublon par gabarit (lot N7). */
+/**
+ * Filtres propriétaires, puis (lot A8) admins toujours exclus et anti-doublon
+ * global par gabarit ou utm_campaign, sur tout l'historique non annulé.
+ */
 async function applyDepartureFilters<T extends { id: string; email?: string | null }>(
   // deno-lint-ignore no-explicit-any
   serviceClient: any, rows: T[], filters: MassEmailFilters,
+  opts: { utmCampaign?: string | null; ctaUrl?: string | null; excludeDedupeKey?: string | null } = {},
 ): Promise<DepartureFiltered<T>> {
-  const base = await applyDepartureFiltersBase(serviceClient, rows, filters);
-  const tpl = filters.template_name ?? "";
-  if (!ONCE_PER_RECIPIENT_TEMPLATES.has(tpl)) return { ...base, alreadyReceived: null };
-  const received = await loadAlreadyReceived(serviceClient, base.rows.map((r) => r.email ?? ""), tpl);
-  const split = splitAlreadyReceived(base.rows, received);
-  return { ...base, rows: split.rows, alreadyReceived: split.alreadyReceived };
+  const { data: adminRows, error: adminErr } = await serviceClient.from("user_roles").select("user_id").eq("role", "admin");
+  if (adminErr) throw new Error(`Admin exclusion failed: ${adminErr.message}`);
+  const adminIds = new Set(((adminRows ?? []) as { user_id: string }[]).map((r) => r.user_id));
+  const nonAdmin = rows.filter((r) => !adminIds.has(r.id));
+  const admins = rows.length - nonAdmin.length;
+  const base = await applyDepartureFiltersBase(serviceClient, nonAdmin, filters);
+  const key = resolveDedupeKey({ template_name: filters.template_name, utm_campaign: opts.utmCampaign, cta_url: opts.ctaUrl });
+  if (!key) return { ...base, alreadyReceived: null, admins };
+  const received = await loadReceivedForKey(serviceClient, key, {
+    repeatAfterDays: filters.repeat_after_days ?? null,
+    excludeDedupeKey: opts.excludeDedupeKey ?? null,
+  });
+  const split = splitReceived(base.rows, received);
+  return { ...base, rows: split.rows, alreadyReceived: split.alreadyReceived, admins };
 }
 
 /** Témoin, déjà répondu (lot N4), autre période (lot N6) et pression (lot N4b), avec compteurs. */
@@ -690,7 +707,7 @@ Deno.serve(async (req) => {
     // Mode COUNT — estimation réelle : applique aussi les filtres obligatoires
     // (suppression list + opt-out produit) pour ne pas surestimer.
     if (mode === "count") {
-      const departure = await applyDepartureFilters(serviceClient, await fetchTargetedProfiles(serviceClient, segment, filters), filters);
+      const departure = await applyDepartureFilters(serviceClient, await fetchTargetedProfiles(serviceClient, segment, filters), filters, { utmCampaign: payload.utm_campaign ?? null });
       const profiles = departure.rows;
       let compliant: { id: string; email: string }[];
       try {
@@ -733,6 +750,7 @@ Deno.serve(async (req) => {
         already_answered: departure.answered,
         pressure_excluded: departure.pressure,
         already_received: departure.alreadyReceived ?? null,
+        admins_excluded: departure.admins ?? 0,
         ...(filters.noel_v2_split ? {
           responders_noel: respondersNoel,
           responders_hiver: respondersHiver,
@@ -777,7 +795,23 @@ Deno.serve(async (req) => {
       }
     }
 
-    const departureSend = await applyDepartureFilters(serviceClient, await fetchTargetedProfiles(serviceClient, segment, filters), filters);
+    // Lot A8 : la clé utm des emails libres est persistée dans les filtres.
+    if (!filters.template_name && typeof payload.utm_campaign === "string" && payload.utm_campaign.trim()) {
+      filters.utm_campaign = payload.utm_campaign.trim().slice(0, 80);
+    }
+    const dedupeKey = await computeDedupeKey({
+      sent_by: userId,
+      segment,
+      filters,
+      subject,
+      body,
+      cta_label,
+      cta_url,
+    });
+    // La reprise d'une même campagne (même empreinte) ne se compte pas comme doublon.
+    const departureSend = await applyDepartureFilters(serviceClient, await fetchTargetedProfiles(serviceClient, segment, filters), filters, {
+      utmCampaign: filters.utm_campaign ?? null, ctaUrl: cta_url ?? null, excludeDedupeKey: dedupeKey,
+    });
     const rawProfiles = departureSend.rows;
 
     // Filtres RGPD/délivrabilité obligatoires (non désactivables) —
@@ -794,6 +828,17 @@ Deno.serve(async (req) => {
 
     const recipients = [...new Set(profiles.map((p) => p.email))];
 
+    // Lot A8 : le nombre saisi par l'admin à la confirmation doit être exact.
+    if (payload.expected_count !== undefined) {
+      const expectedCount = Number(payload.expected_count);
+      if (!Number.isInteger(expectedCount) || expectedCount !== recipients.length) {
+        return new Response(JSON.stringify({
+          error: `Le nombre confirmé (${payload.expected_count}) ne correspond pas à l'audience réelle (${recipients.length}). Rien n'est parti.`,
+          count: recipients.length,
+          expected_count: payload.expected_count,
+        }), { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+    }
     const expectedRecipientCount = Number(payload.expected_recipient_count);
     const maxRecipients = Number(payload.max_recipients);
     if (
@@ -838,15 +883,6 @@ Deno.serve(async (req) => {
     // Empêche double-clic / rejeu sur timeout : si une campagne équivalente
     // (même auteur + segment + filtres + contenu) a été créée dans les 5
     // dernières minutes, on la RÉUTILISE au lieu d'en créer une nouvelle.
-    const dedupeKey = await computeDedupeKey({
-      sent_by: userId,
-      segment,
-      filters,
-      subject,
-      body,
-      cta_label,
-      cta_url,
-    });
     const dedupeCutoff = new Date(Date.now() - DEDUPE_WINDOW_MINUTES * 60_000).toISOString();
 
     let campaignId: string;

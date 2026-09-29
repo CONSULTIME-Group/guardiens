@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { RefreshCw, Send, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { DigestSendConfirm, planRecipientCount, type DigestConfirmState } from "./DigestSendConfirm";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -143,23 +144,41 @@ const SitterDigestTab = () => {
 
   useEffect(() => { fetchStats(); }, [timeRange]);
 
+  const [confirmState, setConfirmState] = useState<DigestConfirmState | null>(null);
+  const buildBody = (dry: boolean) => {
+    const body: any = { manual: true };
+    if (dry) body.dry_run = true;
+    if (manualSitterId.trim()) body.sitter_id = manualSitterId.trim();
+    return body;
+  };
+
+  // Lot A8 : « Envoyer maintenant » simule d'abord pour annoncer le nombre de destinataires.
   const runManual = async () => {
     setSending(true);
     try {
-      const body: any = { manual: true };
-      if (dryRun) body.dry_run = true;
-      if (manualSitterId.trim()) body.sitter_id = manualSitterId.trim();
-      const { data, error } = await supabase.functions.invoke("send-sitter-daily-digest", { body });
+      const { data, error } = await supabase.functions.invoke("send-sitter-daily-digest", { body: buildBody(true) });
       if (error) throw error;
-      toast.success(dryRun ? "Dry-run exécuté" : "Envoi manuel déclenché", {
-        description: data ? JSON.stringify(data).slice(0, 200) : undefined,
-      });
+      if (dryRun) {
+        toast.success("Dry-run exécuté", { description: data ? JSON.stringify(data).slice(0, 200) : undefined });
+        return;
+      }
+      setConfirmState({ count: planRecipientCount(data), targeted: !!manualSitterId.trim() });
+    } catch (e: any) {
+      toast.error("Simulation échouée", { description: e?.message?.slice(0, 200) });
+    } finally { setSending(false); }
+  };
+
+  const confirmSend = async () => {
+    setConfirmState(null);
+    setSending(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-sitter-daily-digest", { body: buildBody(false) });
+      if (error) throw error;
+      toast.success("Envoi manuel déclenché", { description: data ? JSON.stringify(data).slice(0, 200) : undefined });
       fetchStats();
     } catch (e: any) {
       toast.error("Envoi échoué", { description: e?.message?.slice(0, 200) });
-    } finally {
-      setSending(false);
-    }
+    } finally { setSending(false); }
   };
 
   const exportCsv = () => {
@@ -181,7 +200,7 @@ const SitterDigestTab = () => {
     <div className="space-y-4">
       {dataTruncated && <p role="status" className="text-sm text-warning">{TRUNCATED_NOTICE}</p>}
       <p className="text-sm text-muted-foreground">
-        Digest quotidien envoyé à 20h Paris aux gardiens opt-in. Attribution des candidatures via
+        Digest quotidien envoyé à 8 h, heure de Paris, aux gardiens opt-in. Attribution des candidatures via
         <code className="text-xs bg-muted px-1 rounded ml-1">utm_campaign=sitter_daily_digest</code> et event
         <code className="text-xs bg-muted px-1 rounded ml-1">sitter_digest_apply_from_email</code>.
       </p>
@@ -253,11 +272,12 @@ const SitterDigestTab = () => {
             </Button>
           </div>
           <p className="text-[11px] text-muted-foreground">
-            Le mode <code>manual: true</code> contourne la limite anti-doublon 24h. Le dry-run ne modifie ni la file
+            Sans identifiant, l'envoi manuel suit les garde-fous du cron (anti-doublon 24 h, réservation, verrou). Avec un identifiant, il vise un seul membre et les contourne. Le dry-run ne modifie ni la file
             ni les logs, il liste seulement le plan d'envoi.
           </p>
         </CardContent>
       </Card>
+      <DigestSendConfirm state={confirmState} onCancel={() => setConfirmState(null)} onConfirm={confirmSend} />
 
       <div className="rounded-md border overflow-auto">
         <Table>
