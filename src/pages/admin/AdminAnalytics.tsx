@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAllRows } from "@/lib/admin/fetchAllRows";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, TrendingUp, TrendingDown, Users, MousePointerClick, AlertCircle, Filter } from "lucide-react";
@@ -83,11 +84,16 @@ const AdminAnalytics = () => {
 
       try {
         // ── 1. Profils créés (source de vérité pour les inscrits) ──
-        const profilesQuery = supabase
-          .from("profiles")
-          .select("created_at, role", { count: "exact" })
-          .gte("created_at", since.toISOString())
-          .lt("created_at", until.toISOString());
+        // Lot A10 : lecture paginée, l'API coupe à 1 000 lignes.
+        const profilesQuery = fetchAllRows<{ created_at: string; role: string }>((from, to) =>
+          supabase
+            .from("profiles")
+            .select("id, created_at, role")
+            .gte("created_at", since.toISOString())
+            .lt("created_at", until.toISOString())
+            .order("id")
+            .range(from, to) as any,
+        ).then((r) => ({ data: r.rows, error: null as any })).catch((e) => ({ data: null, error: e }));
 
         // ── 2. RPC : counts events filtrés par rôle ──
         const countsRolePromise = supabase.rpc("admin_analytics_event_counts", {
