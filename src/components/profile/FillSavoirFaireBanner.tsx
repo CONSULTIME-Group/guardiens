@@ -14,6 +14,7 @@
  * main est saisie aujourd'hui). À terme, ce champ devra remonter sur /profile
  * pour fermer la boucle UX.
  */
+import { fetchMyProfile } from "@/lib/myProfile";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, X } from "lucide-react";
@@ -36,11 +37,7 @@ const FillSavoirFaireBanner = () => {
 
     let cancelled = false;
     (async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("available_for_help, custom_skills")
-        .eq("id", user.id)
-        .maybeSingle();
+      const { data } = await fetchMyProfile(user.id!);
       if (cancelled || !data) return;
       const cs = Array.isArray(data.custom_skills) ? data.custom_skills : [];
       const filled = cs.filter((s) => typeof s === "string" && s.trim().length > 0).length;

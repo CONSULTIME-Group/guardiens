@@ -1,3 +1,4 @@
+import { fetchMyProfile } from "@/lib/myProfile";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -45,7 +46,7 @@ export const useSubscriptionAccess = () => {
     const load = async () => {
       try {
         const [profileRes, subRes] = await Promise.all([
-          supabase.from("profiles").select("is_founder").eq("id", user.id).maybeSingle(),
+          fetchMyProfile(user.id!),
           supabase.from("subscriptions").select("status, expires_at").eq("user_id", user.id).maybeSingle(),
         ]);
         const isFounder = profileRes.data?.is_founder === true;

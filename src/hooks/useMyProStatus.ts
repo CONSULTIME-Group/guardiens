@@ -1,3 +1,4 @@
+import { fetchMyProfile } from "@/lib/myProfile";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -17,11 +18,7 @@ export function useMyProStatus(): string {
       return;
     }
     void (async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("pro_status")
-        .eq("id", user.id)
-        .maybeSingle();
+      const { data } = await fetchMyProfile(user.id!);
       if (!cancelled) setStatus(((data as any)?.pro_status as string) || "none");
     })();
     return () => {

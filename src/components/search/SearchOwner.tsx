@@ -1,3 +1,4 @@
+import { fetchMyProfile } from "@/lib/myProfile";
 import { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense } from "react";
 import { useTranslation } from "react-i18next";
 import PageMeta from "@/components/PageMeta";
@@ -359,7 +360,7 @@ const SearchOwner = () => {
       return;
     }
     (async () => {
-      const { data } = await supabase.from("profiles").select("city, postal_code").eq("id", user.id).single();
+      const { data } = await fetchMyProfile(user.id!);
       if (data?.city && !cityTouchedRef.current) {
         setCity(data.city);
         setCityInput(data.city);

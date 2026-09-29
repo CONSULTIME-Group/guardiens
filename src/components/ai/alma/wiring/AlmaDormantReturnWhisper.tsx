@@ -7,6 +7,7 @@
  * (flag sessionStorage `alma_welcomeback_shown`).
  * Émet un whisper P0 avec CTA "Voir les correspondances".
  */
+import { fetchMyProfile } from "@/lib/myProfile";
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,11 +36,7 @@ export function AlmaDormantReturnWhisper() {
 
     let cancelled = false;
     (async () => {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("first_name, last_dashboard_visit_at")
-        .eq("id", user.id)
-        .maybeSingle();
+      const { data: profile } = await fetchMyProfile(user.id!);
       if (cancelled || !profile) return;
 
       const lastVisit = (profile as any).last_dashboard_visit_at as string | null;

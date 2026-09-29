@@ -1,3 +1,4 @@
+import { fetchMyProfile } from "@/lib/myProfile";
 import { useState } from "react";
 import { logger } from "@/lib/logger";
 import { useNavigate } from "react-router-dom";
@@ -89,8 +90,7 @@ const ProposeHelperExchangeDialog = ({
       // Resolve sender display name from profiles for safer notification body
       let senderName = (user as any).first_name as string | undefined;
       if (!senderName) {
-        const { data: me } = await supabase
-          .from("profiles").select("first_name").eq("id", user.id).maybeSingle();
+        const { data: me } = await fetchMyProfile(user.id!);
         senderName = me?.first_name || "Un membre";
       }
 

@@ -1,3 +1,4 @@
+import { fetchMyProfile, fetchMyPublicProfile, fetchMySitterProfile } from "@/lib/myProfile";
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { differenceInDays, differenceInHours } from "date-fns";
@@ -139,12 +140,8 @@ export function useSitterDashboardData(userId: string | undefined) {
         supabase.from("applications")
           .select("*, sit:sits(id, title, city, start_date, end_date, status, user_id, property_id, properties:property_id(photos))")
           .eq("sitter_id", userId).order("created_at", { ascending: false }),
-        supabase.from("sitter_profiles")
-          .select("is_available, experience_years, animal_types, competences, interests")
-          .eq("user_id", userId).single(),
-        supabase.from("profiles")
-          .select("identity_verification_status, profile_completion, identity_verified, cancellation_count, is_founder, postal_code, avatar_url, bio, onboarding_completed, onboarding_dismissed_at, onboarding_minimal_completed, latitude, longitude")
-          .eq("id", userId).single(),
+        fetchMySitterProfile(userId!),
+        fetchMyProfile(userId!),
         supabase.from("reviews")
           .select("overall_rating").eq("reviewee_id", userId).eq("published", true),
         supabase.from("badge_attributions").select("id").eq("user_id", userId),
@@ -164,9 +161,7 @@ export function useSitterDashboardData(userId: string | undefined) {
           .select("*").eq("user_id", userId).maybeSingle(),
         // Coordonnées approximatives de l'utilisateur : lancées toujours, mais
         // utilisées seulement si profiles.latitude ou longitude est null.
-        supabase.from("public_profiles")
-          .select("latitude_approx, longitude_approx")
-          .eq("id", userId).maybeSingle(),
+        fetchMyPublicProfile(userId!),
         // Annonces publiées et non terminées (end_date >= aujourd'hui).
         supabase.from("sits")
           .select("id, title, start_date, end_date, user_id, property_id, status, created_at, is_urgent, cover_photo_url, properties:property_id(photos, type, environment, cover_photo_url)")

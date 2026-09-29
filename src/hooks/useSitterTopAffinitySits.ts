@@ -3,6 +3,7 @@
  * déclarée dans alert_preferences prime, puis la distance depuis le profil,
  * puis l'affinité nationale quand aucune coordonnée n'est disponible.
  */
+import { fetchMyProfile } from "@/lib/myProfile";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -105,11 +106,7 @@ export function useSitterTopAffinitySits(): Result {
           )
           .eq("user_id", userId!)
           .maybeSingle(),
-        supabase
-          .from("profiles")
-          .select("postal_code, latitude, longitude")
-          .eq("id", userId!)
-          .maybeSingle(),
+        fetchMyProfile(userId!),
       ]);
 
       const postalCode = (profile?.postal_code as string | null) ?? null;

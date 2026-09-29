@@ -1,3 +1,4 @@
+import { fetchMyOwnerProfile, fetchMyProfile, fetchMySitterProfile } from "@/lib/myProfile";
 import { clearPublishIntent, readPublishIntent } from "@/lib/postOnboardingIntent";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
@@ -126,11 +127,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
   useEffect(() => {
     if (!user || !open) return;
     const load = async () => {
-      const { data: p } = await supabase
-        .from("profiles")
-        .select("first_name, postal_code, city, avatar_url, bio, onboarding_minimal_completed, skill_categories, country, helps_with")
-        .eq("id", user.id)
-        .single();
+      const { data: p } = await fetchMyProfile(user.id!);
       if (p) {
         if (p.first_name) setFirstName(p.first_name);
         if (p.postal_code) setPostalCode(p.postal_code);
@@ -154,11 +151,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
 
       // Lifestyle + compétences spécifiques (sitter ou both)
       if (usesSitterScoring) {
-        const { data: sp } = await supabase
-          .from("sitter_profiles")
-          .select("lifestyle, competences")
-          .eq("user_id", user.id)
-          .maybeSingle();
+        const { data: sp } = await fetchMySitterProfile(user.id!);
         if (sp?.lifestyle && Array.isArray(sp.lifestyle)) {
           setLifestyle(sp.lifestyle as string[]);
         }
@@ -167,11 +160,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
         }
       } else {
         // Owner-only : compétences éventuelles côté owner_profiles
-        const { data: op } = await supabase
-          .from("owner_profiles")
-          .select("competences")
-          .eq("user_id", user.id)
-          .maybeSingle();
+        const { data: op } = await fetchMyOwnerProfile(user.id!);
         if ((op as any)?.competences && Array.isArray((op as any).competences)) {
           setPickedCompetences((op as any).competences as string[]);
         }
@@ -273,11 +262,7 @@ const OnboardingModal = ({ open, onClose, onMinimalComplete }: OnboardingModalPr
 
     // Met à jour profiles.skill_categories (dérivé) + active la visibilité
     // dans le feed d'entraide à la 1ère compétence ajoutée.
-    const { data: existing } = await supabase
-      .from("profiles")
-      .select("available_for_help")
-      .eq("id", user.id)
-      .maybeSingle();
+    const { data: existing } = await fetchMyProfile(user.id!);
     const profileUpdates: Record<string, any> = {
       skill_categories: derivedCategories,
       helps_with: cleanHelpsWith || null,

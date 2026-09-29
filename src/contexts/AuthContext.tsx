@@ -1,3 +1,4 @@
+import { fetchMyProfile } from "@/lib/myProfile";
 import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from "react";
 import { clearAppQueryCache } from "@/lib/appQueryClient";
 import { supabase } from "@/integrations/supabase/client";
@@ -164,11 +165,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchProfile = useCallback(async (supabaseUser: SupabaseUser) => {
     setAuthTimeout(false);
-    const profileRequest = supabase
-      .from("profiles")
-      .select("id, role, first_name, last_name, avatar_url, profile_completion, identity_verified, is_founder, onboarding_completed, onboarding_minimal_completed, onboarding_dismissed_at")
-      .eq("id", supabaseUser.id)
-      .single();
+    const profileRequest = fetchMyProfile(supabaseUser.id!);
 
     let timeoutId: number | undefined;
     const profileTimeout = new Promise<never>((_, reject) => {

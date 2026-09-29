@@ -1,3 +1,4 @@
+import { fetchMyProfile, fetchMySitterProfile } from "@/lib/myProfile";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { geocodeCity } from "@/lib/geocode";
@@ -42,11 +43,11 @@ export function useSearchUserProfile({
     let cancelled = false;
     (async () => {
       const [profileRes, spRes, eligRes, reviewsRes, myProfileRes] = await Promise.all([
-        supabase.from("profiles").select("city, postal_code").eq("id", userId).single(),
-        supabase.from("sitter_profiles").select("*").eq("user_id", userId).maybeSingle(),
+        fetchMyProfile(userId!),
+        fetchMySitterProfile(userId!),
         supabase.from("applications").select("id, sit:sits!inner(status)").eq("sitter_id", userId).eq("status", "accepted"),
         supabase.from("reviews").select("overall_rating").eq("reviewee_id", userId).eq("published", true),
-        supabase.from("profiles").select("identity_verified").eq("id", userId).single(),
+        fetchMyProfile(userId!),
       ]);
       if (cancelled) return;
       const uc = profileRes.data?.city || "";

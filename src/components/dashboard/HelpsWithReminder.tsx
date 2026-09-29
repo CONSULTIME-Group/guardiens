@@ -1,3 +1,4 @@
+import { fetchMyProfile } from "@/lib/myProfile";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -18,7 +19,7 @@ export function useHelpsWithMissing(): boolean {
   useEffect(() => {
     if (!user?.id) return;
     let active = true;
-    void supabase.from("profiles").select("available_for_help, helps_with").eq("id", user.id).maybeSingle().then(({ data }) => {
+    void fetchMyProfile(user.id!).then(({ data }) => {
       if (active) setVisible(Boolean(data?.available_for_help && !data.helps_with?.trim()));
     });
     return () => { active = false; };

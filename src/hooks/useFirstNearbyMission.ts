@@ -4,6 +4,7 @@
  * Partagé entre dashboards gardien et propriétaire pour le volet DONNER
  * de la section entraide bidimensionnelle.
  */
+import { fetchMyProfile } from "@/lib/myProfile";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -30,11 +31,7 @@ export function useFirstNearbyMission(userId: string | undefined) {
     const run = async () => {
       setLoading(true);
       try {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("postal_code")
-          .eq("id", userId)
-          .maybeSingle();
+        const { data: profile } = await fetchMyProfile(userId!);
 
         const dept = profile?.postal_code?.slice(0, 2);
         if (!dept) {

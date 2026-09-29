@@ -1,3 +1,4 @@
+import { fetchMySitterProfile } from "@/lib/myProfile";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -38,11 +39,7 @@ const ActiveRolesSection = () => {
 
   // Charge la disponibilité gardien
   if (sitterActive && isAvailable === null) {
-    supabase
-      .from("sitter_profiles")
-      .select("is_available")
-      .eq("user_id", user.id)
-      .maybeSingle()
+    fetchMySitterProfile(user.id!)
       .then(({ data }) => setIsAvailable(!!data?.is_available));
   }
 

@@ -7,6 +7,7 @@
  * on nomme précisément ce qui manque plutôt qu'une invitation générique.
  * Silencieux en cas d'erreur : la phrase de repli prend le relais.
  */
+import { fetchMyOwnerProfile, fetchMyProfile, fetchMySitterProfile } from "@/lib/myProfile";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -43,11 +44,7 @@ export const useProfileCompletionMissing = (
 
     const load = async () => {
       try {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select(PROFILE_FIELDS)
-          .eq("id", userId)
-          .maybeSingle();
+        const { data: profile } = await fetchMyProfile(userId!);
         if (!profile) {
           if (!cancelled) setSnapshot({ score: null, missing: [] });
           return;
@@ -56,13 +53,7 @@ export const useProfileCompletionMissing = (
 
         if (role === "sitter") {
           const [{ data: sp }, { count: galleryCount }] = await Promise.all([
-            supabase
-              .from("sitter_profiles")
-              .select(
-                "competences, lifestyle, geographic_radius, interests, languages, life_pace, animal_types",
-              )
-              .eq("user_id", userId)
-              .maybeSingle(),
+            fetchMySitterProfile(userId!),
             supabase
               .from("sitter_gallery")
               .select("id", { count: "exact", head: true })
@@ -87,13 +78,7 @@ export const useProfileCompletionMissing = (
 
         const [{ data: op }, { data: properties }, { count: galleryCount }] =
           await Promise.all([
-            supabase
-              .from("owner_profiles")
-              .select(
-                "competences, interests, languages, life_pace, home_ambiance, preferred_sitter_types",
-              )
-              .eq("user_id", userId)
-              .maybeSingle(),
+            fetchMyOwnerProfile(userId!),
             supabase.from("properties").select("id, description").eq("user_id", userId),
             supabase
               .from("owner_gallery")

@@ -1,3 +1,4 @@
+import { fetchMyProfile } from "@/lib/myProfile";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -30,11 +31,7 @@ const ProVerificationSection = ({ user }: { user: any }) => {
   const loadAll = async () => {
     if (!user?.id) return;
     setLoading(true);
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("pro_status, pro_specialty")
-      .eq("id", user.id)
-      .maybeSingle();
+    const { data: profile } = await fetchMyProfile(user.id!);
     if (profile) {
       setProStatus(((profile as any).pro_status as ProStatus) ?? "none");
       setSpecialty((profile as any).pro_specialty ?? "");

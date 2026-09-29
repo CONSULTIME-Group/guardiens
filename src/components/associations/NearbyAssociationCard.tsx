@@ -1,3 +1,4 @@
+import { fetchMyProfile } from "@/lib/myProfile";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,11 +27,7 @@ export function useNearbyAssociation(): NearbyAssociation | null {
     let cancelled = false;
     const run = async () => {
       if (!user?.id) return;
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("departement_code")
-        .eq("id", user.id)
-        .maybeSingle();
+      const { data: profile } = await fetchMyProfile(user.id!);
       const code = (profile as { departement_code?: string | null } | null)?.departement_code;
       if (!code) return;
       const { data } = await supabase

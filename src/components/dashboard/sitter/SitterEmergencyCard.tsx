@@ -1,3 +1,4 @@
+import { fetchMyProfile } from "@/lib/myProfile";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -52,7 +53,7 @@ const SitterEmergencyCard = ({ hasEmergencyProfile }: SitterEmergencyCardProps) 
     const [appsRes, reviewsRes, profileRes, cancellationsRes, subRes, emRes] = await Promise.all([
       supabase.from("applications").select("id, sit:sits!inner(status)").eq("sitter_id", user.id).eq("status", "accepted"),
       supabase.from("reviews").select("overall_rating").eq("reviewee_id", user.id).eq("published", true),
-      supabase.from("profiles").select("identity_verified").eq("id", user.id).single(),
+      fetchMyProfile(user.id!),
       supabase.from("sits").select("id").eq("cancelled_by", user.id).gte("cancelled_at", sixMonthsAgo.toISOString()),
       supabase.from("subscriptions").select("status, expires_at").eq("user_id", user.id).maybeSingle(),
       supabase.from("emergency_sitter_profiles").select("*").eq("user_id", user.id).maybeSingle(),

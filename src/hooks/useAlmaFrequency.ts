@@ -7,6 +7,7 @@
  * Retourne "balanced" tant que la valeur n'est pas chargée, pour ne pas masquer
  * l'UI par défaut. `silent` = kill switch dur pour toutes les bulles proactives.
  */
+import { fetchMyProfile } from "@/lib/myProfile";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -29,11 +30,7 @@ export function useAlmaFrequency(): {
     }
     let cancelled = false;
     (async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("alma_frequency" as any)
-        .eq("id", user.id)
-        .maybeSingle();
+      const { data } = await fetchMyProfile(user.id!);
       if (cancelled) return;
       const raw = (data as any)?.alma_frequency;
       if (raw === "silent" || raw === "low" || raw === "balanced" || raw === "talkative") {

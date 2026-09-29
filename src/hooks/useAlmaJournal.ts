@@ -4,6 +4,7 @@
  * Tout est déterministe et lu en base, aucun appel au modèle. Le calcul des
  * entrées vit dans `src/lib/alma/journal.ts`, testé à part.
  */
+import { fetchMyProfile } from "@/lib/myProfile";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { getDeptCode } from "@/lib/departments";
@@ -94,11 +95,7 @@ export function useAlmaJournal(
         // Variation des formulations, stable sur la journée.
         facts.variantSeed = Math.floor(Date.now() / 86400000);
 
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("postal_code")
-          .eq("id", userId)
-          .maybeSingle();
+        const { data: profile } = await fetchMyProfile(userId!);
 
         if (activeRole === "owner") {
           const [{ data: sits }, { data: properties }] = await Promise.all([
