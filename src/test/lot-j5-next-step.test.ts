@@ -83,12 +83,10 @@ describe("Lot J5, filtre de sortie d'Alma grammatical", () => {
     ["Une garde gratuite.", "Une garde sans frais."],
     ["C'est gratuit.", "C'est sans frais."],
     ["La gratuité du logement.", "L'absence de frais du logement."],
-    ["J'ai demandé à mes voisins.", "J'ai demandé à les gens du coin.".replace("à les", "à les")],
+    ["J'ai demandé à mes voisins.", "J'ai demandé aux gens du coin."],
+    ["Des voisins passent.", "Les gens du coin passent."],
+    ["Un voisin arrose.", "Une personne du coin arrose."],
   ])("%s", (input, expected) => {
-    if (input.startsWith("J'ai")) {
-      expect(rewriteForbiddenWords(input)).not.toMatch(/voisin|personne du coin/i);
-      return;
-    }
     expect(rewriteForbiddenWords(input)).toBe(expected);
   });
 });
