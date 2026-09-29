@@ -112,7 +112,7 @@ const PublicSitDetail = () => {
           supabase.from("public_profiles").select("id, first_name, city, postal_code, avatar_url, identity_verified, bio, completed_sits_count, is_founder").eq("id", sitData.user_id).limit(1),
           supabase.from("properties").select("*").eq("id", sitData.property_id).limit(1),
           supabase.from("reviews").select("id, overall_rating, comment, created_at").eq("reviewee_id", sitData.user_id).eq("published", true).order("created_at", { ascending: false }),
-          supabase.from("badge_attributions").select("badge_id").eq("user_id", sitData.user_id),
+          supabase.from("public_badge_attributions").select("badge_id").eq("user_id", sitData.user_id),
           supabase.from("owner_gallery").select("photo_url, position, width, height").eq("user_id", sitData.user_id).order("position", { ascending: true }),
         ]);
 

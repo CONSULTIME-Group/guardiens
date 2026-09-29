@@ -731,7 +731,7 @@ const SearchOwner = () => {
     const allUserIds = allItems.map((s: any) => s.user_id);
     const [allBadgesRes, emergencyRes, galleryRes] = allUserIds.length > 0
       ? await Promise.all([
-          supabase.from("badge_attributions").select("user_id, badge_id").in("user_id", allUserIds),
+          supabase.from("public_badge_attributions").select("user_id, badge_id").in("user_id", allUserIds),
           supabase.from("public_emergency_sitter_profiles").select("user_id, is_active").in("user_id", allUserIds).eq("is_active", true),
           supabase.from("sitter_gallery").select("user_id, photo_url, created_at").in("user_id", allUserIds).order("created_at", { ascending: false }),
         ])

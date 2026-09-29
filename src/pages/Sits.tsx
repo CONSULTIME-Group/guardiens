@@ -332,7 +332,7 @@ const Sits = () => {
         let ownerAffinityById: Record<string, any> = {};
         if (ownerIds.length > 0) {
           const { data: ownerProfiles } = await supabase
-            .from("owner_profiles")
+            .from("public_owner_profiles")
             .select("user_id, preferred_sitter_types, home_ambiance, languages, interests, life_pace, presence_expected")
             .in("user_id", ownerIds);
           (ownerProfiles || []).forEach((o: any) => { ownerAffinityById[o.user_id] = o; });

@@ -253,7 +253,7 @@ export function useOwnerDashboardData(userId: string | undefined) {
                 .in("id", hydrateIds)
             : emptyRows,
           sitterIds.length > 0
-            ? supabase.from("badge_attributions").select("user_id, badge_id").in("user_id", sitterIds)
+            ? supabase.from("public_badge_attributions").select("user_id, badge_id").in("user_id", sitterIds)
             : emptyRows,
           sitterIds.length > 0
             ? supabase.from("reviews").select("reviewee_id, overall_rating").in("reviewee_id", sitterIds).eq("published", true)
