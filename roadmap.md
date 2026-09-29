@@ -46,3 +46,5 @@
 
 - [x] 0025 : réactivation des réponses retirées (reactivated_at), suppression retirée
 - [x] Liste des tournures négatives restantes sur l accueil (sans appliquer)
+
+- [ ] Lot C1 Consentement cookies (bandeau CNIL, Consent Mode v2, /cookies, admin Pages légales et Trafic). À traiter après le lot A9.
