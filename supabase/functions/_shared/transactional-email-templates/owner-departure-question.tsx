@@ -79,15 +79,6 @@ const Email = ({ firstName, periodBaseUrl }: OwnerDepartureProps) => {
           </Section>
 
           <Section style={{ ...pad, paddingTop: '24px' }} className="em-pad">
-            <Section style={card}>
-              <Text style={bigFigure}>3 sur 4</Text>
-              <Text style={{ ...text, margin: 0 }}>
-                des annonces publiées reçoivent des candidatures. Les premières arrivent en général sous 24 heures.
-              </Text>
-            </Section>
-          </Section>
-
-          <Section style={{ ...pad, paddingTop: '24px' }} className="em-pad">
             <Row style={{ width: 'auto' }}>
               <Column style={{ width: '44px' }}>
                 <Img src={`${IMG}/elisa.jpg`} width="44" height="44" alt="Elisa" style={{ borderRadius: '50%', display: 'block', border: '2px solid #FFFFFF' }} />
@@ -135,5 +126,3 @@ const btnBase = { display: 'block', width: '100%', boxSizing: 'border-box' as co
 const btnPrimary = { ...btnBase, backgroundColor: '#2C6D50', color: '#FFFFFF', border: '1.5px solid #2C6D50' }
 const btnSecondary = { ...btnBase, backgroundColor: '#FFFFFF', color: '#1D1B16', border: '1.5px solid #D9CFBF' }
 const btnLater = { ...btnBase, backgroundColor: '#FFFFFF', color: '#6B645A', border: '1.5px dashed #C9BFAE', fontWeight: 500 }
-const card = { backgroundColor: '#FBF6EC', border: '1px solid #E6DCCB', borderRadius: '16px', padding: '20px 22px' }
-const bigFigure = { fontFamily: serif, fontSize: '34px', lineHeight: '1.1', color: '#2C6D50', fontWeight: 600, margin: '0 0 6px' }
