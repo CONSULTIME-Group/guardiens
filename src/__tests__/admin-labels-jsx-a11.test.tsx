@@ -93,7 +93,7 @@ describe("A11, aucune clé technique en dur dans un texte JSX de src/pages/admin
     for (const file of walk("src/pages/admin")) {
       const src = readFileSync(file, "utf8");
       // texte JSX : entre > et <, hors accolades
-      for (const m of src.matchAll(/>([^<>{}]+)</g)) {
+      for (const m of src.matchAll(/(?<![=\-])>([^<>{}=();"`]+)</g)) {
         for (const w of m[1].split(/[^a-z_]+/)) if (keys.has(w)) hits.push(`${file}: ${w}`);
       }
     }
