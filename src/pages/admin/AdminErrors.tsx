@@ -112,7 +112,8 @@ const AdminErrors = () => {
     setLoading(true);
     // Lot A10 : lecture complète paginée, jamais plafonnée à 200.
     const build = (from: number, to: number) => {
-      let q = supabase.from("error_logs").select("*").order("last_seen_at", { ascending: false }).order("id");
+      // Les erreurs réseau ont leur propre section : exclues ici pour ne pas doubler les chiffres.
+      let q = supabase.from("error_logs").select("*").or("source.is.null,source.neq.NetworkErrorMonitor").order("last_seen_at", { ascending: false }).order("id");
       if (filter === "unresolved") q = q.is("resolved_at", null);
       if (filter === "resolved") q = q.not("resolved_at", "is", null);
       if (severityFilter !== "all") q = q.eq("severity", severityFilter);
@@ -252,19 +253,19 @@ const AdminErrors = () => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="pb-2"><CardDescription>Non résolues</CardDescription></CardHeader>
-          <CardContent><p className="text-3xl font-bold text-destructive">{stats.unresolved}</p></CardContent>
+          <CardContent><p className="text-3xl font-bold text-destructive">{loadError ? UNAVAILABLE_LABEL : stats.unresolved}</p></CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2"><CardDescription>Occurrences totales</CardDescription></CardHeader>
-          <CardContent><p className="text-3xl font-bold">{stats.totalOcc}</p></CardContent>
+          <CardContent><p className="text-3xl font-bold">{loadError ? UNAVAILABLE_LABEL : stats.totalOcc}</p></CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2"><CardDescription>Dernières 24h</CardDescription></CardHeader>
-          <CardContent><p className="text-3xl font-bold">{stats.last24h}</p></CardContent>
+          <CardContent><p className="text-3xl font-bold">{loadError ? UNAVAILABLE_LABEL : stats.last24h}</p></CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2"><CardDescription>Utilisateurs affectés</CardDescription></CardHeader>
-          <CardContent><p className="text-3xl font-bold">{stats.affected}</p></CardContent>
+          <CardContent><p className="text-3xl font-bold">{loadError ? UNAVAILABLE_LABEL : stats.affected}</p></CardContent>
         </Card>
       </div>
 
@@ -310,7 +311,7 @@ const AdminErrors = () => {
           ) : filtered.length === 0 ? (
             <div className="p-8 text-center text-muted-foreground">
               <CheckCircle2 className="h-10 w-10 mx-auto mb-2 text-primary" />
-              Aucune erreur à afficher.
+              {loadError ? "Liste indisponible, la lecture a échoué." : "Aucune erreur à afficher."}
             </div>
           ) : (
             <ul className="divide-y divide-border">
