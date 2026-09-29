@@ -354,10 +354,10 @@ const MutualAidDashboardTab = () => {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <KpiCard label="Nouvelles missions" value={kpis.newMissions} />
-            <KpiCard label="Réponses" value={kpis.responses} />
-            <KpiCard label="Feedbacks" value={kpis.feedbacks} />
-            <KpiCard label="Remerciements" value={kpis.thanks} />
+            <KpiCard label="Nouvelles missions" value={loadError ? UNAVAILABLE_LABEL : kpis.newMissions} />
+            <KpiCard label="Réponses" value={loadError ? UNAVAILABLE_LABEL : kpis.responses} />
+            <KpiCard label="Feedbacks" value={loadError ? UNAVAILABLE_LABEL : kpis.feedbacks} />
+            <KpiCard label="Remerciements" value={loadError ? UNAVAILABLE_LABEL : kpis.thanks} />
           </div>
         </CardContent>
       </Card>
