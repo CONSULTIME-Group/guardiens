@@ -51,3 +51,4 @@
 - [x] Lot J2-B Filet humain et pilotage Alma (classification, bouton contact, 3 signaux, feedback, mesure, synthèse lundi, rejeu admin).
 
 - [x] Lot A9 Modération fiable (signalements, contestations, avis, gardes, annonces, entraide, contact)
+- [x] Lot J2-C Corrections de relecture d'Alma
