@@ -287,7 +287,7 @@ Deno.serve(async (req) => {
     const dossier = {
       prenom: (profileRes.data as any)?.first_name ?? null,
       ville: (profileRes.data as any)?.city ?? null,
-      completion_profil: profilACompleterCharge
+      completion_profil: helpDirective ? null : profilACompleterCharge
         ? 100 - profilACompleter.reduce((total, item) => total + item.points, 0)
         : (profileRes.data as any)?.profile_completion ?? null,
       identite_verifiee: (profileRes.data as any)?.identity_verified ?? null,
