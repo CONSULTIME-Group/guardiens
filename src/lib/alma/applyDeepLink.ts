@@ -7,13 +7,13 @@
 export function applyDeepLinkTarget(args: {
   param: string | null;
   acceptingApplications: boolean;
-  accessLevel: number | null | undefined;
+  accessLevel: number | string | null | undefined;
   hasApplied: boolean;
   canApplyGuards: boolean;
 }): "apply" | "completion" | null {
   if (args.param !== "1") return null;
   if (!args.acceptingApplications || args.hasApplied) return null;
-  if (args.accessLevel === 1) return "completion";
+  if (Number(args.accessLevel) === 1) return "completion";
   if (!args.canApplyGuards) return null;
   return "apply";
 }
