@@ -21,8 +21,17 @@ describe("landing.hero, entraide près de chez soi", () => {
     (JSON.parse(fs.readFileSync(COMMON_PATH, "utf8")) as any).landing
   );
 
-  it("présente l'entraide près de chez soi comme second moteur", () => {
-    expect(landing["hero.lede"]).toContain("on s'entraide près de chez soi");
+  it("présente la garde et l'entraide du quotidien", () => {
+    expect(landing["hero.title_eyebrow"]).toBe("Garde de maison et entraide");
+    expect(landing["hero.title_main"]).toBe("Près de chez vous, il y a toujours quelqu'un.");
+    expect(landing["hero.lede"]).toContain("quand vous partez");
+    expect(landing["hero.lede"]).toContain("le reste de l'année");
+    expect(landing["hero.motto"]).toBe("Tout commence par un échange, et finit par une rencontre.");
+  });
+
+  it("n'emploie aucun tiret cadratin ou demi-cadratin dans le hero", () => {
+    const hero = Object.entries(landing).filter(([k]) => k.startsWith("hero."));
+    for (const [, v] of hero.filter(([k]) => /title_|lede|motto/.test(k))) expect(v).not.toMatch(/[\u2013\u2014]/);
   });
 
   it("n'emploie le mot « voisin » dans aucune clé landing", () => {

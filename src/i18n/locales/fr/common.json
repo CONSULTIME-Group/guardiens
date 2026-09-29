@@ -59,9 +59,10 @@
   "landing": {
     "hero": {
       "eyebrow": "Gardes · Coups de main · Urgences",
-      "title_main": "Vous partez. Guardiens reste.",
+      "title_eyebrow": "Garde de maison et entraide",
+      "title_main": "Près de chez vous, il y a toujours quelqu'un.",
       "motto": "Tout commence par un échange, et finit par une rencontre.",
-      "lede": "Un gardien s'installe chez vous et prend soin de votre maison et de vos animaux. Le reste de l'année, on s'entraide près de chez soi.",
+      "lede": "Quelqu'un pour garder votre maison et vos animaux quand vous partez. Quelqu'un pour une partie de belote, un chien à promener ou le potager à arroser le reste de l'année.",
       "cta_owner": "Publier mon annonce de garde",
       "cta_sitter": "Demander un coup de main",
       "cta_aid": "Je cherche ou je propose un coup de main →",
