@@ -331,7 +331,7 @@ describe("J2-A, rétrocompatibilité de la réponse", () => {
     const src = read("supabase/functions/alma-chat/index.ts");
     expect(src).toContain("answer,\n      remaining:");
     expect(src).toContain("...(action ? { action: { label: action.label, path: action.path } } : {})");
-    expect(src).toContain("...(next && next.chips.length ? { chips: next.chips } : {})");
+    expect(src).toContain("...(chips.length ? { chips } : {})");
   });
 
   it("amorces : version du rôle", () => {
