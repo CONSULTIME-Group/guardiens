@@ -370,9 +370,12 @@ const AdminSmallMissions = () => {
     if (!archiveId) return;
     const id = archiveId;
     const { data: { user } } = await supabase.auth.getUser();
+    const current = missions.find((m: any) => m.id === id);
     const { error } = await supabase
       .from("small_missions")
       .update({
+        // Lot A9 : statut mémorisé pour que « Restaurer » le rende tel quel.
+        status_before_hidden: current?.status && current.status !== "cancelled" ? current.status : null,
         status: "cancelled" as any,
         hidden_by: user?.id ?? null,
         hidden_at: new Date().toISOString(),
@@ -394,7 +397,8 @@ const AdminSmallMissions = () => {
     const { error } = await supabase
       .from("small_missions")
       .update({
-        status: "open" as any,
+        status: (missions.find((m: any) => m.id === id)?.status_before_hidden || "open") as any,
+        status_before_hidden: null,
         hidden_by: null,
         hidden_at: null,
       } as any)
@@ -437,18 +441,18 @@ const AdminSmallMissions = () => {
     setContactSending(true);
     const mission = contactMission;
     const reason = contactReason.trim();
-    const { data, error } = await supabase.functions.invoke(
-      "admin-contact-mission-poster",
-      { body: { missionId: mission.id, reason: reason || undefined } },
-    );
+    // Lot A9 : messagerie admin, l'auteur peut répondre dans la conversation.
+    const content = `Bonjour, l'équipe Guardiens vous écrit au sujet de votre demande « ${mission.title || "d'entraide"} ».\n\n${reason}`;
+    const { error } = await supabase.rpc("admin_send_message_to_user", {
+      p_target_user_id: mission.user_id,
+      p_content: content,
+    });
     setContactSending(false);
-    const success = !error && (data as { success?: boolean })?.success;
-    if (!success) {
-      const msg = (data as { error?: string })?.error || error?.message || "Envoi impossible";
-      toast.error(`Envoi impossible : ${msg}`);
+    if (error) {
+      toast.error(`Envoi impossible : ${error.message}`);
       return;
     }
-    toast.success("Notification envoyée au posteur");
+    toast.success("Message envoyé à l'auteur dans sa messagerie");
     setContactMission(null);
     setContactReason("");
   };
@@ -456,7 +460,7 @@ const AdminSmallMissions = () => {
   const exportCsv = () => {
     if (!responseCountsReady) return;
     const csv = buildCsv(
-      ["Titre", "Posteur", "Catégorie", "Ville", "Date", "Statut", "Notifiés", "Réponses", VIEWS_LABEL],
+      ["Titre", "Auteur", "Catégorie", "Ville", "Date", "Statut", "Notifiés", "Réponses", VIEWS_LABEL],
       filtered.map(m => [
         m.title, `${m.poster?.first_name || ""} ${m.poster?.last_name || ""}`.trim(),
         categoryLabels[m.category] || missionCategoryLabel(m.category), m.city || "",
@@ -704,7 +708,7 @@ const AdminSmallMissions = () => {
           <TableHeader>
             <TableRow>
               <TableHead>Titre</TableHead>
-              <TableHead>Posteur</TableHead>
+              <TableHead>Auteur</TableHead>
               <TableHead>Catégorie</TableHead>
               <TableHead>Ville</TableHead>
               <TableHead>
@@ -765,7 +769,7 @@ const AdminSmallMissions = () => {
                       <Button variant="ghost" size="icon" aria-label="Voir la mission" title="Voir" onClick={() => navigate(`/petites-missions/${(m as any).slug || m.id}`)}>
                         <Eye className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" aria-label="Contacter le posteur" title="Contacter" onClick={() => openContact(m)}>
+                      <Button variant="ghost" size="icon" aria-label="Contacter l'auteur" title="Contacter" onClick={() => openContact(m)}>
                         <Mail className="h-4 w-4" />
                       </Button>
                       <Button
@@ -838,7 +842,7 @@ const AdminSmallMissions = () => {
       <Dialog open={!!restoreId} onOpenChange={() => setRestoreId(null)}>
         <DialogContent>
           <DialogHeader><DialogTitle>Restaurer cette mission ?</DialogTitle></DialogHeader>
-          <DialogDescription>La mission sera remise en ligne et visible dans la recherche.</DialogDescription>
+          <DialogDescription>La demande retrouve son statut d'avant masquage.</DialogDescription>
           <DialogFooter>
             <Button variant="outline" onClick={() => setRestoreId(null)}>Annuler</Button>
             <Button onClick={handleRestore}>Restaurer</Button>
@@ -849,13 +853,13 @@ const AdminSmallMissions = () => {
       <AlertDialog open={!!contactMission} onOpenChange={(open) => { if (!open && !contactSending) { setContactMission(null); setContactReason(""); } }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Contacter le posteur</AlertDialogTitle>
+            <AlertDialogTitle>Contacter l'auteur</AlertDialogTitle>
             <AlertDialogDescription>
-              Envoyer une notification au posteur de la mission « {contactMission?.title} ». Un motif optionnel sera intégré au corps du message.
+              Le message part dans la messagerie de l'auteur de « {contactMission?.title} », qui peut vous répondre directement.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="space-y-2">
-            <Label htmlFor="contact-reason">Motif (optionnel)</Label>
+            <Label htmlFor="contact-reason">Message à l'auteur</Label>
             <Textarea
               id="contact-reason"
               value={contactReason}
@@ -868,8 +872,8 @@ const AdminSmallMissions = () => {
           </div>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={contactSending}>Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={handleContactConfirm} disabled={contactSending}>
-              {contactSending ? "Envoi…" : "Envoyer la notification"}
+            <AlertDialogAction onClick={handleContactConfirm} disabled={contactSending || !contactReason.trim()}>
+              {contactSending ? "Envoi…" : "Envoyer le message"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

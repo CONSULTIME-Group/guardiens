@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Download, RefreshCw, XCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { trackEvent } from "@/lib/analytics";
@@ -260,7 +261,6 @@ const MutualAidDashboardTab = () => {
   useEffect(() => { void load(); }, [load]);
 
   const closeManually = async (id: string) => {
-    if (!window.confirm("Fermer cette mission manuellement ? Cette action est définitive.")) return;
     setClosingId(id);
     const { error } = await supabase
       .from("small_missions")
@@ -272,8 +272,16 @@ const MutualAidDashboardTab = () => {
       .eq("id", id);
     setClosingId(null);
     if (error) {
-      toast.error("Impossible de fermer cette mission.");
+      toast.error(`Fermeture impossible : ${error.message}`);
       return;
+    }
+    // Lot A9 : la fermeture manuelle est tracée dans le journal d'audit.
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { error: logErr } = await supabase.from("admin_action_logs").insert({
+        admin_id: user.id, action: "small_mission_close_manual", target_type: "small_mission", target_id: id,
+      } as any);
+      if (logErr) console.error("admin_action_logs close", logErr);
     }
     toast.success("Mission fermée manuellement.");
     setDormant((prev) => prev.filter((m) => m.id !== id));
@@ -431,18 +439,22 @@ const MutualAidDashboardTab = () => {
                     <TableCell>{missionCategoryLabel(m.category)}</TableCell>
                     <TableCell>{format(new Date(m.created_at), "d MMM yyyy", { locale: fr })}</TableCell>
                     <TableCell className="text-right">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => void closeManually(m.id)}
-                        disabled={closingId === m.id}
-                      >
-                        {closingId === m.id ? (
-                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                        ) : (
-                          <><XCircle className="h-3.5 w-3.5 mr-1" /> Fermer</>
-                        )}
-                      </Button>
+                      <ConfirmDialog
+                        title="Fermer cette demande ?"
+                        description={<>« {m.title} » passe au statut terminée. La fermeture est définitive et tracée dans le journal d'audit.</>}
+                        confirmLabel="Fermer la demande"
+                        destructive
+                        onConfirm={() => closeManually(m.id)}
+                        trigger={
+                          <Button size="sm" variant="ghost" disabled={closingId === m.id}>
+                            {closingId === m.id ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              <><XCircle className="h-3.5 w-3.5 mr-1" /> Fermer</>
+                            )}
+                          </Button>
+                        }
+                      />
                     </TableCell>
                   </TableRow>
                 ))}
