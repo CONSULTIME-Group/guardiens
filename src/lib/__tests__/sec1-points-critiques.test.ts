@@ -3,13 +3,15 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 const read = (p: string) => readFileSync(resolve(process.cwd(), p), "utf8");
-const migration = read("drizzle/migrations/0040_sec1_points_critiques.sql");
+const raw = read("drizzle/migrations/0040_sec1_points_critiques.sql");
+// Le retour arriere en commentaire reprend les anciennes politiques : on teste le SQL execute.
+const migration = raw.split("\n").filter((l) => !l.trim().startsWith("--")).join("\n");
 
 // Verrou SEC1 (29/09/2026) : qui lit quoi apres fermeture.
 describe("SEC1, politiques de lecture", () => {
   it("sauvegarde les definitions avant toute modification", () => {
     expect(migration.indexOf("_backup_policies_sec1_20260929")).toBeLessThan(migration.indexOf("DROP POLICY"));
-    expect(migration).toMatch(/RETOUR ARRIERE/);
+    expect(raw).toMatch(/RETOUR ARRIERE/);
   });
 
   it("owner_profiles : proprietaire, admin, gardien en discussion ou accepte", () => {
