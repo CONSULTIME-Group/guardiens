@@ -211,7 +211,7 @@ export function useDashboardData(): DashboardData {
           id: `del-${d.id}`,
           text: `${name}${city} a demandé la suppression de son compte${suffix}`,
           time: d.requested_at,
-          link: `/admin/users?filter=deletion-pending`,
+          link: `/admin/demandes-suppression`,
           type: "suppression",
         });
       });
