@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { formatOpenRate } from "@/lib/admin/openRate";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +13,7 @@ interface DayStats {
   date: string;
   sent: number;
   opened: number;
+  delivered: number;
   clicked: number;
 }
 
@@ -27,7 +29,7 @@ const MissionDigestTab = () => {
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState("30d");
   const [days, setDays] = useState<DayStats[]>([]);
-  const [totals, setTotals] = useState({ sent: 0, opened: 0, clicked: 0, queuedPending: 0 });
+  const [totals, setTotals] = useState({ sent: 0, delivered: 0, opened: 0, clicked: 0, queuedPending: 0 });
   const [manualHelperId, setManualHelperId] = useState("");
   const [sending, setSending] = useState(false);
   const [dryRun, setDryRun] = useState(false);
@@ -66,12 +68,13 @@ const MissionDigestTab = () => {
 
     const byDay = new Map<string, DayStats>();
     const bump = (d: string, key: keyof Omit<DayStats, "date">, n = 1) => {
-      const s = byDay.get(d) || { date: d, sent: 0, opened: 0, clicked: 0 };
+      const s = byDay.get(d) || { date: d, sent: 0, delivered: 0, opened: 0, clicked: 0 };
       s[key] += n; byDay.set(d, s);
     };
     dedup.forEach((r) => {
       const d = (r.created_at || "").slice(0, 10); if (!d) return;
       bump(d, "sent");
+      if (r.delivered_at) bump(d, "delivered");
       if ((r.open_count || 0) > 0) bump(d, "opened");
       if ((r.click_count || 0) > 0) bump(d, "clicked");
     });
@@ -80,6 +83,7 @@ const MissionDigestTab = () => {
     setDays(list);
     setTotals({
       sent: list.reduce((a, b) => a + b.sent, 0),
+      delivered: list.reduce((a, b) => a + b.delivered, 0),
       opened: list.reduce((a, b) => a + b.opened, 0),
       clicked: list.reduce((a, b) => a + b.clicked, 0),
       queuedPending: queuedPending || 0,
@@ -128,7 +132,7 @@ const MissionDigestTab = () => {
 
   const exportCsv = () => {
     const header = "date,sent,opened,clicked,open_rate,click_rate";
-    const lines = days.map((d) => `${d.date},${d.sent},${d.opened},${d.clicked},${pct(d.opened, d.sent)},${pct(d.clicked, d.sent)}`);
+    const lines = days.map((d) => `${d.date},${d.sent},${d.opened},${d.clicked},${formatOpenRate(d.opened, d.delivered)},${pct(d.clicked, d.sent)}`);
     const blob = new Blob([header + "\n" + lines.join("\n")], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -149,7 +153,7 @@ const MissionDigestTab = () => {
           <div className="text-xs text-muted-foreground">Digests envoyés</div>
         </CardContent></Card>
         <Card><CardContent className="pt-4 pb-3 text-center">
-          <div className="text-2xl font-bold text-success">{pct(totals.opened, totals.sent)}</div>
+          <div className="text-2xl font-bold text-success">{formatOpenRate(totals.opened, totals.delivered)}</div>
           <div className="text-xs text-muted-foreground">Ouverture</div>
         </CardContent></Card>
         <Card><CardContent className="pt-4 pb-3 text-center">
@@ -227,7 +231,7 @@ const MissionDigestTab = () => {
                   <TableCell className="text-right text-xs font-semibold">{d.sent}</TableCell>
                   <TableCell className="text-right text-xs">{d.opened}</TableCell>
                   <TableCell className="text-right text-xs">{d.clicked}</TableCell>
-                  <TableCell className="text-right text-xs">{pct(d.opened, d.sent)}</TableCell>
+                  <TableCell className="text-right text-xs">{formatOpenRate(d.opened, d.delivered)}</TableCell>
                 </TableRow>
               ))
             )}

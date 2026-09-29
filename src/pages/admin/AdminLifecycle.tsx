@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { supabase } from "@/integrations/supabase/client";
+import { formatOpenRate, openRatePct } from "@/lib/admin/openRate";
 import { useAdmin } from "@/hooks/useAdmin";
 import { Navigate } from "react-router-dom";
 
@@ -151,7 +152,7 @@ const AdminLifecycle = () => {
       }
       const tplArr = Array.from(tplMap.values()).map((t) => ({
         ...t,
-        open_rate: pct(t.opened, t.delivered || t.sent),
+        open_rate: openRatePct(t.opened, t.delivered) ?? 0,
         click_rate: pct(t.clicked, t.delivered || t.sent),
         bounce_rate: pct(t.bounced, t.sent),
       })).sort((a, b) => b.sent - a.sent);
@@ -200,7 +201,7 @@ const AdminLifecycle = () => {
         <Kpi label="Complétées" value={totalCompleted} />
         <Kpi label="Sorties" value={totalExited} />
         <Kpi label="Emails envoyés" value={totalSent} />
-        <Kpi label="Taux ouverture" value={`${pct(totalOpened, totalSent)} %`} />
+        <Kpi label="Taux ouverture" value={formatOpenRate(totalOpened, tpls.reduce((s, t) => s + t.delivered, 0))} />
         <Kpi label="Taux clic" value={`${pct(totalClicked, totalSent)} %`} />
       </div>
 
