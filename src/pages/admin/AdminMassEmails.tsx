@@ -341,7 +341,7 @@ const AdminMassEmails = () => {
   const [recipientCount, setRecipientCount] = useState<number | null>(null);
   const [helpsWithCount, setHelpsWithCount] = useState<number | null>(null);
   const [variantCounts, setVariantCounts] = useState<{ a: number; b: number } | null>(null);
-  const [departureCounts, setDepartureCounts] = useState<{ holdout: number | null; answered: number | null } | null>(null);
+  const [departureCounts, setDepartureCounts] = useState<{ holdout: number | null; answered: number | null; pressure?: number | null } | null>(null);
   const [noelV2Counts, setNoelV2Counts] = useState<{ noel: number; hiver: number; other: number } | null>(null);
   const [noelTestMode, setNoelTestMode] = useState<"responder_noel" | "variant_a">("responder_noel");
 
@@ -588,8 +588,8 @@ const AdminMassEmails = () => {
             : null,
         );
         setDepartureCounts(
-          typeof data?.holdout_excluded === "number" || typeof data?.already_answered === "number"
-            ? { holdout: data.holdout_excluded ?? null, answered: data.already_answered ?? null }
+          typeof data?.holdout_excluded === "number" || typeof data?.already_answered === "number" || typeof data?.pressure_excluded === "number"
+            ? { holdout: data.holdout_excluded ?? null, answered: data.already_answered ?? null, pressure: data.pressure_excluded ?? null }
             : null,
         );
         setNoelV2Counts(
@@ -1157,6 +1157,12 @@ const AdminMassEmails = () => {
                         <div className="flex items-center justify-between" data-testid="departure-answered-count">
                           <span className="text-muted-foreground">Déjà répondu</span>
                           <span className="font-medium">{departureCounts.answered}</span>
+                        </div>
+                      )}
+                      {typeof departureCounts.pressure === "number" && (
+                        <div className="flex items-center justify-between" data-testid="pressure-excluded-count">
+                          <span className="text-muted-foreground">Exclus car 3 emails ou plus en 7 jours</span>
+                          <span className="font-medium">{departureCounts.pressure}</span>
                         </div>
                       )}
                       {noelV2Counts && (
