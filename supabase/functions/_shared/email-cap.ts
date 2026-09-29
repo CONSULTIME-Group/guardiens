@@ -53,6 +53,8 @@ export const BYPASS_TEMPLATES = new Set<string>([
   'relance-piece-identite',
   'dispute-resolved',
   'report-resolved',
+  'moderation-decision',
+  'review-refused',
   'cancellation-by-owner',
   'cancellation-by-sitter',
   'cancellation-review-published',

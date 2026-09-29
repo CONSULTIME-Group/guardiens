@@ -72,6 +72,8 @@ const TRANSACTIONAL: ReadonlyArray<string> = [
   'relance-piece-identite',
   'dispute-resolved',
   'report-resolved',
+  'moderation-decision',
+  'review-refused',
   // Direct human reply / messaging
   'contact-reply',
   'new-message',

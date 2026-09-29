@@ -13,9 +13,10 @@ describe("AdminSitsManagement, statuts visibles", () => {
     expect(sitsManagement).toContain('<SelectItem value="in_progress">En cours</SelectItem>');
   });
 
-  it("propose aussi les statuts archivées et expirées", () => {
-    expect(sitsManagement).toContain('value="archived"');
-    expect(sitsManagement).toContain('value="expired"');
+  // Lot A9 : la page Gardes ne montre que les statuts d'après acceptation.
+  it("ne propose plus les statuts d'avant acceptation", () => {
+    expect(sitsManagement).not.toContain('<SelectItem value="archived"');
+    expect(sitsManagement).not.toContain('<SelectItem value="expired"');
   });
 
   it("distingue le déroulé dans le temps et l'état du dossier", () => {
