@@ -10,6 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
+import { reportAdminReadError, UNAVAILABLE_LABEL } from "@/lib/admin/readError";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -53,15 +54,13 @@ export function ConversationsTab({ since }: { since: string }) {
     refetchOnWindowFocus: false,
   });
 
-  const { data: actionEvents = [] } = useQuery({
-    queryKey: ["admin-alma-conversation-actions", since],
+  // Lot A10 : taux « suivies d'une action » calculé en SQL sur toutes les conversations.
+  const { data: followedRaw, isError: followedError } = useQuery({
+    queryKey: ["admin-alma-conversation-followed", since],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("analytics_events")
-        .select("user_id, created_at")
-        .gte("created_at", since)
-        .limit(20000);
-      return (data ?? []) as Array<{ user_id: string | null; created_at: string }>;
+      const { data, error } = await supabase.rpc("admin_a10_alma_followed_by_action" as any, { p_since: since });
+      if (error) { reportAdminReadError("Alma : conversations suivies d'une action", error); throw error; }
+      return data as unknown as { total: number; followed: number };
     },
     staleTime: 60_000,
     refetchOnWindowFocus: false,
@@ -72,10 +71,11 @@ export function ConversationsTab({ since }: { since: string }) {
   const avgLength = useMemo(() => averageAnswerLength(rows), [rows]);
   const openings = useMemo(() => openingRepetition(rows), [rows]);
   const split = useMemo(() => inputSplit(rows), [rows]);
-  const followed = useMemo(
-    () => conversationsFollowedByAction(rows, actionEvents),
-    [rows, actionEvents],
-  );
+  const followed = useMemo(() => {
+    const total = Number(followedRaw?.total) || 0;
+    const count = Number(followedRaw?.followed) || 0;
+    return { count, rate: total > 0 ? count / total : 0 };
+  }, [followedRaw]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();

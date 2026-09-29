@@ -606,14 +606,20 @@ function CulturalFactsTab({ since }: { since: string }) {
   const { data: facts = [], isLoading } = useQuery({
     queryKey: ["admin-alma-cultural-facts"],
     queryFn: async (): Promise<CulturalFactRow[]> => {
-      const { data, error } = await supabase
-        .from("alma_cultural_facts" as any)
-        .select("*")
-        .order("fact_type", { ascending: true })
-        .order("created_at", { ascending: false })
-        .limit(2000);
-      if (error) throw error;
-      return (data ?? []) as unknown as CulturalFactRow[];
+      // Lot A10 : liste complète paginée.
+      try {
+        const { rows } = await fetchAllRows<CulturalFactRow>((from, to) =>
+          (supabase.from("alma_cultural_facts" as any) as any)
+            .select("*")
+            .order("fact_type", { ascending: true })
+            .order("created_at", { ascending: false })
+            .order("id")
+            .range(from, to));
+        return rows;
+      } catch (e) {
+        reportAdminReadError("Alma : faits culturels", e);
+        throw e;
+      }
     },
     staleTime: 60_000,
     refetchOnWindowFocus: false,
