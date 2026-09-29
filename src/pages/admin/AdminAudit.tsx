@@ -230,7 +230,7 @@ const AdminAudit = () => {
             <SelectContent>
               <SelectItem value="all">Toutes les cibles</SelectItem>
               {TARGET_OPTIONS.map((t) => (
-                <SelectItem key={t} value={t}>{t}</SelectItem>
+                <SelectItem key={t} value={t}>{auditEntityLabel(t)}</SelectItem>
               ))}
             </SelectContent>
           </Select>

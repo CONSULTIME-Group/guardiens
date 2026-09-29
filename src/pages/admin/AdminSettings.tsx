@@ -372,7 +372,7 @@ const AdminSettings = () => {
               </Label>
               <p className="text-xs text-muted-foreground">
                 Seuls les comptes créés à partir de cette date sont soumis au garde-fou. Laisser
-                vide pour désactiver le scoping. Reculer la date élargit aux anciens comptes.
+                vide pour désactiver le filtrage par date. Reculer la date élargit aux anciens comptes.
               </p>
               <div className="flex flex-wrap items-center gap-2">
                 <Input
@@ -406,7 +406,7 @@ const AdminSettings = () => {
                 Valeur actuelle :{" "}
                 {appliesSince
                   ? new Date(appliesSince).toLocaleString("fr-FR")
-                  : "aucune (scoping désactivé)"}
+                  : "aucune (filtrage par date désactivé)"}
               </p>
             </div>
           </CardContent>
@@ -756,7 +756,7 @@ const AdminSettings = () => {
             <AlertDialogTitle>
               {confirmDialog?.nextIso
                 ? "Appliquer cette date de bascule ?"
-                : "Désactiver le scoping ?"}
+                : "Désactiver le filtrage par date ?"}
             </AlertDialogTitle>
             <AlertDialogDescription asChild>
               <div className="space-y-2">

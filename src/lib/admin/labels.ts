@@ -89,6 +89,9 @@ export const ROLE_LABELS: Dict = {
   admin: "Administrateur",
   moderator: "Modérateur",
   user: "Membre",
+  pro_directory: "Annuaire des pros",
+  pro: "Professionnel",
+  competence: "Compétence",
 };
 
 export const CLOSE_REASON_LABELS: Dict = {
