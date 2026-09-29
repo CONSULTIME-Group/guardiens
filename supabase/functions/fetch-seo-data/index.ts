@@ -232,6 +232,36 @@ async function fetchGSCData(
   return { totals, rows };
 }
 
+/**
+ * Lot A10 : toutes les pages vues par Google sur la période, sans plafond.
+ * La Search Console renvoie au plus 25 000 lignes par appel : on pagine par
+ * startRow jusqu'à une page incomplète.
+ */
+async function fetchAllGSCPages(
+  accessToken: string,
+  startDate: string,
+  endDate: string,
+): Promise<{ page: string; clicks: number; impressions: number }[]> {
+  const PAGE = 25000;
+  const out: { page: string; clicks: number; impressions: number }[] = [];
+  for (let startRow = 0; startRow < 1_000_000; startRow += PAGE) {
+    const res = await fetch(
+      `https://searchconsole.googleapis.com/webmasters/v3/sites/${encodeURIComponent(GSC_SITE_URL)}/searchAnalytics/query`,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ startDate, endDate, dimensions: ["page"], rowLimit: PAGE, startRow }),
+      },
+    );
+    if (!res.ok) throw new Error(`GSC pages [${res.status}]: ${await res.text()}`);
+    const data = await res.json();
+    const rows = (data.rows || []) as any[];
+    for (const r of rows) out.push({ page: r.keys?.[0] ?? "", clicks: r.clicks || 0, impressions: r.impressions || 0 });
+    if (rows.length < PAGE) break;
+  }
+  return out;
+}
+
 // ---------- Date helpers ----------
 
 function formatDate(d: Date): string {
@@ -352,6 +382,7 @@ Deno.serve(async (req) => {
       ga4Current,
       ga4Previous,
       ga4Channels,
+      gscAllPages,
     ] = await Promise.all([
       fetchGSCData(accessToken, gscStart, gscEnd),
       fetchGSCData(accessToken, gscPrevStart, gscPrevEnd),
@@ -360,6 +391,7 @@ Deno.serve(async (req) => {
       fetchGA4Data(accessToken, ga4PropertyId, ga4Start, ga4End, true),
       fetchGA4Data(accessToken, ga4PropertyId, ga4PrevStart, ga4PrevEnd, false),
       fetchGA4Channels(accessToken, ga4PropertyId, ga4Start, ga4End),
+      fetchAllGSCPages(accessToken, gscStart, gscEnd),
     ]);
 
     const result = {
@@ -374,7 +406,11 @@ Deno.serve(async (req) => {
         previous: gscPrevious.totals,
         topPages: gscTopPages.rows,
         topQueries: gscTopQueries.rows,
+        // Lot A10 : liste complète des pages affichées par Google, sans plafond.
+        allPages: gscAllPages,
       },
+      // Lot A10 : bornes exactes des périodes, pour un libellé juste à l'écran.
+      period: { gscStart, gscEnd, ga4Start, ga4End },
       updated_at: new Date().toISOString(),
       cached: false,
     };
