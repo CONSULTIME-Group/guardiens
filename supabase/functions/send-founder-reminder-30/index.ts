@@ -1,5 +1,5 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
-import { isFreeAccessForAll, PRICING_ACTIVATION_DATE } from '../_shared/config-pricing.ts'
+import { isFreeAccessForAll } from '../_shared/config-pricing.ts'
 import { requireCronCaller } from '../_shared/require-cron-caller.ts'
 
 const corsHeaders = {

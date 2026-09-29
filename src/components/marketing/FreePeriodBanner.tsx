@@ -1,5 +1,4 @@
-import { isInGracePeriod, GRACE_END } from "@/lib/constants";
-import { isPricingActive } from "@/lib/pricing";
+import { isFreeAccessForAll } from "@/lib/pricing";
 
 interface FreePeriodBannerProps {
   className?: string;
@@ -11,22 +10,13 @@ interface FreePeriodBannerProps {
  * Indique les dates exactes pour rassurer les visiteurs.
  */
 export const FreePeriodBanner = ({ className = "" }: FreePeriodBannerProps) => {
-  // Pivot pricing sans deadline : composant désactivé tant que PRICING_IS_ACTIVE = false.
-  if (!isPricingActive()) return null;
-  if (!isInGracePeriod()) return null;
-
-  const endLabel = GRACE_END.toLocaleDateString("fr-FR", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-  // GRACE_END est exclusif (1er octobre 00:00) → dernier jour inclus = 30 septembre
-  const lastFreeDay = new Date(GRACE_END.getTime() - 24 * 60 * 60 * 1000);
-  const lastDayLabel = lastFreeDay.toLocaleDateString("fr-FR", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
+  // Masqué tant que l'accès est gratuit pour tous. Une fois le payant en
+  // vigueur, il n'existe plus de période gratuite à annoncer : le bloc reste
+  // masqué. Aucune date codée en dur (ancienne logique GRACE_END retirée).
+  if (isFreeAccessForAll()) return null;
+  return null;
+  const lastDayLabel = "";
+  const endLabel = "";
 
   return (
     <div
