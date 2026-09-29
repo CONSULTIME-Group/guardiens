@@ -457,5 +457,11 @@ const WORDS: Array<[RegExp, string]> = [
 export function displayText(v: string | null | undefined): string {
   const c = cellValue(v);
   if (c === EMPTY_TABLE_VALUE) return c;
-  return WORDS.reduce((acc, [re, fr]) => acc.replace(re, fr), c);
+  const translated = WORDS.reduce((acc, [re, fr]) => acc.replace(re, fr), c);
+  // Clés techniques glissées dans un texte (« dont animal_types est vide ») :
+  // remplacées par leur libellé, en minuscule, entre guillemets français.
+  return translated.replace(/\b[a-z]+(?:_[a-z0-9]+)+\b/g, (k) => {
+    const l = adminLabel(k);
+    return `« ${l.charAt(0).toLocaleLowerCase("fr-FR")}${l.slice(1)} »`;
+  });
 }

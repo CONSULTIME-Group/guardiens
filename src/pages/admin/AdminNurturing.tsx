@@ -1,4 +1,4 @@
-import { adminLabel } from "@/lib/admin/labels";
+import { adminLabel, displayText } from "@/lib/admin/labels";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useEffect, useMemo, useState } from "react";
 import { fetchAllRows } from "@/lib/admin/fetchAllRows";
@@ -1150,7 +1150,7 @@ const AdminNurturing = () => {
                         <div className="flex items-start justify-between gap-3 flex-wrap">
                           <div>
                             <h3 className="font-semibold text-foreground">{labelSequence(s.key)}</h3>
-                            {s.description && <p className="text-xs text-muted-foreground mt-1 max-w-2xl">{s.description}</p>}
+                            {s.description && <p className="text-xs text-muted-foreground mt-1 max-w-2xl">{displayText(s.description)}</p>}
                           </div>
                           <div className="flex gap-1.5 flex-wrap items-center">
                             <Badge variant={s.active ? "default" : "outline"}>{s.active ? "Active" : "Inactive"}</Badge>
