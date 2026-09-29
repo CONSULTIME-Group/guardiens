@@ -39,6 +39,8 @@ export interface UseAlmaJournalResult {
   markActed: (ruleKey: AlmaJournalRuleKey) => void;
 }
 
+import { profileNudgeAllowed } from "@/lib/alma/profileNudge";
+
 export function useAlmaJournal(
   userId: string | undefined,
   activeRole: "owner" | "sitter",
@@ -47,9 +49,11 @@ export function useAlmaJournal(
   const [page, setPage] = useState<AlmaJournalPage>(EMPTY_PAGE);
   const completion = useProfileCompletionMissing(activeRole, enabled ? userId : undefined);
   const topMissing = useMemo(() => {
+    // Lot J3 : le journal parle du profil seulement sous 40 % de complétion.
+    if (!profileNudgeAllowed(completion.score)) return null;
     const item = [...completion.missing].sort((a, b) => b.points - a.points)[0];
     return item ? { label: item.label, points: item.points, href: item.href } : null;
-  }, [completion.missing]);
+  }, [completion.missing, completion.score]);
 
   useEffect(() => {
     if (!enabled || !userId) {
