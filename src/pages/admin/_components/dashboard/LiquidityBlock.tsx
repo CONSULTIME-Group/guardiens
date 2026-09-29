@@ -146,6 +146,7 @@ export const LiquidityBlock = () => {
                 className="block rounded-lg border border-border p-3 hover:shadow-md transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <p className="text-xs text-muted-foreground">{cell.label}</p>
+                <p className="text-[11px] text-muted-foreground/80">{cell.window}</p>
                 <p className="text-2xl font-bold mt-1">{cell.value}</p>
                 <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{cell.sub}</p>
               </Link>

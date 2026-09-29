@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
+import { UNAVAILABLE_LABEL, reportAdminReadError } from "@/lib/admin/readError";
 import { DEPT_NAMES } from "@/lib/departments";
 
 interface Row {
@@ -21,13 +22,14 @@ const countBy = (rows: Row[], key: keyof Row) => {
  * Lecture réservée aux administrateurs par les règles d'accès de la table.
  */
 export const VolunteerAvailabilityCard = () => {
-  const { data } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ["admin-volunteer-availability"],
     queryFn: async (): Promise<Row[]> => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("volunteer_availability")
         .select("structure_types, departments")
         .eq("available", true);
+      if (error) { reportAdminReadError("Bénévolat en association", error); throw error; }
       return data ?? [];
     },
   });
@@ -42,6 +44,11 @@ export const VolunteerAvailabilityCard = () => {
         <CardTitle className="text-base">Bénévolat en association</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {isError ? (
+          <p role="alert" className="text-sm text-destructive">{UNAVAILABLE_LABEL}</p>
+        ) : isLoading ? (
+          <p className="text-sm text-muted-foreground">Chargement…</p>
+        ) : (<>
         <p className="text-2xl font-semibold">{rows.length}</p>
         <p className="text-sm text-muted-foreground">personnes disponibles</p>
 
@@ -68,6 +75,7 @@ export const VolunteerAvailabilityCard = () => {
             ))}
           </ul>
         </div>
+        </>)}
       </CardContent>
     </Card>
   );

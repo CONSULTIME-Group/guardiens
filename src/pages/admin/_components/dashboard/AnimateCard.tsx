@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { UNAVAILABLE_LABEL, reportAdminReadError } from "@/lib/admin/readError";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SIGNAL_TYPES, ANIMATE_TYPES } from "../../../../../supabase/functions/_shared/admin-signal-config.ts";
 
@@ -15,7 +16,7 @@ export const ANIMATE_LINKS: Record<string, string> = {
  * relances automatiques continuent de tourner ; ici, deux compteurs exacts.
  */
 export const AnimateCard = () => {
-  const { data } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ["admin_animate_counts"],
     queryFn: async () => {
       const out: Record<string, number> = {};
@@ -25,7 +26,7 @@ export const AnimateCard = () => {
           .select("id", { count: "exact", head: true })
           .eq("signal_type", t)
           .is("resolved_at", null);
-        if (error) throw error;
+        if (error) { reportAdminReadError("À animer", error); throw error; }
         out[t] = count ?? 0;
       }
       return out;
@@ -42,7 +43,7 @@ export const AnimateCard = () => {
         <ul className="grid gap-3 sm:grid-cols-2">
           {ANIMATE_TYPES.map((t) => (
             <li key={t} className="rounded-lg border border-border p-3" data-testid={`animate-${t}`}>
-              <p className="text-2xl font-heading text-foreground">{data ? data[t] ?? 0 : "·"}</p>
+              <p className="text-2xl font-heading text-foreground">{isError ? <span className="text-base text-destructive">{UNAVAILABLE_LABEL}</span> : isLoading ? "…" : data?.[t] ?? 0}</p>
               <p className="text-sm text-muted-foreground">{SIGNAL_TYPES[t].label}</p>
               <Link to={ANIMATE_LINKS[t] ?? "/admin"} className="text-sm text-primary underline-offset-4 hover:underline">
                 Voir la liste
