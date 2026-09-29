@@ -142,7 +142,12 @@ export function useAlmaMood({ silent, conversationOpen }: UseAlmaMoodParams): Us
 
       // Météo côté serveur. Un échec laisse simplement la condition à null.
       // Lot P1 : une fois par jour au plus, lecture différée après l'affichage.
-      const weather = await getDailyWeather(user.id);
+      let weather: string | null = null;
+      try {
+        weather = await getDailyWeather(user.id);
+      } catch {
+        weather = null;
+      }
       if (cancelled) return;
 
       try {
