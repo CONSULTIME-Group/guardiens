@@ -28,6 +28,8 @@ const plural = (n: number, one: string, many: string) => (n > 1 ? many : one);
 
 interface Cell {
   label: string;
+  /** Fenêtre de lecture propre à la cellule (lot A10). */
+  window: string;
   value: string;
   sub: string;
   link: string;
@@ -54,12 +56,14 @@ export const LiquidityBlock = () => {
   if (data) {
     cells.push({
       label: "Annonces actives",
+      window: "À cet instant",
       value: String(data.active_listings),
       sub: `${data.eligible_sitters} ${plural(data.eligible_sitters, "gardien éligible", "gardiens éligibles")} à 100 km ou moins d'au moins une annonce`,
       link: "/admin/listings",
     });
     cells.push({
       label: "Candidatures en attente de réponse",
+      window: "À cet instant, toutes dates de dépôt",
       value: String(data.pending_applications),
       sub:
         data.pending_applications > 0 && data.pending_oldest_days !== null
@@ -70,6 +74,7 @@ export const LiquidityBlock = () => {
     if (data.response_count >= MIN_DENOMINATOR && data.response_median_hours !== null) {
       cells.push({
         label: "Délai médian de première réponse",
+        window: `Sur ${data.window_days} jours`,
         value: formatMedianHours(data.response_median_hours),
         sub: `Sur ${data.response_count} ${plural(data.response_count, "candidature avec réponse", "candidatures avec réponse")}`,
         link: "/admin/sits-management",
@@ -77,6 +82,7 @@ export const LiquidityBlock = () => {
     } else {
       cells.push({
         label: "Délai médian de première réponse",
+        window: `Sur ${data.window_days} jours`,
         value: "·",
         sub:
           data.response_count > 0
@@ -88,6 +94,7 @@ export const LiquidityBlock = () => {
     if (data.conversion_decided >= MIN_DENOMINATOR) {
       cells.push({
         label: "Conversion candidature vers garde confirmée",
+        window: `Sur ${data.window_days} jours`,
         value: `${data.conversion_accepted} sur ${data.conversion_decided}`,
         sub: "Candidatures tranchées (acceptées ou rejetées)",
         link: "/admin/sits-management",
@@ -95,6 +102,7 @@ export const LiquidityBlock = () => {
     } else {
       cells.push({
         label: "Conversion candidature vers garde confirmée",
+        window: `Sur ${data.window_days} jours`,
         value: String(data.conversion_accepted),
         sub: `Effectif trop faible pour un taux (${data.conversion_decided} ${plural(data.conversion_decided, "tranchée", "tranchées")})`,
         link: "/admin/sits-management",
@@ -110,7 +118,7 @@ export const LiquidityBlock = () => {
           Liquidité de la place de marché
         </CardTitle>
         <p className="text-xs text-muted-foreground">
-          Fenêtre glissante de {data?.window_days ?? 90} jours
+          Chaque cellule indique sa fenêtre : instantané pour les annonces et les attentes, {data?.window_days ?? 90} jours glissants pour les délais et la conversion
           {data?.generated_at
             ? ` · relevé le ${new Date(data.generated_at).toLocaleString("fr-FR")}`
             : ""}
