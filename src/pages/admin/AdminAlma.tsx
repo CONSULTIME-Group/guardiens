@@ -115,7 +115,7 @@ export default function AdminAlma() {
 
 
       <Tabs value={tab} onValueChange={handleTabChange}>
-        <TabsList>
+        <div className="overflow-x-auto -mx-1 px-1"><TabsList className="w-max">
           <TabsTrigger value="bubbles">
             <Sparkles className="h-4 w-4 mr-2" aria-hidden="true" /> Bulles
           </TabsTrigger>
@@ -134,7 +134,7 @@ export default function AdminAlma() {
           <TabsTrigger value="pilotage">
             <Sparkles className="h-4 w-4 mr-2" aria-hidden="true" /> Pilotage
           </TabsTrigger>
-        </TabsList>
+        </TabsList></div>
 
         <TabsContent value="bubbles" className="mt-4">
           <BubblesTab since={since} range={range} />
