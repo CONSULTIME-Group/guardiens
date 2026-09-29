@@ -8,6 +8,7 @@
 
 import {
   PRICING_IS_ACTIVE,
+  PRICING_ACTIVATION_DATE,
   SITTER_PRICE_MONTHLY,
   SITTER_PRICE_YEARLY,
   SITTER_PRICE_ONESHOT as CFG_SITTER_PRICE_ONESHOT,
@@ -16,6 +17,28 @@ import {
 const NBSP = "\u00A0";
 
 // ── Helpers publics ─────────────────────────────────────────────────────────
+/** Vrai quand le payant est réellement en vigueur : date renseignée et atteinte. */
+export function isPaywallInForce(
+  activationDate: string | null = PRICING_ACTIVATION_DATE,
+  now: Date = new Date(),
+): boolean {
+  if (!activationDate) return false;
+  const d = new Date(activationDate);
+  return !Number.isNaN(d.getTime()) && d <= now;
+}
+
+/**
+ * Accès gratuit pour tous les gardiens : flag éteint, ou flag allumé sans
+ * date d'activation atteinte. Aucune date codée en dur.
+ */
+export function isFreeAccessForAll(
+  pricingActive: boolean = PRICING_IS_ACTIVE,
+  activationDate: string | null = PRICING_ACTIVATION_DATE,
+  now: Date = new Date(),
+): boolean {
+  return !pricingActive || !isPaywallInForce(activationDate, now);
+}
+
 export function isPricingActive(): boolean {
   return PRICING_IS_ACTIVE;
 }

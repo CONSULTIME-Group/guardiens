@@ -12,7 +12,7 @@ import { PawPrint, Home } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { isBeforeLaunch, isInGracePeriod } from "@/lib/constants";
+import { isFreeAccessForAll } from "@/lib/pricing";
 import {
   startConversation,
   buildFirstMessageDraft,
@@ -115,7 +115,9 @@ const ActivateRoleDialog = ({
     if (!user) return;
     setLoading(true);
     try {
-      if (isBeforeLaunch() || isInGracePeriod()) {
+      // Même règle que useSubscriptionAccess : gratuit tant que le payant
+      // n'est pas en vigueur (flag et PRICING_ACTIVATION_DATE).
+      if (isFreeAccessForAll()) {
         const { error } = await supabase.rpc("change_user_role", {
           p_user_id: user.id,
           p_new_role: "both" as any,
