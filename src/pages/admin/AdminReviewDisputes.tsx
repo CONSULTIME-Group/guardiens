@@ -1,3 +1,4 @@
+import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { useEffect, useState } from "react";
 import { refreshAdminBadges } from "@/hooks/useAdminBadges";
 import Head from "@/components/seo/Head";
