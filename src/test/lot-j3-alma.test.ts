@@ -55,7 +55,7 @@ describe("J3, défaut 3 : classement du modèle", () => {
     expect(r.answer).toBe("Réponse.\nBROUILLON: Titre | Desc");
   });
   it("le serveur journalise une ligne manquante", () => {
-    expect(read("supabase/functions/alma-chat/index.ts")).toContain('console.warn("alma-chat classement absent"');
+    expect(read("supabase/functions/alma-chat/index.ts")).toContain('console.error("alma-chat classement absent"');
   });
 });
 

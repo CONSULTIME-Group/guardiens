@@ -518,7 +518,7 @@ Deno.serve(async (req) => {
     const extracted = extractClassification(rawOutput);
     if (!extracted.classification) {
       // Lot J3 : la ligne CLASSEMENT manque ou est illisible, on le journalise.
-      console.warn("alma-chat classement absent", JSON.stringify({
+      console.error("alma-chat classement absent", JSON.stringify({
         finish_reason: r.data?.choices?.[0]?.finish_reason ?? null,
         length: rawOutput.length,
         has_marker: /CLASSEMENT/i.test(rawOutput),
