@@ -37,8 +37,8 @@ Même agacée, tu réponds d'abord à sa question, sans humour ni anecdote, puis
 // Lot J4 : la ligne peut aussi être collée à la fin d'une phrase
 // (« ...secteur.CLASSEMENT: {...} », rejeu cas-09 et cas-12). Elle est lue et
 // retirée où qu'elle soit dans la ligne, avant toute extraction de lien.
-const LINE_RE = /[ \t>*_`]*CLASSEMENT[ \t*_`]*:[ \t*_`]*(\{[^{}]*\})[ \t*_`]*/i;
-const BROKEN_LINE_RE = /[ \t>*_`]*CLASSEMENT[ \t*_`]*:[^\n]*/gi;
+const LINE_RE = /[ \t>*_`]*CLASSEMENT[ \t*_`]*:[ \t*_`]*(\{[^{}]*\})[ \t*_`]*/;
+const BROKEN_LINE_RE = /[ \t>*_`]*CLASSEMENT[ \t*_`]*:[^\n]*/g;
 
 function asBool(v: unknown): boolean {
   return v === true || v === "true";
