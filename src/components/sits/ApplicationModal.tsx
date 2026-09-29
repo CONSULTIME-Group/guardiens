@@ -1,4 +1,3 @@
-import { fetchMyProfile, fetchMySitterProfile } from "@/lib/myProfile";
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -91,10 +90,10 @@ const ApplicationModal = ({
     if (!user || !open) return;
     const load = async () => {
       const [profileRes, sitterRes, reviewRes, badgeRes, galleryRes, sitRes, ownerAffRes] = await Promise.all([
-        fetchMyProfile(user.id!, { fresh: true }),
+        supabase.from("profiles").select("first_name, avatar_url, city, identity_verified, pro_status").eq("id", user.id).single(),
         // Projection complète des 16 champs d'AffinitySitterInput : parité
         // des entrées verrouillée par affinity-input-parity.test.ts.
-        fetchMySitterProfile(user.id!, { fresh: true }),
+        supabase.from("sitter_profiles").select("experience_years, animal_types, own_animals, travels_with_children, travels_with_own_animals, life_pace, lifestyle, availability_during, has_vehicle, has_license, farm_animals_ok, languages, interests, work_during_sit, sensitivities, special_animal_skills, sitter_type").eq("user_id", user.id).maybeSingle(),
         supabase.from("reviews").select("overall_rating").eq("reviewee_id", user.id).eq("published", true),
         supabase.from("badge_attributions").select("badge_id").eq("user_id", user.id),
         supabase.from("sitter_gallery").select("photo_url").eq("user_id", user.id).limit(4),

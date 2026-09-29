@@ -5,7 +5,6 @@
  *
  * Cache module-level pour éviter une refetch par carte dans une liste.
  */
-import { fetchMyOwnerProfile } from "@/lib/myProfile";
 import { useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,7 +14,7 @@ type Loaded = AffinityOwnerInput | null;
 
 async function fetchOwnerWithPets(userId: string): Promise<Loaded> {
   const [ownerRes, propsRes] = await Promise.all([
-    fetchMyOwnerProfile(userId!),
+    supabase.from("owner_profiles").select("*").eq("user_id", userId).maybeSingle(),
     supabase.from("properties").select("car_required, pets(species, special_needs, breed)").eq("user_id", userId),
   ]);
   if (!ownerRes.data) return null;
