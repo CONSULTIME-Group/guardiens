@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { refreshAdminBadges } from "@/hooks/useAdminBadges";
 import { fetchAllRows } from "@/lib/admin/fetchAllRows";
 import { createSeqGuard } from "@/lib/admin/requestSeq";
+import { canDeleteListing, canHideListing, deleteCountsSentence, hideListingUpdate, restoreListingUpdate, type DeleteCounts } from "@/lib/admin/listingActions";
 import { UrlFilterNotice } from "@/components/admin/UrlFilterNotice";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
@@ -91,6 +92,8 @@ const AdminListings = () => {
   if (seenUrlFilter !== urlFilter) {
     setSeenUrlFilter(urlFilter);
     if ((LISTING_FILTERS as readonly string[]).includes(urlFilter ?? "")) setFilterStatus(urlFilter as ListingFilter);
+    // Lot A9 : l'entrée « Annonces » du menu (sans filtre) ouvre la vue « En ligne ».
+    else if (!urlFilter) setFilterStatus("published");
   }
   const [statsReady, setStatsReady] = useState(false);
   const [statsError, setStatsError] = useState<string | null>(null);
@@ -298,26 +301,29 @@ const AdminListings = () => {
   const handleHide = async (id: string) => {
     const { data: userRes } = await supabase.auth.getUser();
     const adminId = userRes?.user?.id;
+    const listing = listings.find(l => l.id === id);
+    if (!listing || !canHideListing(listing.status)) {
+      toast.error("Seule une annonce en ligne ou un brouillon peut être masqué.");
+      setHideModal(null);
+      return;
+    }
     const { error } = await supabase
       .from("sits")
-      .update({ status: "cancelled" as any, hidden_by: adminId ?? null, hidden_at: new Date().toISOString() } as any)
+      .update(hideListingUpdate(listing.status, adminId ?? null, new Date().toISOString()) as any)
       .eq("id", id);
     if (error) {
       toast.error("Erreur : " + error.message);
       return;
     }
-    const listing = listings.find(l => l.id === id);
-    try {
-      if (listing?.user_id) {
-        await supabase.from("notifications").insert({
-          user_id: listing.user_id, type: "listing_hidden",
-          title: "Annonce masquée par l'admin",
-          body: `Votre annonce "${listing.title || "Sans titre"}" a été masquée de la recherche par un administrateur.`,
-          link: `/sits/${id}`,
-        });
-      }
-    } catch (e) {
-      console.error("notify owner hide:", e);
+    let notifyFailed = false;
+    if (listing.user_id) {
+      const { error: nErr } = await supabase.from("notifications").insert({
+        user_id: listing.user_id, type: "listing_hidden",
+        title: "Annonce masquée par l'équipe",
+        body: `Votre annonce "${listing.title || "Sans titre"}" est masquée de la recherche par l'équipe Guardiens.`,
+        link: `/sits/${id}`,
+      });
+      if (nErr) { notifyFailed = true; console.error("notify owner hide:", nErr); toast.error(`Annonce masquée, mais le propriétaire n'a pas été notifié : ${nErr.message}`); }
     }
     try {
       if (adminId) {
@@ -328,15 +334,16 @@ const AdminListings = () => {
     } catch (e) {
       console.error("admin_action_logs hide:", e);
     }
-    toast.success("Annonce masquée"); setHideModal(null); fetchListings(); refreshAdminBadges();
+    if (!notifyFailed) toast.success("Annonce masquée, propriétaire notifié"); setHideModal(null); fetchListings(); refreshAdminBadges();
   };
 
   const handleRestore = async (id: string) => {
     const { data: userRes } = await supabase.auth.getUser();
     const adminId = userRes?.user?.id;
+    const listing = listings.find(l => l.id === id);
     const { error } = await supabase
       .from("sits")
-      .update({ status: "published" as any, hidden_by: null, hidden_at: null } as any)
+      .update(restoreListingUpdate(listing ?? {}) as any)
       .eq("id", id);
     if (error) {
       toast.error("Erreur : " + error.message);
@@ -353,6 +360,22 @@ const AdminListings = () => {
     }
     toast.success("Annonce remise en ligne"); setRestoreModal(null); fetchListings(); refreshAdminBadges();
   };
+
+  const [deleteCounts, setDeleteCounts] = useState<DeleteCounts | null>(null);
+  const [deleteCountsError, setDeleteCountsError] = useState<string | null>(null);
+  useEffect(() => {
+    setDeleteCounts(null);
+    setDeleteCountsError(null);
+    if (!deleteModal) return;
+    let stale = false;
+    supabase.rpc("admin_listing_delete_counts" as any, { p_sit_id: deleteModal }).then(({ data, error }) => {
+      if (stale) return;
+      if (error) { setDeleteCountsError(error.message); return; }
+      const d = (data ?? {}) as Partial<DeleteCounts>;
+      setDeleteCounts({ applications: Number(d.applications) || 0, messages: Number(d.messages) || 0, reviews: Number(d.reviews) || 0, badges: Number(d.badges) || 0 });
+    });
+    return () => { stale = true; };
+  }, [deleteModal]);
 
   const handleDelete = async (id: string) => {
     const listing = listings.find(l => l.id === id);
@@ -814,14 +837,16 @@ const AdminListings = () => {
                         <Button variant="ghost" size="icon" title="Remettre en ligne" aria-label="Remettre en ligne" onClick={() => setRestoreModal(listing.id)}>
                           <Sparkles className="h-4 w-4 text-primary" />
                         </Button>
-                      ) : isAuthorCancelled ? null : (
+                      ) : canHideListing(listing.status) ? (
                         <Button variant="ghost" size="icon" title="Masquer" aria-label="Masquer l'annonce" onClick={() => setHideModal(listing.id)}>
                           <EyeOff className="h-4 w-4" />
                         </Button>
+                      ) : null}
+                      {canDeleteListing(listing.status) && (
+                        <Button variant="ghost" size="icon" title="Supprimer" aria-label="Supprimer l'annonce" onClick={() => setDeleteModal(listing.id)}>
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
                       )}
-                      <Button variant="ghost" size="icon" title="Supprimer" aria-label="Supprimer l'annonce" onClick={() => setDeleteModal(listing.id)}>
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -962,7 +987,14 @@ const AdminListings = () => {
       <Dialog open={!!restoreModal} onOpenChange={(o) => !o && setRestoreModal(null)}>
         <DialogContent>
           <DialogHeader><DialogTitle>Remettre cette annonce en ligne ?</DialogTitle></DialogHeader>
-          <DialogDescription>L'annonce redeviendra visible dans la recherche.</DialogDescription>
+          <DialogDescription>
+            {(() => {
+              const l = listings.find((x) => x.id === restoreModal);
+              return l?.status_before_hidden === "draft"
+                ? "L'annonce retrouve son statut d'avant masquage : brouillon."
+                : "L'annonce retrouve son statut d'avant masquage et redevient visible dans la recherche.";
+            })()}
+          </DialogDescription>
           <DialogFooter>
             <Button variant="outline" onClick={() => setRestoreModal(null)}>Annuler</Button>
             <Button onClick={() => restoreModal && handleRestore(restoreModal)}>Remettre en ligne</Button>
@@ -975,13 +1007,15 @@ const AdminListings = () => {
         <DialogContent>
           <DialogHeader><DialogTitle>Supprimer cette annonce ?</DialogTitle></DialogHeader>
           <DialogDescription>
-            {deleteModal && (stats[deleteModal]?.applications || 0) > 0
-              ? `Cette annonce a ${stats[deleteModal].applications} candidature${stats[deleteModal].applications > 1 ? "s" : ""}. Elles seront supprimées avec l'annonce. Cette action est irréversible.`
-              : "Cette action est irréversible. Le propriétaire sera notifié."}
+            {deleteCountsError
+              ? `Décompte indisponible : ${deleteCountsError}`
+              : deleteCounts
+                ? `${deleteCountsSentence(deleteCounts)} Action irréversible, le propriétaire est notifié.`
+                : "Décompte en cours…"}
           </DialogDescription>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteModal(null)}>Annuler</Button>
-            <Button variant="destructive" onClick={() => deleteModal && handleDelete(deleteModal)}>Supprimer définitivement</Button>
+            <Button variant="destructive" disabled={!deleteCounts} onClick={() => deleteModal && handleDelete(deleteModal)}>Supprimer définitivement</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
