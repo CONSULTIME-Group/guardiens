@@ -70,7 +70,7 @@ export function isClosingMessage(question: string): boolean {
 }
 
 /** Lot J4 : l'information d'abord, jamais une anecdote en première phrase. */
-const OPENING_ANECDOTE = /^[^.!?\n]{0,40}(sieste|marche du milieu|escalier|j'ai (pass[ée] la nuit|dormi|r[êe]v[ée])|mes pattes|chiffonn|[ée]cureuil|courir apr[èe]s un chat|mon humeur)/i;
+const OPENING_ANECDOTE = /^[^.!?\n]{0,80}(sieste|marche du milieu|escalier|j'ai (pass[ée] la nuit|dormi|r[êe]v[ée])|mes pattes|chiffonn|[ée]cureuil|courir apr[èe]s un chat|mon humeur)/i;
 
 export function checkReplayAnswer(a: ReplayAnswer): ReplayVerdict {
   const reasons: string[] = [];
