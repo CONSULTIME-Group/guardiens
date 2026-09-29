@@ -11,6 +11,7 @@ import {
   buildNoelDataFor,
   loadFounderFollowupIds,
   loadPublishedOwnerIds,
+  loadSitterPool,
   type NoelTemplateData,
 } from "../_shared/owner-noel-audience.ts";
 
