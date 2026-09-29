@@ -5,7 +5,7 @@
  * on affiche l'accueil unique. `markSeen()` bascule le flag côté DB (et
  * met à jour l'état local optimiste). Aucune reréapparition possible.
  */
-import { fetchMyProfile } from "@/lib/myProfile";
+import { fetchMyProfile, patchMyProfileCache } from "@/lib/myProfile";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -39,6 +39,7 @@ export function useAlmaFirstMeeting() {
   const markSeen = useCallback(async () => {
     if (!user?.id) return;
     setState((s) => ({ ...s, seen: true }));
+    patchMyProfileCache(user.id, { alma_first_meeting_seen: true });
     try {
       await supabase
         .from("profiles")

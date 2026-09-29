@@ -7,7 +7,7 @@
  * Retourne "balanced" tant que la valeur n'est pas chargée, pour ne pas masquer
  * l'UI par défaut. `silent` = kill switch dur pour toutes les bulles proactives.
  */
-import { fetchMyProfile } from "@/lib/myProfile";
+import { fetchMyProfile, patchMyProfileCache } from "@/lib/myProfile";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -50,6 +50,7 @@ export function useAlmaFrequency(): {
       .from("profiles")
       .update({ alma_frequency: f } as any)
       .eq("id", user.id);
+    patchMyProfileCache(user.id, { alma_frequency: f });
   };
 
   return { frequency, loading, setFrequency };
