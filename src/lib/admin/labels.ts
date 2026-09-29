@@ -211,7 +211,23 @@ export const suppressionReasonLabel = (k: string | null | undefined) => adminLab
 export function templateDisplayName(name: string | null | undefined): string {
   const c = cellValue(name);
   if (c === EMPTY_TABLE_VALUE) return c;
-  return c.replace(/\bDigest quotidien\b/g, "Résumé quotidien").replace(/\bDigest\b/g, "Résumé quotidien").replace(/\bdigest\b/g, "résumé quotidien");
+  return digestToResume(c);
+}
+
+/**
+ * Traduction unique de « Digest » (A14) : la cadence d'origine est conservée,
+ * jamais ajoutée. « Digest hebdo » donne « Résumé hebdomadaire », « Digest
+ * quotidien » donne « Résumé quotidien », « Digest » seul donne « Résumé ».
+ */
+export function digestToResume(text: string): string {
+  return text
+    .replace(/\bDigest demandes d'analyse\b/g, "Résumé des demandes d'analyse")
+    .replace(/\bDigests? (hebdo|hebdomadaire)\b/g, "Résumé hebdomadaire")
+    .replace(/\bdigests? (hebdo|hebdomadaire)\b/g, "résumé hebdomadaire")
+    .replace(/\bDigests? quotidiens?\b/g, "Résumé quotidien")
+    .replace(/\bdigests? quotidiens?\b/g, "résumé quotidien")
+    .replace(/\bDigests?\b/g, "Résumé")
+    .replace(/\bdigests?\b/g, "résumé");
 }
 
 export const AUDIT_ACTION_LABELS: Dict = {
@@ -471,8 +487,6 @@ export function memberName(v: string | null | undefined): string {
 }
 
 const WORDS: Array<[RegExp, string]> = [
-  [/\bDigests?\b/g, "Résumé quotidien"],
-  [/\bdigests?\b/g, "résumé quotidien"],
   [/\bFeedback\b/g, "Retour"],
   [/\bfeedback\b/g, "retour"],
   [/\bBounces?\b/g, "Rebond"],
