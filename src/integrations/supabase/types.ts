@@ -6850,6 +6850,7 @@ export type Database = {
           created_at: string
           details: string | null
           id: string
+          member_message: string | null
           reason: string
           report_type: string
           reporter_id: string
@@ -6865,6 +6866,7 @@ export type Database = {
           created_at?: string
           details?: string | null
           id?: string
+          member_message?: string | null
           reason?: string
           report_type?: string
           reporter_id: string
@@ -6880,6 +6882,7 @@ export type Database = {
           created_at?: string
           details?: string | null
           id?: string
+          member_message?: string | null
           reason?: string
           report_type?: string
           reporter_id?: string
@@ -6916,6 +6919,7 @@ export type Database = {
           created_at: string
           disputer_id: string
           id: string
+          member_message: string | null
           reason: string
           resolved_at: string | null
           resolved_by: string | null
@@ -6929,6 +6933,7 @@ export type Database = {
           created_at?: string
           disputer_id: string
           id?: string
+          member_message?: string | null
           reason: string
           resolved_at?: string | null
           resolved_by?: string | null
@@ -6942,6 +6947,7 @@ export type Database = {
           created_at?: string
           disputer_id?: string
           id?: string
+          member_message?: string | null
           reason?: string
           resolved_at?: string | null
           resolved_by?: string | null
@@ -7690,6 +7696,7 @@ export type Database = {
           specific_expectations: string | null
           start_date: string | null
           status: Database["public"]["Enums"]["sit_status"]
+          status_before_hidden: string | null
           title: string
           unpublished_at: string | null
           updated_at: string
@@ -7742,6 +7749,7 @@ export type Database = {
           specific_expectations?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["sit_status"]
+          status_before_hidden?: string | null
           title?: string
           unpublished_at?: string | null
           updated_at?: string
@@ -7794,6 +7802,7 @@ export type Database = {
           specific_expectations?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["sit_status"]
+          status_before_hidden?: string | null
           title?: string
           unpublished_at?: string | null
           updated_at?: string
@@ -8528,6 +8537,7 @@ export type Database = {
           sit_mode: Database["public"]["Enums"]["mission_sit_mode"] | null
           slug: string
           status: Database["public"]["Enums"]["small_mission_status"]
+          status_before_hidden: string | null
           title: string
           updated_at: string
           user_id: string
@@ -8575,6 +8585,7 @@ export type Database = {
           sit_mode?: Database["public"]["Enums"]["mission_sit_mode"] | null
           slug: string
           status?: Database["public"]["Enums"]["small_mission_status"]
+          status_before_hidden?: string | null
           title?: string
           updated_at?: string
           user_id: string
@@ -8622,6 +8633,7 @@ export type Database = {
           sit_mode?: Database["public"]["Enums"]["mission_sit_mode"] | null
           slug?: string
           status?: Database["public"]["Enums"]["small_mission_status"]
+          status_before_hidden?: string | null
           title?: string
           updated_at?: string
           user_id?: string
@@ -10639,6 +10651,7 @@ export type Database = {
           unread_count: number
         }[]
       }
+      admin_listing_delete_counts: { Args: { p_sit_id: string }; Returns: Json }
       admin_log_message_failure: {
         Args: {
           p_content: string
