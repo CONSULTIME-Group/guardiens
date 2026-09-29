@@ -131,7 +131,7 @@ export function ConversationsTab({ since }: { since: string }) {
             </p>
             <p className="text-xs text-muted-foreground">
               {followed.rate === null
-                ? "Aucune réponse de la période ne propose d'action."
+                ? "Aucune réponse de la période ne propose d'action, comptes admins exclus."
                 : `${followed.count} sur ${followed.total} réponses avec une action proposée`}
             </p>
           </CardContent>
