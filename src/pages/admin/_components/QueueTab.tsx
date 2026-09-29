@@ -405,7 +405,7 @@ export function QueueTab() {
                           )}
                         </TableCell>
                         <TableCell className="text-xs">
-                          {r.bounced_at && <div className="text-destructive">Bounce {fmt(r.bounced_at)}</div>}
+                          {r.bounced_at && <div className="text-destructive">Rebond {fmt(r.bounced_at)}</div>}
                           {r.complained_at && <div className="text-destructive">Plainte {fmt(r.complained_at)}</div>}
                           {r.error_message && (
                             <div className="text-muted-foreground truncate max-w-[200px]" title={r.error_message}>

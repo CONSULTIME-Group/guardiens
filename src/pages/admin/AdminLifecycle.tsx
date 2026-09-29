@@ -281,7 +281,7 @@ const AdminLifecycle = () => {
       </Card>
 
       <Card>
-        <CardHeader><CardTitle className="text-lg">Templates email (fenêtre {windowDays} j)</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="text-lg">Modèles d'email (fenêtre {windowDays} j)</CardTitle></CardHeader>
         <CardContent className="overflow-x-auto">
           {loading ? <p className="text-sm text-muted-foreground">Chargement…</p> : tpls.length === 0 ? (
             <p className="text-sm text-muted-foreground">Aucun envoi sur la période.</p>
