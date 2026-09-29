@@ -5,10 +5,13 @@
 // public.mutual_aid_weekly_digest_plan : rayon d'entraide du membre,
 // opt-in par defaut, disponibilite pour aider, suppressions, et garde-fou
 // "aucune annonce dans le rayon". Cote fonction, on se contente d'envoyer.
-// Body : { dry_run?: boolean, recipient_id?: string, manual?: boolean }
+// Body : { dry_run?: boolean, recipient_id?: string, manual?: boolean, pass?: 'catch_up' }
+// Rattrapage (lot A15) : second passage le mardi 10:00 UTC, meme plan, meme cle
+// anti-doublon, meme verification du journal sur 6 jours.
 import { createClient } from 'npm:@supabase/supabase-js@2.45.0'
 import { requireCronCaller } from '../_shared/require-cron-caller.ts'
 import { startCronRun } from '../_shared/cron-run-log.ts'
+import { DIGEST_BATCH_PAUSE_MS, DIGEST_BATCH_SIZE, DigestErrorCollector, errorStatusKey, runInBatches } from '../_shared/digest-batching.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -19,7 +22,6 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
 const TEMPLATE = 'mutual-aid-weekly-digest'
-const BATCH_SIZE = 20
 
 interface PlanRow {
   user_id: string
@@ -38,11 +40,12 @@ Deno.serve(async (req) => {
   if (guard) return guard
 
   const run = await startCronRun('send-mutual-aid-weekly-digest')
-  let body: { dry_run?: boolean; recipient_id?: string; manual?: boolean } = {}
+  let body: { dry_run?: boolean; recipient_id?: string; manual?: boolean; pass?: string } = {}
   try { if (req.body) body = await req.json() } catch { /* noop */ }
 
   const admin = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } })
   const now = Date.now()
+  const startedAt = now
   const weekAgoIso = new Date(now - 7 * 86400_000).toISOString()
   const dedupWindowIso = new Date(now - 6 * 86400_000).toISOString()
 
@@ -60,9 +63,10 @@ Deno.serve(async (req) => {
     }
     planRows = planRows.filter((r) => !!r.email)
 
+    const pass = body.pass === 'catch_up' ? 'catch_up' : 'main'
     const planned = planRows.length
     if (planned === 0) {
-      await run.finish('success', { planned: 0, sent: 0, skipped: 0, failed: 0, dry_run: !!body.dry_run })
+      await run.finish('success', { planned: 0, sent: 0, skipped: 0, failed: 0, dry_run: !!body.dry_run, pass, duration_ms: Date.now() - startedAt })
       return json({ ok: true, planned: 0, sent: 0, skipped: 0, failed: 0, reason: 'no_plan' })
     }
 
@@ -113,11 +117,8 @@ Deno.serve(async (req) => {
       answersCount: q.answers_count ?? 0,
     }))
 
-    // === 3. Envoi par lots de 20 en parallele ===
-    let sent = 0
-    let skipped = 0
-    let failed = 0
-    const errors: Array<{ user_id: string; reason: string }> = []
+    // === 3. Envoi par lots de 5, pause de 700 ms (sous 10 envois/s Resend) ===
+    const collector = new DigestErrorCollector()
     const dayKey = new Date().toISOString().slice(0, 10)
 
     async function processOne(row: PlanRow): Promise<'sent' | 'skipped' | 'failed'> {
@@ -163,30 +164,21 @@ Deno.serve(async (req) => {
       })
       if (!res.ok) {
         const txt = await res.text().catch(() => '')
-        console.error('send-transactional-email failed', res.status, txt)
-        errors.push({ user_id: row.user_id, reason: `send-transactional-email ${res.status}: ${txt}` })
+        console.error('send-transactional-email failed', res.status, txt.slice(0, 200))
+        collector.add(row.user_id, res.status, txt)
         return 'failed'
       }
       return 'sent'
     }
 
-    for (let i = 0; i < planRows.length; i += BATCH_SIZE) {
-      const batch = planRows.slice(i, i + BATCH_SIZE)
-      const outcomes = await Promise.all(batch.map(async (row) => {
-        try {
-          return await processOne(row)
-        } catch (e) {
-          console.error('[send-mutual-aid-weekly-digest] recipient failed', row.user_id, e)
-          errors.push({ user_id: row.user_id, reason: String(e) })
-          return 'failed' as const
-        }
-      }))
-      for (const outcome of outcomes) {
-        if (outcome === 'sent') sent++
-        else if (outcome === 'skipped') skipped++
-        else failed++
-      }
-    }
+    const { sent, skipped, failed } = await runInBatches(planRows, processOne, {
+      batchSize: DIGEST_BATCH_SIZE,
+      pauseMs: DIGEST_BATCH_PAUSE_MS,
+      onThrow: (row, e) => {
+        console.error('[send-mutual-aid-weekly-digest] recipient failed', row.user_id, e)
+        collector.add(row.user_id, errorStatusKey(e), e)
+      },
+    })
 
     // Surveillance : un ecart d'envoi de plus de 20 pour cent remonte en
     // 'partial', pour que les alertes existantes voient le digest mourir.
@@ -204,6 +196,10 @@ Deno.serve(async (req) => {
       avg_missions: Number(avgMissions.toFixed(2)),
       dry_run: !!body.dry_run,
       shortfall_ratio: planned > 0 ? Number((1 - sent / planned).toFixed(2)) : 0,
+      pass,
+      errors: collector.errors,
+      failed_by_status: collector.byStatus,
+      duration_ms: Date.now() - startedAt,
     })
 
     return json({
@@ -214,7 +210,9 @@ Deno.serve(async (req) => {
       failed,
       avg_missions: Number(avgMissions.toFixed(2)),
       dry_run: !!body.dry_run,
-      errors: errors.slice(0, 20),
+      pass,
+      errors: collector.errors,
+      failed_by_status: collector.byStatus,
     })
   } catch (err) {
     console.error('[send-mutual-aid-weekly-digest] fatal', err)
