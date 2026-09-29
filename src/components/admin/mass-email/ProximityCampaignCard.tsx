@@ -248,7 +248,7 @@ const ProximityCampaignCard = ({
                       {preview.recipients.map((r) => (
                         <TableRow key={r.email}>
                           <TableCell className="text-xs">{r.first_name || "(sans prénom)"}</TableCell>
-                          <TableCell className="text-xs">{r.city || ","}</TableCell>
+                          <TableCell className="text-xs">{r.city || "·"}</TableCell>
                           <TableCell className="text-xs text-right">{r.distance_km} km</TableCell>
                           <TableCell className="text-xs font-mono">{r.email}</TableCell>
                         </TableRow>

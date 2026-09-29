@@ -1,3 +1,4 @@
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useState } from "react";
 import { refreshAdminBadges } from "@/hooks/useAdminBadges";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -176,12 +177,7 @@ const AdminGuides = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Guides locaux</h1>
-        <p className="text-muted-foreground text-sm">
-          {guides.length} guides • Générés par IA avec lieux réels
-        </p>
-      </div>
+      <AdminPageHeader title="Guides locaux" description={`${guides.length} guides · générés par IA avec des lieux réels`} />
 
       <Card>
         <CardHeader>

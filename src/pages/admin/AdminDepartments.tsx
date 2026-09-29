@@ -1,3 +1,5 @@
+import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -135,10 +137,7 @@ const AdminDepartments = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Pages départements</h1>
-        <p className="text-muted-foreground text-sm">{pages.length} départements</p>
-      </div>
+      <AdminPageHeader title="Départements" description={`${pages.length} pages départements`} />
 
       <Card>
         <CardHeader>
@@ -167,15 +166,21 @@ const AdminDepartments = () => {
           <div className="rounded-md border border-dashed p-4 space-y-2">
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <div>
-                <p className="font-medium text-sm">Batch SEO programmatique</p>
+                <p className="font-medium text-sm">Génération par lot</p>
                 <p className="text-xs text-muted-foreground">
                   Génère les pages des 101 départements français (DOM-TOM inclus). Départements déjà créés ignorés. ~3 min.
                 </p>
               </div>
-              <Button onClick={handleBatchAll} disabled={batchRunning || generating} variant="secondary" className="gap-2">
-                {batchRunning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
-                Générer tous les départements
-              </Button>
+              <ConfirmDialog
+                trigger={<Button disabled={batchRunning || generating} variant="secondary" className="gap-2">
+                  {batchRunning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
+                  Générer tous les départements
+                </Button>}
+                title="Générer les pages des 101 départements ?"
+                description="Les départements déjà créés sont ignorés. La génération dure environ 3 minutes et consomme des crédits IA."
+                confirmLabel="Lancer la génération"
+                onConfirm={handleBatchAll}
+              />
             </div>
             {batchProgress && (
               <div className="text-xs text-muted-foreground">

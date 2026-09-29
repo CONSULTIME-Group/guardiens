@@ -1,3 +1,4 @@
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -91,9 +92,7 @@ const AdminLongTailArticles = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-          Articles longue traîne
-        </h1>
+        <AdminPageHeader title="Articles longue traîne" description="Module verrouillé depuis le 11/07, consultable par son adresse." />
         <p className="text-muted-foreground text-sm">
           {totalGenerated} / {ALL_PAIRS.length} combinaisons ville × race déjà créées (brouillon)
         </p>

@@ -1,3 +1,4 @@
+import { adminLabel, ALMA_FACT_TYPE_LABELS } from "@/lib/admin/labels";
 import { fetchAllRows } from "@/lib/admin/fetchAllRows";
 import { reportAdminReadError, UNAVAILABLE_LABEL } from "@/lib/admin/readError";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -114,12 +115,12 @@ export default function AdminAlma() {
 
 
       <Tabs value={tab} onValueChange={handleTabChange}>
-        <TabsList>
+        <div className="overflow-x-auto -mx-1 px-1"><TabsList className="w-max">
           <TabsTrigger value="bubbles">
             <Sparkles className="h-4 w-4 mr-2" aria-hidden="true" /> Bulles
           </TabsTrigger>
           <TabsTrigger value="whispers">
-            <MessageCircle className="h-4 w-4 mr-2" aria-hidden="true" /> Whispers
+            <MessageCircle className="h-4 w-4 mr-2" aria-hidden="true" /> Murmures
           </TabsTrigger>
           <TabsTrigger value="cultural-facts">
             <BookOpen className="h-4 w-4 mr-2" aria-hidden="true" /> Faits culturels
@@ -133,7 +134,7 @@ export default function AdminAlma() {
           <TabsTrigger value="pilotage">
             <Sparkles className="h-4 w-4 mr-2" aria-hidden="true" /> Pilotage
           </TabsTrigger>
-        </TabsList>
+        </TabsList></div>
 
         <TabsContent value="bubbles" className="mt-4">
           <BubblesTab since={since} range={range} />
@@ -372,7 +373,7 @@ function WhispersTab({ since, range }: { since: string; range: Range }) {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <KpiCard label="Whispers émis" value={whispersError ? UNAVAILABLE_LABEL : totals.emitted} />
+        <KpiCard label="Murmures émis" value={whispersError ? UNAVAILABLE_LABEL : totals.emitted} />
         <KpiCard label="Taux d'action" value={whispersError ? UNAVAILABLE_LABEL : fmtPct(totals.actionRate)} />
         <KpiCard label="Taux de rejet" value={whispersError ? UNAVAILABLE_LABEL : fmtPct(totals.dismissRate)} />
         <KpiCard label="Personnes qui ont coupé ce type" value={whispersError ? UNAVAILABLE_LABEL : totals.blacklisted} />
@@ -942,9 +943,9 @@ function MatchingDiagnosisCard() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Fact type</TableHead>
-                  <TableHead className="text-right">Seeds actifs</TableHead>
+                  <TableHead className="text-right">Amorces actives</TableHead>
                   <TableHead className="text-right">Éligibles</TableHead>
-                  <TableHead className="text-right">Muted</TableHead>
+                  <TableHead className="text-right">En sourdine</TableHead>
                   <TableHead className="text-right">Saison</TableHead>
                   <TableHead className="text-right">Surface</TableHead>
                   <TableHead className="text-right">Contexte</TableHead>
@@ -958,7 +959,7 @@ function MatchingDiagnosisCard() {
                   const noEligible = r.count_eligible === 0;
                   return (
                     <TableRow key={r.fact_type} className={noEligible ? "opacity-70" : undefined}>
-                      <TableCell className="font-mono text-xs">{r.fact_type}</TableCell>
+                      <TableCell className="text-xs" title={r.fact_type}>{adminLabel(r.fact_type, ALMA_FACT_TYPE_LABELS)}</TableCell>
                       <TableCell className="text-right tabular-nums">{total}</TableCell>
                       <TableCell className="text-right tabular-nums">
                         <span className={noEligible ? "text-destructive font-semibold" : "text-foreground"}>

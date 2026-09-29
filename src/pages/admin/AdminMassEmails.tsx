@@ -1,3 +1,4 @@
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -750,8 +751,8 @@ const AdminMassEmails = () => {
   const hasInsecureLinks = /http:\/\//i.test(body);
 
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold text-foreground">Envois groupés</h1>
+    <div className="space-y-6">
+      <AdminPageHeader title="Envois groupés" description="Préparez, vérifiez puis envoyez une campagne à un segment de membres." />
 
 
 
@@ -799,7 +800,7 @@ const AdminMassEmails = () => {
                     <Loader2 className="h-3 w-3 animate-spin" /> Calcul…
                   </span>
                 ) : (
-                  `→ ${recipientCount ?? ","} destinataires correspondent à ces critères`
+                  `→ ${recipientCount ?? "·"} destinataires correspondent à ces critères`
                 )}
               </p>
             </CardContent>
@@ -946,7 +947,7 @@ const AdminMassEmails = () => {
 
 
               <div className="flex items-center justify-between pt-2 border-t border-border">
-                <Label htmlFor="cta-toggle" className="text-sm">Ajouter un bouton CTA</Label>
+                <Label htmlFor="cta-toggle" className="text-sm">Ajouter un bouton d'action</Label>
                 <Switch id="cta-toggle" checked={ctaEnabled} onCheckedChange={setCtaEnabled} />
               </div>
 
@@ -969,7 +970,7 @@ const AdminMassEmails = () => {
                   <div className="pt-3 border-t border-border space-y-3">
                     <div className="flex items-center justify-between">
                       <div>
-                        <Label htmlFor="utm-toggle" className="text-sm">Tracking UTM (liens internes)</Label>
+                        <Label htmlFor="utm-toggle" className="text-sm">Suivi UTM (liens internes)</Label>
                         <p className="text-xs text-muted-foreground">Ajouté automatiquement aux URL guardiens.fr</p>
                       </div>
                       <Switch id="utm-toggle" checked={utmEnabled} onCheckedChange={setUtmEnabled} />
@@ -1019,7 +1020,7 @@ const AdminMassEmails = () => {
                 <p className="text-xs text-muted-foreground">
                   Tout est pré-rempli et tracé (campaign : <code className="font-mono">{effectiveCampaign}</code>).
                   Cliquez ci-dessous pour ouvrir l'aperçu, puis confirmez l'envoi à{" "}
-                  <strong className="text-foreground">{recipientCount ?? ","}</strong> destinataires.
+                  <strong className="text-foreground">{recipientCount ?? "·"}</strong> destinataires.
                 </p>
               </div>
             </div>
@@ -1270,14 +1271,14 @@ const AdminMassEmails = () => {
                 <div className="text-sm space-y-1.5">
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Objet</span>
-                    <span className="font-medium text-right max-w-[60%] truncate">{subject || ","}</span>
+                    <span className="font-medium text-right max-w-[60%] truncate">{subject || "·"}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Corps</span>
                     <span>{body.length} car.</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Bouton CTA</span>
+                    <span className="text-muted-foreground">Bouton d'action</span>
                     <span>{ctaEnabled ? `« ${ctaLabel} »` : "Aucun"}</span>
                   </div>
                 </div>
@@ -1287,7 +1288,7 @@ const AdminMassEmails = () => {
                 <div className="rounded-lg border border-border p-4 space-y-2">
                   <h3 className="text-sm font-semibold">Lien & tracking</h3>
                   <div className="text-xs text-muted-foreground break-all bg-muted/40 p-2 rounded">
-                    {withUtm(ctaUrl) || ","}
+                    {withUtm(ctaUrl) || "·"}
                   </div>
                   {utmEnabled && (
                     <div className="flex flex-wrap gap-1.5 text-xs">
@@ -1300,7 +1301,7 @@ const AdminMassEmails = () => {
 
               <div className="rounded-lg border border-border p-4 space-y-2">
                 <h3 className="text-sm font-semibold">Contrôle qualité</h3>
-                <p className="text-xs text-muted-foreground">Indicatif. N'empêche jamais l'envoi.</p>
+                <p className="text-xs text-muted-foreground">Indicatif : l'envoi reste possible.</p>
                 <ul className="space-y-1.5 text-xs">
                   <li className="flex items-start gap-2">
                     {spamFound.length > 0 ? (

@@ -1,3 +1,4 @@
+import { adminLabel, AUDIT_ACTION_LABELS } from "@/lib/admin/labels";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -60,7 +61,7 @@ interface AdminInfo {
 }
 
 function actionLabel(code: string): string {
-  return ACTION_LABELS[code] ?? code;
+  return ACTION_LABELS[code] ?? adminLabel(code, AUDIT_ACTION_LABELS);
 }
 
 function targetHref(row: LogRow): string | null {
@@ -72,9 +73,6 @@ function targetHref(row: LogRow): string | null {
       const slug = (row.metadata as any)?.slug;
       return `/petites-missions/${slug ?? row.target_id}`;
     }
-    case "pro_directory":
-    case "pro":
-      return `/annuaire-pros`;
     case "sit":
     case "garde":
       return `/admin/sits-management`;

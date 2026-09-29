@@ -96,7 +96,7 @@ const DeliveryTab = () => {
     });
     setRunning(false);
     if (error) { toast.error("Erreur : " + error.message); return; }
-    toast.success(dryRun ? "Dry-run OK" : `Snapshot calculé (${data?.breaches?.length || 0} alertes)`);
+    toast.success(dryRun ? "Simulation réussie" : `Snapshot calculé (${data?.breaches?.length || 0} alertes)`);
     load();
   };
 
@@ -138,7 +138,7 @@ const DeliveryTab = () => {
         <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
           <Kpi label="Envoyés" value={latest.total_sent} />
           <Kpi label="Livrés" value={latest.total_delivered} />
-          <Kpi label="Bounce" value={pct(latest.bounce_rate)} tone={latest.bounce_rate > (threshold?.bounce_pct_max ?? 5) ? "destructive" : "muted"} />
+          <Kpi label="Rejets" value={pct(latest.bounce_rate)} tone={latest.bounce_rate > (threshold?.bounce_pct_max ?? 5) ? "destructive" : "muted"} />
           <Kpi label="Plainte" value={pct(latest.complaint_rate)} tone={latest.complaint_rate > (threshold?.complaint_pct_max ?? 0.1) ? "destructive" : "muted"} />
           <Kpi label="Ouverture" value={pct(latest.open_rate)} tone={latest.total_sent > (threshold?.min_sends ?? 10) && latest.open_rate < (threshold?.open_pct_min ?? 15) ? "warning" : "success"} />
           <Kpi label="Clic" value={pct(latest.click_rate)} tone="muted" />
@@ -173,7 +173,7 @@ const DeliveryTab = () => {
               <TableHead className="text-xs">Date</TableHead>
               <TableHead className="text-xs text-right">Envoyés</TableHead>
               <TableHead className="text-xs text-right">Livrés</TableHead>
-              <TableHead className="text-xs text-right">Bounce</TableHead>
+              <TableHead className="text-xs text-right">Rejets</TableHead>
               <TableHead className="text-xs text-right">Plainte</TableHead>
               <TableHead className="text-xs text-right">Ouverture</TableHead>
               <TableHead className="text-xs text-right">Clic</TableHead>
@@ -208,7 +208,7 @@ const DeliveryTab = () => {
           <DialogHeader><DialogTitle>Modifier les seuils de délivrabilité</DialogTitle></DialogHeader>
           {draft && (
             <div className="space-y-3">
-              <NumField label="Bounce max (%)" value={draft.bounce_pct_max} onChange={(v) => setDraft({ ...draft, bounce_pct_max: v })} step={0.1} />
+              <NumField label="Rejets maximum (%)" value={draft.bounce_pct_max} onChange={(v) => setDraft({ ...draft, bounce_pct_max: v })} step={0.1} />
               <NumField label="Ouverture min (%)" value={draft.open_pct_min} onChange={(v) => setDraft({ ...draft, open_pct_min: v })} step={0.5} />
               <NumField label="Plainte max (%)" value={draft.complaint_pct_max} onChange={(v) => setDraft({ ...draft, complaint_pct_max: v })} step={0.01} />
               <NumField label="Min envois pour évaluer l'ouverture" value={draft.min_sends} onChange={(v) => setDraft({ ...draft, min_sends: Math.round(v) })} step={1} />

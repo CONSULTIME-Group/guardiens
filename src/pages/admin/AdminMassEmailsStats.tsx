@@ -1,3 +1,4 @@
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -152,14 +153,9 @@ export default function AdminMassEmailsStats() {
   );
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-semibold">Campagnes mail</h1>
-          <p className="text-sm text-muted-foreground">
-            Envoyés, clics uniques, missions créées, CTR et taux de conversion par campagne.
-          </p>
-        </div>
+    <div className="space-y-6">
+      <AdminPageHeader title="Stats campagnes" description="Envoyés, clics uniques, missions créées, taux de clic et de conversion par campagne." />
+      <div className="flex items-center justify-end gap-4 flex-wrap">
         <div className="flex items-center gap-2">
           <Select value={String(days)} onValueChange={(v) => setDays(Number(v))}>
             <SelectTrigger className="w-48">
@@ -206,7 +202,7 @@ export default function AdminMassEmailsStats() {
                   <TableHead className="text-right">Envoyés</TableHead>
                   <TableHead className="text-right">Clics uniques</TableHead>
                   <TableHead className="text-right">Missions</TableHead>
-                  <TableHead className="text-right">CTR</TableHead>
+                  <TableHead className="text-right">Taux de clic</TableHead>
                   <TableHead className="text-right">Conversion</TableHead>
                 </TableRow>
               </TableHeader>
@@ -214,13 +210,13 @@ export default function AdminMassEmailsStats() {
                 {stats.map((s) => (
                   <TableRow key={s.campaign}>
                     <TableCell className="font-medium">{s.campaign}</TableCell>
-                    <TableCell className="text-right">{s.sent || ","}</TableCell>
+                    <TableCell className="text-right">{s.sent || "·"}</TableCell>
                     <TableCell className="text-right">{s.uniqueVisitors}</TableCell>
                     <TableCell className="text-right">
                       {s.missions > 0 ? <Badge variant="secondary">{s.missions}</Badge> : <span className="text-muted-foreground">0</span>}
                     </TableCell>
-                    <TableCell className="text-right">{s.sent > 0 ? `${s.ctr.toFixed(1)} %` : ","}</TableCell>
-                    <TableCell className="text-right">{s.uniqueVisitors > 0 ? `${s.conversionRate.toFixed(1)} %` : ","}</TableCell>
+                    <TableCell className="text-right">{s.sent > 0 ? `${s.ctr.toFixed(1)} %` : "·"}</TableCell>
+                    <TableCell className="text-right">{s.uniqueVisitors > 0 ? `${s.conversionRate.toFixed(1)} %` : "·"}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -232,7 +228,7 @@ export default function AdminMassEmailsStats() {
       <p className="text-xs text-muted-foreground">
         Méthodologie : <strong>Envoyés</strong> = destinataires distincts des envois groupés (hors ignorés), lus
         dans le détail des envois. <strong>Clics uniques</strong> = destinataires distincts ayant cliqué, jamais un
-        visiteur anonyme. <strong>CTR</strong> = clics uniques ÷ envoyés, au plus 100 %. <strong>Conversion</strong> = missions
+        visiteur anonyme. <strong>Taux de clic</strong> = clics uniques ÷ envoyés, au plus 100 %. <strong>Conversion</strong> = missions
         créées ÷ clics uniques. Attribution conservée 7 jours en localStorage.
       </p>
     </div>

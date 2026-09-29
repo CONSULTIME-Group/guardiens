@@ -69,7 +69,7 @@ export const AcquisitionPilotCard = () => {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button asChild variant="outline" size="sm"><Link to="/admin/seo">SEO</Link></Button>
+          <Button asChild variant="outline" size="sm"><Link to="/admin/traffic?tab=acquisition">SEO</Link></Button>
           <Button asChild variant="outline" size="sm"><Link to="/admin/nurturing">Cycles de vie</Link></Button>
         </div>
       </CardHeader>

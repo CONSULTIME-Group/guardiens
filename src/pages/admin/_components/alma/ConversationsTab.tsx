@@ -1,3 +1,4 @@
+import { adminLabel, SURFACE_LABELS, ALMA_REGISTER_LABELS } from "@/lib/admin/labels";
 /**
  * Onglet Conversations de /admin/alma (lot 2).
  *
@@ -214,11 +215,11 @@ export function ConversationsTab({ since }: { since: string }) {
                 <span>
                   {format(new Date(r.created_at), "d MMM yyyy HH:mm", { locale: fr })}
                 </span>
-                <Badge variant="outline">{r.surface}</Badge>
+                <Badge variant="outline">{adminLabel(r.surface, SURFACE_LABELS)}</Badge>
                 <Badge variant="outline">
                   {r.active_role === "owner" ? "propriétaire" : "gardien"}
                 </Badge>
-                {r.register && <Badge variant="secondary">{r.register}</Badge>}
+                {r.register && <Badge variant="secondary">{adminLabel(r.register, ALMA_REGISTER_LABELS)}</Badge>}
                 {r.input_mode && <Badge variant="outline">{r.input_mode === "voice" ? "voix" : "clavier"}</Badge>}
                 {r.refusal_reason && <Badge variant="destructive">{r.refusal_reason}</Badge>}
               </div>

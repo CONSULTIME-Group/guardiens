@@ -97,7 +97,7 @@ function csvEscape(v: unknown): string {
 
 function downloadCsv(m: Metrics) {
   const lines: string[] = [];
-  lines.push("# Funnel");
+  lines.push("# Entonnoir");
   lines.push("etape,volume,conv_prev,conv_top");
   m.funnel.forEach((r) =>
     lines.push([csvEscape(r.step), r.volume, r.conv_prev ?? "", r.conv_top ?? ""].join(","))
@@ -209,7 +209,7 @@ export default function AdminSignupFunnelTab() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Métrique</TableHead>
-                  <TableHead className="text-right">Baseline</TableHead>
+                  <TableHead className="text-right">Référence</TableHead>
                   <TableHead className="text-right">Aujourd'hui</TableHead>
                   <TableHead className="text-right">Cible</TableHead>
                 </TableRow>
@@ -357,7 +357,7 @@ export default function AdminSignupFunnelTab() {
       {/* Bloc adoption features */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Adoption des features</CardTitle>
+          <CardTitle className="text-base">Adoption des fonctionnalités</CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (

@@ -1,3 +1,4 @@
+import { adminLabel } from "@/lib/admin/labels";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
@@ -261,7 +262,7 @@ export default function AdminAssociations() {
   return (
     <div className="space-y-6">
       <AdminPageHeader
-        title="Associations et refuges"
+        title="Associations"
         description="Fiches rédigées par l'équipe Guardiens, publiées sur la page publique des associations."
       />
 
@@ -296,7 +297,7 @@ export default function AdminAssociations() {
                   </p>
                 </div>
                 <Badge variant={row.status === "published" ? "default" : "secondary"}>
-                  {STATUS_LABELS[row.status] ?? row.status}
+                  {STATUS_LABELS[row.status] ?? adminLabel(row.status)}
                 </Badge>
                 <div className="flex flex-wrap gap-2">
                   <Button size="sm" variant="outline" onClick={() => setEditing(row)}>
@@ -312,9 +313,13 @@ export default function AdminAssociations() {
                       Dépublier
                     </Button>
                   )}
-                  <Button size="sm" variant="outline" onClick={() => persist(row.id, { status: "archived" })}>
-                    Archiver
-                  </Button>
+                  <ConfirmDialog
+                    trigger={<Button size="sm" variant="outline">Archiver</Button>}
+                    title="Archiver cette association ?"
+                    description="La fiche quitte le site public. Vous pourrez la republier ensuite."
+                    confirmLabel="Archiver"
+                    onConfirm={() => persist(row.id, { status: "archived" })}
+                  />
                   <Button
                     size="sm"
                     variant="outline"

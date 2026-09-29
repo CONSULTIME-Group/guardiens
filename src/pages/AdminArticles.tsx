@@ -1,3 +1,4 @@
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,41 +8,16 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Plus, Pencil, Trash2, Eye, ArrowLeft, CheckCircle2, AlertTriangle, XCircle, Link2, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Eye, CheckCircle2, AlertTriangle, XCircle, Link2, Loader2 } from "lucide-react";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { toast } from "sonner";
+import { ARTICLE_CATEGORIES, META_DESCRIPTION_MAX } from "@/lib/admin/articleCategories";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
-const categoryLabels: Record<string, string> = {
-  guide_race: "Guide race",
-  guide_lieu: "Guide lieu",
-  conseil_gardien: "Conseil gardien",
-  conseil_proprio: "Conseil proprio",
-  temoignage: "Témoignage",
-  actualite: "Actualité",
-  conseil: "Conseil",
-  ville: "Ville",
-  vie_locale: "Vie locale",
-  guide_local: "Guide local",
-  guide_pratique: "Guide pratique",
-  saisonnier: "Saisonnier",
-};
+const categoryLabels: Record<string, string> = ARTICLE_CATEGORIES;
 
-const categoryColors: Record<string, string> = {
-  guide_race: "bg-[hsl(141,50%,90%)] text-[hsl(153,50%,25%)]",
-  guide_lieu: "bg-[hsl(214,80%,92%)] text-[hsl(214,50%,30%)]",
-  conseil_gardien: "bg-[hsl(45,90%,90%)] text-[hsl(37,60%,30%)]",
-  conseil_proprio: "bg-[hsl(45,90%,90%)] text-[hsl(37,60%,30%)]",
-  temoignage: "bg-[hsl(330,80%,94%)] text-[hsl(330,50%,30%)]",
-  actualite: "bg-muted text-muted-foreground",
-  conseil: "bg-[hsl(45,90%,90%)] text-[hsl(37,60%,30%)]",
-  ville: "bg-[hsl(214,80%,92%)] text-[hsl(214,50%,30%)]",
-  vie_locale: "bg-[hsl(30,80%,92%)] text-[hsl(30,60%,30%)]",
-  guide_local: "bg-[hsl(270,60%,92%)] text-[hsl(270,50%,30%)]",
-  guide_pratique: "bg-[hsl(45,50%,92%)] text-[hsl(45,40%,30%)]",
-  saisonnier: "bg-[hsl(160,50%,92%)] text-[hsl(160,40%,30%)]",
-};
+const categoryColors: Record<string, string> = {};
 
 interface SeoCheck {
   hasMetaTitle: boolean;
@@ -71,7 +47,7 @@ function getSeoScore(article: any): { score: "green" | "orange" | "red"; checks:
     hasMetaTitle: !!mt,
     hasMetaTitleLength: mt.length > 0 && mt.length <= 60,
     hasMetaDescription: !!md,
-    hasMetaDescriptionLength: md.length >= 120 && md.length <= 160,
+    hasMetaDescriptionLength: md.length >= 120 && md.length <= META_DESCRIPTION_MAX,
     hasHeroImageAlt: !!(article.hero_image_alt && article.hero_image_alt.trim()),
     hasInternalLinks: Array.isArray(article.internal_links) && article.internal_links.length >= 2,
     hasMinContentLength: content.length >= 3000,
@@ -92,7 +68,7 @@ const seoLabels: Record<keyof SeoCheck, string> = {
   hasMetaTitle: "Meta title présent",
   hasMetaTitleLength: "Meta title ≤ 60 caractères",
   hasMetaDescription: "Meta description présente",
-  hasMetaDescriptionLength: "Meta description 120–160 caractères",
+  hasMetaDescriptionLength: `Méta description de 120 à ${META_DESCRIPTION_MAX} caractères`,
   hasHeroImageAlt: "Alt text image hero",
   hasInternalLinks: "Liens internes (≥ 2)",
   hasMinContentLength: "Contenu ≥ 3000 caractères",
@@ -121,7 +97,7 @@ const AdminArticles = () => {
       if (dryRun) {
         toast.success(`Aperçu : ${data.targets} articles à enrichir`);
       } else {
-        toast.success(`✅ ${data.updated} articles enrichis avec liens internes`);
+        toast.success(`${data.updated} articles enrichis avec liens internes`);
         fetchArticles();
       }
     } catch (e: any) {
@@ -172,23 +148,25 @@ const AdminArticles = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <h1 className="font-heading text-2xl font-bold">Articles</h1>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            onClick={() => runAutoLinks(false)}
-            disabled={autoLinking || seoStats.orange === 0}
-            title="Insère 3-4 liens internes contextuels sur les articles qui n'en ont pas"
-          >
-            {autoLinking ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Link2 className="h-4 w-4 mr-2" />}
-            Maillage auto ({seoStats.orange})
-          </Button>
+      <AdminPageHeader title="Articles" description="Articles du journal : rédaction, publication et score SEO." />
+      <div className="flex flex-wrap items-center justify-end">
+        <div className="flex flex-wrap items-center gap-2">
+          <ConfirmDialog
+            trigger={
+              <Button
+                variant="outline"
+                disabled={autoLinking || seoStats.orange === 0}
+                title="Insère 3 ou 4 liens internes contextuels sur les articles qui n'en ont pas"
+              >
+                {autoLinking ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Link2 className="h-4 w-4 mr-2" />}
+                Maillage auto ({seoStats.orange})
+              </Button>
+            }
+            title="Lancer le maillage automatique ?"
+            description={`${seoStats.orange} articles recevront 3 ou 4 liens internes chacun, soit ${seoStats.orange * 3} à ${seoStats.orange * 4} liens ajoutés au contenu.`}
+            confirmLabel="Lancer le maillage"
+            onConfirm={() => runAutoLinks(false)}
+          />
           <Button onClick={() => navigate("/admin/articles/new")}>
             <Plus className="h-4 w-4 mr-2" /> Nouvel article
           </Button>
@@ -275,7 +253,7 @@ const AdminArticles = () => {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
-                    {article.published_at ? format(new Date(article.published_at), "d MMM yyyy", { locale: fr }) : ","}
+                    {article.published_at ? format(new Date(article.published_at), "d MMM yyyy", { locale: fr }) : "·"}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">

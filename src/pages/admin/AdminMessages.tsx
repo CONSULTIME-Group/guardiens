@@ -1,3 +1,4 @@
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -52,7 +53,7 @@ const CTX_LABEL: Record<string, string> = {
 const CTX_COLOR: Record<string, string> = {
   sit_application: "bg-primary",
   sitter_inquiry: "bg-info",
-  small_mission: "bg-amber-500",
+  small_mission: "bg-warning",
   private: "bg-muted-foreground",
 };
 
@@ -127,7 +128,7 @@ export default function AdminMessages() {
   }, [period]);
 
   const roleLabel = (r: string | null) =>
-    r === "owner" ? "Propriétaire" : r === "sitter" ? "Gardien" : r === "both" ? "Les deux" : ",";
+    r === "owner" ? "Propriétaire" : r === "sitter" ? "Gardien" : r === "both" ? "Propriétaire et gardien" : "·";
 
   const maxBar = Math.max(...(stats?.daily.map((d) => d.human + d.system) || [1]), 1);
   const ctxEntries = Object.entries(stats?.by_context || {}).sort((a, b) => b[1] - a[1]);
@@ -135,13 +136,8 @@ export default function AdminMessages() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Messagerie</h1>
-          <p className="text-sm text-muted-foreground">
-            Statistiques fiables (calculs côté serveur, sans limite de lignes)
-          </p>
-        </div>
+      <AdminPageHeader title="Messagerie" description="Statistiques calculées côté serveur, sur toutes les conversations." />
+      <div className="flex items-center justify-end flex-wrap gap-3">
         {tab === "stats" && (
           <Select value={period} onValueChange={(v) => setPeriod(v as Period)}>
             <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
@@ -189,7 +185,7 @@ export default function AdminMessages() {
               hint={`/ ${stats.conversations_total} en base`}
             />
             <KpiCard
-              icon={<Reply className="h-4 w-4 text-emerald-600" />}
+              icon={<Reply className="h-4 w-4 text-success" />}
               label="Taux de réponse"
               value={`${stats.reply_rate}%`}
               hint={`${stats.conversations_with_reply}/${stats.conversations_started_period} conv. répondues`}
@@ -206,7 +202,7 @@ export default function AdminMessages() {
               value={
                 stats.last_message_at
                   ? formatDistanceToNow(new Date(stats.last_message_at), { addSuffix: true, locale: fr })
-                  : ","
+                  : "·"
               }
               small
             />
@@ -306,7 +302,7 @@ export default function AdminMessages() {
                   <TableHead>Membre</TableHead>
                   <TableHead>Rôle</TableHead>
                   <TableHead className="text-right">Messages</TableHead>
-                  <TableHead className="text-right">Conv.</TableHead>
+                  <TableHead className="text-right">Conversations</TableHead>
                   <TableHead className="text-right">Dernier msg</TableHead>
                   <TableHead className="text-right">Fils</TableHead>
                 </TableRow>

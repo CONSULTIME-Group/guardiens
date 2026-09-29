@@ -1,3 +1,4 @@
+import { adminLabel, CLOSE_REASON_LABELS } from "@/lib/admin/labels";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { reportAdminReadError, UNAVAILABLE_LABEL } from "@/lib/admin/readError";
@@ -62,8 +63,8 @@ interface AutoClosedMission {
 export const AUTO_CLOSE_REASONS = ["expired", "auto_completed_after_date"] as const;
 
 const EMAIL_TEMPLATES: { key: string; label: string }[] = [
-  { key: "mission-daily-digest", label: "Digest quotidien mission" },
-  { key: "mutual-aid-weekly-digest", label: "Digest hebdomadaire entraide" },
+  { key: "mission-daily-digest", label: "Résumé quotidien entraide" },
+  { key: "mutual-aid-weekly-digest", label: "Résumé hebdomadaire entraide" },
   { key: "mission-nudge-feedback", label: "Nudge feedback (J+2)" },
   { key: "mission-nudge-no-response", label: "Nudge sans réponse (J+7)" },
   { key: "mission-help-needed", label: "Demande d'aide près de chez vous" },
@@ -357,7 +358,7 @@ const MutualAidDashboardTab = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <KpiCard label="Nouvelles missions" value={loadError ? UNAVAILABLE_LABEL : kpis.newMissions} />
             <KpiCard label="Réponses" value={loadError ? UNAVAILABLE_LABEL : kpis.responses} />
-            <KpiCard label="Feedbacks" value={loadError ? UNAVAILABLE_LABEL : kpis.feedbacks} />
+            <KpiCard label="Retours" value={loadError ? UNAVAILABLE_LABEL : kpis.feedbacks} />
             <KpiCard label="Remerciements" value={loadError ? UNAVAILABLE_LABEL : kpis.thanks} />
           </div>
         </CardContent>
@@ -406,7 +407,7 @@ const MutualAidDashboardTab = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Template</TableHead>
+                <TableHead>Modèle</TableHead>
                 <TableHead className="text-right">Envoyés</TableHead>
                 <TableHead className="text-right">Ouverts</TableHead>
                 <TableHead className="text-right">Taux ouverture</TableHead>
@@ -518,7 +519,7 @@ const MutualAidDashboardTab = () => {
                     <TableCell>{m.city || "·"}</TableCell>
                     <TableCell>{missionCategoryLabel(m.category)}</TableCell>
                     <TableCell>{format(new Date(m.closed_at), "d MMM yyyy", { locale: fr })}</TableCell>
-                    <TableCell><code className="text-[11px] px-1.5 py-0.5 rounded bg-muted">{m.close_reason}</code></TableCell>
+                    <TableCell><span className="text-xs" title={m.close_reason ?? undefined}>{adminLabel(m.close_reason, CLOSE_REASON_LABELS)}</span></TableCell>
                   </TableRow>
                 ))}
               </TableBody>

@@ -1,3 +1,4 @@
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useState, useEffect, useCallback } from "react";
 import { refreshAdminBadges } from "@/hooks/useAdminBadges";
 import { supabase } from "@/integrations/supabase/client";
@@ -246,7 +247,7 @@ const AdminSkills = () => {
 
   return (
     <div className="space-y-6">
-      <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Compétences membres</h1>
+      <AdminPageHeader title="Compétences" description="Référentiel des compétences et libellés proposés par les membres." />
 
       <Tabs value={tab} onValueChange={(v) => { setTab(v); setTabChosen(true); }}>
         <TabsList>
@@ -285,7 +286,7 @@ const AdminSkills = () => {
             <table className="w-full text-sm">
               <thead className="bg-muted/50">
                 <tr>
-                  <th className="text-left px-4 py-3 font-medium">Label</th>
+                  <th className="text-left px-4 py-3 font-medium">Libellé</th>
                   <th className="text-left px-4 py-3 font-medium">Catégorie</th>
                   <th className="text-center px-4 py-3 font-medium">Utilisations</th>
                 </tr>
@@ -316,7 +317,7 @@ const AdminSkills = () => {
               <table className="w-full text-sm">
                 <thead className="bg-muted/50">
                   <tr>
-                    <th className="text-left px-4 py-3 font-medium">Label soumis</th>
+                    <th className="text-left px-4 py-3 font-medium">Libellé proposé</th>
                     <th className="text-center px-4 py-3 font-medium">Soumissions</th>
                     <th className="text-right px-4 py-3 font-medium">Actions</th>
                   </tr>
@@ -400,7 +401,7 @@ const AdminSkills = () => {
               <table className="w-full text-sm">
                 <thead className="bg-muted/50">
                   <tr>
-                    <th className="text-left px-4 py-3 font-medium">Label soumis</th>
+                    <th className="text-left px-4 py-3 font-medium">Libellé proposé</th>
                     <th className="text-left px-4 py-3 font-medium">Normalisé</th>
                     <th className="text-left px-4 py-3 font-medium">Catégorie</th>
                     <th className="text-left px-4 py-3 font-medium">Journal IA</th>
@@ -551,7 +552,7 @@ const AdminSkills = () => {
               disabled={rejecting}
               onClick={(e) => { e.preventDefault(); confirmRejectCompetence(); }}
             >
-              {rejecting ? "Suppression," : "Confirmer le refus"}
+              {rejecting ? "Suppression…" : "Confirmer le refus"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

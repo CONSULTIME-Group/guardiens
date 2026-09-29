@@ -1,3 +1,4 @@
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -115,15 +116,13 @@ const AdminFAQ = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">FAQ</h1>
-          <p className="text-muted-foreground text-sm">{entries.length} questions • Rich snippets Schema.org</p>
-        </div>
-        <Button onClick={() => { resetForm(); setShowForm(true); }} className="gap-2">
+      <AdminPageHeader
+        title="FAQ"
+        description={`${entries.length} questions · extraits enrichis Schema.org`}
+        actions={<Button onClick={() => { resetForm(); setShowForm(true); }} className="gap-2">
           <Plus className="h-4 w-4" /> Ajouter
-        </Button>
-      </div>
+        </Button>}
+      />
 
       {showForm && (
         <Card>

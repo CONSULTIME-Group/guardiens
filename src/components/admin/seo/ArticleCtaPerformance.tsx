@@ -101,14 +101,14 @@ export default function ArticleCtaPerformance() {
                   <th className="py-2 px-2 font-medium text-right">Vues</th>
                   <th className="py-2 px-2 font-medium text-right">Clics mid</th>
                   <th className="py-2 px-2 font-medium text-right">Clics end</th>
-                  <th className="py-2 px-2 font-medium text-right">CTR</th>
-                  <th className="py-2 pl-2 font-medium text-right">Signups 7j</th>
+                  <th className="py-2 px-2 font-medium text-right">Taux de clic</th>
+                  <th className="py-2 pl-2 font-medium text-right">Inscriptions 7 j</th>
                 </tr>
               </thead>
               <tbody>
                 {rows.map((r) => {
                   const totalClicks = r.clicks_mid + r.clicks_end;
-                  const ctr = r.views > 0 ? ((totalClicks / r.views) * 100).toFixed(1) : ",";
+                  const ctr = r.views > 0 ? ((totalClicks / r.views) * 100).toFixed(1) : "·";
                   return (
                     <tr key={r.article_slug} className="border-b last:border-0">
                       <td className="py-2 pr-3">
@@ -124,7 +124,7 @@ export default function ArticleCtaPerformance() {
                       <td className="py-2 px-2 text-right tabular-nums">{r.views}</td>
                       <td className="py-2 px-2 text-right tabular-nums">{r.clicks_mid}</td>
                       <td className="py-2 px-2 text-right tabular-nums">{r.clicks_end}</td>
-                      <td className="py-2 px-2 text-right tabular-nums">{ctr}{ctr !== "," ? " %" : ""}</td>
+                      <td className="py-2 px-2 text-right tabular-nums">{ctr}{ctr !== "·" ? " %" : ""}</td>
                       <td className="py-2 pl-2 text-right tabular-nums">{r.signups_7d}</td>
                     </tr>
                   );

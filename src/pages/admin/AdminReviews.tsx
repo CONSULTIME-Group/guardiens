@@ -1,3 +1,4 @@
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { refreshAdminBadges } from "@/hooks/useAdminBadges";
 import { fetchAllRows } from "@/lib/admin/fetchAllRows";
@@ -312,7 +313,7 @@ const AdminReviews = () => {
 
   return (
     <div className="space-y-6">
-      <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Avis</h1>
+      <AdminPageHeader title="Avis" description="Avis de garde et avis d'annulation à modérer." />
 
       <Tabs defaultValue="reviews">
         <TabsList>
@@ -394,7 +395,7 @@ const AdminReviews = () => {
                         <Badge variant="outline" className="text-xs">{badgeCounts[review.sit_id]} badge{badgeCounts[review.sit_id] > 1 ? "s" : ""}</Badge>
                       ) : <span className="text-xs text-muted-foreground">,</span>}
                     </TableCell>
-                    <TableCell className="max-w-[200px] truncate text-sm text-muted-foreground">{review.comment || ","}</TableCell>
+                    <TableCell className="max-w-[200px] truncate text-sm text-muted-foreground">{review.comment || "·"}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">{format(new Date(review.created_at), "d MMM yyyy", { locale: fr })}</TableCell>
                     <TableCell>
                       <Badge variant={review.published ? "default" : "outline"}>{review.published ? "Publié" : "Masqué"}</Badge>
@@ -586,8 +587,8 @@ const AdminReviews = () => {
                       <TableCell className="text-sm">
                         {r.reviewer?.first_name} → {r.reviewee?.first_name}
                       </TableCell>
-                      <TableCell className="text-sm capitalize">{r.cancelled_by_role || ","}</TableCell>
-                      <TableCell className="max-w-[200px] truncate text-sm text-muted-foreground">{r.cancellation_reason || ","}</TableCell>
+                      <TableCell className="text-sm capitalize">{r.cancelled_by_role || "·"}</TableCell>
+                      <TableCell className="max-w-[200px] truncate text-sm text-muted-foreground">{r.cancellation_reason || "·"}</TableCell>
                       <TableCell>
                         <Badge variant={r.moderation_status === "valide" ? "default" : r.moderation_status === "refuse" ? "destructive" : "outline"}>
                           {MODERATION_LABELS[r.moderation_status] || "En attente"}
@@ -630,7 +631,7 @@ const AdminReviews = () => {
               {detailReview.housing_condition_rating && <div><strong>État du logement :</strong> {detailReview.housing_condition_rating}/5</div>}
               {detailReview.listing_accuracy_rating && <div><strong>Fidélité annonce :</strong> {detailReview.listing_accuracy_rating}/5</div>}
               {detailReview.instructions_clarity_rating && <div><strong>Clarté instructions :</strong> {detailReview.instructions_clarity_rating}/5</div>}
-              <div><strong>Recommande :</strong> {detailReview.would_recommend ? "Oui ✓" : "Non ✗"}</div>
+              <div><strong>Recommande :</strong> {detailReview.would_recommend ? "Oui" : "Non"}</div>
               <div><strong>Commentaire :</strong></div>
               <p className="bg-muted p-3 rounded-lg">{detailReview.comment || "Aucun commentaire"}</p>
               <div className="flex gap-2 pt-2 border-t border-border">

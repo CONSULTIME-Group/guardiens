@@ -179,7 +179,7 @@ export function MoodsTab() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => toggleActive(row)}
+                        onClick={() => { if (window.confirm(row.active ? "Désactiver cette humeur ? Alma ne l'utilisera plus." : "Activer cette humeur ? Alma pourra l'utiliser.")) toggleActive(row); }}
                       >
                         {row.active ? "Désactiver" : "Activer"}
                       </Button>

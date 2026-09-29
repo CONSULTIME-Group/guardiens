@@ -41,7 +41,7 @@ const PRIORITY_ARTICLES = [
 const PRIORITY_BADGES = {
   high: { label: "🔴 Haute", className: "bg-destructive/15 text-destructive" },
   medium: { label: "🟠 Moyenne", className: "bg-warning-soft text-warning" },
-  low: { label: "🟡 Basse", className: "bg-yellow-100 text-yellow-700" },
+  low: { label: "🟡 Basse", className: "bg-warning/10 text-warning" },
 };
 
 const SLUG_LABELS: Record<string, string> = {
@@ -69,7 +69,7 @@ function humanizeSlug(slug: string): string {
 }
 
 const StatusIcon = ({ status }: { status: "done" | "warn" | "fail" }) => {
-  if (status === "done") return <CheckCircle2 className="h-5 w-5 text-emerald-600" />;
+  if (status === "done") return <CheckCircle2 className="h-5 w-5 text-success" />;
   if (status === "warn") return <AlertTriangle className="h-5 w-5 text-warning" />;
   return <XCircle className="h-5 w-5 text-destructive" />;
 };
@@ -146,12 +146,12 @@ const ContentToCreate = () => {
                     <TableCell className="text-right">{current}</TableCell>
                     <TableCell className="text-right text-muted-foreground">{obj.goal}</TableCell>
                     <TableCell className="text-right">
-                      {missing > 0 ? <span className="font-medium text-destructive">{missing}</span> : ","}
+                      {missing > 0 ? <span className="font-medium text-destructive">{missing}</span> : "·"}
                     </TableCell>
                     <TableCell className="text-center">
                       {status === "done" ? (
-                        <Badge className="bg-emerald-100 text-emerald-700 text-[10px]">
-                          ✅ Atteint
+                        <Badge className="bg-success/10 text-success text-[10px]">
+                          Atteint
                         </Badge>
                       ) : (
                         <Badge className={`text-[10px] ${priorityBadge.className}`}>
@@ -190,7 +190,7 @@ const ContentToCreate = () => {
                         <p className="text-xs text-muted-foreground truncate">{item.slug}</p>
                       </div>
                       {exists ? (
-                        <span className="text-xs text-primary font-medium shrink-0">✅ Créé</span>
+                        <span className="text-xs text-primary font-medium shrink-0">Créé</span>
                       ) : (
                         <Button
                           size="sm"

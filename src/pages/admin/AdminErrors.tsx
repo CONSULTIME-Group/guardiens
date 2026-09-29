@@ -1,3 +1,5 @@
+import { adminLabel, ERROR_SEVERITY_LABELS } from "@/lib/admin/labels";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchAllRows } from "@/lib/admin/fetchAllRows";
@@ -214,18 +216,10 @@ const AdminErrors = () => {
   const unresolvedCount = filtered.filter((e) => !e.resolved_at).length;
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <AlertTriangle className="h-6 w-6 text-destructive" />
-            Erreurs utilisateurs
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Erreurs JavaScript et exceptions captées dans le navigateur des utilisateurs.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
+    <div className="space-y-6">
+      <AdminPageHeader title="Erreurs" description="Erreurs JavaScript et exceptions captées dans le navigateur des membres." />
+      <div className="flex flex-wrap items-center justify-end">
+        <div className="flex flex-wrap items-center gap-2">
           <ConfirmDialog
             trigger={
               <Button
@@ -329,7 +323,7 @@ const AdminErrors = () => {
                           if (tp) {
                             return (
                               <Badge
-                                className="bg-amber-500/15 text-warning dark:text-amber-300 border border-amber-500/40 hover:bg-amber-500/20 gap-1"
+                                className="bg-warning/15 text-warning dark:text-warning border border-warning/40 hover:bg-warning/20 gap-1"
                                 title={tp.explanation}
                               >
                                 <ShieldAlert className="h-3 w-3" />
@@ -339,7 +333,7 @@ const AdminErrors = () => {
                           }
                           return (
                             <Badge variant={e.severity === "error" ? "destructive" : "secondary"}>
-                              {e.severity}
+                              {adminLabel(e.severity, ERROR_SEVERITY_LABELS)}
                             </Badge>
                           );
                         })()}
@@ -355,11 +349,11 @@ const AdminErrors = () => {
                       </div>
                       <p className="text-sm font-medium text-foreground line-clamp-2">{e.message}</p>
                       <p className="text-xs text-muted-foreground mt-1 truncate">
-                        {e.url ?? ","}
+                        {e.url ?? "·"}
                         {e.source ? ` · ${e.source}${e.line_no ? `:${e.line_no}` : ""}` : ""}
                       </p>
                       {e.user_email && (
-                        <p className="text-xs text-muted-foreground mt-0.5">👤 {e.user_email}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">Membre : {e.user_email}</p>
                       )}
                     </div>
                   </div>
@@ -391,19 +385,19 @@ const AdminErrors = () => {
                   const tp = getThirdPartyInfo(selected.context);
                   if (!tp) return null;
                   return (
-                    <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 flex gap-3">
-                      <ShieldAlert className="h-5 w-5 text-warning dark:text-amber-400 shrink-0 mt-0.5" />
+                    <div className="rounded-lg border border-warning/40 bg-warning/10 p-4 flex gap-3">
+                      <ShieldAlert className="h-5 w-5 text-warning dark:text-warning shrink-0 mt-0.5" />
                       <div className="space-y-1.5 text-sm">
-                        <p className="font-semibold text-warning-foreground dark:text-amber-200 flex items-center gap-2 flex-wrap">
+                        <p className="font-semibold text-warning-foreground dark:text-warning flex items-center gap-2 flex-wrap">
                           Erreur ignorée automatiquement
-                          <Badge variant="outline" className="border-amber-500/50 text-warning dark:text-amber-300 font-normal">
+                          <Badge variant="outline" className="border-warning/50 text-warning dark:text-warning font-normal">
                             {tp.label}
                           </Badge>
                         </p>
-                        <p className="text-warning-foreground/80 dark:text-amber-100/80 leading-relaxed">
+                        <p className="text-warning-foreground/80 dark:text-warning/80 leading-relaxed">
                           {tp.explanation}
                         </p>
-                        <p className="text-xs text-warning-foreground/70 dark:text-amber-100/70 flex items-center gap-1 pt-1">
+                        <p className="text-xs text-warning-foreground/70 dark:text-warning/70 flex items-center gap-1 pt-1">
                           <Info className="h-3 w-3" />
                           Conservée à titre informatif (1 entrée max par heure et par empreinte). Aucune action requise.
                         </p>
@@ -472,7 +466,7 @@ const AdminErrors = () => {
 
                 {selected.stack && (
                   <div>
-                    <p className="text-xs uppercase text-muted-foreground mb-1">Stack trace</p>
+                    <p className="text-xs uppercase text-muted-foreground mb-1">Trace technique</p>
                     <pre className="text-xs font-mono bg-muted p-3 rounded overflow-x-auto whitespace-pre-wrap max-h-64">
                       {selected.stack}
                     </pre>
@@ -490,7 +484,7 @@ const AdminErrors = () => {
 
                 {selected.user_agent && (
                   <div>
-                    <p className="text-xs uppercase text-muted-foreground mb-1">User Agent</p>
+                    <p className="text-xs uppercase text-muted-foreground mb-1">Navigateur</p>
                     <p className="text-xs text-muted-foreground break-all">{selected.user_agent}</p>
                   </div>
                 )}

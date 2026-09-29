@@ -25,9 +25,9 @@ interface PriorityActionsProps {
 }
 
 const TYPE_CONFIG = {
-  urgent: { label: "Position en baisse", badgeClass: "border-red-300 text-destructive bg-destructive/10" },
-  optimize: { label: "À optimiser", badgeClass: "border-orange-300 text-warning bg-warning-soft" },
-  not_indexed: { label: "Non indexé", badgeClass: "border-yellow-300 text-yellow-700 bg-yellow-50" },
+  urgent: { label: "Position en baisse", badgeClass: "border-destructive/30 text-destructive bg-destructive/10" },
+  optimize: { label: "À optimiser", badgeClass: "border-warning/30 text-warning bg-warning-soft" },
+  not_indexed: { label: "Non indexé", badgeClass: "border-warning/30 text-warning bg-warning/10" },
 };
 
 const PriorityActions = ({ topPages }: PriorityActionsProps) => {
@@ -104,7 +104,7 @@ const PriorityActions = ({ topPages }: PriorityActionsProps) => {
           <CardTitle className="text-lg">Actions prioritaires</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center gap-3 p-4 rounded-lg bg-emerald-50 text-emerald-700">
+          <div className="flex items-center gap-3 p-4 rounded-lg bg-success/10 text-success">
             <CheckCircle2 className="h-5 w-5" />
             <span className="text-sm font-medium">Tout va bien, continuez à publier 🚀</span>
           </div>

@@ -1,3 +1,5 @@
+import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -154,10 +156,7 @@ const AdminCityPages = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Pages SEO Villes</h1>
-        <p className="text-muted-foreground">Générez des landing pages par ville pour le référencement.</p>
-      </div>
+      <AdminPageHeader title="Pages villes" description="Pages d'accueil par ville, générées pour le référencement." />
 
       <Card>
         <CardHeader>
@@ -186,15 +185,21 @@ const AdminCityPages = () => {
           <div className="rounded-md border border-dashed p-4 space-y-2">
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <div>
-                <p className="font-medium text-sm">Batch SEO programmatique</p>
+                <p className="font-medium text-sm">Génération par lot</p>
                 <p className="text-xs text-muted-foreground">
                   Génère les pages des 150 plus grandes villes de France. Les villes déjà créées sont ignorées. ~4 min pour 150 villes.
                 </p>
               </div>
-              <Button onClick={handleBatchTop150} disabled={batchRunning || generating} variant="secondary" className="gap-2">
-                {batchRunning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
-                Générer le top 150
-              </Button>
+              <ConfirmDialog
+                trigger={<Button disabled={batchRunning || generating} variant="secondary" className="gap-2">
+                  {batchRunning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
+                  Générer le top 150
+                </Button>}
+                title="Générer les pages des 150 plus grandes villes ?"
+                description="Les villes déjà créées sont ignorées. La génération dure environ 4 minutes et consomme des crédits IA."
+                confirmLabel="Lancer la génération"
+                onConfirm={handleBatchTop150}
+              />
             </div>
             {batchProgress && (
               <div className="text-xs text-muted-foreground">

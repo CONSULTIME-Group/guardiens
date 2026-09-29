@@ -5,7 +5,7 @@ import {
   ShieldCheck, Mail, FileText, LogOut, ArrowLeft, MapPin, HelpCircle,
   Compass, Handshake, Briefcase, CreditCard, MessageSquare, ScrollText, Settings,
   Lightbulb, AlertTriangle, Bug, Stethoscope, Sprout, BarChart3, Send,
-  Sparkles, UserX, HeartHandshake, Hammer,
+  Sparkles, UserX, HeartHandshake, Hammer, Building2, Award, MailCheck, Inbox, SearchCheck, PawPrint, Scale,
   ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -70,8 +70,8 @@ const adminNavGroups: NavGroup[] = [
     items: [
       { to: "/admin/users", icon: Users, label: "Utilisateurs" },
       { to: "/admin/verifications", icon: ShieldCheck, label: "Vérifications ID", badgeKey: "verifications" },
-      { to: "/admin/associations", icon: Briefcase, label: "Associations" },
-      { to: "/admin/experiences", icon: Briefcase, label: "Expériences", badgeKey: "experiences" },
+      { to: "/admin/associations", icon: Building2, label: "Associations" },
+      { to: "/admin/experiences", icon: Award, label: "Expériences", badgeKey: "experiences" },
       { to: "/admin/skills", icon: Lightbulb, label: "Compétences", badgeKey: "skills" },
     ],
   },
@@ -84,7 +84,7 @@ const adminNavGroups: NavGroup[] = [
       { to: "/admin/small-missions?tab=projets", icon: Hammer, label: "Projets", tabParam: "projets", defaultTab: "entraide" },
       // Pilotage produit de l'entraide, jusqu'ici accessible seulement depuis
       // un onglet de la page Emails, donc introuvable.
-      { to: "/admin/emails-transactionnels?tab=mutual-aid", icon: Handshake, label: "Pilotage entraide", tabParam: "mutual-aid", defaultTab: "templates" },
+      { to: "/admin/pilotage-entraide", icon: BarChart3, label: "Pilotage entraide" },
     ],
   },
   {
@@ -93,8 +93,8 @@ const adminNavGroups: NavGroup[] = [
       { to: "/admin/reviews", icon: Star, label: "Avis", badgeKey: "reviewsModeration" },
       { to: "/admin/review-disputes", icon: AlertTriangle, label: "Contestations", badgeKey: "reviewDisputes" },
       { to: "/admin/reports", icon: Flag, label: "Signalements", badgeKey: "reports" },
-      { to: "/admin/contact-messages", icon: MessageSquare, label: "Messages contact", badgeKey: "contactMessages" },
-      { to: "/admin/messages", icon: Send, label: "Messagerie", badgeKey: "adminMessageFailed" },
+      { to: "/admin/contact-messages", icon: Mail, label: "Messages contact", badgeKey: "contactMessages" },
+      { to: "/admin/messages", icon: MessageSquare, label: "Messagerie", badgeKey: "adminMessageFailed" },
       { to: "/admin/errors", icon: Bug, label: "Erreurs", badgeKey: "errors" },
       { to: "/admin/demandes-suppression", icon: UserX, label: "Demandes RGPD", badgeKey: "deletionRequests" },
     ],
@@ -102,11 +102,11 @@ const adminNavGroups: NavGroup[] = [
   {
     label: "EMAILS",
     items: [
-      { to: "/admin/emails", icon: Mail, label: "Santé email" },
-      { to: "/admin/emails-transactionnels", icon: Mail, label: "Emails transactionnels", excludeTabs: ["mutual-aid"] },
+      { to: "/admin/emails", icon: MailCheck, label: "Santé email" },
+      { to: "/admin/emails-transactionnels", icon: Inbox, label: "Emails transactionnels" },
       { to: "/admin/nurturing", icon: Sprout, label: "Nurturing" },
       // end : « Envois groupés » n'est pas actif sur la sous-page des stats.
-      { to: "/admin/envois-groupes", icon: Mail, label: "Envois groupés", end: true },
+      { to: "/admin/envois-groupes", icon: Send, label: "Envois groupés", end: true },
       { to: "/admin/envois-groupes/stats", icon: BarChart3, label: "Stats campagnes" },
     ],
   },
@@ -114,14 +114,14 @@ const adminNavGroups: NavGroup[] = [
     label: "CONTENU & SYSTÈME",
     items: [
       { to: "/admin/articles", icon: FileText, label: "Articles" },
-      { to: "/admin/articles-longue-traine", icon: FileText, label: "Articles longue traîne" },
+      // Articles longue traîne : module verrouillé depuis le 11/07, hors menu, route conservée.
       { to: "/admin/faq", icon: HelpCircle, label: "FAQ" },
       { to: "/admin/guides", icon: Compass, label: "Guides locaux", badgeKey: "guideRequests" },
-      { to: "/admin/analysis-requests", icon: HelpCircle, label: "Demandes d'analyse", badgeKey: "analysisRequests" },
+      { to: "/admin/analysis-requests", icon: SearchCheck, label: "Demandes d'analyse", badgeKey: "analysisRequests" },
       { to: "/admin/city-pages", icon: MapPin, label: "Pages villes" },
       { to: "/admin/departments", icon: MapPin, label: "Départements" },
-      { to: "/admin/breeds", icon: MapPin, label: "Fiches de race" },
-      { to: "/admin/legal", icon: ScrollText, label: "Pages légales" },
+      { to: "/admin/breeds", icon: PawPrint, label: "Fiches de race" },
+      { to: "/admin/legal", icon: Scale, label: "Pages légales" },
       { to: "/admin/hero-weights", icon: Sparkles, label: "Poids des hero" },
       { to: "/admin/settings", icon: Settings, label: "Paramètres" },
       { to: "/admin/audit", icon: ScrollText, label: "Journal d'audit" },
@@ -183,9 +183,9 @@ export const AdminSidebar = () => {
     >
       <div className={cn("flex items-center gap-2 p-4 pb-3", collapsed ? "justify-center" : "justify-between")}>
         {!collapsed && (
-          <h1 className="font-heading text-lg font-bold tracking-tight text-foreground truncate">
+          <p className="font-heading text-lg font-bold tracking-tight text-foreground truncate">
             Guardiens <span className="text-muted-foreground font-normal text-sm">Admin</span>
-          </h1>
+          </p>
         )}
         <button
           type="button"

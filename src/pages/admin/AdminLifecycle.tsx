@@ -288,15 +288,15 @@ const AdminLifecycle = () => {
           ) : (
             <Table>
               <TableHeader><TableRow>
-                <TableHead>Template</TableHead>
+                <TableHead>Modèle</TableHead>
                 <TableHead className="text-right">Envoyés</TableHead>
                 <TableHead className="text-right">Délivrés</TableHead>
                 <TableHead className="text-right">Ouverts</TableHead>
                 <TableHead className="text-right">Cliqués</TableHead>
-                <TableHead className="text-right">Bounce</TableHead>
-                <TableHead className="text-right">Ouv.</TableHead>
+                <TableHead className="text-right">Rejets</TableHead>
+                <TableHead className="text-right">Ouverture</TableHead>
                 <TableHead className="text-right">Clic</TableHead>
-                <TableHead className="text-right">Bnc.</TableHead>
+                <TableHead className="text-right">Rejets</TableHead>
               </TableRow></TableHeader>
               <TableBody>
                 {tpls.map((t) => (

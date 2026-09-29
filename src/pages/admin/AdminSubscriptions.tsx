@@ -1,3 +1,4 @@
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
@@ -17,10 +18,10 @@ import { avatarImageUrl } from "@/lib/storageImage";
 import { PRICING_IS_ACTIVE } from "@/config/pricing";
 
 const planLabels: Record<string, { label: string; color: string }> = {
-  founder_free: { label: "Fondateur", color: "bg-warning-soft text-warning-foreground dark:bg-amber-900/30 dark:text-amber-400" },
+  founder_free: { label: "Fondateur", color: "bg-warning-soft text-warning-foreground dark:bg-warning/30 dark:text-warning" },
   annual_sitter: { label: "Gardien", color: "bg-primary/10 text-primary" },
   free_launch: { label: "Lancement gratuit", color: "bg-success-soft text-success" },
-  owner_free: { label: "Proprio gratuit", color: "bg-muted text-muted-foreground" },
+  owner_free: { label: "Propriétaire (accès libre)", color: "bg-muted text-muted-foreground" },
 };
 
 const AdminSubscriptions = () => {
@@ -115,7 +116,7 @@ const AdminSubscriptions = () => {
       await supabase.from("notifications").insert({
         user_id: sub.user_id || sub.id, type: "subscription_offered",
         title: "Accès Premium offert !",
-        body: `L'équipe Guardiens vous offre ${months} mois d'accès Premium. Motif : ${motif || ","}.`,
+        body: `L'équipe Guardiens vous offre ${months} mois d'accès Premium. Motif : ${motif || "·"}.`,
         link: "/dashboard",
       });
       toast.success("Premium offert");
@@ -186,7 +187,7 @@ const AdminSubscriptions = () => {
 
   return (
     <div className="space-y-6">
-      <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Abonnements</h1>
+      <AdminPageHeader title="Abonnements" description="Abonnements gardien et statut fondateur." />
 
       {/* Rappels fondateurs : masqués tant que le pricing est inactif, les
           fonctions répondent « skipped » et les boutons ne font rien. */}
@@ -223,7 +224,7 @@ const AdminSubscriptions = () => {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-warning-soft dark:bg-amber-900/30"><Crown className="h-5 w-5 text-warning dark:text-amber-400" /></div>
+            <div className="p-2 rounded-lg bg-warning-soft dark:bg-warning/30"><Crown className="h-5 w-5 text-warning dark:text-warning" /></div>
             <div>
               <p className="text-2xl font-bold">{metrics.founders}</p>
               <p className="text-xs text-muted-foreground">Fondateurs actifs</p>
@@ -252,7 +253,7 @@ const AdminSubscriptions = () => {
 
       {/* Expiring alert */}
       {expiringCount > 0 && (
-        <Card className="border-warning-border bg-warning-soft dark:bg-orange-900/10 dark:border-orange-800">
+        <Card className="border-warning-border bg-warning-soft dark:bg-warning/10 dark:border-warning">
           <CardContent className="p-3 flex items-center gap-3">
             <Clock className="h-5 w-5 text-warning shrink-0" />
             <p className="text-sm flex-1">{expiringCount} abonnement{expiringCount > 1 ? "s" : ""} expire{expiringCount > 1 ? "nt" : ""} dans les 30 prochains jours</p>
@@ -273,7 +274,7 @@ const AdminSubscriptions = () => {
             <SelectItem value="founder_free">Fondateur</SelectItem>
             <SelectItem value="annual_sitter">Gardien</SelectItem>
             <SelectItem value="free_launch">Lancement gratuit</SelectItem>
-            <SelectItem value="owner_free">Proprio gratuit</SelectItem>
+            <SelectItem value="owner_free">Propriétaire (accès libre)</SelectItem>
           </SelectContent>
         </Select>
         {filterExpiring && (
@@ -305,7 +306,7 @@ const AdminSubscriptions = () => {
               const plan = planLabels[sub.plan] || { label: sub.plan, color: "bg-muted text-muted-foreground" };
               const isExpiringSoon = sub.status === "active" && sub.expires_at && differenceInDays(new Date(sub.expires_at), new Date()) <= 30 && differenceInDays(new Date(sub.expires_at), new Date()) >= 0;
               return (
-                <TableRow key={sub.id} className={isExpiringSoon ? "bg-warning-soft/50 dark:bg-orange-900/5" : ""}>
+                <TableRow key={sub.id} className={isExpiringSoon ? "bg-warning-soft/50 dark:bg-warning/5" : ""}>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       {sub.profile?.avatar_url && <img src={avatarImageUrl(sub.profile.avatar_url, 24)} className="w-6 h-6 rounded-full object-cover" />}
@@ -317,17 +318,17 @@ const AdminSubscriptions = () => {
                   <TableCell>
                     <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${plan.color}`}>{plan.label}</span>
                   </TableCell>
-                  <TableCell className="text-xs text-muted-foreground">{sub.started_at ? format(new Date(sub.started_at), "d MMM yyyy", { locale: fr }) : ","}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground">{sub.started_at ? format(new Date(sub.started_at), "d MMM yyyy", { locale: fr }) : "·"}</TableCell>
                   <TableCell className="text-xs text-muted-foreground">
                     {sub.expires_at ? format(new Date(sub.expires_at), "d MMM yyyy", { locale: fr }) : "Illimité"}
-                    {isExpiringSoon && <span className="ml-1 text-warning font-medium">⚠</span>}
+                    {isExpiringSoon && <span className="ml-1 rounded-full bg-warning/15 px-1.5 text-[10px] font-medium text-warning">Bientôt échu</span>}
                   </TableCell>
                   <TableCell>
                     <Badge variant={sub.status === "active" ? "default" : sub.status === "expired" ? "destructive" : "outline"}>
                       {sub.status === "active" ? "Actif" : sub.status === "expired" ? "Expiré" : "Annulé"}
                     </Badge>
                   </TableCell>
-                  <TableCell>{sub.profile?.is_founder ? <Crown className="h-4 w-4 text-warning" /> : ","}</TableCell>
+                  <TableCell>{sub.profile?.is_founder ? <Crown className="h-4 w-4 text-warning" /> : "·"}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
                       <Button variant="ghost" size="icon" title="Voir profil" onClick={() => navigate(`/gardiens/${sub.user_id}`)}>

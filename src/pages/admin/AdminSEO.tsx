@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -415,14 +416,14 @@ const AdminSEO = () => {
           </a>
         </Button>
         <Button variant="default" asChild>
-          <a href="/admin/prerender">
-            Re-snapshot Prerender
-          </a>
+          <Link to="/admin/prerender">
+            Instantanés des pages
+          </Link>
         </Button>
         <Button variant="outline" asChild>
-          <a href="/admin/build-info">
-            Build info
-          </a>
+          <Link to="/admin/build-info">
+            Version en ligne
+          </Link>
         </Button>
       </div>
     </div>

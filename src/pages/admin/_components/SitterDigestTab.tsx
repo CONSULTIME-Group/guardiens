@@ -163,7 +163,7 @@ const SitterDigestTab = () => {
       const { data, error } = await supabase.functions.invoke("send-sitter-daily-digest", { body: buildBody(true) });
       if (error) throw error;
       if (dryRun) {
-        toast.success("Dry-run exécuté", { description: data ? JSON.stringify(data).slice(0, 200) : undefined });
+        toast.success("Simulation exécutée", { description: data ? JSON.stringify(data).slice(0, 200) : undefined });
         return;
       }
       setConfirmState({ count: planRecipientCount(data), targeted: !!manualSitterId.trim() });
@@ -220,7 +220,7 @@ const SitterDigestTab = () => {
         </CardContent></Card>
         <Card><CardContent className="pt-4 pb-3 text-center">
           <div className="text-2xl font-bold text-success">{pct(totals.clicked, totals.sent)}</div>
-          <div className="text-xs text-muted-foreground">Clic CTA</div>
+          <div className="text-xs text-muted-foreground">Clic sur le bouton</div>
         </CardContent></Card>
         <Card><CardContent className="pt-4 pb-3 text-center">
           <div className="text-2xl font-bold text-primary">{totals.applied}</div>
@@ -289,9 +289,9 @@ const SitterDigestTab = () => {
             <TableRow>
               <TableHead className="text-xs">Date</TableHead>
               <TableHead className="text-xs text-right">Envoyés</TableHead>
-              <TableHead className="text-xs text-right">Ouv.</TableHead>
+              <TableHead className="text-xs text-right">Ouverture</TableHead>
               <TableHead className="text-xs text-right">Clic</TableHead>
-              <TableHead className="text-xs text-right">Cand.</TableHead>
+              <TableHead className="text-xs text-right">Candidatures</TableHead>
               <TableHead className="text-xs text-right">Cand./envoi</TableHead>
             </TableRow>
           </TableHeader>

@@ -1,3 +1,4 @@
+import { adminLabel } from "@/lib/admin/labels";
 import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -64,7 +65,7 @@ const statusBadge = (s: string) => {
 };
 
 const fmt = (d: string | null) =>
-  d ? format(new Date(d), "dd/MM/yyyy HH:mm", { locale: fr }) : ",";
+  d ? format(new Date(d), "dd/MM/yyyy HH:mm", { locale: fr }) : "·";
 
 const urgencyBadge = (metadata: SendLogRow["metadata"]) => {
   if (!metadata) return null;
@@ -72,7 +73,7 @@ const urgencyBadge = (metadata: SendLogRow["metadata"]) => {
     return <Badge variant="outline" className="bg-warning-soft text-warning border-warning-border text-[10px]">Urgent</Badge>;
   }
   if (metadata.bypass) {
-    return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 text-[10px]">Bypass</Badge>;
+    return <Badge variant="outline" className="bg-info/10 text-info border-info/30 text-[10px]">Bypass</Badge>;
   }
   return <Badge variant="outline" className="text-muted-foreground text-[10px]">Standard</Badge>;
 };
@@ -189,7 +190,7 @@ export function QueueTab() {
                   <SelectItem value="processing">En traitement</SelectItem>
                   <SelectItem value="sent">Envoyés</SelectItem>
                   <SelectItem value="failed">Échoués</SelectItem>
-                  <SelectItem value="dlq">DLQ</SelectItem>
+                  <SelectItem value="dlq">Abandonnés</SelectItem>
                   <SelectItem value="cancelled">Annulés</SelectItem>
                 </SelectContent>
               </Select>
@@ -204,7 +205,7 @@ export function QueueTab() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Destinataire</TableHead>
-                  <TableHead>Template</TableHead>
+                  <TableHead>Modèle</TableHead>
                   <TableHead>Statut</TableHead>
                   <TableHead className="text-center">Tentatives</TableHead>
                   <TableHead>Prochaine tentative</TableHead>
@@ -223,7 +224,7 @@ export function QueueTab() {
                   rows.map((r) => (
                     <TableRow key={r.id}>
                       <TableCell className="text-sm">{r.recipient_email}</TableCell>
-                      <TableCell className="text-xs font-mono">{r.template_name}</TableCell>
+                      <TableCell className="text-xs" title={r.template_name}>{adminLabel(r.template_name)}</TableCell>
                       <TableCell>{statusBadge(r.status)}</TableCell>
                       <TableCell className="text-center text-sm">{r.attempts}</TableCell>
                       <TableCell className="text-xs whitespace-nowrap">{fmt(r.scheduled_for)}</TableCell>
@@ -294,7 +295,7 @@ export function QueueTab() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Jour</TableHead>
-                  <TableHead>Template</TableHead>
+                  <TableHead>Modèle</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead className="text-right">Hits</TableHead>
                 </TableRow>
@@ -312,7 +313,7 @@ export function QueueTab() {
                       <TableCell className="text-xs whitespace-nowrap">
                         {format(new Date(r.day), "dd/MM/yyyy", { locale: fr })}
                       </TableCell>
-                      <TableCell className="text-xs font-mono">{r.template_name}</TableCell>
+                      <TableCell className="text-xs" title={r.template_name}>{adminLabel(r.template_name)}</TableCell>
                       <TableCell>
                         <Badge variant="outline" className={
                           r.hit_type === "duplicate_send"
@@ -362,14 +363,14 @@ export function QueueTab() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Date</TableHead>
-                    <TableHead>Template</TableHead>
+                    <TableHead>Modèle</TableHead>
                     <TableHead>Type</TableHead>
                     <TableHead>Destinataire</TableHead>
                     <TableHead>Statut</TableHead>
                     <TableHead>Délivré</TableHead>
-                    <TableHead className="text-center">Ouv.</TableHead>
+                    <TableHead className="text-center">Ouverture</TableHead>
                     <TableHead className="text-center">Clics</TableHead>
-                    <TableHead>Bounce / Plainte</TableHead>
+                    <TableHead>Rejet ou plainte</TableHead>
                     <TableHead>resend_id</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -384,7 +385,7 @@ export function QueueTab() {
                     logRows.map((r) => (
                       <TableRow key={r.id}>
                         <TableCell className="text-xs whitespace-nowrap">{fmt(r.created_at)}</TableCell>
-                        <TableCell className="text-xs font-mono">{r.template_name}</TableCell>
+                        <TableCell className="text-xs" title={r.template_name}>{adminLabel(r.template_name)}</TableCell>
                         <TableCell>{urgencyBadge(r.metadata)}</TableCell>
                         <TableCell className="text-sm">{r.recipient_email}</TableCell>
                         <TableCell>{statusBadge(r.status)}</TableCell>
@@ -393,14 +394,14 @@ export function QueueTab() {
                           {r.open_count > 0 ? (
                             <span title={`Dernière : ${fmt(r.last_opened_at)}`}>{r.open_count}</span>
                           ) : (
-                            ","
+                            "·"
                           )}
                         </TableCell>
                         <TableCell className="text-center text-sm">
                           {r.click_count > 0 ? (
                             <span title={r.last_clicked_url ?? ""}>{r.click_count}</span>
                           ) : (
-                            ","
+                            "·"
                           )}
                         </TableCell>
                         <TableCell className="text-xs">
@@ -411,10 +412,10 @@ export function QueueTab() {
                               {r.error_message}
                             </div>
                           )}
-                          {!r.bounced_at && !r.complained_at && !r.error_message && ","}
+                          {!r.bounced_at && !r.complained_at && !r.error_message && "·"}
                         </TableCell>
                         <TableCell className="text-xs font-mono truncate max-w-[160px]" title={r.resend_id ?? ""}>
-                          {r.resend_id ?? ","}
+                          {r.resend_id ?? "·"}
                         </TableCell>
                       </TableRow>
                     ))

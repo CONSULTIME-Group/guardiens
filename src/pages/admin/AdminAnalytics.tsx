@@ -302,11 +302,11 @@ const AdminAnalytics = () => {
   }, [funnelCounts, totalInscrits]);
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-2xl font-bold text-foreground">Analytics</h2>
-          <p className="text-sm text-muted-foreground">Funnel d'activation, conversions et inscriptions</p>
+          <h2 className="font-heading text-xl font-semibold text-foreground">Activation interne</h2>
+          <p className="text-sm text-muted-foreground">Entonnoir d'activation, conversions et inscriptions</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <Tabs value={roleFilter} onValueChange={(v) => setRoleFilter(v as RoleFilter)}>
@@ -344,7 +344,7 @@ const AdminAnalytics = () => {
           <CardContent className="flex items-start gap-3 p-4">
             <AlertCircle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
             <div className="text-sm">
-              <p className="font-medium text-destructive">Tracking inactif</p>
+              <p className="font-medium text-destructive">Mesure inactive</p>
               <p className="text-muted-foreground mt-0.5">
                 {trackingHealth.lastEvent
                   ? `Dernier événement reçu il y a ${formatRelative(trackingHealth.lastEvent)}.`
@@ -377,7 +377,7 @@ const AdminAnalytics = () => {
               icon={MousePointerClick}
             />
             <StatCard
-              label="Signups démarrés"
+              label="Inscriptions démarrées"
               value={funnelCounts.signup_started || 0}
               delta={delta(funnelCounts.signup_started, previousFunnel.signup_started)}
               icon={TrendingUp}

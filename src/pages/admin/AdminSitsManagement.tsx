@@ -1,3 +1,4 @@
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { fetchAllRows } from "@/lib/admin/fetchAllRows";
 import { createSeqGuard } from "@/lib/admin/requestSeq";
@@ -311,10 +312,7 @@ const AdminSitsManagement = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Gardes</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Gardes après acceptation (confirmées, en cours, terminées, annulées) : propriétaire et gardien, déroulé dans le temps, avis.
-        </p>
+        <AdminPageHeader title="Gardes" description="Gardes après acceptation : propriétaire et gardien, déroulé dans le temps, avis." />
         <p className="text-sm text-muted-foreground mt-1">
           Pour les annonces publiées (en recherche de gardien), les brouillons et les statistiques de trafic, consultez l'onglet{' '}
           <button
@@ -391,13 +389,13 @@ const AdminSitsManagement = () => {
           <TableHeader>
             <TableRow>
               <TableHead>Annonce</TableHead>
-              <TableHead>Proprio</TableHead>
+              <TableHead>Propriétaire</TableHead>
               <TableHead>Gardien</TableHead>
               <TableHead>Ville</TableHead>
               <TableHead>Dates</TableHead>
               <TableHead>Dernière activité</TableHead>
               <TableHead className="text-right">Vues</TableHead>
-              <TableHead className="text-right">Msg</TableHead>
+              <TableHead className="text-right">Messages</TableHead>
               <TableHead>Déroulé dans le temps</TableHead>
               <TableHead>État du dossier</TableHead>
               <TableHead>Avis</TableHead>
@@ -442,26 +440,26 @@ const AdminSitsManagement = () => {
                         {sitter.avatar && <img src={avatarImageUrl(sitter.avatar, 20)} className="w-5 h-5 rounded-full object-cover" />}
                         <span>{sitter.name}</span>
                       </div>
-                    ) : ","}
+                    ) : "·"}
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
                     <div className="flex items-center gap-1.5">
-                      <span>{sit.owner?.city || ","}</span>
+                      <span>{sit.owner?.city || "·"}</span>
                       {sit.country && sit.country !== "FR" && (
                         <Badge variant="outline" className="text-[10px] px-1.5 py-0">{getCountryName(sit.country)}</Badge>
                       )}
                     </div>
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
-                    {sit.start_date ? format(new Date(sit.start_date), "d MMM", { locale: fr }) : ","}
+                    {sit.start_date ? format(new Date(sit.start_date), "d MMM", { locale: fr }) : "·"}
                     {" → "}
-                    {sit.end_date ? format(new Date(sit.end_date), "d MMM yy", { locale: fr }) : ","}
+                    {sit.end_date ? format(new Date(sit.end_date), "d MMM yy", { locale: fr }) : "·"}
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
-                    {sit.updated_at ? formatDistanceToNow(new Date(sit.updated_at), { addSuffix: true, locale: fr }) : ","}
+                    {sit.updated_at ? formatDistanceToNow(new Date(sit.updated_at), { addSuffix: true, locale: fr }) : "·"}
                   </TableCell>
-                  <TableCell className="text-right text-sm font-medium tabular-nums">{statsBySit[sit.id]?.views ?? ","}</TableCell>
-                  <TableCell className="text-right text-sm font-medium tabular-nums">{statsBySit[sit.id]?.messages ?? ","}</TableCell>
+                  <TableCell className="text-right text-sm font-medium tabular-nums">{statsBySit[sit.id]?.views ?? "·"}</TableCell>
+                  <TableCell className="text-right text-sm font-medium tabular-nums">{statsBySit[sit.id]?.messages ?? "·"}</TableCell>
                   <TableCell><Badge variant={timing.variant}>{timing.label}</Badge></TableCell>
                   <TableCell>
                     {(() => {
@@ -541,7 +539,7 @@ const AdminSitsManagement = () => {
                     <div>
                       <p className="text-xs text-muted-foreground">Propriétaire</p>
                       <p className="text-sm font-medium">
-                        {selectedSit.owner?.first_name || ","}
+                        {selectedSit.owner?.first_name || "·"}
                       </p>
                     </div>
                   </div>
@@ -557,7 +555,7 @@ const AdminSitsManagement = () => {
                     <div>
                       <p className="text-xs text-muted-foreground">Gardien assigné</p>
                       <p className="text-sm font-medium">
-                        {sitters[selectedSit.id]?.name || ","}
+                        {sitters[selectedSit.id]?.name || "·"}
                       </p>
                     </div>
                   </div>
@@ -570,9 +568,9 @@ const AdminSitsManagement = () => {
                     <div>
                       <p className="text-xs text-muted-foreground">Dates</p>
                       <p className="text-sm font-medium">
-                        {selectedSit.start_date ? format(new Date(selectedSit.start_date), "d MMM yyyy", { locale: fr }) : ","}
+                        {selectedSit.start_date ? format(new Date(selectedSit.start_date), "d MMM yyyy", { locale: fr }) : "·"}
                         {" → "}
-                        {selectedSit.end_date ? format(new Date(selectedSit.end_date), "d MMM yyyy", { locale: fr }) : ","}
+                        {selectedSit.end_date ? format(new Date(selectedSit.end_date), "d MMM yyyy", { locale: fr }) : "·"}
                       </p>
                     </div>
                   </div>
@@ -598,15 +596,15 @@ const AdminSitsManagement = () => {
                 <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Statistiques</h3>
                 <div className="grid grid-cols-3 gap-2">
                   <div className="rounded-lg border p-3 text-center">
-                    <p className="text-2xl font-semibold">{sheetStats?.view_count ?? ","}</p>
+                    <p className="text-2xl font-semibold">{sheetStats?.view_count ?? "·"}</p>
                     <p className="text-xs text-muted-foreground mt-1">Vues</p>
                   </div>
                   <div className="rounded-lg border p-3 text-center">
-                    <p className="text-2xl font-semibold">{sheetStats?.message_count ?? ","}</p>
+                    <p className="text-2xl font-semibold">{sheetStats?.message_count ?? "·"}</p>
                     <p className="text-xs text-muted-foreground mt-1">Messages</p>
                   </div>
                   <div className="rounded-lg border p-3 text-center">
-                    <p className="text-2xl font-semibold">{sheetStats?.conversation_count ?? ","}</p>
+                    <p className="text-2xl font-semibold">{sheetStats?.conversation_count ?? "·"}</p>
                     <p className="text-xs text-muted-foreground mt-1">Conversations</p>
                   </div>
                 </div>
@@ -642,7 +640,7 @@ const AdminSitsManagement = () => {
                             <AvatarFallback className="text-xs"><User className="h-3 w-3" /></AvatarFallback>
                           </Avatar>
                           <span className="text-sm font-medium underline-offset-2 hover:underline">
-                            {app.sitter?.first_name || ","}
+                            {app.sitter?.first_name || "·"}
                           </span>
                         </button>
                         {getStatusBadge(app.status)}
@@ -689,7 +687,7 @@ const AdminSitsManagement = () => {
                 )}
 
                 {selectedSit.status !== "confirmed" && selectedSit.status !== "in_progress" && (
-                  <p className="text-sm text-muted-foreground text-center py-2">Aucune action disponible</p>
+                  <p className="text-sm text-muted-foreground text-center py-2">Cette garde ne demande aucune action.</p>
                 )}
               </div>
             </div>

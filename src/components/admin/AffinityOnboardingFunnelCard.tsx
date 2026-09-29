@@ -87,7 +87,7 @@ export function AffinityOnboardingFunnelCard({ since }: { since: string }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Funnel onboarding affinité</CardTitle>
+        <CardTitle className="text-base">Entonnoir onboarding affinité</CardTitle>
         <p className="text-xs text-muted-foreground">
           Comptes créés depuis {new Date(cohortSince).toLocaleDateString("fr-FR")}, événements analytiques sur la période sélectionnée.
         </p>

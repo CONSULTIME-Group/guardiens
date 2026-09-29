@@ -109,7 +109,7 @@ const FacebookReferralCard = ({ rangeDays }: Props) => {
             {/* KPIs */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <Kpi label="Visites FB" value={stats.landings} />
-              <Kpi label="Feedbacks" value={stats.feedbacks} hint={`${stats.responseRate}% de réponse`} />
+              <Kpi label="Retours" value={stats.feedbacks} hint={`${stats.responseRate}% de réponse`} />
               <Kpi label="Fermés" value={stats.dismissed} />
               <Kpi label="Commentaires" value={stats.comments.length} />
             </div>
@@ -118,7 +118,7 @@ const FacebookReferralCard = ({ rangeDays }: Props) => {
             <div>
               <p className="text-xs uppercase tracking-wide text-muted-foreground mb-2">Réactions</p>
               <div className="grid grid-cols-3 gap-2">
-                <ReactionTile icon={ThumbsUp} label="Utile" value={stats.reactions.useful} tone="text-emerald-600" />
+                <ReactionTile icon={ThumbsUp} label="Utile" value={stats.reactions.useful} tone="text-success" />
                 <ReactionTile icon={Meh} label="Bof" value={stats.reactions.meh} tone="text-warning" />
                 <ReactionTile icon={MessageSquare} label="Commenté" value={stats.reactions.comment} tone="text-primary" />
               </div>

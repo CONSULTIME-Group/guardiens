@@ -1,3 +1,4 @@
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -235,9 +236,9 @@ const AdminContactMessages = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Messages contact</h1>
-        <div className="flex gap-2">
+      <AdminPageHeader title="Messages contact" description="Messages reçus par le formulaire de contact du site." />
+      <div className="flex flex-wrap items-center justify-end">
+        <div className="flex flex-wrap gap-2">
           {(["all", "new", "en_cours", "replied", "closed"] as StatusFilter[]).map(f => (
             <Button key={f} size="sm" variant={filter === f ? "default" : "outline"} onClick={() => { setFilter(f); setPage(0); }}>
               {{ all: "Tous", new: "Nouveaux", en_cours: "En cours", replied: "Répondus", closed: "Fermés" }[f]}
@@ -310,7 +311,7 @@ const AdminContactMessages = () => {
                         )}
                       </div>
                     </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{msg.assigned_to || ","}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{msg.assigned_to || "·"}</TableCell>
                     <TableCell>
                       <div className="flex items-center justify-end gap-1">
                         <Button size="sm" variant="ghost" className="h-8 gap-1 text-xs" onClick={() => handleView(msg)}>

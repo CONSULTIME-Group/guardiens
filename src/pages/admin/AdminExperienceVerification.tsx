@@ -1,3 +1,4 @@
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useState, useEffect, useCallback } from "react";
 import { refreshAdminBadges } from "@/hooks/useAdminBadges";
 import { supabase } from "@/integrations/supabase/client";
@@ -135,7 +136,7 @@ const AdminExperienceVerification = () => {
             )}
             <div>
               <p className="font-medium text-sm">{exp.profile?.first_name} {exp.profile?.last_name}</p>
-              <p className="text-xs text-muted-foreground capitalize">{exp.profile?.role || ","}</p>
+              <p className="text-xs text-muted-foreground capitalize">{exp.profile?.role || "·"}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -151,25 +152,25 @@ const AdminExperienceVerification = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
           <div>
             <p className="text-xs text-muted-foreground uppercase tracking-wide">Plateforme</p>
-            <p className="font-medium">{exp.platform_name || ","}</p>
+            <p className="font-medium">{exp.platform_name || "Non renseigné"}</p>
           </div>
           <div>
             <p className="text-xs text-muted-foreground uppercase tracking-wide">Durée</p>
-            <p className="font-medium">{exp.duration || ","}</p>
+            <p className="font-medium">{exp.duration || "Non renseigné"}</p>
           </div>
           <div>
             <p className="text-xs text-muted-foreground uppercase tracking-wide">Date</p>
-            <p className="font-medium">{exp.experience_date || ","}</p>
+            <p className="font-medium">{exp.experience_date || "Non renseigné"}</p>
           </div>
           <div>
             <p className="text-xs text-muted-foreground uppercase tracking-wide">Lieu</p>
-            <p className="font-medium">{[exp.city, exp.country].filter(Boolean).join(", ") || ","}</p>
+            <p className="font-medium">{[exp.city, exp.country].filter(Boolean).join(", ") || "Non renseigné"}</p>
           </div>
         </div>
 
         <div>
           <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Animaux</p>
-          <p className="text-sm">{exp.animal_types || ","}</p>
+          <p className="text-sm">{exp.animal_types || "Non renseigné"}</p>
         </div>
 
         <div>
@@ -234,9 +235,7 @@ const AdminExperienceVerification = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Expériences externes</h1>
-      </div>
+      <AdminPageHeader title="Expériences" description="Expériences de garde déclarées hors Guardiens, à vérifier." />
 
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as StatusFilter)}>
         <TabsList>
@@ -259,7 +258,7 @@ const AdminExperienceVerification = () => {
             <div className="text-center py-12 text-muted-foreground">
               <Briefcase className="h-12 w-12 mx-auto mb-3 opacity-30" />
               <p className="font-medium">
-                {activeTab === "pending" && "Aucune expérience en attente 🎉"}
+                {activeTab === "pending" && "Toutes les expériences ont été vérifiées."}
                 {activeTab === "verified" && "Aucune expérience validée pour le moment"}
                 {activeTab === "rejected" && "Aucune expérience refusée"}
               </p>

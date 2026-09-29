@@ -51,7 +51,7 @@ const StatusBar = ({ data, loading, refreshing, onRefresh }: StatusBarProps) => 
         : "unavailable";
 
   const statusIcon = (s: SourceStatus) => {
-    if (s === "active") return <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />;
+    if (s === "active") return <CheckCircle2 className="h-3.5 w-3.5 text-success" />;
     if (s === "partial") return <Clock className="h-3.5 w-3.5 text-warning" />;
     if (s === "unavailable") return <AlertCircle className="h-3.5 w-3.5 text-muted-foreground" />;
     return <Clock className="h-3.5 w-3.5 text-muted-foreground animate-pulse" />;
@@ -80,7 +80,7 @@ const StatusBar = ({ data, loading, refreshing, onRefresh }: StatusBarProps) => 
   const lastGa4Raw = ga4Days[ga4Days.length - 1]?.date ?? null;
   const lastGa4Date = lastGa4Raw
     ? `${lastGa4Raw.slice(6, 8)}/${lastGa4Raw.slice(4, 6)}/${lastGa4Raw.slice(0, 4)}`
-    : ",";
+    : "·";
 
   const isStale = cacheAgeMin !== null && cacheAgeMin > 15;
 
@@ -145,24 +145,24 @@ const StatusBar = ({ data, loading, refreshing, onRefresh }: StatusBarProps) => 
       {expert && (
         <div className="rounded-lg border bg-muted/40 px-4 py-3 text-xs space-y-2 font-mono">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1.5">
-            <ExpertRow label="updated_at (UTC)" value={updatedAtDate ? updatedAtDate.toISOString() : ","} />
+            <ExpertRow label="updated_at (UTC)" value={updatedAtDate ? updatedAtDate.toISOString() : "·"} />
             <ExpertRow
               label="updated_at (local)"
-              value={updatedAtDate ? format(updatedAtDate, "dd/MM/yyyy HH:mm:ss", { locale: fr }) : ","}
+              value={updatedAtDate ? format(updatedAtDate, "dd/MM/yyyy HH:mm:ss", { locale: fr }) : "·"}
             />
             <ExpertRow
               label="Âge du cache"
-              value={cacheAgeMin !== null ? `${cacheAgeMin} min` : ","}
+              value={cacheAgeMin !== null ? `${cacheAgeMin} min` : "·"}
               warn={isStale}
             />
             <ExpertRow label="TTL cache" value="15 min (puis fallback 24h si erreur)" />
             <ExpertRow label="Source" value={data?.cached ? (data?.stale ? "cache périmé (fallback)" : "cache") : "live API"} />
-            <ExpertRow label="GA4 propertyId" value={data?.ga4?.propertyId ?? ","} />
+            <ExpertRow label="GA4 propertyId" value={data?.ga4?.propertyId ?? "·"} />
             <ExpertRow label="Plage GA4 demandée" value={`${ga4Range} (J-29 → aujourd'hui)`} />
             <ExpertRow label="Dernier jour GA4 reçu" value={lastGa4Date} />
             <ExpertRow label="Plage GSC demandée" value={`${gscRange} (J-30 → J-2)`} />
-            <ExpertRow label="GA4 sessions" value={data?.ga4?.current?.sessions?.toLocaleString() ?? ","} />
-            <ExpertRow label="GA4 utilisateurs actifs" value={data?.ga4?.current?.activeUsers?.toLocaleString() ?? ","} />
+            <ExpertRow label="GA4 sessions" value={data?.ga4?.current?.sessions?.toLocaleString() ?? "·"} />
+            <ExpertRow label="GA4 utilisateurs actifs" value={data?.ga4?.current?.activeUsers?.toLocaleString() ?? "·"} />
             <ExpertRow label="GSC clics" value={gscClicks.toLocaleString()} />
             <ExpertRow label="GSC impressions" value={gscImpressions.toLocaleString()} />
           </div>

@@ -122,32 +122,22 @@ describe("poids des hero : confirmation obligatoire", () => {
   });
 });
 
-describe("routes retirées : redirection vers /admin", () => {
+describe("routes retirées (lot A11 : redirections mortes purgées)", () => {
   const src = read("src/App.tsx");
   for (const path of [
     "/admin/audit-tarifs", "/admin/seo-debug", "/admin/relance-incomplet",
     "/admin/test-sitter-fields", "/admin/articles/refresh-post-pivot",
+    "/admin/dashboard", "/admin/seo", "/admin/analytics",
   ]) {
     it(path, () => {
-      expect(src).toContain(`<Route path="${path}" element={<Navigate to="/admin" replace />} />`);
+      expect(src).not.toContain(`<Route path="${path}" `);
     });
   }
-  it("la redirection mène bien à /admin", async () => {
-    render(
-      <MemoryRouter initialEntries={["/admin/seo-debug"]}>
-        <Routes>
-          <Route path="/admin/seo-debug" element={<NavigateProbe />} />
-          <Route path="/admin" element={<p>accueil admin</p>} />
-        </Routes>
-      </MemoryRouter>,
-    );
-    expect(await screen.findByText("accueil admin")).toBeTruthy();
-  });
   it("imports inutilisés retirés", () => {
-    for (const n of ["AdminSEO", "AdminAnalytics", "SeoDebug", "AuditTarifs", "AdminRelanceIncomplet", "AdminTestSitterFields", "AdminArticlesRefreshPostPivot"]) {
+    for (const n of ["AdminSEO", "AdminAnalytics", "SeoDebug", "AuditTarifs", "AdminRelanceIncomplet", "AdminTestSitterFields", "AdminArticlesRefreshPostPivot", "AdminLifecycle"]) {
       expect(src).not.toMatch(new RegExp(`const ${n} = lazy`));
     }
-    expect(src).toContain("<AdminLifecycle />");
+    expect(src).toContain('<Route path="/admin/lifecycle" element={<Navigate to="/admin/nurturing" replace />} />');
   });
 });
 
