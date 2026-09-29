@@ -70,7 +70,8 @@ interface MassEmailFilters {
 
 /** Témoin et déjà répondu (lot N4), avec compteurs pour la confirmation. */
 async function applyDepartureFilters<T extends { id: string }>(
-  serviceClient: ReturnType<typeof createClient>, rows: T[], filters: MassEmailFilters,
+  // deno-lint-ignore no-explicit-any
+  serviceClient: any, rows: T[], filters: MassEmailFilters,
 ): Promise<{ rows: T[]; holdout: number | null; answered: number | null }> {
   if (!filters.exclude_owner_v2_holdout && !filters.exclude_departure_answered) return { rows, holdout: null, answered: null };
   const answeredIds = filters.exclude_departure_answered ? await loadAnsweredIds(serviceClient, rows.map((r) => r.id)) : new Set<string>();

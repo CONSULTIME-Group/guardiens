@@ -2,6 +2,7 @@
 import { Check } from "lucide-react";
 import { PERIOD_BUTTONS, type DeparturePeriod, type Readiness } from "@/lib/ownerDeparture";
 import { cn } from "@/lib/utils";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 export const PeriodChoices = ({
   onPick, busy, variant = "stack",
@@ -53,7 +54,7 @@ export const ReadinessList = ({ readiness }: { readiness: Readiness }) => (
 export const Faces = ({ sitters }: { sitters: Array<{ id: string; firstName: string; avatarUrl?: string }> }) => (
   <div className="flex -space-x-2">
     {sitters.slice(0, 3).map((s) => s.avatarUrl ? (
-      <img key={s.id} src={s.avatarUrl} alt={s.firstName} className="h-[32px] w-[32px] rounded-full border-2 border-card object-cover" loading="lazy" />
+      <img key={s.id} src={avatarImageUrl(s.avatarUrl, 64)} alt={s.firstName} className="h-[32px] w-[32px] rounded-full border-2 border-card object-cover" loading="lazy" />
     ) : (
       <span key={s.id} className="flex h-[32px] w-[32px] items-center justify-center rounded-full border-2 border-card bg-primary/15 font-heading text-[13px] text-primary">
         {(s.firstName.charAt(0) || "G").toUpperCase()}
