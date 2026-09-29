@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { refreshAdminBadges } from "@/hooks/useAdminBadges";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -149,6 +150,7 @@ export default function AdminDeletionRequests() {
       setEmail("");
       setNotes("");
       await load();
+      refreshAdminBadges();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Effacement impossible");
     } finally {

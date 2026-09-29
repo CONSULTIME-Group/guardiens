@@ -246,6 +246,13 @@
       "when": 1790662602232,
       "tag": "0034_owner_departure_intents",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1790668818116,
+      "tag": "0035_admin_menu_badges_and_reviews_admin_rls",
+      "breakpoints": true
     }
   ]
 }

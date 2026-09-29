@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from "react";
+import { clearAppQueryCache } from "@/lib/appQueryClient";
 import { supabase } from "@/integrations/supabase/client";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 import { getSignupRedirectUrl } from "@/lib/authRedirect";
@@ -469,6 +470,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setProfileError(false);
     setAuthTimeout(false);
     roleInitialized.current = false;
+    clearAppQueryCache();
     await supabase.auth.signOut();
   }, []);
 

@@ -79,7 +79,11 @@ Deno.serve(async (req) => {
     .maybeSingle()
   if (repErr || !report) return json({ error: 'Report not found' }, 404)
 
-  const targetType = report.target_type as TargetType
+  // La table enregistre « sit » et « user » ; la fonction raisonne en
+  // « listing » et « profile ». Correspondance explicite, anciennes valeurs acceptées.
+  const TARGET_ALIASES: Record<string, TargetType> = { sit: 'listing', user: 'profile' }
+  const rawTarget = String(report.target_type ?? '')
+  const targetType = (TARGET_ALIASES[rawTarget] ?? rawTarget) as TargetType
   const targetId = report.target_id as string | null
   if (!VALID_TARGETS.includes(targetType)) {
     return json({ error: `Unknown target_type: ${targetType}` }, 400)

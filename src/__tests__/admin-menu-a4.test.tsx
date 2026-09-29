@@ -5,15 +5,16 @@ import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { renderHook } from "@testing-library/react";
 
-const { updateSpy, fromSpy, LIVE } = vi.hoisted(() => {
+const { updateSpy, fromSpy, rpcSpy, LIVE } = vi.hoisted(() => {
   const LIVE = { animals: 25, home: 25, mutual_aid: 25, village: 25 };
   const updateSpy = vi.fn();
   const fromSpy = vi.fn();
-  return { updateSpy, fromSpy, LIVE };
+  const rpcSpy = vi.fn();
+  return { updateSpy, fromSpy, rpcSpy, LIVE };
 });
 
 vi.mock("@/integrations/supabase/client", () => ({
-  supabase: { from: (...a: unknown[]) => fromSpy(...a) },
+  supabase: { from: (...a: unknown[]) => fromSpy(...a), rpc: (...a: unknown[]) => rpcSpy(...a) },
 }));
 vi.mock("@/contexts/AuthContext", () => ({
   useAuth: () => ({ user: { id: "admin-1" }, loading: false, isAuthenticated: true, logout: vi.fn() }),
@@ -155,25 +156,18 @@ const NavigateProbe = () => <Navigate to="/admin" replace />;
 
 
 describe("useAdminBadges : une seule lecture partagée", () => {
-  it("deux montages (layout + sidebar) déclenchent une seule exécution", async () => {
-    const counts: string[] = [];
-    const chain: any = new Proxy({}, {
-      get: (_t, prop) => {
-        if (prop === "then") return (r: any) => r({ data: [], count: 0, error: null });
-        return () => chain;
-      },
-    });
-    fromSpy.mockImplementation((t: string) => { counts.push(t); return chain; });
+  it("deux montages (layout + sidebar) déclenchent un seul appel", async () => {
+    rpcSpy.mockResolvedValue({ data: { errors: 2 }, error: null });
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <QueryClientProvider client={qc}>{children}</QueryClientProvider>
     );
     const Both = () => { useAdminBadges(); useAdminBadges(); return null; };
     render(<Both />, { wrapper });
-    await waitFor(() => expect(counts.length).toBeGreaterThan(0));
+    await waitFor(() => expect(rpcSpy).toHaveBeenCalled());
     await new Promise((r) => setTimeout(r, 30));
-    expect(counts.filter((t) => t === "error_logs")).toHaveLength(1);
-    expect(counts.filter((t) => t === "contact_messages")).toHaveLength(1);
-    void renderHook;
+    expect(rpcSpy).toHaveBeenCalledTimes(1);
+    expect(rpcSpy).toHaveBeenCalledWith("admin_menu_badges");
+    void renderHook; void fromSpy;
   });
 });
