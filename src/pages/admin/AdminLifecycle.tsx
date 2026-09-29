@@ -50,6 +50,7 @@ const AdminLifecycle = () => {
   const [windowDays, setWindowDays] = useState<Window>(30);
   const [seqs, setSeqs] = useState<SeqRow[]>([]);
   const [tpls, setTpls] = useState<TplRow[]>([]);
+  const [dataTruncated, setDataTruncated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [exits, setExits] = useState<ExitRow[]>([]);
   const [exitsLoading, setExitsLoading] = useState(true);
@@ -175,6 +176,7 @@ const AdminLifecycle = () => {
 
   return (
     <div className="min-w-0 max-w-7xl mx-auto px-4 py-6 md:py-10 space-y-6">
+      {dataTruncated && <p role="status" className="text-sm text-warning">{TRUNCATED_NOTICE}</p>}
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="font-heading text-2xl md:text-3xl font-semibold">Lifecycle</h1>
