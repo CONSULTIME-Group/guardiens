@@ -26,11 +26,14 @@ const ContactReplyEmail = ({ firstName, originalMessage, replyBody }: ContactRep
           {firstName ? `Bonjour ${firstName},` : 'Bonjour,'}
         </Heading>
         <Text style={text}>Merci pour votre message.</Text>
-        {originalMessage ? (
-          <Text style={blockquote}>{originalMessage}</Text>
-        ) : null}
         {replyBody ? (
           <Text style={text}>{replyBody}</Text>
+        ) : null}
+        {originalMessage ? (
+          <>
+            <Text style={text}>Votre message d'origine :</Text>
+            <Text style={blockquote}>{originalMessage}</Text>
+          </>
         ) : null}
         <LegalFooter
           purpose="la réponse à votre demande de contact"

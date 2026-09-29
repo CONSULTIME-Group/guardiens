@@ -37,6 +37,8 @@ const AdminContactMessages = () => {
   const [assignedTo, setAssignedTo] = useState("");
   const [replyText, setReplyText] = useState("");
   const [sendLoading, setSendLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [statusCounts, setStatusCounts] = useState<Record<string, number | null>>({});
 
   const fetchMessages = useCallback(async () => {
     setLoading(true);
@@ -50,9 +52,23 @@ const AdminContactMessages = () => {
       query = query.eq("status", filter);
     }
 
-    const { data, count } = await query;
-    setMessages(data || []);
-    setTotal(count || 0);
+    const { data, count, error } = await query;
+    if (error) {
+      console.error("[admin-contact] chargement", error);
+      setLoadError(`Les messages n'ont pas pu être chargés : ${error.message}.`);
+    } else {
+      setLoadError(null);
+      setMessages(data || []);
+      setTotal(count || 0);
+    }
+    // Lot A9 : nombres réels des quatre cartes.
+    const statuses = ["new", "en_cours", "replied", "closed"];
+    const results = await Promise.all(statuses.map((st) =>
+      supabase.from("contact_messages").select("id", { count: "exact", head: true }).eq("status", st),
+    ));
+    const counts: Record<string, number | null> = {};
+    results.forEach((r, i) => { counts[statuses[i]] = r.error ? null : r.count ?? 0; });
+    setStatusCounts(counts);
     setLoading(false);
   }, [filter, page]);
 
@@ -64,7 +80,7 @@ const AdminContactMessages = () => {
     if (notes !== undefined) update.admin_notes = notes;
 
     const { error } = await supabase.from("contact_messages").update(update).eq("id", id);
-    if (error) { toast.error("Erreur"); return; }
+    if (error) { toast.error(`Mise à jour impossible : ${error.message}`); return; }
     toast.success("Statut mis à jour");
     fetchMessages();
     window.dispatchEvent(new Event("admin-badges-refresh"));
@@ -80,6 +96,18 @@ const AdminContactMessages = () => {
     }
   };
 
+  const handleSaveNote = async () => {
+    if (!viewModal.msg) return;
+    const { error } = await supabase
+      .from("contact_messages")
+      .update({ admin_notes: adminNotes.trim() || null })
+      .eq("id", viewModal.msg.id);
+    if (error) { toast.error(`Note non enregistrée : ${error.message}`); return; }
+    toast.success("Note interne enregistrée");
+    setViewModal((v) => ({ ...v, msg: v.msg ? { ...v.msg, admin_notes: adminNotes.trim() || null } : v.msg }));
+    fetchMessages();
+  };
+
   const handleSaveAssignment = async () => {
     if (!viewModal.msg) return;
     const value = assignedTo.trim() || null;
@@ -88,7 +116,7 @@ const AdminContactMessages = () => {
       .update({ assigned_to: value })
       .eq("id", viewModal.msg.id);
     if (error) {
-      toast.error("Erreur lors de l'assignation");
+      toast.error(`Assignation impossible : ${error.message}`);
       return;
     }
     toast.success("Assignation sauvegardée");
@@ -136,7 +164,7 @@ const AdminContactMessages = () => {
 
       if (dbError) throw dbError;
 
-      toast.success("Réponse envoyée ✓", {
+      toast.success("Réponse envoyée", {
         description: `Email envoyé à ${msg.email}`,
         duration: 3000
       });
@@ -146,7 +174,7 @@ const AdminContactMessages = () => {
       window.dispatchEvent(new Event("admin-badges-refresh"));
     } catch {
       toast.error("Erreur d'envoi", {
-        description: "Impossible d'envoyer l'email. Vérifie la configuration email.",
+        description: "L'email n'est pas parti. Réessayez dans un instant.",
         duration: 5000
       });
     } finally {
@@ -178,7 +206,7 @@ const AdminContactMessages = () => {
       window.dispatchEvent(new Event("admin-badges-refresh"));
     } catch {
       toast.error("Erreur", {
-        description: "Impossible de mettre à jour le statut. Réessaie.",
+        description: "Le statut n'a pas été mis à jour. Réessayez dans un instant.",
         duration: 5000
       });
     }
@@ -230,12 +258,17 @@ const AdminContactMessages = () => {
             <CardContent className="p-3 flex items-center gap-2">
               <s.icon className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm font-medium">{s.label}</span>
+              <span className="ml-auto text-lg font-semibold tabular-nums" title={statusCounts[s.filter] == null ? "Compteur indisponible" : undefined}>
+                {statusCounts[s.filter] == null ? "?" : statusCounts[s.filter]}
+              </span>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {messages.length === 0 ? (
+      {loadError ? (
+        <p role="alert" className="text-sm text-destructive py-6 text-center">{loadError}</p>
+      ) : messages.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
           <MessageSquare className="h-12 w-12 mx-auto mb-3 text-primary/40" />
           <p className="font-medium">Aucun message</p>
@@ -356,7 +389,10 @@ const AdminContactMessages = () => {
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Notes internes</label>
                   <Textarea placeholder="Notes internes ou actions effectuées..." value={adminNotes} onChange={e => setAdminNotes(e.target.value)} className="min-h-[72px] text-sm resize-none" />
-                  <p className="text-xs text-muted-foreground">Visible uniquement par l'équipe Guardiens. Jamais envoyé.</p>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-xs text-muted-foreground">Visible uniquement par l'équipe Guardiens, jamais envoyée.</p>
+                    <Button size="sm" variant="outline" onClick={handleSaveNote}>Enregistrer la note</Button>
+                  </div>
                 </div>
 
                 <div className="border-t border-border my-4" />

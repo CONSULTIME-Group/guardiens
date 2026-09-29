@@ -11,6 +11,8 @@ const json = (body: unknown, status = 200) =>
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 
+export const DELETABLE_STATUSES = ["published", "draft", "archived", "expired"];
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -57,6 +59,14 @@ Deno.serve(async (req) => {
     }
 
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
+
+    // Lot A9 : suppression limitée aux annonces sans garde engagée.
+    const { data: sit, error: sitError } = await adminClient.from("sits").select("status").eq("id", listingId).maybeSingle();
+    if (sitError) return json({ error: sitError.message }, 500);
+    if (!sit) return json({ error: "Annonce introuvable ou déjà supprimée" }, 404);
+    if (!DELETABLE_STATUSES.includes(String(sit.status))) {
+      return json({ error: "Suppression réservée aux annonces en ligne, brouillons, archivées ou expirées" }, 409);
+    }
 
     // Cleanup dépendances liées à un sit
     const { error: reviewsError } = await adminClient.from("reviews").delete().eq("sit_id", listingId);

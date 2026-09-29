@@ -49,15 +49,24 @@ const targetTypeLabels: Record<string, string> = {
 type ActionKey = "warn" | "hide" | "suspend" | "delete" | "none";
 const DESTRUCTIVE_ACTIONS: ActionKey[] = ["suspend", "delete"];
 
-function targetHref(targetType: string, targetId: string): string | null {
+const actionLabels: Record<string, string> = {
+  warn: "Avertissement",
+  hide: "Contenu masqué",
+  suspend: "Compte suspendu",
+  delete: "Contenu supprimé",
+  none: "Aucune action, signalement non fondé",
+};
+
+/** Lot A9 : liens vers les vues admin, jamais vers les pages membres. */
+export function targetHref(targetType: string, targetId: string, conversationId?: string | null): string | null {
   switch (targetType) {
     case "user":
-    case "profile": return `/gardiens/${targetId}`;
+    case "profile": return `/admin/users?user=${targetId}`;
     case "sit":
-    case "listing": return `/annonces/${targetId}`;
-    case "small_mission": return `/petites-missions/${targetId}`;
-    case "review": return `/mes-avis?highlight=${targetId}`;
-    case "message": return `/messagerie?message=${targetId}`;
+    case "listing": return `/admin/listings?sit=${targetId}`;
+    case "small_mission": return `/admin/small-missions`;
+    case "review": return `/admin/reviews`;
+    case "message": return conversationId ? `/admin/messages?conversation=${conversationId}` : `/admin/messages`;
     default: return null;
   }
 }
@@ -71,6 +80,8 @@ const AdminReports = () => {
   const [total, setTotal] = useState(0);
   const [reporters, setReporters] = useState<Record<string, { name: string; avatar: string | null }>>({});
   const [noteModal, setNoteModal] = useState<{ open: boolean; reportId: string; note: string }>({ open: false, reportId: "", note: "" });
+  const [memberMessage, setMemberMessage] = useState("");
+  const [msgConversations, setMsgConversations] = useState<Record<string, string>>({});
   const [actionModal, setActionModal] = useState<{ open: boolean; reportId: string; action: ActionKey | "" }>({ open: false, reportId: "", action: "" });
   const [confirmDestructive, setConfirmDestructive] = useState<{ open: boolean; action: ActionKey | null }>({ open: false, action: null });
 
@@ -112,14 +123,27 @@ const AdminReports = () => {
     });
   }, [reports]);
 
+  // Conversations des messages signalés, pour le lien « Voir la cible ».
+  useEffect(() => {
+    const ids = reports.filter((r) => r.target_type === "message" && r.target_id).map((r) => r.target_id);
+    if (!ids.length) return;
+    supabase.from("messages").select("id, conversation_id").in("id", ids).then(({ data, error }) => {
+      if (error) { console.error("reports message conversations", error); return; }
+      const map: Record<string, string> = {};
+      (data || []).forEach((m: any) => { if (m.conversation_id) map[m.id] = m.conversation_id; });
+      setMsgConversations(map);
+    });
+  }, [reports]);
+
   const markInProgress = async (id: string) => {
-    await supabase.from("reports").update({ status: "in_progress" }).eq("id", id);
-    toast.success("Prise en charge"); fetchReports(); refreshAdminBadges();
+    const { error } = await supabase.from("reports").update({ status: "in_progress" }).eq("id", id);
+    if (error) { toast.error(`Prise en charge impossible : ${error.message}`); return; }
+    toast.success("Signalement pris en charge"); fetchReports(); refreshAdminBadges();
   };
 
   const currentReport = reports.find(r => r.id === actionModal.reportId);
   const currentTargetLabel = currentReport
-    ? `${targetTypeLabels[currentReport.target_type] || currentReport.target_type}, ${currentReport.target_id}`
+    ? `${targetTypeLabels[currentReport.target_type] || "Contenu"}, motif « ${reasonLabels[currentReport.reason] || "Autre"} »`
     : "";
 
   const executeAction = async () => {
@@ -131,11 +155,13 @@ const AdminReports = () => {
           report_id: actionModal.reportId,
           action: actionModal.action,
           admin_note: currentReport?.admin_notes || undefined,
+          member_message: memberMessage.trim() || undefined,
         },
       });
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
-      toast.success(`Action « ${actionModal.action} » appliquée`);
+      toast.success(`${actionLabels[actionModal.action] || "Décision"} : signalement clos`);
+      setMemberMessage("");
       setActionModal({ open: false, reportId: "", action: "" });
       setConfirmDestructive({ open: false, action: null });
       fetchReports();
@@ -158,8 +184,9 @@ const AdminReports = () => {
   };
 
   const saveNote = async () => {
-    await supabase.from("reports").update({ admin_notes: noteModal.note }).eq("id", noteModal.reportId);
-    toast.success("Note enregistrée"); fetchReports();
+    const { error } = await supabase.from("reports").update({ admin_notes: noteModal.note }).eq("id", noteModal.reportId);
+    if (error) { toast.error(`Note non enregistrée : ${error.message}`); return; }
+    toast.success("Note interne enregistrée"); fetchReports();
     setNoteModal({ open: false, reportId: "", note: "" });
   };
 
@@ -210,7 +237,7 @@ const AdminReports = () => {
         <div className="space-y-4">
           {reports.map((report) => {
             const reporter = reporters[report.reporter_id];
-            const href = targetHref(report.target_type, report.target_id);
+            const href = targetHref(report.target_type, report.target_id, msgConversations[report.target_id]);
             return (
               <Card key={report.id}>
                 <CardContent className="p-5 space-y-3">
@@ -221,13 +248,11 @@ const AdminReports = () => {
                       </div>
                       <div>
                         <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                          <Badge variant="outline" className="text-xs">{targetTypeLabels[report.target_type] || report.target_type}</Badge>
+                          <Badge variant="outline" className="text-xs">{targetTypeLabels[report.target_type] || "Contenu"}</Badge>
                           <span className="text-sm font-medium">{reasonLabels[report.reason] || report.reason}</span>
                           {href && (
                             <a
                               href={href}
-                              target="_blank"
-                              rel="noopener noreferrer"
                               className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
                             >
                               Voir la cible <ExternalLink className="h-3 w-3" />
@@ -239,7 +264,7 @@ const AdminReports = () => {
                         </p>
                         {report.action_taken && (
                           <p className="text-xs text-muted-foreground mt-0.5">
-                            Action prise : <span className="font-medium">{report.action_taken}</span>
+                            Décision : <span className="font-medium">{actionLabels[report.action_taken] || "Décision enregistrée"}</span>
                           </p>
                         )}
                       </div>
@@ -253,7 +278,12 @@ const AdminReports = () => {
 
                   {report.admin_notes && (
                     <div className="text-xs bg-warning-soft p-2 rounded-lg border border-warning-border">
-                      <span className="font-medium">Note admin :</span> {report.admin_notes}
+                      <span className="font-medium">Note interne (jamais envoyée) :</span> {report.admin_notes}
+                    </div>
+                  )}
+                  {report.member_message && (
+                    <div className="text-xs bg-muted/50 p-2 rounded-lg border border-border">
+                      <span className="font-medium">Message envoyé au membre :</span> {report.member_message}
                     </div>
                   )}
 
@@ -264,12 +294,12 @@ const AdminReports = () => {
                       </Button>
                     )}
                     {report.status !== "resolved" && (
-                      <Button size="sm" className="gap-1.5" onClick={() => setActionModal({ open: true, reportId: report.id, action: "" })}>
+                      <Button size="sm" className="gap-1.5" onClick={() => { setMemberMessage(""); setActionModal({ open: true, reportId: report.id, action: "" }); }}>
                         <CheckCircle className="h-3.5 w-3.5" /> Prendre une action
                       </Button>
                     )}
                     <Button size="sm" variant="ghost" className="gap-1.5" onClick={() => setNoteModal({ open: true, reportId: report.id, note: report.admin_notes || "" })}>
-                      <StickyNote className="h-3.5 w-3.5" /> Note
+                      <StickyNote className="h-3.5 w-3.5" /> Note interne
                     </Button>
                   </div>
                 </CardContent>
@@ -319,6 +349,18 @@ const AdminReports = () => {
               </Button>
             ))}
           </div>
+          <div className="space-y-1.5">
+            <label htmlFor="report-member-message" className="text-sm font-medium">Message au membre (envoyé par email)</label>
+            <Textarea
+              id="report-member-message"
+              value={memberMessage}
+              onChange={(e) => setMemberMessage(e.target.value)}
+              rows={3}
+              maxLength={2000}
+              placeholder="Expliquez la décision au membre concerné et au signaleur."
+            />
+            <p className="text-xs text-muted-foreground">La note interne reste dans l'espace admin.</p>
+          </div>
           <DialogFooter>
             <Button variant="outline" disabled={submitting} onClick={() => setActionModal({ open: false, reportId: "", action: "" })}>Annuler</Button>
             <Button onClick={onConfirmClick} disabled={!actionModal.action || submitting}>
@@ -339,7 +381,9 @@ const AdminReports = () => {
               {confirmDestructive.action === "suspend" ? "Suspendre ce compte ?" : "Supprimer ce contenu ?"}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Action irréversible sur : <strong>{currentTargetLabel}</strong>.<br />
+              {confirmDestructive.action === "suspend"
+                ? <>Suspension réversible depuis la fiche membre, sur : <strong>{currentTargetLabel}</strong>.<br /></>
+                : <>Action irréversible sur : <strong>{currentTargetLabel}</strong>.<br /></>}
               Confirmez-vous&nbsp;?
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -359,7 +403,7 @@ const AdminReports = () => {
       {/* Note modal */}
       <Dialog open={noteModal.open} onOpenChange={(o) => !o && setNoteModal({ open: false, reportId: "", note: "" })}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Note interne</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>Note interne (jamais envoyée)</DialogTitle></DialogHeader>
           <Textarea value={noteModal.note} onChange={(e) => setNoteModal((s) => ({ ...s, note: e.target.value }))} rows={4} placeholder="Note admin…" />
           <DialogFooter>
             <Button variant="outline" onClick={() => setNoteModal({ open: false, reportId: "", note: "" })}>Annuler</Button>

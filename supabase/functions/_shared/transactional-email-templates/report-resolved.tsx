@@ -12,7 +12,8 @@ const SITE_NAME = "Guardiens"
 interface ReportResolvedProps {
   reason?: string
   status?: string
-  adminNotes?: string
+  /** Lot A9 : seul le message au membre est affiché, jamais la note interne. */
+  memberMessage?: string
 }
 
 const statusLabels: Record<string, string> = {
@@ -29,7 +30,7 @@ const reasonLabels: Record<string, string> = {
   other: "Autre",
 }
 
-const ReportResolvedEmail = ({ reason, status, adminNotes }: ReportResolvedProps) => (
+const ReportResolvedEmail = ({ reason, status, memberMessage }: ReportResolvedProps) => (
   <Html lang="fr" dir="ltr">
     <BrandedHead />
     <Preview>Votre signalement a été {statusLabels[status || 'resolved'] || 'traité'}, {SITE_NAME}</Preview>
@@ -46,16 +47,16 @@ const ReportResolvedEmail = ({ reason, status, adminNotes }: ReportResolvedProps
           Nous avons bien examiné votre signalement{reason ? ` pour motif « ${reasonLabels[reason] || reason} »` : ''}.
           Celui-ci est maintenant <strong>{statusLabels[status || 'resolved'] || 'traité'}</strong>.
         </Text>
-        {adminNotes ? (
+        {memberMessage ? (
           <>
             <Hr style={hr} />
             <Text style={noteLabel}>Note de l'équipe :</Text>
-            <Text style={noteText}>{adminNotes}</Text>
+            <Text style={noteText}>{memberMessage}</Text>
           </>
         ) : null}
         <Hr style={hr} />
         <Text style={text}>
-          Merci de contribuer à la sécurité de notre communauté. Si vous avez des questions, n'hésitez pas à nous contacter.
+          Merci de contribuer à la sécurité de notre communauté. Pour toute question, répondez simplement à cet email.
         </Text>
         <LegalFooter
           purpose="la modération de la communauté"
@@ -70,7 +71,7 @@ export const template = {
   component: ReportResolvedEmail,
   subject: 'Votre signalement a été traité',
   displayName: 'Signalement traité',
-  previewData: { reason: 'inappropriate', status: 'resolved', adminNotes: 'Le contenu a été retiré.' },
+  previewData: { reason: 'inappropriate', status: 'resolved', memberMessage: 'Le contenu a été retiré.' },
 } satisfies TemplateEntry
 
 const main = { backgroundColor: '#ffffff', fontFamily: "'Outfit', Arial, sans-serif" }

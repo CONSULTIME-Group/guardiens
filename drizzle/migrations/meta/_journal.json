@@ -267,6 +267,20 @@
       "when": 1790682674112,
       "tag": "0037_alma_j2b_pilotage",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1790683412834,
+      "tag": "0038_a9_moderation_fiable",
+      "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1790683456646,
+      "tag": "0039_a9_resolve_dispute_member_message",
+      "breakpoints": true
     }
   ]
 }
