@@ -197,13 +197,19 @@ const PublicSitDetail = () => {
               .select("presence_expected, visits_allowed, overnight_guest, space_usage, smoker_accepted, rules_notes, meeting_preference, handover_preference, welcome_notes, news_frequency, news_format, communication_notes, competences, competences_disponible, specific_expectations, experience_required, environments, preferred_sitter_types, home_ambiance, languages, interests, life_pace")
               .eq("user_id", sitData.user_id)
               .maybeSingle();
-            if (opRow) {
-              setOwnerProfile(opRow);
+            // SEC1 : owner_profiles complet pour le propriétaire, l'admin et le
+            // gardien en discussion ou accepté. Les autres membres lisent la vue
+            // membre (sans foyer ni habitudes de contact), les visiteurs la vue publique.
+            const { data: memberRow } = opRow
+              ? { data: null }
+              : await supabase
+                  .from("member_owner_profiles" as any)
+                  .select("presence_expected, visits_allowed, overnight_guest, space_usage, smoker_accepted, rules_notes, meeting_preference, handover_preference, welcome_notes, news_frequency, news_format, environments, preferred_sitter_types, home_ambiance, languages, interests, life_pace")
+                  .eq("user_id", sitData.user_id)
+                  .maybeSingle();
+            if (opRow || memberRow) {
+              setOwnerProfile(opRow || memberRow);
             } else {
-              // Visiteur non connecté : owner_profiles est réservé aux membres.
-              // La vue publique expose le sous-ensemble publiable, ce qui permet
-              // d'afficher la section « Le cadre proposé par … » (présence prévue,
-              // mot d'accueil) aux visiteurs comme aux membres.
               const { data: publicRow } = await supabase
                 .from("public_owner_profiles" as any)
                 .select("presence_expected, welcome_notes, environments, preferred_sitter_types, home_ambiance, languages, interests, life_pace")

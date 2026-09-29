@@ -152,7 +152,16 @@ const SitDetail = () => {
 
       const ownerData = ownerRes.data?.[0] ?? null;
       const propertyData = propRes.data?.[0] ?? null;
-      const ownerProfileData = ownerProfRes.data?.[0] ?? null;
+      // SEC1 : repli sur la vue membre quand la ligne complète n'est pas lisible.
+      let ownerProfileData: any = ownerProfRes.data?.[0] ?? null;
+      if (!ownerProfileData) {
+        const { data: memberRow } = await supabase
+          .from("member_owner_profiles" as any)
+          .select("*")
+          .eq("user_id", sitData.user_id)
+          .maybeSingle();
+        ownerProfileData = memberRow ?? null;
+      }
 
       // Injecter les photos owner_gallery dans property pour le hero.
       // Fallback géo : si aucune photo (owner_gallery + property.photos vides),
