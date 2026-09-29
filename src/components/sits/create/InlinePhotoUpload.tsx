@@ -1,8 +1,5 @@
 import { useRef, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { compressImageFile } from "@/lib/compressImage";
-import { getImageDimensions } from "@/lib/imageDimensions";
-import { appendPropertyPhoto } from "@/lib/uploadOwnerPhoto";
+import { uploadOwnerGalleryPhoto } from "@/lib/uploadOwnerGalleryPhoto";
 import { Button } from "@/components/ui/button";
 import { UploadCloud } from "lucide-react";
 import { toast } from "sonner";
@@ -26,30 +23,8 @@ const InlinePhotoUpload = ({ userId, nextPosition = 0, label = "Ajouter une phot
   const handleFile = async (file: File) => {
     setUploading(true);
     try {
-      const compressed = await compressImageFile(file, 5, 1200);
-      const dims = await getImageDimensions(compressed);
-      const ext = (compressed.name.split(".").pop() || "jpg").toLowerCase();
-      const path = `${userId}/owner-gallery/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-      const { error: uploadErr } = await supabase.storage.from("property-photos").upload(path, compressed);
-      if (uploadErr) throw uploadErr;
-      const { data: urlData } = supabase.storage.from("property-photos").getPublicUrl(path);
-      const { error: insertErr } = await supabase.from("owner_gallery").insert({
-        user_id: userId,
-        photo_url: urlData.publicUrl,
-        caption: "",
-        category: "home_life" as any,
-        season: null,
-        position: nextPosition,
-        width: dims.width || null,
-        height: dims.height || null,
-      } as any);
-      if (insertErr) throw insertErr;
-      // Branche aussi properties.photos / cover_photo_url (colonnes du
-      // logement), comme le parcours photo guidé : sans cette écriture les
-      // colonnes restent vides et l'annonce ne remonte pas dans le
-      // classement vu par les gardiens.
-      await appendPropertyPhoto(userId, urlData.publicUrl);
-      onUploaded(urlData.publicUrl);
+      const url = await uploadOwnerGalleryPhoto(userId, file, nextPosition);
+      onUploaded(url);
       toast.success("Photo ajoutée à votre galerie");
     } catch (e: any) {
       console.error("[InlinePhotoUpload] upload failed", e);

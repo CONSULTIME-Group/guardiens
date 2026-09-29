@@ -21,6 +21,9 @@ Deno.test('ownerReadiness : 0, 60, 100 %, sans animaux', () => {
   const noPets = computeReadiness({ ...empty, hasProperty: true })
   assertEquals(noPets.items.find((i) => i.key === 'animaux')?.label, 'Une maison à garder')
   assertEquals(noPets.percent, 40)
+  const two = computeReadiness({ ...empty, pets: [{ name: 'Mila', species: 'dog' }, { name: 'Rex', species: 'cat' }] })
+  assertEquals(two.items.find((i) => i.key === 'animaux')?.label, 'Mila et Rex')
+  for (const it of two.items) assert(!/votre (chien|chienne|chat|chatte)/.test(it.label))
 })
 
 Deno.test('jeton : valide, expiré, révoqué, double clic', () => {
