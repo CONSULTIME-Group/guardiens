@@ -1,3 +1,4 @@
+import { clearPublishIntent, rememberPublishIntent } from "@/lib/postOnboardingIntent";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -93,6 +94,8 @@ const StepperBar = ({ current, total }: { current: number; total: number }) => (
 const CreateSmallMission = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  // Lot J1 : la demande en cours devient l'intention à reprendre après un détour.
+  useEffect(() => { rememberPublishIntent(`${window.location.pathname}${window.location.search}`); }, []);
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -538,6 +541,7 @@ const CreateSmallMission = () => {
     try { trackEvent("mission_composer_submitted", { metadata: { mission_id: inserted?.id, category, mission_type: missionType } }); } catch {}
     toast({ title: tp("toast_published_title"), description: tp("toast_published_desc"), duration: 3000 });
     const insertedAny = inserted as any;
+    clearPublishIntent();
     navigate(insertedAny?.id ? `/petites-missions/${insertedAny.slug || insertedAny.id}?published=1` : "/petites-missions");
   };
 
