@@ -38,7 +38,11 @@ export interface SeoData {
     previous: GSCMetrics;
     topPages: GSCRow[];
     topQueries: GSCRow[];
+    /** Lot A10 : toutes les pages affichées par Google, sans plafond. */
+    allPages?: { page: string; clicks: number; impressions: number }[];
   };
+  /** Lot A10 : bornes exactes des périodes (AAAA-MM-JJ). */
+  period?: { gscStart: string; gscEnd: string; ga4Start: string; ga4End: string };
   updated_at: string;
   cached: boolean;
   stale?: boolean;
