@@ -189,14 +189,15 @@ const MutualAidDashboardTab = () => {
         .gte("created_at", start)
         .order("id")
         .range(f, t)),
-      supabase
+      all<any>((f, t) => supabase
         .from("small_missions")
         .select("id,title,city,created_at,user_id,category")
         .eq("status", "open")
         .neq("category", "projet" as any)
         .lte("created_at", dormantThreshold.toISOString())
         .order("created_at", { ascending: true })
-        .limit(200),
+        .order("id")
+        .range(f, t)),
       // Lot A10 : seules les vraies clôtures automatiques, sans les migrations.
       all<any>((f, t) => supabase
         .from("small_missions")
