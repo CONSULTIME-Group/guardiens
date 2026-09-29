@@ -75,8 +75,9 @@ describe("identité d'Alma dans le prompt", () => {
 
   it("porte la carte du site et la règle anti lien inventé", () => {
     expect(promptSource).toContain("LA CARTE DU SITE");
-    expect(promptSource).toContain("/actualites");
-    expect(promptSource).toContain("/petites-missions");
+    // Lot J2-A : la carte est générée depuis la base de connaissance.
+    expect(buildAlmaSystemPrompt("reassurance")).toContain("/actualites");
+    expect(buildAlmaSystemPrompt("reassurance")).toContain("/petites-missions");
     expect(promptSource).toContain(
       "Tu cites uniquement les liens fournis dans les sources de ce tour, ou les chemins de la carte du site.",
     );
@@ -186,7 +187,9 @@ describe("assemblage du prompt par registre", () => {
 
   it("porte les nouveaux blocs de positionnement et d'action", () => {
     expect(promptSource).toContain("POURQUOI GUARDIENS EXISTE");
-    expect(promptSource).toContain("L'ACTION SUIVANTE, ORDRE DE PRIORITÉ");
+    expect(promptSource).toContain("L'ACTION SUIVANTE, CALCULÉE POUR TOI");
+    expect(promptSource).toContain("FAITS VÉRIFIÉS");
+    expect(promptSource).not.toContain("4. Un profil incomplet, les deux éléments qui rapportent le plus");
     expect(promptSource).toContain("QUAND LA PERSONNE TOUCHE LE VIDE");
     expect(promptSource).not.toContain("Jamais d'aveu de petitesse");
   });

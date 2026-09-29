@@ -1,6 +1,7 @@
 // Alma conversationnelle (lot 1).
 // Entrée : { message, history: [{role, content}], active_role, surface, input_mode }
-// Sortie : { answer } ou { limited: true, message } ou { error }
+// Sortie : { answer, action?, chips? } ou { limited: true, message } ou { error }
+// Lot J2-A : action et chips sont optionnels, le front antérieur les ignore.
 //
 // Modèle : Gemini 2.5 Flash via le gateway Lovable (LOVABLE_API_KEY).
 // Contexte dossier chargé côté serveur en service_role, jamais depuis le client.
@@ -13,11 +14,16 @@ import {
   almaRegisterReminder,
   buildAlmaSystemPrompt,
   detectRegister,
+  isSmallTalk,
   normalizeAlmaOutput,
 } from "../_shared/alma-system-prompt.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { almaDirectAnswer, almaHelpDirective, detectAlmaIntent } from "../_shared/alma-intent.ts";
 import { recordAlmaFrustration } from "../_shared/alma-frustration-signal.ts";
+import { formatKnowledge, selectKnowledge } from "../_shared/alma-site-knowledge.ts";
+import { isMoodLineTruthful, loadVerifiedFacts, moodTruthFromFacts } from "../_shared/alma-facts.ts";
+import { formatInventory, loadAlmaInventory } from "../_shared/alma-inventory.ts";
+import { applyDraftToAction, computeNextAction, formatActionDirective } from "../_shared/alma-next-action.ts";
 
 const MAX_HISTORY = 12;
 
@@ -46,6 +52,7 @@ Deno.serve(async (req) => {
     // Le contexte du navigateur est une référence à vérifier, jamais une consigne.
     const mood = typeof body?.mood === "string" && body.mood.length <= 40 ? body.mood : "";
     const moodLine = typeof body?.mood_line === "string" && body.mood_line.length <= 300 ? body.mood_line : "";
+    const pagePath = typeof body?.page_path === "string" && body.page_path.startsWith("/") ? body.page_path.slice(0, 200) : null;
     const history = Array.isArray(body?.history)
       ? body.history
           .filter(
@@ -128,13 +135,49 @@ Deno.serve(async (req) => {
         latency_ms: Date.now() - startedAt,
         sources_count: 0,
       });
-      return json({ answer: direct, remaining: Math.max(0, ALMA_CHAT_DAILY_LIMIT - ((count ?? 0) + 1)) });
+      return json({
+        answer: direct,
+        remaining: Math.max(0, ALMA_CHAT_DAILY_LIMIT - ((count ?? 0) + 1)),
+        action: { label: "Écrire à Jérémie et Elisa", path: "/contact" },
+      });
     }
     const helpDirective = almaHelpDirective(intent);
 
+    // Contexte dossier, chargé côté serveur.
+    const [profileRes, sitterRes, ownerRes] = await Promise.all([
+      adminClient
+        .from("profiles")
+        .select("first_name, city, profile_completion, identity_verified, role, postal_code, departement_code, country, latitude, longitude")
+        .eq("id", userId)
+        .maybeSingle(),
+      adminClient
+        .from("sitter_profiles")
+        .select("animal_types, experience_years, competences")
+        .eq("user_id", userId)
+        .maybeSingle(),
+      adminClient
+        .from("owner_profiles")
+        .select("competences, competences_disponible, presence_expected")
+        .eq("user_id", userId)
+        .maybeSingle(),
+    ]);
+
+    // Lot J2-A : faits vérifiés (les deux côtés pour un membre both) et inventaire autour.
+    const todayIso = new Date().toISOString().slice(0, 10);
+    const prof = (profileRes.data ?? {}) as any;
+    const accountRole = prof.role === "owner" || prof.role === "sitter" || prof.role === "both" ? prof.role : null;
+    const [facts, inventory] = await Promise.all([
+      loadVerifiedFacts(adminClient, userId, accountRole, todayIso).catch(() => null),
+      loadAlmaInventory(adminClient, prof, todayIso).catch(() => null),
+    ]);
+
     // Seul le texte actif du catalogue serveur peut devenir une consigne d'humeur.
     const moodMessages: Array<{ role: "system"; content: string }> = [];
-    if (mood && moodLine && !helpDirective) {
+    // Lot J2-A : l'humeur reste un décor (petite conversation ou registre perso)
+    // et ne raconte jamais une garde ou un départ que la base ne confirme pas.
+    const moodAllowed = (register === "perso" || isSmallTalk(message)) &&
+      Boolean(facts) && isMoodLineTruthful(moodLine, moodTruthFromFacts(facts!, todayIso));
+    if (mood && moodLine && !helpDirective && moodAllowed) {
       try {
         const { data: verifiedMood, error: moodError } = await adminClient
           .from("alma_moods")
@@ -154,25 +197,6 @@ Deno.serve(async (req) => {
         // L'humeur est facultative : une erreur de catalogue ne bloque pas le chat.
       }
     }
-
-    // Contexte dossier, chargé côté serveur.
-    const [profileRes, sitterRes, ownerRes] = await Promise.all([
-      adminClient
-        .from("profiles")
-        .select("first_name, city, profile_completion, identity_verified")
-        .eq("id", userId)
-        .maybeSingle(),
-      adminClient
-        .from("sitter_profiles")
-        .select("animal_types, experience_years, competences")
-        .eq("user_id", userId)
-        .maybeSingle(),
-      adminClient
-        .from("owner_profiles")
-        .select("competences, competences_disponible, presence_expected")
-        .eq("user_id", userId)
-        .maybeSingle(),
-    ]);
 
     // Ce qui manque au profil, selon le barème officiel de complétion.
     // Sans lui, l'amorce « Qu'est-ce qui manque à mon profil ? » reste sans réponse.
@@ -284,12 +308,30 @@ Deno.serve(async (req) => {
       }));
     }
 
+    const completion = helpDirective ? null : profilACompleterCharge
+      ? 100 - profilACompleter.reduce((total, item) => total + item.points, 0)
+      : prof.profile_completion ?? null;
+    const next = facts && inventory
+      ? computeNextAction({
+          facts,
+          inventory,
+          accountRole,
+          activeRole,
+          question: message,
+          register,
+          helpIntent: Boolean(helpDirective),
+          largeAnimals: Boolean((intent as any).largeAnimals),
+          completion,
+          profileAlreadySuggested: history.some((m: any) => m.role === "assistant" && /\/(owner-)?profile\b/.test(m.content)),
+          pagePath,
+        })
+      : null;
+    const knowledge = selectKnowledge({ question: message, role: activeRole, both: accountRole === "both" });
+
     const dossier = {
       prenom: (profileRes.data as any)?.first_name ?? null,
       ville: (profileRes.data as any)?.city ?? null,
-      completion_profil: helpDirective ? null : profilACompleterCharge
-        ? 100 - profilACompleter.reduce((total, item) => total + item.points, 0)
-        : (profileRes.data as any)?.profile_completion ?? null,
+      completion_profil: completion,
       identite_verifiee: (profileRes.data as any)?.identity_verified ?? null,
       // Lot J1 : qui cherche de l'aide n'entend pas parler de points de profil.
       bareme_profil: helpDirective ? null : baremeProfil,
@@ -347,8 +389,12 @@ Deno.serve(async (req) => {
           role: "system",
           content: `Dossier de la personne qui te parle, ce sont ses données, tu peux les citer. Les champs null sont simplement absents :\n${JSON.stringify(dossier, null, 2)}`,
         },
+        { role: "system", content: formatKnowledge(knowledge) },
+        ...(facts ? [{ role: "system" as const, content: `FAITS VÉRIFIÉS, seule base de toute phrase qui affirme un fait sur la personne :\n${JSON.stringify(facts, null, 2)}` }] : []),
+        ...(inventory ? [{ role: "system" as const, content: formatInventory(inventory) }] : []),
         ...history,
         { role: "system", content: almaRegisterReminder(register) },
+        ...(next ? [{ role: "system" as const, content: formatActionDirective(next) }] : []),
         ...(helpDirective ? [{ role: "system" as const, content: helpDirective }] : []),
         { role: "user", content: message },
       ],
@@ -370,7 +416,11 @@ Deno.serve(async (req) => {
       return json({ error: r.error, code: r.code }, r.status === 402 || r.status === 429 ? r.status : 502);
     }
 
-    const answer = normalizeAlmaOutput(r.data?.choices?.[0]?.message?.content ?? "");
+    const drafted = applyDraftToAction(
+      normalizeAlmaOutput(r.data?.choices?.[0]?.message?.content ?? ""),
+      next?.action ?? null,
+    );
+    const answer = drafted.answer;
     if (!answer) {
       await adminClient.from("alma_conversations").insert({
         user_id: userId,
@@ -400,7 +450,12 @@ Deno.serve(async (req) => {
       sources_count: sources.length,
     });
 
-    return json({ answer, remaining: Math.max(0, ALMA_CHAT_DAILY_LIMIT - ((count ?? 0) + 1)) });
+    return json({
+      answer,
+      remaining: Math.max(0, ALMA_CHAT_DAILY_LIMIT - ((count ?? 0) + 1)),
+      ...(drafted.action ? { action: { label: drafted.action.label, path: drafted.action.path } } : {}),
+      ...(next && next.chips.length ? { chips: next.chips } : {}),
+    });
   } catch (e) {
     console.error("alma-chat error", e);
     return json({ error: "Erreur inattendue." }, 500);

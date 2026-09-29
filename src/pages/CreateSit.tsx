@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, useCallback, type MouseEvent as ReactMouse
 import ExpectationSuggestions from "@/components/sits/create/ExpectationSuggestions";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { readFormPrefill } from "@/lib/formPrefill";
 import { supabase } from "@/integrations/supabase/client";
 import { petSpeciesLabelLower } from "@/lib/petLabels";
 import { useAuth } from "@/contexts/AuthContext";
@@ -1081,6 +1082,10 @@ const CreateSit = () => {
     const fin = parsePrefillDate(searchParams.get("fin"));
     if (debut) setStartDate(debut);
     if (fin && (!debut || fin >= debut)) setEndDate(fin);
+    // Lot J2-A : titre et description proposés par Alma, relus avant publication.
+    const alma = readFormPrefill(searchParams, { titleMax: MAX_TITLE_LENGTH, descriptionMax: 1000 });
+    if (alma.title) setTitle(alma.title);
+    if (alma.description) applyExpectations(alma.description);
     datePrefilledRef.current = true;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading]);

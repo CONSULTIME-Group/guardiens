@@ -212,12 +212,12 @@ const INVITATIONS: Record<AlmaJournalRuleKey, AlmaJournalInvitation> = {
     replies: ["Oui, reprenons", "Dites moi ce qui manque", "Plus tard"],
   },
   profil: {
-    question: "Je vous accompagne, ou vous préférez le faire seul ?",
-    replies: ["Accompagnez moi", "Je m'en occupe"],
+    question: "On regarde les deux éléments qui comptent le plus ?",
+    replies: ["Qu'est-ce qui manque à mon profil ?", "Un coup de main près de chez moi"],
   },
   profil_gardien: {
-    question: "Je vous accompagne, ou vous préférez le faire seul ?",
-    replies: ["Accompagnez moi", "Je m'en occupe"],
+    question: "On regarde les deux éléments qui comptent le plus ?",
+    replies: ["Qu'est-ce qui manque à mon profil ?", "Un coup de main près de chez moi"],
   },
   candidature_en_attente: {
     question: "Vous voulez que je vous aide à relancer ?",

@@ -26,6 +26,7 @@ import { useAccessLevel } from "@/hooks/useAccessLevel";
 import AccordDeGarde from "@/components/gardes/AccordDeGarde";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
 import ApplicationModal from "@/components/sits/ApplicationModal";
+import { applyDeepLinkTarget } from "@/lib/alma/applyDeepLink";
 import PostConfirmationChecklist from "@/components/sits/PostConfirmationChecklist";
 import CancelSitModal from "@/components/sits/CancelSitModal";
 import SitMobileStickyApply from "@/components/sits/SitMobileStickyApply";
@@ -175,6 +176,23 @@ const SitterSitView = ({
     searchParams.get("view") === "sitter" &&
     !!user &&
     (user as any).role === "both";
+
+  // Lot J2-A : « Je postule » depuis Alma ouvre le formulaire, une seule fois.
+  const [deepLinkDone, setDeepLinkDone] = useState(false);
+  useEffect(() => {
+    if (deepLinkDone) return;
+    const target = applyDeepLinkTarget({
+      param: searchParams.get("postuler"),
+      acceptingApplications: Boolean(sit.accepting_applications),
+      accessLevel,
+      hasApplied: Boolean(hasApplied),
+      canApplyGuards: Boolean(canApplyGuards),
+    });
+    if (!target) return;
+    setDeepLinkDone(true);
+    if (target === "apply") setApplyOpen(true);
+    else setCompletionOpen(true);
+  }, [deepLinkDone, searchParams, sit.accepting_applications, accessLevel, hasApplied, canApplyGuards]);
 
   return (
     <>

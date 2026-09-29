@@ -31,6 +31,15 @@ export interface PromptStarterContext {
   hasDraftSit?: boolean;
   /** Une annonce est publiée et n'a reçu aucune candidature. */
   hasPublishedSitWithoutApplication?: boolean;
+  /** Lot J2-A : le gardien reçoit la version gardien, le propriétaire la sienne. */
+  activeRole?: "owner" | "sitter";
+}
+
+/** « Comment se passe une garde ? », dans la version du rôle actif. */
+export function howSitWorksStarter(role?: "owner" | "sitter"): string {
+  if (role === "sitter") return "Comment se passe une garde, côté gardien ?";
+  if (role === "owner") return "Comment se passe une garde, côté propriétaire ?";
+  return "Comment se passe une garde ?";
 }
 
 /** Surface d'amorces déduite du chemin courant. */
@@ -88,7 +97,9 @@ export function promptStarters(
     case "settings":
       return ["Comment fonctionne la vérification d'identité"];
     default:
-      return ["Comment se passe une garde ?", "Qu'est-ce que je prépare avant de partir ?"];
+      return ctx.activeRole === "sitter"
+        ? [howSitWorksStarter("sitter"), "Un coup de main près de chez moi"]
+        : [howSitWorksStarter(ctx.activeRole), "Qu'est-ce que je prépare avant de partir ?"];
   }
 }
 
