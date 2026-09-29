@@ -4,35 +4,26 @@ import { Button } from "@/components/ui/button";
 import { Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import type { GSCRow } from "@/hooks/useSeoData";
+import { articlesWithoutImpressions, type PageImpressions } from "@/lib/admin/seoMetrics";
 
 interface Props {
   publishedArticles: { slug: string; published_at: string | null }[];
-  topPages: GSCRow[] | undefined;
+  /** Liste complète des pages Google (lot A10), undefined si GSC indisponible. */
+  pages: PageImpressions[] | undefined;
 }
 
 /**
  * Liste les articles publiés depuis >7j sans impression GSC, avec
  * bouton "Pousser via IndexNow" 1-clic (par ligne et en bulk).
  */
-export default function NoImpressionActionable({ publishedArticles, topPages }: Props) {
+export default function NoImpressionActionable({ publishedArticles, pages }: Props) {
   const [busy, setBusy] = useState<string | null>(null);
   const [bulkBusy, setBulkBusy] = useState(false);
 
-  const orphans = useMemo(() => {
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    const pagesWithImpressions = new Set(
-      (topPages ?? []).filter((p) => p.impressions > 0).map((p) => {
-        const url = p.keys?.[0] || "";
-        try { return new URL(url).pathname.replace(/^\/(articles|actualites)\//, "").replace(/\/$/, ""); } catch { return url; }
-      }),
-    );
-    return publishedArticles
-      .filter((a) => a.published_at && new Date(a.published_at) < sevenDaysAgo && !pagesWithImpressions.has(a.slug))
-      .sort((a, b) => (b.published_at ?? "").localeCompare(a.published_at ?? ""))
-      .slice(0, 50);
-  }, [publishedArticles, topPages]);
+  const orphans = useMemo(
+    () => (pages ? articlesWithoutImpressions(publishedArticles, pages) : []),
+    [publishedArticles, pages],
+  );
 
   const pushOne = async (slug: string) => {
     setBusy(slug);
@@ -42,7 +33,7 @@ export default function NoImpressionActionable({ publishedArticles, topPages }: 
       });
       if (error) throw error;
       const ok = (data as { ok?: boolean })?.ok;
-      ok ? toast.success(`Pousé : ${slug}`) : toast.error("Échec IndexNow");
+      ok ? toast.success(`Envoyé : ${slug}`) : toast.error("Échec IndexNow");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Erreur IndexNow");
     } finally {
@@ -52,6 +43,9 @@ export default function NoImpressionActionable({ publishedArticles, topPages }: 
 
   const pushAll = async () => {
     if (orphans.length === 0) return;
+    // Lot A10 : confirmation avant l'envoi groupé.
+    const ok = window.confirm(`Envoyer ${orphans.length} adresse${orphans.length > 1 ? "s" : ""} à IndexNow (Bing, Yandex) ?`);
+    if (!ok) return;
     setBulkBusy(true);
     try {
       const { data, error } = await supabase.functions.invoke("notify-indexnow", {
@@ -59,7 +53,7 @@ export default function NoImpressionActionable({ publishedArticles, topPages }: 
       });
       if (error) throw error;
       const submitted = (data as { submitted?: number })?.submitted ?? 0;
-      toast.success(`${submitted} URLs poussées vers Bing/Yandex.`);
+      toast.success(`${submitted.toLocaleString("fr-FR")} adresses envoyées à Bing et Yandex.`);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Erreur IndexNow");
     } finally {
@@ -73,9 +67,9 @@ export default function NoImpressionActionable({ publishedArticles, topPages }: 
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
         <div>
-          <CardTitle className="text-lg">Articles sans impression GSC après 7j</CardTitle>
+          <CardTitle className="text-lg">Articles sans impression Google après 7 jours</CardTitle>
           <p className="text-xs text-muted-foreground mt-1">
-            {orphans.length} article{orphans.length > 1 ? "s" : ""} publié{orphans.length > 1 ? "s" : ""} depuis &gt;7 jours, jamais affiché{orphans.length > 1 ? "s" : ""} dans Google.
+            {orphans.length.toLocaleString("fr-FR")} article{orphans.length > 1 ? "s" : ""} publié{orphans.length > 1 ? "s" : ""} depuis &gt;7 jours, jamais affiché{orphans.length > 1 ? "s" : ""} dans Google.
           </p>
         </div>
         <Button onClick={pushAll} disabled={bulkBusy} size="sm">

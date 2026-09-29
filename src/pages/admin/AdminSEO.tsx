@@ -30,6 +30,7 @@ import AiAcquisitionCard from "@/pages/admin/_components/dashboard/AiAcquisition
 import { useSeoData, type GSCRow } from "@/hooks/useSeoData";
 import type { BingPeriodDays } from "@/hooks/useBingData";
 import { articlesWithoutImpressions, pagesFromSeo, formatDurationFr, periodLabel, organicSessions, fmtInt } from "@/lib/admin/seoMetrics";
+import { reportAdminReadError, UNAVAILABLE_LABEL } from "@/lib/admin/readError";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 function downloadCsv(filename: string, rows: GSCRow[]) {
@@ -74,13 +75,16 @@ const AdminSEO = () => {
       setArticleStats({ published: published ?? 0, total: total ?? 0 });
     };
     const fetchProfileCount = async () => {
-      const { count } = await supabase
+      const { count, error } = await supabase
         .from("profiles")
-        .select("id", { count: "exact", head: true });
+        .select("id", { count: "exact", head: true })
+        .or("account_status.is.null,account_status.neq.deleted");
+      if (error) { reportAdminReadError("Trafic : profils inscrits", error); setProfileCount(null); return; }
       setProfileCount(count ?? 0);
     };
     const fetchExistingSlugs = async () => {
-      const { data } = await supabase.from("articles").select("slug, published_at, published");
+      const { data, error } = await supabase.from("articles").select("slug, published_at, published").order("id").range(0, 9999);
+      if (error) { reportAdminReadError("Trafic : articles publiés", error); return; }
       if (data) {
         setExistingSlugs(new Set(data.map((a) => a.slug)));
         setPublishedArticles(data.filter((a) => a.published).map((a) => ({ slug: a.slug, published_at: a.published_at })));
@@ -203,7 +207,7 @@ const AdminSEO = () => {
           <MetricCard
             title="Profils inscrits"
             icon={<UserCheck className="h-4 w-4 text-primary" />}
-            value={profileCount !== null ? fmtInt(profileCount) : "·"}
+            value={profileCount !== null ? fmtInt(profileCount) : UNAVAILABLE_LABEL}
             subtitle="Total"
           />
           <MetricCard
