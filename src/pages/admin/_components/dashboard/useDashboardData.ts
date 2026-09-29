@@ -148,28 +148,20 @@ export function useDashboardData(): DashboardData {
         });
       });
 
-      // Publications & dépublications (historique réel via sit_status_history)
+      // Changements de statut (historique réel via sit_status_history), libellés français.
       (recentStatusChanges || []).forEach((h: any) => {
         const ownerName = h.owner_first_name || "Un propriétaire";
         const city = h.owner_city ? ` à ${h.owner_city}` : "";
         const title = h.sit_title ? ` « ${h.sit_title} »` : "";
-        if (h.new_status === "published") {
-          activityItems.push({
-            id: `pub-${h.id}`,
-            text: `${ownerName} a publié${title}${city}`,
-            time: h.changed_at,
-            link: `/admin/listings`,
-            type: "publication",
-          });
-        } else if (h.old_status === "published") {
-          activityItems.push({
-            id: `unpub-${h.id}`,
-            text: `${ownerName} a dépublié${title} (→ ${h.new_status})`,
-            time: h.changed_at,
-            link: `/admin/listings`,
-            type: "depublication",
-          });
-        }
+        const act = statusChangeActivity(h.old_status ?? null, h.new_status);
+        if (!act) return;
+        activityItems.push({
+          id: `status-${h.id}`,
+          text: `${ownerName} ${act.verb}${title}${city}`,
+          time: h.changed_at,
+          link: `/admin/listings`,
+          type: act.kind,
+        });
       });
 
       (recentReviews || []).forEach((r: any) => {

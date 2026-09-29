@@ -11,7 +11,10 @@ const ACTIVITY_BADGE: Record<ActivityItem["type"], { label: string; variant: "se
   avis: { label: "Avis", variant: "secondary" },
   candidature: { label: "Candidature", variant: "outline" },
   publication: { label: "Publication", variant: "secondary" },
-  depublication: { label: "Dépubliée", variant: "destructive" },
+  confirmation: { label: "Garde confirmée", variant: "secondary" },
+  expiration: { label: "Annonce expirée", variant: "outline" },
+  brouillon: { label: "Remise en brouillon", variant: "outline" },
+  depublication: { label: "Retirée", variant: "outline" },
   suppression: { label: "Suppression compte", variant: "destructive" },
 };
 
