@@ -1,5 +1,6 @@
 import { fetchAllRows } from "@/lib/admin/fetchAllRows";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createSeqGuard, ilikeContains } from "@/lib/admin/requestSeq";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -211,22 +212,27 @@ export default function AdminEmailHealth() {
     return count ?? 0;
   }, []);
 
+  const suppressedSeq = useRef(createSeqGuard());
   const fetchSuppressed = useCallback(
     async (page: number, search: string) => {
+      const token = suppressedSeq.current.next();
       setSuppressedLoading(true);
+      const term = search.trim();
       let countQuery = supabase
         .from("suppressed_emails")
         .select("id", { count: "exact", head: true });
-      if (search.trim()) countQuery = countQuery.ilike("email", `%${search.trim()}%`);
+      if (term) countQuery = countQuery.ilike("email", ilikeContains(term));
       const { count: totalCount } = await countQuery;
 
       let listQuery = supabase
         .from("suppressed_emails")
         .select("id, email, reason, created_at")
         .order("created_at", { ascending: false })
+        .order("id", { ascending: true })
         .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1);
-      if (search.trim()) listQuery = listQuery.ilike("email", `%${search.trim()}%`);
+      if (term) listQuery = listQuery.ilike("email", ilikeContains(term));
       const { data, error } = await listQuery;
+      if (!suppressedSeq.current.isCurrent(token)) return;
       if (error) toast.error("Erreur lors du chargement des désabonnés");
       setSuppressedList((data as any) || []);
       setSuppressedTotal(totalCount ?? 0);
@@ -261,9 +267,16 @@ export default function AdminEmailHealth() {
     refreshAll();
   }, [refreshAll]);
 
+  // Recherche différée de 300 ms, comme la liste des utilisateurs.
+  const [suppressedSearchDebounced, setSuppressedSearchDebounced] = useState("");
   useEffect(() => {
-    fetchSuppressed(suppressedPage, suppressedSearch);
-  }, [fetchSuppressed, suppressedPage, suppressedSearch]);
+    const t = setTimeout(() => setSuppressedSearchDebounced(suppressedSearch), 300);
+    return () => clearTimeout(t);
+  }, [suppressedSearch]);
+
+  useEffect(() => {
+    fetchSuppressed(suppressedPage, suppressedSearchDebounced);
+  }, [fetchSuppressed, suppressedPage, suppressedSearchDebounced]);
 
   // Pipeline tones
   // Le worker est event-driven : un âge élevé quand les files sont vides est normal.
