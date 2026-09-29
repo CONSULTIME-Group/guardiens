@@ -77,7 +77,7 @@ describe("A15, résumé hebdomadaire entraide", () => {
   });
 
   it("migration du cron de rattrapage : mardi 10:00 UTC, pass catch_up", () => {
-    const sql = readFileSync("supabase/migrations/20260929220000_mutual_aid_digest_catch_up_cron.sql", "utf8");
+    const sql = readFileSync("docs/migrations-en-attente/a15_mutual_aid_digest_catch_up_cron.sql", "utf8");
     expect(sql).toContain("'0 10 * * 2'");
     expect(sql).toContain("'pass','catch_up'");
   });
