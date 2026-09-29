@@ -43,6 +43,7 @@ export type AlmaFeedbackValue = "useful" | "not_useful";
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export function readConversationId(raw: unknown): string | undefined {
   return typeof raw === "string" && UUID_RE.test(raw) ? raw : undefined;
+}
 
 /** Seuls les chemins internes du site sont acceptés, jamais une adresse externe. */
 function isInternalPath(v: unknown): v is string {
