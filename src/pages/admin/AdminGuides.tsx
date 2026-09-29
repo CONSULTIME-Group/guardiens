@@ -1,3 +1,4 @@
+import { usePagedSearch, SearchInput, Pager } from "@/components/admin/ui";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useState } from "react";
 import { refreshAdminBadges } from "@/hooks/useAdminBadges";
@@ -175,6 +176,8 @@ const AdminGuides = () => {
     onError: (err: any) => toast.error("Erreur: " + err.message),
   });
 
+  const paged = usePagedSearch(guides ?? [], (g) => `${g.city ?? ""} ${(g as any).department ?? ""} ${(g as any).postal_code ?? ""}`);
+
   return (
     <div className="space-y-6">
       <AdminPageHeader title="Guides locaux" description={`${guides.length} guides · générés par IA avec des lieux réels`} />
@@ -263,13 +266,18 @@ const AdminGuides = () => {
         </Card>
       )}
 
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <SearchInput value={paged.query} onChange={paged.setQuery} placeholder="Rechercher un guide" />
+        <span className="text-sm text-muted-foreground">{paged.total} résultats</span>
+      </div>
+      <Pager page={paged.page} total={paged.total} onPage={paged.setPage} />
       {isLoading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => <div key={i} className="h-16 bg-muted animate-pulse rounded-lg" />)}
         </div>
       ) : (
         <div className="space-y-2">
-          {guides.map((guide) => (
+          {paged.visible.map((guide) => (
             <div
               key={guide.id}
               className="flex items-center gap-3 p-4 bg-card border border-border rounded-lg"
