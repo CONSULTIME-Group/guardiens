@@ -991,10 +991,11 @@ Deno.serve(async (req) => {
           const responders = departureSend.responders ?? new Map<string, NoelResponderPeriod>();
           const others = ids.filter((id) => !responders.has(id));
           const tokens = await mintDepartureTokens(serviceClient, others);
+          const pool = responders.size > 0 ? await loadSitterPool(serviceClient) : undefined;
           for (const id of ids) {
             const base = noelByProfile.get(id) ?? { firstName: "", variant: "B" as const };
             const period = responders.get(id);
-            if (period) noelByProfile.set(id, await buildResponderData(serviceClient, id, period, base));
+            if (period) noelByProfile.set(id, await buildResponderData(serviceClient, id, period, base, pool));
             else {
               const t = tokens.get(id);
               noelByProfile.set(id, { ...base, ...(t ? { periodBaseUrl: periodBaseUrl(t) } : {}) } as NoelTemplateData);
