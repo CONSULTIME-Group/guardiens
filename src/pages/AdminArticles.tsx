@@ -297,6 +297,7 @@ const AdminArticles = () => {
           </TableBody>
         </Table>
       </div>
+      <p className="text-sm text-muted-foreground" data-testid="articles-count">{filtered.length} article{filtered.length > 1 ? "s" : ""} trouvé{filtered.length > 1 ? "s" : ""}</p>
       <Pager page={currentArticlePage} total={filtered.length} onPage={setArticlePage} />
 
       {/* CORRECTION 8, SEO checklist panel */}
