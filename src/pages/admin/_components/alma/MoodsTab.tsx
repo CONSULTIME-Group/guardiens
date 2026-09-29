@@ -172,13 +172,18 @@ export function MoodsTab() {
                     {viewsById.get(row.id) ?? 0}
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button
-                      variant={row.active ? "outline" : "secondary"}
-                      size="sm"
-                      onClick={() => toggleActive(row)}
-                    >
-                      {row.active ? "Active" : "Inactive"}
-                    </Button>
+                    <div className="flex items-center justify-end gap-2">
+                      <Badge variant={row.active ? "default" : "secondary"} data-testid="mood-state">
+                        {row.active ? "Active" : "Inactive"}
+                      </Badge>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => toggleActive(row)}
+                      >
+                        {row.active ? "Désactiver" : "Activer"}
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
