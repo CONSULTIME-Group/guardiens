@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
+import { UrlFilterNotice } from "@/components/admin/UrlFilterNotice";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,6 +20,14 @@ type HistoryFilter = "all" | "verified" | "rejected" | "pending" | "needs_review
 
 const AdminVerifications = () => {
   const [queue, setQueue] = useState<any[]>([]);
+  // ?id= : met en avant la vérification de ce membre (liens depuis les signaux et l'accueil).
+  const [urlParams, setUrlParams] = useSearchParams();
+  const focusId = urlParams.get("id");
+  const clearFocus = () => {
+    const next = new URLSearchParams(urlParams);
+    next.delete("id");
+    setUrlParams(next, { replace: true });
+  };
   const [loading, setLoading] = useState(true);
   const [busyUserId, setBusyUserId] = useState<string | null>(null);
   const [metrics, setMetrics] = useState({ pending: 0, verifiedWeek: 0, rejectedWeek: 0 });
@@ -293,12 +303,21 @@ const AdminVerifications = () => {
         </Card>
       </div>
 
+      {focusId && (
+        <UrlFilterNotice
+          label="Vérification de ce membre mise en avant"
+          notFound={!loading && !queue.some((u) => u.id === focusId)}
+          notFoundText="Ce membre n'a aucune vérification en attente. Consultez l'historique ci-dessous."
+          onClear={clearFocus}
+        />
+      )}
+
       {/* Pending Queue */}
       {queue.length > 0 && (
         <div className="space-y-4">
           <h2 className="font-heading text-lg font-semibold">En attente de traitement ({queue.length})</h2>
           <div className="space-y-6">
-            {queue.map((user, idx) => {
+            {(focusId && queue.some((u) => u.id === focusId) ? queue.filter((u) => u.id === focusId) : queue).map((user, idx) => {
               const attempts = attemptCounts[user.id] || 0;
               const hasDoc = !!user.identity_document_url;
               const hasSelfie = !!user.identity_selfie_url;
