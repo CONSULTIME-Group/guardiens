@@ -15,6 +15,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { isMoodLineTruthful, type MoodTruthFacts } from "../../supabase/functions/_shared/alma-facts";
 import {
   resolveMoodPlan,
   seasonFromDate,
@@ -49,51 +50,58 @@ function readSession(): AlmaMoodRow | null {
   }
 }
 
-/** Contexte d'attention, lu au plus léger : gardes et candidatures. */
+/**
+ * Contexte d'attention, lu au plus léger : gardes et candidatures.
+ * Lot J2-A : les deux côtés sont toujours lus (membre polyvalent), et une
+ * garde ne compte que confirmée avec une date de début.
+ */
 async function loadAttentionContext(
   userId: string,
-  activeRole: "owner" | "sitter",
-): Promise<{ sitInProgress: boolean; sitImminent: boolean; pendingApplication: boolean }> {
+): Promise<{ sitInProgress: boolean; sitImminent: boolean; pendingApplication: boolean; truth: MoodTruthFacts }> {
   const soon = new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString().slice(0, 10);
   const today = new Date().toISOString().slice(0, 10);
+  const empty = { ownerConfirmedSoon: false, sitterConfirmedSoon: false, receivedPending: false };
   try {
-    if (activeRole === "owner") {
-      const { data } = await supabase
+    const [ownRes, sentRes] = await Promise.all([
+      supabase
         .from("sits")
-        .select("status, start_date")
+        .select("id, status, start_date")
         .eq("user_id", userId)
-        .in("status", ["confirmed", "in_progress"])
-        .limit(10);
-      const rows = data ?? [];
-      return {
-        sitInProgress: rows.some((r: any) => r.status === "in_progress"),
-        sitImminent: rows.some(
-          (r: any) =>
-            r.status === "confirmed" && r.start_date && r.start_date >= today && r.start_date <= soon,
-        ),
-        pendingApplication: false,
-      };
+        .in("status", ["published", "confirmed", "in_progress"])
+        .limit(20),
+      supabase
+        .from("applications")
+        .select("status, sits:sit_id(status, start_date)")
+        .eq("sitter_id", userId)
+        .in("status", ["pending", "accepted"])
+        .limit(20),
+    ]);
+    const own = (ownRes.data ?? []) as any[];
+    const sent = (sentRes.data ?? []) as any[];
+    const publishedIds = own.filter((r) => r.status === "published").map((r) => r.id);
+    let receivedPending = false;
+    if (publishedIds.length > 0) {
+      const { data } = await supabase
+        .from("applications")
+        .select("id")
+        .in("sit_id", publishedIds)
+        .eq("status", "pending")
+        .limit(1);
+      receivedPending = (data ?? []).length > 0;
     }
-    const { data } = await supabase
-      .from("applications")
-      .select("status, sits:sit_id(status, start_date)")
-      .eq("sitter_id", userId)
-      .in("status", ["pending", "accepted"])
-      .limit(20);
-    const rows = data ?? [];
+    const soonStart = (d?: string | null) => Boolean(d) && d! >= today && d! <= soon;
+    const ownerConfirmedSoon = own.some((r) => r.status === "confirmed" && soonStart(r.start_date));
+    const sitterConfirmedSoon = sent.some(
+      (r) => r.status === "accepted" && ["confirmed", "in_progress"].includes(r.sits?.status) && soonStart(r.sits?.start_date),
+    );
     return {
-      sitInProgress: rows.some((r: any) => r.sits?.status === "in_progress"),
-      sitImminent: rows.some(
-        (r: any) =>
-          r.status === "accepted" &&
-          r.sits?.start_date &&
-          r.sits.start_date >= today &&
-          r.sits.start_date <= soon,
-      ),
-      pendingApplication: rows.some((r: any) => r.status === "pending"),
+      sitInProgress: own.some((r) => r.status === "in_progress") || sent.some((r) => r.status === "accepted" && r.sits?.status === "in_progress"),
+      sitImminent: ownerConfirmedSoon || sitterConfirmedSoon,
+      pendingApplication: receivedPending,
+      truth: { ownerConfirmedSoon, sitterConfirmedSoon, receivedPending },
     };
   } catch {
-    return { sitInProgress: false, sitImminent: false, pendingApplication: false };
+    return { sitInProgress: false, sitImminent: false, pendingApplication: false, truth: empty };
   }
 }
 
@@ -108,10 +116,7 @@ export function useAlmaMood({ silent, conversationOpen }: UseAlmaMoodParams): Us
     if (!user?.id) return;
 
     (async () => {
-      const attention = await loadAttentionContext(
-        user.id,
-        activeRole === "owner" ? "owner" : "sitter",
-      );
+      const { truth, ...attention } = await loadAttentionContext(user.id);
       if (cancelled) return;
 
       const plan = resolveMoodPlan({
@@ -125,7 +130,10 @@ export function useAlmaMood({ silent, conversationOpen }: UseAlmaMoodParams): Us
       if (!plan.express) return;
 
       const cached = readSession();
-      if (cached) {
+      if (cached && !isMoodLineTruthful(cached.content, truth)) {
+        try { sessionStorage.removeItem(SESSION_KEY); } catch { /* silent */ }
+        setRow(null);
+      } else if (cached) {
         setRow(cached);
         setAvatar(MOOD_AVATAR[cached.mood] ?? plan.avatar);
         return;
@@ -153,6 +161,8 @@ export function useAlmaMood({ silent, conversationOpen }: UseAlmaMoodParams): Us
         if (cancelled || error || !data) return;
         const picked = data as unknown as AlmaMoodRow;
         if (!picked?.id || !picked?.content) return;
+        // Lot J2-A : une phrase qui raconte une garde ou un départ non confirmé se tait.
+        if (!isMoodLineTruthful(picked.content, truth)) return;
         setRow(picked);
         setAvatar(MOOD_AVATAR[picked.mood] ?? plan.avatar);
         try {
