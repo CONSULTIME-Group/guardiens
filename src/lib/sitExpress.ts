@@ -20,11 +20,17 @@ export const isExpressActive = (o: { requested: boolean; hasProperty: boolean; s
   o.requested && o.hasProperty && !o.showSetup && !o.loading;
 
 /** « Mila », « Mila et Rex », « Mila, Rex et Nala ». Jamais d'espèce ni de genre. */
+export const petNames = (pets: ExpressPet[]): string[] => pets.map((p) => (p.name ?? "").trim()).filter(Boolean);
+
+/** Énumération française : virgules, et « et » seulement avant le dernier élément. */
+export function joinFr(items: string[]): string {
+  if (items.length === 0) return "";
+  if (items.length === 1) return items[0];
+  return `${items.slice(0, -1).join(", ")} et ${items[items.length - 1]}`;
+}
+
 export function joinPetNames(pets: ExpressPet[]): string {
-  const names = pets.map((p) => (p.name ?? "").trim()).filter(Boolean);
-  if (names.length === 0) return "";
-  if (names.length === 1) return names[0];
-  return `${names.slice(0, -1).join(", ")} et ${names[names.length - 1]}`;
+  return joinFr(petNames(pets));
 }
 
 export const EXPRESS_PERIOD_HEADER: Record<DeparturePeriod, string> = {
@@ -73,7 +79,8 @@ export function proposeExpressTexts(o: { period: DeparturePeriod; pets: ExpressP
 
   let sitterExpectations: string;
   if (o.pets.length > 0) {
-    const plural = o.pets.length > 1;
+    const named = petNames(o.pets).length;
+    const plural = named > 0 ? named > 1 : o.pets.length > 1;
     const subject = names || (plural ? "Nos animaux" : "Notre animal");
     sitterExpectations = `${subject} ${plural ? "restent" : "reste"} à la maison avec ${plural ? "leurs" : "ses"} habitudes. Nous cherchons une personne attentive, à l'aise avec ${speciesPhrase(o.pets)}.`;
   } else {
@@ -89,6 +96,17 @@ export const NOEL_DATE_PRESETS: DatePreset[] = [
   { key: "noel_second", label: "26 déc. au 2 janv.", start: "2026-12-26", end: "2027-01-02" },
 ];
 
+/** Raccourcis dont la date de début n'est pas passée. */
+export const validPresets = (today: string) => NOEL_DATE_PRESETS.filter((p) => p.start >= today);
+export const firstValidPreset = (today: string) => validPresets(today)[0] ?? null;
+
+/** Date du lendemain au format AAAA-MM-JJ. */
+export function nextDay(date: string): string {
+  const d = new Date(`${date}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + 1);
+  return d.toISOString().slice(0, 10);
+}
+
 export const matchingPreset = (start: string, end: string) =>
   NOEL_DATE_PRESETS.find((p) => p.start === start && p.end === end) ?? null;
 
@@ -99,11 +117,9 @@ export const housingLabel = (type?: string | null) => HOUSING_LABEL[String(type 
 
 /** « On a repris votre maison, Mila et Rex et votre commune. » */
 export function alreadyFilledPhrase(o: { propertyType?: string | null; pets: ExpressPet[]; city?: string | null }): string {
-  const parts = [housingLabel(o.propertyType)];
-  const names = joinPetNames(o.pets);
-  if (names) parts.push(names);
+  const parts = [housingLabel(o.propertyType), ...petNames(o.pets)];
   if ((o.city ?? "").trim()) parts.push("votre commune");
-  const list = parts.length === 1 ? parts[0] : `${parts.slice(0, -1).join(", ")} et ${parts[parts.length - 1]}`;
+  const list = joinFr(parts);
   return `On a repris ${list}. Ajoutez une photo, choisissez vos dates, relisez le texte.`;
 }
 

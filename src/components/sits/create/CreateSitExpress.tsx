@@ -3,7 +3,9 @@
  * Composant de présentation : tout l'état et la publication restent dans
  * CreateSit, qui passe les mêmes valeurs et le même handlePublish.
  */
-import { useRef, useState } from "react";
+import { useRef, useState, type ReactNode } from "react";
+import { Link } from "react-router-dom";
+import { useHideBottomNav } from "@/components/layout/ChromeVisibility";
 import { ArrowLeft, Check, Camera, ImagePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { MAX_TITLE_LENGTH, type PublishBlocker } from "@/lib/sitPublishRules";
 import {
-  EXPRESS_PERIOD_HEADER, NOEL_DATE_PRESETS, alreadyFilledPhrase, housingLabel, joinPetNames, matchingPreset,
+  EXPRESS_PERIOD_HEADER, alreadyFilledPhrase, housingLabel, joinPetNames, matchingPreset, nextDay, validPresets,
   type ExpressPet,
 } from "@/lib/sitExpress";
 import type { DeparturePeriod } from "@/lib/ownerDeparture";
@@ -44,7 +46,24 @@ export interface CreateSitExpressProps {
   publishing: boolean;
   onPublish: () => void;
   onBack: () => void;
+  /** Verdict de modération sous chaque champ texte (même rendu que le formulaire classique). */
+  moderationNotice?: (key: "title" | "absenceReason" | "sitterExpectations") => ReactNode;
+  /** Annonce publiée à venir : bandeau et lien vers elle. */
+  publishedSitId?: string | null;
 }
+
+/** Libellés du pied alignés sur les champs de l'écran express. */
+export function expressBlockerLabel(b: PublishBlocker): string {
+  if (b.id === "desc-reason") return "Pourquoi vous partez : quelques mots de plus";
+  if (b.id === "desc-expectations") return "Ce que vous attendez du gardien : quelques mots de plus";
+  if (b.id === "title") return "Titre";
+  if (b.id === "dates") return "Vos dates";
+  if (b.id === "photo") return "Une photo de chez vous";
+  return b.label;
+}
+
+/** L'erreur de dates s'affiche déjà sous les dates : jamais une seconde fois dans le pied. */
+const DATE_ERROR_IDS = new Set(["date-past", "date-error"]);
 
 const today = () => new Date().toISOString().slice(0, 10);
 
@@ -53,10 +72,13 @@ const Card = ({ children, className }: { children: React.ReactNode; className?: 
 );
 
 const CreateSitExpress = (p: CreateSitExpressProps) => {
+  useHideBottomNav(true);
   const cameraRef = useRef<HTMLInputElement>(null);
+  const presets = validPresets(today());
+  const footerBlockers = p.blocking.filter((b) => !(p.dateError && DATE_ERROR_IDS.has(b.id)));
   const galleryRef = useRef<HTMLInputElement>(null);
   const preset = matchingPreset(p.startDate, p.endDate);
-  const [otherDates, setOtherDates] = useState(p.period !== "noel" || (!!p.startDate && !preset));
+  const [otherDates, setOtherDates] = useState(p.period !== "noel" || presets.length === 0 || (!!p.startDate && !preset));
   const names = joinPetNames(p.pets);
   const pickFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -84,6 +106,15 @@ const CreateSitExpress = (p: CreateSitExpressProps) => {
           </p>
         </div>
 
+        {p.publishedSitId && (
+          <section className="rounded-2xl border border-primary/30 bg-primary/5 p-5" data-testid="express-already-online">
+            <p className="text-[16px] font-semibold text-foreground">Votre annonce est déjà en ligne</p>
+            <Link to={`/sits/${p.publishedSitId}`} className="mt-1 inline-block text-[15px] font-semibold text-primary underline-offset-4 hover:underline">
+              Voir mon annonce
+            </Link>
+          </section>
+        )}
+
         {/* Bloc 1 : photo */}
         <Card>
           <h2 className="font-heading text-[19px] text-foreground">Une photo de chez vous</h2>
@@ -109,7 +140,7 @@ const CreateSitExpress = (p: CreateSitExpressProps) => {
                   <ImagePlus className="h-4 w-4" aria-hidden="true" /> Choisir dans ma galerie
                 </Button>
               </div>
-              <p className="mt-3 text-[14px] text-muted-foreground">Le jardin, le salon ou vos animaux : une photo suffit pour publier.</p>
+              <p className="mt-3 text-[14px] text-muted-foreground">Une photo de chez vous : le jardin, le salon, l'entrée.</p>
             </div>
           )}
         </Card>
@@ -117,9 +148,9 @@ const CreateSitExpress = (p: CreateSitExpressProps) => {
         {/* Bloc 2 : dates */}
         <Card>
           <h2 className="font-heading text-[19px] text-foreground">Vos dates</h2>
-          {p.period === "noel" && (
+          {p.period === "noel" && presets.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-2" data-testid="express-date-presets">
-              {NOEL_DATE_PRESETS.map((d) => {
+              {presets.map((d) => {
                 const active = !otherDates && preset?.key === d.key;
                 return (
                   <button
@@ -158,7 +189,7 @@ const CreateSitExpress = (p: CreateSitExpressProps) => {
               </div>
               <div>
                 <Label htmlFor="express-end" className="mb-1 block text-xs text-muted-foreground">Fin</Label>
-                <Input id="express-end" type="date" min={p.startDate || today()} value={p.endDate} className="h-12 text-base"
+                <Input id="express-end" type="date" min={p.startDate ? nextDay(p.startDate) : today()} value={p.endDate} className="h-12 text-base"
                   onChange={(e) => p.onDates(p.startDate, e.target.value, "autres")} />
               </div>
             </div>
@@ -177,14 +208,17 @@ const CreateSitExpress = (p: CreateSitExpressProps) => {
             <div>
               <Label htmlFor="express-title" className="mb-1 block text-sm">Titre</Label>
               <Input id="express-title" value={p.title} maxLength={MAX_TITLE_LENGTH} className="h-12 text-base" onChange={(e) => p.onTitle(e.target.value)} />
+              {p.moderationNotice?.("title")}
             </div>
             <div>
               <Label htmlFor="express-reason" className="mb-1 block text-sm">Pourquoi vous partez</Label>
               <Textarea id="express-reason" value={p.absenceReason} className="min-h-[72px] text-base" onChange={(e) => p.onAbsenceReason(e.target.value)} />
+              {p.moderationNotice?.("absenceReason")}
             </div>
             <div>
               <Label htmlFor="express-expect" className="mb-1 block text-sm">Ce que vous attendez du gardien</Label>
               <Textarea id="express-expect" value={p.sitterExpectations} className="min-h-[96px] text-base" onChange={(e) => p.onSitterExpectations(e.target.value)} />
+              {p.moderationNotice?.("sitterExpectations")}
             </div>
             <p className="text-[14px] text-muted-foreground">Écrit à partir de votre profil. Modifiez-le librement.</p>
           </div>
@@ -200,15 +234,15 @@ const CreateSitExpress = (p: CreateSitExpressProps) => {
         </section>
       </main>
 
-      <footer className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur">
+      <footer className="fixed inset-x-0 bottom-[var(--bottom-nav-h,0px)] z-40 md:bottom-0 border-t border-border bg-background/95 px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur">
         <div className="mx-auto w-full max-w-[640px]">
-          {p.blocking.length > 0 && (
+          {footerBlockers.length > 0 && (
             <ul className="mb-2 space-y-0.5 text-[13.5px] text-muted-foreground" data-testid="express-blockers">
-              {p.blocking.map((b) => <li key={b.id}>{b.label}</li>)}
+              {footerBlockers.map((b) => <li key={b.id}>{expressBlockerLabel(b)}</li>)}
             </ul>
           )}
-          <Button type="button" className="h-[50px] w-full rounded-full text-[16px]" disabled={p.blocking.length > 0 || p.publishing} onClick={p.onPublish}>
-            {p.publishing ? "Publication en cours…" : "Publier mon annonce"}
+          <Button type="button" variant={p.publishedSitId ? "outline" : "default"} className="h-[50px] w-full rounded-full text-[16px]" disabled={p.blocking.length > 0 || p.publishing} onClick={p.onPublish}>
+            {p.publishing ? "Publication en cours…" : p.publishedSitId ? "Publier une autre annonce" : "Publier mon annonce"}
           </Button>
           <p className="mt-2 text-center text-[13px] text-muted-foreground">Publier est gratuit. Les gardiens vous écrivent, et c'est vous qui choisissez.</p>
         </div>

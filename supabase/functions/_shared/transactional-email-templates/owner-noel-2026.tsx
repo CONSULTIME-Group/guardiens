@@ -75,10 +75,24 @@ const ofPeriod = (p: OwnerNoelProps) => (p.period === 'hiver' ? 'de cet hiver' :
 const pct = (p: OwnerNoelProps) => Math.max(0, Math.min(100, Math.round(p.percent ?? 0)))
 const todoOf = (p: OwnerNoelProps) => (p.todo || '').trim() || 'à la publier'
 
+/** « 1 gardien », « 12 gardiens » (lot N7). */
+export const gardiensCount = (n: number | undefined) => `${n ?? 0} ${(n ?? 0) === 1 ? 'gardien' : 'gardiens'}`
+
+/** Sous ce seuil, objet et titre du mode répondant sont sans pourcentage (lot N7). */
+export const RESPONDER_PERCENT_MIN = 40
+const lowPercent = (p: OwnerNoelProps) => pct(p) < RESPONDER_PERCENT_MIN
+
+export function ownerNoelTitle(p: OwnerNoelProps): string {
+  if (lowPercent(p)) return `Votre annonce ${ofPeriod(p)}, en deux gestes.`
+  return `Votre annonce ${ofPeriod(p)} est prête à ${pct(p)} %.`
+}
+
 export function ownerNoelSubject(p: OwnerNoelProps): string {
   if (!isResponder(p)) return OWNER_NOEL_SUBJECT
+  const lead = p.period === 'hiver' ? 'Cet hiver' : 'Pour Noël'
+  if (lowPercent(p)) return `${lead}, votre annonce en deux gestes`
   if (resolveVariant(p) === 'A') {
-    return `${p.period === 'hiver' ? 'Cet hiver' : 'Pour Noël'}, ${p.nearbyCount} gardiens près de chez vous`
+    return `${lead}, ${gardiensCount(p.nearbyCount)} près de chez vous`
   }
   return `Votre annonce ${ofPeriod(p)} est prête à ${pct(p)} %`
 }
@@ -95,9 +109,11 @@ export const noelPeriodHref = (base: string | undefined, p: string) =>
   `${(base || `${SITE}/ma-periode`).replace(/\/+$/, '')}?p=${p}&${UTM}`
 
 export function ownerNoelPreheader(p: OwnerNoelProps): string {
-  if (isResponder(p)) return `Votre annonce est prête à ${pct(p)} %, il reste ${todoOf(p)}`
+  if (isResponder(p)) {
+    return lowPercent(p) ? `Il reste ${todoOf(p)}` : `Votre annonce est prête à ${pct(p)} %, il reste ${todoOf(p)}`
+  }
   if (resolveVariant(p) === 'A') {
-    return `${p.nearbyCount} gardiens à moins de 50 km de ${(p.city || '').trim()}, et c'est vous qui choisissez`
+    return `${gardiensCount(p.nearbyCount)} à moins de 50 km de ${(p.city || '').trim()}, et c'est vous qui choisissez`
   }
   return 'Vos dates, votre commune, et les gardiens proches vous écrivent'
 }
@@ -105,7 +121,9 @@ export function ownerNoelPreheader(p: OwnerNoelProps): string {
 /** A seulement si les données de la variante A sont réellement présentes. */
 /** « En voici trois / deux / un », adapté au nombre de cartes réellement affichées. */
 export function ownerNoelSubtitle(n: number): string {
-  const tail = "Ils vous envoient leur candidature, et c'est vous qui choisissez."
+  const tail = n === 1
+    ? "Il vous envoie sa candidature, et c'est vous qui choisissez."
+    : "Ils vous envoient leur candidature, et c'est vous qui choisissez."
   const lead = n >= 3 ? 'En voici trois. ' : n === 2 ? 'En voici deux. ' : n === 1 ? 'En voici un. ' : ''
   return lead + tail
 }
@@ -179,7 +197,7 @@ const PeopleBlock = ({ props, profileUrl }: { props: OwnerNoelProps; profileUrl:
       <Eyebrow label="PRÈS DE CHEZ VOUS" />
       {resolveVariant(props) === 'A' ? (
         <>
-          <Text style={h2}>{props.nearbyCount} gardiens à moins de 50 km de {town}</Text>
+          <Text style={h2}>{gardiensCount(props.nearbyCount)} à moins de 50 km de {town}</Text>
           <Text style={sub}>{ownerNoelSubtitle(sitters.length)}</Text>
           {sitters.length > 0 ? (
             <Row style={{ marginTop: '14px' }}>
@@ -210,7 +228,7 @@ const ResponderEmail = (props: OwnerNoelProps) => {
   const done = (props.done || '').trim()
   const profileUrl = props.profileUrl || OWNER_NOEL_PROFILE_URL
   const intro = `${name ? `Bonjour ${name}, ` : 'Bonjour, '}vous nous avez dit partir ${period === 'hiver' ? 'cet hiver' : 'à Noël'}.`
-  const prepared = done ? ` On a préparé votre annonce avec ${done}.` : ' On a préparé votre annonce.'
+  const prepared = done ? ` On a préparé votre annonce avec ${done}.` : ''
   return (
     <Html lang="fr" dir="ltr">
       <BrandedHead />
@@ -224,7 +242,7 @@ const ResponderEmail = (props: OwnerNoelProps) => {
           ) : null}
           <Section style={{ ...pad, paddingTop: '20px' }} className="em-pad">
             <Eyebrow label={period === 'hiver' ? 'CET HIVER' : 'NOËL 2026'} />
-            <Text style={h1}>Votre annonce {ofPeriod(props)} est prête à {pct(props)} %.</Text>
+            <Text style={h1}>{ownerNoelTitle(props)}</Text>
             <Text style={text}>{intro}{prepared} Il reste {todoOf(props)}.</Text>
           </Section>
 
@@ -300,7 +318,7 @@ const Email = (props: OwnerNoelProps) => {
               <Eyebrow label="PRÈS DE CHEZ VOUS" />
               {variant === 'A' ? (
                 <>
-                  <Text style={h2}>{props.nearbyCount} gardiens à moins de 50 km de {town}</Text>
+                  <Text style={h2}>{gardiensCount(props.nearbyCount)} à moins de 50 km de {town}</Text>
                   <Text style={sub}>{ownerNoelSubtitle(sitters.length)}</Text>
                   {sitters.length > 0 ? (
                     <Row style={{ marginTop: '14px' }}>

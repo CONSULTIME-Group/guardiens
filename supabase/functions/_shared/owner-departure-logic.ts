@@ -209,3 +209,22 @@ export function remainingPhrase(todo: ReadinessItem[]): string {
   if (todo.length === 2) return `${lowerFirst(todo[0].label)} et ${lowerFirst(todo[1].label)}`;
   return "quelques détails";
 }
+
+/**
+ * Robots de messagerie (lot N7) : un même jeton qui enregistre plus d'une
+ * période distincte en moins de deux minutes signale un clic automatique.
+ * Le jeton est unique par profil, les réponses « email » du profil suffisent.
+ */
+export const SCANNER_WINDOW_MS = 2 * 60 * 1000;
+export function isScannerBurst(
+  recentEmailRows: Array<{ period: string; answered_at: string }>,
+  period: string,
+  now: Date = new Date(),
+): boolean {
+  const since = now.getTime() - SCANNER_WINDOW_MS;
+  const periods = new Set(
+    recentEmailRows.filter((r) => new Date(r.answered_at).getTime() >= since).map((r) => r.period),
+  );
+  periods.add(period);
+  return periods.size > 1;
+}

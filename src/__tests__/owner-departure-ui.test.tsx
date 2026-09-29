@@ -36,8 +36,24 @@ describe("Page C'est noté", () => {
   });
   it("période plus tard", () => {
     wrap(<NotedView data={base({ period: "plus_tard", alma_state: "hidden" })} />);
-    expect(screen.getByText("C'est noté, on vous réécrit dans un mois.")).toBeTruthy();
+    expect(screen.getByText("C'est noté.")).toBeTruthy();
+    expect(screen.getByTestId("noted-later").textContent).toContain("Prenez votre temps.");
+    expect(screen.getByTestId("noted-later").textContent).toContain("Votre réponse est enregistrée. Vous la retrouvez sur votre tableau de bord.");
     noDash();
+  });
+});
+
+describe("Lot N7, /ma-periode", () => {
+  it("annonce publiée à venir : « Voir mon annonce »", () => {
+    wrap(<NotedView data={base({ upcoming_sit_id: "sit-1", has_published: true })} />);
+    expect(screen.getByTestId("noted-see-sit").getAttribute("href")).toBe("/sits/sit-1");
+    expect(screen.getByText("Voir mon annonce")).toBeTruthy();
+  });
+  it("aucune promesse de rappel daté", () => {
+    wrap(<NotedView data={base({})} />);
+    const t = document.body.textContent ?? "";
+    for (const w of ["mi-novembre", "fin février", "mi-mai", "réécrit", "rappelle"]) expect(t).not.toContain(w);
+    expect(t).toContain("Votre réponse est enregistrée.");
   });
 });
 

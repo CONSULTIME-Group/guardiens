@@ -15,6 +15,8 @@ import {
   departureTokenState,
   isDeparturePeriod,
   isDuplicateAnswer,
+  isScannerBurst,
+  SCANNER_WINDOW_MS,
   isOwnerV2Holdout,
   isWellFormedDepartureToken,
   type IntentRow,
@@ -85,7 +87,7 @@ Deno.serve(async (req) => {
     if (!profile || (profile.account_status && profile.account_status !== "active")) return json({ ok: false, state: "invalid" });
 
     const { data: lastRows } = await service.from("owner_departure_intents")
-      .select("period, answered_at").eq("user_id", userId).order("answered_at", { ascending: false }).limit(1);
+      .select("period, answered_at").eq("user_id", userId).neq("source", "scanner_suspect").order("answered_at", { ascending: false }).limit(1);
     let last: IntentRow | null = (lastRows ?? [])[0] ?? null;
 
     if (mode === "save") {
@@ -93,12 +95,30 @@ Deno.serve(async (req) => {
       if (!isDeparturePeriod(period)) return json({ ok: false, reason: "invalid_period" }, 400);
       if (!isDuplicateAnswer(last, period)) {
         const answered_at = new Date().toISOString();
-        const { error } = await service.from("owner_departure_intents").insert({ user_id: userId, period, source, answered_at });
+        // Robots de messagerie : plusieurs périodes distinctes par le même
+        // jeton en moins de deux minutes, toutes marquées scanner_suspect.
+        let rowSource: string = source;
+        if (source === "email") {
+          const since = new Date(Date.now() - SCANNER_WINDOW_MS).toISOString();
+          const { data: burst } = await service.from("owner_departure_intents")
+            .select("id, period, answered_at").eq("user_id", userId).in("source", ["email", "scanner_suspect"]).gte("answered_at", since);
+          if (isScannerBurst(burst ?? [], period)) {
+            rowSource = "scanner_suspect";
+            const ids = (burst ?? []).map((b: { id: string }) => b.id);
+            if (ids.length) await service.from("owner_departure_intents").update({ source: "scanner_suspect" }).in("id", ids);
+          }
+        }
+        const { error } = await service.from("owner_departure_intents").insert({ user_id: userId, period, source: rowSource, answered_at });
         if (error) {
           console.error("[ma-periode] insert failed", error.message);
           return json({ ok: false, reason: "error" }, 500);
         }
-        last = { period, answered_at };
+        if (rowSource !== "scanner_suspect") last = { period, answered_at };
+        else {
+          const { data: human } = await service.from("owner_departure_intents").select("period, answered_at")
+            .eq("user_id", userId).neq("source", "scanner_suspect").order("answered_at", { ascending: false }).limit(1);
+          last = (human ?? [])[0] ?? null;
+        }
       }
       if (rawToken) {
         await service.from("departure_tokens").update({ used_at: new Date().toISOString() }).eq("token", rawToken).is("used_at", null);
@@ -107,6 +127,10 @@ Deno.serve(async (req) => {
 
     const { count: publishedCount } = await service.from("sits").select("id", { count: "exact", head: true })
       .eq("user_id", userId).or("status.neq.draft,published_at.not.is.null");
+    // Annonce publiée à venir (lot N7) : le bouton y mène directement.
+    const todayParis = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris" }).format(new Date());
+    const { data: upcoming } = await service.from("sits").select("id").eq("user_id", userId).eq("status", "published")
+      .gte("end_date", todayParis).order("start_date", { ascending: true }).limit(1);
     const payload = await ownerReadiness(service, userId!);
 
     return json({
@@ -122,6 +146,7 @@ Deno.serve(async (req) => {
       alma_state: almaDepartureState(last),
       holdout: isOwnerV2Holdout(userId!),
       has_published: (publishedCount ?? 0) > 0,
+      upcoming_sit_id: (upcoming ?? [])[0]?.id ?? null,
     });
   } catch (e) {
     console.error("[ma-periode] unexpected", e);

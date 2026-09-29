@@ -85,7 +85,7 @@ Deno.test('répondant, 0, 2 cartes', () => {
 
 Deno.test('déjà renseigné : noms seuls, appartement, jamais de genre', () => {
   const r = computeReadiness({ city: 'Lyon', latitude: 45, hasProperty: true, pets: [{ name: 'Mila', species: 'dog' }, { name: 'Rex', species: 'dog' }, { name: 'Nala', species: 'cat' }], galleryPhotoCount: 0, propertyPhotoCount: 0, draftStartDates: [] })
-  assertEquals(donePhrase(r, ['Mila', 'Rex', 'Nala'], 'house'), 'votre maison, Mila, Rex et Nala et votre commune')
+  assertEquals(donePhrase(r, ['Mila', 'Rex', 'Nala'], 'house'), 'votre maison, Mila, Rex, Nala et votre commune')
   assertEquals(donePhrase(r, ['Mila'], 'apartment'), 'votre appartement, Mila et votre commune')
   assertEquals(donePhrase(r, [], 'house'), 'votre maison et votre commune')
 })

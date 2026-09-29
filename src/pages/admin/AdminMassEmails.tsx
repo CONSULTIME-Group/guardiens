@@ -302,6 +302,32 @@ const CAMPAIGN_PRESETS: CampaignPreset[] = [
     utmContent: "cta",
   },
   {
+    // Lot N7 : aucun envoi automatique. Anciens publiants sans annonce à venir.
+    key: "owner_departure_question_past",
+    label: "Anciens publiants, question de départ",
+    segment: "proprios",
+    filters: {
+      comptes_actifs: true,
+      exclude_suspended: true,
+      exclude_admins: true,
+      respect_product_optout: true,
+      past_published_no_upcoming: true,
+      exclude_founder_followup: true,
+      prioritize_recent_openers: true,
+      exclude_owner_v2_holdout: true,
+      exclude_departure_answered: true,
+      template_name: "owner-departure-question",
+    },
+    subject: "Vous partez quand, cette année ?",
+    body: "Gabarit dédié owner-departure-question : cinq boutons à jeton personnel vers /ma-periode, créés pour chaque destinataire au lancement.",
+    ctaEnabled: true,
+    ctaLabel: "Pour Noël",
+    ctaUrl: "https://guardiens.fr/ma-periode?utm_source=email&utm_medium=email&utm_campaign=owner_departure_question",
+    utmEnabled: false,
+    utmCampaign: "owner_departure_question",
+    utmContent: "cta",
+  },
+  {
     key: "entraide_demander",
     label: "Entraide B, demander un coup de main",
     segment: "tous",
@@ -341,9 +367,9 @@ const AdminMassEmails = () => {
   const [recipientCount, setRecipientCount] = useState<number | null>(null);
   const [helpsWithCount, setHelpsWithCount] = useState<number | null>(null);
   const [variantCounts, setVariantCounts] = useState<{ a: number; b: number } | null>(null);
-  const [departureCounts, setDepartureCounts] = useState<{ holdout: number | null; answered: number | null; pressure?: number | null } | null>(null);
+  const [departureCounts, setDepartureCounts] = useState<{ holdout: number | null; answered: number | null; pressure?: number | null; received?: number | null } | null>(null);
   const [noelV2Counts, setNoelV2Counts] = useState<{ noel: number; hiver: number; other: number } | null>(null);
-  const [noelTestMode, setNoelTestMode] = useState<"responder_noel" | "variant_a">("responder_noel");
+  const [noelTestMode, setNoelTestMode] = useState<"responder_noel" | "responder_hiver" | "variant_a" | "variant_b">("responder_noel");
 
   const [countLoading, setCountLoading] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -589,7 +615,7 @@ const AdminMassEmails = () => {
         );
         setDepartureCounts(
           typeof data?.holdout_excluded === "number" || typeof data?.already_answered === "number" || typeof data?.pressure_excluded === "number"
-            ? { holdout: data.holdout_excluded ?? null, answered: data.already_answered ?? null, pressure: data.pressure_excluded ?? null }
+            ? { holdout: data.holdout_excluded ?? null, answered: data.already_answered ?? null, pressure: data.pressure_excluded ?? null, received: data.already_received ?? null }
             : null,
         );
         setNoelV2Counts(
@@ -661,10 +687,14 @@ const AdminMassEmails = () => {
           body: body.trim(),
           cta_label: ctaEnabled ? ctaLabel.trim() : undefined,
           cta_url: ctaEnabled ? withUtm(ctaUrl.trim()) : undefined,
+          // Garde-fou serveur : refus si l'audience a changé depuis le compte affiché.
+          ...(typeof recipientCount === "number" ? { expected_recipient_count: recipientCount } : {}),
         },
       });
       if (error) throw error;
-      toast.success(`Envoi lancé, ${data.sent} emails en cours d'expédition`);
+      if (data?.error) throw new Error(data.error);
+      const launched = typeof data?.queued === "number" ? data.queued : typeof data?.sent === "number" ? data.sent : 0;
+      toast.success(`Envoi lancé, ${launched} emails en cours d'expédition`);
       setSubject(""); setBody(""); setCtaEnabled(false); setCtaLabel(""); setCtaUrl("");
       loadHistory();
     } catch (err: any) {
@@ -962,11 +992,13 @@ const AdminMassEmails = () => {
                 <select
                   id="noel-test-mode"
                   value={noelTestMode}
-                  onChange={(e) => setNoelTestMode(e.target.value as "responder_noel" | "variant_a")}
+                  onChange={(e) => setNoelTestMode(e.target.value as "responder_noel" | "responder_hiver" | "variant_a" | "variant_b")}
                   className="w-full h-11 rounded-md border border-input bg-background px-3 text-sm"
                 >
                   <option value="responder_noel">Mode répondant Noël</option>
+                  <option value="responder_hiver">Mode répondant hiver</option>
                   <option value="variant_a">Variante A, non-répondant</option>
+                  <option value="variant_b">Variante B, non-répondant</option>
                 </select>
               </div>
             )}
@@ -1163,6 +1195,12 @@ const AdminMassEmails = () => {
                         <div className="flex items-center justify-between" data-testid="pressure-excluded-count">
                           <span className="text-muted-foreground">Exclus car 3 emails ou plus en 7 jours</span>
                           <span className="font-medium">{departureCounts.pressure}</span>
+                        </div>
+                      )}
+                      {typeof departureCounts.received === "number" && (
+                        <div className="flex items-center justify-between" data-testid="already-received-count">
+                          <span className="text-muted-foreground">Exclus car déjà reçu dans une campagne précédente</span>
+                          <span className="font-medium">{departureCounts.received}</span>
                         </div>
                       )}
                       {noelV2Counts && (

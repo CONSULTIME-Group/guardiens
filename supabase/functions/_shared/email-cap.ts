@@ -223,6 +223,9 @@ export type OverTtlAction = 'send_now' | 'cancel'
  * arrivait, on annule plutot que de reveiller quelqu'un.
  */
 export const DATED_TEMPLATES = new Set<string>([
+  // Lot N7 : campagnes propriétaires datées, annulées plutôt que forcées.
+  'owner-noel-2026',
+  'owner-departure-question',
   'sitter-daily-digest',
   'nearby-daily-digest',
   'mission-daily-digest',

@@ -115,11 +115,13 @@ Deno.serve(async (req) => {
         const both = await buildNoelDataFor(admin, [self, { ...demo, id: `${self.id}-demo` }]);
         const mine = both.get(self.id);
         noelData = (mine?.variant === "A" ? mine : both.get(`${self.id}-demo`)) as Record<string, unknown> ?? {};
-        // Lot N6 : « responder_noel » (mode répondant Noël) ou « variant_a » (non-répondant, boutons à jeton).
-        const noelTestMode = payload?.noel_test_mode === "responder_noel" ? "responder_noel" : "variant_a";
-        if (noelTestMode === "responder_noel") {
-          noelData = await buildResponderData(admin, userData.user.id, "noel", noelData as unknown as NoelTemplateData) as unknown as Record<string, unknown>;
+        // Lots N6 et N7 : répondant Noël, répondant hiver, variante A ou B (non-répondant, boutons à jeton).
+        const rawMode = String(payload?.noel_test_mode ?? "");
+        const noelTestMode = ["responder_noel", "responder_hiver", "variant_a", "variant_b"].includes(rawMode) ? rawMode : "variant_a";
+        if (noelTestMode === "responder_noel" || noelTestMode === "responder_hiver") {
+          noelData = await buildResponderData(admin, userData.user.id, noelTestMode === "responder_hiver" ? "hiver" : "noel", noelData as unknown as NoelTemplateData) as unknown as Record<string, unknown>;
         } else {
+          if (noelTestMode === "variant_b") noelData = { ...noelData, variant: "B", nearbyCount: 0, sitters: [] };
           const tokens = await mintDepartureTokens(admin, [userData.user.id]);
           const t = tokens.get(userData.user.id);
           if (t) noelData = { ...noelData, periodBaseUrl: periodBaseUrl(t) };

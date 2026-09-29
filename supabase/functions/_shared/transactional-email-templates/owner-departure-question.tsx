@@ -59,7 +59,7 @@ const Email = ({ firstName, periodBaseUrl }: OwnerDepartureProps) => {
             </Row>
             <Text style={h1}>Vous partez quand, cette année ?</Text>
             <Text style={text}>
-              {name ? `Bonjour ${name}, ` : 'Bonjour, '}un clic suffit. On prépare votre annonce avec ce que vous avez déjà renseigné, et on revient vers vous au bon moment, avec les gardiens qui habitent près de chez vous.
+              {name ? `Bonjour ${name}, ` : 'Bonjour, '}un clic suffit. On prépare votre annonce avec ce que vous avez déjà renseigné, et on vous écrit au bon moment pour la publier.
             </Text>
           </Section>
 

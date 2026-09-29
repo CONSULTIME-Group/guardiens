@@ -28,6 +28,11 @@ export async function uploadOwnerGalleryPhoto(userId: string, file: File, positi
   } as any);
   if (insertErr) throw insertErr;
   // Branche aussi properties.photos / cover_photo_url (colonnes du logement).
-  await appendPropertyPhoto(userId, urlData.publicUrl);
+  // Un échec ici ne remet pas en cause la photo déjà en galerie : journalisé seulement.
+  try {
+    await appendPropertyPhoto(userId, urlData.publicUrl);
+  } catch (e) {
+    console.error("[uploadOwnerGalleryPhoto] appendPropertyPhoto failed", e);
+  }
   return urlData.publicUrl;
 }

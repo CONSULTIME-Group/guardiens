@@ -16,12 +16,14 @@ type Client = any;
 const IN_CHUNK = 150;
 
 export type NoelResponderPeriod = "noel" | "hiver";
-export interface IntentLite { user_id: string; period: string; answered_at: string }
+export interface IntentLite { user_id: string; period: string; answered_at: string; source?: string | null }
 
 /** Dernière réponse par membre (answered_at le plus récent). */
 export function latestIntentByUser(rows: IntentLite[]): Map<string, string> {
   const best = new Map<string, IntentLite>();
   for (const r of rows) {
+    // Réponses marquées robot de messagerie : hors répartition (lot N7).
+    if (r.source === "scanner_suspect") continue;
     const cur = best.get(r.user_id);
     if (!cur || r.answered_at > cur.answered_at) best.set(r.user_id, r);
   }
@@ -57,7 +59,7 @@ export async function loadLatestIntents(client: Client, ids: string[]): Promise<
   const rows: IntentLite[] = [];
   for (let i = 0; i < ids.length; i += IN_CHUNK) {
     const { data, error } = await client.from("owner_departure_intents")
-      .select("user_id, period, answered_at").in("user_id", ids.slice(i, i + IN_CHUNK));
+      .select("user_id, period, answered_at, source").in("user_id", ids.slice(i, i + IN_CHUNK));
     if (error) throw new Error(`departure intents lookup failed: ${error.message}`);
     rows.push(...((data ?? []) as IntentLite[]));
   }
@@ -67,12 +69,16 @@ export async function loadLatestIntents(client: Client, ids: string[]): Promise<
 const joinFr = (parts: string[]) =>
   parts.length <= 1 ? (parts[0] ?? "") : `${parts.slice(0, -1).join(", ")} et ${parts[parts.length - 1]}`;
 
+const HOUSING_DONE: Record<string, string> = {
+  house: "votre maison", apartment: "votre appartement", farm: "votre ferme", chalet: "votre chalet", other: "votre logement",
+};
+
 /** « votre maison, Mila et Rex, votre commune » : seulement ce qui est réellement renseigné. */
 export function donePhrase(r: Readiness, petNames: string[], propertyType: string | null): string {
   const parts: string[] = [];
   const logement = r.items.find((i) => i.key === "logement");
-  if (logement?.done) parts.push(propertyType === "apartment" ? "votre appartement" : "votre maison");
-  if (petNames.length > 0) parts.push(joinFr(petNames));
+  if (logement?.done) parts.push(HOUSING_DONE[String(propertyType ?? "")] ?? "votre logement");
+  parts.push(...petNames.filter((n) => n.trim() !== ""));
   if (r.items.find((i) => i.key === "commune")?.done) parts.push("votre commune");
   return joinFr(parts);
 }

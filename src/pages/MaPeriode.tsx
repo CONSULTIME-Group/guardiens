@@ -9,10 +9,12 @@ import { Button } from "@/components/ui/button";
 import PageMeta from "@/components/PageMeta";
 import {
   callMaPeriode, finishUrl, isDeparturePeriod, remainingPhrase,
-  PERIOD_NOTED, PERIOD_OF, PERIOD_REMINDER, LATER_SNOOZE_DAYS,
+  PERIOD_NOTED, PERIOD_OF,
   type DeparturePayload, type DeparturePeriod,
 } from "@/lib/ownerDeparture";
 import { Faces, PeriodChoices, ProgressBar, ReadinessList } from "@/components/departure/DepartureParts";
+
+export const RECORDED_LINE = "Votre réponse est enregistrée. Vous la retrouvez sur votre tableau de bord.";
 
 type View = { kind: "loading" } | { kind: "error"; state?: string } | { kind: "ready"; data: DeparturePayload };
 
@@ -21,9 +23,9 @@ export const NotedView = ({ data }: { data: DeparturePayload }) => {
   if (period === "plus_tard") {
     return (
       <section data-testid="noted-later">
-        <h1 className="font-heading text-[30px] leading-tight text-foreground">C'est noté, on vous réécrit dans un mois.</h1>
+        <h1 className="font-heading text-[30px] leading-tight text-foreground">C'est noté.</h1>
         <p className="mt-3 text-[16px] leading-relaxed text-muted-foreground">
-          Rien ne presse. Dans {LATER_SNOOZE_DAYS} jours, on vous repose la question. Votre annonce vous attend d'ici là, avec ce que vous avez déjà renseigné.
+          Prenez votre temps. {RECORDED_LINE} Votre annonce vous attend, avec ce que vous avez déjà renseigné.
         </p>
         <Button asChild variant="outline" className="mt-6 h-[48px] rounded-full px-6">
           <Link to="/dashboard">Aller à mon tableau de bord</Link>
@@ -43,12 +45,14 @@ export const NotedView = ({ data }: { data: DeparturePayload }) => {
       <div className="mt-5"><ProgressBar percent={r.percent} /></div>
       <ReadinessList readiness={r} />
       <Button asChild className="mt-6 h-[50px] w-full rounded-full text-[16px] sm:w-auto sm:px-8">
-        <Link to={finishUrl(period)}>Terminer mon annonce</Link>
+        {data.upcoming_sit_id
+          ? <Link to={`/sits/${data.upcoming_sit_id}`} data-testid="noted-see-sit">Voir mon annonce</Link>
+          : <Link to={finishUrl(period)}>Terminer mon annonce</Link>}
       </Button>
       {data.nearby && data.nearby.count > 0 && data.city ? (
         <div className="mt-6 flex items-center gap-3 rounded-2xl border border-border bg-card p-4" data-testid="noted-nearby">
           <Faces sitters={data.nearby.sitters} />
-          <p className="text-[15px] text-foreground">{data.nearby.count} gardiens à moins de 50 km de {data.city}.</p>
+          <p className="text-[15px] text-foreground">{data.nearby.count} {data.nearby.count === 1 ? "gardien" : "gardiens"} à moins de 50 km de {data.city}.</p>
         </div>
       ) : (
         <div className="mt-6 rounded-2xl border border-border bg-card p-4" data-testid="noted-no-city">
@@ -56,7 +60,7 @@ export const NotedView = ({ data }: { data: DeparturePayload }) => {
           <Link to="/owner-profile" className="mt-2 inline-block text-[15px] font-semibold text-primary underline-offset-4 hover:underline">Ajouter ma commune</Link>
         </div>
       )}
-      <p className="mt-6 text-[14px] text-muted-foreground">Sinon, on vous le rappelle {PERIOD_REMINDER[period]}.</p>
+      <p className="mt-6 text-[14px] text-muted-foreground">{RECORDED_LINE}</p>
     </section>
   );
 };
@@ -96,9 +100,9 @@ const MaPeriode = () => {
         {view.kind === "error" && (
           <section data-testid="departure-error">
             <h1 className="font-heading text-[26px] text-foreground">
-              {view.state === "unauthenticated" ? "Connectez-vous pour répondre" : "Ce lien n'est plus valable"}
+              {view.state === "unauthenticated" ? "Connectez-vous pour répondre" : "Ce lien a expiré. Votre annonce vous attend dans votre tableau de bord."}
             </h1>
-            <p className="mt-3 text-muted-foreground">Vous pouvez répondre depuis votre tableau de bord.</p>
+            {view.state === "unauthenticated" && <p className="mt-3 text-muted-foreground">Vous pouvez répondre depuis votre tableau de bord.</p>}
             <Button asChild className="mt-5 rounded-full"><Link to="/login?redirect=/dashboard">Se connecter</Link></Button>
           </section>
         )}

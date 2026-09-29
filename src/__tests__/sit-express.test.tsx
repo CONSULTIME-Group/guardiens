@@ -117,7 +117,7 @@ describe("écran express", () => {
     const { rerender } = render(<CreateSitExpress {...props({ blocking: [{ id: "photo", label: "Au moins une photo" } as any] })} />);
     const btn = screen.getByText("Publier mon annonce").closest("button")!;
     expect(btn.disabled).toBe(true);
-    expect(screen.getByTestId("express-blockers").textContent).toContain("Au moins une photo");
+    expect(screen.getByTestId("express-blockers").textContent).toContain("Une photo de chez vous");
     rerender(<CreateSitExpress {...props()} />);
     expect(screen.getByText("Publier mon annonce").closest("button")!.disabled).toBe(false);
   });
@@ -127,5 +127,20 @@ describe("écran express", () => {
       expect(document.body.textContent).toContain(t);
     }
     expect(document.body.textContent).not.toMatch(DASH);
+  });
+});
+
+import { validPresets, firstValidPreset, nextDay, joinFr } from "@/lib/sitExpress";
+describe("Lot N7, parcours express", () => {
+  it("raccourcis passés masqués, premier valable présélectionné", () => {
+    expect(validPresets("2026-12-21").map((p) => p.key)).toEqual(["noel_second"]);
+    expect(firstValidPreset("2026-10-01")?.key).toBe("noel_full");
+    expect(validPresets("2027-01-01")).toEqual([]);
+  });
+  it("fin min = lendemain", () => { expect(nextDay("2026-12-31")).toBe("2027-01-01"); });
+  it("énumération française", () => { expect(joinFr(["a", "b", "c"])).toBe("a, b et c"); });
+  it("pluriel sur les animaux nommés", () => {
+    const t = proposeExpressTexts({ period: "noel", pets: [{ name: "Mila", species: "cat" }, { name: "", species: "dog" }], city: null });
+    expect(t.sitterExpectations.startsWith("Mila reste")).toBe(true);
   });
 });

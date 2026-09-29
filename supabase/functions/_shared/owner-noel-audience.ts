@@ -23,7 +23,21 @@ export const NOEL_MIN_COMPLETION = 60;
 /** Comptes fondateurs : un membre en conversation suivie avec eux est traité à la main. */
 export const FOUNDER_PROFILE_IDS: readonly string[] = [
   "7bf29905-d372-4669-93b1-ec7def9b06d5",
+  // Elisa (lot N7).
+  "d593fac5-cf87-4696-8041-70fd3a8d3c76",
 ];
+
+/** Retire fondateurs et admins du vivier de gardiens (décompte et cartes, lot N7). */
+export function excludeStaffSitters<T extends { id: string }>(rows: T[], adminIds: Set<string>, founders: readonly string[] = FOUNDER_PROFILE_IDS): T[] {
+  const f = new Set(founders);
+  return rows.filter((r) => !f.has(r.id) && !adminIds.has(r.id));
+}
+
+export async function loadAdminIds(client: Client): Promise<Set<string>> {
+  const { data, error } = await client.from("user_roles").select("user_id").eq("role", "admin");
+  if (error) throw new Error(`admin roles lookup failed: ${error.message}`);
+  return new Set((data ?? []).map((r: { user_id: string }) => r.user_id));
+}
 
 /** Écussons gardien et entraide, avec leur libellé (miroir de src/components/badges/badge-definitions.ts). */
 export const NOEL_BADGE_LABELS: Record<string, string> = {
@@ -224,7 +238,8 @@ export async function loadSitterPool(client: Client): Promise<SitterRow[]> {
       .not("longitude", "is", null)
       .order("id", { ascending: true })
       .range(f, t));
-  return rows.filter((r) => !isSuspended(r, now));
+  const admins = await loadAdminIds(client);
+  return excludeStaffSitters(rows.filter((r) => !isSuspended(r, now)), admins);
 }
 
 export async function loadPublishedOwnerIds(client: Client): Promise<Set<string>> {

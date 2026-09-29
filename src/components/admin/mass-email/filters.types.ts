@@ -51,6 +51,7 @@ export interface MassEmailFilters {
   // Lot N3, Noël 2026
   exclude_suspended?: boolean;          // comptes suspendus exclus
   never_published_sit?: boolean;        // aucune annonce hors brouillon
+  past_published_no_upcoming?: boolean; // lot N7 : a publié, rien de publié à venir
   exclude_founder_followup?: boolean;   // membres suivis à la main par un fondateur
   prioritize_recent_openers?: boolean;  // ouvreurs des 90 derniers jours en tête
   /** Lot N4 : exclut le groupe témoin owner v2 (10 %). */
