@@ -58,6 +58,20 @@ const PROFILE_SCORE = /(score|points?|compl[ée]tion|\d+\s*%)[^.]{0,60}profil|pr
 const HUMOR = /(aboy|facteur|ma balle|canap[ée]|croquette|ma gamelle|ma queue|haha|blague|chiffonn)/i;
 const SIT_CLAIM = /(votre garde (commence|d[ée]marre|approche)|votre d[ée]part approche)/i;
 
+/**
+ * Lot J4 : un remerciement ou une clôture n'appelle aucune action (cas-29).
+ * Message court, fait uniquement de formules de clôture ; toute autre
+ * question garde l'exigence d'une action cliquable.
+ */
+const CLOSING = /^(merci( beaucoup| bien)?|au revoir|bonne (journ[ée]e|soir[ée]e|nuit)|[àa] bient[ôo]t|parfait|super|d'accord|ok|tr[èe]s bien|c'est not[ée])([ ,!.]+(merci|alma|beaucoup|bonne journ[ée]e|[àa] bient[ôo]t))*[ !.]*$/i;
+export function isClosingMessage(question: string): boolean {
+  const q = question.trim();
+  return q.length <= 40 && CLOSING.test(q);
+}
+
+/** Lot J4 : l'information d'abord, jamais une anecdote en première phrase. */
+const OPENING_ANECDOTE = /^[^.!?\n]{0,40}(sieste|marche du milieu|escalier|j'ai (pass[ée] la nuit|dormi|r[êe]v[ée])|mes pattes|chiffonn|[ée]cureuil|courir apr[èe]s un chat|mon humeur)/i;
+
 export function checkReplayAnswer(a: ReplayAnswer): ReplayVerdict {
   const reasons: string[] = [];
   const cited = [
@@ -72,6 +86,7 @@ export function checkReplayAnswer(a: ReplayAnswer): ReplayVerdict {
   if ((a.frustration ?? 0) >= 2 && HUMOR.test(a.answer)) reasons.push("humour en frustration");
   if (SIT_CLAIM.test(a.answer) && !a.confirmedSit) reasons.push("garde affirmée sans garde confirmée");
   const quietRegister = a.register === "perso" || a.register === "sensible";
-  if (!quietRegister && !a.action?.path) reasons.push("aucune action cliquable");
+  if (!quietRegister && !isClosingMessage(a.question) && !a.action?.path) reasons.push("aucune action cliquable");
+  if (a.register !== "perso" && OPENING_ANECDOTE.test(a.answer.trim())) reasons.push("anecdote en ouverture");
   return { passed: reasons.length === 0, reasons };
 }
