@@ -1,5 +1,5 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
-import { PRICING_IS_ACTIVE } from '../_shared/config-pricing.ts'
+import { isFreeAccessForAll } from '../_shared/config-pricing.ts'
 import { requireCronCaller } from '../_shared/require-cron-caller.ts'
 
 const corsHeaders = {
@@ -14,7 +14,7 @@ Deno.serve(async (req) => {
   const guard = await requireCronCaller(req, corsHeaders, 'send-founder-reminder-30')
   if (guard) return guard
 
-  if (!PRICING_IS_ACTIVE) {
+  if (isFreeAccessForAll()) {
     return new Response(
       JSON.stringify({ skipped: 'pricing_not_active' }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
