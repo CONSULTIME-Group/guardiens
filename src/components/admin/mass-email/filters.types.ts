@@ -57,6 +57,8 @@ export interface MassEmailFilters {
   exclude_owner_v2_holdout?: boolean;
   /** Lot N4 : exclut les membres ayant déjà répondu à la question de départ. */
   exclude_departure_answered?: boolean;
+  /** Lot N6 : témoin exclu, printemps/été/plus tard exclus, noel et hiver en mode répondant. */
+  noel_v2_split?: boolean;
 }
 
 
