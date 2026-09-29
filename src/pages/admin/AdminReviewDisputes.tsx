@@ -1,3 +1,4 @@
+import { adminLabel } from "@/lib/admin/labels";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { useEffect, useState } from "react";
 import { refreshAdminBadges } from "@/hooks/useAdminBadges";
@@ -327,7 +328,7 @@ const DisputeCard = ({
               {dispute.disputer?.first_name || "Membre"} conteste un avis reçu
             </p>
             <p className="text-xs text-muted-foreground">
-              Motif : <span className="font-medium text-foreground">{CATEGORY_LABELS[dispute.category] || dispute.category}</span>
+              Motif : <span className="font-medium text-foreground">{CATEGORY_LABELS[dispute.category] || adminLabel(dispute.category)}</span>
             </p>
           </div>
         </div>

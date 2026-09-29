@@ -1,3 +1,4 @@
+import { segmentLabel } from "@/lib/admin/labels";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -1117,7 +1118,7 @@ const AdminMassEmails = () => {
                           <TableCell className="text-xs whitespace-nowrap">
                             {format(new Date(row.created_at), "dd MMM yyyy", { locale: fr })}
                           </TableCell>
-                          <TableCell className="text-xs">{SEGMENT_LABELS[row.segment] || row.segment}</TableCell>
+                          <TableCell className="text-xs">{SEGMENT_LABELS[row.segment] || segmentLabel(row.segment)}</TableCell>
                           <TableCell className="text-xs max-w-[120px] truncate">{row.subject}</TableCell>
                           <TableCell className="text-xs text-right">{live ? live.recipients : historyCounts ? 0 : "?"}</TableCell>
                           <TableCell className="text-xs">
@@ -1199,7 +1200,7 @@ const AdminMassEmails = () => {
                 <div className="text-sm space-y-1.5">
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Segment</span>
-                    <Badge variant="outline">{SEGMENT_LABELS[segment] || segment}</Badge>
+                    <Badge variant="outline">{SEGMENT_LABELS[segment] || segmentLabel(segment)}</Badge>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Destinataires</span>
@@ -1390,7 +1391,7 @@ const AdminMassEmails = () => {
               <div className="space-y-3 text-sm">
                 <p>
                   Pour confirmer l'envoi à <strong>{recipientCount ?? 0} destinataires</strong>{" "}
-                  ({SEGMENT_LABELS[segment] || segment}), saisissez le nombre exact ci-dessous.
+                  ({SEGMENT_LABELS[segment] || segmentLabel(segment)}), saisissez le nombre exact ci-dessous.
                 </p>
                 <ul className="list-disc pl-5 text-xs text-muted-foreground" data-testid="exclusion-recap">
                   {exclusionRecap({

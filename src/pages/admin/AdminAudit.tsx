@@ -1,4 +1,4 @@
-import { adminLabel, AUDIT_ACTION_LABELS } from "@/lib/admin/labels";
+import { adminLabel, AUDIT_ACTION_LABELS, auditEntityLabel } from "@/lib/admin/labels";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -230,7 +230,7 @@ const AdminAudit = () => {
             <SelectContent>
               <SelectItem value="all">Toutes les cibles</SelectItem>
               {TARGET_OPTIONS.map((t) => (
-                <SelectItem key={t} value={t}>{t}</SelectItem>
+                <SelectItem key={t} value={t}>{auditEntityLabel(t)}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -297,12 +297,9 @@ const AdminAudit = () => {
                     </TableCell>
                     <TableCell>
                       <div className="text-sm">{actionLabel(r.action)}</div>
-                      {!ACTION_LABELS[r.action] && (
-                        <div className="text-xs text-muted-foreground font-mono">{r.action}</div>
-                      )}
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline">{r.target_type}</Badge>
+                      <Badge variant="outline">{auditEntityLabel(r.target_type)}</Badge>
                     </TableCell>
                     <TableCell className="max-w-md">
                       <div className="text-xs text-muted-foreground truncate" title={metadataSummary(r)}>

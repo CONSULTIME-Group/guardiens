@@ -1,3 +1,4 @@
+import { adminLabel } from "@/lib/admin/labels";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { refreshAdminBadges } from "@/hooks/useAdminBadges";
@@ -251,7 +252,7 @@ const AdminReports = () => {
                       <div>
                         <div className="flex items-center gap-2 mb-0.5 flex-wrap">
                           <Badge variant="outline" className="text-xs">{targetTypeLabels[report.target_type] || "Contenu"}</Badge>
-                          <span className="text-sm font-medium">{reasonLabels[report.reason] || report.reason}</span>
+                          <span className="text-sm font-medium">{reasonLabels[report.reason] || adminLabel(report.reason)}</span>
                           {href && (
                             <a
                               href={href}

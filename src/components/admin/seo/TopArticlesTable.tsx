@@ -1,3 +1,4 @@
+import { adminLabel } from "@/lib/admin/labels";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -166,7 +167,7 @@ const TopArticlesTable = ({ topPages }: TopArticlesTableProps) => {
                     : "bg-destructive text-white";
 
               const catClass = CATEGORY_COLORS[row.article.category] || "bg-muted text-muted-foreground";
-              const catLabel = CATEGORY_LABELS[row.article.category] || row.article.category;
+              const catLabel = CATEGORY_LABELS[row.article.category] || adminLabel(row.article.category);
 
               return (
                 <TableRow key={row.article.slug}>

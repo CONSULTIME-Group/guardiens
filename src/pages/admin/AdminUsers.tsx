@@ -1,3 +1,4 @@
+import { adminLabel } from "@/lib/admin/labels";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { fetchAllRows } from "@/lib/admin/fetchAllRows";
@@ -790,7 +791,7 @@ const AdminUsers = () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
-                        <Badge variant="outline">{roleLabels[user.role] || user.role}</Badge>
+                        <Badge variant="outline">{roleLabels[user.role] || adminLabel(user.role)}</Badge>
                         <Button
                           variant="ghost"
                           size="icon"

@@ -112,7 +112,7 @@ const adminNavGroups: NavGroup[] = [
     ],
   },
   {
-    label: "CONTENU & SYSTÈME",
+    label: "CONTENU ET SYSTÈME",
     items: [
       { to: "/admin/articles", icon: FileText, label: "Articles" },
       // Articles longue traîne : module verrouillé depuis le 11/07, hors menu, route conservée.

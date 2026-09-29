@@ -1,4 +1,4 @@
-import { SPECIES_LABELS } from "@/lib/admin/labels";
+import { SPECIES_LABELS, adminLabel } from "@/lib/admin/labels";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
@@ -419,7 +419,7 @@ const AdminBreeds = () => {
                   <div className="min-w-0">
                     <p className="font-medium truncate">{m.displayBreed}</p>
                     <p className="text-xs text-muted-foreground">
-                      {PET_SPECIES_LABELS[m.species] ?? m.species}
+                      {PET_SPECIES_LABELS[m.species] ?? adminLabel(m.species)}
                       {" · "}{m.animals} {m.animals > 1 ? "animaux" : "animal"}
                       {" · "}{m.liveSits} {m.liveSits > 1 ? "annonces en ligne" : "annonce en ligne"}
                     </p>
@@ -473,7 +473,7 @@ const AdminBreeds = () => {
           if (list.length === 0) return null;
           return (
             <Card key={sp}>
-              <CardHeader><CardTitle className="text-base">{SPECIES_LABELS[sp] ?? PET_SPECIES_LABELS[sp] ?? sp} ({list.length})</CardTitle></CardHeader>
+              <CardHeader><CardTitle className="text-base">{SPECIES_LABELS[sp] ?? PET_SPECIES_LABELS[sp] ?? adminLabel(sp)} ({list.length})</CardTitle></CardHeader>
               <CardContent>
                 <ul className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
                   {list.map((r) => {

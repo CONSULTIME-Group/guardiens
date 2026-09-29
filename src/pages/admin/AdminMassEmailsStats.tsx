@@ -1,3 +1,5 @@
+import { LoadingState } from "@/components/admin/ui";
+import { campaignLabel } from "@/lib/admin/labels";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
@@ -189,7 +191,7 @@ export default function AdminMassEmailsStats() {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <p className="text-sm text-muted-foreground">Chargement…</p>
+            <LoadingState />
           ) : stats.length === 0 ? (
             <p className="text-sm text-muted-foreground">
               Aucune campagne sur cette période. Les données apparaîtront après le premier envoi avec UTM actif.
@@ -209,7 +211,7 @@ export default function AdminMassEmailsStats() {
               <TableBody>
                 {stats.map((s) => (
                   <TableRow key={s.campaign}>
-                    <TableCell className="font-medium">{s.campaign}</TableCell>
+                    <TableCell className="font-medium">{campaignLabel(s.campaign)}</TableCell>
                     <TableCell className="text-right">{s.sent || "·"}</TableCell>
                     <TableCell className="text-right">{s.uniqueVisitors}</TableCell>
                     <TableCell className="text-right">

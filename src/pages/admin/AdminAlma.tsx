@@ -1,4 +1,4 @@
-import { KpiTile } from "@/components/admin/ui";
+import { KpiTile, Pager, SearchInput, usePagedSearch } from "@/components/admin/ui";
 import { adminLabel, ALMA_FACT_TYPE_LABELS } from "@/lib/admin/labels";
 import { fetchAllRows } from "@/lib/admin/fetchAllRows";
 import { reportAdminReadError, UNAVAILABLE_LABEL } from "@/lib/admin/readError";
@@ -573,7 +573,7 @@ export function buildFactTypeOptions(
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
     .map(([value, count]) => ({
       value,
-      label: FACT_TYPE_LABELS[value] ?? value,
+      label: FACT_TYPE_LABELS[value] ?? adminLabel(value),
       count,
     }));
   return [{ value: "all", label: "Tous", count: facts.length }, ...options];
@@ -595,6 +595,16 @@ interface CulturalFactRow {
   seasonal_start_month: number | null;
   seasonal_end_month: number | null;
   created_at: string;
+}
+
+/** Contexte d'un fait culturel, lisible : « Surface : Tableau de bord gardien ». */
+function contextSummary(ctx: unknown): string {
+  if (!ctx || typeof ctx !== "object") return "·";
+  const parts = Object.entries(ctx as Record<string, unknown>).map(([k, v]) => {
+    const vals = (Array.isArray(v) ? v : [v]).map((x) => (typeof x === "string" ? adminLabel(x) : String(x)));
+    return `${adminLabel(k)} : ${vals.join(", ")}`;
+  });
+  return parts.length ? parts.join(" · ") : "·";
 }
 
 function CulturalFactsTab({ since }: { since: string }) {
@@ -674,6 +684,8 @@ function CulturalFactsTab({ since }: { since: string }) {
       return true;
     });
   }, [facts, typeFilter, surfaceFilter]);
+  // Lot A11b : recherche commune et pagination par 24, présentation seulement.
+  const pagedFacts = usePagedSearch(filtered, (f) => `${f.content ?? ""} ${f.fact_type ?? ""} ${f.source_url ?? ""}`);
 
   const toggleActive = async (fact: CulturalFactRow) => {
     const next = !fact.active;
@@ -731,8 +743,9 @@ function CulturalFactsTab({ since }: { since: string }) {
           onChange={(e) => setSurfaceFilter(e.target.value)}
           className="h-9 px-3 rounded-md border border-input bg-background text-sm w-64"
         />
+        <SearchInput value={pagedFacts.query} onChange={pagedFacts.setQuery} placeholder="Rechercher un fait" />
         <span className="text-xs text-muted-foreground">
-          {filtered.length} fait{filtered.length > 1 ? "s" : ""}
+          {pagedFacts.total} trouvé{pagedFacts.total > 1 ? "s" : ""}
         </span>
       </div>
 
@@ -758,21 +771,21 @@ function CulturalFactsTab({ since }: { since: string }) {
                     Chargement…
                   </TableCell>
                 </TableRow>
-              ) : filtered.length === 0 ? (
+              ) : pagedFacts.total === 0 ? (
                 <TableRow>
                   <TableCell colSpan={8} className="text-center text-muted-foreground py-6">
                     Aucun fait pour ces filtres.
                   </TableCell>
                 </TableRow>
               ) : (
-                filtered.map((f) => {
+                pagedFacts.visible.map((f) => {
                   const s = statsById.get(f.id) ?? { views: 0, clicks: 0 };
                   const clickRate = s.views > 0 ? s.clicks / s.views : 0;
                   return (
                     <TableRow key={f.id} className={!f.active ? "opacity-60" : undefined}>
                       <TableCell>
-                        <Badge variant="secondary" className="font-mono text-[10px]">
-                          {f.fact_type}
+                        <Badge variant="secondary" className="text-[10px]">
+                          {adminLabel(f.fact_type, ALMA_FACT_TYPE_LABELS)}
                         </Badge>
                       </TableCell>
                       <TableCell className="max-w-md">
@@ -783,8 +796,8 @@ function CulturalFactsTab({ since }: { since: string }) {
                           </div>
                         )}
                       </TableCell>
-                      <TableCell className="font-mono text-[10px] max-w-xs truncate">
-                        {JSON.stringify(f.context_filter)}
+                      <TableCell className="text-[11px] max-w-xs truncate">
+                        {contextSummary(f.context_filter)}
                       </TableCell>
                       <TableCell className="text-right tabular-nums">{s.views}</TableCell>
                       <TableCell className="text-right tabular-nums">{s.clicks}</TableCell>
@@ -805,6 +818,9 @@ function CulturalFactsTab({ since }: { since: string }) {
               )}
             </TableBody>
           </Table>
+          <div className="px-4 pb-3">
+            <Pager page={pagedFacts.page} total={pagedFacts.total} onPage={pagedFacts.setPage} />
+          </div>
         </CardContent>
       </Card>
 

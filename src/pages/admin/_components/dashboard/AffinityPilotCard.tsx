@@ -1,4 +1,5 @@
-import { adminLabel, SURFACE_LABELS } from "@/lib/admin/labels";
+import { EmptyState } from "@/components/admin/ui";
+import { adminLabel, SURFACE_LABELS, reasonLabel } from "@/lib/admin/labels";
 /**
  * Carte admin : pilotage du score d'affinité.
  *
@@ -138,7 +139,7 @@ export const AffinityPilotCard = () => {
           <CardTitle className="text-base">Pilotage du score d'affinité (30 j)</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">Aucune donnée sur les 30 derniers jours.</p>
+          <EmptyState>Aucune donnée sur les 30 derniers jours.</EmptyState>
         </CardContent>
       </Card>
     );
@@ -232,7 +233,7 @@ function labelReason(r: string): string {
     case "disqualified":
       return "Disqualification (allergie, refus)";
     default:
-      return r;
+      return reasonLabel(r);
   }
 }
 

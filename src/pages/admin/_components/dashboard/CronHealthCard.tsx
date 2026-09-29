@@ -14,6 +14,7 @@
  *
  * Respecte le feature flag admin_signals_active.
  */
+import { adminLabel, displayText } from "@/lib/admin/labels";
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, CheckCircle2, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -94,11 +95,11 @@ const CronRow = ({ r }: { r: CronHealth }) => (
     </Badge>
     <div className="flex-1 min-w-0">
       <p className="text-sm font-medium text-foreground truncate">
-        {r.label}
+        {displayText(r.label)}
       </p>
       <p className="text-xs text-muted-foreground">
         Dernière exécution : {formatAge(r.age_minutes)} ·
-        {" "}Statut : {r.last_status ? RUN_STATUS_FR[r.last_status] ?? r.last_status : "inconnu"} ·
+        {" "}Statut : {r.last_status ? RUN_STATUS_FR[r.last_status] ?? adminLabel(r.last_status) : "inconnu"} ·
         {" "}Échecs 7 j : {r.failed_7d}/{r.runs_7d}
         {" "}· Partiels 7 j : {r.partial_7d ?? 0}/{r.runs_7d}
       </p>

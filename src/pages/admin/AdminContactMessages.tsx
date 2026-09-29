@@ -1,3 +1,5 @@
+import { LoadingState } from "@/components/admin/ui";
+import { displayText } from "@/lib/admin/labels";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -232,7 +234,7 @@ const AdminContactMessages = () => {
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
-  if (loading) return <div className="text-muted-foreground py-8 text-center">Chargement…</div>;
+  if (loading) return <LoadingState />;
 
   return (
     <div className="space-y-6">
@@ -294,7 +296,7 @@ const AdminContactMessages = () => {
                   <TableRow key={msg.id} className={msg.status === "new" ? "font-medium" : ""}>
                     <TableCell>{msg.name}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">{msg.email}</TableCell>
-                    <TableCell className="max-w-[200px] truncate">{msg.subject}</TableCell>
+                    <TableCell className="max-w-[200px] truncate">{displayText(msg.subject)}</TableCell>
                     <TableCell className="text-sm">{format(new Date(msg.created_at), "d MMM yyyy HH:mm", { locale: fr })}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1.5">

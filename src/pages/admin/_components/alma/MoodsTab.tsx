@@ -3,6 +3,7 @@
  * Même modèle que l'onglet des faits culturels : liste par humeur, vues sur
  * 30 jours, activation ligne par ligne.
  */
+import { adminLabel } from "@/lib/admin/labels";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -159,7 +160,7 @@ export function MoodsTab() {
               {filtered.map((row) => (
                 <TableRow key={row.id}>
                   <TableCell>
-                    <Badge variant="outline">{MOOD_STATUS_LABEL[row.mood] ?? row.mood}</Badge>
+                    <Badge variant="outline">{MOOD_STATUS_LABEL[row.mood] ?? adminLabel(row.mood)}</Badge>
                   </TableCell>
                   <TableCell className="max-w-md text-sm">{row.content}</TableCell>
                   <TableCell className="text-xs text-muted-foreground">

@@ -422,14 +422,14 @@ const AdminAnalytics = () => {
                 />
               </div>
               <p className="text-xs text-muted-foreground mt-3">
-                Source de vérité pour "Compte créé" : table profiles. Les events <code>signup_form_submitted</code> et <code>signup_email_confirmed</code> sont indicatifs (sous-comptés sur les inscriptions Google OAuth et les anciens comptes).
+                Source de vérité pour « Compte créé » : les profils. Les événements « Formulaire d'inscription envoyé » et « Email d'inscription confirmé » sont indicatifs (sous-comptés sur les inscriptions via Google et les anciens comptes).
               </p>
             </CardContent>
           </Card>
 
-          {/* Lot A10 : l'entonnoir d'inscription unique vit dans l'onglet « Funnel signup » (Entonnoir chiffré, 8 étapes, agrégat SQL). */}
+          {/* Lot A10 : l'entonnoir d'inscription unique vit dans l'onglet « Entonnoir d'inscription » (Entonnoir chiffré, 8 étapes, agrégat SQL). */}
           <p className="text-xs text-muted-foreground">
-            L'entonnoir d'inscription complet, de la page vue à la première action, se trouve dans l'onglet « Funnel signup ».
+            L'entonnoir d'inscription complet, de la page vue à la première action, se trouve dans l'onglet « Entonnoir d'inscription ».
           </p>
 
           {/* Comparaison par rôle */}

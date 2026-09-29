@@ -274,7 +274,7 @@ export default function AdminDeletionRequests() {
                         {r.requester_email ?? (r.user_id ? r.user_id : "·")}
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
-                        {SOURCE_LABEL[r.source] ?? r.source}
+                        {SOURCE_LABEL[r.source] ?? adminLabel(r.source)}
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">{fmt(r.requested_at)}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">{fmt(r.processed_at)}</TableCell>
