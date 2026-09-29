@@ -179,5 +179,8 @@ export function initConsent() {
   const consent = getStoredConsent();
   if (consent === "granted") grantAndLoad();
   else if (consent === "denied") disableGoogleAnalytics();
-  window.addEventListener("consent-changed", (e) => applyConsent((e as CustomEvent).detail as ConsentValue));
+  const w = window as any;
+  if (w.__guardiensConsentListener) window.removeEventListener("consent-changed", w.__guardiensConsentListener);
+  w.__guardiensConsentListener = (e: Event) => applyConsent((e as CustomEvent).detail as ConsentValue);
+  window.addEventListener("consent-changed", w.__guardiensConsentListener);
 }
