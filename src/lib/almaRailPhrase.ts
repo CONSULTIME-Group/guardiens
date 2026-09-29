@@ -7,6 +7,8 @@
  * vouvoiement, sans emoji ni tiret cadratin).
  */
 
+import { profileNudgeAllowed } from "@/lib/alma/profileNudge";
+
 export type AlmaVariant = "confirmed" | "newSitter" | "owner";
 
 export interface AlmaOwnerState {
@@ -61,11 +63,11 @@ export function pickAlmaRailPhrase(input: AlmaPhraseInput): string {
   if (variant === "newSitter" && openingCardVisible) {
     return "Bienvenue chez vous. Une photo, quelques mots, et je vous présente les maisons d'ici.";
   }
-  if (!checklistVisible && profileCompletion < 100) {
+  if (!checklistVisible && profileNudgeAllowed(profileCompletion)) {
     return "Quelques touches à votre profil, et les propriétaires vous remarquent davantage.";
   }
   if (!isAvailable) {
     return "Dites que vous êtes disponible, et les bonnes gardes viennent à vous.";
   }
-  return "Votre profil est prêt. Une belle rencontre peut arriver à tout moment.";
+  return "Un coup de main, un projet ou une garde près de chez vous : je vous montre ce qui bouge autour de vous.";
 }

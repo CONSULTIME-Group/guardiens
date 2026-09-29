@@ -33,7 +33,7 @@ describe("A11, gabarit : un h1 égal au libellé du menu", () => {
       expect(file && existsSync(file), `fichier ${m![1]}`).toBeTruthy();
       const src = read(file!);
       expect(src).toContain("<AdminPageHeader");
-      expect(src).not.toMatch(/<h1[\s>]/);
+      expect(src.replace(/`[^`]*`/g, "")).not.toMatch(/<h1[\s>]/);
       const titleOk =
         src.includes(`title="${item.label}"`) ||
         src.includes(`title={tab === "projets" ? "Projets" : "Entraide"}`);

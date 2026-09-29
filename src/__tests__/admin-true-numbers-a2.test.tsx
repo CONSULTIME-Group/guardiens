@@ -112,7 +112,7 @@ describe("menu admin : un seul élément actif", () => {
     items.filter((it) => resolveNavActive(it as any, { pathname, search }, navMatch(it.to, pathname, (it as any).end))).map((it) => it.label);
 
   it("?tab=mutual-aid : Pilotage entraide", () => {
-    expect(actives("/admin/emails-transactionnels", "?tab=mutual-aid")).toEqual(["Pilotage entraide"]);
+    expect(actives("/admin/pilotage-entraide", "")).toEqual(["Pilotage entraide"]);
   });
   it("?tab=templates : Emails transactionnels", () => {
     expect(actives("/admin/emails-transactionnels", "?tab=templates")).toEqual(["Emails transactionnels"]);

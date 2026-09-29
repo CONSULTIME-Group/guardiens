@@ -30,20 +30,30 @@ churn true si elle veut supprimer son compte ou quitter le site.
 unanswered true si tu ne sais pas répondre ou ne peux pas vérifier ce qu'elle affirme dans les faits reçus.
 Même agacée, tu réponds d'abord à sa question, sans humour ni anecdote, puis tu proposes d'écrire à Jérémie et Elisa sur /contact.`;
 
-const LINE_RE = /\n?\s*CLASSEMENT\s*:\s*(\{[\s\S]*?\})\s*$/;
+// Lot J3 : la ligne est lue où qu'elle soit (le modèle place parfois BROUILLON
+// après elle), avec ou sans gras Markdown ni bloc de code. Avant J3, seule une
+// ligne finale était reconnue, et le repli effaçait tout ce qui suivait
+// « CLASSEMENT », BROUILLON compris.
+const LINE_RE = /^[ \t>*_`]*CLASSEMENT[ \t*_`]*:[ \t*_`]*(\{[^\n]*\})[ \t*_`]*$/im;
+const BROKEN_LINE_RE = /^[ \t>*_`]*CLASSEMENT[ \t*_`]*:[^\n]*$/gim;
 
 function asBool(v: unknown): boolean {
   return v === true || v === "true";
 }
 
-/** Lit et retire la ligne CLASSEMENT. Une ligne illisible est retirée quand même. */
+function stripLine(text: string, re: RegExp): string {
+  const withBreak = new RegExp(`\\n?${re.source}`, re.flags.includes("g") ? re.flags : re.flags + "g");
+  return text.replace(withBreak, "").replace(/```(?:json)?\s*```/g, "").replace(/\n{3,}/g, "\n\n").trim();
+}
+
+/** Lit et retire la ligne CLASSEMENT. Une ligne illisible est retirée quand même, seule. */
 export function extractClassification(text: string): { answer: string; classification: AlmaClassification | null } {
   const m = text.match(LINE_RE);
   if (!m) {
-    // Une ligne tronquée ne doit jamais s'afficher.
-    return { answer: text.replace(/\n?\s*CLASSEMENT\s*:.*$/s, "").trim(), classification: null };
+    // Une ligne tronquée ne doit jamais s'afficher, le reste du texte est conservé.
+    return { answer: stripLine(text, BROKEN_LINE_RE), classification: null };
   }
-  const answer = text.slice(0, m.index).trim();
+  const answer = stripLine(text, LINE_RE);
   try {
     const raw = JSON.parse(m[1]);
     const intent = (ALMA_INTENTS as readonly string[]).includes(raw?.intent) ? raw.intent : "autre";

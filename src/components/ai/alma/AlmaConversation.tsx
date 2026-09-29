@@ -479,6 +479,17 @@ export function AlmaConversation({
                         <span>{message.action.label}</span><ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
                       </Button>
                     )}
+                    {/* Lot J3 : le contact humain est un lien secondaire discret ; l'action principale reste celle du moteur. */}
+                    {message.humanContact && message.action?.path !== "/contact" && (
+                      <button
+                        type="button"
+                        data-testid="alma-human-contact-link"
+                        onClick={openAlmaHumanContact}
+                        className="mt-2 inline-flex min-h-11 items-center text-left text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        {ALMA_HUMAN_CONTACT_LABEL}
+                      </button>
+                    )}
                     {message.chips && message.chips.length > 0 && index === messages.length - 1 && (
                       <div className="no-scrollbar mt-3 flex flex-nowrap gap-2 overflow-x-auto pb-1" data-testid="alma-message-chips">
                         {message.chips.map((chip) => (
@@ -493,18 +504,6 @@ export function AlmaConversation({
                           </Button>
                         ))}
                       </div>
-                    )}
-                    {/* Lot J2-B : contact humain et retour utile / pas utile. */}
-                    {message.humanContact && message.action?.path !== "/contact" && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        data-testid="alma-human-contact-button"
-                        onClick={openAlmaHumanContact}
-                        className="mt-3 h-11 text-[13px]"
-                      >
-                        {ALMA_HUMAN_CONTACT_LABEL}
-                      </Button>
                     )}
                     {message.conversationId && (
                       <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground" data-testid="alma-feedback">

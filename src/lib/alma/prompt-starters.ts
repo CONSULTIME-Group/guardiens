@@ -1,3 +1,4 @@
+import { profileNudgeAllowed } from "@/lib/alma/profileNudge";
 /**
  * Amorces contextuelles du composeur d'Alma, logique pure et testable.
  *
@@ -33,6 +34,8 @@ export interface PromptStarterContext {
   hasPublishedSitWithoutApplication?: boolean;
   /** Lot J2-A : le gardien reçoit la version gardien, le propriétaire la sienne. */
   activeRole?: "owner" | "sitter";
+  /** Lot J3 : complétion du profil ; l'amorce profil seulement sous 40 %. */
+  profileCompletion?: number | null;
 }
 
 /** « Comment se passe une garde ? », dans la version du rôle actif. */
@@ -66,7 +69,9 @@ export function promptStarters(
 ): string[] {
   switch (surface) {
     case "dashboard":
-      return ["Par où je commence ?", "Qu'est-ce qui manque à mon profil ?"];
+      return profileNudgeAllowed(ctx.profileCompletion)
+        ? ["Qu'est-ce qui manque à mon profil ?", "Un coup de main près de chez moi"]
+        : ["Qu'est-ce qui se passe près de chez moi ?", "Un coup de main près de chez moi"];
     case "my_sits":
       if (ctx.hasDraftSit) {
         return [

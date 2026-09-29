@@ -189,3 +189,22 @@ export function conversationsFollowedByAction(
   }
   return { count, rate: rows.length > 0 ? count / rows.length : 0 };
 }
+
+export interface ActionRateRow {
+  action_reason: string;
+  register: string;
+  answers: number | string;
+  acted: number | string;
+}
+
+/**
+ * Lot J3 : taux de suivi mesuré seulement sur les réponses qui proposent une
+ * action (motif différent de « aucune »). null quand aucune réponse n'en a :
+ * l'écran affiche alors « Non mesurable ».
+ */
+export function measureActionFollowUp(rows: ActionRateRow[]): { total: number; count: number; rate: number | null } {
+  const withAction = rows.filter((r) => r.action_reason && r.action_reason !== "aucune");
+  const total = withAction.reduce((s, r) => s + (Number(r.answers) || 0), 0);
+  const count = withAction.reduce((s, r) => s + (Number(r.acted) || 0), 0);
+  return { total, count, rate: total > 0 ? count / total : null };
+}

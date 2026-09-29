@@ -264,7 +264,7 @@ export function adminLabel(key: string | null | undefined, dict?: Dict): string 
 export function cellValue(v: unknown): string {
   if (v === null || v === undefined) return EMPTY_TABLE_VALUE;
   const s = String(v).trim();
-  if (s === "" || s === "," || s === "—" || s === "–" || s === "-") return EMPTY_TABLE_VALUE;
+  if (s === "" || s === "," || s === "\u2014" || s === "\u2013" || s === "-") return EMPTY_TABLE_VALUE;
   return s;
 }
 

@@ -61,15 +61,20 @@ const fmtPct = (v: number) => `${(v * 100).toFixed(1)} %`;
 const fmtDate = (iso: string | null) =>
   iso ? format(new Date(iso), "d MMM yyyy HH:mm", { locale: fr }) : "·";
 
+const ALMA_TABS = ["conversations", "cultural-facts", "whispers", "bubbles", "moods", "pilotage"];
+
 /** Pilote l'adoption et l'impact d'Alma (bulles + whispers). */
 export default function AdminAlma() {
   const seenRef = useRef(false);
   const [range, setRange] = useState<Range>("30d");
   const [searchParams, setSearchParams] = useSearchParams();
   const rawTab = searchParams.get("tab");
-  const tab = ["cultural-facts", "whispers", "bubbles", "moods", "pilotage"].includes(rawTab ?? "")
-    ? (rawTab as string)
-    : "conversations";
+  const urlTab = ALMA_TABS.includes(rawTab ?? "") ? (rawTab as string) : "conversations";
+  // Lot J3 : l'onglet actif vit dans l'état local. Avant, il ne dépendait que
+  // de l'adresse : toute réécriture de l'adresse (retour, lien, recalage)
+  // ramenait l'écran sur Conversations et bloquait clic et flèches.
+  const [tab, setTab] = useState<string>(urlTab);
+  useEffect(() => { setTab(urlTab); }, [urlTab]);
 
   useEffect(() => {
     if (seenRef.current) return;
@@ -80,6 +85,7 @@ export default function AdminAlma() {
   const since = useMemo(() => rangeSinceISO(range), [range]);
 
   const handleTabChange = (next: string) => {
+    setTab(next);
     const params = new URLSearchParams(searchParams);
     if (next === "conversations") params.delete("tab");
     else params.set("tab", next);

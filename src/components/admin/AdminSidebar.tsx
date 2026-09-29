@@ -7,6 +7,7 @@ import {
   Lightbulb, AlertTriangle, Bug, Stethoscope, Sprout, BarChart3, Send,
   Sparkles, UserX, HeartHandshake, Hammer, Building2, Award, MailCheck, Inbox, SearchCheck, PawPrint, Scale,
   ChevronLeft, ChevronRight,
+  Map as MapIcon, SlidersHorizontal,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
@@ -119,10 +120,10 @@ const adminNavGroups: NavGroup[] = [
       { to: "/admin/guides", icon: Compass, label: "Guides locaux", badgeKey: "guideRequests" },
       { to: "/admin/analysis-requests", icon: SearchCheck, label: "Demandes d'analyse", badgeKey: "analysisRequests" },
       { to: "/admin/city-pages", icon: MapPin, label: "Pages villes" },
-      { to: "/admin/departments", icon: MapPin, label: "Départements" },
+      { to: "/admin/departments", icon: MapIcon, label: "Départements" },
       { to: "/admin/breeds", icon: PawPrint, label: "Fiches de race" },
       { to: "/admin/legal", icon: Scale, label: "Pages légales" },
-      { to: "/admin/hero-weights", icon: Sparkles, label: "Poids des hero" },
+      { to: "/admin/hero-weights", icon: SlidersHorizontal, label: "Poids des hero" },
       { to: "/admin/settings", icon: Settings, label: "Paramètres" },
       { to: "/admin/audit", icon: ScrollText, label: "Journal d'audit" },
       { to: "/admin/diagnostics", icon: Stethoscope, label: "Diagnostic" },

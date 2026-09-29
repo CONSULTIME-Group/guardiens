@@ -150,6 +150,14 @@ Deno.serve(async (req) => {
     };
     const raiseSignals = async (c: AlmaClassification, conversationId: string | null) => {
       if (isReplay) return;
+      if (signalsFor(c).length === 0) return;
+      // Lot J3 : les comptes admins (tests fondateurs) ne lèvent aucun signal Alma.
+      try {
+        const { data: isAdmin } = await adminClient.rpc("has_role", { _user_id: userId, _role: "admin" });
+        if (isAdmin === true) return;
+      } catch (e) {
+        console.error("has_role check failed", e);
+      }
       for (const type of signalsFor(c)) {
         try {
           await recordAlmaSignal(adminClient, type, userId, message, { pagePath, bugItem: c.bug_item, conversationId });
@@ -212,7 +220,7 @@ Deno.serve(async (req) => {
       return json({
         answer: direct,
         remaining: Math.max(0, ALMA_CHAT_DAILY_LIMIT - ((count ?? 0) + 1)),
-        ...(human ? { action: { label: "Écrire à Jérémie et Elisa", path: "/contact" }, human_contact: true } : {}),
+        ...(human ? { human_contact: true } : {}),
         ...(conversationId ? { conversation_id: conversationId } : {}),
         ...(isReplay ? { replay_meta: { register, classification, confirmed_sit: false } } : {}),
       });
@@ -499,7 +507,6 @@ Deno.serve(async (req) => {
         return json({
           answer: fallback,
           remaining: Math.max(0, ALMA_CHAT_DAILY_LIMIT - ((count ?? 0) + 1)),
-          action: { label: "Écrire à Jérémie et Elisa", path: "/contact" },
           human_contact: true,
           ...(conversationId ? { conversation_id: conversationId } : {}),
         });
@@ -507,9 +514,19 @@ Deno.serve(async (req) => {
       return json({ error: r.error, code: r.code }, r.status === 402 || r.status === 429 ? r.status : 502);
     }
 
-    const extracted = extractClassification(r.data?.choices?.[0]?.message?.content ?? "");
+    const rawOutput: string = r.data?.choices?.[0]?.message?.content ?? "";
+    const extracted = extractClassification(rawOutput);
+    if (!extracted.classification) {
+      // Lot J3 : la ligne CLASSEMENT manque ou est illisible, on le journalise.
+      console.error("alma-chat classement absent", JSON.stringify({
+        finish_reason: r.data?.choices?.[0]?.finish_reason ?? null,
+        length: rawOutput.length,
+        has_marker: /CLASSEMENT/i.test(rawOutput),
+        tail: rawOutput.slice(-160),
+      }));
+    }
     const classification = mergeClassification(extracted.classification, intent);
-    const drafted = applyDraftToAction(normalizeAlmaOutput(extracted.answer), next?.action ?? null);
+    const drafted = applyDraftToAction(normalizeAlmaOutput(extracted.answer), next?.action ?? null, next?.chips ?? []);
     const answer = drafted.answer;
     if (!answer) {
       await logConversation({
@@ -529,10 +546,11 @@ Deno.serve(async (req) => {
     }
 
     const human = needsHumanContact(classification);
-    // Frustration, bug, départ : le contact humain passe devant l'action calculée.
-    const action = human
-      ? { label: "Écrire à Jérémie et Elisa", path: "/contact", reason: "contact_humain" }
-      : drafted.action;
+    // Lot J3 : l'action principale reste toujours celle du moteur. En
+    // frustration, bug ou départ, « Écrire à Jérémie et Elisa » s'affiche en
+    // lien secondaire (human_contact), jamais à la place de l'action.
+    const action = drafted.action;
+    const chips = drafted.chips;
     const conversationId = await logConversation({
       user_id: userId,
       surface,
@@ -546,7 +564,7 @@ Deno.serve(async (req) => {
       sources_count: sources.length,
       classification,
       proposed_action: action ?? null,
-      chips: next && next.chips.length ? next.chips : null,
+      chips: chips.length ? chips : null,
     });
     await raiseSignals(classification, conversationId);
 
@@ -554,7 +572,7 @@ Deno.serve(async (req) => {
       answer,
       remaining: Math.max(0, ALMA_CHAT_DAILY_LIMIT - ((count ?? 0) + 1)),
       ...(action ? { action: { label: action.label, path: action.path } } : {}),
-      ...(next && next.chips.length ? { chips: next.chips } : {}),
+      ...(chips.length ? { chips } : {}),
       ...(human ? { human_contact: true } : {}),
       ...(conversationId ? { conversation_id: conversationId } : {}),
       ...(isReplay
