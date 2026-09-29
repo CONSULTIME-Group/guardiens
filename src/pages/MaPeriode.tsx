@@ -6,6 +6,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import PageMeta from "@/components/PageMeta";
 import {
   callMaPeriode, finishUrl, isDeparturePeriod, remainingPhrase,
   PERIOD_NOTED, PERIOD_OF, PERIOD_REMINDER, LATER_SNOOZE_DAYS,
