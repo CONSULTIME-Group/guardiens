@@ -77,6 +77,7 @@ export function loadGoogleAnalytics() {
     anonymize_ip: true,
     allow_google_signals: false,
     allow_ad_personalization_signals: false,
+    cookie_expires: 60 * 60 * 24 * 395, // _ga : 13 mois maximum (CNIL)
   });
 
   const s = document.createElement("script");

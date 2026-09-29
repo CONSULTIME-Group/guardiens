@@ -1,3 +1,5 @@
+import { Button } from "@/components/ui/button";
+import { openCookiePreferences } from "@/lib/cookieConsent";
 import PageMeta from "@/components/PageMeta";
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
@@ -17,7 +19,9 @@ const ESSENTIAL_COOKIES: Array<{ name: string; issuer: string; purpose: string; 
   { name: "cf_clearance", issuer: "Cloudflare", purpose: "Vérification challenge", duration: "30 jours" },
   { name: "__lovable_anonymous_id", issuer: "Lovable", purpose: "Identifiant technique anonyme pour le fonctionnement de l'interface", duration: "Session" },
   { name: "guardiens_lang", issuer: "Guardiens", purpose: "Préférence de langue", duration: "12 mois" },
-  { name: "guardiens_cookie_consent_v1", issuer: "Guardiens", purpose: "Mémorisation du choix cookies", duration: "6 mois" },
+  { name: "guardiens_cookie_consent_v1", issuer: "Guardiens", purpose: "Mémorisation du choix cookies (stockage local)", duration: "6 mois" },
+  { name: "sidebar:state", issuer: "Guardiens", purpose: "Position du menu latéral de l'espace membre", duration: "7 jours" },
+  { name: "Notifications web", issuer: "Guardiens", purpose: "Abonnement aux notifications, seulement si vous les activez", duration: "Jusqu'à désactivation" },
 ];
 
 const ANALYTICS_COOKIES: Array<{ name: string; issuer: string; purpose: string; duration: string }> = [
@@ -98,18 +102,23 @@ const Cookies = () => {
             </Table>
           </div>
           <p>
-            Ces cookies ne sont déposés qu'après recueil de votre consentement explicite via le bandeau affiché à votre première visite. Anonymisation IP activée. Aucun partage à des fins publicitaires.
+            Ces cookies sont déposés seulement après votre accord, donné dans le bandeau affiché à votre première visite. Votre choix est conservé 6 mois, puis nous vous le redemandons. Anonymisation IP activée, signaux publicitaires désactivés.
           </p>
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">3. Gérer votre consentement</h2>
           <p>Vous pouvez à tout moment modifier votre choix par les moyens suivants :</p>
           <ul className="list-disc pl-6 space-y-1">
-            <li>Cliquer sur "Gérer mes cookies" dans le pied de page du site</li>
+            <li>Cliquer sur « Gérer mes cookies » dans le pied de page du site, ou sur le bouton ci-dessous</li>
             <li>Modifier les préférences de votre navigateur</li>
-            <li>Activer le signal Global Privacy Control (GPC) que Guardiens respecte</li>
           </ul>
           <p>
-            Le refus des cookies de mesure d'audience n'affecte pas votre expérience de navigation ni l'accès à l'ensemble des fonctionnalités du service.
+            <Button variant="outline" onClick={openCookiePreferences}>Gérer mes cookies</Button>
+          </p>
+          <p>
+            Retirer votre accord arrête la mesure d'audience et supprime les cookies _ga et _ga_* de votre navigateur.
+          </p>
+          <p>
+            Que vous acceptiez ou refusiez la mesure d'audience, le site et toutes ses fonctionnalités restent pleinement accessibles.
           </p>
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">4. Cookies publicitaires</h2>
