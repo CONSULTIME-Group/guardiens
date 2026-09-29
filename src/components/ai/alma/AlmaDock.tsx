@@ -589,6 +589,7 @@ function AlmaDockInner() {
     ctx: {
       hasDraftSit: evolution?.signals.hasDraftSit ?? false,
       hasPublishedSitWithoutApplication: listingWithoutApplication,
+      activeRole: activeRole === "owner" ? "owner" : "sitter",
     },
     whisperType: currentWhisper?.type ?? null,
   });
