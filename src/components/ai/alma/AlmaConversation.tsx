@@ -119,7 +119,7 @@ function looksLikePath(path: string): boolean {
 /** Retire une ligne technique restée dans le texte, où qu'elle soit. */
 function stripTechnicalLines(content: string): string {
   return content
-    .replace(/[ \t]*CLASSEMENT\s*:\s*(\{[^{}]*\})?[^\n]*/gi, "")
+    .replace(/[ \t]*CLASSEMENT\s*:\s*(\{[^{}]*\})?[^\n]*/g, "")
     .replace(/^[ \t*_]*BROUILLON[ \t*_]*:[^\n]*$/gim, "");
 }
 
