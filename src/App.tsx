@@ -1,3 +1,4 @@
+import { CookieConsentBanner } from "@/components/legal/CookieConsentBanner";
 import { Suspense, useState } from "react";
 import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -668,8 +669,8 @@ const App = () => (
                 <GlobalBottomNav />
               </ChromeVisibilityProvider>
               <DeferredTrackers />
-              {/* Bannière cookies retirée : mesure d'audience GA4 exemptée CNIL
-                  (anonymize_ip, pas de pub/signals). Voir src/lib/cookieConsent.ts. */}
+              {/* Bandeau de consentement (lot C1) : GA4 chargé après accord seulement. */}
+              <CookieConsentBanner />
             </BrowserRouter>
           </AuthProvider>
         </TooltipProvider>

@@ -1,3 +1,4 @@
+import { openCookiePreferences } from "@/lib/cookieConsent";
 import React from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -191,6 +192,8 @@ const PublicFooter = React.forwardRef<HTMLElement, PublicFooterProps>(({ local }
             <Link to="/cgs" className="inline-flex min-h-[44px] min-w-[44px] items-center hover:text-white transition-colors">{t("footer.legal.cgs")}</Link>
             <span aria-hidden="true" className="hidden sm:inline text-white/55">·</span>
             <Link to="/cookies" className="inline-flex min-h-[44px] min-w-[44px] items-center hover:text-white transition-colors">{t("footer.legal.cookies")}</Link>
+            <span aria-hidden="true" className="hidden sm:inline text-white/55">·</span>
+            <button type="button" onClick={openCookiePreferences} className="inline-flex min-h-[44px] min-w-[44px] items-center hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm">Gérer mes cookies</button>
             <span aria-hidden="true" className="hidden sm:inline text-white/55">·</span>
             <Link to="/mentions-legales" className="inline-flex min-h-[44px] min-w-[44px] items-center hover:text-white transition-colors">{t("footer.legal.legal_notice")}</Link>
             <span aria-hidden="true" className="hidden sm:inline text-white/55">·</span>
