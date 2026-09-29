@@ -43,7 +43,6 @@ const CATEGORY_LABELS: Record<string, string> = {
   saisonnier: "Saisonnier",
 };
 
-const MEDALS = ["🥇", "🥈", "🥉"];
 
 const TopArticlesTable = ({ topPages }: TopArticlesTableProps) => {
   const [articles, setArticles] = useState<Article[]>([]);
@@ -172,7 +171,7 @@ const TopArticlesTable = ({ topPages }: TopArticlesTableProps) => {
               return (
                 <TableRow key={row.article.slug}>
                   <TableCell className="font-medium text-center">
-                    {i < 3 ? MEDALS[i] : i + 1}
+                    {i + 1}
                   </TableCell>
                   <TableCell className="max-w-[250px]">
                     <a
