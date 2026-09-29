@@ -18,6 +18,7 @@ import {
   subscribeAlmaConversation,
 } from "@/lib/alma/conversation-store";
 import { ALMA_HUMAN_CONTACT_LABEL, AlmaHumanContactForm } from "./AlmaHumanContact";
+import { ALMA_PAGE_LABELS } from "../../../../supabase/functions/_shared/alma-page-labels";
 
 export const ALMA_THINKING_LINES = [
   "Je regarde.",
@@ -28,31 +29,14 @@ export const ALMA_THINKING_LINES = [
   "J'y suis presque.",
 ] as const;
 
-const SECTION_LABELS: Record<string, string> = {
-  "/dashboard": "Tableau de bord",
-  "/profile": "Mon profil gardien",
-  "/owner-profile": "Mon profil propriétaire",
-  "/sits": "Mes annonces",
-  "/sits/create": "Créer une annonce",
-  "/annonces": "Les annonces",
-  "/recherche-gardiens": "Rechercher un gardien",
-  "/messages": "Messagerie",
-  "/favoris": "Mes favoris",
-  "/mes-candidatures": "Mes candidatures",
-  "/mes-avis": "Mes avis",
-  "/mon-secteur": "Mon secteur",
-  "/notifications": "Mes notifications",
-  "/settings": "Réglages",
-  "/alma": "Mon parcours avec Alma",
-  "/petites-missions/creer": "Proposer un coup de main",
-};
+/** Lot J4 : libellés partagés avec le serveur, créer = demander, parcourir = proposer. */
+const SECTION_LABELS: Record<string, string> = ALMA_PAGE_LABELS;
 
 const PUBLIC_SOURCE_TITLES: Record<string, string> = {
   "/faq": "La FAQ",
   "/conseils": "Les conseils d'Alma",
   "/actualites": "Le journal",
   "/associations": "Les associations",
-  "/petites-missions": "L'entraide",
   "/guides": "Les guides locaux",
   "/races": "Les fiches de race",
 };
@@ -64,8 +48,15 @@ interface ExtractedLink {
   label?: string;
 }
 
+export type AlmaMessageSegment =
+  | { type: "text"; value: string }
+  | { type: "link"; href: string; title: string };
+
 interface ParsedMessage {
+  /** Texte lisible, chaque chemin remplacé par le nom de sa page. */
   text: string;
+  /** Texte découpé, les noms de page deviennent des liens dans la phrase. */
+  segments: AlmaMessageSegment[];
   links: ExtractedLink[];
 }
 
@@ -118,34 +109,55 @@ function extractedLink(path: string): ExtractedLink {
  * Un chemin ne compte comme adresse que s'il ouvre un mot, donc précédé d'un
  * début de texte, d'une espace ou d'une ouverture de citation, et s'il porte
  * au moins une lettre. Cela laisse intacts « et/ou », « 24h/24 » et les dates
- * du type 13/09/2026, qui étaient jusqu'ici retirés de la phrase et changés en
- * carte cliquable menant nulle part.
+ * du type 13/09/2026.
  */
 function looksLikePath(path: string): boolean {
   const firstSegment = path.split(/[?#]/)[0].split("/")[1] ?? "";
   return /[a-zA-ZÀ-ÿ]/.test(firstSegment);
 }
 
+/** Retire une ligne technique restée dans le texte, où qu'elle soit. */
+function stripTechnicalLines(content: string): string {
+  return content
+    .replace(/[ \t]*CLASSEMENT\s*:\s*(\{[^{}]*\})?[^\n]*/gi, "")
+    .replace(/^[ \t*_]*BROUILLON[ \t*_]*:[^\n]*$/gim, "");
+}
+
+/**
+ * Lot J4 : un chemin n'est jamais retiré en laissant un vide (« sur la page . »).
+ * Il est remplacé, dans la phrase, par le nom de sa page, rendu en lien.
+ */
 export function parseAlmaMessage(content: string): ParsedMessage {
   const links: ExtractedLink[] = [];
+  const found: AlmaMessageSegment[] = [];
+  const mark = (href: string, title: string) => {
+    found.push({ type: "link", href, title });
+    return `\u0000${found.length - 1}\u0000`;
+  };
+  const remember = (link: ExtractedLink) => {
+    if (!links.some((l) => l.href === link.href)) links.push(link);
+  };
+
   const markdownPattern = /\[([^\]]+)\]\((https?:\/\/[^\s)]+|\/[^\s)]+)\)/g;
-  let text = content.replace(markdownPattern, (_match, title: string, href: string) => {
+  let text = stripTechnicalLines(content).replace(markdownPattern, (_match, title: string, href: string) => {
     const path = normalizeInternalPath(href);
     if (!path) return title;
-    links.push(extractedLink(path));
-    return "";
+    const link = extractedLink(path);
+    remember(link);
+    return mark(path, title.trim() || link.title);
   });
 
   const absolutePattern = /https?:\/\/(?:www\.)?guardiens\.fr\/[a-zA-Z0-9À-ÿ_?&=#./-]+/g;
   const pathPattern = /(^|[\s("'«])(\/[a-zA-Z0-9À-ÿ_?&=#./-]+)/gu;
 
   const consume = (href: string): string | null => {
-    const trailingPunctuation = href.match(/[.,;:!?]+$/)?.[0] ?? "";
-    const cleanHref = trailingPunctuation ? href.slice(0, -trailingPunctuation.length) : href;
+    const trailing = href.match(/[.,;:!?]+$/)?.[0] ?? "";
+    const cleanHref = trailing ? href.slice(0, -trailing.length) : href;
     const path = normalizeInternalPath(cleanHref);
     if (!path) return null;
-    links.push(extractedLink(path));
-    return trailingPunctuation;
+    const link = extractedLink(path);
+    remember(link);
+    return `${mark(path, link.title)}${trailing}`;
   };
 
   text = text.replace(absolutePattern, (href) => consume(href) ?? href);
@@ -157,18 +169,15 @@ export function parseAlmaMessage(content: string): ParsedMessage {
     return result === null ? match : `${prefix}${result}`;
   });
 
-  text = text.replace(/\s{2,}/g, " ").trim();
-  if (links.length > 0 && text) {
-    text = text
-      .replace(/(?:\s*[:,.]\s*)+$/u, "")
-      .replace(/(?:\s|^)(?:ici|à l'adresse(?: suivante)?|à cette adresse|sur cette page)$/iu, "")
-      .replace(/(?:\s*[:,.]\s*)+$/u, "")
-      .trim()
-      .trim();
-    if (text) text = `${text}.`;
-  }
+  text = text.replace(/[ \t]{2,}/g, " ").replace(/\n{3,}/g, "\n\n").trim();
 
-  return { text, links };
+  const segments: AlmaMessageSegment[] = [];
+  for (const [i, part] of text.split("\u0000").entries()) {
+    if (i % 2 === 1) segments.push(found[Number(part)]);
+    else if (part) segments.push({ type: "text", value: part });
+  }
+  const plain = segments.map((s) => (s.type === "text" ? s.value : s.title)).join("");
+  return { text: plain, segments, links };
 }
 
 function useVisualViewportHeight(): number {
@@ -446,8 +455,24 @@ export function AlmaConversation({
                       <span className="text-[10.5px] font-bold uppercase text-terra [letter-spacing:.16em]">ALMA</span>
                       <span className="h-px flex-1 bg-[hsl(var(--line-soft))]" />
                     </div>
-                    {parsed.text && <p className="alma-turn-alma whitespace-pre-line">{parsed.text}</p>}
-                    {parsed.links.map((link) => link.kind === "source" ? (
+                    {parsed.segments.length > 0 && (
+                      <p className="alma-turn-alma whitespace-pre-line">
+                        {parsed.segments.map((segment, segIndex) => segment.type === "text" ? (
+                          <span key={segIndex}>{segment.value}</span>
+                        ) : (
+                          <button
+                            key={segIndex}
+                            type="button"
+                            data-testid="alma-inline-link"
+                            onClick={() => followLink(segment.href)}
+                            className="inline font-semibold text-pine underline underline-offset-4 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          >
+                            {segment.title}
+                          </button>
+                        ))}
+                      </p>
+                    )}
+                    {parsed.links.filter((link) => link.kind === "source").map((link) => (
                       <button
                         key={`${message.id}-${link.href}`}
                         type="button"
@@ -458,18 +483,10 @@ export function AlmaConversation({
                         <span className="mt-1 block font-heading text-[15px] text-foreground">{link.title}</span>
                         <span className="mt-2 inline-block text-xs text-muted-foreground underline underline-offset-4">Lire la source</span>
                       </button>
-                    ) : (
-                      <button
-                        key={`${message.id}-${link.href}`}
-                        type="button"
-                        onClick={() => followLink(link.href)}
-                        className="alma-action-link mt-3 inline-flex min-h-11 items-center gap-2 text-left text-[13px] font-bold text-pine focus-visible:ring-2 focus-visible:ring-ring"
-                      >
-                        <span>{link.title}</span><ArrowRight className="h-4 w-4" aria-hidden />
-                      </button>
                     ))}
                     {/* Lot J2-A : action calculée côté serveur, un bouton sous la bulle. */}
-                    {message.action && !parsed.links.some((l) => l.href === message.action!.path) && (
+                    {/* Lot J4 : un seul bouton principal, toujours celui du moteur. */}
+                    {message.action && (
                       <Button
                         type="button"
                         data-testid="alma-message-action"
