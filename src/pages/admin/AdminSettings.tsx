@@ -368,7 +368,7 @@ const AdminSettings = () => {
             <Separator />
             <div className="space-y-2">
               <Label htmlFor="applies-since" className="text-sm font-medium">
-                Date de bascule (applies_since)
+                Date de bascule <code className="ml-1 font-mono text-[10px] text-muted-foreground/70">applies_since</code>
               </Label>
               <p className="text-xs text-muted-foreground">
                 Seuls les comptes créés à partir de cette date sont soumis au garde-fou. Laisser
@@ -419,10 +419,9 @@ const AdminSettings = () => {
               Système d'alertes admin
             </CardTitle>
             <p className="text-xs text-muted-foreground mt-2">
-              Active la persistance des signaux administrateur (cartes SignalsSection sur
-              {" "}/admin, crons nurturing <code>nudge-*</code>, RPC{" "}
-              <code>admin_dashboard_snapshot</code>). Désactiver coupe l'affichage des signaux
-              ET l'exécution des crons pour un retour au calme immédiat. Bascule sans
+              Active la persistance des signaux administrateur (cartes de signaux de la Vue d'ensemble,
+              relances automatiques, synthèse du tableau de bord <code className="ml-1 font-mono text-[10px] text-muted-foreground/70">admin_dashboard_snapshot</code>). Désactiver coupe l'affichage des signaux
+              et l'exécution des relances pour un retour au calme immédiat. Bascule sans
               redéploiement.
             </p>
           </CardHeader>
@@ -431,8 +430,7 @@ const AdminSettings = () => {
               <div className="min-w-0">
                 <p className="text-sm font-medium">Activation</p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Kill-switch immédiat. Désactivé : les 10 crons <code>nudge-*</code> retournent
-                  {" "}<code>skipped: flag_off</code> et les cartes de signaux disparaissent
+                  Arrêt immédiat. Désactivé : les 10 relances automatiques s'arrêtent (réglage désactivé <code className="ml-1 font-mono text-[10px] text-muted-foreground/70">flag_off</code>) et les cartes de signaux disparaissent
                   de la Vue d'ensemble.
                 </p>
               </div>
@@ -446,7 +444,7 @@ const AdminSettings = () => {
             <Separator />
             <div className="space-y-2">
               <Label htmlFor="signals-applies-since" className="text-sm font-medium">
-                Date de bascule (applies_since)
+                Date de bascule <code className="ml-1 font-mono text-[10px] text-muted-foreground/70">applies_since</code>
               </Label>
               <p className="text-xs text-muted-foreground">
                 Champ documentaire pour tracer l'activation. Laisser vide si non pertinent.
@@ -496,9 +494,8 @@ const AdminSettings = () => {
               Seuils de matching affinité
             </CardTitle>
             <p className="text-xs text-muted-foreground mt-2">
-              Baisser ces seuils élargit le discovery mais peut réduire la qualité perçue des
-              matchs. Modifier avec précaution. Chaque changement est tracé dans{" "}
-              <code>admin_action_logs</code>. Prise en compte au prochain rechargement de page.
+              Baisser ces seuils élargit la découverte mais peut réduire la qualité perçue des
+              rapprochements. Modifier avec précaution. Chaque changement est tracé dans le journal d'audit <code className="ml-1 font-mono text-[10px] text-muted-foreground/70">admin_action_logs</code>. Prise en compte au prochain rechargement de page.
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
