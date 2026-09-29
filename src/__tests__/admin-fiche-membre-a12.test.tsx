@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor, within, configure, fireEvent } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { MemoryRouter, useLocation } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { readFileSync, readdirSync } from "node:fs";
@@ -135,8 +134,7 @@ describe("A12, menu d'actions", () => {
   it("« Supprimer définitivement » est séparé, destructif, et chaque entrée ouvre le bon dialogue", async () => {
     const Page = await loadPage();
     wrap("/admin/users", <Page />);
-    const user = userEvent.setup();
-    const openMenu = async () => user.click(await screen.findByRole("button", { name: "Actions pour Camille Durand" }));
+    const openMenu = async () => { const b = await screen.findByRole("button", { name: "Actions pour Camille Durand" }); fireEvent.pointerDown(b, { button: 0, ctrlKey: false, pointerType: "mouse" }); };
 
     await openMenu();
     const del = await screen.findByRole("menuitem", { name: "Supprimer définitivement" });
@@ -155,7 +153,7 @@ describe("A12, menu d'actions", () => {
     ];
     for (const [item, title] of cases) {
       await openMenu();
-      await user.click(await screen.findByRole("menuitem", { name: item }));
+      fireEvent.click(await screen.findByRole("menuitem", { name: item }));
       const dlg = await screen.findByRole(item === "Supprimer définitivement" ? "alertdialog" : "dialog");
       expect(within(dlg).getByText(title)).toBeTruthy();
       fireEvent.keyDown(dlg, { key: "Escape" });
@@ -176,8 +174,7 @@ describe("A12, panneau fiche membre", () => {
   it("s'ouvre au clic sur le nom, rend les sections, se ferme en retirant ?membre=", async () => {
     const Page = await loadPage();
     wrap("/admin/users", <Page />);
-    const user = userEvent.setup();
-    await user.click(await screen.findByRole("button", { name: "Ouvrir la fiche de Camille Durand" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Ouvrir la fiche de Camille Durand" }));
     await waitFor(() => expect(lastSearch).toContain("membre=u-1"));
     const panel = await screen.findByRole("dialog");
     for (const t of ["Vérification", "Propriétaire", "Gardien", "Entraide", "Avis", "Signalements", "Messagerie", "Messages de l'équipe", "Note interne", "Historique"]) {
