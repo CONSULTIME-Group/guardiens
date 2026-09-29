@@ -2050,7 +2050,7 @@ const CreateSit = () => {
       void trackEvent("sits_express_photo_added", { source: "/sits/create", metadata: { period: expressParams.period } });
     } catch (e) {
       console.error("[CreateSit] express photo upload failed", e);
-      toast({ variant: "destructive", title: "La photo n'a pas pu être envoyée, réessayez." });
+      toast({ variant: "destructive", title: "Envoi de la photo interrompu. Réessayez." });
     } finally {
       setExpressUploading(false);
     }

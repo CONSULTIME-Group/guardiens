@@ -28,7 +28,7 @@ const InlinePhotoUpload = ({ userId, nextPosition = 0, label = "Ajouter une phot
       toast.success("Photo ajoutée à votre galerie");
     } catch (e: any) {
       console.error("[InlinePhotoUpload] upload failed", e);
-      toast.error("La photo n'a pas pu être envoyée, réessayez.");
+      toast.error("Envoi de la photo interrompu. Réessayez.");
     } finally {
       setUploading(false);
       if (inputRef.current) inputRef.current.value = "";
