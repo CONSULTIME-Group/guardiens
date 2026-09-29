@@ -119,7 +119,7 @@ const AdminTraffic = () => {
         <div className="overflow-x-auto -mx-1 px-1">
         <TabsList className="w-max">
           <TabsTrigger value="interne">
-            <Eye className="h-4 w-4 mr-2" /> Trafic interne & funnel
+            <Eye className="h-4 w-4 mr-2" /> Trafic interne et entonnoir
           </TabsTrigger>
           <TabsTrigger value="acquisition">
             <MousePointerClick className="h-4 w-4 mr-2" /> Acquisition SEO
