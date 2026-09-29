@@ -52,6 +52,14 @@ import { profileNudgeAllowed } from "@/lib/alma/profileNudge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { trackEvent } from "@/lib/analytics";
+import {
+  ALMA_PEEK_DURATION_MS,
+  decideWhisperArrival,
+  isFormFieldFocused,
+  isMobileViewport,
+  markSpontaneousUsed,
+  spontaneousUsedThisSession,
+} from "@/lib/alma/whisperArrival";
 import { resolveAlmaCtaHref } from "@/lib/alma/cta-actions";
 import {
   DropdownMenu,
@@ -243,6 +251,13 @@ function AlmaDockInner() {
   // et ne prend pas le curseur de saisie.
   const [spontaneous, setSpontaneous] = useState(false);
   const [userCollapsed, setUserCollapsed] = useState(false);
+  // Bulle courte mobile (lot P1), une fois par whisper.
+  const [peekId, setPeekId] = useState<string | null>(null);
+  useEffect(() => {
+    if (!peekId) return;
+    const t = setTimeout(() => setPeekId(null), ALMA_PEEK_DURATION_MS);
+    return () => clearTimeout(t);
+  }, [peekId]);
   const [entryContext, setEntryContext] = useState<AlmaDockOpenDetail | null>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
 
@@ -300,18 +315,34 @@ function AlmaDockInner() {
   // a explicitement replié et qu'aucun nouveau whisper n'est venu depuis).
   useEffect(() => {
     if (currentWhisper) {
-      setEntryContext(null);
-      setSpontaneous(true);
-      setExpanded(true);
       setUserCollapsed(false);
-      trackEvent("alma_dock_expanded" as any, {
-        metadata: {
-          surface: surfaceFromPath(location.pathname, activeRole),
-          origin: "whisper",
-        },
+      // Lot P1 : plus d'ouverture spontanée sur mobile.
+      const arrival = decideWhisperArrival({
+        isMobile: isMobileViewport(),
+        pathname: location.pathname,
+        spontaneousAlreadyUsed: spontaneousUsedThisSession(),
+        formFieldFocused: isFormFieldFocused(),
       });
-    } else if (userCollapsed) {
-      setExpanded(false);
+      if (arrival === "open_spontaneous") {
+        markSpontaneousUsed();
+        setEntryContext(null);
+        setSpontaneous(true);
+        setExpanded(true);
+        trackEvent("alma_dock_expanded" as any, {
+          metadata: {
+            surface: surfaceFromPath(location.pathname, activeRole),
+            origin: "whisper",
+          },
+        });
+      } else if (arrival === "peek") {
+        setPeekId(currentWhisper.id);
+        trackEvent("alma_whisper_peek_shown" as any, {
+          metadata: { surface: surfaceFromPath(location.pathname, activeRole), whisper_type: currentWhisper.type },
+        });
+      }
+    } else {
+      setPeekId(null);
+      if (userCollapsed) setExpanded(false);
     }
   }, [currentWhisper?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -527,7 +558,8 @@ function AlmaDockInner() {
 
   // Ouverture du panneau tracée avec son origine (N6).
   const openPanel = useCallback(
-    (origin: "whisper" | "avatar" | "pill", trigger?: HTMLElement | null) => {
+    (origin: "whisper" | "avatar" | "pill" | "peek", trigger?: HTMLElement | null) => {
+      setPeekId(null);
       triggerRef.current = trigger ?? (
         document.activeElement instanceof HTMLElement ? document.activeElement : null
       );
@@ -799,6 +831,17 @@ function AlmaDockInner() {
           onJournalAction={onJournalAction}
           onJournalReply={onJournalReply}
         />
+      )}
+
+      {!hideCollapsedPill && peekId && whisper && !expanded && (
+        <button
+          type="button"
+          data-testid="alma-whisper-peek"
+          onClick={(e) => openPanel("peek", e.currentTarget)}
+          className="pointer-events-auto mb-2 max-w-[18rem] truncate rounded-full border border-border bg-card/95 px-3 py-1.5 text-left text-sm text-foreground shadow-md backdrop-blur"
+        >
+          {whisper.message}
+        </button>
       )}
 
       {!hideCollapsedPill && (
