@@ -12,6 +12,7 @@
 // est strictement interdit.
 
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { buildModerationEmailData, buildReporterEmailData, cleanText, runModerationMutations } from './moderation.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -66,7 +67,9 @@ Deno.serve(async (req) => {
 
   const reportId: string = body.report_id
   const action: Action = body.action
-  const adminNote: string | null = (body.admin_note ?? null) || null
+  const adminNote: string | null = cleanText(body.admin_note, 4000)
+  // Lot A9 : message au membre, seul texte envoyé par email.
+  const memberMessage: string | null = cleanText(body.member_message, 2000)
 
   if (!reportId || typeof reportId !== 'string') return json({ error: 'report_id required' }, 400)
   if (!VALID_ACTIONS.includes(action)) return json({ error: 'invalid action' }, 400)
@@ -138,142 +141,33 @@ Deno.serve(async (req) => {
   }
 
   // === Exécution de l'action ===
+  // Lot A9 : chaque mutation est vérifiée. Au premier échec, le signalement
+  // reste ouvert et l'erreur remonte à l'écran.
   const opMeta: Record<string, unknown> = { target_label: targetLabel }
 
-  try {
-    if (action === 'hide') {
-      switch (targetType) {
-        case 'listing':
-          await service.from('sits').update({
-            moderation_hidden_at: now,
-            moderation_hidden_by: adminId,
-            unpublished_at: now,
-            last_unpublished_reason: 'moderation',
-            accepting_applications: false,
-          }).eq('id', targetId)
-          break
-        case 'small_mission':
-          await service.from('small_missions').update({
-            moderation_hidden_at: now,
-            moderation_hidden_by: adminId,
-            status: 'cancelled',
-            closed_at: now,
-            close_reason: 'moderation',
-          }).eq('id', targetId)
-          break
-        case 'review':
-          await service.from('reviews').update({
-            moderation_status: 'hidden',
-            moderation_hidden_at: now,
-            moderation_hidden_by: adminId,
-            published: false,
-          }).eq('id', targetId)
-          break
-        case 'message':
-          await service.from('messages').update({
-            moderation_hidden_at: now,
-            moderation_hidden_by: adminId,
-            content: '[Message masqué par la modération]',
-          }).eq('id', targetId)
-          break
-        case 'profile':
-          await service.from('profiles').update({
-            account_status: 'hidden',
-          }).eq('id', targetId)
-          break
-      }
-    } else if (action === 'suspend') {
-      if (!ownerUserId) return json({ error: 'Cannot resolve owner to suspend' }, 400)
-      await service.from('profiles').update({
-        account_status: 'suspended',
-        suspended_at: now,
-        suspended_by: adminId,
-        suspension_reason: adminNote ?? `Signalement ${report.reason ?? ''}`.trim(),
-      }).eq('id', ownerUserId)
-      opMeta.suspended_user_id = ownerUserId
-    } else if (action === 'delete') {
-      switch (targetType) {
-        case 'listing':
-          await service.from('sits').delete().eq('id', targetId); break
-        case 'small_mission':
-          await service.from('small_missions').delete().eq('id', targetId); break
-        case 'review':
-          await service.from('reviews').delete().eq('id', targetId); break
-        case 'message':
-          await service.from('messages').delete().eq('id', targetId); break
-        case 'profile':
-          // Suppression d'un profil = passage en account_status='deleted'
-          // (la suppression réelle du compte auth passe par le flux dédié).
-          await service.from('profiles').update({
-            account_status: 'deleted',
-            suspended_at: now,
-            suspended_by: adminId,
-            suspension_reason: adminNote ?? 'Suppression modération',
-          }).eq('id', targetId)
-          break
-      }
-    } else if (action === 'warn') {
-      // Warn : email + éventuellement message système dans la conversation
-      // (pour target=message). Le contenu reste visible.
-      if (targetType === 'message') {
-        const { data: msg } = await service.from('messages')
-          .select('conversation_id').eq('id', targetId).maybeSingle()
-        if (msg?.conversation_id) {
-          await service.from('messages').insert({
-            conversation_id: msg.conversation_id,
-            sender_id: adminId,
-            content: `Avertissement de la modération Guardiens : ${adminNote ?? 'ce message a été signalé et jugé inapproprié.'}`,
-            is_system: true,
-          })
-        }
-      }
-    }
-    // action === 'none' : aucune mutation de la cible
-
-    // Envoi email d'avertissement au propriétaire (warn / hide / suspend / delete)
-    if (action !== 'none' && ownerUserId) {
-      const { data: emailRows } = await service.rpc('get_user_emails_admin', {
-        p_user_ids: [ownerUserId],
-      })
-      const ownerEmail = (emailRows as any[] | null)?.[0]?.email
-      if (ownerEmail) {
-        try {
-          const _steRes = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}` },
-            body: JSON.stringify({
-              templateName: 'contact-reply',
-              recipientEmail: ownerEmail,
-              idempotencyKey: `moderation-${reportId}-${action}`,
-              templateData: {
-                subject: 'Décision de modération Guardiens',
-                message: buildOwnerMessage(action, targetType, adminNote),
-              },
-            }),
-          });
-          const _steTxt1 = _steRes.ok ? '' : await _steRes.text().catch(() => '');
-          if (!_steRes.ok) console.error('send-transactional-email failed', _steRes.status, _steTxt1);
-        } catch (e) {
-          console.warn('owner email failed', e)
-        }
-      }
-    }
-  } catch (e) {
-    console.error('Action execution failed', e)
-    return json({ error: 'Action execution failed', details: String(e) }, 500)
+  const failure = await runModerationMutations(service, {
+    action, targetType, targetId, adminId, now, ownerUserId, adminNote, memberMessage,
+    reportReason: report.reason ?? null, opMeta,
+  })
+  if (failure) {
+    console.error('Action execution failed', failure)
+    return json({ error: `Action non appliquée : ${failure}` }, 500)
   }
 
-  // Persiste sur le report
+  // Persiste sur le report (vérifié : sans cela, le signalement reste ouvert)
   const { error: updErr } = await service.from('reports').update({
     status: 'resolved',
     resolved_at: now,
     resolved_by: adminId,
     action_taken: action,
     admin_notes: adminNote ?? report.admin_notes ?? null,
+    member_message: memberMessage,
   }).eq('id', reportId)
-  if (updErr) console.error('report update failed', updErr)
+  if (updErr) {
+    console.error('report update failed', updErr)
+    return json({ error: `Action appliquée mais signalement non clos : ${updErr.message}` }, 500)
+  }
 
-  // Audit
   const { error: logErr } = await service.from('admin_action_logs').insert({
     admin_id: adminId,
     action,
@@ -285,53 +179,39 @@ Deno.serve(async (req) => {
   })
   if (logErr) console.error('audit log failed', logErr)
 
-  // Email au signaleur (préservé)
-  try {
-    const { data: repEmails } = await service.rpc('get_user_emails_admin', {
-      p_user_ids: [report.reporter_id],
-    })
-    const reporterEmail = (repEmails as any[] | null)?.[0]?.email
-    if (reporterEmail) {
-      const _steRes2 = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}` },
-        body: JSON.stringify({
-          templateName: 'report-resolved',
-          recipientEmail: reporterEmail,
-          idempotencyKey: `report-resolved-${reportId}`,
-          templateData: {
-            reason: report.reason,
-            status: 'resolved',
-            adminNotes: adminNote ?? report.admin_notes ?? undefined,
-          },
-        }),
-      });
-      const _steTxt2 = _steRes2.ok ? '' : await _steRes2.text().catch(() => '');
-      if (!_steRes2.ok) console.error('send-transactional-email failed', _steRes2.status, _steTxt2);
+  // Emails après clôture : le membre concerné (moderation-decision) puis le
+  // signaleur (report-resolved). Seul member_message est transmis.
+  if (action !== 'none' && ownerUserId) {
+    const ownerEmail = await emailOf(service, ownerUserId)
+    if (ownerEmail) {
+      await sendTemplate('moderation-decision', ownerEmail, `moderation-${reportId}-${action}`,
+        buildModerationEmailData(action, targetType, memberMessage))
     }
-  } catch (e) {
-    console.warn('reporter email failed', e)
+  }
+  const reporterEmail = report.reporter_id ? await emailOf(service, report.reporter_id) : null
+  if (reporterEmail) {
+    await sendTemplate('report-resolved', reporterEmail, `report-resolved-${reportId}`,
+      buildReporterEmailData(report.reason, memberMessage))
   }
 
   return json({ success: true, action, target_type: targetType, target_id: targetId })
 })
 
-function buildOwnerMessage(action: Action, targetType: TargetType, note: string | null): string {
-  const targetLabel: Record<TargetType, string> = {
-    profile: 'votre profil',
-    listing: 'votre annonce',
-    review: 'votre avis',
-    message: 'un de vos messages',
-    small_mission: 'votre petite mission',
-  }
-  const lead: Record<Action, string> = {
-    warn: `Un avertissement de modération concerne ${targetLabel[targetType]}.`,
-    hide: `${targetLabel[targetType].charAt(0).toUpperCase() + targetLabel[targetType].slice(1)} a été masquée par la modération.`,
-    suspend: 'Votre compte a été suspendu par la modération.',
-    delete: `${targetLabel[targetType].charAt(0).toUpperCase() + targetLabel[targetType].slice(1)} a été supprimée par la modération.`,
-    none: '',
-  }
-  const base = lead[action]
-  const details = note ? `\n\nMotif : ${note}` : ''
-  return `${base}${details}\n\nSi vous pensez qu'il s'agit d'une erreur, répondez à cet email.`
+async function emailOf(service: any, userId: string): Promise<string | null> {
+  const { data } = await service.rpc('get_user_emails_admin', { p_user_ids: [userId] })
+  return (data as any[] | null)?.[0]?.email ?? null
 }
+
+async function sendTemplate(templateName: string, recipientEmail: string, idempotencyKey: string, templateData: Record<string, unknown>) {
+  try {
+    const res = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}` },
+      body: JSON.stringify({ templateName, recipientEmail, idempotencyKey, templateData }),
+    })
+    if (!res.ok) console.error('send-transactional-email failed', templateName, res.status, await res.text().catch(() => ''))
+  } catch (e) {
+    console.warn('email failed', templateName, e)
+  }
+}
+
