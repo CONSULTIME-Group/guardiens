@@ -8,6 +8,12 @@
 
 import { haversineKm } from "./nearby-open-sits.ts";
 import { emailAvatarUrl, emailCity } from "./entraide-card-data.ts";
+import { splitByPressure } from "./owner-campaign-pressure.ts";
+
+/** Garde-fou de pression (lot N4b) : 3 emails ou plus en 7 jours, exclu de l'envoi du jour. */
+export function applyNoelPressure<T extends { email?: string | null }>(rows: T[], recentCounts: Map<string, number>) {
+  return splitByPressure(rows, recentCounts);
+}
 
 export const OWNER_NOEL_TEMPLATE = "owner-noel-2026";
 export const NOEL_RADIUS_KM = 50;

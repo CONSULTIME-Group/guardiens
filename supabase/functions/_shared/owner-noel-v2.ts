@@ -8,6 +8,7 @@
 
 import { isOwnerV2Holdout, remainingPhrase, type Readiness } from "./owner-departure-logic.ts";
 import { ownerReadiness } from "./owner-readiness.ts";
+import { isUnderPressure } from "./owner-campaign-pressure.ts";
 import type { NoelTemplateData, SitterRow } from "./owner-noel-audience.ts";
 
 // deno-lint-ignore no-explicit-any
@@ -32,20 +33,24 @@ export interface NoelV2Split<T> {
   responders: Map<string, NoelResponderPeriod>;
   holdoutExcluded: number;
   otherPeriodExcluded: number;
+  pressureExcluded: number;
 }
 
-export function splitNoelV2Audience<T extends { id: string }>(rows: T[], latest: Map<string, string>): NoelV2Split<T> {
-  let holdoutExcluded = 0, otherPeriodExcluded = 0;
+export function splitNoelV2Audience<T extends { id: string; email?: string | null }>(
+  rows: T[], latest: Map<string, string>, recentCounts: Map<string, number> = new Map(),
+): NoelV2Split<T> {
+  let holdoutExcluded = 0, otherPeriodExcluded = 0, pressureExcluded = 0;
   const kept: T[] = [];
   const responders = new Map<string, NoelResponderPeriod>();
   for (const r of rows) {
     if (isOwnerV2Holdout(r.id)) { holdoutExcluded++; continue; }
     const p = latest.get(r.id);
     if (p === "printemps" || p === "ete" || p === "plus_tard") { otherPeriodExcluded++; continue; }
+    if (isUnderPressure(recentCounts, r.email)) { pressureExcluded++; continue; }
     if (p === "noel" || p === "hiver") responders.set(r.id, p);
     kept.push(r);
   }
-  return { rows: kept, responders, holdoutExcluded, otherPeriodExcluded };
+  return { rows: kept, responders, holdoutExcluded, otherPeriodExcluded, pressureExcluded };
 }
 
 export async function loadLatestIntents(client: Client, ids: string[]): Promise<Map<string, string>> {
