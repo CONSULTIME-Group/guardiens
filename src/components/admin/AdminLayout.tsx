@@ -22,7 +22,7 @@ const resolveAdminTitle = (pathname: string): string => {
   const path = pathname.replace(/\/+$/, "") || "/admin";
   const navLabel = adminNavGroups_export
     .flatMap((group) => group.items)
-    .find((item) => item.to === path)?.label;
+    .find((item) => item.to.split("?")[0] === path)?.label;
   if (navLabel) return navLabel;
   if (ADMIN_TITLE_FALLBACKS[path]) return ADMIN_TITLE_FALLBACKS[path];
   if (path.startsWith("/admin/articles/")) return "Édition d'article";
