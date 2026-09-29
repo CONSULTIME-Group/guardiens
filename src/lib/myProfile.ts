@@ -12,16 +12,15 @@
 import type { QueryClient } from "@tanstack/react-query";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { getAppQueryClient } from "@/lib/appQueryClient";
 
 export const MY_PROFILE_STALE_MS = 5 * 60 * 1000;
 
 type Row = Record<string, any>;
 type Result = { data: Row | null; error: any };
 
-let client: QueryClient | null = null;
-export function registerMyProfileClient(qc: QueryClient | null) {
-  client = qc;
-}
+// Client enregistré par App.tsx (registerAppQueryClient), lu à chaque appel.
+const qc = (): QueryClient | null => getAppQueryClient();
 
 type Kind = "my-profile" | "my-sitter-profile" | "my-owner-profile" | "my-public-profile";
 
@@ -44,6 +43,7 @@ async function readRaw(kind: Kind, userId: string): Promise<Result> {
 
 async function readCached(kind: Kind, userId: string): Promise<Result> {
   try {
+    const client = qc();
     if (!client) return await readRaw(kind, userId);
     return await client.fetchQuery({
       queryKey: [kind, userId],
@@ -62,6 +62,7 @@ export const fetchMyPublicProfile = (userId: string) => readCached("my-public-pr
 
 /** Met à jour le cache après une écriture, sans relire la base. */
 export function patchMyProfileCache(userId: string, patch: Row, kind: Kind = "my-profile") {
+  const client = qc();
   if (!client) return;
   client.setQueryData<Result>([kind, userId], (prev) =>
     prev?.data ? { data: { ...prev.data, ...patch }, error: null } : prev,
@@ -70,7 +71,7 @@ export function patchMyProfileCache(userId: string, patch: Row, kind: Kind = "my
 
 /** Force la relecture au prochain appel (après une écriture complexe). */
 export function invalidateMyProfile(userId: string, kind: Kind = "my-profile") {
-  void client?.invalidateQueries({ queryKey: [kind, userId] });
+  void qc()?.invalidateQueries({ queryKey: [kind, userId] });
 }
 
 export function useMyProfile(userId: string | null | undefined) {
