@@ -33,6 +33,10 @@ import {
 } from "@/lib/sitFieldModeration";
 import InlinePhotoUpload from "@/components/sits/create/InlinePhotoUpload";
 import CreateSitSetupStep from "@/components/sits/create/CreateSitSetupStep";
+import CreateSitExpress from "@/components/sits/create/CreateSitExpress";
+import { readExpressParams, isExpressActive, proposeExpressTexts, mergeExpressTexts, NOEL_DATE_PRESETS } from "@/lib/sitExpress";
+import { computeReadiness } from "@/lib/ownerDeparture";
+import { uploadOwnerGalleryPhoto } from "@/lib/uploadOwnerGalleryPhoto";
 import type { InlineHousingResult } from "@/components/sits/create/InlineHousingBlock";
 import AnnouncementPreviewDialog from "@/components/sits/owner/AnnouncementPreviewDialog";
 import { AlmaBubble } from "@/components/ai/alma/AlmaBubble";
@@ -419,6 +423,9 @@ const CreateSit = () => {
   const republishMode = (searchParams.get("mode") as "copy" | "adapt" | null) || null;
   const republishPrompt = searchParams.get("prompt") || "";
   const draftIdParam = searchParams.get("draftId") || searchParams.get("resume");
+  // Parcours express (lot N5) : sans express=1, rien ne change.
+  const expressParams = readExpressParams(searchParams);
+  const expressActiveRef = useRef(false);
 
   const [currentStep, setCurrentStep] = useState(0);
   const [sitLocation, setSitLocation] = useState<"home" | "away" | null>(null);
@@ -1742,6 +1749,9 @@ const CreateSit = () => {
         }
       } catch {}
       if (localDraftKey) clearFormDraft(localDraftKey);
+      if (expressActiveRef.current) {
+        void trackEvent("sits_express_published", { source: "/sits/create", metadata: { period: expressParams.period, sit_id: sitId } });
+      }
       toast({ title: "Annonce publiée", description: "Les gardiens peuvent maintenant postuler." });
       navigate(`/sits/${sitId}`);
     } catch (err: any) {
@@ -1836,7 +1846,8 @@ const CreateSit = () => {
     loading,
     hasProperty: !!property,
     hasPets: pets.length > 0,
-    hasPhoto,
+    // En express, la photo devient le geste 1 : elle n'est plus un prérequis d'entrée.
+    hasPhoto: expressParams.express ? true : hasPhoto,
     hasIdentity: isIdentityComplete(profileFirstName, profilePostalCode, profileCountry),
     entered: setupEntered,
     dismissed: setupDismissed,
@@ -1969,6 +1980,56 @@ const CreateSit = () => {
   };
 
 
+  // ── Parcours express (lot N5) ──────────────────────────────────────────
+  const expressActive = isExpressActive({
+    requested: expressParams.express, hasProperty: !!property, showSetup, loading,
+  });
+  expressActiveRef.current = expressActive;
+  const [expressUploading, setExpressUploading] = useState(false);
+  const expressPrefilledRef = useRef(false);
+  const expressTextEditedRef = useRef(false);
+  useEffect(() => {
+    if (!expressActive || expressPrefilledRef.current) return;
+    expressPrefilledRef.current = true;
+    void trackEvent("sits_express_seen", { source: "/sits/create", metadata: { period: expressParams.period, sit_id: draftId } });
+    // Textes proposés seulement sur les champs vides ou trop courts : un
+    // brouillon repris garde ce que le propriétaire a déjà écrit.
+    const merged = mergeExpressTexts(
+      { title, absenceReason, sitterExpectations },
+      proposeExpressTexts({ period: expressParams.period, pets, city: ownerCity }),
+      MIN_SUB_DESCRIPTION,
+    );
+    setTitle(merged.title);
+    setAbsenceReason(merged.absenceReason);
+    setSitterExpectations(merged.sitterExpectations);
+    setSpecificExpectations(joinExpectations(merged.absenceReason, merged.sitterExpectations));
+    if (expressParams.period === "noel" && !startDate && !endDate) {
+      setStartDate(NOEL_DATE_PRESETS[0].start);
+      setEndDate(NOEL_DATE_PRESETS[0].end);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [expressActive]);
+  const markExpressTextEdited = () => {
+    if (expressTextEditedRef.current) return;
+    expressTextEditedRef.current = true;
+    void trackEvent("sits_express_text_edited", { source: "/sits/create", metadata: { period: expressParams.period } });
+  };
+  const handleExpressPhoto = async (file: File) => {
+    if (!user) return;
+    setExpressUploading(true);
+    try {
+      const url = await uploadOwnerGalleryPhoto(user.id, file, ownerPhotos.length);
+      registerUploadedPhoto(url);
+      setCoverPhotoUrl(url);
+      void trackEvent("sits_express_photo_added", { source: "/sits/create", metadata: { period: expressParams.period } });
+    } catch (e) {
+      console.error("[CreateSit] express photo upload failed", e);
+      toast({ variant: "destructive", title: "Photo non ajoutée", description: "Réessayez dans un instant, votre saisie est conservée." });
+    } finally {
+      setExpressUploading(false);
+    }
+  };
+
   if (loading) {
     return <div className="p-6 md:p-10 max-w-3xl mx-auto text-muted-foreground">Chargement...</div>;
   }
@@ -2030,6 +2091,70 @@ const CreateSit = () => {
   }
 
 
+
+  if (expressActive) {
+    const expressReadiness = computeReadiness({
+      city: ownerCity,
+      // Le profil porte ses coordonnées dès que l'identité est complète :
+      // l'écran de prérequis géocode le code postal.
+      latitude: isIdentityComplete(profileFirstName, profilePostalCode, profileCountry) ? 0 : null,
+      hasProperty: !!property,
+      pets,
+      galleryPhotoCount: ownerPhotos.length,
+      propertyPhotoCount: property?.photos?.length ?? 0,
+      draftStartDates: [startDate || null],
+    });
+    return (
+      <>
+        <Head><meta name="robots" content="noindex, nofollow" /></Head>
+        <CreateSitExpress
+          period={expressParams.period}
+          readinessPercent={expressReadiness.percent}
+          propertyType={property?.type ?? null}
+          city={ownerCity}
+          postalCode={profilePostalCode}
+          pets={pets}
+          photoUrl={coverPhotoUrl || ownerPhotos[0] || property?.photos?.[0] || null}
+          uploading={expressUploading}
+          onPhotoFile={(f) => { void handleExpressPhoto(f); }}
+          startDate={startDate}
+          endDate={endDate}
+          onDates={(s, e, method) => {
+            setStartDate(s);
+            setEndDate(e);
+            void trackEvent("sits_express_dates_picked", { source: "/sits/create", metadata: { period: expressParams.period, method } });
+          }}
+          dateError={dateError || null}
+          flexibleDates={flexibleDates}
+          onFlexibleDates={setFlexibleDates}
+          title={title}
+          onTitle={(v) => { setTitle(v); markExpressTextEdited(); }}
+          absenceReason={absenceReason}
+          onAbsenceReason={(v) => { updateAbsenceReason(v); markExpressTextEdited(); }}
+          sitterExpectations={sitterExpectations}
+          onSitterExpectations={(v) => { updateSitterExpectations(v); markExpressTextEdited(); }}
+          blocking={getBlockingBlockers(publishBlockers)}
+          publishing={publishing}
+          onPublish={() => { void handlePublish(); }}
+          onBack={() => navigate("/dashboard")}
+        />
+        <AnimalMentionDialog
+          open={animalMentionOpen}
+          onOpenChange={setAnimalMentionOpen}
+          onAddPets={handleAnimalMentionAddPets}
+          onPublishAnyway={handleAnimalMentionPublishAnyway}
+        />
+        <PublishPhotoPromptDialog
+          open={photoPromptOpen}
+          onOpenChange={setPhotoPromptOpen}
+          photoCount={propertyPhotoCount}
+          showSurroundings={photoPromptSurroundings}
+          onAddPhotos={handlePhotoPromptAddPhotos}
+          onPublishAnyway={handlePhotoPromptPublishAnyway}
+        />
+      </>
+    );
+  }
 
   // Draft label
   const draftLabel = savingDraft

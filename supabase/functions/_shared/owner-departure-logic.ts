@@ -168,20 +168,15 @@ export interface ReadinessInput {
 export interface ReadinessItem { key: "commune" | "logement" | "animaux" | "photo" | "dates"; label: string; done: boolean }
 export interface Readiness { percent: number; items: ReadinessItem[]; todo: ReadinessItem[] }
 
-const SPECIES_LABEL: Record<string, string> = {
-  dog: "votre chien", cat: "votre chat", horse: "votre cheval", bird: "votre oiseau",
-  rodent: "votre rongeur", fish: "vos poissons", reptile: "votre reptile",
-  farm_animal: "votre animal de ferme", nac: "votre compagnon",
-};
-
+/**
+ * Noms seuls, jamais de genre deviné (lot N5) : « Mila », « Mila et Rex »,
+ * « Mila, Rex et Nala ». Sans nom : « Vos animaux ».
+ */
 function petLabel(pets: ReadinessInput["pets"]): string {
-  const first = pets[0];
-  const name = (first?.name ?? "").trim();
-  const kind = SPECIES_LABEL[String(first?.species ?? "")] ?? "votre animal";
-  const base = name ? `${name}, ${kind}` : kind.charAt(0).toUpperCase() + kind.slice(1);
-  if (pets.length === 2) return `${base} et un autre compagnon`;
-  if (pets.length > 2) return `${base} et ${pets.length - 1} autres compagnons`;
-  return base;
+  const names = pets.map((p) => (p.name ?? "").trim()).filter(Boolean);
+  if (names.length === 0) return "Vos animaux";
+  if (names.length === 1) return names[0];
+  return `${names.slice(0, -1).join(", ")} et ${names[names.length - 1]}`;
 }
 
 /** Cinq éléments de 20 % : commune, logement, animaux, photo, dates. */

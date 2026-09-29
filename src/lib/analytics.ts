@@ -318,6 +318,11 @@ export type EventType =
   | "sits_create_setup_shown"                   // Écran de mise en route affiché (missing)
   | "sits_create_setup_completed"               // Mise en route terminée (duration_ms, filled)
   | "sits_create_setup_quit"                    // Mise en route quittée vers le tableau de bord (missing)
+  | "sits_express_seen"                         // Parcours express affiché (lot N5, period)
+  | "sits_express_photo_added"                  // Photo ajoutée depuis le parcours express (period)
+  | "sits_express_dates_picked"                 // Dates choisies en express (period, method preset ou autres)
+  | "sits_express_text_edited"                  // Texte proposé modifié en express (period)
+  | "sits_express_published"                    // Annonce publiée depuis le parcours express (period)
   | "application_submitted"                     // Candidature envoyée (source, used_alma_draft, message_length)
   | "application_sent_unedited_draft"           // Candidature envoyée avec brouillon Alma non modifié (sit_id)
   // Vague 14, tracking des sections vedettes des dashboards ---------------

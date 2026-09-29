@@ -19,7 +19,7 @@ Deno.test('objet, enregistrement et expéditeur fondateurs', () => {
 
 Deno.test('textes exacts, cinq boutons à jeton, aucun tiret long', () => {
   const h = html({ firstName: 'camille', periodBaseUrl: BASE })
-  for (const s of ['Vous partez quand, cette année ?', 'Bonjour Camille,', 'Pour Noël', 'Cet hiver', 'Au printemps', 'Cet été', 'Je verrai plus tard', 'Elisa et Jérémie']) assert(h.includes(s), s)
+  for (const s of ['Vous partez quand, cette année ?', 'Bonjour Camille,', 'Pour Noël', 'Cet hiver', 'Au printemps', 'Cet été', 'Je verrai plus tard', 'Elisa et Jérémie', '3 sur 4', 'des annonces publiées reçoivent des candidatures. Les premières arrivent en général sous 24 heures.']) assert(h.includes(s), s)
   for (const p of ['noel', 'hiver', 'printemps', 'ete', 'plus_tard']) assert(h.includes(`${BASE}?p=${p}&`), p)
   const t = text({ firstName: 'camille', periodBaseUrl: BASE })
   for (const s of [h, t]) { assert(!s.includes('\u2014')); assert(!s.includes('\u2013')) }
