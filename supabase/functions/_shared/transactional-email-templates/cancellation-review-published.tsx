@@ -18,19 +18,19 @@ interface Props {
 const CancellationReviewPublishedEmail = ({ targetFirstName, profileUrl }: Props) => (
   <Html lang="fr" dir="ltr">
     <BrandedHead />
-    <Preview>Un avis d'annulation a été publié sur votre profil</Preview>
+    <Preview>Un avis d'annulation vous concernant a été validé</Preview>
     <Body style={main}>
       <Container style={container}>
         <BrandHeader />
-        <Heading style={h1}>Avis d'annulation publié</Heading>
+        <Heading style={h1}>Avis d'annulation validé</Heading>
         <Text style={text}>
           Bonjour {targetFirstName || 'membre'},
         </Text>
         <Text style={text}>
-          Un avis d'annulation a été validé et publié sur votre profil. Vous avez <strong>7 jours</strong> pour y répondre si vous le souhaitez.
+          Un avis d'annulation vous concernant a été validé par notre équipe. Il reste privé : seule notre équipe le consulte, dans l'historique de la garde. Pour y apporter votre version, répondez simplement à cet email.
         </Text>
-        <Button style={button} href={profileUrl || `${SITE_URL}/dashboard`}>
-          Voir mon profil
+        <Button style={button} href={`${SITE_URL}/dashboard`}>
+          Ouvrir mon tableau de bord
         </Button>
         <LegalFooter
           purpose="la gestion des avis"
@@ -46,8 +46,8 @@ const CancellationReviewPublishedEmail = ({ targetFirstName, profileUrl }: Props
 
 export const template = {
   component: CancellationReviewPublishedEmail,
-  subject: 'Un avis d’annulation a été publié sur votre profil',
-  displayName: 'Avis d\'annulation publié',
+  subject: 'Un avis d’annulation vous concernant a été validé',
+  displayName: 'Avis d\'annulation validé',
   previewData: { targetFirstName: 'Marie', profileUrl: 'https://guardiens.fr/gardiens/123' },
 } satisfies TemplateEntry
 
