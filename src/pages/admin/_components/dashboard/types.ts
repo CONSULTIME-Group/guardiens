@@ -19,7 +19,7 @@ export interface ActivityItem {
   text: string;
   time: string;
   link: string;
-  type: "inscription" | "annonce" | "avis" | "candidature" | "publication" | "depublication" | "suppression";
+  type: "inscription" | "annonce" | "avis" | "candidature" | "publication" | "confirmation" | "expiration" | "brouillon" | "depublication" | "suppression";
 }
 
 export interface WeeklySignup {

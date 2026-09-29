@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { fetchAllRows } from "@/lib/admin/fetchAllRows";
 import { TRUNCATED_NOTICE } from "@/lib/admin/csv";
 import { supabase } from "@/integrations/supabase/client";
+import { formatOpenRate, openRatePct } from "@/lib/admin/openRate";
+import { reportAdminReadError, UNAVAILABLE_LABEL } from "@/lib/admin/readError";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -96,6 +98,12 @@ const SEQUENCE_LABELS: Record<string, string> = {
   "onboarding-sitter": "Onboarding Gardien",
   "reactivation-d30": "Réactivation des inactifs (J+30)",
   "sitter-encourage-candidature": "Gardiens sans candidature (J+14)",
+  "complete-affinity-owner": "Affinité à compléter, propriétaires",
+  "complete-affinity-sitter": "Affinité à compléter, gardiens",
+  "referral-boost-monthly": "Parrainage, rappel mensuel",
+  "discover-mutual-aid": "Découverte de l'entraide",
+  "owner-no-sit-relance": "Propriétaires sans annonce",
+  "helper-to-guard": "De l'entraide à la garde",
 };
 
 const TEMPLATE_LABELS: Record<string, string> = {
@@ -106,6 +114,16 @@ const TEMPLATE_LABELS: Record<string, string> = {
   "availability-nudge": "Rappel disponibilités",
   "reactivation-d30": "Réactivation après inactivité",
   "sitter-encourage-candidature": "Encouragement à candidater",
+  "owner-no-sit-j3": "Propriétaire sans annonce (J+3)",
+  "owner-no-sit-j10": "Propriétaire sans annonce (J+10)",
+  "owner-no-sit-j21": "Propriétaire sans annonce (J+21)",
+  "helper-to-guard": "De l'entraide à la garde",
+  "discover-mutual-aid-0": "Découverte de l'entraide, premier email",
+  "discover-mutual-aid-1": "Découverte de l'entraide, deuxième email",
+  "discover-mutual-aid-2": "Découverte de l'entraide, troisième email",
+  "affinity-completion-owner": "Affinité à compléter, propriétaire",
+  "affinity-completion-sitter": "Affinité à compléter, gardien",
+  "referral-boost-monthly": "Parrainage, rappel mensuel",
 };
 
 const REASON_LABELS: Record<string, string> = {
@@ -193,6 +211,8 @@ const AdminNurturing = () => {
   const [lastRunSent, setLastRunSent] = useState<boolean>(false);
   const [sequences, setSequences] = useState<SequenceRow[]>([]);
   const [sequenceSteps, setSequenceSteps] = useState<SequenceStepRow[]>([]);
+  const [engagementError, setEngagementError] = useState(false);
+  const [delivered, setDelivered] = useState<Set<string>>(new Set());
   const [recipientsDialog, setRecipientsDialog] = useState<{ key: string; label: string } | null>(null);
   const sinceIso = useMemo(() => new Date(Date.now() - RANGE_HOURS[range] * 3600_000).toISOString(), [range]);
 
@@ -278,20 +298,28 @@ const AdminNurturing = () => {
       new Set(((logsRes.data ?? []) as LogRow[]).map((l) => l.message_id).filter(Boolean) as string[])
     );
     if (messageIds.length > 0) {
-      // Supabase IN limite ~ 1000, on découpe par lots
+      // Lot A10 : paquets de 150 identifiants (au-delà de ~390, l'URL dépasse la limite).
       const chunks: string[][] = [];
-      for (let i = 0; i < messageIds.length; i += 500) chunks.push(messageIds.slice(i, i + 500));
+      for (let i = 0; i < messageIds.length; i += 150) chunks.push(messageIds.slice(i, i + 150));
       const all: EngagementRow[] = [];
+      const deliveredIds = new Set<string>();
+      let failed = false;
       for (const c of chunks) {
-        const r = await supabase
-          .from("email_engagement_events")
-          .select("message_id, event_type, target_url")
-          .in("message_id", c);
-        if (!r.error && r.data) all.push(...(r.data as EngagementRow[]));
+        const [r, d] = await Promise.all([
+          supabase.from("email_engagement_events").select("message_id, event_type, target_url").in("message_id", c),
+          supabase.from("email_send_log").select("message_id").in("message_id", c).not("delivered_at", "is", null),
+        ]);
+        if (r.error || d.error) { failed = true; reportAdminReadError("Nurturing : engagement", r.error ?? d.error); break; }
+        all.push(...((r.data ?? []) as EngagementRow[]));
+        for (const x of (d.data ?? []) as { message_id: string }[]) deliveredIds.add(x.message_id);
       }
-      setEngagement(all);
+      setEngagementError(failed);
+      setEngagement(failed ? [] : all);
+      setDelivered(deliveredIds);
     } else {
+      setEngagementError(false);
       setEngagement([]);
+      setDelivered(new Set());
     }
 
     // Dernier run du cron evaluate-journeys : on lit cron_run_log (populé par
@@ -536,8 +564,8 @@ const AdminNurturing = () => {
 
   // Stats agrégées par séquence (logs + journeys + engagement)
   const sequenceMetrics = useMemo(() => {
-    type M = { sent: number; failed: number; exited: number; activeJourneys: number; totalJourneys: number; opens: number; clicks: number; actions: number };
-    const def = (): M => ({ sent: 0, failed: 0, exited: 0, activeJourneys: 0, totalJourneys: 0, opens: 0, clicks: 0, actions: 0 });
+    type M = { sent: number; delivered: number; failed: number; exited: number; activeJourneys: number; totalJourneys: number; opens: number; clicks: number; actions: number };
+    const def = (): M => ({ sent: 0, delivered: 0, failed: 0, exited: 0, activeJourneys: 0, totalJourneys: 0, opens: 0, clicks: 0, actions: 0 });
     const m = new Map<string, M>();
     for (const l of logs) {
       const k = l.user_journeys?.sequence_key;
@@ -545,6 +573,7 @@ const AdminNurturing = () => {
       const r = m.get(k) ?? def();
       if (l.sent) {
         r.sent++;
+        if (l.message_id && delivered.has(l.message_id)) r.delivered++;
         const ev = l.message_id ? eventsByMid.get(l.message_id) : undefined;
         if (ev?.open) r.opens++;
         if (ev?.click) r.clicks++;
@@ -595,15 +624,16 @@ const AdminNurturing = () => {
 
   // Engagement global
   const engagementStats = useMemo(() => {
-    let sent = 0, opens = 0, clicks = 0, actions = 0;
+    let sent = 0, deliveredN = 0, opens = 0, clicks = 0, actions = 0;
     for (const m of sequenceMetrics.values()) {
       sent += m.sent;
+      deliveredN += m.delivered;
       opens += m.opens;
       clicks += m.clicks;
       actions += m.actions;
     }
     const pct = (n: number) => sent > 0 ? Math.round((n / sent) * 1000) / 10 : 0;
-    return { sent, opens, clicks, actions, openRate: pct(opens), clickRate: pct(clicks), actionRate: pct(actions) };
+    return { sent, delivered: deliveredN, opens, clicks, actions, openRate: openRatePct(opens, deliveredN) ?? 0, clickRate: pct(clicks), actionRate: pct(actions) };
   }, [sequenceMetrics]);
 
   // Classement des étapes (template_name + step_order) par taux d'action
@@ -612,6 +642,7 @@ const AdminNurturing = () => {
     stepOrder: number;
     templateName: string;
     sent: number;
+    delivered: number;
     opens: number;
     clicks: number;
     exited: number;
@@ -632,6 +663,7 @@ const AdminNurturing = () => {
           stepOrder: l.step_order,
           templateName: l.template_name,
           sent: 0,
+          delivered: 0,
           opens: 0,
           clicks: 0,
           exited: 0,
@@ -642,6 +674,7 @@ const AdminNurturing = () => {
         } as StepStat);
       if (l.sent) {
         r.sent++;
+        if (l.message_id && delivered.has(l.message_id)) r.delivered++;
         const ev = l.message_id ? eventsByMid.get(l.message_id) : undefined;
         if (ev?.open) r.opens++;
         if (ev?.click) {
@@ -656,13 +689,13 @@ const AdminNurturing = () => {
     }
     const arr = Array.from(map.values());
     for (const r of arr) {
-      r.openRate = r.sent > 0 ? Math.round((r.opens / r.sent) * 1000) / 10 : 0;
+      r.openRate = openRatePct(r.opens, r.delivered) ?? 0;
       r.clickRate = r.sent > 0 ? Math.round((r.clicks / r.sent) * 1000) / 10 : 0;
       const denom = r.sent + r.exited;
       r.actionRate = denom > 0 ? Math.round((r.actions / denom) * 1000) / 10 : 0;
     }
     return arr.sort((a, b) => b.actionRate - a.actionRate || b.sent - a.sent);
-  }, [logs, eventsByMid]);
+  }, [logs, eventsByMid, delivered]);
 
   // Classement des CTA cliqués (par target_url)
   type CtaStat = { url: string; clicks: number; uniqueSends: number; templates: Set<string> };
@@ -858,7 +891,7 @@ const AdminNurturing = () => {
                   />
                   <StatCard
                     label="Taux d'ouverture"
-                    value={engagementStats.sent > 0 ? `${engagementStats.openRate}%` : ","}
+                    value={engagementError ? UNAVAILABLE_LABEL : formatOpenRate(engagementStats.opens, engagementStats.delivered)}
                     hint={`${engagementStats.opens} ouvertures (sous-estimé : Apple Mail Privacy)`}
                   />
                   <StatCard
@@ -941,7 +974,7 @@ const AdminNurturing = () => {
                 ) : (
                   <div className="space-y-2">
                     {sequences.map((s) => {
-                      const m = sequenceMetrics.get(s.key) ?? { sent: 0, failed: 0, exited: 0, activeJourneys: 0, totalJourneys: 0, opens: 0, clicks: 0, actions: 0 };
+                      const m = sequenceMetrics.get(s.key) ?? { sent: 0, delivered: 0, failed: 0, exited: 0, activeJourneys: 0, totalJourneys: 0, opens: 0, clicks: 0, actions: 0 };
                       return (
                         <div key={s.key} className="flex items-center justify-between gap-3 border border-border rounded-md px-3 py-2">
                           <div className="flex items-center gap-2 flex-wrap">
@@ -1030,7 +1063,7 @@ const AdminNurturing = () => {
                                 </div>
                               </TableCell>
                               <TableCell className="text-right text-sm">{s.sent}</TableCell>
-                              <TableCell className="text-right text-sm">{s.sent > 0 ? `${s.openRate}%` : ","}</TableCell>
+                              <TableCell className="text-right text-sm">{engagementError ? UNAVAILABLE_LABEL : formatOpenRate(s.opens, s.delivered)}</TableCell>
                               <TableCell className="text-right text-sm">{s.sent > 0 ? `${s.clickRate}%` : ","}</TableCell>
                               <TableCell className={`text-right text-sm ${tone}`}>
                                 {s.sent + s.exited > 0 ? `${s.actionRate}%` : ","}
@@ -1106,7 +1139,7 @@ const AdminNurturing = () => {
                   <p className="text-sm text-muted-foreground py-4 text-center">Aucune séquence configurée.</p>
                 ) : (
                   sequences.map((s) => {
-                    const m = sequenceMetrics.get(s.key) ?? { sent: 0, failed: 0, exited: 0, activeJourneys: 0, totalJourneys: 0, opens: 0, clicks: 0, actions: 0 };
+                    const m = sequenceMetrics.get(s.key) ?? { sent: 0, delivered: 0, failed: 0, exited: 0, activeJourneys: 0, totalJourneys: 0, opens: 0, clicks: 0, actions: 0 };
                     const steps = stepsBySequence.get(s.key) ?? [];
                     const ruleType = s.enrollment_rule?.type ?? ",";
                     const ruleLabel = RULE_TYPE_LABELS[ruleType] ?? ruleType;
@@ -1165,9 +1198,9 @@ const AdminNurturing = () => {
                           <div className="bg-primary/5 border border-primary/15 rounded px-2 py-1.5">
                             <p className="text-muted-foreground">Taux d'ouverture</p>
                             <p className="font-semibold text-foreground text-base">
-                              {m.sent > 0 ? `${Math.round((m.opens / m.sent) * 100)}%` : ","}
+                              {engagementError ? UNAVAILABLE_LABEL : formatOpenRate(m.opens, m.delivered)}
                             </p>
-                            <p className="text-[10px] text-muted-foreground">{m.opens} / {m.sent}</p>
+                            <p className="text-[10px] text-muted-foreground">{m.opens} ouverts sur {m.delivered} livrés</p>
                           </div>
                           <div className="bg-primary/5 border border-primary/15 rounded px-2 py-1.5">
                             <p className="text-muted-foreground">Taux de clic CTA</p>

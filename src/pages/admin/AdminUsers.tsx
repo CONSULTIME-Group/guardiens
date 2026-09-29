@@ -4,6 +4,7 @@ import { createSeqGuard } from "@/lib/admin/requestSeq";
 import { buildCsv, downloadCsv } from "@/lib/admin/csv";
 import { UrlFilterNotice } from "@/components/admin/UrlFilterNotice";
 import { supabase } from "@/integrations/supabase/client";
+import { reportAdminReadError, UNAVAILABLE_LABEL } from "@/lib/admin/readError";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -53,6 +54,7 @@ const verificationLabels: Record<string, { label: string; variant: "default" | "
 const statusLabels: Record<string, { label: string; variant: "default" | "secondary" | "outline" | "destructive" }> = {
   active: { label: "Actif", variant: "default" },
   suspended: { label: "Suspendu", variant: "destructive" },
+  deleted: { label: "Supprimé", variant: "secondary" },
   deletion_pending: { label: "Suppression en cours", variant: "secondary" },
 };
 
@@ -83,7 +85,8 @@ const AdminUsers = () => {
   };
   const usersSeq = useRef(createSeqGuard());
   const [countryStats, setCountryStats] = useState<{ intl: number; codes: string[] }>({ intl: 0, codes: [] });
-  const [kpis, setKpis] = useState<{ total: number; active: number; suspended: number; verified: number; newLast7d: number } | null>(null);
+  const [kpisError, setKpisError] = useState(false);
+  const [kpis, setKpis] = useState<{ deleted: number; total: number; active: number; suspended: number; verified: number; newLast7d: number } | null>(null);
   const [exporting, setExporting] = useState(false);
 
   // Modal states
@@ -204,7 +207,9 @@ const AdminUsers = () => {
 
     if (focusUserId) query = query.eq("id", focusUserId);
     if (filterRole !== "all") query = query.eq("role", filterRole as any);
-    if (filterVerification !== "all") query = query.eq("identity_verification_status", filterVerification);
+    // Lot A10 : un statut vide compte comme « Non vérifié ».
+    if (filterVerification === "not_submitted") query = query.or("identity_verification_status.eq.not_submitted,identity_verification_status.is.null");
+    else if (filterVerification !== "all") query = query.eq("identity_verification_status", filterVerification);
 
     if (filterCountry === "FR") {
       query = query.or("country.eq.FR,country.is.null");
@@ -308,14 +313,19 @@ const AdminUsers = () => {
   useEffect(() => {
     (async () => {
       const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-      const [totalRes, activeRes, suspRes, verifRes, newRes] = await Promise.all([
+      const res = await Promise.all([
         supabase.from("profiles").select("id", { count: "exact", head: true }),
         supabase.from("profiles").select("id", { count: "exact", head: true }).or("account_status.eq.active,account_status.is.null"),
         supabase.from("profiles").select("id", { count: "exact", head: true }).eq("account_status", "suspended"),
         supabase.from("profiles").select("id", { count: "exact", head: true }).eq("identity_verification_status", "verified"),
         supabase.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", sevenDaysAgo),
+        supabase.from("profiles").select("id", { count: "exact", head: true }).eq("account_status", "deleted"),
       ]);
+      const failed = res.find((r) => r.error);
+      if (failed) { reportAdminReadError("Membres : indicateurs", failed.error); setKpisError(true); return; }
+      const [totalRes, activeRes, suspRes, verifRes, newRes, delRes] = res;
       setKpis({
+        deleted: delRes.count ?? 0,
         total: totalRes.count ?? 0,
         active: activeRes.count ?? 0,
         suspended: suspRes.count ?? 0,
@@ -345,7 +355,9 @@ const AdminUsers = () => {
 
       if (focusUserId) query = query.eq("id", focusUserId);
       if (filterRole !== "all") query = query.eq("role", filterRole as any);
-      if (filterVerification !== "all") query = query.eq("identity_verification_status", filterVerification);
+      // Lot A10 : un statut vide compte comme « Non vérifié ».
+    if (filterVerification === "not_submitted") query = query.or("identity_verification_status.eq.not_submitted,identity_verification_status.is.null");
+    else if (filterVerification !== "all") query = query.eq("identity_verification_status", filterVerification);
       if (filterCountry === "FR") query = query.or("country.eq.FR,country.is.null");
       else if (filterCountry === "INTL") query = query.not("country", "is", null).neq("country", "FR");
       else if (filterCountry !== "all") query = query.eq("country", filterCountry);
@@ -629,11 +641,12 @@ const AdminUsers = () => {
       </div>
 
       {/* KPI banner */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
         {[
           { label: "Total inscrits", value: kpis?.total },
           { label: "Actifs", value: kpis?.active },
           { label: "Suspendus", value: kpis?.suspended },
+          { label: "Supprimés", value: kpis?.deleted },
           { label: "Vérifiés", value: kpis?.verified },
           { label: "Hors France", value: intlCount },
           { label: "Nouveaux 7 jours", value: kpis?.newLast7d },
@@ -642,7 +655,7 @@ const AdminUsers = () => {
             <CardContent className="p-4">
               <p className="text-xs text-muted-foreground">{k.label}</p>
               <p className="text-2xl font-bold text-foreground mt-1">
-                {k.value === undefined ? "·" : k.value.toLocaleString("fr-FR")}
+                {kpisError && k.label !== "Hors France" ? UNAVAILABLE_LABEL : k.value === undefined ? "·" : k.value.toLocaleString("fr-FR")}
               </p>
             </CardContent>
           </Card>
@@ -795,7 +808,7 @@ const AdminUsers = () => {
                       </div>
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
-                      {user.postal_code || ","}
+                      {user.postal_code || "Non renseigné"}
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {getDeptLabel(user.postal_code)}

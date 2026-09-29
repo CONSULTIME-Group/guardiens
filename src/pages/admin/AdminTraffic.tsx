@@ -8,6 +8,7 @@ import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import MetricCard from "@/components/admin/seo/MetricCard";
 import TrafficSources from "@/components/admin/seo/TrafficSources";
 import { useSeoData } from "@/hooks/useSeoData";
+import { formatDurationFr, periodLabel, fmtInt } from "@/lib/admin/seoMetrics";
 
 const AdminAnalytics = lazy(() => import("./AdminAnalytics"), "AdminAnalytics");
 const AdminSEO = lazy(() => import("./AdminSEO"), "AdminSEO");
@@ -20,11 +21,7 @@ function pctChange(current: number, previous: number): number | undefined {
   return ((current - previous) / previous) * 100;
 }
 
-function formatDuration(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = Math.round(seconds % 60);
-  return `${m}m ${s < 10 ? "0" : ""}${s}s`;
-}
+const formatDuration = formatDurationFr;
 
 const AdminTraffic = () => {
   const [params, setParams] = useSearchParams();
@@ -37,36 +34,38 @@ const AdminTraffic = () => {
   const ga4 = data?.ga4;
   const gsc = data?.gsc;
 
+  const ga4Period = periodLabel(data?.period?.ga4Start, data?.period?.ga4End, "30 jours");
+  const gscPeriod = periodLabel(data?.period?.gscStart, data?.period?.gscEnd, "Search Console");
   const kpis = useMemo(() => ([
     {
-      title: "Sessions (30j)",
+      title: "Sessions",
       icon: <Users className="h-4 w-4 text-primary" />,
-      value: ga4 ? ga4.current.sessions.toLocaleString() : "·",
-      subtitle: "GA4",
+      value: ga4 ? fmtInt(ga4.current.sessions) : "·",
+      subtitle: `${ga4Period} · GA4, tous canaux`,
       change: ga4?.previous ? pctChange(ga4.current.sessions, ga4.previous.sessions) : undefined,
     },
     {
       title: "Visiteurs uniques",
       icon: <Users className="h-4 w-4 text-primary" />,
-      value: ga4 ? ga4.current.activeUsers.toLocaleString() : "·",
-      subtitle: "30 derniers jours",
+      value: ga4 ? fmtInt(ga4.current.activeUsers) : "·",
+      subtitle: `${ga4Period} · GA4`,
       change: ga4?.previous ? pctChange(ga4.current.activeUsers, ga4.previous.activeUsers) : undefined,
     },
     {
       title: "Clics SEO",
       icon: <MousePointerClick className="h-4 w-4 text-primary" />,
-      value: gsc ? gsc.current.clicks.toLocaleString() : "·",
-      subtitle: "Google Search Console",
+      value: gsc ? fmtInt(gsc.current.clicks) : "·",
+      subtitle: gscPeriod,
       change: gsc?.previous ? pctChange(gsc.current.clicks, gsc.previous.clicks) : undefined,
     },
     {
       title: "Temps moyen",
       icon: <Timer className="h-4 w-4 text-primary" />,
       value: ga4 ? formatDuration(ga4.current.averageSessionDuration) : "·",
-      subtitle: "Par session",
+      subtitle: `Par session · ${ga4Period}`,
       change: ga4?.previous ? pctChange(ga4.current.averageSessionDuration, ga4.previous.averageSessionDuration) : undefined,
     },
-  ]), [ga4, gsc]);
+  ]), [ga4, gsc, ga4Period, gscPeriod]);
 
   return (
     <div className="space-y-6">
@@ -81,7 +80,7 @@ const AdminTraffic = () => {
       {/* Bloc synthèse trafic */}
       <section className="space-y-3">
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-          Synthèse (30 jours)
+          Synthèse
         </h2>
         {loading && !data ? (
           <Card>
@@ -145,6 +144,7 @@ const AdminTraffic = () => {
           <Suspense fallback={<div className="p-8 text-center text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin inline" /></div>}>
             <AdminSignupFunnelTab />
           </Suspense>
+          {/* Lot A10 : entonnoir unique = « Entonnoir chiffré » ci-dessus. Ce bloc détaille seulement l'étape formulaire. */}
           <Suspense fallback={<div className="p-8 text-center text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin inline" /></div>}>
             <SignupFormSubStepsFunnel />
           </Suspense>

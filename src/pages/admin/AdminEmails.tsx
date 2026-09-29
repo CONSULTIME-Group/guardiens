@@ -22,6 +22,7 @@ import SitterDigestTab from "./_components/SitterDigestTab";
 import MissionDigestTab from "./_components/MissionDigestTab";
 import MutualAidDashboardTab from "./_components/MutualAidDashboardTab";
 import { supabase } from "@/integrations/supabase/client";
+import { formatOpenRate, openRatePct } from "@/lib/admin/openRate";
 import { EMAIL_TRACKING_START, clampToTrackingStart, isUninstrumentedTemplate } from "@/lib/emailTracking";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -813,7 +814,7 @@ const EngagementTab = () => {
     const lines = rows.map((r) =>
       [
         r.template, r.sent, r.delivered, r.opened, r.clicked, r.bounced, r.complained, r.unsubscribed,
-        pct(r.delivered, r.sent), pct(r.opened, r.delivered), pct(r.clicked, r.delivered),
+        pct(r.delivered, r.sent), formatOpenRate(r.opened, r.delivered), pct(r.clicked, r.delivered),
         pct(r.unsubscribed, r.delivered), pct(r.bounced, r.sent),
       ].join(",")
     );
@@ -857,7 +858,7 @@ const EngagementTab = () => {
           <div className="text-xs text-muted-foreground">Livraison</div>
         </CardContent></Card>
         <Card><CardContent className="pt-4 pb-3 text-center">
-          <div className="text-2xl font-bold text-success">{pct(totals.opened, totals.delivered)}</div>
+          <div className="text-2xl font-bold text-success">{formatOpenRate(totals.opened, totals.delivered)}</div>
           <div className="text-xs text-muted-foreground">Ouverture</div>
         </CardContent></Card>
         <Card><CardContent className="pt-4 pb-3 text-center">
@@ -912,7 +913,7 @@ const EngagementTab = () => {
                   <TableCell className="text-xs text-right">{r.sent}</TableCell>
                   <TableCell className="text-xs text-right text-muted-foreground">{r.delivered} <span className="text-[10px]">({pct(r.delivered, r.sent)})</span></TableCell>
                   <TableCell className="text-xs text-right">
-                    <span className="font-medium">{pct(r.opened, r.delivered)}</span>
+                    <span className="font-medium">{formatOpenRate(r.opened, r.delivered)}</span>
                     <span className="text-muted-foreground text-[10px] ml-1">({r.opened})</span>
                   </TableCell>
                   <TableCell className="text-xs text-right">

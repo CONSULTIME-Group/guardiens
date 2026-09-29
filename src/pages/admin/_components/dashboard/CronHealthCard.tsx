@@ -56,7 +56,7 @@ const STATE_STYLE: Record<CronState, string> = {
 const STATE_LABEL: Record<CronState, string> = {
   critical: "Critique",
   degraded: "Dégradé",
-  ok: "OK",
+  ok: "Sain",
 };
 
 function formatAge(minutes: number | null): string {
@@ -69,6 +69,17 @@ function formatAge(minutes: number | null): string {
 }
 
 const pluralize = (n: number, one: string, many: string) => (n > 1 ? many : one);
+
+/** Lot A10 : statuts d'exécution en français. */
+export const RUN_STATUS_FR: Record<string, string> = {
+  success: "réussi",
+  failed: "échec",
+  partial: "partiel",
+};
+
+export function cronSummary(ok: number, degraded: number, critical: number): string {
+  return `${ok} ${pluralize(ok, "cron sain", "crons sains")}, ${degraded} ${pluralize(degraded, "dégradé", "dégradés")}, ${critical} ${pluralize(critical, "critique", "critiques")}`;
+}
 
 const CronRow = ({ r }: { r: CronHealth }) => (
   <li className="flex items-start gap-3 rounded-lg border p-3">
@@ -87,14 +98,15 @@ const CronRow = ({ r }: { r: CronHealth }) => (
       </p>
       <p className="text-xs text-muted-foreground">
         Dernière exécution : {formatAge(r.age_minutes)} ·
-        {" "}Statut : {r.last_status ?? "inconnu"} ·
+        {" "}Statut : {r.last_status ? RUN_STATUS_FR[r.last_status] ?? r.last_status : "inconnu"} ·
         {" "}Échecs 7 j : {r.failed_7d}/{r.runs_7d}
         {" "}· Partiels 7 j : {r.partial_7d ?? 0}/{r.runs_7d}
       </p>
       {r.last_error ? (
-        <p className="text-xs text-destructive mt-1 truncate">
-          {r.last_error}
-        </p>
+        <details className="mt-1 text-xs">
+          <summary className="cursor-pointer text-destructive">Voir l'erreur technique</summary>
+          <p className="mt-1 break-words text-muted-foreground">{r.last_error}</p>
+        </details>
       ) : null}
     </div>
   </li>
@@ -122,7 +134,7 @@ export const CronHealthCard = () => {
   const ok = rows.filter((r) => r.state === "ok");
   const attention = [...critical, ...degraded];
 
-  const summary = `${ok.length} ${pluralize(ok.length, "cron", "crons")} OK, ${degraded.length} ${pluralize(degraded.length, "dégradé", "dégradés")}, ${critical.length} ${pluralize(critical.length, "critique", "critiques")}`;
+  const summary = cronSummary(ok.length, degraded.length, critical.length);
 
   return (
     <Card>
@@ -167,7 +179,7 @@ export const CronHealthCard = () => {
               <Accordion type="single" collapsible>
                 <AccordionItem value="healthy" className="border-none">
                   <AccordionTrigger className="py-2 text-sm text-muted-foreground hover:no-underline">
-                    Voir les {ok.length} crons sains
+                    Voir {ok.length > 1 ? `les ${ok.length} crons sains` : "le cron sain"}
                   </AccordionTrigger>
                   <AccordionContent>
                     <ul className="space-y-2">

@@ -29,6 +29,8 @@ import { AcquisitionPilotCard } from "@/pages/admin/_components/dashboard/Acquis
 import AiAcquisitionCard from "@/pages/admin/_components/dashboard/AiAcquisitionCard";
 import { useSeoData, type GSCRow } from "@/hooks/useSeoData";
 import type { BingPeriodDays } from "@/hooks/useBingData";
+import { articlesWithoutImpressions, pagesFromSeo, formatDurationFr, periodLabel, organicSessions, fmtInt } from "@/lib/admin/seoMetrics";
+import { reportAdminReadError, UNAVAILABLE_LABEL } from "@/lib/admin/readError";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 function downloadCsv(filename: string, rows: GSCRow[]) {
@@ -50,11 +52,7 @@ function pctChange(current: number, previous: number): number | undefined {
   return ((current - previous) / previous) * 100;
 }
 
-function formatDuration(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = Math.round(seconds % 60);
-  return `${m}m ${s < 10 ? "0" : ""}${s}s`;
-}
+const formatDuration = formatDurationFr;
 
 const AdminSEO = () => {
   const { data: seoData, loading, error, refresh } = useSeoData();
@@ -77,13 +75,16 @@ const AdminSEO = () => {
       setArticleStats({ published: published ?? 0, total: total ?? 0 });
     };
     const fetchProfileCount = async () => {
-      const { count } = await supabase
+      const { count, error } = await supabase
         .from("profiles")
-        .select("id", { count: "exact", head: true });
+        .select("id", { count: "exact", head: true })
+        .or("account_status.is.null,account_status.neq.deleted");
+      if (error) { reportAdminReadError("Trafic : profils inscrits", error); setProfileCount(null); return; }
       setProfileCount(count ?? 0);
     };
     const fetchExistingSlugs = async () => {
-      const { data } = await supabase.from("articles").select("slug, published_at, published");
+      const { data, error } = await supabase.from("articles").select("slug, published_at, published").order("id").range(0, 9999);
+      if (error) { reportAdminReadError("Trafic : articles publiés", error); return; }
       if (data) {
         setExistingSlugs(new Set(data.map((a) => a.slug)));
         setPublishedArticles(data.filter((a) => a.published).map((a) => ({ slug: a.slug, published_at: a.published_at })));
@@ -104,7 +105,7 @@ const AdminSEO = () => {
   if (!loading && error === "GOOGLE_SERVICE_ACCOUNT_JSON not configured") {
     return (
       <div className="space-y-8">
-        <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Dashboard SEO</h1>
+        <h2 className="font-heading text-2xl font-bold tracking-tight text-foreground">Dashboard SEO</h2>
         <Card className="border-warning">
           <CardContent className="py-6">
             <div className="flex items-start gap-3">
@@ -130,25 +131,13 @@ const AdminSEO = () => {
 
   const gscAvailable = gsc && (gsc.current.clicks > 0 || gsc.current.impressions > 0);
 
-  // Compute KPI 2: Pages with GSC data (at least 1 impression)
-  const pagesWithGSC = gscAvailable && gsc.topPages
-    ? gsc.topPages.filter((p) => p.impressions > 0).length
-    : null;
-
-  // Compute KPI 3: Published articles >7 days old with 0 GSC impressions
-  const noImpressionCount = (() => {
-    if (!gscAvailable || !gsc?.topPages) return null;
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    const pagesWithImpressions = new Set(gsc.topPages.filter((p) => p.impressions > 0).map((p) => {
-      const url = p.keys?.[0] || "";
-      try { return new URL(url).pathname.replace(/^\/articles\//, "").replace(/\/$/, ""); } catch { return url; }
-    }));
-    return publishedArticles.filter((a) => {
-      if (!a.published_at) return false;
-      return new Date(a.published_at) < sevenDaysAgo && !pagesWithImpressions.has(a.slug);
-    }).length;
-  })();
+  // Lot A10 : liste complète des pages Google (plus de top 25) et chemin /actualites/.
+  const allGscPages = pagesFromSeo(gsc);
+  const pagesWithGSC = gscAvailable ? allGscPages.filter((p) => p.impressions > 0).length : null;
+  const noImpressionCount = gscAvailable ? articlesWithoutImpressions(publishedArticles, allGscPages).length : null;
+  const organic = organicSessions(ga4?.channels);
+  const gscPeriod = periodLabel(seoData?.period?.gscStart, seoData?.period?.gscEnd, "Période GSC");
+  const ga4Period = periodLabel(seoData?.period?.ga4Start, seoData?.period?.ga4End, "Période GA4");
 
   // Compute KPI 4: Priority articles to create
   const priorityToCreate = PRIORITY_ARTICLES.filter((a) => !existingSlugs.has(a.slug)).length;
@@ -180,18 +169,17 @@ const AdminSEO = () => {
           <MetricCard
             title="Sessions organiques"
             icon={<Users className="h-4 w-4 text-primary" />}
-            value={ga4 ? ga4.current.sessions.toLocaleString() : "·"}
-            subtitle="30 derniers jours · GA4"
-            change={ga4?.previous ? pctChange(ga4.current.sessions, ga4.previous.sessions) : undefined}
+            value={organic !== null ? fmtInt(organic) : "·"}
+            subtitle={`${ga4Period} · canal Organic Search · GA4`}
           />
           <MetricCard
             title="Pages avec données GSC"
             icon={<Eye className="h-4 w-4 text-primary" />}
             value={pagesWithGSC !== null ? pagesWithGSC.toString() : "·"}
-            subtitle={gscAvailable ? "Pages avec ≥1 impression · GSC" : "GSC non disponible"}
+            subtitle={gscAvailable ? `Pages avec au moins 1 impression · ${gscPeriod}` : "GSC non disponible"}
           />
           <MetricCard
-            title="Sans impression après 7j"
+            title="Sans impression après 7 j"
             icon={<FileText className="h-4 w-4 text-primary" />}
             value={noImpressionCount !== null ? noImpressionCount.toString() : "·"}
             subtitle={noImpressionCount !== null ? "Contenus publiés >7j sans impression · GSC" : "GSC non disponible"}
@@ -214,36 +202,12 @@ const AdminSEO = () => {
         <GA4DiagnosticCard />
 
 
-        {/* KPIs GA4 */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <MetricCard
-            title="Profils inscrits"
-            icon={<UserCheck className="h-4 w-4 text-primary" />}
-            value={profileCount !== null ? profileCount.toLocaleString() : "·"}
-            subtitle="Total"
-          />
-          <MetricCard
-            title="Visiteurs uniques"
-            icon={<Users className="h-4 w-4 text-primary" />}
-            value={ga4 ? ga4.current.activeUsers.toLocaleString() : "·"}
-            subtitle="30 derniers jours · GA4"
-            change={ga4?.previous ? pctChange(ga4.current.activeUsers, ga4.previous.activeUsers) : undefined}
-          />
-          <MetricCard
-            title="Temps moyen"
-            icon={<Timer className="h-4 w-4 text-primary" />}
-            value={ga4 ? formatDuration(ga4.current.averageSessionDuration) : "·"}
-            subtitle="Par session · GA4"
-            change={ga4?.previous ? pctChange(ga4.current.averageSessionDuration, ga4.previous.averageSessionDuration) : undefined}
-          />
-        </div>
-
-
+        {/* Lot A10 : visiteurs, temps moyen et sources figurent une seule fois, dans la synthèse en tête de page. */}
         {/* Sessions GA4 chart */}
         {ga4 && ga4.current.sessionsByDay.length > 0 && (
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Sessions GA4 par jour (30j)</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Sessions GA4 par jour ({ga4Period})</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="h-32 flex items-end gap-[2px]">
@@ -267,8 +231,6 @@ const AdminSEO = () => {
           </Card>
         )}
 
-        {/* Sources de trafic */}
-        <TrafficSources channels={ga4?.channels} loading={loading && !seoData} />
       </section>
 
       {/* ══════════════════════════════════════════ */}
@@ -283,21 +245,21 @@ const AdminSEO = () => {
             <MetricCard
               title="Clics GSC"
               icon={<MousePointerClick className="h-4 w-4 text-primary" />}
-              value={gsc.current.clicks.toLocaleString()}
-              subtitle="28 derniers jours · GSC"
+              value={fmtInt(gsc.current.clicks)}
+              subtitle={gscPeriod}
               change={pctChange(gsc.current.clicks, gsc.previous.clicks)}
             />
             <MetricCard
               title="Impressions GSC"
               icon={<Eye className="h-4 w-4 text-primary" />}
-              value={gsc.current.impressions.toLocaleString()}
-              subtitle="28 derniers jours · GSC"
+              value={fmtInt(gsc.current.impressions)}
+              subtitle={gscPeriod}
               change={pctChange(gsc.current.impressions, gsc.previous.impressions)}
             />
             <MetricCard
               title="Position moyenne"
               icon={<Globe className="h-4 w-4 text-primary" />}
-              value={gsc.current.position.toFixed(1)}
+              value={gsc.current.position.toLocaleString("fr-FR", { maximumFractionDigits: 1 })}
               subtitle="Plus bas = mieux · GSC"
               change={pctChange(gsc.current.position, gsc.previous.position)}
               invertChange
@@ -333,7 +295,7 @@ const AdminSEO = () => {
         {/* Actionnable : articles sans impression GSC après 7j, avec push IndexNow 1-clic */}
         <NoImpressionActionable
           publishedArticles={publishedArticles}
-          topPages={gsc?.topPages}
+          pages={gscAvailable ? allGscPages : undefined}
         />
 
         {/* Top articles, conditional */}

@@ -3,6 +3,7 @@ import { fetchAllRows } from "@/lib/admin/fetchAllRows";
 import { createSeqGuard } from "@/lib/admin/requestSeq";
 import { TRUNCATED_NOTICE } from "@/lib/admin/csv";
 import { supabase } from "@/integrations/supabase/client";
+import { formatOpenRate } from "@/lib/admin/openRate";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +18,7 @@ interface DayStats {
   date: string;
   sent: number;
   opened: number;
+  delivered: number;
   clicked: number;
   applied: number;
 }
@@ -35,7 +37,7 @@ const SitterDigestTab = () => {
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState("30d");
   const [days, setDays] = useState<DayStats[]>([]);
-  const [totals, setTotals] = useState({ sent: 0, opened: 0, clicked: 0, applied: 0, queuedPending: 0 });
+  const [totals, setTotals] = useState({ sent: 0, delivered: 0, opened: 0, clicked: 0, applied: 0, queuedPending: 0 });
   const [manualSitterId, setManualSitterId] = useState("");
   const [sending, setSending] = useState(false);
   const [dryRun, setDryRun] = useState(false);
@@ -114,7 +116,7 @@ const SitterDigestTab = () => {
     // Agrégation par jour (YYYY-MM-DD)
     const byDay = new Map<string, DayStats>();
     const bump = (d: string, key: keyof Omit<DayStats, "date">, n = 1) => {
-      const s = byDay.get(d) || { date: d, sent: 0, opened: 0, clicked: 0, applied: 0 };
+      const s = byDay.get(d) || { date: d, sent: 0, delivered: 0, opened: 0, clicked: 0, applied: 0 };
       s[key] += n;
       byDay.set(d, s);
     };
@@ -122,6 +124,7 @@ const SitterDigestTab = () => {
       const d = (r.created_at || "").slice(0, 10);
       if (!d) return;
       bump(d, "sent");
+      if (r.delivered_at) bump(d, "delivered");
       if ((r.open_count || 0) > 0) bump(d, "opened");
       if ((r.click_count || 0) > 0) bump(d, "clicked");
     });
@@ -134,6 +137,7 @@ const SitterDigestTab = () => {
     setDays(list);
     setTotals({
       sent: list.reduce((a, b) => a + b.sent, 0),
+      delivered: list.reduce((a, b) => a + b.delivered, 0),
       opened: list.reduce((a, b) => a + b.opened, 0),
       clicked: list.reduce((a, b) => a + b.clicked, 0),
       applied: list.reduce((a, b) => a + b.applied, 0),
@@ -185,7 +189,7 @@ const SitterDigestTab = () => {
     const header = "date,sent,opened,clicked,applied,open_rate,click_rate,apply_rate";
     const lines = days.map(
       (d) =>
-        `${d.date},${d.sent},${d.opened},${d.clicked},${d.applied},${pct(d.opened, d.sent)},${pct(d.clicked, d.sent)},${pct(d.applied, d.sent)}`
+        `${d.date},${d.sent},${d.opened},${d.clicked},${d.applied},${formatOpenRate(d.opened, d.delivered)},${pct(d.clicked, d.sent)},${pct(d.applied, d.sent)}`
     );
     const blob = new Blob([header + "\n" + lines.join("\n")], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
@@ -211,7 +215,7 @@ const SitterDigestTab = () => {
           <div className="text-xs text-muted-foreground">Digests envoyés</div>
         </CardContent></Card>
         <Card><CardContent className="pt-4 pb-3 text-center">
-          <div className="text-2xl font-bold text-success">{pct(totals.opened, totals.sent)}</div>
+          <div className="text-2xl font-bold text-success">{formatOpenRate(totals.opened, totals.delivered)}</div>
           <div className="text-xs text-muted-foreground">Ouverture</div>
         </CardContent></Card>
         <Card><CardContent className="pt-4 pb-3 text-center">
@@ -312,7 +316,7 @@ const SitterDigestTab = () => {
                   </TableCell>
                   <TableCell className="text-xs text-right">{d.sent}</TableCell>
                   <TableCell className="text-xs text-right">
-                    <span className="font-medium">{pct(d.opened, d.sent)}</span>
+                    <span className="font-medium">{formatOpenRate(d.opened, d.delivered)}</span>
                     <span className="text-muted-foreground text-[10px] ml-1">({d.opened})</span>
                   </TableCell>
                   <TableCell className="text-xs text-right">

@@ -1,5 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { reportAdminReadError, UNAVAILABLE_LABEL } from "@/lib/admin/readError";
+import { fetchAllRows } from "@/lib/admin/fetchAllRows";
+import { formatOpenRate } from "@/lib/admin/openRate";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -32,6 +35,7 @@ interface EmailStats {
   key: string;
   label: string;
   sent: number;
+  delivered: number;
   opened: number;
   clicked: number;
 }
@@ -54,11 +58,18 @@ interface AutoClosedMission {
   category: string;
 }
 
+/** Lot A10 : raisons de clôture réellement automatiques. */
+export const AUTO_CLOSE_REASONS = ["expired", "auto_completed_after_date"] as const;
+
 const EMAIL_TEMPLATES: { key: string; label: string }[] = [
   { key: "mission-daily-digest", label: "Digest quotidien mission" },
   { key: "mutual-aid-weekly-digest", label: "Digest hebdomadaire entraide" },
   { key: "mission-nudge-feedback", label: "Nudge feedback (J+2)" },
   { key: "mission-nudge-no-response", label: "Nudge sans réponse (J+7)" },
+  { key: "mission-help-needed", label: "Demande d'aide près de chez vous" },
+  { key: "entraide-ligne-relance", label: "Ligne d'entraide, relance" },
+  { key: "entraide-ligne-helps-with", label: "Ligne d'entraide, ce que vous proposez" },
+  { key: "discover-mutual-aid", label: "Découverte de l'entraide" },
 ];
 
 const rangeToStart = (r: Range): Date => {
@@ -122,6 +133,7 @@ const MutualAidDashboardTab = () => {
   const [funnel, setFunnel] = useState<FunnelMetrics | null>(null);
   const [emailStats, setEmailStats] = useState<EmailStats[]>([]);
   const [dormant, setDormant] = useState<DormantMission[]>([]);
+  const [loadError, setLoadError] = useState(false);
   const [autoClosed, setAutoClosed] = useState<AutoClosedMission[]>([]);
   const [closingId, setClosingId] = useState<string | null>(null);
   const seenRef = useRef(false);
@@ -134,6 +146,8 @@ const MutualAidDashboardTab = () => {
 
   const load = useCallback(async () => {
     setLoading(true);
+    setLoadError(false);
+    try {
     const start = rangeToStart(range).toISOString();
     const startOfMonth = new Date();
     startOfMonth.setDate(1);
@@ -143,11 +157,11 @@ const MutualAidDashboardTab = () => {
 
     // Les projets participatifs sortent de l'entraide partout : ils ont leur
     // propre onglet d'administration et leurs propres indicateurs.
-    const projetIdsRes = await supabase
-      .from("small_missions")
-      .select("id")
-      .eq("category", "projet" as any)
-      .limit(20000);
+    // Lot A10 : lectures exhaustives (l'API coupe à 1 000 lignes).
+    const all = <T,>(build: (from: number, to: number) => any) =>
+      fetchAllRows<T>(build).then((r) => ({ data: r.rows, error: null as any }));
+    const projetIdsRes = await all<{ id: string }>((f, t) =>
+      supabase.from("small_missions").select("id").eq("category", "projet" as any).order("id").range(f, t));
     const projetIds = (projetIdsRes.data || []).map((r: any) => r.id);
 
 
@@ -161,19 +175,20 @@ const MutualAidDashboardTab = () => {
       autoRes,
     ] = await Promise.all([
       supabase.from("small_missions").select("id", { count: "exact", head: true }).gte("created_at", start).neq("category", "projet" as any),
-      supabase.from("small_mission_responses").select("mission_id").gte("created_at", start).limit(50000),
-      supabase.from("mission_feedbacks").select("mission_id").gte("created_at", start).limit(50000),
+      all<any>((f, t) => supabase.from("small_mission_responses").select("id, mission_id").gte("created_at", start).order("id").range(f, t)),
+      all<any>((f, t) => supabase.from("mission_feedbacks").select("id, mission_id").gte("created_at", start).order("id").range(f, t)),
       // Cette table n'a pas de colonne `id` : la clé est `response_id`.
       // Le `select("id")` renvoyait un 400 et faisait échouer tout l'écran.
       // Les remerciements ne portent pas de mission_id : ils sont rattachés
       // via les réponses, donc filtrés côté client plus bas.
-      supabase.from("small_mission_response_thanks").select("response_id").gte("created_at", start).limit(50000),
-      supabase
+      all<any>((f, t) => supabase.from("small_mission_response_thanks").select("response_id").gte("created_at", start).order("response_id").range(f, t)),
+      all<any>((f, t) => supabase
         .from("email_send_log")
-        .select("template_name,status,message_id,delivered_at,open_count,click_count,created_at")
+        .select("id,template_name,status,message_id,delivered_at,open_count,click_count,created_at")
         .in("template_name", EMAIL_TEMPLATES.map((t) => t.key))
         .gte("created_at", start)
-        .limit(10000),
+        .order("id")
+        .range(f, t)),
       supabase
         .from("small_missions")
         .select("id,title,city,created_at,user_id,category")
@@ -182,15 +197,17 @@ const MutualAidDashboardTab = () => {
         .lte("created_at", dormantThreshold.toISOString())
         .order("created_at", { ascending: true })
         .limit(200),
-      supabase
+      // Lot A10 : seules les vraies clôtures automatiques, sans les migrations.
+      all<any>((f, t) => supabase
         .from("small_missions")
         .select("id,title,city,closed_at,close_reason,category")
         .not("closed_at", "is", null)
-        .not("close_reason", "is", null)
+        .in("close_reason", AUTO_CLOSE_REASONS as unknown as string[])
         .neq("category", "projet" as any)
         .gte("closed_at", startOfMonth.toISOString())
         .order("closed_at", { ascending: false })
-        .limit(200),
+        .order("id")
+        .range(f, t)),
     ]);
 
     const projetIdSet = new Set(projetIds);
@@ -199,11 +216,12 @@ const MutualAidDashboardTab = () => {
     // Remerciements : on écarte ceux qui portent sur une réponse de projet.
     let projetResponseIds = new Set<string>();
     if (projetIds.length > 0) {
-      const { data: projetResponses } = await supabase
+      const { data: projetResponses } = await all<any>((f, t) => supabase
         .from("small_mission_responses")
         .select("id")
         .in("mission_id", projetIds)
-        .limit(50000);
+        .order("id")
+        .range(f, t));
       projetResponseIds = new Set((projetResponses || []).map((r: any) => r.id));
     }
     const thanksRows = (thanksRes.data || []).filter((r: any) => !projetResponseIds.has(r.response_id));
@@ -232,9 +250,10 @@ const MutualAidDashboardTab = () => {
       const bucket = byTemplate.get(t.key)!;
       const dedup = Array.from(bucket.values()).filter((r: any) => r.status === "sent" || r.delivered_at);
       const sent = dedup.length;
+      const delivered = dedup.filter((r: any) => !!r.delivered_at).length;
       const opened = dedup.reduce((n: number, r: any) => n + ((r.open_count ?? 0) > 0 ? 1 : 0), 0);
       const clicked = dedup.reduce((n: number, r: any) => n + ((r.click_count ?? 0) > 0 ? 1 : 0), 0);
-      return { key: t.key, label: t.label, sent, opened, clicked };
+      return { key: t.key, label: t.label, sent, delivered, opened, clicked };
     });
     setEmailStats(stats);
 
@@ -254,7 +273,10 @@ const MutualAidDashboardTab = () => {
     } catch (e) {
       console.warn("[MutualAidDashboard] funnel rpc threw", e);
     }
-
+    } catch (e) {
+      setLoadError(true);
+      reportAdminReadError("Pilotage entraide", e);
+    }
     setLoading(false);
   }, [range]);
 
@@ -332,10 +354,10 @@ const MutualAidDashboardTab = () => {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <KpiCard label="Nouvelles missions" value={kpis.newMissions} />
-            <KpiCard label="Réponses" value={kpis.responses} />
-            <KpiCard label="Feedbacks" value={kpis.feedbacks} />
-            <KpiCard label="Remerciements" value={kpis.thanks} />
+            <KpiCard label="Nouvelles missions" value={loadError ? UNAVAILABLE_LABEL : kpis.newMissions} />
+            <KpiCard label="Réponses" value={loadError ? UNAVAILABLE_LABEL : kpis.responses} />
+            <KpiCard label="Feedbacks" value={loadError ? UNAVAILABLE_LABEL : kpis.feedbacks} />
+            <KpiCard label="Remerciements" value={loadError ? UNAVAILABLE_LABEL : kpis.thanks} />
           </div>
         </CardContent>
       </Card>
@@ -397,7 +419,7 @@ const MutualAidDashboardTab = () => {
                   <TableCell className="font-medium">{s.label}</TableCell>
                   <TableCell className="text-right tabular-nums">{s.sent}</TableCell>
                   <TableCell className="text-right tabular-nums">{s.opened}</TableCell>
-                  <TableCell className="text-right tabular-nums">{pct(s.opened, s.sent)}</TableCell>
+                  <TableCell className="text-right tabular-nums">{formatOpenRate(s.opened, s.delivered)}</TableCell>
                   <TableCell className="text-right tabular-nums">{s.clicked}</TableCell>
                   <TableCell className="text-right tabular-nums">{pct(s.clicked, s.sent)}</TableCell>
                 </TableRow>
@@ -507,7 +529,7 @@ const MutualAidDashboardTab = () => {
   );
 };
 
-const KpiCard = ({ label, value }: { label: string; value: number }) => (
+const KpiCard = ({ label, value }: { label: string; value: number | string }) => (
   <div className="rounded-xl border border-border bg-card px-4 py-3">
     <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-semibold">{label}</p>
     <p className="mt-1 text-2xl font-bold tabular-nums text-foreground">{value}</p>
