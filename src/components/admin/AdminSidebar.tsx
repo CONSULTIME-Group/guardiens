@@ -20,6 +20,8 @@ interface NavItem {
   label: string;
   end?: boolean;
   badgeKey?: string;
+  /** Lot A9 : destination d'un clic sur la pastille elle-même. */
+  badgeTo?: string;
   /** Valeur du paramètre `tab` que cette entrée représente, quand plusieurs
    *  entrées pointent vers la même page. Sans cela les deux entrées seraient
    *  actives en même temps, le paramètre de recherche étant ignoré. */
@@ -76,7 +78,7 @@ const adminNavGroups: NavGroup[] = [
   {
     label: "ACTIVITÉ",
     items: [
-      { to: "/admin/listings?filter=to_staff", icon: Megaphone, label: "Annonces", badgeKey: "sitsToStaff" },
+      { to: "/admin/listings", icon: Megaphone, label: "Annonces", badgeKey: "sitsToStaff", badgeTo: "/admin/listings?filter=to_staff" },
       { to: "/admin/sits-management", icon: CalendarCheck, label: "Gardes" },
       { to: "/admin/small-missions", icon: Handshake, label: "Entraide", tabParam: "entraide", defaultTab: "entraide" },
       { to: "/admin/small-missions?tab=projets", icon: Hammer, label: "Projets", tabParam: "projets", defaultTab: "entraide" },
@@ -235,9 +237,21 @@ export const AdminSidebar = () => {
                     {!collapsed && (
                       <>
                         <span className="truncate flex-1">{item.label}</span>
-                        {badge.show && (
+                        {badge.show && (item.badgeTo ? (
+                          <span
+                            role="link"
+                            tabIndex={0}
+                            className="ml-auto rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            aria-label={`${item.label} : ${badge.label}`}
+                            title={badge.label}
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); navigate(item.badgeTo!); }}
+                            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); navigate(item.badgeTo!); } }}
+                          >
+                            <AdminBadgePill text={badge.text} label={badge.label} />
+                          </span>
+                        ) : (
                           <AdminBadgePill text={badge.text} label={badge.label} className="ml-auto" />
-                        )}
+                        ))}
                       </>
                     )}
                   </NavLink>
