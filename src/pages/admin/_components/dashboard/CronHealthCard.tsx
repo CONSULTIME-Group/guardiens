@@ -113,7 +113,15 @@ const CronRow = ({ r }: { r: CronHealth }) => (
   </li>
 );
 
-export const CronHealthCard = () => {
+/** Lot A13 : ligne de synthèse, en tâches, lisible d'un coup d'oeil. */
+export function cronOneLine(rows: CronHealth[]): string {
+  const bad = rows.filter((r) => r.state !== "ok");
+  if (bad.length === 0) return `${rows.length} ${pluralize(rows.length, "tâche en bonne santé", "tâches en bonne santé")}`;
+  const names = bad.map((r) => displayText(r.label) || adminLabel(r.edge_name)).join(", ");
+  return `${bad.length} ${pluralize(bad.length, "tâche en échec", "tâches en échec")} : ${names}`;
+}
+
+export const CronHealthCard = ({ enabled = true }: { enabled?: boolean }) => {
   const { enabled: flagEnabled, loading: flagLoading } = useFeatureFlag("admin_signals_active");
 
   const { data, isLoading, error } = useQuery<CronHealth[]>({
@@ -123,75 +131,53 @@ export const CronHealthCard = () => {
       if (error) throw error;
       return (data as unknown as CronHealth[]) ?? [];
     },
-    enabled: flagEnabled,
+    enabled: flagEnabled && enabled,
     staleTime: 30_000,
   });
 
   if (flagLoading || !flagEnabled) return null;
 
   const rows = data ?? [];
-  const critical = rows.filter((r) => r.state === "critical");
-  const degraded = rows.filter((r) => r.state === "degraded");
+  const attention = rows.filter((r) => r.state !== "ok").sort((a) => (a.state === "critical" ? -1 : 1));
   const ok = rows.filter((r) => r.state === "ok");
-  const attention = [...critical, ...degraded];
-
-  const summary = cronSummary(ok.length, degraded.length, critical.length);
 
   return (
-    <Card>
-      <CardHeader>
+    <Card data-testid="cron-health">
+      <CardHeader className="pb-2">
         <CardTitle className="text-base font-heading flex items-center gap-2">
           <Clock className="h-4 w-4 text-muted-foreground" aria-hidden />
           Santé des crons
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
-        {isLoading ? (
-          <div className="space-y-2">
-            <Skeleton className="h-12 rounded-lg" />
-            <Skeleton className="h-12 rounded-lg" />
-          </div>
+      <CardContent className="space-y-2">
+        {!enabled || isLoading ? (
+          <Skeleton className="h-5 w-64" />
         ) : error ? (
-          <p className="text-sm text-destructive">
-            Chargement des indicateurs crons impossible. Réessayez plus tard.
-          </p>
+          <p role="alert" className="text-sm text-destructive">Chiffre indisponible</p>
         ) : rows.length === 0 ? (
           <p className="text-sm text-muted-foreground">Aucune donnée disponible.</p>
         ) : (
           <>
-            <p className="flex items-center gap-2 text-sm text-muted-foreground">
+            <p className="flex items-center gap-2 text-sm text-muted-foreground" data-testid="cron-one-line">
               {attention.length === 0 ? (
                 <CheckCircle2 className="h-4 w-4 text-success shrink-0" aria-hidden />
               ) : (
                 <AlertTriangle className="h-4 w-4 text-warning-foreground shrink-0" aria-hidden />
               )}
-              {summary}
+              {cronOneLine(rows)}
             </p>
-
-            {attention.length > 0 && (
-              <ul className="space-y-2">
-                {attention.map((r) => (
-                  <CronRow key={r.edge_name} r={r} />
-                ))}
-              </ul>
-            )}
-
-            {attention.length > 0 && ok.length > 0 && (
-              <Accordion type="single" collapsible>
-                <AccordionItem value="healthy" className="border-none">
-                  <AccordionTrigger className="py-2 text-sm text-muted-foreground hover:no-underline">
-                    Voir {ok.length > 1 ? `les ${ok.length} crons sains` : "le cron sain"}
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <ul className="space-y-2">
-                      {ok.map((r) => (
-                        <CronRow key={r.edge_name} r={r} />
-                      ))}
-                    </ul>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            )}
+            <Accordion type="single" collapsible>
+              <AccordionItem value="detail" className="border-none">
+                <AccordionTrigger className="py-2 text-sm text-muted-foreground hover:no-underline">
+                  Voir le détail ({cronSummary(ok.length, rows.filter((r) => r.state === "degraded").length, rows.filter((r) => r.state === "critical").length)})
+                </AccordionTrigger>
+                <AccordionContent>
+                  <ul className="space-y-2">
+                    {[...attention, ...ok].map((r) => <CronRow key={r.edge_name} r={r} />)}
+                  </ul>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           </>
         )}
       </CardContent>

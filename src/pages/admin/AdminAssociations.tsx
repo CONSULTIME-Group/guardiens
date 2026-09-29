@@ -31,6 +31,7 @@ import { ASSOCIATION_CONSENT_SUBJECT, buildConsentEmail } from "@/lib/associatio
 import ConfirmDialog from "@/components/admin/ConfirmDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import VolunteersTab from "./_components/associations/VolunteersTab";
+import { VolunteerAvailabilityCard } from "./_components/dashboard/VolunteerAvailabilityCard";
 
 type AssociationRow = {
   id: string;
@@ -781,6 +782,8 @@ export default function AdminAssociations() {
           </CardContent>
         </Card>
       )}
+      {/* Lot A13 : déplacé depuis la vue d'ensemble, même composant, même lecture. */}
+      <VolunteerAvailabilityCard />
         </TabsContent>
       </Tabs>
     </div>

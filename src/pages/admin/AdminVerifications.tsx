@@ -53,24 +53,24 @@ const AdminVerifications = () => {
     open: false, userId: "", name: "", reason: ""
   });
 
-  const hydrateIdentityAssets = async (users: any[]) => {
-    return Promise.all(
-      users.map(async (user) => {
-        const { data, error } = await supabase.functions.invoke("admin-manage-identity-verification", {
-          body: { action: "preview", userId: user.id },
-        });
-
-        if (error) {
-          console.error("identity preview error", user.id, error);
-        }
-
-        return {
-          ...user,
-          identity_document_signed_url: data?.docUrl ?? null,
-          identity_selfie_signed_url: data?.selfieUrl ?? null,
-        };
-      }),
-    );
+  // Lot A13 : liens signés des pièces demandés à l'ouverture d'un dossier
+  // seulement, jamais au chargement de la liste.
+  const [assets, setAssets] = useState<Record<string, { docUrl: string | null; selfieUrl: string | null; loading: boolean }>>({});
+  const loadAssets = async (userId: string) => {
+    if (assets[userId] && !assets[userId].loading) return assets[userId];
+    setAssets((prev) => ({ ...prev, [userId]: { docUrl: null, selfieUrl: null, loading: true } }));
+    const { data, error } = await supabase.functions.invoke("admin-manage-identity-verification", {
+      body: { action: "preview", userId },
+    });
+    if (error) console.error("identity preview error", userId, error);
+    const entry = { docUrl: data?.docUrl ?? null, selfieUrl: data?.selfieUrl ?? null, loading: false };
+    setAssets((prev) => ({ ...prev, [userId]: entry }));
+    return entry;
+  };
+  const openDocs = async (user: any) => {
+    setDocModal({ open: true, userId: user.id, docUrl: null, selfieUrl: null, name: `${user.first_name} ${user.last_name}`, status: user.identity_verification_status });
+    const entry = await loadAssets(user.id);
+    setDocModal((m) => (m.userId === user.id ? { ...m, docUrl: entry.docUrl, selfieUrl: entry.selfieUrl } : m));
   };
 
   const runIdentityAction = async (action: "approve" | "reject" | "request_resend" | "revoke" | "remind", userId: string, reason?: string) => {
@@ -117,7 +117,7 @@ const AdminVerifications = () => {
       if (rank(a) !== rank(b)) return rank(a) - rank(b);
       return new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime();
     });
-    setQueue(await hydrateIdentityAssets(merged));
+    setQueue(merged);
 
     const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 }).toISOString();
     const [verifiedRes, rejectedRes] = await Promise.all([
@@ -144,7 +144,7 @@ const AdminVerifications = () => {
     query = query.neq("identity_verification_status", "not_submitted");
 
     const { data, count } = await query;
-    setHistory(await hydrateIdentityAssets(data || []));
+    setHistory(data || []);
     setHistoryTotal(count || 0);
 
     // Fetch rejection reasons from logs for rejected users
@@ -369,51 +369,56 @@ const AdminVerifications = () => {
                         </p>
                       </div>
                     )}
+                    {(hasDoc || hasSelfie) && !assets[user.id]?.docUrl && !assets[user.id]?.selfieUrl && (
+                      <Button size="sm" variant="outline" disabled={assets[user.id]?.loading} onClick={() => void loadAssets(user.id)}>
+                        <Eye className="h-3.5 w-3.5 mr-1.5" /> {assets[user.id]?.loading ? "Ouverture du dossier…" : "Ouvrir le dossier"}
+                      </Button>
+                    )}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="space-y-1">
                         <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Document d'identité</p>
-                        {user.identity_document_signed_url ? (
+                        {assets[user.id]?.docUrl ? (
                           <img
-                            src={user.identity_document_signed_url}
+                            src={assets[user.id]?.docUrl}
                             alt="Document"
                             className="w-full h-48 object-contain rounded-lg border bg-muted cursor-pointer hover:opacity-80 transition-opacity"
                             onClick={() => setDocModal({
                               open: true,
                               userId: user.id,
-                              docUrl: user.identity_document_signed_url,
-                              selfieUrl: user.identity_selfie_signed_url,
+                              docUrl: assets[user.id]?.docUrl ?? null,
+                              selfieUrl: assets[user.id]?.selfieUrl ?? null,
                               name: `${user.first_name} ${user.last_name}`,
                               status: user.identity_verification_status,
                             })}
                           />
                         ) : (
                           <div className="w-full h-48 rounded-lg border bg-muted flex flex-col items-center justify-center gap-1 text-xs text-muted-foreground px-2 text-center">
-                            {user.identity_document_url ? (
+                            {user.identity_document_url && assets[user.id] && !assets[user.id].loading ? (
                               <>
                                 <AlertTriangle className="h-4 w-4 text-warning" />
                                 <span>Document déposé mais inaccessible</span>
                                 <span className="text-[10px] opacity-70 break-all">{user.identity_document_url}</span>
                               </>
                             ) : (
-                              <span>Pièce d'identité non fournie</span>
+                              <span>{user.identity_document_url ? "Pièce déposée, ouvrez le dossier pour la voir" : "Pièce d'identité non fournie"}</span>
                             )}
                           </div>
                         )}
                       </div>
                       <div className="space-y-1">
                         <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Selfie</p>
-                        {user.identity_selfie_signed_url ? (
-                          <img src={user.identity_selfie_signed_url} alt="Selfie" className="w-full h-48 object-contain rounded-lg border bg-muted" />
+                        {assets[user.id]?.selfieUrl ? (
+                          <img src={assets[user.id]?.selfieUrl} alt="Selfie" className="w-full h-48 object-contain rounded-lg border bg-muted" />
                         ) : (
                           <div className="w-full h-48 rounded-lg border bg-muted flex flex-col items-center justify-center gap-1 text-xs text-muted-foreground px-2 text-center">
-                            {user.identity_selfie_url ? (
+                            {user.identity_selfie_url && assets[user.id] && !assets[user.id].loading ? (
                               <>
                                 <AlertTriangle className="h-4 w-4 text-warning" />
                                 <span>Selfie déposé mais inaccessible</span>
                                 <span className="text-[10px] opacity-70 break-all">{user.identity_selfie_url}</span>
                               </>
                             ) : (
-                              <span>Selfie non fourni</span>
+                              <span>{user.identity_selfie_url ? "Selfie déposé, ouvrez le dossier pour le voir" : "Selfie non fourni"}</span>
                             )}
                           </div>
                         )}
@@ -552,14 +557,7 @@ const AdminVerifications = () => {
                             size="sm"
                             variant="ghost"
                             className="h-8 gap-1 text-xs"
-                            onClick={() => setDocModal({
-                              open: true,
-                              userId: user.id,
-                              docUrl: user.identity_document_signed_url,
-                              selfieUrl: user.identity_selfie_signed_url,
-                              name: `${user.first_name} ${user.last_name}`,
-                              status: user.identity_verification_status,
-                            })}
+                            onClick={() => void openDocs(user)}
                           >
                             <Eye className="h-3.5 w-3.5" /> Doc
                           </Button>

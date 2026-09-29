@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
+import { ErrorState, LoadingState } from "@/components/admin/ui";
 import type { ActivityItem } from "./types";
 import { CollapsibleSection } from "./CollapsibleSection";
 
@@ -20,12 +21,18 @@ const ACTIVITY_BADGE: Record<ActivityItem["type"], { label: string; variant: "se
 
 interface Props {
   activity: ActivityItem[];
+  loading?: boolean;
+  error?: boolean;
 }
 
-/** Activité récente, repliée par défaut sur la vue d'ensemble. */
-export const RecentActivity = ({ activity }: Props) => (
-  <CollapsibleSection title="Activité récente">
-    {activity.length === 0 ? (
+/** Activité récente, dépliée sur la vue d'ensemble (lot A13). */
+export const RecentActivity = ({ activity, loading, error }: Props) => (
+  <CollapsibleSection title="Activité récente" defaultOpen testId="overview-activity">
+    {loading ? (
+      <LoadingState />
+    ) : error ? (
+      <ErrorState />
+    ) : activity.length === 0 ? (
       <p className="text-sm text-muted-foreground">Aucune activité récente.</p>
     ) : (
       <div className="space-y-0">
