@@ -16,6 +16,8 @@ import {
   normalizeAlmaOutput,
 } from "../_shared/alma-system-prompt.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { almaDirectAnswer, almaHelpDirective, detectAlmaIntent } from "../_shared/alma-intent.ts";
+import { recordAlmaFrustration } from "../_shared/alma-frustration-signal.ts";
 
 const MAX_HISTORY = 12;
 
@@ -100,9 +102,39 @@ Deno.serve(async (req) => {
       return json({ limited: true, message: ALMA_CHAT_LIMIT_MESSAGE });
     }
 
+    // Lot J1 : intention d'aide, frustration, départ.
+    const intent = detectAlmaIntent(
+      message,
+      history.filter((m: any) => m.role === "user").map((m: any) => m.content),
+    );
+    if (intent.frustration || intent.leaving) {
+      try {
+        await recordAlmaFrustration(adminClient, userId, message, intent.matched);
+      } catch (e) {
+        console.error("alma_frustration signal failed", e);
+      }
+    }
+    const direct = almaDirectAnswer(intent);
+    if (direct) {
+      await adminClient.from("alma_conversations").insert({
+        user_id: userId,
+        surface,
+        active_role: activeRole,
+        input_mode: inputMode,
+        question: message,
+        answer: direct,
+        register,
+        refusal_reason: null,
+        latency_ms: Date.now() - startedAt,
+        sources_count: 0,
+      });
+      return json({ answer: direct, remaining: Math.max(0, ALMA_CHAT_DAILY_LIMIT - ((count ?? 0) + 1)) });
+    }
+    const helpDirective = almaHelpDirective(intent);
+
     // Seul le texte actif du catalogue serveur peut devenir une consigne d'humeur.
     const moodMessages: Array<{ role: "system"; content: string }> = [];
-    if (mood && moodLine) {
+    if (mood && moodLine && !helpDirective) {
       try {
         const { data: verifiedMood, error: moodError } = await adminClient
           .from("alma_moods")
@@ -259,8 +291,9 @@ Deno.serve(async (req) => {
         ? 100 - profilACompleter.reduce((total, item) => total + item.points, 0)
         : (profileRes.data as any)?.profile_completion ?? null,
       identite_verifiee: (profileRes.data as any)?.identity_verified ?? null,
-      bareme_profil: baremeProfil,
-      profil_a_completer: profilACompleter,
+      // Lot J1 : qui cherche de l'aide n'entend pas parler de points de profil.
+      bareme_profil: helpDirective ? null : baremeProfil,
+      profil_a_completer: helpDirective ? [] : profilACompleter,
       role_actif: activeRole,
       ecran_courant: surface,
       profil_gardien: sitterRes.data ?? null,
@@ -316,6 +349,7 @@ Deno.serve(async (req) => {
         },
         ...history,
         { role: "system", content: almaRegisterReminder(register) },
+        ...(helpDirective ? [{ role: "system" as const, content: helpDirective }] : []),
         { role: "user", content: message },
       ],
     });
