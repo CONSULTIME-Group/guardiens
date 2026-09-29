@@ -1,4 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { fetchAllRows } from "@/lib/admin/fetchAllRows";
+import { createSeqGuard } from "@/lib/admin/requestSeq";
+import { TRUNCATED_NOTICE } from "@/lib/admin/csv";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -36,7 +39,11 @@ const SitterDigestTab = () => {
   const [sending, setSending] = useState(false);
   const [dryRun, setDryRun] = useState(false);
 
+  const [dataTruncated, setDataTruncated] = useState(false);
+  const statsSeq = useRef(createSeqGuard());
+
   const fetchStats = async () => {
+    const token = statsSeq.current.next();
     setLoading(true);
     const now = new Date();
     const start = new Date();
@@ -46,13 +53,26 @@ const SitterDigestTab = () => {
     else if (timeRange === "90d") start.setDate(now.getDate() - 90);
 
     // 1) Emails du digest
-    const { data: logs, error: logsErr } = await supabase
-      .from("email_send_log")
-      .select("message_id,status,created_at,delivered_at,open_count,click_count")
-      .eq("template_name", "sitter-daily-digest")
-      .gte("created_at", start.toISOString())
-      .order("created_at", { ascending: false })
-      .limit(10000);
+    let logs: any[] = [];
+    let logsErr: unknown = null;
+    let logsTruncated = false;
+    try {
+      const res = await fetchAllRows<any>((from, to) =>
+        supabase
+          .from("email_send_log")
+          .select("id,message_id,status,created_at,delivered_at,open_count,click_count")
+          .eq("template_name", "sitter-daily-digest")
+          .gte("created_at", start.toISOString())
+          .order("created_at", { ascending: false })
+          .order("id", { ascending: true })
+          .range(from, to),
+      );
+      logs = res.rows;
+      logsTruncated = res.truncated;
+    } catch (e) {
+      logsErr = e;
+    }
+    if (!statsSeq.current.isCurrent(token)) return;
 
     if (logsErr) {
       toast.error("Erreur lors du chargement des logs");
@@ -70,18 +90,25 @@ const SitterDigestTab = () => {
     const dedup = Array.from(byMsg.values()).filter((r) => r.status === "sent" || r.delivered_at);
 
     // 2) Candidatures attribuées au digest via analytics_events
-    const { data: applies } = await supabase
-      .from("analytics_events")
-      .select("created_at")
-      .eq("event_type", "sitter_digest_apply_from_email")
-      .gte("created_at", start.toISOString())
-      .limit(10000);
+    const appliesRes = await fetchAllRows<any>((from, to) =>
+      supabase
+        .from("analytics_events")
+        .select("id,created_at")
+        .eq("event_type", "sitter_digest_apply_from_email")
+        .gte("created_at", start.toISOString())
+        .order("created_at", { ascending: true })
+        .order("id", { ascending: true })
+        .range(from, to),
+    ).catch(() => ({ rows: [] as any[], truncated: false }));
+    const applies = appliesRes.rows;
 
     // 3) File en attente (status='queued')
     const { count: queuedPending } = await supabase
       .from("sitter_digest_queue")
       .select("id", { count: "exact", head: true })
       .eq("status", "queued");
+    if (!statsSeq.current.isCurrent(token)) return;
+    setDataTruncated(logsTruncated || appliesRes.truncated);
 
     // Agrégation par jour (YYYY-MM-DD)
     const byDay = new Map<string, DayStats>();
