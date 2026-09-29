@@ -21,8 +21,9 @@ describe("send-sitter-daily-digest, verrou single flight", () => {
     expect(SRC).toContain("if (lockHeld) await releaseWorkerLock(supabase as any, DIGEST_LOCK_KEY)");
   });
 
-  it("le mode manuel et le mode dry_run passent outre", () => {
-    expect(SRC).toContain("const needsLock = !body.manual && !body.dry_run");
+  it("seuls le manuel ciblé (lot A8) et le dry_run passent outre", () => {
+    expect(SRC).toContain("const needsLock = !bypassGuards && !body.dry_run");
+    expect(SRC).toContain("digestBypassesGuards(body.manual, body.sitter_id)");
   });
 
   it("un bail périmé est repris sans intervention humaine", () => {
