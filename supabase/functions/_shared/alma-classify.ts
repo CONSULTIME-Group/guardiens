@@ -34,16 +34,25 @@ Même agacée, tu réponds d'abord à sa question, sans humour ni anecdote, puis
 // après elle), avec ou sans gras Markdown ni bloc de code. Avant J3, seule une
 // ligne finale était reconnue, et le repli effaçait tout ce qui suivait
 // « CLASSEMENT », BROUILLON compris.
-const LINE_RE = /^[ \t>*_`]*CLASSEMENT[ \t*_`]*:[ \t*_`]*(\{[^\n]*\})[ \t*_`]*$/im;
-const BROKEN_LINE_RE = /^[ \t>*_`]*CLASSEMENT[ \t*_`]*:[^\n]*$/gim;
+// Lot J4 : la ligne peut aussi être collée à la fin d'une phrase
+// (« ...secteur.CLASSEMENT: {...} », rejeu cas-09 et cas-12). Elle est lue et
+// retirée où qu'elle soit dans la ligne, avant toute extraction de lien.
+const LINE_RE = /[ \t>*_`]*CLASSEMENT[ \t*_`]*:[ \t*_`]*(\{[^{}]*\})[ \t*_`]*/;
+const BROKEN_LINE_RE = /[ \t>*_`]*CLASSEMENT[ \t*_`]*:[^\n]*/g;
 
 function asBool(v: unknown): boolean {
   return v === true || v === "true";
 }
 
 function stripLine(text: string, re: RegExp): string {
-  const withBreak = new RegExp(`\\n?${re.source}`, re.flags.includes("g") ? re.flags : re.flags + "g");
-  return text.replace(withBreak, "").replace(/```(?:json)?\s*```/g, "").replace(/\n{3,}/g, "\n\n").trim();
+  const flags = re.flags.includes("g") ? re.flags : re.flags + "g";
+  return text
+    .replace(new RegExp(`\\n${re.source}(?=\\n|$)`, flags), "")
+    .replace(new RegExp(re.source, flags), "")
+    .replace(/```(?:json)?\s*```/g, "")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
 }
 
 /** Lit et retire la ligne CLASSEMENT. Une ligne illisible est retirée quand même, seule. */

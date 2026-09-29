@@ -186,12 +186,14 @@ describe("J2-A, humeur sans garde confirmée", () => {
 });
 
 describe("J2-A, moteur de prochaine action", () => {
-  it("Jean Pierre (both, 15 chevaux, cherche de l'aide) : publier sa garde, jamais le profil", () => {
+  // Lot J4 : sans départ déclaré, des chevaux relèvent d'abord de l'entraide ; la garde reste proposée en pastille.
+  it("Jean Pierre (both, 15 chevaux, cherche de l'aide) : demander un coup de main, la garde en pastille, jamais le profil", () => {
     const r = computeNextAction(base({
       accountRole: "both", activeRole: "sitter", helpIntent: true, largeAnimals: true, completion: 20,
       question: "je ne pose pas ma candidature je cherche au contraire de l'aide ! j'ai 15 chevaux et poneys",
     }));
-    expect(r.action?.path).toBe(`/sits/create?titre=${encodeURIComponent("Garde de mes chevaux et poneys")}`);
+    expect(r.action?.path).toBe(`/petites-missions/creer?titre=${encodeURIComponent("Un coup de main pour mes chevaux et poneys")}`);
+    expect(r.chips.some((c) => c.path?.startsWith("/sits/create"))).toBe(true);
     expect([r.action, ...r.chips].some((c) => c?.path?.includes("profile"))).toBe(false);
   });
 

@@ -9,6 +9,7 @@ import * as almaFacts from "../../supabase/functions/_shared/alma-facts";
 import * as almaInventory from "../../supabase/functions/_shared/alma-inventory";
 import * as nextAction from "../../supabase/functions/_shared/alma-next-action";
 import * as almaClassify from "../../supabase/functions/_shared/alma-classify";
+import * as almaOutput from "../../supabase/functions/_shared/alma-output";
 import * as normalizeContact from "../../supabase/functions/_shared/normalize-contact-message";
 
 const validMood = { mood: "petillante", content: "Le soleil donne sur la fenêtre.", active: true };
@@ -58,6 +59,7 @@ function harness(options: { rows?: typeof validMood[]; error?: boolean; throws?:
       if (name.endsWith("alma-next-action.ts")) return nextAction;
       if (name.endsWith("alma-signals.ts")) return { recordAlmaSignal: async () => {} };
       if (name.endsWith("alma-classify.ts")) return almaClassify;
+      if (name.endsWith("alma-output.ts")) return almaOutput;
       if (name.endsWith("normalize-contact-message.ts")) return normalizeContact;
       throw new Error(`Unexpected import ${name}`);
     },

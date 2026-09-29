@@ -86,6 +86,12 @@ export function PilotageTab({ range }: { range: "7d" | "30d" | "90d" }) {
 
   const last = runs[0];
   const measure = measureActionFollowUp(rates ?? []);
+  // Lot J4 : les lignes « aucune » (échanges sans action, surtout d'avant J2-A)
+  // ne remplissent plus le tableau ; elles sont comptées en une phrase.
+  const withAction = (rates ?? []).filter((r) => r.action_reason && r.action_reason !== "aucune");
+  const withoutAction = (rates ?? [])
+    .filter((r) => !r.action_reason || r.action_reason === "aucune")
+    .reduce((s, r) => s + (Number(r.answers) || 0), 0);
 
   return (
     <div className="space-y-4">
@@ -95,21 +101,30 @@ export function PilotageTab({ range }: { range: "7d" | "30d" | "90d" }) {
         <CardContent className="space-y-2 text-sm">
           <p>
             {measure.rate === null
-              ? "Non mesurable : aucune réponse de la période ne propose d'action."
+              ? "Non mesurable : aucune réponse de la période ne propose d'action, en dehors des comptes admins."
               : `Réponses avec action : ${pct(measure.count, measure.total)} (${measure.count} sur ${measure.total}).`}
           </p>
+          <p className="text-muted-foreground">
+            Réponses sans action proposée : {withoutAction}. Comptes admins exclus : vos propres tests n'entrent pas dans ce calcul.
+          </p>
+          {withAction.length > 0 && (
           <table className="w-full text-left text-sm">
             <thead><tr className="text-muted-foreground"><th>Action proposée</th><th>Registre</th><th>Réponses</th><th>Taux</th></tr></thead>
             <tbody>
-              {(rates ?? []).map((r) => (
+              {withAction.map((r) => (
                 <tr key={`${r.action_reason}-${r.register}`}>
                   <td>{adminLabel(r.action_reason)}</td><td>{adminLabel(r.register, ALMA_REGISTER_LABELS)}</td><td>{r.answers}</td><td>{pct(Number(r.acted), Number(r.answers))}</td>
                 </tr>
               ))}
             </tbody>
           </table>
+          )}
           {feedback && (
-            <p>Retours : {feedback.useful} utile, {feedback.notUseful} pas utile ({pct(feedback.notUseful, feedback.useful + feedback.notUseful)} pas utile).</p>
+            <p>
+              {feedback.useful + feedback.notUseful === 0
+                ? "Retours : aucun retour sur la période."
+                : `Retours : ${feedback.useful} utile, ${feedback.notUseful} pas utile (${pct(feedback.notUseful, feedback.useful + feedback.notUseful)} pas utile).`}
+            </p>
           )}
         </CardContent>
       </Card>

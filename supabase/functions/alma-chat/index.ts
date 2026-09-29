@@ -34,6 +34,7 @@ import { formatKnowledge, selectKnowledge } from "../_shared/alma-site-knowledge
 import { isMoodLineTruthful, loadVerifiedFacts, moodTruthFromFacts } from "../_shared/alma-facts.ts";
 import { formatInventory, loadAlmaInventory } from "../_shared/alma-inventory.ts";
 import { applyDraftToAction, computeNextAction, formatActionDirective } from "../_shared/alma-next-action.ts";
+import { almaProfileVisibleToModel, polishAlmaAnswer } from "../_shared/alma-output.ts";
 
 const MAX_HISTORY = 12;
 
@@ -412,14 +413,17 @@ Deno.serve(async (req) => {
       : null;
     const knowledge = selectKnowledge({ question: message, role: activeRole, both: accountRole === "both" });
 
+    // Lot J4 : au dessus de 40 %, le score n'est transmis au modèle que si la
+    // question porte sur le profil. Sinon il le citait sans qu'on le demande.
+    const showProfile = !helpDirective && almaProfileVisibleToModel(completion, message);
     const dossier = {
       prenom: (profileRes.data as any)?.first_name ?? null,
       ville: (profileRes.data as any)?.city ?? null,
-      completion_profil: completion,
+      completion_profil: showProfile ? completion : null,
       identite_verifiee: (profileRes.data as any)?.identity_verified ?? null,
       // Lot J1 : qui cherche de l'aide n'entend pas parler de points de profil.
-      bareme_profil: helpDirective ? null : baremeProfil,
-      profil_a_completer: helpDirective ? [] : profilACompleter,
+      bareme_profil: showProfile ? baremeProfil : null,
+      profil_a_completer: showProfile ? profilACompleter : [],
       role_actif: activeRole,
       ecran_courant: surface,
       profil_gardien: sitterRes.data ?? null,
@@ -527,7 +531,10 @@ Deno.serve(async (req) => {
     }
     const classification = mergeClassification(extracted.classification, intent);
     const drafted = applyDraftToAction(normalizeAlmaOutput(extracted.answer), next?.action ?? null, next?.chips ?? []);
-    const answer = drafted.answer;
+    // Lot J4 : mots proscrits reformulés, anecdote déplacée après l'information.
+    const quiet = Boolean(helpDirective) || intent.frustration || classification.frustration >= 2 ||
+      classification.bug_suspected || classification.intent === "aide_recherchee";
+    const answer = polishAlmaAnswer(drafted.answer, { perso: register === "perso", quiet });
     if (!answer) {
       await logConversation({
         user_id: userId,

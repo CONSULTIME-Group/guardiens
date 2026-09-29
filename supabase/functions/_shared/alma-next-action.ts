@@ -52,6 +52,11 @@ export interface NextActionResult {
 /** Seuil sous lequel un profil gardien n'apparaît pas dans la recherche. */
 export const PROFILE_SEARCH_THRESHOLD = 40;
 
+/** Lot J4 : vrai quand la question porte explicitement sur le profil. */
+export function isProfileQuestion(question: string): boolean {
+  return PROFILE_ASKED.test(foldText(question)) || /\bprofil\b/.test(foldText(question));
+}
+
 const PROFILE_ASKED = /(mon profil|ma completion|mon score|completer mon profil|qu'est-ce qui manque|ce qui manque a mon profil|visible)/;
 const SIT_INTENT = /(je pars|partir|depart|vacances|faire garder|garder (mes|ma|mon|nos)|garde de (mes|ma|maison)|absence|trouver un gardien|chevaux|poneys|troupeau|chevres|moutons|poules)/;
 const HOWTO_SIT = /comment se passe une garde/;
@@ -111,8 +116,10 @@ export function computeNextAction(input: NextActionInput): NextActionResult {
   // Qui cherche de l'aide : publier passe devant tout. Lot J3 : l'annonce de
   // garde passe devant seulement si la personne parle d'un départ ; des
   // animaux seuls (« de l'aide pour mes chevaux ») relèvent d'abord de l'entraide.
+  // Lot J4 : des chevaux ou un troupeau ne sont pas un départ. Avant J4,
+  // largeAnimals suffisait à placer la garde devant (test du 29/09, 17:25).
   if (input.helpIntent) {
-    if (DEPARTURE_INTENT.test(q) || Boolean(input.largeAnimals)) {
+    if (DEPARTURE_INTENT.test(q)) {
       candidates.push({ label: "Publier mon annonce de garde", path: withTitle("/sits/create", suggestSitTitle(input.question)), reason: "aide_garde" });
       candidates.push({ label: "Demander un coup de main", path: withTitle("/petites-missions/creer", suggestMissionTitle(input.question)), reason: "aide_entraide" });
     } else {
@@ -193,7 +200,7 @@ export function formatActionDirective(r: NextActionResult): string {
   }
   const when = r.placement === "after"
     ? "Réponds d'abord pleinement ; l'action vient ensuite, en une phrase, ou pas du tout si elle détonne."
-    : "Termine ta réponse par cette action, en une phrase qui la nomme.";
+    : "Termine ta réponse par cette action, en une phrase qui la nomme par le nom de sa page, sans écrire le chemin.";
   return [
     `PROCHAINE ACTION CALCULÉE : « ${r.action.label} », chemin ${r.action.path.split("?")[0]} (motif : ${r.action.reason}).`,
     when,
