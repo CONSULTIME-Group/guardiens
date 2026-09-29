@@ -19,6 +19,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/lib/logger";
 import ConversationThreadPanel from "./ConversationThreadPanel";
+import { UrlFilterNotice } from "../UrlFilterNotice";
 import {
   CONVERSATION_CONTEXT_LABEL,
   REPLY_STATE_LABEL,
@@ -173,6 +174,14 @@ export const ConversationsTable = ({
 
   return (
     <div className="space-y-4">
+      {focusConversationId && (
+        <UrlFilterNotice
+          label="Fil ouvert depuis un lien"
+          notFound={focusMissing}
+          notFoundText="Ce fil est introuvable ou ne contient aucun message."
+          onClear={() => onClearFocusConversation?.()}
+        />
+      )}
       <Card>
         <CardContent className="p-4 space-y-3">
           <div className="flex flex-wrap gap-2">
