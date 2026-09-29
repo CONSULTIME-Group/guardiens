@@ -27,6 +27,7 @@
 // - dry_run=true : ne modifie rien, ne notifie rien, retourne juste le plan.
 // - sitter_id : limite l'exécution à un gardien précis (test ciblé).
 
+import { sitterDigestRunStatus } from '../_shared/digest-batching.ts'
 import { createClient } from 'npm:@supabase/supabase-js@2.45.0'
 import { claimSitNotification, raiseClaimErrorSignal, raiseDigestBacklogSignal, raiseInvalidRecipientSignal, raiseStaleClaimSignal, releaseSitNotification, reportClaimOutcome } from '../_shared/sitNotificationClaim.ts'
 import { parisWindowVerdictForHours, SITTER_DAILY_DIGEST_TARGET_PARIS_HOURS } from '../_shared/paris-hour.ts'
@@ -843,7 +844,15 @@ Deno.serve(async (req) => {
         .eq('edge_name', CATCHUP_TAG)
     }
 
-    const runPartial = errors.length > 0 || budgetReached || (queueRemaining ?? 0) > 0
+    // Lot A15 : budget atteint avec un passage suivant prevu dans la journee
+    // = success. 'partial' seulement sur erreur d'envoi, ou file non vide au
+    // dernier passage (08:05 UTC).
+    const runPartial = sitterDigestRunStatus({
+      errorsCount: errors.length,
+      budgetReached,
+      queueRemaining: queueRemaining ?? 0,
+      utcHour: new Date().getUTCHours(),
+    }) === 'partial'
     await nominalRun?.finish(runPartial ? 'partial' : 'success', {
       sitters_processed: sittersStarted,
       sitters_available: bySitter.size,
