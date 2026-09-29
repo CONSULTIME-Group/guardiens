@@ -288,6 +288,13 @@
       "when": 1790686629431,
       "tag": "0040_sec1_points_critiques",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1790688594169,
+      "tag": "0041_a10_chiffres_justes_agregats",
+      "breakpoints": true
     }
   ]
 }

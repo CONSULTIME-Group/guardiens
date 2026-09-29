@@ -10554,6 +10554,61 @@ export type Database = {
         Args: { p_claim_key: string; p_owner_token: string }
         Returns: string
       }
+      admin_a10_affinity_onboarding_stats: {
+        Args: { p_since: string }
+        Returns: Json
+      }
+      admin_a10_alma_bubble_stats: { Args: { p_since: string }; Returns: Json }
+      admin_a10_alma_followed_by_action: {
+        Args: { p_since: string }
+        Returns: Json
+      }
+      admin_a10_cultural_fact_stats: {
+        Args: { p_since: string }
+        Returns: {
+          clicks: number
+          fact_id: string
+          views: number
+        }[]
+      }
+      admin_a10_event_counts: {
+        Args: { p_since: string; p_types: string[] }
+        Returns: {
+          event_type: string
+          n: number
+        }[]
+      }
+      admin_a10_mood_view_counts: {
+        Args: never
+        Returns: {
+          mood_id: string
+          n: number
+        }[]
+      }
+      admin_a10_pending_competences: {
+        Args: never
+        Returns: {
+          label: string
+          usage_count: number
+        }[]
+      }
+      admin_a10_signup_substeps: {
+        Args: { p_since: string }
+        Returns: {
+          event_type: string
+          n: number
+        }[]
+      }
+      admin_a10_whisper_stats: {
+        Args: { p_since: string }
+        Returns: {
+          actions: number
+          blacklisted_users: number
+          dismissed: number
+          emitted: number
+          whisper_type: string
+        }[]
+      }
       admin_alma_action_rate: {
         Args: { p_days?: number }
         Returns: {
@@ -10938,6 +10993,7 @@ export type Database = {
           transition: string
         }[]
       }
+      admin_sit_view_paths: { Args: { p_sit_id: string }; Returns: string[] }
       admin_top_message_users: {
         Args: { _limit?: number; _since?: string }
         Returns: Json
