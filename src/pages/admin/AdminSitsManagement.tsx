@@ -1,4 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { fetchAllRows } from "@/lib/admin/fetchAllRows";
+import { createSeqGuard } from "@/lib/admin/requestSeq";
+import { canCancelGarde, canForceEnd, cancelGardeUpdate, cancelRecipientsLabel, countCancelledThisWeek, isOverdueGarde, reviewReceivedLabel } from "@/lib/admin/sitsActions";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -56,18 +59,31 @@ const AdminSitsManagement = () => {
   const [sheetStats, setSheetStats] = useState<{ view_count: number; message_count: number; conversation_count: number } | null>(null);
   const [showAllApps, setShowAllApps] = useState(false);
 
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [transitionConfirm, setTransitionConfirm] = useState<"in_progress" | "completed" | null>(null);
+  const sitsSeq = useRef(createSeqGuard());
   const fetchSits = useCallback(async () => {
+    const token = sitsSeq.current.next();
     setLoading(true);
-    const results: any[] = [];
-
+    setLoadError(null);
     const statuses = adminSitsFilterStatuses(filterStatus);
-
-
-    const { data } = await supabase.from("sits").select("*, owner:profiles!sits_user_id_fkey(first_name, last_name, avatar_url, city)").in("status", statuses as any).order("created_at", { ascending: false });
-    (data || []).forEach(d => results.push({ ...d, _type: "sit" }));
-
-    results.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-    setSits(results);
+    try {
+      const { rows } = await fetchAllRows<any>((from, to) =>
+        supabase
+          .from("sits")
+          .select("*, owner:profiles!sits_user_id_fkey(first_name, last_name, avatar_url, city)")
+          .in("status", statuses as any)
+          .order("created_at", { ascending: false })
+          .order("id", { ascending: true })
+          .range(from, to),
+      );
+      if (!sitsSeq.current.isCurrent(token)) return;
+      setSits(rows.map((d) => ({ ...d, _type: "sit" })));
+    } catch (e: any) {
+      if (!sitsSeq.current.isCurrent(token)) return;
+      console.error("[admin-sits] chargement", e);
+      setLoadError(`Les gardes n'ont pas pu être chargées : ${e?.message || "erreur serveur"}.`);
+    }
     setLoading(false);
   }, [filterStatus]);
 
@@ -180,18 +196,33 @@ const AdminSitsManagement = () => {
     if (!sit) return;
     setCancelling(true);
 
-    await supabase.from("sits").update({ status: "cancelled" as any, cancellation_reason: cancelModal.reason } as any).eq("id", cancelModal.id);
-
-    if (sit.user_id) {
-      await supabase.from("notifications").insert({ user_id: sit.user_id, type: "sit_cancelled", title: "Garde annulée par l'admin", body: `La garde "${sit.title}" a été annulée. Motif : ${cancelModal.reason}`, link: `/sits/${sit.id}` });
+    const { data: userData } = await supabase.auth.getUser();
+    const adminId = userData.user?.id;
+    if (!adminId) { toast.error("Session admin introuvable."); setCancelling(false); return; }
+    const { data: touched, error } = await supabase
+      .from("sits")
+      .update(cancelGardeUpdate(adminId, cancelModal.reason, new Date().toISOString()) as any)
+      .eq("id", cancelModal.id)
+      .select("id");
+    if (error || !touched?.length) {
+      toast.error(error ? `Annulation impossible : ${error.message}` : "Annulation refusée : aucune garde modifiée.");
+      setCancelling(false);
+      return;
     }
 
-    const confirmedSitterId = sitters[sit.id]?.id;
-    if (confirmedSitterId) {
-      await supabase.from("notifications").insert({ user_id: confirmedSitterId, type: "sit_cancelled", title: "Garde annulée par l'admin", body: `La garde "${sit.title}" a été annulée. Motif : ${cancelModal.reason}`, link: `/sits/${sit.id}` });
+    const body = `La garde "${sit.title}" a été annulée. Motif : ${cancelModal.reason.trim()}`;
+    const recipients = [sit.user_id, sitters[sit.id]?.id].filter(Boolean) as string[];
+    const failed: string[] = [];
+    for (const uid of recipients) {
+      const { error: nErr } = await supabase.from("notifications").insert({ user_id: uid, type: "sit_cancelled", title: "Garde annulée par l'équipe", body, link: `/sits/${sit.id}` });
+      if (nErr) failed.push(nErr.message);
     }
-
-    toast.success("Garde annulée");
+    await supabase.from("admin_action_logs").insert({
+      admin_id: adminId, action: "cancel_garde", target_type: "garde", target_id: sit.id,
+      note: cancelModal.reason.trim(), metadata: { previous_status: sit.status ?? null, notified: recipients.length - failed.length },
+    });
+    if (failed.length) toast.error(`Garde annulée, mais ${failed.length} notification${failed.length > 1 ? "s" : ""} non envoyée${failed.length > 1 ? "s" : ""}.`);
+    else toast.success("Garde annulée");
     setCancelling(false);
     setCancelModal({ open: false, id: "", type: "", reason: "" });
     fetchSits();
@@ -227,11 +258,22 @@ const AdminSitsManagement = () => {
   // Sheet: admin status transitions
   const handleSheetTransition = async (newStatus: string) => {
     if (!selectedSit) return;
-    const { error } = await supabase.from("sits").update({ status: newStatus as any }).eq("id", selectedSit.id);
-    if (error) {
-      toast.error("Erreur lors de la mise à jour");
+    const { data: touched, error } = await supabase.from("sits").update({ status: newStatus as any }).eq("id", selectedSit.id).select("id");
+    if (error || !touched?.length) {
+      toast.error(error ? `Erreur : ${error.message}` : "Mise à jour refusée : aucune garde modifiée.");
       return;
     }
+    const { data: userData } = await supabase.auth.getUser();
+    if (userData.user?.id) {
+      const { error: logErr } = await supabase.from("admin_action_logs").insert({
+        admin_id: userData.user.id,
+        action: newStatus === "in_progress" ? "mark_garde_in_progress" : "mark_garde_completed",
+        target_type: "garde", target_id: selectedSit.id,
+        metadata: { previous_status: selectedSit.status ?? null },
+      });
+      if (logErr) console.error("admin_action_logs transition", logErr);
+    }
+    setTransitionConfirm(null);
     toast.success(newStatus === "in_progress" ? "Garde marquée en cours" : "Garde marquée terminée");
     setSelectedSit((prev: any) => prev ? { ...prev, status: newStatus } : null);
     fetchSits();
@@ -248,9 +290,9 @@ const AdminSitsManagement = () => {
   };
 
   // Alerts
-  const overdueConfirmed = sits.filter(s => s.status === "confirmed" && s.end_date && isPast(new Date(s.end_date)));
+  const overdueConfirmed = sits.filter((s) => isOverdueGarde(s));
   const missingReviews14d = sits.filter(s => s.status === "completed" && s._type === "sit" && s.end_date && differenceInDays(new Date(), new Date(s.end_date)) >= 14 && (!reviews[s.id]?.owner || !reviews[s.id]?.sitter));
-  const cancelledThisWeek = sits.filter(s => s.status === "cancelled" && differenceInDays(new Date(), new Date(s.created_at)) <= 7);
+  const cancelledThisWeekCount = countCancelledThisWeek(sits);
 
   const filtered = sits.filter(s => {
     if (filterCountry === "fr" && (s.country || "FR") !== "FR") return false;
@@ -271,7 +313,7 @@ const AdminSitsManagement = () => {
       <div>
         <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Gardes</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Cycle opérationnel post-acceptation (confirmed, completed, cancelled) : pairing proprio/gardien, statut temporel, avis.
+          Gardes après acceptation (confirmées, en cours, terminées, annulées) : propriétaire et gardien, déroulé dans le temps, avis.
         </p>
         <p className="text-sm text-muted-foreground mt-1">
           Pour les annonces publiées (en recherche de gardien), les brouillons et les statistiques de trafic, consultez l'onglet{' '}
@@ -285,13 +327,13 @@ const AdminSitsManagement = () => {
       </div>
 
       {/* Alerts */}
-      {(overdueConfirmed.length > 0 || missingReviews14d.length > 0 || cancelledThisWeek.length > 0) && (
+      {(overdueConfirmed.length > 0 || missingReviews14d.length > 0 || cancelledThisWeekCount > 0) && (
         <div className="space-y-2">
           {overdueConfirmed.length > 0 && (
             <Card className="border-warning-border bg-warning-soft">
               <CardContent className="p-3 flex items-center gap-3">
                 <AlertTriangle className="h-5 w-5 text-warning shrink-0" />
-                <p className="text-sm flex-1">{overdueConfirmed.length} garde{overdueConfirmed.length > 1 ? "s" : ""} avec dates passées mais encore "confirmée{overdueConfirmed.length > 1 ? "s" : ""}"</p>
+                <p className="text-sm flex-1">{overdueConfirmed.length} garde{overdueConfirmed.length > 1 ? "s" : ""} avec dates passées, encore confirmée{overdueConfirmed.length > 1 ? "s" : ""} ou en cours</p>
               </CardContent>
             </Card>
           )}
@@ -303,11 +345,11 @@ const AdminSitsManagement = () => {
               </CardContent>
             </Card>
           )}
-          {cancelledThisWeek.length > 0 && (
+          {cancelledThisWeekCount > 0 && (
             <Card className="border-warning-border bg-warning-soft">
               <CardContent className="p-3 flex items-center gap-3">
                 <XCircle className="h-5 w-5 text-warning shrink-0" />
-                <p className="text-sm flex-1">{cancelledThisWeek.length} annulation{cancelledThisWeek.length > 1 ? "s" : ""} cette semaine</p>
+                <p className="text-sm flex-1">{cancelledThisWeekCount} annulation{cancelledThisWeekCount > 1 ? "s" : ""} cette semaine</p>
               </CardContent>
             </Card>
           )}
@@ -327,12 +369,6 @@ const AdminSitsManagement = () => {
             <SelectItem value="in_progress">En cours</SelectItem>
             <SelectItem value="completed">Terminées</SelectItem>
             <SelectItem value="cancelled">Annulées</SelectItem>
-            <SelectItem value="no_draft">+ Annonces publiées</SelectItem>
-            <SelectItem value="published">Publiées (pré-confirmation)</SelectItem>
-            <SelectItem value="draft">Brouillons</SelectItem>
-            <SelectItem value="archived">Archivées</SelectItem>
-            <SelectItem value="expired">Expirées</SelectItem>
-            <SelectItem value="all">Tous statuts</SelectItem>
           </SelectContent>
         </Select>
         <Select value={filterCountry} onValueChange={setFilterCountry}>
@@ -369,7 +405,9 @@ const AdminSitsManagement = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {loading ? (
+            {loadError ? (
+              <TableRow><TableCell colSpan={12} role="alert" className="text-center py-8 text-destructive">{loadError}</TableCell></TableRow>
+            ) : loading ? (
               <TableRow><TableCell colSpan={12} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
             ) : filtered.length === 0 ? (
               <TableRow><TableCell colSpan={12} className="text-center py-8 text-muted-foreground">Aucune garde</TableCell></TableRow>
@@ -377,7 +415,7 @@ const AdminSitsManagement = () => {
               const timing = getTimingStatus(sit);
               const sitter = sitters[sit.id];
               const rev = reviews[sit.id] || { owner: false, sitter: false };
-              const isOverdue = sit.status === "confirmed" && sit.end_date && isPast(new Date(sit.end_date));
+              const isOverdue = canForceEnd(sit);
               return (
                 <TableRow
                   key={sit.id}
@@ -432,8 +470,8 @@ const AdminSitsManagement = () => {
                     })()}
                   </TableCell>
                   <TableCell className="text-xs">
-                    <div>P: {rev.owner ? "✅" : "❌"}</div>
-                    <div>G: {rev.sitter ? "✅" : "❌"}</div>
+                    <div>{reviewReceivedLabel("owner", rev.owner)}</div>
+                    <div className="text-muted-foreground">{reviewReceivedLabel("sitter", rev.sitter)}</div>
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
@@ -445,7 +483,7 @@ const AdminSitsManagement = () => {
                           <RotateCcw className="h-4 w-4 text-primary" />
                         </Button>
                       )}
-                      {sit.status === "confirmed" && (
+                      {canCancelGarde(sit) && (
                         <Button variant="ghost" size="icon" title="Annuler" onClick={() => setCancelModal({ open: true, id: sit.id, type: sit._type, reason: "" })}>
                           <XCircle className="h-4 w-4 text-destructive" />
                         </Button>
@@ -464,7 +502,7 @@ const AdminSitsManagement = () => {
         <DialogContent>
           <DialogHeader><DialogTitle>Annuler cette garde ?</DialogTitle></DialogHeader>
           <DialogDescription>
-            {sitters[cancelModal.id]?.id ? "Les deux parties seront notifiées." : "Le propriétaire sera notifié."}
+            {cancelRecipientsLabel(!!sitters[cancelModal.id]?.id)}
           </DialogDescription>
           <Textarea value={cancelModal.reason} onChange={(e) => setCancelModal(s => ({ ...s, reason: e.target.value }))} placeholder="Motif d'annulation…" rows={3} />
           <DialogFooter>
@@ -635,7 +673,7 @@ const AdminSitsManagement = () => {
                 {selectedSit.status === "confirmed" && (
                   <Button
                     className="w-full"
-                    onClick={() => handleSheetTransition("in_progress")}
+                    onClick={() => setTransitionConfirm("in_progress")}
                   >
                     Marquer en cours
                   </Button>
@@ -644,7 +682,7 @@ const AdminSitsManagement = () => {
                 {selectedSit.status === "in_progress" && (
                   <Button
                     className="w-full"
-                    onClick={() => handleSheetTransition("completed")}
+                    onClick={() => setTransitionConfirm("completed")}
                   >
                     Marquer terminée
                   </Button>
@@ -671,8 +709,8 @@ const AdminSitsManagement = () => {
             <AlertDialogDescription>
               {(() => {
                 const s = forceCompleteModal.sit;
-                const ownerName = sitters[s?.user_id]?.name ?? null;
-                const sitterName = s?.confirmed_sitter_id ? sitters[s.confirmed_sitter_id]?.name ?? null : null;
+                const ownerName = s?.owner ? `${s.owner.first_name ?? ""} ${s.owner.last_name ?? ""}`.trim() || null : null;
+                const sitterName = s ? sitters[s.id]?.name || null : null;
                 const parts: string[] = [];
                 if (ownerName) parts.push(`Propriétaire : ${ownerName}`);
                 if (sitterName) parts.push(`Gardien : ${sitterName}`);
@@ -693,7 +731,26 @@ const AdminSitsManagement = () => {
               disabled={forcingComplete}
               onClick={(e) => { e.preventDefault(); if (forceCompleteModal.sit) forceComplete(forceCompleteModal.sit); }}
             >
-              {forcingComplete ? "Clôture," : "Confirmer la clôture"}
+              {forcingComplete ? "Clôture…" : "Confirmer la clôture"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!transitionConfirm} onOpenChange={(v) => { if (!v) setTransitionConfirm(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {transitionConfirm === "in_progress" ? "Marquer cette garde en cours ?" : "Marquer cette garde terminée ?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              « {selectedSit?.title ?? "Sans titre"} ». Le changement est enregistré dans le journal d'audit.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={(e) => { e.preventDefault(); if (transitionConfirm) handleSheetTransition(transitionConfirm); }}>
+              Confirmer
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
