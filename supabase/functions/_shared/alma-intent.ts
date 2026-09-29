@@ -190,5 +190,5 @@ export function almaHelpDirective(intent: AlmaIntent): string | null {
   const animals = intent.largeAnimals
     ? " Chevaux, poneys, troupeaux et animaux de ferme sont des besoins légitimes, en entraide comme en garde."
     : ""
-  return `La personne cherche de l'aide, elle ne veut pas postuler comme gardien. Réponds en une ou deux phrases : oriente vers la publication avec les deux portes du site, une demande d'entraide sur ${HELP_PATHS.entraide} et une garde sur ${HELP_PATHS.garde}.${animals} Ne parle ni de score, ni de points de profil, ni de complétion. Aucune blague, aucune anecdote.`
+  return `La personne cherche de l'aide, elle ne veut pas postuler comme gardien. Réponds en une ou deux phrases : oriente vers la publication. Sans départ annoncé, commence par la demande d'entraide (page Demander un coup de main, ${HELP_PATHS.entraide}) ; l'annonce de garde (page Créer une annonce de garde, ${HELP_PATHS.garde}) sert à une absence. Tu nommes ces pages, tu n'écris jamais leur chemin.${animals} Ne parle ni de score, ni de points de profil, ni de complétion. Aucune blague, aucune anecdote.`
 }
