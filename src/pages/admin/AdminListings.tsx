@@ -85,6 +85,12 @@ const AdminListings = () => {
   const [filterStatus, setFilterStatus] = useState<ListingFilter>(() =>
     (LISTING_FILTERS as readonly string[]).includes(urlFilter ?? "") ? (urlFilter as ListingFilter) : "published",
   );
+  // Navigation externe (menu latéral) : ?filter= réaligné dans le même rendu.
+  const [seenUrlFilter, setSeenUrlFilter] = useState(urlFilter);
+  if (seenUrlFilter !== urlFilter) {
+    setSeenUrlFilter(urlFilter);
+    if ((LISTING_FILTERS as readonly string[]).includes(urlFilter ?? "")) setFilterStatus(urlFilter as ListingFilter);
+  }
   const [statsReady, setStatsReady] = useState(false);
   const [statsError, setStatsError] = useState<string | null>(null);
   const [listingsTruncated, setListingsTruncated] = useState(false);

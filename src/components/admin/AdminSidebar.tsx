@@ -76,7 +76,7 @@ const adminNavGroups: NavGroup[] = [
   {
     label: "ACTIVITÉ",
     items: [
-      { to: "/admin/listings", icon: Megaphone, label: "Annonces", badgeKey: "sitsToStaff" },
+      { to: "/admin/listings?filter=to_staff", icon: Megaphone, label: "Annonces", badgeKey: "sitsToStaff" },
       { to: "/admin/sits-management", icon: CalendarCheck, label: "Gardes" },
       { to: "/admin/small-missions", icon: Handshake, label: "Entraide", badgeKey: "reportsMission", tabParam: "entraide", defaultTab: "entraide" },
       { to: "/admin/small-missions?tab=projets", icon: Hammer, label: "Projets", tabParam: "projets", defaultTab: "entraide" },
