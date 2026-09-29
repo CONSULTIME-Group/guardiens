@@ -23,6 +23,7 @@ export function rewriteForbiddenWords(text: string): string {
     .replace(new RegExp(`\\b(du|le|au|un|son|votre) logement gratuitement${end}`, "gi"), (_m, det: string) => `${det} logement sans rien payer`)
     .replace(new RegExp(`\\bgratuitement${end}`, "gi"), "sans rien payer pour le logement")
     .replace(new RegExp(`\\bla gratuit[ée]${end}`, "gi"), "l'absence de frais")
+    .replace(new RegExp(`\\bgratuit[ée]${end}`, "gi"), "absence de frais")
     .replace(new RegExp(`\\bgratuit(?:e|es|s)?${end}`, "gi"), "sans frais")
     .replace(new RegExp(`\\bvoisinage${end}`, "gi"), "entourage")
     .replace(new RegExp(`\\bvoisin(?:e|es|s)?${end}`, "gi"), "personne du coin");
