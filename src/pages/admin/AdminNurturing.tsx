@@ -974,7 +974,7 @@ const AdminNurturing = () => {
                 ) : (
                   <div className="space-y-2">
                     {sequences.map((s) => {
-                      const m = sequenceMetrics.get(s.key) ?? { sent: 0, failed: 0, exited: 0, activeJourneys: 0, totalJourneys: 0, opens: 0, clicks: 0, actions: 0 };
+                      const m = sequenceMetrics.get(s.key) ?? { sent: 0, delivered: 0, failed: 0, exited: 0, activeJourneys: 0, totalJourneys: 0, opens: 0, clicks: 0, actions: 0 };
                       return (
                         <div key={s.key} className="flex items-center justify-between gap-3 border border-border rounded-md px-3 py-2">
                           <div className="flex items-center gap-2 flex-wrap">
@@ -1139,7 +1139,7 @@ const AdminNurturing = () => {
                   <p className="text-sm text-muted-foreground py-4 text-center">Aucune séquence configurée.</p>
                 ) : (
                   sequences.map((s) => {
-                    const m = sequenceMetrics.get(s.key) ?? { sent: 0, failed: 0, exited: 0, activeJourneys: 0, totalJourneys: 0, opens: 0, clicks: 0, actions: 0 };
+                    const m = sequenceMetrics.get(s.key) ?? { sent: 0, delivered: 0, failed: 0, exited: 0, activeJourneys: 0, totalJourneys: 0, opens: 0, clicks: 0, actions: 0 };
                     const steps = stepsBySequence.get(s.key) ?? [];
                     const ruleType = s.enrollment_rule?.type ?? ",";
                     const ruleLabel = RULE_TYPE_LABELS[ruleType] ?? ruleType;
@@ -1200,7 +1200,7 @@ const AdminNurturing = () => {
                             <p className="font-semibold text-foreground text-base">
                               {engagementError ? UNAVAILABLE_LABEL : formatOpenRate(m.opens, m.delivered)}
                             </p>
-                            <p className="text-[10px] text-muted-foreground">{m.opens} / {m.sent}</p>
+                            <p className="text-[10px] text-muted-foreground">{m.opens} ouverts sur {m.delivered} livrés</p>
                           </div>
                           <div className="bg-primary/5 border border-primary/15 rounded px-2 py-1.5">
                             <p className="text-muted-foreground">Taux de clic CTA</p>
