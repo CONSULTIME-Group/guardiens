@@ -1,4 +1,4 @@
-import { KpiTile } from "@/components/admin/ui";
+import { KpiTile, Pager, SearchInput, usePagedSearch } from "@/components/admin/ui";
 import { adminLabel, ALMA_FACT_TYPE_LABELS } from "@/lib/admin/labels";
 import { fetchAllRows } from "@/lib/admin/fetchAllRows";
 import { reportAdminReadError, UNAVAILABLE_LABEL } from "@/lib/admin/readError";
@@ -597,6 +597,16 @@ interface CulturalFactRow {
   created_at: string;
 }
 
+/** Contexte d'un fait culturel, lisible : « Surface : Tableau de bord gardien ». */
+function contextSummary(ctx: unknown): string {
+  if (!ctx || typeof ctx !== "object") return "·";
+  const parts = Object.entries(ctx as Record<string, unknown>).map(([k, v]) => {
+    const vals = (Array.isArray(v) ? v : [v]).map((x) => (typeof x === "string" ? adminLabel(x) : String(x)));
+    return `${adminLabel(k)} : ${vals.join(", ")}`;
+  });
+  return parts.length ? parts.join(" · ") : "·";
+}
+
 function CulturalFactsTab({ since }: { since: string }) {
   const qc = useQueryClient();
   const seenRef = useRef(false);
@@ -674,6 +684,8 @@ function CulturalFactsTab({ since }: { since: string }) {
       return true;
     });
   }, [facts, typeFilter, surfaceFilter]);
+  // Lot A11b : recherche commune et pagination par 24, présentation seulement.
+  const pagedFacts = usePagedSearch(filtered, (f) => `${f.content ?? ""} ${f.fact_type ?? ""} ${f.source_url ?? ""}`);
 
   const toggleActive = async (fact: CulturalFactRow) => {
     const next = !fact.active;
@@ -806,6 +818,9 @@ function CulturalFactsTab({ since }: { since: string }) {
               )}
             </TableBody>
           </Table>
+          <div className="px-4 pb-3">
+            <Pager page={pagedFacts.page} total={pagedFacts.total} onPage={pagedFacts.setPage} />
+          </div>
         </CardContent>
       </Card>
 

@@ -363,6 +363,11 @@ export const COLUMN_LABELS: Dict = {
   updated_at: "Modifié le",
   status: "Statut",
   count: "Nombre",
+  surface: "Surface",
+  species: "Espèce",
+  role: "Rôle",
+  season: "Saison",
+  month: "Mois",
 };
 
 const ALL: Dict[] = [
