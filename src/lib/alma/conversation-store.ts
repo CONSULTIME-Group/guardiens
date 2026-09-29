@@ -31,7 +31,18 @@ export interface AlmaChatMessage {
   content: string;
   action?: AlmaChatAction;
   chips?: AlmaChatChip[];
+  /** Lot J2-B : identifiant de l'échange, pour le retour utile / pas utile. */
+  conversationId?: string;
+  /** Lot J2-B : frustration, bug ou question sans réponse détectés. */
+  humanContact?: boolean;
+  feedback?: AlmaFeedbackValue;
 }
+
+export type AlmaFeedbackValue = "useful" | "not_useful";
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+export function readConversationId(raw: unknown): string | undefined {
+  return typeof raw === "string" && UUID_RE.test(raw) ? raw : undefined;
 
 /** Seuls les chemins internes du site sont acceptés, jamais une adresse externe. */
 function isInternalPath(v: unknown): v is string {
@@ -65,6 +76,8 @@ export interface AlmaConversationState {
   sending: boolean;
   limited: boolean;
   error: string | null;
+  /** Lot J2-B : formulaire « Écrire à Jérémie et Elisa » ouvert. */
+  contactOpen: boolean;
 }
 
 const initialState: AlmaConversationState = {
@@ -73,6 +86,7 @@ const initialState: AlmaConversationState = {
   sending: false,
   limited: false,
   error: null,
+  contactOpen: false,
 };
 
 let state: AlmaConversationState = initialState;
@@ -227,6 +241,8 @@ export async function sendAlmaMessage({
           content: answer,
           action: readAlmaAction((data as any)?.action),
           chips: readAlmaChips((data as any)?.chips),
+          conversationId: readConversationId((data as any)?.conversation_id),
+          humanContact: (data as any)?.human_contact === true,
         },
       ],
     });
@@ -234,6 +250,73 @@ export async function sendAlmaMessage({
     if (requestGeneration !== conversationGeneration) return;
     setState({ sending: false, error: "Alma reste joignable dans un instant, réessayez." });
   }
+}
+
+/** Lot J2-B : ouvre le formulaire de contact humain, dans le fil d'Alma. */
+export function openAlmaHumanContact() {
+  setState({ open: true, contactOpen: true, error: null });
+}
+
+export function closeAlmaHumanContact() {
+  setState({ contactOpen: false });
+}
+
+/** Lot J2-B : retour utile / pas utile sur une réponse d'Alma. */
+export async function sendAlmaFeedback(
+  messageId: string,
+  value: AlmaFeedbackValue,
+  client: { from: typeof supabase.from; auth: typeof supabase.auth } = supabase,
+): Promise<boolean> {
+  const msg = state.messages.find((m) => m.id === messageId);
+  if (!msg?.conversationId) return false;
+  const { data: auth } = await client.auth.getUser();
+  const userId = auth?.user?.id;
+  if (!userId) return false;
+  const { error } = await (client.from as any)("alma_feedback").upsert(
+    { conversation_id: msg.conversationId, user_id: userId, value },
+    { onConflict: "conversation_id,user_id" },
+  );
+  if (error) return false;
+  setState({
+    messages: state.messages.map((m) => (m.id === messageId ? { ...m, feedback: value } : m)),
+    ...(value === "not_useful" ? { contactOpen: true } : {}),
+  });
+  return true;
+}
+
+export interface HumanContactInput {
+  name: string;
+  email: string;
+  text: string;
+  surface: string;
+  invoke?: typeof supabase.functions.invoke;
+}
+
+/** Lot J2-B : message à Jérémie et Elisa, avec les derniers échanges et l'écran courant. */
+export async function sendAlmaHumanContact(input: HumanContactInput): Promise<boolean> {
+  const call = input.invoke ?? supabase.functions.invoke.bind(supabase.functions);
+  const { data, error } = await call("alma-chat", {
+    body: {
+      kind: "contact_humans",
+      name: input.name,
+      email: input.email,
+      text: input.text,
+      surface: input.surface,
+      page_path: typeof window !== "undefined" ? window.location.pathname : undefined,
+      transcript: state.messages.slice(-6).map((m) => ({ role: m.role, content: m.content })),
+    },
+  });
+  const ok = !error && (data as any)?.ok === true;
+  if (ok) {
+    setState({
+      contactOpen: false,
+      messages: [
+        ...state.messages,
+        { id: nextId(), role: "alma", content: "Votre message est parti chez Jérémie et Elisa. Ils vous répondent par email." },
+      ],
+    });
+  }
+  return ok;
 }
 
 // Le store survit au dock : écouter l'auth même quand celui-ci est démonté.

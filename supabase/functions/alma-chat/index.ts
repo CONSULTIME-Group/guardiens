@@ -18,8 +18,18 @@ import {
   normalizeAlmaOutput,
 } from "../_shared/alma-system-prompt.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { almaDirectAnswer, almaHelpDirective, detectAlmaIntent } from "../_shared/alma-intent.ts";
-import { recordAlmaFrustration } from "../_shared/alma-frustration-signal.ts";
+import { almaDirectAnswer, almaHelpDirective, detectAlmaIntent, shouldAnswerDirectly } from "../_shared/alma-intent.ts";
+import { recordAlmaSignal } from "../_shared/alma-signals.ts";
+import {
+  CLASSIFICATION_DIRECTIVE,
+  classificationFromPatterns,
+  extractClassification,
+  mergeClassification,
+  needsHumanContact,
+  signalsFor,
+  type AlmaClassification,
+} from "../_shared/alma-classify.ts";
+import { normalizeContactMessage } from "../_shared/normalize-contact-message.ts";
 import { formatKnowledge, selectKnowledge } from "../_shared/alma-site-knowledge.ts";
 import { isMoodLineTruthful, loadVerifiedFacts, moodTruthFromFacts } from "../_shared/alma-facts.ts";
 import { formatInventory, loadAlmaInventory } from "../_shared/alma-inventory.ts";
@@ -41,7 +51,8 @@ Deno.serve(async (req) => {
   try {
     const body = await req.json().catch(() => ({}));
     const message = typeof body?.message === "string" ? body.message.trim() : "";
-    if (!message || message.length > 2000) {
+    const isContact = body?.kind === "contact_humans";
+    if (!isContact && (!message || message.length > 2000)) {
       return json({ error: "Message invalide (1 à 2000 caractères)." }, 400);
     }
     const register = detectRegister(message);
@@ -84,6 +95,70 @@ Deno.serve(async (req) => {
       { auth: { persistSession: false, autoRefreshToken: false } },
     );
 
+    // Lot J2-B : « Écrire à Jérémie et Elisa » depuis Alma.
+    if (isContact) {
+      const name = normalizeContactMessage(String(body?.name ?? "")).slice(0, 120);
+      const email = String(body?.email ?? u.user.email ?? "").trim().slice(0, 200);
+      const text = normalizeContactMessage(String(body?.text ?? ""));
+      const transcript = Array.isArray(body?.transcript)
+        ? body.transcript
+            .filter((m: any) => m && (m.role === "user" || m.role === "alma") && typeof m.content === "string")
+            .slice(-6)
+            .map((m: any) => `${m.role === "alma" ? "Alma" : "Membre"} : ${normalizeContactMessage(String(m.content)).slice(0, 600)}`)
+        : [];
+      if (!text || text.length > 3000 || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+        return json({ error: "Message ou email invalide." }, 400);
+      }
+      const full = [
+        text,
+        "",
+        `Écran : ${pagePath ?? surface}`,
+        ...(transcript.length ? ["", "Derniers échanges avec Alma :", ...transcript] : []),
+      ].join("\n").slice(0, 5000);
+      const { data: cm, error: cmErr } = await adminClient
+        .from("contact_messages")
+        .insert({ name: name || "Membre", email, subject: "Depuis Alma : un membre écrit à Jérémie et Elisa", message: full, source: "alma" })
+        .select("id")
+        .single();
+      if (cmErr) {
+        console.error("contact_messages insert failed", cmErr);
+        return json({ error: "Message non enregistré, réessayez." }, 500);
+      }
+      try {
+        await recordAlmaSignal(adminClient, "alma_contact_request", userId, text, { pagePath, contactMessageId: cm.id });
+      } catch (e) {
+        console.error("alma_contact_request signal failed", e);
+      }
+      return json({ ok: true });
+    }
+
+    // Lot J2-B : rejeu admin du jeu de non-régression, sans écriture ni signal.
+    let isReplay = false;
+    if (body?.replay === true) {
+      const { data: isAdmin } = await adminClient.rpc("has_role", { _user_id: userId, _role: "admin" });
+      if (!isAdmin) return json({ error: "Forbidden" }, 403);
+      isReplay = true;
+    }
+    const logConversation = async (row: Record<string, unknown>): Promise<string | null> => {
+      if (isReplay) return null;
+      const { data } = await adminClient
+        .from("alma_conversations")
+        .insert({ ...row, page_path: pagePath })
+        .select("id")
+        .single();
+      return (data as any)?.id ?? null;
+    };
+    const raiseSignals = async (c: AlmaClassification, conversationId: string | null) => {
+      if (isReplay) return;
+      for (const type of signalsFor(c)) {
+        try {
+          await recordAlmaSignal(adminClient, type, userId, message, { pagePath, bugItem: c.bug_item, conversationId });
+        } catch (e) {
+          console.error(`${type} signal failed`, e);
+        }
+      }
+    };
+
     // Plafond anti-boucle : ALMA_CHAT_DAILY_LIMIT échanges par personne et par jour.
     const dayStart = new Date();
     dayStart.setUTCHours(0, 0, 0, 0);
@@ -93,7 +168,7 @@ Deno.serve(async (req) => {
       .eq("user_id", userId)
       .gte("created_at", dayStart.toISOString());
 
-    if ((count ?? 0) >= ALMA_CHAT_DAILY_LIMIT) {
+    if (!isReplay && (count ?? 0) >= ALMA_CHAT_DAILY_LIMIT) {
       await adminClient.from("alma_conversations").insert({
         user_id: userId,
         surface,
@@ -114,16 +189,12 @@ Deno.serve(async (req) => {
       message,
       history.filter((m: any) => m.role === "user").map((m: any) => m.content),
     );
-    if (intent.frustration || intent.leaving) {
-      try {
-        await recordAlmaFrustration(adminClient, userId, message, intent.matched);
-      } catch (e) {
-        console.error("alma_frustration signal failed", e);
-      }
-    }
-    const direct = almaDirectAnswer(intent);
-    if (direct) {
-      await adminClient.from("alma_conversations").insert({
+    // Lot J2-B : la réponse fixe ne sert qu'en secours (départ poli, ou
+    // frustration maximale sans question). Sinon le modèle répond d'abord.
+    if (shouldAnswerDirectly(intent)) {
+      const direct = almaDirectAnswer(intent)!;
+      const classification = classificationFromPatterns(intent);
+      const conversationId = await logConversation({
         user_id: userId,
         surface,
         active_role: activeRole,
@@ -134,11 +205,16 @@ Deno.serve(async (req) => {
         refusal_reason: null,
         latency_ms: Date.now() - startedAt,
         sources_count: 0,
+        classification,
       });
+      await raiseSignals(classification, conversationId);
+      const human = needsHumanContact(classification);
       return json({
         answer: direct,
         remaining: Math.max(0, ALMA_CHAT_DAILY_LIMIT - ((count ?? 0) + 1)),
-        action: { label: "Écrire à Jérémie et Elisa", path: "/contact" },
+        ...(human ? { action: { label: "Écrire à Jérémie et Elisa", path: "/contact" }, human_contact: true } : {}),
+        ...(conversationId ? { conversation_id: conversationId } : {}),
+        ...(isReplay ? { replay_meta: { register, classification, confirmed_sit: false } } : {}),
       });
     }
     const helpDirective = almaHelpDirective(intent);
@@ -396,33 +472,47 @@ Deno.serve(async (req) => {
         { role: "system", content: almaRegisterReminder(register) },
         ...(next ? [{ role: "system" as const, content: formatActionDirective(next) }] : []),
         ...(helpDirective ? [{ role: "system" as const, content: helpDirective }] : []),
+        { role: "system", content: CLASSIFICATION_DIRECTIVE },
         { role: "user", content: message },
       ],
     });
 
     if (!r.ok) {
-      await adminClient.from("alma_conversations").insert({
+      // Secours : frustration ou départ, la réponse fixe prend le relais.
+      const fallback = intent.frustration || intent.leaving ? almaDirectAnswer(intent) : null;
+      const classification = classificationFromPatterns(intent);
+      const conversationId = await logConversation({
         user_id: userId,
         surface,
         active_role: activeRole,
         input_mode: inputMode,
         question: message,
-        answer: null,
+        answer: fallback,
         register,
-        refusal_reason: r.code ?? `gateway_${r.status}`,
+        refusal_reason: fallback ? "model_fallback" : r.code ?? `gateway_${r.status}`,
         latency_ms: Date.now() - startedAt,
         sources_count: sources.length,
+        classification,
       });
+      await raiseSignals(classification, conversationId);
+      if (fallback) {
+        return json({
+          answer: fallback,
+          remaining: Math.max(0, ALMA_CHAT_DAILY_LIMIT - ((count ?? 0) + 1)),
+          action: { label: "Écrire à Jérémie et Elisa", path: "/contact" },
+          human_contact: true,
+          ...(conversationId ? { conversation_id: conversationId } : {}),
+        });
+      }
       return json({ error: r.error, code: r.code }, r.status === 402 || r.status === 429 ? r.status : 502);
     }
 
-    const drafted = applyDraftToAction(
-      normalizeAlmaOutput(r.data?.choices?.[0]?.message?.content ?? ""),
-      next?.action ?? null,
-    );
+    const extracted = extractClassification(r.data?.choices?.[0]?.message?.content ?? "");
+    const classification = mergeClassification(extracted.classification, intent);
+    const drafted = applyDraftToAction(normalizeAlmaOutput(extracted.answer), next?.action ?? null);
     const answer = drafted.answer;
     if (!answer) {
-      await adminClient.from("alma_conversations").insert({
+      await logConversation({
         user_id: userId,
         surface,
         active_role: activeRole,
@@ -433,11 +523,17 @@ Deno.serve(async (req) => {
         refusal_reason: "empty_answer",
         latency_ms: Date.now() - startedAt,
         sources_count: sources.length,
+        classification,
       });
       return json({ error: "Réponse indisponible pour l'instant." }, 502);
     }
 
-    await adminClient.from("alma_conversations").insert({
+    const human = needsHumanContact(classification);
+    // Frustration, bug, départ : le contact humain passe devant l'action calculée.
+    const action = human
+      ? { label: "Écrire à Jérémie et Elisa", path: "/contact", reason: "contact_humain" }
+      : drafted.action;
+    const conversationId = await logConversation({
       user_id: userId,
       surface,
       active_role: activeRole,
@@ -448,13 +544,22 @@ Deno.serve(async (req) => {
       refusal_reason: null,
       latency_ms: Date.now() - startedAt,
       sources_count: sources.length,
+      classification,
+      proposed_action: action ?? null,
+      chips: next && next.chips.length ? next.chips : null,
     });
+    await raiseSignals(classification, conversationId);
 
     return json({
       answer,
       remaining: Math.max(0, ALMA_CHAT_DAILY_LIMIT - ((count ?? 0) + 1)),
-      ...(drafted.action ? { action: { label: drafted.action.label, path: drafted.action.path } } : {}),
+      ...(action ? { action: { label: action.label, path: action.path } } : {}),
       ...(next && next.chips.length ? { chips: next.chips } : {}),
+      ...(human ? { human_contact: true } : {}),
+      ...(conversationId ? { conversation_id: conversationId } : {}),
+      ...(isReplay
+        ? { replay_meta: { register, classification, confirmed_sit: Boolean(facts && facts.gardes_confirmees.length > 0) } }
+        : {}),
     });
   } catch (e) {
     console.error("alma-chat error", e);

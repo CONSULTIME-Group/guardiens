@@ -1247,10 +1247,14 @@ export type Database = {
         Row: {
           active_role: string
           answer: string | null
+          chips: Json | null
+          classification: Json | null
           created_at: string
           id: string
           input_mode: string | null
           latency_ms: number | null
+          page_path: string | null
+          proposed_action: Json | null
           question: string | null
           refusal_reason: string | null
           register: string | null
@@ -1261,10 +1265,14 @@ export type Database = {
         Insert: {
           active_role: string
           answer?: string | null
+          chips?: Json | null
+          classification?: Json | null
           created_at?: string
           id?: string
           input_mode?: string | null
           latency_ms?: number | null
+          page_path?: string | null
+          proposed_action?: Json | null
           question?: string | null
           refusal_reason?: string | null
           register?: string | null
@@ -1275,10 +1283,14 @@ export type Database = {
         Update: {
           active_role?: string
           answer?: string | null
+          chips?: Json | null
+          classification?: Json | null
           created_at?: string
           id?: string
           input_mode?: string | null
           latency_ms?: number | null
+          page_path?: string | null
+          proposed_action?: Json | null
           question?: string | null
           refusal_reason?: string | null
           register?: string | null
@@ -1347,6 +1359,38 @@ export type Database = {
           weight?: number
         }
         Relationships: []
+      }
+      alma_feedback: {
+        Row: {
+          conversation_id: string
+          created_at: string
+          id: string
+          user_id: string
+          value: string
+        }
+        Insert: {
+          conversation_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+          value: string
+        }
+        Update: {
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+          value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alma_feedback_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "alma_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       alma_journal_shown: {
         Row: {
@@ -1476,6 +1520,36 @@ export type Database = {
           time_of_day?: string | null
           weather_condition?: string | null
           weight?: number
+        }
+        Relationships: []
+      }
+      alma_replay_runs: {
+        Row: {
+          created_at: string
+          failed: number
+          id: string
+          passed: number
+          results: Json
+          run_by: string
+          total: number
+        }
+        Insert: {
+          created_at?: string
+          failed?: number
+          id?: string
+          passed?: number
+          results?: Json
+          run_by: string
+          total?: number
+        }
+        Update: {
+          created_at?: string
+          failed?: number
+          id?: string
+          passed?: number
+          results?: Json
+          run_by?: string
+          total?: number
         }
         Relationships: []
       }
@@ -10217,6 +10291,15 @@ export type Database = {
         Args: { p_claim_key: string; p_owner_token: string }
         Returns: string
       }
+      admin_alma_action_rate: {
+        Args: { p_days?: number }
+        Returns: {
+          acted: number
+          action_reason: string
+          answers: number
+          register: string
+        }[]
+      }
       admin_alma_matching_diagnosis: {
         Args: {
           p_context?: Json
@@ -10603,6 +10686,11 @@ export type Database = {
         Args: { p_name: string; p_value: string }
         Returns: string
       }
+      alma_answer_acted: {
+        Args: { p_conversation_id: string }
+        Returns: boolean
+      }
+      alma_weekly_summary: { Args: { p_since?: string }; Returns: Json }
       anonymize_user_account: {
         Args: { _new_email: string; _user_id: string }
         Returns: Json

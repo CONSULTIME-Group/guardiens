@@ -12,9 +12,12 @@ import type { AlmaJournalEntry, AlmaJournalPage } from "@/lib/alma/journal";
 import {
   getAlmaConversationState,
   openAlmaConversation,
+  openAlmaHumanContact,
+  sendAlmaFeedback,
   sendAlmaMessage,
   subscribeAlmaConversation,
 } from "@/lib/alma/conversation-store";
+import { ALMA_HUMAN_CONTACT_LABEL, AlmaHumanContactForm } from "./AlmaHumanContact";
 
 export const ALMA_THINKING_LINES = [
   "Je regarde.",
@@ -470,7 +473,7 @@ export function AlmaConversation({
                       <Button
                         type="button"
                         data-testid="alma-message-action"
-                        onClick={() => followLink(message.action!.path)}
+                        onClick={() => (message.action!.path === "/contact" ? openAlmaHumanContact() : followLink(message.action!.path))}
                         className="mt-3 h-11 max-w-full justify-start gap-2 whitespace-normal text-left text-[13px] font-bold"
                       >
                         <span>{message.action.label}</span><ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
@@ -489,6 +492,43 @@ export function AlmaConversation({
                             {chip.label}
                           </Button>
                         ))}
+                      </div>
+                    )}
+                    {/* Lot J2-B : contact humain et retour utile / pas utile. */}
+                    {message.humanContact && message.action?.path !== "/contact" && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        data-testid="alma-human-contact-button"
+                        onClick={openAlmaHumanContact}
+                        className="mt-3 h-11 text-[13px]"
+                      >
+                        {ALMA_HUMAN_CONTACT_LABEL}
+                      </Button>
+                    )}
+                    {message.conversationId && (
+                      <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground" data-testid="alma-feedback">
+                        {message.feedback ? (
+                          <span>{message.feedback === "useful" ? "Merci, c'est noté." : "Merci, Jérémie et Elisa peuvent reprendre la suite."}</span>
+                        ) : (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => void sendAlmaFeedback(message.id, "useful")}
+                              className="min-h-11 rounded px-2 underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-ring"
+                            >
+                              Utile
+                            </button>
+                            <span aria-hidden>·</span>
+                            <button
+                              type="button"
+                              onClick={() => void sendAlmaFeedback(message.id, "not_useful")}
+                              className="min-h-11 rounded px-2 underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-ring"
+                            >
+                              Pas utile
+                            </button>
+                          </>
+                        )}
                       </div>
                     )}
                   </div>
@@ -513,6 +553,7 @@ export function AlmaConversation({
             </div>
           )}
           {state.error && <p className="py-3 text-xs text-destructive">{state.error}</p>}
+          {state.contactOpen && <AlmaHumanContactForm surface={surface} />}
         </div>
 
         <footer className="alma-conversation-composer shrink-0 border-t border-[hsl(var(--line-soft))] bg-[hsl(var(--hero-paper))] px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-3 md:px-5 md:pb-5">

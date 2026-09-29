@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PilotageTab } from "./_components/alma/PilotageTab";
 import { ALMA_SURFACES } from "@/lib/alma/surfaces";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -77,7 +78,7 @@ export default function AdminAlma() {
   const [range, setRange] = useState<Range>("30d");
   const [searchParams, setSearchParams] = useSearchParams();
   const rawTab = searchParams.get("tab");
-  const tab = ["cultural-facts", "whispers", "bubbles", "moods"].includes(rawTab ?? "")
+  const tab = ["cultural-facts", "whispers", "bubbles", "moods", "pilotage"].includes(rawTab ?? "")
     ? (rawTab as string)
     : "conversations";
 
@@ -141,6 +142,9 @@ export default function AdminAlma() {
           <TabsTrigger value="moods">
             <Sparkles className="h-4 w-4 mr-2" aria-hidden="true" /> Humeurs
           </TabsTrigger>
+          <TabsTrigger value="pilotage">
+            <Sparkles className="h-4 w-4 mr-2" aria-hidden="true" /> Pilotage
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="bubbles" className="mt-4">
@@ -161,6 +165,10 @@ export default function AdminAlma() {
 
         <TabsContent value="moods" className="mt-4">
           <MoodsTab />
+        </TabsContent>
+
+        <TabsContent value="pilotage" className="mt-4">
+          <PilotageTab range={range} />
         </TabsContent>
       </Tabs>
     </div>

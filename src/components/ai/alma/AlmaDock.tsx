@@ -20,7 +20,8 @@ import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "
 import { supabase } from "@/integrations/supabase/client";
 import { useLocation, useNavigate } from "react-router-dom";
 
-import { ChevronDown, X, MoreHorizontal, Check, EyeOff, Lightbulb, Route, MessageCircle } from "lucide-react";
+import { ChevronDown, X, MoreHorizontal, Check, EyeOff, Lightbulb, Route, MessageCircle, Mail } from "lucide-react";
+import { openAlmaHumanContact } from "@/lib/alma/conversation-store";
 import { AlmaConversation } from "./AlmaConversation";
 import { useAlmaJournal } from "@/hooks/useAlmaJournal";
 import type { AlmaJournalEntry } from "@/lib/alma/journal";
@@ -974,6 +975,17 @@ function AlmaDockInner() {
             >
               <MessageCircle className="mr-2 h-4 w-4" aria-hidden />
               <span>Parler à Alma</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="min-h-11 cursor-pointer"
+              onSelect={(e) => {
+                e.preventDefault();
+                startConversation();
+                openAlmaHumanContact();
+              }}
+            >
+              <Mail className="mr-2 h-4 w-4" aria-hidden />
+              <span>Écrire à Jérémie et Elisa</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">
