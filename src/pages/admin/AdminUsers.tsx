@@ -1,3 +1,4 @@
+import { saveAdminNote } from "@/lib/admin/adminNote";
 import { adminLabel } from "@/lib/admin/labels";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useState, useEffect, useCallback, useRef } from "react";
@@ -575,15 +576,11 @@ const AdminUsers = () => {
     }
   };
 
-  // Écriture unique de la note interne, partagée par le dialogue et le panneau (lot A12).
+  // Écriture unique de la note interne, partagée par le dialogue et le panneau
+  // (lot A12), avec sa ligne de journal update_admin_note (lot A13).
   const persistNote = async (userId: string, note: string): Promise<boolean> => {
-    const { error } = await supabase
-      .from("profile_moderation")
-      .upsert({
-        profile_id: userId,
-        admin_notes: note,
-      }, { onConflict: "profile_id" })
-    if (error) { toast.error("Erreur"); return false; }
+    const { ok } = await saveAdminNote(userId, note);
+    if (!ok) { toast.error("Erreur"); return false; }
     toast.success("Note enregistrée"); fetchUsers();
     return true;
   };

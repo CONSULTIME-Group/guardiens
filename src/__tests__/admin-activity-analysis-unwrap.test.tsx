@@ -22,13 +22,15 @@ import { render, screen, renderHook, waitFor, act } from "@testing-library/react
 
 const mocks = vi.hoisted(() => ({
   invoke: vi.fn(),
+  row: null as any,
 }));
 
-vi.mock("@/integrations/supabase/client", () => ({
-  supabase: {
-    functions: { invoke: mocks.invoke },
-  },
-}));
+vi.mock("@/integrations/supabase/client", () => {
+  const b: any = {};
+  ["select", "order", "limit"].forEach((m) => { b[m] = () => b; });
+  b.maybeSingle = () => Promise.resolve({ data: mocks.row, error: null });
+  return { supabase: { from: () => b, functions: { invoke: mocks.invoke } } };
+});
 
 import { useActivityAnalysis } from "@/pages/admin/_components/dashboard/useActivityAnalysis";
 import { ActivityAnalysisCard } from "@/pages/admin/_components/dashboard/ActivityAnalysisCard";
@@ -45,59 +47,37 @@ const EDGE_PAYLOAD = {
   snapshot_at: new Date().toISOString(),
 };
 
-describe("useActivityAnalysis : déballage de l'enveloppe edge function", () => {
-  beforeEach(() => {
-    mocks.invoke.mockReset();
-  });
+describe("useActivityAnalysis : lecture en base, génération au clic (lot A13)", () => {
+  beforeEach(() => { mocks.invoke.mockReset(); mocks.row = null; });
 
-  it("stocke la charge utile et non l'enveloppe (mode latest)", async () => {
-    mocks.invoke.mockResolvedValue({ data: { analysis: EDGE_PAYLOAD }, error: null });
-
+  it("lit la dernière analyse en base sans appeler la fonction au montage", async () => {
+    mocks.row = { summary: EDGE_PAYLOAD.analysis, actions: EDGE_PAYLOAD.actions, generated_at: EDGE_PAYLOAD.generated_at };
     const { result } = renderHook(() => useActivityAnalysis());
     await waitFor(() => expect(result.current.loading).toBe(false));
-
-    // Avant le correctif, analysis.analysis était l'objet interne (crash #31).
-    expect(typeof result.current.analysis?.analysis).toBe("string");
     expect(result.current.analysis?.analysis).toBe(EDGE_PAYLOAD.analysis);
     expect(result.current.analysis?.actions).toHaveLength(1);
-    expect(result.current.analysis?.generated_at).toBe(EDGE_PAYLOAD.generated_at);
+    expect(mocks.invoke).not.toHaveBeenCalled();
   });
 
-  it("stocke la charge utile et non l'enveloppe (mode refresh)", async () => {
-    mocks.invoke.mockResolvedValue({ data: { analysis: EDGE_PAYLOAD }, error: null });
-
+  it("déballe l'enveloppe de la fonction au clic (mode refresh)", async () => {
     const { result } = renderHook(() => useActivityAnalysis());
     await waitFor(() => expect(result.current.loading).toBe(false));
-
-    mocks.invoke.mockResolvedValue({
-      data: { analysis: { ...EDGE_PAYLOAD, analysis: "Analyse régénérée." } },
-      error: null,
-    });
-    await act(async () => {
-      await result.current.refresh();
-    });
-
+    mocks.invoke.mockResolvedValue({ data: { analysis: { ...EDGE_PAYLOAD, analysis: "Analyse régénérée." } }, error: null });
+    await act(async () => { await result.current.refresh(); });
+    expect(mocks.invoke).toHaveBeenCalledWith("admin-activity-analysis", { body: { mode: "refresh" } });
     await waitFor(() => expect(result.current.analysis?.analysis).toBe("Analyse régénérée."));
   });
 
   it("retombe à null quand aucune analyse n'est stockée", async () => {
-    mocks.invoke.mockResolvedValue({ data: { analysis: null }, error: null });
-
     const { result } = renderHook(() => useActivityAnalysis());
     await waitFor(() => expect(result.current.loading).toBe(false));
-
     expect(result.current.analysis).toBeNull();
   });
 
-  it("ne stocke pas une charge malformée (analysis non textuel)", async () => {
-    mocks.invoke.mockResolvedValue({
-      data: { analysis: { analysis: { nested: true }, actions: [] } },
-      error: null,
-    });
-
+  it("ne stocke pas une charge malformée (summary non textuel)", async () => {
+    mocks.row = { summary: { nested: true }, actions: [], generated_at: "x" };
     const { result } = renderHook(() => useActivityAnalysis());
     await waitFor(() => expect(result.current.loading).toBe(false));
-
     expect(result.current.analysis).toBeNull();
   });
 });

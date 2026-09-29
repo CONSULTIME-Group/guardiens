@@ -216,6 +216,7 @@ export function templateDisplayName(name: string | null | undefined): string {
 
 export const AUDIT_ACTION_LABELS: Dict = {
   suspend_user: "Suspension de compte",
+  update_admin_note: "Note interne modifiée",
   unsuspend_user: "Levée de suspension",
   delete_user: "Suppression de compte",
   change_role: "Changement de rôle",

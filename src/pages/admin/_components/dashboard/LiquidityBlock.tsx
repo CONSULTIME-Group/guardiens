@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-interface LiquiditySnapshot {
+export interface LiquiditySnapshot {
   window_days: number;
   active_listings: number;
   eligible_sitters: number;
@@ -26,7 +26,7 @@ const formatMedianHours = (hours: number): string =>
 
 const plural = (n: number, one: string, many: string) => (n > 1 ? many : one);
 
-interface Cell {
+export interface Cell {
   label: string;
   /** Fenêtre de lecture propre à la cellule (lot A10). */
   window: string;
@@ -41,9 +41,12 @@ interface Cell {
  * d'affichage : jamais de taux ni de médiane sans son dénominateur, et
  * compte brut avec mention explicite si l'effectif est inférieur à 5.
  */
-export const LiquidityBlock = () => {
-  const { data, isLoading, error } = useQuery<LiquiditySnapshot>({
-    queryKey: ["admin_liquidity_snapshot"],
+export const LIQUIDITY_QUERY_KEY = ["admin_liquidity_snapshot"] as const;
+
+/** Lecture partagée (même clé) entre le bloc et la rangée de chiffres clés. */
+export const useLiquiditySnapshot = () =>
+  useQuery<LiquiditySnapshot>({
+    queryKey: LIQUIDITY_QUERY_KEY,
     queryFn: async () => {
       const { data, error } = await supabase.rpc("admin_liquidity_snapshot");
       if (error) throw error;
@@ -52,6 +55,8 @@ export const LiquidityBlock = () => {
     staleTime: 30_000,
   });
 
+/** Cellules calculées, source unique des indicateurs de liquidité. */
+export function buildLiquidityCells(data: LiquiditySnapshot | undefined): Cell[] {
   const cells: Cell[] = [];
   if (data) {
     cells.push({
@@ -109,6 +114,13 @@ export const LiquidityBlock = () => {
       });
     }
   }
+
+  return cells;
+}
+
+export const LiquidityBlock = () => {
+  const { data, isLoading, error } = useLiquiditySnapshot();
+  const cells = buildLiquidityCells(data);
 
   return (
     <Card>

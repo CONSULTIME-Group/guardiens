@@ -87,8 +87,7 @@ describe("KpiCards", () => {
   });
   it("la source compte in_progress et confirmed", () => {
     const src = read("src/pages/admin/_components/dashboard/useDashboardData.ts");
-    expect(src).toContain('.eq("status", "in_progress")');
-    expect(src).toContain('.eq("status", "confirmed")');
+    expect(src).toContain('.in("status", ["in_progress", "confirmed"])');
   });
 });
 
