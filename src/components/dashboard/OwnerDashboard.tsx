@@ -33,6 +33,7 @@ import ApplicationCapSection from "./owner/ApplicationCapSection";
 import OwnerFamilySection from "./owner/OwnerFamilySection";
 import { useFirstNearbyMission } from "@/hooks/useFirstNearbyMission";
 import NextStepRailCard from "./shared/NextStepRailCard";
+import { selectOwnerStarVariant } from "@/lib/ownerStarVariant";
 import RailReadingsCard from "./shared/RailReadingsCard";
 import DashboardRail from "./shared/DashboardRail";
 import { useRailReadings } from "@/hooks/useRailReadings";
@@ -302,6 +303,15 @@ const OwnerDashboard = () => {
     // jamais de profiles.profile_completion qui stocke le max des deux espaces.
     profileCompletion: completionMissing.score ?? accessProfileCompletion ?? 0,
     missing: completionMissing.missing,
+    action: {
+      hasActiveSit: activeSits.length > 0,
+      nearbySittersCount: nearbyOwnerSittersData?.totalCount ?? 0,
+      starVariant: selectOwnerStarVariant({
+        ongoingSit: ongoingSit ?? null,
+        pendingAppsCount: pendingAppCount,
+        latestDraft: latestDraft as any,
+      }),
+    },
   });
 
   // Lot D1 : rangée « À faire » de l'accueil, actions réelles en attente, 3 au plus.
@@ -332,7 +342,7 @@ const OwnerDashboard = () => {
           variant="owner"
           step={{
             ...ownerNextStepRail,
-            phrase: completionMissing.missing?.length
+            phrase: !ownerNextStepRail.secondaryLink && typeof ownerNextStepRail.progressPct === "number" && completionMissing.missing?.length
               ? remainingTouchesPhrase(completionMissing.missing)
               : ownerNextStepRail.phrase,
           }}
