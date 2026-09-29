@@ -75,7 +75,7 @@ describe("A11b, fonctions de libellé", () => {
   });
   it("mots restants traduits dans les textes venus de la base", () => {
     expect(L.displayText("Feedback utilisateur")).toBe("Retour utilisateur");
-    expect(L.displayText("Digest gardiens")).toBe("Résumé quotidien gardiens");
+    expect(L.displayText("Digest gardiens")).toBe("Résumé gardiens");
     expect(L.displayText("Gardiens dont animal_types est vide")).not.toMatch(SNAKE);
   });
 });
