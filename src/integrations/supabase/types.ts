@@ -10821,6 +10821,7 @@ export type Database = {
           view_count: number
         }[]
       }
+      admin_get_member_card: { Args: { p_user_id: string }; Returns: Json }
       admin_get_pending_deletions_count: { Args: never; Returns: number }
       admin_get_recent_account_deletions: {
         Args: { p_limit?: number }

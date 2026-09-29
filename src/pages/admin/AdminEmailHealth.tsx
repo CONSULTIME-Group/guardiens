@@ -1,4 +1,4 @@
-import { adminLabel } from "@/lib/admin/labels";
+import { adminLabel, suppressionReasonLabel } from "@/lib/admin/labels";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { fetchAllRows } from "@/lib/admin/fetchAllRows";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -573,7 +573,7 @@ export default function AdminEmailHealth() {
                       <TableCell className="font-mono text-xs">{s.email}</TableCell>
                       <TableCell>
                         <Badge variant="outline" className="text-xs capitalize">
-                          {adminLabel(s.reason)}
+                          {suppressionReasonLabel(s.reason)}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right text-xs text-muted-foreground">

@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
+import { profileFieldLabel } from "@/lib/admin/labels";
 
 interface Stats {
   sitter_total: number;
@@ -66,14 +67,14 @@ const AffinityCompletenessCard = () => {
               pct={stats.sitter_pct}
               ready={stats.sitter_ready}
               total={stats.sitter_total}
-              hint="animal_types ET work_during_sit"
+              hint={`${profileFieldLabel("animal_types")} et ${profileFieldLabel("work_during_sit").toLocaleLowerCase("fr-FR")}`}
             />
             <Metric
               label="Propriétaires avec présence attendue"
               pct={stats.owner_pct}
               ready={stats.owner_ready}
               total={stats.owner_total}
-              hint="presence_expected"
+              hint={profileFieldLabel("presence_expected")}
             />
           </div>
         ) : null}

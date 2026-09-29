@@ -197,6 +197,23 @@ export const EMAIL_STATUS_LABELS: Dict = {
   complained: "Plainte spam",
 };
 
+/** Motifs de la liste de suppression (suppressed_emails.reason). */
+export const SUPPRESSION_REASON_LABELS: Dict = {
+  bounce: "Rebond",
+  bounced: "Rebond",
+  complaint: "Plainte spam",
+  unsubscribe: "Désabonnement",
+  account_deleted: "Compte supprimé",
+};
+export const suppressionReasonLabel = (k: string | null | undefined) => adminLabel(k, SUPPRESSION_REASON_LABELS);
+
+/** Nom de modèle d'email : « Digest » devient « Résumé quotidien », clé inchangée. */
+export function templateDisplayName(name: string | null | undefined): string {
+  const c = cellValue(name);
+  if (c === EMPTY_TABLE_VALUE) return c;
+  return c.replace(/\bDigest quotidien\b/g, "Résumé quotidien").replace(/\bDigest\b/g, "Résumé quotidien").replace(/\bdigest\b/g, "résumé quotidien");
+}
+
 export const AUDIT_ACTION_LABELS: Dict = {
   suspend_user: "Suspension de compte",
   unsuspend_user: "Levée de suspension",
@@ -221,6 +238,12 @@ export const AUDIT_ACTION_LABELS: Dict = {
   email_apology_sent: "Email d'excuse envoyé",
   feature_flag_toggle: "Changement de réglage",
   setting_update: "Modification d'un paramètre",
+  suspend_account: "Suspension de compte",
+  reactivate_account: "Réactivation de compte",
+  toggle_super_gardien: "Super gardien modifié",
+  identity_approved: "Identité validée",
+  identity_rejected: "Identité refusée",
+  admin_note_update: "Note interne modifiée",
 };
 
 export const AUDIT_ENTITY_LABELS: Dict = {
@@ -375,7 +398,7 @@ const ALL: Dict[] = [
   REPORT_STATUS_LABELS, REVIEW_STATUS_LABELS, VERIFICATION_STATUS_LABELS, ROLE_LABELS,
   CLOSE_REASON_LABELS, SURFACE_LABELS, CONVERSATION_CONTEXT_LABELS, ALMA_FACT_TYPE_LABELS,
   ALMA_REGISTER_LABELS, ALMA_FREQUENCY_LABELS, ERROR_SEVERITY_LABELS, CRON_STATUS_LABELS,
-  EMAIL_STATUS_LABELS, AUDIT_ACTION_LABELS, ARTICLE_CATEGORY_LABELS, SPECIES_LABELS, SEGMENT_LABELS,
+  EMAIL_STATUS_LABELS, SUPPRESSION_REASON_LABELS, AUDIT_ACTION_LABELS, ARTICLE_CATEGORY_LABELS, SPECIES_LABELS, SEGMENT_LABELS,
   AUDIT_ENTITY_LABELS, CAMPAIGN_LABELS, EVENT_LABELS, PROFILE_FIELD_LABELS, SETTING_LABELS, COLUMN_LABELS,
 ];
 

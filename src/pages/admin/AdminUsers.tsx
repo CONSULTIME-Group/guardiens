@@ -16,8 +16,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { format, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Eye, Ban, ShieldCheck, StickyNote, RotateCcw, Trash2, Crown, ChevronLeft, ChevronRight, MessageSquare, FileText, MailCheck, UserCog, Download, Mail } from "lucide-react";
-import { FileSearch } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, MessageSquare } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { SuspendUserDialog } from "./_components/users/SuspendUserDialog";
@@ -29,6 +28,10 @@ import { MessageHistoryDialog, type HistoryItem } from "./_components/users/Mess
 import { LastMessageDialog, type LastMessageState } from "./_components/users/LastMessageDialog";
 import { ErrorDetailDialog, type ErrorDetailState } from "./_components/users/ErrorDetailDialog";
 import ChangeRoleDialog from "./_components/users/ChangeRoleDialog";
+import { MemberActionsMenu, type MemberActionsHandlers, type MemberActionsTarget } from "./_components/users/MemberActionsMenu";
+import { MemberCardSheet, fetchMemberCard } from "./_components/users/MemberCardSheet";
+import { MEMBER_PARAM } from "@/lib/admin/memberCard";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -132,6 +135,7 @@ const AdminUsers = () => {
   });
   const [reactivating, setReactivating] = useState(false);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const openHistory = async () => {
     setHistoryModal({ open: true, loading: true, items: [] });
@@ -202,7 +206,7 @@ const AdminUsers = () => {
     let query = supabase
       .from("profiles")
       .select(
-        "id, first_name, last_name, role, city, postal_code, country, avatar_url, bio, profile_completion, created_at, updated_at, last_seen_at, cancellation_count, identity_verified, identity_verification_status, account_status, is_founder, skill_categories, available_for_help, custom_skills, completed_sits_count, cancellations_as_proprio, email",
+        "id, first_name, last_name, role, city, postal_code, country, avatar_url, bio, profile_completion, created_at, updated_at, last_seen_at, cancellation_count, identity_verified, identity_verification_status, account_status, is_founder, skill_categories, available_for_help, custom_skills, completed_sits_count, cancellations_as_proprio, email, identity_document_url, identity_selfie_url",
         { count: "exact" },
       )
       .order("created_at", { ascending: false });
@@ -289,6 +293,10 @@ const AdminUsers = () => {
 
 
   useEffect(() => { fetchUsers(); }, [fetchUsers]);
+  // Après chaque action (liste relue), la fiche ouverte est relue aussi.
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: ["admin-member-card"] });
+  }, [users, queryClient]);
 
   // Charge une fois : liste des pays présents (hors FR) + total international pour le badge KPI
   useEffect(() => {
@@ -567,17 +575,82 @@ const AdminUsers = () => {
     }
   };
 
-  const handleSaveNote = async () => {
+  // Écriture unique de la note interne, partagée par le dialogue et le panneau (lot A12).
+  const persistNote = async (userId: string, note: string): Promise<boolean> => {
     const { error } = await supabase
       .from("profile_moderation")
       .upsert({
-        profile_id: noteModal.userId,
-        admin_notes: noteModal.currentNote,
+        profile_id: userId,
+        admin_notes: note,
       }, { onConflict: "profile_id" })
-    if (error) toast.error("Erreur");
-    else { toast.success("Note enregistrée"); fetchUsers(); }
+    if (error) { toast.error("Erreur"); return false; }
+    toast.success("Note enregistrée"); fetchUsers();
+    return true;
+  };
+
+  const handleSaveNote = async () => {
+    await persistNote(noteModal.userId, noteModal.currentNote);
     setNoteModal({ open: false, userId: "", currentNote: "" });
   };
+
+  // ── Lot A12 : fiche membre et menu d'actions ──
+  const memberId = urlParams.get(MEMBER_PARAM);
+  const openMember = (id: string) => {
+    const next = new URLSearchParams(urlParams);
+    next.set(MEMBER_PARAM, id);
+    setUrlParams(next);
+  };
+  const closeMember = () => {
+    const next = new URLSearchParams(urlParams);
+    next.delete(MEMBER_PARAM);
+    setUrlParams(next);
+  };
+
+  const nameOf = (u: any, fallback = "cet utilisateur") =>
+    `${u.first_name || ""} ${u.last_name || ""}`.trim() || u.email || fallback;
+
+  const actionTargetOf = (u: any): MemberActionsTarget => ({
+    id: u.id,
+    name: nameOf(u, "ce membre"),
+    account_status: u.account_status,
+    identity_verified: u.identity_verified,
+    is_manual_super: u.is_manual_super,
+    email_confirmed: u.email_confirmed,
+    has_identity_documents: u.has_identity_documents ?? !!(u.identity_document_url || u.identity_selfie_url),
+  });
+
+  /** Chaque entrée ouvre le dialogue existant avec les mêmes valeurs qu'avant. */
+  const actionsFor = (u: any): MemberActionsHandlers => ({
+    onWrite: () => setWriteTarget({ userId: u.id, userName: nameOf(u, "ce membre") }),
+    onMessage: () => setMessageModal({ open: true, userId: u.id, userName: nameOf(u), content: "", step: "edit" }),
+    onLastMessage: () => openLastMessage(u.id, nameOf(u)),
+    onResendConfirmation: () => handleResendConfirmation(u.email),
+    onForceVerify: () => setVerifyModal({ open: true, userId: u.id, userName: `${u.first_name || ""} ${u.last_name || ""}`.trim() || "Utilisateur", email: u.email || "" }),
+    onChangeRole: () => setRoleModal({ open: true, userId: u.id, userName: nameOf(u), currentRole: u.role }),
+    onToggleSuper: () => setSuperModal({ open: true, userId: u.id, userName: `${u.first_name || ""} ${u.last_name || ""}`.trim() || "Utilisateur", email: u.email || "", newValue: !u.is_manual_super }),
+    onNote: () => setNoteModal({ open: true, userId: u.id, currentNote: u.admin_notes || "" }),
+    onSuspend: () => setSuspendModal({ open: true, userId: u.id, reason: "" }),
+    onReactivate: () => setReactivateModal({ open: true, userId: u.id, userName: `${u.first_name || ""} ${u.last_name || ""}`.trim() || "Utilisateur", email: u.email || "" }),
+    onDelete: () => setDeleteConfirm({ open: true, userId: u.id, userName: nameOf(u) }),
+  });
+
+  const memberCardQuery = useQuery({
+    queryKey: ["admin-member-card", memberId],
+    enabled: !!memberId,
+    queryFn: () => fetchMemberCard(memberId as string),
+    retry: false,
+  });
+  const panelUser = (() => {
+    const id = memberCardQuery.data?.identity;
+    if (!id) return null;
+    return {
+      ...id,
+      admin_notes: memberCardQuery.data?.moderation.admin_notes ?? null,
+    };
+  })();
+  const panelHandlers: MemberActionsHandlers = panelUser
+    ? actionsFor(panelUser)
+    : ({} as MemberActionsHandlers);
 
   const handleDeleteUser = async () => {
     setDeleting(true);
@@ -737,12 +810,12 @@ const AdminUsers = () => {
             <TableRow>
               <TableHead>Utilisateur</TableHead>
               <TableHead>Rôle</TableHead>
-              <TableHead>Code postal</TableHead>
-              <TableHead>Département</TableHead>
-              <TableHead>Pays</TableHead>
-              <TableHead>Inscription</TableHead>
-              <TableHead>Dernière activité</TableHead>
-              <TableHead>Profil</TableHead>
+              <TableHead className="hidden md:table-cell">Code postal</TableHead>
+              <TableHead className="hidden md:table-cell">Département</TableHead>
+              <TableHead className="hidden md:table-cell">Pays</TableHead>
+              <TableHead className="hidden md:table-cell">Inscription</TableHead>
+              <TableHead className="hidden md:table-cell">Dernière activité</TableHead>
+              <TableHead className="hidden md:table-cell">Profil</TableHead>
               <TableHead>Vérification</TableHead>
               <TableHead>Statut</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -770,7 +843,12 @@ const AdminUsers = () => {
                 return (
                   <TableRow key={user.id}>
                     <TableCell>
-                      <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => openMember(user.id)}
+                        aria-label={`Ouvrir la fiche de ${nameOf(user)}`}
+                        className="flex items-center gap-3 rounded-md text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      >
                         <Avatar className="h-8 w-8">
                           <AvatarImage src={user.avatar_url || undefined} />
                           <AvatarFallback className="text-xs">
@@ -780,57 +858,40 @@ const AdminUsers = () => {
                         </Avatar>
                         <div>
                           <div className="font-medium text-sm flex items-center gap-1.5">
-                            <span>{user.first_name} {user.last_name}</span>
+                            <span className="hover:text-primary underline-offset-4 hover:underline">{user.first_name} {user.last_name}</span>
                             {user.is_founder && (
                               <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Fondateur</Badge>
                             )}
                           </div>
                           <div className="text-xs text-muted-foreground">{user.email}</div>
                         </div>
-                      </div>
+                      </button>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-1">
-                        <Badge variant="outline">{roleLabels[user.role] || adminLabel(user.role)}</Badge>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6"
-                          title="Changer le rôle"
-                          aria-label="Changer le rôle de l'utilisateur"
-                          onClick={() => setRoleModal({
-                            open: true,
-                            userId: user.id,
-                            userName: `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.email || "cet utilisateur",
-                            currentRole: user.role,
-                          })}
-                        >
-                          <UserCog className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
+                      <Badge variant="outline">{roleLabels[user.role] || adminLabel(user.role)}</Badge>
                     </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
+                    <TableCell className="hidden md:table-cell text-sm text-muted-foreground">
                       {user.postal_code || "Non renseigné"}
                     </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
+                    <TableCell className="hidden md:table-cell text-sm text-muted-foreground">
                       {getDeptLabel(user.postal_code)}
                     </TableCell>
-                    <TableCell className="text-sm">
+                    <TableCell className="hidden md:table-cell text-sm">
                       {(() => {
                         const c = (user.country || "FR").toUpperCase();
                         if (c === "FR") return <span className="text-muted-foreground">France</span>;
                         return <Badge variant="secondary" className="text-xs">{getCountryName(c)}</Badge>;
                       })()}
                     </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
+                    <TableCell className="hidden md:table-cell text-sm text-muted-foreground">
                       {format(new Date(user.created_at), "d MMM yyyy", { locale: fr })}
                     </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
+                    <TableCell className="hidden md:table-cell text-sm text-muted-foreground">
                       {user.last_seen_at
                         ? formatDistanceToNow(new Date(user.last_seen_at), { addSuffix: true, locale: fr })
                         : "Jamais connecté"}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden md:table-cell">
                       <div className="flex items-center gap-1.5">
                         <div className="w-16 h-1.5 bg-muted rounded-full overflow-hidden">
                           <div
@@ -857,170 +918,7 @@ const AdminUsers = () => {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex justify-end gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          title="Écrire à ce membre"
-                          aria-label="Écrire à ce membre"
-                          onClick={() => setWriteTarget({
-                            userId: user.id,
-                            userName: `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.email || "ce membre",
-                          })}
-                        >
-                          <Mail className="h-4 w-4" />
-                        </Button>
-                         <Button
-                          variant="ghost"
-                          size="icon"
-                          title="Envoyer un message"
-                          aria-label="Envoyer un message à l'utilisateur"
-                          onClick={() => setMessageModal({
-                            open: true,
-                            userId: user.id,
-                            userName: `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.email || "cet utilisateur",
-                            content: "",
-                            step: "edit",
-                          })}
-                        >
-                          <MessageSquare className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          title="Voir le contenu du dernier message envoyé"
-                          aria-label="Voir le dernier message envoyé"
-                          onClick={() => openLastMessage(
-                            user.id,
-                            `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.email || "cet utilisateur",
-                          )}
-                        >
-                          <FileText className="h-4 w-4" />
-                        </Button>
-                         <Button
-                          variant="ghost"
-                          size="icon"
-                          title="Voir le profil"
-                          aria-label="Voir le profil public"
-                          onClick={() => {
-                            // Profil unifié /gardiens/:id : ?tab=proprio pour un propriétaire pur.
-                            const suffix = user.role === "owner" ? "?tab=proprio" : "";
-                            window.open(`/gardiens/${user.id}${suffix}`, "_blank");
-                          }}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          title="Forcer vérification ID"
-                          aria-label="Forcer la vérification d'identité"
-                          onClick={() => setVerifyModal({
-                            open: true,
-                            userId: user.id,
-                            userName: `${user.first_name || ""} ${user.last_name || ""}`.trim() || "Utilisateur",
-                            email: user.email || "",
-                          })}
-                          disabled={user.identity_verified || (verifying && verifyModal.userId === user.id)}
-                        >
-                          <ShieldCheck className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          title="Consulter les pièces dans la file de vérification"
-                          aria-label="Consulter les pièces d'identité déposées"
-                          asChild
-                        >
-                          <a href="/admin/verifications" target="_blank" rel="noopener noreferrer">
-                            <FileSearch className="h-4 w-4" />
-                          </a>
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          title={user.is_manual_super ? "Retirer Super Gardien" : "Promouvoir Super Gardien"}
-                          aria-label={user.is_manual_super ? "Retirer le statut Super Gardien" : "Promouvoir Super Gardien"}
-                          disabled={togglingSuper && superModal.userId === user.id}
-                          onClick={() => setSuperModal({
-                            open: true,
-                            userId: user.id,
-                            userName: `${user.first_name || ""} ${user.last_name || ""}`.trim() || "Utilisateur",
-                            email: user.email || "",
-                            newValue: !user.is_manual_super,
-                          })}
-                        >
-                          <Crown className={`h-4 w-4 ${user.is_manual_super ? 'text-warning' : ''}`} />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="relative"
-                          title={user.admin_notes ? "Note interne (présente)" : "Note interne"}
-                          aria-label={user.admin_notes ? "Éditer la note interne (présente)" : "Éditer la note interne"}
-                          onClick={() => setNoteModal({
-                            open: true,
-                            userId: user.id,
-                            currentNote: user.admin_notes || "",
-                          })}
-                        >
-                          <StickyNote className={`h-4 w-4 ${user.admin_notes ? "text-primary" : ""}`} />
-                          {user.admin_notes && (
-                            <span
-                              aria-hidden="true"
-                              className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-primary"
-                            />
-                          )}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          title="Renvoyer l'e-mail de confirmation"
-                          aria-label="Renvoyer l'e-mail de confirmation"
-                          onClick={() => handleResendConfirmation(user.email)}
-                        >
-                          <MailCheck className="h-4 w-4" />
-                        </Button>
-                        {user.account_status === "suspended" ? (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            title="Réactiver le compte"
-                            aria-label="Réactiver le compte"
-                            onClick={() => setReactivateModal({
-                              open: true,
-                              userId: user.id,
-                              userName: `${user.first_name || ""} ${user.last_name || ""}`.trim() || "Utilisateur",
-                              email: user.email || "",
-                            })}
-                          >
-                            <RotateCcw className="h-4 w-4 text-primary" />
-                          </Button>
-                        ) : (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            title="Suspendre le compte"
-                            aria-label="Suspendre le compte"
-                            onClick={() => setSuspendModal({ open: true, userId: user.id, reason: "" })}
-                          >
-                            <Ban className="h-4 w-4 text-destructive" />
-                          </Button>
-                        )}
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          title="Supprimer définitivement"
-                          aria-label="Supprimer définitivement le compte"
-                          onClick={() => setDeleteConfirm({
-                            open: true,
-                            userId: user.id,
-                            userName: `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.email || "cet utilisateur",
-                          })}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
+                      <MemberActionsMenu target={actionTargetOf(user)} handlers={actionsFor(user)} />
                     </TableCell>
                   </TableRow>
                 );
@@ -1046,6 +944,8 @@ const AdminUsers = () => {
           </div>
         </div>
       )}
+
+      <MemberCardSheet userId={memberId} onClose={closeMember} handlers={panelHandlers} onSaveNote={persistNote} />
 
       <SuspendUserDialog
         open={suspendModal.open}

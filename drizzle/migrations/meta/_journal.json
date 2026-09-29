@@ -295,6 +295,13 @@
       "when": 1790688594169,
       "tag": "0041_a10_chiffres_justes_agregats",
       "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1790710355600,
+      "tag": "0042_admin_get_member_card",
+      "breakpoints": true
     }
   ]
 }
