@@ -4,23 +4,27 @@
 // 30 jours, réutilisables (même principe que helps_line_tokens).
 
 import { DEPARTURE_TOKEN_DAYS, isOwnerV2Holdout } from "./owner-departure-logic.ts";
+import { isUnderPressure } from "./owner-campaign-pressure.ts";
 
 // deno-lint-ignore no-explicit-any
 type Client = any;
 const IN_CHUNK = 150;
 
-export interface DepartureSplit<T> { rows: T[]; holdoutExcluded: number; alreadyAnswered: number }
+export interface DepartureSplit<T> { rows: T[]; holdoutExcluded: number; alreadyAnswered: number; pressureExcluded: number }
 
-/** Répartition pure : témoin d'abord, puis déjà répondu. */
-export function splitDepartureAudience<T extends { id: string }>(rows: T[], answered: Set<string>): DepartureSplit<T> {
-  let holdoutExcluded = 0, alreadyAnswered = 0;
+/** Répartition pure : témoin, puis déjà répondu, puis pression (3 emails ou plus en 7 jours, lot N4b). */
+export function splitDepartureAudience<T extends { id: string; email?: string | null }>(
+  rows: T[], answered: Set<string>, recentCounts: Map<string, number> = new Map(),
+): DepartureSplit<T> {
+  let holdoutExcluded = 0, alreadyAnswered = 0, pressureExcluded = 0;
   const kept: T[] = [];
   for (const r of rows) {
     if (isOwnerV2Holdout(r.id)) { holdoutExcluded++; continue; }
     if (answered.has(r.id)) { alreadyAnswered++; continue; }
+    if (isUnderPressure(recentCounts, r.email)) { pressureExcluded++; continue; }
     kept.push(r);
   }
-  return { rows: kept, holdoutExcluded, alreadyAnswered };
+  return { rows: kept, holdoutExcluded, alreadyAnswered, pressureExcluded };
 }
 
 export async function loadAnsweredIds(client: Client, ids: string[]): Promise<Set<string>> {

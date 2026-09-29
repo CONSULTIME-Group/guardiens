@@ -5,9 +5,11 @@ import { HELPS_WITH_TOKEN_DAYS, lineUrlForToken } from "../_shared/ma-ligne-logi
 import { entraideCardData } from "../_shared/entraide-card-data.ts";
 import { loadAnsweredIds, mintDepartureTokens, periodBaseUrl, splitDepartureAudience } from "../_shared/owner-departure-audience.ts";
 import { DEPARTURE_TEMPLATE } from "../_shared/owner-departure-logic.ts";
+import { loadRecentEmailCounts } from "../_shared/owner-campaign-pressure.ts";
 import { buildResponderData, loadLatestIntents, splitNoelV2Audience, type NoelResponderPeriod } from "../_shared/owner-noel-v2.ts";
 import {
   OWNER_NOEL_TEMPLATE,
+  applyNoelPressure,
   buildNoelDataFor,
   loadFounderFollowupIds,
   loadPublishedOwnerIds,
@@ -73,23 +75,30 @@ interface MassEmailFilters {
   noel_v2_split?: boolean;
 }
 
-/** Témoin et déjà répondu (lot N4), avec compteurs pour la confirmation. */
-async function applyDepartureFilters<T extends { id: string }>(
+/** Témoin, déjà répondu (lot N4), autre période (lot N6) et pression (lot N4b), avec compteurs. */
+async function applyDepartureFilters<T extends { id: string; email?: string | null }>(
   // deno-lint-ignore no-explicit-any
   serviceClient: any, rows: T[], filters: MassEmailFilters,
-): Promise<{ rows: T[]; holdout: number | null; answered: number | null; otherPeriod?: number; responders?: Map<string, NoelResponderPeriod> }> {
+): Promise<{ rows: T[]; holdout: number | null; answered: number | null; pressure: number | null; otherPeriod?: number; responders?: Map<string, NoelResponderPeriod> }> {
+  const isOwnerCampaign = filters.template_name === OWNER_NOEL_TEMPLATE || filters.template_name === DEPARTURE_TEMPLATE;
+  const counts = isOwnerCampaign ? await loadRecentEmailCounts(serviceClient, rows.map((r) => r.email ?? "")) : new Map<string, number>();
   if (filters.noel_v2_split) {
-    const split = splitNoelV2Audience(rows, await loadLatestIntents(serviceClient, rows.map((r) => r.id)));
-    return { rows: split.rows, holdout: split.holdoutExcluded, answered: null, otherPeriod: split.otherPeriodExcluded, responders: split.responders };
+    const split = splitNoelV2Audience(rows, await loadLatestIntents(serviceClient, rows.map((r) => r.id)), counts);
+    return { rows: split.rows, holdout: split.holdoutExcluded, answered: null, pressure: split.pressureExcluded, otherPeriod: split.otherPeriodExcluded, responders: split.responders };
   }
-  if (!filters.exclude_owner_v2_holdout && !filters.exclude_departure_answered) return { rows, holdout: null, answered: null };
+  if (!filters.exclude_owner_v2_holdout && !filters.exclude_departure_answered) {
+    if (!isOwnerCampaign) return { rows, holdout: null, answered: null, pressure: null };
+    const p = applyNoelPressure(rows, counts);
+    return { rows: p.rows, holdout: null, answered: null, pressure: p.pressureExcluded };
+  }
   const answeredIds = filters.exclude_departure_answered ? await loadAnsweredIds(serviceClient, rows.map((r) => r.id)) : new Set<string>();
   if (filters.exclude_owner_v2_holdout) {
-    const split = splitDepartureAudience(rows, answeredIds);
-    return { rows: split.rows, holdout: split.holdoutExcluded, answered: split.alreadyAnswered };
+    const split = splitDepartureAudience(rows, answeredIds, counts);
+    return { rows: split.rows, holdout: split.holdoutExcluded, answered: split.alreadyAnswered, pressure: isOwnerCampaign ? split.pressureExcluded : null };
   }
-  const kept = rows.filter((r) => !answeredIds.has(r.id));
-  return { rows: kept, holdout: null, answered: rows.length - kept.length };
+  const notAnswered = rows.filter((r) => !answeredIds.has(r.id));
+  const p = applyNoelPressure(notAnswered, counts);
+  return { rows: p.rows, holdout: null, answered: rows.length - notAnswered.length, pressure: isOwnerCampaign ? p.pressureExcluded : null };
 }
 
 /** Gabarits dont le bouton porte un lien à jeton vers /ma-ligne/:token. */
@@ -689,6 +698,7 @@ Deno.serve(async (req) => {
         variant_b: variantB,
         holdout_excluded: departure.holdout,
         already_answered: departure.answered,
+        pressure_excluded: departure.pressure,
         ...(filters.noel_v2_split ? {
           responders_noel: respondersNoel,
           responders_hiver: respondersHiver,
