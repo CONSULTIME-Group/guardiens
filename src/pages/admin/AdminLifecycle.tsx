@@ -1,4 +1,7 @@
 import { useEffect, useState } from "react";
+import { fetchAllRows } from "@/lib/admin/fetchAllRows";
+import { dedupeByMessageId } from "@/lib/admin/emailLogStats";
+import { TRUNCATED_NOTICE } from "@/lib/admin/csv";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -91,10 +94,17 @@ const AdminLifecycle = () => {
       const since = new Date(Date.now() - windowDays * 86400_000).toISOString();
 
       // Sequences agg
-      const { data: jRows } = await supabase
-        .from("user_journeys")
-        .select("sequence_key, status, started_at")
-        .gte("started_at", since);
+      const empty = { rows: [] as any[], truncated: false, pages: 0 };
+      const jRes = await fetchAllRows<any>((from, to) =>
+        supabase
+          .from("user_journeys")
+          .select("id, sequence_key, status, started_at")
+          .gte("started_at", since)
+          .order("started_at", { ascending: true })
+          .order("id", { ascending: true })
+          .range(from, to),
+      ).catch(() => empty);
+      const jRows = jRes.rows;
       const seqMap = new Map<string, SeqRow>();
       for (const r of jRows || []) {
         const key = (r as any).sequence_key as string;
@@ -110,11 +120,19 @@ const AdminLifecycle = () => {
         .sort((a, b) => b.total - a.total);
 
       // Templates engagement
-      const { data: logs } = await supabase
-        .from("email_send_log")
-        .select("template_name, status, delivered_at, first_opened_at, first_clicked_at, bounced_at")
-        .gte("created_at", since)
-        .limit(50000);
+      const logsRes = await fetchAllRows<any>((from, to) =>
+        supabase
+          .from("email_send_log")
+          .select("id, message_id, created_at, template_name, status, delivered_at, first_opened_at, first_clicked_at, bounced_at")
+          .gte("created_at", since)
+          .order("created_at", { ascending: true })
+          .order("id", { ascending: true })
+          .range(from, to),
+      ).catch(() => empty);
+      if (cancelled) return;
+      setDataTruncated(jRes.truncated || logsRes.truncated);
+      // Un envoi compte une fois : dernier statut par message_id.
+      const logs = dedupeByMessageId(logsRes.rows);
       const tplMap = new Map<string, TplRow>();
       for (const r of logs || []) {
         const k = (r as any).template_name as string;
