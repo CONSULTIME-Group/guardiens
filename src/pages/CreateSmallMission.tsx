@@ -1,6 +1,7 @@
 import { clearPublishIntent, rememberPublishIntent } from "@/lib/postOnboardingIntent";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { readFormPrefill } from "@/lib/formPrefill";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -65,6 +66,7 @@ import { durationMismatch, DURATION_LABEL } from "@/lib/missionDurationCoherence
 const MIN_TITLE_LEN = 10;
 const MIN_DESC_LEN = 60;
 const MAX_TITLE_LEN = 100;
+const MAX_DESCRIPTION_PREFILL = 1000;
 
 /* ── Stepper progress bar ── */
 const STEP_LABELS = ["Votre annonce", "Le détail", "Où et quand"];
@@ -134,9 +136,11 @@ const CreateSmallMission = () => {
   // Échappatoire après un échec d'envoi : la photo reste une exigence forte,
   // jamais un cul-de-sac qui rendrait une offre impubliable.
   const [photoWaived, setPhotoWaived] = useState(false);
-  const [title, setTitle] = useState(() => sanitizeUserTitle(searchParams.get("titre")).slice(0, MAX_TITLE_LEN));
+  // Lot J2-A : titre et description préremplis par Alma, relus avant publication.
+  const prefill = useMemo(() => readFormPrefill(searchParams, { titleMax: MAX_TITLE_LEN, descriptionMax: MAX_DESCRIPTION_PREFILL }), []); // eslint-disable-line react-hooks/exhaustive-deps
+  const [title, setTitle] = useState(() => prefill.title);
   const [titleTouched, setTitleTouched] = useState(false);
-  const [description, setDescription] = useState("");
+  const [description, setDescription] = useState(() => prefill.description);
   const [descTouched, setDescTouched] = useState(false);
   // Contrepartie : phrase unique, la même pour tout le monde. Plus rien à saisir.
   const exchangeOffer = FIXED_EXCHANGE_OFFER;

@@ -123,10 +123,14 @@ const CreateProjet = () => {
   const [submitting, setSubmitting] = useState(false);
 
   // Étape 1
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
+  // Lot J2-A : titre, description et nature préremplis par Alma. Les
+  // déclarations de la charte restent à cocher par le porteur.
+  const [searchParams] = useSearchParams();
+  const prefill = useMemo(() => readFormPrefill(searchParams, { titleMax: 120, descriptionMax: 2000, categories: PROJET_NATURE_VALUES }), []); // eslint-disable-line react-hooks/exhaustive-deps
+  const [title, setTitle] = useState(() => prefill.title);
+  const [description, setDescription] = useState(() => prefill.description);
   const [photos, setPhotos] = useState<string[]>([]);
-  const [nature, setNature] = useState("");
+  const [nature, setNature] = useState(() => prefill.category ?? "");
 
   // Étape 2
   const [city, setCity] = useState("");
