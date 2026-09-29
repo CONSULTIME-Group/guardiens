@@ -2,20 +2,10 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { PRICING_ACTIVATION_DATE } from "@/config/pricing";
-import { isPricingActive } from "@/lib/pricing";
+import { isPricingActive, isPaywallInForce } from "@/lib/pricing";
 import { logger } from "@/lib/logger";
 
 export type SubStatus = "founder_grace" | "founder_expired" | "premium" | "expired" | "never" | "owner" | "pre_launch";
-
-/** Vrai quand le payant est réellement en vigueur (date renseignée et atteinte). */
-export const isPaywallInForce = (
-  activationDate: string | null = PRICING_ACTIVATION_DATE,
-  now: Date = new Date(),
-): boolean => {
-  if (!activationDate) return false;
-  const d = new Date(activationDate);
-  return !Number.isNaN(d.getTime()) && d <= now;
-};
 
 /**
  * Accès complet du gardien (messagerie, candidatures). Aucune date codée en dur.
