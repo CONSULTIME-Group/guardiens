@@ -1,3 +1,4 @@
+import { LoadingState } from "@/components/admin/ui";
 import { campaignLabel } from "@/lib/admin/labels";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useEffect, useMemo, useState } from "react";
@@ -190,7 +191,7 @@ export default function AdminMassEmailsStats() {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <p className="text-sm text-muted-foreground">Chargement…</p>
+            <LoadingState />
           ) : stats.length === 0 ? (
             <p className="text-sm text-muted-foreground">
               Aucune campagne sur cette période. Les données apparaîtront après le premier envoi avec UTM actif.

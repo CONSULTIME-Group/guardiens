@@ -1,5 +1,5 @@
 import { conversationTypeLabel } from "@/lib/admin/labels";
-import { KpiTile } from "@/components/admin/ui";
+import { KpiTile, EmptyState } from "@/components/admin/ui";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -295,7 +295,7 @@ export default function AdminMessages() {
               {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
             </div>
           ) : topUsers.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-8">Aucun message sur cette période</p>
+            <EmptyState>Aucun message sur cette période.</EmptyState>
           ) : (
             <Table>
               <TableHeader>

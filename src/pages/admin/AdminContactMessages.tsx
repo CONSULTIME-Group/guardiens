@@ -1,3 +1,4 @@
+import { LoadingState } from "@/components/admin/ui";
 import { displayText } from "@/lib/admin/labels";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useState, useEffect, useCallback } from "react";
@@ -233,7 +234,7 @@ const AdminContactMessages = () => {
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
-  if (loading) return <div className="text-muted-foreground py-8 text-center">Chargement…</div>;
+  if (loading) return <LoadingState />;
 
   return (
     <div className="space-y-6">
