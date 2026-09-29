@@ -18,14 +18,14 @@ export function almaProfileVisibleToModel(completion: number | null, question: s
 
 /** Reformule les mots proscrits dans la voix d'Alma. */
 export function rewriteForbiddenWords(text: string): string {
+  const end = "(?![a-zà-ÿ])";
   return (text || "")
-    .replace(/\b(du|le|au|un|son|votre) logement gratuitement\b/gi, (_m, det: string) => `${det} logement sans rien payer`)
-    .replace(/\bgratuitement\b/gi, "sans rien payer pour le logement")
-    .replace(/\bgratuit[ée]s?\b/gi, (m) => (/^G/.test(m) ? "Sans frais" : "sans frais"))
-    .replace(/\bla gratuit[ée]\b/gi, "l'absence de frais")
-    .replace(/\bgratuits?\b/gi, "sans frais")
-    .replace(/\bvoisinage\b/gi, "entourage")
-    .replace(/\bvoisin(e|es|s)?\b/gi, "personne du coin");
+    .replace(new RegExp(`\\b(du|le|au|un|son|votre) logement gratuitement${end}`, "gi"), (_m, det: string) => `${det} logement sans rien payer`)
+    .replace(new RegExp(`\\bgratuitement${end}`, "gi"), "sans rien payer pour le logement")
+    .replace(new RegExp(`\\bla gratuit[ée]${end}`, "gi"), "l'absence de frais")
+    .replace(new RegExp(`\\bgratuit(?:e|es|s)?${end}`, "gi"), "sans frais")
+    .replace(new RegExp(`\\bvoisinage${end}`, "gi"), "entourage")
+    .replace(new RegExp(`\\bvoisin(?:e|es|s)?${end}`, "gi"), "personne du coin");
 }
 
 const ANECDOTE = /(sieste|marche du milieu|escalier|j'ai (pass[ée] la nuit|dormi|r[êe]v[ée]|vu un)|mes pattes|vibrisse|chiffonn|[ée]cureuil|je poursui|courir apr[èe]s un chat|chats? qui m'a|for[êe]t (des|dans les) monts|monts (du )?lyonnais|j'y courr|mon humeur)/i;
