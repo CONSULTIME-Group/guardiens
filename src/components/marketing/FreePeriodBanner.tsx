@@ -6,7 +6,7 @@ interface FreePeriodBannerProps {
 
 /**
  * Ancien bandeau « Gratuit pour tous jusqu'au… ». Il annonçait une fin de
- * gratuité calculée depuis une date codée en dur (GRACE_END, retirée).
+ * gratuité calculée depuis une date codée en dur, désormais retirée.
  * Masqué tant que l'accès est gratuit pour tous ; une fois le payant en
  * vigueur, il n'y a plus de période gratuite à annoncer, il reste masqué.
  * Composant conservé (export stable), sans aucune date codée en dur.
