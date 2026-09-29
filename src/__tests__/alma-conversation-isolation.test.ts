@@ -50,7 +50,7 @@ describe("isolation du fil Alma entre comptes", () => {
     openAlmaConversation("Information privée A");
     setAlmaMoodContext({ mood: "calme", line: "Contexte A" });
     emit("SIGNED_OUT", null);
-    expect(getAlmaConversationState()).toEqual({ open: false, messages: [], sending: false, limited: false, error: null });
+    expect(getAlmaConversationState()).toEqual({ open: false, messages: [], sending: false, limited: false, error: null, contactOpen: false });
     expect(getAlmaMoodContext()).toEqual({ mood: null, line: null });
   });
 
