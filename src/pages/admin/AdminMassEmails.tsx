@@ -263,10 +263,11 @@ const CAMPAIGN_PRESETS: CampaignPreset[] = [
       never_published_sit: true,
       exclude_founder_followup: true,
       prioritize_recent_openers: true,
+      noel_v2_split: true,
       template_name: "owner-noel-2026",
     },
     subject: "Pour Noël, votre maison entre de bonnes mains",
-    body: "Gabarit dédié owner-noel-2026 : variante A (gardiens à moins de 50 km) ou B (commune à ajouter), calculée pour chaque destinataire au lancement.",
+    body: "Gabarit dédié owner-noel-2026, étape J+7 de la séquence propriétaire : mode répondant pour ceux qui ont répondu Noël ou cet hiver, variantes A ou B avec les cinq boutons de période pour les autres, calculés pour chaque destinataire au lancement.",
     ctaEnabled: true,
     ctaLabel: "Je prépare ma garde de Noël",
     ctaUrl: "https://guardiens.fr/sits/create?utm_source=email&utm_medium=email&utm_campaign=owner_noel_2026",
@@ -341,6 +342,8 @@ const AdminMassEmails = () => {
   const [helpsWithCount, setHelpsWithCount] = useState<number | null>(null);
   const [variantCounts, setVariantCounts] = useState<{ a: number; b: number } | null>(null);
   const [departureCounts, setDepartureCounts] = useState<{ holdout: number | null; answered: number | null } | null>(null);
+  const [noelV2Counts, setNoelV2Counts] = useState<{ noel: number; hiver: number; other: number } | null>(null);
+  const [noelTestMode, setNoelTestMode] = useState<"responder_noel" | "variant_a">("responder_noel");
 
   const [countLoading, setCountLoading] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -480,6 +483,7 @@ const AdminMassEmails = () => {
           cta_label: ctaEnabled ? ctaLabel.trim() : undefined,
           cta_url: ctaEnabled ? withUtm(ctaUrl.trim()) : undefined,
           template_name: filters.template_name || undefined,
+          ...(filters.template_name === "owner-noel-2026" ? { noel_test_mode: noelTestMode } : {}),
         },
       });
       if (error) throw new Error((error as { message?: string }).message || "Erreur d'envoi test");
@@ -588,7 +592,13 @@ const AdminMassEmails = () => {
             ? { holdout: data.holdout_excluded ?? null, answered: data.already_answered ?? null }
             : null,
         );
+        setNoelV2Counts(
+          typeof data?.responders_noel === "number"
+            ? { noel: data.responders_noel, hiver: data.responders_hiver ?? 0, other: data.other_period_excluded ?? 0 }
+            : null,
+        );
       } catch {
+        setNoelV2Counts(null);
         setDepartureCounts(null);
         setRecipientCount(null);
         setHelpsWithCount(null);
@@ -946,6 +956,20 @@ const AdminMassEmails = () => {
               </p>
             )}
 
+            {filters.template_name === "owner-noel-2026" && (
+              <div className="space-y-1.5">
+                <Label htmlFor="noel-test-mode" className="text-xs text-muted-foreground">Version du test</Label>
+                <select
+                  id="noel-test-mode"
+                  value={noelTestMode}
+                  onChange={(e) => setNoelTestMode(e.target.value as "responder_noel" | "variant_a")}
+                  className="w-full h-11 rounded-md border border-input bg-background px-3 text-sm"
+                >
+                  <option value="responder_noel">Mode répondant Noël</option>
+                  <option value="variant_a">Variante A, non-répondant</option>
+                </select>
+              </div>
+            )}
             <Button
               type="button"
               variant="outline"
@@ -1097,14 +1121,26 @@ const AdminMassEmails = () => {
                     <span className="text-muted-foreground">Destinataires</span>
                     <span className="font-semibold text-base">{recipientCount ?? 0}</span>
                   </div>
+                  {noelV2Counts && (
+                    <>
+                      <div className="flex items-center justify-between" data-testid="noel-responders-noel">
+                        <span className="text-muted-foreground">Répondants Noël</span>
+                        <span className="font-medium">{noelV2Counts.noel}</span>
+                      </div>
+                      <div className="flex items-center justify-between" data-testid="noel-responders-hiver">
+                        <span className="text-muted-foreground">Répondants hiver</span>
+                        <span className="font-medium">{noelV2Counts.hiver}</span>
+                      </div>
+                    </>
+                  )}
                   {variantCounts && (
                     <>
                       <div className="flex items-center justify-between">
-                        <span className="text-muted-foreground">Variante A (gardiens proches)</span>
+                        <span className="text-muted-foreground">{noelV2Counts ? "Non-répondants A (gardiens proches)" : "Variante A (gardiens proches)"}</span>
                         <span className="font-medium">{variantCounts.a}</span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-muted-foreground">Variante B (commune à ajouter)</span>
+                        <span className="text-muted-foreground">{noelV2Counts ? "Non-répondants B (commune à ajouter)" : "Variante B (commune à ajouter)"}</span>
                         <span className="font-medium">{variantCounts.b}</span>
                       </div>
                     </>
@@ -1121,6 +1157,12 @@ const AdminMassEmails = () => {
                         <div className="flex items-center justify-between" data-testid="departure-answered-count">
                           <span className="text-muted-foreground">Déjà répondu</span>
                           <span className="font-medium">{departureCounts.answered}</span>
+                        </div>
+                      )}
+                      {noelV2Counts && (
+                        <div className="flex items-center justify-between" data-testid="noel-other-period">
+                          <span className="text-muted-foreground">Exclus, autre période</span>
+                          <span className="font-medium">{noelV2Counts.other}</span>
                         </div>
                       )}
                     </>

@@ -2,7 +2,8 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { requireAdminOrServiceRole } from "../_shared/require-admin.ts";
 import { entraideCardData } from "../_shared/entraide-card-data.ts";
-import { OWNER_NOEL_TEMPLATE, buildNoelDataFor } from "../_shared/owner-noel-audience.ts";
+import { OWNER_NOEL_TEMPLATE, buildNoelDataFor, type NoelTemplateData } from "../_shared/owner-noel-audience.ts";
+import { buildResponderData } from "../_shared/owner-noel-v2.ts";
 import { mintDepartureTokens, periodBaseUrl } from "../_shared/owner-departure-audience.ts";
 import { DEPARTURE_TEMPLATE } from "../_shared/owner-departure-logic.ts";
 import { resendFetch } from "../_shared/resend-guard.ts";
@@ -114,6 +115,15 @@ Deno.serve(async (req) => {
         const both = await buildNoelDataFor(admin, [self, { ...demo, id: `${self.id}-demo` }]);
         const mine = both.get(self.id);
         noelData = (mine?.variant === "A" ? mine : both.get(`${self.id}-demo`)) as Record<string, unknown> ?? {};
+        // Lot N6 : « responder_noel » (mode répondant Noël) ou « variant_a » (non-répondant, boutons à jeton).
+        const noelTestMode = payload?.noel_test_mode === "responder_noel" ? "responder_noel" : "variant_a";
+        if (noelTestMode === "responder_noel") {
+          noelData = await buildResponderData(admin, userData.user.id, "noel", noelData as unknown as NoelTemplateData) as unknown as Record<string, unknown>;
+        } else {
+          const tokens = await mintDepartureTokens(admin, [userData.user.id]);
+          const t = tokens.get(userData.user.id);
+          if (t) noelData = { ...noelData, periodBaseUrl: periodBaseUrl(t) };
+        }
       }
       // Question de départ : vrai jeton /ma-periode sur le compte de l'admin.
       if (templateName === DEPARTURE_TEMPLATE) {
