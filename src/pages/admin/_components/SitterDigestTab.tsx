@@ -179,6 +179,7 @@ const SitterDigestTab = () => {
 
   return (
     <div className="space-y-4">
+      {dataTruncated && <p role="status" className="text-sm text-warning">{TRUNCATED_NOTICE}</p>}
       <p className="text-sm text-muted-foreground">
         Digest quotidien envoyé à 20h Paris aux gardiens opt-in. Attribution des candidatures via
         <code className="text-xs bg-muted px-1 rounded ml-1">utm_campaign=sitter_daily_digest</code> et event
