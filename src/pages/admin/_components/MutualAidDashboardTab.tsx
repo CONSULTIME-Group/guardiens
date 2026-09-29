@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { reportAdminReadError, UNAVAILABLE_LABEL } from "@/lib/admin/readError";
 import { fetchAllRows } from "@/lib/admin/fetchAllRows";
 import { formatOpenRate } from "@/lib/admin/openRate";
 import { Card, CardContent } from "@/components/ui/card";
@@ -132,6 +133,7 @@ const MutualAidDashboardTab = () => {
   const [funnel, setFunnel] = useState<FunnelMetrics | null>(null);
   const [emailStats, setEmailStats] = useState<EmailStats[]>([]);
   const [dormant, setDormant] = useState<DormantMission[]>([]);
+  const [loadError, setLoadError] = useState(false);
   const [autoClosed, setAutoClosed] = useState<AutoClosedMission[]>([]);
   const [closingId, setClosingId] = useState<string | null>(null);
   const seenRef = useRef(false);
@@ -144,6 +146,8 @@ const MutualAidDashboardTab = () => {
 
   const load = useCallback(async () => {
     setLoading(true);
+    setLoadError(false);
+    try {
     const start = rangeToStart(range).toISOString();
     const startOfMonth = new Date();
     startOfMonth.setDate(1);
@@ -269,7 +273,10 @@ const MutualAidDashboardTab = () => {
     } catch (e) {
       console.warn("[MutualAidDashboard] funnel rpc threw", e);
     }
-
+    } catch (e) {
+      setLoadError(true);
+      reportAdminReadError("Pilotage entraide", e);
+    }
     setLoading(false);
   }, [range]);
 
