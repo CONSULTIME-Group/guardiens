@@ -39,9 +39,9 @@ const PRIORITY_ARTICLES = [
 ];
 
 const PRIORITY_BADGES = {
-  high: { label: "🔴 Haute", className: "bg-destructive/15 text-destructive" },
-  medium: { label: "🟠 Moyenne", className: "bg-warning-soft text-warning" },
-  low: { label: "🟡 Basse", className: "bg-warning/10 text-warning" },
+  high: { label: "Haute", className: "bg-destructive/15 text-destructive" },
+  medium: { label: "Moyenne", className: "bg-warning-soft text-warning" },
+  low: { label: "Basse", className: "bg-warning/10 text-warning" },
 };
 
 const SLUG_LABELS: Record<string, string> = {

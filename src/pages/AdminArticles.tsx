@@ -1,4 +1,5 @@
-import { Pager, PAGE_SIZE } from "@/components/admin/ui";
+import { Pager, PAGE_SIZE, normalizeSearch } from "@/components/admin/ui";
+import { fetchAllRows } from "@/lib/admin/fetchAllRows";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -110,13 +111,19 @@ const AdminArticles = () => {
 
   const fetchArticles = async () => {
     setLoading(true);
-    let query = supabase.from("articles").select("*").order("created_at", { ascending: false });
-    if (filterCategory !== "all") query = query.eq("category", filterCategory);
-    if (filterStatus === "published") query = query.eq("published", true);
-    if (filterStatus === "draft") query = query.eq("published", false);
-    const { data, error } = await query;
-    if (error) toast.error("Erreur de chargement");
-    else setArticles(data || []);
+    try {
+      const { rows } = await fetchAllRows<any>((from, to) => {
+        let query = supabase.from("articles").select("*")
+          .order("created_at", { ascending: false }).order("id", { ascending: true });
+        if (filterCategory !== "all") query = query.eq("category", filterCategory);
+        if (filterStatus === "published") query = query.eq("published", true);
+        if (filterStatus === "draft") query = query.eq("published", false);
+        return query.range(from, to);
+      });
+      setArticles(rows);
+    } catch {
+      toast.error("Chargement impossible, relancez la lecture.");
+    }
     setLoading(false);
   };
 
@@ -131,7 +138,7 @@ const AdminArticles = () => {
   const [articlePage, setArticlePage] = useState(0);
   useEffect(() => { setArticlePage(0); }, [search, filterSeo, filterCategory, filterStatus]);
   const filtered = articles.filter(a => {
-    if (search && !a.title.toLowerCase().includes(search.toLowerCase())) return false;
+    if (search.trim() && !normalizeSearch(a.title ?? "").includes(normalizeSearch(search.trim()))) return false;
     if (filterSeo !== "all") {
       const { score } = getSeoScore(a);
       if (filterSeo === "complete" && score !== "green") return false;
@@ -149,7 +156,9 @@ const AdminArticles = () => {
 
   const selectedSeo = selectedArticle ? getSeoScore(selectedArticle) : null;
 
-  const pagedArticles = filtered.slice(articlePage * PAGE_SIZE, (articlePage + 1) * PAGE_SIZE);
+  const maxArticlePage = Math.max(0, Math.ceil(filtered.length / PAGE_SIZE) - 1);
+  const currentArticlePage = Math.min(articlePage, maxArticlePage);
+  const pagedArticles = filtered.slice(currentArticlePage * PAGE_SIZE, (currentArticlePage + 1) * PAGE_SIZE);
 
   return (
     <div className="space-y-6">
@@ -183,10 +192,10 @@ const AdminArticles = () => {
         <Badge variant="outline" className="gap-1 cursor-pointer" onClick={() => setFilterSeo("all")}>
           Tous ({articles.length})
         </Badge>
-        <Badge variant="outline" className="gap-1 cursor-pointer text-[hsl(141,50%,30%)] border-[hsl(141,50%,70%)]" onClick={() => setFilterSeo("complete")}>
+        <Badge variant="outline" className="gap-1 cursor-pointer text-success border-success/50" onClick={() => setFilterSeo("complete")}>
           <CheckCircle2 className="h-3 w-3" /> Complets ({seoStats.green})
         </Badge>
-        <Badge variant="outline" className="gap-1 cursor-pointer text-[hsl(37,60%,30%)] border-[hsl(37,60%,70%)]" onClick={() => setFilterSeo("incomplete")}>
+        <Badge variant="outline" className="gap-1 cursor-pointer text-warning border-warning/50" onClick={() => setFilterSeo("incomplete")}>
           <AlertTriangle className="h-3 w-3" /> Incomplets ({seoStats.orange})
         </Badge>
         <Badge variant="outline" className="gap-1 cursor-pointer text-destructive border-destructive/50" onClick={() => setFilterSeo("urgent")}>
@@ -231,7 +240,7 @@ const AdminArticles = () => {
             {loading ? (
               <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
             ) : filtered.length === 0 ? (
-              <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Aucun article</TableCell></TableRow>
+              <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">La liste se remplira dès le premier article correspondant.</TableCell></TableRow>
             ) : pagedArticles.map(article => {
               const { score } = getSeoScore(article);
               return (
@@ -247,8 +256,8 @@ const AdminArticles = () => {
                       onClick={() => setSelectedArticle(article)}
                       className="inline-flex items-center gap-1 text-sm cursor-pointer hover:opacity-80"
                     >
-                      {score === "green" && <CheckCircle2 className="h-4 w-4 text-[hsl(141,50%,40%)]" />}
-                      {score === "orange" && <AlertTriangle className="h-4 w-4 text-[hsl(37,80%,50%)]" />}
+                      {score === "green" && <CheckCircle2 className="h-4 w-4 text-success" />}
+                      {score === "orange" && <AlertTriangle className="h-4 w-4 text-warning" />}
                       {score === "red" && <XCircle className="h-4 w-4 text-destructive" />}
                     </button>
                   </TableCell>
@@ -288,6 +297,7 @@ const AdminArticles = () => {
           </TableBody>
         </Table>
       </div>
+      <Pager page={currentArticlePage} total={filtered.length} onPage={setArticlePage} />
 
       {/* CORRECTION 8, SEO checklist panel */}
       <Sheet open={!!selectedArticle} onOpenChange={() => setSelectedArticle(null)}>
@@ -304,7 +314,7 @@ const AdminArticles = () => {
                     <span className="text-sm">{seoLabels[key]}</span>
                     <div className="flex items-center gap-2">
                       {ok ? (
-                        <CheckCircle2 className="h-4 w-4 text-[hsl(141,50%,40%)]" />
+                        <CheckCircle2 className="h-4 w-4 text-success" />
                       ) : (
                         <>
                           <XCircle className="h-4 w-4 text-destructive" />
