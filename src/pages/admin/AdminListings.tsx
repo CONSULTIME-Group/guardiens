@@ -420,7 +420,7 @@ const AdminListings = () => {
   const paginated = filtered.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
 
   const handleExportCsv = () => {
-    const header = ["Titre", "Proprio", "Ville", "Pays", "Début", "Fin", "Statut", "Vues", "Uniques", "Messages", "Candidatures", "Dernière vue", "Dépubliée le", "Motif de dépublication"];
+    const header = ["Titre", "Proprio", "Ville", "Pays", "Début", "Fin", "Statut", "Vues", "Membres uniques", "Messages", "Candidatures", "Dernière vue", "Dépubliée le", "Motif de dépublication"];
     const esc = (v: any) => {
       const s = v == null ? "" : String(v);
       return `"${s.replace(/"/g, '""')}"`;
@@ -648,7 +648,7 @@ const AdminListings = () => {
         <div className="flex flex-wrap gap-2 text-xs">
           <Badge variant="secondary">{filtered.length} annonce{filtered.length > 1 ? "s" : ""}</Badge>
           <Badge variant="outline">{totalViews} vues</Badge>
-          <Badge variant="outline">{totalUniques} uniques</Badge>
+          <Badge variant="outline">{totalUniques} membres uniques</Badge>
           <Badge variant="outline">{totalMsg} msg</Badge>
           <Badge variant="outline">{totalApps} candidatures</Badge>
           {lastViewGlobal && (
@@ -668,7 +668,7 @@ const AdminListings = () => {
               <TableHead>Ville</TableHead>
               <TableHead>Dates</TableHead>
               <TableHead className="text-right" title="Vues totales (public + membres)">Vues</TableHead>
-              <TableHead className="text-right" title="Visiteurs uniques (par session/membre)">Uniques</TableHead>
+              <TableHead className="text-right" title="Nombre de membres connectés distincts ayant vu l'annonce (chemins /sits et /annonces, identifiant et slug). Les visiteurs non connectés ne sont pas comptés, aucun identifiant de séance n'étant enregistré.">Membres uniques</TableHead>
               <TableHead className="text-right">Msg</TableHead>
               <TableHead className="text-right">Cand.</TableHead>
               <TableHead>Dernière vue</TableHead>
@@ -905,7 +905,7 @@ const AdminListings = () => {
               </div>
               <div className="rounded-md border p-3 text-center">
                 <div className="text-xl font-semibold tabular-nums">{stats[trafficListing.id].uniqueViews}</div>
-                <div className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1">Uniques</div>
+                <div className="text-[10px] uppercase tracking-wide text-muted-foreground mt-1" title="Nombre de membres connectés distincts ayant vu l'annonce (chemins /sits et /annonces, identifiant et slug). Les visiteurs non connectés ne sont pas comptés, aucun identifiant de séance n'étant enregistré.">Membres uniques</div>
               </div>
               <div className="rounded-md border p-3 text-center">
                 <div className="text-xl font-semibold tabular-nums">{stats[trafficListing.id].publicViews}</div>

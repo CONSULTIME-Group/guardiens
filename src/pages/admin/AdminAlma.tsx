@@ -1,4 +1,5 @@
 import { fetchAllRows } from "@/lib/admin/fetchAllRows";
+import { reportAdminReadError, UNAVAILABLE_LABEL } from "@/lib/admin/readError";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
@@ -37,28 +38,15 @@ import { DiscoveryFunnelCard } from "./_components/alma/DiscoveryFunnelCard";
 import { trackEvent } from "@/lib/analytics";
 import { WHISPER_PRIORITY } from "@/lib/alma/whisper-types";
 import {
-  aggregateMoments,
-  aggregateWhispers,
-  computeBubbleKpis,
+  kpisFromCounts,
+  momentsFromCounts,
+  whispersFromCounts,
   rangeSinceISO,
   toCsv,
-  type RawEvent,
-  type RawWhisperHistory,
+  type BubbleStatsPayload,
+  type WhisperCountRow,
 } from "@/lib/admin/alma-analytics";
 
-const ROW_LIMIT = 20000;
-
-/** Bandeau discret affiché quand une agrégation atteint le plafond de lignes. */
-function TruncationBanner() {
-  return (
-    <div className="flex items-start gap-2 rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-xs text-warning-foreground">
-      <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0" aria-hidden="true" />
-      <span>
-        Données tronquées au-delà de {ROW_LIMIT.toLocaleString("fr-FR")} lignes, les chiffres peuvent sous-compter.
-      </span>
-    </div>
-  );
-}
 
 type Range = "7d" | "30d" | "90d";
 
@@ -178,27 +166,21 @@ export default function AdminAlma() {
 /* ══════════════════════════ Onglet Bulles ══════════════════════════ */
 
 function BubblesTab({ since, range }: { since: string; range: Range }) {
-  const { data: events = [], isLoading } = useQuery({
-    queryKey: ["admin-alma-events", since],
-    queryFn: async (): Promise<RawEvent[]> => {
-      const { data, error } = await supabase
-        .from("analytics_events")
-        .select("event_type, created_at, user_id")
-        .like("event_type", "alma_%")
-        .gte("created_at", since)
-        .order("created_at", { ascending: false })
-        .limit(ROW_LIMIT);
-      if (error) throw error;
-      return (data ?? []) as RawEvent[];
+  // Lot A10 : agrégat SQL, aucune lecture d'événements côté navigateur.
+  const { data: bubble, isLoading, isError } = useQuery({
+    queryKey: ["admin-alma-bubbles", since],
+    queryFn: async (): Promise<BubbleStatsPayload> => {
+      const { data, error } = await supabase.rpc("admin_a10_alma_bubble_stats" as any, { p_since: since });
+      if (error) { reportAdminReadError("Alma : bulles", error); throw error; }
+      return data as unknown as BubbleStatsPayload;
     },
     staleTime: 60_000,
     refetchOnWindowFocus: false,
   });
 
-
-  const truncated = events.length >= ROW_LIMIT;
-  const kpis = useMemo(() => computeBubbleKpis(events), [events]);
-  const moments = useMemo(() => aggregateMoments(events), [events]);
+  const kpis = useMemo(() => kpisFromCounts(bubble ?? { unique_7d: 0, unique_30d: 0, by_type: [] }), [bubble]);
+  const moments = useMemo(() => momentsFromCounts(bubble?.by_type ?? []), [bubble]);
+  const show = (v: number | string) => (isError ? UNAVAILABLE_LABEL : v);
 
   const onExport = () => {
     void trackEvent("admin_alma_export_csv_clicked", {
@@ -227,12 +209,11 @@ function BubblesTab({ since, range }: { since: string; range: Range }) {
 
   return (
     <div className="space-y-6">
-      {truncated && <TruncationBanner />}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <KpiCard label="Personnes uniques (7j)" value={kpis.uniqueUsers7d} />
-        <KpiCard label="Personnes uniques (30j)" value={kpis.uniqueUsers30d} />
-        <KpiCard label="Vues totales" value={kpis.totalViews} />
-        <KpiCard label="Taux d'engagement" value={fmtPct(kpis.engagementRate)} />
+        <KpiCard label="Personnes uniques (7 j)" value={show(kpis.uniqueUsers7d)} />
+        <KpiCard label="Personnes uniques (30 j)" value={show(kpis.uniqueUsers30d)} />
+        <KpiCard label="Vues totales" value={show(kpis.totalViews)} />
+        <KpiCard label="Taux d'engagement" value={show(fmtPct(kpis.engagementRate))} />
       </div>
 
       <div className="flex justify-end">
@@ -295,23 +276,16 @@ function BubblesTab({ since, range }: { since: string; range: Range }) {
 /* ══════════════════════════ Onglet Whispers ══════════════════════════ */
 
 function WhispersTab({ since, range }: { since: string; range: Range }) {
-  const { data: history = [], isLoading } = useQuery({
+  const { data: whisperRows = [], isLoading, isError: whispersError } = useQuery({
     queryKey: ["admin-alma-whispers", since],
-    queryFn: async (): Promise<RawWhisperHistory[]> => {
-      const { data, error } = await supabase
-        .from("alma_whisper_history")
-        .select("whisper_type, emitted_at, action_taken, dismissed_reason, user_id")
-        .gte("emitted_at", since)
-        .order("emitted_at", { ascending: false })
-        .limit(ROW_LIMIT);
-      if (error) throw error;
-      return (data ?? []) as RawWhisperHistory[];
+    queryFn: async (): Promise<WhisperCountRow[]> => {
+      const { data, error } = await supabase.rpc("admin_a10_whisper_stats" as any, { p_since: since });
+      if (error) { reportAdminReadError("Alma : murmures", error); throw error; }
+      return (data ?? []) as unknown as WhisperCountRow[];
     },
     staleTime: 60_000,
     refetchOnWindowFocus: false,
   });
-
-  const historyTruncated = history.length >= ROW_LIMIT;
 
   const { data: freqRes } = useQuery({
     queryKey: ["admin-alma-frequency"],
@@ -325,8 +299,8 @@ function WhispersTab({ since, range }: { since: string; range: Range }) {
 
 
   const stats = useMemo(
-    () => aggregateWhispers(history, WHISPER_PRIORITY as Record<string, "P0" | "P1" | "P2">),
-    [history],
+    () => whispersFromCounts(whisperRows, WHISPER_PRIORITY as Record<string, "P0" | "P1" | "P2">),
+    [whisperRows],
   );
 
   const totals = useMemo(() => {
@@ -397,12 +371,11 @@ function WhispersTab({ since, range }: { since: string; range: Range }) {
 
   return (
     <div className="space-y-6">
-      {historyTruncated && <TruncationBanner />}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <KpiCard label="Whispers émis" value={totals.emitted} />
-        <KpiCard label="Taux d'action" value={fmtPct(totals.actionRate)} />
-        <KpiCard label="Taux de rejet" value={fmtPct(totals.dismissRate)} />
-        <KpiCard label="Personnes qui ont coupé ce type" value={totals.blacklisted} />
+        <KpiCard label="Whispers émis" value={whispersError ? UNAVAILABLE_LABEL : totals.emitted} />
+        <KpiCard label="Taux d'action" value={whispersError ? UNAVAILABLE_LABEL : fmtPct(totals.actionRate)} />
+        <KpiCard label="Taux de rejet" value={whispersError ? UNAVAILABLE_LABEL : fmtPct(totals.dismissRate)} />
+        <KpiCard label="Personnes qui ont coupé ce type" value={whispersError ? UNAVAILABLE_LABEL : totals.blacklisted} />
       </div>
 
       <Card>
@@ -633,14 +606,20 @@ function CulturalFactsTab({ since }: { since: string }) {
   const { data: facts = [], isLoading } = useQuery({
     queryKey: ["admin-alma-cultural-facts"],
     queryFn: async (): Promise<CulturalFactRow[]> => {
-      const { data, error } = await supabase
-        .from("alma_cultural_facts" as any)
-        .select("*")
-        .order("fact_type", { ascending: true })
-        .order("created_at", { ascending: false })
-        .limit(2000);
-      if (error) throw error;
-      return (data ?? []) as unknown as CulturalFactRow[];
+      // Lot A10 : liste complète paginée.
+      try {
+        const { rows } = await fetchAllRows<CulturalFactRow>((from, to) =>
+          (supabase.from("alma_cultural_facts" as any) as any)
+            .select("*")
+            .order("fact_type", { ascending: true })
+            .order("created_at", { ascending: false })
+            .order("id")
+            .range(from, to));
+        return rows;
+      } catch (e) {
+        reportAdminReadError("Alma : faits culturels", e);
+        throw e;
+      }
     },
     staleTime: 60_000,
     refetchOnWindowFocus: false,
@@ -650,49 +629,19 @@ function CulturalFactsTab({ since }: { since: string }) {
   const { data: statsResult = EMPTY_CULTURAL_STATS } = useQuery({
     queryKey: ["admin-alma-cultural-stats", since],
     queryFn: async () => {
-      const [seenRes, clickRes] = await Promise.all([
-        supabase
-          .from("analytics_events")
-          .select("metadata, created_at")
-          .eq("event_type", "alma_cultural_fact_seen")
-          .gte("created_at", since)
-          .limit(ROW_LIMIT),
-        supabase
-          .from("analytics_events")
-          .select("metadata, created_at")
-          .eq("event_type", "alma_cultural_fact_action_clicked")
-          .gte("created_at", since)
-          .limit(ROW_LIMIT),
-      ]);
-      const seenRows = seenRes.data ?? [];
-      const clickRows = clickRes.data ?? [];
-      const seen = new Map<string, number>();
-      const clicks = new Map<string, number>();
-      for (const r of seenRows) {
-        const id = (r as any).metadata?.fact_id;
-        if (id) seen.set(id, (seen.get(id) ?? 0) + 1);
-      }
-      for (const r of clickRows) {
-        const id = (r as any).metadata?.fact_id;
-        if (id) clicks.set(id, (clicks.get(id) ?? 0) + 1);
-      }
-      const rows = Array.from(seen.entries()).map(([id, views]) => ({
-        id,
-        views,
-        clicks: clicks.get(id) ?? 0,
+      // Lot A10 : agrégat SQL par fait, sans plafond.
+      const { data, error } = await supabase.rpc("admin_a10_cultural_fact_stats" as any, { p_since: since });
+      if (error) { reportAdminReadError("Alma : faits culturels", error); throw error; }
+      const rows = ((data ?? []) as unknown as Array<{ fact_id: string; views: number; clicks: number }>).map((r) => ({
+        id: r.fact_id, views: Number(r.views) || 0, clicks: Number(r.clicks) || 0,
       }));
-      return {
-        rows,
-        truncated: seenRows.length >= ROW_LIMIT || clickRows.length >= ROW_LIMIT,
-      };
+      return { rows, truncated: false };
     },
     staleTime: 60_000,
     refetchOnWindowFocus: false,
   });
 
-
   const stats = statsResult.rows;
-  const statsTruncated = statsResult.truncated;
 
   const factTypeOptions = useMemo(() => buildFactTypeOptions(facts), [facts]);
 
@@ -755,7 +704,6 @@ function CulturalFactsTab({ since }: { since: string }) {
 
   return (
     <div className="space-y-4">
-      {statsTruncated && <TruncationBanner />}
       <div className="flex flex-wrap items-center gap-3">
         <Select value={typeFilter} onValueChange={setTypeFilter}>
           <SelectTrigger className="w-56">

@@ -7,6 +7,8 @@ import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAllRows } from "@/lib/admin/fetchAllRows";
+import { reportAdminReadError } from "@/lib/admin/readError";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -46,29 +48,26 @@ export function MoodsTab() {
   const { data: moods = [], isLoading } = useQuery({
     queryKey: ["admin-alma-moods"],
     queryFn: async (): Promise<MoodRow[]> => {
-      const { data, error } = await supabase
-        .from("alma_moods" as any)
-        .select("*")
-        .order("mood", { ascending: true })
-        .order("created_at", { ascending: true })
-        .limit(2000);
-      if (error) throw error;
-      return (data ?? []) as unknown as MoodRow[];
+      const { rows } = await fetchAllRows<MoodRow>((from, to) =>
+        (supabase.from("alma_moods" as any) as any)
+          .select("*")
+          .order("mood", { ascending: true })
+          .order("created_at", { ascending: true })
+          .order("id")
+          .range(from, to));
+      return rows;
     },
     staleTime: 60_000,
     refetchOnWindowFocus: false,
   });
 
+  // Lot A10 : vues des 30 derniers jours agrégées en SQL.
   const { data: views = [] } = useQuery({
     queryKey: ["admin-alma-mood-views"],
     queryFn: async () => {
-      const since = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString();
-      const { data } = await supabase
-        .from("alma_mood_views" as any)
-        .select("mood_id")
-        .gte("created_at", since)
-        .limit(20000);
-      return (data ?? []) as unknown as Array<{ mood_id: string }>;
+      const { data, error } = await supabase.rpc("admin_a10_mood_view_counts" as any);
+      if (error) { reportAdminReadError("Alma : vues des humeurs", error); throw error; }
+      return (data ?? []) as unknown as Array<{ mood_id: string; n: number }>;
     },
     staleTime: 60_000,
     refetchOnWindowFocus: false,
@@ -76,7 +75,7 @@ export function MoodsTab() {
 
   const viewsById = useMemo(() => {
     const m = new Map<string, number>();
-    for (const v of views) m.set(v.mood_id, (m.get(v.mood_id) ?? 0) + 1);
+    for (const v of views) m.set(v.mood_id, Number(v.n) || 0);
     return m;
   }, [views]);
 
@@ -173,13 +172,18 @@ export function MoodsTab() {
                     {viewsById.get(row.id) ?? 0}
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button
-                      variant={row.active ? "outline" : "secondary"}
-                      size="sm"
-                      onClick={() => toggleActive(row)}
-                    >
-                      {row.active ? "Active" : "Inactive"}
-                    </Button>
+                    <div className="flex items-center justify-end gap-2">
+                      <Badge variant={row.active ? "default" : "secondary"} data-testid="mood-state">
+                        {row.active ? "Active" : "Inactive"}
+                      </Badge>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => toggleActive(row)}
+                      >
+                        {row.active ? "Désactiver" : "Activer"}
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

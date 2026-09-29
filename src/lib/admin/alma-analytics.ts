@@ -177,3 +177,51 @@ export function toCsv<T extends Record<string, unknown>>(rows: T[], columns: (ke
   const body = rows.map((r) => columns.map((c) => esc(r[c])).join(",")).join("\n");
   return `${header}\n${body}`;
 }
+
+/* Lot A10 : mêmes agrégats, calculés depuis les compteurs SQL par type d'événement. */
+export interface EventTypeCount { event_type: string; n: number; last_at: string | null }
+export interface BubbleStatsPayload { unique_7d: number; unique_30d: number; by_type: EventTypeCount[] }
+
+export function momentsFromCounts(byType: EventTypeCount[]): MomentStats[] {
+  return ALMA_MOMENTS.map(({ key, label, role }) => {
+    const scoped = byType.filter((e) => e.event_type.startsWith(key));
+    const views = scoped.filter((e) => isSeenEvent(e.event_type)).reduce((s, e) => s + Number(e.n), 0);
+    const actions = scoped.filter((e) => isActionEvent(e.event_type)).reduce((s, e) => s + Number(e.n), 0);
+    const lastUsedAt = scoped.reduce<string | null>((acc, e) => (e.last_at && (!acc || e.last_at > acc) ? e.last_at : acc), null);
+    return { moment: key, label, role, views, actions, adoptionRate: views > 0 ? actions / views : 0, lastUsedAt };
+  }).sort((a, b) => b.adoptionRate - a.adoptionRate);
+}
+
+export function kpisFromCounts(p: BubbleStatsPayload): BubbleKpis {
+  let views = 0;
+  let actions = 0;
+  for (const e of p.by_type) {
+    if (isSeenEvent(e.event_type)) views += Number(e.n);
+    if (isActionEvent(e.event_type)) actions += Number(e.n);
+  }
+  return {
+    uniqueUsers7d: Number(p.unique_7d) || 0,
+    uniqueUsers30d: Number(p.unique_30d) || 0,
+    totalViews: views,
+    totalActions: actions,
+    engagementRate: views > 0 ? actions / views : 0,
+  };
+}
+
+export interface WhisperCountRow { whisper_type: string; emitted: number; actions: number; dismissed: number; blacklisted_users: number }
+
+export function whispersFromCounts(rows: WhisperCountRow[], priorityMap: Record<string, "P0" | "P1" | "P2">): WhisperStats[] {
+  return rows.map((r) => {
+    const emitted = Number(r.emitted) || 0;
+    const actions = Number(r.actions) || 0;
+    const dismissed = Number(r.dismissed) || 0;
+    return {
+      whisperType: r.whisper_type,
+      priority: priorityMap[r.whisper_type] ?? "P2",
+      emitted, actions, dismissed,
+      actionRate: emitted > 0 ? actions / emitted : 0,
+      dismissRate: emitted > 0 ? dismissed / emitted : 0,
+      blacklistedUsers: Number(r.blacklisted_users) || 0,
+    };
+  }).sort((a, b) => b.actionRate - a.actionRate);
+}

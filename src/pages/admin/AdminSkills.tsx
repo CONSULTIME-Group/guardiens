@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { refreshAdminBadges } from "@/hooks/useAdminBadges";
 import { supabase } from "@/integrations/supabase/client";
+import { reportAdminReadError, UNAVAILABLE_LABEL } from "@/lib/admin/readError";
+import { competenceInsertError } from "@/lib/admin/competenceErrors";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Check, X, Pencil, AlertTriangle, Plus } from "lucide-react";
@@ -121,31 +123,33 @@ const AdminSkills = () => {
     setCompetences((data as any as CompetenceRow[]) || []);
   }, []);
 
+  // Lot A10 : fonction admin sans plafond, même définition que la pastille du menu.
+  const [pendingLoaded, setPendingLoaded] = useState(false);
+  const [pendingError, setPendingError] = useState(false);
   const fetchPendingCompetences = useCallback(async () => {
-    // Find competences in sitter_profiles and owner_profiles that are NOT in competences_validees
-    const { data: validatedData } = await supabase.from("competences_validees").select("label");
-    const validatedSet = new Set((validatedData || []).map((d: any) => d.label));
-
-    const [sitterRes, ownerRes] = await Promise.all([
-      supabase.from("sitter_profiles").select("competences").not("competences", "is", null),
-      supabase.from("owner_profiles").select("competences").not("competences", "is", null),
-    ]);
-
-    const countMap = new Map<string, number>();
-    [...(sitterRes.data || []), ...(ownerRes.data || [])].forEach((p: any) => {
-      (p.competences || []).forEach((c: string) => {
-        if (!validatedSet.has(c)) {
-          countMap.set(c, (countMap.get(c) || 0) + 1);
-        }
-      });
-    });
-
-    setPendingCompetences(
-      Array.from(countMap.entries())
-        .map(([label, count]) => ({ label, count, sources: [] }))
-        .sort((a, b) => b.count - a.count)
-    );
+    const { data, error } = await supabase.rpc("admin_a10_pending_competences" as any);
+    if (error) {
+      setPendingError(true);
+      reportAdminReadError("Compétences en attente", error);
+    } else {
+      setPendingError(false);
+      setPendingCompetences(
+        ((data ?? []) as unknown as Array<{ label: string; usage_count: number }>).map((r) => ({
+          label: r.label, count: Number(r.usage_count) || 0, sources: [],
+        })),
+      );
+    }
+    setPendingLoaded(true);
   }, []);
+
+  const [tab, setTab] = useState<string>("competences");
+  const [tabChosen, setTabChosen] = useState(false);
+  useEffect(() => {
+    if (tabChosen || !pendingLoaded || loading) return;
+    if (pendingCompetences.length > 0) setTab("pending");
+    else if (counts.pending > 0) setTab("legacy");
+    setTabChosen(true);
+  }, [tabChosen, pendingLoaded, loading, pendingCompetences.length, counts.pending]);
 
   useEffect(() => { fetchSkills(); }, [fetchSkills]);
   useEffect(() => { fetchCompetences(); fetchPendingCompetences(); }, [fetchCompetences, fetchPendingCompetences]);
@@ -176,11 +180,14 @@ const AdminSkills = () => {
   };
 
   const handleValidateCompetence = async (label: string) => {
-    // Add to competences_validees
-    await supabase.from("competences_validees").insert({
+    const { error } = await supabase.from("competences_validees").insert({
       label,
       categorie: "competences_savoirs",
     } as any);
+    if (error) {
+      toast({ variant: "destructive", description: competenceInsertError(error, label) });
+      return;
+    }
     toast({ description: `"${label}" ajoutée au référentiel.` });
     fetchCompetences();
     fetchPendingCompetences();
@@ -220,10 +227,14 @@ const AdminSkills = () => {
 
   const handleAddCompetence = async () => {
     if (!newCompLabel.trim()) return;
-    await supabase.from("competences_validees").insert({
+    const { error } = await supabase.from("competences_validees").insert({
       label: newCompLabel.trim(),
       categorie: newCompCategorie,
     } as any);
+    if (error) {
+      toast({ variant: "destructive", description: competenceInsertError(error, newCompLabel.trim()) });
+      return;
+    }
     setNewCompLabel("");
     toast({ description: `"${newCompLabel.trim()}" ajoutée.` });
     fetchCompetences();
@@ -237,10 +248,10 @@ const AdminSkills = () => {
     <div className="space-y-6">
       <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-tight">Compétences membres</h1>
 
-      <Tabs defaultValue="competences">
+      <Tabs value={tab} onValueChange={(v) => { setTab(v); setTabChosen(true); }}>
         <TabsList>
           <TabsTrigger value="competences">Référentiel ({competences.length})</TabsTrigger>
-          <TabsTrigger value="pending">En attente ({pendingCompetences.length})</TabsTrigger>
+          <TabsTrigger value="pending">En attente ({pendingError ? UNAVAILABLE_LABEL : pendingCompetences.length})</TabsTrigger>
           <TabsTrigger value="legacy">Compétences libres ({counts.pending})</TabsTrigger>
         </TabsList>
 
@@ -299,7 +310,7 @@ const AdminSkills = () => {
         {/* Tab: Pending competences from profiles */}
         <TabsContent value="pending" className="space-y-4 mt-4">
           {pendingCompetences.length === 0 ? (
-            <p className="text-muted-foreground text-sm py-8 text-center">Aucune compétence en attente de validation.</p>
+            <p className="text-muted-foreground text-sm py-8 text-center">{pendingError ? "Liste indisponible, la lecture a échoué." : "Aucune compétence en attente de validation."}</p>
           ) : (
             <div className="overflow-x-auto rounded-xl border border-border">
               <table className="w-full text-sm">

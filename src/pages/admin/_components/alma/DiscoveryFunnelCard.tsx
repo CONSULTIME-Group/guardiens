@@ -8,6 +8,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { reportAdminReadError, UNAVAILABLE_LABEL } from "@/lib/admin/readError";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const ALMA_FUNNEL_STEPS: { event: string; label: string }[] = [
@@ -21,20 +22,16 @@ export const ALMA_FUNNEL_STEPS: { event: string; label: string }[] = [
 
 
 export function DiscoveryFunnelCard({ since }: { since: string }) {
-  const { data: rows = [], isLoading } = useQuery({
+  // Lot A10 : compteurs agrégés en SQL, sans plafond.
+  const { data: rows = [], isLoading, isError } = useQuery({
     queryKey: ["admin-alma-funnel", since],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("analytics_events")
-        .select("event_type")
-        .in(
-          "event_type",
-          ALMA_FUNNEL_STEPS.map((s) => s.event),
-        )
-        .gte("created_at", since)
-        .limit(20000);
-      if (error) throw error;
-      return (data ?? []) as Array<{ event_type: string }>;
+      const { data, error } = await supabase.rpc("admin_a10_event_counts" as any, {
+        p_since: since,
+        p_types: ALMA_FUNNEL_STEPS.map((s) => s.event),
+      });
+      if (error) { reportAdminReadError("Alma : entonnoir", error); throw error; }
+      return (data ?? []) as unknown as Array<{ event_type: string; n: number }>;
     },
     staleTime: 60_000,
     refetchOnWindowFocus: false,
@@ -42,7 +39,7 @@ export function DiscoveryFunnelCard({ since }: { since: string }) {
 
   const counts = useMemo(() => {
     const m = new Map<string, number>();
-    for (const r of rows) m.set(r.event_type, (m.get(r.event_type) ?? 0) + 1);
+    for (const r of rows) m.set(r.event_type, Number(r.n) || 0);
     return m;
   }, [rows]);
 
@@ -55,7 +52,8 @@ export function DiscoveryFunnelCard({ since }: { since: string }) {
       </CardHeader>
       <CardContent className="space-y-2">
         {isLoading && <p className="text-sm text-muted-foreground">Lecture des mesures.</p>}
-        {!isLoading &&
+        {isError && <p className="text-sm text-destructive">{UNAVAILABLE_LABEL}</p>}
+        {!isLoading && !isError &&
           ALMA_FUNNEL_STEPS.map((step) => {
             const n = counts.get(step.event) ?? 0;
             const share = base > 0 ? Math.round((n / base) * 100) : 0;

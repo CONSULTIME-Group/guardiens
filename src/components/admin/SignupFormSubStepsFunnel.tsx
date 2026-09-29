@@ -8,6 +8,7 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
+import { reportAdminReadError, UNAVAILABLE_LABEL } from "@/lib/admin/readError";
 import { Loader2 } from "lucide-react";
 
 const STEPS: { key: string; label: string }[] = [
@@ -15,7 +16,7 @@ const STEPS: { key: string; label: string }[] = [
   { key: "signup_role_selected", label: "Rôle sélectionné" },
   { key: "signup_email_entered", label: "Email saisi" },
   { key: "signup_password_entered", label: "Mot de passe saisi" },
-  { key: "signup_submit_clicked", label: "Submit cliqué" },
+  { key: "signup_submit_clicked", label: "Envoi cliqué" },
 ];
 
 export function SignupFormSubStepsFunnel() {
@@ -24,46 +25,28 @@ export function SignupFormSubStepsFunnel() {
     [],
   );
 
-  const { data: rows = [], isLoading } = useQuery({
+  // Lot A10 : agrégat SQL (membres uniques plus événements anonymes), sans plafond.
+  const { data: rows = [], isLoading, isError } = useQuery({
     queryKey: ["signup-substeps-funnel", since],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("analytics_events")
-        .select("event_type, user_id, source, created_at")
-        .in("event_type", STEPS.map((s) => s.key))
-        .gte("created_at", since)
-        .limit(50000);
-      if (error) throw error;
-      return (data ?? []) as Array<{
-        event_type: string;
-        user_id: string | null;
-        source: string | null;
-        created_at: string;
-      }>;
+      const { data, error } = await supabase.rpc("admin_a10_signup_substeps" as any, { p_since: since });
+      if (error) { reportAdminReadError("Sous-étapes d'inscription", error); throw error; }
+      return (data ?? []) as unknown as Array<{ event_type: string; n: number }>;
     },
     staleTime: 5 * 60_000,
   });
 
-  const stats = useMemo(() => {
-    return STEPS.map((step) => {
-      const scoped = rows.filter((r) => r.event_type === step.key);
-      // Compte utilisateurs uniques (auth) + events anonymes (visiteurs sans user_id)
-      const users = new Set<string>();
-      let anonymous = 0;
-      for (const r of scoped) {
-        if (r.user_id) users.add(r.user_id);
-        else anonymous++;
-      }
-      return { ...step, count: users.size + anonymous };
-    });
-  }, [rows]);
+  const stats = useMemo(
+    () => STEPS.map((step) => ({ ...step, count: Number(rows.find((r) => r.event_type === step.key)?.n ?? 0) })),
+    [rows],
+  );
 
   const max = stats[0]?.count ?? 0;
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Sous-étapes formulaire /inscription (30j)</CardTitle>
+        <CardTitle className="text-base">Sous-étapes du formulaire d'inscription (30 j)</CardTitle>
         <p className="text-xs text-muted-foreground">
           Utilisateurs uniques par étape. Le drop d'une ligne à la suivante indique
           où l'on perd le prospect dans le formulaire.
@@ -74,6 +57,8 @@ export function SignupFormSubStepsFunnel() {
           <div className="py-8 flex items-center justify-center text-muted-foreground">
             <Loader2 className="h-5 w-5 animate-spin" />
           </div>
+        ) : isError ? (
+          <p className="py-6 text-center text-sm text-destructive">{UNAVAILABLE_LABEL}</p>
         ) : (
           <div className="space-y-2">
             {stats.map((s, i) => {
