@@ -340,3 +340,29 @@ describe("J2-A, rétrocompatibilité de la réponse", () => {
     expect(promptStarters("other")[0]).toBe("Comment se passe une garde ?");
   });
 });
+
+describe("J2-C, relecture des descriptions", () => {
+  const byKey = (k: string) => ALMA_SITE_KNOWLEDGE.find((e) => e.key === k)!;
+  it("parrainage et abonnement sans prix ni bascule tarifaire", () => {
+    expect(byKey("parrainage").purpose).toBe("Lien personnel pour inviter des proches et des gens du coin à rejoindre Guardiens.");
+    expect(byKey("abonnement").purpose).toBe("État de l'accès gardien du compte.");
+  });
+  it("identité affirmative", () => {
+    expect(byKey("identite").purpose).toBe("Réglages du compte, préférences d'email et vérification d'identité, qui ajoute l'écusson Identité vérifiée sur le profil.");
+  });
+  it("suppression alignée sur le code : immédiate", () => {
+    expect(byKey("suppression").purpose).toContain("immédiate et irréversible");
+    expect(byKey("suppression").purpose).not.toContain("30 jours");
+  });
+  it("écussons : planche membre liée depuis la grille du profil", () => {
+    expect(byKey("ecussons").path).toBe("/planche-badges");
+    expect(readFileSync("src/components/badges/BadgeGridSection.tsx", "utf8")).toContain('to="/planche-badges"');
+  });
+  it("aucune formulation proscrite dans descriptions et amorces", () => {
+    for (const e of ALMA_SITE_KNOWLEDGE) {
+      const t = `${e.purpose} ${e.opener ?? ""}`;
+      expect(t, e.key).not.toMatch(/gratuit|voisin|enfant|payant|\u2014|\u2013/i);
+      expect(t, e.key).not.toMatch(/\b(ne|n')\s?\S+\s(pas|plus|jamais)\b|\baucune?\b/i);
+    }
+  });
+});
