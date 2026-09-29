@@ -10564,6 +10564,7 @@ export type Database = {
         }
         Returns: string
       }
+      admin_menu_badges: { Args: never; Returns: Json }
       admin_message_stats: { Args: { _since?: string }; Returns: Json }
       admin_projet_kpis: { Args: never; Returns: Json }
       admin_reject_competence_label: {

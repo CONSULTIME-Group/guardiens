@@ -1,6 +1,7 @@
 import { Suspense, useState } from "react";
 import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { registerAppQueryClient } from "@/lib/appQueryClient";
 import { BrowserRouter, Route, Routes, Navigate, useParams, useLocation, useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import PageMeta from "@/components/PageMeta";
@@ -215,6 +216,8 @@ const queryClient = new QueryClient({
     },
   },
 });
+registerAppQueryClient(queryClient);
+
 
 // Session valide, profil illisible : écran explicite avec réessai et sortie.
 const ProfileUnavailable = () => {

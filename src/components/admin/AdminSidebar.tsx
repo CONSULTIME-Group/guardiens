@@ -11,6 +11,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdminBadges } from "@/hooks/useAdminBadges";
+import { AdminBadgePill, resolveBadge } from "./AdminBadgePill";
 import { PRICING_IS_ACTIVE } from "@/config/pricing";
 
 interface NavItem {
@@ -36,14 +37,13 @@ export const BADGE_TITLES: Record<string, string> = {
   skills: "compétences proposées à valider",
   reviewsModeration: "avis en attente de modération",
   reviewDisputes: "contestations d'avis à traiter",
-  reports: "signalements ouverts",
-  contactMessages: "messages de contact non traités",
-  adminMessageFailed: "messages admin en échec",
+  reports: "signalements ouverts ou en cours",
+  contactMessages: "messages de contact à traiter",
+  adminMessageFailed: "échecs d'envoi sur 7 jours",
   errors: "erreurs non résolues",
   guideRequests: "demandes de guides en attente",
   analysisRequests: "demandes d'analyse à traiter",
-  reportsSit: "signalements visant des annonces",
-  reportsMission: "signalements visant l'entraide",
+  deletionRequests: "demandes de suppression en attente",
   sitsToStaff: "annonces à staffer (aucune candidature)",
 };
 
@@ -78,7 +78,7 @@ const adminNavGroups: NavGroup[] = [
     items: [
       { to: "/admin/listings?filter=to_staff", icon: Megaphone, label: "Annonces", badgeKey: "sitsToStaff" },
       { to: "/admin/sits-management", icon: CalendarCheck, label: "Gardes" },
-      { to: "/admin/small-missions", icon: Handshake, label: "Entraide", badgeKey: "reportsMission", tabParam: "entraide", defaultTab: "entraide" },
+      { to: "/admin/small-missions", icon: Handshake, label: "Entraide", tabParam: "entraide", defaultTab: "entraide" },
       { to: "/admin/small-missions?tab=projets", icon: Hammer, label: "Projets", tabParam: "projets", defaultTab: "entraide" },
       // Pilotage produit de l'entraide, jusqu'ici accessible seulement depuis
       // un onglet de la page Emails, donc introuvable.
@@ -94,7 +94,7 @@ const adminNavGroups: NavGroup[] = [
       { to: "/admin/contact-messages", icon: MessageSquare, label: "Messages contact", badgeKey: "contactMessages" },
       { to: "/admin/messages", icon: Send, label: "Messagerie", badgeKey: "adminMessageFailed" },
       { to: "/admin/errors", icon: Bug, label: "Erreurs", badgeKey: "errors" },
-      { to: "/admin/demandes-suppression", icon: UserX, label: "Demandes RGPD" },
+      { to: "/admin/demandes-suppression", icon: UserX, label: "Demandes RGPD", badgeKey: "deletionRequests" },
     ],
   },
   {
@@ -159,7 +159,7 @@ export const AdminSidebar = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const badges = useAdminBadges() as unknown as Record<string, number>;
+  const { badges, unavailable } = useAdminBadges();
   const [collapsed, setCollapsed] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
     return localStorage.getItem(STORAGE_KEY) === "1";
@@ -207,10 +207,8 @@ export const AdminSidebar = () => {
             {collapsed && gi > 0 && <div className="my-2 border-t border-border/60" />}
             <div className="space-y-0.5">
               {group.items.map((item) => {
-                const badgeCount = item.badgeKey ? badges[item.badgeKey] || 0 : 0;
-                const badgeLabel = item.badgeKey
-                  ? `${badgeCount} ${BADGE_TITLES[item.badgeKey] ?? "à traiter"}`
-                  : undefined;
+                const badge = resolveBadge(item.badgeKey, badges as Record<string, number | undefined>, unavailable, BADGE_TITLES);
+                const badgeLabel = badge.show ? badge.label : undefined;
                 return (
                   <NavLink
                     key={item.to}
@@ -230,26 +228,15 @@ export const AdminSidebar = () => {
                   >
                     <span className="relative shrink-0">
                       <item.icon className="h-4 w-4" />
-                      {collapsed && badgeCount > 0 && (
-                        <span
-                          className="absolute -top-1.5 -right-2 bg-destructive text-destructive-foreground text-[9px] font-bold rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-0.5"
-                          aria-label={badgeLabel}
-                        >
-                          {badgeCount > 99 ? "99+" : badgeCount}
-                        </span>
+                      {collapsed && badge.show && (
+                        <AdminBadgePill compact text={badge.text} label={badge.label} className="absolute -top-1.5 -right-2" />
                       )}
                     </span>
                     {!collapsed && (
                       <>
                         <span className="truncate flex-1">{item.label}</span>
-                        {badgeCount > 0 && (
-                          <span
-                            className="ml-auto bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1"
-                            title={badgeLabel}
-                            aria-label={badgeLabel}
-                          >
-                            {badgeCount}
-                          </span>
+                        {badge.show && (
+                          <AdminBadgePill text={badge.text} label={badge.label} className="ml-auto" />
                         )}
                       </>
                     )}

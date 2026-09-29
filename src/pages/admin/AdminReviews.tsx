@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { refreshAdminBadges } from "@/hooks/useAdminBadges";
 import { fetchAllRows } from "@/lib/admin/fetchAllRows";
 import { createSeqGuard } from "@/lib/admin/requestSeq";
 import { supabase } from "@/integrations/supabase/client";
@@ -195,9 +196,11 @@ const AdminReviews = () => {
     if (field === "response_status" && action === "refuse") update.response_status = "refusee";
 
     setBusyId(reviewId);
-    const { error } = await supabase.from("reviews").update(update).eq("id", reviewId);
-    if (error) {
-      toast.error("Erreur lors de la mise à jour.");
+    // La RLS peut filtrer la ligne sans erreur : on relit ce qui a été touché.
+    const { data: touched, error } = await supabase.from("reviews").update(update).eq("id", reviewId).select("id");
+    if (error || !touched || touched.length === 0) {
+      if (!error) console.error("[admin-reviews] mise à jour sans effet", reviewId);
+      toast.error(error ? "Erreur lors de la mise à jour." : "Mise à jour refusée : aucun avis modifié.");
       setBusyId(null);
       return;
     }
@@ -241,6 +244,7 @@ const AdminReviews = () => {
     }
 
     toast.success(action === "valide" ? "Validé avec succès" : "Refusé");
+    refreshAdminBadges();
     setBusyId(null);
     setRejectReasonModal(null);
     setRejectReason("");

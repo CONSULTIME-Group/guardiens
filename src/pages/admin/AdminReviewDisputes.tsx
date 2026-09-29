@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { refreshAdminBadges } from "@/hooks/useAdminBadges";
 import Head from "@/components/seo/Head";
 import { supabase } from "@/integrations/supabase/client";
 import { useAdmin } from "@/hooks/useAdmin";
@@ -122,6 +123,7 @@ const AdminReviewDisputes = () => {
       toast.error(error.message || "Erreur lors de la résolution");
       return;
     }
+    refreshAdminBadges();
 
     // Notification email au contestataire (best-effort)
     try {

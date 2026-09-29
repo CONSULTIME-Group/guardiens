@@ -3,6 +3,7 @@ import { Outlet, Navigate, NavLink, useNavigate, useLocation } from "react-route
 import PageMeta from "@/components/PageMeta";
 import { AdminSidebar, adminNavGroups_export, BADGE_TITLES, resolveNavActive } from "./AdminSidebar";
 import { useAdminBadges } from "@/hooks/useAdminBadges";
+import { AdminBadgePill, resolveBadge } from "./AdminBadgePill";
 import { useAdmin } from "@/hooks/useAdmin";
 import { useAuth } from "@/contexts/AuthContext";
 import { Menu, X, ArrowLeft, LogOut } from "lucide-react";
@@ -36,7 +37,9 @@ export const AdminLayout = () => {
   const location = useLocation();
   const adminTitle = resolveAdminTitle(location.pathname);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const badges = useAdminBadges() as unknown as Record<string, number>;
+  // Le hook est appelé avant la garde : on lui passe l'état admin pour qu'il
+  // ne lise rien tant que l'admin n'est pas confirmé.
+  const { badges, unavailable } = useAdminBadges(!authLoading && !adminLoading && isAuthenticated && isAdmin);
 
   if (authLoading || adminLoading) {
     return (
@@ -85,10 +88,8 @@ export const AdminLayout = () => {
                 </p>
                 <div className="space-y-0.5">
                   {group.items.map((item) => {
-                    const badgeCount = item.badgeKey ? badges[item.badgeKey] || 0 : 0;
-                    const badgeLabel = item.badgeKey
-                      ? `${badgeCount} ${BADGE_TITLES[item.badgeKey] ?? "à traiter"}`
-                      : undefined;
+                    const badge = resolveBadge(item.badgeKey, badges as Record<string, number | undefined>, unavailable, BADGE_TITLES);
+                    const badgeLabel = badge.show ? badge.label : undefined;
                     return (
                       <NavLink
                         key={item.to}
@@ -107,7 +108,7 @@ export const AdminLayout = () => {
                       >
                         <span className="relative shrink-0">
                           <item.icon className="h-4 w-4" />
-                          {badgeCount > 0 && (
+                          {badge.show && (
                             <span
                               className="absolute -top-1 -right-1.5 h-2 w-2 rounded-full bg-destructive ring-2 ring-background"
                               aria-hidden="true"
@@ -115,13 +116,8 @@ export const AdminLayout = () => {
                           )}
                         </span>
                         <span className="flex-1">{item.label}</span>
-                        {badgeCount > 0 && (
-                          <span
-                            className="ml-auto bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1"
-                            aria-label={badgeLabel}
-                          >
-                            {badgeCount}
-                          </span>
+                        {badge.show && (
+                          <AdminBadgePill text={badge.text} label={badge.label} className="ml-auto" />
                         )}
                       </NavLink>
                     );

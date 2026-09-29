@@ -1,154 +1,102 @@
 import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useAdmin } from "@/hooks/useAdmin";
 
+/**
+ * Pastilles du menu admin. Une seule lecture : la fonction SQL
+ * admin_menu_badges() (SECURITY DEFINER, réservée aux admins) renvoie toutes
+ * les files, avec les mêmes définitions que les pages cibles.
+ */
 export interface AdminBadges {
   verifications: number;
   experiences: number;
+  skills: number;
+  reviewsModeration: number;
+  reviewDisputes: number;
   reports: number;
   contactMessages: number;
-  skills: number;
-  reviewDisputes: number;
+  adminMessageFailed: number;
   errors: number;
   guideRequests: number;
-  reviewsModeration: number;
-  adminMessageFailed: number;
-  reportsSit: number;
-  reportsMission: number;
   analysisRequests: number;
+  deletionRequests: number;
   sitsToStaff: number;
 }
 
-const EMPTY: AdminBadges = {
-  verifications: 0,
-  experiences: 0,
-  reports: 0,
-  contactMessages: 0,
-  skills: 0,
-  reviewDisputes: 0,
-  errors: 0,
-  guideRequests: 0,
-  reviewsModeration: 0,
-  adminMessageFailed: 0,
-  reportsSit: 0,
-  reportsMission: 0,
-  analysisRequests: 0,
-  sitsToStaff: 0,
-};
+export const BADGE_KEYS: (keyof AdminBadges)[] = [
+  "verifications", "experiences", "skills", "reviewsModeration", "reviewDisputes",
+  "reports", "contactMessages", "adminMessageFailed", "errors", "guideRequests",
+  "analysisRequests", "deletionRequests", "sitsToStaff",
+];
 
-/** Clé partagée : la barre latérale et le menu mobile lisent le même cache,
- *  la lecture ne s'exécute qu'une fois par rafraîchissement. */
+/** Préfixe commun : invalider ce préfixe rafraîchit les pastilles de tout utilisateur. */
 export const ADMIN_BADGES_QUERY_KEY = ["admin-badges"] as const;
+export const adminBadgesQueryKey = (userId: string | undefined) =>
+  [...ADMIN_BADGES_QUERY_KEY, userId] as const;
 
-export async function fetchAdminBadges(): Promise<AdminBadges> {
-  {
-    const results = await Promise.all([
-      supabase.from("profiles").select("id", { count: "exact", head: true }).or("identity_verification_status.eq.pending,and(identity_verification_status.eq.not_submitted,identity_document_url.not.is.null),and(identity_verification_status.eq.not_submitted,identity_selfie_url.not.is.null)"),
-      supabase.from("external_experiences").select("id", { count: "exact", head: true }).eq("verification_status", "pending"),
-      supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "new"),
-      supabase.from("contact_messages").select("id", { count: "exact", head: true }).eq("status", "new"),
-      supabase.from("skills_library").select("id", { count: "exact", head: true }).eq("status", "pending"),
-      supabase.from("review_disputes").select("id", { count: "exact", head: true }).eq("status", "pending"),
-      supabase.from("error_logs").select("id", { count: "exact", head: true }).is("resolved_at", null).neq("severity", "ignored_third_party"),
-      supabase.from("guide_requests" as any).select("id", { count: "exact", head: true }).eq("status", "pending"),
-      supabase.from("reviews").select("id", { count: "exact", head: true }).eq("moderation_status", "en_attente"),
-      supabase.from("admin_message_logs").select("id", { count: "exact", head: true }).eq("status", "failed"),
-      supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "new").eq("target_type", "sit"),
-      supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "new").eq("target_type", "small_mission"),
-      (supabase.from("analysis_requests" as any) as any).select("id", { count: "exact", head: true }).eq("status", "new"),
-    ]);
+export const ADMIN_BADGES_REFRESH_EVENT = "admin-badges-refresh";
 
-    let pendingProfileSkills = 0;
-    try {
-      const [{ data: validatedComps }, { data: sitterComps }, { data: ownerComps }] = await Promise.all([
-        supabase.from("competences_validees").select("label"),
-        supabase.from("sitter_profiles").select("competences").not("competences", "is", null),
-        supabase.from("owner_profiles").select("competences").not("competences", "is", null),
-      ]);
-      const validatedSet = new Set((validatedComps || []).map((c: any) => c.label));
-      const seen = new Set<string>();
-      [...(sitterComps || []), ...(ownerComps || [])].forEach((row: any) => {
-        (row.competences || []).forEach((c: string) => {
-          if (c && !validatedSet.has(c)) seen.add(c);
-        });
-      });
-      pendingProfileSkills = seen.size;
-    } catch {
-      pendingProfileSkills = 0;
-    }
-
-    // « À staffer » : sits publiés, à venir (end_date null ou >= aujourd'hui),
-    // sans aucune candidature. Même définition que le filtre AdminListings.
-    let sitsToStaff = 0;
-    try {
-      const todayISO = new Date().toISOString().slice(0, 10);
-      const { data: openSits } = await supabase
-        .from("sits")
-        .select("id, end_date")
-        .eq("status", "published");
-      const upcoming = (openSits || []).filter(
-        (s: { id: string; end_date: string | null }) => !s.end_date || s.end_date >= todayISO,
-      );
-      const ids = upcoming.map((s) => s.id);
-      if (ids.length > 0) {
-        // L'admin ne lit pas `applications` en direct (RLS) : le comptage passe
-        // par la fonction SECURITY DEFINER réservée aux admins. Même règle que
-        // AdminListings : candidatures non rejetées ni annulées.
-        const withApps = new Set<string>();
-        for (let i = 0; i < ids.length; i += 500) {
-          const { data: counts, error } = await supabase.rpc(
-            "admin_get_listings_application_counts" as any,
-            { p_sit_ids: ids.slice(i, i + 500) },
-          );
-          if (error) throw error;
-          ((counts as { sit_id: string; app_count: number }[] | null) || []).forEach((r) => {
-            if ((r.app_count || 0) > 0) withApps.add(r.sit_id);
-          });
-        }
-        sitsToStaff = ids.filter((id) => !withApps.has(id)).length;
-      }
-    } catch {
-      sitsToStaff = 0;
-    }
-
-    return {
-      verifications: results[0].count || 0,
-      experiences: results[1].count || 0,
-      reports: results[2].count || 0,
-      contactMessages: results[3].count || 0,
-      skills: (results[4].count || 0) + pendingProfileSkills,
-      reviewDisputes: results[5].count || 0,
-      errors: results[6].count || 0,
-      guideRequests: results[7].count || 0,
-      reviewsModeration: results[8].count || 0,
-      adminMessageFailed: results[9].count || 0,
-      reportsSit: results[10].count || 0,
-      reportsMission: results[11].count || 0,
-      analysisRequests: results[12].count || 0,
-      sitsToStaff,
-    };
+/** À appeler après toute action qui change une file admin. */
+export function refreshAdminBadges(): void {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event(ADMIN_BADGES_REFRESH_EVENT));
   }
 }
 
-export function useAdminBadges(): AdminBadges {
+export async function fetchAdminBadges(): Promise<AdminBadges> {
+  const { data, error } = await supabase.rpc("admin_menu_badges" as any);
+  if (error) throw error;
+  const raw = (data ?? {}) as Record<string, unknown>;
+  const out = {} as AdminBadges;
+  for (const k of BADGE_KEYS) {
+    const v = Number(raw[k]);
+    out[k] = Number.isFinite(v) ? v : 0;
+  }
+  return out;
+}
+
+export interface AdminBadgesState {
+  badges: Partial<AdminBadges>;
+  /** true : lecture en échec, les pastilles affichent « ? », jamais 0. */
+  unavailable: boolean;
+}
+
+/**
+ * @param adminConfirmed état admin déjà connu de l'appelant (AdminLayout le
+ * passe avant sa garde). Sinon, lu via useAdmin.
+ */
+export function useAdminBadges(adminConfirmed?: boolean): AdminBadgesState {
   const queryClient = useQueryClient();
-  // Même fréquence qu'avant : une lecture au montage du layout, puis à chaque
-  // événement « admin-badges-refresh ». Pas de relecture au focus ni au remontage.
-  const { data } = useQuery({
-    queryKey: ADMIN_BADGES_QUERY_KEY,
+  const { user } = useAuth();
+  const admin = useAdmin();
+  const userId = user?.id;
+  const isAdmin = adminConfirmed ?? (admin.isAdmin && !admin.loading);
+
+  const { data, isError, error } = useQuery({
+    queryKey: adminBadgesQueryKey(userId),
     queryFn: fetchAdminBadges,
-    staleTime: Infinity,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
+    enabled: !!userId && isAdmin === true,
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+    refetchOnWindowFocus: true,
+    retry: 1,
   });
 
   useEffect(() => {
+    if (isError) console.error("[admin-badges] lecture impossible", error);
+  }, [isError, error]);
+
+  useEffect(() => {
     const handler = () => {
-      queryClient.invalidateQueries({ queryKey: ADMIN_BADGES_QUERY_KEY });
+      // Chaque instance du hook écoute l'événement : sans cancelRefetch:false,
+      // la seconde invalidation annulerait la première et doublerait l'appel.
+      queryClient.invalidateQueries({ queryKey: ADMIN_BADGES_QUERY_KEY }, { cancelRefetch: false });
     };
-    window.addEventListener("admin-badges-refresh", handler);
-    return () => window.removeEventListener("admin-badges-refresh", handler);
+    window.addEventListener(ADMIN_BADGES_REFRESH_EVENT, handler);
+    return () => window.removeEventListener(ADMIN_BADGES_REFRESH_EVENT, handler);
   }, [queryClient]);
 
-  return data ?? EMPTY;
+  return { badges: data ?? {}, unavailable: isError && !data };
 }

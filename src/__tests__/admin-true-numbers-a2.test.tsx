@@ -94,9 +94,10 @@ describe("KpiCards", () => {
 
 describe("badge Avis", () => {
   it("filtre en_attente", () => {
-    const src = read("src/hooks/useAdminBadges.ts");
-    expect(src).toContain('from("reviews").select("id", { count: "exact", head: true }).eq("moderation_status", "en_attente")');
-    expect(src).not.toContain('"moderation_status", "pending"');
+    // Depuis A5b, la définition vit dans admin_menu_badges().
+    const src = read("drizzle/migrations/0035_admin_menu_badges_and_reviews_admin_rls.sql");
+    expect(src).toContain("moderation_status = 'en_attente'");
+    expect(src).not.toContain("moderation_status = 'pending'");
   });
 });
 

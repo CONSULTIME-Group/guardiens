@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { refreshAdminBadges } from "@/hooks/useAdminBadges";
 import { fetchAllRows } from "@/lib/admin/fetchAllRows";
 import { createSeqGuard } from "@/lib/admin/requestSeq";
 import { UrlFilterNotice } from "@/components/admin/UrlFilterNotice";
@@ -327,7 +328,7 @@ const AdminListings = () => {
     } catch (e) {
       console.error("admin_action_logs hide:", e);
     }
-    toast.success("Annonce masquée"); setHideModal(null); fetchListings();
+    toast.success("Annonce masquée"); setHideModal(null); fetchListings(); refreshAdminBadges();
   };
 
   const handleRestore = async (id: string) => {
@@ -350,7 +351,7 @@ const AdminListings = () => {
     } catch (e) {
       console.error("admin_action_logs restore:", e);
     }
-    toast.success("Annonce remise en ligne"); setRestoreModal(null); fetchListings();
+    toast.success("Annonce remise en ligne"); setRestoreModal(null); fetchListings(); refreshAdminBadges();
   };
 
   const handleDelete = async (id: string) => {
@@ -367,6 +368,7 @@ const AdminListings = () => {
       if (error) throw error;
       if (!data?.success) throw new Error(data?.error || "suppression impossible");
       toast.success("Annonce supprimée");
+      refreshAdminBadges();
       setDeleteModal(null);
       setListings(prev => prev.filter(l => l.id !== id));
       await fetchListings();

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { refreshAdminBadges } from "@/hooks/useAdminBadges";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -81,6 +82,7 @@ const AdminExperienceVerification = () => {
     setExperiences(prev => prev.filter(e => e.id !== id));
     setCounts(prev => ({ ...prev, pending: prev.pending - 1, verified: prev.verified + 1 }));
     toast.success("Expérience validée !");
+    refreshAdminBadges();
   };
 
   const handleReject = async () => {
@@ -101,6 +103,7 @@ const AdminExperienceVerification = () => {
     setCounts(prev => ({ ...prev, pending: prev.pending - 1, rejected: prev.rejected + 1 }));
     setRejectModal({ open: false, id: "", reason: "", customReason: "" });
     toast.success("Expérience rejetée.");
+    refreshAdminBadges();
   };
 
   const handleComplement = async () => {

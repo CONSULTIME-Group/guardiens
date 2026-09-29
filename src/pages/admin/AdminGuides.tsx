@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { refreshAdminBadges } from "@/hooks/useAdminBadges";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
@@ -103,7 +104,7 @@ const AdminGuides = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-guide-requests"] });
-      window.dispatchEvent(new Event("admin-badges-refresh"));
+      refreshAdminBadges();
       toast.success("Demande écartée");
     },
   });
@@ -140,6 +141,7 @@ const AdminGuides = () => {
       setDepartment("");
       queryClient.invalidateQueries({ queryKey: ["admin-guides"] });
       queryClient.invalidateQueries({ queryKey: ["admin-guide-place-counts"] });
+      refreshAdminBadges();
     } catch (err: any) {
       toast.error("Erreur: " + err.message);
     } finally {

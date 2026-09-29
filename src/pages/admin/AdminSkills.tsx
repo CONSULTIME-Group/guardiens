@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { refreshAdminBadges } from "@/hooks/useAdminBadges";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -159,7 +160,7 @@ const AdminSkills = () => {
     setEditingId(null);
     toast({ description: `Compétence "${newLabel || skill.label}" approuvée.` });
     fetchSkills();
-    window.dispatchEvent(new Event("admin-badges-refresh"));
+    refreshAdminBadges();
   };
 
   const handleReject = async (skill: SkillRow) => {
@@ -171,7 +172,7 @@ const AdminSkills = () => {
     if (error) { toast({ description: "Erreur lors du refus." }); return; }
     toast({ description: `Compétence "${skill.label}" refusée.` });
     fetchSkills();
-    window.dispatchEvent(new Event("admin-badges-refresh"));
+    refreshAdminBadges();
   };
 
   const handleValidateCompetence = async (label: string) => {
@@ -183,6 +184,7 @@ const AdminSkills = () => {
     toast({ description: `"${label}" ajoutée au référentiel.` });
     fetchCompetences();
     fetchPendingCompetences();
+    refreshAdminBadges();
   };
 
   const confirmRejectCompetence = async () => {
@@ -212,6 +214,7 @@ const AdminSkills = () => {
     setRejecting(false);
     setRejectModal({ open: false, label: "", count: 0 });
     fetchPendingCompetences();
+    refreshAdminBadges();
   };
 
 

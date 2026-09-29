@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { refreshAdminBadges } from "@/hooks/useAdminBadges";
 import { createSeqGuard } from "@/lib/admin/requestSeq";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
@@ -33,7 +34,11 @@ const reasonLabels: Record<string, string> = {
   other: "Autre",
 };
 
+// Valeurs réelles de la table : « sit » et « user ». « listing » et
+// « profile » restent en repli pour d'anciens signalements.
 const targetTypeLabels: Record<string, string> = {
+  sit: "Annonce",
+  user: "Profil",
   profile: "Profil",
   listing: "Annonce",
   review: "Avis",
@@ -46,7 +51,9 @@ const DESTRUCTIVE_ACTIONS: ActionKey[] = ["suspend", "delete"];
 
 function targetHref(targetType: string, targetId: string): string | null {
   switch (targetType) {
+    case "user":
     case "profile": return `/gardiens/${targetId}`;
+    case "sit":
     case "listing": return `/annonces/${targetId}`;
     case "small_mission": return `/petites-missions/${targetId}`;
     case "review": return `/mes-avis?highlight=${targetId}`;
@@ -107,7 +114,7 @@ const AdminReports = () => {
 
   const markInProgress = async (id: string) => {
     await supabase.from("reports").update({ status: "in_progress" }).eq("id", id);
-    toast.success("Prise en charge"); fetchReports();
+    toast.success("Prise en charge"); fetchReports(); refreshAdminBadges();
   };
 
   const currentReport = reports.find(r => r.id === actionModal.reportId);
@@ -132,6 +139,7 @@ const AdminReports = () => {
       setActionModal({ open: false, reportId: "", action: "" });
       setConfirmDestructive({ open: false, action: null });
       fetchReports();
+      refreshAdminBadges();
     } catch (e: any) {
       console.error("admin-moderate-report failed", e);
       toast.error(`Échec : ${e?.message || "erreur serveur"}`);
