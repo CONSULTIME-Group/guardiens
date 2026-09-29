@@ -13,10 +13,50 @@ import { trackEvent } from "@/lib/analytics";
 
 export type AlmaChatRole = "alma" | "user";
 
+/** Lot J2-A : action cliquable renvoyée par le serveur, optionnelle. */
+export interface AlmaChatAction {
+  label: string;
+  path: string;
+}
+
+export interface AlmaChatChip {
+  label: string;
+  path?: string;
+  prompt?: string;
+}
+
 export interface AlmaChatMessage {
   id: string;
   role: AlmaChatRole;
   content: string;
+  action?: AlmaChatAction;
+  chips?: AlmaChatChip[];
+}
+
+/** Seuls les chemins internes du site sont acceptés, jamais une adresse externe. */
+function isInternalPath(v: unknown): v is string {
+  return typeof v === "string" && v.startsWith("/") && !v.startsWith("//") && v.length <= 1500;
+}
+
+export function readAlmaAction(raw: unknown): AlmaChatAction | undefined {
+  const a = raw as any;
+  if (!a || typeof a.label !== "string" || !a.label.trim() || !isInternalPath(a.path)) return undefined;
+  return { label: a.label.slice(0, 80), path: a.path };
+}
+
+export function readAlmaChips(raw: unknown): AlmaChatChip[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+  const out: AlmaChatChip[] = [];
+  for (const c of raw) {
+    if (!c || typeof c.label !== "string" || !c.label.trim()) continue;
+    const chip: AlmaChatChip = { label: c.label.slice(0, 60) };
+    if (isInternalPath(c.path)) chip.path = c.path;
+    else if (typeof c.prompt === "string" && c.prompt.trim()) chip.prompt = c.prompt.slice(0, 200);
+    else continue;
+    out.push(chip);
+    if (out.length >= 3) break;
+  }
+  return out.length ? out : undefined;
 }
 
 export interface AlmaConversationState {
@@ -150,6 +190,7 @@ export async function sendAlmaMessage({
         input_mode: inputMode,
         mood: almaMoodContext.mood,
         mood_line: almaMoodContext.line,
+        page_path: typeof window !== "undefined" ? window.location.pathname : undefined,
       },
     });
 
@@ -178,7 +219,16 @@ export async function sendAlmaMessage({
     }
     setState({
       sending: false,
-      messages: [...state.messages, { id: nextId(), role: "alma", content: answer }],
+      messages: [
+        ...state.messages,
+        {
+          id: nextId(),
+          role: "alma",
+          content: answer,
+          action: readAlmaAction((data as any)?.action),
+          chips: readAlmaChips((data as any)?.chips),
+        },
+      ],
     });
   } catch {
     if (requestGeneration !== conversationGeneration) return;
