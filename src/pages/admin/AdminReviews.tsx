@@ -16,10 +16,30 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Eye, EyeOff, Trash2, Star, AlertTriangle, CheckCircle2, XCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { Eye, EyeOff, FileText, Trash2, Star, AlertTriangle, CheckCircle2, XCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { avatarImageUrl } from "@/lib/storageImage";
 
 const PAGE_SIZE = 50;
+
+/** Lot A9 : sens de l'avis lu depuis la garde jointe. */
+export function reviewDirectionLabel(review: { review_type?: string | null; reviewer_id?: string; sit?: { user_id?: string | null } | null }): string {
+  if (review.review_type === "annulation") return "Avis d'annulation";
+  if (review.review_type === "mission") return "Entraide";
+  const ownerId = review.sit?.user_id;
+  if (!ownerId) return "Garde";
+  return review.reviewer_id === ownerId ? "Propriétaire vers gardien" : "Gardien vers propriétaire";
+}
+
+export const MODERATION_LABELS: Record<string, string> = { en_attente: "En attente", valide: "Validé", refuse: "Refusé" };
+export const RESPONSE_LABELS: Record<string, string> = { aucune: "Aucune", en_attente: "En attente", validee: "Validée", refusee: "Refusée" };
+
+/** Lot A9 : un masquage marque moderation_hidden_at, la republication l'efface
+ * (le trigger notify_review_published ne renotifie pas dans ce cas). */
+export function togglePublishedUpdate(published: boolean, adminId: string | null, now: string) {
+  return published
+    ? { published: false, moderation_hidden_at: now, moderation_hidden_by: adminId }
+    : { published: true, moderation_hidden_at: null, moderation_hidden_by: null };
+}
 
 const AdminReviews = () => {
   const [reviews, setReviews] = useState<any[]>([]);
@@ -39,6 +59,7 @@ const AdminReviews = () => {
   // Cancellation moderation state
   const [cancellationReviews, setCancellationReviews] = useState<any[]>([]);
   const [cancellationLoading, setCancellationLoading] = useState(true);
+  const [cancellationError, setCancellationError] = useState<string | null>(null);
   const [rejectReasonModal, setRejectReasonModal] = useState<{ id: string; type: "review" | "response"; review: any } | null>(null);
   const [rejectReason, setRejectReason] = useState("");
 
@@ -53,7 +74,8 @@ const AdminReviews = () => {
       .select(`
         *,
         reviewer:profiles!reviews_reviewer_id_fkey(first_name, last_name, avatar_url),
-        reviewee:profiles!reviews_reviewee_id_fkey(first_name, last_name, avatar_url)
+        reviewee:profiles!reviews_reviewee_id_fkey(first_name, last_name, avatar_url),
+        sit:sits!reviews_sit_id_fkey(user_id)
       `, { count: "exact" })
       .or("review_type.is.null,review_type.neq.annulation");
 
@@ -89,6 +111,7 @@ const AdminReviews = () => {
 
   const fetchCancellationReviews = useCallback(async () => {
     setCancellationLoading(true);
+    setCancellationError(null);
     const { rows } = await fetchAllRows<any>((from, to) =>
       supabase
         .from("reviews")
@@ -102,7 +125,11 @@ const AdminReviews = () => {
         .order("created_at", { ascending: false })
         .order("id", { ascending: true })
         .range(from, to),
-    ).catch(() => ({ rows: [] as any[] }));
+    ).catch((e) => {
+      console.error("[admin-reviews] avis d'annulation", e);
+      setCancellationError("Les avis d'annulation n'ont pas pu être chargés. Rechargez la page.");
+      return { rows: [] as any[] };
+    });
     setCancellationReviews(rows);
     setCancellationLoading(false);
   }, []);
@@ -130,9 +157,14 @@ const AdminReviews = () => {
   const performTogglePublished = async (review: any) => {
     const willHide = review.published;
     setBusyId(review.id);
-    const { error } = await supabase.from("reviews").update({ published: !review.published }).eq("id", review.id);
-    if (error) {
-      toast.error("Erreur");
+    const { data: { user } } = await supabase.auth.getUser();
+    const { data: touched, error } = await supabase
+      .from("reviews")
+      .update(togglePublishedUpdate(!!review.published, user?.id ?? null, new Date().toISOString()) as any)
+      .eq("id", review.id)
+      .select("id");
+    if (error || !touched?.length) {
+      toast.error(error ? `Erreur : ${error.message}` : "Mise à jour refusée : aucun avis modifié.");
       setBusyId(null);
       return;
     }
@@ -163,7 +195,7 @@ const AdminReviews = () => {
       .update({ published: false, comment: "[Supprimé par l'admin]" })
       .eq("id", review.id);
     if (error) {
-      toast.error("Erreur");
+      toast.error(`Erreur : ${error.message}`);
       setBusyId(null);
       return;
     }
@@ -219,6 +251,20 @@ const AdminReviews = () => {
       reject_reason: action === "refuse" ? rejectReason.trim() : null,
     });
 
+    if (action === "refuse") {
+      // Lot A9 : le motif promis part réellement, à l'auteur du texte refusé.
+      const sent = await sendTransactionalEmail({
+        templateName: "review-refused",
+        recipientUserId: field === "moderation_status" ? review.reviewer_id : review.reviewee_id,
+        idempotencyKey: `review-refused-${reviewId}-${field}`,
+        templateData: {
+          firstName: (field === "moderation_status" ? review.reviewer?.first_name : review.reviewee?.first_name) || undefined,
+          reason: rejectReason.trim(),
+        },
+      });
+      if (!sent.success) toast.error("Refus enregistré, mais l'email du motif n'est pas parti.");
+    }
+
     if (action === "valide") {
       if (field === "moderation_status") {
         await sendTransactionalEmail({
@@ -243,7 +289,7 @@ const AdminReviews = () => {
       }
     }
 
-    toast.success(action === "valide" ? "Validé avec succès" : "Refusé");
+    toast.success(action === "valide" ? "Validé" : "Refus enregistré, motif envoyé à l'auteur");
     refreshAdminBadges();
     setBusyId(null);
     setRejectReasonModal(null);
@@ -317,6 +363,7 @@ const AdminReviews = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Auteur → Destinataire</TableHead>
+                  <TableHead>Type</TableHead>
                   <TableHead>Note</TableHead>
                   <TableHead>Badges</TableHead>
                   <TableHead>Commentaire</TableHead>
@@ -327,9 +374,9 @@ const AdminReviews = () => {
               </TableHeader>
               <TableBody>
                 {loading ? (
-                  <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
                 ) : reviews.length === 0 ? (
-                  <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Aucun avis</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Aucun avis</TableCell></TableRow>
                 ) : reviews.map((review) => (
                   <TableRow key={review.id} className={review.overall_rating <= 2 ? "bg-destructive/5" : ""}>
                     <TableCell className="text-sm">
@@ -340,6 +387,7 @@ const AdminReviews = () => {
                         <span>{review.reviewee?.first_name} {review.reviewee?.last_name}</span>
                       </div>
                     </TableCell>
+                    <TableCell className="text-xs text-muted-foreground">{reviewDirectionLabel(review)}</TableCell>
                     <TableCell>{renderStars(review.overall_rating)}</TableCell>
                     <TableCell>
                       {badgeCounts[review.sit_id] ? (
@@ -353,11 +401,11 @@ const AdminReviews = () => {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
-                        <Button variant="ghost" size="icon" title="Voir" onClick={() => setDetailReview(review)}>
-                          <Eye className="h-4 w-4" />
+                        <Button variant="ghost" size="icon" title="Voir le détail" aria-label="Voir le détail" onClick={() => setDetailReview(review)}>
+                          <FileText className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" disabled={busyId === review.id} title={review.published ? "Masquer" : "Publier"} onClick={() => togglePublished(review)}>
-                          <EyeOff className="h-4 w-4" />
+                        <Button variant="ghost" size="icon" disabled={busyId === review.id} title={review.published ? "Masquer" : "Publier"} aria-label={review.published ? "Masquer l'avis" : "Publier l'avis"} onClick={() => togglePublished(review)}>
+                          {review.published ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </Button>
                         <Button variant="ghost" size="icon" disabled={busyId === review.id} title="Supprimer" onClick={() => setDeleteConfirm(review)}>
                           <Trash2 className="h-4 w-4 text-destructive" />
@@ -540,11 +588,11 @@ const AdminReviews = () => {
                       <TableCell className="max-w-[200px] truncate text-sm text-muted-foreground">{r.cancellation_reason || ","}</TableCell>
                       <TableCell>
                         <Badge variant={r.moderation_status === "valide" ? "default" : r.moderation_status === "refuse" ? "destructive" : "outline"}>
-                          {r.moderation_status}
+                          {MODERATION_LABELS[r.moderation_status] || "En attente"}
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline" className="text-xs">{r.response_status || "aucune"}</Badge>
+                        <Badge variant="outline" className="text-xs">{RESPONSE_LABELS[r.response_status || "aucune"] || "Aucune"}</Badge>
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">{format(new Date(r.created_at), "d MMM yyyy", { locale: fr })}</TableCell>
                     </TableRow>
@@ -570,7 +618,7 @@ const AdminReviews = () => {
                 {detailReview.reviewee?.avatar_url && <img src={avatarImageUrl(detailReview.reviewee.avatar_url, 32)} className="w-8 h-8 rounded-full object-cover" />}
                 <div><strong>Pour :</strong> {detailReview.reviewee?.first_name} {detailReview.reviewee?.last_name}</div>
               </div>
-              <div><strong>Type :</strong> {detailReview.review_type === "annulation" ? "Avis d'annulation" : detailReview.reviewer_id === detailReview.sit?.user_id ? "Proprio → Gardien" : "Gardien → Proprio"}</div>
+              <div><strong>Type :</strong> {reviewDirectionLabel(detailReview)}</div>
               <div className="flex items-center gap-2"><strong>Note globale :</strong> {renderStars(detailReview.overall_rating)} <span className="text-muted-foreground">({detailReview.overall_rating}/5)</span></div>
               {detailReview.communication_rating && <div><strong>Communication :</strong> {detailReview.communication_rating}/5</div>}
               {detailReview.reliability_rating && <div><strong>Fiabilité :</strong> {detailReview.reliability_rating}/5</div>}
@@ -665,7 +713,9 @@ const AdminReviews = () => {
               {validateConfirm && (
                 <>
                   Auteur : <strong>{validateConfirm.review.reviewer?.first_name} {validateConfirm.review.reviewer?.last_name}</strong>.
-                  {" "}Publication immédiate et notification par email.
+                  {validateConfirm.field === "moderation_status"
+                    ? " L'avis est validé et reste privé : il n'est affiché ni sur le profil public ni dans « Mes avis ». La personne concernée reçoit un email qui le lui explique."
+                    : " La réponse est validée et son auteur reçoit un email."}
                 </>
               )}
             </AlertDialogDescription>
