@@ -1,5 +1,5 @@
 import { publicProfilesLoader, publishedReviewsLoader, sitterAffinityLoader } from "@/lib/batchedReads";
-import { fetchMySmallMissionsIndex, fetchMyProperties, fetchMyPets, fetchApplicationsOnMySits } from "@/lib/dashboardShared";
+import { fetchMySmallMissionsIndex, fetchMyProperties, fetchMyPets, fetchApplicationsOnMySits, fetchOpenSmallMissions } from "@/lib/dashboardShared";
 import { fetchMyProfile } from "@/lib/myProfile";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -112,7 +112,7 @@ export function useOwnerDashboardData(userId: string | undefined) {
           supabase.from("reviews").select("overall_rating").eq("reviewee_id", userId).eq("published", true),
           fetchMyProfile(userId!),
           supabase.from("owner_highlights").select("*").eq("owner_id", userId).eq("hidden", false).order("created_at", { ascending: false }).limit(5),
-          supabase.from("small_missions").select("id, title, category, city, created_at").eq("status", "open").order("created_at", { ascending: false }).limit(2),
+          fetchOpenSmallMissions().then((r) => ({ data: r.rows.slice(0, 2), error: r.error as any })),
           fetchMySmallMissionsIndex(userId!).then((data) => ({ data: data.slice(0, 3), error: null })).catch((error) => ({ data: [] as any[], error })),
           fetchMySmallMissionsIndex(userId!).then((data) => ({ data, error: null })).catch((error) => ({ data: [] as any[], error })),
         ]);

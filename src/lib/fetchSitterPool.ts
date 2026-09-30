@@ -1,4 +1,4 @@
-import { PUBLIC_PROFILE_COLUMNS, publicProfilesLoader } from "@/lib/batchedReads";
+import { PUBLIC_PROFILE_COLUMNS, publicProfilesLoader, setPublicProfilesPrimer } from "@/lib/batchedReads";
 /**
  * Lecture COMPLÈTE du vivier de gardiens (public_profiles, role sitter/both).
  *
@@ -84,7 +84,12 @@ export async function fetchSitterPoolShared(excludeUserId: string): Promise<{ ro
   if (!client) return readSitterPoolWithCount(excludeUserId);
   return client.fetchQuery({
     queryKey: ["sitter-pool-shared", excludeUserId],
-    queryFn: () => readSitterPoolWithCount(excludeUserId),
+    queryFn: () => {
+      const p = readSitterPoolWithCount(excludeUserId);
+      setPublicProfilesPrimer(p);
+      void p.finally(() => setPublicProfilesPrimer(null)).catch(() => undefined);
+      return p;
+    },
     staleTime: 5 * 60 * 1000,
   });
 }

@@ -36,6 +36,8 @@ export function createIdLoader(opts: {
   idColumn: string;
   columns: string;
   filter?: (q: any) => any;
+  /** Lecture plus large en cours qui amorcera le cache : on l'attend. */
+  waitFor?: () => Promise<unknown> | null;
 }): IdLoader {
   const cache = new Map<string, { at: number; rows: Row[] }>();
   const inflight = new Map<string, Promise<void>>();
@@ -101,6 +103,8 @@ export function createIdLoader(opts: {
     if (wanted.length === 0) return new Map<string, Row[]>();
     // Hors application (tests unitaires) : lecture directe, aucun état partagé.
     if (!getAppQueryClient()) return direct(wanted);
+    const prior = opts.waitFor?.();
+    if (prior) await prior.catch(() => undefined);
     const pending: Promise<void>[] = [];
     const missing = wanted.filter((id) => !fresh(id) && !inflight.has(id));
     if (missing.length > 0) {
@@ -147,10 +151,16 @@ export function createIdLoader(opts: {
 /** Profils publics d'autres membres (vue public_profiles). */
 export const PUBLIC_PROFILE_COLUMNS =
   "id, first_name, avatar_url, city, postal_code, departement_code, latitude_approx, longitude_approx, identity_verified, profile_completion, role, completed_sits_count, skill_categories, custom_skills";
+let publicProfilesPrimer: Promise<unknown> | null = null;
+/** Le vivier de gardiens signale sa lecture en cours (fetchSitterPool). */
+export function setPublicProfilesPrimer(p: Promise<unknown> | null) {
+  publicProfilesPrimer = p;
+}
 export const publicProfilesLoader = createIdLoader({
   table: "public_profiles",
   idColumn: "id",
   columns: PUBLIC_PROFILE_COLUMNS,
+  waitFor: () => publicProfilesPrimer,
 });
 
 /** Avis publiés reçus par des membres. */

@@ -182,7 +182,8 @@ export function fetchOpenPublishedSits(userId: string): Promise<{ rows: any[]; e
 /** Animaux de tous les logements du membre (toutes colonnes). */
 export function fetchMyPets(userId: string, opts?: { fresh?: boolean }): Promise<any[]> {
   const run = async () => {
-    const props = await fetchMyProperties(userId, opts);
+    // Logements : la copie partagée suffit (fraîche de moins de 10 s).
+    const props = await fetchMyProperties(userId);
     const ids = props.map((p) => p.id).filter(Boolean);
     if (ids.length === 0) return [];
     const { data, error } = await supabase.from("pets").select("*").in("property_id", ids);
@@ -219,5 +220,18 @@ export function fetchApplicationsOnMySits(userId: string): Promise<any[]> {
       .limit(500);
     if (error) throw error;
     return (data ?? []) as any[];
+  });
+}
+
+/** 20 derniers coups de main ouverts, tous membres (lot P1b). */
+export function fetchOpenSmallMissions(): Promise<{ rows: any[]; error: unknown }> {
+  return cached(["open-small-missions"], async () => {
+    const { data, error } = await supabase
+      .from("small_missions")
+      .select("id, title, category, city, postal_code, date_needed, status, created_at, user_id")
+      .eq("status", "open")
+      .order("created_at", { ascending: false })
+      .limit(20);
+    return { rows: (data ?? []) as any[], error: error ?? null };
   });
 }

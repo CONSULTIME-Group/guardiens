@@ -1,5 +1,5 @@
 import { publicProfilesLoader } from "@/lib/batchedReads";
-import { fetchMyBadges, fetchMyEmergencyProfileId, fetchMySmallMissionsIndex, fetchMyConversationsIndex, fetchOpenPublishedSits, fetchMyApplicationsIndex } from "@/lib/dashboardShared";
+import { fetchMyBadges, fetchMyEmergencyProfileId, fetchMySmallMissionsIndex, fetchMyConversationsIndex, fetchOpenPublishedSits, fetchMyApplicationsIndex, fetchOpenSmallMissions } from "@/lib/dashboardShared";
 import { fetchMyProfile, fetchMyPublicProfile, fetchMySitterProfile } from "@/lib/myProfile";
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -158,16 +158,14 @@ export function useSitterDashboardData(userId: string | undefined) {
           .select("*").eq("user_id", userId).maybeSingle(),
         // Coordonnées approximatives de l'utilisateur : lancées toujours, mais
         // utilisées seulement si profiles.latitude ou longitude est null.
-        fetchMyPublicProfile(userId!),
+        // Lot P1b : latitude_approx n'est que l'arrondi de profiles.latitude,
+        // la relire n'apporte rien quand profiles est lu.
+        Promise.resolve({ data: null, error: null }),
         // Annonces publiées et non terminées (end_date >= aujourd'hui).
         fetchOpenPublishedSits(userId!).then((r) => ({ data: r.rows.map((x) => ({ ...x })), error: r.error as any })),
         // Missions ouvertes : lancées toujours, traitées seulement si le
         // gardien a un département connu.
-        supabase.from("small_missions")
-          .select("id, title, category, city, postal_code, date_needed, status, created_at, user_id")
-          .eq("status", "open")
-          .order("created_at", { ascending: false })
-          .limit(20),
+        fetchOpenSmallMissions().then((r) => ({ data: r.rows, error: r.error as any })),
         fetchMySmallMissionsIndex(userId!)
           .then((data) => ({ data: data.filter((m) => m.status === "open" || m.status === "completed").slice(0, 8), error: null }))
           .catch((error) => ({ data: [] as any[], error })),
