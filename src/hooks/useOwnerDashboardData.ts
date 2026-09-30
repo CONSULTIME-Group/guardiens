@@ -109,7 +109,7 @@ export function useOwnerDashboardData(userId: string | undefined) {
         ] = await Promise.all([
           supabase.from("sits").select("*, applications(id, status, sitter_id)").eq("user_id", userId).order("created_at", { ascending: false }),
           fetchMyProperties(userId!).then((data) => ({ data, error: null })).catch((error) => ({ data: [] as any[], error })),
-          supabase.from("reviews").select("overall_rating").eq("reviewee_id", userId).eq("published", true),
+          publishedReviewsLoader.rows([userId!]),
           fetchMyProfile(userId!),
           supabase.from("owner_highlights").select("*").eq("owner_id", userId).eq("hidden", false).order("created_at", { ascending: false }).limit(5),
           fetchOpenSmallMissions().then((r) => ({ data: r.rows.slice(0, 2), error: r.error as any })),
