@@ -1,6 +1,7 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
+import fr from "./locales/fr/common.json";
 import { LANG_STORAGE_KEY, migrateLegacyLangStorage } from "@/lib/langStorageKey";
 
 // Guardiens est monolingue français depuis le 17/08/2026 : allemand, italien,
@@ -11,9 +12,8 @@ import { LANG_STORAGE_KEY, migrateLegacyLangStorage } from "@/lib/langStorageKey
 //
 // Les anciennes variantes `?lang=de|it|es|en` connues de Google retombent sur
 // un rendu français indexable (voir LangUrlSync et resolveInitialLang).
-// Lot P2 : le dictionnaire (105 Ko) sort du fichier d'entrée. Il est chargé
-// en parallèle du démarrage et main.tsx attend `i18nReady` avant le premier
-// rendu : aucun texte ne s'affiche jamais sans sa traduction.
+// Lot P2b : le dictionnaire est de nouveau importé statiquement. Le premier
+// rendu n'attend aucun chargement réseau (P2 le suspendait à un aller-retour).
 
 export const SUPPORTED_LANGS = ["fr"] as const;
 export type SupportedLang = (typeof SUPPORTED_LANGS)[number];
@@ -30,7 +30,7 @@ void i18n
     supportedLngs: SUPPORTED_LANGS as unknown as string[],
     defaultNS: "common",
     ns: ["common"],
-    resources: {},
+    resources: { fr: { common: fr } },
     // Conservée pour le jour où un dictionnaire arriverait après l'init :
     // sans cette option, i18next considérerait une langue absente des
     // resources comme non chargée et n'irait jamais la relire.
@@ -69,9 +69,7 @@ if (typeof document !== "undefined") {
   i18n.on("languageChanged", apply);
 }
 
-/** Résolue quand le dictionnaire français est chargé (attendue avant le rendu). */
-export const i18nReady: Promise<void> = import("./locales/fr/common.json").then((m) => {
-  i18n.addResourceBundle("fr", "common", (m as { default: Record<string, unknown> }).default, true, true);
-});
+/** Conservée pour compatibilité : le dictionnaire est présent dès l'init. */
+export const i18nReady: Promise<void> = Promise.resolve();
 
 export default i18n;

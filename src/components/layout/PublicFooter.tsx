@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useInAppShell } from "./AppShellContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { PRESS_ARTICLE_URL } from "@/components/shared/PressQuote";
+import { PRESS_ARTICLE_URL } from "@/data/siteConstants";
 import { LE_PROGRES_LOGO } from "@/assets/pressLogos";
 import { MISSIONS_CITY_INDEX } from "@/data/missionsCityIndex";
 

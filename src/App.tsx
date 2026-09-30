@@ -1,4 +1,4 @@
-import { Suspense, useState } from "react";
+import { Suspense, useState, lazy as reactLazy } from "react";
 import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { registerAppQueryClient } from "@/lib/appQueryClient";
@@ -27,6 +27,9 @@ import { Button } from "@/components/ui/button";
 
 // ──── Critical routes (eager) ────
 import LangUrlSync from "./components/LangUrlSync";
+// Lot P2b : en-tête et pied publics dans l'entrée, ils font le premier écran visiteur.
+import PublicHeader from "@/components/layout/PublicHeader";
+import PublicFooter from "@/components/layout/PublicFooter";
 import { AfterFirstPaint } from "@/components/layout/AfterFirstPaint";
 import { useAffinityThresholdsBootstrap } from "@/hooks/useAffinityThresholdsBootstrap";
 
@@ -39,11 +42,16 @@ const AppLayout = lazy(
   () => import("@/components/layout/AppLayout").then((m) => ({ default: m.AppLayout })),
   "AppLayout",
 );
-const PublicHeader = lazy(() => import("@/components/layout/PublicHeader"), "PublicHeader");
-const PublicFooter = lazy(() => import("@/components/layout/PublicFooter"), "PublicFooter");
 const GlobalBottomNav = lazy(() => import("@/components/layout/GlobalBottomNav"), "GlobalBottomNav");
-const DeferredTrackers = lazy(() => import("@/components/analytics/DeferredTrackers"), "DeferredTrackers");
-const CookieConsentBanner = lazy(() => import("@/components/legal/CookieConsentBanner"), "CookieConsentBanner");
+// Lot P2b : traceurs, bandeau cookies et mesure de vitesse réunis dans un
+// seul fichier chargé après le premier affichage. Accessoire : un échec de
+// chargement ne fait jamais tomber la page (retente une fois, puis rien).
+const AfterPaintExtras = reactLazy(async () => {
+  const load = () => import("@/components/analytics/AfterPaintExtras");
+  try { return await load(); } catch {
+    try { await new Promise((r) => setTimeout(r, 500)); return await load(); } catch { return { default: () => null }; }
+  }
+});
 const PwaInstallTracking = lazy(
   () => import("@/hooks/usePwaInstall").then((m) => ({ default: m.PwaInstallTracking })),
   "PwaInstallTracking",
@@ -707,9 +715,8 @@ const App = () => (
               </ChromeVisibilityProvider>
               <AfterFirstPaint>
                 <Suspense fallback={null}>
-                  <DeferredTrackers />
-                  {/* Bandeau de consentement (lot C1) : GA4 chargé après accord seulement. */}
-                  <CookieConsentBanner />
+                  {/* Traceurs, bandeau de consentement (lot C1 : GA4 après accord seulement), mesure de vitesse. */}
+                  <AfterPaintExtras />
                 </Suspense>
               </AfterFirstPaint>
             </BrowserRouter>

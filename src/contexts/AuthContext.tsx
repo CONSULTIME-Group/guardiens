@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 import { getSignupRedirectUrl } from "@/lib/authRedirect";
 import { getOAuthTraceId, logOAuthStage, endOAuthFlow } from "@/lib/oauthLogger";
-import { cleanupPushOnLogout, reconcilePushSession } from "@/lib/web-push";
+import { cleanupPushOnLogoutLazy as cleanupPushOnLogout, reconcilePushSessionLazy as reconcilePushSession } from "@/lib/pushSession";
 
 type Role = "owner" | "sitter" | "both";
 type ActiveRole = "owner" | "sitter";

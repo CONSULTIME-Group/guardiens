@@ -15,15 +15,15 @@ const DEFAULT_QUOTE = "« Un service contre un service, pour aussi favoriser le 
 const DEFAULT_SOURCE = "Le Progrès";
 const DEFAULT_DATE = "6 septembre 2026";
 const DEFAULT_EYEBROW = "Dans la presse";
-const DEFAULT_CITE_URL =
-  "https://c.leprogres.fr/economie/2026/09/06/apres-avoir-garde-234-animaux-et-37-maisons-ils-lancent-leur-plateforme-de-home-sitting";
+import { PRESS_ARTICLE_URL as SHARED_PRESS_URL } from "@/data/siteConstants";
+const DEFAULT_CITE_URL = SHARED_PRESS_URL;
 
 /**
  * Date jusqu'à laquelle la mention presse est visible dans le hero de la
  * page d'accueil (ligne discrète « Vu dans »). Passée cette date, seule
  * cette carte sobre subsiste, affichée en permanence après UsagesSection.
  */
-export const PRESS_HIGHLIGHT_UNTIL = new Date("2026-10-06T00:00:00");
+export { PRESS_HIGHLIGHT_UNTIL } from "@/data/siteConstants";
 
 /** URL de l'article, partagée avec la ligne « Vu dans » du hero. */
 export const PRESS_ARTICLE_URL = DEFAULT_CITE_URL;

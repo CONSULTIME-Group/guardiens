@@ -1,14 +1,13 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
-import reportWebVitals from "./lib/webVitals";
 import { installGlobalErrorHandlers } from "./lib/logger";
 import { installGlobalErrorLogger } from "./lib/errorLogger";
 import { initConsent } from "./lib/cookieConsent";
 import { installStorageFallback } from "./lib/storageFallback";
 import { installDomTranslationGuard } from "./lib/domTranslationGuard";
 import { initPwaInstall } from "./lib/pwa-install";
-import { i18nReady } from "./i18n";
+import "./i18n";
 import { runAfterFirstPaint, prefetchRouteChunk } from "./lib/bootSchedule";
 
 // Lot P2, travaux gardés avant le rendu (justesse) :
@@ -74,11 +73,8 @@ if (typeof window !== "undefined") {
 // statiquement par i18next à l'init, il n'y a plus rien à précharger avant le
 // premier rendu. Le repli des anciennes URL `?lang=xx` est géré par
 // LangUrlSync et `src/lib/lang.ts`.
-// Le dictionnaire français est chargé en parallèle ; le rendu l'attend pour
-// ne jamais afficher une clé brute. En cas d'échec, on rend quand même.
-void i18nReady.catch(() => {}).then(() => {
-  createRoot(container).render(<App />);
-});
+// Lot P2b : rendu immédiat, jamais suspendu à un chargement réseau.
+createRoot(container).render(<App />);
 
 // Fallback prerenderReady : PageMeta est la source de vérité et lève le drapeau
 // à la fin de son useEffect, après écriture du canonical. Ce fallback couvre
@@ -94,7 +90,7 @@ if (typeof window !== "undefined") {
   window.setTimeout(markPrerenderReady, 10000);
 }
 
-runAfterFirstPaint(() => reportWebVitals());
+// Lot P2b : la mesure réelle (webVitals) démarre avec AfterPaintExtras, après le premier affichage.
 installGlobalErrorHandlers();
 installGlobalErrorLogger();
 initConsent();

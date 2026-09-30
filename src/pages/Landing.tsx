@@ -8,7 +8,7 @@ import PageMeta from "@/components/PageMeta";
 
 import { usePublicStats } from "@/hooks/usePublicStats";
 import LiveListingsStrip from "@/components/landing/LiveListingsStrip";
-import { PRESS_ARTICLE_URL, PRESS_HIGHLIGHT_UNTIL } from "@/components/shared/PressQuote";
+import { PRESS_ARTICLE_URL, PRESS_HIGHLIGHT_UNTIL, HOME_OG_IMAGE } from "@/data/siteConstants";
 import { LE_PROGRES_LOGO } from "@/assets/pressLogos";
 
 import { UsagesSection } from "@/components/landing/UsagesSection";
@@ -29,7 +29,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import RecentSitsItemListJsonLd from "@/components/seo/RecentSitsItemListJsonLd";
 
 import PublicFooter from "@/components/layout/PublicFooter";
-import { staticRoutes, DEFAULT_OG_IMAGE } from "@/data/siteRoutes";
+// Lot P2b : constante légère, siteRoutes (22 Ko) reste hors de la page d'accueil.
 // Pricing pivot : plus d'Offer JSON-LD tant que PRICING_IS_ACTIVE = false.
 import { GrainOverlay } from "@/components/ui/GrainOverlay";
 import { Button } from "@/components/ui/button";
@@ -37,8 +37,6 @@ import { Button } from "@/components/ui/button";
 
 
 
-const HOME_ROUTE = staticRoutes.find((route) => route.path === "/");
-const HOME_OG_IMAGE = HOME_ROUTE?.ogImage ?? DEFAULT_OG_IMAGE;
 
 
 
