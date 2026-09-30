@@ -1,4 +1,4 @@
-import { Suspense, useState, lazy as reactLazy } from "react";
+import { Suspense, useState } from "react";
 import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { registerAppQueryClient } from "@/lib/appQueryClient";
@@ -46,12 +46,7 @@ const GlobalBottomNav = lazy(() => import("@/components/layout/GlobalBottomNav")
 // Lot P2b : traceurs, bandeau cookies et mesure de vitesse réunis dans un
 // seul fichier chargé après le premier affichage. Accessoire : un échec de
 // chargement ne fait jamais tomber la page (retente une fois, puis rien).
-const AfterPaintExtras = reactLazy(async () => {
-  const load = () => import("@/components/analytics/AfterPaintExtras");
-  try { return await load(); } catch {
-    try { await new Promise((r) => setTimeout(r, 500)); return await load(); } catch { return { default: () => null }; }
-  }
-});
+import AfterPaintExtras from "@/components/analytics/AfterPaintExtrasLazy";
 const PwaInstallTracking = lazy(
   () => import("@/hooks/usePwaInstall").then((m) => ({ default: m.PwaInstallTracking })),
   "PwaInstallTracking",
