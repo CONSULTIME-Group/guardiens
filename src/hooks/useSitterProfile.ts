@@ -296,7 +296,7 @@ export function useSitterProfile() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data: { user: authUser } } = await supabase.auth.getUser();
+      const authUser = (await supabase.auth.getSession()).data.session?.user ?? null; // P1b : session locale
       if (!cancelled) setEmailVerified(!!authUser?.email_confirmed_at);
     })();
     return () => { cancelled = true; };

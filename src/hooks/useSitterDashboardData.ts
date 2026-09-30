@@ -1,3 +1,4 @@
+import { fetchMyBadges, fetchMyEmergencyProfileId, fetchMySmallMissionsIndex, fetchMyConversationsIndex } from "@/lib/dashboardShared";
 import { fetchMyProfile, fetchMyPublicProfile, fetchMySitterProfile } from "@/lib/myProfile";
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -144,18 +145,15 @@ export function useSitterDashboardData(userId: string | undefined) {
         fetchMyProfile(userId!),
         supabase.from("reviews")
           .select("overall_rating").eq("reviewee_id", userId).eq("published", true),
-        supabase.from("badge_attributions").select("id").eq("user_id", userId),
+        fetchMyBadges(userId!).then((data) => ({ data, error: null })).catch((error) => ({ data: [] as any[], error })),
         supabase.from("articles")
           .select("id, title, slug, cover_image_url, excerpt, category")
           .eq("published", true).eq("category", "conseil_gardien")
           .order("published_at", { ascending: false }).limit(3),
         (supabase as any).rpc("get_unread_messages_count", { _user_id: userId }),
         // Single badge query, replaces both badgeDetailsRes AND useUserBadges
-        supabase.from("badge_attributions")
-          .select("badge_id, created_at").eq("user_id", userId)
-          .order("created_at", { ascending: false }),
-        supabase.from("emergency_sitter_profiles")
-          .select("id").eq("user_id", userId).maybeSingle(),
+        fetchMyBadges(userId!).then((data) => ({ data, error: null })).catch((error) => ({ data: [] as any[], error })),
+        fetchMyEmergencyProfileId(userId!).then((id) => ({ data: id ? { id } : null, error: null })).catch((error) => ({ data: null, error })),
         // Reputation, replaces useProfileReputation
         (supabase as any).from("profile_reputation")
           .select("*").eq("user_id", userId).maybeSingle(),
@@ -177,12 +175,9 @@ export function useSitterDashboardData(userId: string | undefined) {
           .eq("status", "open")
           .order("created_at", { ascending: false })
           .limit(20),
-        supabase.from("small_missions")
-          .select("id, title, category, city, date_needed, status, created_at, small_mission_responses(id, status)")
-          .eq("user_id", userId)
-          .in("status", ["open", "completed"])
-          .order("created_at", { ascending: false })
-          .limit(8),
+        fetchMySmallMissionsIndex(userId!)
+          .then((data) => ({ data: data.filter((m) => m.status === "open" || m.status === "completed").slice(0, 8), error: null }))
+          .catch((error) => ({ data: [] as any[], error })),
       ]);
 
 
@@ -592,10 +587,7 @@ export function useSitterDashboardData(userId: string | undefined) {
 
     // Précharge les conversations dont je fais partie.
     (async () => {
-      const { data } = await supabase
-        .from("conversations")
-        .select("id")
-        .or(`owner_id.eq.${userId},sitter_id.eq.${userId}`);
+      const data = await fetchMyConversationsIndex(userId).catch(() => []);
       if (cancelled) return;
       (data || []).forEach((c: any) => memberConvIds.add(c.id));
     })();

@@ -183,25 +183,20 @@ export const useRailReadings = ({
           role === "owner" && stageVariant
             ? OWNER_STAGE_ARTICLES[stageVariant]?.slugs[0]
             : null;
-        if (stageSlug) {
-          const { data } = await supabase
-            .from("articles")
-            .select("slug, title")
-            .eq("slug", stageSlug)
-            .eq("published", true)
-            .maybeSingle();
-          article = data ?? null;
-        }
-        if (!article) {
-          const { data } = await supabase
-            .from("articles")
-            .select("slug, title")
-            .eq("published", true)
-            .or("noindex.is.null,noindex.eq.false")
-            .order("published_at", { ascending: false })
-            .limit(1);
-          article = data?.[0] ?? null;
-        }
+        // Lot P1b : une seule lecture. L'article de l'étape s'il existe,
+        // sinon le plus récent indexable, départagés côté client.
+        let q = supabase
+          .from("articles")
+          .select("slug, title, noindex")
+          .eq("published", true);
+        q = stageSlug
+          ? q.or(`slug.eq.${stageSlug},noindex.is.null,noindex.eq.false`)
+          : q.or("noindex.is.null,noindex.eq.false");
+        const { data } = await q.order("published_at", { ascending: false }).limit(20);
+        const rows = (data ?? []) as Array<{ slug: string; title: string; noindex: boolean | null }>;
+        const hit = (stageSlug ? rows.find((r) => r.slug === stageSlug) : undefined)
+          ?? rows.find((r) => !r.noindex);
+        article = hit ? { slug: hit.slug, title: hit.title } : null;
         if (article) {
           out.push({
             key: "journal",

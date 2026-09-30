@@ -1,3 +1,4 @@
+import { fetchMySitsIndex, fetchMyProperties } from "@/lib/dashboardShared";
 /**
  * Owner Pass 3 : 3 gardiens qui vous correspondent (score d'affinité).
  *
@@ -23,7 +24,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { computeAffinityResultFull, type AffinityResult } from "@/lib/affinityScore";
 import { haversineDistance } from "@/utils/geo";
 import { chunkArray } from "@/lib/chunkArray";
-import { fetchSitterPool, countSitterPool } from "@/lib/fetchSitterPool";
+import { fetchSitterPoolShared } from "@/lib/fetchSitterPool";
 
 /**
  * Plafond de scoring : au-delà, les gardiens les plus éloignés ne sont pas
@@ -72,24 +73,20 @@ export function useOwnerTopAffinitySitters(): Result {
         fetchMyProfile(userId!),
         fetchMyOwnerProfile(userId!),
         supabase.from("pets").select("species, special_needs, breed, property_id, properties!inner(user_id)").eq("properties.user_id", userId!),
-        supabase.from("properties").select("car_required").eq("user_id", userId!),
+        fetchMyProperties(userId!).then((data) => ({ data })).catch(() => ({ data: [] as any[] })),
         // Vivier de gardiens actifs, COMPLET : aucun filtre de confiance
         // (identité vérifiée, complétude). La vue public_profiles ne contient
         // déjà que des comptes actifs avec prénom, c'est la seule hygiène
         // admise. Le plafond de lecture est une borne technique, tracée.
-        fetchSitterPool<any>(
-          "id, first_name, avatar_url, city, latitude_approx, longitude_approx, identity_verified, profile_completion, role",
-          userId!,
-        ),
-        countSitterPool(userId!),
+        // Lot P1b : lecture partagée avec « Près de chez vous », compte exact inclus.
+        fetchSitterPoolShared(userId!).then((r) => r.rows),
+        fetchSitterPoolShared(userId!).then((r) => r.count),
         // Annonce publiée (ou garde en cours) : sans elle, l'affinité n'a
         // pas de base de comparaison suffisante, les cartes montrent les
         // raisons et la ligne « L'affinité se calcule dès votre annonce publiée. ».
-        supabase
-          .from("sits")
-          .select("id", { count: "exact", head: true })
-          .eq("user_id", userId!)
-          .in("status", ["published", "confirmed", "in_progress"]),
+        fetchMySitsIndex(userId!)
+          .then((rows) => ({ count: rows.filter((r) => ["published", "confirmed", "in_progress"].includes(r.status)).length }))
+          .catch(() => ({ count: 0 })),
       ]);
 
       const meLat = (me?.latitude as number | null) ?? null;

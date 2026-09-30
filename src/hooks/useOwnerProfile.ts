@@ -1,3 +1,4 @@
+import { fetchMySitsIndex, fetchMyProperties } from "@/lib/dashboardShared";
 import { fetchMyOwnerProfile, fetchMyProfile, fetchMySitterProfile } from "@/lib/myProfile";
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -197,7 +198,7 @@ export function useOwnerProfile() {
     try {
       [profileRes, propertyRes, ownerRes, sitterRes] = await Promise.all([
         fetchMyProfile(user.id!, { fresh: true }),
-        supabase.from("properties").select("*").eq("user_id", user.id).limit(1).maybeSingle(),
+        fetchMyProperties(user.id!, { fresh: true }).then((rows) => ({ data: rows[0] ?? null, error: null })).catch((error) => ({ data: null, error })),
         fetchMyOwnerProfile(user.id!, { fresh: true }),
         fetchMySitterProfile(user.id!, { fresh: true }),
       ]);
@@ -303,8 +304,9 @@ export function useOwnerProfile() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data: { user: authUser } } = await supabase.auth.getUser();
-      if (!cancelled) setEmailVerified(!!authUser?.email_confirmed_at);
+      // Lot P1b : session locale, aucun appel réseau.
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!cancelled) setEmailVerified(!!session?.user?.email_confirmed_at);
     })();
     return () => { cancelled = true; };
   }, [user]);
@@ -314,12 +316,8 @@ export function useOwnerProfile() {
     if (!user) return;
     let cancelled = false;
     (async () => {
-      const { count } = await supabase
-        .from("sits")
-        .select("id", { count: "exact", head: true })
-        .eq("user_id", user.id)
-        .neq("status", "draft");
-      if (!cancelled) setHasFirstActivity((count ?? 0) > 0);
+      const rows = await fetchMySitsIndex(user.id!).catch(() => []);
+      if (!cancelled) setHasFirstActivity(rows.some((r) => r.status !== "draft"));
     })();
     return () => { cancelled = true; };
   }, [user]);

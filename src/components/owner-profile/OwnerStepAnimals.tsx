@@ -167,7 +167,7 @@ const OwnerStepAnimals = ({ pets, onAddPet, onUpdatePet, onRemovePet }: Props) =
     }
     setUploading(true);
     try {
-      const { data: authData } = await supabase.auth.getUser();
+      const authData = { user: (await supabase.auth.getSession()).data.session?.user ?? null }; // P1b : session locale
       const userId = authData.user?.id;
 
       if (!userId) {

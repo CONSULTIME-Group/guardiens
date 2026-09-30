@@ -14,7 +14,10 @@
  *                 OU >= 1 écusson OU statut gardien d'urgence.
  */
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import {
+  fetchMySitsIndex, fetchMyApplicationsIndex, fetchMySmallMissionsIndex,
+  fetchMyBadges, fetchMyEmergencyProfileId,
+} from "@/lib/dashboardShared";
 import { useAuth } from "@/contexts/AuthContext";
 
 
@@ -79,39 +82,22 @@ export function useAlmaEvolution() {
     queryFn: async (): Promise<AlmaEvolution> => {
       const uid = user!.id;
 
-      const [sitsRes, appsRes, missionsRes, badgesRes, emergencyRes, draftRes] =
-        await Promise.all([
-          supabase
-            .from("sits")
-            .select("id, status")
-            .eq("user_id", uid),
-          supabase
-            .from("applications")
-            .select("id")
-            .eq("sitter_id", uid)
-            .limit(1),
-          supabase
-            .from("small_missions")
-            .select("id")
-            .eq("user_id", uid)
-            .in("status", ["open", "in_progress", "completed"])
-            .limit(1),
-          supabase
-            .from("badge_attributions")
-            .select("id", { count: "exact", head: true })
-            .eq("user_id", uid),
-          supabase
-            .from("emergency_sitter_profiles")
-            .select("id")
-            .eq("user_id", uid)
-            .maybeSingle(),
-          supabase
-            .from("sits")
-            .select("id")
-            .eq("user_id", uid)
-            .eq("status", "draft")
-            .limit(1),
-        ]);
+      // Lot P1b : lectures partagées avec les autres blocs du tableau de bord.
+      const [sitsIdx, appsIdx, missionsIdx, badgesIdx, emergencyId] = await Promise.all([
+        fetchMySitsIndex(uid).catch(() => []),
+        fetchMyApplicationsIndex(uid).catch(() => []),
+        fetchMySmallMissionsIndex(uid).catch(() => []),
+        fetchMyBadges(uid).catch(() => []),
+        fetchMyEmergencyProfileId(uid).catch(() => null),
+      ]);
+      const sitsRes = { data: sitsIdx };
+      const appsRes = { data: appsIdx.slice(0, 1) };
+      const missionsRes = {
+        data: missionsIdx.filter((m) => ["open", "in_progress", "completed"].includes(m.status)).slice(0, 1),
+      };
+      const badgesRes = { count: badgesIdx.length };
+      const emergencyRes = { data: emergencyId };
+      const draftRes = { data: sitsIdx.filter((x) => x.status === "draft").slice(0, 1) };
 
       const sits = sitsRes.data || [];
       const publishedSitsCount = sits.filter((s) =>

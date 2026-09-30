@@ -44,3 +44,45 @@ export async function countSitterPool(excludeUserId: string): Promise<number> {
   if (error) throw error;
   return count ?? 0;
 }
+
+/**
+ * Lot P1b : vivier complet partagé par les blocs du tableau de bord
+ * propriétaire (« Pour vous » et « Près de chez vous »). Une seule lecture
+ * paginée, colonnes réunies, et le compte exact porté par la première page.
+ * Aucun filtre ajouté : mêmes conditions que fetchSitterPool.
+ */
+export const SITTER_POOL_SHARED_SELECT =
+  "id, first_name, avatar_url, city, latitude_approx, longitude_approx, identity_verified, profile_completion, role, completed_sits_count, skill_categories, custom_skills";
+
+async function readSitterPoolWithCount(excludeUserId: string): Promise<{ rows: any[]; count: number }> {
+  const rows: any[] = [];
+  let count = 0;
+  for (let page = 0; page < MAX_PAGES; page++) {
+    const from = page * SITTER_POOL_PAGE;
+    const { data, error, count: c } = await supabase
+      .from("public_profiles")
+      .select(SITTER_POOL_SHARED_SELECT, page === 0 ? { count: "exact" } : undefined)
+      .in("role", ["sitter", "both"])
+      .neq("id", excludeUserId)
+      .order("id", { ascending: true })
+      .range(from, from + SITTER_POOL_PAGE - 1);
+    if (error) throw error;
+    if (page === 0) count = c ?? 0;
+    const batch = (data ?? []) as any[];
+    rows.push(...batch);
+    if (batch.length < SITTER_POOL_PAGE) return { rows, count: Math.max(count, rows.length) };
+  }
+  console.warn(`[sitter-pool] ${MAX_PAGES} pages lues, vivier tronqué.`);
+  return { rows, count: Math.max(count, rows.length) };
+}
+
+export async function fetchSitterPoolShared(excludeUserId: string): Promise<{ rows: any[]; count: number }> {
+  const { getAppQueryClient } = await import("@/lib/appQueryClient");
+  const client = getAppQueryClient();
+  if (!client) return readSitterPoolWithCount(excludeUserId);
+  return client.fetchQuery({
+    queryKey: ["sitter-pool-shared", excludeUserId],
+    queryFn: () => readSitterPoolWithCount(excludeUserId),
+    staleTime: 5 * 60 * 1000,
+  });
+}

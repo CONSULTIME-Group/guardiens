@@ -111,7 +111,7 @@ export function useMissionDistance(missions: MissionLike[], options?: MissionDis
     if (prefilled || postal) return;
     let cancelled = false;
     (async () => {
-      const { data: auth } = await supabase.auth.getUser();
+      const auth = { user: (await supabase.auth.getSession()).data.session?.user ?? null }; // P1b : session locale
       if (!auth.user) return;
       const { data: p } = await fetchMyProfile(auth.user.id!);
       if (cancelled) return;

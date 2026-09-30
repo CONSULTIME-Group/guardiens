@@ -1,3 +1,4 @@
+import { fetchMySmallMissionsIndex, fetchMyProperties } from "@/lib/dashboardShared";
 import { fetchMyProfile } from "@/lib/myProfile";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -106,13 +107,13 @@ export function useOwnerDashboardData(userId: string | undefined) {
           myMissionsDataRes, allMyMissionsCountRes,
         ] = await Promise.all([
           supabase.from("sits").select("*, applications(id, status, sitter_id)").eq("user_id", userId).order("created_at", { ascending: false }),
-          supabase.from("properties").select("id, type, environment, photos").eq("user_id", userId),
+          fetchMyProperties(userId!).then((data) => ({ data, error: null })).catch((error) => ({ data: [] as any[], error })),
           supabase.from("reviews").select("overall_rating").eq("reviewee_id", userId).eq("published", true),
           fetchMyProfile(userId!),
           supabase.from("owner_highlights").select("*").eq("owner_id", userId).eq("hidden", false).order("created_at", { ascending: false }).limit(5),
           supabase.from("small_missions").select("id, title, category, city, created_at").eq("status", "open").order("created_at", { ascending: false }).limit(2),
-          supabase.from("small_missions").select("id, title, category, status, created_at, small_mission_responses(id, status)").eq("user_id", userId).order("created_at", { ascending: false }).limit(3),
-          supabase.from("small_missions").select("id, status").eq("user_id", userId),
+          fetchMySmallMissionsIndex(userId!).then((data) => ({ data: data.slice(0, 3), error: null })).catch((error) => ({ data: [] as any[], error })),
+          fetchMySmallMissionsIndex(userId!).then((data) => ({ data, error: null })).catch((error) => ({ data: [] as any[], error })),
         ]);
 
 
