@@ -58,6 +58,15 @@ const PreviewDiagnosticBanner = import.meta.env.DEV
     )
   : null;
 
+// Ces composants ne font rien sans membre connecté : leur code n'est chargé
+// que pour un membre (même comportement, aucun fichier pour les visiteurs).
+const MemberOnly = ({ children }: { children: React.ReactNode }) => {
+  const { user } = useAuth();
+  return user?.id ? <>{children}</> : null;
+};
+const AppShellOnly = ({ children }: { children: React.ReactNode }) =>
+  useShellMode() === "app" ? <>{children}</> : null;
+
 // ──── Lazy-loaded routes ────
 const FallbackSpinner = () => (
   <div className="min-h-screen flex items-center justify-center">
@@ -662,9 +671,11 @@ const App = () => (
       <ThemeProvider>
         <TooltipProvider>
           <AuthProvider>
-            <Suspense fallback={null}>
-              <PwaInstallTracking />
-            </Suspense>
+            <MemberOnly>
+              <Suspense fallback={null}>
+                <PwaInstallTracking />
+              </Suspense>
+            </MemberOnly>
             <SkipToContent />
             <Toaster />
             <Sonner />
@@ -679,16 +690,20 @@ const App = () => (
                   <PreviewDiagnosticBanner />
                 </Suspense>
               )}
-              <Suspense fallback={null}>
-                <DuplicateAccountGuard />
-              </Suspense>
+              <MemberOnly>
+                <Suspense fallback={null}>
+                  <DuplicateAccountGuard />
+                </Suspense>
+              </MemberOnly>
               <ChromeVisibilityProvider>
                 <AppRoutes />
                 {/* Barre de navigation basse montée une seule fois, pour toutes
                     les routes, y compris celles hors coquille applicative. */}
-                <Suspense fallback={null}>
-                  <GlobalBottomNav />
-                </Suspense>
+                <AppShellOnly>
+                  <Suspense fallback={null}>
+                    <GlobalBottomNav />
+                  </Suspense>
+                </AppShellOnly>
               </ChromeVisibilityProvider>
               <AfterFirstPaint>
                 <Suspense fallback={null}>
