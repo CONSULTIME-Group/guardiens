@@ -13,6 +13,7 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 import { chunkArray } from "@/lib/chunkArray";
+import { getAppQueryClient, onAppQueryCacheClear } from "@/lib/appQueryClient";
 
 const WINDOW_MS = 40;
 const TTL_MS = 5 * 60 * 1000;
@@ -79,8 +80,27 @@ export function createIdLoader(opts: {
     }
   };
 
+  const direct = async (wanted: string[]) => {
+    const results = await Promise.all(
+      chunkArray(wanted, BATCH).map((batch) => {
+        let q = (supabase.from(opts.table as any) as any).select(opts.columns).in(opts.idColumn, batch);
+        if (opts.filter) q = opts.filter(q);
+        return q;
+      }),
+    );
+    const err = results.find((r: any) => r?.error)?.error;
+    if (err) throw err;
+    const out = new Map<string, Row[]>();
+    for (const id of wanted) out.set(id, []);
+    for (const r of results) for (const row of ((r as any).data ?? []) as Row[]) out.get(row[opts.idColumn])?.push(row);
+    return out;
+  };
+
   const load = async (ids: string[]) => {
     const wanted = Array.from(new Set(ids.filter(Boolean)));
+    if (wanted.length === 0) return new Map<string, Row[]>();
+    // Hors application (tests unitaires) : lecture directe, aucun état partagé.
+    if (!getAppQueryClient()) return direct(wanted);
     const pending: Promise<void>[] = [];
     const missing = wanted.filter((id) => !fresh(id) && !inflight.has(id));
     if (missing.length > 0) {
@@ -109,6 +129,7 @@ export function createIdLoader(opts: {
       }
     },
     prime(rows) {
+      if (!getAppQueryClient()) return;
       const at = Date.now();
       const grouped = new Map<string, Row[]>();
       for (const row of rows) {
@@ -161,3 +182,5 @@ export function clearBatchedReads() {
   sitterAffinityLoader.clear();
   sitterCompetencesLoader.clear();
 }
+
+onAppQueryCacheClear(clearBatchedReads);
