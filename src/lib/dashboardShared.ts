@@ -26,14 +26,14 @@ async function cached<T>(key: readonly unknown[], fn: () => Promise<T>): Promise
   return client.fetchQuery({ queryKey: key, queryFn: fn, staleTime: DASHBOARD_SHARED_STALE_MS });
 }
 
-export type MySitIndexRow = { id: string; status: string; updated_at: string | null; created_at: string | null };
+export type MySitIndexRow = { id: string; status: string; start_date: string | null; updated_at: string | null; created_at: string | null };
 
 /** Annonces du membre, triées updated_at desc puis created_at desc. */
 export function fetchMySitsIndex(userId: string): Promise<MySitIndexRow[]> {
   return cached(["my-sits-index", userId], async () => {
     const { data, error } = await supabase
       .from("sits")
-      .select("id, status, updated_at, created_at")
+      .select("id, status, start_date, updated_at, created_at")
       .eq("user_id", userId)
       .order("updated_at", { ascending: false, nullsFirst: false })
       .order("created_at", { ascending: false });

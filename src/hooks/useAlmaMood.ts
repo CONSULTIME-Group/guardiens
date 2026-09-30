@@ -16,6 +16,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { getDailyWeather } from "@/lib/alma/weatherCache";
+import { fetchMySitsIndex, fetchMyApplicationsIndex } from "@/lib/dashboardShared";
 import { isMoodLineTruthful, type MoodTruthFacts } from "../../supabase/functions/_shared/alma-facts";
 import {
   resolveMoodPlan,
@@ -63,20 +64,17 @@ async function loadAttentionContext(
   const today = new Date().toISOString().slice(0, 10);
   const empty = { ownerConfirmedSoon: false, sitterConfirmedSoon: false, receivedPending: false };
   try {
-    const [ownRes, sentRes] = await Promise.all([
-      supabase
-        .from("sits")
-        .select("id, status, start_date")
-        .eq("user_id", userId)
-        .in("status", ["published", "confirmed", "in_progress"])
-        .limit(20),
-      supabase
-        .from("applications")
-        .select("status, sits:sit_id(status, start_date)")
-        .eq("sitter_id", userId)
-        .in("status", ["pending", "accepted"])
-        .limit(20),
-    ]);
+    // Lot P1b : mêmes filtres, appliqués aux lectures partagées du tableau de bord.
+    const [mySits, myApps] = await Promise.all([fetchMySitsIndex(userId), fetchMyApplicationsIndex(userId)]);
+    const ownRes = {
+      data: mySits.filter((r) => ["published", "confirmed", "in_progress"].includes(r.status)).slice(0, 20),
+    };
+    const sentRes = {
+      data: myApps
+        .filter((r) => ["pending", "accepted"].includes(r.status))
+        .slice(0, 20)
+        .map((r) => ({ status: r.status, sits: r.sit ? { status: r.sit.status, start_date: r.sit.start_date } : null })),
+    };
     const own = (ownRes.data ?? []) as any[];
     const sent = (sentRes.data ?? []) as any[];
     const publishedIds = own.filter((r) => r.status === "published").map((r) => r.id);
