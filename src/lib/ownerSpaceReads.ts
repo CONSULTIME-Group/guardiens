@@ -5,6 +5,10 @@
 import { supabase } from "@/integrations/supabase/client";
 import { getAppQueryClient, onAppQueryCacheClear } from "@/lib/appQueryClient";
 import { cached } from "@/lib/dashboardShared";
+import { fetchSitterPoolShared } from "@/lib/fetchSitterPool";
+import * as pool from "@/lib/ownerSitterPool";
+import * as batched from "@/lib/batchedReads";
+import { fetchMyProfile } from "@/lib/myProfile";
 
 /**
  * Lot P4 : avis du tableau de bord propriétaire en une lecture. Avis
@@ -33,8 +37,7 @@ export function fetchMyReviewsBothWays(
     const idSet = new Set(ids);
     const candidates = rows.filter((r) => idSet.has(r.reviewee_id) && r.published === true).map(pub);
     const written = rows.filter((r) => r.reviewer_id === userId).map((r) => ({ sit_id: r.sit_id }));
-    const { publishedReviewsLoader } = await import("@/lib/batchedReads");
-    publishedReviewsLoader.prime([...received, ...candidates], [userId, ...ids]);
+    batched.publishedReviewsLoader.prime([...received, ...candidates], [userId, ...ids]);
     return { received, written, candidates };
   });
 }
@@ -60,12 +63,6 @@ export function fetchOwnerSpaceSitterReads(userId: string): Promise<OwnerSpaceId
   // Hors application (tests unitaires) : aucun cache à amorcer.
   if (!getAppQueryClient()) return Promise.resolve(EMPTY_IDS);
   return cached(["owner-space-sitter-reads", userId], async () => {
-    const [{ fetchSitterPoolShared }, pool, batched, { fetchMyProfile }] = await Promise.all([
-      import("@/lib/fetchSitterPool"),
-      import("@/lib/ownerSitterPool"),
-      import("@/lib/batchedReads"),
-      import("@/lib/myProfile"),
-    ]);
     const [poolRes, me] = await Promise.all([
       fetchSitterPoolShared(userId),
       fetchMyProfile(userId),
@@ -106,13 +103,12 @@ const TOP_WAIT_MS = 4000;
 export function fetchOwnerSpaceDetailReads(userId: string): Promise<true> {
   if (!getAppQueryClient()) return Promise.resolve(true as const);
   return cached(["owner-space-detail-reads", userId], async () => {
-    const [ids, top, batched] = await Promise.all([
+    const [ids, top] = await Promise.all([
       fetchOwnerSpaceSitterReads(userId).catch(() => EMPTY_IDS),
       Promise.race([
         topWaiter(userId).promise,
         new Promise<string[]>((r) => setTimeout(() => r([]), TOP_WAIT_MS)),
       ]),
-      import("@/lib/batchedReads"),
     ]);
     await Promise.all([
       batched.publishedReviewsLoader.load([...top, ...ids.nearby, ...ids.apps]),
