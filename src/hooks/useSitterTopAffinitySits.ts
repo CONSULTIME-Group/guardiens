@@ -9,6 +9,7 @@ import { fetchMyProfile } from "@/lib/myProfile";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { createYieldBudget } from "@/lib/yieldToMain";
 import { computeAffinityResultFull, type AffinityResult } from "@/lib/affinityScore";
 import { getDeptCode } from "@/lib/departments";
 import { haversineDistance } from "@/utils/geo";
@@ -258,7 +259,10 @@ export function useSitterTopAffinitySits(): Result {
 
       const scored: AffinitySitCard[] = [];
       const fallback: AffinitySitCard[] = [];
+      // Lot P1b : calcul découpé en tranches de 8 ms, résultats identiques.
+      const tick = createYieldBudget(8);
       for (const sit of sitsAll) {
+        await tick();
         const pets = petsByProperty.get(sit.property_id) ?? [];
         const ownerFirstName: string | null = sit?.owner?.first_name ?? null;
         const card: AffinitySitCard = {
