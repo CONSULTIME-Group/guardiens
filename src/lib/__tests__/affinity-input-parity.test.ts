@@ -376,8 +376,8 @@ describe("parité des entrées du moteur d'affinité", () => {
         const src = read(path);
         expect(src).toContain("sitterAffinityLoader.rows(");
         expect(src).not.toMatch(/\.from\(\s*["'`](?:sitter_profiles|sitter_profiles_affinity)["'`]/);
-        const remapped = sitterFields.filter((f) => new RegExp(`^\\s*${f}\\s*:`, "m").test(src));
-        expect(remapped.length === 0 || remapped.length === sitterFields.length).toBe(true);
+        // La ligne du chargeur est transmise brute au moteur (aucun littéral gardien reconstruit).
+        expect(src).not.toMatch(/:\s*AffinitySitterInput\s*=\s*\{/);
       });
     }
   });
