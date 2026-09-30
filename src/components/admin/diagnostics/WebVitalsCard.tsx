@@ -8,7 +8,7 @@ import { summarizeVitals, type SummaryDevice, type VitalCell, type VitalRow } fr
 const DEVICE_LABEL: Record<SummaryDevice, string> = { mobile: "Téléphone", tablet: "Tablette", desktop: "Ordinateur" };
 const MAX_ROWS = 5000;
 
-const fmt = (c: VitalCell) => (c.p75 == null ? "–" : `${c.p75} ms`);
+const fmt = (c: VitalCell) => (c.p75 == null ? "·" : `${c.p75} ms`);
 
 export async function fetchWebVitalRows(): Promise<VitalRow[]> {
   const since = new Date(Date.now() - 7 * 86_400_000).toISOString();
