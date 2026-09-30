@@ -2,7 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { haversineDistance } from "@/utils/geo";
 import type { AffinitySitterInput } from "@/lib/affinityScore";
-import { fetchSitterPool } from "@/lib/fetchSitterPool";
+import { fetchSitterPoolShared } from "@/lib/fetchSitterPool";
+import { fetchMyProfile, fetchMyPublicProfile } from "@/lib/myProfile";
 
 /**
  * « Gardiens près de chez vous » pour le dashboard propriétaire.
@@ -89,19 +90,13 @@ export function useNearbyOwnerSitters(currentUserId: string | undefined) {
       // systématiquement (elle ne coûte qu'une ligne) mais ne sert qu'en
       // repli, exactement comme avant.
       const [meRes, approxRes, poolRes] = await Promise.all([
-        supabase.from("profiles").select("latitude, longitude").eq("id", currentUserId!).maybeSingle(),
-        supabase
-          .from("public_profiles")
-          .select("latitude_approx, longitude_approx")
-          .eq("id", currentUserId!)
-          .maybeSingle(),
+        fetchMyProfile(currentUserId!),
+        fetchMyPublicProfile(currentUserId!),
         // Vivier de gardiens actifs, complet : aucun filtre de complétude
         // ni de confiance (la vue ne retient déjà que les comptes actifs).
         // Plafond de lecture technique, tracé s'il est atteint.
-        fetchSitterPool<any>(
-          "id, first_name, avatar_url, city, identity_verified, completed_sits_count, skill_categories, custom_skills, latitude_approx, longitude_approx, role",
-          currentUserId!,
-        ).then((data) => ({ data })),
+        // Lot P1b : même lecture que l'onglet « Pour vous ».
+        fetchSitterPoolShared(currentUserId!).then((r) => ({ data: r.rows })),
       ]);
 
       let meLat: number | null = (meRes.data?.latitude as number | null) ?? null;

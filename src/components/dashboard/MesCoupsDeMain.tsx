@@ -6,6 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import MeetupAnswer from "@/components/entraide/MeetupAnswer";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchMySmallMissionsIndex } from "@/lib/dashboardShared";
+import { getAppQueryClient } from "@/lib/appQueryClient";
+
+const invalidateMine = (uid?: string) => {
+  if (uid) void getAppQueryClient()?.invalidateQueries({ queryKey: ["my-small-missions-index", uid] });
+};
 import { toast } from "sonner";
 
 export interface HelpRow {
@@ -43,13 +49,24 @@ export function useMyHelpExchanges() {
     ]);
 
     const helperMissionIds = (mine.data || []).map((r) => r.mission_id);
-    const { data: missions } = await supabase
-      .from("small_missions")
-      .select("id, title, city, status, close_reason, user_id")
-      .or(`user_id.eq.${user.id}${helperMissionIds.length ? `,id.in.(${helperMissionIds.join(",")})` : ""}`)
-      .in("status", ["in_progress", "completed"])
-      .order("updated_at", { ascending: false })
-      .limit(20);
+    // Lot P1b : mes propres coups de main viennent de la lecture partagée du
+    // tableau de bord ; seuls ceux où j'ai aidé sont lus ici, par identifiants.
+    const [mineAll, helped] = await Promise.all([
+      fetchMySmallMissionsIndex(user.id).catch(() => []),
+      helperMissionIds.length
+        ? supabase
+          .from("small_missions")
+          .select("id, title, city, status, close_reason, user_id, updated_at")
+          .in("id", helperMissionIds)
+          .in("status", ["in_progress", "completed"])
+        : Promise.resolve({ data: [] as any[] }),
+    ]);
+    const byId = new Map<string, any>();
+    for (const m of mineAll) if (m.status === "in_progress" || m.status === "completed") byId.set(m.id, m);
+    for (const m of (helped.data || []) as any[]) byId.set(m.id, m);
+    const missions = Array.from(byId.values())
+      .sort((a, b) => String(b.updated_at ?? "").localeCompare(String(a.updated_at ?? "")))
+      .slice(0, 20) as Array<{ id: string; title: string; city: string | null; status: string; close_reason: string | null; user_id: string }>;
 
     const missionIds = (missions || []).map((m) => m.id);
     const { data: responses } = missionIds.length
@@ -109,6 +126,7 @@ export function useMyHelpExchanges() {
     });
     setBusy(null);
     if ((data as { ok?: boolean })?.ok) {
+      invalidateMine(user?.id);
       toast.success(happened ? "C'est noté, merci." : "C'est noté. Votre besoin reste suivi.");
       await load();
     } else {
