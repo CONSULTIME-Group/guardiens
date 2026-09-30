@@ -1,4 +1,4 @@
-import { fetchMySitsIndex, fetchMyProperties } from "@/lib/dashboardShared";
+import { fetchMySitsIndex, fetchMyProperties, invalidateMyProperties } from "@/lib/dashboardShared";
 import { fetchMyOwnerProfile, fetchMyProfile, fetchMySitterProfile } from "@/lib/myProfile";
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -363,10 +363,12 @@ export function useOwnerProfile() {
       if (Object.keys(propUpdate).length > 0) {
         if (propertyId) {
           const { error } = await supabase.from("properties").update(propUpdate).eq("id", propertyId);
+          invalidateMyProperties(user.id!);
           if (error) throw error;
         } else {
           const { data: newProp, error } = await supabase
             .from("properties").insert({ ...propUpdate, user_id: user.id }).select("id").single();
+          invalidateMyProperties(user.id!);
           if (error) throw error;
           if (newProp) setPropertyId(newProp.id);
         }
@@ -467,6 +469,7 @@ export function useOwnerProfile() {
     if (!currentPropId) {
       const { data: newProp, error: propError } = await supabase
         .from("properties").insert({ user_id: user.id }).select("id").single();
+      invalidateMyProperties(user.id!);
       if (propError || !newProp) {
         logger.error("Failed to create property before pet insert", { error: String(propError) });
         toast({ variant: "destructive", title: "Erreur", description: "Impossible de créer votre logement. Réessayez." });
