@@ -1,3 +1,4 @@
+import { PUBLIC_PROFILE_COLUMNS, publicProfilesLoader } from "@/lib/batchedReads";
 /**
  * Lecture COMPLÈTE du vivier de gardiens (public_profiles, role sitter/both).
  *
@@ -51,8 +52,7 @@ export async function countSitterPool(excludeUserId: string): Promise<number> {
  * paginée, colonnes réunies, et le compte exact porté par la première page.
  * Aucun filtre ajouté : mêmes conditions que fetchSitterPool.
  */
-export const SITTER_POOL_SHARED_SELECT =
-  "id, first_name, avatar_url, city, latitude_approx, longitude_approx, identity_verified, profile_completion, role, completed_sits_count, skill_categories, custom_skills";
+export const SITTER_POOL_SHARED_SELECT = PUBLIC_PROFILE_COLUMNS;
 
 async function readSitterPoolWithCount(excludeUserId: string): Promise<{ rows: any[]; count: number }> {
   const rows: any[] = [];
@@ -70,6 +70,8 @@ async function readSitterPoolWithCount(excludeUserId: string): Promise<{ rows: a
     if (page === 0) count = c ?? 0;
     const batch = (data ?? []) as any[];
     rows.push(...batch);
+    // Les profils lus amorcent le chargeur partagé : les cartes ne les relisent pas.
+    publicProfilesLoader.prime(batch);
     if (batch.length < SITTER_POOL_PAGE) return { rows, count: Math.max(count, rows.length) };
   }
   console.warn(`[sitter-pool] ${MAX_PAGES} pages lues, vivier tronqué.`);

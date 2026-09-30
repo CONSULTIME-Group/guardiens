@@ -1,3 +1,4 @@
+import { publicProfilesLoader } from "@/lib/batchedReads";
 import { fetchOpenPublishedSits } from "@/lib/dashboardShared";
 /**
  * Charge les 3 annonces les plus pertinentes pour un gardien. La préférence
@@ -179,10 +180,7 @@ export function useSitterTopAffinitySits(): Result {
       // Hydratation RLS-safe des propriétaires via la vue publique.
       const sitOwnerIds = Array.from(new Set(sitsAll.map((s) => s.user_id).filter(Boolean))) as string[];
       if (sitOwnerIds.length > 0) {
-        const { data: ownerProfs } = await supabase
-          .from("public_profiles")
-          .select("id, first_name, postal_code, latitude_approx, longitude_approx")
-          .in("id", sitOwnerIds);
+        const { data: ownerProfs } = await publicProfilesLoader.rows(sitOwnerIds);
         const ownerMap = new Map<string, any>();
         (ownerProfs ?? []).forEach((p: any) => ownerMap.set(p.id, p));
         sitsAll.forEach((s: any) => { s.owner = s.user_id ? ownerMap.get(s.user_id) ?? null : null; });

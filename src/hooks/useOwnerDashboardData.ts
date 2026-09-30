@@ -1,3 +1,4 @@
+import { publicProfilesLoader, publishedReviewsLoader, sitterAffinityLoader } from "@/lib/batchedReads";
 import { fetchMySmallMissionsIndex, fetchMyProperties } from "@/lib/dashboardShared";
 import { fetchMyProfile } from "@/lib/myProfile";
 import { useEffect, useRef, useState } from "react";
@@ -249,21 +250,16 @@ export function useOwnerDashboardData(userId: string | undefined) {
         const emptyRows = Promise.resolve({ data: [] as any[], error: null });
         const [profsRes, badgesRes, sitterReviewsRes, affinityRes] = await Promise.all([
           hydrateIds.length > 0
-            ? supabase
-                .from("public_profiles")
-                .select("id, first_name, avatar_url, identity_verified, completed_sits_count")
-                .in("id", hydrateIds)
+            ? publicProfilesLoader.rows(hydrateIds)
             : emptyRows,
           sitterIds.length > 0
             ? supabase.from("public_badge_attributions").select("user_id, badge_id").in("user_id", sitterIds)
             : emptyRows,
           sitterIds.length > 0
-            ? supabase.from("reviews").select("reviewee_id, overall_rating").in("reviewee_id", sitterIds).eq("published", true)
+            ? publishedReviewsLoader.rows(sitterIds)
             : emptyRows,
           sitterIds.length > 0
-            ? supabase.from("sitter_profiles_affinity")
-                .select("user_id, experience_years, life_pace, lifestyle, availability_during, has_vehicle, has_license, languages, interests, work_during_sit, sensitivities, animal_types, sitter_type, travels_with_children, travels_with_own_animals, special_animal_skills, farm_animals_ok")
-                .in("user_id", sitterIds)
+            ? sitterAffinityLoader.rows(sitterIds)
             : emptyRows,
         ]);
 

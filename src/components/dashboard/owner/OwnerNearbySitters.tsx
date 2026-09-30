@@ -1,3 +1,4 @@
+import { publicProfilesLoader, publishedReviewsLoader, sitterAffinityLoader, sitterCompetencesLoader } from "@/lib/batchedReads";
 /**
  * « Près de chez vous » (lot D1) : remplace OwnerSitterSpotlight sur le
  * tableau de bord propriétaire. Trois lignes séparées par un filet, sans
@@ -31,13 +32,13 @@ function useDistinctDetails(ids: string[]) {
       // Lot D3 : même source que le classement (vivier complet), compétences
       // fusionnées depuis la vue publique quand la ligne existe.
       const [sp, pc, pp, rv] = await Promise.all([
-        supabase
-          .from("sitter_profiles_affinity" as any)
-          .select("user_id, sitter_type, experience_years, animal_types, special_animal_skills, interests")
-          .in("user_id", ids),
-        supabase.from("public_sitter_profiles" as any).select("user_id, competences").in("user_id", ids),
-        supabase.from("public_profiles" as any).select("id, completed_sits_count").in("id", ids),
-        supabase.from("reviews").select("reviewee_id, overall_rating").in("reviewee_id", ids).eq("published", true),
+        // Lot P1b : chargeurs partagés, aucune relecture des profils déjà lus.
+        // Lecture sitter_profiles_affinity et select("user_id, competences")
+        // via src/lib/batchedReads.ts.
+        sitterAffinityLoader.rows(ids),
+        sitterCompetencesLoader.rows(ids),
+        publicProfilesLoader.rows(ids),
+        publishedReviewsLoader.rows(ids),
       ]);
       const out: Record<string, DistinctSitterInput> = {};
       for (const id of ids) out[id] = {};

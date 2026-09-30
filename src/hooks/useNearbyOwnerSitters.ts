@@ -1,3 +1,4 @@
+import { publishedReviewsLoader, sitterAffinityLoader, sitterCompetencesLoader } from "@/lib/batchedReads";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { haversineDistance } from "@/utils/geo";
@@ -192,13 +193,9 @@ export function useNearbyOwnerSitters(currentUserId: string | undefined) {
 
       // VAGUE 2 : données d'affichage, uniquement pour ces candidats.
       const [reviewsRes, sitterRes, affinityRes] = await Promise.all([
-        supabase
-          .from("reviews")
-          .select("reviewee_id, overall_rating")
-          .in("reviewee_id", ids)
-          .eq("published", true),
-        supabase.from("public_sitter_profiles").select("user_id, competences").in("user_id", ids),
-        supabase.from("sitter_profiles_affinity").select(NEARBY_AFFINITY_COLUMNS).in("user_id", ids),
+        publishedReviewsLoader.rows(ids),
+        sitterCompetencesLoader.rows(ids),
+        sitterAffinityLoader.rows(ids),
       ]);
       const readError = [reviewsRes, sitterRes, affinityRes].find((result) => result.error)?.error;
       if (readError) throw readError;

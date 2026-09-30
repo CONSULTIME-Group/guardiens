@@ -1,3 +1,4 @@
+import { publicProfilesLoader } from "@/lib/batchedReads";
 import { fetchMyBadges, fetchMyEmergencyProfileId, fetchMySmallMissionsIndex, fetchMyConversationsIndex, fetchOpenPublishedSits } from "@/lib/dashboardShared";
 import { fetchMyProfile, fetchMyPublicProfile, fetchMySitterProfile } from "@/lib/myProfile";
 import { useState, useEffect, useCallback } from "react";
@@ -282,15 +283,11 @@ export function useSitterDashboardData(userId: string | undefined) {
       // 2) Prénom du propriétaire de la prochaine garde (si elle existe).
       // 3) Animaux de la prochaine garde (si elle existe).
       const coordsIds = Array.from(new Set([...candidateOwnerIds, ...authorIds]));
-      const coordsBatches = chunkArray(coordsIds, 150).map((batch) =>
-        supabase
-          .from("public_profiles")
-          .select("id, latitude_approx, longitude_approx")
-          .in("id", batch)
-      );
+      // Lot P1b : chargeur partagé (lots de 150 et cache par identifiant).
+      const coordsBatches = [publicProfilesLoader.rows(coordsIds)];
       const neutralResult = Promise.resolve({ data: null, error: null } as any);
       const nextOwnerPromise = futureGuards.length > 0
-        ? supabase.from("public_profiles").select("first_name").eq("id", futureGuards[0].sit.user_id).single()
+        ? publicProfilesLoader.rows([futureGuards[0].sit.user_id]).then((r) => ({ data: r.data[0] ?? null, error: r.error }))
         : neutralResult;
       const nextPetsPromise = futureGuards.length > 0
         ? supabase.from("pets").select("id, name, species, breed").eq("property_id", futureGuards[0].sit.property_id)

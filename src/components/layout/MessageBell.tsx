@@ -1,3 +1,4 @@
+import { publicProfilesLoader } from "@/lib/batchedReads";
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -76,10 +77,7 @@ const MessageBell = ({ onUnreadChange }: MessageBellProps = {}) => {
     )) as string[];
     const profMap = new Map<string, { first_name: string | null; avatar_url: string | null }>();
     if (otherIds.length > 0) {
-      const { data: profs } = await supabase
-        .from("public_profiles")
-        .select("id, first_name, avatar_url")
-        .in("id", otherIds);
+      const { data: profs } = await publicProfilesLoader.rows(otherIds);
       (profs ?? []).forEach((p: any) => profMap.set(p.id, { first_name: p.first_name, avatar_url: p.avatar_url }));
     }
     convs.forEach((c: any) => {

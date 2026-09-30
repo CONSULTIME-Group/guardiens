@@ -1,3 +1,4 @@
+import { sitterAffinityLoader } from "@/lib/batchedReads";
 import { fetchMySitsIndex, fetchMyProperties } from "@/lib/dashboardShared";
 /**
  * Owner Pass 3 : 3 gardiens qui vous correspondent (score d'affinité).
@@ -134,14 +135,8 @@ export function useOwnerTopAffinitySitters(): Result {
       // Lots de 150 ids : la limite réelle est la longueur de l'URL
       // PostgREST, qui casse au-delà d'environ 390 UUID.
       const ids = scoped.map((p: any) => p.id);
-      const affinityResults = await Promise.all(
-        chunkArray(ids, 150).map((batch) =>
-          supabase
-            .from("sitter_profiles_affinity")
-            .select("user_id, experience_years, life_pace, lifestyle, availability_during, has_vehicle, has_license, languages, interests, work_during_sit, sensitivities, animal_types, sitter_type, travels_with_children, travels_with_own_animals, special_animal_skills, farm_animals_ok")
-            .in("user_id", batch),
-        ),
-      );
+      // Lot P1b : chargeur partagé (lots de 150, cache par identifiant).
+      const affinityResults = [await sitterAffinityLoader.rows(ids)];
       const affinityError = affinityResults.find((result) => result.error)?.error;
       if (affinityError) throw affinityError;
       const sitterRows = affinityResults.flatMap((result) => result.data ?? []);
