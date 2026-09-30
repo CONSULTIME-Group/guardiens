@@ -8,6 +8,7 @@ export const SITE_URL = "https://guardiens.fr";
 /**
  * Image OG par défaut utilisée sur toutes les pages sans image dédiée.
  * Référence unique : doit rester synchronisée avec index.html et PageMeta.tsx.
+ * Copie légère dans siteConstants.ts (parité testée, lot P2).
  */
 export const DEFAULT_OG_IMAGE = `${SITE_URL}/og-default.jpg`;
 

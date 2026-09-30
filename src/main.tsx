@@ -6,14 +6,29 @@ import { installGlobalErrorHandlers } from "./lib/logger";
 import { installGlobalErrorLogger } from "./lib/errorLogger";
 import { initConsent } from "./lib/cookieConsent";
 import { installStorageFallback } from "./lib/storageFallback";
-import { installOAuthDebugHelper } from "./lib/oauthLogger";
 import { installDomTranslationGuard } from "./lib/domTranslationGuard";
 import { initPwaInstall } from "./lib/pwa-install";
+import { i18nReady } from "./i18n";
+import { runAfterFirstPaint, prefetchRouteChunk } from "./lib/bootSchedule";
 
+// Lot P2, travaux gardés avant le rendu (justesse) :
+// - installDomTranslationGuard : protège le DOM contre la traduction du
+//   navigateur, doit précéder la première écriture de React ;
+// - installStorageFallback : l'authentification lit le stockage au démarrage ;
+// - initPwaInstall : l'événement d'installation peut arriver très tôt et
+//   n'est émis qu'une fois ;
+// - gestionnaires d'erreurs et consentement (plus bas) : légers, et doivent
+//   couvrir le démarrage lui-même.
 installDomTranslationGuard();
 installStorageFallback();
 initPwaInstall();
-installOAuthDebugHelper();
+// Outil de débogage OAuth : jamais dans le parcours de production.
+if (import.meta.env.DEV) {
+  void import("./lib/oauthLogger").then((m) => m.installOAuthDebugHelper());
+}
+// Tableau de bord : son fichier est demandé dès le démarrage, en parallèle
+// de la vérification de session, quand un jeton est présent.
+prefetchRouteChunk(window.location.pathname);
 
 // RGPD : en production, forcer un loglevel restrictif pour éviter que des
 // données personnelles ne fuient dans la console navigateur via des libs
@@ -59,9 +74,11 @@ if (typeof window !== "undefined") {
 // statiquement par i18next à l'init, il n'y a plus rien à précharger avant le
 // premier rendu. Le repli des anciennes URL `?lang=xx` est géré par
 // LangUrlSync et `src/lib/lang.ts`.
-createRoot(container).render(
-  <App />
-);
+// Le dictionnaire français est chargé en parallèle ; le rendu l'attend pour
+// ne jamais afficher une clé brute. En cas d'échec, on rend quand même.
+void i18nReady.catch(() => {}).then(() => {
+  createRoot(container).render(<App />);
+});
 
 // Fallback prerenderReady : PageMeta est la source de vérité et lève le drapeau
 // à la fin de son useEffect, après écriture du canonical. Ce fallback couvre
@@ -77,7 +94,7 @@ if (typeof window !== "undefined") {
   window.setTimeout(markPrerenderReady, 10000);
 }
 
-reportWebVitals();
+runAfterFirstPaint(() => reportWebVitals());
 installGlobalErrorHandlers();
 installGlobalErrorLogger();
 initConsent();

@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { buildAbsoluteUrl, normalizeCanonical, normalizePathname } from "@/lib/seo";
 import { logSeoSnapshot } from "@/lib/seoDebugLog";
-import { DEFAULT_OG_IMAGE } from "@/data/siteRoutes";
+import { DEFAULT_OG_IMAGE } from "@/data/siteConstants";
 
 
 const DEFAULT_IMAGE = DEFAULT_OG_IMAGE;

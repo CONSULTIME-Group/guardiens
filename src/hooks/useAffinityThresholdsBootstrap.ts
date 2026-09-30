@@ -11,7 +11,7 @@
 import { useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { setAffinityThresholds } from "@/lib/affinityScore";
+import { runAfterFirstPaint } from "@/lib/bootSchedule";
 
 const KEYS = ["affinity_min_common_criteria", "affinity_min_score_percent"] as const;
 
@@ -22,7 +22,9 @@ export function useAffinityThresholdsBootstrap() {
     if (!user?.id) return;
 
     let cancelled = false;
-    (async () => {
+    // Lot P2 : lecture et moteur d'affinité chargés après le premier
+    // affichage, le moteur reste hors du fichier d'entrée.
+    runAfterFirstPaint(() => void (async () => {
       const { data, error } = await supabase
         .from("feature_flags")
         .select("key, value_int, enabled")
@@ -34,8 +36,9 @@ export function useAffinityThresholdsBootstrap() {
         if (row.key === "affinity_min_common_criteria") patch.minCommonCriteria = row.value_int;
         if (row.key === "affinity_min_score_percent") patch.minScorePercent = row.value_int;
       }
-      setAffinityThresholds(patch);
-    })();
+      const { setAffinityThresholds } = await import("@/lib/affinityScore");
+      if (!cancelled) setAffinityThresholds(patch);
+    })());
     return () => { cancelled = true; };
   }, [user?.id]);
 }
