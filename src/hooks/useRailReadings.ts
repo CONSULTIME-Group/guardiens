@@ -18,6 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { resolveBreedFiche, type BreedFicheCandidate } from "@/lib/breedFicheMatch";
 import { buildBreedEditorialHref } from "@/components/breeds/BreedEditorialLink";
 import { OWNER_STAGE_ARTICLES } from "@/lib/ownerArticleStages";
+import { getAppQueryClient } from "@/lib/appQueryClient";
 import type { OwnerPriorityAction } from "@/hooks/useOwnerPriorityAction";
 
 export interface RailReadingItem {
@@ -183,25 +184,29 @@ export const useRailReadings = ({
           role === "owner" && stageVariant
             ? OWNER_STAGE_ARTICLES[stageVariant]?.slugs[0]
             : null;
-        if (stageSlug) {
-          const { data } = await supabase
+        // Lot P1b : une seule lecture. L'article de l'étape s'il existe,
+        // sinon le plus récent indexable, départagés côté client.
+        // Mise en cache par étape : l'effet se relance quand les animaux ou
+        // l'étape arrivent, l'article n'est pas relu pour autant.
+        const readArticles = async () => {
+          let q = supabase
             .from("articles")
-            .select("slug, title")
-            .eq("slug", stageSlug)
-            .eq("published", true)
-            .maybeSingle();
-          article = data ?? null;
-        }
-        if (!article) {
-          const { data } = await supabase
-            .from("articles")
-            .select("slug, title")
-            .eq("published", true)
-            .or("noindex.is.null,noindex.eq.false")
-            .order("published_at", { ascending: false })
-            .limit(1);
-          article = data?.[0] ?? null;
-        }
+            .select("slug, title, noindex")
+            .eq("published", true);
+          q = stageSlug
+            ? q.or(`slug.eq.${stageSlug},noindex.is.null,noindex.eq.false`)
+            : q.or("noindex.is.null,noindex.eq.false");
+          const res = await q.order("published_at", { ascending: false }).limit(20);
+          return (res.data ?? []) as unknown[];
+        };
+        const client = getAppQueryClient();
+        const data = client
+          ? await client.fetchQuery({ queryKey: ["rail-article", stageSlug ?? null], queryFn: readArticles, staleTime: 10 * 60 * 1000 })
+          : await readArticles();
+        const rows = (data ?? []) as Array<{ slug: string; title: string; noindex: boolean | null }>;
+        const hit = (stageSlug ? rows.find((r) => r.slug === stageSlug) : undefined)
+          ?? rows.find((r) => !r.noindex);
+        article = hit ? { slug: hit.slug, title: hit.title } : null;
         if (article) {
           out.push({
             key: "journal",

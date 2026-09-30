@@ -1,3 +1,4 @@
+import { fetchMyProperties, fetchMyPets } from "@/lib/dashboardShared";
 /**
  * useProfileCompletionMissing, champs manquants du barème de complétion,
  * calculés côté client avec le même barème que la fonction SQL
@@ -79,7 +80,7 @@ export const useProfileCompletionMissing = (
         const [{ data: op }, { data: properties }, { count: galleryCount }] =
           await Promise.all([
             fetchMyOwnerProfile(userId!),
-            supabase.from("properties").select("id, description").eq("user_id", userId),
+            fetchMyProperties(userId!).then((data) => ({ data })).catch(() => ({ data: [] as any[] })),
             supabase
               .from("owner_gallery")
               .select("id", { count: "exact", head: true })
@@ -89,11 +90,8 @@ export const useProfileCompletionMissing = (
         const propertyIds = (properties ?? []).map((p) => p.id);
         let hasPet = false;
         if (propertyIds.length > 0) {
-          const { count: petsCount } = await supabase
-            .from("pets")
-            .select("id", { count: "exact", head: true })
-            .in("property_id", propertyIds);
-          hasPet = (petsCount ?? 0) > 0;
+          const pets = await fetchMyPets(userId!).catch(() => []);
+          hasPet = pets.some((p: any) => propertyIds.includes(p.property_id));
         }
 
         const result = computeOwnerCompletion({

@@ -12,7 +12,7 @@
  * dashboard, notamment par Alma et les whispers.
  */
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { fetchMySitsIndex } from "@/lib/dashboardShared";
 
 export type OwnerPrimaryActionKind = "create_first_sit" | "publish_draft";
 
@@ -34,13 +34,7 @@ export function useOwnerPrimaryAction(userId: string | undefined) {
       // Une seule lecture : le compte d'annonces publiées et le dernier
       // brouillon se déduisent côté client de la même liste, triée comme
       // l'ancienne requête brouillon (updated_at desc, created_at desc).
-      const { data: rows, error } = await supabase
-        .from("sits")
-        .select("id, status, updated_at, created_at")
-        .eq("user_id", userId)
-        .order("updated_at", { ascending: false, nullsFirst: false })
-        .order("created_at", { ascending: false });
-      if (error) throw error;
+      const rows = await fetchMySitsIndex(userId);
       const list = rows ?? [];
 
       // Au moins une annonce publiée (état "activé") : on ne pousse plus.

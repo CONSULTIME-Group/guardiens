@@ -1,3 +1,4 @@
+import { fetchOpenSmallMissions } from "@/lib/dashboardShared";
 /**
  * useFirstNearbyMission, récupère la première mission d'entraide ouverte
  * du département de l'utilisateur (exclut ses propres missions).
@@ -39,12 +40,7 @@ export function useFirstNearbyMission(userId: string | undefined) {
           return;
         }
 
-        const { data: missions } = await supabase
-          .from("small_missions")
-          .select("id, title, category, city, postal_code, date_needed, user_id, status")
-          .eq("status", "open")
-          .order("created_at", { ascending: false })
-          .limit(20);
+        const { rows: missions } = await fetchOpenSmallMissions();
 
         const first = (missions || [])
           .filter((m: any) => m.user_id !== userId && m.postal_code?.startsWith(dept))

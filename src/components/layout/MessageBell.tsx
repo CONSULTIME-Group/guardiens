@@ -1,3 +1,5 @@
+import { fetchMyProfile } from "@/lib/myProfile";
+import { publicProfilesLoader } from "@/lib/batchedReads";
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -76,10 +78,13 @@ const MessageBell = ({ onUnreadChange }: MessageBellProps = {}) => {
     )) as string[];
     const profMap = new Map<string, { first_name: string | null; avatar_url: string | null }>();
     if (otherIds.length > 0) {
-      const { data: profs } = await supabase
-        .from("public_profiles")
-        .select("id, first_name, avatar_url")
-        .in("id", otherIds);
+      // Lot P1b : ma propre fiche vient du profil déjà en cache, les autres
+      // du chargeur partagé (aucune relecture des profils déjà lus).
+      const [{ data: profs }, mine] = await Promise.all([
+        publicProfilesLoader.rows(otherIds.filter((id) => id !== userId)),
+        otherIds.includes(userId) ? fetchMyProfile(userId) : Promise.resolve({ data: null }),
+      ]);
+      if (mine.data) profMap.set(userId, { first_name: mine.data.first_name ?? null, avatar_url: mine.data.avatar_url ?? null });
       (profs ?? []).forEach((p: any) => profMap.set(p.id, { first_name: p.first_name, avatar_url: p.avatar_url }));
     }
     convs.forEach((c: any) => {

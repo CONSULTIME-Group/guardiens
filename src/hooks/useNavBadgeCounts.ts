@@ -1,3 +1,4 @@
+import { fetchMySitsIndex, fetchMyApplicationsIndex, fetchMyConversationsIndex, fetchApplicationsOnMySits } from "@/lib/dashboardShared";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { messagesUnreadExclusive } from "@/lib/navModel";
@@ -38,16 +39,11 @@ export function useNavBadgeCounts(userId: string | undefined): NavBadgeCounts {
 
       // Vague 1 : tout ce qui ne dépend que de userId.
       const [convsRes, userSitsRes, myAppsRes] = await Promise.all([
-        supabase
-          .from("conversations")
-          .select("id, small_mission_id")
-          .or(`owner_id.eq.${userId},sitter_id.eq.${userId}`),
-        supabase.from("sits").select("id").eq("user_id", userId),
-        supabase
-          .from("applications")
-          .select("id", { count: "exact", head: true })
-          .eq("sitter_id", userId)
-          .eq("status", "pending"),
+        fetchMyConversationsIndex(userId).then((data) => ({ data })).catch(() => ({ data: [] as any[] })),
+        fetchMySitsIndex(userId).then((data) => ({ data })).catch(() => ({ data: [] as any[] })),
+        fetchMyApplicationsIndex(userId)
+          .then((rows) => ({ count: rows.filter((r) => r.status === "pending").length }))
+          .catch(() => ({ count: 0 })),
       ]);
 
       const convs = convsRes.data ?? [];
@@ -77,11 +73,9 @@ export function useNavBadgeCounts(userId: string | undefined): NavBadgeCounts {
               .is("read_at", null)
           : Promise.resolve({ count: 0 } as any),
         userSits.length > 0
-          ? supabase
-              .from("applications")
-              .select("id", { count: "exact", head: true })
-              .in("sit_id", userSits.map((s: any) => s.id))
-              .eq("status", "pending")
+          ? fetchApplicationsOnMySits(userId)
+              .then((rows) => ({ count: rows.filter((a: any) => a.status === "pending").length }))
+              .catch(() => ({ count: 0 }))
           : Promise.resolve({ count: 0 } as any),
       ]);
 

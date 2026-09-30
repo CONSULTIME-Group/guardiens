@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchMyProfile } from "@/lib/myProfile";
 import { haversineDistance } from "@/utils/geo";
 
 /**
@@ -32,47 +33,33 @@ export function useHelpersProximityCount(currentUserId: string | undefined) {
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
     queryFn: async () => {
-      // 1. Total national (exact, via head: true)
-      const { count: nationalCount } = await supabase
-        .from("public_profiles")
-        .select("id", { count: "exact", head: true })
-        .eq("available_for_help", true)
-        .not("skill_categories", "eq", "{}");
-
-      // 2. Local : on a besoin des coords du user + des helpers
+      // Lot P1b : une seule lecture. Le compte exact national accompagne la
+      // liste des coups de main (coordonnées approchées), filtrée ensuite
+      // en mémoire pour le compte local, sans requête supplémentaire.
       let localCount = 0;
       let hasGeo = false;
-
-      if (currentUserId) {
-        const { data: me } = await supabase
-          .from("profiles")
-          .select("latitude, longitude")
-          .eq("id", currentUserId)
-          .maybeSingle();
-
-        hasGeo = !!(me?.latitude && me?.longitude);
-
-        if (hasGeo) {
-          const { data: pool } = await supabase
-            .from("public_profiles")
-            .select("id, latitude_approx, longitude_approx")
-            .eq("available_for_help", true)
-            .not("skill_categories", "eq", "{}")
-            .not("latitude_approx", "is", null)
-            .not("longitude_approx", "is", null)
-            .neq("id", currentUserId)
-            .limit(500);
-
-          if (pool) {
-            localCount = pool.filter((p: any) => {
-              const d = haversineDistance(
-                { lat: me!.latitude as number, lng: me!.longitude as number },
-                { lat: p.latitude_approx, lng: p.longitude_approx },
-              );
-              return d <= LOCAL_RADIUS_KM;
-            }).length;
-          }
-        }
+      const [helpersRes, meRes] = await Promise.all([
+        supabase
+          .from("public_profiles")
+          .select("id, latitude_approx, longitude_approx", { count: "exact" })
+          .eq("available_for_help", true)
+          .not("skill_categories", "eq", "{}")
+          .order("id", { ascending: true })
+          .limit(1000),
+        currentUserId ? fetchMyProfile(currentUserId) : Promise.resolve({ data: null }),
+      ]);
+      const nationalCount = helpersRes.count ?? 0;
+      const me = meRes.data as { latitude?: number | null; longitude?: number | null } | null;
+      hasGeo = !!(me?.latitude && me?.longitude);
+      if (hasGeo && currentUserId) {
+        localCount = ((helpersRes.data ?? []) as any[]).filter((p) => {
+          if (p.id === currentUserId || p.latitude_approx == null || p.longitude_approx == null) return false;
+          const d = haversineDistance(
+            { lat: me!.latitude as number, lng: me!.longitude as number },
+            { lat: p.latitude_approx, lng: p.longitude_approx },
+          );
+          return d <= LOCAL_RADIUS_KM;
+        }).length;
       }
 
       return {

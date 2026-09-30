@@ -11,8 +11,15 @@ export function registerAppQueryClient(client: QueryClient): void {
   appQueryClient = client;
 }
 
+const clearHooks: Array<() => void> = [];
+/** Caches hors React Query à vider avec lui (lot P1b). */
+export function onAppQueryCacheClear(fn: () => void): void {
+  clearHooks.push(fn);
+}
+
 export function clearAppQueryCache(): void {
   appQueryClient?.clear();
+  clearHooks.forEach((fn) => { try { fn(); } catch { /* silencieux */ } });
 }
 
 export function getAppQueryClient(): QueryClient | null {

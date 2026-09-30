@@ -1,3 +1,4 @@
+import { fetchMySitsIndex, fetchMyProperties, invalidateMyProperties, fetchMyPets, invalidateMyPets } from "@/lib/dashboardShared";
 import { fetchMyOwnerProfile, fetchMyProfile, fetchMySitterProfile } from "@/lib/myProfile";
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -197,7 +198,7 @@ export function useOwnerProfile() {
     try {
       [profileRes, propertyRes, ownerRes, sitterRes] = await Promise.all([
         fetchMyProfile(user.id!, { fresh: true }),
-        supabase.from("properties").select("*").eq("user_id", user.id).limit(1).maybeSingle(),
+        fetchMyProperties(user.id!, { fresh: true }).then((rows) => ({ data: rows[0] ?? null, error: null })).catch((error) => ({ data: null, error })),
         fetchMyOwnerProfile(user.id!, { fresh: true }),
         fetchMySitterProfile(user.id!, { fresh: true }),
       ]);
@@ -269,7 +270,7 @@ export function useOwnerProfile() {
 
     if (prop) {
       setPropertyId(prop.id);
-      const { data: petsData } = await supabase.from("pets").select("*").eq("property_id", prop.id);
+      const petsData = (await fetchMyPets(user.id!, { fresh: true }).catch(() => [])).filter((a: any) => a.property_id === prop.id);
       setPets(petsData?.map(a => ({
         id: a.id, property_id: a.property_id, species: a.species, breed: a.breed || "",
         name: a.name, age: a.age, photo_url: a.photo_url || "", character: a.character || "",
@@ -303,8 +304,9 @@ export function useOwnerProfile() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data: { user: authUser } } = await supabase.auth.getUser();
-      if (!cancelled) setEmailVerified(!!authUser?.email_confirmed_at);
+      // Lot P1b : session locale, aucun appel réseau.
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!cancelled) setEmailVerified(!!session?.user?.email_confirmed_at);
     })();
     return () => { cancelled = true; };
   }, [user]);
@@ -314,12 +316,8 @@ export function useOwnerProfile() {
     if (!user) return;
     let cancelled = false;
     (async () => {
-      const { count } = await supabase
-        .from("sits")
-        .select("id", { count: "exact", head: true })
-        .eq("user_id", user.id)
-        .neq("status", "draft");
-      if (!cancelled) setHasFirstActivity((count ?? 0) > 0);
+      const rows = await fetchMySitsIndex(user.id!).catch(() => []);
+      if (!cancelled) setHasFirstActivity(rows.some((r) => r.status !== "draft"));
     })();
     return () => { cancelled = true; };
   }, [user]);
@@ -365,10 +363,12 @@ export function useOwnerProfile() {
       if (Object.keys(propUpdate).length > 0) {
         if (propertyId) {
           const { error } = await supabase.from("properties").update(propUpdate).eq("id", propertyId);
+          invalidateMyProperties(user.id!);
           if (error) throw error;
         } else {
           const { data: newProp, error } = await supabase
             .from("properties").insert({ ...propUpdate, user_id: user.id }).select("id").single();
+          invalidateMyProperties(user.id!);
           if (error) throw error;
           if (newProp) setPropertyId(newProp.id);
         }
@@ -469,6 +469,7 @@ export function useOwnerProfile() {
     if (!currentPropId) {
       const { data: newProp, error: propError } = await supabase
         .from("properties").insert({ user_id: user.id }).select("id").single();
+      invalidateMyProperties(user.id!);
       if (propError || !newProp) {
         logger.error("Failed to create property before pet insert", { error: String(propError) });
         toast({ variant: "destructive", title: "Erreur", description: "Impossible de créer votre logement. Réessayez." });
@@ -484,6 +485,7 @@ export function useOwnerProfile() {
       .insert(payload as any)
       .select()
       .single();
+    invalidateMyPets(user.id!);
 
     if (error || !created) {
       logger.error("Failed to insert pet", { error: String(error), payload });
@@ -502,6 +504,7 @@ export function useOwnerProfile() {
     if (!pet.id) return;
     const payload = sanitizePet(pet);
     const { error } = await supabase.from("pets").update(payload as any).eq("id", pet.id);
+    invalidateMyPets(user!.id!);
     if (error) {
       logger.error("Failed to update pet", { error: String(error), payload });
       toast({
@@ -517,6 +520,7 @@ export function useOwnerProfile() {
 
   const removePet = useCallback(async (id: string) => {
     const { error } = await supabase.from("pets").delete().eq("id", id);
+    invalidateMyPets(user!.id!);
     if (error) {
       logger.error("Failed to delete pet", { error: String(error) });
       toast({

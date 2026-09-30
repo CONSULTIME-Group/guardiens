@@ -461,8 +461,10 @@ export async function trackEvent(eventType: EventType, opts: TrackOptions = {}) 
     return;
   }
   try {
-    const { data: { user } } = await supabase.auth.getUser();
-
+    // Lot P1b : identifiant lu dans la session locale, jamais d'appel réseau
+    // auth/v1/user par événement.
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user ?? null;
 
     if (import.meta.env.DEV) {
       // eslint-disable-next-line no-console
@@ -537,7 +539,7 @@ export async function trackFirstAction(
   extraMetadata: Record<string, any> = {}
 ) {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = (await supabase.auth.getSession()).data.session?.user ?? null; // P1b : session locale
     if (!user?.id) return;
     const flagKey = `first_action_tracked_${user.id}`;
     if (typeof window !== "undefined" && localStorage.getItem(flagKey)) return;

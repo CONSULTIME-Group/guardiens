@@ -91,7 +91,7 @@ export async function captureUtmFromUrl(search: string, path: string): Promise<v
 
   if (sameClick) return;
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = (await supabase.auth.getSession()).data.session?.user ?? null; // P1b : session locale
   await supabase
     .from("email_campaign_events")
     .insert({
@@ -113,7 +113,7 @@ export async function captureUtmFromUrl(search: string, path: string): Promise<v
 export async function recordMissionCreatedAttribution(missionId: string): Promise<void> {
   const c = readStored();
   if (!c) return;
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = (await supabase.auth.getSession()).data.session?.user ?? null; // P1b : session locale
   await supabase
     .from("email_campaign_events")
     .insert({

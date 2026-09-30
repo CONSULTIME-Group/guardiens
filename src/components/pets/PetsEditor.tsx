@@ -104,6 +104,7 @@ const PetsEditor = ({ propertyId, onChange }: Props) => {
     setDialogOpen(false);
     setEditing(null);
     await qc.invalidateQueries({ queryKey: ["pets-editor", propertyId] });
+    await qc.invalidateQueries({ queryKey: ["my-pets"] });
   };
 
   const handleDelete = async () => {
@@ -113,6 +114,7 @@ const PetsEditor = ({ propertyId, onChange }: Props) => {
     toast.success("Animal retiré");
     setConfirmDelete(null);
     await qc.invalidateQueries({ queryKey: ["pets-editor", propertyId] });
+    await qc.invalidateQueries({ queryKey: ["my-pets"] });
   };
 
   return (

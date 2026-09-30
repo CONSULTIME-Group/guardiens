@@ -1,3 +1,5 @@
+import { publicProfilesLoader } from "@/lib/batchedReads";
+import { fetchMyBadges, fetchMyEmergencyProfileId, fetchMySmallMissionsIndex, fetchMyConversationsIndex, fetchOpenPublishedSits, fetchMyApplicationsIndex, fetchOpenSmallMissions } from "@/lib/dashboardShared";
 import { fetchMyProfile, fetchMyPublicProfile, fetchMySitterProfile } from "@/lib/myProfile";
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -137,52 +139,36 @@ export function useSitterDashboardData(userId: string | undefined) {
         badgesRes, articlesRes, unreadRes, allBadgesRes, emProfileRes, reputationRes,
         meApproxRes, listingsRes, openMissionsRes, myMissionsRes,
       ] = await Promise.all([
-        supabase.from("applications")
-          .select("*, sit:sits(id, title, city, start_date, end_date, status, user_id, property_id, properties:property_id(photos))")
-          .eq("sitter_id", userId).order("created_at", { ascending: false }),
+        fetchMyApplicationsIndex(userId!).then((data) => ({ data: data.map((a) => ({ ...a })), error: null })).catch((error) => ({ data: null, error })),
         fetchMySitterProfile(userId!),
         fetchMyProfile(userId!),
         supabase.from("reviews")
           .select("overall_rating").eq("reviewee_id", userId).eq("published", true),
-        supabase.from("badge_attributions").select("id").eq("user_id", userId),
+        fetchMyBadges(userId!).then((data) => ({ data, error: null })).catch((error) => ({ data: [] as any[], error })),
         supabase.from("articles")
           .select("id, title, slug, cover_image_url, excerpt, category")
           .eq("published", true).eq("category", "conseil_gardien")
           .order("published_at", { ascending: false }).limit(3),
         (supabase as any).rpc("get_unread_messages_count", { _user_id: userId }),
         // Single badge query, replaces both badgeDetailsRes AND useUserBadges
-        supabase.from("badge_attributions")
-          .select("badge_id, created_at").eq("user_id", userId)
-          .order("created_at", { ascending: false }),
-        supabase.from("emergency_sitter_profiles")
-          .select("id").eq("user_id", userId).maybeSingle(),
+        fetchMyBadges(userId!).then((data) => ({ data, error: null })).catch((error) => ({ data: [] as any[], error })),
+        fetchMyEmergencyProfileId(userId!).then((id) => ({ data: id ? { id } : null, error: null })).catch((error) => ({ data: null, error })),
         // Reputation, replaces useProfileReputation
         (supabase as any).from("profile_reputation")
           .select("*").eq("user_id", userId).maybeSingle(),
         // Coordonnées approximatives de l'utilisateur : lancées toujours, mais
         // utilisées seulement si profiles.latitude ou longitude est null.
-        fetchMyPublicProfile(userId!),
+        // Lot P1b : latitude_approx n'est que l'arrondi de profiles.latitude,
+        // la relire n'apporte rien quand profiles est lu.
+        Promise.resolve({ data: null, error: null }),
         // Annonces publiées et non terminées (end_date >= aujourd'hui).
-        supabase.from("sits")
-          .select("id, title, start_date, end_date, user_id, property_id, status, created_at, is_urgent, cover_photo_url, properties:property_id(photos, type, environment, cover_photo_url)")
-          .eq("status", "published")
-          .neq("user_id", userId)
-          .gte("end_date", todayIso)
-          .order("created_at", { ascending: false })
-          .limit(500),
+        fetchOpenPublishedSits(userId!).then((r) => ({ data: r.rows.map((x) => ({ ...x })), error: r.error as any })),
         // Missions ouvertes : lancées toujours, traitées seulement si le
         // gardien a un département connu.
-        supabase.from("small_missions")
-          .select("id, title, category, city, postal_code, date_needed, status, created_at, user_id")
-          .eq("status", "open")
-          .order("created_at", { ascending: false })
-          .limit(20),
-        supabase.from("small_missions")
-          .select("id, title, category, city, date_needed, status, created_at, small_mission_responses(id, status)")
-          .eq("user_id", userId)
-          .in("status", ["open", "completed"])
-          .order("created_at", { ascending: false })
-          .limit(8),
+        fetchOpenSmallMissions().then((r) => ({ data: r.rows, error: r.error as any })),
+        fetchMySmallMissionsIndex(userId!)
+          .then((data) => ({ data: data.filter((m) => m.status === "open" || m.status === "completed").slice(0, 8), error: null }))
+          .catch((error) => ({ data: [] as any[], error })),
       ]);
 
 
@@ -293,15 +279,11 @@ export function useSitterDashboardData(userId: string | undefined) {
       // 2) Prénom du propriétaire de la prochaine garde (si elle existe).
       // 3) Animaux de la prochaine garde (si elle existe).
       const coordsIds = Array.from(new Set([...candidateOwnerIds, ...authorIds]));
-      const coordsBatches = chunkArray(coordsIds, 150).map((batch) =>
-        supabase
-          .from("public_profiles")
-          .select("id, latitude_approx, longitude_approx")
-          .in("id", batch)
-      );
+      // Lot P1b : chargeur partagé (lots de 150 et cache par identifiant).
+      const coordsBatches = [publicProfilesLoader.rows(coordsIds)];
       const neutralResult = Promise.resolve({ data: null, error: null } as any);
       const nextOwnerPromise = futureGuards.length > 0
-        ? supabase.from("public_profiles").select("first_name").eq("id", futureGuards[0].sit.user_id).single()
+        ? publicProfilesLoader.rows([futureGuards[0].sit.user_id]).then((r) => ({ data: r.data[0] ?? null, error: r.error }))
         : neutralResult;
       const nextPetsPromise = futureGuards.length > 0
         ? supabase.from("pets").select("id, name, species, breed").eq("property_id", futureGuards[0].sit.property_id)
@@ -592,10 +574,7 @@ export function useSitterDashboardData(userId: string | undefined) {
 
     // Précharge les conversations dont je fais partie.
     (async () => {
-      const { data } = await supabase
-        .from("conversations")
-        .select("id")
-        .or(`owner_id.eq.${userId},sitter_id.eq.${userId}`);
+      const data = await fetchMyConversationsIndex(userId).catch(() => []);
       if (cancelled) return;
       (data || []).forEach((c: any) => memberConvIds.add(c.id));
     })();

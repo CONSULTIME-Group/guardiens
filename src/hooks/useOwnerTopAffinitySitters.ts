@@ -1,3 +1,5 @@
+import { sitterAffinityLoader } from "@/lib/batchedReads";
+import { fetchMySitsIndex, fetchMyProperties, fetchMyPets } from "@/lib/dashboardShared";
 /**
  * Owner Pass 3 : 3 gardiens qui vous correspondent (score d'affinité).
  *
@@ -20,10 +22,11 @@ import { fetchMyOwnerProfile, fetchMyProfile } from "@/lib/myProfile";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { createYieldBudget } from "@/lib/yieldToMain";
 import { computeAffinityResultFull, type AffinityResult } from "@/lib/affinityScore";
 import { haversineDistance } from "@/utils/geo";
 import { chunkArray } from "@/lib/chunkArray";
-import { fetchSitterPool, countSitterPool } from "@/lib/fetchSitterPool";
+import { fetchSitterPoolShared } from "@/lib/fetchSitterPool";
 
 /**
  * Plafond de scoring : au-delà, les gardiens les plus éloignés ne sont pas
@@ -71,25 +74,21 @@ export function useOwnerTopAffinitySitters(): Result {
       const [{ data: me }, { data: ownerPrefs }, { data: pets }, { data: myProperties }, pool, exactPoolCount, publishedRes] = await Promise.all([
         fetchMyProfile(userId!),
         fetchMyOwnerProfile(userId!),
-        supabase.from("pets").select("species, special_needs, breed, property_id, properties!inner(user_id)").eq("properties.user_id", userId!),
-        supabase.from("properties").select("car_required").eq("user_id", userId!),
+        fetchMyPets(userId!).then((data) => ({ data })).catch(() => ({ data: [] as any[] })),
+        fetchMyProperties(userId!).then((data) => ({ data })).catch(() => ({ data: [] as any[] })),
         // Vivier de gardiens actifs, COMPLET : aucun filtre de confiance
         // (identité vérifiée, complétude). La vue public_profiles ne contient
         // déjà que des comptes actifs avec prénom, c'est la seule hygiène
         // admise. Le plafond de lecture est une borne technique, tracée.
-        fetchSitterPool<any>(
-          "id, first_name, avatar_url, city, latitude_approx, longitude_approx, identity_verified, profile_completion, role",
-          userId!,
-        ),
-        countSitterPool(userId!),
+        // Lot P1b : lecture partagée avec « Près de chez vous », compte exact inclus.
+        fetchSitterPoolShared(userId!).then((r) => r.rows),
+        fetchSitterPoolShared(userId!).then((r) => r.count),
         // Annonce publiée (ou garde en cours) : sans elle, l'affinité n'a
         // pas de base de comparaison suffisante, les cartes montrent les
         // raisons et la ligne « L'affinité se calcule dès votre annonce publiée. ».
-        supabase
-          .from("sits")
-          .select("id", { count: "exact", head: true })
-          .eq("user_id", userId!)
-          .in("status", ["published", "confirmed", "in_progress"]),
+        fetchMySitsIndex(userId!)
+          .then((rows) => ({ count: rows.filter((r) => ["published", "confirmed", "in_progress"].includes(r.status)).length }))
+          .catch(() => ({ count: 0 })),
       ]);
 
       const meLat = (me?.latitude as number | null) ?? null;
@@ -137,14 +136,8 @@ export function useOwnerTopAffinitySitters(): Result {
       // Lots de 150 ids : la limite réelle est la longueur de l'URL
       // PostgREST, qui casse au-delà d'environ 390 UUID.
       const ids = scoped.map((p: any) => p.id);
-      const affinityResults = await Promise.all(
-        chunkArray(ids, 150).map((batch) =>
-          supabase
-            .from("sitter_profiles_affinity")
-            .select("user_id, experience_years, life_pace, lifestyle, availability_during, has_vehicle, has_license, languages, interests, work_during_sit, sensitivities, animal_types, sitter_type, travels_with_children, travels_with_own_animals, special_animal_skills, farm_animals_ok")
-            .in("user_id", batch),
-        ),
-      );
+      // Lot P1b : chargeur partagé (lots de 150, cache par identifiant).
+      const affinityResults = [await sitterAffinityLoader.rows(ids)];
       const affinityError = affinityResults.find((result) => result.error)?.error;
       if (affinityError) throw affinityError;
       const sitterRows = affinityResults.flatMap((result) => result.data ?? []);
@@ -175,7 +168,10 @@ export function useOwnerTopAffinitySitters(): Result {
       };
 
       const scored: AffinitySitterCard[] = [];
+      // Lot P1b : calcul découpé en tranches de 8 ms, résultats identiques.
+      const tick = createYieldBudget(8);
       for (const p of scoped) {
+        await tick();
         const sitter = sitterByUser.get(p.id) ?? {};
         // Doctrine : on trie par pertinence, on n'élimine jamais. Tous les
         // gardiens du vivier entrent dans le classement ; le chiffre affiché

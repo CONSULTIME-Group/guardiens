@@ -243,7 +243,7 @@ const PetAdviceSection = ({
     }
     let cancelled = false;
     (async () => {
-      const { data: auth } = await supabase.auth.getUser();
+      const auth = { user: (await supabase.auth.getSession()).data.session?.user ?? null }; // P1b : session locale
       const uid = auth.user?.id;
       if (!uid) {
         if (!cancelled) setFetchedPets([]);

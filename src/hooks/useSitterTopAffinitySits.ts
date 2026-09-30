@@ -1,3 +1,5 @@
+import { publicProfilesLoader } from "@/lib/batchedReads";
+import { fetchOpenPublishedSits } from "@/lib/dashboardShared";
 /**
  * Charge les 3 annonces les plus pertinentes pour un gardien. La préférence
  * déclarée dans alert_preferences prime, puis la distance depuis le profil,
@@ -7,6 +9,7 @@ import { fetchMyProfile } from "@/lib/myProfile";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { createYieldBudget } from "@/lib/yieldToMain";
 import { computeAffinityResultFull, type AffinityResult } from "@/lib/affinityScore";
 import { getDeptCode } from "@/lib/departments";
 import { haversineDistance } from "@/utils/geo";
@@ -165,36 +168,20 @@ export function useSitterTopAffinitySits(): Result {
       //    candidat : publiées, ouvertes aux candidatures, non terminées,
       //    hors annonces du gardien lui-même. Jamais le total brut.
       const todayIso = new Date().toISOString().slice(0, 10);
-      const { count: totalPublished } = await supabase
-        .from("sits")
-        .select("id", { count: "exact", head: true })
-        .eq("status", "published")
-        .eq("accepting_applications", true)
-        .gte("end_date", todayIso)
-        .neq("user_id", userId!);
-
-      // 3. Pool national candidat. Le classement complète toujours jusqu'à
-      //    trois annonces si le catalogue en contient au moins trois.
-      const sitsRes: any = await supabase
-        .from("sits")
-        .select(
-          "id, title, city, start_date, end_date, cover_photo_url, user_id, property_id, accepts_sitter_pets, accepts_sitter_children, departement_code, environments",
-        )
-        .eq("status", "published")
-        .eq("accepting_applications", true)
-        .gte("end_date", todayIso)
-        .neq("user_id", userId!)
-        .order("created_at", { ascending: false })
-        .limit(80);
-      const sitsAll: any[] = sitsRes.data ?? [];
+      // Lot P1b : même lecture que « Annonces autour ». Mêmes règles que
+      // l'ancien pool candidat : ouvertes aux candidatures, 80 plus récentes.
+      const shared = await fetchOpenPublishedSits(userId!);
+      const accepting = shared.rows.filter((x: any) => x.accepting_applications === true);
+      const totalPublished = accepting.length;
+      const sitsAll: any[] = accepting.slice(0, 80).map((x: any) => {
+        const { properties: _p, ...rest } = x;
+        return { ...rest };
+      });
 
       // Hydratation RLS-safe des propriétaires via la vue publique.
       const sitOwnerIds = Array.from(new Set(sitsAll.map((s) => s.user_id).filter(Boolean))) as string[];
       if (sitOwnerIds.length > 0) {
-        const { data: ownerProfs } = await supabase
-          .from("public_profiles")
-          .select("id, first_name, postal_code, latitude_approx, longitude_approx")
-          .in("id", sitOwnerIds);
+        const { data: ownerProfs } = await publicProfilesLoader.rows(sitOwnerIds);
         const ownerMap = new Map<string, any>();
         (ownerProfs ?? []).forEach((p: any) => ownerMap.set(p.id, p));
         sitsAll.forEach((s: any) => { s.owner = s.user_id ? ownerMap.get(s.user_id) ?? null : null; });
@@ -272,7 +259,10 @@ export function useSitterTopAffinitySits(): Result {
 
       const scored: AffinitySitCard[] = [];
       const fallback: AffinitySitCard[] = [];
+      // Lot P1b : calcul découpé en tranches de 8 ms, résultats identiques.
+      const tick = createYieldBudget(8);
       for (const sit of sitsAll) {
+        await tick();
         const pets = petsByProperty.get(sit.property_id) ?? [];
         const ownerFirstName: string | null = sit?.owner?.first_name ?? null;
         const card: AffinitySitCard = {

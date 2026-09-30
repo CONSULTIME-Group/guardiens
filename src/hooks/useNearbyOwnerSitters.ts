@@ -1,8 +1,10 @@
+import { publishedReviewsLoader, sitterAffinityLoader, sitterCompetencesLoader } from "@/lib/batchedReads";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { haversineDistance } from "@/utils/geo";
 import type { AffinitySitterInput } from "@/lib/affinityScore";
-import { fetchSitterPool } from "@/lib/fetchSitterPool";
+import { fetchSitterPoolShared } from "@/lib/fetchSitterPool";
+import { fetchMyProfile } from "@/lib/myProfile";
 
 /**
  * « Gardiens près de chez vous » pour le dashboard propriétaire.
@@ -89,24 +91,21 @@ export function useNearbyOwnerSitters(currentUserId: string | undefined) {
       // systématiquement (elle ne coûte qu'une ligne) mais ne sert qu'en
       // repli, exactement comme avant.
       const [meRes, approxRes, poolRes] = await Promise.all([
-        supabase.from("profiles").select("latitude, longitude").eq("id", currentUserId!).maybeSingle(),
-        supabase
-          .from("public_profiles")
-          .select("latitude_approx, longitude_approx")
-          .eq("id", currentUserId!)
-          .maybeSingle(),
+        fetchMyProfile(currentUserId!),
+        // Repli approché lu seulement si les coordonnées exactes manquent.
+        Promise.resolve({ data: null as any }),
         // Vivier de gardiens actifs, complet : aucun filtre de complétude
         // ni de confiance (la vue ne retient déjà que les comptes actifs).
         // Plafond de lecture technique, tracé s'il est atteint.
-        fetchSitterPool<any>(
-          "id, first_name, avatar_url, city, identity_verified, completed_sits_count, skill_categories, custom_skills, latitude_approx, longitude_approx, role",
-          currentUserId!,
-        ).then((data) => ({ data })),
+        // Lot P1b : même lecture que l'onglet « Pour vous ».
+        fetchSitterPoolShared(currentUserId!).then((r) => ({ data: r.rows })),
       ]);
 
       let meLat: number | null = (meRes.data?.latitude as number | null) ?? null;
       let meLng: number | null = (meRes.data?.longitude as number | null) ?? null;
       if (meLat === null || meLng === null) {
+        // Lot P1b : public_profiles.latitude_approx n'est que l'arrondi de
+        // profiles.latitude ; sans coordonnées exactes, il n'y a rien à relire.
         const approx = approxRes.data;
         if (approx?.latitude_approx && approx?.longitude_approx) {
           meLat = approx.latitude_approx as number;
@@ -194,13 +193,9 @@ export function useNearbyOwnerSitters(currentUserId: string | undefined) {
 
       // VAGUE 2 : données d'affichage, uniquement pour ces candidats.
       const [reviewsRes, sitterRes, affinityRes] = await Promise.all([
-        supabase
-          .from("reviews")
-          .select("reviewee_id, overall_rating")
-          .in("reviewee_id", ids)
-          .eq("published", true),
-        supabase.from("public_sitter_profiles").select("user_id, competences").in("user_id", ids),
-        supabase.from("sitter_profiles_affinity").select(NEARBY_AFFINITY_COLUMNS).in("user_id", ids),
+        publishedReviewsLoader.rows(ids),
+        sitterCompetencesLoader.rows(ids),
+        sitterAffinityLoader.rows(ids),
       ]);
       const readError = [reviewsRes, sitterRes, affinityRes].find((result) => result.error)?.error;
       if (readError) throw readError;

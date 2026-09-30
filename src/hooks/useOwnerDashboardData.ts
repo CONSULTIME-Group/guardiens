@@ -1,3 +1,5 @@
+import { publicProfilesLoader, publishedReviewsLoader, sitterAffinityLoader } from "@/lib/batchedReads";
+import { fetchMySmallMissionsIndex, fetchMyProperties, fetchMyPets, fetchApplicationsOnMySits, fetchOpenSmallMissions } from "@/lib/dashboardShared";
 import { fetchMyProfile } from "@/lib/myProfile";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -106,13 +108,13 @@ export function useOwnerDashboardData(userId: string | undefined) {
           myMissionsDataRes, allMyMissionsCountRes,
         ] = await Promise.all([
           supabase.from("sits").select("*, applications(id, status, sitter_id)").eq("user_id", userId).order("created_at", { ascending: false }),
-          supabase.from("properties").select("id, type, environment, photos").eq("user_id", userId),
-          supabase.from("reviews").select("overall_rating").eq("reviewee_id", userId).eq("published", true),
+          fetchMyProperties(userId!).then((data) => ({ data, error: null })).catch((error) => ({ data: [] as any[], error })),
+          publishedReviewsLoader.rows([userId!]),
           fetchMyProfile(userId!),
           supabase.from("owner_highlights").select("*").eq("owner_id", userId).eq("hidden", false).order("created_at", { ascending: false }).limit(5),
-          supabase.from("small_missions").select("id, title, category, city, created_at").eq("status", "open").order("created_at", { ascending: false }).limit(2),
-          supabase.from("small_missions").select("id, title, category, status, created_at, small_mission_responses(id, status)").eq("user_id", userId).order("created_at", { ascending: false }).limit(3),
-          supabase.from("small_missions").select("id, status").eq("user_id", userId),
+          fetchOpenSmallMissions().then((r) => ({ data: r.rows.slice(0, 2), error: r.error as any })),
+          fetchMySmallMissionsIndex(userId!).then((data) => ({ data: data.slice(0, 3), error: null })).catch((error) => ({ data: [] as any[], error })),
+          fetchMySmallMissionsIndex(userId!).then((data) => ({ data, error: null })).catch((error) => ({ data: [] as any[], error })),
         ]);
 
 
@@ -189,19 +191,17 @@ export function useOwnerDashboardData(userId: string | undefined) {
         const sitIds = sitsData.map(s => s.id);
 
         const petsPromise = propIds.length > 0
-          ? supabase.from("pets").select("*").in("property_id", propIds)
+          ? fetchMyPets(userId!).then((data) => ({ data, error: null })).catch((error) => ({ data: [] as any[], error }))
           : Promise.resolve({ data: [], error: null });
 
         const appsPromise = sitIds.length > 0
-          ? supabase
-              .from("applications")
-              // L'embed sit porte les politiques accompagnants : OwnerStarSection
-              // les injecte dans le calcul d'affinité de chaque candidature
-              // (contexte annonce obligatoire, 21/08/2026).
-              .select("*, sit:sits(title, start_date, end_date, accepts_sitter_pets, accepts_sitter_children)")
-              .in("sit_id", sitIds)
-              .order("created_at", { ascending: false })
-              .limit(20)
+          // L'embed sit porte les politiques accompagnants : OwnerStarSection
+          // les injecte dans le calcul d'affinité de chaque candidature
+          // (contexte annonce obligatoire, 21/08/2026). Lot P1b : lecture
+          // partagée avec la pastille de navigation.
+          ? fetchApplicationsOnMySits(userId!)
+              .then((rows) => ({ data: rows.filter((a: any) => sitIds.includes(a.sit_id)).slice(0, 20), error: null }))
+              .catch((error) => ({ data: [] as any[], error }))
           : Promise.resolve({ data: [], error: null });
 
         const [petsRes, appsRes, viewsRes, ownerReviewsRes] = await Promise.all([
@@ -248,21 +248,16 @@ export function useOwnerDashboardData(userId: string | undefined) {
         const emptyRows = Promise.resolve({ data: [] as any[], error: null });
         const [profsRes, badgesRes, sitterReviewsRes, affinityRes] = await Promise.all([
           hydrateIds.length > 0
-            ? supabase
-                .from("public_profiles")
-                .select("id, first_name, avatar_url, identity_verified, completed_sits_count")
-                .in("id", hydrateIds)
+            ? publicProfilesLoader.rows(hydrateIds)
             : emptyRows,
           sitterIds.length > 0
             ? supabase.from("public_badge_attributions").select("user_id, badge_id").in("user_id", sitterIds)
             : emptyRows,
           sitterIds.length > 0
-            ? supabase.from("reviews").select("reviewee_id, overall_rating").in("reviewee_id", sitterIds).eq("published", true)
+            ? publishedReviewsLoader.rows(sitterIds)
             : emptyRows,
           sitterIds.length > 0
-            ? supabase.from("sitter_profiles_affinity")
-                .select("user_id, experience_years, life_pace, lifestyle, availability_during, has_vehicle, has_license, languages, interests, work_during_sit, sensitivities, animal_types, sitter_type, travels_with_children, travels_with_own_animals, special_animal_skills, farm_animals_ok")
-                .in("user_id", sitterIds)
+            ? sitterAffinityLoader.rows(sitterIds)
             : emptyRows,
         ]);
 
@@ -359,7 +354,7 @@ export function useOwnerDashboardData(userId: string | undefined) {
           sits: sitsData,
           pets: petsData,
           recentApps,
-          reviews: reviewsRes.data || [],
+          reviews: (reviewsRes.data || []) as { overall_rating: number }[],
           highlights: rawHighlights as HighlightRow[],
           smallMissions: (missionsRes.data || []) as SmallMission[],
           myMissions: (myMissionsDataRes.data || []) as SmallMission[],
