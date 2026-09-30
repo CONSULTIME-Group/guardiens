@@ -145,10 +145,8 @@ export function useSitterDashboardData(userId: string | undefined) {
         supabase.from("reviews")
           .select("overall_rating").eq("reviewee_id", userId).eq("published", true),
         fetchMyBadges(userId!).then((data) => ({ data, error: null })).catch((error) => ({ data: [] as any[], error })),
-        supabase.from("articles")
-          .select("id, title, slug, cover_image_url, excerpt, category")
-          .eq("published", true).eq("category", "conseil_gardien")
-          .order("published_at", { ascending: false }).limit(3),
+        // Lot P3 : articles jamais affichés par le tableau de bord gardien, lecture retirée.
+        Promise.resolve({ data: [] as any[], error: null }),
         (supabase as any).rpc("get_unread_messages_count", { _user_id: userId }),
         // Single badge query, replaces both badgeDetailsRes AND useUserBadges
         fetchMyBadges(userId!).then((data) => ({ data, error: null })).catch((error) => ({ data: [] as any[], error })),

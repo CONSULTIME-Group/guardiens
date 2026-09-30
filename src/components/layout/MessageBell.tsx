@@ -1,6 +1,6 @@
 import { fetchMyProfile } from "@/lib/myProfile";
 import { publicProfilesLoader } from "@/lib/batchedReads";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
@@ -42,6 +42,9 @@ const MessageBell = ({ onUnreadChange }: MessageBellProps = {}) => {
   const [threads, setThreads] = useState<ThreadPreview[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [open, setOpen] = useState(false);
+  // Lot P3 : les prénoms des interlocuteurs ne servent qu'à la liste ouverte.
+  // La pastille (non lus) n'en a pas besoin : lecture au premier clic.
+  const namesWanted = useRef(false);
 
   const load = useCallback(async () => {
     if (!userId) {
@@ -77,7 +80,7 @@ const MessageBell = ({ onUnreadChange }: MessageBellProps = {}) => {
       convs.flatMap((c: any) => [c.owner_id, c.sitter_id]).filter(Boolean)
     )) as string[];
     const profMap = new Map<string, { first_name: string | null; avatar_url: string | null }>();
-    if (otherIds.length > 0) {
+    if (otherIds.length > 0 && namesWanted.current) {
       // Lot P1b : ma propre fiche vient du profil déjà en cache, les autres
       // du chargeur partagé (aucune relecture des profils déjà lus).
       const [{ data: profs }, mine] = await Promise.all([
@@ -178,7 +181,13 @@ const MessageBell = ({ onUnreadChange }: MessageBellProps = {}) => {
   if (!userId) return null;
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover
+      open={open}
+      onOpenChange={(next) => {
+        if (next && !namesWanted.current) { namesWanted.current = true; void load(); }
+        setOpen(next);
+      }}
+    >
       <PopoverTrigger asChild>
         <button
           type="button"

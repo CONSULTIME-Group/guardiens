@@ -5,7 +5,7 @@ import { fetchOpenPublishedSits } from "@/lib/dashboardShared";
  * déclarée dans alert_preferences prime, puis la distance depuis le profil,
  * puis l'affinité nationale quand aucune coordonnée n'est disponible.
  */
-import { fetchMyProfile } from "@/lib/myProfile";
+import { fetchMyProfile, fetchMySitterProfile } from "@/lib/myProfile";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -99,16 +99,10 @@ export function useSitterTopAffinitySits(): Result {
     gcTime: 15 * 60 * 1000,
     queryFn: async () => {
       // 1. Profil gardien (préférences pour le score + code postal)
+      // Lot P3 : profil gardien partagé (select("*") dans myProfile, ligne
+      // brute transmise au moteur), plus de seconde lecture de sitter_profiles.
       const [{ data: sitter }, { data: profile }] = await Promise.all([
-        supabase
-          .from("sitter_profiles")
-          // 16 champs d'AffinitySitterInput + preferred_environments :
-          // parité des entrées verrouillée par affinity-input-parity.test.ts.
-          .select(
-            "animal_types, life_pace, lifestyle, availability_during, has_vehicle, has_license, languages, interests, work_during_sit, sensitivities, special_animal_skills, sitter_type, experience_years, travels_with_children, travels_with_own_animals, farm_animals_ok, preferred_environments",
-          )
-          .eq("user_id", userId!)
-          .maybeSingle(),
+        fetchMySitterProfile(userId!),
         fetchMyProfile(userId!),
       ]);
 
