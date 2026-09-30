@@ -22,6 +22,7 @@ import { fetchMyOwnerProfile, fetchMyProfile } from "@/lib/myProfile";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { createYieldBudget } from "@/lib/yieldToMain";
 import { computeAffinityResultFull, type AffinityResult } from "@/lib/affinityScore";
 import { haversineDistance } from "@/utils/geo";
 import { chunkArray } from "@/lib/chunkArray";
@@ -167,7 +168,10 @@ export function useOwnerTopAffinitySitters(): Result {
       };
 
       const scored: AffinitySitterCard[] = [];
+      // Lot P1b : calcul découpé en tranches de 8 ms, résultats identiques.
+      const tick = createYieldBudget(8);
       for (const p of scoped) {
+        await tick();
         const sitter = sitterByUser.get(p.id) ?? {};
         // Doctrine : on trie par pertinence, on n'élimine jamais. Tous les
         // gardiens du vivier entrent dans le classement ; le chiffre affiché
