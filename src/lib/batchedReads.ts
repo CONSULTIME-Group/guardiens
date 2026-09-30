@@ -27,7 +27,7 @@ export interface IdLoader {
   /** Lignes à plat, dans l'ordre des identifiants, forme `{ data, error }`. */
   rows(ids: string[]): Promise<{ data: Row[]; error: unknown }>;
   /** Amorce le cache avec des lignes déjà lues (mêmes colonnes). */
-  prime(rows: Row[]): void;
+  prime(rows: Row[], ids?: string[]): void;
   clear(): void;
 }
 
@@ -36,9 +36,12 @@ export function createIdLoader(opts: {
   idColumn: string;
   columns: string;
   filter?: (q: any) => any;
+  /** Taille de lot (défaut 150 identifiants par requête). */
+  batch?: number;
   /** Lecture plus large en cours qui amorcera le cache : on l'attend. */
   waitFor?: () => Promise<unknown> | null;
 }): IdLoader {
+  const batchSize = opts.batch ?? BATCH;
   const cache = new Map<string, { at: number; rows: Row[] }>();
   const inflight = new Map<string, Promise<void>>();
   let queue = new Set<string>();
@@ -58,7 +61,7 @@ export function createIdLoader(opts: {
     waiters = [];
     try {
       const results = await Promise.all(
-        chunkArray(ids, BATCH).map((batch) => {
+        chunkArray(ids, batchSize).map((batch) => {
           let q = (supabase.from(opts.table as any) as any).select(opts.columns).in(opts.idColumn, batch);
           if (opts.filter) q = opts.filter(q);
           return q;
@@ -84,7 +87,7 @@ export function createIdLoader(opts: {
 
   const direct = async (wanted: string[]) => {
     const results = await Promise.all(
-      chunkArray(wanted, BATCH).map((batch) => {
+      chunkArray(wanted, batchSize).map((batch) => {
         let q = (supabase.from(opts.table as any) as any).select(opts.columns).in(opts.idColumn, batch);
         if (opts.filter) q = opts.filter(q);
         return q;
@@ -132,10 +135,12 @@ export function createIdLoader(opts: {
         return { data: [], error };
       }
     },
-    prime(rows) {
+    prime(rows, ids) {
       if (!getAppQueryClient()) return;
       const at = Date.now();
       const grouped = new Map<string, Row[]>();
+      // Identifiants lus sans ligne : mémorisés vides, jamais relus.
+      for (const id of ids ?? []) grouped.set(id, []);
       for (const row of rows) {
         const k = row[opts.idColumn];
         if (!k) continue;
@@ -176,6 +181,9 @@ export const sitterAffinityLoader = createIdLoader({
   table: "sitter_profiles_affinity",
   idColumn: "user_id",
   columns: "*",
+  // Lot P4 : 350 identifiants par requête (environ 13 Ko d'URL, sous la
+  // limite mesurée d'environ 390) : les 600 gardiens scorés et les candidats en 2 requêtes.
+  batch: 350,
 });
 
 /** Compétences publiques des gardiens. */

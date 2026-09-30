@@ -1,4 +1,5 @@
 import { publicProfilesLoader, publishedReviewsLoader, sitterAffinityLoader } from "@/lib/batchedReads";
+import { fetchMyReviewsBothWays } from "@/lib/ownerSpaceReads";
 import { fetchMySmallMissionsIndex, fetchMyProperties, fetchMyPets, fetchApplicationsOnMySits, fetchOpenSmallMissions, fetchMySitsFull } from "@/lib/dashboardShared";
 import { fetchMyProfile } from "@/lib/myProfile";
 import { useEffect, useRef, useState } from "react";
@@ -104,12 +105,11 @@ export function useOwnerDashboardData(userId: string | undefined) {
       try {
         // Vague 1 : tout ce qui ne dépend que de userId part ensemble.
         const [
-          sitsRes, propsRes, reviewsRes, profileRes, highlightsRes, missionsRes,
+          sitsRes, propsRes, profileRes, highlightsRes, missionsRes,
           myMissionsDataRes, allMyMissionsCountRes,
         ] = await Promise.all([
           fetchMySitsFull(userId!, { fresh: refreshTick > 0 }).then((data) => ({ data, error: null as any })).catch((error) => ({ data: [] as any[], error })),
           fetchMyProperties(userId!).then((data) => ({ data, error: null })).catch((error) => ({ data: [] as any[], error })),
-          publishedReviewsLoader.rows([userId!]),
           fetchMyProfile(userId!),
           supabase.from("owner_highlights").select("*").eq("owner_id", userId).eq("hidden", false).order("created_at", { ascending: false }).limit(5),
           fetchOpenSmallMissions().then((r) => ({ data: r.rows.slice(0, 2), error: r.error as any })),
@@ -124,12 +124,11 @@ export function useOwnerDashboardData(userId: string | undefined) {
         // peut pas distinguer un dashboard vide (compte neuf) d'une panne
         // réseau ou d'un refus RLS. On expose l'erreur à l'appelant pour
         // afficher un encart dédié plutôt qu'un empty state trompeur.
-        if (sitsRes.error || profileRes.error || reviewsRes.error) {
-          const critical = sitsRes.error || profileRes.error || reviewsRes.error;
+        if (sitsRes.error || profileRes.error) {
+          const critical = sitsRes.error || profileRes.error;
           console.error("[useOwnerDashboardData] socle error", {
             sits: sitsRes.error,
             profile: profileRes.error,
-            reviews: reviewsRes.error,
           });
           if (!cancelled) {
             setError(critical?.message || "Erreur de chargement du tableau de bord.");
@@ -204,14 +203,11 @@ export function useOwnerDashboardData(userId: string | undefined) {
               .catch((error) => ({ data: [] as any[], error }))
           : Promise.resolve({ data: [], error: null });
 
-        const [petsRes, appsRes, viewsRes, ownerReviewsRes] = await Promise.all([
+        const [petsRes, appsRes, viewsRes] = await Promise.all([
           petsPromise,
           appsPromise,
           sitIds.length > 0
             ? supabase.rpc("get_sit_views_count", { p_sit_ids: sitIds })
-            : Promise.resolve({ data: [], error: null }),
-          recentSitIds.length > 0
-            ? supabase.from("reviews").select("sit_id").eq("reviewer_id", userId).in("sit_id", recentSitIds)
             : Promise.resolve({ data: [], error: null }),
         ]);
 
@@ -246,6 +242,8 @@ export function useOwnerDashboardData(userId: string | undefined) {
           : [];
 
         const emptyRows = Promise.resolve({ data: [] as any[], error: null });
+        // Lot P4 : aucune attente des salves groupées ici, le tableau de
+        // bord entier attend cette vague ; les chargeurs dédoublonnent.
         const [profsRes, badgesRes, sitterReviewsRes, affinityRes] = await Promise.all([
           hydrateIds.length > 0
             ? publicProfilesLoader.rows(hydrateIds)
@@ -253,15 +251,40 @@ export function useOwnerDashboardData(userId: string | undefined) {
           sitterIds.length > 0
             ? supabase.from("public_badge_attributions").select("user_id, badge_id").in("user_id", sitterIds)
             : emptyRows,
-          sitterIds.length > 0
-            ? publishedReviewsLoader.rows(sitterIds)
-            : emptyRows,
+          // Lot P4 : avis reçus, déposés et des candidats en une lecture.
+          // Sans garde récente, aucun avis déposé à repérer : le chargeur
+          // groupé suffit et se fond avec les autres lectures d'avis.
+          recentSitIds.length > 0
+            ? fetchMyReviewsBothWays(userId!, sitterIds, { fresh: refreshTick > 0 })
+                .then((r) => ({ data: r.candidates, received: r.received, written: r.written, error: null as any }))
+                .catch((error) => ({ data: [] as any[], received: [] as any[], written: [] as any[], error }))
+            : publishedReviewsLoader.rows([userId!, ...sitterIds]).then((r) => {
+                const all = (r.data ?? []) as any[];
+                return {
+                  data: all.filter((x) => x.reviewee_id !== userId),
+                  received: all.filter((x) => x.reviewee_id === userId),
+                  written: [] as any[],
+                  error: r.error as any,
+                };
+              }),
           sitterIds.length > 0
             ? sitterAffinityLoader.rows(sitterIds)
             : emptyRows,
         ]);
 
         if (cancelled) return;
+
+        // Avis : lecture socle (compte neuf ou panne), même encart qu'avant.
+        if (sitterReviewsRes.error) {
+          console.error("[OwnerDashboard] critical fetch failed", { reviews: sitterReviewsRes.error });
+          setError((sitterReviewsRes.error as any)?.message || "Erreur de chargement du tableau de bord.");
+          setLoading(false);
+          return;
+        }
+        const reviewsRes = { data: (sitterReviewsRes as any).received as any[] };
+        const ownerReviewsRes = {
+          data: recentSitIds.length > 0 ? ((sitterReviewsRes as any).written as any[]).filter((r: any) => recentSitIds.includes(r.sit_id)) : [],
+        };
 
         const sitterProfMap = new Map<string, any>();
         (profsRes.data ?? []).forEach((p: any) => sitterProfMap.set(p.id, p));

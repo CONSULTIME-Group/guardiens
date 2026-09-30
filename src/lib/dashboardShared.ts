@@ -20,7 +20,8 @@ export const DASHBOARD_SHARED_STALE_MS = 60_000;
  */
 export const HOME_SHARED_STALE_MS = 10_000;
 
-async function cached<T>(key: readonly unknown[], fn: () => Promise<T>): Promise<T> {
+/** Lecture mise en cache partagée (réutilisée par lib/ownerSpaceReads, lot P4). */
+export async function cached<T>(key: readonly unknown[], fn: () => Promise<T>): Promise<T> {
   const client = getAppQueryClient();
   if (!client) return fn();
   return client.fetchQuery({ queryKey: key, queryFn: fn, staleTime: DASHBOARD_SHARED_STALE_MS });
