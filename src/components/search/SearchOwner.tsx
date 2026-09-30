@@ -42,6 +42,7 @@ import { useActiveOwnersCount } from "@/hooks/useActiveOwnersCount";
 import OwnerToSitterAffinity from "@/components/matching/OwnerToSitterAffinity";
 import OwnerAffinityBanner from "@/components/matching/OwnerAffinityBanner";
 import SitterResultCard from "@/components/search/SitterResultCard";
+import { sitterCardLine } from "@/lib/sitterDistinctLine";
 import OwnerLocationPicker from "@/components/search/header/OwnerLocationPicker";
 import { useViewerOwnerForAffinity } from "@/hooks/useViewerOwnerForAffinity";
 import { computeAffinityResultFull, speciesIntersects, type AffinityOwnerInput, type AffinitySitterInput } from "@/lib/affinityScore";
@@ -1826,6 +1827,12 @@ const SearchOwner = () => {
                     {metaBits.length > 0 && (
                       <p className="text-[12.5px] text-muted-foreground truncate">{metaBits.join(" · ")}</p>
                     )}
+                    {(() => {
+                      const line = sitterCardLine(s, { omitSitsAndReviews: true });
+                      return line ? (
+                        <p className="text-[13px] leading-snug text-muted-foreground line-clamp-2">{line}</p>
+                      ) : null;
+                    })()}
                     <div className="flex items-center gap-1.5 flex-wrap mt-1">
                       <PresenceBadge lastSeenAt={profile?.last_seen_at} />
                       <ReplyTimeBadge minutes={s.reply_median_minutes} />

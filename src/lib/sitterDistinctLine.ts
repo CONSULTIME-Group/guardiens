@@ -14,7 +14,17 @@
  *    une ligne précédente est complétée, sinon laissée vide (le composant
  *    n'affiche alors rien sous le prénom).
  */
-import { normalizeAnimalTypes } from "@/lib/sitterSkillGroups";
+const ANIMAL_CODE: Record<string, string> = {
+  dog: "Chiens", cat: "Chats", bird: "Oiseaux", horse: "Chevaux", nac: "NAC",
+  farm: "Animaux de ferme", rodent: "NAC", reptile: "NAC", rabbit: "NAC", fish: "NAC",
+};
+
+/** Codes d'espèces anglais ramenés aux libellés français (partagé avec sitterSkillGroups). */
+export function normalizeAnimalTypes(animalTypes: string[] | null | undefined): string[] {
+  return (animalTypes ?? [])
+    .filter((a): a is string => typeof a === "string" && a.trim().length > 0)
+    .map((a) => ANIMAL_CODE[a.trim()] ?? a.trim());
+}
 
 export interface DistinctSitterInput {
   completed_sits_count?: number | null;
@@ -26,6 +36,7 @@ export interface DistinctSitterInput {
   competences?: string[] | null;
   special_animal_skills?: string[] | null;
   interests?: string[] | null;
+  has_vehicle?: boolean | null;
 }
 
 export const DISTINCT_LINE_MAX_FRAGMENTS = 3;
@@ -126,6 +137,8 @@ function candidateFragments(
   }
   const comp = COMPOSITION[norm(String(s.sitter_type ?? ""))];
   if (comp) out.push({ kind: "fact", text: comp });
+  // Lot R1 : « véhiculé » juste après la situation (true seulement, NULL neutre).
+  if (s.has_vehicle === true) out.push({ kind: "fact", text: "véhiculé" });
   const exp = experienceFragment(s.experience_years);
   if (exp) out.push({ kind: "fact", text: exp });
   if (skills.length > 0) out.push({ kind: "list", prefix: "", items: skills });
@@ -190,4 +203,19 @@ export function sitterDistinctLines(sitters: DistinctSitterInput[]): string[] {
 /** Ligne d'un gardien affiché seul. */
 export function sitterDistinctLine(sitter: DistinctSitterInput): string {
   return sitterDistinctLines([sitter])[0];
+}
+
+/**
+ * Lot R1 : ligne propre à UNE carte de recherche. Aucun retrait des éléments
+ * communs à la liste ni de non-répétition entre cartes. Avec
+ * omitSitsAndReviews, gardes et note (déjà dans la ligne meta) sont exclues.
+ */
+export function sitterCardLine(
+  sitter: DistinctSitterInput,
+  opts: { omitSitsAndReviews?: boolean } = {},
+): string {
+  const s = opts.omitSitsAndReviews
+    ? { ...sitter, completed_sits_count: 0, reviews_count: 0, reviews_avg: null }
+    : sitter;
+  return buildLine(candidateFragments(s, sitterSkillItems(s), sitterInterests(s))).line;
 }
