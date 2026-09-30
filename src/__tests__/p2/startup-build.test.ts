@@ -43,7 +43,13 @@ describe("P2, build de production", () => {
   });
 
   it("aucun module admin, éditeur, graphique ou carte dans l'entrée", () => {
-    for (const marker of ["recharts", "leaflet", "maplibre", "AdminLayout", "ArticleEditor", "lottie", "tiptap"]) {
+    // Imports statiques de l'entrée (les import() paresseux ne comptent pas).
+    const staticImports = [...entryCode.matchAll(/(?:^|[;\n}])\s*import\s*(?:[^"'()]*?from\s*)?["']([^"']+)["']/g)].map((m) => m[1]);
+    expect(staticImports.length).toBeGreaterThan(0);
+    for (const marker of ["recharts", "leaflet", "map", "Admin", "ArticleEditor", "lottie", "tiptap", "Chart"]) {
+      expect(staticImports.filter((i) => i.includes(marker)), marker).toEqual([]);
+    }
+    for (const marker of ["recharts-wrapper", "leaflet-container", "maplibregl", "lottie-web"]) {
       expect(entryCode.includes(marker), marker).toBe(false);
     }
     // Le dictionnaire et le contenu des villes ne sont plus dans l'entrée.
