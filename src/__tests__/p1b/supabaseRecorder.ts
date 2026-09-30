@@ -26,10 +26,15 @@ export function createRecorder(): Recorder {
   return r;
 }
 
-function chain(onFirst: (op: string) => void, single = false): any {
+function chain(onFirst: (op: string) => void, rows: any[] = [], single = false): any {
   let first = true;
   let isSingle = single;
-  const result = () => Promise.resolve({ data: isSingle ? null : [], error: null, count: 0 });
+  let head = false;
+  const result = () => Promise.resolve({
+    data: head ? null : isSingle ? (rows[0] ?? null) : rows.map((r) => ({ ...r })),
+    error: null,
+    count: rows.length,
+  });
   const proxy: any = new Proxy(function () {}, {
     get(_t, prop) {
       if (prop === "then") return (res: any, rej: any) => result().then(res, rej);
@@ -39,12 +44,15 @@ function chain(onFirst: (op: string) => void, single = false): any {
         const p = String(prop);
         if (first) { first = false; onFirst(p); }
         if (p === "maybeSingle" || p === "single") isSingle = true;
+        if (p === "select" && _args[1]?.head) head = true;
         return proxy;
       };
     },
   });
   return proxy;
 }
+
+export const fixtures: Record<string, any[]> = {};
 
 export function createSupabaseMock(rec: Recorder, userId: string) {
   const user = { id: userId, email: "test@example.com" };
@@ -55,7 +63,7 @@ export function createSupabaseMock(rec: Recorder, userId: string) {
       return chain((op) => {
         if (op === "select") { rec.reads.push(table); rec.sites.push(`${table} <- ${site()}`); }
         else rec.writes.push(`${op}:${table}`);
-      });
+      }, fixtures[table] ?? []);
     },
     rpc(name: string) {
       rec.reads.push(`rpc:${name}`); rec.sites.push(`rpc:${name} <- ${site()}`);
