@@ -1,5 +1,4 @@
 import { fetchMyProfile } from "@/lib/myProfile";
-import { publicProfilesLoader } from "@/lib/batchedReads";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -83,6 +82,8 @@ const MessageBell = ({ onUnreadChange }: MessageBellProps = {}) => {
     if (otherIds.length > 0 && namesWanted.current) {
       // Lot P1b : ma propre fiche vient du profil déjà en cache, les autres
       // du chargeur partagé (aucune relecture des profils déjà lus).
+      // Lot P4 : chargeur importé à la demande (hors fichier d'entrée).
+      const { publicProfilesLoader } = await import("@/lib/batchedReads");
       const [{ data: profs }, mine] = await Promise.all([
         publicProfilesLoader.rows(otherIds.filter((id) => id !== userId)),
         otherIds.includes(userId) ? fetchMyProfile(userId) : Promise.resolve({ data: null }),
