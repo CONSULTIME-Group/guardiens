@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { haversineDistance } from "@/utils/geo";
 import type { AffinitySitterInput } from "@/lib/affinityScore";
 import { fetchSitterPoolShared } from "@/lib/fetchSitterPool";
-import { fetchMyProfile, fetchMyPublicProfile } from "@/lib/myProfile";
+import { fetchMyProfile } from "@/lib/myProfile";
 
 /**
  * « Gardiens près de chez vous » pour le dashboard propriétaire.
@@ -103,7 +103,9 @@ export function useNearbyOwnerSitters(currentUserId: string | undefined) {
       let meLat: number | null = (meRes.data?.latitude as number | null) ?? null;
       let meLng: number | null = (meRes.data?.longitude as number | null) ?? null;
       if (meLat === null || meLng === null) {
-        const approx = (await fetchMyPublicProfile(currentUserId!)).data ?? approxRes.data;
+        // Lot P1b : public_profiles.latitude_approx n'est que l'arrondi de
+        // profiles.latitude ; sans coordonnées exactes, il n'y a rien à relire.
+        const approx = approxRes.data;
         if (approx?.latitude_approx && approx?.longitude_approx) {
           meLat = approx.latitude_approx as number;
           meLng = approx.longitude_approx as number;
