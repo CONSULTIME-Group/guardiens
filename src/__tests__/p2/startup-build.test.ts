@@ -26,7 +26,13 @@ let html = "";
 beforeAll(() => {
   if (!dir || !existsSync(join(dir, "index.html"))) {
     dir = mkdtempSync(join(tmpdir(), "p2-build-"));
-    execSync(`npx vite build --outDir ${dir} --logLevel error`, { stdio: "ignore", timeout: 290_000 });
+    execSync(`npx vite build --outDir ${dir} --logLevel error`, {
+      stdio: "ignore",
+      timeout: 290_000,
+      // Vitest pose NODE_ENV=test : sans cette ligne, vite build garde le code de
+      // développement (outils de diagnostic, entrée gonflée) et le test mesure un faux build.
+      env: { ...process.env, NODE_ENV: "production" },
+    });
   }
   html = readFileSync(join(dir, "index.html"), "utf8");
   const src = html.match(/<script[^>]+type="module"[^>]+src="\/assets\/(index-[^"]+\.js)"/)?.[1];
