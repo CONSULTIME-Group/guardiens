@@ -32,6 +32,7 @@ import type { AffinityResult } from "@/lib/affinityScore";
 import { useAuth } from "@/contexts/AuthContext";
 import { sanitizeBioForCard } from "@/lib/sanitizeBio";
 import { publicFirstName } from "@/lib/displayName";
+import { sitterCardLine } from "@/lib/sitterDistinctLine";
 
 interface SitterResultCardProps {
   sitter: any;
@@ -116,6 +117,9 @@ const SitterResultCard = ({
   const metaChunks = [reply, ratingChunk].filter(Boolean) as string[];
 
   // Accroche Playfair : première phrase de bio courte, sinon rien.
+  // Lot R1 : ligne courte « qui il est », en plus de l'accroche ou seule.
+  const cardLine = sitterCardLine(sitter, { omitSitsAndReviews: true });
+
   const quote = firstSentenceUnder(sanitizeBioForCard(profile?.bio), 120);
 
   // Affinité affichable : owner connecté + score non masqué.
@@ -253,6 +257,12 @@ const SitterResultCard = ({
         {metaChunks.length > 0 && (
           <p className="mt-2 text-[13px] text-muted-foreground">
             {metaChunks.join(" · ")}
+          </p>
+        )}
+
+        {cardLine && (
+          <p data-testid="sitter-card-line" className="mt-1.5 text-[13px] leading-snug text-muted-foreground line-clamp-2">
+            {cardLine}
           </p>
         )}
 
