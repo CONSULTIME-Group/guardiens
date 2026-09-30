@@ -98,8 +98,8 @@ async function mountAndCount(role: "owner" | "sitter", populated = true) {
     </>,
   );
   // Laisse se résoudre les chargements différés et les lectures en cascade.
-  // 3,2 s : au-delà des montages différés (temps libre, 2,5 s au plus), tout le tableau de bord est compté.
-  for (let i = 0; i < 160; i++) {
+  // 5,2 s : au-delà des montages différés (temps libre, 2,5 s au plus), tout le tableau de bord est compté.
+  for (let i = 0; i < 260; i++) {
     await act(async () => { await new Promise((r) => setTimeout(r, 20)); });
   }
   const counts = rec.counts();
