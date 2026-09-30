@@ -1,4 +1,4 @@
-import { fetchMyBadges, fetchMyEmergencyProfileId, fetchMySmallMissionsIndex, fetchMyConversationsIndex } from "@/lib/dashboardShared";
+import { fetchMyBadges, fetchMyEmergencyProfileId, fetchMySmallMissionsIndex, fetchMyConversationsIndex, fetchOpenPublishedSits } from "@/lib/dashboardShared";
 import { fetchMyProfile, fetchMyPublicProfile, fetchMySitterProfile } from "@/lib/myProfile";
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -161,13 +161,7 @@ export function useSitterDashboardData(userId: string | undefined) {
         // utilisées seulement si profiles.latitude ou longitude est null.
         fetchMyPublicProfile(userId!),
         // Annonces publiées et non terminées (end_date >= aujourd'hui).
-        supabase.from("sits")
-          .select("id, title, start_date, end_date, user_id, property_id, status, created_at, is_urgent, cover_photo_url, properties:property_id(photos, type, environment, cover_photo_url)")
-          .eq("status", "published")
-          .neq("user_id", userId)
-          .gte("end_date", todayIso)
-          .order("created_at", { ascending: false })
-          .limit(500),
+        fetchOpenPublishedSits(userId!).then((r) => ({ data: r.rows.map((x) => ({ ...x })), error: r.error as any })),
         // Missions ouvertes : lancées toujours, traitées seulement si le
         // gardien a un département connu.
         supabase.from("small_missions")

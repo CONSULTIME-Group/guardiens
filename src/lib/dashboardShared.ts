@@ -146,3 +146,29 @@ export function fetchMyConversationsIndex(userId: string): Promise<MyConversatio
     return (data ?? []) as MyConversationIndexRow[];
   });
 }
+
+export const OPEN_PUBLISHED_SITS_LIMIT = 500;
+const OPEN_PUBLISHED_SITS_SELECT =
+  "id, title, city, start_date, end_date, user_id, property_id, status, created_at, is_urgent, cover_photo_url, accepts_sitter_pets, accepts_sitter_children, departement_code, environments, accepting_applications, properties:property_id(photos, type, environment, cover_photo_url)";
+
+/**
+ * Annonces publiées non terminées des autres membres, plus récentes d'abord
+ * (lot P1b). Partagée par « Annonces autour » et le classement « Pour vous »
+ * du gardien : une seule lecture au lieu de trois (liste, compte, vivier).
+ * Aucun filtre ajouté : chaque lecteur applique ses propres conditions.
+ */
+export function fetchOpenPublishedSits(userId: string): Promise<{ rows: any[]; error: unknown }> {
+  const todayIso = new Date().toISOString().slice(0, 10);
+  return cached(["open-published-sits", userId, todayIso], async () => {
+    const { data, error } = await supabase
+      .from("sits")
+      .select(OPEN_PUBLISHED_SITS_SELECT)
+      .eq("status", "published")
+      .neq("user_id", userId)
+      .gte("end_date", todayIso)
+      .order("created_at", { ascending: false })
+      .limit(OPEN_PUBLISHED_SITS_LIMIT);
+    // Les erreurs restent portées par la valeur (jamais de rejet en cache).
+    return { rows: (data ?? []) as any[], error: error ?? null };
+  });
+}

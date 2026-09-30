@@ -91,7 +91,8 @@ export function useNearbyOwnerSitters(currentUserId: string | undefined) {
       // repli, exactement comme avant.
       const [meRes, approxRes, poolRes] = await Promise.all([
         fetchMyProfile(currentUserId!),
-        fetchMyPublicProfile(currentUserId!),
+        // Repli approché lu seulement si les coordonnées exactes manquent.
+        Promise.resolve({ data: null as any }),
         // Vivier de gardiens actifs, complet : aucun filtre de complétude
         // ni de confiance (la vue ne retient déjà que les comptes actifs).
         // Plafond de lecture technique, tracé s'il est atteint.
@@ -102,7 +103,7 @@ export function useNearbyOwnerSitters(currentUserId: string | undefined) {
       let meLat: number | null = (meRes.data?.latitude as number | null) ?? null;
       let meLng: number | null = (meRes.data?.longitude as number | null) ?? null;
       if (meLat === null || meLng === null) {
-        const approx = approxRes.data;
+        const approx = (await fetchMyPublicProfile(currentUserId!)).data ?? approxRes.data;
         if (approx?.latitude_approx && approx?.longitude_approx) {
           meLat = approx.latitude_approx as number;
           meLng = approx.longitude_approx as number;

@@ -1,3 +1,4 @@
+import { fetchOpenPublishedSits } from "@/lib/dashboardShared";
 /**
  * Charge les 3 annonces les plus pertinentes pour un gardien. La préférence
  * déclarée dans alert_preferences prime, puis la distance depuis le profil,
@@ -165,28 +166,15 @@ export function useSitterTopAffinitySits(): Result {
       //    candidat : publiées, ouvertes aux candidatures, non terminées,
       //    hors annonces du gardien lui-même. Jamais le total brut.
       const todayIso = new Date().toISOString().slice(0, 10);
-      const { count: totalPublished } = await supabase
-        .from("sits")
-        .select("id", { count: "exact", head: true })
-        .eq("status", "published")
-        .eq("accepting_applications", true)
-        .gte("end_date", todayIso)
-        .neq("user_id", userId!);
-
-      // 3. Pool national candidat. Le classement complète toujours jusqu'à
-      //    trois annonces si le catalogue en contient au moins trois.
-      const sitsRes: any = await supabase
-        .from("sits")
-        .select(
-          "id, title, city, start_date, end_date, cover_photo_url, user_id, property_id, accepts_sitter_pets, accepts_sitter_children, departement_code, environments",
-        )
-        .eq("status", "published")
-        .eq("accepting_applications", true)
-        .gte("end_date", todayIso)
-        .neq("user_id", userId!)
-        .order("created_at", { ascending: false })
-        .limit(80);
-      const sitsAll: any[] = sitsRes.data ?? [];
+      // Lot P1b : même lecture que « Annonces autour ». Mêmes règles que
+      // l'ancien pool candidat : ouvertes aux candidatures, 80 plus récentes.
+      const shared = await fetchOpenPublishedSits(userId!);
+      const accepting = shared.rows.filter((x: any) => x.accepting_applications === true);
+      const totalPublished = accepting.length;
+      const sitsAll: any[] = accepting.slice(0, 80).map((x: any) => {
+        const { properties: _p, ...rest } = x;
+        return { ...rest };
+      });
 
       // Hydratation RLS-safe des propriétaires via la vue publique.
       const sitOwnerIds = Array.from(new Set(sitsAll.map((s) => s.user_id).filter(Boolean))) as string[];
