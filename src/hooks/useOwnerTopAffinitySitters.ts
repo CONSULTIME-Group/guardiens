@@ -25,7 +25,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { createYieldBudget } from "@/lib/yieldToMain";
 import { computeAffinityResultFull, type AffinityResult } from "@/lib/affinityScore";
 import { scopeOwnerPoolByDistance, POOL_SCORING_CAP } from "@/lib/ownerSitterPool";
-import { announceOwnerTopIds, fetchOwnerSpaceSitterReads } from "@/lib/dashboardShared";
+import { announceOwnerTopIds, fetchOwnerSpaceSitterReads } from "@/lib/ownerSpaceReads";
 import { chunkArray } from "@/lib/chunkArray";
 import { fetchSitterPoolShared } from "@/lib/fetchSitterPool";
 

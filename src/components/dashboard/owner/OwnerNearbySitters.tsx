@@ -21,7 +21,7 @@ import { avatarImageUrl } from "@/lib/storageImage";
 import DashEyebrow from "./DashEyebrow";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNearbyOwnerSitters } from "@/hooks/useNearbyOwnerSitters";
-import { fetchOwnerSpaceDetailReads } from "@/lib/dashboardShared";
+import { fetchOwnerSpaceDetailReads } from "@/lib/ownerSpaceReads";
 import { nearbyPlaceLabel, nearbyExitLabel } from "@/lib/ownerNearbyLabels";
 
 function useDistinctDetails(ids: string[], userId: string | undefined) {

@@ -1,5 +1,5 @@
 import { publicProfilesLoader, publishedReviewsLoader, sitterAffinityLoader } from "@/lib/batchedReads";
-import { fetchMyReviewsBothWays } from "@/lib/dashboardShared";
+import { fetchMyReviewsBothWays } from "@/lib/ownerSpaceReads";
 import { fetchMySmallMissionsIndex, fetchMyProperties, fetchMyPets, fetchApplicationsOnMySits, fetchOpenSmallMissions, fetchMySitsFull } from "@/lib/dashboardShared";
 import { fetchMyProfile } from "@/lib/myProfile";
 import { useEffect, useRef, useState } from "react";

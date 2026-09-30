@@ -2,7 +2,7 @@ import { publishedReviewsLoader, sitterAffinityLoader, sitterCompetencesLoader }
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { selectNearbyCandidates, sortNearbyByDistance } from "@/lib/ownerSitterPool";
-import { fetchOwnerSpaceDetailReads } from "@/lib/dashboardShared";
+import { fetchOwnerSpaceDetailReads } from "@/lib/ownerSpaceReads";
 import type { AffinitySitterInput } from "@/lib/affinityScore";
 import { fetchSitterPoolShared } from "@/lib/fetchSitterPool";
 import { fetchMyProfile } from "@/lib/myProfile";
