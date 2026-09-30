@@ -75,7 +75,8 @@ describe("Viviers gardiens, règle définitive : on trie, on ne filtre jamais", 
     expect(hookSrc).toContain("console.info");
     // Lot D0 : lecture paginée complète (fetchSitterPool) et comptage exact.
     expect(hookSrc).toContain("fetchSitterPool");
-    expect(hookSrc).toContain("countSitterPool");
+    // Lot P1b : vivier et comptage exact lus ensemble (fetchSitterPoolShared, count: "exact").
+    expect(hookSrc).toContain("fetchSitterPoolShared(userId!).then((r) => r.count)");
     expect(hookSrc).not.toContain("totalPool: pool.length");
   });
 

@@ -189,8 +189,6 @@ const PETS_TRIPLE = ["species", "special_needs", "breed"];
 const SOURCES_PROJECTION = [
   "src/hooks/useViewerSitterForAffinity.ts",
   "src/hooks/useSitterTopAffinitySits.ts",
-  "src/hooks/useOwnerTopAffinitySitters.ts",
-  "src/hooks/useOwnerDashboardData.ts",
   "src/components/sits/ApplicationModal.tsx",
   "src/components/search/SearchOwner.tsx",
   "src/pages/PublicSitterProfile.tsx",
@@ -198,6 +196,21 @@ const SOURCES_PROJECTION = [
   "supabase/functions/send-sitter-daily-digest/index.ts",
   "supabase/functions/send-onboarding-j1/index.ts",
 ];
+
+/**
+ * Lot P1b : lectures groupées. Ces hooks passent par sitterAffinityLoader
+ * (src/lib/batchedReads.ts) ; le verrou porte sur le chargeur, qui doit lire
+ * la vue sitter_profiles_affinity en entier et transmettre la ligne brute.
+ */
+const SOURCES_VIA_AFFINITY_LOADER = [
+  "src/hooks/useOwnerTopAffinitySitters.ts",
+  "src/hooks/useOwnerDashboardData.ts",
+];
+
+/** Lot P1b : animaux du propriétaire lus par fetchMyPets (src/lib/dashboardShared.ts). */
+const PETS_DELEGATES: Record<string, string> = {
+  "src/hooks/useOwnerTopAffinitySitters.ts": "src/lib/dashboardShared.ts",
+};
 
 /** Sources gardien par littéral typé : les clés de l'objet sont contrôlées. */
 const SOURCES_LITERAL = ["src/components/sits/ApplicationsList.tsx"];
@@ -353,6 +366,22 @@ describe("parité des entrées du moteur d'affinité", () => {
     }
   });
 
+  describe("sources gardien par chargeur groupé (lot P1b)", () => {
+    it("sitterAffinityLoader lit sitter_profiles_affinity en entier", () => {
+      const src = read("src/lib/batchedReads.ts");
+      expect(src).toMatch(/sitterAffinityLoader = createIdLoader\(\{\s*table: "sitter_profiles_affinity",\s*idColumn: "user_id",\s*columns: "\*",/);
+    });
+    for (const path of SOURCES_VIA_AFFINITY_LOADER) {
+      it(`${path} passe par sitterAffinityLoader sans re-mapping partiel`, () => {
+        const src = read(path);
+        expect(src).toContain("sitterAffinityLoader.rows(");
+        expect(src).not.toMatch(/\.from\(\s*["'`](?:sitter_profiles|sitter_profiles_affinity)["'`]/);
+        const remapped = sitterFields.filter((f) => new RegExp(`^\\s*${f}\\s*:`, "m").test(src));
+        expect(remapped.length === 0 || remapped.length === sitterFields.length).toBe(true);
+      });
+    }
+  });
+
   describe("sources gardien par littéral typé", () => {
     for (const path of SOURCES_LITERAL) {
       it(`${path} construit les 16 clés`, () => {
@@ -381,6 +410,13 @@ describe("parité des entrées du moteur d'affinité", () => {
         if (petsMode === "embed") {
           expect(src, `${path} : embed pets incomplet (species, special_needs, breed)`).toMatch(PETS_FULL_EMBED);
         } else {
+          const delegate = PETS_DELEGATES[path];
+          if (delegate) {
+            expect(src, `${path} doit lire les animaux via fetchMyPets`).toContain("fetchMyPets");
+            const d = projectedColumns(delegate, ["pets"]);
+            expect(d.star, `${delegate} : fetchMyPets doit lire pets en entier`).toBe(true);
+            return;
+          }
           const { cols } = projectedColumns(path, ["pets"]);
           const missingPetCols = PETS_TRIPLE.filter((c) => !cols.has(c));
           expect(
@@ -442,7 +478,7 @@ describe("parité des entrées du moteur d'affinité", () => {
   const SIT_CONTEXT_SURFACES: Array<[string, RegExp, string]> = [
     ["src/components/sits/ApplicationsList.tsx", /from\("sits"\)\s*\.select\(\s*"accepts_sitter_pets, accepts_sitter_children/, "requête sits dédiée"],
     ["src/components/sits/ApplicationModal.tsx", /from\("sits"\)\s*\.select\(\s*"accepts_sitter_pets, accepts_sitter_children/, "requête sits dédiée"],
-    ["src/hooks/useOwnerDashboardData.ts", /sit:sits\([^)]*accepts_sitter_pets[^)]*accepts_sitter_children/, "embed sit des candidatures"],
+    ["src/lib/dashboardShared.ts", /sit:sits\([^)]*accepts_sitter_pets[^)]*accepts_sitter_children/, "embed sit des candidatures (fetchApplicationsOnMySits, lot P1b)"],
     ["src/components/dashboard/owner/OwnerStarSection.tsx", /accepts_sitter_pets:\s*app\.sit\?\./, "embed sit de chaque candidature"],
     ["src/components/ai/alma/AlmaFitGardien.tsx", /accepts_sitter_pets:\s*targetSit\.accepts_sitter_pets/, "annonce cible chargée par le composant"],
     ["src/pages/SitDetail.tsx", /accepts_sitter_pets:\s*\(sitData as any\)\?\./, "RPC get_public_sit"],

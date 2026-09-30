@@ -39,8 +39,12 @@ describe("D3.1 lignes distinctives sur le vivier complet", () => {
   });
   it("le composant lit sitter_profiles_affinity, compétences fusionnées", () => {
     const src = readFileSync("src/components/dashboard/owner/OwnerNearbySitters.tsx", "utf8");
-    expect(src).toContain('from("sitter_profiles_affinity"');
-    expect(src).toContain('select("user_id, competences")');
+    // Lot P1b : lectures groupées par les chargeurs partagés.
+    expect(src).toContain("sitterAffinityLoader.rows(ids)");
+    expect(src).toContain("sitterCompetencesLoader.rows(ids)");
+    const loaders = readFileSync("src/lib/batchedReads.ts", "utf8");
+    expect(loaders).toContain('table: "sitter_profiles_affinity"');
+    expect(loaders).toContain('columns: "user_id, competences"');
   });
 });
 
