@@ -16,6 +16,12 @@
  *  - consentement : mêmes règles que page_view (mesure d'audience interne,
  *    sans cookie ni traceur tiers, exemptée). GA4 n'est jamais appelé ici ;
  *  - robots exclus.
+ *
+ * Lot P2c : envoi seulement depuis guardiens.fr (jamais la version d'essai,
+ * lovable.app, lovableproject.com, localhost ni les tests), jamais pour une
+ * page masquée au chargement ou de largeur illisible, jamais pour un robot
+ * ou Prerender. La propriété host permet à la carte admin d'ignorer les
+ * mesures anciennes ou parasites.
  */
 import { onCLS, onINP, onFCP, onLCP, onTTFB, type Metric } from "web-vitals";
 import { trackEventBeacon } from "@/lib/analytics";
@@ -72,6 +78,8 @@ export interface VitalEntry { value: number; rating: string }
 export interface CollectorEnv {
   width: number;
   pathname: string;
+  /** window.location.hostname : rien n'est envoyé hors guardiens.fr. */
+  host: string;
   connected: boolean;
   connection?: string | null;
   random?: () => number;
@@ -84,11 +92,13 @@ export interface CollectorEnv {
  */
 export function createVitalsCollector(env: CollectorEnv) {
   const device = deviceKind(env.width);
-  const sampled = (env.random ?? Math.random)() < WEB_VITAL_SAMPLE_RATE[device];
+  const sampled = isPublicVitalHost(env.host) && env.width > 0
+    && (env.random ?? Math.random)() < WEB_VITAL_SAMPLE_RATE[device];
   const pending = new Map<VitalName, VitalEntry>();
   const sent = new Set<VitalName>();
   const send = env.send ?? ((metadata) => { trackEventBeacon("web_vital", { source: "web_vitals", metadata, anonymous: true }); });
   const base = {
+    host: WEB_VITAL_HOST,
     path: normalizeVitalPath(env.pathname),
     device,
     auth: env.connected ? "member" : "visitor",
@@ -126,6 +136,45 @@ function hasSessionToken(): boolean {
   return false;
 }
 
+/** Seuls domaines autorisés à envoyer une mesure (lot P2c). */
+export const WEB_VITAL_HOSTS = ["guardiens.fr", "www.guardiens.fr"] as const;
+/** Valeur de host écrite dans les mesures, lue par la carte admin. */
+export const WEB_VITAL_HOST = "guardiens.fr";
+
+export function isPublicVitalHost(hostname: string | null | undefined): boolean {
+  return (WEB_VITAL_HOSTS as readonly string[]).includes((hostname ?? "").toLowerCase());
+}
+
+const VITAL_BOT_UA = /prerender|bot|crawler|spider|headlesschrome/i;
+
+export interface VitalGateInput {
+  hostname: string;
+  userAgent: string;
+  width: number;
+  visibility: string;
+  painted: boolean;
+  mode: string;
+}
+
+/** Décide si cette page vue peut envoyer des mesures. Pure, testée. */
+export function shouldReportVitals(g: VitalGateInput): boolean {
+  if (g.mode === "test") return false;
+  if (!isPublicVitalHost(g.hostname)) return false;
+  if (VITAL_BOT_UA.test(g.userAgent || "")) return false;
+  if (!Number.isFinite(g.width) || g.width <= 0) return false;
+  if (g.visibility !== "visible") return false;
+  if (!g.painted) return false;
+  return true;
+}
+
+/** Vrai si la page a déjà peint (une page restée masquée ne peint pas). */
+function hasPainted(): boolean {
+  try {
+    const p = performance.getEntriesByType("paint");
+    return p.length > 0;
+  } catch { return false; }
+}
+
 let started = false;
 
 /** Démarre la mesure une fois par document. `onPerfEntry` : rappel de test ou de débogage. */
@@ -133,10 +182,19 @@ const reportWebVitals = (onPerfEntry?: (metric: Metric) => void) => {
   if (typeof window === "undefined" || started) return;
   started = true;
   if (isBotUserAgent()) return;
+  if (!shouldReportVitals({
+    hostname: window.location.hostname,
+    userAgent: navigator.userAgent,
+    width: window.innerWidth,
+    visibility: document.visibilityState,
+    painted: hasPainted(),
+    mode: import.meta.env.MODE,
+  })) return;
 
   const collector = createVitalsCollector({
     width: window.innerWidth,
     pathname: window.location.pathname,
+    host: window.location.hostname,
     connected: hasSessionToken(),
     connection: connectionType(),
   });

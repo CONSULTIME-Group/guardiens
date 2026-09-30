@@ -8,7 +8,7 @@ import { summarizeVitals, p75 } from "@/lib/webVitalsSummary";
 describe("webVitals, collecteur", () => {
   it("un seul envoi par métrique et par page vue", () => {
     const send = vi.fn();
-    const c = createVitalsCollector({ width: 400, pathname: "/", connected: false, random: () => 0, send });
+    const c = createVitalsCollector({ width: 400, pathname: "/", host: "guardiens.fr", connected: false, random: () => 0, send });
     c.record("LCP", 1200.4, "good");
     c.record("LCP", 1300, "good");
     c.flush();
@@ -24,12 +24,12 @@ describe("webVitals, collecteur", () => {
     expect(normalizeVitalPath("/gardiens/3f2a1b4c-1234-4abc-9def-0123456789ab")).toBe("/gardiens/:id");
     expect(normalizeVitalPath("/annonces/12345?x=1")).toBe("/annonces/:id");
     const send = vi.fn();
-    const c = createVitalsCollector({ width: 1400, pathname: "/sits/42", connected: true, random: () => 0, send });
+    const c = createVitalsCollector({ width: 1400, pathname: "/sits/42", host: "guardiens.fr", connected: true, random: () => 0, send });
     c.record("INP", 80, "good");
     c.flush();
     const payload = send.mock.calls[0][0];
     expect(payload.path).toBe("/sits/:id");
-    expect(Object.keys(payload).sort()).toEqual(["auth", "build", "connection", "device", "metrics", "path"]);
+    expect(Object.keys(payload).sort()).toEqual(["auth", "build", "connection", "device", "host", "metrics", "path"]);
   });
 
   it("échantillonnage : 100 % mobile et tablette, 25 % ordinateur", () => {
@@ -38,11 +38,11 @@ describe("webVitals, collecteur", () => {
     expect(deviceKind(900)).toBe("tablet");
     expect(deviceKind(1440)).toBe("desktop");
     const send = vi.fn();
-    const out = createVitalsCollector({ width: 1440, pathname: "/", connected: false, random: () => 0.5, send });
+    const out = createVitalsCollector({ width: 1440, pathname: "/", host: "guardiens.fr", connected: false, random: () => 0.5, send });
     out.record("LCP", 1, "good"); out.flush();
     expect(out.sampled).toBe(false);
     expect(send).not.toHaveBeenCalled();
-    const inMobile = createVitalsCollector({ width: 360, pathname: "/", connected: false, random: () => 0.99, send });
+    const inMobile = createVitalsCollector({ width: 360, pathname: "/", host: "guardiens.fr", connected: false, random: () => 0.99, send });
     expect(inMobile.sampled).toBe(true);
   });
 
@@ -57,7 +57,7 @@ describe("webVitals, collecteur", () => {
 
 describe("carte admin Vitesse ressentie", () => {
   const row = (path: string, device: string, LCP: number, INP: number, LONG_TASK: number) => ({
-    metadata: { path, device, metrics: { LCP: { value: LCP }, INP: { value: INP }, LONG_TASK: { value: LONG_TASK } } },
+    metadata: { host: "guardiens.fr", path, device, metrics: { LCP: { value: LCP }, INP: { value: INP }, LONG_TASK: { value: LONG_TASK } } },
   });
 
   it("75e centile par appareil, chemins triés par nombre de mesures", () => {

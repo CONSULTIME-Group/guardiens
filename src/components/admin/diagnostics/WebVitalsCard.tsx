@@ -16,6 +16,7 @@ export async function fetchWebVitalRows(): Promise<VitalRow[]> {
     .from("analytics_events")
     .select("metadata")
     .eq("event_type", "web_vital")
+    .eq("metadata->>host", "guardiens.fr")
     .gte("created_at", since)
     .order("created_at", { ascending: false })
     .limit(MAX_ROWS);
@@ -23,7 +24,7 @@ export async function fetchWebVitalRows(): Promise<VitalRow[]> {
   return (data ?? []) as VitalRow[];
 }
 
-/** Carte « Vitesse ressentie » (lot P2b), 7 derniers jours, 75e centile. */
+/** Carte « Vitesse ressentie » (lot P2b), Site public guardiens.fr, 7 derniers jours, 75e centile. */
 export default function WebVitalsCard() {
   const q = useQuery({ queryKey: ["admin", "web-vitals-7d"], queryFn: fetchWebVitalRows, staleTime: 5 * 60_000 });
   const summary = q.data ? summarizeVitals(q.data) : null;
@@ -32,7 +33,7 @@ export default function WebVitalsCard() {
       <CardHeader>
         <CardTitle>Vitesse ressentie</CardTitle>
         <CardDescription>
-          7 derniers jours, 75e centile (3 visites sur 4 font mieux). Affichage principal (LCP), réactivité (INP), plus longue tâche des 10 premières secondes.
+          Site public guardiens.fr, 7 derniers jours, 75e centile (3 visites sur 4 font mieux). Affichage principal (LCP), réactivité (INP), plus longue tâche des 10 premières secondes.
           {summary ? ` ${summary.measures.toLocaleString("fr-FR")} mesures.` : ""}
           {q.data && q.data.length >= MAX_ROWS ? ` Limité aux ${MAX_ROWS.toLocaleString("fr-FR")} plus récentes.` : ""}
         </CardDescription>

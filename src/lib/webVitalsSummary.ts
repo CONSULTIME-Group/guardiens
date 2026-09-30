@@ -4,6 +4,9 @@
  * src/lib/webVitals.ts). Sortie : 75e centile de LCP, INP et plus longue
  * tâche par type d'appareil, pour les chemins les plus mesurés.
  */
+/** Seules les mesures du site public comptent (lot P2c). */
+export const SUMMARY_HOST = "guardiens.fr";
+
 export type SummaryDevice = "mobile" | "tablet" | "desktop";
 export const SUMMARY_METRICS = ["LCP", "INP", "LONG_TASK"] as const;
 export type SummaryMetric = (typeof SUMMARY_METRICS)[number];
@@ -30,8 +33,8 @@ export function summarizeVitals(rows: VitalRow[], topN = 10): { paths: PathSumma
   const acc = new Map<string, { total: number; v: Record<string, number[]> }>();
   let measures = 0;
   for (const r of rows) {
-    const m = r.metadata as { path?: unknown; device?: unknown; metrics?: Record<string, { value?: unknown }> } | null;
-    if (!m || typeof m.path !== "string" || !DEVICES.includes(m.device as SummaryDevice) || !m.metrics) continue;
+    const m = r.metadata as { host?: unknown; path?: unknown; device?: unknown; metrics?: Record<string, { value?: unknown }> } | null;
+    if (!m || m.host !== SUMMARY_HOST || typeof m.path !== "string" || !DEVICES.includes(m.device as SummaryDevice) || !m.metrics) continue;
     measures++;
     const e = acc.get(m.path) ?? { total: 0, v: {} };
     e.total++;
