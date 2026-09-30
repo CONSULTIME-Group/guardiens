@@ -1,5 +1,5 @@
 import { publicProfilesLoader, publishedReviewsLoader, sitterAffinityLoader } from "@/lib/batchedReads";
-import { fetchMySmallMissionsIndex, fetchMyProperties, fetchMyPets, fetchApplicationsOnMySits, fetchOpenSmallMissions } from "@/lib/dashboardShared";
+import { fetchMySmallMissionsIndex, fetchMyProperties, fetchMyPets, fetchApplicationsOnMySits, fetchOpenSmallMissions, fetchMySitsFull } from "@/lib/dashboardShared";
 import { fetchMyProfile } from "@/lib/myProfile";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -107,7 +107,7 @@ export function useOwnerDashboardData(userId: string | undefined) {
           sitsRes, propsRes, reviewsRes, profileRes, highlightsRes, missionsRes,
           myMissionsDataRes, allMyMissionsCountRes,
         ] = await Promise.all([
-          supabase.from("sits").select("*, applications(id, status, sitter_id)").eq("user_id", userId).order("created_at", { ascending: false }),
+          fetchMySitsFull(userId!, { fresh: refreshTick > 0 }).then((data) => ({ data, error: null as any })).catch((error) => ({ data: [] as any[], error })),
           fetchMyProperties(userId!).then((data) => ({ data, error: null })).catch((error) => ({ data: [] as any[], error })),
           publishedReviewsLoader.rows([userId!]),
           fetchMyProfile(userId!),

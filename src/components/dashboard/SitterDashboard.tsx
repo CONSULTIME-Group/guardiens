@@ -1,4 +1,4 @@
-import { DeferredMount, useIsDesktopRail } from "@/components/dashboard/shared/DeferredMount";
+import { DeferredMount, StagedMount, useIsDesktopRail } from "@/components/dashboard/shared/DeferredMount";
 /**
  * Tableau de bord gardien (lot D2, maquette validée), même méthode que le
  * lot D1 côté propriétaire : accueil visible tout de suite, une seule
@@ -229,7 +229,9 @@ const SitterDashboard = () => {
                 totalPublished={totalPublished}
                 layout={openingVisible ? "rows" : "star"}
               />
-              <SitterMissingOpportunities fallbackTotalPublished={nbaLoading ? undefined : totalPublished} />
+              <StagedMount testId="missing">
+                <SitterMissingOpportunities fallbackTotalPublished={nbaLoading ? undefined : totalPublished} />
+              </StagedMount>
             </div>
 
             {/* 4. Bandeau entraide (lot P1b : montage différé) */}
@@ -260,7 +262,9 @@ const SitterDashboard = () => {
           {/* Colonne de droite, desktop */}
           {isDesktopRail && (
             <div className="hidden lg:block">
-              <DashboardRail layout="compact">{railContent}</DashboardRail>
+              <StagedMount testId="rail" minHeight={320}>
+                <DashboardRail layout="compact">{railContent}</DashboardRail>
+              </StagedMount>
             </div>
           )}
         </div>

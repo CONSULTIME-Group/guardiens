@@ -188,7 +188,6 @@ const PETS_TRIPLE = ["species", "special_needs", "breed"];
  */
 const SOURCES_PROJECTION = [
   "src/hooks/useViewerSitterForAffinity.ts",
-  "src/hooks/useSitterTopAffinitySits.ts",
   "src/components/sits/ApplicationModal.tsx",
   "src/components/search/SearchOwner.tsx",
   "src/pages/PublicSitterProfile.tsx",
@@ -625,5 +624,13 @@ describe("parité des entrées du moteur d'affinité", () => {
       unknown,
       `nouveaux appelants du moteur à déclarer dans affinity-input-parity.test.ts : ${unknown.join(", ")}`,
     ).toEqual([]);
+  });
+});
+
+describe("lot P3, profil gardien partagé", () => {
+  it("useSitterTopAffinitySits lit le profil gardien par fetchMySitterProfile, sans relecture", () => {
+    const src = readFileSync(join(process.cwd(), "src/hooks/useSitterTopAffinitySits.ts"), "utf8");
+    expect(src).toMatch(/fetchMySitterProfile\(userId!\)/);
+    expect(src).not.toMatch(/from\("sitter_profiles"\)/);
   });
 });

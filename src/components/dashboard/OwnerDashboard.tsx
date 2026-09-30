@@ -1,4 +1,4 @@
-import { DeferredMount, useIsDesktopRail } from "@/components/dashboard/shared/DeferredMount";
+import { DeferredMount, StagedMount, useIsDesktopRail } from "@/components/dashboard/shared/DeferredMount";
 import { useState, useEffect, useMemo, useCallback } from "react";
 
 import { nearbyWaitingSentence } from "@/lib/nearbySittersSentence";
@@ -424,7 +424,9 @@ const OwnerDashboard = () => {
             />
 
             {/* Plafond de candidatures, seulement quand il s'applique */}
-            <ApplicationCapSection sits={sits} onUpdated={reload} />
+            <StagedMount testId="cap">
+              <ApplicationCapSection sits={sits} onUpdated={reload} />
+            </StagedMount>
 
             {/* 3. Près de chez vous (montage différé sous la ligne de flottaison) */}
             <div ref={spotlightRef} className="min-w-0">
@@ -465,6 +467,7 @@ const OwnerDashboard = () => {
 
             {/* 8. Historique des candidatures, accordéon discret */}
             {hasReadApps && (
+              <StagedMount testId="history" minHeight={48}>
               <details className="rounded-2xl bg-card border border-border overflow-hidden">
                 <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between hover:bg-muted/30 transition-colors">
                   <p className="text-sm font-semibold text-foreground">Historique des candidatures</p>
@@ -480,13 +483,16 @@ const OwnerDashboard = () => {
                   />
                 </div>
               </details>
+              </StagedMount>
             )}
           </div>
 
           {/* Colonne de droite, desktop */}
           {isDesktopRail && (
             <div className="hidden lg:block">
-              <DashboardRail layout="compact">{railContent}</DashboardRail>
+              <StagedMount testId="rail" minHeight={320}>
+                <DashboardRail layout="compact">{railContent}</DashboardRail>
+              </StagedMount>
             </div>
           )}
         </div>

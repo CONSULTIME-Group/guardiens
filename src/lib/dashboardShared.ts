@@ -28,18 +28,38 @@ async function cached<T>(key: readonly unknown[], fn: () => Promise<T>): Promise
 
 export type MySitIndexRow = { id: string; status: string; start_date: string | null; updated_at: string | null; created_at: string | null };
 
-/** Annonces du membre, triées updated_at desc puis created_at desc. */
-export function fetchMySitsIndex(userId: string): Promise<MySitIndexRow[]> {
-  return cached(["my-sits-index", userId], async () => {
+/**
+ * Lot P3 : annonces complètes du membre (avec candidatures), lues une seule
+ * fois. Le tableau de bord propriétaire les affiche, l'index en dérive.
+ * `fresh` force une relecture (bouton Réessayer, retour sur l'onglet).
+ */
+export function fetchMySitsFull(userId: string, opts?: { fresh?: boolean }): Promise<any[]> {
+  const key = ["my-sits-full", userId] as const;
+  if (opts?.fresh) getAppQueryClient()?.removeQueries({ queryKey: key, exact: true });
+  return cached(key, async () => {
     const { data, error } = await supabase
       .from("sits")
-      .select("id, status, start_date, updated_at, created_at")
+      .select("*, applications(id, status, sitter_id)")
       .eq("user_id", userId)
-      .order("updated_at", { ascending: false, nullsFirst: false })
       .order("created_at", { ascending: false });
     if (error) throw error;
-    return (data ?? []) as MySitIndexRow[];
+    return (data ?? []) as any[];
   });
+}
+
+const ts = (v: string | null | undefined) => (v ? Date.parse(v) || 0 : 0);
+
+/** Annonces du membre, triées updated_at desc puis created_at desc. */
+export async function fetchMySitsIndex(userId: string): Promise<MySitIndexRow[]> {
+  const rows = await fetchMySitsFull(userId);
+  return rows
+    .map((r) => ({ id: r.id, status: r.status, start_date: r.start_date ?? null, updated_at: r.updated_at ?? null, created_at: r.created_at ?? null }))
+    .sort((a, b) => {
+      const ua = a.updated_at ? ts(a.updated_at) : -Infinity;
+      const ub = b.updated_at ? ts(b.updated_at) : -Infinity;
+      if (ub !== ua) return ub - ua;
+      return ts(b.created_at) - ts(a.created_at);
+    });
 }
 
 export type MyMissionIndexRow = {

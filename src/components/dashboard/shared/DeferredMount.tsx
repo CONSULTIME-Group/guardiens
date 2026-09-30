@@ -7,7 +7,7 @@
  * qui est visible, le reste suit par petites tâches. Rien n'est masqué :
  * chaque bloc finit toujours par être monté.
  */
-import { useEffect, useState, type ReactNode } from "react";
+import { startTransition, useEffect, useState, type ReactNode } from "react";
 import { useInView } from "@/hooks/useInView";
 import { afterIdle } from "@/lib/alma/weatherCache";
 
@@ -52,4 +52,23 @@ export function useIsDesktopRail(): boolean {
     return () => m.removeEventListener?.("change", update);
   }, []);
   return match;
+}
+
+/**
+ * Lot P3 : rendu par étapes. Le bloc est monté juste après le premier
+ * affichage (image suivante, en transition), même s'il est visible. La
+ * première tâche du tableau de bord ne rend que le haut de page ; la place
+ * est réservée (minHeight) pour éviter tout saut de mise en page.
+ */
+export function StagedMount({ children, minHeight = 0, testId }: { children: ReactNode; minHeight?: number; testId?: string }) {
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    const go = () => { if (alive) startTransition(() => setReady(true)); };
+    const raf = typeof requestAnimationFrame === "function" ? requestAnimationFrame(() => setTimeout(go, 0)) : null;
+    if (raf === null) setTimeout(go, 0);
+    return () => { alive = false; if (raf !== null && typeof cancelAnimationFrame === "function") cancelAnimationFrame(raf); };
+  }, []);
+  if (ready) return <>{children}</>;
+  return <div aria-hidden="true" data-staged-placeholder={testId ?? ""} style={{ minHeight }} />;
 }

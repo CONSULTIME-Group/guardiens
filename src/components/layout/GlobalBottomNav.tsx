@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useMatchMedia } from "@/hooks/useMatchMedia";
 import { useLocation } from "react-router-dom";
 import { BottomNav } from "./Navigation";
 import { useShellMode } from "./useShellMode";
@@ -55,7 +56,10 @@ const GlobalBottomNav = () => {
   }, [mounted, bottomNavHidden]);
 
 
-  if (!mounted) return null;
+  // Lot P3 : la barre est masquée au-dessus de 768 px (md:hidden). Elle n'est
+  // plus montée sur ordinateur, ses pastilles ne sont donc plus lues pour rien.
+  const isDesktop = useMatchMedia("(min-width: 768px)");
+  if (!mounted || isDesktop) return null;
   return <BottomNav />;
 };
 

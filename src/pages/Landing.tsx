@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { trackEvent } from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchMyProfile } from "@/lib/myProfile";
 
 import PageMeta from "@/components/PageMeta";
 
@@ -65,7 +66,8 @@ const Landing = () => {
   useEffect(() => {
     if (!user?.id) { setProfileOrigin(null); return; }
     let active = true;
-    void supabase.from("profiles").select("city, latitude, longitude").eq("id", user.id).maybeSingle().then(({ data }) => {
+    // Lot P3 : fiche du membre déjà en cache partagé, aucune seconde lecture.
+    void fetchMyProfile(user.id).then(({ data }) => {
       if (!active || !data || data.latitude === null || data.longitude === null) return;
       setProfileOrigin({ lat: Number(data.latitude), lng: Number(data.longitude), city: data.city });
     });
