@@ -1,3 +1,4 @@
+import { normalizeAnimalTypes } from "@/lib/sitterDistinctLine";
 /**
  * Regroupement des savoir-faire d'un gardien pour la fiche publique (lot F1).
  * Logique pure : comparaison exacte insensible à la casse, aucune donnée inventée.
@@ -93,19 +94,11 @@ const GROUPS: GroupDef[] = [
 ];
 
 /** Codes techniques d'animal_types rencontrés en base, ramenés au libellé. */
-const ANIMAL_CODE: Record<string, string> = {
-  dog: "Chiens", cat: "Chats", bird: "Oiseaux", horse: "Chevaux", nac: "NAC",
-  farm: "Animaux de ferme", rodent: "NAC", reptile: "NAC", rabbit: "NAC", fish: "NAC",
-};
+// Lot R1 : normalizeAnimalTypes vit dans sitterDistinctLine (un seul fichier partagé).
+export { normalizeAnimalTypes };
 
 const norm = (s: string) => s.trim().toLowerCase();
 const cap = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
-
-export function normalizeAnimalTypes(animalTypes: string[] | null | undefined): string[] {
-  return (animalTypes ?? [])
-    .filter((a): a is string => typeof a === "string" && a.trim().length > 0)
-    .map((a) => ANIMAL_CODE[a.trim()] ?? a.trim());
-}
 
 export function groupSitterSkills(input: {
   animalTypes?: string[] | null;

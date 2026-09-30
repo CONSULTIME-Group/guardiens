@@ -14,7 +14,17 @@
  *    une ligne précédente est complétée, sinon laissée vide (le composant
  *    n'affiche alors rien sous le prénom).
  */
-import { normalizeAnimalTypes } from "@/lib/sitterSkillGroups";
+const ANIMAL_CODE: Record<string, string> = {
+  dog: "Chiens", cat: "Chats", bird: "Oiseaux", horse: "Chevaux", nac: "NAC",
+  farm: "Animaux de ferme", rodent: "NAC", reptile: "NAC", rabbit: "NAC", fish: "NAC",
+};
+
+/** Codes d'espèces anglais ramenés aux libellés français (partagé avec sitterSkillGroups). */
+export function normalizeAnimalTypes(animalTypes: string[] | null | undefined): string[] {
+  return (animalTypes ?? [])
+    .filter((a): a is string => typeof a === "string" && a.trim().length > 0)
+    .map((a) => ANIMAL_CODE[a.trim()] ?? a.trim());
+}
 
 export interface DistinctSitterInput {
   completed_sits_count?: number | null;
