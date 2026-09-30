@@ -4,6 +4,7 @@
 
 import { computeReadiness, type Readiness } from "./owner-departure-logic.ts";
 import { loadSitterPool, nearbySitters, pickThree, type SitterRow } from "./owner-noel-audience.ts";
+import { capitalizePetName } from "./owner-departure-logic.ts";
 import { emailAvatarUrl, emailCity } from "./entraide-card-data.ts";
 
 // deno-lint-ignore no-explicit-any
@@ -58,7 +59,7 @@ export async function ownerReadiness(client: Client, userId: string, pool?: Sitt
   return {
     firstName: (profile?.first_name ?? "").trim(),
     city,
-    petNames: pets.map((p) => (p.name ?? "").trim()).filter(Boolean),
+    petNames: pets.map((p) => capitalizePetName(p.name)).filter(Boolean),
     readiness,
     nearby,
   };

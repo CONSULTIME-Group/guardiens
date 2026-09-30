@@ -6,7 +6,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
-  finishUrl, remainingPhrase, PERIOD_OF, type DeparturePayload, type DeparturePeriod,
+  finishUrl, remainingSentence, PERIOD_OF, type DeparturePayload, type DeparturePeriod,
 } from "@/lib/ownerDeparture";
 import { Faces, PeriodChoices, ProgressBar } from "@/components/departure/DepartureParts";
 
@@ -27,7 +27,7 @@ const OwnerDepartureAlmaCard = ({ data, onPick, busy }: Props) => {
           <h2 className="mt-1 font-heading text-[22px] leading-snug text-foreground">
             Votre annonce de {PERIOD_OF[data.period as Exclude<DeparturePeriod, "plus_tard">]} est prête à {data.readiness.percent} %.
           </h2>
-          <p className="mt-2 text-[15px] text-muted-foreground">{remainingPhrase(data.readiness.todo)}</p>
+          <p className="mt-2 text-[15px] text-muted-foreground">{remainingSentence(data.readiness.todo)}</p>
           <div className="mt-4"><ProgressBar percent={data.readiness.percent} /></div>
           <div className="mt-4 flex flex-wrap items-center gap-4">
             <Button asChild className="h-[46px] rounded-full px-6">
@@ -35,7 +35,7 @@ const OwnerDepartureAlmaCard = ({ data, onPick, busy }: Props) => {
             </Button>
             {data.nearby && data.nearby.count > 0 && (
               <span className="flex items-center gap-2 text-[14px] text-muted-foreground">
-                <Faces sitters={data.nearby.sitters} />
+                {data.nearby.sitters.length > 0 && <Faces sitters={data.nearby.sitters} />}
                 {data.nearby.count} gardiens à moins de 50 km
               </span>
             )}

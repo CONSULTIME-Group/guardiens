@@ -3,7 +3,7 @@
  * Logique pure : libellés, raccourcis de dates, textes proposés.
  * Règle : aucun genre deviné pour les animaux, aucun détail inventé.
  */
-import { isDeparturePeriod, type DeparturePeriod } from "@/lib/ownerDeparture";
+import { capitalizePetName, isDeparturePeriod, type DeparturePeriod } from "@/lib/ownerDeparture";
 import { MAX_TITLE_LENGTH } from "@/lib/sitPublishRules";
 
 export interface ExpressPet { name?: string | null; species?: string | null }
@@ -20,7 +20,7 @@ export const isExpressActive = (o: { requested: boolean; hasProperty: boolean; s
   o.requested && o.hasProperty && !o.showSetup && !o.loading;
 
 /** « Mila », « Mila et Rex », « Mila, Rex et Nala ». Jamais d'espèce ni de genre. */
-export const petNames = (pets: ExpressPet[]): string[] => pets.map((p) => (p.name ?? "").trim()).filter(Boolean);
+export const petNames = (pets: ExpressPet[]): string[] => pets.map((p) => capitalizePetName(p.name)).filter(Boolean);
 
 /** Énumération française : virgules, et « et » seulement avant le dernier élément. */
 export function joinFr(items: string[]): string {

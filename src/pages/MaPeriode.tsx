@@ -8,11 +8,11 @@ import { Link, useParams, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import PageMeta from "@/components/PageMeta";
 import {
-  callMaPeriode, finishUrl, isDeparturePeriod, remainingPhrase,
+  callMaPeriode, finishUrl, isDeparturePeriod, remainingSentence,
   PERIOD_NOTED, PERIOD_OF,
   type DeparturePayload, type DeparturePeriod,
 } from "@/lib/ownerDeparture";
-import { Faces, PeriodChoices, ProgressBar, ReadinessList } from "@/components/departure/DepartureParts";
+import { NearbyList, PeriodChoices, ProgressBar, ReadinessList } from "@/components/departure/DepartureParts";
 
 export const RECORDED_LINE = "Votre réponse est enregistrée. Vous la retrouvez sur votre tableau de bord.";
 
@@ -35,12 +35,11 @@ export const NotedView = ({ data }: { data: DeparturePayload }) => {
   }
   if (!period) return null;
   const r = data.readiness;
-  const pets = data.pet_names.length ? ` pour ${data.pet_names.slice(0, 3).join(", ")}` : "";
   return (
     <section data-testid="noted-period">
       <h1 className="font-heading text-[30px] leading-tight text-foreground">C'est noté : {PERIOD_NOTED[period]}.</h1>
       <p className="mt-3 text-[16px] leading-relaxed text-muted-foreground">
-        Votre annonce de {PERIOD_OF[period]}{pets} est prête à {r.percent} %. {remainingPhrase(r.todo)}
+        Votre annonce de {PERIOD_OF[period]} est prête à {r.percent} %.{r.todo.length ? ` ${remainingSentence(r.todo)}` : ""}
       </p>
       <div className="mt-5"><ProgressBar percent={r.percent} /></div>
       <ReadinessList readiness={r} />
@@ -50,9 +49,9 @@ export const NotedView = ({ data }: { data: DeparturePayload }) => {
           : <Link to={finishUrl(period)}>Terminer mon annonce</Link>}
       </Button>
       {data.nearby && data.nearby.count > 0 && data.city ? (
-        <div className="mt-6 flex items-center gap-3 rounded-2xl border border-border bg-card p-4" data-testid="noted-nearby">
-          <Faces sitters={data.nearby.sitters} />
+        <div className="mt-6 rounded-2xl border border-border bg-card p-4" data-testid="noted-nearby">
           <p className="text-[15px] text-foreground">{data.nearby.count} {data.nearby.count === 1 ? "gardien" : "gardiens"} à moins de 50 km de {data.city}.</p>
+          <NearbyList sitters={data.nearby.sitters} />
         </div>
       ) : (
         <div className="mt-6 rounded-2xl border border-border bg-card p-4" data-testid="noted-no-city">

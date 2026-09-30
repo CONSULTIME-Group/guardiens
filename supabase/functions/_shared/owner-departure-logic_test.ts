@@ -1,5 +1,5 @@
 import { assert, assertEquals } from 'https://deno.land/std@0.224.0/assert/mod.ts'
-import { almaDepartureState, computeReadiness, departureTokenState, finishUrl, isDuplicateAnswer, isOwnerV2Holdout, md5, remainingPhrase } from './owner-departure-logic.ts'
+import { almaDepartureState, computeReadiness, departureTokenState, finishUrl, isDuplicateAnswer, isOwnerV2Holdout, md5, remainingPhrase, remainingSentence, capitalizePetName } from './owner-departure-logic.ts'
 import { splitDepartureAudience } from './owner-departure-audience.ts'
 
 const today = '2026-10-01'
@@ -56,4 +56,11 @@ Deno.test('témoin : stable et proche de 10 % sur 1 000 identifiants', () => {
   assertEquals(split.holdoutExcluded, n)
   assertEquals(split.alreadyAnswered, 1)
   assertEquals(split.rows.length, 1000 - n - 1)
+})
+
+Deno.test('noms d animaux capitalises et phrase du reste', () => {
+  assertEquals(capitalizePetName('resa'), 'Resa')
+  const r = computeReadiness({ city: null, latitude: null, hasProperty: false, pets: [{ name: 'Rex' }, { name: 'resa' }], galleryPhotoCount: 0, propertyPhotoCount: 0, draftStartDates: [] } as any)
+  assertEquals(r.items.find((i) => i.key === 'animaux')?.label, 'Rex et Resa')
+  assertEquals(remainingSentence([{ key: 'dates', label: 'Vos dates', done: false }]), 'Il reste vos dates.')
 })
