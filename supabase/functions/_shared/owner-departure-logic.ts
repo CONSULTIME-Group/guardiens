@@ -172,8 +172,14 @@ export interface Readiness { percent: number; items: ReadinessItem[]; todo: Read
  * Noms seuls, jamais de genre deviné (lot N5) : « Mila », « Mila et Rex »,
  * « Mila, Rex et Nala ». Sans nom : « Vos animaux ».
  */
+/** Première lettre du nom d'un animal en majuscule, affichage seulement (« resa » devient « Resa »). */
+export function capitalizePetName(name: string | null | undefined): string {
+  const n = (name ?? "").trim();
+  return n ? n.charAt(0).toLocaleUpperCase("fr-FR") + n.slice(1) : "";
+}
+
 function petLabel(pets: ReadinessInput["pets"]): string {
-  const names = pets.map((p) => (p.name ?? "").trim()).filter(Boolean);
+  const names = pets.map((p) => capitalizePetName(p.name)).filter(Boolean);
   if (names.length === 0) return "Vos animaux";
   if (names.length === 1) return names[0];
   return `${names.slice(0, -1).join(", ")} et ${names[names.length - 1]}`;
@@ -208,6 +214,12 @@ export function remainingPhrase(todo: ReadinessItem[]): string {
   if (todo.length === 1) return lowerFirst(todo[0].label);
   if (todo.length === 2) return `${lowerFirst(todo[0].label)} et ${lowerFirst(todo[1].label)}`;
   return "quelques détails";
+}
+
+/** « Il reste vos dates. », « Il reste une photo de chez vous et vos dates. », vide si tout est prêt. */
+export function remainingSentence(todo: ReadinessItem[]): string {
+  const p = remainingPhrase(todo);
+  return p ? `Il reste ${p}.` : "";
 }
 
 /**

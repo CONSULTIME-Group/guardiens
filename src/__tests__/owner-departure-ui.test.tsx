@@ -24,10 +24,23 @@ describe("Page C'est noté", () => {
   it("avec commune : titre, 60 %, gardiens proches, lien Noël prérempli", () => {
     wrap(<NotedView data={base()} />);
     expect(screen.getByText("C'est noté : Noël.")).toBeTruthy();
-    expect(document.body.textContent).toContain("prête à 60 %");
+    expect(document.body.textContent).toContain("Votre annonce de Noël est prête à 60 %. Il reste une photo de chez vous et vos dates.");
+    expect(document.body.textContent).not.toContain("pour Rex");
+    expect(screen.getByTestId("noted-nearby-list").textContent).toContain("Léa");
+    expect(screen.getByTestId("noted-nearby-list").textContent).toContain("à 3 km");
     expect(screen.getByTestId("noted-nearby").textContent).toContain("12 gardiens à moins de 50 km de Lyon");
     expect(screen.getByText("Terminer mon annonce").closest("a")?.getAttribute("href")).toContain("debut=2026-12-19");
     noDash();
+  });
+  it("noms d'animaux capitalisés dans la liste", () => {
+    const r = computeReadiness({ city: "Lyon", latitude: 45.7, hasProperty: true, pets: [{ name: "Rex", species: "dog" }, { name: "resa", species: "cat" }], galleryPhotoCount: 0, propertyPhotoCount: 0, draftStartDates: [], today: "2026-10-01" });
+    wrap(<NotedView data={base({ readiness: r })} />);
+    expect(screen.getByTestId("readiness-list").textContent).toContain("Rex et Resa");
+  });
+  it("sans gardien listé : aucune zone vide", () => {
+    wrap(<NotedView data={base({ nearby: { count: 120, sitters: [] } })} />);
+    expect(screen.getByTestId("noted-nearby").textContent).toContain("120 gardiens");
+    expect(screen.queryByTestId("noted-nearby-list")).toBeNull();
   });
   it("sans commune : invitation à ajouter la commune", () => {
     wrap(<NotedView data={base({ city: null, nearby: null })} />);

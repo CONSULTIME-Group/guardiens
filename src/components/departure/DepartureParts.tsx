@@ -1,4 +1,5 @@
 /** Briques partagées page « C'est noté » et carte Alma (lot N4). */
+import { useState } from "react";
 import { Check } from "lucide-react";
 import { PERIOD_BUTTONS, type DeparturePeriod, type Readiness } from "@/lib/ownerDeparture";
 import { cn } from "@/lib/utils";
@@ -51,14 +52,46 @@ export const ReadinessList = ({ readiness }: { readiness: Readiness }) => (
   </ul>
 );
 
-export const Faces = ({ sitters }: { sitters: Array<{ id: string; firstName: string; avatarUrl?: string }> }) => (
+type NearbySitter = { id: string; firstName: string; avatarUrl?: string; distanceKm?: number };
+
+/** Photo du gardien, ou initiale sur fond vert pâle si la photo manque ou ne charge pas. */
+export const SitterAvatar = ({ s, size = 32, className }: { s: NearbySitter; size?: number; className?: string }) => {
+  const [broken, setBroken] = useState(false);
+  const style = { width: size, height: size };
+  if (s.avatarUrl && !broken) {
+    return (
+      <img src={avatarImageUrl(s.avatarUrl, size * 2)} alt="" style={style} onError={() => setBroken(true)}
+        className={cn("shrink-0 rounded-full object-cover", className)} loading="lazy" />
+    );
+  }
+  return (
+    <span style={style} data-testid="sitter-initial" className={cn("flex shrink-0 items-center justify-center rounded-full bg-primary/15 font-heading text-[13px] text-primary", className)}>
+      {(s.firstName.charAt(0) || "G").toUpperCase()}
+    </span>
+  );
+};
+
+export const Faces = ({ sitters }: { sitters: NearbySitter[] }) => (
   <div className="flex -space-x-2">
-    {sitters.slice(0, 3).map((s) => s.avatarUrl ? (
-      <img key={s.id} src={avatarImageUrl(s.avatarUrl, 64)} alt={s.firstName} className="h-[32px] w-[32px] rounded-full border-2 border-card object-cover" loading="lazy" />
-    ) : (
-      <span key={s.id} className="flex h-[32px] w-[32px] items-center justify-center rounded-full border-2 border-card bg-primary/15 font-heading text-[13px] text-primary">
-        {(s.firstName.charAt(0) || "G").toUpperCase()}
-      </span>
-    ))}
+    {sitters.slice(0, 3).map((s) => <SitterAvatar key={s.id} s={s} className="border-2 border-card" />)}
   </div>
 );
+
+/** Les trois gardiens les plus proches : avatar, prénom, distance. Rien si la liste est vide. */
+export const NearbyList = ({ sitters }: { sitters: NearbySitter[] }) => {
+  const shown = sitters.filter((s) => s.firstName).slice(0, 3);
+  if (shown.length === 0) return null;
+  return (
+    <ul className="mt-3 flex flex-wrap gap-4" data-testid="noted-nearby-list">
+      {shown.map((s) => (
+        <li key={s.id} className="flex items-center gap-2">
+          <SitterAvatar s={s} size={40} />
+          <span className="text-[14px] leading-tight">
+            <span className="block font-semibold text-foreground">{s.firstName}</span>
+            {typeof s.distanceKm === "number" && <span className="block text-muted-foreground">à {s.distanceKm} km</span>}
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+};
