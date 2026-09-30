@@ -12,3 +12,5 @@
 - Profil du membre connecté (lot P1) : toute lecture de profiles, sitter_profiles, owner_profiles, public_profiles pour soi passe par src/lib/myProfile.ts (clé ["my-profile", id], 5 min, `fresh` sur les écrans d'édition) ; pourquoi : 19 lectures de profiles par tableau de bord ramenées à une.
 
 - Tableau de bord léger (lot P1b) : lectures du membre partagées par src/lib/dashboardShared.ts, lectures d'autrui groupées en .in() par src/lib/batchedReads.ts, blocs sous la ligne de flottaison montés par DeferredMount, scoring d'affinité découpé (src/lib/yieldToMain.ts) ; pourquoi : au plus 2 lectures par table et 40 au total, verrouillé par src/__tests__/p1b/dashboard-read-budget.test.tsx.
+
+- Démarrage léger (lot P2) : coquilles, bandeau cookies, traceurs et outils membres chargés à la demande depuis App.tsx, dictionnaire fr chargé en parallèle (i18nReady) avant le premier rendu, index léger des villes (missionsCityIndex) et constantes (siteConstants) à parité testée ; pourquoi : entrée sous 200 Ko, verrouillée par src/__tests__/p2/startup-build.test.ts.
