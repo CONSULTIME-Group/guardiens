@@ -1,4 +1,4 @@
-import { fetchMySitsIndex, fetchMyProperties, invalidateMyProperties } from "@/lib/dashboardShared";
+import { fetchMySitsIndex, fetchMyProperties, invalidateMyProperties, fetchMyPets, invalidateMyPets } from "@/lib/dashboardShared";
 import { fetchMyOwnerProfile, fetchMyProfile, fetchMySitterProfile } from "@/lib/myProfile";
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -270,7 +270,7 @@ export function useOwnerProfile() {
 
     if (prop) {
       setPropertyId(prop.id);
-      const { data: petsData } = await supabase.from("pets").select("*").eq("property_id", prop.id);
+      const petsData = (await fetchMyPets(user.id!, { fresh: true }).catch(() => [])).filter((a: any) => a.property_id === prop.id);
       setPets(petsData?.map(a => ({
         id: a.id, property_id: a.property_id, species: a.species, breed: a.breed || "",
         name: a.name, age: a.age, photo_url: a.photo_url || "", character: a.character || "",

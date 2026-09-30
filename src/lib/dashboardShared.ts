@@ -56,15 +56,16 @@ export function fetchMySmallMissionsIndex(userId: string): Promise<MyMissionInde
   });
 }
 
-export type MyApplicationIndexRow = { id: string; status: string };
+export type MyApplicationIndexRow = { id: string; status: string; [k: string]: any };
 
-/** Candidatures envoyées par le membre, colonnes légères. */
+/** Candidatures envoyées par le membre, annonce jointe, plus récentes d'abord. */
 export function fetchMyApplicationsIndex(userId: string): Promise<MyApplicationIndexRow[]> {
   return cached(["my-applications-index", userId], async () => {
     const { data, error } = await supabase
       .from("applications")
-      .select("id, status")
-      .eq("sitter_id", userId);
+      .select("*, sit:sits(id, title, city, start_date, end_date, status, user_id, property_id, properties:property_id(photos))")
+      .eq("sitter_id", userId)
+      .order("created_at", { ascending: false });
     if (error) throw error;
     return (data ?? []) as MyApplicationIndexRow[];
   });
@@ -170,5 +171,48 @@ export function fetchOpenPublishedSits(userId: string): Promise<{ rows: any[]; e
       .limit(OPEN_PUBLISHED_SITS_LIMIT);
     // Les erreurs restent portées par la valeur (jamais de rejet en cache).
     return { rows: (data ?? []) as any[], error: error ?? null };
+  });
+}
+
+/** Animaux de tous les logements du membre (toutes colonnes). */
+export function fetchMyPets(userId: string, opts?: { fresh?: boolean }): Promise<any[]> {
+  const run = async () => {
+    const props = await fetchMyProperties(userId, opts);
+    const ids = props.map((p) => p.id).filter(Boolean);
+    if (ids.length === 0) return [];
+    const { data, error } = await supabase.from("pets").select("*").in("property_id", ids);
+    if (error) throw error;
+    return (data ?? []) as any[];
+  };
+  const client = getAppQueryClient();
+  if (!client) return run();
+  return client.fetchQuery({
+    queryKey: ["my-pets", userId],
+    queryFn: run,
+    staleTime: opts?.fresh ? 0 : DASHBOARD_SHARED_STALE_MS,
+  });
+}
+
+export function invalidateMyPets(userId: string) {
+  void getAppQueryClient()?.invalidateQueries({ queryKey: ["my-pets", userId] });
+}
+
+/**
+ * Candidatures reçues sur les annonces du membre, plus récentes d'abord,
+ * avec les politiques accompagnants de l'annonce (contexte d'affinité).
+ */
+export function fetchApplicationsOnMySits(userId: string): Promise<any[]> {
+  return cached(["applications-on-my-sits", userId], async () => {
+    const sits = await fetchMySitsIndex(userId);
+    const ids = sits.map((s) => s.id);
+    if (ids.length === 0) return [];
+    const { data, error } = await supabase
+      .from("applications")
+      .select("*, sit:sits(title, start_date, end_date, accepts_sitter_pets, accepts_sitter_children)")
+      .in("sit_id", ids)
+      .order("created_at", { ascending: false })
+      .limit(500);
+    if (error) throw error;
+    return (data ?? []) as any[];
   });
 }

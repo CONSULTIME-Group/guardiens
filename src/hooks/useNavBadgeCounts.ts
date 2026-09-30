@@ -1,4 +1,4 @@
-import { fetchMySitsIndex, fetchMyApplicationsIndex, fetchMyConversationsIndex } from "@/lib/dashboardShared";
+import { fetchMySitsIndex, fetchMyApplicationsIndex, fetchMyConversationsIndex, fetchApplicationsOnMySits } from "@/lib/dashboardShared";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { messagesUnreadExclusive } from "@/lib/navModel";
@@ -73,11 +73,9 @@ export function useNavBadgeCounts(userId: string | undefined): NavBadgeCounts {
               .is("read_at", null)
           : Promise.resolve({ count: 0 } as any),
         userSits.length > 0
-          ? supabase
-              .from("applications")
-              .select("id", { count: "exact", head: true })
-              .in("sit_id", userSits.map((s: any) => s.id))
-              .eq("status", "pending")
+          ? fetchApplicationsOnMySits(userId)
+              .then((rows) => ({ count: rows.filter((a: any) => a.status === "pending").length }))
+              .catch(() => ({ count: 0 }))
           : Promise.resolve({ count: 0 } as any),
       ]);
 

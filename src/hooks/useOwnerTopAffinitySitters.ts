@@ -1,5 +1,5 @@
 import { sitterAffinityLoader } from "@/lib/batchedReads";
-import { fetchMySitsIndex, fetchMyProperties } from "@/lib/dashboardShared";
+import { fetchMySitsIndex, fetchMyProperties, fetchMyPets } from "@/lib/dashboardShared";
 /**
  * Owner Pass 3 : 3 gardiens qui vous correspondent (score d'affinité).
  *
@@ -73,7 +73,7 @@ export function useOwnerTopAffinitySitters(): Result {
       const [{ data: me }, { data: ownerPrefs }, { data: pets }, { data: myProperties }, pool, exactPoolCount, publishedRes] = await Promise.all([
         fetchMyProfile(userId!),
         fetchMyOwnerProfile(userId!),
-        supabase.from("pets").select("species, special_needs, breed, property_id, properties!inner(user_id)").eq("properties.user_id", userId!),
+        fetchMyPets(userId!).then((data) => ({ data })).catch(() => ({ data: [] as any[] })),
         fetchMyProperties(userId!).then((data) => ({ data })).catch(() => ({ data: [] as any[] })),
         // Vivier de gardiens actifs, COMPLET : aucun filtre de confiance
         // (identité vérifiée, complétude). La vue public_profiles ne contient

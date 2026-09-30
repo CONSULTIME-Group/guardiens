@@ -1,5 +1,5 @@
 import { publicProfilesLoader, publishedReviewsLoader, sitterAffinityLoader } from "@/lib/batchedReads";
-import { fetchMySmallMissionsIndex, fetchMyProperties } from "@/lib/dashboardShared";
+import { fetchMySmallMissionsIndex, fetchMyProperties, fetchMyPets, fetchApplicationsOnMySits } from "@/lib/dashboardShared";
 import { fetchMyProfile } from "@/lib/myProfile";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -191,19 +191,17 @@ export function useOwnerDashboardData(userId: string | undefined) {
         const sitIds = sitsData.map(s => s.id);
 
         const petsPromise = propIds.length > 0
-          ? supabase.from("pets").select("*").in("property_id", propIds)
+          ? fetchMyPets(userId!).then((data) => ({ data, error: null })).catch((error) => ({ data: [] as any[], error }))
           : Promise.resolve({ data: [], error: null });
 
         const appsPromise = sitIds.length > 0
-          ? supabase
-              .from("applications")
-              // L'embed sit porte les politiques accompagnants : OwnerStarSection
-              // les injecte dans le calcul d'affinité de chaque candidature
-              // (contexte annonce obligatoire, 21/08/2026).
-              .select("*, sit:sits(title, start_date, end_date, accepts_sitter_pets, accepts_sitter_children)")
-              .in("sit_id", sitIds)
-              .order("created_at", { ascending: false })
-              .limit(20)
+          // L'embed sit porte les politiques accompagnants : OwnerStarSection
+          // les injecte dans le calcul d'affinité de chaque candidature
+          // (contexte annonce obligatoire, 21/08/2026). Lot P1b : lecture
+          // partagée avec la pastille de navigation.
+          ? fetchApplicationsOnMySits(userId!)
+              .then((rows) => ({ data: rows.filter((a: any) => sitIds.includes(a.sit_id)).slice(0, 20), error: null }))
+              .catch((error) => ({ data: [] as any[], error }))
           : Promise.resolve({ data: [], error: null });
 
         const [petsRes, appsRes, viewsRes, ownerReviewsRes] = await Promise.all([

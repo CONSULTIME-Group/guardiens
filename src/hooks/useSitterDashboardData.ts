@@ -1,5 +1,5 @@
 import { publicProfilesLoader } from "@/lib/batchedReads";
-import { fetchMyBadges, fetchMyEmergencyProfileId, fetchMySmallMissionsIndex, fetchMyConversationsIndex, fetchOpenPublishedSits } from "@/lib/dashboardShared";
+import { fetchMyBadges, fetchMyEmergencyProfileId, fetchMySmallMissionsIndex, fetchMyConversationsIndex, fetchOpenPublishedSits, fetchMyApplicationsIndex } from "@/lib/dashboardShared";
 import { fetchMyProfile, fetchMyPublicProfile, fetchMySitterProfile } from "@/lib/myProfile";
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -139,9 +139,7 @@ export function useSitterDashboardData(userId: string | undefined) {
         badgesRes, articlesRes, unreadRes, allBadgesRes, emProfileRes, reputationRes,
         meApproxRes, listingsRes, openMissionsRes, myMissionsRes,
       ] = await Promise.all([
-        supabase.from("applications")
-          .select("*, sit:sits(id, title, city, start_date, end_date, status, user_id, property_id, properties:property_id(photos))")
-          .eq("sitter_id", userId).order("created_at", { ascending: false }),
+        fetchMyApplicationsIndex(userId!).then((data) => ({ data: data.map((a) => ({ ...a })), error: null })).catch((error) => ({ data: null, error })),
         fetchMySitterProfile(userId!),
         fetchMyProfile(userId!),
         supabase.from("reviews")
