@@ -1,5 +1,5 @@
-import { publicProfilesLoader } from "@/lib/batchedReads";
 import { fetchMyProfile } from "@/lib/myProfile";
+import { publicProfilesLoader } from "@/lib/batchedReads";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
