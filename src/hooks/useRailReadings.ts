@@ -193,15 +193,19 @@ export const useRailReadings = ({
             .from("articles")
             .select("slug, title, noindex")
             .eq("published", true);
-          q = stageSlug
-            ? q.or(`slug.eq.${stageSlug},noindex.is.null,noindex.eq.false`)
-            : q.or("noindex.is.null,noindex.eq.false");
-          const res = await q.order("published_at", { ascending: false }).limit(20);
+          // Toutes les étapes d'un coup : la lecture ne dépend plus de l'étape,
+          // elle n'est donc faite qu'une fois même si l'étape arrive après.
+          const stageSlugs = Object.values(OWNER_STAGE_ARTICLES)
+            .map((v: any) => v?.slugs?.[0])
+            .filter((x: unknown): x is string => typeof x === "string" && /^[a-z0-9-]+$/.test(x));
+          const slugFilter = stageSlugs.length ? `slug.in.(${stageSlugs.join(",")}),` : "";
+          q = q.or(`${slugFilter}noindex.is.null,noindex.eq.false`);
+          const res = await q.order("published_at", { ascending: false }).limit(20 + stageSlugs.length);
           return (res.data ?? []) as unknown[];
         };
         const client = getAppQueryClient();
         const data = client
-          ? await client.fetchQuery({ queryKey: ["rail-article", stageSlug ?? null], queryFn: readArticles, staleTime: 10 * 60 * 1000 })
+          ? await client.fetchQuery({ queryKey: ["rail-article"], queryFn: readArticles, staleTime: 10 * 60 * 1000 })
           : await readArticles();
         const rows = (data ?? []) as Array<{ slug: string; title: string; noindex: boolean | null }>;
         const hit = (stageSlug ? rows.find((r) => r.slug === stageSlug) : undefined)

@@ -403,7 +403,7 @@ async function send(payload: {
   sessionCount++;
 
   try {
-    const user = (await supabase.auth.getSession()).data.session?.user ?? null; // P1b : session locale
+    const user = (await (supabase.auth as any).getSession?.())?.data?.session?.user ?? null; // P1b : session locale
     await supabase.rpc("log_client_error", {
       _fingerprint: payload.fingerprint,
       _message: payload.message.slice(0, 2000),

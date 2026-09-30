@@ -9,12 +9,26 @@ import { useQuery, useQueryClient, type QueryClient } from "@tanstack/react-quer
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import type { AffinityOwnerInput } from "@/lib/affinityScore";
+import { getAppQueryClient } from "@/lib/appQueryClient";
 
 type Loaded = AffinityOwnerInput | null;
 
 async function fetchOwnerWithPets(userId: string): Promise<Loaded> {
+  // Lot P1b : owner_profiles partagé avec la lecture du profil du membre
+  // (clé ["my-owner-profile", id], même select("*"), même forme { data, error }).
+  const readOwner = async () => {
+    const { data, error } = await supabase.from("owner_profiles").select("*").eq("user_id", userId).maybeSingle();
+    if (error) throw error;
+    const row = { data: (data as any) ?? null, error: null };
+    return row;
+  };
+  const client = getAppQueryClient();
+  const ownerPromise = (client
+    ? client.fetchQuery({ queryKey: ["my-owner-profile", userId], queryFn: readOwner, staleTime: 5 * 60 * 1000 })
+    : readOwner()
+  ).catch(() => ({ data: null, error: null }));
   const [ownerRes, propsRes] = await Promise.all([
-    supabase.from("owner_profiles").select("*").eq("user_id", userId).maybeSingle(),
+    ownerPromise,
     supabase.from("properties").select("car_required, pets(species, special_needs, breed)").eq("user_id", userId),
   ]);
   if (!ownerRes.data) return null;

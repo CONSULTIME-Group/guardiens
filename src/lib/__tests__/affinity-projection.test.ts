@@ -65,12 +65,10 @@ describe("projection des colonnes d'affinité", () => {
     expect(missing, `colonnes absentes de la projection SearchOwner : ${missing.join(", ")}`).toEqual([]);
   });
 
-  it("useOwnerTopAffinitySitters projette toutes les colonnes consommées", () => {
-    const projected = projectedColumns("src/hooks/useOwnerTopAffinitySitters.ts", [
-      "sitter_profiles",
-      "sitter_profiles_affinity",
-    ]);
-    const missing = consumed.filter((c) => !projected.has(c));
-    expect(missing, `colonnes absentes de la projection useOwnerTopAffinitySitters : ${missing.join(", ")}`).toEqual([]);
+  it("useOwnerTopAffinitySitters lit toutes les colonnes via sitterAffinityLoader (lot P1b)", () => {
+    const hook = readFileSync("src/hooks/useOwnerTopAffinitySitters.ts", "utf8");
+    expect(hook).toContain("sitterAffinityLoader.rows(");
+    const loader = readFileSync("src/lib/batchedReads.ts", "utf8");
+    expect(loader).toMatch(/table: "sitter_profiles_affinity",\s*idColumn: "user_id",\s*columns: "\*"/);
   });
 });
