@@ -19,7 +19,8 @@ async function fetchOwnerWithPets(userId: string): Promise<Loaded> {
   const readOwner = async () => {
     const { data, error } = await supabase.from("owner_profiles").select("*").eq("user_id", userId).maybeSingle();
     if (error) throw error;
-    return { data: (data as any) ?? null, error: null };
+    const row = { data: (data as any) ?? null, error: null };
+    return row;
   };
   const client = getAppQueryClient();
   const ownerPromise = (client
