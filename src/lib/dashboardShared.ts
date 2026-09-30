@@ -14,6 +14,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { getAppQueryClient } from "@/lib/appQueryClient";
 
 export const DASHBOARD_SHARED_STALE_MS = 60_000;
+/**
+ * Logements et animaux : écrits depuis plusieurs écrans. Fenêtre courte,
+ * juste assez pour dédoublonner le chargement d'une page.
+ */
+export const HOME_SHARED_STALE_MS = 10_000;
 
 async function cached<T>(key: readonly unknown[], fn: () => Promise<T>): Promise<T> {
   const client = getAppQueryClient();
@@ -125,7 +130,7 @@ export function fetchMyProperties(userId: string, opts?: { fresh?: boolean }): P
   return client.fetchQuery({
     queryKey: ["my-properties", userId],
     queryFn: run,
-    staleTime: opts?.fresh ? 0 : DASHBOARD_SHARED_STALE_MS,
+    staleTime: opts?.fresh ? 0 : HOME_SHARED_STALE_MS,
   });
 }
 
@@ -189,7 +194,7 @@ export function fetchMyPets(userId: string, opts?: { fresh?: boolean }): Promise
   return client.fetchQuery({
     queryKey: ["my-pets", userId],
     queryFn: run,
-    staleTime: opts?.fresh ? 0 : DASHBOARD_SHARED_STALE_MS,
+    staleTime: opts?.fresh ? 0 : HOME_SHARED_STALE_MS,
   });
 }
 
