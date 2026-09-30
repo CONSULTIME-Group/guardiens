@@ -45,12 +45,12 @@ const mount = (s: any) => render(<MemoryRouter><SitterResultCard sitter={s} phot
 describe("R1 rendu SitterResultCard", () => {
   it("avec bio : ligne et accroche", () => {
     mount(base("J'adore les chevaux. Et le reste."));
-    expect(screen.getByTestId("sitter-card-line").textContent).toBe("En couple · véhiculé · chevaux");
+    expect(screen.getByTestId("sitter-card-line").textContent).toBe("En couple · chevaux · véhiculé");
     expect(screen.getByText("« J'adore les chevaux. »")).toBeTruthy();
   });
   it("sans bio : ligne seule, meta intacte", () => {
     mount(base(null));
-    expect(screen.getByTestId("sitter-card-line").textContent).toBe("En couple · véhiculé · chevaux");
+    expect(screen.getByTestId("sitter-card-line").textContent).toBe("En couple · chevaux · véhiculé");
     expect(screen.getByText("4,9 sur 3 gardes")).toBeTruthy();
     expect(screen.queryByText(/«/)).toBeNull();
   });

@@ -37,6 +37,12 @@ export interface DistinctSitterInput {
   special_animal_skills?: string[] | null;
   interests?: string[] | null;
   has_vehicle?: boolean | null;
+  /**
+   * Lot R2 : champs descriptifs lus sur la vue publique pour la carte de
+   * recherche, rangés à part pour ne jamais entrer dans le calcul d'affinité.
+   * Repli seulement : une valeur directe du gardien prime.
+   */
+  _card?: Pick<DistinctSitterInput, "competences" | "special_animal_skills" | "interests" | "experience_years"> | null;
 }
 
 export const DISTINCT_LINE_MAX_FRAGMENTS = 3;
@@ -127,6 +133,7 @@ function candidateFragments(
   s: DistinctSitterInput,
   skills: string[],
   interests: string[],
+  order: "dashboard" | "card" = "dashboard",
 ): Fragment[] {
   const out: Fragment[] = [];
   const sits = s.completed_sits_count ?? 0;
@@ -137,12 +144,18 @@ function candidateFragments(
   }
   const comp = COMPOSITION[norm(String(s.sitter_type ?? ""))];
   if (comp) out.push({ kind: "fact", text: comp });
-  // Lot R1 : « véhiculé » juste après la situation (true seulement, NULL neutre).
+  const skillFrag: Fragment | null = skills.length > 0 ? { kind: "list", prefix: "", items: skills } : null;
+  // Lot R2 : sur la carte de recherche, savoir-faire juste après la situation.
+  if (order === "card" && skillFrag) out.push(skillFrag);
+  // Lot R1 : « véhiculé » après la situation (true seulement, NULL neutre).
   if (s.has_vehicle === true) out.push({ kind: "fact", text: "véhiculé" });
   const exp = experienceFragment(s.experience_years);
   if (exp) out.push({ kind: "fact", text: exp });
-  if (skills.length > 0) out.push({ kind: "list", prefix: "", items: skills });
-  if (interests.length > 0) out.push({ kind: "list", prefix: "centres d'intérêt : ", items: interests });
+  if (order === "dashboard" && skillFrag) out.push(skillFrag);
+  // Lot R2 : sur la carte, centres d'intérêt en dernier recours (sans savoir-faire).
+  if (interests.length > 0 && !(order === "card" && skillFrag)) {
+    out.push({ kind: "list", prefix: "centres d'intérêt : ", items: interests });
+  }
   return out;
 }
 
@@ -214,8 +227,18 @@ export function sitterCardLine(
   sitter: DistinctSitterInput,
   opts: { omitSitsAndReviews?: boolean } = {},
 ): string {
+  const c = sitter._card ?? {};
+  const pick = <T,>(v: T | null | undefined, f: T | null | undefined) =>
+    (Array.isArray(v) ? v.length > 0 : v != null && v !== "") ? v : f;
+  const merged: DistinctSitterInput = {
+    ...sitter,
+    competences: pick(sitter.competences, c.competences),
+    special_animal_skills: pick(sitter.special_animal_skills, c.special_animal_skills),
+    interests: pick(sitter.interests, c.interests),
+    experience_years: pick(sitter.experience_years, c.experience_years),
+  };
   const s = opts.omitSitsAndReviews
-    ? { ...sitter, completed_sits_count: 0, reviews_count: 0, reviews_avg: null }
-    : sitter;
-  return buildLine(candidateFragments(s, sitterSkillItems(s), sitterInterests(s))).line;
+    ? { ...merged, completed_sits_count: 0, reviews_count: 0, reviews_avg: null }
+    : merged;
+  return buildLine(candidateFragments(s, sitterSkillItems(s), sitterInterests(s), "card")).line;
 }

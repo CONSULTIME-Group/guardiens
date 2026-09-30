@@ -595,11 +595,18 @@ const SearchOwner = () => {
       // life_pace, languages, interests, work_during_sit, sensitivities) ne
       // sont plus dans la vue publique, elles sont chargées séparément via
       // `sitter_profiles_affinity`, réservée aux membres connectés.
-      .select("user_id, animal_types, has_vehicle, is_available, reply_median_minutes, sitter_type, travels_with_children, travels_with_own_animals");
+      // Lot R2 : competences, special_animal_skills, interests et
+      // experience_years ajoutés à la même lecture, pour la ligne courte de
+      // la carte seulement. Rangés dans `_card` : ils n'entrent jamais dans
+      // le calcul d'affinité ni dans les tris.
+      .select("user_id, animal_types, has_vehicle, is_available, reply_median_minutes, sitter_type, travels_with_children, travels_with_own_animals, competences, special_animal_skills, interests, experience_years");
     // Exclusion du compte courant (cas du rôle `both`), uniquement si connecté.
     if (user?.id) sittersQuery = sittersQuery.neq("user_id", user.id);
     const { data: sittersRaw, error: sittersError } = await sittersQuery.order("user_id", { ascending: true }).limit(SITTERS_SERVER_CAP);
-    const sitters = (sittersRaw || []).map((s: any) => ({ ...s, id: s.user_id }));
+    const sitters = (sittersRaw || []).map((row: any) => {
+      const { competences, special_animal_skills, interests, experience_years, ...s } = row;
+      return { ...s, id: s.user_id, _card: { competences, special_animal_skills, interests, experience_years } };
+    });
 
     if (sittersError) {
       console.error("[SearchOwner] Erreur chargement gardiens:", sittersError);
