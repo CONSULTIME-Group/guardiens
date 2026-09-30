@@ -1,3 +1,4 @@
+import { DeferredMount, useIsDesktopRail } from "@/components/dashboard/shared/DeferredMount";
 /**
  * Tableau de bord gardien (lot D2, maquette validée), même méthode que le
  * lot D1 côté propriétaire : accueil visible tout de suite, une seule
@@ -102,6 +103,7 @@ const SitterDashboard = () => {
   });
   const identityRailAction = sitterPriorityAction.variant === "identity" ? sitterPriorityAction : null;
 
+  const isDesktopRail = useIsDesktopRail();
   const railReadings = useRailReadings({ role: "sitter", userId: user?.id, upcomingGuard: nextGuard });
   const completionMissing = useProfileCompletionMissing("sitter", user?.id);
 
@@ -230,26 +232,37 @@ const SitterDashboard = () => {
               <SitterMissingOpportunities fallbackTotalPublished={nbaLoading ? undefined : totalPublished} />
             </div>
 
-            {/* 4. Bandeau entraide */}
-            <OwnerEntraideBand
-              helpersCount={nearbyHelpersCount}
-              helpersRadiusKm={helpersProximity?.radiusKm ?? 30}
-              mission={firstNearbyMission}
-              activeMission={myActiveMission}
-              headline={SITTER_ENTRAIDE_HEADLINE}
-            />
+            {/* 4. Bandeau entraide (lot P1b : montage différé) */}
+            <DeferredMount minHeight={160}>
+              <OwnerEntraideBand
+                helpersCount={nearbyHelpersCount}
+                helpersRadiusKm={helpersProximity?.radiusKm ?? 30}
+                mission={firstNearbyMission}
+                activeMission={myActiveMission}
+                headline={SITTER_ENTRAIDE_HEADLINE}
+              />
+            </DeferredMount>
 
-            {/* 5. Colonne de droite en mobile : après l'entraide */}
-            <div className="lg:hidden space-y-[22px]">{railContent}</div>
+            {/* 5. Colonne de droite en mobile : après l'entraide. Lot P1b : une
+                seule des deux colonnes est rendue selon la largeur. */}
+            {!isDesktopRail && (
+              <DeferredMount minHeight={200}>
+                <div className="lg:hidden space-y-[22px]">{railContent}</div>
+              </DeferredMount>
+            )}
 
             {/* 6. Pouls */}
-            <CommunityPulseLine testId="sitter-pulse-line" />
+            <DeferredMount minHeight={40}>
+              <CommunityPulseLine testId="sitter-pulse-line" />
+            </DeferredMount>
           </div>
 
           {/* Colonne de droite, desktop */}
-          <div className="hidden lg:block">
-            <DashboardRail layout="compact">{railContent}</DashboardRail>
-          </div>
+          {isDesktopRail && (
+            <div className="hidden lg:block">
+              <DashboardRail layout="compact">{railContent}</DashboardRail>
+            </div>
+          )}
         </div>
       </div>
 

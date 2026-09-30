@@ -1,3 +1,4 @@
+import { DeferredMount, useIsDesktopRail } from "@/components/dashboard/shared/DeferredMount";
 import { useState, useEffect, useMemo, useCallback } from "react";
 
 import { nearbyWaitingSentence } from "@/lib/nearbySittersSentence";
@@ -103,6 +104,7 @@ const OwnerDashboard = () => {
   // Montage différé de la section « Les gardiens » (sous la ligne de
   // flottaison) : ses hooks ne partent qu'à 400 px du viewport, le contenu
   // est prêt avant d'être atteint et aucun décalage visible ne se produit.
+  const isDesktopRail = useIsDesktopRail();
   const { ref: spotlightRef, inView: spotlightInView } = useInView<HTMLDivElement>({
     rootMargin: "400px 0px",
     threshold: 0,
@@ -429,26 +431,37 @@ const OwnerDashboard = () => {
               {spotlightInView ? <OwnerNearbySitters /> : <div aria-hidden="true" className="min-h-[320px]" />}
             </div>
 
-            {/* 4. Votre famille */}
-            <OwnerFamilySection
-              pets={pets}
-              propertyIds={data.propertyIds}
-              onPetsChanged={reload}
-              getNextSitForPet={getNextSitForPet}
-            />
+            {/* 4. Votre famille (lot P1b : montage différé, sous la ligne de flottaison) */}
+            <DeferredMount minHeight={240}>
+              <OwnerFamilySection
+                pets={pets}
+                propertyIds={data.propertyIds}
+                onPetsChanged={reload}
+                getNextSitForPet={getNextSitForPet}
+              />
+            </DeferredMount>
 
             {/* 5. Bandeau entraide */}
-            <OwnerEntraideBand
-              helpersCount={nearbyHelpersCount}
-              helpersRadiusKm={helpersProximity?.radiusKm ?? 30}
-              mission={firstNearbyMission}
-            />
+            <DeferredMount minHeight={160}>
+              <OwnerEntraideBand
+                helpersCount={nearbyHelpersCount}
+                helpersRadiusKm={helpersProximity?.radiusKm ?? 30}
+                mission={firstNearbyMission}
+              />
+            </DeferredMount>
 
-            {/* 6. Colonne de droite en mobile : après l'entraide */}
-            <div className="lg:hidden space-y-[22px]">{railContent}</div>
+            {/* 6. Colonne de droite en mobile : après l'entraide. Lot P1b : une
+                seule des deux colonnes est rendue selon la largeur. */}
+            {!isDesktopRail && (
+              <DeferredMount minHeight={200}>
+                <div className="lg:hidden space-y-[22px]">{railContent}</div>
+              </DeferredMount>
+            )}
 
             {/* 7. Pouls */}
-            <CommunityPulseLine />
+            <DeferredMount minHeight={40}>
+              <CommunityPulseLine />
+            </DeferredMount>
 
             {/* 8. Historique des candidatures, accordéon discret */}
             {hasReadApps && (
@@ -471,9 +484,11 @@ const OwnerDashboard = () => {
           </div>
 
           {/* Colonne de droite, desktop */}
-          <div className="hidden lg:block">
-            <DashboardRail layout="compact">{railContent}</DashboardRail>
-          </div>
+          {isDesktopRail && (
+            <div className="hidden lg:block">
+              <DashboardRail layout="compact">{railContent}</DashboardRail>
+            </div>
+          )}
         </div>
       </div>
 
