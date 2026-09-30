@@ -1,4 +1,3 @@
-import { CookieConsentBanner } from "@/components/legal/CookieConsentBanner";
 import { Suspense, useState } from "react";
 import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -15,16 +14,11 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import SkipToContent from "@/components/layout/SkipToContent";
 import OfflineBanner from "@/components/layout/OfflineBanner";
-import { PreviewDiagnosticBanner } from "@/components/PreviewDiagnosticBanner";
-import DuplicateAccountGuard from "@/components/auth/DuplicateAccountGuard";
 import ScrollToTop from "@/components/layout/ScrollToTop";
 import ScrollLockGuard from "@/components/layout/ScrollLockGuard";
 import RefCapture from "@/components/referral/RefCapture";
 import { useShellMode } from "@/components/layout/useShellMode";
-import GlobalBottomNav from "@/components/layout/GlobalBottomNav";
 import { ChromeVisibilityProvider } from "@/components/layout/ChromeVisibility";
-import DeferredTrackers from "@/components/analytics/DeferredTrackers";
-import { PwaInstallTracking } from "@/hooks/usePwaInstall";
 // CookieConsent retiré (mesure d'audience exemptée CNIL)
 import { toast } from "sonner";
 import { reportError } from "@/lib/errorLogger";
@@ -33,11 +27,36 @@ import { Button } from "@/components/ui/button";
 
 // ──── Critical routes (eager) ────
 import LangUrlSync from "./components/LangUrlSync";
-import { AppLayout } from "@/components/layout/AppLayout";
-import PublicHeader from "@/components/layout/PublicHeader";
-import PublicFooter from "@/components/layout/PublicFooter";
+import { AfterFirstPaint } from "@/components/layout/AfterFirstPaint";
 import { useAffinityThresholdsBootstrap } from "@/hooks/useAffinityThresholdsBootstrap";
 
+
+// ──── Coquilles et composants hors premier écran (lot P2) ────
+// Hors du fichier d'entrée : la coquille membre (AppLayout) n'est chargée que
+// pour un membre connecté, l'en-tête et le pied publics que pour un visiteur.
+// La route suspend jusqu'à leur arrivée (aucun décalage de mise en page).
+const AppLayout = lazy(
+  () => import("@/components/layout/AppLayout").then((m) => ({ default: m.AppLayout })),
+  "AppLayout",
+);
+const PublicHeader = lazy(() => import("@/components/layout/PublicHeader"), "PublicHeader");
+const PublicFooter = lazy(() => import("@/components/layout/PublicFooter"), "PublicFooter");
+const GlobalBottomNav = lazy(() => import("@/components/layout/GlobalBottomNav"), "GlobalBottomNav");
+const DeferredTrackers = lazy(() => import("@/components/analytics/DeferredTrackers"), "DeferredTrackers");
+const CookieConsentBanner = lazy(() => import("@/components/legal/CookieConsentBanner"), "CookieConsentBanner");
+const PwaInstallTracking = lazy(
+  () => import("@/hooks/usePwaInstall").then((m) => ({ default: m.PwaInstallTracking })),
+  "PwaInstallTracking",
+);
+const DuplicateAccountGuard = lazy(() => import("@/components/auth/DuplicateAccountGuard"), "DuplicateAccountGuard");
+// Bandeau de diagnostic : outil de l'aperçu de développement, absent du build
+// de production (la condition est éliminée à la compilation).
+const PreviewDiagnosticBanner = import.meta.env.DEV
+  ? lazy(
+      () => import("@/components/PreviewDiagnosticBanner").then((m) => ({ default: m.PreviewDiagnosticBanner })),
+      "PreviewDiagnosticBanner",
+    )
+  : null;
 
 // ──── Lazy-loaded routes ────
 const FallbackSpinner = () => (
@@ -643,7 +662,9 @@ const App = () => (
       <ThemeProvider>
         <TooltipProvider>
           <AuthProvider>
-            <PwaInstallTracking />
+            <Suspense fallback={null}>
+              <PwaInstallTracking />
+            </Suspense>
             <SkipToContent />
             <Toaster />
             <Sonner />
@@ -653,17 +674,29 @@ const App = () => (
               <RefCapture />
               <LangUrlSync />
               <OfflineBanner />
-              <PreviewDiagnosticBanner />
-              <DuplicateAccountGuard />
+              {PreviewDiagnosticBanner && (
+                <Suspense fallback={null}>
+                  <PreviewDiagnosticBanner />
+                </Suspense>
+              )}
+              <Suspense fallback={null}>
+                <DuplicateAccountGuard />
+              </Suspense>
               <ChromeVisibilityProvider>
                 <AppRoutes />
                 {/* Barre de navigation basse montée une seule fois, pour toutes
                     les routes, y compris celles hors coquille applicative. */}
-                <GlobalBottomNav />
+                <Suspense fallback={null}>
+                  <GlobalBottomNav />
+                </Suspense>
               </ChromeVisibilityProvider>
-              <DeferredTrackers />
-              {/* Bandeau de consentement (lot C1) : GA4 chargé après accord seulement. */}
-              <CookieConsentBanner />
+              <AfterFirstPaint>
+                <Suspense fallback={null}>
+                  <DeferredTrackers />
+                  {/* Bandeau de consentement (lot C1) : GA4 chargé après accord seulement. */}
+                  <CookieConsentBanner />
+                </Suspense>
+              </AfterFirstPaint>
             </BrowserRouter>
           </AuthProvider>
         </TooltipProvider>
