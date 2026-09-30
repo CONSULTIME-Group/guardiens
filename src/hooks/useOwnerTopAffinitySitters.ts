@@ -24,16 +24,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { createYieldBudget } from "@/lib/yieldToMain";
 import { computeAffinityResultFull, type AffinityResult } from "@/lib/affinityScore";
-import { haversineDistance } from "@/utils/geo";
+import { scopeOwnerPoolByDistance, POOL_SCORING_CAP } from "@/lib/ownerSitterPool";
+import { announceOwnerTopIds, fetchOwnerSpaceSitterReads } from "@/lib/dashboardShared";
 import { chunkArray } from "@/lib/chunkArray";
 import { fetchSitterPoolShared } from "@/lib/fetchSitterPool";
 
-/**
- * Plafond de scoring : au-delà, les gardiens les plus éloignés ne sont pas
- * scorés (coût de calcul). Tri par distance AVANT plafonnement, nombre
- * écarté tracé, jamais silencieux.
- */
-export const POOL_SCORING_CAP = 600;
+export { POOL_SCORING_CAP };
 
 
 export interface AffinitySitterCard {
@@ -91,38 +87,18 @@ export function useOwnerTopAffinitySitters(): Result {
           .catch(() => ({ count: 0 })),
       ]);
 
-      const meLat = (me?.latitude as number | null) ?? null;
-      const meLng = (me?.longitude as number | null) ?? null;
-      const hasGeo = meLat !== null && meLng !== null;
-
+      const hasGeo = (me?.latitude ?? null) !== null && (me?.longitude ?? null) !== null;
       const hasPublishedSit = (publishedRes.count ?? 0) > 0;
 
       if (!pool || pool.length === 0) {
+        announceOwnerTopIds(userId!, []);
         return { topSitters: [] as AffinitySitterCard[], totalPool: exactPoolCount, scoredCount: 0, hasGeo, poolExcludedByCap: 0, hasPublishedSit };
       }
 
       // 2. Distance, puis plafond de scoring : on garde les plus proches.
-      const withDistance = pool.map((p: any) => {
-        let distance_km: number | null = null;
-        if (hasGeo && p.latitude_approx != null && p.longitude_approx != null) {
-          distance_km = haversineDistance(
-            { lat: meLat!, lng: meLng! },
-            { lat: p.latitude_approx, lng: p.longitude_approx },
-          );
-        }
-        return { ...p, distance_km };
-      });
-
-      const byDistance = [...withDistance].sort((a, b) => {
-        const da = a.distance_km ?? Number.POSITIVE_INFINITY;
-        const db = b.distance_km ?? Number.POSITIVE_INFINITY;
-        if (da !== db) return da - db;
-        // Sans coordonnées à départager, l'identité vérifiée d'abord.
-        return Number(b.identity_verified === true) - Number(a.identity_verified === true);
-      });
-      const scoped = byDistance.slice(0, POOL_SCORING_CAP);
-
-      const poolExcludedByCap = byDistance.length - scoped.length;
+      // Lot P4 : sélection pure partagée (lib/ownerSitterPool), inchangée.
+      const { scoped, excludedByCap } = scopeOwnerPoolByDistance(pool, me as any);
+      const poolExcludedByCap = excludedByCap;
       if (poolExcludedByCap > 0) {
         console.info(
           `[top3] plafond de scoring ${POOL_SCORING_CAP} atteint : ${poolExcludedByCap} gardiens les plus éloignés non scorés.`,
@@ -137,6 +113,8 @@ export function useOwnerTopAffinitySitters(): Result {
       // PostgREST, qui casse au-delà d'environ 390 UUID.
       const ids = scoped.map((p: any) => p.id);
       // Lot P1b : chargeur partagé (lots de 150, cache par identifiant).
+      // Lot P4 : salve groupée de l'espace propriétaire, servie par le cache.
+      await fetchOwnerSpaceSitterReads(userId!).catch(() => undefined);
       const affinityResults = [await sitterAffinityLoader.rows(ids)];
       const affinityError = affinityResults.find((result) => result.error)?.error;
       if (affinityError) throw affinityError;
@@ -207,8 +185,10 @@ export function useOwnerTopAffinitySitters(): Result {
         return da - db;
       });
 
+      const topSitters = scored.slice(0, 3);
+      announceOwnerTopIds(userId!, topSitters.map((t) => t.id));
       return {
-        topSitters: scored.slice(0, 3),
+        topSitters,
         // Taille réelle du vivier lu, AVANT le plafond de scoring. C'est le
         // chiffre annoncé dans le lien "Voir les N gardiens" : il doit
         // correspondre à ce que le propriétaire trouve derrière /search.

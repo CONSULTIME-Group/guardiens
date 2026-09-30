@@ -1,0 +1,494 @@
+{
+ "top": {
+  "totalPool": 1326,
+  "scoredCount": 600,
+  "sitters": [
+   {
+    "id": "00000000-0000-4000-9000-000000000104",
+    "score": 89,
+    "sortScore": 89,
+    "confidence": 1,
+    "distance": 71.589
+   },
+   {
+    "id": "00000000-0000-4000-9000-000000000047",
+    "score": 89,
+    "sortScore": 89,
+    "confidence": 1,
+    "distance": 74.304
+   },
+   {
+    "id": "00000000-0000-4000-9000-000000000581",
+    "score": 94,
+    "sortScore": 84,
+    "confidence": 0.8888888888888888,
+    "distance": 64.185
+   }
+  ]
+ },
+ "nearby": {
+  "totalCount": 48,
+  "radiusUsed": 30,
+  "sitters": [
+   {
+    "id": "00000000-0000-4000-9000-000000000712",
+    "avg_rating": null,
+    "custom_skills": [
+     "Soins"
+    ],
+    "affinity_input": [
+     [
+      "animal_types",
+      [
+       "Chevaux"
+      ]
+     ],
+     [
+      "availability_during",
+      null
+     ],
+     [
+      "experience_years",
+      null
+     ],
+     [
+      "farm_animals_ok",
+      null
+     ],
+     [
+      "has_license",
+      true
+     ],
+     [
+      "has_vehicle",
+      null
+     ],
+     [
+      "interests",
+      []
+     ],
+     [
+      "languages",
+      [
+       "Français"
+      ]
+     ],
+     [
+      "life_pace",
+      "calme"
+     ],
+     [
+      "lifestyle",
+      null
+     ],
+     [
+      "sensitivities",
+      []
+     ],
+     [
+      "sitter_type",
+      null
+     ],
+     [
+      "special_animal_skills",
+      []
+     ],
+     [
+      "travels_with_children",
+      null
+     ],
+     [
+      "travels_with_own_animals",
+      null
+     ],
+     [
+      "work_during_sit",
+      "on_site"
+     ]
+    ]
+   },
+   {
+    "id": "00000000-0000-4000-9000-000000000445",
+    "avg_rating": null,
+    "custom_skills": [],
+    "affinity_input": [
+     [
+      "animal_types",
+      [
+       "Tous"
+      ]
+     ],
+     [
+      "availability_during",
+      null
+     ],
+     [
+      "experience_years",
+      "1-3"
+     ],
+     [
+      "farm_animals_ok",
+      null
+     ],
+     [
+      "has_license",
+      true
+     ],
+     [
+      "has_vehicle",
+      null
+     ],
+     [
+      "interests",
+      []
+     ],
+     [
+      "languages",
+      [
+       "Français",
+       "Anglais"
+      ]
+     ],
+     [
+      "life_pace",
+      "actif"
+     ],
+     [
+      "lifestyle",
+      null
+     ],
+     [
+      "sensitivities",
+      []
+     ],
+     [
+      "sitter_type",
+      null
+     ],
+     [
+      "special_animal_skills",
+      []
+     ],
+     [
+      "travels_with_children",
+      null
+     ],
+     [
+      "travels_with_own_animals",
+      null
+     ],
+     [
+      "work_during_sit",
+      "on_site"
+     ]
+    ]
+   },
+   {
+    "id": "00000000-0000-4000-9000-000000000103",
+    "avg_rating": 3,
+    "custom_skills": [],
+    "affinity_input": [
+     [
+      "animal_types",
+      [
+       "Chiens"
+      ]
+     ],
+     [
+      "availability_during",
+      null
+     ],
+     [
+      "experience_years",
+      "1-3"
+     ],
+     [
+      "farm_animals_ok",
+      null
+     ],
+     [
+      "has_license",
+      true
+     ],
+     [
+      "has_vehicle",
+      true
+     ],
+     [
+      "interests",
+      []
+     ],
+     [
+      "languages",
+      [
+       "Français"
+      ]
+     ],
+     [
+      "life_pace",
+      "equilibre"
+     ],
+     [
+      "lifestyle",
+      null
+     ],
+     [
+      "sensitivities",
+      []
+     ],
+     [
+      "sitter_type",
+      null
+     ],
+     [
+      "special_animal_skills",
+      []
+     ],
+     [
+      "travels_with_children",
+      null
+     ],
+     [
+      "travels_with_own_animals",
+      null
+     ],
+     [
+      "work_during_sit",
+      null
+     ]
+    ]
+   },
+   {
+    "id": "00000000-0000-4000-9000-000000000181",
+    "avg_rating": null,
+    "custom_skills": [],
+    "affinity_input": [
+     [
+      "animal_types",
+      [
+       "Chiens"
+      ]
+     ],
+     [
+      "availability_during",
+      null
+     ],
+     [
+      "experience_years",
+      null
+     ],
+     [
+      "farm_animals_ok",
+      null
+     ],
+     [
+      "has_license",
+      null
+     ],
+     [
+      "has_vehicle",
+      true
+     ],
+     [
+      "interests",
+      []
+     ],
+     [
+      "languages",
+      [
+       "Français"
+      ]
+     ],
+     [
+      "life_pace",
+      "calme"
+     ],
+     [
+      "lifestyle",
+      [
+       "Calme et posé"
+      ]
+     ],
+     [
+      "sensitivities",
+      []
+     ],
+     [
+      "sitter_type",
+      null
+     ],
+     [
+      "special_animal_skills",
+      []
+     ],
+     [
+      "travels_with_children",
+      null
+     ],
+     [
+      "travels_with_own_animals",
+      null
+     ],
+     [
+      "work_during_sit",
+      null
+     ]
+    ]
+   },
+   {
+    "id": "00000000-0000-4000-9000-000000000709",
+    "avg_rating": null,
+    "custom_skills": [],
+    "affinity_input": [
+     [
+      "animal_types",
+      [
+       "Chats"
+      ]
+     ],
+     [
+      "availability_during",
+      null
+     ],
+     [
+      "experience_years",
+      "1-3"
+     ],
+     [
+      "farm_animals_ok",
+      null
+     ],
+     [
+      "has_license",
+      true
+     ],
+     [
+      "has_vehicle",
+      null
+     ],
+     [
+      "interests",
+      [
+       "Jardinage"
+      ]
+     ],
+     [
+      "languages",
+      [
+       "Français"
+      ]
+     ],
+     [
+      "life_pace",
+      "actif"
+     ],
+     [
+      "lifestyle",
+      null
+     ],
+     [
+      "sensitivities",
+      []
+     ],
+     [
+      "sitter_type",
+      null
+     ],
+     [
+      "special_animal_skills",
+      []
+     ],
+     [
+      "travels_with_children",
+      null
+     ],
+     [
+      "travels_with_own_animals",
+      null
+     ],
+     [
+      "work_during_sit",
+      "office"
+     ]
+    ]
+   },
+   {
+    "id": "00000000-0000-4000-9000-000000000152",
+    "avg_rating": 3,
+    "custom_skills": [],
+    "affinity_input": [
+     [
+      "animal_types",
+      [
+       "Chiens"
+      ]
+     ],
+     [
+      "availability_during",
+      null
+     ],
+     [
+      "experience_years",
+      null
+     ],
+     [
+      "farm_animals_ok",
+      null
+     ],
+     [
+      "has_license",
+      true
+     ],
+     [
+      "has_vehicle",
+      true
+     ],
+     [
+      "interests",
+      []
+     ],
+     [
+      "languages",
+      [
+       "Français"
+      ]
+     ],
+     [
+      "life_pace",
+      "equilibre"
+     ],
+     [
+      "lifestyle",
+      [
+       "Calme et posé"
+      ]
+     ],
+     [
+      "sensitivities",
+      []
+     ],
+     [
+      "sitter_type",
+      null
+     ],
+     [
+      "special_animal_skills",
+      []
+     ],
+     [
+      "travels_with_children",
+      null
+     ],
+     [
+      "travels_with_own_animals",
+      null
+     ],
+     [
+      "work_during_sit",
+      "on_site"
+     ]
+    ]
+   }
+  ]
+ }
+}

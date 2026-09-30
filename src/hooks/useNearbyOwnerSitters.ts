@@ -1,7 +1,8 @@
 import { publishedReviewsLoader, sitterAffinityLoader, sitterCompetencesLoader } from "@/lib/batchedReads";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { haversineDistance } from "@/utils/geo";
+import { selectNearbyCandidates, sortNearbyByDistance } from "@/lib/ownerSitterPool";
+import { fetchOwnerSpaceDetailReads } from "@/lib/dashboardShared";
 import type { AffinitySitterInput } from "@/lib/affinityScore";
 import { fetchSitterPoolShared } from "@/lib/fetchSitterPool";
 import { fetchMyProfile } from "@/lib/myProfile";
@@ -43,14 +44,8 @@ export type NearbyOwnerSitter = {
   affinity_input: AffinitySitterInput | null;
 };
 
-const RADIUS_STEPS = [30, 50, 100];
 const MAX_RESULTS = 6;
-/**
- * Nombre de candidats enrichis (notes, compétences, affinité) après tri.
- * Quatre fois MAX_RESULTS : marge confortable pour que le départage par
- * note, dernier critère de la chaîne, ne puisse pas changer le Top 6.
- */
-const ENRICH_CAP = 24;
+
 
 /**
  * Colonnes du moteur d'affinité, écrites une seule fois et réutilisées par
@@ -58,25 +53,6 @@ const ENRICH_CAP = 24;
  */
 export const NEARBY_AFFINITY_COLUMNS =
   "user_id, experience_years, life_pace, lifestyle, availability_during, has_vehicle, has_license, languages, interests, work_during_sit, sensitivities, animal_types, sitter_type, travels_with_children, travels_with_own_animals, special_animal_skills, farm_animals_ok";
-
-function normalizeCustom(raw: unknown): string[] {
-  if (!raw) return [];
-  if (Array.isArray(raw)) {
-    return raw
-      .map((item) => {
-        if (typeof item === "string") return item.trim();
-        if (item && typeof item === "object") {
-          const obj = item as { status?: string; label?: string };
-          const status = typeof obj.status === "string" ? obj.status : "approved";
-          const label = typeof obj.label === "string" ? obj.label : "";
-          return status === "approved" ? label.trim() : "";
-        }
-        return "";
-      })
-      .filter((s) => s.length > 0);
-  }
-  return [];
-}
 
 export function useNearbyOwnerSitters(currentUserId: string | undefined) {
   return useQuery<{ sitters: NearbyOwnerSitter[]; radiusUsed: number | null; hasGeo: boolean; totalCount: number }>({
@@ -101,97 +77,23 @@ export function useNearbyOwnerSitters(currentUserId: string | undefined) {
         fetchSitterPoolShared(currentUserId!).then((r) => ({ data: r.rows })),
       ]);
 
-      let meLat: number | null = (meRes.data?.latitude as number | null) ?? null;
-      let meLng: number | null = (meRes.data?.longitude as number | null) ?? null;
-      if (meLat === null || meLng === null) {
-        // Lot P1b : public_profiles.latitude_approx n'est que l'arrondi de
-        // profiles.latitude ; sans coordonnées exactes, il n'y a rien à relire.
-        const approx = approxRes.data;
-        if (approx?.latitude_approx && approx?.longitude_approx) {
-          meLat = approx.latitude_approx as number;
-          meLng = approx.longitude_approx as number;
-        }
-      }
-      const hasGeo = meLat !== null && meLng !== null;
-
       const pool = poolRes.data;
+      // Lot P4 : sélection pure partagée avec la lecture groupée de
+      // l'espace propriétaire (lib/ownerSitterPool), logique inchangée.
+      const sel = selectNearbyCandidates(pool ?? [], meRes.data as any);
+      const hasGeo = sel.hasGeo;
+      void approxRes;
 
       if (!pool || pool.length === 0) {
         return { sitters: [], radiusUsed: null, hasGeo, totalCount: 0 };
       }
-
-      // En mémoire, sans requête : distances sur TOUT le vivier.
-      const enriched: NearbyOwnerSitter[] = pool.map((p: any) => {
-        const distance_km =
-          hasGeo && p.latitude_approx != null && p.longitude_approx != null
-            ? haversineDistance(
-                { lat: meLat!, lng: meLng! },
-                { lat: p.latitude_approx, lng: p.longitude_approx },
-              )
-            : null;
-        return {
-          id: p.id,
-          first_name: p.first_name,
-          avatar_url: p.avatar_url,
-          city: p.city,
-          identity_verified: !!p.identity_verified,
-          completed_sits_count: p.completed_sits_count || 0,
-          skill_categories: p.skill_categories || [],
-          custom_skills: normalizeCustom(p.custom_skills),
-          distance_km,
-          is_beyond: false,
-          avg_rating: null,
-          affinity_input: null,
-        };
-      });
-
-      const sortByDistance = (list: NearbyOwnerSitter[]) =>
-        [...list].sort((a, b) => {
-          const da = a.distance_km ?? Infinity;
-          const db = b.distance_km ?? Infinity;
-          if (da !== db) return da - db;
-          if (a.identity_verified !== b.identity_verified) return a.identity_verified ? -1 : 1;
-          if (a.completed_sits_count !== b.completed_sits_count) return b.completed_sits_count - a.completed_sits_count;
-          return (b.avg_rating ?? 0) - (a.avg_rating ?? 0);
-        });
-
-      // Paliers de rayon et filet `is_beyond`, calculés sur le vivier
-      // entier : `radiusUsed` et `totalCount` sont donc inchangés.
-      let selection: NearbyOwnerSitter[];
-      let radiusUsed: number | null = null;
-      let totalCount: number;
-      let beyond = false;
-
-      if (!hasGeo) {
-        selection = sortByDistance(enriched);
-        totalCount = enriched.length;
-      } else {
-        const withDistance = enriched.filter((h) => h.distance_km !== null);
-        const step = RADIUS_STEPS.map((radius) => ({
-          radius,
-          inRange: withDistance.filter((h) => h.distance_km! <= radius),
-        })).find((s) => s.inRange.length >= 3);
-        if (step) {
-          selection = sortByDistance(step.inRange);
-          radiusUsed = step.radius;
-          totalCount = step.inRange.length;
-        } else {
-          selection = sortByDistance(withDistance);
-          totalCount = withDistance.length;
-          beyond = true;
-        }
-      }
-
-      // Candidats à enrichir. Différence de comportement assumée : sans
-      // géoloc, cette présélection se fait sur identité vérifiée puis
-      // nombre de gardes, avant que les notes soient connues ; le
-      // départage par note ne joue donc plus qu'à l'intérieur de ces 24.
-      // Avec géoloc, la distance domine le tri et le Top 6 est strictement
-      // identique à celui d'avant.
-      const candidates = selection.slice(0, ENRICH_CAP);
+      const { radiusUsed, totalCount, beyond, candidates } = sel;
       const ids = candidates.map((c) => c.id);
 
       // VAGUE 2 : données d'affichage, uniquement pour ces candidats.
+      // Lot P4 : la salve groupée de l'espace propriétaire a déjà lu ces
+      // identifiants ; les chargeurs les servent depuis leur cache.
+      await fetchOwnerSpaceDetailReads(currentUserId!).catch(() => undefined);
       const [reviewsRes, sitterRes, affinityRes] = await Promise.all([
         publishedReviewsLoader.rows(ids),
         sitterCompetencesLoader.rows(ids),
@@ -236,7 +138,7 @@ export function useNearbyOwnerSitters(currentUserId: string | undefined) {
       });
 
       return {
-        sitters: sortByDistance(finalList).slice(0, MAX_RESULTS),
+        sitters: sortNearbyByDistance(finalList).slice(0, MAX_RESULTS),
         radiusUsed,
         hasGeo,
         totalCount,

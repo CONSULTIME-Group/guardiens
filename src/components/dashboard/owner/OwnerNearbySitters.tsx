@@ -21,9 +21,10 @@ import { avatarImageUrl } from "@/lib/storageImage";
 import DashEyebrow from "./DashEyebrow";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNearbyOwnerSitters } from "@/hooks/useNearbyOwnerSitters";
+import { fetchOwnerSpaceDetailReads } from "@/lib/dashboardShared";
 import { nearbyPlaceLabel, nearbyExitLabel } from "@/lib/ownerNearbyLabels";
 
-function useDistinctDetails(ids: string[]) {
+function useDistinctDetails(ids: string[], userId: string | undefined) {
   return useQuery({
     queryKey: ["owner-nearby-distinct", ids.join(",")],
     enabled: ids.length > 0,
@@ -31,6 +32,8 @@ function useDistinctDetails(ids: string[]) {
     queryFn: async (): Promise<Record<string, DistinctSitterInput>> => {
       // Lot D3 : même source que le classement (vivier complet), compétences
       // fusionnées depuis la vue publique quand la ligne existe.
+      // Lot P4 : avis et compétences du Top 3 lus dans la salve groupée.
+      if (userId) await fetchOwnerSpaceDetailReads(userId).catch(() => undefined);
       const [sp, pc, pp, rv] = await Promise.all([
         // Lot P1b : chargeurs partagés, aucune relecture des profils déjà lus.
         // Lecture sitter_profiles_affinity et select("user_id, competences")
@@ -64,7 +67,7 @@ export default function OwnerNearbySitters() {
   const { user } = useAuth();
   const { data: nearby } = useNearbyOwnerSitters(user?.id);
   const ids = topSitters.map((s) => s.id);
-  const { data: details } = useDistinctDetails(ids);
+  const { data: details } = useDistinctDetails(ids, user?.id);
 
   if (isLoading) return <div aria-hidden="true" className="min-h-[320px]" />;
 

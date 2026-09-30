@@ -44,8 +44,13 @@ import Landing from "@/pages/Landing";
 import GlobalBottomNav from "@/components/layout/GlobalBottomNav";
 
 const TABLE_MAX = 2;
-/** Valeurs mesurées après P3 (propriétaire 39, gardien 37, comptes neufs 28/30). */
-const P3_TOTAL: Record<string, number> = { "owner-true": 39, "sitter-true": 37, "owner-false": 28, "sitter-false": 30 };
+/**
+ * Valeurs mesurées après P3 (propriétaire 39, gardien 37, comptes neufs 28/30).
+ * Lot P4 : propriétaire 40 sur ce simulateur (qui ignore les filtres) : la
+ * lecture des avis du Top 3 attend désormais le classement au lieu de se
+ * fondre par hasard avec les autres ; sur le vivier réaliste (p4/), 49 → 43.
+ */
+const P3_TOTAL: Record<string, number> = { "owner-true": 40, "sitter-true": 37, "owner-false": 28, "sitter-false": 30 };
 const HOME_MAX = 10;
 
 const recOf = () => h.rec as import("../p1b/supabaseRecorder").Recorder;
