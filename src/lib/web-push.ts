@@ -2,7 +2,8 @@ import { supabase } from '@/integrations/supabase/client';
 
 export interface PushPreferences { messages: boolean; applications: boolean }
 export interface PushConfig { enabled: boolean; publicKey?: string }
-export const PUSH_OWNER_KEY = 'guardiens_push_device_owner';
+import { PUSH_OWNER_KEY } from './pushSession';
+export { PUSH_OWNER_KEY };
 export const PUSH_ID_KEY = 'guardiens_push_subscription_id';
 const TIMEOUT_MS = 10000;
 

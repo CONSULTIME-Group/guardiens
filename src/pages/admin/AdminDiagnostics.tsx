@@ -1,4 +1,5 @@
 import { KpiTile } from "@/components/admin/ui";
+import WebVitalsCard from "@/components/admin/diagnostics/WebVitalsCard";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
@@ -212,6 +213,8 @@ const AdminDiagnostics = () => {
           </Button>
         </>}
       />
+
+      <WebVitalsCard />
 
       <Card>
         <CardHeader className="pb-3">

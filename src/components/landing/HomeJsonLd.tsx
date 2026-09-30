@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { useInternationalSitsCount } from "@/hooks/useInternationalSitsCount";
-import { staticRoutes, DEFAULT_OG_IMAGE } from "@/data/siteRoutes";
+// Lot P2b : constante légère, siteRoutes (22 Ko) reste hors de la page d'accueil.
+import { HOME_OG_IMAGE } from "@/data/siteConstants";
 import howtoStep1 from "@/assets/illustrations/howto-step-1-annonce-448.webp";
 import howtoStep2 from "@/assets/illustrations/howto-step-2-rencontre-448.webp";
 import howtoStep3 from "@/assets/illustrations/howto-step-3-depart-448.webp";
@@ -8,8 +9,6 @@ import howtoStep3 from "@/assets/illustrations/howto-step-3-depart-448.webp";
 // Mise à jour manuelle à chaque retouche du contenu de la home.
 const HOME_CONTENT_LAST_MODIFIED = "2026-09-24";
 
-const HOME_ROUTE = staticRoutes.find((route) => route.path === "/");
-const HOME_OG_IMAGE = HOME_ROUTE?.ogImage ?? DEFAULT_OG_IMAGE;
 
 /**
  * JSON-LD consolidé de la page d'accueil : un seul @graph

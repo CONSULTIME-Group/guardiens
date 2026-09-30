@@ -2,8 +2,9 @@
  * Lot P2 « Démarrage rapide » : verrous sur le build de production.
  *
  * Construit l'application dans un dossier temporaire (ou lit P2_BUILD_DIR
- * s'il est fourni) puis vérifie : entrée sous 200 Ko, au plus 25
- * modulepreload dans index.html, aucun module admin, éditeur, graphique ou
+ * s'il est fourni) puis vérifie : entrée sous 300 Ko (plafond relevé au
+ * lot P2b, prix de l'absence de régression), au plus 14 modulepreload dans
+ * index.html, aucun module admin, éditeur, graphique ou
  * carte dans l'entrée, outils de diagnostic absents du build.
  */
 import { describe, it, expect, beforeAll } from "vitest";
@@ -36,12 +37,12 @@ beforeAll(() => {
 }, 300_000);
 
 describe("P2, build de production", () => {
-  it("fichier d'entrée sous 200 Ko", () => {
-    expect(statSync(entry).size).toBeLessThanOrEqual(200 * 1024);
+  it("fichier d'entrée sous 300 Ko", () => {
+    expect(statSync(entry).size).toBeLessThanOrEqual(300 * 1024);
   });
 
-  it("au plus 25 modulepreload dans index.html", () => {
-    expect((html.match(/rel="modulepreload"/g) ?? []).length).toBeLessThanOrEqual(25);
+  it("au plus 14 modulepreload dans index.html", () => {
+    expect((html.match(/rel="modulepreload"/g) ?? []).length).toBeLessThanOrEqual(14);
   });
 
   it("aucun module admin, éditeur, graphique ou carte dans l'entrée", () => {
@@ -54,7 +55,7 @@ describe("P2, build de production", () => {
     for (const marker of ["recharts-wrapper", "leaflet-container", "maplibregl", "lottie-web"]) {
       expect(entryCode.includes(marker), marker).toBe(false);
     }
-    // Le dictionnaire et le contenu des villes ne sont plus dans l'entrée.
+    // Le contenu des villes n'est plus dans l'entrée (le dictionnaire y est revenu au lot P2b).
     expect(entryCode.includes("Pourquoi cela compte à Lyon")).toBe(false);
   });
 
@@ -62,6 +63,14 @@ describe("P2, build de production", () => {
     expect(allCode.includes("Restart preview")).toBe(false);
     expect(allCode.includes("preview-restart-button")).toBe(false);
     expect(allCode.includes("__oauthLog")).toBe(false);
+  });
+});
+
+describe("P2b, préchargement membre sans exécution", () => {
+  it("repères remplacés par la liste des fichiers AppLayout et Dashboard", () => {
+    expect(entryCode.includes('"__P2B_PRELOAD_')).toBe(false);
+    expect(/assets\/AppLayout-[^"\\]+\.js/.test(entryCode)).toBe(true);
+    expect(/assets\/Dashboard-[^"\\]+\.js/.test(entryCode)).toBe(true);
   });
 });
 

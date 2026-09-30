@@ -4,6 +4,8 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 // @ts-expect-error greffon JS sans types
 import { routeHashesPlugin } from "./scripts/vite-plugin-route-hashes.mjs";
+// @ts-expect-error greffon JS sans types
+import { memberPreloadPlugin } from "./scripts/vite-plugin-member-preload.mjs";
 
 /**
  * Le build n'appelle plus aucune fonction serveur. Le rafraichissement
@@ -42,6 +44,7 @@ export default defineConfig(({ mode }) => ({
     react(),
     mode === "development" && componentTagger(),
     mode === "production" && routeHashesPlugin(),
+    memberPreloadPlugin(),
   ].filter(Boolean) as Plugin[],
   resolve: {
     // IMPORTANT : alias sous forme de TABLEAU. Vite évalue dans l'ordre et

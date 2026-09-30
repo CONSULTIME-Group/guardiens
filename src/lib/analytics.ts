@@ -16,6 +16,7 @@ export type EventType =
   | "pwa_installed"
   | "pwa_app_open"
   | "page_view"
+  | "web_vital"                               // Lot P2b : LCP, INP, CLS, FCP, TTFB, plus longue tâche
   | "city_page_viewed"                        // Vue page ville SEO (slug, residents, proximite)
   | "signup_started"
   | "signup_role_selected"
@@ -368,6 +369,8 @@ interface TrackOptions {
    * Défaut : envoi standard via le client, non bloquant.
    */
   transport?: "default" | "beacon";
+  /** Ligne sans identifiant de membre (mesures techniques, lot P2b). */
+  anonymous?: boolean;
 }
 
 /**
@@ -427,7 +430,7 @@ export function trackEventBeacon(eventType: EventType, opts: TrackOptions = {}):
     const session = readSyncSession();
     const endpoint = `${url}/rest/v1/analytics_events`;
     const body = JSON.stringify({
-      user_id: session?.userId ?? null,
+      user_id: opts.anonymous ? null : session?.userId ?? null,
       event_type: eventType,
       source: opts.source ?? null,
       metadata: withDeviceContext(opts.metadata),
@@ -476,7 +479,7 @@ export async function trackEvent(eventType: EventType, opts: TrackOptions = {}) 
     }
 
     await supabase.from("analytics_events").insert({
-      user_id: user?.id ?? null,
+      user_id: opts.anonymous ? null : user?.id ?? null,
       event_type: eventType,
       source: opts.source ?? null,
       metadata: withDeviceContext(opts.metadata),
