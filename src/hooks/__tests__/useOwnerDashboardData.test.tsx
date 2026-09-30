@@ -88,7 +88,7 @@ describe("useOwnerDashboardData", () => {
         data: [{ id: "prop-1", type: "house", environment: "city", photos: ["/p.jpg"] }],
         error: null,
       },
-      reviews: { data: [{ overall_rating: 5 }], error: null },
+      reviews: { data: [{ reviewee_id: "owner-1", overall_rating: 5 }], error: null },
       profiles: {
         data: {
           first_name: "Alice",
