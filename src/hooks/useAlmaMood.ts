@@ -16,7 +16,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { getDailyWeather } from "@/lib/alma/weatherCache";
-import { fetchMySitsIndex, fetchMyApplicationsIndex } from "@/lib/dashboardShared";
+import { fetchMySitsIndex, fetchMyApplicationsIndex, fetchApplicationsOnMySits } from "@/lib/dashboardShared";
 import { isMoodLineTruthful, type MoodTruthFacts } from "../../supabase/functions/_shared/alma-facts";
 import {
   resolveMoodPlan,
@@ -80,13 +80,10 @@ async function loadAttentionContext(
     const publishedIds = own.filter((r) => r.status === "published").map((r) => r.id);
     let receivedPending = false;
     if (publishedIds.length > 0) {
-      const { data } = await supabase
-        .from("applications")
-        .select("id")
-        .in("sit_id", publishedIds)
-        .eq("status", "pending")
-        .limit(1);
-      receivedPending = (data ?? []).length > 0;
+      // Lot P1b : candidatures reçues déjà lues par le tableau de bord.
+      const received = await fetchApplicationsOnMySits(userId);
+      const published = new Set(publishedIds);
+      receivedPending = received.some((r: any) => published.has(r.sit_id) && r.status === "pending");
     }
     const soonStart = (d?: string | null) => Boolean(d) && d! >= today && d! <= soon;
     const ownerConfirmedSoon = own.some((r) => r.status === "confirmed" && soonStart(r.start_date));
