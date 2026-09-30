@@ -485,6 +485,7 @@ export function useOwnerProfile() {
       .insert(payload as any)
       .select()
       .single();
+    invalidateMyPets(user.id!);
 
     if (error || !created) {
       logger.error("Failed to insert pet", { error: String(error), payload });
