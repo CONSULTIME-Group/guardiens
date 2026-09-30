@@ -13,6 +13,8 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { MISSIONS_CITIES } from "@/data/missionsCityContent";
 import { MISSIONS_CITY_INDEX } from "@/data/missionsCityIndex";
+import * as siteRoutes from "@/data/siteRoutes";
+import * as siteConstants from "@/data/siteConstants";
 
 let dir = process.env.P2_BUILD_DIR ?? "";
 let entry = "";
@@ -68,5 +70,12 @@ describe("P2, index léger des villes entraide", () => {
     expect(MISSIONS_CITY_INDEX.map((c) => [c.slug, c.cityName])).toEqual(
       Object.values(MISSIONS_CITIES).map((c) => [c.slug, c.cityName]),
     );
+  });
+});
+
+describe("P2, constantes du site", () => {
+  it("siteConstants identique à siteRoutes", () => {
+    expect(siteConstants.SITE_URL).toBe(siteRoutes.SITE_URL);
+    expect(siteConstants.DEFAULT_OG_IMAGE).toBe(siteRoutes.DEFAULT_OG_IMAGE);
   });
 });
