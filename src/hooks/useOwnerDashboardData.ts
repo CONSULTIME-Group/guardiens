@@ -354,7 +354,7 @@ export function useOwnerDashboardData(userId: string | undefined) {
           sits: sitsData,
           pets: petsData,
           recentApps,
-          reviews: reviewsRes.data || [],
+          reviews: (reviewsRes.data || []) as { overall_rating: number }[],
           highlights: rawHighlights as HighlightRow[],
           smallMissions: (missionsRes.data || []) as SmallMission[],
           myMissions: (myMissionsDataRes.data || []) as SmallMission[],
