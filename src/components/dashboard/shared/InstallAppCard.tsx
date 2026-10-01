@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { usePwaInstall } from "@/hooks/usePwaInstall";
-import { installPlatform, requestInstall } from "@/lib/pwa-install";
+import { firstInstallVisitDue, installPlatform, requestInstall } from "@/lib/pwa-install";
 import { hasLocalPushSubscription, pushSupport } from "@/lib/web-push";
 import { trackEvent } from "@/lib/analytics";
 
@@ -40,6 +40,8 @@ export default function InstallAppCard() {
   const [hidden, setHidden] = useState(false);
   const [note, setNote] = useState("");
   const shown = useRef<Mode | null>(null);
+  // Première visite : le bandeau d'accueil s'en charge, pas de double invitation.
+  const welcomeVisit = useRef(!!user?.id && firstInstallVisitDue(user.id));
 
   const installed = standalone || knownInstalled;
   const pushReady = typeof Notification !== "undefined" && Notification.permission !== "denied"
@@ -48,7 +50,7 @@ export default function InstallAppCard() {
     : !installed ? "install"
     : pushReady && !hasLocalPushSubscription(user.id) ? "notifications" : null;
   const key = mode && user?.id ? `guardiens_${mode}_card:${user.id}` : "";
-  const visible = !!mode && !hidden && cardDue(key);
+  const visible = !!mode && !hidden && !welcomeVisit.current && cardDue(key);
 
   useEffect(() => {
     if (!visible || !mode || shown.current === mode) return;

@@ -1,12 +1,13 @@
 import { fetchMyProfile } from "@/lib/myProfile";
 import { useAuth } from "@/contexts/AuthContext";
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, lazy, Suspense } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Head from "@/components/seo/Head";
 import { useToast } from "@/hooks/use-toast";
 import OwnerDashboard from "@/components/dashboard/OwnerDashboard";
 import SitterDashboard from "@/components/dashboard/SitterDashboard";
 
+const InstallAppCard = lazy(() => import("@/components/dashboard/shared/InstallAppCard"));
 import { DashboardErrorBoundary } from "@/components/dashboard/DashboardErrorBoundary";
 import { trackEvent } from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";
@@ -174,6 +175,7 @@ const Dashboard = () => {
   return (
     <div className="overflow-x-clip">
       <Head><meta name="robots" content="noindex, nofollow" /></Head>
+      <Suspense fallback={null}><InstallAppCard /></Suspense>
 
       <div
         key={displayedRole}
