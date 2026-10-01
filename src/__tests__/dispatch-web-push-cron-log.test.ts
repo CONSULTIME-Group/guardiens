@@ -22,7 +22,7 @@ function harness(jobs: Array<Record<string, unknown>>, nearby: () => { data: unk
   const inserts: Array<{ table: string; row: unknown }> = [];
   const admin = {
     from: (table: string) => ({ insert: async (row: unknown) => { inserts.push({ table, row }); return { error: null }; } }),
-    rpc: vi.fn(async (name: string) => {
+    rpc: vi.fn(async (name: string, _args?: unknown) => {
       if (name === "push_claim_jobs") return { data: jobs, error: null };
       if (name === "push_job_eligible") return { data: true, error: null };
       if (name === "push_close_job") return { data: true, error: null };
