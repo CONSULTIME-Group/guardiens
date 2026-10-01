@@ -76,7 +76,11 @@
       "chip_guides": "Guides fournis",
       "cta_member_owner": "Publier une annonce",
       "cta_member_sitter": "Proposer un coup de main",
-      "cta_member_search": "Trouver une garde"
+      "cta_member_search": "Trouver une garde",
+      "links_aria": "Pour aller plus loin",
+      "link_definition": "Comprendre le house-sitting",
+      "link_prepare": "Préparer sa maison avant une garde",
+      "link_pricing": "Tarifs"
     },
     "toc": {
       "aria": "Sommaire de la page",
@@ -365,7 +369,7 @@
       }
     },
     "meta_title": "House-sitting : faire garder sa maison et ses animaux | Guardiens",
-    "meta_description": "Un gardien séjourne chez vous pendant votre absence et veille sur la maison et les animaux, sans rémunération de la garde. Échangez, rencontrez, puis choisissez.",
+    "meta_description": "Un gardien séjourne chez vous pendant votre absence et veille sur la maison et les animaux, sans rémunération de la garde. Échangez, rencontrez, choisissez.",
     "how": {
       "cta_owner": "Publier mon annonce",
       "cta_secondary": "Ou commencer par un coup de main →",
