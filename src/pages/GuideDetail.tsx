@@ -433,7 +433,7 @@ const GuideDetail = () => {
               {override.keyPoints.map((k) => <li key={k}>{k}</li>)}
             </ul>
             <p className="mt-4 text-sm text-foreground/80">
-              Seuls les lieux dont l'accueil des chiens ou la règle de laisse est appuyé par une source sont listés ci-dessous. Les panneaux sur place font foi.
+              Les règles de promenade s'appuient sur les sources citées. Les vétérinaires et commerces sont des adresses indicatives : appelez pour confirmer l'accueil et les horaires. Vérifiez aussi la signalétique sur place.
             </p>
             <p className="mt-2 text-sm font-medium text-muted-foreground">Sources</p>
             <ul className="mt-1 space-y-1 text-sm">

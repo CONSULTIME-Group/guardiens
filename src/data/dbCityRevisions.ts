@@ -72,7 +72,7 @@ export const DB_CITY_REVISIONS: Record<string, DbCityRevision> = {
   },
   biarritz: {
     faq: [
-      { q: "Peut-on trouver un gardien à Biarritz ?", a: "Vous pouvez publier une annonce pour Biarritz. Aucun gardien n'indique encore résider dans la commune sur Guardiens, et aucune disponibilité n'est garantie : les candidatures dépendent des gardiens prêts à se déplacer." },
+      { q: "Peut-on trouver un gardien à Biarritz ?", a: "Vous pouvez publier une annonce pour Biarritz. Les candidatures peuvent venir de gardiens de la commune ou prêts à se déplacer. Aucune disponibilité n'est garantie : vérifiez les profils et échangez avant de choisir." },
       { q: "Le gardien est-il payé ?", a: PAID },
       { q: "Où un chien peut-il être lâché à Biarritz ?", a: "La Ville a créé un chemin d'environ 300 mètres pour chiens en liberté dans l'espace naturel de Mouriscot, entre l'allée Gabrielle Dorziat et la rue du Lavoir de Compère. Ailleurs dans les parcs, la laisse reste la règle." },
       { q: "Quelles conditions sur le chemin de Mouriscot ?", a: "Selon la Ville, le chien reste à moins de 100 mètres et revient au rappel, il doit être sociable et identifié, les déjections sont ramassées, et les chiens de catégorie 1 et 2 n'y sont pas admis sauf dérogation." },
