@@ -316,6 +316,13 @@
       "when": 1790860273218,
       "tag": "0044_correctif_article_house_sitting",
       "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1790860700854,
+      "tag": "0045_alt_image_article_house_sitting",
+      "breakpoints": true
     }
   ]
 }
