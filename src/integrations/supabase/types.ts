@@ -7316,6 +7316,79 @@ export type Database = {
           },
         ]
       }
+      push_nearby_jobs: {
+        Row: {
+          attempts: number
+          available_at: string
+          claim_expires_at: string | null
+          claimed_at: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          last_error_code: string | null
+          notification_id: string
+          sit_id: string
+          status: string
+          subscription_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attempts?: number
+          available_at?: string
+          claim_expires_at?: string | null
+          claimed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          last_error_code?: string | null
+          notification_id: string
+          sit_id: string
+          status?: string
+          subscription_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attempts?: number
+          available_at?: string
+          claim_expires_at?: string | null
+          claimed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          last_error_code?: string | null
+          notification_id?: string
+          sit_id?: string
+          status?: string
+          subscription_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_nearby_jobs_sit_id_fkey"
+            columns: ["sit_id"]
+            isOneToOne: false
+            referencedRelation: "public_closed_sits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "push_nearby_jobs_sit_id_fkey"
+            columns: ["sit_id"]
+            isOneToOne: false
+            referencedRelation: "sits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "push_nearby_jobs_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "push_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       push_subscriptions: {
         Row: {
           auth_key: string
@@ -7329,6 +7402,7 @@ export type Database = {
           last_success_at: string | null
           opt_in_applications: boolean
           opt_in_messages: boolean
+          opt_in_nearby_sits: boolean
           p256dh_key: string
           updated_at: string
           user_id: string
@@ -7345,6 +7419,7 @@ export type Database = {
           last_success_at?: string | null
           opt_in_applications?: boolean
           opt_in_messages?: boolean
+          opt_in_nearby_sits?: boolean
           p256dh_key: string
           updated_at?: string
           user_id: string
@@ -7361,6 +7436,7 @@ export type Database = {
           last_success_at?: string | null
           opt_in_applications?: boolean
           opt_in_messages?: boolean
+          opt_in_nearby_sits?: boolean
           p256dh_key?: string
           updated_at?: string
           user_id?: string
@@ -12708,6 +12784,27 @@ export type Database = {
           subscription_id: string
         }[]
       }
+      push_claim_nearby_jobs: {
+        Args: { p_limit?: number }
+        Returns: {
+          attempts: number
+          auth_key: string
+          endpoint: string
+          endpoint_host: string
+          job_id: string
+          p256dh_key: string
+          sit_id: string
+          subscription_id: string
+        }[]
+      }
+      push_claim_self_test: {
+        Args: {
+          p_request_id: string
+          p_subscription_id: string
+          p_user_id: string
+        }
+        Returns: string
+      }
       push_claim_test: {
         Args: {
           p_request_id: string
@@ -12720,6 +12817,10 @@ export type Database = {
         Args: { p_error_code?: string; p_job_id: string; p_outcome: string }
         Returns: boolean
       }
+      push_close_nearby_job: {
+        Args: { p_error_code?: string; p_job_id: string; p_outcome: string }
+        Returns: boolean
+      }
       push_delete_my_subscription: {
         Args: { p_subscription_id: string }
         Returns: boolean
@@ -12729,6 +12830,7 @@ export type Database = {
         Returns: boolean
       }
       push_job_eligible: { Args: { p_job_id: string }; Returns: boolean }
+      push_member_active: { Args: { p_user_id: string }; Returns: boolean }
       push_my_subscriptions: {
         Args: never
         Returns: {
@@ -12740,10 +12842,40 @@ export type Database = {
           opt_in_messages: boolean
         }[]
       }
+      push_my_subscriptions_v2: {
+        Args: never
+        Returns: {
+          created_at: string
+          enabled: boolean
+          id: string
+          opt_in_applications: boolean
+          opt_in_messages: boolean
+          opt_in_nearby_sits: boolean
+        }[]
+      }
+      push_nearby_job_eligible: { Args: { p_job_id: string }; Returns: boolean }
+      push_nearby_target_ok: {
+        Args: { p_sit_id: string; p_user_id: string }
+        Returns: boolean
+      }
+      push_norm_city: { Args: { p: string }; Returns: string }
+      push_set_my_nearby_preference: {
+        Args: { p_opt_in: boolean; p_subscription_id: string }
+        Returns: boolean
+      }
       push_set_my_preferences: {
         Args: {
           p_opt_in_applications: boolean
           p_opt_in_messages: boolean
+          p_subscription_id: string
+        }
+        Returns: boolean
+      }
+      push_set_my_preferences_v2: {
+        Args: {
+          p_opt_in_applications: boolean
+          p_opt_in_messages: boolean
+          p_opt_in_nearby_sits: boolean
           p_subscription_id: string
         }
         Returns: boolean

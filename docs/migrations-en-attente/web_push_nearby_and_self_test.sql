@@ -1,6 +1,8 @@
 -- ============================================================================
 -- Lot notifications Android : annonces proches + test membre.
--- PRÉPARÉ, NON APPLIQUÉ. Application seulement sur GO explicite de Jérémie.
+-- APPLIQUÉE le 01/10/2026 (version 82c52dd, par Jérémie). NE PAS RÉAPPLIQUER
+-- (trigger non idempotent). Fonctions push-self-test, dispatch-web-push et
+-- push-subscription déployées le 01/10/2026 depuis le code relu.
 -- Strictement additif : aucun DROP, aucune ligne existante modifiée, aucun
 -- consentement changé (opt_in_nearby_sits vaut false pour tous les appareils
 -- existants), aucun backfill : seules les notifications insérées APRÈS
