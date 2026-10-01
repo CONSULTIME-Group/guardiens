@@ -244,6 +244,16 @@ const CTA_PAR_SLUG: Record<string, CtaCopy> = {
     endPrimary: { label: "Publier mon projet", href: "/projets/publier", role: "projet" },
   },
 
+  "c-est-quoi-le-house-sitting": {
+    midText: "Vous partez bientôt et vous cherchez quelqu'un pour veiller sur votre maison ?",
+    midPrimary: { label: "Faire garder ma maison", href: "/inscription?role=owner", role: "owner" },
+    midSecondary: { label: "Devenir gardien", href: "/devenir-home-sitter", role: "sitter" },
+    endHeading: "Préparez votre annonce de garde",
+    endText: "Décrivez vos dates, votre logement et vos animaux : les gardiens intéressés vous écrivent, vous choisissez après échange.",
+    endPrimary: { label: "Préparer mon annonce", href: "/inscription?role=owner", role: "owner" },
+    endSecondary: { label: "Je veux garder une maison", href: "/devenir-home-sitter", role: "sitter" },
+  },
+
   "apprendre-menuiserie-permaculture-ecoconstruction-gratuitement": {
     midText: "Apprendre sur un vrai chantier, près de chez vous ?",
     midPrimary: { label: "Recevoir les projets près de chez moi", href: "/inscription?redirect=/projets", role: "projet" },
@@ -291,6 +301,18 @@ function withRewrittenHrefs(copy: CtaCopy): CtaCopy {
   };
 }
 
+/**
+ * Articles guides refondus (mise en page de lecture dédiée) : ancres portées
+ * par les titres, liens éditoriaux soulignés, tableau ajusté. Liste fermée,
+ * les autres articles gardent le rendu historique.
+ */
+export const GUIDE_ARTICLE_SLUGS = new Set<string>(["c-est-quoi-le-house-sitting"]);
+
+/** Déplace l'ancre vide `<h2><a id="x"></a>Titre` sur le titre lui-même. */
+export function hoistHeadingAnchors(html: string): string {
+  return html.replace(/<(h[23])>\s*<a id="([a-z0-9-]+)"><\/a>/g, '<$1 id="$2">');
+}
+
 function ctaCopyPour(slug?: string): CtaCopy {
   return withRewrittenHrefs((slug && CTA_PAR_SLUG[slug]) || CTA_DEFAUT);
 }
@@ -323,10 +345,15 @@ function transformFactBoxes(content: string): string {
 /** Transform :::faq ... ::: blocks into visual Q/A HTML */
 function transformFaqBlocks(content: string): string {
   return content.replace(
-    /:::faq\s*\n([\s\S]*?):::/g,
-    (_, inner: string) => {
+    /:::faq([^\n]*)\n([\s\S]*?):::/g,
+    (_, rawTitle: string, inner: string) => {
       const lines = inner.split("\n");
-      let html = '<div class="article-faq-block"><h2 class="article-faq-heading">Foire aux questions</h2>';
+      // Titre facultatif sur la ligne d'ouverture : il remplace l'intitulé par
+      // défaut et porte l'ancre #faq, ce qui évite un second titre FAQ.
+      const title = rawTitle.trim();
+      let html = title
+        ? `<div class="article-faq-block"><h2 class="article-faq-heading" id="faq">${title}</h2>`
+        : '<div class="article-faq-block"><h2 class="article-faq-heading">Foire aux questions</h2>';
       let currentQ = "";
       let currentA: string[] = [];
 
@@ -464,6 +491,8 @@ export default function ArticleRenderer({ content, userRole, slug, placeholderVa
   html = addEndCTA(html, slug);
   html = adaptEndCTAsForRole(html, userRole);
   html = wrapTables(html);
+  const isGuide = !!slug && GUIDE_ARTICLE_SLUGS.has(slug);
+  if (isGuide) html = hoistHeadingAnchors(html);
 
 
   // Sanitize against XSS (e.g. <script>, onerror=) before injection.
@@ -475,7 +504,7 @@ export default function ArticleRenderer({ content, userRole, slug, placeholderVa
   // utilisateurs connectés (cf. règle dans index.css).
   return (
     <div
-      className="article-rich-content"
+      className={isGuide ? "article-rich-content article-guide" : "article-rich-content"}
       data-user-logged-in={userRole ? "true" : "false"}
       dangerouslySetInnerHTML={{ __html: safeHtml }}
     />
