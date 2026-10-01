@@ -688,6 +688,75 @@
     text-decoration: none;
   }
 
+  /* Articles guides refondus (GUIDE_ARTICLE_SLUGS) : réglages limités à
+     .article-guide, les autres articles gardent le rendu historique. */
+  .article-guide {
+    font-size: 1.05rem;
+    line-height: 1.75;
+  }
+  .article-guide [id] {
+    scroll-margin-top: 6rem;
+  }
+  .article-guide h2 {
+    @apply mt-10 mb-4;
+  }
+  .article-guide .article-banded-section {
+    @apply py-4;
+  }
+  /* Liens éditoriaux : texte souligné, jamais de bouton dans un paragraphe. */
+  .article-guide p a:not(.article-cta-btn),
+  .article-guide li a:not(.article-cta-btn),
+  .article-guide p:last-of-type a:not(.article-cta-btn),
+  .article-guide p:nth-last-of-type(2) a:not(.article-cta-btn) {
+    @apply inline p-0 m-0 rounded-none font-normal text-[length:inherit];
+    background: none;
+    color: hsl(var(--primary));
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transform: none;
+  }
+  /* Sommaire compact : liste en deux colonnes sur grand écran. */
+  .article-guide > p:first-child + ul {
+    @apply my-3 grid gap-x-6 sm:grid-cols-2 text-[0.95rem];
+  }
+  .article-guide > p:first-child + ul li {
+    @apply mb-1;
+  }
+  /* Tableau entièrement visible à partir de 1024 px. */
+  @media (min-width: 1024px) {
+    .article-guide .article-table-scroll > table {
+      min-width: 0;
+      table-layout: fixed;
+    }
+    .article-guide th,
+    .article-guide td {
+      @apply px-3 align-top;
+      overflow-wrap: anywhere;
+      hyphens: auto;
+    }
+    .article-guide th:first-child,
+    .article-guide td:first-child {
+      width: 7.5rem;
+    }
+  }
+  .article-guide .article-table-hint {
+    @apply mb-1 text-sm text-muted-foreground;
+  }
+  @media (min-width: 1024px) {
+    .article-guide .article-table-hint {
+      display: none;
+    }
+  }
+  @media (max-width: 1023px) {
+    .article-guide .article-table-scroll > table {
+      min-width: 640px;
+    }
+    .article-guide .article-table-scroll:focus-visible {
+      outline: 2px solid hsl(var(--ring));
+      outline-offset: 2px;
+    }
+  }
+
   /* ───────────────────────── Notebook card (vignettes en spirale) ─────────────────────────
      Effet "carnet" pour les vignettes hero : ombre douce projetée, légère rotation
      possible, et bord droit *déchiré* via un mask SVG (silhouette irrégulière).

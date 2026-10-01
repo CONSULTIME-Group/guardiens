@@ -302,6 +302,13 @@
       "when": 1790710355600,
       "tag": "0042_admin_get_member_card",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1790859673647,
+      "tag": "0043_refonte_article_house_sitting",
+      "breakpoints": true
     }
   ]
 }
