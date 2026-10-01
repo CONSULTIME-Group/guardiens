@@ -26,83 +26,69 @@ export interface CityContentData {
  articleSections: CityArticleSection[];
  pois: CityPOI[];
  nearbyTowns: string[];
+ /** FAQ visible et JSON-LD FAQPage : source unique pour les villes refondues. */
+ faq?: { q: string; a: string }[];
 }
 
 const cityContent: Record<string, CityContentData> = {
  annecy: {
- heroAlt: "Vue panoramique du lac d'Annecy et des montagnes enneigées",
- subtitle: "Confiez votre maison et vos animaux à un home sitter de confiance en Haute-Savoie.",
+ heroAlt: "Le lac d'Annecy et les montagnes qui l'entourent",
+ subtitle: "Un gardien séjourne chez vous pendant votre absence et veille sur votre logement, votre jardin et vos animaux. La garde n'est pas rémunérée sur Guardiens, et tout se convient avec lui avant le départ.",
  articleSections: [
  {
- id: "pourquoi",
- title: "Pourquoi le house-sitting à Annecy ?",
- content: `Annecy, c'est le cadre de vie dont rêvent beaucoup de Français : le lac, les montagnes, une vieille ville colorée. Mais quand on part en vacances ou en déplacement, la question se pose : **qui s'occupe de la maison et des animaux ?**
+ id: "en-bref",
+ title: "Organiser une garde à domicile à Annecy",
+ content: `Faire garder sa maison à Annecy, c'est confier son logement à une personne qui y séjourne et s'occupe de ce qui compte pour vous : animaux, plantes, courrier, chauffage. Sur Guardiens, vous publiez une annonce, des gardiens postulent, vous échangez avec eux, vous pouvez les rencontrer, puis vous choisissez. Le gardien n'est pas payé pour la garde ; il est hébergé chez vous. Les frais éventuels (courses, nourriture des animaux, transport) se décident à part, par écrit.
 
-Les pensions pour animaux autour d'Annecy coûtent entre 25 et 45 € par jour. Pour deux semaines, ça fait vite 350 à 600 €. Et votre chat qui déteste les cages ? Votre chien qui a besoin de son jardin ?
-
-Le house-sitting (parfois appelé home sitting en français), c'est la solution de bon sens : un gardien du coin vient chez vous, s'occupe de vos animaux dans leur environnement, arrose le jardin, et veille sur la maison. **0 € pour le propriétaire. Logement offert pour le gardien.**
-
-À Annecy, cette logique de proximité est naturelle. Les gens se connaissent entre quartiers, l'entraide est dans l'ADN savoyard. Guardiens digitalise cette confiance de proximité.`,
+Aucun délai de réponse n'est garanti : le nombre de candidatures dépend de vos dates, de la saison et de votre secteur. L'été, l'agglomération attire beaucoup de monde ; une annonce publiée tôt laisse le temps d'échanger sereinement. [Comprendre le house-sitting en détail](/actualites/c-est-quoi-le-house-sitting).`,
  },
  {
- id: "securite",
- title: "Sécurité et vigilance : gel, jardin, montagne",
- content: `En Haute-Savoie, les hivers sont rudes. Un house-sitter à Annecy, ce n'est pas juste quelqu'un qui nourrit le chat, c'est quelqu'un qui :
-
-- **Surveille les canalisations** quand il fait -10°C
-- **Déneige les accès** pour éviter les chutes et les dégâts
-- **Aère la maison** pour prévenir l'humidité
-- **Vérifie le chauffage** et la chaudière en votre absence
-
-En été, c'est l'arrosage du jardin, la gestion des volets contre la chaleur, et une présence dissuasive contre les cambriolages, un vrai sujet dans les zones résidentielles autour du lac.
-
-**Un gardien local connaît ces réalités.** Il sait que la route du Semnoz peut geler en novembre, que les jardins en bord de lac demandent un arrosage spécifique, et que les vétos d'urgence sont à Seynod ou Meythet.`,
+ id: "a-convenir",
+ title: "Ce qu'il faut convenir avant de partir",
+ content: `- **Présence réelle** : combien de temps le gardien peut s'absenter dans la journée, et si votre animal supporte la solitude. Une garde n'est pas une présence 24h/24.
+- **Expérience attendue** : chien qui tire en laisse, chat âgé, traitement à donner. Dites-le dans l'annonce, puis vérifiez en échangeant.
+- **Remise des clés** : en main propre lors d'une rencontre, ou selon une solution que vous maîtrisez. Prévoyez un double chez une personne relais.
+- **Frais** : qui paie la nourriture des animaux, une éventuelle consultation vétérinaire, le bois ou le chauffage. Mieux vaut l'écrire que le supposer.
+- **Personne relais et vétérinaire** : un contact du coin joignable, et les coordonnées de votre vétérinaire habituel.
+- **Hiver** : en altitude ou en zone exposée, consignes précises sur le chauffage, la mise hors gel et le déneigement des accès.`,
  },
  {
- id: "match",
- title: "Le match : pension animale vs Guardiens",
- content: `| | Pension | Guardiens |
-|---|---|---|
-| **Coût** | 25-45 €/jour | 0 € |
-| **Environnement** | Cage / box collectif | Chez vous |
-| **Stress animal** | Élevé (changement) | Minimal (habitudes) |
-| **Maison surveillée** | Non | Oui |
-| **Jardin entretenu** | Non | Oui |
-| **Lien humain** | Personnel de pension | Gardien de confiance |
+ id: "sorties-chien",
+ title: "Sorties avec un chien : les règles locales à transmettre",
+ content: `Votre gardien découvre peut-être le secteur. Quelques repères à lui transmettre, à partir de sources officielles :
 
-Pour un séjour de 14 jours avec un chien et un chat, **vous économisez 500 à 800 € en moyenne** tout en offrant un meilleur confort à vos animaux.`,
+- L'Office de tourisme du lac rappelle qu'en ville, en balade comme en randonnée, **les chiens doivent être tenus en laisse**, et que **les plages autour du lac n'autorisent pas les chiens** ([Lac Annecy Tourisme](https://www.lac-annecy.com/idees-de-sejour/que-faire-au-lac-d-annecy-avec-un-chien/)).
+- Un arrêté municipal de 2025 autorise la promenade sans laisse sur quelques sites précis (dont une portion de la promenade du Thiou), **sauf du 15 avril au 30 juin**, période où la laisse est obligatoire partout dans les espaces naturels ([arrêté CN-2025-281](https://www.annecy.fr/fileadmin/mediatheque_annecy/Actes_administratifs/Arretes-municipaux/2025/2025_juillet/CN_2025_281.pdf)).
+- Certains parcs ferment leurs portes aux animaux : le règlement du parc du Haras les interdit, même tenus en laisse, sauf chiens guides ([arrêté CN-2026-564](https://www.annecy.fr/api/fileadmin/mediatheque_annecy/Ma_ville/Grands_projets/CN_2026_564.pdf)).
+
+Les panneaux à l'entrée de chaque lieu restent la référence. Le [guide des sorties avec un chien à Annecy](/guides/annecy) rassemble les lieux et les règles vérifiées, et l'article [parcs et balades avec un chien à Annecy](/actualites/parcs-balades-chiens-annecy-guide) donne d'autres idées.`,
  },
  {
- id: "comment",
- title: "Comment ça marche ?",
- content: `**1. Inscrivez-vous** en 2 minutes, que vous soyez propriétaire ou gardien.
+ id: "comparer",
+ title: "Garde à domicile, visites ou pension : comment choisir",
+ content: `| Option | Où vit l'animal | Présence | Coût | À vérifier |
+|---|---|---|---|---|
+| Gardien qui séjourne chez vous | Chez vous | Selon l'accord, pas en continu | Pas de rémunération de la garde, frais convenus à part | Expérience, absences dans la journée, relais |
+| Visites d'un pet-sitter | Chez vous | Passages ponctuels | Sur devis | Nombre de passages, adapté surtout aux chats autonomes |
+| Pension | Chez le professionnel | Encadrement par une équipe | Sur devis | Vaccins demandés, conditions d'accueil, places en saison |
 
-**2. Publiez votre annonce**, décrivez votre maison, vos animaux, les dates, et vos attentes.
-
-**3. Recevez des candidatures**, les gardiens du coin postulent. Regardez leurs avis, leur profil, leur expérience.
-
-**4. Choisissez et partez serein**, échangez par messagerie, organisez la passation, et c'est parti.
-
-Tout est sur la plateforme : messagerie, avis croisés, guide de la maison, et même des gardiens d'urgence en cas d'imprévu.`,
+Aucune solution ne convient à tous les animaux. Un chien très anxieux ou un animal qui demande des soins peut justifier un avis vétérinaire avant de choisir. [Comparer les alternatives à la pension](/actualites/pension-chien-alternatives-guide).`,
+ },
+ {
+ id: "urgence",
+ title: "En cas d'imprévu",
+ content: `Notez dans l'accord le vétérinaire habituel, une clinique de garde et une personne relais. Pour les adresses de garde vétérinaire du département, consultez [vétérinaires d'urgence à Annecy et en Haute-Savoie](/actualites/veterinaire-urgence-annecy-haute-savoie), en vérifiant les horaires par téléphone. Le réseau de gardiens d'urgence de Guardiens n'est pas encore activé : prévoyez votre propre solution de secours. [Gérer un imprévu pendant une garde](/actualites/gerer-imprevu-pendant-garde).`,
  },
  ],
- pois: [
- {
- title: "Balades au Semnoz",
- description: "Randonnées accessibles à 20 min d'Annecy. Parfait pour les gardiens avec chien, sentiers balisés et panoramas sur le lac.",
- icon: "mountain",
- },
- {
- title: "Baignades à Veyrier",
- description: "Plages dog-friendly en été. Les gardiens qui aiment la nature apprécient ce coin préservé au pied de la Tournette.",
- icon: "water",
- },
- {
- title: "Urgences vétérinaires 74",
- description: "Clinique VetAdom à Seynod et Urgences Vétérinaires du Lac à Meythet, ouvertes week-end et nuit.",
- icon: "stethoscope",
- },
+ faq: [
+ { q: "Comment trouver un gardien à Annecy ?", a: "Publiez une annonce décrivant votre logement, vos animaux et vos dates. Les gardiens intéressés postulent ; vous lisez leur profil et leurs avis, échangez par messagerie et pouvez les rencontrer avant de choisir. Aucun délai de réponse n'est garanti." },
+ { q: "Le gardien est-il payé ?", a: "Non, la garde n'est pas rémunérée sur Guardiens : le gardien est hébergé chez vous. Les frais éventuels, comme la nourriture des animaux ou une consultation vétérinaire, se conviennent à l'avance. Les tarifs de la plateforme sont détaillés sur la page Tarifs." },
+ { q: "Mon chien peut-il être promené sans laisse à Annecy ?", a: "En règle générale, non : la laisse est demandée en ville et en balade, et les plages du lac n'acceptent pas les chiens. Un arrêté municipal prévoit quelques sites sans laisse, sauf du 15 avril au 30 juin. Suivez toujours les panneaux sur place." },
+ { q: "Le gardien sera-t-il présent en permanence ?", a: "Pas forcément. Le temps de présence et les absences possibles dans la journée se décident entre vous avant la garde, en fonction des besoins de vos animaux." },
+ { q: "Que prévoir pour une garde en hiver ?", a: "Des consignes écrites sur le chauffage, la mise hors gel et l'accès au logement par temps de neige, ainsi que le numéro d'un chauffagiste ou d'une personne relais." },
+ { q: "Que se passe-t-il si le gardien annule ?", a: "Prévenez-vous mutuellement au plus tôt et gardez une solution de secours personnelle. Le réseau de gardiens d'urgence de Guardiens n'est pas encore activé." },
  ],
+ pois: [],
  nearbyTowns: [
  "Annecy-le-Vieux",
  "Seynod",
@@ -118,298 +104,134 @@ Tout est sur la plateforme : messagerie, avis croisés, guide de la maison, et m
  },
 
  lyon: {
-  heroAlt: "Garde de chien et de chat à Lyon - Vue panoramique depuis Fourvière au coucher du soleil - Guardiens",
-  subtitle: "Le home sitting à Lyon, c'est un home sitter de confiance qui s'installe chez vous et veille sur votre chien, votre chat et votre maison. Votre animal garde ses repères, et vous pouvez rencontrer votre gardien avant de lui confier vos clés.",
-  articleSections: [
-   {
-  id: "introduction",
-  title: "Home sitting à Lyon : comment faire garder son chien ou son chat ?",
- content: `Trouver un gardien à Lyon pour son chien ou son chat, à domicile et sans mise en pension, se fait via une plateforme d'entraide entre particuliers. Guardiens réunit des gardiens de confiance dans tous les arrondissements lyonnais, de la Presqu'île à la Croix-Rousse, de Confluence au 3ème et au 6ème. Recommandations par la communauté, rencontre conseillée avant une garde.
+ heroAlt: "Vue de Lyon depuis la colline de Fourvière",
+ subtitle: "Un gardien séjourne chez vous pendant votre absence et veille sur votre logement, votre chien ou votre chat. La garde n'est pas rémunérée sur Guardiens ; présence, clés et frais se conviennent avant le départ.",
+ articleSections: [
+ {
+ id: "en-bref",
+ title: "Faire garder son chien, son chat et son logement à Lyon",
+ content: `À Lyon, le house-sitting permet de laisser votre animal chez lui, dans ses repères, pendant qu'une personne séjourne dans votre logement. Sur Guardiens, vous publiez une annonce, des gardiens postulent, vous échangez, vous pouvez les rencontrer, puis vous décidez. Le gardien n'est pas rémunéré pour la garde ; il est hébergé. Les frais éventuels (nourriture des animaux, transport, soins) se décident à part.
 
-Lyon est l'une des villes les plus accueillantes de France pour les animaux de compagnie. Près d'un quart des foyers lyonnais vivent avec un chien ou un chat. Du parc de la Tête d'Or aux quais de Saône, la ville offre un cadre de vie où les animaux ont toute leur place.
-
-Mais quand vient le moment de partir, vacances, déplacement professionnel, week-end en famille, la question se pose : **à qui confier votre animal et votre maison à Lyon ?**
-
-Guardiens est une plateforme de garde d'animaux et de home sitting fondée par Jérémie et Elisa, installés dans le Vieux-Lyon, rue Juiverie. Après cinq ans de house-sitting à travers la France, des dizaines de maisons gardées, des centaines d'animaux accompagnés, ils ont construit un outil pensé pour les propriétaires lyonnais : des gardiens de proximité, une rencontre physique conseillée avant une garde, et un dispositif de confiance fondé sur les avis croisés.
-
-Ce que Guardiens propose concrètement : vous publiez votre annonce, des gardiens de votre quartier postulent, vous échangez et vous pouvez les rencontrer autour d'un café ou lors d'une visite de votre logement, puis vous confirmez la garde. Votre animal reste chez lui, dans ses repères. Votre maison reste vivante. [Inscrivez-vous pour publier votre annonce](/inscription?role=owner).`,
- },
-  {
- id: "pourquoi-proximite",
- title: "Combien coûte une garde d'animaux à Lyon ?",
- content: `Une pension pour animaux autour de Lyon coûte 25 à 50 € par nuit et par animal, soit 350 à 700 € pour deux semaines avec un chien. Une garde à domicile via Guardiens n'entraîne aucun frais de pension côté propriétaire, votre animal reste chez lui, votre maison reste occupée.
-
-### Une ville où les animaux font partie de la famille
-
-Lyon compte plus de 150 000 chiens et chats dans son agglomération. Les Lyonnais sont attachés à leurs compagnons : promenades quotidiennes à la Tête d'Or, terrasses dog-friendly dans le Vieux-Lyon, cliniques vétérinaires de quartier ouvertes le samedi. L'animal n'est pas un accessoire, c'est un membre du foyer.
-
-Pourtant, quand il faut partir, les solutions classiques restent inadaptées : pension collective stressante pour l'animal, personne de l'immeuble peu disponible, ou, solution par défaut, annuler le voyage.
-
-### Les limites des pensions classiques
-
-Les pensions pour animaux autour de Lyon facturent entre 25 et 50 euros par nuit et par animal. Pour deux semaines avec un chien, comptez 350 à 700 euros. Et le stress du changement d'environnement est réel : un chat arraché à son territoire peut cesser de s'alimenter, un chien anxieux peut développer des troubles du comportement.
-
-Sans compter que votre maison reste vide. Boîte aux lettres qui déborde, plantes qui sèchent, volets fermés en plein jour, autant de signaux qui attirent l'attention.
-
-### Le home sitting : une alternative qui a fait ses preuves, désormais à Lyon
-
-Le home sitting existe depuis des décennies dans les pays anglo-saxons. Le principe est simple : un gardien de confiance s'installe chez vous, s'occupe de vos animaux dans leur environnement habituel, et veille sur votre maison. Pas de frais de pension, pas de stress pour l'animal, pas de maison vide.
-
-À Lyon, cette logique de proximité prend tout son sens. Les quartiers ont une identité forte, les personnes du coin se reconnaissent. Guardiens structure cette confiance de proximité avec des outils de vérification et un cadre clair.`,
+Le nombre de candidatures dépend de vos dates, de votre quartier et de la période ; aucun délai n'est garanti. Pour les vacances scolaires, publiez tôt. [Comprendre le house-sitting en détail](/actualites/c-est-quoi-le-house-sitting).`,
  },
  {
- id: "fonctionnement",
- title: "Comment trouver un gardien fiable à Lyon ?",
- content: `Pour trouver un gardien fiable à Lyon, publiez votre annonce sur Guardiens, recevez des candidatures de gardiens de votre quartier, consultez leurs avis, puis organisez une rencontre si vous le souhaitez avant de confirmer. La vérification d'identité est ouverte à tous les membres : la pièce envoyée est analysée automatiquement, les dossiers qui ne passent pas sont revus par l'équipe, et les profils validés affichent l'écusson « Identité vérifiée ». Regardez cet écusson, échangez avec la personne et envisagez une rencontre avant de confier vos clés.
+ id: "a-convenir",
+ title: "Ce qu'il faut convenir avant de partir",
+ content: `- **Présence** : combien d'heures votre animal peut rester seul, et si le gardien télétravaille ou s'absente en journée.
+- **Logement en ville** : étage sans ascenseur, interphone, local à vélos, règles de copropriété, voisinage sensible aux aboiements.
+- **Clés et badges** : remise en main propre, badge de parking ou de résidence, double chez une personne relais.
+- **Expérience** : chien réactif, chat qui sort, traitement à donner. Parlez-en franchement, puis vérifiez en rencontrant le gardien.
+- **Frais** : nourriture, litière, éventuelle consultation vétérinaire : qui avance, qui rembourse.
+- **Chaleur** : en été, horaires de sortie tôt le matin et tard le soir, volets, eau à disposition.
 
-### Etape 1, Publiez votre annonce
-
-Décrivez votre maison, vos animaux, les dates de votre absence et vos attentes. La publication coûte 0 € aux propriétaires. Précisez votre arrondissement ou votre commune pour que les gardiens de proximité vous trouvent. [Voir les tarifs](/tarifs).
-
-### Etape 2, Échangez avec les gardiens intéressés
-
-Les gardiens de Lyon et de ses environs consultent votre annonce et postulent avec un message personnalisé. Vous consultez leur profil, leurs avis, leur expérience. Vous pouvez ensuite organiser une rencontre : un café dans votre quartier, une visite de votre logement, une promenade avec votre chien. Cette rencontre physique peut renforcer la confiance.
-
-### Etape 3, Confirmez la garde
-
-Une fois le gardien choisi, vous échangez les informations pratiques via la messagerie intégrée : clés, routine de l'animal, contacts du vétérinaire. Un [guide de la maison](/guides/lyon) optionnel vous permet de tout centraliser.
-
-### Etape 4, Partez l'esprit libre avec des nouvelles régulières
-
-Pendant la garde, votre gardien envoie des photos et des nouvelles de vos animaux. En cas d'imprévu, le réseau de [gardiens d'urgence à Lyon](/gardien-urgence) peut intervenir rapidement.`,
+[Préparer sa maison avant une garde](/actualites/preparer-maison-avant-garde) détaille la check-list.`,
  },
  {
- id: "quartiers",
- title: "Quels quartiers de Lyon sont les mieux couverts ?",
- content: `Les 9 arrondissements lyonnais et les communes limitrophes (Villeurbanne, Caluire-et-Cuire, Bron, Oullins, Ecully) sont couverts par le réseau Guardiens, avec une densité plus forte sur le Vieux-Lyon (5ème), la Presqu'île (1er et 2ème), les Brotteaux et la Tête d'Or (6ème), Montchat (3ème) et la Croix-Rousse (4ème).
+ id: "sorties-chien",
+ title: "Sorties avec un chien à Lyon : repères à transmettre",
+ content: `- Sur les berges du Rhône, comme partout en ville, **les chiens doivent être tenus en laisse** ; des espaces canins de liberté et des espaces sanitaires existent sur les quais hauts ([ONLYLYON Tourisme, berges du Rhône](https://www.visiterlyon.com/sortir/parcs-jardins-et-lieux-de-balade/les-berges-du-rhone)).
+- La Ville a aménagé des aires canines, notamment au parc de la Tête d'Or (près du vélodrome) et au parc Blandan ; de nombreux parcs acceptent les chiens en laisse ([Lyon avec un chien, ONLYLYON Tourisme](https://www.visiterlyon.com/lyon-pratique/bons-plans/lyon-avec-un-chien)).
+- Autour de Lyon, le parc de la Feyssine et le Grand Parc de Miribel-Jonage accueillent les chiens tenus en laisse (même source).
+- Dans les TCL, un chien voyage dans un panier, ou avec le ticket dédié pour les chiens de plus de 6 kg (même source, à confirmer sur le site TCL).
 
-Lyon se compose de neuf arrondissements et d'une ceinture de communes limitrophes, chacun avec ses particularités pour la garde d'animaux. Nos gardiens à Lyon connaissent les spécificités de chaque quartier.
-
-**Lyon 1er, Terreaux, Croix-Rousse pentes.** Quartier dense, rues pavées et montées. Les chiens de petite taille s'y adaptent bien. Les gardiens du 1er connaissent les passages piétons vers les quais de Saône pour des promenades au calme. Peu de jardins privatifs, les sorties régulières sont essentielles.
-
-**Lyon 2ème, Presqu'île, Bellecour, Perrache.** Coeur historique et commercial de Lyon, entre Rhône et Saône. Appartements souvent en étage, copropriétés avec règlements stricts sur les animaux. Les gardiens de la Presqu'île utilisent le jardin des Chartreux ou la place Bellecour pour les sorties.
-
-**Lyon 3ème, Part-Dieu, Montchat.** Quartier résidentiel avec un bon équilibre entre appartements et maisons de ville côté Montchat. Le parc Bazin et le square Jussieu offrent des espaces verts de proximité pour les promenades quotidiennes à Lyon.
-
-**Lyon 4ème, Croix-Rousse plateau.** Village dans la ville. Ambiance familiale, marchés, places arborées. Les gardiens de la Croix-Rousse apprécient le boulevard pour les balades avec vue sur les Alpes. Logements atypiques : canuts, lofts, terrasses.
-
-**Lyon 5ème, Vieux-Lyon, Saint-Just, Point-du-Jour.** Le berceau de Guardiens. Ruelles médiévales côté Vieux-Lyon, quartiers résidentiels calmes côté Point-du-Jour. Les gardiens du 5ème connaissent les sentiers de Fourvière, les montées secrètes et les parcs en terrasse. Idéal pour les chats d'appartement avec vue.
-
-**Lyon 6ème, Brotteaux, Tête d'Or, Masséna.** Le quartier le plus prisé de Lyon pour la garde d'animaux. Le parc de la Tête d'Or, 105 hectares, est à quelques minutes à pied. Résidences bourgeoises avec jardins, gardiens souvent sollicités pour des gardes de chiens de grande taille.
-
-**Lyon 7ème, Guillotière, Jean-Macé, Gerland.** Quartier en pleine transformation. Les berges du Rhône offrent un parcours de 5 km idéal pour les chiens sportifs. Le quartier Gerland, plus calme, attire des familles avec jardin. Les gardiens du 7ème gèrent aussi la proximité du marché Jean-Macé.
-
-**Lyon 8ème, Monplaisir, Bachut.** Quartier populaire et vivant, avec des rues commerçantes et des squares de proximité. Les gardiens de Monplaisir connaissent les cliniques vétérinaires du secteur, dont VetEmergency, ouverte 24h/24, et les parcs de Parilly à quelques stations de tram.
-
-**Lyon 9ème, Vaise, Valmy.** Quartier en renouveau côté Confluence, résidentiel et verdoyant côté Vaise. L'Île Barbe, accessible à pied, est un paradis pour les promenades avec chien. Les gardiens du 9ème apprécient le calme des bords de Saône et la proximité de l'autoroute pour les propriétaires qui voyagent.
-
-**Communes limitrophes.** Nos gardiens couvrent également [Caluire-et-Cuire](/house-sitting/caluire-et-cuire) (résidences avec jardin, bords de Saône), Villeurbanne (proximité Tête d'Or, quartier Gratte-Ciel), Bron (maisons individuelles, parc de Parilly), Oullins (quartiers calmes, accès Confluence), et Ecully (résidentiel, campus universitaire, jardins). Chaque commune a ses gardiens de proximité référencés sur la plateforme.`,
+Les panneaux d'entrée de chaque parc font foi. Pour aller plus loin : le [guide des sorties avec un chien à Lyon](/guides/lyon) et l'article [parcs et balades avec un chien à Lyon](/actualites/parcs-chiens-lyon-guide-complet).`,
  },
  {
- id: "proprietaires",
- title: "Propriétaires, ce que vous offre Guardiens",
- content: `Confier votre animal et votre maison à Lyon est une décision importante. Voici ce que Guardiens met en place pour que vous partiez l'esprit libre :
+ id: "comparer",
+ title: "Garde à domicile, visites ou pension",
+ content: `| Option | Où vit l'animal | Présence | Coût | À vérifier |
+|---|---|---|---|---|
+| Gardien qui séjourne chez vous | Chez vous | Selon l'accord, pas en continu | Pas de rémunération de la garde, frais convenus à part | Expérience, absences, personne relais |
+| Visites d'un pet-sitter | Chez vous | Passages ponctuels | Sur devis | Nombre de passages, adapté surtout aux chats autonomes |
+| Pension | Chez le professionnel | Équipe sur place | Sur devis | Vaccins demandés, conditions d'accueil |
 
-**Votre animal reste chez lui, dans ses repères.** Pas de cage, pas de box collectif, pas de transport stressant. Votre chien dort dans son panier, votre chat garde son territoire. Le gardien s'adapte à la routine de votre animal, horaires de repas, promenades habituelles, médicaments si nécessaire.
-
-**Votre maison reste vivante.** Le gardien relève le courrier, arrose les plantes, aère les pièces, allume les lumières le soir. Une maison occupée est une maison protégée. À Lyon, où les absences prolongées sont visibles depuis la rue, cette présence fait la différence.
-
-**Vous pouvez rencontrer votre gardien avant de lui confier vos clés.** Guardiens vous conseille cette rencontre avant la garde. Un café dans votre quartier, une visite de votre logement, une promenade avec votre chien. Vous évaluez le contact humain, votre animal aussi.
-
-**Aucune commission sur les gardes.** Guardiens ne prélève aucun pourcentage sur les gardes. L'accès à Guardiens est ouvert pendant la phase de lancement. Vous accédez à l'ensemble des fonctionnalités, et vous restez libre à tout moment. Vous serez prévenu à l'avance en cas d'évolution tarifaire.
-
-**Un accord de garde clair.** Un document optionnel formalise les engagements de chaque partie : dates, responsabilités, contacts d'urgence. Jamais contraignant, toujours rassurant.
-
-**Une vérification d'identité ouverte à tous.** La pièce envoyée est analysée automatiquement, les dossiers qui ne passent pas sont revus par l'équipe, et les profils validés affichent l'écusson « Identité vérifiée ». Les avis croisés après chaque garde construisent un historique de confiance visible sur le profil.`,
+Le bon choix dépend de votre animal, de la durée et de votre logement. [Où faire garder son chien à Lyon pendant les vacances](/actualites/ou-faire-garder-chien-lyon-vacances) et [garde de chat à domicile à Lyon](/actualites/garde-chat-domicile-lyon) détaillent les options.`,
  },
  {
- id: "gardiens",
- title: "Gardiens, qui sont les personnes de confiance à Lyon",
- content: `Les gardiens Guardiens à Lyon ne correspondent pas à un profil unique. C'est cette diversité qui permet de trouver la bonne personne pour chaque situation :
-
-**Retraités actifs** du Vieux-Lyon ou des Brotteaux, qui ont du temps, de l'expérience avec les animaux et une connaissance fine de leur quartier. Ils apprécient la compagnie d'un animal et la responsabilité de veiller sur une maison.
-
-**Jeunes actifs** en télétravail ou en horaires flexibles, passionnés d'animaux, qui cherchent à contribuer à la vie de leur quartier. Ils sont souvent disponibles pour les gardes de courte durée ou les [petites missions](/petites-missions) ponctuelles.
-
-**Familles** qui souhaitent offrir à leurs enfants l'expérience de s'occuper d'un animal sans l'engagement permanent. Une garde de deux semaines avec un labrador, c'est une aventure pour toute la famille.
-
-**Étudiants**, pour les gardes courtes, les week-ends ou les ponts. Leur disponibilité et leur énergie conviennent parfaitement aux chiens actifs qui ont besoin de longues promenades.
-
-**Vérification d'identité ouverte à tous.** La pièce envoyée est analysée automatiquement, et les dossiers qui ne passent pas ce premier contrôle sont revus par l'équipe. Les profils validés affichent l'écusson « Identité vérifiée ». Consultez aussi le profil détaillé et envisagez une rencontre physique avant la garde.`,
- },
- {
- id: "tarifs",
- title: "Tarifs Guardiens : transparents et sans surprise",
- content: `Le modèle économique de Guardiens est conçu pour être lisible :
-
-**Propriétaires : 0 €.** Vous publiez votre annonce, vous recevez des candidatures, vous choisissez votre gardien. Tout cela sans débourser un centime, toute l'année 2026.
-
-**0 € pour les propriétaires**, et accès gardien ouvert pendant la phase de lancement. Vous serez prévenu à l'avance en cas d'évolution tarifaire. [Consultez le détail des formules sur la page tarifs](/tarifs).
-
-**Aucune commission par garde.** Guardiens ne touche rien sur les gardes elles-mêmes. L'accès à Guardiens est ouvert pendant la phase de lancement. Vous accédez à l'ensemble des fonctionnalités, et vous restez libre à tout moment. Vous serez prévenu à l'avance en cas d'évolution tarifaire.`,
- },
- {
- id: "histoire",
- title: "L'histoire de Guardiens à Lyon",
- content: `Guardiens est né dans le Vieux-Lyon, rue Juiverie, dans l'appartement de Jérémie et Elisa. Pendant cinq ans, ils ont pratiqué le house-sitting à travers la France : des dizaines de maisons gardées, de la ferme isolée à l'appartement haussmannien des Brotteaux, en passant par les chalets de montagne.
-
-234 animaux accompagnés, des chiens de berger aux chats craintifs, des poules de jardin aux tortues de terrarium. Chaque garde leur a appris quelque chose : comment gérer un chien anxieux en l'absence de son maître, comment rassurer un chat qui se cache pendant trois jours, comment intervenir quand une chaudière tombe en panne un dimanche soir.
-
-C'est cette expérience de terrain qui structure aujourd'hui la plateforme : le guide de la maison qui centralise toutes les informations pratiques, les alertes prioritaires envoyées aux gardiens d'urgence éligibles, les avis croisés qui construisent la confiance au fil du temps.
-
-Guardiens accueille aujourd'hui ses premiers membres, ceux qui rejoignent la plateforme pendant sa phase de construction et contribuent à façonner l'outil. Lyon est le point de départ, la France entière le terrain naturel d'expansion.`,
- },
- {
- id: "faq",
- title: "Questions fréquentes des propriétaires à Lyon",
- content: `**Comment rencontrer un gardien avant de confier ma maison ?**
-Après avoir accepté une candidature, vous pouvez organiser une rencontre directement via la messagerie Guardiens. La plupart des propriétaires à Lyon choisissent un café de quartier ou une visite du logement. Guardiens vous recommande cette étape.
-
-**Que se passe-t-il en cas d'urgence ou d'imprévu ?**
-Une alerte prioritaire peut être envoyée aux [gardiens d'urgence à Lyon](/gardien-urgence) qui remplissent les critères. En cas de problème vétérinaire, le gardien contacte la clinique indiquée dans le guide de la maison. En cas de problème technique (fuite, panne), il suit les consignes laissées par le propriétaire.
-
-**Comment fonctionne la vérification d'identité à Lyon ?**
-La vérification d'identité est ouverte à tous les membres : la pièce envoyée est analysée automatiquement, les dossiers qui ne passent pas sont revus par l'équipe, et les profils validés affichent l'écusson « Identité vérifiée ». Les avis croisés après chaque garde et les badges de fiabilité complètent le dispositif de confiance. [En savoir plus dans la FAQ](/faq#confiance-securite).
-
-**Puis-je publier une annonce pour un chien ET un chat ?**
-Absolument. Votre annonce peut inclure tous vos animaux. Les gardiens qui postulent voient la composition exacte de votre foyer et décident en connaissance de cause.
-
-**Combien de temps à l'avance faut-il publier mon annonce ?**
-Pour les vacances d'été à Lyon, nous recommandons un mois à l'avance. Pour un week-end, une à deux semaines suffisent généralement. Plus l'annonce est publiée tôt, plus vous recevez de candidatures de gardiens de qualité.
-
-**Que faire si mon gardien annule au dernier moment ?**
-C'est rare mais cela peut arriver. Guardiens active alors le réseau de gardiens d'urgence de votre zone. Le système de fiabilité pénalise les annulations répétées pour garantir la qualité du réseau.
-
-**Comment se passe la remise des clés à Lyon ?**
-Lors de la rencontre préalable ou le jour du départ, vous remettez les clés en main propre à votre gardien. Certains propriétaires lyonnais laissent un double dans une boîte à clés sécurisée, c'est à votre convenance.
-
-**Guardiens fonctionne-t-il pour les gardes de plusieurs semaines ?**
-Oui. La plateforme est conçue pour les gardes de toute durée, du week-end prolongé aux absences de plusieurs semaines. Les gardiens indiquent leurs disponibilités sur leur profil.`,
- },
- {
- id: "conclusion",
- title: "Lyon, point de départ de Guardiens partout en France",
- content: `Lyon est le coeur du réseau Guardiens. C'est ici que la plateforme est née, ici que les premiers gardiens et propriétaires se sont rencontrés, ici que le modèle de confiance de proximité a été testé et validé.
-
-Que vous viviez dans le Vieux-Lyon, à la Croix-Rousse, à Monplaisir ou à Villeurbanne, Guardiens vous connecte avec des gardiens de votre quartier. Votre animal reste dans ses repères, votre maison reste vivante, et vous partez l'esprit libre.
-
-Le réseau s'étend progressivement à toute la France : [Annecy](/actualites/house-sitting-annecy), Grenoble, Chambéry, et bien au-delà. Mais Lyon reste le pilier, la ville de référence, celle où tout a commencé.
-
-[Publiez votre première annonce](/inscription?role=owner), c'est 0 € pour les propriétaires.
-
-[Devenez gardien à Lyon](/inscription?role=guardian), rejoignez le réseau de confiance.
-
-Consultez également le [guide complet du gardien à Lyon](/guides/lyon), la page [département du Rhône](/departement/rhone), ou découvrez [ce qu'est le house-sitting](/actualites/c-est-quoi-le-house-sitting).`,
+ id: "urgence",
+ title: "En cas d'imprévu",
+ content: `Écrivez dans l'accord le nom de votre vétérinaire, une clinique de garde et une personne relais joignable. Les cliniques de garde de l'agglomération sont listées dans [vétérinaires d'urgence à Lyon](/actualites/veterinaire-urgence-lyon-guide) ; vérifiez leurs horaires par téléphone avant le départ. Le réseau de gardiens d'urgence de Guardiens n'est pas encore activé : gardez une solution de secours personnelle. [Gérer un imprévu pendant une garde](/actualites/gerer-imprevu-pendant-garde).`,
  },
  ],
- pois: [
- {
- title: "Parc de la Tête d'Or",
- description: "105 hectares en plein coeur de Lyon. Le plus grand parc urbain de France, idéal pour les promenades quotidiennes avec un chien. Sentiers ombragés et zones enherbées.",
- icon: "tree",
- },
- {
- title: "Berges du Rhône",
- description: "5 km de promenades aménagées le long du fleuve. Zones dog-friendly, ambiance familiale. Les gardiens sportifs apprécient ce parcours en plein coeur de Lyon.",
- icon: "water",
- },
- {
- title: "Quais de Saône",
- description: "Promenade piétonne de Saint-Paul à Ile Barbe. Calme et verdure en bord de rivière, parfait pour les chiens anxieux qui ont besoin de tranquillité à Lyon.",
- icon: "water",
- },
- {
- title: "Urgences vétérinaires Lyon",
- description: "VetEmergency Lyon 8ème et Clinique Vétérinaire de Garde, ouvertes 24h/24, 7j/7. Numéros dans chaque guide de la maison.",
- icon: "stethoscope",
- },
+ faq: [
+ { q: "Comment trouver un gardien pour mon chien ou mon chat à Lyon ?", a: "Publiez une annonce avec vos animaux, vos dates et votre quartier. Les gardiens intéressés postulent ; vous lisez leur profil et leurs avis, échangez par messagerie et pouvez les rencontrer avant de confirmer. Aucun délai de réponse n'est garanti." },
+ { q: "Le gardien est-il payé ?", a: "Non, la garde n'est pas rémunérée sur Guardiens : le gardien est hébergé chez vous. Les frais éventuels se conviennent à l'avance, par écrit. Les tarifs de la plateforme sont détaillés sur la page Tarifs." },
+ { q: "Mon chien peut-il être promené sans laisse à Lyon ?", a: "La laisse est la règle en ville, y compris sur les berges du Rhône. Des espaces canins de liberté et des aires canines existent, par exemple au parc de la Tête d'Or et au parc Blandan. Suivez les panneaux sur place." },
+ { q: "Le gardien sera-t-il là toute la journée ?", a: "Pas forcément. Les absences possibles dans la journée et le rythme des sorties se décident entre vous avant la garde." },
+ { q: "Comment se passe la remise des clés ?", a: "Le plus souvent en main propre, lors d'une rencontre ou le jour du départ. Pensez aux badges de résidence et à un double confié à une personne relais." },
+ { q: "Que se passe-t-il si le gardien annule ?", a: "Prévenez-vous mutuellement au plus tôt et prévoyez une solution de secours personnelle. Le réseau de gardiens d'urgence de Guardiens n'est pas encore activé." },
  ],
+ pois: [],
  nearbyTowns: [
  "Villeurbanne",
  "Caluire-et-Cuire",
- "Ecully",
- "Tassin-la-Demi-Lune",
- "Sainte-Foy-lès-Lyon",
- "Oullins",
- "Bron",
  "Vénissieux",
- "Rillieux-la-Pape",
- "Saint-Priest",
+ "Bron",
+ "Écully",
+ "Tassin-la-Demi-Lune",
+ "Oullins",
+ "Sainte-Foy-lès-Lyon",
  ],
  },
 
  grenoble: {
- heroAlt: "Vue de Grenoble avec les Alpes et la Bastille en arrière-plan",
- subtitle: "Trouvez un home sitter de confiance au pied des Alpes, gardiens de proximité dans l'agglomération grenobloise.",
+ heroAlt: "Grenoble et les massifs qui l'entourent",
+ subtitle: "Un gardien séjourne chez vous pendant votre absence et veille sur votre logement et vos animaux. La garde n'est pas rémunérée sur Guardiens ; présence, clés et frais se conviennent avant le départ.",
  articleSections: [
  {
- id: "pourquoi",
- title: "Pourquoi le house-sitting à Grenoble ?",
- content: `Grenoble, ceinturée par trois massifs montagneux, Chartreuse, Vercors, Belledonne, attire des passionnés d'outdoor. Mais quand on part randonner, skier ou voyager, qui garde la maison et les animaux ?
+ id: "en-bref",
+ title: "Organiser une garde à domicile à Grenoble",
+ content: `À Grenoble, beaucoup de logements sont des appartements en ville, d'autres des maisons sur les coteaux ou au pied des massifs. Dans les deux cas, le principe est le même : une personne séjourne chez vous et veille sur le logement et les animaux. Sur Guardiens, vous publiez une annonce, des gardiens postulent, vous échangez, vous pouvez les rencontrer, puis vous choisissez. Le gardien n'est pas rémunéré pour la garde ; les frais éventuels se décident à part.
 
-Le house-sitting (parfois appelé home sitting en français) à Grenoble, c'est la réponse locale : un home sitter du coin s'installe chez vous, s'occupe de vos animaux dans leur environnement, et veille sur votre logement. **0 € pour le propriétaire.**
-
-La cuvette grenobloise crée des contraintes spécifiques : pics de pollution en hiver, chaleur estivale concentrée, et quartiers en pente parfois difficiles d'accès par temps de neige. Un home sitter local connaît ces réalités.`,
+Aucun délai de réponse n'est garanti, il dépend de vos dates et de votre secteur. [Comprendre le house-sitting en détail](/actualites/c-est-quoi-le-house-sitting).`,
  },
  {
- id: "securite",
- title: "Pollution, montagne et vigilance : les réflexes d'un gardien grenoblois",
- content: `Grenoble est régulièrement touchée par des épisodes de pollution aux particules fines, surtout entre novembre et février. Un house-sitter averti sait :
-
-- **Limiter les sorties** des animaux lors des alertes pollution (seuil PM10)
-- **Fermer les fenêtres** et utiliser la VMC en mode recirculation
-- **Adapter les promenades** vers les hauteurs mieux ventilées (Bastille, Meylan)
-
-En hiver, les quartiers en pente de La Tronche, Corenc ou Eybens peuvent geler. Un gardien grenoblois anticipe le salage, connaît les parkings en contrebas et sait gérer un chauffage collectif.
-
-En été, la cuvette concentre la chaleur : un bon gardien maintient les volets fermés la journée et aère en soirée, un réflexe vital pour les animaux sensibles.`,
+ id: "a-convenir",
+ title: "Ce qu'il faut convenir avant de partir",
+ content: `- **Présence** : temps de présence attendu, absences possibles en journée (randonnée, travail), besoins de l'animal.
+- **Pollution et chaleur** : en cas d'épisode de pollution ou de forte chaleur, quels horaires et quelle durée de sortie vous souhaitez.
+- **Accès au logement** : clés, badge, stationnement, et pour une maison en pente, accès par temps de neige.
+- **Expérience** : chien réactif, chat âgé, traitement. Dites-le dans l'annonce et vérifiez lors de la rencontre.
+- **Frais** : nourriture, litière, soins éventuels : qui avance, qui rembourse.
+- **Relais** : une personne joignable du coin et votre vétérinaire habituel.`,
  },
  {
- id: "match",
- title: "Pension vs Guardiens à Grenoble",
- content: `Les pensions pour chiens autour de Grenoble facturent entre 25 et 40 €/jour. Pour un chat, comptez 15 à 20 €.
+ id: "sorties-chien",
+ title: "Sorties avec un chien : les règles de la Ville",
+ content: `Grenoble distingue trois types de zones dans ses parcs ([zonage des parcs, Ville de Grenoble](https://www.grenoble.fr/1039-zonage-des-parcs.htm)) :
 
-| | Pension | Guardiens |
-|---|---|---|
-| **Coût** | 25-40 €/jour | 0 € |
-| **Environnement** | Cage / box | Chez vous |
-| **Stress animal** | Élevé | Minimal |
-| **Maison surveillée** | Non | Oui |
-| **Jardin entretenu** | Non | Oui |
+- **Zones en laisse** : c'est la règle générale en ville.
+- **Zones de liberté** : depuis l'été 2025, des secteurs signalés de plusieurs parcs (dont le parc Paul-Mistral, le jardin Hoche ou le parc Vallier-Catane) permettent la promenade sans laisse, sous conditions de contrôle du chien ([le chien dans la ville](https://www.grenoble.fr/804-le-chien-dans-la-ville.htm)).
+- **Zones interdites** : notamment autour des aires de jeux, et certains jardins entiers listés par le règlement, comme le Jardin des Plantes ([règlement des espaces verts](https://www.grenoble.fr/803-reglement-des-espaces-verts.htm)).
 
-Pour un séjour ski de 10 jours avec un chien, **vous économisez 250 à 400 €** et votre animal reste dans son environnement.`,
+Dans les bus et tramways, la Ville indique que les chiens voyagent portés, ou tenus en laisse et muselés. La signalétique sur place reste la référence. Pour d'autres idées : [parcs et balades avec un chien à Grenoble](/actualites/parcs-balades-chiens-grenoble-guide).`,
  },
  {
- id: "quartiers",
- title: "Grenoble quartier par quartier",
- content: `Chaque quartier grenoblois a ses spécificités pour le house-sitting :
+ id: "comparer",
+ title: "Garde à domicile, visites ou pension",
+ content: `| Option | Où vit l'animal | Présence | Coût | À vérifier |
+|---|---|---|---|---|
+| Gardien qui séjourne chez vous | Chez vous | Selon l'accord, pas en continu | Pas de rémunération de la garde, frais convenus à part | Expérience, absences, relais |
+| Visites d'un pet-sitter | Chez vous | Passages ponctuels | Sur devis | Nombre de passages, adapté surtout aux chats autonomes |
+| Pension | Chez le professionnel | Équipe sur place | Sur devis | Vaccins demandés, conditions d'accueil |
 
-- **Centre-ville / Championnet** : appartements, copropriétés strictes, sorties chien au Parc Paul Mistral
-- **Île Verte** : résidentiel calme, proximité Isère, idéal familles avec jardin
-- **Bastille / Saint-Laurent** : logements en pente, vue exceptionnelle, accès parfois compliqué en hiver
-- **Eybens / Échirolles** : maisons avec jardin, parking facile, quartiers familiaux
-- **Meylan / La Tronche** : résidentiel chic, grands jardins, altitude = meilleur air mais risque verglas
-
-Nos gardiens grenoblois connaissent ces spécificités et adaptent leur approche en conséquence.`,
+[Comparer les alternatives à la pension](/actualites/pension-chien-alternatives-guide).`,
+ },
+ {
+ id: "urgence",
+ title: "En cas d'imprévu",
+ content: `Notez dans l'accord votre vétérinaire, une clinique de garde et une personne relais. Les adresses de garde de l'agglomération sont réunies dans [vétérinaires d'urgence à Grenoble et en Isère](/actualites/veterinaire-urgence-grenoble-isere) ; vérifiez les horaires par téléphone. Le réseau de gardiens d'urgence de Guardiens n'est pas encore activé : prévoyez votre propre solution de secours. [Gérer un imprévu pendant une garde](/actualites/gerer-imprevu-pendant-garde).`,
  },
  ],
- pois: [
- {
- title: "Bastille & sentiers",
- description: "Réseau de randonnées accessible depuis le centre-ville. Montée à pied ou en téléphérique. Parfait pour les gardiens avec chien actif.",
- icon: "mountain",
- },
- {
- title: "Parc Paul Mistral",
- description: "Grand parc urbain central avec pelouses et zones ombragées, le poumon vert des gardiens en ville.",
- icon: "tree",
- },
- {
- title: "Urgences vétérinaires 38",
- description: "Clinique vétérinaire de garde à Échirolles, urgences 24h/24. Clinique du Drac à Fontaine en journée.",
- icon: "stethoscope",
- },
+ faq: [
+ { q: "Comment trouver un gardien à Grenoble ?", a: "Publiez une annonce avec votre logement, vos animaux et vos dates. Les gardiens intéressés postulent ; vous consultez leur profil et leurs avis, échangez par messagerie et pouvez les rencontrer avant de choisir. Aucun délai de réponse n'est garanti." },
+ { q: "Le gardien est-il payé ?", a: "Non, la garde n'est pas rémunérée sur Guardiens : le gardien est hébergé chez vous. Les frais éventuels se conviennent à l'avance. Les tarifs de la plateforme sont détaillés sur la page Tarifs." },
+ { q: "Où un chien peut-il être lâché à Grenoble ?", a: "Seulement dans les zones de liberté signalées de certains parcs, comme le parc Paul-Mistral, sous conditions de contrôle du chien. Ailleurs, la laisse est la règle, et certains jardins sont interdits aux chiens." },
+ { q: "Le gardien sera-t-il présent en permanence ?", a: "Pas forcément. Les absences possibles dans la journée se décident entre vous avant la garde, selon les besoins de vos animaux." },
+ { q: "Mon animal a un traitement, est-ce possible ?", a: "Oui si le gardien s'en sent capable. Décrivez le traitement dans l'annonce, montrez les gestes lors de la rencontre et laissez les consignes écrites avec le contact du vétérinaire." },
+ { q: "Que se passe-t-il si le gardien annule ?", a: "Prévenez-vous mutuellement au plus tôt et gardez une solution de secours personnelle. Le réseau de gardiens d'urgence de Guardiens n'est pas encore activé." },
  ],
+ pois: [],
  nearbyTowns: [
  "Meylan",
  "Saint-Martin-d'Hères",
@@ -418,7 +240,6 @@ Nos gardiens grenoblois connaissent ces spécificités et adaptent leur approche
  "Sassenage",
  "La Tronche",
  "Corenc",
- "Voiron",
  "Eybens",
  "Seyssinet-Pariset",
  ],
