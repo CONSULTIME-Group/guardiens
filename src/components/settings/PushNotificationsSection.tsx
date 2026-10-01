@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { BellRing } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -26,6 +26,9 @@ export default function PushNotificationsSection() {
   const [attempt, setAttempt] = useState(0);
   const [canRetry, setCanRetry] = useState(false);
   const support = pushSupport();
+  // Compte courant : un résultat arrivé après un changement de compte est ignoré.
+  const currentUser = useRef(user?.id);
+  currentUser.current = user?.id;
   const denied = typeof Notification !== 'undefined' && Notification.permission === 'denied';
 
   useEffect(() => {
@@ -64,16 +67,39 @@ export default function PushNotificationsSection() {
     return () => { current = false; clearTimeout(timer); };
   }, [user?.id, support, attempt]);
 
+  /** Relit l'état réel après une écriture : l'écran n'affiche que ce que le serveur confirme. */
+  async function reload(userId: string) {
+    try {
+      const state = await getPushState(userId);
+      if (currentUser.current !== userId) return;
+      setSubscribed(state.subscribed); setUncertain(state.uncertain === true);
+      setPrefs({ messages: state.messages, applications: state.applications, nearbySits: state.nearbySits === true });
+      setNearbyAvailable(state.nearbyAvailable === true);
+    } catch { if (currentUser.current === userId) setUncertain(true); }
+  }
+
+  const workerError = (error: unknown) => error instanceof Error && /^push_worker_/.test(error.message);
+  const WORKER_MESSAGE = 'La mise à jour des notifications de votre navigateur n’a pas pu être confirmée. Fermez puis rouvrez Guardiens, puis réessayez.';
+
   async function toggle() {
     if (!user || busy) return;
+    const userId = user.id;
     setBusy(true); setMessage('');
     try {
-      if (subscribed) { await disablePush(user.id); setSubscribed(false); setMessage('Notifications désactivées sur cet appareil.'); void trackEvent('push_disabled', { source: 'settings' }); }
-      else { await enablePush(user.id, config, prefs); setSubscribed(true); setMessage('Notifications activées sur cet appareil. Vous pouvez maintenant les tester.');
-        void trackEvent('push_enabled', { source: 'settings', metadata: { messages: prefs.messages, applications: prefs.applications, nearby_sits: prefs.nearbySits === true } }); }
+      if (subscribed) { await disablePush(userId); setSubscribed(false); setMessage('Notifications désactivées sur cet appareil.'); void trackEvent('push_disabled', { source: 'settings' }); }
+      else {
+        const result = await enablePush(userId, config, prefs);
+        await reload(userId);
+        if (currentUser.current !== userId) return;
+        setMessage(result.nearbyRequested && !result.nearbySaved
+          ? 'Notifications activées pour les messages et candidatures choisis. Les nouvelles annonces près de chez vous n’ont pas pu être enregistrées : réessayez avec l’interrupteur ci-dessus.'
+          : 'Notifications activées sur cet appareil. Vous pouvez maintenant les tester.');
+        void trackEvent('push_enabled', { source: 'settings', metadata: { messages: prefs.messages, applications: prefs.applications, nearby_sits: result.nearbySaved } });
+      }
     } catch (error) {
       setMessage(error instanceof Error && error.message === 'push_permission_denied'
         ? 'Autorisez Guardiens dans les réglages de votre navigateur pour recevoir les notifications.'
+        : workerError(error) ? WORKER_MESSAGE
         : 'La modification reste à confirmer. Réessayez dans un instant. Vos emails restent inchangés.');
     } finally { setBusy(false); }
   }
@@ -81,30 +107,40 @@ export default function PushNotificationsSection() {
   async function save(next: PushPreferences) {
     if (!user || busy) return;
     if (!subscribed) { setPrefs(next); return; }
+    const userId = user.id;
     setBusy(true); setMessage('');
-    try { await updatePushPreferences(user.id, next); setPrefs(next); setMessage('Préférences enregistrées pour cet appareil.'); }
-    catch { setMessage('Les préférences restent à enregistrer. Réessayez dans un instant.'); }
+    try { await updatePushPreferences(userId, next); setPrefs(next); setMessage('Préférences enregistrées pour cet appareil.'); }
+    catch (error) {
+      // Aucune valeur affichée qui ne soit confirmée : on relit l'état réel.
+      await reload(userId);
+      setMessage(workerError(error) ? WORKER_MESSAGE : 'Les préférences restent à enregistrer. Réessayez dans un instant.');
+    }
     finally { setBusy(false); }
   }
 
   async function runTest() {
     if (!user || testBusy) return;
+    const userId = user.id;
     setTestBusy(true); setTestMessage('');
     void trackEvent('push_test_requested', { source: 'settings' });
     let result: Awaited<ReturnType<typeof testPushOnDevice>> = 'error';
-    try { result = await testPushOnDevice(user.id); } catch { result = 'error'; }
+    try { result = await testPushOnDevice(userId); } catch { result = 'uncertain'; }
+    if (result === 'stale' || currentUser.current !== userId) { setTestBusy(false); return; }
     void trackEvent('push_test_result', { source: 'settings', metadata: { outcome: result } });
-    setTestMessage(result === 'accepted' ? 'Notification envoyée au service de votre appareil. Vérifiez qu’elle apparaît bien sur votre téléphone.'
-      : result === 'rate_limited' ? 'Un test vient déjà d’être envoyé. Vous pourrez en relancer un dans cinq minutes.'
-      : result === 'uncertain' ? 'L’envoi n’a pas pu être confirmé. Vérifiez votre téléphone avant de réessayer dans cinq minutes.'
+    setTestMessage(result === 'accepted' ? 'Notification transmise au service de votre appareil. Vérifiez qu’elle apparaît bien sur votre téléphone.'
+      : result === 'rate_limited' ? 'Un test a déjà été demandé il y a moins de cinq minutes. Vous pourrez en relancer un ensuite.'
+      : result === 'uncertain' ? 'La réponse n’est pas arrivée : un envoi a pu avoir lieu. Vérifiez votre téléphone avant de relancer, au plus tôt dans cinq minutes.'
       : result === 'rejected' ? 'Le service de votre appareil a refusé la notification. Désactivez puis réactivez les notifications ici.'
-      : 'Le test n’a pas pu être lancé. Réessayez dans un instant.');
+      : result === 'unavailable' ? 'Cet appareil n’est plus actif pour les notifications. Désactivez puis réactivez-les ici. Aucun test n’a été envoyé.'
+      : result === 'worker_outdated' ? `${WORKER_MESSAGE} Aucun test n’a été envoyé.`
+      : 'Le test n’a pas pu être lancé, rien n’a été envoyé. Réessayez dans un instant.');
+    if (result === 'unavailable') void reload(userId);
     setTestBusy(false);
   }
 
-  return <section className="mb-8 rounded-xl border border-border p-4 space-y-4" aria-labelledby="push-heading">
+  return <section id="push-notifications" className="mb-8 rounded-xl border border-border p-4 space-y-4" aria-labelledby="push-heading">
     <div className="flex items-center gap-2"><BellRing className="h-5 w-5" aria-hidden="true" /><h2 id="push-heading" className="font-semibold">Notifications sur cet appareil</h2></div>
-    <p className="text-sm text-muted-foreground">Soyez prévenu d’un nouveau message ou d’une candidature, même lorsque Guardiens est fermé. La notification affiche seulement le type d’événement, un nouveau message ou une candidature reçue, et le détail reste dans Guardiens.</p>
+    <p className="text-sm text-muted-foreground">Soyez prévenu d’un nouveau message, d’une candidature ou, si vous l’activez, d’une nouvelle annonce près de chez vous, même lorsque Guardiens est fermé. La notification affiche seulement le type d’événement, le détail reste dans Guardiens.</p>
     {support === 'ios-install' ? <p className="text-sm">Sur iPhone ou iPad, ajoutez d’abord Guardiens à l’écran d’accueil, puis ouvrez-le depuis son icône. <Link className="underline" to="/settings?section=installation">Voir les étapes d’installation</Link></p>
       : support === 'unsupported' ? <p className="text-sm">Sur cet appareil, vos alertes arrivent par email.</p>
       : <>
