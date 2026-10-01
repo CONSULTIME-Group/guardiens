@@ -28,7 +28,7 @@ import {
 
 import { CITIES } from "@/data/cities";
 import { useCityStats } from "@/hooks/useCityStats";
-import { getCityContent } from "@/data/cityContent";
+import { getCityContent, REVISED_CITY_SLUGS } from "@/data/cityContent";
 import CityPageMeta from "@/components/seo/CityPageMeta";
 import PageMeta from "@/components/PageMeta";
 import CitySchemaOrg from "@/components/seo/CitySchemaOrg";
@@ -281,7 +281,12 @@ const CityPage = () => {
    seoCounts?.nearby_sitter_count ?? 0
  );
 
- const faqItems = cityData.slug === "lyon"
+ // Villes refondues (lot SEO 01/10/2026) : FAQ visible et JSON-LD lus dans
+ // la même source (cityContent.faq), rendu sans promesse d'urgence active.
+ const revised = REVISED_CITY_SLUGS.has(cityData.slug);
+ const faqItems = revised && content?.faq?.length
+ ? content.faq
+ : cityData.slug === "lyon"
  ? [
  { q: "Comment rencontrer un gardien avant de confier ma maison ?", a: "Après avoir accepté une candidature, vous organisez une rencontre directement via la messagerie Guardiens. La plupart des propriétaires à Lyon choisissent un café de quartier ou une visite du logement. Cette étape est fortement recommandée." },
  { q: "Que se passe-t-il en cas d'urgence ou d'imprévu ?", a: "Une alerte prioritaire peut être envoyée aux gardiens d'urgence éligibles à Lyon. En cas de problème vétérinaire, le gardien contacte la clinique indiquée dans le guide de la maison. En cas de problème technique, il suit les consignes laissées par le propriétaire." },
@@ -323,6 +328,7 @@ const CityPage = () => {
   heroAlt={cityData.heroImageAlt || `House-sitting à ${cityData.name}`}
   department={cityData.department}
   departmentSlug={departmentPageExists ? departmentSlug ?? undefined : undefined}
+  trustLabels={revised ? ["Rencontre possible avant la garde", "Avis croisés", "Garde non rémunérée", "Identité vérifiable"] : undefined}
   />
  );
  }
@@ -353,7 +359,7 @@ const CityPage = () => {
  {stats.guardiansCount > 0
   ? `${stats.guardiansCount} gardien${stats.guardiansCount > 1 ? "s" : ""} inscrit${stats.guardiansCount > 1 ? "s" : ""} ${departmentIn(cityData.department)}`
    : `Gardiens inscrits ${departmentIn(cityData.department)}`}
-  {" · 0 € pour les propriétaires"}
+  {revised ? "" : " · 0 € pour les propriétaires"}
   </p>
   {staticNearbyMention && (
   <p className="text-muted-foreground max-w-3xl leading-relaxed mb-6 -mt-3">
@@ -366,10 +372,12 @@ const CityPage = () => {
  <ShieldCheck className="h-4 w-4" />
  Vérification d'identité
  </Badge>
+ {!revised && (
  <Badge variant="outline" className="text-sm px-4 py-2 gap-2">
  <Heart className="h-4 w-4" />
  Propriétaires : 0 €
  </Badge>
+ )}
  </div>
 
  <div className="flex flex-col sm:flex-row gap-3">
@@ -379,12 +387,20 @@ const CityPage = () => {
  <ArrowRight className="h-4 w-4" />
  </Button>
  </Link>
+ {revised ? (
+ <Link to="/inscription?role=owner">
+ <Button size="lg" variant="outline" className="gap-2">
+ Publier mon annonce de garde
+ </Button>
+ </Link>
+ ) : (
  <Link to="/gardien-urgence">
  <Button size="lg" variant="outline" className="gap-2">
  <Siren className="h-4 w-4" />
  Gardien d'urgence
  </Button>
  </Link>
+ )}
  </div>
  </section>
  )}
@@ -398,10 +414,10 @@ const CityPage = () => {
  <Compass className="h-5 w-5 text-primary" />
  <div>
  <p className="font-semibold text-sm text-foreground">
- Guide du gardien à {cityGuide.city}
+ {revised ? `Sortir avec un chien à ${cityGuide.city}` : `Guide du gardien à ${cityGuide.city}`}
  </p>
  <p className="text-xs text-muted-foreground">
- Parcs, balades, vétos, cafés dog-friendly…
+ {revised ? "Règles de laisse et lieux vérifiés, avec leurs sources" : "Parcs, balades, vétos, cafés dog-friendly…"}
  </p>
  </div>
  <ArrowRight className="h-4 w-4 text-muted-foreground ml-auto" />
@@ -419,6 +435,28 @@ const CityPage = () => {
  )}
 
  {/* Reassurance */}
+ {revised ? (
+ <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">
+ <h2 className="font-heading text-2xl font-bold text-foreground mb-6">
+ Ce que Guardiens apporte, et ce qu'il ne garantit pas
+ </h2>
+ <div className="grid md:grid-cols-3 gap-6 text-sm text-muted-foreground">
+ <div className="space-y-2">
+ <h3 className="font-semibold text-foreground">Choisir en connaissance de cause</h3>
+ <p>Profils, avis croisés après les gardes et vérification d'identité ouverte à tous. Un écusson ne dit rien du comportement : échangez et rencontrez la personne avant de confier vos clés.</p>
+ </div>
+ <div className="space-y-2">
+ <h3 className="font-semibold text-foreground">Une garde non rémunérée</h3>
+ <p>Le gardien est hébergé chez vous et n'est pas payé pour la garde. Les frais éventuels se conviennent entre vous. Les conditions de la plateforme sont sur la page <Link to="/tarifs" className="text-primary underline underline-offset-4">Tarifs</Link>.</p>
+ </div>
+ <div className="space-y-2">
+ <h3 className="font-semibold text-foreground">Un accord écrit et un plan B</h3>
+ <p>Tâches, présence, contacts, vétérinaire et personne relais se notent dans l'accord. Aucune disponibilité n'est garantie et le réseau de gardiens d'urgence n'est pas encore activé.</p>
+ </div>
+ </div>
+ </section>
+ ) : (
+ <>
  <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">
  <h2 className="font-heading text-2xl font-bold text-foreground mb-6">
  Pourquoi choisir Guardiens à {cityData.name} ?
@@ -447,12 +485,14 @@ const CityPage = () => {
  </div>
  </div>
  </section>
+ </>
+ )}
 
  {/* Expertise */}
- <LocalExpertise city={cityData} />
+ {!revised && <LocalExpertise city={cityData} />}
 
  {/* Spots */}
- <LocalSpotsGrid city={cityData} />
+ {!revised && <LocalSpotsGrid city={cityData} />}
 
  {/* Nearby towns from cityContent */}
  {content && content.nearbyTowns.length > 0 && (
@@ -461,7 +501,9 @@ const CityPage = () => {
  Aussi disponible autour de {cityData.name}
  </h2>
  <p className="text-sm text-muted-foreground mb-4">
- Les gardiens Guardiens couvrent {cityData.name} et ses communes alentour.
+ {revised
+ ? `Vous pouvez publier une annonce dans ces communes autour de ${cityData.name}, la disponibilité des gardiens varie selon le secteur.`
+ : `Les gardiens Guardiens couvrent ${cityData.name} et ses communes alentour.`}
  </p>
  <div className="flex flex-wrap gap-2">
  {content.nearbyTowns.map((town) => {
@@ -564,7 +606,7 @@ const CityPage = () => {
  <section className="max-w-5xl mx-auto px-4 py-8 border-t border-border">
  <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 text-sm">
  <Link to={`/guides/${cityData.slug}`} className="text-primary hover:underline">
- Guide local de {cityData.name} →
+ {revised ? `Sortir avec un chien à ${cityData.name} →` : `Guide local de ${cityData.name} →`}
  </Link>
   {departmentPageExists && departmentSlug && (
   <Link
@@ -576,7 +618,11 @@ const CityPage = () => {
   )}
  <Link to="/guides" className="text-primary hover:underline">Tous les guides locaux →</Link>
  <Link to="/tarifs" className="text-primary hover:underline">Voir les tarifs →</Link>
+ {revised ? (
+ <Link to="/actualites/preparer-maison-avant-garde" className="text-primary hover:underline">Préparer sa maison avant une garde →</Link>
+ ) : (
  <Link to="/gardien-urgence" className="text-primary hover:underline">Gardiens d'urgence →</Link>
+ )}
  <Link to="/faq" className="text-primary hover:underline">FAQ complète →</Link>
  <Link to="/a-propos" className="text-primary hover:underline">À propos de Guardiens →</Link>
  </div>
@@ -585,10 +631,10 @@ const CityPage = () => {
  {/* Final CTA */}
  <section className="max-w-5xl mx-auto px-4 py-8 md:py-16 text-center border-t border-border">
  <h2 className="font-heading text-2xl md:text-3xl font-bold text-foreground mb-4">
- Prêt à partir l'esprit libre ?
+ {revised ? `Organiser votre garde à ${cityData.name}` : "Prêt à partir l'esprit libre ?"}
  </h2>
  <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
- Publiez votre annonce en 5 minutes, 0 €.
+ {revised ? "Décrivez votre logement, vos animaux et vos dates, puis échangez avec les gardiens qui postulent." : "Publiez votre annonce en 5 minutes, 0 €."}
  </p>
  <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
  <Link to="/inscription?role=owner">

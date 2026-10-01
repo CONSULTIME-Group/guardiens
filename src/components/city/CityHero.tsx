@@ -11,6 +11,8 @@ interface CityHeroProps {
   heroAlt: string;
   department?: string;
   departmentSlug?: string;
+  /** Libellés de réassurance propres à une ville refondue (sans icône). */
+  trustLabels?: string[];
 }
 
 const SB_INLINE = "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/property-photos/articles-inline";
@@ -35,6 +37,7 @@ export default function CityHero({
   heroAlt,
   department,
   departmentSlug,
+  trustLabels,
 }: CityHeroProps) {
   const cityKey = slugify(city);
   const bgImage = heroImage || CITY_HERO_IMAGES[cityKey];
@@ -116,12 +119,16 @@ export default function CityHero({
       <section className="border-b border-border bg-card">
         <div className="max-w-6xl mx-auto px-4 py-3 md:py-4">
           <div className="flex flex-wrap justify-center gap-3 md:gap-10">
-            {trustSignals.map((s) => (
-              <div key={s.label} className="flex items-center gap-2 text-sm text-muted-foreground">
-                <s.icon className="h-4.5 w-4.5 text-primary" />
-                <span className="font-medium">{s.label}</span>
-              </div>
-            ))}
+            {trustLabels
+              ? trustLabels.map((label) => (
+                  <span key={label} className="text-sm font-medium text-muted-foreground">{label}</span>
+                ))
+              : trustSignals.map((s) => (
+                  <div key={s.label} className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <s.icon className="h-4.5 w-4.5 text-primary" />
+                    <span className="font-medium">{s.label}</span>
+                  </div>
+                ))}
           </div>
         </div>
       </section>

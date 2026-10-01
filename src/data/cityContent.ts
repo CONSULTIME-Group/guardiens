@@ -30,6 +30,9 @@ export interface CityContentData {
  faq?: { q: string; a: string }[];
 }
 
+/** Villes refondues le 01/10/2026 : rendu et FAQ propres, liste fermée. */
+export const REVISED_CITY_SLUGS: ReadonlySet<string> = new Set(["lyon", "annecy", "grenoble"]);
+
 const cityContent: Record<string, CityContentData> = {
  annecy: {
  heroAlt: "Le lac d'Annecy et les montagnes qui l'entourent",
