@@ -343,16 +343,15 @@ function transformFactBoxes(content: string): string {
 }
 
 /** Transform :::faq ... ::: blocks into visual Q/A HTML */
-function transformFaqBlocks(content: string): string {
+function transformFaqBlocks(content: string, omitHeading = false): string {
   return content.replace(
-    /:::faq([^\n]*)\n([\s\S]*?):::/g,
-    (_, rawTitle: string, inner: string) => {
+    /:::faq\s*\n([\s\S]*?):::/g,
+    (_, inner: string) => {
       const lines = inner.split("\n");
-      // Titre facultatif sur la ligne d'ouverture : il remplace l'intitulé par
-      // défaut et porte l'ancre #faq, ce qui évite un second titre FAQ.
-      const title = rawTitle.trim();
-      let html = title
-        ? `<div class="article-faq-block"><h2 class="article-faq-heading" id="faq">${title}</h2>`
+      // Articles guides : le titre FAQ est le H2 #faq du markdown, on ne
+      // rajoute pas l'intitulé par défaut (un seul titre FAQ).
+      let html = omitHeading
+        ? '<div class="article-faq-block">'
         : '<div class="article-faq-block"><h2 class="article-faq-heading">Foire aux questions</h2>';
       let currentQ = "";
       let currentA: string[] = [];
@@ -481,7 +480,10 @@ export default function ArticleRenderer({ content, userRole, slug, placeholderVa
   // donc avant marked.parse.
   const interpolated = interpolatePlaceholders(content, placeholderValues ?? {});
   const withoutH1 = stripLeadingH1(interpolated);
-  const preprocessed = transformFaqBlocks(transformFactBoxes(withoutH1));
+  const preprocessed = transformFaqBlocks(
+    transformFactBoxes(withoutH1),
+    !!slug && GUIDE_ARTICLE_SLUGS.has(slug),
+  );
   let html = marked.parse(preprocessed, { async: false }) as string;
 
   html = resolveArticleImages(html);
