@@ -15,6 +15,15 @@ export type EventType =
   | "pwa_install_declared"
   | "pwa_installed"
   | "pwa_app_open"
+  | "pwa_install_cta_shown"
+  | "pwa_install_cta_clicked"
+  | "pwa_install_cta_dismissed"
+  | "push_activation_cta_shown"
+  | "push_activation_cta_clicked"
+  | "push_enabled"
+  | "push_disabled"
+  | "push_test_requested"
+  | "push_test_result"
   | "page_view"
   | "web_vital"                               // Lot P2b : LCP, INP, CLS, FCP, TTFB, plus longue tâche
   | "city_page_viewed"                        // Vue page ville SEO (slug, residents, proximite)
