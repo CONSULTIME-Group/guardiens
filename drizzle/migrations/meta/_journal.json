@@ -330,6 +330,13 @@
       "when": 1790871046503,
       "tag": "0046_seo_cities_lot2_rewrite_and_biarritz",
       "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1790872037653,
+      "tag": "0047_seo_cities_lot2b_intros",
+      "breakpoints": true
     }
   ]
 }

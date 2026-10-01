@@ -64,7 +64,7 @@ export const GUIDE_OVERRIDES: Record<string, GuideOverride> = {
     sources: [
       { label: "Lyon avec un chien, ONLYLYON Tourisme", url: "https://www.visiterlyon.com/lyon-pratique/bons-plans/lyon-avec-un-chien" },
       { label: "Les berges du Rhône, ONLYLYON Tourisme", url: "https://www.visiterlyon.com/sortir/parcs-jardins-et-lieux-de-balade/les-berges-du-rhone" },
-      { label: "Le parc de la Tête d'Or, Ville de Lyon", url: "https://www.lyon.fr/sortir-et-decouvrir/profiter-de-la-nature-en-ville/le-parc-de-la-tete-d-or" },
+      { label: "Le parc de la Tête d'Or, Ville de Lyon", url: "https://www.lyon.fr/sortir-et-decouvrir/profiter-de-la-nature-en-ville/le-parc-de-la-tete-dor" },
     ],
     keyPoints: [
       "Aires canines : parc de la Tête d'Or, parc Blandan, Clos Layat (8e) ; d'autres parcs disposent de leur propre aire.",
