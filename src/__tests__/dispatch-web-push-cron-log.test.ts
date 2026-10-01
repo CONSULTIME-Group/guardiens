@@ -13,10 +13,11 @@ import * as config from "../../supabase/functions/_shared/web-push/config";
 import * as endpoint from "../../supabase/functions/_shared/web-push/endpoint";
 import * as payload from "../../supabase/functions/_shared/web-push/payload";
 import * as transport from "../../supabase/functions/_shared/web-push/transport";
+import * as budget from "../../supabase/functions/_shared/web-push/dispatch-budget";
 
 const serviceKey = "fixture-service-key";
 
-function harness(jobs: Array<Record<string, unknown>>) {
+function harness(jobs: Array<Record<string, unknown>>, nearby: () => { data: unknown; error: unknown } = () => ({ data: [], error: null })) {
   let handler!: (request: Request) => Promise<Response>;
   const inserts: Array<{ table: string; row: unknown }> = [];
   const admin = {
@@ -25,6 +26,7 @@ function harness(jobs: Array<Record<string, unknown>>) {
       if (name === "push_claim_jobs") return { data: jobs, error: null };
       if (name === "push_job_eligible") return { data: true, error: null };
       if (name === "push_close_job") return { data: true, error: null };
+      if (name === "push_claim_nearby_jobs") return nearby();
       return { data: null, error: null };
     }),
   };
@@ -49,6 +51,7 @@ function harness(jobs: Array<Record<string, unknown>>) {
       if (specifier.includes("supabase-js")) return { createClient: () => admin };
       if (specifier.includes("web-push@")) return { default: { setVapidDetails: () => {}, sendNotification: async () => ({ statusCode: 201 }) } };
       if (specifier.includes("cron-trace")) return cronTrace;
+      if (specifier.includes("dispatch-budget")) return budget;
       if (specifier.includes("web-push/auth")) return auth;
       if (specifier.includes("web-push/config")) return config;
       if (specifier.includes("web-push/endpoint")) return endpoint;
@@ -58,7 +61,7 @@ function harness(jobs: Array<Record<string, unknown>>) {
     },
   });
   return {
-    inserts,
+    inserts, admin,
     run: () => handler(new Request("https://fixture.invalid", {
       method: "POST",
       headers: { Authorization: `Bearer ${serviceKey}` },
@@ -87,5 +90,41 @@ describe("dispatch-web-push, visibilité cron", () => {
     expect((row.row.metrics as Record<string, number>).claimed).toBe(1);
     // Aucun endpoint, aucune clé, aucun membre dans le journal.
     expect(JSON.stringify(row.row)).not.toContain("invalid.example");
+  });
+
+  const fcm = (id: string) => ({ job_id: id, subscription_id: "s", endpoint: "https://fcm.googleapis.com/fcm/send/abc", auth_key: "a", p256dh_key: "k", event_kind: "message", attempts: 1 });
+  const nearbyCalls = (h: ReturnType<typeof harness>) => h.admin.rpc.mock.calls.filter((c) => c[0] === "push_claim_nearby_jobs");
+
+  it("budget total unique : file principale pleine, la file proche n'est pas lue", async () => {
+    const h = harness([1, 2, 3, 4, 5].map((i) => fcm(`j${i}`)));
+    await h.run();
+    expect(nearbyCalls(h)).toHaveLength(0);
+  });
+
+  it("budget total unique : la file proche reçoit seulement le reste", async () => {
+    const h = harness([fcm("j1"), fcm("j2")]);
+    await h.run();
+    expect(nearbyCalls(h)[0][1]).toEqual({ p_limit: 3 });
+  });
+
+  it("file proche en erreur, file vide : passage partiel journalisé", async () => {
+    const h = harness([], () => ({ data: null, error: { message: "boom" } }));
+    const response = await h.run();
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.status).toBe("partial");
+    expect(body.ok).toBe(false);
+    const row = (h.inserts[0] as { row: Record<string, unknown> }).row;
+    expect(row.status).toBe("partial");
+    expect(row.error_message).toBe("push_claim_nearby_jobs failed");
+    expect((row.metrics as Record<string, number>).nearby_unavailable).toBe(1);
+  });
+
+  it("file proche en erreur : les envois principaux restent faits", async () => {
+    const h = harness([fcm("j1")], () => ({ data: null, error: { message: "boom" } }));
+    await h.run();
+    const closes = h.admin.rpc.mock.calls.filter((c) => c[0] === "push_close_job");
+    expect(closes[0][1]).toMatchObject({ p_job_id: "j1", p_outcome: "accepted" });
+    expect(((h.inserts[0] as { row: Record<string, unknown> }).row.metrics as Record<string, number>).accepted).toBe(1);
   });
 });
