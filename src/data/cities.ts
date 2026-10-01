@@ -38,36 +38,36 @@ export const CITIES: CityData[] = [
  "gardien de maison Annecy",
  "home sitter Annecy",
  ],
- h1: "House-sitting à Annecy : partez l'esprit libre",
+ h1: "House-sitting à Annecy : faire garder sa maison et ses animaux",
  metaDescription:
- "Trouvez un home sitter de confiance à Annecy et en Haute-Savoie. Gardiens du coin, disponibles rapidement. 0 € pour les propriétaires.",
+ "Faire garder sa maison et ses animaux à Annecy : un gardien séjourne chez vous, sans rémunération. Ce qu'il faut convenir, règles chiens et lac, imprévus.",
  localSpots: [
  {
- name: "Lac d'Annecy",
+ name: "Promenade du Thiou",
  type: "balade",
- tip: "Tour complet : 40 km, idéal pour les chiens actifs tôt le matin avant l'affluence.",
+ tip: "Une portion est ouverte aux chiens sans laisse par arrêté municipal, sauf du 15 avril au 30 juin.",
  },
  {
- name: "Forêt du Crêt du Maure",
+ name: "Bords du lac",
+ type: "balade",
+ tip: "Laisse demandée en balade ; les plages du lac n'acceptent pas les chiens.",
+ },
+ {
+ name: "Parc du Haras",
  type: "parc",
- tip: "Sentiers ombragés, zéro laisse obligatoire sur les pistes forestières balisées.",
- },
- {
- name: "Vieille-Ville d'Annecy",
- type: "quartier",
- tip: "Traversée possible avec un chien calme, terrasses dog-friendly rue Sainte-Claire.",
+ tip: "Interdit aux animaux, même tenus en laisse, sauf chiens guides.",
  },
  ],
  riskProfile: [
- "Verglas et neige : octobre à avril, notamment sur les hauteurs de Seynod et Cran-Gevrier",
- "Affluence touristique juillet à août : accès lac saturé le week-end",
+ "Hiver : gel et neige possibles, consignes de chauffage et d'accès à prévoir",
+ "Été : forte affluence autour du lac, sorties à décaler tôt le matin",
  ],
  expertiseTips: [
- "Nos gardiens Annecy connaissent les périodes de gel et anticipent la gestion du chauffage et des canalisations.",
- "Pour les résidences secondaires côté lac, nos gardiens gèrent le courrier et les accès même hors saison.",
+ "Précisez par écrit le réglage du chauffage et la mise hors gel si vous partez en hiver.",
+ "Indiquez les lieux de promenade habituels de votre chien et les règles de laisse.",
  ],
  heroImageAlt:
- "House-sitting Annecy - Lac d'Annecy et Haute-Savoie - Guardiens",
+ "Le lac d'Annecy et les montagnes qui l'entourent",
  },
  {
  slug: "lyon",
@@ -86,36 +86,36 @@ export const CITIES: CityData[] = [
   "house-sitting Lyon",
   "garde chien Lyon",
   ],
-  h1: "Home sitting à Lyon : un home sitter de confiance pour votre chien, votre chat et votre maison",
+  h1: "Home sitting à Lyon : faire garder son chien, son chat et son logement",
   metaDescription:
-  "Trouvez un home sitter à Lyon pour garder votre chien, votre chat et votre maison. Rencontre conseillée avant une garde, avis croisés, tous les arrondissements.",
+  "Home sitting à Lyon : un gardien séjourne chez vous et veille sur votre chien, votre chat et votre logement, sans rémunération. Règles, clés, frais, sorties.",
  localSpots: [
  {
  name: "Parc de la Tête d'Or",
  type: "parc",
- tip: "Entrée libre, laisse obligatoire. 105 hectares de pelouses et sentiers ombragés, idéal pour les promenades matinales.",
- },
- {
- name: "Quais de Saône (rive droite)",
- type: "balade",
- tip: "3 km piétons sans voiture de Saint-Paul à Île Barbe. Parfait pour les promenades du soir avec un chien calme.",
+ tip: "Aire canine près du vélodrome ; laisse dans le reste du parc, interdictions signalées sur place.",
  },
  {
  name: "Berges du Rhône",
  type: "balade",
- tip: "5 km de promenade aménagée, zones enherbées pour les chiens. Ambiance familiale le week-end.",
+ tip: "Laisse obligatoire ; espaces canins de liberté sur les quais hauts.",
+ },
+ {
+ name: "Parc Blandan",
+ type: "parc",
+ tip: "Aire canine derrière les terrains de sport.",
  },
  ],
  riskProfile: [
- "Canicule urbaine : îlot de chaleur persistant juillet-août, logements non climatisés fréquents",
- "Pics de pollution aux particules : automne-hiver, vigilance pour les animaux sensibles",
+ "Été : fortes chaleurs en ville, sorties tôt le matin et tard le soir",
+ "Logements en étage : ascenseur, interphone et règles de copropriété à expliquer",
  ],
  expertiseTips: [
- "Nos gardiens lyonnais connaissent les règles de copropriété et les horaires de sorties adaptés à la chaleur urbaine.",
- "Pour les logements en étage sans ascenseur ou sans jardin, nos gardiens adaptent le rythme des sorties.",
+ "Laissez les badges de résidence et une liste des contacts de l'immeuble.",
+ "Précisez les horaires de sortie souhaités en cas de forte chaleur.",
  ],
  heroImageAlt:
- "Garde de chien et de chat à Lyon - Vue panoramique depuis Fourvière - Guardiens",
+ "Vue de Lyon depuis la colline de Fourvière",
  },
  {
  slug: "grenoble",
@@ -132,36 +132,36 @@ export const CITIES: CityData[] = [
  "home sitter Grenoble",
  "home sitting Grenoble",
  ],
- h1: "House-sitting à Grenoble : des gardiens dans votre quartier",
+ h1: "House-sitting à Grenoble : faire garder sa maison et ses animaux",
  metaDescription:
- "Home sitting à Grenoble : trouvez un home sitter de confiance en Isère. Gardiens du coin, disponibles rapidement. 0 € pour les propriétaires.",
+ "House-sitting à Grenoble : un gardien séjourne chez vous, sans rémunération de la garde. Ce qu'il faut convenir, zones chiens des parcs, imprévus.",
  localSpots: [
  {
- name: "Parc Paul Mistral",
+ name: "Parc Paul-Mistral",
  type: "parc",
- tip: "Grand espace vert central, chiens acceptés en laisse. Idéal pour les races actives.",
+ tip: "Zone de liberté signalée pour les chiens depuis l'été 2025 ; laisse ailleurs dans le parc.",
  },
  {
- name: "Bastille (sentier piéton)",
- type: "balade",
- tip: "Montée à pied possible avec chiens de taille moyenne, sol irrégulier à signaler.",
+ name: "Jardin Hoche",
+ type: "parc",
+ tip: "Zonage chiens en place : repérez les secteurs en laisse, libres ou interdits.",
  },
  {
- name: "Quartier Championnet",
- type: "quartier",
- tip: "Quartier calme, peu de circulation, adapté aux sorties matinales avec chiens craintifs.",
+ name: "Jardin des Plantes",
+ type: "parc",
+ tip: "Interdit aux chiens selon le règlement des espaces verts.",
  },
  ],
  riskProfile: [
- "Pollution en cuvette : pic aux particules fréquent novembre à février, fenêtres fermées recommandées",
- "Enneigement ponctuel sur les hauteurs de Meylan et Eybens en hiver",
+ "Hiver : épisodes de pollution possibles, durée des sorties à convenir",
+ "Maisons en pente : accès par temps de neige à anticiper",
  ],
  expertiseTips: [
- "Nos gardiens grenoblois anticipent les épisodes de pollution et adaptent les sorties des animaux.",
- "Pour les logements en pente (Chartreuse, Vercors), nos gardiens maîtrisent les accès même en conditions hivernales.",
+ "Indiquez quelle durée de sortie vous souhaitez en cas d'épisode de pollution.",
+ "Expliquez l'accès au logement et le stationnement.",
  ],
  heroImageAlt:
- "House-sitting Grenoble - Garde maison Isère - Guardiens",
+ "Grenoble et les massifs qui l'entourent",
  },
  {
  slug: "caluire-et-cuire",
