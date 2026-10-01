@@ -21,7 +21,9 @@ Texte.
 |---|---|
 | 1 | 2 |
 
-:::faq Questions fréquentes sur le house-sitting
+## <a id="faq"></a>Questions fréquentes sur le house-sitting
+
+:::faq
 **Question un ?**
 
 Réponse un.
@@ -42,9 +44,10 @@ const renderArticle = (slug: string, md = MD) =>
   );
 
 describe("Article guide house-sitting", () => {
-  it("parseFaq accepte un titre sur la ligne d'ouverture (parité JSON-LD)", () => {
+  it("markdown compatible avec l'ancien rendu : :::faq simple, parité JSON-LD", () => {
+    expect(MD).toMatch(/^:::faq\n/m);
+    expect(MD).not.toMatch(/:::faq[^\S\n]+\S/);
     expect(parseFaqFromMarkdown(MD).map((i) => i.question)).toEqual(["Question un ?", "Question deux ?"]);
-    expect(parseFaqFromMarkdown(":::faq\n**Q ?**\n\nR.\n:::")).toHaveLength(1);
   });
 
   it("un seul titre FAQ, porteur de l'ancre #faq, et ancres hissées sur les h2", () => {
@@ -67,9 +70,11 @@ describe("Article guide house-sitting", () => {
   });
 
   it("les autres articles gardent le rendu historique", () => {
-    const { container } = renderArticle("autre-article", MD.replace(":::faq Questions fréquentes sur le house-sitting", ":::faq"));
+    const { container } = renderArticle("autre-article");
     expect(container.querySelector(".article-guide")).toBeNull();
     expect(container.querySelector("h2#definition")).toBeNull();
+    // Rendu historique (celui de la production actuelle) : ancre #faq présente.
+    expect(container.querySelector('a#faq')).not.toBeNull();
     expect(container.querySelector(".article-faq-heading")?.textContent).toBe("Foire aux questions");
   });
 
@@ -80,6 +85,8 @@ describe("Article guide house-sitting", () => {
     expect(radios).toHaveLength(6);
     fireEvent.click(radios[0]);
     expect(screen.getByText(/jamais garantie/)).toBeTruthy();
+    expect(screen.getByText("Avez-vous une personne relais ou une autre solution en cas d'imprévu ?")).toBeTruthy();
+    expect(adviceFor({ presence: null, soins: null, relais: "non" }).join(" ")).not.toMatch(/dates/);
     const all = adviceFor({ presence: "oui", soins: "oui", relais: "non" }).join(" ");
     expect(all).not.toMatch(/[\u2013\u2014]|score/);
   });

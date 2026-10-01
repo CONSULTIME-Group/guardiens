@@ -18,7 +18,7 @@ const QUESTIONS = [
   },
   {
     key: "relais",
-    label: "Avez-vous de la souplesse sur les dates et une personne relais en cas d'imprévu ?",
+    label: "Avez-vous une personne relais ou une autre solution en cas d'imprévu ?",
   },
 ] as const;
 
@@ -42,10 +42,10 @@ export function adviceFor(answers: Record<Key, Answer>): string[] {
   }
   if (answers.relais === "non") {
     out.push(
-      "Prévoyez une solution de repli (proche, pension, pet-sitter) et publiez votre annonce tôt : aucun gardien ni remplaçant n'est garanti.",
+      "Identifiez une solution de repli (proche, pension, pet-sitter) avant le départ : aucun gardien ni remplaçant n'est garanti.",
     );
   } else if (answers.relais === "oui") {
-    out.push("Notez les coordonnées de votre personne relais dans l'accord écrit, avec un double des clés.");
+    out.push("Notez les coordonnées de votre personne relais ou de votre solution de repli dans l'accord écrit.");
   }
   return out;
 }

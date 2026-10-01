@@ -20,8 +20,7 @@ export interface FaqItem {
   answer: string;
 }
 
-// Titre optionnel sur la ligne d'ouverture (« :::faq Questions fréquentes »).
-const FAQ_BLOCK_RE = /:::faq[^\S\n]*[^\n]*\n([\s\S]*?):::/g;
+const FAQ_BLOCK_RE = /:::faq\s*\n([\s\S]*?):::/g;
 const BOLD_Q_RE = /^(?:\*\*(.+?)\*\*|#{2,4}\s+(.+?))\s*$/;
 
 /**

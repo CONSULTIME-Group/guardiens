@@ -309,6 +309,13 @@
       "when": 1790859673647,
       "tag": "0043_refonte_article_house_sitting",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1790860273218,
+      "tag": "0044_correctif_article_house_sitting",
+      "breakpoints": true
     }
   ]
 }
