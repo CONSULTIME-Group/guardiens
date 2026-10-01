@@ -18,3 +18,5 @@
 - Tableau de bord fluide (lot P3) : blocs bas du tableau de bord montés par StagedMount (hauteur réservée), barre basse non montée sur ordinateur, prénoms de la cloche des messages lus à l'ouverture ; pourquoi : plus longue tâche sous 200 ms en ralenti x4 et au plus 10 lectures sur / pour un membre, verrouillé par src/__tests__/p3/.
 
 - Espace propriétaire sans doublons (lot P4) : les identifiants de « Pour vous », « Près de chez vous » et des candidatures sont calculés par src/lib/ownerSitterPool.ts, lus en deux salves par src/lib/ownerSpaceReads.ts (affinité, puis avis et compétences une fois le Top 3 annoncé), mesurés sur le simulateur réaliste src/__tests__/p4/ (filtres appliqués, plafond 1 000 lignes) ; pourquoi : le simulateur P1b ignore les filtres et ne voit pas les doublons de production.
+
+- Articles guides refondus : la liste fermée GUIDE_ARTICLE_SLUGS (ArticleRenderer) active la mise en page de lecture dédiée (résumé avant l'image, ancres sur les titres, liens soulignés, un seul bloc de ressources) ; le texte reste en base, `:::faq Titre` porte l'unique titre FAQ ; pourquoi : refondre un article sans changer le rendu des autres.
