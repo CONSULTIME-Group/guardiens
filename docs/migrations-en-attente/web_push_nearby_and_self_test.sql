@@ -22,7 +22,8 @@ CREATE TABLE IF NOT EXISTS public.push_nearby_jobs (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   subscription_id uuid NOT NULL REFERENCES public.push_subscriptions(id) ON DELETE CASCADE,
   user_id uuid NOT NULL,
-  sit_id uuid NOT NULL,
+  -- Suppression d'une annonce : ses lignes partent avec elle (plus rien à dédupliquer).
+  sit_id uuid NOT NULL REFERENCES public.sits(id) ON DELETE CASCADE,
   notification_id uuid NOT NULL,
   status text NOT NULL DEFAULT 'pending'
     CHECK (status IN ('pending', 'claimed', 'accepted', 'failed', 'skipped')),
@@ -42,7 +43,7 @@ CREATE INDEX IF NOT EXISTS push_nearby_jobs_claimable_idx
 CREATE INDEX IF NOT EXISTS push_nearby_jobs_user_cap_idx
   ON public.push_nearby_jobs (user_id, created_at DESC);
 COMMENT ON TABLE public.push_nearby_jobs IS
-  'File push annonces proches. Aucun titre, nom, ville ni coordonnée : identifiants techniques uniquement. Lignes conservées 7 jours pour le plafond et la déduplication par annonce.';
+  'File push annonces proches. Aucun titre, nom, ville ni coordonnée : identifiants techniques uniquement. Rétention : lignes conservées tant que l''annonce existe (déduplication durable appareil + annonce, plafond 24 h calculé sur created_at), supprimées avec l''annonce ou l''appareil. Aucune purge par âge : purger recréerait des doublons.';
 
 GRANT ALL ON public.push_nearby_jobs TO service_role;
 REVOKE ALL ON public.push_nearby_jobs FROM PUBLIC, anon, authenticated;
@@ -50,9 +51,39 @@ ALTER TABLE public.push_nearby_jobs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.push_nearby_jobs FORCE ROW LEVEL SECURITY;
 
 -- 3. Règle d'éligibilité unique, utilisée à l'entrée en file et à l'envoi -----
--- « Près de moi » : distance entre coordonnées de profil réelles des deux
--- côtés (aucune coordonnée inventée ni ville géocodée par défaut), comparée
--- au rayon canonique effective_search_radius du gardien.
+-- Annonce visible publiquement : publiée (la politique publique de sits), ni
+-- masquée par le propriétaire (hidden_at) ni par la modération, non expirée.
+-- Comptes actifs des DEUX côtés : ni supprimé, ni suspendu (suspension sans
+-- échéance ou échéance future), ni suppression en attente.
+-- « Près de moi » : l'annonce n'a pas de coordonnées propres ; seules les
+-- coordonnées réelles du profil propriétaire existent. Elles ne sont utilisées
+-- que si la ville de l'annonce est celle du profil : un logement dans une autre
+-- ville (ou une ville d'annonce absente) n'est jamais annoncé proche. Aucune
+-- coordonnée inventée, aucune ville géocodée par défaut.
+CREATE OR REPLACE FUNCTION public.push_norm_city(p text)
+RETURNS text LANGUAGE sql IMMUTABLE SET search_path TO 'public'
+AS $$
+  SELECT nullif(regexp_replace(translate(lower(btrim(coalesce(p, ''))),
+    'àâäáãåçéèêëíìîïñóòôöõúùûüýÿœ-''', 'aaaaaaceeeeiiiinooooouuuuyyo  '), '\s+', ' ', 'g'), '');
+$$;
+REVOKE ALL ON FUNCTION public.push_norm_city(text) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.push_norm_city(text) TO service_role;
+
+CREATE OR REPLACE FUNCTION public.push_member_active(p_user_id uuid)
+RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path TO 'public'
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.profiles p
+    WHERE p.id = p_user_id
+      AND coalesce(p.account_status, 'active') = 'active'
+      AND (p.suspended_at IS NULL OR (p.suspended_until IS NOT NULL AND p.suspended_until <= now()))
+      AND NOT EXISTS (SELECT 1 FROM public.account_deletion_requests d
+                      WHERE d.user_id = p_user_id AND d.status = 'pending' AND d.cancelled_at IS NULL)
+  );
+$$;
+REVOKE ALL ON FUNCTION public.push_member_active(uuid) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.push_member_active(uuid) TO service_role;
+
 CREATE OR REPLACE FUNCTION public.push_nearby_target_ok(p_user_id uuid, p_sit_id uuid)
 RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path TO 'public'
 AS $$
@@ -64,11 +95,14 @@ AS $$
     LEFT JOIN public.sitter_profiles sp ON sp.user_id = p_user_id
     WHERE si.id = p_sit_id
       AND si.status = 'published'::sit_status
+      AND si.hidden_at IS NULL
       AND si.moderation_hidden_at IS NULL
       AND si.end_date >= current_date
       AND si.user_id <> p_user_id
-      AND coalesce(me.account_status, 'active') = 'active'
-      AND me.suspended_at IS NULL
+      AND public.push_member_active(p_user_id)
+      AND public.push_member_active(si.user_id)
+      AND public.push_norm_city(si.city) IS NOT NULL
+      AND public.push_norm_city(si.city) = public.push_norm_city(owner.city)
       AND owner.latitude IS NOT NULL AND owner.longitude IS NOT NULL
       AND me.latitude IS NOT NULL AND me.longitude IS NOT NULL
       AND public.haversine_km(me.latitude, me.longitude, owner.latitude, owner.longitude)
@@ -242,25 +276,49 @@ $$;
 REVOKE ALL ON FUNCTION public.push_set_my_nearby_preference(uuid, boolean) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.push_set_my_nearby_preference(uuid, boolean) TO authenticated, service_role;
 
+-- Écriture atomique des trois préférences d'un appareil, en une seule
+-- instruction : jamais de sauvegarde partielle. NULL = valeur non transmise
+-- (ancien client), laissée intacte.
+CREATE OR REPLACE FUNCTION public.push_set_my_preferences_v2(
+  p_subscription_id uuid, p_opt_in_messages boolean, p_opt_in_applications boolean, p_opt_in_nearby_sits boolean)
+RETURNS boolean LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public'
+AS $$
+DECLARE v_uid uuid := auth.uid();
+BEGIN
+  IF v_uid IS NULL THEN RAISE EXCEPTION 'push_not_authenticated' USING ERRCODE = '42501'; END IF;
+  UPDATE public.push_subscriptions
+  SET opt_in_messages = coalesce(p_opt_in_messages, opt_in_messages),
+      opt_in_applications = coalesce(p_opt_in_applications, opt_in_applications),
+      opt_in_nearby_sits = coalesce(p_opt_in_nearby_sits, opt_in_nearby_sits),
+      updated_at = now()
+  WHERE id = p_subscription_id AND user_id = v_uid;
+  RETURN FOUND;
+END;
+$$;
+REVOKE ALL ON FUNCTION public.push_set_my_preferences_v2(uuid, boolean, boolean, boolean) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.push_set_my_preferences_v2(uuid, boolean, boolean, boolean) TO authenticated, service_role;
+
 -- 7. Test lancé par le membre : réservation atomique, même journal --------------
 -- Partage push_test_attempts avec le test opérateur : 1 test / 5 min / compte.
 -- N'exige aucune préférence : seulement un appareil actif du membre.
+-- Renvoie un motif précis pour que l'écran ne confonde jamais limite et
+-- appareil indisponible : ok, duplicate, rate_limited, subscription_unavailable, invalid.
 CREATE OR REPLACE FUNCTION public.push_claim_self_test(p_request_id uuid, p_user_id uuid, p_subscription_id uuid)
-RETURNS boolean LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
+RETURNS text LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
 AS $$
 BEGIN
-  IF p_request_id IS NULL OR p_user_id IS NULL OR p_subscription_id IS NULL THEN RETURN false; END IF;
+  IF p_request_id IS NULL OR p_user_id IS NULL OR p_subscription_id IS NULL THEN RETURN 'invalid'; END IF;
   PERFORM pg_advisory_xact_lock(hashtextextended('push-test:' || p_user_id::text, 0));
-  IF EXISTS (SELECT 1 FROM push_test_attempts WHERE request_id = p_request_id)
-     OR EXISTS (SELECT 1 FROM push_test_attempts WHERE user_id = p_user_id
-                AND created_at > clock_timestamp() - interval '5 minutes') THEN
-    RETURN false;
-  END IF;
+  IF EXISTS (SELECT 1 FROM push_test_attempts WHERE request_id = p_request_id) THEN RETURN 'duplicate'; END IF;
   PERFORM 1 FROM push_subscriptions WHERE id = p_subscription_id AND user_id = p_user_id AND enabled FOR UPDATE;
-  IF NOT FOUND THEN RETURN false; END IF;
+  IF NOT FOUND THEN RETURN 'subscription_unavailable'; END IF;
+  IF EXISTS (SELECT 1 FROM push_test_attempts WHERE user_id = p_user_id
+             AND created_at > clock_timestamp() - interval '5 minutes') THEN
+    RETURN 'rate_limited';
+  END IF;
   INSERT INTO push_test_attempts(request_id, user_id, subscription_id)
     VALUES (p_request_id, p_user_id, p_subscription_id) ON CONFLICT DO NOTHING;
-  RETURN FOUND;
+  RETURN CASE WHEN FOUND THEN 'ok' ELSE 'duplicate' END;
 END;
 $$;
 REVOKE ALL ON FUNCTION public.push_claim_self_test(uuid, uuid, uuid) FROM PUBLIC, anon, authenticated;
