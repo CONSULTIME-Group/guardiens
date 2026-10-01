@@ -64,7 +64,14 @@ Deno.serve(async (req) => {
 
   try {
     if (action === 'status') {
-      const { data, error } = await memberClient.rpc('push_my_subscriptions');
+      // v2 expose la preference annonces proches ; repli sur v1 tant que la
+      // migration n'est pas appliquee (annonces proches alors indisponibles).
+      let nearbyAvailable = true;
+      let { data, error } = await memberClient.rpc('push_my_subscriptions_v2');
+      if (error) {
+        nearbyAvailable = false;
+        ({ data, error } = await memberClient.rpc('push_my_subscriptions'));
+      }
       if (error) throw error;
       const rows = (data ?? []) as Array<Record<string, unknown>>;
       return json({
@@ -73,8 +80,10 @@ Deno.serve(async (req) => {
           id: r.id,
           opt_in_messages: r.opt_in_messages,
           opt_in_applications: r.opt_in_applications,
+          opt_in_nearby_sits: r.opt_in_nearby_sits === true,
           enabled: r.enabled,
         })),
+        nearby_available: nearbyAvailable,
       });
     }
 
@@ -106,7 +115,16 @@ Deno.serve(async (req) => {
         const status = error.message.includes('max_active') ? 409 : 400;
         return json({ error: 'subscribe_refused', code }, status);
       }
-      return json({ subscription_id: data });
+      // Annonces proches : jamais implicite, uniquement si cochee par le membre.
+      if (parsed.value.optInNearbySits) {
+        const nearby = await memberClient.rpc('push_set_my_nearby_preference', {
+          p_subscription_id: data, p_opt_in: true,
+        });
+        if (nearby.error || nearby.data !== true) {
+          return json({ subscription_id: data, nearby_saved: false });
+        }
+      }
+      return json({ subscription_id: data, nearby_saved: parsed.value.optInNearbySits });
     }
 
     if (action === 'preferences') {
@@ -118,6 +136,12 @@ Deno.serve(async (req) => {
         p_opt_in_applications: parsed.value.optInApplications,
       });
       if (error) throw error;
+      if (data === true && parsed.value.optInNearbySits !== undefined) {
+        const nearby = await memberClient.rpc('push_set_my_nearby_preference', {
+          p_subscription_id: parsed.value.subscriptionId, p_opt_in: parsed.value.optInNearbySits,
+        });
+        if (nearby.error || nearby.data !== true) return json({ updated: false });
+      }
       return json({ updated: data === true });
     }
 
