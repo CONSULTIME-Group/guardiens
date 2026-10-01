@@ -1,6 +1,12 @@
 import { supabase } from '@/integrations/supabase/client';
 
-export interface PushPreferences { messages: boolean; applications: boolean }
+export interface PushPreferences { messages: boolean; applications: boolean; nearbySits?: boolean }
+export interface PushState extends PushPreferences {
+  subscribed: boolean;
+  /** Le serveur n'a pas pu confirmer l'état : ne jamais l'afficher comme actif. */
+  uncertain?: boolean;
+  nearbyAvailable?: boolean;
+}
 export interface PushConfig { enabled: boolean; publicKey?: string }
 import { PUSH_OWNER_KEY } from './pushSession';
 export { PUSH_OWNER_KEY };
@@ -56,21 +62,56 @@ async function registration(): Promise<ServiceWorkerRegistration | undefined> {
   return script && new URL(script).pathname === '/push-sw.js' ? reg : undefined;
 }
 
-export async function getPushState(userId: string): Promise<{ subscribed: boolean } & PushPreferences> {
+export async function getPushState(userId: string): Promise<PushState> {
+  const off: PushState = { subscribed: false, messages: true, applications: true, nearbySits: false };
   const reg = await registration();
   const sub = reg ? await bounded(reg.pushManager.getSubscription()) : null;
-  if (!sub) return { subscribed: false, messages: true, applications: true };
+  if (!sub) return off;
   if (localStorage.getItem(PUSH_OWNER_KEY) !== userId) {
     await bounded(sub.unsubscribe());
     for (const item of await bounded(reg!.getNotifications())) item.close();
     localStorage.removeItem(PUSH_OWNER_KEY);
-    return { subscribed: false, messages: true, applications: true };
+    return off;
   }
-  let result: { subscriptions: Array<{ id: string; enabled: boolean; opt_in_messages: boolean; opt_in_applications: boolean }> };
+  let result: { nearby_available?: boolean; subscriptions: Array<{ id: string; enabled: boolean; opt_in_messages: boolean; opt_in_applications: boolean; opt_in_nearby_sits?: boolean }> };
+  // Erreur serveur : état incertain, jamais présenté comme actif.
   try { result = await api(userId, { action: 'status' }); }
-  catch { return { subscribed: true, messages: true, applications: true }; }
+  catch { return { ...off, uncertain: true }; }
   const row = result.subscriptions.find((item) => item.id === localStorage.getItem(PUSH_ID_KEY));
-  return { subscribed: Boolean(row?.enabled), messages: row?.opt_in_messages ?? true, applications: row?.opt_in_applications ?? true };
+  return {
+    subscribed: Boolean(row?.enabled),
+    messages: row?.opt_in_messages ?? true,
+    applications: row?.opt_in_applications ?? true,
+    nearbySits: row?.opt_in_nearby_sits === true,
+    nearbyAvailable: result.nearby_available === true,
+  };
+}
+
+/** Abonnement local de ce membre, sans appel réseau (pour les cartes du tableau de bord). */
+export function hasLocalPushSubscription(userId: string): boolean {
+  try { return localStorage.getItem(PUSH_OWNER_KEY) === userId && !!localStorage.getItem(PUSH_ID_KEY); }
+  catch { return false; }
+}
+
+export type PushTestResult = 'accepted' | 'rejected' | 'uncertain' | 'rate_limited' | 'error';
+
+/** Test sur l'appareil courant. Le serveur dérive le membre du jeton ; seul l'identifiant d'abonnement local est transmis. */
+export async function testPushOnDevice(userId: string, requestId = crypto.randomUUID()): Promise<PushTestResult> {
+  const subscriptionId = localStorage.getItem(PUSH_ID_KEY);
+  if (!subscriptionId || localStorage.getItem(PUSH_OWNER_KEY) !== userId) return 'error';
+  const { data: { session } } = await bounded(supabase.auth.getSession());
+  if (!session || session.user.id !== userId) return 'error';
+  const { data, error } = await bounded(supabase.functions.invoke('push-self-test', {
+    body: { request_id: requestId, subscription_id: subscriptionId },
+    headers: { Authorization: `Bearer ${session.access_token}` },
+  }));
+  if (error) {
+    const status = (error as { context?: { status?: number } })?.context?.status;
+    return status === 429 ? 'rate_limited' : 'error';
+  }
+  if (data?.accepted === true) return 'accepted';
+  if (data?.uncertain === true) return 'uncertain';
+  return 'rejected';
 }
 
 // Permission is requested synchronously in the click handler, before any network await.
@@ -87,6 +128,7 @@ export async function enablePush(userId: string, config: PushConfig, prefs: Push
   try {
     const result = await api<{ subscription_id: string }>(userId, {
       action: 'subscribe', ...sub.toJSON(), opt_in_messages: prefs.messages, opt_in_applications: prefs.applications,
+      opt_in_nearby_sits: prefs.nearbySits === true,
     });
     localStorage.setItem(PUSH_OWNER_KEY, userId);
     localStorage.setItem(PUSH_ID_KEY, result.subscription_id);
@@ -102,6 +144,7 @@ export async function updatePushPreferences(userId: string, prefs: PushPreferenc
   const result = await api<{ updated: boolean }>(userId, {
     action: 'preferences', subscription_id: localStorage.getItem(PUSH_ID_KEY),
     opt_in_messages: prefs.messages, opt_in_applications: prefs.applications,
+    ...(typeof prefs.nearbySits === 'boolean' ? { opt_in_nearby_sits: prefs.nearbySits } : {}),
   });
   if (!result.updated) throw new Error('push_not_updated');
 }
