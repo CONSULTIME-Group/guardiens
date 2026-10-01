@@ -29,6 +29,8 @@ import {
 import { CITIES } from "@/data/cities";
 import { useCityStats } from "@/hooks/useCityStats";
 import { getCityContent, REVISED_CITY_SLUGS } from "@/data/cityContent";
+import { DB_CITY_REVISIONS } from "@/data/dbCityRevisions";
+import { GUIDE_OVERRIDES } from "@/data/guideOverrides";
 import CityPageMeta from "@/components/seo/CityPageMeta";
 import PageMeta from "@/components/PageMeta";
 import CitySchemaOrg from "@/components/seo/CitySchemaOrg";
@@ -414,10 +416,10 @@ const CityPage = () => {
  <Compass className="h-5 w-5 text-primary" />
  <div>
  <p className="font-semibold text-sm text-foreground">
- {revised ? `Sortir avec un chien à ${cityGuide.city}` : `Guide du gardien à ${cityGuide.city}`}
+ {GUIDE_OVERRIDES[cityGuide.slug] ? `Sortir avec un chien à ${cityGuide.city}` : `Guide du gardien à ${cityGuide.city}`}
  </p>
  <p className="text-xs text-muted-foreground">
- {revised ? "Règles de laisse et lieux vérifiés, avec leurs sources" : "Parcs, balades, vétos, cafés dog-friendly…"}
+ {GUIDE_OVERRIDES[cityGuide.slug] ? "Règles de laisse sourcées et adresses utiles" : "Parcs, balades, vétos, cafés dog-friendly…"}
  </p>
  </div>
  <ArrowRight className="h-4 w-4 text-muted-foreground ml-auto" />
@@ -606,7 +608,7 @@ const CityPage = () => {
  <section className="max-w-5xl mx-auto px-4 py-8 border-t border-border">
  <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 text-sm">
  <Link to={`/guides/${cityData.slug}`} className="text-primary hover:underline">
- {revised ? `Sortir avec un chien à ${cityData.name} →` : `Guide local de ${cityData.name} →`}
+ {GUIDE_OVERRIDES[cityData.slug] ? `Sortir avec un chien à ${cityData.name} →` : `Guide local de ${cityData.name} →`}
  </Link>
   {departmentPageExists && departmentSlug && (
   <Link
@@ -728,7 +730,8 @@ const CityPage = () => {
      dbPage.sitter_count ?? 0,
      dbPage.nearby_sitter_count ?? 0
    );
-  const dbFaqItems = [
+  const dbRevision = DB_CITY_REVISIONS[dbPage.slug];
+  const dbFaqItems = dbRevision ? dbRevision.faq : [
     {
       q: `Comment trouver un gardien de maison à ${dbPage.city} ?`,
       a: `Sur Guardiens, vous publiez une annonce et les gardiens disponibles à ${dbPage.city} et ses environs postulent directement. La vérification d'identité est ouverte à tous les membres : la pièce envoyée est analysée automatiquement, les dossiers qui ne passent pas sont revus par l'équipe, et les profils validés affichent l'écusson « Identité vérifiée ». Regardez cet écusson sur les profils avant de choisir.`,
@@ -773,7 +776,9 @@ const CityPage = () => {
             price: "0",
             priceCurrency: "EUR",
             eligibleCustomerType: "Owner",
+            ...(dbRevision ? { description: "Espace propriétaire gratuit, garde non rémunérée." } : {
             description: "Espace propriétaire à 0 €.",
+            }),
           },
         },
         {
@@ -920,10 +925,10 @@ const CityPage = () => {
  <Compass className="h-5 w-5 text-primary" />
  <div>
  <p className="font-semibold text-sm text-foreground">
- Guide du gardien à {cityGuide.city}
+ {dbRevision && GUIDE_OVERRIDES[cityGuide.slug] ? `Sortir avec un chien à ${cityGuide.city}` : `Guide du gardien à ${cityGuide.city}`}
  </p>
  <p className="text-xs text-muted-foreground">
- Parcs, balades, vétos, cafés dog-friendly…
+ {dbRevision && GUIDE_OVERRIDES[cityGuide.slug] ? "Règles de laisse sourcées et adresses utiles" : "Parcs, balades, vétos, cafés dog-friendly…"}
  </p>
  </div>
  <ArrowRight className="h-4 w-4 text-muted-foreground ml-auto" />
@@ -953,8 +958,8 @@ const CityPage = () => {
  </section>
  )}
 
-        {/* FAQ (uniquement sur pages indexables) */}
-        {!dbNoindex && (
+        {/* FAQ (pages indexables ; pages refondues : toujours visible) */}
+        {(!dbNoindex || dbRevision) && (
           <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">
             <h2 className="font-heading text-2xl font-bold text-foreground mb-6">
               Questions fréquentes sur le house-sitting à {dbPage.city}
@@ -976,8 +981,9 @@ const CityPage = () => {
  Rejoignez la communauté Guardiens à {dbPage.city}
  </h2>
  <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
- Que vous soyez propriétaire ou gardien, rejoignez un réseau de
- confiance basé sur la proximité et le partage.
+ {dbRevision
+   ? "Décrivez votre logement, vos animaux et vos dates, puis échangez avec les gardiens qui postulent avant de choisir."
+   : "Que vous soyez propriétaire ou gardien, rejoignez un réseau de confiance basé sur la proximité et le partage."}
  </p>
  <Link to="/inscription">
  <Button size="lg" className="gap-2">

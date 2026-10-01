@@ -1055,6 +1055,102 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_seo_city_pages_lot2_20261001: {
+        Row: {
+          active_sits_count: number | null
+          aggregate_cities: string[] | null
+          allow_nearby_indexing: boolean | null
+          backed_up_at: string | null
+          canonical_url: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          created_at: string | null
+          department: string | null
+          excerpt: string | null
+          geocode_attempts: number | null
+          geocoded_at: string | null
+          h1_title: string | null
+          hero_image_alt: string | null
+          id: string | null
+          intro_text: string | null
+          latitude: number | null
+          longitude: number | null
+          meta_description: string | null
+          meta_title: string | null
+          nearby_sitter_count: number | null
+          noindex: boolean | null
+          published: boolean | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          sitter_count: number | null
+          slug: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          active_sits_count?: number | null
+          aggregate_cities?: string[] | null
+          allow_nearby_indexing?: boolean | null
+          backed_up_at?: string | null
+          canonical_url?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          created_at?: string | null
+          department?: string | null
+          excerpt?: string | null
+          geocode_attempts?: number | null
+          geocoded_at?: string | null
+          h1_title?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          intro_text?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          meta_description?: string | null
+          meta_title?: string | null
+          nearby_sitter_count?: number | null
+          noindex?: boolean | null
+          published?: boolean | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          sitter_count?: number | null
+          slug?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          active_sits_count?: number | null
+          aggregate_cities?: string[] | null
+          allow_nearby_indexing?: boolean | null
+          backed_up_at?: string | null
+          canonical_url?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          created_at?: string | null
+          department?: string | null
+          excerpt?: string | null
+          geocode_attempts?: number | null
+          geocoded_at?: string | null
+          h1_title?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          intro_text?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          meta_description?: string | null
+          meta_title?: string | null
+          nearby_sitter_count?: number | null
+          noindex?: boolean | null
+          published?: boolean | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          sitter_count?: number | null
+          slug?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       _backup_sitter_booleans_20260820: {
         Row: {
           demanding_breeds_ok: boolean | null

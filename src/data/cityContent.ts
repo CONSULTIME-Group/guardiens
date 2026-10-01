@@ -135,7 +135,7 @@ Le nombre de candidatures dépend de vos dates, de votre quartier et de la péri
  content: `- Sur les berges du Rhône, comme partout en ville, **les chiens doivent être tenus en laisse** ; des espaces canins de liberté et des espaces sanitaires existent sur les quais hauts ([ONLYLYON Tourisme, berges du Rhône](https://www.visiterlyon.com/sortir/parcs-jardins-et-lieux-de-balade/les-berges-du-rhone)).
 - La Ville a aménagé des aires canines, notamment au parc de la Tête d'Or (près du vélodrome) et au parc Blandan ; de nombreux parcs acceptent les chiens en laisse ([Lyon avec un chien, ONLYLYON Tourisme](https://www.visiterlyon.com/lyon-pratique/bons-plans/lyon-avec-un-chien)).
 - Autour de Lyon, le parc de la Feyssine et le Grand Parc de Miribel-Jonage accueillent les chiens tenus en laisse (même source).
-- Dans les TCL, un chien voyage dans un panier, ou avec le ticket dédié pour les chiens de plus de 6 kg (même source, à confirmer sur le site TCL).
+- Dans les transports en commun, un petit chien voyage dans un panier ; pour un grand chien, vérifiez les conditions auprès du réseau TCL avant le trajet.
 
 Les panneaux d'entrée de chaque parc font foi. Pour aller plus loin : le [guide des sorties avec un chien à Lyon](/guides/lyon) et l'article [parcs et balades avec un chien à Lyon](/actualites/parcs-chiens-lyon-guide-complet).`,
  },
