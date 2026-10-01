@@ -12,9 +12,10 @@ await db.exec(`CREATE ROLE anon;CREATE ROLE authenticated;CREATE ROLE service_ro
 CREATE SCHEMA auth;CREATE TABLE auth.users(id uuid PRIMARY KEY);
 CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql AS $$ SELECT nullif(current_setting('test.uid',true),'')::uuid $$;
 CREATE TYPE sit_status AS ENUM ('draft','published','cancelled');
-CREATE TABLE profiles(id uuid PRIMARY KEY,latitude float8,longitude float8,account_status text DEFAULT 'active',suspended_at timestamptz);
+CREATE TABLE profiles(id uuid PRIMARY KEY,latitude float8,longitude float8,city text,account_status text DEFAULT 'active',suspended_at timestamptz,suspended_until timestamptz);
+CREATE TABLE account_deletion_requests(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),user_id uuid,status text,cancelled_at timestamptz);
 CREATE TABLE sitter_profiles(user_id uuid PRIMARY KEY,geographic_radius int);
-CREATE TABLE sits(id uuid PRIMARY KEY,user_id uuid,status sit_status,moderation_hidden_at timestamptz,end_date date);
+CREATE TABLE sits(id uuid PRIMARY KEY,user_id uuid,status sit_status,moderation_hidden_at timestamptz,end_date date,city text,hidden_at timestamptz);
 CREATE TABLE blocked_users(blocker_id uuid,blocked_id uuid);
 CREATE TABLE notifications(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),user_id uuid,type text,title text,body text,link text,read_at timestamptz,created_at timestamptz DEFAULT now());
 CREATE TABLE push_subscriptions(id uuid PRIMARY KEY,user_id uuid,endpoint text,endpoint_host text,auth_key text,p256dh_key text,
@@ -25,7 +26,7 @@ CREATE FUNCTION effective_search_radius(declared integer) RETURNS integer LANGUA
   SELECT CASE WHEN declared IS NULL OR declared = 30 THEN 100 ELSE declared END $$;
 GRANT USAGE ON SCHEMA public TO anon,authenticated,service_role;
 INSERT INTO auth.users VALUES('${me}'),('${owner}'),('${other}');
-INSERT INTO profiles(id,latitude,longitude) VALUES('${me}',45.76,4.84),('${owner}',45.75,5.0),('${other}',43.3,5.37);
+INSERT INTO profiles(id,latitude,longitude,city) VALUES('${me}',45.76,4.84,'Lyon'),('${owner}',45.75,5.0,'Pusignan'),('${other}',43.3,5.37,'Marseille');
 INSERT INTO sitter_profiles VALUES('${me}',30);
 INSERT INTO push_subscriptions(id,user_id,endpoint,endpoint_host,auth_key,p256dh_key,opt_in_messages) VALUES
  ('${sub}','${me}','https://fcm.googleapis.com/a','fcm.googleapis.com','a','p',true),
@@ -34,7 +35,7 @@ await db.exec(readFileSync(new URL('../supabase/migrations/20260919090100_web_pu
 await db.exec(readFileSync(new URL('../docs/migrations-en-attente/web_push_nearby_and_self_test.sql',import.meta.url),'utf8'));
 
 let n=0;
-const sit=async(opts={})=>{const id=crypto.randomUUID();await db.query(`INSERT INTO sits VALUES($1,$2,$3,NULL,current_date+5)`,[id,opts.owner??owner,opts.status??'published']);return id;};
+const sit=async(opts={})=>{const id=crypto.randomUUID();await db.query(`INSERT INTO sits(id,user_id,status,end_date,city) VALUES($1,$2,$3,current_date+5,$4)`,[id,opts.owner??owner,opts.status??'published',opts.city===undefined?'Pusignan':opts.city]);return id;};
 const notify=async(id,user=me)=>{await db.query(`INSERT INTO notifications(user_id,type,title,body,link) VALUES($1,'new_sit_nearby','Nouvelle annonce : X','corps',$2)`,[user,'/sits/'+id]);};
 const jobs=async()=>(await db.query('SELECT count(*)::int c FROM push_nearby_jobs')).rows[0].c;
 const optIn=()=>db.exec(`UPDATE push_subscriptions SET opt_in_nearby_sits=true`);
@@ -82,7 +83,7 @@ await test('claim once, close, never reclaimed; ambiguous claim not replayed',as
   assert.equal((await db.query(`SELECT last_error_code FROM push_nearby_jobs WHERE id<>$1`,[first[0].job_id])).rows[0].last_error_code,'claim_ambiguous');});
 await test('notification insert never fails because of push errors',async()=>{await optIn();
   await db.query(`INSERT INTO notifications(user_id,type,link) VALUES($1,'new_sit_nearby','/sits/not-a-uuid')`,[me]);assert.equal(await jobs(),0);});
-for(const role of ['anon','authenticated'])for(const q of ['SELECT * FROM push_nearby_jobs','SELECT * FROM push_claim_nearby_jobs(1)',`SELECT push_claim_self_test('${U(6)}','${me}','${sub}')`])
+for(const role of ['anon','authenticated'])for(const q of ['SELECT * FROM push_nearby_jobs','SELECT * FROM push_claim_nearby_jobs(1)','SELECT push_nearby_target_ok(gen_random_uuid(),gen_random_uuid())',`SELECT push_claim_self_test('${U(6)}','${me}','${sub}')`])
   await test(`${role} refused: ${q.slice(0,40)}`,async()=>{await db.exec(`SET LOCAL ROLE ${role}`);await assert.rejects(db.query(q),{code:'42501'});});
 await test('member preference only on own device',async()=>{
   await db.exec(`GRANT USAGE ON SCHEMA auth TO authenticated;GRANT EXECUTE ON FUNCTION auth.uid() TO authenticated;SET LOCAL test.uid='${other}';SET LOCAL ROLE authenticated`);
@@ -93,8 +94,49 @@ await test('member preference only on own device',async()=>{
 await test('self test: owner only, once per request, 1 per 5 min, no opt-in required',async()=>{
   await db.exec(`UPDATE push_subscriptions SET opt_in_messages=false`);
   const c=async(r,u=me,s=sub)=>(await db.query('SELECT push_claim_self_test($1,$2,$3) ok',[r,u,s])).rows[0].ok;
-  assert.equal(await c(U(6),other),false);
-  assert.equal(await c(U(6)),true);assert.equal(await c(U(6)),false);assert.equal(await c(U(7)),false);
+  assert.equal(await c(U(6),other),'subscription_unavailable');
+  assert.equal(await c(U(6)),'ok');assert.equal(await c(U(6)),'duplicate');assert.equal(await c(U(7)),'rate_limited');
+  await db.exec(`UPDATE push_subscriptions SET enabled=false WHERE id='${sub2}'`);
+  assert.equal(await c(U(8),me,sub2),'subscription_unavailable');
   await db.exec(`UPDATE push_test_attempts SET created_at=now()-interval '6 minutes'`);
-  assert.equal(await c(U(6)),false);assert.equal(await c(U(7)),true);});
+  assert.equal(await c(U(6)),'duplicate');assert.equal(await c(U(7)),'ok');});
+await test('sit hidden by owner (hidden_at) or moderation: not queued, and skipped at send time',async()=>{await optIn();
+  const h=await sit();await db.query('UPDATE sits SET hidden_at=now() WHERE id=$1',[h]);await notify(h);assert.equal(await jobs(),0);
+  const later=await sit();await notify(later);assert.equal(await jobs(),2);
+  await db.query('UPDATE sits SET hidden_at=now() WHERE id=$1',[later]);
+  assert.equal((await db.query('SELECT count(*)::int c FROM push_claim_nearby_jobs(20)')).rows[0].c,0);
+  assert.equal((await db.query(`SELECT count(*)::int c FROM push_nearby_jobs WHERE status='skipped'`)).rows[0].c,2);});
+await test('sit withdrawn (cancelled) after queueing: skipped, never sent',async()=>{await optIn();
+  const s=await sit();await notify(s);await db.query(`UPDATE sits SET status='cancelled' WHERE id=$1`,[s]);
+  assert.equal((await db.query('SELECT count(*)::int c FROM push_claim_nearby_jobs(20)')).rows[0].c,0);});
+await test('sit deleted: its jobs are removed with it (no orphan, no send)',async()=>{await optIn();
+  const s=await sit();await notify(s);assert.equal(await jobs(),2);await db.query('DELETE FROM sits WHERE id=$1',[s]);assert.equal(await jobs(),0);});
+await test('owner suspended, owner deleted, owner pending deletion: nothing',async()=>{await optIn();
+  await db.exec(`UPDATE profiles SET suspended_at=now() WHERE id='${owner}'`);await notify(await sit());assert.equal(await jobs(),0);
+  await db.exec(`UPDATE profiles SET suspended_until=now()+interval '1 day' WHERE id='${owner}'`);await notify(await sit());assert.equal(await jobs(),0);
+  await db.exec(`UPDATE profiles SET suspended_at=NULL,suspended_until=NULL,account_status='deleted' WHERE id='${owner}'`);await notify(await sit());assert.equal(await jobs(),0);
+  await db.exec(`UPDATE profiles SET account_status='active' WHERE id='${owner}';INSERT INTO account_deletion_requests(user_id,status) VALUES('${owner}','pending')`);await notify(await sit());assert.equal(await jobs(),0);});
+await test('expired suspension of owner no longer blocks',async()=>{await optIn();
+  await db.exec(`UPDATE profiles SET suspended_at=now()-interval '9 days',suspended_until=now()-interval '1 day' WHERE id='${owner}'`);await notify(await sit());assert.equal(await jobs(),2);});
+await test('recipient suspended: nothing',async()=>{await optIn();
+  await db.exec(`UPDATE profiles SET suspended_at=now() WHERE id='${me}'`);await notify(await sit());assert.equal(await jobs(),0);});
+await test('home in another city than owner profile: never announced near (Marseille sit, owner profile Pusignan)',async()=>{await optIn();
+  await notify(await sit({city:'Marseille'}));assert.equal(await jobs(),0);});
+await test('sit without city: no fallback to owner coordinates',async()=>{await optIn();await notify(await sit({city:null}));assert.equal(await jobs(),0);});
+await test('same city with accents/case/hyphen differences is accepted',async()=>{await optIn();
+  await db.exec(`UPDATE profiles SET city='Saint-Étienne' WHERE id='${owner}'`);await notify(await sit({city:' saint etienne '}));assert.equal(await jobs(),2);});
+await test('preferences v2: atomic, absent values preserved, own device only',async()=>{
+  await db.exec(`GRANT USAGE ON SCHEMA auth TO authenticated;GRANT EXECUTE ON FUNCTION auth.uid() TO authenticated;SET LOCAL test.uid='${other}';SET LOCAL ROLE authenticated`);
+  assert.equal((await db.query('SELECT push_set_my_preferences_v2($1,false,false,true) ok',[sub])).rows[0].ok,false);
+  await db.exec(`RESET ROLE;SET LOCAL test.uid='${me}';SET LOCAL ROLE authenticated`);
+  assert.equal((await db.query('SELECT push_set_my_preferences_v2($1,NULL,true,NULL) ok',[sub])).rows[0].ok,true);
+  await db.exec('RESET ROLE');
+  const r=(await db.query('SELECT opt_in_messages m,opt_in_applications a,opt_in_nearby_sits n FROM push_subscriptions WHERE id=$1',[sub])).rows[0];
+  assert.deepEqual(r,{m:true,a:true,n:false});});
+await test('opt-out after queueing: skipped at send time',async()=>{await optIn();await notify(await sit());
+  await db.exec('UPDATE push_subscriptions SET opt_in_nearby_sits=false');
+  assert.equal((await db.query('SELECT count(*)::int c FROM push_claim_nearby_jobs(20)')).rows[0].c,0);});
+await test('device disabled after queueing: skipped at send time',async()=>{await optIn();await notify(await sit());
+  await db.exec('UPDATE push_subscriptions SET enabled=false');
+  assert.equal((await db.query('SELECT count(*)::int c FROM push_claim_nearby_jobs(20)')).rows[0].c,0);});
 await db.close();console.log(JSON.stringify({passed:passed.length,checks:passed},null,2));
