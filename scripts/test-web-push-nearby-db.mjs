@@ -82,11 +82,8 @@ await test('claim once, close, never reclaimed; ambiguous claim not replayed',as
   assert.equal((await db.query(`SELECT last_error_code FROM push_nearby_jobs WHERE id<>$1`,[first[0].job_id])).rows[0].last_error_code,'claim_ambiguous');});
 await test('notification insert never fails because of push errors',async()=>{await optIn();
   await db.query(`INSERT INTO notifications(user_id,type,link) VALUES($1,'new_sit_nearby','/sits/not-a-uuid')`,[me]);assert.equal(await jobs(),0);});
-for(const role of ['anon','authenticated'])await test(`${role} cannot read queue nor call service RPCs`,async()=>{
-  await db.exec(`SET LOCAL ROLE ${role}`);
-  await assert.rejects(db.query('SELECT * FROM push_nearby_jobs'),{code:'42501'});
-  await assert.rejects(db.query('SELECT * FROM push_claim_nearby_jobs(1)'),{code:'42501'});
-  await assert.rejects(db.query('SELECT push_claim_self_test($1,$2,$3)',[U(6),me,sub]),{code:'42501'});});
+for(const role of ['anon','authenticated'])for(const q of ['SELECT * FROM push_nearby_jobs','SELECT * FROM push_claim_nearby_jobs(1)',`SELECT push_claim_self_test('${U(6)}','${me}','${sub}')`])
+  await test(`${role} refused: ${q.slice(0,40)}`,async()=>{await db.exec(`SET LOCAL ROLE ${role}`);await assert.rejects(db.query(q),{code:'42501'});});
 await test('member preference only on own device',async()=>{
   await db.exec(`GRANT USAGE ON SCHEMA auth TO authenticated;GRANT EXECUTE ON FUNCTION auth.uid() TO authenticated;SET LOCAL test.uid='${other}';SET LOCAL ROLE authenticated`);
   assert.equal((await db.query('SELECT push_set_my_nearby_preference($1,true) ok',[sub])).rows[0].ok,false);
