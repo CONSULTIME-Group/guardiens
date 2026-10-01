@@ -12,7 +12,8 @@ import PageMeta from "@/components/PageMeta";
 import { logSeoSnapshot } from "@/lib/seoDebugLog";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import ArticleRenderer, { resolveImagePath } from "@/components/articles/ArticleRenderer";
+import ArticleRenderer, { resolveImagePath, GUIDE_ARTICLE_SLUGS } from "@/components/articles/ArticleRenderer";
+import HouseSittingDiagnostic from "@/components/articles/HouseSittingDiagnostic";
 import ArticleAuthorBio from "@/components/articles/ArticleAuthorBio";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import { parseFaqFromMarkdown, buildFaqSchema } from "@/lib/parseFaq";
@@ -306,6 +307,9 @@ export default function ArticleDetail() {
  }
 
  const altText = article.hero_image_alt || generateAltText(article);
+ // Articles guides refondus : résumé avant l'image, une seule ligne auteur et
+ // date, image contenue, un seul bloc de ressources en fin d'article.
+ const isGuide = GUIDE_ARTICLE_SLUGS.has(article.slug);
  // Normalize internal_links: support both { text, url } and legacy { anchor, slug } formats
  const rawLinks = (article.internal_links as any[] | null) || [];
  const internalLinks = rawLinks.map((link: any) => ({
@@ -366,6 +370,10 @@ export default function ArticleDetail() {
     noindex={article.noindex === true}
     canonical={article.canonical_url || undefined}
     ready={!contentStatsLoading}
+    extraMeta={isGuide && article.hero_image_alt ? [
+      { attr: "property", key: "og:image:alt", content: article.hero_image_alt },
+      { attr: "name", key: "twitter:image:alt", content: article.hero_image_alt },
+    ] : undefined}
     />
     <ArticleSeoLogger article={article} />
 
@@ -433,7 +441,7 @@ export default function ArticleDetail() {
 
 
 
- <header className="mb-8">
+ <header className={isGuide ? "mb-6" : "mb-8"}>
  <div className="flex items-center gap-2 mb-3 flex-wrap">
  <Badge variant="secondary">
  {t(`article.categories.${article.category}`, CATEGORY_LABELS[article.category] || article.category)}
@@ -450,6 +458,19 @@ export default function ArticleDetail() {
  {article.title}
  </h1>
 
+ {isGuide ? (
+ <>
+ <p className="text-sm text-muted-foreground" data-testid="article-byline">
+   Par {article.author_name}, mis à jour le {format(new Date(article.updated_at), "d MMMM yyyy", { locale: fr })}
+ </p>
+ {article.excerpt && (
+ <p className="mt-5 rounded-xl border-l-4 border-primary bg-primary/5 px-5 py-4 text-base leading-relaxed text-foreground" data-testid="article-summary">
+   {article.excerpt}
+ </p>
+ )}
+ </>
+ ) : (
+ <>
  {/* CORRECTION 6, Date de mise à jour ou publication */}
  <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-4">
  <Calendar className="h-3.5 w-3.5" />
@@ -474,6 +495,8 @@ export default function ArticleDetail() {
  </span>
  )}
  </div>
+ </>
+ )}
  </header>
 
   {/* CORRECTION 2, Alt text systématique. Les couvertures PNG (illustrations
@@ -495,11 +518,11 @@ export default function ArticleDetail() {
         />
       </div>
     ) : (
-      <div className="rounded-xl overflow-hidden mb-8">
+      <div className={isGuide ? "rounded-xl overflow-hidden mb-6" : "rounded-xl overflow-hidden mb-8"}>
         <img
           src={getOptimizedImageUrl(resolveImagePath(article.cover_image_url), 800, 75)}
           alt={altText}
-          className="w-full h-auto max-h-96 object-cover"
+          className={isGuide ? "w-full h-[200px] sm:h-[260px] object-cover object-[center_45%]" : "w-full h-auto max-h-96 object-cover"}
           loading="eager"
           decoding="async"
           width={800}
@@ -515,12 +538,14 @@ export default function ArticleDetail() {
  <ArticleRenderer content={article.content} userRole={isAuthenticated ? user?.role : undefined} slug={article.slug} placeholderValues={contentStats} />
 
  {/* Bloc « À propos de l'auteur », affiché si l'auteur est identifié (Jérémie / Elisa) */}
+ {isGuide && <HouseSittingDiagnostic />}
+
  <ArticleAuthorBio authorName={article.author_name} />
 
  {/* CORRECTION 3, À lire aussi (internal links) */}
  {internalLinks.length > 0 && (
  <div className="mt-10 p-5 rounded-xl bg-muted/50 border border-border">
- <h3 className="font-heading text-lg font-semibold text-foreground mb-3">À lire aussi</h3>
+ <h3 className="font-heading text-lg font-semibold text-foreground mb-3">{isGuide ? "Ressources utiles" : "À lire aussi"}</h3>
  <div className="grid gap-3 sm:grid-cols-2">
  {internalLinks.slice(0, 4).map((link, i) => (
  <Link
@@ -565,7 +590,7 @@ export default function ArticleDetail() {
  </div>
  )}
 
- {article.tags.length > 0 && (
+ {!isGuide && article.tags.length > 0 && (
  <div className="flex flex-wrap gap-2 mt-10 pt-6 border-t border-border">
  {article.tags.map((tag) => (
  <Badge key={tag} variant="outline" className="text-xs">
@@ -576,7 +601,7 @@ export default function ArticleDetail() {
  )}
 
  {/* Related articles */}
- {relatedArticles.length > 0 && (
+ {!isGuide && relatedArticles.length > 0 && (
  <div className="mt-10 pt-8 border-t border-border">
             <h2 className="font-heading text-xl font-semibold text-foreground mb-4">
               Articles liés
