@@ -116,32 +116,45 @@ Deno.serve(async (req) => {
         return json({ error: 'subscribe_refused', code }, status);
       }
       // Annonces proches : jamais implicite, uniquement si cochee par le membre.
-      if (parsed.value.optInNearbySits) {
-        const nearby = await memberClient.rpc('push_set_my_nearby_preference', {
-          p_subscription_id: data, p_opt_in: true,
-        });
-        if (nearby.error || nearby.data !== true) {
-          return json({ subscription_id: data, nearby_saved: false });
-        }
+      // Le resultat est toujours explicite : l'ecran ne peut pas annoncer un
+      // opt-in qui n'a pas ete enregistre.
+      const nearbyAvailable = !(await memberClient.rpc('push_my_subscriptions_v2')).error;
+      if (!parsed.value.optInNearbySits) {
+        return json({ subscription_id: data, nearby_requested: false, nearby_saved: false, nearby_available: nearbyAvailable });
       }
-      return json({ subscription_id: data, nearby_saved: parsed.value.optInNearbySits });
+      const nearby = nearbyAvailable
+        ? await memberClient.rpc('push_set_my_nearby_preference', { p_subscription_id: data, p_opt_in: true })
+        : { data: null, error: new Error('nearby_unavailable') };
+      const saved = !nearby.error && nearby.data === true;
+      if (!saved) console.warn('push-subscription annonces proches non enregistrees');
+      return json({ subscription_id: data, nearby_requested: true, nearby_saved: saved, nearby_available: nearbyAvailable });
     }
 
     if (action === 'preferences') {
       const parsed = parsePreferencesInput(body);
       if (!parsed.ok) return json({ error: parsed.reason }, 400);
+      const v = parsed.value;
+      // Une seule ecriture atomique (v2) : jamais de sauvegarde partielle, les
+      // valeurs absentes (ancien client) restent intactes.
+      const v2 = await memberClient.rpc('push_set_my_preferences_v2', {
+        p_subscription_id: v.subscriptionId,
+        p_opt_in_messages: v.optInMessages ?? null,
+        p_opt_in_applications: v.optInApplications ?? null,
+        p_opt_in_nearby_sits: v.optInNearbySits ?? null,
+      });
+      if (!v2.error) return json({ updated: v2.data === true });
+      // Migration non appliquee : repli v1 seulement si rien d'autre n'est demande
+      // et que les deux valeurs v1 sont explicites (v1 ecrit les deux).
+      if (v.optInNearbySits !== undefined) return json({ error: 'nearby_unavailable' }, 409);
+      if (v.optInMessages === undefined || v.optInApplications === undefined) {
+        return json({ error: 'missing_preferences' }, 400);
+      }
       const { data, error } = await memberClient.rpc('push_set_my_preferences', {
-        p_subscription_id: parsed.value.subscriptionId,
-        p_opt_in_messages: parsed.value.optInMessages,
-        p_opt_in_applications: parsed.value.optInApplications,
+        p_subscription_id: v.subscriptionId,
+        p_opt_in_messages: v.optInMessages,
+        p_opt_in_applications: v.optInApplications,
       });
       if (error) throw error;
-      if (data === true && parsed.value.optInNearbySits !== undefined) {
-        const nearby = await memberClient.rpc('push_set_my_nearby_preference', {
-          p_subscription_id: parsed.value.subscriptionId, p_opt_in: parsed.value.optInNearbySits,
-        });
-        if (nearby.error || nearby.data !== true) return json({ updated: false });
-      }
       return json({ updated: data === true });
     }
 

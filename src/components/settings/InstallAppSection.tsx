@@ -55,6 +55,11 @@ export default function InstallAppSection() {
       </div>
       {!knownInstalled && mobile && <Button variant="outline" onClick={declareInstalled}>Je l'ai déjà installée</Button>}
     </>}
+    {(standalone || knownInstalled) && <div className="rounded-xl border bg-card p-4 space-y-2">
+      <h3 className="font-semibold">Étape suivante : les notifications</h3>
+      <p className="text-sm">L'installation n'active pas les notifications. Choisissez ce que vous voulez recevoir sur cet appareil (messages, candidatures, nouvelles annonces près de chez vous), puis faites un test.</p>
+      <Button asChild variant="outline" size="sm"><a href="/settings?section=notifications">Activer les notifications</a></Button>
+    </div>}
     <p role="status" className="text-sm">{message}</p>
     <p className="text-sm text-muted-foreground">Une connexion internet reste nécessaire. Les notifications s'activent séparément, dans la rubrique Notifications sur cet appareil.</p>
   </section>;

@@ -11,12 +11,20 @@ export interface SelfTestDependencies {
   configured: boolean;
   /** Renvoie l'identifiant du membre si le jeton est valide, sinon null. */
   authenticate(token: string): Promise<string | null>;
-  claim(target: TestTarget): Promise<boolean>;
+  /** Motif renvoyé par push_claim_self_test. */
+  claim(target: TestTarget): Promise<SelfTestClaim>;
   subscription(target: TestTarget): Promise<TestSubscription | null>;
   send(subscription: TestSubscription, payload: string): Promise<number>;
   finish(requestId: string, outcome: TestOutcome, status: number | null): Promise<boolean>;
   headers?: Record<string, string>;
+  /** Journal agrégé, sans identifiant. */
+  log?(event: string): void;
 }
+
+export type SelfTestClaim = 'ok' | 'duplicate' | 'rate_limited' | 'subscription_unavailable' | 'invalid';
+const REFUSALS: Record<Exclude<SelfTestClaim, 'ok'>, number> = {
+  duplicate: 409, rate_limited: 429, subscription_unavailable: 409, invalid: 400,
+};
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -49,7 +57,12 @@ export async function handleSelfTest(req: Request, deps: SelfTestDependencies): 
 
   try {
     // Appartenance, appareil actif, idempotence et 1 test / 5 min, en une réservation.
-    if (!await deps.claim(target)) return json({ error: 'test_not_available', sent_attempts: 0 }, 429);
+    const claim = await deps.claim(target);
+    if (claim !== 'ok') {
+      // Rien n'a été envoyé ; le motif exact évite de confondre limite et appareil indisponible.
+      const reason = claim in REFUSALS ? claim : 'invalid';
+      return json({ error: reason, sent_attempts: 0 }, REFUSALS[reason as keyof typeof REFUSALS]);
+    }
   } catch { return json({ error: 'claim_failed', sent_attempts: 0 }, 500); }
 
   let attempts = 0, outcome: TestOutcome = 'skipped', status: number | null = null;
@@ -69,7 +82,11 @@ export async function handleSelfTest(req: Request, deps: SelfTestDependencies): 
       }
     }
   } catch { outcome = 'skipped'; }
-  try { await deps.finish(target.request_id, outcome, status); } catch { /* La demande reste consommée. */ }
+  // Journal en échec : rendu visible (réponse + journal serveur), sans jamais
+  // réémettre. La demande reste consommée, le rate limit tient toujours.
+  let journalOk = false;
+  try { journalOk = await deps.finish(target.request_id, outcome, status) === true; } catch { journalOk = false; }
+  if (!journalOk) (deps.log ?? console.error)('push-self-test journal_failed');
   // « accepted » = pris en charge par le fournisseur, pas reçu sur le téléphone.
-  return json({ ok: true, sent_attempts: attempts, accepted: outcome === 'accepted', uncertain: outcome === 'unknown', outcome });
+  return json({ ok: true, sent_attempts: attempts, accepted: outcome === 'accepted', uncertain: outcome === 'unknown', outcome, journal_ok: journalOk });
 }

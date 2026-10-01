@@ -33,7 +33,7 @@ export default function InstallAppWelcome({ paused }: { paused: boolean }) {
   return <section aria-labelledby="install-welcome-title" className="mx-4 mt-4 rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-3">
     <div>
       <h2 id="install-welcome-title" className="font-heading font-semibold">Guardiens sur votre téléphone</h2>
-      <p className="text-sm text-muted-foreground mt-1">Ajoutez Guardiens à votre écran d'accueil pour retrouver vos échanges et vos gardes depuis une icône, comme une app : accès direct, vos messages et les nouvelles annonces près de chez vous.</p>
+      <p className="text-sm text-muted-foreground mt-1">Ajoutez Guardiens à votre écran d'accueil pour retrouver vos échanges et vos gardes depuis une icône, comme une app : accès direct et vos messages à portée de main. Les alertes (messages, annonces près de chez vous) s'activent ensuite, séparément.</p>
     </div>
     <div className="flex flex-wrap gap-2">
       <Button size="sm" onClick={async () => {

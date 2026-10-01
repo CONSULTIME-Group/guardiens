@@ -1,4 +1,7 @@
 /* Push only: no fetch handler and no cache of pages or private data. */
+/* Version read by the page before a test or nearby alerts: an older worker
+   would show those payloads as "new message". Bump on every payload change. */
+var PUSH_SW_VERSION = 'push-2';
 var UUID = '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}';
 var NEARBY_BODY = 'Une nouvelle annonce de garde près de chez vous.';
 var TEST_BODY = 'Notification de test Guardiens : cet appareil peut recevoir vos alertes.';
@@ -62,7 +65,15 @@ self.addEventListener('notificationclick', (event) => {
 });
 
 self.addEventListener('message', (event) => {
-  if (event.data?.type !== 'GUARDIENS_CLEAR_PUSH') return;
+  var type = event.data && event.data.type;
+  if (type === 'GUARDIENS_PUSH_SW_VERSION') {
+    if (event.ports && event.ports[0]) event.ports[0].postMessage({ version: PUSH_SW_VERSION });
+    return;
+  }
+  /* Controlled activation, requested by the page only. No fetch handler, so
+     taking over changes no page load, cache or session. */
+  if (type === 'GUARDIENS_SKIP_WAITING') { event.waitUntil(self.skipWaiting()); return; }
+  if (type !== 'GUARDIENS_CLEAR_PUSH') return;
   event.waitUntil(self.registration.getNotifications().then((items) => {
     for (const item of items) item.close();
   }));

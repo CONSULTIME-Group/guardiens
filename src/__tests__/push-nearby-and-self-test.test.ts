@@ -15,8 +15,8 @@ const sub = { endpoint: 'https://fcm.googleapis.com/fcm/send/fixture', auth_key:
 const deps = () => ({
   configured: true as boolean,
   authenticate: vi.fn().mockResolvedValue(USER as string | null),
-  claim: vi.fn().mockResolvedValue(true), subscription: vi.fn().mockResolvedValue(sub),
-  send: vi.fn().mockResolvedValue(201), finish: vi.fn().mockResolvedValue(true),
+  claim: vi.fn().mockResolvedValue('ok' as import('../../supabase/functions/_shared/web-push/self-test-handler').SelfTestClaim), subscription: vi.fn().mockResolvedValue(sub),
+  send: vi.fn().mockResolvedValue(201), finish: vi.fn().mockResolvedValue(true), log: vi.fn(),
 } satisfies SelfTestDependencies);
 const req = (body: unknown = { request_id: REQ_ID, subscription_id: SUB_ID }, token = 'member-jwt') =>
   new Request('https://x.test', { method: 'POST', headers: token ? { Authorization: `Bearer ${token}` } : {}, body: JSON.stringify(body) });
@@ -36,15 +36,27 @@ describe('Test membre sur son appareil', () => {
   });
   it('identité issue du jeton, réservation avant lecture, un seul envoi, texte de test identifiable', async () => {
     const d = deps(); const r = await handleSelfTest(req(), d); const body = await r.json();
-    expect(body).toEqual({ ok: true, sent_attempts: 1, accepted: true, uncertain: false, outcome: 'accepted' });
+    expect(body).toEqual({ ok: true, sent_attempts: 1, accepted: true, uncertain: false, outcome: 'accepted', journal_ok: true });
     expect(d.claim).toHaveBeenCalledWith({ request_id: REQ_ID, user_id: USER, subscription_id: SUB_ID });
     expect(d.claim.mock.invocationCallOrder[0]).toBeLessThan(d.subscription.mock.invocationCallOrder[0]);
     expect(JSON.parse(d.send.mock.calls[0][1])).toEqual(buildTestPayload(REQ_ID));
     expect(JSON.stringify(body)).not.toContain(sub.endpoint); expect(JSON.stringify(body)).not.toContain(USER);
   });
-  it('réservation refusée (rejeu, 5 min, abonnement d’un autre) : 429 et aucun envoi', async () => {
-    const d = deps(); d.claim.mockResolvedValue(false);
-    expect((await handleSelfTest(req(), d)).status).toBe(429); expect(d.send).not.toHaveBeenCalled();
+  it.each([
+    ['rate_limited', 429], ['duplicate', 409], ['subscription_unavailable', 409], ['invalid', 400],
+  ] as const)('réservation refusée (%s) : motif exact, aucun envoi', async (claim, status) => {
+    const d = deps(); d.claim.mockResolvedValue(claim);
+    const r = await handleSelfTest(req(), d);
+    expect(r.status).toBe(status); expect(await r.json()).toEqual({ error: claim, sent_attempts: 0 });
+    expect(d.send).not.toHaveBeenCalled(); expect(d.finish).not.toHaveBeenCalled();
+  });
+  it('journal en échec après envoi : visible, jamais de réémission', async () => {
+    for (const fail of [() => Promise.resolve(false), () => Promise.reject(new Error('db'))]) {
+      const d = deps(); d.finish.mockImplementation(fail);
+      const body = await (await handleSelfTest(req(), d)).json();
+      expect(body.journal_ok).toBe(false); expect(body.accepted).toBe(true);
+      expect(d.send).toHaveBeenCalledOnce(); expect(d.log).toHaveBeenCalledWith('push-self-test journal_failed');
+    }
   });
   it('erreur réseau : incertain, sans nouvel essai', async () => {
     const d = deps(); d.send.mockRejectedValue(new Error(sub.endpoint));
@@ -92,6 +104,15 @@ describe('Service worker : nouveaux types', () => {
     const w = worker();
     await w.emit('push', { data: { json: () => ({ kind: 'nearby_sit', url: '/admin' }) } });
     expect(w.self.registration.showNotification).toHaveBeenCalledWith('Guardiens', expect.objectContaining({ data: { url: '/messages' } }));
+  });
+  it('version : répond au contrôle de la page, activation seulement sur demande', async () => {
+    const w = worker(); const port = { postMessage: vi.fn() };
+    (w as any).self.skipWaiting = vi.fn().mockResolvedValue(undefined);
+    await w.emit('message', { data: { type: 'GUARDIENS_PUSH_SW_VERSION' }, ports: [port] });
+    expect(port.postMessage).toHaveBeenCalledWith({ version: 'push-2' });
+    expect((w as any).self.skipWaiting).not.toHaveBeenCalled();
+    await w.emit('message', { data: { type: 'GUARDIENS_SKIP_WAITING' } });
+    expect((w as any).self.skipWaiting).toHaveBeenCalledOnce();
   });
   it('test : notification identifiable, clic vers les réglages', async () => {
     const w = worker();

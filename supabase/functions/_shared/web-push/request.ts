@@ -66,11 +66,13 @@ export function parseSubscribeInput(body: unknown): ParseResult<SubscribeInput> 
 
 export interface PreferencesInput {
   subscriptionId: string;
-  optInMessages: boolean;
-  optInApplications: boolean;
-  /** undefined = préférence annonces proches non transmise, laissée intacte. */
+  /** undefined = valeur non transmise (ancien client), laissée intacte. */
+  optInMessages?: boolean;
+  optInApplications?: boolean;
   optInNearbySits?: boolean;
 }
+
+const optionalBool = (v: unknown) => (typeof v === 'boolean' ? v : undefined);
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -84,9 +86,9 @@ export function parsePreferencesInput(body: unknown): ParseResult<PreferencesInp
     ok: true,
     value: {
       subscriptionId: b.subscription_id,
-      optInMessages: b.opt_in_messages === true,
-      optInApplications: b.opt_in_applications === true,
-      optInNearbySits: typeof b.opt_in_nearby_sits === 'boolean' ? b.opt_in_nearby_sits : undefined,
+      optInMessages: optionalBool(b.opt_in_messages),
+      optInApplications: optionalBool(b.opt_in_applications),
+      optInNearbySits: optionalBool(b.opt_in_nearby_sits),
     },
   };
 }

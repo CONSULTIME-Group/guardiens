@@ -24,3 +24,5 @@
 - Pages villes et guides locaux refondus : liste fermée REVISED_CITY_SLUGS (src/data/cityContent.ts, FAQ visible et JSON-LD lus dans `faq`) et GUIDE_OVERRIDES (src/data/guideOverrides.ts, textes sourcés et lieux retenus par identifiant, base intacte) ; pourquoi : refondre une page sans toucher les autres villes ni réécrire les lignes partagées en base.
 
 - Pages villes servies par la base et refondues : liste fermée DB_CITY_REVISIONS (src/data/dbCityRevisions.ts, FAQ visible et JSON-LD), corps éditorial en base avec sauvegarde datée avant écriture ; dans les guides refondus, commerces réduits à nom, adresse et source, badge « chiens admis » seulement si une source le dit ; pourquoi : aucune promesse non sourcée, les autres villes gardent le gabarit.
+
+- Push : version de public/push-sw.js confirmée par la page avant activation, test ou annonces proches ; un budget unique dans dispatch-web-push ; dédup push_nearby_jobs sans purge ; pourquoi : un ancien worker afficherait un faux message.
