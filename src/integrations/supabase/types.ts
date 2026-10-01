@@ -1247,6 +1247,27 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_seo_refresh_targeted_20261001: {
+        Row: {
+          family: string | null
+          id: string | null
+          seo_dirty_at: string | null
+          slug: string | null
+        }
+        Insert: {
+          family?: string | null
+          id?: string | null
+          seo_dirty_at?: string | null
+          slug?: string | null
+        }
+        Update: {
+          family?: string | null
+          id?: string | null
+          seo_dirty_at?: string | null
+          slug?: string | null
+        }
+        Relationships: []
+      }
       _backup_sitter_booleans_20260820: {
         Row: {
           demanding_breeds_ok: boolean | null
