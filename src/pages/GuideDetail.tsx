@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Suspense, useState, useMemo, useEffect } from "react";
 import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
-import { GUIDE_OVERRIDES } from "@/data/guideOverrides";
+import { GUIDE_OVERRIDES, COMMERCIAL_CATEGORIES, COMMERCIAL_DESCRIPTION } from "@/data/guideOverrides";
 
 // Carte chargée uniquement quand l'utilisateur s'en approche (lazy + IntersectionObserver)
 // pour préserver le LCP et limiter le poids JS initial.
@@ -142,7 +142,20 @@ const GuideDetail = () => {
   const places = useMemo(
     () =>
       override
-        ? rawPlaces.filter((p) => override.places[p.id]).map((p) => ({ ...p, ...override.places[p.id] }))
+        ? rawPlaces
+            .filter((p) => override.places[p.id])
+            .map((p) => {
+              const o = override.places[p.id];
+              const commercial = COMMERCIAL_CATEGORIES.has(p.category);
+              return {
+                ...p,
+                ...o,
+                description: commercial ? COMMERCIAL_DESCRIPTION[p.category] : o.description ?? p.description,
+                // Inconnu n'est pas interdit : aucun badge sans source.
+                dogs_welcome: !commercial && o.dogs_welcome === true,
+                leash_required: commercial ? null : o.leash_required ?? null,
+              };
+            })
         : rawPlaces,
     [rawPlaces, override],
   );
