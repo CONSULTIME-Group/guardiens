@@ -4,7 +4,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 import webpush from 'npm:web-push@3.6.7';
 import { readVapidConfig } from '../_shared/web-push/config.ts';
-import { handleSelfTest } from '../_shared/web-push/self-test-handler.ts';
+import { handleSelfTest, type SelfTestClaim } from '../_shared/web-push/self-test-handler.ts';
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
@@ -24,8 +24,8 @@ Deno.serve(async (req) => {
       const { data, error } = await admin!.rpc('push_claim_self_test', {
         p_request_id: t.request_id, p_user_id: t.user_id, p_subscription_id: t.subscription_id,
       });
-      if (error) throw new Error('claim_failed');
-      return data === true;
+      if (error || typeof data !== 'string') throw new Error('claim_failed');
+      return data as SelfTestClaim;
     },
     subscription: async (t) => {
       const { data, error } = await admin!.from('push_subscriptions').select('endpoint,auth_key,p256dh_key')
