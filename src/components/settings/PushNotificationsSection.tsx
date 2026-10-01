@@ -16,6 +16,7 @@ export default function PushNotificationsSection() {
   const [config, setConfig] = useState<PushConfig>({ enabled: false });
   const [prefs, setPrefs] = useState<PushPreferences>({ messages: true, applications: true, nearbySits: false });
   const [nearbyAvailable, setNearbyAvailable] = useState(false);
+  const [uncertain, setUncertain] = useState(false);
   const [testBusy, setTestBusy] = useState(false);
   const [testMessage, setTestMessage] = useState('');
   const [subscribed, setSubscribed] = useState(false);
@@ -29,7 +30,7 @@ export default function PushNotificationsSection() {
 
   useEffect(() => {
     let current = true;
-    setConfig({ enabled: false }); setSubscribed(false); setMessage(''); setLoading(true); setCanRetry(false);
+    setConfig({ enabled: false }); setSubscribed(false); setMessage(''); setLoading(true); setCanRetry(false); setUncertain(false);
     if (!user || support !== 'supported') { setLoading(false); return; }
     let configFailed = false;
     let timer: ReturnType<typeof setTimeout>;
@@ -47,6 +48,7 @@ export default function PushNotificationsSection() {
       setPrefs({ messages: state.messages, applications: state.applications, nearbySits: state.nearbySits === true });
       setNearbyAvailable(state.nearbyAvailable === true);
       if (state.uncertain) {
+        setUncertain(true);
         setMessage('L’état des notifications sur cet appareil n’a pas pu être confirmé. Réessayez dans un instant.');
         setCanRetry(true);
       }
@@ -108,7 +110,7 @@ export default function PushNotificationsSection() {
       : <>
         {denied && <p className="text-sm">Les notifications sont bloquées dans les réglages de votre navigateur. Vous pouvez y autoriser Guardiens, puis revenir ici.</p>}
         {!loading && !config.enabled && !message && <p className="text-sm">Les notifications sur cet appareil arrivent bientôt. D’ici là, vos alertes arrivent par email.</p>}
-        {(config.enabled || subscribed) && <>
+        {(config.enabled || subscribed) && !uncertain && <>
           <div className="flex items-center justify-between gap-4"><Label htmlFor="push-messages">Nouveaux messages</Label><Switch id="push-messages" checked={prefs.messages} disabled={busy} onCheckedChange={(messages) => void save({ ...prefs, messages })} /></div>
           <div className="flex items-center justify-between gap-4"><Label htmlFor="push-applications">Candidatures reçues</Label><Switch id="push-applications" checked={prefs.applications} disabled={busy} onCheckedChange={(applications) => void save({ ...prefs, applications })} /></div>
           {(nearbyAvailable || !subscribed) && <div className="flex items-center justify-between gap-4">
