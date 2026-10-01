@@ -60,6 +60,22 @@ describe("Article guide house-sitting", () => {
     expect(container.querySelector('[role="region"][aria-label]')).not.toBeNull();
   });
 
+  it("nouveau guide : une FAQ visible issue du même bloc que le schéma", () => {
+    const md = `## <a id="choix"></a>Choisir
+
+:::faq
+**Quelle garde choisir ?**
+
+Une garde adaptée aux besoins.
+:::`;
+    const { container } = renderArticle("pension-chien-alternatives-guide", md);
+    expect(container.querySelector(".article-guide")).not.toBeNull();
+    expect(container.querySelector("h2#choix")).not.toBeNull();
+    expect(container.querySelectorAll(".article-faq-heading")).toHaveLength(1);
+    expect(container.querySelectorAll(".article-faq-question")).toHaveLength(1);
+    expect(parseFaqFromMarkdown(md)[0].question).toBe("Quelle garde choisir ?");
+  });
+
   it("CTA propriétaire prioritaire, gardien secondaire, tracking conservé", () => {
     const { container } = renderArticle("c-est-quoi-le-house-sitting");
     const end = container.querySelectorAll('a[data-cta-position="end"]');

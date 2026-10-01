@@ -306,7 +306,18 @@ function withRewrittenHrefs(copy: CtaCopy): CtaCopy {
  * par les titres, liens éditoriaux soulignés, tableau ajusté. Liste fermée,
  * les autres articles gardent le rendu historique.
  */
-export const GUIDE_ARTICLE_SLUGS = new Set<string>(["c-est-quoi-le-house-sitting"]);
+export const GUIDE_ARTICLE_SLUGS = new Set<string>([
+  "c-est-quoi-le-house-sitting",
+  "expat-proprietaire-faire-garder-maison-etranger",
+  "preparer-maison-avant-garde",
+  "pension-chien-alternatives-guide",
+  "vacances-longues-garde-animal-2-semaines",
+  "parcs-chiens-lyon-guide-complet",
+  "garde-animaux-haute-savoie-guide",
+  "pet-sitting-clermont-ferrand",
+  "chien-reactif-agressif-garde-solutions",
+  "house-sitting-cadre-juridique-france",
+]);
 
 /** Déplace l'ancre vide `<h2><a id="x"></a>Titre` sur le titre lui-même. */
 export function hoistHeadingAnchors(html: string): string {
@@ -348,7 +359,7 @@ function transformFaqBlocks(content: string, omitHeading = false): string {
     /:::faq\s*\n([\s\S]*?):::/g,
     (_, inner: string) => {
       const lines = inner.split("\n");
-      // Articles guides : le titre FAQ est le H2 #faq du markdown, on ne
+      // Guide définition : le titre FAQ est le H2 #faq du markdown, on ne
       // rajoute pas l'intitulé par défaut (un seul titre FAQ).
       let html = omitHeading
         ? '<div class="article-faq-block">'
@@ -482,7 +493,7 @@ export default function ArticleRenderer({ content, userRole, slug, placeholderVa
   const withoutH1 = stripLeadingH1(interpolated);
   const preprocessed = transformFaqBlocks(
     transformFactBoxes(withoutH1),
-    !!slug && GUIDE_ARTICLE_SLUGS.has(slug),
+    slug === "c-est-quoi-le-house-sitting",
   );
   let html = marked.parse(preprocessed, { async: false }) as string;
 
