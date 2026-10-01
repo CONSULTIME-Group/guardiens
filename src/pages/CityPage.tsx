@@ -776,7 +776,9 @@ const CityPage = () => {
             price: "0",
             priceCurrency: "EUR",
             eligibleCustomerType: "Owner",
-            description: dbRevision ? "Espace propriétaire gratuit, garde non rémunérée." : "Espace propriétaire à 0 €.",
+            ...(dbRevision ? { description: "Espace propriétaire gratuit, garde non rémunérée." } : {
+            description: "Espace propriétaire à 0 €.",
+            }),
           },
         },
         {
