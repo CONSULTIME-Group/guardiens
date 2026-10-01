@@ -87,9 +87,9 @@ describe('Push browser lifecycle',()=>{
   it('waiting worker that never activates: bounded timeout, nothing sent',async()=>{
     reg.active=fakeWorker('push-1');const next=fakeWorker('push-2','installed');reg.update.mockImplementation(async()=>{reg.waiting=next;});
     localStorage.setItem(PUSH_OWNER_KEY,'owner');localStorage.setItem(PUSH_ID_KEY,'device-id');
-    vi.useFakeTimers();
+    vi.useFakeTimers({toFake:['setTimeout','clearTimeout']});
     const result=testPushOnDevice('owner');
-    await vi.advanceTimersByTimeAsync(10500);
+    for(let i=0;i<30;i++){await new Promise((r)=>setImmediate(r));await vi.advanceTimersByTimeAsync(500);}
     expect(await result).toBe('worker_outdated');expect(mocks.invoke).not.toHaveBeenCalled();
   });
   const device=()=>{localStorage.setItem(PUSH_OWNER_KEY,'owner');localStorage.setItem(PUSH_ID_KEY,'device-id');};
