@@ -492,7 +492,13 @@ export default function ArticleRenderer({ content, userRole, slug, placeholderVa
   html = adaptEndCTAsForRole(html, userRole);
   html = wrapTables(html);
   const isGuide = !!slug && GUIDE_ARTICLE_SLUGS.has(slug);
-  if (isGuide) html = hoistHeadingAnchors(html);
+  if (isGuide) {
+    html = hoistHeadingAnchors(html);
+    html = html.replace(
+      /<div class="article-table-scroll" role="region" tabindex="0">/g,
+      '<p class="article-table-hint">Faites glisser le tableau pour voir toutes les colonnes.</p><div class="article-table-scroll" role="region" tabindex="0" aria-label="Tableau comparatif, défilement horizontal">',
+    );
+  }
 
 
   // Sanitize against XSS (e.g. <script>, onerror=) before injection.

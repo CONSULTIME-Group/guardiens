@@ -739,6 +739,14 @@
       width: 7.5rem;
     }
   }
+  .article-guide .article-table-hint {
+    @apply mb-1 text-sm text-muted-foreground;
+  }
+  @media (min-width: 1024px) {
+    .article-guide .article-table-hint {
+      display: none;
+    }
+  }
   @media (max-width: 1023px) {
     .article-guide .article-table-scroll > table {
       min-width: 640px;
