@@ -203,7 +203,7 @@ export async function testPushOnDevice(userId: string, requestId = crypto.random
       try { reason = (await (error.context as unknown as Response).clone().json())?.error; } catch { reason = undefined; }
       return reason === 'subscription_unavailable' ? 'unavailable' : 'rate_limited';
     }
-    if (status >= 500 && status !== 500) return 'uncertain'; // passerelle : envoi possible
+    if (status > 500 && status !== 503) return 'uncertain'; // passerelle ou délai serveur : envoi possible
     return 'error'; // 400, 401, 503, 500 claim_failed : rien envoyé
   }
   if (data?.accepted === true) return 'accepted';
@@ -256,6 +256,7 @@ export async function updatePushPreferences(userId: string, prefs: PushPreferenc
     ...(typeof prefs.nearbySits === 'boolean' ? { opt_in_nearby_sits: prefs.nearbySits } : {}),
   });
   if (!result.updated) throw new Error('push_not_updated');
+  if (typeof prefs.nearbySits === 'boolean') rememberNearby(userId, true, prefs.nearbySits);
 }
 
 export async function disablePush(userId?: string): Promise<void> {
