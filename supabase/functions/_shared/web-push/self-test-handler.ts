@@ -1,0 +1,75 @@
+// Test lancé par le membre depuis Paramètres. Identité issue du seul JWT
+// vérifié ; le corps ne contient que l'abonnement courant et une clé
+// d'idempotence. Aucun endpoint ni user_id accepté du client.
+import { extractBearer } from './auth.ts';
+import { validatePushEndpoint } from './endpoint.ts';
+import { validateSubscriptionKeys } from './keys.ts';
+import { buildTestPayload } from './payload.ts';
+import type { TestOutcome, TestSubscription, TestTarget } from './test-handler.ts';
+
+export interface SelfTestDependencies {
+  configured: boolean;
+  /** Renvoie l'identifiant du membre si le jeton est valide, sinon null. */
+  authenticate(token: string): Promise<string | null>;
+  claim(target: TestTarget): Promise<boolean>;
+  subscription(target: TestTarget): Promise<TestSubscription | null>;
+  send(subscription: TestSubscription, payload: string): Promise<number>;
+  finish(requestId: string, outcome: TestOutcome, status: number | null): Promise<boolean>;
+  headers?: Record<string, string>;
+}
+
+const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export async function handleSelfTest(req: Request, deps: SelfTestDependencies): Promise<Response> {
+  const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
+    status, headers: { ...(deps.headers ?? {}), 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
+  });
+  if (req.method !== 'POST') return json({ error: 'method_not_allowed' }, 405);
+  const token = extractBearer(req.headers.get('Authorization'));
+  if (!token) return json({ error: 'unauthorized' }, 401);
+  let userId: string | null = null;
+  try { userId = await deps.authenticate(token); } catch { userId = null; }
+  if (!userId) return json({ error: 'unauthorized' }, 401);
+  if (!deps.configured) return json({ error: 'push_not_configured' }, 503);
+
+  let body: Record<string, unknown>;
+  try {
+    const raw = await req.text();
+    if (raw.length > 1024) return json({ error: 'payload_too_large' }, 413);
+    body = JSON.parse(raw);
+    if (!body || typeof body !== 'object' || Array.isArray(body)) throw new Error();
+  } catch { return json({ error: 'invalid_request' }, 400); }
+  const keys = Object.keys(body).sort().join(',');
+  if (keys !== 'request_id,subscription_id'
+    || typeof body.request_id !== 'string' || !uuid.test(body.request_id)
+    || typeof body.subscription_id !== 'string' || !uuid.test(body.subscription_id)) {
+    return json({ error: 'invalid_request' }, 400);
+  }
+  const target: TestTarget = { request_id: body.request_id, user_id: userId, subscription_id: body.subscription_id };
+
+  try {
+    // Appartenance, appareil actif, idempotence et 1 test / 5 min, en une réservation.
+    if (!await deps.claim(target)) return json({ error: 'test_not_available', sent_attempts: 0 }, 429);
+  } catch { return json({ error: 'claim_failed', sent_attempts: 0 }, 500); }
+
+  let attempts = 0, outcome: TestOutcome = 'skipped', status: number | null = null;
+  try {
+    const sub = await deps.subscription(target);
+    if (sub && validatePushEndpoint(sub.endpoint).ok
+      && validateSubscriptionKeys({ auth: sub.auth_key, p256dh: sub.p256dh_key }).ok) {
+      attempts = 1;
+      try {
+        const code = await deps.send(sub, JSON.stringify(buildTestPayload(target.request_id)));
+        status = Number.isInteger(code) && code >= 100 && code <= 599 ? code : null;
+        outcome = status === null ? 'unknown' : status >= 200 && status < 300 ? 'accepted' : 'rejected';
+      } catch (error) {
+        const code = (error as { statusCode?: unknown })?.statusCode;
+        status = typeof code === 'number' && Number.isInteger(code) && code >= 100 && code <= 599 ? code : null;
+        outcome = status === null ? 'unknown' : 'rejected';
+      }
+    }
+  } catch { outcome = 'skipped'; }
+  try { await deps.finish(target.request_id, outcome, status); } catch { /* La demande reste consommée. */ }
+  // « accepted » = pris en charge par le fournisseur, pas reçu sur le téléphone.
+  return json({ ok: true, sent_attempts: attempts, accepted: outcome === 'accepted', uncertain: outcome === 'unknown', outcome });
+}
