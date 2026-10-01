@@ -5,7 +5,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 import webpush from 'npm:web-push@3.6.7';
 
-import { digestRunStatus } from '../_shared/cron-trace.ts';
+import { nearbyBudget, runStatus } from '../_shared/web-push/dispatch-budget.ts';
 import { isServiceRoleCaller } from '../_shared/web-push/auth.ts';
 import { readVapidConfig } from '../_shared/web-push/config.ts';
 import { validatePushEndpoint } from '../_shared/web-push/endpoint.ts';
@@ -146,21 +146,28 @@ Deno.serve(async (req) => {
 
   await processJobs((jobs ?? []) as Array<Record<string, unknown>>, MAIN);
 
-  // File annonces proches : independante. Si elle est absente (migration non
-  // appliquee) ou en erreur, messages et candidatures ne sont pas affectes.
-  const nearby = await admin.rpc('push_claim_nearby_jobs', { p_limit: limit });
-  if (nearby.error) {
-    counters.nearby_unavailable = 1;
-  } else {
+  // File annonces proches : independante, dans le MEME budget total que
+  // l'appel (comme avant ce lot) pour ne pas allonger l'execution du cron
+  // (toutes les 5 min) au-dela des reservations de 2 minutes.
+  const { budget, nearbyError } = await (async () => {
+    const remaining = nearbyBudget(limit, counters.claimed);
+    if (remaining === 0) return { budget: 0, nearbyError: false };
+    const nearby = await admin.rpc('push_claim_nearby_jobs', { p_limit: remaining });
+    if (nearby.error) return { budget: remaining, nearbyError: true };
     const list = (nearby.data ?? []) as Array<Record<string, unknown>>;
     counters.nearby_claimed = list.length;
     await processJobs(list, NEARBY);
-  }
+    return { budget: remaining, nearbyError: false };
+  })();
+  // Erreur de la file proche : visible (journal + statut partiel), l'envoi
+  // principal deja fait reste acquis.
+  if (nearbyError) counters.nearby_unavailable = 1;
 
   // Journal agrege uniquement : aucun endpoint, aucune cle, aucun membre.
-  console.log('dispatch-web-push', JSON.stringify(counters));
-  if (counters.claimed > 0 || counters.persistence_errors > 0) {
-    await recordRun(digestRunStatus(counters.persistence_errors), counters);
+  console.log('dispatch-web-push', JSON.stringify({ ...counters, nearby_budget: budget }));
+  const status = runStatus(counters.persistence_errors, nearbyError);
+  if (counters.claimed > 0 || counters.persistence_errors > 0 || nearbyError) {
+    await recordRun(status, counters, nearbyError ? 'push_claim_nearby_jobs failed' : undefined);
   }
-  return json({ ok: counters.persistence_errors === 0, ...counters }, counters.persistence_errors ? 500 : 200);
+  return json({ ok: status === 'success', status, ...counters }, counters.persistence_errors ? 500 : 200);
 });
