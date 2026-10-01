@@ -26,7 +26,7 @@ describe("landing.hero, entraide près de chez soi", () => {
     expect(landing["hero.title_main"]).toBe("Un gardien chez vous pour votre maison et vos animaux.");
     expect(landing["hero.title_main"]).not.toMatch(/toujours/);
     expect(landing["hero.lede"]).toContain("pas rémunérée");
-    expect(landing["hero.lede"]).toContain("quand vous partez");
+    expect(landing["hero.lede"]).toContain("pendant votre absence");
     expect(landing["hero.lede"]).toContain("reste de l'année");
     expect(landing["hero.motto"]).toBe("Tout commence par un échange, et finit par une rencontre.");
   });

@@ -62,7 +62,7 @@
       "title_eyebrow": "House-sitting et entraide",
       "title_main": "Un gardien chez vous pour votre maison et vos animaux.",
       "motto": "Tout commence par un échange, et finit par une rencontre.",
-      "lede": "Le house-sitting, c'est une personne qui séjourne chez vous quand vous partez et veille sur votre logement et vos animaux. Sur Guardiens, la garde n'est pas rémunérée, les frais éventuels se conviennent à part. Le reste de l'année, les membres s'entraident : un chien à promener, un potager à arroser.",
+      "lede": "Une personne séjourne chez vous pendant votre absence et veille sur le logement et les animaux. La garde n'est pas rémunérée, les frais se conviennent à part. Le reste de l'année, on s'entraide.",
       "cta_owner": "Publier mon annonce de garde",
       "cta_sitter": "Demander un coup de main",
       "cta_aid": "Je cherche ou je propose un coup de main →",
@@ -77,9 +77,9 @@
       "cta_member_owner": "Publier une annonce",
       "cta_member_sitter": "Proposer un coup de main",
       "cta_member_search": "Trouver une garde",
-      "links_aria": "Pour aller plus loin",
-      "link_definition": "Comprendre le house-sitting",
-      "link_prepare": "Préparer sa maison avant une garde",
+      "links_aria": "En savoir plus",
+      "link_definition": "Le house-sitting",
+      "link_prepare": "Préparer sa garde",
       "link_pricing": "Tarifs"
     },
     "toc": {
