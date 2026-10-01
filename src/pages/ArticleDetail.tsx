@@ -522,7 +522,7 @@ export default function ArticleDetail() {
         <img
           src={getOptimizedImageUrl(resolveImagePath(article.cover_image_url), 800, 75)}
           alt={altText}
-          className={isGuide ? "w-full h-[200px] sm:h-[260px] object-cover object-[center_45%]" : "w-full h-auto max-h-96 object-cover"}
+          className={isGuide ? "w-full h-[200px] sm:h-[260px] object-cover object-[center_25%]" : "w-full h-auto max-h-96 object-cover"}
           loading="eager"
           decoding="async"
           width={800}
