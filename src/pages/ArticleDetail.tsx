@@ -324,7 +324,7 @@ export default function ArticleDetail() {
  "headline": article.meta_title || article.title,
  "description": article.meta_description || article.excerpt,
  "url": `https://guardiens.fr/actualites/${article.slug}`,
- "datePublished": article.created_at,
+ "datePublished": isGuide ? (article.published_at || article.created_at) : article.created_at,
  "dateModified": article.updated_at,
  ...(article.cover_image_url && { "image": article.cover_image_url }),
  "author": (() => {
@@ -522,7 +522,7 @@ export default function ArticleDetail() {
         <img
           src={getOptimizedImageUrl(resolveImagePath(article.cover_image_url), 800, 75)}
           alt={altText}
-          className={isGuide ? "w-full h-[200px] sm:h-[260px] object-cover object-[center_25%]" : "w-full h-auto max-h-96 object-cover"}
+          className={isGuide ? (article.slug === "c-est-quoi-le-house-sitting" ? "w-full h-[200px] sm:h-[260px] object-cover object-[center_25%]" : "w-full h-[200px] sm:h-[260px] object-contain bg-muted/30") : "w-full h-auto max-h-96 object-cover"}
           loading="eager"
           decoding="async"
           width={800}
@@ -538,7 +538,7 @@ export default function ArticleDetail() {
  <ArticleRenderer content={article.content} userRole={isAuthenticated ? user?.role : undefined} slug={article.slug} placeholderValues={contentStats} />
 
  {/* Bloc « À propos de l'auteur », affiché si l'auteur est identifié (Jérémie / Elisa) */}
- {isGuide && <HouseSittingDiagnostic />}
+ {article.slug === "c-est-quoi-le-house-sitting" && <HouseSittingDiagnostic />}
 
  <ArticleAuthorBio authorName={article.author_name} />
 

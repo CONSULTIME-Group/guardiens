@@ -302,6 +302,186 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_articles_gsc_20261001: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_articles_gsc_tables_20261001: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       _backup_breed_content_20260825: {
         Row: {
           alimentation: string | null
