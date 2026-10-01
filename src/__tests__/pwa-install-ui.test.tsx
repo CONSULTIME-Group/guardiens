@@ -37,7 +37,9 @@ describe("guide d'installation", () => {
     mocks.state.standalone = true; mocks.state.canPrompt = true;
     render(<InstallAppSection />);
     expect(screen.getByText(/utilisez déjà Guardiens/)).toBeInTheDocument();
-    expect(screen.queryByRole("button")).toBeNull();
+    expect(screen.queryByRole("button", { name: /Installer/ })).toBeNull();
+    // Étape suivante distincte : activer les notifications, lien vers la rubrique.
+    expect(screen.getByRole("link", { name: "Activer les notifications" })).toHaveAttribute("href", "/settings?section=notifications");
   });
   it("permet de désactiver les relances sans fausse confirmation navigateur", () => {
     render(<InstallAppSection />);
