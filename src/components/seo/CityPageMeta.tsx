@@ -19,8 +19,9 @@ interface Props {
 }
 
 const META_TITLE_OVERRIDES: Record<string, string> = {
-  lyon: "Home sitter à Lyon, garde de chien, chat et maison | Guardiens",
-  grenoble: "Home sitting Grenoble, Gardien de confiance en Isère | Guardiens",
+  lyon: "Home sitting à Lyon : garde de chien, chat et logement | Guardiens",
+  annecy: "House-sitting à Annecy : garde de maison et d'animaux | Guardiens",
+  grenoble: "House-sitting à Grenoble : garde de maison et d'animaux | Guardiens",
   chambery: "Home sitting Chambéry, Gardien de confiance en Savoie | Guardiens",
 };
 

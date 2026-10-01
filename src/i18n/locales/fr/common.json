@@ -59,10 +59,10 @@
   "landing": {
     "hero": {
       "eyebrow": "Gardes · Coups de main · Urgences",
-      "title_eyebrow": "Garde de maison et entraide",
-      "title_main": "Près de chez vous, il y a toujours quelqu'un.",
+      "title_eyebrow": "House-sitting et entraide",
+      "title_main": "Un gardien chez vous pour votre maison et vos animaux.",
       "motto": "Tout commence par un échange, et finit par une rencontre.",
-      "lede": "Quelqu'un pour garder votre maison et vos animaux quand vous partez. Quelqu'un pour une partie de belote, un chien à promener ou le potager à arroser le reste de l'année.",
+      "lede": "Une personne séjourne chez vous pendant votre absence et veille sur le logement et les animaux. La garde n'est pas rémunérée, les frais se conviennent à part. Le reste de l'année, on s'entraide.",
       "cta_owner": "Publier mon annonce de garde",
       "cta_sitter": "Demander un coup de main",
       "cta_aid": "Je cherche ou je propose un coup de main →",
@@ -317,7 +317,7 @@
       "body_1": "Guardiens est un réseau d'entraide entre particuliers, organisé par affinité autant que par proximité. On y garde des maisons, on s'y rend des services, on y rencontre des gens. À un kilomètre comme à mille.",
       "body_2": "La garde de maison et la garde d'animaux à domicile en sont l'usage principal. Un gardien s'installe chez vous pendant votre absence et veille sur ce que vous laissez : votre maison, votre jardin, vos animaux.",
         "body_3": "À côté des gardes, les membres se rendent des coups de main : arrosage, courses, compagnie, un colis à réceptionner. L'échange se décide entre vous. La mise en relation s'appuie sur un score d'affinité calculé sur plusieurs critères pondérés, propres à chaque couple. Les membres font vérifier leur identité et publient des avis croisés après leurs expériences.",
-        "body_4": "La mise en relation s'appuie sur un score d'affinité calculé sur plusieurs critères pondérés, propres à chaque couple, où le mode de vie compte autant que la distance. Les membres documentent leur profil, font vérifier leur identité et publient des avis croisés après leurs expériences. Un statut de gardien d'urgence répond aux imprévus.",
+        "body_4": "La mise en relation s'appuie sur un score d'affinité calculé sur plusieurs critères pondérés, propres à chaque couple, où le mode de vie compte autant que la distance. Les membres documentent leur profil, font vérifier leur identité et publient des avis croisés après leurs expériences. Un réseau de gardiens d'urgence est en préparation.",
         "body_5": "Guardiens publie aussi des guides de race et des guides locaux ville par ville, une sélection d'associations et de refuges présentés avec leurs besoins du moment, et un journal de conseils pratiques.",
         "body_6": "Les membres peuvent aussi ouvrir un chantier chez eux, un potager, un abri, un mur en pierre sèche. Des gens viennent participer quelques jours et repartent avec un savoir-faire appris sur place. Cette partie du réseau commence tout juste, et nous l'alimentons à la main.",
         "body_7": "Le réseau couvre la France entière, et met en relation les Français de l'étranger avec des gardiens sur place. Vous accédez à l'ensemble des fonctionnalités."
@@ -364,8 +364,8 @@
         }
       }
     },
-    "meta_title": "Garde de maison et d'animaux entre particuliers | Guardiens",
-    "meta_description": "House-sitting en France : un gardien veille sur votre maison et vos animaux pendant votre absence. Vous échangez, vous pouvez vous rencontrer, puis vous choisissez.",
+    "meta_title": "House-sitting : faire garder sa maison et ses animaux | Guardiens",
+    "meta_description": "Un gardien séjourne chez vous pendant votre absence et veille sur la maison et les animaux, sans rémunération de la garde. Échangez, rencontrez, choisissez.",
     "how": {
       "cta_owner": "Publier mon annonce",
       "cta_secondary": "Ou commencer par un coup de main →",

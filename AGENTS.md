@@ -20,3 +20,5 @@
 - Espace propriétaire sans doublons (lot P4) : les identifiants de « Pour vous », « Près de chez vous » et des candidatures sont calculés par src/lib/ownerSitterPool.ts, lus en deux salves par src/lib/ownerSpaceReads.ts (affinité, puis avis et compétences une fois le Top 3 annoncé), mesurés sur le simulateur réaliste src/__tests__/p4/ (filtres appliqués, plafond 1 000 lignes) ; pourquoi : le simulateur P1b ignore les filtres et ne voit pas les doublons de production.
 
 - Articles guides refondus : la liste fermée GUIDE_ARTICLE_SLUGS (ArticleRenderer) active la mise en page de lecture dédiée (résumé avant l'image, ancres sur les titres, liens soulignés, un seul bloc de ressources) ; le texte reste en base, `:::faq Titre` porte l'unique titre FAQ ; pourquoi : refondre un article sans changer le rendu des autres.
+
+- Pages villes et guides locaux refondus : liste fermée REVISED_CITY_SLUGS (src/data/cityContent.ts, FAQ visible et JSON-LD lus dans `faq`) et GUIDE_OVERRIDES (src/data/guideOverrides.ts, textes sourcés et lieux retenus par identifiant, base intacte) ; pourquoi : refondre une page sans toucher les autres villes ni réécrire les lignes partagées en base.

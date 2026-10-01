@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Suspense, useState, useMemo, useEffect } from "react";
 import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
+import { GUIDE_OVERRIDES } from "@/data/guideOverrides";
 
 // Carte chargée uniquement quand l'utilisateur s'en approche (lazy + IntersectionObserver)
 // pour préserver le LCP et limiter le poids JS initial.
@@ -92,7 +93,7 @@ const GuideDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
-  const { data: guide, isLoading: guideLoading } = useQuery({
+  const { data: rawGuide, isLoading: guideLoading } = useQuery({
     queryKey: ["city-guide", slug],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -107,12 +108,22 @@ const GuideDetail = () => {
     enabled: !!slug,
   });
 
+  // Guides refondus (liste fermée, src/data/guideOverrides.ts) : textes sourcés.
+  const override = rawGuide ? GUIDE_OVERRIDES[rawGuide.slug] : undefined;
+  const guide = useMemo(
+    () =>
+      rawGuide && override
+        ? { ...rawGuide, intro: override.intro, ideal_for: override.idealFor, leash_rule: override.leashRule, leash_rule_source: override.leashRuleSource }
+        : rawGuide,
+    [rawGuide, override],
+  );
+
   // La page ville /house-sitting/<slug> n'existe pas pour chaque guide :
   // ne lier que si elle est réellement servie, sinon le lien mène à un 404.
   const hasCityPage = useCityPageExists(guide?.slug ?? null);
   const hasDepartmentPage = useDepartmentPageExists(guide?.department ? slugify(guide.department) : null);
 
-  const { data: places = [], isSuccess: placesLoaded } = useQuery({
+  const { data: rawPlaces = [], isSuccess: placesLoaded } = useQuery({
     queryKey: ["guide-places", guide?.id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -126,6 +137,15 @@ const GuideDetail = () => {
     },
     enabled: !!guide?.id,
   });
+
+  // Guide refondu : seuls les lieux retenus sont affichés, conseils corrigés.
+  const places = useMemo(
+    () =>
+      override
+        ? rawPlaces.filter((p) => override.places[p.id]).map((p) => ({ ...p, ...override.places[p.id] }))
+        : rawPlaces,
+    [rawPlaces, override],
+  );
 
   // Le contenu principal (entête, intro, liste des lieux) doit être dans le DOM
   // avant que Prerender ne fige la page. La carte Leaflet ne bloque pas.
@@ -312,13 +332,13 @@ const GuideDetail = () => {
     return <NotFound />;
   }
 
-  const metaTitle = hasCommercialPlaces
+  const metaTitle = override ? override.metaTitle : hasCommercialPlaces
     ? t("guide_detail.meta_title", { city: guide.city })
     : t("guide_detail.meta_title_nature", { city: guide.city });
-  const h1Title = hasCommercialPlaces
+  const h1Title = override ? override.h1 : hasCommercialPlaces
     ? t("guide_detail.title", { city: guide.city })
     : t("guide_detail.title_nature", { city: guide.city });
-  const metaDescription = hasCommercialPlaces
+  const metaDescription = override ? override.metaDescription : hasCommercialPlaces
     ? t("guide_detail.meta_description", { city: guide.city, ideal: guide.ideal_for })
     : t("guide_detail.meta_description_nature", { city: guide.city, ideal: guide.ideal_for });
 
@@ -390,6 +410,33 @@ const GuideDetail = () => {
                 </div>
               ))}
             </dl>
+          </div>
+        )}
+
+        {override && (
+          <div className="max-w-5xl mx-auto px-4 pt-8">
+            <h2 className="font-heading text-xl font-semibold text-foreground mb-3">À retenir avant de sortir</h2>
+            <ul className="list-disc pl-5 space-y-1.5 text-foreground/80">
+              {override.keyPoints.map((k) => <li key={k}>{k}</li>)}
+            </ul>
+            <p className="mt-4 text-sm text-foreground/80">
+              Seuls les lieux dont l'accueil des chiens ou la règle de laisse est appuyé par une source sont listés ci-dessous. Les panneaux sur place font foi.
+            </p>
+            <p className="mt-2 text-sm font-medium text-muted-foreground">Sources</p>
+            <ul className="mt-1 space-y-1 text-sm">
+              {override.sources.map((src) => (
+                <li key={src.url}>
+                  <a href={src.url} target="_blank" rel="noopener noreferrer" className="text-primary underline underline-offset-4 break-words">{src.label}</a>
+                </li>
+              ))}
+            </ul>
+            {hasCityPage && (
+              <p className="mt-4 text-sm">
+                <Link to={`/house-sitting/${guide.slug}`} className="text-primary underline underline-offset-4">
+                  Organiser une garde de maison et d'animaux à {guide.city}
+                </Link>
+              </p>
+            )}
           </div>
         )}
 

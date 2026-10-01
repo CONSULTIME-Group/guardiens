@@ -211,6 +211,11 @@ const Landing = () => {
                 {t("landing.hero.cta_sitter")}
               </Button>
             </div>
+            <nav aria-label={"En savoir plus"} className="mt-3 flex flex-wrap gap-x-4 gap-y-1 font-body text-xs md:text-sm text-white/90">
+              <Link to="/actualites/c-est-quoi-le-house-sitting" className="underline underline-offset-4 hover:text-white">Comprendre le house-sitting</Link>
+              <Link to="/actualites/preparer-maison-avant-garde" className="underline underline-offset-4 hover:text-white">Préparer sa garde</Link>
+              <Link to="/tarifs" className="underline underline-offset-4 hover:text-white">Tarifs</Link>
+            </nav>
             <HomeProximitySearch onLocated={setHomeOrigin} />
             {isPressHighlighted && (
               <a

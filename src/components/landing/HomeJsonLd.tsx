@@ -7,7 +7,7 @@ import howtoStep2 from "@/assets/illustrations/howto-step-2-rencontre-448.webp";
 import howtoStep3 from "@/assets/illustrations/howto-step-3-depart-448.webp";
 
 // Mise à jour manuelle à chaque retouche du contenu de la home.
-const HOME_CONTENT_LAST_MODIFIED = "2026-09-24";
+const HOME_CONTENT_LAST_MODIFIED = "2026-10-01";
 
 
 /**
@@ -108,9 +108,9 @@ export default function HomeJsonLd() {
               "@type": "WebPage",
               "@id": "https://guardiens.fr/#webpage",
               url: "https://guardiens.fr/",
-              name: "Garde d'animaux à domicile, de maison et de jardin, house-sitting près de chez vous | Guardiens",
+              name: "House-sitting : faire garder sa maison et ses animaux | Guardiens",
               description:
-                "House-sitting, garde d'animaux à domicile, de maison et de jardin, et entraide entre gens du coin. Partout en France.",
+                "Un gardien séjourne chez vous pendant votre absence et veille sur la maison et les animaux, sans rémunération de la garde.",
               inLanguage: "fr-FR",
               isPartOf: { "@id": "https://guardiens.fr/#website" },
               about: { "@id": "https://guardiens.fr/#organization" },

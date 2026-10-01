@@ -18,13 +18,13 @@ const TARGETS = [
 
 // Marqueurs attendus (présence obligatoire)
 const REQUIRED_SNIPPETS = [
-  "Garde de maison et d'animaux entre particuliers", // title + og:title + twitter:title
-  "House-sitting en France", // description
-  "Vous choisissez après une rencontre", // og:description / twitter:description
+  "House-sitting : faire garder sa maison et ses animaux", // title + og:title + twitter:title
+  "sans rémunération de la garde", // description, og:description, twitter:description
 ];
 
 // Marqueurs interdits (anciennes versions, doivent être absents)
 const FORBIDDEN_SNIPPETS = [
+  "Garde de maison et d'animaux entre particuliers",
   "Partez l'esprit tranquille",
   "Un gardien près de chez vous s'occupe de votre maison",
 ];

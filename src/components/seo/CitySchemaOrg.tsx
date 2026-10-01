@@ -1,5 +1,6 @@
 import type { CityData } from "@/data/cities";
 import type { CityStats } from "@/hooks/useCityStats";
+import { getCityContent, REVISED_CITY_SLUGS } from "@/data/cityContent";
 
 interface Props {
  city: CityData;
@@ -145,7 +146,10 @@ const FAQ_BY_SLUG: Record<string, Array<{ q: string; a: string }>> = {
 
 const CitySchemaOrg = ({ city, departmentSlug }: Props) => {
  const isLyon = city.slug === "lyon";
- const faqItems = FAQ_BY_SLUG[city.slug] || DEFAULT_FAQ(city.name);
+ const revised = REVISED_CITY_SLUGS.has(city.slug);
+ // Ville refondue : même source que la FAQ visible (cityContent.faq).
+ const revisedFaq = revised ? getCityContent(city.slug)?.faq : undefined;
+ const faqItems = revisedFaq?.length ? revisedFaq : FAQ_BY_SLUG[city.slug] || DEFAULT_FAQ(city.name);
 
  const graph: any[] = [
  {
@@ -220,7 +224,8 @@ const CitySchemaOrg = ({ city, departmentSlug }: Props) => {
  // LocalBusiness pour toutes les villes hub (Lyon, Annecy, Grenoble, Chambéry…)
  // Éligibilité Google Local Pack + AI Overviews.
  const LOCAL_BUSINESS_CITIES = ["lyon", "annecy", "grenoble", "chambery", "caluire-et-cuire"];
- if (LOCAL_BUSINESS_CITIES.includes(city.slug)) {
+ // Ville refondue : pas de LocalBusiness fictif.
+ if (LOCAL_BUSINESS_CITIES.includes(city.slug) && !revised) {
  graph.push({
  "@type": "LocalBusiness",
  name: `Guardiens, Garde d'animaux, de maison et de jardin à ${city.name}`,
