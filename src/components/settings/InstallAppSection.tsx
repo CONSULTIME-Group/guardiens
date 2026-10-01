@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Smartphone, CheckCircle2 } from "lucide-react";
-import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { usePwaInstall } from "@/hooks/usePwaInstall";
 import { declareInstalled, installPlatform, requestInstall } from "@/lib/pwa-install";
@@ -59,7 +58,7 @@ export default function InstallAppSection() {
     {(standalone || knownInstalled) && <div className="rounded-xl border bg-card p-4 space-y-2">
       <h3 className="font-semibold">Étape suivante : les notifications</h3>
       <p className="text-sm">L'installation n'active pas les notifications. Choisissez ce que vous voulez recevoir sur cet appareil (messages, candidatures, nouvelles annonces près de chez vous), puis faites un test.</p>
-      <Button asChild variant="outline" size="sm"><Link to="/settings?section=notifications">Activer les notifications</Link></Button>
+      <Button asChild variant="outline" size="sm"><a href="/settings?section=notifications">Activer les notifications</a></Button>
     </div>}
     <p role="status" className="text-sm">{message}</p>
     <p className="text-sm text-muted-foreground">Une connexion internet reste nécessaire. Les notifications s'activent séparément, dans la rubrique Notifications sur cet appareil.</p>

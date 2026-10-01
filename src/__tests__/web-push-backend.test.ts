@@ -178,7 +178,7 @@ describe('requetes de l abonnement', () => {
     });
     const prefs = parsePreferencesInput({ subscription_id: id, opt_in_applications: true });
     expect(prefs.ok && prefs.value).toEqual({
-      subscriptionId: id, optInMessages: false, optInApplications: true,
+      subscriptionId: id, optInMessages: undefined, optInApplications: true, optInNearbySits: undefined,
     });
   });
 
