@@ -168,3 +168,6 @@ project_id = "erhccyqevdyevpyctsjj"
 
   [functions.send-web-push-test]
     verify_jwt = true
+
+  [functions.push-self-test]
+    verify_jwt = false

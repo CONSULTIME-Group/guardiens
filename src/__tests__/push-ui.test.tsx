@@ -48,7 +48,7 @@ describe('Push settings',()=>{
   it('never prompts automatically and enables only on click',async()=>{
     show(); const button=await screen.findByRole('button',{name:'Activer sur cet appareil'});
     expect(mocks.enable).not.toHaveBeenCalled();fireEvent.click(button);
-    expect(await screen.findByText('Notifications activées sur cet appareil.')).toBeInTheDocument();
+    expect(await screen.findByText('Notifications activées sur cet appareil. Vous pouvez maintenant les tester.')).toBeInTheDocument();
     expect(mocks.enable).toHaveBeenCalledWith('fixture-user',{enabled:true,publicKey:'public-fixture'},{messages:true,applications:true});
   });
   it('configuration absent does not offer permission',async()=>{
