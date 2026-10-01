@@ -110,7 +110,7 @@ export default function HomeJsonLd() {
               url: "https://guardiens.fr/",
               name: "House-sitting : faire garder sa maison et ses animaux | Guardiens",
               description:
-                "Un gardien séjourne chez vous pendant votre absence et veille sur la maison et les animaux, sans rémunération de la garde. Entraide entre membres le reste de l'année.",
+                "Un gardien séjourne chez vous pendant votre absence et veille sur la maison et les animaux, sans rémunération de la garde.",
               inLanguage: "fr-FR",
               isPartOf: { "@id": "https://guardiens.fr/#website" },
               about: { "@id": "https://guardiens.fr/#organization" },
