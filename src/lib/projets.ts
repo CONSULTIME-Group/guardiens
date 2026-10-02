@@ -227,7 +227,9 @@ export function projetMetaLine(
   duration?: string | null,
   mois?: string[] | null,
 ): string | null {
-  const period = formatProjetMonths(mois) || formatProjetPeriod(start, end);
+  // Un jour précis connu se lit en entier (« Samedi 14 novembre 2026 ») ;
+  // sinon mois d'accueil ou mois de la période, comme avant.
+  const period = formatProjetDay(start, end) || formatProjetMonths(mois) || formatProjetPeriod(start, end);
   const parts = [period, projetDurationLabel(duration)].filter(Boolean);
   return parts.length > 0 ? parts.join(" · ") : null;
 }

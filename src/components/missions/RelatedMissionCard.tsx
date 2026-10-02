@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { storageImageUrl } from "@/lib/storageImage";
+import { missionCategoryLabel } from "@/lib/missionCategories";
 
 /**
  * Carte "Près de chez vous" utilisée dans PublicMissionView & SmallMissionDetail.
@@ -14,12 +15,6 @@ import { storageImageUrl } from "@/lib/storageImage";
  *   contrepartie évoquée en bas). La carte reste dense et lisible sans image.
  */
 
-const CATEGORY_LABEL: Record<string, string> = {
-  animals: "Animaux",
-  garden: "Jardin",
-  house: "Maison",
-  skills: "Savoir-faire",
-};
 
 const CATEGORY_GRADIENT: Record<string, string> = {
   animals: "from-primary/25 via-primary/10 to-transparent",
@@ -70,9 +65,11 @@ interface Props {
 
 const RelatedMissionCard = ({ to, photo, category, title, city, timeAgo, exchangeOffer }: Props) => {
   const [imgError, setImgError] = useState(false);
-  const cat = (category || "animals") as string;
-  const label = CATEGORY_LABEL[cat] || CATEGORY_LABEL.animals;
-  const gradient = CATEGORY_GRADIENT[cat] || CATEGORY_GRADIENT.animals;
+  // Libellé lu dans la source unique : une catégorie hors des quatre
+  // illustrées (courses, transport, autre...) ne doit jamais devenir « Animaux ».
+  const cat = (category || "other") as string;
+  const label = missionCategoryLabel(cat);
+  const gradient = CATEGORY_GRADIENT[cat] || "from-muted-foreground/15 via-muted to-transparent";
   const showImage = !!photo && !imgError;
 
   // Sans photo : on abandonne le grand pavé 4:3 vide au profit d'une carte

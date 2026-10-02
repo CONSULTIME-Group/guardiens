@@ -22,23 +22,24 @@ const renderContent = (isAuthenticated: boolean) => {
 describe("EntraideHub, contenu explicite", () => {
   it("présente le modèle complet aux visiteurs sans compte", () => {
     const { onNeed, onHelp } = renderContent(false);
-    expect(screen.getByRole("heading", { name: /Et si, à quelques kilomètres/ })).toBeInTheDocument();
-    expect(screen.getByText(/Arroser quelques plantes. Nourrir un chat./)).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Concrètement" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "Un coup de main près de chez vous" })).toBeInTheDocument();
+    expect(screen.getByText(/Arroser des plantes, nourrir un chat/)).toBeInTheDocument();
+    expect(screen.queryByText(/Dix personnes/)).not.toBeInTheDocument();
+    expect(screen.getByText(/aux membres disponibles près de chez vous/)).toBeInTheDocument();
     expect(screen.getByRole("region", { name: "Comment ça marche" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Questions fréquentes" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Faut-il payer pour utiliser l'Entraide ?" }));
-    expect(screen.getByText("L'Entraide est ouverte à tous les membres. Vous convenez ensemble d'un service ou d'une attention en retour.")).toBeInTheDocument();
+    expect(screen.getByText(/^Non. L'Entraide est gratuite/)).toBeInTheDocument();
     expect(screen.queryByText("Résiliable à tout moment")).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "J'ai besoin d'un coup de main" }));
-    fireEvent.click(screen.getByRole("button", { name: "Je veux bien donner un coup de main" }));
+    fireEvent.click(screen.getByRole("button", { name: "Demander de l'aide" }));
+    fireEvent.click(screen.getByRole("button", { name: "Proposer mon aide" }));
     expect(onNeed).toHaveBeenCalledOnce();
     expect(onHelp).toHaveBeenCalledOnce();
   });
 
   it("conserve le bouton membre et masque Comment ça marche", () => {
     renderContent(true);
-    expect(screen.getByRole("button", { name: "J'ai besoin d'un coup de main" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Demander de l'aide" })).toBeInTheDocument();
     expect(screen.queryByRole("region", { name: "Comment ça marche" })).not.toBeInTheDocument();
   });
 

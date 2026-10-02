@@ -62,3 +62,12 @@
 - [x] Déployer fetch-seo-data (modifiée localement) après GO, contrôle 401
 
 - [x] Lot J3 : corrections Alma après test réel (action principale, titre, CLASSEMENT, onglets admin Alma, indicateur action, profil <40 %, signal test fondateur, admins exclus)
+
+## SEO et compréhension projets/entraide (02/10/2026)
+
+- [x] Projets au plan du site (build + fonction) et robots alignés
+- [x] /projets : titre, intro, deux actions, manifeste retiré, date exacte sur carte
+- [x] /petites-missions : intro, une explication, FAQ tarif
+- [x] Fiches : note compte, contrepartie unique, recommandations honnêtes, note carte projet externe
+- [x] Tests ciblés, captures, build final
+- [ ] Déployer la fonction sitemap (attend GO publication)

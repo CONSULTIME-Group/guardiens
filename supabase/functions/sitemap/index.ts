@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { isIndexableEntraideMission } from "./mission-entries.ts";
+import { isIndexableEntraideMission, isIndexableProjetMission } from "./mission-entries.ts";
 
 const SITE_URL = "https://guardiens.fr";
 
@@ -9,6 +9,7 @@ const staticPages = [
   { loc: "/faq", priority: "0.8", changefreq: "weekly" },
   { loc: "/contact", priority: "0.8", changefreq: "weekly" },
   { loc: "/petites-missions", priority: "0.8", changefreq: "weekly" },
+  { loc: "/projets", priority: "0.7", changefreq: "weekly" },
   { loc: "/petites-missions/lyon", priority: "0.7", changefreq: "weekly" },
   { loc: "/petites-missions/marseille", priority: "0.7", changefreq: "weekly" },
   { loc: "/petites-missions/strasbourg", priority: "0.7", changefreq: "weekly" },
@@ -109,6 +110,7 @@ Deno.serve(async () => {
     { data: departmentPages },
     { data: breedProfiles },
     { data: entraideMissions },
+    { data: projetMissions },
   ] = await Promise.all([
     supabase
       .from("articles")
@@ -144,6 +146,14 @@ Deno.serve(async () => {
       .eq("status", "open")
       .not("slug", "is", null)
       .neq("category", "projet")
+      .order("created_at", { ascending: false }),
+    // Projets participatifs : lus sur la vue publique, servis sous /projets/{slug}.
+    supabase
+      .from("public_small_missions")
+      .select("slug, description, status, category, date_needed, end_date, created_at")
+      .eq("category", "projet")
+      .eq("status", "open")
+      .not("slug", "is", null)
       .order("created_at", { ascending: false }),
   ]);
 
@@ -240,6 +250,14 @@ Deno.serve(async () => {
         "weekly",
         "0.5",
       ));
+    }
+  }
+
+  // Fiches projets participatifs, même règle que leur balise robots.
+  if (projetMissions) {
+    for (const projet of projetMissions) {
+      if (!isIndexableProjetMission(projet)) continue;
+      entries.push(urlEntry(`/projets/${projet.slug}`, projet.created_at.split("T")[0], "weekly", "0.5"));
     }
   }
 

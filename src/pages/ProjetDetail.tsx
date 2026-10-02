@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { logger } from "@/lib/logger";
 import PublicMissionView from "@/components/missions/PublicMissionView";
 import { Button } from "@/components/ui/button";
+import { isIndexableProjetMission } from "../../supabase/functions/_shared/entraideMissionIndexability.js";
 
 /** Même minimum de caractères que l'entraide (SmallMissionDetail). */
 const MIN_MESSAGE_LEN = 10;
@@ -177,6 +178,7 @@ const ProjetDetail = () => {
       timeAgoFr={timeAgoFr}
       memberSinceLong={memberSinceLong}
       onShare={onShare}
+      noindex={!isIndexableProjetMission(projet)}
       onApply={user ? handleApply : undefined}
       hasApplied={hasApplied}
       applying={applying}

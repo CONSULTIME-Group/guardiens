@@ -17,7 +17,7 @@ import { sitRichnessRejectionReason } from "../src/lib/sitIndexability.js";
 import { isAssociationIndexable } from "../src/lib/associationIndexability.js";
 import { isSitterProfileIndexable } from "../src/lib/sitterProfileIndexability.js";
 import { mergedBreedTarget } from "../src/lib/breedFicheMerges.js";
-import { isIndexableEntraideMission } from "../supabase/functions/_shared/entraideMissionIndexability.js";
+import { isIndexableEntraideMission, isIndexableProjetMission } from "../supabase/functions/_shared/entraideMissionIndexability.js";
 import { fetchOrCache as sharedFetchOrCache } from "./lib/sitemapCache.mjs";
 
 
@@ -184,7 +184,7 @@ async function main() {
 
   console.log("🗺️  Sitemap incremental build…");
 
-  const [articles, seoCity, guides, depts, breeds, profiles, sits, associations, entraideMissions] = await Promise.all([
+  const [articles, seoCity, guides, depts, breeds, profiles, sits, associations, entraideMissions, projetMissions] = await Promise.all([
     fetchOrCache(
       "articles", cache,
       // Sonde composite (date + nombre) : sur une requête filtrée, la sortie
@@ -387,6 +387,26 @@ async function main() {
         priority: "0.5",
       }))
     ),
+    // Projets participatifs sous /projets/{slug}. Clé d'invalidation nulle
+    // volontaire : rechargement à chaque build, pour qu'un changement de
+    // catégorie, de statut ou de date ne laisse jamais une ancienne URL.
+    fetchOrCache(
+      "small_missions_projets_v1", cache,
+      async () => null,
+      async () => (await supabase
+        .from("public_small_missions")
+        .select("slug, description, status, category, date_needed, end_date, created_at")
+        .eq("category", "projet")
+        .eq("status", "open")
+        .not("slug", "is", null)
+        .limit(2000)).data,
+      rows => rows.filter(m => isIndexableProjetMission(m)).map(m => ({
+        loc: `/projets/${m.slug}`,
+        lastmod: m.created_at.split("T")[0],
+        changefreq: "weekly",
+        priority: "0.5",
+      }))
+    ),
   ]);
 
 
@@ -409,6 +429,7 @@ async function main() {
   for (const e of profiles) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
   for (const e of sits) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
   for (const e of entraideMissions) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
+  for (const e of projetMissions) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
   // Garde-fou durable : si la base publie des fiches indexables et que la
   // génération n'en produit aucune, le sitemap partirait amputé en silence.
   {

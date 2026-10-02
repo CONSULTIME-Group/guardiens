@@ -214,7 +214,7 @@ const SearchListingCard = ({
       </article>
     );
 
-    return isClickable ? <Link to={projetLink}>{projetCard}</Link> : <>{projetCard}</>;
+    return isClickable ? <Link to={projetLink} aria-label={`Voir le projet : ${item.title || "Sans titre"}`}>{projetCard}</Link> : <>{projetCard}</>;
   }
 
   if (isMission) {
