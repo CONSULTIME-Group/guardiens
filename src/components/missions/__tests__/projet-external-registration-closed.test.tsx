@@ -1,7 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { HelmetProvider } from "react-helmet-async";
 vi.mock("@/components/maps/ApproximateLocationMap", () => ({ default: () => null }));
 import PublicMissionView from "@/components/missions/PublicMissionView";
 
@@ -12,10 +11,10 @@ const base = (over: any) => ({
   date_needed: "2026-11-14", photos: [], accepting_applications: true, ...over,
 });
 const renderIt = (m: any) => render(
-  <HelmetProvider><MemoryRouter>
+  <MemoryRouter>
     <PublicMissionView mission={m} author={null} catMeta={{ label: "Projet" } as any} relatedMissions={[]}
       titlecaseCity={(s) => s || ""} timeAgoFr={() => ""} memberSinceLong={() => null} onShare={() => {}} />
-  </MemoryRouter></HelmetProvider>);
+  </MemoryRouter>);
 
 describe("projet à inscription externe", () => {
   it("ouvert : boutons d'inscription", () => {
