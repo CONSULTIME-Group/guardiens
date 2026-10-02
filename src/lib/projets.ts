@@ -232,3 +232,40 @@ export function projetMetaLine(
   return parts.length > 0 ? parts.join(" · ") : null;
 }
 
+
+/**
+ * Lien d'inscription externe écrit dans le texte d'un projet : premier lien
+ * https trouvé. Aucun autre schéma n'est accepté (pas de http, pas de javascript:).
+ */
+export function externalRegistrationUrl(text?: string | null): string | null {
+  if (!text) return null;
+  const match = text.match(/https:\/\/[^\s<>"')]+/i);
+  if (!match) return null;
+  const candidate = match[0].replace(/[.,;:!?]+$/, "");
+  try {
+    return new URL(candidate).protocol === "https:" ? candidate : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Projet d'un seul jour : « Samedi 14 novembre 2026 », sinon null. */
+export function formatProjetDay(start?: string | null, end?: string | null): string | null {
+  if (!start || (end && end !== start)) return null;
+  const d = new Date(`${start.slice(0, 10)}T12:00:00`);
+  if (isNaN(d.getTime())) return null;
+  return capitalize(new Intl.DateTimeFormat("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(d));
+}
+
+/**
+ * Le texte d'une annonce est enregistré sur une seule ligne (espaces
+ * fusionnés en base) : on le découpe en paragraphes de deux phrases.
+ */
+export function projetParagraphs(text: string): string[] {
+  const explicit = text.split(/\n{2,}/).map((s) => s.trim()).filter(Boolean);
+  if (explicit.length > 1) return explicit;
+  const sentences = text.trim().split(/(?<=[.!?…])\s+(?=[A-ZÀ-ÖØ-Þ])/);
+  const out: string[] = [];
+  for (let i = 0; i < sentences.length; i += 2) out.push(sentences.slice(i, i + 2).join(" "));
+  return out;
+}

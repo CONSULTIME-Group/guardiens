@@ -168,7 +168,9 @@ const EntraideHub = () => {
       const responseCounts = new Map((countsResult.data || []).map((row) => [row.mission_id, row.response_count || 0]));
       const today = new Date();
       today.setHours(0, 0, 0, 0);
+      // Les projets participatifs ont leur propre page (/projets).
       const openNeeds = (needsResult.data || []).filter((row) => {
+        if (row.category === "projet") return false;
         const date = row.end_date || row.date_needed;
         return !date || new Date(date) >= today;
       });

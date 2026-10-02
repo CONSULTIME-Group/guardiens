@@ -1310,6 +1310,49 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_small_mission_plantation_20261002: {
+        Row: {
+          backed_up_at: string | null
+          category: Database["public"]["Enums"]["small_mission_category"] | null
+          description: string | null
+          exchange_offer: string | null
+          id: string | null
+          max_participants: number | null
+          mission_type: Database["public"]["Enums"]["mission_type_enum"] | null
+          slug: string | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          backed_up_at?: string | null
+          category?:
+            | Database["public"]["Enums"]["small_mission_category"]
+            | null
+          description?: string | null
+          exchange_offer?: string | null
+          id?: string | null
+          max_participants?: number | null
+          mission_type?: Database["public"]["Enums"]["mission_type_enum"] | null
+          slug?: string | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          backed_up_at?: string | null
+          category?:
+            | Database["public"]["Enums"]["small_mission_category"]
+            | null
+          description?: string | null
+          exchange_offer?: string | null
+          id?: string | null
+          max_participants?: number | null
+          mission_type?: Database["public"]["Enums"]["mission_type_enum"] | null
+          slug?: string | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       _backup_small_missions_offres_20260921: {
         Row: {
           accepting_applications: boolean | null
