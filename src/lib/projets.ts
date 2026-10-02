@@ -234,19 +234,36 @@ export function projetMetaLine(
 
 
 /**
- * Lien d'inscription externe écrit dans le texte d'un projet : premier lien
- * https trouvé. Aucun autre schéma n'est accepté (pas de http, pas de javascript:).
+ * Lien d'inscription externe : uniquement un lien https précédé explicitement
+ * du mot « inscription » (ou « s'inscrire ») et d'un deux-points, par exemple
+ * « Inscription sur le formulaire en ligne : https://... ». Un simple lien
+ * informatif ne compte pas. Plusieurs liens d'inscription différents : ambigu, null.
  */
 export function externalRegistrationUrl(text?: string | null): string | null {
   if (!text) return null;
-  const match = text.match(/https:\/\/[^\s<>"')]+/i);
-  if (!match) return null;
-  const candidate = match[0].replace(/[.,;:!?]+$/, "");
-  try {
-    return new URL(candidate).protocol === "https:" ? candidate : null;
-  } catch {
-    return null;
+  const re = /(?:inscription|s['’]inscrire)[^:.!?\n]{0,60}:\s*(https:\/\/[^\s<>"')]+)/gi;
+  const found = new Set<string>();
+  for (const m of text.matchAll(re)) {
+    const candidate = m[1].replace(/[.,;:!?]+$/, "");
+    try {
+      if (new URL(candidate).protocol === "https:") found.add(candidate);
+    } catch {
+      /* lien invalide ignoré */
+    }
   }
+  return found.size === 1 ? [...found][0] : null;
+}
+
+/**
+ * Horaires d'accueil écrits explicitement dans le texte, après le mot
+ * « accueil » : « accueil à 9h et à 13h30 » donne ["9h", "13h30"].
+ * Rien d'autre n'est extrait.
+ */
+export function projetAccueilHours(text?: string | null): string[] {
+  if (!text) return [];
+  const m = text.match(/accueil\s+(?:à|a|dès|des)\s+((?:\d{1,2}\s?h(?:\s?\d{2})?)(?:\s*(?:,|et)\s*(?:à\s+)?\d{1,2}\s?h(?:\s?\d{2})?)*)/i);
+  if (!m) return [];
+  return (m[1].match(/\d{1,2}\s?h(?:\s?\d{2})?/gi) || []).map((h) => h.replace(/\s/g, "").toLowerCase());
 }
 
 /** Projet d'un seul jour : « Samedi 14 novembre 2026 », sinon null. */
