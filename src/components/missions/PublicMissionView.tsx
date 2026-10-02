@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { Share2, CheckCircle2, ShieldCheck, Eye, Users, Dog, Flower2, Home as HomeIcon, Sparkles } from "lucide-react";
-import { formatProjetPeriod, formatProjetMonths, formatProjetDay, projetParagraphs, projetDurationLabel, hebergementLabel, projetNatureLabel, savoirFaireLabel, offreLabel, externalRegistrationUrl } from "@/lib/projets";
+import { formatProjetPeriod, formatProjetMonths, formatProjetDay, projetParagraphs, projetDurationLabel, hebergementLabel, projetNatureLabel, savoirFaireLabel, offreLabel, externalRegistrationUrl, projetAccueilHours } from "@/lib/projets";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import ApproximateLocationMap from "@/components/shared/ApproximateLocationMap";
@@ -171,6 +171,10 @@ const PublicMissionView = ({
     const projetRedirect = `/projets/${p.slug || mission.id}`;
     const metaLine = [cityLabel, period, projetDuration].filter(Boolean).join(" · ");
     const registrationUrl = externalRegistrationUrl(mission.description);
+    const accueilHours = projetAccueilHours(mission.description);
+    const accueilLabel = accueilHours.length > 0
+      ? `Accueil à ${accueilHours.length === 1 ? accueilHours[0] : `${accueilHours.slice(0, -1).join(", ")} ou ${accueilHours[accueilHours.length - 1]}`}`
+      : null;
 
     return (
       <div className="min-h-screen bg-background text-foreground animate-fade-in">
@@ -219,6 +223,7 @@ const PublicMissionView = ({
                   {displayTitle}
                 </h1>
                 {metaLine && <p className="text-base text-muted-foreground">{metaLine}</p>}
+                {accueilLabel && <p className="mt-1 text-base font-semibold text-foreground">{accueilLabel}</p>}
                 {registrationUrl && (
                   <Button asChild className="mt-5 w-full h-auto py-4 rounded-full font-bold text-base whitespace-normal lg:hidden">
                     <a href={registrationUrl} target="_blank" rel="noopener noreferrer">S'inscrire sur le formulaire</a>
@@ -408,6 +413,12 @@ const PublicMissionView = ({
                     <div>
                       <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Durée</p>
                       <p className="text-base font-semibold text-foreground">{projetDuration}</p>
+                    </div>
+                  )}
+                  {accueilHours.length > 0 && (
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Horaires d'accueil</p>
+                      <p className="text-base font-semibold text-foreground">{accueilHours.join(" et ")}</p>
                     </div>
                   )}
                   {mission.city && (
