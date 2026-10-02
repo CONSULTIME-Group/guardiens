@@ -150,6 +150,7 @@ const EntraideHub = () => {
   // Liste par défaut partout, mobile et ordinateur, connecté ou non.
   const [mapOpen, setMapOpen] = useState(false);
   const [profile, setProfile] = useState<MemberProfile | null>(null);
+  const [profileLoaded, setProfileLoaded] = useState(false);
   const [myResponses, setMyResponses] = useState<Set<string>>(new Set());
   const [responding, setResponding] = useState<string | null>(null);
   const [confirmNeed, setConfirmNeed] = useState<EntraideNeed | null>(null);
@@ -203,6 +204,7 @@ const EntraideHub = () => {
       ]);
       if (cancelled) return;
       if (profileResult.data) setProfile(profileResult.data as MemberProfile);
+      setProfileLoaded(true);
       setMyResponses(new Set((responsesResult.data || []).map((row) => row.mission_id)));
     };
     void load();
@@ -397,7 +399,7 @@ const EntraideHub = () => {
             </>
           )}
 
-          {isAuthenticated && <MutualAidRadiusLine className="mb-4" />}
+          {isAuthenticated && <MutualAidRadiusLine className="mb-4" availableForHelp={profileLoaded ? profile?.available_for_help === true : null} />}
 
           <section className="pt-2" aria-labelledby="entraide-needs-title">
             <h2 id="entraide-needs-title" className="mt-6 font-heading text-2xl font-semibold text-foreground">Besoins ouverts</h2>
