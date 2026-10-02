@@ -24,6 +24,8 @@ export interface EntraideNeed {
   sit_mode?: string | null;
   category?: string | null;
   user_id?: string | null;
+  author_avatar_url?: string | null;
+  author_first_name?: string | null;
 }
 
 
@@ -57,6 +59,10 @@ export const NeedCard = ({ need, distance, showDistance, compact = false }: {
   compact?: boolean;
 }) => {
   const photo = need.photos?.[0] || null;
+  // Sans photo de mission : portrait public de l'auteur, sinon en-tête typographique.
+  const [avatarFailed, setAvatarFailed] = useState(false);
+  const authorAvatar = !photo && !avatarFailed ? need.author_avatar_url || null : null;
+  const authorName = capitalizeFirstName(need.author_first_name) || null;
   return (
     <article className={`border border-border bg-card ${compact ? "p-3" : "p-4 sm:p-5"} rounded-lg`}>
       {/* Photo réelle en tête de carte, ou en-tête typographique sobre avec ville et date. */}
@@ -69,6 +75,19 @@ export const NeedCard = ({ need, distance, showDistance, compact = false }: {
             height={480}
             loading="lazy"
             decoding="async"
+            className="aspect-[4/3] w-full object-cover"
+          />
+        </div>
+      ) : authorAvatar ? (
+        <div className={`overflow-hidden rounded-md border border-border bg-muted ${compact ? "mb-3" : "mb-4"}`}>
+          <img
+            src={authorAvatar}
+            alt={authorName ? `Portrait de ${authorName}, auteur de l'annonce` : "Portrait de l'auteur de l'annonce"}
+            width={640}
+            height={480}
+            loading="lazy"
+            decoding="async"
+            onError={() => setAvatarFailed(true)}
             className="aspect-[4/3] w-full object-cover"
           />
         </div>
