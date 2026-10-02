@@ -286,3 +286,29 @@ export function projetParagraphs(text: string): string[] {
   for (let i = 0; i < sentences.length; i += 2) out.push(sentences.slice(i, i + 2).join(" "));
   return out;
 }
+
+/** Libellés reconnus dans le texte d'un projet, écrits suivis d'un deux-points. */
+const PROJET_SECTION_LABELS = ["En bref", "Lieu", "Ce qu'on va faire", "Qui peut participer", "Informations pratiques"] as const;
+export type ProjetSectionLabel = (typeof PROJET_SECTION_LABELS)[number];
+
+/**
+ * Rubriques explicitement écrites par l'auteur (« Ce qu'on va faire : ... »).
+ * Le texte est stocké sur une seule ligne : seuls ces libellés exacts, en début
+ * de phrase, structurent la page. Sans libellé reconnu, renvoie null et la page
+ * garde le découpage en paragraphes.
+ */
+export function projetSections(text?: string | null): Partial<Record<ProjetSectionLabel, string>> | null {
+  if (!text) return null;
+  const alt = PROJET_SECTION_LABELS.map((l) => l.replace("'", "['\u2019]")).join("|");
+  const re = new RegExp(`(?:^|(?<=[.!?]\\s))(${alt})\\s*:\\s*`, "g");
+  const marks = [...text.matchAll(re)];
+  if (marks.length === 0) return null;
+  const out: Partial<Record<ProjetSectionLabel, string>> = {};
+  marks.forEach((m, i) => {
+    const label = PROJET_SECTION_LABELS.find((l) => l.replace("'", "").toLowerCase() === m[1].replace(/['\u2019]/, "").toLowerCase())!;
+    const end = i + 1 < marks.length ? marks[i + 1].index! : text.length;
+    const body = text.slice(m.index! + m[0].length, end).trim().replace(/[.\s]+$/, "");
+    if (body) out[label] = capitalize(body) + (/https:\/\/\S+$/.test(body) ? "" : ".");
+  });
+  return out;
+}
