@@ -9,6 +9,7 @@ import { startConversationAndNavigate } from "@/lib/conversation";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { capitalizeFirstName, publicFirstName } from "@/lib/displayName";
+import { avatarImageUrl } from "@/lib/storageImage";
 
 export interface EntraideNeed {
   id: string;
@@ -81,7 +82,7 @@ export const NeedCard = ({ need, distance, showDistance, compact = false }: {
       ) : authorAvatar ? (
         <div className={`overflow-hidden rounded-md border border-border bg-muted ${compact ? "mb-3" : "mb-4"}`}>
           <img
-            src={authorAvatar}
+            src={avatarImageUrl(authorAvatar, 640)}
             alt={authorName ? `Portrait de ${authorName}, auteur de l'annonce` : "Portrait de l'auteur de l'annonce"}
             width={640}
             height={480}
