@@ -735,7 +735,7 @@ const PublicMissionView = ({
               {/* Description */}
               <section>
                 <h2 className="font-heading text-2xl md:text-3xl font-bold mb-5 text-foreground">
-                  {mission.mission_type === "offre" ? t("mission_detail.mission_h2_offer") : t("mission_detail.mission_h2")}
+                  {mission.mission_type === "offre" ? "Le coup de main proposé" : t("mission_detail.mission_h2")}
                 </h2>
                 <div className="space-y-5 text-lg leading-relaxed text-foreground/85 whitespace-pre-wrap">
                   {mission.description}
@@ -855,7 +855,7 @@ const PublicMissionView = ({
                     </p>
                   </>
                 ) : (
-                  <h2 className="font-heading text-3xl md:text-4xl font-bold mb-2">{t("mission_detail.related_title_neutral")}</h2>
+                  <h2 className="font-heading text-3xl md:text-4xl font-bold mb-2">D'autres coups de main sur Guardiens</h2>
                 )}
               </div>
               <Link

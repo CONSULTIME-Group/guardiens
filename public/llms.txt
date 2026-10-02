@@ -13,6 +13,7 @@ L'accès à Guardiens est ouvert pendant la phase de lancement : vous accédez �
 - [FAQ](/faq): Réponses aux questions fréquentes, fonctionnement, sécurité, missions.
 - [Actualités](/actualites): Articles de fond sur la garde d'animaux, le house-sitting et la vie de la plateforme.
 - [Petites missions](/petites-missions): Coups de main entre membres (promenade, visite, dépannage), un service contre un service, sans nuitée.
+- [Projets participatifs](/projets): Projets à réaliser ensemble (plantation, construction, remise en état), participation selon ses envies et ses disponibilités.
 - [Petites missions à Lyon](/petites-missions/lyon): Hub local des coups de main entre membres à Lyon.
 - [Petites missions à Marseille](/petites-missions/marseille): Hub local des coups de main entre membres à Marseille.
 - [Petites missions à Strasbourg](/petites-missions/strasbourg): Hub local des coups de main entre membres à Strasbourg.
