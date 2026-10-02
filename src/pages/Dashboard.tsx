@@ -1,13 +1,14 @@
 import { fetchMyProfile } from "@/lib/myProfile";
 import { useAuth } from "@/contexts/AuthContext";
-import { useRef, useEffect, useState, lazy, Suspense } from "react";
+import { useRef, useEffect, useState, Suspense } from "react";
+import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Head from "@/components/seo/Head";
 import { useToast } from "@/hooks/use-toast";
 import OwnerDashboard from "@/components/dashboard/OwnerDashboard";
 import SitterDashboard from "@/components/dashboard/SitterDashboard";
 
-const InstallAppCard = lazy(() => import("@/components/dashboard/shared/InstallAppCard"));
+const InstallAppCard = lazy(() => import("@/components/dashboard/shared/InstallAppCard"), "InstallAppCard");
 import { DashboardErrorBoundary } from "@/components/dashboard/DashboardErrorBoundary";
 import { trackEvent } from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";
