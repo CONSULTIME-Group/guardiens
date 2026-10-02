@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { Share2, CheckCircle2, ShieldCheck, Eye, Users, Dog, Flower2, Home as HomeIcon, Sparkles } from "lucide-react";
-import { formatProjetPeriod, formatProjetMonths, projetDurationLabel, hebergementLabel, projetNatureLabel, savoirFaireLabel, offreLabel, externalRegistrationUrl } from "@/lib/projets";
+import { formatProjetPeriod, formatProjetMonths, formatProjetDay, projetParagraphs, projetDurationLabel, hebergementLabel, projetNatureLabel, savoirFaireLabel, offreLabel, externalRegistrationUrl } from "@/lib/projets";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import ApproximateLocationMap from "@/components/shared/ApproximateLocationMap";
@@ -152,7 +152,7 @@ const PublicMissionView = ({
   if (mission.category === "projet") {
     const p = mission as any;
     const projetPhotos: string[] = Array.isArray(mission.photos) ? mission.photos.filter(Boolean) : [];
-    const period = formatProjetMonths(p.mois_accueil) || formatProjetPeriod(mission.date_needed, mission.end_date);
+    const period = formatProjetMonths(p.mois_accueil) || formatProjetDay(mission.date_needed, mission.end_date) || formatProjetPeriod(mission.date_needed, mission.end_date);
     const projetDuration = projetDurationLabel(mission.duration_estimate);
     const hebergement = hebergementLabel(p.hebergement);
     const natureLabel = projetNatureLabel(p.nature_projet);
@@ -219,6 +219,11 @@ const PublicMissionView = ({
                   {displayTitle}
                 </h1>
                 {metaLine && <p className="text-base text-muted-foreground">{metaLine}</p>}
+                {registrationUrl && (
+                  <Button asChild className="mt-5 w-full h-auto py-4 rounded-full font-bold text-base whitespace-normal lg:hidden">
+                    <a href={registrationUrl} target="_blank" rel="noopener noreferrer">S'inscrire sur le formulaire</a>
+                  </Button>
+                )}
               </header>
 
               {/* 2. La galerie : le lieu décide de venir, il passe avant la tâche.
@@ -284,7 +289,7 @@ const PublicMissionView = ({
                 <section>
                   <h2 className="font-heading text-2xl md:text-3xl font-bold mb-5 text-foreground">Le projet</h2>
                   <div className="space-y-4 text-base md:text-lg leading-relaxed text-foreground/85">
-                    {mission.description.split(/\n{2,}/).map((para, i) => (
+                    {projetParagraphs(mission.description).map((para, i) => (
                       <p key={i} className="whitespace-pre-line break-words">
                         {para.split(/(https:\/\/[^\s<>"')]+)/g).map((part, j) =>
                           /^https:\/\//.test(part) ? (
