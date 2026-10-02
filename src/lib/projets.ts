@@ -232,3 +232,19 @@ export function projetMetaLine(
   return parts.length > 0 ? parts.join(" · ") : null;
 }
 
+
+/**
+ * Lien d'inscription externe écrit dans le texte d'un projet : premier lien
+ * https trouvé. Aucun autre schéma n'est accepté (pas de http, pas de javascript:).
+ */
+export function externalRegistrationUrl(text?: string | null): string | null {
+  if (!text) return null;
+  const match = text.match(/https:\/\/[^\s<>"')]+/i);
+  if (!match) return null;
+  const candidate = match[0].replace(/[.,;:!?]+$/, "");
+  try {
+    return new URL(candidate).protocol === "https:" ? candidate : null;
+  } catch {
+    return null;
+  }
+}
