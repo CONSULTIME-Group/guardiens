@@ -101,6 +101,8 @@ export const NeedCard = ({ need, distance, showDistance, compact = false }: {
       <h3 className="font-heading text-lg font-semibold text-foreground">{need.title}</h3>
       <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
         {photo && <span>{dateLabel(need)}</span>}
+        {!photo && authorAvatar && <span>{locationLabel(need.city, distance, showDistance)}</span>}
+        {!photo && authorAvatar && <span>{dateLabel(need)}</span>}
         {need.response_count > 0 && (
           <span>{need.response_count} personne{need.response_count > 1 ? "s ont" : " a"} dit je peux</span>
         )}
@@ -126,6 +128,10 @@ export const NeedRow = ({ need, distance, state, onCanHelp, pending = false }: {
   pending?: boolean;
 }) => {
   const photo = need.photos?.[0] || null;
+  // Sans photo de mission : portrait public de l'auteur, sinon initiale de catégorie.
+  const [avatarFailed, setAvatarFailed] = useState(false);
+  const authorAvatar = !photo && !avatarFailed ? need.author_avatar_url || null : null;
+  const authorName = capitalizeFirstName(need.author_first_name) || null;
   const city = capitalizeFirstName(need.city) || "Près de chez vous";
   const place = distance === null
     ? city
@@ -145,6 +151,17 @@ export const NeedRow = ({ need, distance, state, onCanHelp, pending = false }: {
           height={72}
           loading="lazy"
           decoding="async"
+          className="h-[72px] w-[72px] shrink-0 rounded-md border border-border object-cover"
+        />
+      ) : authorAvatar ? (
+        <img
+          src={avatarImageUrl(authorAvatar, 144)}
+          alt={authorName ? `Portrait de ${authorName}, auteur de l'annonce` : "Portrait de l'auteur de l'annonce"}
+          width={72}
+          height={72}
+          loading="lazy"
+          decoding="async"
+          onError={() => setAvatarFailed(true)}
           className="h-[72px] w-[72px] shrink-0 rounded-md border border-border object-cover"
         />
       ) : (

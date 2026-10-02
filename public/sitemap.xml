@@ -3565,14 +3565,14 @@
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/gardiens/7bf29905-d372-4669-93b1-ec7def9b06d5</loc>
-    <lastmod>2026-10-02</lastmod>
+    <loc>https://guardiens.fr/gardiens/55282424-9526-4449-8734-e04f9e1190b1</loc>
+    <lastmod>2026-09-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/gardiens/55282424-9526-4449-8734-e04f9e1190b1</loc>
-    <lastmod>2026-09-29</lastmod>
+    <loc>https://guardiens.fr/gardiens/7bf29905-d372-4669-93b1-ec7def9b06d5</loc>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -3957,12 +3957,6 @@
   <url>
     <loc>https://guardiens.fr/petites-missions/aide-demenagement</loc>
     <lastmod>2026-09-28</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/petites-missions/chantier-participatif-de-plantation</loc>
-    <lastmod>2026-09-30</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>

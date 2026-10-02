@@ -176,7 +176,7 @@ const EntraideHub = () => {
       });
       // Portraits des auteurs d'annonces sans photo : une seule lecture groupée
       // sur la vue publique (l'auteur n'est pas forcément un aidant).
-      const authorIds = [...new Set(openNeeds.filter((row) => !row.photos?.length && row.user_id).map((row) => row.user_id as string))];
+      const authorIds = [...new Set(openNeeds.filter((row) => !row.photos?.[0] && row.user_id).map((row) => row.user_id as string))];
       const authors = new Map<string, { avatar_url: string | null; first_name: string | null }>();
       if (authorIds.length > 0) {
         const { data: authorRows } = await supabase.from("public_profiles").select("id, first_name, avatar_url").in("id", authorIds);
