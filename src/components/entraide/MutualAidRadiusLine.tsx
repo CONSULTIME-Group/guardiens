@@ -14,17 +14,25 @@ export const radiusLineText = (km: number) => `Vous recevez les besoins dans un 
  * actuel et le lien vers le réglage existant.
  */
 /** Rayon d'entraide du membre disponible pour aider, sinon null (partagé, lot D1). */
-export function useMutualAidRadiusKm(): number | null {
+/**
+ * availableForHelp : undefined = non fourni (lecture du profil habituelle),
+ * null = le parent charge encore le profil (on attend), true/false = valeur
+ * déjà lue par le parent (aucune relecture du profil).
+ */
+export function useMutualAidRadiusKm(availableForHelp?: boolean | null): number | null {
   const { user } = useAuth();
   const [km, setKm] = useState<number | null>(null);
 
   useEffect(() => {
-    if (!user?.id) return;
+    if (!user?.id || availableForHelp === null) return;
+    if (availableForHelp === false) { setKm(null); return; }
     let active = true;
     void (async () => {
       try {
-      const { data: profile } = await fetchMyProfile(user.id!);
-      if (!profile?.available_for_help) return;
+      if (availableForHelp === undefined) {
+        const { data: profile } = await fetchMyProfile(user.id!);
+        if (!profile?.available_for_help) return;
+      }
       const { data } = await supabase.rpc("my_mutual_aid_radius_km");
       if (active && typeof data === "number") setKm(data);
       } catch {
@@ -32,12 +40,12 @@ export function useMutualAidRadiusKm(): number | null {
       }
     })();
     return () => { active = false; };
-  }, [user?.id]);
+  }, [user?.id, availableForHelp]);
   return km;
 }
 
-const MutualAidRadiusLine = ({ className = "" }: { className?: string }) => {
-  const km = useMutualAidRadiusKm();
+const MutualAidRadiusLine = ({ className = "", availableForHelp }: { className?: string; availableForHelp?: boolean | null }) => {
+  const km = useMutualAidRadiusKm(availableForHelp);
   if (km === null) return null;
 
   return (
