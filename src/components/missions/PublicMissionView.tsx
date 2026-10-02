@@ -173,7 +173,7 @@ const PublicMissionView = ({
     const registrationUrl = externalRegistrationUrl(mission.description);
     const accueilHours = projetAccueilHours(mission.description);
     const accueilLabel = accueilHours.length > 0
-      ? `Accueil à ${accueilHours.length === 1 ? accueilHours[0] : `${accueilHours.slice(0, -1).join(", ")} ou ${accueilHours[accueilHours.length - 1]}`}`
+      ? `Accueil à ${accueilHours.length === 1 ? accueilHours[0] : `${accueilHours.slice(0, -1).join(", ")} et ${accueilHours[accueilHours.length - 1]}`}`
       : null;
 
     return (
