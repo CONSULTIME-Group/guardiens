@@ -1,20 +1,20 @@
 {
   "sources": {
     "city_guides": {
-      "head": "2026-10-01T03:21:17.654237+00:00|94",
-      "fetchedAt": "2026-10-01T13:11:48.612Z"
+      "head": "2026-10-02T03:21:06.160132+00:00|95",
+      "fetchedAt": "2026-10-02T07:49:39.362Z"
     },
     "articles": {
       "head": "2026-10-01T15:30:12.781243+00:00|131",
       "fetchedAt": "2026-10-01T16:00:09.204Z"
     },
     "seo_city_pages": {
-      "head": "2026-10-01T15:20:01.289573+00:00|164",
-      "fetchedAt": "2026-10-01T16:00:09.148Z"
+      "head": "2026-10-02T04:05:00.469898+00:00|165",
+      "fetchedAt": "2026-10-02T07:49:39.380Z"
     },
     "small_missions_entraide_v1": {
-      "head": "2026-09-30T08:30:30.229578+00:00|8",
-      "fetchedAt": "2026-10-01T16:00:09.181Z"
+      "head": "2026-09-30T08:30:30.229578+00:00|7",
+      "fetchedAt": "2026-10-02T07:49:39.424Z"
     },
     "breed_profiles": {
       "head": "2026-08-19T19:06:57.126227+00:00|81",
@@ -25,16 +25,16 @@
       "fetchedAt": "2026-09-21T02:26:42.993Z"
     },
     "seo_department_pages": {
-      "head": "2026-10-01T04:07:00.241958+00:00|102",
-      "fetchedAt": "2026-10-01T13:11:48.572Z"
+      "head": "2026-10-02T04:07:00.149729+00:00|102",
+      "fetchedAt": "2026-10-02T07:49:39.384Z"
     },
     "public_sits": {
       "head": "2026-10-01T13:59:50.166825+00:00|11",
       "fetchedAt": "2026-10-01T16:00:09.202Z"
     },
     "public_profiles": {
-      "head": "2026-10-01T15:48:44.282307+00:00|1315",
-      "fetchedAt": "2026-10-01T16:00:09.304Z"
+      "head": "2026-10-01T17:05:29.597708+00:00|1316",
+      "fetchedAt": "2026-10-02T07:49:39.561Z"
     }
   },
   "entries": {
@@ -84,6 +84,12 @@
       {
         "loc": "/guides/monteleger",
         "lastmod": "2026-09-30",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/pusignan",
+        "lastmod": "2026-10-02",
         "changefreq": "weekly",
         "priority": "0.7"
       },
@@ -148,12 +154,6 @@
         "priority": "0.7"
       },
       {
-        "loc": "/guides/rennes",
-        "lastmod": "2026-09-30",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
         "loc": "/guides/carhaix-plouguer",
         "lastmod": "2026-09-30",
         "changefreq": "weekly",
@@ -192,6 +192,12 @@
       {
         "loc": "/guides/nantes",
         "lastmod": "2026-09-30",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/rennes",
+        "lastmod": "2026-10-01",
         "changefreq": "weekly",
         "priority": "0.7"
       },
@@ -317,7 +323,7 @@
       },
       {
         "loc": "/guides/lyon",
-        "lastmod": "2026-09-30",
+        "lastmod": "2026-10-01",
         "changefreq": "weekly",
         "priority": "0.7"
       },
@@ -376,13 +382,13 @@
         "priority": "0.7"
       },
       {
-        "loc": "/guides/pau",
-        "lastmod": "2026-09-30",
+        "loc": "/guides/clermont-ferrand",
+        "lastmod": "2026-10-01",
         "changefreq": "weekly",
         "priority": "0.7"
       },
       {
-        "loc": "/guides/clermont-ferrand",
+        "loc": "/guides/pau",
         "lastmod": "2026-09-30",
         "changefreq": "weekly",
         "priority": "0.7"
@@ -400,6 +406,12 @@
         "priority": "0.7"
       },
       {
+        "loc": "/guides/annecy",
+        "lastmod": "2026-10-01",
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
         "loc": "/guides/cogny",
         "lastmod": "2026-09-30",
         "changefreq": "weekly",
@@ -407,12 +419,6 @@
       },
       {
         "loc": "/guides/meyzieu",
-        "lastmod": "2026-09-30",
-        "changefreq": "weekly",
-        "priority": "0.7"
-      },
-      {
-        "loc": "/guides/annecy",
         "lastmod": "2026-09-30",
         "changefreq": "weekly",
         "priority": "0.7"
@@ -1257,7 +1263,7 @@
       },
       {
         "loc": "/house-sitting/mulhouse",
-        "lastmod": "2026-09-29",
+        "lastmod": "2026-10-01",
         "changefreq": "weekly",
         "priority": "0.8"
       },
@@ -1436,12 +1442,6 @@
         "priority": "0.8"
       },
       {
-        "loc": "/house-sitting/clermont-ferrand",
-        "lastmod": "2026-09-30",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
         "loc": "/house-sitting/dunkerque",
         "lastmod": "2026-09-29",
         "changefreq": "weekly",
@@ -1498,6 +1498,12 @@
       {
         "loc": "/house-sitting/nanterre",
         "lastmod": "2026-09-28",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/clermont-ferrand",
+        "lastmod": "2026-10-01",
         "changefreq": "weekly",
         "priority": "0.8"
       },
@@ -1628,14 +1634,14 @@
         "priority": "0.8"
       },
       {
-        "loc": "/house-sitting/paris",
-        "lastmod": "2026-09-28",
+        "loc": "/house-sitting/nice",
+        "lastmod": "2026-10-01",
         "changefreq": "weekly",
         "priority": "0.8"
       },
       {
-        "loc": "/house-sitting/nice",
-        "lastmod": "2026-10-01",
+        "loc": "/house-sitting/paris",
+        "lastmod": "2026-10-02",
         "changefreq": "weekly",
         "priority": "0.8"
       },
@@ -1658,6 +1664,12 @@
         "priority": "0.8"
       },
       {
+        "loc": "/house-sitting/bordeaux",
+        "lastmod": "2026-10-01",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
         "loc": "/house-sitting/rueil-malmaison",
         "lastmod": "2026-09-28",
         "changefreq": "weekly",
@@ -1671,6 +1683,12 @@
       },
       {
         "loc": "/house-sitting/la-rochelle",
+        "lastmod": "2026-10-01",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/rennes",
         "lastmod": "2026-10-01",
         "changefreq": "weekly",
         "priority": "0.8"
@@ -1712,25 +1730,25 @@
         "priority": "0.8"
       },
       {
-        "loc": "/house-sitting/belfort",
-        "lastmod": "2026-09-29",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
         "loc": "/house-sitting/fort-de-france",
         "lastmod": "2026-09-17",
         "changefreq": "weekly",
         "priority": "0.8"
       },
       {
-        "loc": "/house-sitting/strasbourg",
-        "lastmod": "2026-09-21",
+        "loc": "/house-sitting/belfort",
+        "lastmod": "2026-10-01",
         "changefreq": "weekly",
         "priority": "0.8"
       },
       {
         "loc": "/house-sitting/pessac",
+        "lastmod": "2026-10-01",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
+        "loc": "/house-sitting/strasbourg",
         "lastmod": "2026-10-01",
         "changefreq": "weekly",
         "priority": "0.8"
@@ -1827,7 +1845,7 @@
       },
       {
         "loc": "/house-sitting/lille",
-        "lastmod": "2026-09-30",
+        "lastmod": "2026-10-01",
         "changefreq": "weekly",
         "priority": "0.8"
       },
@@ -1988,12 +2006,6 @@
         "priority": "0.8"
       },
       {
-        "loc": "/house-sitting/rennes",
-        "lastmod": "2026-09-29",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
         "loc": "/house-sitting/perpignan",
         "lastmod": "2026-09-30",
         "changefreq": "weekly",
@@ -2092,12 +2104,6 @@
       {
         "loc": "/house-sitting/toulon",
         "lastmod": "2026-09-27",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/house-sitting/bordeaux",
-        "lastmod": "2026-10-01",
         "changefreq": "weekly",
         "priority": "0.8"
       },
@@ -2922,14 +2928,14 @@
         "priority": "0.8"
       },
       {
-        "loc": "/departement/alpes-maritimes",
-        "lastmod": "2026-09-30",
+        "loc": "/departement/cote-d-or",
+        "lastmod": "2026-09-20",
         "changefreq": "weekly",
         "priority": "0.8"
       },
       {
-        "loc": "/departement/cote-d-or",
-        "lastmod": "2026-09-20",
+        "loc": "/departement/alpes-maritimes",
+        "lastmod": "2026-10-02",
         "changefreq": "weekly",
         "priority": "0.8"
       },
@@ -2946,20 +2952,20 @@
         "priority": "0.8"
       },
       {
+        "loc": "/departement/haute-savoie",
+        "lastmod": "2026-10-01",
+        "changefreq": "weekly",
+        "priority": "0.8"
+      },
+      {
         "loc": "/departement/rhone",
-        "lastmod": "2026-09-22",
+        "lastmod": "2026-10-02",
         "changefreq": "weekly",
         "priority": "0.8"
       },
       {
         "loc": "/departement/val-de-marne",
-        "lastmod": "2026-09-22",
-        "changefreq": "weekly",
-        "priority": "0.8"
-      },
-      {
-        "loc": "/departement/haute-savoie",
-        "lastmod": "2026-10-01",
+        "lastmod": "2026-10-02",
         "changefreq": "weekly",
         "priority": "0.8"
       },
@@ -3103,7 +3109,7 @@
       },
       {
         "loc": "/departement/vaucluse",
-        "lastmod": "2026-08-23",
+        "lastmod": "2026-10-02",
         "changefreq": "weekly",
         "priority": "0.8"
       },
@@ -3121,7 +3127,7 @@
       },
       {
         "loc": "/departement/bas-rhin",
-        "lastmod": "2026-09-21",
+        "lastmod": "2026-10-02",
         "changefreq": "weekly",
         "priority": "0.8"
       },
@@ -3324,14 +3330,14 @@
         "priority": "0.8"
       },
       {
-        "loc": "/departement/paris",
-        "lastmod": "2026-09-26",
+        "loc": "/departement/lozere",
+        "lastmod": "2026-08-16",
         "changefreq": "weekly",
         "priority": "0.8"
       },
       {
-        "loc": "/departement/lozere",
-        "lastmod": "2026-08-16",
+        "loc": "/departement/paris",
+        "lastmod": "2026-10-02",
         "changefreq": "weekly",
         "priority": "0.8"
       },
@@ -3497,7 +3503,7 @@
       },
       {
         "loc": "/gardiens/98617b15-e5ed-48fe-841f-3c8eb6769b62",
-        "lastmod": "2026-09-18",
+        "lastmod": "2026-10-02",
         "changefreq": "monthly",
         "priority": "0.5"
       },
@@ -3556,6 +3562,12 @@
         "priority": "0.5"
       },
       {
+        "loc": "/gardiens/e190e857-9e14-4b6a-8279-8a5a625db64d",
+        "lastmod": "2026-10-01",
+        "changefreq": "monthly",
+        "priority": "0.5"
+      },
+      {
         "loc": "/gardiens/11ad39ef-bfad-4d24-8053-bc2c158d2216",
         "lastmod": "2026-09-23",
         "changefreq": "monthly",
@@ -3568,12 +3580,6 @@
         "priority": "0.5"
       },
       {
-        "loc": "/gardiens/e190e857-9e14-4b6a-8279-8a5a625db64d",
-        "lastmod": "2026-09-22",
-        "changefreq": "monthly",
-        "priority": "0.5"
-      },
-      {
         "loc": "/gardiens/7e92f57b-b4da-4e92-848a-8e714794a44b",
         "lastmod": "2026-09-28",
         "changefreq": "monthly",
@@ -3581,7 +3587,7 @@
       },
       {
         "loc": "/gardiens/7bf29905-d372-4669-93b1-ec7def9b06d5",
-        "lastmod": "2026-10-01",
+        "lastmod": "2026-10-02",
         "changefreq": "monthly",
         "priority": "0.5"
       },
@@ -3628,13 +3634,13 @@
         "priority": "0.5"
       },
       {
-        "loc": "/gardiens/744dad15-d256-4915-9f61-19b43fa01951",
-        "lastmod": "2026-09-29",
+        "loc": "/gardiens/ef96578d-fd2a-4307-8384-91ab4d7a2505",
+        "lastmod": "2026-10-01",
         "changefreq": "monthly",
         "priority": "0.5"
       },
       {
-        "loc": "/gardiens/ef96578d-fd2a-4307-8384-91ab4d7a2505",
+        "loc": "/gardiens/744dad15-d256-4915-9f61-19b43fa01951",
         "lastmod": "2026-09-29",
         "changefreq": "monthly",
         "priority": "0.5"
@@ -3695,7 +3701,7 @@
       },
       {
         "loc": "/gardiens/8a2f7ad8-8a78-49ba-b840-895ccb1196b0",
-        "lastmod": "2026-09-28",
+        "lastmod": "2026-10-02",
         "changefreq": "monthly",
         "priority": "0.5"
       },
