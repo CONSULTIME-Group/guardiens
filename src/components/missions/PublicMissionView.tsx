@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { Share2, CheckCircle2, ShieldCheck, Eye, Users, Dog, Flower2, Home as HomeIcon, Sparkles } from "lucide-react";
-import { formatProjetPeriod, formatProjetMonths, formatProjetDay, projetParagraphs, projetDurationLabel, hebergementLabel, projetNatureLabel, savoirFaireLabel, offreLabel, externalRegistrationUrl, projetAccueilHours } from "@/lib/projets";
+import { formatProjetPeriod, formatProjetMonths, formatProjetDay, projetParagraphs, projetDurationLabel, hebergementLabel, projetNatureLabel, savoirFaireLabel, offreLabel, externalRegistrationUrl, projetAccueilHours, projetSections } from "@/lib/projets";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import ApproximateLocationMap from "@/components/shared/ApproximateLocationMap";
@@ -173,8 +173,21 @@ const PublicMissionView = ({
     const registrationUrl = externalRegistrationUrl(mission.description);
     const accueilHours = projetAccueilHours(mission.description);
     const accueilLabel = accueilHours.length > 0
-      ? `Accueil à ${accueilHours.length === 1 ? accueilHours[0] : `${accueilHours.slice(0, -1).join(", ")} et ${accueilHours[accueilHours.length - 1]}`}`
+      ? `Accueil à ${accueilHours.length === 1 ? accueilHours[0] : `${accueilHours.slice(0, -1).join(", ")} ou ${accueilHours[accueilHours.length - 1]}`}`
       : null;
+    const sections = projetSections(mission.description);
+    const placeLabel = sections?.Lieu?.replace(/\.$/, "") || cityLabel;
+    const dayLabel = formatProjetDay(mission.date_needed, mission.end_date) || period;
+    const renderLinks = (para: string) => para.split(/(https:\/\/[^\s<>"')]+)/g).map((part, j) =>
+      /^https:\/\//.test(part) ? (
+        <a key={j} href={part} target="_blank" rel="noopener noreferrer" className="font-semibold text-primary underline underline-offset-4 break-all">
+          {part}
+        </a>
+      ) : part,
+    );
+    const rubriques: Array<[string, string | undefined]> = sections
+      ? [["Ce qu'on va faire", sections["Ce qu'on va faire"]], ["Qui peut participer", sections["Qui peut participer"]], ["Informations pratiques", sections["Informations pratiques"]]]
+      : [];
 
     return (
       <div className="min-h-screen bg-background text-foreground animate-fade-in">
@@ -219,49 +232,37 @@ const PublicMissionView = ({
                     </span>
                   )}
                 </p>
-                <h1 className="font-heading text-3xl sm:text-4xl lg:text-[2.75rem] font-bold leading-tight mb-3 text-foreground break-words">
+                <h1 className="font-heading text-[2rem] lg:text-[2.5rem] font-bold leading-tight mb-3 text-foreground break-words">
                   {displayTitle}
                 </h1>
-                {metaLine && <p className="text-base text-muted-foreground">{metaLine}</p>}
-                {accueilLabel && <p className="mt-1 text-base font-semibold text-foreground">{accueilLabel}</p>}
+                {sections?.["En bref"] ? (
+                  <p className="text-lg leading-relaxed text-foreground/85 max-w-2xl">{sections["En bref"]}</p>
+                ) : (
+                  metaLine && <p className="text-base text-muted-foreground">{metaLine}</p>
+                )}
+                {(dayLabel || placeLabel || accueilLabel) && (
+                  <dl className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {[["Quand", dayLabel], ["Où", placeLabel], ["Accueil", accueilLabel?.replace(/^Accueil à /, "")]].filter(([, v]) => v).map(([k, v]) => (
+                      <div key={k} className="rounded-2xl border border-border bg-card px-4 py-3">
+                        <dt className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{k}</dt>
+                        <dd className="mt-1 text-base font-semibold text-foreground">{v}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                )}
                 {registrationUrl && (
-                  <Button asChild className="mt-5 w-full h-auto py-4 rounded-full font-bold text-base whitespace-normal lg:hidden">
-                    <a href={registrationUrl} target="_blank" rel="noopener noreferrer">S'inscrire sur le formulaire</a>
-                  </Button>
+                  <div className="mt-5 lg:hidden">
+                    <Button asChild className="w-full h-auto py-4 rounded-full font-bold text-base whitespace-normal">
+                      <a href={registrationUrl} target="_blank" rel="noopener noreferrer">S'inscrire au chantier</a>
+                    </Button>
+                    <p className="mt-2 text-center text-xs text-muted-foreground">Sur le formulaire de l'organisateur</p>
+                  </div>
                 )}
               </header>
 
               {/* 2. La galerie : le lieu décide de venir, il passe avant la tâche.
                   Image entière (contain) : une affiche ou une photo verticale
                   ne doit pas être rognée. */}
-              {projetPhotos.length > 0 && (
-                <section>
-                  <div className="rounded-[2rem] overflow-hidden border border-border bg-muted">
-                    <img
-                      src={projetPhotos[0]}
-                      alt={`Le lieu du projet ${displayTitle}`}
-                      className="mx-auto block w-full max-h-[70vh] lg:max-h-[640px] object-contain"
-                      loading="eager"
-                      width={1200}
-                      height={675}
-                    />
-                  </div>
-                  {projetPhotos.length > 1 && (
-                    <div className="mt-4 grid grid-cols-3 gap-3">
-                      {projetPhotos.slice(1).map((src) => (
-                        <img
-                          key={src}
-                          src={src}
-                          alt=""
-                          className="w-full aspect-[4/3] object-cover rounded-2xl border border-border"
-                          loading="lazy"
-                        />
-                      ))}
-                    </div>
-                  )}
-                </section>
-              )}
-
               {/* 3. Le porteur du projet */}
               {author && (
                 <section className="flex items-center gap-5">
@@ -289,23 +290,52 @@ const PublicMissionView = ({
                 </section>
               )}
 
-              {/* 4. Le projet */}
-              {mission.description && (
+              {/* 4. Le projet : rubriques écrites par l'auteur, sinon paragraphes */}
+              {rubriques.some(([, body]) => body) ? (
+                rubriques.filter(([, body]) => body).map(([title, body]) => (
+                  <section key={title}>
+                    <h2 className="font-heading text-2xl font-bold mb-3 text-foreground">{title}</h2>
+                    <p className="text-base md:text-lg leading-relaxed text-foreground/85 break-words">{renderLinks(body!)}</p>
+                  </section>
+                ))
+              ) : mission.description && (
                 <section>
                   <h2 className="font-heading text-2xl md:text-3xl font-bold mb-5 text-foreground">Le projet</h2>
                   <div className="space-y-4 text-base md:text-lg leading-relaxed text-foreground/85">
                     {projetParagraphs(mission.description).map((para, i) => (
-                      <p key={i} className="whitespace-pre-line break-words">
-                        {para.split(/(https:\/\/[^\s<>"')]+)/g).map((part, j) =>
-                          /^https:\/\//.test(part) ? (
-                            <a key={j} href={part} target="_blank" rel="noopener noreferrer" className="font-semibold text-primary underline underline-offset-4 break-all">
-                              {part}
-                            </a>
-                          ) : part,
-                        )}
-                      </p>
+                      <p key={i} className="whitespace-pre-line break-words">{renderLinks(para)}</p>
                     ))}
                   </div>
+                </section>
+              )}
+
+              {projetPhotos.length > 0 && (
+                <section>
+                  <a
+                    href={projetPhotos[0]}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block max-w-full rounded-[1.5rem] border border-border bg-muted p-3"
+                  >
+                    <img
+                      src={projetPhotos[0]}
+                      alt={registrationUrl ? "Affiche du chantier" : "Visuel du projet"}
+                      className="mx-auto block h-auto max-h-[280px] lg:max-h-[380px] w-auto max-w-full object-contain"
+                      loading="eager"
+                    />
+                  </a>
+                  <p className="mt-2 text-sm">
+                    <a href={projetPhotos[0]} target="_blank" rel="noopener noreferrer" className="font-semibold text-primary underline underline-offset-4">
+                      Voir l'image en grand
+                    </a>
+                  </p>
+                  {projetPhotos.length > 1 && (
+                    <div className="mt-4 grid grid-cols-3 gap-3">
+                      {projetPhotos.slice(1).map((src) => (
+                        <img key={src} src={src} alt="" className="w-full aspect-[4/3] object-cover rounded-2xl border border-border" loading="lazy" />
+                      ))}
+                    </div>
+                  )}
                 </section>
               )}
 
@@ -335,8 +365,8 @@ const PublicMissionView = ({
                 </section>
               )}
 
-              {/* 6. Pour participer */}
-              <section>
+              {/* 6. Pour participer (candidature Guardiens) */}
+              {!registrationUrl && <section>
                 <h2 className="font-heading text-2xl md:text-3xl font-bold mb-4 text-foreground">Pour participer</h2>
                 {registrationUrl ? (
                   <p className="text-base md:text-lg leading-relaxed text-foreground/85">
@@ -361,7 +391,7 @@ const PublicMissionView = ({
                     </ul>
                   </>
                 )}
-              </section>
+              </section>}
 
               {/* 7. Ce qui est proposé, strictement ce qui a été déclaré */}
               {offreItems.length > 0 && (
@@ -380,17 +410,23 @@ const PublicMissionView = ({
               {/* 7. Le cadre */}
               <section className="rounded-[2rem] border border-border bg-muted/50 p-8 md:p-10 space-y-3">
                 <h2 className="font-heading text-2xl font-bold text-foreground">Le cadre</h2>
-                <p className="text-base leading-relaxed text-foreground/85">
-                  La participation est libre : chaque participant vient pour apprendre et donner un coup de main.
-                </p>
-                <p className="text-base leading-relaxed text-foreground/85">
-                  Les échanges se font en temps et en savoir-faire, dans les deux sens.
-                </p>
-                <p className="text-base leading-relaxed text-foreground/85">
-                  {registrationUrl
-                    ? "L'organisation du chantier gère l'accueil et les inscriptions, Guardiens n'intervient pas dans l'organisation."
-                    : "Le porteur du projet accueille chez lui, il reste responsable de son chantier et de sa sécurité."}
-                </p>
+                {registrationUrl ? (
+                  <p className="text-base leading-relaxed text-foreground/85">
+                    Guardiens relaie cette annonce publiée par un membre. Les informations ci-dessus sont celles déclarées dans l'annonce, et l'organisation du chantier gère l'accueil et les inscriptions.
+                  </p>
+                ) : (
+                  <>
+                    <p className="text-base leading-relaxed text-foreground/85">
+                      La participation est libre : chaque participant vient pour apprendre et donner un coup de main.
+                    </p>
+                    <p className="text-base leading-relaxed text-foreground/85">
+                      Les échanges se font en temps et en savoir-faire, dans les deux sens.
+                    </p>
+                    <p className="text-base leading-relaxed text-foreground/85">
+                      Le porteur du projet accueille chez lui, il reste responsable de son chantier et de sa sécurité.
+                    </p>
+                  </>
+                )}
                 <Link
                   to="/actualites/chantier-participatif-projet-collectif-cadre-legal"
                   className="inline-block text-sm font-semibold text-primary underline underline-offset-4"
@@ -418,13 +454,13 @@ const PublicMissionView = ({
                   {accueilHours.length > 0 && (
                     <div>
                       <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Horaires d'accueil</p>
-                      <p className="text-base font-semibold text-foreground">{accueilHours.join(" et ")}</p>
+                      <p className="text-base font-semibold text-foreground">{accueilHours.join(" ou ")}</p>
                     </div>
                   )}
                   {mission.city && (
                     <div>
                       <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Lieu</p>
-                      <p className="text-base font-semibold text-foreground">{cityLabel}</p>
+                      <p className="text-base font-semibold text-foreground">{placeLabel}</p>
                     </div>
                   )}
                   {!registrationUrl && typeof p.max_participants === "number" && (
@@ -441,11 +477,11 @@ const PublicMissionView = ({
                   <div className="space-y-3">
                     <Button asChild className="w-full h-auto py-4 rounded-full font-bold text-base whitespace-normal shadow-lg shadow-primary/20">
                       <a href={registrationUrl} target="_blank" rel="noopener noreferrer">
-                        S'inscrire sur le formulaire
+                        S'inscrire au chantier
                       </a>
                     </Button>
                     <p className="text-xs text-center text-muted-foreground px-2 leading-relaxed">
-                      L'inscription se fait sur un site extérieur à Guardiens, auprès de l'organisation du chantier.
+                      Sur le formulaire de l'organisateur, hors de Guardiens.
                     </p>
                   </div>
                 ) : p.accepting_applications === false ? (
