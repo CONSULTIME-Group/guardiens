@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { Share2, CheckCircle2, ShieldCheck, Eye, Users, Dog, Flower2, Home as HomeIcon, Sparkles } from "lucide-react";
-import { formatProjetPeriod, formatProjetMonths, projetDurationLabel, hebergementLabel, projetNatureLabel, savoirFaireLabel, offreLabel } from "@/lib/projets";
+import { formatProjetPeriod, formatProjetMonths, projetDurationLabel, hebergementLabel, projetNatureLabel, savoirFaireLabel, offreLabel, externalRegistrationUrl } from "@/lib/projets";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import ApproximateLocationMap from "@/components/shared/ApproximateLocationMap";
@@ -170,6 +170,7 @@ const PublicMissionView = ({
     ].filter(Boolean) as string[];
     const projetRedirect = `/projets/${p.slug || mission.id}`;
     const metaLine = [cityLabel, period, projetDuration].filter(Boolean).join(" · ");
+    const registrationUrl = externalRegistrationUrl(mission.description);
 
     return (
       <div className="min-h-screen bg-background text-foreground animate-fade-in">
@@ -214,20 +215,22 @@ const PublicMissionView = ({
                     </span>
                   )}
                 </p>
-                <h1 className="font-heading text-4xl md:text-5xl font-bold leading-[1.1] mb-4 text-foreground">
+                <h1 className="font-heading text-3xl sm:text-4xl lg:text-[2.75rem] font-bold leading-tight mb-3 text-foreground break-words">
                   {displayTitle}
                 </h1>
                 {metaLine && <p className="text-base text-muted-foreground">{metaLine}</p>}
               </header>
 
-              {/* 2. La galerie : le lieu décide de venir, il passe avant la tâche */}
+              {/* 2. La galerie : le lieu décide de venir, il passe avant la tâche.
+                  Image entière (contain) : une affiche ou une photo verticale
+                  ne doit pas être rognée. */}
               {projetPhotos.length > 0 && (
                 <section>
-                  <div className="rounded-[2rem] overflow-hidden shadow-2xl shadow-foreground/10 bg-muted">
+                  <div className="rounded-[2rem] overflow-hidden border border-border bg-muted">
                     <img
                       src={projetPhotos[0]}
                       alt={`Le lieu du projet ${displayTitle}`}
-                      className="w-full aspect-[16/9] object-cover"
+                      className="mx-auto block w-full max-h-[70vh] lg:max-h-[640px] object-contain"
                       loading="eager"
                       width={1200}
                       height={675}
@@ -265,7 +268,9 @@ const PublicMissionView = ({
                   )}
                   <div className="min-w-0">
                     <p className="text-lg font-semibold text-foreground">
-                      {authorFirstName ? `${authorFirstName} porte ce projet` : "Un membre porte ce projet"}
+                      {registrationUrl
+                        ? (authorFirstName ? `Annonce publiée par ${authorFirstName}` : "Annonce publiée par un membre")
+                        : (authorFirstName ? `${authorFirstName} porte ce projet` : "Un membre porte ce projet")}
                     </p>
                     <p className="text-sm text-muted-foreground">
                       {[memberSinceLong(author.created_at), titlecaseCity(author.city) || null].filter(Boolean).join(" · ")}
@@ -278,8 +283,18 @@ const PublicMissionView = ({
               {mission.description && (
                 <section>
                   <h2 className="font-heading text-2xl md:text-3xl font-bold mb-5 text-foreground">Le projet</h2>
-                  <div className="space-y-5 text-lg leading-relaxed text-foreground/85 whitespace-pre-wrap">
-                    {mission.description}
+                  <div className="space-y-4 text-base md:text-lg leading-relaxed text-foreground/85">
+                    {mission.description.split(/\n{2,}/).map((para, i) => (
+                      <p key={i} className="whitespace-pre-line break-words">
+                        {para.split(/(https:\/\/[^\s<>"')]+)/g).map((part, j) =>
+                          /^https:\/\//.test(part) ? (
+                            <a key={j} href={part} target="_blank" rel="noopener noreferrer" className="font-semibold text-primary underline underline-offset-4 break-all">
+                              {part}
+                            </a>
+                          ) : part,
+                        )}
+                      </p>
+                    ))}
                   </div>
                 </section>
               )}
@@ -313,7 +328,11 @@ const PublicMissionView = ({
               {/* 6. Pour participer */}
               <section>
                 <h2 className="font-heading text-2xl md:text-3xl font-bold mb-4 text-foreground">Pour participer</h2>
-                {attendusLabels.length === 0 ? (
+                {registrationUrl ? (
+                  <p className="text-base md:text-lg leading-relaxed text-foreground/85">
+                    L'inscription se fait sur le formulaire indiqué par l'organisation, avec le bouton « S'inscrire sur le formulaire ».
+                  </p>
+                ) : attendusLabels.length === 0 ? (
                   <p className="text-lg leading-relaxed text-foreground/85">
                     Aucun prérequis, tout s'apprend sur place
                   </p>
@@ -358,7 +377,9 @@ const PublicMissionView = ({
                   Les échanges se font en temps et en savoir-faire, dans les deux sens.
                 </p>
                 <p className="text-base leading-relaxed text-foreground/85">
-                  Le porteur du projet accueille chez lui, il reste responsable de son chantier et de sa sécurité.
+                  {registrationUrl
+                    ? "L'organisation du chantier gère l'accueil et les inscriptions, Guardiens n'intervient pas dans l'organisation."
+                    : "Le porteur du projet accueille chez lui, il reste responsable de son chantier et de sa sécurité."}
                 </p>
                 <Link
                   to="/actualites/chantier-participatif-projet-collectif-cadre-legal"
@@ -384,7 +405,13 @@ const PublicMissionView = ({
                       <p className="text-base font-semibold text-foreground">{projetDuration}</p>
                     </div>
                   )}
-                  {typeof p.max_participants === "number" && (
+                  {mission.city && (
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Lieu</p>
+                      <p className="text-base font-semibold text-foreground">{cityLabel}</p>
+                    </div>
+                  )}
+                  {!registrationUrl && typeof p.max_participants === "number" && (
                     <div>
                       <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Places</p>
                       <p className="text-base font-semibold text-foreground">
@@ -394,7 +421,18 @@ const PublicMissionView = ({
                   )}
                 </div>
 
-                {p.accepting_applications === false ? (
+                {registrationUrl ? (
+                  <div className="space-y-3">
+                    <Button asChild className="w-full h-auto py-4 rounded-full font-bold text-base whitespace-normal shadow-lg shadow-primary/20">
+                      <a href={registrationUrl} target="_blank" rel="noopener noreferrer">
+                        S'inscrire sur le formulaire
+                      </a>
+                    </Button>
+                    <p className="text-xs text-center text-muted-foreground px-2 leading-relaxed">
+                      L'inscription se fait sur un site extérieur à Guardiens, auprès de l'organisation du chantier.
+                    </p>
+                  </div>
+                ) : p.accepting_applications === false ? (
                   <p className="rounded-2xl border border-border bg-muted/60 px-4 py-4 text-center text-sm text-foreground">
                     Ce projet a fermé ses candidatures.
                   </p>
