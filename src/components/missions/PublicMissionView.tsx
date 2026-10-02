@@ -471,7 +471,7 @@ const PublicMissionView = ({
                     </Button>
                   </Link>
                 )}
-                {!hasApplied && p.accepting_applications !== false && (
+                {!registrationUrl && !hasApplied && p.accepting_applications !== false && (
                   <p className="mt-5 text-xs text-center text-muted-foreground px-2 leading-relaxed">
                     Votre message part directement au porteur du projet.
                   </p>

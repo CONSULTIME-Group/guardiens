@@ -161,7 +161,7 @@ const EntraideHub = () => {
   useEffect(() => {
     const load = async () => {
       const [needsResult, helpersResult, countsResult] = await Promise.all([
-        supabase.from("public_small_missions").select("id, user_id, slug, title, city, category, date_needed, end_date, latitude, longitude, photos, sit_mode").eq("status", "open").eq("mission_type", "besoin").order("created_at", { ascending: false }),
+        supabase.from("public_small_missions").select("id, user_id, slug, title, city, category, date_needed, end_date, latitude, longitude, photos, sit_mode").eq("status", "open").eq("mission_type", "besoin").neq("category", "projet").order("created_at", { ascending: false }),
         supabase.from("public_helpers").select("id, first_name, avatar_url, city, latitude_approx, longitude_approx, helps_with"),
         supabase.from("public_mission_response_counts").select("mission_id, response_count"),
       ]);

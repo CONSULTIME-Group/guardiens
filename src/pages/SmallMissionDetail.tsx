@@ -254,6 +254,12 @@ const SmallMissionDetail = () => {
     const { data: m } = await (isUuidParam ? query.eq("id", id) : query.eq("slug", id)).maybeSingle();
     if (!m) { setLoading(false); return; }
 
+    // Un projet participatif a sa propre page : l'ancien lien y renvoie.
+    if ((m as any).category === "projet") {
+      navigate(`/projets/${(m as any).slug || m.id}${window.location.search}`, { replace: true });
+      return;
+    }
+
     // Rétrocompat : si on est arrivé par UUID et qu'un slug existe, on redirige vers l'URL lisible.
     if (isUuidParam && (m as any).slug) {
       navigate(`/petites-missions/${(m as any).slug}${window.location.search}`, { replace: true });
