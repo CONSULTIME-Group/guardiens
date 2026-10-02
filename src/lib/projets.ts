@@ -301,14 +301,22 @@ export function projetSections(text?: string | null): Partial<Record<ProjetSecti
   if (!text) return null;
   const alt = PROJET_SECTION_LABELS.map((l) => l.replace("'", "['\u2019]")).join("|");
   const re = new RegExp(`(?:^|(?<=[.!?]\\s))(${alt})\\s*:\\s*`, "g");
-  const marks = [...text.matchAll(re)];
+  const trimmed = text.trim();
+  const marks = [...trimmed.matchAll(re)];
   if (marks.length === 0) return null;
+  // Découpage sans perte uniquement : le texte doit commencer par un libellé
+  // (rien avant) et chaque libellé n'apparaît qu'une fois. Sinon, null et la
+  // page affiche le texte intégral.
+  if (marks[0].index !== 0) return null;
   const out: Partial<Record<ProjetSectionLabel, string>> = {};
-  marks.forEach((m, i) => {
+  for (let i = 0; i < marks.length; i++) {
+    const m = marks[i];
     const label = PROJET_SECTION_LABELS.find((l) => l.replace("'", "").toLowerCase() === m[1].replace(/['\u2019]/, "").toLowerCase())!;
-    const end = i + 1 < marks.length ? marks[i + 1].index! : text.length;
-    const body = text.slice(m.index! + m[0].length, end).trim().replace(/[.\s]+$/, "");
-    if (body) out[label] = capitalize(body) + (/https:\/\/\S+$/.test(body) ? "" : ".");
-  });
+    if (label in out) return null;
+    const end = i + 1 < marks.length ? marks[i + 1].index! : trimmed.length;
+    const body = trimmed.slice(m.index! + m[0].length, end).trim().replace(/[.\s]+$/, "");
+    if (!body) return null;
+    out[label] = capitalize(body) + (/https:\/\/\S+$/.test(body) ? "" : ".");
+  }
   return out;
 }
