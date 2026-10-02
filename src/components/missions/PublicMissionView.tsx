@@ -32,6 +32,7 @@ interface MissionLike {
   status: string;
   created_at: string;
   exchange_offer?: string | null;
+  mission_type?: string | null;
   photos?: string[] | null;
   duration_estimate?: string | null;
   date_needed?: string | null;
