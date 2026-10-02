@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-vi.mock("@/components/maps/ApproximateLocationMap", () => ({ default: () => null }));
+vi.mock("@/components/shared/ApproximateLocationMap", () => ({ default: () => null }));
 import PublicMissionView from "@/components/missions/PublicMissionView";
 
 const DESC = "Informations pratiques : accueil à 9h. Inscription sur le formulaire en ligne : https://framaforms.org/x";
