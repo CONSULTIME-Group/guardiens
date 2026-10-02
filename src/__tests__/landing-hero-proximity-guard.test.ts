@@ -22,12 +22,11 @@ describe("landing.hero, entraide près de chez soi", () => {
   );
 
   it("présente la garde et l'entraide du quotidien", () => {
-    expect(landing["hero.title_eyebrow"]).toBe("House-sitting et entraide");
-    expect(landing["hero.title_main"]).toBe("Un gardien chez vous pour votre maison et vos animaux.");
-    expect(landing["hero.title_main"]).not.toMatch(/toujours/);
-    expect(landing["hero.lede"]).toContain("pas rémunérée");
-    expect(landing["hero.lede"]).toContain("pendant votre absence");
-    expect(landing["hero.lede"]).toContain("reste de l'année");
+    expect(landing["hero.title_eyebrow"]).toBe("Garde de maison et entraide");
+    expect(landing["hero.title_main"]).toBe("Près de chez vous, il y a toujours quelqu'un.");
+    expect(landing["hero.lede"]).toBe(
+      "Quelqu'un pour garder votre maison et vos animaux quand vous partez. Quelqu'un pour une partie de belote, un chien à promener ou le potager à arroser le reste de l'année.",
+    );
     expect(landing["hero.motto"]).toBe("Tout commence par un échange, et finit par une rencontre.");
   });
 
