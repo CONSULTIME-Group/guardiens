@@ -117,8 +117,8 @@ const ProjetsListing = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <PageMeta
-        title="Projets participatifs, apprendre en donnant un coup de main"
-        description="Des particuliers ouvrent leur terrain ou leur maison pour un chantier. Vous venez participer quelques jours et vous repartez avec un savoir-faire."
+        title="Projets participatifs, des projets à réaliser ensemble"
+        description="Planter un jardin, construire un abri, remettre un lieu en état : découvrez les projets proposés sur Guardiens et participez selon vos envies et vos disponibilités."
         noindex={!loading && projets.length === 0}
         ready={!loading}
       />
@@ -128,58 +128,26 @@ const ProjetsListing = () => {
           <PageBreadcrumb items={[{ label: "Projets participatifs" }]} />
         </div>
 
-        {/* Bloc éditorial : ce qu'est un projet ici */}
-        <header className="max-w-3xl mb-[52px]">
-          <p className="inline-flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-terra mb-4">
-            <span className="inline-block h-px w-5 bg-terra" aria-hidden />
-            Projets participatifs
-          </p>
-          <h1 className="font-heading text-4xl md:text-5xl font-bold leading-[1.1] mb-6 text-foreground">
-            Des chantiers ouverts, chez des particuliers
+        <header className="max-w-3xl mb-8">
+          <p className="text-sm font-semibold text-primary mb-2">Projets participatifs</p>
+          <h1 className="font-heading text-[2rem] md:text-[2.5rem] font-bold leading-tight mb-4 text-foreground">
+            Des projets à réaliser ensemble
           </h1>
-          <div className="space-y-4 text-lg leading-relaxed text-foreground/85">
-            <p>
-              Quelqu'un ouvre son terrain ou sa maison pour un chantier : un potager, un abri, un mur en pierre
-              sèche, un atelier de récupération.
-            </p>
-            <p>
-              Des gens viennent participer quelques jours, mettent la main à la pâte et repartent avec un
-              savoir-faire appris sur place.
-            </p>
-            <p>
-              Les échanges se font en temps et en savoir-faire, dans les deux sens : chacun donne de son
-              temps, le porteur du projet transmet ce qu'il sait.
-            </p>
+          <p className="text-base md:text-lg leading-relaxed text-foreground/85">
+            Planter un jardin, construire un abri, remettre un lieu en état… Découvrez les projets proposés sur
+            Guardiens et participez selon vos envies et vos disponibilités.
+          </p>
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+            <Button asChild className="rounded-full">
+              <a href="#projets-resultats">Découvrir les projets</a>
+            </Button>
+            <Button asChild variant="outline" className="rounded-full">
+              <Link to="/projets/publier">Publier un projet</Link>
+            </Button>
           </div>
         </header>
 
-        {/* Adresse au lecteur, affichée dans les deux états de la page. */}
-        <section className="max-w-3xl mb-[52px]">
-          <h2 className="font-heading text-2xl md:text-3xl font-bold mb-6 text-foreground">
-            Pourquoi les projets ont leur place ici
-          </h2>
-          <div className="space-y-4 text-base md:text-lg leading-relaxed text-foreground/85">
-            <p>
-              Guardiens est un réseau de proximité. Ce qui s'y joue depuis le début, c'est l'entraide entre
-              des gens qui habitent au même endroit : veiller sur une maison, nourrir un chat, arroser un
-              jardin. Des choses qui représentent un vrai besoin pour l'un, et qui coûtent presque rien à
-              l'autre. Un projet participatif, c'est la même chose avec les mains.
-            </p>
-            <p>
-              Ce qu'on y gagne dépasse le chantier. On se sent utile, on passe une journée avec des gens
-              rencontrés le matin même, et on repart en sachant faire quelque chose qu'on ignorait la veille.
-              C'est le genre d'expérience que seule la proximité fabrique. Pour porter un projet, il suffit
-              d'un lieu, d'une envie, et de quelqu'un pour tenir l'autre bout de la planche.
-            </p>
-            <p>
-              Nous commençons tout juste. Les premiers projets seront les nôtres et ceux de membres que nous
-              accompagnons un par un, et nous les alimenterons à la main le temps qu'il faudra. Si vous avez
-              un chantier en tête, c'est le bon moment : vous serez parmi les premiers, et nous serons
-              derrière vous.
-            </p>
-          </div>
-        </section>
-
+        <div id="projets-resultats" className="scroll-mt-24" />
         {/* Barre de proximité : origine, rayon, et ordre d'affichage. */}
         {!loading && projets.length > 0 && (
           <div className="mb-8 flex flex-wrap items-center gap-3">
@@ -253,8 +221,8 @@ const ProjetsListing = () => {
               Portez le premier projet
             </h2>
             <p className="text-base leading-relaxed text-foreground/85 mb-6">
-              Vous avez un chantier en tête chez vous, et l'envie de le mener avec quelques personnes : racontez
-              ce que vous voulez construire, ce que vous transmettrez, et ce que vous pouvez proposer sur place.
+              Vous avez un projet en tête et l'envie de le mener avec d'autres : décrivez ce que vous voulez
+              réaliser, où et quand.
             </p>
             <div className="flex flex-wrap items-center gap-4">
               <Link to="/projets/publier">
@@ -268,27 +236,20 @@ const ProjetsListing = () => {
           </section>
         )}
 
-        {/* Pied de page : affiché seulement quand des projets existent, pour
-            ne pas répéter l'invitation déjà portée par l'état vide. */}
+        {/* Pied de page court : affiché seulement quand des projets existent. */}
         {!loading && projets.length > 0 && (
-          <section className="mt-[52px] rounded-[2rem] bg-primary text-primary-foreground p-10 md:p-14">
-            <div className="max-w-2xl space-y-5">
-              <h2 className="font-heading text-3xl md:text-4xl font-bold">Vous avez un projet</h2>
-              <p className="text-lg opacity-90 leading-relaxed">
-                Le cadre, les précautions à prendre et la manière d'accueillir des participants chez soi sont
-                détaillés dans notre journal.
-              </p>
-              <div className="flex flex-wrap items-center gap-4">
-                <Link to="/projets/publier">
-                  <Button size="lg" variant="secondary" className="rounded-full font-bold">
-                    Publier mon projet
-                  </Button>
-                </Link>
-                <Link to={ARTICLE_URL} className="text-sm font-medium underline underline-offset-4 opacity-90">
-                  Lire l'article
-                </Link>
-              </div>
-
+          <section className="mt-[52px] rounded-[2rem] border border-border bg-muted/50 p-8 md:p-10 max-w-3xl">
+            <h2 className="font-heading text-2xl font-bold mb-3 text-foreground">Vous avez un projet ?</h2>
+            <p className="text-base leading-relaxed text-foreground/85 mb-5">
+              Décrivez ce que vous voulez réaliser, où et quand. Le cadre et les précautions sont expliqués dans notre journal.
+            </p>
+            <div className="flex flex-wrap items-center gap-4">
+              <Link to="/projets/publier">
+                <Button className="rounded-full">Publier un projet</Button>
+              </Link>
+              <Link to={ARTICLE_URL} className="text-sm font-medium underline underline-offset-4 text-foreground/80">
+                Lire le cadre d'un chantier participatif
+              </Link>
             </div>
           </section>
         )}

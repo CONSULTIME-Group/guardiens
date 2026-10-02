@@ -177,6 +177,14 @@ export const staticRoutes: SiteRoute[] = [
  changeFreq: "weekly",
  },
  {
+ path: "/projets",
+ title: "Projets participatifs | Guardiens",
+ metaDescription: "Des projets à réaliser ensemble : planter, construire, remettre un lieu en état. Participez selon vos envies et vos disponibilités.",
+ h1: "Des projets à réaliser ensemble",
+ sitemapPriority: "0.7",
+ changeFreq: "weekly",
+ },
+ {
  path: "/petites-missions/lyon",
  title: "Recréer du lien à Lyon : coups de main entre gens du coin | Guardiens",
  metaDescription: "À Lyon, découvrez les besoins ouverts et les personnes disponibles pour un coup de main. Une façon concrète de rencontrer les gens du coin.",

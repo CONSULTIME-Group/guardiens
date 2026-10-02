@@ -35,8 +35,8 @@ const EntraideMap = lazy(() => import("@/components/entraide/EntraideMap"), "Ent
 
 const FAQ = [
   { question: "Comment trouver un coup de main près de chez vous ?", answer: "Indiquez votre ville pour classer les besoins et les personnes disponibles par proximité." },
-  { question: "Que faire quand le fil est calme aujourd'hui ?", answer: "Décrivez votre besoin. Il reste visible dans le fil et les personnes disponibles près de chez vous le reçoivent." },
-  { question: "Faut-il payer pour utiliser l'Entraide ?", answer: "L'Entraide est ouverte à tous les membres. Vous convenez ensemble d'un service ou d'une attention en retour." },
+  { question: "Que faire quand le fil est calme aujourd'hui ?", answer: "Décrivez votre besoin. Il reste visible dans le fil et il est proposé aux membres disponibles près de chez vous." },
+  { question: "Faut-il payer pour utiliser l'Entraide ?", answer: "Non. L'Entraide est gratuite : publier un besoin, proposer votre aide et échanger avec un membre ne coûtent rien. Aucun argent ne circule entre membres, vous convenez ensemble d'un service ou d'une attention en retour." },
   { question: "Quelle différence avec une garde de maison ?", answer: "L'Entraide répond à un besoin ponctuel et court dans la journée. Une garde de maison couvre un séjour de plusieurs jours sur place." },
 ] as const;
 
@@ -52,33 +52,26 @@ export const EntraideHubIntro = ({ isAuthenticated, onNeed, onHelp }: {
   onHelp: () => void;
 }) => (
   <>
-    <header className="pb-8 pt-3 sm:pb-10">
+    <header className="pb-6 pt-3">
       <p className="text-sm font-semibold text-primary">Entraide</p>
-      <h1 className="mt-2 max-w-4xl font-heading text-3xl font-bold leading-tight text-foreground sm:text-5xl">
-        Et si, à quelques kilomètres de chez vous, quelqu'un avait besoin d'un petit coup de main ?
+      <h1 className="mt-2 max-w-3xl font-heading text-3xl font-bold leading-tight text-foreground sm:text-[2.5rem]">
+        Un coup de main près de chez vous
       </h1>
-      <p className="mt-4 max-w-3xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-        Arroser quelques plantes. Nourrir un chat. Réceptionner un colis. Aider à déplacer un meuble. Des choses qui, pour l'un, sont un vrai besoin, et qui, pour l'autre, coûtent très peu. Se sentir utile, échanger quelques mots, rencontrer une personne : c'est aussi une façon de se faire du bien.
+      <p className="mt-3 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+        Arroser des plantes, nourrir un chat, réceptionner un colis, déplacer un meuble : demandez un coup de main ou proposez le vôtre, entre gens du coin et sans argent.
       </p>
-      <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-        <Button onClick={onNeed}>J'ai besoin d'un coup de main</Button>
-        <Button variant="outline" onClick={onHelp}>Je veux bien donner un coup de main</Button>
+      <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+        <Button onClick={onNeed}>Demander de l'aide</Button>
+        <Button variant="outline" onClick={onHelp}>Proposer mon aide</Button>
       </div>
     </header>
-    <section className="border-y border-border py-6" aria-labelledby="concretement-title">
-      <h2 id="concretement-title" className="font-heading text-xl font-semibold text-foreground">Concrètement</h2>
-      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-        Vous dites ce dont vous avez besoin. Dix personnes du coin le reçoivent. L'une d'elles dit « Je peux » et vous échangez ensemble.
-      </p>
-    </section>
     {!isAuthenticated && (
-      <section className="mt-8 rounded-lg border border-primary/20 bg-primary/5 p-5 sm:p-6" aria-label="Comment ça marche">
-        <p className="text-xs font-semibold uppercase text-primary">Coups de main</p>
-        <h2 className="mt-1 font-heading text-xl font-semibold text-foreground">Comment ça marche ?</h2>
-        <ol className="mt-4 grid gap-3 sm:grid-cols-3">
-          <li className="rounded-lg border border-border bg-card p-4"><strong className="text-sm text-foreground">1. Vous dites</strong><p className="mt-1 text-xs leading-relaxed text-muted-foreground">Décrivez le coup de main et le moment qui vous conviendrait.</p></li>
-          <li className="rounded-lg border border-border bg-card p-4"><strong className="text-sm text-foreground">2. Dix personnes le reçoivent</strong><p className="mt-1 text-xs leading-relaxed text-muted-foreground">Les personnes disponibles les plus proches découvrent votre besoin.</p></li>
-          <li className="rounded-lg border border-border bg-card p-4"><strong className="text-sm text-foreground">3. L'une dit « Je peux »</strong><p className="mt-1 text-xs leading-relaxed text-muted-foreground">Vous échangez directement et choisissez ensemble le coup de main.</p></li>
+      <section className="mb-2 border-y border-border py-4" aria-label="Comment ça marche">
+        <h2 className="sr-only">Comment ça marche</h2>
+        <ol className="grid gap-2 text-sm text-muted-foreground sm:grid-cols-3 sm:gap-6">
+          <li><strong className="text-foreground">1. Vous décrivez</strong> le coup de main et le moment qui vous convient.</li>
+          <li><strong className="text-foreground">2. Votre demande est proposée</strong> aux membres disponibles près de chez vous.</li>
+          <li><strong className="text-foreground">3. Quelqu'un répond « Je peux »</strong>, vous échangez et convenez ensemble.</li>
         </ol>
       </section>
     )}

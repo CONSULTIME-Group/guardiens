@@ -276,6 +276,7 @@ const SmallMissionDetail = () => {
         .select("id, slug, title, description, category, city, postal_code, created_at, duration_estimate, photos, mission_type, exchange_offer, latitude, longitude")
         .eq("status", "open")
         .neq("id", m.id)
+        .neq("category", "projet")
         .or(`category.eq.${m.category},city.eq.${m.city}`)
         .order("created_at", { ascending: false })
         .limit(30),
@@ -310,8 +311,10 @@ const SmallMissionDetail = () => {
         })
         .sort((a, b) => a.__distance_km - b.__distance_km);
       const near = withDist.filter((r) => r.__distance_km <= NEAR_RADIUS_KM);
-      // On garde au moins 3 cartes si le rayon strict est vide (fallback catégorie).
-      ranked = near.length >= 3 ? near : withDist;
+      // Une seule annonce proche suffit à titrer « Près de chez vous » : on ne
+      // mélange alors pas d'annonces lointaines. Sans aucune annonce proche,
+      // la sélection reste affichée sous un intitulé neutre.
+      ranked = near.length > 0 ? near : withDist;
     }
     setRelatedMissions(ranked.slice(0, 3));
 
@@ -794,6 +797,9 @@ const SmallMissionDetail = () => {
           catMeta={{ label: catMeta.label }}
           durationLabel={mission.duration_estimate ? (DURATION_LABELS[mission.duration_estimate] || mission.duration_estimate) : null}
           relatedMissions={relatedMissions}
+          relatedNear={relatedMissions.some(
+            (rm: any) => typeof rm.__distance_km === "number" && rm.__distance_km <= NEAR_RADIUS_KM,
+          )}
           titlecaseCity={titlecaseCity}
           timeAgoFr={timeAgoFr}
           memberSinceLong={memberSince}

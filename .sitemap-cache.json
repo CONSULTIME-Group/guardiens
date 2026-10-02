@@ -35,6 +35,10 @@
     "public_profiles": {
       "head": "2026-10-02T07:59:42.882278+00:00|1317",
       "fetchedAt": "2026-10-02T08:23:37.633Z"
+    },
+    "small_missions_projets_v1": {
+      "head": null,
+      "fetchedAt": "2026-10-02T09:35:31.580Z"
     }
   },
   "entries": {
@@ -3907,6 +3911,14 @@
         "loc": "/gardiens/ff37056c-13ae-40f0-aca0-740f610020bb",
         "lastmod": "2026-08-18",
         "changefreq": "monthly",
+        "priority": "0.5"
+      }
+    ],
+    "small_missions_projets_v1": [
+      {
+        "loc": "/projets/chantier-participatif-de-plantation",
+        "lastmod": "2026-09-30",
+        "changefreq": "weekly",
         "priority": "0.5"
       }
     ]

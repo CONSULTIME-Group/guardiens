@@ -32,6 +32,7 @@ interface MissionLike {
   status: string;
   created_at: string;
   exchange_offer?: string | null;
+  mission_type?: string | null;
   photos?: string[] | null;
   duration_estimate?: string | null;
   date_needed?: string | null;
@@ -64,6 +65,8 @@ interface Props {
   catMeta: CatMeta;
   durationLabel?: string | null;
   relatedMissions: RelatedMissionLike[];
+  /** Vrai seulement si les recommandations sont réellement proches (distance calculée). */
+  relatedNear?: boolean;
   titlecaseCity: (s?: string | null) => string;
   timeAgoFr: (iso: string) => string;
   memberSinceLong: (iso?: string | null) => string | null;
@@ -95,6 +98,7 @@ const PublicMissionView = ({
   catMeta,
   durationLabel,
   relatedMissions,
+  relatedNear = false,
   titlecaseCity,
   timeAgoFr,
   memberSinceLong,
@@ -198,6 +202,7 @@ const PublicMissionView = ({
           title={`${displayTitle}, projet participatif à ${cityLabel}`}
           description={metaDescription}
           image={ogImage}
+          noindex={noindex}
         />
         <Head>
           <script type="application/ld+json">{JSON.stringify({
@@ -544,7 +549,9 @@ const PublicMissionView = ({
                 />
                 <div className="p-4">
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    {t("mission_detail.location_note")}
+                    {registrationUrl
+                      ? "Localisation approximative. Le lieu exact et l'accueil sont précisés par l'organisateur."
+                      : t("mission_detail.location_note")}
                   </p>
                 </div>
               </div>
@@ -729,25 +736,13 @@ const PublicMissionView = ({
               {/* Description */}
               <section>
                 <h2 className="font-heading text-2xl md:text-3xl font-bold mb-5 text-foreground">
-                  {t("mission_detail.mission_h2")}
+                  {mission.mission_type === "offre" ? "Le coup de main proposé" : t("mission_detail.mission_h2")}
                 </h2>
                 <div className="space-y-5 text-lg leading-relaxed text-foreground/85 whitespace-pre-wrap">
                   {mission.description}
                 </div>
               </section>
 
-              {/* En échange */}
-              {mission.exchange_offer && (
-                <section className="bg-muted/60 p-8 md:p-10 rounded-[2rem] border border-border relative overflow-hidden">
-                  <div className="absolute -top-6 -right-6 w-32 h-32 bg-primary/5 rounded-full blur-2xl" aria-hidden />
-                  <h3 className="text-xs font-bold tracking-[0.2em] uppercase mb-4 text-muted-foreground">
-                    {t("mission_detail.exchange_h3")}
-                  </h3>
-                  <blockquote className="font-heading text-xl md:text-2xl italic leading-snug text-foreground/90">
-                    « {mission.exchange_offer} »
-                  </blockquote>
-                </section>
-              )}
             </div>
           </article>
 
@@ -853,10 +848,16 @@ const PublicMissionView = ({
           <section className="mt-24 md:mt-32 pt-16 border-t border-border">
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
               <div>
-                <h2 className="font-heading text-3xl md:text-4xl font-bold mb-2">{t("mission_detail.related_title")}</h2>
-                <p className="text-muted-foreground text-lg">
-                  {t("mission_detail.related_sub", { city: cityLabel })}
-                </p>
+                {relatedNear ? (
+                  <>
+                    <h2 className="font-heading text-3xl md:text-4xl font-bold mb-2">{t("mission_detail.related_title")}</h2>
+                    <p className="text-muted-foreground text-lg">
+                      {t("mission_detail.related_sub", { city: cityLabel })}
+                    </p>
+                  </>
+                ) : (
+                  <h2 className="font-heading text-3xl md:text-4xl font-bold mb-2">D'autres coups de main sur Guardiens</h2>
+                )}
               </div>
               <Link
                 to="/petites-missions"
@@ -911,9 +912,6 @@ const PublicMissionView = ({
             <div className="flex flex-wrap items-center justify-center gap-5 pt-4 text-sm opacity-80">
               <span className="inline-flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4" /> {t("mission_detail.no_card")}
-              </span>
-              <span className="inline-flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4" /> {t("mission_detail.no_commitment")}
               </span>
               <span className="inline-flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4" /> {t("mission_detail.two_minutes")}
