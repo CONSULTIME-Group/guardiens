@@ -171,6 +171,9 @@ const PublicMissionView = ({
     const projetRedirect = `/projets/${p.slug || mission.id}`;
     const metaLine = [cityLabel, period, projetDuration].filter(Boolean).join(" · ");
     const registrationUrl = externalRegistrationUrl(mission.description);
+    // Même règle pour le bouton mobile et l'encadré : un projet fermé
+    // (candidatures closes ou statut autre que ouvert) n'invite plus à s'inscrire.
+    const registrationOpen = Boolean(registrationUrl) && p.accepting_applications !== false && mission.status === "open";
     const accueilHours = projetAccueilHours(mission.description);
     const accueilLabel = accueilHours.length > 0
       ? `Accueil à ${accueilHours.length === 1 ? accueilHours[0] : `${accueilHours.slice(0, -1).join(", ")} ou ${accueilHours[accueilHours.length - 1]}`}`
@@ -250,7 +253,7 @@ const PublicMissionView = ({
                     ))}
                   </dl>
                 )}
-                {registrationUrl && (
+                {registrationOpen && (
                   <div className="mt-5 lg:hidden">
                     <Button asChild className="w-full h-auto py-4 rounded-full font-bold text-base whitespace-normal">
                       <a href={registrationUrl} target="_blank" rel="noopener noreferrer">S'inscrire au chantier</a>
@@ -473,7 +476,7 @@ const PublicMissionView = ({
                   )}
                 </div>
 
-                {registrationUrl ? (
+                {registrationOpen ? (
                   <div className="space-y-3">
                     <Button asChild className="w-full h-auto py-4 rounded-full font-bold text-base whitespace-normal shadow-lg shadow-primary/20">
                       <a href={registrationUrl} target="_blank" rel="noopener noreferrer">
@@ -484,7 +487,7 @@ const PublicMissionView = ({
                       Sur le formulaire de l'organisateur, hors de Guardiens.
                     </p>
                   </div>
-                ) : p.accepting_applications === false ? (
+                ) : registrationUrl || p.accepting_applications === false ? (
                   <p className="rounded-2xl border border-border bg-muted/60 px-4 py-4 text-center text-sm text-foreground">
                     Ce projet a fermé ses candidatures.
                   </p>
