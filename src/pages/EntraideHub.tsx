@@ -168,10 +168,22 @@ const EntraideHub = () => {
       const responseCounts = new Map((countsResult.data || []).map((row) => [row.mission_id, row.response_count || 0]));
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      setNeeds((needsResult.data || []).filter((row) => {
+      const openNeeds = (needsResult.data || []).filter((row) => {
         const date = row.end_date || row.date_needed;
         return !date || new Date(date) >= today;
-      }).map((row) => ({ ...row, response_count: responseCounts.get(row.id) || 0 })) as EntraideNeed[]);
+      });
+      // Portraits des auteurs d'annonces sans photo : une seule lecture groupée
+      // sur la vue publique (l'auteur n'est pas forcément un aidant).
+      const authorIds = [...new Set(openNeeds.filter((row) => !row.photos?.length && row.user_id).map((row) => row.user_id as string))];
+      const authors = new Map<string, { avatar_url: string | null; first_name: string | null }>();
+      if (authorIds.length > 0) {
+        const { data: authorRows } = await supabase.from("public_profiles").select("id, first_name, avatar_url").in("id", authorIds);
+        for (const row of authorRows || []) if (row.id) authors.set(row.id, { avatar_url: row.avatar_url, first_name: row.first_name });
+      }
+      setNeeds(openNeeds.map((row) => {
+        const author = row.user_id ? authors.get(row.user_id) : undefined;
+        return { ...row, response_count: responseCounts.get(row.id) || 0, author_avatar_url: author?.avatar_url ?? null, author_first_name: author?.first_name ?? null };
+      }) as EntraideNeed[]);
       setHelpers((helpersResult.data || []).flatMap((row) => row.id && row.first_name ? [{ ...row, id: row.id, first_name: row.first_name }] : []) as PublicHelper[]);
       setLoading(false);
     };
