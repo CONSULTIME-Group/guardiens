@@ -53,8 +53,9 @@ export interface SiteRoute {
  * - Tout endpoint d'auth interne (`/auth/`, `/forgot-password`…)
  *
  * Les routes publiques marquées `index: false` dans staticRoutes (ex. `/login`,
- * `/recherche`) sont automatiquement ajoutées par le générateur, ne pas les
- * lister ici en double.
+ * `/recherche`) ne doivent JAMAIS figurer ici : elles restent explorables pour
+ * que leur noindex soit lu. Le générateur refuse ces chemins. robots.txt règle
+ * l'exploration seulement, il ne protège aucune page.
  */
 export const privateDisallowPaths: string[] = [
  "/admin",
@@ -363,7 +364,7 @@ export const staticRoutes: SiteRoute[] = [
  h1: "Connexion",
  sitemapPriority: "0.4",
  changeFreq: "monthly",
- // Page d'auth : pas de valeur SEO + risque de duplication. Disallow + hors sitemap.
+ // Page d'auth : pas de valeur SEO + risque de duplication. noindex + hors sitemap, explorable (pas de Disallow).
  index: false,
  },
  {
