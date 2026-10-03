@@ -566,6 +566,24 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_content_seo_trigger_20261003_2130: {
+        Row: {
+          definition: string | null
+          proacl: unknown[] | null
+          signature: string | null
+        }
+        Insert: {
+          definition?: string | null
+          proacl?: unknown[] | null
+          signature?: string | null
+        }
+        Update: {
+          definition?: string | null
+          proacl?: unknown[] | null
+          signature?: string | null
+        }
+        Relationships: []
+      }
       _backup_cron_auth_20260918: {
         Row: {
           active: boolean | null
@@ -1333,6 +1351,30 @@ export type Database = {
           seo_dirty_at?: string | null
           sitter_count?: number | null
           slug?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_seo_family_state_20261003_2130: {
+        Row: {
+          family: string | null
+          last_global_hash: string | null
+          last_hash: string | null
+          last_marked_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          family?: string | null
+          last_global_hash?: string | null
+          last_hash?: string | null
+          last_marked_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          family?: string | null
+          last_global_hash?: string | null
+          last_hash?: string | null
+          last_marked_at?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -8292,6 +8334,24 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_consumer_lease: {
+        Row: {
+          expires_at: string
+          holder: string | null
+          singleton: boolean
+        }
+        Insert: {
+          expires_at?: string
+          holder?: string | null
+          singleton?: boolean
+        }
+        Update: {
+          expires_at?: string
+          holder?: string | null
+          singleton?: boolean
+        }
+        Relationships: []
+      }
       seo_department_pages: {
         Row: {
           active_sits_count: number
@@ -8346,6 +8406,42 @@ export type Database = {
           sitter_count?: number
           slug?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      seo_render_budget: {
+        Row: {
+          attempts: number
+          month: string
+        }
+        Insert: {
+          attempts?: number
+          month: string
+        }
+        Update: {
+          attempts?: number
+          month?: string
+        }
+        Relationships: []
+      }
+      seo_url_outbox: {
+        Row: {
+          dirty_at: string
+          first_dirty_at: string
+          next_attempt_at: string
+          path: string
+        }
+        Insert: {
+          dirty_at?: string
+          first_dirty_at?: string
+          next_attempt_at?: string
+          path: string
+        }
+        Update: {
+          dirty_at?: string
+          first_dirty_at?: string
+          next_attempt_at?: string
+          path?: string
         }
         Relationships: []
       }
@@ -12313,6 +12409,7 @@ export type Database = {
         Args: { p_mission_id: string; p_size?: number }
         Returns: Json
       }
+      enqueue_seo_url: { Args: { p_path: string }; Returns: undefined }
       filter_blocked_partners: {
         Args: { p_other_ids: string[] }
         Returns: string[]
@@ -13029,6 +13126,7 @@ export type Database = {
         }
         Returns: string
       }
+      queue_owner_public_sits: { Args: { p_user: string }; Returns: undefined }
       reactivate_my_mission_response: {
         Args: { p_message: string; p_mission_id: string }
         Returns: string
@@ -13188,6 +13286,14 @@ export type Database = {
           taux_publication: number
         }[]
       }
+      seo_acquire_consumer: { Args: { p_holder: string }; Returns: boolean }
+      seo_enqueue_urls: { Args: { p_paths: string[] }; Returns: number }
+      seo_queue_template_family: {
+        Args: { p_dry_run: boolean; p_family: string }
+        Returns: number
+      }
+      seo_release_consumer: { Args: { p_holder: string }; Returns: undefined }
+      seo_reserve_render: { Args: { p_holder: string }; Returns: boolean }
       set_email_preferences_by_token: {
         Args: {
           p_alert: boolean
