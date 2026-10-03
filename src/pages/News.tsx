@@ -161,7 +161,11 @@ export default function News() {
 
       const { data, count, error: qError } = await query;
       if (cancelled) return;
-      if (qError) {
+      // Plage au-delà du total (PostgREST PGRST103, HTTP 416) : page hors
+      // limite, donc 404, pas une panne.
+      if (qError && (qError as { code?: string }).code === "PGRST103") {
+        setResult({ key, articles: [], total: 0, error: false });
+      } else if (qError) {
         setResult({ key, articles: [], total: 0, error: true });
       } else {
         setResult({ key, articles: (data as Article[]) || [], total: count || 0, error: false });

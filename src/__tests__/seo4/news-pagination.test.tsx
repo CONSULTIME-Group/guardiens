@@ -187,6 +187,13 @@ describe("rendu News", () => {
     expect(canonical()).toBeNull();
   });
 
+  it("plage refusée par la base (PGRST103) : 404, pas 503", async () => {
+    handler = (q) => (q.range ? Promise.resolve({ data: null, error: { code: "PGRST103", message: "range" } }) : defaultHandler(q));
+    mount("/actualites/page/999");
+    await waitFor(() => expect(statusMeta()).toBe("404"));
+    expect(canonical()).toBeNull();
+  });
+
   it("panne de lecture : 503 noindex, pas une 404, distincte du vide", async () => {
     handler = (q) => (q.range ? Promise.resolve({ data: null, error: { message: "x" } }) : defaultHandler(q));
     const a = mount("/actualites/page/2");
