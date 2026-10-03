@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { fetchAllPages, supabasePage, normalizeLastmod, dedupeEntries, renderSitemapXml, validateSitemapXml, readStaticRoutes } from "../../../scripts/lib/sitemapCore.mjs";
+import { probeCompositeKey, fetchAllPages, supabasePage, normalizeLastmod, dedupeEntries, renderSitemapXml, validateSitemapXml, readStaticRoutes } from "../../../scripts/lib/sitemapCore.mjs";
 import { fetchOrCache, normalizeCache, SITEMAP_CACHE_VERSION } from "../../../scripts/lib/sitemapCache.mjs";
 import { proxySitemap, validateSitemapBody, STATIC_SITEMAP_ORIGIN } from "../../../supabase/functions/sitemap/proxy";
 
@@ -65,6 +65,15 @@ describe("SEO-3 pagination", () => {
     await expect(fetchAllPages({ source: "t", key: "id", page, pageSize: 10 })).rejects.toThrow(/plafond|annoncées/);
   });
 
+  it("total NaN, infini, négatif ou taille de page invalide refusés", async () => {
+    for (const count of [NaN, Infinity, -1, 1.5]) {
+      await expect(fetchAllPages({ source: "t", key: "id", page: async () => ({ data: [], error: null, count }) })).rejects.toThrow(/total/);
+    }
+    for (const pageSize of [0, -5, NaN, Infinity, 2.5]) {
+      await expect(fetchAllPages({ source: "t", key: "id", pageSize, page: async () => ({ data: [], error: null, count: 0 }) })).rejects.toThrow(/taille/);
+    }
+  });
+
   it("un total incohérent est refusé, total absent aussi", async () => {
     await expect(fetchAllPages({ source: "t", key: "id", page: async () => ({ data: rows(3), error: null, count: 5 }) })).rejects.toThrow(/annoncées/);
     await expect(fetchAllPages({ source: "t", key: "id", page: async () => ({ data: rows(3), error: null }) })).rejects.toThrow(/total/);
@@ -101,8 +110,49 @@ describe("SEO-3 cache v4 et sources sans sonde", () => {
   });
 });
 
+describe("SEO-3 clé composite", () => {
+  const client = (date: any, count: any) => ({
+    from: () => {
+      let counting = false;
+      const q: any = {
+        select: (_c: string, o?: object) => { counting = !!o; return q; },
+        eq: () => q,
+        order: () => q,
+        limit: () => Promise.resolve(counting ? count : date),
+      };
+      return q;
+    },
+  });
+  const okDate = { data: [{ updated_at: "2026-09-01" }], error: null };
+  const okCount = { data: [], error: null, count: 4 };
+  it("clé complète si les deux sondes réussissent", async () => {
+    expect(await probeCompositeKey(client(okDate, okCount), "t", "updated_at")).toBe("2026-09-01|4");
+  });
+  it("null si l'une des deux sondes échoue", async () => {
+    expect(await probeCompositeKey(client({ data: null, error: { message: "x" } }, okCount), "t", "updated_at")).toBeNull();
+    expect(await probeCompositeKey(client(okDate, { data: null, error: { message: "x" }, count: null }), "t", "updated_at")).toBeNull();
+    expect(await probeCompositeKey(client(okDate, { data: [], error: null, count: NaN }), "t", "updated_at")).toBeNull();
+    expect(await probeCompositeKey(client(Promise.reject(new Error("réseau")), okCount), "t", "updated_at")).toBeNull();
+  });
+  it("source réellement vide : clé stable", async () => {
+    expect(await probeCompositeKey(client({ data: [], error: null }, { data: [], error: null, count: 0 }), "t", "updated_at")).toBe("no-date|0");
+  });
+});
+
 describe("SEO-3 lastmod et déduplication", () => {
   const today = "2026-10-03";
+  it("valeur source entière validée, futur à l'instant près", () => {
+    const now = new Date("2026-10-03T12:00:00Z");
+    expect(normalizeLastmod("2026-09-01xyz", now)).toBeNull();
+    expect(normalizeLastmod("2026-09-01T25:00:00Z", now)).toBeNull();
+    expect(normalizeLastmod("2026-09-01 10:00:00+00", now)).toBe("2026-09-01");
+    expect(normalizeLastmod("2026-09-01 10:00:00.123456+02:00", now)).toBe("2026-09-01");
+    expect(normalizeLastmod("2026-10-03T11:59:59Z", now)).toBe("2026-10-03");
+    expect(normalizeLastmod("2026-10-03T12:00:01Z", now)).toBeNull();
+    expect(normalizeLastmod("2026-10-03", now)).toBe("2026-10-03");
+    expect(normalizeLastmod("2026-10-04", now)).toBeNull();
+  });
+
   it("absent, valide, invalide, futur", () => {
     expect(normalizeLastmod(null, today)).toBeNull();
     expect(normalizeLastmod("", today)).toBeNull();

@@ -225,7 +225,6 @@ export async function probeCompositeKey(client, table, column, filter = null) {
     if (!d || d.error || !Array.isArray(d.data)) return null;
     if (!c || c.error || !Number.isSafeInteger(c.count) || c.count < 0) return null;
     const date = d.data[0]?.[column] ?? null;
-    if (c.count > 0 && date == null) return null;
     return `${date ?? "no-date"}|${c.count}`;
   } catch {
     return null;
