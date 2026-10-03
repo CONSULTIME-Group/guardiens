@@ -22,6 +22,17 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { resendFetch } from "../_shared/resend-guard.ts";
 import { SENDER_FROM, REPLY_TO_ADDRESS } from "../_shared/sender-address.ts";
+import { expectedCountMismatch } from "../_shared/mass-email-dedupe.ts";
+import {
+  buildSubject,
+  ctaLabel as ctaLabelFor,
+  deliverProximity,
+  loadProximityHistory,
+  missionKind,
+  missionUrl as missionUrlFor,
+  splitByHistory,
+  type MissionKind,
+} from "./logic.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -52,7 +63,7 @@ const CATEGORY_LABEL: Record<string, string> = {
   walk: "Promenade", visit: "Visite à domicile", feeding: "Repas / gamelle",
   transport: "Transport", vet: "Visite vétérinaire", house: "Coup de main maison",
   animals: "Animaux", garden: "Jardin", errand: "Courses", tech: "Technique",
-  company: "Compagnie", other: "Coup de main",
+  company: "Compagnie", other: "Coup de main", projet: "Projet participatif",
 };
 
 function fmtDateFr(iso: string | null | undefined): string {
@@ -69,7 +80,7 @@ function buildHtml(params: {
   missionExcerpt: string;
   missionUrl: string;
   subject: string;
-  missionType: "besoin" | "offre";
+  missionType: MissionKind;
   missionCity: string;
   missionCategory: string | null;
   missionDateNeeded: string | null;
@@ -95,13 +106,21 @@ function buildHtml(params: {
   const excerptHtml = missionExcerpt
     ? `<p style="margin:0 0 12px;font-size:14px;line-height:1.6;color:#555;font-style:italic">${escapeHtml(missionExcerpt)}</p>`
     : "";
-  const introLine = missionType === "offre"
-    ? `En ce moment, tout près de vous, ${author} propose son aide.`
-    : `En ce moment, tout près de vous, ${author} cherche un coup de main.`;
-  const ctaLabel = missionType === "offre" ? "Voir sa proposition" : "Voir sa demande";
-  const closingLine = missionType === "offre"
-    ? "C'est aussi ça, Guardiens : des gens du coin qui donnent de leur temps, sans rien attendre en retour."
-    : "C'est aussi ça, Guardiens : des gens du coin qui se rendent service, sans rien attendre en retour.";
+  const isProjet = missionType === "projet";
+  const leadLine = isProjet
+    ? "Sur Guardiens, il n'y a pas que la garde de maison. Il y a aussi des projets à réaliser ensemble."
+    : "Sur Guardiens, il n'y a pas que la garde de maison. Il y a aussi l'entraide, gratuite, entre gens du coin.";
+  const introLine = isProjet
+    ? `Près de chez vous, ${author} a publié un projet ouvert à la participation.`
+    : missionType === "offre"
+      ? `En ce moment, tout près de vous, ${author} propose son aide.`
+      : `En ce moment, tout près de vous, ${author} cherche un coup de main.`;
+  const ctaLabel = ctaLabelFor(missionType);
+  const closingLine = isProjet
+    ? "La date, le lieu et la façon de participer sont précisés sur la fiche du projet."
+    : missionType === "offre"
+      ? "C'est aussi ça, Guardiens : des gens du coin qui donnent de leur temps, sans rien attendre en retour."
+      : "C'est aussi ça, Guardiens : des gens du coin qui se rendent service, sans rien attendre en retour.";
 
   const catLabel = missionCategory ? (CATEGORY_LABEL[missionCategory] ?? missionCategory) : "";
   const dateLabel = fmtDateFr(missionDateNeeded);
@@ -136,7 +155,7 @@ function buildHtml(params: {
 <tr><td style="padding:24px 40px 8px">
 <h1 style="margin:0 0 20px;font-size:22px;line-height:1.35;color:#1a1a1a;font-weight:700">${escapeHtml(subject)}</h1>
 <p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#3a3a3a">${greeting}</p>
-<p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#3a3a3a">Sur Guardiens, il n'y a pas que la garde de maison. Il y a aussi l'entraide, gratuite, entre gens du coin.</p>
+<p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#3a3a3a">${leadLine}</p>
 <p style="margin:0 0 8px;font-size:15px;line-height:1.7;color:#3a3a3a">${introLine}</p>
 ${cardHtml}
 </td></tr>
@@ -158,13 +177,6 @@ ${cardHtml}
 </table>
 </td></tr></table>
 </body></html>`;
-}
-
-function buildSubject(authorFirstName: string, missionType: "besoin" | "offre"): string {
-  const who = authorFirstName || "un membre";
-  return missionType === "offre"
-    ? `Près de chez vous, ${who} propose son aide, gratuitement`
-    : `Près de chez vous, ${who} cherche un coup de main`;
 }
 
 function buildExcerpt(desc: string | null | undefined, maxLen = 220): string {
@@ -192,6 +204,8 @@ async function computeRecipients(
     title: string;
     description: string | null;
     mission_type: "besoin" | "offre";
+    slug: string | null;
+    category: string | null;
     user_id: string;
     latitude: number | null;
     longitude: number | null;
@@ -203,7 +217,7 @@ async function computeRecipients(
 }> {
   const { data: mission, error: mErr } = await serviceClient
     .from("small_missions")
-    .select("id, title, description, mission_type, user_id, latitude, longitude, city, category, date_needed, photos")
+    .select("id, slug, title, description, mission_type, user_id, latitude, longitude, city, category, date_needed, photos")
     .eq("id", missionId)
     .maybeSingle();
   if (mErr || !mission) throw new Error(`Mission introuvable (${missionId})`);
@@ -266,12 +280,13 @@ async function computeRecipients(
   const ids = all.map((r) => r.user_id);
   const optedOut = new Set<string>();
   if (ids.length > 0) {
-    const CHUNK = 500;
+    const CHUNK = 150;
     for (let i = 0; i < ids.length; i += CHUNK) {
-      const { data: prefs } = await serviceClient
+      const { data: prefs, error: prefErr } = await serviceClient
         .from("email_preferences")
         .select("user_id, product_emails")
         .in("user_id", ids.slice(i, i + CHUNK));
+      if (prefErr) throw new Error(`préférences illisibles : ${prefErr.message}`);
       for (const p of (prefs || []) as any[]) {
         if (p.product_emails === false) optedOut.add(p.user_id);
       }
@@ -283,12 +298,13 @@ async function computeRecipients(
   const suppressed = new Set<string>();
   if (emailsLower.size > 0) {
     const list = [...emailsLower];
-    const CHUNK = 500;
+    const CHUNK = 150;
     for (let i = 0; i < list.length; i += CHUNK) {
-      const { data: sups } = await serviceClient
+      const { data: sups, error: supErr } = await serviceClient
         .from("suppressed_emails")
         .select("email")
         .in("email", list.slice(i, i + CHUNK));
+      if (supErr) throw new Error(`suppressions illisibles : ${supErr.message}`);
       for (const s of (sups || []) as any[]) {
         if (s.email) suppressed.add(String(s.email).toLowerCase());
       }
@@ -376,34 +392,40 @@ Deno.serve(async (req) => {
       radiusKm,
     );
 
-    const missionType: "besoin" | "offre" =
-      ((mission as any).mission_type === "offre" ? "offre" : "besoin");
-    const subject = buildSubject(authorFirstName, missionType);
+    const missionType = missionKind(mission as any);
+    const subject = buildSubject(authorFirstName, missionType, mission.title);
     const excerpt = buildExcerpt((mission as any).description);
-    const missionUrl = `https://guardiens.fr/petites-missions/${mission.id}`;
-    const ctaLabel = missionType === "offre" ? "Voir sa proposition" : "Voir sa demande";
+    const missionUrl = missionUrlFor(mission as any);
+    const ctaLabel = ctaLabelFor(missionType);
+
+    // Historique inter-campagnes : partagé par l'aperçu et l'envoi. Une erreur
+    // de lecture lève et bloque tout (catch global, 500).
+    const history = await loadProximityHistory(serviceClient, missionId);
+    const { fresh, already } = splitByHistory(recipients, history);
 
     if (mode === "preview") {
       // Limite l'aperçu pour rester léger côté UI.
       const PREVIEW_LIMIT = 500;
       return new Response(
         JSON.stringify({
-          count: recipients.length,
+          count: fresh.length,
+          already_notified: already.length,
           author_first_name: authorFirstName,
           mission: {
             id: mission.id,
             title: mission.title,
             mission_type: missionType,
             excerpt,
+            url: missionUrl,
           },
           subject,
-          recipients: recipients.slice(0, PREVIEW_LIMIT).map((r) => ({
+          recipients: fresh.slice(0, PREVIEW_LIMIT).map((r) => ({
             first_name: r.first_name,
             city: r.city,
             distance_km: r.distance_km,
             email: r.email,
           })),
-          truncated: recipients.length > PREVIEW_LIMIT,
+          truncated: fresh.length > PREVIEW_LIMIT,
         }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
@@ -411,11 +433,17 @@ Deno.serve(async (req) => {
 
     // Mode SEND
     if (!RESEND_API_KEY) throw new Error("RESEND_API_KEY not configured");
-    if (recipients.length === 0) {
-      return new Response(JSON.stringify({ error: "Aucun destinataire" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    if (expectedCountMismatch(payload.expected_count, fresh.length)) {
+      return new Response(JSON.stringify({
+        error: `Le nombre de nouveaux destinataires a changé (${fresh.length}). Relancez l'aperçu.`,
+        count: fresh.length,
+      }), { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    if (fresh.length === 0) {
+      return new Response(JSON.stringify({
+        error: "Aucun nouveau destinataire : tout le monde dans ce rayon a déjà été prévenu.",
+        already_notified: already.length,
+      }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     // Log de campagne
@@ -425,7 +453,7 @@ Deno.serve(async (req) => {
         segment: "proximity",
         filters: { mission_id: missionId, radius_km: radiusKm, mission_type: missionType } as any,
         subject,
-        body: `Annonce d'entraide ${missionType === "offre" ? "(offre)" : "(besoin)"} (${mission.title}) à ${radiusKm} km, auteur ${authorFirstName}`,
+        body: `Annonce ${missionType === "projet" ? "projet" : `d'entraide (${missionType})`} (${mission.title}) à ${radiusKm} km, auteur ${authorFirstName}`,
         cta_label: ctaLabel,
         cta_url: missionUrl,
         recipients_count: 0,
@@ -438,21 +466,33 @@ Deno.serve(async (req) => {
       throw new Error(`Failed to create campaign row: ${campErr?.message}`);
     }
     const campaignId = campaign.id as string;
+    const photo = Array.isArray((mission as any).photos) && typeof (mission as any).photos[0] === "string" && (mission as any).photos[0]
+      ? (mission as any).photos[0] : null;
 
-    let sent = 0;
-    let errors = 0;
-    const sendRows: Array<{
-      mass_email_id: string;
-      recipient_email: string;
-      resend_id: string | null;
-      status: string;
-      error_message: string | null;
-    }> = [];
-
-    const BATCH_SIZE = 100;
-    for (let i = 0; i < recipients.length; i += BATCH_SIZE) {
-      const batch = recipients.slice(i, i + BATCH_SIZE);
-      const emailObjects = batch.map((r) => ({
+    const report = await deliverProximity({
+      db: serviceClient,
+      sendBatch: async (emails, idempotencyKey) => {
+        try {
+          const res = await resendFetch("https://api.resend.com/emails/batch", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${RESEND_API_KEY}`,
+              "Idempotency-Key": idempotencyKey,
+            },
+            body: JSON.stringify(emails),
+          }, { functionName: "send-mass-email-proximity" });
+          return { status: res.status, body: await res.text() };
+        } catch (e) {
+          console.error("Proximity batch error:", e);
+          return { status: null, body: String(e) };
+        }
+      },
+    }, {
+      missionId,
+      campaignId,
+      recipients: fresh,
+      buildEmail: (r) => ({
         from: SENDER_FROM,
         reply_to: REPLY_TO_ADDRESS,
         to: [r.email],
@@ -468,79 +508,17 @@ Deno.serve(async (req) => {
           missionCity: (mission as any).city || "",
           missionCategory: (mission as any).category || null,
           missionDateNeeded: (mission as any).date_needed || null,
-          missionPhotoUrl: Array.isArray((mission as any).photos) && (mission as any).photos.length > 0 && typeof (mission as any).photos[0] === "string" ? (mission as any).photos[0] : null,
+          missionPhotoUrl: photo,
         }),
         tracking: { opens: true, clicks: true },
         tags: [
           { name: "campaign_id", value: campaignId },
           { name: "campaign_type", value: "proximity" },
         ],
-      }));
-      try {
-        const res = await resendFetch("https://api.resend.com/emails/batch", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${RESEND_API_KEY}`,
-          },
-          body: JSON.stringify(emailObjects),
-        }, { functionName: "send-mass-email-proximity" });
-        const resBody = await res.text();
-        if (res.ok) {
-          sent += batch.length;
-          let ids: string[] = [];
-          try {
-            const parsed = JSON.parse(resBody);
-            ids = (parsed?.data || []).map((d: any) => d?.id || null);
-          } catch { /* ignore */ }
-          batch.forEach((r, idx) => {
-            sendRows.push({
-              mass_email_id: campaignId,
-              recipient_email: r.email,
-              resend_id: ids[idx] || null,
-              status: "sent",
-              error_message: null,
-            });
-          });
-        } else {
-          console.error(`Proximity batch failed (${i}): ${res.status} ${resBody}`);
-          errors += batch.length;
-          batch.forEach((r) => {
-            sendRows.push({
-              mass_email_id: campaignId,
-              recipient_email: r.email,
-              resend_id: null,
-              status: "failed",
-              error_message: `${res.status}: ${resBody.slice(0, 200)}`,
-            });
-          });
-        }
-      } catch (e) {
-        console.error(`Proximity batch error (${i}):`, e);
-        errors += batch.length;
-        batch.forEach((r) => {
-          sendRows.push({
-            mass_email_id: campaignId,
-            recipient_email: r.email,
-            resend_id: null,
-            status: "failed",
-            error_message: String(e).slice(0, 200),
-          });
-        });
-      }
-      if (i + BATCH_SIZE < recipients.length) {
-        await new Promise((r) => setTimeout(r, 1000));
-      }
-    }
-
-    const INSERT_CHUNK = 500;
-    for (let i = 0; i < sendRows.length; i += INSERT_CHUNK) {
-      const chunk = sendRows.slice(i, i + INSERT_CHUNK);
-      const { error: insErr } = await serviceClient
-        .from("mass_email_sends")
-        .insert(chunk);
-      if (insErr) console.error(`mass_email_sends insert error (chunk ${i}):`, insErr);
-    }
+      }),
+    });
+    const sent = report.sent;
+    const errors = report.failed + report.uncertain + report.blocked;
 
     await serviceClient
       .from("mass_emails")
@@ -550,7 +528,7 @@ Deno.serve(async (req) => {
       })
       .eq("id", campaignId);
 
-    return new Response(JSON.stringify({ sent, errors, campaign_id: campaignId }), {
+    return new Response(JSON.stringify({ ...report, sent, errors, campaign_id: campaignId, already_notified: already.length }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

@@ -40,11 +40,13 @@ interface PreviewRecipient {
 }
 interface PreviewData {
   count: number;
+  /** Personnes du rayon déjà prévenues pour cette annonce (exclues). */
+  already_notified?: number;
   author_first_name: string;
   mission: {
     id: string;
     title: string;
-    mission_type?: "besoin" | "offre";
+    mission_type?: "besoin" | "offre" | "projet";
     excerpt?: string;
   };
   subject?: string;
@@ -78,12 +80,16 @@ const ProximityCampaignCard = ({
   const [preview, setPreview] = useState<PreviewData | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmInput, setConfirmInput] = useState("");
+  // Verrou synchrone : un double clic ne déclenche qu'un seul envoi.
+  const sendingRef = useRef(false);
+  const previewSeq = useRef(0);
 
   const handlePreview = async () => {
     if (!missionId.trim()) {
       toast.error("Renseignez un mission_id");
       return;
     }
+    const seq = ++previewSeq.current;
     setLoading(true);
     setPreview(null);
     try {
@@ -95,7 +101,7 @@ const ProximityCampaignCard = ({
       );
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
-      setPreview(data as PreviewData);
+      if (seq === previewSeq.current) setPreview(data as PreviewData);
     } catch (err: any) {
       toast.error(err.message || "Erreur lors de l'aperçu");
     } finally {
@@ -104,14 +110,20 @@ const ProximityCampaignCard = ({
   };
 
   const handleSend = async () => {
-    if (!preview) return;
+    if (!preview || sendingRef.current) return;
+    sendingRef.current = true;
     setConfirmOpen(false);
     setSending(true);
     try {
       const { data, error } = await supabase.functions.invoke(
         "send-mass-email-proximity",
         {
-          body: { mode: "send", mission_id: missionId.trim(), radius_km: radiusKm },
+          body: {
+            mode: "send",
+            mission_id: missionId.trim(),
+            radius_km: radiusKm,
+            expected_count: preview.count,
+          },
         },
       );
       if (error) throw error;
@@ -126,8 +138,16 @@ const ProximityCampaignCard = ({
     } catch (err: any) {
       toast.error(err.message || "Erreur lors de l'envoi");
     } finally {
+      sendingRef.current = false;
       setSending(false);
     }
+  };
+
+  // Tout changement de mission ou de rayon invalide l'aperçu affiché.
+  const invalidatePreview = () => {
+    previewSeq.current++;
+    setPreview(null);
+    setConfirmInput("");
   };
 
   // Auto-preview (ouverture depuis un contexte pré-rempli, ex : bouton par ligne
@@ -169,7 +189,10 @@ const ProximityCampaignCard = ({
             <Input
               id="prox-mission-id"
               value={missionId}
-              onChange={(e) => setMissionId(e.target.value)}
+              onChange={(e) => {
+                setMissionId(e.target.value);
+                invalidatePreview();
+              }}
               placeholder="uuid de la small_mission"
             />
           </div>
@@ -181,10 +204,13 @@ const ProximityCampaignCard = ({
               min={1}
               max={500}
               value={radiusKm}
-              onChange={(e) => setRadiusKm(Math.max(1, Math.min(500, Number(e.target.value) || 50)))}
+              onChange={(e) => {
+                setRadiusKm(Math.max(1, Math.min(500, Number(e.target.value) || 50)));
+                invalidatePreview();
+              }}
             />
           </div>
-          <Button onClick={handlePreview} disabled={loading}>
+          <Button onClick={handlePreview} disabled={loading || sending}>
             {loading ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -206,13 +232,16 @@ const ProximityCampaignCard = ({
                 Mission : <strong>{preview.mission.title}</strong>
               </span>
               <span className="text-xs uppercase tracking-wide text-muted-foreground">
-                {missionType === "offre" ? "Offre d'aide" : "Demande d'aide"}
+                {missionType === "projet" ? "Projet participatif" : missionType === "offre" ? "Offre d'aide" : "Demande d'aide"}
               </span>
               <span className="text-muted-foreground">
                 Auteur : {preview.author_first_name || "(inconnu)"}
               </span>
               <span>
-                Destinataires : <strong className="text-base">{preview.count}</strong>
+                Nouveaux destinataires : <strong className="text-base">{preview.count}</strong>
+              </span>
+              <span className="text-muted-foreground">
+                Déjà prévenus, exclus : <strong>{preview.already_notified ?? 0}</strong>
               </span>
             </div>
 
@@ -230,7 +259,9 @@ const ProximityCampaignCard = ({
 
             {preview.count === 0 ? (
               <p className="text-sm text-muted-foreground">
-                Aucun destinataire dans ce rayon.
+                {(preview.already_notified ?? 0) > 0
+                  ? "Aucun nouveau destinataire : tout le monde dans ce rayon a déjà été prévenu pour cette annonce."
+                  : "Aucun destinataire dans ce rayon."}
               </p>
             ) : (
               <>
