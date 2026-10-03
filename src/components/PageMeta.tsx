@@ -235,7 +235,7 @@ const PageMeta = ({
 
     // Sans JSON-LD, les blocs d'un rendu précédent sont retirés (aucune
     // ItemList obsolète laissée dans le head).
-    upsertJsonLd(jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : []);
+    upsertJsonLd([jsonLd || []].flat());
 
     // Record snapshot for /admin/seo-debug
     logSeoSnapshot({

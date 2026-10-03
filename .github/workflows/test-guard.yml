@@ -18,10 +18,15 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
+          node-version: 24
 
-      - run: npm ci
+      # Le même verrou de dépendances que le build Lovable, sans résolution
+      # de nouvelles versions à chaque passage de la CI.
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+
+      - run: bun install --frozen-lockfile
 
       - name: Typecheck
         run: npx tsc -b

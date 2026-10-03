@@ -18,7 +18,7 @@ describe("P2b, premier rendu sans attente réseau", () => {
     const src = read("src/main.tsx");
     expect(src).not.toMatch(/i18nReady/);
     expect(src).not.toMatch(/await[^\n]*render|\.then\([^)]*render/);
-    expect(src).toMatch(/createRoot\(container\)\.render\(<App \/>\)/);
+    expect(src).toMatch(/createRoot\(document\.getElementById\("root"\)!\)\.render\(<App \/>\)/);
   });
 
   it("en-tête et pied de page publics dans l'entrée, coquille membre à la demande", () => {

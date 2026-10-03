@@ -44,9 +44,6 @@ if (import.meta.env.PROD) {
   }
 }
 
-// #root absent : createRoot lève lui-même une erreur (plafond de taille).
-const container = document.getElementById("root")!;
-
 // Routes lazy qui écrivent leurs métadonnées tardivement (après un chargement
 // de données). Le verrou est posé ici, avant le rendu, car le chunk de la
 // route peut arriver après le délai du repli global sur réseau dégradé.
@@ -57,7 +54,7 @@ const container = document.getElementById("root")!;
 // /actualites/:slug ne sont pas concernés.
 // Expression unique (plafond de taille du démarrage).
 // Ajouts SEO-4 : /guides (liste) et /departement/:slug.
-const LATE_META_PATH = /^\/(gardiens\/|projets\/|departement\/.|guides\/?$|actualites(\/page\/|\/?$))/;
+const LATE_META_PATH = /^\/((gardiens|projets|departement)\/|guides\/?$|actualites(\/page\/|\/?$))/;
 
 // Ce module ne s'exécute que dans le navigateur (document lu plus haut).
 if (LATE_META_PATH.test(location.pathname)) {
@@ -70,7 +67,8 @@ if (LATE_META_PATH.test(location.pathname)) {
 // premier rendu. Le repli des anciennes URL `?lang=xx` est géré par
 // LangUrlSync et `src/lib/lang.ts`.
 // Lot P2b : rendu immédiat, jamais suspendu à un chargement réseau.
-createRoot(container).render(<App />);
+// React lève lui-même une erreur si #root est absent.
+createRoot(document.getElementById("root")!).render(<App />);
 
 // Fallback prerenderReady : PageMeta est la source de vérité et lève le drapeau
 // à la fin de son useEffect, après écriture du canonical. Ce fallback couvre
@@ -79,12 +77,12 @@ createRoot(container).render(<App />);
 const markPrerenderReady = () => {
   // /annonces (hub, lot SEO-4) et /annonces/:slug : jamais par ce repli,
   // PublicListings et la fiche lèvent le drapeau une fois leur liste rendue.
-  if (window.location.pathname.startsWith("/annonces")) return;
+  if (location.pathname.startsWith("/annonces")) return;
   if (window.prerenderMetaPending) return;
   window.prerenderReady = true;
 };
 
-window.setTimeout(markPrerenderReady, 10000);
+setTimeout(markPrerenderReady, 10000);
 
 // Lot P2b : la mesure réelle (webVitals) démarre avec AfterPaintExtras, après le premier affichage.
 installGlobalErrorHandlers();

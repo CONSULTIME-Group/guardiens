@@ -173,7 +173,9 @@ export default function News() {
     };
 
     if (parsedPage === null) return () => { cancelled = true; };
-    fetchArticles();
+    void fetchArticles().catch(() => {
+      if (!cancelled) setResult({ key, articles: [], total: 0, error: true });
+    });
 
     return () => {
       cancelled = true;
@@ -200,7 +202,9 @@ export default function News() {
       if (cancelled) return;
       // Vitrine facultative : une panne la masque sans bloquer la page.
       setVieLocaleLoaded(vError ? [] : ((data as Article[]) || []));
-    })();
+    })().catch(() => {
+      if (!cancelled) setVieLocaleLoaded([]);
+    });
     return () => {
       cancelled = true;
     };
@@ -230,7 +234,9 @@ export default function News() {
         counts[row.category] = (counts[row.category] || 0) + 1;
       });
       setCategoryCounts(counts);
-    })();
+    })().catch(() => {
+      if (!cancelled) setCategoryCounts({});
+    });
     return () => {
       cancelled = true;
     };

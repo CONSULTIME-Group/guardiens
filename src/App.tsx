@@ -455,6 +455,7 @@ const RedirectProprietaire = () => {
 
 const AppRoutes = () => {
   useAffinityThresholdsBootstrap();
+  const newsRoute = <PublicShellRoute><News /></PublicShellRoute>;
   return (
   <Suspense fallback={<FallbackSpinner />}>
     <Routes>
@@ -479,7 +480,8 @@ const AppRoutes = () => {
       <Route path="/conseils" element={<PublicShellRoute><AlmaTips /></PublicShellRoute>} />
       <Route path="/alma" element={<PublicShellRoute><AlmaEvolution /></PublicShellRoute>} />
       {/* Liste des actualités, page 1 et pages suivantes (lot SEO-4) : même élément, même écran. */}
-      {["/actualites", "/actualites/page/:page"].map((p) => <Route key={p} path={p} element={<PublicShellRoute><News /></PublicShellRoute>} />)}
+      <Route path="/actualites" element={newsRoute} />
+      <Route path="/actualites/page/:page" element={newsRoute} />
       <Route path="/actualites/inventaire-guardiens-france" element={<PublicShellRoute><ArticleInventaire /></PublicShellRoute>} />
       <Route path="/actualites/:slug" element={<PublicShellRoute><ArticleDetail /></PublicShellRoute>} />
       <Route path="/auteurs/:slug" element={<AuthorPage />} />

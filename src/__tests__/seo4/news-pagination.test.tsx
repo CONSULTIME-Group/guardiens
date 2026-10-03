@@ -33,6 +33,7 @@ vi.mock("@/integrations/supabase/client", () => ({
 }));
 
 import News from "@/pages/News";
+import { bootState, productionFallback } from "./prerenderBootHarness";
 
 const TOTAL = 20;
 const art = (i: number, category = "conseil") => ({
@@ -91,6 +92,7 @@ beforeEach(() => {
   (window as any).prerenderReady = false;
 });
 afterEach(() => {
+  vi.useRealTimers();
   document.head.querySelectorAll("[data-head], link[rel=canonical], meta[name=prerender-status-code]").forEach((n) => n.remove());
 });
 
@@ -111,6 +113,12 @@ describe("lecture du numéro de page", () => {
 });
 
 describe("verrou de prérendu posé au démarrage (main.tsx)", () => {
+  it("pose le verrou avant les routes différées des hubs et départements", () => {
+    for (const path of ["/guides", "/guides/", "/departement/rhone", "/actualites/page/2"]) {
+      expect(bootState(path), path).toEqual({ prerenderMetaPending: true, prerenderReady: false });
+    }
+    expect(bootState("/actualites/un-article")).toEqual({});
+  });
   it("liste des actualités verrouillée, articles non", async () => {
     const { readFileSync } = await import("fs");
     const re = new RegExp(readFileSync("src/main.tsx", "utf8").match(/const LATE_META_PATH = \/(.+)\/;/)![1]);
@@ -122,6 +130,67 @@ describe("verrou de prérendu posé au démarrage (main.tsx)", () => {
 });
 
 describe("rendu News", () => {
+  it("les lectures facultatives rejetées n'empêchent pas la liste d'être prête", async () => {
+    handler = (q) => q.range ? defaultHandler(q) : Promise.reject(new Error("Lecture facultative indisponible"));
+    mount("/actualites");
+    await screen.findByText("Titre article 1");
+    await waitFor(() => expect(window.prerenderReady).toBe(true));
+    expect(statusMeta()).toBeNull();
+    expect(canonical()).toBe("https://guardiens.fr/actualites");
+  });
+  it("une promesse réseau rejetée reste une panne 503, jamais une fausse absence", async () => {
+    handler = (q) => q.range ? Promise.reject(new Error("Réseau indisponible")) : defaultHandler(q);
+    mount("/actualites/page/2");
+    await waitFor(() => expect(statusMeta()).toBe("503"));
+    expect(robots()).toMatch(/noindex/);
+    expect(canonical()).toBeNull();
+    expect(window.prerenderReady).toBe(true);
+  });
+  it("réessai différé après une panne : le vrai repli ne libère pas le rendu", async () => {
+    let retryResolve!: (r: Res) => void;
+    let calls = 0;
+    handler = (q) => q.range
+      ? (++calls === 1
+        ? Promise.resolve({ data: null, error: { message: "panne" } })
+        : new Promise((resolve) => { retryResolve = resolve; }))
+      : defaultHandler(q);
+    mount("/actualites/page/2");
+    await waitFor(() => expect(statusMeta()).toBe("503"));
+    vi.useFakeTimers();
+    window.setTimeout(productionFallback(), 10000);
+    fireEvent.click(screen.getByRole("button", { name: /essayer/i }));
+    await act(async () => {});
+    expect(window.prerenderMetaPending).toBe(true);
+    await act(async () => { vi.advanceTimersByTime(12000); });
+    expect(window.prerenderReady).toBe(false);
+    expect(screen.queryByText("Titre article 10")).toBeNull();
+    await act(async () => { retryResolve({ data: ALL.slice(9, 18), count: TOTAL, error: null }); });
+    expect(window.prerenderReady).toBe(true);
+    expect(statusMeta()).toBeNull();
+    expect(canonical()).toBe("https://guardiens.fr/actualites/page/2");
+    expect(screen.getByText("Titre article 10")).toBeTruthy();
+  });
+
+  it("succès A puis lecture B avant dix secondes : aucune capture prématurée", async () => {
+    let secondResolve!: (r: Res) => void;
+    handler = (q) => q.range?.[0] === 9
+      ? new Promise((resolve) => { secondResolve = resolve; })
+      : defaultHandler(q);
+    vi.useFakeTimers();
+    window.setTimeout(productionFallback(), 10000);
+    mount("/actualites");
+    await act(async () => {});
+    expect(window.prerenderReady).toBe(true);
+    await act(async () => { vi.advanceTimersByTime(9500); nav("/actualites/page/2"); });
+    expect(window.prerenderMetaPending).toBe(true);
+    await act(async () => { vi.advanceTimersByTime(1000); });
+    expect(window.prerenderReady).toBe(false);
+    expect(screen.queryByText("Titre article 1")).toBeNull();
+    await act(async () => { secondResolve({ data: ALL.slice(9, 18), count: TOTAL, error: null }); });
+    expect(window.prerenderReady).toBe(true);
+    expect(canonical()).toBe("https://guardiens.fr/actualites/page/2");
+    expect(screen.getByText("Titre article 10")).toBeTruthy();
+  });
   it("page 1 et page 2 : contenus, liens et canonical distincts", async () => {
     const one = mount("/actualites");
     await screen.findByText("Titre article 1");
