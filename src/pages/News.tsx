@@ -9,7 +9,6 @@ import {
   newsCanonicalPath,
   isNewsPageOutOfRange,
   needsNewsPageNormalization,
-  NEWS_BASE_PATH,
 } from "@/lib/newsPagination";
 import PageMeta from "@/components/PageMeta";
 import ArticleCoverFallback from "@/components/news/ArticleCoverFallback";
