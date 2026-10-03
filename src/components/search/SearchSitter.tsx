@@ -85,16 +85,20 @@ interface SearchSitterProps {
    */
   mode?: "internal" | "public";
   /**
-   * Appelé une seule fois, après rendu, quand la première recherche est
-   * terminée (cartes affichées, liste vide ou erreur), avec les annonces
-   * réelles effectivement affichées (démos exclues, vide en cas d'erreur).
-   * Permet à /annonces d'aligner sa liste JSON-LD sur les cartes et de ne
-   * signaler « prête » qu'une fois les liens présents.
+   * Appelé après rendu à chaque changement de l'état courant de la liste :
+   * chargement, erreur, ou annonces réelles effectivement affichées (démos
+   * exclues, même plafond et même ordre que la grille, chemin via sitPath).
+   * Permet à /annonces d'aligner sa liste JSON-LD sur les cartes visibles.
    */
-  onFirstSearchSettled?: (shown: { id: string; slug?: string | null; title?: string | null }[]) => void;
+  onShownListChange?: (state: ShownListState) => void;
 }
 
-const SearchSitter = ({ mode = "internal", onFirstSearchSettled }: SearchSitterProps = {}) => {
+export type ShownListState = {
+  status: "loading" | "ready" | "error";
+  items: { path: string; title: string | null }[];
+};
+
+const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProps = {}) => {
   const isPublic = mode === "public";
  const { user } = useAuth();
  const { hasAccess } = useSubscriptionAccess();
