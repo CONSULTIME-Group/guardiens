@@ -8,6 +8,7 @@ import {
   newsPageHref,
   newsCanonicalPath,
   isNewsPageOutOfRange,
+  needsNewsPageNormalization,
   NEWS_BASE_PATH,
 } from "@/lib/newsPagination";
 import PageMeta from "@/components/PageMeta";
@@ -90,7 +91,9 @@ export default function News() {
   // Résultat étiqueté par la clé de lecture (page, catégorie, recherche) :
   // une réponse ancienne ne s'affiche jamais sous une autre page.
   const [result, setResult] = useState<{ key: string; articles: Article[]; total: number; error: boolean } | null>(null);
-  const [vieLocaleArticles, setVieLocaleArticles] = useState<Article[]>([]);
+  // Vitrine « Vie locale » : null tant qu'elle n'est pas lue (lue une fois,
+  // indépendante du numéro de page).
+  const [vieLocaleLoaded, setVieLocaleLoaded] = useState<Article[] | null>(null);
   const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -144,6 +147,8 @@ export default function News() {
         .lte("published_at", nowIso)
         .or("noindex.is.null,noindex.eq.false")
         .order("published_at", { ascending: false })
+        // Clé unique en second : ordre stable entre pages à date égale.
+        .order("id", { ascending: false })
         .range(from, to);
 
       if (activeCategory !== "all") {
@@ -164,9 +169,22 @@ export default function News() {
       }
     };
 
-    const fetchVieLocale = async () => {
+    if (parsedPage === null) return () => { cancelled = true; };
+    fetchArticles();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeCategory, currentPage, urlSearch, parsedPage, retryTick]);
+
+  const showVieLocale = activeCategory === "all" && !urlSearch.trim();
+  const vieLoaded = vieLocaleLoaded !== null;
+  useEffect(() => {
+    if (!showVieLocale || vieLoaded) return;
+    let cancelled = false;
+    (async () => {
       const nowIso = new Date().toISOString();
-      const { data } = await supabase
+      const { data, error: vError } = await supabase
         .from("articles")
         .select("id, title, slug, excerpt, cover_image_url, category, tags, city, region, author_name, published_at")
         .eq("published", true)
@@ -174,20 +192,17 @@ export default function News() {
         .lte("published_at", nowIso)
         .or("noindex.is.null,noindex.eq.false")
         .order("published_at", { ascending: false })
+        .order("id", { ascending: false })
         .limit(3);
-      const list = (data as Article[]) || [];
-      if (!cancelled) setVieLocaleArticles(list);
-    };
-
-    if (parsedPage === null) return () => { cancelled = true; };
-    fetchArticles();
-    if (activeCategory === "all" && !urlSearch.trim()) fetchVieLocale();
-    else setVieLocaleArticles([]);
-
+      if (cancelled) return;
+      // Vitrine facultative : une panne la masque sans bloquer la page.
+      setVieLocaleLoaded(vError ? [] : ((data as Article[]) || []));
+    })();
     return () => {
       cancelled = true;
     };
-  }, [activeCategory, currentPage, urlSearch, parsedPage, retryTick]);
+  }, [showVieLocale, vieLoaded]);
+  const vieLocaleArticles = showVieLocale ? vieLocaleLoaded ?? [] : [];
 
   // Retour en haut à chaque changement de page.
   useEffect(() => {
@@ -283,9 +298,14 @@ export default function News() {
 
   const hasActiveFilters = urlSearch.trim() !== "" || activeCategory !== "all" || currentPage > 1;
 
+  // Réinitialisation : page 1 sans filtres, langue conservée, entrée
+  // d'historique ajoutée (retour arrière vers la vue filtrée possible).
   const resetFilters = () => {
     setSearchInput("");
-    navigate(NEWS_BASE_PATH, { replace: true });
+    const keep = new URLSearchParams();
+    const lang = searchParams.get("lang");
+    if (lang) keep.set("lang", lang);
+    navigate(newsPageHref(1, keep));
   };
 
   // Ancienne pagination `?page=N` : redirection vers le chemin équivalent.
@@ -295,21 +315,40 @@ export default function News() {
     return <Navigate to={newsPageHref(n && !pageParam ? n : currentPage, searchParams)} replace />;
   }
   // `/actualites/page/1` n'existe pas : la page 1 est `/actualites`.
-  if (pageParam === "1") return <Navigate to={newsPageHref(1, searchParams)} replace />;
+  // Zéros initiaux (« 02 ») : forme canonique « 2 ».
+  if (needsNewsPageNormalization(pageParam, parsedPage)) {
+    return <Navigate to={newsPageHref(parsedPage as number, searchParams)} replace />;
+  }
   // Valeur invalide, ou page au-delà de la dernière une fois le total connu.
   if (parsedPage === null) return <NotFound />;
   if (current && !current.error && isNewsPageOutOfRange(currentPage, totalCount, PAGE_SIZE)) {
     return <NotFound />;
   }
 
+  // Prêt seulement quand la liste de CETTE requête est affichée, et la
+  // vitrine lue si elle s'affiche. Panne de lecture : 503 déclaré, noindex,
+  // sans canonical (jamais une fausse 404 ni une page indexable vide).
+  const ready = !loading && (!showVieLocale || vieLoaded || Boolean(current?.error));
+
   return (
     <>
-      <PageMeta
-        title={`${metaTitle}${pageTitleSuffix}`}
-        description={t("news.meta_description")}
-        path={metaPath}
-        ready={!loading}
-      />
+      {current?.error ? (
+        <PageMeta
+          title={`${metaTitle}${pageTitleSuffix}`}
+          description={t("news.meta_description")}
+          path={metaPath}
+          noindex
+          statusCode={503}
+          noCanonical
+        />
+      ) : (
+        <PageMeta
+          title={`${metaTitle}${pageTitleSuffix}`}
+          description={t("news.meta_description")}
+          path={metaPath}
+          ready={ready}
+        />
+      )}
       <div className="max-w-4xl mx-auto px-4 py-4 md:py-8 animate-fade-in">
         <PageBreadcrumb items={[{ label: t("news.breadcrumb") }]} />
 
@@ -409,7 +448,7 @@ export default function News() {
         )}
 
         {/* Featured "Vie locale & Entraide" section */}
-        {activeCategory === "all" && !urlSearch.trim() && vieLocaleArticles.length > 0 && !loading && (
+        {showVieLocale && vieLocaleArticles.length > 0 && !loading && !error && (
           <div className="mb-6 md:mb-10 p-4 md:p-6 rounded-xl bg-warning-soft/40">
             <h2 className="font-heading text-lg md:text-xl font-bold mb-1">{t("news.vie_locale_title")}</h2>
             <p className="text-muted-foreground text-sm mb-5">
@@ -430,17 +469,12 @@ export default function News() {
                 </Link>
               ))}
             </div>
-            <button
-              onClick={() =>
-                updateParams((p) => {
-                  p.set("categorie", "vie_locale");
-                  p.delete("page");
-                })
-              }
+            <Link
+              to={newsPageHref(1, (() => { const p = new URLSearchParams(searchParams); p.set("categorie", "vie_locale"); p.delete("cat"); return p; })())}
               className="text-primary text-sm font-medium hover:underline inline-flex items-center gap-1"
             >
               {t("news.see_all")} <ArrowRight className="h-3 w-3" />
-            </button>
+            </Link>
           </div>
         )}
 
