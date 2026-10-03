@@ -989,6 +989,33 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_prerender_family_state_20261003_1725: {
+        Row: {
+          backed_up_at: string | null
+          family: string | null
+          last_global_hash: string | null
+          last_hash: string | null
+          last_marked_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          backed_up_at?: string | null
+          family?: string | null
+          last_global_hash?: string | null
+          last_hash?: string | null
+          last_marked_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          backed_up_at?: string | null
+          family?: string | null
+          last_global_hash?: string | null
+          last_hash?: string | null
+          last_marked_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       _backup_profile_guard_20260918: {
         Row: {
           acl: unknown[] | null
