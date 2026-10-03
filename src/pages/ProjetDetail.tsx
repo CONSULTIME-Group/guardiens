@@ -47,14 +47,23 @@ type ProjetView = {
   author: any | null;
 };
 
-/** Retire les balises déclarées par un projet précédent (navigation interne). */
+export const PROJET_LOADING_TITLE = "Chargement du projet | Guardiens";
+
+/**
+ * Retire les balises déclarées par un projet précédent (navigation interne) :
+ * titre, description, og/twitter, canonical, JSON-LD posés par PageMeta
+ * (data-page-meta) et consignes Prerender. Titre neutre pendant le chargement.
+ */
 export function scrubStaleProjetHead(): void {
   if (typeof document === "undefined") return;
   (window as any).prerenderReady = false;
   window.prerenderMetaPending = true;
   document.head
-    .querySelectorAll('link[rel="canonical"], meta[name="prerender-status-code"], meta[name="prerender-header"]')
+    .querySelectorAll(
+      '[data-page-meta="true"], link[rel="canonical"], meta[name="prerender-status-code"], meta[name="prerender-header"]',
+    )
     .forEach((n) => n.remove());
+  document.title = PROJET_LOADING_TITLE;
 }
 
 const ProjetDetail = () => {
