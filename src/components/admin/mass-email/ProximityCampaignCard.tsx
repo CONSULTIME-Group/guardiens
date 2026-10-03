@@ -128,11 +128,25 @@ const ProximityCampaignCard = ({
       );
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
-      toast.success(
-        `Envoi terminé, ${(data as any).sent} email(s) expédié(s)${
-          (data as any).errors ? `, ${(data as any).errors} erreur(s)` : ""
-        }.`,
-      );
+      const d = data as any;
+      const issues = [
+        d.uncertain ? `${d.uncertain} issue(s) incertaine(s), ne pas renvoyer` : "",
+        d.journalFailed ? `${d.journalFailed} envoi(s) non journalisé(s)` : "",
+        d.finishFailed ? `${d.finishFailed} réservation(s) non finalisée(s)` : "",
+        d.blocked ? `${d.blocked} adresse(s) bloquée(s), réservation indisponible` : "",
+        d.skippedBusy ? `${d.skippedBusy} adresse(s) déjà en cours d'envoi` : "",
+        d.failed ? `${d.failed} refus du fournisseur` : "",
+        d.campaign_update_failed ? "campagne non mise à jour" : "",
+      ].filter(Boolean);
+      const msg = `Envoi terminé, ${d.sent} email(s) confirmé(s)${issues.length ? `. ${issues.join(" ; ")}` : ""}.`;
+      if (d.needsReconciliation || issues.length) {
+        toast.warning(
+          d.needsReconciliation ? `${msg} Vérification manuelle nécessaire avant tout nouvel envoi.` : msg,
+          { duration: Infinity },
+        );
+      } else {
+        toast.success(msg);
+      }
       setPreview(null);
       setConfirmInput("");
     } catch (err: any) {

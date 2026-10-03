@@ -19,7 +19,7 @@
  * Sécurité : admin uniquement (user_roles.role = 'admin'). Aucun envoi automatique :
  * ce endpoint n'agit que sur appel explicite (mode="send") de l'admin.
  */
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { resendFetch } from "../_shared/resend-guard.ts";
 import { SENDER_FROM, REPLY_TO_ADDRESS } from "../_shared/sender-address.ts";
 import { expectedCountMismatch } from "../_shared/mass-email-dedupe.ts";
@@ -195,7 +195,8 @@ interface Recipient {
 }
 
 async function computeRecipients(
-  serviceClient: ReturnType<typeof createClient>,
+  // deno-lint-ignore no-explicit-any
+  serviceClient: SupabaseClient<any, any, any>,
   missionId: string,
   radiusKm: number,
 ): Promise<{
@@ -518,17 +519,21 @@ Deno.serve(async (req) => {
       }),
     });
     const sent = report.sent;
-    const errors = report.failed + report.uncertain + report.blocked;
+    const errors = report.failed + report.uncertain + report.blocked + report.journalFailed + report.finishFailed;
 
-    await serviceClient
+    const { error: updErr } = await serviceClient
       .from("mass_emails")
       .update({
         recipients_count: sent,
-        status: errors > 0 && sent === 0 ? "error" : "sent",
+        status: report.needsReconciliation || (errors > 0 && sent === 0) ? "error" : "sent",
       })
       .eq("id", campaignId);
+    if (updErr) console.error("mass_emails update error:", updErr);
 
-    return new Response(JSON.stringify({ ...report, sent, errors, campaign_id: campaignId, already_notified: already.length }), {
+    return new Response(JSON.stringify({
+      ...report, sent, errors, campaign_update_failed: !!updErr,
+      campaign_id: campaignId, already_notified: already.length,
+    }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
