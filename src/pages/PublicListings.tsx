@@ -22,33 +22,15 @@ const CANONICAL = "https://guardiens.fr/annonces";
 
 export default function PublicListings() {
   const { t, i18n } = useTranslation();
-  const [itemListLd, setItemListLd] = useState<any | null>(null);
-  // Prérendu : « prête » seulement quand la liste de cartes (liens vers les
-  // fiches) et la liste JSON-LD sont lues, résultat vide ou en erreur inclus.
-  // ItemList JSON-LD construite à partir des cartes réellement affichées
-  // par la première recherche (aucune autre liste arbitraire).
-  const [listSettled, setListSettled] = useState(false);
-  const onListSettled = useCallback((shown: { id: string; slug?: string | null; title?: string | null }[]) => {
-    if (shown.length > 0) {
-      setItemListLd({
-        "@context": "https://schema.org",
-        "@type": "ItemList",
-        name: TITLE,
-        url: CANONICAL,
-        numberOfItems: shown.length,
-        itemListElement: shown.map((s, i) => ({
-          "@type": "ListItem",
-          position: i + 1,
-          // Même règle que sitPath (slug, sinon identifiant), sans dépendance
-          // supplémentaire au démarrage (plafond de taille de l'entrée).
-          url: `https://guardiens.fr/annonces/${s.slug?.trim() || s.id}`,
-          name: s.title || BREADCRUMB_LISTINGS,
-        })),
-      });
-    }
-    setListSettled(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // État courant des cartes réellement rendues par SearchSitter (chargement,
+  // erreur, ou liste). ItemList construite depuis ces cartes, mise à jour à
+  // chaque changement (Voir plus, filtres) ; retirée si vide ou en erreur.
+  // Prérendu : « prête » seulement hors chargement. Callback stable.
+  const [listState, setListState] = useState<ShownListState | null>(null);
+  const onListChange = useCallback((s: ShownListState) => setListState(s), []);
+  const listReady = !!listState && listState.status !== "loading";
+  const listError = listState?.status === "error";
+  const shown = listState?.status === "ready" ? listState.items : [];
   const [intlCount, setIntlCount] = useState<number>(0);
   const [openCount, setOpenCount] = useState<number>(0);
   const [citiesCount, setCitiesCount] = useState<number>(0);
