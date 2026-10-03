@@ -1,7 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams, Link, useParams, useNavigate, Navigate } from "react-router-dom";
+import NotFound from "@/pages/NotFound";
+import {
+  parseNewsPageParam,
+  newsPageHref,
+  newsCanonicalPath,
+  isNewsPageOutOfRange,
+  NEWS_BASE_PATH,
+} from "@/lib/newsPagination";
 import PageMeta from "@/components/PageMeta";
 import ArticleCoverFallback from "@/components/news/ArticleCoverFallback";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
@@ -79,18 +87,27 @@ function isNew(publishedAt: string | null): boolean {
 export default function News() {
   const { t, i18n } = useTranslation();
   const tCat = (key: string) => t(`news.categories.${key}`, { defaultValue: key });
-  const [articles, setArticles] = useState<Article[]>([]);
+  // Résultat étiqueté par la clé de lecture (page, catégorie, recherche) :
+  // une réponse ancienne ne s'affiche jamais sous une autre page.
+  const [result, setResult] = useState<{ key: string; articles: Article[]; total: number; error: boolean } | null>(null);
   const [vieLocaleArticles, setVieLocaleArticles] = useState<Article[]>([]);
   const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [totalCount, setTotalCount] = useState(0);
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { page: pageParam } = useParams<{ page?: string }>();
+  const parsedPage = parseNewsPageParam(pageParam);
 
   const rawCategory = searchParams.get("categorie") || searchParams.get("cat") || "all";
   const activeCategory = rawCategory === "all" || VALID_CATEGORIES.has(rawCategory) ? rawCategory : "all";
-  const currentPage = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
+  const currentPage = parsedPage ?? 1;
   const urlSearch = searchParams.get("q") || "";
+  const fetchKey = `${currentPage}|${activeCategory}|${urlSearch.trim()}`;
+  const [retryTick, setRetryTick] = useState(0);
+  const current = result && result.key === fetchKey ? result : null;
+  const loading = current === null;
+  const error = current?.error ? t("news.error") : null;
+  const articles = current?.articles ?? [];
+  const totalCount = current?.total ?? 0;
   const [searchInput, setSearchInput] = useState(urlSearch);
 
   // Sync input when URL changes (back/forward navigation)
@@ -106,8 +123,7 @@ export default function News() {
       const next = new URLSearchParams(searchParams);
       if (trimmed) next.set("q", trimmed);
       else next.delete("q");
-      next.delete("page");
-      setSearchParams(next, { replace: true });
+      navigate(newsPageHref(1, next), { replace: true });
     }, 350);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -115,9 +131,8 @@ export default function News() {
 
   useEffect(() => {
     let cancelled = false;
+    const key = fetchKey;
     const fetchArticles = async () => {
-      setLoading(true);
-      setError(null);
       const from = (currentPage - 1) * PAGE_SIZE;
       const to = from + PAGE_SIZE - 1;
       const nowIso = new Date().toISOString();
@@ -143,16 +158,10 @@ export default function News() {
       const { data, count, error: qError } = await query;
       if (cancelled) return;
       if (qError) {
-        setError(t("news.error"));
-        setArticles([]);
-        setTotalCount(0);
+        setResult({ key, articles: [], total: 0, error: true });
       } else {
-        const list = (data as Article[]) || [];
-        if (cancelled) return;
-        setArticles(list);
-        setTotalCount(count || 0);
+        setResult({ key, articles: (data as Article[]) || [], total: count || 0, error: false });
       }
-      setLoading(false);
     };
 
     const fetchVieLocale = async () => {
@@ -170,6 +179,7 @@ export default function News() {
       if (!cancelled) setVieLocaleArticles(list);
     };
 
+    if (parsedPage === null) return () => { cancelled = true; };
     fetchArticles();
     if (activeCategory === "all" && !urlSearch.trim()) fetchVieLocale();
     else setVieLocaleArticles([]);
@@ -177,7 +187,12 @@ export default function News() {
     return () => {
       cancelled = true;
     };
-  }, [activeCategory, currentPage, urlSearch]);
+  }, [activeCategory, currentPage, urlSearch, parsedPage, retryTick]);
+
+  // Retour en haut à chaque changement de page.
+  useEffect(() => {
+    if (typeof window !== "undefined") window.scrollTo({ top: 0 });
+  }, [currentPage]);
 
   // Fetch category counts once (only categories that have at least one article are shown)
   useEffect(() => {
@@ -206,18 +221,11 @@ export default function News() {
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
   const pageList = useMemo(() => buildPageList(currentPage, totalPages), [currentPage, totalPages]);
 
+  // Changement de filtre : retour à la première page, filtres en query.
   const updateParams = (mutate: (p: URLSearchParams) => void, replace = false) => {
     const next = new URLSearchParams(searchParams);
     mutate(next);
-    setSearchParams(next, { replace });
-  };
-
-  const goToPage = (page: number) => {
-    updateParams((p) => {
-      if (page <= 1) p.delete("page");
-      else p.set("page", String(page));
-    });
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    navigate(newsPageHref(1, next), { replace });
   };
 
   const featuredIds = useMemo(() => new Set(vieLocaleArticles.map((a) => a.id)), [vieLocaleArticles]);
@@ -269,25 +277,38 @@ export default function News() {
     activeCategory !== "all"
       ? t("news.meta_title_category", { cat: tCat(activeCategory) })
       : t("news.meta_title_default");
-  const metaPath =
-    activeCategory !== "all"
-      ? `/actualites?categorie=${activeCategory}${currentPage > 1 ? `&page=${currentPage}` : ""}`
-      : `/actualites${currentPage > 1 ? `?page=${currentPage}` : ""}`;
+  const isFiltered = activeCategory !== "all" || urlSearch.trim() !== "";
+  const metaPath = newsCanonicalPath(currentPage, isFiltered);
+  const pageTitleSuffix = currentPage > 1 ? `, page ${currentPage}` : "";
 
   const hasActiveFilters = urlSearch.trim() !== "" || activeCategory !== "all" || currentPage > 1;
 
   const resetFilters = () => {
     setSearchInput("");
-    const next = new URLSearchParams();
-    setSearchParams(next, { replace: true });
+    navigate(NEWS_BASE_PATH, { replace: true });
   };
+
+  // Ancienne pagination `?page=N` : redirection vers le chemin équivalent.
+  const legacyPage = searchParams.get("page");
+  if (legacyPage !== null) {
+    const n = parseNewsPageParam(legacyPage);
+    return <Navigate to={newsPageHref(n && !pageParam ? n : currentPage, searchParams)} replace />;
+  }
+  // `/actualites/page/1` n'existe pas : la page 1 est `/actualites`.
+  if (pageParam === "1") return <Navigate to={newsPageHref(1, searchParams)} replace />;
+  // Valeur invalide, ou page au-delà de la dernière une fois le total connu.
+  if (parsedPage === null) return <NotFound />;
+  if (current && !current.error && isNewsPageOutOfRange(currentPage, totalCount, PAGE_SIZE)) {
+    return <NotFound />;
+  }
 
   return (
     <>
       <PageMeta
-        title={metaTitle}
+        title={`${metaTitle}${pageTitleSuffix}`}
         description={t("news.meta_description")}
         path={metaPath}
+        ready={!loading}
       />
       <div className="max-w-4xl mx-auto px-4 py-4 md:py-8 animate-fade-in">
         <PageBreadcrumb items={[{ label: t("news.breadcrumb") }]} />
@@ -442,7 +463,7 @@ export default function News() {
           <div className="text-center py-16 space-y-4">
             <AlertCircle className="h-10 w-10 text-destructive mx-auto" aria-hidden="true" />
             <p className="text-destructive">{error}</p>
-            <Button variant="outline" onClick={() => updateParams(() => {}, true)}>{t("news.retry")}</Button>
+            <Button variant="outline" onClick={() => setRetryTick((n) => n + 1)}>{t("news.retry")}</Button>
           </div>
         ) : visibleArticles.length === 0 ? (
           <div className="text-center py-16 space-y-3">
@@ -522,41 +543,49 @@ export default function News() {
             {/* Pagination */}
             {totalPages > 1 && (
               <nav className="flex items-center justify-center gap-2 mt-10" aria-label={t("news.pagination_aria")}>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  disabled={currentPage <= 1}
-                  onClick={() => goToPage(currentPage - 1)}
-                  aria-label={t("news.prev_page")}
-                >
-                  <ChevronLeft className="h-4 w-4" aria-hidden="true" />
-                </Button>
+                {currentPage > 1 ? (
+                  <Button asChild variant="outline" size="icon">
+                    <Link to={newsPageHref(currentPage - 1, searchParams)} rel="prev" aria-label={t("news.prev_page")}>
+                      <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+                    </Link>
+                  </Button>
+                ) : (
+                  <Button variant="outline" size="icon" disabled aria-label={t("news.prev_page")}>
+                    <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+                  </Button>
+                )}
                 {pageList.map((p, idx) =>
                   p === "…" ? (
                     <span key={`gap-${idx}`} className="px-2 text-muted-foreground" aria-hidden="true">…</span>
                   ) : (
                     <Button
                       key={p}
+                      asChild
                       variant={p === currentPage ? "default" : "outline"}
                       size="sm"
-                      onClick={() => goToPage(p)}
-                      aria-current={p === currentPage ? "page" : undefined}
-                      aria-label={t("news.page_aria", { n: p })}
                       className="min-w-[36px]"
                     >
-                      {p}
+                      <Link
+                        to={newsPageHref(p, searchParams)}
+                        aria-current={p === currentPage ? "page" : undefined}
+                        aria-label={t("news.page_aria", { n: p })}
+                      >
+                        {p}
+                      </Link>
                     </Button>
                   )
                 )}
-                <Button
-                  variant="outline"
-                  size="icon"
-                  disabled={currentPage >= totalPages}
-                  onClick={() => goToPage(currentPage + 1)}
-                  aria-label={t("news.next_page")}
-                >
-                  <ChevronRight className="h-4 w-4" aria-hidden="true" />
-                </Button>
+                {currentPage < totalPages ? (
+                  <Button asChild variant="outline" size="icon">
+                    <Link to={newsPageHref(currentPage + 1, searchParams)} rel="next" aria-label={t("news.next_page")}>
+                      <ChevronRight className="h-4 w-4" aria-hidden="true" />
+                    </Link>
+                  </Button>
+                ) : (
+                  <Button variant="outline" size="icon" disabled aria-label={t("news.next_page")}>
+                    <ChevronRight className="h-4 w-4" aria-hidden="true" />
+                  </Button>
+                )}
               </nav>
             )}
           </>

@@ -1,3 +1,4 @@
+import { sitPath } from "@/lib/sitUrl";
 import { Link, useLocation } from "react-router-dom";
 import { storageImageUrl } from "@/lib/storageImage";
 import { useTranslation } from "react-i18next";
@@ -124,7 +125,7 @@ const SearchListingCard = ({
     ? `/annonces/demo/${item.slug || item.id}`
     : isAuthenticated && (isOwnerOfSit || isAcceptedSitterOfSit)
     ? `/sits/${item.id}`
-    : `/annonces/${item.id}`;
+    : sitPath(item as { slug?: string | null; id: string });
 
   const isClickable = (isDemo || hasAccess || isPublicContext || isAuthenticated);
 

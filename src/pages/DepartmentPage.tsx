@@ -18,6 +18,7 @@ import { useContentStats } from "@/hooks/useContentStats";
 import { interpolatePlaceholders } from "@/lib/contentPlaceholders";
 import { departmentIn, departmentInCapitalized, departmentOf, rewriteDepartmentMention } from "@/lib/departmentGrammar";
 import { countLabel } from "@/lib/pluralizeFr";
+import DepartmentSitterLinks, { useDepartmentPublicSitters } from "@/components/seo/DepartmentSitterLinks";
 
 const DepartmentPage = () => {
  const { slug } = useParams<{ slug: string }>();
@@ -82,6 +83,9 @@ const DepartmentPage = () => {
  },
   enabled: !!page?.department,
   });
+
+  // Liens vers les fiches publiques des gardiens du département.
+  const deptSitters = useDepartmentPublicSitters(page?.department);
 
   // Variables dynamiques de contenu (placeholders {{...}}), scope département.
   const { values: contentStats, isLoading: contentStatsLoading } = useContentStats({
@@ -199,7 +203,7 @@ const DepartmentPage = () => {
  path={`/departement/${page.slug}`}
   noindex={page.noindex === true}
   image={buildOgImageUrl({ title: page.department, subtitle: countLabel(cityPages.length, "ville couverte"), kind: "departement" })}
-  ready={!contentStatsLoading}
+  ready={!contentStatsLoading && !deptSitters.isLoading}
   />
 
  <div className="min-h-screen bg-background">
@@ -397,6 +401,8 @@ const DepartmentPage = () => {
       ))}
     </div>
   </section>
+
+  <DepartmentSitterLinks deptIn={deptIn} sitters={deptSitters.sitters} total={deptSitters.total} />
 
   {/* Why Guardiens */}
   <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">

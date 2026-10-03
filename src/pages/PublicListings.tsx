@@ -2,7 +2,7 @@
 // Réutilise le moteur de recherche complet (SearchSitter), filtres,
 // département/ville/critères + carte live, mais dans un shell public
 // (header + footer), sans la sidebar dashboard.
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import PageMeta from "@/components/PageMeta";
@@ -23,6 +23,11 @@ const CANONICAL = "https://guardiens.fr/annonces";
 export default function PublicListings() {
   const { t, i18n } = useTranslation();
   const [itemListLd, setItemListLd] = useState<any | null>(null);
+  // Prérendu : « prête » seulement quand la liste de cartes (liens vers les
+  // fiches) et la liste JSON-LD sont lues, résultat vide ou en erreur inclus.
+  const [listSettled, setListSettled] = useState(false);
+  const [itemListSettled, setItemListSettled] = useState(false);
+  const onListSettled = useCallback(() => setListSettled(true), []);
   const [intlCount, setIntlCount] = useState<number>(0);
   const [openCount, setOpenCount] = useState<number>(0);
   const [citiesCount, setCitiesCount] = useState<number>(0);
@@ -102,7 +107,9 @@ export default function PublicListings() {
         .eq("status", "published")
         .order("created_at", { ascending: false })
         .limit(20);
-      if (cancelled || !data || data.length === 0) return;
+      if (cancelled) return;
+      setItemListSettled(true);
+      if (!data || data.length === 0) return;
       setItemListLd({
         "@context": "https://schema.org",
         "@type": "ItemList",
@@ -142,7 +149,7 @@ export default function PublicListings() {
         path="/annonces"
         canonical={CANONICAL}
         jsonLd={jsonld}
-        ready={itemListLd !== null}
+        ready={listSettled && itemListSettled}
       />
 
       <PublicHeader />
@@ -222,7 +229,7 @@ export default function PublicListings() {
             </div>
           }
         >
-          <SearchSitter mode="public" />
+          <SearchSitter mode="public" onFirstSearchSettled={onListSettled} />
         </Suspense>
 
         <PastListingsSection />

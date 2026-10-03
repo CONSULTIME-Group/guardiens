@@ -479,6 +479,7 @@ const AppRoutes = () => {
       <Route path="/conseils" element={<PublicShellRoute><AlmaTips /></PublicShellRoute>} />
       <Route path="/alma" element={<PublicShellRoute><AlmaEvolution /></PublicShellRoute>} />
       <Route path="/actualites" element={<PublicShellRoute><News /></PublicShellRoute>} />
+      <Route path="/actualites/page/:page" element={<PublicShellRoute><News /></PublicShellRoute>} />
       <Route path="/actualites/inventaire-guardiens-france" element={<PublicShellRoute><ArticleInventaire /></PublicShellRoute>} />
       <Route path="/actualites/:slug" element={<PublicShellRoute><ArticleDetail /></PublicShellRoute>} />
       <Route path="/auteurs/:slug" element={<AuthorPage />} />
