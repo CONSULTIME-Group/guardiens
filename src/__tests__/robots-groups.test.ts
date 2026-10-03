@@ -1,7 +1,6 @@
 import { describe, it, expect } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
-// @ts-expect-error module JS sans types
 import { readRobotsConfig, buildRobotsTxt, isAllowed, parseRobots, selectGroupRules } from "../../scripts/robots-lib.mjs";
 
 const root = path.resolve(__dirname, "../..");

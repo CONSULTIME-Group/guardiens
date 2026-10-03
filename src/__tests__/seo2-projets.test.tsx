@@ -3,7 +3,7 @@
  */
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { render, screen, waitFor, act } from "@testing-library/react";
-import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { MemoryRouter, Route, Routes, useNavigate } from "react-router-dom";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import {
@@ -20,6 +20,7 @@ const SLUG = "chantier-participatif-de-plantation";
 
 // ---------- Mocks ----------
 let nextResult: () => Promise<{ data: unknown; error: unknown }>;
+let nextRpc: () => Promise<{ data: unknown; error: unknown }> = () => Promise.resolve({ data: null, error: null });
 const writes: string[] = [];
 vi.mock("@/integrations/supabase/client", () => {
   const chain: any = {
@@ -34,7 +35,7 @@ vi.mock("@/integrations/supabase/client", () => {
   return {
     supabase: {
       from: () => chain,
-      rpc: () => Promise.resolve({ data: null, error: null }),
+      rpc: () => nextRpc(),
     },
   };
 });
@@ -63,6 +64,7 @@ function renderProjet(path: string) {
 }
 
 beforeEach(() => {
+  nextRpc = () => Promise.resolve({ data: null, error: null });
   captured.length = 0;
   writes.length = 0;
   document.head.innerHTML = "";
@@ -149,6 +151,110 @@ describe("fiche projet", () => {
 
   it("aucune écriture en base pendant ces rendus", () => {
     expect(writes).toEqual([]);
+  });
+});
+
+// ---------- Lectures concurrentes et lecture auteur ----------
+let goTo: (p: string) => void = () => undefined;
+const Nav = () => { goTo = useNavigate(); return null; };
+function renderWithNav(path: string) {
+  return render(
+    <MemoryRouter initialEntries={[path]}>
+      <Nav />
+      <Routes>
+        <Route path="/projets/:slug" element={<ProjetDetail />} />
+      </Routes>
+    </MemoryRouter>,
+  );
+}
+const row = (slug: string, title: string) => ({ id: `${slug}-id`, slug, title, category: "projet", status: "open" });
+const canon = () => document.head.querySelector('link[rel="canonical"]')?.getAttribute("href") ?? null;
+
+describe("robustesse de la fiche projet", () => {
+  it("auteur en échec (rejet) : projet affiché, auteur vide, page prête", async () => {
+    nextResult = () => Promise.resolve({ data: row("a", "Projet A"), error: null });
+    nextRpc = () => Promise.reject(new Error("rpc down"));
+    renderProjet("/projets/a");
+    await screen.findByText("Projet A");
+    // Page libérée : plus d'écran de chargement (PublicMissionView, simulée
+    // ici, porte la PageMeta qui lève le drapeau Prerender).
+    await act(async () => { await new Promise((r) => setTimeout(r, 0)); });
+    expect(document.querySelector('[aria-busy="true"]')).toBeNull();
+    expect(captured.at(-1).author).toBeNull();
+    expect(screen.queryByText("Ce projet a été retiré")).toBeNull();
+  });
+
+  it("auteur en erreur renvoyée : même dégradation", async () => {
+    nextResult = () => Promise.resolve({ data: row("a", "Projet A"), error: null });
+    nextRpc = () => Promise.resolve({ data: null, error: { message: "boom" } });
+    renderProjet("/projets/a");
+    await screen.findByText("Projet A");
+    expect(captured.at(-1).author).toBeNull();
+  });
+
+  it("A puis B, réponses dans le désordre : B seul est rendu, A ignorée", async () => {
+    const pending: Record<string, (v: any) => void> = {};
+    const order: string[] = [];
+    nextResult = () => new Promise((r) => { const k = order.length === 0 ? "a" : "b"; order.push(k); pending[k] = r; });
+    renderWithNav("/projets/a");
+    await act(async () => { await Promise.resolve(); });
+    act(() => goTo("/projets/b"));
+    await act(async () => { await Promise.resolve(); });
+    await act(async () => { pending.b({ data: row("b", "Projet B"), error: null }); });
+    await screen.findByText("Projet B");
+    await act(async () => { pending.a({ data: row("a", "Projet A"), error: null }); });
+    expect(screen.queryByText("Projet A")).toBeNull();
+    expect(captured.every((p) => p.mission.title !== "Projet A")).toBe(true);
+    expect(captured.at(-1).canonical).toBe("https://guardiens.fr/projets/b");
+  });
+
+  it("A affiché puis navigation vers B : ancien titre et canonical jamais émis pendant le chargement de B", async () => {
+    let resolveB!: (v: any) => void;
+    let calls = 0;
+    nextResult = () => (++calls === 1
+      ? Promise.resolve({ data: row("a", "Projet A"), error: null })
+      : new Promise((r) => { resolveB = r; }));
+    renderWithNav("/projets/a");
+    await screen.findByText("Projet A");
+    // Simule le canonical que PageMeta aurait posé pour A.
+    const l = document.createElement("link"); l.rel = "canonical"; l.href = "https://guardiens.fr/projets/a"; document.head.appendChild(l);
+    (window as any).prerenderReady = true;
+    const before = captured.length;
+    act(() => goTo("/projets/b"));
+    // Premier commit de B : rien de A n'est rendu ni déclaré.
+    expect(screen.queryByText("Projet A")).toBeNull();
+    expect(captured.length).toBe(before);
+    expect(canon()).toBeNull();
+    expect((window as any).prerenderReady).toBe(false);
+    await act(async () => { resolveB({ data: row("b", "Projet B"), error: null }); });
+    await screen.findByText("Projet B");
+    expect(captured.at(-1).canonical).toBe("https://guardiens.fr/projets/b");
+  });
+
+  it("démontage pendant la lecture : aucune mise à jour tardive", async () => {
+    let resolveIt!: (v: any) => void;
+    nextResult = () => new Promise((r) => { resolveIt = r; });
+    const errors = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const { unmount } = renderProjet("/projets/a");
+    unmount();
+    await act(async () => { resolveIt({ data: row("a", "Projet A"), error: null }); });
+    expect(captured.length).toBe(0);
+    errors.mockRestore();
+  });
+
+  it("Réessayer : l'écran d'erreur disparaît dès le clic, puis le projet s'affiche", async () => {
+    let calls = 0;
+    let resolve2!: (v: any) => void;
+    nextResult = () => (++calls === 1
+      ? Promise.resolve({ data: null, error: { message: "Failed to fetch" } })
+      : new Promise((r) => { resolve2 = r; }));
+    renderProjet("/projets/a");
+    const btn = await screen.findByRole("button", { name: "Réessayer" });
+    act(() => btn.click());
+    expect(screen.queryByText("Ce projet n'a pas pu être chargé")).toBeNull();
+    expect(meta("prerender-status-code")).toBeNull();
+    await act(async () => { resolve2({ data: row("a", "Projet A"), error: null }); });
+    await screen.findByText("Projet A");
   });
 });
 
