@@ -457,3 +457,21 @@ Choix : identité de page dans le chemin (`/actualites/page/N`, page 1 = `/actua
 - Prêt : verrou `prerenderMetaPending` posé au démarrage pour `/actualites` et `/actualites/page/N` (pas les articles), levé seulement quand la liste de la requête courante est affichée et la vitrine Vie locale lue ; une réponse ancienne ne s'affiche ni ne se déclare prête sous une autre page.
 
 Limites : Worker actif non lu ; comportement robot réel à mesurer après publication et recache ; un 5xx émis par le Worker lui-même n'est pas couvert.
+
+### 11 bis. Autres bloquants SEO-4 : PRÉPARÉ (non publié)
+
+Annonces (/annonces) :
+- SearchSitter : `setLoading(false)` et la fin de première recherche passent en `finally` ; une exception inattendue affiche une erreur explicite (« La recherche n'a pas abouti. ») au lieu d'un chargement infini ou d'une liste vide.
+- La liste JSON-LD ItemList est construite à partir des cartes réellement rendues à la première recherche (disponibles plafonnées à l'affichage initial, puis passées ou attribuées, démos exclues). La lecture séparée de 20 annonces est supprimée. Mesure navigateur locale : 29 URL dans ItemList = 29 liens de cartes, aucun écart.
+- Prêt seulement après ce rendu (cartes, vide ou erreur). Le repli global à 10 s ne s'applique plus à `/annonces` (`startsWith("/annonces")` dans main.tsx), donc une lecture lente garde le verrou.
+
+Pages départements :
+- Plus d'exclusion `first_name` nul ; libellé via `publicFirstName`, repli « Gardien inscrit », jamais d'identifiant. Aucun filtre de complétion ou de vérification.
+- Bloc toujours rendu avec le lien « Voir tous les gardiens », y compris vide ; erreur de lecture affichée à part (pas de « 0 inscrits »).
+- Tri documenté honnêtement : identité vérifiée, puis avatar_url non nul d'abord (ordre alphabétique de l'adresse ensuite, sans signification), puis identifiant.
+
+Guides (/guides) :
+- Les guides sans département forment un groupe « Autres destinations » (Marrakech était exclu). Panne de lecture distincte de la liste vide. Prêt après affichage. Ordre city puis id.
+- Mesure SELECT du 03/10/2026 : 95 guides publiés, 1 sans département, 95 slugs distincts. Navigateur local : 95 liens rendus, ensemble identique aux 95 slugs. L'écart historique de 92 sur 95 en production : 1 expliqué (Marrakech), 2 non mesurés sur le snapshot servi.
+
+Limites : rendu réel robot non mesuré (Worker actif non lu, pas de recache) ; l'exception de SearchSitter est couverte par relecture et par le chemin finally, sans test qui monte le moteur complet ; page département vérifiée par tests, pas dans le navigateur.

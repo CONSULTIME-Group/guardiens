@@ -76,7 +76,9 @@ createRoot(container).render(<App />);
 // uniquement les routes sans PageMeta. Une page qui prépare ses métadonnées
 // garde explicitement le verrou, même si son chargement dépasse le délai.
 const markPrerenderReady = () => {
-  if (window.location.pathname.startsWith("/annonces/")) return;
+  // /annonces (hub, lot SEO-4) et /annonces/:slug : jamais par ce repli,
+  // PublicListings et la fiche lèvent le drapeau une fois leur liste rendue.
+  if (window.location.pathname.startsWith("/annonces")) return;
   if (window.prerenderMetaPending) return;
   window.prerenderReady = true;
 };

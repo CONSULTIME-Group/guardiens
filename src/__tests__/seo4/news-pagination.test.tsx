@@ -115,6 +115,8 @@ describe("verrou de prérendu posé au démarrage (main.tsx)", () => {
     const { readFileSync } = await import("fs");
     const re = new RegExp(readFileSync("src/main.tsx", "utf8").match(/const LATE_META_PATH = \/(.+)\/;/)![1]);
     for (const p of ["/actualites", "/actualites/", "/actualites/page/2", "/gardiens/x", "/projets/x"]) expect(re.test(p), p).toBe(true);
+    // Hub /annonces : exclu du repli à 10 s (markPrerenderReady).
+    expect(readFileSync("src/main.tsx", "utf8")).toContain('pathname.startsWith("/annonces")) return;');
     for (const p of ["/actualites/un-article", "/actualites/inventaire-guardiens-france", "/", "/annonces"]) expect(re.test(p), p).toBe(false);
   });
 });
@@ -123,6 +125,7 @@ describe("rendu News", () => {
   it("page 1 et page 2 : contenus, liens et canonical distincts", async () => {
     const one = mount("/actualites");
     await screen.findByText("Titre article 1");
+    await waitFor(() => expect((window as any).prerenderReady).toBe(true));
     expect(screen.queryByText("Titre article 10")).toBeNull();
     expect(canonical()).toBe("https://guardiens.fr/actualites");
     const nextLink = document.querySelector('a[rel="next"]');
@@ -134,6 +137,7 @@ describe("rendu News", () => {
 
     mount("/actualites/page/2");
     await screen.findByText("Titre article 10");
+    await waitFor(() => expect(canonical()).toBe("https://guardiens.fr/actualites/page/2"));
     expect(screen.queryByText("Titre article 1")).toBeNull();
     expect(canonical()).toBe("https://guardiens.fr/actualites/page/2");
     expect(document.title).toMatch(/page 2/);
