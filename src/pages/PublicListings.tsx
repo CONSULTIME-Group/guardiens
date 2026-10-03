@@ -6,7 +6,6 @@ import { Suspense, useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import PageMeta from "@/components/PageMeta";
-import { sitPath } from "@/lib/sitUrl";
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
 import { lazyWithRetry } from "@/lib/lazyWithRetry";
@@ -40,7 +39,9 @@ export default function PublicListings() {
         itemListElement: shown.map((s, i) => ({
           "@type": "ListItem",
           position: i + 1,
-          url: `https://guardiens.fr${sitPath(s)}`,
+          // Même règle que sitPath (slug, sinon identifiant), sans dépendance
+          // supplémentaire au démarrage (plafond de taille de l'entrée).
+          url: `https://guardiens.fr/annonces/${s.slug?.trim() || s.id}`,
           name: s.title || BREADCRUMB_LISTINGS,
         })),
       });
