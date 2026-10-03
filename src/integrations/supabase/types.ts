@@ -584,6 +584,24 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_content_seo_trigger_20261003_2235: {
+        Row: {
+          definition: string | null
+          proacl: unknown[] | null
+          signature: string | null
+        }
+        Insert: {
+          definition?: string | null
+          proacl?: unknown[] | null
+          signature?: string | null
+        }
+        Update: {
+          definition?: string | null
+          proacl?: unknown[] | null
+          signature?: string | null
+        }
+        Relationships: []
+      }
       _backup_cron_auth_20260918: {
         Row: {
           active: boolean | null
