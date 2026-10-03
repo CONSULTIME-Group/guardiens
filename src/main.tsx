@@ -62,7 +62,7 @@ const LATE_META_PATH_PREFIXES = [
 // Liste des actualités (/actualites, /actualites/page/N) : prête seulement
 // une fois la liste affichée (News.tsx), jamais par le repli à 10 s.
 const p = location.pathname.replace(/\/+$/, "");
-if (p === "/actualites" || p.startsWith("/actualites/page/") || LATE_META_PATH_PREFIXES.some((x) => p.startsWith(x) || location.pathname.startsWith(x))) {
+if (p === "/actualites" || p.startsWith("/actualites/page/") || LATE_META_PATH_PREFIXES.some((x) => location.pathname.startsWith(x))) {
   window.prerenderMetaPending = true;
   window.prerenderReady = false;
 }
