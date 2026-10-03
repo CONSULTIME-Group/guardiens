@@ -19,7 +19,7 @@
  *   sont relues à chaque build, sans être écrites dans le cache.
  */
 
-export const SITEMAP_CACHE_VERSION = 3;
+export const SITEMAP_CACHE_VERSION = 4;
 
 export function emptyCache() {
   return { version: SITEMAP_CACHE_VERSION, sources: {}, entries: {} };

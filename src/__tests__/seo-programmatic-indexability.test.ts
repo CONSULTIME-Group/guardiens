@@ -18,8 +18,8 @@ describe("pages programmatiques : cohérence du garde-fou noindex", () => {
 
   it("le sitemap statique exclut les pages ville et département en noindex", () => {
     const src = read("scripts/generate-sitemap.mjs");
-    const cityFetch = src.match(/from\("seo_city_pages"\)[^;]*;/);
-    const deptFetch = src.match(/from\("seo_department_pages"\)[^;]*;/);
+    const cityFetch = src.match(/readAll\("seo_city_pages"[^\n]*/);
+    const deptFetch = src.match(/readAll\("seo_department_pages"[^\n]*/);
     expect(cityFetch?.[0]).toContain("noindex.is.null,noindex.eq.false");
     expect(deptFetch?.[0]).toContain("noindex.is.null,noindex.eq.false");
   });
@@ -38,12 +38,10 @@ describe("pages programmatiques : cohérence du garde-fou noindex", () => {
     }
   });
 
-  it("le sitemap edge exclut les pages ville et département en noindex", () => {
+  it("la fonction sitemap ne lit plus la base, elle relaie le fichier statique", () => {
     const src = read("supabase/functions/sitemap/index.ts");
-    const cityFetch = src.match(/from\("seo_city_pages"\)[\s\S]*?order\("city"\)/);
-    const deptFetch = src.match(/from\("seo_department_pages"\)[\s\S]*?order\("department"\)/);
-    expect(cityFetch?.[0]).toContain("noindex.is.null,noindex.eq.false");
-    expect(deptFetch?.[0]).toContain("noindex.is.null,noindex.eq.false");
+    expect(src).not.toContain("seo_city_pages");
+    expect(src).toContain("proxySitemap");
   });
 
   it("le consommateur seo_dirty_at couvre les pages département", () => {

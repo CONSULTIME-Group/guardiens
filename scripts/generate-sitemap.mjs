@@ -19,6 +19,7 @@ import { isSitterProfileIndexable } from "../src/lib/sitterProfileIndexability.j
 import { mergedBreedTarget } from "../src/lib/breedFicheMerges.js";
 import { isIndexableEntraideMission, isIndexableProjetMission } from "../supabase/functions/_shared/entraideMissionIndexability.js";
 import { fetchOrCache as sharedFetchOrCache, normalizeCache, emptyCache } from "./lib/sitemapCache.mjs";
+import { fetchAllPages, supabasePage, normalizeLastmod, dedupeEntries, renderSitemapXml, validateSitemapXml, readStaticRoutes } from "./lib/sitemapCore.mjs";
 
 
 
@@ -27,33 +28,10 @@ const CACHE_PATH = path.resolve(__dirname, "../.sitemap-cache.json");
 const FORCE = process.env.SITEMAP_FORCE === "1";
 
 // ─── Source de vérité : src/data/siteRoutes.ts ───────────────────────
-// Parser le fichier TS pour extraire SITE_URL + staticRoutes sans
-// dépendance TS runtime. Toute modif des routes doit se faire là-bas.
+// Lecture par l'arbre syntaxique TypeScript (scripts/lib/sitemapCore.mjs).
 function loadStaticRoutes() {
   const filePath = path.resolve(__dirname, "../src/data/siteRoutes.ts");
-  const source = fs.readFileSync(filePath, "utf-8");
-
-  const siteUrlMatch = source.match(/export\s+const\s+SITE_URL\s*=\s*["']([^"']+)["']/);
-  if (!siteUrlMatch) throw new Error("SITE_URL introuvable dans siteRoutes.ts");
-  const siteUrl = siteUrlMatch[1];
-
-  const routes = [];
-  const blockRe = /\{\s*path:\s*(["'])([^"']+)\1[\s\S]*?changeFreq:\s*(["'])(daily|weekly|monthly|yearly)\3[\s\S]*?\}/g;
-  let m;
-  while ((m = blockRe.exec(source)) !== null) {
-    const block = m[0];
-    const path_ = m[2];
-    const changefreq = m[4];
-    const priorityMatch = block.match(/sitemapPriority:\s*(["'])([^"']+)\1/);
-    if (!priorityMatch) continue;
-    // `index: false` → page non indexable, exclue du sitemap (cohérent avec
-    // robots.txt et <meta robots>). Source de vérité : siteRoutes.ts.
-    const indexMatch = block.match(/index:\s*(true|false)/);
-    const indexable = indexMatch ? indexMatch[1] === "true" : true;
-    routes.push({ loc: path_, priority: priorityMatch[2], changefreq, indexable });
-  }
-  if (routes.length === 0) throw new Error("Aucune route extraite de staticRoutes");
-  return { siteUrl, routes };
+  return readStaticRoutes(fs.readFileSync(filePath, "utf-8"));
 }
 
 const { siteUrl: SITE_URL, routes: STATIC_ROUTES } = loadStaticRoutes();
@@ -92,17 +70,9 @@ const PRIORITY_MAP = {
   thematique: "0.6",
 };
 
-function escapeXml(s) {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
-}
-
-function urlEntry(loc, lastmod, changefreq, priority) {
-  return `  <url>
-    <loc>${escapeXml(SITE_URL + loc)}</loc>
-    <lastmod>${lastmod}</lastmod>
-    <changefreq>${changefreq}</changefreq>
-    <priority>${priority}</priority>
-  </url>`;
+/** Lecture paginée intégrale d'une source publique (voir sitemapCore). */
+function readAll(source, table, columns, key, build) {
+  return fetchAllPages({ source, key, page: supabasePage(supabase, table, columns, key, build) });
 }
 
 function loadCache() {
@@ -114,12 +84,14 @@ function loadCache() {
   }
 }
 
+function writeAtomic(target, content) {
+  const tmp = `${target}.tmp-${process.pid}`;
+  fs.writeFileSync(tmp, content, "utf-8");
+  fs.renameSync(tmp, target);
+}
+
 function saveCache(cache) {
-  try {
-    fs.writeFileSync(CACHE_PATH, JSON.stringify(cache, null, 2), "utf-8");
-  } catch (e) {
-    console.warn("⚠️ Failed to write sitemap cache:", e.message);
-  }
+  writeAtomic(CACHE_PATH, JSON.stringify(cache, null, 2));
 }
 
 /**
@@ -137,7 +109,7 @@ async function maxUpdatedAt(table, column = "updated_at", filter = null) {
 /**
  * Clé d'invalidation composite : date la plus récente et nombre de lignes.
  * Utilisée quand la colonne temporelle seule n'est pas fiable (valeur nulle sur
- * une vue publique, par exemple `public_profiles.last_seen_at` qui n'est pas
+ * une vue publique, par exemple la date de dernière visite qui n'est pas
  * exposée en anonyme). Sans cette variante, la clé restait nulle et le cache
  * n'était jamais invalidé.
  */
@@ -160,6 +132,12 @@ function fetchOrCache(key, cache, headProbe, fetcher, builder) {
   return sharedFetchOrCache(key, cache, headProbe, fetcher, builder, FORCE);
 }
 
+
+// updated_at est réécrit par des écritures techniques (marquage et purge
+// seo_dirty_at, déclencheurs) : mesuré le 03/10/2026, 101/101 articles et
+// 95/95 guides datés du jour entre 12:25 et 12:45 UTC sans changement de
+// contenu. Ce n'est pas une date de contenu fiable : lastmod omis.
+const NO_RELIABLE_LASTMOD = null;
 
 async function main() {
   const today = new Date().toISOString().split("T")[0];
@@ -192,10 +170,10 @@ async function main() {
       // max des lignes restantes. Sans le compteur, le cache resservait des
       // URL dépubliées (mesuré le 24/08/2026 sur les pages villes).
       () => maxUpdatedAtWithCount("articles", "updated_at", q => q.eq("published", true)),
-      async () => (await supabase.from("articles").select("slug, category, updated_at, published_at").eq("published", true).or("noindex.is.null,noindex.eq.false")).data,
+      () => readAll("articles", "articles", "id, slug, category, updated_at, published_at", "id", q => q.eq("published", true).or("noindex.is.null,noindex.eq.false")),
       rows => rows.filter(a => !excludedSlugs.has(a.slug)).map(a => ({
         loc: `/actualites/${a.slug}`,
-        lastmod: (a.updated_at || a.published_at || today).split("T")[0],
+        lastmod: NO_RELIABLE_LASTMOD,
         changefreq: "monthly",
         priority: PRIORITY_MAP[a.category] || "0.7",
       }))
@@ -209,10 +187,10 @@ async function main() {
       // Le compteur de lignes publiées fait partie de la clé : une
       // dépublication laisse la date max intacte (cas papeete, 24/08/2026).
       () => maxUpdatedAtWithCount("seo_city_pages", "updated_at", q => q.eq("published", true)),
-      async () => (await supabase.from("seo_city_pages").select("slug, updated_at").eq("published", true).or("noindex.is.null,noindex.eq.false")).data,
+      () => readAll("seo_city_pages", "seo_city_pages", "id, slug, updated_at", "id", q => q.eq("published", true).or("noindex.is.null,noindex.eq.false")),
       rows => rows.map(cp => ({
         loc: `/house-sitting/${cp.slug}`,
-        lastmod: (cp.updated_at || today).split("T")[0],
+        lastmod: NO_RELIABLE_LASTMOD,
         changefreq: "weekly",
         priority: "0.8",
       }))
@@ -220,10 +198,10 @@ async function main() {
     fetchOrCache(
       "city_guides", cache,
       () => maxUpdatedAtWithCount("city_guides", "updated_at", q => q.eq("published", true)),
-      async () => (await supabase.from("city_guides").select("slug, updated_at").eq("published", true)).data,
+      () => readAll("city_guides", "city_guides", "id, slug, updated_at", "id", q => q.eq("published", true)),
       rows => rows.map(cg => ({
         loc: `/guides/${cg.slug}`,
-        lastmod: (cg.updated_at || today).split("T")[0],
+        lastmod: NO_RELIABLE_LASTMOD,
         changefreq: "weekly",
         priority: "0.7",
       }))
@@ -231,10 +209,10 @@ async function main() {
     fetchOrCache(
       "seo_department_pages", cache,
       () => maxUpdatedAtWithCount("seo_department_pages", "updated_at", q => q.eq("published", true)),
-      async () => (await supabase.from("seo_department_pages").select("slug, updated_at").eq("published", true).or("noindex.is.null,noindex.eq.false")).data,
+      () => readAll("seo_department_pages", "seo_department_pages", "id, slug, updated_at", "id", q => q.eq("published", true).or("noindex.is.null,noindex.eq.false")),
       rows => rows.map(dp => ({
         loc: `/departement/${dp.slug}`,
-        lastmod: (dp.updated_at || today).split("T")[0],
+        lastmod: NO_RELIABLE_LASTMOD,
         changefreq: "weekly",
         priority: "0.8",
       }))
@@ -246,7 +224,7 @@ async function main() {
       // le cache resservait des URLs de races supprimées (même mécanique que
       // les pages villes le 24/08/2026).
       () => maxUpdatedAtWithCount("breed_profiles", "generated_at"),
-      async () => (await supabase.from("breed_profiles").select("breed, species, generated_at")).data,
+      () => readAll("breed_profiles", "breed_profiles", "id, breed, species, generated_at", "id"),
       rows => {
         // Slug aligné avec src/lib/normalize.ts → slugify() (sinon soft-404 sur accents)
         const slugifyBreed = (s) =>
@@ -259,7 +237,7 @@ async function main() {
           .filter(bp => !mergedBreedTarget(bp.species, bp.breed))
           .map(bp => ({
             loc: `/races/${bp.species.toLowerCase()}-${slugifyBreed(bp.breed)}`,
-            lastmod: (bp.generated_at || today).split("T")[0],
+            lastmod: normalizeLastmod(bp.generated_at, today),
             changefreq: "monthly",
             priority: "0.6",
           }));
@@ -276,22 +254,22 @@ async function main() {
     // on lit la vue publique `public_profiles` (exposition anonyme validée).
     fetchOrCache(
       "public_profiles", cache,
-      // `last_seen_at` n'est pas exposée en anonyme sur la vue publique : la
-      // sonde renvoyait null, donc le cache ne s'invalidait jamais. On prend
-      // `created_at` plus le nombre de fiches comme clé composite.
-      () => maxUpdatedAtWithCount("public_profiles", "created_at", q => q.in("role", ["sitter", "both"])),
+      // Aucune clé de contenu complète (bio, motivation, identité, galerie) :
+      // relue à chaque build, jamais mise en cache (SEO-3).
+      null,
       async () => {
-        const [{ data: profiles }, { data: sitters }, { data: galleryRows }] = await Promise.all([
-          supabase.from("public_profiles").select("id, last_seen_at, created_at, bio, identity_verified, role").in("role", ["sitter", "both"]).limit(5000),
-          supabase.from("public_sitter_profiles").select("user_id, motivation").limit(5000),
+        const [profiles, sitters, galleryRows] = await Promise.all([
+          readAll("public_profiles", "public_profiles", "id, bio, identity_verified, role", "id", q => q.in("role", ["sitter", "both"])),
+          readAll("public_sitter_profiles", "public_sitter_profiles", "user_id, motivation", "user_id"),
           // `sitter_gallery` est fermée à anon depuis août 2026 (les URLs de
           // photos ne sont jamais servies). On lit la vue publique qui
           // n'expose que le NOMBRE de photos par gardien.
-          supabase.from("public_sitter_gallery_counts").select("user_id, photo_count").limit(20000),
+          readAll("public_sitter_gallery_counts", "public_sitter_gallery_counts", "user_id, photo_count", "user_id"),
         ]);
-        const motivationById = new Map((sitters || []).map(s => [s.user_id, s.motivation]));
-        const galleryCountById = new Map((galleryRows || []).map(g => [g.user_id, g.photo_count || 0]));
-        return (profiles || []).map(p => ({
+        const motivationById = new Map(sitters.map(s => [s.user_id, s.motivation]));
+        const galleryCountById = new Map(galleryRows.map(g => [g.user_id, g.photo_count || 0]));
+        console.log(`[sitemap] sources profils : ${profiles.length} profils, ${sitters.length} motivations, ${galleryRows.length} galeries`);
+        return profiles.map(p => ({
           ...p,
           motivation: motivationById.get(p.id) || null,
           galleryCount: galleryCountById.get(p.id) || 0,
@@ -307,7 +285,8 @@ async function main() {
         console.log(`[sitemap] fiches gardien : ${kept.length} retenues sur ${rows.length}`);
         return kept.map(p => ({
           loc: `/gardiens/${p.id}`,
-          lastmod: (p.last_seen_at || p.created_at || today).split("T")[0],
+          // Aucune date de modification de contenu exposée : lastmod omis.
+          lastmod: null,
           changefreq: "monthly",
           priority: "0.5",
         }));
@@ -320,8 +299,8 @@ async function main() {
     // titre ≥10 caractères, cumul de contenu rédigé ≥200 caractères.
     fetchOrCache(
       "public_sits", cache,
-      () => maxUpdatedAtWithCount("sits", "updated_at", q => q.eq("status", "published").eq("accepting_applications", true)),
-      async () => (await supabase.from("sits").select("id, slug, title, updated_at, created_at, owner_message, daily_routine, specific_expectations").eq("status", "published").eq("accepting_applications", true).limit(2000)).data,
+      null, // relue à chaque build (SEO-3)
+      () => readAll("sits", "sits", "id, slug, title, updated_at, owner_message, daily_routine, specific_expectations", "id", q => q.eq("status", "published").eq("accepting_applications", true)),
       rows => {
         const rejected = { titre_trop_court: 0, contenu_insuffisant: 0 };
         const kept = rows.filter(s => {
@@ -338,7 +317,7 @@ async function main() {
         }
         return kept.map(s => ({
           loc: `/annonces/${s.slug || s.id}`,
-          lastmod: (s.updated_at || s.created_at || today).split("T")[0],
+          lastmod: NO_RELIABLE_LASTMOD,
           changefreq: "weekly",
           priority: "0.7",
         }));
@@ -352,10 +331,10 @@ async function main() {
       // rechargement au lieu de servir des entrées incomplètes.
       "public_animal_associations_v2", cache,
       () => maxUpdatedAtWithCount("public_animal_associations", "updated_at"),
-      async () => (await supabase.from("public_animal_associations").select("slug, name, tagline, description, city, departement_name, updated_at")).data,
+      () => readAll("public_animal_associations", "public_animal_associations", "id, slug, name, tagline, description, city, departement_name, updated_at", "id"),
       rows => rows.filter(a => isAssociationIndexable(a)).map(a => ({
         loc: `/associations/${a.slug}`,
-        lastmod: (a.updated_at || today).split("T")[0],
+        lastmod: NO_RELIABLE_LASTMOD,
         changefreq: "monthly",
         priority: "0.7",
         _name: a.name,
@@ -372,17 +351,13 @@ async function main() {
     ),
     fetchOrCache(
       "small_missions_entraide_v1", cache,
-      () => maxUpdatedAtWithCount("public_small_missions", "created_at", q => q.eq("status", "open").neq("category", "projet")),
-      async () => (await supabase
-        .from("public_small_missions")
-        .select("slug, description, status, mission_type, date_needed, end_date, created_at")
-        .eq("status", "open")
-        .not("slug", "is", null)
-        .neq("category", "projet")
-        .limit(2000)).data,
+      null, // contenu et dates dépendent du temps : relue à chaque build
+      () => readAll("public_small_missions:entraide", "public_small_missions",
+        "id, slug, description, status, mission_type, date_needed, end_date, created_at", "id",
+        q => q.eq("status", "open").not("slug", "is", null).neq("category", "projet")),
       rows => rows.filter(m => isIndexableEntraideMission(m)).map(m => ({
         loc: `/petites-missions/${m.slug}`,
-        lastmod: (m.updated_at || m.created_at || today).split("T")[0],
+        lastmod: null, // vue sans updated_at : omis
         changefreq: "weekly",
         priority: "0.5",
       }))
@@ -392,17 +367,13 @@ async function main() {
     // catégorie, de statut ou de date ne laisse jamais une ancienne URL.
     fetchOrCache(
       "small_missions_projets_v1", cache,
-      async () => null,
-      async () => (await supabase
-        .from("public_small_missions")
-        .select("slug, description, status, category, date_needed, end_date, created_at")
-        .eq("category", "projet")
-        .eq("status", "open")
-        .not("slug", "is", null)
-        .limit(2000)).data,
+      null,
+      () => readAll("public_small_missions:projet", "public_small_missions",
+        "id, slug, description, status, category, date_needed, end_date, created_at", "id",
+        q => q.eq("category", "projet").eq("status", "open").not("slug", "is", null)),
       rows => rows.filter(m => isIndexableProjetMission(m)).map(m => ({
         loc: `/projets/${m.slug}`,
-        lastmod: m.created_at.split("T")[0],
+        lastmod: null, // vue sans updated_at : omis
         changefreq: "weekly",
         priority: "0.5",
       }))
@@ -413,75 +384,28 @@ async function main() {
 
 
 
-  const entries = [];
-
-  for (const page of staticPages) {
-    entries.push(urlEntry(page.loc, today, page.changefreq, page.priority));
+  const raw = [];
+  // Routes statiques et villes codées en dur : aucune date de contenu fiable,
+  // lastmod omis. Une ville aussi présente en base reprend la date de la base
+  // à la déduplication.
+  for (const page of staticPages) raw.push({ loc: page.loc, lastmod: null, changefreq: page.changefreq, priority: page.priority });
+  for (const slug of cityLandingPages) raw.push({ loc: `/house-sitting/${slug}`, lastmod: null, changefreq: "weekly", priority: "0.9" });
+  for (const list of [articles, seoCity, guides, depts, breeds, profiles, sits, entraideMissions, projetMissions, associations]) {
+    for (const e of list) raw.push({ loc: e.loc, lastmod: normalizeLastmod(e.lastmod, today), changefreq: e.changefreq, priority: e.priority });
   }
-  for (const slug of cityLandingPages) {
-    entries.push(urlEntry(`/house-sitting/${slug}`, today, "weekly", "0.9"));
-  }
-  for (const e of articles) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
-  for (const e of seoCity) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
-  for (const e of guides) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
-  for (const e of depts) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
-  for (const e of breeds) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
-  for (const e of profiles) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
-  for (const e of sits) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
-  for (const e of entraideMissions) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
-  for (const e of projetMissions) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
-  // Garde-fou durable : si la base publie des fiches indexables et que la
-  // génération n'en produit aucune, le sitemap partirait amputé en silence.
-  {
-    const { data: liveAssocs } = await supabase
-      .from("public_animal_associations")
-      .select("slug, description");
-    const liveIndexable = (liveAssocs || []).filter(a => isAssociationIndexable(a)).length;
-    if (liveIndexable > 0 && (associations || []).length === 0) {
-      throw new Error(
-        `Sitemap : ${liveIndexable} fiches associations indexables en base, 0 URL générée.`,
-      );
-    }
-  }
-  for (const e of associations || []) entries.push(urlEntry(e.loc, e.lastmod, e.changefreq, e.priority));
-  // Pages légales (/cgu, /confidentialite, /mentions-legales) déjà incluses
-  // dans staticPages via staticRoutes. Ne pas les ré-ajouter ici.
+  const { entries, dupes } = dedupeEntries(raw);
+  if (dupes > 0) console.log(`  ⚠️  ${dupes} doublon(s) <loc> fusionné(s)`);
 
-  // Déduplication finale : un même <loc> ne doit jamais apparaître 2 fois
-  // (cityLandingPages hardcodées vs seo_city_pages DB notamment).
-  // On garde la PREMIÈRE occurrence (priorité au hardcode + ordre staticPages).
-  const seen = new Set();
-  const dedupedEntries = [];
-  let dupeCount = 0;
-  for (const entry of entries) {
-    const locMatch = entry.match(/<loc>([^<]+)<\/loc>/);
-    const loc = locMatch?.[1];
-    if (loc && seen.has(loc)) { dupeCount++; continue; }
-    if (loc) seen.add(loc);
-    dedupedEntries.push(entry);
-  }
-  if (dupeCount > 0) console.log(`  ⚠️  ${dupeCount} doublon(s) <loc> filtré(s)`);
+  const xml = renderSitemapXml(SITE_URL, entries);
+  const locs = validateSitemapXml(xml, SITE_URL, today).map((l) => l.slice(SITE_URL.length));
 
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${dedupedEntries.join("\n")}
-</urlset>`;
-
-  const outPath = path.resolve(__dirname, "../public/sitemap.xml");
-  fs.writeFileSync(outPath, xml, "utf-8");
-  saveCache(cache);
-
-  // Synchronisation des compteurs géographiques annoncés dans public/llms.txt.
-  // Les valeurs sont calculées depuis le sitemap qui vient d'être écrit, jamais
-  // saisies en dur : elles suivent automatiquement l'ajout de villes ou de
-  // départements.
-  const locs = Array.from(seen);
-  const cityCount = locs.filter((l) => /\/house-sitting\/[^/]+$/.test(l)).length;
-  const deptCount = locs.filter((l) => /\/departement\/[^/]+$/.test(l)).length;
+  // llms.txt : compteurs calculés depuis le sitemap, préparés AVANT toute écriture.
+  const cityCount = locs.filter((l) => /^\/house-sitting\/[^/]+$/.test(l)).length;
+  const deptCount = locs.filter((l) => /^\/departement\/[^/]+$/.test(l)).length;
   const llmsPath = path.resolve(__dirname, "../public/llms.txt");
+  let llms = null;
   if (fs.existsSync(llmsPath)) {
-    let llms = fs.readFileSync(llmsPath, "utf-8");
-    llms = llms
+    llms = fs.readFileSync(llmsPath, "utf-8")
       .replace(
         /^(- \[House-sitting par ville\]\(\/house-sitting\): .*?)\d+ villes couvertes\.$/m,
         `$1${cityCount} villes couvertes.`,
@@ -490,26 +414,29 @@ ${dedupedEntries.join("\n")}
         /^(- \[House-sitting par département\]\(\/departement\): .*?)\d+ départements couverts\.$/m,
         `$1${deptCount} départements couverts.`,
       );
-    // Section associations, régénérée entre marqueurs à chaque build.
-    const assocLines = (associations || [])
+    const assocLines = associations
       .map(a => `- [${a._name}](${a.loc}) : ${a._summary}, ${a._city} (${a._dept}).`)
       .join("\n");
     const assocBlock = `<!-- associations:start -->\n## Associations et refuges\n\n${assocLines}\n<!-- associations:end -->`;
-    if (/<!-- associations:start -->[\s\S]*?<!-- associations:end -->/.test(llms)) {
-      llms = llms.replace(/<!-- associations:start -->[\s\S]*?<!-- associations:end -->/, assocBlock);
-    } else {
-      llms = `${llms.trimEnd()}\n\n${assocBlock}\n`;
-    }
-
-    fs.writeFileSync(llmsPath, llms, "utf-8");
-    console.log(`   llms.txt: ${cityCount} villes, ${deptCount} départements, ${(associations || []).length} associations`);
+    llms = /<!-- associations:start -->[\s\S]*?<!-- associations:end -->/.test(llms)
+      ? llms.replace(/<!-- associations:start -->[\s\S]*?<!-- associations:end -->/, assocBlock)
+      : `${llms.trimEnd()}\n\n${assocBlock}\n`;
   }
+
+  // Écritures seulement ici, toutes les lectures ayant réussi.
+  const outPath = path.resolve(__dirname, "../public/sitemap.xml");
+  writeAtomic(outPath, xml);
+  if (llms != null) {
+    writeAtomic(llmsPath, llms);
+    console.log(`   llms.txt: ${cityCount} villes, ${deptCount} départements, ${associations.length} associations`);
+  }
+  saveCache(cache);
 
   console.log(`\n✅ Sitemap generated: ${entries.length} URLs → ${outPath}`);
   console.log(`   Cache: ${CACHE_PATH}${FORCE ? " (forced)" : ""}`);
 }
 
 main().catch((err) => {
-  console.error("❌ Sitemap generation failed:", err);
+  console.error("❌ Sitemap generation failed, aucun fichier remplacé:", err instanceof Error ? err.message : err);
   process.exit(1);
 });

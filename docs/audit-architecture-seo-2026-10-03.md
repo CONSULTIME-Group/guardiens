@@ -387,3 +387,33 @@ Le complément HTML vérifié via GSC Wizard, produit dans un autre workflow, fa
 - Aucun en-tête `X-Prerender-Status` observé ; aucune meta `prerender-status-code` ou `prerender-header` dans les corps lus. Le 301 et le 404 sont des statuts HTTP réellement servis.
 - Bundle courant : `assets/index-DpUwjLsc.js` sur guardiens.fr et guardiens.lovable.app.
 - **Conformité SEO-2 mesurée** pour ces 8 contrôles : P0-1, P0-2, P1-6 et P1-8 sont résolus en production sur ce périmètre. Les « trois URL non résolues » de 12:21 et 12:33 sont résolues. Le 503 n'est toujours pas observé en production (Worker actif non lu) et n'est pas promis.
+
+## 10. SEO-3 plan du site : PRÉPARÉ (non publié, 03/10/2026)
+
+Statut : code, tests et fichier généré prêts en dépôt. Aucune publication, aucun déploiement de fonction, aucune écriture en base, aucun cron, email ni recache. La fonction `sitemap` modifiée n'est PAS déployée.
+
+### Changements
+- `scripts/lib/sitemapCore.mjs` (nouveau) : lecture paginée `fetchAllPages` (tri sur clé unique, `range` par 1 000, total exact exigé en page 1, erreur explicite par page, détection de ligne répétée, plafond de pages, contrôle lignes lues = total annoncé), `normalizeLastmod`, `dedupeEntries`, rendu et validation XML, lecture de `staticRoutes` par l'arbre syntaxique TypeScript.
+- `scripts/generate-sitemap.mjs` : toutes les sources passent par `readAll` (articles, villes, guides, départements, races, profils publics, motivations, galeries, annonces, associations, missions entraide et projets). Plus aucun `.limit()` silencieux. Écriture atomique de `sitemap.xml`, `llms.txt` et du cache seulement après réussite de toutes les lectures et validation du XML ; en cas d'erreur, aucun fichier remplacé, sortie code 1.
+- Sans cache (relues à chaque build) : `public_profiles` (+ motivations, galeries), `public_sits`, missions entraide et projets.
+- Cache versionné v4 : tout cache antérieur (dont les dates du jour de la v3 locale) est ignoré.
+- lastmod : conservé seulement pour les races (`generated_at`, aucune mise à jour technique). Omis pour routes statiques, villes codées, profils, annonces, missions, articles, villes et départements en base, guides, associations. Preuve : `updated_at` réécrit par des écritures techniques, 101/101 articles publiés et 95/95 guides datés du 03/10 entre 12:25 et 12:45 UTC. Aucune date du jour de build, aucune `last_seen_at`, aucune `created_at` présentée comme modification. Dates invalides ou futures écartées.
+- Déduplication : première entrée conservée (priorité, fréquence), date fiable la plus récente reprise d'un doublon.
+- Fonction `sitemap` : réduite à un proxy du fichier statique `https://guardiens.lovable.app/sitemap.xml` (aucune requête en base, pas d'appel au domaine public donc pas de boucle via Cloudflare), redirections non suivies, délai 8 s, plafond 10 Mo, validation XML et domaine `https://guardiens.fr` des `<loc>`, sinon 503 `no-store`. Le XML relayé garde les URL canoniques guardiens.fr. Règles d'éligibilité inchangées (`mission-entries.ts`, `sitterProfileIndexability.js` intacts).
+
+### Mesures (génération locale 03/10/2026, ~12:57 UTC)
+- Sources profils lues : 1 330 profils, 789 motivations, 85 galeries ; 141 fiches retenues. Identique au contrôle SQL indépendant de 12:50:23 UTC.
+- MD5 des UUID générés triés joints par `\n` : `c0cf6f27f5a16027c654dc816f2748c9`, identique au contrôle SQL : ensemble exact, pas seulement le compte.
+- Sitemap : 676 URL en production (lu 12:56:29 UTC) contre 735 générées. Seule différence : +59 fiches `/gardiens/`, 0 retirée ; toutes les autres familles identiques URL par URL (actualités 101, annonces 10, associations 11, auteurs 2, départements 99, guides 95, house-sitting 162, petites-missions 15, projets 1, races 77, statiques 21). 5 doublons fusionnés. XML valide, 0 URL hors https://guardiens.fr.
+- lastmod : 676 balises dont 79 du jour en production, 77 après (races uniquement), 0 du jour.
+- `llms.txt` : compteurs inchangés (162 villes, 99 départements, 11 associations).
+
+### Tests
+- `src/__tests__/seo3/sitemap-seo3.test.ts` : >1000 lignes avec tri/range, collections annexes filtrées paginées, erreur en page 2, page répétée, plafond, total incohérent ou absent, cache v4, source sans sonde, absence de `last_seen_at`/`|| today`/`.limit(n)`, lastmod absent/valide/invalide/futur, déduplication avec date préservée, XML et routes statiques, proxy (origine, 503 statut/XML/domaine/délai, pas de client base).
+- Tests existants adaptés à la source unique : `sitemap-entraide`, `sitemap-projets`, `sitemap-edge-dedup`, `seo-programmatic-indexability`.
+- Passe ciblée : 9 fichiers, 71/71 ; types propres sur les fichiers touchés.
+
+### Exceptions et limites
+- Pagination non transactionnelle : une écriture concurrente pendant la lecture fait échouer le build (total ou clé répétée), elle n'est pas masquée.
+- Proxy non exécuté sous Deno ni déployé ; comportement réel de l'origine (redirections éventuelles) à vérifier au déploiement autorisé.
+- Le build public (Lovable) lance le générateur : une panne de lecture fera échouer la publication au lieu de servir un sitemap partiel, comportement voulu.
