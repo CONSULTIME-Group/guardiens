@@ -251,6 +251,7 @@ async function main() {
       },
       rows => {
         const kept = rows.filter(p => isSitterProfileIndexable({
+          role: p.role,
           bio: p.bio,
           motivation: p.motivation,
           identityVerified: p.identity_verified,
