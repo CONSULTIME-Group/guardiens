@@ -356,3 +356,9 @@ Cette section remplace, pour le périmètre ci-dessous, le statut « préparé, 
 
 ### Search Console
 Le complément HTML vérifié via GSC Wizard, produit dans un autre workflow, fait foi pour Search Console : 2 propriétés en siteOwner lisibles, 25 inspections ciblées, 426 clics et 31 293 impressions du 02/09 au 29/09/2026, sitemap de 673 URL sans erreur. Il ne fournit pas ici de canonical choisi par Google ni de Core Web Vitals : non renseignés dans ce rapport. Les précisions historiques des sections précédentes sont conservées.
+
+### Deuxième tentative de recache (03/10/2026, 12:33 UTC)
+- Jérémie s'est déclaré connecté en admin. État reçu par l'agent au début du tour : `LOVABLE_BROWSER_AUTH_STATUS=signed_out` (aucune session de préversion transmise).
+- Appel unique à `prerender-recache` (6 URL) à 12:33:4x : HTTP 401 `UNAUTHORIZED_NO_AUTH_HEADER`, comme à 12:20:30. Aucune nouvelle tentative, aucune session sur un autre compte.
+- Relecture Googlebot sans redirection, 12:33:54 à 12:33:55 : les trois URL restent sur l'ancienne copie (HTTP 200, aucune Location ; /projets/{uuid} canonical vers lui-même ; les deux routes /petites-missions/… avec l'ancien titre).
+- Cause probable : la session admin est ouverte sur le site publié, alors que l'outil n'injecte que la session de la préversion Lovable. Le compte Lovable du demandeur n'a pas d'utilisateur correspondant dans l'application.
