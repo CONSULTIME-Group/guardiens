@@ -10,6 +10,7 @@ import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
 import { lazyWithRetry } from "@/lib/lazyWithRetry";
 import { supabase } from "@/integrations/supabase/client";
+import type { ShownListState } from "@/components/search/SearchSitter";
 import InternationalShowcase from "@/components/listings/InternationalShowcase";
 import PastListingsSection from "@/components/listings/PastListingsSection";
 
@@ -22,33 +23,15 @@ const CANONICAL = "https://guardiens.fr/annonces";
 
 export default function PublicListings() {
   const { t, i18n } = useTranslation();
-  const [itemListLd, setItemListLd] = useState<any | null>(null);
-  // Prérendu : « prête » seulement quand la liste de cartes (liens vers les
-  // fiches) et la liste JSON-LD sont lues, résultat vide ou en erreur inclus.
-  // ItemList JSON-LD construite à partir des cartes réellement affichées
-  // par la première recherche (aucune autre liste arbitraire).
-  const [listSettled, setListSettled] = useState(false);
-  const onListSettled = useCallback((shown: { id: string; slug?: string | null; title?: string | null }[]) => {
-    if (shown.length > 0) {
-      setItemListLd({
-        "@context": "https://schema.org",
-        "@type": "ItemList",
-        name: TITLE,
-        url: CANONICAL,
-        numberOfItems: shown.length,
-        itemListElement: shown.map((s, i) => ({
-          "@type": "ListItem",
-          position: i + 1,
-          // Même règle que sitPath (slug, sinon identifiant), sans dépendance
-          // supplémentaire au démarrage (plafond de taille de l'entrée).
-          url: `https://guardiens.fr/annonces/${s.slug?.trim() || s.id}`,
-          name: s.title || BREADCRUMB_LISTINGS,
-        })),
-      });
-    }
-    setListSettled(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // État courant des cartes réellement rendues par SearchSitter (chargement,
+  // erreur, ou liste). ItemList construite depuis ces cartes, mise à jour à
+  // chaque changement (Voir plus, filtres) ; retirée si vide ou en erreur.
+  // Prérendu : « prête » seulement hors chargement. Callback stable.
+  const [listState, setListState] = useState<ShownListState | null>(null);
+  const onListChange = useCallback((s: ShownListState) => setListState(s), []);
+  const listReady = !!listState && listState.status !== "loading";
+  const listError = listState?.status === "error";
+  const shown = listState?.status === "ready" ? listState.items : [];
   const [intlCount, setIntlCount] = useState<number>(0);
   const [openCount, setOpenCount] = useState<number>(0);
   const [citiesCount, setCitiesCount] = useState<number>(0);
@@ -118,6 +101,20 @@ export default function PublicListings() {
     return () => { cancelled = true; };
   }, []);
 
+  const itemListLd = shown.length > 0 ? {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: TITLE,
+    url: CANONICAL,
+    numberOfItems: shown.length,
+    // Chemin identique au lien de la carte (sitPath, calculé par SearchSitter).
+    itemListElement: shown.map((s, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: `https://guardiens.fr${s.path}`,
+      name: s.title || BREADCRUMB_LISTINGS,
+    })),
+  } : null;
   const jsonld = itemListLd ? [...BASE_JSONLD, itemListLd] : BASE_JSONLD;
   const intlLabel = t("public_listings.intl_count", { count: intlCount, defaultValue: `${intlCount} listings outside France` });
   // Eyebrow : on n'affiche le compteur de villes que s'il a un signal réel
@@ -134,14 +131,21 @@ export default function PublicListings() {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
-      <PageMeta
-        title={TITLE}
-        description={DESCRIPTION}
-        path="/annonces"
-        canonical={CANONICAL}
-        jsonLd={jsonld}
-        ready={listSettled}
-      />
+      {listError ? (
+        // Panne de la recherche : 503 déclaré, noindex, sans canonical. Une
+        // liste vide reste une page normale. Un 5xx émis par le Worker lui-même
+        // n'est pas couvert ici.
+        <PageMeta title={TITLE} description={DESCRIPTION} path="/annonces" noindex statusCode={503} noCanonical />
+      ) : (
+        <PageMeta
+          title={TITLE}
+          description={DESCRIPTION}
+          path="/annonces"
+          canonical={CANONICAL}
+          jsonLd={jsonld}
+          ready={listReady}
+        />
+      )}
 
       <PublicHeader />
 
@@ -220,7 +224,7 @@ export default function PublicListings() {
             </div>
           }
         >
-          <SearchSitter mode="public" onFirstSearchSettled={onListSettled} />
+          <SearchSitter mode="public" onShownListChange={onListChange} />
         </Suspense>
 
         <PastListingsSection />

@@ -28,10 +28,12 @@ vi.mock("@/integrations/supabase/client", () => ({
   },
 }));
 
-let settle: ((items: { id: string; slug?: string | null; title?: string | null }[]) => void) | undefined;
+let push: ((s: any) => void) | undefined;
+const settle = (items: { id: string; slug?: string | null; title?: string | null }[]) =>
+  push!({ status: "ready", items: items.map((i) => ({ path: `/annonces/${i.slug || i.id}`, title: i.title ?? null })) });
 vi.mock("@/components/search/SearchSitter", () => ({
-  default: (p: { onFirstSearchSettled?: typeof settle }) => {
-    settle = p.onFirstSearchSettled;
+  default: (p: { onShownListChange?: typeof push }) => {
+    push = p.onShownListChange;
     return <div>moteur</div>;
   },
 }));
@@ -60,7 +62,7 @@ const ldTypes = () =>
 
 beforeEach(() => {
   seen.length = 0;
-  settle = undefined;
+  push = undefined;
   handler = () => Promise.resolve({ data: [], count: 0, error: null });
   window.prerenderMetaPending = true;
   (window as any).prerenderReady = false;
@@ -74,7 +76,7 @@ describe("hub /annonces", () => {
     expect((window as any).prerenderReady).toBe(false);
     // Plus aucune lecture séparée de 20 annonces pour la liste JSON-LD.
     expect(seen.some((s) => s.table === "sits" && s.calls.some(([k, a]) => k === "limit" && a[0] === 20))).toBe(false);
-    act(() => settle!([{ id: "a1", slug: "garde-lyon", title: "Garde à Lyon" }, { id: "b2", slug: null, title: null }]));
+    act(() => settle([{ id: "a1", slug: "garde-lyon", title: "Garde à Lyon" }, { id: "b2", slug: null, title: null }]));
     await waitFor(() => expect((window as any).prerenderReady).toBe(true));
     const list = ldTypes().find((j: any) => j?.["@type"] === "ItemList");
     expect(list.numberOfItems).toBe(2);
@@ -87,9 +89,26 @@ describe("hub /annonces", () => {
   it("liste vide ou en erreur : prête, sans ItemList", async () => {
     wrap(<PublicListings />);
     await screen.findByText("moteur");
-    act(() => settle!([]));
+    act(() => settle([]));
     await waitFor(() => expect((window as any).prerenderReady).toBe(true));
     expect(ldTypes().some((j: any) => j?.["@type"] === "ItemList")).toBe(false);
+  });
+});
+
+describe("hub /annonces, état courant", () => {
+  it("ItemList suit Voir plus, puis retirée et 503 en panne", async () => {
+    wrap(<PublicListings />);
+    await screen.findByText("moteur");
+    act(() => settle([{ id: "a", slug: "x" }]));
+    await waitFor(() => expect(ldTypes().find((j: any) => j?.["@type"] === "ItemList")?.numberOfItems).toBe(1));
+    act(() => push!({ status: "loading", items: [] }));
+    await waitFor(() => expect(window.prerenderMetaPending).toBe(true));
+    act(() => settle([{ id: "a", slug: "x" }, { id: "b", slug: "y" }]));
+    await waitFor(() => expect(ldTypes().find((j: any) => j?.["@type"] === "ItemList")?.numberOfItems).toBe(2));
+    act(() => push!({ status: "error", items: [] }));
+    await waitFor(() => expect(document.head.querySelector('meta[name="prerender-status-code"]')?.getAttribute("content")).toBe("503"));
+    expect(ldTypes().some((j: any) => j?.["@type"] === "ItemList")).toBe(false);
+    expect(document.head.querySelector('link[rel="canonical"]')).toBeNull();
   });
 });
 
