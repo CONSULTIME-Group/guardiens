@@ -32,6 +32,15 @@ type Fixture = ReturnType<typeof fixture>;
 async function run(f: Fixture, options: Row = {}) {
   const fetchBefore = globalThis.fetch;
   const getBefore = Deno.env.get;
+  const intervalBefore = globalThis.setInterval;
+  const intervals = new Set<ReturnType<typeof setInterval>>();
+  // Le SDK 2.49.1 démarre des horloges d'auth même avec une clé de service.
+  // Fermer celles créées par ce test, tout en gardant le contrôle des fuites.
+  globalThis.setInterval = ((...args: Parameters<typeof setInterval>) => {
+    const id = intervalBefore(...args);
+    intervals.add(id);
+    return id;
+  }) as typeof setInterval;
   Object.defineProperty(Deno.env, "get", { value: (key: string) => ({
     SUPABASE_URL: "https://test-project.supabase.co", SUPABASE_SERVICE_ROLE_KEY: "fake-test-service-role",
   } as Record<string, string>)[key], configurable: true });
@@ -75,6 +84,8 @@ async function run(f: Fixture, options: Row = {}) {
     }));
     return { status: response.status, payload: await response.json() };
   } finally {
+    for (const id of intervals) clearInterval(id);
+    globalThis.setInterval = intervalBefore;
     globalThis.fetch = fetchBefore;
     Object.defineProperty(Deno.env, "get", { value: getBefore, configurable: true });
   }
