@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
+import { sitPath } from "@/lib/sitUrl";
 
 const SearchMapView = lazy(() => import("@/components/search/SearchMapView"));
 import SearchListingCard from "@/components/search/listing/SearchListingCard";
@@ -453,25 +454,6 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  // État courant des cartes réellement rendues, relayé au parent après
  // commit à chaque changement (Voir plus, filtre, nouvelle recherche).
  const [firstSearchSettled, setFirstSearchSettled] = useState(false);
- const lastListKeyRef = useRef("");
- useEffect(() => {
-   if (!onShownListChange) return;
-   let state: ShownListState;
-   if (!firstSearchSettled || loading) state = { status: "loading", items: [] };
-   else if (searchError) state = { status: "error", items: [] };
-   else {
-     // Miroir exact de la grille rendue plus bas : disponibles plafonnées à
-     // visibleCount, puis passées/attribuées ; démos exclues.
-     const real = tab === "sits" ? results.filter((r: any) => !r.is_demo) : [];
-     const isInactive = (r: any) => r.isAssigned || r.isCompleted || r.isPast;
-     const shown = [...real.filter((r: any) => !isInactive(r)).slice(0, visibleCount), ...real.filter(isInactive)];
-     state = { status: "ready", items: shown.map((r: any) => ({ path: sitPath(r), title: r.title ?? null })) };
-   }
-   const key = state.status + JSON.stringify(state.items);
-   if (key === lastListKeyRef.current) return;
-   lastListKeyRef.current = key;
-   onShownListChange(state);
- }, [firstSearchSettled, loading, searchError, tab, results, visibleCount, onShownListChange]);
 
  // Auto-search when filters change (debounced)
  const doSearch = useCallback(async () => {
@@ -575,6 +557,25 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
    else if (sort === "recent") final.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
    return interleaveDemos(final, DEMO_MISSIONS, 3);
  }, [tab, missionSubTab, rawResults, housingTypes, withPhotosOnly, duration, emergencyOnly, verifiedOnly, animalTypes, isPublic, environments, sort, missionTypeFilter, missionCategoryFilter]);
+ const lastListKeyRef = useRef("");
+ useEffect(() => {
+   if (!onShownListChange) return;
+   let state: ShownListState;
+   if (!firstSearchSettled || loading) state = { status: "loading", items: [] };
+   else if (searchError) state = { status: "error", items: [] };
+   else {
+     // Miroir exact de la grille rendue plus bas : disponibles plafonnées à
+     // visibleCount, puis passées/attribuées ; démos exclues.
+     const real = tab === "sits" ? results.filter((r: any) => !r.is_demo) : [];
+     const isInactive = (r: any) => r.isAssigned || r.isCompleted || r.isPast;
+     const shown = [...real.filter((r: any) => !isInactive(r)).slice(0, visibleCount), ...real.filter(isInactive)];
+     state = { status: "ready", items: shown.map((r: any) => ({ path: sitPath(r), title: r.title ?? null })) };
+   }
+   const key = state.status + JSON.stringify(state.items);
+   if (key === lastListKeyRef.current) return;
+   lastListKeyRef.current = key;
+   onShownListChange(state);
+ }, [firstSearchSettled, loading, searchError, tab, results, visibleCount, onShownListChange]);
 
  const availableMembers = useMemo(() => {
    if (!(tab === "missions" && missionSubTab === "members")) return [];
