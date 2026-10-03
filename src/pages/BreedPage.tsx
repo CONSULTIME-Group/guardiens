@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react";
-import { Link, Navigate, useParams } from "react-router-dom";
+import { useLayoutEffect, useState } from "react";
+import PublicLoadError from "@/components/seo/ErrorPage";
+import { Link, useParams } from "react-router-dom";
+import LegacyProjetRedirect from "@/components/seo/LegacyProjetRedirect";
 import NotFound from "@/pages/NotFound";
 import { MarkdownBody } from "@/components/MarkdownBody";
 import { supabase } from "@/integrations/supabase/client";
@@ -44,8 +46,15 @@ const BreedPage = () => {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [redirectTo, setRedirectTo] = useState<string | null>(null);
+  const [loadFailed, setLoadFailed] = useState(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    let active = true;
+    setBreed(null);
+    setNotFound(false);
+    setRedirectTo(null);
+    setLoadFailed(false);
+    setLoading(true);
     const prefix = SPECIES_PREFIXES.find((p) => slug.startsWith(`${p}-`));
     if (!prefix) {
       setNotFound(true);
@@ -58,7 +67,9 @@ const BreedPage = () => {
       .from("breed_profiles")
       .select("*")
       .eq("species", prefix)
-      .then(({ data }) => {
+      .then(({ data, error }) => {
+        if (!active) return;
+        if (error) { setLoadFailed(true); setLoading(false); return; }
         const match = (data as BreedProfile[] | null)?.find(
           (b) => slugify(b.breed) === breedSlug,
         );
@@ -75,7 +86,8 @@ const BreedPage = () => {
           }
         }
         setLoading(false);
-      });
+      }, () => { if (active) { setLoadFailed(true); setLoading(false); } });
+    return () => { active = false; };
   }, [slug]);
 
   // Pass 5, compagnon culturel : fait race matché sur species + breed slug.
@@ -90,13 +102,15 @@ const BreedPage = () => {
 
   // Fiche absorbée par une autre (doublon) : redirection propre vers la
   // fiche conservée. Le maillage et le sitemap ne pointent que vers la cible.
-  if (redirectTo) return <Navigate to={redirectTo} replace />;
+  if (redirectTo) return <LegacyProjetRedirect target={redirectTo} title="Fiche de race déplacée" description="Cette fiche a été regroupée avec la fiche correspondante." />;
   // Slug de race inconnu : vraie page 404 en noindex, jamais de redirection
   // vers l'index (une redirection masquerait l'erreur aux moteurs).
   if (notFound) return <NotFound />;
+  if (loadFailed) return <PublicLoadError />;
   if (loading || !breed) {
     return (
       <div className="min-w-0 max-w-3xl mx-auto px-4 py-8 md:py-12">
+        <PageMeta title="Chargement de la fiche" description="Chargement de la fiche de race Guardiens." noindex noCanonical ready={false} />
         <div className="animate-pulse space-y-3">
           <div className="h-8 bg-muted rounded w-1/2" />
           <div className="h-4 bg-muted rounded w-3/4" />

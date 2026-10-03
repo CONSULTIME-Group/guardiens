@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, waitFor, act } from "@testing-library/react";
-import { MemoryRouter, Routes, Route } from "react-router-dom";
+import { MemoryRouter, Routes, Route, useNavigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "@/i18n";
 
@@ -10,6 +10,9 @@ let handler: (table: string, calls: Call[]) => Promise<{ data: unknown; count?: 
 const seen: { table: string; calls: Call[] }[] = [];
 vi.mock("@/integrations/supabase/client", () => ({
   supabase: {
+    channel: () => { const channel = { on: () => channel, subscribe: () => channel }; return channel; },
+    removeChannel: () => Promise.resolve(),
+    rpc: (name: string, params: unknown) => handler(`rpc:${name}`, [["params", [params]]]),
     from: (table: string) => {
       const calls: Call[] = [];
       seen.push({ table, calls });
@@ -43,6 +46,18 @@ vi.mock("@/components/listings/InternationalShowcase", () => ({ default: () => n
 vi.mock("@/components/listings/PastListingsSection", () => ({ default: () => null }));
 
 vi.mock("@/hooks/useAlmaCulturalFact", () => ({ useAlmaCulturalFact: () => undefined }));
+vi.mock("@/contexts/AuthContext", () => ({ useAuth: () => ({ user: null, hasSession: false, activeRole: null }) }));
+vi.mock("@/hooks/useSubscriptionAccess", () => ({ useSubscriptionAccess: () => ({ hasAccess: false }) }));
+vi.mock("@/hooks/useAccessLevel", () => ({ useAccessLevel: () => ({ level: "visitor", profileCompletion: 0, canApplyMissions: false }) }));
+vi.mock("@/hooks/useCityPageExists", () => ({ useCityPageExists: () => false }));
+vi.mock("@/hooks/useDepartmentPageExists", () => ({ useDepartmentPageExists: () => false }));
+vi.mock("@/components/sits/ApplicationModal", () => ({ default: () => null }));
+import ArticleDetail from "@/pages/ArticleDetail";
+import PublicSitDetail from "@/pages/PublicSitDetail";
+import SmallMissionDetail from "@/pages/SmallMissionDetail";
+import AssociationDetail from "@/pages/AssociationDetail";
+import GuideDetail from "@/pages/GuideDetail";
+import CityPage from "@/pages/CityPage";
 import BreedPage from "@/pages/BreedPage";
 import PublicListings from "@/pages/PublicListings";
 import GuidesListing from "@/pages/GuidesListing";
@@ -75,6 +90,107 @@ beforeEach(() => {
   window.prerenderMetaPending = true;
   (window as any).prerenderReady = false;
   document.head.querySelectorAll('script[type="application/ld+json"]').forEach((n) => n.remove());
+});
+
+describe("statuts des vraies pages publiques", () => {
+  it.each(["/annonces/inconnue", "/races/dog-inconnue", "/petites-missions/inconnue", "/associations/inconnue", "/guides/inconnue", "/house-sitting/antibes"])("%s attend ses metadonnees meme si le module arrive apres le repli global", (path) => {
+    const w = bootState(path);
+    window.prerenderMetaPending = w.prerenderMetaPending;
+    (window as any).prerenderReady = w.prerenderReady;
+    productionFallback()();
+    expect((window as any).prerenderReady).toBe(false);
+    expect(w.prerenderMetaPending).toBe(true);
+  });
+  const failures = [
+    ["article", "/actualites/inconnu", "/actualites/:slug", <ArticleDetail />, "articles"],
+    ["annonce", "/annonces/inconnue", "/annonces/:id", <PublicSitDetail />, "rpc:get_public_sit"],
+    ["mission", "/petites-missions/inconnue", "/petites-missions/:id", <SmallMissionDetail />, "public_small_missions"],
+    ["race", "/races/dog-inconnue", "/races/:slug", <BreedPage />, "breed_profiles"],
+    ["association", "/associations/inconnue", "/associations/:slug", <AssociationDetail />, "public_animal_associations"],
+    ["guide", "/guides/inconnue", "/guides/:slug", <GuideDetail />, "city_guides"],
+    ["departement", "/departement/inconnu", "/departement/:slug", <DepartmentPage />, "seo_department_pages"],
+    ["ville", "/house-sitting/antibes", "/house-sitting/:slug", <CityPage />, "seo_city_pages"],
+  ] as const;
+  const status = () => document.head.querySelector('meta[name="prerender-status-code"]')?.getAttribute("content");
+  it.each(failures)("%s : une panne critique declare 503, sans canonical", async (_name, path, route, page, table) => {
+    handler = t => Promise.resolve(t === table ? { data: null, error: { message: "provider unavailable" } } : { data: null, error: null });
+    wrap(<Routes><Route path={route} element={page} /></Routes>, path);
+    await waitFor(() => expect(status()).toBe("503"));
+    expect(document.head.querySelector('link[rel="canonical"]')).toBeNull();
+    expect(document.head.querySelector('meta[name="robots"]')?.getAttribute("content")).toContain("noindex");
+  });
+  it.each(failures)("%s : une absence reelle declare 404, sans canonical", async (_name, path, route, page) => {
+    handler = () => Promise.resolve({ data: null, error: null });
+    wrap(<Routes><Route path={route} element={page} /></Routes>, path);
+    await waitFor(() => expect(status()).toBe("404"));
+    expect(document.head.querySelector('link[rel="canonical"]')).toBeNull();
+  });
+  const Go = ({ target }: { target: string }) => { const navigate = useNavigate(); return <button onClick={() => navigate(target)}>Changer de fiche</button>; };
+  it("race : une fiche valide est chargeable apres une 404 sur le meme composant", async () => {
+    handler = () => Promise.resolve({ data: [{ species: "dog", breed: "Cane Corso", temperament: "Texte public" }], error: null });
+    wrap(<><Go target="/races/dog-cane-corso" /><Routes><Route path="/races/:slug" element={<BreedPage />} /></Routes></>, "/races/espece-invalide");
+    await waitFor(() => expect(status()).toBe("404"));
+    await act(async () => { screen.getByText("Changer de fiche").click(); });
+    await screen.findByText("Texte public");
+    await waitFor(() => expect(document.head.querySelector('link[rel="canonical"]')?.getAttribute("href")).toBe("https://guardiens.fr/races/dog-cane-corso"));
+    expect(status()).not.toBe("404");
+  });
+  it("annonce : une ancienne lecture tardive ne remplace pas la nouvelle 404", async () => {
+    let resolveOld!: (value: { data: unknown; error: unknown }) => void;
+    handler = (t, calls) => t === "rpc:get_public_sit" && (calls[0][1][0] as any).p_param === "ancienne"
+      ? new Promise(resolve => { resolveOld = resolve; }) : Promise.resolve({ data: [], error: null });
+    wrap(<><Go target="/annonces/nouvelle-absente" /><Routes><Route path="/annonces/:id" element={<PublicSitDetail />} /></Routes></>, "/annonces/ancienne");
+    await waitFor(() => expect(resolveOld).toBeDefined());
+    await act(async () => { screen.getByText("Changer de fiche").click(); });
+    await waitFor(() => expect(status()).toBe("404"));
+    await act(async () => { resolveOld({ data: [{ id: "ancien", slug: "ancienne", status: "published", user_id: "proprietaire" }], error: null }); });
+    expect(status()).toBe("404"); expect(seen.some(s => s.table === "public_profiles")).toBe(false);
+    expect(document.head.querySelector('link[rel="canonical"]')).toBeNull();
+  });
+  it("mission : une ancienne lecture tardive ne remplace pas la nouvelle 404", async () => {
+    let resolveOld!: (value: { data: unknown; error: unknown }) => void;
+    handler = (t, calls) => t === "public_small_missions" && calls.some(([name, args]) => name === "eq" && args[1] === "ancienne")
+      ? new Promise(resolve => { resolveOld = resolve; }) : Promise.resolve({ data: null, error: null });
+    wrap(<><Go target="/petites-missions/nouvelle-absente" /><Routes><Route path="/petites-missions/:id" element={<SmallMissionDetail />} /></Routes></>, "/petites-missions/ancienne");
+    await waitFor(() => expect(resolveOld).toBeDefined());
+    await act(async () => { screen.getByText("Changer de fiche").click(); });
+    await waitFor(() => expect(status()).toBe("404"));
+    await act(async () => { resolveOld({ data: { id: "ancien", slug: "ancienne", category: "garden", status: "open" }, error: null }); });
+    expect(status()).toBe("404"); expect(document.head.querySelector('link[rel="canonical"]')).toBeNull();
+  });
+  it.each(["annonce", "mission"])("%s : variante UUID declare 301 et cible propre pour Prerender", async (kind) => {
+    const uuid = "11111111-0000-4000-8000-000000000001";
+    const prefix = kind === "annonce" ? "/annonces" : "/petites-missions";
+    const page = kind === "annonce" ? <PublicSitDetail /> : <SmallMissionDetail />;
+    handler = t => Promise.resolve({ data: kind === "annonce" && t === "rpc:get_public_sit"
+      ? [{ id: uuid, slug: "adresse-propre", status: "published" }]
+      : kind === "mission" && t === "public_small_missions" ? { id: uuid, slug: "adresse-propre", category: "garden", status: "open" } : null, error: null });
+    const ua = vi.spyOn(navigator, "userAgent", "get").mockReturnValue("Prerender");
+    try {
+      wrap(<Routes><Route path={`${prefix}/:id`} element={page} /></Routes>, `${prefix}/${uuid}?utm_source=test`);
+      await waitFor(() => expect(status()).toBe("301"));
+      expect(document.head.querySelector('meta[name="prerender-header"]')?.getAttribute("content")).toBe(`Location: https://guardiens.fr${prefix}/adresse-propre`);
+      expect(document.head.querySelector('link[rel="canonical"]')?.getAttribute("href")).toBe(`https://guardiens.fr${prefix}/adresse-propre`);
+    } finally { ua.mockRestore(); }
+  });
+  it("annonce : un seul fil d’Ariane relie la fiche au hub public", async () => {
+    const sit = { id: "11111111-0000-4000-8000-000000000001", slug: "garde-publique", title: "Garde de maison à Lyon", status: "published", city: "Lyon", start_date: "2099-10-01", end_date: "2099-10-10" };
+    handler = t => Promise.resolve({ data: t === "rpc:get_public_sit" ? [sit] : [], error: null });
+    wrap(<Routes><Route path="/annonces/:id" element={<PublicSitDetail />} /></Routes>, "/annonces/garde-publique");
+    await screen.findByRole("heading", { name: "Garde de maison à Lyon" });
+    const breadcrumbs = [...document.querySelectorAll('script[type="application/ld+json"]')].map(s => JSON.parse(s.textContent || "null")).filter(j => j?.["@type"] === "BreadcrumbList");
+    expect(breadcrumbs).toHaveLength(1);
+    expect(breadcrumbs[0].itemListElement[1].item).toBe("https://guardiens.fr/annonces");
+    expect(breadcrumbs[0].itemListElement.at(-1).item).toBe("https://guardiens.fr/annonces/garde-publique");
+  });
+  it("mission : le texte pauvre reste consultable mais noindex comme le sitemap", async () => {
+    const mission = { id: "11111111-0000-4000-8000-000000000001", slug: "mission-courte", title: "Arroser les plantes", category: "garden", status: "open", mission_type: "offre", description: "Une presentation encore courte.", photos: [], city: "Lyon", created_at: "2026-10-01" };
+    handler = (t, calls) => Promise.resolve({ data: t === "public_small_missions" && calls.some(([name,args]) => name === "eq" && args[0] === "slug") ? mission : [], error: null });
+    wrap(<Routes><Route path="/petites-missions/:id" element={<SmallMissionDetail />} /></Routes>, "/petites-missions/mission-courte");
+    await screen.findByRole("heading", { name: "Arroser les plantes" });
+    await waitFor(() => expect(document.head.querySelector('meta[name="robots"]')?.getAttribute("content")).toContain("noindex"));
+    expect(document.head.querySelector('link[rel="canonical"]')?.getAttribute("href")).toBe("https://guardiens.fr/petites-missions/mission-courte");
+  });
 });
 afterEach(() => vi.useRealTimers());
 

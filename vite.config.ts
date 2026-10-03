@@ -76,6 +76,9 @@ export default defineConfig(({ mode }) => ({
   build: {
     rollupOptions: {
       output: {
+        // La table des dependances appartient a l'entree. Des noms courts
+        // reduisent son poids sans modifier les groupes ni raccourcir les empreintes.
+        chunkFileNames: (chunk) => `assets/${chunk.name.slice(0, 19)}-[hash].js`,
         // Découpage par module plutôt que par liste de paquets. Recharts n'a plus
         // de chunk dédié : la forme objet créait « vendor-charts », où Rollup
         // fusionnait des modules partagés, ce qui forçait l'entrée à charger

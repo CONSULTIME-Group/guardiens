@@ -2,7 +2,7 @@
 // Utilisée pour le partage externe (Facebook, LinkedIn, WhatsApp, lien direct).
 // Les meta og:* sont injectées impérativement par PageMeta ; les caches sociaux liront index.html
 // après prerender (Prerender.io / Cloudflare Worker, TODO infra).
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,11 +23,11 @@ import { captureDigestAttribution } from "@/lib/digestAttribution";
 import { isSitRichEnough } from "@/lib/sitIndexability";
 import NearbySitsModule from "@/components/sits/NearbySitsModule";
 import { DEFAULT_OG_IMAGE } from "@/data/siteRoutes";
+import LegacyProjetRedirect from "@/components/seo/LegacyProjetRedirect";
 
 
 import ApplicationModal from "@/components/sits/ApplicationModal";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
-import { useCityPageExists } from "@/hooks/useCityPageExists";
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
 import PublicSitView from "@/components/sits/PublicSitView";
@@ -59,21 +59,13 @@ const PublicSitDetail = () => {
  const [latestReviews, setLatestReviews] = useState<{ overall_rating: number; comment: string; created_at: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [canonicalRedirect, setCanonicalRedirect] = useState<string | null>(null);
  const [applyOpen, setApplyOpen] = useState(false);
  const [hasApplied, setHasApplied] = useState(false);
  const [isAcceptedSitter, setIsAcceptedSitter] = useState(false);
 
   const [viewerType, setViewerType] = useState<ViewerType>("anonymous");
 
-  // Maillage interne : la page ville /house-sitting/<slug> n'existe que pour
-  // les villes statiques ou publiées en base. Ne jamais l'émettre sinon (404).
-  const sitCityName = ((sit as any)?.city as string | undefined)?.trim() || owner?.city?.trim() || "";
-  // Même normalisation que le citySlug du breadcrumb JSON-LD plus bas.
-  const cityPageSlug = sitCityName
-    .toLowerCase()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-  const hasCityPage = useCityPageExists(cityPageSlug || null);
  const sitViewFired = useRef(false);
 
   useEffect(() => {
@@ -82,8 +74,14 @@ const PublicSitDetail = () => {
     }
   }, [loading, loadError, sit]);
 
-  useEffect(() => {
-    if (!param) return;
+  useLayoutEffect(() => {
+    let active = true;
+    const commit = (update: () => void) => { if (active) update(); };
+    setLoading(true); setLoadError(null); setCanonicalRedirect(null); setSit(null); setOwner(null); setProperty(null);
+    setPets([]); setOwnerProfile(null); setHasHouseGuide(false); setBadges([]);
+    setAvgRating(null); setReviewCount(0); setLatestReviews([]); setHasApplied(false);
+    setIsAcceptedSitter(false); setViewerType("anonymous"); sitViewFired.current = false;
+    if (!param) { setLoadError("not_found"); setLoading(false); return; }
     const load = async () => {
       try {
         // Param peut être un UUID (URL legacy) ou un slug SEO.
@@ -91,19 +89,21 @@ const PublicSitDetail = () => {
         const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
         const isUuid = UUID_RE.test(param);
         const { data: sitRows, error: sitErr } = await supabase.rpc("get_public_sit", { p_param: param });
+        if (!active) return;
         if (sitErr) throw sitErr;
         const sitData = (sitRows as any[])?.[0];
         if (!sitData) {
-          setLoadError("not_found");
+          commit(() => setLoadError("not_found"));
           return;
         }
-        setSit(sitData);
+        commit(() => setSit(sitData));
 
 
         // 301-like : si on est arrivés via UUID mais qu'un slug existe, on
         // remplace l'URL par la version slug (mieux pour SEO, partages, CTR).
         if (isUuid && sitData.slug && sitData.slug !== param) {
-          navigate(`/annonces/${sitData.slug}${window.location.search}${window.location.hash}`, { replace: true });
+          commit(() => setCanonicalRedirect(`/annonces/${sitData.slug}`));
+          return;
         }
         const id = sitData.id;
 
@@ -116,6 +116,7 @@ const PublicSitDetail = () => {
           supabase.from("owner_gallery").select("photo_url, position, width, height").eq("user_id", sitData.user_id).order("position", { ascending: true }),
         ]);
 
+        if (!active) return;
         const ownerData = ownerRes.data?.[0] ?? null;
         const propertyData = propRes.data?.[0] ?? null;
         const galleryRows = (galleryRes.data || []) as any[];
@@ -163,8 +164,8 @@ const PublicSitDetail = () => {
           } as any;
         }
 
-        setOwner(enrichedOwner);
-        setProperty(enrichedProperty);
+        commit(() => setOwner(enrichedOwner));
+        commit(() => setProperty(enrichedProperty));
 
         const reviewsRaw = reviewsRes.data || [];
         const seenIds = new Set<string>();
@@ -173,23 +174,23 @@ const PublicSitDetail = () => {
           seenIds.add(r.id);
           return true;
         });
-        setReviewCount(reviews.length);
+        commit(() => setReviewCount(reviews.length));
         if (reviews.length > 0) {
-          setAvgRating((reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length).toFixed(1));
+          commit(() => setAvgRating((reviews.reduce((s: number, r: any) => s + r.overall_rating, 0) / reviews.length).toFixed(1)));
         }
         const withComment = reviews
           .filter((r: any) => typeof r.comment === "string" && r.comment.trim().length > 0)
           .slice(0, 2);
-        setLatestReviews(withComment as any);
+        commit(() => setLatestReviews(withComment as any));
 
         const badgeMap = new Map<string, number>();
         (badgeRes.data || []).forEach((b: any) => badgeMap.set(b.badge_id, (badgeMap.get(b.badge_id) || 0) + 1));
-        setBadges(Array.from(badgeMap.entries()).map(([badge_key, count]) => ({ badge_key, count })).sort((a, b) => b.count - a.count));
+        commit(() => setBadges(Array.from(badgeMap.entries()).map(([badge_key, count]) => ({ badge_key, count })).sort((a, b) => b.count - a.count)));
 
         if (propertyData) {
           try {
             const { data: petsData } = await supabase.from("public_pets" as any).select("*").eq("property_id", propertyData.id);
-            setPets(petsData || []);
+            commit(() => setPets(petsData || []));
           } catch (e) { logger.warn("[PublicSitDetail] pets load failed", { error: (e as any)?.message }); }
           try {
             const { data: opRow } = await supabase
@@ -208,14 +209,14 @@ const PublicSitDetail = () => {
                   .eq("user_id", sitData.user_id)
                   .maybeSingle();
             if (opRow || memberRow) {
-              setOwnerProfile(opRow || memberRow);
+              commit(() => setOwnerProfile(opRow || memberRow));
             } else {
               const { data: publicRow } = await supabase
                 .from("public_owner_profiles" as any)
                 .select("presence_expected, welcome_notes, environments, preferred_sitter_types, home_ambiance, languages, interests, life_pace")
                 .eq("user_id", sitData.user_id)
                 .maybeSingle();
-              setOwnerProfile((publicRow as any) || null);
+              commit(() => setOwnerProfile((publicRow as any) || null));
             }
           } catch (e) { logger.warn("[PublicSitDetail] owner_profile load failed", { error: (e as any)?.message }); }
 
@@ -225,15 +226,15 @@ const PublicSitDetail = () => {
               .select("id")
               .eq("property_id", propertyData.id)
               .maybeSingle();
-            setHasHouseGuide(!!hgRow);
+            commit(() => setHasHouseGuide(!!hgRow));
           } catch (e) { logger.warn("[PublicSitDetail] house_guide load failed", { error: (e as any)?.message }); }
         }
 
         if (user) {
           try {
             const { data: appRows } = await supabase.from("applications").select("id, status").eq("sit_id", id!).eq("sitter_id", user.id).limit(1);
-            if (appRows?.[0]) setHasApplied(true);
-            if (appRows?.[0]?.status === "accepted") setIsAcceptedSitter(true);
+            if (appRows?.[0]) commit(() => setHasApplied(true));
+            if (appRows?.[0]?.status === "accepted") commit(() => setIsAcceptedSitter(true));
           } catch (e) { logger.warn("[PublicSitDetail] applications check failed", { error: (e as any)?.message }); }
         }
 
@@ -262,7 +263,8 @@ const PublicSitDetail = () => {
             }
           }
         }
-        setViewerType(resolvedViewer);
+        if (!active) return;
+        commit(() => setViewerType(resolvedViewer));
 
         // Rôle simple "gardien" : redirection auto vers la vue gardien.
         // "proprio" (incluant "both" par défaut) : on reste sur l'aperçu public ;
@@ -297,18 +299,21 @@ const PublicSitDetail = () => {
         }
       } catch (e: any) {
         logger.warn("[PublicSitDetail] load failed", { sit_param: param, error: e?.message });
-        setLoadError("error");
+        commit(() => setLoadError("error"));
       } finally {
-        setLoading(false);
+        commit(() => setLoading(false));
       }
     };
-    load();
+    void load();
+    return () => { active = false; };
   }, [param, user, navigate]);
 
 
+ if (canonicalRedirect) return <LegacyProjetRedirect target={canonicalRedirect} title="Annonce déplacée" description="Cette annonce est disponible à son adresse actuelle." />;
  if (loading) {
  return (
  <div className="max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-10 space-y-6 animate-pulse">
+ <PageMeta title="Chargement de l’annonce" description="Chargement de l’annonce Guardiens." noindex noCanonical ready={false} />
  <div className="h-[280px] md:h-[420px] rounded-3xl bg-muted" />
  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
  {Array.from({ length: 4 }).map((_, i) => (
@@ -330,9 +335,10 @@ const PublicSitDetail = () => {
  </div>
  );
  }
-  if (loadError === "not_found" || (!loading && !sit)) {
+  if (loadError === "not_found" || (!loading && !sit && loadError !== "error")) {
     return (
       <div className="max-w-2xl mx-auto p-6 md:p-10 text-center space-y-3">
+        <PageMeta title="Annonce indisponible" description="Cette annonce n’est plus disponible sur Guardiens." noindex noCanonical statusCode={404} />
         <h1 className="font-heading text-2xl font-semibold">{t("sit_detail.not_found_title")}</h1>
         <p className="text-muted-foreground text-sm">{t("sit_detail.not_found_body")}</p>
         <Link to="/" className="inline-flex text-primary text-sm font-medium hover:underline">{t("sit_detail.back_home")}</Link>
@@ -342,6 +348,7 @@ const PublicSitDetail = () => {
   if (loadError === "error") {
     return (
       <div className="max-w-2xl mx-auto p-6 md:p-10 text-center space-y-3">
+        <PageMeta title="Annonce momentanément indisponible" description="Cette annonce n’a pas pu être chargée. Vous pouvez réessayer dans un instant." noindex noCanonical statusCode={503} />
         <h1 className="font-heading text-2xl font-semibold">{t("sit_detail.error_title")}</h1>
         <p className="text-muted-foreground text-sm">{t("sit_detail.error_body")}</p>
         <button onClick={() => window.location.reload()} className="inline-flex text-primary text-sm font-medium hover:underline">{t("sit_detail.reload")}</button>
@@ -367,7 +374,7 @@ const PublicSitDetail = () => {
     end.setHours(0, 0, 0, 0);
     return end.getTime() < today.getTime();
   })();
-  if (sit.status !== "published" && !isClosedSit) return <div className="max-w-2xl mx-auto p-6 md:p-10 text-center"><p className="text-muted-foreground">{t("sit_detail.unavailable")}</p></div>;
+  if (sit.status !== "published" && !isClosedSit) return <div className="max-w-2xl mx-auto p-6 md:p-10 text-center"><PageMeta title="Annonce indisponible" description="Cette annonce n’est plus disponible sur Guardiens." noindex noCanonical statusCode={404} /><p className="text-muted-foreground">{t("sit_detail.unavailable")}</p></div>;
   // Le masquage des dates est décidé côté serveur (get_public_sit) : les
   // colonnes start_date et end_date arrivent nulles, elles ne transitent pas.
   const hideDates = sit.dates_hidden === true;
@@ -554,25 +561,6 @@ const PublicSitDetail = () => {
   const isIndexable = !isClosedSit && isSitRichEnough(sit);
 
 
- const citySlug = (cityForTitle || "")
- .toLowerCase()
- .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
- .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
- const origin = canonicalUrl.replace(/\/annonces\/.*$/, "");
- // Le 2e niveau de breadcrumb pointe vers une page silo /house-sitting/<ville>
- // qui n'existe que pour les villes FR réellement servies (villes statiques ou
- // seo_city_pages publiées). On l'omet sinon pour éviter une URL en 404.
- const showCityBreadcrumb = Boolean(hasCityPage && citySlug && (!ownerCountry || ownerCountry === "FR"));
- const breadcrumbLd = {
- "@context": "https://schema.org",
- "@type": "BreadcrumbList",
- itemListElement: [
- { "@type": "ListItem", position: 1, name: "Accueil", item: `${origin}/` },
-       ...(showCityBreadcrumb ? [{ "@type": "ListItem", position: 2, name: cityForTitle, item: `${origin}/house-sitting/${citySlug}` }] : []),
-       { "@type": "ListItem", position: showCityBreadcrumb ? 3 : 2, name: sit.title || "Annonce de garde", item: canonicalUrl },
- ],
- };
-
   // Handler de partage unifié.
   const handleShare = async () => {
     const canNativeShare =
@@ -640,7 +628,6 @@ const PublicSitDetail = () => {
         ]}
       />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
 
       <PublicHeader authedVariant={hasSession} />
 

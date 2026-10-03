@@ -323,8 +323,8 @@ describe("ancienne adresse /petites-missions/{slug|uuid}", () => {
     expect(src).toContain("legacyProjetRedirectTarget(m as any)");
     expect(src).toContain("<LegacyProjetRedirect target={projetRedirect} />");
     expect(src).not.toMatch(/navigate\(`\/projets\//);
-    // Entraide ordinaire : redirection uuid vers slug inchangée.
-    expect(src).toContain("navigate(`/petites-missions/${(m as any).slug}${window.location.search}`, { replace: true });");
+    // Entraide ordinaire : la variante UUID declare aussi une redirection permanente.
+    expect(src).toContain("setCanonicalRedirect(`/petites-missions/${(m as any).slug}`)");
   });
 
   it("verrou de rendu : /projets/ attend PageMeta", () => {
