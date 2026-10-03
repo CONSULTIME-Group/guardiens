@@ -85,11 +85,13 @@ interface SearchSitterProps {
    */
   mode?: "internal" | "public";
   /**
-   * Appelé une seule fois quand la première recherche est terminée (liste
-   * affichée, vide ou en erreur). Permet à la page /annonces de ne signaler
-   * « prête » au prérendu qu'une fois les cartes et leurs liens présents.
+   * Appelé une seule fois, après rendu, quand la première recherche est
+   * terminée (cartes affichées, liste vide ou erreur), avec les annonces
+   * réelles effectivement affichées (démos exclues, vide en cas d'erreur).
+   * Permet à /annonces d'aligner sa liste JSON-LD sur les cartes et de ne
+   * signaler « prête » qu'une fois les liens présents.
    */
-  onFirstSearchSettled?: () => void;
+  onFirstSearchSettled?: (shown: { id: string; slug?: string | null; title?: string | null }[]) => void;
 }
 
 const SearchSitter = ({ mode = "internal", onFirstSearchSettled }: SearchSitterProps = {}) => {
@@ -450,7 +452,9 @@ const SearchSitter = ({ mode = "internal", onFirstSearchSettled }: SearchSitterP
  useEffect(() => {
    if (!firstSearchSettled || settledNotifiedRef.current) return;
    settledNotifiedRef.current = true;
-   onFirstSearchSettled?.();
+   const shown = searchError || tab !== "sits" ? [] : results.filter((r: any) => !r.isDemo);
+   onFirstSearchSettled?.(shown.map((r: any) => ({ id: r.id, slug: r.slug ?? null, title: r.title ?? null })));
+   // eslint-disable-next-line react-hooks/exhaustive-deps
  }, [firstSearchSettled, onFirstSearchSettled]);
 
  // Auto-search when filters change (debounced)
@@ -473,8 +477,12 @@ const SearchSitter = ({ mode = "internal", onFirstSearchSettled }: SearchSitterP
  await searchMissions(searchCoords);
  }
  }
- setLoading(false);
+ } catch {
+   // Exception inattendue (géocodage, réseau) : erreur explicite, jamais
+   // un chargement infini ni une liste vide présentée comme un résultat.
+   setSearchError("La recherche n'a pas abouti.");
  } finally {
+   setLoading(false);
    setFirstSearchSettled(true);
  }
  // Déps FETCH RÉSEAU uniquement : sous-onglets, ville/lieu, rayon, zone, dates.
