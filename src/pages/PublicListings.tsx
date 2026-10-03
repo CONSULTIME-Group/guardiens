@@ -6,6 +6,7 @@ import { Suspense, useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import PageMeta from "@/components/PageMeta";
+import { sitPath } from "@/lib/sitUrl";
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
 import { lazyWithRetry } from "@/lib/lazyWithRetry";
@@ -25,9 +26,28 @@ export default function PublicListings() {
   const [itemListLd, setItemListLd] = useState<any | null>(null);
   // Prérendu : « prête » seulement quand la liste de cartes (liens vers les
   // fiches) et la liste JSON-LD sont lues, résultat vide ou en erreur inclus.
+  // ItemList JSON-LD construite à partir des cartes réellement affichées
+  // par la première recherche (aucune autre liste arbitraire).
   const [listSettled, setListSettled] = useState(false);
-  const [itemListSettled, setItemListSettled] = useState(false);
-  const onListSettled = useCallback(() => setListSettled(true), []);
+  const onListSettled = useCallback((shown: { id: string; slug?: string | null; title?: string | null }[]) => {
+    if (shown.length > 0) {
+      setItemListLd({
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        name: TITLE,
+        url: CANONICAL,
+        numberOfItems: shown.length,
+        itemListElement: shown.map((s, i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          url: `https://guardiens.fr${sitPath(s)}`,
+          name: s.title || BREADCRUMB_LISTINGS,
+        })),
+      });
+    }
+    setListSettled(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [intlCount, setIntlCount] = useState<number>(0);
   const [openCount, setOpenCount] = useState<number>(0);
   const [citiesCount, setCitiesCount] = useState<number>(0);
@@ -97,36 +117,6 @@ export default function PublicListings() {
     return () => { cancelled = true; };
   }, []);
 
-  // ItemList JSON-LD pour Google
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const { data } = await supabase
-        .from("sits")
-        .select("id, slug, title")
-        .eq("status", "published")
-        .order("created_at", { ascending: false })
-        .limit(20);
-      if (cancelled) return;
-      setItemListSettled(true);
-      if (!data || data.length === 0) return;
-      setItemListLd({
-        "@context": "https://schema.org",
-        "@type": "ItemList",
-        name: TITLE,
-        url: CANONICAL,
-        numberOfItems: data.length,
-        itemListElement: data.map((s: any, i: number) => ({
-          "@type": "ListItem",
-          position: i + 1,
-          url: `https://guardiens.fr/annonces/${s.slug || s.id}`,
-          name: s.title || BREADCRUMB_LISTINGS,
-        })),
-      });
-    })();
-    return () => { cancelled = true; };
-  }, [TITLE, BREADCRUMB_LISTINGS]);
-
   const jsonld = itemListLd ? [...BASE_JSONLD, itemListLd] : BASE_JSONLD;
   const intlLabel = t("public_listings.intl_count", { count: intlCount, defaultValue: `${intlCount} listings outside France` });
   // Eyebrow : on n'affiche le compteur de villes que s'il a un signal réel
@@ -149,7 +139,7 @@ export default function PublicListings() {
         path="/annonces"
         canonical={CANONICAL}
         jsonLd={jsonld}
-        ready={listSettled && itemListSettled}
+        ready={listSettled}
       />
 
       <PublicHeader />

@@ -452,7 +452,7 @@ const SearchSitter = ({ mode = "internal", onFirstSearchSettled }: SearchSitterP
  useEffect(() => {
    if (!firstSearchSettled || settledNotifiedRef.current) return;
    settledNotifiedRef.current = true;
-   const shown = searchError || tab !== "sits" ? [] : results.filter((r: any) => !r.isDemo);
+   const shown = searchError || tab !== "sits" ? [] : results.filter((r: any) => !r.is_demo);
    onFirstSearchSettled?.(shown.map((r: any) => ({ id: r.id, slug: r.slug ?? null, title: r.title ?? null })));
    // eslint-disable-next-line react-hooks/exhaustive-deps
  }, [firstSearchSettled, onFirstSearchSettled]);
