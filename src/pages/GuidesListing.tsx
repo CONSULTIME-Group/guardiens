@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import PageMeta from "@/components/PageMeta";
+import { Button } from "@/components/ui/button";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import { Link, useNavigate } from "react-router-dom";
 import { MapPin, Search, ArrowLeft } from "lucide-react";
