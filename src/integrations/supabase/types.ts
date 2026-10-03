@@ -1016,6 +1016,27 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_prerender_jobs_20261003_1830: {
+        Row: {
+          data: Json
+          kind: string
+          name: string
+          taken_at: string
+        }
+        Insert: {
+          data: Json
+          kind: string
+          name: string
+          taken_at?: string
+        }
+        Update: {
+          data?: Json
+          kind?: string
+          name?: string
+          taken_at?: string
+        }
+        Relationships: []
+      }
       _backup_profile_guard_20260918: {
         Row: {
           acl: unknown[] | null

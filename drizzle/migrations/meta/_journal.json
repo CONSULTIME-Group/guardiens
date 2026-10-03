@@ -351,6 +351,13 @@
       "when": 1791051192101,
       "tag": "0049_profile_seo_lifecycle",
       "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1791053528771,
+      "tag": "0050_single_seo_cache_consumer",
+      "breakpoints": true
     }
   ]
 }
