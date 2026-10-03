@@ -54,9 +54,10 @@ const container = document.getElementById("root")!;
 // fiche gardien publique (/gardiens/), fiche projet (/projets/, lot SEO-2),
 // liste des actualités (/actualites et /actualites/page/N, lot SEO-4 : prête
 // seulement une fois la liste affichée par News.tsx). Les articles
-// /actualites/:slug ne sont pas concernés.
+// /actualites/:slug ne sont pas concernés. Hub /annonces (lot SEO-4) :
+// prêt seulement après la première recherche affichée (PublicListings).
 // Expression unique (plafond de taille du démarrage).
-const LATE_META_PATH = /^\/(gardiens\/|projets\/|actualites(\/page\/|\/?$))/;
+const LATE_META_PATH = /^\/(gardiens\/|projets\/|actualites\/page\/|(actualites|annonces)\/?$)/;
 
 // Ce module ne s'exécute que dans le navigateur (document lu plus haut).
 if (LATE_META_PATH.test(location.pathname)) {
