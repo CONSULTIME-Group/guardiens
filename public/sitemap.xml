@@ -2973,6 +2973,11 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/gardiens/18e3f379-914f-4156-991e-55fc491135a3</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/gardiens/19ab5fd2-388d-4874-bf9c-7b8dd61ce949</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
@@ -3636,6 +3641,11 @@
     <loc>https://guardiens.fr/gardiens/ff8a4348-a6cb-4259-bfd0-71ce61e00cce</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/annonces/gardiannage-de-maison-proche-du-zooparc-de-beauval-et-des-ch-0a6da6</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/annonces/garde-milo-a-son-domicile-maison-a-la-campagne-saint-chef-2c79fa</loc>
