@@ -33,16 +33,12 @@ prefetchRouteChunk(window.location.pathname);
 // données personnelles ne fuient dans la console navigateur via des libs
 // tierces qui lisent `localStorage['loglevel']` (loglevel, debug, etc.).
 // Ne touche pas aux environnements dev / preview.
-if (import.meta.env.PROD && typeof window !== "undefined") {
+if (import.meta.env.PROD) {
   try {
-    const current = window.localStorage.getItem("loglevel");
-    if (!current || !/^(ERROR|WARN|SILENT)$/i.test(current)) {
-      window.localStorage.setItem("loglevel", "ERROR");
-    }
+    const ls = localStorage;
+    if (!/^(ERROR|WARN|SILENT)$/i.test(ls.getItem("loglevel") || "")) ls.setItem("loglevel", "ERROR");
     // Neutralise également le canal `debug` (npm `debug`) qui log en clair.
-    if (window.localStorage.getItem("debug")) {
-      window.localStorage.removeItem("debug");
-    }
+    ls.removeItem("debug");
   } catch {
     // storage indisponible (mode privé, iframe cross-origin), aucune action
   }
