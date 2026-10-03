@@ -110,6 +110,15 @@ describe("lecture du numéro de page", () => {
   });
 });
 
+describe("verrou de prérendu posé au démarrage (main.tsx)", () => {
+  it("liste des actualités verrouillée, articles non", async () => {
+    const { readFileSync } = await import("fs");
+    const re = new RegExp(readFileSync("src/main.tsx", "utf8").match(/const LATE_META_PATH = \/(.+)\/;/)![1]);
+    for (const p of ["/actualites", "/actualites/", "/actualites/page/2", "/gardiens/x", "/projets/x"]) expect(re.test(p), p).toBe(true);
+    for (const p of ["/actualites/un-article", "/actualites/inventaire-guardiens-france", "/", "/annonces"]) expect(re.test(p), p).toBe(false);
+  });
+});
+
 describe("rendu News", () => {
   it("page 1 et page 2 : contenus, liens et canonical distincts", async () => {
     const one = mount("/actualites");

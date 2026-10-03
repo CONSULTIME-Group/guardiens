@@ -328,7 +328,8 @@ describe("ancienne adresse /petites-missions/{slug|uuid}", () => {
   });
 
   it("verrou de rendu : /projets/ attend PageMeta", () => {
-    expect(read("src/main.tsx")).toMatch(/LATE_META_PATH_PREFIXES\s*=\s*\[[\s\S]{0,400}"\/projets\/"/);
+    const re = new RegExp(read("src/main.tsx").match(/const LATE_META_PATH = \/(.+)\/;/)![1]);
+    expect(re.test("/projets/un-projet")).toBe(true);
   });
 });
 
