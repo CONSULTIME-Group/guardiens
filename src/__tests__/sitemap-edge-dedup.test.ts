@@ -1,7 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-// @ts-expect-error module JS sans types
 import { dedupeEntries } from "../../scripts/lib/sitemapCore.mjs";
 
 const read = (p: string) => readFileSync(resolve(process.cwd(), p), "utf8");

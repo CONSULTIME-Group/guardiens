@@ -1,9 +1,7 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-// @ts-expect-error module JS sans types
 import { fetchAllPages, supabasePage, normalizeLastmod, dedupeEntries, renderSitemapXml, validateSitemapXml, readStaticRoutes } from "../../../scripts/lib/sitemapCore.mjs";
-// @ts-expect-error module JS sans types
 import { fetchOrCache, normalizeCache, SITEMAP_CACHE_VERSION } from "../../../scripts/lib/sitemapCache.mjs";
 import { proxySitemap, validateSitemapBody, STATIC_SITEMAP_ORIGIN } from "../../../supabase/functions/sitemap/proxy";
 

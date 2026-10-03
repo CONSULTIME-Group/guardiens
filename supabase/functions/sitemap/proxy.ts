@@ -32,7 +32,7 @@ export async function proxySitemap(fetchImpl: typeof fetch = fetch): Promise<Res
     const body = await res.text();
     if (body.length > MAX_BYTES) return fail("réponse trop volumineuse");
     const v = validateSitemapBody(body);
-    if (!v.ok) return fail(v.reason);
+    if (v.ok === false) return fail(v.reason);
     return new Response(body, {
       status: 200,
       headers: {
