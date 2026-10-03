@@ -38,6 +38,7 @@ await db.exec(`
   INSERT INTO city_guides(id,slug,published) VALUES ('${a}','guide',true);
 `);
 await db.exec(readFileSync(new URL('../supabase/prepared-migrations/20261003213000_seo_url_outbox.sql',import.meta.url),'utf8'));
+await db.exec(readFileSync(new URL('../supabase/prepared-migrations/20261003223500_seo_public_content_fields.sql',import.meta.url),'utf8'));
 const query=async(s)=>(await db.query(s)).rows;
 const paths=async()=>(await query('SELECT path FROM seo_url_outbox ORDER BY path')).map(r=>r.path);
 const clear=()=>db.exec('TRUNCATE seo_url_outbox');
@@ -172,6 +173,24 @@ test('gabarits profils : seuls les profils publics sont marques, budget restant 
   assert.deepEqual(await paths(),[]);
   await db.exec("SELECT seo_queue_template_family('sitters',false)");
   assert((await query(`SELECT seo_dirty_at FROM profiles WHERE id='${b}'`))[0].seo_dirty_at);
+});
+test('champs geographiques et date publique avancent la version pendant un recache',async()=>{
+  await db.exec(`ALTER TABLE city_guides ADD postal_code text;
+    ALTER TABLE seo_city_pages ADD department text;
+    ALTER TABLE seo_department_pages ADD region text;
+    ALTER TABLE articles ADD published_at timestamptz;
+    CREATE TRIGGER guides_recache BEFORE UPDATE ON city_guides FOR EACH ROW EXECUTE FUNCTION trg_recache_prerender();
+    CREATE TRIGGER cities_recache BEFORE UPDATE ON seo_city_pages FOR EACH ROW EXECUTE FUNCTION trg_recache_prerender();
+    CREATE TRIGGER departments_recache BEFORE UPDATE ON seo_department_pages FOR EACH ROW EXECUTE FUNCTION trg_recache_prerender();
+    INSERT INTO articles(id,slug,published) VALUES ('${a}','date',true);
+    INSERT INTO seo_department_pages(id,slug,published) VALUES ('${a}','region',true);`);
+  for (const [table,field,value] of [['city_guides','postal_code',"'69001'"],['seo_city_pages','department',"'Rhone'"],['seo_department_pages','region',"'Auvergne'"],['articles','published_at',"'2026-10-03'::timestamptz"]]) {
+    await db.exec(`UPDATE ${table} SET seo_dirty_at='2099-01-01' WHERE id='${a}'`);
+    await db.exec(`UPDATE ${table} SET ${field}=${value} WHERE id='${a}'`);
+    assert((await query(`SELECT seo_dirty_at>'2099-01-01'::timestamptz AS newer FROM ${table} WHERE id='${a}'`))[0].newer);
+  }
+  assert.equal((await query("SELECT count(*)::integer AS n FROM _backup_content_seo_trigger_20261003_2235"))[0].n,1);
+  assert.equal((await query("SELECT has_table_privilege('anon','_backup_content_seo_trigger_20261003_2235','SELECT') AS allowed"))[0].allowed,false);
 });
 test('file et reservations privees, RPC interdite a anon',async()=>{
   for(const t of ['seo_url_outbox','seo_render_budget','seo_consumer_lease','_backup_content_seo_trigger_20261003_2130']){

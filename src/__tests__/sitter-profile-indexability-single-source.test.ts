@@ -28,7 +28,7 @@ describe("règle d'indexabilité des fiches gardien : source unique", () => {
   });
 
   it("le générateur de sitemap importe la même règle", () => {
-    const src = read("scripts/generate-sitemap.mjs");
+    const src = read("supabase/functions/_shared/sitemap-data.js");
     expect(src).toContain("sitterProfileIndexability.js");
     expect(src).toContain("isSitterProfileIndexable(");
     expect(src).not.toMatch(/bio\.length\s*>\s*50/);
@@ -70,7 +70,7 @@ describe("règle d'indexabilité des fiches gardien : source unique", () => {
       expect(cols).toContain("role");
     }
     expect(page).toMatch(/isSitterProfileIndexable\(\{\s*role: profile\?\.role,/);
-    expect(read("scripts/generate-sitemap.mjs")).toMatch(/isSitterProfileIndexable\(\{\s*role: p\.role,/);
+    expect(read("supabase/functions/_shared/sitemap-data.js")).toMatch(/isSitterProfileIndexable\(\{\s*role: p\.role,/);
   });
   it("mesure le texte visible apres masquage des contacts, meme au seuil", () => {
     const input = { role: "sitter", bio: "Une presentation avec lien " + "https://example.test/" + "x".repeat(60), identityVerified: true };

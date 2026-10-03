@@ -4,6 +4,7 @@
  */
 
 export const SITE_URL = "https://guardiens.fr";
+export const SITEMAP_URL = "https://erhccyqevdyevpyctsjj.supabase.co/functions/v1/sitemap";
 
 /**
  * Image OG par défaut utilisée sur toutes les pages sans image dédiée.
@@ -496,4 +497,3 @@ export const dynamicRoutes: DynamicRouteConfig[] = [
  sampleParams: { city: "lyon" },
  },
 ];
-

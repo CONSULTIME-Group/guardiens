@@ -19,7 +19,7 @@ const root = path.resolve(__dirname, "../../..");
 const read = (p: string) => fs.readFileSync(path.resolve(root, p), "utf-8");
 
 const PAGE = "src/pages/PublicSitterProfile.tsx";
-const SITEMAP = "scripts/generate-sitemap.mjs";
+const SITEMAP = "supabase/functions/_shared/sitemap-data.js";
 
 const sourceFiles = (directory: string): string[] =>
   fs.readdirSync(path.resolve(root, directory), { withFileTypes: true }).flatMap((entry) => {

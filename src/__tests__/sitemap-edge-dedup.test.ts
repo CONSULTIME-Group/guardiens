@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { dedupeEntries } from "../../scripts/lib/sitemapCore.mjs";
+import { readStaticCitySlugs } from "../../scripts/lib/sitemapCore.mjs";
 
 const read = (p: string) => readFileSync(resolve(process.cwd(), p), "utf8");
 
@@ -11,12 +12,11 @@ describe("sitemap : villes codées en dur et déduplication", () => {
   const build = read("scripts/generate-sitemap.mjs");
 
   it("les villes codées en dur ne contiennent pas aura et existent côté front", () => {
-    const block = build.match(/const cityLandingPages = \[([\s\S]*?)\];/);
-    expect(block).not.toBeNull();
-    expect(block![1]).not.toMatch(/["']aura["']/);
     const cities = read("src/data/cities.ts");
+    const slugs = readStaticCitySlugs(cities);
+    expect(slugs).not.toContain("aura");
     for (const slug of ["annecy", "lyon", "grenoble", "caluire-et-cuire", "chambery"]) {
-      expect(block![1]).toContain(`"${slug}"`);
+      expect(slugs).toContain(slug);
       expect(cities).toContain(`slug: "${slug}"`);
     }
   });
@@ -28,6 +28,6 @@ describe("sitemap : villes codées en dur et déduplication", () => {
     ]);
     expect(dupes).toBe(1);
     expect(entries).toEqual([{ loc: "/a", lastmod: null, changefreq: "weekly", priority: "0.9" }]);
-    expect(build.indexOf("dedupeEntries(raw)")).toBeLessThan(build.indexOf("renderSitemapXml(SITE_URL"));
+    expect(build).toContain("createSitemapDocument(routeConfig, collections, today)");
   });
 });

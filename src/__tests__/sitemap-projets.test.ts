@@ -27,14 +27,14 @@ describe("sitemap projets participatifs", () => {
   });
 
   it("build et fonction : /projets/{slug} sur la vue publique, jamais d'ancienne URL entraide", () => {
-    const build = read("scripts/generate-sitemap.mjs");
+    const build = read("supabase/functions/_shared/sitemap-data.js");
     for (const src of [build]) {
       expect(src).toContain("isIndexableProjetMission");
       expect(src).toMatch(/\/projets\/\$\{\w+\.slug\}/);
       expect(src).toContain('.neq("category", "projet")');
     }
     // La fonction sitemap ne relaie plus que le fichier statique (SEO-3).
-    expect(read("supabase/functions/sitemap/index.ts")).not.toContain("createClient");
+    expect(read("supabase/functions/sitemap/index.ts")).toContain("collectSitemapData");
     expect(read("src/data/siteRoutes.ts")).toContain('path: "/projets",');
     // Clé d'invalidation nulle : rechargement à chaque build.
     expect(build).toMatch(/"small_missions_projets_v1", cache,\s*null,/);
