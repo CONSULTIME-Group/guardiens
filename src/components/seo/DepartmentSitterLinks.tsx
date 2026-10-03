@@ -35,6 +35,7 @@ export function useDepartmentPublicSitters(departmentName: string | null | undef
     queryKey: ["department-public-sitters", departmentName],
     enabled: !!departmentName,
     staleTime: 5 * 60 * 1000,
+    retry: 1,
     queryFn: async () => {
       const { data: dept, error: deptError } = await supabase
         .from("departements")
