@@ -57,17 +57,11 @@ if (!container) {
 // de données). Le verrou est posé ici, avant le rendu, car le chunk de la
 // route peut arriver après le délai du repli global sur réseau dégradé.
 // Liste volontairement courte et explicite, à compléter route par route.
-const LATE_META_PATH_PREFIXES = [
-  "/gardiens/", // fiche gardien publique, PublicSitterProfile
-  "/projets/", // fiche projet (lot SEO-2) : jamais prête avant la lecture
-];
-
-if (typeof window !== "undefined") {
-  const path = window.location.pathname;
-  if (LATE_META_PATH_PREFIXES.some((prefix) => path.startsWith(prefix))) {
-    window.prerenderMetaPending = true;
-    window.prerenderReady = false;
-  }
+// Fiche gardien publique (PublicSitterProfile) et fiche projet (lot SEO-2).
+// Ce module ne s'exécute que dans le navigateur (document lu plus haut).
+if (/^\/(gardiens|projets)\//.test(window.location.pathname)) {
+  window.prerenderMetaPending = true;
+  window.prerenderReady = false;
 }
 
 // Guardiens est monolingue français : le seul dictionnaire (fr) est importé

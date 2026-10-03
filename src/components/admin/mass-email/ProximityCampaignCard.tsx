@@ -141,7 +141,7 @@ const ProximityCampaignCard = ({
       const msg = `Envoi terminé, ${d.sent} email(s) confirmé(s)${issues.length ? `. ${issues.join(" ; ")}` : ""}.`;
       if (d.needsReconciliation || issues.length) {
         toast.warning(
-          d.needsReconciliation ? `${msg} Vérification manuelle nécessaire avant tout nouvel envoi.` : msg,
+          d.needsReconciliation ? `${msg} Contrôle manuel nécessaire avant tout nouvel envoi.` : msg,
           { duration: Infinity },
         );
       } else {
