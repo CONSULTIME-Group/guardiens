@@ -173,7 +173,7 @@ export const NeedRow = ({ need, distance, state, onCanHelp, pending = false }: {
         </span>
       )}
       <div className="min-w-0 flex-1">
-        <h3 className="line-clamp-1 font-heading text-base font-semibold text-foreground">
+        <h3 className="line-clamp-2 sm:line-clamp-1 font-heading text-base font-semibold text-foreground">
           <Link to={`/petites-missions/${need.slug || need.id}`} className="after:absolute after:inset-0 after:content-['']">
             {need.title}
           </Link>
