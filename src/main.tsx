@@ -54,10 +54,9 @@ const container = document.getElementById("root")!;
 // fiche gardien publique (/gardiens/), fiche projet (/projets/, lot SEO-2),
 // liste des actualités (/actualites et /actualites/page/N, lot SEO-4 : prête
 // seulement une fois la liste affichée par News.tsx). Les articles
-// /actualites/:slug ne sont pas concernés. Hub /annonces (lot SEO-4) :
-// prêt seulement après la première recherche affichée (PublicListings).
+// /actualites/:slug ne sont pas concernés.
 // Expression unique (plafond de taille du démarrage).
-const LATE_META_PATH = /^\/(gardiens\/|projets\/|actualites\/page\/|(actualites|annonces)\/?$)/;
+const LATE_META_PATH = /^\/(gardiens\/|projets\/|actualites(\/page\/|\/?$))/;
 
 // Ce module ne s'exécute que dans le navigateur (document lu plus haut).
 if (LATE_META_PATH.test(location.pathname)) {
@@ -77,7 +76,9 @@ createRoot(container).render(<App />);
 // uniquement les routes sans PageMeta. Une page qui prépare ses métadonnées
 // garde explicitement le verrou, même si son chargement dépasse le délai.
 const markPrerenderReady = () => {
-  if (window.location.pathname.startsWith("/annonces/")) return;
+  // /annonces (hub, lot SEO-4) et /annonces/:slug : jamais par ce repli,
+  // PublicListings et la fiche lèvent le drapeau une fois leur liste rendue.
+  if (window.location.pathname.startsWith("/annonces")) return;
   if (window.prerenderMetaPending) return;
   window.prerenderReady = true;
 };
