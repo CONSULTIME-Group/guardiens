@@ -1,6 +1,6 @@
 # Audit architecture technique SEO, guardiens.fr, 03/10/2026
 
-Lecture seule. Aucun code, aucune base, aucune configuration Cloudflare ou Prerender modifiés. Aucune purge, aucun recache, aucune publication, aucun message.
+Audit de la production en lecture seule : aucune base, aucune configuration Cloudflare ou Prerender modifiée, aucune purge, aucun recache, aucune publication, aucun message. Seul changement de code : le lot SEO-1 (robots), préparé et testé dans le dépôt, non publié (section 7).
 Production lue : déploiement `1a94def8` (en-tête `x-deployment-id`).
 
 ## Chronologie des contrôles (horodatages réels, UTC, 03/10/2026)
@@ -38,7 +38,6 @@ Aucun crawl Googlebot des 673 URL. Aucun lien d'action d'email ni aucun jeton vi
 - http vers https (301), www vers l'apex (308). Préversion id-preview : 401.
 - Bing et les robots IA reçoivent le même prérendu que Google (contrôle sur Evreux).
 - robots.txt et plan du site servis identiques à `public/robots.txt` et `public/sitemap.xml`.
-- Aucun lien de navigation en `onclick` dans les 61 HTML lus : 0 attribut `onclick`, liens en `<a href>`.
 - Aucun JSON-LD illisible sur l'échantillon.
 
 ## P0, défauts confirmés à fort impact
@@ -64,21 +63,21 @@ Aucun crawl Googlebot des 673 URL. Aucun lien d'action d'email ni aucun jeton vi
 
 ## P1, défauts confirmés à impact moyen
 
-### P1-1. Groupes robots nommés sans les restrictions de `*` (contrôle d'exploration)
+### P1-1. Groupes robots nommés sans les restrictions de `*` (contrôle d'exploration). CORRIGÉ EN CODE (SEO-1), non publié
 - **Preuve** : robots.txt 10:45:25. `User-agent: Googlebot`, Bingbot, GPTBot, OAI-SearchBot, ClaudeBot… n'ont que `Allow: /`. Les `Disallow` (/admin, /dashboard, /messages, /sits, paramètres de suivi) sont seulement sous `*`.
 - **Règle** : un robot suit le seul groupe le plus spécifique, les groupes ne fusionnent pas (https://developers.google.com/crawling/docs/robots-txt/robots-txt-spec).
 - **Portée exacte** : c'est une question d'exploration, pas de sécurité. Les espaces privés restent protégés par l'authentification ; robots.txt n'empêche ni l'accès ni l'indexation (https://developers.google.com/search/docs/crawling-indexing/robots/intro).
 - **Effet observé** : /dashboard, /admin, /sits, /messages, /login, /inscription répondent 200 aux robots avec la coquille générique (title de l'accueil, ni canonical ni `meta robots`, 7 liens). Ce sont des pages quasi identiques en 200, que Google peut traiter en soft 404 ou en doublons (https://developers.google.com/search/docs/crawling-indexing/http-network-errors#soft-404-errors). Indexation réelle NON VÉRIFIÉE.
 - **Correction minimale** : dans `generate-robots.mjs`, recopier les `Disallow` dans chaque groupe nommé (ou supprimer les groupes `Allow: /` seul), conserver ByteSpider et cohere-ai en `Disallow: /`, ne pas interdire les chemins qui doivent exposer un `noindex`.
 
-### P1-2. Plan du site tronqué à 1 000 fiches gardiens
+### P1-2. Lecture des profils source plafonnée à 1 000, 60 éligibles absents du sitemap
 - **Preuve** : `scripts/generate-sitemap.mjs:285`, `.limit(5000)` sans ordre ; l'API répond `content-range: 0-999/1329`. Règle `isSitterProfileIndexable` recalculée sur les 1 329 fiches : 141 éligibles, 81 au plan, 60 manquantes, aucune non éligible présente.
 - Même risque latent sur `public_sitter_profiles` (788 lignes), `sits` et `small_missions` (`limit(2000)`).
 - **Correction minimale** : pagination `.order("id").range()` et journal de l'écart avec `count: exact`.
 
 ### P1-3. Deux générateurs de plan du site divergents
 - **Preuve** : le plan servi (673 URL) est le fichier du build. La fonction `sitemap` produit 568 URL avec une liste statique différente (`/conseils` présent, `/cgs` et `/devenir-home-sitter` absents).
-- **Correction minimale** : une seule source (le fichier de build, déjà servi) ; fonction dépréciée par commentaire.
+- **Correction minimale** : un commentaire ne résout pas la divergence. Le prochain lot doit identifier les consommateurs de la fonction `sitemap` (Worker, appels, liens), puis la déprécier ou la raccorder au générateur servi, avec un test de parité des listes d'URL.
 
 ### P1-4. lastmod sans date propre à la page
 - **Preuve** : `generate-sitemap.mjs:165` (`today`) et replis `|| today` lignes 198 à 385. Pages statiques et légales à 2026-10-02 (date du build).
@@ -109,7 +108,7 @@ Correction minimale : afficher ces questions, ou retirer le schéma là où elle
 ## P2, mineur ou à confirmer
 
 - **P2-1. BreadcrumbList multiples** (section 3). Plusieurs fils ne sont pas invalides en soi : Google accepte plusieurs fils d'Ariane sur une page (https://developers.google.com/search/docs/appearance/structured-data/breadcrumb). Seuls les doublons strictement identiques sont du bruit, et les fils divergents méritent un alignement.
-- **P2-2. Générateur robots fragile** (confirmé). `generate-robots.mjs:63` découpe par `\n\s{2}\}` ; l'indentation de `siteRoutes.ts` le met en échec, /login et /inscription (`index: false`) ne sont pas détectées. Correction : importer `siteRoutes` au lieu d'une expression régulière.
+- **P2-2. Générateur robots fragile. CORRIGÉ EN CODE (SEO-1), non publié.** Défaut : `generate-robots.mjs:63` analysait les objets TS par expression régulière dépendante de l'indentation. Résultat souhaité, inchangé : /login et /inscription restent explorables et rendent `noindex`. Correction : lecture par l'arbre syntaxique TypeScript, sans lecture de `staticRoutes`.
 - **P2-3. /login, /inscription sans `meta robots` dans le HTML servi** (coquille, hors prérendu).
 - **P2-4. /gardiens/{uuid inexistant}** : 200 `noindex` (faux 404, page `noindex` donc sans risque d'indexation).
 - **P2-5. http://www** : deux sauts (301 puis 308).
@@ -142,20 +141,22 @@ Déclencheurs présents en base : `articles`, `city_guides`, `seo_city_pages`, `
 | /conseils, /alma | non (servi), /conseils oui dans la fonction | auto | non | AUCUNE | 0 |
 | Privés (/dashboard, /admin/*, /sits, /messages…), auth | non | aucun | JavaScript seulement | sans objet | sans objet |
 
-Écarts : `/questions/:id` et `/alma` sont publics sans politique d'indexation lisible dans le plan ; `/conseils` n'apparaît que dans la fonction non servie. Le mécanisme d'indexation `generate-robots.mjs` lit `siteRoutes.ts` par expression régulière (P2-2) ; le plan lit les données en base, pas `siteRoutes`. Il n'existe donc pas une source unique des routes.
+Écarts : `/questions/:id` et `/alma` sont publics sans politique d'indexation lisible dans le plan ; `/conseils` n'apparaît que dans la fonction non servie. `generate-robots.mjs` lisait `siteRoutes.ts` par expression régulière (P2-2, corrigé en code) ; le plan lit les données en base, pas `siteRoutes`. Il n'existe donc pas une source unique des routes.
 
 ## 2. Maillage crawlable (couverture partielle)
 
 Méthode : liens `<a href>` internes extraits des 61 HTML Googlebot (10:52), parcours en largeur depuis /. Ce n'est pas un crawl complet : les profondeurs « inconnues » ne veulent pas dire « orphelines ».
 
-- **Lien de navigation** : 0 `onclick`, tous les liens lus sont des `<a href>`. 46 liens communs (en-tête et pied) sur les pages de plus de 40 liens.
+- **Navigation non explorable (confirmée en code)** : l'absence d'attribut `onclick` dans le HTML ne prouve rien, React attache ses gestionnaires sans attribut. Défauts confirmés : navigation du bandeau en `Button onClick navigate` (`PublicHeader.tsx`, lignes 164 à 179 environ, menu mobile dans une Sheet non montée) et pagination de /actualites en `Button onClick` (`News.tsx`), voir section 6.
+- **Liens `<a href>` lus** : 46 liens communs (essentiellement pied de page) sur les pages de plus de 40 liens.
 - **Profondeur des 673 URL du plan** : 1 à 0 clic, 54 à 1 clic, 360 à 2 clics, 10 à 3 clics, 248 inconnues dans l'échantillon. 506 des 673 URL sont la cible directe d'au moins un lien lu.
 - **Inconnues par famille** : /gardiens 77, /actualites 76, /annonces 4, /guides 2, /petites-missions 1.
 - **Fiches gardiens** : aucun hub (/, /house-sitting, /departement, /guides, /annonces) ne lie de fiche. Liens vus seulement depuis 2 pages ville et la fiche de mission. Atteignabilité de la plupart des 81 fiches par liens : NON PROUVÉE ; elles dépendent probablement du plan du site.
-- **Races** : 77 fiches liées depuis /races, mais /races n'est lié que depuis les pages races et une annonce, pas depuis le pied de page. Probable sous-maillage.
+- **Hubs (contre-audit ChatGPT, HTTP)** : /house-sitting lie 161/161 villes du plan, /departement 98/98, /races 77/77, /associations 11/11, /guides 92/95, /projets 0/1.
+- **Races** : /races n'est lié que depuis les pages races et une annonce dans l'échantillon, aucun lien /races sur l'accueil lu. Probable sous-maillage, orphelinat non prouvé.
 - **Annonces** : 4 liens depuis /. Le hub /annonces n'expose aucun lien vers une fiche de garde, seulement /annonces/international (contrôle 11:02:03, section 6). Les autres annonces du plan ne sont pas prouvées atteignables.
-- **Projets** : /projets n'est lié que depuis les pages projet.
-- **Pagination** : aucun lien `page=` vu sur les hubs ; listes rendues en un seul bloc. Aucun piège de filtres vu : liens à paramètres limités à `/inscription?redirect=`, `?role=`, `/login?redirect=`, `/contact?sujet=`, `/search?ville=`, `/petites-missions?city=`. Les deux derniers mènent à des pages `noindex` ou à canonical propre.
+- **Projets** : /projets n'est lié que depuis les pages projet dans l'échantillon, aucun lien sur l'accueil lu.
+- **Pagination** : aucun lien `page=` explorable ; /actualites?page=2 sert les mêmes 15 articles que /actualites (section 6). Aucun piège de filtres vu : liens à paramètres limités à `/inscription?redirect=`, `?role=`, `/login?redirect=`, `/contact?sujet=`, `/search?ville=`, `/petites-missions?city=`. Les deux derniers mènent à des pages `noindex` ou à canonical propre.
 - Règle de référence : https://developers.google.com/search/docs/crawling-indexing/links-crawlable.
 
 ## 3. Fils d'Ariane : doublons localisés
@@ -201,12 +202,11 @@ Préparation du code et des tests : possible sans attente. Mise en production, p
 
 0. **SEO-1, robots** : préparé le 03/10 (section 7), non publié.
 1. **Lot A, projets** : `STATIC_SEO_URLS` + /projets et /petites-missions (P0-1) ; PageMeta 404 dans la branche « projet introuvable » (P1-8) ; canonical slug sur /projets/{uuid} (P1-6) ; règle de redirection de l'ancienne adresse (P0-2). Mise en ligne puis recache ciblé de 4 URL.
-2. **Lot B, robots** : groupes nommés complétés et lecture de `siteRoutes` par import (P1-1, P2-2), avec un test qui interprète les groupes comme Google.
-3. **Lot C, plan du site** : pagination, lastmod, source unique (P1-2, P1-3, P1-4).
-4. **Lot D, invalidation** : marquage des familles annonces, entraide, projets, associations, races (P1-5), dans le budget mensuel existant. Exige une migration (déclencheurs).
-5. **Lot E, données structurées** : FAQ visibles ou retirées (P1-7), doublons stricts de fils d'Ariane supprimés (section 3).
-6. **Lot F, maillage** : pagination /actualites traitée en un seul lot (liens `<a href>`, paramètre `page` conservé par la normalisation et par le Worker, canonical par page) ; navigation du bandeau en liens ; liens HTML vers les fiches de garde sur /annonces ; lien /guides-locaux remplacé par /guides ; /races et /projets reliés depuis l'accueil, après mesure complète.
-7. P2 restants.
+2. **Lot C, plan du site** : pagination, lastmod, source unique avec test de parité (P1-2, P1-3, P1-4).
+3. **Lot D, invalidation** : marquage des familles annonces, entraide, projets, associations, races (P1-5), dans le budget mensuel existant. Exige une migration (déclencheurs).
+4. **Lot E, données structurées** : FAQ visibles ou retirées (P1-7), doublons stricts de fils d'Ariane supprimés (section 3).
+5. **Lot F, maillage** : pagination /actualites traitée en un seul lot (liens `<a href>`, paramètre `page` conservé par la normalisation et par le Worker, canonical par page) ; navigation du bandeau en liens ; liens HTML vers les fiches de garde sur /annonces ; lien /guides-locaux remplacé par /guides ; /races et /projets reliés depuis l'accueil, après mesure complète.
+6. P2 restants.
 
 ## Annexe A, statistiques reproductibles
 
@@ -244,22 +244,22 @@ Disallow: /dashboard
 
 ## 6. Compléments du 03/10 (non corrigés dans ce tour)
 
-Source indiquée pour chaque point : « vérifié ici » (commande et heure) ou « relevé par Jérémie » (non refait).
+Source indiquée pour chaque point : « vérifié ici » (commande et heure) ou « contre-audit ChatGPT » (HTTP, lecture SQL ou code selon le point, non refait ici).
 
-- **P1-8, soft 404 indexable sur les projets (remonte au-dessus des P2).** Vérifié ici à 11:02:03 : `GET /projets/audit-inexistant-20261003` (Googlebot) répond 200, canonical vers cette URL inexistante, aucune `meta robots`. Cause en code : la branche `!projet` de `ProjetDetail.tsx` ne rend pas de `PageMeta` (ni `noindex`, ni `statusCode={404}`). Règle : https://developers.google.com/search/docs/crawling-indexing/http-network-errors#soft-404-errors.
-- **Fiches gardiens éligibles.** Relevé par Jérémie (SQL, jointures `public_profiles`, `public_sitter_profiles`, `public_sitter_gallery_counts`) : 141 éligibles, 81 au plan, 60 manquantes. Concorde avec mon calcul de 10:48:02 (P1-2).
-- **Pagination /actualites, triple défaut.** Vérifié ici à 11:02:03 : `/actualites` et `/actualites?page=2` exposent les mêmes 15 liens d'articles (listes identiques) et le même canonical `/actualites`. Relevé par Jérémie en code : pagination en `<Button onClick>` dans `News.tsx`, `normalizePathname` supprime la query, `PRERENDER_KEEP_PARAMS` vide dans le miroir Worker (script de production NON VÉRIFIÉ). À traiter ensemble : remplacer les boutons seuls ne rendrait pas les pages 2 et suivantes explorables. Règle : https://developers.google.com/search/docs/specialty/ecommerce/pagination-and-incremental-page-loading.
-- **Navigation du bandeau.** Relevé par Jérémie : `PublicHeader.tsx` vers les lignes 164 à 179, `NAV_DEFS` rendu en `Button onClick navigate`, pas en `<a href>` ; le menu mobile utilise des `Link` mais dans une Sheet fermée, non montée. Dans les HTML que j'ai lus, aucun lien /projets ni /races sur l'accueil. Cela ne prouve pas que ces familles soient orphelines : pas de crawl complet.
-- **/annonces sans maillage HTML vers les gardes.** Vérifié ici à 11:02:03 : aucun lien vers une fiche de garde, hormis /annonces/international. Un ItemList JSON-LD ne remplace pas un lien HTML. Relevé par Jérémie : le drapeau `ready` de `PublicListings` dépend de la requête ItemList, pas du moteur de recherche affiché. À examiner dans un lot suivant.
+- **P1-8, soft 404 sur les projets (remonte au-dessus des P2).** Vérifié ici à 11:02:03 : `GET /projets/audit-inexistant-20261003` (Googlebot) répond 200, canonical vers cette URL inexistante, aucune `meta robots`. Observé : HTTP 200 et absence de noindex, donc page indexable en principe ; indexation réelle NON VÉRIFIÉE. Cause en code : la branche `!projet` de `ProjetDetail.tsx` ne rend pas de `PageMeta` (ni `noindex`, ni `statusCode={404}`). Règle : https://developers.google.com/search/docs/crawling-indexing/http-network-errors#soft-404-errors.
+- **Fiches gardiens éligibles.** Contre-audit ChatGPT (lecture SQL, jointures `public_profiles`, `public_sitter_profiles`, `public_sitter_gallery_counts`) : 141 éligibles, 81 au plan, 60 manquantes. Concorde avec mon calcul de 10:48:02 (P1-2).
+- **Pagination /actualites, triple défaut.** Vérifié ici à 11:02:03 : `/actualites` et `/actualites?page=2` exposent les mêmes 15 liens d'articles (listes identiques) et le même canonical `/actualites`. Contre-audit ChatGPT (code) : pagination en `<Button onClick>` dans `News.tsx`, `normalizePathname` supprime la query, `PRERENDER_KEEP_PARAMS` vide dans le miroir Worker (script de production NON VÉRIFIÉ). À traiter ensemble : remplacer les boutons seuls ne rendrait pas les pages 2 et suivantes explorables. Règle : https://developers.google.com/search/docs/specialty/ecommerce/pagination-and-incremental-page-loading.
+- **Navigation du bandeau.** Contre-audit ChatGPT (code) : `PublicHeader.tsx` vers les lignes 164 à 179, `NAV_DEFS` rendu en `Button onClick navigate`, pas en `<a href>` ; le menu mobile utilise des `Link` mais dans une Sheet fermée, non montée. Dans les HTML que j'ai lus, aucun lien /projets ni /races sur l'accueil. Cela ne prouve pas que ces familles soient orphelines : pas de crawl complet.
+- **/annonces sans maillage HTML vers les gardes.** Vérifié ici à 11:02:03 : aucun lien vers une fiche de garde, hormis /annonces/international. Un ItemList JSON-LD ne remplace pas un lien HTML. Contre-audit ChatGPT (code) : le drapeau `ready` de `PublicListings` dépend de la requête ItemList, pas du moteur de recherche affiché. À examiner dans un lot suivant.
 - **Lien vers une page inexistante.** Vérifié ici à 11:02:03 et 11:02:04 : `/annonces` lie `/guides-locaux` (`PublicListings.tsx:167`), qui répond 404 `noindex, follow`. Destination attendue : `/guides`.
-- **Couverture des hubs.** Relevé par Jérémie sur le HTML servi : /house-sitting lie 161/161 villes du plan, /departement 98/98, /races 77/77, /associations 11/11, /guides 92/95 (manquent marrakech, plouescat, pusignan), /projets 0/1 avec noindex et ancien texte. Cela précise la section 2 : les familles villes, départements, races et associations sont entièrement reliées depuis leur hub.
+- **Couverture des hubs.** Contre-audit ChatGPT (HTTP) : /house-sitting lie 161/161 villes du plan, /departement 98/98, /races 77/77, /associations 11/11, /guides 92/95 (manquent marrakech, plouescat, pusignan), /projets 0/1 avec noindex et ancien texte. Cela précise la section 2 : les familles villes, départements, races et associations sont entièrement reliées depuis leur hub.
 - **Historique des rafraîchissements.** Relevé par Jérémie : depuis le 01/10, 89 succès HTTP 200 et 6 succès à statut nul dans `prerender_recache_log`, aucune trace pour /projets ni pour l'ancienne URL du projet. Une absence de trace ne prouve pas une panne complète.
-- **Clés de cache du générateur de plan du site (risques reproductibles, perte non prouvée).** Relevé par Jérémie : le cache `public_profiles` est invalidé sur `created_at` et le nombre de lignes, il ne voit donc pas un changement de bio, de motivation, d'identité ou de galerie, qui fait pourtant basculer l'éligibilité. La clé entraide repose sur `created_at` et un compte, avec une condition qui dépend de la date du jour (missions passées). Une fiche peut ainsi devenir éligible ou inéligible sans régénération.
+- **Clés de cache du générateur de plan du site (risques reproductibles, perte non prouvée).** Contre-audit ChatGPT (code) : le cache `public_profiles` est invalidé sur `created_at` et le nombre de lignes, il ne voit donc pas un changement de bio, de motivation, d'identité ou de galerie, qui fait pourtant basculer l'éligibilité. La clé entraide repose sur `created_at` et un compte, avec une condition qui dépend de la date du jour (missions passées). Une fiche peut ainsi devenir éligible ou inéligible sans régénération.
 
 ## 7. SEO-1 préparé : robots.txt (non publié)
 
 - **Groupes** : un groupe pour ByteSpider et cohere-ai (`Disallow: /`) ; un groupe unique qui nomme tous les robots autorisés (moteurs, IA, outils SEO) plus `*`, avec `Allow: /`, les paramètres de suivi et les 18 chemins privés. Politique d'ouverture aux IA inchangée.
 - **Portée** : robots.txt règle l'exploration. Il n'empêche pas l'indexation d'une URL connue par ailleurs et ne protège pas les espaces privés, que l'authentification protège.
-- **Pages noindex** : /login, /inscription, /search, /recherche, /recherche-gardiens et /gardiens/* restent explorables ; le générateur refuse de les mettre en Disallow, et `index: false` n'est plus traduit en Disallow.
+- **Pages noindex** : /login, /inscription, /search, /recherche, /recherche-gardiens et /gardiens/* restent explorables ; le générateur refuse ces chemins exacts (et leur forme avec barre finale) dans les chemins privés, et `index: false` n'est plus traduit en Disallow. Ce garde-fou ne couvre pas toutes les variantes glob (par exemple `/gardiens/*`) : les tests vérifient le fichier produit, pas toute règle future.
 - **Lecture des routes** : `SITE_URL` et `privateDisallowPaths` lus par l'arbre syntaxique TypeScript (`scripts/robots-lib.mjs`) ; `staticRoutes` n'est plus lu par ce générateur.
 - **Tests** : `src/__tests__/robots-groups.test.ts`, 33 cas, passés le 03/10 à 11:01:46 ; `generate-robots:check` passé.
