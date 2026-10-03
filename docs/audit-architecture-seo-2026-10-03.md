@@ -363,7 +363,7 @@ Le complément HTML vérifié via GSC Wizard, produit dans un autre workflow, fa
 - Relecture Googlebot sans redirection, 12:33:54 à 12:33:55 : les trois URL restent sur l'ancienne copie (HTTP 200, aucune Location ; /projets/{uuid} canonical vers lui-même ; les deux routes /petites-missions/… avec l'ancien titre).
 - Jérémie a confirmé sa connexion admin après la demande d'ouvrir la préversion. Le connecteur a pourtant reçu `signed_out` : blocage du mécanisme de transmission, cause NON VÉRIFIÉE (aucune erreur utilisateur démontrée).
 
-### Capacités inspectées en lecture (03/10/2026, 12:35 à 12:40 UTC)
+### Capacités inspectées en lecture (03/10/2026, vers 12:36 UTC)
 - `supabase--curl_edge_functions` : paramètres path, method, headers, body, query_params. Il injecte seulement la session de préversion si elle existe ; aucune option service_role.
 - CLI `lovable` : `supabase` est en lecture seule (analytics, function-logs, info, linter, query, slow-queries), sans invocation de fonction. `auth-session --self` : aucun utilisateur de l'application ne correspond au compte Lovable du demandeur ; `--user` exige une approbation, non disponible. `preview execute-js` : `preview_bridge_unreachable` (aucun onglet de préversion joint).
 - Aucun outil standard n'invoque une fonction en service_role avec des identifiants gérés par la plateforme. Aucun secret lu, aucun jeton fabriqué, aucun réglage d'authentification ni fonction modifiés.
