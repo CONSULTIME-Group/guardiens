@@ -442,3 +442,18 @@ Statut : code, tests et fichier généré prêts en dépôt. Aucune publication,
 - Dérive des données, pas troncature : le build préparé lisait 141 éligibles (`c0cf6f27…`, exact pour ce build) ; la génération de publication a relu les sources et en retient 142, MD5 `82238d89b505f5eb8c7d1ae47cfa19f4`, identique au SQL indépendant de 13:13:28 UTC. Les 141 du build préparé sont un sous-ensemble attendu ; les autres familles ne changent que d'une URL au total (736 contre 735).
 - Proxy réel : à 13:15:48 et 13:16:35, la fonction déployée a relayé le nouveau fichier de l'origine (requête sortante du runtime, sans User-Agent forcé dans le code) avec 200 : l'origine n'a pas refusé ce client. Un refus 403 donnerait une réponse 503 de la fonction, conformément au code.
 - Statut du déploiement 5ce2d893-05fc-4b88-bc77-8169a8bf2a47 : non lisible depuis cet outil (aucun accès en lecture à l'historique de publication) ; la mise en ligne est établie par la bascule HTTP observée.
+
+## 11. SEO-4 pagination du journal : PRÉPARÉ (non publié, 03/10/2026)
+
+Choix : identité de page dans le chemin (`/actualites/page/N`, page 1 = `/actualites`), car le miroir du Worker retire toute query avant le rendu robot. Aucun changement du Worker, du helper canonical commun, de PageMeta ni du plan du site.
+
+- Route explicite `/actualites/page/:page` vers News (src/App.tsx).
+- Numéro validé strictement (entier sûr, 1 à 10 000) ; `/page/1` et zéros initiaux remplacés vers la forme canonique ; valeur invalide, page au-delà du total ou plage refusée par la base (PGRST103) : 404 noindex sans canonical.
+- Panne de lecture : 503 déclaré (prerender-status-code), noindex, sans canonical, bouton Réessayer ; distincte de la liste vide.
+- Ordre déterministe : published_at décroissant puis id.
+- Canonical propre par page de la liste complète, titre « , page N » ; vues filtrées : canonical `/actualites`.
+- Liens Précédent/Suivant/numéros en `<a href>` ; boutons désactivés sans href. Filtres et `lang` conservés ; changement de catégorie et réinitialisation reviennent en page 1 (réinitialisation ajoutée à l'historique).
+- Anciennes adresses `?page=N` : remplacement côté navigateur vers le chemin. Aucun 301 public garanti : le Worker réel peut retirer la query avant le SPA (limite observée, non résolue).
+- Prêt : verrou `prerenderMetaPending` posé au démarrage pour `/actualites` et `/actualites/page/N` (pas les articles), levé seulement quand la liste de la requête courante est affichée et la vitrine Vie locale lue ; une réponse ancienne ne s'affiche ni ne se déclare prête sous une autre page.
+
+Limites : Worker actif non lu ; comportement robot réel à mesurer après publication et recache ; un 5xx émis par le Worker lui-même n'est pas couvert.
