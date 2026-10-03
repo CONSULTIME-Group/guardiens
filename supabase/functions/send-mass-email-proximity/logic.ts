@@ -12,10 +12,12 @@
  *  2. réservation atomique par adresse (member_email_send_claims) juste avant
  *     l'envoi, contre double clic, requêtes simultanées et nouvelle tentative.
  */
-import { acquireMemberSendClaim, finishMemberSendClaim, memberSendOutcome } from "../_shared/member-email-send-claim.ts";
+import { finishMemberSendClaim, memberSendOutcome, type SendClaim } from "../_shared/member-email-send-claim.ts";
 import { NOT_RECEIVED_STATUSES } from "../_shared/mass-email-dedupe.ts";
 
 export const PROXIMITY_CLAIM_TEMPLATE = "mission-proximity-alert-v1";
+/** RPC dédiée : n'acquiert qu'une clé neuve ou « retryable », jamais une reprise sur ancienneté. */
+export const PROXIMITY_ACQUIRE_RPC = "acquire_proximity_send_claim";
 export const PAGE = 1000;
 export const IN_CHUNK = 50;
 
@@ -163,6 +165,48 @@ export interface DeliverReport {
   skippedAlready: number;
   skippedBusy: number;
   blocked: number;
+  /** Lignes mass_email_sends non écrites (panne du journal). */
+  journalFailed: number;
+  /** Réservations non finalisées (restent « sending », jamais reprises). */
+  finishFailed: number;
+  /** Vrai dès qu'une issue doit être vérifiée à la main. */
+  needsReconciliation: boolean;
+}
+
+type ProxAcquisition = { status: "acquired"; claim: SendClaim } | { status: "sent" | "busy" | "uncertain" | "unavailable" };
+
+/** Même dérivation de clé que _shared/member-email-send-claim.ts (clés existantes conservées). */
+export async function proximityClaimKey(email: string, missionId: string): Promise<string> {
+  const bytes = new TextEncoder().encode(JSON.stringify([
+    "member-email-v1", PROXIMITY_CLAIM_TEMPLATE, normalizeEmail(email), missionId,
+  ]));
+  const d = await crypto.subtle.digest("SHA-256", bytes);
+  return Array.from(new Uint8Array(d), (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+/** Absence ou erreur de la RPC dédiée = « unavailable » : aucun appel fournisseur. */
+export async function acquireProximityClaim(db: Db, email: string, missionId: string): Promise<ProxAcquisition> {
+  try {
+    const claim = { key: await proximityClaimKey(email, missionId), token: crypto.randomUUID() };
+    const { data, error } = await db.rpc(PROXIMITY_ACQUIRE_RPC, { p_claim_key: claim.key, p_owner_token: claim.token });
+    if (error) return { status: "unavailable" };
+    if (data === "acquired") return { status: "acquired", claim };
+    return { status: ["sent", "busy", "uncertain"].includes(data) ? data : "unavailable" };
+  } catch {
+    return { status: "unavailable" };
+  }
+}
+
+/** 2xx accepté seulement si le corps est un lot JSON avec un id fournisseur par email. */
+export function parseBatchIds(body: string, expected: number): string[] | null {
+  try {
+    const data = JSON.parse(body)?.data;
+    if (!Array.isArray(data) || data.length !== expected) return null;
+    const ids = data.map((d: { id?: unknown }) => d?.id);
+    return ids.every((id) => typeof id === "string" && id.length > 0) ? ids as string[] : null;
+  } catch {
+    return null;
+  }
 }
 
 async function sha256Hex(s: string): Promise<string> {
@@ -171,10 +215,11 @@ async function sha256Hex(s: string): Promise<string> {
 }
 
 /**
- * Réserve chaque adresse puis envoie par paquets. Un 2xx vaut envoi, un refus
- * 4xx explicite reste rejouable, tout le reste (réseau, 408, 409, 5xx) est
- * ambigu : la réservation n'est pas libérée et la ligne est notée « uncertain »,
- * statut qui compte comme reçu dans l'historique.
+ * Réserve chaque adresse puis envoie par paquets. Un 2xx avec tous les ids
+ * vaut envoi, un refus 4xx explicite reste rejouable, tout le reste (réseau,
+ * 408, 409, 5xx, 2xx illisible) est ambigu : réservation « uncertain », ligne
+ * « uncertain », réconciliation manuelle. La RPC dédiée ne reprend jamais une
+ * réservation « sending » ou « uncertain », quel que soit son âge.
  */
 export async function deliverProximity(
   deps: DeliverDeps,
@@ -183,17 +228,16 @@ export async function deliverProximity(
   const { db, sendBatch } = deps;
   const sleep = deps.sleep ?? ((ms: number) => new Promise((r) => setTimeout(r, ms)));
   const size = deps.batchSize ?? 100;
-  const rep: DeliverReport = { sent: 0, failed: 0, uncertain: 0, skippedAlready: 0, skippedBusy: 0, blocked: 0 };
+  const rep: DeliverReport = {
+    sent: 0, failed: 0, uncertain: 0, skippedAlready: 0, skippedBusy: 0, blocked: 0,
+    journalFailed: 0, finishFailed: 0, needsReconciliation: false,
+  };
 
   for (let i = 0; i < input.recipients.length; i += size) {
     const slice = input.recipients.slice(i, i + size);
-    const claimed: Array<{ r: ProxRecipient; claim: { key: string; token: string } }> = [];
+    const claimed: Array<{ r: ProxRecipient; claim: SendClaim }> = [];
     for (const r of slice) {
-      const a = await acquireMemberSendClaim(db, {
-        templateName: PROXIMITY_CLAIM_TEMPLATE,
-        recipientEmail: normalizeEmail(r.email),
-        idempotencyKey: input.missionId,
-      });
+      const a = await acquireProximityClaim(db, r.email, input.missionId);
       if (a.status === "acquired") claimed.push({ r, claim: a.claim });
       else if (a.status === "sent" || a.status === "uncertain") rep.skippedAlready++;
       else if (a.status === "busy") rep.skippedBusy++;
@@ -208,28 +252,39 @@ export async function deliverProximity(
     } catch (e) {
       res = { status: null, body: String(e) };
     }
-    const ok = res.status !== null && res.status >= 200 && res.status < 300;
-    const outcome: "sent" | "retryable" | "uncertain" = ok ? "sent" : res.status === null ? "uncertain" : memberSendOutcome(res.status);
-    let resendIds: (string | null)[] = [];
-    if (ok) {
-      try { resendIds = (JSON.parse(res.body)?.data ?? []).map((d: { id?: string }) => d?.id ?? null); } catch { /* accepté quand même */ }
-    }
+    const is2xx = res.status !== null && res.status >= 200 && res.status < 300;
+    const ids = is2xx ? parseBatchIds(res.body, claimed.length) : null;
+    const outcome: "sent" | "retryable" | "uncertain" = is2xx
+      ? (ids ? "sent" : "uncertain")
+      : res.status === null ? "uncertain" : memberSendOutcome(res.status);
     const rowStatus = outcome === "sent" ? "sent" : outcome === "retryable" ? "failed" : "uncertain";
     const rows = claimed.map((c, idx) => ({
       mass_email_id: input.campaignId,
       recipient_email: normalizeEmail(c.r.email),
-      resend_id: resendIds[idx] ?? null,
+      resend_id: ids?.[idx] ?? null,
       status: rowStatus,
-      error_message: ok ? null : `${res.status ?? "réseau"}: ${res.body.slice(0, 200)}`,
+      error_message: outcome === "sent" ? null
+        : is2xx ? `${res.status}: réponse sans ids fournisseur complets` : `${res.status ?? "réseau"}: ${res.body.slice(0, 200)}`,
     }));
-    const { error: insErr } = await db.from("mass_email_sends").insert(rows);
-    if (insErr) console.error("mass_email_sends insert error:", insErr);
-    for (const c of claimed) await finishMemberSendClaim(db, c.claim, outcome);
+    let insErr: unknown = null;
+    try {
+      ({ error: insErr } = await db.from("mass_email_sends").insert(rows));
+    } catch (e) {
+      insErr = e;
+    }
+    if (insErr) {
+      console.error("mass_email_sends insert error:", insErr);
+      rep.journalFailed += claimed.length;
+    }
+    for (const c of claimed) {
+      if (!(await finishMemberSendClaim(db, c.claim, outcome))) rep.finishFailed++;
+    }
     if (outcome === "sent") rep.sent += claimed.length;
     else if (outcome === "retryable") rep.failed += claimed.length;
     else rep.uncertain += claimed.length;
 
     if (i + size < input.recipients.length) await sleep(1000);
   }
+  rep.needsReconciliation = rep.uncertain + rep.journalFailed + rep.finishFailed + rep.skippedBusy > 0;
   return rep;
 }
