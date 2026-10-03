@@ -195,6 +195,18 @@ const ProjetsListing = () => {
 
         {loading ? (
           <div className="h-40" aria-busy="true" />
+        ) : loadError ? (
+          <section className="rounded-[2rem] border border-border bg-muted/50 p-8 md:p-12 max-w-3xl">
+            <h2 className="font-heading text-2xl md:text-3xl font-bold mb-4 text-foreground">
+              Les projets n'ont pas pu être chargés
+            </h2>
+            <p className="text-base leading-relaxed text-foreground/85 mb-6">
+              La connexion a échoué. Rechargez la page dans un instant pour voir les projets ouverts.
+            </p>
+            <Button className="rounded-full" onClick={() => window.location.reload()}>
+              Recharger la page
+            </Button>
+          </section>
         ) : emptyByRadius ? (
           <section className="rounded-[2rem] border border-border bg-muted/50 p-8 md:p-12 max-w-3xl">
             <h2 className="font-heading text-2xl md:text-3xl font-bold mb-4 text-foreground">
