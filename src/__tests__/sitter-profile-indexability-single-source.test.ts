@@ -50,4 +50,26 @@ describe("règle d'indexabilité des fiches gardien : source unique", () => {
     expect(isSitterProfileIndexable({ motivation: longBio, identityVerified: true })).toBe(true);
     expect(isSitterProfileIndexable({})).toBe(false);
   });
+
+  it("un role public proprietaire, absent ou inconnu reste noindex malgre une bio riche et la confiance", () => {
+    const rich = { bio: "a".repeat(80), identityVerified: true };
+    for (const role of ["owner", null, undefined, "inconnu"]) {
+      expect(isSitterProfileIndexable({ ...rich, role })).toBe(false);
+    }
+    for (const role of ["sitter", "both"]) {
+      expect(isSitterProfileIndexable({ ...rich, role })).toBe(true);
+      expect(isSitterProfileIndexable({ ...rich, role, bio: "a".repeat(79) })).toBe(false);
+      expect(isSitterProfileIndexable({ ...rich, role, identityVerified: false })).toBe(false);
+    }
+  });
+
+  it("les deux lectures du profil et le sitemap transmettent le role a la regle partagee", () => {
+    const page = read("src/pages/PublicSitterProfile.tsx");
+    for (const name of ["PUBLIC_PROFILE_COLS", "BASE_PROFILE_COLS"]) {
+      const cols = page.match(new RegExp(`${name}\\s*=\\s*"([^"]+)"`))?.[1].split(",").map(s => s.trim());
+      expect(cols).toContain("role");
+    }
+    expect(page).toMatch(/isSitterProfileIndexable\(\{\s*role: profile\?\.role,/);
+    expect(read("scripts/generate-sitemap.mjs")).toMatch(/isSitterProfileIndexable\(\{\s*role: p\.role,/);
+  });
 });

@@ -657,10 +657,10 @@ export default function PublicSitterProfile() {
       // La vue publique `public_profiles` est lisible par tout visiteur ;
       // `profiles` reste réservé au propriétaire du profil.
       const PUBLIC_PROFILE_COLS =
-        "id, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, completed_sits_count, last_seen_at, departement_code, certifications";
+        "id, role, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, completed_sits_count, last_seen_at, departement_code, certifications";
       // `last_name` retiré du select, jamais rendu publiquement.
       const BASE_PROFILE_COLS =
-        "id, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, profile_completion, completed_sits_count, cancellation_count, hero_image_index";
+        "id, role, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, profile_completion, completed_sits_count, cancellation_count, hero_image_index";
 
       // Vue publique : alignée sur les entrées scorées du moteur (symétrie
       // du 23/08/2026), sauf sensitivities (donnée de santé, jamais exposée).
@@ -1363,6 +1363,7 @@ export default function PublicSitterProfile() {
   // puissent pas diverger. Aucun `Disallow` ne doit être posé sur `/gardiens` :
   // il empêcherait Google de voir le noindex des fiches non éligibles.
   const isRichProfile = isSitterProfileIndexable({
+    role: profile?.role,
     bio,
     motivation,
     identityVerified: profile?.identity_verified,

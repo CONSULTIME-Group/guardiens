@@ -1,4 +1,5 @@
 export interface SitterIndexabilityInput {
+  role?: string | null;
   bio?: string | null;
   motivation?: string | null;
   identityVerified?: boolean | null;

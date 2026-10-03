@@ -48,9 +48,11 @@ export function hasSitterTrustSignal(input) {
 
 /**
  * Règle complète : bio substantielle ET signal de confiance.
- * @param {{ bio?: string | null, motivation?: string | null, identityVerified?: boolean | null, galleryCount?: number | null }} input
+ * Les lectures publiques passent aussi le role, comme le filtre du sitemap.
+ * @param {{ role?: string | null, bio?: string | null, motivation?: string | null, identityVerified?: boolean | null, galleryCount?: number | null }} input
  * @returns {boolean}
  */
 export function isSitterProfileIndexable(input) {
+  if (input && "role" in input && input.role !== "sitter" && input.role !== "both") return false;
   return hasSubstantialSitterBio(input) && hasSitterTrustSignal(input);
 }
