@@ -122,6 +122,10 @@ const PageMeta = ({
     // Bloque Prerender.io le temps que le canonical soit injecté.
     // Sera flippé à true en fin d'effect (voir plus bas).
     (window as any).prerenderReady = false;
+    // Lecture en cours (ready faux) : verrou explicite, sinon le repli à 10 s
+    // de main.tsx pourrait lever le drapeau sur un squelette ou sur les
+    // métadonnées d'une lecture précédente (réessai, changement de page).
+    if (ready === false) window.prerenderMetaPending = true;
 
     const upsertMetaTag = ({ attr, key, content }: { attr: "name" | "property"; key: string; content: string }) => {
       document.head.querySelectorAll(`meta[${attr}="${key}"]`).forEach((node) => node.remove());
@@ -229,9 +233,9 @@ const PageMeta = ({
       removeMetaTag({ attr: "property", key: "article:author" });
     }
 
-    if (jsonLd) {
-      upsertJsonLd(Array.isArray(jsonLd) ? jsonLd : [jsonLd]);
-    }
+    // Sans JSON-LD, les blocs d'un rendu précédent sont retirés (aucune
+    // ItemList obsolète laissée dans le head).
+    upsertJsonLd(jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : []);
 
     // Record snapshot for /admin/seo-debug
     logSeoSnapshot({

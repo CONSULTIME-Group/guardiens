@@ -56,7 +56,8 @@ const container = document.getElementById("root")!;
 // seulement une fois la liste affichée par News.tsx). Les articles
 // /actualites/:slug ne sont pas concernés.
 // Expression unique (plafond de taille du démarrage).
-const LATE_META_PATH = /^\/(gardiens\/|projets\/|actualites(\/page\/|\/?$))/;
+// Ajouts SEO-4 : /guides (liste) et /departement/:slug.
+const LATE_META_PATH = /^\/(gardiens\/|projets\/|departement\/.|guides\/?$|actualites(\/page\/|\/?$))/;
 
 // Ce module ne s'exécute que dans le navigateur (document lu plus haut).
 if (LATE_META_PATH.test(location.pathname)) {
