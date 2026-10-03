@@ -92,8 +92,11 @@ Voir section 1. Annonces, entraide, projets, associations, races, questions et a
 - **Production** : `/projets/e5724f3e-…` 200 `index, follow`, canonical vers lui-même (10:52:51). Deux URL indexables pour une fiche.
 - **Correction minimale** : canonical vers `/projets/{slug}` quand le slug existe.
 
-### P1-7. FAQPage déclarée mais absente du texte servi
-Google exige que le contenu FAQ balisé soit visible sur la page (https://developers.google.com/search/docs/appearance/structured-data/faqpage). Contrôle : chaque question du JSON-LD recherchée (40 premiers caractères) dans le texte HTML servi, hors `<noscript>`.
+### P2-8 (anciennement P1-7). FAQPage déclarée mais absente du texte servi, qualité des données structurées
+- **Contexte Google (contre-audit ChatGPT, vérification documentaire du 03/10/2026)** : l'ancienne page FAQPage (`/search/docs/appearance/structured-data/faqpage`) redirige vers https://developers.google.com/search/updates. Le journal des changements du 08/05/2026 indique l'arrêt des résultats enrichis FAQ depuis le 07/05/2026 et la suppression de cette documentation le 15/06/2026.
+- **Portée** : défaut de fidélité du balisage au contenu visible, pas une perte d'éligibilité à un résultat enrichi FAQ, qui n'est plus offert. Aucun gain de résultat enrichi ni aucune pénalité de classement n'est démontré ou promis.
+- **Règle appliquée** : le balisage doit décrire un contenu visible par l'utilisateur sur la page (https://developers.google.com/search/docs/appearance/structured-data/sd-policies, lignes 156 à 166 selon le contre-audit).
+- **Contrôle** : chaque question du JSON-LD recherchée (40 premiers caractères) dans le texte HTML servi, hors `<noscript>`.
 
 | Page | Questions absentes | Cause en code |
 |---|---|---|
@@ -102,8 +105,10 @@ Google exige que le contenu FAQ balisé soit visible sur la page (https://develo
 | /observatoire-garde-animaux | 4/4 | `Observatoire.tsx:236` : schéma seul ; confirmé sur le HTML servi |
 | /devenir-home-sitter | 5/5 (formulation) | questions visibles avec un autre libellé (`DevenirHomeSitter.tsx:186`), certaines questions du schéma probablement absentes |
 
+Confirmé aussi par le contre-audit ChatGPT (HTTP, texte hors script, style et noscript) : /races/dog-cane-corso 4/4 questions absentes, /departement/indre-et-loire 2/2.
+
 Les 12 autres pages avec FAQPage de l'échantillon (/, /faq, /tarifs, entraide, villes, guides, associations…) : 0 question absente.
-Correction minimale : afficher ces questions, ou retirer le schéma là où elles ne sont pas visibles. Note : la réponse département contient « 0 € » alors que la règle éditoriale impose « gratuit ».
+Prochain correctif de qualité : aligner le schéma sur des questions affichées, ou le retirer là où elles ne le sont pas. Note : la réponse département contient « 0 € » alors que la règle éditoriale impose « gratuit ».
 
 ## P2, mineur ou à confirmer
 
@@ -204,7 +209,7 @@ Préparation du code et des tests : possible sans attente. Mise en production, p
 1. **Lot A, projets** : `STATIC_SEO_URLS` + /projets et /petites-missions (P0-1) ; PageMeta 404 dans la branche « projet introuvable » (P1-8) ; canonical slug sur /projets/{uuid} (P1-6) ; règle de redirection de l'ancienne adresse (P0-2). Mise en ligne puis recache ciblé de 4 URL.
 2. **Lot C, plan du site** : pagination, lastmod, source unique avec test de parité (P1-2, P1-3, P1-4).
 3. **Lot D, invalidation** : marquage des familles annonces, entraide, projets, associations, races (P1-5), dans le budget mensuel existant. Exige une migration (déclencheurs).
-4. **Lot E, données structurées** : FAQ visibles ou retirées (P1-7), doublons stricts de fils d'Ariane supprimés (section 3).
+4. **Lot E, données structurées** : FAQ alignées ou schéma retiré (P2-8, qualité), doublons stricts de fils d'Ariane supprimés (section 3).
 5. **Lot F, maillage** : pagination /actualites traitée en un seul lot (liens `<a href>`, paramètre `page` conservé par la normalisation et par le Worker, canonical par page) ; navigation du bandeau en liens ; liens HTML vers les fiches de garde sur /annonces ; lien /guides-locaux remplacé par /guides ; /races et /projets reliés depuis l'accueil, après mesure complète.
 6. P2 restants.
 
@@ -213,7 +218,7 @@ Préparation du code et des tests : possible sans attente. Mise en production, p
 - Plan du site : 673 URL (`/tmp/seo/urls.txt`). Par famille : actualites 101, house-sitting 161, departement 98, guides 95, gardiens 81, races 77, petites-missions 16, associations 11, annonces 9, auteurs 2, projets 1, hubs et fixes 21.
 - Agent navigateur : 673/673 en 200. Agent Googlebot : 61 URL, dont 54 en 200 indexables, 3 en 404 attendus, 4 en `noindex` attendus ou défaut (/projets, /projets/, /recherche, /search), 6 coquilles sans `meta robots`.
 - Fils d'Ariane : 13 pages sur 61 avec 2 blocs, dont 5 identiques et 8 divergents.
-- FAQPage : 16 pages ; 4 familles avec questions absentes du texte servi.
+- FAQPage : 16 pages ; 4 familles avec questions absentes du texte servi (P2-8).
 - Reproduire : `python3 /tmp/seo/crawl.py urls.txt "<UA>" 6` et `python3 /tmp/seo2/deep.py` (2 simultanées, lit `google.jsonl`).
 
 ## Annexe B, extraits de preuve (sans donnée membre)
