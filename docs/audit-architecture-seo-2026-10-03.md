@@ -17,7 +17,6 @@ Heures issues des dates de fichiers et de la commande `date -u`. Aucune heure n'
 | 10:49:14 | Première version de ce rapport | |
 | 10:52:45 à 10:52:53 | Relecture des mêmes 61 URL, agent Googlebot, 2 simultanées, pour garder liens `<a href>`, JSON-LD complets et texte | `/tmp/seo2/deep.jsonl`, script `deep.py` |
 | 03/10/2026, heure exacte non conservée | Requêtes SELECT : `prerender_family_state`, `prerender_recache_log`, déclencheurs `pg_trigger` | ci-dessous |
-
 | 11:02:03 à 11:02:04 | 5 URL, agent Googlebot : /projets/audit-inexistant-20261003, /actualites, /actualites?page=2, /annonces, /guides-locaux | `/tmp/seo2/art1`, `art2` |
 
 Aucun crawl Googlebot des 673 URL. Aucun lien d'action d'email ni aucun jeton visité.
