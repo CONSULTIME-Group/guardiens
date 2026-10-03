@@ -314,3 +314,45 @@ Une fois un préalable rempli, et après GO :
 **Tests (03/10/2026, 11:24 puis revues)** : `seo2-projets.test.tsx` 21/21 à la revue finale (20/20 avant l'ajout du test `PageMeta` réelle) (dont rejet de la lecture auteur, réponses A/B dans le désordre, ancien canonical jamais émis pendant le chargement de B, démontage, « Réessayer ») ; `static-seo-refresh_test.ts` (Deno) 10/10 ; tests voisins 53/53 au premier passage ; `deno check` des deux fonctions : propre. Types du site : propres après retrait d'une annotation `@ts-expect-error` devenue inutile dans `robots-groups.test.ts` (aucun changement de règle robots). Types du site propres à la revue finale.
 
 **Search Console (GSC Wizard)** : installé et activé (ENABLED), mais aucun outil GSC Wizard n'est exposé dans cette conversation ; compte Google et propriété Guardiens NON VÉRIFIÉS ici. L'historique Baromètre confirme que des données GSC ont été lues depuis une autre conversation : aucune panne ni problème de droits GSC général n'est diagnostiqué. Indexation réelle toujours NON VÉRIFIÉE dans cet audit.
+
+## 9. Périmètre activé, états exacts (03/10/2026, UTC)
+
+Cette section remplace, pour le périmètre ci-dessous, le statut « préparé, non publié » des sections 7 et 8. Les autres constats restent valables.
+
+| Élément | État exact | Preuve |
+|---|---|---|
+| Migration `acquire_proximity_send_claim` | Appliquée par ChatGPT en transaction, avant le déploiement | Relecture SQL après application : SECURITY DEFINER, search_path `public, pg_temp` ; EXECUTE anon = false, authenticated = false, service_role = true. La fonction globale `acquire_member_email_send_claim` n'est pas modifiée. Fichier préparé conservé à sa place, en-tête mis à jour, aucune instruction SQL changée. |
+| Fonctions Edge | `send-mass-email-proximity`, `detect-deploy-and-mark-dirty`, `consume-seo-dirty` déployées de 11:53:56 à 11:54:22 | Réponse de l'outil : « Successfully deployed edge functions », sans erreur. Aucune autre fonction déployée. |
+| Frontend | Commit ac83d177 publié (après correction du libellé admin et allègement de main.tsx), visible à 12:20:23 | `assets/index-DpUwjLsc.js` servi sur guardiens.lovable.app et guardiens.fr (ancien `index-Dre1sw59.js` encore servi à 12:19:53) ; robots.txt identique octet pour octet à `public/robots.txt` sur les deux hôtes ; types du site sans erreur. |
+| SEO-1 robots | Publié | Voir ligne précédente. |
+| Recache ciblé | **Non exécuté** | `prerender-recache` à 12:20:30 : HTTP 401 `UNAUTHORIZED_NO_AUTH_HEADER` ; session à l'adresse du demandeur : « no auth user matches the requesting user's email » ; session admin : « requires user approval, which is unavailable in this context ». Aucune session admin obtenue, aucune purge ni recache. Le GO de Jérémie couvre les corrections, il ne lève pas l'exigence d'authentification admin de l'outil. |
+
+### Matrice Googlebot avant recache (12:20:55 à 12:21:00, sans suivre les redirections)
+
+| URL | HTTP réel | Location | Meta robots | Canonical | Titre / H1 | Copie |
+|---|---|---|---|---|---|---|
+| /projets | 200 | aucune | index, follow | /projets | « Des projets à réaliser ensemble », lien vers le projet présent | à jour |
+| /petites-missions | 200 | aucune | index, follow | /petites-missions | « Un coup de main près de chez vous » | à jour |
+| /projets/chantier-participatif-de-plantation | 200 | aucune | index, follow | elle-même | « Plantons ensemble à La Rochelle » | à jour |
+| /projets/e5724f3e-c22b-4fb9-8962-d24c80435660 | 200 | aucune | index, follow | elle-même (UUID) | Plantons ensemble… | **ancienne** |
+| /petites-missions/chantier-participatif-de-plantation | 200 | **aucune** | index, follow | elle-même | ancien titre « Chantier participatif de plantation » | **ancienne** |
+| /petites-missions/e5724f3e-c22b-4fb9-8962-d24c80435660 | 200 | **aucune** | index, follow | ancienne adresse /petites-missions/… | ancien titre | **ancienne** |
+| /projets/audit-inexistant-122055 (inédite) | **404** | aucune | noindex, follow | aucune | « Projet introuvable » | rendu neuf |
+| /robots.txt | 200 | aucune | sans objet | sans objet | identique au dépôt | à jour |
+
+- En-têtes observés : `x-prerender-requestid` et `x-prerender-user-id` seulement, aucun `X-Prerender-Status`. Aucune meta `prerender-status-code` lue dans les copies servies.
+- Le vrai HTTP 404 de l'URL inédite montre que le statut déclaré 404 est appliqué pour un rendu neuf.
+- **301 non validé en HTTP** : les deux anciennes routes sont encore servies depuis l'ancienne copie. Un statut 301 déclaré par PageMeta n'est pas compté comme servi.
+- **503 non promis** : tant que le script Worker actif n'est pas lu, aucune réponse HTTP 503 n'est affirmée.
+
+### Navigateur (rendu JS, 12:21 UTC)
+- /projets : canonical /projets, index, prerenderReady vrai.
+- /projets/{uuid} : canonical /projets/chantier-participatif-de-plantation.
+- /petites-missions/chantier-participatif-de-plantation : redirection côté navigateur vers /projets/chantier-participatif-de-plantation.
+- Passage A vers B : non testé en production (un seul projet en ligne) ; couvert par la revue automatisée antérieure (21/21), non relancée le 03/10.
+
+### Trois URL non résolues
+`/projets/e5724f3e-…`, `/petites-missions/chantier-participatif-de-plantation`, `/petites-missions/e5724f3e-…` : anciennes copies servies aux robots. Résolution : recache ciblé depuis une session admin authentifiée, puis nouveau GET Googlebot pour confirmer canonical et 301 réels.
+
+### Search Console
+Le complément HTML vérifié via GSC Wizard, produit dans un autre workflow, fait foi pour Search Console : 2 propriétés en siteOwner lisibles, 25 inspections ciblées, 426 clics et 31 293 impressions du 02/09 au 29/09/2026, sitemap de 673 URL sans erreur. Il ne fournit pas ici de canonical choisi par Google ni de Core Web Vitals : non renseignés dans ce rapport. Les précisions historiques des sections précédentes sont conservées.
