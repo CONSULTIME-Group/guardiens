@@ -32,7 +32,7 @@ const GuidesListing = () => {
   const [search, setSearch] = useState("");
   const [selectedDept, setSelectedDept] = useState("all");
 
-  const { data: guides = [], isLoading, isError } = useQuery({
+  const { data: guides = [], isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: ["city-guides-listing"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -93,12 +93,19 @@ const GuidesListing = () => {
 
   return (
     <>
-      <PageMeta
-        title={t("guides.meta_title")}
-        description={t("guides.meta_description")}
-        path="/guides"
-        ready={!isLoading}
-      />
+      {isError ? (
+        // Panne de lecture : 503 déclaré, noindex, sans canonical (même
+        // mécanisme que le journal). Une liste vide reste une page normale.
+        // Pendant un réessai, verrou de prérendu maintenu (ready faux).
+        <PageMeta title={t("guides.meta_title")} description={t("guides.meta_description")} path="/guides" noindex statusCode={503} noCanonical ready={!isFetching} />
+      ) : (
+        <PageMeta
+          title={t("guides.meta_title")}
+          description={t("guides.meta_description")}
+          path="/guides"
+          ready={!isLoading}
+        />
+      )}
 
       <div className="bg-background">
         <PageBreadcrumb items={[{ label: t("guides.breadcrumb") }]} />
@@ -149,7 +156,10 @@ const GuidesListing = () => {
               ))}
             </div>
           ) : isError ? (
-            <p className="text-center text-muted-foreground py-12">Les guides n'ont pas pu être chargés. Réessayez dans un instant.</p>
+            <div className="text-center py-12 space-y-4">
+              <p className="text-muted-foreground">Les guides n'ont pas pu être chargés. Réessayez dans un instant.</p>
+              <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>Réessayer</Button>
+            </div>
           ) : filteredGuides.length === 0 ? (
             <p className="text-center text-muted-foreground py-12">
               {guides.length === 0 ? t("guides.empty_default") : t("guides.empty_search")}
