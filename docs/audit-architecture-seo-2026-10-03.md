@@ -361,4 +361,10 @@ Le complément HTML vérifié via GSC Wizard, produit dans un autre workflow, fa
 - Jérémie s'est déclaré connecté en admin. État reçu par l'agent au début du tour : `LOVABLE_BROWSER_AUTH_STATUS=signed_out` (aucune session de préversion transmise).
 - Appel unique à `prerender-recache` (6 URL) à 12:33:4x : HTTP 401 `UNAUTHORIZED_NO_AUTH_HEADER`, comme à 12:20:30. Aucune nouvelle tentative, aucune session sur un autre compte.
 - Relecture Googlebot sans redirection, 12:33:54 à 12:33:55 : les trois URL restent sur l'ancienne copie (HTTP 200, aucune Location ; /projets/{uuid} canonical vers lui-même ; les deux routes /petites-missions/… avec l'ancien titre).
-- Cause probable : la session admin est ouverte sur le site publié, alors que l'outil n'injecte que la session de la préversion Lovable. Le compte Lovable du demandeur n'a pas d'utilisateur correspondant dans l'application.
+- Jérémie a confirmé sa connexion admin après la demande d'ouvrir la préversion. Le connecteur a pourtant reçu `signed_out` : blocage du mécanisme de transmission, cause NON VÉRIFIÉE (aucune erreur utilisateur démontrée).
+
+### Capacités inspectées en lecture (03/10/2026, 12:35 à 12:40 UTC)
+- `supabase--curl_edge_functions` : paramètres path, method, headers, body, query_params. Il injecte seulement la session de préversion si elle existe ; aucune option service_role.
+- CLI `lovable` : `supabase` est en lecture seule (analytics, function-logs, info, linter, query, slow-queries), sans invocation de fonction. `auth-session --self` : aucun utilisateur de l'application ne correspond au compte Lovable du demandeur ; `--user` exige une approbation, non disponible. `preview execute-js` : `preview_bridge_unreachable` (aucun onglet de préversion joint).
+- Aucun outil standard n'invoque une fonction en service_role avec des identifiants gérés par la plateforme. Aucun secret lu, aucun jeton fabriqué, aucun réglage d'authentification ni fonction modifiés.
+- Écran admin existant : `/admin/prerender` (« Instantanés des pages »), champ « URLs/chemins supplémentaires », bouton « Lancer le re-snapshot ». Il appelle `prerender-recache-pending` avec `{ urls }` ; dans ce cas la fonction recache chaque URL et répond par URL `{url, ok, status, error}` sans aucune écriture en base (retour anticipé, lignes 63 à 71). Recache via cet écran : non exécuté à ce jour.
