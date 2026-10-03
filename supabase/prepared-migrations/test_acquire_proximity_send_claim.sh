@@ -2,7 +2,7 @@
 # Test SQL inerte : PostgreSQL jetable dans /tmp, aucune base réelle touchée.
 # Usage : bash supabase/prepared-migrations/test_acquire_proximity_send_claim.sh
 set -euo pipefail
-if [ "$(id -u)" = 0 ]; then exec su nobody -s /bin/bash -c "bash \"$0\""; fi
+if [ "$(id -u)" = 0 ]; then exec setpriv --reuid=65534 --regid=65534 --clear-groups env HOME=/tmp bash "$0"; fi
 HERE="$(cd "$(dirname "$0")" && pwd)"
 DIR="$(mktemp -d /tmp/pgprox.XXXX)"
 PORT=55439
