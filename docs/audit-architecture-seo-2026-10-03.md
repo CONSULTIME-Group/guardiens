@@ -306,10 +306,10 @@ Préparé et testé dans le dépôt après le GO de Jérémie pour le lot SEO. R
 
 Une fois un préalable rempli, et après GO :
 1. Publication du site (code client).
-3. Déploiement ciblé de `detect-deploy-and-mark-dirty` et `consume-seo-dirty` (elles importent la liste partagée modifiée). Aucune migration SEO.
-4. La mise en ligne détectée marque les 8 pages statiques ; /projets et /petites-missions passent au passage suivant du cron (15 min), journalisées dans `prerender_recache_log` par `consume-seo-dirty`.
-5. Recache ciblé ponctuel : `/projets/chantier-participatif-de-plantation`, `/projets/e5724f3e-c22b-4fb9-8962-d24c80435660`, `/petites-missions/chantier-participatif-de-plantation`, `/petites-missions/e5724f3e-c22b-4fb9-8962-d24c80435660`, par la fonction `prerender-recache` existante (réservée administrateur ou compte de service). Elle n'écrit RIEN en base (journal console seulement) : conserver la réponse de l'appel (statut par URL) comme trace d'activation.
-6. GET de contrôle Googlebot en lecture : statut servi, `meta robots`, canonical, `Location`, en-tête `X-Prerender-Status`.
+2. Déploiement ciblé de `detect-deploy-and-mark-dirty` et `consume-seo-dirty` (elles importent la liste partagée modifiée). Aucune migration SEO.
+3. La mise en ligne détectée marque les 8 pages statiques ; /projets et /petites-missions passent au passage suivant du cron (15 min), journalisées dans `prerender_recache_log` par `consume-seo-dirty`.
+4. Recache ciblé ponctuel : `/projets/chantier-participatif-de-plantation`, `/projets/e5724f3e-c22b-4fb9-8962-d24c80435660`, `/petites-missions/chantier-participatif-de-plantation`, `/petites-missions/e5724f3e-c22b-4fb9-8962-d24c80435660`, par la fonction `prerender-recache` existante (réservée administrateur ou compte de service). Elle n'écrit RIEN en base (journal console seulement) : conserver la réponse de l'appel (statut par URL) comme trace d'activation.
+5. GET de contrôle Googlebot en lecture : statut servi, `meta robots`, canonical, `Location`, en-tête `X-Prerender-Status`.
 
 **Tests (03/10/2026, 11:24 puis revues)** : `seo2-projets.test.tsx` 21/21 à la revue finale (20/20 avant l'ajout du test `PageMeta` réelle) (dont rejet de la lecture auteur, réponses A/B dans le désordre, ancien canonical jamais émis pendant le chargement de B, démontage, « Réessayer ») ; `static-seo-refresh_test.ts` (Deno) 10/10 ; tests voisins 53/53 au premier passage ; `deno check` des deux fonctions : propre. Types du site : propres après retrait d'une annotation `@ts-expect-error` devenue inutile dans `robots-groups.test.ts` (aucun changement de règle robots). Types du site propres à la revue finale.
 
