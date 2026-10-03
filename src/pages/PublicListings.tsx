@@ -102,7 +102,9 @@ export default function PublicListings() {
         .eq("status", "published")
         .order("created_at", { ascending: false })
         .limit(20);
-      if (cancelled || !data || data.length === 0) return;
+      if (cancelled) return;
+      setItemListSettled(true);
+      if (!data || data.length === 0) return;
       setItemListLd({
         "@context": "https://schema.org",
         "@type": "ItemList",
@@ -142,7 +144,7 @@ export default function PublicListings() {
         path="/annonces"
         canonical={CANONICAL}
         jsonLd={jsonld}
-        ready={itemListLd !== null}
+        ready={listSettled && itemListSettled}
       />
 
       <PublicHeader />
@@ -222,7 +224,7 @@ export default function PublicListings() {
             </div>
           }
         >
-          <SearchSitter mode="public" />
+          <SearchSitter mode="public" onFirstSearchSettled={onListSettled} />
         </Suspense>
 
         <PastListingsSection />

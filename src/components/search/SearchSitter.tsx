@@ -84,9 +84,15 @@ interface SearchSitterProps {
    * OutOfZoneBanner), annonces passées masquées.
    */
   mode?: "internal" | "public";
+  /**
+   * Appelé une seule fois quand la première recherche est terminée (liste
+   * affichée, vide ou en erreur). Permet à la page /annonces de ne signaler
+   * « prête » au prérendu qu'une fois les cartes et leurs liens présents.
+   */
+  onFirstSearchSettled?: () => void;
 }
 
-const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
+const SearchSitter = ({ mode = "internal", onFirstSearchSettled }: SearchSitterProps = {}) => {
   const isPublic = mode === "public";
  const { user } = useAuth();
  const { hasAccess } = useSubscriptionAccess();
@@ -438,8 +444,18 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
 
 
 
+ // Fin de la première recherche, relayée une fois au parent après rendu.
+ const [firstSearchSettled, setFirstSearchSettled] = useState(false);
+ const settledNotifiedRef = useRef(false);
+ useEffect(() => {
+   if (!firstSearchSettled || settledNotifiedRef.current) return;
+   settledNotifiedRef.current = true;
+   onFirstSearchSettled?.();
+ }, [firstSearchSettled, onFirstSearchSettled]);
+
  // Auto-search when filters change (debounced)
  const doSearch = useCallback(async () => {
+ try {
  setLoading(true);
   setSearchError(null);
   setResultsTruncated(false);
@@ -458,6 +474,9 @@ const SearchSitter = ({ mode = "internal" }: SearchSitterProps = {}) => {
  }
  }
  setLoading(false);
+ } finally {
+   setFirstSearchSettled(true);
+ }
  // Déps FETCH RÉSEAU uniquement : sous-onglets, ville/lieu, rayon, zone, dates.
  // Les filtres purement clients (housing, verified, animaux, durée, urgence, tri…)
  // sont appliqués par le useMemo `results`/`availableMembers` sans refetch.
