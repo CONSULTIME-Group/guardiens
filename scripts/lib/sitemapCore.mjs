@@ -5,9 +5,10 @@
  *
  * Lecture paginée : chaque source est lue par tranches `range()` triées sur
  * une clé unique, avec contrôle d'erreur par page, du nombre total annoncé,
- * des répétitions et d'un plafond de pages. La pagination n'est PAS une
- * photographie transactionnelle : une écriture concurrente entre deux pages
- * fait échouer le contrôle du total ou des clés, elle n'est jamais masquée.
+ * des répétitions et d'un plafond de pages. Ce n'est PAS une photographie
+ * cohérente : une écriture concurrente qui change le total ou fait réapparaître
+ * une clé est détectée, mais une insertion et une suppression entre deux pages
+ * à total constant, sans doublon, peuvent passer inaperçues.
  */
 import ts from "typescript";
 
@@ -22,6 +23,7 @@ export const PAGE_SIZE = 1000;
  * @param {string} p.key clé unique de tri
  */
 export async function fetchAllPages({ source, page, key, pageSize = PAGE_SIZE }) {
+  if (!Number.isInteger(pageSize) || pageSize <= 0) throw new Error(`${source}: taille de page invalide`);
   const rows = [];
   const seen = new Set();
   let expected = null;
@@ -35,7 +37,7 @@ export async function fetchAllPages({ source, page, key, pageSize = PAGE_SIZE })
     }
     if (!Array.isArray(res.data)) throw new Error(`${source}: page ${i + 1} sans tableau`);
     if (i === 0) {
-      if (typeof res.count !== "number") throw new Error(`${source}: total non fourni`);
+      if (!Number.isSafeInteger(res.count) || res.count < 0) throw new Error(`${source}: total non fourni ou invalide`);
       expected = res.count;
       maxPages = Math.ceil(expected / pageSize) + 1;
     }
@@ -64,16 +66,47 @@ export function supabasePage(client, table, columns, key, build = (q) => q) {
   };
 }
 
-/** Date AAAA-MM-JJ valide, non future, sinon null (balise omise). */
-export function normalizeLastmod(value, todayIso) {
-  if (value == null || value === "") return null;
-  const s = String(value);
-  const day = s.slice(0, 10);
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) return null;
+const DATE_ONLY = /^(\d{4})-(\d{2})-(\d{2})$/;
+const TIMESTAMP = /^(\d{4}-\d{2}-\d{2})[T ](\d{2}):(\d{2})(?::(\d{2})(\.\d{1,6})?)?(Z|[+-]\d{2}(?::?\d{2})?)?$/;
+
+function nowMs(now) {
+  if (now instanceof Date) return now.getTime();
+  if (typeof now === "string" && DATE_ONLY.test(now)) return Date.parse(`${now}T23:59:59.999Z`);
+  return Date.now();
+}
+
+function validDay(day) {
   const d = new Date(`${day}T00:00:00Z`);
-  if (Number.isNaN(d.getTime()) || d.toISOString().slice(0, 10) !== day) return null;
-  if (todayIso && day > todayIso) return null;
-  return day;
+  return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === day;
+}
+
+/**
+ * Date de contenu normalisée en AAAA-MM-JJ (UTC), ou null (balise omise).
+ * La valeur source ENTIÈRE doit être une date AAAA-MM-JJ ou un horodatage
+ * ISO 8601 / PostgreSQL valable ; tout suffixe parasite est refusé. Une date
+ * postérieure à `now` (instant de début du build) est refusée, à la
+ * milliseconde près pour un horodatage.
+ */
+export function normalizeLastmod(value, now) {
+  if (value == null) return null;
+  const s = String(value).trim();
+  const limit = nowMs(now);
+  if (DATE_ONLY.test(s)) {
+    if (!validDay(s)) return null;
+    return Date.parse(`${s}T00:00:00Z`) > limit ? null : s;
+  }
+  const m = TIMESTAMP.exec(s);
+  if (!m) return null;
+  const [, day, hh, mi, ss = "00", frac = "", tzRaw] = m;
+  if (!validDay(day) || +hh > 23 || +mi > 59 || +ss > 59) return null;
+  let tz = tzRaw ?? "Z";
+  if (tz !== "Z") {
+    const t = tz.replace(":", "");
+    tz = `${t.slice(0, 3)}:${t.length > 3 ? t.slice(3, 5) : "00"}`;
+  }
+  const ms = Date.parse(`${day}T${hh}:${mi}:${ss}${frac.slice(0, 4)}${tz}`);
+  if (Number.isNaN(ms) || ms > limit) return null;
+  return new Date(ms).toISOString().slice(0, 10);
 }
 
 /**
@@ -175,4 +208,25 @@ export function readStaticRoutes(source) {
       .filter((r) => r.path && r.sitemapPriority && r.changeFreq)
       .map((r) => ({ loc: r.path, priority: r.sitemapPriority, changefreq: r.changeFreq, indexable: r.index !== false })),
   };
+}
+
+/**
+ * Clé d'invalidation composite `date|nombre`. Si l'une des deux sondes échoue,
+ * la clé est null (relecture complète) : une clé partielle ne prouve pas la
+ * stabilité. Une source réellement vide donne `no-date|0`.
+ */
+export async function probeCompositeKey(client, table, column, filter = null) {
+  const withFilter = (q) => (filter ? filter(q) : q);
+  try {
+    const [d, c] = await Promise.all([
+      withFilter(client.from(table).select(column)).order(column, { ascending: false }).limit(1),
+      withFilter(client.from(table).select("id", { count: "exact" })).limit(1),
+    ]);
+    if (!d || d.error || !Array.isArray(d.data)) return null;
+    if (!c || c.error || !Number.isSafeInteger(c.count) || c.count < 0) return null;
+    const date = d.data[0]?.[column] ?? null;
+    return `${date ?? "no-date"}|${c.count}`;
+  } catch {
+    return null;
+  }
 }
