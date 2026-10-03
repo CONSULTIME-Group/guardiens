@@ -268,3 +268,30 @@ Source indiquée pour chaque point : « vérifié ici » (commande et heure) ou 
 - **Pages noindex** : /login, /inscription, /search, /recherche, /recherche-gardiens et /gardiens/* restent explorables ; le générateur refuse ces chemins exacts (et leur forme avec barre finale) dans les chemins privés, et `index: false` n'est plus traduit en Disallow. Ce garde-fou ne couvre pas toutes les variantes glob (par exemple `/gardiens/*`) : les tests vérifient le fichier produit, pas toute règle future.
 - **Lecture des routes** : `SITE_URL` et `privateDisallowPaths` lus par l'arbre syntaxique TypeScript (`scripts/robots-lib.mjs`) ; `staticRoutes` n'est plus lu par ce générateur.
 - **Tests** : `src/__tests__/robots-groups.test.ts`, 33 cas, plus les 4 tests existants `sitter-profile-indexability-single-source.test.ts`, soit 37/37 passés le 03/10 à 11:01:46 ; `generate-robots:check` passé.
+
+## 8. SEO-2 projets préparé (non publié, 03/10/2026)
+
+Préparé et testé dans le dépôt après le GO de Jérémie pour le lot SEO. Rien n'est publié, déployé, purgé ni recaché. Le correctif proximité, le plan du site, le maillage, les notifications et la politique Cloudflare ne sont pas touchés.
+
+| Défaut | Changement préparé | Fichiers |
+|---|---|---|
+| P0-1 /projets servi `noindex` périmé | Hub indexable dès qu'un projet ouvert éligible (`isIndexableProjetMission`) est lu ; une lecture en erreur répond 503 + `noindex` (non mis en cache par Prerender) au lieu d'un faux « aucun projet » ; jamais prêt pendant le chargement. /projets et /petites-missions ajoutées à `STATIC_SEO_URLS` (8 URL, budget inchangé de 6 par passage : 6 au premier passage, 2 au suivant, un échec reste en file) | `ProjetsListing.tsx`, `src/lib/projetSeo.ts`, `_shared/static-seo-refresh.ts` |
+| P0-2 ancienne adresse projet | `/petites-missions/{slug ou uuid}` d'une annonce de catégorie projet : `prerender-status-code` 301 + `prerender-header: Location: https://guardiens.fr/projets/{slug}` (mécanisme déjà utilisé par `NavigateGuideSlug`, `CityPage`, `DepartmentPage`), remplacement d'adresse côté navigateur. L'entraide ordinaire garde sa redirection uuid vers slug actuelle | `SmallMissionDetail.tsx`, `components/seo/LegacyProjetRedirect.tsx` |
+| P1-6 /projets/{uuid} | canonical explicite vers `/projets/{slug}` (repli `/projets/{id}` sans slug) | `ProjetDetail.tsx`, `PublicMissionView.tsx` (prop `canonical` facultative) |
+| P1-8 projet inexistant | 404 + `noindex`, sans canonical ; erreur de lecture distincte : 503 + `noindex`, bouton « Réessayer », jamais le message « retiré » | `ProjetDetail.tsx` |
+| Rendu prématuré | `/projets/` ajouté à `LATE_META_PATH_PREFIXES` : le délai de secours de 10 s ne lève plus le drapeau avant `PageMeta` | `src/main.tsx` |
+
+**Base (SELECT, 03/10/2026, heure exacte non conservée)** : un seul projet, `chantier-participatif-de-plantation`, ouvert, 779 caractères, date 14/11/2026, donc éligible : le hub sera indexable une fois publié et recaché.
+
+**Limites :**
+- Le navigateur reçoit un remplacement d'adresse en JavaScript, pas un 301 HTTP. Le 301 n'existe que pour les robots servis par Prerender.
+- La transmission effective d'un 301 `prerender-header` par Prerender puis par le Worker de production n'a pas été observée dans les relevés de cet audit (seuls les 404 l'ont été). Script Worker de production : NON VÉRIFIÉ. Si le Worker ne relaie pas le `Location`, une règle de redirection Cloudflare ciblée sur `/petites-missions/chantier-participatif-de-plantation` serait l'alternative, à décider après revue ; le miroir `cloudflare-worker-prerender.js` n'est pas modifié.
+- Une annonce reclassée plus tard ne déclenche toujours aucun recache (P1-5, lot D).
+
+**Activation (après GO) :**
+1. Publication du site (code client).
+2. Déploiement de `detect-deploy-and-mark-dirty` et `consume-seo-dirty` (elles importent la liste partagée modifiée). Aucune migration.
+3. La mise en ligne détectée marque les 8 pages statiques ; /projets et /petites-missions passent au passage suivant du cron (15 min).
+4. Recache ciblé ponctuel restant : `/projets/chantier-participatif-de-plantation`, `/projets/e5724f3e-c22b-4fb9-8962-d24c80435660`, `/petites-missions/chantier-participatif-de-plantation`, `/petites-missions/e5724f3e-c22b-4fb9-8962-d24c80435660`. Mécanisme disponible : la fonction `prerender-recache` existante (jeton côté serveur, journal `prerender_recache_log`), appelée par un administrateur. Puis contrôle Googlebot en lecture : statut, `meta robots`, canonical, `Location`.
+
+**Tests (03/10/2026, 11:24 UTC)** : `seo2-projets.test.tsx` 14/14 ; `static-seo-refresh_test.ts` (Deno) 10/10 ; tests voisins (plan projets, entraide, verrous fiches gardiens, indexabilité) 53/53 au total avec les 14 nouveaux ; `deno check` des deux fonctions : propre. Types du site : une seule erreur, dans `robots-groups.test.ts` de SEO-1 (directive `@ts-expect-error` inutile), non touchée dans ce lot.
