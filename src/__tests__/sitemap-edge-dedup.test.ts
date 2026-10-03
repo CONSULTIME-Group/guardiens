@@ -1,36 +1,34 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+// @ts-expect-error module JS sans types
+import { dedupeEntries } from "../../scripts/lib/sitemapCore.mjs";
 
 const read = (p: string) => readFileSync(resolve(process.cwd(), p), "utf8");
 
-// Verrous du sitemap edge : déduplication finale par <loc> et cohérence des
-// villes hardcodées avec les données du front. « aura » a été retiré car le
-// slug ne résout ni dans src/data/cities.ts ni dans seo_city_pages :
-// /house-sitting/aura rend la page introuvable.
-describe("sitemap edge : déduplication et villes hardcodées", () => {
-  const src = read("supabase/functions/sitemap/index.ts");
+// Depuis SEO-3, la déduplication vit dans le générateur unique ; la fonction
+// sitemap ne fait plus que relayer le fichier statique.
+describe("sitemap : villes codées en dur et déduplication", () => {
+  const build = read("scripts/generate-sitemap.mjs");
 
-  it("les villes hardcodées ne contiennent pas aura", () => {
-    const block = src.match(/const cityPages = \[([\s\S]*?)\];/);
+  it("les villes codées en dur ne contiennent pas aura et existent côté front", () => {
+    const block = build.match(/const cityLandingPages = \[([\s\S]*?)\];/);
     expect(block).not.toBeNull();
     expect(block![1]).not.toMatch(/["']aura["']/);
-    for (const slug of ["annecy", "lyon", "grenoble", "caluire-et-cuire", "chambery"]) {
-      expect(block![1]).toContain(`"${slug}"`);
-    }
-  });
-
-  it("chaque ville hardcodée existe dans les données statiques du front", () => {
     const cities = read("src/data/cities.ts");
     for (const slug of ["annecy", "lyon", "grenoble", "caluire-et-cuire", "chambery"]) {
+      expect(block![1]).toContain(`"${slug}"`);
       expect(cities).toContain(`slug: "${slug}"`);
     }
   });
 
-  it("déduplique les entrées par <loc>, première occurrence gagnante", () => {
-    expect(src).toContain("seen.has(loc)");
-    expect(src).toContain("seen.add(loc)");
-    // La déduplication précède la sérialisation finale.
-    expect(src.indexOf("seen.has(loc)")).toBeLessThan(src.indexOf("new Response(xml"));
+  it("déduplique par loc avant sérialisation, première occurrence gagnante", () => {
+    const { entries, dupes } = dedupeEntries([
+      { loc: "/a", lastmod: null, changefreq: "weekly", priority: "0.9" },
+      { loc: "/a", lastmod: null, changefreq: "monthly", priority: "0.5" },
+    ]);
+    expect(dupes).toBe(1);
+    expect(entries).toEqual([{ loc: "/a", lastmod: null, changefreq: "weekly", priority: "0.9" }]);
+    expect(build.indexOf("dedupeEntries(raw)")).toBeLessThan(build.indexOf("renderSitemapXml(SITE_URL"));
   });
 });

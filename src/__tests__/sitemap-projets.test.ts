@@ -28,16 +28,16 @@ describe("sitemap projets participatifs", () => {
 
   it("build et fonction : /projets/{slug} sur la vue publique, jamais d'ancienne URL entraide", () => {
     const build = read("scripts/generate-sitemap.mjs");
-    const edge = read("supabase/functions/sitemap/index.ts");
-    for (const src of [build, edge]) {
+    for (const src of [build]) {
       expect(src).toContain("isIndexableProjetMission");
       expect(src).toMatch(/\/projets\/\$\{\w+\.slug\}/);
       expect(src).toContain('.neq("category", "projet")');
     }
-    expect(edge).toContain('{ loc: "/projets", priority: "0.7", changefreq: "weekly" }');
+    // La fonction sitemap ne relaie plus que le fichier statique (SEO-3).
+    expect(read("supabase/functions/sitemap/index.ts")).not.toContain("createClient");
     expect(read("src/data/siteRoutes.ts")).toContain('path: "/projets",');
     // Clé d'invalidation nulle : rechargement à chaque build.
-    expect(build).toMatch(/"small_missions_projets_v1", cache,\s*async \(\) => null/);
+    expect(build).toMatch(/"small_missions_projets_v1", cache,\s*null,/);
   });
 
   it("la fiche projet applique la même règle à sa balise robots", () => {

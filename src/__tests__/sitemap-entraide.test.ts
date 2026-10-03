@@ -4,13 +4,13 @@ import { resolve } from "node:path";
 import { isIndexableEntraideMission } from "../../supabase/functions/sitemap/mission-entries";
 
 describe("sitemap Entraide", () => {
-  const edgeSource = readFileSync(resolve(process.cwd(), "supabase/functions/sitemap/index.ts"), "utf8");
+  const routes = readFileSync(resolve(process.cwd(), "src/data/siteRoutes.ts"), "utf8");
   const buildSource = readFileSync(resolve(process.cwd(), "scripts/generate-sitemap.mjs"), "utf8");
   const description = "Une description publique suffisamment détaillée pour expliquer précisément le besoin, le contexte, le moment souhaité et le service proposé en retour, sans argent. ".repeat(2);
 
   it("ajoute les quatorze pages villes Entraide", () => {
     for (const city of ["lyon", "marseille", "strasbourg", "paris", "toulouse", "lille", "annecy", "nice", "nantes", "saint-etienne", "rennes", "montpellier", "grenoble", "bordeaux"]) {
-      expect(edgeSource).toContain(`{ loc: "/petites-missions/${city}", priority: "0.7", changefreq: "weekly" }`);
+      expect(routes).toContain(`path: "/petites-missions/${city}",`);
     }
     expect(buildSource).toContain('isIndexableEntraideMission(m)');
     expect(buildSource).toContain('loc: `/petites-missions/${m.slug}`');
