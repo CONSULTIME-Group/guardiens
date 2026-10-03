@@ -388,7 +388,7 @@ Le complément HTML vérifié via GSC Wizard, produit dans un autre workflow, fa
 - Bundle courant : `assets/index-DpUwjLsc.js` sur guardiens.fr et guardiens.lovable.app.
 - **Conformité SEO-2 mesurée** pour ces 8 contrôles : P0-1, P0-2, P1-6 et P1-8 sont résolus en production sur ce périmètre. Les « trois URL non résolues » de 12:21 et 12:33 sont résolues. Le 503 n'est toujours pas observé en production (Worker actif non lu) et n'est pas promis.
 
-## 10. SEO-3 plan du site : PRÉPARÉ (non publié, 03/10/2026)
+## 10. SEO-3 plan du site : PUBLIÉ (03/10/2026, constaté en HTTP à 13:15:41 UTC)
 
 Statut : code, tests et fichier généré prêts en dépôt. Aucune publication, aucun déploiement de fonction, aucune écriture en base, aucun cron, email ni recache. La fonction `sitemap` modifiée n'est PAS déployée.
 
@@ -430,3 +430,11 @@ Statut : code, tests et fichier généré prêts en dépôt. Aucune publication,
 - Build complet `npm run build` (générateur, vite build, `test:guard`) : sortie 0, 425 fichiers et 4 291 tests au vert, 0 échec. Sitemap produit : 735 URL, 77 lastmod, MD5 des 141 UUID `c0cf6f27f5a16027c654dc816f2748c9`, MD5 des 2 fiches dynamiques mission `636d3d51b2d630a7bd9de5c5fb79c3a7` (conforme au SQL de 12:59:46 UTC). Les 14 pages villes statiques `/petites-missions/{ville}` sont conservées.
 - `deno check supabase/functions/sitemap/index.ts` : sortie 0.
 - La section 9 (recache manuel accepté 3/3 par Jérémie, conformité mesurée) reste l'état de référence de SEO-2.
+
+### Activation (03/10/2026, UTC)
+- Publication du site lancée par l'agent de revue (deployment_id 5ce2d893-05fc-4b88-bc77-8169a8bf2a47, vers 13:12). Fonction `sitemap` seule déployée par outil ciblé à 13:11 ; aucune autre fonction, migration, écriture SQL, cron, recache, notification ni email.
+- 13:11:48 : la fonction répondait déjà 200 `X-Sitemap-Source: static` en relayant l'ancien fichier (SHA256 `42618a63…c83e`, 676 URL), identique à l'origine et à guardiens.fr. Observation bornée toutes les 20 s : ancien fichier jusqu'à 13:15:20, nouveau fichier servi à 13:15:41.
+- 13:15:48 : fonction, https://guardiens.lovable.app/sitemap.xml et https://guardiens.fr/sitemap.xml servent le même fichier, SHA256 `cd4ec5247cf428c68083b822a83a4e4868a27a559d759265fa279b3be1cb01c9`, même ensemble de `<loc>` (MD5 trié `76d03568e5d8315c09cf2bfc154a5107`), URL canoniques guardiens.fr.
+- Comptes servis : 736 URL, 77 lastmod, 142 fiches gardien (au lieu de 735/141 en préparation) : la génération de publication a relu les sources et retenu un profil devenu éligible entre-temps, règle inchangée. MD5 des 142 UUID servis : `82238d89b505f5eb8c7d1ae47cfa19f4`. Le fichier servi diffère donc du `public/sitemap.xml` du dépôt d'une fiche, attendu (profils sans cache).
+- Écart ouvert : la fonction répond `Content-Type: text/plain` alors que le code pose `application/xml; charset=utf-8` ; le type est réécrit par la passerelle des fonctions. Le contenu est correct, mais le type exact demandé n'est pas obtenu par cette URL ; la référence pour les robots reste https://guardiens.fr/sitemap.xml (`application/xml`). Non corrigé dans ce tour.
+- Limites inchangées : pagination non cohérente à total constant, écritures atomiques par fichier non transactionnelles.
