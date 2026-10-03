@@ -64,7 +64,7 @@ Deno.test("budget de consume-seo-dirty respecte", () => {
   assertEquals(STATIC_RENDER_BUDGET, 6);
   const r = pickStaticToRecache("2026-09-28T18:00:00Z", new Map(), 4);
   assertEquals(r.toRecache.length, 4);
-  assertEquals(r.deferred, 2);
+  assertEquals(r.deferred, STATIC_SEO_URLS.length - 4);
 });
 
 Deno.test("les deux fonctions de la chaine lisent la liste partagee", async () => {
