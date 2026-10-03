@@ -19,7 +19,7 @@
  * Sécurité : admin uniquement (user_roles.role = 'admin'). Aucun envoi automatique :
  * ce endpoint n'agit que sur appel explicite (mode="send") de l'admin.
  */
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { resendFetch } from "../_shared/resend-guard.ts";
 import { SENDER_FROM, REPLY_TO_ADDRESS } from "../_shared/sender-address.ts";
 import { expectedCountMismatch } from "../_shared/mass-email-dedupe.ts";
