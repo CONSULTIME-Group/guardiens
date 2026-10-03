@@ -16,7 +16,7 @@ interface CityGuide {
   slug: string;
   intro: string;
   ideal_for: string;
-  department: string;
+  department: string | null;
   published: boolean;
 }
 
@@ -32,14 +32,15 @@ const GuidesListing = () => {
   const [search, setSearch] = useState("");
   const [selectedDept, setSelectedDept] = useState("all");
 
-  const { data: guides = [], isLoading } = useQuery({
+  const { data: guides = [], isLoading, isError } = useQuery({
     queryKey: ["city-guides-listing"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("city_guides" as any)
         .select("*")
         .eq("published", true)
-        .order("city");
+        .order("city")
+        .order("id");
       if (error) throw error;
       return (data || []) as unknown as CityGuide[];
     },
@@ -79,12 +80,16 @@ const GuidesListing = () => {
     }
     if (search.trim()) {
       const q = search.toLowerCase().trim();
-      result = result.filter((g) => g.city.toLowerCase().includes(q) || g.department.toLowerCase().includes(q));
+      result = result.filter((g) => g.city.toLowerCase().includes(q) || (g.department ?? "").toLowerCase().includes(q));
     }
     return result;
   }, [guides, search, selectedDept]);
 
-  const departments = [...new Set(filteredGuides.map((g) => g.department).filter(Boolean))];
+  // Groupes par département ; les guides sans département (ex. hors de
+  // France) forment un dernier groupe au lieu de disparaître de la liste.
+  const departments = [...new Set(filteredGuides.map((g) => g.department ?? ""))].sort(
+    (a, b) => Number(a === "") - Number(b === ""),
+  );
 
   return (
     <>
@@ -92,6 +97,7 @@ const GuidesListing = () => {
         title={t("guides.meta_title")}
         description={t("guides.meta_description")}
         path="/guides"
+        ready={!isLoading}
       />
 
       <div className="bg-background">
@@ -142,6 +148,8 @@ const GuidesListing = () => {
                 <div key={i} className="h-48 bg-muted animate-pulse rounded-xl" />
               ))}
             </div>
+          ) : isError ? (
+            <p className="text-center text-muted-foreground py-12">Les guides n'ont pas pu être chargés. Réessayez dans un instant.</p>
           ) : filteredGuides.length === 0 ? (
             <p className="text-center text-muted-foreground py-12">
               {guides.length === 0 ? t("guides.empty_default") : t("guides.empty_search")}
@@ -149,11 +157,11 @@ const GuidesListing = () => {
           ) : (
             <div className="space-y-10">
               {departments.map((dept) => {
-                const deptGuides = filteredGuides.filter((g) => g.department === dept);
+                const deptGuides = filteredGuides.filter((g) => (g.department ?? "") === dept);
                 return (
-                  <section key={dept}>
+                  <section key={dept || "autres"}>
                     <h2 className="font-heading text-xl font-semibold text-foreground mb-4">
-                      {dept}
+                      {dept || "Autres destinations"}
                     </h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                       {deptGuides.map((guide) => {
