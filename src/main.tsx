@@ -50,16 +50,20 @@ if (import.meta.env.PROD && typeof window !== "undefined") {
 
 const container = document.getElementById("root");
 if (!container) {
-  throw new Error("Élément #root introuvable dans le DOM");
+  throw new Error("#root absent");
 }
 
 // Routes lazy qui écrivent leurs métadonnées tardivement (après un chargement
 // de données). Le verrou est posé ici, avant le rendu, car le chunk de la
 // route peut arriver après le délai du repli global sur réseau dégradé.
 // Liste volontairement courte et explicite, à compléter route par route.
-// Fiche gardien publique (PublicSitterProfile) et fiche projet (lot SEO-2).
+const LATE_META_PATH_PREFIXES = [
+  "/gardiens/", // fiche gardien publique, PublicSitterProfile
+  "/projets/", // fiche projet (lot SEO-2) : jamais prête avant la lecture
+];
+
 // Ce module ne s'exécute que dans le navigateur (document lu plus haut).
-if (/^\/(gardiens|projets)\//.test(window.location.pathname)) {
+if (LATE_META_PATH_PREFIXES.some((p) => location.pathname.startsWith(p))) {
   window.prerenderMetaPending = true;
   window.prerenderReady = false;
 }
