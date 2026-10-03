@@ -8,13 +8,13 @@ import {
 
 const base = { isFirstEverRun: false, monthlyUsed: 100, monthlyBudget: 18_000 };
 
-Deno.test("empreinte changee : 10 URL en file, 6 au premier passage, 4 au suivant", () => {
+Deno.test("empreinte changee : 14 URL en file, six par passage", () => {
   assert(shouldMarkStatic({ ...base, bundleChanged: true }));
-  assertEquals(STATIC_SEO_URLS.length, 10);
+  assertEquals(STATIC_SEO_URLS.length, 14);
   const mark = "2026-09-28T18:00:00Z";
   const first = pickStaticToRecache(mark, new Map());
   assertEquals(first.toRecache, STATIC_SEO_URLS.slice(0, 6));
-  assertEquals(first.deferred, 4);
+  assertEquals(first.deferred, 8);
   assert(first.toRecache.includes("https://guardiens.fr/annonces"));
   assert(first.toRecache.includes("https://guardiens.fr/guides"));
   // Passage suivant : les 6 premieres ont un succes journalise apres le repere.
@@ -25,16 +25,21 @@ Deno.test("empreinte changee : 10 URL en file, 6 au premier passage, 4 au suivan
     "https://guardiens.fr/contact",
     "https://guardiens.fr/projets",
     "https://guardiens.fr/petites-missions",
+    "https://guardiens.fr/house-sitting",
+    "https://guardiens.fr/departement",
   ]);
-  assertEquals(second.deferred, 0);
+  assertEquals(second.deferred, 2);
   // Troisieme passage : file vide.
   for (const u of second.toRecache) last.set(u, "2026-09-28T18:20:00Z");
+  const third = pickStaticToRecache(mark, last);
+  assertEquals(third.toRecache, ["https://guardiens.fr/races", "https://guardiens.fr/associations"]);
+  for (const u of third.toRecache) last.set(u, "2026-09-28T18:35:00Z");
   assertEquals(pickStaticToRecache(mark, last).toRecache, []);
 });
 
 Deno.test("un echec reste en file au passage suivant", () => {
   const mark = "2026-09-28T18:00:00Z";
-  const last = new Map(STATIC_SEO_URLS.slice(0, 9).map((u) => [u, "2026-09-28T18:05:00Z"]));
+  const last = new Map(STATIC_SEO_URLS.filter(u => u !== "https://guardiens.fr/petites-missions").map((u) => [u, "2026-09-28T18:05:00Z"]));
   assertEquals(pickStaticToRecache(mark, last).toRecache, ["https://guardiens.fr/petites-missions"]);
 });
 
@@ -65,8 +70,8 @@ Deno.test("premier passage a table vide : aucun marquage", () => {
 });
 
 Deno.test("plafond mensuel : aucun marquage s'il serait franchi", () => {
-  assertEquals(shouldMarkStatic({ ...base, bundleChanged: true, monthlyUsed: 17_991 }), false);
-  assert(shouldMarkStatic({ ...base, bundleChanged: true, monthlyUsed: 17_990 }));
+  assertEquals(shouldMarkStatic({ ...base, bundleChanged: true, monthlyUsed: 17_987 }), false);
+  assert(shouldMarkStatic({ ...base, bundleChanged: true, monthlyUsed: 17_986 }));
 });
 
 Deno.test("deja recachees apres le repere : rien a faire", () => {

@@ -208,14 +208,7 @@ const Observatoire = () => {
 
  const orgSchema = { "@context": "https://schema.org", ...ORGANIZATION_NODE };
 
- const breadcrumbSchema = {
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  itemListElement: [
-   { "@type": "ListItem", position: 1, name: "Accueil", item: "https://guardiens.fr" },
-   { "@type": "ListItem", position: 2, name: "Observatoire", item: PAGE_URL },
-  ],
- };
+
 
  const articleSchema = {
   "@context": "https://schema.org",
@@ -278,7 +271,7 @@ const Observatoire = () => {
  title="Observatoire de la garde d'animaux à domicile en France | Guardiens"
  description="Chiffres-clés sur la garde d'animaux à domicile en France : nombre d'animaux accompagnés, modèle économique, vérifications, badges. Datapoints sourcés Guardiens."
  path="/observatoire-garde-animaux"
- jsonLd={[datasetSchema, orgSchema, breadcrumbSchema, articleSchema, faqSchema]}
+ jsonLd={[datasetSchema, orgSchema, articleSchema, faqSchema]}
  ready={Boolean(species) || speciesError}
  />
 

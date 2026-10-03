@@ -20,6 +20,9 @@ function fixture(profiles: Profile[] = []) {
     readError: false, clearError: false, recacheError: false, concurrent: false,
     logError: false, contentReadError: "",
     ackInFlight: 0, ackMaxInFlight: 0,
+    outbox: [] as Array<{ path: string; dirty_at: string }>,
+    busy: false, capacity: 18000, reserved: 0, released: 0, outboxConcurrent: false,
+    outboxReadError: false, outboxAckError: false, reserveError: false,
   };
 }
 const content = (id: string, extra: Partial<ContentRow> = {}): ContentRow => ({ id, slug: id, published: true, noindex: false, seo_dirty_at: dirty, ...extra });
@@ -39,13 +42,17 @@ async function run(f: ReturnType<typeof fixture>) {
   globalThis.fetch = async (input, init) => {
     const req = new Request(input, init);
     const url = new URL(req.url);
-    const body = req.method === "GET" ? null : await req.json();
+    const body = ["GET", "DELETE"].includes(req.method) ? null : await req.json();
     let result: unknown = [];
     if (url.hostname === "api.prerender.io") {
       assertEquals(url.pathname, "/recache");
       assertEquals(body.prerenderToken, "fake-prerender-token");
       assert(body.url.startsWith("https://guardiens.fr/"));
       f.recached.push(body.url);
+      if (f.outboxConcurrent) {
+        const queued = f.outbox.find((r) => body.url.endsWith(r.path));
+        if (queued) queued.dirty_at = "2026-10-03T11:00:00.000Z";
+      }
       if (f.concurrent) {
         const row = [...f.profiles, ...Object.values(f.content).flat()].find((r) => body.url.endsWith(`/${"slug" in r ? r.slug : r.id}`));
         if (row) row.seo_dirty_at = "2026-10-03T11:00:00.000Z";
@@ -55,7 +62,22 @@ async function run(f: ReturnType<typeof fixture>) {
     assertEquals(url.hostname, "test-project.supabase.co");
     const table = url.pathname.split("/").pop()!;
     const markedTable = table === "profiles" || contentTables.includes(table as typeof contentTables[number]);
-    if (markedTable && req.method === "GET") {
+    if (table === "seo_acquire_consumer") result = !f.busy;
+    else if (table === "seo_reserve_render") {
+      if (f.reserveError) return new Response(JSON.stringify({ message: "reservation failed" }), { status: 500 });
+      result = f.reserved < f.capacity;
+      if (result) f.reserved++;
+    } else if (table === "seo_release_consumer") { f.released++; result = null; }
+    else if (table === "seo_url_outbox" && req.method === "GET") {
+      if (f.outboxReadError) return new Response(JSON.stringify({ message: "queue read failed" }), { status: 500 });
+      result = f.outbox.slice(0, Number(url.searchParams.get("limit"))).map((r) => ({...r}));
+    } else if (table === "seo_url_outbox" && req.method === "PATCH") {
+      result = null;
+    } else if (table === "seo_url_outbox" && req.method === "DELETE") {
+      f.events.push("outbox_clear");
+      if (f.outboxAckError) return new Response(JSON.stringify({ message: "queue ack failed" }), { status: 500 });
+      f.outbox = f.outbox.filter((r) => !(url.searchParams.get("path") === `eq.${r.path}` && url.searchParams.get("dirty_at") === `eq.${r.dirty_at}`));
+    } else if (markedTable && req.method === "GET") {
       if (table === "profiles" && f.readError || table === f.contentReadError) return new Response(JSON.stringify({ message: "test read failed" }), { status: 500 });
       const roles = url.searchParams.get("role");
       const rows = table === "profiles" ? f.profiles : f.content[table];
@@ -224,4 +246,67 @@ Deno.test("lecture programmatique en erreur : aucun render ni effacement", async
   const f = fixture(); f.content.seo_city_pages = [content("read-failure")]; f.contentReadError = "seo_city_pages";
   assertEquals((await run(f)).status, 500); assertEquals(f.recached, []);
   assertEquals(f.content.seo_city_pages[0].seo_dirty_at, dirty);
+});
+
+Deno.test("ancienne adresse conservee sans ligne source : recache journalise puis acquitte", async () => {
+  const f = fixture(); f.outbox = [{ path: "/gardiens/deleted", dirty_at: dirty }];
+  const r = await run(f);
+  assertEquals(r.status, 200); assertEquals(f.recached, ["https://guardiens.fr/gardiens/deleted"]);
+  assertEquals(f.outbox, []); assertEquals(f.events, ["log", "outbox_clear"]);
+  assertEquals(f.reserved, 1); assertEquals(f.released, 1);
+});
+Deno.test("file URL plafonnee a six slots existants", async () => {
+  const f = fixture(); f.outbox = Array.from({ length: 9 }, (_, i) => ({ path: `/projets/old-${i}`, dirty_at: dirty }));
+  const r = await run(f); assertEquals(r.status, 200); assertEquals(f.recached.length, 6);
+  assertEquals(f.outbox.length, 3); assertEquals(f.reserved, 6);
+});
+Deno.test("echec reseau : conserver les anciennes URL", async () => {
+  const f = fixture(); f.outbox = [{ path: "/projets/old", dirty_at: dirty }]; f.recacheError = true;
+  assertEquals((await run(f)).status, 500); assertEquals(f.outbox.length, 1); assertEquals(f.recorded.length, 1);
+});
+Deno.test("nouvelle invalidation pendant la capture : CAS conserve la demande", async () => {
+  const f = fixture(); f.outbox = [{ path: "/projets/old", dirty_at: dirty }]; f.outboxConcurrent = true;
+  assertEquals((await run(f)).status, 200); assertEquals(f.outbox[0].dirty_at, "2026-10-03T11:00:00.000Z");
+});
+Deno.test("echec du journal : aucune URL acquittee", async () => {
+  const f = fixture(); f.outbox = [{ path: "/projets/old", dirty_at: dirty }]; f.logError = true;
+  assertEquals((await run(f)).status, 500); assertEquals(f.outbox.length, 1); assertEquals(f.events, ["log"]);
+});
+Deno.test("echec de lecture URL : aucun appel", async () => {
+  const f = fixture(); f.outboxReadError = true;
+  assertEquals((await run(f)).status, 500); assertEquals(f.recached.length, 0); assertEquals(f.released, 1);
+});
+Deno.test("echec de CAS URL : trace conservee et demande en attente", async () => {
+  const f = fixture(); f.outbox = [{ path: "/projets/old", dirty_at: dirty }]; f.outboxAckError = true;
+  assertEquals((await run(f)).status, 500); assertEquals(f.outbox.length, 1); assertEquals(f.recorded.length, 1);
+});
+Deno.test("execution simultanee refusee : aucune lecture metier ni facture", async () => {
+  const f = fixture([profile("pending")]); f.busy = true;
+  const r = await run(f); assertEquals(r.status, 200); assertEquals(r.payload.skipped, "consumer_busy");
+  assertEquals(f.recached.length, 0); assertEquals(f.reserved, 0); assertEquals(f.released, 0);
+});
+Deno.test("budget mensuel epuise : aucune facture, aucun acquittement", async () => {
+  const f = fixture([profile("pending")]); f.capacity = 0;
+  f.outbox = [{ path: "/projets/old", dirty_at: dirty }];
+  const r = await run(f); assertEquals(r.status, 200); assertEquals(r.payload.monthly_deferred, 2);
+  assertEquals(f.recached.length, 0); assertEquals(f.profiles[0].seo_dirty_at, dirty); assertEquals(f.outbox.length, 1);
+});
+Deno.test("une derniere place mensuelle : une seule tentative puis report", async () => {
+  const f = fixture([profile("pending")]); f.capacity = 1;
+  f.outbox = [{ path: "/projets/old", dirty_at: dirty }];
+  const r = await run(f); assertEquals(r.status, 200); assertEquals(f.recached.length, 1);
+  assertEquals(f.outbox.length, 0); assertEquals(f.profiles[0].seo_dirty_at, dirty); assertEquals(f.reserved, 1);
+});
+Deno.test("erreur reservation : aucun appel et verrou libere", async () => {
+  const f = fixture([profile("pending")]); f.reserveError = true;
+  assertEquals((await run(f)).status, 500); assertEquals(f.recached.length, 0); assertEquals(f.released, 1);
+});
+Deno.test("meme URL en file et famille : une facture et une trace, deux acquittements", async () => {
+  const f = fixture([profile("pending")]); f.outbox = [{ path: "/gardiens/pending", dirty_at: dirty }];
+  assertEquals((await run(f)).status, 200); assertEquals(f.recached.length, 1); assertEquals(f.recorded.length, 1);
+  assertEquals(f.reserved, 1); assertEquals(f.outbox.length, 0); assertEquals(f.profiles[0].seo_dirty_at, null);
+});
+Deno.test("canonical externe : recache la page Guardiens par son slug", async () => {
+  const f = fixture(); f.content.articles = [content("article", { canonical_url: "https://external.test/page" })];
+  assertEquals((await run(f)).status, 200); assertEquals(f.recached, ["https://guardiens.fr/actualites/article"]);
 });

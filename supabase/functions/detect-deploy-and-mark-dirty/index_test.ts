@@ -56,7 +56,11 @@ async function run(f: Fixture, options: Row = {}) {
       const count = table === "prerender_recache_log" ? f.used : f.empty ? 0 : 1;
       return new Response(null, { headers: { "Content-Range": `0-0/${count}` } });
     }
-    if (table === "deploy_fingerprints") {
+    if (table === "seo_queue_template_family") {
+      if (f.failMark) return new Response(JSON.stringify({ message: "template mark failed" }), { status: 500 });
+      if (!body.p_dry_run) f.marked.push(`family:${body.p_family}`);
+      result = f.empty ? 0 : 1;
+    } else if (table === "deploy_fingerprints") {
       if (req.method === "GET") result = f.fingerprints;
       else if (req.method === "PATCH") Object.assign(f.fingerprints.find((r) => `eq.${r.id}` === url.searchParams.get("id"))!, body);
       else f.fingerprints.push({ id: "inserted", seen_count: 1, ...body });
@@ -124,10 +128,10 @@ Deno.test("pages statiques refusées : le repère est repris même quand le bund
   const f = fixture();
   for (const family of families) f.state.get(family)!.last_hash = "new";
   f.state.get("static")!.last_hash = "index-old.js";
-  f.used = 17_991;
+  f.used = 17_987;
   await run(f);
   assertEquals(f.state.get("static")!.last_hash, "index-old.js");
-  f.used = 17_990;
+  f.used = 17_986;
   await run(f);
   assertEquals(f.state.get("static")!.last_hash, "index-new.js");
   assertEquals(f.marked, []);
@@ -153,7 +157,7 @@ Deno.test("fichier hashes indisponible : reprendre le bundle différé et mettre
   assertEquals((await run(f, { route_hashes: null })).payload.reason, "debounced");
   for (const st of f.state.values()) st.last_marked_at = hoursAgo(25);
   f.fingerprints[0].marked_at = hoursAgo(25);
-  assertEquals((await run(f, { route_hashes: null })).payload.marked, 4);
+  assertEquals((await run(f, { route_hashes: null })).payload.marked, 10);
   assert(f.fingerprints[1].marked_at);
   assertEquals((await run(f, { route_hashes: null })).payload.marked, 0);
 });
@@ -181,5 +185,24 @@ Deno.test("échec du marquage : conserver les références de la vague précéde
 Deno.test("la dernière vague par famille protège aussi un bundle déjà marqué", async () => {
   const f = fixture(); f.fingerprints[0].marked_at = hoursAgo(25);
   assertEquals((await run(f)).payload.reason, "debounced");
+  assertEquals(f.marked, []);
+});
+
+Deno.test("famille publique nouvelle : changement differe conserve, puis repris", async () => {
+  const f = fixture();
+  f.state.set("breeds", { family: "breeds", last_hash: "old", last_global_hash: "global", last_marked_at: hoursAgo(2) });
+  const opts = { route_hashes: { global: "global", families: { ...Object.fromEntries(families.map(family => [family, "old"])), breeds: "new" } } };
+  assertEquals((await run(f, opts)).payload.reason, "debounced");
+  assertEquals(f.state.get("breeds")!.last_hash, "old");
+  for (const st of f.state.values()) st.last_marked_at = hoursAgo(25);
+  f.fingerprints[0].marked_at = hoursAgo(25);
+  const resumed = await run(f, opts);
+  assertEquals(resumed.payload.per_family.breeds, 1);
+  assert(f.marked.includes("family:breeds")); assertEquals(f.state.get("breeds")!.last_hash, "new");
+});
+Deno.test("ancienne publication sans les nouvelles empreintes : ne pas adopter un hash absent", async () => {
+  const f = fixture();
+  f.state.set("breeds", { family: "breeds", last_hash: null, last_global_hash: null, last_marked_at: null });
+  await run(f); assertEquals(f.state.get("breeds")!.last_marked_at, null);
   assertEquals(f.marked, []);
 });

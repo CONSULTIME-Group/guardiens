@@ -18,6 +18,12 @@ const FAMILY_ROOTS = {
   departments: "src/pages/DepartmentPage.tsx",
   guides: "src/pages/GuideDetail.tsx",
   articles: "src/pages/ArticleDetail.tsx",
+  sitters: "src/pages/PublicSitterProfile.tsx",
+  sits: "src/pages/PublicSitDetail.tsx",
+  missions: "src/pages/SmallMissionDetail.tsx",
+  projets: "src/pages/ProjetDetail.tsx",
+  breeds: "src/pages/BreedPage.tsx",
+  associations: "src/pages/AssociationDetail.tsx",
 };
 
 /**

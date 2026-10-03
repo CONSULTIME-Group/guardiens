@@ -461,19 +461,7 @@ const DepartmentPage = () => {
  </section>
 
  {/* JSON-LD: Breadcrumb */}
- <script
- type="application/ld+json"
- dangerouslySetInnerHTML={{
- __html: JSON.stringify({
- "@context": "https://schema.org",
- "@type": "BreadcrumbList",
- itemListElement: [
- { "@type": "ListItem", position: 1, name: "Guardiens", item: "https://guardiens.fr" },
- { "@type": "ListItem", position: 2, name: page.department, item: `https://guardiens.fr/departement/${page.slug}` },
- ],
- }),
- }}
- />
+
 
  {/* JSON-LD: Service */}
  <script
@@ -510,33 +498,7 @@ const DepartmentPage = () => {
  />
 
  {/* JSON-LD: FAQPage */}
- <script
- type="application/ld+json"
- dangerouslySetInnerHTML={{
- __html: JSON.stringify({
- "@context": "https://schema.org",
- "@type": "FAQPage",
- mainEntity: [
- {
- "@type": "Question",
-  name: `Comment trouver un pet sitter ${deptIn} ?`,
-  acceptedAnswer: {
-  "@type": "Answer",
-  text: `Inscrivez-vous sur Guardiens, 0 €, et parcourez ${countLabel(cityPages.length, "ville")} ${deptOf} pour trouver un gardien près de chez vous.`,
- },
- },
- {
- "@type": "Question",
- name: `Le house sitting ${deptIn} coûte-t-il quelque chose au propriétaire ?`,
- acceptedAnswer: {
- "@type": "Answer",
- text: "Guardiens coûte 0 € aux propriétaires. Le house sitting repose sur l'échange : le gardien est logé en échange de la garde de vos animaux.",
- },
- },
- ],
- }),
- }}
- />
+
  </div>
  </>
  );

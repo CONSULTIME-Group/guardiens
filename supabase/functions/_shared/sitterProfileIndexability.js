@@ -1,3 +1,5 @@
+import { sanitizeBioForPublic } from "./bio-text.js";
+
 /**
  * Règle unique d'indexabilité d'une fiche gardien `/gardiens/:id`.
  *
@@ -15,9 +17,7 @@
  *  - src/pages/PublicSitterProfile.tsx (meta robots via PageMeta) ;
  *  - scripts/generate-sitemap.mjs (inclusion dans public/sitemap.xml).
  *
- * Le composant passe des textes déjà nettoyés par sanitizeBioForPublic, le
- * script passe les textes bruts : le masquage des coordonnées ne change pas
- * l'ordre de grandeur de la longueur, la règle reste la même.
+ * Les deux consommateurs mesurent le meme texte public, contacts masques.
  *
  * Aucun `Disallow` ne doit être posé sur `/gardiens` : il empêcherait Google
  * de voir le `noindex` des fiches non éligibles, donc bloquerait leur
@@ -33,7 +33,7 @@ export const MIN_SITTER_BIO_LENGTH = 80;
  */
 export function hasSubstantialSitterBio(input) {
   if (!input) return false;
-  const text = input.bio || input.motivation || "";
+  const text = sanitizeBioForPublic(input.bio) || sanitizeBioForPublic(input.motivation);
   return text.length >= MIN_SITTER_BIO_LENGTH;
 }
 

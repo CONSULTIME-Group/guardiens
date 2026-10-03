@@ -45,9 +45,9 @@ describe("pages programmatiques : cohérence du garde-fou noindex", () => {
   });
 
   it("le consommateur seo_dirty_at couvre les pages département", () => {
-    const src = read("supabase/functions/prerender-recache-pending/index.ts");
-    expect(src).toContain('sb.from("seo_department_pages")');
-    expect(src).toContain("seo_department_pages: []");
+    const src = read("supabase/functions/consume-seo-dirty/index.ts");
+    expect(src).toContain('table: "seo_department_pages"');
+    expect(read("supabase/functions/prerender-recache-pending/index.ts")).toContain("queuePrerenderRefresh");
     expect(src).toContain("/departement/");
   });
 });

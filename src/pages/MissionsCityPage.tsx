@@ -129,19 +129,11 @@ const MissionsCityPage = ({ citySlug }: MissionsCityPageProps) => {
       acceptedAnswer: { "@type": "Answer", text: item.a },
     })),
   };
-  const breadcrumbSchema = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Accueil", item: "https://guardiens.fr/" },
-      { "@type": "ListItem", position: 2, name: "Entraide", item: "https://guardiens.fr/petites-missions" },
-      { "@type": "ListItem", position: 3, name: c.cityName, item: `https://guardiens.fr${path}` },
-    ],
-  };
+
 
   return (
     <>
-      <PageMeta title={c.metaTitle} description={c.metaDescription} path={path} jsonLd={[breadcrumbSchema, faqSchema]} />
+      <PageMeta title={c.metaTitle} description={c.metaDescription} path={path} jsonLd={[faqSchema]} />
       <div className="min-h-screen bg-background font-body">
         <PublicHeader />
         <PageBreadcrumb items={[{ label: "Entraide", href: "/petites-missions" }, { label: c.cityName }]} />

@@ -45,3 +45,6 @@ jobs:
 
       - name: Consommateur SEO unique (Postgres local)
         run: npm run test:sql:cache-consumer
+
+      - name: File persistante des URL SEO (Postgres local)
+        run: npm run test:sql:seo-outbox

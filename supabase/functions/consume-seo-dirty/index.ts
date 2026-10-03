@@ -1,23 +1,8 @@
 /**
- * consume-seo-dirty
- *
- * Cron horaire : consomme le flag `articles.seo_dirty_at` posé par le trigger
- * `articles_recache_prerender`. Pour chaque article marqué sale (50 max
- * par exécution, les plus anciens d'abord), appelle l'API Prerender.io recache
- * sur l'URL canonique FR. Guardiens est monolingue français depuis le
- * 17/08/2026 : il n'existe plus aucune variante de langue à recacher.
- *
- * Depuis le 07/09/2026, la même passe consomme aussi `profiles.seo_dirty_at`,
- * posé par les triggers `profiles_mark_seo_dirty` et
- * `sitter_profiles_mark_seo_dirty`, pour les fiches gardien `/gardiens/{id}`.
- * Le compte Prerender est partagé avec un autre domaine, quota mensuel de
- * 25 000 renders : le nombre de fiches réellement recachées par passage est
- * plafonné à SITTER_RENDER_BUDGET. Une fiche devenue non indexable doit aussi
- * être rafraîchie pour remplacer une éventuelle ancienne copie indexable.
- *
- * Le flag n'est effacé que si TOUS les recaches de l'article ont réussi.
- * Chaque tentative est journalisée dans public.prerender_recache_log.
- * En cas d'échec, la fonction renvoie un statut non-2xx.
+ * Consommateur unique des marqueurs SEO et des anciennes URL persistantes.
+ * Cron toutes les 15 minutes, au plus 81 tentatives par passage.
+ * Reservation avant le reseau, verrou partage, journal avant acquittement CAS.
+ * Une page devenue noindex ou absente doit remplacer son ancienne copie.
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { startCronRun } from "../_shared/cron-run-log.ts";
@@ -79,10 +64,14 @@ interface DirtyAcknowledgement {
 }
 
 
-async function recache(url: string, token: string): Promise<{ ok: boolean; status: number | null; detail: string }> {
+interface RecacheResult { ok: boolean; status: number | null; detail: string; deferred?: boolean; duplicate?: boolean }
+type Recacher = (url: string) => Promise<RecacheResult>;
+
+async function requestRecache(url: string, token: string): Promise<RecacheResult> {
   try {
     const r = await fetch("https://api.prerender.io/recache", {
       method: "POST",
+      signal: AbortSignal.timeout(20_000),
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ prerenderToken: token, url }),
     });
@@ -117,7 +106,7 @@ interface SitterMetrics {
 async function processSitters(
   // deno-lint-ignore no-explicit-any
   sb: any,
-  token: string,
+  recache: Recacher,
   logRows: Array<Record<string, unknown>>,
   acknowledgements: DirtyAcknowledgement[],
 ): Promise<SitterMetrics> {
@@ -146,14 +135,15 @@ async function processSitters(
   metrics.sitters_deferred = rows.length - toRecache.length;
   for (const row of toRecache) {
     const url = `${SITE}/gardiens/${row.id}`;
-    const res = await recache(url, token);
+    const res = await recache(url);
+    if (res.deferred) { metrics.sitters_deferred += 1; continue; }
     if (res.ok) {
       metrics.sitters_recached += 1;
       acknowledgements.push({ table: "profiles", id: row.id, seo_dirty_at: row.seo_dirty_at });
     } else {
       metrics.sitters_failed += 1;
     }
-    logRows.push({
+    if (!res.duplicate) logRows.push({
       article_id: null,
       url,
       status_code: res.status,
@@ -202,7 +192,7 @@ interface ProgrammaticMetrics {
 async function processProgrammatic(
   // deno-lint-ignore no-explicit-any
   sb: any,
-  token: string,
+  recache: Recacher,
   source: ProgrammaticSource,
   logRows: Array<Record<string, unknown>>,
   acknowledgements: DirtyAcknowledgement[],
@@ -242,14 +232,15 @@ async function processProgrammatic(
   }
 
   for (const t of toRecache) {
-    const res = await recache(t.url, token);
+    const res = await recache(t.url);
+    if (res.deferred) { metrics.deferred += 1; continue; }
     if (res.ok) {
       metrics.recached += 1;
       acknowledgements.push({ table: source.table, id: t.id, seo_dirty_at: t.seo_dirty_at });
     } else {
       metrics.failed += 1;
     }
-    logRows.push({
+    if (!res.duplicate) logRows.push({
       article_id: null,
       url: t.url,
       status_code: res.status,
@@ -274,6 +265,9 @@ Deno.serve(async (req) => {
 
   const run = await startCronRun("consume-seo-dirty");
 
+  const holder = crypto.randomUUID();
+  let sb: ReturnType<typeof createClient> | null = null;
+  let acquired = false;
   try {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -287,7 +281,47 @@ Deno.serve(async (req) => {
       });
     }
 
-    const sb = createClient(SUPABASE_URL, SERVICE);
+    sb = createClient(SUPABASE_URL, SERVICE);
+    const { data: lock, error: lockError } = await sb.rpc("seo_acquire_consumer", { p_holder: holder });
+    if (lockError) throw lockError;
+    if (!lock) {
+      await run.finish("success", { skipped: "consumer_busy" });
+      return new Response(JSON.stringify({ ok: true, skipped: "consumer_busy" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    acquired = true;
+    const client = sb;
+    const responses = new Map<string, RecacheResult>();
+    let monthlyDeferred = 0;
+    let runtimeDeferred = 0;
+    const deadline = Date.now() + 100_000;
+    let budgetExhausted = false;
+    const recache: Recacher = async (input) => {
+      const url = new URL(input);
+      if (url.origin !== SITE || url.search || url.hash || url.username || url.password) {
+        throw new Error("Recache URL outside the public site");
+      }
+      const key = url.href;
+      const cached = responses.get(key);
+      if (cached) return { ...cached, duplicate: true };
+      if (Date.now() >= deadline) {
+        runtimeDeferred += 1;
+        return { ok: false, status: null, detail: "Runtime deferred", deferred: true };
+      }
+      if (!budgetExhausted) {
+        const { data: allowed, error: reserveError } = await client.rpc("seo_reserve_render", { p_holder: holder });
+        if (reserveError) throw reserveError;
+        budgetExhausted = !allowed;
+      }
+      if (budgetExhausted) {
+        monthlyDeferred += 1;
+        return { ok: false, status: null, detail: "Monthly budget deferred", deferred: true };
+      }
+      const result = await requestRecache(key, PRERENDER_TOKEN);
+      responses.set(key, result);
+      return result;
+    };
 
     const { data, error } = await sb
       .from("articles")
@@ -315,11 +349,29 @@ Deno.serve(async (req) => {
     let articlesAttempted = 0;
 
 
+    const outboxAcks: Array<{ path: string; dirty_at: string }> = [];
+    const outboxRetries: Array<{ path: string; dirty_at: string }> = [];
+    const { data: pendingUrls, error: outboxError } = await sb.from("seo_url_outbox")
+      .select("path, dirty_at").order("first_dirty_at", { ascending: true })
+      .order("path", { ascending: true }).lte("next_attempt_at", new Date().toISOString()).limit(STATIC_RENDER_BUDGET);
+    if (outboxError) throw outboxError;
+    const outboxMetrics = { outbox_recached: 0, outbox_failed: 0, outbox_deferred: 0 };
+    const outboxRows = (pendingUrls ?? []) as Array<{ path: string; dirty_at: string }>;
+    for (const row of outboxRows) {
+      const url = `${SITE}${row.path}`;
+      const res = await recache(url);
+      if (res.deferred) { outboxMetrics.outbox_deferred += 1; continue; }
+      if (res.ok) { urlsOk += 1; outboxMetrics.outbox_recached += 1; outboxAcks.push(row); }
+      else { urlsFailed += 1; outboxMetrics.outbox_failed += 1; outboxRetries.push(row); }
+      if (!res.duplicate) logRows.push({ article_id: null, url, ok: res.ok,
+        status_code: res.status, detail: res.detail, source: "consume-seo-dirty:outbox" });
+    }
+
     // Priorité 1 à 3 : pages villes, guides, départements. Elles passent avant
     // les articles et les fiches gardien quand la file est pleine.
     const programmaticMetrics: Record<string, unknown> = {};
     for (const source of PROGRAMMATIC_SOURCES) {
-      const m = await processProgrammatic(sb, PRERENDER_TOKEN, source, logRows, acknowledgements);
+      const m = await processProgrammatic(sb, recache, source, logRows, acknowledgements);
       urlsOk += m.recached;
       urlsFailed += m.failed;
       programmaticMetrics[`${source.key}_scanned`] = m.scanned;
@@ -341,19 +393,19 @@ Deno.serve(async (req) => {
         continue;
       }
 
-      const base = a.canonical_url && a.canonical_url.startsWith("http")
-        ? a.canonical_url
-        : `${SITE}/actualites/${a.slug}`;
+      // Rafraichir l'adresse de la page, meme si son canonical pointe ailleurs.
+      const base = a.slug ? `${SITE}/actualites/${a.slug}` : a.canonical_url!;
       // Monolingue français : seule l'URL canonique est recachée, jamais de
       // variante `?lang=`.
       const urls = [base];
 
       let allOk = true;
       for (const url of urls) {
-        const res = await recache(url, PRERENDER_TOKEN);
+        const res = await recache(url);
+        if (res.deferred) { articlesDeferred += 1; allOk = false; continue; }
         if (res.ok) urlsOk += 1;
         else { urlsFailed += 1; allOk = false; }
-        logRows.push({
+        if (!res.duplicate) logRows.push({
           article_id: a.id,
           url,
           status_code: res.status,
@@ -386,7 +438,7 @@ Deno.serve(async (req) => {
         const { data: okRows, error: okErr } = await sb
           .from("prerender_recache_log")
           .select("url, created_at")
-          .eq("source", STATIC_LOG_SOURCE)
+          .in("source", [STATIC_LOG_SOURCE, "consume-seo-dirty:outbox"])
           .eq("ok", true)
           .gte("created_at", markedAt)
           .order("created_at", { ascending: false })
@@ -396,13 +448,14 @@ Deno.serve(async (req) => {
         for (const r of (okRows ?? []) as Array<{ url: string; created_at: string }>) {
           if (!lastOk.has(r.url)) lastOk.set(r.url, r.created_at);
         }
-        const { toRecache, deferred } = pickStaticToRecache(markedAt, lastOk, STATIC_RENDER_BUDGET);
+        const { toRecache, deferred } = pickStaticToRecache(markedAt, lastOk, STATIC_RENDER_BUDGET - outboxRows.length);
         staticMetrics.static_deferred = deferred;
         for (const url of toRecache) {
-          const res = await recache(url, PRERENDER_TOKEN);
+          const res = await recache(url);
+          if (res.deferred) { staticMetrics.static_deferred += 1; continue; }
           if (res.ok) { urlsOk += 1; staticMetrics.static_recached += 1; }
           else { urlsFailed += 1; staticMetrics.static_failed += 1; }
-          logRows.push({
+          if (!res.duplicate) logRows.push({
             article_id: null, url, status_code: res.status, ok: res.ok,
             detail: res.detail, source: STATIC_LOG_SOURCE,
           });
@@ -413,7 +466,7 @@ Deno.serve(async (req) => {
 
     // Fiches gardien : même token, même journalisation, budget de renders
     // propre pour ne pas entamer le quota partagé du compte Prerender.
-    const sitterMetrics = await processSitters(sb, PRERENDER_TOKEN, logRows, acknowledgements);
+    const sitterMetrics = await processSitters(sb, recache, logRows, acknowledgements);
     urlsFailed += sitterMetrics.sitters_failed;
     urlsOk += sitterMetrics.sitters_recached;
 
@@ -422,10 +475,23 @@ Deno.serve(async (req) => {
       const { error: logError } = await sb.from("prerender_recache_log").insert(logRows);
       if (logError) throw logError;
     }
+    // Echec fournisseur : ceder la priorite aux autres URL au prochain passage.
+    for (const row of outboxRetries) {
+      const { error: retryError } = await sb.from("seo_url_outbox")
+        .update({ next_attempt_at: new Date(Date.now() + 30 * 60_000).toISOString() })
+        .eq("path", row.path).eq("dirty_at", row.dirty_at);
+      if (retryError) throw retryError;
+    }
+    // Une suppression est acquittee seulement pour la version lue.
+    for (const row of outboxAcks) {
+      const { error: ackError } = await sb.from("seo_url_outbox").delete()
+        .eq("path", row.path).eq("dirty_at", row.dirty_at);
+      if (ackError) throw ackError;
+    }
     // Journaliser les tentatives avant tout acquittement de la file.
     for (let offset = 0; offset < acknowledgements.length; offset += ACKNOWLEDGEMENT_BATCH) {
       const results = await Promise.all(acknowledgements.slice(offset, offset + ACKNOWLEDGEMENT_BATCH).map((row) =>
-        sb.from(row.table).update({ seo_dirty_at: null }).eq("id", row.id).eq("seo_dirty_at", row.seo_dirty_at)
+        client.from(row.table).update({ seo_dirty_at: null }).eq("id", row.id).eq("seo_dirty_at", row.seo_dirty_at)
       ));
       const failed = results.find((r: { error: unknown }) => r.error);
       if (failed?.error) throw failed.error;
@@ -440,6 +506,10 @@ Deno.serve(async (req) => {
       ...programmaticMetrics,
       ...sitterMetrics,
       ...staticMetrics,
+      ...outboxMetrics,
+      monthly_deferred: monthlyDeferred,
+      runtime_deferred: runtimeDeferred,
+      requests_attempted: responses.size,
     };
 
 
@@ -465,5 +535,15 @@ Deno.serve(async (req) => {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
+  } finally {
+    if (acquired && sb) {
+      const { error: releaseError } = await sb.rpc("seo_release_consumer", { p_holder: holder });
+      if (releaseError) {
+        await run.fail(releaseError);
+        return new Response(JSON.stringify({ error: "Consumer lease release failed" }), {
+          status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
   }
 });

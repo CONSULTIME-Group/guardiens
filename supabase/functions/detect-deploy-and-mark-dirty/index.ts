@@ -108,11 +108,17 @@ const ROUTE_HASHES_URL = `${SITE}/route-hashes.json`;
  * Famille de pages pre-rendues -> table portant seo_dirty_at.
  * Les cles doivent correspondre a FAMILY_ROOTS du greffon de build.
  */
-const FAMILY_TABLES: Record<string, { table: string; indexable: boolean }> = {
+const FAMILY_TABLES: Record<string, { table: string; indexable: boolean; queued?: boolean }> = {
   cities: { table: "seo_city_pages", indexable: true },
   departments: { table: "seo_department_pages", indexable: true },
   guides: { table: "city_guides", indexable: false },
   articles: { table: "articles", indexable: true },
+  sitters: { table: "profiles", indexable: false, queued: true },
+  sits: { table: "sits", indexable: false, queued: true },
+  missions: { table: "small_missions", indexable: false, queued: true },
+  projets: { table: "small_missions", indexable: false, queued: true },
+  breeds: { table: "breed_profiles", indexable: false, queued: true },
+  associations: { table: "animal_associations", indexable: false, queued: true },
 };
 
 type RouteHashes = { global: string; families: Record<string, string> };
@@ -252,6 +258,9 @@ Deno.serve(async (req) => {
       if (!hashes) {
         reason = "hashes_unavailable";
         detail = "route-hashes.json illisible, marquage de securite de toutes les familles";
+      } else if (!newHash) {
+        reason = "family_hash_missing";
+        detail = "ancienne publication sans cette famille, attente du fichier complet";
       } else if (!st) {
         reason = "bootstrap";
         detail = "premier passage pour cette famille, empreintes enregistrees sans marquage";
@@ -311,6 +320,12 @@ Deno.serve(async (req) => {
 
       for (const d of toMark) {
         const t = FAMILY_TABLES[d.family];
+        if (t.queued) {
+          const { data: count, error } = await sb.rpc("seo_queue_template_family", { p_family: d.family, p_dry_run: true });
+          if (error) throw error;
+          waveSize += count ?? 0;
+          continue;
+        }
         let q = sb.from(t.table).select("id", { count: "exact", head: true })
           .eq("published", true).is("seo_dirty_at", null);
         if (t.indexable) q = q.or("noindex.is.null,noindex.eq.false");
@@ -335,6 +350,15 @@ Deno.serve(async (req) => {
       const now = new Date().toISOString();
       for (const d of toMark) {
         const t = FAMILY_TABLES[d.family];
+        if (t.queued) {
+          const { data: count, error } = await sb.rpc("seo_queue_template_family", { p_family: d.family, p_dry_run: false });
+          if (error) throw error;
+          const n = count ?? 0;
+          markedRowsByFamily[d.family] = n;
+          perTable[t.table] = (perTable[t.table] ?? 0) + n;
+          marked += n;
+          continue;
+        }
         let q = sb.from(t.table).update({ seo_dirty_at: now })
           .eq("published", true).is("seo_dirty_at", null);
         if (t.indexable) q = q.or("noindex.is.null,noindex.eq.false");
@@ -456,7 +480,7 @@ Deno.serve(async (req) => {
     // marquage est différé ou refusé. Le cron suivant reverra le changement.
     if (hashes) {
       const nowIso = new Date().toISOString();
-      const upserts = decisions.filter((d) => d.family !== STATIC_FAMILY).map((d) => {
+      const upserts = decisions.filter((d) => d.family !== STATIC_FAMILY && d.reason !== "family_hash_missing").map((d) => {
         const st = state.get(d.family);
         return {
           family: d.family,
