@@ -12,8 +12,8 @@
  * `sitter_profiles_mark_seo_dirty`, pour les fiches gardien `/gardiens/{id}`.
  * Le compte Prerender est partagé avec un autre domaine, quota mensuel de
  * 25 000 renders : le nombre de fiches réellement recachées par passage est
- * plafonné à SITTER_RENDER_BUDGET. Les fiches non indexables au sens de
- * `isSitterProfileIndexable` voient leur flag effacé sans consommer de render.
+ * plafonné à SITTER_RENDER_BUDGET. Une fiche devenue non indexable doit aussi
+ * être rafraîchie pour remplacer une éventuelle ancienne copie indexable.
  *
  * Le flag n'est effacé que si TOUS les recaches de l'article ont réussi.
  * Chaque tentative est journalisée dans public.prerender_recache_log.
@@ -22,7 +22,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { startCronRun } from "../_shared/cron-run-log.ts";
 import { requireAdminOrServiceRole } from "../_shared/require-admin.ts";
-import { isSitterProfileIndexable } from "../_shared/sitterProfileIndexability.js";
 import {
   pickStaticToRecache,
   STATIC_FAMILY,
@@ -100,8 +99,8 @@ interface SitterMetrics {
  * Trois garde-fous :
  *  - lecture plafonnée à SITTER_SCAN_BATCH lignes, les plus anciennes d'abord ;
  *  - au plus SITTER_RENDER_BUDGET appels Prerender par passage ;
- *  - seules les fiches indexables consomment un render, les autres voient leur
- *    flag effacé immédiatement.
+ *  - toutes les fiches déjà marquées sont traitées, même après un changement
+ *    de rôle ou d'indexabilité ; aucune demande n'est effacée sans succès.
  *
  * La déduplication est assurée en amont par les triggers, qui ne repoussent
  * jamais une date déjà posée : une rafale de modifications sur un même profil
@@ -123,56 +122,26 @@ async function processSitters(
 
   const { data, error } = await sb
     .from("profiles")
-    .select("id, bio, identity_verified, seo_dirty_at")
+    .select("id, seo_dirty_at")
     .not("seo_dirty_at", "is", null)
-    .in("role", ["sitter", "both"])
     .order("seo_dirty_at", { ascending: true })
     .limit(SITTER_SCAN_BATCH);
 
   if (error) throw error;
 
-  const rows = (data ?? []) as Array<{ id: string; bio: string | null; identity_verified: boolean | null }>;
+  const rows = (data ?? []) as Array<{ id: string; seo_dirty_at: string }>;
   metrics.sitters_scanned = rows.length;
   if (rows.length === 0) return metrics;
 
-  const ids = rows.map((r) => r.id);
-  const [motivations, galleries] = await Promise.all([
-    sb.from("sitter_profiles").select("user_id, motivation").in("user_id", ids),
-    sb.from("sitter_gallery").select("user_id").in("user_id", ids),
-  ]);
-
-  const motivationById = new Map<string, string | null>(
-    ((motivations.data ?? []) as Array<{ user_id: string; motivation: string | null }>).map((m) => [m.user_id, m.motivation]),
-  );
-  const galleryCountById = new Map<string, number>();
-  for (const g of (galleries.data ?? []) as Array<{ user_id: string }>) {
-    galleryCountById.set(g.user_id, (galleryCountById.get(g.user_id) ?? 0) + 1);
-  }
-
-  const skipIds: string[] = [];
-  const toRecache: string[] = [];
-
-  for (const r of rows) {
-    const indexable = isSitterProfileIndexable({
-      bio: r.bio,
-      motivation: motivationById.get(r.id) ?? null,
-      identityVerified: r.identity_verified,
-      galleryCount: galleryCountById.get(r.id) ?? 0,
-    });
-    if (!indexable) skipIds.push(r.id);
-    else if (toRecache.length < SITTER_RENDER_BUDGET) toRecache.push(r.id);
-    else metrics.sitters_deferred += 1;
-  }
-
-  metrics.sitters_skipped_noindex = skipIds.length;
-
-  const clearedIds = [...skipIds];
-  for (const id of toRecache) {
-    const url = `${SITE}/gardiens/${id}`;
+  const toRecache = rows.slice(0, SITTER_RENDER_BUDGET);
+  metrics.sitters_deferred = rows.length - toRecache.length;
+  const clearedRows: typeof rows = [];
+  for (const row of toRecache) {
+    const url = `${SITE}/gardiens/${row.id}`;
     const res = await recache(url, token);
     if (res.ok) {
       metrics.sitters_recached += 1;
-      clearedIds.push(id);
+      clearedRows.push(row);
     } else {
       metrics.sitters_failed += 1;
     }
@@ -187,8 +156,10 @@ async function processSitters(
     console.log(`[consume-seo-dirty] ${url} -> ${res.status ?? "network_error"}`);
   }
 
-  if (clearedIds.length > 0) {
-    await sb.from("profiles").update({ seo_dirty_at: null }).in("id", clearedIds);
+  for (const row of clearedRows) {
+    const { error: clearError } = await sb.from("profiles")
+      .update({ seo_dirty_at: null }).eq("id", row.id).eq("seo_dirty_at", row.seo_dirty_at);
+    if (clearError) throw clearError;
   }
 
   return metrics;
