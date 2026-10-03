@@ -341,6 +341,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
   {
     key: "journal",
     path: "/actualites",
+    aliases: ["/actualites/page/:page"],
     label: "Le journal",
     purpose: "Articles et nouvelles de Guardiens.",
     audience: "all",

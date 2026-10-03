@@ -73,10 +73,14 @@ export const NAV_DEFS: ReadonlyArray<{ key: string; shortKey?: string; to: strin
 
 /** Classes partagées des liens Connexion et Inscription sur ordinateur. */
 const AUTH_BTN = "min-h-11 whitespace-nowrap px-2 text-xs xl:px-3 xl:text-sm";
+const MOBILE_AUTH_BTN = "min-h-12 w-full";
 
 export default function PublicHeader({ authedVariant = false }: { authedVariant?: boolean }) {
   const location = useLocation();
   const { t } = useTranslation();
+  const loginLabel = t("nav.login");
+  const registerLabel = t("nav.register");
+  const mySpaceLabel = t("nav.my_space");
   const { hasSession, authChecked } = useAuth();
   const inAppShell = useInAppShell();
   const isCompact = useIsCompactViewport();
@@ -188,7 +192,7 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
           ) : hasSession ? (
             <>
               <Button asChild size="sm" className="min-h-11 whitespace-nowrap px-2 xl:px-3">
-                <Link to="/dashboard">{t("nav.my_space")}</Link>
+                <Link to="/dashboard">{mySpaceLabel}</Link>
               </Button>
               {!isCompact && bells}
               <UserMenu />
@@ -196,10 +200,10 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
           ) : (
             <>
               <Button asChild variant="ghost" size="sm" className={AUTH_BTN}>
-                <Link to="/login">{t("nav.login")}</Link>
+                <Link to="/login">{loginLabel}</Link>
               </Button>
               <Button asChild size="sm" className={AUTH_BTN}>
-                <Link to="/inscription">{t("nav.register")}</Link>
+                <Link to="/inscription">{registerLabel}</Link>
               </Button>
             </>
           )}
@@ -258,20 +262,20 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
                       <div className="h-12 w-full rounded-md bg-muted/40 animate-pulse" aria-hidden="true" />
                     ) : hasSession ? (
                       <SheetClose asChild>
-                        <Button asChild className="min-h-12 w-full">
-                          <Link to="/dashboard">{t("nav.my_space")}</Link>
+                        <Button asChild className={MOBILE_AUTH_BTN}>
+                          <Link to="/dashboard">{mySpaceLabel}</Link>
                         </Button>
                       </SheetClose>
                     ) : (
                       <div className="space-y-3">
                         <SheetClose asChild>
-                          <Button asChild variant="outline" className="min-h-12 w-full">
-                            <Link to="/login">{t("nav.login")}</Link>
+                          <Button asChild variant="outline" className={MOBILE_AUTH_BTN}>
+                            <Link to="/login">{loginLabel}</Link>
                           </Button>
                         </SheetClose>
                         <SheetClose asChild>
-                          <Button asChild className="min-h-12 w-full">
-                            <Link to="/inscription">{t("nav.register")}</Link>
+                          <Button asChild className={MOBILE_AUTH_BTN}>
+                            <Link to="/inscription">{registerLabel}</Link>
                           </Button>
                         </SheetClose>
                       </div>

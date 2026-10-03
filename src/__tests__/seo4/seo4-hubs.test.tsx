@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, waitFor, act } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "@/i18n";
 
@@ -45,12 +45,18 @@ vi.mock("@/components/listings/PastListingsSection", () => ({ default: () => nul
 import PublicListings from "@/pages/PublicListings";
 import GuidesListing from "@/pages/GuidesListing";
 import DepartmentSitterLinks, { useDepartmentPublicSitters, sitterLinkLabel } from "@/components/seo/DepartmentSitterLinks";
+import DepartmentPage from "@/pages/DepartmentPage";
+import { bootState, productionFallback } from "./prerenderBootHarness";
 
-const wrap = (ui: React.ReactNode) => {
+vi.mock("@/hooks/useContentStats", () => ({ useContentStats: () => ({ values: {}, isLoading: false }) }));
+vi.mock("@/components/seo/NeighborDepartments", () => ({ default: () => null }));
+vi.mock("@/components/associations/DepartmentAssociations", () => ({ default: () => null }));
+
+const wrap = (ui: React.ReactNode, path = "/") => {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={qc}>
-      <MemoryRouter>{ui}</MemoryRouter>
+      <MemoryRouter initialEntries={[path]}>{ui}</MemoryRouter>
     </QueryClientProvider>,
   );
 };
@@ -68,6 +74,7 @@ beforeEach(() => {
   (window as any).prerenderReady = false;
   document.head.querySelectorAll('script[type="application/ld+json"]').forEach((n) => n.remove());
 });
+afterEach(() => vi.useRealTimers());
 
 describe("hub /annonces", () => {
   it("prête seulement après la première recherche, ItemList = cartes affichées", async () => {
@@ -113,6 +120,29 @@ describe("hub /annonces, état courant", () => {
 });
 
 describe("liens gardiens des pages départements", () => {
+  it("la vraie page département attend les profils au-delà du repli de dix secondes", async () => {
+    let release!: (r: { data: unknown; count?: number; error: unknown }) => void;
+    handler = (table) => {
+      if (table === "seo_department_pages") return Promise.resolve({ data: { slug: "rhone", department: "Rhône", h1_title: "Gardiens dans le Rhône", intro_text: "Texte public", sitter_count: 2 }, error: null });
+      if (table === "departements") return Promise.resolve({ data: { code: "69" }, error: null });
+      if (table === "public_profiles") return new Promise((resolve) => { release = resolve; });
+      return Promise.resolve({ data: [], error: null });
+    };
+    Object.assign(window, bootState("/departement/rhone"));
+    wrap(<Routes><Route path="/departement/:slug" element={<DepartmentPage />} /></Routes>, "/departement/rhone");
+    await waitFor(() => expect(release).toBeDefined());
+    vi.useFakeTimers();
+    window.setTimeout(productionFallback(), 10000);
+    await act(async () => { vi.advanceTimersByTime(12000); });
+    expect(window.prerenderReady).toBe(false);
+    expect(document.querySelector('a[href="/gardiens/public-test"]')).toBeNull();
+    await act(async () => {
+      release({ data: [{ id: "public-test", first_name: null, city: "Lyon" }], count: 1, error: null });
+      await vi.advanceTimersByTimeAsync(10);
+    });
+    expect(document.querySelector('a[href="/gardiens/public-test"]')).not.toBeNull();
+    expect(window.prerenderReady).toBe(true);
+  });
   it("aucune exclusion sur le prénom, repli neutre, jamais d'identifiant", async () => {
     handler = (table) =>
       table === "departements"
@@ -152,6 +182,27 @@ describe("liens gardiens des pages départements", () => {
 
 describe("hub /guides", () => {
   const g = (id: string, city: string, department: string | null) => ({ id, city, slug: city.toLowerCase(), intro: "", ideal_for: "", department, published: true });
+
+  it("lecture lente : le vrai repli attend les liens visibles", async () => {
+    let release!: (r: { data: unknown; error: unknown }) => void;
+    handler = (table) => table === "city_guides"
+      ? new Promise((resolve) => { release = resolve; })
+      : Promise.resolve({ data: [], error: null });
+    window.prerenderMetaPending = false;
+    wrap(<GuidesListing />);
+    await waitFor(() => expect(release).toBeDefined());
+    vi.useFakeTimers();
+    window.setTimeout(productionFallback(), 10000);
+    await act(async () => { vi.advanceTimersByTime(12000); });
+    expect(window.prerenderReady).toBe(false);
+    expect(window.prerenderMetaPending).toBe(true);
+    await act(async () => {
+      release({ data: [g("2", "Marrakech", null)], error: null });
+      await vi.advanceTimersByTimeAsync(10);
+    });
+    expect(document.querySelector('a[href="/guides/marrakech"]')).not.toBeNull();
+    expect(window.prerenderReady).toBe(true);
+  });
 
   it("guide sans département rendu dans un groupe, prête après affichage", async () => {
     handler = (table) =>

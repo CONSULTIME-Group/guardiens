@@ -100,6 +100,18 @@ describe("canonique de bootstrap : exécution du script extrait d'index.html", (
 });
 
 describe("PageMeta : remplacement de la canonique de bootstrap", () => {
+  it("repose le verrou après un premier succès et retire le JSON-LD précédent", async () => {
+    const view = render(<MemoryRouter><PageMeta title="A" description="Texte A" path="/actualites" jsonLd={{ "@type": "ItemList", numberOfItems: 1 }} /></MemoryRouter>);
+    await waitFor(() => expect(window.prerenderReady).toBe(true));
+    expect(document.head.querySelector('script[type="application/ld+json"][data-page-meta]')).not.toBeNull();
+    view.rerender(<MemoryRouter><PageMeta title="B" description="Texte B" path="/actualites/page/2" ready={false} /></MemoryRouter>);
+    await waitFor(() => expect(window.prerenderMetaPending).toBe(true));
+    expect(window.prerenderReady).toBe(false);
+    expect(document.head.querySelector('script[type="application/ld+json"][data-page-meta]')).toBeNull();
+    view.rerender(<MemoryRouter><PageMeta title="B" description="Texte B" path="/actualites/page/2" ready /></MemoryRouter>);
+    await waitFor(() => expect(window.prerenderReady).toBe(true));
+    expect(window.prerenderMetaPending).toBe(false);
+  });
   afterEach(() => {
     cleanup();
     clearCanonicals();
