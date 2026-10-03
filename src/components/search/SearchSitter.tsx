@@ -446,20 +446,28 @@ const SearchSitter = ({ mode = "internal", onFirstSearchSettled }: SearchSitterP
 
 
 
- // Fin de la première recherche, relayée une fois au parent après rendu.
+ // État courant des cartes réellement rendues, relayé au parent après
+ // commit à chaque changement (Voir plus, filtre, nouvelle recherche).
  const [firstSearchSettled, setFirstSearchSettled] = useState(false);
- const settledNotifiedRef = useRef(false);
+ const lastListKeyRef = useRef("");
  useEffect(() => {
-   if (!firstSearchSettled || settledNotifiedRef.current) return;
-   settledNotifiedRef.current = true;
-   // Miroir exact de la grille rendue plus bas : disponibles plafonnées à
-   // visibleCount, puis passées/attribuées ; démos exclues.
-   const real = results.filter((r: any) => !r.is_demo);
-   const isInactive = (r: any) => r.isAssigned || r.isCompleted || r.isPast;
-   const shown = searchError || tab !== "sits" ? [] : [...real.filter((r: any) => !isInactive(r)).slice(0, visibleCount), ...real.filter(isInactive)];
-   onFirstSearchSettled?.(shown.map((r: any) => ({ id: r.id, slug: r.slug ?? null, title: r.title ?? null })));
-   // eslint-disable-next-line react-hooks/exhaustive-deps
- }, [firstSearchSettled, onFirstSearchSettled]);
+   if (!onShownListChange) return;
+   let state: ShownListState;
+   if (!firstSearchSettled || loading) state = { status: "loading", items: [] };
+   else if (searchError) state = { status: "error", items: [] };
+   else {
+     // Miroir exact de la grille rendue plus bas : disponibles plafonnées à
+     // visibleCount, puis passées/attribuées ; démos exclues.
+     const real = tab === "sits" ? results.filter((r: any) => !r.is_demo) : [];
+     const isInactive = (r: any) => r.isAssigned || r.isCompleted || r.isPast;
+     const shown = [...real.filter((r: any) => !isInactive(r)).slice(0, visibleCount), ...real.filter(isInactive)];
+     state = { status: "ready", items: shown.map((r: any) => ({ path: sitPath(r), title: r.title ?? null })) };
+   }
+   const key = state.status + JSON.stringify(state.items);
+   if (key === lastListKeyRef.current) return;
+   lastListKeyRef.current = key;
+   onShownListChange(state);
+ }, [firstSearchSettled, loading, searchError, tab, results, visibleCount, onShownListChange]);
 
  // Auto-search when filters change (debounced)
  const doSearch = useCallback(async () => {
