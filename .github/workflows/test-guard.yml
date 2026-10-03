@@ -28,6 +28,12 @@ jobs:
 
       - run: bun install --frozen-lockfile
 
+      - name: Installer ripgrep pour les gardes de contenu
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes ripgrep
+
+
       - name: Typecheck
         run: npx tsc -b
 
