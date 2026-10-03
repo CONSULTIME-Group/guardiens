@@ -1,16 +1,20 @@
 import { assert, assertEquals, assertRejects } from "https://deno.land/std@0.224.0/assert/mod.ts";
+import { acquireMemberSendClaim } from "../_shared/member-email-send-claim.ts";
 import {
-  buildSubject, ctaLabel, deliverProximity, loadProximityHistory, missionKind, missionUrl,
+  buildSubject, parseBatchIds, proximityClaimKey, PROXIMITY_CLAIM_TEMPLATE, ctaLabel, deliverProximity, loadProximityHistory, missionKind, missionUrl,
   splitByHistory, type ProxRecipient,
 } from "./logic.ts";
 
 // Base simulée : tables en mémoire + RPC de réservation fidèle au SQL réel.
 type Row = Record<string, unknown>;
-function fakeDb(opts: { failTable?: string } = {}) {
+type FakeOpts = { failTable?: string; failInsert?: boolean; failFinish?: boolean; missingRpc?: boolean };
+function fakeDb(opts: FakeOpts = {}) {
+  const clock = { now: 0 }; // minutes, avancé par les tests (voyage dans le temps)
   const tables: Record<string, Row[]> = {
     mass_emails: [], mass_email_sends: [], mission_notification_queue: [], email_send_log: [],
   };
-  const claims = new Map<string, { token: string; state: string }>();
+  const claims = new Map<string, { token: string; state: string; at: number }>();
+  const calls: string[] = [];
   const get = (r: Row, col: string) => {
     const m = /^(\w+)->>(\w+)$/.exec(col);
     if (m) return (r[m[1]] as Row | undefined)?.[m[2]];
@@ -26,7 +30,10 @@ function fakeDb(opts: { failTable?: string } = {}) {
       like: (c: string, p: string) => (preds.push((r) => String(get(r, c) ?? "").startsWith(p.replace(/%$/, ""))), q),
       order: () => q,
       range: (a: number, b: number) => (range = [a, b], q),
-      insert: (rows: Row[]) => { tables[t].push(...rows); return Promise.resolve({ error: null }); },
+      insert: (rows: Row[]) => {
+        if (opts.failInsert && t === "mass_email_sends") return Promise.resolve({ error: { message: "journal en panne" } });
+        tables[t].push(...rows); return Promise.resolve({ error: null });
+      },
       then: (res: (v: unknown) => void) => {
         if (opts.failTable === t) return res({ data: null, error: { message: "boom" } });
         const all = tables[t].filter((r) => preds.every((p) => p(r)));
@@ -35,19 +42,27 @@ function fakeDb(opts: { failTable?: string } = {}) {
     };
     return q;
   }
+  // Fidèle au SQL réel : la RPC globale reprend sending après 15 min et
+  // uncertain après 6 h ; la RPC dédiée ne reprend que retryable.
   async function rpc(name: string, a: Row) {
     await Promise.resolve();
+    calls.push(name);
     const key = a.p_claim_key as string;
-    if (name === "acquire_member_email_send_claim") {
+    const token = a.p_owner_token as string;
+    if (name === "acquire_member_email_send_claim" || name === "acquire_proximity_send_claim") {
+      if (opts.missingRpc && name === "acquire_proximity_send_claim") return { data: null, error: { message: "function does not exist" } };
       const c = claims.get(key);
-      if (!c || c.state === "retryable") { claims.set(key, { token: a.p_owner_token as string, state: "sending" }); return { data: "acquired", error: null }; }
+      const legacy = name === "acquire_member_email_send_claim";
+      const stale = !!c && legacy && ((c.state === "sending" && clock.now - c.at > 15) || (c.state === "uncertain" && clock.now - c.at > 360));
+      if (!c || c.state === "retryable" || stale) { claims.set(key, { token, state: "sending", at: clock.now }); return { data: "acquired", error: null }; }
       return { data: c.state === "sent" ? "sent" : c.state === "uncertain" ? "uncertain" : "busy", error: null };
     }
+    if (opts.failFinish) return { data: null, error: { message: "finalisation en panne" } };
     const c = claims.get(key);
-    if (c && c.token === a.p_owner_token && c.state === "sending") { c.state = a.p_outcome as string; return { data: true, error: null }; }
+    if (c && c.token === token && c.state === "sending") { c.state = a.p_outcome as string; c.at = clock.now; return { data: true, error: null }; }
     return { data: false, error: null };
   }
-  return { tables, claims, from, rpc };
+  return { tables, claims, calls, clock, opts, from, rpc };
 }
 
 const MISSION = "e5724f3e-c22b-4fb9-8962-d24c80435660";
@@ -147,4 +162,75 @@ Deno.test("projet : objet, bouton et adresse /projets ; entraide inchangée", ()
   assertEquals(missionUrl(n), "https://guardiens.fr/petites-missions/m1");
   assertEquals(buildSubject("Elsa", "besoin"), "Près de chez vous, Elsa cherche un coup de main");
   assertEquals(buildSubject("Elsa", "offre"), "Près de chez vous, Elsa propose son aide, gratuitement");
+});
+
+// ---- Complément 03/10/2026 : aucune reprise sur ancienneté, réponses vérifiées ----
+
+Deno.test("clé dédiée identique à la clé globale existante", async () => {
+  let seen = "";
+  await acquireMemberSendClaim({ rpc: (_n: string, a: Record<string, unknown>) => (seen = a.p_claim_key as string, Promise.resolve({ data: "busy", error: null })) },
+    { templateName: PROXIMITY_CLAIM_TEMPLATE, recipientEmail: "p0@x.fr", idempotencyKey: MISSION });
+  assertEquals(await proximityClaimKey("  P0@X.fr ", MISSION), seen);
+});
+
+Deno.test("ambigu + journal en panne, puis tentative après plus de 6 h : aucun renvoi", async () => {
+  const db = fakeDb({ failInsert: true });
+  const r1 = await campaign(db, people(2), 50, async () => ({ status: 503, body: "x" }));
+  assertEquals([r1.rep.uncertain, r1.rep.journalFailed, r1.rep.needsReconciliation], [2, 2, true]);
+  db.opts.failInsert = false;
+  db.clock.now += 6 * 60 + 1;
+  const r2 = await campaign(db, people(2), 50, ok);
+  assertEquals(r2.calls.length, 0);
+  assertEquals(r2.rep.skippedAlready, 2);
+  assert(!db.calls.includes("acquire_member_email_send_claim"));
+});
+
+Deno.test("acceptation fournisseur puis crash avant journal et finalisation, puis plus de 15 min : aucun renvoi", async () => {
+  const db = fakeDb();
+  const id = crypto.randomUUID();
+  db.tables.mass_emails.push({ id, segment: "proximity", status: "sending", filters: { mission_id: MISSION } });
+  const crash = deliverProximity({ db, sleep: async () => {}, sendBatch: async () => { throw new Error("CRASH_AFTER_ACCEPT"); } },
+    { missionId: MISSION, campaignId: id, recipients: people(2), buildEmail: (r) => r.email });
+  // simule l'arrêt du processus : réservations restées « sending », rien journalisé
+  db.opts.failInsert = true; db.opts.failFinish = true;
+  await crash;
+  db.opts.failInsert = false; db.opts.failFinish = false;
+  for (const c of db.claims.values()) { c.state = "sending"; }
+  db.tables.mass_email_sends.length = 0;
+  db.clock.now += 16;
+  const r = await campaign(db, people(2), 50, ok);
+  assertEquals(r.calls.length, 0);
+  assertEquals(r.rep.skippedBusy, 2);
+  db.clock.now += 60 * 24 * 30;
+  assertEquals((await campaign(db, people(2), 50, ok)).calls.length, 0);
+});
+
+Deno.test("erreur de finalisation : signalée, réconciliation exigée, pas de renvoi", async () => {
+  const db = fakeDb({ failFinish: true });
+  const r = await campaign(db, people(3), 50, ok);
+  assertEquals([r.rep.sent, r.rep.finishFailed, r.rep.needsReconciliation], [3, 3, true]);
+  db.opts.failFinish = false;
+  db.clock.now += 16;
+  assertEquals((await campaign(db, people(3), 50, ok)).calls.length, 0);
+});
+
+Deno.test("2xx illisible ou ids manquants : uncertain, jamais sent", async () => {
+  for (const body of ["pas du json", JSON.stringify({ data: [{ id: "a" }] }), JSON.stringify({ data: [{ id: "a" }, {}] }), "{}"]) {
+    const db = fakeDb();
+    const r = await campaign(db, people(2), 50, async () => ({ status: 200, body }));
+    assertEquals([r.rep.sent, r.rep.uncertain, r.rep.needsReconciliation], [0, 2, true]);
+    assert(db.tables.mass_email_sends.every((x) => x.status === "uncertain"));
+    assertEquals((await campaign(db, people(2), 50, ok)).calls.length, 0);
+  }
+  assertEquals(parseBatchIds(JSON.stringify({ data: [{ id: "a" }, { id: "b" }] }), 2), ["a", "b"]);
+});
+
+Deno.test("RPC dédiée absente : zéro appel fournisseur ; reprise seulement après refus 4xx certain", async () => {
+  const db = fakeDb({ missingRpc: true });
+  const r = await campaign(db, people(2), 50, ok);
+  assertEquals([r.calls.length, r.rep.blocked], [0, 2]);
+  db.opts.missingRpc = false;
+  const r2 = await campaign(db, people(2), 50, async () => ({ status: 422, body: "invalid" }));
+  assertEquals(r2.rep.failed, 2);
+  assertEquals((await campaign(db, people(2), 50, ok)).rep.sent, 2);
 });
