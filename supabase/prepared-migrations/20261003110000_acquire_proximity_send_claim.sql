@@ -1,6 +1,9 @@
--- PRÉPARÉE, NON APPLIQUÉE. À appliquer seulement sur GO explicite de Jérémie,
--- AVANT le déploiement de send-mass-email-proximity (sinon la fonction bloque
--- tout envoi : RPC absente = aucun appel fournisseur).
+-- APPLIQUÉE le 03/10/2026 par ChatGPT, en transaction, sur GO de Jérémie
+-- (« fais les correctifs »), avant le déploiement de send-mass-email-proximity
+-- (11:54 UTC). Trace : relecture pg_get_functiondef après application
+-- (SECURITY DEFINER, search_path public, pg_temp ; EXECUTE refusé à anon et
+-- authenticated, accordé à service_role). Fichier conservé hors du dossier
+-- des migrations automatiques : NE PAS réappliquer ni déplacer.
 --
 -- Réservation dédiée aux alertes de proximité. Même table et mêmes clés que
 -- acquire_member_email_send_claim, mais acquis seulement sur insertion neuve
