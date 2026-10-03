@@ -103,8 +103,8 @@ export default function News() {
   const activeCategory = rawCategory === "all" || VALID_CATEGORIES.has(rawCategory) ? rawCategory : "all";
   const currentPage = parsedPage ?? 1;
   const urlSearch = searchParams.get("q") || "";
-  const fetchKey = `${currentPage}|${activeCategory}|${urlSearch.trim()}`;
   const [retryTick, setRetryTick] = useState(0);
+  const fetchKey = `${currentPage}|${activeCategory}|${urlSearch.trim()}|${retryTick}`;
   const current = result && result.key === fetchKey ? result : null;
   const loading = current === null;
   const error = current?.error ? t("news.error") : null;
