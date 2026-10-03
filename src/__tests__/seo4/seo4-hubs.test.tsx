@@ -111,12 +111,13 @@ describe("liens gardiens des pages départements", () => {
     expect(sitterLinkLabel(res.sitters[1])).not.toMatch(/u-2|DUPONT/);
   });
 
-  it("erreur distincte du zéro, lien vers la liste complète toujours présent", async () => {
+  it("erreur distincte du zéro, lien vers la liste complète toujours présent", { timeout: 10000 }, async () => {
     handler = () => Promise.resolve({ data: null, error: { message: "x" } });
     let res: any;
     const Probe = () => ((res = useDepartmentPublicSitters("Rhône")), null);
     wrap(<Probe />);
-    await waitFor(() => expect(res.isLoading).toBe(false));
+    // Une seule nouvelle tentative (retry: 1) avant l'état d'erreur.
+    await waitFor(() => expect(res.isLoading).toBe(false), { timeout: 5000 });
     expect(res.isError).toBe(true);
 
     const a = wrap(<DepartmentSitterLinks deptIn="dans le Rhône" sitters={[]} total={0} isError />);
