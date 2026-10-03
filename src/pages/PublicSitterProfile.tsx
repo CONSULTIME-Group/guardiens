@@ -205,11 +205,12 @@ interface OwnerProfileData {
 }
 
 export default function PublicSitterProfile() {
-  const prerenderMetaDeclared = useRef(false);
-  if (!prerenderMetaDeclared.current && typeof window !== "undefined") {
+  const { id } = useParams<{ id: string }>();
+  const prerenderProfileId = useRef<string | null | undefined>(null);
+  if (prerenderProfileId.current !== id && typeof window !== "undefined") {
     window.prerenderMetaPending = true;
     window.prerenderReady = false;
-    prerenderMetaDeclared.current = true;
+    prerenderProfileId.current = id;
   }
   // Relâchement du verrou au démontage : couvre une navigation rapide qui
   // quitte la fiche avant que PageMeta ait pu monter et rendre la main.
@@ -218,7 +219,6 @@ export default function PublicSitterProfile() {
       if (typeof window !== "undefined") window.prerenderMetaPending = false;
     };
   }, []);
-  const { id } = useParams<{ id: string }>();
   const auth = useAuth();
   const { sitter: viewerSitter } = useViewerSitterForAffinity();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -230,6 +230,7 @@ export default function PublicSitterProfile() {
   const heroWeights = useHeroWeights();
 
   const [loading, setLoading] = useState(true);
+  const [resolvedProfileId, setResolvedProfileId] = useState<string | undefined>(undefined);
   const [profile, setProfile] = useState<any>(null);
   const [sitterProfile, setSitterProfile] = useState<any>(null);
   // Localisation lisible : nom du département, région, et slugs de pages
@@ -647,8 +648,27 @@ export default function PublicSitterProfile() {
   const [loadError, setLoadError] = useState<null | 'error'>(null);
   const [loadNonce, setLoadNonce] = useState(0);
   useEffect(() => {
-    if (!id || id === "undefined" || id === "null") { setLoading(false); return; }
+    let active = true;
+    setProfile(null);
+    setSitterProfile(null);
+    setOwnerProfile(null);
+    setGallery([]);
+    setGalleryCount(0);
+    setReviews([]);
+    setReviewCount(0);
+    setAvgRating(0);
+    setBadgesBySitId({});
+    setEmergencyActive(false);
+    setHasActiveSubscription(false);
+    setExternalExperiences([]);
+    setMissionCount(0);
+    setTargetPets([]);
+    setTargetOwnerAffinity(null);
+    setLoadError(null);
+    if (!id || id === "undefined" || id === "null") { setResolvedProfileId(id); setLoading(false); return; }
     const load = async () => {
+      window.prerenderMetaPending = true;
+      window.prerenderReady = false;
       setLoading(true);
       setLoadError(null);
       try {
@@ -706,6 +726,9 @@ export default function PublicSitterProfile() {
             .eq("verification_status", "verified"),
         ]);
 
+      if (!active) return;
+      if (profileRes.error) throw profileRes.error;
+
       // Store in local variables before setState.
       // ⚠️ `public_profiles` (vue publique) ne contient PAS `hero_image_index` ,       // on doit donc le merger explicitement depuis `profiles` pour que la
       // sélection manuelle survive au reload.
@@ -718,6 +741,8 @@ export default function PublicSitterProfile() {
             cancellation_count: baseData?.cancellation_count ?? 0,
           }
         : baseData;
+
+      if (!fetchedPublicProfile) return;
 
       const fetchedSitterProfile = sitterRes?.data ?? null;
       const fetchedOwnerProfile = (ownerRes?.data as OwnerProfileData | null) ?? null;
@@ -732,7 +757,9 @@ export default function PublicSitterProfile() {
       // « photos réservées aux membres » et le calcul d'indexabilité SEO. Les
       // URLs des photos, elles, ne sont jamais servies à un anonyme.
       {
-        const { data: cnt } = await (supabase as any).rpc("gallery_photo_count", { p_user_id: id });
+        const { data: cnt, error: countError } = await (supabase as any).rpc("gallery_photo_count", { p_user_id: id });
+        if (!active) return;
+        if (countError) throw countError;
         setGalleryCount(typeof cnt === "number" ? cnt : 0);
       }
 
@@ -755,6 +782,7 @@ export default function PublicSitterProfile() {
             .from("properties")
             .select("car_required, pets:pets(species, special_needs, breed)")
             .eq("user_id", id);
+          if (!active) return;
           const flat = (propsData || []).flatMap((p: any) => p.pets || []);
           setTargetPets(flat);
           // Voiture requise : critère d'affinité (direction gardien → propriétaire).
@@ -765,6 +793,7 @@ export default function PublicSitterProfile() {
               : current,
           );
         } catch {
+          if (!active) return;
           setTargetPets([]);
         }
       } else {
@@ -778,6 +807,7 @@ export default function PublicSitterProfile() {
 
       if (reviewsRes.data) {
         const enrichedReviews = await hydrateReviewers(reviewsRes.data as any[]);
+        if (!active) return;
         setReviews(enrichedReviews);
         setReviewCount(reviewsRes.data.length);
         if (reviewsRes.data.length > 0) {
@@ -794,6 +824,7 @@ export default function PublicSitterProfile() {
             .select("badge_id, sit_id")
             .in("sit_id", sitIdsFromReviews)
             .eq("user_id", id);
+          if (!active) return;
           const grouped: Record<string, string[]> = {};
           (badgeAttrData || []).forEach((b: any) => {
             if (!grouped[b.sit_id]) grouped[b.sit_id] = [];
@@ -832,6 +863,7 @@ export default function PublicSitterProfile() {
         // Toast si l'onglet demandé n'est pas disponible
         if (requested && tabAvailability[requested] === false) {
           import('sonner').then(({ toast }) => {
+            if (!active) return;
             toast.info(`L'onglet « ${tabLabels[requested]} » n'est pas disponible pour ce profil.`);
           });
           // Nettoie l'URL pour éviter de re-déclencher
@@ -847,13 +879,18 @@ export default function PublicSitterProfile() {
       // et le DOM ne porte que le squelette. PageMeta est seul maître du drapeau.
 
       } catch (e: any) {
+        if (!active) return;
         console.error('[PublicSitterProfile] load failed', e);
         setLoadError('error');
       } finally {
-        setLoading(false);
+        if (active) {
+          setResolvedProfileId(id);
+          setLoading(false);
+        }
       }
     };
     load();
+    return () => { active = false; };
   }, [id, loadNonce, auth?.hasSession]);
 
 
@@ -1177,7 +1214,7 @@ export default function PublicSitterProfile() {
     setOwnerSitsLoadingMore(false);
   };
 
-  if (loading) {
+  if (loading || resolvedProfileId !== id) {
     // Squelette qui préfigure la vraie structure : hero pleine largeur à hauteur
     // réservée (responsive), rangée de tuiles, bouton. Objectif : éviter le CLS
     // à l'arrivée des données. Aucun changement visuel par ailleurs.
@@ -1214,6 +1251,8 @@ export default function PublicSitterProfile() {
           title="Profil momentanément indisponible"
           description="Ce profil n'a pas pu être chargé. Vous pouvez réessayer dans un instant."
           noindex
+          statusCode={503}
+          noCanonical
         />
         <div className="text-center space-y-3 max-w-md">
           <p className="text-lg font-semibold text-foreground">Impossible de charger ce profil</p>
@@ -1233,7 +1272,7 @@ export default function PublicSitterProfile() {
     );
   }
 
-  if (!profile && !ownerProfile) {
+  if (!profile) {
     // Profil inexistant ou compte effacé (anonymisé) : état vide propre, jamais indexable.
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -1241,6 +1280,8 @@ export default function PublicSitterProfile() {
           title="Profil indisponible"
           description="Ce profil n'est plus disponible sur Guardiens."
           noindex
+          statusCode={404}
+          noCanonical
         />
         <div className="text-center">
           <p className="text-lg font-semibold text-foreground">Profil indisponible</p>
