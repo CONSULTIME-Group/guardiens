@@ -42,9 +42,26 @@ vi.mock("@/integrations/supabase/client", () => {
 vi.mock("@/contexts/AuthContext", () => ({ useAuth: () => ({ user: null }) }));
 vi.mock("@/hooks/use-toast", () => ({ useToast: () => ({ toast: () => undefined }) }));
 const captured: any[] = [];
-vi.mock("@/components/missions/PublicMissionView", () => ({
-  default: (props: any) => { captured.push(props); return <h1>{props.mission.title}</h1>; },
-}));
+vi.mock("@/components/missions/PublicMissionView", async () => {
+  // PageMeta réelle : les balises de A sont celles que la production poserait.
+  const { default: PageMeta } = await vi.importActual<any>("@/components/PageMeta");
+  return {
+    default: (props: any) => {
+      captured.push(props);
+      return (
+        <>
+          <PageMeta
+            title={props.mission.title}
+            description={`Description ${props.mission.title}`}
+            canonical={props.canonical}
+            jsonLd={{ "@context": "https://schema.org", "@type": "Event", name: props.mission.title }}
+          />
+          <h1>{props.mission.title}</h1>
+        </>
+      );
+    },
+  };
+});
 
 import ProjetDetail from "@/pages/ProjetDetail";
 import LegacyProjetRedirect from "@/components/seo/LegacyProjetRedirect";
@@ -229,6 +246,33 @@ describe("robustesse de la fiche projet", () => {
     await act(async () => { resolveB({ data: row("b", "Projet B"), error: null }); });
     await screen.findByText("Projet B");
     expect(captured.at(-1).canonical).toBe("https://guardiens.fr/projets/b");
+  });
+
+  it("PageMeta réelle : au premier commit de B, aucune balise de A (titre, description, canonical, JSON-LD)", async () => {
+    let resolveB!: (v: any) => void;
+    let calls = 0;
+    nextResult = () => (++calls === 1
+      ? Promise.resolve({ data: row("a", "Projet A"), error: null })
+      : new Promise((r) => { resolveB = r; }));
+    renderWithNav("/projets/a");
+    await screen.findByText("Projet A");
+    await waitFor(() => expect(canon()).toBe("https://guardiens.fr/projets/a"));
+    expect(document.title).toContain("Projet A");
+    expect(meta("description")).toBe("Description Projet A");
+    expect(document.head.querySelectorAll('script[type="application/ld+json"][data-page-meta="true"]').length).toBe(1);
+    act(() => goTo("/projets/b"));
+    expect(document.title).not.toContain("Projet A");
+    expect(meta("description")).toBeNull();
+    expect(canon()).toBeNull();
+    expect(document.head.querySelector('[data-page-meta="true"]')).toBeNull();
+    expect(document.head.innerHTML).not.toContain("Projet A");
+    expect((window as any).prerenderReady).toBe(false);
+    expect(window.prerenderMetaPending).toBe(true);
+    await act(async () => { resolveB({ data: row("b", "Projet B"), error: null }); });
+    await screen.findByText("Projet B");
+    await waitFor(() => expect(canon()).toBe("https://guardiens.fr/projets/b"));
+    expect(document.title).toContain("Projet B");
+    expect(meta("description")).toBe("Description Projet B");
   });
 
   it("démontage pendant la lecture : aucune mise à jour tardive", async () => {
