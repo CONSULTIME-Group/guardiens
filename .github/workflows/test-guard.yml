@@ -39,3 +39,6 @@ jobs:
 
       - name: Garde différentielle des tests
         run: npm run test:guard
+
+      - name: Cycle d'invalidation SEO des profils (Postgres local)
+        run: npm run test:sql:profile-seo
