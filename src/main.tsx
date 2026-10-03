@@ -57,13 +57,11 @@ if (!container) {
 // liste des actualités (/actualites et /actualites/page/N, lot SEO-4 : prête
 // seulement une fois la liste affichée par News.tsx). Les articles
 // /actualites/:slug ne sont pas concernés.
-const LATE_META_PATH_PREFIXES = [
-  "/gardiens/",
-  "/projets/",
-];
+// Expression unique (plafond de taille du démarrage).
+const LATE_META_PATH = /^\/(gardiens\/|projets\/|actualites(\/page\/|\/?$))/;
 
 // Ce module ne s'exécute que dans le navigateur (document lu plus haut).
-if (LATE_META_PATH_PREFIXES.some((p) => location.pathname.startsWith(p)) || /^\/actualites(\/page\/|\/?$)/.test(location.pathname)) {
+if (LATE_META_PATH.test(location.pathname)) {
   window.prerenderMetaPending = true;
   window.prerenderReady = false;
 }
