@@ -280,12 +280,13 @@ async function computeRecipients(
   const ids = all.map((r) => r.user_id);
   const optedOut = new Set<string>();
   if (ids.length > 0) {
-    const CHUNK = 500;
+    const CHUNK = 150;
     for (let i = 0; i < ids.length; i += CHUNK) {
-      const { data: prefs } = await serviceClient
+      const { data: prefs, error: prefErr } = await serviceClient
         .from("email_preferences")
         .select("user_id, product_emails")
         .in("user_id", ids.slice(i, i + CHUNK));
+      if (prefErr) throw new Error(`préférences illisibles : ${prefErr.message}`);
       for (const p of (prefs || []) as any[]) {
         if (p.product_emails === false) optedOut.add(p.user_id);
       }
@@ -297,12 +298,13 @@ async function computeRecipients(
   const suppressed = new Set<string>();
   if (emailsLower.size > 0) {
     const list = [...emailsLower];
-    const CHUNK = 500;
+    const CHUNK = 150;
     for (let i = 0; i < list.length; i += CHUNK) {
-      const { data: sups } = await serviceClient
+      const { data: sups, error: supErr } = await serviceClient
         .from("suppressed_emails")
         .select("email")
         .in("email", list.slice(i, i + CHUNK));
+      if (supErr) throw new Error(`suppressions illisibles : ${supErr.message}`);
       for (const s of (sups || []) as any[]) {
         if (s.email) suppressed.add(String(s.email).toLowerCase());
       }
