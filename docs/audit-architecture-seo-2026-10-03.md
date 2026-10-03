@@ -417,3 +417,9 @@ Statut : code, tests et fichier généré prêts en dépôt. Aucune publication,
 - Pagination non transactionnelle : une écriture concurrente pendant la lecture fait échouer le build (total ou clé répétée), elle n'est pas masquée.
 - Proxy non exécuté sous Deno ni déployé ; comportement réel de l'origine (redirections éventuelles) à vérifier au déploiement autorisé.
 - Le build public (Lovable) lance le générateur : une panne de lecture fera échouer la publication au lieu de servir un sitemap partiel, comportement voulu.
+
+### Contrôle croisé avec le SQL indépendant (03/10/2026, 12:58 à 13:04 UTC)
+- Missions : les 15 URL `/petites-missions/` du sitemap (servi et généré) sont 14 pages villes statiques de `siteRoutes.ts` et 1 fiche. Fiches générées par la règle JS partagée : `/petites-missions/aide-demenagement` et `/projets/chantier-participatif-de-plantation`. MD5 des chemins triés joints par LF : `636d3d51b2d630a7bd9de5c5fb79c3a7`, identique au SQL de 12:59:46 UTC. Aucune fiche à retirer, règles métier inchangées.
+- Profils : les 82 anciens restent éligibles, 59 ajoutés, 0 retiré (confirmé par le SQL de 12:58 UTC).
+- Dénominateurs : articles 101 sur 101, villes SEO 162, guides 95, départements 99, associations 11. Races : 81 lignes source pour 77 URL (fusions de fiches de `breedFicheMerges`). Annonces : 12 ouvertes en source pour 10 URL (2 écartées pour contenu insuffisant par `sitIndexability`).
+- Origine : https://guardiens.lovable.app/sitemap.xml sert le même fichier que guardiens.fr (SHA256 `42618a635aaf402795919bfea4a9211ed17cbf3c2746a8f3fc40dc7e0afcc83e`, URL canoniques guardiens.fr), ce qui confirme qu'un proxy vers l'origine est pertinent et ne boucle pas.
