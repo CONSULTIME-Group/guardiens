@@ -52,17 +52,15 @@ if (!container) {
 // Routes lazy qui écrivent leurs métadonnées tardivement (après un chargement
 // de données). Le verrou est posé ici, avant le rendu, car le chunk de la
 // route peut arriver après le délai du repli global sur réseau dégradé.
-// Liste volontairement courte et explicite, à compléter route par route.
-const LATE_META_PATH_PREFIXES = [
-  "/gardiens/", // fiche gardien publique, PublicSitterProfile
-  "/projets/", // fiche projet (lot SEO-2) : jamais prête avant la lecture
-];
+// Liste volontairement courte et explicite, à compléter route par route :
+// fiche gardien publique (/gardiens/), fiche projet (/projets/, lot SEO-2),
+// liste des actualités (/actualites et /actualites/page/N, lot SEO-4 : prête
+// seulement une fois la liste affichée par News.tsx). Les articles
+// /actualites/:slug ne sont pas concernés.
+const LATE_META_PATH = /^\/(gardiens|projets)\/|^\/actualites(\/page\/|\/?$)/;
 
 // Ce module ne s'exécute que dans le navigateur (document lu plus haut).
-// Liste des actualités (/actualites, /actualites/page/N) : prête seulement
-// une fois la liste affichée (News.tsx), jamais par le repli à 10 s.
-const p = location.pathname.replace(/\/+$/, "");
-if (p === "/actualites" || p.startsWith("/actualites/page/") || LATE_META_PATH_PREFIXES.some((x) => location.pathname.startsWith(x))) {
+if (LATE_META_PATH.test(location.pathname)) {
   window.prerenderMetaPending = true;
   window.prerenderReady = false;
 }
