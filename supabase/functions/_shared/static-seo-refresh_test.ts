@@ -8,17 +8,21 @@ import {
 
 const base = { isFirstEverRun: false, monthlyUsed: 100, monthlyBudget: 18_000 };
 
-Deno.test("empreinte changee : 8 URL en file, 6 au premier passage, 2 au suivant", () => {
+Deno.test("empreinte changee : 10 URL en file, 6 au premier passage, 4 au suivant", () => {
   assert(shouldMarkStatic({ ...base, bundleChanged: true }));
-  assertEquals(STATIC_SEO_URLS.length, 8);
+  assertEquals(STATIC_SEO_URLS.length, 10);
   const mark = "2026-09-28T18:00:00Z";
   const first = pickStaticToRecache(mark, new Map());
   assertEquals(first.toRecache, STATIC_SEO_URLS.slice(0, 6));
-  assertEquals(first.deferred, 2);
+  assertEquals(first.deferred, 4);
+  assert(first.toRecache.includes("https://guardiens.fr/annonces"));
+  assert(first.toRecache.includes("https://guardiens.fr/guides"));
   // Passage suivant : les 6 premieres ont un succes journalise apres le repere.
   const last = new Map(first.toRecache.map((u) => [u, "2026-09-28T18:05:00Z"]));
   const second = pickStaticToRecache(mark, last);
   assertEquals(second.toRecache, [
+    "https://guardiens.fr/a-propos",
+    "https://guardiens.fr/contact",
     "https://guardiens.fr/projets",
     "https://guardiens.fr/petites-missions",
   ]);
@@ -30,11 +34,22 @@ Deno.test("empreinte changee : 8 URL en file, 6 au premier passage, 2 au suivant
 
 Deno.test("un echec reste en file au passage suivant", () => {
   const mark = "2026-09-28T18:00:00Z";
-  const last = new Map(STATIC_SEO_URLS.slice(0, 7).map((u) => [u, "2026-09-28T18:05:00Z"]));
+  const last = new Map(STATIC_SEO_URLS.slice(0, 9).map((u) => [u, "2026-09-28T18:05:00Z"]));
   assertEquals(pickStaticToRecache(mark, last).toRecache, ["https://guardiens.fr/petites-missions"]);
 });
 
-Deno.test("hubs projets et entraide presents, toujours en https://guardiens.fr", () => {
+Deno.test("les nouveaux hubs rejoignent une vague existante sans repayer les autres pages", () => {
+  const mark = "2026-09-28T18:00:00Z";
+  const added = ["https://guardiens.fr/annonces", "https://guardiens.fr/guides"];
+  const last = new Map(STATIC_SEO_URLS.filter((u) => !added.includes(u)).map((u) => [u, "2026-09-28T18:05:00Z"]));
+  assertEquals(pickStaticToRecache(mark, last), { toRecache: added, deferred: 0 });
+  last.set(added[1], "2026-09-28T18:20:00Z");
+  assertEquals(pickStaticToRecache(mark, last), { toRecache: [added[0]], deferred: 0 });
+});
+
+Deno.test("hubs annonces, guides, projets et entraide presents, toujours en https://guardiens.fr", () => {
+  assert(STATIC_SEO_URLS.includes("https://guardiens.fr/annonces"));
+  assert(STATIC_SEO_URLS.includes("https://guardiens.fr/guides"));
   assert(STATIC_SEO_URLS.includes("https://guardiens.fr/projets"));
   assert(STATIC_SEO_URLS.includes("https://guardiens.fr/petites-missions"));
   assertEquals(new Set(STATIC_SEO_URLS).size, STATIC_SEO_URLS.length);
@@ -50,8 +65,8 @@ Deno.test("premier passage a table vide : aucun marquage", () => {
 });
 
 Deno.test("plafond mensuel : aucun marquage s'il serait franchi", () => {
-  assertEquals(shouldMarkStatic({ ...base, bundleChanged: true, monthlyUsed: 17_993 }), false);
-  assert(shouldMarkStatic({ ...base, bundleChanged: true, monthlyUsed: 17_992 }));
+  assertEquals(shouldMarkStatic({ ...base, bundleChanged: true, monthlyUsed: 17_991 }), false);
+  assert(shouldMarkStatic({ ...base, bundleChanged: true, monthlyUsed: 17_990 }));
 });
 
 Deno.test("deja recachees apres le repere : rien a faire", () => {
