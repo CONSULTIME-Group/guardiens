@@ -83,8 +83,9 @@ const DepartmentSitterLinks = ({ deptIn, sitters, total }: Props) => {
       </ul>
       <p className="mt-4 text-sm">
         <Link to="/recherche-gardiens" className="text-primary hover:underline">
-          Voir les {total} gardiens {deptIn}
+          Voir tous les gardiens
         </Link>
+        <span className="text-muted-foreground"> ({total} inscrits {deptIn})</span>
       </p>
     </section>
   );
