@@ -950,6 +950,24 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_owner_seo_flags_20261003_1945: {
+        Row: {
+          id: string | null
+          saved_at: string | null
+          seo_dirty_at: string | null
+        }
+        Insert: {
+          id?: string | null
+          saved_at?: string | null
+          seo_dirty_at?: string | null
+        }
+        Update: {
+          id?: string | null
+          saved_at?: string | null
+          seo_dirty_at?: string | null
+        }
+        Relationships: []
+      }
       _backup_policies_sec1_20260929: {
         Row: {
           cmd: string | null
