@@ -100,7 +100,7 @@ describe("SEO-3 cache v4 et sources sans sonde", () => {
   });
 
   it("le générateur passe null pour profils, annonces et missions", () => {
-    const src = readFileSync(resolve(process.cwd(), "scripts/generate-sitemap.mjs"), "utf8");
+    const src = readFileSync(resolve(process.cwd(), "supabase/functions/_shared/sitemap-data.js"), "utf8");
     for (const k of ["public_profiles", "public_sits", "small_missions_entraide_v1", "small_missions_projets_v1"]) {
       expect(src).toMatch(new RegExp(`"${k}", cache,\\s*(//[^\\n]*\\n\\s*)*null`));
     }
@@ -201,7 +201,7 @@ describe("SEO-3 proxy de la fonction sitemap", () => {
     expect(res.status).toBe(200);
     expect(await res.text()).toContain("<loc>https://guardiens.fr/</loc>");
     const src = readFileSync(resolve(process.cwd(), "supabase/functions/sitemap/index.ts"), "utf8");
-    expect(src).not.toMatch(/createClient|supabase-js/);
+    expect(src).toContain("createLiveSitemapHandler");
   });
 
   it("503 sur statut amont, XML invalide, domaine étranger ou délai", async () => {

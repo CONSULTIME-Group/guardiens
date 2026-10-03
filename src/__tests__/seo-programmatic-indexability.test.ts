@@ -17,7 +17,7 @@ describe("pages programmatiques : cohérence du garde-fou noindex", () => {
   });
 
   it("le sitemap statique exclut les pages ville et département en noindex", () => {
-    const src = read("scripts/generate-sitemap.mjs");
+    const src = read("supabase/functions/_shared/sitemap-data.js");
     const cityFetch = src.match(/readAll\("seo_city_pages"[^\n]*/);
     const deptFetch = src.match(/readAll\("seo_department_pages"[^\n]*/);
     expect(cityFetch?.[0]).toContain("noindex.is.null,noindex.eq.false");
@@ -28,7 +28,7 @@ describe("pages programmatiques : cohérence du garde-fou noindex", () => {
     // Une bascule noindex sort la ligne de l'ensemble indexable : si la tête
     // de cache était filtrée, elle pourrait ne pas bouger et le cache
     // servirait des entrées périmées.
-    const src = read("scripts/generate-sitemap.mjs");
+    const src = read("supabase/functions/_shared/sitemap-data.js");
     // maxUpdatedAtWithCount est la variante à clé composite (date + nombre
     // de lignes) introduite pour invalider aussi sur dépublication.
     const heads = src.match(/maxUpdatedAt(?:WithCount)?\("seo_(city|department)_pages"[^)]*\)/g) ?? [];
@@ -38,10 +38,10 @@ describe("pages programmatiques : cohérence du garde-fou noindex", () => {
     }
   });
 
-  it("la fonction sitemap ne lit plus la base, elle relaie le fichier statique", () => {
+  it("la fonction sitemap lit les memes sources et criteres que le build", () => {
     const src = read("supabase/functions/sitemap/index.ts");
     expect(src).not.toContain("seo_city_pages");
-    expect(src).toContain("proxySitemap");
+    expect(src).toContain("collectSitemapData");
   });
 
   it("le consommateur seo_dirty_at couvre les pages département", () => {

@@ -18,6 +18,7 @@ export function readRobotsConfig(source) {
   const sf = ts.createSourceFile("siteRoutes.ts", source, ts.ScriptTarget.Latest, true);
   let siteUrl = null;
   let privatePaths = null;
+  let sitemapUrl = null;
   for (const stmt of sf.statements) {
     if (!ts.isVariableStatement(stmt)) continue;
     for (const decl of stmt.declarationList.declarations) {
@@ -30,6 +31,11 @@ export function readRobotsConfig(source) {
       if (name === "SITE_URL") {
         if (!ts.isStringLiteralLike(init)) throw new Error("SITE_URL doit etre une chaine litterale");
         siteUrl = init.text;
+      }
+      if (name === "SITEMAP_URL") {
+        if (!ts.isStringLiteralLike(init)) throw new Error("SITEMAP_URL doit etre une chaine litterale");
+        sitemapUrl = init.text;
+        if (!sitemapUrl.startsWith("https://")) throw new Error("SITEMAP_URL doit utiliser HTTPS");
       }
       if (name === "privateDisallowPaths") {
         if (!ts.isArrayLiteralExpression(init)) throw new Error("privateDisallowPaths doit etre un tableau litteral");
@@ -46,7 +52,7 @@ export function readRobotsConfig(source) {
   for (const p of privatePaths) {
     if (!p.startsWith("/")) throw new Error(`Chemin prive invalide : ${p}`);
   }
-  return { siteUrl, privatePaths };
+  return { siteUrl, privatePaths, ...(sitemapUrl ? { sitemapUrl } : {}) };
 }
 
 // Surfaces publiques non indexables : jamais en Disallow, sinon leur noindex
@@ -65,7 +71,7 @@ export const SEO_TOOLS = ["DataForSeoBot", "AhrefsBot", "SemrushBot"];
 export const SCRAPERS_BLOCKED = ["ByteSpider", "cohere-ai"];
 export const TRACKING_DISALLOW = ["/*?*utm_", "/*?*sessionid="];
 
-export function buildRobotsTxt({ siteUrl, privatePaths }) {
+export function buildRobotsTxt({ siteUrl, privatePaths, sitemapUrl }) {
   const blocked = privatePaths.filter((p) =>
     CRAWLABLE_NOINDEX.some((c) => p === c || p === `${c}/`),
   );
@@ -99,7 +105,7 @@ export function buildRobotsTxt({ siteUrl, privatePaths }) {
     "# /recherche-gardiens, fiches /gardiens/:id non eligibles) : volontairement",
     "# explorables, sinon leur balise noindex ne serait jamais lue.",
     "",
-    `Sitemap: ${siteUrl}/sitemap.xml`,
+    `Sitemap: ${sitemapUrl || `${siteUrl}/sitemap.xml`}`,
     "",
   ].join("\n");
 }

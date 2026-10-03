@@ -93,7 +93,7 @@ describe("associations, routes", () => {
   it("déclare la route publique dans siteRoutes et le sitemap", () => {
     const routes = readFileSync(resolve(process.cwd(), "src/data/siteRoutes.ts"), "utf-8");
     expect(routes).toContain('path: "/associations"');
-    const sitemap = readFileSync(resolve(process.cwd(), "scripts/generate-sitemap.mjs"), "utf-8");
+    const sitemap = readFileSync(resolve(process.cwd(), "supabase/functions/_shared/sitemap-data.js"), "utf-8");
     expect(sitemap).toContain("public_animal_associations");
     expect(sitemap).toContain("isAssociationIndexable");
   });

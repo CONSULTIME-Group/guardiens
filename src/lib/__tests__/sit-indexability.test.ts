@@ -60,8 +60,10 @@ describe("non-divergence des deux implémentations", () => {
   const read = (p: string) => readFileSync(resolve(process.cwd(), p), "utf8");
 
   it("generate-sitemap.mjs utilise la règle partagée et pas un seuil local", () => {
-    const src = read("scripts/generate-sitemap.mjs");
-    expect(src).toContain('from "../src/lib/sitIndexability.js"');
+    const src = read("supabase/functions/_shared/sitemap-data.js");
+    expect(read("scripts/generate-sitemap.mjs")).toContain("collectSitemapData");
+    expect(src).toContain('from "./sitIndexability.js"');
+    expect(read("src/lib/sitIndexability.js")).toContain('from "../../supabase/functions/_shared/sitIndexability.js"');
     expect(src).toContain("sitRichnessRejectionReason(s)");
     expect(src).not.toMatch(/daily_routine\s*\|\|\s*""\)\.length\)\s*>=/);
   });

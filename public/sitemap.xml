@@ -3393,6 +3393,11 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/gardiens/b00c0955-04ce-4f3f-b389-47da5838dbea</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/gardiens/b25af31a-bacb-4951-809d-5893aad6230d</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
