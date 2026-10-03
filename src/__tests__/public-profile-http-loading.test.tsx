@@ -52,9 +52,9 @@ function Navigation() {
   const navigate = useNavigate();
   return <button onClick={() => navigate(`/gardiens/${B}`)}>Fiche B</button>;
 }
-function mount() {
+function mount(id = A) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(<QueryClientProvider client={client}><MemoryRouter initialEntries={[`/gardiens/${A}`]}>
+  return render(<QueryClientProvider client={client}><MemoryRouter initialEntries={[`/gardiens/${id}`]}>
     <Navigation /><Routes><Route path="/gardiens/:id" element={<PublicSitterProfile />} /></Routes>
   </MemoryRouter></QueryClientProvider>);
 }
@@ -78,6 +78,13 @@ beforeEach(() => {
 afterEach(() => { cleanup(); expect(fixture.writes).toEqual([]); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
 describe("public profile HTTP and loading", () => {
+  it.each(["not-a-uuid", "undefined", "null"])("declares malformed id %s as 404 before its primary lookup", async (id) => {
+    fixture.read = async (table) => table === "public_profiles" ? { data: null, error: { code: "22P02", message: "invalid UUID" } } : ok();
+    mount(id);
+    await expectFailure(404);
+    expect(fixture.calls).not.toContain("public_profiles");
+    expect(fixture.calls).not.toContain("gallery_photo_count");
+  });
   it.each(["sitter", "both", "owner"])("renders a loaded %s profile with the shared role policy", async (role) => {
     fixture.read = async (table) => table === "public_profiles" ? ok({ ...profile, role }) : table === "gallery_photo_count" ? ok(0) : ok();
     mount();

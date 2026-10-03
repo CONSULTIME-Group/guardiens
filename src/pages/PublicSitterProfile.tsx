@@ -665,7 +665,7 @@ export default function PublicSitterProfile() {
     setTargetPets([]);
     setTargetOwnerAffinity(null);
     setLoadError(null);
-    if (!id || id === "undefined" || id === "null") { setResolvedProfileId(id); setLoading(false); return; }
+    if (!id || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) { setResolvedProfileId(id); setLoading(false); return; }
     const load = async () => {
       window.prerenderMetaPending = true;
       window.prerenderReady = false;
