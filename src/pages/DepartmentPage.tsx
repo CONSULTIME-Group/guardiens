@@ -1,3 +1,4 @@
+import PublicLoadError from "@/components/seo/ErrorPage";
 import { useMemo } from "react";
 import { useParams, Link, Navigate } from "react-router-dom";
 import NotFound from "@/pages/NotFound";
@@ -23,7 +24,7 @@ import DepartmentSitterLinks, { useDepartmentPublicSitters } from "@/components/
 const DepartmentPage = () => {
  const { slug } = useParams<{ slug: string }>();
 
- const { data: page, isLoading } = useQuery({
+ const { data: page, isLoading, isError: pageFailed } = useQuery({
  queryKey: ["department-page", slug],
  queryFn: async () => {
  const { data, error } = await supabase
@@ -43,20 +44,21 @@ const DepartmentPage = () => {
   // cible peut être un chemin complet (barre oblique initiale), par
   // exemple une page ville. Même logique de chaîne que la redirection
   // ville (5 sauts max).
-  const { data: departmentRedirect } = useQuery({
+  const { data: departmentRedirect, isError: redirectFailed } = useQuery({
     queryKey: ["department-redirect", slug],
-    enabled: !!slug && !isLoading && !page,
+    enabled: !!slug && !isLoading && !pageFailed && !page,
     staleTime: 5 * 60 * 1000,
     queryFn: async () => {
       let current = slug!;
       const visited = new Set<string>([current]);
       for (let i = 0; i < 5; i++) {
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from("redirects")
           .select("slug_to")
           .eq("scope", "department")
           .eq("slug_from", current)
           .maybeSingle();
+        if (error) throw error;
         if (!data?.slug_to || visited.has(data.slug_to)) break;
         current = data.slug_to;
         visited.add(current);
@@ -117,6 +119,8 @@ const DepartmentPage = () => {
  },
  enabled: !!page?.department,
  });
+
+ if (pageFailed || redirectFailed) return <PublicLoadError />;
 
  if (isLoading) {
  return (

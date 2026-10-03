@@ -179,7 +179,7 @@ const PublicSitView = ({
         <div className="mb-4 md:mb-8">
           <PageBreadcrumb
             items={[
-              { label: t("sit_detail.breadcrumb_listings"), href: "/search" },
+              { label: t("sit_detail.breadcrumb_listings"), href: "/annonces" },
               { label: title },
             ]}
           />

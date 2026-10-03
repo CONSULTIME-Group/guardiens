@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import PublicLoadError from "@/components/seo/ErrorPage";
+import LegacyProjetRedirect from "@/components/seo/LegacyProjetRedirect";
+import { useEffect, useLayoutEffect, useState } from "react";
+import { useParams, Link } from "react-router-dom";
 import NotFound from "@/pages/NotFound";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
@@ -136,11 +138,12 @@ function ArticleSeoLogger({ article }: { article: ArticleFull }) {
 
 export default function ArticleDetail() {
  const { slug } = useParams<{ slug: string }>();
- const navigate = useNavigate();
  const { t } = useTranslation();
  const { user, isAuthenticated } = useAuth();
  const [article, setArticle] = useState<ArticleFull | null>(null);
  const [loading, setLoading] = useState(true);
+ const [loadFailed, setLoadFailed] = useState(false);
+ const [canonicalRedirect, setCanonicalRedirect] = useState<string | null>(null);
  const [relatedArticles, setRelatedArticles] = useState<RelatedArticle[]>([]);
   const [cityGuideSlug, setCityGuideSlug] = useState<string | null>(null);
   const [cityPageSlug, setCityPageSlug] = useState<string | null>(null);
@@ -151,38 +154,45 @@ export default function ArticleDetail() {
     citySlug: cityPageSlug,
   });
 
-  useEffect(() => {
-  if (!slug) return;
+  useLayoutEffect(() => {
   let cancelled = false;
+  const commit = (update: () => void) => { if (!cancelled) update(); };
+  setLoading(true); setLoadFailed(false); setArticle(null); setCanonicalRedirect(null);
+  setRelatedArticles([]); setCityGuideSlug(null); setCityPageSlug(null);
+  if (!slug) { setLoading(false); return; }
   const fetchAll = async () => {
     // 1) Vérifier la table redirects (source de vérité unique).
     //    Boucle de résolution courte (≤ 5 sauts) pour gérer les chaînes.
     let current = slug;
     const visited = new Set<string>([current]);
     for (let i = 0; i < 5; i++) {
-      const { data: red } = await supabase
+      const { data: red, error: redirectError } = await supabase
         .from("redirects")
         .select("slug_to")
         .eq("scope", "article")
         .eq("slug_from", current)
         .maybeSingle();
+      if (cancelled) return;
+      if (redirectError) throw redirectError;
       if (!red?.slug_to || visited.has(red.slug_to)) break;
       current = red.slug_to;
       visited.add(current);
     }
     if (current !== slug) {
-      if (!cancelled) navigate(`/actualites/${current}`, { replace: true });
+      commit(() => setCanonicalRedirect(`/actualites/${current}`));
       return;
     }
- const { data } = await supabase
+ const { data, error } = await supabase
 .from("articles")
 .select("*")
 .eq("slug", slug)
 .eq("published", true)
 .maybeSingle();
+ if (cancelled) return;
+ if (error) throw error;
  const art = data as ArticleFull | null;
- setArticle(art);
- setLoading(false);
+ commit(() => setArticle(art));
+ commit(() => setLoading(false));
 
  if (!art) return;
 
@@ -233,7 +243,7 @@ export default function ArticleDetail() {
           }
         }
       }
-      setRelatedArticles(merged.slice(0, 4));
+      commit(() => setRelatedArticles(merged.slice(0, 4)));
 
  // Cross-link: city guide
  if (art.city) {
@@ -243,7 +253,7 @@ export default function ArticleDetail() {
 .eq("published", true)
 .ilike("city", `%${art.city}%`)
 .maybeSingle();
- if (guide) setCityGuideSlug((guide as any).slug);
+ if (guide) commit(() => setCityGuideSlug((guide as any).slug));
 
  const { data: cp } = await supabase
 .from("seo_city_pages")
@@ -252,10 +262,10 @@ export default function ArticleDetail() {
 .not("slug", "like", "test-%")
 .ilike("city", `%${art.city}%`)
 .maybeSingle();
- if (cp) setCityPageSlug((cp as any).slug);
+ if (cp) commit(() => setCityPageSlug((cp as any).slug));
  }
  };
-  fetchAll();
+  void fetchAll().catch(() => { commit(() => setLoadFailed(true)); commit(() => setLoading(false)); });
   return () => { cancelled = true; };
   }, [slug]);
 
@@ -285,12 +295,15 @@ export default function ArticleDetail() {
    return () => document.removeEventListener("click", handler, { capture: true } as any);
  }, [article]);
 
+  if (loadFailed) return <PublicLoadError />;
+  if (canonicalRedirect) return <LegacyProjetRedirect target={canonicalRedirect} title="Article déplacé" description="Cet article est disponible à son adresse actuelle." />;
   if (loading) {
   // Le squelette occupe au moins une hauteur d'écran : sinon le pied de page
   // remonte dans la fenêtre puis redescend à l'arrivée du contenu, ce qui
   // provoquait la quasi-totalité du décalage cumulé mesuré sur les articles.
   return (
   <div className="max-w-3xl mx-auto px-4 py-8 space-y-6 min-h-[100svh]">
+  <PageMeta title="Chargement de l’article" description="Chargement de l’article Guardiens." noindex noCanonical ready={false} />
   <Skeleton className="h-8 w-48" />
   <Skeleton className="h-64 w-full rounded-lg" />
   <Skeleton className="h-6 w-3/4" />

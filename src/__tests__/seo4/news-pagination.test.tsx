@@ -117,15 +117,15 @@ describe("verrou de prérendu posé au démarrage (main.tsx)", () => {
     for (const path of ["/guides", "/guides/", "/departement/rhone", "/actualites/page/2"]) {
       expect(bootState(path), path).toEqual({ prerenderMetaPending: true, prerenderReady: false });
     }
-    expect(bootState("/actualites/un-article")).toEqual({});
+    expect(bootState("/actualites/un-article")).toEqual({ prerenderMetaPending: true, prerenderReady: false });
   });
-  it("liste des actualités verrouillée, articles non", async () => {
+  it("liste et articles attendent leurs metadonnees", async () => {
     const { readFileSync } = await import("fs");
     const re = new RegExp(readFileSync("src/main.tsx", "utf8").match(/const LATE_META_PATH = \/(.+)\/;/)![1]);
-    for (const p of ["/actualites", "/actualites/", "/actualites/page/2", "/gardiens/x", "/projets/x"]) expect(re.test(p), p).toBe(true);
+    for (const p of ["/actualites", "/actualites/", "/actualites/page/2", "/gardiens/x", "/projets/x", "/annonces", "/actualites/un-article", "/actualites/inventaire-guardiens-france"]) expect(re.test(p), p).toBe(true);
     // Hub /annonces : exclu du repli à 10 s (markPrerenderReady).
     expect(readFileSync("src/main.tsx", "utf8")).toContain('pathname.startsWith("/annonces")) return;');
-    for (const p of ["/actualites/un-article", "/actualites/inventaire-guardiens-france", "/", "/annonces"]) expect(re.test(p), p).toBe(false);
+    for (const p of ["/"]) expect(re.test(p), p).toBe(false);
   });
 });
 

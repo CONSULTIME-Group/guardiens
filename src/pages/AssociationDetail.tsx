@@ -1,3 +1,4 @@
+import PublicLoadError from "@/components/seo/ErrorPage";
 import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -107,15 +108,16 @@ export default function AssociationDetail() {
   const [failedPhotos, setFailedPhotos] = useState<Record<number, boolean>>({});
   const [logoFailed, setLogoFailed] = useState(false);
 
-  const { data, isLoading } = useQuery<PublicAssociation | null>({
+  const { data, isLoading, isError } = useQuery<PublicAssociation | null>({
     queryKey: ["public-association", slug],
     enabled: !!slug,
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("public_animal_associations" as any)
         .select(PUBLIC_ASSOCIATION_COLUMNS)
         .eq("slug", slug!)
         .maybeSingle();
+      if (error) throw error;
       return (data as any) ?? null;
     },
   });
@@ -123,6 +125,8 @@ export default function AssociationDetail() {
   const photos = useMemo(() => normalizePhotos(data?.photos).slice(0, MAX_PHOTOS), [data?.photos]);
   const visiblePhotos = photos.filter((_, i) => !failedPhotos[i]);
   const allStored = photos.length > 0 && photos.every((p) => p.hosting === "storage");
+
+  if (isError) return <PublicLoadError />;
 
   if (isLoading) {
     return (

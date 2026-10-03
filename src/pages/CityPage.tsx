@@ -1,3 +1,4 @@
+import PublicLoadError from "@/components/seo/ErrorPage";
 import { useEffect, useMemo, useRef } from "react";
 import { MarkdownBody } from "@/components/MarkdownBody";
 import { useParams, Link, Navigate } from "react-router-dom";
@@ -66,7 +67,7 @@ const CityPage = () => {
  const departmentPageExists = useDepartmentPageExists(departmentSlug);
 
  // Fallback: fetch from seo_city_pages if not in static data
- const { data: dbPage, isLoading: dbLoading } = useQuery({
+ const { data: dbPage, isLoading: dbLoading, isError: dbFailed } = useQuery({
  queryKey: ["city-page", slug],
  queryFn: async () => {
  const { data, error } = await supabase
@@ -84,20 +85,21 @@ const CityPage = () => {
   // Redirections de consolidation (scope city) : un slug absent de
   // seo_city_pages peut avoir ete regroupe vers une autre page ville.
   // Meme logique de chaine que la redirection article (5 sauts max).
-  const { data: cityRedirect } = useQuery({
+  const { data: cityRedirect, isError: redirectFailed } = useQuery({
     queryKey: ["city-redirect", slug],
-    enabled: !!slug && !cityData && !dbLoading && !dbPage,
+    enabled: !!slug && !cityData && !dbLoading && !dbFailed && !dbPage,
     staleTime: 5 * 60 * 1000,
     queryFn: async () => {
       let current = slug!;
       const visited = new Set<string>([current]);
       for (let i = 0; i < 5; i++) {
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from("redirects")
           .select("slug_to")
           .eq("scope", "city")
           .eq("slug_from", current)
           .maybeSingle();
+        if (error) throw error;
         if (!data?.slug_to || visited.has(data.slug_to)) break;
         current = data.slug_to;
         visited.add(current);
@@ -662,6 +664,8 @@ const CityPage = () => {
  }
 
  // ── DB FALLBACK PATH (existing seo_city_pages) ──
+ if (dbFailed || redirectFailed) return <PublicLoadError />;
+
  if (dbLoading) {
  return (
  <div className="min-h-screen bg-background">

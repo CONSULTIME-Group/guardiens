@@ -9,14 +9,14 @@ import { SITE_ORIGIN } from "@/lib/projetSeo";
  * Navigateur : remplacement côté client, ce n'est pas un 301 HTTP.
  * Les paramètres de suivi ne passent pas dans la cible permanente.
  */
-const LegacyProjetRedirect = ({ target }: { target: string }) => {
+const LegacyProjetRedirect = ({ target, title = "Projet participatif", description = "Ce projet participatif a changé d'adresse." }: { target: string; title?: string; description?: string }) => {
   const isPrerender =
     typeof navigator !== "undefined" && /Prerender/i.test(navigator.userAgent);
   return (
     <>
       <PageMeta
-        title="Projet participatif"
-        description="Ce projet participatif a changé d'adresse."
+        title={title}
+        description={description}
         path={target}
         canonical={`${SITE_ORIGIN}${target}`}
         statusCode={301}

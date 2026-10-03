@@ -1,6 +1,6 @@
 import { MISSION_CATEGORIES } from "@/lib/missionCategories";
 import { useTranslation } from "react-i18next";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useLayoutEffect, useCallback, useRef } from "react";
 import { trackEvent } from "@/lib/analytics";
 import { captureMissionSource, readMissionSource } from "@/lib/missionResponseSource";
 import { logger } from "@/lib/logger";
@@ -27,6 +27,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import ReportButton from "@/components/reports/ReportButton";
+import PublicLoadError from "@/components/seo/ErrorPage";
+import { isIndexableEntraideMission } from "../../supabase/functions/_shared/entraideMissionIndexability.js";
 import PageMeta from "@/components/PageMeta";
 import LegacyProjetRedirect from "@/components/seo/LegacyProjetRedirect";
 import { legacyProjetRedirectTarget } from "@/lib/projetSeo";
@@ -226,6 +228,8 @@ const SmallMissionDetail = () => {
   const [author, setAuthor] = useState<any>(null);
   const [responses, setResponses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [canonicalRedirect, setCanonicalRedirect] = useState<string | null>(null);
   const [projetRedirect, setProjetRedirect] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [hasResponded, setHasResponded] = useState(false);
@@ -246,32 +250,43 @@ const SmallMissionDetail = () => {
   // Current user's response
   const myResponse = responses.find(r => r.responder_id === user?.id);
 
+  const loadVersion = useRef(0);
   const load = useCallback(async () => {
-    if (!id) return;
+    const version = ++loadVersion.current;
+    const current = () => version === loadVersion.current;
+    const commit = (update: () => void) => { if (current()) update(); };
+    try {
+    commit(() => setLoading(true)); commit(() => setLoadFailed(false)); commit(() => setMission(null)); commit(() => setProjetRedirect(null)); commit(() => setCanonicalRedirect(null));
+    if (!id) { commit(() => setLoading(false)); return; }
     if (id.startsWith("demo-")) { navigate("/petites-missions", { replace: true }); return; }
 
     // Le paramètre d'URL peut être soit un UUID (legacy), soit un slug lisible.
     const isUuidParam = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
     // Visiteurs anonymes : vue publique (colonnes d'affichage uniquement).
     const query = (supabase as any).from(user ? "small_missions" : "public_small_missions").select("*");
-    const { data: m } = await (isUuidParam ? query.eq("id", id) : query.eq("slug", id)).maybeSingle();
-    if (!m) { setLoading(false); return; }
+    let result;
+    try { result = await (isUuidParam ? query.eq("id", id) : query.eq("slug", id)).maybeSingle(); }
+    catch { commit(() => setLoadFailed(true)); commit(() => setLoading(false)); return; }
+    if (!current()) return;
+    if (result.error) { commit(() => setLoadFailed(true)); commit(() => setLoading(false)); return; }
+    const m = result.data;
+    if (!m) { commit(() => setLoading(false)); return; }
 
     // Un projet participatif a sa propre page : l'ancien lien y renvoie,
     // en 301 déclaré aux robots (Prerender) et en remplacement côté navigateur.
     const projetTarget = legacyProjetRedirectTarget(m as any);
     if (projetTarget) {
-      setProjetRedirect(projetTarget);
-      setLoading(false);
+      commit(() => setProjetRedirect(projetTarget));
+      commit(() => setLoading(false));
       return;
     }
 
     // Rétrocompat : si on est arrivé par UUID et qu'un slug existe, on redirige vers l'URL lisible.
     if (isUuidParam && (m as any).slug) {
-      navigate(`/petites-missions/${(m as any).slug}${window.location.search}`, { replace: true });
+      commit(() => setCanonicalRedirect(`/petites-missions/${(m as any).slug}`));
       return;
     }
-    setMission(m);
+    commit(() => setMission(m));
 
     // Parallélisation : tous ces appels sont indépendants une fois la mission chargée.
     // Pour "près de chez vous" on charge un pool large (30) puis on filtre par distance
@@ -299,8 +314,9 @@ const SmallMissionDetail = () => {
         : Promise.resolve({ data: [] as any[] }),
     ]);
 
+    if (!current()) return;
     const authorRow: any = Array.isArray(authorRes.data) ? authorRes.data[0] : authorRes.data;
-    setAuthor(authorRow ? { ...authorRow, created_at: authorRow.member_since } : null);
+    commit(() => setAuthor(authorRow ? { ...authorRow, created_at: authorRow.member_since } : null));
 
     // Filtrage par proximité réelle si on connaît les coords de la mission courante.
     const pool = (relatedRes.data || []) as any[];
@@ -322,7 +338,7 @@ const SmallMissionDetail = () => {
       // la sélection reste affichée sous un intitulé neutre.
       ranked = near.length > 0 ? near : withDist;
     }
-    setRelatedMissions(ranked.slice(0, 3));
+    commit(() => setRelatedMissions(ranked.slice(0, 3)));
 
     // Hydratation RLS-safe des responders et givers via la vue publique.
     const respRows = ((respsRes.data as any[]) ?? []).slice();
@@ -341,20 +357,24 @@ const SmallMissionDetail = () => {
       respRows.forEach((r: any) => { r.responder = r.responder_id ? hMap.get(r.responder_id) ?? null : null; });
       recFbRows.forEach((f: any) => { f.giver = f.giver_id ? hMap.get(f.giver_id) ?? null : null; });
     }
-    setResponses(respRows);
+    commit(() => setResponses(respRows));
 
     if (user) {
-      setHasResponded(!!(respRows.some((r: any) => r.responder_id === user.id)));
+      commit(() => setHasResponded(!!(respRows.some((r: any) => r.responder_id === user.id))));
       const sentMap: Record<string, boolean> = {};
       (givenFbRes.data as any[])?.forEach((f: any) => { sentMap[f.receiver_id] = true; });
-      setFeedbackSent(sentMap);
-      setReceivedFeedbacks(recFbRows);
+      commit(() => setFeedbackSent(sentMap));
+      commit(() => setReceivedFeedbacks(recFbRows));
     }
 
-    setLoading(false);
+    commit(() => setLoading(false));
+    } catch (error) {
+      logger.warn("[SmallMissionDetail] load failed", { error: String(error) });
+      commit(() => setLoadFailed(true)); commit(() => setLoading(false));
+    }
   }, [id, user, navigate]);
 
-  useEffect(() => { load(); }, [load]);
+  useLayoutEffect(() => { void load(); return () => { loadVersion.current += 1; }; }, [load]);
 
   // Compteur de vues : 1 fois par mission par session (sessionStorage)
   const missionUuid: string | undefined = mission?.id;
@@ -722,6 +742,9 @@ const SmallMissionDetail = () => {
     setSearchParams({}, { replace: true });
   };
 
+  if (loadFailed) return <PublicLoadError />;
+  if (canonicalRedirect) return <LegacyProjetRedirect target={canonicalRedirect} title="Mission déplacée" description="Cette mission est disponible à son adresse actuelle." />;
+
   if (projetRedirect) {
     return <LegacyProjetRedirect target={projetRedirect} />;
   }
@@ -730,6 +753,7 @@ const SmallMissionDetail = () => {
     return (
       <>
         {!user && <PublicHeader />}
+        <PageMeta title="Chargement de la mission" description="Chargement de la mission Guardiens." noindex noCanonical ready={false} />
         <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10 animate-pulse">
           <div className="h-4 w-48 bg-muted rounded mb-6" />
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
@@ -756,6 +780,7 @@ const SmallMissionDetail = () => {
   if (!mission) return (
     <>
       {!user && <PublicHeader />}
+      <PageMeta title="Mission indisponible" description="Cette mission n’est plus disponible sur Guardiens." noindex noCanonical statusCode={404} />
       <div className="p-6 md:p-10 max-w-3xl mx-auto min-h-[40vh]">
         <h1 className="font-heading text-2xl font-bold mb-2">{tr("mission_detail.not_found_title")}</h1>
         <p className="text-muted-foreground mb-4">{tr("mission_detail.not_found_body")}</p>
@@ -778,7 +803,7 @@ const SmallMissionDetail = () => {
   // Une OFFRE (disponibilité) n'a pas d'échéance : pas de bannière "date dépassée".
   const isOfferMission = (mission as any).mission_type === "offre";
   const isDatePassed = !isOfferMission && mission.date_needed && new Date(mission.date_needed) < new Date();
-  const shouldNoindex = mission.status !== "open" || Boolean(isDatePassed);
+  const shouldNoindex = !isIndexableEntraideMission(mission);
 
   const handleSharePublishedLink = async () => {
     const cleanUrl = window.location.href.split("?")[0];

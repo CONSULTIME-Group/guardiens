@@ -1,3 +1,4 @@
+import PublicLoadError from "@/components/seo/ErrorPage";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import NotFound from "@/pages/NotFound";
 import { useTranslation } from "react-i18next";
@@ -93,7 +94,7 @@ const GuideDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
-  const { data: rawGuide, isLoading: guideLoading } = useQuery({
+  const { data: rawGuide, isLoading: guideLoading, isError: guideFailed } = useQuery({
     queryKey: ["city-guide", slug],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -123,7 +124,7 @@ const GuideDetail = () => {
   const hasCityPage = useCityPageExists(guide?.slug ?? null);
   const hasDepartmentPage = useDepartmentPageExists(guide?.department ? slugify(guide.department) : null);
 
-  const { data: rawPlaces = [], isSuccess: placesLoaded } = useQuery({
+  const { data: rawPlaces = [], isSuccess: placesLoaded, isError: placesFailed } = useQuery({
     queryKey: ["guide-places", guide?.id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -331,6 +332,8 @@ const GuideDetail = () => {
       })),
     };
   }, [essentials, t]);
+
+  if (guideFailed || placesFailed) return <PublicLoadError />;
 
   if (guideLoading) {
     return (

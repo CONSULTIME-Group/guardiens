@@ -47,14 +47,9 @@ if (import.meta.env.PROD) {
 // Routes lazy qui écrivent leurs métadonnées tardivement (après un chargement
 // de données). Le verrou est posé ici, avant le rendu, car le chunk de la
 // route peut arriver après le délai du repli global sur réseau dégradé.
-// Liste volontairement courte et explicite, à compléter route par route :
-// fiche gardien publique (/gardiens/), fiche projet (/projets/, lot SEO-2),
-// liste des actualités (/actualites et /actualites/page/N, lot SEO-4 : prête
-// seulement une fois la liste affichée par News.tsx). Les articles
-// /actualites/:slug ne sont pas concernés.
-// Expression unique (plafond de taille du démarrage).
-// Ajouts SEO-4 : /guides (liste) et /departement/:slug.
-const LATE_META_PATH = /^\/((gardiens|projets|departement)\/|guides\/?$|actualites(\/page\/|\/?$))/;
+// Les pages publiques qui attendent des donnees gardent ce verrou jusqu'a
+// l'ecriture de leurs metadonnees. Le repli ne doit pas capturer leur squelette.
+const LATE_META_PATH = /^\/(gardiens|projets|departement|house-sitting|petites-missions|races|associations|guides|annonces|actualites)(\/|$)/;
 
 // Ce module ne s'exécute que dans le navigateur (document lu plus haut).
 if (LATE_META_PATH.test(location.pathname)) {
