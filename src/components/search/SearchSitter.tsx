@@ -452,7 +452,11 @@ const SearchSitter = ({ mode = "internal", onFirstSearchSettled }: SearchSitterP
  useEffect(() => {
    if (!firstSearchSettled || settledNotifiedRef.current) return;
    settledNotifiedRef.current = true;
-   const shown = searchError || tab !== "sits" ? [] : results.filter((r: any) => !r.is_demo);
+   // Miroir exact de la grille rendue plus bas : disponibles plafonnées à
+   // visibleCount, puis passées/attribuées ; démos exclues.
+   const real = results.filter((r: any) => !r.is_demo);
+   const isInactive = (r: any) => r.isAssigned || r.isCompleted || r.isPast;
+   const shown = searchError || tab !== "sits" ? [] : [...real.filter((r: any) => !isInactive(r)).slice(0, visibleCount), ...real.filter(isInactive)];
    onFirstSearchSettled?.(shown.map((r: any) => ({ id: r.id, slug: r.slug ?? null, title: r.title ?? null })));
    // eslint-disable-next-line react-hooks/exhaustive-deps
  }, [firstSearchSettled, onFirstSearchSettled]);
