@@ -71,6 +71,9 @@ export const NAV_DEFS: ReadonlyArray<{ key: string; shortKey?: string; to: strin
   { key: "news", to: "/actualites" },
 ];
 
+/** Classes partagées des liens Connexion et Inscription sur ordinateur. */
+const AUTH_BTN = "min-h-11 whitespace-nowrap px-2 text-xs xl:px-3 xl:text-sm";
+
 export default function PublicHeader({ authedVariant = false }: { authedVariant?: boolean }) {
   const location = useLocation();
   const { t } = useTranslation();
@@ -192,10 +195,10 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
             </>
           ) : (
             <>
-              <Button asChild variant="ghost" size="sm" className="min-h-11 whitespace-nowrap px-2 text-xs xl:px-3 xl:text-sm">
+              <Button asChild variant="ghost" size="sm" className={AUTH_BTN}>
                 <Link to="/login">{t("nav.login")}</Link>
               </Button>
-              <Button asChild size="sm" className="min-h-11 whitespace-nowrap px-2 text-xs xl:px-3 xl:text-sm">
+              <Button asChild size="sm" className={AUTH_BTN}>
                 <Link to="/inscription">{t("nav.register")}</Link>
               </Button>
             </>
