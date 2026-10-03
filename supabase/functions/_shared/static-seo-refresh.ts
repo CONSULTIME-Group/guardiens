@@ -15,6 +15,11 @@ export const STATIC_SEO_URLS: readonly string[] = [
   "https://guardiens.fr/faq",
   "https://guardiens.fr/a-propos",
   "https://guardiens.fr/contact",
+  // Lot SEO-2 : hubs alimentés par la base, rafraîchis à chaque mise en ligne.
+  // 8 URL pour un budget de 6 par passage : les 2 dernières partent au
+  // passage suivant (cron 15 min), sans dépasser le budget.
+  "https://guardiens.fr/projets",
+  "https://guardiens.fr/petites-missions",
 ];
 
 /**

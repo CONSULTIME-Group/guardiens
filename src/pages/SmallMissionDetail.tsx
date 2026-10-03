@@ -28,6 +28,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import ReportButton from "@/components/reports/ReportButton";
 import PageMeta from "@/components/PageMeta";
+import LegacyProjetRedirect from "@/components/seo/LegacyProjetRedirect";
+import { legacyProjetRedirectTarget } from "@/lib/projetSeo";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import Head from "@/components/seo/Head";
 const entraideHeader = "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/property-photos/misc/entraide-header.webp";
@@ -224,6 +226,7 @@ const SmallMissionDetail = () => {
   const [author, setAuthor] = useState<any>(null);
   const [responses, setResponses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [projetRedirect, setProjetRedirect] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [hasResponded, setHasResponded] = useState(false);
   const [closeModalOpen, setCloseModalOpen] = useState(false);
@@ -254,9 +257,12 @@ const SmallMissionDetail = () => {
     const { data: m } = await (isUuidParam ? query.eq("id", id) : query.eq("slug", id)).maybeSingle();
     if (!m) { setLoading(false); return; }
 
-    // Un projet participatif a sa propre page : l'ancien lien y renvoie.
-    if ((m as any).category === "projet") {
-      navigate(`/projets/${(m as any).slug || m.id}${window.location.search}`, { replace: true });
+    // Un projet participatif a sa propre page : l'ancien lien y renvoie,
+    // en 301 déclaré aux robots (Prerender) et en remplacement côté navigateur.
+    const projetTarget = legacyProjetRedirectTarget(m as any);
+    if (projetTarget) {
+      setProjetRedirect(projetTarget);
+      setLoading(false);
       return;
     }
 
@@ -715,6 +721,10 @@ const SmallMissionDetail = () => {
   const handleClosePublishedBanner = () => {
     setSearchParams({}, { replace: true });
   };
+
+  if (projetRedirect) {
+    return <LegacyProjetRedirect target={projetRedirect} />;
+  }
 
   if (loading) {
     return (
