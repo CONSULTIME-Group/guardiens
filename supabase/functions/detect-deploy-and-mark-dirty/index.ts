@@ -37,6 +37,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { startCronRun } from "../_shared/cron-run-log.ts";
 import { requireAdminOrServiceRole } from "../_shared/require-admin.ts";
 import { shouldMarkStatic, STATIC_FAMILY, STATIC_SEO_URLS } from "../_shared/static-seo-refresh.ts";
+import { nextFamilyRefreshState } from "../_shared/deploy-refresh-state.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -215,12 +216,19 @@ Deno.serve(async (req) => {
     );
 
     const nowMs = Date.now();
-    const lastMarkedAt = rows.map((r) => r.marked_at).filter((d): d is string => !!d).sort().pop();
+    const lastMarkedAt = [
+      ...rows.map((r) => r.marked_at),
+      ...Object.keys(FAMILY_TABLES).map((family) => state.get(family)?.last_marked_at),
+    ].filter((d): d is string => !!d).sort((a, b) => Date.parse(a) - Date.parse(b)).pop();
     const hoursSinceLastMark = lastMarkedAt
       ? (nowMs - new Date(lastMarkedAt).getTime()) / 3_600_000
       : Number.POSITIVE_INFINITY;
 
     const bundleChanged = !existing;
+    // Sans route-hashes, une empreinte déjà vue mais jamais marquée reste à
+    // reprendre après le debounce ou le refus de budget. Le bootstrap reste
+    // exclu tant qu'aucune vague n'a été acceptée.
+    const pendingBundle = bundleChanged || (existing?.marked_at === null && rows.some((r) => !!r.marked_at));
     const globalHash = hashes?.global ?? null;
 
     // 1. Decision par famille, avant tout marquage.
@@ -274,7 +282,7 @@ Deno.serve(async (req) => {
     if (isFirstEverRun) {
       globalReason = "bootstrap";
       toMark = [];
-    } else if (!hashes && !bundleChanged) {
+    } else if (!hashes && !pendingBundle) {
       // Sans fichier d'empreintes lisible, on retombe sur l'ancien comportement
       // (marquage complet), mais uniquement quand un nouveau bundle apparait :
       // sinon le repli marquerait 436 pages a chaque fenetre de 24 h.
@@ -382,7 +390,8 @@ Deno.serve(async (req) => {
     // plus, consommes par consume-seo-dirty a budget plafonne. Independant du
     // debounce des familles, qui protege les vagues de 436 pages.
     let staticMarked = false;
-    if (bundleChanged && !isFirstEverRun) {
+    const staticBundleChanged = state.get(STATIC_FAMILY)?.last_hash !== fingerprint;
+    if (staticBundleChanged && !isFirstEverRun) {
       let used = monthlyUsed;
       if (toMark.length === 0) {
         const monthStart = new Date();
@@ -396,7 +405,8 @@ Deno.serve(async (req) => {
         used = count ?? 0;
       }
       staticMarked = shouldMarkStatic({
-        bundleChanged, isFirstEverRun, monthlyUsed: used + waveSize, monthlyBudget,
+        bundleChanged: staticBundleChanged, isFirstEverRun,
+        monthlyUsed: used + (toMark.length > 0 ? waveSize : 0), monthlyBudget,
       });
       if (staticMarked) {
         const nowIso = new Date().toISOString();
@@ -442,22 +452,16 @@ Deno.serve(async (req) => {
       );
     }
 
-    // 6. Etat par famille : empreintes toujours enregistrees, date de vague
-    // seulement si la famille a ete marquee.
+    // 6. Etat par famille : conserver la dernière vague acceptée quand le
+    // marquage est différé ou refusé. Le cron suivant reverra le changement.
     if (hashes) {
       const nowIso = new Date().toISOString();
       const upserts = decisions.filter((d) => d.family !== STATIC_FAMILY).map((d) => {
         const st = state.get(d.family);
         return {
           family: d.family,
-          last_hash: d.new_hash ?? st?.last_hash ?? null,
-          last_global_hash: globalHash ?? st?.last_global_hash ?? null,
-          // Au bootstrap d'une famille, l'horloge du filet temporel demarre
-          // maintenant : sinon le passage suivant declencherait aussitot une
-          // vague complete au motif "jamais rafraichie".
-          last_marked_at: markedRowsByFamily[d.family] !== undefined
-            ? nowIso
-            : st?.last_marked_at ?? nowIso,
+          ...nextFamilyRefreshState(st, { family: d.new_hash, global: globalHash },
+            markedRowsByFamily[d.family] !== undefined, nowIso),
           updated_at: nowIso,
         };
       });
@@ -469,13 +473,16 @@ Deno.serve(async (req) => {
 
     // 7. Empreinte de bundle.
     if (existing) {
-      await sb.from("deploy_fingerprints")
-        .update({ last_seen_at: new Date().toISOString(), seen_count: existing.seen_count + 1 })
+      const { error: updateError } = await sb.from("deploy_fingerprints")
+        .update({ last_seen_at: new Date().toISOString(), seen_count: existing.seen_count + 1,
+          ...(toMark.length > 0 ? { marked_at: new Date().toISOString(), marked_rows: marked } : {}),
+        })
         .eq("id", existing.id);
+      if (updateError) throw updateError;
     } else {
       const { error: insertError } = await sb.from("deploy_fingerprints").insert({
         fingerprint,
-        marked_at: marked > 0 ? new Date().toISOString() : null,
+        marked_at: toMark.length > 0 ? new Date().toISOString() : null,
         marked_rows: marked,
       });
       if (insertError) throw insertError;
