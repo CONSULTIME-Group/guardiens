@@ -285,6 +285,6 @@ export async function deliverProximity(
 
     if (i + size < input.recipients.length) await sleep(1000);
   }
-  rep.needsReconciliation = rep.uncertain + rep.journalFailed + rep.finishFailed + rep.skippedBusy > 0;
+  rep.needsReconciliation = rep.uncertain + rep.journalFailed + rep.finishFailed > 0;
   return rep;
 }
