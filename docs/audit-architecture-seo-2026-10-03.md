@@ -23,8 +23,8 @@ Aucun crawl Googlebot des 673 URL. Aucun lien d'action d'email ni aucun jeton vi
 
 ## Ce qui n'est pas vérifié
 
-- **Search Console** : non connectée à ce jour. Indexation réelle, pages exclues, erreurs de plan du site : NON VÉRIFIÉ (vérification prévue côté ChatGPT).
-- **Worker Cloudflare réellement déployé, WAF, règles de cache** : NON VÉRIFIÉ. `cloudflare-worker-prerender.js` du dépôt est un miroir ancien, pas une preuve. Seul le comportement observé est rapporté.
+- **Search Console** : côté ChatGPT, une connexion Google est nécessaire ; la tentative n'a pas fourni d'accès vérifié et le contrôle suivant a expiré. État d'authentification inconnu. Indexation Google réelle, pages exclues, erreurs de plan du site : NON VÉRIFIÉ.
+- **Worker Cloudflare réellement déployé, WAF, règles de cache, console Prerender** : NON VÉRIFIÉ. `cloudflare-worker-prerender.js` du dépôt est un miroir ancien, pas une preuve. Seul le comportement observé est rapporté.
 - **Prerender.io** (quota, échecs, âge du cache par URL, durée de conservation) : NON VÉRIFIÉ côté console. La base n'enregistre que nos propres demandes de recache (section 4).
 - **Maillage complet** : couverture PARTIELLE (61 pages lues sur 673). Voir section 2.
 
@@ -37,7 +37,7 @@ Aucun crawl Googlebot des 673 URL. Aucun lien d'action d'email ni aucun jeton vi
 - /projets?utm_source=x et /tarifs/ : canonical vers l'URL propre. /recherche, /search : `noindex, follow`.
 - http vers https (301), www vers l'apex (308). Préversion id-preview : 401.
 - Bing et les robots IA reçoivent le même prérendu que Google (contrôle sur Evreux).
-- robots.txt et plan du site servis identiques à `public/robots.txt` et `public/sitemap.xml`.
+- Comparaison du 03/10 vers 10:45 UTC, avant SEO-1 : robots.txt et plan du site servis identiques à `public/robots.txt` et `public/sitemap.xml`. Depuis, `public/robots.txt` a été régénéré par SEO-1 et diffère encore de la production (non publié) ; `public/sitemap.xml` est inchangé.
 - Aucun JSON-LD illisible sur l'échantillon.
 
 ## P0, défauts confirmés à fort impact
@@ -85,12 +85,23 @@ Aucun crawl Googlebot des 673 URL. Aucun lien d'action d'email ni aucun jeton vi
 - **Correction minimale** : omettre `lastmod` sans date propre.
 
 ### P1-5. Familles sans invalidation lors d'une modification
-Voir section 1. Annonces, entraide, projets, associations, races, questions et auteurs n'ont ni déclencheur ni entrée statique. Une création, un reclassement, une clôture ou une suppression ne rafraîchit pas leur prérendu, ni le hub qui les liste. Les cas P0 en sont des exemples. Correction minimale : étendre le marquage existant (`prerender_family_state`, `consume-seo-dirty`) aux familles à contenu en base, dans le budget mensuel déjà prévu.
+Voir section 1. Dans le code et les traces étudiées (`prerender_recache_log`, déclencheurs, `STATIC_SEO_URLS`), aucun mécanisme d'invalidation n'a été trouvé pour annonces, entraide, projets, associations, races, questions et auteurs : ni déclencheur ni entrée statique lors d'une création, d'un reclassement, d'une clôture ou d'une suppression, pour la fiche comme pour le hub qui la liste. Ce n'est pas la garantie qu'aucun système externe (Worker, console Prerender, non vérifiés) ne rafraîchit ces URL. Les cas P0 en sont des exemples. Correction minimale : étendre le marquage existant (`prerender_family_state`, `consume-seo-dirty`) aux familles à contenu en base, dans le budget mensuel déjà prévu.
 
 ### P1-6. /projets/{uuid} déclare son propre canonical
 - **Code** : `ProjetDetail.tsx:56` accepte l'UUID ; `PublicMissionView.tsx:201` appelle `PageMeta` sans `canonical`, qui prend donc l'URL courante.
 - **Production** : `/projets/e5724f3e-…` 200 `index, follow`, canonical vers lui-même (10:52:51). Deux URL indexables pour une fiche.
 - **Correction minimale** : canonical vers `/projets/{slug}` quand le slug existe.
+
+## P2, mineur ou à confirmer
+
+- **P2-1. BreadcrumbList multiples** (section 3). Plusieurs fils ne sont pas invalides en soi : Google accepte plusieurs fils d'Ariane sur une page (https://developers.google.com/search/docs/appearance/structured-data/breadcrumb). Seuls les doublons strictement identiques sont du bruit, et les fils divergents méritent un alignement.
+- **P2-2. Générateur robots fragile. CORRIGÉ EN CODE (SEO-1), non publié.** Défaut : `generate-robots.mjs:63` analysait les objets TS par expression régulière dépendante de l'indentation. Résultat souhaité, inchangé : /login et /inscription restent explorables et rendent `noindex`. Correction : lecture par l'arbre syntaxique TypeScript, sans lecture de `staticRoutes`.
+- **P2-3. /login, /inscription sans `meta robots` dans le HTML servi** (coquille, hors prérendu).
+- **P2-4. /gardiens/{uuid inexistant}** : 200 `noindex` (faux 404, page `noindex` donc sans risque d'indexation).
+- **P2-5. http://www** : deux sauts (301 puis 308).
+- **P2-6. Second H1** venant du `<noscript>` de `index.html:117`. Effet probablement nul.
+- **P2-7. guardiens.lovable.app** sert la coquille 200 sans canonical dans le HTML (Googlebot, /projets). Le canonical est posé par JavaScript. Risque faible pour Google, non nul pour les robots sans JavaScript. Moyen de poser un `X-Robots-Tag` sur ce domaine : NON VÉRIFIÉ.
+- Retiré de la version précédente : « pas d'en-tête de cache ». `cf-cache-status: DYNAMIC` n'est pas un défaut SEO sans lenteur observée (temps médian 76 ms navigateur, 85 à 800 ms robots).
 
 ### P2-8 (anciennement P1-7). FAQPage déclarée mais absente du texte servi, qualité des données structurées
 - **Contexte Google (contre-audit ChatGPT, vérification documentaire du 03/10/2026)** : l'ancienne page FAQPage (`/search/docs/appearance/structured-data/faqpage`) redirige vers https://developers.google.com/search/updates. Le journal des changements du 08/05/2026 indique l'arrêt des résultats enrichis FAQ depuis le 07/05/2026 et la suppression de cette documentation le 15/06/2026.
@@ -109,17 +120,6 @@ Confirmé aussi par le contre-audit ChatGPT (HTTP, texte hors script, style et n
 
 Les 12 autres pages avec FAQPage de l'échantillon (/, /faq, /tarifs, entraide, villes, guides, associations…) : 0 question absente.
 Prochain correctif de qualité : aligner le schéma sur des questions affichées, ou le retirer là où elles ne le sont pas. Note : la réponse département contient « 0 € » alors que la règle éditoriale impose « gratuit ».
-
-## P2, mineur ou à confirmer
-
-- **P2-1. BreadcrumbList multiples** (section 3). Plusieurs fils ne sont pas invalides en soi : Google accepte plusieurs fils d'Ariane sur une page (https://developers.google.com/search/docs/appearance/structured-data/breadcrumb). Seuls les doublons strictement identiques sont du bruit, et les fils divergents méritent un alignement.
-- **P2-2. Générateur robots fragile. CORRIGÉ EN CODE (SEO-1), non publié.** Défaut : `generate-robots.mjs:63` analysait les objets TS par expression régulière dépendante de l'indentation. Résultat souhaité, inchangé : /login et /inscription restent explorables et rendent `noindex`. Correction : lecture par l'arbre syntaxique TypeScript, sans lecture de `staticRoutes`.
-- **P2-3. /login, /inscription sans `meta robots` dans le HTML servi** (coquille, hors prérendu).
-- **P2-4. /gardiens/{uuid inexistant}** : 200 `noindex` (faux 404, page `noindex` donc sans risque d'indexation).
-- **P2-5. http://www** : deux sauts (301 puis 308).
-- **P2-6. Second H1** venant du `<noscript>` de `index.html:117`. Effet probablement nul.
-- **P2-7. guardiens.lovable.app** sert la coquille 200 sans canonical dans le HTML (Googlebot, /projets). Le canonical est posé par JavaScript. Risque faible pour Google, non nul pour les robots sans JavaScript. Moyen de poser un `X-Robots-Tag` sur ce domaine : NON VÉRIFIÉ.
-- Retiré de la version précédente : « pas d'en-tête de cache ». `cf-cache-status: DYNAMIC` n'est pas un défaut SEO sans lenteur observée (temps médian 76 ms navigateur, 85 à 800 ms robots).
 
 ## 1. Familles de routes, générateurs et invalidation
 
@@ -216,7 +216,7 @@ Préparation du code et des tests : possible sans attente. Mise en production, p
 ## Annexe A, statistiques reproductibles
 
 - Plan du site : 673 URL (`/tmp/seo/urls.txt`). Par famille : actualites 101, house-sitting 161, departement 98, guides 95, gardiens 81, races 77, petites-missions 16, associations 11, annonces 9, auteurs 2, projets 1, hubs et fixes 21.
-- Agent navigateur : 673/673 en 200. Agent Googlebot : 61 URL, dont 54 en 200 indexables, 3 en 404 attendus, 4 en `noindex` attendus ou défaut (/projets, /projets/, /recherche, /search), 6 coquilles sans `meta robots`.
+- Agent navigateur : 673/673 en 200. Agent Googlebot : 61 URL, réparties en catégories mutuellement exclusives recalculées depuis `/tmp/seo/google.jsonl` (statut final, `meta robots`, `X-Robots-Tag`, canonical), sans nouveau GET : 46 en 200 avec canonical et sans `noindex` (dont les cas P0-2 et P1-6) ; 6 en 200 `noindex` (/projets, /projets/, /projets?utm_source=x, /recherche, /search, /gardiens/{uuid inexistant}) ; 6 coquilles 200 sans canonical ni `meta robots` (/login, /inscription, /dashboard, /admin, /sits, /messages) ; 3 en 404 (pages inexistantes testées). Total 61.
 - Fils d'Ariane : 13 pages sur 61 avec 2 blocs, dont 5 identiques et 8 divergents.
 - FAQPage : 16 pages ; 4 familles avec questions absentes du texte servi (P2-8).
 - Reproduire : `python3 /tmp/seo/crawl.py urls.txt "<UA>" 6` et `python3 /tmp/seo2/deep.py` (2 simultanées, lit `google.jsonl`).
