@@ -33,16 +33,12 @@ prefetchRouteChunk(window.location.pathname);
 // données personnelles ne fuient dans la console navigateur via des libs
 // tierces qui lisent `localStorage['loglevel']` (loglevel, debug, etc.).
 // Ne touche pas aux environnements dev / preview.
-if (import.meta.env.PROD && typeof window !== "undefined") {
+if (import.meta.env.PROD) {
   try {
-    const current = window.localStorage.getItem("loglevel");
-    if (!current || !/^(ERROR|WARN|SILENT)$/i.test(current)) {
-      window.localStorage.setItem("loglevel", "ERROR");
-    }
+    const ls = localStorage;
+    if (!/^(ERROR|WARN|SILENT)$/i.test(ls.getItem("loglevel") || "")) ls.setItem("loglevel", "ERROR");
     // Neutralise également le canal `debug` (npm `debug`) qui log en clair.
-    if (window.localStorage.getItem("debug")) {
-      window.localStorage.removeItem("debug");
-    }
+    ls.removeItem("debug");
   } catch {
     // storage indisponible (mode privé, iframe cross-origin), aucune action
   }
@@ -50,7 +46,7 @@ if (import.meta.env.PROD && typeof window !== "undefined") {
 
 const container = document.getElementById("root");
 if (!container) {
-  throw new Error("Élément #root introuvable dans le DOM");
+  throw new Error("#root absent");
 }
 
 // Routes lazy qui écrivent leurs métadonnées tardivement (après un chargement
@@ -62,12 +58,10 @@ const LATE_META_PATH_PREFIXES = [
   "/projets/", // fiche projet (lot SEO-2) : jamais prête avant la lecture
 ];
 
-if (typeof window !== "undefined") {
-  const path = window.location.pathname;
-  if (LATE_META_PATH_PREFIXES.some((prefix) => path.startsWith(prefix))) {
-    window.prerenderMetaPending = true;
-    window.prerenderReady = false;
-  }
+// Ce module ne s'exécute que dans le navigateur (document lu plus haut).
+if (LATE_META_PATH_PREFIXES.some((p) => location.pathname.startsWith(p))) {
+  window.prerenderMetaPending = true;
+  window.prerenderReady = false;
 }
 
 // Guardiens est monolingue français : le seul dictionnaire (fr) est importé
@@ -87,9 +81,7 @@ const markPrerenderReady = () => {
   window.prerenderReady = true;
 };
 
-if (typeof window !== "undefined") {
-  window.setTimeout(markPrerenderReady, 10000);
-}
+window.setTimeout(markPrerenderReady, 10000);
 
 // Lot P2b : la mesure réelle (webVitals) démarre avec AfterPaintExtras, après le premier affichage.
 installGlobalErrorHandlers();
