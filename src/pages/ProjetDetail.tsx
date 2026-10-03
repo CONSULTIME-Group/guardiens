@@ -7,6 +7,8 @@ import { logger } from "@/lib/logger";
 import PublicMissionView from "@/components/missions/PublicMissionView";
 import { Button } from "@/components/ui/button";
 import { isIndexableProjetMission } from "../../supabase/functions/_shared/entraideMissionIndexability.js";
+import PageMeta from "@/components/PageMeta";
+import { classifyProjetLookup, isUuid, projetCanonicalUrl, projetStatusCode, type ProjetLookup } from "@/lib/projetSeo";
 
 /** Même minimum de caractères que l'entraide (SmallMissionDetail). */
 const MIN_MESSAGE_LEN = 10;
@@ -43,6 +45,8 @@ const ProjetDetail = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const [projet, setProjet] = useState<any | null>(null);
+  const [lookup, setLookup] = useState<ProjetLookup["state"]>("loading");
+  const [reloadKey, setReloadKey] = useState(0);
   const [author, setAuthor] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [applyMessage, setApplyMessage] = useState("");
@@ -53,22 +57,33 @@ const ProjetDetail = () => {
     const load = async () => {
       if (!slug) return;
       setLoading(true);
-      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
+      setLookup("loading");
       const query = (supabase as any)
         .from("public_small_missions")
         .select("*")
         .eq("category", "projet");
-      const { data } = await (isUuid ? query.eq("id", slug) : query.eq("slug", slug)).maybeSingle();
-      setProjet(data || null);
+      let res: { data: unknown; error: unknown } | null = null;
+      try {
+        res = await (isUuid(slug) ? query.eq("id", slug) : query.eq("slug", slug)).maybeSingle();
+      } catch (err) {
+        logger.error("[ProjetDetail.load]", { err: String(err) });
+        res = null;
+      }
+      // Une lecture en échec n'est jamais une absence : sinon une panne
+      // passagère servirait un 404 aux robots pour un projet réel.
+      const result = classifyProjetLookup(res);
+      const data: any = result.state === "found" ? result.row : null;
+      setProjet(data);
       if (data?.id) {
         const { data: a } = await supabase.rpc("get_mission_author_public", { _mission_id: data.id });
         const row: any = Array.isArray(a) ? a[0] : a;
         setAuthor(row ? { ...row, created_at: row.member_since } : null);
       }
+      setLookup(result.state);
       setLoading(false);
     };
     void load();
-  }, [slug]);
+  }, [slug, reloadKey]);
 
   const onShare = useCallback(() => {
     const url = window.location.href;
@@ -151,9 +166,37 @@ const ProjetDetail = () => {
     return <div className="min-h-screen bg-background" aria-busy="true" />;
   }
 
+  if (lookup === "error") {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center px-4">
+        <PageMeta
+          title="Projet momentanément indisponible"
+          description="Ce projet n'a pas pu être chargé. Réessayez dans un instant."
+          noindex
+          statusCode={projetStatusCode("error")}
+          noCanonical
+        />
+        <div className="max-w-md text-center space-y-5">
+          <h1 className="font-heading text-3xl font-bold text-foreground">Ce projet n'a pas pu être chargé</h1>
+          <p className="text-muted-foreground">
+            La connexion a échoué. Le projet existe peut-être toujours : vous pouvez réessayer.
+          </p>
+          <Button className="rounded-full" onClick={() => setReloadKey((k) => k + 1)}>Réessayer</Button>
+        </div>
+      </div>
+    );
+  }
+
   if (!projet) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center px-4">
+        <PageMeta
+          title="Projet introuvable"
+          description="Ce projet participatif n'existe pas ou a été retiré. Découvrez les projets ouverts en ce moment."
+          noindex
+          statusCode={projetStatusCode("absent")}
+          noCanonical
+        />
         <div className="max-w-md text-center space-y-5">
           <h1 className="font-heading text-3xl font-bold text-foreground">Ce projet a été retiré</h1>
           <p className="text-muted-foreground">
@@ -179,6 +222,7 @@ const ProjetDetail = () => {
       memberSinceLong={memberSinceLong}
       onShare={onShare}
       noindex={!isIndexableProjetMission(projet)}
+      canonical={projetCanonicalUrl(projet)}
       onApply={user ? handleApply : undefined}
       hasApplied={hasApplied}
       applying={applying}

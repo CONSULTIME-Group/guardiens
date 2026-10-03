@@ -74,6 +74,8 @@ interface Props {
   viewCount?: number;
   responsesCount?: number;
   noindex?: boolean;
+  /** Adresse de référence explicite (projets : /projets/{slug}). */
+  canonical?: string;
   /** Branche projet seulement : action de candidature d'un membre connecté. */
   onApply?: () => void;
   /** Branche projet seulement : la candidature est déjà partie. */
@@ -106,6 +108,7 @@ const PublicMissionView = ({
   viewCount = 0,
   responsesCount = 0,
   noindex = false,
+  canonical,
   onApply,
   hasApplied = false,
   applying = false,
@@ -203,6 +206,7 @@ const PublicMissionView = ({
           description={metaDescription}
           image={ogImage}
           noindex={noindex}
+          canonical={canonical}
         />
         <Head>
           <script type="application/ld+json">{JSON.stringify({

@@ -59,6 +59,7 @@ if (!container) {
 // Liste volontairement courte et explicite, à compléter route par route.
 const LATE_META_PATH_PREFIXES = [
   "/gardiens/", // fiche gardien publique, PublicSitterProfile
+  "/projets/", // fiche projet (lot SEO-2) : jamais prête avant la lecture
 ];
 
 if (typeof window !== "undefined") {
