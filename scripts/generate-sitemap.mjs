@@ -18,7 +18,7 @@ import { isAssociationIndexable } from "../src/lib/associationIndexability.js";
 import { isSitterProfileIndexable } from "../src/lib/sitterProfileIndexability.js";
 import { mergedBreedTarget } from "../src/lib/breedFicheMerges.js";
 import { isIndexableEntraideMission, isIndexableProjetMission } from "../supabase/functions/_shared/entraideMissionIndexability.js";
-import { fetchOrCache as sharedFetchOrCache } from "./lib/sitemapCache.mjs";
+import { fetchOrCache as sharedFetchOrCache, normalizeCache, emptyCache } from "./lib/sitemapCache.mjs";
 
 
 
@@ -106,11 +106,11 @@ function urlEntry(loc, lastmod, changefreq, priority) {
 }
 
 function loadCache() {
-  if (FORCE) return { sources: {}, entries: {} };
+  if (FORCE) return emptyCache();
   try {
-    return JSON.parse(fs.readFileSync(CACHE_PATH, "utf-8"));
+    return normalizeCache(JSON.parse(fs.readFileSync(CACHE_PATH, "utf-8")));
   } catch {
-    return { sources: {}, entries: {} };
+    return emptyCache();
   }
 }
 
