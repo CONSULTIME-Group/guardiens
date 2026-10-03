@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -40,24 +40,55 @@ function memberSinceLong(iso?: string | null): string | null {
   return `Membre depuis ${d.toLocaleDateString("fr-FR", { month: "long", year: "numeric" })}`;
 }
 
+type ProjetView = {
+  key: string | null;
+  state: ProjetLookup["state"];
+  projet: any | null;
+  author: any | null;
+};
+
+/** Retire les balises déclarées par un projet précédent (navigation interne). */
+export function scrubStaleProjetHead(): void {
+  if (typeof document === "undefined") return;
+  (window as any).prerenderReady = false;
+  window.prerenderMetaPending = true;
+  document.head
+    .querySelectorAll('link[rel="canonical"], meta[name="prerender-status-code"], meta[name="prerender-header"]')
+    .forEach((n) => n.remove());
+}
+
 const ProjetDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const { toast } = useToast();
   const { user } = useAuth();
-  const [projet, setProjet] = useState<any | null>(null);
-  const [lookup, setLookup] = useState<ProjetLookup["state"]>("loading");
   const [reloadKey, setReloadKey] = useState(0);
-  const [author, setAuthor] = useState<any | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Clé de la lecture attendue : un changement de projet ou « Réessayer »
+  // invalide l'état affiché dès le rendu, avant tout effet.
+  const routeKey = `${slug ?? ""}#${reloadKey}`;
+  const [view, setView] = useState<ProjetView>({ key: null, state: "loading", projet: null, author: null });
+  const generation = useRef(0);
+  const isCurrent = view.key === routeKey && view.state !== "loading";
+  const projet: any | null = isCurrent ? view.projet : null;
+  const author: any | null = isCurrent ? view.author : null;
+  const lookup: ProjetLookup["state"] = isCurrent ? view.state : "loading";
+  const loading = !isCurrent;
   const [applyMessage, setApplyMessage] = useState("");
   const [applying, setApplying] = useState(false);
   const [hasApplied, setHasApplied] = useState(false);
 
+  // Tant que la lecture du paramètre courant n'a pas répondu, aucune balise
+  // de l'ancien projet ne reste déclarée et Prerender attend.
+  useLayoutEffect(() => {
+    if (isCurrent) return;
+    scrubStaleProjetHead();
+  }, [isCurrent, routeKey]);
+
   useEffect(() => {
+    if (!slug) return;
+    const gen = ++generation.current;
+    const key = routeKey;
+    const alive = () => generation.current === gen;
     const load = async () => {
-      if (!slug) return;
-      setLoading(true);
-      setLookup("loading");
       const query = (supabase as any)
         .from("public_small_missions")
         .select("*")
@@ -69,21 +100,32 @@ const ProjetDetail = () => {
         logger.error("[ProjetDetail.load]", { err: String(err) });
         res = null;
       }
+      if (!alive()) return;
       // Une lecture en échec n'est jamais une absence : sinon une panne
       // passagère servirait un 404 aux robots pour un projet réel.
       const result = classifyProjetLookup(res);
       const data: any = result.state === "found" ? result.row : null;
-      setProjet(data);
-      if (data?.id) {
-        const { data: a } = await supabase.rpc("get_mission_author_public", { _mission_id: data.id });
+      // Le contenu du projet libère la page tout de suite, auteur inconnu.
+      setView({ key, state: result.state, projet: data, author: null });
+      if (!data?.id) return;
+      // Lecture secondaire : une panne laisse l'auteur vide, jamais la page.
+      try {
+        const { data: a, error } = await supabase.rpc("get_mission_author_public", { _mission_id: data.id });
+        if (error) throw error;
+        if (!alive()) return;
         const row: any = Array.isArray(a) ? a[0] : a;
-        setAuthor(row ? { ...row, created_at: row.member_since } : null);
+        const nextAuthor = row ? { ...row, created_at: row.member_since } : null;
+        setView((v) => (v.key === key ? { ...v, author: nextAuthor } : v));
+      } catch (err) {
+        logger.error("[ProjetDetail.author]", { err: String(err) });
       }
-      setLookup(result.state);
-      setLoading(false);
     };
     void load();
-  }, [slug, reloadKey]);
+    return () => {
+      // Démontage ou nouveau paramètre : toute réponse en vol est ignorée.
+      if (generation.current === gen) generation.current += 1;
+    };
+  }, [slug, routeKey]);
 
   const onShare = useCallback(() => {
     const url = window.location.href;
