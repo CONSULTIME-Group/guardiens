@@ -176,7 +176,10 @@ describe("robustesse de la fiche projet", () => {
     nextRpc = () => Promise.reject(new Error("rpc down"));
     renderProjet("/projets/a");
     await screen.findByText("Projet A");
-    await waitFor(() => expect((window as any).prerenderReady).toBe(true));
+    // Page libérée : plus d'écran de chargement (PublicMissionView, simulée
+    // ici, porte la PageMeta qui lève le drapeau Prerender).
+    await act(async () => { await new Promise((r) => setTimeout(r, 0)); });
+    expect(document.querySelector('[aria-busy="true"]')).toBeNull();
     expect(captured.at(-1).author).toBeNull();
     expect(screen.queryByText("Ce projet a été retiré")).toBeNull();
   });
