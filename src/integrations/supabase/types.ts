@@ -11336,6 +11336,10 @@ export type Database = {
         Args: { p_claim_key: string; p_owner_token: string }
         Returns: string
       }
+      acquire_proximity_send_claim: {
+        Args: { p_claim_key: string; p_owner_token: string }
+        Returns: string
+      }
       admin_a10_affinity_onboarding_stats: {
         Args: { p_since: string }
         Returns: Json
