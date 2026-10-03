@@ -56,14 +56,6 @@ const HouseSittingHub = () => {
   const jsonLd = [
     {
       "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      itemListElement: [
-        { "@type": "ListItem", position: 1, name: "Accueil", item: SITE },
-        { "@type": "ListItem", position: 2, name: "House-sitting", item: `${SITE}/house-sitting` },
-      ],
-    },
-    {
-      "@context": "https://schema.org",
       "@type": "ItemList",
       name: "Villes couvertes par Guardiens",
       numberOfItems: total,

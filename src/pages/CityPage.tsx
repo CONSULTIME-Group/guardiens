@@ -782,19 +782,6 @@ const CityPage = () => {
           },
         },
         {
-          "@type": "BreadcrumbList",
-          itemListElement: [
-            { "@type": "ListItem", position: 1, name: "Accueil", item: "https://guardiens.fr" },
-            { "@type": "ListItem", position: 2, name: "Nos villes", item: "https://guardiens.fr/nos-villes" },
-            {
-              "@type": "ListItem",
-              position: 3,
-              name: `House-sitting à ${dbPage.city}`,
-              item: `https://guardiens.fr/house-sitting/${dbPage.slug}`,
-            },
-          ],
-        },
-        {
           "@type": "FAQPage",
           mainEntity: dbFaqItems.map((f) => ({
             "@type": "Question",

@@ -144,7 +144,7 @@ const FAQ_BY_SLUG: Record<string, Array<{ q: string; a: string }>> = {
  chambery: CHAMBERY_FAQ,
 };
 
-const CitySchemaOrg = ({ city, departmentSlug }: Props) => {
+const CitySchemaOrg = ({ city }: Props) => {
  const isLyon = city.slug === "lyon";
  const revised = REVISED_CITY_SLUGS.has(city.slug);
  // Ville refondue : même source que la FAQ visible (cityContent.faq).
@@ -181,34 +181,6 @@ const CitySchemaOrg = ({ city, departmentSlug }: Props) => {
  },
  },
  {
- "@type": "BreadcrumbList",
- itemListElement: [
- {
- "@type": "ListItem",
- position: 1,
- name: "Accueil",
- item: "https://guardiens.fr",
- },
-  ...(departmentSlug
-  ? [{
-  "@type": "ListItem",
-  position: 2,
-  name: city.department,
-  item: `https://guardiens.fr/departement/${departmentSlug}`,
-  }]
-  : []),
-  {
-  "@type": "ListItem",
-  position: departmentSlug ? 3 : 2,
- name: isLyon
- ? "Garde chien et chat Lyon"
- : `House-sitting à ${city.name}`,
- // Google exige un "item" (URL) sur TOUS les éléments, y compris le dernier.
- item: `https://guardiens.fr/house-sitting/${city.slug}`,
- },
- ],
- },
- {
  "@type": "FAQPage",
  mainEntity: faqItems.map((f) => ({
  "@type": "Question",
@@ -220,35 +192,6 @@ const CitySchemaOrg = ({ city, departmentSlug }: Props) => {
  })),
  },
  ];
-
- // LocalBusiness pour toutes les villes hub (Lyon, Annecy, Grenoble, Chambéry…)
- // Éligibilité Google Local Pack + AI Overviews.
- const LOCAL_BUSINESS_CITIES = ["lyon", "annecy", "grenoble", "chambery", "caluire-et-cuire"];
- // Ville refondue : pas de LocalBusiness fictif.
- if (LOCAL_BUSINESS_CITIES.includes(city.slug) && !revised) {
- graph.push({
- "@type": "LocalBusiness",
- name: `Guardiens, Garde d'animaux, de maison et de jardin à ${city.name}`,
- description: `Plateforme de garde de chien, de chat, de maison et de jardin, home sitting à ${city.name}. Gardiens de proximité, aucune commission prélevée sur les gardes.`,
- url: `https://guardiens.fr/house-sitting/${city.slug}`,
- address: {
- "@type": "PostalAddress",
- addressLocality: city.name,
- addressRegion: city.department,
- addressCountry: "FR",
- },
- geo: {
- "@type": "GeoCoordinates",
- latitude: city.coordinates?.lat,
- longitude: city.coordinates?.lng,
- },
- areaServed: {
- "@type": "City",
- name: city.name,
- },
- priceRange: "0 € pour les propriétaires",
- });
- }
 
  return (
  <script

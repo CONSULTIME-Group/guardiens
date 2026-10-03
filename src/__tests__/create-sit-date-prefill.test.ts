@@ -2,7 +2,9 @@
  * Vérifie le préremplissage des dates de garde depuis l'email saisonnier.
  * Test pur : miroir de parsePrefillDate et des conditions de prefill.
  */
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+beforeEach(() => { vi.useFakeTimers(); vi.setSystemTime(new Date("2026-10-03T12:00:00Z")); });
+afterEach(() => vi.useRealTimers());
 import { parsePrefillDate } from "@/pages/CreateSit";
 
 function tomorrow(offsetDays = 1): string {

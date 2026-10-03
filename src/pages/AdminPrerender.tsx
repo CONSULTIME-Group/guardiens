@@ -9,8 +9,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 
 /**
- * /admin/prerender, Force le re-snapshot Prerender de pages SEO précises
- * sans attendre le cycle automatique post-publish.
+ * /admin/prerender, Enregistre le rafraichissement de pages SEO precises
+ * pour le prochain passage du consommateur commun.
  *
  * Sources :
  *  - articles      → /actualites/:slug
@@ -32,7 +32,7 @@ export default function AdminPrerender() {
   const [extra, setExtra] = useState("");
   const [running, setRunning] = useState(false);
   const [results, setResults] = useState<
-    Array<{ url: string; ok: boolean; status?: number; error?: string }>
+    Array<{ url: string; ok: boolean; status?: number; error?: string; queued?: boolean }>
   >([]);
 
   useEffect(() => {
@@ -95,7 +95,7 @@ export default function AdminPrerender() {
       const res = (data?.results ?? []) as typeof results;
       setResults(res);
       const ok = res.filter((r) => r.ok).length;
-      toast.success(`Re-snapshot demandé : ${ok}/${res.length} succès.`);
+      toast.success(`Rafraîchissement enregistré : ${ok}/${res.length} demandes. Traitement par passages de 15 minutes, selon la file et le budget disponible.`);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Échec de l'appel");
     } finally {
@@ -110,11 +110,11 @@ export default function AdminPrerender() {
         <meta name="robots" content="noindex, nofollow" />
       </Head>
 
-      <AdminPageHeader title="Instantanés des pages" breadcrumb={[{ label: "Diagnostic", to: "/admin/diagnostics" }]} description="Mise à jour immédiate de l'instantané servi aux moteurs de recherche." />
+      <AdminPageHeader title="Instantanés des pages" breadcrumb={[{ label: "Diagnostic", to: "/admin/diagnostics" }]} description="Demandes de mise à jour des instantanés servis aux moteurs de recherche." />
       <p className="text-sm text-muted-foreground mb-6">
-        Force la mise à jour du cache Prerender pour les pages sélectionnées,
-        sans attendre la prochaine publication. Utilisez après une correction
-        SEO urgente (canonical, noindex, meta).
+        Les pages sélectionnées rejoignent la file de rafraîchissement. Le traitement
+        passe toutes les 15 minutes, selon le nombre de demandes et le budget disponible.
+        Vérifiez ensuite la réponse publique pour confirmer la nouvelle copie.
       </p>
 
       <Card className="mb-6">
@@ -185,7 +185,7 @@ export default function AdminPrerender() {
 
       <div className="flex justify-end mb-6">
         <Button onClick={launch} disabled={running}>
-          {running ? "Re-snapshot en cours…" : "Lancer le re-snapshot"}
+          {running ? "Enregistrement…" : "Demander le rafraîchissement"}
         </Button>
       </div>
 
@@ -206,7 +206,7 @@ export default function AdminPrerender() {
                   />
                   <span className="font-mono text-xs flex-1 truncate">{r.url}</span>
                   <span className="text-xs text-muted-foreground">
-                    {r.ok ? `OK ${r.status ?? ""}` : r.error ?? `KO ${r.status ?? ""}`}
+                    {r.queued ? "Enregistrée" : r.ok ? `OK ${r.status ?? ""}` : r.error ?? `KO ${r.status ?? ""}`}
                   </span>
                 </div>
               ))}

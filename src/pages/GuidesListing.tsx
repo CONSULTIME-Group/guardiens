@@ -207,19 +207,7 @@ const GuidesListing = () => {
         </div>
 
         {/* JSON-LD: Breadcrumb */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "BreadcrumbList",
-              itemListElement: [
-                { "@type": "ListItem", position: 1, name: "Guardiens", item: "https://guardiens.fr" },
-                { "@type": "ListItem", position: 2, name: "Guides locaux", item: "https://guardiens.fr/guides" },
-              ],
-            }),
-          }}
-        />
+
 
         {/* JSON-LD: CollectionPage */}
         <script

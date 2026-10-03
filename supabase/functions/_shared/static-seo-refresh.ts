@@ -23,6 +23,10 @@ export const STATIC_SEO_URLS: readonly string[] = [
   // passage suivant (cron 15 min), sans dépasser le budget.
   "https://guardiens.fr/projets",
   "https://guardiens.fr/petites-missions",
+  "https://guardiens.fr/house-sitting",
+  "https://guardiens.fr/departement",
+  "https://guardiens.fr/races",
+  "https://guardiens.fr/associations",
 ];
 
 /**

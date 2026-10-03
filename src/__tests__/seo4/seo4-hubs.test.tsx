@@ -42,6 +42,8 @@ vi.mock("@/components/layout/PublicFooter", () => ({ default: () => null }));
 vi.mock("@/components/listings/InternationalShowcase", () => ({ default: () => null }));
 vi.mock("@/components/listings/PastListingsSection", () => ({ default: () => null }));
 
+vi.mock("@/hooks/useAlmaCulturalFact", () => ({ useAlmaCulturalFact: () => undefined }));
+import BreedPage from "@/pages/BreedPage";
 import PublicListings from "@/pages/PublicListings";
 import GuidesListing from "@/pages/GuidesListing";
 import DepartmentSitterLinks, { useDepartmentPublicSitters, sitterLinkLabel } from "@/components/seo/DepartmentSitterLinks";
@@ -221,5 +223,33 @@ describe("hub /guides", () => {
     handler = () => Promise.resolve({ data: null, error: { message: "x" } });
     wrap(<GuidesListing />);
     await screen.findByText(/n'ont pas pu être chargés/);
+  });
+});
+
+describe("balisage fidele au contenu public", () => {
+  const nodes = () => [...document.querySelectorAll('script[type="application/ld+json"]')]
+    .flatMap(s => { const j=JSON.parse(s.textContent || "null"); return j?.["@graph"] || (Array.isArray(j) ? j : [j]); });
+  it("departement : un seul fil visible et aucun FAQ sans contenu", async () => {
+    handler = table => Promise.resolve({ data: table === "seo_department_pages"
+      ? { slug: "rhone", department: "Rhône", h1_title: "Gardiens dans le Rhône", intro_text: "Texte public", sitter_count: 0 }
+      : [], error: null });
+    wrap(<Routes><Route path="/departement/:slug" element={<DepartmentPage />} /></Routes>, "/departement/rhone");
+    await screen.findByRole("heading", { level: 1 });
+    await waitFor(() => expect(nodes().filter(j => j?.["@type"] === "BreadcrumbList")).toHaveLength(1));
+    expect(nodes().some(j => j?.["@type"] === "FAQPage")).toBe(false);
+    const trail = nodes().find(j => j?.["@type"] === "BreadcrumbList");
+    expect(trail.itemListElement.at(-1).item).toBe("https://guardiens.fr/departement/rhone");
+    expect(screen.getByRole("navigation", { name: "Fil d'Ariane" })).toBeDefined();
+  });
+  it("race : garde le fil et l'article, retire seulement la FAQ invisible", async () => {
+    handler = table => Promise.resolve({ data: table === "breed_profiles"
+      ? [{ species: "dog", breed: "Cane Corso", temperament: "Texte public de temperament", sitter_tips: "Conseils publics pour la garde" }]
+      : [], error: null });
+    wrap(<Routes><Route path="/races/:slug" element={<BreedPage />} /></Routes>, "/races/dog-cane-corso");
+    await screen.findByRole("heading", { level: 1 });
+    await waitFor(() => expect(nodes().some(j => j?.["@type"] === "Article")).toBe(true));
+    expect(nodes().filter(j => j?.["@type"] === "BreadcrumbList")).toHaveLength(1);
+    expect(nodes().some(j => j?.["@type"] === "FAQPage")).toBe(false);
+    expect(screen.getByText("Texte public de temperament")).toBeDefined();
   });
 });

@@ -72,4 +72,12 @@ describe("règle d'indexabilité des fiches gardien : source unique", () => {
     expect(page).toMatch(/isSitterProfileIndexable\(\{\s*role: profile\?\.role,/);
     expect(read("scripts/generate-sitemap.mjs")).toMatch(/isSitterProfileIndexable\(\{\s*role: p\.role,/);
   });
+  it("mesure le texte visible apres masquage des contacts, meme au seuil", () => {
+    const input = { role: "sitter", bio: "Une presentation avec lien " + "https://example.test/" + "x".repeat(60), identityVerified: true };
+    expect(input.bio.length).toBeGreaterThan(80);
+    expect(isSitterProfileIndexable(input)).toBe(false);
+    expect(isSitterProfileIndexable({ role: "sitter", bio: " ".repeat(80), identityVerified: true })).toBe(false);
+    expect(isSitterProfileIndexable({ role: "sitter", bio: " ", motivation: "a".repeat(80), identityVerified: true })).toBe(true);
+  });
+
 });
