@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { reportError } from "@/lib/errorLogger";
 import PageMeta from "@/components/PageMeta";
+import { projetsHubSeo } from "@/lib/projetSeo";
+import { isIndexableProjetMission } from "../../supabase/functions/_shared/entraideMissionIndexability.js";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import { Button } from "@/components/ui/button";
 import SearchListingCard from "@/components/search/listing/SearchListingCard";
@@ -40,22 +42,27 @@ const radiusLabel = (value: number) =>
 const ProjetsListing = () => {
   const [projets, setProjets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [sort, setSort] = useState<"distance" | "recent">("distance");
 
   useEffect(() => {
     const load = async () => {
       try {
-        const { data } = await (supabase as any)
+        const { data, error } = await (supabase as any)
           .from("public_small_missions")
           .select("*")
           .eq("category", "projet")
           .eq("status", "open")
           .order("created_at", { ascending: false })
           .limit(60);
+        // Une lecture en échec n'est pas « aucun projet » : sinon le hub
+        // serait servi « ne pas indexer » et mis en cache sur une panne.
+        if (error) throw error;
         setProjets((data || []) as any[]);
       } catch (e) {
         reportError(e, { component: "ProjetsListing", source: "load" });
         setProjets([]);
+        setLoadError(true);
       } finally {
         setLoading(false);
       }
@@ -111,6 +118,12 @@ const ProjetsListing = () => {
     return idx >= 0 && idx < PROJET_RADIUS_VALUES.length - 1 ? PROJET_RADIUS_VALUES[idx + 1] : null;
   }, [radius]);
 
+  const hubSeo = projetsHubSeo({
+    loading,
+    error: loadError,
+    eligibleCount: projets.filter((p) => isIndexableProjetMission(p)).length,
+  });
+
   const emptyByRadius = !loading && projets.length > 0 && visibleProjets.length === 0;
 
 
@@ -119,8 +132,9 @@ const ProjetsListing = () => {
       <PageMeta
         title="Projets participatifs, des projets à réaliser ensemble"
         description="Planter un jardin, construire un abri, remettre un lieu en état : découvrez les projets proposés sur Guardiens et participez selon vos envies et vos disponibilités."
-        noindex={!loading && projets.length === 0}
-        ready={!loading}
+        noindex={hubSeo.noindex}
+        ready={hubSeo.ready}
+        statusCode={hubSeo.statusCode}
       />
 
       <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
