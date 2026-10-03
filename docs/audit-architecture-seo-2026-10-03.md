@@ -368,3 +368,22 @@ Le complément HTML vérifié via GSC Wizard, produit dans un autre workflow, fa
 - CLI `lovable` : `supabase` est en lecture seule (analytics, function-logs, info, linter, query, slow-queries), sans invocation de fonction. `auth-session --self` : aucun utilisateur de l'application ne correspond au compte Lovable du demandeur ; `--user` exige une approbation, non disponible. `preview execute-js` : `preview_bridge_unreachable` (aucun onglet de préversion joint).
 - Aucun outil standard n'invoque une fonction en service_role avec des identifiants gérés par la plateforme. Aucun secret lu, aucun jeton fabriqué, aucun réglage d'authentification ni fonction modifiés.
 - Écran admin existant : `/admin/prerender` (« Instantanés des pages »), champ « URLs/chemins supplémentaires », bouton « Lancer le re-snapshot ». Il appelle `prerender-recache-pending` avec `{ urls }` ; dans ce cas la fonction recache chaque URL et répond par URL `{url, ok, status, error}` sans aucune écriture en base (retour anticipé, lignes 63 à 71). Recache via cet écran : non exécuté à ce jour.
+
+### Recache manuel et conformité mesurée (03/10/2026)
+- Recache lancé par Jérémie depuis l'écran admin `/admin/prerender`, vers 12:52 UTC (14:52 Paris), sur les 3 URL restées anciennes : accepté 3/3 (réponse Prerender 200 par URL). Accusé de réception seulement, pas une preuve de rendu.
+- GET Googlebot sans suivre les redirections, 12:53:37 à 12:53:47 UTC :
+
+| URL | HTTP réel | Location | Meta robots | Canonical | Titre / H1 | Lien vers le projet |
+|---|---|---|---|---|---|---|
+| /projets | 200 | aucune | index, follow | /projets | « Des projets à réaliser ensemble » | oui |
+| /petites-missions | 200 | aucune | index, follow | /petites-missions | « Un coup de main près de chez vous » | sans objet |
+| /projets/chantier-participatif-de-plantation | 200 | aucune | index, follow | elle-même | « Plantons ensemble à La Rochelle » | sans objet |
+| /projets/e5724f3e-c22b-4fb9-8962-d24c80435660 | 200 | aucune | index, follow | **/projets/chantier-participatif-de-plantation** | Plantons ensemble… | sans objet |
+| /petites-missions/chantier-participatif-de-plantation | **301** | https://guardiens.fr/projets/chantier-participatif-de-plantation | sans objet | sans objet | sans objet | sans objet |
+| /petites-missions/e5724f3e-c22b-4fb9-8962-d24c80435660 | **301** | https://guardiens.fr/projets/chantier-participatif-de-plantation | sans objet | sans objet | sans objet | sans objet |
+| /projets/audit-inexistant-125337 (inédite) | 404 | aucune | noindex, follow | aucune | « Projet introuvable » | sans objet |
+| /robots.txt | 200 | aucune | sans objet | sans objet | identique octet pour octet à `public/robots.txt` | sans objet |
+
+- Aucun en-tête `X-Prerender-Status` observé ; aucune meta `prerender-status-code` ou `prerender-header` dans les corps lus. Le 301 et le 404 sont des statuts HTTP réellement servis.
+- Bundle courant : `assets/index-DpUwjLsc.js` sur guardiens.fr et guardiens.lovable.app.
+- **Conformité SEO-2 mesurée** pour ces 8 contrôles : P0-1, P0-2, P1-6 et P1-8 sont résolus en production sur ce périmètre. Les « trois URL non résolues » de 12:21 et 12:33 sont résolues. Le 503 n'est toujours pas observé en production (Worker actif non lu) et n'est pas promis.
