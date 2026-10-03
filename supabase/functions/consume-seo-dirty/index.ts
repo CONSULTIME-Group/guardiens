@@ -2,7 +2,7 @@
  * consume-seo-dirty
  *
  * Cron horaire : consomme le flag `articles.seo_dirty_at` posé par le trigger
- * `articles_recache_prerender`. Pour chaque article publié marqué sale (50 max
+ * `articles_recache_prerender`. Pour chaque article marqué sale (50 max
  * par exécution, les plus anciens d'abord), appelle l'API Prerender.io recache
  * sur l'URL canonique FR. Guardiens est monolingue français depuis le
  * 17/08/2026 : il n'existe plus aucune variante de langue à recacher.
@@ -61,12 +61,20 @@ const DEPARTMENT_RENDER_BUDGET = 10;
 const ARTICLE_RENDER_BUDGET = 8;
 /** Lignes examinées par passage et par famille programmatique (lecture non facturée). */
 const PROGRAMMATIC_SCAN_BATCH = 200;
+/** Acquittements independants en petites salves, apres journalisation. */
+const ACKNOWLEDGEMENT_BATCH = 6;
 
 
 interface ArticleRow {
   id: string;
   slug: string;
   canonical_url: string | null;
+  seo_dirty_at: string;
+}
+
+interface DirtyAcknowledgement {
+  table: string;
+  id: string;
   seo_dirty_at: string;
 }
 
@@ -111,6 +119,7 @@ async function processSitters(
   sb: any,
   token: string,
   logRows: Array<Record<string, unknown>>,
+  acknowledgements: DirtyAcknowledgement[],
 ): Promise<SitterMetrics> {
   const metrics: SitterMetrics = {
     sitters_scanned: 0,
@@ -135,13 +144,12 @@ async function processSitters(
 
   const toRecache = rows.slice(0, SITTER_RENDER_BUDGET);
   metrics.sitters_deferred = rows.length - toRecache.length;
-  const clearedRows: typeof rows = [];
   for (const row of toRecache) {
     const url = `${SITE}/gardiens/${row.id}`;
     const res = await recache(url, token);
     if (res.ok) {
       metrics.sitters_recached += 1;
-      clearedRows.push(row);
+      acknowledgements.push({ table: "profiles", id: row.id, seo_dirty_at: row.seo_dirty_at });
     } else {
       metrics.sitters_failed += 1;
     }
@@ -156,12 +164,6 @@ async function processSitters(
     console.log(`[consume-seo-dirty] ${url} -> ${res.status ?? "network_error"}`);
   }
 
-  for (const row of clearedRows) {
-    const { error: clearError } = await sb.from("profiles")
-      .update({ seo_dirty_at: null }).eq("id", row.id).eq("seo_dirty_at", row.seo_dirty_at);
-    if (clearError) throw clearError;
-  }
-
   return metrics;
 }
 
@@ -171,15 +173,13 @@ interface ProgrammaticSource {
   table: string;
   /** Préfixe d'URL publique, le slug est concaténé. */
   pathPrefix: string;
-  /** La table porte-t-elle une colonne `noindex` ? */
-  hasNoindex: boolean;
   budget: number;
 }
 
 const PROGRAMMATIC_SOURCES: ProgrammaticSource[] = [
-  { key: "city", table: "seo_city_pages", pathPrefix: "/house-sitting/", hasNoindex: true, budget: CITY_RENDER_BUDGET },
-  { key: "guide", table: "city_guides", pathPrefix: "/guides/", hasNoindex: false, budget: GUIDE_RENDER_BUDGET },
-  { key: "department", table: "seo_department_pages", pathPrefix: "/departement/", hasNoindex: true, budget: DEPARTMENT_RENDER_BUDGET },
+  { key: "city", table: "seo_city_pages", pathPrefix: "/house-sitting/", budget: CITY_RENDER_BUDGET },
+  { key: "guide", table: "city_guides", pathPrefix: "/guides/", budget: GUIDE_RENDER_BUDGET },
+  { key: "department", table: "seo_department_pages", pathPrefix: "/departement/", budget: DEPARTMENT_RENDER_BUDGET },
 ];
 
 interface ProgrammaticMetrics {
@@ -196,9 +196,8 @@ interface ProgrammaticMetrics {
  * Même contrat que les fiches gardien :
  *  - lecture plafonnée, les plus anciennes d'abord ;
  *  - budget de renders propre par passage ;
- *  - règle d'indexabilité reprise du plan du site (publiée et non noindex) :
- *    une page non indexable voit son flag effacé sans dépenser de render ;
- *  - flag effacé seulement en cas de succès.
+ *  - une page devenue non indexable est aussi rafraîchie ;
+ *  - flag effacé seulement en cas de succès et pour la version lue.
  */
 async function processProgrammatic(
   // deno-lint-ignore no-explicit-any
@@ -206,6 +205,7 @@ async function processProgrammatic(
   token: string,
   source: ProgrammaticSource,
   logRows: Array<Record<string, unknown>>,
+  acknowledgements: DirtyAcknowledgement[],
 ): Promise<ProgrammaticMetrics> {
   const metrics: ProgrammaticMetrics = {
     scanned: 0,
@@ -215,10 +215,9 @@ async function processProgrammatic(
     deferred: 0,
   };
 
-  const columns = source.hasNoindex ? "id, slug, published, noindex" : "id, slug, published";
   const { data, error } = await sb
     .from(source.table)
-    .select(columns)
+    .select("id, slug, seo_dirty_at")
     .not("seo_dirty_at", "is", null)
     .order("seo_dirty_at", { ascending: true })
     .limit(PROGRAMMATIC_SCAN_BATCH);
@@ -227,31 +226,26 @@ async function processProgrammatic(
   const rows = (data ?? []) as Array<{
     id: string;
     slug: string | null;
-    published: boolean | null;
-    noindex?: boolean | null;
+    seo_dirty_at: string;
   }>;
   metrics.scanned = rows.length;
   if (rows.length === 0) return metrics;
 
-  const skipIds: string[] = [];
-  const toRecache: Array<{ id: string; url: string }> = [];
+  const toRecache: Array<{ id: string; url: string; seo_dirty_at: string }> = [];
 
   for (const r of rows) {
-    const indexable = !!r.slug && r.published === true && !(source.hasNoindex && r.noindex === true);
-    if (!indexable) skipIds.push(r.id);
+    // Sans adresse connue, conserver la demande pour diagnostic et reprise.
+    if (!r.slug) metrics.failed += 1;
     else if (toRecache.length < source.budget) {
-      toRecache.push({ id: r.id, url: `${SITE}${source.pathPrefix}${r.slug}` });
+      toRecache.push({ id: r.id, seo_dirty_at: r.seo_dirty_at, url: `${SITE}${source.pathPrefix}${r.slug}` });
     } else metrics.deferred += 1;
   }
-
-  metrics.skipped_noindex = skipIds.length;
-  const clearedIds = [...skipIds];
 
   for (const t of toRecache) {
     const res = await recache(t.url, token);
     if (res.ok) {
       metrics.recached += 1;
-      clearedIds.push(t.id);
+      acknowledgements.push({ table: source.table, id: t.id, seo_dirty_at: t.seo_dirty_at });
     } else {
       metrics.failed += 1;
     }
@@ -264,10 +258,6 @@ async function processProgrammatic(
       source: `consume-seo-dirty:${source.key}`,
     });
     console.log(`[consume-seo-dirty] ${t.url} -> ${res.status ?? "network_error"}`);
-  }
-
-  if (clearedIds.length > 0) {
-    await sb.from(source.table).update({ seo_dirty_at: null }).in("id", clearedIds);
   }
 
   return metrics;
@@ -302,7 +292,6 @@ Deno.serve(async (req) => {
     const { data, error } = await sb
       .from("articles")
       .select("id, slug, canonical_url, seo_dirty_at")
-      .eq("published", true)
       .not("seo_dirty_at", "is", null)
       .order("seo_dirty_at", { ascending: true })
       .limit(BATCH);
@@ -318,7 +307,8 @@ Deno.serve(async (req) => {
     const articles = (data ?? []) as ArticleRow[];
 
     const logRows: Array<Record<string, unknown>> = [];
-    const clearedIds: string[] = [];
+    const acknowledgements: DirtyAcknowledgement[] = [];
+    const clearedRows: ArticleRow[] = [];
     let urlsOk = 0;
     let urlsFailed = 0;
     let articlesDeferred = 0;
@@ -329,7 +319,7 @@ Deno.serve(async (req) => {
     // les articles et les fiches gardien quand la file est pleine.
     const programmaticMetrics: Record<string, unknown> = {};
     for (const source of PROGRAMMATIC_SOURCES) {
-      const m = await processProgrammatic(sb, PRERENDER_TOKEN, source, logRows);
+      const m = await processProgrammatic(sb, PRERENDER_TOKEN, source, logRows, acknowledgements);
       urlsOk += m.recached;
       urlsFailed += m.failed;
       programmaticMetrics[`${source.key}_scanned`] = m.scanned;
@@ -345,6 +335,11 @@ Deno.serve(async (req) => {
         continue;
       }
       articlesAttempted += 1;
+
+      if (!a.slug && !a.canonical_url?.startsWith("http")) {
+        urlsFailed += 1;
+        continue;
+      }
 
       const base = a.canonical_url && a.canonical_url.startsWith("http")
         ? a.canonical_url
@@ -369,7 +364,10 @@ Deno.serve(async (req) => {
         console.log(`[consume-seo-dirty] ${url} -> ${res.status ?? "network_error"}`);
       }
 
-      if (allOk) clearedIds.push(a.id);
+      if (allOk) {
+        clearedRows.push(a);
+        acknowledgements.push({ table: "articles", id: a.id, seo_dirty_at: a.seo_dirty_at });
+      }
     }
 
     // Pages statiques (STATIC_SEO_URLS) : recachées si leur dernier succès
@@ -415,21 +413,27 @@ Deno.serve(async (req) => {
 
     // Fiches gardien : même token, même journalisation, budget de renders
     // propre pour ne pas entamer le quota partagé du compte Prerender.
-    const sitterMetrics = await processSitters(sb, PRERENDER_TOKEN, logRows);
+    const sitterMetrics = await processSitters(sb, PRERENDER_TOKEN, logRows, acknowledgements);
     urlsFailed += sitterMetrics.sitters_failed;
     urlsOk += sitterMetrics.sitters_recached;
 
 
     if (logRows.length > 0) {
-      await sb.from("prerender_recache_log").insert(logRows);
+      const { error: logError } = await sb.from("prerender_recache_log").insert(logRows);
+      if (logError) throw logError;
     }
-    if (clearedIds.length > 0) {
-      await sb.from("articles").update({ seo_dirty_at: null }).in("id", clearedIds);
+    // Journaliser les tentatives avant tout acquittement de la file.
+    for (let offset = 0; offset < acknowledgements.length; offset += ACKNOWLEDGEMENT_BATCH) {
+      const results = await Promise.all(acknowledgements.slice(offset, offset + ACKNOWLEDGEMENT_BATCH).map((row) =>
+        sb.from(row.table).update({ seo_dirty_at: null }).eq("id", row.id).eq("seo_dirty_at", row.seo_dirty_at)
+      ));
+      const failed = results.find((r: { error: unknown }) => r.error);
+      if (failed?.error) throw failed.error;
     }
 
     const payload = {
       dirty_before: articles.length,
-      cleared: clearedIds.length,
+      cleared: clearedRows.length,
       urls_ok: urlsOk,
       urls_failed: urlsFailed,
       articles_deferred: articlesDeferred,

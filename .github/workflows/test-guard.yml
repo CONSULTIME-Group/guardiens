@@ -42,3 +42,6 @@ jobs:
 
       - name: Cycle d'invalidation SEO des profils (Postgres local)
         run: npm run test:sql:profile-seo
+
+      - name: Consommateur SEO unique (Postgres local)
+        run: npm run test:sql:cache-consumer
