@@ -92,7 +92,7 @@ export default function News() {
   const [result, setResult] = useState<{ key: string; articles: Article[]; total: number; error: boolean } | null>(null);
   const [vieLocaleArticles, setVieLocaleArticles] = useState<Article[]>([]);
   const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { page: pageParam } = useParams<{ page?: string }>();
   const parsedPage = parseNewsPageParam(pageParam);
