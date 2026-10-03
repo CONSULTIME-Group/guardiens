@@ -125,6 +125,7 @@ describe("rendu News", () => {
   it("page 1 et page 2 : contenus, liens et canonical distincts", async () => {
     const one = mount("/actualites");
     await screen.findByText("Titre article 1");
+    await waitFor(() => expect((window as any).prerenderReady).toBe(true));
     expect(screen.queryByText("Titre article 10")).toBeNull();
     expect(canonical()).toBe("https://guardiens.fr/actualites");
     const nextLink = document.querySelector('a[rel="next"]');
@@ -136,6 +137,7 @@ describe("rendu News", () => {
 
     mount("/actualites/page/2");
     await screen.findByText("Titre article 10");
+    await waitFor(() => expect(canonical()).toBe("https://guardiens.fr/actualites/page/2"));
     expect(screen.queryByText("Titre article 1")).toBeNull();
     expect(canonical()).toBe("https://guardiens.fr/actualites/page/2");
     expect(document.title).toMatch(/page 2/);
