@@ -528,7 +528,7 @@ Deno.serve(async (req) => {
       })
       .eq("id", campaignId);
 
-    return new Response(JSON.stringify({ sent, errors, campaign_id: campaignId, already_notified: already.length, ...report }), {
+    return new Response(JSON.stringify({ ...report, sent, errors, campaign_id: campaignId, already_notified: already.length }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
