@@ -3,11 +3,10 @@ import fs from "node:fs";
 import path from "node:path";
 
 /**
- * Garde anti-divergence : la règle d'indexabilité des fiches gardien est
- * consommée aussi par la fonction edge `consume-seo-dirty`, qui ne peut pas
- * importer `src/`. Le miroir Deno doit rester rigoureusement identique au
- * fichier de référence, sinon une fiche en noindex pourrait consommer un
- * render Prerender facturé.
+ * Garder le miroir de la règle d'indexabilité identique à sa référence.
+ * Le recache traite aussi les fiches devenues noindex : leur ancienne copie
+ * doit être remplacée. Les cas de reprise et d'échec sont exercés par le
+ * vrai handler dans consume-seo-dirty/index_test.ts.
  */
 const read = (p: string) => fs.readFileSync(path.resolve(process.cwd(), p), "utf-8");
 
@@ -18,11 +17,12 @@ describe("miroir Deno de la règle d'indexabilité gardien", () => {
     );
   });
 
-  it("le consommateur applique la règle et plafonne les renders", () => {
+  it("le consommateur traite toute fiche marquée dans le même budget", () => {
     const src = read("supabase/functions/consume-seo-dirty/index.ts");
-    expect(src).toContain('from "../_shared/sitterProfileIndexability.js"');
-    expect(src).toContain("isSitterProfileIndexable(");
-    expect(src).toMatch(/SITTER_RENDER_BUDGET = \d+/);
+    expect(src).not.toContain('.in("role", ["sitter", "both"])');
+    expect(src).toContain("rows.slice(0, SITTER_RENDER_BUDGET)");
+    expect(src).toContain('.eq("seo_dirty_at", row.seo_dirty_at)');
+    expect(src).toMatch(/SITTER_RENDER_BUDGET = 25/);
     expect(src).toContain("/gardiens/");
   });
 });

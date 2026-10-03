@@ -27,7 +27,6 @@ import PublicHeader from "@/components/layout/PublicHeader";
 import { useShellMode } from "@/components/layout/useShellMode";
 import { useAuth } from "@/contexts/AuthContext";
 
-import RecentSitsItemListJsonLd from "@/components/seo/RecentSitsItemListJsonLd";
 
 import PublicFooter from "@/components/layout/PublicFooter";
 // Lot P2b : constante légère, siteRoutes (22 Ko) reste hors de la page d'accueil.
@@ -127,9 +126,6 @@ const Landing = () => {
  image={HOME_OG_IMAGE}
  />
       <HomeJsonLd />
-
-      {/* ItemList Schema.org des annonces récentes (Helmet, séparé du @graph). */}
-      <RecentSitsItemListJsonLd limit={8} />
 
       {/* ═══════════════ NAVBAR ═══════════════ */}
       <PublicHeader authedVariant />

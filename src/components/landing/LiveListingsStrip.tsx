@@ -5,6 +5,7 @@ import { useRecentPublishedSits } from "@/hooks/useRecentPublishedSits";
 import { haversineDistance } from "@/lib/geocode";
 import { storageImageSrcSet, storageImageUrl } from "@/lib/storageImage";
 import type { HomeOrigin } from "@/components/landing/HomeProximitySearch";
+import RecentSitsItemListJsonLd from "@/components/seo/RecentSitsItemListJsonLd";
 
 interface HomeListing {
   id: string;
@@ -115,6 +116,7 @@ export default function LiveListingsStrip({ origin = null }: { origin?: HomeOrig
 
   return (
     <section id="en-ce-moment" className="border-b border-border/40 bg-background py-[52px] scroll-mt-24 md:py-16" aria-labelledby="live-listings-title">
+      <RecentSitsItemListJsonLd listings={listings} name={liveListingsTitle(origin)} />
       <div className="lp-wide">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">En direct</p>
         <h2 id="live-listings-title" className="mt-2 font-heading text-3xl font-semibold text-foreground md:text-5xl">{liveListingsTitle(origin)}</h2>
