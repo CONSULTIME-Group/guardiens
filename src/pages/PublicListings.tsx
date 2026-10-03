@@ -164,7 +164,7 @@ export default function PublicListings() {
                 {t("public_listings.see_also_missions")} <span aria-hidden>→</span>
               </Link>
               <Link
-                to="/guides-locaux"
+                to="/guides"
                 className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 {t("public_listings.local_guides")}

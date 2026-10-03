@@ -1,5 +1,5 @@
 import { useState, useEffect, useLayoutEffect, useCallback, useRef, lazy, Suspense } from "react";
-import { useNavigate, Link, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
@@ -71,8 +71,10 @@ export const NAV_DEFS: ReadonlyArray<{ key: string; shortKey?: string; to: strin
   { key: "news", to: "/actualites" },
 ];
 
+/** Classes partagées des liens Connexion et Inscription sur ordinateur. */
+const AUTH_BTN = "min-h-11 whitespace-nowrap px-2 text-xs xl:px-3 xl:text-sm";
+
 export default function PublicHeader({ authedVariant = false }: { authedVariant?: boolean }) {
-  const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
   const { hasSession, authChecked } = useAuth();
@@ -168,13 +170,14 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
           {NAV_DEFS.map((l) => (
             <Button
               key={l.to}
+              asChild
               variant="ghost"
               size="sm"
-              onClick={() => navigate(l.to)}
               className={`min-h-11 whitespace-nowrap px-1.5 text-sm xl:px-2 2xl:px-3 ${isActive(l.to) ? "text-primary font-semibold" : ""}`}
-              aria-current={isActive(l.to) ? "page" : undefined}
             >
-              {t(`nav.${l.shortKey ?? l.key}`)}
+              <Link to={l.to} aria-current={isActive(l.to) ? "page" : undefined}>
+                {t(`nav.${l.shortKey ?? l.key}`)}
+              </Link>
             </Button>
           ))}
         </nav>
@@ -184,19 +187,19 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
             <div className="h-8 w-36 rounded-md bg-muted/40 animate-pulse" aria-hidden="true" />
           ) : hasSession ? (
             <>
-              <Button size="sm" className="min-h-11 whitespace-nowrap px-2 xl:px-3" onClick={() => navigate("/dashboard")}>
-                {t("nav.my_space")}
+              <Button asChild size="sm" className="min-h-11 whitespace-nowrap px-2 xl:px-3">
+                <Link to="/dashboard">{t("nav.my_space")}</Link>
               </Button>
               {!isCompact && bells}
               <UserMenu />
             </>
           ) : (
             <>
-              <Button variant="ghost" size="sm" className="min-h-11 whitespace-nowrap px-2 text-xs xl:px-3 xl:text-sm" onClick={() => navigate("/login")}>
-                {t("nav.login")}
+              <Button asChild variant="ghost" size="sm" className={AUTH_BTN}>
+                <Link to="/login">{t("nav.login")}</Link>
               </Button>
-              <Button size="sm" className="min-h-11 whitespace-nowrap px-2 text-xs xl:px-3 xl:text-sm" onClick={() => navigate("/inscription")}>
-                {t("nav.register")}
+              <Button asChild size="sm" className={AUTH_BTN}>
+                <Link to="/inscription">{t("nav.register")}</Link>
               </Button>
             </>
           )}
@@ -255,20 +258,20 @@ export default function PublicHeader({ authedVariant = false }: { authedVariant?
                       <div className="h-12 w-full rounded-md bg-muted/40 animate-pulse" aria-hidden="true" />
                     ) : hasSession ? (
                       <SheetClose asChild>
-                        <Button className="min-h-12 w-full" onClick={() => navigate("/dashboard")}>
-                          {t("nav.my_space")}
+                        <Button asChild className="min-h-12 w-full">
+                          <Link to="/dashboard">{t("nav.my_space")}</Link>
                         </Button>
                       </SheetClose>
                     ) : (
                       <div className="space-y-3">
                         <SheetClose asChild>
-                          <Button variant="outline" className="min-h-12 w-full" onClick={() => navigate("/login")}>
-                            {t("nav.login")}
+                          <Button asChild variant="outline" className="min-h-12 w-full">
+                            <Link to="/login">{t("nav.login")}</Link>
                           </Button>
                         </SheetClose>
                         <SheetClose asChild>
-                          <Button className="min-h-12 w-full" onClick={() => navigate("/inscription")}>
-                            {t("nav.register")}
+                          <Button asChild className="min-h-12 w-full">
+                            <Link to="/inscription">{t("nav.register")}</Link>
                           </Button>
                         </SheetClose>
                       </div>
