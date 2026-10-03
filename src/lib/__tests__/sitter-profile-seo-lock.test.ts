@@ -60,8 +60,8 @@ describe("fiche gardien publique, verrous SEO", () => {
     const main = read("src/main.tsx");
     expect(main).toMatch(/if\s*\(window\.prerenderMetaPending\)\s*return/);
     expect(main).toMatch(/setTimeout\(markPrerenderReady,\s*10000\)/);
-    expect(main).toContain("LATE_META_PATH_PREFIXES");
-    expect(main).toMatch(/LATE_META_PATH_PREFIXES\s*=\s*\[[\s\S]{0,300}"\/gardiens\/"/);
+    const re = new RegExp(main.match(/const LATE_META_PATH = \/(.+)\/;/)![1]);
+    expect(re.test("/gardiens/un-gardien")).toBe(true);
     expect(read(PAGE)).toContain("window.prerenderMetaPending = true");
     expect(read("src/components/PageMeta.tsx")).toMatch(
       /prerenderMetaPending\s*=\s*false;[\s\S]{0,100}prerenderReady\s*=\s*true/,
