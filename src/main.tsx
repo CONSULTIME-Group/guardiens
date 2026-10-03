@@ -81,9 +81,7 @@ const markPrerenderReady = () => {
   window.prerenderReady = true;
 };
 
-if (typeof window !== "undefined") {
-  window.setTimeout(markPrerenderReady, 10000);
-}
+window.setTimeout(markPrerenderReady, 10000);
 
 // Lot P2b : la mesure réelle (webVitals) démarre avec AfterPaintExtras, après le premier affichage.
 installGlobalErrorHandlers();
