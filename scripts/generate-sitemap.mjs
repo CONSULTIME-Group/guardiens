@@ -19,7 +19,7 @@ import { isSitterProfileIndexable } from "../src/lib/sitterProfileIndexability.j
 import { mergedBreedTarget } from "../src/lib/breedFicheMerges.js";
 import { isIndexableEntraideMission, isIndexableProjetMission } from "../supabase/functions/_shared/entraideMissionIndexability.js";
 import { fetchOrCache as sharedFetchOrCache, normalizeCache, emptyCache } from "./lib/sitemapCache.mjs";
-import { fetchAllPages, supabasePage, normalizeLastmod, dedupeEntries, renderSitemapXml, validateSitemapXml, readStaticRoutes } from "./lib/sitemapCore.mjs";
+import { probeCompositeKey, fetchAllPages, supabasePage, normalizeLastmod, dedupeEntries, renderSitemapXml, validateSitemapXml, readStaticRoutes } from "./lib/sitemapCore.mjs";
 
 
 
@@ -94,37 +94,9 @@ function saveCache(cache) {
   writeAtomic(CACHE_PATH, JSON.stringify(cache, null, 2));
 }
 
-/**
- * Returns the most recent updated_at for a table (head-only, fast).
- * Returns null on error so we fall back to refetching.
- */
-async function maxUpdatedAt(table, column = "updated_at", filter = null) {
-  let q = supabase.from(table).select(column).order(column, { ascending: false }).limit(1);
-  if (filter) q = filter(q);
-  const { data, error } = await q;
-  if (error || !data?.[0]) return null;
-  return data[0][column] || null;
-}
-
-/**
- * Clé d'invalidation composite : date la plus récente et nombre de lignes.
- * Utilisée quand la colonne temporelle seule n'est pas fiable (valeur nulle sur
- * une vue publique, par exemple la date de dernière visite qui n'est pas
- * exposée en anonyme). Sans cette variante, la clé restait nulle et le cache
- * n'était jamais invalidé.
- */
-async function maxUpdatedAtWithCount(table, column, filter = null) {
-  const [date, countRes] = await Promise.all([
-    maxUpdatedAt(table, column, filter),
-    (async () => {
-      let q = supabase.from(table).select("id", { count: "exact" }).limit(1);
-      if (filter) q = filter(q);
-      const { count, error } = await q;
-      return error ? null : count;
-    })(),
-  ]);
-  if (!date && countRes == null) return null;
-  return `${date ?? "no-date"}|${countRes ?? "no-count"}`;
+/** Clé composite date|nombre, null si l'une des deux sondes échoue (sitemapCore). */
+function maxUpdatedAtWithCount(table, column, filter = null) {
+  return probeCompositeKey(supabase, table, column, filter);
 }
 
 // Source de vérité unique du cache : scripts/lib/sitemapCache.mjs.
@@ -140,7 +112,9 @@ function fetchOrCache(key, cache, headProbe, fetcher, builder) {
 const NO_RELIABLE_LASTMOD = null;
 
 async function main() {
-  const today = new Date().toISOString().split("T")[0];
+  // Référence d'heure unique capturée au début du build (bornage des dates futures).
+  const buildNow = new Date();
+  const today = buildNow;
   const cache = loadCache();
 
   // Slugs volontairement exclus du sitemap (doublons/anciennes URLs).
@@ -437,6 +411,10 @@ async function main() {
 }
 
 main().catch((err) => {
-  console.error("❌ Sitemap generation failed, aucun fichier remplacé:", err instanceof Error ? err.message : err);
+  // Échec de lecture ou de validation : levé avant toute écriture, aucun
+  // fichier remplacé. Échec d'écriture : chaque fichier est remplacé de façon
+  // atomique, mais l'ensemble n'est pas transactionnel (un fichier déjà
+  // renommé reste en place).
+  console.error("❌ Sitemap generation failed:", err instanceof Error ? err.message : err);
   process.exit(1);
 });
