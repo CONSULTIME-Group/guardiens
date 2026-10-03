@@ -71,3 +71,10 @@
 - [x] Fiches : note compte, contrepartie unique, recommandations honnêtes, note carte projet externe
 - [x] Tests ciblés, captures, build final
 - [ ] Déployer la fonction sitemap (attend GO publication)
+
+## Anti-double-envoi proximité, complément du 03/10/2026
+
+- [x] RPC dédiée acquire_proximity_send_claim préparée (supabase/prepared-migrations, non appliquée) + test SQL en mémoire
+- [x] Branchement dans logic.ts, 2xx vérifié, pannes journal/finalisation exposées à l'admin
+- [x] Tests simulés avec voyage dans le temps, typecheck fonction propre
+- [ ] Appliquer la migration puis déployer la fonction et publier : attend le GO de Jérémie
