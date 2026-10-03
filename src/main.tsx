@@ -44,10 +44,8 @@ if (import.meta.env.PROD) {
   }
 }
 
-const container = document.getElementById("root");
-if (!container) {
-  throw new Error("#root absent");
-}
+// #root absent : createRoot lève lui-même une erreur (plafond de taille).
+const container = document.getElementById("root")!;
 
 // Routes lazy qui écrivent leurs métadonnées tardivement (après un chargement
 // de données). Le verrou est posé ici, avant le rendu, car le chunk de la
