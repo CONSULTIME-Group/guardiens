@@ -1037,6 +1037,30 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_profile_seo_triggers_20261003_1800: {
+        Row: {
+          acl: string[] | null
+          definition: string
+          kind: string
+          name: string
+          taken_at: string
+        }
+        Insert: {
+          acl?: string[] | null
+          definition: string
+          kind: string
+          name: string
+          taken_at?: string
+        }
+        Update: {
+          acl?: string[] | null
+          definition?: string
+          kind?: string
+          name?: string
+          taken_at?: string
+        }
+        Relationships: []
+      }
       _backup_property_photos_20260820: {
         Row: {
           backed_up_at: string

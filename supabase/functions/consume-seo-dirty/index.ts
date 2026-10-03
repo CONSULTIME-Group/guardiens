@@ -102,9 +102,9 @@ interface SitterMetrics {
  *  - toutes les fiches déjà marquées sont traitées, même après un changement
  *    de rôle ou d'indexabilité ; aucune demande n'est effacée sans succès.
  *
- * La déduplication est assurée en amont par les triggers, qui ne repoussent
- * jamais une date déjà posée : une rafale de modifications sur un même profil
- * ne laisse qu'une seule ligne sale, donc un seul render.
+ * Les triggers conservent une seule ligne sale par profil, avec la date de
+ * sa dernière modification. L'acquittement id + date conserve une demande
+ * plus récente apparue pendant le traitement.
  */
 async function processSitters(
   // deno-lint-ignore no-explicit-any
