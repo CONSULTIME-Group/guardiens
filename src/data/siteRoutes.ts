@@ -4,7 +4,7 @@
  */
 
 export const SITE_URL = "https://guardiens.fr";
-export const SITEMAP_URL = "https://erhccyqevdyevpyctsjj.supabase.co/functions/v1/sitemap";
+export const SITEMAP_URL = "https://guardiens.fr/sitemap.xml";
 
 /**
  * Image OG par défaut utilisée sur toutes les pages sans image dédiée.
