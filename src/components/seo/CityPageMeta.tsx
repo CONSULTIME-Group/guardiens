@@ -19,10 +19,11 @@ interface Props {
 }
 
 const META_TITLE_OVERRIDES: Record<string, string> = {
-  lyon: "Home sitting à Lyon : garde de chien, chat et logement | Guardiens",
-  annecy: "House-sitting à Annecy : garde de maison et d'animaux | Guardiens",
-  grenoble: "House-sitting à Grenoble : garde de maison et d'animaux | Guardiens",
-  chambery: "Home sitting Chambéry, Gardien de confiance en Savoie | Guardiens",
+  lyon: "Home sitter à Lyon : garde de chien, chat et maison",
+  annecy: "Home sitter à Annecy : garde de chien, chat et maison",
+  grenoble: "Home sitter à Grenoble : garde de chien, chat et maison",
+  chambery: "Home sitter à Chambéry : garde de maison et d'animaux",
+  "caluire-et-cuire": "Home sitter à Caluire-et-Cuire : garde de maison et d'animaux",
 };
 
 const CityPageMeta = ({ city, noindex = false, metaTitle, ready }: Props) => {
