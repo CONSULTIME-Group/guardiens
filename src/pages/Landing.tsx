@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { trackEvent } from "@/lib/analytics";
@@ -116,6 +116,12 @@ const Landing = () => {
   const kpiMissions = publicStats?.missions_entraide ?? 0;
   const isPressHighlighted = new Date() < PRESS_HIGHLIGHT_UNTIL;
 
+
+  // Lot P5 : le vrai hero est rendu, on retire le fond statique d'index.html
+  // (avant PageMeta, donc avant prerenderReady).
+  useLayoutEffect(() => {
+    document.getElementById("boot-hero")?.remove();
+  }, []);
 
  return (
  <div className="min-h-screen bg-background text-foreground">
