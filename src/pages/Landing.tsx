@@ -157,35 +157,35 @@ const Landing = () => {
             decoding="async"
           />
         </picture>
-        {/* Voile renforcé sous la colonne (520 px) et qui s'efface vers le
+        {/* Voile renforcé sous la colonne (jusqu'à 680 px) et qui s'efface vers le
             sujet de la photo : contraste AA sur tous les textes du hero. */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/75 via-45% to-black/25" />
 
         <div className="relative z-10 lp-wide pb-8 pt-20 md:py-24">
-          {/* Colonne resserrée à 520 px : la maison et le paysage restent
-              visibles à droite. */}
-          <div className="max-w-[520px]">
+          {/* Colonne pleine largeur sur mobile, 600 px puis 680 px sur grand
+              écran : la maison et le paysage restent visibles à droite. */}
+          <div className="w-full max-w-full md:max-w-[600px] lg:max-w-[680px]">
 
             {/* Une seule star typographique : l'accroche, seule en Playfair. */}
-            <h1 className="font-heading text-[clamp(26px,8.4vw,38px)] sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-2 md:mb-[18px] text-balance">
+            <h1 className="font-heading text-[clamp(26px,8.4vw,38px)] sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] mb-2 md:mb-6 text-balance">
               <span className="block font-body text-xs md:text-sm font-semibold uppercase tracking-[0.14em] text-white/90 mb-2 md:mb-3">
                 {t("landing.hero.title_eyebrow")}
               </span>
               <span className="block">{t("landing.hero.title_main")}</span>
             </h1>
 
-            <p className="font-body text-sm md:text-base text-white/90 leading-relaxed mb-2 md:mb-[18px] animate-hero-fade-up animation-delay-400">
+            <p className="font-body text-sm md:text-base text-white/90 leading-relaxed mb-2 md:mb-6 animate-hero-fade-up animation-delay-400">
               {t("landing.hero.lede")}
             </p>
 
             {/* La ligne qui porte l'ouverture : ce qu'on trouve sans l'avoir
                 cherché. Playfair italique, taille intermédiaire entre le
                 titre et le paragraphe. */}
-            <p className="font-heading italic text-lg md:text-2xl text-white/95 leading-snug mb-3 md:mb-5 animate-hero-fade-up animation-delay-700">
+            <p className="font-heading italic text-lg md:text-2xl text-white/95 leading-snug mb-3 md:mb-6 animate-hero-fade-up animation-delay-700">
               {t("landing.hero.motto")}
             </p>
 
-            <div className="flex flex-wrap items-center gap-2 animate-hero-fade-up animation-delay-900">
+            <div className="flex flex-wrap items-center gap-2 md:gap-4 animate-hero-fade-up animation-delay-900">
               <Button
                 onClick={() => {
                   void trackEvent("cta_proprio_clicked", { metadata: { location: "hero" } });
