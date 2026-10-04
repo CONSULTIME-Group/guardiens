@@ -127,7 +127,7 @@ describe("Entraide, la page vue d'un membre", () => {
 
   it("prend l'origine dans le profil connecté, sans saisie de ville", async () => {
     renderHub();
-    expect(await screen.findByRole("heading", { name: "Besoins près de chez vous" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Entraide et coups de main près de chez vous" })).toBeInTheDocument();
     await waitFor(() => expect(screen.getByText("Autour de Lyon. Le plus proche est tout près de chez vous.")).toBeInTheDocument());
     expect(screen.getByRole("button", { name: "Changer de lieu" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Situer" })).toBeNull();
@@ -206,7 +206,7 @@ describe("Entraide, la page vue d'un membre", () => {
     const meta = await screen.findByTestId("page-meta");
     expect(meta.textContent).toContain("FAQPage");
     expect(meta.textContent).not.toContain("Person");
-    expect(meta.getAttribute("data-description")).toBe("Trouvez un coup de main près de chez vous, ou proposez le vôtre aux membres du coin.");
+    expect(meta.getAttribute("data-description")).toBe("Jardinage, courses, trajets, une partie de belote : demandez ou proposez un coup de main près de chez vous. Guardiens est gratuit.");
     expect(meta.getAttribute("data-description")).not.toMatch(/voisin/i);
   });
 

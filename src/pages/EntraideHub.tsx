@@ -88,7 +88,7 @@ export const EntraideMemberHeader = ({ subtitle, availableForHelp, onNeed, onHel
 }) => (
   <header className="pb-6 pt-3">
     <p className="text-sm font-semibold text-primary">Entraide</p>
-    <h1 className="mt-2 font-heading text-3xl font-bold leading-tight text-foreground sm:text-4xl">Besoins près de chez vous</h1>
+    <h1 className="mt-2 font-heading text-3xl font-bold leading-tight text-foreground sm:text-4xl">Entraide et coups de main près de chez vous</h1>
     <p className="mt-3 max-w-2xl text-base text-muted-foreground">
       {subtitle || "Indiquez votre ville pour voir les besoins les plus proches."}
     </p>
@@ -369,8 +369,8 @@ const EntraideHub = () => {
   return (
     <>
       <PageMeta
-        title="Entraide près de chez vous, Guardiens"
-        description="Trouvez un coup de main près de chez vous, ou proposez le vôtre aux membres du coin."
+        title="Entraide entre particuliers : coups de main près de chez vous | Guardiens"
+        description="Jardinage, courses, trajets, une partie de belote : demandez ou proposez un coup de main près de chez vous. Guardiens est gratuit."
         path="/petites-missions"
         jsonLd={[faqSchema]}
       />
