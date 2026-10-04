@@ -575,6 +575,96 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_articles_lot3_20261004: {
+        Row: {
+          admin_notes: string | null
+          author_name: string | null
+          canonical_url: string | null
+          category: string | null
+          city: string | null
+          content: string | null
+          cover_image_url: string | null
+          cover_image_url_backup: string | null
+          created_at: string | null
+          excerpt: string | null
+          hero_image_alt: string | null
+          id: string | null
+          internal_links: Json | null
+          meta_description: string | null
+          meta_title: string | null
+          noindex: boolean | null
+          published: boolean | null
+          published_at: string | null
+          region: string | null
+          related_breed: string | null
+          related_city: string | null
+          search_tsv: unknown
+          seo_dirty_at: string | null
+          slug: string | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          author_name?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          city?: string | null
+          content?: string | null
+          cover_image_url?: string | null
+          cover_image_url_backup?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          hero_image_alt?: string | null
+          id?: string | null
+          internal_links?: Json | null
+          meta_description?: string | null
+          meta_title?: string | null
+          noindex?: boolean | null
+          published?: boolean | null
+          published_at?: string | null
+          region?: string | null
+          related_breed?: string | null
+          related_city?: string | null
+          search_tsv?: unknown
+          seo_dirty_at?: string | null
+          slug?: string | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       _backup_breed_content_20260825: {
         Row: {
           alimentation: string | null
@@ -1274,6 +1364,27 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_seo_city_pages_content_20261004: {
+        Row: {
+          content: string | null
+          id: string | null
+          intro_text: string | null
+          slug: string | null
+        }
+        Insert: {
+          content?: string | null
+          id?: string | null
+          intro_text?: string | null
+          slug?: string | null
+        }
+        Update: {
+          content?: string | null
+          id?: string | null
+          intro_text?: string | null
+          slug?: string | null
+        }
+        Relationships: []
+      }
       _backup_seo_city_pages_lot2_20261001: {
         Row: {
           active_sits_count: number | null
@@ -1461,6 +1572,36 @@ export type Database = {
           search_tsv?: unknown
           seo_dirty_at?: string | null
           sitter_count?: number | null
+          slug?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      _backup_seo_city_pages_meta_20261004: {
+        Row: {
+          city: string | null
+          h1_title: string | null
+          id: string | null
+          meta_description: string | null
+          meta_title: string | null
+          slug: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          city?: string | null
+          h1_title?: string | null
+          id?: string | null
+          meta_description?: string | null
+          meta_title?: string | null
+          slug?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          city?: string | null
+          h1_title?: string | null
+          id?: string | null
+          meta_description?: string | null
+          meta_title?: string | null
           slug?: string | null
           updated_at?: string | null
         }
