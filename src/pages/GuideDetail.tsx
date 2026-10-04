@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Suspense, useState, useMemo, useEffect } from "react";
 import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
 import { GUIDE_OVERRIDES, COMMERCIAL_CATEGORIES, COMMERCIAL_DESCRIPTION } from "@/data/guideOverrides";
+import HouseSittingGuideInsert from "@/components/city/HouseSittingGuideInsert";
 
 // Carte chargée uniquement quand l'utilisateur s'en approche (lazy + IntersectionObserver)
 // pour préserver le LCP et limiter le poids JS initial.
@@ -607,6 +608,8 @@ const GuideDetail = () => {
               </div>
             </div>
           )}
+
+          <HouseSittingGuideInsert className="mt-14" />
 
           {/* CTA : masqué si la page ville n'existe pas (évite un lien vers un 404) */}
           {hasCityPage && (
