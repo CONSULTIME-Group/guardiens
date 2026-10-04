@@ -293,21 +293,21 @@ const CityPage = () => {
  ? content.faq
  : cityData.slug === "lyon"
  ? [
- { q: "Comment rencontrer un gardien avant de confier ma maison ?", a: "Après avoir accepté une candidature, vous organisez une rencontre directement via la messagerie Guardiens. La plupart des propriétaires à Lyon choisissent un café de quartier ou une visite du logement. Cette étape est fortement recommandée." },
+ { q: "Comment rencontrer un gardien avant de confier ma maison ?", a: "Après avoir accepté une candidature, vous organisez une rencontre directement via la messagerie Guardiens. La plupart des propriétaires à Lyon choisissent un café de quartier ou une visite du logement. Cette étape est facultative." },
  { q: "Que se passe-t-il en cas d'urgence ou d'imprévu ?", a: "Une alerte prioritaire peut être envoyée aux gardiens d'urgence éligibles à Lyon. En cas de problème vétérinaire, le gardien contacte la clinique indiquée dans le guide de la maison. En cas de problème technique, il suit les consignes laissées par le propriétaire." },
  { q: "Comment fonctionne la vérification d'identité à Lyon ?", a: "La vérification d'identité est ouverte à tous les membres. Vous envoyez une pièce d'identité, elle est analysée automatiquement, et les dossiers qui ne passent pas ce premier contrôle sont revus par l'équipe. Les profils validés affichent l'écusson « Identité vérifiée ». Les avis croisés après chaque garde et les badges de fiabilité complètent le dispositif de confiance." },
  { q: "Puis-je publier une annonce pour un chien ET un chat ?", a: "Absolument. Votre annonce peut inclure tous vos animaux. Les gardiens qui postulent voient la composition exacte de votre foyer et décident en connaissance de cause." },
  { q: "Combien de temps à l'avance faut-il publier mon annonce ?", a: "Pour les vacances d'été à Lyon, nous recommandons un mois à l'avance. Pour un week-end, une à deux semaines suffisent. Plus l'annonce est publiée tôt, plus vous recevez de candidatures de qualité." },
- { q: "Que faire si mon gardien annule au dernier moment ?", a: "C'est rare mais cela peut arriver. Guardiens active alors le réseau de gardiens d'urgence de votre zone. Le système de fiabilité pénalise les annulations répétées pour garantir la qualité du réseau." },
- { q: "Comment se passe la remise des clés à Lyon ?", a: "Lors de la rencontre préalable ou le jour du départ, vous remettez les clés en main propre à votre gardien. Certains propriétaires lyonnais laissent un double dans une boîte à clés sécurisée." },
+ { q: "Que faire si mon gardien annule au dernier moment ?", a: "Vous pouvez solliciter les gardiens d'urgence éligibles de votre zone grâce à la fonction gardien d'urgence, et republier votre annonce. Le système de fiabilité pénalise les annulations répétées." },
+ { q: "Comment se passe la remise des clés à Lyon ?", a: "Le jour du départ, ou lors d'une rencontre préalable si vous en organisez une, vous remettez les clés en main propre à votre gardien. Certains propriétaires lyonnais laissent un double dans une boîte à clés sécurisée." },
  { q: "Guardiens fonctionne-t-il pour les gardes de plusieurs semaines ?", a: "Oui. La plateforme est conçue pour les gardes de toute durée, du week-end prolongé aux absences de plusieurs semaines. Les gardiens indiquent leurs disponibilités sur leur profil." },
  ]
  : [
  { q: `Comment trouver un gardien de maison à ${cityData.name} ?`, a: `Sur Guardiens, vous publiez une annonce et les gardiens disponibles à ${cityData.name} et ses environs postulent directement. La vérification d'identité est ouverte à tous les membres : la pièce envoyée est analysée automatiquement, les dossiers qui ne passent pas sont revus par l'équipe, et les profils validés affichent l'écusson « Identité vérifiée ». Regardez cet écusson sur les profils avant de choisir.` },
- { q: `Y a-t-il des frais pour les propriétaires à ${cityData.name} ?`, a: "Non. L'espace propriétaire coûte 0 €, et aucune commission n'est prélevée sur les gardes. L'espace gardien est ouvert pendant la phase de lancement." },
- { q: `Que se passe-t-il en cas d'urgence pendant la garde à ${cityData.name} ?`, a: `Guardiens dispose d'un réseau de Gardiens d'Urgence dans chaque zone. En cas d'imprévu, animal malade, problème technique, le gardien en poste peut déclencher une alerte.` },
- { q: `Combien coûte une pension pour animaux à ${cityData.name} ?`, a: `Les pensions autour de ${cityData.name} facturent en moyenne 25 à 45 euros par nuit et par animal. Ordres de grandeur constatés en 2026, variables selon la ville, la saison et la taille de l'animal. Sur Guardiens, la garde à domicile coûte 0 € au propriétaire : le gardien s'installe chez vous et s'occupe de vos animaux dans leur environnement habituel.` },
- { q: `Comment devenir gardien à ${cityData.name} ?`, a: `Inscrivez-vous, complétez votre profil et faites vérifier votre identité. Vous pourrez ensuite postuler aux gardes disponibles ${departmentIn(cityData.department)}. L'accès gardien est ouvert pendant la phase de lancement.` },
+ { q: `Y a-t-il des frais pour les propriétaires à ${cityData.name} ?`, a: "Non. L'espace propriétaire coûte 0 €, et aucune commission n'est prélevée sur les gardes. Guardiens est gratuit, pour les propriétaires comme pour les gardiens." },
+ { q: `Que se passe-t-il en cas d'urgence pendant la garde à ${cityData.name} ?`, a: `Guardiens propose une fonction gardien d'urgence : des gardiens expérimentés acceptent d'être sollicités en cas d'imprévu. En cas d'imprévu, animal malade, problème technique, le gardien en poste peut déclencher une alerte.` },
+ { q: `Combien coûte une pension pour animaux à ${cityData.name} ?`, a: `Les tarifs des pensions varient selon la ville, la saison et la taille de l'animal : demandez un devis. Sur Guardiens, la garde à domicile est un échange et l'inscription est gratuite : le gardien s'installe chez vous et s'occupe de vos animaux dans leur environnement habituel.` },
+ { q: `Comment devenir gardien à ${cityData.name} ?`, a: `Inscrivez-vous, complétez votre profil et faites vérifier votre identité. Vous pourrez ensuite postuler aux gardes disponibles ${departmentIn(cityData.department)}. L'inscription est gratuite.` },
  ];
 
  return (
@@ -747,19 +747,19 @@ const CityPage = () => {
     },
     {
       q: `Y a-t-il des frais pour les propriétaires à ${dbPage.city} ?`,
-      a: "Non. L'espace propriétaire coûte 0 €, et aucune commission n'est prélevée sur les gardes. L'espace gardien est ouvert pendant la phase de lancement.",
+      a: "Non. L'espace propriétaire coûte 0 €, et aucune commission n'est prélevée sur les gardes. Guardiens est gratuit, pour les propriétaires comme pour les gardiens.",
     },
     {
       q: `Que se passe-t-il en cas d'urgence pendant la garde à ${dbPage.city} ?`,
-      a: `Guardiens dispose d'un réseau de Gardiens d'Urgence dans chaque zone. En cas d'imprévu, animal malade ou problème technique, le gardien en poste peut déclencher une alerte.`,
+      a: `Guardiens propose une fonction gardien d'urgence : des gardiens expérimentés acceptent d'être sollicités en cas d'imprévu. En cas d'imprévu, animal malade ou problème technique, le gardien en poste peut déclencher une alerte.`,
     },
     {
       q: `Combien coûte une pension pour animaux à ${dbPage.city} ?`,
-      a: `Les pensions autour de ${dbPage.city} facturent en moyenne 25 à 45 euros par nuit et par animal. Ordres de grandeur constatés en 2026, variables selon la ville, la saison et la taille de l'animal. Sur Guardiens, la garde à domicile coûte 0 € au propriétaire : le gardien s'installe chez vous et s'occupe de vos animaux dans leur environnement habituel.`,
+      a: `Les tarifs des pensions varient selon la ville, la saison et la taille de l'animal : demandez un devis. Sur Guardiens, la garde à domicile est un échange et l'inscription est gratuite : le gardien s'installe chez vous et s'occupe de vos animaux dans leur environnement habituel.`,
     },
     {
       q: `Comment devenir gardien à ${dbPage.city} ?`,
-      a: `Inscrivez-vous, complétez votre profil et faites vérifier votre identité. Vous pourrez ensuite postuler aux gardes disponibles ${departmentIn(dbPage.department)}. L'accès gardien est ouvert pendant la phase de lancement.`,
+      a: `Inscrivez-vous, complétez votre profil et faites vérifier votre identité. Vous pourrez ensuite postuler aux gardes disponibles ${departmentIn(dbPage.department)}. L'inscription est gratuite.`,
     },
   ];
 

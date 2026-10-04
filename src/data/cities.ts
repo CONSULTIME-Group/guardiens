@@ -38,9 +38,9 @@ export const CITIES: CityData[] = [
  "gardien de maison Annecy",
  "home sitter Annecy",
  ],
- h1: "House-sitting à Annecy : faire garder sa maison et ses animaux",
+ h1: "Home sitting à Annecy : faire garder sa maison et ses animaux",
  metaDescription:
- "Faire garder sa maison et ses animaux à Annecy : un gardien séjourne chez vous, sans rémunération. Ce qu'il faut convenir, règles chiens et lac, imprévus.",
+    "Home sitting à Annecy : un home sitter loge chez vous et veille sur votre maison et vos animaux. Règles chiens et lac, gardiens à proximité, inscription gratuite.",
  localSpots: [
  {
  name: "Promenade du Thiou",
@@ -88,7 +88,7 @@ export const CITIES: CityData[] = [
   ],
   h1: "Home sitting à Lyon : faire garder son chien, son chat et son logement",
   metaDescription:
-  "Home sitting à Lyon : un gardien séjourne chez vous et veille sur votre chien, votre chat et votre logement, sans rémunération. Règles, clés, frais, sorties.",
+    "Home sitting à Lyon : un home sitter loge chez vous et veille sur votre chien, votre chat et votre logement. Gardiens à proximité, inscription gratuite.",
  localSpots: [
  {
  name: "Parc de la Tête d'Or",
@@ -132,9 +132,9 @@ export const CITIES: CityData[] = [
  "home sitter Grenoble",
  "home sitting Grenoble",
  ],
- h1: "House-sitting à Grenoble : faire garder sa maison et ses animaux",
+ h1: "Home sitting à Grenoble : faire garder sa maison et ses animaux",
  metaDescription:
- "House-sitting à Grenoble : un gardien séjourne chez vous, sans rémunération de la garde. Ce qu'il faut convenir, zones chiens des parcs, imprévus.",
+    "Home sitting à Grenoble : un home sitter loge chez vous et veille sur votre maison et vos animaux. Zones chiens des parcs, gardiens à proximité, inscription gratuite.",
  localSpots: [
  {
  name: "Parc Paul-Mistral",
@@ -176,9 +176,9 @@ export const CITIES: CityData[] = [
  "pet sitting nord Lyon",
  "gardien maison Caluire",
  ],
- h1: "House-sitting à Caluire-et-Cuire : votre gardien de confiance",
+ h1: "Home sitting à Caluire-et-Cuire : votre gardien de confiance",
  metaDescription:
- "Garde de maison et animaux à Caluire-et-Cuire. Gardiens du coin à 15 min. Résidences avec jardin, chiens et chats bienvenus. Gratuit propriétaires.",
+    "Home sitting à Caluire-et-Cuire : un home sitter loge chez vous et veille sur votre maison et vos animaux. Gardiens à proximité, inscription gratuite.",
  localSpots: [
  {
  name: "Parc de Montribloud",
@@ -222,9 +222,9 @@ export const CITIES: CityData[] = [
  "home sitter Chambéry",
  "home sitting Chambéry",
  ],
- h1: "House-sitting à Chambéry : partez sans inquiétude",
+ h1: "Home sitting à Chambéry : partez l'esprit léger",
  metaDescription:
- "Home sitting à Chambéry : trouvez un home sitter de confiance en Savoie. Gardiens du coin, disponibles rapidement. 0 € pour les propriétaires.",
+    "Home sitting à Chambéry : un home sitter loge chez vous et veille sur votre maison et vos animaux en Savoie. Gardiens à proximité, inscription gratuite.",
  localSpots: [
  {
  name: "Lac du Bourget (rive sud)",
