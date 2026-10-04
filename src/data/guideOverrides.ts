@@ -54,9 +54,9 @@ const C = { tips: COMMERCIAL_TIP };
 
 export const GUIDE_OVERRIDES: Record<string, GuideOverride> = {
   lyon: {
-    metaTitle: "Sortir avec un chien à Lyon : règles de laisse, aires canines, parcs | Guardiens",
+    metaTitle: "Que faire à Lyon avec son chien : parcs, aires canines, règles",
     metaDescription: "Laisse, aires canines de la Tête d'Or et de Blandan, berges du Rhône : les règles pour sortir avec un chien à Lyon, avec leurs sources.",
-    h1: "Sortir avec un chien à Lyon : règles et repères locaux",
+    h1: "Que faire à Lyon avec son chien : parcs, aires canines et règles",
     intro: "En ville, la laisse est la règle. Lyon compte des aires canines aménagées, notamment au parc de la Tête d'Or (près du vélodrome), au parc Blandan (derrière les terrains de sport) et près du Clos Layat dans le 8e, et de nombreux parcs acceptent les chiens tenus en laisse. Les panneaux à l'entrée de chaque parc font foi.",
     idealFor: "Utile pour un gardien qui découvre Lyon ou un propriétaire qui prépare les consignes de sortie de son chien.",
     leashRule: "Oui. Les chiens doivent être tenus en laisse en ville, y compris sur les berges du Rhône ; des aires canines et des espaces canins de liberté sur les quais hauts permettent de les lâcher.",
@@ -94,9 +94,9 @@ export const GUIDE_OVERRIDES: Record<string, GuideOverride> = {
     },
   },
   annecy: {
-    metaTitle: "Sortir avec un chien à Annecy : laisse, lac, sites autorisés | Guardiens",
+    metaTitle: "Où promener son chien à Annecy : lac, parcs, règles",
     metaDescription: "Laisse, plages du lac interdites aux chiens, sites sans laisse hors période du 15 avril au 30 juin, parcs fermés aux animaux : les règles à Annecy, sourcées.",
-    h1: "Sortir avec un chien à Annecy : règles et repères locaux",
+    h1: "Où promener son chien à Annecy : lac, parcs et règles locales",
     intro: "À Annecy, l'Office de tourisme demande de tenir les chiens en laisse en ville comme en balade, et les plages autour du lac n'acceptent pas les chiens. Un arrêté municipal autorise la promenade sans laisse sur quatre sites précis, sauf du 15 avril au 30 juin. Certains parcs, comme le parc du Haras, sont interdits aux animaux.",
     idealFor: "Utile pour un gardien qui découvre Annecy ou un propriétaire qui prépare les consignes de sortie de son chien.",
     leashRule: "Oui en règle générale. Quatre sites listés par l'arrêté municipal CN-2025-281 admettent les chiens sans laisse, à portée de voix, sauf du 15 avril au 30 juin où la laisse est obligatoire en tout lieu.",
@@ -135,9 +135,9 @@ export const GUIDE_OVERRIDES: Record<string, GuideOverride> = {
   },
 
   rennes: {
-    metaTitle: "Sortir avec un chien à Rennes : laisse, espaces canins, parcs | Guardiens",
+    metaTitle: "Où promener son chien à Rennes : parcs, espaces canins",
     metaDescription: "Laisse dans les parcs, trois types d'espaces canins, espace partagé des Prairies Saint-Martin : les règles pour sortir avec un chien à Rennes, sourcées.",
-    h1: "Sortir avec un chien à Rennes : règles et repères locaux",
+    h1: "Où promener son chien à Rennes : parcs, espaces canins et règles",
     intro: "À Rennes, les chiens sont admis dans tous les parcs et jardins de la Ville, tenus en laisse. Ils peuvent être lâchés dans les espaces canins, dont la carte est publiée par Rennes Métropole. Les lieux ci-dessous sont des repères, pas une liste complète : l'affichage à l'entrée fait foi.",
     idealFor: "Utile pour un gardien qui découvre Rennes ou un propriétaire qui prépare les consignes de sortie de son chien.",
     leashRule: "Oui dans les parcs et jardins, sauf dans les espaces canins où la laisse n'est pas obligatoire.",
@@ -162,9 +162,9 @@ export const GUIDE_OVERRIDES: Record<string, GuideOverride> = {
     },
   },
   "clermont-ferrand": {
-    metaTitle: "Sortir avec un chien à Clermont-Ferrand : laisse, volcans | Guardiens",
+    metaTitle: "Où promener son chien à Clermont-Ferrand : volcans, laisse",
     metaDescription: "Chaîne des Puys en laisse, secteurs interdits, tour du lac d'Aydat, parcs en ville à vérifier sur place : les repères pour sortir avec un chien autour de Clermont.",
-    h1: "Sortir avec un chien à Clermont-Ferrand : règles et repères locaux",
+    h1: "Où promener son chien à Clermont-Ferrand : volcans, lacs et règles",
     intro: "Nous n'avons pas trouvé de règle officielle récente, parc par parc, pour les jardins de Clermont-Ferrand : en ville, l'affichage à l'entrée fait foi et nous ne présentons aucun parc comme ouvert aux chiens. Autour de la ville, l'Office de tourisme donne des règles claires pour la Chaîne des Puys et le lac d'Aydat.",
     idealFor: "Utile pour un gardien qui découvre Clermont-Ferrand ou un propriétaire qui prépare les consignes de sortie de son chien.",
     leashRule: "Oui sur tout le périmètre Chaîne des Puys et faille de Limagne, avec des secteurs interdits même en laisse. En ville, suivez l'affichage de chaque parc.",
