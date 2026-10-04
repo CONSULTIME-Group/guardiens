@@ -26,3 +26,5 @@
 - Pages villes servies par la base et refondues : liste fermée DB_CITY_REVISIONS (src/data/dbCityRevisions.ts, FAQ visible et JSON-LD), corps éditorial en base avec sauvegarde datée avant écriture ; dans les guides refondus, commerces réduits à nom, adresse et source, badge « chiens admis » seulement si une source le dit ; pourquoi : aucune promesse non sourcée, les autres villes gardent le gabarit.
 
 - Push : version de public/push-sw.js confirmée par la page avant activation, test ou annonces proches ; un budget unique dans dispatch-web-push ; dédup push_nearby_jobs sans purge ; pourquoi : un ancien worker afficherait un faux message.
+
+- Fond du hero avant React (lot P5) : #boot-hero statique dans index.html (photo et voile seuls, sous le header de 77 px), retiré par script inline hors "/" ou si session, par Landing au montage, garde-fou 15 s ; pourquoi : LCP peint au parse sans toucher à l entrée JS.
