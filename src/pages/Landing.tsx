@@ -242,7 +242,7 @@ const Landing = () => {
                 </span>
               </a>
             )}
-            {!isAuthenticated && <Link to="/inscription?role=sitter" className="mt-2 inline-block text-xs text-primary-foreground/90 underline underline-offset-4">Vous voulez garder ? Créez votre profil.</Link>}
+            {!isAuthenticated && <Link to="/inscription?role=sitter" className="mt-2 block w-fit text-xs text-primary-foreground/90 underline underline-offset-4">Vous voulez garder ? Créez votre profil.</Link>}
           </div>
         </div>
       </section>
