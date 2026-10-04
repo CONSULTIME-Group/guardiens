@@ -18,8 +18,8 @@ const TARGETS = [
 
 // Marqueurs attendus (présence obligatoire)
 const REQUIRED_SNIPPETS = [
-  "House-sitting : faire garder sa maison et ses animaux", // title + og:title + twitter:title
-  "sans rémunération de la garde", // description, og:description, twitter:description
+  "Garde d'animaux et de maison près de chez vous", // title + og:title + twitter:title
+  "Guardiens est gratuit", // description, og:description, twitter:description
 ];
 
 // Marqueurs interdits (anciennes versions, doivent être absents)

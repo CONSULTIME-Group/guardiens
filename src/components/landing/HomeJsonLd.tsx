@@ -7,7 +7,7 @@ import howtoStep2 from "@/assets/illustrations/howto-step-2-rencontre-448.webp";
 import howtoStep3 from "@/assets/illustrations/howto-step-3-depart-448.webp";
 
 // Mise à jour manuelle à chaque retouche du contenu de la home.
-const HOME_CONTENT_LAST_MODIFIED = "2026-10-01";
+const HOME_CONTENT_LAST_MODIFIED = "2026-10-04";
 
 
 /**
@@ -108,9 +108,9 @@ export default function HomeJsonLd() {
               "@type": "WebPage",
               "@id": "https://guardiens.fr/#webpage",
               url: "https://guardiens.fr/",
-              name: "House-sitting : faire garder sa maison et ses animaux | Guardiens",
+              name: "Garde d'animaux et de maison près de chez vous | Guardiens",
               description:
-                "Un gardien séjourne chez vous pendant votre absence et veille sur la maison et les animaux, sans rémunération de la garde.",
+                "Faites garder votre chien, votre chat et votre maison par un gardien près de chez vous, et trouvez un coup de main au quotidien. Guardiens est gratuit.",
               inLanguage: "fr-FR",
               isPartOf: { "@id": "https://guardiens.fr/#website" },
               about: { "@id": "https://guardiens.fr/#organization" },

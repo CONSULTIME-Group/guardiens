@@ -22,7 +22,7 @@ describe("landing.hero, entraide près de chez soi", () => {
   );
 
   it("présente la garde et l'entraide du quotidien", () => {
-    expect(landing["hero.title_eyebrow"]).toBe("Garde de maison et entraide");
+    expect(landing["hero.title_eyebrow"]).toBe("Garde d'animaux, de maison et entraide");
     expect(landing["hero.title_main"]).toBe("Près de chez vous, il y a toujours quelqu'un.");
     expect(landing["hero.lede"]).toBe(
       "Quelqu'un pour garder votre maison et vos animaux quand vous partez. Quelqu'un pour une partie de belote, un chien à promener ou le potager à arroser le reste de l'année.",
