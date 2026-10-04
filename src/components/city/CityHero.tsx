@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { slugify } from "@/lib/normalize";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import { Button } from "@/components/ui/button";
@@ -39,11 +39,23 @@ export default function CityHero({
   departmentSlug,
   trustLabels,
 }: CityHeroProps) {
+  const location = useLocation();
+  const currentPath = location.pathname.replace(/\/+$/, "") || "/";
+  const breadcrumbItems = [
+    { name: "Guardiens", item: "https://guardiens.fr/" },
+    ...(department && departmentSlug ? [{ name: department, item: `https://guardiens.fr/departement/${departmentSlug}` }] : []),
+    { name: city, item: `https://guardiens.fr${currentPath}` },
+  ];
   const cityKey = slugify(city);
   const bgImage = heroImage || CITY_HERO_IMAGES[cityKey];
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        itemListElement: breadcrumbItems.map((item, index) => ({ "@type": "ListItem", position: index + 1, ...item })),
+      }) }} />
       {/* Hero */}
       <section className="relative w-full min-h-[420px] md:min-h-[500px] flex items-end overflow-hidden">
         {bgImage ? (
@@ -63,7 +75,7 @@ export default function CityHero({
 
         <div className="relative z-10 w-full max-w-6xl mx-auto px-4 pb-10 pt-24 md:pb-14">
           {/* Breadcrumb */}
-          {/* Fil d'Ariane visuel, le BreadcrumbList structuré est fourni en JSON-LD via CitySchemaOrg pour éviter les doublons et les éléments invalides détectés par GSC. */}
+          {/* Le fil visible et son balisage sont produits ici avec les memes elements. */}
           <nav className="hidden md:block text-sm text-white/70 mb-4" aria-label="Fil d'Ariane">
             <ol className="flex items-center gap-1.5 flex-wrap">
               <li>
@@ -72,16 +84,12 @@ export default function CityHero({
                 </Link>
               </li>
               <li className="text-white/40">/</li>
-              {department && (
+              {department && departmentSlug && (
                 <>
                   <li>
-                    {departmentSlug ? (
-                      <Link to={`/departement/${departmentSlug}`} className="hover:text-white transition-colors">
-                        {department}
-                      </Link>
-                    ) : (
-                      <span>{department}</span>
-                    )}
+                    <Link to={`/departement/${departmentSlug}`} className="hover:text-white transition-colors">
+                      {department}
+                    </Link>
                   </li>
                   <li className="text-white/40">/</li>
                 </>
