@@ -5,6 +5,7 @@ import { reportError } from "@/lib/errorLogger";
 import PageMeta from "@/components/PageMeta";
 import { projetsHubSeo } from "@/lib/projetSeo";
 import { isIndexableProjetMission } from "../../supabase/functions/_shared/entraideMissionIndexability.js";
+import { faqPageJsonLd } from "@/lib/associationFaq";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import { Button } from "@/components/ui/button";
 import SearchListingCard from "@/components/search/listing/SearchListingCard";
@@ -38,6 +39,57 @@ const PROJET_DEFAULT_RADIUS: RadiusKm = 250;
 
 const radiusLabel = (value: number) =>
   PROJET_RADIUS_CHOICES.find((c) => c.value === value)?.label ?? `${value} km`;
+
+const LEGAL_GUIDE_URL = "/actualites/chantier-participatif-projet-collectif-cadre-legal";
+
+const PROJETS_FAQ = [
+  { question: "Qu'est-ce qu'un chantier participatif ?", answer: "C'est un chantier ouvert à des personnes qui viennent donner un coup de main et apprendre en faisant, chez un particulier ou dans une association, en échange d'un accueil et d'un savoir-faire transmis." },
+  { question: "Faut-il savoir bricoler pour participer ?", answer: "Le savoir-faire se transmet sur place. Chaque projet précise ce que vous y apprendrez et ce qui est attendu des participants." },
+  { question: "Combien coûte la participation ?", answer: "Guardiens est gratuit. La personne qui porte le projet précise ce qu'elle propose sur place : repas, hébergement, savoir-faire transmis." },
+  { question: "Qui est responsable en cas d'accident ?", answer: "Chez un particulier, la personne qui accueille répond en principe des dommages corporels subis par celles qui viennent l'aider. Vérifiez votre assurance habitation, et lisez notre guide du cadre légal.", link: true },
+  { question: "Comment publier un projet ?", answer: "Avec le bouton « Publier un projet » : décrivez le lieu, les dates, ce que vous voulez réaliser et ce que vous proposez sur place." },
+];
+
+const LegalLink = () => (
+  <Link to={LEGAL_GUIDE_URL} className="text-primary underline underline-offset-4">notre guide du cadre légal</Link>
+);
+
+const ProjetsEditorial = () => (
+  <section className="mt-12 max-w-3xl space-y-10" aria-label="Le chantier participatif">
+    <div>
+      <h2 className="font-heading text-2xl font-bold mb-3 text-foreground">Le chantier participatif, en quelques mots</h2>
+      <p className="text-base leading-relaxed text-foreground/85">Un chantier participatif réunit des personnes qui viennent aider sur un projet concret, un potager, une haie, un abri, un mur en pierre sèche, en échange d'un accueil et d'un savoir-faire transmis. Il se déroule souvent chez un particulier, parfois dans une association. Chacun vient le temps convenu, selon ses envies et ses disponibilités.</p>
+    </div>
+    <div>
+      <h2 className="font-heading text-2xl font-bold mb-3 text-foreground">Rejoindre un projet</h2>
+      <ol className="list-decimal pl-6 space-y-2 text-base leading-relaxed text-foreground/85">
+        <li>Choisissez un projet près de chez vous, ou plus loin si l'aventure vous tente.</li>
+        <li>Lisez ce qui est proposé sur place : dates, tâches, ce que vous apprendrez, repas ou hébergement.</li>
+        <li>Écrivez à la personne qui porte le projet pour convenir de votre venue.</li>
+      </ol>
+    </div>
+    <div>
+      <h2 className="font-heading text-2xl font-bold mb-3 text-foreground">Lancer votre projet</h2>
+      <p className="text-base leading-relaxed text-foreground/85">Décrivez le lieu, les dates, ce que vous voulez réaliser, le savoir-faire que vous transmettez et ce que vous proposez sur place. Publiez-le environ un mois avant, pour laisser à chacun le temps de s'organiser. Avant de commencer, lisez <LegalLink /> : assurance, accueil, responsabilités.</p>
+    </div>
+    <div>
+      <h2 className="font-heading text-2xl font-bold mb-4 text-foreground">Questions fréquentes sur les chantiers participatifs</h2>
+      <dl className="space-y-5">
+        {PROJETS_FAQ.map((item) => (
+          <div key={item.question}>
+            <dt className="font-semibold text-foreground mb-1">{item.question}</dt>
+            <dd className="text-base leading-relaxed text-foreground/85">
+              {item.link ? (<>{item.answer.replace("notre guide du cadre légal.", "")}<LegalLink />.</>) : item.answer}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+    <p className="text-base leading-relaxed text-foreground/85">
+      Pour aller plus loin : <Link to="/actualites/chantier-participatif-low-tech-participer-lancer-projet" className="text-primary underline underline-offset-4">participer ou lancer un chantier participatif</Link>, <Link to="/petites-missions" className="text-primary underline underline-offset-4">les coups de main près de chez vous</Link>, <Link to="/associations" className="text-primary underline underline-offset-4">les associations et refuges</Link>.
+    </p>
+  </section>
+);
 
 const ProjetsListing = () => {
   const [projets, setProjets] = useState<any[]>([]);
@@ -130,8 +182,9 @@ const ProjetsListing = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <PageMeta
-        title="Projets participatifs, des projets à réaliser ensemble"
-        description="Planter un jardin, construire un abri, remettre un lieu en état : découvrez les projets proposés sur Guardiens et participez selon vos envies et vos disponibilités."
+        title="Chantiers participatifs et projets à réaliser ensemble | Guardiens"
+        description="Planter une haie, construire un abri : rejoignez un chantier participatif près de chez vous ou publiez votre projet. Guardiens est gratuit."
+        jsonLd={[faqPageJsonLd(PROJETS_FAQ)]}
         noindex={hubSeo.noindex}
         ready={hubSeo.ready}
         statusCode={hubSeo.statusCode}
@@ -143,9 +196,9 @@ const ProjetsListing = () => {
         </div>
 
         <header className="max-w-3xl mb-8">
-          <p className="text-sm font-semibold text-primary mb-2">Projets participatifs</p>
+          <p className="text-sm font-semibold text-primary mb-2">Chantiers et projets participatifs</p>
           <h1 className="font-heading text-[2rem] md:text-[2.5rem] font-bold leading-tight mb-4 text-foreground">
-            Des projets à réaliser ensemble
+            Des chantiers et projets à réaliser ensemble
           </h1>
           <p className="text-base md:text-lg leading-relaxed text-foreground/85">
             Planter un jardin, construire un abri, remettre un lieu en état… Découvrez les projets proposés sur
@@ -279,6 +332,8 @@ const ProjetsListing = () => {
             </div>
           </section>
         )}
+
+        <ProjetsEditorial />
       </div>
     </div>
   );
