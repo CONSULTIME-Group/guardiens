@@ -66,4 +66,4 @@ Disallow: /auth/
 # /recherche-gardiens, fiches /gardiens/:id non eligibles) : volontairement
 # explorables, sinon leur balise noindex ne serait jamais lue.
 
-Sitemap: https://erhccyqevdyevpyctsjj.supabase.co/functions/v1/sitemap
+Sitemap: https://guardiens.fr/sitemap.xml

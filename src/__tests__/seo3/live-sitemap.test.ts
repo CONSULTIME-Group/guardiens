@@ -61,7 +61,7 @@ describe("sitemap actuel sans nouvelle publication", () => {
   it("partage les routes compilees et annonce le endpoint public dans robots", () => {
     const inventory = JSON.parse(readFileSync("public/sitemap-routes.json", "utf8"));
     expect(inventory.cityLandingPages).toEqual(readStaticCitySlugs(readFileSync("src/data/cities.ts", "utf8")));
-    expect(readRobotsConfig(readFileSync("src/data/siteRoutes.ts", "utf8")).sitemapUrl).toBe("https://erhccyqevdyevpyctsjj.supabase.co/functions/v1/sitemap");
+    expect(readRobotsConfig(readFileSync("src/data/siteRoutes.ts", "utf8")).sitemapUrl).toBe("https://guardiens.fr/sitemap.xml");
     for (const path of ["scripts/generate-sitemap.mjs", "supabase/functions/sitemap/index.ts"]) expect(readFileSync(path, "utf8")).toContain("collectSitemapData");
     expect(validateRoutesConfig(inventory)).toBe(inventory);
   });
