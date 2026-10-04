@@ -22,7 +22,7 @@ const renderContent = (isAuthenticated: boolean) => {
 describe("EntraideHub, contenu explicite", () => {
   it("présente le modèle complet aux visiteurs sans compte", () => {
     const { onNeed, onHelp } = renderContent(false);
-    expect(screen.getByRole("heading", { level: 1, name: "Un coup de main près de chez vous" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "Entraide et coups de main près de chez vous" })).toBeInTheDocument();
     expect(screen.getByText(/Arroser des plantes, nourrir un chat/)).toBeInTheDocument();
     expect(screen.queryByText(/Dix personnes/)).not.toBeInTheDocument();
     expect(screen.getByText(/aux membres disponibles près de chez vous/)).toBeInTheDocument();

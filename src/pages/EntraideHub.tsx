@@ -55,7 +55,7 @@ export const EntraideHubIntro = ({ isAuthenticated, onNeed, onHelp }: {
     <header className="pb-6 pt-3">
       <p className="text-sm font-semibold text-primary">Entraide</p>
       <h1 className="mt-2 max-w-3xl font-heading text-3xl font-bold leading-tight text-foreground sm:text-[2.5rem]">
-        Un coup de main près de chez vous
+        Entraide et coups de main près de chez vous
       </h1>
       <p className="mt-3 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
         Arroser des plantes, nourrir un chat, réceptionner un colis, déplacer un meuble : demandez un coup de main ou proposez le vôtre, entre gens du coin et sans argent.
