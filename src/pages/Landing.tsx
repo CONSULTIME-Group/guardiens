@@ -117,6 +117,12 @@ const Landing = () => {
   const isPressHighlighted = new Date() < PRESS_HIGHLIGHT_UNTIL;
 
 
+  // Lot P5 : le vrai hero est rendu, on retire le fond statique d'index.html
+  // (avant PageMeta, donc avant prerenderReady).
+  useLayoutEffect(() => {
+    document.getElementById("boot-hero")?.remove();
+  }, []);
+
  return (
  <div className="min-h-screen bg-background text-foreground">
    <PageMeta
