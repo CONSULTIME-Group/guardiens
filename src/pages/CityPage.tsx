@@ -312,7 +312,7 @@ const CityPage = () => {
  return (
  <>
   <CityPageMeta city={cityData} ready={!contentStatsLoading} />
-  <CitySchemaOrg city={cityData} stats={stats} departmentSlug={departmentPageExists ? departmentSlug : null} />
+  <CitySchemaOrg city={cityData} faqItems={faqItems} />
 
  {(() => {
  const cityKey = cityData.slug;
@@ -340,7 +340,7 @@ const CityPage = () => {
  return (
  <>
           <PageBreadcrumb items={[
-            { label: "Nos villes" },
+            { label: "Nos villes", href: "/house-sitting" },
  { label: cityData.name },
  ]} />
  </>
@@ -829,7 +829,7 @@ const CityPage = () => {
 
       <div className="min-h-screen bg-background">
         <PageBreadcrumb items={[
-          { label: "Nos villes" },
+          { label: "Nos villes", href: "/house-sitting" },
           { label: dbPage.city },
         ]} />
 
