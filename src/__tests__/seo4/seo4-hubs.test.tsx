@@ -52,6 +52,9 @@ vi.mock("@/hooks/useAccessLevel", () => ({ useAccessLevel: () => ({ level: "visi
 vi.mock("@/hooks/useCityPageExists", () => ({ useCityPageExists: () => false }));
 vi.mock("@/hooks/useDepartmentPageExists", () => ({ useDepartmentPageExists: () => false }));
 vi.mock("@/components/sits/ApplicationModal", () => ({ default: () => null }));
+import CityHero from "@/components/city/CityHero";
+import CitySchemaOrg from "@/components/seo/CitySchemaOrg";
+import { CITIES } from "@/data/cities";
 import ArticleDetail from "@/pages/ArticleDetail";
 import PublicSitDetail from "@/pages/PublicSitDetail";
 import SmallMissionDetail from "@/pages/SmallMissionDetail";
@@ -92,6 +95,18 @@ beforeEach(() => {
   document.head.querySelectorAll('script[type="application/ld+json"]').forEach((n) => n.remove());
 });
 
+describe("fil des villes avec grand visuel", () => {
+  it.each([undefined, "rhone"])("un seul schema suit les liens visibles, departement %s", (departmentSlug) => {
+    const city = CITIES.find(c => c.slug === "lyon")!;
+    wrap(<><CitySchemaOrg city={city} stats={{} as any} /><CityHero city="Lyon" h1Title="Garde à Lyon" subtitle="Garde de maison" heroAlt="Lyon" department="Rhône" departmentSlug={departmentSlug} /></>, "/house-sitting/lyon");
+    const schemas = [...document.querySelectorAll('script[type="application/ld+json"]')].flatMap(s => { const json = JSON.parse(s.textContent || "null"); return json?.["@graph"] || [json]; }).filter(s => s?.["@type"] === "BreadcrumbList");
+    expect(schemas).toHaveLength(1);
+    const expected = ["https://guardiens.fr/", ...(departmentSlug ? ["https://guardiens.fr/departement/rhone"] : []), "https://guardiens.fr/house-sitting/lyon"];
+    expect(schemas[0].itemListElement.map((i: any) => i.item)).toEqual(expected);
+    const nav = document.querySelector('nav')!;
+    expect([...nav.querySelectorAll("a")].map(a => `https://guardiens.fr${a.getAttribute("href")}`)).toEqual(expected.slice(0, -1));
+  });
+});
 describe("statuts des vraies pages publiques", () => {
   it.each(["/annonces/inconnue", "/races/dog-inconnue", "/petites-missions/inconnue", "/associations/inconnue", "/guides/inconnue", "/house-sitting/antibes"])("%s attend ses metadonnees meme si le module arrive apres le repli global", (path) => {
     const w = bootState(path);
