@@ -40,6 +40,7 @@ import LocalSpotsGrid from "@/components/seo/LocalSpotsGrid";
 import LocalNetworkGrid from "@/components/seo/LocalNetworkGrid";
 import NearbyCityLinks from "@/components/seo/NearbyCityLinks";
 import CityArticleBody from "@/components/city/CityArticleBody";
+import HouseSittingGuideInsert from "@/components/city/HouseSittingGuideInsert";
 import StickyCTA from "@/components/seo/StickyCTA";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import { departmentIn } from "@/lib/departmentGrammar";
@@ -437,6 +438,10 @@ const CityPage = () => {
  <CityArticleBody sections={content.articleSections} />
  </section>
  )}
+
+ <section className="max-w-5xl mx-auto px-4 py-6">
+ <HouseSittingGuideInsert />
+ </section>
 
  {/* Reassurance */}
  {revised ? (
@@ -892,6 +897,10 @@ const CityPage = () => {
             </article>
           </section>
         )}
+
+        <section className="max-w-5xl mx-auto px-4 py-6">
+          <HouseSittingGuideInsert />
+        </section>
 
         {/* Gardiens du coin */}
         <CitySittersGrid
