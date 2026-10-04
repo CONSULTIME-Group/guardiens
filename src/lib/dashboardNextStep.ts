@@ -342,7 +342,7 @@ export const sitterActionStep = (input: SitterActionInput): RailActionStep => {
     const meta = [(help.title || "").trim() || null, cityPart(help.city)].filter(Boolean).join(", ");
     return {
       eyebrow: "Votre prochain pas",
-      title: "Entraide et coups de main près de chez vous",
+      title: "Un coup de main près de chez vous",
       phrase: meta ? `${meta}.` : undefined,
       ctaLabel: "Proposer mon aide",
       ctaTo: `/petites-missions/${help.id}`,
@@ -400,7 +400,7 @@ export const ownerActionStep = (input: OwnerActionInput): RailActionStep => {
   }
   return {
     eyebrow: "Votre prochain pas",
-    title: "Entraide et coups de main près de chez vous",
+    title: "Un coup de main près de chez vous",
     ctaLabel: "Demander un coup de main",
     ctaTo: "/petites-missions/creer",
     secondaryLink,

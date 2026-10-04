@@ -29,7 +29,7 @@ describe("Lot J5, carte « Votre prochain pas »", () => {
 
   it("profil à 94 %, gardien, mission proche : Proposer mon aide, lien galerie, sans barre", () => {
     const step = sitterNextStep({ ...base, profileCompletion: 94, missing: galleryMissing, action: { nearbyListings: [], nearbyMissions: [mission] } })!;
-    expect(step.title).toBe("Entraide et coups de main près de chez vous");
+    expect(step.title).toBe("Un coup de main près de chez vous");
     expect(step.ctaLabel).toBe("Proposer mon aide");
     expect(step.ctaTo).toBe("/petites-missions/m1");
     expect(step.secondaryLink).toEqual({ label: "Ajouter des photos à ma galerie", to: "/profile?tab=galerie" });
