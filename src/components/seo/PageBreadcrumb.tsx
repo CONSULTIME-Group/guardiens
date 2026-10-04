@@ -34,21 +34,23 @@ const PageBreadcrumb = ({ items }: PageBreadcrumbProps) => {
 
   // Schema.org BreadcrumbList, every ListItem MUST have an `item` URL
   // (Google now flags missing URLs on the last item as invalid).
-  const schemaItems = allItems.map((item, i) => {
+  const schemaItems = allItems.flatMap((item, i) => {
     const isLast = i === allItems.length - 1;
     const href = item.href
       ? `${BASE_URL}${item.href}`
       : isLast
         ? currentUrl
         : undefined;
+    // Un groupe sans destination est visible mais ne represente pas une page.
+    if (!href) return [];
     const entry: Record<string, any> = {
       "@type": "ListItem",
-      position: i + 1,
+      position: 0,
       name: item.label,
     };
     if (href) entry.item = href;
-    return entry;
-  });
+    return [entry];
+  }).map((entry, index) => ({ ...entry, position: index + 1 }));
 
   const schema = {
     "@context": "https://schema.org",

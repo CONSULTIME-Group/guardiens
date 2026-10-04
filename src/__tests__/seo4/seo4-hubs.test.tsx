@@ -54,6 +54,7 @@ vi.mock("@/hooks/useDepartmentPageExists", () => ({ useDepartmentPageExists: () 
 vi.mock("@/components/sits/ApplicationModal", () => ({ default: () => null }));
 import CityHero from "@/components/city/CityHero";
 import CitySchemaOrg from "@/components/seo/CitySchemaOrg";
+import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 import { CITIES } from "@/data/cities";
 import ArticleDetail from "@/pages/ArticleDetail";
 import PublicSitDetail from "@/pages/PublicSitDetail";
@@ -98,13 +99,41 @@ beforeEach(() => {
 describe("fil des villes avec grand visuel", () => {
   it.each([undefined, "rhone"])("un seul schema suit les liens visibles, departement %s", (departmentSlug) => {
     const city = CITIES.find(c => c.slug === "lyon")!;
-    wrap(<><CitySchemaOrg city={city} stats={{} as any} /><CityHero city="Lyon" h1Title="Garde à Lyon" subtitle="Garde de maison" heroAlt="Lyon" department="Rhône" departmentSlug={departmentSlug} /></>, "/house-sitting/lyon");
+    wrap(<><CitySchemaOrg city={city} faqItems={[]} /><CityHero city="Lyon" h1Title="Garde à Lyon" subtitle="Garde de maison" heroAlt="Lyon" department="Rhône" departmentSlug={departmentSlug} /></>, "/house-sitting/lyon");
     const schemas = [...document.querySelectorAll('script[type="application/ld+json"]')].flatMap(s => { const json = JSON.parse(s.textContent || "null"); return json?.["@graph"] || [json]; }).filter(s => s?.["@type"] === "BreadcrumbList");
     expect(schemas).toHaveLength(1);
     const expected = ["https://guardiens.fr/", ...(departmentSlug ? ["https://guardiens.fr/departement/rhone"] : []), "https://guardiens.fr/house-sitting/lyon"];
     expect(schemas[0].itemListElement.map((i: any) => i.item)).toEqual(expected);
     const nav = document.querySelector('nav')!;
     expect([...nav.querySelectorAll("a")].map(a => `https://guardiens.fr${a.getAttribute("href")}`)).toEqual(expected.slice(0, -1));
+  });
+});
+describe("FAQ des cinq villes statiques", () => {
+  it.each(CITIES.map(city => city.slug))("%s : questions structurees identiques aux questions affichees", async (slug) => {
+    vi.stubGlobal("IntersectionObserver", class {
+      constructor(private callback: (entries: unknown[], observer: unknown) => void) {}
+      observe(target: Element) { this.callback([{ target, isIntersecting: true, intersectionRatio: 1 }], this); }
+      unobserve() {}
+      disconnect() {}
+    });
+    wrap(<Routes><Route path="/house-sitting/:slug" element={<CityPage />} /></Routes>, `/house-sitting/${slug}`);
+    await screen.findByRole("heading", { level: 1 });
+    const graphs = [...document.querySelectorAll('script[type="application/ld+json"]')].flatMap(s => { const j = JSON.parse(s.textContent || "null"); return j?.["@graph"] || [j]; });
+    const faq = graphs.find(j => j?.["@type"] === "FAQPage");
+    expect(faq).toBeDefined();
+    const names = faq.mainEntity.map((q: any) => q.name);
+    expect(names.length).toBeGreaterThan(0);
+    for (const name of names) expect(screen.getByText(name)).toBeInTheDocument();
+    const breadcrumbs = graphs.filter(j => j?.["@type"] === "BreadcrumbList");
+    expect(breadcrumbs).toHaveLength(1);
+    expect(breadcrumbs[0].itemListElement.every((item: any) => item.item?.startsWith("https://guardiens.fr/"))).toBe(true);
+  });
+  it("un groupe sans page ne produit pas un element schema sans URL", () => {
+    wrap(<PageBreadcrumb items={[{ label: "Groupe sans page" },{ label: "Nos villes", href: "/house-sitting" },{ label: "Lyon" }]} />, "/house-sitting/lyon");
+    const schema = JSON.parse(document.head.querySelector('script[type="application/ld+json"]')!.textContent!);
+    expect(schema.itemListElement.map((item: any) => item.position)).toEqual([1,2,3]);
+    expect(schema.itemListElement.map((item: any) => item.item)).toEqual(["https://guardiens.fr/","https://guardiens.fr/house-sitting","https://guardiens.fr/house-sitting/lyon"]);
+    expect(screen.getByText("Groupe sans page")).toBeInTheDocument();
   });
 });
 describe("statuts des vraies pages publiques", () => {
@@ -207,7 +236,7 @@ describe("statuts des vraies pages publiques", () => {
     expect(document.head.querySelector('link[rel="canonical"]')?.getAttribute("href")).toBe("https://guardiens.fr/petites-missions/mission-courte");
   });
 });
-afterEach(() => vi.useRealTimers());
+afterEach(() => { vi.useRealTimers(); vi.unstubAllGlobals(); });
 
 describe("hub /annonces", () => {
   it("prête seulement après la première recherche, ItemList = cartes affichées", async () => {
