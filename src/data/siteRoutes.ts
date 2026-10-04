@@ -131,8 +131,8 @@ export interface DynamicRouteConfig {
 export const staticRoutes: SiteRoute[] = [
  {
  path: "/",
-		title: "House-sitting : faire garder sa maison et ses animaux | Guardiens",
-		metaDescription: "Un gardien séjourne chez vous pendant votre absence et veille sur la maison et les animaux, sans rémunération de la garde. Échangez, rencontrez, choisissez.",
+		title: "Garde d'animaux et de maison près de chez vous | Guardiens",
+		metaDescription: "Faites garder votre chien, votre chat et votre maison par un gardien près de chez vous, et trouvez un coup de main au quotidien. Guardiens est gratuit.",
  h1: "Guardiens, comme confier ses clés à quelqu'un du coin",
  sitemapPriority: "1.0",
  changeFreq: "daily",
@@ -141,7 +141,7 @@ export const staticRoutes: SiteRoute[] = [
  {
  path: "/tarifs",
 		title: "Tarifs Guardiens : nos engagements de service | Guardiens",
-		metaDescription: "0 € pour les propriétaires, accès gardien ouvert pendant la phase de lancement, aucune commission prélevée sur les gardes.",
+		metaDescription: "Guardiens est gratuit, pour les propriétaires comme pour les gardiens : aucune commission sur les gardes.",
 		h1: "Tarifs Guardiens : nos engagements de service",
  sitemapPriority: "0.8",
  changeFreq: "weekly",

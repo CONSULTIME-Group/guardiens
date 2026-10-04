@@ -59,7 +59,7 @@
   "landing": {
     "hero": {
       "eyebrow": "Gardes · Coups de main · Urgences",
-      "title_eyebrow": "Garde de maison et entraide",
+      "title_eyebrow": "Garde d'animaux, de maison et entraide",
       "title_main": "Près de chez vous, il y a toujours quelqu'un.",
       "motto": "Tout commence par un échange, et finit par une rencontre.",
       "lede": "Quelqu'un pour garder votre maison et vos animaux quand vous partez. Quelqu'un pour une partie de belote, un chien à promener ou le potager à arroser le reste de l'année.",
@@ -364,8 +364,8 @@
         }
       }
     },
-    "meta_title": "House-sitting : faire garder sa maison et ses animaux | Guardiens",
-    "meta_description": "Un gardien séjourne chez vous pendant votre absence et veille sur la maison et les animaux, sans rémunération de la garde. Échangez, rencontrez, choisissez.",
+    "meta_title": "Garde d'animaux et de maison près de chez vous | Guardiens",
+    "meta_description": "Faites garder votre chien, votre chat et votre maison par un gardien près de chez vous, et trouvez un coup de main au quotidien. Guardiens est gratuit.",
     "how": {
       "cta_owner": "Publier mon annonce",
       "cta_secondary": "Ou commencer par un coup de main →",
