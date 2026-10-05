@@ -19,7 +19,7 @@ export const DEFAULT_OG_IMAGE = `${SITE_URL}/og-default.jpg`;
  * la baseline tarifaire vit dans src/lib/pricing.ts (getPricingBaseline).
  */
 export const SITE_DESCRIPTION_LONG =
-  "Guardiens met en relation des propriétaires et des gardiens pour la garde de maison et d'animaux, partout en France. Vous publiez votre annonce, vous recevez des candidatures, vous échangez, vous pouvez vous rencontrer, puis vous choisissez. L'accès à la plateforme est ouvert pendant la phase de lancement, toute évolution sera annoncée à l'avance.";
+  "Guardiens met en relation des propriétaires et des gardiens pour la garde de maison et d'animaux, partout en France, et réunit l'entraide du quotidien entre particuliers. Vous publiez votre annonce, les gardiens à proximité vous écrivent, vous échangez et vous choisissez ; la rencontre est facultative. Guardiens est gratuit, pour les propriétaires comme pour les gardiens.";
 
 export interface SiteRoute {
  path: string;
