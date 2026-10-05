@@ -2,6 +2,7 @@ import { Component, type ErrorInfo, type ReactNode } from "react";
 import { AlertTriangle, RefreshCw, Send, Home, PuzzleIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { reportError } from "@/lib/errorLogger";
+import { isStaleChunkError, reloadOnceForStaleChunk } from "@/lib/staleChunk";
 
 interface Props {
   children: ReactNode;
@@ -26,6 +27,10 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
+    // Lot F1 : chunk d'une version remplacée. Rechargement unique (60 s),
+    // sans journaliser ; sinon l'écran d'erreur s'affiche comme avant.
+    if (isStaleChunkError(error) && reloadOnceForStaleChunk()) return;
+
     // Generate a short ID the user can quote in support
     const errorId = Math.random().toString(36).slice(2, 10).toUpperCase();
 
@@ -64,11 +69,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   handleReset = () => {
-    const isDynamicImportFailure = this.state.error?.message?.includes(
-      "Failed to fetch dynamically imported module",
-    );
-
-    if (isDynamicImportFailure) {
+    if (isStaleChunkError(this.state.error)) {
       window.location.reload();
       return;
     }
