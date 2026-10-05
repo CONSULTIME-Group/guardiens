@@ -77,12 +77,11 @@ export function lazyWithRetry<T extends ComponentType<any>>(
         clearReloadMark(reloadKey);
         return module;
       } catch (error) {
-        const lastReloadAt = getLastReloadAt(reloadKey);
-        const canReload = !lastReloadAt || Date.now() - lastReloadAt > RELOAD_TTL_MS;
-
-        if (canReload) {
-          markReload(reloadKey);
-          window.location.reload();
+        // Lot F1 : l'ancienne fenêtre de 30 s par route laissait un second
+        // chunk (AppLayout puis MessageBell) recharger encore, et le message
+        // Firefox/Safari n'était pas reconnu par le journal. Un seul marqueur
+        // global, 60 s, partagé avec l'ErrorBoundary et vite:preloadError.
+        if (reloadOnceForStaleChunk()) {
           return new Promise(() => {}) as never;
         }
 
