@@ -6,6 +6,7 @@ describe("lot F4 : décision de réparation du miroir", () => {
     expect(decideDrift(["abandoned"])).toEqual({ kind: "repair", queueStatus: "abandoned" });
     expect(decideDrift(["cancelled"])).toEqual({ kind: "repair", queueStatus: "cancelled" });
     expect(decideDrift(["sent"])).toEqual({ kind: "repair", queueStatus: "sent" });
+    expect(decideDrift(["superseded"])).toEqual({ kind: "repair", queueStatus: "superseded" });
   });
   it("laisse une ligne vivante", () => {
     expect(decideDrift(["abandoned", "pending"])).toEqual({ kind: "live" });
@@ -41,18 +42,22 @@ describe("lot F4 : réparation", () => {
         { id: "a", metadata: { idempotency_key: "k1" } },
         { id: "b", metadata: { idempotency_key: "k2" } },
         { id: "c", metadata: { idempotency_key: "k3" } },
+        { id: "d", metadata: { idempotency_key: "k4" } },
       ],
       [
         { idempotency_key: "k1", status: "abandoned" },
         { idempotency_key: "k2", status: "sent" },
+        { idempotency_key: "k4", status: "superseded" },
       ],
     );
     const result = await repairMirrorDrift(client, new Date("2026-10-05T07:00:00Z"));
-    expect(result.repaired).toBe(2);
+    expect(result.repaired).toBe(3);
     expect(result.orphanKeys).toEqual(["k3"]);
     expect(updates[0]).toMatchObject({ id: "a", patch: { status: "abandoned" } });
     expect(String(updates[0].patch.error_message)).toContain("abandoned");
     expect(updates[1].patch.status).toBeUndefined();
     expect((updates[1].patch.metadata as Record<string, unknown>).flushed_at).toBe("2026-10-05T07:00:00.000Z");
+    expect(updates[2]).toMatchObject({ id: "d", patch: { status: "cancelled" } });
+    expect(String(updates[2].patch.error_message)).toContain("superseded dans la file");
   });
 });
