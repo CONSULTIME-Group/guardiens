@@ -1,7 +1,7 @@
 // Lot F4 : réparation du miroir email_send_log depuis email_deferred_queue.
 // Module sans import Deno pour être testé aussi par Vitest.
 
-export const TERMINAL_QUEUE_STATUSES = ["abandoned", "cancelled", "sent"] as const;
+export const TERMINAL_QUEUE_STATUSES = ["abandoned", "cancelled", "sent", "superseded"] as const;
 const LIVE_QUEUE_STATUSES = ["pending", "processing"];
 const BATCH = 500;
 
@@ -21,7 +21,7 @@ export type DriftDecision =
 export function decideDrift(queueStatuses: string[]): DriftDecision {
   if (queueStatuses.length === 0) return { kind: "orphan" };
   if (queueStatuses.some((s) => LIVE_QUEUE_STATUSES.includes(s))) return { kind: "live" };
-  for (const terminal of ["sent", "cancelled", "abandoned"] as const) {
+  for (const terminal of ["sent", "cancelled", "abandoned", "superseded"] as const) {
     if (queueStatuses.includes(terminal)) return { kind: "repair", queueStatus: terminal };
   }
   return { kind: "other", queueStatus: queueStatuses[0] };
@@ -80,6 +80,8 @@ export async function repairMirrorDrift(
     const note = `Aligné par email-pipeline-watchdog le ${stamp} : file en '${decision.queueStatus}'.`;
     const patch = decision.queueStatus === "sent"
       ? { metadata: { ...(row.metadata ?? {}), flushed_at: stamp, mirror_repaired: "sent" }, error_message: note }
+      : decision.queueStatus === "superseded"
+      ? { status: "cancelled", error_message: `superseded dans la file. ${note}` }
       : { status: decision.queueStatus, error_message: note };
     const { error: uErr } = await service
       .from("email_send_log")
