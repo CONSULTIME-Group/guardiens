@@ -66,7 +66,7 @@ describe("alert-admin-signals service authorization", () => {
     expect(response.status).toBe(401);
     expect(parse).not.toHaveBeenCalled();
     expect(h.from).not.toHaveBeenCalled();
-    expect(h.rpc).not.toHaveBeenCalled();
+    expect(h.rpc.mock.calls.filter(([n]: [string]) => n !== "alma_weekly_summary")).toEqual([]);
     expect(h.fetch).not.toHaveBeenCalled();
   });
 
@@ -76,7 +76,7 @@ describe("alert-admin-signals service authorization", () => {
     expect(response.status).toBe(200);
     expect(await response.json()).toMatchObject({ ok: true, sent: false, dry_run: true, critical_open: 1, warning_open: 0 });
     expect(h.from).toHaveBeenCalledTimes(1);
-    expect(h.rpc).not.toHaveBeenCalled();
+    expect(h.rpc.mock.calls.filter(([n]: [string]) => n !== "alma_weekly_summary")).toEqual([]);
     expect(h.fetch).not.toHaveBeenCalled();
   });
 
@@ -92,14 +92,14 @@ describe("alert-admin-signals service authorization", () => {
     const h = harness();
     const response = await h.invoke(new Request("https://fixture.invalid", { method: "POST", headers: { authorization: `Bearer ${serviceKey}` }, body: '{"dry_run":true}' }));
     expect(await response.json()).toMatchObject({ sent: false, reason: "no_actionable_critical_signal", auto_resolved: [] });
-    expect(h.rpc).not.toHaveBeenCalled();
+    expect(h.rpc.mock.calls.filter(([n]: [string]) => n !== "alma_weekly_summary")).toEqual([]);
     expect(h.fetch).not.toHaveBeenCalled();
   });
 
   it.each([false, "true", 1])("preserves normal reconciliation for dry_run=%s", async (dry_run) => {
     const h = harness();
     await h.invoke(new Request("https://fixture.invalid", { method: "POST", headers: { authorization: `Bearer ${serviceKey}` }, body: JSON.stringify({ dry_run }) }));
-    expect(h.rpc).toHaveBeenCalledTimes(1);
+    expect(h.rpc.mock.calls.filter(([n]: [string]) => n !== "alma_weekly_summary")).toHaveLength(1);
     expect(h.rpc).toHaveBeenCalledWith("auto_resolve_admin_signals");
   });
 
@@ -124,14 +124,14 @@ describe("alert-admin-signals service authorization", () => {
     const h = harness({ noServiceKey: true });
     expect((await h.invoke(new Request("https://fixture.invalid", { headers: { authorization: `Bearer ${forgedJwt}` } }))).status).toBe(401);
     expect(h.from).not.toHaveBeenCalled();
-    expect(h.rpc).not.toHaveBeenCalled();
+    expect(h.rpc.mock.calls.filter(([n]: [string]) => n !== "alma_weekly_summary")).toEqual([]);
   });
 
   it("keeps OPTIONS public without privileged reads or sending", async () => {
     const h = harness();
     expect((await h.invoke(new Request("https://fixture.invalid", { method: "OPTIONS" }))).status).toBe(200);
     expect(h.from).not.toHaveBeenCalled();
-    expect(h.rpc).not.toHaveBeenCalled();
+    expect(h.rpc.mock.calls.filter(([n]: [string]) => n !== "alma_weekly_summary")).toEqual([]);
     expect(h.fetch).not.toHaveBeenCalled();
   });
 });

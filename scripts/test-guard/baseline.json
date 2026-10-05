@@ -14,6 +14,10 @@
     {
       "file": "src/__tests__/owner-stage-articles.test.ts",
       "reason": "Dépend du contenu de la base de production (table articles, slugs du mapping OWNER_STAGE_ARTICLES). Un renommage d'article en base doit faire échouer ce test sans bloquer le build : instable par nature, hors périmètre de la garde dans les deux sens. À lancer à la main via npm run test:data dans un environnement connecté."
+    },
+    {
+      "file": "src/integration/__tests__/get-public-sit-dates.test.ts",
+      "reason": "Dépend du contenu de la base de production (exige au moins une garde close). Sans cette donnée il échoue sans rapport avec le code : hors périmètre de la garde dans les deux sens. À lancer à la main dans un environnement connecté."
     }
   ],
   "knownFailures": []
