@@ -1,5 +1,6 @@
-import { lazy, Suspense, useEffect, useLayoutEffect, useState, type ReactNode } from "react";
+import { Suspense, useEffect, useLayoutEffect, useState, type ReactNode } from "react";
 import { Outlet, useSearchParams, useLocation } from "react-router-dom";
+import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
 import { Sidebar } from "./Navigation";
 import Breadcrumbs from "./Breadcrumbs";
 const AlmaDock = lazy(() =>
