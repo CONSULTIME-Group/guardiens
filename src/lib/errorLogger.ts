@@ -14,13 +14,16 @@ let sessionCount = 0;
 /**
  * Patterns d'erreurs non actionnables, ignorés silencieusement.
  * - "Script error." : cross-origin sans stack (pixel FB, GA…)
- * - chunks périmés : déjà gérés par lazyWithRetry
+ * - chunks périmés : rechargement unique (src/lib/staleChunk.ts, lot F1),
+ *   messages Chrome, Firefox et Safari
  * - ResizeObserver : warning bénin
  * - réseau utilisateur / navigation annulée : non actionnable
  */
 const IGNORED_PATTERNS: RegExp[] = [
   /^Script error\.?$/i,
-  /Failed to fetch dynamically imported module/i,
+  /dynamically imported module/i,
+  /Importing a module script failed/i,
+  /Unable to preload CSS/i,
   /ChunkLoadError/i,
   /Loading chunk \d+ failed/i,
   /ResizeObserver loop/i,
@@ -365,6 +368,10 @@ async function send(payload: {
   // navigateurs notoirement instables (autofill, bridges natifs, JS injecté).
   const inApp = isInAppBrowser();
   const sourceReason = detectThirdPartySource(payload.source, payload.stack);
+  // Lot F3 : une erreur née dans une extension de navigateur (source ou
+  // première frame chrome/moz/safari-extension) n'est pas du site : rien
+  // n'est enregistré (ex. "reading 'M_ID'", 301 occurrences).
+  if (sourceReason === "extension") return;
   const thirdPartyReason: ThirdPartyReason | null = inApp
     ? "in_app_webview"
     : sourceReason;
