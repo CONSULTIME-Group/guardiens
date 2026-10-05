@@ -55,6 +55,8 @@ function harness(options: { admin?: boolean; anomaly?: boolean; recent?: boolean
     if (specifier.includes("require-admin")) return auth;
     if (specifier.includes("supabase-js")) return { createClient };
     if (specifier.includes("resend-guard")) return { resendFetch };
+    // Réparation du miroir (lot F) testée à part dans email-mirror-drift : ici, aucune dérive.
+    if (specifier.includes("mirror-drift")) return { repairMirrorDrift: async () => ({ repaired: 0, orphanKeys: [], other: 0 }) };
     if (specifier.includes("email-categories")) return { EMAIL_CATEGORY_MAP: { "fixture-transactional": "transactional", "fixture-product": "product" } };
     throw new Error(`Unexpected import ${specifier}`);
   });
