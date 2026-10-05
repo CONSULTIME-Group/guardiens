@@ -2,20 +2,20 @@
   "version": 4,
   "sources": {
     "city_guides": {
-      "head": "2026-10-03T12:45:18.743518+00:00|95",
-      "fetchedAt": "2026-10-03T12:57:20.053Z"
+      "head": "2026-10-05T07:14:21.036951+00:00|96",
+      "fetchedAt": "2026-10-05T08:49:20.418Z"
     },
     "seo_city_pages": {
-      "head": "2026-10-03T22:20:04.223444+00:00|165",
-      "fetchedAt": "2026-10-03T22:47:05.811Z"
+      "head": "2026-10-05T04:05:00.453219+00:00|165",
+      "fetchedAt": "2026-10-05T08:49:20.444Z"
     },
     "articles": {
-      "head": "2026-10-03T12:45:18.73992+00:00|131",
-      "fetchedAt": "2026-10-03T12:57:20.065Z"
+      "head": "2026-10-04T16:10:12.374046+00:00|133",
+      "fetchedAt": "2026-10-05T08:49:20.417Z"
     },
     "seo_department_pages": {
-      "head": "2026-10-03T04:07:00.133052+00:00|102",
-      "fetchedAt": "2026-10-03T12:57:20.086Z"
+      "head": "2026-10-05T04:07:00.182296+00:00|102",
+      "fetchedAt": "2026-10-05T08:49:20.403Z"
     },
     "breed_profiles": {
       "head": "2026-08-19T19:06:57.126227+00:00|81",
@@ -198,6 +198,12 @@
       },
       {
         "loc": "/guides/colmar",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/quetteville",
         "lastmod": null,
         "changefreq": "weekly",
         "priority": "0.7"
@@ -2037,6 +2043,12 @@
         "priority": "0.6"
       },
       {
+        "loc": "/actualites/garde-chien-faire-garder-son-chien",
+        "lastmod": null,
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
         "loc": "/actualites/parcs-balades-chiens-grenoble-guide",
         "lastmod": null,
         "changefreq": "monthly",
@@ -2176,6 +2188,12 @@
       },
       {
         "loc": "/actualites/house-sitting-hiver-montagne-savoie",
+        "lastmod": null,
+        "changefreq": "monthly",
+        "priority": "0.6"
+      },
+      {
+        "loc": "/actualites/garde-animaux-domicile-chien-chat",
         "lastmod": null,
         "changefreq": "monthly",
         "priority": "0.6"

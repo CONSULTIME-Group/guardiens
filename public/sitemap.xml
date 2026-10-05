@@ -596,6 +596,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/actualites/garde-chien-faire-garder-son-chien</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/actualites/parcs-balades-chiens-grenoble-guide</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -712,6 +717,11 @@
   </url>
   <url>
     <loc>https://guardiens.fr/actualites/house-sitting-hiver-montagne-savoie</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/actualites/garde-animaux-domicile-chien-chat</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -1642,6 +1652,11 @@
   </url>
   <url>
     <loc>https://guardiens.fr/guides/colmar</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/guides/quetteville</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -3108,6 +3123,11 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/gardiens/5816bf95-4f23-4ef2-9127-2fb63063eb91</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/gardiens/588d9ab7-189e-42b1-9312-2d7792d85540</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
@@ -3648,7 +3668,7 @@
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/annonces/gardiannage-de-maison-proche-du-zooparc-de-beauval-et-des-ch-0a6da6</loc>
+    <loc>https://guardiens.fr/annonces/gardiannage-de-maison-proche-du-zooparc-de-beauval-et-des-ch-villentrois-0a6da6</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -3659,6 +3679,11 @@
   </url>
   <url>
     <loc>https://guardiens.fr/annonces/garde-de-deux-chiens-frere-et-soeur-5-nuits-a-pusignan-69330-314465</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/annonces/garde-chien-du-28-octobre-au-6-novembre-collonges-sous-saleve-4af335</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -3678,7 +3703,7 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/annonces/garder-2-chats-adorables-maison-a-la-campagne-en-haute-loire-tence-9105ea</loc>
+    <loc>https://guardiens.fr/annonces/nous-recherchons-une-personne-ou-un-couple-retraite-pour-gar-853154</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
