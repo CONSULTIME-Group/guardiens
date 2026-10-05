@@ -2,6 +2,7 @@
 // Carte mondiale + grille simple : les distances FR n'ont pas de sens ici,
 // mais la position pays/ville doit être immédiatement visible.
 import { useEffect, useState } from "react";
+import MapErrorBoundary from "@/components/shared/MapErrorBoundary";
 import { Link } from "react-router-dom";
 import Head from "@/components/seo/Head";
 import { Globe2, MapPin } from "lucide-react";
@@ -68,6 +69,7 @@ function InternationalMap({ sits }: { sits: IntlSitWithCoords[] }) {
 
   return (
     <div className="rounded-2xl overflow-hidden border border-border bg-card shadow-sm h-[320px] md:h-[420px]">
+      <MapErrorBoundary>
       <MapContainer center={center} zoom={initialZoom} className="h-full w-full" attributionControl={true} scrollWheelZoom={false}>
 
         <LeafletUnmountGuard />
@@ -83,6 +85,7 @@ function InternationalMap({ sits }: { sits: IntlSitWithCoords[] }) {
           <Marker key={s.id} position={[s.coords.lat, s.coords.lng]} icon={pinIcon} />
         ))}
       </MapContainer>
+      </MapErrorBoundary>
     </div>
   );
 }

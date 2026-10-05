@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import MapErrorBoundary from "@/components/shared/MapErrorBoundary";
 import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import L from "leaflet";
 import { LeafletUnmountGuard } from "@/components/shared/LeafletUnmountGuard";
@@ -72,6 +73,7 @@ const SearchOwnerMapView = ({ sitters, centerCoords, onContact, contactingId }: 
 
   return (
     <div className="w-full h-full relative">
+      <MapErrorBoundary>
       <MapContainer
         center={center}
         zoom={centerCoords ? 11 : 6}
@@ -95,6 +97,7 @@ const SearchOwnerMapView = ({ sitters, centerCoords, onContact, contactingId }: 
           />
         ))}
       </MapContainer>
+      </MapErrorBoundary>
 
       {active && (
         <div
