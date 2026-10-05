@@ -1,4 +1,5 @@
-import { useState, useEffect, useLayoutEffect, useCallback, useRef, lazy, Suspense } from "react";
+import { useState, useEffect, useLayoutEffect, useCallback, useRef, Suspense } from "react";
+import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
 import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
