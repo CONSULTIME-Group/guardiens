@@ -1,4 +1,5 @@
 import "leaflet/dist/leaflet.css";
+import MapErrorBoundary from "@/components/shared/MapErrorBoundary";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import { LeafletUnmountGuard } from "@/components/shared/LeafletUnmountGuard";
@@ -59,6 +60,7 @@ const GuideMap = ({ places, categories }: GuideMapProps) => {
   return (
     <div className="max-w-5xl mx-auto px-4 mb-8">
       <div className="rounded-xl overflow-hidden border border-border h-[300px] sm:h-[400px]">
+        <MapErrorBoundary>
         <MapContainer
           center={center}
           bounds={bounds}
@@ -98,6 +100,7 @@ const GuideMap = ({ places, categories }: GuideMapProps) => {
             );
           })}
         </MapContainer>
+        </MapErrorBoundary>
       </div>
       <div className="flex flex-wrap gap-3 mt-3">
         {categories.map((cat) => {

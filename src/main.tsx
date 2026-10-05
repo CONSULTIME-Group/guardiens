@@ -3,6 +3,7 @@ import App from "./App.tsx";
 import "./index.css";
 import { installGlobalErrorHandlers } from "./lib/logger";
 import { installGlobalErrorLogger } from "./lib/errorLogger";
+import { reloadOnceForStaleChunk } from "./lib/staleChunk";
 import { initConsent } from "./lib/cookieConsent";
 import { installStorageFallback } from "./lib/storageFallback";
 import { installDomTranslationGuard } from "./lib/domTranslationGuard";
@@ -82,4 +83,8 @@ setTimeout(markPrerenderReady, 10000);
 // Lot P2b : la mesure réelle (webVitals) démarre avec AfterPaintExtras, après le premier affichage.
 installGlobalErrorHandlers();
 installGlobalErrorLogger();
+// Lot F1 : préchargement d'un chunk d'une version remplacée.
+window.addEventListener("vite:preloadError", (e) => {
+  if (reloadOnceForStaleChunk()) e.preventDefault();
+});
 initConsent();

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useLayoutEffect } from "react";
+import MapErrorBoundary from "@/components/shared/MapErrorBoundary";
 import { MapContainer, TileLayer, Marker, useMap, ZoomControl } from "react-leaflet";
 import L from "leaflet";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -206,6 +207,7 @@ const SearchMapView = ({
           haut à droite sur grand écran, et disparaît sur mobile où le
           pincement suffit et où le coin bas est déjà occupé. */}
       <div className="w-full md:w-1/2 relative flex-1 min-h-0 [&_.leaflet-control-attribution]:text-[10px]">
+        <MapErrorBoundary>
         <MapContainer
           center={center}
           zoom={userCoords ? 11 : 6}
@@ -241,6 +243,7 @@ const SearchMapView = ({
               );
             })}
         </MapContainer>
+        </MapErrorBoundary>
 
         {/* Sélecteur : toutes les annonces vs annonces actives uniquement */}
         <div className="absolute top-3 left-3 right-3 md:right-auto z-[400] bg-card border-2 border-border rounded-xl shadow-lg p-1 flex text-sm md:text-xs max-w-[calc(100vw-1.5rem)] md:max-w-none">

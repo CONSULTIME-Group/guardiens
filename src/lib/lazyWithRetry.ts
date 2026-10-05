@@ -1,91 +1,34 @@
 import { lazy, type ComponentType } from "react";
-
-const RELOAD_TTL_MS = 30_000;
-
-/**
- * Empreinte stable d'une fabrique d'import.
- *
- * Le repli historique gardait les 50 premiers caractères de la source de la
- * fabrique. Après minification, toutes les routes commencent par la même
- * séquence, donc toutes partageaient la même clé de rechargement : dès qu'une
- * route avait rechargé, les autres se voyaient refuser leur unique tentative
- * et remontaient l'erreur brute à l'ErrorBoundary. Un hash de la source
- * complète redonne une clé par route.
- */
-const hashSource = (source: string) => {
-  let hash = 0;
-  for (let i = 0; i < source.length; i += 1) {
-    hash = (hash * 31 + source.charCodeAt(i)) | 0;
-  }
-  return `f${(hash >>> 0).toString(36)}`;
-};
-
-const getReloadKey = (chunkName?: string, fallbackId?: string) =>
-  `chunk-reload-${chunkName ?? fallbackId ?? "anonymous-chunk"}`;
-
-
-const getLastReloadAt = (reloadKey: string) => {
-  try {
-    const value = sessionStorage.getItem(reloadKey);
-    if (!value) return null;
-
-    const timestamp = Number(value);
-    return Number.isFinite(timestamp) ? timestamp : 0;
-  } catch {
-    return null;
-  }
-};
-
-const markReload = (reloadKey: string) => {
-  try {
-    sessionStorage.setItem(reloadKey, String(Date.now()));
-  } catch {
-    // Ignore storage errors (private mode, quota, etc.)
-  }
-};
-
-const clearReloadMark = (reloadKey: string) => {
-  try {
-    sessionStorage.removeItem(reloadKey);
-  } catch {
-    // Ignore storage errors
-  }
-};
+import { reloadOnceForStaleChunk } from "./staleChunk";
 
 /**
  * Wrapper autour de React.lazy qui :
  * 1. Retente une fois en cas d'échec réseau transitoire
  * 2. Si toujours en échec après un déploiement (chunk hash périmé),
- *    force un rechargement complet de la page une seule fois par fenêtre courte
- *    pour éviter les boucles, sans bloquer définitivement les futurs rechargements.
+ *    recharge la page une seule fois. Lot F1 : l'ancienne fenêtre de 30 s
+ *    par route laissait un second chunk (AppLayout puis MessageBell)
+ *    échouer après rechargement, et les cloches utilisaient le lazy nu.
+ *    Un seul marqueur global de 60 s, partagé avec l'ErrorBoundary et
+ *    vite:preloadError (src/lib/staleChunk.ts).
+ *
+ * Le second paramètre (nom de chunk) est conservé pour la lisibilité des
+ * appels existants.
  */
 export function lazyWithRetry<T extends ComponentType<any>>(
   factory: () => Promise<{ default: T }>,
-  chunkName?: string,
+  _chunkName?: string,
 ) {
   return lazy(async () => {
-    const reloadKey = getReloadKey(chunkName, hashSource(factory.toString()));
-
     try {
-      const module = await factory();
-      clearReloadMark(reloadKey);
-      return module;
+      return await factory();
     } catch {
       try {
         await new Promise((resolve) => setTimeout(resolve, 400));
-        const module = await factory();
-        clearReloadMark(reloadKey);
-        return module;
+        return await factory();
       } catch (error) {
-        const lastReloadAt = getLastReloadAt(reloadKey);
-        const canReload = !lastReloadAt || Date.now() - lastReloadAt > RELOAD_TTL_MS;
-
-        if (canReload) {
-          markReload(reloadKey);
-          window.location.reload();
+        if (reloadOnceForStaleChunk()) {
           return new Promise(() => {}) as never;
         }
-
         throw error;
       }
     }

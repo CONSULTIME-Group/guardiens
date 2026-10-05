@@ -27,7 +27,11 @@ const FORBIDDEN_SNIPPETS = [
   "Garde de maison et d'animaux entre particuliers",
   "Partez l'esprit tranquille",
   "Un gardien près de chez vous s'occupe de votre maison",
+  "phase de lancement",
 ];
+
+// Marqueurs interdits dans tout le document (bloc noscript compris, lot F5).
+const FORBIDDEN_DOCUMENT_SNIPPETS = ["phase de lancement"];
 
 const PRERENDER_RECACHE_URL =
   "https://erhccyqevdyevpyctsjj.supabase.co/functions/v1/prerender-recache";
@@ -59,7 +63,10 @@ async function checkUrl(url) {
   const head = headEnd > 0 ? html.slice(0, headEnd) : html;
 
   const missing = REQUIRED_SNIPPETS.filter((s) => !head.includes(s));
-  const forbidden = FORBIDDEN_SNIPPETS.filter((s) => head.includes(s));
+  const forbidden = [
+    ...FORBIDDEN_SNIPPETS.filter((s) => head.includes(s)),
+    ...FORBIDDEN_DOCUMENT_SNIPPETS.filter((s) => !head.includes(s) && html.includes(s)),
+  ];
 
   const titleMatch = head.match(/<title>([^<]+)<\/title>/i);
   console.log(`  status   : ${status}`);

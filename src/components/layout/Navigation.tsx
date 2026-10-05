@@ -5,7 +5,8 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
-import { lazy, Suspense, useLayoutEffect, useRef, useState } from "react";
+import { Suspense, useLayoutEffect, useRef, useState } from "react";
+import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
 import { useNavBadgeCounts } from "@/hooks/useNavBadgeCounts";
 import { useChromeVisibility } from "./ChromeVisibility";
 import UserMenu from "./UserMenu";

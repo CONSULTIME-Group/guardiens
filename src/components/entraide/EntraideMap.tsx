@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Circle, CircleMarker, MapContainer, Popup, TileLayer, Tooltip, useMap, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import LeafletUnmountGuard from "@/components/shared/LeafletUnmountGuard";
+import LeafletUnmountGuard, { isMapAlive } from "@/components/shared/LeafletUnmountGuard";
+import MapErrorBoundary from "@/components/shared/MapErrorBoundary";
 import { MAP_TILE_WORLD_ATTRIBUTION, MAP_TILE_WORLD_URL } from "@/lib/mapTiles";
 import { offsetApproximatePoint } from "@/lib/entraideMap";
 import { HelperCard, NeedCard, type EntraideNeed, type PublicHelper } from "./EntraideCards";
@@ -43,6 +44,8 @@ const clusterPoints = (points: Point[], zoom: number): Cluster[] => {
 const FitPoints = ({ points, focus }: { points: Point[]; focus: [number, number] | null }) => {
   const map = useMap();
   useEffect(() => {
+    // Lot F2 : jamais de recadrage sur une carte détruite.
+    if (!isMapAlive(map)) return;
     if (focus) {
       map.setView(focus, 12);
       return;
@@ -57,7 +60,7 @@ const FitPoints = ({ points, focus }: { points: Point[]; focus: [number, number]
 const NeedCircles = ({ points }: { points: Point[] }) => {
   const map = useMap();
   const [zoom, setZoom] = useState(map.getZoom());
-  useMapEvents({ zoomend: () => setZoom(map.getZoom()) });
+  useMapEvents({ zoomend: () => { if (isMapAlive(map)) setZoom(map.getZoom()); } });
   const clusters = useMemo(() => clusterPoints(points, zoom), [points, zoom]);
   return (
     <>
@@ -150,7 +153,9 @@ const EntraideMap = ({ needs, helpers, focus }: {
     return <div className="flex h-[360px] items-center justify-center bg-muted text-sm text-muted-foreground">La carte se remplit avec les coups de main du coin.</div>;
   }
 
+  // Lot F2 : si la carte échoue, la page s'affiche sans elle.
   return (
+    <MapErrorBoundary>
     <div className="overflow-hidden rounded-lg border border-border" aria-label="Carte des besoins et des personnes disponibles">
       <div className="h-[360px] sm:h-[520px]">
         <MapContainer center={focus || [46.6, 2.4]} zoom={focus ? 12 : 6} className="h-full w-full" scrollWheelZoom>
@@ -163,6 +168,7 @@ const EntraideMap = ({ needs, helpers, focus }: {
       </div>
       <MapLegend />
     </div>
+    </MapErrorBoundary>
   );
 };
 

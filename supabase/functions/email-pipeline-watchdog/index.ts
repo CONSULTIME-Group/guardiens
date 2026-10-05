@@ -11,6 +11,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { resendFetch } from "../_shared/resend-guard.ts";
 import { EMAIL_CATEGORY_MAP } from "../_shared/email-categories.ts";
 import { requireAdminOrServiceRole } from "../_shared/require-admin.ts";
+import { repairMirrorDrift } from "./mirror-drift.ts";
 
 // Liste des templates transactionnels, transmise en SQL pour que le compteur
 // transactionnel en retard soit calcule sur toute la file, pas sur la liste
@@ -35,6 +36,8 @@ const MAX_FAILURE_RATE = 0.3;
 const MIN_ATTEMPTS_FOR_RATE = 10;
 
 type Anomaly = {
+  /** Déjà enregistrée (une fois par clé et par jour) : pas de second log. */
+  logged?: boolean;
   code: string;
   title: string;
   detail: string;
@@ -195,22 +198,43 @@ Deno.serve(async (req) => {
     // (pending/processing) dans email_deferred_queue est une dérive : la file
     // a tranché, le miroir n'a pas suivi. C'est l'invariant qui manquait lors
     // de l'incident des 2 162 lignes fantômes (août 2026).
+    // Lot F4 : le watchdog répare le miroir au lieu d'alerter en boucle.
+    // Ligne 'deferred' de plus de 24h dont la file (même idempotency_key)
+    // est terminale : abandoned et cancelled sont recopiés dans le statut ;
+    // sent pose metadata.flushed_at (convention existante, l'envoi réel a
+    // déjà sa propre ligne avec resend_id, on ne compte pas deux envois).
+    // L'alerte ne reste levée que pour une clé sans aucune ligne en file,
+    // enregistrée une fois par clé et par jour.
+    let orphanKeys: string[] = [];
     try {
-      const { data: driftRaw, error: driftErr } = await service.rpc("email_mirror_drift_count");
-      if (driftErr) {
-        console.error("email_mirror_drift_count failed", driftErr);
-      } else {
-        const drift = Number(driftRaw ?? 0);
-        if (drift > 0) {
-          anomalies.push({
-            code: "email_deferred_mirror_drift",
-            title: "Miroir email_send_log désynchronisé de la file",
-            detail: `${drift} ligne(s) email_send_log en statut 'deferred' depuis plus de 24h sans ligne vivante dans email_deferred_queue. Le journal affirme un envoi en attente que la file ne porte plus. Ne jamais conclure à un incident d'envoi à partir du seul email_send_log : joindre sur metadata.idempotency_key et chercher une ligne 'sent' avec resend_id.`,
-          });
-        }
-      }
+      const result = await repairMirrorDrift(service);
+      orphanKeys = result.orphanKeys;
+      if (result.repaired > 0) console.log("mirror drift repaired", result.repaired);
     } catch (driftEx) {
-      console.error("mirror drift check failed", driftEx);
+      console.error("mirror drift repair failed", driftEx);
+    }
+    const today = new Date().toISOString().slice(0, 10);
+    for (const key of orphanKeys) {
+      const fingerprint = `email_pipeline:email_deferred_mirror_drift:${key}:${today}`;
+      const { data: seen } = await service
+        .from("error_logs")
+        .select("id")
+        .eq("fingerprint", fingerprint)
+        .limit(1);
+      if (seen && seen.length > 0) continue;
+      await service.rpc("log_client_error", {
+        _fingerprint: fingerprint,
+        _message: `[email_deferred_mirror_drift] Ligne email_send_log 'deferred' depuis plus de 24h sans aucune ligne dans email_deferred_queue (idempotency_key ${key}).`,
+        _severity: "error",
+        _source: "email-pipeline-watchdog",
+        _context: { code: "email_deferred_mirror_drift", idempotency_key: key } as unknown as Record<string, unknown>,
+      });
+      anomalies.push({
+        code: `email_deferred_mirror_drift`,
+        title: "Miroir email_send_log sans ligne en file",
+        detail: `Clé ${key} : ligne email_send_log 'deferred' depuis plus de 24h, aucune ligne dans email_deferred_queue.`,
+        logged: true,
+      });
     }
 
     if (anomalies.length === 0) {
@@ -221,6 +245,10 @@ Deno.serve(async (req) => {
     const oneHourAgo = new Date(Date.now() - 60 * 60_000).toISOString();
     const fresh: Anomaly[] = [];
     for (const a of anomalies) {
+      if (a.logged) {
+        fresh.push(a);
+        continue;
+      }
       const fingerprint = `email_pipeline:${a.code}`;
       const { data: recent, error: qErr } = await service
         .from("error_logs")

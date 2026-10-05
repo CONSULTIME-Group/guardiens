@@ -2,6 +2,7 @@ import { Component, type ErrorInfo, type ReactNode } from "react";
 import { AlertTriangle, RefreshCw, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { reportError } from "@/lib/errorLogger";
+import { isStaleChunkError, reloadOnceForStaleChunk } from "@/lib/staleChunk";
 import { trackEvent } from "@/lib/analytics";
 
 interface Props {
@@ -34,6 +35,7 @@ export class DashboardErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
+    if (isStaleChunkError(error) && reloadOnceForStaleChunk()) return; // lot F1
     const errorId = Math.random().toString(36).slice(2, 10).toUpperCase();
     this.setState({ errorId });
 

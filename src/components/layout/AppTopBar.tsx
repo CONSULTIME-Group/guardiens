@@ -1,4 +1,5 @@
-import { lazy, Suspense, useLayoutEffect, useRef, useState } from "react";
+import { Suspense, useLayoutEffect, useRef, useState } from "react";
+import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
 import { Link } from "react-router-dom";
 import { BackButton } from "./BackButton";
 import UserMenu from "./UserMenu";

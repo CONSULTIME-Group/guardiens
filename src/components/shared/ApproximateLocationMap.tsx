@@ -3,6 +3,7 @@
 // Affiche un cercle flou (rayon ~1.5 km) au lieu du point exact pour préserver
 // la vie privée tant que la mise en relation n'a pas eu lieu.
 import { useEffect, useState } from "react";
+import MapErrorBoundary from "@/components/shared/MapErrorBoundary";
 import "leaflet/dist/leaflet.css";
 import { MapContainer, TileLayer, Circle } from "react-leaflet";
 import L from "leaflet";
@@ -149,6 +150,7 @@ const ApproximateLocationMap = ({
 
   return (
     <div className={`relative overflow-hidden ${className}`}>
+      <MapErrorBoundary>
       <MapContainer
         center={[coords.lat, coords.lng]}
         zoom={12}
@@ -178,6 +180,7 @@ const ApproximateLocationMap = ({
           }}
         />
       </MapContainer>
+      </MapErrorBoundary>
       {city && (
         <div className="absolute bottom-3 left-3 z-[400] bg-card/95 backdrop-blur px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm border border-border pointer-events-none">
           {city}{postalCode ? ` · ${postalCode.slice(0, 2)}` : ""}
