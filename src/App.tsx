@@ -47,6 +47,7 @@ const GlobalBottomNav = lazy(() => import("@/components/layout/GlobalBottomNav")
 // seul fichier chargé après le premier affichage. Accessoire : un échec de
 // chargement ne fait jamais tomber la page (retente une fois, puis rien).
 import AfterPaintExtras from "@/components/analytics/AfterPaintExtrasLazy";
+import EspaceParamSwitch from "@/components/routing/EspaceParamSwitch";
 const PwaInstallTracking = lazy(
   () => import("@/hooks/usePwaInstall").then((m) => ({ default: m.PwaInstallTracking })),
   "PwaInstallTracking",
@@ -689,6 +690,7 @@ const App = () => (
               <ScrollToTop />
               <ScrollLockGuard />
               <RefCapture />
+              <EspaceParamSwitch />
               <LangUrlSync />
               <OfflineBanner />
               {PreviewDiagnosticBanner && (

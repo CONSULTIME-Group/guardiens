@@ -59,9 +59,9 @@ export const SPACE_OWNER_TO_SITTER =
 export const SPACE_SITTER_TO_OWNER =
   "Vous êtes dans votre espace gardien : il montre les gardes proposées par les propriétaires. Pour faire garder chez vous, votre annonce se prépare dans votre espace propriétaire.";
 export const SPACE_ACTIVATE_SITTER =
-  "Votre compte a seulement l'espace propriétaire. Pour garder chez les autres, vous pouvez activer l'espace gardien dans vos réglages, rubrique des espaces.";
+  "Votre compte a seulement l'espace propriétaire. Pour garder chez les autres, vous pouvez activer l'espace gardien dans vos réglages, rubrique Mes espaces.";
 export const SPACE_ACTIVATE_OWNER =
-  "Votre compte a seulement l'espace gardien. Pour faire garder chez vous, vous pouvez activer l'espace propriétaire dans vos réglages, rubrique des espaces.";
+  "Votre compte a seulement l'espace gardien. Pour faire garder chez vous, vous pouvez activer l'espace propriétaire dans vos réglages, rubrique Mes espaces.";
 
 export const SITTER_SEARCH_PATH = "/annonces?espace=gardien";
 export const OWNER_CREATE_PATH = "/sits/create?espace=proprietaire";
