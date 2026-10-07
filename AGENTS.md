@@ -1,6 +1,6 @@
 # Décisions techniques
 
-- Vue d ensemble admin (lot A13) : chaque bloc a sa propre lecture React Query, pas de squelette global, recharts en import différé, analyse IA lue en table et générée au clic ; pourquoi : moins de 16 lectures au chargement et une panne n éteint pas les autres blocs.
+- Vue d ensemble admin (lot A13) : une lecture React Query par bloc, recharts différé, analyse IA générée au clic ; pourquoi : moins de 16 lectures et une panne n éteint pas les autres blocs.
 
 - Tableau de bord propriétaire (lot D1) : les blocs partagés avec le gardien changent par variante (prop `layout`/`variant`, défaut inchangé) ou par composant propriétaire dédié ; pourquoi : le rendu gardien reste intact jusqu'au lot D2.
 
@@ -9,9 +9,9 @@
 
 - Tableau de bord léger (lot P1b) : lectures du membre partagées par src/lib/dashboardShared.ts, lectures d'autrui groupées en .in() par src/lib/batchedReads.ts, blocs sous la ligne de flottaison montés par DeferredMount, scoring d'affinité découpé (src/lib/yieldToMain.ts) ; pourquoi : au plus 2 lectures par table et 40 au total, verrouillé par src/__tests__/p1b/dashboard-read-budget.test.tsx.
 
-- Démarrage léger (lots P2, P2b) : dictionnaire fr, PublicHeader et PublicFooter dans l'entrée (aucun rendu suspendu au réseau) ; traceurs, bandeau cookies et mesure webVitals réunis dans AfterPaintExtras après le premier affichage ; coquille membre et Dashboard préchargés sans exécution (modulepreload, scripts/vite-plugin-member-preload.mjs) ; pas de manualChunks pour du code applicatif ; pourquoi : entrée sous 300 Ko et 14 préchargements sur /, verrouillés par src/__tests__/p2/startup-build.test.ts, un manualChunks hisse les dépendances partagées dans le chemin critique.
+- Démarrage léger (lots P2, P2b, P5) : seuls a11y, article, footer, nav du dictionnaire dans l'entrée, le reste attendu par lazyWithRetry (dictionaryGate), alerte de build à 300 000 octets ; PublicHeader et PublicFooter dans l'entrée (aucun rendu suspendu au réseau) ; traceurs, bandeau cookies et mesure webVitals réunis dans AfterPaintExtras après le premier affichage ; coquille membre et Dashboard préchargés sans exécution (modulepreload, scripts/vite-plugin-member-preload.mjs) ; pas de manualChunks pour du code applicatif ; pourquoi : entrée sous 300 Ko et 14 préchargements sur /, verrouillés par src/__tests__/p2/startup-build.test.ts, un manualChunks hisse les dépendances partagées dans le chemin critique.
 
-- Tableau de bord fluide (lot P3) : blocs bas du tableau de bord montés par StagedMount (hauteur réservée), barre basse non montée sur ordinateur, prénoms de la cloche des messages lus à l'ouverture ; pourquoi : plus longue tâche sous 200 ms en ralenti x4 et au plus 10 lectures sur / pour un membre, verrouillé par src/__tests__/p3/.
+- Tableau de bord fluide (lot P3) : blocs bas par StagedMount, barre basse absente sur ordinateur, prénoms de la cloche lus à l'ouverture ; pourquoi : tâche max 200 ms en ralenti x4, 10 lectures sur /, verrou src/__tests__/p3/.
 
 - Espace propriétaire sans doublons (lot P4) : les identifiants de « Pour vous », « Près de chez vous » et des candidatures sont calculés par src/lib/ownerSitterPool.ts, lus en deux salves par src/lib/ownerSpaceReads.ts (affinité, puis avis et compétences une fois le Top 3 annoncé), mesurés sur le simulateur réaliste src/__tests__/p4/ (filtres appliqués, plafond 1 000 lignes) ; pourquoi : le simulateur P1b ignore les filtres et ne voit pas les doublons de production.
 

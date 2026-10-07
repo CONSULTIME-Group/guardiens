@@ -1,5 +1,6 @@
 import { lazy, type ComponentType } from "react";
 import { reloadOnceForStaleChunk } from "./staleChunk";
+import { waitDictionary } from "./dictionaryGate";
 
 /**
  * Wrapper autour de React.lazy qui :
@@ -15,9 +16,11 @@ import { reloadOnceForStaleChunk } from "./staleChunk";
  * appels existants.
  */
 export function lazyWithRetry<T extends ComponentType<any>>(
-  factory: () => Promise<{ default: T }>,
+  load: () => Promise<{ default: T }>,
   _chunkName?: string,
 ) {
+  // Lot P5 : la page attend aussi le dictionnaire complet (même rendu qu'avant).
+  const factory = () => Promise.all([load(), waitDictionary()]).then(([m]) => m);
   return lazy(async () => {
     try {
       return await factory();
