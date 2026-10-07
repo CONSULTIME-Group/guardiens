@@ -1,7 +1,8 @@
 import { describe, it, expect, vi } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
 
-vi.mock("@/contexts/AuthContext", () => ({ useAuth: () => ({ user: { id: "u1", role: "both" } }) }));
+const auth = { user: { id: "u1", role: "both" } };
+vi.mock("@/contexts/AuthContext", () => ({ useAuth: () => auth }));
 vi.mock("@/integrations/supabase/client", () => ({ supabase: {} }));
 vi.mock("@/lib/myProfile", () => ({
   fetchMySitterProfile: () => Promise.resolve({ data: null }),
