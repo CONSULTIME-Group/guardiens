@@ -11,7 +11,7 @@
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useFeatureFlag } from "@/hooks/useFeatureFlag";
+import { useFeatureFlag, getFlag } from "@/hooks/useFeatureFlag";
 import { useAffinityOnboardingStatus } from "@/hooks/useAffinityOnboardingStatus";
 import { isPublishPath, rememberPublishIntent } from "@/lib/postOnboardingIntent";
 import { isArrivalV2Account } from "@/lib/arrival";
@@ -22,10 +22,9 @@ const OnboardingGate = () => {
   const navigate = useNavigate();
   const { enabled, appliesSince, loading: flagLoading } = useFeatureFlag("mandatory_affinity_onboarding");
   const status = useAffinityOnboardingStatus();
-  const arrival = useFeatureFlag("arrival_v2");
 
   useEffect(() => {
-    if (loading || flagLoading || status.loading || arrival.loading) return;
+    if (loading || flagLoading || status.loading) return;
     if (!user || !enabled || !status.needsOnboarding) return;
     // Scoping : ne redirige que les comptes créés après la date de bascule.
     // Les comptes antérieurs gardent le nudge doux (AffinityMissingCTA).
@@ -50,14 +49,20 @@ const OnboardingGate = () => {
     const redirect = `${location.pathname}${location.search}${location.hash}`;
     rememberPublishIntent(redirect);
     // Lot 1 : un propriétaire v2 incomplet reprend le parcours d'arrivée.
-    if (user.role === "owner" && !arrival.loading && isArrivalV2Account(arrival, status.profileCreatedAt)) {
-      const step = status.needsPostal ? "/arrivee/vous" : "/arrivee/affinites";
-      const key = step === "/arrivee/vous" ? "next" : "redirect";
-      navigate(`${step}?${key}=${encodeURIComponent(redirect)}`, { replace: true });
-      return;
-    }
-    navigate(`/onboarding/affinity?redirect=${encodeURIComponent(redirect)}`, { replace: true });
-  }, [loading, flagLoading, status.loading, status.needsOnboarding, status.needsPostal, status.profileCreatedAt, user, enabled, appliesSince, location, navigate, arrival]);
+    // Lu seulement au moment de rediriger : aucune lecture de plus sur /dashboard.
+    const fallback = `/onboarding/affinity?redirect=${encodeURIComponent(redirect)}`;
+    if (user.role !== "owner") { navigate(fallback, { replace: true }); return; }
+    let cancelled = false;
+    void getFlag("arrival_v2").then((arrival) => {
+      if (cancelled) return;
+      if (isArrivalV2Account(arrival, status.profileCreatedAt)) {
+        const step = status.needsPostal ? "/arrivee/vous" : "/arrivee/affinites";
+        const key = step === "/arrivee/vous" ? "next" : "redirect";
+        navigate(`${step}?${key}=${encodeURIComponent(redirect)}`, { replace: true });
+      } else navigate(fallback, { replace: true });
+    });
+    return () => { cancelled = true; };
+  }, [loading, flagLoading, status.loading, status.needsOnboarding, status.needsPostal, status.profileCreatedAt, user, enabled, appliesSince, location, navigate]);
 
   return null;
 };

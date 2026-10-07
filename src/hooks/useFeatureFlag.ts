@@ -38,7 +38,7 @@ async function fetchFlag(key: string): Promise<FlagValue> {
   };
 }
 
-async function getFlag(key: string): Promise<FlagValue> {
+export async function getFlag(key: string): Promise<FlagValue> {
   const now = Date.now();
   const entry = cache.get(key);
   if (entry && now - entry.fetchedAt < TTL_MS) return entry.value;
