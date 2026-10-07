@@ -18,6 +18,8 @@
  * d'animaux et une fiche sans aucun animal.
  */
 
+import { animalFromText } from "../../supabase/functions/_shared/alma-companion";
+
 const SPECIES_RX =
   /\b(chats?|chatons?|chien(ne)?s?|chiots?|cheval|chevaux|poney|poneys|poules?|coqs?|lapins?|hamsters?|cochons?\s+d['’]inde|furets?|oiseaux?|poissons?|tortues?|rongeurs?|nac|animaux|animal)\b/i;
 
@@ -44,3 +46,18 @@ export const shouldPromptAnimalMention = (
   input: SitAnimalMentionInput,
   petCount: number,
 ): boolean => petCount === 0 && sitTextMentionsAnimals(input);
+
+/**
+ * Lot L4 : annonce PUBLIÉE sans fiche animal alors que le texte en cite un.
+ * Renvoie le libellé à présenter (« yorkshire », « chien »), ou null.
+ * Générique, jamais codé pour une annonce.
+ */
+export const animalToPresent = (
+  input: SitAnimalMentionInput & { status?: string | null },
+  petCount: number,
+): string | null => {
+  if (input.status !== "published" || !shouldPromptAnimalMention(input, petCount)) return null;
+  return animalFromText(input.title, input.absenceReason, input.sitterExpectations, input.specificExpectations) ?? "animal";
+};
+
+export const presentAnimalTitle = (animal: string): string => `Présentez votre ${animal} aux gardiens`;

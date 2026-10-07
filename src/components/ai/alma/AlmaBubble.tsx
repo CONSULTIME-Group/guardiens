@@ -90,6 +90,8 @@ export function AlmaBubble({
           <span className="text-[10px] font-semibold uppercase tracking-wider text-primary/80">
             Alma
           </span>
+          {/* Lot L4, transparence (règlement européen sur l'IA, article 50). */}
+          <span className="text-[9px] leading-tight text-muted-foreground text-center max-w-[72px]">Compagne IA de Guardiens</span>
         </div>
 
 
