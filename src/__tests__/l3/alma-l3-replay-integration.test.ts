@@ -98,8 +98,8 @@ export const REPLAY_OUTPUT: Record<string, { answer: string; action: string; pat
 const VOICE: Record<string, string> = {
   "cas-43": "Vous êtes dans votre espace propriétaire, Martine : la page Annonces y montre vos propres annonces. Les gardes proposées par les propriétaires vous attendent dans votre espace gardien. Guardiens propose des gardes en France, Polynésie française comprise, et il n'y a aucune garde en Italie aujourd'hui.",
   "cas-44": "Garder un chien en Italie, je comprends l'envie, mais il n'y a aucune garde en Italie aujourd'hui : Guardiens propose des gardes en France, Polynésie française comprise. Depuis votre espace propriétaire, vous voyez vos annonces ; les gardes à garder sont dans votre espace gardien.",
-  "cas-45": "C'est normal : vous êtes dans votre espace propriétaire, et la page Annonces y montre vos propres annonces. Les gardes proposées par les autres propriétaires se trouvent dans votre espace gardien, je vous y emmène.",
-  "cas-46": "Elle se trouve dans votre espace gardien. Ici, dans votre espace propriétaire, la page Annonces ne montre que les vôtres ; un clic suffit pour changer d'espace.",
+  "cas-45": "Guardiens propose des gardes en France, Polynésie française comprise, et il n'y a aucune garde en Italie aujourd'hui. C'est normal : vous êtes dans votre espace propriétaire, et la page Annonces y montre vos propres annonces. Les gardes proposées par les autres propriétaires se trouvent dans votre espace gardien, je vous y emmène.",
+  "cas-46": "Guardiens propose des gardes en France, Polynésie française comprise ; il n'y a aucune garde en Italie aujourd'hui. Elle se trouve dans votre espace gardien. Ici, dans votre espace propriétaire, la page Annonces ne montre que les vôtres ; un clic suffit pour changer d'espace.",
   "cas-47": "Pour la photo de votre maison, tout se passe dans Mon profil propriétaire, rubrique Galerie : chaque photo s'y supprime ou s'y remplace. Si c'était la couverture de votre annonce, la suivante prend sa place.",
 };
 const BAD: Record<string, string> = {
