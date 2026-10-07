@@ -115,6 +115,7 @@ const SPECIES_FR: Record<string, string> = {
   dog: "chien", cat: "chat", horse: "cheval", bird: "oiseau", rodent: "rongeur",
   fish: "poisson", reptile: "reptile", farm_animal: "animal de ferme", nac: "NAC",
 };
+const SAFE_FALLBACK = "Dites-moi ce que vous cherchez, je regarde avec vous ce que Guardiens propose aujourd'hui.";
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 interface ViewedSit {
@@ -477,6 +478,8 @@ Deno.serve(async (req) => {
     const myPets: ListingPet[] = ((myPetsRes?.data ?? []) as any[]).map((p) => ({ name: p.name ?? null, species: p.species ?? null, breed: p.breed ?? null, age: typeof p.age === "number" ? p.age : null }));
     const recentRows = ((recentRes?.data ?? []) as any[]).filter((r) => typeof r?.answer === "string" && r.answer);
     const recentAnswers: string[] = recentRows.map((r) => r.answer);
+    // Lot L4b : le gabarit de repli varie aussi son ouverture.
+    if (locked?.kind === "ai_identity") locked = aiIdentityBrief(pickAiIdentityTemplate(recentAnswers));
     const lastRow = rc?.last_exchange
       ? { question: String(rc.last_exchange.question ?? ""), answer: String(rc.last_exchange.answer ?? ""), created_at: new Date(Date.now() - Number(rc.last_exchange.days_ago ?? 1) * 86_400_000).toISOString() }
       : recentRows.find((r) => r.question);
@@ -508,15 +511,18 @@ Deno.serve(async (req) => {
       ? (expressed === "sitter" ? foreignPlaceInConversation(message, previousUser) : foreignPlaceIn(message))
       : null;
     const foreignNone = foreign && !publishedRows.some((r) => ((r.country || "") + "").toUpperCase() === foreign.iso) ? foreign : null;
+    // Lot L4b : départements lus à chaque tour, ils nourrissent aussi le filet de sortie.
+    let departements: any[] = [];
+    try {
+      const { data } = await adminClient.from("departements").select("code, nom, nom_region");
+      departements = Array.isArray(data) ? (data as any[]) : [];
+    } catch (e) {
+      console.error("alma-chat departements failed", e);
+    }
     let frenchNone: FrenchPlaceMatch | null = null;
     if (!foreign && placeAsked) {
-      try {
-        const { data } = await adminClient.from("departements").select("code, nom, nom_region");
-        const match = frenchPlaceIn(message, Array.isArray(data) ? (data as any[]) : [], publishedRows);
-        if (match && match.count === 0) frenchNone = match;
-      } catch (e) {
-        console.error("alma-chat departements failed", e);
-      }
+      const match = frenchPlaceIn(message, departements, publishedRows);
+      if (match && match.count === 0) frenchNone = match;
     }
     if (!locked && !viewed && (guidance || foreignNone || frenchNone)) {
       const placeSentence = foreignNone ? foreignNoneSentence(foreignNone.inCountry) : frenchNone ? frenchNoneSentence(frenchNone.label) : null;
@@ -578,6 +584,7 @@ Deno.serve(async (req) => {
     let profilACompleter: Array<{ champ: string; libelle: string; points: number }> = [];
     let profilACompleterCharge = false;
     try {
+      if (rc) throw new Error("rejeu simulé");
       const { data, error } = await adminClient.rpc("profile_completion_missing", {
         p_user_id: userId,
         p_role: activeRole,
@@ -888,7 +895,38 @@ Deno.serve(async (req) => {
       if (myPets.length && asksAboutOwnPets(message) && !myPets.some((p) => p.name && foldC(text).includes(foldC(p.name)))) out.push("animal_non_nomme");
       return out;
     };
-    const hardIssues = (text: string) => (locked ? checkLocked(text, locked) : []);
+    const actionLabels = [locked?.action?.label, next?.action?.label, viewedAction?.label, drafted.action?.label, ...drafted.chips.map((c: any) => c.label)]
+      .filter((x): x is string => typeof x === "string" && x.length > 0);
+    const placeNames = [
+      ...FRENCH_CITIES,
+      ...departements.map((d: any) => d.nom).filter(Boolean),
+      ...[...new Set(departements.map((d: any) => d.nom_region).filter(Boolean))] as string[],
+    ];
+    const memberText = foldC([
+      message,
+      ...history.map((m: any) => String(m?.content ?? "")),
+      JSON.stringify(facts ?? {}),
+      JSON.stringify(dossier),
+      prof.city ?? "",
+      myPets.map((p) => [p.name, p.breed].filter(Boolean).join(" ")).join(" "),
+      lastExchange ? lastExchange.question + " " + lastExchange.answer : "",
+    ].join(" \n "));
+    const guard: OutputGuardInput = {
+      memberText,
+      contextText: foldC([
+        memberText,
+        viewed ? JSON.stringify(viewed.facts) + " " + (viewed.description ?? "") : "",
+        inventory ? formatInventory(inventory, { foreignOpen }) : "",
+        sources.map((x: any) => `${x.title ?? ""} ${x.snippet ?? ""} ${x.url ?? ""}`).join(" "),
+        locked ? locked.facts.map((x) => x.text).join(" ") + " " + locked.template : "",
+        next ? JSON.stringify(next) : "",
+      ].join(" \n ")),
+      gazetteer: placeNames,
+      noListingPlaces: foreignWordsWithoutListings(publishedRows),
+      actionLabels,
+      hasPriorExchange: history.length > 0 || Boolean(lastExchange),
+    };
+    const hardIssues = (text: string) => [...(locked ? checkLocked(text, locked) : []), ...checkOutput(text, guard)];
     let issues = [...hardIssues(answer), ...softIssues(answer)];
     let retried = false;
     if (answer && issues.length) {
@@ -898,6 +936,10 @@ Deno.serve(async (req) => {
         ...issues.map((x) => x === "amorce_repetee" ? "- Elle commence comme une réponse récente : commence autrement."
           : x === "animal_non_nomme" ? `- Nomme ses animaux : ${myPets.map((p) => p.name).filter(Boolean).join(", ")}.`
           : x.startsWith("manque:") ? `- Fait obligatoire absent : ${x.slice(7)}.`
+          : x.startsWith("lieu_sans_annonce:") ? `- Lieu sans aucune annonce (${x.split(":")[1]}) : ne le cite que pour dire qu'il n'y a aucune garde dans ce pays aujourd'hui, jamais comme destination.`
+          : x.startsWith("lieu_hors_faits:") ? `- Lieu absent des faits (${x.split(":")[1]}) : retire-le, ne cite que des lieux présents dans ses faits ou sa question.`
+          : x === "echange_fantome" ? "- Tu évoques un échange passé qui n'existe pas : retire cette référence."
+          : x === "libelle_recopie" ? "- Tu recopies le libellé d'un bouton avec sa majuscule : décris l'action avec tes mots."
           : `- Contenu interdit : ${x.replace("interdit:", "")}.`),
         `Ta réponse précédente : « ${answer.slice(0, 600)} »`,
       ].join("\n");
@@ -909,6 +951,11 @@ Deno.serve(async (req) => {
         if (second && issues2.length < issues.length) { answer = second; issues = issues2; }
       }
     }
+    // Lot L4b : filet de sortie sur le texte final, quel que soit le chemin.
+    // Réparation déterministe d'abord (verbe de bouton, phrases fautives),
+    // puis contrôle des faits verrouillés sur ce texte réparé.
+    const guardIssuesBefore = checkOutput(answer, guard);
+    if (guardIssuesBefore.length) answer = repairOutput(answer, guard);
     const hard = locked ? checkLocked(answer, locked) : [];
     if (locked && hard.length) {
       answer = locked.template;
@@ -917,6 +964,17 @@ Deno.serve(async (req) => {
     } else if (locked) {
       (classification as any).fallback_template = false;
     }
+    if (!answer && guardIssuesBefore.length) {
+      answer = SAFE_FALLBACK;
+      (classification as any).fallback_template = true;
+    }
+    const guardAfter = checkOutput(answer, guard);
+    if (guardAfter.length) {
+      // Dernier rempart : un gabarit maison ne cite jamais de lieu hors faits.
+      answer = locked ? locked.template : SAFE_FALLBACK;
+      (classification as any).fallback_template = true;
+    }
+    if (guardIssuesBefore.length) (classification as any).output_guard = guardIssuesBefore;
     if (retried) (classification as any).retried = true;
     if (issues.some((x) => !x.startsWith("manque:") && !x.startsWith("interdit:")) && !(classification as any).fallback_template) {
       (classification as any).soft_issues = issues;
