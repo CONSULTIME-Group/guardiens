@@ -286,7 +286,7 @@ const OwnerDashboard = () => {
   if (error) return <DashboardLoadError onRetry={reload} detail={error} />;
 
   // Lot 1 : jamais pour un propriétaire passé par /bienvenue (arrivée v2).
-  if (showOnboarding && user?.onboardingMinimalCompleted && !user?.arrivalWelcomeSeenAt) {
+  if (showOnboarding && user?.onboardingMinimalCompleted && !arrivalWelcomeSeen) {
     return (
       <OnboardingWelcome
         role="owner"

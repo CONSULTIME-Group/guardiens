@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Head from "@/components/seo/Head";
 import { useAuth } from "@/contexts/AuthContext";
+import { fetchMyProfile } from "@/lib/myProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { safeNext, welcomeUsesOrder, type WelcomeUse } from "@/lib/arrival";
 import { ArrivalShell, Eyebrow, Gouache, SaveError, trackArrival, useArrivalT, useArrivalViewed } from "@/components/arrival/ArrivalUI";
@@ -32,11 +33,19 @@ const Bienvenue = () => {
   try { entraideFirst = entraideFirst || localStorage.getItem(SIGNUP_INTENT_KEY) === "entraide"; } catch { /* rien */ }
 
   // Une seule fois par compte : déjà vu, on file à la destination prévue.
-  const alreadySeen = !!user?.arrivalWelcomeSeenAt;
+  const [alreadySeen, setAlreadySeen] = useState<boolean | null>(null);
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    fetchMyProfile(user.id, { fresh: true }).then(({ data }) => {
+      if (!cancelled) setAlreadySeen(!!(data as { arrival_welcome_seen_at?: string | null } | null)?.arrival_welcome_seen_at);
+    }).catch(() => { if (!cancelled) setAlreadySeen(false); });
+    return () => { cancelled = true; };
+  }, [user]);
   useEffect(() => {
     if (alreadySeen) navigate(next, { replace: true });
   }, [alreadySeen, next, navigate]);
-  useArrivalViewed("C4", !!user && !alreadySeen);
+  useArrivalViewed("C4", !!user && alreadySeen === false);
 
   const go = async () => {
     if (!user) return;
@@ -50,7 +59,7 @@ const Bienvenue = () => {
     navigate(user.role === "owner" ? `/arrivee/vous?next=${encodeURIComponent(next)}` : next, { replace: true });
   };
 
-  if (!user || alreadySeen) return null;
+  if (!user || alreadySeen !== false) return null;
 
   return (
     <ArrivalShell header={t("arrival.c4.header")}>
