@@ -1,5 +1,10 @@
 {
-  "steps": { "you": "Vous", "departure": "Votre départ", "listing": "Votre annonce", "affinities": "Affinités" },
+  "steps": {
+    "you": "Vous",
+    "departure": "Votre départ",
+    "listing": "Votre annonce",
+    "affinities": "Affinités"
+  },
   "error_save": "L'enregistrement n'a pas abouti. Vos réponses sont gardées, réessayez.",
   "continue": "Continuer",
   "c1": {
@@ -61,7 +66,13 @@
     "abroad": "La maison est hors de France",
     "in_france": "La maison est en France",
     "type_label": "C'est plutôt",
-    "types": { "house": "Maison", "apartment": "Appartement", "farm": "Ferme", "chalet": "Chalet", "other": "Autre" },
+    "types": {
+      "house": "Maison",
+      "apartment": "Appartement",
+      "farm": "Ferme",
+      "chalet": "Chalet",
+      "other": "Autre"
+    },
     "postal": "Code postal",
     "city": "Commune",
     "country": "Pays"
@@ -106,5 +117,144 @@
     "aide_title": "Donner un coup de main près de chez vous",
     "aide_text": "Potager, courses, trajets, jeux de société.",
     "later": "Plus tard, voir mon annonce"
+  },
+  "steps_sitter": {
+    "you": "Vous",
+    "affinities": "Affinités",
+    "skills": "Savoir-faire",
+    "first": "Premier pas"
+  },
+  "back": "Revenir",
+  "g1": {
+    "header_sitter": "Deux minutes",
+    "header_entraide": "Une minute",
+    "text": "Votre commune sert à vous montrer les gardes et les coups de main près de chez vous. Votre adresse exacte reste privée.",
+    "where_label": "Où vivez-vous ?",
+    "abroad": "Je vis hors de France",
+    "in_france": "Je vis en France",
+    "photo_label": "Une photo de vous (facultatif)",
+    "photo_help": "Un visage met en confiance les propriétaires qui vous lisent.",
+    "photo_add": "Ajouter une photo",
+    "photo_change": "Changer la photo",
+    "photo_sending": "Envoi en cours"
+  },
+  "g2": {
+    "header": "Affinités · 1 sur 2",
+    "eyebrow": "Vos affinités",
+    "title": "Vos réponses dessinent vos affinités, {{name}}.",
+    "title_noname": "Vos réponses dessinent vos affinités.",
+    "text": "Chaque annonce affiche un score d'affinité avec vous. Il rapproche les personnes faites pour s'entendre.",
+    "example": "Exemple d'annonce",
+    "example_score": "88",
+    "example_label": "Affinité",
+    "example_title": "Deux chats à Tassin, du 20 au 27 décembre",
+    "example_chip1": "Chats acceptés",
+    "example_chip2": "Télétravail possible",
+    "point1": "Vous répondez une fois, en une minute. Tout reste modifiable.",
+    "point2": "Les propriétaires répondent aux mêmes questions : le score se calcule des deux côtés.",
+    "point3": "Toutes les annonces restent visibles. L'affinité décide de l'ordre, et chaque score montre ses raisons.",
+    "animals": "Quels animaux acceptez-vous ?",
+    "work": "Pendant une garde, vous êtes plutôt",
+    "type": "Vous gardez",
+    "vehicle": "Avez-vous un véhicule ?",
+    "vehicle_help": "Utile pour les maisons à la campagne et les gardes avec un chien à emmener.",
+    "yes": "Oui",
+    "no": "Non"
+  },
+  "g3": {
+    "header": "Affinités · 2 sur 2",
+    "eyebrow": "Vos affinités",
+    "title": "Et au quotidien, vous êtes plutôt…",
+    "text": "Ces réponses rapprochent les maisons dont le rythme ressemble au vôtre.",
+    "pace": "Votre rythme de vie",
+    "pace_sub": {
+      "calme": "Plutôt casanier",
+      "equilibre": "Vie posée",
+      "actif": "Souvent dehors"
+    },
+    "languages": "Les langues que vous parlez",
+    "more_languages": "Autres langues",
+    "interests": "Vos centres d'intérêt (facultatif, trois ou plus)",
+    "see_all": "Voir les {{count}}"
+  },
+  "g4": {
+    "header": "Facultatif",
+    "eyebrow": "Vos savoir-faire",
+    "title": "Ce que vous aimez faire pour les autres",
+    "text": "Ces choix s'affichent sur votre fiche. Ils aident les propriétaires à vous choisir, et les gens du coin à vous demander un coup de main.",
+    "groups": {
+      "animaux": "Animaux",
+      "jardin": "Jardin",
+      "competences": "Savoirs et loisirs",
+      "coups_de_main": "Coups de main"
+    },
+    "free_label": "En une phrase, ce que vous aimez faire",
+    "free_help": "L'échange se décide entre vous : un merci, un repas, un service rendu.",
+    "later": "Compléter plus tard"
+  },
+  "n1": {
+    "header": "Facultatif",
+    "eyebrow": "Restez prévenu",
+    "title_sitter": "Soyez le premier sur les gardes près de chez vous.",
+    "text_sitter": "Guardiens s'installe sur votre téléphone comme une application. Une notification vous prévient dès qu'une garde s'ouvre près de chez vous ou qu'un propriétaire vous répond.",
+    "title_owner": "Soyez prévenu dès qu'un gardien candidate.",
+    "text_owner": "Guardiens s'installe sur votre téléphone comme une application. Une notification vous prévient dès qu'un gardien candidate ou vous écrit.",
+    "ios1_title": "Ajoutez Guardiens à votre écran d'accueil",
+    "ios1_text": "Dans Safari, touchez Partager, puis Sur l'écran d'accueil.",
+    "ios2_title": "Activez les notifications",
+    "ios2_text": "Ouvrez Guardiens depuis sa nouvelle icône, puis touchez Activer.",
+    "install": "Installer",
+    "enable": "Activer les notifications",
+    "activate": "Activer",
+    "when": "Vous serez prévenu quand",
+    "nearby": "Une garde s'ouvre près de chez vous",
+    "owner_replies": "Un propriétaire répond à votre candidature",
+    "messages": "Vous recevez un message",
+    "sitter_applies": "Un gardien candidate",
+    "later": "Plus tard",
+    "error": "L'activation n'a pas abouti. Vous pourrez la reprendre depuis vos réglages."
+  },
+  "g5": {
+    "eyebrow": "Premier pas",
+    "title": "Une maison vous attend près de {{city}}, {{name}}.",
+    "title_noname": "Une maison vous attend près de {{city}}.",
+    "at": "{{city}} · à {{d}} km",
+    "discover": "Découvrir cette garde",
+    "count_line": "{{n}} gardes ouvertes à moins de 30 km, {{total}} en France, triées par affinité.",
+    "all": "Toutes les annonces",
+    "dashboard": "Aller à mon espace",
+    "affinity": "Affinité",
+    "affinity_pending": "Affinité en cours",
+    "profile_steps_one": "Encore {{count}} étape pour pouvoir candidater.",
+    "profile_steps_other": "Encore {{count}} étapes pour pouvoir candidater.",
+    "profile_cta": "Compléter ma fiche",
+    "profile_ok": "Votre fiche peut candidater. Une photo aide les propriétaires à vous choisir.",
+    "add": "Ajouter"
+  },
+  "g5b": {
+    "title": "Le réseau se construit commune par commune, {{name}}, et vous en faites partie.",
+    "title_noname": "Le réseau se construit commune par commune, et vous en faites partie.",
+    "text": "Les gardes autour de {{city}} arrivent au fil des départs. Voici les plus proches aujourd'hui.",
+    "closest": "Les gardes les plus proches",
+    "sit_at": "Une garde à {{city}}",
+    "sit_meta": "À {{d}} km · {{dates}}",
+    "alert_text": "Un email dès qu'une garde s'ouvre dans votre rayon.",
+    "alert_link": "Changer le rayon",
+    "help_title": "En attendant, un coup de main près de chez vous",
+    "help_text": "Un trajet, le potager, une partie de belote : votre proposition s'affiche dans les coups de main proposés autour de {{city}}.",
+    "help_cta": "Proposer un coup de main"
+  },
+  "e1": {
+    "eyebrow": "Premier pas",
+    "title": "De quoi auriez-vous besoin, {{name}} ?",
+    "title_noname": "De quoi auriez-vous besoin ?",
+    "nearby": "<1>{{count}} membres</1> ont des savoir-faire à partager à moins de {{radius}} km de {{city}}.",
+    "need_label": "Votre besoin, en une phrase",
+    "publish": "Publier ma demande",
+    "offer_title": "Proposer un coup de main",
+    "offer_text": "Jeux de société, potager, courses, trajets",
+    "projects_title": "Les projets participatifs près de chez vous",
+    "projects_text": "Un abri, une haie, un potager, à plusieurs",
+    "dashboard": "Aller à mon espace"
   }
 }
