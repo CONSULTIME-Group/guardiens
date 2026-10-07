@@ -63,7 +63,7 @@ export interface VerifiedFacts {
   candidatures_recues: Record<string, number>;
   candidatures_recues_non_ouvertes: number;
   annonces_publiees: Array<{ sit_id: string; titre: string | null; ville: string | null; debut: string | null }>;
-  brouillons: Array<{ sit_id: string; titre: string | null }>;
+  brouillons: Array<{ sit_id: string; titre: string | null; debut?: string | null }>;
   missions_publiees: Array<{ id: string; titre: string | null; type: string; statut: string }>;
   /** Plus ancienne candidature envoyée encore sans réponse, en jours. */
   candidature_sans_reponse_jours: number | null;
@@ -120,7 +120,7 @@ export function buildVerifiedFacts(input: VerifiedFactsInput): VerifiedFacts {
     annonces_publiees: input.ownSits
       .filter((s) => s.status === "published")
       .map((s) => ({ sit_id: s.id, titre: s.title, ville: s.city, debut: s.start_date })),
-    brouillons: input.ownSits.filter((s) => s.status === "draft").map((s) => ({ sit_id: s.id, titre: s.title })),
+    brouillons: input.ownSits.filter((s) => s.status === "draft").map((s) => ({ sit_id: s.id, titre: s.title, debut: s.start_date })),
     missions_publiees: input.missions
       .filter((m) => m.status === "open" || m.status === "in_progress")
       .map((m) => ({ id: m.id, titre: m.title, type: m.mission_type, statut: m.status })),
