@@ -64,7 +64,7 @@ export function lockedDirective(b: LockedBrief): string {
   return [
     "FAITS VERROUILLÉS, à donner tous, dans ta voix, sans en changer le sens :",
     ...b.facts.map((f) => `- ${f.text}`),
-    b.action ? `ACTION OBLIGATOIRE affichée sous ta réponse : « ${b.action.label} ». Tu peux l'annoncer, sans écrire de lien.` : "",
+    b.action ? `ACTION OBLIGATOIRE affichée sous ta réponse : « ${b.action.label} ». Le bouton porte l'action : ne recopie jamais son libellé dans tes phrases (ni majuscule, ni guillemets), dis avec tes mots ce qu'il permet, sans écrire de lien.` : "",
     `CONSIGNE : ${b.guidance}`,
     "INTERDITS : aucun lieu, aucune annonce, aucun chiffre qui ne figure pas ci-dessus ; aucune autre action que l'action obligatoire ; aucun tiret long ; aucun emoji ; vouvoiement.",
     "Rédige librement, chaleureusement, comme Alma. Pas de liste « Localisation : », « Dates : », fais des phrases.",
@@ -321,10 +321,23 @@ export function asksIfHuman(message: string): boolean {
   return HUMAN_Q.test(q) && ASKING.test(q);
 }
 
-export const AI_IDENTITY_TEMPLATE =
-  "Je suis l'assistante IA de Guardiens, et c'est sous les traits d'Alma, la chienne de la maison, que je vous réponds. Derrière moi, Jérémie et Elisa lisent les messages qu'on leur adresse. Dites-moi ce que vous cherchez, je regarde avec vous.";
+/** Lot L4b : trois gabarits, aucun n'ouvre sur « Je suis ». */
+export const AI_IDENTITY_TEMPLATES = [
+  "Vous parlez à l'assistante IA de Guardiens, sous les traits d'Alma, la chienne de la maison. Pour échanger avec une personne, Jérémie et Elisa lisent les messages qu'on leur adresse. Dites-moi ce que vous cherchez, je regarde avec vous.",
+  "Bonne question, et la réponse est simple : une intelligence artificielle, celle de Guardiens, qui prend la voix d'Alma, notre chienne. Jérémie et Elisa, eux, lisent chaque message qu'on leur envoie. Sur quoi puis-je vous aider ?",
+  "C'est une IA qui vous répond, l'assistante de Guardiens, avec la voix d'Alma, la chienne de la maison. Derrière moi, Jérémie et Elisa lisent les messages qu'on leur écrit. Que puis-je regarder pour vous ?",
+];
+export const AI_IDENTITY_TEMPLATE = AI_IDENTITY_TEMPLATES[0];
 
-export function aiIdentityBrief(): LockedBrief {
+/** Gabarit dont l'amorce n'a pas servi récemment. */
+export function pickAiIdentityTemplate(recentAnswers: string[], rand: () => number = Math.random): string {
+  const used = new Set(recentAnswers.map(openerKey));
+  const free = AI_IDENTITY_TEMPLATES.filter((t) => !used.has(openerKey(t)));
+  const pool = free.length ? free : AI_IDENTITY_TEMPLATES;
+  return pool[Math.floor(rand() * pool.length) % pool.length];
+}
+
+export function aiIdentityBrief(template?: string): LockedBrief {
   return {
     kind: "ai_identity",
     facts: [
@@ -332,11 +345,12 @@ export function aiIdentityBrief(): LockedBrief {
       { key: "retour_aide", text: "Après l'avoir dit, reviens à ce que tu peux faire pour la personne.", present: () => true },
     ],
     forbid: [
+      { key: "ouverture_je_suis", re: /^\s*je suis (l'|une |un )?(assistante|ia\b|intelligence)/i },
       { key: "deni", re: /je (suis|reste) (une |un )?(vraie|vrai|r[ée]elle) (personne|humaine?)|je suis humaine|je ne suis pas (une |un )?(ia|intelligence|robot|programme|machine)/i },
     ],
     action: null,
-    guidance: "Réponds vrai, avec chaleur et dans ta voix, en une ou deux phrases, puis reviens à ce que tu peux faire. Jamais de déni, jamais de détour.",
-    template: AI_IDENTITY_TEMPLATE,
+    guidance: "Réponds vrai, avec chaleur et dans ta voix, en une ou deux phrases, puis reviens à ce que tu peux faire. Jamais de déni, jamais de détour. Ne commence pas par « Je suis » : varie l'ouverture (la question, la personne, une image de chienne). Ne parle d'aucun échange passé qui ne figure pas dans l'historique.",
+    template: template ?? AI_IDENTITY_TEMPLATE,
   };
 }
 
@@ -370,6 +384,15 @@ export interface CompanionInput {
   freeTalk: boolean;
 }
 
+/** Lot L4b : trois réponses modèles, pour le ton seulement. */
+export const VOICE_EXAMPLES = [
+  "EXEMPLES DE TON (lieux, dates et animaux entre crochets sont des places vides : ne reprends que ceux des faits de ce tour, jamais ceux des exemples) :",
+  "1. Fiche d'annonce avec un yorkshire, question « Quel est le nom de votre village ? » : « La garde se trouve à [localisation de la fiche], du [dates de la fiche], avec un yorkshire de [âge] ans à la maison. À cet âge, un yorkshire apprécie surtout les siestes au chaud et les petits tours du jardin, je le comprends bien. Le nom exact du village, c'est le propriétaire qui vous le donnera : envoyez-lui votre candidature avec un message, il vous répondra. »",
+  "2. Question « Comment supprimer la photo de ma maison ? » : « Les photos de votre logement se gèrent à un seul endroit, la Galerie de votre profil propriétaire. Chacune s'y remplace ou s'y supprime, et si c'était la couverture de votre annonce, la suivante prend sa place. Une maison bien montrée, c'est comme une porte entrouverte : on a envie d'y passer la truffe. »",
+  "3. Question « Je cherche une garde en Toscane » depuis l'espace propriétaire : « Il n'y a aucune garde en Italie aujourd'hui : Guardiens propose des gardes en France, Polynésie française comprise. Vous êtes dans votre espace propriétaire, qui montre vos propres annonces ; les gardes des autres membres vous attendent dans votre espace gardien. Côté France, il y a de belles balades à faire, j'en remue déjà la queue. »",
+  "Dans ces exemples : une seule touche de chien, liée au sujet, jamais en ouverture ; prénom au plus une fois ; vouvoiement ; aucun tiret long.",
+].join("\n");
+
 export function companionDirective(c: CompanionInput): string {
   const lines = ["COMPAGNON, ce que tu sais de la personne (données réelles, rien d'autre) :"];
   if (c.firstName) lines.push(`- Prénom : ${c.firstName}. Au plus une fois dans la réponse, pas forcément en ouverture.`);
@@ -382,6 +405,12 @@ export function companionDirective(c: CompanionInput): string {
   }
   lines.push(
     "TOUCHE DE CHIEN : au plus une par réponse, liée au sujet de la question (un animal cité, une balade, une maison), jamais en ouverture détachée du sujet, jamais un fait inventé sur la personne.",
+  );
+  lines.push(
+    "Ne fais jamais référence à un échange passé (« comme je vous l'ai dit », « la dernière fois ») s'il ne figure pas dans l'historique ou ci-dessus.",
+    "Ne cite aucune annonce, aucun lieu, aucun animal de la personne qui ne figure pas dans ses faits ou dans sa question.",
+    "Un bouton porte l'action sous ta réponse : n'écris jamais son libellé avec sa majuscule (pas « Vous pouvez Postuler »), décris l'action avec tes mots.",
+    VOICE_EXAMPLES,
   );
   if (!c.freeTalk) lines.push("Question pratique : pas d'humeur du jour ni d'anecdote générale, l'information d'abord.");
   if (c.recentOpeners.length) {
@@ -409,4 +438,114 @@ export function currentSitSentence(facts: any, todayIso: string): string | null 
   const place = next.ville ?? next.city ?? null;
   const ongoing = start && start <= todayIso;
   return `${ongoing ? "Garde en cours" : "Garde à venir"}${place ? ` à ${place}` : ""}${start && end ? `, du ${frDateLong(start, false)} au ${frDateLong(end)}` : ""}.`;
+}
+
+// ---------------------------------------------------------------------------
+// Lot L4b : filet de sortie sur le texte final, sur tous les chemins.
+// ---------------------------------------------------------------------------
+
+export interface OutputGuardInput {
+  /** Texte replié de ce que le modèle a reçu sur la personne : faits, dossier, question, historique. */
+  memberText: string;
+  /** Texte replié de tout le contexte autorisé (membre + fiche, inventaire, sources, faits verrouillés). */
+  contextText: string;
+  /** Lieux connus (communes, départements, régions), sous leur graphie usuelle. */
+  gazetteer: string[];
+  /** Mots repliés des lieux étrangers sans annonce publiée. */
+  noListingPlaces: string[];
+  /** Libellés des boutons proposés sous la réponse. */
+  actionLabels: string[];
+  /** Un échange antérieur figure dans le contexte (historique ou dernier échange). */
+  hasPriorExchange: boolean;
+}
+
+const stripAccents = (s: string) => (s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+const escRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const NEGATION = /\b(aucune?|pas de|pas d'|n'y a pas|n'existe|ne propose|ni)\b/;
+const POSSESSIVE = /\b(votre|vos)\b/;
+const PHANTOM = /(comme je vous (l')?ai (deja )?(dit|explique|indique|precise)|je vous l'ai (deja )?dit|comme (je le disais|deja dit|dit plus haut|indique precedemment)|comme evoque|je vous le redis|je le repete|la derniere fois)/;
+export const ACTION_VERBS = ["Postuler", "Publier", "Créer", "Passer", "Voir", "Ouvrir", "Régler", "Reprendre", "Compléter", "Ajouter", "Modifier", "Activer", "Écrire", "Envoyer", "Gérer", "Découvrir", "Rechercher", "Préparer"];
+/** Mots ambigus en tête de phrase : jamais pris pour un lieu. */
+const GAZ_SKIP = new Set(["Nord", "Lot", "Cher", "Ain", "Var", "Manche", "Somme", "Paris-Saclay"]);
+/** Biographie d'Alma, que le modèle connaît par sa consigne. */
+const ALMA_BIO = ["lyon", "cordoba"];
+
+export function splitSentences(text: string): string[] {
+  return (text || "").split(/(?<=[.!?\u2026])\s+|\n+/).filter((x) => x.trim());
+}
+
+function labelVerbs(labels: string[]): Set<string> {
+  const out = new Set(ACTION_VERBS);
+  for (const l of labels) {
+    const w = (l || "").trim().split(/\s+/)[0];
+    if (w && /^\p{Lu}/u.test(w)) out.add(w);
+  }
+  return out;
+}
+
+/** Positions des verbes de bouton recopiés avec leur majuscule, hors début de phrase. */
+function labelCopies(text: string, labels: string[]): Array<{ index: number; word: string }> {
+  const verbs = labelVerbs(labels);
+  const out: Array<{ index: number; word: string }> = [];
+  const re = /\p{Lu}[\p{L}']*/gu;
+  for (const m of text.matchAll(re)) {
+    if (!verbs.has(m[0])) continue;
+    const before = text.slice(0, m.index).replace(/[\s«"“(]+$/u, "");
+    if (!before || /[.!?\u2026:\n]$/.test(before)) continue;
+    out.push({ index: m.index!, word: m[0] });
+  }
+  return out;
+}
+
+function placesIn(sentence: string, gazetteer: string[]): string[] {
+  const s = stripAccents(sentence);
+  const out: string[] = [];
+  for (const g of gazetteer) {
+    if (!g || GAZ_SKIP.has(g)) continue;
+    const name = stripAccents(g);
+    if (!/^\p{Lu}/u.test(name)) continue;
+    if (new RegExp(`(^|[^\\p{L}])${escRe(name)}(?![\\p{L}])`, "u").test(s)) out.push(g);
+  }
+  return out;
+}
+
+const inText = (folded: string, place: string) =>
+  new RegExp(`(^|[^a-z])${escRe(foldC(place))}(?![a-z])`).test(folded);
+
+/** Défauts du texte final ; vide quand il est conforme. */
+export function checkOutput(answer: string, g: OutputGuardInput): string[] {
+  const issues = new Set<string>();
+  for (const sentence of splitSentences(answer)) {
+    const f = foldC(sentence);
+    for (const w of g.noListingPlaces) {
+      if (inText(f, w) && !NEGATION.test(f)) issues.add(`lieu_sans_annonce:${w}`);
+    }
+    for (const place of placesIn(sentence, g.gazetteer)) {
+      const k = foldC(place);
+      if (POSSESSIVE.test(f) && !inText(g.memberText, k)) issues.add(`lieu_hors_faits:${k}`);
+      else if (!inText(g.contextText, k) && !ALMA_BIO.includes(k)) issues.add(`lieu_hors_faits:${k}`);
+    }
+    if (!g.hasPriorExchange && PHANTOM.test(f)) issues.add("echange_fantome");
+  }
+  if (labelCopies(answer, g.actionLabels).length) issues.add("libelle_recopie");
+  return [...issues];
+}
+
+/**
+ * Réparation déterministe : verbe de bouton remis en minuscule, phrases qui
+ * citent un lieu interdit ou un échange fantôme retirées.
+ */
+export function repairOutput(answer: string, g: OutputGuardInput): string {
+  let text = answer || "";
+  const copies = labelCopies(text, g.actionLabels).sort((a, b) => b.index - a.index);
+  for (const c of copies) {
+    text = text.slice(0, c.index) + c.word.charAt(0).toLocaleLowerCase("fr") + c.word.slice(1) + text.slice(c.index + c.word.length);
+  }
+  const paragraphs = text.split(/\n{2,}/).map((p) => {
+    const kept = splitSentences(p).filter((s) => checkOutput(s, { ...g, actionLabels: [] }).length === 0);
+    return kept.join(" ");
+  }).filter((p) => p.trim());
+  const out = paragraphs.join("\n\n").trim();
+  // Une phrase qui commençait par un connecteur orphelin reste lisible.
+  return out.replace(/^(Et|Mais|Donc|Alors),?\s+(\p{L})/u, (_m, _c, l) => l.toLocaleUpperCase("fr"));
 }
