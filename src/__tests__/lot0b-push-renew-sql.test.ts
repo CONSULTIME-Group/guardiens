@@ -1,3 +1,4 @@
+// @vitest-environment node
 /**
  * Lot 0b : renouvellement côté base (migration 0056 réelle sur PGlite).
  * - perdu en 410 : nouvelle adresse, préférences gardées, enabled = true
