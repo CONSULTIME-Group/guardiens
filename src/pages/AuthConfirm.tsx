@@ -9,6 +9,10 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { trackEventWithUserId } from "@/lib/analytics";
 
+/** Compte créé il y a moins de 24 h (premier SIGNED_IN d'une inscription). */
+export const isFreshAccount = (createdAt: string | null, now = Date.now()) =>
+  !!createdAt && now - new Date(createdAt).getTime() < 24 * 3600 * 1000;
+
 const AuthConfirm = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -59,19 +63,24 @@ const AuthConfirm = () => {
                   localStorage.setItem(flagKey, "1");
 
                   let role: string | null = null;
+                  let createdAt: string | null = null;
                   try {
                     const { data: prof } = await supabase
                       .from("profiles")
-                      .select("role")
+                      .select("role, created_at")
                       .eq("id", userId)
                       .maybeSingle();
                     role = (prof?.role as string | undefined) ?? null;
+                    createdAt = (prof?.created_at as string | undefined) ?? session?.user?.created_at ?? null;
                   } catch { /* silencieux */ }
 
-                  trackEventWithUserId(userId, "signup_email_confirmed", {
-                    source: "/auth/confirm",
-                    metadata: { user_id: userId, role, via: "email_link" },
-                  });
+                  // Lot 1 : mesure de la perte clic/confirmation, comptes de moins de 24 h.
+                  if (isFreshAccount(createdAt)) {
+                    trackEventWithUserId(userId, "signup_email_confirmed", {
+                      source: "/auth/confirm",
+                      metadata: { user_id: userId, role, via: "email_link" },
+                    });
+                  }
                   const completedKey = `signup_completed_tracked_${userId}`;
                   if (!localStorage.getItem(completedKey)) {
                     localStorage.setItem(completedKey, "1");

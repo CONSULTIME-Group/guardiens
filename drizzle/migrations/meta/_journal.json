@@ -400,6 +400,13 @@
       "when": 1791362933947,
       "tag": "0056_push_renew_subscription",
       "breakpoints": true
+    },
+    {
+      "idx": 57,
+      "version": "7",
+      "when": 1791367590965,
+      "tag": "0057_arrival_v2_welcome_seen",
+      "breakpoints": true
     }
   ]
 }

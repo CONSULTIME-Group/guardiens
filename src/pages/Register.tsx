@@ -24,6 +24,10 @@ import { PasswordStrengthMeter } from "@/components/auth/PasswordStrengthMeter";
 import { lovable } from "@/integrations/lovable";
 import { startOAuthFlow, logOAuthStage, endOAuthFlow } from "@/lib/oauthLogger";
 import { detectSignupIntent, roleForSignupIntent, signupIntentBannerKey } from "@/lib/signupIntent";
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
+import { ARRIVAL_FLAG, arrivalAppliesToNewSignup } from "@/lib/arrival";
+import { ArrivalC1, ArrivalC2Header, ArrivalC3 } from "@/components/arrival/RegisterArrivalParts";
+import { trackArrival } from "@/components/arrival/ArrivalUI";
 import {
  Dialog,
  DialogContent,
@@ -150,7 +154,11 @@ const Register = () => {
   // Destination post-inscription centralisée (src/lib/postAuthTarget.ts) :
   // pro vers sa fiche dédiée, propriétaire vers le tunnel de création
   // d'annonce, redirection explicite toujours prioritaire.
-  const postAuthTarget = resolvePostAuthTarget(selectedRole, redirectTarget);
+  // Lot 1 : drapeau arrival_v2. Éteint, tout reste strictement identique.
+  const arrivalFlag = useFeatureFlag(ARRIVAL_FLAG);
+  const v2 = arrivalFlag.enabled;
+  const [entraideIntent, setEntraideIntent] = useState(detectedIntent === "entraide");
+  const postAuthTarget = resolvePostAuthTarget(selectedRole, redirectTarget, arrivalAppliesToNewSignup(arrivalFlag));
 
  const pwStrength = useMemo(() => getPasswordStrength(password), [password]);
 
@@ -317,6 +325,19 @@ const Register = () => {
  return;
  }
 
+ // Lot 1 : signup_completed part au succès de signUp, même sans session
+ // (confirmation email attendue). La clé locale évite un second envoi par
+ // /auth/confirm sur le même appareil.
+ try {
+  if (newUserId) {
+   localStorage.setItem(`signup_completed_tracked_${newUserId}`, "1");
+   trackEventWithUserId(newUserId, "signup_completed", {
+    source: "/inscription",
+    metadata: { role: selectedRole, user_id: newUserId, auto_confirmed: false, via: "signup" },
+   });
+  }
+ } catch {}
+ if (v2) trackArrival("completed", "C2");
  setStep("confirmation");
  } catch (error: any) {
  const rawMessage = error?.message || "unknown";
@@ -455,7 +476,7 @@ const Register = () => {
  };
 
  return (
- <div className="min-h-screen flex bg-background">
+ <div className={cn("min-h-screen flex bg-background", v2 && "arrival-root")}>
  <Head><meta name="robots" content="noindex, follow" /></Head>
 
  <AuthIllustrationPanel
@@ -490,7 +511,7 @@ const Register = () => {
  <span className="text-primary">g</span>uardiens
  </h1>
  </Link>
- {step !== "confirmation" && (
+ {step !== "confirmation" && !v2 && (
  <>
  <div className="mt-2 lg:mt-3 mb-1 lg:mb-2 flex flex-col items-center gap-1 lg:gap-1.5" aria-label={t("register_page.step_aria", { step })}>
  <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 text-primary text-xs font-semibold px-2.5 py-0.5 lg:py-1">
@@ -524,7 +545,17 @@ const Register = () => {
 
  <InAppBrowserBanner className="mb-4 lg:mb-6" />
 
- {step === "confirmation" && (
+ {step === "confirmation" && v2 && (
+  <ArrivalC3
+   email={email}
+   onResend={handleResendEmail}
+   resendDisabled={isResending || resendCooldown > 0}
+   cooldown={resendCooldown}
+   onFixEmail={() => { setStep(2); setResendCount(0); setResendCooldown(0); }}
+  />
+ )}
+
+ {step === "confirmation" && !v2 && (
  <div className="flex flex-col items-center text-center space-y-5 py-4 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
  <div className="rounded-full bg-primary/10 p-4">
  <MailCheck className="h-10 w-10 text-primary" />
@@ -611,7 +642,36 @@ const Register = () => {
  </div>
  )}
 
-  {step === 1 && (
+  {step === 1 && v2 && (
+   <ArrivalC1
+    selected={selectedRole}
+    loginHref={`/login${buildRedirectQuery(redirectTarget)}`}
+    onSelect={(r) => {
+     setSelectedRole(r);
+     setEntraideIntent(false);
+     setFormError(null);
+     trackEvent("signup_role_selected", { source: "/inscription", metadata: { role: r } });
+    }}
+    onEntraide={() => {
+     // Même logique que roleForSignupIntent("entraide") : rôle polyvalent.
+     const r = (roleForSignupIntent("entraide") ?? "both") as Role;
+     setSelectedRole(r);
+     setEntraideIntent(true);
+     try { localStorage.setItem("guardiens_signup_intent", "entraide"); } catch {}
+     trackEvent("signup_role_selected", { source: "/inscription", metadata: { role: r, intent: "entraide" } });
+     trackArrival("completed", "C1");
+     setStep(2);
+    }}
+    onContinue={() => {
+     if (!selectedRole) return;
+     try { localStorage.removeItem("guardiens_signup_intent"); } catch {}
+     trackArrival("completed", "C1");
+     setStep(2);
+    }}
+   />
+  )}
+
+  {step === 1 && !v2 && (
   <>
   <div className="space-y-3 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
   {roles.map((role) => (
@@ -661,12 +721,18 @@ const Register = () => {
 
   {step === 2 && (
   <form onSubmit={handleSubmit} className="space-y-5 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
+  {v2 && (
+   <ArrivalC2Header
+    recap={entraideIntent ? t("arrival.c2.entraide_recap") : selectedRole === "owner" ? t("arrival.c1.owner_title") : selectedRole === "sitter" ? t("arrival.c1.sitter_title") : (roles.find((r) => r.value === selectedRole)?.label ?? "")}
+    onModify={() => setStep(1)}
+   />
+  )}
   {intentBannerKey && (
    <div className="rounded-lg border border-terra-border/60 bg-terra-soft/60 px-4 py-3 text-sm text-foreground">
     {t(`register_page.intent_banner.${intentBannerKey}`)}
    </div>
   )}
-  <div className="text-center mb-4">
+  <div className={cn("text-center mb-4", v2 && "hidden")}>
   <span className="inline-block px-4 py-1.5 rounded-pill bg-primary/10 text-primary text-sm font-medium">
   {roles.find((r) => r.value === selectedRole)?.label}
   </span>
@@ -812,6 +878,7 @@ const Register = () => {
     </button>
    </div>
 
+   {v2 && <p className="text-xs text-muted-foreground">{t("arrival.c2.password_hint")}</p>}
    <PasswordStrengthMeter password={password} isCommon={isObviouslyWeak(password)} />
 
    {formError && (
@@ -822,12 +889,12 @@ const Register = () => {
   </div>
 
            <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
-             {isLoading ? t("register_page.submitting") : t("register_page.submit")}
+             {isLoading ? t("register_page.submitting") : v2 ? t("arrival.c2.submit") : t("register_page.submit")}
            </Button>
   </form>
   )}
 
-   {step !== "confirmation" && (
+   {step !== "confirmation" && !(v2 && step === 1) && (
    <div className="mt-6 text-center text-sm text-muted-foreground">
     <p>
     {t("register_page.have_account")}{" "}

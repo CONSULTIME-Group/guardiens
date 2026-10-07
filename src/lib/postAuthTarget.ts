@@ -20,7 +20,14 @@ export const OWNER_SIGNUP_TUNNEL_TARGET = "/sits/create?source=signup";
 export function resolvePostAuthTarget(
   role: SignupRole | null,
   redirectTarget: string | null,
+  /** Lot 1 : parcours d'arrivée v2 actif, la destination passe par /bienvenue. */
+  arrivalV2 = false,
 ): string {
+  const target = baseTarget(role, redirectTarget);
+  return arrivalV2 ? `/bienvenue?next=${encodeURIComponent(target)}` : target;
+}
+
+function baseTarget(role: SignupRole | null, redirectTarget: string | null): string {
   if (redirectTarget) return redirectTarget;
   // Un polyvalent (both) est aussi un propriétaire : 93 comptes concernés
   // en base au 16/08/2026. Le tunnel de création d'annonce s'impose à lui
