@@ -103,9 +103,9 @@ export type ArrivalIntent = "owner" | "sitter" | "entraide";
 export type ArrivalFlow = "owner" | "sitter" | "entraide";
 
 /** Intention écrite en C4 : entraide si choisie en C1, sinon le rôle. */
-export function arrivalIntentFor(role: string | null | undefined, entraide: boolean): ArrivalIntent {
+export function arrivalIntentFor(role: string | null | undefined, entraide: boolean): ArrivalIntent | null {
   if (entraide) return "entraide";
-  return role === "owner" ? "owner" : "sitter";
+  return role === "owner" ? "owner" : role === "sitter" ? "sitter" : null;
 }
 
 const DEFAULT_NEXTS = ["/dashboard", "/sits/create?source=signup", "/"];
@@ -132,7 +132,8 @@ export function readCarry(p: URLSearchParams, fallbackFlow: ArrivalFlow = "sitte
 }
 
 /** C4 « Faisons connaissance » : destination selon l'intention. */
-export function afterWelcome(intent: ArrivalIntent, next: string): string {
+export function afterWelcome(intent: ArrivalIntent | null, next: string): string {
+  if (!intent) return next;
   if (intent === "owner") return `/arrivee/vous?next=${encodeURIComponent(next)}`;
   return arrivalUrl("/arrivee/vous", { flow: intent, next: isExplicitNext(next) ? next : null });
 }
