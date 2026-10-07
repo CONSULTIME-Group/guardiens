@@ -56,7 +56,7 @@ export function decodePublicKey(key: string): Uint8Array<ArrayBuffer> {
 }
 
 /** Doit correspondre à PUSH_SW_VERSION dans public/push-sw.js. */
-export const PUSH_SW_VERSION = 'push-2';
+export const PUSH_SW_VERSION = 'push-3';
 const WORKER_WAIT_MS = 10000;
 
 function askVersion(worker: ServiceWorker | null | undefined, ms = 2000): Promise<string | null> {

@@ -109,7 +109,7 @@ describe('Service worker : nouveaux types', () => {
     const w = worker(); const port = { postMessage: vi.fn() };
     (w as any).self.skipWaiting = vi.fn().mockResolvedValue(undefined);
     await w.emit('message', { data: { type: 'GUARDIENS_PUSH_SW_VERSION' }, ports: [port] });
-    expect(port.postMessage).toHaveBeenCalledWith({ version: 'push-2' });
+    expect(port.postMessage).toHaveBeenCalledWith({ version: 'push-3' });
     expect((w as any).self.skipWaiting).not.toHaveBeenCalled();
     await w.emit('message', { data: { type: 'GUARDIENS_SKIP_WAITING' } });
     expect((w as any).self.skipWaiting).toHaveBeenCalledOnce();

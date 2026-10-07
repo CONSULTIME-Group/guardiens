@@ -1,7 +1,7 @@
 /* Push only: no fetch handler and no cache of pages or private data. */
 /* Version read by the page before a test or nearby alerts: an older worker
    would show those payloads as "new message". Bump on every payload change. */
-var PUSH_SW_VERSION = 'push-2';
+var PUSH_SW_VERSION = 'push-3';
 var UUID = '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}';
 var NEARBY_BODY = 'Une nouvelle annonce de garde près de chez vous.';
 var TEST_BODY = 'Notification de test Guardiens : cet appareil peut recevoir vos alertes.';
@@ -77,4 +77,26 @@ self.addEventListener('message', (event) => {
   event.waitUntil(self.registration.getNotifications().then((items) => {
     for (const item of items) item.close();
   }));
+});
+
+/* Lot 0b: the push service renewed or dropped this device address. The
+   worker resubscribes with the same public key, without asking anything,
+   then asks an open Guardiens page to send the new address (the worker has
+   no member session). Without an open page, the next visit renews it. */
+self.addEventListener('pushsubscriptionchange', (event) => {
+  event.waitUntil((async () => {
+    var old = event.oldSubscription;
+    var key = old && old.options && old.options.applicationServerKey;
+    var sub = event.newSubscription || null;
+    if (!sub && key) {
+      try { sub = await self.registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key }); }
+      catch { sub = null; }
+    }
+    if (!sub) return;
+    var windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const client of windows) {
+      if (new URL(client.url).origin !== self.location.origin) continue;
+      client.postMessage({ type: 'GUARDIENS_PUSH_RENEW' });
+    }
+  })());
 });
