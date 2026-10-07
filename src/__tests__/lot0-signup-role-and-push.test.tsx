@@ -85,10 +85,13 @@ describe("Lots 0 C et 0b, notifications arrêtées", () => {
 
   it("abonnement actif côté serveur : pas de carte", async () => {
     local(); setPermission("denied");
+    const reg = { active: { scriptURL: "http://localhost/push-sw.js" }, pushManager: { getSubscription: () => Promise.resolve({ endpoint: "x" }) } };
+    Object.defineProperty(navigator, "serviceWorker", { configurable: true, value: { getRegistration: () => Promise.resolve(reg) } });
     invoke.mockResolvedValue(status(true));
     render(<PushResubscribeCard />);
     await waitFor(() => expect(invoke).toHaveBeenCalled());
     expect(screen.queryByText(TEXT)).toBeNull();
+    delete (navigator as any).serviceWorker;
   });
 
   it("désactivé en 410 avec autorisation accordée : renouvellement silencieux, aucune carte", async () => {
