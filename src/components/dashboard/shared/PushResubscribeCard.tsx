@@ -45,7 +45,7 @@ export default function PushResubscribeCard() {
     void check();
     // Le worker signale une adresse renouvelée par le service de push.
     const onMessage = (event: MessageEvent) => {
-      if (event.data?.type === "GUARDIENS_PUSH_RENEW") { try { sessionStorage.removeItem(SILENT_RENEW_SESSION_KEY); } catch { /* rien */ } void check(); }
+      if (event.data?.type === "GUARDIENS_PUSH_RENEW") { void check(); }
     };
     const sw = typeof navigator !== "undefined" ? navigator.serviceWorker : undefined;
     sw?.addEventListener?.("message", onMessage);
