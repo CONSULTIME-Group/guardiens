@@ -147,6 +147,28 @@ export function foreignPlaceIn(message: string): ForeignPlace | null {
   return null;
 }
 
+/** Lot L4b : mots repliés des lieux étrangers dont le pays n'a aucune annonce publiée. */
+export function foreignWordsWithoutListings(rows: PublishedSitRow[]): string[] {
+  const open = new Set(rows.map((r) => ((r.country || "") + "").toUpperCase()));
+  const out: string[] = [];
+  for (const [re, place] of FOREIGN) {
+    if (open.has(place.iso)) continue;
+    out.push(...re.source.replace(/\\b/g, "").replace(/[()]/g, "").split("|").filter(Boolean));
+  }
+  return out;
+}
+
+/** Lieu étranger de la conversation : question, sinon messages précédents de la personne. */
+export function foreignPlaceInConversation(message: string, previousUserMessages: string[]): ForeignPlace | null {
+  const now = foreignPlaceIn(message);
+  if (now) return now;
+  for (let i = previousUserMessages.length - 1; i >= 0; i--) {
+    const p = foreignPlaceIn(previousUserMessages[i]);
+    if (p) return p;
+  }
+  return null;
+}
+
 /** Codes pays servis par Guardiens comme France (métropole et outre-mer). */
 export const FRANCE_CODES = new Set(["FR", "PF", "GP", "MQ", "GF", "RE", "YT", "NC", "PM", "WF", "BL", "MF"]);
 
