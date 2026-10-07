@@ -26,6 +26,15 @@ const OnboardingGate = () => {
   const { enabled, appliesSince, loading: flagLoading } = useFeatureFlag("mandatory_affinity_onboarding");
   const status = useAffinityOnboardingStatus();
 
+  // Lot 2 : première ouverture de l'application installée, N1 reprend à l'étape 2.
+  useEffect(() => {
+    if (!user || location.pathname.startsWith("/arrivee/")) return;
+    try {
+      const pending = localStorage.getItem("guardiens_arrival_n1_pending");
+      if (pending && matchMedia("(display-mode: standalone)").matches) navigate(pending, { replace: true });
+    } catch { /* rien */ }
+  }, [user, location.pathname, navigate]);
+
   useEffect(() => {
     if (loading || flagLoading || status.loading) return;
     if (!user || !enabled || !status.needsOnboarding) return;
@@ -54,18 +63,21 @@ const OnboardingGate = () => {
     // Lot 1 : un propriétaire v2 incomplet reprend le parcours d'arrivée.
     // Lu seulement au moment de rediriger : aucune lecture de plus sur /dashboard.
     const fallback = `/onboarding/affinity?redirect=${encodeURIComponent(redirect)}`;
-    if (user.role !== "owner") { navigate(fallback, { replace: true }); return; }
     let cancelled = false;
     void getFlag("arrival_v2").then((arrival) => {
       if (cancelled) return;
-      if (isArrivalV2Account(arrival, status.profileCreatedAt)) {
-        const step = status.needsPostal ? "/arrivee/vous" : "/arrivee/affinites";
-        const key = step === "/arrivee/vous" ? "next" : "redirect";
-        navigate(`${step}?${key}=${encodeURIComponent(redirect)}`, { replace: true });
-      } else navigate(fallback, { replace: true });
+      if (!isArrivalV2Account(arrival, status.profileCreatedAt)) { navigate(fallback, { replace: true }); return; }
+      const r = encodeURIComponent(redirect);
+      if (user.role === "owner") {
+        navigate(status.needsPostal ? `/arrivee/vous?next=${r}` : `/arrivee/affinites?redirect=${r}`, { replace: true });
+        return;
+      }
+      // Lot 2 : gardien (et entraide, seul le code postal manque) reprend G1 ou G2.
+      const flow = status.needsSitter || status.needsOwner ? "sitter" : "entraide";
+      navigate(status.needsPostal ? `/arrivee/vous?flow=${flow}&next=${r}` : `/arrivee/garder?flow=sitter&next=${r}`, { replace: true });
     });
     return () => { cancelled = true; };
-  }, [loading, flagLoading, status.loading, status.needsOnboarding, status.needsPostal, status.profileCreatedAt, user, enabled, appliesSince, location, navigate]);
+  }, [loading, flagLoading, status.loading, status.needsOnboarding, status.needsPostal, status.needsSitter, status.needsOwner, status.profileCreatedAt, user, enabled, appliesSince, location, navigate]);
 
   return null;
 };
