@@ -7,6 +7,7 @@ import i18n from "i18next";
 import { useTranslation } from "react-i18next";
 import arrivalFr from "@/i18n/locales/fr/arrival.json";
 import { trackEvent } from "@/lib/analytics";
+import { supabase } from "@/integrations/supabase/client";
 import type { ArrivalStep } from "@/lib/arrival";
 import "./arrival.css";
 
@@ -88,8 +89,9 @@ export function ArrivalShell({ header, children, stepBar, sitterStep }: {
 }
 
 /** Envoi de l'avatar, même chemin que la modale d'accueil (bucket avatars). */
-export async function uploadAvatar(userId: string, file: File): Promise<string> {
-  const { supabase } = await import("@/integrations/supabase/client");
+export async function uploadAvatar(userId: string, original: File): Promise<string> {
+  const { compressAvatarFile } = await import("@/lib/compressImage");
+  const file = await compressAvatarFile(original);
   const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
   const path = `${userId}/avatar.${ext}`;
   const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true, contentType: file.type || undefined });

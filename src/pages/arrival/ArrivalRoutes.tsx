@@ -4,10 +4,10 @@ import { Suspense, type ComponentType, type ReactNode } from "react";
 import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
 import { useLocation } from "react-router-dom";
 
-const S = () => import("./ArrivalSitterScreens");
+const S = () => import("./ArriveeVous");
 const SCREENS = {
   "/bienvenue": lazy(() => import("./Bienvenue")),
-  "/arrivee/vous": lazy(() => import("./ArriveeVous")),
+  "/arrivee/vous": lazy(S),
   "/arrivee/depart": lazy(() => import("./ArriveeDepart")),
   "/arrivee/affinites": lazy(() => import("./ArriveeAffinites")),
   "/arrivee/aussi": lazy(() => import("./ArriveeAussi")),

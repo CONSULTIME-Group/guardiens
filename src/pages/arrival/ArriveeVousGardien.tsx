@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import PostalCodeCityFields from "@/components/profile/PostalCodeCityFields";
 import { departmentCodeFromPostal } from "@/lib/postalDepartment";
 import { isPostalCodeValidForCountry } from "@/lib/setupState";
+import { avatarImageUrl } from "@/lib/storageImage";
 import { afterG1, canSkipG1, readCarry } from "@/lib/arrival";
 import { ArrivalShell, Eyebrow, Gouache, SaveError, trackArrival, uploadAvatar, useArrivalT, useArrivalViewed } from "@/components/arrival/ArrivalUI";
 const maisonSeule = new URL("../../assets/landing/maison-seule-450.webp", import.meta.url).href;
@@ -137,7 +138,7 @@ const ArriveeVousGardien = () => {
         <p className="text-sm font-medium">{t("arrival.g1.photo_label")}</p>
         <p className="text-sm text-muted-foreground">{t("arrival.g1.photo_help")}</p>
         <div className="flex items-center gap-4">
-          {avatar && <img src={avatar} alt="" className="h-16 w-16 rounded-full object-cover" />}
+          {avatar && <img src={avatarImageUrl(avatar, 64)} alt="" className="h-16 w-16 rounded-full object-cover" />}
           <button type="button" className="arrival-choice" disabled={uploading} onClick={() => fileRef.current?.click()}>
             {uploading ? t("arrival.g1.photo_sending") : avatar ? t("arrival.g1.photo_change") : t("arrival.g1.photo_add")}
           </button>
