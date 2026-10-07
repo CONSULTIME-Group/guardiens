@@ -12568,6 +12568,10 @@ export type Database = {
         Args: { p_referred_id: string }
         Returns: undefined
       }
+      apply_signup_role: {
+        Args: { p_role: Database["public"]["Enums"]["user_role"] }
+        Returns: boolean
+      }
       archive_sit: { Args: { p_sit_id: string }; Returns: undefined }
       association_photos_consented: {
         Args: { _slug: string }
