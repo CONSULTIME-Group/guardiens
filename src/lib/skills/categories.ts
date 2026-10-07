@@ -98,7 +98,6 @@ const KEYWORDS: Record<SkillCategoryKey, RegExp[]> = {
     /informatique|num[ée]rique|web|excel|word|ordinateur|smartphone/i,
     /scolaire|devoirs|cours|p[ée]dagog|enseign/i,
     /photo|art|musique|peinture|dessin|[ée]criture|lecture/i,
-    /jeux|jeu de soci[ée]t[ée]|belote|[ée]checs/i,
     /administrat|comptab|fiscal|juridique/i,
     /diplôme|dipl[ôo]me|certif/i,
   ],
