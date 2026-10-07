@@ -24,6 +24,8 @@ export interface AffinityWriteInput {
   lifePace: string;
   interests: string[];
   languages: string[];
+  /** Lot 2 (G2) : véhicule déclaré, facultatif ; null ou absent = non répondu, rien n'est écrit. */
+  hasVehicle?: boolean | null;
 }
 
 type Row = Record<string, unknown>;
@@ -48,6 +50,7 @@ export function buildAffinityWrites(i: AffinityWriteInput): { profile: Row | nul
         animal_types: i.animalTypes,
         work_during_sit: i.workDuringSit,
         sitter_type: i.sitterType,
+        has_vehicle: i.hasVehicle ?? null,
         ...shared,
       })
     : null;
