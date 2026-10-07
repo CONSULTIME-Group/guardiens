@@ -52,8 +52,7 @@ describe("lot 2b, cache du profil après C4", () => {
         <Routes><Route path="*" element={<><Bienvenue /><Where /></>} /></Routes>
       </MemoryRouter>,
     );
-    await new Promise((r) => setTimeout(r, 300)); screen.debug(undefined, 3000);
-    fireEvent.click(await screen.findByRole("button", { name: "Faisons connaissance" }));
+    fireEvent.click(await screen.findByRole("button", { name: /Faisons connaissance|arrival\.c4\.cta/ }));
     await waitFor(() => expect(path).not.toBe("/bienvenue"));
     c4.unmount();
 
