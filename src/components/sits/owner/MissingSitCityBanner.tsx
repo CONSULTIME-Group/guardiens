@@ -10,7 +10,7 @@ import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchMySitsFull } from "@/lib/dashboardShared";
-import { patchMyProfileCache } from "@/lib/myProfile";
+import { patchMyProfileCache, useMyProfile } from "@/lib/myProfile";
 import { normalizeCityName, normalizeCityTyping } from "@/lib/normalizeCity";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -102,12 +102,15 @@ export function MissingSitCityInline({ sit, ownerCity, applicationsCount, userId
 }
 
 /** Mode liste : toutes les annonces publiées sans commune du membre. */
-export default function MissingSitCityBanner({ userId, ownerCity }: { userId: string | null | undefined; ownerCity?: string | null }) {
+export default function MissingSitCityBanner({ userId }: { userId: string | null | undefined }) {
   const qc = useQueryClient();
+  // Copie partagée du profil (lot P1), aucune lecture supplémentaire.
+  const { data: me, isSuccess: meLoaded } = useMyProfile(userId);
+  const ownerCity = (me as any)?.city as string | null | undefined;
   const [done, setDone] = useState<Set<string>>(new Set());
   const { data } = useQuery({
     queryKey: ["missing-sit-city", userId],
-    enabled: !!userId && !(ownerCity || "").trim(),
+    enabled: !!userId && meLoaded && !(ownerCity || "").trim(),
     queryFn: () => fetchMySitsFull(userId as string),
     staleTime: 60_000,
   });
