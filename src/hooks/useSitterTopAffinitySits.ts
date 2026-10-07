@@ -7,6 +7,7 @@ import { fetchOpenPublishedSits } from "@/lib/dashboardShared";
  */
 import { fetchMyProfile, fetchMySitterProfile } from "@/lib/myProfile";
 import { useQuery } from "@tanstack/react-query";
+import { sitLocationLabelLocal } from "@/lib/sitLocationLoad";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { createYieldBudget } from "@/lib/yieldToMain";
@@ -23,6 +24,8 @@ export interface AffinitySitCard {
   id: string;
   title: string | null;
   city: string | null;
+  /** Lot L1 : localisation affichée selon la règle unique sitLocation. */
+  location_label?: string;
   start_date: string | null;
   end_date: string | null;
   cover_photo_url: string | null;
@@ -263,6 +266,7 @@ export function useSitterTopAffinitySits(): Result {
           id: sit.id,
           title: sit.title,
           city: sit.city,
+          location_label: sitLocationLabelLocal(sit, sit?.owner),
           start_date: sit.start_date,
           end_date: sit.end_date,
           cover_photo_url: sit.cover_photo_url,

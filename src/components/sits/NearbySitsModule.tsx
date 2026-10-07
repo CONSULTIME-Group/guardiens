@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/lib/logger";
+import { sitLocationLabelLocal } from "@/lib/sitLocationLoad";
 
 interface NearbySit {
   id: string;
@@ -9,6 +10,10 @@ interface NearbySit {
   title: string | null;
   city: string | null;
   cover_photo_url: string | null;
+  departement_code?: string | null;
+  user_id?: string | null;
+  /** Lot L1 : localisation selon la règle unique sitLocation. */
+  location_label?: string;
 }
 
 /**
@@ -26,7 +31,7 @@ const NearbySitsModule = ({ city, excludeId }: { city?: string | null; excludeId
         const base = () =>
           supabase
             .from("sits")
-            .select("id, slug, title, city, cover_photo_url")
+            .select("id, slug, title, city, cover_photo_url, departement_code, user_id")
             .eq("status", "published")
             .eq("accepting_applications", true)
             .order("created_at", { ascending: false })
@@ -47,7 +52,20 @@ const NearbySitsModule = ({ city, excludeId }: { city?: string | null; excludeId
           seen.add(s.id);
           return true;
         });
-        if (!cancelled) setSits(unique.slice(0, 3));
+        const top = unique.slice(0, 3);
+        // Lot L1 : ville du profil, puis code postal et département, pour
+        // les seules annonces sans commune. Une lecture au plus.
+        const ownerIds = Array.from(new Set(top.filter((s) => !(s.city || "").trim() && s.user_id).map((s) => s.user_id as string)));
+        const owners = new Map<string, { city: string | null; postal_code: string | null }>();
+        if (ownerIds.length > 0) {
+          const { data } = await supabase.from("public_profiles").select("id, city, postal_code").in("id", ownerIds);
+          for (const o of (data || []) as any[]) owners.set(o.id, o);
+        }
+        const labelled = top.map((s) => ({
+          ...s,
+          location_label: sitLocationLabelLocal(s, s.user_id ? owners.get(s.user_id) : null),
+        }));
+        if (!cancelled) setSits(labelled);
       } catch (e: any) {
         logger.warn("[NearbySitsModule] load failed", { error: e?.message });
       }
@@ -82,7 +100,7 @@ const NearbySitsModule = ({ city, excludeId }: { city?: string | null; excludeId
             </div>
             <div className="p-3">
               <p className="text-sm font-medium line-clamp-2">{s.title || "Annonce de garde"}</p>
-              {s.city && <p className="text-xs text-muted-foreground mt-1">{s.city}</p>}
+              <p className="text-xs text-muted-foreground mt-1">{s.location_label}</p>
             </div>
           </Link>
         ))}

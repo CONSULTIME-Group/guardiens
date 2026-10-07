@@ -1922,6 +1922,36 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_sit_city_l1_20261007: {
+        Row: {
+          backed_up_at: string | null
+          city: string | null
+          country: string | null
+          departement_code: string | null
+          id: string | null
+          status: Database["public"]["Enums"]["sit_status"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          backed_up_at?: string | null
+          city?: string | null
+          country?: string | null
+          departement_code?: string | null
+          id?: string | null
+          status?: Database["public"]["Enums"]["sit_status"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          backed_up_at?: string | null
+          city?: string | null
+          country?: string | null
+          departement_code?: string | null
+          id?: string | null
+          status?: Database["public"]["Enums"]["sit_status"] | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       _backup_sitter_booleans_20260820: {
         Row: {
           demanding_breeds_ok: boolean | null

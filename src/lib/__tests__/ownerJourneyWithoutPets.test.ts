@@ -65,6 +65,7 @@ describe("Parcours de création franchissable sans aucun animal", () => {
       hasProperty: true,
       galleryPhotoCount: 1,
       petCount: 0,
+      locationCity: "Lyon",
     };
     const blockers = getSitPublishBlockers(input);
     expect(blockers.find((b) => b.id === "pets")?.advisory).toBe(true);

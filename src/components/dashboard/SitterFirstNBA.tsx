@@ -1,3 +1,4 @@
+import { sitLocationLabel } from "@/lib/sitLocation";
 /**
  * NBA nouvelle génération pour le gardien débutant :
  * « 3 annonces qui vous correspondent » avec badge d'affinité.
@@ -153,7 +154,7 @@ const SitterFirstNBA = ({ sits, mode = "affinity", scopeLabel }: Props) => {
                   {/* Corps sous l'image */}
                   <div className="mt-3 flex flex-col flex-1">
                     <p className="text-[11px] uppercase tracking-[0.16em] font-medium text-primary truncate">
-                      {sit.city || "France"}
+                      {sit.location_label || sitLocationLabel({ sitCity: sit.city })}
                     </p>
                     <h3 className="mt-1.5 font-heading text-[16px] sm:text-[17px] font-semibold leading-snug text-foreground line-clamp-2">
                       {sit.title || "Annonce"}

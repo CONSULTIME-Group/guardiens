@@ -91,7 +91,11 @@ describe("J3, défauts 1 et 2 : action principale et titre", () => {
   it("le contact humain ne remplace plus l'action principale", () => {
     const src = read("supabase/functions/alma-chat/index.ts");
     expect(src).not.toContain('reason: "contact_humain"');
-    expect(src).toContain("const action = drafted.action;");
+    // Lot L1 : sur une fiche d'annonce ouverte, l'action de l'annonce consultée
+    // passe devant ; le contact humain, lui, ne remplace jamais l'action.
+    const line = src.split("\n").find((l) => l.trim().startsWith("const action = ")) ?? "";
+    expect(line).toContain("drafted.action");
+    expect(line).not.toMatch(/human|contact/i);
     expect(needsHumanContact({ intent: "aide_recherchee", frustration: 2, bug_suspected: false, bug_item: null, churn: false, unanswered: false, source: "model" })).toBe(true);
   });
   it("le fil affiche le contact humain en lien secondaire sous l'action", () => {

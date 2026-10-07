@@ -95,8 +95,10 @@ describe("send-alert-digest, ventilation des exclusions", () => {
 describe("send-nearby-daily-digest, ventilation des exclusions", () => {
   it("nomme chaque motif au lieu d'un compteur muet", async () => {
     const published = new Date().toISOString();
+    // Dates relatives : une garde déjà terminée sort de la fenêtre et vidait le digest.
+    const dayIso = (n: number) => new Date(Date.now() + n * 86400000).toISOString().slice(0, 10);
     const { handler } = loadHandler("supabase/functions/send-nearby-daily-digest/index.ts", {
-      sits: [{ id: "s1", slug: "s1", title: "Annonce", city: "Lyon", start_date: "2026-10-01", end_date: "2026-10-05", user_id: "owner", status: "published", created_at: published, published_at: published, property_id: null, departement_code: "69", accepting_applications: true, country: "FR", profiles: { latitude: 45.75, longitude: 4.85, postal_code: "69001", departement_code: "69", country: "FR" } }],
+      sits: [{ id: "s1", slug: "s1", title: "Annonce", city: "Lyon", start_date: dayIso(20), end_date: dayIso(25), user_id: "owner", status: "published", created_at: published, published_at: published, property_id: null, departement_code: "69", accepting_applications: true, country: "FR", profiles: { latitude: 45.75, longitude: 4.85, postal_code: "69001", departement_code: "69", country: "FR" } }],
       small_missions: [],
       properties: [],
       email_preferences: [
