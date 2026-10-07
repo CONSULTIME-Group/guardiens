@@ -80,7 +80,16 @@ interface SitPublishBase {
   hasCoverPhoto?: boolean | null;
   /** Animaux enregistrés sur le profil propriétaire. */
   petCount?: number | null;
+  /**
+   * Lot L1 : commune de la garde, celle de l'annonce ou à défaut la ville du
+   * profil propriétaire (reprise automatique par la base à la publication).
+   */
+  locationCity?: string | null;
 }
+
+/** Message exact du refus de publication sans commune, partagé avec la base. */
+export const SIT_CITY_REQUIRED_MESSAGE =
+  "Indiquez la commune de votre logement pour que les gardiens sachent où se trouve la garde.";
 
 export interface SitPublishTwoFieldsInput extends SitPublishBase {
   descriptionMode: "two-fields";
@@ -277,6 +286,9 @@ export const getSitPublishBlockers = (
       : null,
 
 
+    !len(input.locationCity)
+      ? { id: "city", label: SIT_CITY_REQUIRED_MESSAGE, anchor: "sit-city-field" }
+      : null,
     ...getDescriptionBlockers(input, options),
     photoCount === 0
       ? {
@@ -332,6 +344,7 @@ export const getSitPublishRequirements = (
   { id: "dates", label: "Date de début et date de fin de la garde" },
   { id: "date-past", label: "Date de début à venir, pas dans le passé" },
   { id: "date-error", label: "Date de fin postérieure à la date de début" },
+  { id: "city", label: "Commune de votre logement" },
   ...(mode === "two-fields" || options.viaCreateForm
     ? mode === "two-fields"
       ? [
@@ -377,6 +390,7 @@ export interface SitPublishSit {
   specific_expectations?: string | null;
   cover_photo_url?: string | null;
   published_at?: string | null;
+  city?: string | null;
 }
 
 export interface BuildSitPublishInputOptions {
@@ -394,12 +408,16 @@ export interface BuildSitPublishInputOptions {
   twoFields?: { absenceReason?: string | null; sitterExpectations?: string | null };
   /** Erreur de dates déjà calculée par un formulaire, en repli. */
   dateError?: string | null;
+  /** Ville du profil propriétaire, repli de la commune de l'annonce. */
+  ownerCity?: string | null;
   /** Neutralisations, pour un écran qui ne détient pas ces champs. */
   overrides?: {
     hasProperty?: boolean;
     galleryPhotoCount?: number;
     propertyPhotoCount?: number;
     petCount?: number;
+    /** Commune déjà résolue par l'écran appelant. */
+    locationCity?: string | null;
     /** Texte réellement écrit en base, quand il diffère de l'affichage. */
     specificExpectations?: string | null;
   };
@@ -426,6 +444,10 @@ export const buildSitPublishInput = (o: BuildSitPublishInputOptions): SitPublish
       ov.propertyPhotoCount ?? count((o.property as { photos?: unknown[] } | null)?.photos),
     hasCoverPhoto: !!o.sit.cover_photo_url,
     petCount: ov.petCount ?? count(o.pets),
+    locationCity:
+      ov.locationCity !== undefined
+        ? ov.locationCity
+        : (o.sit.city || "").trim() || (o.ownerCity || "").trim() || null,
   };
 
   if (o.twoFields) {
