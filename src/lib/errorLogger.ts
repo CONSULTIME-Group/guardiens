@@ -45,6 +45,9 @@ const IGNORED_PATTERNS: RegExp[] = [
   // Outlook Safe Links / bots de scan email : "Object Not Found Matching Id:X, MethodName:update, ParamCount:4"
   // Erreur générée par le scanner Microsoft lors du prefetch des liens (ex: /unsubscribe). Non actionnable.
   /Object Not Found Matching Id:\d+, MethodName:/i,
+  // Lot F4 : portefeuilles crypto (extension ou navigateur) qui injectent un
+  // script dans la page ; le site n'utilise jamais window.ethereum.
+  /window\.ethereum/i,
 ];
 
 function shouldIgnore(message: string): boolean {
@@ -414,8 +417,10 @@ async function send(payload: {
     await supabase.rpc("log_client_error", {
       _fingerprint: payload.fingerprint,
       _message: payload.message.slice(0, 2000),
-      _stack: payload.stack?.slice(0, 5000) ?? null,
-      _source: payload.source ?? null,
+      // Lot F4 : la source (event.filename) et la pile reprennent l'adresse
+      // de la page, jetons de connexion compris : elles sont nettoyées aussi.
+      _stack: sanitizeUrlSecrets(payload.stack?.slice(0, 5000) ?? null),
+      _source: sanitizeUrlSecrets(payload.source ?? null)?.slice(0, 500) ?? null,
       _line_no: payload.line_no ?? null,
       _col_no: payload.col_no ?? null,
       _url: typeof window !== "undefined" ? sanitizeUrlSecrets(window.location.href)?.slice(0, 500) ?? null : null,
