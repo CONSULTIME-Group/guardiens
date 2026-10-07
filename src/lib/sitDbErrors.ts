@@ -23,6 +23,10 @@ export const describeSitWriteError = (
   const verb = context === "republish" ? "republiée" : "publiée";
 
   if (code === "P0001") {
+    // Lot L1 : garde-fou base « commune exigée », message repris tel quel.
+    if (has(msg, "commune")) {
+      return "Indiquez la commune de votre logement pour que les gardiens sachent où se trouve la garde.";
+    }
     if (has(msg, "animal")) {
       return `Votre annonce ne peut pas être ${verb} sans au moins un animal à faire garder. Ajoutez-le dans votre logement, puis recommencez.`;
     }
@@ -63,6 +67,7 @@ export const sitWriteErrorNeedsSignal = (err: SitDbErrorLike | null | undefined)
   const code = String(err?.code || "");
   const msg = String(err?.message || "").toLowerCase();
   if (code === "P0001") {
+    if (has(msg, "commune")) return false;
     if (has(msg, "animal")) return true;
     if (has(msg, "environnement") || has(msg, "min_gardien_sits") || has(msg, "expérience") || has(msg, "experience")) return false;
     return true;
