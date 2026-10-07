@@ -22,6 +22,7 @@ import * as sitLocation from "../../../supabase/functions/_shared/sit-location";
 import * as homePhoto from "../../../supabase/functions/_shared/alma-home-photo";
 import * as truth from "../../../supabase/functions/_shared/alma-truth";
 import * as companion from "../../../supabase/functions/_shared/alma-companion";
+import * as places from "../../../supabase/functions/_shared/alma-places";
 import { ALMA_REPLAY_CASES } from "@/data/almaReplayCases";
 import { checkReplayAnswer } from "@/lib/alma/replayChecks";
 
@@ -64,7 +65,7 @@ function harness(profile: Record<string, unknown>, modelAnswers: string[] = ["RÃ
     "alma-system-prompt.ts": prompt, "alma-intent.ts": almaIntent, "alma-site-knowledge.ts": siteKnowledge,
     "alma-facts.ts": almaFacts, "alma-inventory.ts": almaInventory, "alma-next-action.ts": nextAction,
     "alma-classify.ts": almaClassify, "alma-output.ts": almaOutput, "normalize-contact-message.ts": normalizeContact,
-    "alma-owner-question.ts": ownerQuestion, "sit-location.ts": sitLocation, "alma-home-photo.ts": homePhoto, "alma-truth.ts": truth, "alma-companion.ts": companion,
+    "alma-owner-question.ts": ownerQuestion, "sit-location.ts": sitLocation, "alma-home-photo.ts": homePhoto, "alma-truth.ts": truth, "alma-companion.ts": companion, "alma-places.ts": places,
   };
   runInNewContext(outputText, {
     exports: {}, Request, Response, Date, console: { error: vi.fn(), log: vi.fn() },
