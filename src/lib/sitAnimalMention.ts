@@ -56,8 +56,11 @@ export const animalToPresent = (
   input: SitAnimalMentionInput & { status?: string | null },
   petCount: number,
 ): string | null => {
-  if (input.status !== "published" || !shouldPromptAnimalMention(input, petCount)) return null;
-  return animalFromText(input.title, input.absenceReason, input.sitterExpectations, input.specificExpectations) ?? "animal";
+  if (input.status !== "published" || petCount !== 0) return null;
+  // Les races (« yorkshire ») ne sont pas dans SPECIES_RX : animalFromText les reconnaît.
+  const named = animalFromText(input.title, input.absenceReason, input.sitterExpectations, input.specificExpectations);
+  if (named) return named;
+  return sitTextMentionsAnimals(input) ? "animal" : null;
 };
 
 export const presentAnimalTitle = (animal: string): string => `Présentez votre ${animal} aux gardiens`;
