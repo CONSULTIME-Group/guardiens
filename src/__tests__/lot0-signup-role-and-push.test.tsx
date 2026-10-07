@@ -23,7 +23,7 @@ vi.mock("@/contexts/AuthContext", () => ({ useAuth: () => ({ user: { id: "u1" } 
 import {
   rememberSignupRole, readPendingSignupRole, applyPendingSignupRole, withSignupRoleParam, SIGNUP_ROLE_KEY,
 } from "@/lib/signupRole";
-import { PUSH_ID_KEY, PUSH_OWNER_KEY, serverDisabledPush } from "@/lib/web-push";
+import { PUSH_ID_KEY, PUSH_OWNER_KEY, pushDeviceStatus } from "@/lib/web-push";
 import PushResubscribeCard from "@/components/dashboard/shared/PushResubscribeCard";
 
 beforeEach(() => {
@@ -70,37 +70,54 @@ describe("Lot 0 B, rôle choisi avant Google", () => {
   });
 });
 
-describe("Lot 0 C, notifications arrêtées", () => {
+describe("Lots 0 C et 0b, notifications arrêtées", () => {
   const status = (enabled: boolean) => ({ data: { subscriptions: [{ id: "s1", enabled, opt_in_messages: true, opt_in_applications: false }] }, error: null });
+  const setPermission = (p: NotificationPermission) => {
+    (globalThis as any).Notification = { permission: p, requestPermission: vi.fn() };
+  };
+  const TEXT = "Vos notifications se sont arrêtées sur cet appareil.";
+  const local = () => { localStorage.setItem(PUSH_ID_KEY, "s1"); localStorage.setItem(PUSH_OWNER_KEY, "u1"); };
 
   it("sans identifiant local, aucun appel", async () => {
-    expect(await serverDisabledPush("u1")).toBeNull();
+    expect(await pushDeviceStatus("u1")).toEqual({ kind: "none" });
     expect(invoke).not.toHaveBeenCalled();
   });
 
   it("abonnement actif côté serveur : pas de carte", async () => {
-    localStorage.setItem(PUSH_ID_KEY, "s1");
-    localStorage.setItem(PUSH_OWNER_KEY, "u1");
+    local(); setPermission("denied");
+    const reg = { active: { scriptURL: "http://localhost/push-sw.js" }, pushManager: { getSubscription: () => Promise.resolve({ endpoint: "x" }) } };
+    Object.defineProperty(navigator, "serviceWorker", { configurable: true, value: { getRegistration: () => Promise.resolve(reg) } });
     invoke.mockResolvedValue(status(true));
     render(<PushResubscribeCard />);
     await waitFor(() => expect(invoke).toHaveBeenCalled());
-    expect(screen.queryByText("Vos notifications se sont arrêtées sur cet appareil.")).toBeNull();
+    expect(screen.queryByText(TEXT)).toBeNull();
+    delete (navigator as any).serviceWorker;
   });
 
-  it("abonnement désactivé côté serveur : carte une seule fois par session", async () => {
-    localStorage.setItem(PUSH_ID_KEY, "s1");
-    localStorage.setItem(PUSH_OWNER_KEY, "u1");
+  it("désactivé en 410 avec autorisation accordée : renouvellement silencieux, aucune carte", async () => {
+    local(); setPermission("granted");
+    invoke.mockResolvedValue(status(false));
+    expect(await pushDeviceStatus("u1")).toEqual({ kind: "renewable", subscriptionId: "s1" });
+    render(<PushResubscribeCard />);
+    await waitFor(() => expect(trackEventMock).toHaveBeenCalledWith("push_renewed_silently", expect.anything()));
+    expect(screen.queryByText(TEXT)).toBeNull();
+    expect(trackEventMock).not.toHaveBeenCalledWith("push_resubscribe_shown", expect.anything());
+    expect((globalThis as any).Notification.requestPermission).not.toHaveBeenCalled();
+  });
+
+  it.each(["denied", "default"] as NotificationPermission[])("autorisation %s : carte une seule fois par session", async (perm) => {
+    local(); setPermission(perm);
     invoke.mockResolvedValue(status(false));
     const { unmount } = render(<PushResubscribeCard />);
-    expect(await screen.findByText("Vos notifications se sont arrêtées sur cet appareil.")).toBeInTheDocument();
+    expect(await screen.findByText(TEXT)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Les réactiver" })).toBeInTheDocument();
     expect(trackEventMock).toHaveBeenCalledWith("push_resubscribe_shown", expect.anything());
     unmount();
-    invoke.mockClear();
+    trackEventMock.mockClear();
     render(<PushResubscribeCard />);
     await new Promise((r) => setTimeout(r, 20));
-    expect(invoke).not.toHaveBeenCalled();
-    expect(screen.queryByText("Vos notifications se sont arrêtées sur cet appareil.")).toBeNull();
+    expect(screen.queryByText(TEXT)).toBeNull();
+    expect(trackEventMock).not.toHaveBeenCalledWith("push_resubscribe_shown", expect.anything());
   });
 });
 

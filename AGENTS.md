@@ -15,7 +15,7 @@
 
 - Espace propriétaire sans doublons (lot P4) : les identifiants de « Pour vous », « Près de chez vous » et des candidatures sont calculés par src/lib/ownerSitterPool.ts, lus en deux salves par src/lib/ownerSpaceReads.ts (affinité, puis avis et compétences une fois le Top 3 annoncé), mesurés sur le simulateur réaliste src/__tests__/p4/ (filtres appliqués, plafond 1 000 lignes) ; pourquoi : le simulateur P1b ignore les filtres et ne voit pas les doublons de production.
 
-- Push : version de public/push-sw.js confirmée par la page avant activation, test ou annonces proches ; un budget unique dans dispatch-web-push ; dédup push_nearby_jobs sans purge ; pourquoi : un ancien worker afficherait un faux message.
+- Push : version de public/push-sw.js confirmée par la page avant activation, test ou annonces proches ; un budget unique dans dispatch-web-push ; dédup push_nearby_jobs sans purge ; adresse perdue en 404/410 renouvelée sans geste (action renew, push_renew_subscription), carte de réactivation seulement sans autorisation ; pourquoi : un ancien worker afficherait un faux message et un abonnement ne s'arrête que par le membre.
 
 - Fond du hero avant React (lot P5) : #boot-hero statique dans index.html (photo et voile seuls, sous le header de 77 px), retiré par script inline hors "/" ou si session, par Landing au montage, garde-fou 15 s ; pourquoi : LCP peint au parse sans toucher à l entrée JS.
 

@@ -23,6 +23,7 @@ export type EventType =
   | "push_enabled"
   | "push_resubscribe_shown"
   | "push_resubscribe_clicked"
+  | "push_renewed_silently"
   | "signup_role_applied"
   | "push_disabled"
   | "push_test_requested"

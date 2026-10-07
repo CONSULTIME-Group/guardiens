@@ -1,5 +1,5 @@
 // Edge push-subscription : gestion des abonnements push par le membre.
-// Actions : config, status, subscribe, preferences, unsubscribe.
+// Actions : config, status, subscribe, preferences, unsubscribe, renew.
 // Le proprietaire est derive UNIQUEMENT du JWT verifie. Aucune reponse ni
 // aucun journal ne contient d'endpoint, de cle ou d'identifiant de membre.
 import { createClient } from 'npm:@supabase/supabase-js@2';
@@ -11,6 +11,7 @@ import {
   isBodySizeAcceptable,
   isPushAction,
   parsePreferencesInput,
+  parseRenewInput,
   parseSubscribeInput,
   parseUnsubscribeInput,
   sanitizeForLog,
@@ -128,6 +129,25 @@ Deno.serve(async (req) => {
       const saved = !nearby.error && nearby.data === true;
       if (!saved) console.warn('push-subscription annonces proches non enregistrees');
       return json({ subscription_id: data, nearby_requested: true, nearby_saved: saved, nearby_available: nearbyAvailable });
+    }
+
+    if (action === 'renew') {
+      // Lot 0b : seul le membre authentifie renouvelle SES abonnements, et
+      // seulement ceux perdus en 404 ou 410 (jamais une desactivation volontaire).
+      const parsed = parseRenewInput(body);
+      if (!parsed.ok) return json({ error: parsed.reason, renew_version: 1 }, 400);
+      const v = parsed.value;
+      const { data, error } = await admin.rpc('push_renew_subscription', {
+        p_user_id: userId,
+        p_subscription_id: v.subscriptionId,
+        p_endpoint: v.endpoint,
+        p_endpoint_host: v.endpointHost,
+        p_auth_key: v.auth,
+        p_p256dh_key: v.p256dh,
+      });
+      if (error) throw error;
+      const outcome = typeof data === 'string' ? data : 'unknown';
+      return json({ renewed: outcome === 'renewed', outcome, renew_version: 1 }, outcome === 'renewed' ? 200 : 409);
     }
 
     if (action === 'preferences') {

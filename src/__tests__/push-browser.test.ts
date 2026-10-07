@@ -18,7 +18,7 @@ beforeEach(()=>{
   mocks.session.mockResolvedValue({data:{session:{user:{id:'owner'},access_token:'fixture-token'}}});
   mocks.invoke.mockResolvedValue({data:{subscription_id:'device-id',updated:true,deleted:true},error:null});
   sub={endpoint:'https://fcm.googleapis.com/fcm/send/fixture',unsubscribe:vi.fn().mockResolvedValue(true),toJSON:()=>({endpoint:'https://fcm.googleapis.com/fcm/send/fixture',keys:{p256dh:publicKey,auth:'fixture'}})};
-  reg={active:fakeWorker('push-2'),update:vi.fn().mockResolvedValue(undefined),pushManager:{getSubscription:vi.fn().mockResolvedValue(null),subscribe:vi.fn().mockResolvedValue(sub)},getNotifications:vi.fn().mockResolvedValue([])};
+  reg={active:fakeWorker('push-3'),update:vi.fn().mockResolvedValue(undefined),pushManager:{getSubscription:vi.fn().mockResolvedValue(null),subscribe:vi.fn().mockResolvedValue(sub)},getNotifications:vi.fn().mockResolvedValue([])};
   register=vi.fn().mockResolvedValue(reg);permission=vi.fn().mockResolvedValue('granted');
   vi.stubGlobal('Notification',{permission:'default',requestPermission:permission});vi.stubGlobal('PushManager',function(){});
   Object.defineProperty(window,'isSecureContext',{configurable:true,value:true});
@@ -67,7 +67,7 @@ describe('Push browser lifecycle',()=>{
     expect(reg.update).not.toHaveBeenCalled();expect(reg.pushManager.subscribe).toHaveBeenCalledOnce();
   });
   it('old active worker: update, controlled activation of the waiting worker, then subscribe',async()=>{
-    const old=fakeWorker('push-1');const next=fakeWorker('push-2','installed');reg.active=old;
+    const old=fakeWorker('push-1');const next=fakeWorker('push-3','installed');reg.active=old;
     reg.update.mockImplementation(async()=>{reg.waiting=next;});
     next.postMessage=((orig:any)=>(msg:any,ports?:any)=>{orig(msg,ports);if(msg.type==='GUARDIENS_SKIP_WAITING'){reg.waiting=null;reg.active=next;next.setState('activated');}})(next.postMessage);
     await enablePush('owner',{enabled:true,publicKey},{messages:true,applications:true});
@@ -85,7 +85,7 @@ describe('Push browser lifecycle',()=>{
     expect(mocks.invoke).not.toHaveBeenCalled();
   });
   it('waiting worker that never activates: bounded timeout, nothing sent',async()=>{
-    reg.active=fakeWorker('push-1');const next=fakeWorker('push-2','installed');reg.update.mockImplementation(async()=>{reg.waiting=next;});
+    reg.active=fakeWorker('push-1');const next=fakeWorker('push-3','installed');reg.update.mockImplementation(async()=>{reg.waiting=next;});
     localStorage.setItem(PUSH_OWNER_KEY,'owner');localStorage.setItem(PUSH_ID_KEY,'device-id');
     vi.useFakeTimers({toFake:['setTimeout','clearTimeout']});
     const result=testPushOnDevice('owner');

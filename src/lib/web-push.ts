@@ -56,7 +56,7 @@ export function decodePublicKey(key: string): Uint8Array<ArrayBuffer> {
 }
 
 /** Doit correspondre à PUSH_SW_VERSION dans public/push-sw.js. */
-export const PUSH_SW_VERSION = 'push-2';
+export const PUSH_SW_VERSION = 'push-3';
 const WORKER_WAIT_MS = 10000;
 
 function askVersion(worker: ServiceWorker | null | undefined, ms = 2000): Promise<string | null> {
@@ -294,22 +294,62 @@ export function reconcilePushSession(userId?: string): void {
   } catch { /* Unavailable storage means no persisted device owner. */ }
 }
 
+type StatusRow = { id: string; enabled: boolean; opt_in_messages: boolean; opt_in_applications: boolean; opt_in_nearby_sits?: boolean };
+export type PushDeviceStatus =
+  | { kind: 'none' }
+  | { kind: 'renewable'; subscriptionId: string }
+  | { kind: 'needs_gesture'; prefs: PushPreferences };
+
+function permissionState(): NotificationPermission | 'unsupported' {
+  try { return typeof Notification === 'undefined' ? 'unsupported' : Notification.permission; } catch { return 'unsupported'; }
+}
+
 /**
- * Lot 0 : l'appareil garde un identifiant d'abonnement, mais le serveur l'a
- * désactivé (envoi 404 ou 410). Renvoie les préférences connues pour la
- * réactivation, ou null si l'abonnement est actif, absent ou incertain.
- * Sans identifiant local, aucun appel réseau.
+ * Lots 0 et 0b : état de l'abonnement de cet appareil. Sans identifiant
+ * local du membre, aucun appel réseau.
+ * - renewable : autorisation accordée, mais le serveur l'a désactivé ou le
+ *   navigateur n'a plus d'abonnement ; se renouvelle sans rien demander.
+ * - needs_gesture : même situation, autorisation retirée ou jamais donnée ;
+ *   seul un geste du membre peut la rétablir.
  */
-export async function serverDisabledPush(userId: string): Promise<PushPreferences | null> {
+export async function pushDeviceStatus(userId: string): Promise<PushDeviceStatus> {
   let localId: string | null = null;
   try {
     localId = localStorage.getItem(PUSH_ID_KEY);
-    if (!localId || localStorage.getItem(PUSH_OWNER_KEY) !== userId) return null;
-  } catch { return null; }
+    if (!localId || localStorage.getItem(PUSH_OWNER_KEY) !== userId) return { kind: 'none' };
+  } catch { return { kind: 'none' }; }
+  let row: StatusRow | undefined;
   try {
-    const result = await api<{ subscriptions: Array<{ id: string; enabled: boolean; opt_in_messages: boolean; opt_in_applications: boolean; opt_in_nearby_sits?: boolean }> }>(userId, { action: 'status' });
-    const row = result.subscriptions.find((item) => item.id === localId);
-    if (!row || row.enabled !== false) return null;
-    return { messages: row.opt_in_messages ?? true, applications: row.opt_in_applications ?? true, nearbySits: row.opt_in_nearby_sits === true };
-  } catch { return null; }
+    const result = await api<{ subscriptions: StatusRow[] }>(userId, { action: 'status' });
+    row = result.subscriptions.find((item) => item.id === localId);
+  } catch { return { kind: 'none' }; }
+  if (!row) return { kind: 'none' };
+  let browserHasSub = true;
+  if (row.enabled) {
+    try { browserHasSub = Boolean(await (await registration())?.pushManager.getSubscription()); } catch { browserHasSub = true; }
+    if (browserHasSub) return { kind: 'none' };
+  }
+  if (permissionState() === 'granted') return { kind: 'renewable', subscriptionId: row.id };
+  return { kind: 'needs_gesture', prefs: { messages: row.opt_in_messages ?? true, applications: row.opt_in_applications ?? true, nearbySits: row.opt_in_nearby_sits === true } };
+}
+
+export const SILENT_RENEW_SESSION_KEY = 'guardiens_push_silent_renew';
+
+/**
+ * Lot 0b : réabonnement silencieux, autorisation déjà accordée. Aucune
+ * demande d'autorisation, aucun affichage. Préférences gardées côté serveur.
+ */
+export async function renewPushSilently(userId: string, subscriptionId: string): Promise<boolean> {
+  if (permissionState() !== 'granted' || pushSupport() !== 'supported') return false;
+  try {
+    const config = await getPushConfig(userId);
+    if (!config.enabled || !config.publicKey) return false;
+    const reg = await bounded(navigator.serviceWorker.register('/push-sw.js', { scope: '/' }));
+    await bounded(navigator.serviceWorker.ready);
+    await ensurePushWorkerCurrent(reg);
+    const sub = (await reg.pushManager.getSubscription())
+      ?? await bounded(reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: decodePublicKey(config.publicKey) }));
+    const result = await api<{ renewed: boolean }>(userId, { action: 'renew', subscription_id: subscriptionId, ...sub.toJSON() });
+    return result.renewed === true;
+  } catch { return false; }
 }

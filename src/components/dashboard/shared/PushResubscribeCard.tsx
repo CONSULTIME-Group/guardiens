@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { enablePush, getPushConfig, serverDisabledPush, type PushPreferences } from "@/lib/web-push";
+import { enablePush, getPushConfig, pushDeviceStatus, renewPushSilently, SILENT_RENEW_SESSION_KEY, type PushPreferences } from "@/lib/web-push";
 import { trackEvent } from "@/lib/analytics";
 
 export const RESUBSCRIBE_SESSION_KEY = "guardiens_push_resubscribe_shown";
 
 /**
  * Lot 0 : carte discrète, une fois par session, quand l'abonnement de cet
- * appareil a été désactivé côté serveur. La demande d'autorisation reste
+ * appareil s'est arrêté et que l'autorisation n'est plus accordée (lot 0b). La demande d'autorisation reste
  * déclenchée par le clic sur « Les réactiver ».
  */
 export default function PushResubscribeCard() {
@@ -19,15 +19,37 @@ export default function PushResubscribeCard() {
 
   useEffect(() => {
     if (!user?.id) return;
-    try { if (sessionStorage.getItem(RESUBSCRIBE_SESSION_KEY)) return; } catch { /* rien */ }
+    const userId = user.id;
     let current = true;
-    void serverDisabledPush(user.id).then((p) => {
-      if (!current || !p) return;
-      try { sessionStorage.setItem(RESUBSCRIBE_SESSION_KEY, "1"); } catch { /* rien */ }
-      setPrefs(p);
-      void trackEvent("push_resubscribe_shown", { source: "dashboard" });
+    const flag = (key: string) => {
+      try { if (sessionStorage.getItem(key)) return false; sessionStorage.setItem(key, "1"); } catch { /* rien */ }
+      return true;
+    };
+    // Lot 0b : autorisation accordée, réabonnement silencieux, une tentative par session.
+    const check = () => pushDeviceStatus(userId).then(async (s) => {
+      if (!current) return;
+      if (s.kind === "renewable") {
+        if (!flag(SILENT_RENEW_SESSION_KEY)) return;
+        const ok = await renewPushSilently(userId, s.subscriptionId);
+        void trackEvent("push_renewed_silently", { source: "dashboard", metadata: { ok } });
+        return;
+      }
+      // Lot 0 : la carte ne sert que si un geste du membre est nécessaire.
+      if (s.kind === "needs_gesture" && current) {
+        try { if (sessionStorage.getItem(RESUBSCRIBE_SESSION_KEY)) return; } catch { /* rien */ }
+        flag(RESUBSCRIBE_SESSION_KEY);
+        setPrefs(s.prefs);
+        void trackEvent("push_resubscribe_shown", { source: "dashboard" });
+      }
     });
-    return () => { current = false; };
+    void check();
+    // Le worker signale une adresse renouvelée par le service de push.
+    const onMessage = (event: MessageEvent) => {
+      if (event.data?.type === "GUARDIENS_PUSH_RENEW") { void check(); }
+    };
+    const sw = typeof navigator !== "undefined" ? navigator.serviceWorker : undefined;
+    sw?.addEventListener?.("message", onMessage);
+    return () => { current = false; sw?.removeEventListener?.("message", onMessage); };
   }, [user?.id]);
 
   if (!user || !prefs) return null;
