@@ -8,10 +8,14 @@ const read = (p: string) => readFileSync(p, "utf8");
 describe("P2b, premier rendu sans attente réseau", () => {
   it("le dictionnaire fr est importé statiquement et prêt immédiatement", async () => {
     const src = read("src/i18n/index.ts");
-    expect(src).toMatch(/import fr from "\.\/locales\/fr\/common\.json"/);
+    // Lot P5 : import statique limité aux textes du premier écran.
+    expect(src).toMatch(/import \{ a11y, article, footer, nav \} from "\.\/locales\/fr\/common\.json"/);
     const i18n = await import("@/i18n");
     await expect(i18n.i18nReady).resolves.toBeUndefined();
     expect(i18n.default.hasResourceBundle("fr", "common")).toBe(true);
+    for (const k of ["nav.login", "footer.tagline", "a11y.skip_to_content"]) {
+      expect(i18n.default.t(k), k).not.toBe(k);
+    }
   });
 
   it("main.tsx rend sans attendre de promesse", () => {
