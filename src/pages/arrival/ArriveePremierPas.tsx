@@ -9,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { MIN_COMPLETION_TO_APPLY } from "@/hooks/useAccessLevel";
 import { loadFirstStep, type FirstStepCard, type FirstStepData } from "@/lib/arrivalFirstStep";
 import { arrivalUrl, stepsToReach } from "@/lib/arrival";
+import AlmaAvatar from "@/components/ai/alma/AlmaAvatar";
 import { ArrivalShell, Eyebrow, Gouache, useArrivalT, useArrivalViewed } from "@/components/arrival/ArrivalUI";
 const waitingBench = new URL("../../assets/empty-states/v2/responsive/waiting-bench-384.webp", import.meta.url).href;
 
@@ -54,6 +55,14 @@ const ArriveePremierPas = () => {
     </div>
   );
 
+  // Lot 2b : phrase d'Alma, seulement si l'alerte de nouvelle garde est active.
+  const almaLine = data.alertActive ? (
+    <div className="flex items-start gap-3" data-testid="g5-alma-line">
+      <AlmaAvatar size={32} mood="gentle" aria-hidden={true} />
+      <p className="text-sm text-foreground/80">{t("arrival.g5.alma_line")}</p>
+    </div>
+  ) : null;
+
   if (data.hasNear && data.best) {
     const b = data.best;
     return (
@@ -82,6 +91,7 @@ const ArriveePremierPas = () => {
           </div>
         </article>
         <p className="text-sm">{t("arrival.g5.count_line", { n: data.nearCount, total: data.total })} <Link to="/search" className="arrival-link">{t("arrival.g5.all")}</Link></p>
+        {almaLine}
         {score >= MIN_COMPLETION_TO_APPLY && profileCard}
         <p className="text-center"><Link to="/dashboard" className="arrival-link text-sm">{t("arrival.g5.dashboard")}</Link></p>
       </ArrivalShell>
@@ -114,6 +124,7 @@ const ArriveePremierPas = () => {
           ))}
         </section>
       )}
+      {almaLine}
       {data.alertActive && (
         <div className="arrival-card p-4 space-y-1" data-testid="g5b-alert">
           <p>{t("arrival.g5b.alert_text")}</p>

@@ -229,7 +229,8 @@
     "profile_steps_other": "Encore {{count}} étapes pour pouvoir candidater.",
     "profile_cta": "Compléter ma fiche",
     "profile_ok": "Votre fiche peut candidater. Une photo aide les propriétaires à vous choisir.",
-    "add": "Ajouter"
+    "add": "Ajouter",
+    "alma_line": "Je garde un œil sur les nouvelles gardes près de chez vous, et je vous écris dès qu'une s'ouvre dans votre rayon."
   },
   "g5b": {
     "title": "Le réseau se construit commune par commune, {{name}}, et vous en faites partie.",
