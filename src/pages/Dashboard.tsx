@@ -9,6 +9,7 @@ import OwnerDashboard from "@/components/dashboard/OwnerDashboard";
 import SitterDashboard from "@/components/dashboard/SitterDashboard";
 
 const InstallAppCard = lazy(() => import("@/components/dashboard/shared/InstallAppCard"), "InstallAppCard");
+const PushResubscribeCard = lazy(() => import("@/components/dashboard/shared/PushResubscribeCard"), "PushResubscribeCard");
 import { DashboardErrorBoundary } from "@/components/dashboard/DashboardErrorBoundary";
 import { trackEvent } from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";
@@ -177,6 +178,7 @@ const Dashboard = () => {
     <div className="overflow-x-clip">
       <Head><meta name="robots" content="noindex, nofollow" /></Head>
       <Suspense fallback={null}><InstallAppCard /></Suspense>
+      <Suspense fallback={null}><PushResubscribeCard /></Suspense>
 
       <div
         key={displayedRole}

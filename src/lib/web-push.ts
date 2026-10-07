@@ -293,3 +293,23 @@ export function reconcilePushSession(userId?: string): void {
     if (owner && owner !== userId) setTimeout(() => { void cleanupPushOnLogout(); }, 0);
   } catch { /* Unavailable storage means no persisted device owner. */ }
 }
+
+/**
+ * Lot 0 : l'appareil garde un identifiant d'abonnement, mais le serveur l'a
+ * désactivé (envoi 404 ou 410). Renvoie les préférences connues pour la
+ * réactivation, ou null si l'abonnement est actif, absent ou incertain.
+ * Sans identifiant local, aucun appel réseau.
+ */
+export async function serverDisabledPush(userId: string): Promise<PushPreferences | null> {
+  let localId: string | null = null;
+  try {
+    localId = localStorage.getItem(PUSH_ID_KEY);
+    if (!localId || localStorage.getItem(PUSH_OWNER_KEY) !== userId) return null;
+  } catch { return null; }
+  try {
+    const result = await api<{ subscriptions: Array<{ id: string; enabled: boolean; opt_in_messages: boolean; opt_in_applications: boolean; opt_in_nearby_sits?: boolean }> }>(userId, { action: 'status' });
+    const row = result.subscriptions.find((item) => item.id === localId);
+    if (!row || row.enabled !== false) return null;
+    return { messages: row.opt_in_messages ?? true, applications: row.opt_in_applications ?? true, nearbySits: row.opt_in_nearby_sits === true };
+  } catch { return null; }
+}
