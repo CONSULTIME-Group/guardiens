@@ -555,6 +555,7 @@ const OwnerSitView = ({
       property: property as any,
       galleryPhotos: ownerGallery,
       pets: pets as any,
+      ownerCity: owner?.city ?? null,
     }),
     { viaCreateForm: publishNeedsForm, resumeHref: `/sits/create?resume=${sit.id}` },
   );
