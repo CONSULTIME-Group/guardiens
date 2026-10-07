@@ -690,7 +690,7 @@ Deno.serve(async (req) => {
         },
         { role: "system", content: formatKnowledge(knowledge) },
         ...(facts ? [{ role: "system" as const, content: `FAITS VÉRIFIÉS, seule base de toute phrase qui affirme un fait sur la personne :\n${JSON.stringify(facts, null, 2)}` }] : []),
-        ...(inventory ? [{ role: "system" as const, content: formatInventory(inventory) }] : []),
+        ...(inventory ? [{ role: "system" as const, content: formatInventory(inventory, { foreignOpen }) }] : []),
         ...history,
         { role: "system", content: almaRegisterReminder(register) },
         ...(viewed
