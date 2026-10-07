@@ -8,3 +8,9 @@ export function isArrivalV2Account(
   return new Date(profileCreatedAt).getTime() >= new Date(flag.appliesSince).getTime();
 }
 
+
+export const ARRIVAL_FLAG = "arrival_v2";
+
+/** Une inscription en cours crée par définition un compte après la bascule. */
+export const arrivalAppliesToNewSignup = (flag: { enabled: boolean; appliesSince: string | null }) =>
+  flag.enabled && !!flag.appliesSince;

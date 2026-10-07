@@ -14,7 +14,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useFeatureFlag, getFlag } from "@/hooks/useFeatureFlag";
 import { useAffinityOnboardingStatus } from "@/hooks/useAffinityOnboardingStatus";
 import { isPublishPath, rememberPublishIntent } from "@/lib/postOnboardingIntent";
-import { isArrivalV2Account } from "@/lib/arrivalFlag";
+
+/** Lot 1 : compte arrivée v2 (copie locale de src/lib/arrivalFlag.ts, évite un module de plus dans la coquille). */
+const isArrivalV2Account = (f: { enabled: boolean; appliesSince: string | null }, created: string | null | undefined) =>
+  !!(f.enabled && f.appliesSince && created) && new Date(created!).getTime() >= new Date(f.appliesSince!).getTime();
 
 const OnboardingGate = () => {
   const { user, loading } = useAuth();

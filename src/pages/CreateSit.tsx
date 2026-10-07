@@ -1,5 +1,4 @@
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
-import { isArrivalV2Account } from "@/lib/arrivalFlag";
 import { clearPublishIntent } from "@/lib/postOnboardingIntent";
 import { useState, useEffect, useRef, useCallback, type MouseEvent as ReactMouseEvent } from "react";
 import ExpectationSuggestions from "@/components/sits/create/ExpectationSuggestions";
@@ -93,6 +92,10 @@ import {
 import { shouldPromptAnimalMention } from "@/lib/sitAnimalMention";
 import { shouldOfferPublishExitChoice, type DraftHoldReason } from "@/lib/draftHoldReasons";
 import { reportError } from "@/lib/errorLogger";
+
+/** Lot 1 : compte arrivée v2 (copie locale de src/lib/arrivalFlag.ts, évite un module de plus dans la coquille). */
+const isArrivalV2Account = (f: { enabled: boolean; appliesSince: string | null }, created: string | null | undefined) =>
+  !!(f.enabled && f.appliesSince && created) && new Date(created!).getTime() >= new Date(f.appliesSince!).getTime();
 
 
 interface PropertySummary {
