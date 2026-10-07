@@ -393,6 +393,13 @@
       "when": 1791361836043,
       "tag": "0055_apply_signup_role",
       "breakpoints": true
+    },
+    {
+      "idx": 56,
+      "version": "7",
+      "when": 1791362933947,
+      "tag": "0056_push_renew_subscription",
+      "breakpoints": true
     }
   ]
 }

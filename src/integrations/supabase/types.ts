@@ -13681,6 +13681,17 @@ export type Database = {
         Returns: boolean
       }
       push_norm_city: { Args: { p: string }; Returns: string }
+      push_renew_subscription: {
+        Args: {
+          p_auth_key: string
+          p_endpoint: string
+          p_endpoint_host: string
+          p_p256dh_key: string
+          p_subscription_id: string
+          p_user_id: string
+        }
+        Returns: string
+      }
       push_set_my_nearby_preference: {
         Args: { p_opt_in: boolean; p_subscription_id: string }
         Returns: boolean
