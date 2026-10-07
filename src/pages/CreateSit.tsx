@@ -1,5 +1,5 @@
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
-import { isArrivalV2Account } from "@/lib/arrival";
+import { isArrivalV2Account } from "@/lib/arrivalFlag";
 import { clearPublishIntent } from "@/lib/postOnboardingIntent";
 import { useState, useEffect, useRef, useCallback, type MouseEvent as ReactMouseEvent } from "react";
 import ExpectationSuggestions from "@/components/sits/create/ExpectationSuggestions";

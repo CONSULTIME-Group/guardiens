@@ -14,7 +14,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useFeatureFlag, getFlag } from "@/hooks/useFeatureFlag";
 import { useAffinityOnboardingStatus } from "@/hooks/useAffinityOnboardingStatus";
 import { isPublishPath, rememberPublishIntent } from "@/lib/postOnboardingIntent";
-import { isArrivalV2Account } from "@/lib/arrival";
+import { isArrivalV2Account } from "@/lib/arrivalFlag";
 
 const OnboardingGate = () => {
   const { user, loading } = useAuth();

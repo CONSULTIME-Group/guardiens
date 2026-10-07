@@ -26,7 +26,6 @@ interface Profile {
   onboardingDismissedAt: string | null;
   /** Lot 1 : clic sur « Faisons connaissance » de /bienvenue. */
   arrivalWelcomeSeenAt?: string | null;
-  createdAt?: string | null;
 }
 
 interface AuthContextType {
@@ -108,7 +107,6 @@ const mapProfile = (profile: any, authEmail?: string): Profile => ({
   onboardingMinimalCompleted: profile.onboarding_minimal_completed ?? false,
   onboardingDismissedAt: profile.onboarding_dismissed_at || null,
   arrivalWelcomeSeenAt: profile.arrival_welcome_seen_at ?? null,
-  createdAt: profile.created_at ?? null,
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

@@ -7,14 +7,7 @@ import { finishUrl, type DeparturePeriod } from "../../supabase/functions/_share
 export const ARRIVAL_FLAG = "arrival_v2";
 export type ArrivalStep = "C1" | "C2" | "C3" | "C4" | "P1" | "P2" | "P3" | "P4";
 
-/** Compte concerné par C4 et la suite : même règle que mandatory_affinity_onboarding. */
-export function isArrivalV2Account(
-  flag: { enabled: boolean; appliesSince: string | null },
-  profileCreatedAt: string | null | undefined,
-): boolean {
-  if (!flag.enabled || !flag.appliesSince || !profileCreatedAt) return false;
-  return new Date(profileCreatedAt).getTime() >= new Date(flag.appliesSince).getTime();
-}
+export { isArrivalV2Account } from "./arrivalFlag";
 
 /** Une inscription en cours crée par définition un compte après la bascule. */
 export const arrivalAppliesToNewSignup = (flag: { enabled: boolean; appliesSince: string | null }) =>
