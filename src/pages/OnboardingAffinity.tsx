@@ -669,6 +669,11 @@ const OnboardingAffinity = () => {
                   Se déconnecter
                 </Button>
               </div>
+              {saveError && (
+                <p role="alert" className="text-sm text-destructive">
+                  L'enregistrement n'a pas abouti. Vos réponses sont gardées, réessayez.
+                </p>
+              )}
               {!canSubmit && missingFields.length > 0 && (
                 <p
                   id="onboarding-missing"
