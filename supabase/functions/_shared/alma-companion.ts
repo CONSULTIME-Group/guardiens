@@ -457,6 +457,8 @@ export interface OutputGuardInput {
   actionLabels: string[];
   /** Un échange antérieur figure dans le contexte (historique ou dernier échange). */
   hasPriorExchange: boolean;
+  /** Question sur Alma elle-même : sa biographie (Lyon, Córdoba) peut être citée. */
+  allowAlmaBio?: boolean;
 }
 
 const stripAccents = (s: string) => (s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -523,7 +525,7 @@ export function checkOutput(answer: string, g: OutputGuardInput): string[] {
     for (const place of placesIn(sentence, g.gazetteer)) {
       const k = foldC(place);
       if (POSSESSIVE.test(f) && !inText(g.memberText, k)) issues.add(`lieu_hors_faits:${k}`);
-      else if (!inText(g.contextText, k) && !ALMA_BIO.includes(k)) issues.add(`lieu_hors_faits:${k}`);
+      else if (!inText(g.contextText, k) && !(g.allowAlmaBio && ALMA_BIO.includes(k))) issues.add(`lieu_hors_faits:${k}`);
     }
     if (!g.hasPriorExchange && PHANTOM.test(f)) issues.add("echange_fantome");
   }

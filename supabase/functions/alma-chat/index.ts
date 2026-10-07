@@ -925,6 +925,7 @@ Deno.serve(async (req) => {
       noListingPlaces: foreignWordsWithoutListings(publishedRows),
       actionLabels,
       hasPriorExchange: history.length > 0 || Boolean(lastExchange),
+      allowAlmaBio: register === "perso" || aboutAlma,
     };
     const hardIssues = (text: string) => [...(locked ? checkLocked(text, locked) : []), ...checkOutput(text, guard)];
     let issues = [...hardIssues(answer), ...softIssues(answer)];
