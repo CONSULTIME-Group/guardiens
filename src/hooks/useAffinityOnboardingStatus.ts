@@ -45,7 +45,9 @@ async function loadStatus(userId: string, role: string | null) {
 
   const sitter = sitterRes.data as { animal_types?: string[] | null; work_during_sit?: string | null; sitter_type?: string | null } | null;
   const owner = ownerRes.data as { presence_expected?: string | null; preferred_sitter_types?: string[] | null } | null;
-  const profile = profileRes.data as { created_at?: string | null; postal_code?: string | null } | null;
+  const profile = profileRes.data as { created_at?: string | null; postal_code?: string | null; arrival_intent?: string | null } | null;
+  // Lot 2 : intention entraide, seul le code postal reste exigé.
+  const entraide = profile?.arrival_intent === "entraide";
 
   const sitterComplete =
     !!sitter &&
@@ -62,8 +64,8 @@ async function loadStatus(userId: string, role: string | null) {
   const isOwner = role === "owner" || role === "both";
 
   return {
-    needsSitter: isSitter && !sitterComplete,
-    needsOwner: isOwner && !ownerComplete,
+    needsSitter: !entraide && isSitter && !sitterComplete,
+    needsOwner: !entraide && isOwner && !ownerComplete,
     needsPostal: !(profile?.postal_code ?? "").trim(),
     profileCreatedAt: profile?.created_at ?? null,
   };

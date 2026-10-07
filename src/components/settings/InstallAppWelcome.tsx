@@ -15,7 +15,7 @@ export default function InstallAppWelcome({ paused }: { paused: boolean }) {
   const [visible, setVisible] = useState(document.visibilityState === "visible");
   const firstVisit = useRef(!!user?.id && firstInstallVisitDue(user.id));
   const measured = useRef(false);
-  const quietRoute = /^\/(messages|settings|onboarding)(\/|$)|\/(create|edit)(\/|$)/.test(pathname);
+  const quietRoute = /^\/(messages|settings|onboarding|arrivee|bienvenue)(\/|$)|\/(create|edit)(\/|$)/.test(pathname);
   const show = !!user?.id && firstVisit.current && !dismissed && !paused && visible && !quietRoute && installPlatform().mobile && !standalone && !knownInstalled;
 
   useEffect(() => {
