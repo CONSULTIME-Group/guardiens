@@ -73,10 +73,12 @@ export function inventoryIsEmpty(inv: AlmaInventory): boolean {
 }
 
 /** Bloc envoyé au modèle. */
-export function formatInventory(inv: AlmaInventory): string {
+export function formatInventory(inv: AlmaInventory, opts: { foreignOpen?: boolean } = {}): string {
+  // Lot L3 : la page internationale n'est citée que si une annonce hors de France existe.
+  const intl = opts.foreignOpen === false ? " : propose les gardes en France et l'alerte de secteur" : " : propose /annonces/international";
   const lines: string[] = [
     "AUTOUR DE LA PERSONNE, ÉLÉMENTS RÉELS ET PUBLICS (tu peux les nommer avec leur lien ; tu ne cites aucun nombre de membres)",
-    `Département : ${inv.departement ?? "inconnu"}${inv.hors_france ? `, la personne vit hors de France (${inv.pays}) : propose /annonces/international` : ""}.`,
+    `Département : ${inv.departement ?? "inconnu"}${inv.hors_france ? `, la personne vit hors de France (${inv.pays})${intl}` : ""}.`,
   ];
   const block = (title: string, items: InventoryItem[]) => {
     if (!items.length) return;

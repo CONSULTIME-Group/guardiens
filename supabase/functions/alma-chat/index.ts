@@ -45,6 +45,23 @@ import {
   type ViewerState,
 } from "../_shared/alma-owner-question.ts";
 import { deptCodeFromPostal, sitCommune, sitLocationLabel } from "../_shared/sit-location.ts";
+import {
+  ALERT_ACTION,
+  asksAboutListings,
+  expressedIntent,
+  foreignNoneSentence,
+  foreignPlaceIn,
+  frenchNoneSentence,
+  frenchPlaceIn,
+  hasForeignSits,
+  isMessagingQuestion,
+  MESSAGING_DIRECTIVE,
+  SCOPE_DIRECTIVE,
+  scrubTruth,
+  spaceGuidance,
+  type FrenchPlaceMatch,
+  type PublishedSitRow,
+} from "../_shared/alma-truth.ts";
 import { detectHomePhotoQuestion, HOME_PHOTO_ACTION, HOME_PHOTO_ANSWER } from "../_shared/alma-home-photo.ts";
 
 const SPECIES_FR: Record<string, string> = {
@@ -377,6 +394,73 @@ Deno.serve(async (req) => {
       loadAlmaInventory(adminClient, prof, todayIso).catch(() => null),
     ]);
 
+    // Lot L3 : espace actif, périmètre réel (lu en base), brouillons.
+    const previousUser = history.filter((m: any) => m.role === "user").map((m: any) => m.content);
+    const expressed = expressedIntent(message, previousUser);
+    const guidance = viewed ? null : spaceGuidance({ accountRole, activeRole, intent: expressed });
+    let publishedRows: PublishedSitRow[] = [];
+    try {
+      const { data } = await adminClient
+        .from("sits")
+        .select("country, city, departement_code")
+        .eq("status", "published")
+        .eq("accepting_applications", true)
+        .limit(1000);
+      publishedRows = Array.isArray(data) ? (data as PublishedSitRow[]) : [];
+    } catch (e) {
+      console.error("alma-chat published sits failed", e);
+    }
+    const foreignOpen = hasForeignSits(publishedRows);
+    const placeAsked = asksAboutListings(message) || expressed === "sitter";
+    const foreign = placeAsked ? foreignPlaceIn(message) : null;
+    const foreignNone = foreign && !publishedRows.some((r) => ((r.country || "") + "").toUpperCase() === foreign.iso) ? foreign : null;
+    let frenchNone: FrenchPlaceMatch | null = null;
+    if (!foreign && placeAsked) {
+      try {
+        const { data } = await adminClient.from("departements").select("code, nom, nom_region");
+        const match = frenchPlaceIn(message, Array.isArray(data) ? (data as any[]) : [], publishedRows);
+        if (match && match.count === 0) frenchNone = match;
+      } catch (e) {
+        console.error("alma-chat departements failed", e);
+      }
+    }
+    if (!viewed && (guidance || foreignNone || frenchNone)) {
+      const placeSentence = foreignNone ? foreignNoneSentence(foreignNone.inCountry) : frenchNone ? frenchNoneSentence(frenchNone.label) : null;
+      const truthAnswer = [placeSentence, guidance?.sentence ?? null].filter(Boolean).join(" ");
+      const truthAction = guidance
+        ? (foreignNone && guidance.switchable ? { ...guidance.action, label: "Passer en espace gardien et voir les gardes en France" } : guidance.action)
+        : ALERT_ACTION;
+      const truthChips = guidance && (foreignNone || frenchNone)
+        ? [{ label: ALERT_ACTION.label, path: ALERT_ACTION.path }]
+        : !guidance && foreignNone ? [{ label: "Voir les gardes en France", path: "/annonces" }] : [];
+      const classification: AlmaClassification = { ...classificationFromPatterns(intent), unanswered: false };
+      const conversationId = await logConversation({
+        user_id: userId,
+        surface,
+        active_role: activeRole,
+        input_mode: inputMode,
+        question: message,
+        answer: truthAnswer,
+        register,
+        refusal_reason: null,
+        latency_ms: Date.now() - startedAt,
+        sources_count: 0,
+        classification,
+        proposed_action: truthAction,
+        chips: truthChips.length ? truthChips : null,
+      });
+      await raiseSignals(classification, conversationId);
+      return json({
+        answer: truthAnswer,
+        remaining: Math.max(0, ALMA_CHAT_DAILY_LIMIT - ((count ?? 0) + 1)),
+        action: { label: truthAction.label, path: truthAction.path },
+        ...(truthChips.length ? { chips: truthChips } : {}),
+        ...(conversationId ? { conversation_id: conversationId } : {}),
+        ...(isReplay ? { replay_meta: { register, classification, confirmed_sit: false } } : {}),
+      });
+    }
+    const messagingAsked = isMessagingQuestion(message);
+
     // Seul le texte actif du catalogue serveur peut devenir une consigne d'humeur.
     const moodMessages: Array<{ role: "system"; content: string }> = [];
     // Lot J2-A : l'humeur reste un décor (petite conversation ou registre perso)
@@ -533,6 +617,9 @@ Deno.serve(async (req) => {
           completion,
           profileAlreadySuggested: history.some((m: any) => m.role === "assistant" && /\/(owner-)?profile\b/.test(m.content)),
           pagePath,
+          sitterIntent: expressed === "sitter",
+          foreignOpen,
+          today: todayIso,
         })
       : null;
     const knowledge = selectKnowledge({ question: message, role: activeRole, both: accountRole === "both" });
@@ -614,6 +701,8 @@ Deno.serve(async (req) => {
           : []),
         ...(next ? [{ role: "system" as const, content: formatActionDirective(next) }] : []),
         ...(helpDirective ? [{ role: "system" as const, content: helpDirective }] : []),
+        { role: "system" as const, content: SCOPE_DIRECTIVE },
+        ...(messagingAsked ? [{ role: "system" as const, content: MESSAGING_DIRECTIVE }] : []),
         { role: "system", content: CLASSIFICATION_DIRECTIVE },
         { role: "user", content: message },
       ],
@@ -680,7 +769,7 @@ Deno.serve(async (req) => {
       classification.bug_suspected || classification.intent === "aide_recherchee";
     const answer = addressedToOwner && viewed
       ? buildOwnerQuestionAnswer(viewed.facts, viewed.viewer)
-      : polishAlmaAnswer(drafted.answer, { perso: register === "perso", quiet });
+      : scrubTruth(polishAlmaAnswer(drafted.answer, { perso: register === "perso", quiet }), { messaging: messagingAsked, foreignOpen });
     if (!answer) {
       await logConversation({
         user_id: userId,
