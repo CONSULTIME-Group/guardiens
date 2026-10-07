@@ -4,7 +4,7 @@
  */
 import { finishUrl, type DeparturePeriod } from "../../supabase/functions/_shared/owner-departure-logic.ts";
 
-export type ArrivalStep = "C1" | "C2" | "C3" | "C4" | "P1" | "P2" | "P3" | "P4";
+export type ArrivalStep = "C1" | "C2" | "C3" | "C4" | "P1" | "P2" | "P3" | "P4" | "G1" | "G2" | "G3" | "G4" | "G5" | "N1" | "E1";
 
 export { isArrivalV2Account, ARRIVAL_FLAG, arrivalAppliesToNewSignup } from "./arrivalFlag";
 

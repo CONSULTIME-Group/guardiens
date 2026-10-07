@@ -15,6 +15,7 @@ import { departmentCodeFromPostal } from "@/lib/postalDepartment";
 import { isPostalCodeValidForCountry } from "@/lib/setupState";
 import { canSkipP1, safeNext } from "@/lib/arrival";
 import { ArrivalShell, Eyebrow, Gouache, SaveError, SingleChoice, trackArrival, useArrivalT, useArrivalViewed } from "@/components/arrival/ArrivalUI";
+import ArriveeVousGardien from "./ArriveeVousGardien";
 const maisonSeule = new URL("../../assets/landing/maison-seule-450.webp", import.meta.url).href;
 
 const TYPES = ["house", "apartment", "farm", "chalet", "other"] as const;
@@ -43,7 +44,7 @@ export function p1Valid(o: { firstName: string; postalCode: string; city: string
     && isPostalCodeValidForCountry(o.postalCode, o.country);
 }
 
-const ArriveeVous = () => {
+const ArriveeVousProprietaire = () => {
   const t = useArrivalT();
   const { user, refreshProfile } = useAuth();
   const navigate = useNavigate();
@@ -157,6 +158,13 @@ const ArriveeVous = () => {
       <button type="button" className="arrival-primary" onClick={save} disabled={!valid || saving}>{t("arrival.continue")}</button>
     </ArrivalShell>
   );
+};
+
+/** Lot 2 : ?flow=sitter|entraide affiche G1, sinon P1. */
+const ArriveeVous = () => {
+  const [params] = useSearchParams();
+  const flow = params.get("flow");
+  return flow === "sitter" || flow === "entraide" ? <ArriveeVousGardien /> : <ArriveeVousProprietaire />;
 };
 
 export default ArriveeVous;
