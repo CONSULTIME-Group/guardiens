@@ -43,6 +43,8 @@ export interface AlmaReplayCase {
     first_name?: string | null;
     city?: string | null;
     pets?: Array<{ name: string | null; species: string | null; breed?: string | null; age?: number | null }>;
+    /** Lot L4b : faits vérifiés simulés (brouillons, annonces), seuls lus en rejeu. */
+    facts?: { brouillons?: Array<{ sit_id: string; titre: string | null; debut?: string | null }> };
   };
   /** Lot L4 : rejoué deux fois, les deux réponses ne commencent pas par les mêmes cinq mots. */
   varietyCheck?: boolean;
