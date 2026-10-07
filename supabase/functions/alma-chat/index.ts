@@ -452,6 +452,11 @@ Deno.serve(async (req) => {
       prof.first_name = rc.first_name ?? null;
       prof.city = rc.city ?? null;
       prof.postal_code = rc.postal_code ?? null;
+      prof.departement_code = rc.departement_code ?? null;
+      prof.latitude = rc.latitude ?? null;
+      prof.longitude = rc.longitude ?? null;
+      prof.profile_completion = null;
+      prof.identity_verified = null;
     }
     const [facts, inventory] = await Promise.all([
       rc ? Promise.resolve(simulatedFacts(accountRole, rc.facts)) : loadVerifiedFacts(adminClient, userId, accountRole, todayIso).catch(() => null),
@@ -462,7 +467,7 @@ Deno.serve(async (req) => {
     // d'Alma (continuité de moins de 7 jours, amorces à ne pas répéter).
     const safeRead = async (f: () => any) => { try { return await f(); } catch { return { data: [] }; } };
     const [myPetsRes, recentRes] = await Promise.all([
-      rc?.pets !== undefined
+      rc
         ? Promise.resolve({ data: Array.isArray(rc.pets) ? rc.pets : [] })
         : safeRead(() => adminClient.from("pets").select("name, species, breed, age, properties!inner(user_id)").eq("properties.user_id", userId).limit(10)),
       rc
@@ -597,7 +602,10 @@ Deno.serve(async (req) => {
     let sits: unknown[] = [];
     let applications: unknown[] = [];
     let pets: unknown[] = [];
-    if (activeRole === "owner") {
+    if (rc) {
+      // Lot L4b : rejeu, le dossier ne contient que le contexte simulé.
+      pets = Array.isArray(rc.pets) ? rc.pets : [];
+    } else if (activeRole === "owner") {
       const [sitsRes, propsRes] = await Promise.all([
         adminClient
           .from("sits")
@@ -707,17 +715,17 @@ Deno.serve(async (req) => {
     // question porte sur le profil. Sinon il le citait sans qu'on le demande.
     const showProfile = !helpDirective && almaProfileVisibleToModel(completion, message);
     const dossier = {
-      prenom: (profileRes.data as any)?.first_name ?? null,
-      ville: (profileRes.data as any)?.city ?? null,
+      prenom: prof.first_name ?? null,
+      ville: prof.city ?? null,
       completion_profil: showProfile ? completion : null,
-      identite_verifiee: (profileRes.data as any)?.identity_verified ?? null,
+      identite_verifiee: prof.identity_verified ?? null,
       // Lot J1 : qui cherche de l'aide n'entend pas parler de points de profil.
       bareme_profil: showProfile ? baremeProfil : null,
       profil_a_completer: showProfile ? profilACompleter : [],
       role_actif: activeRole,
       ecran_courant: surface,
-      profil_gardien: sitterRes.data ?? null,
-      profil_proprietaire: ownerRes.data ?? null,
+      profil_gardien: rc ? null : sitterRes.data ?? null,
+      profil_proprietaire: rc ? null : ownerRes.data ?? null,
       annonces: sits,
       animaux: pets,
       candidatures: applications,
