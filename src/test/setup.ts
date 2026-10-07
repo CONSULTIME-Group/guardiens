@@ -1,4 +1,8 @@
 import "@testing-library/jest-dom";
+import frCommon from "@/i18n/locales/fr/common.json";
+
+// Lot P5 : en test, le dictionnaire complet est présent dès l'init (comme avant).
+(globalThis as any).__I18N_FULL__ = frCommon;
 
 // jsdom n'implémente pas HTMLCanvasElement.getContext, or lottie-web
 // l'appelle au chargement du module. On fournit un stub minimal.

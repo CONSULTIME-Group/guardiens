@@ -1,7 +1,11 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
-import fr from "./locales/fr/common.json";
+// Lot P5 : seuls les textes du premier écran (en-tête, pied de page,
+// accessibilité) restent dans l'entrée ; le dictionnaire complet arrive en
+// parallèle et chaque page paresseuse l'attend (src/lib/dictionaryGate.ts).
+import { a11y, article, footer, nav } from "./locales/fr/common.json";
+import { setDictionaryGate } from "@/lib/dictionaryGate";
 import { LANG_STORAGE_KEY, migrateLegacyLangStorage } from "@/lib/langStorageKey";
 
 // Guardiens est monolingue français depuis le 17/08/2026 : allemand, italien,
@@ -30,7 +34,7 @@ void i18n
     supportedLngs: SUPPORTED_LANGS as unknown as string[],
     defaultNS: "common",
     ns: ["common"],
-    resources: { fr: { common: fr } },
+    resources: { fr: { common: (globalThis as any).__I18N_FULL__ ?? { a11y, article, footer, nav } } },
     // Conservée pour le jour où un dictionnaire arriverait après l'init :
     // sans cette option, i18next considérerait une langue absente des
     // resources comme non chargée et n'irait jamais la relire.
@@ -49,6 +53,16 @@ void i18n
     interpolation: { escapeValue: false },
     react: { useSuspense: false },
   });
+
+let full: Promise<void> | null = null;
+/** Dictionnaire complet, chargé une fois (nouvelle tentative après un échec). */
+export function loadFullDictionary(): Promise<void> {
+  return (full ??= import("./locales/fr/common.json?raw")
+    .then((m) => { i18n.addResourceBundle("fr", "common", JSON.parse(m.default), true, true); })
+    .catch((e) => { full = null; throw e; }));
+}
+setDictionaryGate(loadFullDictionary);
+void loadFullDictionary().catch(() => {});
 
 /**
  * Monolingue français : il n'existe plus aucun dictionnaire à charger à la

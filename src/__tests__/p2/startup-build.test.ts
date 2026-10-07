@@ -47,6 +47,11 @@ describe("P2, build de production", () => {
     expect(statSync(entry).size).toBeLessThanOrEqual(300 * 1024);
   });
 
+  it("lot P5 : fichier d'entrée sous l'alerte de 300 000 octets", () => {
+    const size = statSync(entry).size;
+    expect(size, `fichier d'entrée à ${size} octets, alerte à 300 000 (plafond dur 307 200)`).toBeLessThanOrEqual(300_000);
+  });
+
   it("au plus 14 modulepreload dans index.html", () => {
     expect((html.match(/rel="modulepreload"/g) ?? []).length).toBeLessThanOrEqual(14);
   });
