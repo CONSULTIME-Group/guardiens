@@ -13,6 +13,14 @@ export interface AlmaReplayCase {
   question: string;
   /** Messages précédents du même membre, dans l'ordre. */
   history: string[];
+  /** Lot L1 : page ouverte au moment de la question (fiche d'annonce). */
+  pagePath?: string;
+  /** Lot L1 : attentes propres au cas, vérifiées par checkReplayAnswer. */
+  expect?: {
+    mentionsOwner?: boolean;
+    actionPath?: string;
+    forbidden?: string[];
+  };
 }
 
 export const ALMA_REPLAY_CASES: AlmaReplayCase[] = [
@@ -402,5 +410,35 @@ export const ALMA_REPLAY_CASES: AlmaReplayCase[] = [
       "j'ai peut etre fais une erreur mais je ne pose pas ma candidature je cherche au contraire de l'aide !!!",
       "inadapté; j'ai 15 chevaux et poneys"
     ]
+  },
+  {
+    "id": "cas-39",
+    "member": "Membre 23",
+    "activeRole": "sitter",
+    "accountRole": "sitter",
+    "surface": "sit_detail",
+    "question": "Bonjour quel est le nom de votre joli village ?",
+    "history": [],
+    "pagePath": "/sits/85315487-7c43-4e10-a97e-821aefd10a8c",
+    "expect": {
+      "mentionsOwner": true,
+      "actionPath": "/sits/85315487-7c43-4e10-a97e-821aefd10a8c?postuler=1",
+      "forbidden": ["Lyon", "Córdoba", "Cordoba"]
+    }
+  },
+  {
+    "id": "cas-40",
+    "member": "Membre 24",
+    "activeRole": "sitter",
+    "accountRole": "sitter",
+    "surface": "sit_detail",
+    "question": "Pouvez-vous me préciser la ville",
+    "history": [],
+    "pagePath": "/sits/85315487-7c43-4e10-a97e-821aefd10a8c",
+    "expect": {
+      "mentionsOwner": true,
+      "actionPath": "/sits/85315487-7c43-4e10-a97e-821aefd10a8c?postuler=1",
+      "forbidden": ["Lyon", "Córdoba", "Cordoba"]
+    }
   }
 ];
