@@ -1,6 +1,6 @@
 /** Lot 1 : un seul point d'entrée à la demande pour /bienvenue et /arrivee/*,
  * chaque écran chargé à son tour (aucune liste de dépendances dans l'entrée). */
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, type ComponentType, type ReactNode } from "react";
 import { useLocation } from "react-router-dom";
 
 const SCREENS = {
@@ -12,11 +12,12 @@ const SCREENS = {
   "*": lazy(() => import("@/pages/NotFound")),
 } as const;
 
-const ArrivalRoutes = () => {
+/** `g` : garde d'authentification de App.tsx (ProtectedRoute), passée en prop pour alléger l'entrée. */
+const ArrivalRoutes = ({ g: Guard }: { g: ComponentType<{ children: ReactNode }> }) => {
   const { pathname } = useLocation();
   const key = pathname.replace(/\/+$/, "") as keyof typeof SCREENS;
   const Screen = SCREENS[key] ?? SCREENS["*"];
-  return <Suspense fallback={null}><Screen /></Suspense>;
+  return <Guard><Suspense fallback={null}><Screen /></Suspense></Guard>;
 };
 
 export default ArrivalRoutes;
