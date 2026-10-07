@@ -7,9 +7,9 @@ import { validateSubscriptionKeys } from './keys.ts';
 export const PUSH_MAX_BODY_BYTES = 4096;
 export const PUSH_MAX_ACTIVE_ENDPOINTS = 5;
 
-export type PushAction = 'config' | 'status' | 'subscribe' | 'preferences' | 'unsubscribe';
+export type PushAction = 'config' | 'status' | 'subscribe' | 'preferences' | 'unsubscribe' | 'renew';
 
-const ACTIONS: PushAction[] = ['config', 'status', 'subscribe', 'preferences', 'unsubscribe'];
+const ACTIONS: PushAction[] = ['config', 'status', 'subscribe', 'preferences', 'unsubscribe', 'renew'];
 
 export function isPushAction(value: unknown): value is PushAction {
   return typeof value === 'string' && (ACTIONS as string[]).includes(value);
@@ -110,4 +110,21 @@ export function isBodySizeAcceptable(raw: string): boolean {
 /** Aucun endpoint, aucune cle, aucun identifiant de membre en sortie. */
 export function sanitizeForLog(reason: string): string {
   return reason.replace(/[^a-z0-9_]/gi, '_').slice(0, 40);
+}
+
+export interface RenewInput { subscriptionId: string; endpoint: string; endpointHost: string; auth: string; p256dh: string }
+
+/** Lot 0b : nouvelle adresse pour un abonnement existant, préférences inchangées. */
+export function parseRenewInput(body: unknown): ParseResult<RenewInput> {
+  if (!body || typeof body !== 'object') return { ok: false, reason: 'invalid_body' };
+  const b = body as Record<string, unknown>;
+  if (typeof b.subscription_id !== 'string' || !UUID_RE.test(b.subscription_id)) {
+    return { ok: false, reason: 'invalid_subscription_id' };
+  }
+  const endpointCheck = validatePushEndpoint(b.endpoint);
+  if (!endpointCheck.ok) return { ok: false, reason: 'reason' in endpointCheck ? endpointCheck.reason : 'invalid_endpoint' };
+  const keysCheck = validateSubscriptionKeys(b.keys);
+  if (!keysCheck.ok) return { ok: false, reason: 'reason' in keysCheck ? keysCheck.reason : 'invalid_keys' };
+  const keys = b.keys as { auth: string; p256dh: string };
+  return { ok: true, value: { subscriptionId: b.subscription_id, endpoint: b.endpoint as string, endpointHost: endpointCheck.host, auth: keys.auth, p256dh: keys.p256dh } };
 }
