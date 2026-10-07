@@ -12,6 +12,11 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Trash2, ArrowLeft, Info, GripVertical, UploadCloud, Pencil, Check, X, Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { nextCoverAfterRemoval, publishedCoverWarning, propertyPhotoStoragePath } from "@/lib/galleryPhotoRemoval";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import PhotoTipsAlert from "./PhotoTipsAlert";
 import PhotoJourneyDialog from "./PhotoJourneyDialog";
 import PhotoQualityChecker from "./PhotoQualityChecker";
@@ -279,7 +284,31 @@ const OwnerGallery = () => {
     if (files.length > 0) uploadFiles(files);
   };
 
+  // Lot L2 : la base retire la photo du logement et remplace les couvertures
+  // (logement et annonces) par la photo suivante. Avant de toucher la
+  // couverture d'une annonce publiée, on le dit.
+  const [pendingDelete, setPendingDelete] = useState<{ id: string; messages: string[] } | null>(null);
+
   const handleDelete = async (id: string) => {
+    if (!user) return;
+    const target = photos.find((p) => p.id === id);
+    if (!target) return;
+    const { data: covered } = await supabase
+      .from("sits")
+      .select("title")
+      .eq("user_id", user.id)
+      .eq("status", "published")
+      .eq("cover_photo_url", target.photo_url);
+    const rows = (covered as { title: string | null }[] | null) ?? [];
+    if (rows.length > 0) {
+      const hasNext = !!nextCoverAfterRemoval(photos, id);
+      setPendingDelete({ id, messages: rows.map((r) => publishedCoverWarning(r.title ?? "", hasNext)) });
+      return;
+    }
+    await performDelete(id);
+  };
+
+  const performDelete = async (id: string) => {
     const previous = photos;
     const target = photos.find((p) => p.id === id);
     setPhotos((prev) => prev.filter((p) => p.id !== id));
@@ -289,11 +318,13 @@ const OwnerGallery = () => {
       toast({ variant: "destructive", title: "Erreur", description: "Impossible de supprimer la photo." });
       return;
     }
-    const marker = "/property-photos/";
-    const idx = target?.photo_url?.indexOf(marker) ?? -1;
-    if (target?.photo_url && idx >= 0) {
-      const path = decodeURIComponent(target.photo_url.slice(idx + marker.length).split("?")[0]);
-      await supabase.storage.from("property-photos").remove([path]);
+    const path = propertyPhotoStoragePath(target?.photo_url);
+    if (target?.photo_url && path) {
+      // Fichier supprimé seulement si plus rien ne le référence (avatar, animal, autre annonce).
+      const { data: stillUsed, error: refErr } = await supabase.rpc("owner_photo_still_referenced", { p_url: target.photo_url });
+      if (!refErr && stillUsed === false) {
+        await supabase.storage.from("property-photos").remove([path]);
+      }
     }
     toast({ title: "Photo supprimée" });
     window.dispatchEvent(new Event("owner-gallery:changed"));
@@ -461,6 +492,27 @@ const OwnerGallery = () => {
           )}
         </div>
       )}
+
+      <AlertDialog open={!!pendingDelete} onOpenChange={(o) => { if (!o) setPendingDelete(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Supprimer cette photo ?</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2">
+                {pendingDelete?.messages.map((m) => <p key={m}>{m}</p>)}
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => { const id = pendingDelete?.id; setPendingDelete(null); if (id) performDelete(id); }}
+            >
+              Supprimer la photo
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Grid sortable */}
       {photos.length > 0 && (

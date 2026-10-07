@@ -353,7 +353,8 @@ export function useOwnerProfile() {
         property_type: "type", environment: "environment",
         rooms_count: "rooms_count", bedrooms_count: "bedrooms_count",
         car_required: "car_required", accessible: "accessible",
-        equipments: "equipments", photos: "photos",
+        // Lot L2 : photos gérées par la Galerie seule (owner_gallery), jamais par ce formulaire.
+        equipments: "equipments",
         description: "description", region_highlights: "region_highlights",
       };
       const propUpdate: any = {};
