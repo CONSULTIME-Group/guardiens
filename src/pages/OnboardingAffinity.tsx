@@ -337,57 +337,41 @@ const OnboardingAffinity = () => {
   const handleSubmit = async () => {
     if (!user || !chosenRole) return;
     setSaving(true);
+    setSaveError(false);
     try {
-      // 1. Persist role if it changed, plus le code postal et le code
-      // département dérivé (colonne vide sur 295 profils au 23/08/2026).
-      const roleChanged = user.role !== chosenRole;
-      if (roleChanged || needsPostal) {
-        await supabase
-          .from("profiles")
-          .update({
-            ...(roleChanged ? { role: chosenRole } : {}),
-            ...(needsPostal
-              ? {
-                  postal_code: postalClean,
-                  departement_code: departmentCodeFromPostal(postalClean),
-                }
-              : {}),
-          })
-          .eq("id", user.id);
+      // Lot 0 : seules les colonnes affichées ET renseignées partent, et
+      // chaque { error } est lu. Une erreur arrête tout : ni événement de
+      // complétion, ni navigation.
+      const writes = buildAffinityWrites({
+        userId: user.id,
+        currentRole: (user.role as Role) ?? null,
+        chosenRole,
+        needsPostal,
+        postalCode: postalClean,
+        departementCode: needsPostal ? departmentCodeFromPostal(postalClean) : null,
+        showSitterBlock,
+        showOwnerBlock,
+        animalTypes,
+        workDuringSit,
+        sitterType,
+        presenceExpected,
+        preferredSitterTypes,
+        homeAmbiance,
+        lifePace,
+        interests,
+        languages,
+      });
+      if (writes.profile) {
+        const { error } = await supabase.from("profiles").update(writes.profile as any).eq("id", user.id);
+        if (error) throw error;
       }
-      // 2. Persist sitter fields
-      if (showSitterBlock) {
-        await supabase
-          .from("sitter_profiles")
-          .upsert(
-            {
-              user_id: user.id,
-              animal_types: animalTypes,
-              work_during_sit: workDuringSit,
-              sitter_type: sitterType,
-              life_pace: lifePace || null,
-              interests,
-              languages,
-            },
-            { onConflict: "user_id" },
-          );
+      if (writes.sitter) {
+        const { error } = await supabase.from("sitter_profiles").upsert(writes.sitter as any, { onConflict: "user_id" });
+        if (error) throw error;
       }
-      // 3. Persist owner fields
-      if (showOwnerBlock) {
-        await supabase
-          .from("owner_profiles")
-          .upsert(
-            {
-              user_id: user.id,
-              presence_expected: presenceExpected,
-              preferred_sitter_types: preferredSitterTypes,
-              home_ambiance: homeAmbiance,
-              life_pace: lifePace || null,
-              interests,
-              languages,
-            } as any,
-            { onConflict: "user_id" },
-          );
+      if (writes.owner) {
+        const { error } = await supabase.from("owner_profiles").upsert(writes.owner as any, { onConflict: "user_id" });
+        if (error) throw error;
       }
       completedRef.current = true;
       const duration = startedAtRef.current
@@ -412,7 +396,7 @@ const OnboardingAffinity = () => {
       navigate(exitTarget, { replace: true });
     } catch (e) {
       console.error("OnboardingAffinity: save failed", e);
-      toast.error("Impossible d'enregistrer, réessayez.");
+      setSaveError(true);
     } finally {
       setSaving(false);
     }
