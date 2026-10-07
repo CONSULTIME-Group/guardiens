@@ -22,6 +22,7 @@ import * as sitLocation from "../../../supabase/functions/_shared/sit-location";
 import * as homePhoto from "../../../supabase/functions/_shared/alma-home-photo";
 import * as truth from "../../../supabase/functions/_shared/alma-truth";
 import * as companion from "../../../supabase/functions/_shared/alma-companion";
+import * as places from "../../../supabase/functions/_shared/alma-places";
 import { ALMA_REPLAY_CASES } from "@/data/almaReplayCases";
 import { checkReplayAnswer } from "@/lib/alma/replayChecks";
 
@@ -64,7 +65,7 @@ function harness(profile: Record<string, unknown>, modelAnswers: string[] = ["R�
     "alma-system-prompt.ts": prompt, "alma-intent.ts": almaIntent, "alma-site-knowledge.ts": siteKnowledge,
     "alma-facts.ts": almaFacts, "alma-inventory.ts": almaInventory, "alma-next-action.ts": nextAction,
     "alma-classify.ts": almaClassify, "alma-output.ts": almaOutput, "normalize-contact-message.ts": normalizeContact,
-    "alma-owner-question.ts": ownerQuestion, "sit-location.ts": sitLocation, "alma-home-photo.ts": homePhoto, "alma-truth.ts": truth, "alma-companion.ts": companion,
+    "alma-owner-question.ts": ownerQuestion, "sit-location.ts": sitLocation, "alma-home-photo.ts": homePhoto, "alma-truth.ts": truth, "alma-companion.ts": companion, "alma-places.ts": places,
   };
   runInNewContext(outputText, {
     exports: {}, Request, Response, Date, console: { error: vi.fn(), log: vi.fn() },
@@ -97,8 +98,8 @@ export const REPLAY_OUTPUT: Record<string, { answer: string; action: string; pat
 const VOICE: Record<string, string> = {
   "cas-43": "Vous êtes dans votre espace propriétaire, Martine : la page Annonces y montre vos propres annonces. Les gardes proposées par les propriétaires vous attendent dans votre espace gardien. Guardiens propose des gardes en France, Polynésie française comprise, et il n'y a aucune garde en Italie aujourd'hui.",
   "cas-44": "Garder un chien en Italie, je comprends l'envie, mais il n'y a aucune garde en Italie aujourd'hui : Guardiens propose des gardes en France, Polynésie française comprise. Depuis votre espace propriétaire, vous voyez vos annonces ; les gardes à garder sont dans votre espace gardien.",
-  "cas-45": "C'est normal : vous êtes dans votre espace propriétaire, et la page Annonces y montre vos propres annonces. Les gardes proposées par les autres propriétaires se trouvent dans votre espace gardien, je vous y emmène.",
-  "cas-46": "Elle se trouve dans votre espace gardien. Ici, dans votre espace propriétaire, la page Annonces ne montre que les vôtres ; un clic suffit pour changer d'espace.",
+  "cas-45": "Guardiens propose des gardes en France, Polynésie française comprise, et il n'y a aucune garde en Italie aujourd'hui. C'est normal : vous êtes dans votre espace propriétaire, et la page Annonces y montre vos propres annonces. Les gardes proposées par les autres propriétaires se trouvent dans votre espace gardien, je vous y emmène.",
+  "cas-46": "Guardiens propose des gardes en France, Polynésie française comprise ; il n'y a aucune garde en Italie aujourd'hui. Elle se trouve dans votre espace gardien. Ici, dans votre espace propriétaire, la page Annonces ne montre que les vôtres ; un clic suffit pour changer d'espace.",
   "cas-47": "Pour la photo de votre maison, tout se passe dans Mon profil propriétaire, rubrique Galerie : chaque photo s'y supprime ou s'y remplace. Si c'était la couverture de votre annonce, la suivante prend sa place.",
 };
 const BAD: Record<string, string> = {

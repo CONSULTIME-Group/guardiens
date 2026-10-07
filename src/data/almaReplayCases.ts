@@ -43,6 +43,8 @@ export interface AlmaReplayCase {
     first_name?: string | null;
     city?: string | null;
     pets?: Array<{ name: string | null; species: string | null; breed?: string | null; age?: number | null }>;
+    /** Lot L4b : faits vérifiés simulés (brouillons, annonces), seuls lus en rejeu. */
+    facts?: { brouillons?: Array<{ sit_id: string; titre: string | null; debut?: string | null }> };
   };
   /** Lot L4 : rejoué deux fois, les deux réponses ne commencent pas par les mêmes cinq mots. */
   varietyCheck?: boolean;
@@ -588,7 +590,12 @@ export const ALMA_REPLAY_CASES: AlmaReplayCase[] = [
     "replayContext": {
       "account_role": "both",
       "first_name": "Martine",
-      "city": "Damgan"
+      "city": "Damgan",
+      "facts": {
+        "brouillons": [
+          { "sit_id": "00000000-0000-4000-8000-000000000043", "titre": "Garde de ma maison à Damgan", "debut": "2026-09-03" }
+        ]
+      }
     },
     "varietyCheck": true
   },
@@ -627,7 +634,12 @@ export const ALMA_REPLAY_CASES: AlmaReplayCase[] = [
     "replayContext": {
       "account_role": "both",
       "first_name": "Martine",
-      "city": "Damgan"
+      "city": "Damgan",
+      "facts": {
+        "brouillons": [
+          { "sit_id": "00000000-0000-4000-8000-000000000043", "titre": "Garde de ma maison à Damgan", "debut": "2026-09-03" }
+        ]
+      }
     }
   },
   {
@@ -666,7 +678,12 @@ export const ALMA_REPLAY_CASES: AlmaReplayCase[] = [
     "replayContext": {
       "account_role": "both",
       "first_name": "Martine",
-      "city": "Damgan"
+      "city": "Damgan",
+      "facts": {
+        "brouillons": [
+          { "sit_id": "00000000-0000-4000-8000-000000000043", "titre": "Garde de ma maison à Damgan", "debut": "2026-09-03" }
+        ]
+      }
     }
   },
   {
@@ -706,7 +723,12 @@ export const ALMA_REPLAY_CASES: AlmaReplayCase[] = [
     "replayContext": {
       "account_role": "both",
       "first_name": "Martine",
-      "city": "Damgan"
+      "city": "Damgan",
+      "facts": {
+        "brouillons": [
+          { "sit_id": "00000000-0000-4000-8000-000000000043", "titre": "Garde de ma maison à Damgan", "debut": "2026-09-03" }
+        ]
+      }
     }
   },
   {

@@ -51,6 +51,8 @@ import {
   expressedIntent,
   foreignNoneSentence,
   foreignPlaceIn,
+  foreignPlaceInConversation,
+  foreignWordsWithoutListings,
   frenchNoneSentence,
   frenchPlaceIn,
   hasForeignSits,
@@ -69,6 +71,7 @@ import {
   asksAboutOwnPets,
   asksIfHuman,
   checkLocked,
+  checkOutput,
   companionDirective,
   currentSitSentence,
   foldC,
@@ -76,16 +79,43 @@ import {
   lockedDirective,
   openerKey,
   ownerQuestionBrief,
+  pickAiIdentityTemplate,
+  repairOutput,
   repeatsOpener,
   spaceScopeBrief,
   type ListingPet,
   type LockedBrief,
+  type OutputGuardInput,
 } from "../_shared/alma-companion.ts";
+import { FRENCH_CITIES } from "../_shared/alma-places.ts";
+import type { VerifiedFacts } from "../_shared/alma-facts.ts";
+
+/** Lot L4b : rejeu, faits vides puis complétés par le contexte simulé seul. */
+function simulatedFacts(role: string | null, extra: any): VerifiedFacts {
+  const base: VerifiedFacts = {
+    role_compte: role,
+    gardes_confirmees: [],
+    candidatures_envoyees: {},
+    candidatures_envoyees_detail: [],
+    candidatures_recues: {},
+    candidatures_recues_non_ouvertes: 0,
+    annonces_publiees: [],
+    brouillons: [],
+    missions_publiees: [],
+    candidature_sans_reponse_jours: null,
+  };
+  if (!extra || typeof extra !== "object") return base;
+  for (const k of Object.keys(base) as Array<keyof VerifiedFacts>) {
+    if (k !== "role_compte" && extra[k] !== undefined) (base as any)[k] = extra[k];
+  }
+  return base;
+}
 
 const SPECIES_FR: Record<string, string> = {
   dog: "chien", cat: "chat", horse: "cheval", bird: "oiseau", rodent: "rongeur",
   fish: "poisson", reptile: "reptile", farm_animal: "animal de ferme", nac: "NAC",
 };
+const SAFE_FALLBACK = "Dites-moi ce que vous cherchez, je regarde avec vous ce que Guardiens propose aujourd'hui.";
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 interface ViewedSit {
@@ -418,8 +448,19 @@ Deno.serve(async (req) => {
     const accountRole = rcRole === "owner" || rcRole === "sitter" || rcRole === "both"
       ? rcRole
       : prof.role === "owner" || prof.role === "sitter" || prof.role === "both" ? prof.role : null;
+    // Lot L4b : en rejeu, aucune donnée du compte admin ne se mêle au membre simulé.
+    if (rc) {
+      prof.first_name = rc.first_name ?? null;
+      prof.city = rc.city ?? null;
+      prof.postal_code = rc.postal_code ?? null;
+      prof.departement_code = rc.departement_code ?? null;
+      prof.latitude = rc.latitude ?? null;
+      prof.longitude = rc.longitude ?? null;
+      prof.profile_completion = null;
+      prof.identity_verified = null;
+    }
     const [facts, inventory] = await Promise.all([
-      loadVerifiedFacts(adminClient, userId, accountRole, todayIso).catch(() => null),
+      rc ? Promise.resolve(simulatedFacts(accountRole, rc.facts)) : loadVerifiedFacts(adminClient, userId, accountRole, todayIso).catch(() => null),
       loadAlmaInventory(adminClient, prof, todayIso).catch(() => null),
     ]);
 
@@ -427,16 +468,18 @@ Deno.serve(async (req) => {
     // d'Alma (continuité de moins de 7 jours, amorces à ne pas répéter).
     const safeRead = async (f: () => any) => { try { return await f(); } catch { return { data: [] }; } };
     const [myPetsRes, recentRes] = await Promise.all([
-      rc?.pets !== undefined
+      rc
         ? Promise.resolve({ data: Array.isArray(rc.pets) ? rc.pets : [] })
         : safeRead(() => adminClient.from("pets").select("name, species, breed, age, properties!inner(user_id)").eq("properties.user_id", userId).limit(10)),
-      rc?.recent_answers !== undefined
+      rc
         ? Promise.resolve({ data: (Array.isArray(rc.recent_answers) ? rc.recent_answers : []).map((a: string) => ({ answer: a, question: "", created_at: new Date().toISOString() })) })
         : safeRead(() => adminClient.from("alma_conversations").select("question, answer, created_at").eq("user_id", userId).not("answer", "is", null).order("created_at", { ascending: false }).limit(20)),
     ]);
     const myPets: ListingPet[] = ((myPetsRes?.data ?? []) as any[]).map((p) => ({ name: p.name ?? null, species: p.species ?? null, breed: p.breed ?? null, age: typeof p.age === "number" ? p.age : null }));
     const recentRows = ((recentRes?.data ?? []) as any[]).filter((r) => typeof r?.answer === "string" && r.answer);
     const recentAnswers: string[] = recentRows.map((r) => r.answer);
+    // Lot L4b : le gabarit de repli varie aussi son ouverture.
+    if (locked?.kind === "ai_identity") locked = aiIdentityBrief(pickAiIdentityTemplate(recentAnswers));
     const lastRow = rc?.last_exchange
       ? { question: String(rc.last_exchange.question ?? ""), answer: String(rc.last_exchange.answer ?? ""), created_at: new Date(Date.now() - Number(rc.last_exchange.days_ago ?? 1) * 86_400_000).toISOString() }
       : recentRows.find((r) => r.question);
@@ -463,17 +506,23 @@ Deno.serve(async (req) => {
     }
     const foreignOpen = hasForeignSits(publishedRows);
     const placeAsked = asksAboutListings(message) || expressed === "sitter";
-    const foreign = placeAsked ? foreignPlaceIn(message) : null;
+    // Lot L4b : une relance (« Où est cette page ? ») garde le lieu demandé avant.
+    const foreign = placeAsked
+      ? (expressed === "sitter" ? foreignPlaceInConversation(message, previousUser) : foreignPlaceIn(message))
+      : null;
     const foreignNone = foreign && !publishedRows.some((r) => ((r.country || "") + "").toUpperCase() === foreign.iso) ? foreign : null;
+    // Lot L4b : départements lus à chaque tour, ils nourrissent aussi le filet de sortie.
+    let departements: any[] = [];
+    try {
+      const { data } = await adminClient.from("departements").select("code, nom, nom_region");
+      departements = Array.isArray(data) ? (data as any[]) : [];
+    } catch (e) {
+      console.error("alma-chat departements failed", e);
+    }
     let frenchNone: FrenchPlaceMatch | null = null;
     if (!foreign && placeAsked) {
-      try {
-        const { data } = await adminClient.from("departements").select("code, nom, nom_region");
-        const match = frenchPlaceIn(message, Array.isArray(data) ? (data as any[]) : [], publishedRows);
-        if (match && match.count === 0) frenchNone = match;
-      } catch (e) {
-        console.error("alma-chat departements failed", e);
-      }
+      const match = frenchPlaceIn(message, departements, publishedRows);
+      if (match && match.count === 0) frenchNone = match;
     }
     if (!locked && !viewed && (guidance || foreignNone || frenchNone)) {
       const placeSentence = foreignNone ? foreignNoneSentence(foreignNone.inCountry) : frenchNone ? frenchNoneSentence(frenchNone.label) : null;
@@ -486,7 +535,7 @@ Deno.serve(async (req) => {
         : !guidance && foreignNone ? [{ label: "Voir les gardes en France", path: "/annonces" }] : [];
       // Lot L4 : le lieu demandé (« toscane ») n'est jamais nommé comme disponible.
       const placeWords: string[] = foreignNone
-        ? (message.match(/\b(?:en|au|aux|à|dans le|dans la)\s+([A-Za-zÀ-ÿ'-]{3,})/gi) ?? [])
+        ? ([message, ...previousUser].join(" ").match(/\b(?:en|au|aux|à|dans le|dans la)\s+([A-Za-zÀ-ÿ'-]{3,})/gi) ?? [])
             .map((m: string) => m.split(/\s+/).pop() ?? "")
             .filter((w: string) => !foldC(foreignNone.inCountry).includes(foldC(w)) && !/^(france|polyn)/i.test(foldC(w)))
         : [];
@@ -535,6 +584,7 @@ Deno.serve(async (req) => {
     let profilACompleter: Array<{ champ: string; libelle: string; points: number }> = [];
     let profilACompleterCharge = false;
     try {
+      if (rc) throw new Error("rejeu simulé");
       const { data, error } = await adminClient.rpc("profile_completion_missing", {
         p_user_id: userId,
         p_role: activeRole,
@@ -559,7 +609,10 @@ Deno.serve(async (req) => {
     let sits: unknown[] = [];
     let applications: unknown[] = [];
     let pets: unknown[] = [];
-    if (activeRole === "owner") {
+    if (rc) {
+      // Lot L4b : rejeu, le dossier ne contient que le contexte simulé.
+      pets = Array.isArray(rc.pets) ? rc.pets : [];
+    } else if (activeRole === "owner") {
       const [sitsRes, propsRes] = await Promise.all([
         adminClient
           .from("sits")
@@ -669,17 +722,17 @@ Deno.serve(async (req) => {
     // question porte sur le profil. Sinon il le citait sans qu'on le demande.
     const showProfile = !helpDirective && almaProfileVisibleToModel(completion, message);
     const dossier = {
-      prenom: (profileRes.data as any)?.first_name ?? null,
-      ville: (profileRes.data as any)?.city ?? null,
+      prenom: prof.first_name ?? null,
+      ville: prof.city ?? null,
       completion_profil: showProfile ? completion : null,
-      identite_verifiee: (profileRes.data as any)?.identity_verified ?? null,
+      identite_verifiee: prof.identity_verified ?? null,
       // Lot J1 : qui cherche de l'aide n'entend pas parler de points de profil.
       bareme_profil: showProfile ? baremeProfil : null,
       profil_a_completer: showProfile ? profilACompleter : [],
       role_actif: activeRole,
       ecran_courant: surface,
-      profil_gardien: sitterRes.data ?? null,
-      profil_proprietaire: ownerRes.data ?? null,
+      profil_gardien: rc ? null : sitterRes.data ?? null,
+      profil_proprietaire: rc ? null : ownerRes.data ?? null,
       annonces: sits,
       animaux: pets,
       candidatures: applications,
@@ -842,7 +895,39 @@ Deno.serve(async (req) => {
       if (myPets.length && asksAboutOwnPets(message) && !myPets.some((p) => p.name && foldC(text).includes(foldC(p.name)))) out.push("animal_non_nomme");
       return out;
     };
-    const hardIssues = (text: string) => (locked ? checkLocked(text, locked) : []);
+    const actionLabels = [locked?.action?.label, next?.action?.label, viewedAction?.label, drafted.action?.label, ...drafted.chips.map((c: any) => c.label)]
+      .filter((x): x is string => typeof x === "string" && x.length > 0);
+    const placeNames = [
+      ...FRENCH_CITIES,
+      ...departements.map((d: any) => d.nom).filter(Boolean),
+      ...[...new Set(departements.map((d: any) => d.nom_region).filter(Boolean))] as string[],
+    ];
+    const memberText = foldC([
+      message,
+      ...history.map((m: any) => String(m?.content ?? "")),
+      JSON.stringify(facts ?? {}),
+      JSON.stringify(dossier),
+      prof.city ?? "",
+      myPets.map((p) => [p.name, p.breed].filter(Boolean).join(" ")).join(" "),
+      lastExchange ? lastExchange.question + " " + lastExchange.answer : "",
+    ].join(" \n "));
+    const guard: OutputGuardInput = {
+      memberText,
+      contextText: foldC([
+        memberText,
+        viewed ? JSON.stringify(viewed.facts) + " " + (viewed.description ?? "") : "",
+        inventory ? formatInventory(inventory, { foreignOpen }) : "",
+        sources.map((x: any) => `${x.title ?? ""} ${x.snippet ?? ""} ${x.url ?? ""}`).join(" "),
+        locked ? locked.facts.map((x) => x.text).join(" ") + " " + locked.template : "",
+        next ? JSON.stringify(next) : "",
+      ].join(" \n ")),
+      gazetteer: placeNames,
+      noListingPlaces: foreignWordsWithoutListings(publishedRows),
+      actionLabels,
+      hasPriorExchange: history.length > 0 || Boolean(lastExchange),
+      allowAlmaBio: register === "perso" || aboutAlma,
+    };
+    const hardIssues = (text: string) => [...(locked ? checkLocked(text, locked) : []), ...checkOutput(text, guard)];
     let issues = [...hardIssues(answer), ...softIssues(answer)];
     let retried = false;
     if (answer && issues.length) {
@@ -852,6 +937,10 @@ Deno.serve(async (req) => {
         ...issues.map((x) => x === "amorce_repetee" ? "- Elle commence comme une réponse récente : commence autrement."
           : x === "animal_non_nomme" ? `- Nomme ses animaux : ${myPets.map((p) => p.name).filter(Boolean).join(", ")}.`
           : x.startsWith("manque:") ? `- Fait obligatoire absent : ${x.slice(7)}.`
+          : x.startsWith("lieu_sans_annonce:") ? `- Lieu sans aucune annonce (${x.split(":")[1]}) : ne le cite que pour dire qu'il n'y a aucune garde dans ce pays aujourd'hui, jamais comme destination.`
+          : x.startsWith("lieu_hors_faits:") ? `- Lieu absent des faits (${x.split(":")[1]}) : retire-le, ne cite que des lieux présents dans ses faits ou sa question.`
+          : x === "echange_fantome" ? "- Tu évoques un échange passé qui n'existe pas : retire cette référence."
+          : x === "libelle_recopie" ? "- Tu recopies le libellé d'un bouton avec sa majuscule : décris l'action avec tes mots."
           : `- Contenu interdit : ${x.replace("interdit:", "")}.`),
         `Ta réponse précédente : « ${answer.slice(0, 600)} »`,
       ].join("\n");
@@ -863,6 +952,11 @@ Deno.serve(async (req) => {
         if (second && issues2.length < issues.length) { answer = second; issues = issues2; }
       }
     }
+    // Lot L4b : filet de sortie sur le texte final, quel que soit le chemin.
+    // Réparation déterministe d'abord (verbe de bouton, phrases fautives),
+    // puis contrôle des faits verrouillés sur ce texte réparé.
+    const guardIssuesBefore = checkOutput(answer, guard);
+    if (guardIssuesBefore.length) answer = repairOutput(answer, guard);
     const hard = locked ? checkLocked(answer, locked) : [];
     if (locked && hard.length) {
       answer = locked.template;
@@ -871,6 +965,17 @@ Deno.serve(async (req) => {
     } else if (locked) {
       (classification as any).fallback_template = false;
     }
+    if (!answer && guardIssuesBefore.length) {
+      answer = SAFE_FALLBACK;
+      (classification as any).fallback_template = true;
+    }
+    const guardAfter = checkOutput(answer, guard);
+    if (guardAfter.length) {
+      // Dernier rempart : un gabarit maison ne cite jamais de lieu hors faits.
+      answer = locked ? locked.template : SAFE_FALLBACK;
+      (classification as any).fallback_template = true;
+    }
+    if (guardIssuesBefore.length) (classification as any).output_guard = guardIssuesBefore;
     if (retried) (classification as any).retried = true;
     if (issues.some((x) => !x.startsWith("manque:") && !x.startsWith("interdit:")) && !(classification as any).fallback_template) {
       (classification as any).soft_issues = issues;

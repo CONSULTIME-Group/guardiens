@@ -38,7 +38,7 @@ describe("L4, transparence", () => {
   it("un déni est refusé, la nature d'IA est exigée", () => {
     const b = aiIdentityBrief();
     expect(checkLocked("Je suis une vraie personne, rassurez-vous.", b).length).toBeGreaterThan(0);
-    expect(checkLocked("Je suis l'assistante IA de Guardiens, sous les traits d'Alma. Que cherchez-vous ?", b)).toEqual([]);
+    expect(checkLocked("Vous parlez à l'assistante IA de Guardiens, sous les traits d'Alma. Que cherchez-vous ?", b)).toEqual([]);
     expect(checkLocked(b.template, b)).toEqual([]);
   });
 });
