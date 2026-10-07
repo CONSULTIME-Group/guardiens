@@ -588,7 +588,12 @@ export const ALMA_REPLAY_CASES: AlmaReplayCase[] = [
     "replayContext": {
       "account_role": "both",
       "first_name": "Martine",
-      "city": "Damgan"
+      "city": "Damgan",
+      "facts": {
+        "brouillons": [
+          { "sit_id": "00000000-0000-4000-8000-000000000043", "titre": "Garde de ma maison à Damgan", "debut": "2026-09-03" }
+        ]
+      }
     },
     "varietyCheck": true
   },
@@ -627,7 +632,12 @@ export const ALMA_REPLAY_CASES: AlmaReplayCase[] = [
     "replayContext": {
       "account_role": "both",
       "first_name": "Martine",
-      "city": "Damgan"
+      "city": "Damgan",
+      "facts": {
+        "brouillons": [
+          { "sit_id": "00000000-0000-4000-8000-000000000043", "titre": "Garde de ma maison à Damgan", "debut": "2026-09-03" }
+        ]
+      }
     }
   },
   {
@@ -666,7 +676,12 @@ export const ALMA_REPLAY_CASES: AlmaReplayCase[] = [
     "replayContext": {
       "account_role": "both",
       "first_name": "Martine",
-      "city": "Damgan"
+      "city": "Damgan",
+      "facts": {
+        "brouillons": [
+          { "sit_id": "00000000-0000-4000-8000-000000000043", "titre": "Garde de ma maison à Damgan", "debut": "2026-09-03" }
+        ]
+      }
     }
   },
   {
@@ -706,7 +721,12 @@ export const ALMA_REPLAY_CASES: AlmaReplayCase[] = [
     "replayContext": {
       "account_role": "both",
       "first_name": "Martine",
-      "city": "Damgan"
+      "city": "Damgan",
+      "facts": {
+        "brouillons": [
+          { "sit_id": "00000000-0000-4000-8000-000000000043", "titre": "Garde de ma maison à Damgan", "debut": "2026-09-03" }
+        ]
+      }
     }
   },
   {
