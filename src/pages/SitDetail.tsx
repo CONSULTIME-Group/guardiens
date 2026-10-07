@@ -9,7 +9,7 @@
  * Le détail des comportements vit dans les sous-vues.
  */
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useParams, Navigate } from "react-router-dom";
+import { useParams, Navigate, useSearchParams } from "react-router-dom";
 import Head from "@/components/seo/Head";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -59,7 +59,19 @@ const fallbackImageForGeo = (city: string | null, country: string | null): strin
 
 const SitDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const { user, activeRole } = useAuth();
+  const { user, activeRole, switchRole } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Lot L1 : « Passer en espace gardien pour postuler » proposé par Alma.
+  // La bascule ne vaut que pour un compte qui a déjà l'espace gardien ;
+  // les autres voient l'invitation d'activation habituelle sur la fiche.
+  useEffect(() => {
+    if (searchParams.get("espace") !== "gardien" || !user) return;
+    if ((user.role === "both" || user.role === "sitter") && activeRole !== "sitter") switchRole("sitter");
+    const next = new URLSearchParams(searchParams);
+    next.delete("espace");
+    setSearchParams(next, { replace: true });
+  }, [searchParams, user, activeRole, switchRole, setSearchParams]);
 
   // Alma étape 1, compagnon culturel + usage_nudge sur la fiche annonce.
   useAlmaCulturalFact({ surface: "sit_detail", context: { role: activeRole } });
