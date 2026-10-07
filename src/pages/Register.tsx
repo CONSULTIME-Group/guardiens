@@ -12,6 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { getSignupRedirectUrl } from "@/lib/authRedirect";
 import { resolvePostAuthTarget } from "@/lib/postAuthTarget";
+import { rememberSignupRole, withSignupRoleParam } from "@/lib/signupRole";
 import { sanitizeRedirect, buildRedirectQuery } from "@/lib/safeRedirect";
 import { useToast } from "@/hooks/use-toast";
 import { trackEvent, trackEventWithUserId, mapSignupError } from "@/lib/analytics";
@@ -404,7 +405,9 @@ const Register = () => {
  metadata: { role: selectedRole, method: "google" },
  });
  } catch {}
-  const googleRedirectUrl = `${window.location.origin}${postAuthTarget}`;
+  // Lot 0 : Google ne transmet pas le rôle, il est gardé localement et dans l'URL de retour.
+  if (selectedRole) rememberSignupRole(selectedRole);
+  const googleRedirectUrl = `${window.location.origin}${selectedRole ? withSignupRoleParam(postAuthTarget, selectedRole) : postAuthTarget}`;
 
   logOAuthStage("sdk_called", "/inscription", {
  role: selectedRole,

@@ -6,6 +6,7 @@ import type { User as SupabaseUser } from "@supabase/supabase-js";
 import { getSignupRedirectUrl } from "@/lib/authRedirect";
 import { getOAuthTraceId, logOAuthStage, endOAuthFlow } from "@/lib/oauthLogger";
 import { cleanupPushOnLogoutLazy as cleanupPushOnLogout, reconcilePushSessionLazy as reconcilePushSession } from "@/lib/pushSession";
+import { applyPendingSignupRole } from "@/lib/signupRole";
 
 type Role = "owner" | "sitter" | "both";
 type ActiveRole = "owner" | "sitter";
@@ -165,6 +166,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchProfile = useCallback(async (supabaseUser: SupabaseUser) => {
     setAuthTimeout(false);
+    // Lot 0 : rôle choisi avant Google, appliqué avant la lecture du profil.
+    await applyPendingSignupRole();
     const profileRequest = fetchMyProfile(supabaseUser.id!, { fresh: true });
 
     let timeoutId: number | undefined;
