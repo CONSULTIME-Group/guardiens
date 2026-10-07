@@ -10,6 +10,12 @@ const SCREENS = {
   "/arrivee/depart": lazy(() => import("./ArriveeDepart")),
   "/arrivee/affinites": lazy(() => import("./ArriveeAffinites")),
   "/arrivee/aussi": lazy(() => import("./ArriveeAussi")),
+  "/arrivee/garder": lazy(() => import("./ArriveeGarder")),
+  "/arrivee/vous-connaitre": lazy(() => import("./ArriveeVousConnaitre")),
+  "/arrivee/savoir-faire": lazy(() => import("./ArriveeSavoirFaire")),
+  "/arrivee/application": lazy(() => import("./ArriveeApplication")),
+  "/arrivee/premier-pas": lazy(() => import("./ArriveePremierPas")),
+  "/arrivee/entraide": lazy(() => import("./ArriveeEntraide")),
   "*": lazy(() => import("@/pages/NotFound")),
 } as const;
 

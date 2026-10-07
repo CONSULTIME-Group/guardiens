@@ -70,7 +70,7 @@ const ArriveeSavoirFaire = () => {
   };
 
   if (!user || loading) return null;
-  const sitter = carry.flow !== "owner";
+  const sitter = carry.flow === "sitter";
 
   return (
     <ArrivalShell header={t("arrival.g4.header")} sitterStep={sitter ? { current: "skills" } : undefined}>
