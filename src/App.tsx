@@ -557,8 +557,8 @@ const AppRoutes = () => {
       <Route path="/annonces/:id" element={<PublicSitDetail />} />
       <Route path="/gardiens/:id" element={<PublicSitterProfile />} />
       <Route path="/onboarding/affinity" element={<ProtectedRoute><OnboardingAffinity /></ProtectedRoute>} />
-      <Route path="/bienvenue" element={<ProtectedRoute><ArrivalRoutes /></ProtectedRoute>} />
-      <Route path="/arrivee/*" element={<ProtectedRoute><ArrivalRoutes /></ProtectedRoute>} />
+      <Route path="/bienvenue" element={<ArrivalRoutes />} />
+      <Route path="/arrivee/*" element={<ArrivalRoutes />} />
 
       <Route path="/projets" element={<PublicShellRoute><ProjetsListing /></PublicShellRoute>} />
       <Route path="/projets/publier" element={<ProtectedRoute><CreateProjet /></ProtectedRoute>} />
