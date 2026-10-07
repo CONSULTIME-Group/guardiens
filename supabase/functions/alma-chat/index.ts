@@ -51,6 +51,8 @@ import {
   expressedIntent,
   foreignNoneSentence,
   foreignPlaceIn,
+  foreignPlaceInConversation,
+  foreignWordsWithoutListings,
   frenchNoneSentence,
   frenchPlaceIn,
   hasForeignSits,
@@ -69,6 +71,7 @@ import {
   asksAboutOwnPets,
   asksIfHuman,
   checkLocked,
+  checkOutput,
   companionDirective,
   currentSitSentence,
   foldC,
@@ -76,11 +79,37 @@ import {
   lockedDirective,
   openerKey,
   ownerQuestionBrief,
+  pickAiIdentityTemplate,
+  repairOutput,
   repeatsOpener,
   spaceScopeBrief,
   type ListingPet,
   type LockedBrief,
+  type OutputGuardInput,
 } from "../_shared/alma-companion.ts";
+import { FRENCH_CITIES } from "../_shared/alma-places.ts";
+import type { VerifiedFacts } from "../_shared/alma-facts.ts";
+
+/** Lot L4b : rejeu, faits vides puis complétés par le contexte simulé seul. */
+function simulatedFacts(role: string | null, extra: any): VerifiedFacts {
+  const base: VerifiedFacts = {
+    role_compte: role,
+    gardes_confirmees: [],
+    candidatures_envoyees: {},
+    candidatures_envoyees_detail: [],
+    candidatures_recues: {},
+    candidatures_recues_non_ouvertes: 0,
+    annonces_publiees: [],
+    brouillons: [],
+    missions_publiees: [],
+    candidature_sans_reponse_jours: null,
+  };
+  if (!extra || typeof extra !== "object") return base;
+  for (const k of Object.keys(base) as Array<keyof VerifiedFacts>) {
+    if (k !== "role_compte" && extra[k] !== undefined) (base as any)[k] = extra[k];
+  }
+  return base;
+}
 
 const SPECIES_FR: Record<string, string> = {
   dog: "chien", cat: "chat", horse: "cheval", bird: "oiseau", rodent: "rongeur",
@@ -418,8 +447,14 @@ Deno.serve(async (req) => {
     const accountRole = rcRole === "owner" || rcRole === "sitter" || rcRole === "both"
       ? rcRole
       : prof.role === "owner" || prof.role === "sitter" || prof.role === "both" ? prof.role : null;
+    // Lot L4b : en rejeu, aucune donnée du compte admin ne se mêle au membre simulé.
+    if (rc) {
+      prof.first_name = rc.first_name ?? null;
+      prof.city = rc.city ?? null;
+      prof.postal_code = rc.postal_code ?? null;
+    }
     const [facts, inventory] = await Promise.all([
-      loadVerifiedFacts(adminClient, userId, accountRole, todayIso).catch(() => null),
+      rc ? Promise.resolve(simulatedFacts(accountRole, rc.facts)) : loadVerifiedFacts(adminClient, userId, accountRole, todayIso).catch(() => null),
       loadAlmaInventory(adminClient, prof, todayIso).catch(() => null),
     ]);
 
@@ -430,7 +465,7 @@ Deno.serve(async (req) => {
       rc?.pets !== undefined
         ? Promise.resolve({ data: Array.isArray(rc.pets) ? rc.pets : [] })
         : safeRead(() => adminClient.from("pets").select("name, species, breed, age, properties!inner(user_id)").eq("properties.user_id", userId).limit(10)),
-      rc?.recent_answers !== undefined
+      rc
         ? Promise.resolve({ data: (Array.isArray(rc.recent_answers) ? rc.recent_answers : []).map((a: string) => ({ answer: a, question: "", created_at: new Date().toISOString() })) })
         : safeRead(() => adminClient.from("alma_conversations").select("question, answer, created_at").eq("user_id", userId).not("answer", "is", null).order("created_at", { ascending: false }).limit(20)),
     ]);
@@ -463,7 +498,10 @@ Deno.serve(async (req) => {
     }
     const foreignOpen = hasForeignSits(publishedRows);
     const placeAsked = asksAboutListings(message) || expressed === "sitter";
-    const foreign = placeAsked ? foreignPlaceIn(message) : null;
+    // Lot L4b : une relance (« Où est cette page ? ») garde le lieu demandé avant.
+    const foreign = placeAsked
+      ? (expressed === "sitter" ? foreignPlaceInConversation(message, previousUser) : foreignPlaceIn(message))
+      : null;
     const foreignNone = foreign && !publishedRows.some((r) => ((r.country || "") + "").toUpperCase() === foreign.iso) ? foreign : null;
     let frenchNone: FrenchPlaceMatch | null = null;
     if (!foreign && placeAsked) {
@@ -486,7 +524,7 @@ Deno.serve(async (req) => {
         : !guidance && foreignNone ? [{ label: "Voir les gardes en France", path: "/annonces" }] : [];
       // Lot L4 : le lieu demandé (« toscane ») n'est jamais nommé comme disponible.
       const placeWords: string[] = foreignNone
-        ? (message.match(/\b(?:en|au|aux|à|dans le|dans la)\s+([A-Za-zÀ-ÿ'-]{3,})/gi) ?? [])
+        ? ([message, ...previousUser].join(" ").match(/\b(?:en|au|aux|à|dans le|dans la)\s+([A-Za-zÀ-ÿ'-]{3,})/gi) ?? [])
             .map((m: string) => m.split(/\s+/).pop() ?? "")
             .filter((w: string) => !foldC(foreignNone.inCountry).includes(foldC(w)) && !/^(france|polyn)/i.test(foldC(w)))
         : [];
