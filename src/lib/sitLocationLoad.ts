@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { deptCodeFromPostal, sitLocationLabel } from "@/lib/sitLocation";
+import { DEPT_NAMES } from "@/lib/departments";
 
 /**
  * Calcule le libellé de localisation d'une annonce depuis ses lignes brutes.
@@ -27,4 +28,23 @@ export async function loadSitLocationLabel(
     }
   }
   return sitLocationLabel({ ...base, departementName });
+}
+
+/**
+ * Variante synchrone, sans aucune lecture réseau : le nom du département vient
+ * de la table locale DEPT_NAMES. Pour les listes et blocs du tableau de bord,
+ * dont le budget de lectures est verrouillé.
+ */
+export function sitLocationLabelLocal(
+  sit: { city?: string | null; departement_code?: string | null } | null | undefined,
+  owner: { city?: string | null; postal_code?: string | null } | null | undefined,
+): string {
+  const code = (sit?.departement_code || "").trim() || deptCodeFromPostal(owner?.postal_code);
+  const departementName = code ? DEPT_NAMES[code] ?? DEPT_NAMES[code.padStart(2, "0")] ?? null : null;
+  return sitLocationLabel({
+    sitCity: sit?.city,
+    ownerCity: owner?.city,
+    postalCode: owner?.postal_code,
+    departementName,
+  });
 }

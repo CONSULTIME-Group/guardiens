@@ -142,3 +142,14 @@ describe("L1, action proposée sur sit_detail", () => {
     expect(all.some((p) => /\/(sits|annonces)\/autre/.test(p))).toBe(false);
   });
 });
+
+describe("L1 suite : libellé local sans lecture réseau (listes du tableau de bord)", () => {
+  it("annonce, puis profil, puis code postal et département, sans jamais « France »", async () => {
+    const { sitLocationLabelLocal } = await import("@/lib/sitLocationLoad");
+    expect(sitLocationLabelLocal({ city: "Zellwiller" }, { city: "Autre" })).toBe("Zellwiller");
+    expect(sitLocationLabelLocal({ city: null }, { city: "Zellwiller", postal_code: "67140" })).toBe("Zellwiller");
+    expect(sitLocationLabelLocal({ city: null, departement_code: "69" }, { city: null, postal_code: "69380" })).toBe("69380, Rhône");
+    expect(sitLocationLabelLocal({ city: null }, { postal_code: "69380" })).toBe("69380, Rhône");
+    expect(sitLocationLabelLocal(null, null)).toBe("Commune à préciser");
+  });
+});

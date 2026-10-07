@@ -43,6 +43,7 @@ const validTwoFields = (): SitPublishTwoFieldsInput => ({
   hasProperty: true,
   galleryPhotoCount: 2,
   petCount: 1,
+  locationCity: "Lyon",
 });
 
 /** Annonce complète et publiable en mode bloc unique. */
@@ -56,6 +57,7 @@ const validSingleBlock = (): SitPublishSingleBlockInput => ({
   hasProperty: true,
   galleryPhotoCount: 2,
   petCount: 1,
+  locationCity: "Lyon",
 });
 
 const ids = (input: SitPublishInput) => getSitPublishBlockers(input).map((b) => b.id);
@@ -185,6 +187,7 @@ describe("autres prérequis", () => {
       galleryPhotoCount: 0,
       propertyPhotoCount: 0,
       petCount: 0,
+      locationCity: "Lyon",
     };
     expect(ids(empty)).toEqual(["property", "title", "photo", "pets"]);
     const blocking = getBlockingBlockers(getSitPublishBlockers(empty)).map((b) => b.id);
@@ -256,6 +259,7 @@ describe("adaptateur unique", () => {
       property: { photos: [] },
       galleryPhotos: [],
       pets: [{}],
+      ownerCity: "Lyon",
     });
     expect(input.descriptionMode).toBe("single-block");
     expect(getSitPublishBlockers(input)).toEqual([]);
@@ -267,6 +271,7 @@ describe("adaptateur unique", () => {
       property: { photos: ["a.jpg"] },
       pets: [{}],
       twoFields: { absenceReason: text(40), sitterExpectations: text(40) },
+      ownerCity: "Lyon",
     });
     expect(input.descriptionMode).toBe("two-fields");
     expect(getSitPublishBlockers(input)).toEqual([]);
@@ -304,6 +309,7 @@ describe("libellés des prérequis, suivant le mode", () => {
       "dates",
       "date-past",
       "date-error",
+      "city",
       "desc-reason",
       "desc-expectations",
       "photo",
@@ -320,6 +326,7 @@ describe("libellés des prérequis, suivant le mode", () => {
       "dates",
       "date-past",
       "date-error",
+      "city",
       "desc-reason",
       "photo",
       "pets",
@@ -346,6 +353,7 @@ describe("blocages informatifs et limite de titre", () => {
     galleryPhotoCount: 1,
     petCount: 1,
     specificExpectations: "x".repeat(120),
+    locationCity: "Lyon",
   };
 
   it("la ligne des deux questions informe sans verrouiller la publication", () => {
