@@ -186,9 +186,12 @@ const SitDetail = () => {
       // Override : la ville/pays de l'annonce priment sur le profil (résidence secondaire, étranger).
       const sitCity = (sitData as any)?.city?.trim();
       const sitCountry = (sitData as any)?.country?.trim();
-      const effectiveOwner = ownerData && (sitCity || (sitCountry && sitCountry !== "FR"))
+      const baseOwner = ownerData && (sitCity || (sitCountry && sitCountry !== "FR"))
         ? { ...ownerData, city: sitCity || ownerData.city, country: sitCountry || (ownerData as any).country || "FR" }
         : ownerData;
+      // Lot L1 : libellé de localisation jamais vide (src/lib/sitLocation.ts).
+      const locationLabel = await loadSitLocationLabel(sitData as any, ownerData as any);
+      const effectiveOwner = baseOwner ? { ...baseOwner, location_label: locationLabel } : baseOwner;
 
       setOwner(effectiveOwner);
       setProperty(enrichedProperty);
