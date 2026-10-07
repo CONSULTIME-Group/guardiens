@@ -15,7 +15,7 @@ export interface ReplayAnswer {
   frustration?: number | null;
   confirmedSit?: boolean | null;
   /** Lot L1 : attentes propres au cas (voir almaReplayCases). */
-  expect?: { mentionsOwner?: boolean; actionPath?: string; forbidden?: string[] } | null;
+  expect?: { mentionsOwner?: boolean; mentions?: string[]; actionPath?: string; forbidden?: string[] } | null;
 }
 
 export interface ReplayVerdict {
@@ -92,6 +92,7 @@ export function checkReplayAnswer(a: ReplayAnswer): ReplayVerdict {
   if (a.register !== "perso" && OPENING_ANECDOTE.test(a.answer.trim())) reasons.push("anecdote en ouverture");
   const ex = a.expect;
   if (ex?.mentionsOwner && !/propri[ée]taire/i.test(a.answer)) reasons.push("propriétaire non mentionné");
+  for (const w of ex?.mentions ?? []) if (!a.answer.includes(w)) reasons.push(`mention attendue « ${w} »`);
   if (ex?.actionPath && a.action?.path !== ex.actionPath) reasons.push(`action attendue ${ex.actionPath}`);
   for (const w of ex?.forbidden ?? []) if (a.answer.includes(w)) reasons.push(`mention interdite « ${w} »`);
   return { passed: reasons.length === 0, reasons };

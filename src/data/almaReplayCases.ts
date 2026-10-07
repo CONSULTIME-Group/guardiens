@@ -18,6 +18,8 @@ export interface AlmaReplayCase {
   /** Lot L1 : attentes propres au cas, vérifiées par checkReplayAnswer. */
   expect?: {
     mentionsOwner?: boolean;
+    /** Lot L2 : mots que la réponse doit contenir. */
+    mentions?: string[];
     actionPath?: string;
     forbidden?: string[];
   };
@@ -439,6 +441,34 @@ export const ALMA_REPLAY_CASES: AlmaReplayCase[] = [
       "mentionsOwner": true,
       "actionPath": "/sits/85315487-7c43-4e10-a97e-821aefd10a8c?postuler=1",
       "forbidden": ["Lyon", "Córdoba", "Cordoba"]
+    }
+  },
+  {
+    "id": "cas-41",
+    "member": "Membre 25",
+    "activeRole": "owner",
+    "accountRole": "owner",
+    "surface": "dashboard",
+    "question": "Je veux supprimer la photo de ma maison",
+    "history": [],
+    "expect": {
+      "mentions": ["Galerie"],
+      "actionPath": "/owner-profile?section=gallery",
+      "forbidden": ["messagerie", "Messagerie"]
+    }
+  },
+  {
+    "id": "cas-42",
+    "member": "Membre 25",
+    "activeRole": "owner",
+    "accountRole": "owner",
+    "surface": "dashboard",
+    "question": "Je ne peux trouver la page pour supprimer la photo de ma maison",
+    "history": ["Je veux supprimer la photo de ma maison"],
+    "expect": {
+      "mentions": ["Galerie"],
+      "actionPath": "/owner-profile?section=gallery",
+      "forbidden": ["messagerie", "Messagerie"]
     }
   }
 ];
