@@ -37,6 +37,7 @@ import {
 } from "@/components/sits/shared/sitConstants";
 import { petSpeciesLabelLower } from "@/lib/petLabels";
 import { publicFirstName } from "@/lib/displayName";
+import { loadSitLocationLabel } from "@/lib/sitLocationLoad";
 
 type ViewerType = "anonymous" | "gardien" | "proprio" | "owner_of_sit" | "admin";
 
@@ -157,7 +158,7 @@ const PublicSitDetail = () => {
         }
         const locationLabel = await loadSitLocationLabel(sitData as any, ownerData as any);
         if (!active) return;
-        enrichedOwner = { ...(enrichedOwner || {}), location_label: locationLabel };
+        if (enrichedOwner) enrichedOwner = { ...enrichedOwner, location_label: locationLabel };
 
         commit(() => setOwner(enrichedOwner));
         commit(() => setProperty(enrichedProperty));
@@ -444,7 +445,7 @@ const PublicSitDetail = () => {
   const ownerCountry = ((owner as any)?.country as string | undefined)?.trim() || (sit as any)?.country?.trim() || "FR";
   // Source de vérité : la ville portée par l'annonce (résidence secondaire,
   // étranger), avec repli sur la ville du profil propriétaire.
-  const sitCity = ((sit as any)?.city as string | undefined)?.trim() || owner?.city?.trim() || "";
+  const sitCity = ((sit as any)?.city as string | undefined)?.trim() || owner?.city?.trim() || owner?.location_label || "";
   const cityForTitle = (sitCity && ownerCountry && ownerCountry !== "FR")
     ? `${sitCity} (${ownerCountry})`
     : (sitCity || "France");
