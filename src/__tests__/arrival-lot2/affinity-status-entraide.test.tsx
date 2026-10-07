@@ -5,6 +5,7 @@ const auth = { user: { id: "u1", role: "both" } };
 vi.mock("@/contexts/AuthContext", () => ({ useAuth: () => auth }));
 vi.mock("@/integrations/supabase/client", () => ({ supabase: {} }));
 vi.mock("@/lib/myProfile", () => ({
+  patchMyProfileCache: vi.fn(),
   fetchMySitterProfile: () => Promise.resolve({ data: null }),
   fetchMyOwnerProfile: () => Promise.resolve({ data: null }),
   fetchMyProfile: () => Promise.resolve({ data: { postal_code: "69001", created_at: "2026-10-07T10:00:00Z", arrival_intent: "entraide" } }),
