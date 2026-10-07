@@ -31,8 +31,12 @@ export const missingCityTitle = (n: number): string =>
       ? "Ajoutez la commune de votre logement : 1 gardien a déjà postulé"
       : "Ajoutez la commune de votre logement";
 
-export const sitNeedsCity = (sit: SitLike | null | undefined, ownerCity?: string | null): boolean =>
-  !!sit && sit.status === "published" && !(sit.city || "").trim() && !(ownerCity || "").trim();
+export const sitNeedsCity = (
+  sit: SitLike | null | undefined,
+  ownerCity?: string | null,
+  statuses: string[] = ["published"],
+): boolean =>
+  !!sit && statuses.includes(String(sit.status)) && !(sit.city || "").trim() && !(ownerCity || "").trim();
 
 function Row({ sit, applicationsCount, userId, onSaved, showTitle }: {
   sit: SitLike; applicationsCount: number; userId: string; onSaved: (city: string) => void; showTitle: boolean;
@@ -94,7 +98,7 @@ export function MissingSitCityInline({ sit, ownerCity, applicationsCount, userId
   sit: SitLike; ownerCity?: string | null; applicationsCount: number; userId: string | null | undefined; onSaved?: (city: string) => void;
 }) {
   const [savedCity, setSavedCity] = useState<string | null>(null);
-  if (!userId || savedCity || !sitNeedsCity(sit, ownerCity)) return null;
+  if (!userId || savedCity || !sitNeedsCity(sit, ownerCity, ["published", "draft"])) return null;
   return (
     <Row sit={sit} applicationsCount={applicationsCount} userId={userId} showTitle={false}
       onSaved={(c) => { setSavedCity(c); onSaved?.(c); }} />
