@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Head from "@/components/seo/Head";
 import { useAuth } from "@/contexts/AuthContext";
-import { fetchMyProfile } from "@/lib/myProfile";
+import { fetchMyProfile, patchMyProfileCache } from "@/lib/myProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { afterWelcome, arrivalIntentFor, safeNext, welcomeUsesOrder, type WelcomeUse } from "@/lib/arrival";
 import { ArrivalShell, Eyebrow, Gouache, SaveError, trackArrival, useArrivalT, useArrivalViewed } from "@/components/arrival/ArrivalUI";
@@ -53,8 +53,11 @@ const Bienvenue = () => {
     setSaving(true);
     setFailed(false);
     const intent = arrivalIntentFor(user.role, entraideIntent);
-    const { error } = await supabase.from("profiles").update({ arrival_welcome_seen_at: new Date().toISOString(), arrival_intent: intent } as any).eq("id", user.id);
+    const patch = { arrival_welcome_seen_at: new Date().toISOString(), arrival_intent: intent };
+    const { error } = await supabase.from("profiles").update(patch as any).eq("id", user.id);
     if (error) { setSaving(false); setFailed(true); return; }
+    // Lot 2b : cache my-profile à jour, sinon le garde lirait l'ancien profil 5 min.
+    patchMyProfileCache(user.id, patch);
     trackArrival("completed", "C4");
     try { localStorage.removeItem(SIGNUP_INTENT_KEY); } catch { /* rien */ }
     void Promise.resolve(refreshProfile?.()).catch(() => {});

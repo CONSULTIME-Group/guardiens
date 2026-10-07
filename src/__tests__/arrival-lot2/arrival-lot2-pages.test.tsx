@@ -32,6 +32,7 @@ vi.mock("@/contexts/AuthContext", () => ({
 vi.mock("@/hooks/useFeatureFlag", () => ({ useFeatureFlag: () => flag }));
 vi.mock("@/lib/analytics", () => ({ trackEvent: vi.fn(), trackEventWithUserId: vi.fn(), mapSignupError: () => "x" }));
 vi.mock("@/lib/myProfile", () => ({
+  patchMyProfileCache: vi.fn(),
   fetchMyProfile: () => Promise.resolve({ data: profileRow, error: null }),
   fetchMyOwnerProfile: () => Promise.resolve({ data: ownerRow, error: null }),
   fetchMySitterProfile: () => Promise.resolve({ data: sitterRow, error: null }),
