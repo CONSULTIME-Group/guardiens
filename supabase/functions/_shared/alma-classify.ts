@@ -17,16 +17,19 @@ export interface AlmaClassification {
   bug_item: string | null;
   churn: boolean;
   unanswered: boolean;
+  /** Lot L1 : question au « vous » destinée au propriétaire de l'annonce consultée. */
+  addressed_to_owner?: boolean;
   /** model : lu dans la réponse ; patterns : motifs seuls ; merged : les deux. */
   source: "model" | "patterns" | "merged";
 }
 
 export const CLASSIFICATION_DIRECTIVE = `CLASSEMENT, obligatoire, invisible pour la personne. Après ta réponse, ajoute une dernière ligne, seule, exactement de cette forme :
-CLASSEMENT: {"intent":"…","frustration":0,"bug_suspected":false,"bug_item":"","churn":false,"unanswered":false}
+CLASSEMENT: {"intent":"…","frustration":0,"bug_suspected":false,"bug_item":"","churn":false,"unanswered":false,"addressed_to_owner":false}
 intent parmi : aide_recherchee (elle cherche quelqu'un pour ses animaux ou sa maison), garde, entraide, projet, dossier (son profil, ses annonces, ses candidatures), mode_emploi (comment faire sur le site), sensible, perso (questions sur toi), depart, autre.
 frustration de 0 (sereine) à 3 (très agacée : majuscules, points d'exclamation, reproche).
 bug_suspected true si elle décrit un élément du site qui ne répond pas ; bug_item nomme cet élément en quelques mots.
 churn true si elle veut supprimer son compte ou quitter le site.
+addressed_to_owner true si, sur une fiche d'annonce, elle pose au « vous » une question destinée au propriétaire de cette annonce (son logement, sa commune, ses animaux, ses dates, ses horaires, ses consignes), par exemple « quel est le nom de votre village ? ».
 unanswered true si tu ne sais pas répondre ou ne peux pas vérifier ce qu'elle affirme dans les faits reçus.
 Même agacée, tu réponds d'abord à sa question, sans humour ni anecdote, puis tu proposes d'écrire à Jérémie et Elisa sur /contact.`;
 
@@ -77,6 +80,7 @@ export function extractClassification(text: string): { answer: string; classific
         bug_item: item,
         churn: asBool(raw?.churn),
         unanswered: asBool(raw?.unanswered),
+        addressed_to_owner: asBool(raw?.addressed_to_owner),
         source: "model",
       },
     };
@@ -117,6 +121,7 @@ export function mergeClassification(model: AlmaClassification | null, intent: Al
     bug_item: model.bug_item,
     churn: model.churn || net.churn,
     unanswered: model.unanswered,
+    addressed_to_owner: model.addressed_to_owner === true,
     source: changed ? "merged" : "model",
   };
 }
