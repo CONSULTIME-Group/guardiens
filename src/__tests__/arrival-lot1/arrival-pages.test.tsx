@@ -104,15 +104,15 @@ describe("Parcours propriétaire v2", () => {
     search = new URLSearchParams({ next: "/sits/create?source=signup" });
     const { default: Bienvenue } = await import("@/pages/arrival/Bienvenue");
     R(<Bienvenue />);
-    fireEvent.click(screen.getByRole("button", { name: "Faisons connaissance" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Faisons connaissance" }));
     await waitFor(() => expect(navigateMock).toHaveBeenCalledWith(`/arrivee/vous?next=${encodeURIComponent("/sits/create?source=signup")}`, { replace: true }));
     expect(writes.find((w) => w.table === "profiles")?.row).toHaveProperty("arrival_welcome_seen_at");
 
     cleanup(); navigateMock.mockReset();
-    authUser = { ...authUser!, arrivalWelcomeSeenAt: "2026-10-07T10:00:00Z" };
+    profileRow = { arrival_welcome_seen_at: "2026-10-07T10:00:00Z" };
     const r = R(<Bienvenue />);
+    await waitFor(() => expect(navigateMock).toHaveBeenCalledWith("/sits/create?source=signup", { replace: true }));
     expect(r.container.textContent).toBe("");
-    expect(navigateMock).toHaveBeenCalledWith("/sits/create?source=signup", { replace: true });
   });
 
   it("P1 : type requis, logement sans valeurs par défaut, puis P2", async () => {
