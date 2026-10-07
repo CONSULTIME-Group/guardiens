@@ -1751,6 +1751,11 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/guides/longvic</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/guides/romans-sur-isere</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -1862,6 +1867,11 @@
   </url>
   <url>
     <loc>https://guardiens.fr/guides/champlemy</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/guides/collonges-sous-saleve</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -2958,6 +2968,11 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/gardiens/04dc0609-0bb5-4e19-9b40-cdff4a94409a</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/gardiens/0dd3fa01-8777-4210-a352-1f13c33a9ed2</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
@@ -2999,6 +3014,11 @@
   </url>
   <url>
     <loc>https://guardiens.fr/gardiens/24a69602-e6c1-46d6-92cf-5b42f2b4235f</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/gardiens/2a182d10-8b8d-47a2-b19e-3253ce533334</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -3478,6 +3498,11 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/gardiens/c3e3ad31-340f-4875-8c09-08e7c19b5b98</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/gardiens/c576eaa3-0157-4712-8ea7-c64252ed2d62</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
@@ -3693,7 +3718,7 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/annonces/garde-de-trois-chiens-yonne-89-vers-joigny-cezy-768cd8</loc>
+    <loc>https://guardiens.fr/annonces/garde-de-2-chats-et-1-poisson-proche-dijon-1-semaine-en-mars-longvic-5a30d3</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -3723,12 +3748,22 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/annonces/garde-3-chiens-c6b0f5</loc>
+    <loc>https://guardiens.fr/annonces/garde-3-chiens-zellwiller-c6b0f5</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/petites-missions/aide-demenagement</loc>
+    <loc>https://guardiens.fr/annonces/garde-de-2-chats-et-1-poisson-proche-dijon-1-semaine-en-mars-longvic-c85a20</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/petites-missions/un-coup-de-main-pour-transporter-des-meubles</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/petites-missions/un-coup-de-main-pour-transporter-un-canape-2-place-surtout-dans-un-vehicule-plus</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
