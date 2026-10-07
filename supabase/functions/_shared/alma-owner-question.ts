@@ -76,7 +76,9 @@ function frDate(iso: string | null, withYear: boolean): string {
   return `${d === 1 ? "1er" : d} ${MONTHS[m - 1]}${withYear ? ` ${y}` : ""}`;
 }
 
-const plural = (label: string, n: number) => (n > 1 && !/[sx]$/.test(label) ? `${label}s` : label);
+const IRREGULAR: Record<string, string> = { cheval: "chevaux", "animal de ferme": "animaux de ferme", nac: "NAC", NAC: "NAC" };
+const plural = (label: string, n: number) =>
+  n > 1 ? IRREGULAR[label] ?? (/[sx]$/.test(label) ? label : `${label}s`) : label;
 
 export function buildOwnerQuestionAnswer(sit: ViewedSitFacts, viewer: ViewerState): string {
   const lines: string[] = ["Voici ce que l'annonce indique."];
