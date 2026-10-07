@@ -304,7 +304,7 @@ Deno.serve(async (req) => {
     // Lot L2 : photo du logement, une seule adresse, la Galerie.
     if (detectHomePhotoQuestion(message)) {
       const classification: AlmaClassification = { ...classificationFromPatterns(intent), unanswered: false };
-      const action = { label: HOME_PHOTO_ACTION.label, path: HOME_PHOTO_ACTION.path };
+      const homeAction = { label: HOME_PHOTO_ACTION.label, path: HOME_PHOTO_ACTION.path };
       const conversationId = await logConversation({
         user_id: userId,
         surface,
@@ -317,13 +317,13 @@ Deno.serve(async (req) => {
         latency_ms: Date.now() - startedAt,
         sources_count: 0,
         classification,
-        proposed_action: { ...action, reason: HOME_PHOTO_ACTION.reason },
+        proposed_action: { ...homeAction, reason: HOME_PHOTO_ACTION.reason },
       });
       await raiseSignals(classification, conversationId);
       return json({
         answer: HOME_PHOTO_ANSWER,
         remaining: Math.max(0, ALMA_CHAT_DAILY_LIMIT - ((count ?? 0) + 1)),
-        action,
+        action: homeAction,
         ...(conversationId ? { conversation_id: conversationId } : {}),
         ...(isReplay ? { replay_meta: { register, classification, confirmed_sit: false } } : {}),
       });
