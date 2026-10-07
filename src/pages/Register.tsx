@@ -26,7 +26,8 @@ import { startOAuthFlow, logOAuthStage, endOAuthFlow } from "@/lib/oauthLogger";
 import { detectSignupIntent, roleForSignupIntent, signupIntentBannerKey } from "@/lib/signupIntent";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { ARRIVAL_FLAG, arrivalAppliesToNewSignup } from "@/lib/arrivalFlag";
-import { lazy, Suspense } from "react";
+import { Suspense } from "react";
+import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
 // Lot 1 : écrans C1 à C3 chargés seulement drapeau allumé.
 const ArrivalC1 = lazy(() => import("@/components/arrival/RegisterArrivalParts").then((m) => ({ default: m.ArrivalC1 })));
 const ArrivalC2Header = lazy(() => import("@/components/arrival/RegisterArrivalParts").then((m) => ({ default: m.ArrivalC2Header })));

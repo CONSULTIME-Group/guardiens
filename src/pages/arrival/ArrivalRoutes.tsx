@@ -1,6 +1,7 @@
 /** Lot 1 : un seul point d'entrée à la demande pour /bienvenue et /arrivee/*,
  * chaque écran chargé à son tour (aucune liste de dépendances dans l'entrée). */
-import { lazy, Suspense, type ComponentType, type ReactNode } from "react";
+import { Suspense, type ComponentType, type ReactNode } from "react";
+import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
 import { useLocation } from "react-router-dom";
 
 const SCREENS = {
