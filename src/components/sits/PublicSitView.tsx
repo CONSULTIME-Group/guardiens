@@ -46,6 +46,8 @@ interface OwnerLike {
   avatar_url?: string | null;
   city?: string | null;
   postal_code?: string | null;
+  /** Lot L1 : libellé de localisation partagé, jamais vide. */
+  location_label?: string | null;
   bio?: string | null;
   identity_verified?: boolean | null;
   is_founder?: boolean | null;
