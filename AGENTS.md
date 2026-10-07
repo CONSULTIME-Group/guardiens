@@ -23,3 +23,4 @@
 
 - Rôle d'une inscription Google (lot 0) : rôle choisi gardé en localStorage horodaté et dans ?signup_role=, appliqué par apply_signup_role (profil de moins de 30 min, sans rôle en métadonnées) avant la lecture du profil dans AuthContext ; pourquoi : Google ne transmet pas les métadonnées et un compte existant ne doit jamais changer de rôle.
 - Écran d'affinité obligatoire (lot 0) : pré-rempli depuis la base, écritures construites par src/lib/affinityOnboardingWrites.ts (colonnes affichées et renseignées seulement), toute erreur bloque complétion et navigation ; pourquoi : un tableau vide écrasait des réponses existantes.
+- Parcours d'arrivée v2 (lot 1) : drapeau arrival_v2, écrans sous /bienvenue et /arrivee/* servis par un seul module à la demande (src/pages/arrival/ArrivalRoutes.tsx), textes arrival.* ajoutés au dictionnaire au chargement, logique pure dans src/lib/arrival.ts ; pourquoi : l'entrée reste sous 307 200 octets.
