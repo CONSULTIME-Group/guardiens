@@ -27,7 +27,7 @@ const SECOND_PERSON_TOPIC = new RegExp(`\\b(votre|vos)\\s+(\\w+\\s+){0,2}${TOPIC
 const ASK_PRECISE = /\b(pouvez|pourriez)[- ]vous\s+(me\s+|nous\s+)?(preciser|dire|indiquer|donner|confirmer|envoyer)\b/;
 const HOUSE_HAS = /\b(la maison|le logement|l'appartement|le jardin|le chien|le chat|la propriete)\s+(a|est|dispose|possede)[- ]t[- ](elle|il)\b/;
 const HAVE_YOU = /\b(avez|aurez|etes|serez|partez|rentrez|habitez|vivez)[- ]vous\b/;
-const HAVE_YOU_TOPIC = new RegExp(`\\b(avez|aurez)[- ]vous\\s+(un|une|des|d'|deja)\\s*(\\w+\\s+){0,2}${TOPICS}?`);
+const HAVE_YOU_TOPIC = new RegExp(`\\b(avez|aurez)[- ]vous\\s+(un|une|des|d'|deja)\\s*(\\w+\\s+){0,2}${TOPICS}`);
 const WHERE_IS = /\b(ou se (situe|trouve)|ou est situe|c'est ou|ou habitez)\b/;
 
 /** Questions sur le site ou sur Alma : jamais adressées au propriétaire. */
