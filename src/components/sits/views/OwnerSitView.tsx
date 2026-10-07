@@ -47,6 +47,7 @@ import { useAcceptApplication } from "@/hooks/useAcceptApplication";
 import { buildPlatformCandidates, type PlatformCandidate } from "@/lib/platformCandidates";
 import { useToast } from "@/hooks/use-toast";
 import { formatSitPeriod } from "@/lib/dateRange";
+import { MissingSitCityInline } from "@/components/sits/owner/MissingSitCityBanner";
 import {
   getSitPublishBlockers,
   getBlockingBlockers,
@@ -555,6 +556,7 @@ const OwnerSitView = ({
       property: property as any,
       galleryPhotos: ownerGallery,
       pets: pets as any,
+      ownerCity: owner?.city ?? null,
     }),
     { viaCreateForm: publishNeedsForm, resumeHref: `/sits/create?resume=${sit.id}` },
   );
@@ -716,6 +718,16 @@ const OwnerSitView = ({
 
   return (
     <>
+      {/* Lot L1 : commune manquante (annonce publiée ou brouillon). */}
+      <div id="sit-city-field" className="scroll-mt-24 empty:hidden mb-4">
+        <MissingSitCityInline
+          sit={sit as any}
+          ownerCity={owner?.city ?? null}
+          applicationsCount={internalAppCount}
+          userId={sit.user_id}
+          onSaved={(city) => setSit({ ...(sit as any), city })}
+        />
+      </div>
       {/* Brouillon : checklist de publication (remplace l'ancien bandeau) */}
       {isDraft && (
         <DraftChecklist
@@ -765,10 +777,10 @@ const OwnerSitView = ({
                       {formatSitPeriod(sit.start_date, sit.end_date) || "Dates non renseignées"}
                     </span>
                   </div>
-                  {owner?.city && (
+                  {(owner?.city || owner?.location_label) && (
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <MapPin className="h-4 w-4 shrink-0" />
-                      <span>{owner.city}</span>
+                      <span>{owner.city || owner.location_label}</span>
                     </div>
                   )}
                   {sit.flexible_dates && (

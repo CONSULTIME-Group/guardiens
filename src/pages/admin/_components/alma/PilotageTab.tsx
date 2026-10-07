@@ -52,6 +52,7 @@ export function PilotageTab({ range }: { range: "7d" | "30d" | "90d" }) {
           history: c.history.map((q) => ({ role: "user", content: q })),
           surface: c.surface,
           active_role: c.activeRole,
+          ...(c.pagePath ? { page_path: c.pagePath } : {}),
         },
       });
       const d = (data ?? {}) as any;
@@ -66,6 +67,7 @@ export function PilotageTab({ range }: { range: "7d" | "30d" | "90d" }) {
             register: d.replay_meta?.register ?? null,
             frustration: d.replay_meta?.classification?.frustration ?? null,
             confirmedSit: d.replay_meta?.confirmed_sit ?? null,
+            expect: c.expect ?? null,
           });
       results.push({ id: c.id, question: c.question, answer: answer.slice(0, 400), ...verdict });
       setReplaying({ done: results.length, total: ALMA_REPLAY_CASES.length });

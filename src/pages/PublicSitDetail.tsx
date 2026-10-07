@@ -37,6 +37,7 @@ import {
 } from "@/components/sits/shared/sitConstants";
 import { petSpeciesLabelLower } from "@/lib/petLabels";
 import { publicFirstName } from "@/lib/displayName";
+import { loadSitLocationLabel } from "@/lib/sitLocationLoad";
 
 type ViewerType = "anonymous" | "gardien" | "proprio" | "owner_of_sit" | "admin";
 
@@ -140,17 +141,9 @@ const PublicSitDetail = () => {
           });
         }
 
-        let enrichedOwner = ownerData;
-        if (ownerData && !ownerData.city && /^\d{5}$/.test(String((ownerData as any).postal_code || ""))) {
-          try {
-            const res = await fetch(`https://geo.api.gouv.fr/communes?codePostal=${(ownerData as any).postal_code}&fields=nom&limit=1`);
-            if (res.ok) {
-              const arr: { nom?: string }[] = await res.json();
-              const resolvedCity = arr?.[0]?.nom?.trim();
-              if (resolvedCity) enrichedOwner = { ...ownerData, city: resolvedCity };
-            }
-          } catch { /* silencieux */ }
-        }
+        // Lot L1 : aucune commune n'est déduite d'un code postal (un code
+        // postal couvre souvent plusieurs communes). Libellé de repli partagé.
+        let enrichedOwner: any = ownerData;
 
         // Override : si l'annonce porte une ville/pays spécifiques (résidence secondaire,
         // garde à l'étranger), ils priment sur la ville du profil propriétaire.
@@ -163,6 +156,9 @@ const PublicSitDetail = () => {
             country: sitCountry || (enrichedOwner as any).country || "FR",
           } as any;
         }
+        const locationLabel = await loadSitLocationLabel(sitData as any, ownerData as any);
+        if (!active) return;
+        if (enrichedOwner) enrichedOwner = { ...enrichedOwner, location_label: locationLabel };
 
         commit(() => setOwner(enrichedOwner));
         commit(() => setProperty(enrichedProperty));
@@ -449,7 +445,7 @@ const PublicSitDetail = () => {
   const ownerCountry = ((owner as any)?.country as string | undefined)?.trim() || (sit as any)?.country?.trim() || "FR";
   // Source de vérité : la ville portée par l'annonce (résidence secondaire,
   // étranger), avec repli sur la ville du profil propriétaire.
-  const sitCity = ((sit as any)?.city as string | undefined)?.trim() || owner?.city?.trim() || "";
+  const sitCity = ((sit as any)?.city as string | undefined)?.trim() || owner?.city?.trim() || owner?.location_label || "";
   const cityForTitle = (sitCity && ownerCountry && ownerCountry !== "FR")
     ? `${sitCity} (${ownerCountry})`
     : (sitCity || "France");

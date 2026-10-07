@@ -2,20 +2,20 @@
   "version": 4,
   "sources": {
     "city_guides": {
-      "head": "2026-10-05T07:14:21.036951+00:00|96",
-      "fetchedAt": "2026-10-05T08:49:20.418Z"
+      "head": "2026-10-07T06:42:32.661674+00:00|98",
+      "fetchedAt": "2026-10-07T07:17:14.647Z"
     },
     "seo_city_pages": {
-      "head": "2026-10-05T04:05:00.453219+00:00|165",
-      "fetchedAt": "2026-10-05T08:49:20.444Z"
+      "head": "2026-10-07T07:00:07.102095+00:00|165",
+      "fetchedAt": "2026-10-07T07:17:14.763Z"
     },
     "articles": {
-      "head": "2026-10-04T16:10:12.374046+00:00|133",
-      "fetchedAt": "2026-10-05T08:49:20.417Z"
+      "head": "2026-10-05T15:55:11.542462+00:00|133",
+      "fetchedAt": "2026-10-07T07:17:14.728Z"
     },
     "seo_department_pages": {
-      "head": "2026-10-05T04:07:00.182296+00:00|102",
-      "fetchedAt": "2026-10-05T08:49:20.403Z"
+      "head": "2026-10-07T04:07:00.09088+00:00|102",
+      "fetchedAt": "2026-10-07T07:17:14.649Z"
     },
     "breed_profiles": {
       "head": "2026-08-19T19:06:57.126227+00:00|81",
@@ -317,6 +317,12 @@
         "priority": "0.7"
       },
       {
+        "loc": "/guides/longvic",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
         "loc": "/guides/romans-sur-isere",
         "lastmod": null,
         "changefreq": "weekly",
@@ -450,6 +456,12 @@
       },
       {
         "loc": "/guides/champlemy",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/collonges-sous-saleve",
         "lastmod": null,
         "changefreq": "weekly",
         "priority": "0.7"

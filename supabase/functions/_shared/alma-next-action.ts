@@ -41,6 +41,11 @@ export interface NextActionInput {
   profileAlreadySuggested?: boolean;
   /** Chemin de la page ouverte, par exemple /sits/abc. */
   pagePath?: string | null;
+  /**
+   * Lot L1 : annonce consultée, publiée et ouverte aux candidatures. Son
+   * action passe en tête et aucune autre annonce n'est proposée.
+   */
+  viewedSit?: { id: string; action: AlmaAction } | null;
 }
 
 export interface NextActionResult {
@@ -91,7 +96,7 @@ const DEPARTURE_INTENT = /(je pars|partir|depart|vacances|faire garder|garde de|
 
 const withTitle = (path: string, title: string) => `${path}?titre=${encodeURIComponent(title)}`;
 
-function sitIdFromPath(path?: string | null): string | null {
+export function sitIdFromPath(path?: string | null): string | null {
   const m = (path || "").match(/^\/(?:sits|annonces)\/([^/?#]+)$/);
   if (!m || m[1] === "create" || m[1] === "international") return null;
   return m[1];
@@ -142,7 +147,9 @@ export function computeNextAction(input: NextActionInput): NextActionResult {
   if (sitterSide) {
     const nearby = inventory.gardes[0];
     const waiting = (facts.candidature_sans_reponse_jours ?? 0) > 7;
-    if (nearby) {
+    if (input.viewedSit) {
+      // Lot L1 : jamais une autre annonce tant que celle-ci est ouverte.
+    } else if (nearby) {
       candidates.push({ label: `Postuler : ${nearby.titre}`, path: `/sits/${nearby.id}?postuler=1`, reason: waiting ? "candidature_sans_reponse" : "annonce_proche" });
     } else if (!input.helpIntent) {
       candidates.push({ label: "Régler mon alerte de secteur", path: "/mon-secteur", reason: "rien_de_proche" });
@@ -168,16 +175,26 @@ export function computeNextAction(input: NextActionInput): NextActionResult {
   if (asked) candidates.unshift({ label: "Compléter mon profil", path: profilePath, reason: "profil_demande" });
   else if (invisible) candidates.push({ label: "Compléter mon profil", path: profilePath, reason: "profil_invisible" });
 
+  // Lot L1 : l'annonce consultée passe devant tout, les autres annonces sortent.
+  if (input.viewedSit) {
+    candidates.unshift(input.viewedSit.action);
+  }
+  const otherSit = (path: string): boolean => {
+    if (!input.viewedSit) return false;
+    const m = path.match(/^\/(?:sits|annonces)\/([^/?#]+)/);
+    return !!m && m[1] !== input.viewedSit.id && m[1] !== "create" && m[1] !== "international";
+  };
+
   // Dédoublonnage par chemin.
   const seen = new Set<string>();
-  const unique = candidates.filter((c) => (seen.has(c.path) ? false : (seen.add(c.path), true)));
+  const unique = candidates.filter((c) => !otherSit(c.path) && (seen.has(c.path) ? false : (seen.add(c.path), true)));
 
   const action = placement === "none" ? null : unique[0] ?? null;
 
   // Pastilles : écran courant, puis actions suivantes, puis une question utile.
   const chips: AlmaChip[] = [];
   const sitId = sitIdFromPath(input.pagePath);
-  if (sitId && input.activeRole === "sitter") chips.push({ label: "Je postule", path: `/sits/${sitId}?postuler=1` });
+  if (sitId && input.activeRole === "sitter" && !input.viewedSit) chips.push({ label: "Je postule", path: `/sits/${sitId}?postuler=1` });
   for (const c of unique.slice(action ? 1 : 0)) {
     if (chips.length >= 2) break;
     if (!chips.some((x) => x.path === c.path)) chips.push({ label: c.label, path: c.path });

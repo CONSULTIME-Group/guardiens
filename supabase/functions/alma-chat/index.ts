@@ -35,6 +35,80 @@ import { isMoodLineTruthful, loadVerifiedFacts, moodTruthFromFacts } from "../_s
 import { formatInventory, loadAlmaInventory } from "../_shared/alma-inventory.ts";
 import { applyDraftToAction, computeNextAction, formatActionDirective } from "../_shared/alma-next-action.ts";
 import { almaProfileVisibleToModel, polishAlmaAnswer } from "../_shared/alma-output.ts";
+import { sitIdFromPath } from "../_shared/alma-next-action.ts";
+import {
+  asksAboutAlma,
+  buildOwnerQuestionAnswer,
+  detectAddressedToOwner,
+  sitDetailAction,
+  type ViewedSitFacts,
+  type ViewerState,
+} from "../_shared/alma-owner-question.ts";
+import { deptCodeFromPostal, sitCommune, sitLocationLabel } from "../_shared/sit-location.ts";
+
+const SPECIES_FR: Record<string, string> = {
+  dog: "chien", cat: "chat", horse: "cheval", bird: "oiseau", rodent: "rongeur",
+  fish: "poisson", reptile: "reptile", farm_animal: "animal de ferme", nac: "NAC",
+};
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+interface ViewedSit {
+  facts: ViewedSitFacts;
+  viewer: ViewerState;
+  conversationId: string | null;
+}
+
+/**
+ * Lot L1 : annonce consultée (surface sit_detail), lue côté serveur.
+ * null si la page n'est pas une fiche, si l'annonce est introuvable ou si la
+ * personne en est la propriétaire.
+ */
+async function loadViewedSit(admin: any, ref: string, userId: string, activeRole: "owner" | "sitter"): Promise<ViewedSit | null> {
+  const cols = "id, slug, title, status, accepting_applications, city, departement_code, start_date, end_date, user_id, property_id";
+  const q = admin.from("sits").select(cols);
+  const { data: sit } = await (UUID_RE.test(ref) ? q.eq("id", ref) : q.eq("slug", ref)).maybeSingle();
+  if (!sit || sit.user_id === userId) return null;
+  const [ownerRes, petsRes, appRes, convRes] = await Promise.all([
+    admin.from("profiles").select("city, postal_code").eq("id", sit.user_id).maybeSingle(),
+    sit.property_id
+      ? admin.from("pets").select("species").eq("property_id", sit.property_id).limit(30)
+      : Promise.resolve({ data: [] }),
+    admin.from("applications").select("id, status").eq("sit_id", sit.id).eq("sitter_id", userId).limit(1),
+    admin.from("conversations").select("id").eq("sit_id", sit.id).eq("sitter_id", userId).limit(1),
+  ]);
+  const owner = (ownerRes?.data ?? {}) as { city?: string | null; postal_code?: string | null };
+  const commune = sitCommune({ sitCity: sit.city, ownerCity: owner.city });
+  let departementName: string | null = null;
+  if (!commune) {
+    const code = (sit.departement_code || "").trim() || deptCodeFromPostal(owner.postal_code);
+    if (code) {
+      const { data: d } = await admin.from("departements").select("nom").eq("code", code).maybeSingle();
+      departementName = d?.nom ?? null;
+    }
+  }
+  const pets: Record<string, number> = {};
+  for (const p of (petsRes?.data ?? []) as any[]) {
+    const k = SPECIES_FR[p.species] ?? "animal";
+    pets[k] = (pets[k] ?? 0) + 1;
+  }
+  const app = ((appRes?.data ?? []) as any[]).find((a) => a.status !== "cancelled") ?? null;
+  const conversationId = ((convRes?.data ?? []) as any[])[0]?.id ?? null;
+  const viewer: ViewerState = app ? "applied" : activeRole === "owner" ? "owner_space" : "can_apply";
+  return {
+    facts: {
+      id: sit.id,
+      title: sit.title ?? null,
+      open: sit.status === "published" && sit.accepting_applications !== false,
+      locationLabel: sitLocationLabel({ sitCity: sit.city, ownerCity: owner.city, postalCode: owner.postal_code, departementName }),
+      communeMissing: !commune,
+      startDate: sit.start_date ?? null,
+      endDate: sit.end_date ?? null,
+      pets,
+    },
+    viewer,
+    conversationId,
+  };
+}
 
 const MAX_HISTORY = 12;
 
@@ -56,7 +130,7 @@ Deno.serve(async (req) => {
     if (!isContact && (!message || message.length > 2000)) {
       return json({ error: "Message invalide (1 à 2000 caractères)." }, 400);
     }
-    const register = detectRegister(message);
+    let register = detectRegister(message);
     const activeRole = body?.active_role === "owner" ? "owner" : "sitter";
     // Voix ou clavier, renseigne la répartition suivie dans /admin/alma.
     const inputMode = body?.input_mode === "voice" ? "voice" : "keyboard";
@@ -228,6 +302,25 @@ Deno.serve(async (req) => {
     }
     const helpDirective = almaHelpDirective(intent);
 
+    // Lot L1 : fiche d'annonce consultée.
+    const viewedRef = sitIdFromPath(pagePath);
+    let viewed: ViewedSit | null = null;
+    if (viewedRef) {
+      try {
+        viewed = await loadViewedSit(adminClient, viewedRef, userId, activeRole);
+      } catch (e) {
+        console.error("alma-chat viewed sit failed", e);
+      }
+    }
+    const viewedOpen = viewed && viewed.facts.open ? viewed : null;
+    const ownerQuestionByPattern = Boolean(viewed) && detectAddressedToOwner(message);
+    const aboutAlma = asksAboutAlma(message);
+    // Une question au « vous » sur une fiche n'ouvre jamais le carnet personnel.
+    if (viewed && register === "perso" && !aboutAlma) register = "reassurance";
+    const viewedAction = viewedOpen
+      ? sitDetailAction(viewedOpen.facts.id, viewedOpen.viewer, viewedOpen.conversationId)
+      : null;
+
     // Contexte dossier, chargé côté serveur.
     const [profileRes, sitterRes, ownerRes] = await Promise.all([
       adminClient
@@ -262,7 +355,7 @@ Deno.serve(async (req) => {
     // et ne raconte jamais une garde ou un départ que la base ne confirme pas.
     const moodAllowed = (register === "perso" || isSmallTalk(message)) &&
       Boolean(facts) && isMoodLineTruthful(moodLine, moodTruthFromFacts(facts!, todayIso));
-    if (mood && moodLine && !helpDirective && moodAllowed) {
+    if (mood && moodLine && !helpDirective && moodAllowed && !(viewed && !aboutAlma)) {
       try {
         const { data: verifiedMood, error: moodError } = await adminClient
           .from("alma_moods")
@@ -396,8 +489,11 @@ Deno.serve(async (req) => {
     const completion = helpDirective ? null : profilACompleterCharge
       ? 100 - profilACompleter.reduce((total, item) => total + item.points, 0)
       : prof.profile_completion ?? null;
+    // Lot L1 : sur une annonce ouverte, aucune autre annonce n'est proposée.
+    if (viewedOpen && inventory) inventory.gardes = [];
     const next = facts && inventory
       ? computeNextAction({
+          viewedSit: viewedAction ? { id: viewedOpen!.facts.id, action: viewedAction } : null,
           facts,
           inventory,
           accountRole,
@@ -482,6 +578,12 @@ Deno.serve(async (req) => {
         ...(inventory ? [{ role: "system" as const, content: formatInventory(inventory) }] : []),
         ...history,
         { role: "system", content: almaRegisterReminder(register) },
+        ...(viewed
+          ? [{
+              role: "system" as const,
+              content: `FICHE D'ANNONCE CONSULTÉE, ce que l'annonce contient réellement :\n${JSON.stringify(viewed.facts, null, 2)}\nLa personne te parle depuis cette fiche. Une question au « vous » sur le logement, la commune, les animaux, les dates, les horaires ou les consignes s'adresse au propriétaire, pas à toi : donne ce que la fiche contient, puis indique que le propriétaire répondra à sa candidature. Ne raconte jamais ta propre vie (Lyon, Córdoba, Elisa, tes chats), sauf si on t'interroge sur toi par ton nom.${viewed.facts.open ? " Ne propose aucune autre annonce que celle-ci." : ""}`,
+            }]
+          : []),
         ...(next ? [{ role: "system" as const, content: formatActionDirective(next) }] : []),
         ...(helpDirective ? [{ role: "system" as const, content: helpDirective }] : []),
         { role: "system", content: CLASSIFICATION_DIRECTIVE },
@@ -491,7 +593,10 @@ Deno.serve(async (req) => {
 
     if (!r.ok) {
       // Secours : frustration ou départ, la réponse fixe prend le relais.
-      const fallback = intent.frustration || intent.leaving ? almaDirectAnswer(intent) : null;
+      // Lot L1 : une question au propriétaire reçoit la réponse factuelle.
+      const fallback = ownerQuestionByPattern && viewed
+        ? buildOwnerQuestionAnswer(viewed.facts, viewed.viewer)
+        : intent.frustration || intent.leaving ? almaDirectAnswer(intent) : null;
       const classification = classificationFromPatterns(intent);
       const conversationId = await logConversation({
         user_id: userId,
@@ -529,12 +634,25 @@ Deno.serve(async (req) => {
         tail: rawOutput.slice(-160),
       }));
     }
-    const classification = mergeClassification(extracted.classification, intent);
-    const drafted = applyDraftToAction(normalizeAlmaOutput(extracted.answer), next?.action ?? null, next?.chips ?? []);
+    const merged = mergeClassification(extracted.classification, intent);
+    const addressedToOwner = Boolean(viewed) && (ownerQuestionByPattern || merged.addressed_to_owner === true);
+    const classification: AlmaClassification = {
+      ...merged,
+      addressed_to_owner: addressedToOwner,
+      // La réponse factuelle couvre la question : pas de signal « sans réponse ».
+      unanswered: addressedToOwner ? false : merged.unanswered,
+    };
+    const drafted = applyDraftToAction(
+      normalizeAlmaOutput(extracted.answer),
+      next?.action ?? viewedAction ?? null,
+      next?.chips ?? [],
+    );
     // Lot J4 : mots proscrits reformulés, anecdote déplacée après l'information.
     const quiet = Boolean(helpDirective) || intent.frustration || classification.frustration >= 2 ||
       classification.bug_suspected || classification.intent === "aide_recherchee";
-    const answer = polishAlmaAnswer(drafted.answer, { perso: register === "perso", quiet });
+    const answer = addressedToOwner && viewed
+      ? buildOwnerQuestionAnswer(viewed.facts, viewed.viewer)
+      : polishAlmaAnswer(drafted.answer, { perso: register === "perso", quiet });
     if (!answer) {
       await logConversation({
         user_id: userId,
@@ -556,7 +674,7 @@ Deno.serve(async (req) => {
     // Lot J3 : l'action principale reste toujours celle du moteur. En
     // frustration, bug ou départ, « Écrire à Jérémie et Elisa » s'affiche en
     // lien secondaire (human_contact), jamais à la place de l'action.
-    const action = drafted.action;
+    const action = viewedAction && (addressedToOwner || !drafted.action) ? viewedAction : drafted.action;
     const chips = drafted.chips;
     const conversationId = await logConversation({
       user_id: userId,

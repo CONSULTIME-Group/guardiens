@@ -558,6 +558,7 @@ const Sits = () => {
           sit,
           property: sit.properties,
           pets: sit.pets,
+          ownerCity: sit.ownerCity ?? null,
           overrides: { galleryPhotoCount: sit.ownerGalleryCount ?? 0 },
         }),
         { viaCreateForm: needsForm, resumeHref, pastDatesAction: adaptHref },

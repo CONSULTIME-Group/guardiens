@@ -3,6 +3,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 
 import { nearbyWaitingSentence } from "@/lib/nearbySittersSentence";
 import { useAuth } from "@/contexts/AuthContext";
+import MissingSitCityBanner from "@/components/sits/owner/MissingSitCityBanner";
 import { Link } from "react-router-dom";
 import OwnerNearbySitters from "./owner/OwnerNearbySitters";
 import OwnerEntraideBand from "./owner/OwnerEntraideBand";
@@ -392,6 +393,11 @@ const OwnerDashboard = () => {
 
       <div className="px-4 sm:px-5 md:px-8">
         <RoleActivationBanner userRole={user?.role || "owner"} />
+      </div>
+
+      {/* Lot L1 : annonce publiée sans commune. */}
+      <div className="px-4 sm:px-5 md:px-8">
+        <MissingSitCityBanner userId={user?.id} />
       </div>
 
       {/* Grille lot D1 : colonne principale 720 px, colonne de droite 328 px, écart 48 px */}

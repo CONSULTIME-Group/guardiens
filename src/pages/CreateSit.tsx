@@ -190,6 +190,7 @@ const BLOCKER_STEP_BY_ID: Record<string, number> = {
   "desc-reason": 0,
   "desc-expectations": 0,
   "desc-two-fields": 0,
+  city: 0,
   pets: 2,
   cover: 2,
 };
@@ -1290,6 +1291,7 @@ const CreateSit = () => {
       overrides: {
         galleryPhotoCount: ownerPhotos.length,
         petCount: pets.length,
+        locationCity: sitCity.trim() || ownerCity.trim() || null,
       },
     }),
   );
@@ -2387,6 +2389,26 @@ const CreateSit = () => {
           {sitLocation !== "home" ? null : (
           <>
 
+
+          {/* Lot L1 : commune exigée quand le profil n'en porte pas. */}
+          {!ownerCity.trim() && (
+            <div id="sit-city-field" className="scroll-mt-24">
+              <Label htmlFor="sit_city_required" className="text-sm font-medium">Commune de votre logement</Label>
+              <p className="text-xs text-muted-foreground mt-0.5 mb-1.5">
+                Indiquez la commune de votre logement pour que les gardiens sachent où se trouve la garde.
+              </p>
+              <Input
+                id="sit_city_required"
+                value={sitCity}
+                onChange={(e) => setSitCity(normalizeCityTyping(e.target.value))}
+                onBlur={(e) => setSitCity(normalizeCityName(e.target.value))}
+                placeholder="Ex : Lozanne"
+                className="h-12 text-base"
+                maxLength={100}
+                autoComplete="address-level2"
+              />
+            </div>
+          )}
 
           {/* Titre */}
           <div id="title-field" className="scroll-mt-24">

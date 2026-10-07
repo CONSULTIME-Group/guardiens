@@ -10,6 +10,7 @@ import AffinityBadge from "@/components/matching/AffinityBadge";
 import { useAffinityWithShadow } from "@/hooks/useAffinityWithShadow";
 import { useDepartementNames } from "@/hooks/useDepartementNames";
 import { departementNameFromCode, formatCityDepartement } from "@/lib/locationLabel";
+import { sitCommune, sitLocationLabel } from "@/lib/sitLocation";
 import { projetMetaLine, projetNatureLabel } from "@/lib/projets";
 
 
@@ -50,13 +51,16 @@ const SearchListingCard = ({
   // Ville affichée : profil public du propriétaire (public_profiles.city).
   // Le département suit le MÊME enregistrement, avec repli sur l'annonce.
   const departementNames = useDepartementNames();
-  const locationLabel = formatCityDepartement(
-    item.owner?.city,
-    departementNameFromCode(
-      item.owner?.departement_code || (item as any).departement_code,
-      departementNames,
-    ),
+  const deptName = departementNameFromCode(
+    item.owner?.departement_code || (item as any).departement_code,
+    departementNames,
   );
+  // Lot L1 : commune de l'annonce, puis ville du profil, puis
+  // « code postal, département » (src/lib/sitLocation.ts), jamais vide.
+  const commune = sitCommune({ sitCity: (item as any).city, ownerCity: item.owner?.city });
+  const locationLabel = commune
+    ? formatCityDepartement(commune, deptName)
+    : sitLocationLabel({ postalCode: (item.owner as any)?.postal_code, departementName: deptName });
 
   const missionPhotos = Array.isArray((item as any).photos) ? (item as any).photos.filter(Boolean) : [];
   const photos: string[] = item.property?.photos || missionPhotos;
@@ -195,7 +199,7 @@ const SearchListingCard = ({
 
         <div className="mt-4 px-0.5 flex flex-col flex-1">
           <p className="text-[11px] uppercase tracking-[0.16em] font-medium truncate text-primary/70">
-            <span className="truncate">{locationLabel || item.city || "France"}</span>
+            <span className="truncate">{locationLabel}</span>
           </p>
 
           <div className="mt-1.5 flex items-start justify-between gap-2">
@@ -279,7 +283,7 @@ const SearchListingCard = ({
           </h3>
 
           <div className="mt-1.5 flex flex-wrap items-center gap-x-1.5 text-[11px] text-muted-foreground">
-            <span className="truncate">{item.owner?.city || item.city || "France"}</span>
+            <span className="truncate">{commune || locationLabel}</span>
             {item.distance != null && (
               <span>· {item.distance < 1 ? "<1" : Math.round(item.distance)} km</span>
             )}

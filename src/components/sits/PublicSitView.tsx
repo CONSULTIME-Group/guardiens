@@ -46,6 +46,8 @@ interface OwnerLike {
   avatar_url?: string | null;
   city?: string | null;
   postal_code?: string | null;
+  /** Lot L1 : libellé de localisation partagé, jamais vide. */
+  location_label?: string | null;
   bio?: string | null;
   identity_verified?: boolean | null;
   is_founder?: boolean | null;
@@ -162,7 +164,7 @@ const PublicSitView = ({
   const petPhotos = pets
     .filter((p) => !!p.photo_url)
     .map((p) => ({ url: p.photo_url as string, name: p.name, species: petSpeciesLabel(p.species) ?? "Animal" }));
-  const cityLabel = sit.city || owner?.city || "France";
+  const cityLabel = sit.city || owner?.city || owner?.location_label || "France";
   const redirect = `/annonces/${sit.slug || sit.id}`;
   const title = sit.title ? sanitizeUserTitle(sit.title) : t("sit_detail.fallback_title", { city: cityLabel });
   const description = property?.description || "";
