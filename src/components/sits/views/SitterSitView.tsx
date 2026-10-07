@@ -309,7 +309,7 @@ const SitterSitView = ({
             <div className="px-4 md:px-6 py-3 md:py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-6">
               {showRecap ? (
                 <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 min-w-0">
-                  {owner?.city && <Fact icon={MapPin} label={owner.city} />}
+                  {(owner?.city || owner?.location_label) && <Fact icon={MapPin} label={owner.city || owner.location_label} />}
                   {days > 0 && (
                     <Fact
                       icon={CalendarDays}

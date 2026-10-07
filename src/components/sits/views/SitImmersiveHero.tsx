@@ -46,9 +46,12 @@ const SitImmersiveHero = ({
   })();
 
   const ownerName = owner?.first_name || "L'hôte";
-  const cityName = owner?.city || "";
-  const department: string | undefined =
-    owner?.department || (owner?.postal_code ? String(owner.postal_code).slice(0, 2) : undefined);
+  // Lot L1 : libellé partagé (src/lib/sitLocation.ts), jamais vide.
+  const realCity = (owner?.city || "").trim();
+  const cityName = realCity || owner?.location_label || "";
+  const department: string | undefined = realCity
+    ? owner?.department || (owner?.postal_code ? String(owner.postal_code).slice(0, 2) : undefined)
+    : undefined;
 
   return (
     <SitHero
