@@ -8,7 +8,7 @@ import Head from "@/components/seo/Head";
 import { useAuth } from "@/contexts/AuthContext";
 import { fetchMyProfile } from "@/lib/myProfile";
 import { supabase } from "@/integrations/supabase/client";
-import { safeNext, welcomeUsesOrder, type WelcomeUse } from "@/lib/arrival";
+import { afterWelcome, arrivalIntentFor, safeNext, welcomeUsesOrder, type WelcomeUse } from "@/lib/arrival";
 import { ArrivalShell, Eyebrow, Gouache, SaveError, trackArrival, useArrivalT, useArrivalViewed } from "@/components/arrival/ArrivalUI";
 const gouacheWelcome = new URL("../../assets/onboarding/gouache-welcome.png", import.meta.url).href;
 const maisonSeule = new URL("../../assets/landing/maison-seule-450.webp", import.meta.url).href;
@@ -29,8 +29,9 @@ const Bienvenue = () => {
   const [saving, setSaving] = useState(false);
   const [failed, setFailed] = useState(false);
 
-  let entraideFirst = /^\/(projets|petites-missions)/.test(next);
-  try { entraideFirst = entraideFirst || localStorage.getItem(SIGNUP_INTENT_KEY) === "entraide"; } catch { /* rien */ }
+  let entraideIntent = false;
+  try { entraideIntent = localStorage.getItem(SIGNUP_INTENT_KEY) === "entraide"; } catch { /* rien */ }
+  const entraideFirst = entraideIntent || /^\/(projets|petites-missions)/.test(next);
 
   // Une seule fois par compte : déjà vu, on file à la destination prévue.
   const [alreadySeen, setAlreadySeen] = useState<boolean | null>(null);
@@ -51,12 +52,13 @@ const Bienvenue = () => {
     if (!user) return;
     setSaving(true);
     setFailed(false);
-    const { error } = await supabase.from("profiles").update({ arrival_welcome_seen_at: new Date().toISOString() } as any).eq("id", user.id);
+    const intent = arrivalIntentFor(user.role, entraideIntent);
+    const { error } = await supabase.from("profiles").update({ arrival_welcome_seen_at: new Date().toISOString(), arrival_intent: intent } as any).eq("id", user.id);
     if (error) { setSaving(false); setFailed(true); return; }
     trackArrival("completed", "C4");
     try { localStorage.removeItem(SIGNUP_INTENT_KEY); } catch { /* rien */ }
     void Promise.resolve(refreshProfile?.()).catch(() => {});
-    navigate(user.role === "owner" ? `/arrivee/vous?next=${encodeURIComponent(next)}` : next, { replace: true });
+    navigate(afterWelcome(intent, next), { replace: true });
   };
 
   if (!user || alreadySeen !== false) return null;

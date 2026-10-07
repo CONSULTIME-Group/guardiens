@@ -55,6 +55,7 @@ export const SKILL_CATEGORIES: readonly SkillCategory[] = [
       "Informatique",
       "Aide aux devoirs",
       "Photographie",
+      "Jeux de société",
     ],
   },
   {
@@ -67,6 +68,8 @@ export const SKILL_CATEGORIES: readonly SkillCategory[] = [
       "Aide administrative",
       "Transport",
       "Ménage occasionnel",
+      "Courses",
+      "Trajets en voiture",
     ],
   },
 ] as const;
@@ -99,7 +102,7 @@ const KEYWORDS: Record<SkillCategoryKey, RegExp[]> = {
     /diplôme|dipl[ôo]me|certif/i,
   ],
   coups_de_main: [
-    /courses|livraison|transport|chauffeur|covoit/i,
+    /courses|livraison|transport|chauffeur|covoit|trajet/i,
     /m[ée]nage|repassage|linge/i,
     /bricolage|r[ée]paration|montage|d[ée]m[ée]nagement|peinture mur|plomberie|[ée]lectricit/i,
     /accompagn|aide.*(pers|[âa]g[ée])/i,

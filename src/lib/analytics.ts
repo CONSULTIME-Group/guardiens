@@ -30,6 +30,9 @@ export type EventType =
   | "signup_mailbox_opened"          // C3 : bouton messagerie (provider)
   | "arrival_owner_period_selected"  // P2 (periode)
   | "arrival_owner_also_selected"    // P4 (garder, coup_de_main)
+  | "arrival_install_clicked"        // N1 (lot 2)
+  | "arrival_push_enabled"           // N1 (nearby)
+  | "arrival_push_skipped"           // N1
   | "push_disabled"
   | "push_test_requested"
   | "push_test_result"

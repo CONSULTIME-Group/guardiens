@@ -175,7 +175,7 @@ describe("Parcours propriétaire v2", () => {
     expect(screen.queryByTestId("arrival-published")).toBeNull();
   });
 
-  it("P4 garder : change_user_role vers both puis bloc gardien", async () => {
+  it("P4 garder : change_user_role vers both puis G2", async () => {
     search = new URLSearchParams({ sit: "s1" });
     const { default: ArriveeAussi } = await import("@/pages/arrival/ArriveeAussi");
     R(<ArriveeAussi />);
@@ -183,16 +183,16 @@ describe("Parcours propriétaire v2", () => {
     expect(cont).toHaveProperty("disabled", true);
     fireEvent.click(screen.getByRole("button", { name: /Garder des maisons/ }));
     fireEvent.click(cont);
-    await waitFor(() => expect(navigateMock).toHaveBeenCalledWith(`/onboarding/affinity?redirect=${encodeURIComponent("/sits/s1")}`));
+    await waitFor(() => expect(navigateMock).toHaveBeenCalledWith("/arrivee/garder?flow=owner&sit=s1"));
     expect(rpcCalls.find((c) => c.fn === "change_user_role")?.args).toEqual({ p_user_id: "u1", p_new_role: "both" });
   });
 
-  it("P4 coup de main : available_for_help puis savoir-faire", async () => {
+  it("P4 coup de main : available_for_help puis G4", async () => {
     const { default: ArriveeAussi } = await import("@/pages/arrival/ArriveeAussi");
     R(<ArriveeAussi />);
     fireEvent.click(screen.getByRole("button", { name: /Donner un coup de main/ }));
     fireEvent.click(screen.getByRole("button", { name: "Continuer" }));
-    await waitFor(() => expect(navigateMock).toHaveBeenCalledWith("/profile?section=competences"));
+    await waitFor(() => expect(navigateMock).toHaveBeenCalledWith("/arrivee/savoir-faire?flow=owner&aide=1"));
     expect(writes.find((w) => w.table === "profiles")?.row).toEqual({ available_for_help: true });
   });
 });

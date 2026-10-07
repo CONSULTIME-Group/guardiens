@@ -4,12 +4,19 @@ import { Suspense, type ComponentType, type ReactNode } from "react";
 import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
 import { useLocation } from "react-router-dom";
 
+const S = () => import("./ArrivalSitterScreens");
 const SCREENS = {
   "/bienvenue": lazy(() => import("./Bienvenue")),
   "/arrivee/vous": lazy(() => import("./ArriveeVous")),
   "/arrivee/depart": lazy(() => import("./ArriveeDepart")),
   "/arrivee/affinites": lazy(() => import("./ArriveeAffinites")),
   "/arrivee/aussi": lazy(() => import("./ArriveeAussi")),
+  "/arrivee/garder": lazy(() => S().then((m) => ({ default: m.G2 }))),
+  "/arrivee/vous-connaitre": lazy(() => S().then((m) => ({ default: m.G3 }))),
+  "/arrivee/savoir-faire": lazy(() => S().then((m) => ({ default: m.G4 }))),
+  "/arrivee/application": lazy(() => S().then((m) => ({ default: m.N1 }))),
+  "/arrivee/premier-pas": lazy(() => S().then((m) => ({ default: m.G5 }))),
+  "/arrivee/entraide": lazy(() => S().then((m) => ({ default: m.E1 }))),
   "*": lazy(() => import("@/pages/NotFound")),
 } as const;
 

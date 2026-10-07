@@ -46,18 +46,23 @@ export function Gouache({ src, className = "", size = 160 }: { src: string; clas
 export type OwnerStepKey = "you" | "departure" | "listing" | "affinities";
 const OWNER_STEPS: OwnerStepKey[] = ["you", "departure", "listing", "affinities"];
 
-export function OwnerStepBar({ current }: { current: OwnerStepKey }) {
+export type SitterStepKey = "you" | "affinities" | "skills" | "first";
+const SITTER_STEPS: SitterStepKey[] = ["you", "affinities", "skills", "first"];
+const ENTRAIDE_STEPS: SitterStepKey[] = ["you", "first"];
+
+function StepBar({ keys, current, ns }: { keys: string[]; current: string; ns: string }) {
   const t = useArrivalT();
-  const idx = OWNER_STEPS.indexOf(current);
+  const idx = keys.indexOf(current);
+  const cols = { gridTemplateColumns: `repeat(${keys.length}, 1fr)` };
   return (
-    <div className="space-y-1.5" aria-label={t(`arrival.steps.${current}`)}>
-      <div className="arrival-stepbar">
-        {OWNER_STEPS.map((s, i) => <span key={s} data-done={i <= idx ? "true" : "false"} />)}
+    <div className="space-y-1.5" aria-label={t(`arrival.${ns}.${current}`)}>
+      <div className="arrival-stepbar" style={cols}>
+        {keys.map((s, i) => <span key={s} data-done={i <= idx ? "true" : "false"} />)}
       </div>
-      <ol className="grid grid-cols-4 gap-1.5 text-[11px] text-muted-foreground">
-        {OWNER_STEPS.map((s, i) => (
+      <ol className="grid gap-1.5 text-[11px] text-muted-foreground" style={cols}>
+        {keys.map((s, i) => (
           <li key={s} className={i === idx ? "font-semibold text-foreground" : ""} aria-current={i === idx ? "step" : undefined}>
-            {t(`arrival.steps.${s}`)}
+            {t(`arrival.${ns}.${s}`)}
           </li>
         ))}
       </ol>
@@ -65,16 +70,34 @@ export function OwnerStepBar({ current }: { current: OwnerStepKey }) {
   );
 }
 
-export function ArrivalShell({ header, children, stepBar }: { header: string; children: ReactNode; stepBar?: OwnerStepKey }) {
+export const OwnerStepBar = ({ current }: { current: OwnerStepKey }) => <StepBar keys={OWNER_STEPS} current={current} ns="steps" />;
+
+export function ArrivalShell({ header, children, stepBar, sitterStep }: {
+  header: string; children: ReactNode; stepBar?: OwnerStepKey; sitterStep?: { current: SitterStepKey; entraide?: boolean };
+}) {
   return (
     <main className="arrival-root min-h-screen min-w-0">
       <div className="mx-auto w-full max-w-md px-5 pb-16 pt-6 space-y-6">
         <p className="text-center text-sm text-muted-foreground">{header}</p>
         {stepBar && <OwnerStepBar current={stepBar} />}
+        {sitterStep && <StepBar keys={sitterStep.entraide ? ENTRAIDE_STEPS : SITTER_STEPS} current={sitterStep.current} ns="steps_sitter" />}
         {children}
       </div>
     </main>
   );
+}
+
+/** Envoi de l'avatar, même chemin que la modale d'accueil (bucket avatars). */
+export async function uploadAvatar(userId: string, file: File): Promise<string> {
+  const { supabase } = await import("@/integrations/supabase/client");
+  const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+  const path = `${userId}/avatar.${ext}`;
+  const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true, contentType: file.type || undefined });
+  if (error) throw error;
+  const url = `${supabase.storage.from("avatars").getPublicUrl(path).data.publicUrl}?t=${Date.now()}`;
+  const { error: e2 } = await supabase.from("profiles").update({ avatar_url: url }).eq("id", userId);
+  if (e2) throw e2;
+  return url;
 }
 
 /** Choix multiple : bouton type="button" avec aria-pressed. */

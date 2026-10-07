@@ -4,7 +4,7 @@
  */
 import { finishUrl, type DeparturePeriod } from "../../supabase/functions/_shared/owner-departure-logic.ts";
 
-export type ArrivalStep = "C1" | "C2" | "C3" | "C4" | "P1" | "P2" | "P3" | "P4";
+export type ArrivalStep = "C1" | "C2" | "C3" | "C4" | "P1" | "P2" | "P3" | "P4" | "G1" | "G2" | "G3" | "G4" | "G5" | "N1" | "E1";
 
 export { isArrivalV2Account, ARRIVAL_FLAG, arrivalAppliesToNewSignup } from "./arrivalFlag";
 
@@ -98,9 +98,129 @@ export const welcomeUsesOrder = (entraideFirst: boolean): WelcomeUse[] =>
 export const canSkipP1 = (o: { firstName?: string | null; city?: string | null; hasProperty: boolean }) =>
   (o.firstName ?? "").trim().length >= 2 && (o.city ?? "").trim().length > 0 && o.hasProperty;
 
-/** Enchaînement P4 : garder d'abord, coup de main ensuite, puis l'annonce. */
-export function alsoNextSteps(o: { garder: boolean; coupDeMain: boolean; sitPath: string }): string {
-  const after = o.coupDeMain ? `/profile?section=competences` : o.sitPath;
-  if (o.garder) return `/onboarding/affinity?redirect=${encodeURIComponent(after)}`;
-  return after;
+// ── Lot 2 : parcours gardien, entraide, application ──────────────────────
+export type ArrivalIntent = "owner" | "sitter" | "entraide";
+export type ArrivalFlow = "owner" | "sitter" | "entraide";
+
+/** Intention écrite en C4 : entraide si choisie en C1, sinon le rôle. */
+export function arrivalIntentFor(role: string | null | undefined, entraide: boolean): ArrivalIntent | null {
+  if (entraide) return "entraide";
+  return role === "owner" ? "owner" : role === "sitter" ? "sitter" : null;
+}
+
+const DEFAULT_NEXTS = ["/dashboard", "/sits/create?source=signup", "/"];
+/** Vrai si `next` est une redirection d'origine (ex. /annonces/<id>), pas une destination par défaut. */
+export function isExplicitNext(next: string | null | undefined): boolean {
+  if (!next) return false;
+  return !DEFAULT_NEXTS.includes(next) && !/^\/(bienvenue|arrivee|onboarding)(\/|\?|$)/.test(next);
+}
+
+/** Paramètres transportés d'un écran à l'autre. */
+export interface ArrivalCarry { flow: ArrivalFlow; next?: string | null; sit?: string | null; aide?: boolean }
+export function arrivalUrl(path: string, c: ArrivalCarry): string {
+  const q = new URLSearchParams({ flow: c.flow });
+  if (c.next) q.set("next", c.next);
+  if (c.sit) q.set("sit", c.sit);
+  if (c.aide) q.set("aide", "1");
+  return `${path}?${q.toString()}`;
+}
+export function readCarry(p: URLSearchParams, fallbackFlow: ArrivalFlow = "sitter"): ArrivalCarry {
+  const f = p.get("flow");
+  const flow: ArrivalFlow = f === "owner" || f === "entraide" || f === "sitter" ? f : fallbackFlow;
+  const rawNext = p.get("next");
+  return { flow, next: rawNext ? safeNext(rawNext) : null, sit: p.get("sit"), aide: p.get("aide") === "1" };
+}
+
+/** C4 « Faisons connaissance » : destination selon l'intention. */
+export function afterWelcome(intent: ArrivalIntent | null, next: string): string {
+  if (!intent) return next;
+  if (intent === "owner") return `/arrivee/vous?next=${encodeURIComponent(next)}`;
+  return arrivalUrl("/arrivee/vous", { flow: intent, next: isExplicitNext(next) ? next : null });
+}
+
+/** G1 sautée si prénom et commune existent déjà. */
+export const canSkipG1 = (o: { firstName?: string | null; city?: string | null }) =>
+  (o.firstName ?? "").trim().length >= 2 && (o.city ?? "").trim().length > 0;
+
+/** Après G1 : G2 pour un gardien, redirection d'origine ou E1 pour l'entraide. */
+export function afterG1(c: ArrivalCarry): string {
+  if (c.flow === "entraide") return c.next ?? "/arrivee/entraide";
+  return arrivalUrl("/arrivee/garder", c);
+}
+/** Après G3 : redirection d'origine pour un gardien, G4 sinon ; propriétaire : G4 si coup de main, sinon N1. */
+export function afterG3(c: ArrivalCarry): string {
+  if (c.flow === "owner") return c.aide ? arrivalUrl("/arrivee/savoir-faire", c) : arrivalUrl("/arrivee/application", c);
+  if (c.next) return c.next;
+  return arrivalUrl("/arrivee/savoir-faire", c);
+}
+export const afterG4 = (c: ArrivalCarry) => arrivalUrl("/arrivee/application", c);
+/** Après N1 : premier pas pour un gardien, l'annonce ou le tableau de bord pour un propriétaire. */
+export function afterN1(c: ArrivalCarry): string {
+  if (c.flow === "owner") return c.sit ? `/sits/${c.sit}` : "/dashboard";
+  if (c.flow === "entraide") return c.next ?? "/arrivee/entraide";
+  return c.next ?? "/arrivee/premier-pas";
+}
+
+/** P4 du lot 1 : « Garder » vers G2 puis G3, « Coup de main » vers G4. */
+export function alsoNextSteps(o: { garder: boolean; coupDeMain: boolean; sit: string | null }): string {
+  const c: ArrivalCarry = { flow: "owner", sit: o.sit, aide: o.coupDeMain };
+  if (o.garder) return arrivalUrl("/arrivee/garder", c);
+  return arrivalUrl("/arrivee/savoir-faire", c);
+}
+
+// ── G2 ───────────────────────────────────────────────────────────────────
+export const ARRIVAL_ANIMALS = ["Tous", "Chiens", "Chats", "Chevaux", "Oiseaux", "Animaux de ferme", "NAC"];
+/** « Tous » coche l'ensemble ; décocher une espèce retire « Tous ». */
+export function toggleAnimals(current: string[], next: string[]): string[] {
+  const addedAll = next.includes("Tous") && !current.includes("Tous");
+  const removedAll = !next.includes("Tous") && current.includes("Tous");
+  if (addedAll) return [...ARRIVAL_ANIMALS];
+  if (removedAll) return [];
+  const species = ARRIVAL_ANIMALS.filter((a) => a !== "Tous");
+  if (current.includes("Tous") && next.length < current.length) return next.filter((a) => a !== "Tous");
+  return species.every((s) => next.includes(s)) ? [...ARRIVAL_ANIMALS] : next;
+}
+export const ARRIVAL_WORK_OPTIONS: { value: string; label: string }[] = [
+  { value: "full_remote", label: "Sur place, en télétravail toute la journée" },
+  { value: "partial_remote", label: "En télétravail une partie de la journée" },
+  { value: "on_site", label: "Sur place et disponible toute la journée" },
+  { value: "out_daytime", label: "Dehors la journée, là le soir et la nuit" },
+  { value: "flexible", label: "Je m'adapte au rythme de la maison" },
+];
+export const ARRIVAL_SITTER_TYPE_OPTIONS: { value: string; label: string }[] = [
+  { value: "Solo", label: "Seul·e" },
+  { value: "Couple", label: "En couple" },
+  { value: "Famille", label: "En famille" },
+  { value: "Retraité", label: "À la retraite" },
+];
+export const ARRIVAL_SITTER_LANGUAGES = ["Français", "Anglais", "Espagnol", "Italien", "Allemand"];
+
+// ── N1 ───────────────────────────────────────────────────────────────────
+export const N1_PENDING_KEY = "guardiens_arrival_n1_pending";
+export type N1Mode = "skip" | "ios-install" | "activate";
+export function n1Mode(o: { support: "supported" | "ios-install" | "unsupported"; subscribed: boolean }): N1Mode {
+  if (o.support === "unsupported" || o.subscribed) return "skip";
+  return o.support === "ios-install" ? "ios-install" : "activate";
+}
+
+// ── G5 ───────────────────────────────────────────────────────────────────
+export const FIRST_STEP_RADIUS_KM = 30;
+export interface FirstStepSit { id: string; distanceKm: number | null }
+/** Trie par distance (sans coordonnée en dernier), n'élimine jamais. */
+export function pickFirstSteps<T extends FirstStepSit>(sits: T[], radiusKm = FIRST_STEP_RADIUS_KM) {
+  const sorted = [...sits].sort((a, b) => (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity));
+  const near = sorted.filter((s) => s.distanceKm != null && s.distanceKm <= radiusKm);
+  return { hasNear: near.length > 0, best: near[0] ?? null, nearCount: near.length, total: sits.length, closest: sorted.slice(0, 2) };
+}
+
+/** Nombre d'étapes pour atteindre le seuil de candidature (les plus lourdes d'abord). */
+export function stepsToReach(score: number, missingPoints: number[], threshold: number): number {
+  if (score >= threshold) return 0;
+  let s = score;
+  let n = 0;
+  for (const p of [...missingPoints].sort((a, b) => b - a)) {
+    s += p; n++;
+    if (s >= threshold) return n;
+  }
+  return n;
 }

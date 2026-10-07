@@ -86,9 +86,8 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
   // est différée au premier retour sur une autre page, tableau de bord compris.
   const isSitCreateTunnel = location.pathname.startsWith("/sits/create");
 
-  // Lot 1 : un propriétaire passé par /bienvenue (arrivée v2) ne voit jamais la modale.
-  const arrivalWelcomeSeen = useArrivalWelcomeSeen(user?.role === "owner" ? user?.id : null);
-  const isArrivalV2Owner = user?.role === "owner" && arrivalWelcomeSeen;
+  // Lots 1 et 2 : un compte passé par /bienvenue (arrivée v2) ne voit jamais la modale.
+  const isArrivalV2Owner = useArrivalWelcomeSeen(user?.id);
   const isArrivalPath = location.pathname.startsWith("/bienvenue") || location.pathname.startsWith("/arrivee/");
   const showOnboarding = !dismissed && !isProContext && !isSitCreateTunnel && !isArrivalV2Owner && !isArrivalPath && (isTour || needsMinimal || needsOnboarding);
 

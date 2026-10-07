@@ -24,6 +24,7 @@ const ArriveeAussi = () => {
   const sitId = params.get("sit");
   const redirect = sanitizeRedirect(params.get("redirect"));
   const sitPath = sitId ? `/sits/${sitId}` : redirect || "/dashboard";
+  const sitRef = sitId ?? null;
   const [garder, setGarder] = useState(false);
   const [aide, setAide] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -46,7 +47,7 @@ const ArriveeAussi = () => {
     void trackEvent("arrival_owner_also_selected", { source: "/arrivee/aussi", metadata: { garder, coup_de_main: aide } });
     trackArrival("completed", "P4");
     await Promise.resolve(refreshProfile?.()).catch(() => {});
-    navigate(alsoNextSteps({ garder, coupDeMain: aide, sitPath }));
+    navigate(alsoNextSteps({ garder, coupDeMain: aide, sit: sitRef }));
   };
 
   if (!user) return null;
