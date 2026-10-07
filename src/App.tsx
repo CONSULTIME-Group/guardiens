@@ -84,7 +84,7 @@ const Register = lazy(() => import("./pages/Register"), "Register");
 const NotFound = lazy(() => import("./pages/NotFound"), "NotFound");
 const AuthConfirm = lazy(() => import("./pages/AuthConfirm"), "AuthConfirm");
 // Lot 1, parcours d'arrivée v2 : écrans chargés à la demande, hors entrée.
-const ArrivalRoutes = lazy(() => import("./pages/arrival/ArrivalRoutes"), "ArrivalRoutes");
+const ArrivalRoutes = lazy(() => import("./pages/arrival/ArrivalRoutes"));
 
 // Dashboard est lazy : il tire OngoingSitHero, MonAnnonceCard et tout le
 // graphe propriétaire (~40Ko de chunks). Inutile sur /login, /landing, etc.
@@ -557,8 +557,8 @@ const AppRoutes = () => {
       <Route path="/annonces/:id" element={<PublicSitDetail />} />
       <Route path="/gardiens/:id" element={<PublicSitterProfile />} />
       <Route path="/onboarding/affinity" element={<ProtectedRoute><OnboardingAffinity /></ProtectedRoute>} />
-      <Route path="/bienvenue" element={<ProtectedRoute><ArrivalRoutes /></ProtectedRoute>} />
-      <Route path="/arrivee/*" element={<ProtectedRoute><ArrivalRoutes /></ProtectedRoute>} />
+      <Route path="/bienvenue" element={<ArrivalRoutes g={ProtectedRoute} />} />
+      <Route path="/arrivee/*" element={<ArrivalRoutes g={ProtectedRoute} />} />
 
       <Route path="/projets" element={<PublicShellRoute><ProjetsListing /></PublicShellRoute>} />
       <Route path="/projets/publier" element={<ProtectedRoute><CreateProjet /></ProtectedRoute>} />

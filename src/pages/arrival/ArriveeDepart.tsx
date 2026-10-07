@@ -9,17 +9,16 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchMyProfile } from "@/lib/myProfile";
 import { trackEvent } from "@/lib/analytics";
-import { OWNER_SIGNUP_TUNNEL_TARGET } from "@/lib/postAuthTarget";
 import { PERIOD_LABEL, arrivalCreateUrl, resolveProximity, safeNext, upcomingPeriods } from "@/lib/arrival";
 import { ArrivalShell, Eyebrow, Gouache, trackArrival, useArrivalT, useArrivalViewed } from "@/components/arrival/ArrivalUI";
-import depart from "@/assets/illustrations/howto-step-3-depart-224.webp";
+const depart = new URL("../../assets/illustrations/howto-step-3-depart-224.webp", import.meta.url).href;
 
 const ArriveeDepart = () => {
   const t = useArrivalT();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [params] = useSearchParams();
-  const next = safeNext(params.get("next"), OWNER_SIGNUP_TUNNEL_TARGET);
+  const next = safeNext(params.get("next"), "/sits/create?source=signup");
   const spaceHref = next.startsWith("/sits/create") ? "/dashboard" : next;
   const [name, setName] = useState("");
   const [city, setCity] = useState("");

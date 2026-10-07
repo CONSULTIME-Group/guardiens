@@ -16,6 +16,7 @@ import { useOwnerProfile } from "@/hooks/useOwnerProfile";
 import { formatCityLabel } from "@/lib/cityLabel";
 
 import OnboardingWelcome from "./OnboardingWelcome";
+import { useArrivalWelcomeSeen } from "@/hooks/useArrivalWelcomeSeen";
 import NearbyEmergencySitters from "./NearbyEmergencySitters";
 import DashboardSkeleton from "@/components/skeletons/DashboardSkeleton";
 import { differenceInDays } from "date-fns";
@@ -67,6 +68,8 @@ import { trackEvent } from "@/lib/analytics";
 
 const OwnerDashboard = () => {
   const { user } = useAuth();
+  // Lot 1 : propriétaire passé par /bienvenue, jamais OnboardingWelcome.
+  const arrivalWelcomeSeen = useArrivalWelcomeSeen(user?.id);
   const { shouldShow: showAlmaFirstMeeting, markSeen: markAlmaFirstMeetingSeen } = useAlmaFirstMeeting();
 
   /* ── Data fetching ── */
@@ -286,7 +289,7 @@ const OwnerDashboard = () => {
   if (error) return <DashboardLoadError onRetry={reload} detail={error} />;
 
   // Lot 1 : jamais pour un propriétaire passé par /bienvenue (arrivée v2).
-  if (showOnboarding && user?.onboardingMinimalCompleted && !user?.arrivalWelcomeSeenAt) {
+  if (showOnboarding && user?.onboardingMinimalCompleted && !arrivalWelcomeSeen) {
     return (
       <OnboardingWelcome
         role="owner"

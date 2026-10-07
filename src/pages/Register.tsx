@@ -25,9 +25,15 @@ import { lovable } from "@/integrations/lovable";
 import { startOAuthFlow, logOAuthStage, endOAuthFlow } from "@/lib/oauthLogger";
 import { detectSignupIntent, roleForSignupIntent, signupIntentBannerKey } from "@/lib/signupIntent";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
-import { ARRIVAL_FLAG, arrivalAppliesToNewSignup } from "@/lib/arrival";
-import { ArrivalC1, ArrivalC2Header, ArrivalC3 } from "@/components/arrival/RegisterArrivalParts";
-import { trackArrival } from "@/components/arrival/ArrivalUI";
+import { ARRIVAL_FLAG, arrivalAppliesToNewSignup } from "@/lib/arrivalFlag";
+import { Suspense } from "react";
+import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
+// Lot 1 : écrans C1 à C3 chargés seulement drapeau allumé.
+const ArrivalC1 = lazy(() => import("@/components/arrival/RegisterArrivalParts").then((m) => ({ default: m.ArrivalC1 })));
+const ArrivalC2Header = lazy(() => import("@/components/arrival/RegisterArrivalParts").then((m) => ({ default: m.ArrivalC2Header })));
+const ArrivalC3 = lazy(() => import("@/components/arrival/RegisterArrivalParts").then((m) => ({ default: m.ArrivalC3 })));
+const trackArrival = (kind: "viewed" | "completed", step: "C1" | "C2") =>
+  void trackEvent(kind === "viewed" ? "arrival_step_viewed" : "arrival_step_completed", { source: "arrival", metadata: { step } });
 import {
  Dialog,
  DialogContent,
@@ -546,13 +552,13 @@ const Register = () => {
  <InAppBrowserBanner className="mb-4 lg:mb-6" />
 
  {step === "confirmation" && v2 && (
-  <ArrivalC3
+  <Suspense fallback={null}><ArrivalC3
    email={email}
    onResend={handleResendEmail}
    resendDisabled={isResending || resendCooldown > 0}
    cooldown={resendCooldown}
    onFixEmail={() => { setStep(2); setResendCount(0); setResendCooldown(0); }}
-  />
+  /></Suspense>
  )}
 
  {step === "confirmation" && !v2 && (
@@ -643,7 +649,7 @@ const Register = () => {
  )}
 
   {step === 1 && v2 && (
-   <ArrivalC1
+   <Suspense fallback={null}><ArrivalC1
     selected={selectedRole}
     loginHref={`/login${buildRedirectQuery(redirectTarget)}`}
     onSelect={(r) => {
@@ -668,7 +674,7 @@ const Register = () => {
      trackArrival("completed", "C1");
      setStep(2);
     }}
-   />
+   /></Suspense>
   )}
 
   {step === 1 && !v2 && (
@@ -722,10 +728,10 @@ const Register = () => {
   {step === 2 && (
   <form onSubmit={handleSubmit} className="space-y-5 animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
   {v2 && (
-   <ArrivalC2Header
+   <Suspense fallback={null}><ArrivalC2Header
     recap={entraideIntent ? t("arrival.c2.entraide_recap") : selectedRole === "owner" ? t("arrival.c1.owner_title") : selectedRole === "sitter" ? t("arrival.c1.sitter_title") : (roles.find((r) => r.value === selectedRole)?.label ?? "")}
     onModify={() => setStep(1)}
-   />
+   /></Suspense>
   )}
   {intentBannerKey && (
    <div className="rounded-lg border border-terra-border/60 bg-terra-soft/60 px-4 py-3 text-sm text-foreground">

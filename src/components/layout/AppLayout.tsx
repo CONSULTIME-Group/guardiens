@@ -8,6 +8,7 @@ const AlmaDock = lazy(() =>
 );
 import { AlmaProvider } from "@/contexts/AlmaContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useArrivalWelcomeSeen } from "@/hooks/useArrivalWelcomeSeen";
 const OnboardingModal = lazy(() => import("@/components/onboarding/OnboardingModal"));
 import OnboardingGate from "@/components/onboarding/OnboardingGate";
 // DuplicateAccountGuard est monté globalement dans App.tsx pour s'exécuter
@@ -86,7 +87,8 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
   const isSitCreateTunnel = location.pathname.startsWith("/sits/create");
 
   // Lot 1 : un propriétaire passé par /bienvenue (arrivée v2) ne voit jamais la modale.
-  const isArrivalV2Owner = user?.role === "owner" && !!user?.arrivalWelcomeSeenAt;
+  const arrivalWelcomeSeen = useArrivalWelcomeSeen(user?.role === "owner" ? user?.id : null);
+  const isArrivalV2Owner = user?.role === "owner" && arrivalWelcomeSeen;
   const isArrivalPath = location.pathname.startsWith("/bienvenue") || location.pathname.startsWith("/arrivee/");
   const showOnboarding = !dismissed && !isProContext && !isSitCreateTunnel && !isArrivalV2Owner && !isArrivalPath && (isTour || needsMinimal || needsOnboarding);
 

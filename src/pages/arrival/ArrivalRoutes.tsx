@@ -1,24 +1,24 @@
-/** Lot 1 : un seul module à la demande pour /bienvenue et /arrivee/*. */
+/** Lot 1 : un seul point d'entrée à la demande pour /bienvenue et /arrivee/*,
+ * chaque écran chargé à son tour (aucune liste de dépendances dans l'entrée). */
+import { Suspense, type ComponentType, type ReactNode } from "react";
+import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
 import { useLocation } from "react-router-dom";
-import Bienvenue from "./Bienvenue";
-import ArriveeVous from "./ArriveeVous";
-import ArriveeDepart from "./ArriveeDepart";
-import ArriveeAffinites from "./ArriveeAffinites";
-import ArriveeAussi from "./ArriveeAussi";
-import NotFound from "@/pages/NotFound";
 
-const SCREENS: Record<string, () => JSX.Element | null> = {
-  "/bienvenue": Bienvenue,
-  "/arrivee/vous": ArriveeVous,
-  "/arrivee/depart": ArriveeDepart,
-  "/arrivee/affinites": ArriveeAffinites,
-  "/arrivee/aussi": ArriveeAussi,
-};
+const SCREENS = {
+  "/bienvenue": lazy(() => import("./Bienvenue")),
+  "/arrivee/vous": lazy(() => import("./ArriveeVous")),
+  "/arrivee/depart": lazy(() => import("./ArriveeDepart")),
+  "/arrivee/affinites": lazy(() => import("./ArriveeAffinites")),
+  "/arrivee/aussi": lazy(() => import("./ArriveeAussi")),
+  "*": lazy(() => import("@/pages/NotFound")),
+} as const;
 
-const ArrivalRoutes = () => {
+/** `g` : garde d'authentification de App.tsx (ProtectedRoute), passée en prop pour alléger l'entrée. */
+const ArrivalRoutes = ({ g: Guard }: { g: ComponentType<{ children: ReactNode }> }) => {
   const { pathname } = useLocation();
-  const Screen = SCREENS[pathname.replace(/\/+$/, "")] ?? NotFound;
-  return <Screen />;
+  const key = pathname.replace(/\/+$/, "") as keyof typeof SCREENS;
+  const Screen = SCREENS[key] ?? SCREENS["*"];
+  return <Guard><Suspense fallback={null}><Screen /></Suspense></Guard>;
 };
 
 export default ArrivalRoutes;
