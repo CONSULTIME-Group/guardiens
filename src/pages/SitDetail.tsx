@@ -14,6 +14,7 @@ import Head from "@/components/seo/Head";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { geocodeCity } from "@/lib/geocode";
+import { loadSitLocationLabel } from "@/lib/sitLocationLoad";
 import SitDetailSkeleton from "@/components/skeletons/SitDetailSkeleton";
 import OwnerSitView from "@/components/sits/views/OwnerSitView";
 import { IncompleteProfileBadge } from "@/components/sits/IncompleteProfileBadge";
