@@ -24,3 +24,5 @@
 - Push : version de public/push-sw.js confirmée par la page avant activation, test ou annonces proches ; un budget unique dans dispatch-web-push ; dédup push_nearby_jobs sans purge ; pourquoi : un ancien worker afficherait un faux message.
 
 - Fond du hero avant React (lot P5) : #boot-hero statique dans index.html (photo et voile seuls, sous le header de 77 px), retiré par script inline hors "/" ou si session, par Landing au montage, garde-fou 15 s ; pourquoi : LCP peint au parse sans toucher à l entrée JS.
+
+- Photos du logement (lot L2) : owner_gallery est la source unique ; properties.photos et properties.cover_photo_url n'acceptent que des URL de la galerie du propriétaire (trg_guard_property_photos_in_gallery), une suppression en galerie retire la photo du logement et remplace les couvertures par la suivante (trg_sync_owner_gallery_delete), fichier supprimé seulement si owner_photo_still_referenced est faux ; pourquoi : une photo envoyée hors Galerie devenait introuvable et impossible à supprimer.

@@ -45,6 +45,7 @@ import {
   type ViewerState,
 } from "../_shared/alma-owner-question.ts";
 import { deptCodeFromPostal, sitCommune, sitLocationLabel } from "../_shared/sit-location.ts";
+import { detectHomePhotoQuestion, HOME_PHOTO_ACTION, HOME_PHOTO_ANSWER } from "../_shared/alma-home-photo.ts";
 
 const SPECIES_FR: Record<string, string> = {
   dog: "chien", cat: "chat", horse: "cheval", bird: "oiseau", rodent: "rongeur",
@@ -296,6 +297,33 @@ Deno.serve(async (req) => {
         answer: direct,
         remaining: Math.max(0, ALMA_CHAT_DAILY_LIMIT - ((count ?? 0) + 1)),
         ...(human ? { human_contact: true } : {}),
+        ...(conversationId ? { conversation_id: conversationId } : {}),
+        ...(isReplay ? { replay_meta: { register, classification, confirmed_sit: false } } : {}),
+      });
+    }
+    // Lot L2 : photo du logement, une seule adresse, la Galerie.
+    if (detectHomePhotoQuestion(message)) {
+      const classification: AlmaClassification = { ...classificationFromPatterns(intent), unanswered: false };
+      const homeAction = { label: HOME_PHOTO_ACTION.label, path: HOME_PHOTO_ACTION.path };
+      const conversationId = await logConversation({
+        user_id: userId,
+        surface,
+        active_role: activeRole,
+        input_mode: inputMode,
+        question: message,
+        answer: HOME_PHOTO_ANSWER,
+        register,
+        refusal_reason: null,
+        latency_ms: Date.now() - startedAt,
+        sources_count: 0,
+        classification,
+        proposed_action: { ...homeAction, reason: HOME_PHOTO_ACTION.reason },
+      });
+      await raiseSignals(classification, conversationId);
+      return json({
+        answer: HOME_PHOTO_ANSWER,
+        remaining: Math.max(0, ALMA_CHAT_DAILY_LIMIT - ((count ?? 0) + 1)),
+        action: homeAction,
         ...(conversationId ? { conversation_id: conversationId } : {}),
         ...(isReplay ? { replay_meta: { register, classification, confirmed_sit: false } } : {}),
       });

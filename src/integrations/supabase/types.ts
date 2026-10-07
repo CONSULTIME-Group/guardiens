@@ -1397,6 +1397,30 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_l2_photos_20261007: {
+        Row: {
+          backed_up_at: string
+          cover_photo_url: string | null
+          photos: string[] | null
+          property_id: string
+          user_id: string
+        }
+        Insert: {
+          backed_up_at?: string
+          cover_photo_url?: string | null
+          photos?: string[] | null
+          property_id: string
+          user_id: string
+        }
+        Update: {
+          backed_up_at?: string
+          cover_photo_url?: string | null
+          photos?: string[] | null
+          property_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       _backup_mission_conv_link_20260927: {
         Row: {
           id: string | null
@@ -13475,6 +13499,14 @@ export type Database = {
       open_mission_response_conversation: {
         Args: { p_response_id: string }
         Returns: string
+      }
+      owner_gallery_next_cover: {
+        Args: { p_created: string; p_position: number; p_user: string }
+        Returns: string
+      }
+      owner_photo_still_referenced: {
+        Args: { p_url: string }
+        Returns: boolean
       }
       patch_my_email_preferences: {
         Args: {
