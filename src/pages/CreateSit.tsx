@@ -1,3 +1,5 @@
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
+import { isArrivalV2Account } from "@/lib/arrival";
 import { clearPublishIntent } from "@/lib/postOnboardingIntent";
 import { useState, useEffect, useRef, useCallback, type MouseEvent as ReactMouseEvent } from "react";
 import ExpectationSuggestions from "@/components/sits/create/ExpectationSuggestions";
@@ -560,6 +562,8 @@ const CreateSit = () => {
   const [profilePostalCode, setProfilePostalCode] = useState<string>("");
   const [profileCountry, setProfileCountry] = useState<string>("FR");
   const [profileCreatedAt, setProfileCreatedAt] = useState<string | null>(null);
+  const arrivalFlag = useFeatureFlag("arrival_v2");
+  const arrivalV2Account = isArrivalV2Account(arrivalFlag, profileCreatedAt);
   const [loading, setLoading] = useState(true);
   const [publishing, setPublishing] = useState(false);
   const [isRepublish, setIsRepublish] = useState(false);
@@ -1782,7 +1786,13 @@ const CreateSit = () => {
         void trackEvent("sits_express_published", { source: "/sits/create", metadata: { period: expressParams.period, sit_id: sitId } });
       }
       toast({ title: "Annonce publiée", description: "Les gardiens peuvent maintenant postuler." });
-      navigate(`/sits/${sitId}`);
+      // Lot 1 (arrivée v2) : une première annonce express publiée depuis
+      // l'inscription enchaîne sur les affinités (P3) au lieu de la fiche.
+      navigate(
+        arrivalV2Account && expressActiveRef.current && searchParams.get("source") === "signup"
+          ? `/arrivee/affinites?sit=${sitId}`
+          : `/sits/${sitId}`,
+      );
     } catch (err: any) {
       // Le texte renvoyé par la base est technique et en anglais : il reste en
       // console, l'utilisateur reçoit une phrase compréhensible.
@@ -1876,7 +1886,9 @@ const CreateSit = () => {
     hasProperty: !!property,
     hasPets: pets.length > 0,
     // En express, la photo devient le geste 1 : elle n'est plus un prérequis d'entrée.
-    hasPhoto: expressParams.express ? true : hasPhoto,
+    // Lot 1 : compte arrivée v2 sorti de P1 (prénom, commune, logement) :
+    // aucun écran de mise en route, la photo vient en premier geste.
+    hasPhoto: expressParams.express || arrivalV2Account ? true : hasPhoto,
     hasIdentity: isIdentityComplete(profileFirstName, profilePostalCode, profileCountry),
     entered: setupEntered,
     dismissed: setupDismissed,
@@ -3048,7 +3060,7 @@ const CreateSit = () => {
               <SummaryCard icon={Home} title="Le logement" editLink="/profile">
                 {property ? (
                   <div className="space-y-2">
-                    <p className="text-sm">{typeLabels[property.type] || property.type} · {envLabels[property.environment || ""] || property.environment}</p>
+                    <p className="text-sm">{[typeLabels[property.type] || property.type, property.environment ? (envLabels[property.environment] || property.environment) : null].filter(Boolean).join(" · ")}</p>
                     {property.rooms_count ? <p className="text-sm text-muted-foreground">{property.rooms_count} pièces · {property.bedrooms_count} chambres</p> : null}
                     {property.equipments.length > 0 && (
                       <div className="flex flex-wrap gap-1.5 mt-1">

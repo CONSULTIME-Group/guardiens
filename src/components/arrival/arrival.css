@@ -1,0 +1,70 @@
+/* Lot 1, parcours d'arrivée v2 : jetons propres aux écrans d'arrivée,
+   chargés seulement avec ces écrans (hors entrée). */
+.arrival-root {
+  --arrival-bg: #FAF8F5;
+  --arrival-field: #F3EEE7;
+  --arrival-green: #2C6D50;
+  --arrival-eyebrow: #8A5D3B;
+  background: var(--arrival-bg);
+  color: hsl(var(--foreground));
+  font-family: "Outfit", ui-sans-serif, system-ui, sans-serif;
+}
+.arrival-root h1, .arrival-root h2, .arrival-title {
+  font-family: "Playfair Display", Georgia, serif;
+}
+.arrival-eyebrow {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  color: var(--arrival-eyebrow);
+  text-transform: uppercase; letter-spacing: 0.14em;
+  font-size: 0.75rem; font-weight: 600;
+}
+.arrival-eyebrow::before { content: ""; width: 20px; height: 1px; background: currentColor; }
+.arrival-field {
+  background: var(--arrival-field);
+  font-size: 16px !important;
+  min-height: 48px;
+  border-color: transparent;
+}
+.arrival-root input, .arrival-root select, .arrival-root textarea, .arrival-root button[role="combobox"] {
+  font-size: 16px;
+}
+.arrival-root input:not([type="checkbox"]), .arrival-root button[role="combobox"] {
+  background: var(--arrival-field);
+}
+.arrival-choice {
+  min-height: 44px;
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--card));
+  border-radius: 9999px;
+  padding: 0.5rem 1rem;
+  font-size: 0.95rem;
+  transition: background-color .15s, border-color .15s, color .15s;
+}
+.arrival-choice[aria-pressed="true"], .arrival-choice[aria-checked="true"] {
+  background: var(--arrival-green); border-color: var(--arrival-green); color: #fff;
+}
+.arrival-card {
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--card));
+  border-radius: 1rem;
+  min-height: 44px;
+  transition: border-color .15s, box-shadow .15s;
+}
+.arrival-card[aria-pressed="true"], .arrival-card[aria-checked="true"] {
+  border-color: var(--arrival-green);
+  box-shadow: 0 0 0 2px var(--arrival-green);
+}
+.arrival-primary {
+  background: var(--arrival-green); color: #fff;
+  min-height: 48px; border-radius: 9999px; font-weight: 600; width: 100%;
+}
+.arrival-primary:disabled { opacity: .5; }
+.arrival-link { color: var(--arrival-green); text-decoration: underline; text-underline-offset: 4px; min-height: 44px; }
+.arrival-gouache {
+  mix-blend-mode: multiply;
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 55%, transparent 78%);
+  mask-image: radial-gradient(ellipse at center, #000 55%, transparent 78%);
+}
+.arrival-stepbar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.arrival-stepbar span { height: 4px; border-radius: 9999px; background: hsl(var(--border)); }
+.arrival-stepbar span[data-done="true"] { background: var(--arrival-green); }

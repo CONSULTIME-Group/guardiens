@@ -85,7 +85,10 @@ export const AppLayout = ({ children }: { children?: ReactNode }) => {
   // est différée au premier retour sur une autre page, tableau de bord compris.
   const isSitCreateTunnel = location.pathname.startsWith("/sits/create");
 
-  const showOnboarding = !dismissed && !isProContext && !isSitCreateTunnel && (isTour || needsMinimal || needsOnboarding);
+  // Lot 1 : un propriétaire passé par /bienvenue (arrivée v2) ne voit jamais la modale.
+  const isArrivalV2Owner = user?.role === "owner" && !!user?.arrivalWelcomeSeenAt;
+  const isArrivalPath = location.pathname.startsWith("/bienvenue") || location.pathname.startsWith("/arrivee/");
+  const showOnboarding = !dismissed && !isProContext && !isSitCreateTunnel && !isArrivalV2Owner && !isArrivalPath && (isTour || needsMinimal || needsOnboarding);
 
   // La modale reste montée une fois qu'elle a été nécessaire, même après
   // fermeture. Démonter l'arbre du dialogue alors que Radix le croit encore

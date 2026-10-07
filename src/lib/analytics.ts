@@ -25,6 +25,11 @@ export type EventType =
   | "push_resubscribe_clicked"
   | "push_renewed_silently"
   | "signup_role_applied"
+  | "arrival_step_viewed"            // Lot 1 arrivée v2 (step C1..P4)
+  | "arrival_step_completed"
+  | "signup_mailbox_opened"          // C3 : bouton messagerie (provider)
+  | "arrival_owner_period_selected"  // P2 (periode)
+  | "arrival_owner_also_selected"    // P4 (garder, coup_de_main)
   | "push_disabled"
   | "push_test_requested"
   | "push_test_result"

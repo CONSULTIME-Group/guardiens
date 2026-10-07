@@ -83,6 +83,12 @@ const Login = lazy(() => import("./pages/Login"), "Login");
 const Register = lazy(() => import("./pages/Register"), "Register");
 const NotFound = lazy(() => import("./pages/NotFound"), "NotFound");
 const AuthConfirm = lazy(() => import("./pages/AuthConfirm"), "AuthConfirm");
+// Lot 1, parcours d'arrivée v2 : écrans chargés à la demande, hors entrée.
+const Bienvenue = lazy(() => import("./pages/arrival/Bienvenue"), "Bienvenue");
+const ArriveeVous = lazy(() => import("./pages/arrival/ArriveeVous"), "ArriveeVous");
+const ArriveeDepart = lazy(() => import("./pages/arrival/ArriveeDepart"), "ArriveeDepart");
+const ArriveeAffinites = lazy(() => import("./pages/arrival/ArriveeAffinites"), "ArriveeAffinites");
+const ArriveeAussi = lazy(() => import("./pages/arrival/ArriveeAussi"), "ArriveeAussi");
 
 // Dashboard est lazy : il tire OngoingSitHero, MonAnnonceCard et tout le
 // graphe propriétaire (~40Ko de chunks). Inutile sur /login, /landing, etc.
@@ -555,6 +561,11 @@ const AppRoutes = () => {
       <Route path="/annonces/:id" element={<PublicSitDetail />} />
       <Route path="/gardiens/:id" element={<PublicSitterProfile />} />
       <Route path="/onboarding/affinity" element={<ProtectedRoute><OnboardingAffinity /></ProtectedRoute>} />
+      <Route path="/bienvenue" element={<ProtectedRoute><Bienvenue /></ProtectedRoute>} />
+      <Route path="/arrivee/vous" element={<ProtectedRoute><ArriveeVous /></ProtectedRoute>} />
+      <Route path="/arrivee/depart" element={<ProtectedRoute><ArriveeDepart /></ProtectedRoute>} />
+      <Route path="/arrivee/affinites" element={<ProtectedRoute><ArriveeAffinites /></ProtectedRoute>} />
+      <Route path="/arrivee/aussi" element={<ProtectedRoute><ArriveeAussi /></ProtectedRoute>} />
 
       <Route path="/projets" element={<PublicShellRoute><ProjetsListing /></PublicShellRoute>} />
       <Route path="/projets/publier" element={<ProtectedRoute><CreateProjet /></ProtectedRoute>} />

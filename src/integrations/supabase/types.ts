@@ -7701,6 +7701,7 @@ export type Database = {
           alma_hidden: boolean
           alma_muted_categories: string[]
           animal_experience: string
+          arrival_welcome_seen_at: string | null
           available_for_help: boolean | null
           avatar_url: string | null
           bio: string | null
@@ -7761,6 +7762,7 @@ export type Database = {
           alma_hidden?: boolean
           alma_muted_categories?: string[]
           animal_experience?: string
+          arrival_welcome_seen_at?: string | null
           available_for_help?: boolean | null
           avatar_url?: string | null
           bio?: string | null
@@ -7821,6 +7823,7 @@ export type Database = {
           alma_hidden?: boolean
           alma_muted_categories?: string[]
           animal_experience?: string
+          arrival_welcome_seen_at?: string | null
           available_for_help?: boolean | null
           avatar_url?: string | null
           bio?: string | null

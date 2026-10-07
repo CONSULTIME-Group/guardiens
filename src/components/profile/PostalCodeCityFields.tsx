@@ -25,6 +25,9 @@ interface Props {
   showAbroadToggle?: boolean;
   /** Show the red asterisk next to required labels. Defaults to true for backward compatibility. */
   showRequiredMark?: boolean;
+  /** Libellés de l'interrupteur étranger / France (défauts inchangés). */
+  abroadLabel?: string;
+  franceLabel?: string;
 }
 
 /**
@@ -50,6 +53,8 @@ const PostalCodeCityFields = ({
   country,
   showAbroadToggle = true,
   showRequiredMark = true,
+  abroadLabel = "Je vis à l'étranger",
+  franceLabel = "Je vis en France",
 }: Props) => {
   const requiredMark = showRequiredMark && required ? " *" : "";
   const { handlePostalCodeChange, selectCity, cities, loading, error } =
@@ -117,7 +122,7 @@ const PostalCodeCityFields = ({
             onClick={toggleAbroad}
             className="text-xs text-primary hover:underline"
           >
-            Je vis en France
+            {franceLabel}
           </button>
         )}
       </div>
@@ -193,7 +198,7 @@ const PostalCodeCityFields = ({
           onClick={toggleAbroad}
           className="text-xs text-primary hover:underline"
         >
-          Je vis à l'étranger
+          {abroadLabel}
         </button>
       )}
     </div>

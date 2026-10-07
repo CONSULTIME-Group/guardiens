@@ -1,0 +1,2 @@
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS arrival_welcome_seen_at timestamptz NULL;
+COMMENT ON COLUMN public.profiles.arrival_welcome_seen_at IS 'Lot 1 arrivee v2 : horodatage du clic sur Faisons connaissance (/bienvenue), ecran montre une seule fois.';
