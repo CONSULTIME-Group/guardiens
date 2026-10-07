@@ -68,7 +68,7 @@ const ArriveeAussi = () => {
         {cards.filter((c) => !c.hidden).map((c) => (
           <button key={c.title} type="button" aria-pressed={c.on} onClick={() => c.set(!c.on)}
             className="arrival-card flex w-full items-center gap-4 p-4 text-left">
-            <img src={c.img} alt="" aria-hidden="true" className="arrival-gouache h-16 w-16 shrink-0 object-contain" />
+            <img src={c.img} alt="" aria-hidden="true" className="illustration-blend h-16 w-16 shrink-0 object-contain" />
             <span>
               <span className="block font-semibold">{c.title}</span>
               <span className="block text-sm text-muted-foreground">{c.text}</span>

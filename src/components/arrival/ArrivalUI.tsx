@@ -40,7 +40,7 @@ export function Eyebrow({ children }: { children: ReactNode }) {
 }
 
 export function Gouache({ src, className = "", size = 160 }: { src: string; className?: string; size?: number }) {
-  return <img src={src} alt="" aria-hidden="true" width={size} height={size} loading="eager" className={`arrival-gouache mx-auto object-contain ${className}`} style={{ width: size, height: "auto" }} />;
+  return <img src={src} alt="" aria-hidden="true" width={size} height={size} loading="eager" className={`illustration-blend mx-auto object-contain ${className}`} style={{ width: size, height: "auto" }} />;
 }
 
 export type OwnerStepKey = "you" | "departure" | "listing" | "affinities";

@@ -65,7 +65,7 @@ const Bienvenue = () => {
       <ul className="space-y-3">
         {welcomeUsesOrder(entraideFirst).map((u) => (
           <li key={u} className="flex items-center gap-4">
-            <img src={USE_IMG[u]} alt="" aria-hidden="true" className="arrival-gouache h-16 w-16 shrink-0 object-contain" />
+            <img src={USE_IMG[u]} alt="" aria-hidden="true" className="illustration-blend h-16 w-16 shrink-0 object-contain" />
             <div>
               <p className="font-semibold">{t(`arrival.c4.${u}_title`)}</p>
               <p className="text-sm text-muted-foreground">{t(`arrival.c4.${u}_text`)}</p>

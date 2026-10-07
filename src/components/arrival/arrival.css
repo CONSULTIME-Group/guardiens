@@ -60,11 +60,6 @@
 }
 .arrival-primary:disabled { opacity: .5; }
 .arrival-link { color: var(--arrival-green); text-decoration: underline; text-underline-offset: 4px; min-height: 44px; }
-.arrival-gouache {
-  mix-blend-mode: multiply;
-  -webkit-mask-image: radial-gradient(ellipse at center, #000 55%, transparent 78%);
-  mask-image: radial-gradient(ellipse at center, #000 55%, transparent 78%);
-}
 .arrival-stepbar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
 .arrival-stepbar span { height: 4px; border-radius: 9999px; background: hsl(var(--border)); }
 .arrival-stepbar span[data-done="true"] { background: var(--arrival-green); }

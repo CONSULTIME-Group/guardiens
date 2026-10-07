@@ -35,7 +35,7 @@ export function ArrivalC1({ selected, onSelect, onEntraide, onContinue, loginHre
         {cards.map((c) => (
           <button key={c.role} type="button" role="radio" aria-checked={selected === c.role} onClick={() => onSelect(c.role)}
             className="arrival-card flex w-full items-center gap-4 p-4 text-left">
-            <img src={c.img} alt="" aria-hidden="true" className="arrival-gouache h-20 w-20 shrink-0 object-contain" />
+            <img src={c.img} alt="" aria-hidden="true" className="illustration-blend h-20 w-20 shrink-0 object-contain" />
             <span>
               <span className="block text-lg font-semibold">{c.title}</span>
               <span className="block text-sm text-muted-foreground">{c.text}</span>
