@@ -8,9 +8,9 @@ import { Trans } from "react-i18next";
 import { mailboxFor } from "@/lib/arrival";
 import { trackEvent } from "@/lib/analytics";
 import { Eyebrow, Gouache, useArrivalT, useArrivalViewed } from "./ArrivalUI";
-import gouacheAnnonce from "@/assets/illustrations/howto-step-1-annonce-224.webp";
-import gouacheGarde from "@/assets/onboarding/gouache-garde.png";
-import mailbox from "@/assets/empty-states/v2/responsive/rural-mailbox-384.webp";
+const gouacheAnnonce = new URL("../../assets/illustrations/howto-step-1-annonce-224.webp", import.meta.url).href;
+const gouacheGarde = new URL("../../assets/onboarding/gouache-garde.png", import.meta.url).href;
+const mailbox = new URL("../../assets/empty-states/v2/responsive/rural-mailbox-384.webp", import.meta.url).href;
 
 type Role = "owner" | "sitter" | "both";
 

@@ -9,12 +9,12 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { safeNext, welcomeUsesOrder, type WelcomeUse } from "@/lib/arrival";
 import { ArrivalShell, Eyebrow, Gouache, SaveError, trackArrival, useArrivalT, useArrivalViewed } from "@/components/arrival/ArrivalUI";
-import gouacheWelcome from "@/assets/onboarding/gouache-welcome.png";
-import maisonSeule from "@/assets/landing/maison-seule-450.webp";
-import gouacheEntraide from "@/assets/onboarding/gouache-entraide.png";
-import spotBricolage from "@/assets/missions/spot-bricolage-160.webp";
-import jeremie from "@/assets/auteur-jeremie.jpg";
-import elisa from "@/assets/auteur-elisa.jpg";
+const gouacheWelcome = new URL("../../assets/onboarding/gouache-welcome.png", import.meta.url).href;
+const maisonSeule = new URL("../../assets/landing/maison-seule-450.webp", import.meta.url).href;
+const gouacheEntraide = new URL("../../assets/onboarding/gouache-entraide.png", import.meta.url).href;
+const spotBricolage = new URL("../../assets/missions/spot-bricolage-160.webp", import.meta.url).href;
+const jeremie = new URL("../../assets/auteur-jeremie.jpg", import.meta.url).href;
+const elisa = new URL("../../assets/auteur-elisa.jpg", import.meta.url).href;
 
 const USE_IMG: Record<WelcomeUse, string> = { gardes: maisonSeule, entraide: gouacheEntraide, projets: spotBricolage };
 export const SIGNUP_INTENT_KEY = "guardiens_signup_intent";
