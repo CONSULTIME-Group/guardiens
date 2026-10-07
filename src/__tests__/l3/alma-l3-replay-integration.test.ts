@@ -21,6 +21,7 @@ import * as ownerQuestion from "../../../supabase/functions/_shared/alma-owner-q
 import * as sitLocation from "../../../supabase/functions/_shared/sit-location";
 import * as homePhoto from "../../../supabase/functions/_shared/alma-home-photo";
 import * as truth from "../../../supabase/functions/_shared/alma-truth";
+import * as companion from "../../../supabase/functions/_shared/alma-companion";
 import { ALMA_REPLAY_CASES } from "@/data/almaReplayCases";
 import { checkReplayAnswer } from "@/lib/alma/replayChecks";
 
@@ -33,7 +34,7 @@ const PUBLISHED = [
 const OWN_SITS = [{ id: "68f35bdd-554d-47c5-b401-197b2b63ce91", title: "Suite à plusieurs annulations je cherche un gardien pour Angus du 3/9 au 20/9", status: "draft", city: "Damgan", start_date: "2026-09-03", end_date: "2026-09-20" }];
 const DEPS = [{ code: "56", nom: "Morbihan", nom_region: "Bretagne" }, { code: "987", nom: "Polynésie française", nom_region: "Outre-mer" }];
 
-function harness(profile: Record<string, unknown>) {
+function harness(profile: Record<string, unknown>, modelAnswers: string[] = ["Réponse du modèle."]) {
   let handler!: (request: Request) => Promise<Response>;
   const writes: Array<{ table: string; row: any }> = [];
   const from = vi.fn((table: string) => {
@@ -54,7 +55,8 @@ function harness(profile: Record<string, unknown>) {
     };
     return chain;
   });
-  const callLovableAI = vi.fn(async () => ({ ok: true, data: { choices: [{ message: { content: "Réponse du modèle." } }] } }));
+  let call = 0;
+  const callLovableAI = vi.fn(async () => ({ ok: true, data: { choices: [{ message: { content: modelAnswers[Math.min(call++, modelAnswers.length - 1)] } }] } }));
   const client = { from, rpc: vi.fn(async () => ({ data: [], error: null })), auth: { getUser: vi.fn(async () => ({ data: { user: { id: MARTINE } }, error: null })) } };
   const source = readFileSync("supabase/functions/alma-chat/index.ts", "utf8");
   const { outputText } = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS } });
@@ -62,7 +64,7 @@ function harness(profile: Record<string, unknown>) {
     "alma-system-prompt.ts": prompt, "alma-intent.ts": almaIntent, "alma-site-knowledge.ts": siteKnowledge,
     "alma-facts.ts": almaFacts, "alma-inventory.ts": almaInventory, "alma-next-action.ts": nextAction,
     "alma-classify.ts": almaClassify, "alma-output.ts": almaOutput, "normalize-contact-message.ts": normalizeContact,
-    "alma-owner-question.ts": ownerQuestion, "sit-location.ts": sitLocation, "alma-home-photo.ts": homePhoto, "alma-truth.ts": truth,
+    "alma-owner-question.ts": ownerQuestion, "sit-location.ts": sitLocation, "alma-home-photo.ts": homePhoto, "alma-truth.ts": truth, "alma-companion.ts": companion,
   };
   runInNewContext(outputText, {
     exports: {}, Request, Response, Date, console: { error: vi.fn(), log: vi.fn() },
@@ -91,19 +93,48 @@ function harness(profile: Record<string, unknown>) {
 
 export const REPLAY_OUTPUT: Record<string, { answer: string; action: string; path: string }> = {};
 
-describe("L3, rejeu des 5 phrases réelles sur alma-chat", () => {
+// Lot L4 : le modèle rédige dans la voix d'Alma, sur faits verrouillés.
+const VOICE: Record<string, string> = {
+  "cas-43": "Vous êtes dans votre espace propriétaire, Martine : la page Annonces y montre vos propres annonces. Les gardes proposées par les propriétaires vous attendent dans votre espace gardien. Guardiens propose des gardes en France, Polynésie française comprise, et il n'y a aucune garde en Italie aujourd'hui.",
+  "cas-44": "Garder un chien en Italie, je comprends l'envie, mais il n'y a aucune garde en Italie aujourd'hui : Guardiens propose des gardes en France, Polynésie française comprise. Depuis votre espace propriétaire, vous voyez vos annonces ; les gardes à garder sont dans votre espace gardien.",
+  "cas-45": "C'est normal : vous êtes dans votre espace propriétaire, et la page Annonces y montre vos propres annonces. Les gardes proposées par les autres propriétaires se trouvent dans votre espace gardien, je vous y emmène.",
+  "cas-46": "Elle se trouve dans votre espace gardien. Ici, dans votre espace propriétaire, la page Annonces ne montre que les vôtres ; un clic suffit pour changer d'espace.",
+  "cas-47": "Pour la photo de votre maison, tout se passe dans Mon profil propriétaire, rubrique Galerie : chaque photo s'y supprime ou s'y remplace. Si c'était la couverture de votre annonce, la suivante prend sa place.",
+};
+const BAD: Record<string, string> = {
+  "cas-43": "Il y a de belles gardes en Toscane, regardez les annonces à l'international.",
+  "cas-44": "Il y a de belles gardes en Toscane, regardez les annonces à l'international.",
+  "cas-45": "Vous pouvez publier le brouillon, puis consulter les annonces.",
+  "cas-46": "Vous pouvez publier le brouillon, puis consulter les annonces.",
+  "cas-47": "Je ne peux pas consulter votre messagerie ni vérifier ce message.",
+};
+
+describe("L3 et L4, rejeu des 5 phrases réelles sur alma-chat", () => {
   for (const id of ["cas-43", "cas-44", "cas-45", "cas-46", "cas-47"]) {
-    it(`${id} conforme`, async () => {
+    it(`${id} : voix libre conforme aux faits verrouillés`, async () => {
       const c = ALMA_REPLAY_CASES.find((x) => x.id === id)!;
-      const h = harness({ role: c.accountRole, first_name: "Martine", city: "Damgan", departement_code: "56", country: "FR" });
+      const h = harness({ role: c.accountRole, first_name: "Martine", city: "Damgan", departement_code: "56", country: "FR" }, [VOICE[id]]);
       const out = await h.invoke(c);
       REPLAY_OUTPUT[id] = { answer: out.answer, action: out.action?.label, path: out.action?.path };
-      console.log(`[${id}] ${c.question}\n  réponse : ${out.answer}\n  action : ${out.action?.label} -> ${out.action?.path}`);
-      expect(h.callLovableAI).not.toHaveBeenCalled();
+      expect(h.callLovableAI).toHaveBeenCalledTimes(1);
+      expect(out.answer).toBe(VOICE[id]);
+      const v = checkReplayAnswer({ question: c.question, answer: out.answer, action: out.action, expect: c.expect });
+      expect(v.reasons).toEqual([]);
+      const log = h.writes.find((w) => w.table === "alma_conversations")?.row;
+      expect(log?.classification?.fallback_template).toBe(false);
+      expect(log?.proposed_action?.label ?? "").not.toMatch(/^Publier le brouillon/);
+    });
+    it(`${id} : interdit ou fait manquant, repli sur le gabarit journalisé`, async () => {
+      const c = ALMA_REPLAY_CASES.find((x) => x.id === id)!;
+      const h = harness({ role: c.accountRole, first_name: "Martine", city: "Damgan", departement_code: "56", country: "FR" }, [BAD[id]]);
+      const out = await h.invoke(c);
+      expect(out.answer).not.toBe(BAD[id]);
       const v = checkReplayAnswer({ question: c.question, answer: out.answer, action: out.action, expect: c.expect });
       expect(v.reasons).toEqual([]);
       expect(out.answer).not.toMatch(/[\u2013\u2014]|voisin|gratuit|international|dossier/i);
-      expect(h.writes[0]?.row?.proposed_action?.label ?? "").not.toMatch(/^Publier le brouillon/);
+      const log = h.writes.find((w) => w.table === "alma_conversations")?.row;
+      expect(log?.classification?.fallback_template).toBe(true);
+      expect(log?.classification?.fallback_issues?.length).toBeGreaterThan(0);
     });
   }
 });

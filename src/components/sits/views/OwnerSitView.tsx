@@ -48,6 +48,7 @@ import { buildPlatformCandidates, type PlatformCandidate } from "@/lib/platformC
 import { useToast } from "@/hooks/use-toast";
 import { formatSitPeriod } from "@/lib/dateRange";
 import { MissingSitCityInline } from "@/components/sits/owner/MissingSitCityBanner";
+import PresentAnimalBanner from "@/components/sits/owner/PresentAnimalBanner";
 import {
   getSitPublishBlockers,
   getBlockingBlockers,
@@ -726,6 +727,13 @@ const OwnerSitView = ({
           applicationsCount={internalAppCount}
           userId={sit.user_id}
           onSaved={(city) => setSit({ ...(sit as any), city })}
+        />
+      </div>
+      {/* Lot L4 : annonce publiée qui cite un animal sans fiche animal. */}
+      <div className="empty:hidden mb-4">
+        <PresentAnimalBanner
+          sit={{ id: sit.id, status: sit.status, title: sit.title, absenceReason: sit.absence_reason, sitterExpectations: sit.sitter_expectations, specificExpectations: sit.specific_expectations }}
+          petCount={pets?.length ?? 0}
         />
       </div>
       {/* Brouillon : checklist de publication (remplace l'ancien bandeau) */}

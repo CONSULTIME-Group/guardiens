@@ -381,6 +381,8 @@ export function AlmaConversation({
             />
             <div className="min-w-0">
               <p className="font-heading text-[19px] leading-tight text-foreground">Alma</p>
+              {/* Lot L4, transparence (règlement européen sur l'IA, article 50). */}
+              <p className="text-[11px] text-muted-foreground">Compagne IA de Guardiens</p>
               <p className="mt-1 text-[10.5px] font-bold uppercase text-terra [letter-spacing:.16em]">
                 {stageLabel ?? "Votre assistante"}
               </p>

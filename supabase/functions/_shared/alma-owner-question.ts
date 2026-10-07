@@ -64,6 +64,8 @@ export interface ViewedSitFacts {
   endDate: string | null;
   /** Comptes par libellé français, par exemple { chien: 1 }. */
   pets: Record<string, number>;
+  /** Lot L4 : animal cité dans le titre ou la description quand aucune fiche animal n'existe. */
+  textAnimal?: string | null;
 }
 
 export type ViewerState = "can_apply" | "applied" | "owner_space";
@@ -89,11 +91,9 @@ export function buildOwnerQuestionAnswer(sit: ViewedSitFacts, viewer: ViewerStat
     lines.push(`Dates : du ${frDate(sit.startDate, false)} au ${frDate(sit.endDate, true)}.`);
   }
   const pets = Object.entries(sit.pets).filter(([, n]) => n > 0);
-  lines.push(
-    pets.length
-      ? `Animaux : ${pets.map(([k, n]) => `${n} ${plural(k, n)}`).join(", ")}.`
-      : "Animaux : aucun animal déclaré sur l'annonce.",
-  );
+  // Lot L4 : sans fiche animal, on cite l'animal du titre ou on se tait.
+  if (pets.length) lines.push(`Animaux : ${pets.map(([k, n]) => `${n} ${plural(k, n)}`).join(", ")}.`);
+  else if (sit.textAnimal) lines.push(`Animal cité dans l'annonce : le ${sit.textAnimal}.`);
   const closing = viewer === "applied"
     ? OWNER_QUESTION_SENTENCE_APPLIED
     : viewer === "owner_space"

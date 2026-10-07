@@ -9,7 +9,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ALMA_REPLAY_CASES } from "@/data/almaReplayCases";
-import { checkReplayAnswer } from "@/lib/alma/replayChecks";
+import { checkReplayAnswer, sameOpener } from "@/lib/alma/replayChecks";
+import { measureCompanion, SHARED_OPENER_TARGET, type CompanionMeasure } from "@/lib/alma/companionMetrics";
 
 interface RateRow { action_reason: string; register: string; answers: number; acted: number }
 interface ReplayResult { id: string; question: string; passed: boolean; reasons: string[]; answer: string }
@@ -21,16 +22,21 @@ export function PilotageTab({ range }: { range: "7d" | "30d" | "90d" }) {
   const days = range === "7d" ? 7 : range === "30d" ? 30 : 90;
   const [rates, setRates] = useState<RateRow[] | null>(null);
   const [feedback, setFeedback] = useState<{ useful: number; notUseful: number } | null>(null);
+  const [companion, setCompanion] = useState<CompanionMeasure | null>(null);
   const [runs, setRuns] = useState<ReplayRun[]>([]);
   const [replaying, setReplaying] = useState<{ done: number; total: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const [r, f, h] = await Promise.all([
+    const since = new Date(Date.now() - days * 86_400_000).toISOString();
+    const [r, f, h, c] = await Promise.all([
       (supabase.rpc as any)("admin_alma_action_rate", { p_days: days }),
       (supabase.from as any)("alma_feedback").select("value").gte("created_at", new Date(Date.now() - days * 86_400_000).toISOString()),
       (supabase.from as any)("alma_replay_runs").select("id, created_at, total, passed, failed, results").order("created_at", { ascending: false }).limit(5),
+      // Lot L4 : variété des amorces et replis sur gabarit.
+      (supabase.from as any)("alma_conversations").select("answer, classification").gte("created_at", since).order("created_at", { ascending: false }).limit(5000),
     ]);
+    setCompanion(c.error ? null : measureCompanion((c.data ?? []) as any[]));
     if (r.error) setError("Taux d'action indisponible.");
     setRates((r.data ?? []) as RateRow[]);
     const vals = ((f.data ?? []) as { value: string }[]).map((x) => x.value);
@@ -45,7 +51,7 @@ export function PilotageTab({ range }: { range: "7d" | "30d" | "90d" }) {
     const results: ReplayResult[] = [];
     setReplaying({ done: 0, total: ALMA_REPLAY_CASES.length });
     for (const c of ALMA_REPLAY_CASES) {
-      const { data, error: e } = await supabase.functions.invoke("alma-chat", {
+      const ask = (recent?: string[]) => supabase.functions.invoke("alma-chat", {
         body: {
           replay: true,
           message: c.question,
@@ -53,8 +59,11 @@ export function PilotageTab({ range }: { range: "7d" | "30d" | "90d" }) {
           surface: c.surface,
           active_role: c.activeRole,
           ...(c.pagePath ? { page_path: c.pagePath } : {}),
+          // Lot L4 : contexte simulé du membre, et réponses récentes pour la variété.
+          replay_context: { ...(c.replayContext ?? {}), ...(recent ? { recent_answers: recent } : {}) },
         },
       });
+      const { data, error: e } = await ask();
       const d = (data ?? {}) as any;
       const answer = typeof d.answer === "string" ? d.answer : "";
       const verdict = e || !answer
@@ -69,6 +78,15 @@ export function PilotageTab({ range }: { range: "7d" | "30d" | "90d" }) {
             confirmedSit: d.replay_meta?.confirmed_sit ?? null,
             expect: c.expect ?? null,
           });
+      // Lot L4 : deux réponses à la même question ne commencent pas pareil.
+      if (c.varietyCheck && answer) {
+        const again = await ask([answer]);
+        const second = typeof (again.data as any)?.answer === "string" ? (again.data as any).answer : "";
+        if (second && sameOpener(answer, second)) {
+          verdict.passed = false;
+          verdict.reasons = [...verdict.reasons, "même amorce sur deux réponses"];
+        }
+      }
       results.push({ id: c.id, question: c.question, answer: answer.slice(0, 400), ...verdict });
       setReplaying({ done: results.length, total: ALMA_REPLAY_CASES.length });
     }
@@ -130,6 +148,23 @@ export function PilotageTab({ range }: { range: "7d" | "30d" | "90d" }) {
           )}
         </CardContent>
       </Card>
+
+      {companion && (
+        <Card>
+          <CardHeader><CardTitle className="text-base">Compagnon : variété et faits</CardTitle></CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            <p>
+              Réponses partageant leurs cinq premiers mots : {pct(companion.sharedOpeners, companion.answers)} ({companion.sharedOpeners} sur {companion.answers}), objectif sous {Math.round(SHARED_OPENER_TARGET * 100)} %.
+            </p>
+            <p>
+              Replis sur gabarit : {companion.lockedChecked === 0 ? "aucune réponse contrôlée sur la période." : `${pct(companion.fallbacks, companion.lockedChecked)} (${companion.fallbacks} sur ${companion.lockedChecked} réponses à faits verrouillés).`}
+            </p>
+            {feedback && (
+              <p>Pas utile : {feedback.useful + feedback.notUseful === 0 ? "aucun retour sur la période." : `${pct(feedback.notUseful, feedback.useful + feedback.notUseful)} des retours.`}</p>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader><CardTitle className="text-base">Jeu de non-régression ({ALMA_REPLAY_CASES.length} cas réels)</CardTitle></CardHeader>

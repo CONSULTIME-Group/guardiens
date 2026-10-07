@@ -63,6 +63,24 @@ import {
   type PublishedSitRow,
 } from "../_shared/alma-truth.ts";
 import { detectHomePhotoQuestion, HOME_PHOTO_ACTION, HOME_PHOTO_ANSWER } from "../_shared/alma-home-photo.ts";
+import {
+  aiIdentityBrief,
+  animalFromText,
+  asksAboutOwnPets,
+  asksIfHuman,
+  checkLocked,
+  companionDirective,
+  currentSitSentence,
+  foldC,
+  homePhotoBrief,
+  lockedDirective,
+  openerKey,
+  ownerQuestionBrief,
+  repeatsOpener,
+  spaceScopeBrief,
+  type ListingPet,
+  type LockedBrief,
+} from "../_shared/alma-companion.ts";
 
 const SPECIES_FR: Record<string, string> = {
   dog: "chien", cat: "chat", horse: "cheval", bird: "oiseau", rodent: "rongeur",
@@ -72,6 +90,9 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 
 interface ViewedSit {
   facts: ViewedSitFacts;
+  /** Lot L4 : fiches animaux et texte de l'annonce. */
+  petsList: ListingPet[];
+  description: string | null;
   viewer: ViewerState;
   conversationId: string | null;
 }
@@ -82,14 +103,14 @@ interface ViewedSit {
  * personne en est la propriétaire.
  */
 async function loadViewedSit(admin: any, ref: string, userId: string, activeRole: "owner" | "sitter"): Promise<ViewedSit | null> {
-  const cols = "id, slug, title, status, accepting_applications, city, departement_code, start_date, end_date, user_id, property_id";
+  const cols = "id, slug, title, status, accepting_applications, city, departement_code, start_date, end_date, user_id, property_id, owner_message, specific_expectations";
   const q = admin.from("sits").select(cols);
   const { data: sit } = await (UUID_RE.test(ref) ? q.eq("id", ref) : q.eq("slug", ref)).maybeSingle();
   if (!sit || sit.user_id === userId) return null;
   const [ownerRes, petsRes, appRes, convRes] = await Promise.all([
     admin.from("profiles").select("city, postal_code").eq("id", sit.user_id).maybeSingle(),
     sit.property_id
-      ? admin.from("pets").select("species").eq("property_id", sit.property_id).limit(30)
+      ? admin.from("pets").select("name, species, breed, age").eq("property_id", sit.property_id).limit(30)
       : Promise.resolve({ data: [] }),
     admin.from("applications").select("id, status").eq("sit_id", sit.id).eq("sitter_id", userId).limit(1),
     admin.from("conversations").select("id").eq("sit_id", sit.id).eq("sitter_id", userId).limit(1),
@@ -112,7 +133,11 @@ async function loadViewedSit(admin: any, ref: string, userId: string, activeRole
   const app = ((appRes?.data ?? []) as any[]).find((a) => a.status !== "cancelled") ?? null;
   const conversationId = ((convRes?.data ?? []) as any[])[0]?.id ?? null;
   const viewer: ViewerState = app ? "applied" : activeRole === "owner" ? "owner_space" : "can_apply";
+  const petsList = ((petsRes?.data ?? []) as any[]).map((p) => ({ name: p.name ?? null, species: p.species ?? null, breed: p.breed ?? null, age: typeof p.age === "number" ? p.age : null }));
+  const description = [sit.owner_message, sit.specific_expectations].filter((x: unknown) => typeof x === "string" && x).join(" ").slice(0, 800) || null;
   return {
+    petsList,
+    description,
     facts: {
       id: sit.id,
       title: sit.title ?? null,
@@ -122,6 +147,7 @@ async function loadViewedSit(admin: any, ref: string, userId: string, activeRole
       startDate: sit.start_date ?? null,
       endDate: sit.end_date ?? null,
       pets,
+      textAnimal: petsList.length ? null : animalFromText(sit.title, description),
     },
     viewer,
     conversationId,
@@ -232,6 +258,8 @@ Deno.serve(async (req) => {
       if (!isAdmin) return json({ error: "Forbidden" }, 403);
       isReplay = true;
     }
+    // Lot L4 : contexte simulé du membre, rejeu admin uniquement.
+    const rc = isReplay && body?.replay_context && typeof body.replay_context === "object" ? body.replay_context as Record<string, any> : null;
     const logConversation = async (row: Record<string, unknown>): Promise<string | null> => {
       if (isReplay) return null;
       const { data } = await adminClient
@@ -318,32 +346,14 @@ Deno.serve(async (req) => {
         ...(isReplay ? { replay_meta: { register, classification, confirmed_sit: false } } : {}),
       });
     }
-    // Lot L2 : photo du logement, une seule adresse, la Galerie.
+    // Lots L2 et L4 : photo du logement, faits verrouillés, voix libre.
+    let locked: LockedBrief | null = null;
+    let lockedChips: Array<{ label: string; path: string }> = [];
     if (detectHomePhotoQuestion(message)) {
-      const classification: AlmaClassification = { ...classificationFromPatterns(intent), unanswered: false };
-      const homeAction = { label: HOME_PHOTO_ACTION.label, path: HOME_PHOTO_ACTION.path };
-      const conversationId = await logConversation({
-        user_id: userId,
-        surface,
-        active_role: activeRole,
-        input_mode: inputMode,
-        question: message,
-        answer: HOME_PHOTO_ANSWER,
-        register,
-        refusal_reason: null,
-        latency_ms: Date.now() - startedAt,
-        sources_count: 0,
-        classification,
-        proposed_action: { ...homeAction, reason: HOME_PHOTO_ACTION.reason },
-      });
-      await raiseSignals(classification, conversationId);
-      return json({
-        answer: HOME_PHOTO_ANSWER,
-        remaining: Math.max(0, ALMA_CHAT_DAILY_LIMIT - ((count ?? 0) + 1)),
-        action: homeAction,
-        ...(conversationId ? { conversation_id: conversationId } : {}),
-        ...(isReplay ? { replay_meta: { register, classification, confirmed_sit: false } } : {}),
-      });
+      locked = homePhotoBrief(HOME_PHOTO_ACTION, HOME_PHOTO_ANSWER);
+    } else if (asksIfHuman(message)) {
+      // Lot L4, transparence : Alma dit qu'elle est une IA, jamais de déni.
+      locked = aiIdentityBrief();
     }
     const helpDirective = almaHelpDirective(intent);
 
@@ -358,13 +368,27 @@ Deno.serve(async (req) => {
       }
     }
     const viewedOpen = viewed && viewed.facts.open ? viewed : null;
-    const ownerQuestionByPattern = Boolean(viewed) && detectAddressedToOwner(message);
+    const ownerQuestionByPattern = Boolean(viewed) && !locked && detectAddressedToOwner(message);
     const aboutAlma = asksAboutAlma(message);
     // Une question au « vous » sur une fiche n'ouvre jamais le carnet personnel.
     if (viewed && register === "perso" && !aboutAlma) register = "reassurance";
     const viewedAction = viewedOpen
       ? sitDetailAction(viewedOpen.facts.id, viewedOpen.viewer, viewedOpen.conversationId)
       : null;
+    // Lot L4 : question au propriétaire, faits de la fiche verrouillés, voix libre.
+    const ownerBriefFor = (v: ViewedSit) => ownerQuestionBrief({
+      locationLabel: v.facts.locationLabel,
+      communeMissing: v.facts.communeMissing,
+      startDate: v.facts.startDate,
+      endDate: v.facts.endDate,
+      pets: v.petsList,
+      title: v.facts.title,
+      description: v.description,
+      viewer: v.viewer,
+      action: viewedAction ?? sitDetailAction(v.facts.id, v.viewer, v.conversationId),
+      template: buildOwnerQuestionAnswer(v.facts, v.viewer),
+    });
+    if (!locked && ownerQuestionByPattern && viewed) locked = ownerBriefFor(viewed);
 
     // Contexte dossier, chargé côté serveur.
     const [profileRes, sitterRes, ownerRes] = await Promise.all([
@@ -388,11 +412,38 @@ Deno.serve(async (req) => {
     // Lot J2-A : faits vérifiés (les deux côtés pour un membre both) et inventaire autour.
     const todayIso = new Date().toISOString().slice(0, 10);
     const prof = (profileRes.data ?? {}) as any;
-    const accountRole = prof.role === "owner" || prof.role === "sitter" || prof.role === "both" ? prof.role : null;
+    if (rc?.first_name !== undefined) prof.first_name = rc.first_name;
+    if (rc?.city !== undefined) prof.city = rc.city;
+    const rcRole = rc?.account_role;
+    const accountRole = rcRole === "owner" || rcRole === "sitter" || rcRole === "both"
+      ? rcRole
+      : prof.role === "owner" || prof.role === "sitter" || prof.role === "both" ? prof.role : null;
     const [facts, inventory] = await Promise.all([
       loadVerifiedFacts(adminClient, userId, accountRole, todayIso).catch(() => null),
       loadAlmaInventory(adminClient, prof, todayIso).catch(() => null),
     ]);
+
+    // Lot L4 : compagnon. Ses animaux (tous rôles) et ses 20 dernières réponses
+    // d'Alma (continuité de moins de 7 jours, amorces à ne pas répéter).
+    const safeRead = async (f: () => any) => { try { return await f(); } catch { return { data: [] }; } };
+    const [myPetsRes, recentRes] = await Promise.all([
+      rc?.pets !== undefined
+        ? Promise.resolve({ data: Array.isArray(rc.pets) ? rc.pets : [] })
+        : safeRead(() => adminClient.from("pets").select("name, species, breed, age, properties!inner(user_id)").eq("properties.user_id", userId).limit(10)),
+      rc?.recent_answers !== undefined
+        ? Promise.resolve({ data: (Array.isArray(rc.recent_answers) ? rc.recent_answers : []).map((a: string) => ({ answer: a, question: "", created_at: new Date().toISOString() })) })
+        : safeRead(() => adminClient.from("alma_conversations").select("question, answer, created_at").eq("user_id", userId).not("answer", "is", null).order("created_at", { ascending: false }).limit(20)),
+    ]);
+    const myPets: ListingPet[] = ((myPetsRes?.data ?? []) as any[]).map((p) => ({ name: p.name ?? null, species: p.species ?? null, breed: p.breed ?? null, age: typeof p.age === "number" ? p.age : null }));
+    const recentRows = ((recentRes?.data ?? []) as any[]).filter((r) => typeof r?.answer === "string" && r.answer);
+    const recentAnswers: string[] = recentRows.map((r) => r.answer);
+    const lastRow = rc?.last_exchange
+      ? { question: String(rc.last_exchange.question ?? ""), answer: String(rc.last_exchange.answer ?? ""), created_at: new Date(Date.now() - Number(rc.last_exchange.days_ago ?? 1) * 86_400_000).toISOString() }
+      : recentRows.find((r) => r.question);
+    const lastDays = lastRow ? Math.floor((Date.now() - new Date(lastRow.created_at).getTime()) / 86_400_000) : 99;
+    const lastExchange = lastRow && lastDays < 7 && lastRow.question && history.length === 0
+      ? { question: lastRow.question, answer: lastRow.answer ?? "", daysAgo: lastDays }
+      : null;
 
     // Lot L3 : espace actif, périmètre réel (lu en base), brouillons.
     const previousUser = history.filter((m: any) => m.role === "user").map((m: any) => m.content);
@@ -424,39 +475,29 @@ Deno.serve(async (req) => {
         console.error("alma-chat departements failed", e);
       }
     }
-    if (!viewed && (guidance || foreignNone || frenchNone)) {
+    if (!locked && !viewed && (guidance || foreignNone || frenchNone)) {
       const placeSentence = foreignNone ? foreignNoneSentence(foreignNone.inCountry) : frenchNone ? frenchNoneSentence(frenchNone.label) : null;
       const truthAnswer = [placeSentence, guidance?.sentence ?? null].filter(Boolean).join(" ");
       const truthAction = guidance
         ? (foreignNone && guidance.switchable ? { ...guidance.action, label: "Passer en espace gardien et voir les gardes en France" } : guidance.action)
         : ALERT_ACTION;
-      const truthChips = guidance && (foreignNone || frenchNone)
+      lockedChips = guidance && (foreignNone || frenchNone)
         ? [{ label: ALERT_ACTION.label, path: ALERT_ACTION.path }]
         : !guidance && foreignNone ? [{ label: "Voir les gardes en France", path: "/annonces" }] : [];
-      const classification: AlmaClassification = { ...classificationFromPatterns(intent), unanswered: false };
-      const conversationId = await logConversation({
-        user_id: userId,
-        surface,
-        active_role: activeRole,
-        input_mode: inputMode,
-        question: message,
-        answer: truthAnswer,
-        register,
-        refusal_reason: null,
-        latency_ms: Date.now() - startedAt,
-        sources_count: 0,
-        classification,
-        proposed_action: truthAction,
-        chips: truthChips.length ? truthChips : null,
-      });
-      await raiseSignals(classification, conversationId);
-      return json({
-        answer: truthAnswer,
-        remaining: Math.max(0, ALMA_CHAT_DAILY_LIMIT - ((count ?? 0) + 1)),
-        action: { label: truthAction.label, path: truthAction.path },
-        ...(truthChips.length ? { chips: truthChips } : {}),
-        ...(conversationId ? { conversation_id: conversationId } : {}),
-        ...(isReplay ? { replay_meta: { register, classification, confirmed_sit: false } } : {}),
+      // Lot L4 : le lieu demandé (« toscane ») n'est jamais nommé comme disponible.
+      const placeWords: string[] = foreignNone
+        ? (message.match(/\b(?:en|au|aux|à|dans le|dans la)\s+([A-Za-zÀ-ÿ'-]{3,})/gi) ?? [])
+            .map((m: string) => m.split(/\s+/).pop() ?? "")
+            .filter((w: string) => !foldC(foreignNone.inCountry).includes(foldC(w)) && !/^(france|polyn)/i.test(foldC(w)))
+        : [];
+      locked = spaceScopeBrief({
+        spaceSentence: guidance?.sentence ?? null,
+        switchable: Boolean(guidance?.switchable),
+        foreignInCountry: foreignNone ? foreignNone.inCountry : null,
+        frenchNoneLabel: frenchNone ? frenchNone.label : null,
+        askedPlaceWords: placeWords.map((w) => w.charAt(0).toUpperCase() + w.slice(1)),
+        action: truthAction,
+        template: truthAnswer,
       });
     }
     const messagingAsked = isMessagingQuestion(message);
@@ -676,11 +717,18 @@ Deno.serve(async (req) => {
             },
           ];
 
-    const r = await callLovableAI({
-      model: "google/gemini-2.5-flash",
-      // 0.85 : à 0.6 le modèle retombe sur les mêmes ouvertures.
-      temperature: 0.85,
-      messages: [
+    // Lot L4 : compagnon, données réelles seulement.
+    const companion = companionDirective({
+      firstName: prof.first_name ?? null,
+      city: prof.city ?? null,
+      pets: myPets,
+      currentSit: facts ? currentSitSentence(facts, todayIso) : null,
+      listings: (facts?.annonces_publiees ?? []).map((a: any) => a.titre).filter(Boolean),
+      lastExchange,
+      recentOpeners: [...new Set(recentAnswers.map(openerKey).filter((k) => k.split(" ").length >= 3))],
+      freeTalk: register === "perso" || isSmallTalk(message),
+    });
+    const baseMessages = [
         { role: "system", content: buildAlmaSystemPrompt(register) },
         ...moodMessages,
         ...sourcesMessages,
@@ -703,18 +751,28 @@ Deno.serve(async (req) => {
         ...(helpDirective ? [{ role: "system" as const, content: helpDirective }] : []),
         { role: "system" as const, content: SCOPE_DIRECTIVE },
         ...(messagingAsked ? [{ role: "system" as const, content: MESSAGING_DIRECTIVE }] : []),
+        { role: "system" as const, content: companion },
+        ...(locked ? [{ role: "system" as const, content: lockedDirective(locked) }] : []),
         { role: "system", content: CLASSIFICATION_DIRECTIVE },
         { role: "user", content: message },
-      ],
+    ];
+    const askModel = (extra?: string) => callLovableAI({
+      model: "google/gemini-2.5-flash",
+      // 0.85 : à 0.6 le modèle retombe sur les mêmes ouvertures.
+      temperature: 0.85,
+      messages: extra
+        ? [...baseMessages.slice(0, -1), { role: "system" as const, content: extra }, baseMessages[baseMessages.length - 1]]
+        : baseMessages,
     });
+    const r = await askModel();
 
     if (!r.ok) {
       // Secours : frustration ou départ, la réponse fixe prend le relais.
       // Lot L1 : une question au propriétaire reçoit la réponse factuelle.
-      const fallback = ownerQuestionByPattern && viewed
-        ? buildOwnerQuestionAnswer(viewed.facts, viewed.viewer)
+      const fallback = locked
+        ? locked.template
         : intent.frustration || intent.leaving ? almaDirectAnswer(intent) : null;
-      const classification = classificationFromPatterns(intent);
+      const classification: AlmaClassification = { ...classificationFromPatterns(intent), ...(locked ? { fallback_template: true, unanswered: false } : {}) } as AlmaClassification;
       const conversationId = await logConversation({
         user_id: userId,
         surface,
@@ -733,6 +791,8 @@ Deno.serve(async (req) => {
         return json({
           answer: fallback,
           remaining: Math.max(0, ALMA_CHAT_DAILY_LIMIT - ((count ?? 0) + 1)),
+          ...(locked?.action ? { action: { label: locked.action.label, path: locked.action.path } } : {}),
+          ...(lockedChips.length ? { chips: lockedChips } : {}),
           human_contact: true,
           ...(conversationId ? { conversation_id: conversationId } : {}),
         });
@@ -753,23 +813,68 @@ Deno.serve(async (req) => {
     }
     const merged = mergeClassification(extracted.classification, intent);
     const addressedToOwner = Boolean(viewed) && (ownerQuestionByPattern || merged.addressed_to_owner === true);
+    // Lot L4 : une question au propriétaire repérée par le modèle seul est
+    // contrôlée sur les mêmes faits verrouillés.
+    if (!locked && addressedToOwner && viewed) locked = ownerBriefFor(viewed);
     const classification: AlmaClassification = {
       ...merged,
       addressed_to_owner: addressedToOwner,
       // La réponse factuelle couvre la question : pas de signal « sans réponse ».
-      unanswered: addressedToOwner ? false : merged.unanswered,
-    };
+      unanswered: addressedToOwner || locked ? false : merged.unanswered,
+    } as AlmaClassification;
     const drafted = applyDraftToAction(
       normalizeAlmaOutput(extracted.answer),
-      next?.action ?? viewedAction ?? null,
-      next?.chips ?? [],
+      locked?.action ?? next?.action ?? viewedAction ?? null,
+      locked?.action ? lockedChips : next?.chips ?? [],
     );
     // Lot J4 : mots proscrits reformulés, anecdote déplacée après l'information.
     const quiet = Boolean(helpDirective) || intent.frustration || classification.frustration >= 2 ||
       classification.bug_suspected || classification.intent === "aide_recherchee";
-    const answer = addressedToOwner && viewed
-      ? buildOwnerQuestionAnswer(viewed.facts, viewed.viewer)
-      : scrubTruth(polishAlmaAnswer(drafted.answer, { perso: register === "perso", quiet }), { messaging: messagingAsked, foreignOpen });
+    const finish = (raw: string) =>
+      scrubTruth(polishAlmaAnswer(raw, { perso: register === "perso", quiet }), { messaging: messagingAsked, foreignOpen });
+    let answer = finish(drafted.answer);
+    // Lot L4 : contrôle après génération.
+    //  - faits verrouillés : un manque ou un interdit fait retomber sur le gabarit ;
+    //  - amorce répétée, ou animal du membre non nommé : une seule relance.
+    const softIssues = (text: string): string[] => {
+      const out: string[] = [];
+      if (repeatsOpener(text, recentAnswers)) out.push("amorce_repetee");
+      if (myPets.length && asksAboutOwnPets(message) && !myPets.some((p) => p.name && foldC(text).includes(foldC(p.name)))) out.push("animal_non_nomme");
+      return out;
+    };
+    const hardIssues = (text: string) => (locked ? checkLocked(text, locked) : []);
+    let issues = [...hardIssues(answer), ...softIssues(answer)];
+    let retried = false;
+    if (answer && issues.length) {
+      retried = true;
+      const feedback = [
+        "RELECTURE DE TA RÉPONSE PRÉCÉDENTE, à corriger :",
+        ...issues.map((x) => x === "amorce_repetee" ? "- Elle commence comme une réponse récente : commence autrement."
+          : x === "animal_non_nomme" ? `- Nomme ses animaux : ${myPets.map((p) => p.name).filter(Boolean).join(", ")}.`
+          : x.startsWith("manque:") ? `- Fait obligatoire absent : ${x.slice(7)}.`
+          : `- Contenu interdit : ${x.replace("interdit:", "")}.`),
+        `Ta réponse précédente : « ${answer.slice(0, 600)} »`,
+      ].join("\n");
+      const r2 = await askModel(feedback);
+      if (r2.ok) {
+        const raw2: string = r2.data?.choices?.[0]?.message?.content ?? "";
+        const second = finish(normalizeAlmaOutput(extractClassification(raw2).answer));
+        const issues2 = [...hardIssues(second), ...softIssues(second)];
+        if (second && issues2.length < issues.length) { answer = second; issues = issues2; }
+      }
+    }
+    const hard = locked ? checkLocked(answer, locked) : [];
+    if (locked && hard.length) {
+      answer = locked.template;
+      (classification as any).fallback_template = true;
+      (classification as any).fallback_issues = hard;
+    } else if (locked) {
+      (classification as any).fallback_template = false;
+    }
+    if (retried) (classification as any).retried = true;
+    if (issues.some((x) => !x.startsWith("manque:") && !x.startsWith("interdit:")) && !(classification as any).fallback_template) {
+      (classification as any).soft_issues = issues;
+    }
     if (!answer) {
       await logConversation({
         user_id: userId,
@@ -791,7 +896,7 @@ Deno.serve(async (req) => {
     // Lot J3 : l'action principale reste toujours celle du moteur. En
     // frustration, bug ou départ, « Écrire à Jérémie et Elisa » s'affiche en
     // lien secondaire (human_contact), jamais à la place de l'action.
-    const action = viewedAction && (addressedToOwner || !drafted.action) ? viewedAction : drafted.action;
+    const action = locked?.action ?? (viewedAction && (addressedToOwner || !drafted.action) ? viewedAction : drafted.action);
     const chips = drafted.chips;
     const conversationId = await logConversation({
       user_id: userId,

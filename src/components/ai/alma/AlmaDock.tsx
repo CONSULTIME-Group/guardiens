@@ -934,6 +934,8 @@ function AlmaDockInner() {
           aria-hidden
         >
           <span className="text-xs font-semibold text-foreground/80">Alma</span>
+          {/* Lot L4, transparence (règlement européen sur l'IA, article 50). */}
+          <span className="text-[10px] text-muted-foreground">Compagne IA de Guardiens</span>
           {/* Sous le nom : le stade de relation, jamais l'humeur. L'humeur
               se lit dans le texte du panneau et dans l'avatar. */}
           {stage && STAGE_SHORT_LABEL[stage] ? (

@@ -156,7 +156,7 @@ describe("J2-B, synthèse du lundi", () => {
 
 describe("J2-B, rejeu", () => {
   it("jeu figé : 40 cas (38 du lot J2-B, 2 du lot L1), prénoms remplacés", () => {
-    expect(ALMA_REPLAY_CASES).toHaveLength(47);
+    expect(ALMA_REPLAY_CASES).toHaveLength(50);
     const text = JSON.stringify(ALMA_REPLAY_CASES);
     for (const name of ["Jacqueline", "Véronica", "Julia", "Guilhem", "jean pierre", "Laëtitia", "Pascal", "Françoise", "Rita", "Alain"]) {
       expect(text).not.toContain(name);
