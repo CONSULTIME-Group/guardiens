@@ -7,7 +7,6 @@ import { Link } from "react-router-dom";
 import Head from "@/components/seo/Head";
 import { useAuth } from "@/contexts/AuthContext";
 import { MIN_COMPLETION_TO_APPLY } from "@/hooks/useAccessLevel";
-import { useProfileCompletionMissing } from "@/hooks/useProfileCompletionMissing";
 import { loadFirstStep, type FirstStepCard, type FirstStepData } from "@/lib/arrivalFirstStep";
 import { arrivalUrl, stepsToReach } from "@/lib/arrival";
 import { ArrivalShell, Eyebrow, Gouache, useArrivalT, useArrivalViewed } from "@/components/arrival/ArrivalUI";
@@ -27,7 +26,6 @@ const ArriveePremierPas = () => {
   const t = useArrivalT();
   const { user } = useAuth();
   const [data, setData] = useState<FirstStepData | null>(null);
-  const completion = useProfileCompletionMissing("sitter", user?.id);
 
   useEffect(() => {
     if (!user) return;
@@ -40,9 +38,9 @@ const ArriveePremierPas = () => {
   if (!user || !data) return null;
   const name = user.firstName;
   const city = data.city;
-  const score = completion.score ?? data.completion;
-  const steps = stepsToReach(score, completion.missing.map((m) => m.points), MIN_COMPLETION_TO_APPLY);
-  const firstMissing = [...completion.missing].sort((a, b) => b.points - a.points)[0];
+  const score = data.completion;
+  const steps = stepsToReach(score, data.missing.map((m) => m.points), MIN_COMPLETION_TO_APPLY);
+  const firstMissing = [...data.missing].sort((a, b) => b.points - a.points)[0];
 
   const profileCard = score < MIN_COMPLETION_TO_APPLY ? (
     <div className="arrival-card p-4 space-y-3" data-testid="g5-profile">

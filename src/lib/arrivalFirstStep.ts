@@ -10,6 +10,7 @@ import { publicProfilesLoader } from "@/lib/batchedReads";
 import { computeAffinityResultFull, type AffinityResult } from "@/lib/affinityScore";
 import { haversineDistance } from "@/utils/geo";
 import { pickFirstSteps } from "@/lib/arrival";
+import { computeSitterCompletion, type CompletionItem } from "@/lib/profileCompletion";
 
 export interface FirstStepCard {
   id: string; title: string | null; city: string; start_date: string | null; end_date: string | null;
@@ -18,7 +19,7 @@ export interface FirstStepCard {
 
 export interface FirstStepData {
   city: string; hasNear: boolean; best: FirstStepCard | null; nearCount: number; total: number; closest: FirstStepCard[];
-  completion: number; hasAvatar: boolean; hasSkills: boolean; alertActive: boolean;
+  completion: number; missing: CompletionItem[]; hasAvatar: boolean; hasSkills: boolean; alertActive: boolean;
 }
 
 async function scoreCards(cards: FirstStepCard[], raws: Map<string, any>, sitter: any) {
@@ -34,10 +35,15 @@ async function scoreCards(cards: FirstStepCard[], raws: Map<string, any>, sitter
     const raw = raws.get(c.id);
     const o = ((owners.data ?? []) as any[]).find((x) => x.user_id === raw?.user_id) ?? {};
     c.affinity = computeAffinityResultFull({
-      preferred_sitter_types: o.preferred_sitter_types, home_ambiance: o.home_ambiance, languages: o.languages,
-      interests: o.interests, life_pace: o.life_pace, presence_expected: o.presence_expected,
+      preferred_sitter_types: o.preferred_sitter_types,
+      home_ambiance: o.home_ambiance,
+      languages: o.languages,
+      interests: o.interests,
+      life_pace: o.life_pace,
+      presence_expected: o.presence_expected,
       pets: ((pets.data ?? []) as any[]).filter((p) => p.property_id === raw?.property_id),
-      accepts_sitter_pets: raw?.accepts_sitter_pets ?? null, accepts_sitter_children: raw?.accepts_sitter_children ?? null,
+      accepts_sitter_pets: raw?.accepts_sitter_pets ?? null,
+      accepts_sitter_children: raw?.accepts_sitter_children ?? null,
       car_required: ((props.data ?? []) as any[]).find((p) => p.id === raw?.property_id)?.car_required ?? null,
       distance_km: c.distanceKm,
     } as any, sitter);
@@ -45,11 +51,12 @@ async function scoreCards(cards: FirstStepCard[], raws: Map<string, any>, sitter
 }
 
 export async function loadFirstStep(userId: string): Promise<FirstStepData> {
-  const [{ data: profile }, { data: sitter }, shared, alertRes] = await Promise.all([
+  const [{ data: profile }, { data: sitter }, shared, alertRes, gallery] = await Promise.all([
     fetchMyProfile(userId, { fresh: true }),
     fetchMySitterProfile(userId, { fresh: true }),
     fetchOpenPublishedSits(userId),
     supabase.from("alert_preferences").select("id").eq("user_id", userId).eq("active", true).contains("alert_types", ["gardes"]).limit(1).maybeSingle(),
+    supabase.from("sitter_gallery").select("id", { count: "exact", head: true }).eq("user_id", userId),
   ]);
   const p = (profile ?? {}) as any;
   const me = typeof p.latitude === "number" && typeof p.longitude === "number" ? { lat: p.latitude, lng: p.longitude } : null;
@@ -71,7 +78,14 @@ export async function loadFirstStep(userId: string): Promise<FirstStepData> {
   await scoreCards(shown, raws, sitter).catch(() => {});
   return {
     city: p.city || "", hasNear: pick.hasNear, best: pick.best, nearCount: pick.nearCount, total: pick.total, closest: pick.closest,
-    completion: typeof p.profile_completion === "number" ? p.profile_completion : 0,
+    ...(() => {
+      // Même barème que le serveur (src/lib/profileCompletion.ts), comme le rail du tableau de bord.
+      const sp = (sitter ?? {}) as any;
+      const r = computeSitterCompletion({ role: "sitter", ...p, competences: sp.competences ?? null, lifestyle: sp.lifestyle ?? null,
+        geographic_radius: sp.geographic_radius ?? null, interests: sp.interests ?? null, languages: sp.languages ?? null,
+        life_pace: sp.life_pace ?? null, animal_types: sp.animal_types ?? null, sitter_gallery_count: (gallery as any)?.count ?? 0 });
+      return { completion: r.score, missing: r.missing };
+    })(),
     hasAvatar: !!p.avatar_url, hasSkills: Array.isArray(p.competences) && p.competences.length > 0,
     alertActive: !!(alertRes as any)?.data,
   };

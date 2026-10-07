@@ -222,6 +222,7 @@ const SOURCES_LITERAL = ["src/components/sits/ApplicationsList.tsx"];
 const OWNER_LITERAL_SOURCES: Array<[string, string, "table" | "embed"]> = [
   ["src/hooks/useOwnerTopAffinitySitters.ts", "const ownerInput = {", "table"],
   ["src/hooks/useSitterTopAffinitySits.ts", "computeAffinityResultFull(", "table"],
+  ["src/lib/arrivalFirstStep.ts", "computeAffinityResultFull(", "table"],
   ["supabase/functions/send-onboarding-j1/index.ts", "const ownerInput = {", "embed"],
   ["supabase/functions/send-sitter-daily-digest/index.ts", "const loadOwnerInput =", "embed"],
 ];
