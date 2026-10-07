@@ -124,7 +124,7 @@ describe("L1, action proposée sur sit_detail", () => {
     expect(sitDetailAction(id, "owner_space", null).path).toBe(`/sits/${id}?espace=gardien&postuler=1`);
   });
   it("jamais une autre annonce tant que celle-ci est ouverte", () => {
-    const inventory = emptyInventory();
+    const inventory = emptyInventory({} as any);
     inventory.gardes = [{ titre: "Autre", ville: "Lyon", lien: "/annonces/autre", id: "autre" } as any];
     const r = computeNextAction({
       facts: { candidatures_envoyees: {}, brouillons: [], annonces_publiees: [], candidatures_recues_non_ouvertes: 0, gardes_confirmees: [] } as any,
