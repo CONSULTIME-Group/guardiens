@@ -9,6 +9,7 @@
 import type { VerifiedFacts } from "./alma-facts.ts";
 import type { AlmaInventory } from "./alma-inventory.ts";
 import { foldText } from "./alma-site-knowledge.ts";
+import { isStaleDraft, STALE_DRAFT_LABEL, staleDraftPath } from "./alma-truth.ts";
 
 export interface AlmaAction {
   label: string;
@@ -46,6 +47,12 @@ export interface NextActionInput {
    * action passe en tête et aucune autre annonce n'est proposée.
    */
   viewedSit?: { id: string; action: AlmaAction } | null;
+  /** Lot L3 : intention de gardien exprimée, aucune action propriétaire. */
+  sitterIntent?: boolean;
+  /** Lot L3 : au moins une annonce publiée hors de France existe. */
+  foreignOpen?: boolean;
+  /** Lot L3 : date du jour (ISO court) pour juger un brouillon périmé. */
+  today?: string;
 }
 
 export interface NextActionResult {
@@ -62,7 +69,8 @@ export function isProfileQuestion(question: string): boolean {
   return PROFILE_ASKED.test(foldText(question)) || /\bprofil\b/.test(foldText(question));
 }
 
-const PROFILE_ASKED = /(mon profil|ma completion|mon score|completer mon profil|qu'est-ce qui manque|ce qui manque a mon profil|visible)/;
+// Lot L3 : « visible » seul déclenchait sur « mon annonce est-elle visible ».
+const PROFILE_ASKED = /(mon profil|ma completion|mon score|completer mon profil|qu'est-ce qui manque|ce qui manque a mon profil|profil (est-il |est )?visible|suis-je visible)/;
 const SIT_INTENT = /(je pars|partir|depart|vacances|faire garder|garder (mes|ma|mon|nos)|garde de (mes|ma|maison)|absence|trouver un gardien|chevaux|poneys|troupeau|chevres|moutons|poules)/;
 const HOWTO_SIT = /comment se passe une garde/;
 
@@ -92,7 +100,8 @@ export function suggestSitTitle(question: string): string {
 }
 
 /** Lot J3 : un départ ou une absence déclarés, pas seulement des animaux. */
-const DEPARTURE_INTENT = /(je pars|partir|depart|vacances|faire garder|garde de|garder (mes|ma|mon|nos)|absence|absente?|trouver un gardien|week-end|weekend)/;
+// Lot L3 : « garde de » seul déclenchait sur « je cherche une garde de chien ».
+const DEPARTURE_INTENT = /(je pars|partir|depart|vacances|faire garder|garde de (mes|ma|mon|nos)|garder (mes|ma|mon|nos)|absence|absente?|trouver un gardien|week-end|weekend)/;
 
 const withTitle = (path: string, title: string) => `${path}?titre=${encodeURIComponent(title)}`;
 
@@ -134,9 +143,13 @@ export function computeNextAction(input: NextActionInput): NextActionResult {
   }
 
   // 1. Propriétaire.
-  if (ownerSide) {
+  // Lot L3 : une intention de gardien n'appelle aucune action propriétaire.
+  if (ownerSide && !input.sitterIntent) {
     const draft = facts.brouillons[0];
-    if (draft) candidates.push({ label: `Publier le brouillon${draft.titre ? ` « ${draft.titre} »` : ""}`, path: `/sits/create?draftId=${draft.sit_id}`, reason: "brouillon" });
+    const today = input.today ?? new Date().toISOString().slice(0, 10);
+    if (draft && isStaleDraft(draft, today)) {
+      candidates.push({ label: STALE_DRAFT_LABEL, path: staleDraftPath(draft.sit_id), reason: "brouillon_perime" });
+    } else if (draft) candidates.push({ label: `Publier le brouillon${draft.titre ? ` « ${draft.titre} »` : ""}`, path: `/sits/create?draftId=${draft.sit_id}`, reason: "brouillon" });
     if (facts.candidatures_recues_non_ouvertes > 0) candidates.push({ label: "Lire les candidatures reçues", path: "/sits", reason: "candidatures_non_ouvertes" });
     if (!facts.annonces_publiees.length && sitIntent && !input.helpIntent) {
       candidates.push({ label: "Publier mon annonce de garde", path: withTitle("/sits/create", suggestSitTitle(input.question)), reason: "intention_garde" });
@@ -164,7 +177,8 @@ export function computeNextAction(input: NextActionInput): NextActionResult {
   else candidates.push({ label: `Voir « ${inventory.projets[0].titre} »`, path: inventory.projets[0].lien, reason: "projet_proche" });
   const question = inventory.questions_sans_reponse[0];
   if (question) candidates.push({ label: `Répondre à la question « ${question.titre} »`, path: question.lien, reason: "question_sans_reponse" });
-  if (inventory.hors_france || /etranger|international|hors de france/.test(q)) {
+  // Lot L3 : la page internationale n'est proposée que si une annonce hors de France existe.
+  if (input.foreignOpen !== false && (inventory.hors_france || /etranger|international|hors de france/.test(q))) {
     candidates.unshift({ label: "Voir les gardes à l'international", path: "/annonces/international", reason: "international" });
   }
 

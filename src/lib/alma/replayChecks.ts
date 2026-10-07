@@ -15,7 +15,7 @@ export interface ReplayAnswer {
   frustration?: number | null;
   confirmedSit?: boolean | null;
   /** Lot L1 : attentes propres au cas (voir almaReplayCases). */
-  expect?: { mentionsOwner?: boolean; mentions?: string[]; actionPath?: string; forbidden?: string[] } | null;
+  expect?: { mentionsOwner?: boolean; mentions?: string[]; actionPath?: string; forbidden?: string[]; placeNotAvailable?: string[]; forbiddenActionPrefix?: string } | null;
 }
 
 export interface ReplayVerdict {
@@ -95,5 +95,12 @@ export function checkReplayAnswer(a: ReplayAnswer): ReplayVerdict {
   for (const w of ex?.mentions ?? []) if (!a.answer.includes(w)) reasons.push(`mention attendue « ${w} »`);
   if (ex?.actionPath && a.action?.path !== ex.actionPath) reasons.push(`action attendue ${ex.actionPath}`);
   for (const w of ex?.forbidden ?? []) if (a.answer.includes(w)) reasons.push(`mention interdite « ${w} »`);
+  // Lot L3 : un lieu cité ne l'est que pour dire qu'il n'y a aucune garde.
+  for (const place of ex?.placeNotAvailable ?? []) {
+    for (const s of a.answer.split(/(?<=[.!?])\s+/)) {
+      if (s.includes(place) && !/\baucune?\b|\bpas de\b/i.test(s)) reasons.push(`lieu présenté comme disponible « ${place} »`);
+    }
+  }
+  if (ex?.forbiddenActionPrefix && (a.action?.label ?? "").startsWith(ex.forbiddenActionPrefix)) reasons.push(`action interdite « ${ex.forbiddenActionPrefix} »`);
   return { passed: reasons.length === 0, reasons };
 }

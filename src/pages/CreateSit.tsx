@@ -738,6 +738,17 @@ const CreateSit = () => {
   }, []);
   const [localDraftRestored, setLocalDraftRestored] = useState(false);
   const [remoteDraftResumed, setRemoteDraftResumed] = useState(false);
+  // Lot L3 : « Reprendre ce brouillon avec de nouvelles dates » (Alma) ouvre
+  // le brouillon à l'étape des dates, après la reprise du brouillon.
+  const resumeAtDates = searchParams.get("etape") === "dates";
+  useEffect(() => {
+    if (!resumeAtDates) return;
+    const t = window.setTimeout(() => {
+      setCurrentStep(0);
+      document.getElementById("dates-field")?.scrollIntoView({ block: "center" });
+    }, 400);
+    return () => window.clearTimeout(t);
+  }, [resumeAtDates, remoteDraftResumed, localDraftRestored]);
   // Restaure la copie locale si elle est postérieure au brouillon distant.
   const restoreLocalDraftIfFresher = useCallback((remoteUpdatedAt: string | null, remoteDraftId?: string | null, sourceLoaded?: boolean) => {
     if (!localDraftKey) return;

@@ -13,6 +13,8 @@ export interface AlmaReplayCase {
   question: string;
   /** Messages précédents du même membre, dans l'ordre. */
   history: string[];
+  /** Lot L3 : contexte réel du membre au moment de la question. */
+  context?: string;
   /** Lot L1 : page ouverte au moment de la question (fiche d'annonce). */
   pagePath?: string;
   /** Lot L1 : attentes propres au cas, vérifiées par checkReplayAnswer. */
@@ -20,6 +22,10 @@ export interface AlmaReplayCase {
     mentionsOwner?: boolean;
     /** Lot L2 : mots que la réponse doit contenir. */
     mentions?: string[];
+    /** Lot L3 : lieux qui ne doivent jamais être présentés comme disponibles. */
+    placeNotAvailable?: string[];
+    /** Lot L3 : libellé d'action interdit (préfixe). */
+    forbiddenActionPrefix?: string;
     actionPath?: string;
     forbidden?: string[];
   };
@@ -469,6 +475,146 @@ export const ALMA_REPLAY_CASES: AlmaReplayCase[] = [
       "mentions": ["Galerie"],
       "actionPath": "/owner-profile?section=gallery",
       "forbidden": ["messagerie", "Messagerie"]
+    }
+  },
+  {
+    "id": "cas-43",
+    "member": "Membre 26",
+    "activeRole": "owner",
+    "accountRole": "both",
+    "surface": "sits_list",
+    "question": "Je recherche une garde en toscane",
+    "history": [],
+    "context": "Rôle both, espace propriétaire actif, brouillon dont la date de début (03/09/2026) est passée",
+    "expect": {
+      "mentions": [
+        "espace propriétaire",
+        "espace gardien"
+      ],
+      "actionPath": "/annonces?espace=gardien",
+      "placeNotAvailable": [
+        "Toscane",
+        "Italie"
+      ],
+      "forbidden": [
+        "international",
+        "dossier",
+        "Toscane"
+      ],
+      "forbiddenActionPrefix": "Publier le brouillon"
+    }
+  },
+  {
+    "id": "cas-44",
+    "member": "Membre 26",
+    "activeRole": "owner",
+    "accountRole": "both",
+    "surface": "listings",
+    "question": "Je cherche à garder un chien en toscane.",
+    "history": [
+      "Je recherche une garde en toscane"
+    ],
+    "context": "Rôle both, espace propriétaire actif, brouillon dont la date de début (03/09/2026) est passée",
+    "expect": {
+      "mentions": [
+        "espace propriétaire",
+        "espace gardien"
+      ],
+      "actionPath": "/annonces?espace=gardien",
+      "placeNotAvailable": [
+        "Toscane",
+        "Italie"
+      ],
+      "forbidden": [
+        "international",
+        "dossier",
+        "Toscane"
+      ],
+      "forbiddenActionPrefix": "Publier le brouillon"
+    }
+  },
+  {
+    "id": "cas-45",
+    "member": "Membre 26",
+    "activeRole": "owner",
+    "accountRole": "both",
+    "surface": "listings",
+    "question": "Où sont les annonces ? Sous la rubrique annonces, je ne trouve que la mienne.",
+    "history": [
+      "Je recherche une garde en toscane",
+      "Je cherche à garder un chien en toscane."
+    ],
+    "context": "Rôle both, espace propriétaire actif, brouillon dont la date de début (03/09/2026) est passée",
+    "expect": {
+      "mentions": [
+        "espace propriétaire",
+        "espace gardien"
+      ],
+      "actionPath": "/annonces?espace=gardien",
+      "placeNotAvailable": [
+        "Toscane",
+        "Italie"
+      ],
+      "forbidden": [
+        "international",
+        "dossier",
+        "Toscane"
+      ],
+      "forbiddenActionPrefix": "Publier le brouillon"
+    }
+  },
+  {
+    "id": "cas-46",
+    "member": "Membre 26",
+    "activeRole": "owner",
+    "accountRole": "both",
+    "surface": "listings",
+    "question": "Où est cette page ?",
+    "history": [
+      "Je recherche une garde en toscane",
+      "Je cherche à garder un chien en toscane.",
+      "Où sont les annonces ? Sous la rubrique annonces, je ne trouve que la mienne."
+    ],
+    "context": "Rôle both, espace propriétaire actif, brouillon dont la date de début (03/09/2026) est passée",
+    "expect": {
+      "mentions": [
+        "espace propriétaire",
+        "espace gardien"
+      ],
+      "actionPath": "/annonces?espace=gardien",
+      "placeNotAvailable": [
+        "Toscane",
+        "Italie"
+      ],
+      "forbidden": [
+        "international",
+        "dossier",
+        "Toscane"
+      ],
+      "forbiddenActionPrefix": "Publier le brouillon"
+    }
+  },
+  {
+    "id": "cas-47",
+    "member": "Membre 25",
+    "activeRole": "owner",
+    "accountRole": "owner",
+    "surface": "listings",
+    "question": "Je ne peux trouver la page pour supprimer la photo de ma maison",
+    "history": [
+      "Je veux supprimer la photo de ma maison"
+    ],
+    "context": "Classement par motifs (source patterns), question sans lien avec la messagerie",
+    "expect": {
+      "mentions": [
+        "Galerie"
+      ],
+      "actionPath": "/owner-profile?section=gallery",
+      "forbidden": [
+        "messagerie",
+        "Messagerie",
+        "dossier"
+      ]
     }
   }
 ];
