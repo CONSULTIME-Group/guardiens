@@ -111,10 +111,10 @@ describe("P3, P4, C4", () => {
     expect(initialLanguages(["Français", "Anglais"])).toEqual(["Français", "Anglais"]);
     expect(initialLanguages([])).toEqual(["Français"]);
   });
-  it("P4 : garder d'abord, coup de main ensuite", () => {
-    expect(alsoNextSteps({ garder: true, coupDeMain: false, sitPath: "/sits/1" })).toBe(`/onboarding/affinity?redirect=${encodeURIComponent("/sits/1")}`);
-    expect(alsoNextSteps({ garder: false, coupDeMain: true, sitPath: "/sits/1" })).toBe("/profile?section=competences");
-    expect(alsoNextSteps({ garder: true, coupDeMain: true, sitPath: "/sits/1" })).toContain(encodeURIComponent("/profile?section=competences"));
+  it("P4 : garder vers G2 (puis G3), coup de main vers G4 (lot 2)", () => {
+    expect(alsoNextSteps({ garder: true, coupDeMain: false, sit: "1" })).toBe("/arrivee/garder?flow=owner&sit=1");
+    expect(alsoNextSteps({ garder: false, coupDeMain: true, sit: "1" })).toBe("/arrivee/savoir-faire?flow=owner&sit=1&aide=1");
+    expect(alsoNextSteps({ garder: true, coupDeMain: true, sit: "1" })).toBe("/arrivee/garder?flow=owner&sit=1&aide=1");
   });
   it("C4 : entraide d'abord pour l'intention entraide", () => {
     expect(welcomeUsesOrder(false)[0]).toBe("gardes");
