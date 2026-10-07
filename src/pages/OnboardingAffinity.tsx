@@ -14,6 +14,8 @@
  * Réutilise les listes d'options centralisées dans profileMatchingOptions.
  */
 import { resolvePostOnboardingTarget } from "@/lib/postOnboardingIntent";
+import { fetchMyProfile, fetchMySitterProfile, fetchMyOwnerProfile } from "@/lib/myProfile";
+import { buildAffinityWrites } from "@/lib/affinityOnboardingWrites";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Head from "@/components/seo/Head";
@@ -92,6 +94,46 @@ const OnboardingAffinity = () => {
   // Code postal : requis pour tous les rôles tant qu'il manque sur profiles
   // (23/08/2026, fuite d'inscriptions géographiquement introuvables).
   const [postalCode, setPostalCode] = useState<string>("");
+  // Lot 0 : erreur d'écriture affichée sous le bouton, réponses gardées.
+  const [saveError, setSaveError] = useState(false);
+
+  // Lot 0 : pré-remplissage avec les valeurs déjà en base. Un champ déjà
+  // saisi à l'écran n'est jamais écrasé par la lecture.
+  useEffect(() => {
+    if (!user?.id) return;
+    let cancelled = false;
+    const keep = <T,>(cur: T, next: T, empty: (v: T) => boolean) => (empty(cur) && !empty(next) ? next : cur);
+    const arr = (v: unknown): string[] => (Array.isArray(v) ? (v as string[]) : []);
+    const str = (v: unknown): string => (typeof v === "string" ? v : "");
+    const noArr = (v: string[]) => v.length === 0;
+    const noStr = (v: string) => v === "";
+    void Promise.all([
+      fetchMySitterProfile(user.id, { fresh: true }),
+      fetchMyOwnerProfile(user.id, { fresh: true }),
+      fetchMyProfile(user.id),
+    ]).then(([s, o, p]) => {
+      if (cancelled) return;
+      const sp = s.data ?? {};
+      const op = o.data ?? {};
+      setAnimalTypes((c) => keep(c, arr(sp.animal_types), noArr));
+      setWorkDuringSit((c) => keep(c, str(sp.work_during_sit), noStr));
+      setSitterType((c) => keep(c, str(sp.sitter_type), noStr));
+      setPresenceExpected((c) => keep(c, str(op.presence_expected), noStr));
+      setPreferredSitterTypes((c) => keep(c, arr(op.preferred_sitter_types), noArr));
+      setHomeAmbiance((c) => keep(c, arr(op.home_ambiance), noArr));
+      setLifePace((c) => keep(c, str(sp.life_pace) || str(op.life_pace), noStr));
+      const dbInterests = arr(sp.interests).length ? arr(sp.interests) : arr(op.interests);
+      setInterests((c) => keep(c, dbInterests, noArr));
+      const dbLanguages = arr(sp.languages).length ? arr(sp.languages) : arr(op.languages);
+      // « Français » n'est coché par défaut que si rien n'est en base.
+      if (dbLanguages.length) {
+        setLanguages((c) => (c.length === 1 && c[0] === "Français" ? dbLanguages : keep(c, dbLanguages, noArr)));
+      }
+      setPostalCode((c) => keep(c, str(p.data?.postal_code), noStr));
+    });
+    return () => { cancelled = true; };
+  }, [user?.id]);
+
 
   const needsPostal = status.needsPostal;
   const postalClean = postalCode.trim();
