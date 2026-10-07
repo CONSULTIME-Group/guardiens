@@ -46,7 +46,7 @@ describe("lot 2, G2", () => {
 describe("lot 2, G4 et E1", () => {
   it("rien n'est écrit sans choix ; un choix pose available_for_help", () => {
     expect(buildG4Writes([], "")).toBeNull();
-    expect(buildG4Writes(["Courses"], "")).toMatchObject({ available_for_help: true, skill_categories: ["coups_de_main"] });
+    expect(buildG4Writes(["Courses"], "")).toMatchObject({ available_for_help: true, competences: ["Courses"] });
   });
   it("trajets et jeux classés", () => {
     expect(deriveCategoriesFromCompetences(["Trajets en voiture"])).toEqual(["coups_de_main"]);
