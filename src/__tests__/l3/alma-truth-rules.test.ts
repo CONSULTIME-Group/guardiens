@@ -53,7 +53,7 @@ describe("règle 1 : espace actif", () => {
 
 describe("règle 2 : périmètre réel", () => {
   const sits = [{ country: "FR", city: "Damgan", departement_code: "56" }, { country: "PF", city: "Papeete", departement_code: "987" }];
-  const deps = [{ code: "56", nom: "Morbihan", nom_region: "Bretagne" }, { code: "29", nom: "Finistère", nom_region: "Bretagne" }, { code: "74", nom: "Haute-Savoie", nom_region: "Auvergne-Rhône-Alpes" }, { code: "987", nom: "Polynésie française" }];
+  const deps = [{ code: "56", nom: "Morbihan", nom_region: "Bretagne" }, { code: "29", nom: "Finistère", nom_region: "Bretagne" }, { code: "74", nom: "Haute-Savoie", nom_region: "Savoies" }, { code: "987", nom: "Polynésie française" }];
   it("Toscane et Italie : Italie, phrase exacte", () => {
     expect(foreignPlaceIn("une garde en toscane")?.iso).toBe("IT");
     expect(foreignNoneSentence("en Italie")).toBe("Guardiens propose des gardes en France, Polynésie française comprise. Il n'y a aucune garde en Italie aujourd'hui.");
