@@ -110,8 +110,6 @@ const ApproximateLocationMap = ({
       return;
     }
     setLoading(true);
-  // Plan IGN vide hors France : fond mondial pour les annonces internationales.
-  const isFrance = !country || country === "FR" || /france/i.test(country);
     geocode(city, postalCode, country).then((c) => {
       if (cancelled) return;
       setCoords(c);
@@ -119,6 +117,8 @@ const ApproximateLocationMap = ({
     });
     return () => { cancelled = true; };
   }, [city, postalCode, country, lat, lng, hasExact]);
+  // Plan IGN vide hors France : fond mondial pour les annonces internationales.
+  const isFrance = !country || country === "FR" || /france/i.test(country);
 
   if (loading || !coords) {
     return (
