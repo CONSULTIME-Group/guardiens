@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS analytics_events_type_created_idx ON public.analytics_events (event_type, created_at DESC);
