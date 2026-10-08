@@ -103,7 +103,7 @@ const PublicSitDetail = () => {
         // 301-like : si on est arrivés via UUID mais qu'un slug existe, on
         // remplace l'URL par la version slug (mieux pour SEO, partages, CTR).
         if (isUuid && sitData.slug && sitData.slug !== param) {
-          commit(() => setCanonicalRedirect(`/annonces/${sitData.slug}`));
+          commit(() => setCanonicalRedirect(`/annonces/${sitData.slug}${window.location.search}${window.location.hash}`));
           return;
         }
         const id = sitData.id;

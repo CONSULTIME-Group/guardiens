@@ -9,7 +9,7 @@ import { MapContainer, TileLayer, Circle } from "react-leaflet";
 import L from "leaflet";
 import { LeafletUnmountGuard } from "@/components/shared/LeafletUnmountGuard";
 import { supabase } from "@/integrations/supabase/client";
-import { MAP_TILE_URL, MAP_TILE_ATTRIBUTION, MAP_TILE_MAX_ZOOM } from "@/lib/mapTiles";
+import { MAP_TILE_URL, MAP_TILE_ATTRIBUTION, MAP_TILE_MAX_ZOOM, MAP_TILE_WORLD_URL, MAP_TILE_WORLD_ATTRIBUTION, MAP_TILE_WORLD_MAX_ZOOM } from "@/lib/mapTiles";
 
 interface Props {
   city?: string | null;
@@ -117,6 +117,8 @@ const ApproximateLocationMap = ({
     });
     return () => { cancelled = true; };
   }, [city, postalCode, country, lat, lng, hasExact]);
+  // Plan IGN vide hors France : fond mondial pour les annonces internationales.
+  const isFrance = !country || country === "FR" || /france/i.test(country);
 
   if (loading || !coords) {
     return (
@@ -164,9 +166,9 @@ const ApproximateLocationMap = ({
       >
         <LeafletUnmountGuard />
         <TileLayer
-          url={MAP_TILE_URL}
-          attribution={MAP_TILE_ATTRIBUTION}
-          maxZoom={MAP_TILE_MAX_ZOOM}
+          url={isFrance ? MAP_TILE_URL : MAP_TILE_WORLD_URL}
+          attribution={isFrance ? MAP_TILE_ATTRIBUTION : MAP_TILE_WORLD_ATTRIBUTION}
+          maxZoom={isFrance ? MAP_TILE_MAX_ZOOM : MAP_TILE_WORLD_MAX_ZOOM}
         />
         <Circle
           center={[coords.lat, coords.lng]}
