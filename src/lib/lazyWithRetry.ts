@@ -20,7 +20,13 @@ export function lazyWithRetry<T extends ComponentType<any>>(
   _chunkName?: string,
 ) {
   // Lot P5 : la page attend aussi le dictionnaire complet (même rendu qu'avant).
-  const factory = () => Promise.all([load(), waitDictionary()]).then(([m]) => m);
+  // Un module vide (vu sur d'anciens navigateurs) suit le chemin d'échec :
+  // nouvelle tentative puis rechargement, au lieu d'un écran d'erreur.
+  const factory = () =>
+    Promise.all([load(), waitDictionary()]).then(([m]) => {
+      if (!m || !m.default) throw new Error("lazy module without default export");
+      return m;
+    });
   return lazy(async () => {
     try {
       return await factory();
