@@ -283,7 +283,7 @@ const SmallMissionDetail = () => {
 
     // Rétrocompat : si on est arrivé par UUID et qu'un slug existe, on redirige vers l'URL lisible.
     if (isUuidParam && (m as any).slug) {
-      commit(() => setCanonicalRedirect(`/petites-missions/${(m as any).slug}`));
+      commit(() => setCanonicalRedirect(`/petites-missions/${(m as any).slug}${window.location.search}${window.location.hash}`));
       return;
     }
     commit(() => setMission(m));
