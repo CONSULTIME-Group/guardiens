@@ -283,7 +283,7 @@ const SmallMissionDetail = () => {
 
     // Rétrocompat : si on est arrivé par UUID et qu'un slug existe, on redirige vers l'URL lisible.
     if (isUuidParam && (m as any).slug) {
-      commit(() => setCanonicalRedirect(`/petites-missions/${(m as any).slug}${window.location.search}${window.location.hash}`));
+      commit(() => setCanonicalRedirect(`/petites-missions/${(m as any).slug}`));
       return;
     }
     commit(() => setMission(m));
@@ -743,7 +743,7 @@ const SmallMissionDetail = () => {
   };
 
   if (loadFailed) return <PublicLoadError />;
-  if (canonicalRedirect) return <LegacyProjetRedirect target={canonicalRedirect} title="Mission déplacée" description="Cette mission est disponible à son adresse actuelle." />;
+  if (canonicalRedirect) return <LegacyProjetRedirect target={`${canonicalRedirect}${window.location.search}${window.location.hash}`} title="Mission déplacée" description="Cette mission est disponible à son adresse actuelle." />;
 
   if (projetRedirect) {
     return <LegacyProjetRedirect target={projetRedirect} />;

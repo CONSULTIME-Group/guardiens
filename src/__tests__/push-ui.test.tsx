@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom';
 import PushNotificationsSection from '@/components/settings/PushNotificationsSection';
 const mocks = vi.hoisted(() => ({ support: 'supported', config: vi.fn(), state: vi.fn(), enable: vi.fn(), disable: vi.fn(), update: vi.fn(), test: vi.fn() }));
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: { id: 'fixture-user' } }) }));
-vi.mock('@/lib/web-push', () => ({ pushSupport: () => mocks.support, getPushConfig: mocks.config, getPushState: mocks.state, enablePush: mocks.enable, disablePush: mocks.disable, updatePushPreferences: mocks.update, testPushOnDevice: mocks.test }));
+vi.mock('@/lib/web-push', () => ({ pushSupport: () => mocks.support, getPushConfig: mocks.config, getPushState: mocks.state, enablePush: mocks.enable, disablePush: mocks.disable, updatePushPreferences: mocks.update, testPushOnDevice: mocks.test, markPushOptOut: vi.fn(), clearPushOptOut: vi.fn() }));
 vi.mock('@/lib/analytics', () => ({ trackEvent: vi.fn() }));
 beforeEach(() => {
   vi.clearAllMocks(); mocks.support='supported';

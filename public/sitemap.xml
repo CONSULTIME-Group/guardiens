@@ -3268,6 +3268,11 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/gardiens/7700aa0a-7fce-45fa-b863-5ebc1b74462c</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/gardiens/78f44fad-b165-40e3-b0b7-48ca681c29f2</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
@@ -3374,6 +3379,11 @@
   </url>
   <url>
     <loc>https://guardiens.fr/gardiens/9a4b2013-fe29-48c9-80cc-32d97db0a93b</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/gardiens/9e9965a8-d0a3-4f35-bf2b-8ad22a666143</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -3723,11 +3733,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/annonces/garder-spoon-a-domicile-gourdon-7d59cd</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://guardiens.fr/annonces/nous-recherchons-une-personne-ou-un-couple-retraite-pour-gar-853154</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -3764,6 +3769,11 @@
   </url>
   <url>
     <loc>https://guardiens.fr/petites-missions/un-coup-de-main-pour-transporter-un-canape-2-place-surtout-dans-un-vehicule-plus</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/petites-missions/besoin-un-coin-jardin-pour-mettre-en-securite-mon-camping-car-et-mon-chat-je-vis</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
