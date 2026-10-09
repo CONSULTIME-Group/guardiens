@@ -23,6 +23,9 @@ export type EventType =
   | "push_enabled"
   | "push_resubscribe_shown"
   | "push_resubscribe_clicked"
+  | "push_offer_shown"
+  | "push_offer_clicked"
+  | "push_offer_postponed"
   | "push_renewed_silently"
   | "signup_role_applied"
   | "arrival_step_viewed"            // Lot 1 arrivée v2 (step C1..P4)

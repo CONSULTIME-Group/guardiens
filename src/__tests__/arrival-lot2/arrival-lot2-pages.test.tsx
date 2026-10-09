@@ -38,6 +38,7 @@ vi.mock("@/lib/myProfile", () => ({
   fetchMySitterProfile: () => Promise.resolve({ data: sitterRow, error: null }),
 }));
 vi.mock("@/lib/web-push", () => ({
+  postponePushOffer: vi.fn(),
   pushSupport: () => support,
   hasLocalPushSubscription: () => false,
   getPushConfig: () => Promise.resolve({ enabled: true, publicKey: "k" }),
