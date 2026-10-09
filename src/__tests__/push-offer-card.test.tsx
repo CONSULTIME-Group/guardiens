@@ -17,7 +17,6 @@ vi.mock("@/lib/web-push", async (orig) => {
   const m = await orig<typeof import("@/lib/web-push")>();
   return {
     ...m,
-    pushSupport: () => "supported",
     enablePush: (...a: unknown[]) => enablePushMock(...a),
     getPushState: () => Promise.resolve({ subscribed: true, messages: true, applications: true }),
   };
@@ -28,6 +27,11 @@ import { markPushOptOut, postponePushOffer, canOfferPush } from "@/lib/web-push"
 
 const CTA = "Recevoir mes candidatures sur mon téléphone";
 const setPermission = (p: NotificationPermission) => { (globalThis as any).Notification = { permission: p, requestPermission: vi.fn() }; };
+
+Object.defineProperty(window, "isSecureContext", { configurable: true, value: true });
+(window as any).PushManager = function PushManager() {};
+window.matchMedia ??= ((() => ({ matches: false, addEventListener() {}, removeEventListener() {} })) as any);
+Object.defineProperty(navigator, "serviceWorker", { configurable: true, value: { getRegistration: () => Promise.resolve(undefined), addEventListener() {}, removeEventListener() {} } });
 
 beforeEach(() => {
   localStorage.clear(); sessionStorage.clear();
