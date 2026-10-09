@@ -1,20 +1,21 @@
-# Diagnostic : double alerte La Rochelle reçue par Claire
+# Publication du lot push : constat et suite
 
-## Preuve (lecture seule, table mass_email_sends)
-Adresse clairepoimboeuf@orange.fr, profil 3561bc39, un seul profil à ce nom.
+## Constat (vérifié le 09/10 à 07:19 UTC, lecture seule)
 
-| Date (UTC) | Campagne | Rayon | ID fournisseur | Statut |
-|---|---|---|---|---|
-| 02/10 10:58:34 | b5240019 | 80 km | 01a0fc44-115a-7301-a5e9-b13b21357aff | ouvert 11:04 |
-| 02/10 10:58:44 | 17e72026 | 180 km | 01a0fc44-378c-78e2-a8d3-c40d3b7bcb39 | ouvert 11:04 |
+- guardiens.fr et guardiens.lovable.app servent tous les deux `index-DOHSwqUT.js`, avec l'identifiant de déploiement `81193e2a-bee6-4424-8b90-2f5ba4096cbc`. C'est l'ancienne version, celle d'avant les lots 1, 2, 2b, P5 et push.
+- La publication demandée (`5c7e8141-6c50-4dc0-9f11-d9a62484a126`) n'est donc pas en ligne : aucune des deux adresses ne la sert.
+- Le domaine guardiens.fr est connecté et actif. Le projet est publié. Le domaine ne bloque rien.
+- Le dernier enregistrement du projet est bien `4a8aa57b` (07:11 UTC, « Corrigé PushResubscribeCard »).
+- La dernière build locale de ce code passait (entrée 219 480 octets, sous le plafond). Rien n'indique un échec de build, mais je n'ai aucun moyen de lire le statut du déploiement `5c7e8141` lui-même.
 
-Les deux emails : circuit `send-mass-email-proximity` (segment proximity), filtre mission_id e5724f3e (plantation), objet « Près de chez vous, Gaelle cherche un coup de main », mission_type besoin. Deux ID fournisseur distincts, 10 secondes d'écart.
+## Conclusion
 
-## Cause établie
-Élargissement du rayon de 80 à 180 km : le second envoi ne connaissait pas le premier. Aucun digest, aucune vague automatique, aucun autre profil ni adresse en cause (email_send_log : seulement owner-departure-question le 30/09). Le reclassement en projet n'y est pour rien. Ce n'est pas un nouveau défaut : c'est exactement l'incident du 02/10.
+Le site n'est pas publié avec le lot push. La réponse « pending » indiquait seulement une demande en file. Plusieurs minutes plus tard, l'ancienne version est toujours servie : la demande a échoué ou n'a jamais été lancée. Une attente plus longue n'est pas la cause probable, un déploiement prend en général environ une minute.
 
-## Digest et vague
-Pas impliqués ici. Dédup existante : vague = email_send_log, clé mission-wave-<id>-, et mission_notification_queue par membre ; le correctif prêt les ajoute aussi aux exclusions de l'envoi de proximité. La réapparition d'une annonce dans le digest n'est pas en cause dans ce cas.
+## Étape proposée (après votre approbation)
 
-## Correctif minimal recommandé
-Aucun nouveau code. Le correctif anti-double-envoi est déjà prêt, testé, mais pas encore déployé (commits fb2de36c7 à 05b8c6993). Son test 80 puis 180 km reproduit ce cas. Avec votre GO : déployer la fonction send-mass-email-proximity, puis publier le site. Pas de migration.
+1. Relancer la publication avec l'outil de publication du projet, pour `4a8aa57b`, après lecture des alertes de sécurité. Vous pouvez aussi cliquer sur Publier puis Mettre à jour dans l'éditeur.
+2. Une seule vérification, environ deux minutes plus tard, sur guardiens.fr et guardiens.lovable.app. Elle confirme que l'identifiant de déploiement et le nom du fichier d'entrée ont changé, et que la carte des notifications servie est la nouvelle (bouton « Recevoir mes candidatures sur mon téléphone » présent dans le fichier).
+3. Si l'ancienne version est toujours servie, je ne dis pas que c'est publié. Je vous indique de publier depuis l'éditeur et de lire le message d'erreur affiché.
+
+Aucune modification de code ni de base.
