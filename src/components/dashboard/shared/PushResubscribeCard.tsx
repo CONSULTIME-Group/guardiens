@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,21 +28,28 @@ export default function PushResubscribeCard({ role }: { role?: string | null }) 
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [done, setDone] = useState(false);
+  // Membre affiché : tout résultat arrivé pour un autre compte est ignoré.
+  const owner = useRef<string | null>(null);
+  owner.current = user?.id ?? null;
 
   useEffect(() => {
+    // Changement de compte, de rôle ou déconnexion : aucune carte héritée.
+    setMode(null); setPrefs(null); setConfig(null); setDone(false); setMessage(""); setBusy(false);
     if (!user?.id) return;
     const userId = user.id;
     let current = true;
+    const alive = () => current && owner.current === userId;
     const flag = (key: string) => {
       try { if (sessionStorage.getItem(key)) return false; sessionStorage.setItem(key, "1"); } catch { /* rien */ }
       return true;
     };
-    const preload = () => getPushConfig(userId).then((c) => { if (current) setConfig(c); }).catch(() => { if (current) setConfig({ enabled: false }); });
+    const preload = () => getPushConfig(userId).then((c) => { if (alive()) setConfig(c); }).catch(() => { if (alive()) setConfig({ enabled: false }); });
     const check = () => pushDeviceStatus(userId).then(async (s) => {
-      if (!current) return;
+      if (!alive()) return;
       if (s.kind === "renewable") {
         if (!flag(SILENT_RENEW_SESSION_KEY)) return;
         const ok = await renewPushSilently(userId, s.subscriptionId);
+        if (!alive()) return;
         void trackEvent("push_renewed_silently", { source: "dashboard", metadata: { ok } });
         return;
       }
@@ -77,16 +84,20 @@ export default function PushResubscribeCard({ role }: { role?: string | null }) 
   if (mode === "offer" && config && !config.enabled) return null;
 
   const activate = async () => {
-    if (busy || !config) return;
+    if (busy || !config || !user) return;
+    const userId = user.id;
+    const sameMember = () => owner.current === userId;
     setBusy(true);
     setMessage("");
     void trackEvent(mode === "offer" ? "push_offer_clicked" : "push_resubscribe_clicked", { source: "dashboard" });
     try {
       // Premier await : Notification.requestPermission, dans le geste.
-      await enablePush(user.id, config, prefs);
-      const state = await getPushState(user.id);
+      await enablePush(userId, config, prefs);
+      if (!sameMember()) return;
+      const state = await getPushState(userId);
+      if (!sameMember()) return;
       if (!state.subscribed) throw new Error("push_not_confirmed");
-      clearPushOptOut(user.id);
+      clearPushOptOut(userId);
       if (mode === "offer") {
         void trackEvent("push_enabled", { source: "dashboard", metadata: { messages: prefs.messages, applications: prefs.applications, nearby_sits: false } });
         setDone(true);
@@ -94,11 +105,12 @@ export default function PushResubscribeCard({ role }: { role?: string | null }) 
         setMode(null);
       }
     } catch (error) {
+      if (!sameMember()) return;
       const denied = error instanceof Error && error.message === "push_permission_denied";
       if (denied && mode === "offer") { setMode(null); return; }
       setMessage("L'activation n'a pas abouti. Vous pouvez réessayer depuis vos réglages de notifications.");
     } finally {
-      setBusy(false);
+      if (sameMember()) setBusy(false);
     }
   };
 
@@ -111,7 +123,7 @@ export default function PushResubscribeCard({ role }: { role?: string | null }) 
   if (done) {
     return (
       <div role="status" className="mx-4 mt-4 rounded-lg border border-border bg-card p-4 text-sm text-card-foreground">
-        <p>C'est fait : vos candidatures et vos messages arriveront sur cet appareil.</p>
+        <p>Notifications activées sur cet appareil.</p>
       </div>
     );
   }
