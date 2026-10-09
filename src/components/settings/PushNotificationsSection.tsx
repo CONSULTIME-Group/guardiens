@@ -7,7 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { trackEvent } from '@/lib/analytics';
 import {
-  disablePush, enablePush, testPushOnDevice, getPushConfig, getPushState, pushSupport, updatePushPreferences,
+  disablePush, enablePush, markPushOptOut, clearPushOptOut, testPushOnDevice, getPushConfig, getPushState, pushSupport, updatePushPreferences,
   type PushConfig, type PushPreferences,
 } from '@/lib/web-push';
 
@@ -86,9 +86,10 @@ export default function PushNotificationsSection() {
     const userId = user.id;
     setBusy(true); setMessage('');
     try {
-      if (subscribed) { await disablePush(userId); setSubscribed(false); setMessage('Notifications désactivées sur cet appareil.'); void trackEvent('push_disabled', { source: 'settings' }); }
+      if (subscribed) { await disablePush(userId); markPushOptOut(userId); setSubscribed(false); setMessage('Notifications désactivées sur cet appareil.'); void trackEvent('push_disabled', { source: 'settings' }); }
       else {
         const result = await enablePush(userId, config, prefs);
+        clearPushOptOut(userId);
         await reload(userId);
         if (currentUser.current !== userId) return;
         setMessage(result.nearbyRequested && !result.nearbySaved

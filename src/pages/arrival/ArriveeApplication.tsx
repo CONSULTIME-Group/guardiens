@@ -11,7 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { trackEvent } from "@/lib/analytics";
 import { usePwaInstall } from "@/hooks/usePwaInstall";
 import { requestInstall } from "@/lib/pwa-install";
-import { enablePush, getPushConfig, hasLocalPushSubscription, pushSupport, type PushConfig } from "@/lib/web-push";
+import { enablePush, getPushConfig, hasLocalPushSubscription, postponePushOffer, pushSupport, type PushConfig } from "@/lib/web-push";
 import { N1_PENDING_KEY, afterN1, arrivalUrl, n1Mode, readCarry } from "@/lib/arrival";
 import { ArrivalShell, Eyebrow, Gouache, trackArrival, useArrivalT, useArrivalViewed } from "@/components/arrival/ArrivalUI";
 const sitterReady = new URL("../../assets/empty-states/v2/responsive/sitter-ready-384.webp", import.meta.url).href;
@@ -49,7 +49,7 @@ const ArriveeApplication = () => {
   useArrivalViewed("N1", !!user && mode !== "skip");
 
   const finish = () => { clearPending(); trackArrival("completed", "N1"); navigate(nextUrl); };
-  const skip = () => { void trackEvent("arrival_push_skipped", { source: "/arrivee/application" }); clearPending(); navigate(nextUrl); };
+  const skip = () => { if (user) postponePushOffer(user.id); void trackEvent("arrival_push_skipped", { source: "/arrivee/application" }); clearPending(); navigate(nextUrl); };
 
   const activate = async () => {
     if (!user || !config) return;
