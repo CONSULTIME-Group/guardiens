@@ -353,3 +353,36 @@ export async function renewPushSilently(userId: string, subscriptionId: string):
     return result.renewed === true;
   } catch { return false; }
 }
+
+/**
+ * Proposition d'activation du tableau de bord. Une désactivation explicite
+ * (réglages) ou un « Plus tard » sont gardés par membre sur cet appareil :
+ * la proposition ne revient jamais après une désactivation, et pas avant
+ * 30 jours après un report.
+ */
+const OPT_OUT_KEY = 'guardiens_push_opted_out';
+const OFFER_LATER_KEY = 'guardiens_push_offer_later';
+export const PUSH_OFFER_LATER_MS = 30 * 24 * 60 * 60 * 1000;
+
+function readMap(key: string): Record<string, number> {
+  try { const v = JSON.parse(localStorage.getItem(key) ?? '{}'); return v && typeof v === 'object' ? v : {}; } catch { return {}; }
+}
+function writeMap(key: string, userId: string, value: number | null): void {
+  try {
+    const map = readMap(key);
+    if (value === null) delete map[userId]; else map[userId] = value;
+    localStorage.setItem(key, JSON.stringify(map));
+  } catch { /* stockage indisponible */ }
+}
+export const markPushOptOut = (userId: string) => writeMap(OPT_OUT_KEY, userId, Date.now());
+export const clearPushOptOut = (userId: string) => { writeMap(OPT_OUT_KEY, userId, null); writeMap(OFFER_LATER_KEY, userId, null); };
+export const postponePushOffer = (userId: string, now = Date.now()) => writeMap(OFFER_LATER_KEY, userId, now);
+
+/** Proposition seulement si rien n'a jamais été décidé sur cet appareil. */
+export function canOfferPush(userId: string, now = Date.now()): boolean {
+  if (pushSupport() !== 'supported' || permissionState() !== 'default') return false;
+  if (hasLocalPushSubscription(userId)) return false;
+  if (readMap(OPT_OUT_KEY)[userId]) return false;
+  const later = readMap(OFFER_LATER_KEY)[userId];
+  return !(typeof later === 'number' && now - later < PUSH_OFFER_LATER_MS);
+}

@@ -178,7 +178,7 @@ const Dashboard = () => {
     <div className="overflow-x-clip">
       <Head><meta name="robots" content="noindex, nofollow" /></Head>
       <Suspense fallback={null}><InstallAppCard /></Suspense>
-      <Suspense fallback={null}><PushResubscribeCard /></Suspense>
+      <Suspense fallback={null}><PushResubscribeCard role={activeRole} /></Suspense>
 
       <div
         key={displayedRole}
