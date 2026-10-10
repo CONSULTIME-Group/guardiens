@@ -39,7 +39,8 @@ export const SIT_STATUS_LABELS: Record<SitStatus, SitStatusBadge> = {
   confirmed: { label: "Confirmée", variant: "secondary" },
   in_progress: { label: "En cours", variant: "default" },
   completed: { label: "Terminée", variant: "secondary" },
-  cancelled: { label: "Annulée (auteur)", variant: "outline" },
+  // Annulée sans préjuger de l'auteur : il se lit dans cancelled_by ou hidden_by.
+  cancelled: { label: "Annulée", variant: "outline" },
   archived: { label: "Archivée", variant: "secondary" },
   expired: { label: "Expirée", variant: "outline" },
 };

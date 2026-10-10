@@ -23,6 +23,7 @@ import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supa
 import { resendFetch } from "../_shared/resend-guard.ts";
 import { SENDER_FROM, REPLY_TO_ADDRESS } from "../_shared/sender-address.ts";
 import { expectedCountMismatch } from "../_shared/mass-email-dedupe.ts";
+import { proximityBlockReason, type DiffusableMission } from "../_shared/mission-diffusion-guard.ts";
 import {
   buildSubject,
   ctaLabel as ctaLabelFor,
@@ -383,6 +384,27 @@ Deno.serve(async (req) => {
     if (!missionId) {
       return new Response(JSON.stringify({ error: "mission_id requis" }), {
         status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Garde-fou (audit du 10/10/2026) : AVANT tout calcul de destinataires,
+    // aperçu compris, une publication close, masquée ou périmée est refusée.
+    const { data: state, error: stateErr } = await serviceClient
+      .from("small_missions")
+      .select("status, mission_type, hidden_by, hidden_at, moderation_hidden_at, closed_at, date_needed, end_date")
+      .eq("id", missionId)
+      .maybeSingle();
+    if (stateErr || !state) {
+      return new Response(JSON.stringify({ error: "Mission introuvable" }), {
+        status: 404,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const blocked = proximityBlockReason(state as DiffusableMission);
+    if (blocked) {
+      return new Response(JSON.stringify({ error: blocked, blocked: true }), {
+        status: 409,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }

@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CollapsibleSection } from "@/pages/admin/_components/dashboard/CollapsibleSection";
+import { ErrorState } from "@/components/admin/ui";
 import { canonicalSitStatuses, SIT_STATUS_SHORT_LABELS, isSitStatus, type SitStatus } from "@/lib/sitStatus";
 
 type StatusCounts = Record<SitStatus, number>;
@@ -46,10 +48,16 @@ const emptyCounts = (): StatusCounts =>
 export const DraftStatsPanel = () => {
   const [stats, setStats] = useState<PeriodStats[] | null>(null);
   const [loading, setLoading] = useState(true);
+  const [open, setOpen] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const [nonce, setNonce] = useState(0);
 
   useEffect(() => {
+    if (!open) return;
     const load = async () => {
       setLoading(true);
+      setFailed(false);
+      let anyError = false;
       const periods = buildPeriods();
       const results: PeriodStats[] = await Promise.all(
         periods.map(async (p) => {
@@ -59,6 +67,7 @@ export const DraftStatsPanel = () => {
           });
           if (error) {
             console.error("admin_get_sits_status_counts:", error);
+            anyError = true;
           } else {
             (data as Array<{ status: string; cnt: number }> | null)?.forEach((row) => {
               if (isSitStatus(row.status)) counts[row.status] = Number(row.cnt) || 0;
@@ -68,12 +77,21 @@ export const DraftStatsPanel = () => {
           return { label: p.label, since: p.since, counts };
         })
       );
-      setStats(results);
+      // Une période en échec ne s'affiche pas comme des zéros.
+      setFailed(anyError);
+      setStats(anyError ? null : results);
       setLoading(false);
     };
     load();
-  }, []);
+  }, [open, nonce]);
 
+  return (
+    <CollapsibleSection title="Répartition actuelle par date de création" onOpenChange={setOpen}>
+      {failed ? <ErrorState detail="Répartition par période" onRetry={() => setNonce((n) => n + 1)} /> : renderBody()}
+    </CollapsibleSection>
+  );
+
+  function renderBody() {
   if (loading || !stats) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -86,19 +104,12 @@ export const DraftStatsPanel = () => {
 
   return (
     <div className="space-y-2">
-      <div className="flex items-baseline justify-between">
-        <h2 className="font-body text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          Brouillons & conversion
-        </h2>
-        <span className="text-xs text-muted-foreground">
-          Suivi du passage brouillon → publié, par période de création.
-        </span>
-      </div>
+      <p className="text-xs text-muted-foreground">
+        État actuel des annonces créées sur chaque période. Ce n'est pas un taux de conversion : une annonce peut avoir changé d'état plusieurs fois.
+      </p>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {stats.map((p) => {
           const total = STATUSES.reduce((sum, s) => sum + p.counts[s], 0);
-          const visible = total - p.counts.draft;
-          const rate = total > 0 ? Math.round((visible / total) * 100) : 0;
           return (
             <Card key={p.label}>
               <CardHeader className="pb-2">
@@ -106,16 +117,11 @@ export const DraftStatsPanel = () => {
               </CardHeader>
               <CardContent className="space-y-2">
                 <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-bold text-warning">{p.counts.draft}</span>
-                  <span className="text-xs text-muted-foreground">brouillons</span>
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  Conversion : <span className="font-semibold text-foreground">{rate}%</span>
-                  {" "}
-                  <span className="opacity-70">({visible}/{total})</span>
+                  <span className="text-3xl font-bold text-foreground">{total}</span>
+                  <span className="text-xs text-muted-foreground">annonces créées</span>
                 </div>
                 <div className="grid grid-cols-2 gap-x-3 gap-y-1 pt-1 text-xs">
-                  {STATUSES.filter((s) => s !== "draft").map((s) => (
+                  {STATUSES.map((s) => (
                     <div key={s} className="flex justify-between">
                       <span className="text-muted-foreground">{SIT_STATUS_SHORT_LABELS[s]}</span>
                       <span className={`font-medium ${STATUS_COLORS[s] ?? "text-foreground"}`}>{p.counts[s]}</span>
@@ -129,6 +135,7 @@ export const DraftStatsPanel = () => {
       </div>
     </div>
   );
+  }
 };
 
 export default DraftStatsPanel;

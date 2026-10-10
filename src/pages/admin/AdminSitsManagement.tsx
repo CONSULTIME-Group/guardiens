@@ -24,6 +24,9 @@ import { useNavigate } from "react-router-dom";
 import { getCountryName } from "@/lib/countries";
 import { avatarImageUrl } from "@/lib/storageImage";
 import { adminSitsFilterStatuses, resolveSitStatusBadge } from "@/lib/sitStatus";
+import { listingCity, sitSituation } from "@/lib/admin/listingSituation";
+import { APPLICATION_STATUS_LABELS } from "@/lib/admin/listingHistory";
+import { DossierHistory } from "@/components/admin/DossierDetailSheet";
 
 import {
   AlertDialog,
@@ -79,7 +82,8 @@ const AdminSitsManagement = () => {
           .range(from, to),
       );
       if (!sitsSeq.current.isCurrent(token)) return;
-      setSits(rows.map((d) => ({ ...d, _type: "sit" })));
+      // Un masquage d'annonce par l'équipe (hidden_by) n'est pas l'annulation d'une garde.
+      setSits(rows.filter((d) => !(d.status === "cancelled" && d.hidden_by)).map((d) => ({ ...d, _type: "sit" })));
     } catch (e: any) {
       if (!sitsSeq.current.isCurrent(token)) return;
       console.error("[admin-sits] chargement", e);
@@ -281,13 +285,9 @@ const AdminSitsManagement = () => {
   };
 
   const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "pending": return <Badge variant="outline">En attente</Badge>;
-      case "accepted": return <Badge variant="default">Acceptée</Badge>;
-      case "rejected": return <Badge variant="destructive">Refusée</Badge>;
-      case "withdrawn": return <Badge variant="secondary">Retirée</Badge>;
-      default: return <Badge variant="outline">{status}</Badge>;
-    }
+    const label = APPLICATION_STATUS_LABELS[status] ?? `Statut ${status}`;
+    const variant = status === "accepted" ? "default" : status === "rejected" ? "destructive" : status === "withdrawn" || status === "cancelled" ? "secondary" : "outline";
+    return <Badge variant={variant}>{label}</Badge>;
   };
 
   // Alerts
@@ -444,7 +444,8 @@ const AdminSitsManagement = () => {
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
                     <div className="flex items-center gap-1.5">
-                      <span>{sit.owner?.city || "·"}</span>
+                      <span>{listingCity(sit).city || "·"}</span>
+                      {listingCity(sit).fromOwner && <span className="text-[10px]" title="Ville du profil du propriétaire">(profil)</span>}
                       {sit.country && sit.country !== "FR" && (
                         <Badge variant="outline" className="text-[10px] px-1.5 py-0">{getCountryName(sit.country)}</Badge>
                       )}
@@ -464,12 +465,26 @@ const AdminSitsManagement = () => {
                   <TableCell>
                     {(() => {
                       const dossier = resolveSitStatusBadge(sit.status);
-                      return <Badge variant={dossier.variant}>{dossier.label}</Badge>;
+                      const precise = sit.status === "cancelled" ? sitSituation(sit) : null;
+                      return (
+                        <div>
+                          <Badge variant={dossier.variant}>{dossier.label}</Badge>
+                          {precise && <p className="text-[11px] text-muted-foreground mt-0.5">{precise.label === "Annulée, motif non renseigné" ? "Motif et auteur non renseignés" : [precise.label, precise.detail].filter(Boolean).join(", ")}</p>}
+                        </div>
+                      );
                     })()}
                   </TableCell>
                   <TableCell className="text-xs">
-                    <div>{reviewReceivedLabel("owner", rev.owner)}</div>
-                    <div className="text-muted-foreground">{reviewReceivedLabel("sitter", rev.sitter)}</div>
+                    {sit.status === "cancelled" ? (
+                      <span className="text-muted-foreground">Sans objet, garde annulée</span>
+                    ) : sit.status === "completed" ? (
+                      <>
+                        <div>{reviewReceivedLabel("owner", rev.owner)}</div>
+                        <div className="text-muted-foreground">{reviewReceivedLabel("sitter", rev.sitter)}</div>
+                      </>
+                    ) : (
+                      <span className="text-muted-foreground">Après la garde</span>
+                    )}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
@@ -575,6 +590,19 @@ const AdminSitsManagement = () => {
                     </div>
                   </div>
 
+                  <div className="rounded-lg border p-3 space-y-1 text-sm">
+                    {(() => { const sx = sitSituation(selectedSit); return (
+                      <p><span className="text-muted-foreground">Situation : </span><span className="font-medium">{sx.label}</span>{sx.detail ? `, ${sx.detail}` : ""}</p>
+                    ); })()}
+                    <p>
+                      <span className="text-muted-foreground">Gardien accepté : </span>
+                      {sitters[selectedSit.id]?.name || "aucun actuellement. Cela ne dit pas si un gardien avait été confirmé auparavant."}
+                    </p>
+                    {selectedSit.cancelled_at && (
+                      <p><span className="text-muted-foreground">Annulée le : </span>{format(new Date(selectedSit.cancelled_at), "d MMM yyyy", { locale: fr })}</p>
+                    )}
+                  </div>
+
                   {/* Status + Type */}
                   <div className="flex items-center gap-3">
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
@@ -661,6 +689,10 @@ const AdminSitsManagement = () => {
                   </div>
                 )}
               </div>
+
+              <Separator />
+
+              <DossierHistory kind="sit" item={selectedSit} enabled={sheetOpen} />
 
               <Separator />
 
