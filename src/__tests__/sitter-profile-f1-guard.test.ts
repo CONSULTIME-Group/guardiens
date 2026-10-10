@@ -28,20 +28,21 @@ describe("onglet gardien allégé", () => {
   });
 });
 
-describe("gouache du hero partagé entière (lots F1c, L5)", () => {
+describe("gouache du hero partagé immersive (L5, décision root du 10 octobre)", () => {
   const heroSrc = readFileSync("src/components/profile/ProfileHero.tsx", "utf8");
   const hs = heroSrc.indexOf("data-hero-gouache");
-  const frame = heroSrc.slice(hs, heroSrc.indexOf("</div>", hs));
+  const frame = heroSrc.slice(hs, heroSrc.indexOf("</picture>", hs));
   const img = frame.slice(frame.indexOf("<img"), frame.indexOf("/>", frame.indexOf("<img")));
-  it("image en object-contain, sans opacité ni recadrage", () => {
-    expect(img).toContain("object-contain");
+  it("fond couvrant continu, sans opacité globale", () => {
+    expect(img).toContain("object-cover");
     expect(img).not.toMatch(/opacity-/);
-    expect(img).not.toContain("object-cover");
+    expect(img).not.toContain("object-contain");
   });
   it("aucun voile en dégradé superposé", () => {
     expect(frame).not.toMatch(/linear-gradient|mask-image|maskImage/);
   });
-  it("conteneur au ratio 1536/544", () => {
-    expect(heroSrc).toContain("[aspect-ratio:1536/544]");
+  it("aucune colonne image ni empilement mobile séparé", () => {
+    expect(heroSrc).not.toContain("lg:grid-cols-");
+    expect(heroSrc).not.toContain("[aspect-ratio:1536/544]");
   });
 });

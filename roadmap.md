@@ -1,5 +1,11 @@
 # Roadmap
 
+## Reprise ciblée L5, hero immersif (10/10/2026)
+- [ ] Remplacer la composition en colonnes par une gouache continue et une protection locale du texte.
+- [ ] Tests pertinents et contrôles automatiques du build et des types.
+- [ ] Inspecter visuellement quatre profils aux six largeurs, ID et ouverture picker sans sauvegarde.
+- [ ] Consigner preuves et limites dans plan/TODO. L5 attend validation root, L6 non lancé, aucune publication.
+
 ## Lot E7, page Entraide vue d'un membre
 
 - [x] Extraire `respondToMission` dans `src/lib/missionRespond.ts` et brancher `SmallMissionDetail.tsx` dessus
