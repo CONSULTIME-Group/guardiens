@@ -318,6 +318,15 @@ const ApplicationModal = ({
         onSuccess();
         return;
       }
+      // Garde serveur (trg_guard_application_min_completion) : sous 40 %, refus explicite.
+      if (String((error as { message?: string }).message ?? "").includes("PROFILE_INCOMPLETE")) {
+        toast({
+          title: "Profil à compléter",
+          description: "Complétez votre profil jusqu'à 40 % pour pouvoir candidater. Vous pouvez déjà consulter toutes les annonces.",
+          variant: "destructive",
+        });
+        return;
+      }
       toast({ title: "Erreur", description: "Impossible d'envoyer la candidature.", variant: "destructive" });
       return;
     }
