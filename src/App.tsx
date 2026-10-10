@@ -48,6 +48,7 @@ const GlobalBottomNav = lazy(() => import("@/components/layout/GlobalBottomNav")
 // chargement ne fait jamais tomber la page (retente une fois, puis rien).
 import AfterPaintExtras from "@/components/analytics/AfterPaintExtrasLazy";
 import EspaceParamSwitch from "@/components/routing/EspaceParamSwitch";
+import EmailClickRedirect from "./pages/EmailClickRedirect";
 const PwaInstallTracking = lazy(
   () => import("@/hooks/usePwaInstall").then((m) => ({ default: m.PwaInstallTracking })),
   "PwaInstallTracking",
@@ -169,7 +170,8 @@ const PreviewOngoingSitHero = lazy(() => import("./pages/dev/PreviewOngoingSitHe
 const PreviewMissionCards = lazy(() => import("./pages/dev/PreviewMissionCards"), "PreviewMissionCards");
 const PreviewCockpits = lazy(() => import("./pages/dev/PreviewCockpits"), "PreviewCockpits");
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"), "Unsubscribe");
-const EmailClickRedirect = lazy(() => import("./pages/EmailClickRedirect"), "EmailClickRedirect");
+// /go : redirection d'e-mail, importée directement (module minuscule, sans
+// dépendance hors React Router) pour ne pas dépendre d'un chunk différé.
 const EmailDeepLink = lazy(() => import("./pages/EmailDeepLink"), "EmailDeepLink");
 const ApplicationQuickAction = lazy(() => import("./pages/ApplicationQuickAction"), "ApplicationQuickAction");
 const MissionChooseHelper = lazy(() => import("./pages/MissionChooseHelper"), "MissionChooseHelper");

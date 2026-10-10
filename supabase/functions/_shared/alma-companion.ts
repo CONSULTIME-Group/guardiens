@@ -363,6 +363,40 @@ export function openerKey(text: string): string {
   return foldC(text).replace(/[^a-z0-9' ]+/g, " ").split(" ").filter(Boolean).slice(0, 5).join(" ");
 }
 
+/**
+ * Lot L4c : la réponse finale (y compris le gabarit) reprend une amorce
+ * récente. On ne rajoute aucun préfixe : on ouvre par une autre phrase de la
+ * même réponse, donc avec les mêmes faits vérifiés, et l'appelant revalide le
+ * texte (checkLocked, checkOutput). Les paragraphes d'action en fin de texte
+ * restent en fin. Renvoie null si aucune phrase ne convient.
+ */
+const ANAPHORIC_START = /^(\S+ ){0,2}y\b|^(il|elle|ils|elles|cela|ca|ce|cet|cette|ces|celle|celui|si elle|si il|la suivante|le suivant|ensuite|puis|aussi|donc)\b/;
+
+export function reopenWithAnotherSentence(answer: string, recentAnswers: string[], accept: (t: string) => boolean = () => true): string | null {
+  const paras = answer.split(/\n\s*\n/);
+  const body = paras[0];
+  const tail = paras.slice(1);
+  const sentences = body.match(/[^.!?]+[.!?]+(\s|$)|[^.!?]+$/g)?.map((s) => s.trim()).filter(Boolean) ?? [];
+  const pools: Array<() => string | null> = [];
+  for (let k = 1; k < sentences.length; k++) {
+    pools.push(() => [[...sentences.slice(k), ...sentences.slice(0, k)].join(" "), ...tail].join("\n\n"));
+  }
+  // Une seule phrase d'ouverture : le paragraphe suivant passe devant.
+  for (let k = 1; k < tail.length; k++) {
+    pools.push(() => [tail[k - 1], body, ...tail.filter((_, i) => i !== k - 1)].join("\n\n"));
+  }
+  for (const make of pools) {
+    const t = make();
+    if (!t) continue;
+    const opener = openerKey(t);
+    if (opener.split(" ").length < 3 || repeatsOpener(t, recentAnswers)) continue;
+    // Une phrase qui renvoie à la précédente (« y », « elle », « cela ») ne peut pas ouvrir.
+    if (ANAPHORIC_START.test(foldC(t).slice(0, 40))) continue;
+    if (accept(t)) return t;
+  }
+  return null;
+}
+
 export function repeatsOpener(answer: string, recentAnswers: string[]): boolean {
   const k = openerKey(answer);
   return k.split(" ").length >= 3 && recentAnswers.slice(0, 20).some((r) => openerKey(r) === k);

@@ -4,7 +4,8 @@ import { measureActionFollowUp } from "@/lib/admin/alma-conversations";
  * Lot J2-B : pilotage d'Alma. Taux d'action à 10 minutes, retours utile /
  * pas utile, et rejeu du jeu de non-régression, uniquement au clic.
  */
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { fetchAllRows } from "@/lib/admin/fetchAllRows";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,29 +21,62 @@ const pct = (n: number, d: number) => (d > 0 ? `${Math.round((100 * n) / d)} %` 
 
 export function PilotageTab({ range }: { range: "7d" | "30d" | "90d" }) {
   const days = range === "7d" ? 7 : range === "30d" ? 30 : 90;
-  const [rates, setRates] = useState<RateRow[] | null>(null);
-  const [feedback, setFeedback] = useState<{ useful: number; notUseful: number } | null>(null);
-  const [companion, setCompanion] = useState<CompanionMeasure | null>(null);
-  const [runs, setRuns] = useState<ReplayRun[]>([]);
+  type Block<T> = { state: "loading" | "ok" | "error"; value: T | null; truncated?: boolean };
+  const loading = { state: "loading" as const, value: null };
+  const [ratesB, setRatesB] = useState<Block<RateRow[]>>(loading);
+  const [feedbackB, setFeedbackB] = useState<Block<{ useful: number; notUseful: number }>>(loading);
+  const [companionB, setCompanionB] = useState<Block<CompanionMeasure>>(loading);
+  const [runsB, setRunsB] = useState<Block<ReplayRun[]>>(loading);
   const [replaying, setReplaying] = useState<{ done: number; total: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const version = useRef(0);
+  const rates = ratesB.value;
+  const feedback = feedbackB.value;
+  const companion = companionB.value;
+  const runs = runsB.value ?? [];
 
   const load = useCallback(async () => {
+    const v = ++version.current;
+    const fresh = () => v === version.current; // réponse d'une période obsolète ignorée
+    setRatesB(loading); setFeedbackB(loading); setCompanionB(loading); setRunsB(loading);
     const since = new Date(Date.now() - days * 86_400_000).toISOString();
-    const [r, f, h, c] = await Promise.all([
-      (supabase.rpc as any)("admin_alma_action_rate", { p_days: days }),
-      (supabase.from as any)("alma_feedback").select("value").gte("created_at", new Date(Date.now() - days * 86_400_000).toISOString()),
-      (supabase.from as any)("alma_replay_runs").select("id, created_at, total, passed, failed, results").order("created_at", { ascending: false }).limit(5),
-      // Lot L4 : variété des amorces et replis sur gabarit.
-      (supabase.from as any)("alma_conversations").select("answer, classification").gte("created_at", since).order("created_at", { ascending: false }).limit(5000),
+    const run = async <T,>(set: (b: Block<T>) => void, fn: () => Promise<{ value: T; truncated?: boolean }>) => {
+      try { const r = await fn(); if (fresh()) set({ state: "ok", value: r.value, truncated: r.truncated }); }
+      catch { if (fresh()) set({ state: "error", value: null }); }
+    };
+    await Promise.all([
+      run(setRatesB, async () => {
+        const r = await (supabase.rpc as any)("admin_alma_action_rate", { p_days: days });
+        if (r.error) throw r.error;
+        return { value: (r.data ?? []) as RateRow[] };
+      }),
+      run(setFeedbackB, async () => {
+        const res = await fetchAllRows<{ value: string; id: string }>((from, to) =>
+          (supabase.from as any)("alma_feedback").select("id, value").gte("created_at", since).order("id").range(from, to));
+        const vals = res.rows.map((x) => x.value);
+        return { value: { useful: vals.filter((x) => x === "useful").length, notUseful: vals.filter((x) => x === "not_useful").length }, truncated: res.truncated };
+      }),
+      run(setRunsB, async () => {
+        const h = await (supabase.from as any)("alma_replay_runs").select("id, created_at, total, passed, failed, results").order("created_at", { ascending: false }).limit(5);
+        if (h.error) throw h.error;
+        return { value: (h.data ?? []) as ReplayRun[] };
+      }),
+      // Lot L4 : variété des amorces et replis sur gabarit, même lecture paginée que Conversations.
+      run(setCompanionB, async () => {
+        const res = await fetchAllRows<any>((from, to) =>
+          (supabase.from as any)("alma_conversations").select("id, answer, classification").gte("created_at", since)
+            .order("created_at", { ascending: false }).order("id", { ascending: false }).range(from, to), { cap: 5000 });
+        return { value: measureCompanion(res.rows), truncated: res.truncated };
+      }),
     ]);
-    setCompanion(c.error ? null : measureCompanion((c.data ?? []) as any[]));
-    if (r.error) setError("Taux d'action indisponible.");
-    setRates((r.data ?? []) as RateRow[]);
-    const vals = ((f.data ?? []) as { value: string }[]).map((x) => x.value);
-    setFeedback({ useful: vals.filter((v) => v === "useful").length, notUseful: vals.filter((v) => v === "not_useful").length });
-    setRuns((h.data ?? []) as ReplayRun[]);
   }, [days]);
+
+  const Unavailable = ({ label }: { label: string }) => (
+    <p className="flex flex-wrap items-center gap-2 text-destructive">
+      {label} : indisponible, la lecture a échoué.
+      <Button variant="outline" size="sm" onClick={() => void load()}>Réessayer</Button>
+    </p>
+  );
 
   useEffect(() => { void load(); }, [load]);
 
@@ -119,6 +153,7 @@ export function PilotageTab({ range }: { range: "7d" | "30d" | "90d" }) {
       <Card>
         <CardHeader><CardTitle className="text-base">Action à 10 minutes</CardTitle></CardHeader>
         <CardContent className="space-y-2 text-sm">
+          {ratesB.state === "loading" ? <p className="text-muted-foreground">Lecture en cours.</p> : ratesB.state === "error" ? <Unavailable label="Taux d'action" /> : (<>
           <p>
             {measure.rate === null
               ? "Non mesurable : aucune réponse de la période ne propose d'action, en dehors des comptes admins."
@@ -139,6 +174,9 @@ export function PilotageTab({ range }: { range: "7d" | "30d" | "90d" }) {
             </tbody>
           </table>
           )}
+          </>)}
+          {feedbackB.state === "error" && <Unavailable label="Retours" />}
+          {feedbackB.state === "loading" && <p className="text-muted-foreground">Retours : lecture en cours.</p>}
           {feedback && (
             <p>
               {feedback.useful + feedback.notUseful === 0
@@ -149,6 +187,14 @@ export function PilotageTab({ range }: { range: "7d" | "30d" | "90d" }) {
         </CardContent>
       </Card>
 
+      {companionB.state !== "ok" && (
+        <Card>
+          <CardHeader><CardTitle className="text-base">Compagnon : variété et faits</CardTitle></CardHeader>
+          <CardContent className="text-sm">
+            {companionB.state === "loading" ? <p className="text-muted-foreground">Lecture en cours.</p> : <Unavailable label="Mesures du compagnon" />}
+          </CardContent>
+        </Card>
+      )}
       {companion && (
         <Card>
           <CardHeader><CardTitle className="text-base">Compagnon : variété et faits</CardTitle></CardHeader>
@@ -156,6 +202,7 @@ export function PilotageTab({ range }: { range: "7d" | "30d" | "90d" }) {
             <p>
               Réponses partageant leurs cinq premiers mots : {pct(companion.sharedOpeners, companion.answers)} ({companion.sharedOpeners} sur {companion.answers}), objectif sous {Math.round(SHARED_OPENER_TARGET * 100)} %.
             </p>
+            {companionB.truncated && <p className="text-muted-foreground">Données partielles : 5 000 réponses les plus récentes de la période.</p>}
             <p>
               Replis sur gabarit : {companion.lockedChecked === 0 ? "aucune réponse contrôlée sur la période." : `${pct(companion.fallbacks, companion.lockedChecked)} (${companion.fallbacks} sur ${companion.lockedChecked} réponses à faits verrouillés).`}
             </p>
@@ -172,6 +219,8 @@ export function PilotageTab({ range }: { range: "7d" | "30d" | "90d" }) {
           <Button onClick={() => void replay()} disabled={!!replaying}>
             {replaying ? `Rejeu en cours, ${replaying.done} sur ${replaying.total}` : "Rejouer le jeu de test"}
           </Button>
+          {runsB.state === "error" && <Unavailable label="Historique des rejeux" />}
+          {runsB.state === "ok" && !last && <p className="text-muted-foreground">Aucun rejeu enregistré.</p>}
           {last && (
             <div className="space-y-2">
               <p>
