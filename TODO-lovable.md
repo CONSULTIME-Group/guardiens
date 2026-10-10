@@ -73,3 +73,7 @@ Navigateur local non connecté, ordinateur seulement (1280 px). Aucun audit mobi
 - [ ] Performance : InternationalListings géocode chaque annonce au chargement (jusqu'à 60 appels) ; SearchSitter rapatrie jusqu'à 500 ouvertes + 500 fermées puis filtre côté client
 - [x] Données privées : projection explicite des sits, propriétaires lus via public_profiles, annonces fermées via la vue réduite public_closed_sits (sans dates ni texte libre)
 - [x] Code mort retiré dans SearchSitter.tsx : 30 imports jamais utilisés (ReportButton, EnvironmentPills, Tooltip, Toast, Input, Slider, Switch, Tabs, Popover, Checkbox, Sheet, icônes, alertRadius, getRegionName, getDeptsInRegion), constante animalChips, appel useToast. Conservés : ILLUSTRATIONS (gouaches), setMissionTypeFilter, userCompletedSits (alimentés par des hooks), useInternationalSitsCount (utilisé par la landing)
+
+## Chantier profils, cartes et recherche (plan du 10/10/2026, aucun lot lancé)
+
+- [ ] Suivi : docs/plan-chantier-profils-recherche-2026-10-10.md (registre des constats, lots L1 à L7, gates, points non vérifiés)
