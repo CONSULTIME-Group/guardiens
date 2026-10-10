@@ -82,7 +82,7 @@ const OwnerLocationPicker = ({
       </div>
       {citySuggestions.length > 0 && (
         <div className={`space-y-1${communesClassName ? ` ${communesClassName}` : ""}`}>
-          <p className="px-3 text-[10px] uppercase tracking-wide text-muted-foreground/70">Communes</p>
+          <p className="px-3 text-[10px] uppercase tracking-wide text-muted-foreground/70">Villes</p>
           {citySuggestions.map((s: any, i: number) => (
             <button
               key={i}
