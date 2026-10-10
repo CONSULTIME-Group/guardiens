@@ -8,7 +8,7 @@ Aucun critère de confiance n'exclut un gardien d'un vivier : identité vérifi�
 
 - Seules exclusions admises : incompatibilité déclarée en distribution sortante (allergie déclarée, refus d'espèce) et critères de délivrabilité et consentement (compte actif, opt-in, non supprimé, dans le rayon déclaré).
 - Seules hygiènes de pool admises : compte actif, hors soi-même, rôle gardien ou polyvalent.
-- Seuil 60 % : applique UNIQUEMENT au bouton « candidater ». Le gardien sous le seuil reçoit les mêmes annonces, même ordre, voit la page de l'annonce. CTA invitant à compléter, alimenté par la fonction SQL `sitter_missing_opportunities`.
+- Seuil 40 % (40 inclus, contrôlé en base) : applique UNIQUEMENT au bouton « candidater ». Le gardien sous le seuil reçoit les mêmes annonces, même ordre, voit la page de l'annonce. CTA invitant à compléter, alimenté par la fonction SQL `sitter_missing_opportunities`.
 - La règle vaut aussi pour les compteurs : `count_eligible_sitters`, `admin_liquidity_snapshot`, `count_mission_notification_audience` comptent le vivier réel, sans filtre de confiance, sinon les chiffres mentent sur la distribution.
 
 ## Plafonds jamais silencieux
