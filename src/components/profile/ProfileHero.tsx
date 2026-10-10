@@ -2,8 +2,8 @@
  * Hero partagé du profil public, facettes gardien et propriétaire (lot L5).
  *
  * Contrat :
- *  - Gouache en fond continu, identité superposée avec protection locale.
- *    Aucun panneau image séparé, aucune illustration empilée sur mobile.
+ *  - Dans le carnet, gouache entière en ouverture puis bande identité et contact.
+ *    L'usage autonome conserve son agencement côte à côte.
  *  - Données réelles uniquement : photo, prénom, ville et pays, mobilité
  *    déclarée, dernière visite (L3), palier de réactivité (L3), CTA.
  *  - Identité vérifiée : icône 44 px près du prénom (IdentityVerifiedMark).
@@ -138,11 +138,29 @@ const ProfileHero = (p: ProfileHeroProps) => {
     <header
       className="profile-hero profile-notebook relative isolate w-full overflow-hidden"
       data-profile-hero
+      data-in-notebook={p.inNotebook || undefined}
       data-facet={p.facet}
       data-hero-subject={leftSubject ? "left" : "right"}
     >
       {!p.inNotebook && <span aria-hidden="true" className="profile-notebook-spiral" />}
       <div className="profile-notebook-page relative mx-auto flex max-w-6xl flex-col gap-5 py-6 pr-4 md:flex-row md:items-center md:gap-6 md:py-7 md:pr-6" data-hero-content>
+        {p.inNotebook && (
+          <picture className="profile-notebook-art relative block min-w-0 w-full" data-hero-gouache>
+            <source media="(max-width: 639px)" srcSet={p.heroMobile} />
+            <img
+              src={p.heroDesktop}
+              alt=""
+              aria-hidden="true"
+              data-hero-anchor={p.heroAnchor}
+              data-hero-notebook={/hero-(13|63)(?:[.-])/.test(p.heroDesktop) || undefined}
+              width={1536}
+              height={544}
+              loading="eager"
+              decoding="async"
+              className="profile-hero-art block h-auto w-full object-contain"
+            />
+          </picture>
+        )}
         <div className="profile-hero-identity relative min-w-0 md:w-[360px] md:shrink-0">
           <div className="flex items-start gap-4">
             <Button
@@ -175,7 +193,7 @@ const ProfileHero = (p: ProfileHeroProps) => {
                   {p.firstName}
                 </h1>
                 {p.identityVerified && <IdentityVerifiedMark firstName={p.firstName} />}
-                {!p.isOwnProfile && (
+                {!p.inNotebook && !p.isOwnProfile && (
                   <FavoriteButton targetType="sitter" targetId={p.id} size="md" />
                 )}
               </div>
@@ -208,6 +226,9 @@ const ProfileHero = (p: ProfileHeroProps) => {
               </div>
               <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1" data-hero-cta>
                 {renderCta()}
+                {p.inNotebook && !p.isOwnProfile && (
+                  <FavoriteButton targetType="sitter" targetId={p.id} size="md" />
+                )}
                 {reassurance && (
                   <span className="text-[12.5px] text-muted-foreground font-body">{reassurance}</span>
                 )}
@@ -216,7 +237,7 @@ const ProfileHero = (p: ProfileHeroProps) => {
           </div>
         </div>
 
-        <picture className="profile-notebook-art relative block min-w-0 flex-1" data-hero-gouache>
+        {!p.inNotebook && <picture className="profile-notebook-art relative block min-w-0 flex-1" data-hero-gouache>
           <source media="(max-width: 639px)" srcSet={p.heroMobile} />
           <img
             src={p.heroDesktop}
@@ -230,7 +251,7 @@ const ProfileHero = (p: ProfileHeroProps) => {
             decoding="async"
             className="profile-hero-art block h-auto w-full object-contain"
           />
-        </picture>
+        </picture>}
       </div>
       {p.isOwnProfile && (
             <Button

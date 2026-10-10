@@ -339,6 +339,7 @@ export const SitterContactCard = ({
   reassurance,
   facts,
   showButton,
+  ctaVisible = true,
   sticky,
 }: {
   firstName: string;
@@ -347,6 +348,7 @@ export const SitterContactCard = ({
   facts: Array<{ label: string; value: string }>;
   /** "always" : desktop ; "md" : à partir de md (mobile porté par la barre collante). */
   showButton: "always" | "md";
+  ctaVisible?: boolean;
   sticky?: boolean;
 }) => {
   if (cta.kind === "own") return null;
@@ -363,7 +365,7 @@ export const SitterContactCard = ({
       <p className="mt-2 text-[14.5px] text-muted-foreground font-body">
         Présentez votre maison et vos animaux à {firstName}, puis faites connaissance.
       </p>
-      <div className={showButton === "md" ? "hidden lg:block" : ""}>
+      <div className={!ctaVisible ? "hidden" : showButton === "md" ? "hidden lg:block" : ""}>
         <div className="mt-[14px]">
           <CtaButton cta={cta} firstName={firstName} className={btnCls} />
         </div>

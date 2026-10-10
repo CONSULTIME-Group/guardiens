@@ -1084,6 +1084,37 @@
   }
   .profile-notebook-page { padding-left: calc(var(--spiral-w) + 1.25rem); }
   .profile-notebook-sheet { isolation: isolate; }
+  .profile-notebook-sheet {
+    --hero-paper: 42 52% 95%;
+    background-color: hsl(var(--hero-paper));
+  }
+  .profile-notebook-sheet .profile-hero[data-in-notebook] [data-hero-content] {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.5rem;
+    padding-top: 1rem;
+  }
+  .profile-notebook-sheet .profile-hero[data-in-notebook] .profile-hero-identity {
+    width: 100%;
+    padding-bottom: 1rem;
+  }
+  .profile-notebook-sheet [data-hero-avatar] img,
+  .profile-notebook-sheet [data-hero-avatar] > span {
+    width: 76px;
+    height: 96px;
+  }
+  .profile-notebook-sheet [data-hero-avatar] > span { font-size: 2rem; }
+  .profile-notebook-sheet [data-contact-card] {
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 0 0 1.25rem;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+  .profile-notebook-sheet .profile-hero-art[data-hero-notebook="true"] {
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, transparent 9%, black 13%, black 93%, transparent), linear-gradient(to bottom, transparent, black 8%, black 92%, transparent);
+    mask-image: linear-gradient(to right, transparent 0%, transparent 9%, black 13%, black 93%, transparent), linear-gradient(to bottom, transparent, black 8%, black 92%, transparent);
+  }
   .profile-notebook-sheet .profile-notebook-page {
     width: 100%;
     padding-left: calc(var(--spiral-w) + 1.25rem);
