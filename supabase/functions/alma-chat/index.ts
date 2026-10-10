@@ -975,6 +975,19 @@ Deno.serve(async (req) => {
       answer = locked ? locked.template : SAFE_FALLBACK;
       (classification as any).fallback_template = true;
     }
+    // Lot L4c : contrôle de répétition sur le texte final, gabarit compris.
+    // Aucun nouvel appel au modèle : on ouvre par une autre phrase de la même
+    // réponse, revalidée sur les mêmes contrôles que le texte d'origine.
+    if (answer && repeatsOpener(answer, recentAnswers)) {
+      const reopened = reopenWithAnotherSentence(answer, recentAnswers, (t) =>
+        checkOutput(t, guard).length === 0 && (!locked || checkLocked(t, locked).length === 0));
+      if (reopened) {
+        answer = reopened;
+        (classification as any).reopened = true;
+      } else {
+        (classification as any).opener_repeated = true;
+      }
+    }
     if (guardIssuesBefore.length) (classification as any).output_guard = guardIssuesBefore;
     if (retried) (classification as any).retried = true;
     if (issues.some((x) => !x.startsWith("manque:") && !x.startsWith("interdit:")) && !(classification as any).fallback_template) {
