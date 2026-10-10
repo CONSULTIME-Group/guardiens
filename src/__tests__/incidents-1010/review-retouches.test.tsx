@@ -28,7 +28,7 @@ describe("ConversationsTab en échec de lecture", () => {
 });
 
 describe("Alma, changement d'espace", () => {
-  const base = { facts: {} as any, inventory: {} as any, accountRole: "both" as const, register: "dossier" as const, completion: null };
+  const base = { facts: { candidatures_envoyees: {}, brouillons: [], annonces_publiees: [] } as any, inventory: {} as any, accountRole: "both" as const, register: "dossier" as const, completion: null };
   const go = (question: string, activeRole: "owner" | "sitter") => computeNextAction({ ...base, question, activeRole }).action?.path;
   it("destination propriétaire explicite depuis l'espace propriétaire", () =>
     expect(go("Je veux passer en espace propriétaire", "owner")).toBe("/dashboard?espace=proprietaire"));
