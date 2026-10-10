@@ -133,7 +133,6 @@ const SearchOwner = () => {
   const [loading, setLoading] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
   // Vrai quand la requête serveur a atteint le plafond (jeu potentiellement tronqué → tri distance/affinité partiel).
-  const [resultsTruncated, setResultsTruncated] = useState(false);
   // Le plafond reste à 500 tant que le géocodage en éventail n'est pas résolu :
   // au delà, le nombre d'appels de géocodage déclenche la limitation de débit et
   // la liste se vide. La tranche est rendue déterministe par un tri sur user_id.
@@ -147,7 +146,6 @@ const SearchOwner = () => {
   // Empty state intelligence
   const [alertCreated, setAlertCreated] = useState(false);
   const [isCreatingAlert, setIsCreatingAlert] = useState(false);
-  const [franceTotalSitters, setFranceTotalSitters] = useState<number | null>(null);
 
   // Popover open states (only one at a time)
   const [openPop, setOpenPop] = useState<string | null>(null);
@@ -290,20 +288,22 @@ const SearchOwner = () => {
     setCityInput(value);
     setLocQuery(value);
     fetchCitySuggestions(value);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [fetchCitySuggestions]);
 
   // Validation clavier : la touche Entrée promeut la saisie en état métier.
   const handleCityKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key !== "Enter") return;
     cityTouchedRef.current = true;
     setCity(cityInput);
-    // Saisie libre validée au clavier : la référence postale précédente ne
-    // correspond plus, on la remet à zéro.
+    // Saisie libre validée au clavier : la référence postale et le centre
+    // précédents ne correspondent plus. Le pays est celui de la recherche.
     setCityPostalCode(null);
+    setCityCenter(null);
+    setCityCountry(selectedCountry);
+    if (cityInput.trim()) setZoneMode((z) => (z === "country" ? "radius" : z));
     setCitySuggestions([]);
     setOpenPop(null);
-  }, [cityInput]);
+  }, [cityInput, selectedCountry]);
 
   // Pays peuplés : RPC search_sitter_country_counts, exactement la même
   // population que la recherche (gardiens consultables, compte courant exclu).
@@ -483,7 +483,7 @@ const SearchOwner = () => {
 
   // Create sitter alert
   const handleCreateAlert = async () => {
-    if ((zoneMode !== "france" && !city) || alertCreated || isCreatingAlert) return;
+    if ((!(zoneMode === "country" && selectedCountry === "FR") && !city) || alertCreated || isCreatingAlert) return;
     setIsCreatingAlert(true);
     trackEvent("search_empty_action", { source: "owner", metadata: { action: "create_alert", zone_mode: zoneMode } });
 
@@ -491,7 +491,7 @@ const SearchOwner = () => {
     let savedScope = city;
     let error: any = null;
 
-    if (zoneMode === "france") {
+    if (zoneMode === "country" && selectedCountry === "FR") {
       savedScope = "France entière";
       const { data: existing } = await supabase
         .from("alert_preferences")
@@ -967,7 +967,7 @@ const SearchOwner = () => {
           ...(refRegion ? [{ key: "region" as ZoneMode, label: REGION_NAMES[refRegion] ?? "Ma région", count: densityCounts.region }] : []),
         ]
       : []),
-    { key: "country", label: selectedCountry === null ? "Tous les pays" : `${countryName(selectedCountry)} entière`, count: densityCounts.country },
+    { key: "country", label: scopeLabel, count: densityCounts.country },
   ];
 
   // SEO vague 40 : page indexable pour capter la demande organique.
