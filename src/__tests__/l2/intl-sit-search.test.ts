@@ -41,7 +41,8 @@ describe("L2 moteur international", () => {
   it("libellés et titres sans code brut", () => {
     expect(intlPlaceLabel({ city: "Saint-Ludger", country: "CA" })).toBe("Saint-Ludger, Canada");
     expect(intlTitle("PF", null)).toBe("Gardes à l'étranger : Polynésie française");
-    expect(intlTitle(null, null)).toBe("Gardes à l'étranger, tous les pays");
+    expect(intlTitle(null, null)).toBe("Gardes à l'étranger, tous les pays hors France");
+    expect(intlTitle(null, null, true)).toBe("Gardes dans tous les pays, France incluse");
     expect(closestSortAvailable(null)).toBe(false);
   });
   it("lieu propriétaire prioritaire, aucun FR déduit", () => {
@@ -65,5 +66,53 @@ describe("L2 géocodage hors France", () => {
   });
   it("le géocodeur du site reste prioritaire", async () => {
     expect(await geocodeIntlPlace("X", "CA", async () => ({ lat: 1, lng: 2 }), f)).toEqual({ lat: 1, lng: 2 });
+  });
+});
+
+import { pickUniquePlace, parseUrlPoint, carryOverParams, __resetIntlPointCache } from "@/lib/intlSitSearch";
+describe("L2 revue root", () => {
+  const m = (lat: number, lng: number, detail: string) => ({ name: "Springfield", detail, country: "US", postalCode: null, lat, lng });
+  it("homonymes distincts sans région : aucun point", () => {
+    expect(pickUniquePlace([m(39.8, -89.6, "Illinois, États-Unis"), m(42.1, -72.6, "Massachusetts, États-Unis")], null)).toBeNull();
+  });
+  it("la région lève l'ambiguïté", () => {
+    expect(pickUniquePlace([m(39.8, -89.6, "Illinois, États-Unis"), m(42.1, -72.6, "Massachusetts, États-Unis")], "Massachusetts")).toEqual({ lat: 42.1, lng: -72.6 });
+  });
+  it("nom « Saint Ludger, Québec, Canada » : région utilisée, une seule requête par lieu", async () => {
+    __resetIntlPointCache();
+    let calls = 0;
+    const photon = { features: [
+      { properties: { name: "Saint-Ludger", countrycode: "CA", osm_key: "place", osm_value: "village", state: "Québec", country: "Canada" }, geometry: { coordinates: [-70.69, 45.75] } },
+      { properties: { name: "Saint-Ludger", countrycode: "CA", osm_key: "place", osm_value: "village", state: "Nouveau-Brunswick", country: "Canada" }, geometry: { coordinates: [-66.0, 47.0] } },
+    ] };
+    const f = (async () => { calls++; return { ok: true, json: async () => photon }; }) as any;
+    expect(await geocodeIntlPlace("Saint Ludger, Québec, Canada", "CA", async () => null, f)).toEqual({ lat: 45.75, lng: -70.69 });
+    expect(await geocodeIntlPlace("Saint Ludger, Québec, Canada", "CA", async () => null, f)).toEqual({ lat: 45.75, lng: -70.69 });
+    __resetIntlPointCache();
+    expect(await geocodeIntlPlace("Saint Ludger", "CA", async () => null, f)).toBeNull();
+    __resetIntlPointCache();
+    expect(await geocodeIntlPlace("Saint Ludger", "CA", async () => null, f)).toBeNull();
+    expect(calls).toBe(3);
+  });
+  it("échec mis en cache : pas de nouvelle requête", async () => {
+    __resetIntlPointCache();
+    let calls = 0;
+    const f = (async () => { calls++; return { ok: false }; }) as any;
+    await geocodeIntlPlace("Nulle", "CA", async () => null, f);
+    await geocodeIntlPlace("Nulle", "CA", async () => null, f);
+    expect(calls).toBe(1);
+  });
+  it("coordonnées d'adresse validées", () => {
+    expect(parseUrlPoint("45.5", "-73.6")).toEqual({ lat: 45.5, lng: -73.6 });
+    expect(parseUrlPoint("91", "0")).toBeNull();
+    expect(parseUrlPoint("0", "181")).toBeNull();
+    expect(parseUrlPoint("abc", "1")).toBeNull();
+    expect(parseUrlPoint("", "1")).toBeNull();
+    expect(parseUrlPoint(null, "1")).toBeNull();
+  });
+  it("changement de pays : dates et animaux compatibles gardés, ville et zone effacées", () => {
+    const from = new URLSearchParams({ ville: "Lyon", rayon: "30", zone: "dept", debut: "2026-11-01", fin: "2026-11-30", animaux: "Chiens,Reptiles" });
+    expect(carryOverParams(from, "intl").toString()).toBe("debut=2026-11-01&fin=2026-11-30&animaux=Chiens%2CReptiles");
+    expect(carryOverParams(from, "france").toString()).toBe("debut=2026-11-01&fin=2026-11-30&animaux=Chiens");
   });
 });

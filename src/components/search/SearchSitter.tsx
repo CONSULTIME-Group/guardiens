@@ -30,7 +30,8 @@ import { Search, MapPin, Lock, Sparkles, Globe2, X, AlertCircle, RefreshCw } fro
 import { format, differenceInDays, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
-import { fetchIntlOpenSits } from "@/lib/intlSitSearch";
+import { fetchIntlOpenSits, intlCountryCounts, carryOverParams, DEST_WORLD, DEST_ABROAD } from "@/lib/intlSitSearch";
+import DestinationCountrySelect from "@/components/search/DestinationCountrySelect";
 import { applyOpenSitFilter, checkGeocodedPoint, communeDeptFromCoords, pointUsable, fetchAllPages, fetchInChunks, isEndedSit, isFrancePlace, isOpenSit, isPastSit, isWithinRadius, parisTodayIso, resolveSitPlace, sitGeocodeKey, sitGeocodeKeyString } from "@/lib/sitSearchRules";
 import { sanitizeBioForCard } from "@/lib/sanitizeBio";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
@@ -177,6 +178,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
  const initialLoadDone = useRef(false);
  const [intlCount, setIntlCount] = useState<number>(0);
+ const [intlCounts, setIntlCounts] = useState<Array<{ code: string; name: string; count: number }>>([]);
  // Lot L1 : la ville saisie n'a pas pu être située, ou le rayon a dû se replier
  // sur le département faute de coordonnées. Signalé à l'écran, jamais silencieux.
  const [geocodeFailedCity, setGeocodeFailedCity] = useState<string | null>(null);
@@ -191,9 +193,9 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
    let cancelled = false;
    (async () => {
      // Lot L2 : moteur international partagé (lieu du propriétaire).
-     let count = 0;
-     try { count = (await fetchIntlOpenSits()).length; } catch { count = 0; }
-     if (!cancelled) setIntlCount(count || 0);
+     let rows: Awaited<ReturnType<typeof fetchIntlOpenSits>> = [];
+     try { rows = await fetchIntlOpenSits(); } catch { rows = []; }
+     if (!cancelled) { setIntlCount(rows.length); setIntlCounts(intlCountryCounts(rows)); }
    })();
    return () => { cancelled = true; };
  }, []);
@@ -938,7 +940,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
 
   // Lectures découpées et paginées, triées sur une colonne unique.
   const petsPromise = fetchInChunks<any>(allPropertyIds, (chunk, from, to) =>
-    supabase.from("pets").select("id, species, name, special_needs, property_id").in("property_id", chunk).order("id", { ascending: true }).range(from, to) as any);
+    (supabase.from("public_pets" as any) as any).select("id, species, name, special_needs, property_id").in("property_id", chunk).order("id", { ascending: true }).range(from, to) as any);
   const reviewsPromise = fetchInChunks<any>(allUserIds, (chunk, from, to) =>
     supabase.from("reviews").select("id, overall_rating, reviewee_id").in("reviewee_id", chunk).eq("published", true).order("id", { ascending: true }).range(from, to) as any);
   const badgesPromise = fetchInChunks<any>(allUserIds, (chunk, from, to) =>
@@ -1357,6 +1359,19 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  : t("search_results.count_available_fr", { count: resultCount });
 
  // ─── Pill style ───
+ // Lot L2 : choix du pays de destination. France = moteur L1 de cette page ;
+ // autre choix = recherche internationale, dates et animaux conservés,
+ // ville, zone et rayon effacés (incompatibles).
+ const onDestinationChange = (v: string) => {
+   if (v === "FR") return;
+   const carry = carryOverParams(new URLSearchParams({ debut: startDate, fin: endDate, animaux: animalTypes.join(",") }), "intl");
+   if (v !== DEST_ABROAD) carry.set("pays", v === DEST_WORLD ? DEST_WORLD : v);
+   const q = carry.toString();
+   navigate(`/annonces/international${q ? `?${q}` : ""}`);
+ };
+ const destinationSelect = (cls: string) => tab === "sits" ? (
+   <DestinationCountrySelect value="FR" onChange={onDestinationChange} counts={intlCounts} triggerClassName={cls} />
+ ) : null;
  const pillClass = "snap-start flex items-center gap-2 px-4 py-2 min-h-11 rounded-full border border-border bg-card cursor-pointer hover:border-primary transition-colors text-sm whitespace-nowrap shrink-0";
 
    // ─── Card renderer ───
@@ -1501,6 +1516,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
         portail du popover produisait deux contenus ouverts simultanément. */}
     {!isMobile && (
     <div className="flex items-center gap-3 px-6 pt-4 pb-2">
+      {destinationSelect("h-auto w-56 rounded-2xl border border-border bg-card px-5 py-4 text-left shadow-sm")}
       <div className="flex-1 min-w-0">
         <LocationPickerPopover
           open={editingCity}
@@ -1529,6 +1545,9 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
     </div>
     )}
 
+    {isMobile && tab === "sits" && (
+      <div className="px-6 pt-3">{destinationSelect("w-full h-11 rounded-full border border-border bg-card px-4 text-sm")}</div>
+    )}
     <div
      id="search-filter-pills"
      className={`relative -mr-6 sm:mr-0 ${isMobile && viewMode === "map" && !mobileFiltersOpen ? "hidden" : ""}`}
