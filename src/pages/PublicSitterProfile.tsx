@@ -365,168 +365,6 @@ export default function PublicSitterProfile() {
     </div>
   );
 
-  const PracticalGrid = (props: {
-    animalTypes: string[]; sitterProfile: any; radius: number | null; city: string | null; locationLabel?: string | null;
-    competences: string[]; specialSkills: string[]; lifestyle: string[]; lifePace: string;
-    preferredEnvironments: string[]; languages: string[]; interests: string[];
-    typeLine: string; durationLabel: string; frequencyLabel: string; noticeLabel: string;
-    mobilityLabel: string; presenceLabel: string; experienceLabel: string;
-    deptName: string | null; deptCode: string | null; regionName: string | null; deptSlug: string | null;
-  }) => (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-      {props.animalTypes.length > 0 && (
-        <div>
-          <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Animaux acceptés</h3>
-          <div className="flex flex-wrap gap-1.5">
-            {props.animalTypes.map(a => (
-              <span key={a} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground font-body">
-                {ANIMAL_LABELS[a] || a}
-              </span>
-            ))}
-            {props.sitterProfile?.farm_animals_ok && (
-              <span className="border border-primary text-primary rounded-full text-xs px-2.5 py-1 bg-primary/5 font-body">
-                Animaux de ferme
-              </span>
-            )}
-          </div>
-        </div>
-      )}
-      {(props.sitterProfile?.travels_with_own_animals || props.sitterProfile?.travels_with_children) && (
-        <div>
-          <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Accompagnants</h3>
-          <ul className="text-sm text-foreground/80 font-body space-y-1">
-            {props.sitterProfile?.travels_with_own_animals && (() => {
-              const own: string[] = (props.sitterProfile?.own_animals || []).filter((s: string) => s && s.toLowerCase() !== "non");
-              const detail = own.length > 0 ? own.map(s => s.replace(/^Oui[\s,\-\u2014]*/i, "").trim()).filter(Boolean).join(", ") : "";
-              return (
-                <li>Voyage avec ses animaux{detail ? ` : ${detail}` : ""}</li>
-              );
-            })()}
-            {props.sitterProfile?.travels_with_children && (
-              <li>Voyage parfois avec ses enfants</li>
-            )}
-          </ul>
-        </div>
-      )}
-      {(props.city || props.deptName) && (
-        <div>
-          <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Sa zone</h3>
-          <div className="text-sm text-foreground/70 font-body space-y-1">
-            {props.city && (
-              <p className="text-foreground">
-                {props.locationLabel || props.city}
-                {props.deptName
-                  ? `, ${props.deptName}${props.deptCode ? ` (${props.deptCode})` : ""}`
-                  : ""}
-              </p>
-            )}
-            {props.regionName && (
-              <p className="text-muted-foreground">{props.regionName}</p>
-            )}
-            {props.radius && (
-              <p>
-                Jusqu'à {props.radius} km
-                {props.city ? ` autour de ${props.city}` : ""}
-              </p>
-            )}
-            {props.mobilityLabel && <p>{props.mobilityLabel}</p>}
-            {/* Lot 2 : zones déclarées seulement, « non renseignée » sinon. */}
-            <p data-testid="travel-zones-summary" className={props.sitterProfile?.travel_zones ? "" : "text-muted-foreground"}>
-              {travelZonesSummary(props.sitterProfile?.travel_zones)}
-            </p>
-            {props.deptSlug && props.deptName && (
-              <p>
-                <Link
-                  to={`/departement/${props.deptSlug}`}
-                  className="inline-flex min-h-11 items-center text-primary hover:underline"
-                >
-                  Voir les gardiens de ce département
-
-                </Link>
-              </p>
-            )}
-          </div>
-        </div>
-      )}
-      {props.competences.length > 0 && (
-        <div>
-          <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Savoir-faire</h3>
-          <div className="flex flex-wrap gap-1.5">
-            {props.competences.map(c => (
-              <span key={c} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground/80 font-body">{c}</span>
-            ))}
-          </div>
-        </div>
-      )}
-      {props.specialSkills.length > 0 && (
-        <div>
-          <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Soins spécifiques</h3>
-          <div className="flex flex-wrap gap-1.5">
-            {props.specialSkills.map(c => (
-              <span key={c} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground/80 font-body">{c}</span>
-            ))}
-          </div>
-        </div>
-      )}
-      {(props.lifestyle.length > 0 || props.lifePace) && (
-        <div>
-          <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Style de vie</h3>
-          <div className="flex flex-wrap gap-1.5">
-            {props.lifestyle.map(l => (
-              <span key={l} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground font-body">{l}</span>
-            ))}
-            {props.lifestyle.length === 0 && props.lifePace && (
-              <span className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground font-body">{props.lifePace}</span>
-            )}
-          </div>
-        </div>
-      )}
-      {props.preferredEnvironments.length > 0 && (
-        <div>
-          <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Environnements préférés</h3>
-          <div className="flex flex-wrap gap-1.5">
-            {props.preferredEnvironments.map(e => (
-              <span key={e} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground font-body">{ENV_LABELS[e] || e}</span>
-            ))}
-          </div>
-        </div>
-      )}
-      {props.languages.length > 0 && (
-        <div>
-          <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Langues parlées</h3>
-          <div className="flex flex-wrap gap-1.5">
-            {props.languages.map(l => (
-              <span key={l} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground font-body">{l}</span>
-            ))}
-          </div>
-        </div>
-      )}
-      {props.interests.length > 0 && (
-        <div>
-          <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Centres d'intérêt</h3>
-          <div className="flex flex-wrap gap-1.5">
-            {props.interests.map(i => (
-              <span key={i} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground font-body">{i}</span>
-            ))}
-          </div>
-        </div>
-      )}
-      {(props.typeLine || props.presenceLabel || props.experienceLabel || props.durationLabel || props.frequencyLabel || props.noticeLabel) && (
-        <div>
-          <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Profil &amp; disponibilité</h3>
-          <div className="text-sm text-foreground/70 font-body space-y-0.5">
-            {props.typeLine && <p>{props.typeLine}</p>}
-            {props.presenceLabel && <p>{props.presenceLabel}</p>}
-            {props.experienceLabel && <p>Expérience : {props.experienceLabel}</p>}
-            {props.durationLabel && <p>{props.durationLabel}</p>}
-            {props.frequencyLabel && <p>{props.frequencyLabel}</p>}
-            {props.noticeLabel && <p>{props.noticeLabel}</p>}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-
   const GallerySimple = ({ visibleGallery, setLightboxIdx }: { visibleGallery: any[]; setLightboxIdx: (n: number) => void }) => (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3">
       {visibleGallery.map((g: any, i: number) => (
@@ -1855,6 +1693,10 @@ export default function PublicSitterProfile() {
           { label: "Centres d'intérêt", value: listLabel(sitterInterests) },
           { label: "À la maison", value: homeFactLabel(sitterProfile?.own_animals, sitterProfile?.life_pace) },
           { label: "Atouts", value: assetsLabel(declaredCertifications, sitterProfile?.has_license, sitterProfile?.has_vehicle) },
+          // L5 : faits de l'ancien bloc pratique, jamais présentés ailleurs.
+          { label: "Accompagnants", value: companionsLabel(sitterProfile) },
+          { label: "Style de vie", value: listLabel(lifestyle) },
+          { label: "Environnements préférés", value: listLabel(preferredEnvironments.map((e) => ENV_LABELS[e] || e)) },
         ].filter((f) => f.value);
 
         // Bandeau entraide
@@ -1880,6 +1722,9 @@ export default function PublicSitterProfile() {
           { label: "Mobilité", value: travelZoneLabels(sitterProfile?.travel_zones).join(", ") || "Non renseignée" },
           { label: "Durée", value: durationLabel },
           { label: "Avant la garde", value: meetingPreferenceLabel(sitterProfile?.meeting_preference) },
+          { label: "Présence", value: presenceLabel },
+          { label: "Fréquence", value: frequencyLabel },
+          { label: "Préavis", value: noticeLabel },
           { label: "Expérience", value: experienceLabel },
           { label: "Avis", value: sitterRoleCount > 0 ? `★ ${formatRatingFr(sitterRoleAvg)} (${sitterRoleCount})` : "" },
         ].filter((f) => f.value);
