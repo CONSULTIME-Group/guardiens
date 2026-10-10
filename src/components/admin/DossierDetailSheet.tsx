@@ -130,7 +130,7 @@ export function DossierDetailSheet({ kind, item, open, onOpenChange, extra, foot
   const city = item ? (kind === "sit" ? listingCity(item) : { city: item.city ?? null, fromOwner: false }) : null;
   const total = counts.data ? Object.values(counts.data).reduce((a, b) => a + b, 0) : 0;
 
-  const dates: Array<[string, string | null]> = item ? (kind === "sit" ? [
+  const rawDates = (item ? (kind === "sit" ? [
     ["Créée le", fmt(item.created_at)],
     ["Dates de garde", item.start_date ? `${fmt(item.start_date)} au ${fmt(item.end_date) ?? "date de fin non renseignée"}` : null],
     ["Dernière mise en ligne", fmt(item.published_at)],
@@ -143,7 +143,8 @@ export function DossierDetailSheet({ kind, item, open, onOpenChange, extra, foot
     ["Date de fin", fmt(item.end_date)],
     ["Masquée le", fmt(item.hidden_at)],
     ["Clôturée le", fmt(item.closed_at)],
-  ] as Array<[string, string | null]>).filter(([, v]) => !!v) : [];
+  ]) : []) as Array<[string, string | null]>;
+  const dates = rawDates.filter(([, v]) => !!v);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
