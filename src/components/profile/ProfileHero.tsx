@@ -13,7 +13,6 @@ import { MapPin, Shield, BadgeCheck, Image as ImageIcon } from "lucide-react";
 import StatutGardienBadge from "@/components/profile/StatutGardienBadge";
 import FavoriteButton from "@/components/shared/FavoriteButton";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import ReplyTimeBadge from "@/components/sitters/ReplyTimeBadge";
 import ResponsivenessBadge from "@/components/profile/ResponsivenessBadge";
 import { avatarImageUrl } from "@/lib/storageImage";
 import { formatRatingFr } from "@/lib/formatRatingFr";
@@ -318,10 +317,6 @@ const ProfileHero = ({
                   </span>
                 )}
               </div>
-
-              {replyMedianMinutes != null && (
-                <ReplyTimeBadge minutes={replyMedianMinutes} className="self-start mt-1" />
-              )}
 
               {/* Réactivité calculée (90 jours), identique gardien et propriétaire. */}
               <ResponsivenessBadge userId={id} className="self-start mt-1" />

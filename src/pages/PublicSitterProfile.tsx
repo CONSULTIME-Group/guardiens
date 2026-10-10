@@ -92,6 +92,7 @@ import {
   SectionHeading,
 } from "@/components/profile/sitter/SitterF1Sections";
 import { groupSitterSkills, skillsHeadline } from "@/lib/sitterSkillGroups";
+import { declaredHelpOffer, hasEntraideFacet, entraideOfferBandText, lastVisitLabel } from "@/lib/profileSignals";
 import { pickProfileQuote } from "@/lib/profileQuote";
 import {
   meetingPreferenceLabel,
@@ -126,17 +127,6 @@ const SITTER_TYPE_LABELS: Record<string, string> = {
   Solo: "Solo", Couple: "Couple", Famille: "Famille", "Retraité": "Retraité(e)",
 };
 
-/** Formulation simple de la dernière visite : "cette semaine", "ce mois-ci", sinon le mois. */
-function lastVisitLabel(iso: string | null | undefined): string | null {
-  if (!iso) return null;
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return null;
-  const now = new Date();
-  const diffDays = Math.floor((now.getTime() - d.getTime()) / 86400000);
-  if (diffDays <= 7) return "cette semaine";
-  if (d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()) return "ce mois-ci";
-  return `en ${format(d, "MMMM yyyy", { locale: fr })}`;
-}
 
 /** Seuil de bascule du pouls de la communauté vers le chiffre départemental. */
 const LOCAL_PULSE_MIN_SITTERS = 5;
@@ -177,11 +167,8 @@ const FreshStartStory = ({
           <li>Membre depuis {format(new Date(createdAt), "MMMM yyyy", { locale: fr })}.</li>
         )}
         {visit && <li>Dernière visite {visit}.</li>}
-        <li>
-          {identityVerified
-            ? `${firstName} a vérifié son identité et rempli son profil.`
-            : `${firstName} a rempli son profil.`}
-        </li>
+        {/* Lot L3 : jamais « a rempli son profil », vrai aussi pour un profil à 35 %. */}
+        {identityVerified && <li>{firstName} a vérifié son identité.</li>}
       </ul>
     </section>
   );
@@ -586,10 +573,10 @@ export default function PublicSitterProfile() {
     const availability: Record<ProfileTab, boolean> = {
       gardien: sitterProfile !== null,
       proprio: ownerProfile !== null,
-      entraide: missionCount > 0,
+      entraide: hasEntraideFacet(helpOffer, missionCount),
     };
     if (availability[requested]) setActiveTab(requested);
-  }, [tabParam, loading, sitterProfile, ownerProfile, missionCount]);
+  }, [tabParam, loading, sitterProfile, ownerProfile, missionCount, helpOffer]);
 
   // Scroll vers l'ancre (#confiance, #verification, …) une fois les données
   // chargées : en SPA, le hash natif ne déclenche pas le scroll car l'élément
@@ -636,6 +623,8 @@ export default function PublicSitterProfile() {
   // Ligne « ce que je propose » (vue public_helpers, lisible par les visiteurs).
   const [helpsWith, setHelpsWith] = useState<string | null>(null);
   useEffect(() => {
+    // Reset immédiat : jamais la ligne du profil précédent pendant le chargement.
+    setHelpsWith(null);
     if (!id) return;
     let cancelled = false;
     (supabase as any)
@@ -682,7 +671,7 @@ export default function PublicSitterProfile() {
       // La vue publique `public_profiles` est lisible par tout visiteur ;
       // `profiles` reste réservé au propriétaire du profil.
       const PUBLIC_PROFILE_COLS =
-        "id, role, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, completed_sits_count, last_seen_at, departement_code, certifications, country";
+        "id, role, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, completed_sits_count, last_seen_at, departement_code, certifications, country, available_for_help, skill_categories";
       // `last_name` retiré du select, jamais rendu publiquement.
       const BASE_PROFILE_COLS =
         "id, role, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, profile_completion, completed_sits_count, cancellation_count, hero_image_index";
@@ -842,7 +831,15 @@ export default function PublicSitterProfile() {
       // Calculate default tab from fetched data
       const hasSitterProfile = fetchedSitterProfile !== null;
       const hasOwnerProfile = fetchedOwnerProfile !== null;
-      const hasEntraide = fetchedMissionCount > 0;
+      const fetchedPublic: any = (profileRes as any)?.data ?? null;
+      const hasEntraide = hasEntraideFacet(
+        declaredHelpOffer({
+          availableForHelp: fetchedPublic?.available_for_help,
+          skillCategories: fetchedPublic?.skill_categories,
+          helpsWith: null,
+        }),
+        fetchedMissionCount,
+      );
       const currentTabParam = searchParams.get('tab');
 
       const tabAvailability: Record<ProfileTab, boolean> = {
@@ -1469,7 +1466,7 @@ export default function PublicSitterProfile() {
   // Tab visibility
   const hasSitterProfile = sitterProfile !== null;
   const hasOwnerProfile = ownerProfile !== null;
-  const hasEntraide = missionCount > 0;
+  const hasEntraide = hasEntraideFacet(helpOffer, missionCount);
   const availableTabs = [hasSitterProfile, hasOwnerProfile, hasEntraide].filter(Boolean).length;
 
   // ── CTA du hero, contextuel à la facette active (vague 38, chantier 1) ──
@@ -1708,6 +1705,7 @@ export default function PublicSitterProfile() {
               emergencyActive={emergencyActive}
               statutGardien={reputation?.statut_gardien ?? null}
               replyMedianMinutes={sitterProfile?.reply_median_minutes ?? null}
+              lastSeenAt={profile?.last_seen_at ?? null}
               quote={pickProfileQuote(bio, motivation)}
             />
           );
@@ -1880,7 +1878,8 @@ export default function PublicSitterProfile() {
         ].filter((f) => f.value);
 
         // Bandeau entraide
-        const band = entraideBandText({ firstName, city: city || null, helpsWith, competences });
+        const bandText = entraideOfferBandText(helpOffer, firstName, city || null);
+        const band = bandText ? { text: bandText } : null;
         const citySlug = city ? citySlugOf(city) : "";
         const bandLink = hasEntraide
           ? { label: `Voir l'entraide de ${firstName}`, onClick: () => handleTabChange('entraide') }
