@@ -41,7 +41,7 @@ vi.mock("@/integrations/supabase/client", () => ({
           if (["insert", "update", "delete", "upsert"].includes(key)) return () => { throw new Error("Écriture interdite"); };
           if (key === "then") return (ok: any, fail: any) => {
             const isSitList = table === "sits" && !q.head;
-            if (isSitList) sitReads.push(q);
+            if (isSitList && String(q.calls[0]?.args[0]).includes("slug")) sitReads.push(q);
             const p = isSitList && failing
               ? Promise.reject(new Error("Lecture indisponible"))
               : Promise.resolve({ data: isSitList ? fixture : [], count: table === "sits" ? fixture.length : 0, error: null });
