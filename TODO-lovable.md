@@ -116,3 +116,8 @@ Navigateur local non connecté, ordinateur seulement (1280 px). Aucun audit mobi
 - [x] L2 revue 0c0fff3 : homonymes par département, suggestions fermées à chaque changement d'adresse, aucun 0 affiché en cas de panne. Ouvert : état vide France en panne (L1).
 
 - [x] L2, état vide mobilité (10/10/2026) : preuve root build 443e09e, Canada résidence 2 / mobilité 0 ; libellé corrigé « Aucun gardien n'a encore déclaré cette destination », suggestion chiffrée de résidents retirée en mode mobilité ; types/build verts, contrôle visiteur confirmé.
+
+## Checkpoint 10/10/2026
+- L2 VALIDÉ par root (preuves exactes dans le plan, section « Clôture L2 »).
+- L3 livré sans publication, en attente de relecture root : entraide déclarée, confiance (sources corrigées), dernière visite, réactivité 90 j sans taux, chronologie, E7 constaté (double rôle = max des scores, non modifié). L4 non lancé.
+- L7 : corriger le faux état vide du moteur France SearchSitter après échec de requête.
