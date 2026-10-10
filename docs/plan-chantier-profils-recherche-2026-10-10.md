@@ -1,4 +1,4 @@
-# Plan de chantier profils, cartes et recherche (10/10/2026)
+# Plan de chantier profils, cartes et recherche (10/10/2026, relu)
 
 Document de planification uniquement. Aucun lot n'est lancé ni autorisé à l'implémentation par ce document. Aucune recette future n'est présentée comme passée.
 
@@ -25,8 +25,8 @@ Limites : connexion GitHub perdue côté Lovable (modifications conservées dans
 
 - Gouache personnalisable conservée, y compris les petites gouaches de compétences.
 - Entraide affichée selon la volonté déclarée, une compétence n'est pas une volonté.
-- Complétion (barème 100) et confiance (5/5) restent deux notions distinctes ; l'affinité est un troisième concept, sans rapport avec la confiance.
-- Profils sous 40 % visibles ; candidature possible à partir de 40 % inclus.
+- Deux scores conservés et distincts : complétion (barème 100) et confiance (5/5). L'affinité est un troisième concept, sans rapport avec la confiance.
+- Profils sous 40 % visibles ; candidature possible à partir de 40 % inclus. Aucun barème modifié dans ce chantier sans décision explicite.
 - Simplicité B2C.
 - Aucune donnée privée, aucune coordonnée exacte, photos selon les droits (galerie gardien réservée aux membres).
 - Aucune recopie des animaux d'une annonce privée vers un profil.
@@ -48,13 +48,13 @@ Preuve : C = code, N = navigateur Codex, L = local Lovable. Statut : fait / bug 
 | F7 | Montréal, Canada sur fiche publique | N | fait | - |
 | F8 | Propriétaire : garde completed affichée | C, L | fait | - |
 | F9 | Imports morts SearchSitter retirés | C | fait | - |
-| A1 | Zone d'annonce calculée sur owner.city, pas sur la localisation du logement | C (SearchSitter) | bug confirmé | L1 |
+| A1 | Zone d'annonce calculée sur owner.city, pas sur le lieu de garde ; cible : coordonnées approximatives du lieu de garde issues du champ adapté (structure sits / properties à vérifier, code postal de l'annonce non confirmé) | C (SearchSitter) | bug confirmé | L1 |
 | A2 | Mode France n'impose pas FR (Québec dans la grille) | C, L | bug confirmé | L1 |
 | A3 | Drawer « Voir N résultats » = results.length (32) vs 15 disponibles + 17 fermées | C, L | bug confirmé | L1 |
 | A4 | Compteur France inclut expirées, hors France et fermées | C | bug confirmé | L1 |
 | A5 | « près de vous » dès qu'une ville est saisie, même en France entière | C | bug confirmé | L1 |
 | A6 | Compteurs hors France incohérents (dates, accepting_applications) entre PublicListings, SearchSitter, InternationalShowcase, InternationalListings | C | bug confirmé | L1 |
-| A7 | Cap 500 ouvertes + 500 fermées, pays filtré après limite | C | bug confirmé | L1 |
+| A7 | Plafond 500 ouvertes + 500 fermées, pays filtré après limite | C | risque de résultats incomplets à volume élevé, pas de bug actuel prouvé (15 annonces) | L1 |
 | A8 | Dates de fin inclusives et fuseaux | C | à vérifier | L1 |
 | A9 | Erreur de géocodage silencieuse pouvant fausser la distance | C | à vérifier | L1 |
 | A10 | Bandeau 2 + grille 15 avec Québec (Codex preview) | N, non reproduit en L | à vérifier, cause non tranchée | L1 |
@@ -67,26 +67,27 @@ Preuve : C = code, N = navigateur Codex, L = local Lovable. Statut : fait / bug 
 | B6 | Titres « en France », « quelqu'un du coin » hors contexte voyage | C | recommandation | L2 |
 | B7 | URL pays/ville/filtres, reset et retour arrière | C | à vérifier | L2 |
 | B8 | InternationalListings géocode jusqu'à 60 annonces au chargement | C | recommandation | L2 |
-| C1 | Cartes gardiens 4 colonnes étroites, auto-rows-fr crée de grands vides | N | bug confirmé | L3 |
-| C2 | Note de carte : nombre de gardes affiché à la place du nombre d'avis | C | bug confirmé | L3 |
-| C3 | replyPhrase : médiane arrondie en « moins de », promesse trompeuse | C | bug confirmé | L3 |
-| C4 | Citation : première phrase > 120 caractères renvoie null | C | à vérifier | L3 |
-| C5 | Filtre « avec photos » ignore couverture et galerie | C | à vérifier | L3 |
-| C6 | Compteurs de cartes potentiellement périmés après changement | C | à vérifier | L3 |
-| D1 | FreshStartStory « Venaya a rempli son profil » à 35 % | N | bug confirmé | L4 |
-| D2 | MarginLettering dans les marges verticales | C | recommandation (suppression) | L4 |
-| D3 | Héros gardien et propriétaire non harmonisés (photo 180x196, h1 68 vs photo ronde 176, h1 plus petit) | N | recommandation | L4 |
-| D4 | Sections vides (Ses annonces, animaux non renseignés, phrases au futur) | N | recommandation | L4 |
-| D5 | « Prépare sa garde » affiché sans intention connue | C | à vérifier | L4 |
-| D6 | Contact absent entre 768 et 1023 px (rail lg, sticky md mobile) | C | à vérifier | L4 |
-| D7 | Widget Alma pouvant recouvrir le contenu | N | à vérifier | L4 |
-| D8 | Bloc PracticalGrid jamais affiché | C | à arbitrer | L4 |
-| E1 | hasEntraide basé sur missionCount > 0, masque les offres déclarées | C | bug confirmé | L5 |
-| E2 | Bande helpsWith : liste blanche HELP_SKILLS 5 catégories, exclut jardin et bricolage | C | bug confirmé | L5 |
-| E3 | Confiance 5 étapes : source de hasFirstActivity à vérifier | C | à vérifier | L5 |
-| E4 | Phrase vérification d'identité « par l'équipe » vs automatique | C | à vérifier contre le vrai flux | L5 |
-| E5 | Réactivité : deux systèmes (30 j et 90 j, seuil 5 contacts, >= 70 %, médiane < 72 h) | C | recommandation (contrat unique, proposition 90 j min 5, à valider) | L5 |
-| E6 | Chronologie : doublons premier avis / premier 5 étoiles, graphique 12 mois quasi vide | N | recommandation | L5 |
+| E1 | hasEntraide basé sur missionCount > 0, masque les offres déclarées | C | règle restrictive constatée, recommandation fonctionnelle à aligner sur les intentions | L3 |
+| E2 | Bande helpsWith : liste blanche HELP_SKILLS 5 catégories, exclut jardin et bricolage | C | règle restrictive constatée, recommandation fonctionnelle à aligner sur les intentions | L3 |
+| E3 | Confiance 5 étapes : source de hasFirstActivity à vérifier | C | à vérifier | L3 |
+| E4 | Phrase vérification d'identité « par l'équipe » vs automatique | C | à vérifier contre le vrai flux | L3 |
+| E5 | Réactivité : deux systèmes (30 j et 90 j, seuil 5 contacts, >= 70 %, médiane < 72 h) | C | recommandation (contrat unique, proposition 90 j min 5, à valider) | L3 |
+| E6 | Chronologie : doublons premier avis / premier 5 étoiles, graphique 12 mois quasi vide | N | recommandation | L3 |
+| E7 | Seuil 40 % sur comptes double rôle et source serveur de la complétion | C | à vérifier avant toute décision sur le barème | L3 |
+| C1 | Cartes gardiens 4 colonnes étroites, auto-rows-fr crée de grands vides | N | recommandation UX confirmée | L4 |
+| C2 | Note de carte : nombre de gardes affiché à la place du nombre d'avis | C | bug confirmé | L4 |
+| C3 | replyPhrase : médiane arrondie en « moins de », promesse trompeuse | C | bug confirmé | L4 |
+| C4 | Citation : première phrase > 120 caractères renvoie null | C | à vérifier | L4 |
+| C5 | Filtre « avec photos » ignore couverture et galerie | C | à vérifier | L4 |
+| C6 | Compteurs de cartes potentiellement périmés après changement | C | à vérifier | L4 |
+| D1 | FreshStartStory « Venaya a rempli son profil » à 35 % | N | bug confirmé | L5 |
+| D2 | MarginLettering dans les marges verticales | C | recommandation (suppression) | L5 |
+| D3 | Héros gardien et propriétaire non harmonisés (photo 180x196, h1 68 vs photo ronde 176, h1 plus petit) | N | recommandation | L5 |
+| D4 | Sections vides (Ses annonces, animaux non renseignés, phrases au futur) | N | recommandation | L5 |
+| D5 | « Prépare sa garde » affiché sans intention connue | C | à vérifier | L5 |
+| D6 | Contact absent entre 768 et 1023 px (rail lg, sticky md mobile) | C | à vérifier | L5 |
+| D7 | Widget Alma pouvant recouvrir le contenu | N | à vérifier | L5 |
+| D8 | Bloc PracticalGrid jamais affiché | C | à arbitrer | L5 |
 | G1 | Environnement en double : menu Campagne vs puces Ville (Mon profil Jérémie) | N | bug confirmé | L6 |
 | G2 | Titre « Identité et vérification » couvre bio, langues, intérêts | N | recommandation | L6 |
 | G3 | « Découvrir Lyon » long, à plier par défaut, origine générée à vérifier | N | à vérifier | L6 |
@@ -95,39 +96,80 @@ Preuve : C = code, N = navigateur Codex, L = local Lovable. Statut : fait / bug 
 | G6 | Libellé de région « Rhône, Alpes et Massif central » | C | à arbitrer | L6 |
 | H1 | Propriétaire Cécile : aucun animal sur fiche, 4 sur l'annonce Rouans | N | donnée de saisie, ne pas recopier | - |
 | H2 | Mémoire affinité mentionne 60 %, site applique 40 % | C | à corriger (doc) | L7 |
-| H3 | Fond de confiance équivalent à 100 | - | critique abandonnée | - |
 
-## 4. Lots
+## 4. Séquence et règles de livraison
 
-Chaque lot : diff exact limité au périmètre, types, tests métier utiles (pas de tests miroirs de CSS), build final, puis recette visuelle et fonctionnelle sur le build aux dimensions concernées avec captures, et contrôle de régression des lots précédents. Checkpoint : SHA, tests, preuves, statut, mise à jour TODO. Rollback par commit, migrations compatibles si nécessaires. Pas d'enchaînement tant qu'un bug bloquant ou une recette manque : statut « partiellement validé ». Les lots déjà autorisés n'ont pas besoin d'un GO chacun ; seule la production l'exige. Ici : plan seulement, aucun lot autorisé.
+Ordre strict : L1, puis L2, puis L3, puis L4, puis L5, puis L6, puis L7.
+- L3 peut faire une préanalyse des sources de données de l'édition (lecture seule) ; l'aller-retour réel d'enregistrement est validé en L6.
+- Un lot ne commence que lorsque le précédent est validé : types, tests, build, puis recette visuelle et fonctionnelle sur le build. Tout point bloquant arrête la séquence, le lot reste « partiellement validé ».
+
+Pour chaque lot : diff exact limité au périmètre ; typecheck ; tests métier utiles (pas de tests miroirs de CSS) ; build final ; recette après build aux dimensions concernées avec captures ; contrôle de régression des lots précédents ; checkpoint (SHA, tests, preuves, statut, mise à jour TODO). Rollback par commit, migrations compatibles si nécessaires. Seule la production exige un GO ; ici, plan seulement, aucun lot autorisé.
+
+## 5. Lots
 
 ### L1 Fiabilité du moteur d'annonces
-Périmètre : A1 à A11. Localisation du logement (sits.city, code postal) au lieu de owner.city ; sémantique ouvertes / pourvues / passées ; France = FR strict, « autre pays » et « tous » distincts ; drawer, densités, grille et carte sur la même population disponible ; cohérence internationale (dates, accepting_applications) ; élargissement explicite ; aucun retour à l'ensemble faute de coordonnées ; pagination serveur ou pool complet (fin du cap 500/500 et du pays filtré après limite) ; dates de fin inclusives, fuseau Europe/Paris ; erreurs de géocodage visibles sans fausser la distance. A10 : reproduire et établir la cause avant correctif.
-Recette : mêmes chiffres dans drawer, titre, carte, bandeaux ; Lyon, France, Canada, PF, tous pays ; annonce Marlhes placée à Marlhes.
+Périmètre : A1 à A11. Lieu de garde (coordonnées approximatives issues du champ adapté, structure à vérifier) au lieu de owner.city ; sémantique ouvertes / pourvues / passées ; France = FR strict, « autre pays » et « tous » distincts ; drawer, densités, grille et carte sur la même population disponible ; cohérence internationale (dates, accepting_applications) ; élargissement explicite ; aucun retour à l'ensemble faute de coordonnées ; pagination serveur ou pool complet pour lever le risque A7 ; dates de fin inclusives, fuseau Europe/Paris ; erreurs de géocodage visibles sans fausser la distance. A10 : reproduire et établir la cause avant correctif.
+
+Recette après build :
+- Lyon 15 km, département, région, France : mêmes chiffres dans drawer, titre, grille, carte, bandeaux.
+- France entière : aucune annonce hors FR.
+- Annonce Marlhes d'un propriétaire Saint-Étienne placée à Marlhes.
+- Annonce dont la date de fin est aujourd'hui : encore ouverte.
+- Géocodage en échec simulé : message visible, aucune distance inventée.
 
 ### L2 Recherche internationale (annonces et gardiens)
-Dépend de L1. Parcours pays visible, puis ville du pays, puis rayon ; « Tous les pays » ; filtres dates et animaux communs ; remplacer l'autocomplétion France seule de SearchSitter ; réutiliser le moteur L1 dans InternationalListings sans casser route ni canonical ; liste par défaut, carte en option ; B4 à investiguer sans cause supposée ; showcase à partir de 1 ou 2 annonces ; noms complets CA / PF (PF comme destination géographique) ; tri « plus proches » désactivé ou expliqué sans ville ; textes adaptés au voyage ; URL pays/ville/filtres, reset, retour arrière. Drapeaux facultatifs.
+Périmètre : B1 à B8. Pays visible, puis ville du pays, puis rayon ; « Tous les pays » ; filtres dates et animaux communs ; autocomplétion par pays dans SearchSitter ; moteur L1 réutilisé par InternationalListings sans casser route ni canonical ; liste par défaut, carte en option ; showcase dès 1 annonce ; noms complets CA / PF (PF comme destination géographique) ; tri « plus proches » désactivé ou expliqué sans ville ; textes adaptés au voyage ; URL pays/ville/filtres. Drapeaux facultatifs.
 
-### L3 Cartes de synthèse gardiens et annonces
-Dépend de L2 (destination) et des vérifications de données L5. Grille adaptée à la largeur utile, hauteur auto ; identité, photo, icône vérifiée, ville et pays, mobilité, raison d'affinité, animaux, 1 ou 2 compétences en gouache, dernière activité approximative, réactivité et avis réels, bio courte sans invention. Profils incomplets visibles, initiale en repli, cartes comparables. C2, C3, C4, C5, C6. Attribut sans donnée omis. CTA « Voir le profil » cohérent avec favoris et navigation clavier du carrousel. Cartes annonces : lieu complet, dates, animaux, couverture correcte, photos privées jamais forcées.
+Recette après build :
+- CA (Montréal, Saint-Ludger), FR (Lyon), MX, BR, PF, Tous les pays : compteurs, liste, carte cohérents.
+- Carte : repères CA présents si annonces CA (B4 expliqué), PF correctement placée.
+- URL : copier, recharger, retour arrière, reset ; état restauré.
+- Pays sans résultat : message adapté, pas de texte « France ».
 
-### L4 Héros et fiches publiques
-Après L3. Gouache choisie préservée, sujets lisibles ; héros compact environ 280 à 320 px sur ordinateur (objectif, pas règle mobile) ; photo, prénom, ville, pays, mobilité, dernière activité, icône vérifiée et CTA au premier écran ; icône vérifiée cliquable 44 px avec explication au survol, focus et toucher ; suppression de MarginLettering ; harmonie gardien / propriétaire ; moins de cadres sombres et de doubles surtitres ; galerie en mini aperçu + « Voir les photos » (accès membres préservé) ; sections vides masquées ; D1 neutralisé ; D5 ; en-tête collant et ancres d'onglets non masquées ; D6 ; D7 ; D8 arbitré ; aucune bio inventée.
+### L3 Entraide, confiance, activité (données et affichage minimum)
+Périmètre : E1 à E7. Valider d'abord les données et le contrat de réactivité ; règles actuelles conservées par défaut. Toute décision sur un taux brut affiché est prise avant implémentation, pas pendant. Offres déclarées et missions réalisées distinctes ; illustrations de compétences alignées sur les gouaches existantes, sans nouvel asset inventé ; onglets aide / garde / public clairs ; confiance 5 étapes (email, identité, photo, >= 40 %, première activité : annonce pour propriétaire, garde pour gardien) distincte de la complétion 100 (l'identité y compte pour 5 %, chevauchement assumé, pas de fusion) ; affinité séparée ; explication de 5/5 sans promesse de fiabilité ; dernière activité relative, son absence ne signifie pas « peu fiable » ; Alma et CommunityPulse secondaires. E7 : contrôler le seuil 40 % sur comptes double rôle et la source serveur de la complétion avant toute décision ; aucun barème modifié.
 
-### L5 Entraide, confiance, activité
-Vérification des données avant le design de L3 et L4, implémentation ensuite. E1, E2 ; offres déclarées et missions réalisées affichées séparément ; illustrations de compétences uniformisées avec les gouaches existantes, sans nouvel asset inventé ; onglets aide / garde / public clairs ; confiance 5 étapes (email, identité, photo, >= 40 %, première activité : annonce pour propriétaire, garde pour gardien) distincte de la complétion 100 (l'identité y compte pour 5 %, chevauchement assumé, pas de fusion) ; affinité séparée ; explication de 5/5 sans promesse de fiabilité ; E3, E4 ; E5 contrat unique validé par Jérémie avant affichage d'un taux ; dernière activité relative, son absence ne signifie pas « peu fiable » ; E6 ; Alma et CommunityPulse secondaires.
+Recette après build :
+- Membre avec offre d'entraide déclarée et 0 mission : offre visible.
+- Membre avec mission réalisée : distincte de l'offre.
+- Profil complétion 100 et confiance 5/5 ; profil complétion 100 et confiance partielle : deux chiffres distincts et expliqués.
+- Réactivité sous le seuil de contacts : aucun taux affiché, formulation neutre.
+- Compte double rôle à 39 et 40 % : refus et accord identiques côté gardien (fixture isolée).
+
+### L4 Cartes de synthèse gardiens et annonces
+Périmètre : C1 à C6. Grille adaptée à la largeur utile, hauteur auto ; identité, photo, icône vérifiée, ville et pays, mobilité, raison d'affinité, animaux, 1 ou 2 compétences en gouache, dernière activité approximative, réactivité et avis réels (contrat L3), bio courte sans invention. Profils incomplets visibles, initiale en repli, cartes comparables. Attribut sans donnée omis. CTA « Voir le profil » cohérent avec favoris et clavier du carrousel. Cartes annonces : lieu complet, dates, animaux, couverture correcte, photos privées jamais forcées.
+
+Recette après build :
+- Profil clairsemé à 35 % avec photo et sans photo : carte comparable, initiale en repli, aucun vide.
+- Note : nombre d'avis étiqueté, distinct du nombre de gardes.
+- Géographie : ville et pays hors France, mobilité si déclarée.
+- Filtre « avec photos » : couverture et galerie prises en compte.
+- 1280, 1440, 1920 : pas de colonne étroite ni de grand vide.
+
+### L5 Héros et fiches publiques
+Périmètre : D1 à D8. Gouache choisie préservée, sujets lisibles ; héros compact environ 280 à 320 px sur ordinateur (objectif, pas règle mobile) ; photo, prénom, ville, pays, mobilité, dernière activité, icône vérifiée et CTA au premier écran ; icône vérifiée cliquable 44 px, explication au survol, focus et toucher ; suppression de MarginLettering ; harmonie gardien / propriétaire ; moins de cadres sombres et de doubles surtitres ; galerie en mini aperçu + « Voir les photos » (accès membres préservé) ; sections vides masquées ; D1 neutralisé ; en-tête collant et ancres non masquées ; D8 arbitré ; aucune bio inventée.
+
+Recette après build :
+- 3 profils (gardien complet, gardien à 35 %, propriétaire), ordinateur et mobile.
+- Icônes 44 px : survol, focus clavier, toucher.
+- Gouache choisie affichée, sujet lisible.
+- Contact accessible de 360 à 1920, y compris 768 à 1023.
+- Widget Alma sans recouvrement.
 
 ### L6 Édition du profil
-Alimente L2 et L5. G1 : une source cohérente, données existantes conservées, aucun écrasement automatique ; complétion et confiance distinctes mais navigation allégée ; G2, G3 ; aides progressives courtes ; G4 sans promettre de sauvegarde auto avant le code ; erreurs par champ sans perte des changements ; pays, ville, mobilité combinable sans préchoix, opt-in entraide ; aller-retour réel enregistrer / recharger / fiche publique / recherche testé en préproduction sans écrire sur un profil réel ; G5, G6.
+Périmètre : G1 à G6. Une source cohérente pour l'environnement, données existantes conservées, aucun écrasement automatique ; complétion et confiance distinctes, navigation allégée ; aides progressives courtes ; état modifié / enregistré clair, sans promettre de sauvegarde auto ; erreurs par champ sans perte ; pays, ville, mobilité combinable sans préchoix, opt-in entraide.
+
+Recette après build (préproduction, compte de test, jamais un profil réel) :
+- Enregistrer, recharger, fiche publique, recherche : valeur identique partout.
+- Erreur simulée : message par champ, saisie conservée.
+- Environnement, pays, mobilité : diff avant / après limité aux champs changés.
 
 ### L7 Recette globale et livraison
-Rôles : anonyme, membre non admin, propriétaire, gardien, double rôle, admin (la session admin ne prouve rien pour un non admin). Largeurs : 360, 390, 768, 1024, 1280, 1440, 1920. Rendu réel, pas inspection de code. Cas : France, Lyon, Canada, Montréal, Saint-Ludger, BR, MX, PF, tous pays, zéro résultat, profil incomplet, 39 / 40 %. Aucune candidature ni notification réelle : fixtures isolées ou transaction annulée ; sauvegarde mobilité testée en isolé. Liste, carte, URL, rechargement, retour, tri, compteurs, confidentialité, photos, contact, droits, avis admin, favoris (aucun clic irréversible en production). H2. Resynchronisation GitHub préparée comme prérequis de traçabilité sans élargir de permissions. GO explicite, puis recette production limitée, sans message ni notification.
+Rôles : anonyme, membre non admin, propriétaire, gardien, double rôle, admin (la session admin ne prouve rien pour un non admin). Largeurs : 360, 390, 768, 1024, 1280, 1440, 1920. Rendu réel, pas inspection de code. Cas : France, Lyon, Canada, Montréal, Saint-Ludger, BR, MX, PF, tous pays, zéro résultat, profil incomplet, 39 / 40 %. Aucune candidature ni notification réelle : fixtures isolées ou transaction annulée. Liste, carte, URL, rechargement, retour, tri, compteurs, confidentialité, photos, contact, droits, avis admin, favoris (aucun clic irréversible en production). H2. Resynchronisation GitHub préparée sans élargir de permissions. GO explicite, puis recette production limitée, sans message ni notification.
 
-Gates : L1 moteur, puis L2 destination, puis L3 cartes ; L4 après L3 ; L5 vérification données avant L3/L4 puis implémentation ; L6 alimente L2 et L5 ; L7 transverse final.
+## 6. Points non vérifiés
 
-## 5. Points non vérifiés
-
-- Mobile, tablette et grand écran : non faits (seule la fiche gardien publique vue à 360 px plus tôt).
+- Mobile, tablette, grand écran : un contrôle à 360 px de la fiche gardien a été rapporté plus tôt par le service seulement ; aucune recette multi-formats validée par Codex.
 - Anonyme : seulement le service d'annonces en local ; session root connectée en préproduction.
 - Membre non admin : jamais vérifié.
 - Sauvegarde réelle de la mobilité : non faite (visuel seulement, tests unitaires).

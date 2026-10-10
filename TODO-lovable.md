@@ -76,4 +76,4 @@ Navigateur local non connecté, ordinateur seulement (1280 px). Aucun audit mobi
 
 ## Chantier profils, cartes et recherche (plan du 10/10/2026, aucun lot lancé)
 
-- [ ] Suivi : docs/plan-chantier-profils-recherche-2026-10-10.md (registre des constats, lots L1 à L7, gates, points non vérifiés)
+- [ ] Suivi : [plan du chantier](docs/plan-chantier-profils-recherche-2026-10-10.md) (registre des constats, lots L1 à L7 en séquence stricte, recettes après build, points non vérifiés)
