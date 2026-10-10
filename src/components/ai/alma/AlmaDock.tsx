@@ -784,6 +784,10 @@ function AlmaDockInner() {
   const hideCollapsedPill = location.pathname === "/dashboard"
     || (location.pathname === "/sits/create" && new URLSearchParams(location.search).get("express") === "1");
   if (hideCollapsedPill && !expanded) return null;
+  // L5 : sur les grilles de résultats, la bulle repliée se réduit (avatar,
+  // nom et mention IA, menu) pour ne plus recouvrir les cartes ; la
+  // conversation reste à un clic sur l'avatar.
+  const compactDock = !expanded && /^\/(recherche-gardiens|search|annonces|sits)(\/|$)/.test(location.pathname);
 
 
 
@@ -938,7 +942,7 @@ function AlmaDockInner() {
           <span className="text-[10px] text-muted-foreground">Compagne IA de Guardiens</span>
           {/* Sous le nom : le stade de relation, jamais l'humeur. L'humeur
               se lit dans le texte du panneau et dans l'avatar. */}
-          {stage && STAGE_SHORT_LABEL[stage] ? (
+          {compactDock ? null : stage && STAGE_SHORT_LABEL[stage] ? (
             <span className="text-[10px] font-medium text-muted-foreground">
               {STAGE_SHORT_LABEL[stage]}
             </span>
@@ -950,6 +954,8 @@ function AlmaDockInner() {
         {/* N4 : porte d'entrée visible de la conversation. Elle reste
             affichée en mode silencieux, le silence portant sur les messages
             spontanés d'Alma, pas sur la possibilité de lui parler. */}
+{!compactDock && (
+        <>
         <button
           type="button"
           data-testid="alma-ask-pill"
@@ -961,6 +967,8 @@ function AlmaDockInner() {
         </button>
 
         <div className="h-6 w-px bg-border/70" aria-hidden />
+        </>
+        )}
 
 
         {/* Menu unique : parcours, conseil, fréquence, masquer. */}
