@@ -114,3 +114,5 @@ Navigateur local non connecté, ordinateur seulement (1280 px). Aucun audit mobi
 - [x] L2 recherche gardiens : pays explicite sans ville du profil, pas de tri par distance sans ville, titres contextuels. Recette connectée à faire par root.
 - [x] L2 critère 2 : « Peuvent venir ici » ne lit que les zones déclarées (NULL jamais inclus). Recette root finale avant L3.
 - [x] L2 revue 0c0fff3 : homonymes par département, suggestions fermées à chaque changement d'adresse, aucun 0 affiché en cas de panne. Ouvert : état vide France en panne (L1).
+
+- [x] L2, état vide mobilité (10/10/2026) : preuve root build 443e09e, Canada résidence 2 / mobilité 0 ; libellé corrigé « Aucun gardien n'a encore déclaré cette destination », suggestion chiffrée de résidents retirée en mode mobilité ; types/build verts, contrôle visiteur confirmé.
