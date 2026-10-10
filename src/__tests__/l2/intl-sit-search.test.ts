@@ -116,3 +116,24 @@ describe("L2 revue root", () => {
     expect(carryOverParams(from, "france").toString()).toBe("debut=2026-11-01&fin=2026-11-30&animaux=Chiens");
   });
 });
+
+import { uniquePlaceKeys as __upk, placeKey as __pk } from "@/lib/intlSitSearch";
+import { checkGeocodedPoint as __cgp, pointUsable as __pu } from "@/lib/sitSearchRules";
+describe("L2, homonymes français : validation par lieu résolu", () => {
+  const m93 = { place: { city: "Montreuil", country: "FR", dept: "93" } } as any;
+  const m62 = { place: { city: "Montreuil", country: "FR", dept: "62" } } as any;
+  const ca = { place: { city: "Montréal", country: "CA", dept: null } } as any;
+  it("deux départements = deux clés, chacune avec son département", () => {
+    expect(__pk(m93)).not.toBe(__pk(m62));
+    const keys = __upk([m93, m62, m62]);
+    expect(keys).toHaveLength(2);
+    expect(keys.map((k) => k.place.dept).sort()).toEqual(["62", "93"]);
+    expect(__pk(ca)).toBe("montréal|CA");
+  });
+  it("un point tombé dans le 62 ne sert jamais l'annonce du 93, il reste valable pour le 62", () => {
+    const pointDept = "62";
+    const [k93, k62] = ["93", "62"].map((d) => __upk([m93, m62]).find((k) => k.place.dept === d)!);
+    expect(__pu(__cgp(k93.place, pointDept))).toBe(false);
+    expect(__pu(__cgp(k62.place, pointDept))).toBe(true);
+  });
+});
