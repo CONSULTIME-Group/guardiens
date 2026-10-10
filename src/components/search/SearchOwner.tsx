@@ -6,7 +6,13 @@ import { logger } from "@/lib/logger";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import ReportButton from "@/components/reports/ReportButton";
 import { supabase } from "@/integrations/supabase/client";
-import { geocodeCity, haversineDistance } from "@/lib/geocode";
+import { geocodeCity } from "@/lib/geocode";
+import {
+  fetchSitterSearchPool, fetchSitterCountryCounts, poolRowToSitter, distanceFrom,
+  applyZone, zoneCounts, changeCountry, selectPlace, suggestionSources,
+  fromGeoApiGouv, fromPhoton, computeMapViewport, RESULTS_PAGE_SIZE,
+  type ZoneMode, type PlaceSuggestion,
+} from "@/lib/sitterSearch";
 import { ALLOWED_ALERT_RADII, snapToAllowedRadius } from "@/lib/alertRadius";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -37,8 +43,6 @@ import TrustHaloAvatar from "@/components/sitters/TrustHaloAvatar";
 import ReachReassuranceBanner from "@/components/marketing/ReachReassuranceBanner";
 import PresenceBadge from "@/components/messages/PresenceBadge";
 import ReplyTimeBadge from "@/components/sitters/ReplyTimeBadge";
-import { useActiveSittersCount } from "@/hooks/useActiveSittersCount";
-import { useActiveOwnersCount } from "@/hooks/useActiveOwnersCount";
 import OwnerToSitterAffinity from "@/components/matching/OwnerToSitterAffinity";
 import OwnerAffinityBanner from "@/components/matching/OwnerAffinityBanner";
 import SitterResultCard from "@/components/search/SitterResultCard";
@@ -64,7 +68,6 @@ const RADIUS_SHORTCUTS = [5, 15, 30, 50];
 
 type SortOption = "affinity" | "closest" | "rating" | "experience";
 type ViewMode = "list" | "map";
-type ZoneMode = "radius" | "dept" | "region" | "france" | "country";
 
 const SearchOwnerMapView = lazy(() => import("@/components/search/SearchOwnerMapView"));
 
@@ -89,13 +92,17 @@ const SearchOwner = () => {
   const cityTouchedRef = useRef(false);
   const [cityPostalCode, setCityPostalCode] = useState<string | null>(null);
   const [userPostalCode, setUserPostalCode] = useState<string | null>(null);
-  const [citySuggestions, setCitySuggestions] = useState<any[]>([]);
+  const [citySuggestions, setCitySuggestions] = useState<PlaceSuggestion[]>([]);
+  // Pays de la ville choisie et centre fourni par la suggestion.
+  const [cityCountry, setCityCountry] = useState<string | null>(null);
+  const [cityCenter, setCityCenter] = useState<{ lat: number; lng: number } | null>(null);
   const [radius, setRadius] = useState([15]);
   const [zoneMode, setZoneMode] = useState<ZoneMode>("radius");
-  // Pays sélectionné (code ISO 2 lettres) quand zoneMode === "country".
-  const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
-  // Dernier mode de zone hors "country", restauré par « Tous les pays ».
-  const prevZoneModeRef = useRef<ZoneMode>("radius");
+  // Pays de recherche (ISO 2 lettres), null = « Tous les pays » : aucune
+  // restriction de pays. Appliqué côté serveur, avant pagination.
+  const [selectedCountry, setSelectedCountry] = useState<string | null>("FR");
+  // Nombre de cartes affichées dans la grille (« Afficher plus »).
+  const [visibleCount, setVisibleCount] = useState(RESULTS_PAGE_SIZE);
   // Note: filtre Dates retiré tant que la disponibilité datée n'est pas modélisée côté gardien.
   const [animalTypes, setAnimalTypes] = useState<string[]>([]);
   const [vehicled, setVehicled] = useState(false);
@@ -121,16 +128,9 @@ const SearchOwner = () => {
   // sans relancer aucune requête Supabase ni géocodage.
   const [rawResults, setRawResults] = useState<any[]>([]);
   const [searchCenter, setSearchCenter] = useState<{ lat: number; lng: number } | null>(null);
-  const [loading, setLoading] = useState(false);
+  // Vrai dès le montage : aucun « 0 gardien » affiché avant la première lecture.
+  const [loading, setLoading] = useState(true);
   const [searchError, setSearchError] = useState<string | null>(null);
-  // Vrai quand la requête serveur a atteint le plafond (jeu potentiellement tronqué → tri distance/affinité partiel).
-  const [resultsTruncated, setResultsTruncated] = useState(false);
-  // Le plafond reste à 500 tant que le géocodage en éventail n'est pas résolu :
-  // au delà, le nombre d'appels de géocodage déclenche la limitation de débit et
-  // la liste se vide. La tranche est rendue déterministe par un tri sur user_id.
-  // Le vrai correctif est une RPC `search_sitters` en SQL (filtrage et tri côté
-  // serveur, plus de rapatriement massif côté client).
-  const SITTERS_SERVER_CAP = 500;
   const [contactingId, setContactingId] = useState<string | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [initialLoaded, setInitialLoaded] = useState(false);
@@ -138,7 +138,6 @@ const SearchOwner = () => {
   // Empty state intelligence
   const [alertCreated, setAlertCreated] = useState(false);
   const [isCreatingAlert, setIsCreatingAlert] = useState(false);
-  const [franceTotalSitters, setFranceTotalSitters] = useState<number | null>(null);
 
   // Popover open states (only one at a time)
   const [openPop, setOpenPop] = useState<string | null>(null);
@@ -146,19 +145,33 @@ const SearchOwner = () => {
   // Debounce ref
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
 
-  // City autocomplete
+  // Autocomplétion selon le pays : France = geo.api.gouv.fr, autre pays =
+  // Photon (OpenStreetMap) restreint à ce pays, tous pays = les deux. Chaque
+  // suggestion porte son pays. Numéro de requête : une réponse tardive
+  // n'écrase jamais une frappe plus récente.
   const cityDebounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const suggestSeqRef = useRef(0);
   const fetchCitySuggestions = useCallback((q: string) => {
     clearTimeout(cityDebounceRef.current);
-    if (q.length < 2) { setCitySuggestions([]); return; }
+    const seq = ++suggestSeqRef.current;
+    if (q.trim().length < 2) { setCitySuggestions([]); return; }
     cityDebounceRef.current = setTimeout(async () => {
-      try {
-        const res = await fetch(`https://geo.api.gouv.fr/communes?nom=${encodeURIComponent(q)}&fields=nom,codesPostaux,centre&boost=population&limit=5`);
-        const data = await res.json();
-        setCitySuggestions(data || []);
-      } catch { setCitySuggestions([]); }
+      const src = suggestionSources(selectedCountry);
+      const [gouv, photon] = await Promise.all([
+        src.gouv
+          ? fetch(`https://geo.api.gouv.fr/communes?nom=${encodeURIComponent(q)}&fields=nom,codesPostaux,centre&boost=population&limit=5`)
+              .then((r) => r.json()).then(fromGeoApiGouv).catch(() => [] as PlaceSuggestion[])
+          : Promise.resolve([] as PlaceSuggestion[]),
+        src.photon
+          ? fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=15&lang=fr&layer=city&layer=locality&layer=district`)
+              .then((r) => r.json()).then((j) => fromPhoton(j, selectedCountry)).catch(() => [] as PlaceSuggestion[])
+          : Promise.resolve([] as PlaceSuggestion[]),
+      ]);
+      if (seq !== suggestSeqRef.current) return;
+      const photonOut = selectedCountry === null ? photon.filter((p) => p.country !== "FR") : photon;
+      setCitySuggestions([...gouv, ...photonOut].slice(0, 8));
     }, 300);
-  }, []);
+  }, [selectedCountry]);
 
   // Saisie brute du champ de lieu : sert uniquement aux suggestions locales
   // (départements / régions). Vidée dès qu'une suggestion est choisie, pour ne
@@ -168,9 +181,13 @@ const SearchOwner = () => {
   const normalizeLoc = (s: string) =>
     s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
 
+  // Départements et régions : seulement quand la recherche porte sur la
+  // France ou sur tous les pays.
+  const frZonesOffered = selectedCountry === "FR" || selectedCountry === null;
+
   const deptSuggestions = useMemo<string[]>(() => {
     const q = locQuery.trim();
-    if (q.length < 2) return [];
+    if (q.length < 2 || !frZonesOffered) return [];
     const nq = normalizeLoc(q);
     const out: string[] = [];
     if (/^\d{5}$/.test(q)) {
@@ -183,25 +200,26 @@ const SearchOwner = () => {
       if (normalizeLoc(code).startsWith(nq) || normalizeLoc(DEPT_NAMES[code]).includes(nq)) out.push(code);
     }
     return out.slice(0, 4);
-  }, [locQuery]);
+  }, [locQuery, frZonesOffered]);
 
   const regionSuggestions = useMemo<string[]>(() => {
     const q = locQuery.trim();
-    if (q.length < 2) return [];
+    if (q.length < 2 || !frZonesOffered) return [];
     const nq = normalizeLoc(q);
     return Object.keys(REGION_NAMES)
       .filter((code) => normalizeLoc(REGION_NAMES[code]).includes(nq))
       .slice(0, 3);
-  }, [locQuery]);
+  }, [locQuery, frZonesOffered]);
 
   const handleSelectDept = useCallback((deptCode: string) => {
     cityTouchedRef.current = true;
     setCity(`${deptCode} ${DEPT_NAMES[deptCode]}`);
     setCityInput(`${deptCode} ${DEPT_NAMES[deptCode]}`);
     setCityPostalCode(deptToRefPostalCode(deptCode));
-    // Une zone française explicite annule tout filtre pays, sinon deux filtres
-    // géographiques contradictoires s'appliqueraient.
-    setSelectedCountry(null);
+    setCityCountry("FR");
+    setCityCenter(null);
+    // Un département est français : le pays de recherche devient la France.
+    setSelectedCountry("FR");
     setZoneMode("dept");
     setCitySuggestions([]);
     setLocQuery("");
@@ -214,26 +232,35 @@ const SearchOwner = () => {
     setCity(REGION_NAMES[regionCode] ?? "");
     setCityInput(REGION_NAMES[regionCode] ?? "");
     if (firstDept) setCityPostalCode(deptToRefPostalCode(firstDept));
-    setSelectedCountry(null);
+    setCityCountry("FR");
+    setCityCenter(null);
+    setSelectedCountry("FR");
     setZoneMode("region");
     setCitySuggestions([]);
     setLocQuery("");
     setOpenPop(null);
   }, []);
 
-  // Sélection d'une commune (suggestions geo.api.gouv.fr), factorisée entre les
-  // popovers desktop et mobile : annule aussi le filtre pays.
-  const handleSelectCity = useCallback((s: any) => {
+  // Sélection d'une ville : chaque suggestion porte son pays, le pays de
+  // recherche le suit (sauf en « Tous les pays »), le centre vient de la
+  // suggestion elle-même (aucun second géocodage ambigu).
+  const handleSelectCity = useCallback((s: PlaceSuggestion) => {
     cityTouchedRef.current = true;
-    setCity(s.nom);
-    setCityInput(s.nom);
-    setCityPostalCode(s.codesPostaux?.[0] ?? null);
-    setSelectedCountry(null);
-    setZoneMode((prev) => (prev === "country" ? "radius" : prev));
+    const next = selectPlace(
+      { country: selectedCountry, zoneMode, city, cityCountry, cityPostalCode },
+      s,
+    );
+    setCity(next.city);
+    setCityInput(next.city);
+    setCityPostalCode(next.cityPostalCode);
+    setCityCountry(next.cityCountry);
+    setCityCenter(s.lat != null && s.lng != null ? { lat: s.lat, lng: s.lng } : null);
+    setSelectedCountry(next.country);
+    setZoneMode(next.zoneMode);
     setCitySuggestions([]);
     setLocQuery("");
     setOpenPop(null);
-  }, []);
+  }, [selectedCountry, zoneMode, city, cityCountry, cityPostalCode]);
 
   // À chaque ouverture du sélecteur de lieu, la saisie repart de la valeur
   // métier courante et les suggestions sont vidées, sinon la nouvelle frappe
@@ -253,48 +280,35 @@ const SearchOwner = () => {
     setCityInput(value);
     setLocQuery(value);
     fetchCitySuggestions(value);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [fetchCitySuggestions]);
 
   // Validation clavier : la touche Entrée promeut la saisie en état métier.
   const handleCityKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key !== "Enter") return;
     cityTouchedRef.current = true;
     setCity(cityInput);
-    // Saisie libre validée au clavier : la référence postale précédente ne
-    // correspond plus, on la remet à zéro.
+    // Saisie libre validée au clavier : la référence postale et le centre
+    // précédents ne correspondent plus. Le pays est celui de la recherche.
     setCityPostalCode(null);
+    setCityCenter(null);
+    setCityCountry(selectedCountry);
+    if (cityInput.trim()) setZoneMode((z) => (z === "country" ? "radius" : z));
     setCitySuggestions([]);
     setOpenPop(null);
-  }, [cityInput]);
+  }, [cityInput, selectedCountry]);
 
-  // Pays réellement peuplés : source unique = RPC public.get_sitter_country_map()
-  // (jointure sitter_profiles × profiles). Aucune liste de pays en dur, donc aucune
-  // entrée à zéro gardien ne peut apparaître.
-  const [countryByUser, setCountryByUser] = useState<Map<string, string>>(new Map());
+  // Pays peuplés : RPC search_sitter_country_counts, exactement la même
+  // population que la recherche (gardiens consultables, compte courant exclu).
+  // Le chiffre du menu est donc celui que la liste affiche, filtres retirés.
   const [sitterCountries, setSitterCountries] = useState<Array<{ code: string; count: number }>>([]);
 
   useEffect(() => {
     let cancelled = false;
-    (async () => {
-      const { data, error } = await supabase.rpc("get_sitter_country_map");
-      if (cancelled || error || !data) return;
-      const map = new Map<string, string>();
-      const counts = new Map<string, number>();
-      (data as any[]).forEach((r) => {
-        if (!r?.user_id || !r?.country) return;
-        map.set(r.user_id, r.country);
-        counts.set(r.country, (counts.get(r.country) || 0) + 1);
-      });
-      setCountryByUser(map);
-      setSitterCountries(
-        Array.from(counts.entries())
-          .map(([code, count]) => ({ code, count }))
-          .sort((a, b) => b.count - a.count || a.code.localeCompare(b.code)),
-      );
-    })();
+    fetchSitterCountryCounts()
+      .then((rows) => { if (!cancelled) setSitterCountries(rows); })
+      .catch(() => undefined);
     return () => { cancelled = true; };
-  }, []);
+  }, [user?.id]);
 
   const countryName = useCallback((code: string) => {
     try {
@@ -304,14 +318,30 @@ const SearchOwner = () => {
     }
   }, []);
 
-  // Mémorise le dernier mode hors pays, pour le restaurer via « Tous les pays ».
-  useEffect(() => {
-    if (zoneMode !== "country") prevZoneModeRef.current = zoneMode;
-  }, [zoneMode]);
+  // Changement de pays, y compris « Tous les pays » (null) : règle unique
+  // changeCountry (ville d'un autre pays retirée, département et région
+  // réservés à la France).
+  const handleCountryChange = useCallback((next: string | null) => {
+    cityTouchedRef.current = true;
+    const s = changeCountry(
+      { country: selectedCountry, zoneMode, city, cityCountry, cityPostalCode },
+      next,
+    );
+    setSelectedCountry(s.country);
+    setZoneMode(s.zoneMode);
+    if (s.city !== city) {
+      setCity(s.city);
+      setCityInput(s.city);
+      setCityCenter(null);
+      setSearchCenter(null);
+    }
+    setCityCountry(s.cityCountry);
+    setCityPostalCode(s.cityPostalCode);
+    setCitySuggestions([]);
+    setOpenPop(null);
+  }, [selectedCountry, zoneMode, city, cityCountry, cityPostalCode]);
 
-
-
-  // Geolocation
+  // Geolocation (communes françaises, geo.api.gouv.fr)
   const handleGeolocate = useCallback(() => {
     if (!navigator.geolocation) { toast.error("Géolocalisation non disponible"); return; }
     navigator.geolocation.getCurrentPosition(
@@ -324,49 +354,68 @@ const SearchOwner = () => {
             setCity(data[0].nom);
             setCityInput(data[0].nom);
             setCityPostalCode(data[0].codesPostaux?.[0] ?? null);
+            setCityCountry("FR");
+            setCityCenter({ lat: Math.round(pos.coords.latitude * 100) / 100, lng: Math.round(pos.coords.longitude * 100) / 100 });
+            if (selectedCountry !== null) setSelectedCountry("FR");
+            setZoneMode((prev) => (prev === "country" ? "radius" : prev));
             setCitySuggestions([]);
+          } else {
+            toast.error("Position hors de France : saisissez votre ville.");
           }
         } catch { toast.error("Impossible de déterminer votre ville"); }
       },
       () => toast.error("Géolocalisation refusée")
     );
-  }, []);
+  }, [selectedCountry]);
 
   // Load owner city + postal code on mount, URL params take precedence
   useEffect(() => {
     const urlCity = searchParams.get("city") || searchParams.get("ville");
     const urlPostal = searchParams.get("postal_code");
     const urlZone = searchParams.get("zone");
+    const urlCountry = (searchParams.get("pays") || "").trim().toUpperCase();
     const urlRadius = parseInt(searchParams.get("rayon") || "", 10);
     if (Number.isFinite(urlRadius) && urlRadius > 0 && urlRadius <= 200) setRadius([snapToAllowedRadius(urlRadius)]);
+    if (urlCountry === "TOUS") setSelectedCountry(null);
+    else if (/^[A-Z]{2}$/.test(urlCountry)) setSelectedCountry(urlCountry);
 
     if (urlCity) {
       cityTouchedRef.current = true;
       setCity(urlCity);
       setCityInput(urlCity);
+      setCityCountry(/^[A-Z]{2}$/.test(urlCountry) ? urlCountry : "FR");
       if (urlPostal) {
         setCityPostalCode(urlPostal);
         setUserPostalCode(urlPostal);
       }
       if (urlZone === "dept") setZoneMode("dept");
       else if (urlZone === "region") setZoneMode("region");
-      else if (urlZone === "france") setZoneMode("france");
+      else if (urlZone === "france" || urlZone === "pays") setZoneMode("country");
       else setZoneMode("radius");
       setInitialLoaded(true);
       return;
     }
+    if (urlZone === "france" || urlZone === "pays") setZoneMode("country");
 
     if (!user) {
+      setZoneMode((z) => (z === "radius" ? "country" : z));
       setInitialLoaded(true);
       return;
     }
     (async () => {
       const { data } = await fetchMyProfile(user.id!);
-      if (data?.city && !cityTouchedRef.current) {
-        setCity(data.city);
-        setCityInput(data.city);
+      const profileCountry = String((data as any)?.country || "FR").trim().toUpperCase() || "FR";
+      if (!cityTouchedRef.current) {
+        if (!/^[A-Z]{2}$/.test(urlCountry)) setSelectedCountry(profileCountry);
+        if (data?.city) {
+          setCity(data.city);
+          setCityInput(data.city);
+          setCityCountry(profileCountry);
+        } else {
+          setZoneMode((z) => (z === "radius" ? "country" : z));
+        }
       }
-      if (data?.postal_code) {
+      if (data?.postal_code && profileCountry === "FR") {
         setUserPostalCode(data.postal_code);
         setCityPostalCode(data.postal_code);
       }
@@ -374,18 +423,12 @@ const SearchOwner = () => {
     })();
   }, [user, searchParams]);
 
-  // Fetch true France-wide sitter count via la vue publique (lisible par anon, vague 40).
-  // Le compte courant est exclu du total, comme dans la liste de résultats.
-  useEffect(() => {
-    (async () => {
-      let q = supabase
-        .from("public_sitter_profiles")
-        .select("user_id", { count: "exact", head: true });
-      if (user?.id) q = q.neq("user_id", user.id);
-      const { count } = await q;
-      setFranceTotalSitters(count ?? 0);
-    })();
-  }, [user?.id]);
+  // Total consultable, même population que la liste.
+  const totalSearchable = useMemo(() => sitterCountries.reduce((a, c) => a + c.count, 0), [sitterCountries]);
+  const countryCount = useCallback(
+    (code: string | null) => (code === null ? totalSearchable : sitterCountries.find((c) => c.code === code)?.count ?? 0),
+    [sitterCountries, totalSearchable],
+  );
 
   // Reset alert state when zone changes
   useEffect(() => { setAlertCreated(false); }, [city, radius, zoneMode]);
@@ -432,7 +475,7 @@ const SearchOwner = () => {
 
   // Create sitter alert
   const handleCreateAlert = async () => {
-    if ((zoneMode !== "france" && !city) || alertCreated || isCreatingAlert) return;
+    if ((!(zoneMode === "country" && selectedCountry === "FR") && !city) || alertCreated || isCreatingAlert) return;
     setIsCreatingAlert(true);
     trackEvent("search_empty_action", { source: "owner", metadata: { action: "create_alert", zone_mode: zoneMode } });
 
@@ -440,7 +483,7 @@ const SearchOwner = () => {
     let savedScope = city;
     let error: any = null;
 
-    if (zoneMode === "france") {
+    if (zoneMode === "country" && selectedCountry === "FR") {
       savedScope = "France entière";
       const { data: existing } = await supabase
         .from("alert_preferences")
@@ -580,68 +623,31 @@ const SearchOwner = () => {
     }
   };
 
-  // Search logic
+  // Search logic (lot 1 international) : vivier complet du pays choisi, lu
+  // par la RPC search_sitter_pool (pays et éligibilité filtrés côté serveur,
+  // pagination par pages de 1 000, aucune tranche). Chaque lancement porte un
+  // numéro : une réponse qui arrive après un changement de pays ou de ville
+  // est ignorée, jamais affichée.
+  const searchSeqRef = useRef(0);
   const handleSearch = useCallback(async () => {
+    const seq = ++searchSeqRef.current;
+    const stale = () => seq !== searchSeqRef.current;
     setLoading(true);
     setSearchError(null);
 
-    setResultsTruncated(false);
-    // Vue publique (vague 40) : lecture anon OK. On alias user_id -> id pour préserver
-    // les clés React et le contrat de mapping historique côté sitter_profiles.
-    let sittersQuery = supabase
-      .from("public_sitter_profiles")
-      // Projection explicite : colonnes réellement consommées (filtres, tri,
-      // carte, carte de résultat). Les colonnes d'affinité (experience_years,
-      // life_pace, languages, interests, work_during_sit, sensitivities) ne
-      // sont plus dans la vue publique, elles sont chargées séparément via
-      // `sitter_profiles_affinity`, réservée aux membres connectés.
-      // Lot R2 : competences, special_animal_skills, interests et
-      // experience_years ajoutés à la même lecture, pour la ligne courte de
-      // la carte seulement. Rangés dans `_card` : ils n'entrent jamais dans
-      // le calcul d'affinité ni dans les tris.
-      .select("user_id, animal_types, has_vehicle, is_available, reply_median_minutes, sitter_type, travels_with_children, travels_with_own_animals, competences, special_animal_skills, interests, experience_years");
-    // Exclusion du compte courant (cas du rôle `both`), uniquement si connecté.
-    if (user?.id) sittersQuery = sittersQuery.neq("user_id", user.id);
-    const { data: sittersRaw, error: sittersError } = await sittersQuery.order("user_id", { ascending: true }).limit(SITTERS_SERVER_CAP);
-    const sitters = (sittersRaw || []).map((row: any) => {
-      const { competences, special_animal_skills, interests, experience_years, ...s } = row;
-      return { ...s, id: s.user_id, _card: { competences, special_animal_skills, interests, experience_years } };
-    });
-
-    if (sittersError) {
-      console.error("[SearchOwner] Erreur chargement gardiens:", sittersError);
+    let pool: any[];
+    try {
+      pool = (await fetchSitterSearchPool(selectedCountry)).map(poolRowToSitter);
+    } catch (err) {
+      if (stale()) return;
+      console.error("[SearchOwner] Erreur chargement gardiens:", err);
       setSearchError("Impossible de charger les gardiens.");
       setLoading(false);
       return;
     }
-
-    const rawSitters = (sitters || []) as any[];
-    setResultsTruncated(rawSitters.length >= SITTERS_SERVER_CAP);
-
-    // Hydratation RLS-safe des profils via la vue publique.
-    // Colonne absente de la vue : last_name.
-    const sitterUserIds = Array.from(new Set(
-      rawSitters.map((s: any) => s.user_id).filter(Boolean),
-    )) as string[];
-    if (sitterUserIds.length > 0) {
-      const { data: sitterProfs, error: profilesError } = await supabase
-        .from("public_profiles")
-        .select("id, first_name, avatar_url, city, postal_code, profile_completion, identity_verified, completed_sits_count, bio, last_seen_at, latitude_approx, longitude_approx")
-        .in("id", sitterUserIds);
-
-      if (profilesError) {
-        console.error("[SearchOwner] Erreur hydratation profils:", profilesError);
-        setSearchError("Impossible de charger les gardiens.");
-        setLoading(false);
-        return;
-      }
-
-      const sitterProfMap = new Map<string, any>();
-      (sitterProfs ?? []).forEach((p: any) => sitterProfMap.set(p.id, p));
-      rawSitters.forEach((s: any) => {
-        s.profile = s.user_id ? sitterProfMap.get(s.user_id) ?? null : null;
-      });
-    }
+    if (stale()) return;
+    const rawSitters = pool;
+    const sitterUserIds = rawSitters.map((s: any) => s.user_id) as string[];
 
     // Données d'affinité : vue réservée aux membres connectés, chargée
     // uniquement lorsque le visiteur dispose d'un profil propriétaire.
@@ -659,6 +665,7 @@ const SearchOwner = () => {
             .in("user_id", ids),
         ),
       );
+      if (stale()) return;
       const affinityMap = new Map<string, any>();
       affinityResults.forEach((res: any) => {
         if (res?.error) {
@@ -673,80 +680,60 @@ const SearchOwner = () => {
       });
     }
 
-    // Seuil de complétion abaissé à 40 (vague 40, 20/07/2026) : le profil public
-    // refondu gère les profils clairsemés, on ne masque plus de vrais gardiens.
-    let items = rawSitters.filter((s: any) => s.profile?.profile_completion >= 40);
+    const items = rawSitters;
 
-    // Coordonnées : on utilise latitude_approx / longitude_approx de la vue public_profiles, arrondies à 2 décimales (environ 1,1 km) pour ne jamais exposer la position exacte des membres, la vue étant lisible par le rôle anon. Cette précision suffit largement : rayon minimum de recherche 5 km et pins à l'échelle de la commune. Ces colonnes sont alimentées par trg_geocode_profile. Le géocodage à la volée n'est qu'un repli pour les profils sans coordonnées. Ne pas revenir à un géocodage systématique, c'était des centaines d'appels réseau par recherche, et ne jamais réintroduire les coordonnées brutes.
+    // Coordonnées : latitude_approx / longitude_approx (2 décimales, environ 1,1 km), jamais les coordonnées brutes. Le géocodage à la volée n'est qu'un repli pour les profils sans coordonnées, toujours avec le pays du profil.
     const hasStoredCoords = (p: any) =>
       typeof p?.latitude_approx === "number" && typeof p?.longitude_approx === "number";
 
-    // Seules les villes des gardiens sans coordonnées en base sont géocodées.
-    // Le pays du profil est passé quand il est connu (carte des pays chargée
-    // via get_sitter_country_map) : sans lui, la ville d'un gardien établi
-    // hors France serait cherchée en France par défaut.
     const noCoordSitters = items.filter((s: any) => !hasStoredCoords(s.profile));
-    const countryByCity = new Map<string, string>();
+    const cityKey = (c: string, co: string | null) => `${c}::${co ?? ""}`;
+    const uniqueCities = new Map<string, { city: string; country: string | null }>();
     noCoordSitters.forEach((s: any) => {
-      const cityName = s.profile?.city;
-      const co = countryByUser.get(s.user_id) || (s.profile as any)?.country;
-      if (cityName && co) countryByCity.set(cityName, co);
+      const c = s.profile?.city;
+      if (c) uniqueCities.set(cityKey(c, s.country), { city: c, country: s.country ?? null });
     });
-    const uniqueCities = [...new Set(
-      noCoordSitters
-        .map((s: any) => s.profile?.city)
-        .filter(Boolean),
-    )] as string[];
     const cityCoords = new Map<string, { lat: number; lng: number }>();
-    // Concurrence plafonnée à 10 appels simultanés : au delà, la limitation de
-    // débit du service de géocodage se déclenche et plus aucune coordonnée ne
-    // revient. Un échec dégrade la précision, il ne doit jamais vider la liste
-    // (repli département sur le code postal, plus bas).
     const GEOCODE_CONCURRENCY = 10;
-    for (let i = 0; i < uniqueCities.length; i += GEOCODE_CONCURRENCY) {
-      const chunk = uniqueCities.slice(i, i + GEOCODE_CONCURRENCY);
-      await Promise.all(chunk.map(async (c) => {
-        const coords = await geocodeCity(c, countryByCity.get(c));
-        if (coords) cityCoords.set(c, { lat: coords.lat, lng: coords.lng });
+    const cityList = Array.from(uniqueCities.entries());
+    for (let i = 0; i < cityList.length; i += GEOCODE_CONCURRENCY) {
+      await Promise.all(cityList.slice(i, i + GEOCODE_CONCURRENCY).map(async ([k, v]) => {
+        const coords = await geocodeCity(v.city, v.country);
+        if (coords) cityCoords.set(k, { lat: coords.lat, lng: coords.lng });
       }));
     }
+    if (stale()) return;
 
-    // Reference postal code for dept/region zones
-    const refPostalCode = cityPostalCode ?? userPostalCode;
-    const refDept = getDeptCode(refPostalCode);
-    const refRegion = getRegionCode(refDept);
-
-    // Resolve search coords (for radius mode + distance display)
+    // Centre de recherche : coordonnées de la suggestion choisie, sinon
+    // géocodage avec le pays de la ville (Montréal au Canada, pas en France).
     let searchCoords: { lat: number; lng: number } | null = null;
     if (city) {
-      searchCoords = await geocodeCity(city);
+      searchCoords = cityCenter ?? (await geocodeCity(city, cityCountry ?? selectedCountry ?? undefined));
     }
+    if (stale()) return;
 
-    // Helper: enrich a sitter with coords and distance
     const withCoords = (s: any) => {
       const p = s.profile;
       const coords = hasStoredCoords(p)
         ? { lat: p.latitude_approx as number, lng: p.longitude_approx as number }
-        : (p?.city ? cityCoords.get(p.city) ?? null : null);
-      const dist = coords && searchCoords ? Math.round(haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng)) : null;
-      return { ...s, _dist: dist, _lat: coords?.lat ?? null, _lng: coords?.lng ?? null };
+        : (p?.city ? cityCoords.get(cityKey(p.city, s.country)) ?? null : null);
+      return { ...s, _dist: distanceFrom(searchCoords, coords?.lat, coords?.lng), _lat: coords?.lat ?? null, _lng: coords?.lng ?? null };
     };
-
-
-    // Enrich ALL items with coords (needed for density counts across zones)
     const allItems = items.map(withCoords);
 
-    // Fetch badges, emergency profiles, reviews et galerie pour TOUS les candidats
+    // Enrichissement par lots de 100 identifiants : URL bornée et réponses
+    // sous le plafond serveur de 1 000 lignes, quelle que soit la taille du vivier.
     const allUserIds = allItems.map((s: any) => s.user_id);
-    const [allBadgesRes, emergencyRes, galleryRes] = allUserIds.length > 0
-      ? await Promise.all([
-          supabase.from("public_badge_attributions").select("user_id, badge_id").in("user_id", allUserIds),
-          supabase.from("public_emergency_sitter_profiles").select("user_id, is_active").in("user_id", allUserIds).eq("is_active", true),
-          supabase.from("sitter_gallery").select("user_id, photo_url, created_at").in("user_id", allUserIds).order("created_at", { ascending: false }),
-        ])
-      : [{ data: [] as any[], error: null }, { data: [] as any[], error: null }, { data: [] as any[], error: null }] as const;
+    const idChunks = chunkArray(allUserIds, 100);
+    const [badgeResults, emergencyResults, galleryResults, reviewResults] = await Promise.all([
+      Promise.all(idChunks.map((ids) => supabase.from("public_badge_attributions").select("user_id, badge_id").in("user_id", ids))),
+      Promise.all(idChunks.map((ids) => supabase.from("public_emergency_sitter_profiles").select("user_id, is_active").in("user_id", ids).eq("is_active", true))),
+      Promise.all(idChunks.map((ids) => supabase.from("sitter_gallery").select("user_id, photo_url, created_at").in("user_id", ids).order("created_at", { ascending: false }))),
+      Promise.all(idChunks.map((ids) => supabase.from("reviews").select("reviewee_id, overall_rating").in("reviewee_id", ids).eq("published", true))),
+    ]);
+    if (stale()) return;
 
-    const enrichError = (allBadgesRes as any).error || (emergencyRes as any).error || (galleryRes as any).error;
+    const enrichError = [...badgeResults, ...emergencyResults, ...galleryResults, ...reviewResults].find((r: any) => r.error)?.error;
     if (enrichError) {
       console.error("[SearchOwner] Erreur enrichissement gardiens:", enrichError);
       setSearchError("Impossible de charger les informations complètes des gardiens.");
@@ -754,37 +741,18 @@ const SearchOwner = () => {
       return;
     }
 
-    const emergencySet = new Set((emergencyRes.data || []).map((e: any) => e.user_id));
+    const emergencySet = new Set(emergencyResults.flatMap((r: any) => r.data ?? []).map((e: any) => e.user_id));
 
     const reviewsAgg = new Map<string, { sum: number; count: number }>();
-    if (allUserIds.length > 0) {
-      const reviewResults = await Promise.all(
-        chunkArray(allUserIds, 100).map((batch) =>
-          supabase
-            .from("reviews")
-            .select("reviewee_id, overall_rating")
-            .in("reviewee_id", batch)
-            .eq("published", true),
-        ),
-      );
-      const reviewsError = reviewResults.find((result) => result.error)?.error;
-      if (reviewsError) {
-        console.error("[SearchOwner] Erreur chargement avis:", reviewsError);
-        setSearchError("Impossible de charger les avis des gardiens.");
-        setLoading(false);
-        return;
-      }
-      const reviewRows = reviewResults.flatMap((result) => result.data ?? []);
-      (reviewRows || []).forEach((r: any) => {
-        const cur = reviewsAgg.get(r.reviewee_id) || { sum: 0, count: 0 };
-        cur.sum += r.overall_rating || 0;
-        cur.count += 1;
-        reviewsAgg.set(r.reviewee_id, cur);
-      });
-    }
+    reviewResults.flatMap((r: any) => r.data ?? []).forEach((r: any) => {
+      const cur = reviewsAgg.get(r.reviewee_id) || { sum: 0, count: 0 };
+      cur.sum += r.overall_rating || 0;
+      cur.count += 1;
+      reviewsAgg.set(r.reviewee_id, cur);
+    });
 
     const badgeMap = new Map<string, Map<string, number>>();
-    (allBadgesRes.data || []).forEach((b: any) => {
+    badgeResults.flatMap((r: any) => r.data ?? []).forEach((b: any) => {
       if (!badgeMap.has(b.user_id)) badgeMap.set(b.user_id, new Map());
       const m = badgeMap.get(b.user_id)!;
       m.set(b.badge_id, (m.get(b.badge_id) || 0) + 1);
@@ -792,13 +760,12 @@ const SearchOwner = () => {
 
     // Galerie : max 4 photos par gardien, avatar prépendu si présent.
     const photoMap = new Map<string, string[]>();
-    (galleryRes.data || []).forEach((g: any) => {
+    galleryResults.flatMap((r: any) => r.data ?? []).forEach((g: any) => {
       const arr = photoMap.get(g.user_id) || [];
       if (arr.length < 4 && g.photo_url) arr.push(g.photo_url);
       photoMap.set(g.user_id, arr);
     });
 
-    // Enrich all items
     const enrichedAll = allItems.map((s: any) => {
       const agg = reviewsAgg.get(s.user_id);
       const avgRating = agg && agg.count > 0 ? agg.sum / agg.count : null;
@@ -809,7 +776,6 @@ const SearchOwner = () => {
       const gallery = photoMap.get(s.user_id) || [];
       const avatar = s.profile?.avatar_url;
       const photos = avatar ? [avatar, ...gallery.filter((p) => p !== avatar)] : gallery;
-      // Score d'affinité pré-calculé pour permettre le tri "Meilleure affinité".
       const affinity = viewerOwner
         ? computeAffinityResultFull(viewerOwner as AffinityOwnerInput, s as AffinitySitterInput)
         : null;
@@ -819,7 +785,7 @@ const SearchOwner = () => {
     setRawResults(enrichedAll);
     setSearchCenter(searchCoords);
     setLoading(false);
-  }, [city, cityPostalCode, userPostalCode, viewerOwner, user?.id]);
+  }, [city, cityCenter, cityCountry, selectedCountry, viewerOwner, user?.id]);
 
   // Auto-search on network dep change (debounced) : ville / code postal uniquement.
   // Les filtres purement clients (véhicule, vérifié, note min, animaux, radius, zone, tri…)
@@ -835,8 +801,10 @@ const SearchOwner = () => {
   // de densité sur `rawResults`. Recalculé sans coût réseau.
   const { results, densityCounts } = useMemo(() => {
     const refPostal = cityPostalCode ?? userPostalCode;
-    const refDept = getDeptCode(refPostal);
-    const refRegion = getRegionCode(refDept);
+    // Département de référence : seulement pour une recherche en France.
+    const refDept = selectedCountry === "FR" || (selectedCountry === null && (cityCountry ?? "FR") === "FR")
+      ? getDeptCode(refPostal)
+      : null;
 
     let filtered = rawResults;
     if (vehicled) filtered = filtered.filter((s: any) => s.has_vehicle);
@@ -857,55 +825,16 @@ const SearchOwner = () => {
       filtered = filtered.filter((s: any) => s.avgRating !== null && s.avgRating >= min);
     }
 
-    // Pays d'un gardien, résolu via la RPC (la vue publique n'expose pas `country`).
-    const countryOf = (s: any) => countryByUser.get(s.user_id) ?? null;
-    const countryReady = countryByUser.size > 0;
+    // Zones : règles uniques de src/lib/sitterSearch (département et région
+    // réservés aux gardiens établis en France, repli département du rayon
+    // pour un gardien sans coordonnées). Le vivier est déjà celui du pays.
+    const ctx = { zoneMode, country: selectedCountry, center: searchCenter, radiusKm: radius[0], refDept };
+    const density = zoneCounts(filtered, ctx);
 
-    // Repli département : quand un gardien n'a ni coordonnées en base ni
-    // géocodage abouti, on le rattache au rayon si son code postal partage les
-    // deux premiers chiffres de la référence (même logique que côté annonces).
-    // Une panne de géocodage dégrade la précision, elle ne vide pas la liste.
-    const inRadius = (s: any) => {
-      if (s._dist != null) return s._dist <= radius[0];
-      if (!refDept) return false;
-      const cp = s.profile?.postal_code;
-      return cp ? getDeptCode(cp) === refDept : false;
-    };
-
-    const density = {
-      radius: searchCenter ? filtered.filter(inRadius).length : 0,
-      dept: refDept ? filtered.filter((s: any) => {
-        const cp = s.profile?.postal_code; return cp ? getDeptCode(cp) === refDept : false;
-      }).length : 0,
-      region: refRegion ? filtered.filter((s: any) => {
-        const cp = s.profile?.postal_code; return cp ? getRegionCode(getDeptCode(cp)) === refRegion : false;
-      }).length : 0,
-      france: countryReady ? filtered.filter((s: any) => countryOf(s) === "FR").length : filtered.length,
-      country: selectedCountry && countryReady
-        ? filtered.filter((s: any) => countryOf(s) === selectedCountry).length
-        : 0,
-    };
-
-    let zoned = filtered;
-    if (zoneMode === "radius") {
-      if (searchCenter) {
-        zoned = zoned.filter(inRadius);
-      } else if (city) {
-        zoned = zoned.filter((s: any) => s.profile?.city?.toLowerCase().includes(city.toLowerCase()));
-      }
-    } else if (zoneMode === "dept" && refDept) {
-      zoned = zoned.filter((s: any) => {
-        const cp = s.profile?.postal_code; return cp ? getDeptCode(cp) === refDept : false;
-      });
-    } else if (zoneMode === "region" && refRegion) {
-      zoned = zoned.filter((s: any) => {
-        const cp = s.profile?.postal_code; return cp ? getRegionCode(getDeptCode(cp)) === refRegion : false;
-      });
-    } else if (zoneMode === "country" && selectedCountry && countryReady) {
-      zoned = zoned.filter((s: any) => countryOf(s) === selectedCountry);
-    } else if (zoneMode === "france" && countryReady) {
-      // « France » est désormais un vrai filtre : tous les profils ont un pays renseigné.
-      zoned = zoned.filter((s: any) => countryOf(s) === "FR");
+    let zoned = applyZone(filtered, ctx);
+    if (zoneMode === "radius" && !searchCenter && city) {
+      // Ville introuvable au géocodage : repli sur le nom de commune.
+      zoned = zoned.filter((s: any) => s.profile?.city?.toLowerCase().includes(city.toLowerCase()));
     }
 
     let effectiveSort: SortOption = sort;
@@ -949,34 +878,46 @@ const SearchOwner = () => {
     }
 
     return { results: sorted, densityCounts: density };
-  }, [rawResults, searchCenter, city, cityPostalCode, userPostalCode, radius, zoneMode, selectedCountry, countryByUser, animalTypes, vehicled, availableOnly, verifiedOnly, emergencyOnly, minSits, minRating, sort, sortUserOverride, viewerOwner]);
+  }, [rawResults, searchCenter, city, cityCountry, cityPostalCode, userPostalCode, radius, zoneMode, selectedCountry, animalTypes, vehicled, availableOnly, verifiedOnly, emergencyOnly, minSits, minRating, sort, sortUserOverride, viewerOwner]);
 
+  // La grille repart du premier palier à chaque changement de résultats.
+  useEffect(() => { setVisibleCount(RESULTS_PAGE_SIZE); }, [results]);
 
   const hasActiveFilters = vehicled || availableOnly || verifiedOnly || emergencyOnly || animalTypes.length > 0 || minSits !== "all" || minRating !== "all";
   const hasAnyRating = results.some((s: any) => s.avgRating !== null);
 
   // Zone helpers
-  const refDept = getDeptCode(getZoneRefPostalCode());
+  const isFranceSearch = selectedCountry === "FR";
+  const refDept = isFranceSearch || (selectedCountry === null && (cityCountry ?? "FR") === "FR")
+    ? getDeptCode(getZoneRefPostalCode())
+    : null;
   const refRegion = getRegionCode(refDept);
   const deptLabel = refDept ? `${refDept} ${DEPT_NAMES[refDept] || ""}`.trim() : "Département";
-  // regionLabel volontairement supprimé (positionnement national, pas régional).
+  const scopeLabel = selectedCountry === null ? "Tous les pays" : countryName(selectedCountry);
 
-  // Suggest expanding when current zone is empty and a wider zone has results.
-  // L'étape "région" est volontairement omise : la promesse produit est « France
-  // entière », pas régionale (positionnement national).
-  const suggestExpansion = (): { target: ZoneMode; count: number; label: string } | null => {
+  // Élargissement proposé seulement vers une zone qui a réellement des
+  // gardiens : rayon, département (France), pays entier, puis tous les pays.
+  const suggestExpansion = (): { target: ZoneMode | "all"; count: number; label: string } | null => {
     if (results.length > 0) return null;
-    if (zoneMode === "radius" && densityCounts.dept > 0) {
+    if (zoneMode === "radius" && refDept && densityCounts.dept > 0) {
       return { target: "dept", count: densityCounts.dept, label: deptLabel };
     }
-    if (zoneMode !== "france" && densityCounts.france > 0) {
-      return { target: "france", count: densityCounts.france, label: "France entière" };
+    if (zoneMode !== "country" && densityCounts.country > 0) {
+      return { target: "country", count: densityCounts.country, label: selectedCountry === null ? "tous les pays" : scopeLabel };
+    }
+    if (selectedCountry !== null && !hasActiveFilters && totalSearchable > countryCount(selectedCountry)) {
+      return { target: "all", count: totalSearchable, label: "tous les pays" };
     }
     return null;
   };
 
   const expansion = suggestExpansion();
-  const isLaunchMode = (franceTotalSitters ?? 0) === 0;
+  const isLaunchMode = sitterCountries.length > 0 && totalSearchable === 0;
+
+  const applyExpansion = (target: ZoneMode | "all") => {
+    if (target === "all") handleCountryChange(null);
+    else setZoneMode(target);
+  };
 
   const resetFilters = () => {
     setVehicled(false);
@@ -1007,21 +948,51 @@ const SearchOwner = () => {
   const sortPillBase = "snap-start shrink-0 rounded-full px-3 py-1 min-h-9 inline-flex items-center text-xs border border-border text-muted-foreground cursor-pointer hover:border-primary transition-colors whitespace-nowrap";
   const sortPillActive = "snap-start shrink-0 rounded-full px-3 py-1 min-h-9 inline-flex items-center text-xs bg-primary/10 text-primary border border-primary/30 font-semibold cursor-pointer whitespace-nowrap";
 
-
-  // Hors France, les zones françaises (rayon, département, région) n'ont aucun sens :
-  // elles reposent toutes sur le code postal français. On les désactive sans les masquer.
-  const foreignCountrySelected = zoneMode === "country" && !!selectedCountry && selectedCountry !== "FR";
-
-  // Mode région exposé : le filtrage régional est implémenté plus haut dans ce fichier. Ne pas remasquer.
+  // Rayon : dès qu'une ville est choisie, dans tout pays (centre géocodé
+  // avec son pays). Département et région : France seulement, masqués
+  // ailleurs plutôt que laissés grisés avec des chiffres français.
   const zoneChips: Array<{ key: ZoneMode; label: string; count: number; disabled?: boolean }> = [
-    { key: "radius", label: `${radius[0]} km`, count: densityCounts.radius, disabled: !city || foreignCountrySelected },
-    { key: "dept", label: refDept ? `Dép. ${refDept}` : "Département", count: densityCounts.dept, disabled: !refDept || foreignCountrySelected },
-    { key: "region", label: refRegion ? REGION_NAMES[refRegion] ?? "Ma région" : "Ma région", count: densityCounts.region, disabled: !refRegion || foreignCountrySelected },
-    { key: "france", label: "France", count: densityCounts.france },
+    { key: "radius", label: `${radius[0]} km`, count: densityCounts.radius, disabled: !city },
+    ...(refDept
+      ? [
+          { key: "dept" as ZoneMode, label: `Dép. ${refDept}`, count: densityCounts.dept },
+          ...(refRegion ? [{ key: "region" as ZoneMode, label: REGION_NAMES[refRegion] ?? "Ma région", count: densityCounts.region }] : []),
+        ]
+      : []),
+    { key: "country", label: scopeLabel, count: densityCounts.country },
   ];
 
-  const { data: activeSittersCount } = useActiveSittersCount();
-  const { data: activeOwnersCount } = useActiveOwnersCount();
+  // Carte : points des résultats (coordonnées approximées), cadrage sur la
+  // ville, sinon sur les résultats, sinon sur le pays choisi.
+  const [countryCenter, setCountryCenter] = useState<{ lat: number; lng: number } | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    setCountryCenter(null);
+    if (!selectedCountry || selectedCountry === "FR") return;
+    void geocodeCity(countryName(selectedCountry), selectedCountry).then((c) => {
+      if (!cancelled && c) setCountryCenter({ lat: c.lat, lng: c.lng });
+    });
+    return () => { cancelled = true; };
+  }, [selectedCountry, countryName]);
+
+  const mapPins = useMemo(() => results
+    .filter((s: any) => s._lat != null && s._lng != null)
+    .map((s: any) => ({
+      id: s.id,
+      user_id: s.user_id,
+      firstName: publicFirstName(s.profile?.first_name) || "Gardien",
+      city: s.profile?.city ?? null,
+      avatar: s.profile?.avatar_url ?? null,
+      avgRating: s.avgRating ?? null,
+      dist: s._dist ?? null,
+      coords: { lat: s._lat, lng: s._lng },
+    })), [results]);
+  const mapViewport = useMemo(() => computeMapViewport({
+    country: selectedCountry,
+    center: city ? searchCenter : null,
+    points: mapPins.map((p) => p.coords),
+    countryCenter,
+  }), [selectedCountry, city, searchCenter, mapPins, countryCenter]);
 
   // SEO vague 40 : page indexable pour capter la demande organique.
   const seoTitle = "Trouver un gardien d'animaux près de chez vous · Guardiens";
@@ -1060,22 +1031,21 @@ const SearchOwner = () => {
             ? "Classés par affinité avec votre foyer."
             : "Classés du plus proche au plus loin."}
         </p>
-        {(activeSittersCount || activeOwnersCount) && (
+        {totalSearchable > 0 && (
           <p className="hidden md:flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground pt-0.5">
-            {!!activeSittersCount && (
-              <span className="inline-flex items-center">
-                <span className="font-semibold text-foreground mr-1">{activeSittersCount.toLocaleString("fr-FR")}</span>
-                gardiens en France
-              </span>
-            )}
-            {!!activeSittersCount && !!activeOwnersCount && (
-              <span className="text-muted-foreground/60">·</span>
-            )}
-            {!!activeOwnersCount && (
-              <span className="inline-flex items-center">
-                <span className="font-semibold text-foreground mr-1">{activeOwnersCount.toLocaleString("fr-FR")}</span>
-                propriétaires inscrits
-              </span>
+            <span className="inline-flex items-center">
+              <span className="font-semibold text-foreground mr-1">{totalSearchable.toLocaleString("fr-FR")}</span>
+              gardiens consultables
+            </span>
+            {countryCount("FR") > 0 && (
+              <>
+                <span className="text-muted-foreground/60">·</span>
+                <span className="inline-flex items-center">
+                  dont
+                  <span className="font-semibold text-foreground mx-1">{countryCount("FR").toLocaleString("fr-FR")}</span>
+                  en France
+                </span>
+              </>
             )}
           </p>
         )}
@@ -1111,7 +1081,7 @@ const SearchOwner = () => {
                     <span className="text-muted-foreground">Où cherchez-vous un gardien&nbsp;?</span>
                   )}
                 </span>
-                <span className="text-xs text-muted-foreground shrink-0 hidden lg:inline">Ville, département ou région</span>
+                <span className="text-xs text-muted-foreground shrink-0 hidden lg:inline">{isFranceSearch ? "Ville, département ou région" : `Ville · ${scopeLabel}`}</span>
               </button>
             }
             cityInput={cityInput}
@@ -1119,6 +1089,8 @@ const SearchOwner = () => {
             onCityKeyDown={handleCityKeyDown}
             onGeolocate={handleGeolocate}
             citySuggestions={citySuggestions}
+            country={selectedCountry}
+            countryLabel={scopeLabel}
             deptSuggestions={deptSuggestions}
             regionSuggestions={regionSuggestions}
             onSelectCity={handleSelectCity}
@@ -1152,6 +1124,8 @@ const SearchOwner = () => {
             onCityKeyDown={handleCityKeyDown}
             onGeolocate={handleGeolocate}
             citySuggestions={citySuggestions}
+            country={selectedCountry}
+            countryLabel={scopeLabel}
             deptSuggestions={deptSuggestions}
             regionSuggestions={regionSuggestions}
             onSelectCity={handleSelectCity}
@@ -1299,7 +1273,7 @@ const SearchOwner = () => {
                   <PopoverTrigger asChild>
                     <button
                       type="button"
-                      onClick={() => { setSelectedCountry(null); setZoneMode("radius"); }}
+                      onClick={() => setZoneMode("radius")}
                       disabled={z.disabled}
                       aria-pressed={active}
                       className={chipClass}
@@ -1337,7 +1311,7 @@ const SearchOwner = () => {
               <button
                 key={z.key}
                 type="button"
-                onClick={() => { setSelectedCountry(null); setZoneMode(z.key); }}
+                onClick={() => setZoneMode(z.key)}
                 disabled={z.disabled}
                 aria-pressed={active}
                 className={chipClass}
@@ -1347,44 +1321,32 @@ const SearchOwner = () => {
             );
           })}
 
-          {/* Pill Pays, en dernier. Liste construite depuis la base : jamais d'entrée
-              à zéro gardien. Masquée s'il n'existe qu'un seul pays peuplé. */}
+          {/* Pays : liste et chiffres de search_sitter_country_counts, même
+              population que la liste. « Tous les pays » lève la restriction. */}
           {sitterCountries.length > 1 && (() => {
-            const active = zoneMode === "country" && !!selectedCountry;
-            const chipClass = `min-h-9 rounded-full border px-3 py-1 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40 disabled:cursor-not-allowed ${
-              active
-                ? "bg-primary text-primary-foreground border-primary"
-                : "bg-card text-muted-foreground border-border hover:border-primary"
-            }`;
+            const chipClass = "min-h-9 rounded-full border px-3 py-1 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring bg-card text-foreground border-border hover:border-primary";
             return (
               <Popover open={openPop === "country"} onOpenChange={(o) => setOpenPop(o ? "country" : null)}>
                 <PopoverTrigger asChild>
-                  <button type="button" aria-pressed={active} className={chipClass}>
-                    {active && selectedCountry ? countryName(selectedCountry) : "Pays"}
+                  <button type="button" className={chipClass} aria-label={`Pays de recherche : ${scopeLabel}`}>
+                    Pays : {scopeLabel}
                   </button>
                 </PopoverTrigger>
                 <PopoverContent align="start" className="w-56 p-2 space-y-1 max-h-72 overflow-y-auto">
                   <button
                     type="button"
-                    className="w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-muted transition-colors"
-                    onClick={() => {
-                      setSelectedCountry(null);
-                      setZoneMode(prevZoneModeRef.current ?? "radius");
-                      setOpenPop(null);
-                    }}
+                    className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${selectedCountry === null ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted"}`}
+                    onClick={() => handleCountryChange(null)}
                   >
                     Tous les pays
+                    <span className="ml-1 text-muted-foreground">({totalSearchable})</span>
                   </button>
                   {sitterCountries.map((c) => (
                     <button
                       key={c.code}
                       type="button"
                       className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${selectedCountry === c.code ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted"}`}
-                      onClick={() => {
-                        setSelectedCountry(c.code);
-                        setZoneMode("country");
-                        setOpenPop(null);
-                      }}
+                      onClick={() => handleCountryChange(c.code)}
                     >
                       {countryName(c.code)}
                       <span className="ml-1 text-muted-foreground">({c.count})</span>
@@ -1499,11 +1461,6 @@ const SearchOwner = () => {
       {/* Results */}
       {viewMode === "list" ? (
         <div className="p-6">
-          {resultsTruncated && !loading && !searchError && (
-            <div className="max-w-4xl mx-auto mb-4 bg-muted/60 border border-border rounded-lg p-3 text-sm text-muted-foreground">
-              Beaucoup de résultats dans cette zone. Affinez votre recherche (ville, rayon) pour un classement par distance plus fiable.
-            </div>
-          )}
           {searchError ? (
             <div
               role="alert"
@@ -1547,19 +1504,21 @@ const SearchOwner = () => {
                 <h2 className="font-heading text-xl md:text-2xl font-semibold">
                   {isLaunchMode
                     ? "Soyez parmi les premiers propriétaires"
-                    : city
-                      ? `Aucun gardien à ${city} pour l'instant`
-                      : zoneMode === "france"
-                        ? "Aucun gardien en France pour l'instant"
+                    : hasActiveFilters
+                      ? "Aucun gardien ne correspond à ces filtres"
+                      : city && zoneMode === "radius"
+                        ? `Aucun gardien à moins de ${radius[0]} km de ${city} pour l'instant`
                         : zoneMode === "dept" && refDept
                           ? `Aucun gardien dans ${deptLabel} pour l'instant`
-                          : "Aucun gardien dans cette zone pour l'instant"}
+                          : zoneMode === "country" && selectedCountry
+                            ? `Aucun gardien consultable dans ce pays (${scopeLabel}) pour l'instant`
+                            : "Aucun gardien dans cette zone pour l'instant"}
                 </h2>
                 <p className="text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
                   {isLaunchMode
                     ? "La communauté de gardiens se construit. Créez une alerte pour recevoir un e-mail dès qu'un gardien rejoint votre zone."
-                    : zoneMode !== "france"
-                      ? "Essayez d'élargir à la France entière, ou activez une alerte pour être prévenu dès qu'un gardien rejoint votre zone."
+                    : expansion
+                      ? "Vous pouvez élargir la zone ci-dessous, ou activer une alerte pour être prévenu dès qu'un gardien la rejoint."
                       : "Activez une alerte pour être prévenu dès qu'un gardien rejoint votre zone."}
                 </p>
                 {hasActiveFilters && (
@@ -1614,12 +1573,12 @@ const SearchOwner = () => {
                         Rechercher dans le département
                       </button>
                     )}
-                    {zoneMode === "dept" && (
+                    {(zoneMode === "dept" || zoneMode === "region") && (
                       <button
-                        onClick={() => setZoneMode("france")}
+                        onClick={() => setZoneMode("country")}
                         className="rounded-full px-3 py-1.5 text-xs border border-border bg-background hover:border-primary hover:bg-primary/5 transition-colors"
                       >
-                        France entière
+                        {scopeLabel === "France" ? "France entière" : scopeLabel}
                       </button>
                     )}
                     {minRating !== "all" && (
@@ -1655,7 +1614,7 @@ const SearchOwner = () => {
                 {expansion && (
                   <button
                     onClick={() => {
-                      setZoneMode(expansion.target);
+                      applyExpansion(expansion.target);
                       trackEvent("search_empty_action", { source: "owner", metadata: { action: "expand_zone", from: zoneMode, to: expansion.target } });
                     }}
                     className="text-left p-4 rounded-xl border border-primary bg-primary/5 hover:bg-primary/10 transition-colors"
@@ -1773,7 +1732,7 @@ const SearchOwner = () => {
                   const fn = (publicFirstName(s.profile?.first_name) || "Gardien").toLowerCase();
                   nameCounts[fn] = (nameCounts[fn] || 0) + 1;
                 });
-                return results.map((s: any) => (
+                return results.slice(0, visibleCount).map((s: any) => (
                   <SitterResultCard
                     key={s.id}
                     sitter={s}
@@ -1786,6 +1745,16 @@ const SearchOwner = () => {
                 ));
               })()}
             </div>
+            {results.length > visibleCount && (
+              <div className="mt-6 flex flex-col items-center gap-1">
+                <Button variant="outline" onClick={() => setVisibleCount((n) => n + RESULTS_PAGE_SIZE)}>
+                  Afficher plus de gardiens
+                </Button>
+                <p className="text-xs text-muted-foreground">
+                  {visibleCount} affichés sur {results.length}
+                </p>
+              </div>
+            )}
             </>
           )}
         </div>
@@ -1859,19 +1828,8 @@ const SearchOwner = () => {
           <div className="order-1 md:order-2 w-full md:w-1/2 h-[45vh] md:h-auto relative bg-muted/30">
             <Suspense fallback={<div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground">Chargement de la carte…</div>}>
               <SearchOwnerMapView
-                sitters={results
-                  .filter((s: any) => s._lat != null && s._lng != null)
-                  .map((s: any) => ({
-                    id: s.id,
-                    user_id: s.user_id,
-                    firstName: publicFirstName(s.profile?.first_name) || "Gardien",
-                    city: s.profile?.city ?? null,
-                    avatar: s.profile?.avatar_url ?? null,
-                    avgRating: s.avgRating ?? null,
-                    dist: s._dist ?? null,
-                    coords: { lat: s._lat, lng: s._lng },
-                  }))}
-                centerCoords={searchCenter}
+                sitters={mapPins}
+                viewport={mapViewport}
                 onContact={handleContact}
                 contactingId={contactingId}
               />

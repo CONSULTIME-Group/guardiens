@@ -6,7 +6,11 @@ import { LeafletUnmountGuard } from "@/components/shared/LeafletUnmountGuard";
 import { Link } from "react-router-dom";
 import { Star, MapPin, X } from "lucide-react";
 import { storageImageUrl } from "@/lib/storageImage";
-import { MAP_TILE_URL, MAP_TILE_ATTRIBUTION, MAP_TILE_MAX_ZOOM } from "@/lib/mapTiles";
+import {
+  MAP_TILE_URL, MAP_TILE_ATTRIBUTION, MAP_TILE_MAX_ZOOM,
+  MAP_TILE_WORLD_URL, MAP_TILE_WORLD_ATTRIBUTION, MAP_TILE_WORLD_MAX_ZOOM,
+} from "@/lib/mapTiles";
+import type { MapViewport } from "@/lib/sitterSearch";
 import "leaflet/dist/leaflet.css";
 
 interface SitterPin {
@@ -22,7 +26,8 @@ interface SitterPin {
 
 interface Props {
   sitters: SitterPin[];
-  centerCoords: { lat: number; lng: number } | null;
+  /** Cadrage et fond calculés par computeMapViewport (src/lib/sitterSearch). */
+  viewport: MapViewport;
   onContact: (sitterId: string) => void;
   contactingId: string | null;
 }
@@ -40,16 +45,21 @@ const createPinIcon = (active: boolean, avatar?: string | null) => {
   });
 };
 
-const Centerer = ({ bounds, fallback }: { bounds: L.LatLngBoundsExpression | null; fallback: [number, number] }) => {
+const Centerer = ({ viewport }: { viewport: MapViewport }) => {
   const map = useMap();
+  const key = JSON.stringify(viewport);
   useEffect(() => {
-    if (bounds) map.fitBounds(bounds, { padding: [40, 40], maxZoom: 13, animate: true });
-    else map.setView(fallback, 6, { animate: true });
-  }, [bounds, fallback, map]);
+    if (viewport.bounds && viewport.bounds.length >= 2) {
+      map.fitBounds(viewport.bounds as L.LatLngBoundsExpression, { padding: [40, 40], maxZoom: 12, animate: true });
+    } else {
+      map.setView(viewport.center, viewport.zoom, { animate: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key, map]);
   return null;
 };
 
-const SearchOwnerMapView = ({ sitters, centerCoords, onContact, contactingId }: Props) => {
+const SearchOwnerMapView = ({ sitters, viewport, onContact, contactingId }: Props) => {
   const [activeId, setActiveId] = useState<string | null>(null);
   const popRef = useRef<HTMLDivElement>(null);
 
@@ -61,33 +71,28 @@ const SearchOwnerMapView = ({ sitters, centerCoords, onContact, contactingId }: 
     return () => document.removeEventListener("mousedown", h);
   }, []);
 
-  const center: [number, number] = centerCoords ? [centerCoords.lat, centerCoords.lng] : [46.6, 2.5];
-  const bounds: L.LatLngBoundsExpression | null =
-    sitters.length >= 2
-      ? (sitters.map((s) => [s.coords.lat, s.coords.lng]) as L.LatLngBoundsExpression)
-      : sitters.length === 1 && centerCoords
-        ? ([[sitters[0].coords.lat, sitters[0].coords.lng], [centerCoords.lat, centerCoords.lng]] as L.LatLngBoundsExpression)
-        : null;
-
   const active = sitters.find((s) => s.id === activeId);
 
   return (
     <div className="w-full h-full relative">
       <MapErrorBoundary>
       <MapContainer
-        center={center}
-        zoom={centerCoords ? 11 : 6}
+        center={viewport.center}
+        zoom={viewport.zoom}
         className="w-full h-full"
         zoomControl
         attributionControl={true}
       >
         <LeafletUnmountGuard />
-        <Centerer bounds={bounds} fallback={center} />
-        <TileLayer
-          url={MAP_TILE_URL}
-          attribution={MAP_TILE_ATTRIBUTION}
-          maxZoom={MAP_TILE_MAX_ZOOM}
-        />
+        <Centerer viewport={viewport} />
+        {/* Plan IGN en France métropolitaine, fond mondial ailleurs (outre-mer,
+            étranger, tous pays) : un fond vide ne doit jamais faire croire qu'un
+            point est faux. La clé force le remplacement de la couche. */}
+        {viewport.tiles === "ign" ? (
+          <TileLayer key="ign" url={MAP_TILE_URL} attribution={MAP_TILE_ATTRIBUTION} maxZoom={MAP_TILE_MAX_ZOOM} />
+        ) : (
+          <TileLayer key="world" url={MAP_TILE_WORLD_URL} attribution={MAP_TILE_WORLD_ATTRIBUTION} maxZoom={MAP_TILE_WORLD_MAX_ZOOM} />
+        )}
         {sitters.map((s) => (
           <Marker
             key={s.id}

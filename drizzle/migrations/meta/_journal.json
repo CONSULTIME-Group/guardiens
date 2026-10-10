@@ -421,6 +421,13 @@
       "when": 1791486295271,
       "tag": "0059_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 60,
+      "version": "7",
+      "when": 1791620183435,
+      "tag": "0060_search_sitter_pool",
+      "breakpoints": true
     }
   ]
 }

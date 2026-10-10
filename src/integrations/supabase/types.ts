@@ -13859,6 +13859,42 @@ export type Database = {
           url: string
         }[]
       }
+      search_sitter_country_counts: {
+        Args: never
+        Returns: {
+          country: string
+          sitters: number
+        }[]
+      }
+      search_sitter_pool: {
+        Args: { p_country?: string }
+        Returns: {
+          animal_types: string[]
+          avatar_url: string
+          bio: string
+          city: string
+          competences: string[]
+          completed_sits_count: number
+          country: string
+          experience_years: string
+          first_name: string
+          has_vehicle: boolean
+          identity_verified: boolean
+          interests: string[]
+          is_available: boolean
+          last_seen_at: string
+          latitude_approx: number
+          longitude_approx: number
+          postal_code: string
+          profile_completion: number
+          reply_median_minutes: number
+          sitter_type: string
+          special_animal_skills: string[]
+          travels_with_children: boolean
+          travels_with_own_animals: boolean
+          user_id: string
+        }[]
+      }
       seasonal_nurture_plan: {
         Args: { p_active_days?: number; p_period_key: string }
         Returns: {

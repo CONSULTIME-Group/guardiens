@@ -2973,6 +2973,11 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/gardiens/097ad66d-4da8-4182-af58-4e4250e585c6</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/gardiens/0dd3fa01-8777-4210-a352-1f13c33a9ed2</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
@@ -3009,6 +3014,11 @@
   </url>
   <url>
     <loc>https://guardiens.fr/gardiens/19ab5fd2-388d-4874-bf9c-7b8dd61ce949</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/gardiens/22ab2ecb-e656-4af8-a600-b6cb22690a1e</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -3548,6 +3558,11 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/gardiens/d12b7985-bd6a-4ce4-951d-4e2d1e05e1bd</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/gardiens/d1af6a00-36a3-4291-8ef3-bc9aefdc5c65</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
@@ -3718,17 +3733,17 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/annonces/un-noel-magique-au-c-ur-du-magnifique-quebec-entoure-de-natu-saint-ludger-quebec-45219d</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/annonces/garde-chien-du-28-octobre-au-6-novembre-collonges-sous-saleve-4af335</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/annonces/garde-de-chienne-a-saint-cyr-sur-mer-du-19-au-28-octobre-202-st-cyr-sur-mer-4e838b</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/annonces/garde-de-2-chats-et-1-poisson-proche-dijon-1-semaine-en-mars-longvic-5a30d3</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -3754,11 +3769,6 @@
   </url>
   <url>
     <loc>https://guardiens.fr/annonces/garde-3-chiens-zellwiller-c6b0f5</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/annonces/garde-de-2-chats-et-1-poisson-proche-dijon-1-semaine-en-mars-longvic-c85a20</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
