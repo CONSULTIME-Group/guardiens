@@ -1080,7 +1080,9 @@ export default function PublicSitterProfile() {
           .from('public_closed_sits')
           .select('id, slug, title, city, cover_photo_url, status')
           .eq('user_id', id)
-          .eq('status', 'archived')
+          // Une garde terminée (completed) compte aussi comme garde passée :
+          // sinon « prépare sa première annonce » s'affiche à tort.
+          .in('status', ['archived', 'completed'])
           .limit(50);
 
         if (archErr) console.error('[archivedSits]', archErr);
@@ -1393,7 +1395,7 @@ export default function PublicSitterProfile() {
   });
   // Meta description structurée : promesse + animaux + zone + signaux de confiance.
   const animalsForDesc = animalLabels || "animaux";
-  const cityForDesc = city ? `à ${city}${radius ? ` (rayon ${radius} km)` : ''}` : "près de chez vous";
+  const cityForDesc = city ? `à ${locationLabel}${radius ? ` (rayon ${radius} km)` : ''}` : "près de chez vous";
   const trustForDesc = [
     profile?.identity_verified ? "identité vérifiée" : null,
     completedSits > 0 ? `${completedSits} garde${completedSits > 1 ? 's' : ''}` : null,
