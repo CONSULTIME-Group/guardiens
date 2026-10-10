@@ -18,7 +18,7 @@ import {
   type SitPlace,
 } from "@/lib/sitSearchRules";
 import { getCountryName } from "@/lib/countries";
-import { fromPhoton } from "@/lib/sitterSearch";
+import { fromPhoton, type PlaceSuggestion } from "@/lib/sitterSearch";
 
 export interface IntlSit {
   id: string;
@@ -36,8 +36,20 @@ export interface IntlSit {
 const SIT_COLS =
   "id, slug, title, city, country, departement_code, start_date, end_date, created_at, cover_photo_url, user_id, property_id, property:properties!sits_property_id_fkey(photos, cover_photo_url)";
 
-/** Lecture complète des annonces ouvertes, puis lieu propriétaire et espèces. */
-export async function fetchIntlOpenSits(opts: { withSpecies?: boolean } = {}): Promise<IntlSit[]> {
+/** Lecture tronquée (plafond de pages atteint) : jamais de compteur présenté comme complet. */
+export class IntlPoolTruncatedError extends Error {
+  constructor(what: string) {
+    super(`Lecture incomplète (${what}) : plafond de pages atteint, comptage non fiable.`);
+    this.name = "IntlPoolTruncatedError";
+  }
+}
+
+/**
+ * Lecture complète des annonces ouvertes, puis lieu propriétaire et espèces.
+ * Par défaut hors France ; includeFrance = tous les pays, France incluse.
+ * Tout jeu tronqué lève IntlPoolTruncatedError.
+ */
+export async function fetchIntlOpenSits(opts: { withSpecies?: boolean; includeFrance?: boolean } = {}): Promise<IntlSit[]> {
   const res = await fetchAllPages<any>((from, to) =>
     applyOpenSitFilter(supabase.from("sits").select(SIT_COLS) as any)
       .order("created_at", { ascending: false })
@@ -45,6 +57,7 @@ export async function fetchIntlOpenSits(opts: { withSpecies?: boolean } = {}): P
       .range(from, to) as any,
   );
   if (res.error) throw res.error;
+  if (res.truncated) throw new IntlPoolTruncatedError("annonces");
   const rows = res.rows ?? [];
   const ownerIds = [...new Set(rows.map((r: any) => r.user_id).filter(Boolean))] as string[];
   const owners = await fetchInChunks<any>(ownerIds, (chunk, from, to) =>
@@ -56,19 +69,21 @@ export async function fetchIntlOpenSits(opts: { withSpecies?: boolean } = {}): P
       .range(from, to) as any,
   );
   if (owners.error) throw owners.error;
+  if (owners.truncated) throw new IntlPoolTruncatedError("propriétaires");
   const ownerById = new Map((owners.data ?? []).map((o: any) => [o.id, o]));
 
   const placed = rows
     .map((r: any) => ({ r, place: resolveSitPlace({ ...r, owner: ownerById.get(r.user_id) ?? null }) }))
-    .filter(({ place }) => !!place.country && place.country !== "FR");
+    .filter(({ place }) => !!place.country && (opts.includeFrance || place.country !== "FR"));
 
   const speciesByProperty = new Map<string, Set<string>>();
   if (opts.withSpecies && placed.length) {
     const propIds = [...new Set(placed.map(({ r }) => r.property_id).filter(Boolean))] as string[];
     const pets = await fetchInChunks<any>(propIds, (chunk, from, to) =>
-      supabase.from("pets").select("id, species, property_id").in("property_id", chunk).order("id", { ascending: true }).range(from, to) as any,
+      (supabase.from("public_pets" as any) as any).select("id, species, property_id").in("property_id", chunk).order("id", { ascending: true }).range(from, to) as any,
     );
     if (pets.error) throw pets.error;
+    if (pets.truncated) throw new IntlPoolTruncatedError("animaux");
     for (const p of pets.data ?? []) {
       if (!speciesByProperty.has(p.property_id)) speciesByProperty.set(p.property_id, new Set());
       if (p.species) speciesByProperty.get(p.property_id)!.add(p.species);
@@ -169,11 +184,11 @@ export function intlPlaceLabel(place: Pick<SitPlace, "city" | "country">): strin
 }
 
 /** Titre contextuel : pays choisi ou étranger en général. */
-export function intlTitle(country: string | null, city: string | null): string {
+export function intlTitle(country: string | null, city: string | null, world = false): string {
   if (city && country) return `Gardes à ${city}, ${getCountryName(country)}`;
   if (city) return `Gardes autour de ${city}`;
   if (country) return `Gardes à l'étranger : ${getCountryName(country)}`;
-  return "Gardes à l'étranger, tous les pays";
+  return world ? "Gardes dans tous les pays, France incluse" : "Gardes à l'étranger, tous les pays hors France";
 }
 
 /** Le tri « plus proches » n'a de sens qu'avec une ville située. */
@@ -181,28 +196,113 @@ export const closestSortAvailable = (center: { lat: number; lng: number } | null
 
 const normName = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 
+/** Limiteur du repli Photon : 2 requêtes simultanées au plus. */
+const PHOTON_MAX = 2;
+let photonActive = 0;
+const photonQueue: Array<() => void> = [];
+async function photonSlot<T>(fn: () => Promise<T>): Promise<T> {
+  if (photonActive >= PHOTON_MAX) await new Promise<void>((r) => photonQueue.push(r));
+  photonActive++;
+  try { return await fn(); } finally { photonActive--; photonQueue.shift()?.(); }
+}
+/** Cache de session, échecs compris : un lieu n'est jamais redemandé. */
+const intlPointCache = new Map<string, Promise<{ lat: number; lng: number } | null>>();
+export const __resetIntlPointCache = () => intlPointCache.clear();
+
 /**
- * Point approximatif (centre de commune) d'un lieu hors France : géocodeur du
- * site, puis repli Photon limité au pays et au nom exact (accents, tirets et
- * casse ignorés). Aucun point si le nom ne correspond pas : rien d'inventé.
+ * Choix d'une commune parmi des résultats de même nom et même pays.
+ * Une région fournie (« Saint-Ludger, Québec ») départage ; sans région,
+ * plusieurs communes distantes de plus de 10 km = ambiguïté, aucun point.
  */
-export async function geocodeIntlPlace(
+export function pickUniquePlace(
+  matches: PlaceSuggestion[],
+  region: string | null,
+): { lat: number; lng: number } | null {
+  let pool = matches.filter((m) => m.lat != null && m.lng != null);
+  if (region) {
+    const r = normName(region);
+    pool = pool.filter((m) => normName(m.detail ?? "").includes(r));
+  }
+  if (!pool.length) return null;
+  const a = pool[0];
+  const distinct = pool.some((m) => haversineKm({ lat: a.lat!, lng: a.lng! }, { lat: m.lat!, lng: m.lng! }) > 10);
+  if (distinct) return null;
+  return { lat: Math.round(a.lat! * 1000) / 1000, lng: Math.round(a.lng! * 1000) / 1000 };
+}
+
+/**
+ * Point approximatif (centre de commune) d'un lieu : géocodeur du site, puis
+ * repli Photon borné, limité au pays et au nom exact (accents, tirets et casse
+ * ignorés), sans choix silencieux entre homonymes. Rien d'inventé.
+ */
+export function geocodeIntlPlace(
   city: string,
   country: string,
   primary: (city: string, country: string) => Promise<{ lat: number; lng: number } | null>,
   fetcher: typeof fetch = fetch,
 ): Promise<{ lat: number; lng: number } | null> {
-  try {
-    const p = await primary(city, country);
-    if (p) return { lat: p.lat, lng: p.lng };
-  } catch { /* repli */ }
-  try {
-    const r = await fetcher(`https://photon.komoot.io/api/?q=${encodeURIComponent(city)}&limit=10&lang=fr&layer=city&layer=locality&layer=district`);
-    if (!r.ok) return null;
-    const target = normName(city.split(",")[0]);
-    const hit = fromPhoton(await r.json(), country).find((s) => normName(s.name) === target && s.lat != null && s.lng != null);
-    return hit ? { lat: Math.round(hit.lat! * 1000) / 1000, lng: Math.round(hit.lng! * 1000) / 1000 } : null;
-  } catch {
-    return null;
-  }
+  const key = `${normName(city)}|${country}`;
+  const hit = intlPointCache.get(key);
+  if (hit) return hit;
+  const parts = city.split(",").map((x) => x.trim()).filter(Boolean);
+  const name = parts[0] ?? city;
+  const countryName = normName(getCountryName(country));
+  const region = parts.slice(1).find((p) => normName(p) !== countryName && normName(p) !== country.toLowerCase()) ?? null;
+  const p = (async () => {
+    try {
+      const pr = await primary(city, country);
+      if (pr) return { lat: pr.lat, lng: pr.lng };
+    } catch { /* repli */ }
+    try {
+      return await photonSlot(async () => {
+        const r = await fetcher(`https://photon.komoot.io/api/?q=${encodeURIComponent(name)}&limit=10&lang=fr&layer=city&layer=locality&layer=district`);
+        if (!r.ok) return null;
+        const target = normName(name);
+        const matches = fromPhoton(await r.json(), country).filter((s) => normName(s.name) === target);
+        return pickUniquePlace(matches, region);
+      });
+    } catch {
+      return null;
+    }
+  })();
+  intlPointCache.set(key, p);
+  return p;
 }
+
+/** Coordonnées lues dans l'adresse : nombres finis dans les bornes terrestres. */
+export function parseUrlPoint(lat: string | null, lng: string | null): { lat: number; lng: number } | null {
+  if (lat === null || lng === null || lat.trim() === "" || lng.trim() === "") return null;
+  const a = Number(lat), b = Number(lng);
+  if (!Number.isFinite(a) || !Number.isFinite(b) || Math.abs(a) > 90 || Math.abs(b) > 180) return null;
+  return { lat: a, lng: b };
+}
+
+/** Animaux : libellés partagés par /annonces et /annonces/international dans l'adresse. */
+export const SPECIES_LABELS: Array<{ key: string; label: string; france: boolean }> = [
+  { key: "dog", label: "Chiens", france: true },
+  { key: "cat", label: "Chats", france: true },
+  { key: "horse", label: "Chevaux", france: true },
+  { key: "bird", label: "Oiseaux", france: true },
+  { key: "rodent", label: "Rongeurs", france: false },
+  { key: "fish", label: "Poissons", france: false },
+  { key: "reptile", label: "Reptiles", france: false },
+  { key: "farm_animal", label: "Animaux de ferme", france: true },
+  { key: "nac", label: "NAC", france: true },
+];
+
+/**
+ * Paramètres conservés d'une recherche à l'autre au changement de pays :
+ * dates et animaux compatibles ; ville, coordonnées, zone et rayon effacés.
+ */
+export function carryOverParams(from: URLSearchParams, target: "france" | "intl"): URLSearchParams {
+  const out = new URLSearchParams();
+  for (const k of ["debut", "fin"]) { const v = from.get(k); if (v) out.set(k, v); }
+  const animals = (from.get("animaux") || "").split(",").map((x) => x.trim()).filter(Boolean)
+    .filter((l) => SPECIES_LABELS.some((s) => s.label === l && (target === "intl" || s.france)));
+  if (animals.length) out.set("animaux", animals.join(","));
+  return out;
+}
+
+/** Valeurs du choix de destination. */
+export const DEST_WORLD = "monde"; // tous les pays, France incluse
+export const DEST_ABROAD = "etranger"; // tous les pays hors France
