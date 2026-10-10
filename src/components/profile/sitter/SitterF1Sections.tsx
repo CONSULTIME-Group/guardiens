@@ -37,195 +37,6 @@ export const SectionHeading = ({ eyebrow, title, id }: { eyebrow: string; title:
   </div>
 );
 
-/* ── En-tête ──────────────────────────────────────────────────────── */
-interface HeroProps {
-  id: string;
-  firstName: string;
-  city: string | null;
-  departmentName: string | null;
-  avatarUrl: string | null;
-  heroDesktop: string;
-  heroMobile: string;
-  heroAnchor?: string;
-  isOwnProfile: boolean;
-  onOpenHeroPicker: () => void;
-  onOpenAvatarLightbox: () => void;
-  hasAvatarLightbox: boolean;
-  breadcrumb?: ReactNode;
-  memberSince: string | null;
-  completedSits: number;
-  identityVerified: boolean;
-  avgRating: number;
-  reviewCount: number;
-  isAvailable: boolean;
-  hasActiveSubscription: boolean;
-  emergencyActive: boolean;
-  statutGardien: string | null;
-  /** Ancien délai 30 jours : conservé pour compatibilité, non affiché (contrat unique L3, 90 jours). */
-  replyMedianMinutes: number | null;
-  lastSeenAt?: string | null;
-  quote: string | null;
-}
-
-
-export const SitterIdentityHero = (p: HeroProps) => {
-  const place = [p.city, p.departmentName].filter(Boolean).join(", ");
-  const memberSince = p.memberSince
-    ? new Date(p.memberSince).toLocaleDateString("fr-FR", { month: "long", year: "numeric" })
-    : null;
-  const scrollToTrust = () => {
-    const el = [document.getElementById("confiance"), document.getElementById("confiance-mobile")].find(
-      (n) => n && (n as HTMLElement).offsetParent !== null,
-    ) as HTMLElement | null;
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-  return (
-    <header className="relative w-full" data-sitter-hero>
-      {/* Gouache du hero : entière, pleine intensité, rien par-dessus (lot F1c). */}
-      <div
-        className="relative overflow-hidden w-full bg-[hsl(var(--hero-paper))] [aspect-ratio:1536/544] md:max-h-[520px]"
-        data-sitter-hero-frame
-      >
-        <img
-          src={p.heroDesktop}
-          srcSet={`${p.heroMobile} 768w, ${p.heroDesktop} 1536w`}
-          sizes="100vw"
-          alt=""
-          aria-hidden="true"
-          data-hero-anchor={p.heroAnchor}
-          width={1536}
-          height={544}
-          loading="eager"
-          decoding="async"
-          fetchPriority="high"
-          className="w-full h-full object-contain object-center"
-        />
-        {p.isOwnProfile && (
-          <button
-            type="button"
-            onClick={p.onOpenHeroPicker}
-            className="absolute top-3 right-3 z-20 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-background/95 border border-border text-[13px] font-semibold text-foreground shadow-sm"
-            title="Choisir une autre illustration de carnet"
-          >
-            Changer l'image
-          </button>
-        )}
-      </div>
-
-      <div className="relative max-w-5xl mx-auto px-4 md:px-6">
-        <div className="pt-[34px] flex flex-col items-center text-center md:flex-row md:items-end md:text-left gap-[22px] md:gap-[34px] min-w-0">
-          {/* Vignette papier déchiré */}
-          <button
-            type="button"
-            onClick={p.onOpenAvatarLightbox}
-            disabled={!p.hasAvatarLightbox}
-            aria-label={`Agrandir la photo de ${p.firstName}`}
-            className="notebook-card relative shrink-0 disabled:cursor-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-            style={{ transform: "rotate(-2.2deg)", padding: "14px 20px 12px 14px" }}
-          >
-            <span className="notebook-card-paper absolute inset-0" aria-hidden="true" />
-            <span className="relative block">
-              {p.avatarUrl && !p.avatarUrl.includes("placeholder.svg") ? (
-                <img
-                  src={avatarImageUrl(p.avatarUrl, 400)}
-                  alt={p.firstName}
-                  className="block w-[146px] h-[158px] md:w-[180px] md:h-[196px] rounded-[3px] object-cover"
-                />
-              ) : (
-                <span className="flex w-[146px] h-[158px] md:w-[180px] md:h-[196px] rounded-[3px] bg-muted items-center justify-center font-heading text-6xl text-foreground">
-                  {p.firstName?.charAt(0) || "?"}
-                </span>
-              )}
-              {place && (
-                <span className="block mt-2 font-heading italic text-[15px] text-foreground/80 text-center">{place}</span>
-              )}
-            </span>
-          </button>
-
-          <div className="min-w-0 flex-1 pb-1">
-            <p className="text-[12px] uppercase tracking-[0.16em] text-secondary font-body font-semibold">
-              {p.departmentName ? `Garde de maisons en ${p.departmentName}` : "Garde de maisons"}
-            </p>
-            <div className="mt-1 flex items-center justify-center md:justify-start gap-3 min-w-0">
-              <h1 className="font-heading text-[48px] md:text-[68px] font-semibold tracking-[-0.02em] leading-none text-foreground break-words [overflow-wrap:anywhere] min-w-0">
-                {p.firstName}
-              </h1>
-              <FavoriteButton targetType="sitter" targetId={p.id} size="md" />
-            </div>
-            {(() => {
-              const visit = lastVisitLabel(p.lastSeenAt ?? null);
-              const parts = [
-                memberSince ? `Membre depuis ${memberSince}` : null,
-                p.completedSits > 0 ? `${p.completedSits} garde${p.completedSits > 1 ? "s réalisées" : " réalisée"}` : null,
-                visit ? `Dernière visite ${visit}` : null,
-              ].filter(Boolean);
-              return parts.length > 0 ? (
-                <p className="mt-2 text-[15px] text-muted-foreground font-body">{parts.join(" · ")}</p>
-              ) : null;
-            })()}
-            <div className="mt-[14px] flex flex-wrap items-center justify-center md:justify-start gap-x-4 gap-y-2 text-[14px] font-body text-foreground">
-              {p.identityVerified && (
-                <TooltipProvider delayDuration={200}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        type="button"
-                        onClick={scrollToTrust}
-                        aria-label="Voir les détails de confiance et vérifications"
-                        className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-founder-soft border border-founder-border px-3 py-1 text-founder-foreground font-medium"
-                      >
-                        <Shield size={14} className="text-founder" aria-hidden="true" /> Identité vérifiée
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" className="max-w-xs text-xs leading-relaxed">
-                      Une pièce d'identité officielle a été fournie et contrôlée automatiquement. C'est un signal de confiance parmi d'autres : vos échanges et votre rencontre le complètent.
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
-              {p.avgRating > 0 && p.reviewCount > 0 && (
-                <span className="inline-flex items-center gap-1.5" aria-label={`${formatRatingFr(p.avgRating)} sur 5, ${p.reviewCount} avis`}>
-                  <span className="text-founder" aria-hidden="true">★★★★★</span>
-                  <span className="font-semibold">{formatRatingFr(p.avgRating)}</span>
-                  <span className="text-muted-foreground">· {p.reviewCount} avis</span>
-                </span>
-              )}
-              {p.isAvailable && (
-                <span className="inline-flex items-center gap-1.5">
-                  <span aria-hidden="true" className="h-2 w-2 rounded-full bg-primary" /> Disponible
-                </span>
-              )}
-              {p.hasActiveSubscription && <span className="text-muted-foreground">Abonné</span>}
-              {p.emergencyActive && <span className="text-muted-foreground">Gardien d'urgence</span>}
-              {p.statutGardien && p.statutGardien !== "novice" && (
-                <StatutGardienBadge statut={p.statutGardien as any} />
-              )}
-              <ResponsivenessBadge userId={p.id} />
-            </div>
-          </div>
-        </div>
-
-        {p.quote && (
-          <figure className="mt-[34px] max-w-[700px] mx-auto md:mx-0 text-center md:text-left">
-            <blockquote className="relative font-heading italic text-[23px] md:text-[30px] leading-snug text-foreground">
-              <span aria-hidden="true" className="block h-[40px] mb-2 md:mb-0 md:h-auto md:absolute md:-left-8 md:-top-4 font-heading text-[64px] leading-none text-secondary/40 not-italic">
-                «
-              </span>
-              {p.quote}
-            </blockquote>
-            <figcaption className="mt-2 text-[13.5px] text-muted-foreground font-body">
-              {p.firstName}, dans ses mots
-            </figcaption>
-            <svg width="180" height="16" viewBox="0 0 180 16" aria-hidden="true" className="mt-[22px] mx-auto md:mx-0 text-secondary/50">
-              <path d="M2 9 C 28 3, 52 14, 80 8 S 132 3, 178 10" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-            </svg>
-          </figure>
-        )}
-      </div>
-    </header>
-  );
-};
-
 /* ── Ses savoir-faire ─────────────────────────────────────────────── */
 export const SitterSkillsSection = ({
   groups,
@@ -361,10 +172,12 @@ export const SitterAboutSection = ({
   const [open, setOpen] = useState(false);
   const full = [motivation, bio].filter(Boolean).join("\n\n");
   const cut = cutLongText(full);
+  // L5 : section masquée quand rien de réel n'est à montrer.
+  if (!full && facts.length === 0 && !children) return null;
   return (
     <section aria-label={`À propos de ${firstName}`} className="scroll-mt-20">
       <SectionHeading eyebrow="À propos" title={`Qui est ${firstName}.`} />
-      {full ? (
+      {full && (
         <div className="max-w-[700px]">
           <p className="text-[16px] leading-[1.7] text-foreground font-body whitespace-pre-line">
             {open || !cut.truncated ? full : cut.text}
@@ -380,8 +193,6 @@ export const SitterAboutSection = ({
             </button>
           )}
         </div>
-      ) : (
-        <p className="text-sm text-muted-foreground italic font-body">La présentation de {firstName} arrive bientôt.</p>
       )}
       {facts.length > 0 && (
         <dl className="mt-[34px] pt-[22px] border-t border-border grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-5">
