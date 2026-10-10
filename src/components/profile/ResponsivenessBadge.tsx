@@ -15,6 +15,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { RESPONSIVENESS_SCOPE_NOTE } from "@/lib/profileSignals";
 
 export type ResponsivenessTier =
   | "under_1h"
@@ -65,6 +66,7 @@ const ResponsivenessBadge = ({ userId, tier, className = "" }: Props) => {
 
   return (
     <span
+      title={RESPONSIVENESS_SCOPE_NOTE}
       className={`inline-flex items-center gap-1.5 text-xs font-medium rounded-full px-2.5 py-1 bg-success-soft text-success border border-success-border ${className}`}
     >
       <Clock className="w-3 h-3 shrink-0" aria-hidden="true" />

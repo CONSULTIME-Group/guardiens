@@ -10,7 +10,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import FavoriteButton from "@/components/shared/FavoriteButton";
 import StatutGardienBadge from "@/components/profile/StatutGardienBadge";
-import ReplyTimeBadge from "@/components/sitters/ReplyTimeBadge";
+import { lastVisitLabel } from "@/lib/profileSignals";
 import ResponsivenessBadge from "@/components/profile/ResponsivenessBadge";
 import type { HeroCtaVariant } from "@/components/profile/ProfileHero";
 import { BADGE_DEFINITIONS } from "@/components/badges/badge-definitions";
@@ -73,7 +73,9 @@ interface HeroProps {
   hasActiveSubscription: boolean;
   emergencyActive: boolean;
   statutGardien: string | null;
+  /** Ancien délai 30 jours : conservé pour compatibilité, non affiché (contrat unique L3, 90 jours). */
   replyMedianMinutes: number | null;
+  lastSeenAt?: string | null;
   quote: string | null;
 }
 
@@ -162,13 +164,17 @@ export const SitterIdentityHero = (p: HeroProps) => {
               </h1>
               <FavoriteButton targetType="sitter" targetId={p.id} size="md" />
             </div>
-            {(memberSince || p.completedSits > 0) && (
-              <p className="mt-2 text-[15px] text-muted-foreground font-body">
-                {memberSince && `Membre depuis ${memberSince}`}
-                {p.completedSits > 0 &&
-                  ` · ${p.completedSits} garde${p.completedSits > 1 ? "s réalisées" : " réalisée"}`}
-              </p>
-            )}
+            {(() => {
+              const visit = lastVisitLabel(p.lastSeenAt ?? null);
+              const parts = [
+                memberSince ? `Membre depuis ${memberSince}` : null,
+                p.completedSits > 0 ? `${p.completedSits} garde${p.completedSits > 1 ? "s réalisées" : " réalisée"}` : null,
+                visit ? `Dernière visite ${visit}` : null,
+              ].filter(Boolean);
+              return parts.length > 0 ? (
+                <p className="mt-2 text-[15px] text-muted-foreground font-body">{parts.join(" · ")}</p>
+              ) : null;
+            })()}
             <div className="mt-[14px] flex flex-wrap items-center justify-center md:justify-start gap-x-4 gap-y-2 text-[14px] font-body text-foreground">
               {p.identityVerified && (
                 <TooltipProvider delayDuration={200}>
@@ -206,7 +212,6 @@ export const SitterIdentityHero = (p: HeroProps) => {
               {p.statutGardien && p.statutGardien !== "novice" && (
                 <StatutGardienBadge statut={p.statutGardien as any} />
               )}
-              {p.replyMedianMinutes != null && <ReplyTimeBadge minutes={p.replyMedianMinutes} />}
               <ResponsivenessBadge userId={p.id} />
             </div>
           </div>
