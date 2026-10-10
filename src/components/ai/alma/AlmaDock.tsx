@@ -837,7 +837,7 @@ function AlmaDockInner() {
         />
       )}
 
-      {!hideCollapsedPill && peekId && whisper && !expanded && (
+      {!hideCollapsedPill && !compactDock && peekId && whisper && !expanded && (
         <button
           type="button"
           data-testid="alma-whisper-peek"
