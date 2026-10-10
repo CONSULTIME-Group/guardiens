@@ -1081,7 +1081,7 @@ const SearchOwner = () => {
                     <span className="text-muted-foreground">Où cherchez-vous un gardien&nbsp;?</span>
                   )}
                 </span>
-                <span className="text-xs text-muted-foreground shrink-0 hidden lg:inline">Ville, département ou région</span>
+                <span className="text-xs text-muted-foreground shrink-0 hidden lg:inline">{isFranceSearch ? "Ville, département ou région" : `Ville · ${scopeLabel}`}</span>
               </button>
             }
             cityInput={cityInput}
