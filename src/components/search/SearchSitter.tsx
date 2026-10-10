@@ -115,23 +115,9 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  return "radius";
  });
  const [densityCounts, setDensityCounts] = useState<{ radius: number; dept: number; region: number; france: number }>({ radius: 0, dept: 0, region: 0, france: 0 });
- // ─── Élargissement automatique de zone (offre nationale encore faible) ───
- // Quand la recherche par rayon ne renvoie rien alors que des annonces existent
- // ailleurs, on bascule UNE SEULE FOIS vers la zone la plus étroite non vide.
- // Jamais si l'utilisateur a lui-même réglé sa zone, ni sur un deep-link.
- const [zoneTouchedByUser, setZoneTouchedByUser] = useState(false);
- const autoWidenedRef = useRef(false);
- const [autoWidened, setAutoWidened] = useState<{ to: Exclude<ZoneMode, "radius">; fromRadius: number; count: number } | null>(null);
- const deepLinkLockedRef = useRef(
-  ["zone", "ville", "rayon", "debut", "fin"].some((k) => !!searchParams.get(k)),
- );
- const markZoneTouched = () => {
-  setZoneTouchedByUser(true);
-  autoWidenedRef.current = true;
-  setAutoWidened(null);
- };
- const setZoneModeByUser = (m: ZoneMode) => { markZoneTouched(); setZoneMode(m); };
- const setRadiusByUser = (v: number[]) => { markZoneTouched(); setRadius(v); };
+ // Zone et rayon ne changent que sur un geste du membre (aucun élargissement automatique).
+ const setZoneModeByUser = (m: ZoneMode) => setZoneMode(m);
+ const setRadiusByUser = (v: number[]) => setRadius(v);
  const [userPostalCode, setUserPostalCode] = useState<string | null>(null);
  const [startDate, setStartDate] = useState(() => searchParams.get("debut") || "");
  const [endDate, setEndDate] = useState(() => searchParams.get("fin") || "");
@@ -377,7 +363,6 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  setCity(name);
  setCityPostalCode(refCp);
  setCitySuggestions([]);
- markZoneTouched();
  setZoneMode("dept");
  setEditingCity(false);
  };
@@ -392,7 +377,6 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  setCity(name);
  setCityPostalCode(refCp);
  setCitySuggestions([]);
- markZoneTouched();
  setZoneMode("region");
  setEditingCity(false);
  };
@@ -1714,36 +1698,10 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
 
     {/* ─── Out-of-zone banner ─── PRIORITÉ 1 : quand il s'affiche, il masque
          SitterDiscoveryBanner et AffinityMissingCTA (une seule bannière au-dessus des résultats). */}
-    {autoWidened && tab === "sits" && zoneMode === autoWidened.to && (
-      <div className="mx-6 mt-4 rounded-2xl border border-primary/20 bg-primary/5 p-4 text-sm text-foreground flex flex-col sm:flex-row sm:items-center gap-3">
-        <p className="flex-1 min-w-0 leading-relaxed">
-          {autoWidened.to === "dept"
-            ? t("search_auto_widen.to_dept", { radius: autoWidened.fromRadius, count: autoWidened.count })
-            : autoWidened.to === "region"
-            ? t("search_auto_widen.to_region", { count: autoWidened.count })
-            : t("search_auto_widen.to_france")}
-        </p>
-        <Button
-          size="sm"
-          variant="outline"
-          className="shrink-0 bg-card"
-          onClick={() => {
-            const back = autoWidened.fromRadius;
-            markZoneTouched();
-            setRadius([back]);
-            setZoneMode("radius");
-          }}
-        >
-          {t("search_auto_widen.back", { radius: autoWidened.fromRadius })}
-        </Button>
-      </div>
-    )}
-
     {(() => {
-      const widenBannerVisible = !!autoWidened && tab === "sits" && zoneMode === autoWidened.to;
       // En vue carte, ce bandeau pousse la carte hors du viewport : il reste
       // réservé à la vue liste.
-      const showOutOfZone = viewMode !== "map" && !widenBannerVisible && tab === "sits" && !loading && zoneMode !== "france" && densityCounts.france > densityCounts.radius;
+      const showOutOfZone = viewMode !== "map" && tab === "sits" && !loading && zoneMode !== "france" && densityCounts.france > densityCounts.radius;
       return showOutOfZone ? (
         <OutOfZoneBanner
           zoneMode={zoneMode}
@@ -1768,13 +1726,33 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
   )}
 
   {tab === "sits" && !loading && !searchError && geocodeFailedCity && (
-    <div role="status" className="mx-6 mt-4 bg-muted/60 border border-border rounded-lg p-3 text-sm text-muted-foreground">
-      Nous n'avons pas pu situer « {geocodeFailedCity} ». Les distances ne sont pas calculées{appliedZone === "dept" ? ", les annonces sont cherchées dans votre département." : ", toutes les annonces de France sont affichées."}
+    <div role="status" className="mx-6 mt-4 bg-muted/60 border border-border rounded-lg p-3 text-sm text-muted-foreground flex flex-col sm:flex-row sm:items-center gap-3">
+      <p className="flex-1 min-w-0">
+        Nous n'avons pas pu situer « {geocodeFailedCity} ». {appliedZone === "radius"
+          ? "Aucune annonce ne peut être confirmée dans ce rayon, aucune distance n'est calculée."
+          : appliedZone === "dept"
+          ? "Les distances ne sont pas calculées, les annonces sont cherchées dans le département choisi."
+          : appliedZone === "region"
+          ? "Les distances ne sont pas calculées, les annonces sont cherchées dans la région choisie."
+          : "Les distances ne sont pas calculées."}
+      </p>
+      {appliedZone === "radius" && (
+        <Button size="sm" variant="outline" className="shrink-0 bg-card" onClick={() => setZoneModeByUser("france")}>
+          Voir toute la France
+        </Button>
+      )}
     </div>
   )}
-  {tab === "sits" && !loading && !searchError && !geocodeFailedCity && zoneMode === "radius" && unlocatedCount > 0 && (
-    <div role="status" className="mx-6 mt-4 bg-muted/60 border border-border rounded-lg p-3 text-sm text-muted-foreground">
-      {unlocatedCount === 1 ? "1 annonce n'a pas de commune situable : elle est incluse d'après son département, sans distance." : `${unlocatedCount} annonces n'ont pas de commune situable : elles sont incluses d'après leur département, sans distance.`}
+  {tab === "sits" && !loading && !searchError && !geocodeFailedCity && appliedZone === "radius" && unlocatedCount > 0 && (
+    <div role="status" className="mx-6 mt-4 bg-muted/60 border border-border rounded-lg p-3 text-sm text-muted-foreground flex flex-col sm:flex-row sm:items-center gap-3">
+      <p className="flex-1 min-w-0">
+        {unlocatedCount === 1
+          ? "1 annonce de votre département n'a pas de commune situable : elle n'est pas comptée dans le rayon."
+          : `${unlocatedCount} annonces de votre département n'ont pas de commune situable : elles ne sont pas comptées dans le rayon.`}
+      </p>
+      <Button size="sm" variant="outline" className="shrink-0 bg-card" onClick={() => setZoneModeByUser("dept")}>
+        Voir le département
+      </Button>
     </div>
   )}
 
