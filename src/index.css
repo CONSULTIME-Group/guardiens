@@ -1078,7 +1078,7 @@
 
   /* One paper surface, with enough room for the complete original painting. */
   .profile-hero {
-    --profile-art-height: min(35.42vw, 440px);
+    --profile-art-height: min(28vw, 340px);
     background-color: hsl(var(--hero-paper));
     padding-bottom: var(--profile-art-height);
   }
@@ -1100,7 +1100,7 @@
   .profile-hero-identity { max-width: 760px; }
 
   @media (max-width: 639px) {
-    .profile-hero { --profile-art-height: 72vw; }
+    .profile-hero { --profile-art-height: 35.42vw; }
   }
 
   .alma-conversation-sheet {
