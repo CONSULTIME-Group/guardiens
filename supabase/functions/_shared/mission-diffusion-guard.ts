@@ -15,11 +15,18 @@ export interface DiffusableMission {
   end_date?: string | null;
 }
 
-const endOfDay = (iso: string): number => {
+import { parisDateKey } from "./paris-hour.ts";
+
+/**
+ * Clé de date Paris (AAAA-MM-JJ) de l'échéance. La fin de journée est
+ * 23:59:59 heure de Paris, été comme hiver : on compare les dates civiles
+ * de Paris, pas les timestamps UTC. Une date invalide garde le comportement
+ * actuel : jamais dépassée.
+ */
+const parisDayOf = (iso: string): string => {
   const d = new Date(iso);
-  if (isNaN(d.getTime())) return Number.POSITIVE_INFINITY;
-  d.setUTCHours(23, 59, 59, 999);
-  return d.getTime();
+  if (isNaN(d.getTime())) return "9999-12-31";
+  return parisDateKey(d);
 };
 
 /** Motif lisible du refus, ou null si la diffusion est permise. */
@@ -28,10 +35,11 @@ export function proximityBlockReason(m: DiffusableMission, now: Date = new Date(
   if (m.status === "cancelled") return "Publication annulée, diffusion impossible.";
   if (m.status === "completed") return "Publication terminée, diffusion impossible.";
   if (m.closed_at) return "Publication clôturée, diffusion impossible.";
-  if (m.status !== "open" && m.status !== "in_progress") return "Publication non ouverte, diffusion impossible.";
-  const t = now.getTime();
-  if (m.end_date && endOfDay(m.end_date) < t) return "Date de fin dépassée, diffusion impossible.";
-  if (m.mission_type !== "offre" && m.date_needed && endOfDay(m.date_needed) < t) {
+  if (m.status === "in_progress") return "Une personne est déjà retenue, diffusion impossible.";
+  if (m.status !== "open") return "Publication non ouverte, diffusion impossible.";
+  const today = parisDateKey(now);
+  if (m.end_date && parisDayOf(m.end_date) < today) return "Date de fin dépassée, diffusion impossible.";
+  if (m.mission_type !== "offre" && m.date_needed && parisDayOf(m.date_needed) < today) {
     return "Date de besoin dépassée, diffusion impossible.";
   }
   return null;
