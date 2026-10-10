@@ -6,7 +6,13 @@ import { logger } from "@/lib/logger";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import ReportButton from "@/components/reports/ReportButton";
 import { supabase } from "@/integrations/supabase/client";
-import { geocodeCity, haversineDistance } from "@/lib/geocode";
+import { geocodeCity } from "@/lib/geocode";
+import {
+  fetchSitterSearchPool, fetchSitterCountryCounts, poolRowToSitter, distanceFrom,
+  applyZone, zoneCounts, changeCountry, selectPlace, suggestionSources,
+  fromGeoApiGouv, fromPhoton, computeMapViewport, RESULTS_PAGE_SIZE,
+  type ZoneMode, type PlaceSuggestion,
+} from "@/lib/sitterSearch";
 import { ALLOWED_ALERT_RADII, snapToAllowedRadius } from "@/lib/alertRadius";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -64,7 +70,6 @@ const RADIUS_SHORTCUTS = [5, 15, 30, 50];
 
 type SortOption = "affinity" | "closest" | "rating" | "experience";
 type ViewMode = "list" | "map";
-type ZoneMode = "radius" | "dept" | "region" | "france" | "country";
 
 const SearchOwnerMapView = lazy(() => import("@/components/search/SearchOwnerMapView"));
 
@@ -89,13 +94,17 @@ const SearchOwner = () => {
   const cityTouchedRef = useRef(false);
   const [cityPostalCode, setCityPostalCode] = useState<string | null>(null);
   const [userPostalCode, setUserPostalCode] = useState<string | null>(null);
-  const [citySuggestions, setCitySuggestions] = useState<any[]>([]);
+  const [citySuggestions, setCitySuggestions] = useState<PlaceSuggestion[]>([]);
+  // Pays de la ville choisie et centre fourni par la suggestion.
+  const [cityCountry, setCityCountry] = useState<string | null>(null);
+  const [cityCenter, setCityCenter] = useState<{ lat: number; lng: number } | null>(null);
   const [radius, setRadius] = useState([15]);
   const [zoneMode, setZoneMode] = useState<ZoneMode>("radius");
-  // Pays sélectionné (code ISO 2 lettres) quand zoneMode === "country".
-  const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
-  // Dernier mode de zone hors "country", restauré par « Tous les pays ».
-  const prevZoneModeRef = useRef<ZoneMode>("radius");
+  // Pays de recherche (ISO 2 lettres), null = « Tous les pays » : aucune
+  // restriction de pays. Appliqué côté serveur, avant pagination.
+  const [selectedCountry, setSelectedCountry] = useState<string | null>("FR");
+  // Nombre de cartes affichées dans la grille (« Afficher plus »).
+  const [visibleCount, setVisibleCount] = useState(RESULTS_PAGE_SIZE);
   // Note: filtre Dates retiré tant que la disponibilité datée n'est pas modélisée côté gardien.
   const [animalTypes, setAnimalTypes] = useState<string[]>([]);
   const [vehicled, setVehicled] = useState(false);
