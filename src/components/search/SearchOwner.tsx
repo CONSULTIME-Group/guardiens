@@ -43,8 +43,6 @@ import TrustHaloAvatar from "@/components/sitters/TrustHaloAvatar";
 import ReachReassuranceBanner from "@/components/marketing/ReachReassuranceBanner";
 import PresenceBadge from "@/components/messages/PresenceBadge";
 import ReplyTimeBadge from "@/components/sitters/ReplyTimeBadge";
-import { useActiveSittersCount } from "@/hooks/useActiveSittersCount";
-import { useActiveOwnersCount } from "@/hooks/useActiveOwnersCount";
 import OwnerToSitterAffinity from "@/components/matching/OwnerToSitterAffinity";
 import OwnerAffinityBanner from "@/components/matching/OwnerAffinityBanner";
 import SitterResultCard from "@/components/search/SitterResultCard";
@@ -1245,7 +1243,7 @@ const SearchOwner = () => {
                   <PopoverTrigger asChild>
                     <button
                       type="button"
-                      onClick={() => { setSelectedCountry(null); setZoneMode("radius"); }}
+                      onClick={() => setZoneMode("radius")}
                       disabled={z.disabled}
                       aria-pressed={active}
                       className={chipClass}
@@ -1318,11 +1316,7 @@ const SearchOwner = () => {
                       key={c.code}
                       type="button"
                       className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${selectedCountry === c.code ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted"}`}
-                      onClick={() => {
-                        setSelectedCountry(c.code);
-                        setZoneMode("country");
-                        setOpenPop(null);
-                      }}
+                      onClick={() => handleCountryChange(c.code)}
                     >
                       {countryName(c.code)}
                       <span className="ml-1 text-muted-foreground">({c.count})</span>
@@ -1590,7 +1584,7 @@ const SearchOwner = () => {
                 {expansion && (
                   <button
                     onClick={() => {
-                      setZoneMode(expansion.target);
+                      applyExpansion(expansion.target);
                       trackEvent("search_empty_action", { source: "owner", metadata: { action: "expand_zone", from: zoneMode, to: expansion.target } });
                     }}
                     className="text-left p-4 rounded-xl border border-primary bg-primary/5 hover:bg-primary/10 transition-colors"
@@ -1721,6 +1715,16 @@ const SearchOwner = () => {
                 ));
               })()}
             </div>
+            {results.length > visibleCount && (
+              <div className="mt-6 flex flex-col items-center gap-1">
+                <Button variant="outline" onClick={() => setVisibleCount((n) => n + RESULTS_PAGE_SIZE)}>
+                  Afficher plus de gardiens
+                </Button>
+                <p className="text-xs text-muted-foreground">
+                  {visibleCount} affichés sur {results.length}
+                </p>
+              </div>
+            )}
             </>
           )}
         </div>
