@@ -117,28 +117,9 @@ export interface OpeningRepetition {
   repetitionRate: number;
 }
 
-/** Contrôle anti formulation mécanique : cinq premiers mots des réponses. */
+/** Contrôle anti formulation mécanique : même définition que le Pilotage (openerGroups). */
 export function openingRepetition(rows: RawConversation[]): OpeningRepetition {
-  const counts = new Map<string, number>();
-  let total = 0;
-  for (const r of rows) {
-    const answer = (r.answer ?? "").trim();
-    if (!answer) continue;
-    const opening = answer
-      .toLowerCase()
-      .replace(/\s+/g, " ")
-      .split(" ")
-      .slice(0, 5)
-      .join(" ");
-    if (!opening) continue;
-    total++;
-    counts.set(opening, (counts.get(opening) ?? 0) + 1);
-  }
-  const groups = Array.from(counts.entries())
-    .map(([opening, count]) => ({ opening, count }))
-    .filter((g) => g.count > 1)
-    .sort((a, b) => b.count - a.count);
-  const repeated = groups.reduce((acc, g) => acc + g.count, 0);
+  const { total, repeated, groups } = openerGroups(rows.map((r) => r.answer));
   return { groups, repetitionRate: total > 0 ? repeated / total : 0 };
 }
 
