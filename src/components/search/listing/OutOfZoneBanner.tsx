@@ -27,11 +27,15 @@ export const OutOfZoneBanner = ({
   navigate,
   trackEvent,
 }: OutOfZoneBannerProps) => {
-  const elsewhere = densityCounts.france - densityCounts.radius;
-  const inDeptOnly = Math.max(0, densityCounts.dept - densityCounts.radius);
-  const inRegionOnly = Math.max(0, densityCounts.region - densityCounts.dept);
-  const outsideRegion = Math.max(0, densityCounts.france - densityCounts.region);
-  const hasLocal = densityCounts.radius > 0;
+  // Lot L1 : le bandeau compare la France à la zone RÉELLEMENT choisie
+  // (rayon, département ou région), jamais au seul rayon.
+  const zoneCount = zoneMode === "dept" ? densityCounts.dept : zoneMode === "region" ? densityCounts.region : densityCounts.radius;
+  const zoneText = zoneMode === "dept" ? "dans le département" : zoneMode === "region" ? "dans la région" : `dans ${radius[0]} km`;
+  const elsewhere = Math.max(0, densityCounts.france - zoneCount);
+  const inDeptOnly = zoneMode === "radius" ? Math.max(0, densityCounts.dept - densityCounts.radius) : 0;
+  const inRegionOnly = zoneMode === "region" ? 0 : Math.max(0, densityCounts.region - Math.max(densityCounts.dept, zoneCount));
+  const outsideRegion = Math.max(0, densityCounts.france - Math.max(densityCounts.region, zoneCount));
+  const hasLocal = zoneCount > 0;
 
   const containerClass = hasLocal
     ? "mx-6 mt-4 w-[calc(100%-3rem)] text-left rounded-2xl border border-border bg-card shadow-sm hover:shadow-md hover:border-primary/40 transition p-4 sm:p-5 flex items-start sm:items-center gap-4 flex-col sm:flex-row cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
@@ -97,7 +101,7 @@ export const OutOfZoneBanner = ({
             {hasLocal ? (
               <>
                 <span className={numberClass}>+{elsewhere}</span>{" "}
-                autre{elsewhere > 1 ? "s" : ""} annonce{elsewhere > 1 ? "s" : ""} hors de votre rayon
+                autre{elsewhere > 1 ? "s" : ""} annonce{elsewhere > 1 ? "s" : ""} hors de votre {zoneMode === "radius" ? "rayon" : "zone"}
               </>
             ) : (
               <>
@@ -110,8 +114,8 @@ export const OutOfZoneBanner = ({
             </span>
           </p>
           <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-            {hasLocal && densityCounts.radius > 0
-              ? `Vous voyez ${densityCounts.radius} annonce${densityCounts.radius > 1 ? "s" : ""} dans ${radius[0]} km. ${
+            {hasLocal
+              ? `Vous voyez ${zoneCount} annonce${zoneCount > 1 ? "s" : ""} ${zoneText}. ${
                   [
                     inDeptOnly > 0 ? `${inDeptOnly} ailleurs dans le département` : null,
                     inRegionOnly > 0 ? `${inRegionOnly} dans la région` : null,
@@ -128,7 +132,15 @@ export const OutOfZoneBanner = ({
         className="flex flex-wrap gap-2 shrink-0 w-full sm:w-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        {densityCounts.region > densityCounts.radius && (
+        {zoneMode === "radius" && densityCounts.dept > densityCounts.radius && (
+          <Button size="sm" variant="outline" className="bg-card" onClick={() => {
+            trackEvent("search_outofzone_click", { source: "search_outofzone", metadata: { action: "expand_zone", to: "dept", previous_mode: zoneMode, delta: elsewhere, count_radius: densityCounts.radius, count_region: densityCounts.region, count_france: densityCounts.france, has_local: hasLocal } });
+            setZoneMode("dept");
+          }}>
+            Mon département ({densityCounts.dept})
+          </Button>
+        )}
+        {zoneMode !== "region" && densityCounts.region > zoneCount && (
           <Button size="sm" variant="outline" className="bg-card" onClick={() => {
             trackEvent("search_outofzone_click", { source: "search_outofzone", metadata: { action: "expand_zone", to: "region", previous_mode: zoneMode, delta: elsewhere, count_radius: densityCounts.radius, count_region: densityCounts.region, count_france: densityCounts.france, has_local: hasLocal } });
             setZoneMode("region");
