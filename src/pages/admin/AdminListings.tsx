@@ -644,10 +644,10 @@ const AdminListings = () => {
         </div>
         <div className="flex flex-wrap gap-2 text-xs">
           <Badge variant="secondary">{countUnknown ? (statsError ? "Nombre indisponible" : "Nombre en chargement") : `${filtered.length} annonce${filtered.length > 1 ? "s" : ""}`}</Badge>
-          <Badge variant="outline">{totalViews} vues</Badge>
-          <Badge variant="outline">{totalUniques} membres uniques (somme par annonce, une personne peut compter plusieurs fois)</Badge>
-          <Badge variant="outline">{totalMsg} messages (somme)</Badge>
-          <Badge variant="outline">{totalApps} candidatures</Badge>
+          <Badge variant="outline">Vues : {totalViews}</Badge>
+          <Badge variant="outline">Membres uniques, somme par annonce (une personne peut compter plusieurs fois) : {totalUniques}</Badge>
+          <Badge variant="outline">Messages, somme : {totalMsg}</Badge>
+          <Badge variant="outline">Candidatures : {totalApps}</Badge>
           {lastViewGlobal && (
             <Badge variant="outline">
               Dernière vue {formatDistanceToNow(new Date(lastViewGlobal), { addSuffix: true, locale: fr })}
