@@ -1588,7 +1588,9 @@ const SearchOwner = () => {
                         ? `Aucun gardien à moins de ${radius[0]} km de ${city} pour l'instant`
                         : zoneMode === "dept" && refDept
                           ? `Aucun gardien dans ${deptLabel} pour l'instant`
-                          : zoneMode === "country" && selectedCountry
+                          : effectivePresence === "come" && selectedCountry
+                            ? `Aucun gardien n'a encore déclaré cette destination (${scopeLabel})`
+                            : zoneMode === "country" && selectedCountry
                             ? `Aucun gardien consultable dans ce pays (${scopeLabel}) pour l'instant`
                             : "Aucun gardien dans cette zone pour l'instant"}
                 </h2>
