@@ -469,6 +469,8 @@ export const SITTER_PUBLIC_DESCRIPTIVE_COLUMNS = [
   "accompanied_by",
   "own_animals",
   "geographic_radius",
+  // Lot 2 mobilité (10/10/2026) : zones déclarées, affichées, jamais scorées.
+  "travel_zones",
   "min_stay_duration",
   "is_available",
   "competences",
