@@ -1,4 +1,4 @@
-import { travelZonesSummary, travelZoneLabels, countryName } from "@/lib/travelZones";
+import { travelZoneLabels, countryName } from "@/lib/travelZones";
 import { formatRatingFr } from "@/lib/formatRatingFr";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { splitReviewsByRole, sitterReviewsHeading } from "@/lib/publicProfileReviews";
@@ -73,7 +73,6 @@ import ProfileRail from "@/components/profile/ProfileRail";
 import AffinityTeaserCard from "@/components/profile/AffinityTeaserCard";
 import AlmaWhisperCard from "@/components/profile/AlmaWhisperCard";
 import CommunityPulseCard from "@/components/profile/CommunityPulseCard";
-import MarginLettering from "@/components/profile/MarginLettering";
 import type { FooterLocalContext } from "@/components/layout/PublicFooter";
 import { useCommunityPulse } from "@/hooks/useCommunityPulse";
 import { avatarImageUrl, storageImageUrl } from "@/lib/storageImage";
@@ -81,7 +80,6 @@ import { petSpeciesLabel } from "@/lib/petLabels";
 import { isRadiusDeclared } from "@/lib/searchRadius";
 import { countLabel } from "@/lib/pluralizeFr";
 import {
-  SitterIdentityHero,
   SitterSkillsSection,
   EditorialReview,
   SitterAboutSection,
@@ -94,12 +92,13 @@ import {
 } from "@/components/profile/sitter/SitterF1Sections";
 import { groupSitterSkills, skillsHeadline } from "@/lib/sitterSkillGroups";
 import { declaredHelpOffer, hasEntraideFacet, entraideOfferBandText, lastVisitLabel } from "@/lib/profileSignals";
-import { pickProfileQuote } from "@/lib/profileQuote";
 import {
   meetingPreferenceLabel,
   homeFactLabel,
   assetsLabel,
   listLabel,
+  companionsLabel,
+  ownerHostedSitsCount,
 } from "@/lib/sitterProfileFacts";
 
 /** Pages entraide par ville réellement routées (App.tsx). */
@@ -361,168 +360,6 @@ export default function PublicSitterProfile() {
       {reviews.length > 4 && (
         <div className="md:col-span-2">
           <ShowMoreBtn items={reviews} showAll={showAll} setShowAll={setShowAll} />
-        </div>
-      )}
-    </div>
-  );
-
-  const PracticalGrid = (props: {
-    animalTypes: string[]; sitterProfile: any; radius: number | null; city: string | null; locationLabel?: string | null;
-    competences: string[]; specialSkills: string[]; lifestyle: string[]; lifePace: string;
-    preferredEnvironments: string[]; languages: string[]; interests: string[];
-    typeLine: string; durationLabel: string; frequencyLabel: string; noticeLabel: string;
-    mobilityLabel: string; presenceLabel: string; experienceLabel: string;
-    deptName: string | null; deptCode: string | null; regionName: string | null; deptSlug: string | null;
-  }) => (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-      {props.animalTypes.length > 0 && (
-        <div>
-          <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Animaux acceptés</h3>
-          <div className="flex flex-wrap gap-1.5">
-            {props.animalTypes.map(a => (
-              <span key={a} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground font-body">
-                {ANIMAL_LABELS[a] || a}
-              </span>
-            ))}
-            {props.sitterProfile?.farm_animals_ok && (
-              <span className="border border-primary text-primary rounded-full text-xs px-2.5 py-1 bg-primary/5 font-body">
-                Animaux de ferme
-              </span>
-            )}
-          </div>
-        </div>
-      )}
-      {(props.sitterProfile?.travels_with_own_animals || props.sitterProfile?.travels_with_children) && (
-        <div>
-          <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Accompagnants</h3>
-          <ul className="text-sm text-foreground/80 font-body space-y-1">
-            {props.sitterProfile?.travels_with_own_animals && (() => {
-              const own: string[] = (props.sitterProfile?.own_animals || []).filter((s: string) => s && s.toLowerCase() !== "non");
-              const detail = own.length > 0 ? own.map(s => s.replace(/^Oui[\s,\-\u2014]*/i, "").trim()).filter(Boolean).join(", ") : "";
-              return (
-                <li>Voyage avec ses animaux{detail ? ` : ${detail}` : ""}</li>
-              );
-            })()}
-            {props.sitterProfile?.travels_with_children && (
-              <li>Voyage parfois avec ses enfants</li>
-            )}
-          </ul>
-        </div>
-      )}
-      {(props.city || props.deptName) && (
-        <div>
-          <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Sa zone</h3>
-          <div className="text-sm text-foreground/70 font-body space-y-1">
-            {props.city && (
-              <p className="text-foreground">
-                {props.locationLabel || props.city}
-                {props.deptName
-                  ? `, ${props.deptName}${props.deptCode ? ` (${props.deptCode})` : ""}`
-                  : ""}
-              </p>
-            )}
-            {props.regionName && (
-              <p className="text-muted-foreground">{props.regionName}</p>
-            )}
-            {props.radius && (
-              <p>
-                Jusqu'à {props.radius} km
-                {props.city ? ` autour de ${props.city}` : ""}
-              </p>
-            )}
-            {props.mobilityLabel && <p>{props.mobilityLabel}</p>}
-            {/* Lot 2 : zones déclarées seulement, « non renseignée » sinon. */}
-            <p data-testid="travel-zones-summary" className={props.sitterProfile?.travel_zones ? "" : "text-muted-foreground"}>
-              {travelZonesSummary(props.sitterProfile?.travel_zones)}
-            </p>
-            {props.deptSlug && props.deptName && (
-              <p>
-                <Link
-                  to={`/departement/${props.deptSlug}`}
-                  className="inline-flex min-h-11 items-center text-primary hover:underline"
-                >
-                  Voir les gardiens de ce département
-
-                </Link>
-              </p>
-            )}
-          </div>
-        </div>
-      )}
-      {props.competences.length > 0 && (
-        <div>
-          <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Savoir-faire</h3>
-          <div className="flex flex-wrap gap-1.5">
-            {props.competences.map(c => (
-              <span key={c} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground/80 font-body">{c}</span>
-            ))}
-          </div>
-        </div>
-      )}
-      {props.specialSkills.length > 0 && (
-        <div>
-          <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Soins spécifiques</h3>
-          <div className="flex flex-wrap gap-1.5">
-            {props.specialSkills.map(c => (
-              <span key={c} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground/80 font-body">{c}</span>
-            ))}
-          </div>
-        </div>
-      )}
-      {(props.lifestyle.length > 0 || props.lifePace) && (
-        <div>
-          <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Style de vie</h3>
-          <div className="flex flex-wrap gap-1.5">
-            {props.lifestyle.map(l => (
-              <span key={l} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground font-body">{l}</span>
-            ))}
-            {props.lifestyle.length === 0 && props.lifePace && (
-              <span className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground font-body">{props.lifePace}</span>
-            )}
-          </div>
-        </div>
-      )}
-      {props.preferredEnvironments.length > 0 && (
-        <div>
-          <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Environnements préférés</h3>
-          <div className="flex flex-wrap gap-1.5">
-            {props.preferredEnvironments.map(e => (
-              <span key={e} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground font-body">{ENV_LABELS[e] || e}</span>
-            ))}
-          </div>
-        </div>
-      )}
-      {props.languages.length > 0 && (
-        <div>
-          <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Langues parlées</h3>
-          <div className="flex flex-wrap gap-1.5">
-            {props.languages.map(l => (
-              <span key={l} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground font-body">{l}</span>
-            ))}
-          </div>
-        </div>
-      )}
-      {props.interests.length > 0 && (
-        <div>
-          <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Centres d'intérêt</h3>
-          <div className="flex flex-wrap gap-1.5">
-            {props.interests.map(i => (
-              <span key={i} className="border border-border bg-card rounded-full text-xs px-2.5 py-1 text-foreground font-body">{i}</span>
-            ))}
-          </div>
-        </div>
-      )}
-      {(props.typeLine || props.presenceLabel || props.experienceLabel || props.durationLabel || props.frequencyLabel || props.noticeLabel) && (
-        <div>
-          <h3 className="text-sm font-semibold text-foreground font-body mb-2.5">Profil &amp; disponibilité</h3>
-          <div className="text-sm text-foreground/70 font-body space-y-0.5">
-            {props.typeLine && <p>{props.typeLine}</p>}
-            {props.presenceLabel && <p>{props.presenceLabel}</p>}
-            {props.experienceLabel && <p>Expérience : {props.experienceLabel}</p>}
-            {props.durationLabel && <p>{props.durationLabel}</p>}
-            {props.frequencyLabel && <p>{props.frequencyLabel}</p>}
-            {props.noticeLabel && <p>{props.noticeLabel}</p>}
-          </div>
         </div>
       )}
     </div>
@@ -1090,7 +927,7 @@ export default function PublicSitterProfile() {
           .select('id, slug, title, city, cover_photo_url, status')
           .eq('user_id', id)
           // Une garde terminée (completed) compte aussi comme garde passée :
-          // sinon « prépare sa première annonce » s'affiche à tort.
+          // sinon le texte de première annonce s'affiche à tort.
           .in('status', ['archived', 'completed'])
           .limit(50);
 
@@ -1377,6 +1214,10 @@ export default function PublicSitterProfile() {
   //   n'était PAS le propriétaire (donc le gardien laissant un avis au proprio).
   //   Les avis sans sit_id (missions d'entraide) restent côté gardien.
   const { gardeReviews, missionReviews, ownerReviews } = splitReviewsByRole(reviews as any[]);
+  // L5 : gardes réellement accueillies par le propriétaire, prouvées par un avis
+  // publié lié à une garde (source publique). Une annonce publiée, même future,
+  // ne prouve ni une garde réalisée ni un accueil passé.
+  const ownerHostedSits = ownerHostedSitsCount(ownerReviews as any[]);
   const sitterRoleReviews = [...gardeReviews, ...missionReviews];
   const sitterRoleCount = sitterRoleReviews.length;
   const sitterRoleAvg = sitterRoleCount > 0
@@ -1662,9 +1503,6 @@ export default function PublicSitterProfile() {
           url={`https://guardiens.fr/gardiens/${id}`}
         />
       )}
-      {/* Lettrage décoratif des marges : conditions de largeur et de marge
-          libre mesurées, rendu par portail pour rester fixe à la fenêtre. */}
-      <MarginLettering />
       <PageMeta
         title={pageTitle}
         description={pageDesc}
@@ -1692,38 +1530,10 @@ export default function PublicSitterProfile() {
           heroWeights,
           overrideIndex,
         );
-        if (activeTab === 'gardien') {
-          return (
-            <SitterIdentityHero
-              id={id}
-              firstName={firstName}
-              city={locationLabel || null}
-              departmentName={geoInfo.deptName}
-              avatarUrl={profile.avatar_url || null}
-              heroDesktop={heroDesktop}
-              heroMobile={heroMobile}
-              heroAnchor={anchor}
-              isOwnProfile={isOwn}
-              onOpenHeroPicker={() => setHeroPickerOpen(true)}
-              onOpenAvatarLightbox={() => hasAvatar && setLightboxIdx(0)}
-              hasAvatarLightbox={hasAvatar}
-              memberSince={profile?.created_at ?? null}
-              completedSits={completedSits}
-              identityVerified={!!profile?.identity_verified}
-              avgRating={heroAvg}
-              reviewCount={heroCount}
-              isAvailable={isAvailable}
-              hasActiveSubscription={hasActiveSubscription}
-              emergencyActive={emergencyActive}
-              statutGardien={reputation?.statut_gardien ?? null}
-              replyMedianMinutes={sitterProfile?.reply_median_minutes ?? null}
-              lastSeenAt={profile?.last_seen_at ?? null}
-              quote={pickProfileQuote(bio, motivation)}
-            />
-          );
-        }
+        const isSitterFacet = activeTab === 'gardien';
         return (
           <ProfileHero
+            facet={isSitterFacet ? "sitter" : activeTab === "entraide" ? "entraide" : "owner"}
             id={id}
             firstName={firstName}
             city={locationLabel || null}
@@ -1734,24 +1544,24 @@ export default function PublicSitterProfile() {
             heroAnchor={anchor}
             isOwnProfile={isOwn}
             onOpenHeroPicker={() => setHeroPickerOpen(true)}
-            // Sans photo de profil, l'avatar n'est pas cliquable du tout :
-            // mieux vaut rien qu'une visionneuse ouverte sur autre chose.
+            // Sans photo de profil, l'avatar n'est pas cliquable du tout.
             onOpenAvatarLightbox={() => hasAvatar && setLightboxIdx(0)}
             hasAvatarLightbox={hasAvatar}
-            isAvailable={isAvailable}
+            memberSince={profile?.created_at ?? null}
+            completedSits={isSitterFacet ? completedSits : 0}
+            lastSeenAt={profile?.last_seen_at ?? null}
+            mobilityLabels={isSitterFacet ? travelZoneLabels(sitterProfile?.travel_zones) : []}
+            isAvailable={isSitterFacet && isAvailable}
             avgRating={heroAvg}
             reviewCount={heroCount}
-            replyMedianMinutes={sitterProfile?.reply_median_minutes ?? null}
-            statutGardien={reputation?.statut_gardien ?? null}
+            statutGardien={isSitterFacet ? (reputation?.statut_gardien ?? null) : null}
             identityVerified={!!profile?.identity_verified}
-            hasActiveSubscription={hasActiveSubscription}
-            emergencyActive={emergencyActive}
+            hasActiveSubscription={isSitterFacet && hasActiveSubscription}
+            emergencyActive={isSitterFacet && emergencyActive}
             cta={heroCta}
             ctaReassurance={heroCtaReassurance}
           />
-
         );
-
       })()}
 
       {/* ── BARRE D'ONGLETS, visible si ≥ 2 onglets ── */}
@@ -1887,6 +1697,10 @@ export default function PublicSitterProfile() {
           { label: "Centres d'intérêt", value: listLabel(sitterInterests) },
           { label: "À la maison", value: homeFactLabel(sitterProfile?.own_animals, sitterProfile?.life_pace) },
           { label: "Atouts", value: assetsLabel(declaredCertifications, sitterProfile?.has_license, sitterProfile?.has_vehicle) },
+          // L5 : faits de l'ancien bloc pratique, jamais présentés ailleurs.
+          { label: "Accompagnants", value: companionsLabel(sitterProfile) },
+          { label: "Style de vie", value: listLabel(lifestyle) },
+          { label: "Environnements préférés", value: listLabel(preferredEnvironments.map((e) => ENV_LABELS[e] || e)) },
         ].filter((f) => f.value);
 
         // Bandeau entraide
@@ -1912,6 +1726,9 @@ export default function PublicSitterProfile() {
           { label: "Mobilité", value: travelZoneLabels(sitterProfile?.travel_zones).join(", ") || "Non renseignée" },
           { label: "Durée", value: durationLabel },
           { label: "Avant la garde", value: meetingPreferenceLabel(sitterProfile?.meeting_preference) },
+          { label: "Présence", value: presenceLabel },
+          { label: "Fréquence", value: frequencyLabel },
+          { label: "Préavis", value: noticeLabel },
           { label: "Expérience", value: experienceLabel },
           { label: "Avis", value: sitterRoleCount > 0 ? `★ ${formatRatingFr(sitterRoleAvg)} (${sitterRoleCount})` : "" },
         ].filter((f) => f.value);
@@ -1978,7 +1795,7 @@ export default function PublicSitterProfile() {
         );
 
         return (
-        <div data-profile-content className="max-w-5xl mx-auto px-4 md:px-6 py-[34px] md:py-[52px] pb-[calc(10.5rem+env(safe-area-inset-bottom))] md:pb-[52px]">
+        <div data-profile-content className="max-w-5xl mx-auto px-4 md:px-6 py-[34px] md:py-[52px] pb-[calc(10.5rem+env(safe-area-inset-bottom))] lg:pb-[52px]">
           <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-[52px]">
           <div className="space-y-[52px] min-w-0">
 
@@ -1990,13 +1807,14 @@ export default function PublicSitterProfile() {
               specialSkills={specialSkills}
             />
 
-            {/* Avis : titre et résumé conservés, blocs éditoriaux */}
+            {/* Avis : masqués sans avis (L5, aucune section vide). */}
+            {sitterRoleCount > 0 && (
             <section aria-label="Avis reçus" className="scroll-mt-20">
               <SectionHeading eyebrow="Avis" title={sitterReviewsHeading(sitterRoleCount, sitterRoleAvg, firstName).title} />
               <p className="-mt-2 mb-[22px] text-sm text-muted-foreground">
                 {sitterRoleCount > 0
                   ? sitterReviewsHeading(sitterRoleCount, sitterRoleAvg, firstName).summary
-                  : "Les premiers retours des propriétaires apparaîtront ici, tels quels."}
+                  : ""}
               </p>
               {sitterRoleCount > 0 && (
                 <>
@@ -2037,6 +1855,7 @@ export default function PublicSitterProfile() {
                 </>
               )}
             </section>
+            )}
 
             <SitterAboutSection
               firstName={firstName}
@@ -2166,7 +1985,7 @@ export default function PublicSitterProfile() {
         let proprioAlmaPhrase: string | null = null;
         if (ownerAvg >= 4.5 && ownerReviews.length >= 3) {
           proprioAlmaPhrase = `${firstName} rassure : ${ownerReviews.length} gardiens lui donnent ${formatRatingFr(ownerAvg)} sur 5.`;
-        } else if (pets.length > 0 && ownerSitsTotal > 0) {
+        } else if (pets.length > 0 && ownerHostedSits > 0) {
           proprioAlmaPhrase = `${firstName} a déjà accueilli des gardiens pour ${pets.length > 1 ? 'ses animaux' : 'son animal'}.`;
         } else if (profile?.identity_verified) {
           proprioAlmaPhrase = `L'identité de ${firstName} a été vérifiée à partir d'une pièce officielle.`;
@@ -2225,19 +2044,20 @@ export default function PublicSitterProfile() {
             Icon: CalendarClock,
             title: `Membre depuis ${anciennete(profile.created_at)}`,
             detail: ownerSitsTotal > 0
-              ? `${ownerSitsTotal} garde${ownerSitsTotal > 1 ? 's' : ''} publiée${ownerSitsTotal > 1 ? 's' : ''}`
+              ? `${ownerSitsTotal} annonce${ownerSitsTotal > 1 ? 's' : ''} publiée${ownerSitsTotal > 1 ? 's' : ''}`
               : null,
           });
         }
 
         return (
-        <div data-profile-content className="max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-8 pb-[calc(10.5rem+env(safe-area-inset-bottom))] md:pb-8">
+        <div data-profile-content className="max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-8 pb-[calc(10.5rem+env(safe-area-inset-bottom))] lg:pb-8">
           <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-8">
             <div className="space-y-[52px] min-w-0">
 
               <StoryTiles tiles={tiles} />
 
               {/* Son mot d'accueil */}
+              {(ownerProfile?.welcome_notes || bio || (ownerProfile?.competences?.length ?? 0) > 0) && (
               <section aria-label={`Mot d'accueil de ${firstName}`} className="scroll-mt-20">
                 <div className="mb-5">
                   <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-secondary">
@@ -2260,11 +2080,7 @@ export default function PublicSitterProfile() {
                       </p>
                     )}
                   </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground italic font-body">
-                    Le mot d'accueil de {firstName} arrive bientôt.
-                  </p>
-                )}
+                ) : null}
                 {(ownerProfile?.competences?.length ?? 0) > 0 && (
                   <div className="mt-6 space-y-2">
                     <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">Savoir-faire</p>
@@ -2276,8 +2092,10 @@ export default function PublicSitterProfile() {
                   </div>
                 )}
               </section>
+              )}
 
               {/* Ses animaux */}
+              {(ownerDataLoading || pets.length > 0) && (
               <section aria-label={`Animaux de ${firstName}`} className="scroll-mt-20">
                 <div className="mb-5">
                   <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-secondary">
@@ -2326,14 +2144,12 @@ export default function PublicSitterProfile() {
                       );
                     })}
                   </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground italic font-body">
-                    Les compagnons de {firstName} apparaîtront ici.
-                  </p>
-                )}
+                ) : null}
               </section>
+              )}
 
               {/* Ses annonces */}
+              {(ownerDataLoading || ownerSits.length > 0) && (
               <section aria-label={`Annonces de ${firstName}`} className="scroll-mt-20">
                 <div className="mb-5">
                   <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-secondary">
@@ -2415,12 +2231,9 @@ export default function PublicSitterProfile() {
                       )}
                     </div>
                   </div>
-                ) : archivedSits.length === 0 ? (
-                  <p className="text-sm text-muted-foreground italic font-body">
-                    {firstName} prépare sa première annonce.
-                  </p>
                 ) : null}
               </section>
+              )}
 
               {/* Ses gardes passées (annonces archivées, non annulées) */}
               {archivedSits.length > 0 && (
@@ -2487,7 +2300,7 @@ export default function PublicSitterProfile() {
                     )}
                     {id && <MissionBadgesReceived profileId={id} />}
                   {id && <HelpCounts userId={id} className="mt-2" />}
-                    {(ownerReviews || []).length === 0 && (userBadges || []).length === 0 && ownerSitsTotal === 0 ? (
+                    {(ownerReviews || []).length === 0 && (userBadges || []).length === 0 && ownerHostedSits === 0 ? (
                       <FreshStartStory
                         firstName={firstName}
                         createdAt={profile?.created_at}
@@ -2503,7 +2316,7 @@ export default function PublicSitterProfile() {
                           created_at: b.created_at,
                           count: b.count ?? 1,
                         }))}
-                        completedSits={ownerSitsTotal}
+                        completedSits={ownerHostedSits}
                         lastActivity={null}
                         firstName={firstName}
                       />
@@ -2513,6 +2326,7 @@ export default function PublicSitterProfile() {
               )}
 
               {/* Les avis */}
+              {(ownerDataLoading || ownerReviews.length > 0 || missionFeedbacks.length > 0) && (
               <section aria-label="Avis reçus" className="scroll-mt-20">
                 <div className="mb-5">
                   <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-secondary">
@@ -2521,7 +2335,7 @@ export default function PublicSitterProfile() {
                   <h2 className="font-heading text-[22px] sm:text-[26px] font-semibold text-foreground mt-1 leading-tight">
                     {ownerReviews.length > 0
                       ? 'Ce que les gardiens racontent.'
-                      : `${firstName} accueillera son premier gardien bientôt.`}
+                      : 'Avis d\'entraide reçus.'}
                   </h2>
                   {ownerReviews.length > 0 && (
                     <p className="text-sm text-muted-foreground mt-1">
@@ -2574,11 +2388,7 @@ export default function PublicSitterProfile() {
                     })}
                     <ShowMoreBtn items={ownerReviews} showAll={showAllOwnerReviews} setShowAll={setShowAllOwnerReviews} />
                   </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground italic font-body">
-                    Les premiers retours des gardiens apparaîtront ici.
-                  </p>
-                )}
+                ) : null}
                 {missionFeedbacks.length > 0 && (
                   <div className="mt-6 space-y-3 border-t border-border/50 pt-5">
                     <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
@@ -2606,6 +2416,7 @@ export default function PublicSitterProfile() {
                   </div>
                 )}
               </section>
+              )}
 
               {/* Galerie propriétaire, uniquement si contenu */}
               {ownerGalleryPhotos.length > 0 && (
@@ -2650,7 +2461,7 @@ export default function PublicSitterProfile() {
 
       {/* ── ONGLET ENTRAIDE ── */}
       {activeTab === 'entraide' && (
-        <div data-profile-content className="max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-8 pb-[calc(10.5rem+env(safe-area-inset-bottom))] md:pb-8">
+        <div data-profile-content className="max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-8 pb-[calc(10.5rem+env(safe-area-inset-bottom))] lg:pb-8">
           <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-8">
           <div className="min-w-0 space-y-10">
 
@@ -2674,7 +2485,7 @@ export default function PublicSitterProfile() {
                 { value: missionsHelped.length, label: 'Coup' + (missionsHelped.length > 1 ? 's de main donnés' : ' de main donné') },
                 { value: thanksReceived, label: 'Merci' + (thanksReceived > 1 ? 's reçus' : ' reçu') },
                 { value: missionFeedbacks.length, label: 'Avis reçu' + (missionFeedbacks.length > 1 ? 's' : '') },
-              ].map(({ value, label }) => (
+              ].filter(({ value }) => value > 0).map(({ value, label }) => (
                 <div key={label} className="bg-card border border-border rounded-xl px-4 py-4 text-center">
                   <p className="font-heading text-2xl font-bold text-foreground">{value}</p>
                   <p className="text-xs text-foreground/50 font-body mt-0.5">{label}</p>
@@ -2683,6 +2494,7 @@ export default function PublicSitterProfile() {
             </div>
           )}
 
+          {(entraideLoading || missionsPublished.length > 0) && (
           <div className="space-y-3">
             <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
               Missions publiées{missionsPublished.length > 0 && ` (${missionsPublished.length})`}
@@ -2722,11 +2534,11 @@ export default function PublicSitterProfile() {
                 })}
                 <ShowMoreBtn items={missionsPublished} showAll={showAllMissionsPublished} setShowAll={setShowAllMissionsPublished} />
               </div>
-            ) : (
-              <p className="text-sm text-foreground/50 font-body italic">Les missions publiées apparaîtront ici.</p>
-            )}
+            ) : null}
           </div>
+          )}
 
+          {(entraideLoading || missionsHelped.length > 0) && (
           <div className="space-y-3">
             <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
               Coups de main donnés{missionsHelped.length > 0 && ` (${missionsHelped.length})`}
@@ -2753,11 +2565,11 @@ export default function PublicSitterProfile() {
                 })}
                 <ShowMoreBtn items={missionsHelped} showAll={showAllMissionsHelped} setShowAll={setShowAllMissionsHelped} />
               </div>
-            ) : (
-              <p className="text-sm text-foreground/50 font-body italic">Les coups de main donnés apparaîtront ici.</p>
-            )}
+            ) : null}
           </div>
+          )}
 
+          {(entraideLoading || missionFeedbacks.length > 0) && (
           <div className="space-y-3 border-t border-border/50 pt-8">
             <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
               Avis d'entraide reçus{missionFeedbacks.length > 0 && ` (${missionFeedbacks.length})`}
@@ -2786,18 +2598,14 @@ export default function PublicSitterProfile() {
                 ))}
                 <ShowMoreBtn items={missionFeedbacks} showAll={showAllEntraideFeedbacks} setShowAll={setShowAllEntraideFeedbacks} />
               </div>
-            ) : (
-              <p className="text-sm text-foreground/50 font-body italic">Les avis d'entraide apparaîtront ici après la première mission.</p>
-            )}
+            ) : null}
           </div>
+          )}
 
           {!entraideLoading && missionsPublished.length === 0 && missionsHelped.length === 0 && missionFeedbacks.length === 0 && (
-            <div className="text-center py-12 space-y-2">
-              <p className="text-base text-foreground/50 font-body">
-                {helpOffer.offered ? `Pas encore de mission réalisée par ${firstName}.` : `L'entraide de ${firstName} démarre ici.`}
-              </p>
-              <p className="text-sm text-foreground/40 font-body italic">Les échanges de services apparaîtront ici après la première mission.</p>
-            </div>
+            <p className="text-sm text-muted-foreground font-body" data-entraide-empty>
+              {helpOffer.offered ? `Pas encore de mission réalisée par ${firstName}.` : `Aucune mission d'entraide pour le moment.`}
+            </p>
           )}
 
             {/* Rail INLINE (mobile) : mêmes cartes que le rail sticky. */}
@@ -2817,7 +2625,7 @@ export default function PublicSitterProfile() {
           Mirroir strict du CTA hero courant (facette active), gaté par
           IntersectionObserver : n'apparaît que si le hero est hors écran.
           Un seul bloc, jamais deux CTA concurrents. */}
-      {activeTab === 'gardien' && profile && (
+      {activeTab === 'gardien' && profile && !heroCtaVisible && (
         <SitterStickyBar
           firstName={firstName}
           avatarUrl={hasAvatar ? profile.avatar_url : null}
@@ -2829,7 +2637,7 @@ export default function PublicSitterProfile() {
       )}
       {activeTab !== 'gardien' && !heroCtaVisible && (() => {
         const baseCls =
-          "md:hidden fixed left-0 right-0 z-40 bg-background border-t border-border px-3 sm:px-4 pt-2.5 sm:pt-3 pb-[calc(env(safe-area-inset-bottom)+0.625rem)] shadow-lg bottom-[var(--bottom-nav-h,0px)]";
+          "lg:hidden fixed left-0 right-0 z-40 bg-background border-t border-border px-3 sm:px-4 pt-2.5 sm:pt-3 pb-[calc(env(safe-area-inset-bottom)+0.625rem)] shadow-lg bottom-[var(--bottom-nav-h,0px)]";
         const btnCls =
           "flex items-center justify-center bg-primary text-primary-foreground rounded-lg px-3 sm:px-4 py-3 text-[13px] sm:text-sm font-medium w-full leading-tight text-center break-words";
         const mutedCls =

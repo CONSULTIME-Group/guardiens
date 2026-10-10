@@ -49,7 +49,6 @@ const ALLOWED = new Set([
   "src/components/landing/PretexteSection.tsx",
   // Lettrage décoratif de marge : fondu vertical local sur le texte lui-même,
   // aucun token de fond codé en dur, hors périmètre EmptyState.
-  "src/components/profile/MarginLettering.tsx",
 
 ]);
 

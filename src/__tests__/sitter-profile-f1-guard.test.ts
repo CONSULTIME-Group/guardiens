@@ -28,11 +28,10 @@ describe("onglet gardien allégé", () => {
   });
 });
 
-describe("gouache du hero gardien restaurée en plein (lot F1c)", () => {
-  const hs = sections.indexOf("data-sitter-hero>");
-  const he = sections.indexOf("data-sitter-hero-frame", hs);
-  const frameEnd = sections.indexOf("</div>", he);
-  const frame = sections.slice(hs, frameEnd);
+describe("gouache du hero partagé entière (lots F1c, L5)", () => {
+  const heroSrc = readFileSync("src/components/profile/ProfileHero.tsx", "utf8");
+  const hs = heroSrc.indexOf("data-hero-gouache");
+  const frame = heroSrc.slice(hs, heroSrc.indexOf("</div>", hs));
   const img = frame.slice(frame.indexOf("<img"), frame.indexOf("/>", frame.indexOf("<img")));
   it("image en object-contain, sans opacité ni recadrage", () => {
     expect(img).toContain("object-contain");
@@ -43,6 +42,6 @@ describe("gouache du hero gardien restaurée en plein (lot F1c)", () => {
     expect(frame).not.toMatch(/linear-gradient|mask-image|maskImage/);
   });
   it("conteneur au ratio 1536/544", () => {
-    expect(frame).toContain("[aspect-ratio:1536/544]");
+    expect(heroSrc).toContain("[aspect-ratio:1536/544]");
   });
 });

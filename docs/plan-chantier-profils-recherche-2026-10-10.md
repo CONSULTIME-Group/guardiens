@@ -370,3 +370,23 @@ Tous les diffs relus ; root connecté : Frederic, onglet entraide avec offre, 4 
 - Affinité : tri seulement, inchangé.
 
 Vérifications : types OK ; tests L4 (src/__tests__/l4/card-facts.test.ts, fixture 7 avis 4 gardes, bio longue, photos), R1 mis à jour (il verrouillait l'ancien bug « 4,9 sur 3 gardes »), P3, L3 et recherche verts ; build complète OK. Recette visiteur sur build à 1920/1440/1280/768/390 : France 48 cartes sans erreur, cartes sans photo avec initiale, Canada résidence 2 cartes sans Lyon dans le contenu principal, annonce internationale Saint Ludger 1 avec couverture, pays et dates. Limites : annonce Saint Ludger sans animaux affichés (aucune donnée animale publique, non modifiée) ; profil 35 % avec/sans photo vérifié sur données réelles visibles (initiale) mais pas en fixture isolée ; favoris non cliqués ; session connectée et anneau d'affinité non revérifiés. L5 non lancé.
+
+
+## Checkpoint L5 (10/10/2026), livré, non publié, en attente de revue root
+
+L4 clos par root (SHA 45b04fc). Grille à 1349 px connecté : 3 colonnes utiles à cause de la barre latérale (contexte, pas une régression).
+
+Fait :
+- Hero partagé ProfileHero (facettes gardien, propriétaire, entraide) : identité sur papier à gauche, gouache entière à droite dès 1024 px (object-contain, sans voile), gouache sous l'identité en dessous ; photo, prénom, ville et pays, mobilité déclarée, dernière visite L3, palier public_responsiveness, CTA au premier écran ; onOpenHeroPicker conservé pour le propre profil.
+- IdentityVerifiedMark : icône 44 px près du prénom, aria-label « Identité vérifiée », infobulle au survol et au focus, explication au clic (analyse automatique, contrôle manuel si elle ne conclut pas, aucune garantie de fiabilité).
+- Citation retirée du hero (texte complet dans « À propos »). SitterIdentityHero et MarginLettering supprimés (aucun autre usage).
+- PracticalGrid supprimé après reprise de ses faits : présence, fréquence et préavis (carte contact) ; accompagnants, style de vie et environnements (À propos).
+- Sections vides masquées : avis, présentation, mot d'accueil, animaux, annonces, missions publiées, coups de main, avis d'entraide ; un seul message court sous l'offre sans mission ; compteurs à zéro retirés.
+- Guilherme : chronologie et phrase Alma propriétaire fondées sur ownerHostedSitsCount (gardes distinctes avec avis public, hors annulations), plus jamais sur le nombre d'annonces ; tuile « 1 annonce publiée ». Libellé JSON-LD de la page annonce corrigé.
+- Contact de 768 à 1023 px : CTA dans le hero et barres collantes jusqu'à lg.
+- Alma : bulle repliée réduite sur /recherche-gardiens, /search et /annonces(/international), mention IA conservée, aucun padding global.
+- « Savoirs et langues » : aucune gouache livres ou langues dans les assets ; spot-bienetre conservé.
+
+Preuves : types OK, tests L5/F1 et 335 tests liés verts, build complète OK. Captures ouvertes : /tmp/browser/l5/shots/. Hauteur du hero : 280 px à 1280/1440/1920, 292 à 312 à 1024, 513 à 533 à 768 (gouache sous l'identité), 424 à 434 à 390 ; icône 44x44 ; CTA 44 px ; aucun débordement horizontal. Popover ouvert au clic. Guilherme : aucune « garde réalisée » ni « déjà accueilli », badge « Répond généralement en 2 à 3 jours » visible. Frederic entraide : offre, 4 gouaches et un seul message court. Barre de contact présente à 800 px.
+
+Non vérifié : galerie en session et fixture isolée, Picker, recouvrement Alma en session (L7). Observé hors correctif : tuiles propriétaire « Membre depuis Ce mois » et « mer à St cyr sur mer ».
