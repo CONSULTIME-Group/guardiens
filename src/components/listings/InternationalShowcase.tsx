@@ -4,19 +4,10 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { MapPin, Globe2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { applyOpenSitFilter } from "@/lib/sitSearchRules";
+import { fetchIntlOpenSits, intlPlaceLabel, type IntlSit as EngineSit } from "@/lib/intlSitSearch";
 import fallbackMarrakech from "@/assets/fallback-marrakech.webp";
 
-interface IntlSit {
-  slug?: string | null;
-  id: string;
-  title: string | null;
-  city: string | null;
-  country: string | null;
-  cover_photo_url: string | null;
-  property: { photos: string[] | null } | null;
-}
+type IntlSit = EngineSit;
 
 const InternationalShowcase = () => {
   const [sits, setSits] = useState<IntlSit[]>([]);
@@ -25,23 +16,18 @@ const InternationalShowcase = () => {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data } = await applyOpenSitFilter(
-        supabase.from("sits").select("id, slug, title, city, country, cover_photo_url, property:properties(photos)") as any,
-        )
-        .not("country", "is", null)
-        .neq("country", "FR")
-        .order("created_at", { ascending: false })
-        .limit(6);
+      // Lot L2 : même moteur que la page internationale (lieu du propriétaire).
+      let data: IntlSit[] = [];
+      try { data = await fetchIntlOpenSits(); } catch (e) { console.error("[InternationalShowcase]", e); }
       if (cancelled) return;
-      setSits((data as any) || []);
+      setSits(data.slice(0, 6));
       setLoading(false);
     })();
     return () => { cancelled = true; };
   }, []);
 
-  // Tant que l'offre internationale est < 3 annonces, on masque le carousel
-  // (la pastille radar du hero reste, suffisante pour signaler une seule annonce).
-  if (loading || sits.length < 3) return null;
+  // Lot L2 (B2) : visible dès une annonce hors France.
+  if (loading || sits.length === 0) return null;
 
   return (
     <section
@@ -68,12 +54,9 @@ const InternationalShowcase = () => {
       <div className="-mx-4 md:mx-0 overflow-x-auto md:overflow-visible pb-2 md:pb-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <ul className="flex md:grid md:grid-cols-2 lg:grid-cols-3 gap-4 px-4 md:px-0">
           {sits.slice(0, 3).map((s) => {
-            const city = (s.city || "").toUpperCase();
-            const country = (s.country || "").toUpperCase();
-            const isMarrakech =
-              city.includes("MARRAKECH") || city.includes("MARRAKESH") ||
-              country === "MAROC" || country === "MOROCCO";
-            const cover = s.cover_photo_url || s.property?.photos?.[0] || (isMarrakech ? fallbackMarrakech : null);
+            const city = (s.place.city || "").toUpperCase();
+            const isMarrakech = city.includes("MARRAKECH") || city.includes("MARRAKESH") || s.place.country === "MA";
+            const cover = s.cover_photo_url || s.photos?.[0] || (isMarrakech ? fallbackMarrakech : null);
             return (
               <li key={s.id} className="shrink-0 w-[78vw] sm:w-[60vw] md:w-auto">
                 <Link
@@ -97,10 +80,7 @@ const InternationalShowcase = () => {
                   <div className="p-4">
                     <p className="text-xs text-muted-foreground flex items-center gap-1.5 mb-1.5">
                       <MapPin className="h-3 w-3" />
-                      {s.city || ","}
-                      {s.country && s.country !== "FR" && (
-                        <span className="font-medium text-foreground/80">({s.country})</span>
-                      )}
+                      {intlPlaceLabel(s.place)}
                     </p>
                     <h3 className="font-heading text-base font-medium text-foreground line-clamp-2">
                       {s.title || "Garde de maison"}

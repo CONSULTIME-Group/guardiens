@@ -11,6 +11,7 @@ import PublicFooter from "@/components/layout/PublicFooter";
 import { lazyWithRetry } from "@/lib/lazyWithRetry";
 import { supabase } from "@/integrations/supabase/client";
 import { applyOpenSitFilter } from "@/lib/sitSearchRules";
+import { fetchIntlOpenSits } from "@/lib/intlSitSearch";
 import type { ShownListState } from "@/components/search/SearchSitter";
 import InternationalShowcase from "@/components/listings/InternationalShowcase";
 import PastListingsSection from "@/components/listings/PastListingsSection";
@@ -66,12 +67,10 @@ export default function PublicListings() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { count } = await applyOpenSitFilter(
-        supabase.from("sits").select("id", { count: "exact", head: true }),
-      )
-        .not("country", "is", null)
-        .neq("country", "FR");
-      if (!cancelled) setIntlCount(count || 0);
+      // Lot L2 : moteur international partagé (lieu du propriétaire).
+      let count = 0;
+      try { count = (await fetchIntlOpenSits()).length; } catch { count = 0; }
+      if (!cancelled) setIntlCount(count);
     })();
     return () => { cancelled = true; };
   }, []);

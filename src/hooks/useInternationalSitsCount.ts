@@ -1,29 +1,17 @@
 /**
- * Compte les annonces publiées à l'étranger (hors France).
- * Cache 10 min via react-query. Ne bloque jamais le rendu.
+ * Compte les annonces ouvertes hors France (lieu du propriétaire, repli
+ * annonce, jamais FR déduit). Cache 10 min via react-query, même clé partout.
  */
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { applyOpenSitFilter } from "@/lib/sitSearchRules";
+import { fetchIntlOpenSits } from "@/lib/intlSitSearch";
+
+export const INTL_SITS_COUNT_KEY = ["international-sits-count"] as const;
 
 export function useInternationalSitsCount() {
   const { data, isLoading } = useQuery({
-    queryKey: ["international-sits-count"],
+    queryKey: INTL_SITS_COUNT_KEY,
     staleTime: 10 * 60 * 1000,
-    queryFn: async (): Promise<{ count: number }> => {
-      // Lot L1 : annonces ouvertes uniquement, mêmes règles que la recherche.
-      const { count } = await applyOpenSitFilter(
-        supabase.from("sits").select("id", { count: "exact", head: true }),
-      )
-        .not("country", "is", null)
-        .neq("country", "FR");
-
-      return { count: count ?? 0 };
-    },
+    queryFn: async (): Promise<{ count: number }> => ({ count: (await fetchIntlOpenSits()).length }),
   });
-
-  return {
-    count: data?.count ?? 0,
-    isLoading,
-  };
+  return { count: data?.count ?? 0, isLoading };
 }

@@ -3773,6 +3773,11 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/annonces/garde-de-2-chats-et-1-poisson-proche-dijon-1-semaine-en-mars-longvic-c85a20</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/petites-missions/un-coup-de-main-pour-transporter-des-meubles</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
