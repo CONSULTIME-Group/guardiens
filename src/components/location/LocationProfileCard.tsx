@@ -32,6 +32,7 @@ const LocationProfileCard = ({ city, postalCode, onUseDescription, editable = fa
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [used, setUsed] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const fetchProfile = async (forceRegenerate = false) => {
     if (!city || !postalCode || postalCode.length < 4) return;
@@ -96,7 +97,10 @@ const LocationProfileCard = ({ city, postalCode, onUseDescription, editable = fa
           <MapPin className="h-4 w-4 text-primary shrink-0" />
           <h4 className="text-sm font-semibold">Découvrir {city}</h4>
         </div>
-        {editable && (
+        <Button type="button" variant="ghost" size="sm" aria-expanded={open} onClick={() => setOpen(o => !o)} className="text-xs h-11">
+          {open ? "Replier" : "Afficher"}
+        </Button>
+        {open && editable && (
           <Button
             type="button"
             variant="ghost"
@@ -109,6 +113,10 @@ const LocationProfileCard = ({ city, postalCode, onUseDescription, editable = fa
         )}
       </div>
 
+      <p className="text-xs text-muted-foreground">
+        Texte rédigé automatiquement par une intelligence artificielle à partir du nom de la commune, non vérifié par Guardiens.
+      </p>
+      {open && (<>
       <div className="space-y-2">
         {fields.map(({ key, label }) => (
           profile[key] ? (
@@ -146,6 +154,7 @@ const LocationProfileCard = ({ city, postalCode, onUseDescription, editable = fa
           </Button>
         </div>
       )}
+      </>)}
     </div>
   );
 };

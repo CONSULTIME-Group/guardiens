@@ -131,3 +131,5 @@ Navigateur local non connecté, ordinateur seulement (1280 px). Aucun audit mobi
 - [x] ID survol/focus/clic et picker ouverture seulement en fixture isolée avec écritures réseau bloquées ; aucun profil/contact/favori réel modifié.
 - [ ] Limites explicites : recette après build sur Vite, artefact statique absent, preuve typecheck séparée indisponible ; têtes d'animaux partiellement protégées sur mobile, validation visuelle Jérémie attendue ; galerie/session réelle et grille picker complète non revérifiées.
 - [ ] L5 reste à valider par Jérémie ; L6 non commencé ; aucune publication.
+
+- L6 livré non publié (voir plan, section L6) ; recette visuelle et sauvegarde réelle à faire sur compte de test. L7 en attente de retour.

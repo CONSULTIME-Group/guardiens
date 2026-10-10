@@ -101,6 +101,7 @@ const SitterProfile = () => {
   const [galleryCount, setGalleryCount] = useState(0);
   const [dirty, setDirty] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState(false);
   const draftKey = user ? `guardiens_sitter_profile_draft_${user.id}` : null;
   const draftHydratedRef = useRef(false);
   const lastAppliedFocusRef = useRef<string | null>(null);
@@ -219,6 +220,7 @@ const SitterProfile = () => {
     setLocalData(prev => ({ ...prev, ...partial }));
     setDirty(true);
     setSaved(false);
+    setSaveError(false);
   }, []);
 
   // La contrainte de longueur de la motivation vit au niveau du champ (StepIdentity,
@@ -235,6 +237,7 @@ const SitterProfile = () => {
     const mobilityWasComplete = isRadiusDeclared(data.geographic_radius);
 
     const success = await saveStep(localData);
+    setSaveError(!success);
     if (!success) return;
 
     // Track cp_recovered event when postal_code was saved via email relance
@@ -514,7 +517,6 @@ const SitterProfile = () => {
         <div className={`fixed left-0 right-0 z-40 bg-background/95 backdrop-blur-sm border-t border-border bottom-[var(--bottom-nav-h,0px)] md:bottom-0 md:left-64 before:pointer-events-none before:content-[''] before:absolute before:left-0 before:right-0 before:-top-6 before:h-6 before:bg-gradient-to-t before:from-background before:to-transparent ${(!dirty && !saving && !saved) ? "md:hidden" : ""}`}>
           <ProfileProgressStrip
             completion={liveScore}
-            publicProfileUrl={user ? `/gardiens/${user.id}` : undefined}
             nextIncomplete={(() => {
               const next = sidebarSections.find(s => !s.optional && !s.complete);
               return next ? { id: next.id, label: next.label, missingCount: next.missingCount } : undefined;
@@ -537,6 +539,8 @@ const SitterProfile = () => {
               <span className="inline-flex items-center gap-1 text-primary">
                 <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" /> {tp("saved")}
               </span>
+            ) : saveError && dirty ? (
+              <span role="alert" className="text-destructive">{tp("save_error")}</span>
             ) : dirty ? (
               tp("dirty")
             ) : null}

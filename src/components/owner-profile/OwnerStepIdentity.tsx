@@ -95,7 +95,7 @@ const OwnerStepIdentity = ({ data, onChange, onUploadPhoto }: Props) => {
 
   return (
     <div className="space-y-6">
-      <h2 className="font-heading text-2xl font-bold">Identité & vérification</h2>
+      <h2 className="font-heading text-2xl font-bold">Vous et votre présentation</h2>
 
       <div className="flex flex-col items-center gap-3">
         <button type="button" onClick={() => fileRef.current?.click()}
