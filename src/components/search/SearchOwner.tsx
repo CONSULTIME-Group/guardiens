@@ -146,19 +146,33 @@ const SearchOwner = () => {
   // Debounce ref
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
 
-  // City autocomplete
+  // Autocomplétion selon le pays : France = geo.api.gouv.fr, autre pays =
+  // Photon (OpenStreetMap) restreint à ce pays, tous pays = les deux. Chaque
+  // suggestion porte son pays. Numéro de requête : une réponse tardive
+  // n'écrase jamais une frappe plus récente.
   const cityDebounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const suggestSeqRef = useRef(0);
   const fetchCitySuggestions = useCallback((q: string) => {
     clearTimeout(cityDebounceRef.current);
-    if (q.length < 2) { setCitySuggestions([]); return; }
+    const seq = ++suggestSeqRef.current;
+    if (q.trim().length < 2) { setCitySuggestions([]); return; }
     cityDebounceRef.current = setTimeout(async () => {
-      try {
-        const res = await fetch(`https://geo.api.gouv.fr/communes?nom=${encodeURIComponent(q)}&fields=nom,codesPostaux,centre&boost=population&limit=5`);
-        const data = await res.json();
-        setCitySuggestions(data || []);
-      } catch { setCitySuggestions([]); }
+      const src = suggestionSources(selectedCountry);
+      const [gouv, photon] = await Promise.all([
+        src.gouv
+          ? fetch(`https://geo.api.gouv.fr/communes?nom=${encodeURIComponent(q)}&fields=nom,codesPostaux,centre&boost=population&limit=5`)
+              .then((r) => r.json()).then(fromGeoApiGouv).catch(() => [] as PlaceSuggestion[])
+          : Promise.resolve([] as PlaceSuggestion[]),
+        src.photon
+          ? fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=15&lang=fr&layer=city&layer=locality&layer=district`)
+              .then((r) => r.json()).then((j) => fromPhoton(j, selectedCountry)).catch(() => [] as PlaceSuggestion[])
+          : Promise.resolve([] as PlaceSuggestion[]),
+      ]);
+      if (seq !== suggestSeqRef.current) return;
+      const photonOut = selectedCountry === null ? photon.filter((p) => p.country !== "FR") : photon;
+      setCitySuggestions([...gouv, ...photonOut].slice(0, 8));
     }, 300);
-  }, []);
+  }, [selectedCountry]);
 
   // Saisie brute du champ de lieu : sert uniquement aux suggestions locales
   // (départements / régions). Vidée dès qu'une suggestion est choisie, pour ne
@@ -168,9 +182,13 @@ const SearchOwner = () => {
   const normalizeLoc = (s: string) =>
     s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
 
+  // Départements et régions : seulement quand la recherche porte sur la
+  // France ou sur tous les pays.
+  const frZonesOffered = selectedCountry === "FR" || selectedCountry === null;
+
   const deptSuggestions = useMemo<string[]>(() => {
     const q = locQuery.trim();
-    if (q.length < 2) return [];
+    if (q.length < 2 || !frZonesOffered) return [];
     const nq = normalizeLoc(q);
     const out: string[] = [];
     if (/^\d{5}$/.test(q)) {
@@ -183,25 +201,26 @@ const SearchOwner = () => {
       if (normalizeLoc(code).startsWith(nq) || normalizeLoc(DEPT_NAMES[code]).includes(nq)) out.push(code);
     }
     return out.slice(0, 4);
-  }, [locQuery]);
+  }, [locQuery, frZonesOffered]);
 
   const regionSuggestions = useMemo<string[]>(() => {
     const q = locQuery.trim();
-    if (q.length < 2) return [];
+    if (q.length < 2 || !frZonesOffered) return [];
     const nq = normalizeLoc(q);
     return Object.keys(REGION_NAMES)
       .filter((code) => normalizeLoc(REGION_NAMES[code]).includes(nq))
       .slice(0, 3);
-  }, [locQuery]);
+  }, [locQuery, frZonesOffered]);
 
   const handleSelectDept = useCallback((deptCode: string) => {
     cityTouchedRef.current = true;
     setCity(`${deptCode} ${DEPT_NAMES[deptCode]}`);
     setCityInput(`${deptCode} ${DEPT_NAMES[deptCode]}`);
     setCityPostalCode(deptToRefPostalCode(deptCode));
-    // Une zone française explicite annule tout filtre pays, sinon deux filtres
-    // géographiques contradictoires s'appliqueraient.
-    setSelectedCountry(null);
+    setCityCountry("FR");
+    setCityCenter(null);
+    // Un département est français : le pays de recherche devient la France.
+    setSelectedCountry("FR");
     setZoneMode("dept");
     setCitySuggestions([]);
     setLocQuery("");
@@ -214,26 +233,35 @@ const SearchOwner = () => {
     setCity(REGION_NAMES[regionCode] ?? "");
     setCityInput(REGION_NAMES[regionCode] ?? "");
     if (firstDept) setCityPostalCode(deptToRefPostalCode(firstDept));
-    setSelectedCountry(null);
+    setCityCountry("FR");
+    setCityCenter(null);
+    setSelectedCountry("FR");
     setZoneMode("region");
     setCitySuggestions([]);
     setLocQuery("");
     setOpenPop(null);
   }, []);
 
-  // Sélection d'une commune (suggestions geo.api.gouv.fr), factorisée entre les
-  // popovers desktop et mobile : annule aussi le filtre pays.
-  const handleSelectCity = useCallback((s: any) => {
+  // Sélection d'une ville : chaque suggestion porte son pays, le pays de
+  // recherche le suit (sauf en « Tous les pays »), le centre vient de la
+  // suggestion elle-même (aucun second géocodage ambigu).
+  const handleSelectCity = useCallback((s: PlaceSuggestion) => {
     cityTouchedRef.current = true;
-    setCity(s.nom);
-    setCityInput(s.nom);
-    setCityPostalCode(s.codesPostaux?.[0] ?? null);
-    setSelectedCountry(null);
-    setZoneMode((prev) => (prev === "country" ? "radius" : prev));
+    const next = selectPlace(
+      { country: selectedCountry, zoneMode, city, cityCountry, cityPostalCode },
+      s,
+    );
+    setCity(next.city);
+    setCityInput(next.city);
+    setCityPostalCode(next.cityPostalCode);
+    setCityCountry(next.cityCountry);
+    setCityCenter(s.lat != null && s.lng != null ? { lat: s.lat, lng: s.lng } : null);
+    setSelectedCountry(next.country);
+    setZoneMode(next.zoneMode);
     setCitySuggestions([]);
     setLocQuery("");
     setOpenPop(null);
-  }, []);
+  }, [selectedCountry, zoneMode, city, cityCountry, cityPostalCode]);
 
   // À chaque ouverture du sélecteur de lieu, la saisie repart de la valeur
   // métier courante et les suggestions sont vidées, sinon la nouvelle frappe
@@ -268,33 +296,18 @@ const SearchOwner = () => {
     setOpenPop(null);
   }, [cityInput]);
 
-  // Pays réellement peuplés : source unique = RPC public.get_sitter_country_map()
-  // (jointure sitter_profiles × profiles). Aucune liste de pays en dur, donc aucune
-  // entrée à zéro gardien ne peut apparaître.
-  const [countryByUser, setCountryByUser] = useState<Map<string, string>>(new Map());
+  // Pays peuplés : RPC search_sitter_country_counts, exactement la même
+  // population que la recherche (gardiens consultables, compte courant exclu).
+  // Le chiffre du menu est donc celui que la liste affiche, filtres retirés.
   const [sitterCountries, setSitterCountries] = useState<Array<{ code: string; count: number }>>([]);
 
   useEffect(() => {
     let cancelled = false;
-    (async () => {
-      const { data, error } = await supabase.rpc("get_sitter_country_map");
-      if (cancelled || error || !data) return;
-      const map = new Map<string, string>();
-      const counts = new Map<string, number>();
-      (data as any[]).forEach((r) => {
-        if (!r?.user_id || !r?.country) return;
-        map.set(r.user_id, r.country);
-        counts.set(r.country, (counts.get(r.country) || 0) + 1);
-      });
-      setCountryByUser(map);
-      setSitterCountries(
-        Array.from(counts.entries())
-          .map(([code, count]) => ({ code, count }))
-          .sort((a, b) => b.count - a.count || a.code.localeCompare(b.code)),
-      );
-    })();
+    fetchSitterCountryCounts()
+      .then((rows) => { if (!cancelled) setSitterCountries(rows); })
+      .catch(() => undefined);
     return () => { cancelled = true; };
-  }, []);
+  }, [user?.id]);
 
   const countryName = useCallback((code: string) => {
     try {
@@ -304,14 +317,30 @@ const SearchOwner = () => {
     }
   }, []);
 
-  // Mémorise le dernier mode hors pays, pour le restaurer via « Tous les pays ».
-  useEffect(() => {
-    if (zoneMode !== "country") prevZoneModeRef.current = zoneMode;
-  }, [zoneMode]);
+  // Changement de pays, y compris « Tous les pays » (null) : règle unique
+  // changeCountry (ville d'un autre pays retirée, département et région
+  // réservés à la France).
+  const handleCountryChange = useCallback((next: string | null) => {
+    cityTouchedRef.current = true;
+    const s = changeCountry(
+      { country: selectedCountry, zoneMode, city, cityCountry, cityPostalCode },
+      next,
+    );
+    setSelectedCountry(s.country);
+    setZoneMode(s.zoneMode);
+    if (s.city !== city) {
+      setCity(s.city);
+      setCityInput(s.city);
+      setCityCenter(null);
+      setSearchCenter(null);
+    }
+    setCityCountry(s.cityCountry);
+    setCityPostalCode(s.cityPostalCode);
+    setCitySuggestions([]);
+    setOpenPop(null);
+  }, [selectedCountry, zoneMode, city, cityCountry, cityPostalCode]);
 
-
-
-  // Geolocation
+  // Geolocation (communes françaises, geo.api.gouv.fr)
   const handleGeolocate = useCallback(() => {
     if (!navigator.geolocation) { toast.error("Géolocalisation non disponible"); return; }
     navigator.geolocation.getCurrentPosition(
@@ -324,49 +353,68 @@ const SearchOwner = () => {
             setCity(data[0].nom);
             setCityInput(data[0].nom);
             setCityPostalCode(data[0].codesPostaux?.[0] ?? null);
+            setCityCountry("FR");
+            setCityCenter({ lat: Math.round(pos.coords.latitude * 100) / 100, lng: Math.round(pos.coords.longitude * 100) / 100 });
+            if (selectedCountry !== null) setSelectedCountry("FR");
+            setZoneMode((prev) => (prev === "country" ? "radius" : prev));
             setCitySuggestions([]);
+          } else {
+            toast.error("Position hors de France : saisissez votre ville.");
           }
         } catch { toast.error("Impossible de déterminer votre ville"); }
       },
       () => toast.error("Géolocalisation refusée")
     );
-  }, []);
+  }, [selectedCountry]);
 
   // Load owner city + postal code on mount, URL params take precedence
   useEffect(() => {
     const urlCity = searchParams.get("city") || searchParams.get("ville");
     const urlPostal = searchParams.get("postal_code");
     const urlZone = searchParams.get("zone");
+    const urlCountry = (searchParams.get("pays") || "").trim().toUpperCase();
     const urlRadius = parseInt(searchParams.get("rayon") || "", 10);
     if (Number.isFinite(urlRadius) && urlRadius > 0 && urlRadius <= 200) setRadius([snapToAllowedRadius(urlRadius)]);
+    if (urlCountry === "TOUS") setSelectedCountry(null);
+    else if (/^[A-Z]{2}$/.test(urlCountry)) setSelectedCountry(urlCountry);
 
     if (urlCity) {
       cityTouchedRef.current = true;
       setCity(urlCity);
       setCityInput(urlCity);
+      setCityCountry(/^[A-Z]{2}$/.test(urlCountry) ? urlCountry : "FR");
       if (urlPostal) {
         setCityPostalCode(urlPostal);
         setUserPostalCode(urlPostal);
       }
       if (urlZone === "dept") setZoneMode("dept");
       else if (urlZone === "region") setZoneMode("region");
-      else if (urlZone === "france") setZoneMode("france");
+      else if (urlZone === "france" || urlZone === "pays") setZoneMode("country");
       else setZoneMode("radius");
       setInitialLoaded(true);
       return;
     }
+    if (urlZone === "france" || urlZone === "pays") setZoneMode("country");
 
     if (!user) {
+      setZoneMode((z) => (z === "radius" ? "country" : z));
       setInitialLoaded(true);
       return;
     }
     (async () => {
       const { data } = await fetchMyProfile(user.id!);
-      if (data?.city && !cityTouchedRef.current) {
-        setCity(data.city);
-        setCityInput(data.city);
+      const profileCountry = String((data as any)?.country || "FR").trim().toUpperCase() || "FR";
+      if (!cityTouchedRef.current) {
+        if (!/^[A-Z]{2}$/.test(urlCountry)) setSelectedCountry(profileCountry);
+        if (data?.city) {
+          setCity(data.city);
+          setCityInput(data.city);
+          setCityCountry(profileCountry);
+        } else {
+          setZoneMode((z) => (z === "radius" ? "country" : z));
+        }
       }
-      if (data?.postal_code) {
+      if (data?.postal_code && profileCountry === "FR") {
         setUserPostalCode(data.postal_code);
         setCityPostalCode(data.postal_code);
       }
@@ -374,18 +422,12 @@ const SearchOwner = () => {
     })();
   }, [user, searchParams]);
 
-  // Fetch true France-wide sitter count via la vue publique (lisible par anon, vague 40).
-  // Le compte courant est exclu du total, comme dans la liste de résultats.
-  useEffect(() => {
-    (async () => {
-      let q = supabase
-        .from("public_sitter_profiles")
-        .select("user_id", { count: "exact", head: true });
-      if (user?.id) q = q.neq("user_id", user.id);
-      const { count } = await q;
-      setFranceTotalSitters(count ?? 0);
-    })();
-  }, [user?.id]);
+  // Total consultable, même population que la liste.
+  const totalSearchable = useMemo(() => sitterCountries.reduce((a, c) => a + c.count, 0), [sitterCountries]);
+  const countryCount = useCallback(
+    (code: string | null) => (code === null ? totalSearchable : sitterCountries.find((c) => c.code === code)?.count ?? 0),
+    [sitterCountries, totalSearchable],
+  );
 
   // Reset alert state when zone changes
   useEffect(() => { setAlertCreated(false); }, [city, radius, zoneMode]);
@@ -580,68 +622,31 @@ const SearchOwner = () => {
     }
   };
 
-  // Search logic
+  // Search logic (lot 1 international) : vivier complet du pays choisi, lu
+  // par la RPC search_sitter_pool (pays et éligibilité filtrés côté serveur,
+  // pagination par pages de 1 000, aucune tranche). Chaque lancement porte un
+  // numéro : une réponse qui arrive après un changement de pays ou de ville
+  // est ignorée, jamais affichée.
+  const searchSeqRef = useRef(0);
   const handleSearch = useCallback(async () => {
+    const seq = ++searchSeqRef.current;
+    const stale = () => seq !== searchSeqRef.current;
     setLoading(true);
     setSearchError(null);
 
-    setResultsTruncated(false);
-    // Vue publique (vague 40) : lecture anon OK. On alias user_id -> id pour préserver
-    // les clés React et le contrat de mapping historique côté sitter_profiles.
-    let sittersQuery = supabase
-      .from("public_sitter_profiles")
-      // Projection explicite : colonnes réellement consommées (filtres, tri,
-      // carte, carte de résultat). Les colonnes d'affinité (experience_years,
-      // life_pace, languages, interests, work_during_sit, sensitivities) ne
-      // sont plus dans la vue publique, elles sont chargées séparément via
-      // `sitter_profiles_affinity`, réservée aux membres connectés.
-      // Lot R2 : competences, special_animal_skills, interests et
-      // experience_years ajoutés à la même lecture, pour la ligne courte de
-      // la carte seulement. Rangés dans `_card` : ils n'entrent jamais dans
-      // le calcul d'affinité ni dans les tris.
-      .select("user_id, animal_types, has_vehicle, is_available, reply_median_minutes, sitter_type, travels_with_children, travels_with_own_animals, competences, special_animal_skills, interests, experience_years");
-    // Exclusion du compte courant (cas du rôle `both`), uniquement si connecté.
-    if (user?.id) sittersQuery = sittersQuery.neq("user_id", user.id);
-    const { data: sittersRaw, error: sittersError } = await sittersQuery.order("user_id", { ascending: true }).limit(SITTERS_SERVER_CAP);
-    const sitters = (sittersRaw || []).map((row: any) => {
-      const { competences, special_animal_skills, interests, experience_years, ...s } = row;
-      return { ...s, id: s.user_id, _card: { competences, special_animal_skills, interests, experience_years } };
-    });
-
-    if (sittersError) {
-      console.error("[SearchOwner] Erreur chargement gardiens:", sittersError);
+    let pool: any[];
+    try {
+      pool = (await fetchSitterSearchPool(selectedCountry)).map(poolRowToSitter);
+    } catch (err) {
+      if (stale()) return;
+      console.error("[SearchOwner] Erreur chargement gardiens:", err);
       setSearchError("Impossible de charger les gardiens.");
       setLoading(false);
       return;
     }
-
-    const rawSitters = (sitters || []) as any[];
-    setResultsTruncated(rawSitters.length >= SITTERS_SERVER_CAP);
-
-    // Hydratation RLS-safe des profils via la vue publique.
-    // Colonne absente de la vue : last_name.
-    const sitterUserIds = Array.from(new Set(
-      rawSitters.map((s: any) => s.user_id).filter(Boolean),
-    )) as string[];
-    if (sitterUserIds.length > 0) {
-      const { data: sitterProfs, error: profilesError } = await supabase
-        .from("public_profiles")
-        .select("id, first_name, avatar_url, city, postal_code, profile_completion, identity_verified, completed_sits_count, bio, last_seen_at, latitude_approx, longitude_approx")
-        .in("id", sitterUserIds);
-
-      if (profilesError) {
-        console.error("[SearchOwner] Erreur hydratation profils:", profilesError);
-        setSearchError("Impossible de charger les gardiens.");
-        setLoading(false);
-        return;
-      }
-
-      const sitterProfMap = new Map<string, any>();
-      (sitterProfs ?? []).forEach((p: any) => sitterProfMap.set(p.id, p));
-      rawSitters.forEach((s: any) => {
-        s.profile = s.user_id ? sitterProfMap.get(s.user_id) ?? null : null;
-      });
-    }
+    if (stale()) return;
+    const rawSitters = pool;
+    const sitterUserIds = rawSitters.map((s: any) => s.user_id) as string[];
 
     // Données d'affinité : vue réservée aux membres connectés, chargée
     // uniquement lorsque le visiteur dispose d'un profil propriétaire.
@@ -659,6 +664,7 @@ const SearchOwner = () => {
             .in("user_id", ids),
         ),
       );
+      if (stale()) return;
       const affinityMap = new Map<string, any>();
       affinityResults.forEach((res: any) => {
         if (res?.error) {
@@ -673,80 +679,60 @@ const SearchOwner = () => {
       });
     }
 
-    // Seuil de complétion abaissé à 40 (vague 40, 20/07/2026) : le profil public
-    // refondu gère les profils clairsemés, on ne masque plus de vrais gardiens.
-    let items = rawSitters.filter((s: any) => s.profile?.profile_completion >= 40);
+    const items = rawSitters;
 
-    // Coordonnées : on utilise latitude_approx / longitude_approx de la vue public_profiles, arrondies à 2 décimales (environ 1,1 km) pour ne jamais exposer la position exacte des membres, la vue étant lisible par le rôle anon. Cette précision suffit largement : rayon minimum de recherche 5 km et pins à l'échelle de la commune. Ces colonnes sont alimentées par trg_geocode_profile. Le géocodage à la volée n'est qu'un repli pour les profils sans coordonnées. Ne pas revenir à un géocodage systématique, c'était des centaines d'appels réseau par recherche, et ne jamais réintroduire les coordonnées brutes.
+    // Coordonnées : latitude_approx / longitude_approx (2 décimales, environ 1,1 km), jamais les coordonnées brutes. Le géocodage à la volée n'est qu'un repli pour les profils sans coordonnées, toujours avec le pays du profil.
     const hasStoredCoords = (p: any) =>
       typeof p?.latitude_approx === "number" && typeof p?.longitude_approx === "number";
 
-    // Seules les villes des gardiens sans coordonnées en base sont géocodées.
-    // Le pays du profil est passé quand il est connu (carte des pays chargée
-    // via get_sitter_country_map) : sans lui, la ville d'un gardien établi
-    // hors France serait cherchée en France par défaut.
     const noCoordSitters = items.filter((s: any) => !hasStoredCoords(s.profile));
-    const countryByCity = new Map<string, string>();
+    const cityKey = (c: string, co: string | null) => `${c}::${co ?? ""}`;
+    const uniqueCities = new Map<string, { city: string; country: string | null }>();
     noCoordSitters.forEach((s: any) => {
-      const cityName = s.profile?.city;
-      const co = countryByUser.get(s.user_id) || (s.profile as any)?.country;
-      if (cityName && co) countryByCity.set(cityName, co);
+      const c = s.profile?.city;
+      if (c) uniqueCities.set(cityKey(c, s.country), { city: c, country: s.country ?? null });
     });
-    const uniqueCities = [...new Set(
-      noCoordSitters
-        .map((s: any) => s.profile?.city)
-        .filter(Boolean),
-    )] as string[];
     const cityCoords = new Map<string, { lat: number; lng: number }>();
-    // Concurrence plafonnée à 10 appels simultanés : au delà, la limitation de
-    // débit du service de géocodage se déclenche et plus aucune coordonnée ne
-    // revient. Un échec dégrade la précision, il ne doit jamais vider la liste
-    // (repli département sur le code postal, plus bas).
     const GEOCODE_CONCURRENCY = 10;
-    for (let i = 0; i < uniqueCities.length; i += GEOCODE_CONCURRENCY) {
-      const chunk = uniqueCities.slice(i, i + GEOCODE_CONCURRENCY);
-      await Promise.all(chunk.map(async (c) => {
-        const coords = await geocodeCity(c, countryByCity.get(c));
-        if (coords) cityCoords.set(c, { lat: coords.lat, lng: coords.lng });
+    const cityList = Array.from(uniqueCities.entries());
+    for (let i = 0; i < cityList.length; i += GEOCODE_CONCURRENCY) {
+      await Promise.all(cityList.slice(i, i + GEOCODE_CONCURRENCY).map(async ([k, v]) => {
+        const coords = await geocodeCity(v.city, v.country);
+        if (coords) cityCoords.set(k, { lat: coords.lat, lng: coords.lng });
       }));
     }
+    if (stale()) return;
 
-    // Reference postal code for dept/region zones
-    const refPostalCode = cityPostalCode ?? userPostalCode;
-    const refDept = getDeptCode(refPostalCode);
-    const refRegion = getRegionCode(refDept);
-
-    // Resolve search coords (for radius mode + distance display)
+    // Centre de recherche : coordonnées de la suggestion choisie, sinon
+    // géocodage avec le pays de la ville (Montréal au Canada, pas en France).
     let searchCoords: { lat: number; lng: number } | null = null;
     if (city) {
-      searchCoords = await geocodeCity(city);
+      searchCoords = cityCenter ?? (await geocodeCity(city, cityCountry ?? selectedCountry ?? undefined));
     }
+    if (stale()) return;
 
-    // Helper: enrich a sitter with coords and distance
     const withCoords = (s: any) => {
       const p = s.profile;
       const coords = hasStoredCoords(p)
         ? { lat: p.latitude_approx as number, lng: p.longitude_approx as number }
-        : (p?.city ? cityCoords.get(p.city) ?? null : null);
-      const dist = coords && searchCoords ? Math.round(haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng)) : null;
-      return { ...s, _dist: dist, _lat: coords?.lat ?? null, _lng: coords?.lng ?? null };
+        : (p?.city ? cityCoords.get(cityKey(p.city, s.country)) ?? null : null);
+      return { ...s, _dist: distanceFrom(searchCoords, coords?.lat, coords?.lng), _lat: coords?.lat ?? null, _lng: coords?.lng ?? null };
     };
-
-
-    // Enrich ALL items with coords (needed for density counts across zones)
     const allItems = items.map(withCoords);
 
-    // Fetch badges, emergency profiles, reviews et galerie pour TOUS les candidats
+    // Enrichissement par lots de 100 identifiants : URL bornée et réponses
+    // sous le plafond serveur de 1 000 lignes, quelle que soit la taille du vivier.
     const allUserIds = allItems.map((s: any) => s.user_id);
-    const [allBadgesRes, emergencyRes, galleryRes] = allUserIds.length > 0
-      ? await Promise.all([
-          supabase.from("public_badge_attributions").select("user_id, badge_id").in("user_id", allUserIds),
-          supabase.from("public_emergency_sitter_profiles").select("user_id, is_active").in("user_id", allUserIds).eq("is_active", true),
-          supabase.from("sitter_gallery").select("user_id, photo_url, created_at").in("user_id", allUserIds).order("created_at", { ascending: false }),
-        ])
-      : [{ data: [] as any[], error: null }, { data: [] as any[], error: null }, { data: [] as any[], error: null }] as const;
+    const idChunks = chunkArray(allUserIds, 100);
+    const [badgeResults, emergencyResults, galleryResults, reviewResults] = await Promise.all([
+      Promise.all(idChunks.map((ids) => supabase.from("public_badge_attributions").select("user_id, badge_id").in("user_id", ids))),
+      Promise.all(idChunks.map((ids) => supabase.from("public_emergency_sitter_profiles").select("user_id, is_active").in("user_id", ids).eq("is_active", true))),
+      Promise.all(idChunks.map((ids) => supabase.from("sitter_gallery").select("user_id, photo_url, created_at").in("user_id", ids).order("created_at", { ascending: false }))),
+      Promise.all(idChunks.map((ids) => supabase.from("reviews").select("reviewee_id, overall_rating").in("reviewee_id", ids).eq("published", true))),
+    ]);
+    if (stale()) return;
 
-    const enrichError = (allBadgesRes as any).error || (emergencyRes as any).error || (galleryRes as any).error;
+    const enrichError = [...badgeResults, ...emergencyResults, ...galleryResults, ...reviewResults].find((r: any) => r.error)?.error;
     if (enrichError) {
       console.error("[SearchOwner] Erreur enrichissement gardiens:", enrichError);
       setSearchError("Impossible de charger les informations complètes des gardiens.");
@@ -754,37 +740,18 @@ const SearchOwner = () => {
       return;
     }
 
-    const emergencySet = new Set((emergencyRes.data || []).map((e: any) => e.user_id));
+    const emergencySet = new Set(emergencyResults.flatMap((r: any) => r.data ?? []).map((e: any) => e.user_id));
 
     const reviewsAgg = new Map<string, { sum: number; count: number }>();
-    if (allUserIds.length > 0) {
-      const reviewResults = await Promise.all(
-        chunkArray(allUserIds, 100).map((batch) =>
-          supabase
-            .from("reviews")
-            .select("reviewee_id, overall_rating")
-            .in("reviewee_id", batch)
-            .eq("published", true),
-        ),
-      );
-      const reviewsError = reviewResults.find((result) => result.error)?.error;
-      if (reviewsError) {
-        console.error("[SearchOwner] Erreur chargement avis:", reviewsError);
-        setSearchError("Impossible de charger les avis des gardiens.");
-        setLoading(false);
-        return;
-      }
-      const reviewRows = reviewResults.flatMap((result) => result.data ?? []);
-      (reviewRows || []).forEach((r: any) => {
-        const cur = reviewsAgg.get(r.reviewee_id) || { sum: 0, count: 0 };
-        cur.sum += r.overall_rating || 0;
-        cur.count += 1;
-        reviewsAgg.set(r.reviewee_id, cur);
-      });
-    }
+    reviewResults.flatMap((r: any) => r.data ?? []).forEach((r: any) => {
+      const cur = reviewsAgg.get(r.reviewee_id) || { sum: 0, count: 0 };
+      cur.sum += r.overall_rating || 0;
+      cur.count += 1;
+      reviewsAgg.set(r.reviewee_id, cur);
+    });
 
     const badgeMap = new Map<string, Map<string, number>>();
-    (allBadgesRes.data || []).forEach((b: any) => {
+    badgeResults.flatMap((r: any) => r.data ?? []).forEach((b: any) => {
       if (!badgeMap.has(b.user_id)) badgeMap.set(b.user_id, new Map());
       const m = badgeMap.get(b.user_id)!;
       m.set(b.badge_id, (m.get(b.badge_id) || 0) + 1);
@@ -792,13 +759,12 @@ const SearchOwner = () => {
 
     // Galerie : max 4 photos par gardien, avatar prépendu si présent.
     const photoMap = new Map<string, string[]>();
-    (galleryRes.data || []).forEach((g: any) => {
+    galleryResults.flatMap((r: any) => r.data ?? []).forEach((g: any) => {
       const arr = photoMap.get(g.user_id) || [];
       if (arr.length < 4 && g.photo_url) arr.push(g.photo_url);
       photoMap.set(g.user_id, arr);
     });
 
-    // Enrich all items
     const enrichedAll = allItems.map((s: any) => {
       const agg = reviewsAgg.get(s.user_id);
       const avgRating = agg && agg.count > 0 ? agg.sum / agg.count : null;
@@ -809,7 +775,6 @@ const SearchOwner = () => {
       const gallery = photoMap.get(s.user_id) || [];
       const avatar = s.profile?.avatar_url;
       const photos = avatar ? [avatar, ...gallery.filter((p) => p !== avatar)] : gallery;
-      // Score d'affinité pré-calculé pour permettre le tri "Meilleure affinité".
       const affinity = viewerOwner
         ? computeAffinityResultFull(viewerOwner as AffinityOwnerInput, s as AffinitySitterInput)
         : null;
@@ -819,7 +784,7 @@ const SearchOwner = () => {
     setRawResults(enrichedAll);
     setSearchCenter(searchCoords);
     setLoading(false);
-  }, [city, cityPostalCode, userPostalCode, viewerOwner, user?.id]);
+  }, [city, cityCenter, cityCountry, selectedCountry, viewerOwner, user?.id]);
 
   // Auto-search on network dep change (debounced) : ville / code postal uniquement.
   // Les filtres purement clients (véhicule, vérifié, note min, animaux, radius, zone, tri…)
