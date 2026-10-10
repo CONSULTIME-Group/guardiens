@@ -25,9 +25,9 @@ export function isTransientError(error: Err | unknown): boolean {
   if (!error) return false;
   const e = error as { message?: string; code?: string; status?: number };
   const status = Number(e.status ?? 0);
-  if (status === 408 || status === 429 || status >= 500) return true;
   const msg = String(e.message ?? error);
   if (/permission denied|does not exist|column|42501|42P01|42703|PGRST2/i.test(msg + " " + (e.code ?? ""))) return false;
+  if (status === 408 || status === 429 || status >= 500) return true;
   return /error sending request|fetch failed|network|timeout|timed out|ECONNRESET|connection (reset|closed)|socket|57014/i.test(msg + " " + (e.code ?? ""));
 }
 

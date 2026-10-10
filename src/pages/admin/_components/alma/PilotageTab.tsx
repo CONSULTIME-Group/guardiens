@@ -176,6 +176,7 @@ export function PilotageTab({ range }: { range: "7d" | "30d" | "90d" }) {
           )}
           </>)}
           {feedbackB.state === "error" && <Unavailable label="Retours" />}
+          {feedbackB.truncated && <p className="text-muted-foreground">Retours : données partielles, plafond de lecture atteint.</p>}
           {feedbackB.state === "loading" && <p className="text-muted-foreground">Retours : lecture en cours.</p>}
           {feedback && (
             <p>
@@ -219,6 +220,7 @@ export function PilotageTab({ range }: { range: "7d" | "30d" | "90d" }) {
           <Button onClick={() => void replay()} disabled={!!replaying}>
             {replaying ? `Rejeu en cours, ${replaying.done} sur ${replaying.total}` : "Rejouer le jeu de test"}
           </Button>
+          {runsB.state === "loading" && <p className="text-muted-foreground">Historique des rejeux : lecture en cours.</p>}
           {runsB.state === "error" && <Unavailable label="Historique des rejeux" />}
           {runsB.state === "ok" && !last && <p className="text-muted-foreground">Aucun rejeu enregistré.</p>}
           {last && (

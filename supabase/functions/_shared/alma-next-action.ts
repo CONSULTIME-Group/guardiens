@@ -65,7 +65,7 @@ export interface NextActionResult {
 export const PROFILE_SEARCH_THRESHOLD = 40;
 
 /** Texte déjà replié (sans accents, minuscules). */
-export const ROLE_SWITCH_INTENT = /\binvers|\bbascul|changer d.espace|changer de (role|compte)|passer (en|cote|du cote) (gardien|guardien|proprietaire)/;
+export const ROLE_SWITCH_INTENT = /\binvers|\bbascul|changer d.espace|changer de (role|compte)|passer (en|cote|du cote) (espace )?(gardien|guardien|proprietaire)/;
 
 /** Lot J4 : vrai quand la question porte explicitement sur le profil. */
 export function isProfileQuestion(question: string): boolean {
@@ -134,7 +134,10 @@ export function computeNextAction(input: NextActionInput): NextActionResult {
   // on oriente vers le changement d'espace réel, jamais vers l'entraide.
   const switchAsked = role === "both" && ROLE_SWITCH_INTENT.test(q);
   if (switchAsked) {
-    const toSitter = input.activeRole === "owner";
+    // Destination nommée explicitement d'abord, sinon inversion de l'espace courant.
+    const wantsSitter = /(espace|cote|passer en|en tant que|devenir) (gardien|guardien)/.test(q);
+    const wantsOwner = /(espace|cote|passer en|en tant que|devenir) proprietaire/.test(q);
+    const toSitter = wantsSitter !== wantsOwner ? wantsSitter : input.activeRole === "owner";
     return {
       action: toSitter
         ? { label: "Passer en espace gardien", path: "/dashboard?espace=gardien", reason: "changer_espace" }
