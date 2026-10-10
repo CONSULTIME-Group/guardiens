@@ -1083,6 +1083,17 @@
     --spiral-w: 34px;
   }
   .profile-notebook-page { padding-left: calc(var(--spiral-w) + 1.25rem); }
+  .profile-notebook-sheet { isolation: isolate; }
+  .profile-notebook-sheet .profile-notebook-page {
+    width: 100%;
+    padding-left: calc(var(--spiral-w) + 1.25rem);
+    padding-right: 1rem;
+  }
+  .profile-notebook-sheet > .profile-notebook-spiral { z-index: 45; }
+  .profile-notebook-tabs { background-color: hsl(var(--hero-paper)); }
+  @media (min-width: 768px) {
+    .profile-notebook-sheet .profile-notebook-page { padding-right: 1.5rem; }
+  }
   .profile-notebook-spiral {
     position: absolute; top: 0; bottom: 0; left: 0; width: var(--spiral-w);
     pointer-events: none;

@@ -58,6 +58,7 @@ export interface ProfileHeroProps {
   emergencyActive: boolean;
   cta: HeroCtaVariant;
   ctaReassurance?: string;
+  inNotebook?: boolean;
 }
 
 /** Faits de la ligne secondaire, purs et testables. */
@@ -140,7 +141,7 @@ const ProfileHero = (p: ProfileHeroProps) => {
       data-facet={p.facet}
       data-hero-subject={leftSubject ? "left" : "right"}
     >
-      <span aria-hidden="true" className="profile-notebook-spiral" />
+      {!p.inNotebook && <span aria-hidden="true" className="profile-notebook-spiral" />}
       <div className="profile-notebook-page relative mx-auto flex max-w-6xl flex-col gap-5 py-6 pr-4 md:flex-row md:items-center md:gap-6 md:py-7 md:pr-6" data-hero-content>
         <div className="profile-hero-identity relative min-w-0 md:w-[360px] md:shrink-0">
           <div className="flex items-start gap-4">
