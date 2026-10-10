@@ -68,7 +68,7 @@ export default function PublicListings() {
     let cancelled = false;
     (async () => {
       // Lot L2 : moteur international partagé (lieu du propriétaire).
-      let count = 0;
+      let count: number | null = 0;
       try { count = (await fetchIntlOpenSits()).length; } catch (e) { console.error("[PublicListings] annonces hors France", e); count = null; }
       if (!cancelled) setIntlCount(count);
     })();
