@@ -968,6 +968,38 @@ const SearchOwner = () => {
     { key: "country", label: scopeLabel, count: densityCounts.country },
   ];
 
+  // Carte : points des résultats (coordonnées approximées), cadrage sur la
+  // ville, sinon sur les résultats, sinon sur le pays choisi.
+  const [countryCenter, setCountryCenter] = useState<{ lat: number; lng: number } | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    setCountryCenter(null);
+    if (!selectedCountry || selectedCountry === "FR") return;
+    void geocodeCity(countryName(selectedCountry), selectedCountry).then((c) => {
+      if (!cancelled && c) setCountryCenter({ lat: c.lat, lng: c.lng });
+    });
+    return () => { cancelled = true; };
+  }, [selectedCountry, countryName]);
+
+  const mapPins = useMemo(() => results
+    .filter((s: any) => s._lat != null && s._lng != null)
+    .map((s: any) => ({
+      id: s.id,
+      user_id: s.user_id,
+      firstName: publicFirstName(s.profile?.first_name) || "Gardien",
+      city: s.profile?.city ?? null,
+      avatar: s.profile?.avatar_url ?? null,
+      avgRating: s.avgRating ?? null,
+      dist: s._dist ?? null,
+      coords: { lat: s._lat, lng: s._lng },
+    })), [results]);
+  const mapViewport = useMemo(() => computeMapViewport({
+    country: selectedCountry,
+    center: city ? searchCenter : null,
+    points: mapPins.map((p) => p.coords),
+    countryCenter,
+  }), [selectedCountry, city, searchCenter, mapPins, countryCenter]);
+
   // SEO vague 40 : page indexable pour capter la demande organique.
   const seoTitle = "Trouver un gardien d'animaux près de chez vous · Guardiens";
   const seoDescription = "Consultez librement les profils de gardiens d'animaux en France : chats, chiens, NAC. Inscription avec une adresse email pour contacter un gardien.";
