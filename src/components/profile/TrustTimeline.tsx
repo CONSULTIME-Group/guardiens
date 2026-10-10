@@ -109,6 +109,7 @@ const TrustTimeline = ({
 
   const heatmap = buildActivityHeatmap(reviews, badges);
   const max = maxActivity(heatmap);
+  const activeMonths = heatmap.filter((m) => m.count > 0).length;
 
   // Échelle d'intensité 0-4 pour la heatmap (style contributions).
   const intensity = (n: number) => {
@@ -134,7 +135,7 @@ const TrustTimeline = ({
         </h3>
       </header>
 
-      <ol className="relative pl-5 space-y-4 mb-6">
+      <ol className={`relative pl-5 space-y-4 ${activeMonths >= 3 ? "mb-6" : ""}`}>
         <span
           aria-hidden="true"
           className="absolute left-[7px] top-1.5 bottom-1.5 w-px bg-border"
@@ -163,7 +164,8 @@ const TrustTimeline = ({
         ))}
       </ol>
 
-      {/* Heatmap activité 12 mois */}
+      {/* Heatmap 12 mois : seulement avec au moins 3 mois actifs, jamais douze barres vides. */}
+      {activeMonths >= 3 && (
       <div>
         <p className="text-xs uppercase tracking-[2px] text-muted-foreground font-sans mb-2">
           Activité publique, 12 derniers mois
@@ -182,12 +184,8 @@ const TrustTimeline = ({
             </div>
           ))}
         </div>
-        {max === 0 && (
-          <p className="text-xs text-muted-foreground italic mt-2">
-            Pas encore d'activité publique sur cette période.
-          </p>
-        )}
       </div>
+      )}
     </section>
   );
 };

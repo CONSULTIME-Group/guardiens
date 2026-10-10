@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { cutLongText, meetingPreferenceLabel, homeFactLabel, assetsLabel, reviewDateLabel, entraideBandText } from "@/lib/sitterProfileFacts";
+import { cutLongText, meetingPreferenceLabel, homeFactLabel, assetsLabel, reviewDateLabel } from "@/lib/sitterProfileFacts";
 
 describe("cutLongText", () => {
   it("laisse un texte court intact", () => {
