@@ -82,6 +82,7 @@ import {
   pickAiIdentityTemplate,
   repairOutput,
   repeatsOpener,
+  reopenWithAnotherSentence,
   spaceScopeBrief,
   type ListingPet,
   type LockedBrief,
