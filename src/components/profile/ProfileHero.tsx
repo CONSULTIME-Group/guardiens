@@ -130,102 +130,106 @@ const ProfileHero = (p: ProfileHeroProps) => {
         ? (p.cta.hint ?? "")
         : p.cta.kind === "unauthenticated"
           ? "L'inscription est ouverte pendant la phase de lancement."
-          : `Vous échangez directement avec ${p.firstName}.`
+          : "";
   );
 
   return (
     <header
-      className="profile-hero relative isolate w-full overflow-hidden"
+      className="profile-hero profile-notebook relative isolate w-full overflow-hidden"
       data-profile-hero
       data-facet={p.facet}
       data-hero-subject={leftSubject ? "left" : "right"}
     >
-      <picture className="absolute inset-0 -z-10" data-hero-gouache>
-        <source media="(max-width: 639px)" srcSet={p.heroMobile} />
-        <img
-          src={p.heroDesktop}
-          alt=""
-          aria-hidden="true"
-          data-hero-anchor={p.heroAnchor}
-          data-hero-notebook={/hero-63(?:[.-])/.test(p.heroDesktop) || undefined}
-          width={1536}
-          height={544}
-          loading="eager"
-          decoding="async"
-          className="profile-hero-art absolute bottom-0 h-full w-full object-contain"
-        />
-      </picture>
-      <div className="relative mx-auto max-w-6xl px-4 py-6 md:px-6 md:py-7" data-hero-content>
-        <div className="profile-hero-identity relative min-w-0 flex items-start gap-3 md:gap-5">
-          <Button
-            variant="ghost"
-            type="button"
-            onClick={p.onOpenAvatarLightbox}
-            disabled={!p.hasAvatarLightbox}
-            aria-label={`Agrandir la photo de ${p.firstName}`}
-            className="h-auto shrink-0 rounded-full p-0 hover:bg-transparent disabled:cursor-default disabled:opacity-100"
-            data-hero-avatar
-          >
-            {hasPhoto ? (
-              <img
-                src={avatarImageUrl(p.avatarUrl as string, 320)}
-                alt={p.firstName}
-                width={128}
-                height={128}
-                className="block h-20 w-20 rounded-full object-cover border-4 border-background shadow-md md:h-24 md:w-24"
-              />
-            ) : (
-              <span className="flex h-20 w-20 rounded-full bg-muted border-4 border-background items-center justify-center font-heading text-4xl text-foreground md:h-24 md:w-24">
-                {p.firstName?.charAt(0) || "?"}
-              </span>
-            )}
-          </Button>
-
-          <div className="min-w-0 flex-1">
-            <p className="text-xs uppercase text-secondary font-body font-semibold">{eyebrow}</p>
-            <div className="mt-0.5 flex flex-wrap items-center gap-1 min-w-0">
-              <h1 className="font-heading text-[32px] md:text-[42px] font-semibold leading-tight text-foreground break-words min-w-0 max-w-full">
-                {p.firstName}
-              </h1>
-              {p.identityVerified && <IdentityVerifiedMark firstName={p.firstName} />}
-              {!p.isOwnProfile && (
-                <FavoriteButton targetType="sitter" targetId={p.id} size="md" />
-              )}
-            </div>
-            {place && <p className="mt-1 text-[15px] text-foreground font-body" data-hero-place>{place}</p>}
-            {facts.length > 0 && (
-              <p className="mt-1 text-[13.5px] text-muted-foreground font-body">{facts.join(" · ")}</p>
-            )}
-            {mobility.length > 0 && (
-              <p className="mt-1 text-[13.5px] text-foreground/80 font-body" data-hero-mobility>
-                Peut se déplacer : {mobility.join(", ")}
-              </p>
-            )}
-            <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[13.5px] font-body text-foreground">
-              {p.avgRating > 0 && p.reviewCount > 0 && (
-                <span className="inline-flex items-center gap-1" aria-label={`${formatRatingFr(p.avgRating)} sur 5, ${p.reviewCount} avis`}>
-                  <span className="text-founder" aria-hidden="true">★</span>
-                  <span className="font-semibold">{formatRatingFr(p.avgRating)}</span>
-                  <span className="text-muted-foreground">· {p.reviewCount} avis</span>
+      <span aria-hidden="true" className="profile-notebook-spiral" />
+      <div className="profile-notebook-page relative mx-auto flex max-w-6xl flex-col gap-5 py-6 pr-4 md:flex-row md:items-center md:gap-6 md:py-7 md:pr-6" data-hero-content>
+        <div className="profile-hero-identity relative min-w-0 md:w-[360px] md:shrink-0">
+          <div className="flex items-start gap-4">
+            <Button
+              variant="ghost"
+              type="button"
+              onClick={p.onOpenAvatarLightbox}
+              disabled={!p.hasAvatarLightbox}
+              aria-label={`Agrandir la photo de ${p.firstName}`}
+              className="profile-print h-auto shrink-0 p-0 hover:bg-transparent disabled:cursor-default disabled:opacity-100"
+              data-hero-avatar
+            >
+              {hasPhoto ? (
+                <img
+                  src={avatarImageUrl(p.avatarUrl as string, 320)}
+                  alt={p.firstName}
+                  width={120}
+                  height={150}
+                  className="block h-[112px] w-[90px] object-cover md:h-[150px] md:w-[120px]"
+                />
+              ) : (
+                <span className="flex h-[112px] w-[90px] bg-muted items-center justify-center font-heading text-4xl text-foreground md:h-[150px] md:w-[120px]">
+                  {p.firstName?.charAt(0) || "?"}
                 </span>
               )}
-              {p.isAvailable && (
-                <span className="inline-flex items-center gap-1.5">
-                  <span aria-hidden="true" className="h-2 w-2 rounded-full bg-primary" /> Disponible
-                </span>
+            </Button>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs uppercase text-secondary font-body font-semibold">{eyebrow}</p>
+              <div className="mt-0.5 flex flex-wrap items-center gap-1 min-w-0">
+                <h1 className="font-heading text-[32px] md:text-[42px] font-semibold leading-tight text-foreground break-words min-w-0 max-w-full">
+                  {p.firstName}
+                </h1>
+                {p.identityVerified && <IdentityVerifiedMark firstName={p.firstName} />}
+                {!p.isOwnProfile && (
+                  <FavoriteButton targetType="sitter" targetId={p.id} size="md" />
+                )}
+              </div>
+              {place && <p className="mt-1 text-[15px] text-foreground font-body" data-hero-place>{place}</p>}
+              {facts.length > 0 && (
+                <p className="mt-1 text-[13.5px] text-muted-foreground font-body">{facts.join(" · ")}</p>
               )}
-              {p.hasActiveSubscription && <span className="text-muted-foreground">Abonné</span>}
-              {p.emergencyActive && <span className="text-muted-foreground">Gardien d'urgence</span>}
-              {p.statutGardien && p.statutGardien !== "novice" && <StatutGardienBadge statut={p.statutGardien as any} />}
-              <ResponsivenessBadge userId={p.id} />
-            </div>
-            <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1" data-hero-cta>
-              {renderCta()}
-              {reassurance && <p className="rounded-md bg-background/95 px-1.5 py-1 text-[12.5px] text-muted-foreground font-body">{reassurance}</p>}
+              {mobility.length > 0 && (
+                <p className="mt-1 text-[13.5px] text-foreground/80 font-body" data-hero-mobility>
+                  Peut se déplacer : {mobility.join(", ")}
+                </p>
+              )}
+              <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[13.5px] font-body text-foreground">
+                {p.avgRating > 0 && p.reviewCount > 0 && (
+                  <span className="inline-flex items-center gap-1" aria-label={`${formatRatingFr(p.avgRating)} sur 5, ${p.reviewCount} avis`}>
+                    <span className="text-founder" aria-hidden="true">★</span>
+                    <span className="font-semibold">{formatRatingFr(p.avgRating)}</span>
+                    <span className="text-muted-foreground">· {p.reviewCount} avis</span>
+                  </span>
+                )}
+                {p.isAvailable && (
+                  <span className="inline-flex items-center gap-1.5">
+                    <span aria-hidden="true" className="h-2 w-2 rounded-full bg-primary" /> Disponible
+                  </span>
+                )}
+                {p.hasActiveSubscription && <span className="text-muted-foreground">Abonné</span>}
+                {p.emergencyActive && <span className="text-muted-foreground">Gardien d'urgence</span>}
+                {p.statutGardien && p.statutGardien !== "novice" && <StatutGardienBadge statut={p.statutGardien as any} />}
+                <ResponsivenessBadge userId={p.id} />
+              </div>
+              <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1" data-hero-cta>
+                {renderCta()}
+                {reassurance && (
+                  <span className="text-[12.5px] text-muted-foreground font-body">{reassurance}</span>
+                )}
+              </div>
             </div>
           </div>
         </div>
 
+        <picture className="profile-notebook-art relative block min-w-0 flex-1" data-hero-gouache>
+          <source media="(max-width: 639px)" srcSet={p.heroMobile} />
+          <img
+            src={p.heroDesktop}
+            alt=""
+            aria-hidden="true"
+            data-hero-anchor={p.heroAnchor}
+            data-hero-notebook={/hero-63(?:[.-])/.test(p.heroDesktop) || undefined}
+            width={1536}
+            height={544}
+            loading="eager"
+            decoding="async"
+            className="profile-hero-art block h-auto w-full object-contain"
+          />
+        </picture>
       </div>
       {p.isOwnProfile && (
             <Button
