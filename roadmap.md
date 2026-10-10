@@ -1,5 +1,19 @@
 # Roadmap
 
+## État actuel (10/10/2026, 18:45 Paris)
+
+- L1 à L7 livrés et publiés en version réduite (base publiée c33531b2, déploiement 33330154 réussi). Les sections plus bas qui disent « non publié » ou « L6 non lancé » sont historiques.
+- Correction de publication réussie : texte IdentityVerifiedMark reformulé, garde test:guard conservée dans le build, liste de référence vide.
+- L5 hero et gouaches laissés en l'état actuel.
+- L1 membre non admin : dérogation conservée, contrôle RLS non admin non passé.
+- Limites explicites, non levées : pas de matrice mobile complète, pas de recette avec session réelle de membre, pas de sauvegarde réelle de profil testée.
+- L7 reliquat fermé : test d'intégration src/__tests__/seo4/search-sitter-outage-retry.test.tsx sur le vrai SearchSitter (panne en liste et carte, aucun 0 ni bandeau d'élargissement, Réessayer avec mêmes critères puis reprise). Aucun correctif applicatif nécessaire.
+
+Tâches encore actives :
+- Envoi test entraide-ligne-relance (droits admin requis).
+- Fonction sitemap à déployer et migration acquire_proximity_send_claim à appliquer (GO de Jérémie).
+- Recette mobile et session membre réelle (non faite).
+
 ## Diagnostic publication du 10/10/2026
 - [x] Préétapes sync/robots et lectures sitemap bornées, sans écriture.
 - [x] Annuler la séparation CI seule et rétablir la garde obligatoire en fin de publication.
@@ -12,10 +26,10 @@
 - [x] 8 tests ciblés verts, build automatique vert et contrôle visuel desktop.
 
 ## Reprise ciblée L5, hero immersif (10/10/2026)
-- [ ] Remplacer la composition en colonnes par une gouache continue et une protection locale du texte.
-- [ ] Tests pertinents et contrôles automatiques du build et des types.
-- [ ] Inspecter visuellement quatre profils aux six largeurs, ID et ouverture picker sans sauvegarde.
-- [ ] Consigner preuves et limites dans plan/TODO. L5 attend validation root, L6 non lancé, aucune publication.
+- [x] (historique, publié en l'état) Remplacer la composition en colonnes par une gouache continue et une protection locale du texte.
+- [x] Tests pertinents et contrôles automatiques du build et des types.
+- [ ] (limite conservée) Inspecter visuellement quatre profils aux six largeurs, ID et ouverture picker sans sauvegarde.
+- [x] Consigner preuves et limites (historique : L5 à L7 publiés depuis).
 
 ## Lot E7, page Entraide vue d'un membre
 
