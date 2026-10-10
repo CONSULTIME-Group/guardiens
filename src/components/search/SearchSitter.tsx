@@ -1701,7 +1701,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
     {(() => {
       // En vue carte, ce bandeau pousse la carte hors du viewport : il reste
       // réservé à la vue liste.
-      const showOutOfZone = viewMode !== "map" && tab === "sits" && !loading && zoneMode !== "france" && densityCounts.france > densityCounts.radius;
+      const showOutOfZone = viewMode !== "map" && tab === "sits" && !loading && zoneMode !== "france" && appliedZone !== "france" && densityCounts.france > densityCounts.radius;
       return showOutOfZone ? (
         <OutOfZoneBanner
           zoneMode={zoneMode}
