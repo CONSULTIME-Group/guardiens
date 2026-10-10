@@ -120,9 +120,13 @@ export function resolveSitPlace(s: SitPlaceInput): SitPlace {
   const o = s.owner ?? null;
   const oCity = cleanStr(o?.city);
   const oCountry = cleanStr(o?.country).toUpperCase() || null;
-  if (oCity && oCountry) {
-    const dept = oCountry === "FR" ? normDept(o?.departement_code) ?? deptFromPostalStrict(o?.postal_code) : null;
-    return { city: oCity, country: oCountry, dept, source: "owner" };
+  if (oCity) {
+    // Ville du propriétaire = base. Pays du propriétaire, sinon pays de
+    // l'annonce en repli (jamais FR déduit). Département lu sur le seul profil
+    // du propriétaire, jamais celui de l'annonce accolé à sa ville.
+    const country = oCountry || cleanStr(s.country).toUpperCase() || null;
+    const dept = country === "FR" ? normDept(o?.departement_code) ?? deptFromPostalStrict(o?.postal_code) : null;
+    return { city: oCity, country, dept, source: "owner" };
   }
   const sCity = cleanStr(s.city);
   const sCountry = cleanStr(s.country).toUpperCase() || null;
@@ -149,6 +153,22 @@ export const sitGeocodeKeyString = (s: SitPlaceInput): string | null => {
 export const isFrancePlace = (s: SitPlaceInput): boolean => resolveSitPlace(s).country === "FR";
 
 export const sitDeptCode = (s: SitPlaceInput): string | null => resolveSitPlace(s).dept;
+
+/**
+ * Vérification d'un point géocodé (L1, Montreuil) : en France, quand le lieu
+ * résolu porte un département, le point n'est retenu que si son département
+ * (communeDeptFromCoords) est le même. Discordance ou vérification impossible :
+ * le point est écarté (aucune distance, aucun rayon, « lieu à préciser »).
+ * Sans département de référence, rien à comparer : point conservé.
+ */
+export type PointCheck = "verified" | "mismatch" | "unverifiable" | "not_applicable";
+export function checkGeocodedPoint(place: Pick<SitPlace, "country" | "dept">, pointDept: string | null | undefined): PointCheck {
+  if (place.country !== "FR" || !place.dept) return "not_applicable";
+  const pd = normDept(pointDept);
+  if (!pd) return "unverifiable";
+  return pd === normDept(place.dept) ? "verified" : "mismatch";
+}
+export const pointUsable = (c: PointCheck): boolean => c === "verified" || c === "not_applicable";
 
 /** Inclusion stricte dans un rayon : coordonnées vérifiées et distance <= rayon. */
 export function isWithinRadius(distanceKm: number | null | undefined, radiusKm: number): boolean {

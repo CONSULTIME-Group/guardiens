@@ -30,7 +30,7 @@ import { Search, MapPin, Lock, Sparkles, Globe2, X, AlertCircle, RefreshCw } fro
 import { format, differenceInDays, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
-import { applyOpenSitFilter, communeDeptFromCoords, fetchAllPages, fetchInChunks, isEndedSit, isFrancePlace, isOpenSit, isPastSit, isWithinRadius, parisTodayIso, resolveSitPlace, sitGeocodeKey, sitGeocodeKeyString } from "@/lib/sitSearchRules";
+import { applyOpenSitFilter, checkGeocodedPoint, communeDeptFromCoords, pointUsable, fetchAllPages, fetchInChunks, isEndedSit, isFrancePlace, isOpenSit, isPastSit, isWithinRadius, parisTodayIso, resolveSitPlace, sitGeocodeKey, sitGeocodeKeyString } from "@/lib/sitSearchRules";
 import { sanitizeBioForCard } from "@/lib/sanitizeBio";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import FavoriteButton from "@/components/shared/FavoriteButton";
@@ -737,19 +737,27 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
    today: string,
   ) => {
    const coordsByKey = new Map<string, { lat: number; lng: number }>();
-   const keys = new Map<string, { city: string; country: string | null }>();
+   const keys = new Map<string, { city: string; country: string | null; place: ReturnType<typeof resolveSitPlace> }>();
    items.forEach((s) => {
-     const g = sitGeocodeKey(s); const k = sitGeocodeKeyString(s);
-     if (g && k) keys.set(k, g);
+     const g = sitGeocodeKey(s); const pl = resolveSitPlace(s);
+     // Clé incluant le département : même commune, départements différents
+     // (Montreuil 93 / 62) vérifiés séparément.
+     const k0 = sitGeocodeKeyString(s); const k = k0 ? `${k0}::${pl.dept ?? ""}` : null;
+     if (g && k) keys.set(k, { ...g, place: pl });
    });
    await Promise.all([...keys.entries()].map(async ([k, g]) => {
      const c = await geocodeCity(g.city, g.country);
-     if (c) coordsByKey.set(k, { lat: c.lat, lng: c.lng });
+     if (!c) return;
+     const check = g.place.country === "FR" && g.place.dept
+       ? checkGeocodedPoint(g.place, await communeDeptFromCoords(c.lat, c.lng))
+       : "not_applicable";
+     // Point discordant ou invérifiable : jamais une coordonnée vérifiée.
+     if (pointUsable(check)) coordsByKey.set(k, { lat: c.lat, lng: c.lng });
    }));
    const placeOf = (s: any) => resolveSitPlace(s);
    const coordsOf = (s: any) => {
-     const k = sitGeocodeKeyString(s);
-     return k ? coordsByKey.get(k) ?? null : null;
+     const k0 = sitGeocodeKeyString(s);
+     return k0 ? coordsByKey.get(`${k0}::${resolveSitPlace(s).dept ?? ""}`) ?? null : null;
    };
 
    const french = items.filter((s) => isFrancePlace(s));
