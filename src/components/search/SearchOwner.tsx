@@ -922,6 +922,54 @@ const SearchOwner = () => {
   const expansion = suggestExpansion();
   const isLaunchMode = sitterCountries.length > 0 && totalSearchable === 0;
 
+  const applyExpansion = (target: ZoneMode | "all") => {
+    if (target === "all") handleCountryChange(null);
+    else setZoneMode(target);
+  };
+
+  const resetFilters = () => {
+    setVehicled(false);
+    setAvailableOnly(false);
+    setVerifiedOnly(false);
+    setEmergencyOnly(false);
+    setAnimalTypes([]);
+    setMinSits("all");
+    setMinRating("all");
+  };
+
+  // Animal type helpers
+  const animalLabel = animalTypes.length > 0
+    ? animalTypes.length <= 2 ? animalTypes.join(", ") : `${animalTypes.length} types`
+    : "Animaux";
+
+  const toggleAnimal = (chip: string) => {
+    if (chip === "Tous") { setAnimalTypes(prev => prev.includes("Tous") ? [] : ["Tous"]); return; }
+    setAnimalTypes(prev => {
+      const filtered = prev.filter(a => a !== "Tous");
+      return filtered.includes(chip) ? filtered.filter(a => a !== chip) : [...filtered, chip];
+    });
+  };
+
+  const pillBase = "snap-start flex items-center gap-2 px-4 py-2 min-h-11 rounded-full border border-border bg-card cursor-pointer hover:border-primary transition-colors text-sm whitespace-nowrap shrink-0";
+  const pillActive = "snap-start flex items-center gap-2 px-4 py-2 min-h-11 rounded-full border border-primary bg-primary/10 text-primary cursor-pointer transition-colors text-sm font-medium whitespace-nowrap shrink-0";
+
+  const sortPillBase = "snap-start shrink-0 rounded-full px-3 py-1 min-h-9 inline-flex items-center text-xs border border-border text-muted-foreground cursor-pointer hover:border-primary transition-colors whitespace-nowrap";
+  const sortPillActive = "snap-start shrink-0 rounded-full px-3 py-1 min-h-9 inline-flex items-center text-xs bg-primary/10 text-primary border border-primary/30 font-semibold cursor-pointer whitespace-nowrap";
+
+  // Rayon : dès qu'une ville est choisie, dans tout pays (centre géocodé
+  // avec son pays). Département et région : France seulement, masqués
+  // ailleurs plutôt que laissés grisés avec des chiffres français.
+  const zoneChips: Array<{ key: ZoneMode; label: string; count: number; disabled?: boolean }> = [
+    { key: "radius", label: `${radius[0]} km`, count: densityCounts.radius, disabled: !city },
+    ...(refDept
+      ? [
+          { key: "dept" as ZoneMode, label: `Dép. ${refDept}`, count: densityCounts.dept },
+          ...(refRegion ? [{ key: "region" as ZoneMode, label: REGION_NAMES[refRegion] ?? "Ma région", count: densityCounts.region }] : []),
+        ]
+      : []),
+    { key: "country", label: selectedCountry === null ? "Tous les pays" : `${countryName(selectedCountry)} entière`, count: densityCounts.country },
+  ];
+
   // SEO vague 40 : page indexable pour capter la demande organique.
   const seoTitle = "Trouver un gardien d'animaux près de chez vous · Guardiens";
   const seoDescription = "Consultez librement les profils de gardiens d'animaux en France : chats, chiens, NAC. Inscription avec une adresse email pour contacter un gardien.";
