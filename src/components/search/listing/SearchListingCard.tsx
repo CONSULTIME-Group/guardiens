@@ -10,7 +10,7 @@ import AffinityBadge from "@/components/matching/AffinityBadge";
 import { useAffinityWithShadow } from "@/hooks/useAffinityWithShadow";
 import { useDepartementNames } from "@/hooks/useDepartementNames";
 import { departementNameFromCode, formatCityDepartement } from "@/lib/locationLabel";
-import { sitCommune, sitLocationLabel } from "@/lib/sitLocation";
+import { deptCodeFromPostal, sitCommune, sitLocationLabel } from "@/lib/sitLocation";
 import { projetMetaLine, projetNatureLabel } from "@/lib/projets";
 
 
@@ -68,7 +68,7 @@ const SearchListingCard = ({
     : sitLocationLabel({
         // Code postal du profil affiché seulement s'il correspond au département
         // du lieu de garde (correspondance validée), sinon département seul.
-        postalCode: !isSitPlace || deptCodeFromPostal((item.owner as any)?.postal_code) === (item as any).locationDept
+        postalCode: !isSitPlace || (!!(item as any).locationDept && deptCodeFromPostal((item.owner as any)?.postal_code) === (item as any).locationDept)
           ? (item.owner as any)?.postal_code
           : null,
         departementName: deptName,
