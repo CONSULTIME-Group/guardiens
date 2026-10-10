@@ -66,7 +66,7 @@ export function ConversationsTab({ since }: { since: string }) {
   const shown = (v: React.ReactNode) => (corpusError ? UNAVAILABLE_LABEL : isLoading ? "…" : v);
 
   // Lot A10 : taux « suivies d'une action » calculé en SQL sur toutes les conversations.
-  const { data: followedRaw, isError: followedError } = useQuery({
+  const { data: followedRaw, isError: followedError, isLoading: followedLoading, refetch: refetchFollowed } = useQuery({
     queryKey: ["admin-alma-conversation-followed", since],
     queryFn: async () => {
       // Lot J3 : seules les réponses qui proposent une action comptent, et
@@ -139,13 +139,17 @@ export function ConversationsTab({ since }: { since: string }) {
           <CardContent className="p-4">
             <p className="text-xs text-muted-foreground">Réponses avec action, suivies sous dix minutes</p>
             <p className="text-2xl font-semibold">
-              {followedError ? UNAVAILABLE_LABEL : followed.rate === null ? "Non mesurable" : pct(followed.rate)}
+              {followedLoading ? "…" : followedError ? UNAVAILABLE_LABEL : followed.rate === null ? "Non mesurable" : pct(followed.rate)}
             </p>
-            <p className="text-xs text-muted-foreground">
-              {followed.rate === null
-                ? "Aucune réponse de la période ne propose d'action, comptes admins exclus."
-                : `${followed.count} sur ${followed.total} réponses avec une action proposée`}
-            </p>
+            {followedError ? (
+              <Button variant="outline" size="sm" onClick={() => void refetchFollowed()}>Réessayer</Button>
+            ) : !followedLoading && followedRaw ? (
+              <p className="text-xs text-muted-foreground">
+                {followed.rate === null
+                  ? "Aucune réponse de la période ne propose d'action, comptes admins exclus."
+                  : `${followed.count} sur ${followed.total} réponses avec une action proposée`}
+              </p>
+            ) : null}
           </CardContent>
         </Card>
         <Card>
@@ -221,12 +225,12 @@ export function ConversationsTab({ since }: { since: string }) {
         <Button variant="outline" size="sm" onClick={exportCsv} disabled={!ready}>
           <Download className="h-4 w-4 mr-2" aria-hidden="true" /> Exporter
         </Button>
-        <span className="text-xs text-muted-foreground">{paged.total} trouvé{paged.total > 1 ? "s" : ""}</span>
+        {ready && <span className="text-xs text-muted-foreground">{paged.total} trouvé{paged.total > 1 ? "s" : ""}</span>}
       </div>
 
       <div className="space-y-2">
         {isLoading && <p className="text-sm text-muted-foreground">Chargement du corpus.</p>}
-        {paged.visible.map((r) => (
+        {ready && paged.visible.map((r) => (
           <Card key={r.id}>
             <CardContent className="p-4 space-y-2">
               <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
@@ -248,7 +252,7 @@ export function ConversationsTab({ since }: { since: string }) {
             </CardContent>
           </Card>
         ))}
-        <Pager page={paged.page} total={paged.total} onPage={paged.setPage} />
+        {ready && <Pager page={paged.page} total={paged.total} onPage={paged.setPage} />}
       </div>
     </div>
   );

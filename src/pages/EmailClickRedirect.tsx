@@ -19,6 +19,7 @@ function safeTarget(raw: string | null): string {
   try {
     const u = new URL(raw)
     const allowed = new Set(['guardiens.fr', 'www.guardiens.fr', 'guardiens.lovable.app'])
+    if (u.protocol !== 'https:' && u.protocol !== 'http:') return FALLBACK
     if (!allowed.has(u.hostname)) return FALLBACK
     return u.toString()
   } catch {
