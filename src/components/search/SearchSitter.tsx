@@ -2439,10 +2439,10 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
          <Link
            to="/annonces/international"
            className="inline-flex items-center gap-2 rounded-full border border-border bg-card hover:bg-accent hover:border-primary/40 text-sm text-foreground px-4 py-2 transition-colors"
-           aria-label={intlCount === null ? "Voir les annonces hors France" : t("search_results.intl_link_aria", { count: intlCount })}
+           aria-label={intlCount === null ? t("search_results.intl_link_nocount", { defaultValue: "Voir les annonces hors France" }) : t("search_results.intl_link_aria", { count: intlCount })}
          >
            <Globe2 className="h-4 w-4 text-muted-foreground" />
-           <span>{intlCount === null ? "Voir les annonces hors France" : t("search_results.intl_link", { count: intlCount })}</span>
+           <span>{intlCount === null ? t("search_results.intl_link_nocount", { defaultValue: "Voir les annonces hors France" }) : t("search_results.intl_link", { count: intlCount })}</span>
          </Link>
        </div>
      )}
