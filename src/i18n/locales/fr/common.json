@@ -1790,6 +1790,7 @@
     "group_past_sub": "Signal d'activité dans la zone, non actionnables",
     "load_more_one": "Voir plus d'annonces ({{count}} restante)",
     "load_more_other": "Voir plus d'annonces ({{count}} restantes)",
+    "intl_link_nocount": "Vous cherchez à l'étranger ? Voir les annonces hors France",
     "intl_link_one": "Vous cherchez à l'étranger ? Voir {{count}} annonce hors France",
     "intl_link_other": "Vous cherchez à l'étranger ? Voir les {{count}} annonces hors France",
     "intl_link_aria_one": "Voir {{count}} annonce hors France",
