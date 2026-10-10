@@ -36,7 +36,7 @@ describe("R1 sitterCardLine", () => {
 });
 
 const base = (bio: string | null) => ({
-  user_id: "u1", sitter_type: "Couple", has_vehicle: true, animal_types: ["Chiens", "Chevaux"], avgRating: 4.9,
+  user_id: "u1", sitter_type: "Couple", has_vehicle: true, animal_types: ["Chiens", "Chevaux"], avgRating: 4.9, reviewCount: 7,
   profile: { first_name: "Léa", city: "Lyon", bio, completed_sits_count: 3 },
 });
 const mount = (s: any) => render(<MemoryRouter><SitterResultCard sitter={s} photos={[]} affinity={null}
@@ -51,7 +51,8 @@ describe("R1 rendu SitterResultCard", () => {
   it("sans bio : ligne seule, meta intacte", () => {
     mount(base(null));
     expect(screen.getByTestId("sitter-card-line").textContent).toBe("En couple · chevaux · véhiculé");
-    expect(screen.getByText("4,9 sur 3 gardes")).toBeTruthy();
+    // Lot L4 : note sur le nombre d avis (7), gardes réalisées à part (3).
+    expect(screen.getByText("4,9/5 sur 7 avis · 3 gardes réalisées")).toBeTruthy();
     expect(screen.queryByText(/«/)).toBeNull();
   });
 });

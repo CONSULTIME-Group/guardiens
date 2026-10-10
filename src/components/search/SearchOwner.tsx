@@ -43,10 +43,11 @@ import { trackEvent } from "@/lib/analytics";
 import TrustHaloAvatar from "@/components/sitters/TrustHaloAvatar";
 import ReachReassuranceBanner from "@/components/marketing/ReachReassuranceBanner";
 import PresenceBadge from "@/components/messages/PresenceBadge";
-import ReplyTimeBadge from "@/components/sitters/ReplyTimeBadge";
 import OwnerToSitterAffinity from "@/components/matching/OwnerToSitterAffinity";
 import OwnerAffinityBanner from "@/components/matching/OwnerAffinityBanner";
 import SitterResultCard from "@/components/search/SitterResultCard";
+import { ratingSummary } from "@/lib/cardFacts";
+import { responsivenessLabel } from "@/components/profile/ResponsivenessBadge";
 import { sitterCardLine } from "@/lib/sitterDistinctLine";
 import OwnerLocationPicker from "@/components/search/header/OwnerLocationPicker";
 import { useViewerOwnerForAffinity } from "@/hooks/useViewerOwnerForAffinity";
@@ -760,11 +761,14 @@ const SearchOwner = () => {
     // sous le plafond serveur de 1 000 lignes, quelle que soit la taille du vivier.
     const allUserIds = allItems.map((s: any) => s.user_id);
     const idChunks = chunkArray(allUserIds, 100);
-    const [badgeResults, emergencyResults, galleryResults, reviewResults] = await Promise.all([
+    const [badgeResults, emergencyResults, galleryResults, reviewResults, tierResults, helpResults] = await Promise.all([
       Promise.all(idChunks.map((ids) => supabase.from("public_badge_attributions").select("user_id, badge_id").in("user_id", ids))),
       Promise.all(idChunks.map((ids) => supabase.from("public_emergency_sitter_profiles").select("user_id, is_active").in("user_id", ids).eq("is_active", true))),
       Promise.all(idChunks.map((ids) => supabase.from("sitter_gallery").select("user_id, photo_url, created_at").in("user_id", ids).order("created_at", { ascending: false }))),
       Promise.all(idChunks.map((ids) => supabase.from("reviews").select("reviewee_id, overall_rating").in("reviewee_id", ids).eq("published", true))),
+      // Lot L4 : palier public de réactivité (90 j, 5 contacts) et offre d'entraide opt-in.
+      Promise.all(idChunks.map((ids) => (supabase as any).from("public_responsiveness").select("user_id, tier").in("user_id", ids))),
+      Promise.all(idChunks.map((ids) => supabase.from("public_profiles").select("id").in("id", ids).eq("available_for_help", true))),
     ]);
     if (stale()) return;
 
@@ -776,6 +780,9 @@ const SearchOwner = () => {
       return;
     }
 
+    // Signaux secondaires : une panne les rend neutres, sans bloquer la liste.
+    const tierMap = new Map<string, string>(tierResults.flatMap((r: any) => r.error ? [] : r.data ?? []).map((t: any) => [t.user_id, t.tier]));
+    const helpSet = new Set<string>(helpResults.flatMap((r: any) => r.error ? [] : r.data ?? []).map((h: any) => h.id));
     const emergencySet = new Set(emergencyResults.flatMap((r: any) => r.data ?? []).map((e: any) => e.user_id));
 
     const reviewsAgg = new Map<string, { sum: number; count: number }>();
@@ -814,7 +821,7 @@ const SearchOwner = () => {
       const affinity = viewerOwner
         ? computeAffinityResultFull(viewerOwner as AffinityOwnerInput, s as AffinitySitterInput)
         : null;
-      return { ...s, avgRating, reviewCount: agg?.count || 0, topBadges, isEmergency: emergencySet.has(s.user_id), _photos: photos, _affinity: affinity };
+      return { ...s, avgRating, reviewCount: agg?.count || 0, topBadges, isEmergency: emergencySet.has(s.user_id), _photos: photos, _affinity: affinity, _responsivenessTier: tierMap.get(s.user_id) ?? null, _helpOffered: helpSet.has(s.user_id) };
     });
 
     setRawResults(enrichedAll);
@@ -1805,10 +1812,9 @@ const SearchOwner = () => {
                 </div>
               )}
             {results.length > 0 && <OwnerAffinityBanner className="mb-4" />}
-            {/* Grille dense 4 col desktop / 3 laptop / 2 tablette / 1 mobile.
-                Padding-right sur >= xl pour éviter que la dernière colonne passe
-                sous le AlmaDock fixé (right-6 md:). */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 auto-rows-fr xl:pr-16">
+            {/* Lot L4 : colonnes calculées sur la largeur UTILE (cartes de 280 px
+                minimum), hauteur de ligne libre, marge basse pour le dock Alma. */}
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,280px),1fr))] gap-5 pb-24">
               {(() => {
                 const nameCounts: Record<string, number> = {};
                 results.forEach((s: any) => {
@@ -1853,11 +1859,7 @@ const SearchOwner = () => {
                 s._dist === 0 ? "Dans votre ville" : (s._dist != null && s._dist !== Infinity) ? `${s._dist} km` : null;
               const metaBits = [
                 distTxt,
-                s.avgRating != null && nSits > 0
-                  ? `${s.avgRating.toFixed(1).replace(".", ",")} sur ${nSits} garde${nSits > 1 ? "s" : ""}`
-                  : nSits > 0
-                    ? `${nSits} garde${nSits > 1 ? "s" : ""}`
-                    : null,
+                ratingSummary(s.avgRating, s.reviewCount || 0, nSits),
               ].filter(Boolean) as string[];
               return (
                 <div
@@ -1894,7 +1896,9 @@ const SearchOwner = () => {
                     })()}
                     <div className="flex items-center gap-1.5 flex-wrap mt-1">
                       <PresenceBadge lastSeenAt={profile?.last_seen_at} />
-                      <ReplyTimeBadge minutes={s.reply_median_minutes} />
+                      {responsivenessLabel(s._responsivenessTier) && (
+                        <span className="text-[11px] text-muted-foreground">{responsivenessLabel(s._responsivenessTier)}</span>
+                      )}
                     </div>
                   </div>
                   <span
