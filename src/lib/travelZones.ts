@@ -133,18 +133,21 @@ export interface MobileSitter {
 }
 
 /**
- * « Peut venir ici » : une zone déclarée couvre la destination (OU), ou le
- * gardien habite le pays de destination et, si une ville est donnée, se
- * trouve dans son rayon (distance sur positions approximatives). Un gardien
- * « local » hors de son rayon n'est pas retenu.
+ * « Peut venir ici » : ne lit que les zones DÉCLARÉES. NULL ou [] = jamais
+ * retenu (aucune mobilité inventée, aucun opt-in implicite par la résidence).
+ * world, continent, pays ou région déclarés couvrent la destination. « local »
+ * seul : retenu uniquement avec une ville de destination, même pays, et
+ * position approximative dans le rayon ; sans ville, local ne couvre pas un
+ * pays entier.
  */
 export function canComeTo(s: MobileSitter, dest: Destination): boolean {
   const zones = normalizeTravelZones(s.travel_zones);
+  if (!zones || zones.length === 0) return false;
   const tokens = new Set(destinationTokens(dest));
-  if (zones && zones.some((z) => tokens.has(z))) return true;
-  const resident = (s.country ?? "").toUpperCase() === dest.country.toUpperCase();
-  if (!resident) return false;
-  if (!dest.center) return true;
+  if (zones.some((z) => tokens.has(z))) return true;
+  if (!zones.includes("local")) return false;
+  if ((s.country ?? "").toUpperCase() !== dest.country.toUpperCase()) return false;
+  if (!dest.center) return false;
   const lat = s.profile?.latitude_approx, lng = s.profile?.longitude_approx;
   if (typeof lat !== "number" || typeof lng !== "number") return false;
   const d = haversineDistance(dest.center.lat, dest.center.lng, lat, lng);
