@@ -1298,7 +1298,7 @@ export default function PublicSitterProfile() {
   // Relative date helper
   const anciennete = (dateStr: string) => {
     const months = Math.floor((Date.now() - new Date(dateStr).getTime()) / (30 * 86400000));
-    if (months < 1) return 'Ce mois';
+    if (months < 1) return format(new Date(dateStr), 'MMMM yyyy', { locale: fr });
     if (months < 12) return `${months} mois`;
     const y = Math.floor(months / 12);
     return `${y} an${y > 1 ? 's' : ''}`;

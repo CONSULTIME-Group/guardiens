@@ -1346,7 +1346,9 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  const demoCount = results.filter((r: any) => r.is_demo).length;
  const resultCount = tab === "missions" && missionSubTab === "members" ? availableMembers.length : availableSitsCount;
   // hasNoLocalRealMissions retiré : OutOfZoneBanner couvre déjà ce cas.
- const countLabel = tab === "missions" && missionSubTab === "members"
+ const countLabel = searchError
+ ? "Recherche indisponible"
+ : tab === "missions" && missionSubTab === "members"
  ? t("search_results.count_members", { count: resultCount })
   : resultCount === 0 && demoCount > 0
   ? t("search_results.count_demo", { count: demoCount })
@@ -1659,7 +1661,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
         setWithPhotosOnly={setWithPhotosOnly}
          duration={duration as any}
          setDuration={setDuration as any}
-         currentResultsCount={availableSitsCountForDrawer}
+         currentResultsCount={searchError ? undefined : availableSitsCountForDrawer}
         loading={loading}
         onApply={() => {
           doSearch();
@@ -1736,7 +1738,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
     {(() => {
       // En vue carte, ce bandeau pousse la carte hors du viewport : il reste
       // réservé à la vue liste.
-      const showOutOfZone = viewMode !== "map" && tab === "sits" && !loading && zoneMode !== "france" && appliedZone !== "france" && densityCounts.france > (zoneMode === "dept" ? densityCounts.dept : zoneMode === "region" ? densityCounts.region : densityCounts.radius);
+      const showOutOfZone = !searchError && viewMode !== "map" && tab === "sits" && !loading && zoneMode !== "france" && appliedZone !== "france" && densityCounts.france > (zoneMode === "dept" ? densityCounts.dept : zoneMode === "region" ? densityCounts.region : densityCounts.radius);
       return showOutOfZone ? (
         <OutOfZoneBanner
           zoneMode={zoneMode}
@@ -2096,27 +2098,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  {viewMode === "list" ? (
  <div className="p-6">
  {searchError ? (
-   <div
-     role="alert"
-     className="max-w-2xl mx-auto my-8 rounded-2xl border border-destructive/40 bg-destructive/5 p-6 text-center space-y-3"
-   >
-     <AlertCircle className="h-10 w-10 mx-auto text-destructive" aria-hidden="true" />
-     <h2 className="font-heading text-lg font-semibold text-foreground">
-       Une erreur est survenue lors de la recherche
-     </h2>
-     <p className="text-sm text-muted-foreground">
-       {searchError} Vérifiez votre connexion, puis réessayez.
-     </p>
-     <Button
-       type="button"
-       variant="outline"
-       onClick={() => { void doSearch(); }}
-       className="gap-2"
-     >
-       <RefreshCw className="h-4 w-4" aria-hidden="true" />
-       Réessayer
-     </Button>
-   </div>
+   <SearchErrorAlert message={searchError} onRetry={() => { void doSearch(); }} />
  ) : loading ? (
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-6 sm:gap-y-10">
     {Array.from({ length: 6 }).map((_, i) => (
@@ -2452,6 +2434,9 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  </div>
  ) : (
  /* ─── Map view ─── */
+ searchError ? (
+ <div className="p-6"><SearchErrorAlert message={searchError} onRetry={() => { void doSearch(); }} /></div>
+ ) : (
  <Suspense fallback={<div className="flex items-center justify-center h-[calc(100vh-200px)]"><p className="text-muted-foreground">{t("search_results.map_loading")}</p></div>}>
  <SearchMapView
  results={results}
@@ -2464,6 +2449,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  renderCard={renderCard}
  />
  </Suspense>
+ )
  )}
 
  </div>
@@ -2494,3 +2480,31 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
 };
 
 export default SearchSitter;
+
+/** Panne de recherche : même encart en liste et en carte, jamais un faux état vide. Réessayer relance avec les critères courants. */
+function SearchErrorAlert({ message, onRetry }: { message: string; onRetry: () => void }) {
+  return (
+
+   <div
+     role="alert"
+     className="max-w-2xl mx-auto my-8 rounded-2xl border border-destructive/40 bg-destructive/5 p-6 text-center space-y-3"
+   >
+     <AlertCircle className="h-10 w-10 mx-auto text-destructive" aria-hidden="true" />
+     <h2 className="font-heading text-lg font-semibold text-foreground">
+       Une erreur est survenue lors de la recherche
+     </h2>
+     <p className="text-sm text-muted-foreground">
+       {message} Vérifiez votre connexion, puis réessayez.
+     </p>
+     <Button
+       type="button"
+       variant="outline"
+       onClick={onRetry}
+       className="gap-2"
+     >
+       <RefreshCw className="h-4 w-4" aria-hidden="true" />
+       Réessayer
+     </Button>
+   </div>
+  );
+}

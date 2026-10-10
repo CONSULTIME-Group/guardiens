@@ -133,3 +133,4 @@ Navigateur local non connecté, ordinateur seulement (1280 px). Aucun audit mobi
 - [ ] L5 reste à valider par Jérémie ; L6 non commencé ; aucune publication.
 
 - L6 livré non publié (voir plan, section L6) ; recette visuelle et sauvegarde réelle à faire sur compte de test. L7 en attente de retour.
+- L7 réduit livré non publié (voir plan, section L7) ; limites : panne recherche sans test auto, captures édition non faites.
