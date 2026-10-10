@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
-  parisTodayIso, isFranceSit, isOpenSit, isEndedSit, isPastSit, sitGeocodeKey, sitDeptCode, resolveSitPlace, isWithinRadius, fetchAllPages, fetchInChunks, applyOpenSitFilter,
+  parisTodayIso, isFranceSit, isOpenSit, isEndedSit, isPastSit, sitGeocodeKey, resolveSitPlace, isFrancePlace, isWithinRadius, fetchAllPages, fetchInChunks, applyOpenSitFilter,
 } from "@/lib/sitSearchRules";
 
 describe("moteur d'annonces, règles L1", () => {
