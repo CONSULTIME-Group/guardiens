@@ -220,7 +220,7 @@ const ProfileHero = (p: ProfileHeroProps) => {
             </div>
             <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1" data-hero-cta>
               {renderCta()}
-              {reassurance && <p className="text-[12.5px] text-muted-foreground font-body">{reassurance}</p>}
+              {reassurance && <p className="rounded-md bg-background/95 px-1.5 py-1 text-[12.5px] text-muted-foreground font-body">{reassurance}</p>}
             </div>
           </div>
         </div>
