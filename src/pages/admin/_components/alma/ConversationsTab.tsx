@@ -7,6 +7,7 @@ import { adminLabel, SURFACE_LABELS, ALMA_REGISTER_LABELS, reasonLabel } from "@
  * la surface et le rôle actif.
  */
 import { useMemo } from "react";
+import type React from "react";
 import { Pager, SearchInput, usePagedSearch } from "@/components/admin/ui";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
@@ -28,6 +29,7 @@ import {
   type RawConversation,
 } from "@/lib/admin/alma-conversations";
 import { toCsv } from "@/lib/admin/alma-analytics";
+import { fetchAllRows } from "@/lib/admin/fetchAllRows";
 
 const ROW_LIMIT = 5000;
 
@@ -111,17 +113,26 @@ export function ConversationsTab({ since }: { since: string }) {
 
   return (
     <div className="space-y-4">
+      {corpusError && (
+        <div className="flex flex-wrap items-center gap-2 text-sm text-destructive">
+          <span>Corpus {UNAVAILABLE_LABEL.toLowerCase()} : la lecture a échoué, aucun chiffre n'est calculé.</span>
+          <Button variant="outline" size="sm" onClick={() => void corpus.refetch()}>Réessayer</Button>
+        </div>
+      )}
+      {truncated && (
+        <p className="text-xs text-muted-foreground">Données partielles : seules les {ROW_LIMIT} réponses les plus récentes de la période sont lues.</p>
+      )}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardContent className="p-4">
             <p className="text-xs text-muted-foreground">Échanges</p>
-            <p className="text-2xl font-semibold">{rows.length}</p>
+            <p className="text-2xl font-semibold">{shown(truncated ? `${rows.length}+` : rows.length)}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <p className="text-xs text-muted-foreground">Longueur moyenne des réponses</p>
-            <p className="text-2xl font-semibold">{avgLength} car.</p>
+            <p className="text-2xl font-semibold">{shown(`${avgLength} car.`)}</p>
           </CardContent>
         </Card>
         <Card>
@@ -140,9 +151,9 @@ export function ConversationsTab({ since }: { since: string }) {
         <Card>
           <CardContent className="p-4">
             <p className="text-xs text-muted-foreground">Part de la dictée</p>
-            <p className="text-2xl font-semibold">{pct(split.voiceShare)}</p>
+            <p className="text-2xl font-semibold">{shown(pct(split.voiceShare))}</p>
             <p className="text-xs text-muted-foreground">
-              {split.voice} voix, {split.keyboard} clavier
+              {ready ? `${split.voice} voix, ${split.keyboard} clavier` : ""}
             </p>
           </CardContent>
         </Card>
@@ -152,7 +163,9 @@ export function ConversationsTab({ since }: { since: string }) {
         <Card>
           <CardContent className="p-4 space-y-2">
             <p className="text-sm font-semibold">Thèmes</p>
-            {themes.length === 0 ? (
+            {!ready ? (
+              <p className="text-xs text-muted-foreground">{shown("")}</p>
+            ) : themes.length === 0 ? (
               <p className="text-xs text-muted-foreground">Aucun échange sur la période.</p>
             ) : (
               themes.map((t) => (
@@ -170,7 +183,9 @@ export function ConversationsTab({ since }: { since: string }) {
         <Card>
           <CardContent className="p-4 space-y-2">
             <p className="text-sm font-semibold">Refus par motif</p>
-            {refusals.length === 0 ? (
+            {!ready ? (
+              <p className="text-xs text-muted-foreground">{shown("")}</p>
+            ) : refusals.length === 0 ? (
               <p className="text-xs text-muted-foreground">Aucun refus sur la période.</p>
             ) : (
               refusals.map((r) => (
@@ -189,9 +204,9 @@ export function ConversationsTab({ since }: { since: string }) {
           <CardContent className="p-4 space-y-2">
             <p className="text-sm font-semibold">Répétition des ouvertures</p>
             <p className="text-xs text-muted-foreground">
-              Part des réponses partageant leurs cinq premiers mots : {pct(openings.repetitionRate)}
+              Part des réponses partageant leurs cinq premiers mots : {shown(pct(openings.repetitionRate))}
             </p>
-            {openings.groups.slice(0, 6).map((g) => (
+            {ready && openings.groups.slice(0, 6).map((g) => (
               <div key={g.opening} className="flex items-center justify-between gap-2 text-xs">
                 <span className="truncate">{g.opening}</span>
                 <span className="text-muted-foreground shrink-0">{g.count}</span>
@@ -203,7 +218,7 @@ export function ConversationsTab({ since }: { since: string }) {
 
       <div className="flex flex-wrap items-center gap-2">
         <SearchInput value={paged.query} onChange={paged.setQuery} placeholder="Rechercher dans le corpus" className="w-64" />
-        <Button variant="outline" size="sm" onClick={exportCsv}>
+        <Button variant="outline" size="sm" onClick={exportCsv} disabled={!ready}>
           <Download className="h-4 w-4 mr-2" aria-hidden="true" /> Exporter
         </Button>
         <span className="text-xs text-muted-foreground">{paged.total} trouvé{paged.total > 1 ? "s" : ""}</span>
