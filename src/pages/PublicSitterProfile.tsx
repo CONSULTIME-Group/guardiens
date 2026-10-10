@@ -80,7 +80,6 @@ import { petSpeciesLabel } from "@/lib/petLabels";
 import { isRadiusDeclared } from "@/lib/searchRadius";
 import { countLabel } from "@/lib/pluralizeFr";
 import {
-  SitterIdentityHero,
   SitterSkillsSection,
   EditorialReview,
   SitterAboutSection,
@@ -99,6 +98,7 @@ import {
   homeFactLabel,
   assetsLabel,
   listLabel,
+  companionsLabel,
 } from "@/lib/sitterProfileFacts";
 
 /** Pages entraide par ville réellement routées (App.tsx). */
