@@ -108,7 +108,7 @@ export function sitSituation(s: SitLike): Situation {
         // Code enregistré tel quel : on n'en déduit ni annulation réelle ni rôle.
         return { ...base, label: ARCHIVED_REASON_LABEL, detail: actor, tone: "outline" };
       }
-      return { ...base, label: who ? `Annulée ${who}` : "Annulée", detail: reason ? `Motif : ${reason}, ${who ? actor.toLowerCase() : "acteur non enregistré"}` : "Motif non renseigné", tone: "outline" };
+      return { ...base, label: who ? `Annulée ${who}` : "Annulée", detail: reason ? (who ? `Motif : ${reason}` : `Motif : ${reason}, acteur non enregistré`) : "Motif non renseigné", tone: "outline" };
     }
     default:
       return { ...base, label: `Statut inconnu : ${s.status ?? "non renseigné"}`, detail: null, tone: "destructive" };

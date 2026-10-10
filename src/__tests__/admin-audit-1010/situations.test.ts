@@ -13,6 +13,25 @@ describe("annonces : brouillon, retrait, masquage, annulation", () => {
     const s = sitSituation({ status: "draft" });
     expect(s.label).toBe("En préparation");
     expect(s.bucket).toBe("preparing");
+    expect(s.detail).toBe("Brouillon, aucun retrait enregistré, non visible");
+  });
+  it("confirmée, en cours, terminée, archivée : fiche consultable, avancement séparé", () => {
+    for (const status of ["confirmed", "in_progress", "completed", "archived"]) {
+      const s = sitSituation({ status });
+      expect(s.visible).toBe(true);
+      expect(s.visibility).toBe("Fiche consultable publiquement");
+    }
+    expect(sitSituation({ status: "confirmed" }).label).toBe("Gardien confirmé");
+  });
+  it("code archived : retrait / archivage enregistré, sans rôle inventé", () => {
+    const s = sitSituation({ status: "cancelled", user_id: "o1", cancellation_reason: "archived" });
+    expect(s.label).toBe("Retrait / archivage enregistré");
+    expect(s.detail).toBe("Acteur non enregistré");
+    const h = statusHistoryEvents([{ old_status: "published", new_status: "cancelled", changed_at: "2026-10-08T10:00:00Z", changed_by: "o1", reason: "archived" }], "o1");
+    expect(h[0]).toMatchObject({ at: "2026-10-08T10:00:00Z", actor: "Propriétaire", detail: "Retrait / archivage enregistré" });
+  });
+  it("motif connu, acteur absent : acteur non enregistré", () => {
+    expect(sitSituation({ status: "cancelled", user_id: "o1", cancellation_reason: "Voyage" }).detail).toBe("Motif : Voyage, acteur non enregistré");
   });
   it("found_offline : retirée par le propriétaire, solution trouvée ailleurs", () => {
     const s = sitSituation({ status: "draft", unpublished_at: "2026-10-01", last_unpublished_reason: "found_offline" });
@@ -129,5 +148,15 @@ describe("historique", () => {
     expect(t[2].source).toBe("admin_log");
     expect(t[1].actor).toBe("Propriétaire");
     expect(buildTimeline(sitFieldEvents({}))).toEqual([]);
+  });
+  it("garde deux actions réelles proches d'une même source et trie le résultat", () => {
+    const t = buildTimeline([
+      ...adminLogEvents([
+        { action: "hide_listing", created_at: "2026-10-06T09:03:00Z", note: "Doublon" },
+        { action: "hide_listing", created_at: "2026-10-06T09:01:00Z", note: "Signalement" },
+      ]),
+      ...sitFieldEvents({ created_at: "2026-10-06T09:02:00Z" }),
+    ]);
+    expect(t.map((e) => e.detail ?? e.kind)).toEqual(["Signalement", "create", "Doublon"]);
   });
 });
