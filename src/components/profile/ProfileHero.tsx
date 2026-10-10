@@ -2,9 +2,8 @@
  * Hero partagé du profil public, facettes gardien et propriétaire (lot L5).
  *
  * Contrat :
- *  - Un fond, pas une image pleine page avant l'identité : identité sur papier
- *    lisible à gauche, gouache entière (object-contain) à droite sur ordinateur,
- *    gouache sous l'identité sur mobile.
+ *  - Gouache en fond continu, identité superposée avec protection locale.
+ *    Aucun panneau image séparé, aucune illustration empilée sur mobile.
  *  - Données réelles uniquement : photo, prénom, ville et pays, mobilité
  *    déclarée, dernière visite (L3), palier de réactivité (L3), CTA.
  *  - Identité vérifiée : icône 44 px près du prénom (IdentityVerifiedMark).
@@ -12,6 +11,7 @@
  *  - Le sélecteur d'illustration reste réservé au propre profil.
  */
 import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import { Image as ImageIcon } from "lucide-react";
 import StatutGardienBadge from "@/components/profile/StatutGardienBadge";
 import FavoriteButton from "@/components/shared/FavoriteButton";
@@ -89,14 +89,16 @@ const ProfileHero = (p: ProfileHeroProps) => {
   const facts = heroFactLine(p);
   const mobility = (p.mobilityLabels ?? []).filter(Boolean);
   const hasPhoto = !!p.avatarUrl && !p.avatarUrl.includes("placeholder.svg");
+  // Asset focal subjects, not member-specific layout. Keep the cat/dog visible.
+  const leftSubject = /hero-(57|61)(?:[.-])/.test(p.heroDesktop);
 
   const baseCls =
-    "inline-flex min-h-11 items-center justify-center rounded-[99px] px-6 py-3 text-sm font-medium transition-colors";
+    "min-h-11 h-auto max-w-full whitespace-normal px-5 py-3 text-sm font-medium text-center";
   const renderCta = () => {
     const cta = p.cta;
     if (cta.kind === "own" || cta.kind === "muted") {
       return (
-        <button
+        <Button
           type="button"
           disabled
           aria-disabled="true"
@@ -104,21 +106,21 @@ const ProfileHero = (p: ProfileHeroProps) => {
           className={`${baseCls} bg-muted text-muted-foreground cursor-not-allowed opacity-70`}
         >
           {cta.kind === "own" ? (cta.label ?? "Aperçu de votre profil") : cta.label}
-        </button>
+        </Button>
       );
     }
     if (cta.kind === "unauthenticated") {
       return (
-        <Link to={cta.signupHref} className={`${baseCls} bg-primary text-primary-foreground hover:bg-primary/90`}>
+        <Button asChild className={baseCls}><Link to={cta.signupHref}>
           {cta.label ?? `S'inscrire pour contacter ${p.firstName}`}
-        </Link>
+        </Link></Button>
       );
     }
     const onClick = cta.kind === "owner" ? cta.onContact : cta.onActivate;
     return (
-      <button type="button" onClick={onClick} className={`${baseCls} bg-primary text-primary-foreground hover:bg-primary/90`}>
+      <Button type="button" onClick={onClick} className={baseCls}>
         {cta.label ?? `Contacter ${p.firstName}`}
-      </button>
+      </Button>
     );
   };
   const reassurance = p.ctaReassurance ?? (
@@ -133,19 +135,34 @@ const ProfileHero = (p: ProfileHeroProps) => {
 
   return (
     <header
-      className="relative w-full overflow-hidden bg-[hsl(var(--hero-paper))]"
+      className="profile-hero relative isolate w-full overflow-hidden"
       data-profile-hero
       data-facet={p.facet}
+      data-hero-subject={leftSubject ? "left" : "right"}
     >
-      <div className="relative max-w-6xl mx-auto flex flex-col lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,52%)] lg:min-h-[280px] lg:max-h-[340px]">
-        {/* Identité, sur papier lisible */}
-        <div className="relative z-10 min-w-0 px-4 md:px-6 pt-5 pb-4 lg:py-6 flex gap-4 md:gap-5 items-start">
-          <button
+      <picture className="absolute inset-0 -z-10" data-hero-gouache>
+        <source media="(max-width: 639px)" srcSet={p.heroMobile} />
+        <img
+          src={p.heroDesktop}
+          alt=""
+          aria-hidden="true"
+          data-hero-anchor={p.heroAnchor}
+          width={1536}
+          height={544}
+          loading="eager"
+          decoding="async"
+          className="profile-hero-art absolute inset-0 h-full w-full object-cover"
+        />
+      </picture>
+      <div className="relative mx-auto max-w-6xl px-4 py-6 md:px-6 md:py-7" data-hero-content>
+        <div className="profile-hero-identity relative min-w-0 flex items-start gap-3 md:gap-5">
+          <Button
+            variant="ghost"
             type="button"
             onClick={p.onOpenAvatarLightbox}
             disabled={!p.hasAvatarLightbox}
             aria-label={`Agrandir la photo de ${p.firstName}`}
-            className="shrink-0 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-default"
+            className="h-auto shrink-0 rounded-full p-0 hover:bg-transparent disabled:cursor-default disabled:opacity-100"
             data-hero-avatar
           >
             {hasPhoto ? (
@@ -154,19 +171,19 @@ const ProfileHero = (p: ProfileHeroProps) => {
                 alt={p.firstName}
                 width={128}
                 height={128}
-                className="block w-[88px] h-[88px] md:w-[128px] md:h-[128px] rounded-full object-cover border-4 border-background shadow-md"
+                className="block h-20 w-20 rounded-full object-cover border-4 border-background shadow-md md:h-24 md:w-24"
               />
             ) : (
-              <span className="flex w-[88px] h-[88px] md:w-[128px] md:h-[128px] rounded-full bg-muted border-4 border-background items-center justify-center font-heading text-4xl md:text-5xl text-foreground">
+              <span className="flex h-20 w-20 rounded-full bg-muted border-4 border-background items-center justify-center font-heading text-4xl text-foreground md:h-24 md:w-24">
                 {p.firstName?.charAt(0) || "?"}
               </span>
             )}
-          </button>
+          </Button>
 
           <div className="min-w-0 flex-1">
-            <p className="text-[11.5px] uppercase tracking-[0.16em] text-secondary font-body font-semibold">{eyebrow}</p>
-            <div className="mt-0.5 flex items-center gap-1 min-w-0">
-              <h1 className="font-heading text-[34px] md:text-[48px] font-semibold tracking-[-0.02em] leading-none text-foreground break-words min-w-0">
+            <p className="text-xs uppercase text-secondary font-body font-semibold">{eyebrow}</p>
+            <div className="mt-0.5 flex flex-wrap items-center gap-1 min-w-0">
+              <h1 className="font-heading text-[32px] md:text-[42px] font-semibold leading-tight text-foreground break-words min-w-0 max-w-full">
                 {p.firstName}
               </h1>
               {p.identityVerified && <IdentityVerifiedMark firstName={p.firstName} />}
@@ -203,40 +220,24 @@ const ProfileHero = (p: ProfileHeroProps) => {
             </div>
             <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1" data-hero-cta>
               {renderCta()}
-              {reassurance && <p className="text-[12.5px] text-muted-foreground font-body">{reassurance}</p>}
+              {reassurance && <p className="rounded-md bg-background/95 px-1.5 py-1 text-[12.5px] text-muted-foreground font-body">{reassurance}</p>}
             </div>
           </div>
         </div>
 
-        {/* Gouache personnalisée : entière, sujets lisibles, aucun voile. */}
-        <div className="relative w-full md:max-w-3xl md:mx-auto lg:max-w-none lg:h-full [aspect-ratio:1536/544] lg:[aspect-ratio:auto]" data-hero-gouache>
-          <img
-            src={p.heroDesktop}
-            srcSet={`${p.heroMobile} 768w, ${p.heroDesktop} 1536w`}
-            sizes="(min-width: 1024px) 52vw, 100vw"
-            alt=""
-            aria-hidden="true"
-            data-hero-anchor={p.heroAnchor}
-            width={1536}
-            height={544}
-            loading="eager"
-            decoding="async"
-            fetchPriority="high"
-            className="absolute inset-0 w-full h-full object-contain object-center"
-          />
-          {p.isOwnProfile && (
-            <button
+      </div>
+      {p.isOwnProfile && (
+            <Button
+              variant="outline"
               type="button"
               onClick={p.onOpenHeroPicker}
-              className="absolute top-3 right-3 z-20 inline-flex min-h-11 items-center gap-1.5 px-3.5 rounded-full bg-background/95 border border-border text-[13px] font-semibold text-foreground shadow-sm"
+              className="absolute bottom-3 right-3 z-20 min-h-11 h-auto gap-1.5 px-3.5 bg-background/95 text-[13px] font-semibold shadow-sm"
               title="Choisir une autre illustration de carnet"
             >
               <ImageIcon className="w-4 h-4" aria-hidden="true" />
               Changer l'image
-            </button>
+            </Button>
           )}
-        </div>
-      </div>
     </header>
   );
 };

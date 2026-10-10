@@ -1076,6 +1076,43 @@
     color: hsl(var(--foreground));
   }
 
+  /* Local readability wash only: the gouache remains untouched elsewhere. */
+  .profile-hero {
+    background-color: hsl(var(--hero-paper));
+    min-height: 320px;
+  }
+
+  .profile-hero-art { object-position: center 24%; }
+  .profile-hero-art[data-hero-anchor="left"] { object-position: left center; }
+  .profile-hero-art[data-hero-anchor="right"] { object-position: right center; }
+
+  .profile-hero-identity { max-width: 600px; }
+  .profile-hero[data-hero-subject="left"] .profile-hero-identity { margin-left: auto; }
+  @media (min-width: 1024px) {
+    .profile-hero[data-hero-subject="left"] .profile-hero-identity { max-width: 460px; }
+  }
+  .profile-hero-identity::before {
+    content: "";
+    position: absolute;
+    inset: -36px -48px -24px -32px;
+    z-index: -1;
+    background: radial-gradient(ellipse closest-side at 50% 50%, hsl(var(--background) / .98) 40%, hsl(var(--background) / .94) 65%, hsl(var(--background) / .55) 82%, hsl(var(--background) / 0) 100%);
+    pointer-events: none;
+  }
+
+  @media (max-width: 767px) {
+    .profile-hero { min-height: 360px; }
+    .profile-hero-identity { max-width: 500px; }
+    .profile-hero-identity::before { inset: -32px -24px -12px -24px; }
+    .profile-hero [data-hero-content] { padding-bottom: 116px; }
+    .profile-hero[data-hero-subject="left"] .profile-hero-art { object-position: 32% center; }
+    .profile-hero[data-hero-subject="right"] .profile-hero-art { object-position: 75% center; }
+  }
+
+  @media (min-width: 640px) and (max-width: 1023px) {
+    .profile-hero-identity { max-width: 420px; }
+  }
+
   .alma-conversation-sheet {
     width: 100%;
     max-width: none;

@@ -16,7 +16,7 @@ const modules = import.meta.glob<{ default: string }>(
 
 // Tri par numéro pour aligner l'ordre sur HERO_BANK (01, 02, …, 100).
 const HERO_BANK_MOBILE: readonly string[] = Object.entries(modules)
-  .sort(([a], [b]) => a.localeCompare(b))
+  .sort(([a], [b]) => a.localeCompare(b, undefined, { numeric: true }))
   .map(([, mod]) => mod.default);
 
 if (HERO_BANK_MOBILE.length !== 100) {

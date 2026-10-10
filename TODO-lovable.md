@@ -124,3 +124,10 @@ Navigateur local non connecté, ordinateur seulement (1280 px). Aucun audit mobi
 - L3 VALIDÉ root 3c25bb75. L4 livré sans publication, en attente de relecture root (détail dans le plan). L6/L7 : ajouter fixture visuelle réactivité publique et confiance 5/5 vs complétion 100.
 
 - L5 livré (non publié), en attente de revue root ; à faire en L7 : galerie en session, recouvrement Alma, tuiles propriétaire « Membre depuis Ce mois ».
+
+## Reprise L5 : composition précédente rejetée
+- [x] Hero immersif plein fond, identité/contact superposés et protection crème locale, index personnalisés conservés. Checkpoint applicatif `c5ea02ed82fd18c4d57293ab84c31d079054b17f` ; diff et preuves dans le plan.
+- [x] 49 tests ciblés verts ; harness build OK 10/10/2026 14:45:39 UTC ; 24 captures aux six largeurs réellement inspectées, planches `/tmp/browser/l5-immersive/final-{390,768,1024,1280,1440,1920}.jpg` ; aucun débordement, hero desktop 320 px, CTA 44 ou 64 px.
+- [x] ID survol/focus/clic et picker ouverture seulement en fixture isolée avec écritures réseau bloquées ; aucun profil/contact/favori réel modifié.
+- [ ] Limites explicites : recette après build sur Vite, artefact statique absent, preuve typecheck séparée indisponible ; têtes d'animaux partiellement protégées sur mobile, validation visuelle Jérémie attendue ; galerie/session réelle et grille picker complète non revérifiées.
+- [ ] L5 reste à valider par Jérémie ; L6 non commencé ; aucune publication.
