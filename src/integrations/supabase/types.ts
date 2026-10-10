@@ -11563,6 +11563,7 @@ export type Database = {
           certifications: string[] | null
           city: string | null
           completed_sits_count: number | null
+          country: string | null
           created_at: string | null
           custom_skills: Json | null
           departement_code: string | null
@@ -11585,6 +11586,7 @@ export type Database = {
           certifications?: string[] | null
           city?: string | null
           completed_sits_count?: number | null
+          country?: never
           created_at?: string | null
           custom_skills?: Json | null
           departement_code?: string | null
@@ -11607,6 +11609,7 @@ export type Database = {
           certifications?: string[] | null
           city?: string | null
           completed_sits_count?: number | null
+          country?: never
           created_at?: string | null
           custom_skills?: Json | null
           departement_code?: string | null
