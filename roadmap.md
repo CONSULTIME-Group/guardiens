@@ -2,8 +2,8 @@
 
 ## Gouaches peintes sur les profils (10/10/2026)
 
-- [ ] Conserver les peintures, supprimer le zoom et intégrer le papier sans rectangle rapporté.
-- [ ] Vérifier les sujets entiers et le contact sur le profil affiché, sans publication.
+- [x] Conserver les peintures, supprimer le zoom et fondre leurs bords sur le papier du profil.
+- [x] Profil affiché vérifié à 1280 et 390 px : sujets entiers, contact visible, aucun débordement. 17 tests ciblés verts, build automatique vert, aucune publication.
 
 ## État actuel (10/10/2026, 18:45 Paris)
 
