@@ -177,7 +177,8 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  const [sitterProfile, setSitterProfile] = useState<any>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
  const initialLoadDone = useRef(false);
- const [intlCount, setIntlCount] = useState<number>(0);
+ // null = lecture en échec : lien sans chiffre, jamais un 0 présenté comme compté.
+ const [intlCount, setIntlCount] = useState<number | null>(0);
  const [intlCounts, setIntlCounts] = useState<Array<{ code: string; name: string; count: number }>>([]);
  // Lot L1 : la ville saisie n'a pas pu être située, ou le rayon a dû se replier
  // sur le département faute de coordonnées. Signalé à l'écran, jamais silencieux.
@@ -193,9 +194,13 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
    let cancelled = false;
    (async () => {
      // Lot L2 : moteur international partagé (lieu du propriétaire).
-     let rows: Awaited<ReturnType<typeof fetchIntlOpenSits>> = [];
-     try { rows = await fetchIntlOpenSits(); } catch { rows = []; }
-     if (!cancelled) { setIntlCount(rows.length); setIntlCounts(intlCountryCounts(rows)); }
+     try {
+       const rows = await fetchIntlOpenSits();
+       if (!cancelled) { setIntlCount(rows.length); setIntlCounts(intlCountryCounts(rows)); }
+     } catch (e) {
+       console.error("[SearchSitter] annonces hors France", e);
+       if (!cancelled) setIntlCount(null);
+     }
    })();
    return () => { cancelled = true; };
  }, []);
@@ -2429,15 +2434,15 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
     })()}
 
      {/* Lien "Français à l'étranger" en pied de résultats (déplacé depuis le toolbar) */}
-     {tab === "sits" && intlCount > 0 && !loading && results.length > 0 && (
+     {tab === "sits" && (intlCount === null || intlCount > 0) && !loading && results.length > 0 && (
        <div className="mt-8 flex justify-center">
          <Link
            to="/annonces/international"
            className="inline-flex items-center gap-2 rounded-full border border-border bg-card hover:bg-accent hover:border-primary/40 text-sm text-foreground px-4 py-2 transition-colors"
-           aria-label={t("search_results.intl_link_aria", { count: intlCount })}
+           aria-label={intlCount === null ? "Voir les annonces hors France" : t("search_results.intl_link_aria", { count: intlCount })}
          >
            <Globe2 className="h-4 w-4 text-muted-foreground" />
-           <span>{t("search_results.intl_link", { count: intlCount })}</span>
+           <span>{intlCount === null ? "Voir les annonces hors France" : t("search_results.intl_link", { count: intlCount })}</span>
          </Link>
        </div>
      )}

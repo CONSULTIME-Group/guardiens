@@ -34,7 +34,7 @@ export default function PublicListings() {
   const listReady = !!listState && listState.status !== "loading";
   const listError = listState?.status === "error";
   const shown = listState?.status === "ready" ? listState.items : [];
-  const [intlCount, setIntlCount] = useState<number>(0);
+  const [intlCount, setIntlCount] = useState<number | null>(0);
   const [openCount, setOpenCount] = useState<number>(0);
   const [citiesCount, setCitiesCount] = useState<number>(0);
 
@@ -69,7 +69,7 @@ export default function PublicListings() {
     (async () => {
       // Lot L2 : moteur international partagé (lieu du propriétaire).
       let count = 0;
-      try { count = (await fetchIntlOpenSits()).length; } catch { count = 0; }
+      try { count = (await fetchIntlOpenSits()).length; } catch (e) { console.error("[PublicListings] annonces hors France", e); count = null; }
       if (!cancelled) setIntlCount(count);
     })();
     return () => { cancelled = true; };
@@ -112,7 +112,7 @@ export default function PublicListings() {
     })),
   } : null;
   const jsonld = itemListLd ? [...BASE_JSONLD, itemListLd] : BASE_JSONLD;
-  const intlLabel = t("public_listings.intl_count", { count: intlCount, defaultValue: `${intlCount} listings outside France` });
+  const intlLabel = intlCount === null ? "Voir les annonces hors France" : t("public_listings.intl_count", { count: intlCount, defaultValue: `${intlCount} listings outside France` });
   // Eyebrow : on n'affiche le compteur de villes que s'il a un signal réel
   // (>= 2). « 1 ville » est un faux signal qui décrédibilise la promesse.
   const eyebrowDynamic = openCount > 0
@@ -173,14 +173,14 @@ export default function PublicListings() {
               >
                 {t("public_listings.pricing")}
               </Link>
-              {intlCount > 0 && (
+              {(intlCount === null || intlCount > 0) && (
                 <Link
                   to="/annonces/international"
                   className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
                   aria-label={intlLabel}
                 >
                   <span className="relative flex h-2 w-2 shrink-0" aria-hidden="true">
-                    {intlCount >= 3 && (
+                    {intlCount !== null && intlCount >= 3 && (
                       <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-60 animate-ping" />
                     )}
                     <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
@@ -193,14 +193,14 @@ export default function PublicListings() {
           <p className="mt-4 md:mt-5 text-sm md:text-base text-muted-foreground max-w-2xl leading-relaxed">
             {t("public_listings.subtitle_short")}
           </p>
-          {intlCount > 0 && (
+          {(intlCount === null || intlCount > 0) && (
             <Link
               to="/annonces/international"
               className="md:hidden mt-4 inline-flex items-center gap-2 rounded-full bg-accent/40 hover:bg-accent/60 border border-border px-3.5 py-2 text-xs transition-colors"
               aria-label={intlLabel}
             >
               <span className="relative flex h-2 w-2 shrink-0" aria-hidden="true">
-                {intlCount >= 3 && (
+                {intlCount !== null && intlCount >= 3 && (
                   <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-60 animate-ping" />
                 )}
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />

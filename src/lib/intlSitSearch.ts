@@ -163,19 +163,27 @@ export function haversineKm(a: { lat: number; lng: number }, b: { lat: number; l
   return 2 * R * Math.asin(Math.sqrt(x));
 }
 
-/** Clés de géocodage dédupliquées (ville, pays) : une requête par lieu, jamais par annonce. */
-export function uniquePlaceKeys(items: Pick<IntlSit, "place">[]): Array<{ key: string; city: string; country: string }> {
-  const m = new Map<string, { key: string; city: string; country: string }>();
+/**
+ * Clé de lieu RÉSOLU : ville + pays, plus département en France. Deux
+ * homonymes français de départements différents ont deux clés, donc chacun
+ * sa validation de point ; le géocodage reste dédupliqué par ville + pays
+ * (cache de geocodeIntlPlace), sans mélanger les validations.
+ */
+export const placeKey = (s: Pick<IntlSit, "place">): string | null =>
+  s.place.city && s.place.country
+    ? `${s.place.city.toLowerCase()}|${s.place.country}${s.place.country === "FR" ? `|${s.place.dept ?? ""}` : ""}`
+    : null;
+
+/** Lieux résolus distincts, chacun avec son propre lieu (département inclus). */
+export function uniquePlaceKeys(items: Pick<IntlSit, "place">[]): Array<{ key: string; city: string; country: string; place: IntlSit["place"] }> {
+  const m = new Map<string, { key: string; city: string; country: string; place: IntlSit["place"] }>();
   for (const s of items) {
-    if (!s.place.city || !s.place.country) continue;
-    const key = `${s.place.city.toLowerCase()}|${s.place.country}`;
-    if (!m.has(key)) m.set(key, { key, city: s.place.city, country: s.place.country });
+    const key = placeKey(s);
+    if (!key) continue;
+    if (!m.has(key)) m.set(key, { key, city: s.place.city!, country: s.place.country!, place: s.place });
   }
   return [...m.values()];
 }
-
-export const placeKey = (s: Pick<IntlSit, "place">): string | null =>
-  s.place.city && s.place.country ? `${s.place.city.toLowerCase()}|${s.place.country}` : null;
 
 /** Libellé lisible du lieu : « Saint-Ludger, Canada », jamais un code pays brut. */
 export function intlPlaceLabel(place: Pick<SitPlace, "city" | "country">): string {
