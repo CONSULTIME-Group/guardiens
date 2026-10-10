@@ -24,7 +24,7 @@ describe("L5 hero : faits réels", () => {
 });
 
 describe("L5 identité vérifiée", () => {
-  it("explique le contrôle automatique puis manuel, sans promesse de fiabilité", () => {
+  it("explique l'analyse automatique puis la revue par l'équipe, sans promesse de fiabilité", () => {
     const t = IDENTITY_EXPLANATION.join(" ");
     expect(t).toMatch(/analysée automatiquement/);
     expect(t).toMatch(/personne de l'équipe/);

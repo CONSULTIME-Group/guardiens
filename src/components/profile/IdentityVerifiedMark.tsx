@@ -3,7 +3,7 @@
  *
  * Icône seule, cible 44 px, posée près du prénom. Survol et focus : infobulle
  * courte. Clic ou toucher : explication précise du contrôle réel (analyse
- * automatique, contrôle manuel par l'équipe si l'analyse ne conclut pas),
+ * automatique, dossier revu par l'équipe si l'analyse ne conclut pas),
  * jamais un simple défilement vers un parcours d'inscription.
  */
 import { useState } from "react";
@@ -15,7 +15,7 @@ export const IDENTITY_TOOLTIP = "Identité vérifiée à partir d'une pièce off
 
 export const IDENTITY_EXPLANATION = [
   "Une pièce d'identité officielle a été transmise à Guardiens.",
-  "Elle est d'abord analysée automatiquement. Si l'analyse ne permet pas de conclure, une personne de l'équipe la contrôle à la main.",
+  "Elle est d'abord analysée automatiquement. Si l'analyse ne permet pas de conclure, une personne de l'équipe revoit le dossier.",
   "La pièce n'est jamais affichée sur le profil.",
   "C'est un signal de confiance parmi d'autres : il ne garantit pas la fiabilité. Vos échanges et votre rencontre le complètent.",
 ];
