@@ -95,3 +95,4 @@
 - [x] Branchement dans logic.ts, 2xx vérifié, pannes journal/finalisation exposées à l'admin
 - [x] Tests simulés avec voyage dans le temps, typecheck fonction propre
 - [ ] Appliquer la migration puis déployer la fonction et publier : attend le GO de Jérémie
+- [x] Publication : garde bloquée par texte L5 « contrôle à la main », reformulé (test isolé vert)

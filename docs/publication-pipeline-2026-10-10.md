@@ -27,3 +27,10 @@
 - Version du correctif pipeline avant ce rapport : `3ec4b6d19b7171ee698609a1baf7a5289515cea0`.
 
 Aucune publication, modification UI, donnée, permission ou action membre. Le prochain essai de publication appartient à Jérémie. Si le blocage persiste, son journal distant sera nécessaire pour distinguer compilation et hébergement.
+## Cause distante confirmée (deploy 71a56b5a, 10/10/2026 16:18 UTC)
+
+- Journaux : sync, robots, sitemap et Vite réussis ; `test:guard` sort 1 (4733 verts, 2 échecs dans fichiers exclus, 1 écart rejoué).
+- Écart réel : `src/test/no-verified-sitter-claim.test.ts` ÉCHOUE (échec nouveau), il ne « passe désormais » pas. `knownFailures` est vide : aucune entrée à retirer, baseline.json inchangée.
+- Cause : texte L5 de `IdentityVerifiedMark.tsx` (« contrôle à la main », « contrôle manuel ») interdit par le garde éditorial.
+- Correctif : formulation « une personne de l'équipe revoit le dossier » ; intitulé du test L5 aligné. Inventaire du garde fait en Node (sans dépendre de `rg`).
+- Vérification : les 2 fichiers de test lancés seuls, 44 verts. Suite générale non relancée ; un autre échec éventuel ne serait visible qu'à la prochaine publication.
