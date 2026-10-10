@@ -18,6 +18,7 @@ import {
   type SitPlace,
 } from "@/lib/sitSearchRules";
 import { getCountryName } from "@/lib/countries";
+import { fromPhoton } from "@/lib/sitterSearch";
 
 export interface IntlSit {
   id: string;
@@ -198,7 +199,6 @@ export async function geocodeIntlPlace(
   try {
     const r = await fetcher(`https://photon.komoot.io/api/?q=${encodeURIComponent(city)}&limit=10&lang=fr&layer=city&layer=locality&layer=district`);
     if (!r.ok) return null;
-    const { fromPhoton } = await import("@/lib/sitterSearch");
     const target = normName(city.split(",")[0]);
     const hit = fromPhoton(await r.json(), country).find((s) => normName(s.name) === target && s.lat != null && s.lng != null);
     return hit ? { lat: Math.round(hit.lat! * 1000) / 1000, lng: Math.round(hit.lng! * 1000) / 1000 } : null;
