@@ -65,7 +65,14 @@ const SearchListingCard = ({
     ? `${commune} · lieu à confirmer`
     : commune
     ? formatCityDepartement(commune, deptName)
-    : sitLocationLabel({ postalCode: (item.owner as any)?.postal_code, departementName: deptName });
+    : sitLocationLabel({
+        // Code postal du profil affiché seulement s'il correspond au département
+        // du lieu de garde (correspondance validée), sinon département seul.
+        postalCode: !isSitPlace || deptCodeFromPostal((item.owner as any)?.postal_code) === (item as any).locationDept
+          ? (item.owner as any)?.postal_code
+          : null,
+        departementName: deptName,
+      });
 
   const missionPhotos = Array.isArray((item as any).photos) ? (item as any).photos.filter(Boolean) : [];
   const photos: string[] = item.property?.photos || missionPhotos;
