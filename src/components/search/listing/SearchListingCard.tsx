@@ -10,7 +10,7 @@ import AffinityBadge from "@/components/matching/AffinityBadge";
 import { useAffinityWithShadow } from "@/hooks/useAffinityWithShadow";
 import { useDepartementNames } from "@/hooks/useDepartementNames";
 import { departementNameFromCode, formatCityDepartement } from "@/lib/locationLabel";
-import { deptCodeFromPostal, sitCommune, sitLocationLabel } from "@/lib/sitLocation";
+import { sitCommune, sitLocationLabel } from "@/lib/sitLocation";
 import { projetMetaLine, projetNatureLabel } from "@/lib/projets";
 
 
