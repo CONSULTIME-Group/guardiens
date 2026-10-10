@@ -1,4 +1,4 @@
-import { travelZonesSummary, travelZoneLabels, countryName } from "@/lib/travelZones";
+import { travelZoneLabels, countryName } from "@/lib/travelZones";
 import { formatRatingFr } from "@/lib/formatRatingFr";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { splitReviewsByRole, sitterReviewsHeading } from "@/lib/publicProfileReviews";
@@ -92,7 +92,6 @@ import {
 } from "@/components/profile/sitter/SitterF1Sections";
 import { groupSitterSkills, skillsHeadline } from "@/lib/sitterSkillGroups";
 import { declaredHelpOffer, hasEntraideFacet, entraideOfferBandText, lastVisitLabel } from "@/lib/profileSignals";
-import { pickProfileQuote } from "@/lib/profileQuote";
 import {
   meetingPreferenceLabel,
   homeFactLabel,
