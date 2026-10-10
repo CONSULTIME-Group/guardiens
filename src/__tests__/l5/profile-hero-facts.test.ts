@@ -32,7 +32,7 @@ describe("L5 identité vérifiée", () => {
     expect(IDENTITY_TOOLTIP.length).toBeGreaterThan(0);
   });
   it("le hero partagé sert les deux facettes, l'ancien en-tête gardien a disparu", () => {
-    expect(page).toContain('facet={isSitterFacet ? "sitter" : "owner"}');
+    expect(page).toContain('facet={isSitterFacet ? "sitter" : activeTab === "entraide" ? "entraide" : "owner"}');
     expect(page).not.toContain("<SitterIdentityHero");
     expect(page).toContain("onOpenHeroPicker");
   });

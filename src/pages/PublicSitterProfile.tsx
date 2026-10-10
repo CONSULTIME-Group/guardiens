@@ -1533,7 +1533,7 @@ export default function PublicSitterProfile() {
         const isSitterFacet = activeTab === 'gardien';
         return (
           <ProfileHero
-            facet={isSitterFacet ? "sitter" : "owner"}
+            facet={isSitterFacet ? "sitter" : activeTab === "entraide" ? "entraide" : "owner"}
             id={id}
             firstName={firstName}
             city={locationLabel || null}

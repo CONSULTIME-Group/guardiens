@@ -29,7 +29,7 @@ export type HeroCtaVariant =
   | { kind: "muted"; label: string; hint?: string };
 
 export interface ProfileHeroProps {
-  facet: "sitter" | "owner";
+  facet: "sitter" | "owner" | "entraide";
   id: string;
   firstName: string;
   /** Ville, avec le pays hors France (« Montréal, Canada »). */
@@ -62,7 +62,7 @@ export interface ProfileHeroProps {
 
 /** Faits de la ligne secondaire, purs et testables. */
 export function heroFactLine(input: {
-  facet: "sitter" | "owner";
+  facet: "sitter" | "owner" | "entraide";
   memberSince?: string | null;
   completedSits?: number;
   lastSeenAt?: string | null;
@@ -85,7 +85,7 @@ const ProfileHero = (p: ProfileHeroProps) => {
   const place = [p.city, p.departmentName].filter(Boolean).join(", ");
   const eyebrow = p.facet === "sitter"
     ? (p.departmentName ? `Garde de maisons en ${p.departmentName}` : "Garde de maisons")
-    : "Fait garder sa maison";
+    : p.facet === "owner" ? "Fait garder sa maison" : "Entraide";
   const facts = heroFactLine(p);
   const mobility = (p.mobilityLabels ?? []).filter(Boolean);
   const hasPhoto = !!p.avatarUrl && !p.avatarUrl.includes("placeholder.svg");
@@ -137,9 +137,9 @@ const ProfileHero = (p: ProfileHeroProps) => {
       data-profile-hero
       data-facet={p.facet}
     >
-      <div className="relative max-w-6xl mx-auto flex flex-col md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,52%)] md:min-h-[280px] md:max-h-[340px]">
+      <div className="relative max-w-6xl mx-auto flex flex-col lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,52%)] lg:min-h-[280px] lg:max-h-[340px]">
         {/* Identité, sur papier lisible */}
-        <div className="relative z-10 min-w-0 px-4 md:px-6 pt-5 pb-4 md:py-6 flex gap-4 md:gap-5 items-start">
+        <div className="relative z-10 min-w-0 px-4 md:px-6 pt-5 pb-4 lg:py-6 flex gap-4 md:gap-5 items-start">
           <button
             type="button"
             onClick={p.onOpenAvatarLightbox}
@@ -166,7 +166,7 @@ const ProfileHero = (p: ProfileHeroProps) => {
           <div className="min-w-0 flex-1">
             <p className="text-[11.5px] uppercase tracking-[0.16em] text-secondary font-body font-semibold">{eyebrow}</p>
             <div className="mt-0.5 flex items-center gap-1 min-w-0">
-              <h1 className="font-heading text-[34px] md:text-[48px] font-semibold tracking-[-0.02em] leading-none text-foreground break-words [overflow-wrap:anywhere] min-w-0">
+              <h1 className="font-heading text-[34px] md:text-[48px] font-semibold tracking-[-0.02em] leading-none text-foreground break-words min-w-0">
                 {p.firstName}
               </h1>
               {p.identityVerified && <IdentityVerifiedMark firstName={p.firstName} />}
@@ -209,11 +209,11 @@ const ProfileHero = (p: ProfileHeroProps) => {
         </div>
 
         {/* Gouache personnalisée : entière, sujets lisibles, aucun voile. */}
-        <div className="relative w-full md:h-full [aspect-ratio:1536/544] md:[aspect-ratio:auto]" data-hero-gouache>
+        <div className="relative w-full md:max-w-3xl md:mx-auto lg:max-w-none lg:h-full [aspect-ratio:1536/544] lg:[aspect-ratio:auto]" data-hero-gouache>
           <img
             src={p.heroDesktop}
             srcSet={`${p.heroMobile} 768w, ${p.heroDesktop} 1536w`}
-            sizes="(min-width: 768px) 52vw, 100vw"
+            sizes="(min-width: 1024px) 52vw, 100vw"
             alt=""
             aria-hidden="true"
             data-hero-anchor={p.heroAnchor}
