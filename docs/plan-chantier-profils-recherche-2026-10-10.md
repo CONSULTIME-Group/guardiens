@@ -351,3 +351,22 @@ Vérifications : types OK ; 106 tests ciblés (dont src/__tests__/l3/profile-sig
 ## Ajout L7
 
 Moteur France SearchSitter : après échec de requête, un faux état vide s'affiche (constaté en recette L2). À corriger avant livraison L7.
+
+## Clôture L3 (validation root 3c25bb75)
+
+Tous les diffs relus ; root connecté : Frederic, onglet entraide avec offre, 4 gouaches dont jardin et bricolage, 0 mission ; Venaya 35 % sans « a rempli son profil », dernière visite visible. Service : 3 largeurs, 106 tests, build. Root SQL sans écriture : 39 = false, 40 = true, NULL = false ; double rôle = maximum des deux scores confirmé, aucun barème changé. Statut : L3 validé. Corrections demandées avant usage sur cartes, faites en L4 : RESPONSIVENESS_ABSENT_NOTE = « Délai de réponse indisponible. » (la vue ne donne pas la raison d'une absence de palier), RESPONSIVENESS_SCOPE_NOTE = 90 derniers jours, 5 contacts ou sollicitations (messages et candidatures reçus). Sous le seuil, rien n'est affiché.
+
+À ajouter à la recette L6/L7 : fixture locale visuelle d'un palier public de réactivité et d'une confiance 5/5 distincte d'une complétion 100, faute de données réelles ; un rendu de fixture ne compte pas comme preuve de données réelles.
+
+## L4 livré (10/10/2026), en attente de relecture root
+
+- Grille gardiens : colonnes en auto-fill sur la largeur utile, cartes de 280 px minimum, plus d'auto-rows-fr ni de pr-16 ; marge basse pb-24 pour le dock Alma. Mesuré : 6 colonnes à 1920, 4 à 1440 et 1280, 2 à 768, 1 à 390.
+- Carte gardien et mini-synthèse de la vue carte : note « x/5 sur N avis » sur le nombre d'avis publiés, gardes réalisées à part (bug nSits corrigé aux deux endroits, src/lib/cardFacts.ts ratingSummary).
+- Réactivité : palier public_responsiveness lu en lots (contrat L3), l'ancien délai 30 jours arrondi « moins de » supprimé ; composant ReplyTimeBadge supprimé (plus aucune référence). Dernière visite approximative sur la carte.
+- Bio : citation réelle coupée sur un mot (cardQuote), plus de disparition au-delà de 120 caractères. « Prépare sa première garde » supprimé.
+- Pays affiché hors France, mobilité déclarée seulement, animaux normalisés et dédoublonnés, 1 ou 2 gouaches de savoir-faire existantes (module partagé src/components/profile/skillSpots.ts) sans répéter une pastille animal ; « Propose aussi l'entraide » seulement si available_for_help vrai (public_profiles).
+- Favori sorti du lien de carte : un lien imbriqué dans le lien cassait le rendu (barre blanche) ; zone 44 px. Carrousel : boutons 44 px, points devenus indicatifs.
+- Filtre « Annonces avec photos » : couverture de l'annonce, du logement ou première photo de galerie propriétaire (sitHasPhotos) ; galerie gardien jamais lue en visiteur (RLS membres inchangée).
+- Affinité : tri seulement, inchangé.
+
+Vérifications : types OK ; tests L4 (src/__tests__/l4/card-facts.test.ts, fixture 7 avis 4 gardes, bio longue, photos), R1 mis à jour (il verrouillait l'ancien bug « 4,9 sur 3 gardes »), P3, L3 et recherche verts ; build complète OK. Recette visiteur sur build à 1920/1440/1280/768/390 : France 48 cartes sans erreur, cartes sans photo avec initiale, Canada résidence 2 cartes sans Lyon dans le contenu principal, annonce internationale Saint Ludger 1 avec couverture, pays et dates. Limites : annonce Saint Ludger sans animaux affichés (aucune donnée animale publique, non modifiée) ; profil 35 % avec/sans photo vérifié sur données réelles visibles (initiale) mais pas en fixture isolée ; favoris non cliqués ; session connectée et anneau d'affinité non revérifiés. L5 non lancé.
