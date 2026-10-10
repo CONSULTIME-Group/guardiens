@@ -152,7 +152,7 @@ const ProfileHero = (p: ProfileHeroProps) => {
           height={544}
           loading="eager"
           decoding="async"
-          className="profile-hero-art absolute inset-0 h-full w-full object-cover"
+          className="profile-hero-art absolute bottom-0 h-full w-full object-contain"
         />
       </picture>
       <div className="relative mx-auto max-w-6xl px-4 py-6 md:px-6 md:py-7" data-hero-content>
