@@ -1452,7 +1452,7 @@ const SearchOwner = () => {
                     ? t("search_results.sitters_hint_affinity")
                     : activeSort === "rating"
                       ? t("search_results.sitters_hint_rating")
-                      : sort === "experience"
+                      : activeSort === "experience"
                         ? t("search_results.sitters_hint_experience")
                         : t("search_results.sitters_hint_closest")}
                 </p>
@@ -1467,7 +1467,7 @@ const SearchOwner = () => {
             {(() => {
               const sortOptions: Array<{ value: SortOption; label: string }> = [
                 ...(viewerOwner ? [{ value: "affinity" as SortOption, label: t("search_results.sort_affinity") }] : []),
-                { value: "closest", label: t("search_results.sort_closest") },
+                ...(city ? [{ value: "closest" as SortOption, label: t("search_results.sort_closest") }] : []),
                 { value: "rating", label: t("search_results.sort_rating_sitters") },
                 { value: "experience", label: t("search_results.sort_experience") },
               ];
@@ -1477,7 +1477,7 @@ const SearchOwner = () => {
               };
               return (
                 <>
-                  <Select value={sort} onValueChange={(v) => handleSort(v as SortOption)}>
+                  <Select value={activeSort} onValueChange={(v) => handleSort(v as SortOption)}>
                     <SelectTrigger className="sm:hidden h-8 w-auto gap-1.5 rounded-full border-border bg-card px-3 text-xs shrink-0">
                       <SelectValue />
                     </SelectTrigger>
