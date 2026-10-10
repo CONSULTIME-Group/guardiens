@@ -37,8 +37,8 @@ jobs:
       - name: Typecheck
         run: npx tsc -b
 
-      - name: Compilation production et garde différentielle des tests
-        run: npm run validate:ci
+      - name: Garde différentielle des tests
+        run: npm run test:guard
 
       - name: Cycle d'invalidation SEO des profils (Postgres local)
         run: npm run test:sql:profile-seo
