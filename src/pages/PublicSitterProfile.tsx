@@ -73,7 +73,6 @@ import ProfileRail from "@/components/profile/ProfileRail";
 import AffinityTeaserCard from "@/components/profile/AffinityTeaserCard";
 import AlmaWhisperCard from "@/components/profile/AlmaWhisperCard";
 import CommunityPulseCard from "@/components/profile/CommunityPulseCard";
-import MarginLettering from "@/components/profile/MarginLettering";
 import type { FooterLocalContext } from "@/components/layout/PublicFooter";
 import { useCommunityPulse } from "@/hooks/useCommunityPulse";
 import { avatarImageUrl, storageImageUrl } from "@/lib/storageImage";
@@ -1662,9 +1661,6 @@ export default function PublicSitterProfile() {
           url={`https://guardiens.fr/gardiens/${id}`}
         />
       )}
-      {/* Lettrage décoratif des marges : conditions de largeur et de marge
-          libre mesurées, rendu par portail pour rester fixe à la fenêtre. */}
-      <MarginLettering />
       <PageMeta
         title={pageTitle}
         description={pageDesc}
@@ -1692,38 +1688,10 @@ export default function PublicSitterProfile() {
           heroWeights,
           overrideIndex,
         );
-        if (activeTab === 'gardien') {
-          return (
-            <SitterIdentityHero
-              id={id}
-              firstName={firstName}
-              city={locationLabel || null}
-              departmentName={geoInfo.deptName}
-              avatarUrl={profile.avatar_url || null}
-              heroDesktop={heroDesktop}
-              heroMobile={heroMobile}
-              heroAnchor={anchor}
-              isOwnProfile={isOwn}
-              onOpenHeroPicker={() => setHeroPickerOpen(true)}
-              onOpenAvatarLightbox={() => hasAvatar && setLightboxIdx(0)}
-              hasAvatarLightbox={hasAvatar}
-              memberSince={profile?.created_at ?? null}
-              completedSits={completedSits}
-              identityVerified={!!profile?.identity_verified}
-              avgRating={heroAvg}
-              reviewCount={heroCount}
-              isAvailable={isAvailable}
-              hasActiveSubscription={hasActiveSubscription}
-              emergencyActive={emergencyActive}
-              statutGardien={reputation?.statut_gardien ?? null}
-              replyMedianMinutes={sitterProfile?.reply_median_minutes ?? null}
-              lastSeenAt={profile?.last_seen_at ?? null}
-              quote={pickProfileQuote(bio, motivation)}
-            />
-          );
-        }
+        const isSitterFacet = activeTab === 'gardien';
         return (
           <ProfileHero
+            facet={isSitterFacet ? "sitter" : "owner"}
             id={id}
             firstName={firstName}
             city={locationLabel || null}
@@ -1734,24 +1702,24 @@ export default function PublicSitterProfile() {
             heroAnchor={anchor}
             isOwnProfile={isOwn}
             onOpenHeroPicker={() => setHeroPickerOpen(true)}
-            // Sans photo de profil, l'avatar n'est pas cliquable du tout :
-            // mieux vaut rien qu'une visionneuse ouverte sur autre chose.
+            // Sans photo de profil, l'avatar n'est pas cliquable du tout.
             onOpenAvatarLightbox={() => hasAvatar && setLightboxIdx(0)}
             hasAvatarLightbox={hasAvatar}
-            isAvailable={isAvailable}
+            memberSince={profile?.created_at ?? null}
+            completedSits={isSitterFacet ? completedSits : 0}
+            lastSeenAt={profile?.last_seen_at ?? null}
+            mobilityLabels={isSitterFacet ? travelZoneLabels(sitterProfile?.travel_zones) : []}
+            isAvailable={isSitterFacet && isAvailable}
             avgRating={heroAvg}
             reviewCount={heroCount}
-            replyMedianMinutes={sitterProfile?.reply_median_minutes ?? null}
-            statutGardien={reputation?.statut_gardien ?? null}
+            statutGardien={isSitterFacet ? (reputation?.statut_gardien ?? null) : null}
             identityVerified={!!profile?.identity_verified}
-            hasActiveSubscription={hasActiveSubscription}
-            emergencyActive={emergencyActive}
+            hasActiveSubscription={isSitterFacet && hasActiveSubscription}
+            emergencyActive={isSitterFacet && emergencyActive}
             cta={heroCta}
             ctaReassurance={heroCtaReassurance}
           />
-
         );
-
       })()}
 
       {/* ── BARRE D'ONGLETS, visible si ≥ 2 onglets ── */}
