@@ -48,7 +48,7 @@ export const FR_REGION_CODES = ["ARA", "BFC", "BRE", "CVL", "COR", "GES", "HDF",
 
 /** Libellés affichés. Règle éditoriale : le nom officiel ARA n'est jamais affiché. */
 export const FR_REGION_LABELS: Record<string, string> = {
-  ARA: "Rhône, Alpes et Massif central",
+  ARA: "Lyon, Grenoble, Clermont-Ferrand et Alpes du Nord",
   BFC: "Bourgogne-Franche-Comté",
   BRE: "Bretagne",
   CVL: "Centre-Val de Loire",

@@ -121,6 +121,7 @@ const OwnerProfilePage = () => {
   }, [user]);
   const [dirty, setDirty] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState(false);
   const draftKey = user ? `guardiens_owner_profile_draft_${user.id}` : null;
   const draftHydratedRef = useRef(false);
 
@@ -130,6 +131,7 @@ const OwnerProfilePage = () => {
     setLocalData(prev => ({ ...prev, ...partial }));
     setDirty(true);
     setSaved(false);
+    setSaveError(false);
   }, []);
 
   // Permet aux composants enfants (ex. OwnerStepHousing) de demander un changement de section.
@@ -195,6 +197,7 @@ const OwnerProfilePage = () => {
   const handleSave = useCallback(async () => {
     if (Object.keys(localData).length === 0) return;
     const success = await saveStep(localData);
+    setSaveError(!success);
     if (!success) return;
     setLocalData({});
     setDirty(false);
@@ -453,7 +456,6 @@ const OwnerProfilePage = () => {
         <div className={`fixed bottom-[var(--bottom-nav-h,0px)] md:bottom-0 left-0 right-0 md:left-64 z-40 bg-background/95 backdrop-blur-sm border-t border-border before:pointer-events-none before:content-[''] before:absolute before:left-0 before:right-0 before:-top-6 before:h-6 before:bg-gradient-to-t before:from-background before:to-transparent ${(!dirty && !saving && !saved) ? (liveScore >= 100 ? "hidden" : "md:hidden") : ""}`}>
           <ProfileProgressStrip
             completion={liveScore}
-            publicProfileUrl={user ? `/gardiens/${user.id}?tab=proprio` : undefined}
             nextIncomplete={(() => {
               const next = sidebarSections.find(s => !s.optional && !s.complete);
               return next ? { id: next.id, label: next.label, missingCount: next.missingCount } : undefined;
@@ -475,6 +477,8 @@ const OwnerProfilePage = () => {
               <span className="inline-flex items-center gap-1 text-primary">
                 <Check className="h-3.5 w-3.5" aria-hidden="true" /> {tp("saved")}
               </span>
+            ) : saveError && dirty ? (
+              <span role="alert" className="text-destructive">{tp("save_error")}</span>
             ) : dirty ? (
               tp("dirty")
             ) : null}
