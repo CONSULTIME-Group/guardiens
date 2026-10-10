@@ -1085,6 +1085,10 @@
   .profile-hero-art { object-position: center 24%; }
   .profile-hero-art[data-hero-anchor="left"] { object-position: left center; }
   .profile-hero-art[data-hero-anchor="right"] { object-position: right center; }
+  /* The notebook asset includes grey side margins: let its paper fill the hero. */
+  @media (min-width: 640px) {
+    .profile-hero-art[data-hero-notebook="true"] { transform: scale(1.24); }
+  }
 
   .profile-hero-identity { max-width: 600px; }
   .profile-hero[data-hero-subject="left"] .profile-hero-identity { margin-left: auto; }

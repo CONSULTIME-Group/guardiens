@@ -20,6 +20,10 @@ describe("onglet gardien allégé", () => {
     expect(sections).toContain("Faire garder avec");
     expect(sections).toContain("Comment ça se passe");
   });
+  it("la carte contact et son rayon restent dans le flux", () => {
+    expect(gardien).toContain("sticky={false}");
+    expect(gardien).not.toContain("sticky={!mobile}");
+  });
   it("ancres de confiance posées sur le bloc parcours", () => {
     expect(gardien).toContain('journeyBlock(mobile ? "confiance-mobile" : "confiance")');
   });
