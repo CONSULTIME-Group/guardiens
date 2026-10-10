@@ -60,11 +60,16 @@ const SearchListingCard = ({
   );
   // Lot L1 : commune de l'annonce, puis ville du profil, puis
   // « code postal, département » (src/lib/sitLocation.ts), jamais vide.
-  const commune = sitCommune({ sitCity: (item as any).city, ownerCity: item.owner?.city });
+  // Annonce de garde : commune de l'annonce seule, jamais celle du domicile.
+  const commune = isSitPlace
+    ? (((item as any).city ?? "").trim() || null)
+    : sitCommune({ sitCity: (item as any).city, ownerCity: item.owner?.city });
   const locationLabel = locationIncoherent && commune
     ? `${commune} · lieu à confirmer`
     : commune
     ? formatCityDepartement(commune, deptName)
+    : isSitPlace
+    ? (deptName ? `Lieu à préciser, ${deptName}` : "Lieu à préciser")
     : sitLocationLabel({
         // Code postal du profil affiché seulement s'il correspond au département
         // du lieu de garde (correspondance validée), sinon département seul.
