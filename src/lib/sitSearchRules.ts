@@ -8,10 +8,10 @@
  *  - Ouverte : publiée, candidatures acceptées, fin >= aujourd'hui (Europe/Paris,
  *    date de fin incluse) ou fin non renseignée.
  *  - France : country === "FR" strictement. Un pays absent n'est pas la France.
- *  - Lieu de garde : commune et pays de l'annonce (sits.city, sits.country),
- *    département de l'annonce (sits.departement_code) ou de la commune géocodée.
- *    Jamais la ville ni le code postal du profil propriétaire pour situer,
- *    classer par département ou mesurer une distance.
+ *  - Lieu de garde : profil public du propriétaire (ville, pays, département
+ *    ou code postal), repli sur l'annonce seulement si ville ou pays manque.
+ *    Voir resolveSitPlace. (Historique : la première version de L1 situait
+ *    sur l'annonce, requalifiée par décision produit du 10/10/2026.)
  *  - Rayon : uniquement les annonces dont les coordonnées approximatives de la
  *    commune sont vérifiées et à une distance <= rayon. Aucune autre inclusion.
  */
@@ -70,20 +70,19 @@ export interface SitPlaceInput {
   city?: string | null;
   country?: string | null;
   departement_code?: string | null;
-  owner?: { postal_code?: string | null; country?: string | null } | null;
+  owner?: {
+    city?: string | null;
+    postal_code?: string | null;
+    country?: string | null;
+    departement_code?: string | null;
+  } | null;
 }
 
-/** Clé de géocodage du lieu de garde, null si la commune manque. */
-export function sitGeocodeKey(s: SitPlaceInput): { city: string; country: string | null } | null {
-  const city = (s.city ?? "").trim();
-  if (city.length < 2) return null;
-  const country = (s.country ?? "").trim().toUpperCase() || null;
-  return { city, country };
-}
-
-export const sitGeocodeKeyString = (s: SitPlaceInput): string | null => {
-  const k = sitGeocodeKey(s);
-  return k ? `${k.city.toLowerCase()}::${(k.country ?? "").toLowerCase()}` : null;
+const cleanStr = (v: unknown): string => {
+  if (typeof v !== "string") return "";
+  const t = v.trim();
+  const l = t.toLowerCase();
+  return t && l !== "null" && l !== "undefined" ? t : "";
 };
 
 const normDept = (d: string | null | undefined): string | null => {
@@ -92,31 +91,63 @@ const normDept = (d: string | null | undefined): string | null => {
   return /^\d$/.test(v) ? `0${v}` : v;
 };
 
-export interface SitPlaceResolution {
-  /** Département retenu pour les zones département/région, null si non fiable. */
+const deptFromPostalStrict = (postal: string | null | undefined): string | null => {
+  const p = cleanStr(postal);
+  if (!/^\d{5}$/.test(p)) return null;
+  return p.startsWith("97") || p.startsWith("98") ? p.slice(0, 3) : p.slice(0, 2);
+};
+
+export interface SitPlace {
+  /** Commune retenue, null si aucune source n'en fournit. */
+  city: string | null;
+  /** Pays ISO retenu, null si inconnu (jamais déduit FR). */
+  country: string | null;
+  /** Département (France seulement), null si non fiable. */
   dept: string | null;
-  /** Commune géocodée et département de l'annonce en désaccord. */
-  incoherent: boolean;
+  /** owner = profil public du propriétaire ; sit = repli annonce ; none. */
+  source: "owner" | "sit" | "none";
 }
 
 /**
- * Lieu de garde, côté département. `communeDept` = département de la commune
- * géocodée (undefined/null si inconnu). Jamais de repli sur le code postal du
- * propriétaire : son domicile n'est pas le lieu de garde.
- *  - hors France : aucun département ;
- *  - commune et département de l'annonce en désaccord : lieu incohérent, aucun
- *    département ni distance (signalé, jamais corrigé en base) ;
- *  - sinon : département de la commune, puis celui de l'annonce.
+ * Lieu de garde (décision Jérémie, 10/10/2026 : « la ville du proprio c'est la
+ * base »). Source PRINCIPALE = profil public du propriétaire (ville + pays,
+ * département ou code postal du même profil). Repli entier sur l'annonce
+ * seulement si la localisation du propriétaire est incomplète (ville ou pays
+ * absent). Les deux sources ne sont jamais mélangées : pas de département
+ * d'annonce accolé à la ville du propriétaire, pas de pays FR déduit.
  */
-export function resolveSitPlace(s: SitPlaceInput, communeDept?: string | null): SitPlaceResolution {
-  if (!isFranceSit(s)) return { dept: null, incoherent: false };
-  const own = normDept(s.departement_code);
-  const fromCommune = normDept(communeDept);
-  if (own && fromCommune && own !== fromCommune) return { dept: null, incoherent: true };
-  return { dept: fromCommune ?? own, incoherent: false };
+export function resolveSitPlace(s: SitPlaceInput): SitPlace {
+  const o = s.owner ?? null;
+  const oCity = cleanStr(o?.city);
+  const oCountry = cleanStr(o?.country).toUpperCase() || null;
+  if (oCity && oCountry) {
+    const dept = oCountry === "FR" ? normDept(o?.departement_code) ?? deptFromPostalStrict(o?.postal_code) : null;
+    return { city: oCity, country: oCountry, dept, source: "owner" };
+  }
+  const sCity = cleanStr(s.city);
+  const sCountry = cleanStr(s.country).toUpperCase() || null;
+  if (sCity || sCountry) {
+    const dept = sCountry === "FR" ? normDept(s.departement_code) : null;
+    return { city: sCity || null, country: sCountry, dept, source: "sit" };
+  }
+  return { city: null, country: null, dept: null, source: "none" };
 }
 
-/** Département du lieu de garde sans géocodage (département de l'annonce seul). */
+/** Clé de géocodage du lieu résolu, null si la commune manque. */
+export function sitGeocodeKey(s: SitPlaceInput): { city: string; country: string | null } | null {
+  const p = resolveSitPlace(s);
+  if (!p.city || p.city.length < 2) return null;
+  return { city: p.city, country: p.country };
+}
+
+export const sitGeocodeKeyString = (s: SitPlaceInput): string | null => {
+  const k = sitGeocodeKey(s);
+  return k ? `${k.city.toLowerCase()}::${(k.country ?? "").toLowerCase()}` : null;
+};
+
+/** France stricte sur le lieu résolu (pays du propriétaire, sinon de l'annonce). */
+export const isFrancePlace = (s: SitPlaceInput): boolean => resolveSitPlace(s).country === "FR";
+
 export const sitDeptCode = (s: SitPlaceInput): string | null => resolveSitPlace(s).dept;
 
 /** Inclusion stricte dans un rayon : coordonnées vérifiées et distance <= rayon. */
