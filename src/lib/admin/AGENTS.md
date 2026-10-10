@@ -1,2 +1,3 @@
 # src/lib/admin
+- Admin errors use one parent paginated read and errorPresentation for both lists, filtering, counts and secret-safe rendering; why: shared totals stay consistent and historical secrets never reach displayed logs.
 - Lecture admin des annonces et entraides (audit du 10/10/2026) : situation humaine par src/lib/admin/listingSituation.ts, historique par src/lib/admin/listingHistory.ts et DossierDetailSheet (chargé à l'ouverture), notifiés par src/lib/admin/missionNotified.ts, garde-fou de diffusion unique dans supabase/functions/_shared/mission-diffusion-guard.ts ; pourquoi : un état ne se déduit jamais d'une absence et l'écran comme le serveur refusent la même diffusion.

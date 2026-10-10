@@ -1,6 +1,6 @@
 import { adminLabel, ERROR_SEVERITY_LABELS } from "@/lib/admin/labels";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchAllRows } from "@/lib/admin/fetchAllRows";
 import { reportAdminReadError, UNAVAILABLE_LABEL } from "@/lib/admin/readError";
@@ -25,28 +25,9 @@ import { toast } from "sonner";
 import NetworkErrorsSection from "@/components/admin/NetworkErrorsSection";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 
-interface ErrorLog {
-  id: string;
-  user_id: string | null;
-  user_email: string | null;
-  message: string;
-  stack: string | null;
-  source: string | null;
-  line_no: number | null;
-  col_no: number | null;
-  url: string | null;
-  user_agent: string | null;
-  severity: string;
-  context: any;
-  fingerprint: string;
-  occurrences: number;
-  first_seen_at: string;
-  last_seen_at: string;
-  resolved_at: string | null;
-  resolved_by: string | null;
-  admin_notes: string | null;
-  created_at: string;
-}
+import { presentError, filterErrors, errorViewStats, type ErrorRecord, type PresentedError, type ErrorPeriod } from "@/lib/admin/errorPresentation";
+
+type ErrorLog = PresentedError;
 
 /**
  * Erreurs filtrées automatiquement parce qu'elles proviennent de JS injecté
@@ -110,55 +91,36 @@ const AdminErrors = () => {
   const [selected, setSelected] = useState<ErrorLog | null>(null);
 
   const [loadError, setLoadError] = useState(false);
+  const [period, setPeriod] = useState<ErrorPeriod>("all");
+  const [truncated, setTruncated] = useState(false);
+  const readVersion = useRef(0);
   const load = async () => {
+    const version = ++readVersion.current;
     setLoading(true);
-    // Lot A10 : lecture complète paginée, jamais plafonnée à 200.
-    const build = (from: number, to: number) => {
-      // Les erreurs réseau ont leur propre section : exclues ici pour ne pas doubler les chiffres.
-      let q = supabase.from("error_logs").select("*").or("source.is.null,source.neq.NetworkErrorMonitor").order("last_seen_at", { ascending: false }).order("id");
-      if (filter === "unresolved") q = q.is("resolved_at", null);
-      if (filter === "resolved") q = q.not("resolved_at", "is", null);
-      if (severityFilter !== "all") q = q.eq("severity", severityFilter);
-      // Par défaut, on masque les erreurs marquées tierces (autofill WebView FB/IG, extensions),
-      // elles polluent le panneau alors qu'elles ne viennent pas de notre bundle.
-      else q = q.neq("severity", "ignored_third_party");
-      return q.range(from, to);
-    };
+    setLoadError(false);
+    setErrors([]);
+    setTruncated(false);
     try {
-      const { rows } = await fetchAllRows<ErrorLog>(build as any);
-      setLoadError(false);
-      setErrors(rows);
+      const { rows, truncated: partial } = await fetchAllRows<ErrorRecord>((from, to) =>
+        supabase.from("error_logs").select("*").order("last_seen_at", { ascending: false }).order("id").range(from, to));
+      if (version !== readVersion.current) return;
+      setErrors(rows.map(presentError));
+      setTruncated(partial);
     } catch (e) {
+      if (version !== readVersion.current) return;
       setLoadError(true);
-      setErrors([]);
       reportAdminReadError("Erreurs", e);
     }
-    setLoading(false);
+    if (version === readVersion.current) setLoading(false);
   };
 
-  useEffect(() => { load(); }, [filter, severityFilter]);
+  useEffect(() => { void load(); return () => { readVersion.current++; }; }, []);
 
-  const filtered = useMemo(() => {
-    if (!search.trim()) return errors;
-    const s = search.toLowerCase();
-    return errors.filter(
-      (e) =>
-        e.message?.toLowerCase().includes(s) ||
-        e.url?.toLowerCase().includes(s) ||
-        e.user_email?.toLowerCase().includes(s) ||
-        e.source?.toLowerCase().includes(s),
-    );
-  }, [errors, search]);
-
-  const stats = useMemo(() => {
-    const unresolved = errors.filter((e) => !e.resolved_at).length;
-    const totalOcc = errors.reduce((sum, e) => sum + (e.occurrences || 1), 0);
-    const last24h = errors.filter(
-      (e) => new Date(e.last_seen_at).getTime() > Date.now() - 24 * 3600_000,
-    ).length;
-    const affected = new Set(errors.filter((e) => e.user_email).map((e) => e.user_email)).size;
-    return { unresolved, totalOcc, last24h, affected };
-  }, [errors]);
+  const filtered = useMemo(() => filterErrors(errors, { state: filter, severity: severityFilter, period, search }), [errors, filter, severityFilter, period, search]);
+  const stats = useMemo(() => errorViewStats(filtered), [filtered]);
+  const appErrors = filtered.filter(e => e.source !== "NetworkErrorMonitor");
+  const networkErrors = filtered.filter(e => e.source === "NetworkErrorMonitor");
+  const metric = (value: number) => loadError ? UNAVAILABLE_LABEL : loading ? "Chargement…" : value;
 
   const resolve = async (id: string) => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -181,7 +143,7 @@ const AdminErrors = () => {
       .update({ resolved_at: null, resolved_by: null })
       .eq("id", id);
     if (error) toast.error("Échec");
-    else { load(); window.dispatchEvent(new Event("admin-badges-refresh")); }
+    else { load(); setSelected(null); window.dispatchEvent(new Event("admin-badges-refresh")); }
   };
 
   const remove = async (id: string) => {
@@ -194,7 +156,7 @@ const AdminErrors = () => {
   const archiveAll = async () => {
     const targets = filtered.filter((e) => !e.resolved_at);
     if (targets.length === 0) {
-      toast.info("Aucune erreur non résolue à archiver");
+      toast.info("Aucun résultat non résolu à marquer");
       return;
     }
     setArchiving(true);
@@ -205,9 +167,9 @@ const AdminErrors = () => {
       .update({ resolved_at: new Date().toISOString(), resolved_by: user?.id })
       .in("id", ids);
     setArchiving(false);
-    if (error) toast.error("Échec de l'archivage");
+    if (error) toast.error("Échec de la mise à jour");
     else {
-      toast.success(`${ids.length} erreur(s) archivée(s)`);
+      toast.success(`${ids.length} dossier(s) marqué(s) résolu(s)`);
       window.dispatchEvent(new Event("admin-badges-refresh"));
       load();
     }
@@ -217,7 +179,7 @@ const AdminErrors = () => {
 
   return (
     <div className="space-y-6">
-      <AdminPageHeader title="Erreurs" description="Erreurs JavaScript et exceptions captées dans le navigateur des membres." />
+      <AdminPageHeader title="Erreurs" description="Dossiers JavaScript et réseau captés dans le navigateur, avec leurs occurrences historiques." />
       <div className="flex flex-wrap items-center justify-end">
         <div className="flex flex-wrap items-center gap-2">
           <ConfirmDialog
@@ -226,15 +188,15 @@ const AdminErrors = () => {
                 variant="outline"
                 size="sm"
                 className="gap-2"
-                disabled={archiving || loading || unresolvedCount === 0}
+                disabled={archiving || loading || loadError || unresolvedCount === 0}
               >
                 <Archive className="h-4 w-4" />
-                {archiving ? "Archivage…" : "Tout archiver"}
+                {archiving ? "Mise à jour…" : `Marquer les résultats résolus (${unresolvedCount})`}
               </Button>
             }
-            title={`Archiver ${unresolvedCount} erreur${unresolvedCount > 1 ? "s" : ""} ?`}
-            description="Toutes les erreurs non résolues actuellement filtrées seront marquées comme résolues. Vous pouvez les rouvrir ensuite individuellement."
-            confirmLabel="Tout archiver"
+            title={`Marquer ${unresolvedCount} dossiers résolus ?`}
+            description="Cette action renseigne la date de résolution des dossiers non résolus de la vue filtrée. Elle ne répare aucun incident. Vous pourrez les rouvrir individuellement."
+            confirmLabel="Marquer les résultats résolus"
             onConfirm={archiveAll}
           />
           <Button onClick={load} variant="outline" size="sm" className="gap-2">
@@ -243,28 +205,29 @@ const AdminErrors = () => {
         </div>
       </div>
 
+      {loadError && <p className="text-sm">Indisponible <Button onClick={load} variant="outline" size="sm">Réessayer</Button></p>}
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="pb-2"><CardDescription>Non résolues</CardDescription></CardHeader>
-          <CardContent><p className="text-3xl font-bold text-destructive">{loadError ? UNAVAILABLE_LABEL : stats.unresolved}</p></CardContent>
+          <CardContent><p className="text-3xl font-bold text-destructive">{metric(stats.unresolved)}</p></CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2"><CardDescription>Occurrences totales</CardDescription></CardHeader>
-          <CardContent><p className="text-3xl font-bold">{loadError ? UNAVAILABLE_LABEL : stats.totalOcc}</p></CardContent>
+          <CardContent><p className="text-3xl font-bold">{metric(stats.totalOcc)}</p></CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2"><CardDescription>Dernières 24h</CardDescription></CardHeader>
-          <CardContent><p className="text-3xl font-bold">{loadError ? UNAVAILABLE_LABEL : stats.last24h}</p></CardContent>
+          <CardContent><p className="text-3xl font-bold">{metric(stats.last24h)}</p></CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-2"><CardDescription>Utilisateurs affectés</CardDescription></CardHeader>
-          <CardContent><p className="text-3xl font-bold">{loadError ? UNAVAILABLE_LABEL : stats.affected}</p></CardContent>
+          <CardHeader className="pb-2"><CardDescription>Comptes identifiés</CardDescription></CardHeader>
+          <CardContent><p className="text-3xl font-bold">{metric(stats.affected)}</p></CardContent>
         </Card>
       </div>
 
       {/* Section dédiée aux erreurs réseau (NetworkErrorMonitor) */}
-      <NetworkErrorsSection />
+
 
       {/* Filtres */}
       <div className="flex flex-wrap gap-3 items-center">
@@ -286,6 +249,15 @@ const AdminErrors = () => {
             <SelectItem value="ignored_third_party">Ignorée (script tiers)</SelectItem>
           </SelectContent>
         </Select>
+        <Select value={period} onValueChange={(v: ErrorPeriod) => setPeriod(v)}>
+          <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Toutes périodes</SelectItem>
+            <SelectItem value="24h">Dernières 24h</SelectItem>
+            <SelectItem value="7d">7 derniers jours</SelectItem>
+            <SelectItem value="30d">30 derniers jours</SelectItem>
+          </SelectContent>
+        </Select>
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -297,19 +269,27 @@ const AdminErrors = () => {
         </div>
       </div>
 
+      <p className="text-sm text-muted-foreground">
+        {loadError ? "Indisponible" : loading ? "Chargement…" : `${filtered.length} dossiers dans la vue filtrée : ${stats.app} application, ${stats.network} réseau. ${stats.expected} refus attendus.`}
+        {truncated && " Données partielles : plafond de lecture atteint."}
+        {" Les sessions anonymes ne sont pas comptées parmi les comptes identifiés."}
+      </p>
+      <NetworkErrorsSection rows={networkErrors} loading={loading} loadError={loadError} onRetry={load} onSelect={setSelected} />
       {/* Liste */}
       <Card>
         <CardContent className="p-0">
           {loading ? (
             <div className="p-8 text-center text-muted-foreground">Chargement…</div>
-          ) : filtered.length === 0 ? (
+          ) : loadError ? (
+            <div className="p-8 text-center">Indisponible <Button variant="outline" onClick={load}>Réessayer</Button></div>
+          ) : appErrors.length === 0 ? (
             <div className="p-8 text-center text-muted-foreground">
               <CheckCircle2 className="h-10 w-10 mx-auto mb-2 text-primary" />
               {loadError ? "Liste indisponible, la lecture a échoué." : "Aucune erreur à afficher."}
             </div>
           ) : (
             <ul className="divide-y divide-border">
-              {filtered.map((e) => (
+              {appErrors.map((e) => (
                 <li
                   key={e.id}
                   className="p-4 hover:bg-accent/40 cursor-pointer transition-colors"
@@ -337,6 +317,7 @@ const AdminErrors = () => {
                             </Badge>
                           );
                         })()}
+                        {e.refusalReason && <Badge variant="outline" title={e.refusalReason}>Refus attendu</Badge>}
                         <Badge variant="outline">×{e.occurrences}</Badge>
                         {e.resolved_at && (
                           <Badge variant="outline" className="text-primary border-primary">
@@ -381,6 +362,7 @@ const AdminErrors = () => {
               </DialogHeader>
 
               <div className="space-y-4 mt-2">
+                {selected.refusalReason && <p className="text-sm"><Badge variant="outline">Refus attendu</Badge> {selected.refusalReason}</p>}
                 {(() => {
                   const tp = getThirdPartyInfo(selected.context);
                   if (!tp) return null;
@@ -442,14 +424,14 @@ const AdminErrors = () => {
                 {selected.url && (
                   <div>
                     <p className="text-xs uppercase text-muted-foreground mb-1">URL</p>
-                    <a
-                      href={selected.url}
+                    {selected.safeHref ? <a
+                      href={selected.safeHref}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-sm text-primary hover:underline inline-flex items-center gap-1 break-all"
                     >
                       {selected.url} <ExternalLink className="h-3 w-3" />
-                    </a>
+                    </a> : <p className="text-sm break-all">{selected.url} (lien désactivé)</p>}
                   </div>
                 )}
 
@@ -491,13 +473,9 @@ const AdminErrors = () => {
 
                 <div className="flex flex-wrap gap-2 pt-3 border-t border-border">
                   {selected.resolved_at ? (
-                    <Button onClick={() => reopen(selected.id)} variant="outline">
-                      Rouvrir
-                    </Button>
+                    <ConfirmDialog trigger={<Button variant="outline">Rouvrir</Button>} title="Rouvrir ce dossier ?" description="Le dossier sera de nouveau marqué non résolu." confirmLabel="Rouvrir" onConfirm={() => reopen(selected.id)} />
                   ) : (
-                    <Button onClick={() => resolve(selected.id)} className="gap-2">
-                      <CheckCircle2 className="h-4 w-4" /> Marquer résolue
-                    </Button>
+                    <ConfirmDialog trigger={<Button className="gap-2"><CheckCircle2 className="h-4 w-4" /> Marquer résolu</Button>} title="Marquer ce dossier résolu ?" description="Cette action renseigne une date de résolution, sans réparer l'incident." confirmLabel="Marquer résolu" onConfirm={() => resolve(selected.id)} />
                   )}
                   <ConfirmDialog
                     trigger={
