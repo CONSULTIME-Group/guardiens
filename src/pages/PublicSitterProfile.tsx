@@ -1395,7 +1395,7 @@ export default function PublicSitterProfile() {
   });
   // Meta description structurée : promesse + animaux + zone + signaux de confiance.
   const animalsForDesc = animalLabels || "animaux";
-  const cityForDesc = city ? `à ${city}${radius ? ` (rayon ${radius} km)` : ''}` : "près de chez vous";
+  const cityForDesc = city ? `à ${locationLabel}${radius ? ` (rayon ${radius} km)` : ''}` : "près de chez vous";
   const trustForDesc = [
     profile?.identity_verified ? "identité vérifiée" : null,
     completedSits > 0 ? `${completedSits} garde${completedSits > 1 ? 's' : ''}` : null,
