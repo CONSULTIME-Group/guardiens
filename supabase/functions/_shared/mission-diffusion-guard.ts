@@ -15,11 +15,18 @@ export interface DiffusableMission {
   end_date?: string | null;
 }
 
-const endOfDay = (iso: string): number => {
+import { parisDateKey } from "./paris-hour";
+
+/**
+ * Clé de date Paris (AAAA-MM-JJ) de l'échéance. La fin de journée est
+ * 23:59:59 heure de Paris, été comme hiver : on compare les dates civiles
+ * de Paris, pas les timestamps UTC. Une date invalide garde le comportement
+ * actuel : jamais dépassée.
+ */
+const parisDayOf = (iso: string): string => {
   const d = new Date(iso);
-  if (isNaN(d.getTime())) return Number.POSITIVE_INFINITY;
-  d.setUTCHours(23, 59, 59, 999);
-  return d.getTime();
+  if (isNaN(d.getTime())) return "9999-12-31";
+  return parisDateKey(d);
 };
 
 /** Motif lisible du refus, ou null si la diffusion est permise. */
