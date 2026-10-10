@@ -151,7 +151,6 @@ const ProfileHero = (p: ProfileHeroProps) => {
           height={544}
           loading="eager"
           decoding="async"
-          fetchPriority="high"
           className="profile-hero-art absolute inset-0 h-full w-full object-cover"
         />
       </picture>
