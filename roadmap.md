@@ -3,7 +3,7 @@
 ## Ajustement profil Bénédicte
 - [x] Carte contact et rayon dans le flux, sans suivi du défilement.
 - [x] Papier du carnet étendu à la largeur du hero sans changer l'asset.
-- [ ] Test ciblé et contrôle visuel.
+- [x] 8 tests ciblés verts, build automatique vert et contrôle visuel desktop.
 
 ## Reprise ciblée L5, hero immersif (10/10/2026)
 - [ ] Remplacer la composition en colonnes par une gouache continue et une protection locale du texte.
