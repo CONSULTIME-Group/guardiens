@@ -130,7 +130,7 @@ const ProfileHero = (p: ProfileHeroProps) => {
         ? (p.cta.hint ?? "")
         : p.cta.kind === "unauthenticated"
           ? "L'inscription est ouverte pendant la phase de lancement."
-          : "";
+          : ""
   );
 
   return (
