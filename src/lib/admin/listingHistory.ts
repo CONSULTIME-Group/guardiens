@@ -3,6 +3,7 @@
 // sans événement, le dossier le dit.
 import { SIT_STATUS_SHORT_LABELS, isSitStatus } from "@/lib/sitStatus";
 import { unpublishReasonAdminLabel } from "@/lib/unpublishReason";
+import { ARCHIVED_REASON_LABEL } from "@/lib/admin/listingSituation";
 
 export type EventSource = "field" | "status_history" | "admin_log";
 
@@ -51,7 +52,12 @@ export function buildTimeline(events: DossierEvent[]): DossierEvent[] {
   const out: DossierEvent[] = [];
   for (const e of sorted) {
     const t = new Date(e.at).getTime();
-    const dup = out.findIndex((o) => o.kind === e.kind && Math.abs(new Date(o.at).getTime() - t) <= DEDUPE_WINDOW_MS);
+    // Même événement vu par deux sources différentes seulement : deux actions
+    // réelles d'une même source, ou d'acteurs/motifs différents, sont gardées.
+    const dup = out.findIndex((o) => o.kind === e.kind && o.source !== e.source
+      && Math.abs(new Date(o.at).getTime() - t) <= DEDUPE_WINDOW_MS
+      && !(o.actor && e.actor && o.actor !== e.actor)
+      && !(o.detail && e.detail && o.detail !== e.detail));
     if (dup === -1) { out.push(e); continue; }
     const kept = out[dup];
     if (SOURCE_RANK[e.source] < SOURCE_RANK[kept.source]) {
@@ -60,7 +66,8 @@ export function buildTimeline(events: DossierEvent[]): DossierEvent[] {
       out[dup] = { ...kept, detail: e.detail };
     }
   }
-  return out;
+  return out.sort((a, b) =>
+    new Date(a.at).getTime() - new Date(b.at).getTime() || SOURCE_RANK[a.source] - SOURCE_RANK[b.source]);
 }
 
 export interface SitFields {
@@ -80,9 +87,9 @@ export function sitFieldEvents(s: SitFields): DossierEvent[] {
   });
   if (s.hidden_at) ev.push({ at: s.hidden_at, kind: "hide", label: "Masquage par l'équipe", source: "field", actor: "Équipe" });
   if (s.cancelled_at) ev.push({
-    at: s.cancelled_at, kind: "cancel", label: "Annulation", source: "field",
+    at: s.cancelled_at, kind: "cancel", label: s.cancellation_reason === "archived" ? ARCHIVED_REASON_LABEL : "Annulation", source: "field",
     actor: s.cancelled_by ? (s.cancelled_by === s.user_id ? "Propriétaire" : "Compte autre que le propriétaire") : "Auteur non enregistré",
-    detail: s.cancellation_reason?.trim() || "Motif non renseigné",
+    detail: s.cancellation_reason === "archived" ? ARCHIVED_REASON_LABEL : s.cancellation_reason?.trim() || "Motif non renseigné",
   });
   return ev;
 }
@@ -95,7 +102,7 @@ export function statusHistoryEvents(
     at: r.changed_at,
     kind: r.new_status === "published" ? "publish" : r.new_status === "cancelled" ? "cancel" : r.new_status === "completed" ? "complete" : r.new_status === "in_progress" ? "in_progress" : `status:${r.new_status}`,
     label: `${sitLabel(r.old_status)} vers ${sitLabel(r.new_status)}`,
-    detail: r.reason ? (unpublishReasonAdminLabel(r.reason) || r.reason) : null,
+    detail: r.reason === "archived" ? ARCHIVED_REASON_LABEL : r.reason ? (unpublishReasonAdminLabel(r.reason) || r.reason) : null,
     actor: r.changed_by ? (ownerId && r.changed_by === ownerId ? "Propriétaire" : "Compte autre que le propriétaire") : "Auteur non enregistré",
     source: "status_history" as const,
   }));
