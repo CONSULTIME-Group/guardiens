@@ -82,6 +82,7 @@ Navigateur local non connecté, ordinateur seulement (1280 px). Aucun audit mobi
 - [ ] A1 à A9 : première version e92029d revue avec 5 bloquants (rayon, NULL candidatures, code postal propriétaire, lectures > 1 000, autorisation mal transcrite), corrigés le 10/10, statut partiellement validé. Détail : [plan, section 6](docs/plan-chantier-profils-recherche-2026-10-10.md)
 - [x] Migration 0065 additive déjà appliquée (L1 n'est pas frontend seul)
 - [x] Autorisation : L1 à L7 autorisés en séquence conditionnelle, GO requis seulement pour la production
+- [x] Microcorrectif L1 (10/10) : point géocodé écarté si son département diffère du profil (Montreuil 93/62), ville propriétaire gardée si pays NULL. Voir plan. L1 toujours partiel.
 - [ ] A10 non reproduit, cause non tranchée
 - [ ] Recette connectée, vue carte, régression Canada et avis admin en navigateur
 - [x] A1 requalifié choix produit (10/10, Jérémie) : lieu = ville du propriétaire, repli annonce. « Paris »/69 affichée Lyon, Marlhes cherchée à Saint-Étienne. Ancienne règle « lieu à confirmer » retirée
