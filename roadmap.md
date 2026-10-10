@@ -119,3 +119,5 @@ Tâches encore actives :
 ## Audits admin Annonces / Entraide du 10/10/2026
 - Statut : aperçu prêt, publication et fonction edge non déployées (send-mass-email-proximity, garde-fou préparé dans le code).
 - Reste : GO de Jérémie pour publier le site et déployer la fonction.
+
+- [ ] Fiche publique : feuille unique ~1024px, bande identité compacte, contenu pleine largeur, rail en zone secondaire, observer CTA corrigé (sans publier)
