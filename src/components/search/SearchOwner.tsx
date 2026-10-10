@@ -1007,22 +1007,21 @@ const SearchOwner = () => {
             ? "Classés par affinité avec votre foyer."
             : "Classés du plus proche au plus loin."}
         </p>
-        {(activeSittersCount || activeOwnersCount) && (
+        {totalSearchable > 0 && (
           <p className="hidden md:flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground pt-0.5">
-            {!!activeSittersCount && (
-              <span className="inline-flex items-center">
-                <span className="font-semibold text-foreground mr-1">{activeSittersCount.toLocaleString("fr-FR")}</span>
-                gardiens en France
-              </span>
-            )}
-            {!!activeSittersCount && !!activeOwnersCount && (
-              <span className="text-muted-foreground/60">·</span>
-            )}
-            {!!activeOwnersCount && (
-              <span className="inline-flex items-center">
-                <span className="font-semibold text-foreground mr-1">{activeOwnersCount.toLocaleString("fr-FR")}</span>
-                propriétaires inscrits
-              </span>
+            <span className="inline-flex items-center">
+              <span className="font-semibold text-foreground mr-1">{totalSearchable.toLocaleString("fr-FR")}</span>
+              gardiens consultables
+            </span>
+            {countryCount("FR") > 0 && (
+              <>
+                <span className="text-muted-foreground/60">·</span>
+                <span className="inline-flex items-center">
+                  dont
+                  <span className="font-semibold text-foreground mx-1">{countryCount("FR").toLocaleString("fr-FR")}</span>
+                  en France
+                </span>
+              </>
             )}
           </p>
         )}
@@ -1284,7 +1283,7 @@ const SearchOwner = () => {
               <button
                 key={z.key}
                 type="button"
-                onClick={() => { setSelectedCountry(null); setZoneMode(z.key); }}
+                onClick={() => setZoneMode(z.key)}
                 disabled={z.disabled}
                 aria-pressed={active}
                 className={chipClass}
@@ -1294,33 +1293,25 @@ const SearchOwner = () => {
             );
           })}
 
-          {/* Pill Pays, en dernier. Liste construite depuis la base : jamais d'entrée
-              à zéro gardien. Masquée s'il n'existe qu'un seul pays peuplé. */}
+          {/* Pays : liste et chiffres de search_sitter_country_counts, même
+              population que la liste. « Tous les pays » lève la restriction. */}
           {sitterCountries.length > 1 && (() => {
-            const active = zoneMode === "country" && !!selectedCountry;
-            const chipClass = `min-h-9 rounded-full border px-3 py-1 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40 disabled:cursor-not-allowed ${
-              active
-                ? "bg-primary text-primary-foreground border-primary"
-                : "bg-card text-muted-foreground border-border hover:border-primary"
-            }`;
+            const chipClass = "min-h-9 rounded-full border px-3 py-1 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring bg-card text-foreground border-border hover:border-primary";
             return (
               <Popover open={openPop === "country"} onOpenChange={(o) => setOpenPop(o ? "country" : null)}>
                 <PopoverTrigger asChild>
-                  <button type="button" aria-pressed={active} className={chipClass}>
-                    {active && selectedCountry ? countryName(selectedCountry) : "Pays"}
+                  <button type="button" className={chipClass} aria-label={`Pays de recherche : ${scopeLabel}`}>
+                    Pays : {scopeLabel}
                   </button>
                 </PopoverTrigger>
                 <PopoverContent align="start" className="w-56 p-2 space-y-1 max-h-72 overflow-y-auto">
                   <button
                     type="button"
-                    className="w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-muted transition-colors"
-                    onClick={() => {
-                      setSelectedCountry(null);
-                      setZoneMode(prevZoneModeRef.current ?? "radius");
-                      setOpenPop(null);
-                    }}
+                    className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${selectedCountry === null ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted"}`}
+                    onClick={() => handleCountryChange(null)}
                   >
                     Tous les pays
+                    <span className="ml-1 text-muted-foreground">({totalSearchable})</span>
                   </button>
                   {sitterCountries.map((c) => (
                     <button
@@ -1446,11 +1437,6 @@ const SearchOwner = () => {
       {/* Results */}
       {viewMode === "list" ? (
         <div className="p-6">
-          {resultsTruncated && !loading && !searchError && (
-            <div className="max-w-4xl mx-auto mb-4 bg-muted/60 border border-border rounded-lg p-3 text-sm text-muted-foreground">
-              Beaucoup de résultats dans cette zone. Affinez votre recherche (ville, rayon) pour un classement par distance plus fiable.
-            </div>
-          )}
           {searchError ? (
             <div
               role="alert"
@@ -1494,19 +1480,21 @@ const SearchOwner = () => {
                 <h2 className="font-heading text-xl md:text-2xl font-semibold">
                   {isLaunchMode
                     ? "Soyez parmi les premiers propriétaires"
-                    : city
-                      ? `Aucun gardien à ${city} pour l'instant`
-                      : zoneMode === "france"
-                        ? "Aucun gardien en France pour l'instant"
+                    : hasActiveFilters
+                      ? "Aucun gardien ne correspond à ces filtres"
+                      : city && zoneMode === "radius"
+                        ? `Aucun gardien à moins de ${radius[0]} km de ${city} pour l'instant`
                         : zoneMode === "dept" && refDept
                           ? `Aucun gardien dans ${deptLabel} pour l'instant`
-                          : "Aucun gardien dans cette zone pour l'instant"}
+                          : zoneMode === "country" && selectedCountry
+                            ? `Aucun gardien consultable dans ce pays (${scopeLabel}) pour l'instant`
+                            : "Aucun gardien dans cette zone pour l'instant"}
                 </h2>
                 <p className="text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
                   {isLaunchMode
                     ? "La communauté de gardiens se construit. Créez une alerte pour recevoir un e-mail dès qu'un gardien rejoint votre zone."
-                    : zoneMode !== "france"
-                      ? "Essayez d'élargir à la France entière, ou activez une alerte pour être prévenu dès qu'un gardien rejoint votre zone."
+                    : expansion
+                      ? "Vous pouvez élargir la zone ci-dessous, ou activer une alerte pour être prévenu dès qu'un gardien la rejoint."
                       : "Activez une alerte pour être prévenu dès qu'un gardien rejoint votre zone."}
                 </p>
                 {hasActiveFilters && (
@@ -1561,12 +1549,12 @@ const SearchOwner = () => {
                         Rechercher dans le département
                       </button>
                     )}
-                    {zoneMode === "dept" && (
+                    {(zoneMode === "dept" || zoneMode === "region") && (
                       <button
-                        onClick={() => setZoneMode("france")}
+                        onClick={() => setZoneMode("country")}
                         className="rounded-full px-3 py-1.5 text-xs border border-border bg-background hover:border-primary hover:bg-primary/5 transition-colors"
                       >
-                        France entière
+                        {scopeLabel === "France" ? "France entière" : scopeLabel}
                       </button>
                     )}
                     {minRating !== "all" && (
@@ -1720,7 +1708,7 @@ const SearchOwner = () => {
                   const fn = (publicFirstName(s.profile?.first_name) || "Gardien").toLowerCase();
                   nameCounts[fn] = (nameCounts[fn] || 0) + 1;
                 });
-                return results.map((s: any) => (
+                return results.slice(0, visibleCount).map((s: any) => (
                   <SitterResultCard
                     key={s.id}
                     sitter={s}
@@ -1806,19 +1794,8 @@ const SearchOwner = () => {
           <div className="order-1 md:order-2 w-full md:w-1/2 h-[45vh] md:h-auto relative bg-muted/30">
             <Suspense fallback={<div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground">Chargement de la carte…</div>}>
               <SearchOwnerMapView
-                sitters={results
-                  .filter((s: any) => s._lat != null && s._lng != null)
-                  .map((s: any) => ({
-                    id: s.id,
-                    user_id: s.user_id,
-                    firstName: publicFirstName(s.profile?.first_name) || "Gardien",
-                    city: s.profile?.city ?? null,
-                    avatar: s.profile?.avatar_url ?? null,
-                    avgRating: s.avgRating ?? null,
-                    dist: s._dist ?? null,
-                    coords: { lat: s._lat, lng: s._lng },
-                  }))}
-                centerCoords={searchCenter}
+                sitters={mapPins}
+                viewport={mapViewport}
                 onContact={handleContact}
                 contactingId={contactingId}
               />
