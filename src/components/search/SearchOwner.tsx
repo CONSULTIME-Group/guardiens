@@ -1095,6 +1095,8 @@ const SearchOwner = () => {
             onCityKeyDown={handleCityKeyDown}
             onGeolocate={handleGeolocate}
             citySuggestions={citySuggestions}
+            country={selectedCountry}
+            countryLabel={scopeLabel}
             deptSuggestions={deptSuggestions}
             regionSuggestions={regionSuggestions}
             onSelectCity={handleSelectCity}
@@ -1128,6 +1130,8 @@ const SearchOwner = () => {
             onCityKeyDown={handleCityKeyDown}
             onGeolocate={handleGeolocate}
             citySuggestions={citySuggestions}
+            country={selectedCountry}
+            countryLabel={scopeLabel}
             deptSuggestions={deptSuggestions}
             regionSuggestions={regionSuggestions}
             onSelectCity={handleSelectCity}

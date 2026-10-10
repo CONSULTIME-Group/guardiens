@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Crosshair } from "lucide-react";
 import { DEPT_NAMES } from "@/lib/departments";
 import { REGION_NAMES } from "@/lib/regions";
+import type { PlaceSuggestion } from "@/lib/sitterSearch";
 
 interface OwnerLocationPickerProps {
   open: boolean;
@@ -18,10 +19,13 @@ interface OwnerLocationPickerProps {
   onCityInputChange: (value: string) => void;
   onCityKeyDown: (e: KeyboardEvent<HTMLInputElement>) => void;
   onGeolocate: () => void;
-  citySuggestions: any[];
+  citySuggestions: PlaceSuggestion[];
+  /** Pays de recherche, null = tous les pays (libellés et aide de saisie). */
+  country?: string | null;
+  countryLabel?: string;
   deptSuggestions: string[];
   regionSuggestions: string[];
-  onSelectCity: (suggestion: any) => void;
+  onSelectCity: (suggestion: PlaceSuggestion) => void;
   onSelectDept: (code: string) => void;
   onSelectRegion: (code: string) => void;
 }
@@ -44,6 +48,8 @@ const OwnerLocationPicker = ({
   onCityKeyDown,
   onGeolocate,
   citySuggestions,
+  country = "FR",
+  countryLabel,
   deptSuggestions,
   regionSuggestions,
   onSelectCity,
@@ -55,14 +61,15 @@ const OwnerLocationPicker = ({
     <PopoverContent align="start" className={contentClassName}>
       <div className="relative">
         <Input
-          placeholder="Ville, département (ex. 69) ou région…"
+          placeholder={country === "FR" ? "Ville, département (ex. 69) ou région…" : country ? `Ville (${countryLabel ?? country})…` : "Ville, dans tous les pays…"}
           value={cityInput}
           onChange={(e) => onCityInputChange(e.target.value)}
           onKeyDown={onCityKeyDown}
           className="pr-10"
-          aria-label="Ville, département ou région"
+          aria-label={country === "FR" ? "Ville, département ou région" : "Ville"}
           autoFocus={autoFocus}
         />
+        {(country === "FR" || country === null) && (
         <button
           type="button"
           onClick={onGeolocate}
@@ -71,6 +78,7 @@ const OwnerLocationPicker = ({
         >
           <Crosshair className="h-4 w-4" aria-hidden="true" />
         </button>
+        )}
       </div>
       {citySuggestions.length > 0 && (
         <div className={`space-y-1${communesClassName ? ` ${communesClassName}` : ""}`}>
@@ -81,8 +89,8 @@ const OwnerLocationPicker = ({
               className="w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-muted transition-colors"
               onClick={() => onSelectCity(s)}
             >
-              <span className="font-medium">{s.nom}</span>
-              {s.codesPostaux?.[0] && <span className="text-muted-foreground ml-1">({s.codesPostaux[0]})</span>}
+              <span className="font-medium">{s.name}</span>
+              {s.detail && <span className="text-muted-foreground ml-1">({s.detail}{s.country === "FR" && country !== "FR" ? ", France" : ""})</span>}
             </button>
           ))}
         </div>
