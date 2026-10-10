@@ -12,8 +12,8 @@ import { storageImageUrl } from "@/lib/storageImage";
  *  - photo 4:3, mini-carrousel préservé, badge lieu incrusté ("Ville · X km")
  *  - prénom Playfair, chips en pin doux (bg-primary/10 text-primary), sans amber
  *  - ligne meta en langage naturel (chaque segment omis si donnée absente)
- *  - accroche Playfair italique = première phrase de bio (< 120 chars), sinon rien
- *  - pied : mini ring d'affinité 54px (owner + score affichable), sinon micro-histoire réelle
+ *  - accroche = citation réelle de la bio, coupée sur un mot (lot L4)
+ *  - pied : mini ring d affinité (tri, jamais filtre), sinon faits réels seulement
  *          + bouton SECONDAIRE "Faire connaissance" (menant au profil, comme la carte).
  * Le bouton primaire "Contacter" DISPARAÎT (la rencontre vit sur le profil refondu).
  */
@@ -33,6 +33,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { sanitizeBioForCard } from "@/lib/sanitizeBio";
 import { publicFirstName } from "@/lib/displayName";
 import { sitterCardLine } from "@/lib/sitterDistinctLine";
+import { ratingSummary, cardQuote, cardAnimals, cardSkillGroups, cardPlaceFacts } from "@/lib/cardFacts";
+import { lastVisitLabel } from "@/lib/profileSignals";
+import { responsivenessLabel } from "@/components/profile/ResponsivenessBadge";
+import { SPOTS } from "@/components/profile/skillSpots";
 
 interface SitterResultCardProps {
   sitter: any;
@@ -41,34 +45,6 @@ interface SitterResultCardProps {
   hasOwnerProfile: boolean;
   duplicateName: boolean;
   city: string;
-}
-
-/**
- * Extrait la première phrase d'une bio si elle tient sous 120 caractères,
- * sinon renvoie null (jamais de troncature ni de génération).
- */
-function firstSentenceUnder(bio: string | null | undefined, max = 120): string | null {
-  if (!bio) return null;
-  const trimmed = bio.trim();
-  if (!trimmed) return null;
-  const m = trimmed.match(/^[^.!?…]+[.!?…]/);
-  const first = (m ? m[0] : trimmed).trim();
-  if (first.length === 0 || first.length > max) return null;
-  return first;
-}
-
-/**
- * "Répond en moins de 2 h" / "Répond en moins de 30 min" à partir des minutes médianes.
- * Aucun affichage si la donnée est absente ou aberrante.
- */
-function replyPhrase(minutes: number | null | undefined): string | null {
-  if (minutes == null || !Number.isFinite(minutes) || minutes <= 0) return null;
-  if (minutes < 60) {
-    const rounded = Math.max(5, Math.round(minutes / 5) * 5);
-    return `Répond en moins de ${rounded} min`;
-  }
-  const hours = Math.max(1, Math.round(minutes / 60));
-  return `Répond en moins de ${hours} h`;
 }
 
 const SitterResultCard = ({
@@ -86,7 +62,7 @@ const SitterResultCard = ({
   // Certains membres saisissent leur nom complet dans le champ prénom,
   // seul le premier mot est affiché publiquement.
   const firstName: string = publicFirstName(profile?.first_name) || "Gardien";
-  const sitterAnimalTypes: string[] = sitter.animal_types || [];
+  const sitterAnimalTypes: string[] = cardAnimals(sitter.animal_types);
   const initials = firstName.charAt(0).toUpperCase();
   const hasPhotos = photos.length > 0;
   const currentPhoto = hasPhotos ? photos[photoIdx % photos.length] : null;
@@ -102,39 +78,37 @@ const SitterResultCard = ({
 
   // Badge lieu incrusté : "Ville · 2 km", ou "Ville" seule, ou rien.
   const locChunks = [profile?.city, distLabel].filter(Boolean) as string[];
+  const countryChunk = cardPlaceFacts(sitter.country ?? profile?.country, null).countryLabel;
+  if (countryChunk && !distLabel) locChunks.push(countryChunk);
   const locLabel = locChunks.length > 0 ? locChunks.join(" · ") : null;
 
-  // Ligne meta naturelle : "Répond en moins de 2 h · 4,9 sur 7 gardes"
-  const reply = replyPhrase(sitter.reply_median_minutes);
+  // Ligne meta (lot L4) : note /5 sur le nombre d'AVIS, gardes à part ;
+  // réactivité = palier public 90 jours (contrat L3), jamais un délai arrondi.
   const nSits: number = profile?.completed_sits_count || 0;
-  const rating: number | null = sitter.avgRating;
-  const ratingChunk =
-    rating != null && nSits > 0
-      ? `${rating.toFixed(1).replace(".", ",")} sur ${nSits} garde${nSits > 1 ? "s" : ""}`
-      : nSits > 0
-        ? `${nSits} garde${nSits > 1 ? "s" : ""} réalisée${nSits > 1 ? "s" : ""}`
-        : null;
-  const metaChunks = [reply, ratingChunk].filter(Boolean) as string[];
+  const ratingChunk = ratingSummary(sitter.avgRating, sitter.reviewCount || 0, nSits);
+  const reply = responsivenessLabel(sitter._responsivenessTier);
+  const visit = lastVisitLabel(profile?.last_seen_at);
+  const metaChunks = [ratingChunk, visit ? `Vu ${visit}` : null].filter(Boolean) as string[];
 
-  // Accroche Playfair : première phrase de bio courte, sinon rien.
-  // Lot R1 : ligne courte « qui il est », en plus de l'accroche ou seule.
   const cardLine = sitterCardLine(sitter, { omitSitsAndReviews: true });
+  const quote = cardQuote(sanitizeBioForCard(profile?.bio), 120);
+  // Une gouache qui répète un animal déjà en pastille n'apporte rien.
+  const animalSet = new Set(sitterAnimalTypes.map((a) => a.toLowerCase()));
+  const skillGroups = cardSkillGroups({
+    animalTypes: sitter.animal_types,
+    competences: sitter.competences ?? sitter._card?.competences,
+    specialSkills: sitter.special_animal_skills ?? sitter._card?.special_animal_skills,
+    exclude: animalSet,
+  });
+  const place = cardPlaceFacts(sitter.country ?? profile?.country, sitter.travel_zones);
 
-  const quote = firstSentenceUnder(sanitizeBioForCard(profile?.bio), 120);
-
-  // Affinité affichable : owner connecté + score non masqué.
-  // On trie, on n'élimine jamais : l'anneau est rendu dès qu'un score
-  // existe ; le chiffre affiché dépend de `affinity.scoreReliable`.
+  // Affinité affichable : owner connecté + score non masqué. Tri, jamais filtre.
   const showAffinityRing = !isAnon && !!affinity;
-  // Fallback owner sans score affichable : petite mention discrète.
   const showAffinityFallback = !isAnon && hasOwnerProfile && !showAffinityRing;
 
-  // Micro-histoire : uniquement des faits réels, jamais générée.
-  //   - "Prépare sa première garde" si aucun garde à ce jour.
-  //   - "Identité vérifiée" si applicable.
+  // Faits réels seulement ; l'absence de garde ne prouve aucune intention.
   const microFacts: string[] = [];
-  if (nSits === 0) microFacts.push("Prépare sa première garde");
-  if (profile?.identity_verified) microFacts.push("Identité vérifiée");
+  if (sitter._helpOffered === true) microFacts.push("Propose aussi l'entraide");
 
   const stop = (e: MouseEvent) => {
     e.preventDefault();
@@ -150,15 +124,17 @@ const SitterResultCard = ({
   };
 
   return (
+    <div className="group relative h-full">
+      {/* Favori HORS du lien de carte (lot L4) : un lien dans un lien cassait
+          le rendu, et le favori ne doit jamais ouvrir la fiche. Zone 44 px. */}
+      <div className="absolute top-2 right-2 z-20 flex h-11 w-11 items-center justify-center">
+        <FavoriteButton targetType="sitter" targetId={sitter.user_id} anonRedirect={signupRedirect} />
+      </div>
     <Link
       to={`/gardiens/${sitter.user_id}`}
       aria-label={`Voir le profil de ${firstName}`}
-      className="group relative bg-card rounded-[20px] overflow-hidden border border-border shadow-sm hover:shadow-lg hover:-translate-y-0.5 hover:border-primary/40 transition-all flex flex-col h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="relative bg-card rounded-[20px] overflow-hidden border border-border shadow-sm hover:shadow-lg hover:-translate-y-0.5 hover:border-primary/40 transition-all flex flex-col h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
-      {/* Favori (overlay, redirect encodé pour anon) */}
-      <div className="absolute top-2 right-2 z-10">
-        <FavoriteButton targetType="sitter" targetId={sitter.user_id} anonRedirect={signupRedirect} />
-      </div>
 
       {/* Photo 4:3 avec mini-carrousel préservé */}
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
@@ -181,7 +157,7 @@ const SitterResultCard = ({
               type="button"
               onClick={prev}
               aria-label="Photo précédente"
-              className="absolute left-1.5 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full bg-background/85 text-foreground opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity flex items-center justify-center shadow-sm hover:bg-background"
+              className="absolute left-1.5 top-1/2 -translate-y-1/2 h-11 w-11 rounded-full bg-background/85 text-foreground opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity flex items-center justify-center shadow-sm hover:bg-background"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
@@ -189,25 +165,17 @@ const SitterResultCard = ({
               type="button"
               onClick={next}
               aria-label="Photo suivante"
-              className="absolute right-1.5 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full bg-background/85 text-foreground opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity flex items-center justify-center shadow-sm hover:bg-background"
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 h-11 w-11 rounded-full bg-background/85 text-foreground opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity flex items-center justify-center shadow-sm hover:bg-background"
             >
               <ChevronRight className="h-4 w-4" />
             </button>
-            <div
-              className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1"
-              onClick={stop}
-            >
+            {/* Points indicatifs seulement : la navigation passe par les deux boutons de 44 px. */}
+            <div aria-hidden="true" className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1">
               {photos.map((_, i) => (
-                <button
+                <span
                   key={i}
-                  type="button"
-                  aria-label={`Photo ${i + 1}`}
-                  onClick={(e) => {
-                    stop(e);
-                    setPhotoIdx(i);
-                  }}
                   className={`h-1.5 rounded-full transition-all ${
-                    i === photoIdx ? "w-4 bg-white" : "w-1.5 bg-white/60 hover:bg-white/80"
+                    i === photoIdx ? "w-4 bg-background" : "w-1.5 bg-background/60"
                   }`}
                 />
               ))}
@@ -260,6 +228,12 @@ const SitterResultCard = ({
           </p>
         )}
 
+        {(reply || place.mobility) && (
+          <p className="mt-1 text-[12.5px] text-muted-foreground">
+            {[reply, place.mobility].filter(Boolean).join(" · ")}
+          </p>
+        )}
+
         {cardLine && (
           <p data-testid="sitter-card-line" className="mt-1.5 text-[13px] leading-snug text-muted-foreground line-clamp-2">
             {cardLine}
@@ -285,7 +259,20 @@ const SitterResultCard = ({
           </div>
         )}
 
-        {/* Accroche Playfair italique, uniquement si bio courte réelle */}
+        {skillGroups.length > 0 && (
+          <ul className="mt-2.5 flex flex-wrap gap-2" aria-label="Savoir-faire">
+            {skillGroups.map((g) => (
+              <li key={g.key} className="inline-flex items-center gap-1.5 text-[12px] text-foreground/80">
+                {SPOTS[g.spot] && (
+                  <img src={SPOTS[g.spot]} alt="" aria-hidden="true" width={28} height={28} loading="lazy" decoding="async" className="h-7 w-7 object-contain" />
+                )}
+                {g.label}
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {/* Accroche : citation réelle de la bio, coupée sur un mot */}
         {quote && (
           <p className="mt-3 font-heading italic text-[13.5px] leading-snug text-foreground/80 line-clamp-2">
             « {quote} »
@@ -307,7 +294,7 @@ const SitterResultCard = ({
             ) : microFacts.length > 0 ? (
               <ul className="space-y-0.5 text-[12px] leading-snug text-muted-foreground">
                 {microFacts.map((f) => (
-                  <li key={f} className="truncate">{f}</li>
+                  <li key={f}>{f}</li>
                 ))}
               </ul>
             ) : null}
@@ -322,6 +309,7 @@ const SitterResultCard = ({
         </div>
       </div>
     </Link>
+    </div>
   );
 };
 

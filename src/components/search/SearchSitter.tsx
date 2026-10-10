@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense } from "react";
 
+import { sitHasPhotos } from "@/lib/cardFacts";
 import InviteToMySitButton from "@/components/sits/owner/InviteToMySitButton";
 import { Sprout, PawPrint, GraduationCap, Handshake as HandshakeIcon, LayoutGrid, Map as MapIcon, SlidersHorizontal, Loader2, Home, Wrench } from "lucide-react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
@@ -503,7 +504,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
    if (tab === "sits") {
      let final = rawResults.slice();
      if (housingTypes.length > 0) final = final.filter((s: any) => housingTypes.includes(s.property?.type));
-     if (withPhotosOnly) final = final.filter((s: any) => s.property?.photos?.length > 0);
+     if (withPhotosOnly) final = final.filter((s: any) => sitHasPhotos(s));
      if (duration !== "all") {
        final = final.filter((s: any) => {
          if (!s.start_date || !s.end_date) return true;

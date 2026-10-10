@@ -19,22 +19,10 @@ import { getMemberAvatarUrl, getMemberPublicFirstName } from "@/lib/memberUtils"
 import { capitalizeFirstName } from "@/lib/displayName";
 import type { SkillGroup, SkillSpot } from "@/lib/sitterSkillGroups";
 import { cutLongText, reviewDateLabel } from "@/lib/sitterProfileFacts";
-import spotChat from "@/assets/missions/spot-chat-160.webp";
-import spotChien from "@/assets/missions/spot-chien-160.webp";
-import spotPoules from "@/assets/missions/spot-poules-160.webp";
-import spotBienetre from "@/assets/missions/spot-bienetre-160.webp";
-import spotJardin from "@/assets/missions/spot-jardin-160.webp";
-import spotBricolage from "@/assets/missions/spot-bricolage-160.webp";
 import spotVerger from "@/assets/missions/spot-verger-160.webp";
 
-const SPOTS: Record<SkillSpot, string> = {
-  "spot-chat": spotChat,
-  "spot-chien": spotChien,
-  "spot-poules": spotPoules,
-  "spot-bienetre": spotBienetre,
-  "spot-jardin": spotJardin,
-  "spot-bricolage": spotBricolage,
-};
+import { SPOTS } from "@/components/profile/skillSpots";
+export { SPOTS };
 
 /* ── Titre de section : trait 22 px + eyebrow + H2 ─────────────────── */
 export const SectionHeading = ({ eyebrow, title, id }: { eyebrow: string; title: ReactNode; id?: string }) => (

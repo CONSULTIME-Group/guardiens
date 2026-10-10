@@ -95,7 +95,11 @@ export function lastVisitLabel(iso: string | null | undefined, now: Date = new D
 export const RESPONSIVENESS_CONTRACT = { windowDays: 90, minContacts: 5 } as const;
 
 export const RESPONSIVENESS_SCOPE_NOTE =
-  "Calculé sur les 90 derniers jours, à partir de 5 échanges reçus au moins.";
+  "Délai médian de première réponse sur les 90 derniers jours, calculé à partir de 5 contacts ou sollicitations au moins (messages et candidatures reçus).";
 
-export const RESPONSIVENESS_ABSENT_NOTE =
-  "Pas encore assez d'échanges récents pour indiquer un délai de réponse.";
+/**
+ * Palier absent : la vue ne dit pas pourquoi (moins de 5 contacts, taux sous
+ * 70 %, médiane au-delà de 72 h ou panne). Formulation neutre, et les
+ * surfaces n'affichent en général rien.
+ */
+export const RESPONSIVENESS_ABSENT_NOTE = "Délai de réponse indisponible.";
