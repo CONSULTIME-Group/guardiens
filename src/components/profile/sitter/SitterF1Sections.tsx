@@ -363,7 +363,7 @@ export const SitterContactCard = ({
       <p className="mt-2 text-[14.5px] text-muted-foreground font-body">
         Présentez votre maison et vos animaux à {firstName}, puis faites connaissance.
       </p>
-      <div className={showButton === "md" ? "hidden md:block" : ""}>
+      <div className={showButton === "md" ? "hidden lg:block" : ""}>
         <div className="mt-[14px]">
           <CtaButton cta={cta} firstName={firstName} className={btnCls} />
         </div>
@@ -409,7 +409,7 @@ export const SitterStickyBar = ({
   return (
     <div
       data-sitter-sticky-bar
-      className="md:hidden fixed left-0 right-0 z-40 bottom-[var(--bottom-nav-h,0px)] bg-background/[0.97] border-t border-border shadow-[0_-6px_20px_-10px_hsl(var(--foreground)/0.2)] px-5 pt-3 pb-[calc(22px+env(safe-area-inset-bottom))]"
+      className="lg:hidden fixed left-0 right-0 z-40 bottom-[var(--bottom-nav-h,0px)] bg-background/[0.97] border-t border-border shadow-[0_-6px_20px_-10px_hsl(var(--foreground)/0.2)] px-5 pt-3 pb-[calc(22px+env(safe-area-inset-bottom))]"
     >
       <div className="flex items-center gap-3 min-w-0">
         <Avatar className="w-10 h-10 shrink-0">

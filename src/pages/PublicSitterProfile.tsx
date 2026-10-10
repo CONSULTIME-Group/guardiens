@@ -1795,7 +1795,7 @@ export default function PublicSitterProfile() {
         );
 
         return (
-        <div data-profile-content className="max-w-5xl mx-auto px-4 md:px-6 py-[34px] md:py-[52px] pb-[calc(10.5rem+env(safe-area-inset-bottom))] md:pb-[52px]">
+        <div data-profile-content className="max-w-5xl mx-auto px-4 md:px-6 py-[34px] md:py-[52px] pb-[calc(10.5rem+env(safe-area-inset-bottom))] lg:pb-[52px]">
           <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-[52px]">
           <div className="space-y-[52px] min-w-0">
 
@@ -2052,7 +2052,7 @@ export default function PublicSitterProfile() {
         }
 
         return (
-        <div data-profile-content className="max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-8 pb-[calc(10.5rem+env(safe-area-inset-bottom))] md:pb-8">
+        <div data-profile-content className="max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-8 pb-[calc(10.5rem+env(safe-area-inset-bottom))] lg:pb-8">
           <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-8">
             <div className="space-y-[52px] min-w-0">
 
@@ -2461,7 +2461,7 @@ export default function PublicSitterProfile() {
 
       {/* ── ONGLET ENTRAIDE ── */}
       {activeTab === 'entraide' && (
-        <div data-profile-content className="max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-8 pb-[calc(10.5rem+env(safe-area-inset-bottom))] md:pb-8">
+        <div data-profile-content className="max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-8 pb-[calc(10.5rem+env(safe-area-inset-bottom))] lg:pb-8">
           <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-8">
           <div className="min-w-0 space-y-10">
 
@@ -2625,7 +2625,7 @@ export default function PublicSitterProfile() {
           Mirroir strict du CTA hero courant (facette active), gaté par
           IntersectionObserver : n'apparaît que si le hero est hors écran.
           Un seul bloc, jamais deux CTA concurrents. */}
-      {activeTab === 'gardien' && profile && (
+      {activeTab === 'gardien' && profile && !heroCtaVisible && (
         <SitterStickyBar
           firstName={firstName}
           avatarUrl={hasAvatar ? profile.avatar_url : null}
@@ -2637,7 +2637,7 @@ export default function PublicSitterProfile() {
       )}
       {activeTab !== 'gardien' && !heroCtaVisible && (() => {
         const baseCls =
-          "md:hidden fixed left-0 right-0 z-40 bg-background border-t border-border px-3 sm:px-4 pt-2.5 sm:pt-3 pb-[calc(env(safe-area-inset-bottom)+0.625rem)] shadow-lg bottom-[var(--bottom-nav-h,0px)]";
+          "lg:hidden fixed left-0 right-0 z-40 bg-background border-t border-border px-3 sm:px-4 pt-2.5 sm:pt-3 pb-[calc(env(safe-area-inset-bottom)+0.625rem)] shadow-lg bottom-[var(--bottom-nav-h,0px)]";
         const btnCls =
           "flex items-center justify-center bg-primary text-primary-foreground rounded-lg px-3 sm:px-4 py-3 text-[13px] sm:text-sm font-medium w-full leading-tight text-center break-words";
         const mutedCls =
