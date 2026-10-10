@@ -1809,6 +1809,7 @@ export default function PublicSitterProfile() {
 
             {/* Avis : masqués sans avis (L5, aucune section vide). */}
             {sitterRoleCount > 0 && (
+            {(ownerDataLoading || ownerReviews.length > 0 || missionFeedbacks.length > 0) && (
             <section aria-label="Avis reçus" className="scroll-mt-20">
               <SectionHeading eyebrow="Avis" title={sitterReviewsHeading(sitterRoleCount, sitterRoleAvg, firstName).title} />
               <p className="-mt-2 mb-[22px] text-sm text-muted-foreground">
@@ -1855,6 +1856,7 @@ export default function PublicSitterProfile() {
                 </>
               )}
             </section>
+            )}
             )}
 
             <SitterAboutSection
@@ -2057,6 +2059,7 @@ export default function PublicSitterProfile() {
               <StoryTiles tiles={tiles} />
 
               {/* Son mot d'accueil */}
+              {(ownerProfile?.welcome_notes || bio || (ownerProfile?.competences?.length ?? 0) > 0) && (
               <section aria-label={`Mot d'accueil de ${firstName}`} className="scroll-mt-20">
                 <div className="mb-5">
                   <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-secondary">
@@ -2079,11 +2082,7 @@ export default function PublicSitterProfile() {
                       </p>
                     )}
                   </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground italic font-body">
-                    Le mot d'accueil de {firstName} arrive bientôt.
-                  </p>
-                )}
+                ) : null}
                 {(ownerProfile?.competences?.length ?? 0) > 0 && (
                   <div className="mt-6 space-y-2">
                     <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">Savoir-faire</p>
@@ -2095,8 +2094,10 @@ export default function PublicSitterProfile() {
                   </div>
                 )}
               </section>
+              )}
 
               {/* Ses animaux */}
+              {(ownerDataLoading || pets.length > 0) && (
               <section aria-label={`Animaux de ${firstName}`} className="scroll-mt-20">
                 <div className="mb-5">
                   <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-secondary">
@@ -2145,14 +2146,12 @@ export default function PublicSitterProfile() {
                       );
                     })}
                   </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground italic font-body">
-                    Les compagnons de {firstName} apparaîtront ici.
-                  </p>
-                )}
+                ) : null}
               </section>
+              )}
 
               {/* Ses annonces */}
+              {(ownerDataLoading || ownerSits.length > 0) && (
               <section aria-label={`Annonces de ${firstName}`} className="scroll-mt-20">
                 <div className="mb-5">
                   <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-secondary">
@@ -2234,12 +2233,9 @@ export default function PublicSitterProfile() {
                       )}
                     </div>
                   </div>
-                ) : archivedSits.length === 0 ? (
-                  <p className="text-sm text-muted-foreground italic font-body">
-                    {firstName} prépare sa première annonce.
-                  </p>
                 ) : null}
               </section>
+              )}
 
               {/* Ses gardes passées (annonces archivées, non annulées) */}
               {archivedSits.length > 0 && (
@@ -2340,7 +2336,7 @@ export default function PublicSitterProfile() {
                   <h2 className="font-heading text-[22px] sm:text-[26px] font-semibold text-foreground mt-1 leading-tight">
                     {ownerReviews.length > 0
                       ? 'Ce que les gardiens racontent.'
-                      : `${firstName} accueillera son premier gardien bientôt.`}
+                      : 'Avis d\'entraide reçus.'}
                   </h2>
                   {ownerReviews.length > 0 && (
                     <p className="text-sm text-muted-foreground mt-1">
@@ -2393,11 +2389,7 @@ export default function PublicSitterProfile() {
                     })}
                     <ShowMoreBtn items={ownerReviews} showAll={showAllOwnerReviews} setShowAll={setShowAllOwnerReviews} />
                   </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground italic font-body">
-                    Les premiers retours des gardiens apparaîtront ici.
-                  </p>
-                )}
+                ) : null}
                 {missionFeedbacks.length > 0 && (
                   <div className="mt-6 space-y-3 border-t border-border/50 pt-5">
                     <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
