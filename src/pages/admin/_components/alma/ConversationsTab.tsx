@@ -37,23 +37,31 @@ function pct(v: number) {
 
 export function ConversationsTab({ since }: { since: string }) {
 
-  const { data: rows = [], isLoading } = useQuery({
+  const corpus = useQuery({
     queryKey: ["admin-alma-conversations", since],
-    queryFn: async (): Promise<RawConversation[]> => {
-      const { data, error } = await supabase
-        .from("alma_conversations" as any)
-        .select(
-          "id, created_at, surface, active_role, question, answer, register, refusal_reason, input_mode, user_id",
-        )
-        .gte("created_at", since)
-        .order("created_at", { ascending: false })
-        .limit(ROW_LIMIT);
-      if (error) throw error;
-      return (data ?? []) as unknown as RawConversation[];
+    queryFn: async () => {
+      try {
+        return await fetchAllRows<RawConversation>((from, to) =>
+          (supabase.from("alma_conversations" as any) as any)
+            .select("id, created_at, surface, active_role, question, answer, register, refusal_reason, input_mode, user_id")
+            .gte("created_at", since)
+            .order("created_at", { ascending: false })
+            .order("id", { ascending: false })
+            .range(from, to), { cap: ROW_LIMIT });
+      } catch (error) {
+        reportAdminReadError("Alma : corpus des conversations", error);
+        throw error;
+      }
     },
     staleTime: 60_000,
     refetchOnWindowFocus: false,
   });
+  const rows = useMemo(() => corpus.data?.rows ?? [], [corpus.data]);
+  const isLoading = corpus.isLoading;
+  const corpusError = corpus.isError;
+  const truncated = corpus.data?.truncated ?? false;
+  const ready = !isLoading && !corpusError;
+  const shown = (v: React.ReactNode) => (corpusError ? UNAVAILABLE_LABEL : isLoading ? "…" : v);
 
   // Lot A10 : taux « suivies d'une action » calculé en SQL sur toutes les conversations.
   const { data: followedRaw, isError: followedError } = useQuery({
