@@ -1133,12 +1133,11 @@
       padding-right: 2.5rem;
     }
   }
-  .profile-notebook-sheet .profile-hero[data-in-notebook] [data-hero-content] { padding-right: 0; }
+  .profile-notebook-sheet .profile-hero[data-in-notebook] [data-hero-content] { padding-right: 1rem; }
   @media (min-width: 768px) {
     .profile-notebook-sheet .profile-hero[data-in-notebook] [data-hero-content] { padding-right: 2.5rem; }
   }
   .profile-notebook-sheet .profile-hero[data-in-notebook] .profile-hero-identity {
-    padding-bottom: 0.25rem;
     border-bottom: 1px solid hsl(var(--border));
     padding-bottom: 1.25rem;
   }
