@@ -77,3 +77,9 @@ Navigateur local non connecté, ordinateur seulement (1280 px). Aucun audit mobi
 ## Chantier profils, cartes et recherche (plan du 10/10/2026, aucun lot lancé)
 
 - [ ] Suivi : [plan du chantier](docs/plan-chantier-profils-recherche-2026-10-10.md) (registre des constats, lots L1 à L7 en séquence stricte, recettes après build, points non vérifiés)
+
+## Lot L1 moteur d'annonces (10/10/2026)
+- [x] A1 à A9 corrigés, A11 expliqué, migration 0065, build et types OK, recette visiteur ordinateur et mobile 390 px. Détail : [plan, section 6](docs/plan-chantier-profils-recherche-2026-10-10.md)
+- [ ] A10 non reproduit, cause non tranchée
+- [ ] Recette connectée, vue carte, régression Canada et avis admin en navigateur
+- [ ] Donnée : annonce archivée « Paris » avec département 69 (non modifiée)
