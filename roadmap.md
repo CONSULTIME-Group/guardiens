@@ -1,5 +1,10 @@
 # Roadmap
 
+## Gouaches peintes sur les profils (10/10/2026)
+
+- [x] Conserver les peintures, supprimer le zoom et fondre leurs bords sur le papier du profil.
+- [x] Profil affiché vérifié à 1280 et 390 px : sujets entiers, contact visible, aucun débordement. 17 tests ciblés verts, build automatique vert, aucune publication.
+
 ## État actuel (10/10/2026, 18:45 Paris)
 
 - L1 à L7 livrés et publiés en version réduite (base publiée c33531b2, déploiement 33330154 réussi). Les sections plus bas qui disent « non publié » ou « L6 non lancé » sont historiques.

@@ -1076,45 +1076,31 @@
     color: hsl(var(--foreground));
   }
 
-  /* Local readability wash only: the gouache remains untouched elsewhere. */
+  /* One paper surface, with enough room for the complete original painting. */
   .profile-hero {
+    --profile-art-height: min(28vw, 340px);
     background-color: hsl(var(--hero-paper));
-    min-height: 320px;
+    padding-bottom: var(--profile-art-height);
   }
 
-  .profile-hero-art { object-position: center 24%; }
-  .profile-hero-art[data-hero-anchor="left"] { object-position: left center; }
-  .profile-hero-art[data-hero-anchor="right"] { object-position: right center; }
-  /* The notebook asset includes grey side margins: let its paper fill the hero. */
-  @media (min-width: 640px) {
-    .profile-hero-art[data-hero-notebook="true"] { transform: scale(1.45); }
+  .profile-hero [data-hero-gouache] {
+    top: auto;
+    height: var(--profile-art-height);
+    mix-blend-mode: multiply;
+    mask-image: linear-gradient(to bottom, transparent, black 8%, black 96%, transparent);
   }
+  .profile-hero-art {
+    object-position: center bottom;
+    /* Pale paper disappears into the page without fading the painted subjects. */
+    mix-blend-mode: multiply;
+  }
+  .profile-hero-art[data-hero-notebook="true"] {
+    mask-image: linear-gradient(to right, transparent 0%, transparent 11%, black 18%, black 86%, transparent 91%, transparent 100%);
+  }
+  .profile-hero-identity { max-width: 760px; }
 
-  .profile-hero-identity { max-width: 600px; }
-  .profile-hero[data-hero-subject="left"] .profile-hero-identity { margin-left: auto; }
-  @media (min-width: 1024px) {
-    .profile-hero[data-hero-subject="left"] .profile-hero-identity { max-width: 460px; }
-  }
-  .profile-hero-identity::before {
-    content: "";
-    position: absolute;
-    inset: -36px -48px -24px -32px;
-    z-index: -1;
-    background: radial-gradient(ellipse closest-side at 50% 50%, hsl(var(--background) / .98) 40%, hsl(var(--background) / .94) 65%, hsl(var(--background) / .55) 82%, hsl(var(--background) / 0) 100%);
-    pointer-events: none;
-  }
-
-  @media (max-width: 767px) {
-    .profile-hero { min-height: 360px; }
-    .profile-hero-identity { max-width: 500px; }
-    .profile-hero-identity::before { inset: -32px -24px -12px -24px; }
-    .profile-hero [data-hero-content] { padding-bottom: 116px; }
-    .profile-hero[data-hero-subject="left"] .profile-hero-art { object-position: 32% center; }
-    .profile-hero[data-hero-subject="right"] .profile-hero-art { object-position: 75% center; }
-  }
-
-  @media (min-width: 640px) and (max-width: 1023px) {
-    .profile-hero-identity { max-width: 420px; }
+  @media (max-width: 639px) {
+    .profile-hero { --profile-art-height: 35.42vw; }
   }
 
   .alma-conversation-sheet {
