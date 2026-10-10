@@ -105,7 +105,6 @@ describe("invalidation après action", () => {
     ["src/pages/admin/AdminReviewDisputes.tsx", 1],
     ["src/pages/admin/AdminReports.tsx", 2],
     ["src/pages/admin/AdminSkills.tsx", 4],
-    ["src/pages/admin/AdminListings.tsx", 3],
     ["src/pages/admin/AdminGuides.tsx", 2],
     ["src/pages/admin/AdminDeletionRequests.tsx", 1],
   ];
@@ -113,6 +112,21 @@ describe("invalidation après action", () => {
     const src = read(p);
     const calls = src.match(/refreshAdminBadges\(\);/g) || [];
     expect(calls.length).toBeGreaterThanOrEqual(min);
+  });
+
+  it("AdminListings rafraîchit les pastilles après masquer, restaurer et supprimer", () => {
+    const src = read("src/pages/admin/AdminListings.tsx");
+    // Helper factorisé réellement relié à refreshAdminBadges.
+    expect(src).toMatch(/const refreshAfterAction = \(\) => \{[^}]*refreshAdminBadges\(\);[^}]*\};/);
+    const body = (name: string, next: string) => {
+      const start = src.indexOf(`const ${name} = async`);
+      const end = src.indexOf(next, start + 1);
+      expect(start).toBeGreaterThan(-1);
+      return src.slice(start, end > start ? end : undefined);
+    };
+    expect(body("handleHide", "const handleRestore")).toMatch(/refreshAfterAction\(\);|refreshAdminBadges\(\);/);
+    expect(body("handleRestore", "const handleDelete")).toMatch(/refreshAfterAction\(\);|refreshAdminBadges\(\);/);
+    expect(body("handleDelete", "\n  const ")).toMatch(/refreshAfterAction\(\);|refreshAdminBadges\(\);/);
   });
 
   it("la déconnexion vide le cache", () => {
