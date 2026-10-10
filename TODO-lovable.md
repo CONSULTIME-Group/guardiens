@@ -84,5 +84,8 @@ Navigateur local non connecté, ordinateur seulement (1280 px). Aucun audit mobi
 - [x] Autorisation : L1 à L7 autorisés en séquence conditionnelle, GO requis seulement pour la production
 - [ ] A10 non reproduit, cause non tranchée
 - [ ] Recette connectée, vue carte, régression Canada et avis admin en navigateur
-- [ ] Donnée : annonce archivée « Paris » avec département 69 (non modifiée), affichée « lieu à confirmer » sans département ni distance
+- [x] A1 requalifié choix produit (10/10, Jérémie) : lieu = ville du propriétaire, repli annonce. « Paris »/69 affichée Lyon, Marlhes cherchée à Saint-Étienne. Ancienne règle « lieu à confirmer » retirée
+- [ ] Compteurs hors France serveur encore sur sits.country (0 divergence mesurée), à aligner en L2
+- [ ] Géocodage indisponible pour 6 villes (lieux à préciser sur la carte), Montreuil ambigu
+- [ ] RLS non administrateur non vérifiable ici (SET ROLE refusé en bac à sable)
 - [ ] Panneau Filtres à vérifier connecté (désactivé en visiteur)

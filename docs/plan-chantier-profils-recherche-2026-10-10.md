@@ -224,3 +224,25 @@ Recette sur build local (vite preview), visiteur, ordinateur 1280 et mobile 390 
 - Aucune erreur console.
 
 Non vérifié : panneau Filtres (désactivé en visiteur, à vérifier connecté par Codex), session connectée et non administrateur, tablette, régressions Canada 2 gardiens et avis admin en navigateur. Le paramètre rayon=15 (valeur par défaut) n'est pas réécrit dans l'adresse, comportement antérieur. Bandeau « Renseignez votre ville » visible en visiteur malgré une ville saisie, antérieur, noté pour L2. Le libellé détail d'annonce (src/lib/sitLocationLoad.ts) garde le repli code postal propriétaire pour l'affichage, hors moteur de recherche, à arbitrer en L5. « Auvergne-Rhône-Alpes » visible dans l'état vide, sujet L6.
+
+### L1, requalification A1 par décision produit (10/10/2026, Jérémie 13:47)
+
+Décision : « La ville du proprio c'est la base. Il ne va pas poster une annonce où il ne vit pas. » L'interprétation précédente de A1 (lieu = commune de l'annonce, propriétaire jamais utilisé) est remplacée ; trace conservée ci-dessus. A1 n'était pas un bug mais un choix produit, désormais confirmé.
+
+Règle (resolveSitPlace, src/lib/sitSearchRules.ts) : source principale = profil public du propriétaire (ville, pays, département ou code postal du même profil). Repli entier sur l'annonce seulement si ville ou pays du propriétaire manque. Jamais de mélange (pas de département d'annonce accolé à la ville du propriétaire), jamais de pays FR déduit. La notion « lieu incohérent » et le contrôle commune/département par geo.api.gouv.fr sont retirés pour les annonces (conservé pour situer la ville cherchée). Même source pour zones, pays, distance, carte (pins et bulle) et cartes d'annonce.
+
+Inchangé : ouvertes (accepting_applications IS NOT FALSE), fin incluse Europe/Paris, France FR strict, rayon strict (coordonnées vérifiées <= rayon), élargissement explicite, pagination et hydratation par lots, compteurs hors archives, indicateur « X annonces situées sur Y ».
+
+Reste sur sits.country (non modifié, sans migration) : compteurs serveur hors France (PublicListings, InternationalListings, InternationalShowcase, useInternationalSitsCount). Mesure lecture seule du 10/10 : 0 divergence pays annonce/propriétaire sur 48 annonces ; à aligner sur la source propriétaire en L2 si une divergence apparaît.
+
+Vérifications : tsgo 0 erreur ; vitest sitSearchRules + search 30 tests réussis (propriétaire principal, repli, pays, département non mélangé) ; vite build réussie.
+Recette build local (vite preview :4173), visiteur, 1280 / 1024 / 768 / 390, captures /tmp/browser/l1b/shots :
+- Lyon 15 km : 0 ouverte (Pusignan 18 km exclue) aux 4 largeurs ; annonce « Paris » du propriétaire lyonnais affichée « Lyon, Rhône » dans les passées.
+- Département 2, région 7, France 13 ; Québec absent de la grille France.
+- Saint-Étienne 15 km : 1 annonce, « Garde 16 animaux à Marlhes » affichée « Saint-Étienne, Loire ».
+- Ville introuvable : 0 résultat, message, aucun élargissement automatique.
+- Carte France : 7 pins, « 7 annonces situées sur 13 · 6 lieux à préciser ». Cause des 6 : service de géocodage répondant GEOCODING_UNAVAILABLE (Longvic, Quetteville, Zellwiller, Villentrois, Collonges-sous-Salève, Saint Ludger), aucune distance inventée. Montreuil géocodé dans le Pas-de-Calais (ambiguïté de nom), à vérifier.
+- Aucune erreur console.
+
+Non vérifié : panneau Filtres (désactivé en visiteur ; preuve admin antérieure de Jérémie seulement), session connectée sur cette version, non administrateur. Blocage technique RLS : le rôle base du bac à sable ne peut pas exécuter SET ROLE authenticated/anon (« permission denied to set role »), la lecture non administrateur n'est donc pas vérifiable ici sans compte réel. Preuves admin antérieures (Lyon 0 / drawer 0, département 2 / drawer 2, France 13, carte ; Canada 2 Venaya et Godelive ; avis admin Rouans) portent sur une version précédente, non confondues avec une vérification non administrateur.
+Statut : partiellement validé. L2 non lancé.
