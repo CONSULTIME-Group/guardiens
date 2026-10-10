@@ -182,7 +182,7 @@ Sujets hors périmètre conservés dans TODO-lovable.md (analytics, SEO/GSC, fav
 
 ## 6. Suivi d'exécution (ajout du 10/10/2026, l'historique ci-dessus est inchangé)
 
-Autorisation : Jérémie a autorisé le 10/10/2026 le lot L1 seul. L2 à L7 restent non autorisés. Aucune publication.
+Autorisation (transcription initiale, erronée) : « L1 seul, L2 à L7 non autorisés ». Rectificatif du 10/10/2026 : Jérémie autorise TOUT le chantier L1 à L7, en séquence conditionnelle (un lot ne commence que si le précédent est validé après build et recette). Aucun nouveau GO par lot ; seule la publication en production exige un GO explicite. Aucune publication.
 
 ### L1, statut : partiellement validé
 Fait (types 0 erreur, build complète réussie, recette sur build local en visiteur) :
@@ -201,3 +201,26 @@ Fait (types 0 erreur, build complète réussie, recette sur build local en visit
 
 Non vérifié : session connectée, carte (vue carte) en détail, formats tablette, régression Canada 2 gardiens et avis admin en navigateur (tests automatiques verts seulement), rayon 15 km via l'interface (compteur du sélecteur : 1, l'annonce 69380 sans commune ; Pusignan à 18 km exclue).
 Test en échec hors lot : get-public-sit-dates (aucune garde confirmed ou in_progress en base, test dépendant des données).
+
+### L1, revue du diff e92029d (10/10/2026) : 5 bloquants traités, statut toujours partiellement validé
+
+Le relevé « Fait » ci-dessus est conservé tel quel, mais A1, A4/A6, A9 n'y étaient pas corrects. Corrections :
+1. Rayon strict : seules les annonces aux coordonnées vérifiées (commune géocodée et lieu cohérent) à distance <= rayon sont incluses ou comptées (isWithinRadius). Une annonce sans commune situable n'est plus jamais dans un rayon ; elle reste en département et France, avec message « n'est pas comptée dans le rayon » et bouton « Voir le département ». Ville demandée mais non située (rayon, département ou région) : aucun résultat local, message, bouton « Voir toute la France », plus aucun repli silencieux vers le département ou la France. Sans aucune ville (ni saisie ni profil) : France entière affichée avec l'invitation existante à renseigner une ville, bandeau hors zone masqué. Élargissement automatique de zone supprimé (effet et bandeau associé) ; missions inchangées.
+2. Ouverture : applyOpenSitFilter utilise accepting_applications IS NOT FALSE (true ou NULL), strictement équivalent à isOpenSit (!== false). Test de parité sur 96 combinaisons statut x true/false/NULL x dates. L'état grisé (isPastSit) suit la même règle.
+3. Département du lieu de garde : département de la commune géocodée (geo.api.gouv.fr, centre approximatif), puis celui de l'annonce ; plus aucun repli sur le code postal du propriétaire. Commune et département en désaccord (A11 « Paris »/69) : lieu incohérent, ni département, ni distance, ni position carte, libellé « Paris · lieu à confirmer » ; donnée non modifiée. Carte d'annonce : département du lieu de garde, code postal du profil affiché seulement s'il correspond à ce département.
+4. Lectures .in() d'hydratation (profils, galerie, animaux, avis, écussons, profils propriétaires) découpées par 150 identifiants et paginées par 1 000 (fetchInChunks), triées sur une colonne unique ; test au-delà de 1 000 lignes.
+5. Bandeau hors zone : comparé à la zone choisie (rayon, département, région), plus au seul rayon ; bouton « Mon département » ajouté en mode rayon.
+
+Migration 0065 (additive, public_closed_sits : country, departement_code) déjà appliquée sur la base partagée : L1 n'est donc pas un lot frontend seul.
+
+Vérifications : tsgo 0 erreur ; vitest 124 tests (sitSearchRules, search, l1, seo4) et startup-build 8 tests réussis ; vite build réussie.
+Recette sur build local (vite preview), visiteur, ordinateur 1280 et mobile 390 :
+- Lyon 15 km : « Aucune annonce ouverte près de Lyon », 0 ouverte (Pusignan 18 km exclue, 69380 sans commune exclue et signalée), 2 annonces lyonnaises archivées grisées.
+- Département : 2 (Pusignan, 69380) ; région : 7 ; France : 13 ; bandeau 2 / 5 / 6 cohérent.
+- Liens directs ?ville=Lyon&zone=dept : 2, &zone=region : 7 (département déduit de la position de Lyon).
+- Ville introuvable (rayon et département) : 0 résultat, message et bouton France.
+- Sans ville : 13 en France, plus de bandeau « hors de votre zone ».
+- Carte France entière : marqueurs sur les communes situées seulement ; liste et carte peuvent différer pour les annonces non localisées ou incohérentes (voulu).
+- Aucune erreur console.
+
+Non vérifié : panneau Filtres (désactivé en visiteur, à vérifier connecté par Codex), session connectée et non administrateur, tablette, régressions Canada 2 gardiens et avis admin en navigateur. Le paramètre rayon=15 (valeur par défaut) n'est pas réécrit dans l'adresse, comportement antérieur. Bandeau « Renseignez votre ville » visible en visiteur malgré une ville saisie, antérieur, noté pour L2. Le libellé détail d'annonce (src/lib/sitLocationLoad.ts) garde le repli code postal propriétaire pour l'affichage, hors moteur de recherche, à arbitrer en L5. « Auvergne-Rhône-Alpes » visible dans l'état vide, sujet L6.

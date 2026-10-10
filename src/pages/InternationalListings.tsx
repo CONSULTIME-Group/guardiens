@@ -12,7 +12,7 @@ import { MapContainer, Marker, TileLayer, useMap } from "react-leaflet";
 import { LeafletUnmountGuard } from "@/components/shared/LeafletUnmountGuard";
 import L from "leaflet";
 import { supabase } from "@/integrations/supabase/client";
-import { parisTodayIso } from "@/lib/sitSearchRules";
+import { applyOpenSitFilter } from "@/lib/sitSearchRules";
 import { Skeleton } from "@/components/ui/skeleton";
 import { geocodeCity } from "@/lib/geocode";
 import {
@@ -110,12 +110,9 @@ export default function InternationalListings() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data } = await supabase
-        .from("sits")
-        .select("id, slug, title, city, country, start_date, end_date, cover_photo_url, property:properties(photos)")
-        .eq("status", "published")
-        .eq("accepting_applications", true)
-        .or(`end_date.is.null,end_date.gte.${parisTodayIso()}`)
+      const { data } = await applyOpenSitFilter(
+        supabase.from("sits").select("id, slug, title, city, country, start_date, end_date, cover_photo_url, property:properties(photos)") as any,
+        )
         .not("country", "is", null)
         .neq("country", "FR")
         .order("created_at", { ascending: false })

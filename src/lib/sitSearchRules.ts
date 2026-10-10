@@ -9,11 +9,12 @@
  *    date de fin incluse) ou fin non renseignée.
  *  - France : country === "FR" strictement. Un pays absent n'est pas la France.
  *  - Lieu de garde : commune et pays de l'annonce (sits.city, sits.country),
- *    département de l'annonce (sits.departement_code). Jamais la ville du
- *    profil propriétaire pour situer ou mesurer une distance.
+ *    département de l'annonce (sits.departement_code) ou de la commune géocodée.
+ *    Jamais la ville ni le code postal du profil propriétaire pour situer,
+ *    classer par département ou mesurer une distance.
+ *  - Rayon : uniquement les annonces dont les coordonnées approximatives de la
+ *    commune sont vérifiées et à une distance <= rayon. Aucune autre inclusion.
  */
-import { deptCodeFromPostal } from "@/lib/sitLocation";
-
 /** Date du jour à Paris, AAAA-MM-JJ. */
 export function parisTodayIso(now: Date = new Date()): string {
   const parts = new Intl.DateTimeFormat("en-CA", {
@@ -41,11 +42,27 @@ export const isOpenSit = (
 export const isEndedSit = (s: { end_date?: string | null }, today: string): boolean =>
   !!s.end_date && s.end_date.slice(0, 10) < today;
 
-/** Filtre serveur équivalent à isOpenSit, pour les comptages exacts. */
-export function applyOpenSitFilter<Q extends { eq: any; or: any }>(q: Q, today: string = parisTodayIso()): Q {
+/**
+ * Annonce non ouverte (grisée, jamais comptée ouverte) : toute annonce qui
+ * n'est pas ouverte au sens de isOpenSit, statuts confirmés/en cours exclus
+ * (ils ont leur propre état « pourvue »).
+ */
+export const isPastSit = (
+  s: { status?: string | null; accepting_applications?: boolean | null; end_date?: string | null; unpublished_at?: string | null },
+  today: string,
+): boolean => {
+  if (s.status === "confirmed" || s.status === "in_progress") return false;
+  return !isOpenSit(s, today);
+};
+
+/**
+ * Filtre serveur strictement équivalent à isOpenSit : accepting_applications
+ * IS NOT FALSE (true ou NULL acceptés, comme `!== false`), fin nulle ou >= aujourd'hui.
+ */
+export function applyOpenSitFilter<Q extends { eq: any; or: any; not: any }>(q: Q, today: string = parisTodayIso()): Q {
   return q
     .eq("status", "published")
-    .eq("accepting_applications", true)
+    .not("accepting_applications", "is", false)
     .or(`end_date.is.null,end_date.gte.${today}`) as Q;
 }
 
@@ -69,15 +86,66 @@ export const sitGeocodeKeyString = (s: SitPlaceInput): string | null => {
   return k ? `${k.city.toLowerCase()}::${(k.country ?? "").toLowerCase()}` : null;
 };
 
+const normDept = (d: string | null | undefined): string | null => {
+  const v = (d ?? "").trim().toUpperCase();
+  if (!v) return null;
+  return /^\d$/.test(v) ? `0${v}` : v;
+};
+
+export interface SitPlaceResolution {
+  /** Département retenu pour les zones département/région, null si non fiable. */
+  dept: string | null;
+  /** Commune géocodée et département de l'annonce en désaccord. */
+  incoherent: boolean;
+}
+
 /**
- * Département du lieu de garde : celui de l'annonce, sinon celui déduit du code
- * postal du propriétaire, seulement en France (jamais pour un code étranger).
+ * Lieu de garde, côté département. `communeDept` = département de la commune
+ * géocodée (undefined/null si inconnu). Jamais de repli sur le code postal du
+ * propriétaire : son domicile n'est pas le lieu de garde.
+ *  - hors France : aucun département ;
+ *  - commune et département de l'annonce en désaccord : lieu incohérent, aucun
+ *    département ni distance (signalé, jamais corrigé en base) ;
+ *  - sinon : département de la commune, puis celui de l'annonce.
  */
-export function sitDeptCode(s: SitPlaceInput): string | null {
-  if (!isFranceSit(s)) return null;
-  const own = (s.departement_code ?? "").trim();
-  if (own) return own;
-  return deptCodeFromPostal(s.owner?.postal_code ?? null);
+export function resolveSitPlace(s: SitPlaceInput, communeDept?: string | null): SitPlaceResolution {
+  if (!isFranceSit(s)) return { dept: null, incoherent: false };
+  const own = normDept(s.departement_code);
+  const fromCommune = normDept(communeDept);
+  if (own && fromCommune && own !== fromCommune) return { dept: null, incoherent: true };
+  return { dept: fromCommune ?? own, incoherent: false };
+}
+
+/** Département du lieu de garde sans géocodage (département de l'annonce seul). */
+export const sitDeptCode = (s: SitPlaceInput): string | null => resolveSitPlace(s).dept;
+
+/** Inclusion stricte dans un rayon : coordonnées vérifiées et distance <= rayon. */
+export function isWithinRadius(distanceKm: number | null | undefined, radiusKm: number): boolean {
+  return typeof distanceKm === "number" && Number.isFinite(distanceKm) && distanceKm <= radiusKm;
+}
+
+/**
+ * Département d'un point (centre approximatif d'une commune française), par
+ * geo.api.gouv.fr. Mis en cache pour la session ; null si inconnu ou en erreur
+ * (aucune incohérence n'est alors déclarée).
+ */
+const communeDeptCache = new Map<string, Promise<string | null>>();
+export function communeDeptFromCoords(lat: number, lng: number): Promise<string | null> {
+  const key = `${lat.toFixed(3)},${lng.toFixed(3)}`;
+  const hit = communeDeptCache.get(key);
+  if (hit) return hit;
+  const p = (async () => {
+    try {
+      const r = await fetch(`https://geo.api.gouv.fr/communes?lat=${lat}&lon=${lng}&fields=codeDepartement&format=json`);
+      if (!r.ok) return null;
+      const data = await r.json();
+      return Array.isArray(data) && data[0]?.codeDepartement ? String(data[0].codeDepartement) : null;
+    } catch {
+      return null;
+    }
+  })();
+  communeDeptCache.set(key, p);
+  return p;
 }
 
 /** Lecture paginée stable : pages de 1 000 jusqu'à la dernière page incomplète. */
@@ -97,4 +165,27 @@ export async function fetchAllPages<T>(
   }
   console.warn(`[sit-pool] ${MAX_PAGES} pages lues, jeu tronqué.`);
   return { rows, error: null, truncated: true };
+}
+
+/**
+ * Lecture `.in()` découpée : paquets de `chunkSize` identifiants (URL courte),
+ * chaque paquet lu par pages de 1 000 (aucune borne PostgREST silencieuse).
+ * `build(chunk)` doit renvoyer une requête triée sur une colonne unique.
+ */
+export async function fetchInChunks<T>(
+  ids: string[],
+  build: (chunk: string[], from: number, to: number) => PromiseLike<{ data: T[] | null; error: any }>,
+  chunkSize = 150,
+): Promise<{ data: T[]; error: any; truncated: boolean }> {
+  const unique = Array.from(new Set(ids.filter(Boolean)));
+  const out: T[] = [];
+  let truncated = false;
+  for (let i = 0; i < unique.length; i += chunkSize) {
+    const chunk = unique.slice(i, i + chunkSize);
+    const res = await fetchAllPages<T>((from, to) => build(chunk, from, to));
+    if (res.error) return { data: out, error: res.error, truncated };
+    out.push(...res.rows);
+    truncated = truncated || res.truncated;
+  }
+  return { data: out, error: null, truncated };
 }

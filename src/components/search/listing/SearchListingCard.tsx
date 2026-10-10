@@ -10,7 +10,7 @@ import AffinityBadge from "@/components/matching/AffinityBadge";
 import { useAffinityWithShadow } from "@/hooks/useAffinityWithShadow";
 import { useDepartementNames } from "@/hooks/useDepartementNames";
 import { departementNameFromCode, formatCityDepartement } from "@/lib/locationLabel";
-import { sitCommune, sitLocationLabel } from "@/lib/sitLocation";
+import { deptCodeFromPostal, sitCommune, sitLocationLabel } from "@/lib/sitLocation";
 import { projetMetaLine, projetNatureLabel } from "@/lib/projets";
 
 
@@ -48,19 +48,31 @@ const SearchListingCard = ({
   viewerSitterProfile,
 }: SearchListingCardProps) => {
   const { t } = useTranslation();
-  // Ville affichée : profil public du propriétaire (public_profiles.city).
-  // Le département suit le MÊME enregistrement, avec repli sur l'annonce.
+  // Département affiché : pour une annonce de garde, celui du lieu de garde
+  // résolu par la recherche (locationDept, jamais le domicile du propriétaire) ;
+  // pour une mission, celui du profil comme auparavant.
   const departementNames = useDepartementNames();
+  const isSitPlace = "locationDept" in (item as any);
+  const locationIncoherent = !!(item as any).locationIncoherent;
   const deptName = departementNameFromCode(
-    item.owner?.departement_code || (item as any).departement_code,
+    isSitPlace ? (item as any).locationDept : item.owner?.departement_code || (item as any).departement_code,
     departementNames,
   );
   // Lot L1 : commune de l'annonce, puis ville du profil, puis
   // « code postal, département » (src/lib/sitLocation.ts), jamais vide.
   const commune = sitCommune({ sitCity: (item as any).city, ownerCity: item.owner?.city });
-  const locationLabel = commune
+  const locationLabel = locationIncoherent && commune
+    ? `${commune} · lieu à confirmer`
+    : commune
     ? formatCityDepartement(commune, deptName)
-    : sitLocationLabel({ postalCode: (item.owner as any)?.postal_code, departementName: deptName });
+    : sitLocationLabel({
+        // Code postal du profil affiché seulement s'il correspond au département
+        // du lieu de garde (correspondance validée), sinon département seul.
+        postalCode: !isSitPlace || (!!(item as any).locationDept && deptCodeFromPostal((item.owner as any)?.postal_code) === (item as any).locationDept)
+          ? (item.owner as any)?.postal_code
+          : null,
+        departementName: deptName,
+      });
 
   const missionPhotos = Array.isArray((item as any).photos) ? (item as any).photos.filter(Boolean) : [];
   const photos: string[] = item.property?.photos || missionPhotos;

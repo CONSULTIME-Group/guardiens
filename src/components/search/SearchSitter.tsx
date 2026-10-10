@@ -30,7 +30,7 @@ import { Search, MapPin, Lock, Sparkles, Globe2, X, AlertCircle, RefreshCw } fro
 import { format, differenceInDays, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
-import { applyOpenSitFilter, fetchAllPages, isEndedSit, isFranceSit, isOpenSit, parisTodayIso, sitDeptCode, sitGeocodeKey, sitGeocodeKeyString } from "@/lib/sitSearchRules";
+import { applyOpenSitFilter, communeDeptFromCoords, fetchAllPages, fetchInChunks, isEndedSit, isFranceSit, isOpenSit, isPastSit, isWithinRadius, parisTodayIso, resolveSitPlace, sitGeocodeKey, sitGeocodeKeyString } from "@/lib/sitSearchRules";
 import { sanitizeBioForCard } from "@/lib/sanitizeBio";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import FavoriteButton from "@/components/shared/FavoriteButton";
@@ -115,23 +115,9 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  return "radius";
  });
  const [densityCounts, setDensityCounts] = useState<{ radius: number; dept: number; region: number; france: number }>({ radius: 0, dept: 0, region: 0, france: 0 });
- // ─── Élargissement automatique de zone (offre nationale encore faible) ───
- // Quand la recherche par rayon ne renvoie rien alors que des annonces existent
- // ailleurs, on bascule UNE SEULE FOIS vers la zone la plus étroite non vide.
- // Jamais si l'utilisateur a lui-même réglé sa zone, ni sur un deep-link.
- const [zoneTouchedByUser, setZoneTouchedByUser] = useState(false);
- const autoWidenedRef = useRef(false);
- const [autoWidened, setAutoWidened] = useState<{ to: Exclude<ZoneMode, "radius">; fromRadius: number; count: number } | null>(null);
- const deepLinkLockedRef = useRef(
-  ["zone", "ville", "rayon", "debut", "fin"].some((k) => !!searchParams.get(k)),
- );
- const markZoneTouched = () => {
-  setZoneTouchedByUser(true);
-  autoWidenedRef.current = true;
-  setAutoWidened(null);
- };
- const setZoneModeByUser = (m: ZoneMode) => { markZoneTouched(); setZoneMode(m); };
- const setRadiusByUser = (v: number[]) => { markZoneTouched(); setRadius(v); };
+ // Zone et rayon ne changent que sur un geste du membre (aucun élargissement automatique).
+ const setZoneModeByUser = (m: ZoneMode) => setZoneMode(m);
+ const setRadiusByUser = (v: number[]) => setRadius(v);
  const [userPostalCode, setUserPostalCode] = useState<string | null>(null);
  const [startDate, setStartDate] = useState(() => searchParams.get("debut") || "");
  const [endDate, setEndDate] = useState(() => searchParams.get("fin") || "");
@@ -194,6 +180,9 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  // sur le département faute de coordonnées. Signalé à l'écran, jamais silencieux.
  const [geocodeFailedCity, setGeocodeFailedCity] = useState<string | null>(null);
  const [unlocatedCount, setUnlocatedCount] = useState(0);
+ // Zone demandée mais référence (position, département, région) introuvable :
+ // aucun résultat local, message et élargissement explicites.
+ const [zoneRefMissing, setZoneRefMissing] = useState(false);
  // Zone réellement appliquée au dernier calcul (peut différer de zoneMode si la
  // référence manque) : le libellé du compteur la suit.
  const [appliedZone, setAppliedZone] = useState<"radius" | "dept" | "region" | "france">("france");
@@ -377,7 +366,6 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  setCity(name);
  setCityPostalCode(refCp);
  setCitySuggestions([]);
- markZoneTouched();
  setZoneMode("dept");
  setEditingCity(false);
  };
@@ -392,7 +380,6 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  setCity(name);
  setCityPostalCode(refCp);
  setCitySuggestions([]);
- markZoneTouched();
  setZoneMode("region");
  setEditingCity(false);
  };
@@ -686,25 +673,8 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  }, [testDemoMode, loading, results, availableMembers, tab, missionSubTab, city, startDate, endDate, sort]);
 
 
- // ─── Effet d'élargissement automatique ───
- useEffect(() => {
-  if (loading || tab !== "sits" || zoneMode !== "radius") return;
-  if (zoneTouchedByUser || autoWidenedRef.current || deepLinkLockedRef.current) return;
-  if (densityCounts.radius > 0) return;
-  let target: Exclude<ZoneMode, "radius"> | null = null;
-  let count = 0;
-  if (densityCounts.dept > 0) { target = "dept"; count = densityCounts.dept; }
-  else if (densityCounts.region > 0) { target = "region"; count = densityCounts.region; }
-  else if (densityCounts.france > 0) { target = "france"; count = densityCounts.france; }
-  if (!target) return;
-  autoWidenedRef.current = true;
-  setAutoWidened({ to: target, fromRadius: radius[0], count });
-  void trackEvent("search_auto_widened", {
-   source: "search_sitter",
-   metadata: { from: "radius", to: target, radius: radius[0], results: count },
-  });
-  setZoneMode(target);
- }, [loading, tab, zoneMode, zoneTouchedByUser, densityCounts, radius]);
+ // Lot L1 : plus aucun élargissement automatique de zone. Un rayon vide
+ // affiche le bandeau hors zone avec ses boutons d'élargissement explicites.
 
  // Track out-of-zone banner impression (déduplique par tab+zoneMode dans la session)
  const outOfZoneTrackedRef = useRef<Set<string>>(new Set());
@@ -754,6 +724,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
 
  // Reference postal code for dept/region zone modes (selected city if available, else user CP)
  const getZoneRefPostalCode = (): string | null => cityPostalCode ?? userPostalCode;
+ const normalizeRefDept = (d: string | null): string | null => (d ? (/^\d$/.test(d) ? `0${d}` : d.toUpperCase()) : null);
 
  /**
   * Lot L1 : zone calculée sur le LIEU DE GARDE (commune et pays de l'annonce,
@@ -766,30 +737,57 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
   today: string,
  ) => {
   const coordsByKey = new Map<string, { lat: number; lng: number }>();
-  const keys = new Map<string, { city: string; country: string | null }>();
+  const communeDeptByKey = new Map<string, string | null>();
+  const keys = new Map<string, { city: string; country: string | null; fr: boolean }>();
   items.forEach((s) => {
     const g = sitGeocodeKey(s); const k = sitGeocodeKeyString(s);
-    if (g && k) keys.set(k, g);
+    if (g && k) keys.set(k, { ...g, fr: isFranceSit(s) });
   });
   await Promise.all([...keys.entries()].map(async ([k, g]) => {
     const c = await geocodeCity(g.city, g.country);
-    if (c) coordsByKey.set(k, { lat: c.lat, lng: c.lng });
+    if (!c) return;
+    coordsByKey.set(k, { lat: c.lat, lng: c.lng });
+    // Département de la commune géocodée (France) : contrôle de cohérence avec
+    // le département saisi sur l'annonce.
+    if (g.fr) communeDeptByKey.set(k, await communeDeptFromCoords(c.lat, c.lng));
   }));
-  const coordsOf = (s: any) => { const k = sitGeocodeKeyString(s); return k ? coordsByKey.get(k) ?? null : null; };
+  const placeOf = (s: any) => {
+    const k = sitGeocodeKeyString(s);
+    return resolveSitPlace(s, k ? communeDeptByKey.get(k) ?? null : null);
+  };
+  // Coordonnées vérifiées : commune géocodée ET lieu cohérent. Une annonce au
+  // lieu incohérent (commune et département en désaccord) n'a ni distance ni
+  // position sur la carte.
+  const coordsOf = (s: any) => {
+    const k = sitGeocodeKeyString(s);
+    if (!k) return null;
+    const co = coordsByKey.get(k) ?? null;
+    if (!co) return null;
+    return placeOf(s).incoherent ? null : co;
+  };
 
   const french = items.filter((s) => isFranceSit(s));
   const frenchOpen = french.filter((s) => isOpenSit(s, today));
-  const refDept = getDeptCode(getZoneRefPostalCode());
+  // Département de référence : code postal de la ville choisie ; sinon, pour une
+  // ville saisie ou reçue par lien sans code postal, département de sa position
+  // géocodée ; sinon code postal du profil.
+  const cityGiven = !!city && city !== userCity;
+  const refDept = cityPostalCode
+    ? getDeptCode(cityPostalCode)
+    : cityGiven
+    ? (searchCoords ? normalizeRefDept(await communeDeptFromCoords(searchCoords.lat, searchCoords.lng)) : null)
+    : getDeptCode(userPostalCode);
   const refRegion = getRegionCode(refDept);
+  const hasReference = !!(city || userCity);
+  // Rayon : seulement les coordonnées vérifiées à distance <= rayon. Une annonce
+  // sans commune situable n'est jamais comptée dans un rayon.
   const inRadius = (s: any) => {
     const co = coordsOf(s);
-    if (co && searchCoords) return haversineDistance(searchCoords.lat, searchCoords.lng, co.lat, co.lng) <= radius[0];
-    // Sans coordonnées du lieu de garde : repli département, sans distance.
-    const d = sitDeptCode(s);
-    return !co && !!d && !!refDept && d === refDept;
+    if (!co || !searchCoords) return false;
+    return isWithinRadius(haversineDistance(searchCoords.lat, searchCoords.lng, co.lat, co.lng), radius[0]);
   };
-  const inDept = (s: any) => !!refDept && sitDeptCode(s) === refDept;
-  const inRegion = (s: any) => !!refRegion && getRegionCode(sitDeptCode(s)) === refRegion;
+  const inDept = (s: any) => !!refDept && placeOf(s).dept === refDept;
+  const inRegion = (s: any) => !!refRegion && getRegionCode(placeOf(s).dept) === refRegion;
   setDensityCounts({
     radius: searchCoords ? frenchOpen.filter(inRadius).length : 0,
     dept: refDept ? frenchOpen.filter(inDept).length : 0,
@@ -798,22 +796,33 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
   });
 
   let filtered = french;
-  let unlocated = 0;
   let applied: "radius" | "dept" | "region" | "france" = "france";
   if (zoneMode === "radius") {
-    if (searchCoords) {
-      filtered = french.filter(inRadius);
-      unlocated = filtered.filter((s) => !coordsOf(s)).length;
-      applied = "radius";
-    } else if (refDept) {
-      filtered = french.filter(inDept);
-      applied = "dept";
+    if (searchCoords) { filtered = french.filter(inRadius); applied = "radius"; }
+    else if (hasReference) {
+      // Ville demandée mais non située : aucun résultat local confirmable,
+      // jamais de repli silencieux vers le département ou la France.
+      filtered = []; applied = "radius";
     }
-  } else if (zoneMode === "dept" && refDept) { filtered = french.filter(inDept); applied = "dept"; }
-  else if (zoneMode === "region" && refRegion) { filtered = french.filter(inRegion); applied = "region"; }
-  setUnlocatedCount(unlocated);
+    // Aucune ville ni profil situé : pas de référence, France entière affichée
+    // avec l'invitation visible à renseigner une ville.
+  } else if (zoneMode === "dept") {
+    if (refDept) { filtered = french.filter(inDept); applied = "dept"; }
+    else if (hasReference) { filtered = []; applied = "dept"; }
+  } else if (zoneMode === "region") {
+    if (refRegion) { filtered = french.filter(inRegion); applied = "region"; }
+    else if (hasReference) { filtered = []; applied = "region"; }
+  }
+  setZoneRefMissing(hasReference && (zoneMode === "radius" ? !searchCoords : zoneMode === "dept" ? !refDept : zoneMode === "region" ? !refRegion : false));
+  // Annonces ouvertes du département de référence sans coordonnées vérifiées :
+  // jamais dans le rayon, signalées pour un élargissement explicite.
+  setUnlocatedCount(applied === "radius" && refDept ? frenchOpen.filter((s) => !coordsOf(s) && placeOf(s).dept === refDept).length : 0);
   setAppliedZone(applied);
-  return { items: filtered, coordsOf };
+  const decorate = (s: any) => {
+    const pl = placeOf(s);
+    return { ...s, locationDept: pl.dept, locationIncoherent: pl.incoherent };
+  };
+  return { items: filtered.map(decorate), coordsOf };
  };
 
    const searchSits = async (searchCoords: { lat: number; lng: number } | null) => {
@@ -866,16 +875,17 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
    // Hydrate owner data from public_profiles (safe public view) in a single batched call
    const ownerIds = Array.from(new Set(items.map((s: any) => s.user_id).filter(Boolean)));
    if (ownerIds.length > 0) {
+   // Lectures .in() découpées et paginées (fetchInChunks) : aucune borne
+   // PostgREST de 1 000 lignes ni URL trop longue au-delà de 150 identifiants.
    const [ownersRes, galleryRes] = await Promise.all([
-     supabase
-.from("public_profiles")
-.select("id, first_name, avatar_url, city, postal_code, departement_code, identity_verified, is_founder")
-.in("id", ownerIds),
-     supabase
-.from("owner_gallery")
-.select("user_id, photo_url, position, category")
-.in("user_id", ownerIds)
-.order("position", { ascending: true }),
+     fetchInChunks<any>(ownerIds, (chunk, from, to) => supabase
+       .from("public_profiles")
+       .select("id, first_name, avatar_url, city, postal_code, departement_code, identity_verified, is_founder")
+       .in("id", chunk).order("id", { ascending: true }).range(from, to) as any),
+     fetchInChunks<any>(ownerIds, (chunk, from, to) => supabase
+       .from("owner_gallery")
+       .select("id, user_id, photo_url, position, category")
+       .in("user_id", chunk).order("id", { ascending: true }).range(from, to) as any),
    ]);
    if (ownersRes.error || galleryRes.error) {
      console.error("[SearchSitter] Erreur hydratation propriétaires:", ownersRes.error || galleryRes.error);
@@ -883,7 +893,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
      return;
    }
    const owners = ownersRes.data;
-   const galleryRows = galleryRes.data;
+   const galleryRows = [...galleryRes.data].sort((a: any, b: any) => (a.position ?? 0) - (b.position ?? 0));
    const ownerMap = new Map((owners || []).map((o: any) => [o.id, o]));
    // Repli d'affichage : on retient la photo de LIEU la mieux placée
    // (logement, jardin, puis quartier), jamais une photo d'animal en priorité.
@@ -914,15 +924,16 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
      const isArchived = s.status === "archived";
      const isUnpublished = s.status === "draft" && !!s.unpublished_at;
      const isExpired = s.status === "published" && isEndedSit(s, todayIso);
-     // Publiée mais candidatures fermées : non actionnable, jamais comptée ouverte.
-     const isClosedToApps = s.status === "published" && s.accepting_applications === false;
      return {
        ...s,
        isAssigned: s.status === "confirmed" || s.status === "in_progress",
        isCompleted,
        isArchived,
        isUnpublished,
-       isPast: isExpired || isCancelled || isArchived || isUnpublished || isClosedToApps,
+       isExpired,
+       // Même règle que les compteurs (isOpenSit) : tout ce qui n'est pas ouvert
+       // est grisé, sauf pourvue (confirmée/en cours) ; terminée garde isCompleted.
+       isPast: !isCompleted && isPastSit(s, todayIso),
      };
    });
   const { items: locFiltered, coordsOf } = await filterSitsByLocation(items, searchCoords, todayIso);
@@ -933,18 +944,15 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
   const allPropertyIds = Array.from(new Set(items.map((s: any) => s.property_id).filter(Boolean)));
   const allUserIds = Array.from(new Set(items.map((s: any) => s.user_id).filter(Boolean)));
 
-  const petsPromise = allPropertyIds.length > 0
-    ? supabase.from("pets").select("species, name, special_needs, property_id").in("property_id", allPropertyIds)
-    : Promise.resolve({ data: [] as any[], error: null });
-  const reviewsPromise = allUserIds.length > 0
-    ? supabase.from("reviews").select("overall_rating, reviewee_id").in("reviewee_id", allUserIds).eq("published", true)
-    : Promise.resolve({ data: [] as any[], error: null });
-  const badgesPromise = allUserIds.length > 0
-    ? supabase.from("public_badge_attributions").select("badge_id, user_id").in("user_id", allUserIds)
-    : Promise.resolve({ data: [] as any[], error: null });
-  const ownerProfPromise = allUserIds.length > 0
-    ? supabase.from("public_owner_profiles").select("user_id, environments, preferred_sitter_types, home_ambiance, languages, interests, life_pace, presence_expected").in("user_id", allUserIds)
-    : Promise.resolve({ data: [] as any[], error: null });
+  // Lectures découpées et paginées, triées sur une colonne unique.
+  const petsPromise = fetchInChunks<any>(allPropertyIds, (chunk, from, to) =>
+    supabase.from("pets").select("id, species, name, special_needs, property_id").in("property_id", chunk).order("id", { ascending: true }).range(from, to) as any);
+  const reviewsPromise = fetchInChunks<any>(allUserIds, (chunk, from, to) =>
+    supabase.from("reviews").select("id, overall_rating, reviewee_id").in("reviewee_id", chunk).eq("published", true).order("id", { ascending: true }).range(from, to) as any);
+  const badgesPromise = fetchInChunks<any>(allUserIds, (chunk, from, to) =>
+    supabase.from("public_badge_attributions").select("id, badge_id, user_id").in("user_id", chunk).order("id", { ascending: true }).range(from, to) as any);
+  const ownerProfPromise = fetchInChunks<any>(allUserIds, (chunk, from, to) =>
+    supabase.from("public_owner_profiles").select("user_id, environments, preferred_sitter_types, home_ambiance, languages, interests, life_pace, presence_expected").in("user_id", chunk).order("user_id", { ascending: true }).range(from, to) as any);
 
   const [petsRes, reviewsRes, badgesRes, ownerProfRes] = await Promise.all([
     petsPromise, reviewsPromise, badgesPromise, ownerProfPromise,
@@ -1708,36 +1716,10 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
 
     {/* ─── Out-of-zone banner ─── PRIORITÉ 1 : quand il s'affiche, il masque
          SitterDiscoveryBanner et AffinityMissingCTA (une seule bannière au-dessus des résultats). */}
-    {autoWidened && tab === "sits" && zoneMode === autoWidened.to && (
-      <div className="mx-6 mt-4 rounded-2xl border border-primary/20 bg-primary/5 p-4 text-sm text-foreground flex flex-col sm:flex-row sm:items-center gap-3">
-        <p className="flex-1 min-w-0 leading-relaxed">
-          {autoWidened.to === "dept"
-            ? t("search_auto_widen.to_dept", { radius: autoWidened.fromRadius, count: autoWidened.count })
-            : autoWidened.to === "region"
-            ? t("search_auto_widen.to_region", { count: autoWidened.count })
-            : t("search_auto_widen.to_france")}
-        </p>
-        <Button
-          size="sm"
-          variant="outline"
-          className="shrink-0 bg-card"
-          onClick={() => {
-            const back = autoWidened.fromRadius;
-            markZoneTouched();
-            setRadius([back]);
-            setZoneMode("radius");
-          }}
-        >
-          {t("search_auto_widen.back", { radius: autoWidened.fromRadius })}
-        </Button>
-      </div>
-    )}
-
     {(() => {
-      const widenBannerVisible = !!autoWidened && tab === "sits" && zoneMode === autoWidened.to;
       // En vue carte, ce bandeau pousse la carte hors du viewport : il reste
       // réservé à la vue liste.
-      const showOutOfZone = viewMode !== "map" && !widenBannerVisible && tab === "sits" && !loading && zoneMode !== "france" && densityCounts.france > densityCounts.radius;
+      const showOutOfZone = viewMode !== "map" && tab === "sits" && !loading && zoneMode !== "france" && appliedZone !== "france" && densityCounts.france > (zoneMode === "dept" ? densityCounts.dept : zoneMode === "region" ? densityCounts.region : densityCounts.radius);
       return showOutOfZone ? (
         <OutOfZoneBanner
           zoneMode={zoneMode}
@@ -1762,13 +1744,43 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
   )}
 
   {tab === "sits" && !loading && !searchError && geocodeFailedCity && (
-    <div role="status" className="mx-6 mt-4 bg-muted/60 border border-border rounded-lg p-3 text-sm text-muted-foreground">
-      Nous n'avons pas pu situer « {geocodeFailedCity} ». Les distances ne sont pas calculées{appliedZone === "dept" ? ", les annonces sont cherchées dans votre département." : ", toutes les annonces de France sont affichées."}
+    <div role="status" className="mx-6 mt-4 bg-muted/60 border border-border rounded-lg p-3 text-sm text-muted-foreground flex flex-col sm:flex-row sm:items-center gap-3">
+      <p className="flex-1 min-w-0">
+        Nous n'avons pas pu situer « {geocodeFailedCity} ». {zoneRefMissing
+          ? (appliedZone === "radius" ? "Aucune annonce ne peut être confirmée dans ce rayon, aucune distance n'est calculée." : "Aucune annonce locale ne peut être confirmée, aucune distance n'est calculée.")
+          : appliedZone === "dept"
+          ? "Les distances ne sont pas calculées, les annonces sont cherchées dans le département choisi."
+          : appliedZone === "region"
+          ? "Les distances ne sont pas calculées, les annonces sont cherchées dans la région choisie."
+          : "Les distances ne sont pas calculées."}
+      </p>
+      {zoneRefMissing && (
+        <Button size="sm" variant="outline" className="shrink-0 bg-card" onClick={() => setZoneModeByUser("france")}>
+          Voir toute la France
+        </Button>
+      )}
     </div>
   )}
-  {tab === "sits" && !loading && !searchError && !geocodeFailedCity && zoneMode === "radius" && unlocatedCount > 0 && (
-    <div role="status" className="mx-6 mt-4 bg-muted/60 border border-border rounded-lg p-3 text-sm text-muted-foreground">
-      {unlocatedCount === 1 ? "1 annonce n'a pas de commune situable : elle est incluse d'après son département, sans distance." : `${unlocatedCount} annonces n'ont pas de commune situable : elles sont incluses d'après leur département, sans distance.`}
+  {tab === "sits" && !loading && !searchError && !geocodeFailedCity && zoneRefMissing && (
+    <div role="status" className="mx-6 mt-4 bg-muted/60 border border-border rounded-lg p-3 text-sm text-muted-foreground flex flex-col sm:flex-row sm:items-center gap-3">
+      <p className="flex-1 min-w-0">
+        Nous n'avons pas pu déterminer {appliedZone === "region" ? "la région" : appliedZone === "dept" ? "le département" : "la position"} de « {city || userCity} ». Aucune annonce locale ne peut être confirmée.
+      </p>
+      <Button size="sm" variant="outline" className="shrink-0 bg-card" onClick={() => setZoneModeByUser("france")}>
+        Voir toute la France
+      </Button>
+    </div>
+  )}
+  {tab === "sits" && !loading && !searchError && !geocodeFailedCity && appliedZone === "radius" && unlocatedCount > 0 && (
+    <div role="status" className="mx-6 mt-4 bg-muted/60 border border-border rounded-lg p-3 text-sm text-muted-foreground flex flex-col sm:flex-row sm:items-center gap-3">
+      <p className="flex-1 min-w-0">
+        {unlocatedCount === 1
+          ? "1 annonce de votre département n'a pas de commune situable : elle n'est pas comptée dans le rayon."
+          : `${unlocatedCount} annonces de votre département n'ont pas de commune situable : elles ne sont pas comptées dans le rayon.`}
+      </p>
+      <Button size="sm" variant="outline" className="shrink-0 bg-card" onClick={() => setZoneModeByUser("dept")}>
+        Voir le département
+      </Button>
     </div>
   )}
 
