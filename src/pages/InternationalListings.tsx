@@ -121,6 +121,10 @@ export default function InternationalListings() {
     setSuggestions([]);
     setActiveIdx(-1);
   };
+  // Tout changement d'adresse (retour, réinitialisation, pays, monde) annule
+  // minuteur et requête en vol et ferme les suggestions.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { cancelSuggestions(); }, [params.toString()]);
   useEffect(() => () => { if (suggestTimer.current) clearTimeout(suggestTimer.current); suggestAbort.current?.abort(); }, []);
 
   // ── État lu dans l'adresse ──
@@ -198,11 +202,10 @@ export default function InternationalListings() {
     const todo = uniquePlaceKeys(base).filter((k) => !points.has(k.key));
     if (!todo.length) return;
     let cancelled = false;
-    const deptOf = new Map(base.map((s) => [placeKey(s), s.place] as const));
     Promise.all(todo.map(async (k) => {
       const c = await geocodeIntlPlace(k.city, k.country, geocodeCity);
       // France (mode « France incluse ») : même contrôle de département que L1.
-      const place = deptOf.get(k.key);
+      const place = k.place;
       if (c && place && place.country === "FR" && place.dept) {
         const check = checkGeocodedPoint(place, await communeDeptFromCoords(c.lat, c.lng));
         if (!pointUsable(check)) return [k.key, null] as const;
@@ -450,7 +453,9 @@ export default function InternationalListings() {
             <>
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <p className="text-sm text-foreground" aria-live="polite">
-                  {locating
+                  {loadError
+                    ? "Comptage indisponible pour le moment"
+                    : locating
                     ? `Localisation en cours autour de ${city}…`
                     : `${sorted.length} annonce${sorted.length > 1 ? "s" : ""}${city ? ` à ${radius} km de ${city}` : country ? ` : ${getCountryName(country)}` : world ? " dans tous les pays, France incluse" : " à l'étranger"}`}
                 </p>
@@ -482,7 +487,7 @@ export default function InternationalListings() {
                 </>
               )}
 
-              {locating ? (
+              {loadError ? null : locating ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5" aria-busy="true">
                   {[0, 1, 2].map((i) => <Skeleton key={i} className="h-64 rounded-2xl" />)}
                 </div>
