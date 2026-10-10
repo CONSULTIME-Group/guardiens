@@ -87,3 +87,25 @@ export function reviewDateLabel(start: string | null | undefined, end: string | 
   return format(new Date(createdAt), "MMMM yyyy", { locale: fr });
 }
 
+
+/**
+ * Accompagnants déclarés (lot L5, repris de l'ancien bloc pratique).
+ * Seules les déclarations vraies produisent un texte ; rien sinon.
+ */
+export function companionsLabel(sp: {
+  travels_with_own_animals?: boolean | null;
+  travels_with_children?: boolean | null;
+  own_animals?: string[] | null;
+} | null | undefined): string {
+  if (!sp) return "";
+  const parts: string[] = [];
+  if (sp.travels_with_own_animals === true) {
+    const own = (sp.own_animals || [])
+      .filter((x) => x && x.toLowerCase() !== "non")
+      .map((x) => x.replace(/^Oui[\s,\-\u2014]*/i, "").trim())
+      .filter(Boolean);
+    parts.push(own.length > 0 ? `Ses animaux (${own.join(", ")})` : "Ses animaux");
+  }
+  if (sp.travels_with_children === true) parts.push("Parfois ses enfants");
+  return parts.join(", ");
+}
