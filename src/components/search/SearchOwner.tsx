@@ -130,13 +130,6 @@ const SearchOwner = () => {
   const [searchCenter, setSearchCenter] = useState<{ lat: number; lng: number } | null>(null);
   const [loading, setLoading] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
-  // Vrai quand la requête serveur a atteint le plafond (jeu potentiellement tronqué → tri distance/affinité partiel).
-  // Le plafond reste à 500 tant que le géocodage en éventail n'est pas résolu :
-  // au delà, le nombre d'appels de géocodage déclenche la limitation de débit et
-  // la liste se vide. La tranche est rendue déterministe par un tri sur user_id.
-  // Le vrai correctif est une RPC `search_sitters` en SQL (filtrage et tri côté
-  // serveur, plus de rapatriement massif côté client).
-  const SITTERS_SERVER_CAP = 500;
   const [contactingId, setContactingId] = useState<string | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [initialLoaded, setInitialLoaded] = useState(false);
