@@ -327,3 +327,7 @@ Statut : L2 en attente de revue root ; L3 autorisé, ouvert après cette revue.
 - Preuves : types OK, 66 tests ciblés (dont P3) verts, build complète OK. Recette visiteur 1280 sur build : suggestion cliquée (Saint-Ludger-de-Milot, première proposée) 0 annonce à 50 km, cohérent ; retour arrière ferme les suggestions ; gardiens Canada 2 ; Lyon inchangé (3 hors France) ; panne simulée de lecture des annonces : international « Comptage indisponible » + alerte, /annonces lien sans chiffre.
 - Constat hors L2, non corrigé : même panne, la liste France de /annonces affiche « Aucune annonce ouverte sur ce périmètre » (moteur L1), à traiter si root le demande.
 - Non vérifié : session connectée.
+
+## L2, complément état vide mobilité (10/10/2026, 13:28 UTC)
+
+Preuve root sur le build 443e09e, session connectée, `/recherche-gardiens?pays=CA` : résidence = 2, mobilité = 0 (correct). L'état vide du mode mobilité disait « Aucun gardien consultable dans ce pays (Canada) » et proposait « Tous les pays 1411 gardiens disponibles », un compteur de résidents présenté comme de la mobilité. Correction : en mode « Peuvent venir ici », l'état vide affiche « Aucun gardien n'a encore déclaré cette destination (Canada) » et aucune suggestion d'élargissement chiffrée (les compteurs portent sur les résidents). Contrôle visiteur sur la build corrigée : libellé exact confirmé, aucun compteur trompeur. Types et build complets au vert.
