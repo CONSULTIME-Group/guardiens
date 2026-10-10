@@ -1,6 +1,6 @@
 import { travelZonesSummary, travelZoneLabels, countryName } from "@/lib/travelZones";
 import { formatRatingFr } from "@/lib/formatRatingFr";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { splitReviewsByRole, sitterReviewsHeading } from "@/lib/publicProfileReviews";
 import { getMemberAvatarUrl, getMemberPublicFirstName, getMemberInitial } from "@/lib/memberUtils";
 import { capitalizeFirstName } from "@/lib/displayName";
@@ -86,6 +86,7 @@ import {
   EditorialReview,
   SitterAboutSection,
   EntraideBand,
+  EntraideOfferSection,
   HowItWorksSteps,
   SitterContactCard,
   SitterStickyBar,
@@ -2655,6 +2656,8 @@ export default function PublicSitterProfile() {
 
 
 
+          {/* Offre déclarée (opt-in), affichée même sans aucune mission réalisée. */}
+          <EntraideOfferSection offer={helpOffer} firstName={firstName} city={city || null} />
 
           {entraideLoading && (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3" aria-busy="true">
@@ -2790,7 +2793,9 @@ export default function PublicSitterProfile() {
 
           {!entraideLoading && missionsPublished.length === 0 && missionsHelped.length === 0 && missionFeedbacks.length === 0 && (
             <div className="text-center py-12 space-y-2">
-              <p className="text-base text-foreground/50 font-body">L'entraide de {firstName} démarre ici.</p>
+              <p className="text-base text-foreground/50 font-body">
+                {helpOffer.offered ? `Pas encore de mission réalisée par ${firstName}.` : `L'entraide de ${firstName} démarre ici.`}
+              </p>
               <p className="text-sm text-foreground/40 font-body italic">Les échanges de services apparaîtront ici après la première mission.</p>
             </div>
           )}

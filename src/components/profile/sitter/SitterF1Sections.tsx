@@ -10,7 +10,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import FavoriteButton from "@/components/shared/FavoriteButton";
 import StatutGardienBadge from "@/components/profile/StatutGardienBadge";
-import { lastVisitLabel } from "@/lib/profileSignals";
+import { lastVisitLabel, type HelpOffer } from "@/lib/profileSignals";
 import ResponsivenessBadge from "@/components/profile/ResponsivenessBadge";
 import type { HeroCtaVariant } from "@/components/profile/ProfileHero";
 import { BADGE_DEFINITIONS } from "@/components/badges/badge-definitions";
@@ -447,6 +447,37 @@ export const EntraideBand = ({
     </div>
   </section>
 );
+
+/* ── Offre d'entraide déclarée (lot L3) ──────────────────────────── */
+export const EntraideOfferSection = ({
+  offer,
+  firstName,
+  city,
+}: {
+  offer: HelpOffer;
+  firstName: string;
+  city: string | null;
+}) => {
+  if (!offer.offered) return null;
+  return (
+    <section aria-label={`Ce que propose ${firstName}`} className="space-y-4">
+      <SectionHeading eyebrow="Ce que je propose" title={`${firstName} propose un coup de main${city ? ` autour de ${city}` : ""}`} />
+      {offer.line && (
+        <p className="text-[15.5px] leading-relaxed text-foreground font-body whitespace-pre-line break-words">« {offer.line} »</p>
+      )}
+      {offer.categories.length > 0 && (
+        <ul className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {offer.categories.map((c) => (
+            <li key={c.key} className="flex flex-col items-center gap-2 rounded-xl bg-secondary/10 px-3 py-4 text-center">
+              <img src={SPOTS[c.spot]} alt="" aria-hidden="true" width={64} height={64} loading="lazy" decoding="async" className="h-16 w-16 object-contain" />
+              <span className="text-sm font-medium text-foreground font-body">{c.label}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+};
 
 /* ── Comment ça se passe ──────────────────────────────────────────── */
 export const HowItWorksSteps = ({ firstName }: { firstName: string }) => {
