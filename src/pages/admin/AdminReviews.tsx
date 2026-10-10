@@ -42,6 +42,70 @@ export function togglePublishedUpdate(published: boolean, adminId: string | null
     : { published: true, moderation_hidden_at: null, moderation_hidden_by: null };
 }
 
+/** Jointures de l'annonce concernée : garde (sits) ou entraide (small_missions, via mission_id). */
+const LISTING_JOINS = `sit:sits!reviews_sit_id_fkey(id, user_id, title, city, start_date, end_date),
+        mission:small_missions!reviews_mission_id_fkey(id, title, city, date_needed, end_date)`;
+
+export type ReviewListingRef = {
+  kind: "garde" | "entraide";
+  available: boolean;
+  title: string | null;
+  city: string | null;
+  dates: string | null;
+  href: string | null;
+  reference: string | null;
+};
+
+const fmtDay = (d?: string | null) => {
+  if (!d) return null;
+  const date = new Date(d);
+  return isNaN(date.getTime()) ? null : format(date, "d MMM yyyy", { locale: fr });
+};
+
+/** Annonce rattachée à un avis : uniquement la source réellement jointe, jamais déduite. */
+export function reviewListingRef(review: any): ReviewListingRef {
+  const isMission = review?.review_type === "mission" || (!review?.sit_id && !!review?.mission_id);
+  if (isMission) {
+    const m = review?.mission;
+    const reference = review?.mission_id ?? null;
+    if (!m?.id) return { kind: "entraide", available: false, title: null, city: null, dates: null, href: null, reference };
+    const a = fmtDay(m.date_needed), b = fmtDay(m.end_date);
+    return {
+      kind: "entraide", available: true, title: m.title?.trim() || "Entraide sans titre", city: m.city || null,
+      dates: a && b && a !== b ? `${a} au ${b}` : a, href: `/petites-missions/${m.id}`, reference,
+    };
+  }
+  const s = review?.sit;
+  const reference = review?.sit_id ?? null;
+  if (!s?.id) return { kind: "garde", available: false, title: null, city: null, dates: null, href: null, reference };
+  const a = fmtDay(s.start_date), b = fmtDay(s.end_date);
+  return {
+    kind: "garde", available: true, title: s.title?.trim() || "Garde sans titre", city: s.city || null,
+    dates: a && b ? `${a} au ${b}` : a || b, href: `/sits/${s.id}`, reference,
+  };
+}
+
+function ReviewListingCell({ review }: { review: any }) {
+  const ref = reviewListingRef(review);
+  if (!ref.available) {
+    return (
+      <span className="text-xs text-muted-foreground">
+        Annonce indisponible{ref.reference ? ` (réf. ${String(ref.reference).slice(0, 8)})` : ""}
+      </span>
+    );
+  }
+  const meta = [ref.kind === "entraide" ? "Entraide" : null, ref.city, ref.dates].filter(Boolean).join(", ");
+  return (
+    <span className="inline-flex flex-col min-w-0">
+      <a href={ref.href!} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-primary hover:underline truncate">
+        {ref.title}
+      </a>
+      {meta && <span className="text-xs text-muted-foreground truncate">{meta}</span>}
+    </span>
+  );
+}
+
+
 const AdminReviews = () => {
   const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -76,7 +140,7 @@ const AdminReviews = () => {
         *,
         reviewer:profiles!reviews_reviewer_id_fkey(first_name, last_name, avatar_url),
         reviewee:profiles!reviews_reviewee_id_fkey(first_name, last_name, avatar_url),
-        sit:sits!reviews_sit_id_fkey(user_id)
+        ${LISTING_JOINS}
       `, { count: "exact" })
       .or("review_type.is.null,review_type.neq.annulation");
 
@@ -120,7 +184,7 @@ const AdminReviews = () => {
           *,
           reviewer:profiles!reviews_reviewer_id_fkey(first_name, last_name, avatar_url),
           reviewee:profiles!reviews_reviewee_id_fkey(first_name, last_name, avatar_url),
-          sit:sits!reviews_sit_id_fkey(title, start_date, end_date)
+          ${LISTING_JOINS}
         `)
         .eq("review_type", "annulation")
         .order("created_at", { ascending: false })
@@ -364,6 +428,7 @@ const AdminReviews = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Auteur → Destinataire</TableHead>
+                  <TableHead>Annonce</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead>Note</TableHead>
                   <TableHead>Badges</TableHead>
@@ -375,9 +440,9 @@ const AdminReviews = () => {
               </TableHeader>
               <TableBody>
                 {loading ? (
-                  <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
                 ) : reviews.length === 0 ? (
-                  <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Aucun avis</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Aucun avis</TableCell></TableRow>
                 ) : reviews.map((review) => (
                   <TableRow key={review.id} className={review.overall_rating <= 2 ? "bg-destructive/5" : ""}>
                     <TableCell className="text-sm">
@@ -388,6 +453,7 @@ const AdminReviews = () => {
                         <span>{review.reviewee?.first_name} {review.reviewee?.last_name}</span>
                       </div>
                     </TableCell>
+                    <TableCell className="max-w-[240px]"><ReviewListingCell review={review} /></TableCell>
                     <TableCell className="text-xs text-muted-foreground">{reviewDirectionLabel(review)}</TableCell>
                     <TableCell>{renderStars(review.overall_rating)}</TableCell>
                     <TableCell>
@@ -468,13 +534,7 @@ const AdminReviews = () => {
                         </Badge>
                       </div>
 
-                      {review.sit && (
-                        <p className="text-xs text-muted-foreground">
-                          Garde : {review.sit.title}
-                          {review.sit.start_date && `, ${format(new Date(review.sit.start_date), "d MMM yyyy", { locale: fr })}`}
-                          {review.sit.end_date && ` → ${format(new Date(review.sit.end_date), "d MMM yyyy", { locale: fr })}`}
-                        </p>
-                      )}
+                      <div className="text-xs"><ReviewListingCell review={review} /></div>
 
                       <div className="bg-muted/50 rounded-lg p-3">
                         <p className="text-sm italic">{review.cancellation_reason}</p>
@@ -527,6 +587,7 @@ const AdminReviews = () => {
                         <span className="text-muted-foreground">à l'avis de</span>
                         <span>{review.reviewer?.first_name} {review.reviewer?.last_name}</span>
                       </div>
+                      <div className="text-xs"><ReviewListingCell review={review} /></div>
 
                       <div className="bg-muted/30 rounded-lg p-3 border-l-2 border-muted-foreground/20">
                         <p className="text-xs text-muted-foreground mb-1">Avis original :</p>
@@ -574,6 +635,7 @@ const AdminReviews = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Auteur → Cible</TableHead>
+                    <TableHead>Annonce</TableHead>
                     <TableHead>Annulé par</TableHead>
                     <TableHead>Raison</TableHead>
                     <TableHead>Modération</TableHead>
@@ -587,6 +649,7 @@ const AdminReviews = () => {
                       <TableCell className="text-sm">
                         {r.reviewer?.first_name} → {r.reviewee?.first_name}
                       </TableCell>
+                      <TableCell className="max-w-[240px]"><ReviewListingCell review={r} /></TableCell>
                       <TableCell className="text-sm capitalize">{r.cancelled_by_role || "·"}</TableCell>
                       <TableCell className="max-w-[200px] truncate text-sm text-muted-foreground">{r.cancellation_reason || "·"}</TableCell>
                       <TableCell>
@@ -622,6 +685,7 @@ const AdminReviews = () => {
                 <div><strong>Pour :</strong> {detailReview.reviewee?.first_name} {detailReview.reviewee?.last_name}</div>
               </div>
               <div><strong>Type :</strong> {reviewDirectionLabel(detailReview)}</div>
+              <div><strong>Annonce :</strong> <ReviewListingCell review={detailReview} /></div>
               <div className="flex items-center gap-2"><strong>Note globale :</strong> {renderStars(detailReview.overall_rating)} <span className="text-muted-foreground">({detailReview.overall_rating}/5)</span></div>
               {detailReview.communication_rating && <div><strong>Communication :</strong> {detailReview.communication_rating}/5</div>}
               {detailReview.reliability_rating && <div><strong>Fiabilité :</strong> {detailReview.reliability_rating}/5</div>}
