@@ -109,3 +109,19 @@ export function companionsLabel(sp: {
   if (sp.travels_with_children === true) parts.push("Parfois ses enfants");
   return parts.join(", ");
 }
+
+/**
+ * Gardes accueillies par un propriétaire (lot L5) : nombre de gardes distinctes
+ * portant un avis public reçu en tant que propriétaire, hors annulations.
+ * Jamais le nombre d'annonces publiées.
+ */
+export function ownerHostedSitsCount(
+  ownerReviews: Array<{ sit_id?: string | null; review_type?: string | null }> | null | undefined,
+): number {
+  const ids = new Set<string>();
+  for (const r of ownerReviews ?? []) {
+    if (!r?.sit_id || r.review_type === "annulation") continue;
+    ids.add(r.sit_id);
+  }
+  return ids.size;
+}

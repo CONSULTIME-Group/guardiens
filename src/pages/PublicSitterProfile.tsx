@@ -98,6 +98,7 @@ import {
   assetsLabel,
   listLabel,
   companionsLabel,
+  ownerHostedSitsCount,
 } from "@/lib/sitterProfileFacts";
 
 /** Pages entraide par ville réellement routées (App.tsx). */
@@ -1213,6 +1214,10 @@ export default function PublicSitterProfile() {
   //   n'était PAS le propriétaire (donc le gardien laissant un avis au proprio).
   //   Les avis sans sit_id (missions d'entraide) restent côté gardien.
   const { gardeReviews, missionReviews, ownerReviews } = splitReviewsByRole(reviews as any[]);
+  // L5 : gardes réellement accueillies par le propriétaire, prouvées par un avis
+  // publié lié à une garde (source publique). Une annonce publiée, même future,
+  // ne prouve ni une garde réalisée ni un accueil passé.
+  const ownerHostedSits = ownerHostedSitsCount(ownerReviews as any[]);
   const sitterRoleReviews = [...gardeReviews, ...missionReviews];
   const sitterRoleCount = sitterRoleReviews.length;
   const sitterRoleAvg = sitterRoleCount > 0
@@ -1978,7 +1983,7 @@ export default function PublicSitterProfile() {
         let proprioAlmaPhrase: string | null = null;
         if (ownerAvg >= 4.5 && ownerReviews.length >= 3) {
           proprioAlmaPhrase = `${firstName} rassure : ${ownerReviews.length} gardiens lui donnent ${formatRatingFr(ownerAvg)} sur 5.`;
-        } else if (pets.length > 0 && ownerSitsTotal > 0) {
+        } else if (pets.length > 0 && ownerHostedSits > 0) {
           proprioAlmaPhrase = `${firstName} a déjà accueilli des gardiens pour ${pets.length > 1 ? 'ses animaux' : 'son animal'}.`;
         } else if (profile?.identity_verified) {
           proprioAlmaPhrase = `L'identité de ${firstName} a été vérifiée à partir d'une pièce officielle.`;
@@ -2037,7 +2042,7 @@ export default function PublicSitterProfile() {
             Icon: CalendarClock,
             title: `Membre depuis ${anciennete(profile.created_at)}`,
             detail: ownerSitsTotal > 0
-              ? `${ownerSitsTotal} garde${ownerSitsTotal > 1 ? 's' : ''} publiée${ownerSitsTotal > 1 ? 's' : ''}`
+              ? `${ownerSitsTotal} annonce${ownerSitsTotal > 1 ? 's' : ''} publiée${ownerSitsTotal > 1 ? 's' : ''}`
               : null,
           });
         }
@@ -2299,7 +2304,7 @@ export default function PublicSitterProfile() {
                     )}
                     {id && <MissionBadgesReceived profileId={id} />}
                   {id && <HelpCounts userId={id} className="mt-2" />}
-                    {(ownerReviews || []).length === 0 && (userBadges || []).length === 0 && ownerSitsTotal === 0 ? (
+                    {(ownerReviews || []).length === 0 && (userBadges || []).length === 0 && ownerHostedSits === 0 ? (
                       <FreshStartStory
                         firstName={firstName}
                         createdAt={profile?.created_at}
@@ -2315,7 +2320,7 @@ export default function PublicSitterProfile() {
                           created_at: b.created_at,
                           count: b.count ?? 1,
                         }))}
-                        completedSits={ownerSitsTotal}
+                        completedSits={ownerHostedSits}
                         lastActivity={null}
                         firstName={firstName}
                       />
