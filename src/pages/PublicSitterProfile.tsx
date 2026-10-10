@@ -99,7 +99,6 @@ import {
   homeFactLabel,
   assetsLabel,
   listLabel,
-  entraideBandText,
 } from "@/lib/sitterProfileFacts";
 
 /** Pages entraide par ville réellement routées (App.tsx). */
@@ -573,10 +572,13 @@ export default function PublicSitterProfile() {
     const availability: Record<ProfileTab, boolean> = {
       gardien: sitterProfile !== null,
       proprio: ownerProfile !== null,
-      entraide: hasEntraideFacet(helpOffer, missionCount),
+      entraide: hasEntraideFacet(
+        declaredHelpOffer({ availableForHelp: profile?.available_for_help, skillCategories: profile?.skill_categories, helpsWith: null }),
+        missionCount,
+      ),
     };
     if (availability[requested]) setActiveTab(requested);
-  }, [tabParam, loading, sitterProfile, ownerProfile, missionCount, helpOffer]);
+  }, [tabParam, loading, sitterProfile, ownerProfile, missionCount, profile]);
 
   // Scroll vers l'ancre (#confiance, #verification, …) une fois les données
   // chargées : en SPA, le hash natif ne déclenche pas le scroll car l'élément
@@ -638,6 +640,15 @@ export default function PublicSitterProfile() {
     return () => { cancelled = true; };
   }, [id]);
 
+  // Offre d'entraide déclarée (opt-in available_for_help), distincte des missions réalisées.
+  const helpOffer = useMemo(
+    () => declaredHelpOffer({
+      availableForHelp: profile?.id === id ? profile?.available_for_help : null,
+      skillCategories: profile?.id === id ? profile?.skill_categories : null,
+      helpsWith,
+    }),
+    [profile, id, helpsWith],
+  );
 
   const [loadError, setLoadError] = useState<null | 'error'>(null);
   const [loadNonce, setLoadNonce] = useState(0);
