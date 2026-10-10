@@ -1,14 +1,9 @@
 import { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense } from "react";
 
-import ReportButton from "@/components/reports/ReportButton";
 import InviteToMySitButton from "@/components/sits/owner/InviteToMySitButton";
-import { Sprout, PawPrint, GraduationCap, Handshake as HandshakeIcon, LayoutGrid, Map as MapIcon, Cat, Bird, SlidersHorizontal, ShieldCheck, Crosshair, Bell, BellRing, Loader2, Home, Wrench } from "lucide-react";
-import EnvironmentPills from "@/components/shared/EnvironmentPills";
+import { Sprout, PawPrint, GraduationCap, Handshake as HandshakeIcon, LayoutGrid, Map as MapIcon, SlidersHorizontal, Loader2, Home, Wrench } from "lucide-react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { useToast } from "@/hooks/use-toast";
-import { ToastAction } from "@/components/ui/toast";
 import { sitPath } from "@/lib/sitUrl";
 
 const SearchMapView = lazy(() => import("@/components/search/SearchMapView"));
@@ -23,14 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { pickPlaceCover } from "@/lib/coverPriority";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
-import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { AdvancedFiltersSheet } from "@/components/search/header/AdvancedFiltersSheet";
 import { SearchEmptyState } from "@/components/search/listing/SearchEmptyState";
 import { AlmaEmptySearchBubble } from "@/components/ai/alma/AlmaEmptySearchBubble";
@@ -38,17 +26,16 @@ import { SitterDiscoveryBanner } from "@/components/search/SitterDiscoveryBanner
 import { OutOfZoneBanner } from "@/components/search/listing/OutOfZoneBanner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, MapPin, Calendar, Star, Lock, Zap, Sparkles, Globe2, X, AlertCircle, RefreshCw } from "lucide-react";
+import { Search, MapPin, Lock, Sparkles, Globe2, X, AlertCircle, RefreshCw } from "lucide-react";
 import { format, differenceInDays, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
 import { sanitizeBioForCard } from "@/lib/sanitizeBio";
-import { ALLOWED_ALERT_RADII, snapToAllowedRadius } from "@/lib/alertRadius";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import FavoriteButton from "@/components/shared/FavoriteButton";
 import { ILLUSTRATIONS } from "@/components/shared/EmptyState";
 import { getDeptCode, DEPT_NAMES } from "@/lib/departments";
-import { getRegionCode, getRegionName, getDeptsInRegion, REGION_NAMES, DEPT_TO_REGION } from "@/lib/regions";
+import { getRegionCode, REGION_NAMES, DEPT_TO_REGION } from "@/lib/regions";
 import { trackEvent } from "@/lib/analytics";
 // ReachReassuranceBanner retiré : redondant avec le sélecteur Zone.
 import LocationPickerPopover from "@/components/search/header/LocationPickerPopover";
@@ -60,7 +47,6 @@ import { useSearchAlert } from "@/hooks/search/useSearchAlert";
 import { useSearchUserProfile } from "@/hooks/search/useSearchUserProfile";
 import { PRICING_IS_ACTIVE } from "@/config/pricing";
 import { avatarImageUrl } from "@/lib/storageImage";
-const animalChips = ["Chiens", "Chats", "Chevaux", "Oiseaux", "Animaux de ferme", "NAC"];
 const animalChipToSpecies: Record<string, string> = {
  Chiens: "dog", Chats: "cat", Chevaux: "horse", Oiseaux: "bird",
  "Animaux de ferme": "farm_animal", NAC: "nac",
@@ -106,7 +92,6 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  const isMobile = useIsMobile();
  const { t } = useTranslation();
  const navigate = useNavigate();
- const { toast } = useToast();
  const [searchParams, setSearchParams] = useSearchParams();
  const [tab, setTab] = useState<SearchTab>("sits");
  const [missionSubTab, setMissionSubTab] = useState<MissionSubTab>("published");
