@@ -249,6 +249,7 @@ const AdminListings = () => {
   useEffect(() => {
     setStatsReady(false);
     setStatsError(null);
+    setStats({});
     if (!listings.length) { setStats({}); setStatsReady(true); return; }
     let cancelled = false;
     const ids = listings.map((l) => l.id);
@@ -510,10 +511,16 @@ const AdminListings = () => {
   };
 
   // Totaux d'en-tête, cohérents avec les annonces affichées (filtered)
-  const totalViews = filtered.reduce((a, l) => a + (stats[l.id]?.views || 0), 0);
-  const totalUniques = filtered.reduce((a, l) => a + (stats[l.id]?.uniqueViews || 0), 0);
-  const totalMsg = filtered.reduce((a, l) => a + (stats[l.id]?.messages || 0), 0);
-  const totalApps = filtered.reduce((a, l) => a + (stats[l.id]?.applications || 0), 0);
+  // Statistiques absentes ou en échec : aucun total, jamais un zéro.
+  const statsOk = statsReady && !statsError;
+  const sumStat = (k: "views" | "uniqueViews" | "messages" | "applications"): number | null =>
+    statsOk ? filtered.reduce((a, l) => a + (stats[l.id]?.[k] ?? 0), 0) : null;
+  const statShown = (v: number | null) => v === null ? (statsError ? "Indisponible" : "…") : String(v);
+  const totalViews = statShown(sumStat("views"));
+  const totalUniques = statShown(sumStat("uniqueViews"));
+  const totalMsg = statShown(sumStat("messages"));
+  const totalApps = statShown(sumStat("applications"));
+  const countUnknown = filterStatus === "to_staff" && !focusSitId && !focusOwnerId && !statsOk;
   const lastViewGlobal = filtered
     .map((l) => stats[l.id]?.lastViewAt)
     .filter(Boolean)
@@ -636,11 +643,11 @@ const AdminListings = () => {
           )}
         </div>
         <div className="flex flex-wrap gap-2 text-xs">
-          <Badge variant="secondary">{filtered.length} annonce{filtered.length > 1 ? "s" : ""}</Badge>
-          <Badge variant="outline">{totalViews} vues</Badge>
-          <Badge variant="outline">{totalUniques} membres uniques (somme par annonce, une personne peut compter plusieurs fois)</Badge>
-          <Badge variant="outline">{totalMsg} messages (somme)</Badge>
-          <Badge variant="outline">{totalApps} candidatures</Badge>
+          <Badge variant="secondary">{countUnknown ? (statsError ? "Nombre indisponible" : "Nombre en chargement") : `${filtered.length} annonce${filtered.length > 1 ? "s" : ""}`}</Badge>
+          <Badge variant="outline">Vues : {totalViews}</Badge>
+          <Badge variant="outline">Membres uniques, somme par annonce (une personne peut compter plusieurs fois) : {totalUniques}</Badge>
+          <Badge variant="outline">Messages, somme : {totalMsg}</Badge>
+          <Badge variant="outline">Candidatures : {totalApps}</Badge>
           {lastViewGlobal && (
             <Badge variant="outline">
               Dernière vue {formatDistanceToNow(new Date(lastViewGlobal), { addSuffix: true, locale: fr })}
@@ -650,26 +657,30 @@ const AdminListings = () => {
       </div>
 
       <div className="rounded-lg border bg-card overflow-x-auto">
-        <Table>
+        <Table className="table-fixed min-w-[900px]">
+          <colgroup>
+            <col className="w-[30%]" /><col className="w-[17%]" /><col className="w-[19%]" />
+            <col className="w-[9%]" /><col className="w-[6%]" /><col className="w-[260px]" />
+          </colgroup>
           <TableHeader>
             <TableRow>
               <TableHead>Annonce</TableHead>
-              <TableHead>Ville</TableHead>
-              <TableHead>Dates</TableHead>
+              <TableHead>Lieu et dates</TableHead>
               <TableHead>Situation</TableHead>
               <TableHead className="text-right">Candidatures</TableHead>
               <TableHead className="text-right" title="Vues totales (public + membres)">Vues</TableHead>
-              <TableHead className="text-right" title="Nombre de membres connectés distincts ayant vu l'annonce (chemins /sits et /annonces, identifiant et slug). Les visiteurs non connectés ne sont pas comptés, aucun identifiant de séance n'étant enregistré.">Membres uniques</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
+              <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
             ) : loadError ? (
-              <TableRow><TableCell colSpan={8} className="text-center py-8 text-destructive">Indisponible</TableCell></TableRow>
+              <TableRow><TableCell colSpan={6} className="text-center py-8 text-destructive">Indisponible</TableCell></TableRow>
+            ) : countUnknown ? (
+              <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">{statsError ? "Indisponible, candidatures non lues" : "Chargement des candidatures…"}</TableCell></TableRow>
             ) : filtered.length === 0 ? (
-              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Aucune annonce</TableCell></TableRow>
+              <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Aucune annonce</TableCell></TableRow>
             ) : paginated.map((listing) => {
               const sit = sitSituation(listing);
               const st = stats[listing.id];
@@ -681,7 +692,7 @@ const AdminListings = () => {
               const contact = () => setWriteTarget({ userId: listing.user_id, userName: ownerName || "ce membre", sitId: listing.id });
               return (
                 <TableRow key={listing.id}>
-                  <TableCell className="max-w-[280px]">
+                  <TableCell className="min-w-0">
                     <div className="flex items-center gap-2 min-w-0">
                       {coverNotPlace && (
                         <span
@@ -697,19 +708,19 @@ const AdminListings = () => {
                       <span className="truncate">{ownerName || "Propriétaire non renseigné"}</span>
                     </div>
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1.5">
+                  <TableCell className="text-sm text-muted-foreground min-w-0">
+                    <div className="flex flex-wrap items-center gap-1.5">
                       <span>{city.city || "·"}</span>
                       {city.fromOwner && <span className="text-[10px]" title="L'annonce ne précise pas de ville : ville du profil du propriétaire">(profil)</span>}
                       {listing.country && listing.country !== "FR" && (
                         <Badge variant="outline" className="text-[10px] px-1.5 py-0">{getCountryName(listing.country)}</Badge>
                       )}
                     </div>
-                  </TableCell>
-                  <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
+                    <div className="text-xs whitespace-nowrap">
                     {listing.start_date ? format(new Date(listing.start_date), "d MMM", { locale: fr }) : "·"}
                     {" au "}
                     {listing.end_date ? format(new Date(listing.end_date), "d MMM yy", { locale: fr }) : "·"}
+                    </div>
                   </TableCell>
                   <TableCell>
                     <Badge variant={sit.tone}>{sit.label}</Badge>
@@ -721,13 +732,12 @@ const AdminListings = () => {
                         {st.applications}
                       </button>
                     ) : (
-                      <span className="text-muted-foreground">{st ? st.applications : "·"}</span>
+                      <span className="text-muted-foreground">{st ? st.applications : statsError ? "Indisponible" : "·"}</span>
                     )}
                   </TableCell>
                   <TableCell className="text-right text-sm tabular-nums">{st?.views ?? "·"}</TableCell>
-                  <TableCell className="text-right text-sm text-muted-foreground tabular-nums">{st?.uniqueViews ?? "·"}</TableCell>
                   <TableCell className="text-right">
-                    <div className="flex justify-end items-center gap-1">
+                    <div className="flex justify-end items-center gap-1 whitespace-nowrap">
                       <Button variant="outline" size="sm" onClick={() => setDetailListing(listing)}>
                         <Info className="h-4 w-4 mr-1" /> Détails
                       </Button>
@@ -789,7 +799,7 @@ const AdminListings = () => {
         extra={detailListing ? (
           <p className="text-sm text-muted-foreground">
             {stats[detailListing.id]
-              ? `${stats[detailListing.id].views} vues, ${stats[detailListing.id].messages} messages dans ${stats[detailListing.id].conversations} conversations.`
+              ? `${stats[detailListing.id].views} vues, ${stats[detailListing.id].uniqueViews} membres connectés distincts, ${stats[detailListing.id].messages} messages dans ${stats[detailListing.id].conversations} conversations.`
               : "Statistiques de trafic indisponibles."}
           </p>
         ) : null}

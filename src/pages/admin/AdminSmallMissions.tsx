@@ -129,6 +129,7 @@ const AdminSmallMissions = () => {
   useEffect(() => {
     let cancelled = false;
     setNotifiedError(null);
+    setNotifiedCounts(null);
     loadNotifiedCounts()
       .then((c) => { if (!cancelled) setNotifiedCounts(c); })
       .catch((e) => { if (!cancelled) { setNotifiedCounts(null); setNotifiedError(e?.message || "lecture refusée"); } });
@@ -228,6 +229,8 @@ const AdminSmallMissions = () => {
   useEffect(() => {
     setResponseCountsReady(false);
     setResponseError(null);
+    setResponseCounts({});
+    if (loadError) return;
     if (!missions.length) {
       setResponseCounts({});
       setResponseCountsReady(true);
@@ -239,15 +242,20 @@ const AdminSmallMissions = () => {
       const counts: Record<string, number> = {};
       for (let i = 0; i < ids.length; i += RESPONSE_CHUNK) {
         const chunk = ids.slice(i, i + RESPONSE_CHUNK);
-        const { data, error } = await supabase
-          .from("small_mission_responses")
-          .select("mission_id")
-          .in("mission_id", chunk);
-        if (error) {
-          if (!cancelled) { setResponseCounts({}); setResponseError(error.message); }
+        let data: any[];
+        try {
+          // Lecture paginée exhaustive, ordre stable : jamais plafonnée à 1 000 lignes.
+          ({ rows: data } = await fetchAllRows<any>((from, to) => supabase
+            .from("small_mission_responses")
+            .select("id, mission_id")
+            .in("mission_id", chunk)
+            .order("id", { ascending: true })
+            .range(from, to)));
+        } catch (e: any) {
+          if (!cancelled) { setResponseCounts({}); setResponseError(e?.message || "lecture refusée"); }
           return;
         }
-        (data ?? []).forEach((r: any) => {
+        data.forEach((r: any) => {
           counts[r.mission_id] = (counts[r.mission_id] || 0) + 1;
         });
       }
@@ -257,7 +265,7 @@ const AdminSmallMissions = () => {
       }
     })();
     return () => { cancelled = true; };
-  }, [missions, responseNonce]);
+  }, [missions, responseNonce, loadError]);
 
   const filtered = useMemo(() => {
     let list = missions;
@@ -419,7 +427,7 @@ const AdminSmallMissions = () => {
   };
 
   const exportCsv = () => {
-    if (!responseCountsReady) return;
+    if (!responseCountsReady || responseError) return;
     const csv = buildCsv(
       ["Titre", "Auteur", "Catégorie", "Ville", "Date", "Statut", "Notifiés", "Réponses", VIEWS_LABEL],
       filtered.map(m => [
@@ -436,16 +444,18 @@ const AdminSmallMissions = () => {
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   // Compteurs alignés sur la liste affichée (filtres et période compris).
+  const listOk = !loading && !loadError;
   const shownKpis = {
-    total: filtered.length,
-    open: filtered.filter((m) => m.status === "open").length,
+    total: listOk ? filtered.length : null,
+    open: listOk ? filtered.filter((m) => m.status === "open").length : null,
     views: filtered.reduce((a, m) => a + (m.view_count || 0), 0),
-    responses: responseError || !responseCountsReady ? null : filtered.reduce((a, m) => a + (responseCounts[m.id] || 0), 0),
-    noResponse: responseError || !responseCountsReady ? null : filtered.filter((m) => !responseCounts[m.id]).length,
-    notified: notifiedCounts ? filtered.reduce((a, m) => a + (notifiedCounts[m.id] || 0), 0) : null,
-    zeroReach: notifiedCounts ? filtered.filter((m) => !notifiedCounts[m.id]).length : null,
+    responses: !listOk || responseError || !responseCountsReady ? null : filtered.reduce((a, m) => a + (responseCounts[m.id] || 0), 0),
+    noResponse: !listOk || responseError || !responseCountsReady ? null : filtered.filter((m) => !responseCounts[m.id]).length,
+    notified: listOk && notifiedCounts ? filtered.reduce((a, m) => a + (notifiedCounts[m.id] || 0), 0) : null,
+    zeroReach: listOk && notifiedCounts ? filtered.filter((m) => !notifiedCounts[m.id]).length : null,
   };
-  const kpiValue = (v: number | null) => (v === null ? "Indisponible" : v.toLocaleString("fr-FR"));
+  const anyError = !!(loadError || responseError || notifiedError);
+  const kpiValue = (v: number | null) => (v === null ? (anyError ? "Indisponible" : "…") : v.toLocaleString("fr-FR"));
 
   const projetFilled = projetKpis && projetKpis.closed_count > 0
     ? Math.round((projetKpis.closed_filled / projetKpis.closed_count) * 100)
@@ -456,7 +466,7 @@ const AdminSmallMissions = () => {
       <AdminPageHeader
         title={tab === "projets" ? "Projets" : "Entraide"}
         description={tab === "projets" ? "Projets participatifs publiés par les membres." : "Demandes et offres d'entraide entre membres."}
-        actions={<Button variant="outline" size="sm" onClick={exportCsv} disabled={!responseCountsReady}>
+        actions={<Button variant="outline" size="sm" onClick={exportCsv} disabled={!responseCountsReady || !!responseError || !listOk}>
           <Download className="h-4 w-4 mr-2" /> Exporter CSV
         </Button>}
       />
@@ -600,7 +610,7 @@ const AdminSmallMissions = () => {
         </div>
         <details className="text-xs text-muted-foreground">
           <summary className="cursor-pointer">Périmètre de « Notifiés »</summary>
-          <p className="mt-1">{NOTIFIED_SCOPE} {shownKpis.views.toLocaleString("fr-FR")} vues uniques au total sur ces publications.</p>
+          <p className="mt-1">{NOTIFIED_SCOPE} {listOk ? shownKpis.views.toLocaleString("fr-FR") : "Indisponible :"} vues uniques au total sur ces publications.</p>
         </details>
       </div>
       )}
@@ -665,14 +675,17 @@ const AdminSmallMissions = () => {
       )}
 
       <div className="rounded-lg border bg-card overflow-x-auto">
-        <Table>
+        <Table className="table-fixed min-w-[900px]">
+          <colgroup>
+            <col className="w-[30%]" /><col className="w-[19%]" /><col className="w-[19%]" />
+            <col className="w-[8%]" /><col className="w-[8%]" /><col className="w-[260px]" />
+          </colgroup>
           <TableHeader>
             <TableRow>
               <TableHead>Publication</TableHead>
-              <TableHead>Ville</TableHead>
               <TableHead>
-                <button onClick={() => toggleSort("created_at")} className="inline-flex items-center gap-1 hover:text-foreground">
-                  Date <ArrowUpDown className="h-3 w-3" />
+                <button onClick={() => toggleSort("created_at")} className="inline-flex items-center gap-1 hover:text-foreground" title="Tri par date de publication">
+                  Lieu et dates <ArrowUpDown className="h-3 w-3" />
                 </button>
               </TableHead>
               <TableHead>Situation</TableHead>
@@ -682,32 +695,26 @@ const AdminSmallMissions = () => {
                   Réponses <ArrowUpDown className="h-3 w-3" />
                 </button>
               </TableHead>
-              <TableHead title={VIEWS_HINT}>
-                <button onClick={() => toggleSort("view_count")} className="inline-flex items-center gap-1 hover:text-foreground">
-                  {VIEWS_LABEL} <ArrowUpDown className="h-3 w-3" />
-                </button>
-              </TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
+              <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
             ) : loadError ? (
-              <TableRow><TableCell colSpan={8} className="text-center py-8 text-destructive">Indisponible</TableCell></TableRow>
+              <TableRow><TableCell colSpan={6} className="text-center py-8 text-destructive">Indisponible</TableCell></TableRow>
             ) : filterStatus === "no_response" && (responseError || !responseCountsReady) ? (
-              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">{responseError ? "Indisponible : les réponses n'ont pas pu être lues." : "Lecture des réponses…"}</TableCell></TableRow>
+              <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">{responseError ? "Indisponible : les réponses n'ont pas pu être lues." : "Lecture des réponses…"}</TableCell></TableRow>
             ) : filtered.length === 0 ? (
-              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Aucune mission</TableCell></TableRow>
+              <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Aucune mission</TableCell></TableRow>
             ) : paginated.map((m) => {
               const status = resolveStatusBadge(m);
               const isSuspect = moneyPattern.test(m.description || "") || moneyPattern.test(m.exchange_offer || "");
-              const views = m.view_count ?? 0;
-              const notified = notifiedCounts ? notifiedCounts[m.id] || 0 : null;
+                            const notified = notifiedCounts ? notifiedCounts[m.id] || 0 : null;
               const blocked = proximityBlockReason(m);
               return (
                 <TableRow key={m.id} className={isSuspect ? "bg-warning-soft/50" : ""}>
-                  <TableCell className="max-w-[280px]">
+                  <TableCell className="min-w-0">
                     <div className="font-medium line-clamp-2">
                       {isSuspect && <AlertTriangle className="h-3 w-3 text-warning inline mr-1" />}
                       {m.title}
@@ -719,17 +726,19 @@ const AdminSmallMissions = () => {
                       <span>{categoryLabels[m.category] || missionCategoryLabel(m.category)}</span>
                     </div>
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{m.city || "·"}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground whitespace-nowrap">{format(new Date(m.created_at), "d MMM yyyy", { locale: fr })}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground min-w-0">
+                    <div className="truncate">{m.city || "·"}</div>
+                    <div className="text-xs">{missionDateLine(m)}</div>
+                    <div className="text-[11px]">publiée le {format(new Date(m.created_at), "d MMM yyyy", { locale: fr })}</div>
+                  </TableCell>
                   <TableCell>
                     <Badge variant={status.variant}>{status.label}</Badge>
                     {status.detail && <p className="text-[11px] text-muted-foreground mt-0.5">{status.detail}</p>}
                   </TableCell>
                   <TableCell className="text-sm font-medium tabular-nums">{notified === null ? "·" : notified}</TableCell>
-                  <TableCell className="text-sm font-medium tabular-nums">{responseError || !responseCountsReady ? "·" : responseCounts[m.id] || 0}</TableCell>
-                  <TableCell className="text-sm font-medium tabular-nums">{views}</TableCell>
+                  <TableCell className="text-sm font-medium tabular-nums">{responseError ? "Indisponible" : !responseCountsReady ? "·" : responseCounts[m.id] || 0}</TableCell>
                   <TableCell className="text-right">
-                    <div className="flex justify-end items-center gap-1">
+                    <div className="flex justify-end items-center gap-1 whitespace-nowrap">
                       <Button variant="outline" size="sm" onClick={() => setDetailMission(m)}>
                         <Info className="h-4 w-4 mr-1" /> Détails
                       </Button>
@@ -783,6 +792,7 @@ const AdminSmallMissions = () => {
               {notifiedCounts ? `${notifiedCounts[detailMission.id] || 0} personne${(notifiedCounts[detailMission.id] || 0) > 1 ? "s" : ""}` : "Indisponible"}
             </p>
             <p className="text-xs text-muted-foreground">{NOTIFIED_SCOPE}</p>
+            <p><span className="text-muted-foreground">{VIEWS_LABEL} : </span>{detailMission.view_count ?? 0}</p>
             {proximityBlockReason(detailMission) && <p className="text-xs text-muted-foreground">Diffusion : {proximityBlockReason(detailMission)}</p>}
           </div>
         ) : null}
@@ -862,7 +872,7 @@ const AdminSmallMissions = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      <Dialog open={!!proximityMission} onOpenChange={(open) => { if (!open) setProximityMission(null); }}>
+      <Dialog open={!!proximityMission} onOpenChange={(open) => { if (!open) { setProximityMission(null); setNotifiedNonce((n) => n + 1); } }}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
             <DialogTitle>Envoyer aux inscrits à proximité</DialogTitle>
@@ -885,5 +895,14 @@ const AdminSmallMissions = () => {
     </div>
   );
 };
+
+/** Date de besoin ou de fin quand elle est connue. */
+function missionDateLine(m: { date_needed?: string | null; end_date?: string | null }): string {
+  const f = (d: string) => format(new Date(d), "d MMM yyyy", { locale: fr });
+  if (m.date_needed && m.end_date) return `Du ${f(m.date_needed)} au ${f(m.end_date)}`;
+  if (m.date_needed) return `Le ${f(m.date_needed)}`;
+  if (m.end_date) return `Jusqu'au ${f(m.end_date)}`;
+  return "Sans date de besoin";
+}
 
 export default AdminSmallMissions;

@@ -12,8 +12,10 @@ export interface Situation {
   label: string;
   /** Précision factuelle, ou null. */
   detail: string | null;
-  /** Visible publiquement aujourd'hui. */
+  /** Fiche consultable publiquement aujourd'hui (liste ou lien direct). */
   visible: boolean;
+  /** Libellé de visibilité, séparé de l'avancement. */
+  visibility?: string;
   /** Résultat déclaré par un membre, ou null si rien n'est déclaré. */
   declaredOutcome: string | null;
   tone: SituationTone;
@@ -60,12 +62,16 @@ export function sitBucket(s: SitLike): SitBucket {
   }
 }
 
+export const ARCHIVED_REASON_LABEL = "Retrait / archivage enregistré";
+/** Confirmées, en cours, terminées, archivées : HTTP 200, noindex (PublicSitDetail). */
+const CONSULTABLE = { visible: true, visibility: "Fiche consultable publiquement" };
+
 export function sitSituation(s: SitLike): Situation {
   const bucket = sitBucket(s);
   const base = { visible: false, declaredOutcome: null as string | null, bucket };
   switch (bucket) {
     case "preparing":
-      return { ...base, label: "En préparation", detail: "Brouillon, jamais retiré, non visible", tone: "outline" };
+      return { ...base, label: "En préparation", detail: "Brouillon, aucun retrait enregistré, non visible", tone: "outline" };
     case "withdrawn": {
       const r = s.last_unpublished_reason;
       const outcome = r ? WITHDRAW_OUTCOME[r] ?? (r in UNPUBLISH_REASON_ADMIN_LABELS ? null : unpublishReasonAdminLabel(r)) : null;
@@ -80,15 +86,15 @@ export function sitSituation(s: SitLike): Situation {
     case "seeking":
       return { ...base, visible: true, label: "Cherche un gardien", detail: "En ligne", tone: "default" };
     case "confirmed":
-      return { ...base, label: "Gardien confirmé", detail: "Garde à venir", tone: "secondary" };
+      return { ...base, ...CONSULTABLE, label: "Gardien confirmé", detail: "Garde à venir", tone: "secondary" };
     case "in_progress":
-      return { ...base, label: "Garde en cours", detail: null, tone: "default" };
+      return { ...base, ...CONSULTABLE, label: "Garde en cours", detail: null, tone: "default" };
     case "completed":
-      return { ...base, label: "Garde terminée", detail: null, tone: "secondary" };
+      return { ...base, ...CONSULTABLE, label: "Garde terminée", detail: null, tone: "secondary" };
     case "expired":
       return { ...base, label: "Expirée", detail: "Dates passées, annonce close automatiquement", tone: "outline" };
     case "archived":
-      return { ...base, label: "Archivée", detail: "Retirée des listes", tone: "secondary" };
+      return { ...base, ...CONSULTABLE, label: "Archivée", detail: "Retirée des listes", tone: "secondary" };
     case "hidden":
       return { ...base, label: "Masquée par l'équipe", detail: s.hidden_at ? null : "Date de masquage non renseignée", tone: "destructive" };
     case "cancelled": {
@@ -97,7 +103,12 @@ export function sitSituation(s: SitLike): Situation {
       if (s.cancelled_by && s.user_id && s.cancelled_by === s.user_id) who = "par le propriétaire";
       else if (s.cancelled_by) who = "par un compte autre que le propriétaire";
       if (!who && !reason) return { ...base, label: "Annulée, motif non renseigné", detail: null, tone: "outline" };
-      return { ...base, label: who ? `Annulée ${who}` : "Annulée", detail: reason ? `Motif : ${reason}` : "Motif non renseigné", tone: "outline" };
+      const actor = who ? `Action ${who}` : "Acteur non enregistré";
+      if (reason === "archived") {
+        // Code enregistré tel quel : on n'en déduit ni annulation réelle ni rôle.
+        return { ...base, label: ARCHIVED_REASON_LABEL, detail: actor, tone: "outline" };
+      }
+      return { ...base, label: who ? `Annulée ${who}` : "Annulée", detail: reason ? (who ? `Motif : ${reason}` : `Motif : ${reason}, acteur non enregistré`) : "Motif non renseigné", tone: "outline" };
     }
     default:
       return { ...base, label: `Statut inconnu : ${s.status ?? "non renseigné"}`, detail: null, tone: "destructive" };
