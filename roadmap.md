@@ -2,8 +2,8 @@
 
 ## Diagnostic publication du 10/10/2026
 - [x] Préétapes sync/robots et lectures sitemap bornées, sans écriture.
-- [x] Séparer compilation et garde exhaustive conservée en CI.
-- [x] 4 contrôles du contrat verts, compilation automatique « build OK » à 16:14:20 UTC.
+- [x] Annuler la séparation CI seule et rétablir la garde obligatoire en fin de publication.
+- [x] Préserver baseline et verdicts ; aucun test global relancé.
 - [x] Limite consignée : journaux de publication distants non exposés, étape exacte du déploiement non démontrable.
 
 ## Ajustement profil Bénédicte

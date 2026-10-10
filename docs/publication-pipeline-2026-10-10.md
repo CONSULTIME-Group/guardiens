@@ -9,20 +9,20 @@
 - Aucun rapport existant `vitest-guard-*` n'était disponible dans `/tmp`. Aucune suite générale n'a été relancée.
 - Les lectures sitemap disposent d'une pagination contrôlée mais pas d'un délai réseau explicite. Un diagnostic lecture seule, avec timeout de 10 s par requête et 45 s global, a réussi en 0,85 s (collecte 0,434 s). Aucun blocage réseau reproduit, aucune modification du sitemap ou de sa stratégie de cache.
 
-## Correctif minimal
+## Rectification à 16:15 UTC
 
-- `package.json` : `build` conserve toutes les préétapes et Vite ; nouvelle commande `validate:ci` = `npm run build && npm run test:guard`.
-- `.github/workflows/test-guard.yml` : appelle explicitement `validate:ci` après le typecheck.
-- `scripts/test-guard/README.md` : décrit la séparation et précise que Lovable ne consulte pas les contrôles GitHub avant publication.
-- `AGENTS.md` : règle de séparation ; `roadmap.md` : état de clôture.
-- Baseline, exclusions, rejeux, verdicts et codes d'échec de la garde inchangés. La CI doit être verte avant publication manuelle ; aucune garantie de blocage automatique Lovable sur un contrôle GitHub rouge.
+- La séparation CI seule introduite dans `3ec4b6d19` est annulée : elle contrevenait à la décision propriétaire du 17/08. Ce n'était pas une correction démontrée de l'échec distant.
+- `package.json` : `build` termine de nouveau par `npm run test:guard`, suppression de `validate:ci`.
+- `.github/workflows/test-guard.yml` : appel original à `test:guard` rétabli.
+- README et AGENTS : garde obligatoire à la publication rétablie ; roadmap corrigée.
+- Baseline, exclusions, rejeux, verdicts et codes d'échec inchangés. Aucune cause distante démontrée, donc aucun autre correctif spéculatif.
 
 ## Vérifications
 
 - `timeout 15 node scripts/sync-index-html.mjs --check` : OK, 0,04 s, aucune écriture.
 - `timeout 15 node scripts/generate-robots.mjs --check` : OK, 0,39 s, aucune écriture.
 - `timeout 45 node /tmp/publication-diagnostic/probe.mjs` : lectures sitemap OK, 0,85 s, aucune écriture. Premier essai interrompu immédiatement sur un chemin d'import de diagnostic erroné, corrigé uniquement dans `/tmp`.
-- Quatre assertions Node sur les commandes build/CI/garde : OK, moins d'une seconde.
+- Quatre assertions antérieures sur la séparation : obsolètes après rectification, ne constituent pas une preuve de résolution.
 - Journal automatique local : `build OK`, 16:14:20 UTC. Ce signal ne prouve pas une compilation distante de publication, ni son mode production. Pas de compilation manuelle supplémentaire, le harnais assure les builds.
 - Version du correctif pipeline avant ce rapport : `3ec4b6d19b7171ee698609a1baf7a5289515cea0`.
 
