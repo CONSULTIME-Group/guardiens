@@ -1,4 +1,4 @@
-import { travelZonesSummary, travelZoneLabels } from "@/lib/travelZones";
+import { travelZonesSummary, travelZoneLabels, countryName } from "@/lib/travelZones";
 import { formatRatingFr } from "@/lib/formatRatingFr";
 import { useState, useEffect, useRef } from "react";
 import { splitReviewsByRole, sitterReviewsHeading } from "@/lib/publicProfileReviews";
@@ -380,7 +380,7 @@ export default function PublicSitterProfile() {
   );
 
   const PracticalGrid = (props: {
-    animalTypes: string[]; sitterProfile: any; radius: number | null; city: string | null;
+    animalTypes: string[]; sitterProfile: any; radius: number | null; city: string | null; locationLabel?: string | null;
     competences: string[]; specialSkills: string[]; lifestyle: string[]; lifePace: string;
     preferredEnvironments: string[]; languages: string[]; interests: string[];
     typeLine: string; durationLabel: string; frequencyLabel: string; noticeLabel: string;
@@ -428,7 +428,7 @@ export default function PublicSitterProfile() {
           <div className="text-sm text-foreground/70 font-body space-y-1">
             {props.city && (
               <p className="text-foreground">
-                {props.city}
+                {props.locationLabel || props.city}
                 {props.deptName
                   ? `, ${props.deptName}${props.deptCode ? ` (${props.deptCode})` : ""}`
                   : ""}
@@ -682,7 +682,7 @@ export default function PublicSitterProfile() {
       // La vue publique `public_profiles` est lisible par tout visiteur ;
       // `profiles` reste réservé au propriétaire du profil.
       const PUBLIC_PROFILE_COLS =
-        "id, role, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, completed_sits_count, last_seen_at, departement_code, certifications";
+        "id, role, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, completed_sits_count, last_seen_at, departement_code, certifications, country";
       // `last_name` retiré du select, jamais rendu publiquement.
       const BASE_PROFILE_COLS =
         "id, role, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, profile_completion, completed_sits_count, cancellation_count, hero_image_index";
@@ -905,8 +905,10 @@ export default function PublicSitterProfile() {
   // Un slug n'est retenu que si la page correspondante existe et est publiée.
   useEffect(() => {
     let cancelled = false;
-    const code = profile?.departement_code ?? null;
-    const cityName = profile?.city ?? null;
+    // Hors France, aucun département français déduit d'un code postal étranger.
+    const abroad = !!(profile as any)?.country && (profile as any).country !== "FR";
+    const code = abroad ? null : (profile?.departement_code ?? null);
+    const cityName = abroad ? null : (profile?.city ?? null);
     if (!code && !cityName) return;
 
     const loadGeo = async () => {
@@ -1305,6 +1307,9 @@ export default function PublicSitterProfile() {
   // Prénom complet, prénoms composés inclus. Seuls les segments qui portent
   // une marque de nom de famille (capitales, initiales) sont retirés.
   const city = profile?.city || "";
+  // Audit international : pays affiché avec la ville hors France (« Montréal, Canada »).
+  const profileCountry: string | null = (profile as any)?.country ?? null;
+  const locationLabel = city && profileCountry && profileCountry !== "FR" ? `${city}, ${countryName(profileCountry)}` : city;
   // RGPD : masquage présentationnel des coordonnées (jamais de modification en base).
   const bio = sanitizeBioForPublic(profile?.bio);
   // Une motivation sous le seuil (50 car.) reste un brouillon : jamais publiée.
@@ -1681,7 +1686,7 @@ export default function PublicSitterProfile() {
             <SitterIdentityHero
               id={id}
               firstName={firstName}
-              city={city || null}
+              city={locationLabel || null}
               departmentName={geoInfo.deptName}
               avatarUrl={profile.avatar_url || null}
               heroDesktop={heroDesktop}
@@ -1709,7 +1714,7 @@ export default function PublicSitterProfile() {
           <ProfileHero
             id={id}
             firstName={firstName}
-            city={city || null}
+            city={locationLabel || null}
             departmentName={geoInfo.deptName}
             avatarUrl={profile.avatar_url || null}
             heroDesktop={heroDesktop}
