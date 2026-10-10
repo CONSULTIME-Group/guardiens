@@ -32,5 +32,5 @@ Aucune publication, modification UI, donnée, permission ou action membre. Le pr
 - Journaux : sync, robots, sitemap et Vite réussis ; `test:guard` sort 1 (4733 verts, 2 échecs dans fichiers exclus, 1 écart rejoué).
 - Écart réel : `src/test/no-verified-sitter-claim.test.ts` ÉCHOUE (échec nouveau), il ne « passe désormais » pas. `knownFailures` est vide : aucune entrée à retirer, baseline.json inchangée.
 - Cause : texte L5 de `IdentityVerifiedMark.tsx` (« contrôle à la main », « contrôle manuel ») interdit par le garde éditorial.
-- Correctif : formulation « une personne de l'équipe revoit le dossier » ; intitulé du test L5 aligné. Inventaire du garde fait en Node (sans dépendre de `rg`).
+- Correctif : formulation « une personne de l'équipe revoit le dossier » ; intitulé du test L5 aligné. Inventaire du garde inchangé (version d'origine, `rg --files`).
 - Vérification : les 2 fichiers de test lancés seuls, 44 verts. Suite générale non relancée ; un autre échec éventuel ne serait visible qu'à la prochaine publication.
