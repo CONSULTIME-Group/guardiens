@@ -1731,7 +1731,7 @@ export default function PublicSitterProfile() {
           { label: "Avant la garde", value: meetingPreferenceLabel(sitterProfile?.meeting_preference) },
           { label: "Présence", value: presenceLabel },
           { label: "Fréquence", value: frequencyLabel },
-          { label: "Préavis", value: noticeLabel },
+          { label: "Préavis", value: noticeLabel.replace(/^Préavis\s*:\s*/i, "") },
           { label: "Expérience", value: experienceLabel },
           { label: "Avis", value: sitterRoleCount > 0 ? `★ ${formatRatingFr(sitterRoleAvg)} (${sitterRoleCount})` : "" },
         ].filter((f) => f.value);
@@ -1788,6 +1788,7 @@ export default function PublicSitterProfile() {
               reassurance={heroCtaReassurance}
               facts={contactFacts}
               showButton={mobile ? "md" : "always"}
+              ctaVisible={!heroCtaVisible}
               sticky={false}
             />
             {journeyBlock(mobile ? "confiance-mobile" : "confiance")}
@@ -1801,6 +1802,18 @@ export default function PublicSitterProfile() {
         <div data-profile-content className="profile-notebook-page py-[34px] md:py-[52px] pb-[calc(10.5rem+env(safe-area-inset-bottom))] lg:pb-[52px]">
           <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-[52px]">
           <div className="space-y-[52px] min-w-0">
+
+            <SitterAboutSection
+              firstName={firstName}
+              motivation={motivation || ""}
+              bio={bio || ""}
+              facts={aboutFacts}
+              deptLink={geoInfo.deptSlug && geoInfo.deptName
+                ? { href: `/departement/${geoInfo.deptSlug}`, label: `Voir les gardiens en ${geoInfo.deptName}` }
+                : null}
+            >
+              {externalExperiences.length > 0 ? <PublicExperiences experiences={externalExperiences} /> : null}
+            </SitterAboutSection>
 
             <SitterSkillsSection
               groups={skillGroups}
@@ -1859,18 +1872,6 @@ export default function PublicSitterProfile() {
               )}
             </section>
             )}
-
-            <SitterAboutSection
-              firstName={firstName}
-              motivation={motivation || ""}
-              bio={bio || ""}
-              facts={aboutFacts}
-              deptLink={geoInfo.deptSlug && geoInfo.deptName
-                ? { href: `/departement/${geoInfo.deptSlug}`, label: `Voir les gardiens en ${geoInfo.deptName}` }
-                : null}
-            >
-              {externalExperiences.length > 0 ? <PublicExperiences experiences={externalExperiences} /> : null}
-            </SitterAboutSection>
 
             {band && <EntraideBand text={band.text} link={bandLink} />}
 
