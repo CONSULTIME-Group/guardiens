@@ -151,6 +151,9 @@ export function useSitterProfile() {
 
     const p = profileRes.data;
     const s = sitterRes.data;
+    // Première activité gardien (lot L3) : une garde RÉALISÉE
+    // (profiles.completed_sits_count, calculé serveur), jamais une candidature.
+    setHasFirstActivity(((p as any)?.completed_sits_count ?? 0) > 0);
 
     const merged: SitterProfileData = {
       first_name: p?.first_name || "",
@@ -306,21 +309,6 @@ export function useSitterProfile() {
     return () => { cancelled = true; };
   }, [user]);
 
-  // Première activité gardien (lot L3) : une garde RÉALISÉE, lue dans
-  // profiles.completed_sits_count (calculé serveur), jamais une candidature.
-  useEffect(() => {
-    if (!user) return;
-    let cancelled = false;
-    (async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("completed_sits_count")
-        .eq("id", user.id)
-        .maybeSingle();
-      if (!cancelled) setHasFirstActivity(((data as any)?.completed_sits_count ?? 0) > 0);
-    })();
-    return () => { cancelled = true; };
-  }, [user]);
 
   const saveStep = useCallback(async (stepData: Partial<SitterProfileData>): Promise<boolean> => {
     if (!user) return false;
