@@ -27,27 +27,24 @@ import {
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Search, Archive, Trash2, Eye, RotateCcw, Mail, AlertTriangle, ArrowUpDown, Download, Send } from "lucide-react";
+import { Search, Archive, Trash2, Eye, RotateCcw, Mail, AlertTriangle, ArrowUpDown, Download, Send, Info, MoreHorizontal } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { ErrorState } from "@/components/admin/ui";
+import DossierDetailSheet from "@/components/admin/DossierDetailSheet";
+import { missionSituation } from "@/lib/admin/listingSituation";
+import { proximityBlockReason } from "@/lib/admin/missionDiffusion";
+import { loadNotifiedCounts, NOTIFIED_SCOPE } from "@/lib/admin/missionNotified";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import ProximityCampaignCard from "@/components/admin/mass-email/ProximityCampaignCard";
 import { avatarImageUrl } from "@/lib/storageImage";
 
-const statusLabels: Record<string, { label: string; variant: "default" | "secondary" | "outline" | "destructive" }> = {
-  open: { label: "Ouverte", variant: "default" },
-  in_progress: { label: "En cours", variant: "secondary" },
-  completed: { label: "Terminée", variant: "outline" },
-  cancelled: { label: "Annulée", variant: "destructive" },
-};
-
-// Distingue une mission masquée par l'admin d'une mission annulée par l'auteur.
-function resolveStatusBadge(m: { status: string; hidden_by?: string | null }) {
-  if (m.status === "cancelled") {
-    return m.hidden_by
-      ? { label: "Masquée (admin)", variant: "secondary" as const }
-      : { label: "Annulée (auteur)", variant: "outline" as const };
-  }
-  return statusLabels[m.status] || { label: m.status, variant: "outline" as const };
+// Audit du 10/10/2026 : situation humaine, clôtures équipe et automatiques distinguées.
+function resolveStatusBadge(m: any) {
+  const sx = missionSituation(m);
+  return { label: sx.label, variant: sx.tone, detail: sx.detail };
 }
+
+const MISSION_STATUSES = ["open", "in_progress", "completed", "cancelled"];
 
 /** Libellés catégories : miroir de la source unique, jamais de valeur brute anglaise. */
 const categoryLabels: Record<string, string> = MISSION_CATEGORY_LABEL as Record<string, string>;
@@ -111,14 +108,12 @@ const AdminSmallMissions = () => {
   const [contactMission, setContactMission] = useState<any | null>(null);
   const [contactReason, setContactReason] = useState("");
   const [contactSending, setContactSending] = useState(false);
-  const [kpis, setKpis] = useState({
-    total: 0,
-    open: 0,
-    totalViews: 0,
-    totalResponses: 0,
-    totalNotified: 0,
-    zeroReach: 0,
-  });
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [responseError, setResponseError] = useState<string | null>(null);
+  const [notifiedError, setNotifiedError] = useState<string | null>(null);
+  const [notifiedNonce, setNotifiedNonce] = useState(0);
+  const [responseNonce, setResponseNonce] = useState(0);
+  const [detailMission, setDetailMission] = useState<any | null>(null);
   // Onglet courant, lu dans l'URL pour que le menu latéral puisse pointer
   // directement sur les projets. Les projets participatifs ont leurs propres
   // indicateurs, et la liste est la même, filtrée sur la catégorie côté serveur.
@@ -128,63 +123,17 @@ const AdminSmallMissions = () => {
   const [releasingId, setReleasingId] = useState<string | null>(null);
   // Destinataires réellement prévenus, par publication. C'est ce qui explique
   // les zéro réponse : sans notifiés, il n'y a rien à convertir.
-  const [notifiedCounts, setNotifiedCounts] = useState<Record<string, number>>({});
+  const [notifiedCounts, setNotifiedCounts] = useState<Record<string, number> | null>(null);
 
-  // Indicateurs globaux de l'entraide (hors pagination et filtres).
-  // Les projets participatifs sont exclus de bout en bout : ils ont leurs
-  // propres indicateurs dans l'onglet Projets, et les mélanger rendrait les
-  // deux mesures illisibles dès le premier projet publié.
+  // Destinataires réellement prévenus, toutes sources d'envoi réussi lisibles.
   useEffect(() => {
-    (async () => {
-      const projetIdsRes = await fetchAllRows<{ id: string }>((from, to) =>
-        supabase.from("small_missions").select("id").eq("category", "projet" as any)
-          .order("created_at", { ascending: true }).order("id", { ascending: true }).range(from, to),
-      ).catch(() => ({ rows: [] as { id: string }[], truncated: false, pages: 0 }));
-      const projetIds = new Set(projetIdsRes.rows.map((r) => r.id));
-      const empty = { rows: [] as any[], truncated: false, pages: 0 };
-      const [{ count: total }, { count: open }, viewsRes, respRes, notifRes] = await Promise.all([
-        supabase.from("small_missions").select("id", { count: "exact", head: true }).neq("category", "projet" as any),
-        supabase.from("small_missions").select("id", { count: "exact", head: true }).eq("status", "open" as any).neq("category", "projet" as any),
-        fetchAllRows<any>((from, to) =>
-          supabase.from("small_missions").select("view_count").neq("category", "projet" as any)
-            .order("created_at", { ascending: true }).order("id", { ascending: true }).range(from, to),
-        ).catch(() => empty),
-        fetchAllRows<any>((from, to) =>
-          supabase.from("small_mission_responses").select("mission_id")
-            .order("created_at", { ascending: true }).order("id", { ascending: true }).range(from, to),
-        ).catch(() => empty),
-        fetchAllRows<any>((from, to) =>
-          supabase.from("mission_notification_queue").select("mission_id").eq("status", "sent")
-            .order("id", { ascending: true }).range(from, to),
-        ).catch(() => empty),
-      ]);
-      const respRows = respRes.rows;
-      const notifRows = notifRes.rows;
-      const entraideResponses = respRows.filter(
-        (r: any) => !projetIds.has(r.mission_id),
-      ).length;
-      const totalViews = viewsRes.rows.reduce((s: number, r: any) => s + (r.view_count || 0), 0);
-      const counts: Record<string, number> = {};
-      notifRows.forEach((r: any) => {
-        counts[r.mission_id] = (counts[r.mission_id] || 0) + 1;
-      });
-      setNotifiedCounts(counts);
-      const totalNotified = notifRows.filter(
-        (r: any) => !projetIds.has(r.mission_id),
-      ).length;
-      const reachedEntraide = Object.keys(counts).filter((id) => !projetIds.has(id)).length;
-      const zeroReach = Math.max(0, (total || 0) - reachedEntraide);
-      setKpis(k => ({
-        ...k,
-        total: total || 0,
-        open: open || 0,
-        totalViews,
-        totalResponses: entraideResponses,
-        totalNotified,
-        zeroReach,
-      }));
-    })();
-  }, []);
+    let cancelled = false;
+    setNotifiedError(null);
+    loadNotifiedCounts()
+      .then((c) => { if (!cancelled) setNotifiedCounts(c); })
+      .catch((e) => { if (!cancelled) { setNotifiedCounts(null); setNotifiedError(e?.message || "lecture refusée"); } });
+    return () => { cancelled = true; };
+  }, [notifiedNonce]);
 
   // Indicateurs des projets, calculés en base : les candidatures aux gardes
   // vivent dans `applications`, table que l'administration ne lit pas en
@@ -231,7 +180,7 @@ const AdminSmallMissions = () => {
         .from("small_missions")
         .select("*, poster:profiles!small_missions_user_id_fkey(first_name, last_name, avatar_url)");
 
-      if (filterStatus !== "all") query = query.eq("status", filterStatus as any);
+      if (MISSION_STATUSES.includes(filterStatus)) query = query.eq("status", filterStatus as any);
       // L'onglet borne toujours la catégorie, la catégorie choisie s'ajoute.
       if (tab === "projets") query = query.eq("category", "projet" as any);
       else {
@@ -258,12 +207,15 @@ const AdminSmallMissions = () => {
     try {
       const { rows, truncated } = await fetchAllRows<any>((from, to) => buildQuery().range(from, to));
       if (!missionsSeq.current.isCurrent(token)) return;
+      setLoadError(null);
       setMissions(rows);
       setTotalCount(rows.length);
       setMissionsTruncated(truncated);
-    } catch {
+    } catch (e: any) {
       if (!missionsSeq.current.isCurrent(token)) return;
-      toast.error("Erreur de chargement");
+      // Jamais la liste d'un filtre précédent présentée comme le résultat actuel.
+      setMissions([]);
+      setLoadError(e?.message || "lecture refusée");
     }
     setLoading(false);
   }, [filterStatus, filterCategory, filterPeriod, sortBy, sortDir, tab]);
@@ -275,6 +227,7 @@ const AdminSmallMissions = () => {
   // .in() est chunké par lots de 200 ids pour rester sous les limites de PostgREST.
   useEffect(() => {
     setResponseCountsReady(false);
+    setResponseError(null);
     if (!missions.length) {
       setResponseCounts({});
       setResponseCountsReady(true);
@@ -290,7 +243,10 @@ const AdminSmallMissions = () => {
           .from("small_mission_responses")
           .select("mission_id")
           .in("mission_id", chunk);
-        if (error) continue;
+        if (error) {
+          if (!cancelled) { setResponseCounts({}); setResponseError(error.message); }
+          return;
+        }
         (data ?? []).forEach((r: any) => {
           counts[r.mission_id] = (counts[r.mission_id] || 0) + 1;
         });
@@ -301,7 +257,7 @@ const AdminSmallMissions = () => {
       }
     })();
     return () => { cancelled = true; };
-  }, [missions]);
+  }, [missions, responseNonce]);
 
   const filtered = useMemo(() => {
     let list = missions;
@@ -313,6 +269,10 @@ const AdminSmallMissions = () => {
         m.poster?.first_name?.toLowerCase().includes(s)
       );
     }
+    if (filterStatus === "no_response") {
+      // Sans compteurs fiables, on n'affirme pas qu'une mission est sans réponse.
+      list = responseCountsReady && !responseError ? list.filter((m) => !responseCounts[m.id]) : [];
+    }
     if (sortBy === "response_count") {
       list = [...list].sort((a, b) => {
         const d = (responseCounts[b.id] || 0) - (responseCounts[a.id] || 0);
@@ -320,7 +280,7 @@ const AdminSmallMissions = () => {
       });
     }
     return list;
-  }, [missions, search, sortBy, sortDir, responseCounts]);
+  }, [missions, search, sortBy, sortDir, responseCounts, filterStatus, responseCountsReady, responseError]);
 
   const paginated = useMemo(() => filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE), [filtered, page]);
 
@@ -467,19 +427,25 @@ const AdminSmallMissions = () => {
         categoryLabels[m.category] || missionCategoryLabel(m.category), m.city || "",
         format(new Date(m.created_at), "yyyy-MM-dd"),
         resolveStatusBadge(m).label,
-        String(notifiedCounts[m.id] || 0),
-        String(responseCounts[m.id] || 0), String(m.view_count ?? 0),
+        notifiedCounts ? String(notifiedCounts[m.id] || 0) : "",
+        responseError ? "" : String(responseCounts[m.id] || 0), String(m.view_count ?? 0),
       ]),
     );
     downloadCsv(csv, `${tab === "projets" ? "projets" : "entraide"}-${format(new Date(), "yyyy-MM-dd")}.csv`);
   };
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const ratioGlobal = kpis.totalViews > 0 ? ((kpis.totalResponses / kpis.totalViews) * 100).toFixed(1) : "0";
-  // Indicateur maître : ce que produit une notification envoyée.
-  const notifToResponse = kpis.totalNotified > 0
-    ? ((kpis.totalResponses / kpis.totalNotified) * 100).toFixed(1)
-    : "0";
+  // Compteurs alignés sur la liste affichée (filtres et période compris).
+  const shownKpis = {
+    total: filtered.length,
+    open: filtered.filter((m) => m.status === "open").length,
+    views: filtered.reduce((a, m) => a + (m.view_count || 0), 0),
+    responses: responseError || !responseCountsReady ? null : filtered.reduce((a, m) => a + (responseCounts[m.id] || 0), 0),
+    noResponse: responseError || !responseCountsReady ? null : filtered.filter((m) => !responseCounts[m.id]).length,
+    notified: notifiedCounts ? filtered.reduce((a, m) => a + (notifiedCounts[m.id] || 0), 0) : null,
+    zeroReach: notifiedCounts ? filtered.filter((m) => !notifiedCounts[m.id]).length : null,
+  };
+  const kpiValue = (v: number | null) => (v === null ? "Indisponible" : v.toLocaleString("fr-FR"));
 
   const projetFilled = projetKpis && projetKpis.closed_count > 0
     ? Math.round((projetKpis.closed_filled / projetKpis.closed_count) * 100)
@@ -613,40 +579,34 @@ const AdminSmallMissions = () => {
         </div>
       )}
 
-      {/* KPIs entraide */}
+      {/* KPIs entraide, sur les publications affichées */}
       {tab === "entraide" && (
-      <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-3">
-        <Card className="border-primary/40"><CardContent className="p-4">
-          <p className="text-xs text-muted-foreground" title="Réponses ÷ notifications envoyées">Conversion notif. → réponse</p>
-          <p className="text-2xl font-bold tabular-nums">{notifToResponse}%</p>
-          <p className="text-[11px] text-muted-foreground mt-0.5">{kpis.totalNotified} notifiés</p>
-        </CardContent></Card>
-        <Card className={kpis.zeroReach > 0 ? "border-warning-border bg-warning-soft" : undefined}><CardContent className="p-4">
-          <p className="text-xs text-muted-foreground">Publications sans destinataire</p>
-          <p className="text-2xl font-bold tabular-nums">{kpis.zeroReach}</p>
-        </CardContent></Card>
-        <Card><CardContent className="p-4">
-          <p className="text-xs text-muted-foreground">Total</p>
-          <p className="text-2xl font-bold tabular-nums">{kpis.total}</p>
-        </CardContent></Card>
-        <Card><CardContent className="p-4">
-          <p className="text-xs text-muted-foreground">Ouvertes</p>
-          <p className="text-2xl font-bold tabular-nums">{kpis.open}</p>
-        </CardContent></Card>
-        <Card><CardContent className="p-4">
-          <p className="text-xs text-muted-foreground">{VIEWS_LABEL}</p>
-          <p className="text-2xl font-bold tabular-nums">{kpis.totalViews}</p>
-        </CardContent></Card>
-        <Card><CardContent className="p-4">
-          <p className="text-xs text-muted-foreground">Réponses</p>
-          <p className="text-2xl font-bold tabular-nums">{kpis.totalResponses}</p>
-        </CardContent></Card>
-        <Card><CardContent className="p-4">
-          <p className="text-xs text-muted-foreground">Ratio réponses/vues</p>
-          <p className="text-2xl font-bold tabular-nums">{ratioGlobal}%</p>
-        </CardContent></Card>
+      <div className="space-y-2">
+        <p className="text-xs text-muted-foreground">Chiffres calculés sur les {filtered.length} publications affichées (filtres et période en cours).</p>
+        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
+          {[
+            { label: "Publications affichées", value: kpiValue(shownKpis.total) },
+            { label: "Ouvertes", value: kpiValue(shownKpis.open) },
+            { label: "Réponses reçues", value: kpiValue(shownKpis.responses) },
+            { label: "Sans réponse", value: kpiValue(shownKpis.noResponse) },
+            { label: "Personnes notifiées (somme par publication)", value: kpiValue(shownKpis.notified) },
+            { label: "Sans envoi réussi enregistré", value: kpiValue(shownKpis.zeroReach) },
+          ].map((k) => (
+            <Card key={k.label}><CardContent className="p-4">
+              <p className="text-xs text-muted-foreground">{k.label}</p>
+              <p className="text-2xl font-bold tabular-nums">{k.value}</p>
+            </CardContent></Card>
+          ))}
+        </div>
+        <details className="text-xs text-muted-foreground">
+          <summary className="cursor-pointer">Périmètre de « Notifiés »</summary>
+          <p className="mt-1">{NOTIFIED_SCOPE} {shownKpis.views.toLocaleString("fr-FR")} vues uniques au total sur ces publications.</p>
+        </details>
       </div>
       )}
+      {notifiedError && <ErrorState detail={`Notifiés : ${notifiedError}`} onRetry={() => setNotifiedNonce((n) => n + 1)} />}
+      {responseError && <ErrorState detail={`Réponses : ${responseError}`} onRetry={() => setResponseNonce((n) => n + 1)} />}
+      {loadError && <ErrorState detail={`Liste : ${loadError}`} onRetry={fetchMissions} />}
 
       {suspectMissions.length > 0 && (
         <Card className="border-warning-border bg-warning-soft">
@@ -663,13 +623,14 @@ const AdminSmallMissions = () => {
           <Input placeholder="Rechercher titre, ville, auteur…" value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
         </div>
         <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-[150px]"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-[200px]" aria-label="Situation"><SelectValue /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Tous statuts</SelectItem>
+            <SelectItem value="all">Toutes situations</SelectItem>
             <SelectItem value="open">Ouvertes</SelectItem>
-            <SelectItem value="in_progress">En cours</SelectItem>
-            <SelectItem value="completed">Terminées</SelectItem>
-            <SelectItem value="cancelled">Masquées / annulées</SelectItem>
+            <SelectItem value="no_response">Sans réponse</SelectItem>
+            <SelectItem value="in_progress">Personne retenue</SelectItem>
+            <SelectItem value="completed">Clôturées</SelectItem>
+            <SelectItem value="cancelled">Annulées, expirées ou masquées</SelectItem>
           </SelectContent>
         </Select>
         {tab === "entraide" && (
@@ -707,17 +668,15 @@ const AdminSmallMissions = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Titre</TableHead>
-              <TableHead>Auteur</TableHead>
-              <TableHead>Catégorie</TableHead>
+              <TableHead>Publication</TableHead>
               <TableHead>Ville</TableHead>
               <TableHead>
                 <button onClick={() => toggleSort("created_at")} className="inline-flex items-center gap-1 hover:text-foreground">
                   Date <ArrowUpDown className="h-3 w-3" />
                 </button>
               </TableHead>
-              <TableHead>Statut</TableHead>
-              <TableHead title="Personnes réellement prévenues pour cette publication">Notifiés</TableHead>
+              <TableHead>Situation</TableHead>
+              <TableHead title={NOTIFIED_SCOPE}>Notifiés</TableHead>
               <TableHead>
                 <button onClick={() => toggleSort("response_count")} className="inline-flex items-center gap-1 hover:text-foreground">
                   Réponses <ArrowUpDown className="h-3 w-3" />
@@ -728,71 +687,81 @@ const AdminSmallMissions = () => {
                   {VIEWS_LABEL} <ArrowUpDown className="h-3 w-3" />
                 </button>
               </TableHead>
-              <TableHead title="Réponses ÷ vues">Ratio</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow><TableCell colSpan={11} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
+              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
+            ) : loadError ? (
+              <TableRow><TableCell colSpan={8} className="text-center py-8 text-destructive">Indisponible</TableCell></TableRow>
+            ) : filterStatus === "no_response" && (responseError || !responseCountsReady) ? (
+              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">{responseError ? "Indisponible : les réponses n'ont pas pu être lues." : "Lecture des réponses…"}</TableCell></TableRow>
             ) : filtered.length === 0 ? (
-              <TableRow><TableCell colSpan={11} className="text-center py-8 text-muted-foreground">Aucune mission</TableCell></TableRow>
+              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Aucune mission</TableCell></TableRow>
             ) : paginated.map((m) => {
               const status = resolveStatusBadge(m);
               const isSuspect = moneyPattern.test(m.description || "") || moneyPattern.test(m.exchange_offer || "");
               const views = m.view_count ?? 0;
-              const resp = responseCounts[m.id] || 0;
-              const notified = notifiedCounts[m.id] || 0;
-              const ratio = views > 0 ? `${((resp / views) * 100).toFixed(0)}%` : "·";
+              const notified = notifiedCounts ? notifiedCounts[m.id] || 0 : null;
+              const blocked = proximityBlockReason(m);
               return (
                 <TableRow key={m.id} className={isSuspect ? "bg-warning-soft/50" : ""}>
-                  <TableCell className="font-medium max-w-[180px] truncate">
-                    {isSuspect && <AlertTriangle className="h-3 w-3 text-warning inline mr-1" />}
-                    {m.title}
-                  </TableCell>
-                  <TableCell className="text-sm">
-                    <div className="flex items-center gap-2">
-                      {m.poster?.avatar_url && <img src={avatarImageUrl(m.poster.avatar_url, 20)} className="w-5 h-5 rounded-full object-cover" alt="" />}
-                      <span>{m.poster?.first_name} {m.poster?.last_name}</span>
+                  <TableCell className="max-w-[280px]">
+                    <div className="font-medium line-clamp-2">
+                      {isSuspect && <AlertTriangle className="h-3 w-3 text-warning inline mr-1" />}
+                      {m.title}
+                    </div>
+                    <div className="flex items-center gap-1.5 mt-0.5 text-xs text-muted-foreground">
+                      {m.poster?.avatar_url && <img src={avatarImageUrl(m.poster.avatar_url, 20)} className="w-4 h-4 rounded-full object-cover" alt="" />}
+                      <span className="truncate">{m.poster?.first_name} {m.poster?.last_name}</span>
+                      <span>·</span>
+                      <span>{categoryLabels[m.category] || missionCategoryLabel(m.category)}</span>
                     </div>
                   </TableCell>
-                  <TableCell><Badge variant="outline" className="text-xs">{categoryLabels[m.category] || missionCategoryLabel(m.category)}</Badge></TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{m.city}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{format(new Date(m.created_at), "d MMM yyyy", { locale: fr })}</TableCell>
-                  <TableCell><Badge variant={status.variant}>{status.label}</Badge></TableCell>
-                  <TableCell className={`text-sm font-medium tabular-nums ${notified === 0 ? "text-warning" : ""}`}>{notified}</TableCell>
-                  <TableCell className="text-sm font-medium tabular-nums">{resp}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{m.city || "·"}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground whitespace-nowrap">{format(new Date(m.created_at), "d MMM yyyy", { locale: fr })}</TableCell>
+                  <TableCell>
+                    <Badge variant={status.variant}>{status.label}</Badge>
+                    {status.detail && <p className="text-[11px] text-muted-foreground mt-0.5">{status.detail}</p>}
+                  </TableCell>
+                  <TableCell className="text-sm font-medium tabular-nums">{notified === null ? "·" : notified}</TableCell>
+                  <TableCell className="text-sm font-medium tabular-nums">{responseError || !responseCountsReady ? "·" : responseCounts[m.id] || 0}</TableCell>
                   <TableCell className="text-sm font-medium tabular-nums">{views}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground tabular-nums">{ratio}</TableCell>
                   <TableCell className="text-right">
-                    <div className="flex justify-end gap-1">
-                      <Button variant="ghost" size="icon" aria-label="Voir la mission" title="Voir" onClick={() => navigate(`/petites-missions/${(m as any).slug || m.id}`)}>
-                        <Eye className="h-4 w-4" />
+                    <div className="flex justify-end items-center gap-1">
+                      <Button variant="outline" size="sm" onClick={() => setDetailMission(m)}>
+                        <Info className="h-4 w-4 mr-1" /> Détails
                       </Button>
-                      <Button variant="ghost" size="icon" aria-label="Contacter l'auteur" title="Contacter" onClick={() => openContact(m)}>
-                        <Mail className="h-4 w-4" />
+                      <Button variant="ghost" size="sm" onClick={() => openContact(m)}>
+                        <Mail className="h-4 w-4 mr-1" /> Contacter
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        aria-label="Envoyer aux inscrits à proximité"
-                        title="Envoyer aux inscrits à proximité (15 km)"
-                        onClick={() => setProximityMission({ id: m.id, title: m.title })}
-                      >
-                        <Send className="h-4 w-4 text-primary" />
-                      </Button>
-                      {m.status !== "cancelled" ? (
-                        <Button variant="ghost" size="icon" aria-label="Masquer la mission" title="Masquer" onClick={() => setArchiveId(m.id)}>
-                          <Archive className="h-4 w-4" />
-                        </Button>
-                      ) : m.hidden_by ? (
-                        <Button variant="ghost" size="icon" aria-label="Restaurer la mission" title="Restaurer" onClick={() => setRestoreId(m.id)}>
-                          <RotateCcw className="h-4 w-4" />
-                        </Button>
-                      ) : null}
-                      <Button variant="ghost" size="icon" aria-label="Supprimer la mission" title="Supprimer" onClick={() => setDeleteId(m.id)}>
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" aria-label="Autres actions" title="Autres actions">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-64">
+                          <DropdownMenuItem onSelect={() => navigate(`/petites-missions/${(m as any).slug || m.id}`)}><Eye className="h-4 w-4 mr-2" /> Voir la publication</DropdownMenuItem>
+                          <DropdownMenuItem disabled={!!blocked} onSelect={() => { if (!blocked) setProximityMission({ id: m.id, title: m.title }); }}>
+                            <Send className="h-4 w-4 mr-2" />
+                            <span className="flex flex-col">
+                              <span>Envoyer aux inscrits à proximité</span>
+                              {blocked && <span className="text-[11px] text-muted-foreground">{blocked}</span>}
+                            </span>
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          {m.status !== "cancelled" ? (
+                            <DropdownMenuItem onSelect={() => setArchiveId(m.id)}><Archive className="h-4 w-4 mr-2" /> Masquer la mission</DropdownMenuItem>
+                          ) : m.hidden_by ? (
+                            <DropdownMenuItem onSelect={() => setRestoreId(m.id)}><RotateCcw className="h-4 w-4 mr-2" /> Restaurer la mission</DropdownMenuItem>
+                          ) : null}
+                          <DropdownMenuItem className="text-destructive focus:text-destructive" onSelect={() => setDeleteId(m.id)}>
+                            <Trash2 className="h-4 w-4 mr-2" /> Supprimer la mission
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -802,11 +771,25 @@ const AdminSmallMissions = () => {
         </Table>
       </div>
 
-      {/* Clé de lecture de la colonne Notifiés, sinon le zéro se lit comme un bug. */}
-      <p className="text-xs text-muted-foreground">
-        Lecture de la colonne Notifiés : un zéro signifie que la publication est antérieure à la mise
-        en service de la file de notification, le 9 juillet 2026 : la diffusion a fonctionné normalement.
-      </p>
+      <DossierDetailSheet
+        kind="mission"
+        item={detailMission}
+        open={!!detailMission}
+        onOpenChange={(o) => { if (!o) setDetailMission(null); }}
+        extra={detailMission ? (
+          <div className="text-sm space-y-1">
+            <p>
+              <span className="text-muted-foreground">Notifiés : </span>
+              {notifiedCounts ? `${notifiedCounts[detailMission.id] || 0} personne${(notifiedCounts[detailMission.id] || 0) > 1 ? "s" : ""}` : "Indisponible"}
+            </p>
+            <p className="text-xs text-muted-foreground">{NOTIFIED_SCOPE}</p>
+            {proximityBlockReason(detailMission) && <p className="text-xs text-muted-foreground">Diffusion : {proximityBlockReason(detailMission)}</p>}
+          </div>
+        ) : null}
+        footer={detailMission ? (
+          <Button size="sm" variant="outline" onClick={() => navigate(`/petites-missions/${detailMission.slug || detailMission.id}`)}>Voir la publication</Button>
+        ) : null}
+      />
 
       {/* Pagination */}
       <div className="flex items-center justify-between gap-3">

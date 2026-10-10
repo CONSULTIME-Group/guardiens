@@ -36,8 +36,9 @@ describe("AdminSitsManagement, statuts visibles", () => {
 
 describe("AdminListings, KPI", () => {
   it("compte les gardes en cours", () => {
-    expect(listings).toContain('.eq("status", "in_progress" as any)');
-    expect(listings).toContain('{ label: "Gardes en cours", value: kpis?.inProgress }');
+    // Audit du 10/10/2026 : répartition complète, une case par situation.
+    expect(listings).toContain("sitDistribution(rows)");
+    expect(read("src/lib/admin/listingSituation.ts")).toContain('{ key: "in_progress", label: "Gardes en cours" }');
   });
 });
 

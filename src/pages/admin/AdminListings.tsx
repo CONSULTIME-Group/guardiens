@@ -20,7 +20,11 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { format, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Eye, EyeOff, Trash2, Search, Sparkles, Share2, Link2, Mail, BarChart3, MessageSquare, Download, ChevronLeft, ChevronRight, Send, Loader2, Image as ImageIcon } from "lucide-react";
+import { Eye, EyeOff, Trash2, Search, Sparkles, Share2, Link2, Mail, BarChart3, MessageSquare, Download, ChevronLeft, ChevronRight, Send, Loader2, Image as ImageIcon, MoreHorizontal, Info } from "lucide-react";
+import { buildCsv, downloadCsv } from "@/lib/admin/csv";
+import { ErrorState } from "@/components/admin/ui";
+import DossierDetailSheet from "@/components/admin/DossierDetailSheet";
+import { LISTING_FILTERS, LISTING_FILTER_LABELS, listingCity, listingFilterScope, sitDistribution, sitSituation, SIT_BUCKETS_PRIMARY, SIT_BUCKETS_SECONDARY, type ListingFilter, type SitBucket } from "@/lib/admin/listingSituation";
 import { useMessageAiAssistant, type MessageAiAction } from "@/hooks/useMessageAiAssistant";
 import {
   DropdownMenu,
@@ -44,22 +48,6 @@ import { unpublishReasonAdminLabel } from "@/lib/unpublishReason";
 
 type BadgeVariant = SitStatusBadgeVariant;
 
-const resolveStatusBadge = (listing: any): { label: string; variant: BadgeVariant } => {
-  if (listing.status === "cancelled") {
-    return listing.hidden_by
-      ? { label: "Masquée (admin)", variant: "destructive" }
-      : { label: "Annulée (auteur)", variant: "outline" };
-  }
-  // Une annonce dépubliée revient en draft : elle ne doit pas être confondue
-  // avec un brouillon jamais publié.
-  if (listing.status === "draft" && listing.unpublished_at) {
-    return { label: "Dépubliée", variant: "outline" };
-  }
-  return resolveSitStatusBadge(listing.status);
-};
-
-
-
 type Stats = {
   views: number;
   uniqueViews: number;
@@ -81,8 +69,6 @@ const AdminListings = () => {
   // Annonces = vie de la publication. Par défaut : tout ce qui est visible publiquement ou bloqué côté annonce (hors brouillons et hors gardes opérationnelles déjà confirmées)
   // ?filter= (statut), ?sit= (une annonce, tout statut), ?owner= (un propriétaire, tout statut).
   const [urlParams, setUrlParams] = useSearchParams();
-  const LISTING_FILTERS = ["published", "draft", "cancelled", "all", "no_draft", "to_staff"] as const;
-  type ListingFilter = typeof LISTING_FILTERS[number];
   const urlFilter = urlParams.get("filter");
   const focusSitId = urlParams.get("sit");
   const focusOwnerId = urlParams.get("owner");
@@ -114,8 +100,12 @@ const AdminListings = () => {
   const [hideModal, setHideModal] = useState<string | null>(null);
   const [restoreModal, setRestoreModal] = useState<string | null>(null);
 
-  // KPIs (indépendants des filtres, calculés au montage)
-  const [kpis, setKpis] = useState<{ total: number; published: number; draft: number; inProgress: number; cancelled: number; archived: number; newLast7d: number } | null>(null);
+  // Répartition complète (indépendante des filtres), rechargée après chaque action.
+  const [kpis, setKpis] = useState<{ total: number; counts: Record<SitBucket, number>; newLast7d: number } | null>(null);
+  const [kpisError, setKpisError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [statsNonce, setStatsNonce] = useState(0);
+  const [detailListing, setDetailListing] = useState<any | null>(null);
 
   // Pagination client-side
   const PAGE_SIZE = 25;
@@ -169,13 +159,14 @@ const AdminListings = () => {
         .order("id", { ascending: true });
       if (focusSitId) return q.eq("id", focusSitId);
       if (focusOwnerId) return q.eq("user_id", focusOwnerId);
-      if (filterStatus === "no_draft") {
-        q = q.neq("status", "draft" as any);
-      } else if (filterStatus === "to_staff") {
-        q = q.eq("status", "published" as any);
-      } else if (filterStatus !== "all") {
-        q = q.eq("status", filterStatus as any);
-      }
+      const scope = listingFilterScope(filterStatus);
+      if (scope.status) q = q.eq("status", scope.status as any);
+      if (scope.statusIn) q = q.in("status", scope.statusIn as any);
+      if (scope.statusNeq) q = q.neq("status", scope.statusNeq as any);
+      if (scope.unpublished === "null") q = q.is("unpublished_at", null);
+      if (scope.unpublished === "not_null") q = q.not("unpublished_at", "is", null);
+      if (scope.hiddenBy === "null") q = q.is("hidden_by", null);
+      if (scope.hiddenBy === "not_null") q = q.not("hidden_by", "is", null);
       return q;
     };
     let data: any[] | null = null;
@@ -188,11 +179,16 @@ const AdminListings = () => {
       error = e;
     }
     if (!listingsSeq.current.isCurrent(token)) return;
-    if (error) toast.error("Erreur de chargement");
-    else {
+    if (error) {
+      // Jamais les annonces d'un filtre précédent présentées comme le résultat actuel.
+      setListings([]);
+      setCities([]);
+      setLoadError((error as any)?.message || "lecture refusée");
+    } else {
+      setLoadError(null);
       setListings(data || []);
-      const uniqueCities = [...new Set((data || []).map((l: any) => l.owner?.city).filter(Boolean))];
-      setCities(uniqueCities as string[]);
+      const uniqueCities = [...new Set((data || []).map((l: any) => listingCity(l).city).filter(Boolean))];
+      setCities((uniqueCities as string[]).sort((x, y) => x.localeCompare(y, "fr")));
     }
     setLoading(false);
   }, [filterStatus, focusSitId, focusOwnerId]);
@@ -226,30 +222,24 @@ const AdminListings = () => {
 
 
 
-  // KPI counts (indépendants des filtres, calculés au montage)
-  useEffect(() => {
-    (async () => {
-      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-      const [totalRes, pubRes, draftRes, progRes, cancRes, archRes, newRes] = await Promise.all([
-        supabase.from("sits").select("id", { count: "exact", head: true }),
-        supabase.from("sits").select("id", { count: "exact", head: true }).eq("status", "published" as any),
-        supabase.from("sits").select("id", { count: "exact", head: true }).eq("status", "draft" as any),
-        supabase.from("sits").select("id", { count: "exact", head: true }).eq("status", "in_progress" as any),
-        supabase.from("sits").select("id", { count: "exact", head: true }).eq("status", "cancelled" as any),
-        supabase.from("sits").select("id", { count: "exact", head: true }).eq("status", "archived" as any),
-        supabase.from("sits").select("id", { count: "exact", head: true }).gte("created_at", sevenDaysAgo),
-      ]);
-      setKpis({
-        total: totalRes.count ?? 0,
-        published: pubRes.count ?? 0,
-        draft: draftRes.count ?? 0,
-        inProgress: progRes.count ?? 0,
-        cancelled: cancRes.count ?? 0,
-        archived: archRes.count ?? 0,
-        newLast7d: newRes.count ?? 0,
-      });
-    })();
+  // Répartition complète : chaque annonce dans exactement une case.
+  const loadKpis = useCallback(async () => {
+    setKpisError(null);
+    try {
+      const { rows } = await fetchAllRows<any>((from, to) =>
+        supabase.from("sits").select("id, status, unpublished_at, hidden_by, created_at")
+          .order("created_at", { ascending: false }).order("id", { ascending: true }).range(from, to),
+      );
+      const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+      const d = sitDistribution(rows);
+      setKpis({ ...d, newLast7d: rows.filter((r) => r.created_at && new Date(r.created_at).getTime() >= weekAgo).length });
+    } catch (e: any) {
+      setKpis(null);
+      setKpisError(e?.message || "lecture refusée");
+    }
   }, []);
+  useEffect(() => { loadKpis(); }, [loadKpis]);
+  const refreshAfterAction = () => { fetchListings(); loadKpis(); refreshAdminBadges(); };
 
   // Reset pagination quand le contexte de filtrage change
   useEffect(() => { setPage(0); }, [filterStatus, search, filterCity]);
@@ -266,7 +256,8 @@ const AdminListings = () => {
       if (cancelled) return;
       if (error) {
         console.error("admin_get_listings_stats:", error);
-        setStatsError("Statistiques des annonces indisponibles : le filtre « À staffer » et les compteurs ne sont pas fiables.");
+        setStats({});
+        setStatsError("Statistiques des annonces indisponibles : le filtre « Sans candidature » et les compteurs ne sont pas affichés.");
         return;
       }
       const map: Record<string, Stats> = {};
@@ -287,7 +278,7 @@ const AdminListings = () => {
       setStatsReady(true);
     });
     return () => { cancelled = true; };
-  }, [listings]);
+  }, [listings, statsNonce]);
 
   const openTraffic = async (listing: any) => {
     setTrafficListing(listing);
@@ -336,7 +327,7 @@ const AdminListings = () => {
     } catch (e) {
       console.error("admin_action_logs hide:", e);
     }
-    if (!notifyFailed) toast.success("Annonce masquée, propriétaire notifié"); setHideModal(null); fetchListings(); refreshAdminBadges();
+    if (!notifyFailed) toast.success("Annonce masquée, propriétaire notifié"); setHideModal(null); refreshAfterAction();
   };
 
   const handleRestore = async (id: string) => {
@@ -360,7 +351,7 @@ const AdminListings = () => {
     } catch (e) {
       console.error("admin_action_logs restore:", e);
     }
-    toast.success("Annonce remise en ligne"); setRestoreModal(null); fetchListings(); refreshAdminBadges();
+    toast.success("Annonce remise en ligne"); setRestoreModal(null); refreshAfterAction();
   };
 
   const [deleteCounts, setDeleteCounts] = useState<DeleteCounts | null>(null);
@@ -397,6 +388,7 @@ const AdminListings = () => {
       setDeleteModal(null);
       setListings(prev => prev.filter(l => l.id !== id));
       await fetchListings();
+      loadKpis();
     } catch (err: any) {
       toast.error("Erreur : " + (err?.message || "suppression impossible"));
       setDeleteModal(null);
@@ -405,7 +397,7 @@ const AdminListings = () => {
 
   const filtered = listings.filter((l) => {
     if (search && !l.title?.toLowerCase().includes(search.toLowerCase()) && !l.owner?.first_name?.toLowerCase().includes(search.toLowerCase())) return false;
-    if (filterCity && filterCity !== "all_cities" && l.owner?.city !== filterCity) return false;
+    if (filterCity && filterCity !== "all_cities" && listingCity(l).city !== filterCity) return false;
     if (filterStatus === "to_staff" && !focusSitId && !focusOwnerId) {
       // Sans statistiques chargées, on ne sait pas : on n'affiche pas l'annonce.
       if (!stats[l.id]) return false;
@@ -422,42 +414,31 @@ const AdminListings = () => {
   const paginated = filtered.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
 
   const handleExportCsv = () => {
-    const header = ["Titre", "Propriétaire", "Ville", "Pays", "Début", "Fin", "Statut", "Vues", "Membres uniques", "Messages", "Candidatures", "Dernière vue", "Dépubliée le", "Motif de dépublication"];
-    const esc = (v: any) => {
-      const s = v == null ? "" : String(v);
-      return `"${s.replace(/"/g, '""')}"`;
-    };
+    const header = ["Titre", "Propriétaire", "Ville", "Source de la ville", "Pays", "Début", "Fin", "Situation", "Précision", "Vues", "Membres uniques", "Messages", "Candidatures", "Dernière vue", "Retirée le", "Motif du retrait"];
+    // Statistiques indisponibles : cellule vide, jamais zéro.
+    const n = (v: number | undefined) => (v === undefined ? "" : v);
     const rows = filtered.map((l) => {
       const st = stats[l.id];
       const owner = `${l.owner?.first_name || ""} ${l.owner?.last_name || ""}`.trim();
+      const city = listingCity(l);
+      const sit = sitSituation(l);
       return [
         l.title || "Sans titre",
         owner,
-        l.owner?.city || "",
+        city.city ?? "",
+        city.city ? (city.fromOwner ? "Profil du propriétaire" : "Annonce") : "",
         l.country ? getCountryName(l.country) : "",
         l.start_date ? format(new Date(l.start_date), "yyyy-MM-dd") : "",
         l.end_date ? format(new Date(l.end_date), "yyyy-MM-dd") : "",
-        resolveStatusBadge(l).label,
-        st?.views ?? 0,
-        st?.uniqueViews ?? 0,
-        st?.messages ?? 0,
-        st?.applications ?? 0,
+        sit.label,
+        sit.detail ?? "",
+        n(st?.views), n(st?.uniqueViews), n(st?.messages), n(st?.applications),
         st?.lastViewAt ? format(new Date(st.lastViewAt), "yyyy-MM-dd HH:mm") : "",
         l.unpublished_at ? format(new Date(l.unpublished_at), "d MMMM yyyy", { locale: fr }) : "",
         l.unpublished_at ? unpublishReasonAdminLabel(l.last_unpublished_reason) : "",
-
-      ].map(esc).join(",");
+      ];
     });
-    const csv = "\uFEFF" + [header.map(esc).join(","), ...rows].join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `annonces-${format(new Date(), "yyyy-MM-dd")}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    downloadCsv(buildCsv(header, rows), `annonces-${format(new Date(), "yyyy-MM-dd")}.csv`);
   };
 
   const handleSendMessage = async () => {
@@ -560,31 +541,47 @@ const AdminListings = () => {
         </Button>
       </div>
 
-      <ListingExitsSection />
-
-      {/* KPI banner */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
-        {[
-          { label: "Total annonces", value: kpis?.total },
-          { label: "En ligne", value: kpis?.published },
-          { label: "Brouillons", value: kpis?.draft },
-          { label: "Gardes en cours", value: kpis?.inProgress },
-          { label: "Masquées / annulées", value: kpis?.cancelled },
-          { label: "Archivées", value: kpis?.archived },
-          { label: "Nouvelles 7 jours", value: kpis?.newLast7d },
-        ].map((k) => (
-          <Card key={k.label}>
-            <CardContent className="p-4">
-              <p className="text-xs text-muted-foreground">{k.label}</p>
-              <p className="text-2xl font-bold text-foreground mt-1">
-                {k.value === undefined ? "·" : k.value.toLocaleString("fr-FR")}
-              </p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {/* Répartition complète : la somme des cases égale le total. */}
+      {kpisError ? (
+        <ErrorState detail={`Répartition des annonces : ${kpisError}`} onRetry={loadKpis} />
+      ) : (
+        <div className="space-y-2">
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+            {[
+              { label: "Total annonces", value: kpis?.total },
+              ...SIT_BUCKETS_PRIMARY.map((b) => ({ label: b.label, value: kpis?.counts[b.key] })),
+              { label: "Créées ces 7 jours", value: kpis?.newLast7d },
+            ].map((k) => (
+              <Card key={k.label}>
+                <CardContent className="p-4">
+                  <p className="text-xs text-muted-foreground">{k.label}</p>
+                  <p className="text-2xl font-bold text-foreground mt-1">
+                    {k.value === undefined ? "·" : k.value.toLocaleString("fr-FR")}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          {kpis && (
+            <details className="rounded-lg border bg-card px-4 py-2 text-sm">
+              <summary className="cursor-pointer text-muted-foreground">
+                Autres états : {SIT_BUCKETS_SECONDARY.reduce((sum, b) => sum + kpis.counts[b.key], 0).toLocaleString("fr-FR")} annonces
+              </summary>
+              <ul className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-1">
+                {SIT_BUCKETS_SECONDARY.filter((b) => b.key !== "unknown" || kpis.counts.unknown > 0).map((b) => (
+                  <li key={b.key} className="flex justify-between gap-2">
+                    <span className="text-muted-foreground">{b.label}</span>
+                    <span className="font-medium tabular-nums">{kpis.counts[b.key]}</span>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          )}
+        </div>
+      )}
 
       <DraftStatsPanel />
+      <ListingExitsSection />
 
       {(focusSitId || focusOwnerId) && (
         <UrlFilterNotice
@@ -594,11 +591,8 @@ const AdminListings = () => {
           onClear={clearFocus}
         />
       )}
-      {statsError && (
-        <p role="alert" className="rounded-lg border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-          {statsError}
-        </p>
-      )}
+      {statsError && <ErrorState detail={statsError} onRetry={() => setStatsNonce((n) => n + 1)} />}
+      {loadError && <ErrorState detail={`Liste des annonces : ${loadError}`} onRetry={fetchListings} />}
       {filterStatus === "to_staff" && !statsReady && !statsError && listings.length > 0 && (
         <p role="status" className="text-sm text-muted-foreground">Chargement des candidatures…</p>
       )}
@@ -615,14 +609,9 @@ const AdminListings = () => {
           next.set("filter", v);
           setUrlParams(next, { replace: true });
         }}>
-          <SelectTrigger className="w-[220px]"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-[260px]" aria-label="Situation"><SelectValue /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="published">En ligne (par défaut)</SelectItem>
-            <SelectItem value="to_staff">À staffer (0 candidature)</SelectItem>
-            <SelectItem value="draft">Brouillons</SelectItem>
-            <SelectItem value="cancelled">Masquées / annulées</SelectItem>
-            <SelectItem value="no_draft">Tout sauf brouillons</SelectItem>
-            <SelectItem value="all">Tous statuts</SelectItem>
+            {LISTING_FILTERS.map((f) => <SelectItem key={f} value={f}>{LISTING_FILTER_LABELS[f]}</SelectItem>)}
           </SelectContent>
         </Select>
         {cities.length > 0 && (
@@ -649,8 +638,8 @@ const AdminListings = () => {
         <div className="flex flex-wrap gap-2 text-xs">
           <Badge variant="secondary">{filtered.length} annonce{filtered.length > 1 ? "s" : ""}</Badge>
           <Badge variant="outline">{totalViews} vues</Badge>
-          <Badge variant="outline">{totalUniques} membres uniques</Badge>
-          <Badge variant="outline">{totalMsg} msg</Badge>
+          <Badge variant="outline">{totalUniques} membres uniques (somme par annonce, une personne peut compter plusieurs fois)</Badge>
+          <Badge variant="outline">{totalMsg} messages (somme)</Badge>
           <Badge variant="outline">{totalApps} candidatures</Badge>
           {lastViewGlobal && (
             <Badge variant="outline">
@@ -664,33 +653,35 @@ const AdminListings = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Titre</TableHead>
-              <TableHead>Propriétaire</TableHead>
+              <TableHead>Annonce</TableHead>
               <TableHead>Ville</TableHead>
               <TableHead>Dates</TableHead>
+              <TableHead>Situation</TableHead>
+              <TableHead className="text-right">Candidatures</TableHead>
               <TableHead className="text-right" title="Vues totales (public + membres)">Vues</TableHead>
               <TableHead className="text-right" title="Nombre de membres connectés distincts ayant vu l'annonce (chemins /sits et /annonces, identifiant et slug). Les visiteurs non connectés ne sont pas comptés, aucun identifiant de séance n'étant enregistré.">Membres uniques</TableHead>
-              <TableHead className="text-right">Messages</TableHead>
-              <TableHead className="text-right">Candidatures</TableHead>
-              <TableHead>Dernière vue</TableHead>
-              <TableHead>Statut</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow><TableCell colSpan={11} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
+              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Chargement…</TableCell></TableRow>
+            ) : loadError ? (
+              <TableRow><TableCell colSpan={8} className="text-center py-8 text-destructive">Indisponible</TableCell></TableRow>
             ) : filtered.length === 0 ? (
-              <TableRow><TableCell colSpan={11} className="text-center py-8 text-muted-foreground">Aucune annonce</TableCell></TableRow>
+              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Aucune annonce</TableCell></TableRow>
             ) : paginated.map((listing) => {
-              const s = resolveStatusBadge(listing);
+              const sit = sitSituation(listing);
               const st = stats[listing.id];
+              const city = listingCity(listing);
               const isAdminHidden = listing.status === "cancelled" && !!listing.hidden_by;
               const coverUrl = (listing as any).cover_photo_url as string | null;
               const coverNotPlace = !coverUrl || animalPhotoUrls.has(coverUrl);
+              const ownerName = `${listing.owner?.first_name || ""} ${listing.owner?.last_name || ""}`.trim();
+              const contact = () => setWriteTarget({ userId: listing.user_id, userName: ownerName || "ce membre", sitId: listing.id });
               return (
                 <TableRow key={listing.id}>
-                  <TableCell className="font-medium max-w-[200px]">
+                  <TableCell className="max-w-[280px]">
                     <div className="flex items-center gap-2 min-w-0">
                       {coverNotPlace && (
                         <span
@@ -699,18 +690,17 @@ const AdminListings = () => {
                           aria-label={coverUrl ? "Couverture montrant un animal" : "Aucune couverture définie"}
                         />
                       )}
-                      <span className="truncate">{listing.title || "Sans titre"}</span>
+                      <span className="font-medium line-clamp-2">{listing.title || "Sans titre"}</span>
                     </div>
-                  </TableCell>
-                  <TableCell className="text-sm">
-                    <div className="flex items-center gap-2">
-                      {listing.owner?.avatar_url && <img src={avatarImageUrl(listing.owner.avatar_url, 24)} className="w-6 h-6 rounded-full object-cover" />}
-                      <span>{listing.owner?.first_name} {listing.owner?.last_name}</span>
+                    <div className="flex items-center gap-1.5 mt-0.5 text-xs text-muted-foreground">
+                      {listing.owner?.avatar_url && <img src={avatarImageUrl(listing.owner.avatar_url, 24)} alt="" className="w-4 h-4 rounded-full object-cover" />}
+                      <span className="truncate">{ownerName || "Propriétaire non renseigné"}</span>
                     </div>
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
                     <div className="flex items-center gap-1.5">
-                      <span>{listing.owner?.city || "·"}</span>
+                      <span>{city.city || "·"}</span>
+                      {city.fromOwner && <span className="text-[10px]" title="L'annonce ne précise pas de ville : ville du profil du propriétaire">(profil)</span>}
                       {listing.country && listing.country !== "FR" && (
                         <Badge variant="outline" className="text-[10px] px-1.5 py-0">{getCountryName(listing.country)}</Badge>
                       )}
@@ -718,135 +708,70 @@ const AdminListings = () => {
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
                     {listing.start_date ? format(new Date(listing.start_date), "d MMM", { locale: fr }) : "·"}
-                    {" → "}
+                    {" au "}
                     {listing.end_date ? format(new Date(listing.end_date), "d MMM yy", { locale: fr }) : "·"}
                   </TableCell>
-                  <TableCell className="text-right text-sm font-medium tabular-nums">{st?.views ?? "·"}</TableCell>
-                  <TableCell className="text-right text-sm text-muted-foreground tabular-nums">{st?.uniqueViews ?? "·"}</TableCell>
-                  <TableCell className="text-right text-sm tabular-nums">
-                    {st && st.messages > 0 ? (
-                      <button
-                        onClick={() => openDrill(listing, "conversations")}
-                        className="font-medium text-foreground hover:text-primary hover:underline"
-                        title="Voir les conversations et lire les messages"
-                      >
-                        {st.messages}
-                      </button>
-                    ) : (
-                      <span className="text-muted-foreground">{st?.messages ?? "·"}</span>
-                    )}
+                  <TableCell>
+                    <Badge variant={sit.tone}>{sit.label}</Badge>
+                    {sit.detail && <p className="text-[11px] text-muted-foreground mt-0.5">{sit.detail}</p>}
                   </TableCell>
                   <TableCell className="text-right text-sm tabular-nums">
                     {st && st.applications > 0 ? (
-                      <button
-                        onClick={() => openDrill(listing, "applications")}
-                        className="font-medium text-foreground hover:text-primary hover:underline"
-                        title="Voir les candidats"
-                      >
+                      <button onClick={() => openDrill(listing, "applications")} className="font-medium text-foreground hover:text-primary hover:underline" title="Voir les candidats">
                         {st.applications}
                       </button>
                     ) : (
-                      <span className="text-muted-foreground">{st?.applications ?? "·"}</span>
+                      <span className="text-muted-foreground">{st ? st.applications : "·"}</span>
                     )}
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
-                    {st?.lastViewAt ? formatDistanceToNow(new Date(st.lastViewAt), { addSuffix: true, locale: fr }) : "·"}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1 flex-wrap">
-                      <Badge variant={s.variant}>{s.label}</Badge>
-                      {listing.status === "draft" && listing.unpublished_at && listing.last_unpublished_reason && (
-                        <span className="text-[11px] text-muted-foreground">
-                          {unpublishReasonAdminLabel(listing.last_unpublished_reason)}
-                        </span>
-                      )}
-                    </div>
-                  </TableCell>
-
+                  <TableCell className="text-right text-sm tabular-nums">{st?.views ?? "·"}</TableCell>
+                  <TableCell className="text-right text-sm text-muted-foreground tabular-nums">{st?.uniqueViews ?? "·"}</TableCell>
                   <TableCell className="text-right">
-                    <div className="flex justify-end gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        title="Photo de couverture"
-                        aria-label="Choisir la photo de couverture"
-                        onClick={() => setCoverListing(listing)}
-                      >
-                        <ImageIcon className={`h-4 w-4 ${coverNotPlace ? "text-warning" : ""}`} />
+                    <div className="flex justify-end items-center gap-1">
+                      <Button variant="outline" size="sm" onClick={() => setDetailListing(listing)}>
+                        <Info className="h-4 w-4 mr-1" /> Détails
                       </Button>
-                      <Button variant="ghost" size="icon" title="Sources de trafic" aria-label="Sources de trafic" onClick={() => openTraffic(listing)}>
-                        <BarChart3 className="h-4 w-4" />
+                      <Button variant="ghost" size="sm" disabled={!listing.user_id} onClick={contact}>
+                        <Mail className="h-4 w-4 mr-1" /> Contacter
                       </Button>
-                      <Button variant="ghost" size="icon" title="Voir l'annonce" aria-label="Voir l'annonce" onClick={() => navigate(`/sits/${listing.id}`)}>
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        title="Message au propriétaire"
-                        aria-label="Message au propriétaire"
-                        onClick={() => setMessageModal({ open: true, listing, content: "" })}
-                        disabled={!listing.user_id}
-                      >
-                        <MessageSquare className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        title="Écrire à ce membre"
-                        aria-label="Écrire à ce membre"
-                        disabled={!listing.user_id}
-                        onClick={() => setWriteTarget({
-                          userId: listing.user_id,
-                          userName: `${listing.owner?.first_name || ""} ${listing.owner?.last_name || ""}`.trim() || "ce membre",
-                          sitId: listing.id,
-                        })}
-                      >
-                        <Mail className="h-4 w-4" />
-                      </Button>
-                      {listing.status === "published" && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          title="Envoyer aux gardiens du coin"
-                          aria-label="Envoyer aux gardiens du coin"
-                          onClick={() => setProximityListing(listing)}
-                        >
-                          <Send className="h-4 w-4" />
-                        </Button>
-                      )}
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" title="Partager" aria-label="Partager">
-                            <Share2 className="h-4 w-4" />
+                          <Button variant="ghost" size="icon" aria-label="Autres actions" title="Autres actions">
+                            <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-56">
-                          <DropdownMenuLabel className="text-xs text-muted-foreground">Partager cette annonce</DropdownMenuLabel>
+                        <DropdownMenuContent align="end" className="w-60">
+                          <DropdownMenuItem onSelect={() => navigate(`/sits/${listing.id}`)}><Eye className="h-4 w-4 mr-2" /> Voir l'annonce publique</DropdownMenuItem>
+                          <DropdownMenuItem onSelect={() => openTraffic(listing)}><BarChart3 className="h-4 w-4 mr-2" /> Sources de trafic</DropdownMenuItem>
+                          {st && st.messages > 0 && (
+                            <DropdownMenuItem onSelect={() => openDrill(listing, "conversations")}><MessageSquare className="h-4 w-4 mr-2" /> Conversations ({st.messages} messages)</DropdownMenuItem>
+                          )}
+                          <DropdownMenuItem onSelect={() => setCoverListing(listing)}><ImageIcon className="h-4 w-4 mr-2" /> Photo de couverture</DropdownMenuItem>
+                          <DropdownMenuItem disabled={!listing.user_id} onSelect={() => setMessageModal({ open: true, listing, content: "" })}><MessageSquare className="h-4 w-4 mr-2" /> Message rapide au propriétaire</DropdownMenuItem>
+                          {listing.status === "published" && (
+                            <DropdownMenuItem onSelect={() => setProximityListing(listing)}><Send className="h-4 w-4 mr-2" /> Envoyer aux gardiens du coin</DropdownMenuItem>
+                          )}
                           <DropdownMenuSeparator />
+                          <DropdownMenuLabel className="text-xs text-muted-foreground">Partager</DropdownMenuLabel>
                           <DropdownMenuItem onSelect={() => handleCopyLink(listing)}><Link2 className="h-4 w-4 mr-2" /> Copier le lien</DropdownMenuItem>
-                          <DropdownMenuItem onSelect={() => handleNativeShare(listing)}><Share2 className="h-4 w-4 mr-2" /> Partage rapide…</DropdownMenuItem>
-                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onSelect={() => handleNativeShare(listing)}><Share2 className="h-4 w-4 mr-2" /> Partage rapide</DropdownMenuItem>
                           <DropdownMenuItem onSelect={() => handleShareTo(listing, "facebook")}>Facebook</DropdownMenuItem>
                           <DropdownMenuItem onSelect={() => handleShareTo(listing, "twitter")}>X (Twitter)</DropdownMenuItem>
                           <DropdownMenuItem onSelect={() => handleShareTo(listing, "whatsapp")}>WhatsApp</DropdownMenuItem>
                           <DropdownMenuItem onSelect={() => handleShareTo(listing, "email")}><Mail className="h-4 w-4 mr-2" /> E-mail</DropdownMenuItem>
+                          {(isAdminHidden || canHideListing(listing.status) || canDeleteListing(listing.status)) && <DropdownMenuSeparator />}
+                          {isAdminHidden ? (
+                            <DropdownMenuItem onSelect={() => setRestoreModal(listing.id)}><Sparkles className="h-4 w-4 mr-2" /> Remettre en ligne</DropdownMenuItem>
+                          ) : canHideListing(listing.status) ? (
+                            <DropdownMenuItem onSelect={() => setHideModal(listing.id)}><EyeOff className="h-4 w-4 mr-2" /> Masquer l'annonce</DropdownMenuItem>
+                          ) : null}
+                          {canDeleteListing(listing.status) && (
+                            <DropdownMenuItem className="text-destructive focus:text-destructive" onSelect={() => setDeleteModal(listing.id)}>
+                              <Trash2 className="h-4 w-4 mr-2" /> Supprimer l'annonce
+                            </DropdownMenuItem>
+                          )}
                         </DropdownMenuContent>
                       </DropdownMenu>
-                      {isAdminHidden ? (
-                        <Button variant="ghost" size="icon" title="Remettre en ligne" aria-label="Remettre en ligne" onClick={() => setRestoreModal(listing.id)}>
-                          <Sparkles className="h-4 w-4 text-primary" />
-                        </Button>
-                      ) : canHideListing(listing.status) ? (
-                        <Button variant="ghost" size="icon" title="Masquer" aria-label="Masquer l'annonce" onClick={() => setHideModal(listing.id)}>
-                          <EyeOff className="h-4 w-4" />
-                        </Button>
-                      ) : null}
-                      {canDeleteListing(listing.status) && (
-                        <Button variant="ghost" size="icon" title="Supprimer" aria-label="Supprimer l'annonce" onClick={() => setDeleteModal(listing.id)}>
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      )}
                     </div>
                   </TableCell>
                 </TableRow>
@@ -855,6 +780,26 @@ const AdminListings = () => {
           </TableBody>
         </Table>
       </div>
+
+      <DossierDetailSheet
+        kind="sit"
+        item={detailListing}
+        open={!!detailListing}
+        onOpenChange={(o) => { if (!o) setDetailListing(null); }}
+        extra={detailListing ? (
+          <p className="text-sm text-muted-foreground">
+            {stats[detailListing.id]
+              ? `${stats[detailListing.id].views} vues, ${stats[detailListing.id].messages} messages dans ${stats[detailListing.id].conversations} conversations.`
+              : "Statistiques de trafic indisponibles."}
+          </p>
+        ) : null}
+        footer={detailListing ? (
+          <div className="flex flex-wrap gap-2">
+            <Button size="sm" variant="outline" onClick={() => navigate(`/sits/${detailListing.id}`)}>Voir l'annonce publique</Button>
+            {detailListing.user_id && <Button size="sm" variant="ghost" onClick={() => navigate(`/admin/users?user=${detailListing.user_id}`)}>Fiche du membre</Button>}
+          </div>
+        ) : null}
+      />
 
       {/* Pagination */}
       {filtered.length > 0 && (

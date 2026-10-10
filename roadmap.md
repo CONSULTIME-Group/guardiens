@@ -115,3 +115,7 @@ Tâches encore actives :
 - [x] Tests simulés avec voyage dans le temps, typecheck fonction propre
 - [ ] Appliquer la migration puis déployer la fonction et publier : attend le GO de Jérémie
 - [x] Publication : garde bloquée par texte L5 « contrôle à la main », reformulé (test isolé vert)
+
+## Audits admin Annonces / Entraide du 10/10/2026
+- Statut : aperçu prêt, publication et fonction edge non déployées (send-mass-email-proximity, garde-fou préparé dans le code).
+- Reste : GO de Jérémie pour publier le site et déployer la fonction.
