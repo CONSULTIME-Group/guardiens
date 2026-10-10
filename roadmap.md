@@ -3,8 +3,8 @@
 ## Diagnostic publication du 10/10/2026
 - [x] Préétapes sync/robots et lectures sitemap bornées, sans écriture.
 - [x] Séparer compilation et garde exhaustive conservée en CI.
-- [ ] Contrat du pipeline et compilation automatique finale.
-- [ ] Journaux du déploiement distant : non exposés par les outils disponibles.
+- [x] 4 contrôles du contrat verts, compilation automatique « build OK » à 16:14:20 UTC.
+- [x] Limite consignée : journaux de publication distants non exposés, étape exacte du déploiement non démontrable.
 
 ## Ajustement profil Bénédicte
 - [x] Carte contact et rayon dans le flux, sans suivi du défilement.
