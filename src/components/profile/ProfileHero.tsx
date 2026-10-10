@@ -171,7 +171,7 @@ const ProfileHero = (p: ProfileHeroProps) => {
               </h1>
               {p.identityVerified && <IdentityVerifiedMark firstName={p.firstName} />}
               {!p.isOwnProfile && (
-                <FavoriteButton targetType={p.facet === "sitter" ? "sitter" : "sitter"} targetId={p.id} size="md" />
+                <FavoriteButton targetType="sitter" targetId={p.id} size="md" />
               )}
             </div>
             {place && <p className="mt-1 text-[15px] text-foreground font-body" data-hero-place>{place}</p>}
