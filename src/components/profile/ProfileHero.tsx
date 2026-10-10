@@ -161,8 +161,10 @@ const ProfileHero = (p: ProfileHeroProps) => {
             />
           </picture>
         )}
-        <div className="profile-hero-identity relative min-w-0 md:w-[360px] md:shrink-0">
-          <div className="flex items-start gap-4">
+        <div className={p.inNotebook
+          ? "profile-hero-identity relative min-w-0 flex flex-col gap-4 md:flex-row md:items-center md:justify-between md:gap-8"
+          : "profile-hero-identity relative min-w-0 md:w-[360px] md:shrink-0"}>
+          <div className="flex items-start gap-4 min-w-0">
             <Button
               variant="ghost"
               type="button"
@@ -224,17 +226,27 @@ const ProfileHero = (p: ProfileHeroProps) => {
                 {p.statutGardien && p.statutGardien !== "novice" && <StatutGardienBadge statut={p.statutGardien as any} />}
                 <ResponsivenessBadge userId={p.id} />
               </div>
-              <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1" data-hero-cta>
-                {renderCta()}
-                {p.inNotebook && !p.isOwnProfile && (
-                  <FavoriteButton targetType="sitter" targetId={p.id} size="md" />
-                )}
-                {reassurance && (
-                  <span className="text-[12.5px] text-muted-foreground font-body">{reassurance}</span>
-                )}
-              </div>
+              {!p.inNotebook && (
+                <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1" data-hero-cta>
+                  {renderCta()}
+                  {reassurance && (
+                    <span className="text-[12.5px] text-muted-foreground font-body">{reassurance}</span>
+                  )}
+                </div>
+              )}
             </div>
           </div>
+          {p.inNotebook && (
+            <div className="flex min-w-0 flex-col gap-1.5 md:max-w-[320px] md:shrink-0 md:items-end md:text-right" data-hero-contact>
+              <div className="flex flex-wrap items-center gap-2 md:justify-end" data-hero-cta>
+                {renderCta()}
+                {!p.isOwnProfile && <FavoriteButton targetType="sitter" targetId={p.id} size="md" />}
+              </div>
+              {reassurance && (
+                <span className="text-[12.5px] text-muted-foreground font-body">{reassurance}</span>
+              )}
+            </div>
+          )}
         </div>
 
         {!p.inNotebook && <picture className="profile-notebook-art relative block min-w-0 flex-1" data-hero-gouache>

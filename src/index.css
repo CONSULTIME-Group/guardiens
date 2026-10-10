@@ -1123,10 +1123,34 @@
     padding-left: calc(var(--spiral-w) + 1.25rem);
     padding-right: 1rem;
   }
-  .profile-notebook-sheet > .profile-notebook-spiral { z-index: 45; }
+  .profile-notebook-sheet > .profile-notebook-spiral { z-index: 45; opacity: 0.55; }
+  .profile-notebook-sheet { --spiral-w: 22px; }
   .profile-notebook-tabs { background-color: hsl(var(--hero-paper)); }
   @media (min-width: 768px) {
-    .profile-notebook-sheet .profile-notebook-page { padding-right: 1.5rem; }
+    /* Même retrait des deux côtés pour gouache, identité, onglets et sections. */
+    .profile-notebook-sheet .profile-notebook-page {
+      padding-left: calc(var(--spiral-w) + 2.5rem);
+      padding-right: 2.5rem;
+    }
+  }
+  .profile-notebook-sheet .profile-hero[data-in-notebook] [data-hero-content] { padding-right: 0; }
+  @media (min-width: 768px) {
+    .profile-notebook-sheet .profile-hero[data-in-notebook] [data-hero-content] { padding-right: 2.5rem; }
+  }
+  .profile-notebook-sheet .profile-hero[data-in-notebook] .profile-hero-identity {
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid hsl(var(--border));
+    padding-bottom: 1.25rem;
+  }
+  /* Cartes blanches aplaties sur le papier, dans la feuille seulement. */
+  .profile-notebook-sheet [data-profile-content] .bg-card,
+  .profile-notebook-sheet [data-profile-content] .bg-background {
+    background-color: transparent;
+    box-shadow: none;
+  }
+  .profile-notebook-sheet [data-profile-secondary] [data-contact-card] {
+    border-bottom: 0;
+    padding-bottom: 0;
   }
   .profile-notebook-spiral {
     position: absolute; top: 0; bottom: 0; left: 0; width: var(--spiral-w);
