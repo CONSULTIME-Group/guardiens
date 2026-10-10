@@ -198,7 +198,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
        const rows = await fetchIntlOpenSits();
        if (!cancelled) { setIntlCount(rows.length); setIntlCounts(intlCountryCounts(rows)); }
      } catch (e) {
-       console.error("[SearchSitter] annonces hors France", e);
+       console.error("[SearchSitter] intl count", e);
        if (!cancelled) setIntlCount(null);
      }
    })();
