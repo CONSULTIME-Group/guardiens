@@ -24,3 +24,7 @@
 - Rôle d'une inscription Google (lot 0) : rôle choisi gardé en localStorage horodaté et dans ?signup_role=, appliqué par apply_signup_role (profil de moins de 30 min, sans rôle en métadonnées) avant la lecture du profil dans AuthContext ; pourquoi : Google ne transmet pas les métadonnées et un compte existant ne doit jamais changer de rôle.
 - Écran d'affinité obligatoire (lot 0) : pré-rempli depuis la base, écritures construites par src/lib/affinityOnboardingWrites.ts (colonnes affichées et renseignées seulement), toute erreur bloque complétion et navigation ; pourquoi : un tableau vide écrasait des réponses existantes.
 - Arrivée v2 (lots 1-2) : drapeau arrival_v2, /bienvenue et /arrivee/* via ArrivalRoutes.tsx, écrans lot 2 ré-exportés par ArriveeVous, intention dans profiles.arrival_intent, logique dans src/lib/arrival.ts, aucun import dynamique d'un module de l'entrée ; pourquoi : entrée < 307 200 octets.
+
+<!-- LOVABLE:BEGIN -->
+- Publication compiles assets only; exhaustive validation stays in `validate:ci` and GitHub CI with unchanged guard semantics; why: avoid full-suite replays during hosting builds.
+<!-- LOVABLE:END -->
