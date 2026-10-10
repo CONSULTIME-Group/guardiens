@@ -442,6 +442,13 @@
       "when": 1791622060614,
       "tag": "0062_sitter_visibility_no_completion_apply_guard",
       "breakpoints": true
+    },
+    {
+      "idx": 63,
+      "version": "7",
+      "when": 1791622265523,
+      "tag": "0063_application_completion_rule_fn",
+      "breakpoints": true
     }
   ]
 }

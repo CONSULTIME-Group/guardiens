@@ -12574,6 +12574,10 @@ export type Database = {
         Args: { _new_email: string; _user_id: string }
         Returns: Json
       }
+      application_completion_allowed: {
+        Args: { p_completion: number }
+        Returns: boolean
+      }
       apply_referral_reward: {
         Args: { p_referred_id: string }
         Returns: undefined
