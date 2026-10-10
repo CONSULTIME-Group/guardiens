@@ -417,3 +417,12 @@ Base `796c8a41`. L5 laissé en l'état sur décision de Jérémie.
 - G6 : région ARA affichée « Lyon, Grenoble, Clermont-Ferrand et Alpes du Nord », identifiant `region:FR-ARA` inchangé.
 Vérifications : types OK, build automatique OK (15:24 UTC), 727 tests profil/lib dont 2 nouveaux (`OwnerStepHousing.env.test.tsx`). Aucune donnée, SQL, droit, barème modifiés.
 Limites : recette visuelle 1 desktop + 1 mobile et aller-retour sauvegarde/erreur non faits (page connectée, aucun compte de test déclaré, fixture non montée pour budget). L7 non lancé.
+
+## L7 Recette réduite (10/10/2026, non publiée)
+Les mentions antérieures « L6 non commencé / non autorisé » sont dépassées : L6 livré, relu par root (preview connectée en lecture seule).
+- Panne recherche annonces (`SearchSitter.tsx`) : encart unique « Une erreur est survenue » + Réessayer en liste ET en carte (`SearchErrorAlert`), compteur « Recherche indisponible », bandeau d'élargissement masqué, panneau Filtres sans nombre. Réessayer relance `doSearch` avec les critères courants. Moteur et géocodage inchangés.
+- L6 validé par fixture isolée `src/pages/__tests__/owner-profile-save-flow.test.tsx` : vraie page OwnerProfile, doubles pour le hook de données, l'authentification et le client. Refus : saisie et brouillon conservés, erreur visible, base non écrite ; réessai : valeur envoyée, erreur effacée, brouillon supprimé, relecture identique.
+- « Membre depuis Ce mois » remplacé par le mois et l'année (`PublicSitterProfile.tsx`).
+- H2 : doctrine affinité corrigée de 60 % en 40 % (mémoire projet).
+Vérifications : types OK, build automatique OK (15:29 UTC), 1 test ciblé vert. Version `103ae248`.
+Limites : pas de test automatisé de la panne SearchSitter (composant trop lourd à monter à budget réduit) ; captures desktop/mobile de l'édition non faites (page connectée, pas de compte de test) ; vue 5/5 confiance vs 100 complétion et palier de réactivité non captés ; non-admin non vérifié (dérogation) ; aucune publication.
