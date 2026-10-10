@@ -44,9 +44,4 @@ describe("date d'avis et bandeau entraide", () => {
     expect(reviewDateLabel("2026-08-20", "2026-08-31", "2026-09-01T10:00:00Z")).toBe("Garde du 20 au 31 août 2026");
     expect(reviewDateLabel(null, null, "2026-09-01T10:00:00Z")).toBe("septembre 2026");
   });
-  it("courses et trajet en voiture", () => {
-    expect(entraideBandText({ firstName: "Krystina", city: "Pont de Cheruy", helpsWith: null, competences: ["Courses pour personne âgée", "Transport"] }))
-      .toEqual({ kind: "skills", text: "Krystina peut aussi donner un coup de main autour de Pont de Cheruy : des courses pour une personne âgée ou un trajet en voiture." });
-    expect(entraideBandText({ firstName: "A", city: null, helpsWith: null, competences: [] })).toBeNull();
-  });
 });

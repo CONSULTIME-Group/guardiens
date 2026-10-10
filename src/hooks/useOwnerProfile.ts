@@ -10,6 +10,9 @@ import { compressAvatarFile } from "@/lib/compressImage";
 import { clearViewerOwnerCache } from "@/hooks/useViewerOwnerForAffinity";
 import { ENV_KEYS } from "@/components/shared/EnvironmentPills";
 
+/** Statuts prouvant qu'une annonce a été publiée. */
+const OWNER_PUBLISHED_STATUSES = new Set(["published", "confirmed", "in_progress", "completed"]);
+
 export interface OwnerProfileData {
   // Step 1 - Identity (profiles table)
   first_name: string;
@@ -311,13 +314,14 @@ export function useOwnerProfile() {
     return () => { cancelled = true; };
   }, [user]);
 
-  // Première activité proprio : au moins une annonce non-brouillon.
+  // Première activité proprio (lot L3) : au moins une annonce réellement
+  // publiée (OWNER_PUBLISHED_STATUSES), jamais un brouillon ni une annulation.
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
     (async () => {
       const rows = await fetchMySitsIndex(user.id!).catch(() => []);
-      if (!cancelled) setHasFirstActivity(rows.some((r) => r.status !== "draft"));
+      if (!cancelled) setHasFirstActivity(rows.some((r) => OWNER_PUBLISHED_STATUSES.has(r.status)));
     })();
     return () => { cancelled = true; };
   }, [user]);

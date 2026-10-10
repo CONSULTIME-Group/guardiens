@@ -306,17 +306,18 @@ export function useSitterProfile() {
     return () => { cancelled = true; };
   }, [user]);
 
-  // Première activité gardien : au moins une candidature acceptée.
+  // Première activité gardien (lot L3) : une garde RÉALISÉE, lue dans
+  // profiles.completed_sits_count (calculé serveur), jamais une candidature.
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
     (async () => {
-      const { count } = await supabase
-        .from("applications")
-        .select("id", { count: "exact", head: true })
-        .eq("sitter_id", user.id)
-        .eq("status", "accepted");
-      if (!cancelled) setHasFirstActivity((count ?? 0) > 0);
+      const { data } = await supabase
+        .from("profiles")
+        .select("completed_sits_count")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (!cancelled) setHasFirstActivity(((data as any)?.completed_sits_count ?? 0) > 0);
     })();
     return () => { cancelled = true; };
   }, [user]);
