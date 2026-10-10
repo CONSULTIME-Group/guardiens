@@ -1,21 +1,25 @@
 /**
- * Hero resserré du profil public gardien (vague 37).
+ * Hero partagé du profil public, facettes gardien et propriétaire (lot L5).
  *
  * Contrat :
- *  - N'affiche que des données réelles. Pas de "Non renseigné" ni d'accroche fictive.
- *  - Max 3 chips (priorité : ID vérifiée, Abonné, Gardien d'urgence).
- *  - UN SEUL CTA primaire, 4 variantes exclusives, + une ligne de réassurance.
- *  - Aucun bloc affinité, aucun bloc Alma, aucune ligne stats, pas de TrustScore.
- *    Ces éléments passent dans le rail droit (desktop) ou dans le flux (mobile).
+ *  - Un fond, pas une image pleine page avant l'identité : identité sur papier
+ *    lisible à gauche, gouache entière (object-contain) à droite sur ordinateur,
+ *    gouache sous l'identité sur mobile.
+ *  - Données réelles uniquement : photo, prénom, ville et pays, mobilité
+ *    déclarée, dernière visite (L3), palier de réactivité (L3), CTA.
+ *  - Identité vérifiée : icône 44 px près du prénom (IdentityVerifiedMark).
+ *  - Pas de citation longue dans le hero, elle vit dans « À propos ».
+ *  - Le sélecteur d'illustration reste réservé au propre profil.
  */
 import { Link } from "react-router-dom";
-import { MapPin, Shield, BadgeCheck, Image as ImageIcon } from "lucide-react";
+import { Image as ImageIcon } from "lucide-react";
 import StatutGardienBadge from "@/components/profile/StatutGardienBadge";
 import FavoriteButton from "@/components/shared/FavoriteButton";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import ResponsivenessBadge from "@/components/profile/ResponsivenessBadge";
+import IdentityVerifiedMark from "@/components/profile/IdentityVerifiedMark";
 import { avatarImageUrl } from "@/lib/storageImage";
 import { formatRatingFr } from "@/lib/formatRatingFr";
+import { lastVisitLabel } from "@/lib/profileSignals";
 
 export type HeroCtaVariant =
   | { kind: "own"; label?: string }
@@ -24,11 +28,12 @@ export type HeroCtaVariant =
   | { kind: "sitter"; onActivate: () => void; label?: string }
   | { kind: "muted"; label: string; hint?: string };
 
-interface ProfileHeroProps {
+export interface ProfileHeroProps {
+  facet: "sitter" | "owner";
   id: string;
   firstName: string;
+  /** Ville, avec le pays hors France (« Montréal, Canada »). */
   city: string | null;
-  /** Nom du département, affiché après la ville quand il est connu. */
   departmentName?: string | null;
   avatarUrl: string | null;
   heroDesktop: string;
@@ -38,328 +43,201 @@ interface ProfileHeroProps {
   onOpenHeroPicker: () => void;
   onOpenAvatarLightbox: () => void;
   hasAvatarLightbox: boolean;
-
+  memberSince?: string | null;
+  /** Gardes réalisées (facette gardien seulement). */
+  completedSits?: number;
+  lastSeenAt?: string | null;
+  /** Zones de mobilité déclarées, libellés. Vide = rien affiché. */
+  mobilityLabels?: string[];
   isAvailable: boolean;
   avgRating: number;
   reviewCount: number;
-  replyMedianMinutes: number | null;
-
   statutGardien: string | null;
   identityVerified: boolean;
   hasActiveSubscription: boolean;
   emergencyActive: boolean;
-
   cta: HeroCtaVariant;
   ctaReassurance?: string;
 }
 
+/** Faits de la ligne secondaire, purs et testables. */
+export function heroFactLine(input: {
+  facet: "sitter" | "owner";
+  memberSince?: string | null;
+  completedSits?: number;
+  lastSeenAt?: string | null;
+  now?: Date;
+}): string[] {
+  const since = input.memberSince ? new Date(input.memberSince) : null;
+  const sinceLabel = since && !Number.isNaN(since.getTime())
+    ? since.toLocaleDateString("fr-FR", { month: "long", year: "numeric" })
+    : null;
+  const sits = input.facet === "sitter" ? input.completedSits ?? 0 : 0;
+  const visit = lastVisitLabel(input.lastSeenAt ?? null, input.now);
+  return [
+    sinceLabel ? `Membre depuis ${sinceLabel}` : null,
+    sits > 0 ? `${sits} garde${sits > 1 ? "s réalisées" : " réalisée"}` : null,
+    visit ? `Dernière visite ${visit}` : null,
+  ].filter((x): x is string => !!x);
+}
 
-const ProfileHero = ({
-  id,
-  firstName,
-  city,
-  departmentName = null,
-  avatarUrl,
-  heroDesktop,
-  heroMobile,
-  heroAnchor,
-  isOwnProfile,
-  onOpenHeroPicker,
-  onOpenAvatarLightbox,
-  hasAvatarLightbox,
-  isAvailable,
-  avgRating,
-  reviewCount,
-  replyMedianMinutes,
-  statutGardien,
-  identityVerified,
-  hasActiveSubscription,
-  emergencyActive,
-  cta,
-  ctaReassurance,
-}: ProfileHeroProps) => {
+const ProfileHero = (p: ProfileHeroProps) => {
+  const place = [p.city, p.departmentName].filter(Boolean).join(", ");
+  const eyebrow = p.facet === "sitter"
+    ? (p.departmentName ? `Garde de maisons en ${p.departmentName}` : "Garde de maisons")
+    : "Fait garder sa maison";
+  const facts = heroFactLine(p);
+  const mobility = (p.mobilityLabels ?? []).filter(Boolean);
+  const hasPhoto = !!p.avatarUrl && !p.avatarUrl.includes("placeholder.svg");
 
-  // Chips : cap à 3, priorité ID > Abonné > Urgence.
-  const chips: Array<{ key: string; node: JSX.Element }> = [];
-  if (identityVerified) {
-    chips.push({
-      key: "id",
-      node: (
-        <TooltipProvider delayDuration={200}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-        <button
-          type="button"
-          onClick={() => {
-            const el = [
-              document.getElementById("confiance"),
-              document.getElementById("confiance-mobile"),
-            ].find((n) => n && (n as HTMLElement).offsetParent !== null) as
-              | HTMLElement
-              | null;
-            if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-          }}
-          aria-label="Voir les détails de confiance et vérifications"
-          className="inline-flex min-h-11 items-center gap-1.5 text-xs bg-primary text-primary-foreground px-3 py-1 rounded-full font-semibold shadow-md border border-primary/40 hover:bg-primary/90 transition-colors cursor-pointer"
-        >
-          <Shield size={12} className="text-primary-foreground" /> Identité vérifiée
-        </button>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" className="max-w-xs text-xs leading-relaxed">
-              Une pièce d'identité officielle a été fournie et contrôlée automatiquement. C'est un signal de confiance parmi d'autres : vos échanges et votre rencontre le complètent.
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      ),
-    });
-  }
-  if (hasActiveSubscription) {
-    chips.push({
-      key: "sub",
-      node: (
-        <span className="inline-flex items-center gap-1 text-xs text-foreground/85 border border-border/60 rounded-full px-2 py-0.5 bg-background/85 backdrop-blur-sm">
-          <BadgeCheck size={11} className="text-primary" /> Abonné
-        </span>
-      ),
-    });
-  }
-  if (emergencyActive) {
-    chips.push({
-      key: "eme",
-      node: (
-        <span className="inline-flex items-center gap-1 text-xs text-foreground/85 border border-border/60 rounded-full px-2 py-0.5 bg-background/85 backdrop-blur-sm">
-          <Shield size={11} className="text-primary" /> Gardien d'urgence
-        </span>
-      ),
-    });
-  }
-  const visibleChips = chips.slice(0, 3);
-
-
-
-
-
-  // CTA
+  const baseCls =
+    "inline-flex min-h-11 items-center justify-center rounded-[99px] px-6 py-3 text-sm font-medium transition-colors";
   const renderCta = () => {
-    const baseCls =
-      "inline-flex items-center justify-center rounded-lg px-6 py-3 text-sm font-medium transition-colors flex-1 sm:flex-initial";
-    if (cta.kind === "own") {
+    const cta = p.cta;
+    if (cta.kind === "own" || cta.kind === "muted") {
       return (
         <button
           type="button"
           disabled
           aria-disabled="true"
-          title="Ceci est votre profil public. Utilisez « Modifier mon profil » pour le mettre à jour."
+          title={cta.kind === "own" ? "Ceci est votre profil public." : cta.hint}
           className={`${baseCls} bg-muted text-muted-foreground cursor-not-allowed opacity-70`}
         >
-          {cta.label ?? "Aperçu de votre profil"}
-        </button>
-      );
-    }
-    if (cta.kind === "muted") {
-      return (
-        <button
-          type="button"
-          disabled
-          aria-disabled="true"
-          title={cta.hint}
-          className={`${baseCls} bg-muted text-muted-foreground cursor-not-allowed opacity-70`}
-        >
-          {cta.label}
+          {cta.kind === "own" ? (cta.label ?? "Aperçu de votre profil") : cta.label}
         </button>
       );
     }
     if (cta.kind === "unauthenticated") {
       return (
-        <Link
-          to={cta.signupHref}
-          className={`${baseCls} bg-primary text-primary-foreground hover:bg-primary/90`}
-        >
-          {cta.label ?? `S'inscrire pour contacter ${firstName}`}
+        <Link to={cta.signupHref} className={`${baseCls} bg-primary text-primary-foreground hover:bg-primary/90`}>
+          {cta.label ?? `S'inscrire pour contacter ${p.firstName}`}
         </Link>
       );
     }
-    if (cta.kind === "owner") {
-      return (
-        <button
-          type="button"
-          onClick={cta.onContact}
-          className={`${baseCls} bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer`}
-        >
-          {cta.label ?? `Contacter ${firstName}`}
-        </button>
-      );
-    }
+    const onClick = cta.kind === "owner" ? cta.onContact : cta.onActivate;
     return (
-      <button
-        type="button"
-        onClick={cta.onActivate}
-        className={`${baseCls} bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer`}
-      >
-        {cta.label ?? `Contacter ${firstName}`}
+      <button type="button" onClick={onClick} className={`${baseCls} bg-primary text-primary-foreground hover:bg-primary/90`}>
+        {cta.label ?? `Contacter ${p.firstName}`}
       </button>
     );
   };
-
-  const defaultReassurance =
-    cta.kind === "own"
+  const reassurance = p.ctaReassurance ?? (
+    p.cta.kind === "own"
       ? "Vous voyez cette page comme un visiteur."
-      : cta.kind === "muted"
-        ? (cta.hint ?? "")
-        : cta.kind === "unauthenticated"
+      : p.cta.kind === "muted"
+        ? (p.cta.hint ?? "")
+        : p.cta.kind === "unauthenticated"
           ? "L'inscription est ouverte pendant la phase de lancement."
-          : `Vous échangez directement avec ${firstName}.`;
-  const reassurance = ctaReassurance ?? defaultReassurance;
-
+          : `Vous échangez directement avec ${p.firstName}.`
+  );
 
   return (
-    <div className="relative overflow-hidden w-full flex items-end bg-[hsl(var(--hero-paper))] md:max-h-[520px] md:[aspect-ratio:1536/544]">
-      {/* Illustration plein hero : gouache composée, sujet central, jamais rognée. */}
-      <div className="absolute inset-0 z-0 pointer-events-none">
-        <img
-          src={heroDesktop}
-          srcSet={`${heroMobile} 768w, ${heroDesktop} 1536w`}
-          sizes="100vw"
-          alt=""
-          aria-hidden="true"
-          data-hero-anchor={heroAnchor}
-          width={1536}
-          height={544}
-          loading="eager"
-          decoding="async"
-          fetchPriority="high"
-          style={{
-            willChange: "transform",
-            transform: "translateZ(0)",
-            backfaceVisibility: "hidden",
-          }}
-          className="w-full h-full object-contain object-center"
-        />
-      </div>
-
-      {isOwnProfile && (
-        <button
-          type="button"
-          onClick={onOpenHeroPicker}
-          className="absolute top-3 right-3 z-20 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-background/95 backdrop-blur-md border border-foreground/25 text-[13px] font-semibold text-foreground shadow-[0_2px_10px_hsl(var(--foreground)/0.18)] hover:bg-background hover:shadow-[0_4px_16px_hsl(var(--foreground)/0.25)] transition-all"
-          title="Choisir une autre illustration de carnet"
-        >
-          <ImageIcon className="w-4 h-4" />
-          Changer l'image
-        </button>
-      )}
-
-      {/* Voile unique, horizontal : le papier protège la lisibilité à gauche
-          et laisse la moitié droite de la gouache pleinement visible. */}
-      <div
-        className="absolute inset-0 z-[1] pointer-events-none"
-        style={{
-          background:
-            "linear-gradient(to right, hsl(var(--hero-paper)) 0%, hsl(var(--hero-paper) / 0.95) 34%, hsl(var(--hero-paper) / 0.6) 50%, hsl(var(--hero-paper) / 0.05) 66%, transparent 100%)",
-        }}
-      />
-
-      <div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 pb-5 sm:pb-8 pt-4 sm:pt-6">
-        <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-6 min-w-0">
-          <div className="shrink-0 relative">
-            <button
-              type="button"
-              onClick={onOpenAvatarLightbox}
-              disabled={!hasAvatarLightbox}
-              aria-label={`Agrandir la photo de ${firstName}`}
-              className="block rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-default"
-            >
-              {avatarUrl && !avatarUrl.includes("placeholder.svg") ? (
-                <img
-                  src={avatarImageUrl(avatarUrl, 352)}
-                  alt={firstName}
-                  className="w-28 h-28 sm:w-36 sm:h-36 md:w-44 md:h-44 rounded-full object-cover object-center border-4 border-background shadow-md ring-2 ring-primary ring-offset-2"
-                />
-              ) : (
-                <div className="w-28 h-28 sm:w-36 sm:h-36 md:w-44 md:h-44 rounded-full bg-muted flex items-center justify-center font-heading font-bold text-foreground text-4xl sm:text-5xl md:text-6xl border-4 border-background shadow-md ring-2 ring-primary ring-offset-2">
-                  {firstName?.charAt(0) || "?"}
-                </div>
-              )}
-            </button>
-            {statutGardien && statutGardien !== "novice" && (
-              <div className="absolute -bottom-2 -right-2">
-                <StatutGardienBadge statut={statutGardien as any} />
-              </div>
-            )}
-          </div>
-
-          <div className="flex flex-col gap-1.5 pb-1 min-w-0 flex-1">
-            {isAvailable && (
-              <span className="inline-flex w-fit items-center gap-1.5 text-xs bg-primary text-primary-foreground px-3 py-1 rounded-full font-semibold shadow-md border border-primary/40 backdrop-blur-sm">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-foreground opacity-60" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary-foreground" />
-                </span>
-                Disponible
+    <header
+      className="relative w-full overflow-hidden bg-[hsl(var(--hero-paper))]"
+      data-profile-hero
+      data-facet={p.facet}
+    >
+      <div className="relative max-w-6xl mx-auto flex flex-col md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,52%)] md:min-h-[280px] md:max-h-[340px]">
+        {/* Identité, sur papier lisible */}
+        <div className="relative z-10 min-w-0 px-4 md:px-6 pt-5 pb-4 md:py-6 flex gap-4 md:gap-5 items-start">
+          <button
+            type="button"
+            onClick={p.onOpenAvatarLightbox}
+            disabled={!p.hasAvatarLightbox}
+            aria-label={`Agrandir la photo de ${p.firstName}`}
+            className="shrink-0 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-default"
+            data-hero-avatar
+          >
+            {hasPhoto ? (
+              <img
+                src={avatarImageUrl(p.avatarUrl as string, 320)}
+                alt={p.firstName}
+                width={128}
+                height={128}
+                className="block w-[88px] h-[88px] md:w-[128px] md:h-[128px] rounded-full object-cover border-4 border-background shadow-md"
+              />
+            ) : (
+              <span className="flex w-[88px] h-[88px] md:w-[128px] md:h-[128px] rounded-full bg-muted border-4 border-background items-center justify-center font-heading text-4xl md:text-5xl text-foreground">
+                {p.firstName?.charAt(0) || "?"}
               </span>
             )}
+          </button>
 
-            <div
-              tabIndex={0}
-              className="group/hero-card self-start max-w-full min-w-0 inline-flex flex-col gap-1 rounded-2xl bg-background/90 backdrop-blur-md border border-border/60 shadow-md px-3 py-2 sm:px-4 sm:py-2.5 outline-none transition-all duration-300 ease-out hover:bg-background hover:shadow-xl hover:-translate-y-0.5 focus-visible:bg-background focus-visible:shadow-xl focus-visible:ring-2 focus-visible:ring-primary/40 active:bg-background active:shadow-xl"
-            >
-              <div className="flex flex-wrap items-center gap-x-2 sm:gap-x-3 gap-y-1.5 min-w-0 max-w-full">
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-heading font-bold text-foreground leading-tight break-words [overflow-wrap:anywhere] hyphens-auto min-w-0">
-                  <span className="capitalize">{firstName}</span>
-                </h1>
-
-                {id && <FavoriteButton targetType="sitter" targetId={id} size="md" />}
-                {avgRating > 0 && reviewCount > 0 && (
-                  <span className="inline-flex items-baseline gap-1 text-sm font-medium text-foreground/85">
-                    <span className="font-semibold">{formatRatingFr(avgRating)}</span>
-                    <span className="text-primary">★</span>
-                    <span className="text-muted-foreground text-xs">({reviewCount})</span>
-                  </span>
-                )}
-              </div>
-
-              {/* Réactivité calculée (90 jours), identique gardien et propriétaire. */}
-              <ResponsivenessBadge userId={id} className="self-start mt-1" />
-
-              {/* Localisation seule : le rôle est déjà porté par les onglets
-                  et par la balise title de la page. */}
-              {city && (
-                <p className="text-sm sm:text-base text-foreground/80 flex items-center gap-1 font-medium min-w-0 max-w-full break-words">
-                  <MapPin className="w-3.5 h-3.5 shrink-0" />
-                  <span className="min-w-0 break-words">
-                    {city}
-                    {departmentName ? `, ${departmentName}` : ""}
-                  </span>
-                </p>
+          <div className="min-w-0 flex-1">
+            <p className="text-[11.5px] uppercase tracking-[0.16em] text-secondary font-body font-semibold">{eyebrow}</p>
+            <div className="mt-0.5 flex items-center gap-1 min-w-0">
+              <h1 className="font-heading text-[34px] md:text-[48px] font-semibold tracking-[-0.02em] leading-none text-foreground break-words [overflow-wrap:anywhere] min-w-0">
+                {p.firstName}
+              </h1>
+              {p.identityVerified && <IdentityVerifiedMark firstName={p.firstName} />}
+              {!p.isOwnProfile && (
+                <FavoriteButton targetType={p.facet === "sitter" ? "sitter" : "sitter"} targetId={p.id} size="md" />
               )}
-
-
             </div>
-
-            {visibleChips.length > 0 && (
-              <div className="flex items-center gap-2 flex-wrap">
-                {visibleChips.map((c) => (
-                  <span key={c.key}>{c.node}</span>
-                ))}
-              </div>
+            {place && <p className="mt-1 text-[15px] text-foreground font-body" data-hero-place>{place}</p>}
+            {facts.length > 0 && (
+              <p className="mt-1 text-[13.5px] text-muted-foreground font-body">{facts.join(" · ")}</p>
             )}
-
-            {/* CTA unique + réassurance */}
-            <div
-              data-hero-cta
-              className="mt-3 flex flex-col items-stretch gap-2 self-start max-w-full"
-            >
-              {renderCta()}
-              {/* La réassurance reste sous le bouton, donc sur la zone de
-                  papier opaque du dégradé, avec son propre fond discret. */}
-              <p className="self-start max-w-full rounded-lg bg-background/85 backdrop-blur-sm px-2.5 py-1 text-[11px] sm:text-xs text-foreground/80 font-body text-left leading-snug break-words">
-                {reassurance}
+            {mobility.length > 0 && (
+              <p className="mt-1 text-[13.5px] text-foreground/80 font-body" data-hero-mobility>
+                Peut se déplacer : {mobility.join(", ")}
               </p>
+            )}
+            <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[13.5px] font-body text-foreground">
+              {p.avgRating > 0 && p.reviewCount > 0 && (
+                <span className="inline-flex items-center gap-1" aria-label={`${formatRatingFr(p.avgRating)} sur 5, ${p.reviewCount} avis`}>
+                  <span className="text-founder" aria-hidden="true">★</span>
+                  <span className="font-semibold">{formatRatingFr(p.avgRating)}</span>
+                  <span className="text-muted-foreground">· {p.reviewCount} avis</span>
+                </span>
+              )}
+              {p.isAvailable && (
+                <span className="inline-flex items-center gap-1.5">
+                  <span aria-hidden="true" className="h-2 w-2 rounded-full bg-primary" /> Disponible
+                </span>
+              )}
+              {p.hasActiveSubscription && <span className="text-muted-foreground">Abonné</span>}
+              {p.emergencyActive && <span className="text-muted-foreground">Gardien d'urgence</span>}
+              {p.statutGardien && p.statutGardien !== "novice" && <StatutGardienBadge statut={p.statutGardien as any} />}
+              <ResponsivenessBadge userId={p.id} />
+            </div>
+            <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1" data-hero-cta>
+              {renderCta()}
+              {reassurance && <p className="text-[12.5px] text-muted-foreground font-body">{reassurance}</p>}
             </div>
           </div>
         </div>
+
+        {/* Gouache personnalisée : entière, sujets lisibles, aucun voile. */}
+        <div className="relative w-full md:h-full [aspect-ratio:1536/544] md:[aspect-ratio:auto]" data-hero-gouache>
+          <img
+            src={p.heroDesktop}
+            srcSet={`${p.heroMobile} 768w, ${p.heroDesktop} 1536w`}
+            sizes="(min-width: 768px) 52vw, 100vw"
+            alt=""
+            aria-hidden="true"
+            data-hero-anchor={p.heroAnchor}
+            width={1536}
+            height={544}
+            loading="eager"
+            decoding="async"
+            fetchPriority="high"
+            className="absolute inset-0 w-full h-full object-contain object-center"
+          />
+          {p.isOwnProfile && (
+            <button
+              type="button"
+              onClick={p.onOpenHeroPicker}
+              className="absolute top-3 right-3 z-20 inline-flex min-h-11 items-center gap-1.5 px-3.5 rounded-full bg-background/95 border border-border text-[13px] font-semibold text-foreground shadow-sm"
+              title="Choisir une autre illustration de carnet"
+            >
+              <ImageIcon className="w-4 h-4" aria-hidden="true" />
+              Changer l'image
+            </button>
+          )}
+        </div>
       </div>
-    </div>
+    </header>
   );
 };
 
