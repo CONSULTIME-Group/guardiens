@@ -30,6 +30,7 @@ import { Search, MapPin, Lock, Sparkles, Globe2, X, AlertCircle, RefreshCw } fro
 import { format, differenceInDays, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
+import { fetchIntlOpenSits } from "@/lib/intlSitSearch";
 import { applyOpenSitFilter, checkGeocodedPoint, communeDeptFromCoords, pointUsable, fetchAllPages, fetchInChunks, isEndedSit, isFrancePlace, isOpenSit, isPastSit, isWithinRadius, parisTodayIso, resolveSitPlace, sitGeocodeKey, sitGeocodeKeyString } from "@/lib/sitSearchRules";
 import { sanitizeBioForCard } from "@/lib/sanitizeBio";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
@@ -189,12 +190,9 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  useEffect(() => {
    let cancelled = false;
    (async () => {
-     // Mêmes règles que les autres compteurs : annonces ouvertes uniquement.
-     const { count } = await applyOpenSitFilter(
-       supabase.from("sits").select("id", { count: "exact", head: true }),
-     )
-       .not("country", "is", null)
-       .neq("country", "FR");
+     // Lot L2 : moteur international partagé (lieu du propriétaire).
+     let count = 0;
+     try { count = (await fetchIntlOpenSits()).length; } catch { count = 0; }
      if (!cancelled) setIntlCount(count || 0);
    })();
    return () => { cancelled = true; };

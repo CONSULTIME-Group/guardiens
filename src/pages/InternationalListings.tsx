@@ -1,135 +1,254 @@
-// Page dédiée aux annonces de garde hors France.
-// Carte mondiale + grille simple : les distances FR n'ont pas de sens ici,
-// mais la position pays/ville doit être immédiatement visible.
-import { useEffect, useState } from "react";
+// Page dédiée aux annonces de garde hors France (lot L2).
+// Pays de destination, puis ville du pays et rayon, filtres dates et animaux,
+// liste par défaut, carte en option. Moteur partagé : src/lib/intlSitSearch.ts
+// (lieu du propriétaire, repli annonce, jamais de FR déduit). Toute la
+// recherche vit dans l'adresse (copier, recharger, retour arrière).
+import { useEffect, useMemo, useRef, useState } from "react";
 import MapErrorBoundary from "@/components/shared/MapErrorBoundary";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import Head from "@/components/seo/Head";
-import { Globe2, MapPin } from "lucide-react";
+import { Globe2, MapPin, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import "leaflet/dist/leaflet.css";
 import { MapContainer, Marker, TileLayer, useMap } from "react-leaflet";
 import { LeafletUnmountGuard } from "@/components/shared/LeafletUnmountGuard";
 import L from "leaflet";
-import { supabase } from "@/integrations/supabase/client";
-import { applyOpenSitFilter } from "@/lib/sitSearchRules";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { geocodeCity } from "@/lib/geocode";
+import { COUNTRIES, getCountryName, isValidCountryCode } from "@/lib/countries";
+import { fromPhoton, computeMapViewport, type PlaceSuggestion } from "@/lib/sitterSearch";
 import {
-  MAP_TILE_WORLD_URL,
-  MAP_TILE_WORLD_ATTRIBUTION,
-  MAP_TILE_WORLD_MAX_ZOOM,
-} from "@/lib/mapTiles";
+  fetchIntlOpenSits,
+  intlCountryCounts,
+  filterIntl,
+  applyIntlRadius,
+  uniquePlaceKeys,
+  placeKey,
+  intlPlaceLabel,
+  intlTitle,
+  closestSortAvailable,
+  geocodeIntlPlace,
+  type IntlSit,
+} from "@/lib/intlSitSearch";
+import { MAP_TILE_WORLD_URL, MAP_TILE_WORLD_ATTRIBUTION, MAP_TILE_WORLD_MAX_ZOOM } from "@/lib/mapTiles";
 import fallbackMarrakech from "@/assets/fallback-marrakech.webp";
 
 const CANONICAL = "https://guardiens.fr/annonces/international";
-
-type IntlSit = {
-  slug?: string | null;
-  id: string;
-  title: string | null;
-  city: string | null;
-  country: string | null;
-  start_date: string | null;
-  end_date: string | null;
-  cover_photo_url: string | null;
-  property?: { photos?: string[] | null } | null;
-};
-
-type IntlSitWithCoords = IntlSit & { coords?: { lat: number; lng: number } | null };
+const RADII = [25, 50, 100, 200];
+const SPECIES: Array<{ key: string; label: string }> = [
+  { key: "dog", label: "Chiens" },
+  { key: "cat", label: "Chats" },
+  { key: "horse", label: "Chevaux" },
+  { key: "bird", label: "Oiseaux" },
+  { key: "rodent", label: "Rongeurs" },
+  { key: "fish", label: "Poissons" },
+  { key: "reptile", label: "Reptiles" },
+  { key: "farm_animal", label: "Animaux de ferme" },
+  { key: "nac", label: "NAC" },
+];
+const ALL = "all";
 
 const pinIcon = L.divIcon({
   className: "",
-  iconSize: [34, 34],
-  iconAnchor: [17, 17],
-  html: `<span style="display:block;width:34px;height:34px;border-radius:9999px;background:hsl(var(--primary));border:3px solid hsl(var(--background));box-shadow:0 8px 20px hsl(var(--foreground) / .22);"></span>`,
+  iconSize: [30, 30],
+  iconAnchor: [15, 15],
+  html: `<span style="display:block;width:30px;height:30px;border-radius:9999px;background:hsl(var(--primary));border:3px solid hsl(var(--background));box-shadow:0 8px 20px hsl(var(--foreground) / .22);"></span>`,
 });
 
-function InternationalMap({ sits }: { sits: IntlSitWithCoords[] }) {
-  const points = sits.filter((s): s is IntlSitWithCoords & { coords: { lat: number; lng: number } } => !!s.coords);
-  // Sans point géocodé, vue monde plutôt qu'un centre codé en dur sur une
-  // ville, qui donnait une carte de Marrakech sans aucune annonce.
-  const hasPoints = points.length > 0;
-  const center: [number, number] = hasPoints ? [points[0].coords.lat, points[0].coords.lng] : [20, 0];
-  const initialZoom = hasPoints ? 9 : 2;
+type Pt = { lat: number; lng: number };
 
-  const FitBounds = () => {
-    const map = useMap();
-    useEffect(() => {
-      if (!hasPoints) {
-        map.setView([20, 0], 2, { animate: false });
-        return;
-      }
-      map.fitBounds(points.map((p) => [p.coords.lat, p.coords.lng]) as [number, number][], {
-        padding: [34, 34],
-        maxZoom: 9,
-      });
-    }, [map]);
-    return null;
-  };
+function FitView({ bounds, center, zoom }: { bounds: Array<[number, number]> | null; center: [number, number]; zoom: number }) {
+  const map = useMap();
+  useEffect(() => {
+    if (bounds && bounds.length >= 2) map.fitBounds(bounds, { padding: [34, 34], maxZoom: 10 });
+    else map.setView(center, zoom, { animate: false });
+  }, [map, bounds, center, zoom]);
+  return null;
+}
 
+function IntlMap({ points, country, center }: { points: Array<Pt & { id: string }>; country: string | null; center: Pt | null }) {
+  const vp = computeMapViewport({ country, center, points });
+  // Clé = recherche courante : la carte est recréée, aucun ancien repère ni cadrage.
+  const key = `${country ?? "all"}|${center ? `${center.lat},${center.lng}` : "-"}|${points.map((p) => p.id).join(",")}`;
   return (
     <div className="rounded-2xl overflow-hidden border border-border bg-card shadow-sm h-[320px] md:h-[420px]">
       <MapErrorBoundary>
-      <MapContainer center={center} zoom={initialZoom} className="h-full w-full" attributionControl={true} scrollWheelZoom={false}>
-
-        <LeafletUnmountGuard />
-        <FitBounds />
-        {/* Annonces hors France : le Plan IGN est vide au-delà du territoire,
-            fond OpenStreetMap standard pour cette page uniquement. */}
-        <TileLayer
-          url={MAP_TILE_WORLD_URL}
-          attribution={MAP_TILE_WORLD_ATTRIBUTION}
-          maxZoom={MAP_TILE_WORLD_MAX_ZOOM}
-        />
-        {points.map((s) => (
-          <Marker key={s.id} position={[s.coords.lat, s.coords.lng]} icon={pinIcon} />
-        ))}
-      </MapContainer>
+        <MapContainer key={key} center={vp.center} zoom={vp.zoom} className="h-full w-full" scrollWheelZoom={false}>
+          <LeafletUnmountGuard />
+          <FitView bounds={vp.bounds} center={vp.center} zoom={vp.zoom} />
+          <TileLayer url={MAP_TILE_WORLD_URL} attribution={MAP_TILE_WORLD_ATTRIBUTION} maxZoom={MAP_TILE_WORLD_MAX_ZOOM} />
+          {points.map((p) => (
+            <Marker key={p.id} position={[p.lat, p.lng]} icon={pinIcon} />
+          ))}
+        </MapContainer>
       </MapErrorBoundary>
     </div>
   );
 }
 
+const round3 = (n: number) => Math.round(n * 1000) / 1000;
+
 export default function InternationalListings() {
   const { t, i18n } = useTranslation();
-  const [sits, setSits] = useState<IntlSitWithCoords[] | null>(null);
+  const [params, setParams] = useSearchParams();
+  const [all, setAll] = useState<IntlSit[] | null>(null);
+  const [loadError, setLoadError] = useState(false);
+  const [points, setPoints] = useState<Map<string, Pt | null>>(new Map());
+  const [cityCenter, setCityCenter] = useState<Pt | null>(null);
+  const [cityFailed, setCityFailed] = useState(false);
+  const [cityInput, setCityInput] = useState(params.get("ville") ?? "");
+  const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
+  const suggestTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const locale =
-    ({ fr: "fr-FR", en: "en-GB" } as Record<string, string>)[i18n.language] ||
-    "fr-FR";
+  // ── État lu dans l'adresse ──
+  const rawCountry = (params.get("pays") || "").toUpperCase();
+  const country = rawCountry && rawCountry !== "FR" && isValidCountryCode(rawCountry) ? rawCountry : null;
+  const city = params.get("ville") || null;
+  const radius = RADII.includes(Number(params.get("rayon"))) ? Number(params.get("rayon")) : 50;
+  const start = params.get("debut") || null;
+  const end = params.get("fin") || null;
+  const species = (params.get("animaux") || "").split(",").filter((s) => SPECIES.some((x) => x.key === s));
+  const view = params.get("vue") === "carte" ? "carte" : "liste";
+  const urlLat = Number(params.get("lat"));
+  const urlLng = Number(params.get("lng"));
 
-  function formatPeriod(s?: string | null, e?: string | null) {
+  const update = (patch: Record<string, string | null>) => {
+    const next = new URLSearchParams(params);
+    for (const [k, v] of Object.entries(patch)) {
+      if (v === null || v === "") next.delete(k);
+      else next.set(k, v);
+    }
+    setParams(next); // entrée d'historique : le retour arrière restaure la recherche
+  };
+
+  const locale = ({ fr: "fr-FR", en: "en-GB" } as Record<string, string>)[i18n.language] || "fr-FR";
+  const formatPeriod = (s?: string | null, e?: string | null) => {
     if (!s && !e) return t("intl_listings.flexible_dates");
-    const fmt = (d: string) =>
-      new Date(d).toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric" });
+    const fmt = (d: string) => new Date(d).toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric" });
     if (s && e) return `${fmt(s)} → ${fmt(e)}`;
     return fmt((s || e) as string);
-  }
+  };
 
+  // Lecture unique du jeu complet (pages de 1 000), espèces incluses.
   useEffect(() => {
     let cancelled = false;
-    (async () => {
-      const { data } = await applyOpenSitFilter(
-        supabase.from("sits").select("id, slug, title, city, country, start_date, end_date, cover_photo_url, property:properties(photos)") as any,
-        )
-        .not("country", "is", null)
-        .neq("country", "FR")
-        .order("created_at", { ascending: false })
-        .limit(60);
-      const rows = ((data as IntlSit[]) || []);
-      const enriched = await Promise.all(
-        rows.map(async (sit) => {
-          if (!sit.city) return { ...sit, coords: null };
-          const coords = await geocodeCity(sit.city, sit.country || undefined);
-          return { ...sit, coords: coords ? { lat: coords.lat, lng: coords.lng } : null };
-        }),
-      );
-      if (cancelled) return;
-      setSits(enriched);
-    })();
+    fetchIntlOpenSits({ withSpecies: true })
+      .then((rows) => { if (!cancelled) setAll(rows); })
+      .catch((e) => { console.error("[InternationalListings]", e); if (!cancelled) { setLoadError(true); setAll([]); } });
     return () => { cancelled = true; };
   }, []);
+
+  // Ville de référence : coordonnées de la suggestion (adresse), sinon un seul géocodage ville + pays.
+  useEffect(() => {
+    setCityInput(city ?? "");
+    setCityFailed(false);
+    if (!city) { setCityCenter(null); return; }
+    if (Number.isFinite(urlLat) && Number.isFinite(urlLng) && params.get("lat") && params.get("lng")) {
+      setCityCenter({ lat: urlLat, lng: urlLng });
+      return;
+    }
+    let cancelled = false;
+    setCityCenter(null);
+    (country ? geocodeIntlPlace(city, country, geocodeCity) : geocodeCity(city)).then((c) => {
+      if (cancelled) return;
+      if (c) setCityCenter({ lat: c.lat, lng: c.lng });
+      else setCityFailed(true);
+    });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [city, country, params.get("lat"), params.get("lng")]);
+
+  const base = useMemo(() => (all ? filterIntl(all, { country, start, end, species }) : []), [all, country, start, end, species.join(",")]);
+
+  // Géocodage à la demande seulement (carte ou ville), une fois par lieu distinct.
+  const needPoints = view === "carte" || !!city;
+  useEffect(() => {
+    if (!needPoints || !all) return;
+    const todo = uniquePlaceKeys(base).filter((k) => !points.has(k.key));
+    if (!todo.length) return;
+    let cancelled = false;
+    Promise.all(todo.map(async (k) => [k.key, await geocodeIntlPlace(k.city, k.country, geocodeCity)] as const)).then((res) => {
+      if (cancelled) return;
+      setPoints((prev) => {
+        const next = new Map(prev);
+        for (const [key, c] of res) next.set(key, c ? { lat: c.lat, lng: c.lng } : null);
+        return next;
+      });
+    });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [needPoints, base, all]);
+
+  const pointOf = (s: IntlSit): Pt | null => {
+    const k = placeKey(s);
+    return k ? points.get(k) ?? null : null;
+  };
+  const pointsPending = needPoints && uniquePlaceKeys(base).some((k) => !points.has(k.key));
+
+  const { items: radiusItems, unlocated } = useMemo(
+    () => applyIntlRadius(base, city ? cityCenter : null, radius, pointOf),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [base, cityCenter, city, radius, points],
+  );
+  const results = city ? (cityCenter ? radiusItems : []) : radiusItems;
+
+  const canClosest = closestSortAvailable(city ? cityCenter : null);
+  const sort = params.get("tri") === "proches" && canClosest ? "proches" : "recentes";
+  const sorted = useMemo(() => {
+    const out = [...results];
+    if (sort === "proches") out.sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity));
+    return out;
+  }, [results, sort]);
+
+  const counts = useMemo(() => intlCountryCounts(all ?? []), [all]);
+  const otherCountries = useMemo(
+    () => COUNTRIES.filter((c) => c.code !== "FR" && !counts.some((x) => x.code === c.code)),
+    [counts],
+  );
+
+  const mapPoints = sorted.map((s) => ({ id: s.id, p: pointOf(s) })).filter((x): x is { id: string; p: Pt } => !!x.p).map((x) => ({ id: x.id, ...x.p }));
+  const located = mapPoints.length;
+  const title = intlTitle(country, city);
+  const hasFilters = !!(country || city || start || end || species.length || params.get("tri"));
+
+  // ── Autocomplétion par pays (Photon, communes uniquement) ──
+  const onCityInput = (v: string) => {
+    setCityInput(v);
+    if (suggestTimer.current) clearTimeout(suggestTimer.current);
+    if (v.trim().length < 2) { setSuggestions([]); return; }
+    suggestTimer.current = setTimeout(async () => {
+      try {
+        const r = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(v.trim())}&limit=15&lang=fr&layer=city&layer=locality&layer=district`);
+        const json = await r.json();
+        setSuggestions(fromPhoton(json, country).filter((s) => s.country !== "FR").slice(0, 8));
+      } catch {
+        setSuggestions([]);
+      }
+    }, 250);
+  };
+  const pickCity = (s: PlaceSuggestion) => {
+    setSuggestions([]);
+    update({
+      ville: s.name,
+      pays: s.country,
+      lat: s.lat != null ? String(round3(s.lat)) : null,
+      lng: s.lng != null ? String(round3(s.lng)) : null,
+    });
+  };
+  const clearCity = () => { setSuggestions([]); update({ ville: null, lat: null, lng: null, tri: null }); };
+  const onCountry = (v: string) => {
+    const next = v === ALL ? null : v;
+    // Une ville d'un autre pays est retirée : jamais de ville résiduelle.
+    update({ pays: next, ville: null, lat: null, lng: null, tri: null });
+  };
+  const toggleSpecies = (k: string) => {
+    const set = new Set(species);
+    if (set.has(k)) set.delete(k); else set.add(k);
+    update({ animaux: [...set].join(",") || null });
+  };
 
   return (
     <div className="bg-background text-foreground">
@@ -146,7 +265,7 @@ export default function InternationalListings() {
             <Globe2 className="h-3.5 w-3.5" /> {t("intl_listings.kicker")}
           </p>
           <h1 className="font-heading text-2xl md:text-4xl lg:text-5xl font-medium leading-tight text-foreground tracking-tight max-w-3xl">
-            {t("intl_listings.title")}
+            {title}
           </h1>
           <p className="mt-4 text-base md:text-lg text-muted-foreground max-w-2xl leading-relaxed">
             {t("intl_listings.subtitle")}
@@ -156,7 +275,208 @@ export default function InternationalListings() {
               {t("intl_listings.back_link")}
             </Link>
           </p>
-          <div className="mt-6 grid gap-4 md:grid-cols-2 max-w-4xl">
+        </section>
+
+        {/* Barre de recherche : pays, ville du pays, rayon, dates, animaux */}
+        <section aria-label="Rechercher une garde à l'étranger" className="max-w-6xl mx-auto px-4 md:px-6 pb-6">
+          <div className="rounded-2xl border border-border bg-card p-4 md:p-5 space-y-4">
+            <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_auto]">
+              <label className="space-y-1.5 min-w-0">
+                <span className="text-xs font-medium text-muted-foreground">Pays de destination</span>
+                <Select value={country ?? ALL} onValueChange={onCountry}>
+                  <SelectTrigger aria-label="Pays de destination"><SelectValue /></SelectTrigger>
+                  <SelectContent className="max-h-80">
+                    <SelectItem value={ALL}>Tous les pays ({all ? all.length : "…"})</SelectItem>
+                    {counts.map((c) => (
+                      <SelectItem key={c.code} value={c.code}>{c.name} ({c.count})</SelectItem>
+                    ))}
+                    {otherCountries.map((c) => (
+                      <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </label>
+              <div className="space-y-1.5 relative min-w-0">
+                <label htmlFor="intl-city" className="text-xs font-medium text-muted-foreground">
+                  Ville {country ? `(${getCountryName(country)})` : "(tous pays)"}
+                </label>
+                <div className="relative">
+                  <Input
+                    id="intl-city"
+                    value={cityInput}
+                    onChange={(e) => onCityInput(e.target.value)}
+                    placeholder={country ? `Une ville, ${getCountryName(country)}` : "Une ville à l'étranger"}
+                    autoComplete="off"
+                    aria-autocomplete="list"
+                    aria-controls="intl-city-list"
+                  />
+                  {city && (
+                    <button type="button" onClick={clearCity} aria-label="Retirer la ville" className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground">
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+                {suggestions.length > 0 && (
+                  <ul id="intl-city-list" role="listbox" className="absolute z-[500] mt-1 w-full rounded-xl border border-border bg-popover shadow-lg overflow-hidden">
+                    {suggestions.map((s, i) => (
+                      <li key={`${s.name}-${s.detail}-${i}`}>
+                        <button type="button" role="option" aria-selected={false} onClick={() => pickCity(s)} className="w-full text-left px-3 py-2 text-sm hover:bg-muted">
+                          <span className="font-medium text-foreground">{s.name}</span>
+                          {s.detail && <span className="text-muted-foreground">, {s.detail}</span>}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+              <label className="space-y-1.5">
+                <span className="text-xs font-medium text-muted-foreground">Rayon</span>
+                <Select value={String(radius)} onValueChange={(v) => update({ rayon: v === "50" ? null : v })} disabled={!city}>
+                  <SelectTrigger aria-label="Rayon" className="md:w-32"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {RADII.map((r) => <SelectItem key={r} value={String(r)}>{r} km</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </label>
+            </div>
+
+            <div className="flex flex-wrap items-end gap-3">
+              <label className="space-y-1.5">
+                <span className="text-xs font-medium text-muted-foreground">Du</span>
+                <Input type="date" value={start ?? ""} onChange={(e) => update({ debut: e.target.value || null })} className="w-40" aria-label="Date de début" />
+              </label>
+              <label className="space-y-1.5">
+                <span className="text-xs font-medium text-muted-foreground">Au</span>
+                <Input type="date" value={end ?? ""} onChange={(e) => update({ fin: e.target.value || null })} className="w-40" aria-label="Date de fin" />
+              </label>
+              <label className="space-y-1.5">
+                <span className="text-xs font-medium text-muted-foreground">Trier</span>
+                <Select value={sort} onValueChange={(v) => update({ tri: v === "proches" ? "proches" : null })}>
+                  <SelectTrigger aria-label="Trier" className="w-48"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="recentes">Plus récentes</SelectItem>
+                    <SelectItem value="proches" disabled={!canClosest}>
+                      {canClosest ? "Plus proches" : "Plus proches (choisissez une ville)"}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </label>
+              {hasFilters && (
+                <Button variant="ghost" size="sm" onClick={() => setParams(new URLSearchParams(view === "carte" ? { vue: "carte" } : {}))}>
+                  Réinitialiser
+                </Button>
+              )}
+            </div>
+
+            <div className="flex flex-wrap gap-2" role="group" aria-label="Animaux">
+              {SPECIES.map((s) => {
+                const on = species.includes(s.key);
+                return (
+                  <button
+                    key={s.key}
+                    type="button"
+                    aria-pressed={on}
+                    onClick={() => toggleSpecies(s.key)}
+                    className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${on ? "bg-primary text-primary-foreground border-primary" : "bg-background text-foreground border-border hover:bg-muted"}`}
+                  >
+                    {s.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        <section className="max-w-6xl mx-auto px-4 md:px-6 pb-10 md:pb-16 space-y-5">
+          {all === null ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {[0, 1, 2].map((i) => <Skeleton key={i} className="h-64 rounded-2xl" />)}
+            </div>
+          ) : (
+            <>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="text-sm text-foreground" aria-live="polite">
+                  {city && !cityCenter && !cityFailed
+                    ? `Recherche autour de ${city}…`
+                    : `${sorted.length} annonce${sorted.length > 1 ? "s" : ""}${city ? ` à ${radius} km de ${city}` : country ? ` : ${getCountryName(country)}` : " à l'étranger"}`}
+                </p>
+                <div className="inline-flex rounded-full border border-border p-0.5" role="group" aria-label="Affichage">
+                  <button type="button" aria-pressed={view === "liste"} onClick={() => update({ vue: null })} className={`rounded-full px-3 py-1 text-xs font-medium ${view === "liste" ? "bg-primary text-primary-foreground" : "text-foreground"}`}>Liste</button>
+                  <button type="button" aria-pressed={view === "carte"} onClick={() => update({ vue: "carte" })} className={`rounded-full px-3 py-1 text-xs font-medium ${view === "carte" ? "bg-primary text-primary-foreground" : "text-foreground"}`}>Carte</button>
+                </div>
+              </div>
+
+              {loadError && <p role="alert" className="text-sm text-destructive">Impossible de charger les annonces. Réessayez dans un instant.</p>}
+              {cityFailed && (
+                <p role="status" className="text-sm text-muted-foreground">
+                  Nous n'avons pas pu situer « {city} ». Aucune distance n'est calculée ; retirez la ville ou choisissez une suggestion.
+                </p>
+              )}
+              {city && cityCenter && unlocated > 0 && !pointsPending && (
+                <p className="text-sm text-muted-foreground">
+                  {unlocated} annonce{unlocated > 1 ? "s" : ""} du pays n'{unlocated > 1 ? "ont" : "a"} pas de lieu situable : non comptée{unlocated > 1 ? "s" : ""} dans le rayon.
+                </p>
+              )}
+
+              {view === "carte" && (
+                <>
+                  <IntlMap points={mapPoints} country={country} center={city ? cityCenter : null} />
+                  <p className="text-xs text-muted-foreground">
+                    {pointsPending ? "Placement des annonces sur la carte…" : `${located} annonce${located > 1 ? "s" : ""} située${located > 1 ? "s" : ""} sur ${sorted.length}${sorted.length - located > 0 ? `, ${sorted.length - located} lieu${sorted.length - located > 1 ? "x" : ""} à préciser` : ""}. Positions approximatives à l'échelle de la commune.`}
+                  </p>
+                </>
+              )}
+
+              {sorted.length === 0 && !(city && !cityCenter && !cityFailed) ? (
+                <div className="border border-dashed border-border rounded-2xl p-10 text-center">
+                  <Globe2 className="h-8 w-8 mx-auto text-muted-foreground mb-3" />
+                  <h2 className="font-heading text-xl font-medium text-foreground mb-2">
+                    {hasFilters ? "Aucune annonce ne correspond à cette recherche" : t("intl_listings.empty_title")}
+                  </h2>
+                  <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                    {hasFilters ? "Élargissez le rayon, retirez un filtre ou choisissez « Tous les pays »." : t("intl_listings.empty_body")}
+                  </p>
+                  {hasFilters ? (
+                    <Button className="mt-5 rounded-full" onClick={() => setParams(new URLSearchParams())}>Voir tous les pays</Button>
+                  ) : (
+                    <Link to="/inscription" className="inline-flex mt-5 items-center gap-1.5 rounded-full bg-primary text-primary-foreground px-5 py-2.5 text-sm font-semibold hover:opacity-90 transition-opacity">
+                      {t("intl_listings.empty_cta")}
+                    </Link>
+                  )}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {sorted.map((s) => {
+                    const c = (s.place.city || "").toUpperCase();
+                    const isMarrakech = c.includes("MARRAKECH") || c.includes("MARRAKESH") || s.place.country === "MA";
+                    const cover = s.cover_photo_url || s.photos?.[0] || (isMarrakech ? fallbackMarrakech : null);
+                    return (
+                      <Link key={s.id} to={`/annonces/${s.slug || s.id}`} className="group block rounded-2xl overflow-hidden border border-border bg-card hover:shadow-lg transition-shadow">
+                        <div className="aspect-[4/3] bg-muted overflow-hidden">
+                          {cover ? (
+                            <img src={cover} alt={s.title || t("intl_listings.cover_alt")} loading="lazy" className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-muted-foreground"><Globe2 className="h-10 w-10 opacity-40" /></div>
+                          )}
+                        </div>
+                        <div className="p-4">
+                          <p className="text-xs text-muted-foreground flex items-center gap-1.5 mb-1.5">
+                            <MapPin className="h-3 w-3" />
+                            <span>{intlPlaceLabel(s.place)}</span>
+                            {s.distance != null && <span>· {s.distance < 1 ? "< 1" : Math.round(s.distance)} km</span>}
+                          </p>
+                          <h3 className="font-heading text-base font-medium text-foreground line-clamp-2 mb-2">{s.title || t("intl_listings.default_title")}</h3>
+                          <p className="text-xs text-muted-foreground">{formatPeriod(s.start_date, s.end_date)}</p>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </>
+          )}
+
+          <div className="grid gap-4 md:grid-cols-2 max-w-4xl pt-4">
             <div className="rounded-2xl border border-border bg-card/60 p-5">
               <p className="text-sm md:text-base text-foreground">
                 Vous vivez à l'étranger et votre maison en France reste vide plusieurs mois&nbsp;?
@@ -174,85 +494,6 @@ export default function InternationalListings() {
               </p>
             </div>
           </div>
-        </section>
-
-
-        <section className="max-w-6xl mx-auto px-4 md:px-6 pb-10 md:pb-16 space-y-6">
-          {sits === null ? (
-            <>
-              <Skeleton className="h-[320px] md:h-[420px] rounded-2xl" />
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {[0, 1, 2].map((i) => (
-                  <Skeleton key={i} className="h-64 rounded-2xl" />
-                ))}
-              </div>
-            </>
-          ) : sits.length === 0 ? (
-            <div className="border border-dashed border-border rounded-2xl p-10 text-center">
-              <Globe2 className="h-8 w-8 mx-auto text-muted-foreground mb-3" />
-              <h2 className="font-heading text-xl font-medium text-foreground mb-2">
-                {t("intl_listings.empty_title")}
-              </h2>
-              <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                {t("intl_listings.empty_body")}
-              </p>
-              <Link
-                to="/inscription"
-                className="inline-flex mt-5 items-center gap-1.5 rounded-full bg-primary text-primary-foreground px-5 py-2.5 text-sm font-semibold hover:opacity-90 transition-opacity"
-              >
-                {t("intl_listings.empty_cta")}
-              </Link>
-            </div>
-          ) : (
-            <>
-              <InternationalMap sits={sits} />
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {sits.map((s) => {
-                  const city = (s.city || "").toUpperCase();
-                  const country = (s.country || "").toUpperCase();
-                  const isMarrakech = city.includes("MARRAKECH") || city.includes("MARRAKESH") || country === "MAROC" || country === "MOROCCO";
-                  const cover = s.cover_photo_url || s.property?.photos?.[0] || (isMarrakech ? fallbackMarrakech : null);
-                  return (
-                    <Link
-                      key={s.id}
-                      to={`/annonces/${s.slug || s.id}`}
-                      className="group block rounded-2xl overflow-hidden border border-border bg-card hover:shadow-lg transition-shadow"
-                    >
-                      <div className="aspect-[4/3] bg-muted overflow-hidden">
-                        {cover ? (
-                          <img
-                            src={cover}
-                            alt={s.title || t("intl_listings.cover_alt")}
-                            loading="lazy"
-                            className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                            <Globe2 className="h-10 w-10 opacity-40" />
-                          </div>
-                        )}
-                      </div>
-                      <div className="p-4">
-                        <p className="text-xs text-muted-foreground flex items-center gap-1.5 mb-1.5">
-                          <MapPin className="h-3 w-3" />
-                          {s.city || ","}
-                          {s.country && s.country !== "FR" && (
-                            <span className="font-medium text-foreground/80">({s.country})</span>
-                          )}
-                        </p>
-                        <h3 className="font-heading text-base font-medium text-foreground line-clamp-2 mb-2">
-                          {s.title || t("intl_listings.default_title")}
-                        </h3>
-                        <p className="text-xs text-muted-foreground">
-                          {formatPeriod(s.start_date, s.end_date)}
-                        </p>
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
-            </>
-          )}
         </section>
       </div>
     </div>

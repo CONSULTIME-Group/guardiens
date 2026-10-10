@@ -103,3 +103,9 @@ Navigateur local non connecté, ordinateur seulement (1280 px). Aucun audit mobi
 - [ ] Recette membre non admin réelle : bloquée (aucun compte de test déclaré, SET ROLE refusé, pas d'usurpation). Décision Jérémie : accepter la preuve statique ou fournir un compte de test.
 - [ ] Noté : annonces en pause d'autrui (7) visibles en grisé pour l'admin seulement ; homonymes (Saint-Denis) sans choix, renvoyé en L2 ; panne vérification département sans message dédié.
 - [ ] L2 non démarré, critères précisés dans le plan.
+
+## L1 clos par dérogation, L2 livré (10/10/2026)
+- [x] L1 clos par décision Jérémie 14:28 ; recette membre non admin NON passée, retirée de la gate.
+- [x] L2 livré non publié (détail et preuves dans le plan) : page internationale pays, ville, rayon, dates, animaux, liste/carte, adresse partageable, carrousel dès 1.
+- [ ] L2 à valider : suggestion de ville cliquée, dates/animaux en navigateur, carte gardiens CA, session connectée.
+- [ ] L3 non lancé, attend validation L2.
