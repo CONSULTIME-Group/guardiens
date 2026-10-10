@@ -64,6 +64,9 @@ export interface NextActionResult {
 /** Seuil sous lequel un profil gardien n'apparaît pas dans la recherche. */
 export const PROFILE_SEARCH_THRESHOLD = 40;
 
+/** Texte déjà replié (sans accents, minuscules). */
+export const ROLE_SWITCH_INTENT = /\b(inverse|inverser|inversee?|basculer|changer d'espace|changer de role|changer de compte|passer (en|cote|du cote) (gardien|guardien|proprietaire)|espace (gardien|proprietaire))\b/;
+
 /** Lot J4 : vrai quand la question porte explicitement sur le profil. */
 export function isProfileQuestion(question: string): boolean {
   return PROFILE_ASKED.test(foldText(question)) || /\bprofil\b/.test(foldText(question));
@@ -126,6 +129,20 @@ export function computeNextAction(input: NextActionInput): NextActionResult {
       : "end";
 
   const sitIntent = SIT_INTENT.test(q) || Boolean(input.largeAnimals);
+
+  // Demande d'inverser ou de changer d'espace sur un compte aux deux facettes :
+  // on oriente vers le changement d'espace réel, jamais vers l'entraide.
+  const switchAsked = role === "both" && ROLE_SWITCH_INTENT.test(q);
+  if (switchAsked) {
+    const toSitter = input.activeRole === "owner";
+    return {
+      action: toSitter
+        ? { label: "Passer en espace gardien", path: "/dashboard?espace=gardien", reason: "changer_espace" }
+        : { label: "Passer en espace propriétaire", path: "/dashboard?espace=proprietaire", reason: "changer_espace" },
+      chips: [],
+      placement,
+    };
+  }
 
   // Qui cherche de l'aide : publier passe devant tout. Lot J3 : l'annonce de
   // garde passe devant seulement si la personne parle d'un départ ; des
