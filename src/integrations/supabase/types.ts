@@ -9666,6 +9666,7 @@ export type Database = {
           smoker: boolean | null
           special_animal_skills: string[]
           strict_rules_ok: boolean | null
+          travel_zones: string[] | null
           travels_with_children: boolean | null
           travels_with_own_animals: boolean | null
           updated_at: string
@@ -9718,6 +9719,7 @@ export type Database = {
           smoker?: boolean | null
           special_animal_skills?: string[]
           strict_rules_ok?: boolean | null
+          travel_zones?: string[] | null
           travels_with_children?: boolean | null
           travels_with_own_animals?: boolean | null
           updated_at?: string
@@ -9770,6 +9772,7 @@ export type Database = {
           smoker?: boolean | null
           special_animal_skills?: string[]
           strict_rules_ok?: boolean | null
+          travel_zones?: string[] | null
           travels_with_children?: boolean | null
           travels_with_own_animals?: boolean | null
           updated_at?: string
@@ -11697,6 +11700,7 @@ export type Database = {
           reply_median_minutes: number | null
           sitter_type: string | null
           special_animal_skills: string[] | null
+          travel_zones: string[] | null
           travels_with_children: boolean | null
           travels_with_own_animals: boolean | null
           user_id: string | null
@@ -13895,6 +13899,37 @@ export type Database = {
           user_id: string
         }[]
       }
+      search_sitter_pool_mobile: {
+        Args: { p_country: string; p_tokens: string[] }
+        Returns: {
+          animal_types: string[]
+          avatar_url: string
+          bio: string
+          city: string
+          competences: string[]
+          completed_sits_count: number
+          country: string
+          experience_years: string
+          first_name: string
+          geographic_radius: number
+          has_vehicle: boolean
+          identity_verified: boolean
+          interests: string[]
+          is_available: boolean
+          last_seen_at: string
+          latitude_approx: number
+          longitude_approx: number
+          postal_code: string
+          profile_completion: number
+          reply_median_minutes: number
+          sitter_type: string
+          special_animal_skills: string[]
+          travel_zones: string[]
+          travels_with_children: boolean
+          travels_with_own_animals: boolean
+          user_id: string
+        }[]
+      }
       seasonal_nurture_plan: {
         Args: { p_active_days?: number; p_period_key: string }
         Returns: {
@@ -14026,6 +14061,7 @@ export type Database = {
           user_id: string
         }[]
       }
+      valid_travel_zones: { Args: { z: string[] }; Returns: boolean }
     }
     Enums: {
       activity_level: "calm" | "moderate" | "sportive"

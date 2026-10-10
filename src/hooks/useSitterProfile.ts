@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { logger } from "@/lib/logger";
 import { validateAvatarFile } from "@/lib/validateAvatarFile";
 import { compressAvatarFile } from "@/lib/compressImage";
+import { normalizeTravelZones } from "@/lib/travelZones";
 
 export interface SitterProfileData {
   // Step 1 - Identity (from profiles table)
@@ -40,6 +41,8 @@ export interface SitterProfileData {
   vehicle_type: string;
   /** 30 est le marqueur de silence (ancien défaut de colonne), pas une déclaration. */
   geographic_radius: number | null;
+  /** Zones de déplacement (lot 2). null = non renseignée, jamais un opt-in implicite. */
+  travel_zones: string[] | null;
   min_duration: number;
   max_duration: number;
   availability_dates: any[];
@@ -97,7 +100,7 @@ const defaultData: SitterProfileData = {
   motivation: "",
   sitter_type: "", accompanied_by: "", smoker: null, availability_during: "", lifestyle: [],
   animal_types: [], experience_years: "", references_text: "",
-  has_license: null, has_vehicle: null, vehicle_type: "", geographic_radius: null, /* jamais pré-écrit : la question attend une vraie réponse */ min_duration: 3, max_duration: 21, availability_dates: [], is_available: false,
+  has_license: null, has_vehicle: null, vehicle_type: "", geographic_radius: null, travel_zones: null, /* jamais pré-écrit : la question attend une vraie réponse */ min_duration: 3, max_duration: 21, availability_dates: [], is_available: false,
   min_stay_duration: "flexible", preferred_frequency: "flexible", min_notice: "asap", preferred_periods: [], preferred_environments: [],
   strict_rules_ok: null, prefer_visitors: null, farm_animals_ok: null, preferences_notes: "",
   meeting_preference: [], handover_preference: "", languages: [], bonus_skills: [], interests: [],
@@ -172,6 +175,7 @@ export function useSitterProfile() {
       has_vehicle: s?.has_vehicle ?? null,
       vehicle_type: (s as any)?.vehicle_type || "",
       geographic_radius: s?.geographic_radius ?? null,
+      travel_zones: normalizeTravelZones((s as any)?.travel_zones),
       min_duration: s?.min_duration || 3,
       max_duration: s?.max_duration || 21,
       availability_dates: (s?.availability_dates as any[]) || [],
@@ -346,7 +350,7 @@ export function useSitterProfile() {
       const sitterFields = [
         "motivation", "sitter_type", "accompanied_by", "smoker", "availability_during",
         "lifestyle", "animal_types", "experience_years", "references_text",
-        "has_license", "has_vehicle", "vehicle_type", "geographic_radius", "min_duration", "max_duration",
+        "has_license", "has_vehicle", "vehicle_type", "geographic_radius", "travel_zones", "min_duration", "max_duration",
         "availability_dates", "is_available", "strict_rules_ok", "prefer_visitors", "farm_animals_ok",
         "preferences_notes", "meeting_preference", "handover_preference",
         "languages", "bonus_skills", "interests", "competences",
@@ -361,6 +365,7 @@ export function useSitterProfile() {
 
       const sitterUpdate: any = {};
       sitterFields.forEach(f => { if (f in stepData) sitterUpdate[f] = (stepData as any)[f]; });
+      if ("travel_zones" in sitterUpdate) sitterUpdate.travel_zones = normalizeTravelZones(sitterUpdate.travel_zones);
 
       if (Object.keys(sitterUpdate).length > 0) {
         if (sitterProfileId) {

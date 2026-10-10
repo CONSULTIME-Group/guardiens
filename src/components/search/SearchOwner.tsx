@@ -8,11 +8,12 @@ import ReportButton from "@/components/reports/ReportButton";
 import { supabase } from "@/integrations/supabase/client";
 import { geocodeCity } from "@/lib/geocode";
 import {
-  fetchSitterSearchPool, fetchSitterCountryCounts, poolRowToSitter, distanceFrom,
+  fetchSitterSearchPool, fetchSitterMobilePool, fetchSitterCountryCounts, poolRowToSitter, distanceFrom,
   applyZone, zoneCounts, changeCountry, selectPlace, suggestionSources,
   fromGeoApiGouv, fromPhoton, computeMapViewport, RESULTS_PAGE_SIZE,
   type ZoneMode, type PlaceSuggestion,
 } from "@/lib/sitterSearch";
+import { canComeTo, destinationTokens } from "@/lib/travelZones";
 import { ALLOWED_ALERT_RADII, snapToAllowedRadius } from "@/lib/alertRadius";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -127,6 +128,17 @@ const SearchOwner = () => {
   // Les filtres purement clients (avec véhicule, vérifié, note min, animaux, etc.) sont appliqués en mémoire via useMemo,
   // sans relancer aucune requête Supabase ni géocodage.
   const [rawResults, setRawResults] = useState<any[]>([]);
+  // Lot 2 : « Habitent à proximité » (live) ou « Peuvent venir ici » (come).
+  const [presence, setPresence] = useState<"live" | "come">("live");
+  // Clé du jeu brut affiché : un jeu chargé pour un autre pays ou un autre
+  // mode n'est jamais montré pendant la nouvelle lecture (fin de « Canada (777) »).
+  const [rawKey, setRawKey] = useState<string | null>(null);
+  // « Peuvent venir ici » exige une destination pays ; « Tous les pays » = proximité.
+  const effectivePresence: "live" | "come" = selectedCountry ? presence : "live";
+  const destRegion = effectivePresence === "come" && selectedCountry === "FR" && city
+    ? getRegionCode(getDeptCode(cityPostalCode))
+    : null;
+  const searchKey = `${selectedCountry ?? "*"}|${effectivePresence}|${destRegion ?? ""}`;
   const [searchCenter, setSearchCenter] = useState<{ lat: number; lng: number } | null>(null);
   // Vrai dès le montage : aucun « 0 gardien » affiché avant la première lecture.
   const [loading, setLoading] = useState(true);
@@ -632,12 +644,16 @@ const SearchOwner = () => {
   const handleSearch = useCallback(async () => {
     const seq = ++searchSeqRef.current;
     const stale = () => seq !== searchSeqRef.current;
+    const key = searchKey;
     setLoading(true);
     setSearchError(null);
 
     let pool: any[];
     try {
-      pool = (await fetchSitterSearchPool(selectedCountry)).map(poolRowToSitter);
+      pool = (effectivePresence === "come" && selectedCountry
+        ? await fetchSitterMobilePool(destinationTokens({ country: selectedCountry, regionFr: destRegion }), selectedCountry)
+        : await fetchSitterSearchPool(selectedCountry)
+      ).map(poolRowToSitter);
     } catch (err) {
       if (stale()) return;
       console.error("[SearchOwner] Erreur chargement gardiens:", err);
@@ -783,9 +799,10 @@ const SearchOwner = () => {
     });
 
     setRawResults(enrichedAll);
+    setRawKey(key);
     setSearchCenter(searchCoords);
     setLoading(false);
-  }, [city, cityCenter, cityCountry, selectedCountry, viewerOwner, user?.id]);
+  }, [city, cityCenter, cityCountry, selectedCountry, viewerOwner, user?.id, effectivePresence, destRegion, searchKey]);
 
   // Auto-search on network dep change (debounced) : ville / code postal uniquement.
   // Les filtres purement clients (véhicule, vérifié, note min, animaux, radius, zone, tri…)
@@ -806,6 +823,10 @@ const SearchOwner = () => {
       ? getDeptCode(refPostal)
       : null;
 
+    // Jeu brut d'une autre recherche (pays, mode) : rien d'affiché pendant la lecture.
+    if (rawKey !== searchKey) {
+      return { results: [] as any[], densityCounts: { radius: 0, dept: 0, region: 0, country: 0 } };
+    }
     let filtered = rawResults;
     if (vehicled) filtered = filtered.filter((s: any) => s.has_vehicle);
     if (availableOnly) filtered = filtered.filter((s: any) => s.is_available);
@@ -831,8 +852,10 @@ const SearchOwner = () => {
     const ctx = { zoneMode, country: selectedCountry, center: searchCenter, radiusKm: radius[0], refDept };
     const density = zoneCounts(filtered, ctx);
 
-    let zoned = applyZone(filtered, ctx);
-    if (zoneMode === "radius" && !searchCenter && city) {
+    let zoned = effectivePresence === "come" && selectedCountry
+      ? filtered.filter((s: any) => canComeTo(s, { country: selectedCountry, regionFr: destRegion, center: city ? searchCenter : null }))
+      : applyZone(filtered, ctx);
+    if (effectivePresence === "live" && zoneMode === "radius" && !searchCenter && city) {
       // Ville introuvable au géocodage : repli sur le nom de commune.
       zoned = zoned.filter((s: any) => s.profile?.city?.toLowerCase().includes(city.toLowerCase()));
     }
@@ -878,11 +901,13 @@ const SearchOwner = () => {
     }
 
     return { results: sorted, densityCounts: density };
-  }, [rawResults, searchCenter, city, cityCountry, cityPostalCode, userPostalCode, radius, zoneMode, selectedCountry, animalTypes, vehicled, availableOnly, verifiedOnly, emergencyOnly, minSits, minRating, sort, sortUserOverride, viewerOwner]);
+  }, [rawResults, searchCenter, city, cityCountry, cityPostalCode, userPostalCode, radius, zoneMode, selectedCountry, animalTypes, vehicled, availableOnly, verifiedOnly, emergencyOnly, minSits, minRating, sort, sortUserOverride, viewerOwner, effectivePresence, destRegion, rawKey, searchKey]);
 
   // La grille repart du premier palier à chaque changement de résultats.
   useEffect(() => { setVisibleCount(RESULTS_PAGE_SIZE); }, [results]);
 
+  // Tri réellement appliqué (même règle que le dérivé des résultats).
+  const activeSort: SortOption = !sortUserOverride && sort === "affinity" && !viewerOwner ? "closest" : sort;
   const hasActiveFilters = vehicled || availableOnly || verifiedOnly || emergencyOnly || animalTypes.length > 0 || minSits !== "all" || minRating !== "all";
   const hasAnyRating = results.some((s: any) => s.avgRating !== null);
 
@@ -1027,9 +1052,13 @@ const SearchOwner = () => {
         </h1>
         <p className="text-sm md:text-[15px] text-muted-foreground max-w-2xl leading-relaxed">
           Des gardiens de confiance près de chez vous, que vous pouvez rencontrer avant une garde.{" "}
-          {viewerOwner
+          {activeSort === "affinity"
             ? "Classés par affinité avec votre foyer."
-            : "Classés du plus proche au plus loin."}
+            : activeSort === "rating"
+              ? "Classés par note."
+              : activeSort === "experience"
+                ? "Classés par expérience."
+                : "Classés du plus proche au plus loin."}
         </p>
         {totalSearchable > 0 && (
           <p className="hidden md:flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground pt-0.5">
@@ -1243,7 +1272,7 @@ const SearchOwner = () => {
           aria-label="Périmètre de recherche"
           className="flex items-center gap-1.5 flex-wrap pt-1"
         >
-          {zoneChips.map((z) => {
+          {effectivePresence === "live" && zoneChips.map((z) => {
             const active = zoneMode === z.key;
             const chipClass = `min-h-9 rounded-full border px-3 py-1 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40 disabled:cursor-not-allowed ${
               active
@@ -1321,6 +1350,23 @@ const SearchOwner = () => {
             );
           })}
 
+          {/* Lot 2 : qui habite près de la destination, ou qui peut y venir. */}
+          {selectedCountry && (
+            <div role="group" aria-label="Type de recherche" className="inline-flex rounded-full border border-border bg-card p-0.5 shrink-0">
+              {([["live", "Habitent à proximité"], ["come", "Peuvent venir ici"]] as const).map(([k, label]) => (
+                <button
+                  key={k}
+                  type="button"
+                  aria-pressed={effectivePresence === k}
+                  onClick={() => setPresence(k)}
+                  className={`min-h-9 rounded-full px-3 text-xs transition-colors ${effectivePresence === k ? "bg-primary/10 text-primary font-semibold" : "text-muted-foreground hover:text-foreground"}`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
+
           {/* Pays : liste et chiffres de search_sitter_country_counts, même
               population que la liste. « Tous les pays » lève la restriction. */}
           {sitterCountries.length > 1 && (() => {
@@ -1364,15 +1410,15 @@ const SearchOwner = () => {
           <div className="flex items-center gap-2 min-w-0 flex-1 overflow-x-auto no-scrollbar snap-x snap-mandatory">
             <div className="shrink-0 min-w-0" aria-live="polite">
               <p className="font-heading text-[17px] sm:text-lg font-semibold leading-tight text-foreground">
-                {loading
+                {loading || rawKey !== searchKey
                   ? t("search_results.sitters_searching")
                   : t("search_results.sitters_found", { count: results.length })}
               </p>
-              {!loading && results.length > 0 && (
+              {!loading && rawKey === searchKey && results.length > 0 && (
                 <p className="text-[11.5px] text-muted-foreground leading-snug mt-0.5">
-                  {sort === "affinity" && viewerOwner
+                  {activeSort === "affinity"
                     ? t("search_results.sitters_hint_affinity")
-                    : sort === "rating"
+                    : activeSort === "rating"
                       ? t("search_results.sitters_hint_rating")
                       : sort === "experience"
                         ? t("search_results.sitters_hint_experience")
@@ -1483,7 +1529,7 @@ const SearchOwner = () => {
                 Réessayer
               </Button>
             </div>
-          ) : loading ? (
+          ) : loading || rawKey !== searchKey ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" aria-busy="true" aria-label="Chargement des gardiens">
               {Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="bg-card rounded-xl overflow-hidden border border-border">
