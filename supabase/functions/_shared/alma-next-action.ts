@@ -65,7 +65,7 @@ export interface NextActionResult {
 export const PROFILE_SEARCH_THRESHOLD = 40;
 
 /** Texte déjà replié (sans accents, minuscules). */
-export const ROLE_SWITCH_INTENT = /\binvers|\bbascul|changer d.espace|changer de (role|compte)|passer (en|cote|du cote) (gardien|guardien|proprietaire)/;
+export const ROLE_SWITCH_INTENT = /\binvers|\bbascul|changer d.espace|changer de (role|compte)|passer (en|cote|du cote) (espace )?(gardien|guardien|proprietaire)/;
 
 /** Lot J4 : vrai quand la question porte explicitement sur le profil. */
 export function isProfileQuestion(question: string): boolean {
