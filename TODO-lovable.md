@@ -148,3 +148,7 @@ Navigateur local non connecté, ordinateur seulement (1280 px). Aucun audit mobi
 
 - L6 livré non publié (voir plan, section L6) ; recette visuelle et sauvegarde réelle à faire sur compte de test. L7 en attente de retour.
 - L7 réduit livré non publié (voir plan, section L7) ; limites : panne recherche sans test auto, captures édition non faites.
+
+## Audits admin Annonces / Entraide (10/10/2026)
+- [x] Situations humaines, filtres, répartition complète, fiche détail, notifiés réconciliés, diffusion bloquée côté écran : aperçu prêt.
+- [ ] Publication du site et déploiement de send-mass-email-proximity : en attente de GO.
