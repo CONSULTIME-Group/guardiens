@@ -1,3 +1,4 @@
+import { travelZonesSummary, travelZoneLabels } from "@/lib/travelZones";
 import { formatRatingFr } from "@/lib/formatRatingFr";
 import { useState, useEffect, useRef } from "react";
 import { splitReviewsByRole, sitterReviewsHeading } from "@/lib/publicProfileReviews";
@@ -443,6 +444,10 @@ export default function PublicSitterProfile() {
               </p>
             )}
             {props.mobilityLabel && <p>{props.mobilityLabel}</p>}
+            {/* Lot 2 : zones déclarées seulement, « non renseignée » sinon. */}
+            <p data-testid="travel-zones-summary" className={props.sitterProfile?.travel_zones ? "" : "text-muted-foreground"}>
+              {travelZonesSummary(props.sitterProfile?.travel_zones)}
+            </p>
             {props.deptSlug && props.deptName && (
               <p>
                 <Link
@@ -685,7 +690,7 @@ export default function PublicSitterProfile() {
       // Vue publique : alignée sur les entrées scorées du moteur (symétrie
       // du 23/08/2026), sauf sensitivities (donnée de santé, jamais exposée).
       const PUBLIC_SITTER_COLS =
-        "user_id, motivation, sitter_type, accompanied_by, lifestyle, animal_types, has_vehicle, has_license, geographic_radius, min_stay_duration, is_available, competences, special_animal_skills, preferred_frequency, min_notice, preferred_environments, farm_animals_ok, own_animals, reply_median_minutes, travels_with_children, travels_with_own_animals, work_during_sit, availability_during, experience_years, languages, interests, life_pace, meeting_preference";
+        "user_id, motivation, sitter_type, accompanied_by, lifestyle, animal_types, has_vehicle, has_license, geographic_radius, min_stay_duration, is_available, competences, special_animal_skills, preferred_frequency, min_notice, preferred_environments, farm_animals_ok, own_animals, reply_median_minutes, travels_with_children, travels_with_own_animals, work_during_sit, availability_during, experience_years, languages, interests, life_pace, meeting_preference, travel_zones";
       const [profileRes, baseProfileRes, sitterRes, reviewsRes, galleryRes, emergencyRes, subRes, ownerRes, missionsRes, extExpRes] =
         await Promise.all([
           supabase.from("public_profiles").select(PUBLIC_PROFILE_COLS).eq("id", id).maybeSingle(),
@@ -1885,6 +1890,8 @@ export default function PublicSitterProfile() {
         const contactFacts = [
           { label: "Animaux", value: animalsFact },
           { label: "Rayon", value: radius ? `${radius} km` : "" },
+          // Lot 2 : zones déclarées, « Non renseignée » sinon (jamais une mobilité supposée).
+          { label: "Mobilité", value: travelZoneLabels(sitterProfile?.travel_zones).join(", ") || "Non renseignée" },
           { label: "Durée", value: durationLabel },
           { label: "Avant la garde", value: meetingPreferenceLabel(sitterProfile?.meeting_preference) },
           { label: "Expérience", value: experienceLabel },

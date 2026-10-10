@@ -43,6 +43,9 @@ export interface PoolRow {
   special_animal_skills: string[] | null;
   interests: string[] | null;
   experience_years: string | null;
+  /** Lot 2, seulement via search_sitter_pool_mobile. */
+  travel_zones?: string[] | null;
+  geographic_radius?: number | null;
 }
 
 /** Vivier complet (pays donné, ou tous pays si null), paginé sans perte. */
@@ -60,6 +63,26 @@ export async function fetchSitterSearchPool(country: string | null): Promise<Poo
     if (batch.length < SITTER_POOL_PAGE) return rows;
   }
   console.warn(`[sitter-search] ${MAX_PAGES} pages lues, vivier tronqué.`);
+  return rows;
+}
+
+/**
+ * « Peuvent venir ici » : résidents du pays de destination OU gardiens dont
+ * une zone déclarée couvre la destination (jetons destinationTokens).
+ */
+export async function fetchSitterMobilePool(tokens: string[], country: string): Promise<PoolRow[]> {
+  const rows: PoolRow[] = [];
+  for (let page = 0; page < MAX_PAGES; page++) {
+    const from = page * SITTER_POOL_PAGE;
+    const { data, error } = await (supabase as any)
+      .rpc("search_sitter_pool_mobile", { p_country: country, p_tokens: tokens })
+      .order("user_id", { ascending: true })
+      .range(from, from + SITTER_POOL_PAGE - 1);
+    if (error) throw error;
+    const batch = (data ?? []) as PoolRow[];
+    rows.push(...batch);
+    if (batch.length < SITTER_POOL_PAGE) return rows;
+  }
   return rows;
 }
 
@@ -84,6 +107,8 @@ export function poolRowToSitter(r: PoolRow) {
     sitter_type: r.sitter_type,
     travels_with_children: r.travels_with_children,
     travels_with_own_animals: r.travels_with_own_animals,
+    travel_zones: r.travel_zones ?? null,
+    geographic_radius: r.geographic_radius ?? null,
     _card: {
       competences: r.competences,
       special_animal_skills: r.special_animal_skills,
