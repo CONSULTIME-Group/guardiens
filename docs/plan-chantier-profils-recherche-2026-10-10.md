@@ -406,3 +406,14 @@ Preuves finales : 49 tests ciblés verts, 7 fichiers (journal `/tmp/browser/l5-i
 Gouaches conservées : Bénédicte `0229ec31` utilise réellement hero-63 (carnet, chat et hérisson, pas chien), Venaya hero-57 (chat), Frederic hero-95 (jardin), Guilherme hero-61 (chien). Aucun index réel changé. À 390, le fond reste plein écran et reconnaissable, mais les têtes du chat Venaya et du chien Guilherme restent partiellement sous la protection de texte ; compromis visuel soumis à validation root, pas déclaré parfait. Aucun voile global.
 
 Interactions en fixture isolée, sans compte ni usurpation : survol/focus/clic ID et ouverture du picker, toutes les requêtes non GET/HEAD/OPTIONS bloquées, aucune sauvegarde. Captures `id-hover.png`, `id-focus.png`, `id-click.png`, `picker-open.png` ; aucune erreur page. Picker capturé à l'ouverture, images lazy hors zone non chargées : grille complète non recettée. Galerie membre et session réelle non revérifiées ; limites L7 antérieures conservées. L5 attend validation Jérémie avant L6.
+
+## L6 Édition du profil, livraison (10/10/2026, non publiée)
+Base `796c8a41`. L5 laissé en l'état sur décision de Jérémie.
+- G1 : sélecteur unique « Environnement » retiré du logement ; puces `environments` seule saisie. Ancien `environment` jamais effacé ni recopié : rappel « Ancien choix enregistré » et bouton « Ajouter » explicite (`OwnerStepHousing.tsx`).
+- G2 : titre « Vous et votre présentation » (`OwnerStepIdentity.tsx`).
+- G3 : « Découvrir [ville] » replié par défaut, mention « rédigé automatiquement par une IA, non vérifié » (`LocationProfileCard.tsx`).
+- G4 : « Modifications non enregistrées » / « Enregistré » / erreur visible avec saisie conservée, propriétaire et gardien (`OwnerProfile.tsx`, `SitterProfile.tsx`, `common.json`). Aucune promesse d'enregistrement automatique.
+- G5 : un seul lien « Voir mon profil public » (avatars non cliquables, lien retiré du bandeau de progression).
+- G6 : région ARA affichée « Lyon, Grenoble, Clermont-Ferrand et Alpes du Nord », identifiant `region:FR-ARA` inchangé.
+Vérifications : types OK, build automatique OK (15:24 UTC), 727 tests profil/lib dont 2 nouveaux (`OwnerStepHousing.env.test.tsx`). Aucune donnée, SQL, droit, barème modifiés.
+Limites : recette visuelle 1 desktop + 1 mobile et aller-retour sauvegarde/erreur non faits (page connectée, aucun compte de test déclaré, fixture non montée pour budget). L7 non lancé.
