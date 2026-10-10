@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
-  parisTodayIso, isFranceSit, isOpenSit, isEndedSit, isPastSit, sitGeocodeKey, sitDeptCode, resolveSitPlace, isWithinRadius, fetchAllPages, fetchInChunks, applyOpenSitFilter,
+  parisTodayIso, isFranceSit, isOpenSit, isEndedSit, isPastSit, sitGeocodeKey, resolveSitPlace, isFrancePlace, isWithinRadius, fetchAllPages, fetchInChunks, applyOpenSitFilter,
 } from "@/lib/sitSearchRules";
 
 describe("moteur d'annonces, règles L1", () => {
@@ -28,27 +28,38 @@ describe("moteur d'annonces, règles L1", () => {
     expect(isFranceSit({ country: null })).toBe(false);
   });
 
-  it("Marlhes est situé à Marlhes, jamais à la ville du propriétaire", () => {
-    const sit = { city: "Marlhes", country: "FR", departement_code: "42", owner: { postal_code: "42000" } } as any;
-    (sit.owner as any).city = "Saint-Étienne";
-    expect(sitGeocodeKey(sit)).toEqual({ city: "Marlhes", country: "FR" });
+  it("source principale = propriétaire : Marlhes (propriétaire Saint-Étienne) cherché à Saint-Étienne", () => {
+    const sit = { city: "Marlhes", country: "FR", departement_code: "42", owner: { city: "Saint-Étienne", country: "FR", postal_code: "42000", departement_code: "42" } };
+    expect(resolveSitPlace(sit)).toEqual({ city: "Saint-Étienne", country: "FR", dept: "42", source: "owner" });
+    expect(sitGeocodeKey(sit)).toEqual({ city: "Saint-Étienne", country: "FR" });
   });
 
-  it("commune absente : pas de géocodage, département de l'annonce seul, jamais le code postal du propriétaire", () => {
-    expect(sitGeocodeKey({ city: null, country: "FR" })).toBeNull();
-    expect(sitDeptCode({ city: null, country: "FR", departement_code: null, owner: { postal_code: "69380" } })).toBeNull();
-    expect(sitDeptCode({ country: "FR", departement_code: "42", owner: { postal_code: "69005" } })).toBe("42");
-    expect(sitDeptCode({ country: "CA", owner: { postal_code: "G0M1W0" } })).toBeNull();
+  it("A11 : annonce « Paris » d'un propriétaire lyonnais, cherchée à Lyon (69), sans lieu incohérent", () => {
+    const paris = { city: "Paris", country: "FR", departement_code: "69", owner: { city: "Lyon", country: "FR", postal_code: "69005", departement_code: null } };
+    expect(resolveSitPlace(paris)).toEqual({ city: "Lyon", country: "FR", dept: "69", source: "owner" });
   });
 
-  it("A11 : commune Paris (75) et département 69 en désaccord, lieu incohérent sans département", () => {
-    const paris = { city: "Paris", country: "FR", departement_code: "69", owner: { postal_code: "69005" } };
-    expect(resolveSitPlace(paris, "75")).toEqual({ dept: null, incoherent: true });
-    expect(resolveSitPlace({ city: "Marlhes", country: "FR", departement_code: "42" }, "42")).toEqual({ dept: "42", incoherent: false });
-    // département de la commune quand l'annonce n'en a pas
-    expect(resolveSitPlace({ city: "Marlhes", country: "FR", departement_code: null }, "42")).toEqual({ dept: "42", incoherent: false });
-    // département inconnu de la commune : celui de l'annonce
-    expect(resolveSitPlace({ city: "X", country: "FR", departement_code: "1" }, null)).toEqual({ dept: "01", incoherent: false });
+  it("département du propriétaire jamais mélangé avec celui de l'annonce", () => {
+    const p = resolveSitPlace({ city: "A", country: "FR", departement_code: "75", owner: { city: "Vienne", country: "FR", postal_code: "38200" } });
+    expect(p.dept).toBe("38");
+  });
+
+  it("pays : lu sur le propriétaire, jamais FR déduit d'un pays absent", () => {
+    expect(resolveSitPlace({ owner: { city: "Montréal", country: "CA", postal_code: "H2X1Y4" } })).toEqual({ city: "Montréal", country: "CA", dept: null, source: "owner" });
+    // pays du propriétaire absent : repli entier sur l'annonce
+    expect(resolveSitPlace({ city: "Lyon", country: "FR", departement_code: "69", owner: { city: "Lyon", country: null, postal_code: "69005" } }))
+      .toEqual({ city: "Lyon", country: "FR", dept: "69", source: "sit" });
+    // aucune source de pays : pas France
+    expect(isFrancePlace({ city: null, country: null, owner: { city: "Lyon", country: null } })).toBe(false);
+  });
+
+  it("repli annonce si la ville du propriétaire manque, sans commune inventée", () => {
+    const p = resolveSitPlace({ city: "Punaauia", country: "PF", departement_code: "987", owner: { city: "", country: "PF", postal_code: "98718" } });
+    expect(p).toEqual({ city: "Punaauia", country: "PF", dept: null, source: "sit" });
+    const cp = resolveSitPlace({ city: null, country: "FR", departement_code: "69", owner: { city: null, country: "FR", postal_code: "69380" } });
+    expect(cp).toEqual({ city: null, country: "FR", dept: "69", source: "sit" });
+    expect(sitGeocodeKey({ city: null, country: "FR", owner: { city: null, country: "FR" } })).toBeNull();
+    expect(resolveSitPlace({}).source).toBe("none");
   });
 
   it("rayon : seule une distance vérifiée <= rayon inclut (Pusignan 18 km exclu à 15 km)", () => {
