@@ -79,7 +79,10 @@ Navigateur local non connecté, ordinateur seulement (1280 px). Aucun audit mobi
 - [ ] Suivi : [plan du chantier](docs/plan-chantier-profils-recherche-2026-10-10.md) (registre des constats, lots L1 à L7 en séquence stricte, recettes après build, points non vérifiés)
 
 ## Lot L1 moteur d'annonces (10/10/2026)
-- [x] A1 à A9 corrigés, A11 expliqué, migration 0065, build et types OK, recette visiteur ordinateur et mobile 390 px. Détail : [plan, section 6](docs/plan-chantier-profils-recherche-2026-10-10.md)
+- [ ] A1 à A9 : première version e92029d revue avec 5 bloquants (rayon, NULL candidatures, code postal propriétaire, lectures > 1 000, autorisation mal transcrite), corrigés le 10/10, statut partiellement validé. Détail : [plan, section 6](docs/plan-chantier-profils-recherche-2026-10-10.md)
+- [x] Migration 0065 additive déjà appliquée (L1 n'est pas frontend seul)
+- [x] Autorisation : L1 à L7 autorisés en séquence conditionnelle, GO requis seulement pour la production
 - [ ] A10 non reproduit, cause non tranchée
 - [ ] Recette connectée, vue carte, régression Canada et avis admin en navigateur
-- [ ] Donnée : annonce archivée « Paris » avec département 69 (non modifiée)
+- [ ] Donnée : annonce archivée « Paris » avec département 69 (non modifiée), affichée « lieu à confirmer » sans département ni distance
+- [ ] Panneau Filtres à vérifier connecté (désactivé en visiteur)
