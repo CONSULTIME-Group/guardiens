@@ -87,30 +87,3 @@ export function reviewDateLabel(start: string | null | undefined, end: string | 
   return format(new Date(createdAt), "MMMM yyyy", { locale: fr });
 }
 
-const HELP_SKILLS: Array<{ values: string[]; label: string }> = [
-  { values: ["courses pour personne âgée", "courses"], label: "des courses pour une personne âgée" },
-  { values: ["transport", "conduite"], label: "un trajet en voiture" },
-  { values: ["aide aux devoirs", "aide scolaire"], label: "de l'aide aux devoirs" },
-  { values: ["aide administrative"], label: "de l'aide administrative" },
-  { values: ["informatique"], label: "un coup de pouce en informatique" },
-];
-
-/** Coups de main déduits des compétences, deux au plus. */
-export function entraideHelpItems(competences: string[] | null | undefined): string[] {
-  const set = new Set((competences ?? []).map((c) => String(c).trim().toLowerCase()));
-  return HELP_SKILLS.filter((h) => h.values.some((v) => set.has(v))).map((h) => h.label).slice(0, 2);
-}
-
-export function entraideBandText(input: {
-  firstName: string;
-  city: string | null;
-  helpsWith: string | null;
-  competences: string[] | null | undefined;
-}): { kind: "line"; text: string } | { kind: "skills"; text: string } | null {
-  const line = input.helpsWith?.trim();
-  if (line) return { kind: "line", text: `${input.firstName} l'écrit ainsi : « ${line} »` };
-  const items = entraideHelpItems(input.competences);
-  if (items.length === 0) return null;
-  const where = input.city ? ` autour de ${input.city}` : "";
-  return { kind: "skills", text: `${input.firstName} peut aussi donner un coup de main${where} : ${items.join(" ou ")}.` };
-}

@@ -10,7 +10,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import FavoriteButton from "@/components/shared/FavoriteButton";
 import StatutGardienBadge from "@/components/profile/StatutGardienBadge";
-import ReplyTimeBadge from "@/components/sitters/ReplyTimeBadge";
+import { lastVisitLabel, type HelpOffer } from "@/lib/profileSignals";
 import ResponsivenessBadge from "@/components/profile/ResponsivenessBadge";
 import type { HeroCtaVariant } from "@/components/profile/ProfileHero";
 import { BADGE_DEFINITIONS } from "@/components/badges/badge-definitions";
@@ -73,7 +73,9 @@ interface HeroProps {
   hasActiveSubscription: boolean;
   emergencyActive: boolean;
   statutGardien: string | null;
+  /** Ancien délai 30 jours : conservé pour compatibilité, non affiché (contrat unique L3, 90 jours). */
   replyMedianMinutes: number | null;
+  lastSeenAt?: string | null;
   quote: string | null;
 }
 
@@ -162,13 +164,17 @@ export const SitterIdentityHero = (p: HeroProps) => {
               </h1>
               <FavoriteButton targetType="sitter" targetId={p.id} size="md" />
             </div>
-            {(memberSince || p.completedSits > 0) && (
-              <p className="mt-2 text-[15px] text-muted-foreground font-body">
-                {memberSince && `Membre depuis ${memberSince}`}
-                {p.completedSits > 0 &&
-                  ` · ${p.completedSits} garde${p.completedSits > 1 ? "s réalisées" : " réalisée"}`}
-              </p>
-            )}
+            {(() => {
+              const visit = lastVisitLabel(p.lastSeenAt ?? null);
+              const parts = [
+                memberSince ? `Membre depuis ${memberSince}` : null,
+                p.completedSits > 0 ? `${p.completedSits} garde${p.completedSits > 1 ? "s réalisées" : " réalisée"}` : null,
+                visit ? `Dernière visite ${visit}` : null,
+              ].filter(Boolean);
+              return parts.length > 0 ? (
+                <p className="mt-2 text-[15px] text-muted-foreground font-body">{parts.join(" · ")}</p>
+              ) : null;
+            })()}
             <div className="mt-[14px] flex flex-wrap items-center justify-center md:justify-start gap-x-4 gap-y-2 text-[14px] font-body text-foreground">
               {p.identityVerified && (
                 <TooltipProvider delayDuration={200}>
@@ -206,7 +212,6 @@ export const SitterIdentityHero = (p: HeroProps) => {
               {p.statutGardien && p.statutGardien !== "novice" && (
                 <StatutGardienBadge statut={p.statutGardien as any} />
               )}
-              {p.replyMedianMinutes != null && <ReplyTimeBadge minutes={p.replyMedianMinutes} />}
               <ResponsivenessBadge userId={p.id} />
             </div>
           </div>
@@ -442,6 +447,37 @@ export const EntraideBand = ({
     </div>
   </section>
 );
+
+/* ── Offre d'entraide déclarée (lot L3) ──────────────────────────── */
+export const EntraideOfferSection = ({
+  offer,
+  firstName,
+  city,
+}: {
+  offer: HelpOffer;
+  firstName: string;
+  city: string | null;
+}) => {
+  if (!offer.offered) return null;
+  return (
+    <section aria-label={`Ce que propose ${firstName}`} className="space-y-4">
+      <SectionHeading eyebrow="Ce que je propose" title={`${firstName} propose un coup de main${city ? ` autour de ${city}` : ""}`} />
+      {offer.line && (
+        <p className="text-[15.5px] leading-relaxed text-foreground font-body whitespace-pre-line break-words">« {offer.line} »</p>
+      )}
+      {offer.categories.length > 0 && (
+        <ul className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {offer.categories.map((c) => (
+            <li key={c.key} className="flex flex-col items-center gap-2 rounded-xl bg-secondary/10 px-3 py-4 text-center">
+              <img src={SPOTS[c.spot]} alt="" aria-hidden="true" width={64} height={64} loading="lazy" decoding="async" className="h-16 w-16 object-contain" />
+              <span className="text-sm font-medium text-foreground font-body">{c.label}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+};
 
 /* ── Comment ça se passe ──────────────────────────────────────────── */
 export const HowItWorksSteps = ({ firstName }: { firstName: string }) => {

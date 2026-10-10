@@ -85,13 +85,15 @@ export function buildTrustTimeline(input: Input): TimelineEvent[] {
     .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
 
   if (ratedSorted.length > 0) {
+    const firstFive = ratedSorted.find((r) => (r.overall_rating ?? 0) >= 5);
+    // Lot L3 : un seul jalon quand le premier avis est aussi le premier 5 étoiles.
+    const sameReview = firstFive === ratedSorted[0];
     out.push({
       kind: "first_review",
       date: ratedSorted[0].created_at,
-      label: "Premier avis reçu",
+      label: sameReview ? "Premier avis reçu, 5 étoiles" : "Premier avis reçu",
     });
-    const firstFive = ratedSorted.find((r) => (r.overall_rating ?? 0) >= 5);
-    if (firstFive) {
+    if (firstFive && !sameReview) {
       out.push({
         kind: "first_five_star",
         date: firstFive.created_at,

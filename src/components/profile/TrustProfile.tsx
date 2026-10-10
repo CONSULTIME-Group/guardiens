@@ -89,7 +89,7 @@ const TrustProfile = ({ emailVerified, identityVerified, hasAvatar, profileCompl
           )}
 
           <p className="text-xs text-muted-foreground italic leading-relaxed">
-            Plus votre profil de confiance est complet, plus vous inspirez confiance. Un profil de confiance complet, c'est comme une poignée de main ferme : ça rassure.
+            Ces cinq étapes montrent ce que vous avez déclaré et vérifié. Elles rassurent, sans garantir la fiabilité d'une garde : vos échanges et votre rencontre la complètent. Distinct de la complétion du profil (sur 100) et de l'affinité.
           </p>
         </CollapsibleContent>
       </Collapsible>

@@ -151,6 +151,9 @@ export function useSitterProfile() {
 
     const p = profileRes.data;
     const s = sitterRes.data;
+    // Première activité gardien (lot L3) : une garde RÉALISÉE
+    // (profiles.completed_sits_count, calculé serveur), jamais une candidature.
+    setHasFirstActivity(((p as any)?.completed_sits_count ?? 0) > 0);
 
     const merged: SitterProfileData = {
       first_name: p?.first_name || "",
@@ -306,20 +309,6 @@ export function useSitterProfile() {
     return () => { cancelled = true; };
   }, [user]);
 
-  // Première activité gardien : au moins une candidature acceptée.
-  useEffect(() => {
-    if (!user) return;
-    let cancelled = false;
-    (async () => {
-      const { count } = await supabase
-        .from("applications")
-        .select("id", { count: "exact", head: true })
-        .eq("sitter_id", user.id)
-        .eq("status", "accepted");
-      if (!cancelled) setHasFirstActivity((count ?? 0) > 0);
-    })();
-    return () => { cancelled = true; };
-  }, [user]);
 
   const saveStep = useCallback(async (stepData: Partial<SitterProfileData>): Promise<boolean> => {
     if (!user) return false;
