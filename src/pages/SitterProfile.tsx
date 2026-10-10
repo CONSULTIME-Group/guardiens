@@ -220,6 +220,7 @@ const SitterProfile = () => {
     setLocalData(prev => ({ ...prev, ...partial }));
     setDirty(true);
     setSaved(false);
+    setSaveError(false);
   }, []);
 
   // La contrainte de longueur de la motivation vit au niveau du champ (StepIdentity,

@@ -14,8 +14,18 @@ import type { OwnerProfileData } from "@/hooks/useOwnerProfile";
 const TYPES = ["Appartement", "Maison", "Ferme", "Chalet", "Autre"];
 const TYPE_MAP: Record<string, string> = { Appartement: "apartment", Maison: "house", Ferme: "farm", Chalet: "chalet", Autre: "other" };
 
-const ENVS = ["Centre-ville", "Périurbain", "Campagne", "Montagne", "Bord de mer", "Forêt"];
-const ENV_MAP: Record<string, string> = { "Centre-ville": "city_center", Périurbain: "suburban", Campagne: "countryside", Montagne: "mountain", "Bord de mer": "seaside", Forêt: "forest" };
+/**
+ * Ancien sélecteur unique (`environment`), retiré de l'écran : les puces
+ * `environments` sont la seule saisie. La valeur ancienne n'est jamais
+ * effacée ni recopiée sans geste du membre (bouton « Ajouter »).
+ */
+const LEGACY_ENV_TO_PILL: Record<string, { key: string; label: string }> = {
+  city_center: { key: "ville", label: "Ville" },
+  countryside: { key: "campagne", label: "Campagne" },
+  mountain: { key: "montagne", label: "Montagne" },
+  seaside: { key: "mer", label: "Bord de mer" },
+  forest: { key: "foret", label: "Forêt" },
+};
 
 const COUNTS = ["1", "2", "3", "4", "5", "Plus de 5"];
 const EQUIPMENTS = ["Jardin", "Piscine", "WiFi", "Parking", "Terrasse", "Cheminée", "Buanderie", "Lave-vaisselle", "Congélateur", "TV", "Équipement sport", "BBQ"];
@@ -30,7 +40,6 @@ interface Props {
 const OwnerStepHousing = ({ data, onChange }: Props) => {
   const uid = useId();
   const propertyTypeId = `${uid}-property-type`;
-  const environmentId = `${uid}-environment`;
   const environmentsGroupId = `${uid}-environments-label`;
   const roomsId = `${uid}-rooms`;
   const bedroomsId = `${uid}-bedrooms`;
@@ -38,6 +47,8 @@ const OwnerStepHousing = ({ data, onChange }: Props) => {
   const accessibleId = `${uid}-accessible`;
   const equipmentsGroupId = `${uid}-equipments-label`;
   const descriptionId = `${uid}-description`;
+
+  const legacyEnv = data.environment ? LEGACY_ENV_TO_PILL[data.environment] ?? null : null;
 
   return (
     <div className="space-y-6">
@@ -53,23 +64,24 @@ const OwnerStepHousing = ({ data, onChange }: Props) => {
             </SelectContent>
           </Select>
         </div>
-        <div className="space-y-2">
-          <Label htmlFor={environmentId}>Environnement</Label>
-          <Select value={data.environment} onValueChange={v => onChange({ environment: v })}>
-            <SelectTrigger id={environmentId} className="rounded-lg h-12"><SelectValue placeholder="Choisir" /></SelectTrigger>
-            <SelectContent>
-              {ENVS.map(e => <SelectItem key={e} value={ENV_MAP[e]}>{e}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </div>
       </div>
 
       <div className="space-y-1">
         <Label id={environmentsGroupId} className="text-sm font-medium text-foreground">L'environnement de votre logement</Label>
         <p className="text-xs text-muted-foreground mb-3">Sélectionnez jusqu'à 3 environnements qui décrivent votre cadre de vie.</p>
         <div role="group" aria-labelledby={environmentsGroupId}>
-          <EnvironmentPills selected={data.environments} onChange={v => onChange({ environments: v })} />
+          <EnvironmentPills selected={data.environments || []} onChange={v => onChange({ environments: v })} />
         </div>
+        {legacyEnv && !(data.environments || []).includes(legacyEnv.key) && (
+          <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+            <span>Ancien choix enregistré : {legacyEnv.label}.</span>
+            {(data.environments || []).length < 3 && (
+              <Button type="button" variant="outline" size="sm" onClick={() => onChange({ environments: [...(data.environments || []), legacyEnv.key] })}>
+                Ajouter « {legacyEnv.label} »
+              </Button>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
