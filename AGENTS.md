@@ -1,7 +1,5 @@
 # Décisions techniques
 
-- Vue d ensemble admin (lot A13) : une lecture React Query par bloc, recharts différé, analyse IA générée au clic ; pourquoi : moins de 16 lectures et une panne n éteint pas les autres blocs.
-
 - Tableau de bord propriétaire (lot D1) : les blocs partagés avec le gardien changent par variante (prop `layout`/`variant`, défaut inchangé) ou par composant propriétaire dédié ; pourquoi : le rendu gardien reste intact jusqu'au lot D2.
 
 - Lectures d'autrui (profil propriétaire, écussons) : vues member_owner_profiles, public_owner_profiles, public_badge_attributions, tables réservées au titulaire, à l'admin et aux personnes engagées ; pourquoi : SEC1, aucune donnée de foyer ni lien donneur exposé.
@@ -26,5 +24,5 @@
 - Arrivée v2 (lots 1-2) : drapeau arrival_v2, /bienvenue et /arrivee/* via ArrivalRoutes.tsx, écrans lot 2 ré-exportés par ArriveeVous, intention dans profiles.arrival_intent, logique dans src/lib/arrival.ts, aucun import dynamique d'un module de l'entrée ; pourquoi : entrée < 307 200 octets.
 
 <!-- LOVABLE:BEGIN -->
-- Publication compiles assets only; exhaustive validation stays in `validate:ci` and GitHub CI with unchanged guard semantics; why: avoid full-suite replays during hosting builds.
+- `build` ends with `test:guard` and CI runs `test:guard` directly; why: owner decision of 17/08/2026, a red test blocks publication.
 <!-- LOVABLE:END -->
