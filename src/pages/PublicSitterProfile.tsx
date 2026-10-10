@@ -1521,6 +1521,8 @@ export default function PublicSitterProfile() {
 
       {/* ── Contenu principal z-1 ── */}
       <div className="relative z-[1]">
+      <div className="profile-notebook profile-notebook-sheet relative mx-auto max-w-6xl" data-profile-notebook>
+      <span aria-hidden="true" className="profile-notebook-spiral" />
       {/* ── HERO RESSERRÉ (vague 37) ── */}
       {profile && id && (() => {
         const overrideIndex = profile?.hero_image_index ?? null;
@@ -1533,6 +1535,7 @@ export default function PublicSitterProfile() {
         const isSitterFacet = activeTab === 'gardien';
         return (
           <ProfileHero
+            inNotebook
             facet={isSitterFacet ? "sitter" : activeTab === "entraide" ? "entraide" : "owner"}
             id={id}
             firstName={firstName}
@@ -1566,7 +1569,7 @@ export default function PublicSitterProfile() {
 
       {/* ── BARRE D'ONGLETS, visible si ≥ 2 onglets ── */}
       {availableTabs > 1 && (
-        <p className="max-w-5xl mx-auto px-4 pt-4 text-sm text-muted-foreground font-body">
+        <p className="profile-notebook-page pt-4 text-sm text-muted-foreground font-body">
           {hasSitterProfile && hasOwnerProfile
             ? `${firstName} garde chez les autres et fait garder à la maison.`
             : hasSitterProfile
@@ -1575,7 +1578,7 @@ export default function PublicSitterProfile() {
         </p>
       )}
       {availableTabs > 1 && (
-        <div className="flex border-b border-border bg-card sticky z-40 max-w-5xl mx-auto" style={{ top: "var(--public-header-h, 0px)" }}>
+        <div className="profile-notebook-page profile-notebook-tabs flex flex-wrap border-b border-border sticky z-40" style={{ top: "var(--public-header-h, 0px)" }}>
           {hasSitterProfile && (
             <button
               type="button"
@@ -1640,7 +1643,7 @@ export default function PublicSitterProfile() {
       )}
 
       {/* ── SÉPARATEUR ── */}
-      {availableTabs <= 1 && activeTab !== "gardien" && <hr className="border-border max-w-5xl mx-auto" />}
+      {availableTabs <= 1 && activeTab !== "gardien" && <div className="profile-notebook-page"><hr className="border-border" /></div>}
 
       {/* ── ONGLET GARDIEN, fiche allégée (lot F1) ───────────────────── */}
       {activeTab === 'gardien' && (() => {
@@ -1795,7 +1798,7 @@ export default function PublicSitterProfile() {
         );
 
         return (
-        <div data-profile-content className="max-w-5xl mx-auto px-4 md:px-6 py-[34px] md:py-[52px] pb-[calc(10.5rem+env(safe-area-inset-bottom))] lg:pb-[52px]">
+        <div data-profile-content className="profile-notebook-page py-[34px] md:py-[52px] pb-[calc(10.5rem+env(safe-area-inset-bottom))] lg:pb-[52px]">
           <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-[52px]">
           <div className="space-y-[52px] min-w-0">
 
@@ -2050,7 +2053,7 @@ export default function PublicSitterProfile() {
         }
 
         return (
-        <div data-profile-content className="max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-8 pb-[calc(10.5rem+env(safe-area-inset-bottom))] lg:pb-8">
+        <div data-profile-content className="profile-notebook-page py-6 md:py-8 pb-[calc(10.5rem+env(safe-area-inset-bottom))] lg:pb-8">
           <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-8">
             <div className="space-y-[52px] min-w-0">
 
@@ -2461,7 +2464,7 @@ export default function PublicSitterProfile() {
 
       {/* ── ONGLET ENTRAIDE ── */}
       {activeTab === 'entraide' && (
-        <div data-profile-content className="max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-8 pb-[calc(10.5rem+env(safe-area-inset-bottom))] lg:pb-8">
+        <div data-profile-content className="profile-notebook-page py-6 md:py-8 pb-[calc(10.5rem+env(safe-area-inset-bottom))] lg:pb-8">
           <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-8">
           <div className="min-w-0 space-y-10">
 

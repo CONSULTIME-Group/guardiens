@@ -707,6 +707,13 @@ const AdminListings = () => {
                       {listing.owner?.avatar_url && <img src={avatarImageUrl(listing.owner.avatar_url, 24)} alt="" className="w-4 h-4 rounded-full object-cover" />}
                       <span className="truncate">{ownerName || "Propriétaire non renseigné"}</span>
                     </div>
+                    {st && !statsError ? (
+                      <Button variant="link" onClick={() => openDrill(listing, "conversations")} className="h-auto justify-start p-0 mt-1 text-xs">
+                        {st.messages} message{st.messages !== 1 ? "s" : ""}
+                      </Button>
+                    ) : (
+                      <p className="mt-1 text-xs text-muted-foreground">{statsError ? "Messages indisponibles" : "Lecture des messages en cours…"}</p>
+                    )}
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground min-w-0">
                     <div className="flex flex-wrap items-center gap-1.5">
