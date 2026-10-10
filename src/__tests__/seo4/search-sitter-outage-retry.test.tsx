@@ -91,7 +91,7 @@ describe("L7, panne puis reprise sur le vrai SearchSitter", () => {
     noFalseEmpty();
     fireEvent.click(screen.getAllByRole("button", { name: /grille|liste/i })[0]);
 
-    const failedRead = sitReads.at(-1)!;
+    const failedRead = sitReads[sitReads.length - 1]!;
     const geocodeBefore = geocodeCalls.length;
     failing = false;
     fireEvent.click(screen.getByRole("button", { name: "Réessayer" }));
@@ -103,7 +103,7 @@ describe("L7, panne puis reprise sur le vrai SearchSitter", () => {
     // Mêmes critères : même ville géocodée, même requête d'annonces.
     expect(geocodeCalls.length).toBeGreaterThan(geocodeBefore);
     expect(geocodeCalls.slice(geocodeBefore).some((a) => a[0] === "Lyon")).toBe(true);
-    const retryRead = sitReads.at(-1)!;
+    const retryRead = sitReads[sitReads.length - 1]!;
     expect(JSON.stringify(retryRead.calls)).toBe(JSON.stringify(failedRead.calls));
     expect(JSON.stringify(retryRead.calls)).toContain("2030-0");
   });
