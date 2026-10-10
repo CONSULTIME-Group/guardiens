@@ -435,6 +435,13 @@
       "when": 1791621385801,
       "tag": "0061_sitter_travel_zones",
       "breakpoints": true
+    },
+    {
+      "idx": 62,
+      "version": "7",
+      "when": 1791622060614,
+      "tag": "0062_sitter_visibility_no_completion_apply_guard",
+      "breakpoints": true
     }
   ]
 }
