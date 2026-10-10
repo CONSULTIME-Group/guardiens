@@ -2624,6 +2624,8 @@ export default function PublicSitterProfile() {
       )}
 
 
+      </div>
+
       {/* ── CTA sticky mobile UNIFIÉ (vague 38) ──
           Mirroir strict du CTA hero courant (facette active), gaté par
           IntersectionObserver : n'apparaît que si le hero est hors écran.
