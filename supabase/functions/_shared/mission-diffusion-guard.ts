@@ -35,10 +35,11 @@ export function proximityBlockReason(m: DiffusableMission, now: Date = new Date(
   if (m.status === "cancelled") return "Publication annulée, diffusion impossible.";
   if (m.status === "completed") return "Publication terminée, diffusion impossible.";
   if (m.closed_at) return "Publication clôturée, diffusion impossible.";
-  if (m.status !== "open" && m.status !== "in_progress") return "Publication non ouverte, diffusion impossible.";
-  const t = now.getTime();
-  if (m.end_date && endOfDay(m.end_date) < t) return "Date de fin dépassée, diffusion impossible.";
-  if (m.mission_type !== "offre" && m.date_needed && endOfDay(m.date_needed) < t) {
+  if (m.status === "in_progress") return "Une personne est déjà retenue, diffusion impossible.";
+  if (m.status !== "open") return "Publication non ouverte, diffusion impossible.";
+  const today = parisDateKey(now);
+  if (m.end_date && parisDayOf(m.end_date) < today) return "Date de fin dépassée, diffusion impossible.";
+  if (m.mission_type !== "offre" && m.date_needed && parisDayOf(m.date_needed) < today) {
     return "Date de besoin dépassée, diffusion impossible.";
   }
   return null;
