@@ -47,4 +47,19 @@ describe("lot 2, mobilité géographique", () => {
     expect(s.travel_zones).toEqual(["world"]);
     expect(s.geographic_radius).toBe(20);
   });
+
+  it("résidents sans mobilité déclarée : jamais « peuvent venir ici »", () => {
+    const ca = (z: string[] | null) => ({ country: "CA", travel_zones: z, geographic_radius: 50, profile: { latitude_approx: 45.5, longitude_approx: -73.57 } });
+    expect(canComeTo(ca(null), { country: "CA" })).toBe(false);
+    expect(canComeTo(ca([]), { country: "CA" })).toBe(false);
+    expect(canComeTo(ca(null), { country: "CA", center: montreal })).toBe(false);
+    // local seul : pas de pays entier sans ville
+    expect(canComeTo(ca(["local"]), { country: "CA" })).toBe(false);
+    expect(canComeTo(ca(["local"]), { country: "CA", center: montreal })).toBe(true);
+    expect(canComeTo(ca(["local"]), { country: "CA", center: { lat: 49.28, lng: -123.12 } })).toBe(false);
+    expect(canComeTo(ca(["country:CA"]), { country: "CA" })).toBe(true);
+    expect(canComeTo(ca(["world"]), { country: "BR" })).toBe(true);
+    expect(canComeTo(ca(["continent:NA"]), { country: "BR" })).toBe(false);
+    expect(canComeTo(ca(["country:CA"]), { country: "BR" })).toBe(false);
+  });
 });
