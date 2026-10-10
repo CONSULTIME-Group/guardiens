@@ -143,7 +143,7 @@ export function DossierDetailSheet({ kind, item, open, onOpenChange, extra, foot
     ["Date de fin", fmt(item.end_date)],
     ["Masquée le", fmt(item.hidden_at)],
     ["Clôturée le", fmt(item.closed_at)],
-  ]).filter(([, v]) => !!v) : [];
+  ] as Array<[string, string | null]>).filter(([, v]) => !!v) : [];
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
