@@ -1,6 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { execSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync, statSync } from "node:fs";
 
 /**
  * Garde-fou éditorial, deux blocs.
