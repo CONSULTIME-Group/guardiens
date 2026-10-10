@@ -1077,30 +1077,46 @@
   }
 
   /* One paper surface, with enough room for the complete original painting. */
-  .profile-hero {
-    --profile-art-height: min(28vw, 340px);
+  /* Fiche publique en carnet : spirale au bord gauche, gouache peinte sur la page. */
+  .profile-notebook {
     background-color: hsl(var(--hero-paper));
-    padding-bottom: var(--profile-art-height);
+    --spiral-w: 34px;
   }
-
-  .profile-hero [data-hero-gouache] {
-    top: auto;
-    height: var(--profile-art-height);
-    mix-blend-mode: multiply;
-    mask-image: linear-gradient(to bottom, transparent, black 8%, black 96%, transparent);
+  .profile-notebook-page { padding-left: calc(var(--spiral-w) + 1.25rem); }
+  .profile-notebook-spiral {
+    position: absolute; top: 0; bottom: 0; left: 0; width: var(--spiral-w);
+    pointer-events: none;
+    background-image:
+      radial-gradient(circle at 74% 50%, hsl(var(--foreground) / 0.55) 0 3px, transparent 3.5px),
+      radial-gradient(ellipse 15px 4px at 40% 50%, transparent 0 55%, hsl(var(--foreground) / 0.6) 60% 85%, transparent 90%),
+      linear-gradient(to right, hsl(var(--foreground) / 0.05), transparent);
+    background-size: 100% 22px, 100% 22px, 100% 100%;
+    background-repeat: repeat-y, repeat-y, no-repeat;
+    border-right: 1px solid hsl(var(--foreground) / 0.08);
   }
+  .profile-print {
+    background: hsl(var(--card));
+    padding: 6px 6px 18px !important;
+    border-radius: 2px !important;
+    box-shadow: 0 1px 2px hsl(var(--foreground) / 0.12), 0 6px 14px -6px hsl(var(--foreground) / 0.25);
+    transform: rotate(-2.5deg);
+  }
+  .profile-notebook-art { isolation: auto; }
   .profile-hero-art {
-    object-position: center bottom;
-    /* Pale paper disappears into the page without fading the painted subjects. */
+    /* Le papier pâle de la gouache se fond dans la page, bords estompés. */
     mix-blend-mode: multiply;
+    -webkit-mask-image: linear-gradient(to right, transparent, black 7%, black 93%, transparent), linear-gradient(to bottom, transparent, black 8%, black 92%, transparent);
+    -webkit-mask-composite: source-in;
+    mask-image: linear-gradient(to right, transparent, black 7%, black 93%, transparent), linear-gradient(to bottom, transparent, black 8%, black 92%, transparent);
+    mask-composite: intersect;
   }
   .profile-hero-art[data-hero-notebook="true"] {
-    mask-image: linear-gradient(to right, transparent 0%, transparent 11%, black 18%, black 86%, transparent 91%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, transparent 11%, black 18%, black 90%, transparent), linear-gradient(to bottom, transparent, black 8%, black 92%, transparent);
+    mask-image: linear-gradient(to right, transparent 0%, transparent 11%, black 18%, black 90%, transparent), linear-gradient(to bottom, transparent, black 8%, black 92%, transparent);
   }
-  .profile-hero-identity { max-width: 760px; }
 
   @media (max-width: 639px) {
-    .profile-hero { --profile-art-height: 35.42vw; }
+    .profile-notebook { --spiral-w: 24px; }
   }
 
   .alma-conversation-sheet {

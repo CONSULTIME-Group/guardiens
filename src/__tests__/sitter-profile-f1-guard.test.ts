@@ -37,16 +37,17 @@ describe("gouache du hero partagé immersive (L5, décision root du 10 octobre)"
   const hs = heroSrc.indexOf("data-hero-gouache");
   const frame = heroSrc.slice(hs, heroSrc.indexOf("</picture>", hs));
   const img = frame.slice(frame.indexOf("<img"), frame.indexOf("/>", frame.indexOf("<img")));
-  it("fond couvrant continu, sans opacité globale", () => {
-    expect(img).toContain("object-cover");
+  it("gouache entière, jamais recadrée, sans opacité globale (carnet du 10/10)", () => {
+    expect(img).toContain("object-contain");
+    expect(img).not.toContain("object-cover");
     expect(img).not.toMatch(/opacity-/);
-    expect(img).not.toContain("object-contain");
   });
-  it("aucun voile en dégradé superposé", () => {
-    expect(frame).not.toMatch(/linear-gradient|mask-image|maskImage/);
+  it("aucun voile en dégradé superposé dans le balisage", () => {
+    expect(frame).not.toMatch(/linear-gradient|maskImage/);
   });
-  it("aucune colonne image ni empilement mobile séparé", () => {
-    expect(heroSrc).not.toContain("lg:grid-cols-");
+  it("portrait imprimé, pas de rond, et pas de phrase de réassurance inutile", () => {
+    expect(heroSrc).toContain("profile-print");
+    expect(heroSrc).not.toContain("Vous échangez directement");
     expect(heroSrc).not.toContain("[aspect-ratio:1536/544]");
   });
 });
