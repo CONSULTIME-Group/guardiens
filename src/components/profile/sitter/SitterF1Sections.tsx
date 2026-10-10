@@ -5,13 +5,9 @@ import { formatRatingFr } from "@/lib/formatRatingFr";
  */
 import { useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Shield } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { ArrowRight } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import FavoriteButton from "@/components/shared/FavoriteButton";
-import StatutGardienBadge from "@/components/profile/StatutGardienBadge";
-import { lastVisitLabel, type HelpOffer } from "@/lib/profileSignals";
-import ResponsivenessBadge from "@/components/profile/ResponsivenessBadge";
+import { type HelpOffer } from "@/lib/profileSignals";
 import type { HeroCtaVariant } from "@/components/profile/ProfileHero";
 import { BADGE_DEFINITIONS } from "@/components/badges/badge-definitions";
 import { avatarImageUrl } from "@/lib/storageImage";
