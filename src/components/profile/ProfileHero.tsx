@@ -89,6 +89,8 @@ const ProfileHero = (p: ProfileHeroProps) => {
   const facts = heroFactLine(p);
   const mobility = (p.mobilityLabels ?? []).filter(Boolean);
   const hasPhoto = !!p.avatarUrl && !p.avatarUrl.includes("placeholder.svg");
+  // Asset focal subjects, not member-specific layout. Keep the cat/dog visible.
+  const leftSubject = /hero-(57|61)(?:[.-])/.test(p.heroDesktop);
 
   const baseCls =
     "min-h-11 h-auto max-w-full whitespace-normal px-5 py-3 text-sm font-medium text-center";
@@ -136,6 +138,7 @@ const ProfileHero = (p: ProfileHeroProps) => {
       className="profile-hero relative isolate w-full overflow-hidden"
       data-profile-hero
       data-facet={p.facet}
+      data-hero-subject={leftSubject ? "left" : "right"}
     >
       <picture className="absolute inset-0 -z-10" data-hero-gouache>
         <source media="(max-width: 639px)" srcSet={p.heroMobile} />
