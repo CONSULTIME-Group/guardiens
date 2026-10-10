@@ -1814,7 +1814,7 @@ export default function PublicSitterProfile() {
               <p className="-mt-2 mb-[22px] text-sm text-muted-foreground">
                 {sitterRoleCount > 0
                   ? sitterReviewsHeading(sitterRoleCount, sitterRoleAvg, firstName).summary
-                  : "Les premiers retours des propriétaires apparaîtront ici, tels quels."}
+                  : ""}
               </p>
               {sitterRoleCount > 0 && (
                 <>

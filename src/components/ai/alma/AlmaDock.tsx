@@ -787,7 +787,7 @@ function AlmaDockInner() {
   // L5 : sur les grilles de résultats, la bulle repliée se réduit (avatar,
   // nom et mention IA, menu) pour ne plus recouvrir les cartes ; la
   // conversation reste à un clic sur l'avatar.
-  const compactDock = !expanded && /^\/(recherche-gardiens|search|sits|annonces(\/international)?)\/?$/.test(location.pathname);
+  const compactDock = !expanded && /^\/(recherche-gardiens|search|annonces(\/international)?)\/?$/.test(location.pathname);
 
 
 
