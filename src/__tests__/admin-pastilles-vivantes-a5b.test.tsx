@@ -120,13 +120,13 @@ describe("invalidation après action", () => {
     expect(src).toMatch(/const refreshAfterAction = \(\) => \{[^}]*refreshAdminBadges\(\);[^}]*\};/);
     const body = (name: string, next: string) => {
       const start = src.indexOf(`const ${name} = async`);
-      const end = src.indexOf(`const ${next}`, start + 1);
+      const end = src.indexOf(next, start + 1);
       expect(start).toBeGreaterThan(-1);
       return src.slice(start, end > start ? end : undefined);
     };
-    expect(body("handleHide", "handleRestore")).toMatch(/refreshAfterAction\(\);|refreshAdminBadges\(\);/);
-    expect(body("handleRestore", "handleDelete")).toMatch(/refreshAfterAction\(\);|refreshAdminBadges\(\);/);
-    expect(body("handleDelete", "export")).toMatch(/refreshAfterAction\(\);|refreshAdminBadges\(\);/);
+    expect(body("handleHide", "const handleRestore")).toMatch(/refreshAfterAction\(\);|refreshAdminBadges\(\);/);
+    expect(body("handleRestore", "const handleDelete")).toMatch(/refreshAfterAction\(\);|refreshAdminBadges\(\);/);
+    expect(body("handleDelete", "\n  const ")).toMatch(/refreshAfterAction\(\);|refreshAdminBadges\(\);/);
   });
 
   it("la déconnexion vide le cache", () => {
