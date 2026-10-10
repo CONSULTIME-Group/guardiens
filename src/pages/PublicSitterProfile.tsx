@@ -1080,7 +1080,9 @@ export default function PublicSitterProfile() {
           .from('public_closed_sits')
           .select('id, slug, title, city, cover_photo_url, status')
           .eq('user_id', id)
-          .eq('status', 'archived')
+          // Une garde terminée (completed) compte aussi comme garde passée :
+          // sinon « prépare sa première annonce » s'affiche à tort.
+          .in('status', ['archived', 'completed'])
           .limit(50);
 
         if (archErr) console.error('[archivedSits]', archErr);
