@@ -2,6 +2,8 @@
  * Agrégateurs purs pour l'onglet Conversations de /admin/alma.
  * Consomment des lignes brutes `alma_conversations`. Aucun accès réseau.
  */
+import { openerGroups } from "@/lib/alma/companionMetrics";
+
 
 export interface RawConversation {
   id: string;
