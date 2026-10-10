@@ -4,18 +4,19 @@
  */
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { applyOpenSitFilter } from "@/lib/sitSearchRules";
 
 export function useInternationalSitsCount() {
   const { data, isLoading } = useQuery({
     queryKey: ["international-sits-count"],
     staleTime: 10 * 60 * 1000,
     queryFn: async (): Promise<{ count: number }> => {
-      const { count } = await supabase
-        .from("sits")
-        .select("id", { count: "exact", head: true })
-        .eq("status", "published")
+      // Lot L1 : annonces ouvertes uniquement, mêmes règles que la recherche.
+      const { count } = await applyOpenSitFilter(
+        supabase.from("sits").select("id", { count: "exact", head: true }),
+      )
         .not("country", "is", null)
-        .not("country", "in", "(FR,France)");
+        .neq("country", "FR");
 
       return { count: count ?? 0 };
     },

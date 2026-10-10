@@ -179,3 +179,25 @@ Rôles : anonyme, membre non admin, propriétaire, gardien, double rôle, admin 
 - Recette production de la règle 40 % : en attente de GO.
 
 Sujets hors périmètre conservés dans TODO-lovable.md (analytics, SEO/GSC, favoris, push, articles) : inchangés, aucune automatisation ajoutée.
+
+## 6. Suivi d'exécution (ajout du 10/10/2026, l'historique ci-dessus est inchangé)
+
+Autorisation : Jérémie a autorisé le 10/10/2026 le lot L1 seul. L2 à L7 restent non autorisés. Aucune publication.
+
+### L1, statut : partiellement validé
+Fait (types 0 erreur, build complète réussie, recette sur build local en visiteur) :
+- A1 lieu de garde : commune et pays de l'annonce (sits.city, sits.country), département de l'annonce (sits.departement_code, repli code postal propriétaire en France seulement). Sits n'a aucune coordonnée : centre approximatif de la commune géocodée, aucune adresse. Constaté : « Marlhes, Loire », plus Saint-Étienne.
+- A2 France = FR strict dans tous les modes (Québec, Polynésie, Marrakech hors de la grille, visibles seulement dans le bloc « hors France »).
+- A3 drawer : nombre d'annonces disponibles, plus la longueur de la liste.
+- A4, A6 : règle unique src/lib/sitSearchRules.ts (publiée, candidatures ouvertes, fin >= aujourd'hui Europe/Paris incluse) dans SearchSitter, PublicListings, InternationalListings, InternationalShowcase, useInternationalSitsCount. Recette Lyon : bandeau 13, titre région 7, liste 7, bandeau 1/1/5/6, hors France 3.
+- A5 libellé suit la zone réellement appliquée (rayon, département, région, France).
+- A7 plafonds 500 retirés : lecture paginée stable par pages de 1 000.
+- A8 date de Paris et fin incluse (tests).
+- A9 ville non située : message visible, aucune distance depuis l'ancienne position ; annonces sans commune : incluses par département, sans distance, avec mention.
+- Sélecteur de zone : département lu sur la ville choisie (il ne lisait que le profil).
+- Migration 0065 (additive) : public_closed_sits expose country et departement_code.
+- A11 reproduit et expliqué : annonce archivée « Paris » avec departement_code 69 et propriétaire à Lyon. La distance venait de la ville du propriétaire (corrigé). L'incohérence ville/département est une donnée, non modifiée ; elle apparaît encore en mode département 69.
+- A10 non reproduit : la grille ne contient plus aucune annonce hors France ; cause de l'observation Codex non tranchée.
+
+Non vérifié : session connectée, carte (vue carte) en détail, formats tablette, régression Canada 2 gardiens et avis admin en navigateur (tests automatiques verts seulement), rayon 15 km via l'interface (compteur du sélecteur : 1, l'annonce 69380 sans commune ; Pusignan à 18 km exclue).
+Test en échec hors lot : get-public-sit-dates (aucune garde confirmed ou in_progress en base, test dépendant des données).

@@ -30,6 +30,7 @@ import { Search, MapPin, Lock, Sparkles, Globe2, X, AlertCircle, RefreshCw } fro
 import { format, differenceInDays, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
+import { applyOpenSitFilter, fetchAllPages, isEndedSit, isFranceSit, isOpenSit, parisTodayIso, sitDeptCode, sitGeocodeKey, sitGeocodeKeyString } from "@/lib/sitSearchRules";
 import { sanitizeBioForCard } from "@/lib/sanitizeBio";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import FavoriteButton from "@/components/shared/FavoriteButton";
@@ -181,7 +182,6 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
   const [searchError, setSearchError] = useState<string | null>(null);
  // Vrai quand la requête serveur a atteint le plafond (jeu potentiellement tronqué → tri distance/affinité partiel).
  const [resultsTruncated, setResultsTruncated] = useState(false);
- const SITS_SERVER_CAP = 500;
  const [userCity, setUserCity] = useState("");
  const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
  const [sitterEligible, setSitterEligible] = useState(false);
@@ -190,13 +190,20 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
  const initialLoadDone = useRef(false);
  const [intlCount, setIntlCount] = useState<number>(0);
+ // Lot L1 : la ville saisie n'a pas pu être située, ou le rayon a dû se replier
+ // sur le département faute de coordonnées. Signalé à l'écran, jamais silencieux.
+ const [geocodeFailedCity, setGeocodeFailedCity] = useState<string | null>(null);
+ const [unlocatedCount, setUnlocatedCount] = useState(0);
+ // Zone réellement appliquée au dernier calcul (peut différer de zoneMode si la
+ // référence manque) : le libellé du compteur la suit.
+ const [appliedZone, setAppliedZone] = useState<"radius" | "dept" | "region" | "france">("france");
  useEffect(() => {
    let cancelled = false;
    (async () => {
-     const { count } = await supabase
-       .from("sits")
-       .select("id", { count: "exact", head: true })
-       .eq("status", "published")
+     // Mêmes règles que les autres compteurs : annonces ouvertes uniquement.
+     const { count } = await applyOpenSitFilter(
+       supabase.from("sits").select("id", { count: "exact", head: true }),
+     )
        .not("country", "is", null)
        .neq("country", "FR");
      if (!cancelled) setIntlCount(count || 0);
@@ -447,9 +454,13 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
   setSearchError(null);
   setResultsTruncated(false);
  let searchCoords = userCoords;
+ setGeocodeFailedCity(null);
  if (city && city !== userCity) {
  const coords = await geocodeCity(city);
+ // Échec de géocodage : aucune distance calculée depuis l'ancienne position,
+ // message visible (lot L1, jamais de repli silencieux).
  if (coords) searchCoords = coords;
+ else { searchCoords = null; setGeocodeFailedCity(city); }
  }
  if (tab === "sits") {
  await searchSits(searchCoords);
@@ -741,95 +752,68 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  });
 
 
- const computeDistance = (ownerCity: string, cityCoords: Map<string, { lat: number; lng: number }>, searchCoords: { lat: number; lng: number } | null) => {
- if (!searchCoords) return null;
- const coords = cityCoords.get(ownerCity);
- if (!coords) return null;
- return haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng);
- };
-
  // Reference postal code for dept/region zone modes (selected city if available, else user CP)
  const getZoneRefPostalCode = (): string | null => cityPostalCode ?? userPostalCode;
 
- const filterByLocation = async (
- items: any[],
- getCityFn: (item: any) => string | undefined,
- searchCoords: { lat: number; lng: number } | null,
- getPostalCodeFn?: (item: any) => string | undefined,
- isInternationalFn?: (item: any) => boolean,
- densityFilterFn?: (item: any) => boolean,
- franceCountOverride?: number | null,
+ /**
+  * Lot L1 : zone calculée sur le LIEU DE GARDE (commune et pays de l'annonce,
+  * département de l'annonce), jamais sur la ville du profil propriétaire.
+  * France = FR strict dans tous les modes, y compris « France entière ».
+  */
+ const filterSitsByLocation = async (
+  items: any[],
+  searchCoords: { lat: number; lng: number } | null,
+  today: string,
  ) => {
- const cityCoords = new Map<string, { lat: number; lng: number }>();
- const uniqueCities = [...new Set(items.map(getCityFn).filter(Boolean))] as string[];
- await Promise.all(uniqueCities.map(async (c) => {
- const coords = await geocodeCity(c);
- if (coords) cityCoords.set(c, { lat: coords.lat, lng: coords.lng });
- }));
+  const coordsByKey = new Map<string, { lat: number; lng: number }>();
+  const keys = new Map<string, { city: string; country: string | null }>();
+  items.forEach((s) => {
+    const g = sitGeocodeKey(s); const k = sitGeocodeKeyString(s);
+    if (g && k) keys.set(k, g);
+  });
+  await Promise.all([...keys.entries()].map(async ([k, g]) => {
+    const c = await geocodeCity(g.city, g.country);
+    if (c) coordsByKey.set(k, { lat: c.lat, lng: c.lng });
+  }));
+  const coordsOf = (s: any) => { const k = sitGeocodeKeyString(s); return k ? coordsByKey.get(k) ?? null : null; };
 
- // Compute density counts for each zone mode (always, for the counter UI).
- // Density est calculée sur les items « actionnables » (open/publiés/non expirés)
- // pour rester aligné avec les compteurs SEO/eyebrow des pages publiques.
- const densityItems = densityFilterFn ? items.filter(densityFilterFn) : items;
- // Les annonces hors France ne comptent dans aucune densité de zone française
- // (rayon, département, région) : elles ont leur page dédiée.
- const isIntl = (s: any) => isInternationalFn ? isInternationalFn(s) : false;
- const frenchDensityItems = densityItems.filter((s) => !isIntl(s));
- const refDept = getDeptCode(getZoneRefPostalCode());
- const refRegion = getRegionCode(refDept);
- const radiusCount = searchCoords ? frenchDensityItems.filter((s) => {
- const c = getCityFn(s); if (!c) return false;
- const co = cityCoords.get(c); if (!co) return false;
- return haversineDistance(searchCoords.lat, searchCoords.lng, co.lat, co.lng) <= radius[0];
- }).length : 0;
- const deptCount = refDept ? frenchDensityItems.filter((s) => {
- const cp = getPostalCodeFn?.(s); return cp ? getDeptCode(cp) === refDept : false;
- }).length : 0;
- const regionCount = refRegion ? frenchDensityItems.filter((s) => {
- const cp = getPostalCodeFn?.(s); return cp ? getRegionCode(getDeptCode(cp)) === refRegion : false;
- }).length : 0;
- setDensityCounts({
-   radius: radiusCount,
-   dept: deptCount,
-   region: regionCount,
-   // Compteur France : total exact serveur quand il est fourni, pour ne pas
-   // plafonner à SITS_SERVER_CAP.
-   france: franceCountOverride ?? densityItems.length,
- });
+  const french = items.filter((s) => isFranceSit(s));
+  const frenchOpen = french.filter((s) => isOpenSit(s, today));
+  const refDept = getDeptCode(getZoneRefPostalCode());
+  const refRegion = getRegionCode(refDept);
+  const inRadius = (s: any) => {
+    const co = coordsOf(s);
+    if (co && searchCoords) return haversineDistance(searchCoords.lat, searchCoords.lng, co.lat, co.lng) <= radius[0];
+    // Sans coordonnées du lieu de garde : repli département, sans distance.
+    const d = sitDeptCode(s);
+    return !co && !!d && !!refDept && d === refDept;
+  };
+  const inDept = (s: any) => !!refDept && sitDeptCode(s) === refDept;
+  const inRegion = (s: any) => !!refRegion && getRegionCode(sitDeptCode(s)) === refRegion;
+  setDensityCounts({
+    radius: searchCoords ? frenchOpen.filter(inRadius).length : 0,
+    dept: refDept ? frenchOpen.filter(inDept).length : 0,
+    region: refRegion ? frenchOpen.filter(inRegion).length : 0,
+    france: frenchOpen.length,
+  });
 
-
- // Filtre de zone. Les annonces hors France sont écartées des zones françaises
- // (rayon, département, région) : une annonce à 16 000 km n'est pas « près de
- // vous ». Elles restent visibles en mode « Toute la France » et sur la page
- // dédiée /annonces/international.
- let filtered = items;
- if (zoneMode === "radius") {
- if (!searchCoords) return { items, cityCoords };
- filtered = items.filter((s) => {
- if (isIntl(s)) return false;
-  const ownerCity = getCityFn(s); if (!ownerCity) return false;
-  const coords = cityCoords.get(ownerCity);
-  // Repli département : une ville non géocodable ne doit pas faire disparaître une annonce du rayon. On retombe sur le code postal, seule donnée fiable. Ne pas revenir à un return false sec.
-  if (!coords) {
-    const cp = getPostalCodeFn?.(s);
-    if (!cp || !refDept) return false;
-    return getDeptCode(cp) === refDept;
-  }
- return haversineDistance(searchCoords.lat, searchCoords.lng, coords.lat, coords.lng) <= radius[0];
- });
- } else if (zoneMode === "dept" && refDept) {
- filtered = items.filter((s) => {
- if (isIntl(s)) return false;
- const cp = getPostalCodeFn?.(s); return cp ? getDeptCode(cp) === refDept : false;
- });
- } else if (zoneMode === "region" && refRegion) {
- filtered = items.filter((s) => {
- if (isIntl(s)) return false;
- const cp = getPostalCodeFn?.(s); return cp ? getRegionCode(getDeptCode(cp)) === refRegion : false;
- });
- }
- // zoneMode === "france" → no filter
- return { items: filtered, cityCoords };
+  let filtered = french;
+  let unlocated = 0;
+  let applied: "radius" | "dept" | "region" | "france" = "france";
+  if (zoneMode === "radius") {
+    if (searchCoords) {
+      filtered = french.filter(inRadius);
+      unlocated = filtered.filter((s) => !coordsOf(s)).length;
+      applied = "radius";
+    } else if (refDept) {
+      filtered = french.filter(inDept);
+      applied = "dept";
+    }
+  } else if (zoneMode === "dept" && refDept) { filtered = french.filter(inDept); applied = "dept"; }
+  else if (zoneMode === "region" && refRegion) { filtered = french.filter(inRegion); applied = "region"; }
+  setUnlocatedCount(unlocated);
+  setAppliedZone(applied);
+  return { items: filtered, coordsOf };
  };
 
    const searchSits = async (searchCoords: { lat: number; lng: number } | null) => {
@@ -840,69 +824,43 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
     // On rapatrie aussi les annonces internationales, mais filterByLocation les
     // écarte des zones françaises (rayon / dept / région). Elles s'affichent en
     // mode « Toute la France » et sur la page dédiée /annonces/international.
-    const SIT_COLUMNS = "id, user_id, property_id, title, slug, status, city, country, start_date, end_date, created_at, unpublished_at, environments, is_urgent, cover_photo_url, accepting_applications, max_applications, property:properties!sits_property_id_fkey(type, environment, photos, cover_photo_url)";
+     const SIT_COLUMNS = "id, user_id, property_id, title, slug, status, city, country, departement_code, start_date, end_date, created_at, unpublished_at, environments, is_urgent, cover_photo_url, accepting_applications, max_applications, property:properties!sits_property_id_fkey(type, environment, photos, cover_photo_url)";
 
-    // Lignes ouvertes (publiées, plus les dépubliées pour les membres) : ce sont
-    // les seules candidatables, donc les seules soumises au filtre de dates.
-    let query = supabase
-.from("sits")
- // Projection explicite : on ne rapatrie que les colonnes réellement lues en aval
- // (filtres, tri, densité, carte, cartes de résultat). Pas d'étoile, pour ne pas
- // exposer au navigateur la modération, la télémétrie interne et les champs longs.
- .select(SIT_COLUMNS)
- .or(isPublic
-   ? "status.eq.published"
-   : "status.eq.published,and(status.eq.draft,unpublished_at.not.is.null)")
- .order("created_at", { ascending: false })
- .limit(SITS_SERVER_CAP);
-   if (startDate) query = query.gte("end_date", startDate);
-   if (endDate) query = query.lte("start_date", endDate);
+    // Lot L1 : plus de plafond de 500. Lecture paginée stable (created_at puis id),
+    // pages de 1 000 jusqu'à la dernière page incomplète. Les compteurs sont
+    // calculés sur ce jeu complet, avec les mêmes règles que la liste.
+    const openPage = (from: number, to: number) => {
+      let q = supabase
+        .from("sits")
+        // Projection explicite, pas d'étoile (modération et champs longs exclus).
+        .select(SIT_COLUMNS)
+        .or(isPublic
+          ? "status.eq.published"
+          : "status.eq.published,and(status.eq.draft,unpublished_at.not.is.null)");
+      if (startDate) q = q.gte("end_date", startDate);
+      if (endDate) q = q.lte("start_date", endDate);
+      return q.order("created_at", { ascending: false }).order("id", { ascending: true }).range(from, to) as any;
+    };
+    // Lignes fermées : vue réduite public_closed_sits (sans date ni coordonnée),
+    // jamais filtrées par dates.
+    const closedPage = (from: number, to: number) =>
+      supabase
+        .from("public_closed_sits")
+        .select("id, user_id, title, slug, status, city, country, departement_code, cover_photo_url")
+        .order("id", { ascending: true })
+        .range(from, to) as any;
 
-   // Comptage exact, indépendant du LIMIT, pour le compteur « Toute la France ».
-   // Sans ça, au delà de SITS_SERVER_CAP le total affiché cesse de bouger.
-   let openCountQuery = supabase
-     .from("sits")
-     .select("*", { count: "exact", head: true })
-     .or(isPublic
-       ? "status.eq.published"
-       : "status.eq.published,and(status.eq.draft,unpublished_at.not.is.null)");
-   if (startDate) openCountQuery = openCountQuery.gte("end_date", startDate);
-   if (endDate) openCountQuery = openCountQuery.lte("start_date", endDate);
-   const closedCountQuery = supabase
-     .from("public_closed_sits")
-     .select("*", { count: "exact", head: true });
-
-   // Lignes fermées (pourvues, terminées, annulées, archivées) : signal de vie de
-   // la communauté, non actionnables, donc JAMAIS filtrées par dates. Elles passent
-   // toujours par la vue réduite `public_closed_sits`, sans date ni texte libre ni
-   // coordonnée, pour tous les visiteurs, authentifiés ou non.
-   const closedQuery = supabase
-     .from("public_closed_sits")
-     .select("id, user_id, title, slug, status, city, cover_photo_url")
-     .limit(SITS_SERVER_CAP);
-
-
-
-   const [{ data, error: sitsError }, closedRes, openCountRes, closedCountRes] = await Promise.all([
-     query,
-     closedQuery,
-     openCountQuery,
-     closedCountQuery,
-   ]);
-   if (sitsError) {
-     console.error("[SearchSitter] Erreur chargement annonces:", sitsError);
-     setSearchError("Impossible de charger les annonces.");
-     return;
-   }
-   if (closedRes.error) {
-     console.error("[SearchSitter] Erreur chargement annonces fermées:", closedRes.error);
-   }
-     let items = [...(data || []), ...((closedRes.data as any[]) || [])];
-     const franceExactCount = (openCountRes.count ?? 0) + (closedCountRes.count ?? 0);
-     setResultsTruncated(
-       (data || []).length >= SITS_SERVER_CAP ||
-       ((closedRes.data as any[]) || []).length >= SITS_SERVER_CAP
-     );
+    const [openRes, closedRes] = await Promise.all([fetchAllPages<any>(openPage), fetchAllPages<any>(closedPage)]);
+    if (openRes.error) {
+      console.error("[SearchSitter] Erreur chargement annonces:", openRes.error);
+      setSearchError("Impossible de charger les annonces.");
+      return;
+    }
+    if (closedRes.error) {
+      console.error("[SearchSitter] Erreur chargement annonces fermées:", closedRes.error);
+    }
+      let items = [...openRes.rows, ...closedRes.rows];
+      setResultsTruncated(openRes.truncated || closedRes.truncated);
 
 
    // Hydrate owner data from public_profiles (safe public view) in a single batched call
@@ -948,37 +906,26 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
    }));
    }
    // Mark assigned/past sits (will be rendered greyed-out, non-clickable).
-   const todayIso = new Date().toISOString().slice(0, 10);
+   // Lot L1 : date du jour à Paris, date de fin incluse.
+   const todayIso = parisTodayIso();
    items = items.map((s: any) => {
      const isCompleted = s.status === "completed";
      const isCancelled = s.status === "cancelled";
      const isArchived = s.status === "archived";
      const isUnpublished = s.status === "draft" && !!s.unpublished_at;
-     const isExpired = s.status === "published" && s.end_date && s.end_date < todayIso;
+     const isExpired = s.status === "published" && isEndedSit(s, todayIso);
+     // Publiée mais candidatures fermées : non actionnable, jamais comptée ouverte.
+     const isClosedToApps = s.status === "published" && s.accepting_applications === false;
      return {
        ...s,
        isAssigned: s.status === "confirmed" || s.status === "in_progress",
        isCompleted,
        isArchived,
        isUnpublished,
-       isPast: isExpired || isCancelled || isArchived || isUnpublished,
+       isPast: isExpired || isCancelled || isArchived || isUnpublished || isClosedToApps,
      };
    });
-  // NB: les filtres purement clients (housing, photos, durée, urgence, verified,
-  // animaux, expérience, environnements) sont appliqués plus bas dans le useMemo
-  // `results`, sans refetch. On ne garde ici QUE ce qui affecte la zone/density
-  // ou nécessite les données rapatriées côté propriétaire.
-  const { items: locFiltered, cityCoords } = await filterByLocation(
-  items,
-  (s: any) => s.owner?.city,
-  searchCoords,
-  (s: any) => s.owner?.postal_code,
-  (s: any) => !!s.country && s.country !== "FR",
-  // Density : uniquement les annonces actionnables (publiées, ouvertes aux
-  // candidatures, non expirées) pour rester aligné avec l'eyebrow SEO.
-  (s: any) => s.status === "published" && s.accepting_applications !== false && (!s.end_date || s.end_date >= todayIso),
-  franceExactCount,
-  );
+  const { items: locFiltered, coordsOf } = await filterSitsByLocation(items, searchCoords, todayIso);
 
   items = locFiltered;
 
@@ -1050,15 +997,6 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
     if (o?.user_id) ownerProfByUser.set(o.user_id, o);
   });
 
-  // Géocodage international (nécessite le jeu final avant tout filtre client)
-  const intlItems = items.filter((it: any) => !it.latitude && it.country && it.country !== "FR" && (it.city || it.owner?.city));
-  const intlKeys = [...new Set(intlItems.map((it: any) => `${it.city || it.owner?.city}, ${it.country}`))];
-  const intlCoords = new Map<string, { lat: number; lng: number }>();
-  await Promise.all(intlKeys.map(async (k) => {
-    const c = await geocodeCity(k);
-    if (c) intlCoords.set(k, { lat: c.lat, lng: c.lng });
-  }));
-
   const coordsMap = new Map<string, { lat: number; lng: number }>();
   const enriched = items.map((sit: any) => {
     const pets = petsByProperty.get(sit.property_id) || [];
@@ -1069,25 +1007,17 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
     const badgeCounts = new Map<string, number>();
     ownerBadges.forEach((b: any) => badgeCounts.set(b.badge_id, (badgeCounts.get(b.badge_id) || 0) + 1));
     const topBadges = Array.from(badgeCounts.entries()).map(([badge_id, count]) => ({ badge_key: badge_id, count })).sort((a, b) => b.count - a.count).slice(0, 2);
-    const dist = searchCoords && sit.owner?.city ? computeDistance(sit.owner.city, cityCoords, searchCoords) : null;
+    // Distance au lieu de garde géocodé (commune de l'annonce), jamais inventée.
+    const placeCoords = coordsOf(sit);
+    const dist = searchCoords && placeCoords ? haversineDistance(searchCoords.lat, searchCoords.lng, placeCoords.lat, placeCoords.lng) : null;
     const isNew = differenceInHours(new Date(), new Date(sit.created_at)) < 48;
     const days = sit.start_date && sit.end_date ? differenceInDays(new Date(sit.end_date), new Date(sit.start_date)) : 0;
     const sitEnvs: string[] = (sit as any).environments || [];
     const ownerEnvs: string[] = (ownerProf as any)?.environments || [];
     const resolvedEnvs = sitEnvs.length > 0 ? sitEnvs : ownerEnvs;
 
-    // Coords pour la carte (map view) : on renseigne pour TOUS les items rapatriés,
-    // les filtres clients pourront réduire la liste sans invalider ces coordonnées.
-    if (sit.latitude && sit.longitude) {
-      coordsMap.set(sit.id, { lat: sit.latitude, lng: sit.longitude });
-    } else if (sit.country && sit.country !== "FR") {
-      const key = `${sit.city || sit.owner?.city}, ${sit.country}`;
-      const c = intlCoords.get(key);
-      if (c) coordsMap.set(sit.id, c);
-    } else if (sit.owner?.city) {
-      const c = cityCoords.get(sit.owner.city);
-      if (c) coordsMap.set(sit.id, c);
-    }
+    // Carte : centre approximatif de la commune de l'annonce, aucune adresse.
+    if (placeCoords) coordsMap.set(sit.id, placeCoords);
 
     return { ...sit, pets, avgRating, reviewCount: agg?.count || 0, topBadges, distance: dist, isNew, durationDays: days, environments: resolvedEnvs, ownerEnvironments: ownerEnvs, ownerMatch: ownerProf };
   });
@@ -1404,6 +1334,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  // Compteur "annonces disponibles" : on EXCLUT les démos, les attribuées et les terminées
  // pour ne pas surévaluer l'offre réelle.
  const availableSitsCount = results.filter((r: any) => !r.isAssigned && !r.isCompleted && !r.isPast && !r.is_demo).length;
+ const availableSitsCountForDrawer = tab === "sits" ? availableSitsCount : results.filter((r: any) => !r.is_demo).length;
  const demoCount = results.filter((r: any) => r.is_demo).length;
  const resultCount = tab === "missions" && missionSubTab === "members" ? availableMembers.length : availableSitsCount;
   // hasNoLocalRealMissions retiré : OutOfZoneBanner couvre déjà ce cas.
@@ -1413,8 +1344,16 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
   ? t("search_results.count_demo", { count: demoCount })
  : resultCount === 0
  ? (city ? t("search_results.count_none_city", { city }) : t("search_results.count_none"))
- : city
+ : tab !== "sits"
+ ? (city ? t("search_results.count_available_near", { count: resultCount }) : t("search_results.count_available_fr", { count: resultCount }))
+ // Lot L1 : le libellé suit la zone réellement appliquée, jamais « près de
+ // vous » en France entière ni quand la ville n'a pas pu être située.
+ : appliedZone === "radius"
  ? t("search_results.count_available_near", { count: resultCount })
+ : appliedZone === "dept"
+ ? t("search_results.count_available_dept", { count: resultCount })
+ : appliedZone === "region"
+ ? t("search_results.count_available_region", { count: resultCount })
  : t("search_results.count_available_fr", { count: resultCount });
 
  // ─── Pill style ───
@@ -1625,7 +1564,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
         setZoneMode={setZoneModeByUser}
         radius={radius}
         setRadius={setRadiusByUser}
-        userPostalCode={userPostalCode}
+        userPostalCode={getZoneRefPostalCode()}
         densityCounts={densityCounts}
         regionCode={getRegionCode(getDeptCode(getZoneRefPostalCode()))}
         regionName={(() => {
@@ -1695,7 +1634,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
         setWithPhotosOnly={setWithPhotosOnly}
          duration={duration as any}
          setDuration={setDuration as any}
-         currentResultsCount={results.length}
+         currentResultsCount={availableSitsCountForDrawer}
         loading={loading}
         onApply={() => {
           doSearch();
@@ -1819,6 +1758,17 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
   {resultsTruncated && !loading && !searchError && (
     <div className="mx-6 mt-4 bg-muted/60 border border-border rounded-lg p-3 text-sm text-muted-foreground">
       Beaucoup de résultats dans cette zone. Affinez votre recherche (ville, rayon) pour un classement par distance plus fiable.
+    </div>
+  )}
+
+  {tab === "sits" && !loading && !searchError && geocodeFailedCity && (
+    <div role="status" className="mx-6 mt-4 bg-muted/60 border border-border rounded-lg p-3 text-sm text-muted-foreground">
+      Nous n'avons pas pu situer « {geocodeFailedCity} ». Les distances ne sont pas calculées{appliedZone === "dept" ? ", les annonces sont cherchées dans votre département." : ", toutes les annonces de France sont affichées."}
+    </div>
+  )}
+  {tab === "sits" && !loading && !searchError && !geocodeFailedCity && zoneMode === "radius" && unlocatedCount > 0 && (
+    <div role="status" className="mx-6 mt-4 bg-muted/60 border border-border rounded-lg p-3 text-sm text-muted-foreground">
+      {unlocatedCount === 1 ? "1 annonce n'a pas de commune situable : elle est incluse d'après son département, sans distance." : `${unlocatedCount} annonces n'ont pas de commune situable : elles sont incluses d'après leur département, sans distance.`}
     </div>
   )}
 

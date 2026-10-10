@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { MapPin, Globe2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { parisTodayIso } from "@/lib/sitSearchRules";
 import fallbackMarrakech from "@/assets/fallback-marrakech.webp";
 
 interface IntlSit {
@@ -29,6 +30,7 @@ const InternationalShowcase = () => {
         .select("id, slug, title, city, country, cover_photo_url, property:properties(photos)")
         .eq("status", "published")
         .eq("accepting_applications", true)
+        .or(`end_date.is.null,end_date.gte.${parisTodayIso()}`)
         .not("country", "is", null)
         .neq("country", "FR")
         .order("created_at", { ascending: false })

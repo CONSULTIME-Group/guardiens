@@ -10,6 +10,7 @@ import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
 import { lazyWithRetry } from "@/lib/lazyWithRetry";
 import { supabase } from "@/integrations/supabase/client";
+import { applyOpenSitFilter } from "@/lib/sitSearchRules";
 import type { ShownListState } from "@/components/search/SearchSitter";
 import InternationalShowcase from "@/components/listings/InternationalShowcase";
 import PastListingsSection from "@/components/listings/PastListingsSection";
@@ -65,10 +66,9 @@ export default function PublicListings() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { count } = await supabase
-        .from("sits")
-        .select("id", { count: "exact", head: true })
-        .eq("status", "published")
+      const { count } = await applyOpenSitFilter(
+        supabase.from("sits").select("id", { count: "exact", head: true }),
+      )
         .not("country", "is", null)
         .neq("country", "FR");
       if (!cancelled) setIntlCount(count || 0);
@@ -82,13 +82,10 @@ export default function PublicListings() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const todayIso = new Date().toISOString().slice(0, 10);
-      const { data, count } = await supabase
-        .from("sits")
-        .select("city", { count: "exact" })
-        .eq("status", "published")
-        .eq("accepting_applications", true)
-        .gte("end_date", todayIso);
+      // Lot L1 : ouvertes en France (FR strict), même population que la liste.
+      const { data, count } = await applyOpenSitFilter(
+        supabase.from("sits").select("city", { count: "exact" }),
+      ).eq("country", "FR");
       if (cancelled) return;
       setOpenCount(count || 0);
       const cities = new Set(
