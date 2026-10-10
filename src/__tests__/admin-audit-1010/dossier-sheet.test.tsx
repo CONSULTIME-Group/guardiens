@@ -37,7 +37,7 @@ describe("fiche détail admin", () => {
     expect(screen.queryByText(/0 événement/)).toBeNull();
     failHistory = false;
     fireEvent.click(screen.getByRole("button", { name: /Relancer la lecture/ }));
-    expect(await screen.findByText("En ligne vers Annulées".replace("Annulées", "Annulées"))).toBeTruthy();
+    expect(await screen.findByText("Publiées vers Annulées")).toBeTruthy();
     expect(screen.getByText(/Auteur non enregistré/)).toBeTruthy();
   });
 });
