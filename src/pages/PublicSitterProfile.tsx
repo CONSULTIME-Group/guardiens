@@ -1785,7 +1785,7 @@ export default function PublicSitterProfile() {
               reassurance={heroCtaReassurance}
               facts={contactFacts}
               showButton={mobile ? "md" : "always"}
-              sticky={!mobile}
+              sticky={false}
             />
             {journeyBlock(mobile ? "confiance-mobile" : "confiance")}
             {affinityNode}
