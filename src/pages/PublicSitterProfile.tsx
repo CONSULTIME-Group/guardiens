@@ -2485,7 +2485,7 @@ export default function PublicSitterProfile() {
                 { value: missionsHelped.length, label: 'Coup' + (missionsHelped.length > 1 ? 's de main donnés' : ' de main donné') },
                 { value: thanksReceived, label: 'Merci' + (thanksReceived > 1 ? 's reçus' : ' reçu') },
                 { value: missionFeedbacks.length, label: 'Avis reçu' + (missionFeedbacks.length > 1 ? 's' : '') },
-              ].map(({ value, label }) => (
+              ].filter(({ value }) => value > 0).map(({ value, label }) => (
                 <div key={label} className="bg-card border border-border rounded-xl px-4 py-4 text-center">
                   <p className="font-heading text-2xl font-bold text-foreground">{value}</p>
                   <p className="text-xs text-foreground/50 font-body mt-0.5">{label}</p>
@@ -2494,6 +2494,7 @@ export default function PublicSitterProfile() {
             </div>
           )}
 
+          {(entraideLoading || missionsPublished.length > 0) && (
           <div className="space-y-3">
             <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
               Missions publiées{missionsPublished.length > 0 && ` (${missionsPublished.length})`}
@@ -2533,11 +2534,11 @@ export default function PublicSitterProfile() {
                 })}
                 <ShowMoreBtn items={missionsPublished} showAll={showAllMissionsPublished} setShowAll={setShowAllMissionsPublished} />
               </div>
-            ) : (
-              <p className="text-sm text-foreground/50 font-body italic">Les missions publiées apparaîtront ici.</p>
-            )}
+            ) : null}
           </div>
+          )}
 
+          {(entraideLoading || missionsHelped.length > 0) && (
           <div className="space-y-3">
             <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
               Coups de main donnés{missionsHelped.length > 0 && ` (${missionsHelped.length})`}
@@ -2564,11 +2565,11 @@ export default function PublicSitterProfile() {
                 })}
                 <ShowMoreBtn items={missionsHelped} showAll={showAllMissionsHelped} setShowAll={setShowAllMissionsHelped} />
               </div>
-            ) : (
-              <p className="text-sm text-foreground/50 font-body italic">Les coups de main donnés apparaîtront ici.</p>
-            )}
+            ) : null}
           </div>
+          )}
 
+          {(entraideLoading || missionFeedbacks.length > 0) && (
           <div className="space-y-3 border-t border-border/50 pt-8">
             <p className="text-xs uppercase tracking-widest text-foreground/50 font-body">
               Avis d'entraide reçus{missionFeedbacks.length > 0 && ` (${missionFeedbacks.length})`}
@@ -2597,18 +2598,14 @@ export default function PublicSitterProfile() {
                 ))}
                 <ShowMoreBtn items={missionFeedbacks} showAll={showAllEntraideFeedbacks} setShowAll={setShowAllEntraideFeedbacks} />
               </div>
-            ) : (
-              <p className="text-sm text-foreground/50 font-body italic">Les avis d'entraide apparaîtront ici après la première mission.</p>
-            )}
+            ) : null}
           </div>
+          )}
 
           {!entraideLoading && missionsPublished.length === 0 && missionsHelped.length === 0 && missionFeedbacks.length === 0 && (
-            <div className="text-center py-12 space-y-2">
-              <p className="text-base text-foreground/50 font-body">
-                {helpOffer.offered ? `Pas encore de mission réalisée par ${firstName}.` : `L'entraide de ${firstName} démarre ici.`}
-              </p>
-              <p className="text-sm text-foreground/40 font-body italic">Les échanges de services apparaîtront ici après la première mission.</p>
-            </div>
+            <p className="text-sm text-muted-foreground font-body" data-entraide-empty>
+              {helpOffer.offered ? `Pas encore de mission réalisée par ${firstName}.` : `Aucune mission d'entraide pour le moment.`}
+            </p>
           )}
 
             {/* Rail INLINE (mobile) : mêmes cartes que le rail sticky. */}
