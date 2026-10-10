@@ -191,6 +191,9 @@ const SearchMapView = ({
   );
 
   const activeItem = results.find((r) => r.id === activePin);
+  // Lot L1 : population exacte du mode affiché, aucune annonce retirée de la liste.
+  const locatedCount = visibleResults.filter((it) => !!getCoords(it)).length;
+  const unlocatedCount = visibleResults.length - locatedCount;
 
 
   return (
@@ -199,7 +202,9 @@ const SearchMapView = ({
         {/* Colonne liste : les cartes gardent leur largeur de grille, sinon la
             photo s'étire sur toute la demi largeur de l'écran. */}
         <div className="mx-auto w-full max-w-sm space-y-3">
-          {results.map(renderCard)}
+          {/* Lot L1 : en annonces de garde, la liste suit le même mode que les
+              repères (actives ou toutes). */}
+          {(tab === "sits" ? visibleResults : results).map(renderCard)}
         </div>
       </div>
 
@@ -269,6 +274,13 @@ const SearchMapView = ({
           </button>
         </div>
 
+        {tab === "sits" && (
+          <div role="status" className="absolute top-16 md:top-14 left-3 z-[400] bg-card border border-border rounded-lg shadow-md px-3 py-1.5 text-xs text-foreground">
+            {locatedCount} annonce{locatedCount > 1 ? "s" : ""} située{locatedCount > 1 ? "s" : ""} sur {visibleResults.length}
+            {unlocatedCount > 0 && ` · ${unlocatedCount} lieu${unlocatedCount > 1 ? "x" : ""} à préciser`}
+          </div>
+        )}
+
         {/* Légende */}
         <div className="absolute bottom-20 md:bottom-3 left-3 z-[400] bg-card border border-border rounded-lg shadow-md px-3 py-2 text-sm md:text-xs font-medium text-foreground pointer-events-none space-y-1">
           <div className="flex items-center gap-2">
@@ -333,7 +345,9 @@ const SearchMapView = ({
                 </h4>
                 <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
                   <MapPin className="h-3 w-3" />
-                  {activeItem.owner?.city || ""}
+                  {tab === "sits"
+                    ? ((activeItem as any).locationIncoherent ? `${(activeItem as any).city} · lieu à confirmer` : ((activeItem as any).city || "Lieu à préciser"))
+                    : (activeItem.owner?.city || "")}
                   {activeItem.distance != null && ` · ${Math.round(activeItem.distance)} km`}
                 </p>
                 {Object.keys(petGroups).length > 0 && (
