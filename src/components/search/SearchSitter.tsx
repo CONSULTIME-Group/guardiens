@@ -30,7 +30,7 @@ import { Search, MapPin, Lock, Sparkles, Globe2, X, AlertCircle, RefreshCw } fro
 import { format, differenceInDays, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
-import { applyOpenSitFilter, communeDeptFromCoords, fetchAllPages, fetchInChunks, isEndedSit, isFranceSit, isOpenSit, isPastSit, isWithinRadius, parisTodayIso, resolveSitPlace, sitGeocodeKey, sitGeocodeKeyString } from "@/lib/sitSearchRules";
+import { applyOpenSitFilter, communeDeptFromCoords, fetchAllPages, fetchInChunks, isEndedSit, isFrancePlace, isOpenSit, isPastSit, isWithinRadius, parisTodayIso, resolveSitPlace, sitGeocodeKey, sitGeocodeKeyString } from "@/lib/sitSearchRules";
 import { sanitizeBioForCard } from "@/lib/sanitizeBio";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import FavoriteButton from "@/components/shared/FavoriteButton";
@@ -806,7 +806,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
   setAppliedZone(applied);
   const decorate = (s: any) => {
     const pl = placeOf(s);
-    return { ...s, locationDept: pl.dept, locationIncoherent: pl.incoherent };
+    return { ...s, locationCity: pl.city, locationCountry: pl.country, locationDept: pl.dept, locationSource: pl.source };
   };
   return { items: filtered.map(decorate), coordsOf };
  };
@@ -866,7 +866,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
    const [ownersRes, galleryRes] = await Promise.all([
      fetchInChunks<any>(ownerIds, (chunk, from, to) => supabase
        .from("public_profiles")
-       .select("id, first_name, avatar_url, city, postal_code, departement_code, identity_verified, is_founder")
+       .select("id, first_name, avatar_url, city, postal_code, departement_code, country, identity_verified, is_founder")
        .in("id", chunk).order("id", { ascending: true }).range(from, to) as any),
      fetchInChunks<any>(ownerIds, (chunk, from, to) => supabase
        .from("owner_gallery")

@@ -346,7 +346,7 @@ const SearchMapView = ({
                 <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
                   <MapPin className="h-3 w-3" />
                   {tab === "sits"
-                    ? ((activeItem as any).locationIncoherent ? `${(activeItem as any).city} · lieu à confirmer` : ((activeItem as any).city || "Lieu à préciser"))
+                    ? ((activeItem as any).locationCity || "Lieu à préciser")
                     : (activeItem.owner?.city || "")}
                   {activeItem.distance != null && ` · ${Math.round(activeItem.distance)} km`}
                 </p>
