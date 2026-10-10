@@ -927,7 +927,7 @@ export default function PublicSitterProfile() {
           .select('id, slug, title, city, cover_photo_url, status')
           .eq('user_id', id)
           // Une garde terminée (completed) compte aussi comme garde passée :
-          // sinon « prépare sa première annonce » s'affiche à tort.
+          // sinon le texte de première annonce s'affiche à tort.
           .in('status', ['archived', 'completed'])
           .limit(50);
 

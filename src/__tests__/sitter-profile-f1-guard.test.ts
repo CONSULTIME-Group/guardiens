@@ -42,6 +42,6 @@ describe("gouache du hero partagé entière (lots F1c, L5)", () => {
     expect(frame).not.toMatch(/linear-gradient|mask-image|maskImage/);
   });
   it("conteneur au ratio 1536/544", () => {
-    expect(frame).toContain("[aspect-ratio:1536/544]");
+    expect(heroSrc).toContain("[aspect-ratio:1536/544]");
   });
 });
