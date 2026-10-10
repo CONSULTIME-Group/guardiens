@@ -142,10 +142,12 @@ const extractPgFields = (body: string | null): Record<string, string> => {
 };
 
 /**
- * Erreurs métier levées volontairement par une fonction Postgres via
- * RAISE EXCEPTION (code P0001). PostgREST les renvoie en 400, mais ce sont
- * des refus fonctionnels attendus (doublon d'alerte, quota de zones atteint,
- * ville ou rayon invalide), déjà traités par un message clair côté appelant.
+ * Erreurs métier levées volontairement par la base via RAISE EXCEPTION
+ * (code P0001), que ce soit une fonction RPC ou un trigger sur une écriture
+ * directe de table (ex: doublon de titre sur small_missions). PostgREST les
+ * renvoie en 400, mais ce sont des refus fonctionnels attendus (doublon
+ * d'alerte, quota de zones atteint, ville ou rayon invalide, annonce déjà
+ * en ligne), déjà traités par un message clair côté appelant.
  * Aucun toast technique, aucun log admin.
  */
 const isBusinessRpcRefusal = (
@@ -154,7 +156,7 @@ const isBusinessRpcRefusal = (
   pg: Record<string, string>,
 ): boolean =>
   status === 400 &&
-  /\/rest\/v1\/rpc\//.test(url) &&
+  /\/rest\/v1\//.test(url) &&
   pg.pg_code === "P0001";
 
 const NetworkErrorMonitor = () => {
