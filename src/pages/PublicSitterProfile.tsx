@@ -447,12 +447,15 @@ export default function PublicSitterProfile() {
     if (loading) return;
     const target = document.querySelector<HTMLElement>("[data-hero-cta]");
     if (!target || typeof IntersectionObserver === "undefined") return;
+    // Visibilité réelle : seul l'en-tête collant est retranché en haut.
+    const headerH =
+      parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--public-header-h")) || 0;
     const io = new IntersectionObserver(
       (entries) => {
         const e = entries[0];
         if (e) setHeroCtaVisible(e.isIntersecting);
       },
-      { rootMargin: "0px 0px -40% 0px", threshold: 0.01 },
+      { rootMargin: `-${Math.round(headerH)}px 0px 0px 0px`, threshold: 0.5 },
     );
     io.observe(target);
     return () => io.disconnect();
@@ -1521,7 +1524,7 @@ export default function PublicSitterProfile() {
 
       {/* ── Contenu principal z-1 ── */}
       <div className="relative z-[1]">
-      <div className="profile-notebook profile-notebook-sheet relative mx-auto max-w-6xl" data-profile-notebook>
+      <div className="profile-notebook profile-notebook-sheet relative mx-auto max-w-[1024px]" data-profile-notebook>
       <span aria-hidden="true" className="profile-notebook-spiral" />
       {/* ── HERO RESSERRÉ (vague 37) ── */}
       {profile && id && (() => {
@@ -1800,7 +1803,7 @@ export default function PublicSitterProfile() {
 
         return (
         <div data-profile-content className="profile-notebook-page py-[34px] md:py-[52px] pb-[calc(10.5rem+env(safe-area-inset-bottom))] lg:pb-[52px]">
-          <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-[52px]">
+          <div>
           <div className="space-y-[52px] min-w-0">
 
             <SitterAboutSection
@@ -1953,13 +1956,9 @@ export default function PublicSitterProfile() {
                 </div>
               </section>
             ) : null}
-            {/* Rail inline (mobile), en fin de flux. */}
-            <div className="lg:hidden">
-              <ProfileRail inline>{railChildren(true)}</ProfileRail>
-            </div>
+            {/* Zone secondaire en fin de flux, une seule fois. */}
+            <ProfileRail variant="secondary">{railChildren(false)}</ProfileRail>
           </div>
-
-          <ProfileRail stickyMode="card">{railChildren(false)}</ProfileRail>
           </div>
         </div>
         );
@@ -2055,7 +2054,7 @@ export default function PublicSitterProfile() {
 
         return (
         <div data-profile-content className="profile-notebook-page py-6 md:py-8 pb-[calc(10.5rem+env(safe-area-inset-bottom))] lg:pb-8">
-          <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-8">
+          <div>
             <div className="space-y-[52px] min-w-0">
 
               <StoryTiles tiles={tiles} />
@@ -2448,14 +2447,9 @@ export default function PublicSitterProfile() {
                 </section>
               )}
 
-              {/* Rail inline mobile */}
-              <div className="lg:hidden">
-                <ProfileRail inline>{proprioRailChildren}</ProfileRail>
-              </div>
+              {/* Zone secondaire en fin de flux, une seule fois. */}
+              <ProfileRail variant="secondary">{proprioRailChildren}</ProfileRail>
             </div>
-
-            {/* Rail sticky desktop */}
-            <ProfileRail>{proprioRailChildren}</ProfileRail>
           </div>
         </div>
         );
@@ -2466,7 +2460,7 @@ export default function PublicSitterProfile() {
       {/* ── ONGLET ENTRAIDE ── */}
       {activeTab === 'entraide' && (
         <div data-profile-content className="profile-notebook-page py-6 md:py-8 pb-[calc(10.5rem+env(safe-area-inset-bottom))] lg:pb-8">
-          <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-8">
+          <div>
           <div className="min-w-0 space-y-10">
 
 
@@ -2612,14 +2606,9 @@ export default function PublicSitterProfile() {
             </p>
           )}
 
-            {/* Rail INLINE (mobile) : mêmes cartes que le rail sticky. */}
-            <div className="lg:hidden">
-              <ProfileRail inline>{reportNode}</ProfileRail>
-            </div>
+            {/* Zone secondaire en fin de flux, une seule fois. */}
+            <ProfileRail variant="secondary">{reportNode}</ProfileRail>
           </div>
-
-          {/* Rail STICKY (desktop ≥ lg). */}
-          <ProfileRail>{reportNode}</ProfileRail>
           </div>
         </div>
       )}
