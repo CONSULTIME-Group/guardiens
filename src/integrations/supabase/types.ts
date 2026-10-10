@@ -11164,7 +11164,9 @@ export type Database = {
       public_closed_sits: {
         Row: {
           city: string | null
+          country: string | null
           cover_photo_url: string | null
+          departement_code: string | null
           id: string | null
           slug: string | null
           status: string | null
@@ -11173,7 +11175,9 @@ export type Database = {
         }
         Insert: {
           city?: string | null
+          country?: never
           cover_photo_url?: string | null
+          departement_code?: string | null
           id?: string | null
           slug?: string | null
           status?: never
@@ -11182,7 +11186,9 @@ export type Database = {
         }
         Update: {
           city?: string | null
+          country?: never
           cover_photo_url?: string | null
+          departement_code?: string | null
           id?: string | null
           slug?: string | null
           status?: never
