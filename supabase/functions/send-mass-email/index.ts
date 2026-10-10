@@ -236,6 +236,8 @@ ${ctaBlock}
  */
 /** Taille max des listes passées dans un .in() (URL PostgREST, casse vers 390 UUID). Les insertions en corps POST gardent 500. */
 export const IN_CHUNK = 150;
+export { lookupActiveLineTokens, LINE_TOKEN_CHUNK } from "./lineTokens.ts";
+import { lookupActiveLineTokens } from "./lineTokens.ts";
 
 async function applyMandatoryComplianceFilters<T extends { id: string; email: string }>(
   serviceClient: ReturnType<typeof createClient>,
@@ -1026,21 +1028,12 @@ Deno.serve(async (req) => {
       const lineUrlByEmail = new Map<string, string>();
       if (lineCampaign) {
         const expires = new Date(Date.now() + HELPS_WITH_TOKEN_DAYS * 86400000).toISOString();
-        const profileIds = remainingRecipients
+        const profileIds = [...new Set(remainingRecipients
           .map((email) => idByEmail.get(email.toLowerCase()))
-          .filter((id): id is string => !!id);
+          .filter((id): id is string => !!id))];
         // Un seul jeton actif par profil : réutiliser le jeton valide existant.
-        const activeByProfile = new Map<string, string>();
-        for (let i = 0; i < profileIds.length; i += IN_CHUNK) {
-          const { data, error } = await serviceClient
-            .from("helps_line_tokens")
-            .select("profile_id, token")
-            .in("profile_id", profileIds.slice(i, i + IN_CHUNK))
-            .is("revoked_at", null)
-            .gt("expires_at", new Date().toISOString());
-          if (error) throw new Error(`line token lookup failed: ${error.message}`);
-          for (const r of data ?? []) activeByProfile.set(r.profile_id as string, r.token as string);
-        }
+        // Arrêt explicite avant tout envoi si la lecture échoue durablement.
+        const activeByProfile = await lookupActiveLineTokens(serviceClient as any, profileIds, new Date().toISOString());
         const rows: Array<{ token: string; profile_id: string; expires_at: string }> = [];
         for (const email of remainingRecipients) {
           const profileId = idByEmail.get(email.toLowerCase());
