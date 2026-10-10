@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
-  parisTodayIso, isFranceSit, isOpenSit, isEndedSit, isPastSit, sitGeocodeKey, resolveSitPlace, isFrancePlace, isWithinRadius, fetchAllPages, fetchInChunks, applyOpenSitFilter,
+  parisTodayIso, isFranceSit, isOpenSit, isEndedSit, isPastSit, sitGeocodeKey, resolveSitPlace, isFrancePlace, isWithinRadius, fetchAllPages, fetchInChunks, applyOpenSitFilter, checkGeocodedPoint, pointUsable,
 } from "@/lib/sitSearchRules";
 
 describe("moteur d'annonces, règles L1", () => {
@@ -46,9 +46,9 @@ describe("moteur d'annonces, règles L1", () => {
 
   it("pays : lu sur le propriétaire, jamais FR déduit d'un pays absent", () => {
     expect(resolveSitPlace({ owner: { city: "Montréal", country: "CA", postal_code: "H2X1Y4" } })).toEqual({ city: "Montréal", country: "CA", dept: null, source: "owner" });
-    // pays du propriétaire absent : repli entier sur l'annonce
-    expect(resolveSitPlace({ city: "Lyon", country: "FR", departement_code: "69", owner: { city: "Lyon", country: null, postal_code: "69005" } }))
-      .toEqual({ city: "Lyon", country: "FR", dept: "69", source: "sit" });
+    // pays du propriétaire absent : ville du propriétaire gardée, pays de l'annonce en repli, dept du profil
+    expect(resolveSitPlace({ city: "Lyon", country: "FR", departement_code: "38", owner: { city: "Lyon", country: null, postal_code: "69005" } }))
+      .toEqual({ city: "Lyon", country: "FR", dept: "69", source: "owner" });
     // aucune source de pays : pas France
     expect(isFrancePlace({ city: null, country: null, owner: { city: "Lyon", country: null } })).toBe(false);
   });
@@ -144,5 +144,38 @@ describe("moteur d'annonces, règles L1", () => {
       return { data: Array.from({ length: n }, (_, i) => from + i), error: null };
     });
     expect(big.data).toHaveLength(7000);
+  });
+});
+
+describe("L1 microcorrectif : ville propriétaire et point géocodé vérifié", () => {
+  it("propriétaire Saint-Étienne sans pays, annonce Marlhes FR : Saint-Étienne", () => {
+    const p = resolveSitPlace({ city: "Marlhes", country: "FR", departement_code: "42", owner: { city: "Saint-Étienne", country: null, postal_code: "42000" } });
+    expect(p).toEqual({ city: "Saint-Étienne", country: "FR", dept: "42", source: "owner" });
+  });
+  it("propriétaire sans pays ni CP, annonce Marlhes 42 : jamais le département de l'annonce", () => {
+    const p = resolveSitPlace({ city: "Marlhes", country: "FR", departement_code: "42", owner: { city: "Saint-Étienne", country: null } });
+    expect(p.city).toBe("Saint-Étienne"); expect(p.dept).toBeNull();
+  });
+  it("propriétaire sans pays et annonce sans pays : pas FR déduit", () => {
+    expect(resolveSitPlace({ city: "X", owner: { city: "Lyon", country: null } }).country).toBeNull();
+  });
+  it("propriétaire Lyon 69, annonce Paris 75 : reste Lyon", () => {
+    expect(resolveSitPlace({ city: "Paris", country: "FR", departement_code: "75", owner: { city: "Lyon", country: "FR", postal_code: "69003" } }))
+      .toEqual({ city: "Lyon", country: "FR", dept: "69", source: "owner" });
+  });
+  it("Montreuil 93 géocodé 62 : écarté ; géocodé 93 : retenu", () => {
+    const place = resolveSitPlace({ owner: { city: "Montreuil", country: "FR", postal_code: "93100" } });
+    expect(checkGeocodedPoint(place, "62")).toBe("mismatch");
+    expect(pointUsable(checkGeocodedPoint(place, "62"))).toBe(false);
+    expect(checkGeocodedPoint(place, "93")).toBe("verified");
+    expect(pointUsable(checkGeocodedPoint(place, "93"))).toBe(true);
+  });
+  it("vérification NULL : le point ne devient pas vérifié", () => {
+    const place = resolveSitPlace({ owner: { city: "Montreuil", country: "FR", postal_code: "93100" } });
+    expect(checkGeocodedPoint(place, null)).toBe("unverifiable");
+    expect(pointUsable("unverifiable")).toBe(false);
+  });
+  it("hors France ou sans département : rien à comparer", () => {
+    expect(checkGeocodedPoint({ country: "CA", dept: null }, null)).toBe("not_applicable");
   });
 });
