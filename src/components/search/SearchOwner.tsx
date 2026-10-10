@@ -128,7 +128,8 @@ const SearchOwner = () => {
   // sans relancer aucune requête Supabase ni géocodage.
   const [rawResults, setRawResults] = useState<any[]>([]);
   const [searchCenter, setSearchCenter] = useState<{ lat: number; lng: number } | null>(null);
-  const [loading, setLoading] = useState(false);
+  // Vrai dès le montage : aucun « 0 gardien » affiché avant la première lecture.
+  const [loading, setLoading] = useState(true);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [contactingId, setContactingId] = useState<string | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
