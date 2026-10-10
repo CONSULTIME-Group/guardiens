@@ -257,3 +257,29 @@ Statut : partiellement validé. L2 non lancé.
 - Saint-Étienne rayon 15 km = 1 annonce ; la carte « Garde 16 animaux à Marlhes » affiche « SAINT-ÉTIENNE, LOIRE · < 1 KM », conforme à la règle ville du propriétaire prioritaire.
 - Versions de recette distinguées : anonyme 4 largeurs (1280/1024/768/390) sur c5331c ; anonyme 1280 sur 064 ; preuve root admin sur 064.
 - Limite maintenue : recette membre non administrateur non passée (bac à sable : « permission denied to set role authenticated/anon », aucun compte membre de test disponible). L1 reste partiellement validé ; L2 non démarré (gate séquentielle).
+
+### L1, gate de clôture du 10/10/2026 (reprise « Ok go », code 064a30a472477a47c79a742588a762a39c8bf422, docs b8f4240e4)
+
+Recette membre non administrateur réelle : impossible, sans contournement.
+- Statut d'authentification du bac à sable : signed_out. L'outil de session sait ouvrir une session sur un compte existant, mais aucun compte de test déclaré n'existe (aucune colonne ni rôle « test » ; 3 adresses sur 1 587 contiennent test/qa, rien ne prouve qu'il s'agit de comptes de test, non utilisées). Ouvrir une session sur un autre membre serait une usurpation, refusé. SET ROLE authenticated/anon toujours refusé. Aucun compte créé, aucune donnée modifiée.
+- Vérification alternative (preuve statique, lecture seule du catalogue, PAS une recette RLS) : sits SELECT authenticated = propriétaire OU status published OU candidature acceptée OU admin ; anon = published. public_profiles, public_owner_profiles, public_closed_sits : SELECT accordé à anon et authenticated. La recherche ne lit que sits, public_closed_sits, public_profiles, public_owner_profiles : un membre lit donc la même population ouverte que le visiteur (recetté) et que l'admin.
+- Écart admin/membre identifié par le code : en session connectée la requête inclut draft + unpublished_at (annonces en pause). L'admin en voit 7 d'autrui (mesure lecture seule), un membre seulement les siennes. Effet limité à la section grisée « passées ou attribuées » ; compteurs d'ouvertes non touchés (isOpenSit exige published). Les chiffres d'archives de la recette admin peuvent donc dépasser ceux d'un membre de 7 au plus. Non corrigé (comportement de droits, hors portée).
+
+Recette visiteur 1280 sur le code 064 (serveur local, captures /tmp/browser/l1c/shots) :
+- Lyon : 0 ouverte près de Lyon, mention « 1 annonce de votre département n'a pas de commune situable », pas d'élargissement automatique, 13 en France, 3 hors France.
+- France entière : 13 disponibles, « Lieu à préciser, Rhône » visible, archives 16.
+- Panne du service de localisation (fonction geocode coupée) : message « Nous n'avons pas pu situer « Lyon ». Aucune annonce ne peut être confirmée dans ce rayon, aucune distance n'est calculée. », aucun élargissement automatique. A9 vérifié.
+- Panne de la vérification de département (geo.api.gouv coupé) : positions écartées, aucune distance inventée, mais aucun message propre à cette panne (la mention département disparaît). Non bloquant, noté.
+- Ville homonyme (Saint-Denis) : une seule commune retenue sans choix proposé ni mention de l'homonymie. Pas de distance inventée, pas d'élargissement. Traitement par autocomplétion en L2 (B1).
+- Aucune erreur console applicative (avertissements React de refs préexistants).
+Non refait sur ce passage : 390/768/1024 (dernière preuve 4 largeurs sur c5331c), drawer et bascule carte actif/toutes (preuve root admin sur 064).
+
+Conclusion de gate : L1 fonctionnellement clos pour visiteur et admin sur 064 ; recette membre non administrateur réelle non passée, remplacée par une preuve statique de niveau inférieur. Décision de Jérémie requise : accepter cette preuve pour ouvrir L2, ou fournir un compte membre de test dédié. L2 non démarré.
+
+### L2, critères de recette précisés (conception seulement, aucune implémentation)
+1. Canada : recherche gardiens pays CA = exactement les gardiens actifs avec prénom résidant au Canada (2 au 10/10 : Venaya 35 %, Godelive 85 %), compteur, liste et carte égaux ; profils sous 40 % visibles, candidature seule bloquée.
+2. Résidence et mobilité distinctes : « Habitent à proximité » ne lit que la résidence ; « Peuvent venir ici » ne lit que travel_zones déclarées (NULL jamais inclus) ; un même gardien peut figurer dans les deux, jamais par déduction ; aucun jeu d'une clé pays/mode/région différente affiché.
+3. Annonces : lieu = profil public du propriétaire, repli entier sur l'annonce (resolveSitPlace) ; compteurs internationaux serveur (PublicListings, InternationalListings, InternationalShowcase, useInternationalSitsCount) alignés sur cette même source, pas sur sits.country seul.
+4. Pays, ville, rayon universels : pays visible d'abord, puis ville suggérée dans ce pays, puis rayon ; mêmes règles pour CA, FR, MX, BR, PF ; homonymes proposés au choix ; « Tous les pays » sans restriction ; tri « plus proches » désactivé ou expliqué sans ville ; état dans l'URL, retour arrière et réinitialisation fidèles.
+5. Carte recentrée : changement de pays ou de ville recadre sur la nouvelle zone, aucun repère ni cadrage Lyon résiduel, aucun ancien résultat affiché pendant le chargement ; coordonnées toujours approximatives.
+Hors portée L2 : barèmes, gouaches, entraide, seuil 40 % (candidature seulement).

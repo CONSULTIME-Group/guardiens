@@ -96,3 +96,10 @@ Navigateur local non connecté, ordinateur seulement (1280 px). Aucun audit mobi
 - [x] Saint-Étienne 15 km = 1 ; carte « Garde 16 animaux à Marlhes » affiche « SAINT-ÉTIENNE, LOIRE · < 1 KM » (ville propriétaire prioritaire)
 - [ ] Recette membre non admin : bloquée (SET ROLE refusé, aucun compte membre de test) ; L1 partiellement validé, L2 non démarré
 - Versions distinctes : anonyme 4 largeurs sur c5331c, anonyme 1280 sur 064, root admin sur 064
+
+## L1 gate de clôture (10/10/2026, code 064a30a47)
+- [x] Visiteur 1280 : Lyon 0 ouverte + 1 non située du département, France 13, panne geocode visible (A9), aucun élargissement automatique.
+- [x] Preuve statique RLS membre (catalogue en lecture seule) : même population ouverte que visiteur et admin. Ce n'est PAS une recette RLS réelle.
+- [ ] Recette membre non admin réelle : bloquée (aucun compte de test déclaré, SET ROLE refusé, pas d'usurpation). Décision Jérémie : accepter la preuve statique ou fournir un compte de test.
+- [ ] Noté : annonces en pause d'autrui (7) visibles en grisé pour l'admin seulement ; homonymes (Saint-Denis) sans choix, renvoyé en L2 ; panne vérification département sans message dédié.
+- [ ] L2 non démarré, critères précisés dans le plan.
