@@ -1,5 +1,11 @@
 # Roadmap
 
+## Diagnostic publication du 10/10/2026
+- [x] Préétapes sync/robots et lectures sitemap bornées, sans écriture.
+- [x] Séparer compilation et garde exhaustive conservée en CI.
+- [ ] Contrat du pipeline et compilation automatique finale.
+- [ ] Journaux du déploiement distant : non exposés par les outils disponibles.
+
 ## Ajustement profil Bénédicte
 - [x] Carte contact et rayon dans le flux, sans suivi du défilement.
 - [x] Papier du carnet étendu à la largeur du hero sans changer l'asset.

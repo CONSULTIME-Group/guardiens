@@ -49,16 +49,16 @@ construite et déployée par l'infrastructure Lovable, qui ne consulte pas les
 checks GitHub. Un workflow rouge n'empêche aucun déploiement déclenché depuis
 l'interface Lovable.
 
-La seule porte réelle côté Lovable est le script `build` de `package.json` :
-la publication l'exécute, et un code de sortie non nul fait échouer la
-publication. **La garde y est câblée depuis le 17/08/2026** (décision du
-propriétaire : un test rouge doit bloquer la publication) : `build` se
-termine par `&& npm run test:guard`.
+Le script `build` prépare les fichiers publics et compile la production.
+Depuis le 10/10/2026, la suite exhaustive est séparée : `validate:ci`
+exécute ce même build puis `test:guard`, explicitement dans le workflow CI.
+La référence, les exclusions, les rejeux et les codes d'échec sont inchangés.
+Un contrôle CI rouge doit être traité avant publication, mais Lovable
+ne consulte pas automatiquement ce contrôle GitHub.
 
 Conséquences :
 
-- chaque publication gagne environ 1 à 2 minutes (suite complète, sans
-  rejeu tant qu'il n'y a pas d'écart) ;
+- la suite complète et ses rejeux restent en CI, pas dans chaque publication ;
 - les tests qui lisent la base de production (`article-internal-links`,
   `article-pricing-content`) sont dans `excludedFiles` : une donnée qui
   bouge en base ne fait jamais échouer un build. Ils se relancent à la
