@@ -5,7 +5,8 @@
  * search_sitter_pool, pays filtré côté serveur AVANT toute pagination, pages
  * de 1 000 lignes (plafond serveur), plus de tranche de 500 profils triés par
  * identifiant. La population est celle des vues publiques (compte actif,
- * prénom, complétion >= 40) : la même que les compteurs par pays.
+ * prénom renseigné, sans seuil de complétion depuis le 10/10/2026) : la même
+ * que les compteurs par pays.
  * Coordonnées toujours approximées (2 décimales), jamais précises.
  */
 import { supabase } from "@/integrations/supabase/client";
