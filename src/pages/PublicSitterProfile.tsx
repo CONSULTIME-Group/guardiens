@@ -1807,7 +1807,8 @@ export default function PublicSitterProfile() {
               specialSkills={specialSkills}
             />
 
-            {/* Avis : titre et résumé conservés, blocs éditoriaux */}
+            {/* Avis : masqués sans avis (L5, aucune section vide). */}
+            {sitterRoleCount > 0 && (
             <section aria-label="Avis reçus" className="scroll-mt-20">
               <SectionHeading eyebrow="Avis" title={sitterReviewsHeading(sitterRoleCount, sitterRoleAvg, firstName).title} />
               <p className="-mt-2 mb-[22px] text-sm text-muted-foreground">
@@ -1854,6 +1855,7 @@ export default function PublicSitterProfile() {
                 </>
               )}
             </section>
+            )}
 
             <SitterAboutSection
               firstName={firstName}

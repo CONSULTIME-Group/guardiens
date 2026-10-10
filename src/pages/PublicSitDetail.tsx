@@ -544,7 +544,7 @@ const PublicSitDetail = () => {
      "@type": "InteractionCounter",
      interactionType: "https://schema.org/PerformAction",
      userInteractionCount: owner.completed_sits_count,
-     name: "Gardes déjà accueillies par ce membre",
+     name: "Gardes réalisées comme gardien par ce membre",
    },
  }),
  };
