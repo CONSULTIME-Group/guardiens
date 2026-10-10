@@ -946,6 +946,9 @@ const SearchOwner = () => {
   // gardiens : rayon, département (France), pays entier, puis tous les pays.
   const suggestExpansion = (): { target: ZoneMode | "all"; count: number; label: string } | null => {
     if (results.length > 0) return null;
+    // Mode « Peuvent venir ici » : les compteurs d'élargissement portent sur
+    // les résidents, pas sur la mobilité déclarée ; aucune suggestion chiffrée.
+    if (effectivePresence === "come") return null;
     if (zoneMode === "radius" && refDept && densityCounts.dept > 0) {
       return { target: "dept", count: densityCounts.dept, label: deptLabel };
     }
