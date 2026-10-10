@@ -1746,15 +1746,15 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
   {tab === "sits" && !loading && !searchError && geocodeFailedCity && (
     <div role="status" className="mx-6 mt-4 bg-muted/60 border border-border rounded-lg p-3 text-sm text-muted-foreground flex flex-col sm:flex-row sm:items-center gap-3">
       <p className="flex-1 min-w-0">
-        Nous n'avons pas pu situer « {geocodeFailedCity} ». {appliedZone === "radius"
-          ? "Aucune annonce ne peut être confirmée dans ce rayon, aucune distance n'est calculée."
+        Nous n'avons pas pu situer « {geocodeFailedCity} ». {zoneRefMissing
+          ? (appliedZone === "radius" ? "Aucune annonce ne peut être confirmée dans ce rayon, aucune distance n'est calculée." : "Aucune annonce locale ne peut être confirmée, aucune distance n'est calculée.")
           : appliedZone === "dept"
           ? "Les distances ne sont pas calculées, les annonces sont cherchées dans le département choisi."
           : appliedZone === "region"
           ? "Les distances ne sont pas calculées, les annonces sont cherchées dans la région choisie."
           : "Les distances ne sont pas calculées."}
       </p>
-      {appliedZone === "radius" && (
+      {zoneRefMissing && (
         <Button size="sm" variant="outline" className="shrink-0 bg-card" onClick={() => setZoneModeByUser("france")}>
           Voir toute la France
         </Button>
