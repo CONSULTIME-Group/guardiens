@@ -90,3 +90,9 @@ Navigateur local non connecté, ordinateur seulement (1280 px). Aucun audit mobi
 - [ ] Géocodage indisponible pour 6 villes (lieux à préciser sur la carte), Montreuil ambigu
 - [ ] RLS non administrateur non vérifiable ici (SET ROLE refusé en bac à sable)
 - [ ] Panneau Filtres à vérifier connecté (désactivé en visiteur)
+
+### Preuve recette root L1, build 064a30a472477a47c79a742588a762a39c8bf422 (10/10/2026)
+- [x] Preview distante, session admin réelle : Lyon 15 km = 0, drawer « Voir 0 résultat » ; élargissement explicite département = 2, drawer « Voir 2 résultats »
+- [x] Saint-Étienne 15 km = 1 ; carte « Garde 16 animaux à Marlhes » affiche « SAINT-ÉTIENNE, LOIRE · < 1 KM » (ville propriétaire prioritaire)
+- [ ] Recette membre non admin : bloquée (SET ROLE refusé, aucun compte membre de test) ; L1 partiellement validé, L2 non démarré
+- Versions distinctes : anonyme 4 largeurs sur c5331c, anonyme 1280 sur 064, root admin sur 064
