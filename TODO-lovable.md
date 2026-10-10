@@ -58,3 +58,18 @@ Fichier de suivi des tâches reportées. Mis à jour manuellement après chaque 
 - [ ] Anomalie fiche Venaya (35 %) : FreshStartStory affiche « Venaya a rempli son profil » alors que le profil est incomplet. Remplacer par une formulation neutre, ne jamais dire « complété » sous le seuil.
 - [ ] Mémoire affinité : mentionne encore le seuil 60 %, le site applique 40 %
 - [ ] Connexion GitHub perdue côté Lovable : les modifications restent dans Lovable
+
+## Audit recherche d'annonces /annonces et /annonces/international (10/10/2026, sans correctif de comportement)
+
+Navigateur local non connecté, ordinateur seulement (1280 px). Aucun audit mobile ni connecté à ce tour.
+
+- [ ] Bug, drawer « Voir N résultats » : AdvancedFiltersSheet reçoit results.length (SearchSitter.tsx, prop currentResultsCount), qui inclut les annonces passées et attribuées ; le titre de liste compte seulement les disponibles (availableSitsCount). Mesuré : 15 publiées + 17 fermées (public_closed_sits : 14 archived, 3 completed) = 32
+- [ ] Bug, compteur France : densityCounts.france = franceExactCount = annonces publiées (expirées et hors France incluses) + 17 fermées (SearchSitter.tsx, searchSits). Alimente « 32 annonces hors de votre zone », « Toute la France (32) », SitterDiscoveryBanner et l'élargissement auto, alors que la densité rayon/département/région ne compte que les ouvertes françaises
+- [ ] Bug, libellé : « N annonces disponibles près de vous » choisi dès qu'une ville est saisie (countLabel), même en zone « Toute la France » ; en mode France la grille inclut le Québec (choix voulu dans filterByLocation, commentaire « restent visibles en mode Toute la France »), d'où « près de vous » avec une annonce au Canada
+- [ ] Incohérence compteur hors France : PublicListings et SearchSitter comptent les publiées hors FR sans accepting_applications ni date de fin ; InternationalShowcase exige accepting_applications et se masque sous 3 ; InternationalListings ne filtre ni date ni acceptation (limite 60). Mesuré : 3 (CA, 2 PF)
+- [ ] Choix produit à arbitrer : titre SEO fixe « en France » (public_listings.meta_title) quelle que soit la ville ; aucun filtre pays dans le drawer, l'étranger passe par le lien séparé /annonces/international
+- [ ] Localisation : la zone se calcule sur la ville et le code postal du PROPRIÉTAIRE (s.owner.city), pas sur sits.city ; une annonce Marlhes d'un propriétaire Saint-Étienne est placée à Saint-Étienne. Observé aussi « PARIS, RHÔNE < 1 km » près de Lyon dans les annonces passées : à investiguer
+- [ ] Constat Codex « 2 annonces département » et « grille 15 avec Québec » non reproduit à l'identique en local (local : 0 près de Lyon, bandeau 32 hors zone) ; la grille 15 correspond au mode France, cause probable : bascule ou élargissement vers France
+- [ ] Performance : InternationalListings géocode chaque annonce au chargement (jusqu'à 60 appels) ; SearchSitter rapatrie jusqu'à 500 ouvertes + 500 fermées puis filtre côté client
+- [x] Données privées : projection explicite des sits, propriétaires lus via public_profiles, annonces fermées via la vue réduite public_closed_sits (sans dates ni texte libre)
+- [x] Code mort retiré dans SearchSitter.tsx : 30 imports jamais utilisés (ReportButton, EnvironmentPills, Tooltip, Toast, Input, Slider, Switch, Tabs, Popover, Checkbox, Sheet, icônes, alertRadius, getRegionName, getDeptsInRegion), constante animalChips, appel useToast. Conservés : ILLUSTRATIONS (gouaches), setMissionTypeFilter, userCompletedSits (alimentés par des hooks), useInternationalSitsCount (utilisé par la landing)
