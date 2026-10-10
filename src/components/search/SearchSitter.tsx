@@ -180,6 +180,9 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  // sur le département faute de coordonnées. Signalé à l'écran, jamais silencieux.
  const [geocodeFailedCity, setGeocodeFailedCity] = useState<string | null>(null);
  const [unlocatedCount, setUnlocatedCount] = useState(0);
+ // Zone demandée mais référence (position, département, région) introuvable :
+ // aucun résultat local, message et élargissement explicites.
+ const [zoneRefMissing, setZoneRefMissing] = useState(false);
  // Zone réellement appliquée au dernier calcul (peut différer de zoneMode si la
  // référence manque) : le libellé du compteur la suit.
  const [appliedZone, setAppliedZone] = useState<"radius" | "dept" | "region" | "france">("france");
@@ -721,6 +724,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
 
  // Reference postal code for dept/region zone modes (selected city if available, else user CP)
  const getZoneRefPostalCode = (): string | null => cityPostalCode ?? userPostalCode;
+ const normalizeRefDept = (d: string | null): string | null => (d ? (/^\d$/.test(d) ? `0${d}` : d.toUpperCase()) : null);
 
  /**
   * Lot L1 : zone calculée sur le LIEU DE GARDE (commune et pays de l'annonce,
@@ -764,7 +768,15 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
 
   const french = items.filter((s) => isFranceSit(s));
   const frenchOpen = french.filter((s) => isOpenSit(s, today));
-  const refDept = getDeptCode(getZoneRefPostalCode());
+  // Département de référence : code postal de la ville choisie ; sinon, pour une
+  // ville saisie ou reçue par lien sans code postal, département de sa position
+  // géocodée ; sinon code postal du profil.
+  const cityGiven = !!city && city !== userCity;
+  const refDept = cityPostalCode
+    ? getDeptCode(cityPostalCode)
+    : cityGiven
+    ? (searchCoords ? normalizeRefDept(await communeDeptFromCoords(searchCoords.lat, searchCoords.lng)) : null)
+    : getDeptCode(userPostalCode);
   const refRegion = getRegionCode(refDept);
   const hasReference = !!(city || userCity);
   // Rayon : seulement les coordonnées vérifiées à distance <= rayon. Une annonce
@@ -794,8 +806,14 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
     }
     // Aucune ville ni profil situé : pas de référence, France entière affichée
     // avec l'invitation visible à renseigner une ville.
-  } else if (zoneMode === "dept" && refDept) { filtered = french.filter(inDept); applied = "dept"; }
-  else if (zoneMode === "region" && refRegion) { filtered = french.filter(inRegion); applied = "region"; }
+  } else if (zoneMode === "dept") {
+    if (refDept) { filtered = french.filter(inDept); applied = "dept"; }
+    else if (hasReference) { filtered = []; applied = "dept"; }
+  } else if (zoneMode === "region") {
+    if (refRegion) { filtered = french.filter(inRegion); applied = "region"; }
+    else if (hasReference) { filtered = []; applied = "region"; }
+  }
+  setZoneRefMissing(hasReference && (zoneMode === "radius" ? !searchCoords : zoneMode === "dept" ? !refDept : zoneMode === "region" ? !refRegion : false));
   // Annonces ouvertes du département de référence sans coordonnées vérifiées :
   // jamais dans le rayon, signalées pour un élargissement explicite.
   setUnlocatedCount(applied === "radius" && refDept ? frenchOpen.filter((s) => !coordsOf(s) && placeOf(s).dept === refDept).length : 0);
@@ -1741,6 +1759,16 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
           Voir toute la France
         </Button>
       )}
+    </div>
+  )}
+  {tab === "sits" && !loading && !searchError && !geocodeFailedCity && zoneRefMissing && (
+    <div role="status" className="mx-6 mt-4 bg-muted/60 border border-border rounded-lg p-3 text-sm text-muted-foreground flex flex-col sm:flex-row sm:items-center gap-3">
+      <p className="flex-1 min-w-0">
+        Nous n'avons pas pu déterminer {appliedZone === "region" ? "la région" : appliedZone === "dept" ? "le département" : "la position"} de « {city || userCity} ». Aucune annonce locale ne peut être confirmée.
+      </p>
+      <Button size="sm" variant="outline" className="shrink-0 bg-card" onClick={() => setZoneModeByUser("france")}>
+        Voir toute la France
+      </Button>
     </div>
   )}
   {tab === "sits" && !loading && !searchError && !geocodeFailedCity && appliedZone === "radius" && unlocatedCount > 0 && (
