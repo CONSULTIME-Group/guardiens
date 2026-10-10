@@ -42,12 +42,15 @@ describe("R2 sitterCardLine, savoir-faire d'abord", () => {
 });
 
 describe("R2 recherche : aucune requête supplémentaire", () => {
+  // Lot 1 international : la liste passe par la RPC search_sitter_pool (une
+  // lecture paginée), le compteur par search_sitter_country_counts.
   const src = readFileSync("src/components/search/SearchOwner.tsx", "utf8");
-  it("toujours deux lectures de public_sitter_profiles (compteur + liste)", () => {
-    expect(src.match(/\.from\("public_sitter_profiles"\)/g)?.length).toBe(2);
+  const lib = readFileSync("src/lib/sitterSearch.ts", "utf8");
+  it("aucune lecture directe de public_sitter_profiles, une seule RPC de vivier", () => {
+    expect(src.match(/\.from\("public_sitter_profiles"\)/g)).toBeNull();
+    expect(lib.match(/rpc\("search_sitter_pool"/g)?.length).toBe(1);
   });
-  it("colonnes ajoutées à la lecture existante et rangées dans _card", () => {
-    expect(src).toContain("travels_with_own_animals, competences, special_animal_skills, interests, experience_years\")");
-    expect(src).toContain("_card: { competences, special_animal_skills, interests, experience_years }");
+  it("colonnes de la carte lues dans la même lecture et rangées dans _card", () => {
+    expect(lib).toMatch(/_card: \{\s*competences: r\.competences,\s*special_animal_skills: r\.special_animal_skills,\s*interests: r\.interests,\s*experience_years: r\.experience_years,/);
   });
 });

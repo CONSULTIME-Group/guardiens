@@ -16,7 +16,7 @@ vi.mock("@/integrations/supabase/client", () => ({
   supabase: { functions: { invoke: (...a: any[]) => invoke(...a) } },
 }));
 
-const src = readFileSync(resolve(process.cwd(), "src/components/search/SearchOwner.tsx"), "utf8");
+const src = readFileSync(resolve(process.cwd(), "src/lib/sitterSearch.ts"), "utf8");
 
 describe("géocodage en panne", () => {
   
@@ -41,7 +41,7 @@ describe("géocodage en panne", () => {
 
 
   it("SearchOwner déclare un repli département dans le prédicat de rayon", () => {
-    const m = src.match(/const inRadius = \(s: any\) => \{[\s\S]*?\n {4}\};/);
+    const m = src.match(/export function inRadius\([\s\S]*?\n\}/);
     expect(m, "prédicat inRadius introuvable").not.toBeNull();
     const body = m![0];
     expect(body, "aucun repli sur le département dans inRadius").toMatch(/refDept/);
