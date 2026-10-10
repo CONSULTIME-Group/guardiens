@@ -1096,7 +1096,7 @@
     position: absolute;
     inset: -36px -48px -24px -32px;
     z-index: -1;
-    background: radial-gradient(ellipse at 50% 45%, hsl(var(--background) / .98) 40%, hsl(var(--background) / .94) 65%, hsl(var(--background) / .55) 82%, hsl(var(--background) / 0) 100%);
+    background: radial-gradient(ellipse closest-side at 50% 50%, hsl(var(--background) / .98) 40%, hsl(var(--background) / .94) 65%, hsl(var(--background) / .55) 82%, hsl(var(--background) / 0) 100%);
     pointer-events: none;
   }
 
@@ -1107,6 +1107,10 @@
     .profile-hero [data-hero-content] { padding-bottom: 116px; }
     .profile-hero[data-hero-subject="left"] .profile-hero-art { object-position: 32% center; }
     .profile-hero[data-hero-subject="right"] .profile-hero-art { object-position: 75% center; }
+  }
+
+  @media (min-width: 640px) and (max-width: 1023px) {
+    .profile-hero-identity { max-width: 420px; }
   }
 
   .alma-conversation-sheet {
