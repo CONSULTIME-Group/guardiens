@@ -726,47 +726,33 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  const getZoneRefPostalCode = (): string | null => cityPostalCode ?? userPostalCode;
  const normalizeRefDept = (d: string | null): string | null => (d ? (/^\d$/.test(d) ? `0${d}` : d.toUpperCase()) : null);
 
- /**
-  * Lot L1 : zone calculée sur le LIEU DE GARDE (commune et pays de l'annonce,
-  * département de l'annonce), jamais sur la ville du profil propriétaire.
-  * France = FR strict dans tous les modes, y compris « France entière ».
-  */
- const filterSitsByLocation = async (
-  items: any[],
-  searchCoords: { lat: number; lng: number } | null,
-  today: string,
- ) => {
-  const coordsByKey = new Map<string, { lat: number; lng: number }>();
-  const communeDeptByKey = new Map<string, string | null>();
-  const keys = new Map<string, { city: string; country: string | null; fr: boolean }>();
-  items.forEach((s) => {
-    const g = sitGeocodeKey(s); const k = sitGeocodeKeyString(s);
-    if (g && k) keys.set(k, { ...g, fr: isFranceSit(s) });
-  });
-  await Promise.all([...keys.entries()].map(async ([k, g]) => {
-    const c = await geocodeCity(g.city, g.country);
-    if (!c) return;
-    coordsByKey.set(k, { lat: c.lat, lng: c.lng });
-    // Département de la commune géocodée (France) : contrôle de cohérence avec
-    // le département saisi sur l'annonce.
-    if (g.fr) communeDeptByKey.set(k, await communeDeptFromCoords(c.lat, c.lng));
-  }));
-  const placeOf = (s: any) => {
-    const k = sitGeocodeKeyString(s);
-    return resolveSitPlace(s, k ? communeDeptByKey.get(k) ?? null : null);
-  };
-  // Coordonnées vérifiées : commune géocodée ET lieu cohérent. Une annonce au
-  // lieu incohérent (commune et département en désaccord) n'a ni distance ni
-  // position sur la carte.
-  const coordsOf = (s: any) => {
-    const k = sitGeocodeKeyString(s);
-    if (!k) return null;
-    const co = coordsByKey.get(k) ?? null;
-    if (!co) return null;
-    return placeOf(s).incoherent ? null : co;
-  };
+  /**
+   * Lot L1 (décision du 10/10/2026) : zone calculée sur la localisation du
+   * PROPRIÉTAIRE (profil public : ville, pays, département), repli sur
+   * l'annonce seulement si elle manque (resolveSitPlace). France = FR strict.
+   */
+  const filterSitsByLocation = async (
+   items: any[],
+   searchCoords: { lat: number; lng: number } | null,
+   today: string,
+  ) => {
+   const coordsByKey = new Map<string, { lat: number; lng: number }>();
+   const keys = new Map<string, { city: string; country: string | null }>();
+   items.forEach((s) => {
+     const g = sitGeocodeKey(s); const k = sitGeocodeKeyString(s);
+     if (g && k) keys.set(k, g);
+   });
+   await Promise.all([...keys.entries()].map(async ([k, g]) => {
+     const c = await geocodeCity(g.city, g.country);
+     if (c) coordsByKey.set(k, { lat: c.lat, lng: c.lng });
+   }));
+   const placeOf = (s: any) => resolveSitPlace(s);
+   const coordsOf = (s: any) => {
+     const k = sitGeocodeKeyString(s);
+     return k ? coordsByKey.get(k) ?? null : null;
+   };
 
-  const french = items.filter((s) => isFranceSit(s));
+   const french = items.filter((s) => isFrancePlace(s));
   const frenchOpen = french.filter((s) => isOpenSit(s, today));
   // Département de référence : code postal de la ville choisie ; sinon, pour une
   // ville saisie ou reçue par lien sans code postal, département de sa position
