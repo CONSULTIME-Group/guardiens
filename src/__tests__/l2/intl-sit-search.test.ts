@@ -49,3 +49,21 @@ describe("L2 moteur international", () => {
     expect(resolveSitPlace({ city: "X", country: null, owner: null }).country).toBeNull();
   });
 });
+
+import { geocodeIntlPlace } from "@/lib/intlSitSearch";
+describe("L2 géocodage hors France", () => {
+  const photon = { features: [
+    { properties: { name: "Saint-Ludger", countrycode: "CA", osm_key: "place", osm_value: "village", state: "Québec", country: "Canada" }, geometry: { coordinates: [-70.69123, 45.75456] } },
+    { properties: { name: "Saint-Ludger", countrycode: "FR", osm_key: "place", osm_value: "village" }, geometry: { coordinates: [1, 1] } },
+  ] };
+  const f = (async () => ({ ok: true, json: async () => photon })) as any;
+  it("repli Photon : pays et nom exacts, point arrondi", async () => {
+    expect(await geocodeIntlPlace("Saint Ludger", "CA", async () => null, f)).toEqual({ lat: 45.755, lng: -70.691 });
+  });
+  it("aucun point si le nom ne correspond pas", async () => {
+    expect(await geocodeIntlPlace("Montréal", "CA", async () => null, f)).toBeNull();
+  });
+  it("le géocodeur du site reste prioritaire", async () => {
+    expect(await geocodeIntlPlace("X", "CA", async () => ({ lat: 1, lng: 2 }), f)).toEqual({ lat: 1, lng: 2 });
+  });
+});

@@ -177,3 +177,32 @@ export function intlTitle(country: string | null, city: string | null): string {
 
 /** Le tri « plus proches » n'a de sens qu'avec une ville située. */
 export const closestSortAvailable = (center: { lat: number; lng: number } | null): boolean => !!center;
+
+const normName = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+
+/**
+ * Point approximatif (centre de commune) d'un lieu hors France : géocodeur du
+ * site, puis repli Photon limité au pays et au nom exact (accents, tirets et
+ * casse ignorés). Aucun point si le nom ne correspond pas : rien d'inventé.
+ */
+export async function geocodeIntlPlace(
+  city: string,
+  country: string,
+  primary: (city: string, country: string) => Promise<{ lat: number; lng: number } | null>,
+  fetcher: typeof fetch = fetch,
+): Promise<{ lat: number; lng: number } | null> {
+  try {
+    const p = await primary(city, country);
+    if (p) return { lat: p.lat, lng: p.lng };
+  } catch { /* repli */ }
+  try {
+    const r = await fetcher(`https://photon.komoot.io/api/?q=${encodeURIComponent(city)}&limit=10&lang=fr&layer=city&layer=locality&layer=district`);
+    if (!r.ok) return null;
+    const { fromPhoton } = await import("@/lib/sitterSearch");
+    const target = normName(city.split(",")[0]);
+    const hit = fromPhoton(await r.json(), country).find((s) => normName(s.name) === target && s.lat != null && s.lng != null);
+    return hit ? { lat: Math.round(hit.lat! * 1000) / 1000, lng: Math.round(hit.lng! * 1000) / 1000 } : null;
+  } catch {
+    return null;
+  }
+}

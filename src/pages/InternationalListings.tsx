@@ -30,6 +30,7 @@ import {
   intlPlaceLabel,
   intlTitle,
   closestSortAvailable,
+  geocodeIntlPlace,
   type IntlSit,
 } from "@/lib/intlSitSearch";
 import { MAP_TILE_WORLD_URL, MAP_TILE_WORLD_ATTRIBUTION, MAP_TILE_WORLD_MAX_ZOOM } from "@/lib/mapTiles";
@@ -151,7 +152,7 @@ export default function InternationalListings() {
     }
     let cancelled = false;
     setCityCenter(null);
-    geocodeCity(city, country).then((c) => {
+    (country ? geocodeIntlPlace(city, country, geocodeCity) : geocodeCity(city)).then((c) => {
       if (cancelled) return;
       if (c) setCityCenter({ lat: c.lat, lng: c.lng });
       else setCityFailed(true);
@@ -169,7 +170,7 @@ export default function InternationalListings() {
     const todo = uniquePlaceKeys(base).filter((k) => !points.has(k.key));
     if (!todo.length) return;
     let cancelled = false;
-    Promise.all(todo.map(async (k) => [k.key, await geocodeCity(k.city, k.country)] as const)).then((res) => {
+    Promise.all(todo.map(async (k) => [k.key, await geocodeIntlPlace(k.city, k.country, geocodeCity)] as const)).then((res) => {
       if (cancelled) return;
       setPoints((prev) => {
         const next = new Map(prev);
