@@ -809,8 +809,10 @@ const SearchOwner = () => {
   // de densité sur `rawResults`. Recalculé sans coût réseau.
   const { results, densityCounts } = useMemo(() => {
     const refPostal = cityPostalCode ?? userPostalCode;
-    const refDept = getDeptCode(refPostal);
-    const refRegion = getRegionCode(refDept);
+    // Département de référence : seulement pour une recherche en France.
+    const refDept = selectedCountry === "FR" || (selectedCountry === null && (cityCountry ?? "FR") === "FR")
+      ? getDeptCode(refPostal)
+      : null;
 
     let filtered = rawResults;
     if (vehicled) filtered = filtered.filter((s: any) => s.has_vehicle);
@@ -831,55 +833,16 @@ const SearchOwner = () => {
       filtered = filtered.filter((s: any) => s.avgRating !== null && s.avgRating >= min);
     }
 
-    // Pays d'un gardien, résolu via la RPC (la vue publique n'expose pas `country`).
-    const countryOf = (s: any) => countryByUser.get(s.user_id) ?? null;
-    const countryReady = countryByUser.size > 0;
+    // Zones : règles uniques de src/lib/sitterSearch (département et région
+    // réservés aux gardiens établis en France, repli département du rayon
+    // pour un gardien sans coordonnées). Le vivier est déjà celui du pays.
+    const ctx = { zoneMode, country: selectedCountry, center: searchCenter, radiusKm: radius[0], refDept };
+    const density = zoneCounts(filtered, ctx);
 
-    // Repli département : quand un gardien n'a ni coordonnées en base ni
-    // géocodage abouti, on le rattache au rayon si son code postal partage les
-    // deux premiers chiffres de la référence (même logique que côté annonces).
-    // Une panne de géocodage dégrade la précision, elle ne vide pas la liste.
-    const inRadius = (s: any) => {
-      if (s._dist != null) return s._dist <= radius[0];
-      if (!refDept) return false;
-      const cp = s.profile?.postal_code;
-      return cp ? getDeptCode(cp) === refDept : false;
-    };
-
-    const density = {
-      radius: searchCenter ? filtered.filter(inRadius).length : 0,
-      dept: refDept ? filtered.filter((s: any) => {
-        const cp = s.profile?.postal_code; return cp ? getDeptCode(cp) === refDept : false;
-      }).length : 0,
-      region: refRegion ? filtered.filter((s: any) => {
-        const cp = s.profile?.postal_code; return cp ? getRegionCode(getDeptCode(cp)) === refRegion : false;
-      }).length : 0,
-      france: countryReady ? filtered.filter((s: any) => countryOf(s) === "FR").length : filtered.length,
-      country: selectedCountry && countryReady
-        ? filtered.filter((s: any) => countryOf(s) === selectedCountry).length
-        : 0,
-    };
-
-    let zoned = filtered;
-    if (zoneMode === "radius") {
-      if (searchCenter) {
-        zoned = zoned.filter(inRadius);
-      } else if (city) {
-        zoned = zoned.filter((s: any) => s.profile?.city?.toLowerCase().includes(city.toLowerCase()));
-      }
-    } else if (zoneMode === "dept" && refDept) {
-      zoned = zoned.filter((s: any) => {
-        const cp = s.profile?.postal_code; return cp ? getDeptCode(cp) === refDept : false;
-      });
-    } else if (zoneMode === "region" && refRegion) {
-      zoned = zoned.filter((s: any) => {
-        const cp = s.profile?.postal_code; return cp ? getRegionCode(getDeptCode(cp)) === refRegion : false;
-      });
-    } else if (zoneMode === "country" && selectedCountry && countryReady) {
-      zoned = zoned.filter((s: any) => countryOf(s) === selectedCountry);
-    } else if (zoneMode === "france" && countryReady) {
-      // « France » est désormais un vrai filtre : tous les profils ont un pays renseigné.
-      zoned = zoned.filter((s: any) => countryOf(s) === "FR");
+    let zoned = applyZone(filtered, ctx);
+    if (zoneMode === "radius" && !searchCenter && city) {
+      // Ville introuvable au géocodage : repli sur le nom de commune.
+      zoned = zoned.filter((s: any) => s.profile?.city?.toLowerCase().includes(city.toLowerCase()));
     }
 
     let effectiveSort: SortOption = sort;
@@ -923,79 +886,41 @@ const SearchOwner = () => {
     }
 
     return { results: sorted, densityCounts: density };
-  }, [rawResults, searchCenter, city, cityPostalCode, userPostalCode, radius, zoneMode, selectedCountry, countryByUser, animalTypes, vehicled, availableOnly, verifiedOnly, emergencyOnly, minSits, minRating, sort, sortUserOverride, viewerOwner]);
+  }, [rawResults, searchCenter, city, cityCountry, cityPostalCode, userPostalCode, radius, zoneMode, selectedCountry, animalTypes, vehicled, availableOnly, verifiedOnly, emergencyOnly, minSits, minRating, sort, sortUserOverride, viewerOwner]);
 
+  // La grille repart du premier palier à chaque changement de résultats.
+  useEffect(() => { setVisibleCount(RESULTS_PAGE_SIZE); }, [results]);
 
   const hasActiveFilters = vehicled || availableOnly || verifiedOnly || emergencyOnly || animalTypes.length > 0 || minSits !== "all" || minRating !== "all";
   const hasAnyRating = results.some((s: any) => s.avgRating !== null);
 
   // Zone helpers
-  const refDept = getDeptCode(getZoneRefPostalCode());
+  const isFranceSearch = selectedCountry === "FR";
+  const refDept = isFranceSearch || (selectedCountry === null && (cityCountry ?? "FR") === "FR")
+    ? getDeptCode(getZoneRefPostalCode())
+    : null;
   const refRegion = getRegionCode(refDept);
   const deptLabel = refDept ? `${refDept} ${DEPT_NAMES[refDept] || ""}`.trim() : "Département";
-  // regionLabel volontairement supprimé (positionnement national, pas régional).
+  const scopeLabel = selectedCountry === null ? "Tous les pays" : countryName(selectedCountry);
 
-  // Suggest expanding when current zone is empty and a wider zone has results.
-  // L'étape "région" est volontairement omise : la promesse produit est « France
-  // entière », pas régionale (positionnement national).
-  const suggestExpansion = (): { target: ZoneMode; count: number; label: string } | null => {
+  // Élargissement proposé seulement vers une zone qui a réellement des
+  // gardiens : rayon, département (France), pays entier, puis tous les pays.
+  const suggestExpansion = (): { target: ZoneMode | "all"; count: number; label: string } | null => {
     if (results.length > 0) return null;
-    if (zoneMode === "radius" && densityCounts.dept > 0) {
+    if (zoneMode === "radius" && refDept && densityCounts.dept > 0) {
       return { target: "dept", count: densityCounts.dept, label: deptLabel };
     }
-    if (zoneMode !== "france" && densityCounts.france > 0) {
-      return { target: "france", count: densityCounts.france, label: "France entière" };
+    if (zoneMode !== "country" && densityCounts.country > 0) {
+      return { target: "country", count: densityCounts.country, label: selectedCountry === null ? "tous les pays" : scopeLabel };
+    }
+    if (selectedCountry !== null && !hasActiveFilters && totalSearchable > countryCount(selectedCountry)) {
+      return { target: "all", count: totalSearchable, label: "tous les pays" };
     }
     return null;
   };
 
   const expansion = suggestExpansion();
-  const isLaunchMode = (franceTotalSitters ?? 0) === 0;
-
-  const resetFilters = () => {
-    setVehicled(false);
-    setAvailableOnly(false);
-    setVerifiedOnly(false);
-    setEmergencyOnly(false);
-    setAnimalTypes([]);
-    setMinSits("all");
-    setMinRating("all");
-  };
-
-  // Animal type helpers
-  const animalLabel = animalTypes.length > 0
-    ? animalTypes.length <= 2 ? animalTypes.join(", ") : `${animalTypes.length} types`
-    : "Animaux";
-
-  const toggleAnimal = (chip: string) => {
-    if (chip === "Tous") { setAnimalTypes(prev => prev.includes("Tous") ? [] : ["Tous"]); return; }
-    setAnimalTypes(prev => {
-      const filtered = prev.filter(a => a !== "Tous");
-      return filtered.includes(chip) ? filtered.filter(a => a !== chip) : [...filtered, chip];
-    });
-  };
-
-  const pillBase = "snap-start flex items-center gap-2 px-4 py-2 min-h-11 rounded-full border border-border bg-card cursor-pointer hover:border-primary transition-colors text-sm whitespace-nowrap shrink-0";
-  const pillActive = "snap-start flex items-center gap-2 px-4 py-2 min-h-11 rounded-full border border-primary bg-primary/10 text-primary cursor-pointer transition-colors text-sm font-medium whitespace-nowrap shrink-0";
-
-  const sortPillBase = "snap-start shrink-0 rounded-full px-3 py-1 min-h-9 inline-flex items-center text-xs border border-border text-muted-foreground cursor-pointer hover:border-primary transition-colors whitespace-nowrap";
-  const sortPillActive = "snap-start shrink-0 rounded-full px-3 py-1 min-h-9 inline-flex items-center text-xs bg-primary/10 text-primary border border-primary/30 font-semibold cursor-pointer whitespace-nowrap";
-
-
-  // Hors France, les zones françaises (rayon, département, région) n'ont aucun sens :
-  // elles reposent toutes sur le code postal français. On les désactive sans les masquer.
-  const foreignCountrySelected = zoneMode === "country" && !!selectedCountry && selectedCountry !== "FR";
-
-  // Mode région exposé : le filtrage régional est implémenté plus haut dans ce fichier. Ne pas remasquer.
-  const zoneChips: Array<{ key: ZoneMode; label: string; count: number; disabled?: boolean }> = [
-    { key: "radius", label: `${radius[0]} km`, count: densityCounts.radius, disabled: !city || foreignCountrySelected },
-    { key: "dept", label: refDept ? `Dép. ${refDept}` : "Département", count: densityCounts.dept, disabled: !refDept || foreignCountrySelected },
-    { key: "region", label: refRegion ? REGION_NAMES[refRegion] ?? "Ma région" : "Ma région", count: densityCounts.region, disabled: !refRegion || foreignCountrySelected },
-    { key: "france", label: "France", count: densityCounts.france },
-  ];
-
-  const { data: activeSittersCount } = useActiveSittersCount();
-  const { data: activeOwnersCount } = useActiveOwnersCount();
+  const isLaunchMode = sitterCountries.length > 0 && totalSearchable === 0;
 
   // SEO vague 40 : page indexable pour capter la demande organique.
   const seoTitle = "Trouver un gardien d'animaux près de chez vous · Guardiens";
