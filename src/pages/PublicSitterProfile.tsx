@@ -1809,7 +1809,6 @@ export default function PublicSitterProfile() {
 
             {/* Avis : masqués sans avis (L5, aucune section vide). */}
             {sitterRoleCount > 0 && (
-            {(ownerDataLoading || ownerReviews.length > 0 || missionFeedbacks.length > 0) && (
             <section aria-label="Avis reçus" className="scroll-mt-20">
               <SectionHeading eyebrow="Avis" title={sitterReviewsHeading(sitterRoleCount, sitterRoleAvg, firstName).title} />
               <p className="-mt-2 mb-[22px] text-sm text-muted-foreground">
@@ -1856,7 +1855,6 @@ export default function PublicSitterProfile() {
                 </>
               )}
             </section>
-            )}
             )}
 
             <SitterAboutSection
@@ -2328,6 +2326,7 @@ export default function PublicSitterProfile() {
               )}
 
               {/* Les avis */}
+              {(ownerDataLoading || ownerReviews.length > 0 || missionFeedbacks.length > 0) && (
               <section aria-label="Avis reçus" className="scroll-mt-20">
                 <div className="mb-5">
                   <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-secondary">
@@ -2417,6 +2416,7 @@ export default function PublicSitterProfile() {
                   </div>
                 )}
               </section>
+              )}
 
               {/* Galerie propriétaire, uniquement si contenu */}
               {ownerGalleryPhotos.length > 0 && (
