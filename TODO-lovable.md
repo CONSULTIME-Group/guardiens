@@ -122,3 +122,5 @@ Navigateur local non connecté, ordinateur seulement (1280 px). Aucun audit mobi
 - L3 livré sans publication, en attente de relecture root : entraide déclarée, confiance (sources corrigées), dernière visite, réactivité 90 j sans taux, chronologie, E7 constaté (double rôle = max des scores, non modifié). L4 non lancé.
 - L7 : corriger le faux état vide du moteur France SearchSitter après échec de requête.
 - L3 VALIDÉ root 3c25bb75. L4 livré sans publication, en attente de relecture root (détail dans le plan). L6/L7 : ajouter fixture visuelle réactivité publique et confiance 5/5 vs complétion 100.
+
+- L5 livré (non publié), en attente de revue root ; à faire en L7 : galerie en session, recouvrement Alma, tuiles propriétaire « Membre depuis Ce mois ».
