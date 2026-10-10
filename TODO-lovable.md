@@ -50,6 +50,11 @@ Fichier de suivi des tâches reportées. Mis à jour manuellement après chaque 
 - [x] Fiche gardien hors France : « Montréal, Canada » dans l'en-tête et la description
 - [ ] Bloc PracticalGrid présent dans le code de la fiche gardien mais jamais affiché : décider affichage ou suppression
 - [ ] Libellé de région à valider : « Rhône, Alpes et Massif central »
-- [ ] Audit connecté non fait par l'agent (pas de session) : propre page d'édition mobilité, vue membre connecté
+- [x] Audit connecté (session Jérémie, exécuté par Codex le 10/10/2026) :
+  - [x] /profile propriétaire OK
+  - [x] Édition mobilité (rôle gardien, Mobilité et Rayon) : formulaire ouvert, options local / région / France entière / monde / continents / ajouter un pays (Canada) présentes, aucun choix précoché. Aucun champ modifié, aucune sauvegarde envoyée, rôle rétabli Propriétaire. Audit visuel seulement : le roundtrip réel reste couvert par les tests (lot2-travel-zones), pas par une écriture en production.
+  - [x] Recette recherche connectée : Canada (2) = 2 cartes (Venaya, Godelive) ; bascule de pays affiche « Chargement » sans anciens résultats Lyon ; mode « Peuvent venir ici » Canada = 2 ; fiche Venaya (35 %) ouvre avec « Montréal, Canada », mobilité « Non renseignée », photo inexistante désactivée ; fiche Godelive : photo et dépliage savoir-faire OK ; fiche propriétaire Cécile et avis admin (liste, détail, lien) validés précédemment.
+  - [x] Confidentialité lue par Codex : politiques SELECT de profiles restreintes (titulaire et admin), vues publiques à projections contrôlées. Limite : pas de vérification en tant que membre non admin, la couverture exacte des politiques pour un membre ordinaire reste à confirmer.
+- [ ] Anomalie fiche Venaya (35 %) : FreshStartStory affiche « Venaya a rempli son profil » alors que le profil est incomplet. Remplacer par une formulation neutre, ne jamais dire « complété » sous le seuil.
 - [ ] Mémoire affinité : mentionne encore le seuil 60 %, le site applique 40 %
 - [ ] Connexion GitHub perdue côté Lovable : les modifications restent dans Lovable
