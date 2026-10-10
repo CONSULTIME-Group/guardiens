@@ -380,6 +380,20 @@ const SearchOwner = () => {
     );
   }, [selectedCountry]);
 
+  // Garde-fou : une ville d'un autre pays que le pays choisi n'est jamais
+  // conservée (pastille, adresse, retour arrière), quel que soit le chemin.
+  useEffect(() => {
+    if (city && cityCountry && selectedCountry && cityCountry !== selectedCountry) {
+      setCity("");
+      setCityInput("");
+      setCityCountry(null);
+      setCityPostalCode(null);
+      setCityCenter(null);
+      setSearchCenter(null);
+      setZoneMode("country");
+    }
+  }, [city, cityCountry, selectedCountry]);
+
   // Load owner city + postal code on mount, URL params take precedence
   useEffect(() => {
     const urlCity = searchParams.get("city") || searchParams.get("ville");
@@ -417,7 +431,12 @@ const SearchOwner = () => {
     (async () => {
       const { data } = await fetchMyProfile(user.id!);
       const profileCountry = String((data as any)?.country || "FR").trim().toUpperCase() || "FR";
-      if (!cityTouchedRef.current) {
+      // Pays explicite dans l'adresse, différent du pays du profil (ou « TOUS ») :
+      // jamais de ville du profil reprise, périmètre pays entier.
+      const explicitOther = urlCountry === "TOUS" || (/^[A-Z]{2}$/.test(urlCountry) && urlCountry !== profileCountry);
+      if (!cityTouchedRef.current && explicitOther) {
+        setZoneMode("country");
+      } else if (!cityTouchedRef.current) {
         if (!/^[A-Z]{2}$/.test(urlCountry)) setSelectedCountry(profileCountry);
         if (data?.city) {
           setCity(data.city);
@@ -427,7 +446,7 @@ const SearchOwner = () => {
           setZoneMode((z) => (z === "radius" ? "country" : z));
         }
       }
-      if (data?.postal_code && profileCountry === "FR") {
+      if (data?.postal_code && profileCountry === "FR" && !explicitOther) {
         setUserPostalCode(data.postal_code);
         setCityPostalCode(data.postal_code);
       }
@@ -864,6 +883,8 @@ const SearchOwner = () => {
     if (!sortUserOverride && sort === "affinity" && !viewerOwner) {
       effectiveSort = "closest";
     }
+    // Sans ville d'ancrage, aucune distance : pas de tri « plus proches ».
+    if (effectiveSort === "closest" && !city) effectiveSort = "experience";
 
     const affinityRank = (s: any) => {
       const a = s._affinity;
@@ -907,7 +928,8 @@ const SearchOwner = () => {
   useEffect(() => { setVisibleCount(RESULTS_PAGE_SIZE); }, [results]);
 
   // Tri réellement appliqué (même règle que le dérivé des résultats).
-  const activeSort: SortOption = !sortUserOverride && sort === "affinity" && !viewerOwner ? "closest" : sort;
+  const baseSort: SortOption = !sortUserOverride && sort === "affinity" && !viewerOwner ? "closest" : sort;
+  const activeSort: SortOption = baseSort === "closest" && !city ? "experience" : baseSort;
   const hasActiveFilters = vehicled || availableOnly || verifiedOnly || emergencyOnly || animalTypes.length > 0 || minSits !== "all" || minRating !== "all";
   const hasAnyRating = results.some((s: any) => s.avgRating !== null);
 
@@ -1048,10 +1070,20 @@ const SearchOwner = () => {
           Les gardiens
         </p>
         <h1 className="font-heading text-[clamp(26px,4vw,34px)] font-semibold leading-tight text-foreground">
-          Quelqu'un du coin veille sur eux.
+          {effectivePresence === "come" && selectedCountry
+            ? `Des gardiens prêts à venir : ${countryName(selectedCountry)}`
+            : selectedCountry && selectedCountry !== "FR"
+              ? `Des gardiens de confiance : ${countryName(selectedCountry)}`
+              : selectedCountry === null
+                ? "Des gardiens de confiance, partout"
+                : "Quelqu'un du coin veille sur eux."}
         </h1>
         <p className="text-sm md:text-[15px] text-muted-foreground max-w-2xl leading-relaxed">
-          Des gardiens de confiance près de chez vous, que vous pouvez rencontrer avant une garde.{" "}
+          {effectivePresence === "come"
+            ? "Gardiens qui peuvent se déplacer jusqu'à cette destination."
+            : selectedCountry === "FR"
+              ? "Des gardiens de confiance près de chez vous, que vous pouvez rencontrer avant une garde."
+              : "Gardiens qui habitent la zone choisie."}{" "}
           {activeSort === "affinity"
             ? "Classés par affinité avec votre foyer."
             : activeSort === "rating"
@@ -1420,7 +1452,7 @@ const SearchOwner = () => {
                     ? t("search_results.sitters_hint_affinity")
                     : activeSort === "rating"
                       ? t("search_results.sitters_hint_rating")
-                      : sort === "experience"
+                      : activeSort === "experience"
                         ? t("search_results.sitters_hint_experience")
                         : t("search_results.sitters_hint_closest")}
                 </p>
@@ -1435,7 +1467,7 @@ const SearchOwner = () => {
             {(() => {
               const sortOptions: Array<{ value: SortOption; label: string }> = [
                 ...(viewerOwner ? [{ value: "affinity" as SortOption, label: t("search_results.sort_affinity") }] : []),
-                { value: "closest", label: t("search_results.sort_closest") },
+                ...(city ? [{ value: "closest" as SortOption, label: t("search_results.sort_closest") }] : []),
                 { value: "rating", label: t("search_results.sort_rating_sitters") },
                 { value: "experience", label: t("search_results.sort_experience") },
               ];
@@ -1445,7 +1477,7 @@ const SearchOwner = () => {
               };
               return (
                 <>
-                  <Select value={sort} onValueChange={(v) => handleSort(v as SortOption)}>
+                  <Select value={activeSort} onValueChange={(v) => handleSort(v as SortOption)}>
                     <SelectTrigger className="sm:hidden h-8 w-auto gap-1.5 rounded-full border-border bg-card px-3 text-xs shrink-0">
                       <SelectValue />
                     </SelectTrigger>

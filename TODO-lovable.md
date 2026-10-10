@@ -111,3 +111,4 @@ Navigateur local non connecté, ordinateur seulement (1280 px). Aucun audit mobi
 - [ ] L3 non lancé, attend validation L2.
 - [x] L2 compléments revue root 44aa7a1 : choix du pays sur /annonces, robustesse moteur et suggestions, bulles carte, animaux visiteur via public_pets, sitemap remis. Détail dans le plan.
 - [ ] Validation root de L2 attendue ; L3 non lancé. Donnée : annonce Punaauia sans animal déclaré.
+- [x] L2 recherche gardiens : pays explicite sans ville du profil, pas de tri par distance sans ville, titres contextuels. Recette connectée à faire par root.
