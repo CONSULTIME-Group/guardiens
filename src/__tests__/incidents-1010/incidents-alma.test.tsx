@@ -55,7 +55,7 @@ describe("send-mass-email, jetons de ligne", () => {
 describe("Alma, amorce répétée sur la réponse finale (cas 40, 41, 43, 50)", () => {
   const cases: Record<string, { a: string; must: string[] }> = {
     "cas-40": { a: "La garde se situe dans le 69380, dans le Rhône, pour des dates allant du 9 au 20 janvier 2027. L'annonce mentionne un yorkshire de 11 ans. La commune exacte vous sera précisée par le propriétaire : vous pouvez lui poser la question en envoyant votre candidature.\n\nVous pouvez postuler à cette annonce.", must: ["69380", "yorkshire", "propriétaire", "postuler"] },
-    "cas-41": { a: "Les photos de votre logement se gèrent toutes au même endroit, dans la rubrique Galerie de votre profil propriétaire. Vous pouvez y supprimer une photo. Si elle servait de couverture, la suivante prend sa place.", must: ["Galerie", "supprimer"] },
+    "cas-41": { a: "Les photos de votre logement se gèrent toutes au même endroit, dans la rubrique Galerie de votre profil propriétaire. Vous pouvez y ajouter de nouvelles photos, en remplacer certaines, ou en supprimer d'autres. Si la photo que vous enlevez servait de couverture à votre annonce, la suivante prendra sa place automatiquement.", must: ["Galerie", "supprimer"] },
     "cas-43": { a: "Guardiens propose des gardes en France, mais il n'y a aucune garde en Italie aujourd'hui.\n\nPour voir les gardes proposées par d'autres membres, rendez-vous dans votre espace gardien.\n\nJe peux vous montrer les gardes disponibles en France.", must: ["aucune garde en Italie", "espace gardien"] },
     "cas-50": { a: "Pour trouver quelqu'un pour garder Filou pendant vos vacances en novembre, vous devez publier une annonce de garde. Vous décrivez votre besoin et les dates. Les gardiens intéressés pourront vous contacter.\n\nVous pouvez publier votre annonce de garde.", must: ["Filou", "novembre", "publier"] },
   };
@@ -67,7 +67,8 @@ describe("Alma, amorce répétée sur la réponse finale (cas 40, 41, 43, 50)", 
       for (const m of must) expect(out).toContain(m);
       expect(out.length).toBe(a.length);
       // la dernière ligne d'action reste à la fin
-      expect(out.split("\n\n").pop()).toBe(a.split("\n\n").pop());
+      if (a.includes("\n\n")) expect(out.split("\n\n").pop()).toBe(a.split("\n\n").pop());
+      expect(out).not.toMatch(/^(Vous pouvez y|Elle|Il|Cela)\b/);
     });
   }
   it("aucune variante acceptée : null, jamais de préfixe ajouté", () => {

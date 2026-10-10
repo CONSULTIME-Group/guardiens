@@ -370,6 +370,8 @@ export function openerKey(text: string): string {
  * texte (checkLocked, checkOutput). Les paragraphes d'action en fin de texte
  * restent en fin. Renvoie null si aucune phrase ne convient.
  */
+const ANAPHORIC_START = /^(\S+ ){0,2}y\b|^(il|elle|ils|elles|cela|ca|ce|cet|cette|ces|celle|celui|si elle|si il|la suivante|le suivant|ensuite|puis|aussi|donc)\b/;
+
 export function reopenWithAnotherSentence(answer: string, recentAnswers: string[], accept: (t: string) => boolean = () => true): string | null {
   const paras = answer.split(/\n\s*\n/);
   const body = paras[0];
@@ -388,6 +390,8 @@ export function reopenWithAnotherSentence(answer: string, recentAnswers: string[
     if (!t) continue;
     const opener = openerKey(t);
     if (opener.split(" ").length < 3 || repeatsOpener(t, recentAnswers)) continue;
+    // Une phrase qui renvoie à la précédente (« y », « elle », « cela ») ne peut pas ouvrir.
+    if (ANAPHORIC_START.test(foldC(t).slice(0, 40))) continue;
     if (accept(t)) return t;
   }
   return null;
