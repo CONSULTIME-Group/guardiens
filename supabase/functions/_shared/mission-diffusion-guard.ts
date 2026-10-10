@@ -15,7 +15,7 @@ export interface DiffusableMission {
   end_date?: string | null;
 }
 
-import { parisDateKey } from "./paris-hour";
+import { parisDateKey } from "./paris-hour.ts";
 
 /**
  * Clé de date Paris (AAAA-MM-JJ) de l'échéance. La fin de journée est
