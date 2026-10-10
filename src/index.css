@@ -1088,19 +1088,22 @@
 
   .profile-hero-identity { max-width: 600px; }
   .profile-hero[data-hero-subject="left"] .profile-hero-identity { margin-left: auto; }
+  @media (min-width: 1024px) {
+    .profile-hero[data-hero-subject="left"] .profile-hero-identity { max-width: 460px; }
+  }
   .profile-hero-identity::before {
     content: "";
     position: absolute;
-    inset: -70px -120px -70px -90px;
+    inset: -36px -48px -24px -32px;
     z-index: -1;
-    background: radial-gradient(ellipse closest-side at 50% 50%, hsl(var(--background) / .98) 32%, hsl(var(--background) / .94) 62%, hsl(var(--background) / .65) 80%, hsl(var(--background) / 0) 100%);
+    background: radial-gradient(ellipse at 50% 45%, hsl(var(--background) / .98) 40%, hsl(var(--background) / .94) 65%, hsl(var(--background) / .55) 82%, hsl(var(--background) / 0) 100%);
     pointer-events: none;
   }
 
   @media (max-width: 767px) {
     .profile-hero { min-height: 360px; }
     .profile-hero-identity { max-width: 500px; }
-    .profile-hero-identity::before { inset: -64px -80px -40px -60px; }
+    .profile-hero-identity::before { inset: -32px -24px -12px -24px; }
     .profile-hero [data-hero-content] { padding-bottom: 116px; }
     .profile-hero[data-hero-subject="left"] .profile-hero-art { object-position: 32% center; }
     .profile-hero[data-hero-subject="right"] .profile-hero-art { object-position: 75% center; }
