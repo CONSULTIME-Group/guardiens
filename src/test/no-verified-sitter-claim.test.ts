@@ -168,9 +168,22 @@ const EXCLUDE_REGION = new Set([
   "src/__tests__/jsonld-validation.test.ts",
 ]);
 
+// Inventaire en Node pur : `rg` n'existe pas dans l'environnement de
+// publication (échec du 10/10/2026), le scan doit rester autonome.
+// Mêmes règles que `rg --files` : fichiers cachés et node_modules ignorés.
+function walk(path: string, out: string[]): void {
+  const st = statSync(path, { throwIfNoEntry: false });
+  if (!st) return;
+  if (st.isFile()) { out.push(path); return; }
+  for (const name of readdirSync(path)) {
+    if (name.startsWith(".") || name === "node_modules") continue;
+    walk(`${path}/${name}`, out);
+  }
+}
 function scannedFiles(): string[] {
-  const output = execSync(`rg --files ${SCAN_PATHS.join(" ")}`, { encoding: "utf8" });
-  return [...new Set(output.split("\n").filter(Boolean))];
+  const out: string[] = [];
+  for (const p of SCAN_PATHS) walk(p, out);
+  return [...new Set(out)];
 }
 
 /**
