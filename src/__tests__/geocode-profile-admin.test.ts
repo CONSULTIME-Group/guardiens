@@ -6,9 +6,9 @@ const source = readFileSync("supabase/functions/geocode-profile/index.ts", "utf8
   .replace(/import \{ createClient \} from [^;]+;/, "");
 const compiled = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText;
 
-function harness({ admin = false, user = true, roleError = null, city = "", secret = "trigger-secret" } = {}) {
+function harness({ admin = false, user = true, roleError = null, city = "", country = "FR", postal = "", secret = "trigger-secret", fetchResponse = undefined as undefined | ((url: string) => Promise<any>) } = {}) {
   let handler: (req: Request) => Promise<Response>;
-  const profileRead = vi.fn().mockResolvedValue({ data: { city, postal_code: "", country: "FR" }, error: null });
+  const profileRead = vi.fn().mockResolvedValue({ data: { city, postal_code: postal, country }, error: null });
   const update = vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) });
   const rpc = vi.fn().mockResolvedValue({ data: admin, error: roleError });
   const client = {
@@ -18,16 +18,16 @@ function harness({ admin = false, user = true, roleError = null, city = "", secr
       select: () => ({ eq: () => ({ maybeSingle: profileRead }) }), update,
     }),
   };
-  const fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ features: [{ geometry: { coordinates: [2, 48] } }] }) });
-  new Function("Deno", "createClient", "fetch", compiled)({
+  const fetch = vi.fn(fetchResponse ?? (async () => ({ ok: true, json: async () => ({ features: [{ geometry: { coordinates: [2, 48] } }] }) })));
+  new Function("Deno", "createClient", "fetch", "AbortSignal", compiled)({
     env: { get: (key: string) => key === "GEOCODE_PROFILE_SECRET" ? secret : "test" },
     serve: (fn: typeof handler) => { handler = fn; },
-  }, () => client, fetch);
+  }, () => client, fetch, { timeout: () => new AbortController().signal });
   const run = (headers = {}) => handler(new Request("https://test.local", {
     method: "POST", headers: { "Content-Type": "application/json", ...headers },
     body: JSON.stringify({ user_id: "target" }),
   }));
-  return { run, profileRead, update, rpc };
+  return { run, profileRead, update, rpc, fetch };
 }
 
 describe("manual profile geocoding authorization", () => {
@@ -66,6 +66,63 @@ describe("manual profile geocoding authorization", () => {
   it("returns a skipped result without writing when the city is missing", async () => {
     const h = harness({ admin: true });
     expect(await (await h.run({ Authorization: "Bearer admin" })).json()).toEqual({ skipped: "no city" });
+    expect(h.update).not.toHaveBeenCalled();
+  });
+});
+
+const response = (data: unknown) => ({ ok: true, json: async () => data });
+const saintLudger = (overrides = {}, coordinates = [-70.69462, 45.74213]) => ({
+  properties: { name: "Saint-Ludger", countrycode: "CA", postcode: "G0M 1W0", ...overrides },
+  geometry: { coordinates },
+});
+const canada = { admin: true, city: "Saint Ludger", country: "CA", postal: "G0M1W0" };
+const adminHeaders = { Authorization: "Bearer admin" };
+
+describe("international geocoding fallback", () => {
+  it("uses a matching Canadian city when Nominatim refuses the backend", async () => {
+    const h = harness({ ...canada, fetchResponse: async (url) => url.includes("nominatim")
+      ? { ok: false, status: 403 } : response({ features: [saintLudger()] }) });
+    expect(await (await h.run(adminHeaders)).json()).toMatchObject({ ok: true, source: "photon" });
+    expect(h.update).toHaveBeenCalledWith({ latitude: 45.74213, longitude: -70.69462 });
+    expect(new URL(h.fetch.mock.calls[0][0]).searchParams.get("country")).toBe("Canada");
+  });
+  it("uses the fallback after a network failure", async () => {
+    const h = harness({ ...canada, fetchResponse: async (url) => {
+      if (url.includes("nominatim")) throw new Error("timeout");
+      return response({ features: [saintLudger()] });
+    } });
+    expect(await (await h.run(adminHeaders)).json()).toMatchObject({ ok: true, source: "photon" });
+  });
+  it("keeps a successful Nominatim result without calling Photon", async () => {
+    const h = harness({ ...canada, fetchResponse: async () => response([{ lat: "45.74213", lon: "-70.69462" }]) });
+    expect(await (await h.run(adminHeaders)).json()).toMatchObject({ ok: true, source: "nominatim" });
+    expect(h.fetch).toHaveBeenCalledTimes(1);
+  });
+  it.each([
+    ["another country", { countrycode: "FR" }, [-70.69462, 45.74213]],
+    ["another city", { name: "Saint-Léger" }, [-70.69462, 45.74213]],
+    ["another postcode", { postcode: "OTHER" }, [-70.69462, 45.74213]],
+    ["invalid coordinates", {}, [-70.69462, 145]],
+  ])("does not write a fallback with %s", async (_reason, overrides, coordinates) => {
+    const h = harness({ ...canada, fetchResponse: async (url) => url.includes("nominatim")
+      ? response([]) : response({ features: [saintLudger(overrides, coordinates)] }) });
+    expect(await (await h.run(adminHeaders)).json()).toMatchObject({ skipped: "no result" });
+    expect(h.update).not.toHaveBeenCalled();
+  });
+  it("does not choose between homonyms without a matching postcode", async () => {
+    const h = harness({ ...canada, fetchResponse: async (url) => url.includes("nominatim") ? response([])
+      : response({ features: [saintLudger({ postcode: "OTHER" }), saintLudger({ postcode: "ELSEWHERE" })] }) });
+    expect(await (await h.run(adminHeaders)).json()).toMatchObject({ skipped: "no result" });
+    expect(h.update).not.toHaveBeenCalled();
+  });
+  it("uses the matching Canadian postcode to distinguish homonyms", async () => {
+    const h = harness({ ...canada, fetchResponse: async (url) => url.includes("nominatim") ? response([])
+      : response({ features: [saintLudger({ postcode: "OTHER" }, [-71, 46]), saintLudger()] }) });
+    expect(await (await h.run(adminHeaders)).json()).toMatchObject({ ok: true, lat: 45.74213, lng: -70.69462 });
+  });
+  it("does not write when both providers are unavailable", async () => {
+    const h = harness({ ...canada, fetchResponse: async () => ({ ok: false, status: 503 }) });
+    expect(await (await h.run(adminHeaders)).json()).toMatchObject({ skipped: "no result" });
     expect(h.update).not.toHaveBeenCalled();
   });
 });
