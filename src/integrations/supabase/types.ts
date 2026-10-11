@@ -1485,6 +1485,24 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_mission_coords_e10_20261011: {
+        Row: {
+          id: string | null
+          latitude: number | null
+          longitude: number | null
+        }
+        Insert: {
+          id?: string | null
+          latitude?: number | null
+          longitude?: number | null
+        }
+        Update: {
+          id?: string | null
+          latitude?: number | null
+          longitude?: number | null
+        }
+        Relationships: []
+      }
       _backup_notification_email_rpc_20260918: {
         Row: {
           acl: unknown[] | null
