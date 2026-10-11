@@ -1,5 +1,5 @@
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { UrlFilterNotice } from "@/components/admin/UrlFilterNotice";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,6 +31,7 @@ const AdminVerifications = () => {
   };
   const [loading, setLoading] = useState(true);
   const [busyUserId, setBusyUserId] = useState<string | null>(null);
+  const rejectingRef = useRef(false);
   const [metrics, setMetrics] = useState({ pending: 0, verifiedWeek: 0, rejectedWeek: 0 });
   const [rejectModal, setRejectModal] = useState<{ open: boolean; userId: string; reason: string; customReason: string }>({
     open: false, userId: "", reason: "", customReason: ""
@@ -214,6 +215,9 @@ const AdminVerifications = () => {
   const handleReject = async () => {
     const reason = rejectModal.reason === "Autre" ? rejectModal.customReason : rejectModal.reason;
     if (!reason) { toast.error("Veuillez préciser un motif"); return; }
+    // Lot C3 : un seul refus par clic, même en clics répétés.
+    if (rejectingRef.current) return;
+    rejectingRef.current = true;
 
     setBusyUserId(rejectModal.userId);
     try {
@@ -226,6 +230,7 @@ const AdminVerifications = () => {
     } catch (error: any) {
       toast.error(error?.message || "Impossible de refuser cette vérification");
     } finally {
+      rejectingRef.current = false;
       setBusyUserId(null);
     }
   };
@@ -641,7 +646,7 @@ const AdminVerifications = () => {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setRejectModal({ open: false, userId: "", reason: "", customReason: "" })}>Annuler</Button>
-            <Button variant="destructive" onClick={handleReject} disabled={!rejectModal.reason || (rejectModal.reason === "Autre" && !rejectModal.customReason)}>Refuser</Button>
+            <Button variant="destructive" onClick={handleReject} disabled={busyUserId === rejectModal.userId || !rejectModal.reason || (rejectModal.reason === "Autre" && !rejectModal.customReason)}>{busyUserId === rejectModal.userId ? "Refus en cours..." : "Refuser"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -14,11 +14,15 @@
  *  - Idempotency send : `unread-reminder-<conv>-<message_id>`.
  *  - Messages système exclus. Quiet hours / anti-spam gérés par
  *    send-transactional-email.
+ *  - Lot R1 (11/10/2026) : une seule relance par destinataire, toutes ses
+ *    conversations en attente groupées, et au plus une relance par jour
+ *    tous crons de relance confondus.
  */
 import { recordDeliveryFailure } from "../_shared/delivery-failure.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { startCronRun } from "../_shared/cron-run-log.ts";
 import { requireAdminOrServiceRole } from "../_shared/require-admin.ts";
+import { createReminderSlot } from "../_shared/reminder-daily-slot.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -57,9 +61,24 @@ Deno.serve(async (req) => {
 
     if (convErr) throw convErr;
 
-    for (const conv of convs ?? []) {
-      if (sent >= SEND_CAP) { capReached = true; break; }
+    // Lot R1 : on collecte d'abord, on envoie ensuite UNE relance par
+    // destinataire (toutes ses conversations en attente), et au plus une
+    // relance par jour tous crons confondus (_shared/reminder-daily-slot.ts).
+    type Eligible = {
+      convId: string;
+      recipientId: string;
+      recipientRole: "owner" | "sitter";
+      email: string;
+      firstName: string | null;
+      senderFirstName: string;
+      triggerId: string;
+      triggerAt: string;
+      contextLabel: string | null;
+      messagePreview: string | null;
+    };
+    const byRecipient = new Map<string, Eligible[]>();
 
+    for (const conv of convs ?? []) {
       // 2) Trouve le message non lu le plus récent, non-système,
       //    envoyé par l'AUTRE partie (owner ↔ sitter), dans la fenêtre.
       const { data: unreadMsgs } = await supabase
@@ -144,7 +163,7 @@ Deno.serve(async (req) => {
       }
 
       // Label contextuel
-      let contextLabel: string | undefined;
+      let contextLabel: string | null = null;
       if (conv.sit_id) {
         const { data: sit } = await supabase
           .from("sits").select("title").eq("id", conv.sit_id).maybeSingle();
@@ -166,23 +185,56 @@ Deno.serve(async (req) => {
         ? rawPreview.slice(0, 217) + "…"
         : rawPreview;
 
+      const list = byRecipient.get(recipientId) ?? [];
+      list.push({
+        convId: conv.id,
+        recipientId,
+        recipientRole,
+        email: recipient.email,
+        firstName: recipient.first_name ?? null,
+        senderFirstName: sender?.first_name ?? "Un membre",
+        triggerId: triggerMsg.id,
+        triggerAt: triggerMsg.created_at,
+        contextLabel,
+        messagePreview: messagePreview || null,
+      });
+      byRecipient.set(recipientId, list);
+    }
+
+    const slot = createReminderSlot(supabase);
+    let slotTaken = 0;
+    let groupedConversations = 0;
+
+    for (const [recipientId, items] of byRecipient) {
+      if (sent >= SEND_CAP) { capReached = true; break; }
+      // Le plus récent en tête : c'est lui qu'on cite.
+      items.sort((a, b) => b.triggerAt.localeCompare(a.triggerAt));
+      const lead = items[0];
+      const oldest = items[items.length - 1];
+      if (await slot.isTaken(lead.email)) { slotTaken++; continue; }
+
+      const single = items.length === 1;
       const _steRes = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}` },
         body: JSON.stringify({
           templateName: "unread-messages-reminder",
           category: "transactional",
-          recipientEmail: recipient.email,
-          idempotencyKey: `unread-reminder-${conv.id}-${triggerMsg.id}`,
+          recipientEmail: lead.email,
+          // Une conversation : clé historique inchangée. Plusieurs : clé du jour
+          // par destinataire, un seul envoi groupé même en cas de relance du cron.
+          idempotencyKey: single
+            ? `unread-reminder-${lead.convId}-${lead.triggerId}`
+            : `unread-reminder-grouped-${recipientId}-${new Date(now).toISOString().slice(0, 10)}`,
           templateData: {
-            firstName: recipient.first_name ?? null,
-            unreadCount: 1,
-            conversationsCount: 1,
-            oldestUnreadDays: Math.max(1, Math.floor((Date.now() - new Date(triggerMsg.created_at).getTime()) / (24 * 3600 * 1000))),
-            topSenderFirstName: sender?.first_name ?? "Un membre",
-            conversationUrl: `https://guardiens.fr/messages/${conv.id}`,
-            contextLabel: contextLabel ?? null,
-            messagePreview: messagePreview || null,
+            firstName: lead.firstName,
+            unreadCount: items.length,
+            conversationsCount: items.length,
+            oldestUnreadDays: Math.max(1, Math.floor((Date.now() - new Date(oldest.triggerAt).getTime()) / (24 * 3600 * 1000))),
+            topSenderFirstName: lead.senderFirstName,
+            conversationUrl: single ? `https://guardiens.fr/messages/${lead.convId}` : "https://guardiens.fr/messages",
+            contextLabel: single ? lead.contextLabel : null,
+            messagePreview: lead.messagePreview,
           },
         }),
       });
@@ -192,30 +244,32 @@ Deno.serve(async (req) => {
 
       if (sendErr) {
         failed++;
-        console.error("send failed", { conv: conv.id, err: sendErr.message });
+        console.error("send failed", { conv: lead.convId, err: sendErr.message });
         // Trace persistante obligatoire : sans elle, un cron qui echoue en
         // boucle reste invisible.
         await recordDeliveryFailure(supabase, {
           templateName: "unread-messages-reminder",
-          recipientEmail: recipient.email,
+          recipientEmail: lead.email,
           recipientId,
-          conversationId: conv.id,
+          conversationId: lead.convId,
           entityType: "conversation",
-          entityId: conv.id,
+          entityId: lead.convId,
           source: "remind-unread-messages",
           errorMessage: sendErr.message,
         });
         continue;
       }
 
+      slot.take(lead.email);
       await supabase
         .from("conversations")
         .update({ unread_reminder_sent_at: new Date().toISOString() })
-        .eq("id", conv.id);
+        .in("id", items.map((i) => i.convId));
       sent++;
+      groupedConversations += items.length;
     }
 
-    await run.finish("success", { sent, skipped, failed, scanned: convs?.length ?? 0, capReached });
+    await run.finish("success", { sent, skipped, failed, scanned: convs?.length ?? 0, capReached, slotTaken, groupedConversations });
     if (capReached) console.warn("remind-unread-messages: SEND_CAP atteint", { cap: SEND_CAP });
     return new Response(JSON.stringify({ success: true, sent, skipped, failed, capReached }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
