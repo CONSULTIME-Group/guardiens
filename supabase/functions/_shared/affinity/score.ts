@@ -637,7 +637,6 @@ function evalIdealProfile(owner: AffinityOwnerInput, sitter: AffinitySitterInput
   const work = sitter.work_during_sit
     ?? (sitter.availability_during == null ? null : AVAILABILITY_TO_WORK[norm(String(sitter.availability_during))])
     ?? null;
-    ?? null;
 
   const npExperienced = norm(PREF_SITTER_EXP_EXPERIENCED);
   const npBeginner = norm(PREF_SITTER_EXP_BEGINNER);
