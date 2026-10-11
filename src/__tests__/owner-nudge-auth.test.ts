@@ -52,6 +52,8 @@ function harness(options: { admin?: boolean; flag?: boolean; roleError?: boolean
     if (specifier.includes("require-admin")) return auth;
     if (specifier.includes("supabase-js")) return { createClient };
     if (specifier.includes("cron-run-log")) return { startCronRun };
+    // Lot R1 : créneau quotidien de relance (testé à part).
+    if (specifier.includes("reminder-daily-slot")) return { createReminderSlot: () => ({ isTaken: async () => false, take: () => {} }) };
     throw new Error(`Unexpected import ${specifier}`);
   });
   return { invoke: (req: Request) => handler(req), from, rpc, getUser, createClient, startCronRun, finish, fail, fetch };
