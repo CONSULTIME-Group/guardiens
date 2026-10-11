@@ -30,6 +30,7 @@ import { respondToMission } from "@/lib/missionRespond";
 import CanHelpDialog from "@/components/entraide/CanHelpDialog";
 import { toast } from "sonner";
 import { capitalizeFirstName } from "@/lib/displayName";
+import { sortHelpers } from "@/lib/helperDisplay";
 
 const EntraideMap = lazy(() => import("@/components/entraide/EntraideMap"), "EntraideMap");
 
@@ -156,7 +157,7 @@ const EntraideHub = () => {
     const load = async () => {
       const [needsResult, helpersResult, countsResult] = await Promise.all([
         supabase.from("public_small_missions").select("id, user_id, slug, title, city, category, date_needed, end_date, latitude, longitude, photos, sit_mode").eq("status", "open").eq("mission_type", "besoin").order("created_at", { ascending: false }),
-        supabase.from("public_helpers").select("id, first_name, avatar_url, city, latitude_approx, longitude_approx, helps_with"),
+        supabase.from("public_helpers").select("id, first_name, avatar_url, city, latitude_approx, longitude_approx, helps_with, competences, last_active_on"),
         supabase.from("public_mission_response_counts").select("mission_id, response_count"),
       ]);
       const responseCounts = new Map((countsResult.data || []).map((row) => [row.mission_id, row.response_count || 0]));
@@ -226,7 +227,8 @@ const EntraideHub = () => {
   const sortedHelpers = useMemo(
     () => {
       const otherHelpers = user?.id ? helpers.filter((helper) => helper.id !== user.id) : helpers;
-      return origin ? sortByDistance(otherHelpers, helperDistance) : otherHelpers;
+      // Lot E3 : celles et ceux qui disent pour quoi ils peuvent aider d'abord, puis la distance.
+      return sortHelpers(otherHelpers, origin ? helperDistance : null);
     },
     [helpers, origin, helperDistance, user?.id],
   );

@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { haversineDistance } from "@/lib/geocode";
 import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
 import { MISSIONS_CITIES } from "@/data/missionsCityContent";
+import { sortHelpers } from "@/lib/helperDisplay";
 
 const EntraideMap = lazy(() => import("@/components/entraide/EntraideMap"), "EntraideMap");
 
@@ -72,7 +73,7 @@ const MissionsCityPage = ({ citySlug }: MissionsCityPageProps) => {
       const [profiles, needsResult, helpersResult, countsResult] = await Promise.all([
         fetchAvailableProfiles(),
         supabase.from("public_small_missions").select("id, slug, title, city, date_needed, end_date, latitude, longitude, photos, sit_mode").eq("status", "open").eq("mission_type", "besoin").order("created_at", { ascending: false }),
-        supabase.from("public_helpers").select("id, first_name, avatar_url, city, latitude_approx, longitude_approx, helps_with"),
+        supabase.from("public_helpers").select("id, first_name, avatar_url, city, latitude_approx, longitude_approx, helps_with, competences, last_active_on"),
         supabase.from("public_mission_response_counts").select("mission_id, response_count"),
       ]);
       if (!active) return;
@@ -97,15 +98,11 @@ const MissionsCityPage = ({ citySlug }: MissionsCityPageProps) => {
       const localHelpers = (helpersResult.data || [])
         .flatMap((row) => row.id && row.first_name ? [{ ...row, id: row.id, first_name: row.first_name }] : [])
         .filter((row) => isInsideRadius(c.coordinates, c.radiusKm, row.latitude_approx, row.longitude_approx)) as PublicHelper[];
-      localHelpers.sort((a, b) => {
-        const aDistance = haversineDistance(c.coordinates.lat, c.coordinates.lng, Number(a.latitude_approx), Number(a.longitude_approx));
-        const bDistance = haversineDistance(c.coordinates.lat, c.coordinates.lng, Number(b.latitude_approx), Number(b.longitude_approx));
-        return aDistance - bDistance;
-      });
+      const sortedLocalHelpers = sortHelpers(localHelpers, (h) => haversineDistance(c.coordinates.lat, c.coordinates.lng, Number(h.latitude_approx), Number(h.longitude_approx)));
 
       setAvailableCount(profiles.filter((profile) => isInsideRadius(c.coordinates, c.radiusKm, profile.latitude_approx, profile.longitude_approx)).length);
       setNeeds(localNeeds);
-      setHelpers(localHelpers);
+      setHelpers(sortedLocalHelpers);
       setLoading(false);
     };
     void load();
