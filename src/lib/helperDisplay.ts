@@ -19,20 +19,34 @@ export interface HelperLike {
   last_active_on?: string | null;
 }
 
-/** Savoir-faire à montrer : nettoyés, sans doublon (casse et accents), 4 au plus. */
+/** Libellés surtout utiles pendant une garde : gardés, mais montrés après les autres. */
+const SIT_SPECIFIC = /m[ée]dicament|premiers secours|piscine/i;
+export const HELPER_SKILL_MAX_CHARS = 40;
+
+function shorten(label: string): string {
+  if (label.length <= HELPER_SKILL_MAX_CHARS) return label;
+  const cut = label.slice(0, HELPER_SKILL_MAX_CHARS - 1);
+  const space = cut.lastIndexOf(" ");
+  return `${(space > 20 ? cut.slice(0, space) : cut).replace(/[\s,;:]+$/, "")}…`;
+}
+
+/**
+ * Savoir-faire à montrer : nettoyés, sans doublon (casse et accents),
+ * libellés propres à la garde en dernier, 40 caractères et 4 au plus.
+ */
 export function helperSkills(competences: readonly (string | null | undefined)[] | null | undefined, max = HELPER_SKILLS_SHOWN): string[] {
   const seen = new Set<string>();
-  const out: string[] = [];
+  const all: string[] = [];
   for (const raw of competences ?? []) {
     const label = (raw ?? "").replace(/\s+/g, " ").trim();
     if (!label) continue;
-    const key = label.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+    const key = label.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
     if (seen.has(key)) continue;
     seen.add(key);
-    out.push(label);
-    if (out.length >= max) break;
+    all.push(label);
   }
-  return out;
+  const ordered = [...all.filter((l) => !SIT_SPECIFIC.test(l)), ...all.filter((l) => SIT_SPECIFIC.test(l))];
+  return ordered.slice(0, max).map(shorten);
 }
 
 /** La personne dit pour quoi elle peut aider. */
@@ -54,24 +68,36 @@ function daysSince(day: string | null | undefined, today: Date): number | null {
 export function helperActivityLabel(lastActiveOn: string | null | undefined, today: Date = new Date()): string | null {
   const days = daysSince(lastActiveOn, today);
   if (days === null) return null;
-  if (days <= 7) return "Actif cette semaine";
-  if (days <= 30) return "Actif ce mois-ci";
+  if (days <= 7) return "En ligne cette semaine";
+  if (days <= 30) return "En ligne ce mois-ci";
   return null;
 }
 
+/** Rayon dans lequel ce qu'une personne propose compte avant la distance. */
+export const HELPER_NEAR_KM = 30;
+
 /**
- * Ordre de la liste : d'abord les personnes qui disent pour quoi elles
- * peuvent aider, puis la distance quand un lieu est connu, sinon l'activité
- * la plus récente. Tri stable, aucune personne retirée.
+ * Ordre de la liste. Lieu connu : dans un rayon de 30 km, les personnes qui
+ * disent pour quoi elles peuvent aider d'abord, puis les autres, chacun par
+ * distance ; au-delà, la distance seule. Lieu inconnu : celles qui disent
+ * pour quoi elles peuvent aider d'abord, puis l'activité la plus récente.
+ * Tri stable, aucune personne retirée.
  */
 export function sortHelpers<T extends HelperLike>(helpers: readonly T[], distanceOf?: ((helper: T) => number | null) | null): T[] {
-  const rank = helpers.map((helper, index) => ({
-    helper,
-    index,
-    tier: helperSaysHow(helper) ? 0 : 1,
-    distance: distanceOf ? distanceOf(helper) : null,
-    active: helper.last_active_on ? Date.parse(`${helper.last_active_on.slice(0, 10)}T00:00:00Z`) || 0 : 0,
-  }));
+  const rank = helpers.map((helper, index) => {
+    const distance = distanceOf ? distanceOf(helper) : null;
+    const says = helperSaysHow(helper);
+    const tier = !distanceOf
+      ? (says ? 0 : 1)
+      : distance !== null && distance <= HELPER_NEAR_KM ? (says ? 0 : 1) : 2;
+    return {
+      helper,
+      index,
+      tier,
+      distance,
+      active: helper.last_active_on ? Date.parse(`${helper.last_active_on.slice(0, 10)}T00:00:00Z`) || 0 : 0,
+    };
+  });
   rank.sort((a, b) => {
     if (a.tier !== b.tier) return a.tier - b.tier;
     if (distanceOf) {
@@ -85,17 +111,12 @@ export function sortHelpers<T extends HelperLike>(helpers: readonly T[], distanc
   return rank.map((entry) => entry.helper);
 }
 
-function joinFr(items: string[]): string {
-  if (items.length <= 1) return items.join("");
-  return `${items.slice(0, -1).join(", ")} et ${items[items.length - 1]}`;
-}
-
 /** Premier message prérempli, modifiable avant envoi. */
 export function helperFirstMessage(firstName: string, skills: string[]): string {
   const greet = firstName ? `Bonjour ${firstName},` : "Bonjour,";
-  const named = skills.slice(0, 2).map((skill) => skill.toLowerCase());
+  const named = skills.slice(0, 2);
   const what = named.length > 0
-    ? `J'ai vu que vous pouvez aider pour ${joinFr(named)}.`
+    ? `J'ai vu que vous proposez votre aide pour : ${named.join(", ")}.`
     : "J'ai vu que vous êtes disponible pour donner un coup de main.";
   return `${greet}\n\n${what} J'aurais peut-être besoin d'un coup de main bientôt, pourrait-on en parler ?\n\nMerci !`;
 }

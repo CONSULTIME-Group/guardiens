@@ -3,8 +3,8 @@
 --
 -- public_helpers gagne deux colonnes, ajoutées en fin de vue (les colonnes
 -- existantes ne bougent pas, les droits anon et authenticated sont gardés) :
--- - competences : savoir-faire du profil gardien puis du profil propriétaire,
---   6 au plus (la carte en montre 4). Déjà publics par public_sitter_profiles
+-- - competences : savoir-faire du profil propriétaire (choisis pour l'entraide)
+--   puis du profil gardien, 8 au plus (la carte en montre 4). Déjà publics par public_sitter_profiles
 --   et public_owner_profiles.
 -- - last_active_on : jour de la dernière activité (heure de Paris), moins
 --   précis que public_profiles.last_seen_at, déjà public.
@@ -18,7 +18,7 @@ CREATE OR REPLACE VIEW public.public_helpers AS
     (round((p.latitude)::numeric, 2))::double precision AS latitude_approx,
     (round((p.longitude)::numeric, 2))::double precision AS longitude_approx,
     p.helps_with,
-    (array_cat(COALESCE(sp.competences, '{}'::text[]), COALESCE(op.competences, '{}'::text[])))[1:6] AS competences,
+    (array_cat(COALESCE(op.competences, '{}'::text[]), COALESCE(sp.competences, '{}'::text[])))[1:8] AS competences,
     ((p.last_seen_at AT TIME ZONE 'Europe/Paris'))::date AS last_active_on
    FROM public.profiles p
      LEFT JOIN public.sitter_profiles sp ON sp.user_id = p.id

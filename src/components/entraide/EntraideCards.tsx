@@ -225,8 +225,8 @@ export const HelperCard = ({ helper, distance, showDistance, compact = false, co
     try {
       const { conversationId, error } = await startConversation({ otherUserId: helper.id, context: "helper_inquiry" });
       if (!conversationId) {
-        toast.error(error?.includes("propositions spontanées")
-          ? "Ce membre préfère être contacté depuis une annonce."
+        toast.error(error?.includes("soi-même")
+          ? "Cette carte est la vôtre."
           : "La conversation sera disponible dans un instant. Réessayez.");
         return;
       }
@@ -250,14 +250,14 @@ export const HelperCard = ({ helper, distance, showDistance, compact = false, co
           <h3 className="font-heading text-lg font-semibold text-foreground">{firstName}</h3>
           <p className="text-xs text-muted-foreground">
             {locationLabel(helper.city, distance, showDistance)}
-            {activity && <span className="text-primary">{` · ${activity}`}</span>}
+            {activity && <>{" · "}<span className="text-primary">{activity}</span></>}
           </p>
           <HelpCounts userId={helper.id} className="mt-1" counts={counts} />
         </div>
         <MissionBadgesReceived profileId={helper.id} variant="compact" rows={badgeRows} />
       </div>
       {skills.length > 0 && (
-        <p className="mt-3 text-sm text-foreground" data-testid="helper-skills">
+        <p className={`mt-3 text-sm text-foreground ${compact ? "line-clamp-2" : ""}`} data-testid="helper-skills">
           <span className="text-muted-foreground">Peut vous aider pour : </span>
           {skills.join(", ")}
         </p>

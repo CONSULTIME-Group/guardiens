@@ -35,6 +35,7 @@ import { latestVideoInviteId, videoInviteState, isVideoInvite } from "@/lib/vide
 import { useHideBottomNav, useHideTopBar } from "@/components/layout/ChromeVisibility";
 import { avatarImageUrl } from "@/lib/storageImage";
 import { compressMessagePhotoFile } from "@/lib/compressImage";
+import { shouldPrefillDraft } from "@/lib/conversation";
 
 
 const MESSAGES_PAGE_SIZE = 50;
@@ -343,20 +344,22 @@ const Messages = () => {
   });
 
   // ── Pré-remplissage du brouillon via `?draft=` ──
-  // Permet à un appelant externe (ex: carrousel « Coup de main » du dashboard
-  // gardien) d'amorcer le 1er message avec un contexte précis. Appliqué UNE
-  // SEULE FOIS, quand la conversation cible est ouverte, et seulement si
-  // l'utilisateur n'a pas déjà commencé à taper. Param retiré de l'URL ensuite.
+  // Permet à un appelant externe (carte « Prêts à aider », carrousel
+  // « Coup de main », activation de rôle) d'amorcer le 1er message. Lot E3 :
+  // le brouillon est lu une seule fois et retiré de l'adresse, puis posé
+  // après le chargement des messages de la conversation visée (la remise à
+  // zéro du champ au changement de conversation ne l'efface plus), et
+  // seulement si la conversation est vierge (shouldPrefillDraft).
+  const pendingDraftRef = useRef<{ convId: string | null; text: string } | null>(null);
   useEffect(() => {
     const draft = searchParams.get("draft");
-    if (!draft || !activeConv) return;
-    if (newMessage.trim().length > 0) return;
-    setNewMessage(draft);
+    if (!draft) return;
+    pendingDraftRef.current = { convId: searchParams.get("c"), text: draft };
     const next = new URLSearchParams(searchParams);
     next.delete("draft");
     setSearchParams(next, { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeConv?.id, searchParams]);
+  }, [searchParams]);
 
   // ── Realtime sur la liste : tout INSERT sur une conversation de l'utilisateur ──
   // déclenche un rechargement debouncé de la liste pour rafraîchir badges et tri.
@@ -399,6 +402,14 @@ const Messages = () => {
     const ordered = ((data as Message[]) || []).slice().reverse();
     setMessages(ordered);
     setHasMoreMessages((count || 0) > ordered.length);
+
+    const pending = pendingDraftRef.current;
+    if (pending && (!pending.convId || pending.convId === convId)) {
+      pendingDraftRef.current = null;
+      setNewMessage((current) =>
+        shouldPrefillDraft({ messages: ordered, currentInput: current }).shouldPrefill ? pending.text : current,
+      );
+    }
 
     if (user) {
       await supabase
