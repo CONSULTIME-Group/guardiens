@@ -66,6 +66,7 @@ import { sortForCover, withoutAnimalPhotos } from "@/lib/coverPriority";
 import { normalizeCityTyping, normalizeCityName } from "@/lib/normalizeCity";
 import { readFormDraft, writeFormDraft, clearFormDraft, getFormDraftSavedAt } from "@/lib/formDraft";
 import { readSitPrefill } from "@/lib/missionContentGuards";
+import { shouldApplyMissionDates } from "@/lib/missionSitMode";
 import { makePlainTextPasteHandler } from "@/lib/pastePlainText";
 import { DEFAULT_MAX_APPLICATIONS } from "@/lib/applicationCap";
 import {
@@ -445,6 +446,8 @@ const CreateSit = () => {
   // Préremplissage des dates depuis l'email saisonnier : une seule fois, jamais
   // après une saisie utilisateur, et jamais quand un brouillon est repris.
   const datePrefilledRef = useRef(false);
+  /** Lot G1 : titre repris d'un besoin d'entraide (null sinon), pour y appliquer ?debut=&fin=. */
+  const missionPrefillTitleRef = useRef<string | null>(null);
   // Écran de choix à la sortie : annonce prête, jamais publiée, sortie demandée.
   const [sitPublishedAt, setSitPublishedAt] = useState<string | null>(null);
   const [exitChoiceOpen, setExitChoiceOpen] = useState(false);
@@ -714,6 +717,7 @@ const CreateSit = () => {
     }
     if (prefill.title.trim()) setTitle(prefill.title.slice(0, 120));
     if (prefill.description.trim()) applyExpectations(prefill.description);
+    missionPrefillTitleRef.current = prefill.title.trim() ? prefill.title.slice(0, 120) : "";
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
   const applyLocalDraft = useCallback((d: SitLocalDraft) => {
@@ -1092,6 +1096,17 @@ const CreateSit = () => {
     if (datePrefilledRef.current) return;
     if (loading) return;
     if (draftIdParam || fromSitId || republishMode || searchParams.get("resume")) return;
+    // Lot G1 : texte repris d'un besoin, encore à l'écran, sans brouillon repris.
+    if (shouldApplyMissionDates({
+      prefillTitle: missionPrefillTitleRef.current, title, remoteDraftResumed, localDraftRestored, startDate, endDate,
+    })) {
+      const debut = parsePrefillDate(searchParams.get("debut"));
+      const fin = parsePrefillDate(searchParams.get("fin"));
+      if (debut) setStartDate(debut);
+      if (fin && (!debut || fin >= debut)) setEndDate(fin);
+      datePrefilledRef.current = true;
+      return;
+    }
     const formEmpty =
       !title && !startDate && !endDate && !ownerMessage && !dailyRoutine &&
       !coverPhotoUrl && !specificExpectations && openTo.length === 0 &&
