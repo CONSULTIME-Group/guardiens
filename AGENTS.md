@@ -23,6 +23,8 @@
 
 - Fin d'un coup de main (lot E2a) : « Marquer comme terminé » (fiche et messagerie) passe par mark_mission_done (auteur ou personne retenue, rencontre confirmée avec une personne retenue) ; question de rencontre entre 9 h et 20 h (heure de Paris) ; clôture automatique 3 jours après la date ; un « oui » après clôture automatique devient rencontre confirmée ; public_mission_feedbacks filtrée sur public_ok ; SQL préparé dans supabase/prepared-migrations, Lovable crée le fichier drizzle à l'application ; pourquoi : aucun coup de main n'avait jamais été compté ni commenté.
 
+- Catégorie d'un besoin (lot E6) : déduite du titre et de la description par inferMissionCategory (src/lib/missionCategories.ts), sans question dans le formulaire ; MatchedHelpersInviteBlock lit les personnes dans un carré d'environ 50 km autour du besoin ; pourquoi : depuis la suppression du choix, tout nouveau besoin était en « other » et le bloc d'invitation tirait 30 profils au hasard en France.
+
 - Fond du hero avant React (lot P5) : #boot-hero statique dans index.html (photo et voile seuls, sous le header de 77 px), retiré par script inline hors "/" ou si session, par Landing au montage, garde-fou 15 s ; pourquoi : LCP peint au parse sans toucher à l entrée JS.
 
 - Photos du logement (lot L2) : owner_gallery est la source unique ; properties.photos et properties.cover_photo_url n'acceptent que des URL de la galerie du propriétaire (trg_guard_property_photos_in_gallery), une suppression en galerie retire la photo du logement et remplace les couvertures par la suivante (trg_sync_owner_gallery_delete), fichier supprimé seulement si owner_photo_still_referenced est faux ; pourquoi : une photo envoyée hors Galerie devenait introuvable et impossible à supprimer.
