@@ -1,5 +1,5 @@
 /**
- * Lot G1 (11/10/2026) : un besoin qui parle d'animaux pose la question
+ * Lot E9 (11/10/2026) : un besoin qui parle d'animaux pose la question
  * « Comment ça se passe ? ». Quelqu'un s'installe chez la personne : garde
  * proposée, texte et dates repris. Animal gardé chez la personne qui aide,
  * ou passages : coup de main (décision de Jérémie).
@@ -17,7 +17,7 @@ import {
 } from "@/lib/missionSitMode";
 import { inferMissionCategory } from "@/lib/missionCategories";
 
-describe("G1, ouverture de la question", () => {
+describe("E9, ouverture de la question", () => {
   it("tout besoin animaux, même ponctuel", () => {
     expect(shouldAskSitMode({ missionType: "besoin", multiDay: false, titleCategory: "animals", sitLike: false })).toBe(true);
   });
@@ -35,7 +35,7 @@ describe("G1, ouverture de la question", () => {
   });
 });
 
-describe("G1, suites", () => {
+describe("E9, suites", () => {
   it("la garde reprend les dates sous les noms lus par l'annonce", () => {
     expect(sitCreateUrl("2026-12-14", "2026-12-30")).toBe("/sits/create?debut=2026-12-14&fin=2026-12-30");
     expect(sitCreateUrl("2026-12-14T00:00:00.000Z", null)).toBe("/sits/create?debut=2026-12-14");
@@ -68,7 +68,7 @@ describe("G1, suites", () => {
   });
 });
 
-describe("G1, branchements", () => {
+describe("E9, branchements", () => {
   const form = readFileSync("src/pages/CreateSmallMission.tsx", "utf8");
   it("le formulaire pose la question sur askSitMode et redirige par sitCreateUrl", () => {
     expect(form).toContain("shouldAskSitMode({ missionType, multiDay: multiDaySit, titleCategory, sitLike: !!sitLike })");
