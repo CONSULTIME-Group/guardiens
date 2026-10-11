@@ -407,7 +407,9 @@ async function repairOnce(userId: string): Promise<PushRepair> {
   // Sans aucun abonnement connu, rien à réparer : aucun appel réseau.
   if (!owner && pushSupport() !== 'supported') return { kind: 'none' };
   let reg = await registration().catch(() => undefined);
-  const sub = reg ? await bounded(reg.pushManager.getSubscription()).catch(() => null) : null;
+  const sub: PushSubscription | null = reg
+    ? await bounded<PushSubscription | null>(reg.pushManager.getSubscription()).catch((): null => null)
+    : null;
   const granted = permissionState() === 'granted';
 
   if (!owner) {
