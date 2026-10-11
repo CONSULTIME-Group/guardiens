@@ -25,6 +25,16 @@
 import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { clampRadiusKm, MAX_RADIUS_KM, PROXIMITY_DEDUP_DAYS } from "../_shared/proximity-radius.ts";
 import { PUBLISHED_STATUS } from "../_shared/sit-alert-guard.ts";
+import {
+  farSubject,
+  haversineKm,
+  isFarForRecipient,
+  isNationwideRadius,
+  isOwnerFarFromFrance,
+} from "../_shared/far-listing.ts";
+
+/** Lignes d'une campagne annulée qui ne sont jamais parties (lot Q1). */
+const CANCELLED_UNSERVED_STATUSES = new Set(["queued", "skipped"]);
 
 /** Au dela de ce nombre de destinataires, la diffusion manuelle est signalee. */
 export const LARGE_BROADCAST_THRESHOLD = 150;
@@ -40,22 +50,27 @@ export const LARGE_BROADCAST_THRESHOLD = 150;
 async function computeAlreadyServed(
   serviceClient: SupabaseClient,
   sitId: string,
-): Promise<Set<string>> {
+  opts: { recentWindow: boolean } = { recentWindow: true },
+): Promise<{ emails: Set<string>; userIds: Set<string> }> {
   const served = new Set<string>();
+  const servedUsers = new Set<string>();
   const cutoff = new Date(Date.now() - PROXIMITY_DEDUP_DAYS * 86400_000).toISOString();
 
-  const { data: campaigns } = await serviceClient
+  const { data: campaigns, error: campErr } = await serviceClient
     .from("mass_emails")
-    .select("id, filters, created_at")
+    .select("id, filters, created_at, status")
     .eq("segment", "listing_proximity");
+  if (campErr) throw new Error(`dedup campaigns lookup failed: ${campErr.message}`);
 
-  const ids = ((campaigns || []) as any[])
-    .filter(
-      (c) =>
-        String(c?.filters?.sit_id || "") === sitId ||
-        String(c?.created_at || "") >= cutoff,
-    )
-    .map((c) => c.id as string);
+  const relevant = ((campaigns || []) as any[]).filter(
+    (c) =>
+      String(c?.filters?.sit_id || "") === sitId ||
+      (opts.recentWindow && String(c?.created_at || "") >= cutoff),
+  );
+  const ids = relevant.map((c) => c.id as string);
+  // Lot Q1 : dans une campagne annulée, seules les lignes réellement parties
+  // comptent ; ses lignes jamais envoyées bloquaient toute rediffusion.
+  const cancelledIds = new Set(relevant.filter((c) => c?.status === "cancelled").map((c) => c.id as string));
 
   // On exclut toute adresse déjà engagée sur ces campagnes, quel que soit
   // l'aboutissement (sent, delivered, opened, skipped, queued, sending,
@@ -63,18 +78,38 @@ async function computeAlreadyServed(
   // Ne retenir que "sent" laissait repasser des adresses que l'idempotence
   // bloquait ensuite au moment de l'envoi, d'où des campagnes à zéro départ.
   const CH = 200;
+  const PAGE = 1000;
   for (let i = 0; i < ids.length; i += CH) {
-    const { data: rows } = await serviceClient
-      .from("mass_email_sends")
-      .select("recipient_email, status")
-      .in("mass_email_id", ids.slice(i, i + CH))
-      .neq("status", "failed");
-    for (const row of (rows || []) as any[]) {
-      if (row.recipient_email) served.add(String(row.recipient_email).toLowerCase());
+    for (let from = 0; ; from += PAGE) {
+      const { data: rows, error } = await serviceClient
+        .from("mass_email_sends")
+        .select("id, mass_email_id, recipient_email, status")
+        .in("mass_email_id", ids.slice(i, i + CH))
+        .neq("status", "failed")
+        .order("id", { ascending: true })
+        .range(from, from + PAGE - 1);
+      if (error) throw new Error(`dedup sends lookup failed: ${error.message}`);
+      for (const row of (rows || []) as any[]) {
+        if (cancelledIds.has(row.mass_email_id) && CANCELLED_UNSERVED_STATUSES.has(String(row.status))) continue;
+        if (row.recipient_email) served.add(String(row.recipient_email).toLowerCase());
+      }
+      if (!rows || rows.length < PAGE) break;
     }
   }
 
-  return served;
+  // Lot Q1 : les gardiens déjà alertés à la publication de cette annonce
+  // (notify-sitters-on-publish, journal sit_notification_log) ne la
+  // reçoivent pas une seconde fois.
+  const { data: published, error: pubErr } = await serviceClient
+    .from("sit_notification_log")
+    .select("user_id, status")
+    .contains("sit_ids", [sitId]);
+  if (pubErr) throw new Error(`publish alert lookup failed: ${pubErr.message}`);
+  for (const row of (published || []) as any[]) {
+    if (row.user_id && row.status !== "released") servedUsers.add(String(row.user_id));
+  }
+
+  return { emails: served, userIds: servedUsers };
 }
 
 const corsHeaders = {
@@ -82,17 +117,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
 };
-
-function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const R = 6371;
-  const toRad = (d: number) => (d * Math.PI) / 180;
-  const dLat = toRad(lat2 - lat1);
-  const dLon = toRad(lon2 - lon1);
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
-  return 2 * R * Math.asin(Math.min(1, Math.sqrt(a)));
-}
 
 function toTitleCase(s: string | null | undefined): string {
   const clean = (s ?? "").toString().trim();
@@ -128,7 +152,8 @@ function buildExcerpt(desc: string | null | undefined, maxLen = 220): string {
   return clean.slice(0, maxLen - 3).trimEnd() + "...";
 }
 
-function buildSubject(authorFirstName: string, city: string): string {
+function buildSubject(authorFirstName: string, city: string, far = false): string {
+  if (far) return farSubject(authorFirstName, city);
   const who = authorFirstName || "un propriétaire";
   if (city) return `${who} cherche un gardien près de chez vous à ${city}`;
   return `${who} cherche un gardien près de chez vous`;
@@ -177,7 +202,8 @@ interface Recipient {
   first_name: string;
   city: string;
   email: string;
-  distance_km: number;
+  /** Null : gardien sans lieu renseigné, visé par une diffusion nationale. */
+  distance_km: number | null;
 }
 
 async function computeRecipients(
@@ -247,6 +273,11 @@ async function computeRecipients(
 
   const petsSentence = buildPetsSentence(petsList);
 
+  // Lot Q1 : un rayon d'au moins 1 000 km est une diffusion nationale. Tous
+  // les gardiens actifs sont visés, lieu renseigné ou non, et la boîte
+  // englobante (fausse au-delà de 180 degrés) n'est pas appliquée.
+  const nationwide = isNationwideRadius(radiusKm);
+  const ownerFar = isOwnerFarFromFrance(centerLat, centerLon);
   const latDelta = radiusKm / 111;
   const lonDelta = radiusKm / (111 * Math.cos((centerLat * Math.PI) / 180) || 1);
 
@@ -254,31 +285,37 @@ async function computeRecipients(
   const PAGE = 1000;
   let from = 0;
   while (true) {
-    const { data, error } = await serviceClient
+    let q = serviceClient
       .from("profiles")
       .select("id, first_name, email, city, latitude, longitude, account_status, role")
-      .in("role", ["sitter", "both"])
-      .not("latitude", "is", null)
-      .not("longitude", "is", null)
-      .gte("latitude", centerLat - latDelta)
-      .lte("latitude", centerLat + latDelta)
-      .gte("longitude", centerLon - lonDelta)
-      .lte("longitude", centerLon + lonDelta)
-      .range(from, from + PAGE - 1);
+      .in("role", ["sitter", "both"]);
+    if (!nationwide) {
+      q = q
+        .not("latitude", "is", null)
+        .not("longitude", "is", null)
+        .gte("latitude", centerLat - latDelta)
+        .lte("latitude", centerLat + latDelta)
+        .gte("longitude", centerLon - lonDelta)
+        .lte("longitude", centerLon + lonDelta);
+    }
+    const { data, error } = await q.order("id", { ascending: true }).range(from, from + PAGE - 1);
     if (error) throw error;
     if (!data || data.length === 0) break;
     for (const p of data as any[]) {
       if (!p.email) continue;
       if (p.account_status && p.account_status !== "active") continue;
       if (p.id === (sit as any).user_id) continue;
-      const d = haversineKm(centerLat, centerLon, Number(p.latitude), Number(p.longitude));
-      if (d <= radiusKm) {
+      const hasPlace = p.latitude != null && p.longitude != null;
+      const d = hasPlace
+        ? haversineKm(centerLat, centerLon, Number(p.latitude), Number(p.longitude))
+        : null;
+      if (nationwide || (d !== null && d <= radiusKm)) {
         all.push({
           user_id: p.id,
           first_name: p.first_name || "",
           city: p.city || "",
           email: String(p.email).trim(),
-          distance_km: Math.round(d * 10) / 10,
+          distance_km: d === null ? null : Math.round(d * 10) / 10,
         });
       }
     }
@@ -323,7 +360,9 @@ async function computeRecipients(
 
   const seenEmail = new Set<string>();
   const filtered: Recipient[] = [];
-  for (const r of all.sort((a, b) => a.distance_km - b.distance_km)) {
+  const byDistance = (a: Recipient, b: Recipient) =>
+    (a.distance_km ?? Number.POSITIVE_INFINITY) - (b.distance_km ?? Number.POSITIVE_INFINITY);
+  for (const r of all.sort(byDistance)) {
     const key = r.email.toLowerCase();
     if (seenEmail.has(key)) continue;
     if (suppressed.has(key)) continue;
@@ -345,6 +384,8 @@ async function computeRecipients(
     coverPhotoUrl,
     petsSentence,
     listingCity,
+    nationwide,
+    ownerFar,
   };
 }
 
@@ -420,6 +461,8 @@ Deno.serve(async (req) => {
       coverPhotoUrl,
       petsSentence,
       listingCity,
+      nationwide,
+      ownerFar,
     } = await computeRecipients(serviceClient, sitId, radiusKm);
 
     // Liste explicite optionnelle : INTERSECTION avec la cible géographique,
@@ -451,14 +494,23 @@ Deno.serve(async (req) => {
     // Déduplication (même annonce, ou toute diffusion de proximité des 7
     // derniers jours). Appliquée en preview comme à l'envoi, pour que le
     // compte affiché à l'admin soit celui réellement expédié.
-    const alreadyServed = await computeAlreadyServed(serviceClient, sitId);
-    const targets = recipients.filter((r) => !alreadyServed.has(r.email.toLowerCase()));
+    // Lot Q1 : une garde lointaine diffusée à l'échelle nationale lève la
+    // fenêtre de 7 jours (offre d'une autre nature) ; la déduplication par
+    // annonce reste appliquée.
+    const farBroadcast = nationwide && ownerFar;
+    const alreadyServed = await computeAlreadyServed(serviceClient, sitId, { recentWindow: !farBroadcast });
+    const targets = recipients.filter(
+      (r) => !alreadyServed.emails.has(r.email.toLowerCase()) && !alreadyServed.userIds.has(r.user_id),
+    );
     const dedupInfo = {
-      dedup_days: PROXIMITY_DEDUP_DAYS,
+      dedup_days: farBroadcast ? 0 : PROXIMITY_DEDUP_DAYS,
       excluded_recent: recipients.length - targets.length,
+      nationwide,
+      owner_far: ownerFar,
+      far_recipients: targets.filter((r) => isFarForRecipient(r.distance_km, ownerFar || nationwide)).length,
     };
 
-    const subject = buildSubject(authorFirstName, listingCity);
+    const subject = buildSubject(authorFirstName, listingCity, farBroadcast || nationwide);
     const excerpt = buildExcerpt(sit.owner_message ?? sit.specific_expectations);
     const dateRange = buildDateRange(sit.start_date, sit.end_date);
     const startDateFr = formatDateFr(sit.start_date);
@@ -533,7 +585,8 @@ Deno.serve(async (req) => {
         JSON.stringify({
           queued: 0,
           targeted: recipients.length,
-          already_served: alreadyServed.size,
+          already_served: alreadyServed.emails.size,
+          already_alerted_at_publish: alreadyServed.userIds.size,
           mode: "queue",
           radius_km: radiusKm,
           requested_radius_km: radiusDecision.requestedRadiusKm,
@@ -610,6 +663,7 @@ Deno.serve(async (req) => {
     // `nearby-sit-alert`) et non par le gabarit générique des campagnes.
     let enqueued = 0;
     for (const r of targets) {
+      const far = isFarForRecipient(r.distance_km, ownerFar || nationwide);
       const { error: qErr } = await serviceClient.rpc("enqueue_email", {
         queue_name: "mass_emails",
         payload: {
@@ -622,7 +676,8 @@ Deno.serve(async (req) => {
             ownerFirstName: authorFirstName || undefined,
             sitTitle: sit.title || undefined,
             city: listingCity || undefined,
-            distanceKm: r.distance_km,
+            distanceKm: far || r.distance_km === null ? undefined : r.distance_km,
+            farAway: far,
             startDate: startDateFr || undefined,
             endDate: endDateFr || undefined,
             sitId: sit.id,
@@ -662,7 +717,8 @@ Deno.serve(async (req) => {
       mode: "queue",
       queued: enqueued,
       targeted: recipients.length,
-      already_served: alreadyServed.size,
+      already_served: alreadyServed.emails.size,
+      already_alerted_at_publish: alreadyServed.userIds.size,
       ...dedupInfo,
       campaign_id: campaignId,
       radius_km: radiusKm,

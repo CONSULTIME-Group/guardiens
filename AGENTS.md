@@ -51,4 +51,7 @@
 
 <!-- LOVABLE:BEGIN -->
 - `build` ends with `test:guard` and CI runs `test:guard` directly; why: owner decision of 17/08/2026, a red test blocks publication.
+
+- Garde lointaine (lot Q1) : une diffusion de proximité d'au moins 1 000 km vise tous les gardiens actifs, lieu renseigné ou non ; un gardien à plus de 200 km (ou sans lieu pour un propriétaire à plus de 1 500 km de Paris) reçoit la variante lointaine de nearby-sit-alert (objet et texte sans « près de chez vous », sans distance) ; dans une campagne annulée, seules les lignes parties comptent pour la déduplication, les alertes de publication de l'annonce (sit_notification_log) y comptent, la fenêtre de 7 jours est levée pour une garde lointaine diffusée à l'échelle nationale (src/__tests__/q1/, supabase/functions/_shared/far-listing.ts) ; pourquoi : le 11/10/2026, l'annonce de Saint Ludger (Québec) partait vers 538 gardiens avec « près de chez vous » et « à environ 5 500 km de chez vous ».
+
 <!-- LOVABLE:END -->

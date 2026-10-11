@@ -40,7 +40,7 @@ import { Loader2, Search, Send, AlertTriangle } from "lucide-react";
 interface PreviewRecipient {
   first_name: string;
   city: string;
-  distance_km: number;
+  distance_km: number | null;
   email: string;
 }
 interface PreviewData {
@@ -327,7 +327,7 @@ const ListingProximityCard = ({
                       <TableRow key={r.email}>
                         <TableCell className="text-xs py-1.5">{r.first_name || "(sans prénom)"}</TableCell>
                         <TableCell className="text-xs py-1.5">{r.city || "·"}</TableCell>
-                        <TableCell className="text-xs py-1.5 text-right tabular-nums">{r.distance_km} km</TableCell>
+                        <TableCell className="text-xs py-1.5 text-right tabular-nums">{r.distance_km == null ? "lieu non renseigné" : `${r.distance_km} km`}</TableCell>
                         <TableCell className="text-xs py-1.5 font-mono">{r.email}</TableCell>
                       </TableRow>
                     ))}

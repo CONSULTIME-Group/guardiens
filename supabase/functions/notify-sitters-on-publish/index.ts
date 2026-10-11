@@ -26,6 +26,7 @@ import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-
 import { startCronRun } from "../_shared/cron-run-log.ts";
 import { requireCronCaller } from "../_shared/require-cron-caller.ts";
 import { evaluateSitAlert, PUBLISHED_STATUS } from "../_shared/sit-alert-guard.ts";
+import { isFarForRecipient, isOwnerFarFromFrance } from "../_shared/far-listing.ts";
 import {
   APPLY_COMPLETION_THRESHOLD,
   completionMessageFor,
@@ -263,6 +264,8 @@ Deno.serve(async (req) => {
         dept: deptFromPostal((owner as any).postal_code),
       };
       const ownerFirstName = toTitleCase((owner as any).first_name);
+      // Lot Q1 : garde lointaine (propriétaire loin de la France, ou gardien à plus de 200 km).
+      const ownerFar = isOwnerFarFromFrance((owner as any).latitude, (owner as any).longitude);
       const listingCity = String(sit.city || (owner as any).city || "").trim();
 
       // Animaux et photo, pour un email qui dit quelque chose.
@@ -524,7 +527,8 @@ Deno.serve(async (req) => {
               ownerFirstName: ownerFirstName || undefined,
               sitTitle: sit.title || undefined,
               city: listingCity || undefined,
-              distanceKm: t.distance_km ?? undefined,
+              distanceKm: isFarForRecipient(t.distance_km ?? null, ownerFar) ? undefined : (t.distance_km ?? undefined),
+              farAway: isFarForRecipient(t.distance_km ?? null, ownerFar),
               startDate: formatDateFr(sit.start_date) || undefined,
               endDate: formatDateFr(sit.end_date) || undefined,
               sitId: sit.id,
