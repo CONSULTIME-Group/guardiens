@@ -38,7 +38,13 @@ jobs:
         run: npx tsc -b
 
       - name: Garde différentielle des tests
-        run: npm run test:guard
+        run: |
+          set -o pipefail
+          npm run test:guard 2>&1 | tee /tmp/guard.log || {
+            grep -E "^  - " /tmp/guard.log | head -9 | sed 's/^/::error::/'
+            grep -E "AssertionError|TypeError|ReferenceError|SyntaxError|Error: |expected " /tmp/guard.log | head -45 | cut -c1-400 | sed 's/^/::warning::/'
+            exit 1
+          }
 
       - name: Cycle d'invalidation SEO des profils (Postgres local)
         run: npm run test:sql:profile-seo
