@@ -35,6 +35,8 @@ import {
 
 /** Lignes d'une campagne annulée qui ne sont jamais parties (lot Q1). */
 const CANCELLED_UNSERVED_STATUSES = new Set(["queued", "skipped"]);
+/** Motif posé par cancel-mass-email et par le worker sur une ligne annulée. */
+const CANCELLED_ROW_ERROR = "campaign cancelled";
 
 /** Au dela de ce nombre de destinataires, la diffusion manuelle est signalee. */
 export const LARGE_BROADCAST_THRESHOLD = 150;
@@ -83,7 +85,7 @@ async function computeAlreadyServed(
     for (let from = 0; ; from += PAGE) {
       const { data: rows, error } = await serviceClient
         .from("mass_email_sends")
-        .select("id, mass_email_id, recipient_email, status")
+        .select("id, mass_email_id, recipient_email, status, last_error")
         .in("mass_email_id", ids.slice(i, i + CH))
         .neq("status", "failed")
         .order("id", { ascending: true })
@@ -91,6 +93,9 @@ async function computeAlreadyServed(
       if (error) throw new Error(`dedup sends lookup failed: ${error.message}`);
       for (const row of (rows || []) as any[]) {
         if (cancelledIds.has(row.mass_email_id) && CANCELLED_UNSERVED_STATUSES.has(String(row.status))) continue;
+        // Une campagne annulée peut ensuite passer « done » une fois toutes
+        // ses lignes closes : la ligne garde la trace de l'annulation.
+        if (String(row.status) === "skipped" && row.last_error === CANCELLED_ROW_ERROR) continue;
         if (row.recipient_email) served.add(String(row.recipient_email).toLowerCase());
       }
       if (!rows || rows.length < PAGE) break;
