@@ -175,6 +175,8 @@ function harness(options: Options = {}) {
         resolveDeferral: () => ({ action: "defer" }),
       };
       if (specifier.includes("resend-guard")) return { resendFetch };
+      // Lots C1, C2 : statut de compte (testé à part, sans effet ici en transactionnel).
+      if (specifier.includes("account-email-block")) return { isAccountBlockedForMarketing: () => false };
       if (specifier.includes("email-link-wrap")) return { wrapEmailLink: (href: string) => href };
       if (specifier.includes("sender-address")) return { ...senderAddress, REPLY_TO_ADDRESS: "reply@fixture.test" };
       if (specifier.includes("email-first-name")) return { normalizeEmailFirstNames: (d: Record<string, unknown>) => d };
