@@ -23,7 +23,7 @@ vi.mock("@/contexts/AuthContext", () => ({ useAuth: () => ({ user: { id: "u1" } 
 import {
   rememberSignupRole, readPendingSignupRole, applyPendingSignupRole, withSignupRoleParam, SIGNUP_ROLE_KEY,
 } from "@/lib/signupRole";
-import { PUSH_ID_KEY, PUSH_OWNER_KEY, pushDeviceStatus } from "@/lib/web-push";
+import { PUSH_ID_KEY, PUSH_OWNER_KEY, repairPushDevice } from "@/lib/web-push";
 import PushResubscribeCard from "@/components/dashboard/shared/PushResubscribeCard";
 
 beforeEach(() => {
@@ -79,7 +79,7 @@ describe("Lots 0 C et 0b, notifications arrêtées", () => {
   const local = () => { localStorage.setItem(PUSH_ID_KEY, "s1"); localStorage.setItem(PUSH_OWNER_KEY, "u1"); };
 
   it("sans identifiant local, aucun appel", async () => {
-    expect(await pushDeviceStatus("u1")).toEqual({ kind: "none" });
+    expect(await repairPushDevice("u1")).toEqual({ kind: "none" });
     expect(invoke).not.toHaveBeenCalled();
   });
 
@@ -94,10 +94,9 @@ describe("Lots 0 C et 0b, notifications arrêtées", () => {
     delete (navigator as any).serviceWorker;
   });
 
-  it("désactivé en 410 avec autorisation accordée : renouvellement silencieux, aucune carte", async () => {
+  it("désactivé en 410 avec autorisation accordée : réparation silencieuse tentée, aucune carte", async () => {
     local(); setPermission("granted");
     invoke.mockResolvedValue(status(false));
-    expect(await pushDeviceStatus("u1")).toEqual({ kind: "renewable", subscriptionId: "s1" });
     render(<PushResubscribeCard />);
     await waitFor(() => expect(trackEventMock).toHaveBeenCalledWith("push_renewed_silently", expect.anything()));
     expect(screen.queryByText(TEXT)).toBeNull();

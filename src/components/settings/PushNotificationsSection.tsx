@@ -7,7 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { trackEvent } from '@/lib/analytics';
 import {
-  disablePush, enablePush, markPushOptOut, clearPushOptOut, testPushOnDevice, getPushConfig, getPushState, pushSupport, updatePushPreferences,
+  disablePush, enablePush, markPushOptOut, clearPushOptOut, testPushOnDevice, getPushConfig, getPushState, pushSupport, repairPushDevice, updatePushPreferences,
   type PushConfig, type PushPreferences,
 } from '@/lib/web-push';
 
@@ -39,10 +39,14 @@ export default function PushNotificationsSection() {
     let timer: ReturnType<typeof setTimeout>;
     // Bound the entire read, including session and browser calls. A late
     // response cannot replace the result of a retry or another account.
-    const read = Promise.all([getPushConfig(user.id).catch(() => {
+    // Lot N1 : l'appareil est d'abord remis en état (adresse morte, stockage
+    // effacé, nouvelle adresse) ; l'écran affiche ensuite l'état confirmé.
+    const userId = user.id;
+    const read = Promise.all([getPushConfig(userId).catch(() => {
       configFailed = true;
       return { enabled: false };
-    }), getPushState(user.id)]);
+    }), Promise.race([repairPushDevice(userId), new Promise((resolve) => setTimeout(resolve, 6000))])
+      .catch(() => null).then(() => getPushState(userId))]);
     Promise.race([read, new Promise<never>((_, reject) => {
       timer = setTimeout(() => reject(new Error('push_load_timeout')), 12000);
     })]).then(([settings, state]) => {

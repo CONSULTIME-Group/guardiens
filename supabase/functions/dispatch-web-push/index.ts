@@ -138,6 +138,18 @@ Deno.serve(async (req) => {
         if (disabled.error || disabled.data !== true) counters.persistence_errors += 1;
         counters.disabled += 1;
       }
+      if (decision.outcome === 'accepted') {
+        // Lot N1 : derniere prise en charge connue de l'appareil, seul indice
+        // qu'un push est parti. Une erreur ici ne change pas l'envoi.
+        try {
+          const seen = await admin.from('push_subscriptions')
+            .update({ last_success_at: new Date().toISOString() })
+            .eq('id', job.subscription_id);
+          if (seen?.error) console.warn('dispatch-web-push last_success_at non enregistre');
+        } catch {
+          console.warn('dispatch-web-push last_success_at non enregistre');
+        }
+      }
       await finalize(job.job_id, decision.outcome, decision.errorCode);
       // 'accepted' signifie pris en charge par le service de push, jamais remis.
       counters[decision.outcome] += 1;

@@ -2,15 +2,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import PushNotificationsSection from '@/components/settings/PushNotificationsSection';
-const mocks = vi.hoisted(() => ({ support: 'supported', config: vi.fn(), state: vi.fn(), enable: vi.fn(), disable: vi.fn(), update: vi.fn(), test: vi.fn() }));
+const mocks = vi.hoisted(() => ({ support: 'supported', config: vi.fn(), state: vi.fn(), enable: vi.fn(), disable: vi.fn(), update: vi.fn(), test: vi.fn(), repair: vi.fn() }));
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: { id: 'fixture-user' } }) }));
-vi.mock('@/lib/web-push', () => ({ pushSupport: () => mocks.support, getPushConfig: mocks.config, getPushState: mocks.state, enablePush: mocks.enable, disablePush: mocks.disable, updatePushPreferences: mocks.update, testPushOnDevice: mocks.test, markPushOptOut: vi.fn(), clearPushOptOut: vi.fn() }));
+vi.mock('@/lib/web-push', () => ({ pushSupport: () => mocks.support, getPushConfig: mocks.config, getPushState: mocks.state, enablePush: mocks.enable, disablePush: mocks.disable, updatePushPreferences: mocks.update, testPushOnDevice: mocks.test, repairPushDevice: mocks.repair, markPushOptOut: vi.fn(), clearPushOptOut: vi.fn() }));
 vi.mock('@/lib/analytics', () => ({ trackEvent: vi.fn() }));
 beforeEach(() => {
   vi.clearAllMocks(); mocks.support='supported';
   mocks.config.mockResolvedValue({enabled:true,publicKey:'public-fixture'});
   mocks.state.mockResolvedValue({subscribed:false,messages:true,applications:true});
-  mocks.enable.mockResolvedValue({nearbyRequested:false,nearbySaved:false}); mocks.disable.mockResolvedValue(undefined); mocks.update.mockResolvedValue(undefined);
+  mocks.enable.mockResolvedValue({nearbyRequested:false,nearbySaved:false}); mocks.disable.mockResolvedValue(undefined); mocks.update.mockResolvedValue(undefined); mocks.repair.mockResolvedValue({kind:'ok'});
   vi.stubGlobal('Notification',{permission:'default'});
 });
 const show=()=>render(<MemoryRouter><PushNotificationsSection /></MemoryRouter>);

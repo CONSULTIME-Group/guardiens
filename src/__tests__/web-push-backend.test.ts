@@ -265,7 +265,12 @@ describe('transport, erreurs et reprises', () => {
 
   it('ne rejoue pas les autres erreurs client', () => {
     expect(classifyPushResponse(400, 1).outcome).toBe('failed');
+    expect(classifyPushResponse(400, 1).disableSubscription).toBe(false);
     expect(classifyPushResponse(403, 1).outcome).toBe('failed');
+  });
+
+  it('lot N1 : 403 ne desactive jamais en masse (jeton serveur possible)', () => {
+    expect(classifyPushResponse(403, 1).disableSubscription).toBe(false);
   });
 
   it('ne rejoue jamais une tentative reseau ambigue', () => {
