@@ -154,7 +154,7 @@ Deno.serve(async (req) => {
 })
 
 async function runEvaluation(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   dryRun: boolean,
 ) {
   const stats = {
@@ -590,7 +590,7 @@ async function runEvaluation(
 const CRON_ENTITY_ID = '00000000-0000-0000-0000-000000000000'
 
 async function maybeInsertRunAnomaly(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   stats: { enrolled: number; sent: number; exited: number; skipped: number; errors: number; capped: boolean; bySequence: Record<string, unknown> },
 ) {
   // 3 runs consécutifs non success (partial ou failed)
@@ -651,7 +651,7 @@ async function maybeInsertRunAnomaly(
 // Enrollment dispatch
 // ---------------------------------------------------------------------------
 async function enrollForSequence(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   seq: Sequence,
   dryRun: boolean,
 ): Promise<number> {
@@ -973,7 +973,7 @@ async function enrollForSequence(
 // Exit condition evaluation
 // ---------------------------------------------------------------------------
 async function checkExitCondition(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   cond: ExitCondition | null,
 ): Promise<boolean> {

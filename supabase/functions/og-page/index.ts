@@ -162,7 +162,7 @@ Deno.serve(async (req) => {
     await ensureResvg();
     const png = new Resvg(svg, { fitTo: { mode: "width", value: 1200 } }).render().asPng();
 
-    return new Response(png, {
+    return new Response(png as unknown as BodyInit, {
       status: 200,
       headers: {
         ...corsHeaders,

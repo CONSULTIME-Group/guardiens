@@ -57,7 +57,7 @@ interface StalledDiscussion {
 }
 
 async function sendReminderEmail(params: {
-  serviceClient: ReturnType<typeof createClient>;
+  serviceClient: any;
   app: PendingApp;
   messageId: string;
   templateName: string;
@@ -186,7 +186,7 @@ async function sendReminderEmail(params: {
  * email_send_log, suppression vérifiée, catégorie transactionnelle.
  */
 async function sendStalledDiscussionEmail(params: {
-  serviceClient: ReturnType<typeof createClient>;
+  serviceClient: any;
   disc: StalledDiscussion;
   messageId: string;
 }): Promise<{ ok: boolean; outcome: "sent" | "deferred" | "skipped" | "failed"; error?: string }> {

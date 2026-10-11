@@ -337,7 +337,7 @@ Deno.serve(async (req) => {
 })
 
 async function sendEmailSafely(
-  admin: ReturnType<typeof createClient>,
+  admin: any,
   userId: string,
   templateName: string,
   templateData: Record<string, unknown>,

@@ -63,7 +63,7 @@ async function callAI(apiKey: string, prompt: string, maxTokens = 1000) {
  * Une requête Nominatim par seconde au maximum, comme avant.
  */
 async function geocodePlacesInBackground(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   city: string,
   rows: Array<{ id: string; name: string; address: string | null }>,
 ) {
