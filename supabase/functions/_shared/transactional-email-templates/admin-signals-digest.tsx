@@ -39,7 +39,7 @@ const Email = ({
 }: Props) => (
   <Html lang="fr" dir="ltr">
     <BrandedHead />
-    <Preview>{criticalCount} action(s) à mener aujourd'hui</Preview>
+    <Preview>{`${criticalCount} action(s) à mener aujourd'hui`}</Preview>
     <Body style={main}>
       <Container style={container}>
         <BrandHeader />
@@ -75,7 +75,7 @@ const Email = ({
           Signaux warning ouverts : {warningCount}.
         </Text>
 
-        <LegalFooter />
+        <LegalFooter purpose="le suivi opérationnel de la plateforme" basis="6.1.f" />
       </Container>
     </Body>
   </Html>

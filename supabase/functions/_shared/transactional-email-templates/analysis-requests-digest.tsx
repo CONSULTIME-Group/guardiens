@@ -37,7 +37,7 @@ const AnalysisRequestsDigestEmail = ({
 }: Props) => (
   <Html lang="fr" dir="ltr">
     <BrandedHead />
-    <Preview>{total} demande(s) d'analyse reçue(s)</Preview>
+    <Preview>{`${total} demande(s) d'analyse reçue(s)`}</Preview>
     <Body style={main}>
       <Container style={container}>
         <BrandHeader />

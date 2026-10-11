@@ -62,7 +62,7 @@ const AlertDigestEmail = ({
     <Html lang="fr" dir="ltr">
       <BrandedHead />
       <Preview>
-        {total} nouveauté{total > 1 ? 's' : ''} dans votre veille {zone}
+        {`${total} nouveauté${total > 1 ? 's' : ''} dans votre veille ${zone}`}
       </Preview>
       <Body style={main}>
         <Container style={container}>

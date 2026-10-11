@@ -47,7 +47,7 @@ function daysUntil(startDate: string | null): number | null {
 }
 
 async function sendDraftReminder(params: {
-  serviceClient: ReturnType<typeof createClient>;
+  serviceClient: any;
   draft: StaleDraft;
   messageId: string;
 }): Promise<{ ok: boolean; outcome: "sent" | "deferred" | "skipped" | "failed"; error?: string }> {

@@ -102,7 +102,7 @@ Deno.serve(async (req) => {
     // on refuse, on n'elargit jamais.
     if (cohortFilter.cohortPresent && planBrut > 0 && cibleRetenue === 0) {
       const reason = `cohorte figée présente pour ${periodKey} mais croisement vide, envoi refusé`
-      await run.finish('failed', {
+      await run.fail(new Error(reason), {
         period_key: periodKey,
         plan_brut: planBrut,
         cible_retenue: 0,

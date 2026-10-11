@@ -68,7 +68,7 @@ const SitRow = ({ sit }: { sit: SitCard }) => (
   <table role="presentation" cellPadding={0} cellSpacing={0} width="100%" style={cardTable}>
     <tbody>
       <tr>
-        <td width="92" valign="top" bgcolor={LINE} style={thumbCell}>
+        <td width="92" valign="top" style={{ ...thumbCell, backgroundColor: LINE }}>
           {sit.imageUrl ? (
             <Img
               src={toThumbUrl(sit.imageUrl)}

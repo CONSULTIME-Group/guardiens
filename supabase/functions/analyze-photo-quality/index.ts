@@ -199,10 +199,11 @@ Deno.serve(async (req) => {
     const results: Scored[] = [];
     for (const url of capped) {
       // Stop net si quota explosé en cours de batch.
-      const newCount: number = await admin
-        .rpc("increment_photo_analysis_quota", { _user_id: userId })
-        .then(({ data }) => (data as number) ?? 0)
-        .catch(() => 0);
+      const newCount: number = await Promise.resolve(
+        admin
+          .rpc("increment_photo_analysis_quota", { _user_id: userId })
+          .then(({ data }) => (data as number) ?? 0)
+      ).catch(() => 0);
       if (newCount > MAX_PER_DAY) break;
       try {
         const r = await analyzeOne(url, LOVABLE_API_KEY);

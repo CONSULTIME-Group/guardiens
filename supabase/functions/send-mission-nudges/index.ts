@@ -271,7 +271,7 @@ Deno.serve(async (req) => {
 })
 
 async function sendNudge(
-  admin: ReturnType<typeof createClient>,
+  admin: any,
   m: Mission,
   kind: 'feedback' | 'no_response',
   results: Array<{ mission_id: string; nudge_type: string; status: string; reason?: string }>,
@@ -367,7 +367,7 @@ async function sendNudge(
 }
 
 async function sendResponseWaitingNudge(
-  admin: ReturnType<typeof createClient>,
+  admin: any,
   ctx: { mission: Mission; responseId: string; responderFirstName: string },
   results: Array<{ mission_id: string; nudge_type: string; status: string; reason?: string }>,
   dryRun?: boolean,
@@ -463,7 +463,7 @@ async function sendResponseWaitingNudge(
 // Mêmes garde-fous que sendNudge : compte actif, opt-in produit, suppression,
 // dédup par template + destinataire + mission_id dans email_send_log.
 async function sendMissionEmail(
-  admin: ReturnType<typeof createClient>,
+  admin: any,
   ctx: {
     missionId: string
     recipientUserId: string

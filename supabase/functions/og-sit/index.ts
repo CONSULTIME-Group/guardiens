@@ -357,7 +357,7 @@ Deno.serve(async (req) => {
       headers["Content-Disposition"] = `attachment; filename="guardiens-annonce-${id.slice(0, 8)}.png"`;
     }
 
-    return new Response(png, { status: 200, headers });
+    return new Response(png as unknown as BodyInit, { status: 200, headers });
   } catch (err) {
     console.error("og-sit error:", err);
     return new Response(JSON.stringify({ error: "Internal error", detail: String(err) }), {

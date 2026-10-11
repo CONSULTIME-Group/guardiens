@@ -2,7 +2,7 @@
 //
 // `<AlmaSignoff />` — bloc de clôture standardisé pour les emails signés Alma.
 // Rappelle que l'utilisateur garde la main sur ses décisions, et affiche la
-// baseline de rassurance pricing. À placer juste au-dessus de <LegalFooter />.
+// baseline de rassurance pricing. À placer juste au-dessus de <LegalFooter purpose="de l'envoi des messages signés Alma, votre assistante Guardiens" basis="6.1.f" />.
 //
 // Vouvoiement absolu (mem://style/editorial-tone-mapping).
 // Aucun tiret cadratin, aucun emoji.

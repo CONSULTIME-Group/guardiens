@@ -633,9 +633,9 @@ function evalIdealProfile(owner: AffinityOwnerInput, sitter: AffinitySitterInput
   const actual = typeof sitter.sitter_type === "string"
     ? toArray([sitter.sitter_type])
     : toArray(sitter.sitter_type);
-  const experience = norm(sitter.experience_years);
+  const experience = sitter.experience_years == null ? "" : norm(String(sitter.experience_years));
   const work = sitter.work_during_sit
-    ?? AVAILABILITY_TO_WORK[norm(sitter.availability_during)]
+    ?? (sitter.availability_during == null ? null : AVAILABILITY_TO_WORK[norm(String(sitter.availability_during))])
     ?? null;
 
   const npExperienced = norm(PREF_SITTER_EXP_EXPERIENCED);

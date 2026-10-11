@@ -91,7 +91,7 @@ const Email = ({
         ) : null}
 
 
-        <LegalFooter />
+        <LegalFooter purpose="l'alerte sur la qualité du contenu publié" basis="6.1.f" />
       </Container>
     </Body>
   </Html>

@@ -145,7 +145,7 @@ const Email = ({ firstName, city, radiusKm, newCount = 0, missions = [], questio
 
           <Hr style={hr} />
           <AlmaSignoff />
-          <LegalFooter />
+          <LegalFooter purpose="l'envoi du résumé hebdomadaire de l'entraide" basis="6.1.b" />
         </Container>
       </Body>
     </Html>

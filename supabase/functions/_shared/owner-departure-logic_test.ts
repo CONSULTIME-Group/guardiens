@@ -48,7 +48,7 @@ Deno.test('enregistrement de la période et carte Alma', () => {
 })
 
 Deno.test('témoin : stable et proche de 10 % sur 1 000 identifiants', () => {
-  const ids = Array.from({ length: 1000 }, (_, i) => crypto.randomUUID ? `00000000-0000-4000-8000-${String(i).padStart(12, '0')}` : '')
+  const ids = Array.from({ length: 1000 }, (_, i) => typeof crypto.randomUUID === 'function' ? `00000000-0000-4000-8000-${String(i).padStart(12, '0')}` : '')
   const n = ids.filter(isOwnerV2Holdout).length
   assert(n >= 70 && n <= 135, `témoin ${n}`)
   for (const id of ids.slice(0, 50)) assertEquals(isOwnerV2Holdout(id), isOwnerV2Holdout(id))

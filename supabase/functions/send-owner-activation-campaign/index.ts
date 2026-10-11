@@ -42,7 +42,7 @@ interface Recipient {
   first_name: string | null;
 }
 
-async function fetchSegment(sc: ReturnType<typeof createClient>): Promise<Recipient[]> {
+async function fetchSegment(sc: any): Promise<Recipient[]> {
   const PAGE = 1000;
   const all: Recipient[] = [];
   let from = 0;

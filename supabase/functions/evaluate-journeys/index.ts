@@ -46,8 +46,8 @@ type EnrollmentRule =
   | { type: 'owner_no_sit'; min_age_days?: number; window_days?: number; max_age_days?: number }
   | { type: 'sitter_no_application'; min_age_days?: number; window_days?: number; max_age_days?: number }
   | { type: 'active_referral'; min_age_days?: number; active_within_days?: number; window_days?: number; max_age_days?: number }
-  | { type: 'sitter_missing_affinity'; min_age_days?: number; max_age_days?: number }
-  | { type: 'owner_missing_affinity'; min_age_days?: number; max_age_days?: number }
+  | { type: 'sitter_missing_affinity'; min_age_days?: number; window_days?: number; max_age_days?: number }
+  | { type: 'owner_missing_affinity'; min_age_days?: number; window_days?: number; max_age_days?: number }
   | { type: 'helper_no_guard_activity'; min_age_days?: number; window_days?: number; max_age_days?: number }
 
 type AgeRule = { min_age_days?: number; max_age_days?: number; window_days?: number }
@@ -154,7 +154,7 @@ Deno.serve(async (req) => {
 })
 
 async function runEvaluation(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   dryRun: boolean,
 ) {
   const stats = {
@@ -590,7 +590,7 @@ async function runEvaluation(
 const CRON_ENTITY_ID = '00000000-0000-0000-0000-000000000000'
 
 async function maybeInsertRunAnomaly(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   stats: { enrolled: number; sent: number; exited: number; skipped: number; errors: number; capped: boolean; bySequence: Record<string, unknown> },
 ) {
   // 3 runs consécutifs non success (partial ou failed)
@@ -651,7 +651,7 @@ async function maybeInsertRunAnomaly(
 // Enrollment dispatch
 // ---------------------------------------------------------------------------
 async function enrollForSequence(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   seq: Sequence,
   dryRun: boolean,
 ): Promise<number> {
@@ -973,7 +973,7 @@ async function enrollForSequence(
 // Exit condition evaluation
 // ---------------------------------------------------------------------------
 async function checkExitCondition(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   cond: ExitCondition | null,
 ): Promise<boolean> {

@@ -43,7 +43,7 @@ const Email = ({ firstName, missionTitle = 'Le coup de main', missionId, authorF
           </Section>
           <Hr style={hr} />
           <AlmaSignoff />
-          <LegalFooter />
+          <LegalFooter purpose="le suivi des avis sur un coup de main effectué" basis="6.1.b" />
         </Container>
       </Body>
     </Html>

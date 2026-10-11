@@ -92,7 +92,7 @@ const findWikiImage = async (
 
 /** Étapes 2 et 3 : télécharger le candidat et le déposer dans notre stockage. */
 const storeImage = async (
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   imageUrl: string,
   species: string,
   normalizedBreed: string,
@@ -149,7 +149,7 @@ const storeImage = async (
  * rapatriement. Retourne l'URL stockée ou null, et remplit la trace.
  */
 const resolveAndStoreImage = async (
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   args: { species: string; breed: string; image_url?: string | null },
 ): Promise<{ stored: string | null; credit: string | null; trace: ImageTrace }> => {
   const trace = newTrace();

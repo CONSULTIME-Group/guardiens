@@ -49,7 +49,7 @@ const Email = ({ firstName, missionTitle = 'Votre mission', missionId }: Props) 
           </Text>
           <Hr style={hr} />
           <AlmaSignoff />
-          <LegalFooter />
+          <LegalFooter purpose="la relance d'une mission sans réponse" basis="6.1.b" />
         </Container>
       </Body>
     </Html>

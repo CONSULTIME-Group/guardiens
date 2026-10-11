@@ -21,8 +21,11 @@ import { Hr, Section, Text } from 'npm:@react-email/components@0.0.22'
 
 const SITE_NAME = 'Guardiens'
 
-const BASIS_LABEL: Record<'6.1.b' | '6.1.f', string> = {
+export type LegalBasis = '6.1.b' | '6.1.c' | '6.1.f'
+
+const BASIS_LABEL: Record<LegalBasis, string> = {
   '6.1.b': 'exécution de mesures précontractuelles ou contractuelles',
+  '6.1.c': 'obligation légale',
   '6.1.f': 'intérêt légitime',
 }
 
@@ -34,7 +37,7 @@ export interface LegalFooterProps {
    */
   purpose: string
   /** Base légale RGPD applicable. Défaut : 6.1.b (exécution contractuelle). */
-  basis?: '6.1.b' | '6.1.f'
+  basis?: LegalBasis
   /** Mention complémentaire optionnelle (ex. avis : L. 111-7-2 du Code de la consommation). */
   extra?: React.ReactNode
   /** Affiche « L'équipe Guardiens ». Défaut true ; false quand le gabarit est déjà signé. */

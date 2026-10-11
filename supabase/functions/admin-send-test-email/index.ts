@@ -114,7 +114,7 @@ Deno.serve(async (req) => {
         const demo = { ...self, city: "Lyon", latitude: 45.764, longitude: 4.8357 };
         const both = await buildNoelDataFor(admin, [self, { ...demo, id: `${self.id}-demo` }]);
         const mine = both.get(self.id);
-        noelData = (mine?.variant === "A" ? mine : both.get(`${self.id}-demo`)) as Record<string, unknown> ?? {};
+        noelData = ((mine?.variant === "A" ? mine : both.get(`${self.id}-demo`)) ?? {}) as unknown as Record<string, unknown>;
         // Lots N6 et N7 : répondant Noël, répondant hiver, variante A ou B (non-répondant, boutons à jeton).
         const rawMode = String(payload?.noel_test_mode ?? "");
         const noelTestMode = ["responder_noel", "responder_hiver", "variant_a", "variant_b"].includes(rawMode) ? rawMode : "variant_a";

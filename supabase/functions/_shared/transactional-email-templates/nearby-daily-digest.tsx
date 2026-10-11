@@ -56,7 +56,7 @@ const NearbyDailyDigestEmail = ({ firstName, radiusKm = 15, city, items = [] }: 
     <Html lang="fr" dir="ltr">
       <BrandedHead />
       <Preview>
-        {count} annonce{count > 1 ? 's' : ''} près de chez vous aujourd'hui
+        {`${count} annonce${count > 1 ? 's' : ''} près de chez vous aujourd'hui`}
       </Preview>
       <Body style={main}>
         <Container style={container}>

@@ -143,7 +143,7 @@ const Email = ({
             Vous choisissez la fréquence de ces emails, flux par flux, depuis vos{' '}
             <Link href={`${SITE_URL}/email-preferences`} style={link}>préférences email</Link>.
           </Text>
-          <LegalFooter />
+          <LegalFooter purpose="l'envoi du résumé hebdomadaire près de chez vous" basis="6.1.b" />
         </Container>
       </Body>
     </Html>
