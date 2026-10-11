@@ -15,7 +15,6 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
 
 const SNOOZE_KEY = "fill_savoir_faire_banner_snoozed_until";
 const SNOOZE_DAYS = 30;

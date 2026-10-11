@@ -190,6 +190,8 @@
     },
     "free_label": "En une phrase, ce que vous aimez faire",
     "free_help": "L'échange se décide entre vous : un merci, un repas, un service rendu.",
+    "max": "Dix savoir-faire au plus : retirez-en un pour en choisir un autre.",
+    "money": "Gardez la phrase sans montant ni tarif : l'échange se décide ensuite entre vous.",
     "later": "Compléter plus tard"
   },
   "n1": {

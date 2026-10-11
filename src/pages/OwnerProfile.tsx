@@ -415,7 +415,7 @@ const OwnerProfilePage = () => {
                 <>
                   <OwnerStepSkills
                     competences={mergedData.owner_competences || []}
-                    competencesDisponible={mergedData.owner_competences_disponible || false}
+                    competencesDisponible={mergedData.available_for_help === true}
                     skillCategories={mergedData.owner_skill_categories || []}
                     onChange={(partial) => handleChange(partial as any)}
                   />

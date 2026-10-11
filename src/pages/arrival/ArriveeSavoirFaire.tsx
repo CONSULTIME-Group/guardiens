@@ -56,18 +56,32 @@ const ArriveeSavoirFaire = () => {
   const [helpsWith, setHelpsWith] = useState("");
   const [saving, setSaving] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [moneyError, setMoneyError] = useState(false);
+  const [atMax, setAtMax] = useState(false);
+  const choose = (next: string[]) => {
+    setAtMax(next.length > G4_MAX_COMPETENCES);
+    setCompetences(next.slice(0, G4_MAX_COMPETENCES));
+  };
 
   const role: string = user?.role ?? (carry.flow === "owner" ? "owner" : "sitter");
 
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
-    const roleTable = role === "owner" ? fetchMyOwnerProfile(user.id, { fresh: true }) : fetchMySitterProfile(user.id, { fresh: true });
-    Promise.all([fetchMyProfile(user.id, { fresh: true }), roleTable]).then(([me, mine]) => {
+    const none = Promise.resolve({ data: null });
+    Promise.all([
+      fetchMyProfile(user.id, { fresh: true }),
+      role === "owner" ? none : fetchMySitterProfile(user.id, { fresh: true }),
+      role === "sitter" ? none : fetchMyOwnerProfile(user.id, { fresh: true }),
+    ]).then(([me, sitter, owner]) => {
       if (cancelled) return;
       const p = (me.data ?? {}) as { helps_with?: string | null };
-      const r = (mine.data ?? {}) as { competences?: string[] | null };
-      setCompetences(Array.isArray(r.competences) ? r.competences : []);
+      const list = (row: unknown) => {
+        const c = (row as { competences?: string[] | null } | null)?.competences;
+        return Array.isArray(c) ? c : [];
+      };
+      // Double rôle : réunion des deux listes, rien n'est perdu à l'enregistrement.
+      setCompetences(Array.from(new Set([...list(sitter.data), ...list(owner.data)])).slice(0, G4_MAX_COMPETENCES));
       setHelpsWith(p.helps_with || "");
       setLoading(false);
     }).catch(() => { if (!cancelled) setLoading(false); });
@@ -79,7 +93,8 @@ const ArriveeSavoirFaire = () => {
     if (!user) return;
     setSaving(true);
     setFailed(false);
-    if (helpsWith.trim() && hasMoneyMention(helpsWith)) { setSaving(false); setFailed(true); return; }
+    setMoneyError(false);
+    if (helpsWith.trim() && hasMoneyMention(helpsWith)) { setSaving(false); setMoneyError(true); return; }
     const writes = buildG4Writes({ userId: user.id, role, competences, helpsWith });
     if (writes) {
       // Profil du rôle d'abord : la disponibilité n'est posée qu'une fois les savoir-faire enregistrés.
@@ -120,7 +135,7 @@ const ArriveeSavoirFaire = () => {
         return (
           <MultiChoice key={cat.key} label={t(`arrival.g4.groups.${cat.key}`)} value={competences.filter((c) => list.includes(c))}
             options={list.map((s) => ({ value: s, label: s }))}
-            onChange={(v) => setCompetences([...competences.filter((c) => !list.includes(c)), ...v])} />
+            onChange={(v) => choose([...competences.filter((c) => !list.includes(c)), ...v])} />
         );
       })}
       <div className="space-y-2">
@@ -128,6 +143,8 @@ const ArriveeSavoirFaire = () => {
         <Textarea id="g4-free" className="arrival-field" rows={3} maxLength={G4_MAX_HELPS_WITH} value={helpsWith} onChange={(e) => setHelpsWith(e.target.value)} />
         <p className="text-sm text-muted-foreground">{t("arrival.g4.free_help")}</p>
       </div>
+      {atMax && <p role="status" className="text-sm text-muted-foreground">{t("arrival.g4.max")}</p>}
+      {moneyError && <p role="alert" className="text-sm text-destructive">{t("arrival.g4.money")}</p>}
       <SaveError show={failed} />
       <button type="button" className="arrival-primary" onClick={save} disabled={saving}>{t("arrival.continue")}</button>
       <p className="text-center"><button type="button" className="arrival-link text-sm" onClick={() => navigate(nextUrl)}>{t("arrival.g4.later")}</button></p>
