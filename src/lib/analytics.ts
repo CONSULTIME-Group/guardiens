@@ -328,6 +328,7 @@ export type EventType =
   | "entraide_feed_chip_toggled"                // Chip filter mobile toggled (filter_types)
   | "entraide_feed_default_view"                // Vue par défaut du feed unifié mobile (une fois par session)
   | "entraide_idea_tile_clicked"                // Lot E4 : tuile « Une idée pour commencer » (idea, authenticated)
+  | "alma_rail_action_clicked"                  // Lot E5 : lien direct de la carte Alma du tableau de bord (action, variant)
   | "admin_mutual_aid_dashboard_seen"           // Dashboard admin entraide affiché (1x par montage)
   | "admin_alma_dashboard_seen"                 // Dashboard admin Alma affiché (1x par montage)
   | "admin_alma_export_csv_clicked"             // Export CSV depuis dashboard admin Alma

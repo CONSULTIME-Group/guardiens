@@ -164,6 +164,7 @@ const SitterDashboard = () => {
       <AlmaRailWhisper
         profileCompletion={profileCompletion ?? 0}
         isAvailable={!!isAvailable}
+        skillsMissing={competencesCount === 0}
         {...(isNewSitter
           ? { variant: "newSitter" as const, openingCardVisible: openingVisible }
           : { checklistVisible: false })}

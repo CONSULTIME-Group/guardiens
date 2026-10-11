@@ -55,7 +55,7 @@ describe("J4, point 2 : libellés des pages", () => {
   });
   it("créer une mission, c'est demander ; parcourir, c'est proposer", () => {
     expect(ALMA_PAGE_LABELS["/petites-missions/creer"]).toBe("Demander un coup de main");
-    expect(ALMA_PAGE_LABELS["/petites-missions"]).toBe("Proposer un coup de main");
+    expect(ALMA_PAGE_LABELS["/petites-missions"]).toBe("L'entraide près de chez vous");
     for (const [path, label] of Object.entries(ALMA_PAGE_LABELS)) {
       if (/\/(creer|create|publier)$/.test(path)) expect(label).toMatch(/^(Demander|Créer|Publier|Lancer)/);
       expect(/\/(creer|create|publier)$/.test(path) && /^Proposer/.test(label)).toBe(false);
