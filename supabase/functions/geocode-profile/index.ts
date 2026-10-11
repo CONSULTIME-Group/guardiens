@@ -7,8 +7,9 @@
  *
  * Stratégie :
  *   - Si pays = FR (ou non renseigné) → api-adresse.data.gouv.fr (BAN, précis FR)
- *   - Sinon → fallback Nominatim (OpenStreetMap) avec `country=<pays>` pour
+ *   - Sinon → Nominatim (OpenStreetMap) avec `country=<pays>` pour
  *     géocoder les profils internationaux (ex : Marrakech / Maroc).
+ *   - Photon en secours, uniquement avec ville et pays concordants.
  *
  * Sécurité :
  *   - Pas de JWT (verify_jwt = false) car appelée depuis pg_net.
@@ -66,14 +67,71 @@ async function geocodeNominatim(city: string, country: string): Promise<{ lat: n
     format: "json",
     limit: "1",
   });
-  const r = await fetch(`https://nominatim.openstreetmap.org/search?${params}`, {
-    headers: { "User-Agent": "Guardiens/1.0 (geocode-profile contact@guardiens.fr)" },
-  });
-  if (!r.ok) return null;
-  const arr = await r.json();
-  const first = Array.isArray(arr) ? arr[0] : null;
-  if (!first) return null;
-  return { lat: parseFloat(first.lat), lng: parseFloat(first.lon) };
+  try {
+    const r = await fetch(`https://nominatim.openstreetmap.org/search?${params}`, {
+      headers: { "User-Agent": "Guardiens/1.0 (geocode-profile contact@guardiens.fr)" },
+      signal: AbortSignal.timeout(6000),
+    });
+    if (!r.ok) {
+      console.warn("geocode-profile: Nominatim HTTP", r.status);
+      return null;
+    }
+    const arr = await r.json();
+    const first = Array.isArray(arr) ? arr[0] : null;
+    if (!first) return null;
+    const coords = { lat: parseFloat(first.lat), lng: parseFloat(first.lon) };
+    return validCoords(coords) ? coords : null;
+  } catch {
+    console.warn("geocode-profile: Nominatim indisponible");
+    return null;
+  }
+}
+
+function validCoords(coords: { lat: number; lng: number }): boolean {
+  return Number.isFinite(coords.lat) && Number.isFinite(coords.lng)
+    && Math.abs(coords.lat) <= 90 && Math.abs(coords.lng) <= 180;
+}
+
+const normalizePlace = (value: string) => value.normalize("NFD")
+  .replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+
+async function geocodePhoton(city: string, country: string, postal: string): Promise<{ lat: number; lng: number } | null> {
+  const code = country.length === 2 ? country.toUpperCase()
+    : Object.entries(COUNTRY_NAME_BY_CODE).find(([, name]) => normalizePlace(name) === normalizePlace(country))?.[0];
+  if (!code) return null;
+  const params = new URLSearchParams({ q: city, limit: "10", lang: "en" });
+  params.append("layer", "city");
+  params.append("layer", "locality");
+  try {
+    const r = await fetch(`https://photon.komoot.io/api/?${params}`, { signal: AbortSignal.timeout(6000) });
+    if (!r.ok) {
+      console.warn("geocode-profile: Photon HTTP", r.status);
+      return null;
+    }
+    const data = await r.json();
+    const matches = (Array.isArray(data?.features) ? data.features : []).filter((f: any) => {
+      const p = f.properties;
+      const c = f.geometry?.coordinates;
+      return p?.countrycode?.toUpperCase() === code && typeof p?.name === "string"
+        && normalizePlace(p.name) === normalizePlace(city)
+        && Array.isArray(c) && typeof c[0] === "number" && typeof c[1] === "number"
+        && validCoords({ lat: c[1], lng: c[0] });
+    });
+    const postalKey = postal.replace(/\s/g, "").toUpperCase();
+    const byPostal = postalKey ? matches.filter((f: any) => typeof f.properties.postcode === "string"
+      && f.properties.postcode.replace(/\s/g, "").toUpperCase() === postalKey) : [];
+    // Un homonyme sans code postal concordant reste introuvable.
+    const candidates = byPostal.length ? byPostal : matches;
+    if (candidates.length !== 1) return null;
+    const foundPostal = candidates[0].properties.postcode;
+    if (postalKey && typeof foundPostal === "string" && foundPostal.trim()
+      && foundPostal.replace(/\s/g, "").toUpperCase() !== postalKey) return null;
+    const [lng, lat] = candidates[0].geometry.coordinates;
+    return { lat, lng };
+  } catch {
+    console.warn("geocode-profile: Photon indisponible");
+    return null;
+  }
 }
 
 Deno.serve(async (req) => {
@@ -122,12 +180,21 @@ Deno.serve(async (req) => {
     const isFR = country === "FR" || country.toLowerCase() === "france";
 
     let coords: { lat: number; lng: number } | null = null;
+    let source = "nominatim";
     if (isFR) {
       coords = await geocodeFR(city, postal);
+      source = "ban";
       // Fallback Nominatim si BAN ne trouve rien
-      if (!coords) coords = await geocodeNominatim(city, "France");
+      if (!coords) {
+        coords = await geocodeNominatim(city, "France");
+        source = "nominatim";
+      }
     } else {
       coords = await geocodeNominatim(city, country);
+    }
+    if (!coords) {
+      coords = await geocodePhoton(city, country, postal);
+      source = "photon";
     }
 
     if (!coords) return json({ skipped: "no result", city, country, postal });
@@ -139,7 +206,7 @@ Deno.serve(async (req) => {
 
     if (uErr) return json({ error: uErr.message }, 500);
 
-    return json({ ok: true, lat: coords.lat, lng: coords.lng, source: isFR ? "ban" : "nominatim" });
+    return json({ ok: true, lat: coords.lat, lng: coords.lng, source });
   } catch (e) {
     return json({ error: String(e) }, 500);
   }
