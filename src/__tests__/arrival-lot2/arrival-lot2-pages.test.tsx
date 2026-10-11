@@ -33,6 +33,7 @@ vi.mock("@/hooks/useFeatureFlag", () => ({ useFeatureFlag: () => flag }));
 vi.mock("@/lib/analytics", () => ({ trackEvent: vi.fn(), trackEventWithUserId: vi.fn(), mapSignupError: () => "x" }));
 vi.mock("@/lib/myProfile", () => ({
   patchMyProfileCache: vi.fn(),
+  invalidateMyProfile: vi.fn(),
   fetchMyProfile: () => Promise.resolve({ data: profileRow, error: null }),
   fetchMyOwnerProfile: () => Promise.resolve({ data: ownerRow, error: null }),
   fetchMySitterProfile: () => Promise.resolve({ data: sitterRow, error: null }),
@@ -169,15 +170,22 @@ describe("Parcours gardien v2", () => {
   });
 
   it("G4 : un savoir-faire pose available_for_help, puis N1", async () => {
+    authUser = { id: "u1", role: "sitter", firstName: "Marie" };
     search = new URLSearchParams({ flow: "sitter" });
-    profileRow = { competences: [] };
+    profileRow = {};
+    sitterRow = { competences: [] };
     const { default: G4 } = await import("@/pages/arrival/ArriveeSavoirFaire");
     R(<G4 />);
     fireEvent.click(await screen.findByRole("button", { name: "Jeux de société" }));
     fireEvent.click(screen.getByRole("button", { name: "Trajets en voiture" }));
     fireEvent.click(screen.getByRole("button", { name: "Continuer" }));
     await waitFor(() => expect(navigateMock).toHaveBeenCalledWith("/arrivee/application?flow=sitter"));
-    expect(writes.find((w) => w.table === "profiles")?.row).toMatchObject({ competences: ["Jeux de société", "Trajets en voiture"], available_for_help: true });
+    // Lot E1 : les savoir-faire vont dans le profil du rôle, jamais dans profiles (colonne absente).
+    expect(writes.find((w) => w.table === "sitter_profiles")?.row).toMatchObject({ competences: ["Jeux de société", "Trajets en voiture"] });
+    const profile = writes.find((w) => w.table === "profiles")?.row as Record<string, unknown>;
+    expect(profile).toMatchObject({ available_for_help: true });
+    expect(profile.skill_categories).toEqual(expect.arrayContaining(["competences", "coups_de_main"]));
+    expect(profile).not.toHaveProperty("competences");
   });
 
   it("G4 propriétaire : fin vers N1 puis l'annonce", async () => {

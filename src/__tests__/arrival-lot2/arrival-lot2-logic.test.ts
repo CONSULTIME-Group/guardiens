@@ -45,8 +45,28 @@ describe("lot 2, G2", () => {
 
 describe("lot 2, G4 et E1", () => {
   it("rien n'est écrit sans choix ; un choix pose available_for_help", () => {
-    expect(buildG4Writes([], "")).toBeNull();
-    expect(buildG4Writes(["Courses"], "")).toMatchObject({ available_for_help: true, competences: ["Courses"] });
+    expect(buildG4Writes({ userId: "u", role: "sitter", competences: [], helpsWith: "" })).toBeNull();
+    const w = buildG4Writes({ userId: "u", role: "sitter", competences: ["Courses"], helpsWith: "" })!;
+    expect(w.profile).toMatchObject({ available_for_help: true });
+    expect(w.profile).not.toHaveProperty("competences");
+    expect(w.sitter).toEqual({ user_id: "u", competences: ["Courses"] });
+    expect(w.owner).toBeNull();
+  });
+  it("E1 : propriétaire et double rôle écrivent dans owner_profiles, 10 savoir-faire et 200 caractères au plus", () => {
+    const many = Array.from({ length: 12 }, (_, i) => `Savoir ${i}`);
+    const owner = buildG4Writes({ userId: "u", role: "owner", competences: many, helpsWith: "x".repeat(250) })!;
+    expect(owner.sitter).toBeNull();
+    expect((owner.owner!.competences as string[]).length).toBe(10);
+    expect(owner.owner!.competences_disponible).toBe(true);
+    expect((owner.profile.helps_with as string).length).toBe(200);
+    const both = buildG4Writes({ userId: "u", role: "both", competences: ["Courses"], helpsWith: "" })!;
+    expect(both.sitter).not.toBeNull();
+    expect(both.owner).not.toBeNull();
+  });
+  it("E1 : une phrase seule rend disponible, sans toucher aux savoir-faire", () => {
+    const w = buildG4Writes({ userId: "u", role: "sitter", competences: [], helpsWith: "Je fais les courses le samedi" })!;
+    expect(w.profile).toEqual({ available_for_help: true, helps_with: "Je fais les courses le samedi" });
+    expect(w.sitter).toBeNull();
   });
   it("trajets et jeux classés", () => {
     expect(deriveCategoriesFromCompetences(["Trajets en voiture"])).toEqual(["coups_de_main"]);

@@ -72,6 +72,9 @@ const SECTION_PARAM_MAP: Record<string, string> = {
   profil: "sitter",
   experience: "experience",
   competences: "skills",
+  // Lot E1 : adresse unique des savoir-faire pour les deux rôles.
+  "savoir-faire": "skills",
+  skills: "skills",
   mobilite: "mobility",
   galerie: "gallery",
 };
