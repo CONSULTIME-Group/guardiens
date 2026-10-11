@@ -1,5 +1,7 @@
 import { fetchMySitsIndex, fetchMyApplicationsIndex, fetchMyConversationsIndex, fetchApplicationsOnMySits } from "@/lib/dashboardShared";
+import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { syncAppBadge } from "@/lib/appBadge";
 import { supabase } from "@/integrations/supabase/client";
 import { messagesUnreadExclusive } from "@/lib/navModel";
 
@@ -96,6 +98,13 @@ export function useNavBadgeCounts(userId: string | undefined): NavBadgeCounts {
     },
 
   });
+
+  // Lot N2 : pastille de l'icône alignée sur les messages non lus (Messages
+  // et Entraide), même total que celui envoyé avec les notifications push.
+  useEffect(() => {
+    if (!userId) { syncAppBadge(0); return; }
+    if (data) syncAppBadge(data.unreadCount + data.missionBadgeCount);
+  }, [userId, data]);
 
   return data ?? EMPTY;
 }
