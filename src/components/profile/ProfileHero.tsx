@@ -59,6 +59,12 @@ export interface ProfileHeroProps {
   cta: HeroCtaVariant;
   ctaReassurance?: string;
   inNotebook?: boolean;
+  /**
+   * Lot F (11/10/2026) : fiche ouverte. La gouache passe au-dessus de la bande
+   * identité, sur toute la largeur utile (1536 px au plus, sa taille native),
+   * toujours entière, sans recadrage ni agrandissement.
+   */
+  open?: boolean;
 }
 
 /** Faits de la ligne secondaire, purs et testables. */
@@ -134,6 +140,29 @@ const ProfileHero = (p: ProfileHeroProps) => {
           : ""
   );
 
+  const artNode = (
+    <picture
+      className={p.open
+        ? "profile-notebook-art relative mx-auto block w-full max-w-[1536px]"
+        : "profile-notebook-art relative block min-w-0 w-full"}
+      data-hero-gouache
+    >
+      <source media="(max-width: 639px)" srcSet={p.heroMobile} />
+      <img
+        src={p.heroDesktop}
+        alt=""
+        aria-hidden="true"
+        data-hero-anchor={p.heroAnchor}
+        data-hero-notebook={/hero-(13|63)(?:[.-])/.test(p.heroDesktop) || undefined}
+        width={1536}
+        height={544}
+        loading="eager"
+        decoding="async"
+        className="profile-hero-art block h-auto w-full object-contain"
+      />
+    </picture>
+  );
+
   return (
     <header
       className="profile-hero profile-notebook relative isolate w-full overflow-hidden"
@@ -141,26 +170,12 @@ const ProfileHero = (p: ProfileHeroProps) => {
       data-in-notebook={p.inNotebook || undefined}
       data-facet={p.facet}
       data-hero-subject={leftSubject ? "left" : "right"}
+      data-hero-open={p.open || undefined}
     >
+      {p.inNotebook && p.open && artNode}
       {!p.inNotebook && <span aria-hidden="true" className="profile-notebook-spiral" />}
       <div className="profile-notebook-page relative mx-auto flex max-w-6xl flex-col gap-5 py-6 pr-4 md:flex-row md:items-center md:gap-6 md:py-7 md:pr-6" data-hero-content>
-        {p.inNotebook && (
-          <picture className="profile-notebook-art relative block min-w-0 w-full" data-hero-gouache>
-            <source media="(max-width: 639px)" srcSet={p.heroMobile} />
-            <img
-              src={p.heroDesktop}
-              alt=""
-              aria-hidden="true"
-              data-hero-anchor={p.heroAnchor}
-              data-hero-notebook={/hero-(13|63)(?:[.-])/.test(p.heroDesktop) || undefined}
-              width={1536}
-              height={544}
-              loading="eager"
-              decoding="async"
-              className="profile-hero-art block h-auto w-full object-contain"
-            />
-          </picture>
-        )}
+        {p.inNotebook && !p.open && artNode}
         <div className={p.inNotebook
           ? "profile-hero-identity relative min-w-0 flex flex-col gap-4 md:flex-row md:items-center md:justify-between md:gap-8"
           : "profile-hero-identity relative min-w-0 md:w-[360px] md:shrink-0"}>
@@ -191,7 +206,7 @@ const ProfileHero = (p: ProfileHeroProps) => {
             <div className="min-w-0 flex-1">
               <p className="text-xs uppercase text-secondary font-body font-semibold">{eyebrow}</p>
               <div className="mt-0.5 flex flex-wrap items-center gap-1 min-w-0">
-                <h1 className="font-heading text-[32px] md:text-[42px] font-semibold leading-tight text-foreground break-words min-w-0 max-w-full">
+                <h1 className="font-heading text-[32px] md:text-[42px] lg:text-[52px] font-semibold leading-tight text-foreground break-words min-w-0 max-w-full">
                   {p.firstName}
                 </h1>
                 {p.identityVerified && <IdentityVerifiedMark firstName={p.firstName} />}

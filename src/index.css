@@ -1151,6 +1151,39 @@
     border-bottom: 0;
     padding-bottom: 0;
   }
+  /* Lot F (11/10/2026) : fiche publique ouverte. Plus de spirale ni de feuille,
+     la gouache en héros sur la largeur utile, sections sur 1240 px. */
+  .profile-open.profile-notebook-sheet {
+    --spiral-w: 0px;
+    background-color: hsl(var(--background));
+  }
+  .profile-open .profile-notebook-page {
+    max-width: 1240px;
+    margin-inline: auto;
+  }
+  .profile-open .profile-notebook-tabs { background-color: hsl(var(--background)); }
+  /* Le header isole le fondu : son fond doit être celui de la page pour que
+     le blanc de la gouache disparaisse au multiply. */
+  .profile-open .profile-hero.profile-notebook {
+    --spiral-w: 0px;
+    background-color: hsl(var(--background));
+  }
+  .profile-open .profile-hero[data-hero-open] [data-hero-content] { padding-top: 0.5rem; }
+  .profile-open [data-hero-avatar] img,
+  .profile-open [data-hero-avatar] > span {
+    width: 96px;
+    height: 120px;
+  }
+  @media (min-width: 768px) {
+    .profile-open [data-hero-avatar] img,
+    .profile-open [data-hero-avatar] > span {
+      width: 120px;
+      height: 150px;
+    }
+  }
+  .profile-surface { background-color: hsl(var(--card)); }
+  .profile-glance { background-color: hsl(var(--primary) / 0.07); }
+
   .profile-notebook-spiral {
     position: absolute; top: 0; bottom: 0; left: 0; width: var(--spiral-w);
     pointer-events: none;

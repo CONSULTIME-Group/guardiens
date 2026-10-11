@@ -89,6 +89,8 @@ import {
   SitterContactCard,
   SitterStickyBar,
   SectionHeading,
+  SitterConditionsSection,
+  SitterGlanceBand,
 } from "@/components/profile/sitter/SitterF1Sections";
 import { groupSitterSkills, skillsHeadline } from "@/lib/sitterSkillGroups";
 import { declaredHelpOffer, hasEntraideFacet, entraideOfferBandText, lastVisitLabel } from "@/lib/profileSignals";
@@ -99,6 +101,8 @@ import {
   listLabel,
   companionsLabel,
   ownerHostedSitsCount,
+  gardeZoneLabel,
+  noticeDelayLabel,
 } from "@/lib/sitterProfileFacts";
 
 /** Pages entraide par ville réellement routées (App.tsx). */
@@ -1208,6 +1212,10 @@ export default function PublicSitterProfile() {
 
   const frequencyLabel = mobilityPublicLabel(FREQUENCY_OPTIONS, preferredFrequency);
   const noticeLabel = mobilityPublicLabel(NOTICE_OPTIONS, minNotice);
+  // Lot F (11/10/2026) : délai lisible, « 2 semaines avant la garde, idéalement ».
+  const noticeDelay = noticeLabel
+    ? noticeDelayLabel(NOTICE_OPTIONS.find((o) => o.value === minNotice)?.label)
+    : "";
 
 
 
@@ -1524,8 +1532,9 @@ export default function PublicSitterProfile() {
 
       {/* ── Contenu principal z-1 ── */}
       <div className="relative z-[1]">
-      <div className="profile-notebook profile-notebook-sheet relative mx-auto max-w-[1024px]" data-profile-notebook>
-      <span aria-hidden="true" className="profile-notebook-spiral" />
+      {/* Lot F (11/10/2026) : fiche ouverte, gouache en héros pleine largeur,
+          sans spirale ni feuille de carnet. */}
+      <div className="profile-notebook profile-notebook-sheet profile-open relative" data-profile-notebook>
       {/* ── HERO RESSERRÉ (vague 37) ── */}
       {profile && id && (() => {
         const overrideIndex = profile?.hero_image_index ?? null;
@@ -1539,6 +1548,7 @@ export default function PublicSitterProfile() {
         return (
           <ProfileHero
             inNotebook
+            open
             facet={isSitterFacet ? "sitter" : activeTab === "entraide" ? "entraide" : "owner"}
             id={id}
             firstName={firstName}
@@ -1725,19 +1735,35 @@ export default function PublicSitterProfile() {
               ? "Tous"
               : animalTypes.map((a) => ANIMAL_LABELS[a] || a).join(", "))
           : "";
-        const contactFacts = [
-          { label: "Animaux", value: animalsFact },
-          { label: "Rayon", value: radius ? `${radius} km` : "" },
-          // Lot 2 : zones déclarées, « Non renseignée » sinon (jamais une mobilité supposée).
-          { label: "Mobilité", value: travelZoneLabels(sitterProfile?.travel_zones).join(", ") || "Non renseignée" },
-          { label: "Durée", value: durationLabel },
+        // Lot F (11/10/2026) : les conditions quittent la carte contact pour la
+        // section « Sa façon de garder ». Rayon et zones fusionnés en une ligne,
+        // préavis rendu lisible. Rien d'affiché sans déclaration.
+        const conditionFacts = [
+          { label: "Zone de garde", value: gardeZoneLabel({ radiusKm: radius, city: city || null, zoneLabels: travelZoneLabels(sitterProfile?.travel_zones) }) },
+          { label: "Animaux gardés", value: animalsFact },
+          { label: "Durée des gardes", value: durationLabel },
+          { label: "Rythme", value: frequencyLabel },
+          { label: "Délai pour le prévenir", value: noticeDelay },
           { label: "Avant la garde", value: meetingPreferenceLabel(sitterProfile?.meeting_preference) },
-          { label: "Présence", value: presenceLabel },
-          { label: "Fréquence", value: frequencyLabel },
-          { label: "Préavis", value: noticeLabel.replace(/^Préavis\s*:\s*/i, "") },
           { label: "Expérience", value: experienceLabel },
+        ].filter((f) => f.value);
+        const contactFacts = [
           { label: "Avis", value: sitterRoleCount > 0 ? `★ ${formatRatingFr(sitterRoleAvg)} (${sitterRoleCount})` : "" },
         ].filter((f) => f.value);
+
+        // En bref : preuves réelles seulement, bande masquée sans garde ni avis.
+        const sinceDate = profile?.created_at ? new Date(profile.created_at) : null;
+        const sinceLabel = sinceDate && !Number.isNaN(sinceDate.getTime())
+          ? sinceDate.toLocaleDateString("fr-FR", { month: "long", year: "numeric" })
+          : "";
+        const glanceItems = completedSits > 0 || sitterRoleCount > 0
+          ? [
+              completedSits > 0 ? { value: String(completedSits), label: completedSits > 1 ? "gardes réalisées" : "garde réalisée" } : null,
+              sitterRoleCount > 0 ? { value: `${formatRatingFr(sitterRoleAvg)} / 5`, label: `d'après ${sitterRoleCount} avis` } : null,
+              animalsFact ? { value: animalsFact, label: "animaux gardés", size: "sm" as const } : null,
+              sinceLabel ? { value: sinceLabel.charAt(0).toUpperCase() + sinceLabel.slice(1), label: "membre depuis", size: "sm" as const } : null,
+            ].filter((x): x is { value: string; label: string; size?: "sm" } => !!x)
+          : [];
 
         const firstSitDate = gardeReviews
           .map((r: any) => r.sit_start_date as string | null)
@@ -1806,6 +1832,8 @@ export default function PublicSitterProfile() {
           <div>
           <div className="space-y-[52px] min-w-0">
 
+            <SitterGlanceBand items={glanceItems} />
+
             <SitterAboutSection
               firstName={firstName}
               motivation={motivation || ""}
@@ -1817,6 +1845,8 @@ export default function PublicSitterProfile() {
             >
               {externalExperiences.length > 0 ? <PublicExperiences experiences={externalExperiences} /> : null}
             </SitterAboutSection>
+
+            <SitterConditionsSection firstName={firstName} presence={presenceLabel} facts={conditionFacts} />
 
             <SitterSkillsSection
               groups={skillGroups}
