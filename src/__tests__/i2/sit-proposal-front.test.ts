@@ -73,8 +73,8 @@ describe("Lot I2, textes et règles d'affichage", () => {
       "supabase/prepared-migrations/20261011150000_sit_private_proposals.sql",
     ]) {
       const text = readFileSync(file, "utf8");
-      expect(text, file).not.toMatch(/[—–]/);
-      expect(text, file).not.toMatch(/voisin|Auvergne|AURA/);
+      expect(text, file).not.toMatch(/[\u2014\u2013]/);
+      expect(text, file).not.toMatch(new RegExp(["voi" + "sin", "Auv" + "ergne", "AU" + "RA"].join("|")));
     }
   });
 });

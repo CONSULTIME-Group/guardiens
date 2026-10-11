@@ -176,7 +176,7 @@ await test('proposition privée créée : 5 jours, commune reprise, notification
   assert.equal(n.title, 'Une garde vous est proposée');
   assert.equal(n.link, `/propositions/${proposal}`);
   assert.match(n.body, /visible que par vous/);
-  assert.doesNotMatch(n.body, /[—–]/);
+  assert.doesNotMatch(n.body, /[\u2014\u2013]/);
 });
 
 await test('une seconde proposition au même gardien est refusée', async () => {
