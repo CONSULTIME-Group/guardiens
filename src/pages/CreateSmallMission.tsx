@@ -1,6 +1,7 @@
 import { clearPublishIntent, rememberPublishIntent } from "@/lib/postOnboardingIntent";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { inferMissionCategory } from "@/lib/missionCategories";
 import { readFormPrefill } from "@/lib/formPrefill";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -129,7 +130,8 @@ const CreateSmallMission = () => {
   // Les offres ne se publient plus, elles vivent sur le profil.
   const missionType = "besoin" as const;
   // Plus de catégorie choisie : le besoin s'écrit en clair, la proximité fait le reste.
-  const category = "other";
+  // Lot E6 : la catégorie est déduite du texte (visuels, filtres, invitations).
+  // Déclarée après title et description, voir plus bas.
   const [photoTouched, setPhotoTouched] = useState(false);
   const [photoUploading, setPhotoUploading] = useState(false);
   const [photoFailed, setPhotoFailed] = useState(false);
@@ -141,6 +143,7 @@ const CreateSmallMission = () => {
   const [title, setTitle] = useState(() => prefill.title);
   const [titleTouched, setTitleTouched] = useState(false);
   const [description, setDescription] = useState(() => prefill.description);
+  const category = useMemo(() => inferMissionCategory(title, description), [title, description]);
   const [descTouched, setDescTouched] = useState(false);
   // Contrepartie : phrase unique, la même pour tout le monde. Plus rien à saisir.
   const exchangeOffer = FIXED_EXCHANGE_OFFER;

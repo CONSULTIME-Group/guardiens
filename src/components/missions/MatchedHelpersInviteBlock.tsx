@@ -59,15 +59,28 @@ export default function MatchedHelpersInviteBlock({
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      // Une catégorie sans compétence correspondante ne fait pas disparaître
-      // le bloc : on retombe sur une sélection par proximité seule.
-      let query = supabase
-        .from("public_profiles")
-        .select("id, first_name, avatar_url, city, latitude_approx, longitude_approx, skill_categories, available_for_help")
-        .eq("available_for_help", true)
-        .neq("id", ownerId);
-      if (skillKey) query = query.contains("skill_categories", [skillKey]);
-      const { data } = await query.limit(30);
+      // Lot E6 : lecture dans un carré d'environ 50 km autour du besoin (avant :
+      // 30 profils pris au hasard en France, presque jamais proches). Une
+      // catégorie sans assez de personnes compétentes retombe sur la proximité.
+      const box = (q: any) => (ownerLat != null && ownerLng != null
+        ? q.gte("latitude_approx", ownerLat - 0.5).lte("latitude_approx", ownerLat + 0.5)
+          .gte("longitude_approx", ownerLng - 0.7).lte("longitude_approx", ownerLng + 0.7)
+        : q);
+      const read = (withSkill: boolean) => {
+        let query = box(supabase
+          .from("public_profiles")
+          .select("id, first_name, avatar_url, city, latitude_approx, longitude_approx, skill_categories, available_for_help")
+          .eq("available_for_help", true)
+          .neq("id", ownerId));
+        if (withSkill && skillKey) query = query.contains("skill_categories", [skillKey]);
+        return query.limit(500);
+      };
+      let { data } = await read(true);
+      if (skillKey && (data?.length ?? 0) < MAX_HELPERS) {
+        const all = await read(false);
+        const seen = new Set((data ?? []).map((h: any) => h.id));
+        data = [...(data ?? []), ...((all.data ?? []) as any[]).filter((h: any) => !seen.has(h.id))];
+      }
 
       if (cancelled || !data) return;
 
@@ -79,8 +92,10 @@ export default function MatchedHelpersInviteBlock({
         return { ...h, distance };
       });
 
-      // Filtre proximité si on a les coords des deux côtés ; sinon, on garde tout.
-      const filtered = enriched.filter((h) => h.distance == null || h.distance <= SEARCH_RADIUS_KM);
+      // Filtre proximité quand le besoin a des coordonnées ; sinon, on garde tout.
+      const filtered = enriched.filter((h) => (ownerLat == null || ownerLng == null)
+        ? true
+        : h.distance != null && h.distance <= SEARCH_RADIUS_KM);
 
       // Tri : distance croissante en premier, sans distance ensuite.
       filtered.sort((a, b) => {

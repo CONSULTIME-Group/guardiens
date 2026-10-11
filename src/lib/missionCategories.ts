@@ -63,3 +63,27 @@ export const ENTRAIDE_NATURE_LABEL: Record<EntraideNature, string> = {
 export function missionNature(missionType: string | null | undefined): EntraideNature {
   return missionType === "offre" ? "offre" : "demande";
 }
+
+/**
+ * Lot E6 (11/10/2026) : catégorie déduite du titre et de la description, sans
+ * rien demander de plus dans le formulaire. Ordre de priorité : animaux,
+ * jardin, transport, maison, courses, compagnie, savoir-faire ; sinon « other ».
+ */
+const CATEGORY_RULES: Array<{ key: MissionCategory; rx: RegExp }> = [
+  { key: "animals", rx: /\b(chiens?|chienne|chats?|chatons?|chevaux|cheval|poules?|lapins?|animal|animaux|litiere|veterinaire|teckel|anes?|chevres?|moutons?|nourrir (le|la|les|mon|ma|mes) (chien|chat|chevaux|poules|animaux))\b/ },
+  { key: "garden", rx: /\b(jardin|potager|arros\w*|tomates?|tondre|tonte|haies?|pelouse|semis|recolte\w*|legumes|plantations?|desherb\w*)\b/ },
+  { key: "transport", rx: /\b(transport\w*|trajets?|covoiturage|gare|aeroport|conduire|emmener|vehicule|camion\w*)\b/ },
+  { key: "house", rx: /\b(meubles?|monter|bricol\w*|repar\w*|peindre|peinture|etageres?|bibliotheque|demenag\w*|cartons?|poncer|ponceuse|perceuse|menage|fuite|plomberie|coiffeuse|canape)\b/ },
+  { key: "errand", rx: /\b(courses|livraisons?|colis|pharmacie|supermarche|marche|boulangerie)\b/ },
+  { key: "company", rx: /\b(jeux?|belote|cartes|scrabble|compagnie|discuter|promenade|balade|lecture|visite)\b/ },
+  { key: "skills", rx: /\b(informatique|ordinateur|smartphone|telephone|administrati\w*|formulaires?|impots|anglais|cours|coudre|couture|rideaux|traduction|photos?)\b/ },
+];
+
+export function inferMissionCategory(title: string | null | undefined, description?: string | null): MissionCategory {
+  const text = `${title ?? ""} ${description ?? ""}`
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+  for (const rule of CATEGORY_RULES) if (rule.rx.test(text)) return rule.key;
+  return "other";
+}
