@@ -99,7 +99,7 @@ const OwnerDashboard = () => {
   const helpsWithMissing = useHelpsWithMissing();
   const { unreadCount } = useNavBadgeCounts(user?.id);
   const digestLine = useOwnerDigestLine(!!user?.id);
-  const { data: ownerProfile, loading: ownerProfileLoading } = useOwnerProfile();
+  const { data: ownerProfile, loading: ownerProfileLoading, loadError: ownerProfileLoadError } = useOwnerProfile();
   const ownerCity = ownerProfile?.city ? formatCityLabel(ownerProfile.city) : "";
 
   /* ── UI state ── */
@@ -357,7 +357,7 @@ const OwnerDashboard = () => {
       )}
       <AlmaRailWhisper
         variant="owner"
-        skillsMissing={!ownerProfileLoading && (ownerProfile?.owner_competences?.length ?? 0) === 0}
+        skillsMissing={!ownerProfileLoading && !ownerProfileLoadError && (ownerProfile?.owner_competences?.length ?? 0) === 0}
         ownerState={{
           ongoingSit: !!ongoingSit,
           ongoingSitterFirstName: ongoingSit

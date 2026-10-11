@@ -53,7 +53,7 @@ describe("J4, point 2 : libellés des pages", () => {
     expect(app).toContain(`path="${path}"`);
     expect(label.startsWith("/")).toBe(false);
   });
-  it("créer une mission, c'est demander ; parcourir, c'est proposer", () => {
+  it("créer une mission, c'est demander ; la page Entraide se nomme par son lieu (lot E5)", () => {
     expect(ALMA_PAGE_LABELS["/petites-missions/creer"]).toBe("Demander un coup de main");
     expect(ALMA_PAGE_LABELS["/petites-missions"]).toBe("L'entraide près de chez vous");
     for (const [path, label] of Object.entries(ALMA_PAGE_LABELS)) {

@@ -102,7 +102,7 @@ const AlmaRailWhisper = ({
 
   return (
     <aside
-      role="button"
+      role={action && !hidden ? "link" : "button"}
       tabIndex={0}
       aria-label={ariaLabel}
       onClick={(e) => handleActivate(e.currentTarget)}

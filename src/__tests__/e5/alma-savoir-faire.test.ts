@@ -56,12 +56,14 @@ describe("E5, textes et branchements", () => {
     }
   });
   it("les deux tableaux de bord transmettent l'absence de savoir-faire", () => {
-    expect(readFileSync("src/components/dashboard/SitterDashboard.tsx", "utf8")).toContain("skillsMissing={competencesCount === 0}");
-    expect(readFileSync("src/components/dashboard/OwnerDashboard.tsx", "utf8")).toContain("skillsMissing={!ownerProfileLoading");
+    expect(readFileSync("src/components/dashboard/SitterDashboard.tsx", "utf8")).toContain('skillsMissing={competencesCount === 0 && user?.role !== "both" && !helpsWithMissing}');
+    expect(readFileSync("src/components/dashboard/OwnerDashboard.tsx", "utf8")).toContain("skillsMissing={!ownerProfileLoading && !ownerProfileLoadError");
   });
   it("Alma suit la décision du 11/10 sur l'aide aux devoirs et la garde d'enfants", () => {
     const prompt = readFileSync("supabase/functions/_shared/alma-system-prompt.ts", "utf8");
     expect(prompt).not.toContain("Jamais la garde d'enfants");
-    expect(prompt).toContain("toujours gratuitement");
+    expect(prompt).toContain("l'échange se fait en temps et en savoir-faire");
+    // « gratuit » est réécrit par le filtre de sortie d'Alma : la phrase l'évite.
+    expect(prompt).not.toContain("toujours gratuitement");
   });
 });
