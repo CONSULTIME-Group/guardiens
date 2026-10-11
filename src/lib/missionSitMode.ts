@@ -30,7 +30,12 @@ export const AT_HELPER_NOTE =
 export const SIT_MODE_AT_HOME_TITLE =
   "Quelqu'un s'installe chez vous : c'est une garde, publiez-la comme annonce.";
 export const SIT_MODE_AT_HOME_TEXT =
-  "Les gardiens de votre secteur la reçoivent et vous choisissez la personne qui vous convient. Votre texte et vos dates sont repris.";
+  "Les gardiens de votre secteur la reçoivent et vous choisissez la personne qui vous convient.";
+
+/** Lot G1 : ce qui est repris dans l'annonce, dit seulement quand c'est vrai. */
+export function sitPrefillNote(hasDates: boolean): string {
+  return hasDates ? "Votre texte et vos dates sont repris." : "Votre texte est repris.";
+}
 export const SIT_MODE_PRIMARY = "Publier une annonce de garde";
 export const SIT_MODE_SECONDARY = "Publier quand même un besoin";
 
@@ -60,11 +65,31 @@ export function sitModeLine(mode: MissionSitMode, firstName?: string | null): st
 export function shouldAskSitMode(args: {
   missionType: string | null | undefined;
   multiDay: boolean;
-  category: string | null | undefined;
+  /** Catégorie déduite du seul titre : la description cite souvent un animal en passant. */
+  titleCategory: string | null | undefined;
   sitLike: boolean;
 }): boolean {
   if (args.missionType !== "besoin") return false;
-  return args.multiDay || args.category === "animals" || args.sitLike;
+  return args.multiDay || args.titleCategory === "animals" || args.sitLike;
+}
+
+/**
+ * Lot G1 : les dates d'un besoin (?debut=&fin=) s'appliquent à l'annonce
+ * quand le texte repris du besoin est toujours à l'écran (aucun brouillon
+ * repris entre-temps) et qu'aucune date n'est déjà posée.
+ */
+export function shouldApplyMissionDates(args: {
+  prefillTitle: string | null;
+  title: string;
+  remoteDraftResumed: boolean;
+  localDraftRestored: boolean;
+  startDate: string;
+  endDate: string;
+}): boolean {
+  if (args.prefillTitle === null) return false;
+  if (args.remoteDraftResumed || args.localDraftRestored) return false;
+  if (args.title !== args.prefillTitle) return false;
+  return !args.startDate && !args.endDate;
 }
 
 /** Signal de modération « ressemble à une garde » : seulement si quelqu'un s'installe chez la personne. */

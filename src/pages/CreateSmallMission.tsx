@@ -50,6 +50,7 @@ import {
   shouldAskSitMode,
   reportsSitLike,
   sitCreateUrl,
+  sitPrefillNote,
 } from "@/lib/missionSitMode";
 import { waveAudienceMessage } from "@/lib/missionAudienceMessage";
 import { AlertCircle, ChevronLeft, CalendarIcon } from "lucide-react";
@@ -339,11 +340,16 @@ const CreateSmallMission = () => {
     [missionType, title, description, dateNeeded, endDate],
   );
   /** Lot G1 : la question s'ouvre aussi pour tout besoin qui parle d'animaux. */
+  const titleCategory = useMemo(() => inferMissionCategory(title), [title]);
   const askSitMode = useMemo(
-    () => shouldAskSitMode({ missionType, multiDay: multiDaySit, category, sitLike: !!sitLike }),
-    [missionType, multiDaySit, category, sitLike],
+    () => shouldAskSitMode({ missionType, multiDay: multiDaySit, titleCategory, sitLike: !!sitLike }),
+    [missionType, multiDaySit, titleCategory, sitLike],
   );
   const [sitMode, setSitMode] = useState<MissionSitMode | null>(null);
+  // Question refermée par une modification du texte : le choix repart de zéro.
+  useEffect(() => {
+    if (!askSitMode) setSitMode(null);
+  }, [askSitMode]);
   const [sitHomeStayConfirmed, setSitHomeStayConfirmed] = useState(false);
   const rehoming = useMemo(() => rehomingSignals(title, description), [title, description]);
   const moneyWording = useMemo(
@@ -532,7 +538,7 @@ const CreateSmallMission = () => {
       const mid = inserted.id;
       const metaBase = { title: cleanTitle, city: city.trim() };
       const rpc = (supabase.rpc as any).bind(supabase);
-      if (sitLike && reportsSitLike(true, askSitMode ? sitMode : null)) {
+      if (sitLike && reportsSitLike(true, sitMode)) {
         rpc("report_mission_content_signal", {
           _mission_id: mid,
           _signal_type: "sit_like_mission",
@@ -757,7 +763,7 @@ const CreateSmallMission = () => {
                     {sitMode === "at_home" && !sitHomeStayConfirmed && (
                       <div className="rounded-lg border border-border bg-card p-3 space-y-2" role="note">
                         <p className="text-sm font-semibold text-foreground">{SIT_MODE_AT_HOME_TITLE}</p>
-                        <p className="text-xs text-muted-foreground">{SIT_MODE_AT_HOME_TEXT}</p>
+                        <p className="text-xs text-muted-foreground">{SIT_MODE_AT_HOME_TEXT} {sitPrefillNote(!!dateNeeded)}</p>
                         <div className="flex flex-wrap items-center gap-3">
                           <Button
                             type="button"
