@@ -60,8 +60,8 @@ describe("L5 faits pratiques repris, sections vides masquées", () => {
     expect(companionsLabel({ travels_with_own_animals: null, travels_with_children: false })).toBe("");
     expect(companionsLabel({ travels_with_own_animals: true, own_animals: ["Oui, un chien"] })).toBe("Ses animaux (un chien)");
   });
-  it("présence, fréquence, préavis et accompagnants présentés", () => {
-    for (const k of ['label: "Présence"', 'label: "Fréquence"', 'label: "Préavis"', 'label: "Accompagnants"']) {
+  it("présence, rythme, délai et accompagnants présentés (libellés du lot F, 11/10/2026)", () => {
+    for (const k of ['presence={presenceLabel}', 'label: "Rythme"', 'label: "Délai pour le prévenir"', 'label: "Accompagnants"']) {
       expect(page).toContain(k);
     }
   });

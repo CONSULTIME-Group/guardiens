@@ -125,3 +125,40 @@ export function ownerHostedSitsCount(
   }
   return ids.size;
 }
+
+/* ── Fiche gardien, section « Sa façon de garder » (lot F, 11/10/2026) ── */
+
+const startsWithVowelSound = (s: string) => /^[aeiouyhàâäéèêëîïôöùûü]/i.test(s.trim());
+
+/** « autour de Lyon », « autour d'Écully ». */
+export function aroundCity(city: string): string {
+  const c = city.trim();
+  return startsWithVowelSound(c) ? `autour d'${c}` : `autour de ${c}`;
+}
+
+/**
+ * Zone de garde : le rayon déclaré précise « près de chez soi », les autres
+ * zones disent jusqu'où le gardien accepte d'aller. Une seule ligne, pour
+ * qu'un rayon de 40 km ne contredise plus une région entière affichée à côté.
+ * Chaîne vide quand rien n'est déclaré.
+ */
+export function gardeZoneLabel(input: {
+  radiusKm: number | null | undefined;
+  city: string | null | undefined;
+  zoneLabels: string[];
+}): string {
+  const LOCAL = "Près de chez soi";
+  const others = input.zoneLabels.filter((z) => z && z !== LOCAL);
+  const city = (input.city ?? "").trim();
+  const near = input.radiusKm
+    ? (city ? `Jusqu'à ${input.radiusKm} km ${aroundCity(city)}` : `Jusqu'à ${input.radiusKm} km de chez soi`)
+    : input.zoneLabels.includes(LOCAL) ? LOCAL : "";
+  if (near && others.length > 0) return `${near} ; aussi : ${others.join(", ")}`;
+  return near || others.join(", ");
+}
+
+/** « Délai pour le prévenir » : « 2 semaines avant la garde, idéalement ». */
+export function noticeDelayLabel(optionLabel: string | null | undefined): string {
+  const v = (optionLabel ?? "").trim();
+  return v ? `${v} avant la garde, idéalement` : "";
+}
