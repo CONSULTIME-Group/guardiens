@@ -145,11 +145,11 @@ export async function loadAlmaInventory(client: any, p: InventoryProfile, today:
     safe(client.from("animal_associations").select("slug, name, city").eq("status", "published").eq("departement_code", dep).order("name", { ascending: true }).limit(2)),
     questionsP,
   ]);
-  inv.gardes = sits.map((s) => ({ titre: s.title, ville: s.city, debut: s.start_date, fin: s.end_date, lien: `/annonces/${s.slug || s.id}`, id: s.id }));
-  inv.demandes_entraide = besoins.map((m) => ({ titre: m.title, ville: m.city, lien: `/petites-missions/${m.id}`, id: m.id }));
-  inv.offres_entraide = offres.map((m) => ({ titre: m.title, ville: m.city, lien: `/petites-missions/${m.id}`, id: m.id }));
-  inv.projets = projets.map((m) => ({ titre: m.title, ville: m.city, lien: `/projets/${m.slug || m.id}`, id: m.id }));
-  inv.associations = assos.map((a) => ({ titre: a.name, ville: a.city, lien: `/associations/${a.slug}` }));
-  inv.questions_sans_reponse = questions.map((q) => ({ titre: q.title, ville: q.city, lien: `/questions/${q.id}`, id: q.id }));
+  inv.gardes = sits.map((s: any) => ({ titre: s.title, ville: s.city, debut: s.start_date, fin: s.end_date, lien: `/annonces/${s.slug || s.id}`, id: s.id }));
+  inv.demandes_entraide = besoins.map((m: any) => ({ titre: m.title, ville: m.city, lien: `/petites-missions/${m.id}`, id: m.id }));
+  inv.offres_entraide = offres.map((m: any) => ({ titre: m.title, ville: m.city, lien: `/petites-missions/${m.id}`, id: m.id }));
+  inv.projets = projets.map((m: any) => ({ titre: m.title, ville: m.city, lien: `/projets/${m.slug || m.id}`, id: m.id }));
+  inv.associations = assos.map((a: any) => ({ titre: a.name, ville: a.city, lien: `/associations/${a.slug}` }));
+  inv.questions_sans_reponse = questions.map((q: any) => ({ titre: q.title, ville: q.city, lien: `/questions/${q.id}`, id: q.id }));
   return inv;
 }
