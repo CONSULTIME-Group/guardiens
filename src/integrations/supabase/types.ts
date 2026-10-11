@@ -1487,6 +1487,21 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_owner_help_e2a_20261011: {
+        Row: {
+          available_for_help: boolean | null
+          id: string | null
+        }
+        Insert: {
+          available_for_help?: boolean | null
+          id?: string | null
+        }
+        Update: {
+          available_for_help?: boolean | null
+          id?: string | null
+        }
+        Relationships: []
+      }
       _backup_owner_seo_flags_20261003_1945: {
         Row: {
           id: string | null
@@ -13461,6 +13476,7 @@ export type Database = {
         Args: { p_response_id: string }
         Returns: boolean
       }
+      mark_mission_done: { Args: { p_mission_id: string }; Returns: Json }
       mark_sit_applications_viewed: {
         Args: { p_sit_id: string }
         Returns: number
