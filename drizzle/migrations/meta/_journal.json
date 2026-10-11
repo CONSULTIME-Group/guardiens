@@ -505,6 +505,13 @@
       "when": 1791734314828,
       "tag": "0071_e6_categories_besoins",
       "breakpoints": true
+    },
+    {
+      "idx": 72,
+      "version": "7",
+      "when": 1791736965569,
+      "tag": "0072_lot_e3_public_helpers",
+      "breakpoints": true
     }
   ]
 }
