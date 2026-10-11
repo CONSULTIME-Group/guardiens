@@ -74,6 +74,7 @@ describe("E3, brouillon dans la messagerie", () => {
     const src = readFileSync("src/pages/Messages.tsx", "utf8");
     expect(src).toContain("pendingDraftRef.current = { convId: searchParams.get(\"c\"), text: draft };");
     expect(src).toContain("shouldPrefillDraft({ messages: ordered, currentInput: current })");
+    expect(src).toContain("if (inputConvIdRef.current !== convId) {");
   });
 });
 
