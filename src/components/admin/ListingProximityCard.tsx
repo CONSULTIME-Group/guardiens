@@ -119,7 +119,7 @@ const ListingProximityCard = ({
       const hasCity = !!(owner?.city && String(owner.city).trim().length > 0);
       const hasPostal = !!(owner?.postal_code && String(owner.postal_code).trim().length > 0);
       if (hasCity && hasPostal) {
-        return `Cette annonce ne peut pas être diffusée par proximité. Les coordonnées géographiques de ${firstName} ne sont pas encore calculées. Cela devrait se résoudre automatiquement sous 1 minute, réessayez ensuite. Si le problème persiste, un géocodage manuel peut être déclenché depuis /admin/users.`;
+        return `Cette annonce ne peut pas être diffusée par proximité. Les coordonnées géographiques de ${firstName} ne sont pas encore calculées. Dans /admin/users, ouvrez Actions pour ce membre puis « Recalculer la localisation ». Revenez ensuite prévisualiser les destinataires.`;
       }
       return `Cette annonce ne peut pas être diffusée par proximité. ${firstName} n'a pas complété sa localisation. Demandez-lui de saisir sa ville et son code postal dans son profil.`;
     } catch {

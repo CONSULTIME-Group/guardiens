@@ -32,6 +32,8 @@ export interface MemberActionsHandlers {
   onLastMessage: () => void;
   onResendConfirmation: () => void;
   onForceVerify: () => void;
+  onGeocode?: () => void;
+  geocoding?: boolean;
   onChangeRole: () => void;
   onToggleSuper: () => void;
   onNote: () => void;
@@ -87,6 +89,15 @@ export const MemberActionsMenu = ({ target, handlers, align = "end" }: { target:
           </>
         )}
         <DropdownMenuSeparator />
+        {handlers.onGeocode && (
+          <>
+            <DropdownMenuLabel className="text-xs text-muted-foreground">Localisation</DropdownMenuLabel>
+            <DropdownMenuItem onSelect={handlers.onGeocode} disabled={handlers.geocoding}>
+              {handlers.geocoding ? "Calcul de la localisation…" : "Recalculer la localisation"}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        )}
         <DropdownMenuLabel className="text-xs text-muted-foreground">Compte</DropdownMenuLabel>
         <DropdownMenuGroup>
           <DropdownMenuItem onSelect={handlers.onChangeRole}>Changer le rôle</DropdownMenuItem>

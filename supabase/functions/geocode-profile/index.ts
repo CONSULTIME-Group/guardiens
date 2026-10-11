@@ -14,6 +14,7 @@
  *   - Pas de JWT (verify_jwt = false) car appelée depuis pg_net.
  *   - Vérifie un secret partagé GEOCODE_PROFILE_SECRET dans l'en-tête
  *     `x-geocode-secret` pour empêcher tout appel externe non autorisé.
+ *   - Une relance manuelle accepte aussi un JWT vérifié avec rôle admin.
  *   - Utilise la service_role pour lire/écrire le profil (bypass RLS).
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -80,8 +81,21 @@ Deno.serve(async (req) => {
 
   try {
     const secret = Deno.env.get("GEOCODE_PROFILE_SECRET");
-    if (!secret || req.headers.get("x-geocode-secret") !== secret) {
-      return json({ error: "forbidden" }, 403);
+    const trustedTrigger = !!secret && req.headers.get("x-geocode-secret") === secret;
+    if (!trustedTrigger) {
+      const authHeader = req.headers.get("Authorization");
+      if (!authHeader) return json({ error: "Non autorisé" }, 401);
+      const callerClient = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_ANON_KEY")!,
+        { global: { headers: { Authorization: authHeader } } },
+      );
+      const { data: { user }, error: authError } = await callerClient.auth.getUser();
+      if (authError || !user) return json({ error: "Non autorisé" }, 401);
+      const { data: isAdmin, error: roleError } = await callerClient.rpc("has_role", {
+        _user_id: user.id, _role: "admin",
+      });
+      if (roleError || isAdmin !== true) return json({ error: "Accès refusé" }, 403);
     }
 
     const { user_id } = await req.json();
