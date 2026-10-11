@@ -5,6 +5,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
   ENTRAIDE_IDEAS,
+  farNeedsLabel,
   helpersCountLine,
   helpersMore,
   helpersSectionTitle,
@@ -35,6 +36,15 @@ describe("E4, chiffres", () => {
     expect(helpersSectionTitle(0, "Lyon")).toBe("Prêts à aider autour de Lyon");
     expect(helpersSectionTitle(792, null)).toBe("Prêts à aider sur Guardiens");
   });
+  it("lieu connu sans nom de ville : chez vous", () => {
+    expect(helpersSectionTitle(12, "vous")).toBe("12 personnes prêtes à aider à moins de 30 km de chez vous");
+    expect(helpersCountLine(12, "vous")).toBe("Autour de vous, 12 personnes sont prêtes à donner un coup de main.");
+  });
+  it("besoins repliés : plus loin avec un lieu, les autres sans lieu", () => {
+    expect(farNeedsLabel(8, true)).toBe("Plus loin : 8 besoins ouverts ailleurs en France");
+    expect(farNeedsLabel(1, true)).toBe("Plus loin : 1 besoin ouvert ailleurs en France");
+    expect(farNeedsLabel(7, false)).toBe("Voir les 7 autres besoins ouverts en France");
+  });
   it("dépliage : tout le secteur s'il est court, sinon par paliers", () => {
     expect(helpersMore(4, 78, 792, 12)).toEqual({ label: "Voir les 78 personnes", next: 78 });
     expect(helpersMore(78, 78, 792, 12)).toEqual({ label: "Voir 12 de plus", next: 90 });
@@ -56,6 +66,13 @@ describe("E4, branchements", () => {
     const cards = readFileSync("src/components/entraide/EntraideCards.tsx", "utf8");
     expect(cards).toContain('<Button type="button" size="sm" variant="outline" onClick={onCanHelp}');
     expect(cards).toContain('<Button type="button" size="sm" variant="outline" className="mt-4" onClick={contact}');
+  });
+  it("lien vers les savoir-faire gardé pour une personne disponible (lot E1)", () => {
+    expect(hub).toContain('to="/profile?section=savoir-faire"');
+  });
+  it("membre : chiffres et besoins attendent son lieu", () => {
+    expect(hub).toContain("const originPending = isAuthenticated && !profileLoaded;");
+    expect(hub).toContain("countLine={pageLoading ? null");
   });
   it("retour d'inscription : ?contact= ouvre la conversation", () => {
     expect(hub).toContain('searchParams.get("contact")');

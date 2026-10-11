@@ -105,7 +105,7 @@ describe("Entraide, la page vue d'un membre", () => {
     rows = {
       public_small_missions: [
         need("loin", "Repeindre un portail", 46.2, 5.2),
-        need("proche", "Arroser le potager", 45.76, 4.86),
+        need("proche", "Arroser les tomates", 45.76, 4.86),
       ],
       public_helpers: Array.from({ length: 20 }, (_, index) => ({
         id: index === 0 ? "me" : `h${index}`,
@@ -137,25 +137,26 @@ describe("Entraide, la page vue d'un membre", () => {
 
   it("affiche la liste par défaut à 1440 px et à 360 px", async () => {
     renderHub();
-    await waitFor(() => expect(screen.getByText("Arroser le potager")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("Arroser les tomates")).toBeInTheDocument());
     expect(screen.queryByTestId("entraide-map")).toBeNull();
     cleanup();
     setViewport(360);
     renderHub();
-    await waitFor(() => expect(screen.getByText("Arroser le potager")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("Arroser les tomates")).toBeInTheDocument());
     expect(screen.queryByTestId("entraide-map")).toBeNull();
   });
 
   it("montre les besoins proches, replie les besoins lointains", async () => {
     renderHub();
-    await waitFor(() => expect(screen.getByText("Arroser le potager")).toBeInTheDocument());
-    expect(screen.queryByText("Repeindre un portail")).toBeNull();
+    await waitFor(() => expect(screen.getByText("Arroser les tomates")).toBeInTheDocument());
+    expect(screen.getByText("Repeindre un portail")).not.toBeVisible();
     const toggle = screen.getByRole("button", { name: /Plus loin : 1 besoin ouvert ailleurs en France/ });
     expect(toggle).toHaveAttribute("aria-expanded", "false");
     fireEvent.click(toggle);
-    expect(screen.getByText("Repeindre un portail")).toBeInTheDocument();
+    expect(toggle).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByText("Repeindre un portail")).toBeVisible();
     const titles = screen.getAllByRole("heading", { level: 3 }).map((node) => node.textContent);
-    expect(titles.indexOf("Arroser le potager")).toBeLessThan(titles.indexOf("Repeindre un portail"));
+    expect(titles.indexOf("Arroser les tomates")).toBeLessThan(titles.indexOf("Repeindre un portail"));
   });
 
   it("une tuile d'idée ouvre le formulaire avec le titre écrit", async () => {
@@ -172,7 +173,7 @@ describe("Entraide, la page vue d'un membre", () => {
 
   it("branche le bouton « Je peux » sur la fonction de réponse partagée", async () => {
     renderHub();
-    await waitFor(() => expect(screen.getAllByRole("button", { name: "Je peux" }).length).toBe(1));
+    await waitFor(() => expect(screen.getAllByRole("button", { name: "Je peux" }).filter((button) => button.closest("[hidden]") === null).length).toBe(1));
     fireEvent.click(screen.getAllByRole("button", { name: "Je peux" })[0]);
     expect(respondMock).not.toHaveBeenCalled();
     fireEvent.click(await screen.findByRole("button", { name: "Envoyer ma proposition" }));

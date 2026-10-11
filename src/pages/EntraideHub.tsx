@@ -27,6 +27,8 @@ import {
   HELPERS_FIRST_SHOWN,
   helpersCountLine,
   helpersMore,
+  farNeedsLabel,
+  NEEDS_SHOWN_WITHOUT_PLACE,
   helpersSectionTitle,
   needFormPath,
   type EntraideIdeaKey,
@@ -82,7 +84,7 @@ export const EntraideHubIntro = ({ city, countLine, showHelp, onNeed, onHelp, ch
       <span className="hidden sm:inline">Le potager à arroser, les courses, un trajet, une partie de jeux de société : dites simplement ce qu'il vous faut.</span>
       <span className="sm:hidden">Dites simplement ce qu'il vous faut.</span>
     </p>
-    <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
+    <div className="mt-5 flex flex-row flex-wrap items-center gap-3">
       <Button onClick={onNeed}>Demander un coup de main</Button>
       {showHelp && <Button variant="outline" onClick={onHelp}>Proposer mon aide</Button>}
     </div>
@@ -257,19 +259,25 @@ const EntraideHub = () => {
 
   // Lot E4 : besoins proches d'abord, les autres repliés sous « Plus loin ».
   const nearNeeds = useMemo(
-    () => (origin ? sortedNeeds.filter((need) => { const d = needDistance(need); return d !== null && d <= NEARBY_THRESHOLD_KM; }) : sortedNeeds),
+    () => (origin
+      ? sortedNeeds.filter((need) => { const d = needDistance(need); return d !== null && d <= NEARBY_THRESHOLD_KM; })
+      : sortedNeeds.slice(0, NEEDS_SHOWN_WITHOUT_PLACE)),
     [sortedNeeds, origin, needDistance],
   );
   const farNeeds = useMemo(
-    () => (origin ? sortedNeeds.filter((need) => !nearNeeds.includes(need)) : []),
-    [sortedNeeds, origin, nearNeeds],
+    () => sortedNeeds.filter((need) => !nearNeeds.includes(need)),
+    [sortedNeeds, nearNeeds],
   );
-  const sectorQuiet = origin !== null && !loading && nearNeeds.length === 0;
+  // Membre : on attend son profil (son lieu) avant d'afficher chiffres et besoins.
+  const originPending = isAuthenticated && !profileLoaded;
+  const pageLoading = loading || originPending;
+  const sectorQuiet = origin !== null && !pageLoading && nearNeeds.length === 0;
   const nearHelpersCount = useMemo(
     () => (origin ? sortedHelpers.filter((helper) => { const d = helperDistance(helper); return d !== null && d <= NEARBY_THRESHOLD_KM; }).length : sortedHelpers.length),
     [sortedHelpers, origin, helperDistance],
   );
-  const placeCity = origin ? originCity : null;
+  // « vous » quand la position est connue sans nom de ville.
+  const placeCity = origin ? originCity || "vous" : null;
   const helpersMoreAction = helpersMore(helpersShown, nearHelpersCount, sortedHelpers.length, HELPERS_PAGE_SIZE);
 
   // Lot E4 : retour d'inscription depuis « Écrire à X » (?contact=<id>).
@@ -293,6 +301,8 @@ const EntraideHub = () => {
       setSearchedOrigin([result.lat, result.lng]);
       setSearchedCity(city.trim());
       setShowLocationField(false);
+      setHelpersShown(HELPERS_FIRST_SHOWN);
+      setFarOpen(false);
     }
   };
 
@@ -374,17 +384,9 @@ const EntraideHub = () => {
   };
 
   const locationField = (
-    <div className="mt-4">
-      {showLocationField || !origin ? (
-        <div className="flex max-w-md gap-2">
-          <Input value={city} onChange={(event) => setCity(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") void locate(); }} placeholder="Votre ville" aria-label="Votre ville" className="min-w-0" />
-          <Button type="button" variant="outline" onClick={locate} disabled={locating}>{locating ? "Recherche..." : "Afficher"}</Button>
-        </div>
-      ) : (
-        <button type="button" onClick={() => setShowLocationField(true)} className="text-sm font-semibold text-primary underline underline-offset-4">
-          Changer de lieu
-        </button>
-      )}
+    <div className="flex max-w-md gap-2">
+      <Input value={city} onChange={(event) => setCity(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") void locate(); }} placeholder="Votre ville" aria-label="Votre ville" className="min-w-0" />
+      <Button type="button" variant="outline" onClick={locate} disabled={locating}>{locating ? "Recherche..." : "Afficher"}</Button>
     </div>
   );
 
@@ -410,13 +412,13 @@ const EntraideHub = () => {
         <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
           <EntraideHubIntro
             city={placeCity}
-            countLine={loading ? null : helpersCountLine(nearHelpersCount, placeCity)}
+            countLine={pageLoading ? null : helpersCountLine(nearHelpersCount, placeCity)}
             showHelp={!isAuthenticated || (profileLoaded && profile?.available_for_help !== true)}
             onNeed={goNeed}
             onHelp={goHelp}
           >
             <div className="mt-4 space-y-1 text-sm text-muted-foreground">
-              {origin && !showLocationField ? (
+              {originPending ? null : origin && !showLocationField ? (
                 <p>
                   Lieu : {originCity || "votre position"} ·{" "}
                   <button type="button" onClick={() => setShowLocationField(true)} className="font-semibold text-primary underline underline-offset-4">
@@ -425,16 +427,21 @@ const EntraideHub = () => {
                 </p>
               ) : locationField}
               {isAuthenticated && <MutualAidRadiusLine availableForHelp={profileLoaded ? profile?.available_for_help === true : null} />}
+              {profile?.available_for_help === true && (
+                <p>
+                  <Link to="/profile?section=savoir-faire" className="font-semibold text-primary underline underline-offset-4">Mes savoir-faire</Link>
+                </p>
+              )}
             </div>
           </EntraideHubIntro>
 
           <EntraideIdeas onPick={pickIdea} />
 
           <section className="pt-2" aria-labelledby="entraide-needs-title">
-            <div className="mt-8 flex flex-wrap items-end justify-between gap-3">
-              <div>
-                <h2 id="entraide-needs-title" className="font-heading text-2xl font-semibold text-foreground">Besoins ouverts</h2>
-                {placeCity && <p className="text-sm text-muted-foreground">Autour de {placeCity}</p>}
+            <div className="mt-6 flex items-center justify-between gap-3 sm:mt-8 sm:items-end">
+              <div className="min-w-0">
+                <h2 id="entraide-needs-title" className="font-heading text-xl font-semibold text-foreground sm:text-2xl">Besoins ouverts</h2>
+                {placeCity && <p className="hidden text-sm text-muted-foreground sm:block">Autour de {placeCity}</p>}
               </div>
               {viewToggle}
             </div>
@@ -447,7 +454,7 @@ const EntraideHub = () => {
               </div>
             )}
 
-            {loading ? (
+            {pageLoading ? (
               <div className="mt-5 space-y-3" aria-busy="true">{[0, 1, 2, 3].map((item) => <div key={item} className="h-[96px] animate-pulse rounded-lg bg-muted" />)}</div>
             ) : mapOpen ? null : (
               <>
@@ -486,24 +493,22 @@ const EntraideHub = () => {
                       className="text-left"
                     >
                       <span className="block text-sm font-semibold text-foreground underline-offset-4 hover:underline">
-                        Plus loin : {farNeeds.length === 1 ? "1 besoin ouvert" : `${farNeeds.length} besoins ouverts`} ailleurs en France
+                        {farNeedsLabel(farNeeds.length, origin !== null)}
                       </span>
-                      <span className="block text-xs text-muted-foreground">Pour celles et ceux qui passent par là.</span>
+                      {origin && <span className="block text-xs text-muted-foreground">Pour celles et ceux qui passent par là.</span>}
                     </button>
-                    {farOpen && (
-                      <ul id="entraide-far-needs" className="mt-3 space-y-3">
-                        {farNeeds.map((need) => (
-                          <NeedRow
-                            key={need.id}
-                            need={need}
-                            distance={needDistance(need)}
-                            state={needState(need)}
-                            pending={responding === need.id}
-                            onCanHelp={() => void canHelp(need)}
-                          />
-                        ))}
-                      </ul>
-                    )}
+                    <ul id="entraide-far-needs" hidden={!farOpen} className="mt-3 space-y-3">
+                      {farNeeds.map((need) => (
+                        <NeedRow
+                          key={need.id}
+                          need={need}
+                          distance={needDistance(need)}
+                          state={needState(need)}
+                          pending={responding === need.id}
+                          onCanHelp={() => void canHelp(need)}
+                        />
+                      ))}
+                    </ul>
                   </div>
                 )}
               </>

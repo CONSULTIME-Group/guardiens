@@ -31,9 +31,20 @@ export function helpersCountLine(count: number, city: string | null): string | n
 export function helpersSectionTitle(count: number, city: string | null): string {
   if (!city) return "Prêts à aider sur Guardiens";
   if (count <= 0) return `Prêts à aider autour de ${city}`;
+  // « vous » : lieu connu par la position, sans nom de ville.
+  const place = city === "vous" ? "chez vous" : city;
   return count === 1
-    ? `1 personne prête à aider à moins de 30 km de ${city}`
-    : `${count} personnes prêtes à aider à moins de 30 km de ${city}`;
+    ? `1 personne prête à aider à moins de 30 km de ${place}`
+    : `${count} personnes prêtes à aider à moins de 30 km de ${place}`;
+}
+
+/** Sans lieu connu : les premiers besoins visibles, le reste replié. */
+export const NEEDS_SHOWN_WITHOUT_PLACE = 3;
+
+/** Libellé du bouton qui déplie les besoins lointains (ou les autres besoins, sans lieu). */
+export function farNeedsLabel(count: number, hasPlace: boolean): string {
+  if (hasPlace) return `Plus loin : ${count === 1 ? "1 besoin ouvert" : `${count} besoins ouverts`} ailleurs en France`;
+  return count === 1 ? "Voir 1 autre besoin ouvert en France" : `Voir les ${count} autres besoins ouverts en France`;
 }
 
 /** Bouton qui déplie la liste des personnes : tout le secteur d'un coup s'il est court, sinon par paliers. */
