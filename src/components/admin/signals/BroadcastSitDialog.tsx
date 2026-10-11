@@ -36,7 +36,7 @@ interface PreviewData {
     pets_sentence?: string;
   };
   subject?: string;
-  recipients: Array<{ first_name: string; city: string; distance_km: number; email: string }>;
+  recipients: Array<{ first_name: string; city: string; distance_km: number | null; email: string }>;
   truncated: boolean;
 }
 
@@ -221,7 +221,7 @@ export const BroadcastSitDialog = ({ open, onOpenChange, signal, onSent }: Props
                           <span className="text-muted-foreground"> · {r.city || "?"}</span>
                         </span>
                         <span className="text-muted-foreground shrink-0 tabular-nums">
-                          {r.distance_km} km
+                          {r.distance_km == null ? "lieu non renseigné" : `${r.distance_km} km`}
                         </span>
                       </li>
                     ))}

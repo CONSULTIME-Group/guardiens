@@ -6,6 +6,7 @@ import { BrandedHead } from './_branded-head.tsx'
 import { BrandHeader } from './_brand-header.tsx'
 import { LegalFooter } from './_legal-footer.tsx'
 import type { TemplateEntry } from './registry.ts'
+import { farSubject, isFarForRecipient } from '../far-listing.ts'
 
 const SITE_URL = 'https://guardiens.fr'
 
@@ -32,7 +33,16 @@ interface Props {
   completionSteps?: number
   /** Ancre du profil qui porte le geste nomme dans la phrase. */
   completionHref?: string
+  /**
+   * Lot Q1 : garde lointaine (plus de 200 km, ou lieu du gardien inconnu
+   * pour une garde hors de France). Deduit de distanceKm quand absent.
+   */
+  farAway?: boolean
 }
+
+/** Garde lointaine : drapeau explicite, sinon distance superieure a 200 km. */
+export const isFarAlert = (data: { farAway?: boolean; distanceKm?: number | null }) =>
+  typeof data.farAway === 'boolean' ? data.farAway : isFarForRecipient(data.distanceKm ?? null, false)
 
 const buildProfileUrl = (href?: string) => {
   const path = href && href.startsWith('/') ? href : '/profile'
@@ -54,28 +64,39 @@ const NearbySitAlertEmail = ({
   completionSentence,
   completionSteps,
   completionHref,
+  farAway,
 }: Props) => {
   const ctaHref = sitId ? `${SITE_URL}/sits/${sitId}` : `${SITE_URL}/sits`
+  const far = isFarAlert({ farAway, distanceKm })
   return (
     <Html lang="fr" dir="ltr">
       <BrandedHead />
       <Preview>
-        Une nouvelle annonce près de chez vous{city ? ` à ${city}` : ''}
+        {far
+          ? (city ? `Une garde à ${city}` : 'Une nouvelle garde à découvrir')
+          : `Une nouvelle annonce près de chez vous${city ? ` à ${city}` : ''}`}
       </Preview>
       <Body style={main}>
         <Container style={container}>
           <BrandHeader />
-          <Heading style={h1}>Une annonce près de chez vous</Heading>
+          <Heading style={h1}>{far ? 'Une garde pour partir loin' : 'Une annonce près de chez vous'}</Heading>
 
           <Text style={text}>
             Bonjour{sitterFirstName ? ` ${sitterFirstName}` : ''},
           </Text>
 
-          <Text style={text}>
-            Une nouvelle garde vient d'être publiée dans votre secteur
-            {city ? <> à <strong>{city}</strong></> : null}
-            {typeof distanceKm === 'number' ? <> (à environ {distanceKm} km de chez vous)</> : null}.
-          </Text>
+          {far ? (
+            <Text style={text}>
+              {ownerFirstName ? `${ownerFirstName} vient` : 'Un membre vient'} de publier une garde
+              {city ? <> à <strong>{city}</strong></> : null}.
+            </Text>
+          ) : (
+            <Text style={text}>
+              Une nouvelle garde vient d'être publiée dans votre secteur
+              {city ? <> à <strong>{city}</strong></> : null}
+              {typeof distanceKm === 'number' ? <> (à environ {distanceKm} km de chez vous)</> : null}.
+            </Text>
+          )}
 
           <Section style={card}>
             {coverPhotoUrl ? (
@@ -99,10 +120,18 @@ const NearbySitAlertEmail = ({
             ) : null}
           </Section>
 
-          <Text style={text}>
-            Le secteur compte encore peu de gardiens disponibles : votre profil
-            peut vraiment faire la différence pour cette famille.
-          </Text>
+          {far ? (
+            <Text style={text}>
+              Une garde lointaine se prépare tôt (trajet, dates, arrivée). Si
+              celle-ci vous tente, présentez-vous dès maintenant pour en parler
+              {ownerFirstName ? ` avec ${ownerFirstName}` : ''}.
+            </Text>
+          ) : (
+            <Text style={text}>
+              Le secteur compte encore peu de gardiens disponibles : votre profil
+              peut vraiment faire la différence pour cette famille.
+            </Text>
+          )}
 
           {canApply === false && completionSentence ? (
             <Text style={text}>{completionSentence}</Text>
@@ -141,9 +170,11 @@ const NearbySitAlertEmail = ({
 export const template = {
   component: NearbySitAlertEmail,
   subject: (data: Record<string, any>) =>
-    data.city
-      ? `Nouvelle annonce à ${data.city}`
-      : 'Nouvelle annonce près de chez vous',
+    isFarAlert(data)
+      ? farSubject(data.ownerFirstName, data.city)
+      : data.city
+        ? `Nouvelle annonce à ${data.city}`
+        : 'Nouvelle annonce près de chez vous',
   displayName: 'Alerte annonce locale (gardien)',
   previewData: {
     sitterFirstName: 'Faïza',
