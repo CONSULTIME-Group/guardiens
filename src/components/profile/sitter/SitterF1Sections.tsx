@@ -432,3 +432,76 @@ export const SitterStickyBar = ({
     </div>
   );
 };
+
+/* ── En bref : preuves chiffrées sous les onglets (lot F, 11/10/2026) ── */
+export const SitterGlanceBand = ({
+  items,
+}: {
+  items: Array<{ value: string; label: string; size?: "lg" | "sm" }>;
+}) => {
+  if (items.length === 0) return null;
+  return (
+    <dl
+      aria-label="En bref"
+      data-profile-glance
+      className="profile-glance grid grid-cols-2 md:grid-cols-4 gap-x-[22px] gap-y-[22px] rounded-[22px] px-[22px] py-[22px] md:px-[34px] md:py-[26px]"
+    >
+      {items.map((it) => (
+        <div key={it.label} className="flex min-w-0 flex-col-reverse gap-1.5">
+          <dt className="text-[13.5px] text-muted-foreground font-body">{it.label}</dt>
+          <dd
+            className={
+              it.size === "sm"
+                ? "font-heading text-[19px] md:text-[22px] font-semibold leading-snug text-foreground break-words"
+                : "font-heading text-[30px] md:text-[38px] font-semibold leading-none text-foreground"
+            }
+          >
+            {it.value}
+          </dd>
+        </div>
+      ))}
+    </dl>
+  );
+};
+
+/* ── Sa façon de garder : conditions déclarées (lot F, 11/10/2026) ──
+ * Sortie de la carte contact pour être lue en section. Pas d'icône
+ * décorative (règle du projet), la présence pendant la garde en tête car
+ * c'est le critère le plus lourd du moteur d'affinité. */
+export const SitterConditionsSection = ({
+  firstName,
+  presence,
+  facts,
+}: {
+  firstName: string;
+  presence: string;
+  facts: Array<{ label: string; value: string }>;
+}) => {
+  if (!presence && facts.length === 0) return null;
+  return (
+    <section aria-labelledby="sa-facon-de-garder" className="scroll-mt-20" data-profile-conditions>
+      <SectionHeading eyebrow="Conditions de garde" title="Sa façon de garder." id="sa-facon-de-garder" />
+      <p className="-mt-2 mb-[22px] text-[15px] text-muted-foreground font-body">
+        Ce que {firstName} a déclaré, pour vérifier en un coup d'œil que cela correspond à votre maison.
+      </p>
+      <div className="profile-surface overflow-hidden rounded-[18px] border border-border">
+        {presence && (
+          <div className="border-l-4 border-primary px-[22px] py-[18px] md:px-[26px]">
+            <p className="text-[13px] text-muted-foreground font-body">Présence pendant la garde</p>
+            <p className="mt-1 font-heading text-[20px] md:text-[22px] font-semibold leading-snug text-foreground">{presence}</p>
+          </div>
+        )}
+        {facts.length > 0 && (
+          <dl className={`grid grid-cols-1 md:grid-cols-2 gap-x-[34px] px-[22px] md:px-[26px] ${presence ? "border-t border-border" : ""}`}>
+            {facts.map((f) => (
+              <div key={f.label} className="min-w-0 border-b border-border/70 py-[16px] last:border-b-0 md:[&:nth-last-child(2):nth-child(odd)]:border-b-0">
+                <dt className="text-[13px] text-muted-foreground font-body">{f.label}</dt>
+                <dd className="mt-1 text-[15.5px] font-semibold text-foreground font-body break-words">{f.value}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
+      </div>
+    </section>
+  );
+};
