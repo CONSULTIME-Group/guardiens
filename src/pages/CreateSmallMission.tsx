@@ -25,6 +25,7 @@ import { useAccessLevel, MIN_COMPLETION_TO_APPLY } from "@/hooks/useAccessLevel"
 import { canPublishSmallMission, shouldNudgeProfileCompletion } from "@/lib/missionPublishAccess";
 import MissionPhotoUpload from "@/components/missions/MissionPhotoUpload";
 import { geocodeCity } from "@/lib/geocode";
+import { MISSION_PLACE_NOT_FOUND, resolveMissionCoords, type Coords } from "@/lib/missionPlace";
 import { trackFirstAction, trackEvent } from "@/lib/analytics";
 import { recordMissionCreatedAttribution } from "@/lib/campaignAttribution";
 import {
@@ -154,6 +155,8 @@ const CreateSmallMission = () => {
   const [placeTouched, setPlaceTouched] = useState(false);
   const [city, setCity] = useState("");
   const [postalCode, setPostalCode] = useState("");
+  /** Lot E10 : centre de la commune choisie par le code postal. */
+  const [placeCoords, setPlaceCoords] = useState<Coords | null>(null);
   const [dateNeeded, setDateNeeded] = useState("");
   const [endDate, setEndDate] = useState("");
   const [calendarOpen, setCalendarOpen] = useState(false);
@@ -376,7 +379,7 @@ const CreateSmallMission = () => {
     let cancelled = false;
     const timer = window.setTimeout(async () => {
       try {
-        const coords = await geocodeCity(city.trim());
+        const coords = placeCoords ?? await geocodeCity(city.trim(), "FR");
         if (cancelled || !coords) return;
         // Même fonction et même rayon que la vague : mission_wave_audience
         // côté moteur, mission_wave_audience_preview côté formulaire, filtres
@@ -391,7 +394,7 @@ const CreateSmallMission = () => {
       }
     }, 600);
     return () => { cancelled = true; window.clearTimeout(timer); };
-  }, [step, city]);
+  }, [step, city, placeCoords]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -461,8 +464,18 @@ const CreateSmallMission = () => {
     }
 
     setSubmitting(true);
-    let coords: { lat: number; lng: number } | null = null;
-    try { coords = await geocodeCity(city.trim()); } catch { coords = null; }
+    // Lot E10 : sans lieu situé, personne ne serait prévenu ; on demande la commune.
+    const coords = await resolveMissionCoords(
+      { fieldCoords: placeCoords, postalCode, city },
+      (query, country) => geocodeCity(query, country),
+    );
+    if (!coords) {
+      setSubmitting(false);
+      toast({ title: "Commune à préciser", description: MISSION_PLACE_NOT_FOUND, variant: "destructive" });
+      setStep(3);
+      setPlaceTouched(true);
+      return;
+    }
 
     const cleanTitle = stripEmojis(sanitizeUserTitle(title) || title.trim());
     const cleanDescription = stripEmojis(description);
@@ -836,7 +849,14 @@ const CreateSmallMission = () => {
                     onChange={(partial) => {
                       if (partial.city !== undefined) setCity(partial.city);
                       if (partial.postal_code !== undefined) setPostalCode(partial.postal_code);
+                      // Lot E10 : coordonnées de la commune choisie ; toute saisie sans centre les efface.
+                      if (typeof partial.latitude === "number" && typeof partial.longitude === "number") {
+                        setPlaceCoords({ lat: partial.latitude, lng: partial.longitude });
+                      } else if (partial.city !== undefined || partial.postal_code !== undefined) {
+                        setPlaceCoords(null);
+                      }
                     }}
+                    showAbroadToggle={false}
                     required
                     showRequiredMark={false}
                     inputClassName="h-12 text-base"

@@ -11,7 +11,8 @@ import { normalizeCityTyping, normalizeCityName } from "@/lib/normalizeCity";
 interface Props {
   city: string;
   postalCode: string;
-  onChange: (partial: { city?: string; postal_code?: string; country?: string | null }) => void;
+  /** latitude et longitude : centre de la commune choisie (geo.api.gouv.fr), quand il est connu. */
+  onChange: (partial: { city?: string; postal_code?: string; country?: string | null; latitude?: number | null; longitude?: number | null }) => void;
   cityLabel?: string;
   postalLabel?: string;
   cityId?: string;
