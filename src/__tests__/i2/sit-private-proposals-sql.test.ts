@@ -1,4 +1,3 @@
-// @vitest-environment node
 /**
  * Lot I2 : la migration des propositions privées est jouée sur un Postgres
  * local (PGlite) par scripts/test-sit-private-proposals.mjs. Ce test la
