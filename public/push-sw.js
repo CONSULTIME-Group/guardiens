@@ -1,7 +1,7 @@
 /* Push only: no fetch handler and no cache of pages or private data. */
 /* Version read by the page before a test or nearby alerts: an older worker
    would show those payloads as "new message". Bump on every payload change. */
-var PUSH_SW_VERSION = 'push-3';
+var PUSH_SW_VERSION = 'push-4';
 var UUID = '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}';
 var NEARBY_BODY = 'Une nouvelle annonce de garde près de chez vous.';
 var TEST_BODY = 'Notification de test Guardiens : cet appareil peut recevoir vos alertes.';
@@ -34,17 +34,36 @@ function safePath(url) {
   return '/messages';
 }
 
+/* Lot N2 : pastille de l'icone (application installee). Seul un entier
+   venu du serveur est accepte ; une erreur ne bloque jamais la notification. */
+function setAppBadge(payload) {
+  var count = payload && payload.badge;
+  var nav = self.navigator;
+  if (typeof count !== 'number' || !isFinite(count) || count < 0 || !nav) return Promise.resolve();
+  count = Math.min(Math.floor(count), 99);
+  try {
+    if (count > 0 && nav.setAppBadge) return Promise.resolve(nav.setAppBadge(count)).catch(function () {});
+    if (count === 0 && nav.clearAppBadge) return Promise.resolve(nav.clearAppBadge()).catch(function () {});
+  } catch { /* API absente ou refusee : notification seule. */ }
+  return Promise.resolve();
+}
+
 self.addEventListener('push', (event) => {
   let payload = {};
   try { payload = event.data ? event.data.json() : {}; } catch { /* Generic notice below. */ }
   const d = describe(payload || {});
-  event.waitUntil(self.registration.showNotification('Guardiens', {
-    body: d.body,
-    icon: '/icons/icon-192.png',
-    tag: d.tag,
-    renotify: false,
-    data: { url: d.url },
-  }));
+  event.waitUntil(Promise.all([
+    self.registration.showNotification('Guardiens', {
+      body: d.body,
+      icon: '/icons/icon-192.png',
+      /* Icone monochrome de la barre d'etat Android. */
+      badge: '/icons/badge-96.png',
+      tag: d.tag,
+      renotify: false,
+      data: { url: d.url },
+    }),
+    setAppBadge(payload || {}),
+  ]));
 });
 
 self.addEventListener('notificationclick', (event) => {

@@ -9,6 +9,13 @@ export interface PushPayload {
   url: string;
   tag: string;
   kind?: 'message' | 'application' | 'nearby_sit' | 'test';
+  /** Lot N2 : nombre de messages non lus, pour la pastille de l'icône. Jamais de contenu. */
+  badge?: number;
+}
+
+/** Entier entre 0 et 99, sinon absent : la pastille n'affiche jamais une valeur douteuse. */
+export function sanitizeBadge(value: unknown): number | undefined {
+  return typeof value === 'number' && Number.isInteger(value) && value >= 0 ? Math.min(value, 99) : undefined;
 }
 
 const BODIES: Record<PushEventKind, string> = {
@@ -31,13 +38,15 @@ export function isPushEventKind(value: unknown): value is PushEventKind {
   return value === 'message' || value === 'application';
 }
 
-export function buildPushPayload(kind: PushEventKind, jobId: string): PushPayload {
+export function buildPushPayload(kind: PushEventKind, jobId: string, badge?: unknown): PushPayload {
+  const count = sanitizeBadge(badge);
   return {
     title: 'Guardiens',
     body: BODIES[kind],
     url: URLS[kind],
     // Le tag derive du seul identifiant de job, donnee technique non personnelle.
     tag: `guardiens-${kind}-${jobId}`,
+    ...(count === undefined ? {} : { badge: count }),
   };
 }
 

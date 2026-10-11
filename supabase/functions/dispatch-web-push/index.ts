@@ -1,6 +1,6 @@
 // Edge dispatch-web-push : envoi des notifications en attente.
 // Appelable uniquement avec la cle service_role, jamais par un client.
-// Cron installe : job 1224 dispatch-web-push, toutes les cinq minutes.
+// Cron installe : job 1224 dispatch-web-push, chaque minute (lot N2, migration 0068).
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 import webpush from 'npm:web-push@3.6.7';
@@ -9,7 +9,7 @@ import { nearbyBudget, runStatus } from '../_shared/web-push/dispatch-budget.ts'
 import { isServiceRoleCaller } from '../_shared/web-push/auth.ts';
 import { readVapidConfig } from '../_shared/web-push/config.ts';
 import { validatePushEndpoint } from '../_shared/web-push/endpoint.ts';
-import { buildNearbySitPayload, buildPushPayload, isPushEventKind } from '../_shared/web-push/payload.ts';
+import { buildNearbySitPayload, buildPushPayload, isPushEventKind, sanitizeBadge } from '../_shared/web-push/payload.ts';
 import {
   clampBatchSize,
   classifyNetworkFailure,
@@ -48,7 +48,7 @@ Deno.serve(async (req) => {
   }
 
   // Une ligne de journal seulement quand il s'est passe quelque chose : la
-  // file est vide la plupart du temps, inutile d'ecrire 288 lignes par jour.
+  // file est vide la plupart du temps, inutile d'ecrire 1 440 lignes par jour.
   const startedAt = new Date().toISOString();
   const recordRun = async (
     status: 'success' | 'partial' | 'failed',
@@ -76,13 +76,21 @@ Deno.serve(async (req) => {
 
   const counters = { claimed: 0, accepted: 0, failed: 0, retry: 0, skipped: 0, disabled: 0, persistence_errors: 0, nearby_claimed: 0, nearby_unavailable: 0 };
 
-  type Queue = { eligible: string; close: string; payload: (job: Record<string, unknown>) => string | null; ttl: number };
+  type Queue = { eligible: string; close: string; payload: (job: Record<string, unknown>, badge?: number) => string | null; ttl: number; badge: boolean };
   const MAIN: Queue = {
-    eligible: 'push_job_eligible', close: 'push_close_job', ttl: 3600,
-    payload: (job) => isPushEventKind(job.event_kind) ? JSON.stringify(buildPushPayload(job.event_kind, String(job.job_id))) : null,
+    eligible: 'push_job_eligible', close: 'push_close_job', ttl: 3600, badge: true,
+    payload: (job, badge) => isPushEventKind(job.event_kind) ? JSON.stringify(buildPushPayload(job.event_kind, String(job.job_id), badge)) : null,
+  };
+  // Lot N2 : nombre de messages non lus du membre, pour la pastille de l'icone.
+  // Absent en cas d'erreur : la notification part quand meme, sans pastille.
+  const unreadBadge = async (subscriptionId: unknown): Promise<number | undefined> => {
+    try {
+      const result = await admin.rpc('push_unread_badge', { p_subscription_id: subscriptionId });
+      return result?.error ? undefined : sanitizeBadge(result?.data);
+    } catch { return undefined; }
   };
   const NEARBY: Queue = {
-    eligible: 'push_nearby_job_eligible', close: 'push_close_nearby_job', ttl: 6 * 3600,
+    eligible: 'push_nearby_job_eligible', close: 'push_close_nearby_job', ttl: 6 * 3600, badge: false,
     payload: (job) => { const p = buildNearbySitPayload(String(job.job_id), String(job.sit_id)); return p ? JSON.stringify(p) : null; },
   };
 
@@ -100,7 +108,7 @@ Deno.serve(async (req) => {
         counters.skipped += 1;
         continue;
       }
-      const payload = queue.payload(job);
+      const payload = queue.payload(job, queue.badge ? await unreadBadge(job.subscription_id) : undefined);
       if (!payload) {
         await finalize(job.job_id, 'skipped', 'bad_kind');
         counters.skipped += 1;
@@ -160,7 +168,7 @@ Deno.serve(async (req) => {
 
   // File annonces proches : independante, dans le MEME budget total que
   // l'appel (comme avant ce lot) pour ne pas allonger l'execution du cron
-  // (toutes les 5 min) au-dela des reservations de 2 minutes.
+  // (chaque minute) au-dela des reservations de 2 minutes.
   const { budget, nearbyError } = await (async () => {
     const remaining = nearbyBudget(limit, counters.claimed);
     if (remaining === 0) return { budget: 0, nearbyError: false };

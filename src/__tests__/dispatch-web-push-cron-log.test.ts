@@ -17,10 +17,15 @@ import * as budget from "../../supabase/functions/_shared/web-push/dispatch-budg
 
 const serviceKey = "fixture-service-key";
 
-function harness(jobs: Array<Record<string, unknown>>, nearby: () => { data: unknown; error: unknown } = () => ({ data: [], error: null })) {
+function harness(
+  jobs: Array<Record<string, unknown>>,
+  nearby: () => { data: unknown; error: unknown } = () => ({ data: [], error: null }),
+  badge: () => { data: unknown; error: unknown } = () => ({ data: null, error: null }),
+) {
   let handler!: (request: Request) => Promise<Response>;
   const inserts: Array<{ table: string; row: unknown }> = [];
   const updates: Array<{ table: string; row: unknown; column: string; value: unknown }> = [];
+  const sent: string[] = [];
   const admin = {
     from: (table: string) => ({
       insert: async (row: unknown) => { inserts.push({ table, row }); return { error: null }; },
@@ -31,6 +36,7 @@ function harness(jobs: Array<Record<string, unknown>>, nearby: () => { data: unk
       if (name === "push_job_eligible") return { data: true, error: null };
       if (name === "push_close_job") return { data: true, error: null };
       if (name === "push_claim_nearby_jobs") return nearby();
+      if (name === "push_unread_badge") return badge();
       return { data: null, error: null };
     }),
   };
@@ -53,7 +59,7 @@ function harness(jobs: Array<Record<string, unknown>>, nearby: () => { data: unk
     require: (specifier: string) => {
       if (specifier.includes("supabase-js@2/cors")) return { corsHeaders: {} };
       if (specifier.includes("supabase-js")) return { createClient: () => admin };
-      if (specifier.includes("web-push@")) return { default: { setVapidDetails: () => {}, sendNotification: async () => ({ statusCode: 201 }) } };
+      if (specifier.includes("web-push@")) return { default: { setVapidDetails: () => {}, sendNotification: async (_s: unknown, body: string) => { sent.push(body); return { statusCode: 201 }; } } };
       if (specifier.includes("cron-trace")) return cronTrace;
       if (specifier.includes("dispatch-budget")) return budget;
       if (specifier.includes("web-push/auth")) return auth;
@@ -65,7 +71,7 @@ function harness(jobs: Array<Record<string, unknown>>, nearby: () => { data: unk
     },
   });
   return {
-    inserts, updates, admin,
+    inserts, updates, sent, admin,
     run: () => handler(new Request("https://fixture.invalid", {
       method: "POST",
       headers: { Authorization: `Bearer ${serviceKey}` },
@@ -130,6 +136,21 @@ describe("dispatch-web-push, visibilité cron", () => {
     expect(h.updates).toHaveLength(1);
     expect(h.updates[0]).toMatchObject({ table: "push_subscriptions", column: "id", value: "s" });
     expect(typeof (h.updates[0].row as Record<string, unknown>).last_success_at).toBe("string");
+  });
+
+  it("lot N2 : le nombre de non-lus part avec la notification de message", async () => {
+    const h = harness([fcm("j1")], undefined, () => ({ data: 3, error: null }));
+    await h.run();
+    expect(JSON.parse(h.sent[0])).toMatchObject({ body: "Vous avez un nouveau message.", badge: 3 });
+    const badgeCalls = h.admin.rpc.mock.calls.filter((c) => c[0] === "push_unread_badge");
+    expect(badgeCalls[0][1]).toEqual({ p_subscription_id: "s" });
+  });
+
+  it("lot N2 : compteur indisponible, la notification part sans pastille", async () => {
+    const h = harness([fcm("j1")], undefined, () => ({ data: null, error: { message: "boom" } }));
+    await h.run();
+    expect(JSON.parse(h.sent[0]).badge).toBeUndefined();
+    expect(JSON.parse(h.sent[0]).body).toBe("Vous avez un nouveau message.");
   });
 
   it("file proche en erreur : les envois principaux restent faits", async () => {
