@@ -28,7 +28,10 @@ export const MEETUP_SEND_FROM_HOUR = 9;
 export const MEETUP_SEND_UNTIL_HOUR = 20;
 
 export function isMeetupSendingHour(now: Date): boolean {
-  const hour = Number(new Intl.DateTimeFormat("fr-FR", { hour: "2-digit", hour12: false, timeZone: "Europe/Paris" }).format(now));
+  // formatToParts : le format français donne « 09 h », illisible par Number.
+  const part = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", hourCycle: "h23", timeZone: "Europe/Paris" })
+    .formatToParts(now).find((p) => p.type === "hour")?.value;
+  const hour = Number(part);
   return Number.isFinite(hour) && hour >= MEETUP_SEND_FROM_HOUR && hour < MEETUP_SEND_UNTIL_HOUR;
 }
 

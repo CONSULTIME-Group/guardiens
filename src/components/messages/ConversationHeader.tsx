@@ -114,7 +114,7 @@ const ConversationHeader = ({
     const load = async () => {
       const [{ data: mission }, { data: response }] = await Promise.all([
         supabase.from("small_missions")
-          .select("id, title, exchange_offer, date_needed, user_id, status")
+          .select("id, title, exchange_offer, date_needed, user_id, status, close_reason")
           .eq("id", missionId)
           .single(),
         supabase.from("small_mission_responses")
@@ -181,8 +181,14 @@ const ConversationHeader = ({
     setMarkingDone(true);
     try {
       const { data, error } = await (supabase as any).rpc("mark_mission_done", { p_mission_id: missionData.id });
-      if (error || !data?.ok) throw new Error(data?.reason || "mark_done_failed");
-      setMissionData((prev: any) => ({ ...prev, status: "completed" }));
+      if (error) throw error;
+      if (!data?.ok) {
+        toast.error(data?.reason === "forbidden"
+          ? "L'auteur du besoin et la personne retenue peuvent marquer ce coup de main comme terminé."
+          : data?.reason === "cancelled" ? "Ce besoin est clôturé." : "Réessayez dans un instant pour marquer ce coup de main comme terminé.");
+        return;
+      }
+      setMissionData((prev: any) => ({ ...prev, status: "completed", close_reason: data.counted ? "meetup_confirmed" : prev?.close_reason }));
       onActionDone();
     } catch {
       toast.error("Réessayez dans un instant pour marquer ce coup de main comme terminé.");
@@ -529,7 +535,7 @@ const ConversationHeader = ({
           <span className="text-sm text-muted-foreground">Échange décliné</span>
         </div>
       )}
-      {isSmallMission && missionData && responseData && responseData.status === "accepted" && missionData.status === "completed" && (
+      {isSmallMission && missionData && responseData && responseData.status === "accepted" && missionData.status === "completed" && missionData.close_reason !== "meetup_not_happened" && (
         <div className="px-4 py-2 bg-primary/5 border-t border-primary/20 flex items-center gap-2">
           <CheckCircle className="text-primary w-4 h-4 shrink-0" />
           <span className="text-sm text-primary font-medium">Échange terminé</span>

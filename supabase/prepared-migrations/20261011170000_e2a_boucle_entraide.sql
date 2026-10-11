@@ -5,10 +5,13 @@
 --    messagerie). Réservé à l'auteur et à la personne retenue. Avec une
 --    personne retenue, le besoin passe en « rencontre confirmée » : il compte
 --    dans les coups de main donnés et ouvre l'avis. Sans personne retenue :
---    terminé par l'auteur, sans compteur.
+--    terminé par l'auteur, sans compteur. L'écusson coup_de_main_or suit la
+--    même règle que le « oui » par email : attribué quand la personne retenue
+--    confirme elle-même.
 -- 2. confirm_mission_meetup : un « oui » donné après la clôture automatique
---    transforme cette clôture en rencontre confirmée (seule modification :
---    la condition du UPDATE de la branche « oui »).
+--    transforme cette clôture en rencontre confirmée (seules modifications,
+--    dans le UPDATE de la branche « oui » : la condition WHERE, et closed_at
+--    garde la date de clôture déjà posée).
 -- 3. public_mission_feedbacks : seuls les avis dont la case « publier » est
 --    cochée (public_ok) restent publics. La vue appartient à postgres et
 --    contourne la RLS : sans filtre, tous les avis étaient lisibles.
@@ -26,6 +29,7 @@ DECLARE
   v_uid uuid := auth.uid();
   m record;
   v_helper_id uuid;
+  v_badge_rows int := 0;
 BEGIN
   IF v_uid IS NULL THEN RETURN jsonb_build_object('ok', false, 'reason', 'unauthorized'); END IF;
 
@@ -44,7 +48,7 @@ BEGIN
 
   IF m.status = 'cancelled' THEN RETURN jsonb_build_object('ok', false, 'reason', 'cancelled'); END IF;
   IF m.status = 'completed' AND (m.close_reason IS DISTINCT FROM 'auto_completed_after_date' OR v_helper_id IS NULL) THEN
-    RETURN jsonb_build_object('ok', true, 'already', true, 'counted', m.close_reason = 'meetup_confirmed');
+    RETURN jsonb_build_object('ok', true, 'already', true, 'counted', COALESCE(m.close_reason = 'meetup_confirmed', false));
   END IF;
 
   UPDATE public.small_missions
@@ -54,8 +58,15 @@ BEGIN
          updated_at = now()
    WHERE id = p_mission_id;
 
+  IF v_helper_id IS NOT NULL AND v_uid = v_helper_id THEN
+    INSERT INTO public.badge_attributions (user_id, badge_id, giver_id, mission_id, is_manual)
+    VALUES (v_helper_id, 'coup_de_main_or', m.user_id, m.id, false)
+    ON CONFLICT DO NOTHING;
+    GET DIAGNOSTICS v_badge_rows = ROW_COUNT;
+  END IF;
+
   RETURN jsonb_build_object('ok', true, 'already', false, 'counted', v_helper_id IS NOT NULL,
-    'helper_id', v_helper_id, 'owner_id', m.user_id);
+    'badge_awarded', v_badge_rows > 0, 'helper_id', v_helper_id, 'owner_id', m.user_id);
 END;
 $function$;
 

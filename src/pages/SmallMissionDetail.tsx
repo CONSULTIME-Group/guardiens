@@ -694,6 +694,7 @@ const SmallMissionDetail = () => {
       if (error) throw error;
       if (!done?.ok) throw new Error(done?.reason || "mark_done_failed");
       setMission((prev: any) => ({ ...prev, status: "completed", close_reason: done.counted ? "meetup_confirmed" : "completed_by_author" }));
+      if (done.already) return;
       // Batch notifications to accepted responders (compute inline to avoid forward-ref)
       const accepted = responses.filter(r => r.status === "accepted");
       if (accepted.length > 0) {
@@ -961,7 +962,7 @@ const SmallMissionDetail = () => {
                         toast({ variant: "destructive", title: "Erreur", description: error.message });
                         return;
                       }
-                      // On garde hasResponded=true : la ligne reste en BDD (status=withdrawn), pas de re-réponse possible sans admin.
+                      // On garde hasResponded=true : la ligne reste en BDD (status=withdrawn), la réponse peut être réactivée depuis la page Entraide tant que le besoin est ouvert.
                       setResponses(prev => prev.map(r =>
                         r.id === myResponse.id ? { ...r, status: "withdrawn" } : r,
                       ));
