@@ -40,14 +40,16 @@ function previewOverlay() {
 }
 
 describe("HeroPickerModal — identité de l'aperçu", () => {
-  it("sans filtre, cliquer la 3ᵉ vignette affiche « n° 003 » et l'image hero-03", () => {
+  it("sans filtre, seules les 58 illustrations actives sont proposées ; la 2ᵉ vignette est la n° 003", () => {
     renderModal();
 
     const thumbs = thumbnails();
-    expect(thumbs.length).toBe(100);
-    expect(thumbs[2]).toHaveAttribute("title", "Illustration n°003, Animaux & plantes");
+    expect(thumbs.length).toBe(58);
+    // hero-02 est retirée : la 2ᵉ vignette porte l'identité n° 003, pas sa position.
+    expect(thumbs[1]).toHaveAttribute("title", "Illustration n°003, Animaux & plantes");
+    expect(thumbs.some((t) => t.getAttribute("title")?.startsWith("Illustration n°002,"))).toBe(false);
 
-    fireEvent.click(thumbs[2]);
+    fireEvent.click(thumbs[1]);
 
     const preview = previewOverlay();
     expect(preview.textContent).toContain("n° 003");
@@ -55,38 +57,38 @@ describe("HeroPickerModal — identité de l'aperçu", () => {
     expect(img.getAttribute("src")).toMatch(/hero-03\.jpg/);
   });
 
-  it("avec le filtre « Maison » actif, cliquer la 5ᵉ vignette affiche « n° 075 » et l'image hero-75", () => {
+  it("avec le filtre « Maison » actif, cliquer la 5ᵉ vignette affiche « n° 077 » et l'image hero-77", () => {
     renderModal();
 
-    fireEvent.click(screen.getByRole("button", { name: /^Maison \(10\)$/ }));
+    fireEvent.click(screen.getByRole("button", { name: /^Maison \(7\)$/ }));
 
     const thumbs = thumbnails();
-    expect(thumbs.length).toBe(10);
-    // La 5ᵉ vignette de la catégorie « Maison » est l'illustration n° 075.
-    expect(thumbs[4]).toHaveAttribute("title", "Illustration n°075, Maison");
+    expect(thumbs.length).toBe(7);
+    // 74 et 75 sont retirées : la 5ᵉ vignette de « Maison » est l'illustration n° 077.
+    expect(thumbs[4]).toHaveAttribute("title", "Illustration n°077, Maison");
 
     fireEvent.click(thumbs[4]);
 
     const preview = previewOverlay();
-    expect(preview.textContent).toContain("n° 075");
+    expect(preview.textContent).toContain("n° 077");
     expect(preview.textContent).not.toContain("n° 071");
-    const img = within(preview).getByAltText("Aperçu illustration 75");
-    expect(img.getAttribute("src")).toMatch(/hero-75\.jpg/);
+    const img = within(preview).getByAltText("Aperçu illustration 77");
+    expect(img.getAttribute("src")).toMatch(/hero-77\.jpg/);
   });
 
   it("avec le filtre « Maison », chaque vignette cliquée affiche son propre numéro", () => {
     renderModal();
 
-    fireEvent.click(screen.getByRole("button", { name: /^Maison \(10\)$/ }));
+    fireEvent.click(screen.getByRole("button", { name: /^Maison \(7\)$/ }));
     const thumbs = thumbnails();
 
-    for (const k of [0, 4, 9]) {
+    for (const [k, num] of [[0, 71], [4, 77], [6, 80]] as const) {
       fireEvent.click(thumbs[k]);
-      const expectedNum = String(71 + k).padStart(3, "0");
+      const expectedNum = String(num).padStart(3, "0");
       const preview = previewOverlay();
       expect(preview.textContent).toContain(`n° ${expectedNum}`);
-      const img = within(preview).getByAltText(`Aperçu illustration ${71 + k}`);
-      expect(img.getAttribute("src")).toContain(`hero-${71 + k}.jpg`);
+      const img = within(preview).getByAltText(`Aperçu illustration ${num}`);
+      expect(img.getAttribute("src")).toContain(`hero-${num}.jpg`);
       // Retour à la galerie avant le clic suivant.
       fireEvent.click(within(preview).getByRole("button", { name: "Retour à la galerie" }));
     }
