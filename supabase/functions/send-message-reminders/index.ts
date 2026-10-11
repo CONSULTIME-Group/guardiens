@@ -3,10 +3,14 @@
 // - sitter_inquiry  : J+2, on relance le GARDIEN (sondage proprio)
 // - mission_help / owner_pitch : aucune relance
 // 1 relance max par conversation (champ reminder_sent_at).
+// Lot R1 : une seule relance par destinataire et par jour, tous crons de
+// relance confondus (_shared/reminder-daily-slot.ts). Une conversation
+// écartée pour ce motif reste éligible le lendemain.
 
 import { recordDeliveryFailure } from "../_shared/delivery-failure.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { requireCronCaller } from "../_shared/require-cron-caller.ts";
+import { createReminderSlot } from "../_shared/reminder-daily-slot.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -49,7 +53,8 @@ Deno.serve(async (req) => {
 
     if (error) throw error;
 
-    const stats = { processed: 0, sent: 0, skipped: 0, errors: 0 };
+    const stats = { processed: 0, sent: 0, skipped: 0, errors: 0, slot_taken: 0 };
+    const slot = createReminderSlot(supabase);
 
     for (const conv of convs ?? []) {
       stats.processed++;
@@ -92,6 +97,9 @@ Deno.serve(async (req) => {
         .eq("user_id", recipientId)
         .maybeSingle();
       if (prefs && prefs.email_messages === false) { stats.skipped++; continue; }
+
+      // Lot R1 : une relance déjà partie vers cette personne aujourd'hui.
+      if (await slot.isTaken(recipient.email)) { stats.slot_taken++; continue; }
 
       // Contexte enrichi
       let sitTitle: string | null = null;
@@ -149,6 +157,8 @@ Deno.serve(async (req) => {
         stats.errors++;
         continue;
       }
+
+      slot.take(recipient.email);
 
       // Marque la conv comme relancée
       await supabase

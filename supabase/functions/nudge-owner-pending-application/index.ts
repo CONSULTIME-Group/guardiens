@@ -15,6 +15,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { startCronRun, type CronRun } from "../_shared/cron-run-log.ts";
 import { requireAdminOrServiceRole } from "../_shared/require-admin.ts";
+import { createReminderSlot } from "../_shared/reminder-daily-slot.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -419,6 +420,11 @@ Deno.serve(async (req) => {
     let emailsDeferred = 0;
     let emailsSkipped = 0;
     const errors: Array<{ application_id: string; error: string }> = [];
+    // Lot R1 : une seule relance par propriétaire et par jour, tous crons de
+    // relance confondus. Une candidature écartée pour ce motif reste éligible
+    // au passage suivant (aucune trace d'envoi n'est écrite).
+    const slot = createReminderSlot(serviceClient);
+    let emailsSlotTaken = 0;
 
     for (const app of pending) {
       const severity = app.hours_since_created >= 96 ? "critical" : "warning";
@@ -461,8 +467,10 @@ Deno.serve(async (req) => {
       // appel direct à send-transactional-email, alors qu'ici c'est un helper
       // interne qui passe déjà logMetadata (et le `metadata:` de l'insert
       // admin_signals plus haut est une colonne DB, pas un champ d'appel).
+      if (await slot.isTaken(app.owner_email)) { emailsSlotTaken += 1; continue; }
       const reminderParams = { serviceClient, app, messageId: `pending-app-${app.application_id}`, templateName: "pending_application_reminder" };
       const result = await sendReminderEmail(reminderParams);
+      if (result.outcome === "sent" || result.outcome === "deferred") slot.take(app.owner_email);
       if (result.outcome === "sent") emailsSent += 1;
       else if (result.outcome === "deferred") emailsDeferred += 1;
       else if (result.outcome === "skipped") emailsSkipped += 1;
@@ -528,11 +536,13 @@ Deno.serve(async (req) => {
         stalledEmailsSkipped += 1;
         continue;
       }
+      if (await slot.isTaken(disc.owner_email)) { emailsSlotTaken += 1; continue; }
       const result = await sendStalledDiscussionEmail({
         serviceClient,
         disc,
         messageId: `stalled-discussion-${disc.application_id}`,
       });
+      if (result.outcome === "sent" || result.outcome === "deferred") slot.take(disc.owner_email);
       if (result.outcome === "sent") stalledEmailsSent += 1;
       else if (result.outcome === "deferred") stalledEmailsDeferred += 1;
       else if (result.outcome === "skipped") stalledEmailsSkipped += 1;
@@ -550,6 +560,7 @@ Deno.serve(async (req) => {
         emails_sent: emailsSent,
         emails_deferred: emailsDeferred,
         emails_skipped: emailsSkipped,
+        emails_slot_taken: emailsSlotTaken,
         stalled_detected: stalled.length,
         stalled_signals_inserted: stalledSignalsInserted,
         stalled_emails_sent: stalledEmailsSent,
@@ -568,6 +579,7 @@ Deno.serve(async (req) => {
         emails_sent: emailsSent,
         emails_deferred: emailsDeferred,
         emails_skipped: emailsSkipped,
+        emails_slot_taken: emailsSlotTaken,
         stalled_detected: stalled.length,
         stalled_signals_inserted: stalledSignalsInserted,
         stalled_emails_sent: stalledEmailsSent,

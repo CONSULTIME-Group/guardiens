@@ -60,6 +60,8 @@ function harness(logs: Row[], options: { signalError?: string; sendStatus?: numb
     if(name.includes("supabase-js")) return { createClient: () => client };
     if(name.includes("require-admin")) return { requireAdminOrServiceRole: async () => null };
     if(name.includes("cron-run-log")) return { startCronRun: async () => ({ finish, fail: vi.fn() }) };
+    // Lot R1 : créneau quotidien de relance, libre dans ce harnais (testé à part).
+    if(name.includes("reminder-daily-slot")) return { createReminderSlot: () => ({ isTaken: async () => false, take: () => {} }) };
     throw new Error(name);
   } });
   return { fetch, finish, invoke: () => handler(new Request("https://fixture.invalid", {method:"POST",body:"{}"})),

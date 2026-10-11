@@ -25,6 +25,7 @@ import { useAffinityOnboardingStatus } from "@/hooks/useAffinityOnboardingStatus
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { trackEvent } from "@/lib/analytics";
 import { sanitizeRedirect } from "@/lib/safeRedirect";
+import { clearAffinitySnooze, snoozeAffinityOnboarding } from "@/lib/onboardingGateRules";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -202,7 +203,7 @@ const OnboardingAffinity = () => {
   // (close_button | navigate_away | page_unload), `step` renseigne l'étape
   // courante au moment de la sortie.
   const emitAbandoned = (
-    reason: "close_button" | "navigate_away" | "page_unload",
+    reason: "close_button" | "navigate_away" | "page_unload" | "later",
     transport: "default" | "beacon" = "default",
   ) => {
     if (!shownTrackedRef.current) return;
@@ -392,6 +393,7 @@ const OnboardingAffinity = () => {
       });
       await refreshProfile();
       await status.refresh();
+      clearAffinitySnooze();
       toast.success("C'est noté, vous pourrez compléter votre profil ensuite.");
       navigate(exitTarget, { replace: true });
     } catch (e) {
@@ -656,6 +658,18 @@ const OnboardingAffinity = () => {
                   aria-describedby={!canSubmit ? "onboarding-missing" : undefined}
                 >
                   {saving ? "Enregistrement..." : "Accéder à mon espace"}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    // Lot G1 : reporter de 24 h et aller là où le membre voulait aller.
+                    emitAbandonedRef.current("later");
+                    snoozeAffinityOnboarding();
+                    navigate(exitTarget, { replace: true });
+                  }}
+                  className="sm:w-auto"
+                >
+                  Plus tard
                 </Button>
                 <Button
                   variant="ghost"

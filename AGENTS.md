@@ -35,6 +35,12 @@
 - Écran d'affinité obligatoire (lot 0) : pré-rempli depuis la base, écritures construites par src/lib/affinityOnboardingWrites.ts (colonnes affichées et renseignées seulement), toute erreur bloque complétion et navigation ; pourquoi : un tableau vide écrasait des réponses existantes.
 - Arrivée v2 (lots 1-2) : drapeau arrival_v2, /bienvenue et /arrivee/* via ArrivalRoutes.tsx, écrans lot 2 ré-exportés par ArriveeVous, intention dans profiles.arrival_intent, logique dans src/lib/arrival.ts, aucun import dynamique d'un module de l'entrée ; pourquoi : entrée < 307 200 octets.
 
+- Porte d'affinité (lot G1) : OnboardingGate ne redirige jamais depuis /messages, /sits, /mes-candidatures, /propositions, /notifications, /review, /mes-avis, /house-guide, /settings (src/lib/onboardingGateRules.ts) ; « Plus tard » sur /onboarding/affinity reporte la porte de 24 h (localStorage guardiens_affinity_snooze_until, effacé à l'enregistrement) ; pourquoi : du 05 au 09/10/2026 une propriétaire n'a jamais pu lire ses 5 candidatures, chaque message la renvoyait au questionnaire.
+
+- Relances (lot R1) : une seule relance par destinataire et par jour (20 h glissantes) entre send-message-reminders, remind-unread-messages et nudge-owner-pending-application (_shared/reminder-daily-slot.ts, lecture de email_send_log sent, pending, deferred, échec de lecture = créneau pris) ; remind-unread-messages groupe toutes les conversations en attente d'un destinataire en un email ; un élément écarté reste éligible le lendemain ; pourquoi : 39 emails en 10 jours à une propriétaire avec 5 candidatures, les relances sont transactionnelles donc hors plafond.
+
+- Garde-fous d'envoi (lots C1 à C3) : un email product dont le report dépasse sa durée de vie est annulé, jamais forcé (decideOverTtl reçoit la catégorie) ; send-transactional-email refuse tout email non transactionnel vers un compte suspendu ou non actif (_shared/account-email-block.ts, statut suppressed, motif account_suspended) ; le refus d'identité est une transition atomique (aucun nouveau journal ni email si le dossier est déjà refusé) et le bouton admin est verrouillé pendant l'appel ; pourquoi : 28 destinataires au-delà de 3 emails marketing par semaine, un compte suspendu jusqu'en 2036 encore relancé, 9 refus et 9 emails en 16 secondes le 29/09/2026.
+
 <!-- LOVABLE:BEGIN -->
 - `build` ends with `test:guard` and CI runs `test:guard` directly; why: owner decision of 17/08/2026, a red test blocks publication.
 <!-- LOVABLE:END -->

@@ -14,6 +14,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useFeatureFlag, getFlag } from "@/hooks/useFeatureFlag";
 import { useAffinityOnboardingStatus } from "@/hooks/useAffinityOnboardingStatus";
 import { isPublishPath, rememberPublishIntent } from "@/lib/postOnboardingIntent";
+import { isAffinityOnboardingSnoozed, isGateAlwaysOpenPath } from "@/lib/onboardingGateRules";
 
 /** Lot 1 : compte arrivée v2 (copie locale de src/lib/arrivalFlag.ts, évite un module de plus dans la coquille). */
 const isArrivalV2Account = (f: { enabled: boolean; appliesSince: string | null }, created: string | null | undefined) =>
@@ -46,18 +47,13 @@ const OnboardingGate = () => {
     if (!status.profileCreatedAt) return;
     if (new Date(status.profileCreatedAt).getTime() < new Date(appliesSince).getTime()) return;
     const path = location.pathname;
-    // Routes à ne jamais interrompre.
-    if (
-      path.startsWith("/onboarding/affinity") ||
-      path.startsWith("/logout") ||
-      path.startsWith("/reset-password") ||
-      // Lot 1 : écrans du parcours d'arrivée v2.
-      path.startsWith("/bienvenue") ||
-      path.startsWith("/arrivee/") ||
-      // Lot J1 : publier une première demande passe avant l'onboarding
-      // affinité ; il est proposé après la publication (page suivante).
-      isPublishPath(path)
-    ) return;
+    // Routes à ne jamais interrompre (lot G1 : messagerie, annonces,
+    // candidatures, gardes et compte en plus de l'onboarding lui-même).
+    // Lot J1 : publier une première demande passe avant l'onboarding
+    // affinité ; il est proposé après la publication (page suivante).
+    if (isGateAlwaysOpenPath(path) || isPublishPath(path)) return;
+    // Lot G1 : « Plus tard » reporte la porte de 24 h.
+    if (isAffinityOnboardingSnoozed()) return;
     const redirect = `${location.pathname}${location.search}${location.hash}`;
     rememberPublishIntent(redirect);
     // Lot 1 : un propriétaire v2 incomplet reprend le parcours d'arrivée.

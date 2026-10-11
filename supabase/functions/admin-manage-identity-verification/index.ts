@@ -133,11 +133,17 @@ Deno.serve(async (req) => {
     if (action === "reject") {
       if (!reason?.trim()) return json({ error: "Motif requis" }, 400);
 
-      const { error } = await adminClient
+      // Lot C3 (11/10/2026) : transition atomique. Un dossier déjà refusé
+      // n'est ni re-journalisé ni re-notifié : le 29/09/2026, des clics
+      // répétés ont produit 9 refus et 9 emails en 16 secondes.
+      const { data: updated, error } = await adminClient
         .from("profiles")
         .update({ identity_verified: false, identity_verification_status: "rejected" })
-        .eq("id", userId);
+        .eq("id", userId)
+        .or("identity_verification_status.is.null,identity_verification_status.neq.rejected")
+        .select("id");
       if (error) return json({ error: error.message }, 500);
+      if (!updated || updated.length === 0) return json({ success: true, already: "rejected" });
 
       const email = await getUserEmail(userId);
 

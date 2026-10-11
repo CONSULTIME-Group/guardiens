@@ -217,6 +217,7 @@ export type OverTtlAction = 'send_now' | 'cancel'
  *
  * - Contenu date (digest, alerte annonce) : `cancel`. L'envoyer en retard, c'est
  *   envoyer une information fausse.
+ * - Email marketing (categorie product, lot C1 du 11/10/2026) : `cancel`.
  * - Tout le reste : `send_now`. Le plafond de frequence protege des relances
  *   marketing, il n'a pas vocation a detruire un email legitime. Mieux vaut un
  *   email de trop qu'une notification jamais delivree.
@@ -240,9 +241,15 @@ export const DATED_TEMPLATES = new Set<string>([
 export function decideOverTtl(input: {
   templateName: string
   reason?: string
+  /** Lot C1 (11/10/2026) : categorie de l'email, quand l'appelant la connait. */
+  category?: string
 }): OverTtlAction {
   if (input.reason === 'quiet_hours') return 'cancel'
   if (DATED_TEMPLATES.has(input.templateName)) return 'cancel'
+  // Lot C1 : un email marketing (categorie product) ne franchit jamais le
+  // plafond. Mesure du 11/10/2026 : 28 destinataires au-dela de 3 par semaine,
+  // 45 envois forces en 14 jours. Mieux vaut un email marketing de moins.
+  if (input.category === 'product') return 'cancel'
   return 'send_now'
 }
 
@@ -256,6 +263,7 @@ export function resolveDeferral(input: {
   reason: string
   scheduledFor: Date
   firstEnqueuedAt: Date
+  category?: string
 }): { action: 'enqueue' } | { action: OverTtlAction; ttlDeadline: Date } {
   // ETAPE 2 : garde placee AVANT tout calcul de TTL. Un gabarit en derogation
   // ne peut donc jamais atteindre `decideOverTtl`, quel que soit le motif, et
@@ -269,7 +277,7 @@ export function resolveDeferral(input: {
     return { action: 'enqueue' }
   }
   return {
-    action: decideOverTtl({ templateName: input.templateName, reason: input.reason }),
+    action: decideOverTtl({ templateName: input.templateName, reason: input.reason, category: input.category }),
     ttlDeadline,
   }
 }

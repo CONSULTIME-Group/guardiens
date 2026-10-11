@@ -96,8 +96,10 @@ async function md5Uuid(key: string): Promise<string> {
 // === Frequency cap & quiet hours ===
 // Pure logic lives in _shared/email-cap.ts so it can be unit-tested.
 import { resendFetch } from "../_shared/resend-guard.ts";
+import { isAccountBlockedForMarketing, type AccountStatusRow } from "../_shared/account-email-block.ts";
 import {
   BYPASS_TEMPLATES,
+  DATED_TEMPLATES,
   decideDeferral,
   resolveDeferral,
   NEARBY_SIT_ALERT_TEMPLATES,
@@ -612,6 +614,45 @@ Deno.serve(async (req) => {
     }
   }
 
+  // 1d. Lot C2 (11/10/2026) : compte suspendu ou inactif. Aucun email
+  // marketing, recapitulatif ou alerte ne part vers lui ; les transactionnels
+  // (moderation, compte, echanges en cours) restent autorises. Cas reel : un
+  // compte suspendu jusqu'en 2036 recevait encore relances et recapitulatifs.
+  // Lecture en echec : envoi maintenu (on ne bloque pas tout le site sur une
+  // panne de lecture), l'erreur est journalisee.
+  if (category !== 'transactional') {
+    const lowered = effectiveRecipient.toLowerCase().trim()
+    const pattern = lowered.replace(/[\\%_]/g, (c) => `\\${c}`)
+    const { data: acct, error: acctErr } = await supabase
+      .from('profiles')
+      .select('account_status, suspended_at, suspended_until')
+      .ilike('email', pattern)
+      .limit(1)
+      .maybeSingle()
+    if (acctErr) {
+      console.error('Lecture du statut de compte impossible, envoi maintenu', { error: acctErr.message })
+    } else if (acct && isAccountBlockedForMarketing(acct as AccountStatusRow, new Date())) {
+      const { error: logSuspErr } = await supabase.from('email_send_log').insert({
+        message_id: messageId,
+        template_name: templateName,
+        recipient_email: effectiveRecipient,
+        status: 'suppressed',
+        metadata: { idempotency_key: idempotencyKey, category, suppressed_reason: 'account_suspended' },
+      })
+      if (logSuspErr) {
+        console.error('email_send_log write failed', {
+          status: 'suppressed', template_name: templateName, message_id: messageId,
+          error: logSuspErr.message, code: logSuspErr.code,
+        })
+      }
+      console.log('Email blocked, account suspended or inactive', { templateName, category })
+      return new Response(
+        JSON.stringify({ success: false, reason: 'account_suspended' }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+  }
+
   // 2. Check suppression list (fail-closed: if we can't verify, don't send).
   // Exception : les templates légaux de la liste blanche (accusé RGPD, lien de
   // désinscription) franchissent la liste de suppression. Voir
@@ -825,14 +866,19 @@ Deno.serve(async (req) => {
         reason: deferReason,
         scheduledFor,
         firstEnqueuedAt,
+        // Lot C1 : un email marketing ne franchit jamais le plafond.
+        category,
       })
 
       if (resolution.action === 'cancel') {
         const isNearbyAlert = NEARBY_SIT_ALERT_TEMPLATES.has(templateName)
+        const isProductCap = category === 'product' && !DATED_TEMPLATES.has(templateName) && deferReason !== 'quiet_hours'
         // Motif lisible, destine au tableau de bord admin. Une alerte de
         // nouvelle annonce detruite doit etre comptable, pas silencieuse.
         const humanReason = isNearbyAlert
           ? `Alerte de nouvelle annonce detruite : report au ${scheduledFor.toISOString()} (motif ${deferReason}), au dela de la duree de vie du gabarit fixee au ${resolution.ttlDeadline.toISOString()}.`
+          : isProductCap
+          ? `Email marketing annule, plafond de frequence atteint : report au ${scheduledFor.toISOString()} (motif ${deferReason}), au dela de la duree de vie du gabarit fixee au ${resolution.ttlDeadline.toISOString()}.`
           : `Contenu date annule : report au ${scheduledFor.toISOString()} (motif ${deferReason}), au dela de la duree de vie du gabarit fixee au ${resolution.ttlDeadline.toISOString()}.`
         const cancelReason = `ttl_exceeded_cancelled (${deferReason}, report ${scheduledFor.toISOString()} > TTL ${resolution.ttlDeadline.toISOString()})`
         if (sourceQueueId) {
