@@ -9081,7 +9081,9 @@ export type Database = {
       sit_invitations: {
         Row: {
           created_at: string
+          expires_at: string | null
           id: string
+          kind: string
           message: string | null
           owner_id: string
           responded_at: string | null
@@ -9092,7 +9094,9 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          expires_at?: string | null
           id?: string
+          kind?: string
           message?: string | null
           owner_id: string
           responded_at?: string | null
@@ -9103,7 +9107,9 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          expires_at?: string | null
           id?: string
+          kind?: string
           message?: string | null
           owner_id?: string
           responded_at?: string | null
@@ -12765,6 +12771,10 @@ export type Database = {
         Args: { p_category: string; p_reason: string; p_review_id: string }
         Returns: string
       }
+      create_sit_proposal: {
+        Args: { p_message?: string; p_sit_id: string; p_sitter_id: string }
+        Returns: string
+      }
       decline_garde_accord: { Args: { p_garde_id: string }; Returns: undefined }
       delete_email: {
         Args: { message_id: number; queue_name: string }
@@ -13282,6 +13292,7 @@ export type Database = {
         }[]
       }
       get_sit_context_for_alma: { Args: { _sit_id: string }; Returns: Json }
+      get_sit_proposal: { Args: { p_invitation_id: string }; Returns: Json }
       get_sit_view_count_week: { Args: { p_sit_id: string }; Returns: number }
       get_sit_views_count: {
         Args: { p_sit_ids: string[] }
@@ -13864,6 +13875,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      respond_sit_proposal: {
+        Args: { p_accept: boolean; p_invitation_id: string; p_message?: string }
+        Returns: Json
+      }
       retry_missing_geocoding: { Args: never; Returns: Json }
       school_zone_from_postal_code: { Args: { p_cp: string }; Returns: string }
       search_alma_knowledge: {
@@ -13998,6 +14013,8 @@ export type Database = {
         Args: { _code: string; _message: string; _sit_id: string }
         Returns: undefined
       }
+      sit_proposal_blockers: { Args: { p_sit_id: string }; Returns: string[] }
+      sit_proposal_limits: { Args: never; Returns: Json }
       sitter_missing_opportunities:
         | { Args: never; Returns: Json }
         | { Args: { _sitter_id?: string }; Returns: Json }

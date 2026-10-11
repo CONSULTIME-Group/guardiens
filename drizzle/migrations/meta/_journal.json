@@ -470,6 +470,13 @@
       "when": 1791665041804,
       "tag": "0066_perf_analytics_events_57014",
       "breakpoints": true
+    },
+    {
+      "idx": 67,
+      "version": "7",
+      "when": 1791714767236,
+      "tag": "0067_sit_private_proposals",
+      "breakpoints": true
     }
   ]
 }
