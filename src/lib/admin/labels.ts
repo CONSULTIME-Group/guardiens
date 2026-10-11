@@ -313,6 +313,7 @@ export const CAMPAIGN_LABELS: Dict = {
   owner_activation: "Activation des propriétaires",
   entraide_ligne: "Phrase d'entraide",
   entraide_ligne_relance: "Relance de la phrase d'entraide",
+  entraide_ligne_nouveaux: "Phrase d'entraide, nouveaux disponibles",
   sitter_daily_digest: "Résumé quotidien gardiens",
   mission_daily_digest: "Résumé quotidien entraide",
   mutual_aid_weekly_digest: "Résumé hebdomadaire entraide",

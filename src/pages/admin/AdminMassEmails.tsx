@@ -256,6 +256,32 @@ const CAMPAIGN_PRESETS: CampaignPreset[] = [
     utmContent: "cta",
   },
   {
+    // Lot E7b (11/10/2026) : aucun envoi automatique. Mêmes gabarit et filtres
+    // que la relance, sans le filtre de la campagne du 22/09 : l'anti-doublon
+    // par gabarit écarte les 629 personnes qui l'ont déjà reçue. Cible au
+    // 11/10 : 121 personnes disponibles sans phrase (base), surtout devenues
+    // disponibles par leurs savoir-faire après le 22/09.
+    key: "entraide_ligne_nouveaux",
+    label: "Entraide A ter, nouveaux disponibles sans phrase",
+    segment: "tous",
+    filters: {
+      comptes_actifs: true,
+      available_for_help: true,
+      helps_with_empty: true,
+      exclude_admins: true,
+      respect_product_optout: true,
+      template_name: "entraide-ligne-relance",
+    },
+    subject: "Rendre service fait du bien. À vous aussi.",
+    body: "Une partie de cartes, un panier de légumes, un trajet en voiture : pour quelqu'un près de chez vous, c'est un vrai coup de main. Pour vous, c'est souvent un bon moment. Dites en une phrase ce que vous aimez faire. Les gens du coin vous trouveront.",
+    ctaEnabled: true,
+    ctaLabel: "J'écris ma ligne",
+    ctaUrl: "https://guardiens.fr/ma-ligne?utm_source=email&utm_medium=email&utm_campaign=entraide_ligne_nouveaux",
+    utmEnabled: false,
+    utmCampaign: "entraide_ligne_nouveaux",
+    utmContent: "cta",
+  },
+  {
     // Lot N3 : aucun envoi automatique. Jérémie lance lui-même la campagne.
     key: "owner_noel_2026",
     label: "Propriétaires, Noël 2026",
