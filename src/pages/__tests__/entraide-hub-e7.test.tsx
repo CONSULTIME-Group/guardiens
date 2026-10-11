@@ -128,8 +128,10 @@ describe("Entraide, la page vue d'un membre", () => {
   it("prend l'origine dans le profil connecté, sans saisie de ville", async () => {
     renderHub();
     expect(await screen.findByRole("heading", { name: "Entraide et coups de main près de chez vous" })).toBeInTheDocument();
-    await waitFor(() => expect(screen.getByText("Autour de Lyon. Le plus proche est tout près de chez vous.")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/Autour de Lyon, 19 personnes sont prêtes à donner un coup de main\./)).toBeInTheDocument());
+    expect(screen.getByText(/Lieu : Lyon/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Changer de lieu" })).toBeInTheDocument();
+    expect(screen.getByText("Entraide · autour de Lyon")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Situer" })).toBeNull();
   });
 
@@ -144,16 +146,33 @@ describe("Entraide, la page vue d'un membre", () => {
     expect(screen.queryByTestId("entraide-map")).toBeNull();
   });
 
-  it("trie les besoins par distance croissante", async () => {
+  it("montre les besoins proches, replie les besoins lointains", async () => {
     renderHub();
-    await waitFor(() => expect(screen.getByText("Repeindre un portail")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("Arroser le potager")).toBeInTheDocument());
+    expect(screen.queryByText("Repeindre un portail")).toBeNull();
+    const toggle = screen.getByRole("button", { name: /Plus loin : 1 besoin ouvert ailleurs en France/ });
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    fireEvent.click(toggle);
+    expect(screen.getByText("Repeindre un portail")).toBeInTheDocument();
     const titles = screen.getAllByRole("heading", { level: 3 }).map((node) => node.textContent);
-    expect(titles.slice(0, 2)).toEqual(["Arroser le potager", "Repeindre un portail"]);
+    expect(titles.indexOf("Arroser le potager")).toBeLessThan(titles.indexOf("Repeindre un portail"));
+  });
+
+  it("une tuile d'idée ouvre le formulaire avec le titre écrit", async () => {
+    renderHub();
+    expect(await screen.findByRole("heading", { name: "Une idée pour commencer" })).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: /Arroser le potager|Faire les courses|Monter un meuble|Promener le chien|Nourrir le chat|Une partie de jeux de société/ }).length).toBe(6);
+  });
+
+  it("un seul bouton plein dans l'en-tête", async () => {
+    renderHub();
+    expect(await screen.findByRole("button", { name: "Demander un coup de main" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Proposer mon aide" })).toBeNull();
   });
 
   it("branche le bouton « Je peux » sur la fonction de réponse partagée", async () => {
     renderHub();
-    await waitFor(() => expect(screen.getAllByRole("button", { name: "Je peux" }).length).toBe(2));
+    await waitFor(() => expect(screen.getAllByRole("button", { name: "Je peux" }).length).toBe(1));
     fireEvent.click(screen.getAllByRole("button", { name: "Je peux" })[0]);
     expect(respondMock).not.toHaveBeenCalled();
     fireEvent.click(await screen.findByRole("button", { name: "Envoyer ma proposition" }));
@@ -179,7 +198,8 @@ describe("Entraide, la page vue d'un membre", () => {
   it("propose de publier quand le premier besoin dépasse trente kilomètres", async () => {
     rows.public_small_missions = [need("loin", "Repeindre un portail", 46.4, 5.4)];
     renderHub();
-    expect(await screen.findByText("Le premier besoin de votre secteur peut être le vôtre.")).toBeInTheDocument();
+    expect(await screen.findByText("Le fil est calme autour de Lyon aujourd'hui")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Écrire ma demande" })).toBeInTheDocument();
   });
 
   it("charge la section des personnes en trois requêtes au plus", async () => {
@@ -190,8 +210,10 @@ describe("Entraide, la page vue d'un membre", () => {
     expect(helperCalls.length).toBeLessThanOrEqual(3);
     expect(screen.queryByText("Moi")).toBeNull();
     expect(screen.getByText("Lyon, tout près de chez vous")).toBeInTheDocument();
-    expect(screen.getAllByRole("heading", { level: 3 }).filter((node) => node.textContent === "Gaston" || node.textContent?.startsWith("Membre")).length).toBe(12);
-    expect(screen.getByRole("button", { name: "Voir 12 de plus" })).toBeInTheDocument();
+    expect(screen.getAllByRole("heading", { level: 3 }).filter((node) => node.textContent === "Gaston" || node.textContent?.startsWith("Membre")).length).toBe(4);
+    expect(screen.getByRole("heading", { name: "19 personnes prêtes à aider à moins de 30 km de Lyon" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Voir les 19 personnes" }));
+    expect(screen.getAllByRole("heading", { level: 3 }).filter((node) => node.textContent === "Gaston" || node.textContent?.startsWith("Membre")).length).toBe(19);
   });
 
   it("charge la page d'un membre en huit requêtes au plus", async () => {

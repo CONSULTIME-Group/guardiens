@@ -191,7 +191,7 @@ export const NeedRow = ({ need, distance, state, onCanHelp, pending = false }: {
         ) : state === "responded" ? (
           <span className="text-xs font-semibold text-primary">Vous avez dit je peux</span>
         ) : (
-          <Button type="button" size="sm" onClick={onCanHelp} disabled={pending}>
+          <Button type="button" size="sm" variant="outline" onClick={onCanHelp} disabled={pending}>
             {pending ? "Envoi..." : "Je peux"}
           </Button>
         )}
@@ -199,6 +199,29 @@ export const NeedRow = ({ need, distance, state, onCanHelp, pending = false }: {
     </li>
   );
 };
+
+/**
+ * Ouvre la conversation avec une personne prête à aider, premier message
+ * prérempli (lot E3). Sert aussi au retour d'inscription (?contact=, lot E4).
+ */
+export async function openHelperConversation(helper: PublicHelper, navigate: (to: string) => void): Promise<boolean> {
+  const firstName = capitalizeFirstName(publicFirstName(helper.first_name)) || "";
+  try {
+    const { conversationId, error } = await startConversation({ otherUserId: helper.id, context: "helper_inquiry" });
+    if (!conversationId) {
+      toast.error(error?.includes("soi-même")
+        ? "Cette carte est la vôtre."
+        : "La conversation sera disponible dans un instant. Réessayez.");
+      return false;
+    }
+    const draft = helperFirstMessage(firstName, helperSkills(helper.competences));
+    navigate(`/messages?c=${conversationId}&draft=${encodeURIComponent(draft)}`);
+    return true;
+  } catch {
+    toast.error("La conversation sera disponible dans un instant. Réessayez.");
+    return false;
+  }
+}
 
 export const HelperCard = ({ helper, distance, showDistance, compact = false, counts, badgeRows }: {
   helper: PublicHelper;
@@ -223,17 +246,7 @@ export const HelperCard = ({ helper, distance, showDistance, compact = false, co
     if (opening) return;
     setOpening(true);
     try {
-      const { conversationId, error } = await startConversation({ otherUserId: helper.id, context: "helper_inquiry" });
-      if (!conversationId) {
-        toast.error(error?.includes("soi-même")
-          ? "Cette carte est la vôtre."
-          : "La conversation sera disponible dans un instant. Réessayez.");
-        return;
-      }
-      const draft = helperFirstMessage(firstName === "Membre" ? "" : firstName, skills);
-      navigate(`/messages?c=${conversationId}&draft=${encodeURIComponent(draft)}`);
-    } catch {
-      toast.error("La conversation sera disponible dans un instant. Réessayez.");
+      await openHelperConversation(helper, navigate);
     } finally {
       setOpening(false);
     }
@@ -263,7 +276,7 @@ export const HelperCard = ({ helper, distance, showDistance, compact = false, co
         </p>
       )}
       {helper.helps_with?.trim() && <p className="mt-3 text-sm leading-relaxed text-foreground">{helper.helps_with.trim()}</p>}
-      <Button type="button" size="sm" className="mt-4" onClick={contact} disabled={opening}>
+      <Button type="button" size="sm" variant="outline" className="mt-4" onClick={contact} disabled={opening}>
         {opening ? "Ouverture..." : `Écrire à ${firstName}`}
       </Button>
     </article>
