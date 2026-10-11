@@ -28,9 +28,9 @@ export const AT_HELPER_NOTE =
   "Un coup de main entre gens du coin, en échange d'un service ou d'une attention.";
 
 export const SIT_MODE_AT_HOME_TITLE =
-  "Pour une garde de plusieurs jours chez vous, publiez une annonce de garde.";
+  "Quelqu'un s'installe chez vous : c'est une garde, publiez-la comme annonce.";
 export const SIT_MODE_AT_HOME_TEXT =
-  "Les gardiens de votre secteur la reçoivent, et vous choisissez après les avoir rencontrés.";
+  "Les gardiens de votre secteur la reçoivent et vous choisissez la personne qui vous convient. Votre texte et vos dates sont repris.";
 export const SIT_MODE_PRIMARY = "Publier une annonce de garde";
 export const SIT_MODE_SECONDARY = "Publier quand même un besoin";
 
@@ -48,4 +48,36 @@ export function sitModeLine(mode: MissionSitMode, firstName?: string | null): st
     case "at_helper":
       return "L'animal vient chez vous";
   }
+}
+
+/**
+ * Lot G1 (11/10/2026) : la question « Comment ça se passe ? » s'ouvre pour
+ * tout besoin qui parle d'animaux, en plus des gardes de plusieurs jours.
+ * Décision de Jérémie : on propose la garde quand quelqu'un s'installe chez
+ * la personne ; un animal gardé chez la personne qui aide, ou des passages,
+ * restent un coup de main.
+ */
+export function shouldAskSitMode(args: {
+  missionType: string | null | undefined;
+  multiDay: boolean;
+  category: string | null | undefined;
+  sitLike: boolean;
+}): boolean {
+  if (args.missionType !== "besoin") return false;
+  return args.multiDay || args.category === "animals" || args.sitLike;
+}
+
+/** Signal de modération « ressemble à une garde » : seulement si quelqu'un s'installe chez la personne. */
+export function reportsSitLike(sitLike: boolean, mode: MissionSitMode | null | undefined): boolean {
+  return sitLike && (!mode || mode === "at_home");
+}
+
+/** Adresse de l'annonce de garde préremplie (paramètres lus par CreateSit : debut, fin). */
+export function sitCreateUrl(dateNeeded?: string | null, endDate?: string | null): string {
+  const params = new URLSearchParams();
+  const day = (value?: string | null) => (value ? value.slice(0, 10) : "");
+  if (day(dateNeeded)) params.set("debut", day(dateNeeded));
+  if (day(endDate)) params.set("fin", day(endDate));
+  const qs = params.toString();
+  return `/sits/create${qs ? `?${qs}` : ""}`;
 }

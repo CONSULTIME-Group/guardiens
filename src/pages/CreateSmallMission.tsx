@@ -47,6 +47,9 @@ import {
   SIT_MODE_SECONDARY,
   type MissionSitMode,
   isMissionSitMode,
+  shouldAskSitMode,
+  reportsSitLike,
+  sitCreateUrl,
 } from "@/lib/missionSitMode";
 import { waveAudienceMessage } from "@/lib/missionAudienceMessage";
 import { AlertCircle, ChevronLeft, CalendarIcon } from "lucide-react";
@@ -335,6 +338,11 @@ const CreateSmallMission = () => {
     () => missionType === "besoin" && looksLikeMultiDaySit(title, description, dateNeeded, endDate),
     [missionType, title, description, dateNeeded, endDate],
   );
+  /** Lot G1 : la question s'ouvre aussi pour tout besoin qui parle d'animaux. */
+  const askSitMode = useMemo(
+    () => shouldAskSitMode({ missionType, multiDay: multiDaySit, category, sitLike: !!sitLike }),
+    [missionType, multiDaySit, category, sitLike],
+  );
   const [sitMode, setSitMode] = useState<MissionSitMode | null>(null);
   const [sitHomeStayConfirmed, setSitHomeStayConfirmed] = useState(false);
   const rehoming = useMemo(() => rehomingSignals(title, description), [title, description]);
@@ -384,7 +392,7 @@ const CreateSmallMission = () => {
     if (!user) return;
     if (hasMoneyMention(exchangeOffer)) return;
     if (submitting) return;
-    if (multiDaySit && !isMissionSitMode(sitMode)) {
+    if (askSitMode && !isMissionSitMode(sitMode)) {
       toast({
         title: SIT_MODE_QUESTION_TITLE,
         description: "Choisissez le déroulement qui correspond, puis publiez.",
@@ -466,7 +474,7 @@ const CreateSmallMission = () => {
       date_needed: dateNeeded || null,
       end_date: endDate || null,
       duration_estimate: duration,
-      sit_mode: multiDaySit && sitMode ? sitMode : null,
+      sit_mode: askSitMode && sitMode ? sitMode : null,
       pet_species: petSpecies || null,
       pet_size: petSize || null,
       photos,
@@ -524,7 +532,7 @@ const CreateSmallMission = () => {
       const mid = inserted.id;
       const metaBase = { title: cleanTitle, city: city.trim() };
       const rpc = (supabase.rpc as any).bind(supabase);
-      if (sitLike) {
+      if (sitLike && reportsSitLike(true, askSitMode ? sitMode : null)) {
         rpc("report_mission_content_signal", {
           _mission_id: mid,
           _signal_type: "sit_like_mission",
@@ -642,31 +650,8 @@ const CreateSmallMission = () => {
                 <h2 className="font-heading font-semibold text-lg">Le détail</h2>
 
                 {/* Garde-fous éditoriaux, non bloquants */}
-                {sitLike && (
-                  <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-2" role="note">
-                    <p className="text-sm font-semibold text-foreground">
-                      Ça ressemble à une garde d'animaux
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Les gardes ont un espace dédié, plus visible et mieux suivi, avec dates et consignes structurées. Votre texte est repris tel quel.
-                    </p>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          writeSitPrefill({ title, description });
-                          try { void trackEvent("mission_to_sit_redirect", { metadata: { signals: sitLike.matched } }); } catch {}
-                          navigate("/sits/create");
-                        }}
-                      >
-                        Créer une annonce de garde
-                      </Button>
-                      <span className="text-[11px] text-muted-foreground">Ou continuez votre demande, vous restez libre.</span>
-                    </div>
-                  </div>
-                )}
+                {/* Lot G1 : une garde d'animaux se décide à l'étape suivante, par la
+                    question « Comment ça se passe ? » (s'installer chez vous = garde). */}
                 {moneyWording && (
                   <div className="rounded-xl border border-warning/40 bg-warning/10 p-4 space-y-1" role="note">
                     <p className="text-sm font-semibold text-foreground">
@@ -738,7 +723,7 @@ const CreateSmallMission = () => {
                 <h2 className="font-heading font-semibold text-lg">Où et quand ?</h2>
 
                 {/* Question de déroulement : la personne décide, jamais un blocage. */}
-                {multiDaySit && (
+                {askSitMode && (
                   <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-3" role="group" aria-labelledby="sit-mode-question">
                     <p id="sit-mode-question" className="text-sm font-semibold text-foreground">{SIT_MODE_QUESTION_TITLE}</p>
                     <div className="space-y-2" role="radiogroup" aria-label={SIT_MODE_QUESTION_TITLE}>
@@ -779,14 +764,8 @@ const CreateSmallMission = () => {
                             size="sm"
                             onClick={() => {
                               writeSitPrefill({ title, description });
-                              try { void trackEvent("mission_multi_day_sit_redirect", { metadata: { city: city.trim() } }); } catch {}
-                              navigate(
-                                `/sits/create?${new URLSearchParams({
-                                  ...(city.trim() ? { city: city.trim() } : {}),
-                                  ...(dateNeeded ? { start: dateNeeded } : {}),
-                                  ...(endDate ? { end: endDate } : {}),
-                                }).toString()}`,
-                              );
+                              try { void trackEvent("mission_multi_day_sit_redirect", { metadata: { city: city.trim(), category, multi_day: multiDaySit } }); } catch {}
+                              navigate(sitCreateUrl(dateNeeded, endDate));
                             }}
                           >
                             {SIT_MODE_PRIMARY}
