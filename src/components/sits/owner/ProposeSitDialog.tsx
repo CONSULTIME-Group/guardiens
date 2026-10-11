@@ -71,6 +71,8 @@ const ProposeSitDialog = ({ open, onOpenChange, ownerId, sitter, initialSitId, o
   const [proposed, setProposed] = useState<Set<string>>(new Set());
   const [step, setStep] = useState<Step>({ kind: "choose" });
   const [message, setMessage] = useState("");
+  // Lot I3 : « seulement lui ou elle » ou « en priorité, puis tous les gardiens ».
+  const [publishAfter, setPublishAfter] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const name = sitter.first_name;
@@ -144,8 +146,8 @@ const ProposeSitDialog = ({ open, onOpenChange, ownerId, sitter, initialSitId, o
     setSending(true);
     setError(null);
     try {
-      await createSitProposal(sit.id, sitter.id, message);
-      track("sit_proposal_sent", { sitter_id: sitter.id, sit_id: sit.id });
+      await createSitProposal(sit.id, sitter.id, message, publishAfter);
+      track("sit_proposal_sent", { sitter_id: sitter.id, sit_id: sit.id, publish_after: publishAfter });
       try {
         const { sendTransactionalEmail } = await import("@/lib/sendTransactionalEmail");
         await sendTransactionalEmail({
@@ -307,10 +309,40 @@ const ProposeSitDialog = ({ open, onOpenChange, ownerId, sitter, initialSitId, o
                 className="text-[16px]"
               />
             </div>
-            <div className="rounded-[14px] bg-primary/[0.07] px-4 py-3 text-[14px] leading-relaxed text-foreground">
-              <strong>Votre garde reste privée.</strong> Elle n'est visible que par {name}. La publier pour d'autres
-              gardiens reste votre choix, à tout moment.
-            </div>
+            <fieldset className="space-y-2" data-proposal-visibility>
+              <legend className="mb-2 text-[15px] font-semibold text-foreground">Qui peut voir cette garde ?</legend>
+              {[
+                {
+                  value: false,
+                  title: `${name} seulement`,
+                  detail: "Votre garde reste privée. Vous pourrez la publier plus tard, à tout moment.",
+                },
+                {
+                  value: true,
+                  title: `${name} en priorité, puis tous les gardiens`,
+                  detail: `${name} a ${SIT_PROPOSAL_LIMITS.priorityHours} heures pour répondre en priorité. Ensuite, votre garde est publiée et d'autres gardiens peuvent candidater.`,
+                },
+              ].map((o) => (
+                <label
+                  key={String(o.value)}
+                  className={`flex cursor-pointer items-start gap-3 rounded-[16px] bg-card px-4 py-3 ${
+                    publishAfter === o.value ? "border-2 border-primary" : "border border-border"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="propose-visibilite"
+                    checked={publishAfter === o.value}
+                    onChange={() => setPublishAfter(o.value)}
+                    className="mt-1 h-5 w-5 accent-[hsl(var(--primary))]"
+                  />
+                  <span>
+                    <span className="block text-[15px] font-semibold text-foreground">{o.title}</span>
+                    <span className="mt-0.5 block text-[13px] text-muted-foreground">{o.detail}</span>
+                  </span>
+                </label>
+              ))}
+            </fieldset>
             <p className="text-[13px] leading-relaxed text-muted-foreground">
               {name} a {SIT_PROPOSAL_LIMITS.expiryDays} jours pour répondre. Vous pouvez proposer cette garde à{" "}
               {SIT_PROPOSAL_LIMITS.maxOpenPerSit} gardiens en même temps. Au premier oui, vous confirmez la garde ensemble
@@ -338,6 +370,9 @@ const ProposeSitDialog = ({ open, onOpenChange, ownerId, sitter, initialSitId, o
               <DialogDescription>
                 {name} la reçoit dans ses notifications et par email. Sa réponse vous arrive dans votre espace : en cas
                 de oui, vous confirmez la garde ensemble.
+                {publishAfter
+                  ? ` Sans oui dans les ${SIT_PROPOSAL_LIMITS.priorityHours} heures, votre garde est publiée pour tous les gardiens.`
+                  : ""}
               </DialogDescription>
             </DialogHeader>
             <div className="flex flex-wrap items-center justify-between gap-4">

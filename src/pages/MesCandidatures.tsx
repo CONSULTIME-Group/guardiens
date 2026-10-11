@@ -75,6 +75,8 @@ const MesCandidatures = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [apps, setApps] = useState<SitterApp[]>([]);
+  // Lot I2 : candidatures nées d'une proposition privée (garde en brouillon).
+  const [proposalBySit, setProposalBySit] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const prevStatusRef = useRef<Record<string, string>>({});
 
@@ -100,6 +102,16 @@ const MesCandidatures = () => {
         });
       }
 
+      if (rows.some((r) => r.sit_status === "draft")) {
+        const { data: proposals } = await (supabase as any)
+          .from("sit_invitations")
+          .select("id, sit_id")
+          .eq("sitter_id", user.id)
+          .eq("kind", "private");
+        setProposalBySit(
+          Object.fromEntries(((proposals as { id: string; sit_id: string }[] | null) ?? []).map((p) => [p.sit_id, p.id])),
+        );
+      }
       setApps(rows);
       prevStatusRef.current = Object.fromEntries(rows.map((r) => [r.application_id, r.status]));
     } catch (e) {
@@ -191,7 +203,12 @@ const MesCandidatures = () => {
     const period = showContent ? formatSitPeriod(app.sit_start_date, app.sit_end_date, null) : null;
     const badge = appStatusBadge[app.status] || appStatusBadge.pending;
     const note = sitStateNote(app.sit_status);
-    const title = showContent ? app.sit_title || "Annonce sans titre" : "Annonce non publiée";
+    const proposalId = !showContent ? proposalBySit[app.sit_id] : undefined;
+    const title = showContent
+      ? app.sit_title || "Annonce sans titre"
+      : proposalId
+        ? `Garde proposée par ${app.owner?.first_name || "un propriétaire"}`
+        : "Annonce non publiée";
 
     return (
       <li
@@ -228,6 +245,13 @@ const MesCandidatures = () => {
                 {showContent ? (
                   <Link
                     to={`/sits/${app.sit_id}`}
+                    className="block font-heading font-semibold text-base text-foreground hover:text-primary transition-colors truncate"
+                  >
+                    {title}
+                  </Link>
+                ) : proposalId ? (
+                  <Link
+                    to={`/propositions/${proposalId}`}
                     className="block font-heading font-semibold text-base text-foreground hover:text-primary transition-colors truncate"
                   >
                     {title}
