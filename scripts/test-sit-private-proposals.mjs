@@ -10,10 +10,7 @@ const migration = readFileSync(
   new URL('supabase/prepared-migrations/20261011150000_sit_private_proposals.sql', root),
   'utf8',
 );
-const priorityMigration = readFileSync(
-  new URL('supabase/prepared-migrations/20261011170000_sit_proposal_priority.sql', root),
-  'utf8',
-);
+
 const db = new PGlite();
 
 const OWNER = '10000000-0000-4000-8000-000000000001';
@@ -285,81 +282,6 @@ await test('les invitations publiques gardent leur lien vers l annonce', async (
   await db.query(`INSERT INTO sit_invitations (sit_id, owner_id, sitter_id) VALUES ($1, $2, $3)`, [SIT_PUBLISHED, OWNER, SITTER2]);
   const n = await one(`SELECT title, link FROM notifications WHERE user_id = $1 AND link = $2`, [SITTER2, `/sits/${SIT_PUBLISHED}`]);
   assert.equal(n.title, 'Invitation à candidater');
-});
-
-// ---------------------------------------------------------------------------
-// Lot I3 : priorité de 48 heures puis publication automatique.
-await as('');
-await db.exec(priorityMigration);
-await db.exec(priorityMigration);
-const OWNER2 = '30000000-0000-4000-8000-0000000000b1';
-const PROP2 = '40000000-0000-4000-8000-0000000000b2';
-const PSIT = '50000000-0000-4000-8000-0000000000b3';
-const PSIT2 = '50000000-0000-4000-8000-0000000000b4';
-const PSIT3 = '50000000-0000-4000-8000-0000000000b5';
-await db.exec(`
-  INSERT INTO profiles (id, first_name, city, role) VALUES ('${OWNER2}', 'Lise', 'Annecy', 'owner');
-  INSERT INTO properties (id, user_id, type, photos) VALUES ('${PROP2}', '${OWNER2}', 'chalet', ARRAY['https://x.test/sejour.jpg']);
-  INSERT INTO sits (id, user_id, property_id, title, start_date, end_date, city, specific_expectations, status)
-  SELECT v.id::uuid, '${OWNER2}', '${PROP2}', v.t, current_date + 20, current_date + 25, 'Annecy',
-    'Un chat, des plantes et une vue sur le lac à arroser de regards.', 'draft'
-  FROM (VALUES ('${PSIT}', 'Chalet A'), ('${PSIT2}', 'Chalet B'), ('${PSIT3}', 'Chalet C')) AS v(id, t);
-`);
-
-await test('I3 : limites avec la durée de priorité, une seule signature de création', async () => {
-  const r = await one(`SELECT sit_proposal_limits() AS l, (SELECT count(*)::int FROM pg_proc WHERE proname = 'create_sit_proposal') AS n`);
-  assert.equal(r.l.priority_hours, 48);
-  assert.equal(r.n, 1);
-});
-
-await test('I3 : sans priorité, aucune publication programmée', async () => {
-  await as(OWNER2);
-  await one(`SELECT create_sit_proposal($1, $2, 'Bonjour')`, [PSIT3, SITTER]);
-  assert.equal((await one(`SELECT proposal_publish_at FROM sits WHERE id = $1`, [PSIT3])).proposal_publish_at, null);
-});
-
-await test('I3 : priorité demandée, publication programmée à 48 heures', async () => {
-  await as(OWNER2);
-  await one(`SELECT create_sit_proposal($1, $2, 'Bonjour', true)`, [PSIT, SITTER]);
-  const r = await one(`SELECT round(extract(epoch FROM proposal_publish_at - now()) / 3600) AS h FROM sits WHERE id = $1`, [PSIT]);
-  assert.equal(Number(r.h), 48);
-  await as('');
-  assert.equal((await one(`SELECT publish_due_proposal_sits() AS n`)).n, 0);
-});
-
-await test('I3 : à l échéance, sans oui, la garde est publiée et le propriétaire prévenu', async () => {
-  await as('');
-  await db.query(`UPDATE sits SET proposal_publish_at = now() - interval '1 minute' WHERE id = $1`, [PSIT]);
-  assert.equal((await one(`SELECT publish_due_proposal_sits() AS n`)).n, 1);
-  const sit = await one(`SELECT status, proposal_publish_at FROM sits WHERE id = $1`, [PSIT]);
-  assert.deepEqual(sit, { status: 'published', proposal_publish_at: null });
-  const n = await one(`SELECT title, link FROM notifications WHERE user_id = $1 AND type = 'sit_auto_published'`, [OWNER2]);
-  assert.deepEqual(n, { title: 'Votre garde est publiée', link: `/sits/${PSIT}` });
-  // La proposition reste ouverte sur la garde publiée.
-  await as(SITTER);
-  const inv = (await one(`SELECT id FROM sit_invitations WHERE sit_id = $1 AND sitter_id = $2`, [PSIT, SITTER])).id;
-  assert.equal((await one(`SELECT get_sit_proposal($1) AS p`, [inv])).p.state, 'open');
-});
-
-await test('I3 : un oui avant l échéance suspend la publication automatique', async () => {
-  await as(OWNER2);
-  const inv = (await one(`SELECT create_sit_proposal($1, $2, NULL, true) AS id`, [PSIT2, SITTER2])).id;
-  await as(SITTER2);
-  await one(`SELECT respond_sit_proposal($1, true, NULL)`, [inv]);
-  await as('');
-  await db.query(`UPDATE sits SET proposal_publish_at = now() - interval '1 minute' WHERE id = $1`, [PSIT2]);
-  assert.equal((await one(`SELECT publish_due_proposal_sits() AS n`)).n, 0);
-  assert.deepEqual(await one(`SELECT status, proposal_publish_at FROM sits WHERE id = $1`, [PSIT2]), { status: 'draft', proposal_publish_at: null });
-});
-
-await test('I3 : un non sans autre proposition ouverte avance la publication', async () => {
-  await as('');
-  await db.query(`UPDATE sits SET proposal_publish_at = now() + interval '40 hours' WHERE id = $1`, [PSIT3]);
-  await as(SITTER);
-  const inv = (await one(`SELECT id FROM sit_invitations WHERE sit_id = $1 AND sitter_id = $2`, [PSIT3, SITTER])).id;
-  await one(`SELECT respond_sit_proposal($1, false, 'Pas libre')`, [inv]);
-  const r = await one(`SELECT proposal_publish_at <= now() AS due FROM sits WHERE id = $1`, [PSIT3]);
-  assert.equal(r.due, true);
 });
 
 for (const name of passed) console.log(`ok ${name}`);

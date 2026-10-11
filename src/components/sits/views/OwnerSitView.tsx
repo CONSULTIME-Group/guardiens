@@ -770,11 +770,10 @@ const OwnerSitView = ({
         />
 
       )}
-      {/* Lot I3 : propositions privées envoyées depuis la fiche d'un gardien */}
+      {/* Propositions privées envoyées depuis la fiche d'un gardien (lot I2) */}
       <SentProposalsBlock
         sitId={sit.id}
         isDraft={isDraft}
-        publishAt={(sit as unknown as { proposal_publish_at?: string | null }).proposal_publish_at ?? null}
       />
 
       {/* Confirmation publication, rappel des dates exactes */}

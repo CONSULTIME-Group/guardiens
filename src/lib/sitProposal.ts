@@ -14,8 +14,6 @@ export const SIT_PROPOSAL_LIMITS = {
   expiryDays: 5,
   maxOpenPerSit: 3,
   maxPerDay: 10,
-  /** Lot I3 : durée de priorité avant publication automatique, en heures. */
-  priorityHours: 48,
 } as const;
 
 export type ProposalBlocker = "city" | "dates" | "photo" | "description";
@@ -89,17 +87,11 @@ export async function fetchProposalBlockers(sitId: string): Promise<ProposalBloc
   );
 }
 
-export async function createSitProposal(
-  sitId: string,
-  sitterId: string,
-  message: string,
-  publishAfter = false,
-): Promise<string> {
+export async function createSitProposal(sitId: string, sitterId: string, message: string): Promise<string> {
   const { data, error } = await rpc("create_sit_proposal", {
     p_sit_id: sitId,
     p_sitter_id: sitterId,
     p_message: message.trim() || null,
-    p_publish_after: publishAfter,
   });
   if (error) throw error;
   return data as string;

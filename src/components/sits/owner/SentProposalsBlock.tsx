@@ -1,5 +1,5 @@
 /**
- * Lot I3 : propositions privées envoyées pour une garde, vues par son
+ * Propositions privées envoyées pour une garde, vues par son
  * propriétaire (état, délai restant, lien vers chaque proposition).
  * Ne rend rien tant qu'aucune proposition n'a été envoyée.
  */
@@ -26,28 +26,7 @@ export function sentProposalStateLabel(row: Pick<Row, "status" | "expires_at">, 
   return `${row.status === "viewed" ? "Vue" : "Envoyée"}, ${left.charAt(0).toLowerCase()}${left.slice(1)}`;
 }
 
-/** « … le 13 octobre à 14 h 37. » ; vide si rien n'est programmé. */
-export function scheduledPublicationLabel(publishAt: string | null | undefined): string {
-  if (!publishAt) return "";
-  const d = new Date(publishAt);
-  if (Number.isNaN(d.getTime())) return "";
-  const day = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", timeZone: "Europe/Paris" }).format(d);
-  const parts = new Intl.DateTimeFormat("fr-FR", { hour: "2-digit", minute: "2-digit", hourCycle: "h23", timeZone: "Europe/Paris" })
-    .formatToParts(d);
-  const hh = Number(parts.find((p) => p.type === "hour")?.value ?? "0");
-  const mm = parts.find((p) => p.type === "minute")?.value ?? "00";
-  return `Sans oui d'ici là, publication automatique le ${day} à ${hh} h ${mm}.`;
-}
-
-const SentProposalsBlock = ({
-  sitId,
-  isDraft,
-  publishAt,
-}: {
-  sitId: string;
-  isDraft: boolean;
-  publishAt?: string | null;
-}) => {
+const SentProposalsBlock = ({ sitId, isDraft }: { sitId: string; isDraft: boolean }) => {
   const [rows, setRows] = useState<Row[]>([]);
 
   useEffect(() => {
@@ -86,7 +65,6 @@ const SentProposalsBlock = ({
         {isDraft
           ? "Cette garde n'est visible que par les gardiens à qui vous l'avez proposée."
           : "Ces gardiens ont reçu votre garde en proposition personnelle."}
-        {isDraft && publishAt ? ` ${scheduledPublicationLabel(publishAt)}` : ""}
       </p>
       <ul className="mt-3 divide-y divide-border">
         {rows.map((r) => (

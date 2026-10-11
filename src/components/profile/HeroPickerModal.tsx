@@ -5,7 +5,7 @@
  * affichée en haut de son profil public.
  *
  * Fonctionnement :
- *   - Affiche les illustrations actives (ACTIVE_HERO_INDEXES) en grille filtrable par thème.
+ *   - Affiche les 100 illustrations de HERO_BANK en grille filtrable par thème.
  *   - Le choix est sauvegardé dans `profiles.hero_image_index` et prend le pas
  *     sur la sélection automatique par hash.
  *   - Une option "Sélection automatique" remet à NULL → retour au comportement
@@ -22,7 +22,6 @@ import { Loader2, Check, RotateCcw, X, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import {
-  ACTIVE_HERO_INDEXES,
   HERO_BANK,
   getCategoryByBankIndex,
   heroDisplayNumber,
@@ -73,10 +72,9 @@ export function HeroPickerModal({
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
 
   // Construit la liste indexée filtrée selon la catégorie sélectionnée.
-  // Seules les illustrations actives sont proposées (banque nettoyée).
-  const items = ACTIVE_HERO_INDEXES.map((idx) => ({
+  const items = HERO_BANK.map((src, idx) => ({
     idx,
-    src: HERO_BANK[idx],
+    src,
     mobileSrc: getMobileByIndex(idx),
     category: getCategoryByBankIndex(idx),
   })).filter((it) => filter === "all" || it.category === filter);
@@ -88,7 +86,7 @@ export function HeroPickerModal({
     mutual_aid: 0,
     village: 0,
   };
-  ACTIVE_HERO_INDEXES.forEach((idx) => {
+  HERO_BANK.forEach((_, idx) => {
     counts[getCategoryByBankIndex(idx)]++;
   });
 
@@ -159,7 +157,7 @@ export function HeroPickerModal({
                 : "bg-card text-foreground border-border hover:bg-muted"
             }`}
           >
-            Toutes ({ACTIVE_HERO_INDEXES.length})
+            Toutes ({HERO_BANK.length})
           </button>
           {(Object.keys(CATEGORY_LABELS) as HeroCategoryName[]).map((cat) => (
             <button
