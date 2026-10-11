@@ -22,6 +22,12 @@ vi.mock("@/lib/geocode", async (orig) => ({
   ...(await orig<typeof import("@/lib/geocode")>()),
   geocodeCity: (...a: unknown[]) => { geocodeCalls.push(a); return Promise.resolve({ lat: 45.764, lng: 4.8357, city: "Lyon" }); },
 }));
+// La vérification du département fait aussi partie du géocodage externe.
+// Garder les règles de recherche réelles sans appeler l'API communale.
+vi.mock("@/lib/sitSearchRules", async (orig) => ({
+  ...(await orig<typeof import("@/lib/sitSearchRules")>()),
+  communeDeptFromCoords: vi.fn().mockResolvedValue("69"),
+}));
 
 const fixture = Array.from({ length: 3 }, (_, i) => ({
   id: `sit-${i + 1}`, slug: `lyon-${i + 1}`, title: `Annonce Lyon ${i + 1}`,
