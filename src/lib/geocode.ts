@@ -69,14 +69,15 @@ export async function geocodeCity(city: string, country?: string | null): Promis
         body: { city: city.trim(), country: country?.trim() || undefined },
       });
       if (error || !data?.lat || !data?.lng) {
-        memoryCache.set(key, null);
+        // Lot E10 : seule une commune réellement introuvable est mémorisée ;
+        // une panne passagère ou un géocodeur limité se retente au clic suivant.
+        if (!error && data && !data.fallback && data.error === "City not found") memoryCache.set(key, null);
         return null;
       }
       const result: GeoResult = { lat: data.lat, lng: data.lng, city: data.city };
       memoryCache.set(key, result);
       return result;
     } catch {
-      memoryCache.set(key, null);
       return null;
     } finally {
       release();

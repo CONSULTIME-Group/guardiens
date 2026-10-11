@@ -55,7 +55,7 @@ export function usePostalCodeCity(
           await res.json();
 
         if (!data || data.length === 0) {
-          setPostalState({ cities: [], loading: false, error: "Code postal non reconnu" });
+          setPostalState({ cities: [], loading: false, error: "Code postal à vérifier" });
           return;
         }
 
