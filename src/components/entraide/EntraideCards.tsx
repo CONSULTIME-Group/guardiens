@@ -5,7 +5,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import MissionBadgesReceived, { type MissionBadgeRow } from "@/components/missions/MissionBadgesReceived";
 import HelpCounts from "@/components/entraide/HelpCounts";
 import { categoryInitial } from "@/lib/entraideHubModel";
-import { startConversationAndNavigate } from "@/lib/conversation";
+import { startConversation } from "@/lib/conversation";
+import { helperActivityLabel, helperFirstMessage, helperSkills } from "@/lib/helperDisplay";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { capitalizeFirstName, publicFirstName } from "@/lib/displayName";
@@ -38,6 +39,10 @@ export interface PublicHelper {
   latitude_approx: number | null;
   longitude_approx: number | null;
   helps_with: string | null;
+  /** Lot E3 : savoir-faire du profil gardien puis propriétaire (vue public_helpers). */
+  competences?: string[] | null;
+  /** Lot E3 : dernier jour d'activité, à la journée. */
+  last_active_on?: string | null;
 }
 
 const dateLabel = (need: EntraideNeed) => {
@@ -207,6 +212,8 @@ export const HelperCard = ({ helper, distance, showDistance, compact = false, co
   const navigate = useNavigate();
   const [opening, setOpening] = useState(false);
   const firstName = capitalizeFirstName(publicFirstName(helper.first_name)) || "Membre";
+  const skills = helperSkills(helper.competences);
+  const activity = helperActivityLabel(helper.last_active_on);
 
   const contact = async () => {
     if (!isAuthenticated) {
@@ -216,7 +223,15 @@ export const HelperCard = ({ helper, distance, showDistance, compact = false, co
     if (opening) return;
     setOpening(true);
     try {
-      await startConversationAndNavigate({ otherUserId: helper.id, context: "helper_inquiry" }, navigate);
+      const { conversationId, error } = await startConversation({ otherUserId: helper.id, context: "helper_inquiry" });
+      if (!conversationId) {
+        toast.error(error?.includes("propositions spontanées")
+          ? "Ce membre préfère être contacté depuis une annonce."
+          : "La conversation sera disponible dans un instant. Réessayez.");
+        return;
+      }
+      const draft = helperFirstMessage(firstName === "Membre" ? "" : firstName, skills);
+      navigate(`/messages?c=${conversationId}&draft=${encodeURIComponent(draft)}`);
     } catch {
       toast.error("La conversation sera disponible dans un instant. Réessayez.");
     } finally {
@@ -233,11 +248,20 @@ export const HelperCard = ({ helper, distance, showDistance, compact = false, co
         </Avatar>
         <div className="min-w-0 flex-1">
           <h3 className="font-heading text-lg font-semibold text-foreground">{firstName}</h3>
-          <p className="text-xs text-muted-foreground">{locationLabel(helper.city, distance, showDistance)}</p>
+          <p className="text-xs text-muted-foreground">
+            {locationLabel(helper.city, distance, showDistance)}
+            {activity && <span className="text-primary">{` · ${activity}`}</span>}
+          </p>
           <HelpCounts userId={helper.id} className="mt-1" counts={counts} />
         </div>
         <MissionBadgesReceived profileId={helper.id} variant="compact" rows={badgeRows} />
       </div>
+      {skills.length > 0 && (
+        <p className="mt-3 text-sm text-foreground" data-testid="helper-skills">
+          <span className="text-muted-foreground">Peut vous aider pour : </span>
+          {skills.join(", ")}
+        </p>
+      )}
       {helper.helps_with?.trim() && <p className="mt-3 text-sm leading-relaxed text-foreground">{helper.helps_with.trim()}</p>}
       <Button type="button" size="sm" className="mt-4" onClick={contact} disabled={opening}>
         {opening ? "Ouverture..." : `Écrire à ${firstName}`}
