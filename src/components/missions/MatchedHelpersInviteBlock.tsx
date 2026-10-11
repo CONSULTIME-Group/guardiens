@@ -64,7 +64,7 @@ export default function MatchedHelpersInviteBlock({
       // catégorie sans assez de personnes compétentes retombe sur la proximité.
       const box = (q: any) => (ownerLat != null && ownerLng != null
         ? q.gte("latitude_approx", ownerLat - 0.5).lte("latitude_approx", ownerLat + 0.5)
-          .gte("longitude_approx", ownerLng - 0.7).lte("longitude_approx", ownerLng + 0.7)
+          .gte("longitude_approx", ownerLng - 0.75).lte("longitude_approx", ownerLng + 0.75)
         : q);
       const read = (withSkill: boolean) => {
         let query = box(supabase
@@ -97,8 +97,13 @@ export default function MatchedHelpersInviteBlock({
         ? true
         : h.distance != null && h.distance <= SEARCH_RADIUS_KM);
 
-      // Tri : distance croissante en premier, sans distance ensuite.
+      // Tri : personnes au savoir-faire demandé d'abord, puis distance
+      // croissante, sans distance ensuite.
+      const hasSkill = (h: any) => !!skillKey && Array.isArray(h.skill_categories) && h.skill_categories.includes(skillKey);
       filtered.sort((a, b) => {
+        const sa = hasSkill(a) ? 0 : 1;
+        const sb = hasSkill(b) ? 0 : 1;
+        if (sa !== sb) return sa - sb;
         if (a.distance != null && b.distance != null) return a.distance - b.distance;
         if (a.distance != null) return -1;
         if (b.distance != null) return 1;

@@ -74,16 +74,18 @@ const CATEGORY_RULES: Array<{ key: MissionCategory; rx: RegExp }> = [
   { key: "garden", rx: /\b(jardin|potager|arros\w*|tomates?|tondre|tonte|haies?|pelouse|semis|recolte\w*|legumes|plantations?|desherb\w*)\b/ },
   { key: "transport", rx: /\b(transport\w*|trajets?|covoiturage|gare|aeroport|conduire|emmener|vehicule|camion\w*)\b/ },
   { key: "house", rx: /\b(meubles?|monter|bricol\w*|repar\w*|peindre|peinture|etageres?|bibliotheque|demenag\w*|cartons?|poncer|ponceuse|perceuse|menage|fuite|plomberie|coiffeuse|canape)\b/ },
-  { key: "errand", rx: /\b(courses|livraisons?|colis|pharmacie|supermarche|marche|boulangerie)\b/ },
+  { key: "errand", rx: /\b(courses|livraisons?|colis|pharmacie|supermarche|boulangerie)\b/ },
   { key: "company", rx: /\b(jeux?|belote|cartes|scrabble|compagnie|discuter|promenade|balade|lecture|visite)\b/ },
-  { key: "skills", rx: /\b(informatique|ordinateur|smartphone|telephone|administrati\w*|formulaires?|impots|anglais|cours|coudre|couture|rideaux|traduction|photos?)\b/ },
+  { key: "skills", rx: /\b(informatique|ordinateur|smartphone|telephone|administrati\w*|formulaires?|impots|anglais|cours|coudre|couture|rideaux|traduction)\b/ },
 ];
 
+const fold = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+/** Le titre décide d'abord ; la description ne sert que si le titre ne dit rien. */
 export function inferMissionCategory(title: string | null | undefined, description?: string | null): MissionCategory {
-  const text = `${title ?? ""} ${description ?? ""}`
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
-  for (const rule of CATEGORY_RULES) if (rule.rx.test(text)) return rule.key;
+  const texts = [fold(title ?? ""), fold(`${title ?? ""} ${description ?? ""}`)];
+  for (const text of texts) {
+    for (const rule of CATEGORY_RULES) if (rule.rx.test(text)) return rule.key;
+  }
   return "other";
 }

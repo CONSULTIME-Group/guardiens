@@ -21,6 +21,9 @@ describe("E6, catégorie déduite", () => {
     ["Un coup de main pour coudre des rideaux", "", "skills"],
     ["Remplir un formulaire en ligne", "", "skills"],
     ["Un service", "à convenir", "other"],
+    ["Besoin d'aide pour mon chat", "si ça marche pour vous, je fais les courses après", "animals"],
+    ["Un service", "ça marche pour moi le samedi", "other"],
+    ["Promener mon chien", "je vous enverrai des photos", "animals"],
   ])("%s", (title, description, expected) => {
     expect(inferMissionCategory(title, description)).toBe(expected);
   });
@@ -38,6 +41,8 @@ describe("E6, invitations proches", () => {
     expect(src).toContain('gte("latitude_approx", ownerLat - 0.5)');
     expect(src).toContain("read(false)");
     expect(src).not.toContain("limit(30)");
+    expect(src).toContain("ownerLng - 0.75");
+    expect(src).toContain("if (sa !== sb) return sa - sb;");
   });
 });
 
@@ -46,6 +51,7 @@ describe("E6, rattrapage", () => {
     const sql = readFileSync("supabase/prepared-migrations/20261011183000_e6_categories_besoins.sql", "utf8");
     expect(sql).toContain("_backup_mission_category_e6_20261011");
     expect(sql).toContain("WHERE s.id = v.id AND s.category = 'other'");
-    expect(sql).toContain("IF v_count > 11 THEN RAISE EXCEPTION");
+    expect(sql).toContain("IF v_count <> 11 THEN RAISE EXCEPTION");
+    expect(sql).toContain("RAISE NOTICE");
   });
 });

@@ -29,6 +29,7 @@ BEGIN
     ) AS v(id, category)
    WHERE s.id = v.id AND s.category = 'other';
   GET DIAGNOSTICS v_count = ROW_COUNT;
-  IF v_count > 11 THEN RAISE EXCEPTION 'Rattrapage inattendu : % besoins', v_count; END IF;
+  RAISE NOTICE 'Lot E6 : % besoins reclassés sur 11 prévus', v_count;
+  IF v_count <> 11 THEN RAISE EXCEPTION 'Rattrapage inattendu : % besoins au lieu de 11', v_count; END IF;
 END;
 $migration$;
