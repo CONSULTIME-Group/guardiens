@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 import { runInNewContext } from 'node:vm';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { buildPushPayload, sanitizeBadge } from '../../../supabase/functions/_shared/web-push/payload';
-import { resetAppBadgeMemo, syncAppBadge } from '@/lib/appBadge';
+import { syncAppBadge } from '@/lib/appBadge';
 
 function worker(navigator?: Record<string, unknown>) {
   const handlers: Record<string, (event: any) => void> = {};
@@ -61,16 +61,15 @@ describe('N2, service worker', () => {
 });
 
 describe('N2, pastille tenue à jour par le site', () => {
-  afterEach(() => { resetAppBadgeMemo(); vi.unstubAllGlobals(); });
-  it('pose le total puis l efface quand tout est lu, sans appel répété', () => {
+  afterEach(() => { vi.unstubAllGlobals(); });
+  it('pose le total puis l efface quand tout est lu, même si le worker l a changé entre-temps', () => {
     const setAppBadge = vi.fn().mockResolvedValue(undefined);
     const clearAppBadge = vi.fn().mockResolvedValue(undefined);
     Object.assign(navigator, { setAppBadge, clearAppBadge });
-    syncAppBadge(2); syncAppBadge(2);
-    expect(setAppBadge).toHaveBeenCalledTimes(1);
+    syncAppBadge(2);
     expect(setAppBadge).toHaveBeenCalledWith(2);
-    syncAppBadge(0);
-    expect(clearAppBadge).toHaveBeenCalledOnce();
+    syncAppBadge(0); syncAppBadge(0);
+    expect(clearAppBadge).toHaveBeenCalledTimes(2);
     delete (navigator as any).setAppBadge; delete (navigator as any).clearAppBadge;
   });
   it('navigateur sans API : aucune erreur', () => {

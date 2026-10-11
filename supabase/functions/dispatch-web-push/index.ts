@@ -1,6 +1,6 @@
 // Edge dispatch-web-push : envoi des notifications en attente.
 // Appelable uniquement avec la cle service_role, jamais par un client.
-// Cron installe : job 1224 dispatch-web-push, toutes les cinq minutes.
+// Cron installe : job 1224 dispatch-web-push, chaque minute (lot N2, migration 0068).
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 import webpush from 'npm:web-push@3.6.7';
@@ -48,7 +48,7 @@ Deno.serve(async (req) => {
   }
 
   // Une ligne de journal seulement quand il s'est passe quelque chose : la
-  // file est vide la plupart du temps, inutile d'ecrire 288 lignes par jour.
+  // file est vide la plupart du temps, inutile d'ecrire 1 440 lignes par jour.
   const startedAt = new Date().toISOString();
   const recordRun = async (
     status: 'success' | 'partial' | 'failed',
@@ -168,7 +168,7 @@ Deno.serve(async (req) => {
 
   // File annonces proches : independante, dans le MEME budget total que
   // l'appel (comme avant ce lot) pour ne pas allonger l'execution du cron
-  // (toutes les 5 min) au-dela des reservations de 2 minutes.
+  // (chaque minute) au-dela des reservations de 2 minutes.
   const { budget, nearbyError } = await (async () => {
     const remaining = nearbyBudget(limit, counters.claimed);
     if (remaining === 0) return { budget: 0, nearbyError: false };

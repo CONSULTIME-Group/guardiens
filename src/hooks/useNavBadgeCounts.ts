@@ -101,9 +101,9 @@ export function useNavBadgeCounts(userId: string | undefined): NavBadgeCounts {
 
   // Lot N2 : pastille de l'icône alignée sur les messages non lus (Messages
   // et Entraide), même total que celui envoyé avec les notifications push.
+  // Sans compte (chargement de la session), la pastille posée par le worker reste.
   useEffect(() => {
-    if (!userId) { syncAppBadge(0); return; }
-    if (data) syncAppBadge(data.unreadCount + data.missionBadgeCount);
+    if (userId && data) syncAppBadge(data.unreadCount + data.missionBadgeCount);
   }, [userId, data]);
 
   return data ?? EMPTY;

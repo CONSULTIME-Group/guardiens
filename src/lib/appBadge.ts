@@ -10,23 +10,16 @@ type BadgeNavigator = Navigator & {
   clearAppBadge?: () => Promise<void>;
 };
 
-let lastCount: number | null = null;
-
 export function syncAppBadge(count: number): void {
   if (typeof navigator === "undefined") return;
   const nav = navigator as BadgeNavigator;
+  // Aucun mémo : le service worker peut avoir changé la pastille entre deux
+  // lectures, le site réécrit donc toujours la valeur qu'il connaît.
   const next = Number.isFinite(count) && count > 0 ? Math.min(Math.floor(count), 99) : 0;
-  if (next === lastCount) return;
-  lastCount = next;
   try {
     const pending = next > 0 ? nav.setAppBadge?.(next) : nav.clearAppBadge?.();
     void pending?.catch?.(() => undefined);
   } catch {
     /* API refusée : la pastille reste celle posée par le service worker */
   }
-}
-
-/** Réservé aux tests. */
-export function resetAppBadgeMemo(): void {
-  lastCount = null;
 }
