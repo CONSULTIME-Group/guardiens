@@ -1445,6 +1445,25 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_mission_category_e6_20261011: {
+        Row: {
+          category: Database["public"]["Enums"]["small_mission_category"] | null
+          id: string | null
+        }
+        Insert: {
+          category?:
+            | Database["public"]["Enums"]["small_mission_category"]
+            | null
+          id?: string | null
+        }
+        Update: {
+          category?:
+            | Database["public"]["Enums"]["small_mission_category"]
+            | null
+          id?: string | null
+        }
+        Relationships: []
+      }
       _backup_mission_conv_link_20260927: {
         Row: {
           id: string | null
