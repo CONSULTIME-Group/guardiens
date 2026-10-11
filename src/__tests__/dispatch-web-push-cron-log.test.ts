@@ -20,8 +20,12 @@ const serviceKey = "fixture-service-key";
 function harness(jobs: Array<Record<string, unknown>>, nearby: () => { data: unknown; error: unknown } = () => ({ data: [], error: null })) {
   let handler!: (request: Request) => Promise<Response>;
   const inserts: Array<{ table: string; row: unknown }> = [];
+  const updates: Array<{ table: string; row: unknown; column: string; value: unknown }> = [];
   const admin = {
-    from: (table: string) => ({ insert: async (row: unknown) => { inserts.push({ table, row }); return { error: null }; } }),
+    from: (table: string) => ({
+      insert: async (row: unknown) => { inserts.push({ table, row }); return { error: null }; },
+      update: (row: unknown) => ({ eq: async (column: string, value: unknown) => { updates.push({ table, row, column, value }); return { error: null }; } }),
+    }),
     rpc: vi.fn(async (name: string, _args?: unknown) => {
       if (name === "push_claim_jobs") return { data: jobs, error: null };
       if (name === "push_job_eligible") return { data: true, error: null };
@@ -61,7 +65,7 @@ function harness(jobs: Array<Record<string, unknown>>, nearby: () => { data: unk
     },
   });
   return {
-    inserts, admin,
+    inserts, updates, admin,
     run: () => handler(new Request("https://fixture.invalid", {
       method: "POST",
       headers: { Authorization: `Bearer ${serviceKey}` },
@@ -118,6 +122,14 @@ describe("dispatch-web-push, visibilité cron", () => {
     expect(row.status).toBe("partial");
     expect(row.error_message).toBe("push_claim_nearby_jobs failed");
     expect((row.metrics as Record<string, number>).nearby_unavailable).toBe(1);
+  });
+
+  it("lot N1 : une prise en charge note last_success_at sur l'abonnement", async () => {
+    const h = harness([fcm("j1")]);
+    await h.run();
+    expect(h.updates).toHaveLength(1);
+    expect(h.updates[0]).toMatchObject({ table: "push_subscriptions", column: "id", value: "s" });
+    expect(typeof (h.updates[0].row as Record<string, unknown>).last_success_at).toBe("string");
   });
 
   it("file proche en erreur : les envois principaux restent faits", async () => {

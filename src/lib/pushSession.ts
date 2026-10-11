@@ -14,10 +14,16 @@ export async function cleanupPushOnLogoutLazy(userId?: string): Promise<void> {
   await m.cleanupPushOnLogout(userId);
 }
 
+/**
+ * Lot N1 : seul un changement de compte nettoie l'appareil. Une session
+ * perdue (jeton expiré, rafraîchissement échoué) laisse l'abonnement intact :
+ * le membre le retrouve à sa reconnexion. La déconnexion volontaire passe par
+ * cleanupPushOnLogoutLazy, pendant que la session est encore valide.
+ */
 export function reconcilePushSessionLazy(userId?: string): void {
   try {
     const owner = localStorage.getItem(PUSH_OWNER_KEY);
-    if (owner && owner !== userId) {
+    if (userId && owner && owner !== userId) {
       setTimeout(() => { void import("@/lib/web-push").then((m) => m.cleanupPushOnLogout()).catch(() => {}); }, 0);
     }
   } catch { /* stockage indisponible : aucun propriétaire mémorisé */ }

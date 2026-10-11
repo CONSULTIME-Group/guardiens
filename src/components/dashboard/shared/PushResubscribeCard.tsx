@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
-  canOfferPush, clearPushOptOut, enablePush, getPushConfig, getPushState, postponePushOffer, pushDeviceStatus,
-  renewPushSilently, SILENT_RENEW_SESSION_KEY, type PushConfig, type PushPreferences,
+  canOfferPush, clearPushOptOut, enablePush, getPushConfig, getPushState, postponePushOffer, repairPushDevice,
+  PUSH_REPAIR_SESSION_KEY, type PushConfig, type PushPreferences, type PushRepair,
 } from "@/lib/web-push";
 import { trackEvent } from "@/lib/analytics";
 
@@ -44,15 +44,19 @@ export default function PushResubscribeCard({ role }: { role?: string | null }) 
       return true;
     };
     const preload = () => getPushConfig(userId).then((c) => { if (alive()) setConfig(c); }).catch(() => { if (alive()) setConfig({ enabled: false }); });
-    const check = () => pushDeviceStatus(userId).then(async (s) => {
+    // Lot N1 : réparation silencieuse une fois par session, et à chaque nouvelle
+    // adresse signalée par le worker (pushsubscriptionchange).
+    const check = (fromWorker = false) => {
+      const run: Promise<PushRepair> = fromWorker || flag(PUSH_REPAIR_SESSION_KEY)
+        ? repairPushDevice(userId)
+        : Promise.resolve({ kind: "none" });
+      return run.catch((): PushRepair => ({ kind: "failed" })).then((s) => {
       if (!alive()) return;
-      if (s.kind === "renewable") {
-        if (!flag(SILENT_RENEW_SESSION_KEY)) return;
-        const ok = await renewPushSilently(userId, s.subscriptionId);
-        if (!alive()) return;
-        void trackEvent("push_renewed_silently", { source: "dashboard", metadata: { ok } });
+      if (s.kind === "repaired" || s.kind === "failed") {
+        void trackEvent("push_renewed_silently", { source: fromWorker ? "worker" : "dashboard", metadata: { ok: s.kind === "repaired" } });
         return;
       }
+      if (s.kind === "ok") return;
       if (s.kind === "needs_gesture") {
         try { if (sessionStorage.getItem(RESUBSCRIBE_SESSION_KEY)) return; } catch { /* rien */ }
         flag(RESUBSCRIBE_SESSION_KEY);
@@ -70,10 +74,11 @@ export default function PushResubscribeCard({ role }: { role?: string | null }) 
         void preload();
         void trackEvent("push_offer_shown", { source: "dashboard" });
       }
-    });
+      });
+    };
     void check();
     const onMessage = (event: MessageEvent) => {
-      if (event.data?.type === "GUARDIENS_PUSH_RENEW") { void check(); }
+      if (event.data?.type === "GUARDIENS_PUSH_RENEW") { void check(true); }
     };
     const sw = typeof navigator !== "undefined" ? navigator.serviceWorker : undefined;
     sw?.addEventListener?.("message", onMessage);
