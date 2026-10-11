@@ -1103,6 +1103,30 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_cron_push_n2_20261011: {
+        Row: {
+          active: boolean | null
+          command: string | null
+          jobid: number | null
+          jobname: string | null
+          schedule: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          command?: string | null
+          jobid?: number | null
+          jobname?: string | null
+          schedule?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          command?: string | null
+          jobid?: number | null
+          jobname?: string | null
+          schedule?: string | null
+        }
+        Relationships: []
+      }
       _backup_dashboard_snapshot_s1b_20260928: {
         Row: {
           definition: string
@@ -13746,6 +13770,10 @@ export type Database = {
           p_subscription_id: string
         }
         Returns: boolean
+      }
+      push_unread_badge: {
+        Args: { p_subscription_id: string }
+        Returns: number
       }
       push_upsert_subscription: {
         Args: {
