@@ -6,6 +6,9 @@ import {
   getSitterHeroSources,
   getSitterHeroAnchor,
   getCategoryByBankIndex,
+  ACTIVE_HERO_INDEXES,
+  RETIRED_HERO_FILES,
+  isRetiredHeroIndex,
   type HeroCategoryName,
 } from "./heroBank";
 
@@ -108,14 +111,15 @@ describe("heroBank — distribution globale proche des cibles", () => {
     }
   });
 
-  it("toutes les images de la banque sont sélectionnables (couverture > 0 pour chacune)", () => {
+  it("toutes les images actives sont sélectionnables, aucune image retirée n'est attribuée", () => {
     const ids = makeSeededIds(SAMPLE_SIZE);
     const seen = new Set<number>();
     for (const id of ids) {
       seen.add(HERO_BANK.indexOf(getSitterHeroImage(id)));
     }
-    // Sur 10k tirages avec ~100 images, on doit voir TOUTES les images au moins une fois.
-    expect(seen.size).toBe(HERO_BANK.length);
+    // Sur 10k tirages, on doit voir TOUTES les images actives et aucune retirée.
+    expect([...seen].filter((i) => isRetiredHeroIndex(i))).toEqual([]);
+    expect(seen.size).toBe(ACTIVE_HERO_INDEXES.length);
   });
 
   it("respecte des poids personnalisés (ex: 100% animals)", () => {
@@ -125,5 +129,21 @@ describe("heroBank — distribution globale proche des cibles", () => {
       const idx = HERO_BANK.indexOf(getSitterHeroImage(id, customWeights));
       expect(getCategoryByBankIndex(idx)).toBe("animals");
     }
+  });
+});
+
+describe("heroBank — illustrations retirées (audit du 11/10/2026)", () => {
+  it("42 illustrations retirées, 58 actives, chaque catégorie garde au moins 4 images", () => {
+    expect(RETIRED_HERO_FILES.length).toBe(42);
+    expect(ACTIVE_HERO_INDEXES.length).toBe(58);
+    const perCat: Record<HeroCategoryName, number> = { animals: 0, home: 0, mutual_aid: 0, village: 0 };
+    for (const i of ACTIVE_HERO_INDEXES) perCat[getCategoryByBankIndex(i)]++;
+    expect(perCat).toEqual({ animals: 40, home: 7, mutual_aid: 4, village: 7 });
+  });
+
+  it("un choix explicite d'une illustration retirée reste respecté", () => {
+    // hero-02 (index 1) est retirée : le membre qui l'a choisie la garde.
+    expect(isRetiredHeroIndex(1)).toBe(true);
+    expect(getSitterHeroImage("any-id", undefined, 1)).toBe(HERO_BANK[1]);
   });
 });
