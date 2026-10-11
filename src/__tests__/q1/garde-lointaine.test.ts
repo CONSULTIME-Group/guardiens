@@ -60,6 +60,7 @@ describe("Q1, fonction de diffusion", () => {
   });
   it("campagne annulée ignorée, alertes de publication comptées, fenêtre de 7 jours levée pour une garde lointaine", () => {
     expect(PROX).toContain("CANCELLED_UNSERVED_STATUSES");
+    expect(PROX).toContain('if (String(row.status) === "skipped" && row.last_error === CANCELLED_ROW_ERROR) continue;');
     expect(PROX).toContain("if (error) throw new Error(`dedup sends lookup failed");
     expect(PROX).toContain('.from("sit_notification_log")');
     expect(PROX).toContain('.contains("sit_ids", [sitId])');
