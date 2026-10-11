@@ -46,7 +46,7 @@ const Email = ({ firstName, missionTitle = 'Votre mission', missionId, ageDays }
           </Text>
           <Hr style={hr} />
           <AlmaSignoff />
-          <LegalFooter />
+          <LegalFooter purpose="la clôture automatique d'une mission sans preneur" basis="6.1.b" />
         </Container>
       </Body>
     </Html>

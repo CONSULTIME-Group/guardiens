@@ -75,7 +75,7 @@ const Email = ({
           Signaux warning ouverts : {warningCount}.
         </Text>
 
-        <LegalFooter />
+        <LegalFooter purpose="le suivi opérationnel de la plateforme" basis="6.1.f" />
       </Container>
     </Body>
   </Html>

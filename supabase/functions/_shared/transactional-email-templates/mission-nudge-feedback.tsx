@@ -44,7 +44,7 @@ const Email = ({ firstName, missionTitle = 'Votre mission', missionId, helperFir
           </Section>
           <Hr style={hr} />
           <AlmaSignoff />
-          <LegalFooter />
+          <LegalFooter purpose="le suivi des avis sur un coup de main" basis="6.1.b" />
         </Container>
       </Body>
     </Html>

@@ -74,7 +74,7 @@ const Email = ({
           <Button href={dashboardUrl} style={cta}>Ouvrir le dashboard Delivery</Button>
         </Section>
 
-        <LegalFooter />
+        <LegalFooter purpose="la surveillance de la délivrabilité des emails" basis="6.1.f" />
       </Container>
     </Body>
   </Html>
