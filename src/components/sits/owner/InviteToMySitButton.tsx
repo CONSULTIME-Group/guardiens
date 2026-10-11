@@ -53,6 +53,10 @@ interface Props {
   hideIfNoSits?: boolean;
   /** Callback déclenché après le préchargement quand hideIfNoSits=true. */
   onPublishedSitsResolved?: (count: number) => void;
+  /** Masque l'icône du bouton (fiche publique : pas d'icône décorative). */
+  hideIcon?: boolean;
+  /** Origine pour le suivi (ex. "public_profile"). */
+  source?: string;
 }
 
 const InviteToMySitButton = ({
@@ -63,6 +67,8 @@ const InviteToMySitButton = ({
   className,
   hideIfNoSits = false,
   onPublishedSitsResolved,
+  hideIcon = false,
+  source,
 }: Props) => {
   const { user, activeRole } = useAuth();
   const ownerId = user?.id ?? null;
@@ -114,7 +120,7 @@ const InviteToMySitButton = ({
       const [{ data: sitRows }, { data: invRows }] = await Promise.all([
         supabase
           .from("sits")
-          .select("id, title, start_date, end_date")
+          .select("id, title, start_date, end_date, city")
           .eq("user_id", ownerId)
           .eq("status", "published")
           .order("start_date", { ascending: true }),
@@ -125,7 +131,7 @@ const InviteToMySitButton = ({
           .eq("sitter_id", sitter.id),
       ]);
       if (cancel) return;
-      // city via profile (les sits n'ont pas city directement → on prend la ville du proprio)
+      // Commune de l'annonce (lot L1), à défaut celle du profil propriétaire.
       const { data: prof } = await supabase
         .from("profiles")
         .select("city")
@@ -137,7 +143,7 @@ const InviteToMySitButton = ({
           title: s.title,
           start_date: s.start_date,
           end_date: s.end_date,
-          city: (prof as any)?.city ?? null,
+          city: s.city ?? (prof as any)?.city ?? null,
         })),
       );
       setInvitations((invRows as InvitationLite[]) || []);
@@ -176,9 +182,14 @@ const InviteToMySitButton = ({
           e.stopPropagation();
           setChosenSit(null);
           setOpen(true);
+          if (source) {
+            void import("@/lib/analytics").then(({ trackEvent }) =>
+              trackEvent("sit_invite_opened", { source, metadata: { sitter_id: sitter?.id ?? null } }),
+            );
+          }
         }}
       >
-        <Send className="h-3.5 w-3.5 mr-1.5" />
+        {hideIcon ? null : <Send className="h-3.5 w-3.5 mr-1.5" />}
         {label}
       </Button>
 

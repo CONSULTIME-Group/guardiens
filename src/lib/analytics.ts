@@ -290,6 +290,7 @@ export type EventType =
   | "alma_fit_gardien_seen"                     // Bulle fit gardien affichée (sitter_id, sit_id, score)
   | "alma_fit_gardien_reciprocity_shown"        // Bonus reciprocity affiché (sitter_id, sit_id, views)
   | "alma_invite_from_alma_clicked"             // Clic CTA Inviter depuis la bulle Alma (sitter_id, sit_id)
+  | "sit_invite_opened"                         // Lot I1 : ouverture du choix d'annonce à proposer (source, sitter_id)
   // Alma Pass 2 Tour 3 : empty search + notif summary ---------------------
   | "alma_empty_search_bubble_seen"             // Bulle empty search affichée (restrictive_filter, radius, zone_mode)
   | "alma_empty_search_action_clicked"          // Action empty search cliquée (action_id, restrictive_filter?)
