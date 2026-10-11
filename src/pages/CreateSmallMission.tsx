@@ -339,7 +339,7 @@ const CreateSmallMission = () => {
     () => missionType === "besoin" && looksLikeMultiDaySit(title, description, dateNeeded, endDate),
     [missionType, title, description, dateNeeded, endDate],
   );
-  /** Lot G1 : la question s'ouvre aussi pour tout besoin qui parle d'animaux. */
+  /** Lot E9 : la question s'ouvre aussi pour tout besoin qui parle d'animaux. */
   const titleCategory = useMemo(() => inferMissionCategory(title), [title]);
   const askSitMode = useMemo(
     () => shouldAskSitMode({ missionType, multiDay: multiDaySit, titleCategory, sitLike: !!sitLike }),
@@ -656,7 +656,7 @@ const CreateSmallMission = () => {
                 <h2 className="font-heading font-semibold text-lg">Le détail</h2>
 
                 {/* Garde-fous éditoriaux, non bloquants */}
-                {/* Lot G1 : une garde d'animaux se décide à l'étape suivante, par la
+                {/* Lot E9 : une garde d'animaux se décide à l'étape suivante, par la
                     question « Comment ça se passe ? » (s'installer chez vous = garde). */}
                 {moneyWording && (
                   <div className="rounded-xl border border-warning/40 bg-warning/10 p-4 space-y-1" role="note">

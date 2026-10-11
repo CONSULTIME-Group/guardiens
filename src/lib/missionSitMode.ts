@@ -32,7 +32,7 @@ export const SIT_MODE_AT_HOME_TITLE =
 export const SIT_MODE_AT_HOME_TEXT =
   "Les gardiens de votre secteur la reçoivent et vous choisissez la personne qui vous convient.";
 
-/** Lot G1 : ce qui est repris dans l'annonce, dit seulement quand c'est vrai. */
+/** Lot E9 : ce qui est repris dans l'annonce, dit seulement quand c'est vrai. */
 export function sitPrefillNote(hasDates: boolean): string {
   return hasDates ? "Votre texte et vos dates sont repris." : "Votre texte est repris.";
 }
@@ -56,7 +56,7 @@ export function sitModeLine(mode: MissionSitMode, firstName?: string | null): st
 }
 
 /**
- * Lot G1 (11/10/2026) : la question « Comment ça se passe ? » s'ouvre pour
+ * Lot E9 (11/10/2026) : la question « Comment ça se passe ? » s'ouvre pour
  * tout besoin qui parle d'animaux, en plus des gardes de plusieurs jours.
  * Décision de Jérémie : on propose la garde quand quelqu'un s'installe chez
  * la personne ; un animal gardé chez la personne qui aide, ou des passages,
@@ -74,7 +74,7 @@ export function shouldAskSitMode(args: {
 }
 
 /**
- * Lot G1 : les dates d'un besoin (?debut=&fin=) s'appliquent à l'annonce
+ * Lot E9 : les dates d'un besoin (?debut=&fin=) s'appliquent à l'annonce
  * quand le texte repris du besoin est toujours à l'écran (aucun brouillon
  * repris entre-temps) et qu'aucune date n'est déjà posée.
  */

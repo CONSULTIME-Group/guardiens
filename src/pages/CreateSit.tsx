@@ -446,7 +446,7 @@ const CreateSit = () => {
   // Préremplissage des dates depuis l'email saisonnier : une seule fois, jamais
   // après une saisie utilisateur, et jamais quand un brouillon est repris.
   const datePrefilledRef = useRef(false);
-  /** Lot G1 : titre repris d'un besoin d'entraide (null sinon), pour y appliquer ?debut=&fin=. */
+  /** Lot E9 : titre repris d'un besoin d'entraide (null sinon), pour y appliquer ?debut=&fin=. */
   const missionPrefillTitleRef = useRef<string | null>(null);
   // Écran de choix à la sortie : annonce prête, jamais publiée, sortie demandée.
   const [sitPublishedAt, setSitPublishedAt] = useState<string | null>(null);
@@ -1096,7 +1096,7 @@ const CreateSit = () => {
     if (datePrefilledRef.current) return;
     if (loading) return;
     if (draftIdParam || fromSitId || republishMode || searchParams.get("resume")) return;
-    // Lot G1 : texte repris d'un besoin, encore à l'écran, sans brouillon repris.
+    // Lot E9 : texte repris d'un besoin, encore à l'écran, sans brouillon repris.
     if (shouldApplyMissionDates({
       prefillTitle: missionPrefillTitleRef.current, title, remoteDraftResumed, localDraftRestored, startDate, endDate,
     })) {
