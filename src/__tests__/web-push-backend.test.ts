@@ -269,10 +269,8 @@ describe('transport, erreurs et reprises', () => {
     expect(classifyPushResponse(403, 1).outcome).toBe('failed');
   });
 
-  it('lot N1 : desactive sur 403 (cle differente), l appareil se reabonne ensuite', () => {
-    const d = classifyPushResponse(403, 1);
-    expect(d.disableSubscription).toBe(true);
-    expect(d.errorCode).toBe('http_403');
+  it('lot N1 : 403 ne desactive jamais en masse (jeton serveur possible)', () => {
+    expect(classifyPushResponse(403, 1).disableSubscription).toBe(false);
   });
 
   it('ne rejoue jamais une tentative reseau ambigue', () => {

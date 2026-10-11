@@ -23,9 +23,10 @@ export function classifyPushResponse(status: number, attempts: number): PushDeci
   if (status >= 200 && status < 300) {
     return { outcome: 'accepted', errorCode: null, disableSubscription: false };
   }
-  // 403 : la cle du serveur ne correspond plus a celle de l'abonnement (lot N1).
-  // La ligne est desactivee pour que l'appareil se reabonne a la visite suivante.
-  if (status === 403 || status === 404 || status === 410) {
+  // 403 reste un echec simple : il vient aussi d'un souci de cle cote serveur
+  // (jeton VAPID refuse), qui desactiverait tous les appareils d'un coup. Une
+  // cle differente est detectee cote appareil (lot N1, subscriptionMatchesKey).
+  if (status === 404 || status === 410) {
     return { outcome: 'failed', errorCode: `http_${status}`, disableSubscription: true };
   }
   if (status === 429 || status >= 500) {

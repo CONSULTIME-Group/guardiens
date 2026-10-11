@@ -35,6 +35,8 @@ let reg: any;
 let rows: Array<Record<string, unknown>>;
 let calls: Array<Record<string, unknown>>;
 const fresh = fakeSub('https://fcm.googleapis.com/fcm/send/fresh');
+const legacy = fakeSub('https://fcm.googleapis.com/fcm/send/legacy');
+const taken = fakeSub('https://fcm.googleapis.com/fcm/send/taken');
 
 beforeEach(() => {
   vi.clearAllMocks(); localStorage.clear(); sessionStorage.clear();
@@ -44,7 +46,11 @@ beforeEach(() => {
     calls.push(body);
     if (body.action === 'config') return { data: { enabled: true, publicKey }, error: null };
     if (body.action === 'status') return { data: { subscriptions: rows }, error: null };
-    if (body.action === 'subscribe') return { data: { subscription_id: body.endpoint === fresh.endpoint ? 'new-id' : 'same-id' }, error: null };
+    if (body.action === 'subscribe') {
+      if (body.endpoint === legacy.endpoint) return { data: { subscription_id: 'old-id' }, error: null };
+      if (body.endpoint === taken.endpoint) return { data: null, error: { context: new Response(JSON.stringify({ error: 'subscribe_refused', code: 'endpoint_unavailable' }), { status: 400 }) } };
+      return { data: { subscription_id: body.endpoint === fresh.endpoint ? 'new-id' : 'same-id' }, error: null };
+    }
     if (body.action === 'unsubscribe') return { data: { deleted: true }, error: null };
     return { data: null, error: new Error('unexpected') };
   });
@@ -158,6 +164,38 @@ describe('N1, réparation silencieuse', () => {
     device('https://fcm.googleapis.com/fcm/send/dead'); rows = [row(false, { opt_in_nearby_sits: true })];
     expect(await repairPushDevice('u1')).toEqual({ kind: 'needs_gesture', prefs: { messages: true, applications: false, nearbySits: true } });
     expect(reg.pushManager.subscribe).not.toHaveBeenCalled();
+  });
+
+  it('appareil inscrit avant N1 (adresse non mémorisée) : adresse confirmée, aucune ligne retirée', async () => {
+    device(); rows = [row(true)];
+    reg.pushManager.getSubscription.mockResolvedValue(legacy);
+    expect(await repairPushDevice('u1')).toEqual({ kind: 'repaired' });
+    expect(legacy.unsubscribe).not.toHaveBeenCalled();
+    expect(actions()).not.toContain('unsubscribe');
+    expect(localStorage.getItem(PUSH_ENDPOINT_KEY)).toBe(legacy.endpoint);
+    expect(localStorage.getItem(PUSH_ID_KEY)).toBe('old-id');
+  });
+
+  it('adresse rattachée à un autre compte : ce navigateur est désabonné', async () => {
+    reg.pushManager.getSubscription.mockResolvedValue(taken);
+    expect(await repairPushDevice('u1')).toEqual({ kind: 'failed' });
+    expect(taken.unsubscribe).toHaveBeenCalledOnce();
+  });
+
+  it('réparations simultanées : une seule exécution', async () => {
+    const sub = fakeSub('https://fcm.googleapis.com/fcm/send/kept');
+    reg.pushManager.getSubscription.mockResolvedValue(sub);
+    const [a, b] = await Promise.all([repairPushDevice('u1'), repairPushDevice('u1')]);
+    expect(a).toEqual(b);
+    expect(actions().filter((x) => x === 'subscribe')).toHaveLength(1);
+  });
+
+  it('worker perdu, autorisation accordée : réinstallé puis nouvelle adresse', async () => {
+    device('https://fcm.googleapis.com/fcm/send/dead'); rows = [row(false)];
+    (navigator.serviceWorker.getRegistration as ReturnType<typeof vi.fn>).mockResolvedValue(undefined);
+    expect(await repairPushDevice('u1')).toEqual({ kind: 'repaired' });
+    expect(navigator.serviceWorker.register).toHaveBeenCalledWith('/push-sw.js', { scope: '/' });
+    expect(reg.pushManager.subscribe).toHaveBeenCalledOnce();
   });
 
   it('appareil d un autre compte : rien n est touché', async () => {

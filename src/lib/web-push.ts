@@ -41,11 +41,23 @@ async function api<T>(userId: string, body: Record<string, unknown>): Promise<T>
   const { data, error } = await bounded(supabase.functions.invoke('push-subscription', {
     body, headers: { Authorization: `Bearer ${session.access_token}` },
   }));
-  if (error || !data || data.error) throw new Error('push_request_failed');
+  if (error || !data || data.error) throw Object.assign(new Error('push_request_failed'), { code: await refusalCode(error, data) });
   const current = await bounded(supabase.auth.getSession());
   if (current.data.session?.user.id !== userId) throw new Error('push_session_changed');
   return data as T;
 }
+
+/** Code de refus renvoyé par push-subscription (ex. endpoint_unavailable, max_active_endpoints). */
+async function refusalCode(error: unknown, data: unknown): Promise<string | undefined> {
+  const fromData = (data as { code?: unknown } | null)?.code;
+  if (typeof fromData === 'string') return fromData;
+  try {
+    const context = (error as { context?: Response } | null)?.context;
+    const body = context && typeof context.clone === 'function' ? await context.clone().json() : null;
+    return typeof body?.code === 'string' ? body.code : undefined;
+  } catch { return undefined; }
+}
+const codeOf = (error: unknown) => (error as { code?: string } | null)?.code;
 
 export const getPushConfig = (userId: string) => api<PushConfig>(userId, { action: 'config' });
 
@@ -237,6 +249,8 @@ export async function enablePush(userId: string, config: PushConfig, prefs: Push
   if (existing) await existing.unsubscribe().catch(() => false);
   const sub = await bounded(reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey }));
   try {
+    // L'ancienne ligne de cet appareil part d'abord : elle compte dans le plafond de 5 appareils actifs.
+    if (previousId) await api(userId, { action: 'unsubscribe', subscription_id: previousId }).catch(() => undefined);
     const result = await api<{ subscription_id: string; nearby_requested?: boolean; nearby_saved?: boolean }>(userId, {
       action: 'subscribe', ...sub.toJSON(), opt_in_messages: prefs.messages, opt_in_applications: prefs.applications,
       opt_in_nearby_sits: prefs.nearbySits === true,
@@ -244,9 +258,6 @@ export async function enablePush(userId: string, config: PushConfig, prefs: Push
     localStorage.setItem(PUSH_OWNER_KEY, userId);
     localStorage.setItem(PUSH_ID_KEY, result.subscription_id);
     localStorage.setItem(PUSH_ENDPOINT_KEY, sub.endpoint);
-    if (previousId && previousId !== result.subscription_id) {
-      await api(userId, { action: 'unsubscribe', subscription_id: previousId }).catch(() => undefined);
-    }
     const nearbyRequested = prefs.nearbySits === true;
     return { nearbyRequested, nearbySaved: nearbyRequested && result.nearby_saved === true };
   } catch (error) {
@@ -374,12 +385,28 @@ export const PUSH_REPAIR_SESSION_KEY = 'guardiens_push_repair';
  * needs_gesture : autorisation retirée ou jamais donnée, seul un geste du
  * membre peut la rétablir.
  */
-export async function repairPushDevice(userId: string): Promise<PushRepair> {
+export function repairPushDevice(userId: string): Promise<PushRepair> {
+  // Une seule réparation à la fois (onglets, message du worker, nouvel essai) :
+  // deux réparations simultanées s'annuleraient leurs adresses.
+  const pending = repairInFlight.get(userId);
+  if (pending) return pending;
+  const run = (async () => {
+    const locks = typeof navigator !== 'undefined'
+      ? (navigator as Navigator & { locks?: { request: <T>(name: string, cb: () => Promise<T>) => Promise<T> } }).locks
+      : undefined;
+    return locks?.request ? locks.request('guardiens-push-repair', () => repairOnce(userId)) : repairOnce(userId);
+  })().catch((): PushRepair => ({ kind: 'failed' })).finally(() => repairInFlight.delete(userId));
+  repairInFlight.set(userId, run);
+  return run;
+}
+const repairInFlight = new Map<string, Promise<PushRepair>>();
+
+async function repairOnce(userId: string): Promise<PushRepair> {
   const owner = readLocal(PUSH_OWNER_KEY);
   if (owner && owner !== userId) return { kind: 'none' };
   // Sans aucun abonnement connu, rien à réparer : aucun appel réseau.
   if (!owner && pushSupport() !== 'supported') return { kind: 'none' };
-  const reg = await registration().catch(() => undefined);
+  let reg = await registration().catch(() => undefined);
   const sub = reg ? await bounded(reg.pushManager.getSubscription()).catch(() => null) : null;
   const granted = permissionState() === 'granted';
 
@@ -401,40 +428,57 @@ export async function repairPushDevice(userId: string): Promise<PushRepair> {
     key = config.enabled ? safeKey(config.publicKey) : null;
   } catch { key = null; }
 
-  const sameAddress = Boolean(sub && (!storedEndpoint || sub.endpoint === storedEndpoint));
-  if (row?.enabled && sub && sameAddress && (!key || subscriptionMatchesKey(sub, key))) {
-    if (!storedEndpoint) rememberDevice(userId, row.id, sub.endpoint);
-    return { kind: 'ok' };
+  const keyOk = Boolean(sub && (!key || subscriptionMatchesKey(sub, key)));
+  if (row?.enabled && sub && keyOk) {
+    if (storedEndpoint === sub.endpoint) return { kind: 'ok' };
+    // Appareil inscrit avant N1 (adresse non mémorisée) ou adresse renouvelée
+    // par le navigateur : l'adresse actuelle est transmise, sans réabonnement.
+    return attachDevice(userId, sub, prefs, row.id);
   }
   if (!granted) return row ? { kind: 'needs_gesture', prefs } : { kind: 'none' };
-  if (!reg || !key) return { kind: 'failed' };
-
-  // Adresse renouvelée par le navigateur, ligne encore active : transmise telle quelle.
-  let fresh: PushSubscription | null = row?.enabled && sub && !sameAddress && subscriptionMatchesKey(sub, key) ? sub : null;
+  if (!key || pushSupport() !== 'supported') return { kind: 'failed' };
   try {
-    if (!fresh) {
-      if (sub) await bounded(sub.unsubscribe()).catch(() => false);
-      await ensurePushWorkerCurrent(reg);
-      fresh = await bounded(reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key }));
+    if (!reg) {
+      // Worker perdu alors que l'autorisation reste accordée : réinstallé.
+      reg = await bounded(navigator.serviceWorker.register('/push-sw.js', { scope: '/' }));
+      await bounded(navigator.serviceWorker.ready);
     }
+    // Worker confirmé avant de toucher à l'abonnement existant.
+    await ensurePushWorkerCurrent(reg);
+    if (sub) await bounded(sub.unsubscribe()).catch(() => false);
+    const fresh = await bounded(reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key }));
+    return attachDevice(userId, fresh, prefs, row?.id ?? localId);
   } catch { return { kind: 'failed' }; }
-  return attachDevice(userId, fresh, prefs, row?.id ?? localId);
 }
 
-/** Enregistre l'adresse pour le membre, puis retire l'ancienne ligne de cet appareil. */
+/**
+ * Enregistre l'adresse pour le membre. L'ancienne ligne de cet appareil est
+ * retirée d'abord quand l'adresse change : elle compte dans le plafond de
+ * 5 appareils actifs.
+ */
 async function attachDevice(userId: string, sub: PushSubscription, prefs: PushPreferences, previousId: string | null): Promise<PushRepair> {
+  // Adresse connue et différente : l'ancienne ligne est obsolète. Adresse
+  // inconnue (appareil inscrit avant N1) : rien n'est retiré avant la réponse.
+  const stored = readLocal(PUSH_ENDPOINT_KEY);
+  const changed = Boolean(previousId && stored && stored !== sub.endpoint);
+  if (changed && previousId) await api(userId, { action: 'unsubscribe', subscription_id: previousId }).catch(() => undefined);
   try {
     const result = await api<{ subscription_id: string }>(userId, {
       action: 'subscribe', ...sub.toJSON(), opt_in_messages: prefs.messages, opt_in_applications: prefs.applications,
       opt_in_nearby_sits: prefs.nearbySits === true,
     });
     if (!result.subscription_id) return { kind: 'failed' };
+    const wasKnown = readLocal(PUSH_ID_KEY) === result.subscription_id && readLocal(PUSH_ENDPOINT_KEY) === sub.endpoint;
     rememberDevice(userId, result.subscription_id, sub.endpoint);
-    if (previousId && previousId !== result.subscription_id) {
+    if (previousId && previousId !== result.subscription_id && !changed) {
       await api(userId, { action: 'unsubscribe', subscription_id: previousId }).catch(() => undefined);
     }
-    return { kind: 'repaired' };
-  } catch { return { kind: 'failed' }; }
+    return { kind: wasKnown ? 'ok' : 'repaired' };
+  } catch (error) {
+    // Adresse rattachée à un autre compte : ce navigateur ne doit plus recevoir ses notifications.
+    if (codeOf(error) === 'endpoint_unavailable') await bounded(sub.unsubscribe()).catch(() => false);
+    return { kind: 'failed' };
+  }
 }
 
 /**

@@ -45,7 +45,8 @@ export default function PushNotificationsSection() {
     const read = Promise.all([getPushConfig(userId).catch(() => {
       configFailed = true;
       return { enabled: false };
-    }), repairPushDevice(userId).catch(() => null).then(() => getPushState(userId))]);
+    }), Promise.race([repairPushDevice(userId), new Promise((resolve) => setTimeout(resolve, 6000))])
+      .catch(() => null).then(() => getPushState(userId))]);
     Promise.race([read, new Promise<never>((_, reject) => {
       timer = setTimeout(() => reject(new Error('push_load_timeout')), 12000);
     })]).then(([settings, state]) => {
