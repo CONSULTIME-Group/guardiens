@@ -16,7 +16,7 @@ describe("P1", () => {
   it("fenêtre Je peux, réponses actives, séparateur", () => {
     expect(dialog).toContain("Vous proposez votre aide à");
     expect(hub).toContain('.in("status", ["pending", "accepted"])');
-    expect(hub).toContain("Plus loin, pour celles et ceux qui voyagent");
+    expect(hub).toContain("Pour celles et ceux qui passent par là.");
     expect(cards).not.toContain("Disponible pour un coup de main");
   });
   it("titre En ce moment", () => {

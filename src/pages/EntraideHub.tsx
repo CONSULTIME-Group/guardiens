@@ -1,11 +1,11 @@
-import { Fragment, Suspense, useCallback, useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PageMeta from "@/components/PageMeta";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
-import { HelperCard, NeedRow, type EntraideNeed, type NeedRowState, type PublicHelper } from "@/components/entraide/EntraideCards";
+import { HelperCard, NeedRow, openHelperConversation, type EntraideNeed, type NeedRowState, type PublicHelper } from "@/components/entraide/EntraideCards";
 import type { MissionBadgeRow } from "@/components/missions/MissionBadgesReceived";
 import EntraideProofs from "@/components/entraide/EntraideProofs";
 import { useAuth } from "@/contexts/AuthContext";
@@ -19,13 +19,21 @@ import { MISSIONS_CITIES, MISSIONS_CITY_SLUGS } from "@/data/missionsCityContent
 import {
   HELPERS_PAGE_SIZE,
   distanceFrom,
-  isSectorQuiet,
   NEARBY_THRESHOLD_KM,
-  memberSubtitle,
-  nearestDistanceKm,
   sortByDistance,
   type Origin,
 } from "@/lib/entraideHubModel";
+import {
+  HELPERS_FIRST_SHOWN,
+  helpersCountLine,
+  helpersMore,
+  farNeedsLabel,
+  NEEDS_SHOWN_WITHOUT_PLACE,
+  helpersSectionTitle,
+  needFormPath,
+  type EntraideIdeaKey,
+} from "@/lib/entraideIdeas";
+import EntraideIdeas from "@/components/entraide/EntraideIdeas";
 import { respondToMission } from "@/lib/missionRespond";
 import CanHelpDialog from "@/components/entraide/CanHelpDialog";
 import { toast } from "sonner";
@@ -35,10 +43,10 @@ import { sortHelpers } from "@/lib/helperDisplay";
 const EntraideMap = lazy(() => import("@/components/entraide/EntraideMap"), "EntraideMap");
 
 const FAQ = [
-  { question: "Comment trouver un coup de main près de chez vous ?", answer: "Indiquez votre ville pour classer les besoins et les personnes disponibles par proximité." },
-  { question: "Que faire quand le fil est calme aujourd'hui ?", answer: "Décrivez votre besoin. Il reste visible dans le fil et il est proposé aux membres disponibles près de chez vous." },
-  { question: "Faut-il payer pour utiliser l'Entraide ?", answer: "Non. L'Entraide est gratuite : publier un besoin, proposer votre aide et échanger avec un membre ne coûtent rien. Aucun argent ne circule entre membres, vous convenez ensemble d'un service ou d'une attention en retour." },
-  { question: "Quelle différence avec une garde de maison ?", answer: "L'Entraide répond à un besoin ponctuel et court dans la journée. Une garde de maison couvre un séjour de plusieurs jours sur place." },
+  { question: "Comment trouver un coup de main près de chez vous ?", answer: "Indiquez votre ville : les besoins et les personnes disponibles sont classés par proximité." },
+  { question: "Que faire quand le fil est calme ?", answer: "Décrivez votre besoin. Il part vers les membres disponibles les plus proches et reste visible dans le fil." },
+  { question: "Faut-il payer pour utiliser l'Entraide ?", answer: "Guardiens est gratuit. Entre membres, l'échange se fait en services ou en attentions, convenus ensemble." },
+  { question: "Quelle différence avec une garde de maison ?", answer: "L'Entraide répond à un besoin court et ponctuel. Une garde de maison couvre un séjour de plusieurs jours sur place." },
 ] as const;
 
 const faqSchema = {
@@ -47,65 +55,55 @@ const faqSchema = {
   mainEntity: FAQ.map((item) => ({ "@type": "Question", name: item.question, acceptedAnswer: { "@type": "Answer", text: item.answer } })),
 };
 
-export const EntraideHubIntro = ({ isAuthenticated, onNeed, onHelp }: {
-  isAuthenticated: boolean;
+const HOW_STEPS = [
+  "Vous décrivez le coup de main et le moment qui vous convient.",
+  "Votre demande part vers les personnes disponibles les plus proches, dix à la fois.",
+  "Quelqu'un répond « Je peux », vous convenez ensemble du moment et d'un service ou d'une attention en retour.",
+] as const;
+
+/**
+ * Lot E4 : en-tête unique, visiteur et membre. Un seul bouton plein
+ * (« Demander un coup de main ») ; « Proposer mon aide » en second plan,
+ * remplacé par la ligne de rayon quand la personne aide déjà.
+ */
+export const EntraideHubIntro = ({ city, countLine, showHelp, onNeed, onHelp, children }: {
+  city: string | null;
+  countLine: string | null;
+  showHelp: boolean;
   onNeed: () => void;
   onHelp: () => void;
+  children?: React.ReactNode;
 }) => (
-  <>
-    <header className="pb-6 pt-3">
-      <p className="text-sm font-semibold text-primary">Entraide</p>
-      <h1 className="mt-2 max-w-3xl font-heading text-3xl font-bold leading-tight text-foreground sm:text-[2.5rem]">
-        Entraide et coups de main près de chez vous
-      </h1>
-      <p className="mt-3 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-        Arroser des plantes, nourrir un chat, réceptionner un colis, déplacer un meuble : demandez un coup de main ou proposez le vôtre, entre gens du coin et sans argent.
-      </p>
-      <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-        <Button onClick={onNeed}>Demander de l'aide</Button>
-        <Button variant="outline" onClick={onHelp}>Proposer mon aide</Button>
-      </div>
-    </header>
-    {!isAuthenticated && (
-      <section className="mb-2 border-y border-border py-4" aria-label="Comment ça marche">
-        <h2 className="sr-only">Comment ça marche</h2>
-        <ol className="grid gap-2 text-sm text-muted-foreground sm:grid-cols-3 sm:gap-6">
-          <li><strong className="text-foreground">1. Vous décrivez</strong> le coup de main et le moment qui vous convient.</li>
-          <li><strong className="text-foreground">2. Votre demande est proposée</strong> aux membres disponibles près de chez vous.</li>
-          <li><strong className="text-foreground">3. Quelqu'un répond « Je peux »</strong>, vous échangez et convenez ensemble.</li>
-        </ol>
-      </section>
-    )}
-  </>
+  <header className="pb-2 pt-3">
+    <p className="text-xs font-semibold uppercase tracking-wide text-primary">{city ? `Entraide · autour de ${city}` : "Entraide"}</p>
+    <h1 className="mt-2 max-w-3xl font-heading text-[1.75rem] font-bold leading-tight text-foreground sm:text-[2.5rem]">
+      Entraide et coups de main près de chez vous
+    </h1>
+    <p className="mt-3 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+      {countLine ? `${countLine} ` : ""}
+      <span className="hidden sm:inline">Le potager à arroser, les courses, un trajet, une partie de jeux de société : dites simplement ce qu'il vous faut.</span>
+      <span className="sm:hidden">Dites simplement ce qu'il vous faut.</span>
+    </p>
+    <div className="mt-5 flex flex-row flex-wrap items-center gap-3">
+      <Button onClick={onNeed}>Demander un coup de main</Button>
+      {showHelp && <Button variant="outline" onClick={onHelp}>Proposer mon aide</Button>}
+    </div>
+    {children}
+  </header>
 );
 
-/** En-tête compact du membre : origine automatique, statut d'aide, action principale. */
-export const EntraideMemberHeader = ({ subtitle, availableForHelp, onNeed, onHelp, locationField }: {
-  subtitle: string | null;
-  availableForHelp: boolean;
-  onNeed: () => void;
-  onHelp: () => void;
-  locationField: React.ReactNode;
-}) => (
-  <header className="pb-6 pt-3">
-    <p className="text-sm font-semibold text-primary">Entraide</p>
-    <h1 className="mt-2 font-heading text-3xl font-bold leading-tight text-foreground sm:text-4xl">Entraide et coups de main près de chez vous</h1>
-    <p className="mt-3 max-w-2xl text-base text-muted-foreground">
-      {subtitle || "Indiquez votre ville pour voir les besoins les plus proches."}
-    </p>
-    {locationField}
-    <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
-      <Button onClick={onNeed}>Demander un coup de main</Button>
-      {availableForHelp ? (
-        <p className="text-sm text-muted-foreground">
-          Vous êtes disponible pour aider. Vous recevez les besoins publiés près de chez vous.{" "}
-          <Link to="/profile?section=savoir-faire" className="font-semibold text-primary underline underline-offset-4">Modifier</Link>
-        </p>
-      ) : (
-        <Button variant="outline" onClick={onHelp}>Me rendre disponible pour aider</Button>
-      )}
-    </div>
-  </header>
+export const EntraideHowItWorks = () => (
+  <section className="mt-12" aria-labelledby="entraide-how-title">
+    <h2 id="entraide-how-title" className="font-heading text-2xl font-semibold text-foreground">Comment ça se passe</h2>
+    <ol className="mt-5 grid gap-4 sm:grid-cols-3">
+      {HOW_STEPS.map((step, index) => (
+        <li key={step} className="flex gap-3 text-sm leading-relaxed text-muted-foreground">
+          <span aria-hidden="true" className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-secondary font-heading text-sm font-semibold text-secondary-foreground">{index + 1}</span>
+          <span>{step}</span>
+        </li>
+      ))}
+    </ol>
+  </section>
 );
 
 export const EntraideFaq = () => (
@@ -149,7 +147,9 @@ const EntraideHub = () => {
   const [responding, setResponding] = useState<string | null>(null);
   const [confirmNeed, setConfirmNeed] = useState<EntraideNeed | null>(null);
   const [confirmFirstName, setConfirmFirstName] = useState<string | null>(null);
-  const [helpersShown, setHelpersShown] = useState(HELPERS_PAGE_SIZE);
+  const [helpersShown, setHelpersShown] = useState(HELPERS_FIRST_SHOWN);
+  const [farOpen, setFarOpen] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
   const [counts, setCounts] = useState<Map<string, { given_count: number | null; received_count: number | null }>>(new Map());
   const [badges, setBadges] = useState<Map<string, MissionBadgeRow[]>>(new Map());
 
@@ -257,8 +257,40 @@ const EntraideHub = () => {
     return () => { cancelled = true; };
   }, [visibleHelperIds]);
 
-  const nearest = useMemo(() => nearestDistanceKm(sortedNeeds.map(needDistance)), [sortedNeeds, needDistance]);
-  const sectorQuiet = isSectorQuiet(origin, nearest, sortedNeeds.length);
+  // Lot E4 : besoins proches d'abord, les autres repliés sous « Plus loin ».
+  const nearNeeds = useMemo(
+    () => (origin
+      ? sortedNeeds.filter((need) => { const d = needDistance(need); return d !== null && d <= NEARBY_THRESHOLD_KM; })
+      : sortedNeeds.slice(0, NEEDS_SHOWN_WITHOUT_PLACE)),
+    [sortedNeeds, origin, needDistance],
+  );
+  const farNeeds = useMemo(
+    () => sortedNeeds.filter((need) => !nearNeeds.includes(need)),
+    [sortedNeeds, nearNeeds],
+  );
+  // Membre : on attend son profil (son lieu) avant d'afficher chiffres et besoins.
+  const originPending = isAuthenticated && !profileLoaded;
+  const pageLoading = loading || originPending;
+  const sectorQuiet = origin !== null && !pageLoading && nearNeeds.length === 0;
+  const nearHelpersCount = useMemo(
+    () => (origin ? sortedHelpers.filter((helper) => { const d = helperDistance(helper); return d !== null && d <= NEARBY_THRESHOLD_KM; }).length : sortedHelpers.length),
+    [sortedHelpers, origin, helperDistance],
+  );
+  // « vous » quand la position est connue sans nom de ville.
+  const placeCity = origin ? originCity || "vous" : null;
+  const helpersMoreAction = helpersMore(helpersShown, nearHelpersCount, sortedHelpers.length, HELPERS_PAGE_SIZE);
+
+  // Lot E4 : retour d'inscription depuis « Écrire à X » (?contact=<id>).
+  useEffect(() => {
+    const contactId = searchParams.get("contact");
+    if (!contactId || !isAuthenticated || loading) return;
+    const next = new URLSearchParams(searchParams);
+    next.delete("contact");
+    setSearchParams(next, { replace: true });
+    const helper = helpers.find((row) => row.id === contactId);
+    if (helper && helper.id !== user?.id) void openHelperConversation(helper, navigate);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, isAuthenticated, loading, helpers]);
 
   const locate = async () => {
     if (city.trim().length < 2 || locating) return;
@@ -268,10 +300,17 @@ const EntraideHub = () => {
     if (result) {
       setSearchedOrigin([result.lat, result.lng]);
       setSearchedCity(city.trim());
+      setShowLocationField(false);
+      setHelpersShown(HELPERS_FIRST_SHOWN);
+      setFarOpen(false);
     }
   };
 
-  const goNeed = () => navigate(isAuthenticated ? "/petites-missions/creer" : "/inscription?redirect=/petites-missions/creer");
+  const goNeed = () => navigate(needFormPath(isAuthenticated));
+  const pickIdea = (key: EntraideIdeaKey, label: string) => {
+    void trackEvent("entraide_idea_tile_clicked", { metadata: { idea: key, authenticated: isAuthenticated } });
+    navigate(needFormPath(isAuthenticated, label));
+  };
   const goHelp = async () => {
     if (!isAuthenticated || !user?.id) {
       navigate("/inscription?redirect=/petites-missions");
@@ -345,22 +384,14 @@ const EntraideHub = () => {
   };
 
   const locationField = (
-    <div className="mt-4">
-      {showLocationField || !origin ? (
-        <div className="flex max-w-md gap-2">
-          <Input value={city} onChange={(event) => setCity(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") void locate(); }} placeholder="Votre ville" aria-label="Votre ville" className="min-w-0" />
-          <Button type="button" variant="outline" onClick={locate} disabled={locating}>{locating ? "Recherche..." : "Afficher"}</Button>
-        </div>
-      ) : (
-        <button type="button" onClick={() => setShowLocationField(true)} className="text-sm font-semibold text-primary underline underline-offset-4">
-          Changer de lieu
-        </button>
-      )}
+    <div className="flex max-w-md gap-2">
+      <Input value={city} onChange={(event) => setCity(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") void locate(); }} placeholder="Votre ville" aria-label="Votre ville" className="min-w-0" />
+      <Button type="button" variant="outline" onClick={locate} disabled={locating}>{locating ? "Recherche..." : "Afficher"}</Button>
     </div>
   );
 
   const viewToggle = (
-    <div className="mt-6 flex justify-end">
+    <div className="flex justify-end">
       <div className="inline-grid grid-cols-2 rounded-lg border border-border bg-muted p-1" role="group" aria-label="Affichage des résultats">
         <Button type="button" variant={!mapOpen ? "default" : "ghost"} size="sm" onClick={() => setMapOpen(false)}>Liste</Button>
         <Button type="button" variant={mapOpen ? "default" : "ghost"} size="sm" onClick={() => setMapOpen(true)}>Carte</Button>
@@ -379,26 +410,41 @@ const EntraideHub = () => {
       <PageBreadcrumb items={[{ label: "Entraide" }]} />
       <div className="min-w-0 bg-background pb-24">
         <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
-          {isAuthenticated ? (
-            <EntraideMemberHeader
-              subtitle={memberSubtitle(originCity, nearest)}
-              availableForHelp={profile?.available_for_help === true}
-              onNeed={goNeed}
-              onHelp={goHelp}
-              locationField={locationField}
-            />
-          ) : (
-            <>
-              <EntraideHubIntro isAuthenticated={isAuthenticated} onNeed={goNeed} onHelp={goHelp} />
-              {locationField}
-            </>
-          )}
+          <EntraideHubIntro
+            city={placeCity}
+            countLine={pageLoading ? null : helpersCountLine(nearHelpersCount, placeCity)}
+            showHelp={!isAuthenticated || (profileLoaded && profile?.available_for_help !== true)}
+            onNeed={goNeed}
+            onHelp={goHelp}
+          >
+            <div className="mt-4 space-y-1 text-sm text-muted-foreground">
+              {originPending ? null : origin && !showLocationField ? (
+                <p>
+                  Lieu : {originCity || "votre position"} ·{" "}
+                  <button type="button" onClick={() => setShowLocationField(true)} className="font-semibold text-primary underline underline-offset-4">
+                    Changer de lieu
+                  </button>
+                </p>
+              ) : locationField}
+              {isAuthenticated && <MutualAidRadiusLine availableForHelp={profileLoaded ? profile?.available_for_help === true : null} />}
+              {profile?.available_for_help === true && (
+                <p>
+                  <Link to="/profile?section=savoir-faire" className="font-semibold text-primary underline underline-offset-4">Mes savoir-faire</Link>
+                </p>
+              )}
+            </div>
+          </EntraideHubIntro>
 
-          {isAuthenticated && <MutualAidRadiusLine className="mb-4" availableForHelp={profileLoaded ? profile?.available_for_help === true : null} />}
+          <EntraideIdeas onPick={pickIdea} />
 
           <section className="pt-2" aria-labelledby="entraide-needs-title">
-            <h2 id="entraide-needs-title" className="mt-6 font-heading text-2xl font-semibold text-foreground">Besoins ouverts</h2>
-            {viewToggle}
+            <div className="mt-6 flex items-center justify-between gap-3 sm:mt-8 sm:items-end">
+              <div className="min-w-0">
+                <h2 id="entraide-needs-title" className="font-heading text-xl font-semibold text-foreground sm:text-2xl">Besoins ouverts</h2>
+                {placeCity && <p className="hidden text-sm text-muted-foreground sm:block">Autour de {placeCity}</p>}
+              </div>
+              {viewToggle}
+            </div>
 
             {mapOpen && (
               <div className="mt-3">
@@ -408,47 +454,72 @@ const EntraideHub = () => {
               </div>
             )}
 
-            {sectorQuiet && (
-              <div className="mt-5 rounded-lg border border-border bg-card p-5">
-                <p className="text-sm font-semibold text-foreground">Le premier besoin de votre secteur peut être le vôtre.</p>
-                <Button className="mt-3" onClick={goNeed}>Demander un coup de main</Button>
-              </div>
-            )}
-
-            {loading ? (
+            {pageLoading ? (
               <div className="mt-5 space-y-3" aria-busy="true">{[0, 1, 2, 3].map((item) => <div key={item} className="h-[96px] animate-pulse rounded-lg bg-muted" />)}</div>
-            ) : mapOpen ? null : sortedNeeds.length > 0 ? (
-              <ul className="mt-5 space-y-3">
-                {sortedNeeds.map((need, index) => {
-                  const distance = needDistance(need);
-                  const previous = index > 0 ? needDistance(sortedNeeds[index - 1]) : null;
-                  const firstFar = distance !== null && distance > NEARBY_THRESHOLD_KM && (index === 0 || (previous !== null && previous <= NEARBY_THRESHOLD_KM));
-                  return (
-                  <Fragment key={need.id}>
-                  {firstFar && (
-                    <li role="separator" aria-label="Plus loin" className="pt-4 text-sm font-semibold text-muted-foreground">
-                      Plus loin, pour celles et ceux qui voyagent
-                    </li>
-                  )}
-                  <NeedRow
-                    key={need.id}
-                    need={need}
-                    distance={needDistance(need)}
-                    state={needState(need)}
-                    pending={responding === need.id}
-                    onCanHelp={() => void canHelp(need)}
-                  />
-                  </Fragment>
-                  );
-                })}
-              </ul>
-            ) : (
-              <p className="mt-5 rounded-lg border border-border p-5 text-sm text-muted-foreground">Le prochain besoin apparaîtra ici. Les personnes disponibles restent visibles plus bas.</p>
+            ) : mapOpen ? null : (
+              <>
+                {sectorQuiet ? (
+                  <div className="mt-5 rounded-lg border border-border bg-card p-5">
+                    <p className="font-heading text-lg font-semibold text-foreground">
+                      {placeCity ? `Le fil est calme autour de ${placeCity} aujourd'hui` : "Le fil est calme dans votre secteur aujourd'hui"}
+                    </p>
+                    <p className="mt-1 text-sm text-muted-foreground">Votre demande sera la première du secteur. Elle part vers les personnes disponibles les plus proches, dix à la fois.</p>
+                    <Button variant="outline" className="mt-3" onClick={goNeed}>Écrire ma demande</Button>
+                  </div>
+                ) : nearNeeds.length > 0 ? (
+                  <ul className="mt-5 space-y-3">
+                    {nearNeeds.map((need) => (
+                      <NeedRow
+                        key={need.id}
+                        need={need}
+                        distance={needDistance(need)}
+                        state={needState(need)}
+                        pending={responding === need.id}
+                        onCanHelp={() => void canHelp(need)}
+                      />
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="mt-5 rounded-lg border border-border p-5 text-sm text-muted-foreground">Le prochain besoin apparaîtra ici. Les personnes disponibles restent visibles plus bas.</p>
+                )}
+
+                {farNeeds.length > 0 && (
+                  <div className="mt-6">
+                    <button
+                      type="button"
+                      aria-expanded={farOpen}
+                      aria-controls="entraide-far-needs"
+                      onClick={() => setFarOpen((open) => !open)}
+                      className="text-left"
+                    >
+                      <span className="block text-sm font-semibold text-foreground underline-offset-4 hover:underline">
+                        {farNeedsLabel(farNeeds.length, origin !== null)}
+                      </span>
+                      {origin && <span className="block text-xs text-muted-foreground">Pour celles et ceux qui passent par là.</span>}
+                    </button>
+                    <ul id="entraide-far-needs" hidden={!farOpen} className="mt-3 space-y-3">
+                      {farNeeds.map((need) => (
+                        <NeedRow
+                          key={need.id}
+                          need={need}
+                          distance={needDistance(need)}
+                          state={needState(need)}
+                          pending={responding === need.id}
+                          onCanHelp={() => void canHelp(need)}
+                        />
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </>
             )}
           </section>
 
+          <EntraideHowItWorks />
+
           <section className="mt-14" aria-labelledby="entraide-helpers-title">
-            <h2 id="entraide-helpers-title" className="font-heading text-2xl font-semibold text-foreground">{origin ? "Prêts à aider près de chez vous" : "Prêts à aider sur Guardiens"}</h2>
+            <p className="text-xs font-semibold uppercase tracking-wide text-primary">Le pouls de la communauté</p>
+            <h2 id="entraide-helpers-title" className="mt-1 font-heading text-2xl font-semibold text-foreground">{helpersSectionTitle(nearHelpersCount, placeCity)}</h2>
             <p className="mt-2 text-sm text-muted-foreground">Aider, c'est aussi se faire du bien.</p>
             <div className="mt-5 grid gap-4 md:grid-cols-2">
               {visibleHelpers.map((helper) => (
@@ -462,9 +533,9 @@ const EntraideHub = () => {
                 />
               ))}
             </div>
-            {sortedHelpers.length > visibleHelpers.length && (
-              <Button variant="outline" className="mt-5" onClick={() => setHelpersShown((shown) => shown + HELPERS_PAGE_SIZE)}>
-                Voir {HELPERS_PAGE_SIZE} de plus
+            {helpersMoreAction && (
+              <Button variant="outline" className="mt-5" onClick={() => setHelpersShown(helpersMoreAction.next)}>
+                {helpersMoreAction.label}
               </Button>
             )}
           </section>
