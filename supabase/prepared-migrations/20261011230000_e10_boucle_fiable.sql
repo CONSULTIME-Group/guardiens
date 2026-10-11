@@ -2,7 +2,8 @@
 -- 1. confirm_mission_meetup : un « non » arrivé après une rencontre confirmée
 --    (ancien lien, ou l'autre personne) reste un avis négatif ; le besoin
 --    reste « rencontre confirmée » et compté. Seule modification par rapport
---    au lot E2a : la branche ELSIF et close_reason lu dans m.
+--    au lot E2a : la branche ELSIF (rencontre confirmée ou besoin annulé),
+--    close_reason lu dans m, et un « oui » qui laisse un besoin annulé tel quel.
 -- 2. Coordonnées des 3 besoins ouverts publiés sans lieu situé (centre de la
 --    commune, geo.api.gouv.fr, relevé le 11/10/2026) : sans elles, aucune
 --    vague ne partait et ils restaient hors de la liste « près de chez vous ».
@@ -71,10 +72,12 @@ BEGIN
     UPDATE public.small_missions
        SET status = 'completed', closed_at = COALESCE(closed_at, now()), close_reason = 'meetup_confirmed', updated_at = now()
      WHERE id = m.id
+       AND status <> 'cancelled'
        AND (status <> 'completed' OR close_reason IS NOT DISTINCT FROM 'auto_completed_after_date');
-  ELSIF m.status = 'completed' AND m.close_reason IS NOT DISTINCT FROM 'meetup_confirmed' THEN
+  ELSIF m.status = 'cancelled' OR (m.status = 'completed' AND m.close_reason IS NOT DISTINCT FROM 'meetup_confirmed') THEN
     -- Lot E10 : une rencontre déjà confirmée reste confirmée ; ce « non »
     -- (souvent un ancien lien) reste un avis, sans rouvrir ni décompter.
+    -- Un besoin annulé (par son auteur ou la modération) garde son statut.
     NULL;
   ELSE
     v_ref_date := COALESCE(m.end_date, m.date_needed);

@@ -25,7 +25,7 @@ import { useAccessLevel, MIN_COMPLETION_TO_APPLY } from "@/hooks/useAccessLevel"
 import { canPublishSmallMission, shouldNudgeProfileCompletion } from "@/lib/missionPublishAccess";
 import MissionPhotoUpload from "@/components/missions/MissionPhotoUpload";
 import { geocodeCity } from "@/lib/geocode";
-import { MISSION_PLACE_NOT_FOUND, resolveMissionCoords, type Coords } from "@/lib/missionPlace";
+import { MISSION_PLACE_NOT_FOUND, officialPostalCentre, resolveMissionCoords, type Coords } from "@/lib/missionPlace";
 import { trackFirstAction, trackEvent } from "@/lib/analytics";
 import { recordMissionCreatedAttribution } from "@/lib/campaignAttribution";
 import {
@@ -379,7 +379,11 @@ const CreateSmallMission = () => {
     let cancelled = false;
     const timer = window.setTimeout(async () => {
       try {
-        const coords = placeCoords ?? await geocodeCity(city.trim(), "FR");
+        const coords = await resolveMissionCoords(
+          { fieldCoords: placeCoords, postalCode, city },
+          (query, country) => geocodeCity(query, country),
+          officialPostalCentre,
+        );
         if (cancelled || !coords) return;
         // Même fonction et même rayon que la vague : mission_wave_audience
         // côté moteur, mission_wave_audience_preview côté formulaire, filtres
@@ -394,7 +398,7 @@ const CreateSmallMission = () => {
       }
     }, 600);
     return () => { cancelled = true; window.clearTimeout(timer); };
-  }, [step, city, placeCoords]);
+  }, [step, city, postalCode, placeCoords]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -468,12 +472,16 @@ const CreateSmallMission = () => {
     const coords = await resolveMissionCoords(
       { fieldCoords: placeCoords, postalCode, city },
       (query, country) => geocodeCity(query, country),
+      officialPostalCentre,
     );
     if (!coords) {
       setSubmitting(false);
       toast({ title: "Commune à préciser", description: MISSION_PLACE_NOT_FOUND, variant: "destructive" });
       setStep(3);
       setPlaceTouched(true);
+      window.setTimeout(() => {
+        document.getElementById("mission-field-place")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 50);
       return;
     }
 
@@ -852,7 +860,7 @@ const CreateSmallMission = () => {
                       // Lot E10 : coordonnées de la commune choisie ; toute saisie sans centre les efface.
                       if (typeof partial.latitude === "number" && typeof partial.longitude === "number") {
                         setPlaceCoords({ lat: partial.latitude, lng: partial.longitude });
-                      } else if (partial.city !== undefined || partial.postal_code !== undefined) {
+                      } else if ((partial.city !== undefined && partial.city !== city) || partial.postal_code !== undefined) {
                         setPlaceCoords(null);
                       }
                     }}
