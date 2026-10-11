@@ -44,7 +44,7 @@ const Email = ({
 }: Props) => (
   <Html lang="fr" dir="ltr">
     <BrandedHead />
-    <Preview>Alerte délivrabilité : {breaches.length} seuil(s) dépassé(s)</Preview>
+    <Preview>{`Alerte délivrabilité : ${breaches.length} seuil(s) dépassé(s)`}</Preview>
     <Body style={main}>
       <Container style={container}>
         <BrandHeader />
