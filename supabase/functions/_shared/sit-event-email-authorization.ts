@@ -58,10 +58,15 @@ export async function authorizeSitEventEmail(db: Client, input: {
         .eq('sitter_id', sitterId).eq('status', status))
     }
     if (name === 'sit-invitation') {
-      if (sit.user_id !== caller || sit.status !== 'published') return denied
-      const invitation = await one(db.from('sit_invitations').select('id,owner_id,sitter_id,status,message')
+      if (sit.user_id !== caller || !['published', 'draft'].includes(sit.status)) return denied
+      const invitation = await one(db.from('sit_invitations').select('id,owner_id,sitter_id,status,message,kind,expires_at')
         .eq('sit_id', sit.id).eq('owner_id', caller).eq('sitter_id', recipient))
       if (!invitation || !['sent', 'viewed'].includes(invitation.status)) return denied
+      // Lot I2 : une proposition privée vise un brouillon et expire ; une
+      // invitation ordinaire exige toujours une garde publiée.
+      const isPrivate = invitation.kind === 'private'
+      if (!isPrivate && sit.status !== 'published') return denied
+      if (isPrivate && !(typeof invitation.expires_at === 'string' && Date.parse(invitation.expires_at) > Date.now())) return denied
       const owner = await profile(caller)
       const sitter = await profile(recipient)
       const start = dateLabel(sit.start_date), end = dateLabel(sit.end_date)
@@ -70,6 +75,7 @@ export async function authorizeSitEventEmail(db: Client, input: {
         sitTitle: sit.title, sitCity: sit.city ?? owner?.city ?? '',
         sitPeriod: start && end ? `du ${start} au ${end}` : start ? `à partir du ${start}` : null,
         message: invitation.message, sitId: sit.id,
+        proposalId: isPrivate ? invitation.id : null,
       }
       canonical = `sit-invite-${sit.id}-${recipient}`
     } else if (name === 'review-received') {

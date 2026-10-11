@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { cn } from "@/lib/utils";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -128,6 +128,12 @@ const EditSit = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  // Lot I2 : seul un retour interne vers une fiche gardien est accepté.
+  const retourParam = searchParams.get("retour");
+  const proposalReturn = retourParam && /^\/gardiens\/[0-9a-f-]{36}\?proposer=[0-9a-f-]{36}$/i.test(retourParam)
+    ? retourParam
+    : null;
 
   const [title, setTitle] = useState("");
   const [titleTouched, setTitleTouched] = useState(false);
@@ -402,11 +408,12 @@ const EditSit = () => {
     }
     initialSnapshot.current = currentSnapshot;
     toast({ title: "Annonce mise à jour" });
-    navigate(`/sits/${id}`);
+    // Lot I2 : retour vers la fiche du gardien à qui la garde va être proposée.
+    navigate(proposalReturn ?? `/sits/${id}`);
   }, [
     user, id, canSave, persistedDesc, trimmedTitle, startDate, endDate,
     flexibleDates, flexibleMonths, flexibleDuration, flexibleFreeNote, inlineFlexibility, openTo, isUrgent,
-    minGardienSits, currentSnapshot, navigate, toast,
+    minGardienSits, currentSnapshot, navigate, toast, proposalReturn,
   ]);
 
 
