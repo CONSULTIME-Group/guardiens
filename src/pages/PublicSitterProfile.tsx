@@ -1756,13 +1756,15 @@ export default function PublicSitterProfile() {
         const sinceLabel = sinceDate && !Number.isNaN(sinceDate.getTime())
           ? sinceDate.toLocaleDateString("fr-FR", { month: "long", year: "numeric" })
           : "";
-        const glanceItems = completedSits > 0 || sitterRoleCount > 0
-          ? [
-              completedSits > 0 ? { value: String(completedSits), label: completedSits > 1 ? "gardes réalisées" : "garde réalisée" } : null,
-              sitterRoleCount > 0 ? { value: `${formatRatingFr(sitterRoleAvg)} / 5`, label: `d'après ${sitterRoleCount} avis` } : null,
-              animalsFact ? { value: animalsFact, label: "animaux gardés", size: "sm" as const } : null,
-              sinceLabel ? { value: sinceLabel.charAt(0).toUpperCase() + sinceLabel.slice(1), label: "membre depuis", size: "sm" as const } : null,
-            ].filter((x): x is { value: string; label: string; size?: "sm" } => !!x)
+        type GlanceItem = { value: string; label: string; size?: "lg" | "sm" };
+        const glanceCandidates: Array<GlanceItem | null> = [
+          completedSits > 0 ? { value: String(completedSits), label: completedSits > 1 ? "gardes réalisées" : "garde réalisée" } : null,
+          sitterRoleCount > 0 ? { value: `${formatRatingFr(sitterRoleAvg)} / 5`, label: `d'après ${sitterRoleCount} avis` } : null,
+          animalsFact ? { value: animalsFact, label: "animaux gardés", size: "sm" } : null,
+          sinceLabel ? { value: sinceLabel.charAt(0).toUpperCase() + sinceLabel.slice(1), label: "membre depuis", size: "sm" } : null,
+        ];
+        const glanceItems: GlanceItem[] = completedSits > 0 || sitterRoleCount > 0
+          ? glanceCandidates.filter((x): x is GlanceItem => x !== null)
           : [];
 
         const firstSitDate = gardeReviews
