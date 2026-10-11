@@ -114,7 +114,7 @@ const ConversationHeader = ({
     const load = async () => {
       const [{ data: mission }, { data: response }] = await Promise.all([
         supabase.from("small_missions")
-          .select("id, title, exchange_offer, date_needed, user_id")
+          .select("id, title, exchange_offer, date_needed, user_id, status, close_reason")
           .eq("id", missionId)
           .single(),
         supabase.from("small_mission_responses")
@@ -172,12 +172,29 @@ const ConversationHeader = ({
     setResponseData((prev: any) => ({ ...prev, status: "declined" }));
   };
 
+  // Lot E2a : la fin d'un coup de main passe par mark_mission_done (auteur ou
+  // personne retenue). L'ancien code écrivait un statut de réponse inexistant :
+  // l'écriture échouait sans message et l'avis n'était jamais proposé.
+  const [markingDone, setMarkingDone] = useState(false);
   const handleMarkDone = async () => {
-    if (!responseData?.id) return;
-    await supabase.from("small_mission_responses")
-      .update({ status: "completed" as any })
-      .eq("id", responseData.id);
-    setResponseData((prev: any) => ({ ...prev, status: "completed" }));
+    if (!missionData?.id || markingDone) return;
+    setMarkingDone(true);
+    try {
+      const { data, error } = await (supabase as any).rpc("mark_mission_done", { p_mission_id: missionData.id });
+      if (error) throw error;
+      if (!data?.ok) {
+        toast.error(data?.reason === "forbidden"
+          ? "L'auteur du besoin et la personne retenue peuvent marquer ce coup de main comme terminé."
+          : data?.reason === "cancelled" ? "Ce besoin est clôturé." : "Réessayez dans un instant pour marquer ce coup de main comme terminé.");
+        return;
+      }
+      setMissionData((prev: any) => ({ ...prev, status: "completed", close_reason: data.counted ? "meetup_confirmed" : prev?.close_reason }));
+      onActionDone();
+    } catch {
+      toast.error("Réessayez dans un instant pour marquer ce coup de main comme terminé.");
+    } finally {
+      setMarkingDone(false);
+    }
   };
 
   // Check if user already left feedback for this mission
@@ -495,7 +512,7 @@ const ConversationHeader = ({
           )}
         </div>
       )}
-      {isSmallMission && missionData && responseData && responseData.status === "accepted" && (
+      {isSmallMission && missionData && responseData && responseData.status === "accepted" && missionData.status !== "completed" && (
         <div className="px-4 py-2 bg-success-soft border-t border-success-border flex items-center gap-2">
           <CheckCircle className="text-success w-4 h-4 shrink-0" />
           <span className="text-sm text-success-foreground font-medium">Échange accepté</span>
@@ -505,6 +522,7 @@ const ConversationHeader = ({
               variant="outline"
               className="ml-auto border-success-border text-success-foreground hover:bg-success-soft"
               onClick={handleMarkDone}
+              disabled={markingDone}
             >
               Marquer comme terminé
             </Button>
@@ -517,7 +535,7 @@ const ConversationHeader = ({
           <span className="text-sm text-muted-foreground">Échange décliné</span>
         </div>
       )}
-      {isSmallMission && missionData && responseData && responseData.status === "completed" && (
+      {isSmallMission && missionData && responseData && responseData.status === "accepted" && missionData.status === "completed" && missionData.close_reason !== "meetup_not_happened" && (
         <div className="px-4 py-2 bg-primary/5 border-t border-primary/20 flex items-center gap-2">
           <CheckCircle className="text-primary w-4 h-4 shrink-0" />
           <span className="text-sm text-primary font-medium">Échange terminé</span>

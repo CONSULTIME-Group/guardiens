@@ -63,7 +63,7 @@ export const MissionChooseBanner = ({ missionId, userId, otherUserId, otherFirst
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Choisir {name} ?</AlertDialogTitle>
-            <AlertDialogDescription>Votre besoin passe en cours et les autres personnes sont prévenues que la place est prise.</AlertDialogDescription>
+            <AlertDialogDescription>Votre besoin passe en cours et les autres réponses sont écartées.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Annuler</AlertDialogCancel>

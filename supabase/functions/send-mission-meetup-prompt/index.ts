@@ -14,7 +14,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { requireCronCaller } from "../_shared/require-cron-caller.ts";
 import { startCronRun } from "../_shared/cron-run-log.ts";
-import { isMeetupDue, MEETUP_PROMPT_TITLE, meetupPromptBody } from "../_shared/mission-meetup.ts";
+import { isMeetupDue, isMeetupSendingHour, MEETUP_PROMPT_TITLE, meetupPromptBody } from "../_shared/mission-meetup.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -54,6 +54,8 @@ Deno.serve(async (req) => {
 
   const supabase = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
   const now = new Date();
+  // Lot E2a : jamais de question la nuit ; le passage horaire suivant la reprend.
+  if (!isMeetupSendingHour(now)) return json({ ok: true, skipped: "quiet_hours" });
 
   try {
     const { data: missions, error } = await supabase

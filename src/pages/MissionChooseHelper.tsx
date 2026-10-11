@@ -50,7 +50,7 @@ export default function MissionChooseHelper() {
       ) : done?.ok ? (
         <section className="flex flex-col gap-4" aria-live="polite">
           <h1 className="font-heading text-3xl font-semibold text-foreground">C'est noté, {helper} vous aide.</h1>
-          <p className="text-muted-foreground">Votre besoin passe en cours. Les autres personnes qui avaient proposé leur aide sont prévenues.</p>
+          <p className="text-muted-foreground">Votre besoin passe en cours. Les autres réponses restent visibles sur la page du besoin : vous pouvez leur répondre depuis cette page.</p>
           <Button asChild className="self-start"><Link to="/messages">Écrire à {helper}</Link></Button>
         </section>
       ) : done && !done.ok ? (
@@ -63,7 +63,7 @@ export default function MissionChooseHelper() {
         <section className="flex flex-col gap-4">
           <h1 className="font-heading text-3xl font-semibold text-foreground">C'est {helper} qui vous aide ?</h1>
           {peek.mission_title && <p className="rounded-lg border border-border bg-card p-4 font-semibold text-foreground">{peek.mission_title}</p>}
-          <p className="text-muted-foreground">En confirmant, votre besoin passe en cours et les autres personnes sont prévenues.</p>
+          <p className="text-muted-foreground">En confirmant, votre besoin passe en cours. Les autres réponses restent visibles sur la page du besoin.</p>
           <Button onClick={confirm} disabled={sending} className="self-start">{sending ? "Enregistrement en cours..." : `Choisir ${helper}`}</Button>
           {slug && <Link to={`/petites-missions/${slug}`} className="text-sm font-semibold text-primary underline underline-offset-4">Voir le besoin</Link>}
         </section>
