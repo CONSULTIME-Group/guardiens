@@ -32,7 +32,7 @@ async function ensureMonthlyPrice(stripe: Stripe): Promise<string> {
   // Search for existing product by metadata
   const products = await stripe.products.list({ limit: 100 });
   let product = products.data.find(
-    (p) => p.metadata?.guardiens_type === "monthly_9eur"
+    (p: { metadata?: Record<string, string> }) => p.metadata?.guardiens_type === "monthly_9eur"
   );
 
   if (!product) {
@@ -51,7 +51,7 @@ async function ensureMonthlyPrice(stripe: Stripe): Promise<string> {
     limit: 10,
   });
   const monthlyPrice = prices.data.find(
-    (p) =>
+    (p: { unit_amount?: number | null; currency?: string; recurring?: { interval?: string } | null }) =>
       p.unit_amount === 900 &&
       p.currency === "eur" &&
       p.recurring?.interval === "month"
