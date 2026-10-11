@@ -91,7 +91,22 @@ Deno.serve(async (req) => {
       .in("status", ["pending"])
       .select("id");
     if (defErr) console.warn("deferred queue cancel error:", defErr);
-    const deferredCancelled = (deferredRows ?? []).length;
+    let deferredCancelled = (deferredRows ?? []).length;
+    // Lot Q1 : une diffusion de proximité passe par le gabarit, ses reports
+    // portent la clé listing-proximity-{annonce}-{gardien}.
+    const { data: camp } = await service
+      .from("mass_emails").select("segment, filters").eq("id", campaign_id).maybeSingle();
+    const proxSitId = (camp as any)?.segment === "listing_proximity" ? String((camp as any)?.filters?.sit_id ?? "") : "";
+    if (/^[0-9a-f-]{36}$/i.test(proxSitId)) {
+      const { data: proxDeferred, error: proxDefErr } = await service
+        .from("email_deferred_queue")
+        .update({ status: "cancelled", updated_at: new Date().toISOString(), last_error: "campaign cancelled" })
+        .like("idempotency_key", `listing-proximity-${proxSitId}-%`)
+        .in("status", ["pending"])
+        .select("id");
+      if (proxDefErr) console.warn("proximity deferred cancel error:", proxDefErr);
+      deferredCancelled += (proxDeferred ?? []).length;
+    }
 
     // 3) marque les lignes queued/failed comme skipped
     await service

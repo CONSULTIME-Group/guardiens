@@ -12,7 +12,7 @@ import {
   isFarForRecipient,
   isNationwideRadius,
   isOwnerFarFromFrance,
-} from "../../supabase/functions/_shared/far-listing";
+} from "../../../supabase/functions/_shared/far-listing";
 
 const PROX = readFileSync("supabase/functions/send-listing-proximity/index.ts", "utf8");
 const TPL = readFileSync("supabase/functions/_shared/transactional-email-templates/nearby-sit-alert.tsx", "utf8");
@@ -59,14 +59,15 @@ describe("Q1, fonction de diffusion", () => {
     expect(PROX).toContain("if (nationwide || (d !== null && d <= radiusKm)) {");
   });
   it("campagne annulée ignorée, alertes de publication comptées, fenêtre de 7 jours levée pour une garde lointaine", () => {
-    expect(PROX).toContain('.filter((c) => c?.status !== "cancelled")');
+    expect(PROX).toContain("CANCELLED_UNSERVED_STATUSES");
+    expect(PROX).toContain("if (error) throw new Error(`dedup sends lookup failed");
     expect(PROX).toContain('.from("sit_notification_log")');
     expect(PROX).toContain('.contains("sit_ids", [sitId])');
     expect(PROX).toContain("const farBroadcast = nationwide && ownerFar;");
     expect(PROX).toContain("{ recentWindow: !farBroadcast }");
   });
   it("chaque gardien reçoit le drapeau farAway, sans distance quand la garde est lointaine", () => {
-    expect(PROX).toContain("const far = isFarForRecipient(r.distance_km, ownerFar);");
+    expect(PROX).toContain("const far = isFarForRecipient(r.distance_km, ownerFar || nationwide);");
     expect(PROX).toContain("farAway: far,");
     expect(PROX).toContain("distanceKm: far || r.distance_km === null ? undefined : r.distance_km,");
   });

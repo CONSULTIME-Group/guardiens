@@ -33,6 +33,9 @@ import {
   isOwnerFarFromFrance,
 } from "../_shared/far-listing.ts";
 
+/** Lignes d'une campagne annulée qui ne sont jamais parties (lot Q1). */
+const CANCELLED_UNSERVED_STATUSES = new Set(["queued", "skipped"]);
+
 /** Au dela de ce nombre de destinataires, la diffusion manuelle est signalee. */
 export const LARGE_BROADCAST_THRESHOLD = 150;
 
@@ -53,21 +56,21 @@ async function computeAlreadyServed(
   const servedUsers = new Set<string>();
   const cutoff = new Date(Date.now() - PROXIMITY_DEDUP_DAYS * 86400_000).toISOString();
 
-  const { data: campaigns } = await serviceClient
+  const { data: campaigns, error: campErr } = await serviceClient
     .from("mass_emails")
     .select("id, filters, created_at, status")
     .eq("segment", "listing_proximity");
+  if (campErr) throw new Error(`dedup campaigns lookup failed: ${campErr.message}`);
 
-  // Lot Q1 : une campagne annulée ne compte pas, ses lignes « skipped »
-  // ne servent personne et bloquaient toute rediffusion de l'annonce.
-  const ids = ((campaigns || []) as any[])
-    .filter((c) => c?.status !== "cancelled")
-    .filter(
-      (c) =>
-        String(c?.filters?.sit_id || "") === sitId ||
-        (opts.recentWindow && String(c?.created_at || "") >= cutoff),
-    )
-    .map((c) => c.id as string);
+  const relevant = ((campaigns || []) as any[]).filter(
+    (c) =>
+      String(c?.filters?.sit_id || "") === sitId ||
+      (opts.recentWindow && String(c?.created_at || "") >= cutoff),
+  );
+  const ids = relevant.map((c) => c.id as string);
+  // Lot Q1 : dans une campagne annulée, seules les lignes réellement parties
+  // comptent ; ses lignes jamais envoyées bloquaient toute rediffusion.
+  const cancelledIds = new Set(relevant.filter((c) => c?.status === "cancelled").map((c) => c.id as string));
 
   // On exclut toute adresse déjà engagée sur ces campagnes, quel que soit
   // l'aboutissement (sent, delivered, opened, skipped, queued, sending,
@@ -75,14 +78,22 @@ async function computeAlreadyServed(
   // Ne retenir que "sent" laissait repasser des adresses que l'idempotence
   // bloquait ensuite au moment de l'envoi, d'où des campagnes à zéro départ.
   const CH = 200;
+  const PAGE = 1000;
   for (let i = 0; i < ids.length; i += CH) {
-    const { data: rows } = await serviceClient
-      .from("mass_email_sends")
-      .select("recipient_email, status")
-      .in("mass_email_id", ids.slice(i, i + CH))
-      .neq("status", "failed");
-    for (const row of (rows || []) as any[]) {
-      if (row.recipient_email) served.add(String(row.recipient_email).toLowerCase());
+    for (let from = 0; ; from += PAGE) {
+      const { data: rows, error } = await serviceClient
+        .from("mass_email_sends")
+        .select("id, mass_email_id, recipient_email, status")
+        .in("mass_email_id", ids.slice(i, i + CH))
+        .neq("status", "failed")
+        .order("id", { ascending: true })
+        .range(from, from + PAGE - 1);
+      if (error) throw new Error(`dedup sends lookup failed: ${error.message}`);
+      for (const row of (rows || []) as any[]) {
+        if (cancelledIds.has(row.mass_email_id) && CANCELLED_UNSERVED_STATUSES.has(String(row.status))) continue;
+        if (row.recipient_email) served.add(String(row.recipient_email).toLowerCase());
+      }
+      if (!rows || rows.length < PAGE) break;
     }
   }
 
@@ -496,7 +507,7 @@ Deno.serve(async (req) => {
       excluded_recent: recipients.length - targets.length,
       nationwide,
       owner_far: ownerFar,
-      far_recipients: targets.filter((r) => isFarForRecipient(r.distance_km, ownerFar)).length,
+      far_recipients: targets.filter((r) => isFarForRecipient(r.distance_km, ownerFar || nationwide)).length,
     };
 
     const subject = buildSubject(authorFirstName, listingCity, farBroadcast || nationwide);
@@ -574,7 +585,8 @@ Deno.serve(async (req) => {
         JSON.stringify({
           queued: 0,
           targeted: recipients.length,
-          already_served: alreadyServed.emails.size + alreadyServed.userIds.size,
+          already_served: alreadyServed.emails.size,
+          already_alerted_at_publish: alreadyServed.userIds.size,
           mode: "queue",
           radius_km: radiusKm,
           requested_radius_km: radiusDecision.requestedRadiusKm,
@@ -651,7 +663,7 @@ Deno.serve(async (req) => {
     // `nearby-sit-alert`) et non par le gabarit générique des campagnes.
     let enqueued = 0;
     for (const r of targets) {
-      const far = isFarForRecipient(r.distance_km, ownerFar);
+      const far = isFarForRecipient(r.distance_km, ownerFar || nationwide);
       const { error: qErr } = await serviceClient.rpc("enqueue_email", {
         queue_name: "mass_emails",
         payload: {
@@ -705,7 +717,8 @@ Deno.serve(async (req) => {
       mode: "queue",
       queued: enqueued,
       targeted: recipients.length,
-      already_served: alreadyServed.emails.size + alreadyServed.userIds.size,
+      already_served: alreadyServed.emails.size,
+      already_alerted_at_publish: alreadyServed.userIds.size,
       ...dedupInfo,
       campaign_id: campaignId,
       radius_km: radiusKm,

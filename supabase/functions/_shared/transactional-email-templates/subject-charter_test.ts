@@ -35,7 +35,13 @@ const SAMPLES: Record<string, Record<string, any>[]> = {
   'review-received': [{ reviewerName: 'Marie' }, {}],
   'review-reminder': [{ revieweeName: 'Marie' }, {}],
   'sit-confirmed': [{ sitterFirstName: 'Marie' }, {}],
-  'nearby-sit-alert': [{ city: 'Lyon' }, {}],
+  'nearby-sit-alert': [
+    { city: 'Lyon' },
+    {},
+    { farAway: true, ownerFirstName: 'Andrée', city: 'Saint Ludger, Québec, Canada' },
+    { distanceKm: 250, city: 'Brest' },
+    { farAway: true },
+  ],
   'availability-nudge': [{ city: 'Lyon' }, {}],
 }
 
