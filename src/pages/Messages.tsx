@@ -494,8 +494,16 @@ const Messages = () => {
     });
   }, [activeConv, loadingMoreMessages, messages]);
 
+  // Le champ n'est vidé qu'au vrai changement de conversation : loadMessages
+  // change d'identité quand l'objet user est rafraîchi, ce qui effaçait la
+  // saisie en cours et le brouillon prérempli (lot E3).
+  const inputConvIdRef = useRef<string | null>(null);
   useEffect(() => {
-    setNewMessage("");
+    const convId = activeConv?.id ?? null;
+    if (inputConvIdRef.current !== convId) {
+      inputConvIdRef.current = convId;
+      setNewMessage("");
+    }
     if (!activeConv) return;
     loadMessages(activeConv.id);
   }, [activeConv?.id, loadMessages]);
