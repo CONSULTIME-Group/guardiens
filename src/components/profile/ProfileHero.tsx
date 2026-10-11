@@ -153,7 +153,6 @@ const ProfileHero = (p: ProfileHeroProps) => {
         alt=""
         aria-hidden="true"
         data-hero-anchor={p.heroAnchor}
-        data-hero-notebook={/hero-(13|63)(?:[.-])/.test(p.heroDesktop) || undefined}
         width={1536}
         height={544}
         loading="eager"
@@ -271,7 +270,6 @@ const ProfileHero = (p: ProfileHeroProps) => {
             alt=""
             aria-hidden="true"
             data-hero-anchor={p.heroAnchor}
-            data-hero-notebook={/hero-63(?:[.-])/.test(p.heroDesktop) || undefined}
             width={1536}
             height={544}
             loading="eager"

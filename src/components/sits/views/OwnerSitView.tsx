@@ -69,6 +69,7 @@ import OwnerSitManagement from "@/components/sits/shared/OwnerSitManagement";
 import SitPhotoManager from "@/components/sits/owner/SitPhotoManager";
 import DraftChecklist from "@/components/sits/owner/DraftChecklist";
 import InviteSittersBlock from "@/components/sits/owner/InviteSittersBlock";
+import SentProposalsBlock from "@/components/sits/owner/SentProposalsBlock";
 import AnimalMentionDialog from "@/components/sits/owner/AnimalMentionDialog";
 import PublishPhotoPromptDialog from "@/components/sits/owner/PublishPhotoPromptDialog";
 import {
@@ -769,6 +770,11 @@ const OwnerSitView = ({
         />
 
       )}
+      {/* Propositions privées envoyées depuis la fiche d'un gardien (lot I2) */}
+      <SentProposalsBlock
+        sitId={sit.id}
+        isDraft={isDraft}
+      />
 
       {/* Confirmation publication, rappel des dates exactes */}
       <AlertDialog open={publishConfirmOpen} onOpenChange={setPublishConfirmOpen}>

@@ -10,6 +10,7 @@ const migration = readFileSync(
   new URL('supabase/prepared-migrations/20261011150000_sit_private_proposals.sql', root),
   'utf8',
 );
+
 const db = new PGlite();
 
 const OWNER = '10000000-0000-4000-8000-000000000001';

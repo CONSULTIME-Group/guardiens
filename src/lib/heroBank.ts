@@ -229,32 +229,9 @@ function getIndex(
 const CATEGORY_FALLBACK_INDEX: Record<HeroCategoryName, number> = {
   animals: 0,     // hero-01
   home: 70,       // hero-71
-  mutual_aid: 83, // hero-84 (hero-81 retirée)
-  village: 91,    // hero-92 (hero-91 retirée)
+  mutual_aid: 80, // hero-81
+  village: 90,    // hero-91
 };
-
-/**
- * Illustrations retirées (numéros de fichier 1-indexés, audit du 11/10/2026) :
- * spirale ou bord de carnet, stylos posés, bandes noires, texte étranger ou
- * anglais, grande signature. Elles restent dans HERO_BANK pour ne pas décaler
- * les index enregistrés en base (`profiles.hero_image_index`), mais ne sont
- * plus proposées dans le sélecteur ni attribuées automatiquement. Un choix
- * explicite déjà enregistré par un membre reste respecté.
- */
-export const RETIRED_HERO_FILES: readonly number[] = [
-  2, 10, 11, 13, 14, 16, 21, 22, 31, 34, 35, 39, 41, 45, 50, 51, 53, 55, 57, 58,
-  60, 62, 63, 64, 65, 66, 67, 68, 69, 70, 74, 75, 79, 81, 82, 83, 87, 88, 89, 91,
-  96, 100,
-];
-
-const RETIRED_INDEXES: ReadonlySet<number> = new Set(
-  RETIRED_HERO_FILES.map((fileNum) => fileNum - 1),
-);
-
-/** True si l'illustration (index 0-based) est retirée de la banque active. */
-export function isRetiredHeroIndex(idx: number): boolean {
-  return RETIRED_INDEXES.has(idx);
-}
 
 /** True si l'index pointe sur un asset utilisable (string non vide). */
 function isValidAsset(idx: number): boolean {
@@ -263,37 +240,16 @@ function isValidAsset(idx: number): boolean {
   return typeof url === "string" && url.length > 0;
 }
 
-/** True si l'asset est utilisable ET proposé (non retiré). */
-function isActiveAsset(idx: number): boolean {
-  return isValidAsset(idx) && !isRetiredHeroIndex(idx);
-}
-
-/** Index 0-based des illustrations actives d'une catégorie, dans l'ordre de la banque. */
-function activeIndexesOf(category: HeroCategoryName): number[] {
-  const range = HERO_CATEGORY_RANGES.find((c) => c.name === category);
-  if (!range) return [];
-  const [start, endExclusive] = range.range;
-  const out: number[] = [];
-  for (let i = start - 1; i < endExclusive - 1; i++) {
-    if (!isRetiredHeroIndex(i)) out.push(i);
-  }
-  return out;
-}
-
-/** Index 0-based de toutes les illustrations proposées aux membres. */
-export const ACTIVE_HERO_INDEXES: readonly number[] = HERO_BANK.map((_, i) => i).filter(
-  (i) => !isRetiredHeroIndex(i),
-);
-
 /** Index de fallback valide pour la catégorie demandée (3 niveaux de repli). */
 function getCategoryFallbackIndex(category: HeroCategoryName): number {
   const preferred = CATEGORY_FALLBACK_INDEX[category];
-  if (isActiveAsset(preferred)) return preferred;
-  for (const i of activeIndexesOf(category)) {
-    if (isActiveAsset(i)) return i;
-  }
-  for (let i = 0; i < HERO_BANK.length; i++) {
-    if (isActiveAsset(i)) return i;
+  if (isValidAsset(preferred)) return preferred;
+  const range = HERO_CATEGORY_RANGES.find((c) => c.name === category);
+  if (range) {
+    const [start, endExclusive] = range.range;
+    for (let i = start - 1; i < endExclusive - 1; i++) {
+      if (isValidAsset(i)) return i;
+    }
   }
   for (let i = 0; i < HERO_BANK.length; i++) {
     if (isValidAsset(i)) return i;
@@ -371,16 +327,7 @@ function resolveSelection(
   }
 
   const intra = hashStringToIndex(`hero-img:${sitterId}`, span);
-  let candidate = start - 1 + intra;
-
-  // Illustration retirée : nouveau tirage parmi les illustrations actives de
-  // la même catégorie. Les membres déjà sur une image active ne changent pas.
-  if (isRetiredHeroIndex(candidate)) {
-    const active = activeIndexesOf(chosen.name);
-    if (active.length > 0) {
-      candidate = active[hashStringToIndex(`hero-alt:${sitterId}`, active.length)];
-    }
-  }
+  const candidate = start - 1 + intra;
 
   // Asset manquant → fallback dans la même catégorie.
   if (!isValidAsset(candidate)) {
