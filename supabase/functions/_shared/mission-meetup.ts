@@ -19,6 +19,19 @@ export const MEETUP_DELAY_DAYS = 1;
 /** Délai de relance après l'acceptation, quand aucune date n'est indiquée. */
 export const MEETUP_NO_DATE_DELAY_DAYS = 3;
 
+/**
+ * Lot E2a : la question part en journée, heure de Paris (9 h à 20 h). Avant,
+ * le passage de 0 h 40 UTC l'envoyait la nuit, juste avant la clôture
+ * automatique.
+ */
+export const MEETUP_SEND_FROM_HOUR = 9;
+export const MEETUP_SEND_UNTIL_HOUR = 20;
+
+export function isMeetupSendingHour(now: Date): boolean {
+  const hour = Number(new Intl.DateTimeFormat("fr-FR", { hour: "2-digit", hour12: false, timeZone: "Europe/Paris" }).format(now));
+  return Number.isFinite(hour) && hour >= MEETUP_SEND_FROM_HOUR && hour < MEETUP_SEND_UNTIL_HOUR;
+}
+
 export interface MeetupCandidate {
   end_date?: string | null;
   date_needed?: string | null;

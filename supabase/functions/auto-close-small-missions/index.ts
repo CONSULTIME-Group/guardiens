@@ -4,7 +4,7 @@
 //
 // 1) AUTO-COMPLETE (vague 32) : les missions BESOIN avec une réponse acceptée
 //    dont la date de référence (end_date, sinon date_needed) est passée d'au moins
-//    1 jour passent en 'completed'. Si aucune date n'est fournie, on retombe sur
+//    3 jours (lot E2a) passent en 'completed'. Si aucune date n'est fournie, on retombe sur
 //    accepted_at + 7 jours (approximé par la plus récente réponse acceptée).
 //    Les deux parties reçoivent une notification les invitant à remercier /
 //    laisser un retour. L'email de nudge feedback est laissé au cron dédié.
@@ -39,7 +39,10 @@ Deno.serve(async (req) => {
   const now = new Date()
   const nowIso = now.toISOString()
   const today = nowIso.slice(0, 10)
-  const yesterday = new Date(now.getTime() - 86400_000).toISOString().slice(0, 10)
+  // Lot E2a : un coup de main daté n'est clos automatiquement que 3 jours après
+  // sa date, pour laisser répondre à « Vous vous êtes rencontrés ? » (J+1, en
+  // journée). Avant, la clôture passait quelques heures après la question.
+  const autoCompleteCutoff = new Date(now.getTime() - 3 * 86400_000).toISOString().slice(0, 10)
   const createdAtCutoff = new Date(now.getTime() - 45 * 86400_000).toISOString()
   const acceptedFallbackCutoff = new Date(now.getTime() - 7 * 86400_000).toISOString()
 
@@ -76,9 +79,9 @@ Deno.serve(async (req) => {
       // Date de référence
       let isPast = false
       if (m.end_date) {
-        isPast = m.end_date <= yesterday
+        isPast = m.end_date <= autoCompleteCutoff
       } else if (m.date_needed) {
-        isPast = m.date_needed <= yesterday
+        isPast = m.date_needed <= autoCompleteCutoff
       } else {
         isPast = acc.created_at < acceptedFallbackCutoff
       }

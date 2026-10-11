@@ -688,9 +688,12 @@ const SmallMissionDetail = () => {
     if (completing) return;
     setCompleting(true);
     try {
-      const { error } = await supabase.from("small_missions").update({ status: "completed" as any }).eq("id", mission.id);
+      // Lot E2a : fin d'un coup de main par mark_mission_done (rencontre
+      // confirmée quand une personne est retenue : compteur et avis).
+      const { data: done, error } = await (supabase as any).rpc("mark_mission_done", { p_mission_id: mission.id });
       if (error) throw error;
-      setMission((prev: any) => ({ ...prev, status: "completed" }));
+      if (!done?.ok) throw new Error(done?.reason || "mark_done_failed");
+      setMission((prev: any) => ({ ...prev, status: "completed", close_reason: done.counted ? "meetup_confirmed" : "completed_by_author" }));
       // Batch notifications to accepted responders (compute inline to avoid forward-ref)
       const accepted = responses.filter(r => r.status === "accepted");
       if (accepted.length > 0) {
@@ -941,8 +944,8 @@ const SmallMissionDetail = () => {
                 <AlertDialogHeader>
                   <AlertDialogTitle>Retirer votre réponse ?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Ce retrait est définitif : vous ne pourrez plus proposer votre aide sur cette
-                    publication. {author?.first_name || "L'auteur"} en sera informé(e).
+                    {author?.first_name || "L'auteur"} en sera informé(e). Tant que le besoin est
+                    ouvert, vous pourrez proposer à nouveau votre aide depuis la page Entraide.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>

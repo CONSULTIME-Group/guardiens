@@ -99,7 +99,7 @@ export default function MissionQuickCanHelp() {
     if (!done?.ok) return INVALID_TEXT[done?.reason ?? "invalid"] ?? INVALID_TEXT.invalid;
     if (done.happened) return "C'est noté, merci. Votre coup de main compte pour le coin.";
     return done.reopened
-      ? "C'est noté. Le besoin redevient visible et d'autres personnes du coin le recevront."
+      ? `C'est noté. Le besoin reste ouvert : convenez d'un autre moment avec ${otherName} dans la conversation.`
       : "C'est noté. Vous pouvez convenir d'un autre moment directement dans la conversation.";
   };
 
