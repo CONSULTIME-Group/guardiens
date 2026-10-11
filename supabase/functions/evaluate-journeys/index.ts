@@ -47,7 +47,7 @@ type EnrollmentRule =
   | { type: 'sitter_no_application'; min_age_days?: number; window_days?: number; max_age_days?: number }
   | { type: 'active_referral'; min_age_days?: number; active_within_days?: number; window_days?: number; max_age_days?: number }
   | { type: 'sitter_missing_affinity'; min_age_days?: number; window_days?: number; max_age_days?: number }
-  | { type: 'owner_missing_affinity'; min_age_days?: number; max_age_days?: number }
+  | { type: 'owner_missing_affinity'; min_age_days?: number; window_days?: number; max_age_days?: number }
   | { type: 'helper_no_guard_activity'; min_age_days?: number; window_days?: number; max_age_days?: number }
 
 type AgeRule = { min_age_days?: number; max_age_days?: number; window_days?: number }
