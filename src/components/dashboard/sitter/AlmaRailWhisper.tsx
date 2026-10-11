@@ -10,7 +10,9 @@ import type { KeyboardEvent } from "react";
 import AlmaAvatar from "@/components/ai/alma/AlmaAvatar";
 import { useAlmaHidden } from "@/hooks/useAlmaHidden";
 import { toast } from "sonner";
-import { pickAlmaRailPhrase } from "@/lib/almaRailPhrase";
+import { pickAlmaRail } from "@/lib/almaRailPhrase";
+import { useNavigate } from "react-router-dom";
+import { trackEvent } from "@/lib/analytics";
 import { openAlmaDock } from "@/lib/alma/dock-events";
 
 interface AlmaRailWhisperProps {
@@ -19,6 +21,8 @@ interface AlmaRailWhisperProps {
   checklistVisible?: boolean;
   variant?: "confirmed" | "newSitter" | "owner";
   openingCardVisible?: boolean;
+  /** Lot E5 : aucun savoir-faire déclaré. */
+  skillsMissing?: boolean;
   /** Contexte propriétaire (variant="owner") */
   ownerState?: {
     ongoingSit: boolean;
@@ -35,10 +39,12 @@ const AlmaRailWhisper = ({
   variant = "confirmed",
   openingCardVisible = false,
   ownerState,
+  skillsMissing = false,
 }: AlmaRailWhisperProps) => {
   const { hidden, setHidden } = useAlmaHidden();
+  const navigate = useNavigate();
 
-  const phrase = pickAlmaRailPhrase({
+  const { phrase, action } = pickAlmaRail({
     variant,
     hidden,
     profileCompletion,
@@ -46,6 +52,7 @@ const AlmaRailWhisper = ({
     checklistVisible,
     openingCardVisible,
     ownerState,
+    skillsMissing,
   });
 
   const handleActivate = (trigger?: HTMLElement | null) => {
@@ -58,6 +65,11 @@ const AlmaRailWhisper = ({
           /* silent */
         }
       })();
+      return;
+    }
+    if (action) {
+      void trackEvent("alma_rail_action_clicked", { metadata: { action: "savoir_faire", variant } });
+      navigate(action.href);
       return;
     }
     try {
@@ -85,12 +97,12 @@ const AlmaRailWhisper = ({
     }
   };
 
-  const linkLabel = hidden ? "Réafficher Alma" : "Parler à Alma";
-  const ariaLabel = hidden ? "Réafficher Alma" : "Parler à Alma";
+  const linkLabel = hidden ? "Réafficher Alma" : action ? action.label : "Parler à Alma";
+  const ariaLabel = linkLabel;
 
   return (
     <aside
-      role="button"
+      role={action && !hidden ? "link" : "button"}
       tabIndex={0}
       aria-label={ariaLabel}
       onClick={(e) => handleActivate(e.currentTarget)}

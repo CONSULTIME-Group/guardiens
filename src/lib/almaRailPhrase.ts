@@ -28,9 +28,52 @@ export interface AlmaPhraseInput {
   openingCardVisible?: boolean;
   /** Contexte propriétaire (variant owner). */
   ownerState?: AlmaOwnerState;
+  /** Lot E5 : aucun savoir-faire déclaré (profil gardien et propriétaire réunis). */
+  skillsMissing?: boolean;
+}
+
+/** Lot E5 : adresse unique des savoir-faire (lot E1). */
+export const SAVOIR_FAIRE_PATH = "/profile?section=savoir-faire";
+export const ALMA_SKILLS_SITTER_PHRASE =
+  "Ce que vous aimez faire pour les gens du coin compte aussi. Deux savoir-faire, et l'on sait à qui demander un coup de main.";
+export const ALMA_SKILLS_OWNER_PHRASE =
+  "Vous avez sûrement un savoir-faire à partager près de chez vous. Ajoutez-le, il apparaît sur la page Entraide.";
+export const ALMA_SKILLS_ACTION_LABEL = "Ajouter mes savoir-faire";
+
+export interface AlmaRailChoice {
+  phrase: string;
+  /** Lien direct (lot E5) ; sinon la carte ouvre la conversation avec Alma. */
+  action: { label: string; href: string } | null;
+}
+
+const skillsAction = { label: ALMA_SKILLS_ACTION_LABEL, href: SAVOIR_FAIRE_PATH };
+
+/**
+ * Lot E5 : phrase et lien éventuel. Les gardes passent d'abord (garde en
+ * cours, candidatures, annonce à raconter, profil, disponibilité) ; l'invitation
+ * aux savoir-faire vient ensuite, à la place de la phrase d'ambiance.
+ */
+export function pickAlmaRail(input: AlmaPhraseInput): AlmaRailChoice {
+  const phrase = pickAlmaRailPhraseBase(input);
+  const { hidden, variant, skillsMissing, ownerState, checklistVisible = false, profileCompletion = 100, isAvailable = true, openingCardVisible = false } = input;
+  if (hidden || !skillsMissing) return { phrase, action: null };
+  if (variant === "owner") {
+    if (ownerState && !ownerState.ongoingSit && !ownerState.pendingApps && !ownerState.noActiveSit) {
+      return { phrase: ALMA_SKILLS_OWNER_PHRASE, action: skillsAction };
+    }
+    return { phrase, action: null };
+  }
+  if (variant === "newSitter" && openingCardVisible) return { phrase, action: null };
+  if (!checklistVisible && profileNudgeAllowed(profileCompletion)) return { phrase, action: null };
+  if (!isAvailable) return { phrase, action: null };
+  return { phrase: ALMA_SKILLS_SITTER_PHRASE, action: skillsAction };
 }
 
 export function pickAlmaRailPhrase(input: AlmaPhraseInput): string {
+  return pickAlmaRail(input).phrase;
+}
+
+function pickAlmaRailPhraseBase(input: AlmaPhraseInput): string {
   const {
     variant,
     hidden,
