@@ -11381,28 +11381,6 @@ export type Database = {
           latitude_approx: number | null
           longitude_approx: number | null
         }
-        Insert: {
-          avatar_url?: string | null
-          city?: string | null
-          competences?: never
-          first_name?: string | null
-          helps_with?: string | null
-          id?: string | null
-          last_active_on?: never
-          latitude_approx?: never
-          longitude_approx?: never
-        }
-        Update: {
-          avatar_url?: string | null
-          city?: string | null
-          competences?: never
-          first_name?: string | null
-          helps_with?: string | null
-          id?: string | null
-          last_active_on?: never
-          latitude_approx?: never
-          longitude_approx?: never
-        }
         Relationships: []
       }
       public_mission_feedbacks: {
