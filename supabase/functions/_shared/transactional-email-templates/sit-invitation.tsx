@@ -17,6 +17,8 @@ interface Props {
   sitPeriod?: string
   message?: string
   sitId: string
+  /** Lot I2 : proposition privée d'un brouillon, visible par ce seul gardien. */
+  proposalId?: string | null
 }
 
 const SitInvitationEmail = ({
@@ -27,7 +29,18 @@ const SitInvitationEmail = ({
   sitPeriod,
   message,
   sitId,
+  proposalId,
 }: Props) => (
+  proposalId ? (
+    <ProposalEmail
+      sitterFirstName={sitterFirstName}
+      ownerFirstName={ownerFirstName}
+      sitCity={sitCity}
+      sitPeriod={sitPeriod}
+      message={message}
+      proposalId={proposalId}
+    />
+  ) : (
   <Html lang="fr" dir="ltr">
     <BrandedHead />
     <Preview>
@@ -77,6 +90,66 @@ const SitInvitationEmail = ({
       </Container>
     </Body>
   </Html>
+  )
+)
+
+const ProposalEmail = ({
+  sitterFirstName,
+  ownerFirstName,
+  sitCity,
+  sitPeriod,
+  message,
+  proposalId,
+}: Omit<Props, 'sitId' | 'sitTitle'> & { proposalId: string }) => (
+  <Html lang="fr" dir="ltr">
+    <BrandedHead />
+    <Preview>
+      {ownerFirstName || 'Un propriétaire'} vous propose de garder sa maison
+    </Preview>
+    <Body style={main}>
+      <Container style={container}>
+        <BrandHeader />
+        <Heading style={h1}>Une garde vous est proposée</Heading>
+
+        <Text style={text}>
+          Bonjour{sitterFirstName ? ` ${sitterFirstName}` : ''},
+        </Text>
+
+        <Text style={text}>
+          {ownerFirstName || 'Un propriétaire'} a pensé à vous pour garder sa maison
+          {sitCity ? ` à ${sitCity}` : ''}
+          {sitPeriod ? `, ${sitPeriod}` : ''}. Cette proposition n'est visible que par vous :
+          les photos du logement, les dates et ce qui vous est confié vous attendent.
+        </Text>
+
+        {message && message.trim().length > 0 && (
+          <Section style={card}>
+            <Text style={cardTitle}>Son message :</Text>
+            <Text style={cardLine}>{message}</Text>
+          </Section>
+        )}
+
+        <Section style={ctaSection}>
+          <Button style={button} href={`${SITE_URL}/propositions/${proposalId}`}>
+            Voir la proposition
+          </Button>
+        </Section>
+
+        <Text style={muted}>
+          Vous avez 5 jours pour répondre. Vous pouvez dire oui, poser une question ou
+          décliner avec un mot.
+        </Text>
+
+        <Hr style={hr} />
+
+        <LegalFooter
+          purpose="la mise en relation entre propriétaires et gardiens"
+          basis="6.1.b"
+          extra="Vous recevez ce message car un propriétaire vous a personnellement proposé sa garde."
+        />
+      </Container>
+    </Body>
+  </Html>
 )
 
 const main = { backgroundColor: '#ffffff', fontFamily: "'Outfit', Arial, sans-serif" }
@@ -103,7 +176,9 @@ const hr = { borderColor: '#E9E4DD', margin: '20px 0' }
 export const template: TemplateEntry = {
   component: SitInvitationEmail,
   subject: (data: Record<string, any>) =>
-    `${data.ownerFirstName || 'Un propriétaire'} vous invite à candidater à sa garde`,
+    data.proposalId
+      ? `${data.ownerFirstName || 'Un propriétaire'} vous propose de garder sa maison`
+      : `${data.ownerFirstName || 'Un propriétaire'} vous invite à candidater à sa garde`,
   displayName: 'Invitation à candidater (gardien)',
   previewData: {
     sitterFirstName: 'Camille',

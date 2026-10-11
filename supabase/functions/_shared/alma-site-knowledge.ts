@@ -470,6 +470,8 @@ export const ALMA_KNOWLEDGE_EXCLUDED_ROUTES: string[] = [
   "/bienvenue", "/arrivee/*",
   // Liens à jeton ou de service ouverts depuis un email
   "/go", "/acces", "/unsubscribe", "/email-preferences", "/candidature/reponse",
+  // Proposition de garde privée (lot I2), ouverte depuis la notification ou l'email
+  "/propositions/:id",
   // Pages de ville entraide, décrites par l'entrée villes
   "/petites-missions/annecy", "/petites-missions/bordeaux", "/petites-missions/grenoble",
   "/petites-missions/lille", "/petites-missions/marseille", "/petites-missions/montpellier",

@@ -111,6 +111,7 @@ const Sits = lazy(() => import("./pages/Sits"), "Sits");
 const CreateSit = lazy(() => import("./pages/CreateSit"), "CreateSit");
 const SitDetail = lazy(() => import("./pages/SitDetail"), "SitDetail");
 const EditSit = lazy(() => import("./pages/EditSit"), "EditSit");
+const SitProposal = lazy(() => import("./pages/SitProposal"), "SitProposal");
 const HouseGuide = lazy(() => import("./pages/HouseGuide"), "HouseGuide");
 const LeaveReview = lazy(() => import("./pages/LeaveReview"), "LeaveReview");
 const MesAvis = lazy(() => import("./pages/MesAvis"), "MesAvis");
@@ -632,6 +633,7 @@ const AppRoutes = () => {
         <Route path="/sits/create" element={<CreateSit />} />
         <Route path="/sits/:id" element={<SitDetail />} />
         <Route path="/sits/:id/edit" element={<EditSit />} />
+        <Route path="/propositions/:id" element={<SitProposal />} />
         <Route path="/review/:sitId" element={<LeaveReview />} />
         <Route path="/mes-avis" element={<MesAvis />} />
         <Route path="/notifications" element={<Notifications />} />

@@ -92,7 +92,7 @@ import {
   SitterConditionsSection,
   SitterGlanceBand,
 } from "@/components/profile/sitter/SitterF1Sections";
-import InviteToMySitButton from "@/components/sits/owner/InviteToMySitButton";
+import ProposeSitDialog from "@/components/sits/owner/ProposeSitDialog";
 import { groupSitterSkills, skillsHeadline } from "@/lib/sitterSkillGroups";
 import { declaredHelpOffer, hasEntraideFacet, entraideOfferBandText, lastVisitLabel } from "@/lib/profileSignals";
 import {
@@ -216,6 +216,21 @@ export default function PublicSitterProfile() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const tabParam = searchParams.get('tab');
+  // Lot I2 : « Lui proposer ma garde », rouvert au retour de l'édition d'un
+  // brouillon (?proposer=<garde>).
+  const proposerParam = searchParams.get("proposer");
+  const [proposeOpen, setProposeOpen] = useState(false);
+  useEffect(() => {
+    if (proposerParam && auth?.activeRole === "owner") setProposeOpen(true);
+  }, [proposerParam, auth?.activeRole]);
+  const closePropose = (open: boolean) => {
+    setProposeOpen(open);
+    if (!open && searchParams.has("proposer")) {
+      const next = new URLSearchParams(searchParams);
+      next.delete("proposer");
+      setSearchParams(next, { replace: true });
+    }
+  };
 
   const { data: reputation } = useProfileReputation(id);
   const { data: userBadges } = useUserBadges(id);
@@ -1823,17 +1838,28 @@ export default function PublicSitterProfile() {
               ctaVisible={!heroCtaVisible}
               sticky={false}
               secondary={
-                isOwner && !isOwn && id ? (
-                  <InviteToMySitButton
-                    sitter={{ id, first_name: firstName }}
-                    hideIfNoSits
-                    hideIcon
-                    source="public_profile"
-                    variant="outline"
-                    size="default"
-                    label="Lui proposer ma garde"
-                    className="w-full h-[48px] rounded-[99px] text-[15px] font-medium"
-                  />
+                isOwner && !isOwn && auth?.user?.id && (resolvedProfileId ?? id) ? (
+                  <>
+                    <button
+                      type="button"
+                      data-propose-sit-trigger
+                      onClick={() => setProposeOpen(true)}
+                      className="flex w-full h-[48px] items-center justify-center rounded-[99px] border border-border bg-card px-5 text-[15px] font-medium text-foreground hover:border-primary/50 transition-colors"
+                    >
+                      Lui proposer ma garde
+                    </button>
+                    <ProposeSitDialog
+                      open={proposeOpen}
+                      onOpenChange={closePropose}
+                      ownerId={auth.user.id}
+                      sitter={{ id: (resolvedProfileId ?? id)!, first_name: firstName }}
+                      initialSitId={proposerParam}
+                      onWriteFirst={() => {
+                        closePropose(false);
+                        void contactSitterHandler();
+                      }}
+                    />
+                  </>
                 ) : null
               }
             />

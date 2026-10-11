@@ -291,6 +291,14 @@ export type EventType =
   | "alma_fit_gardien_reciprocity_shown"        // Bonus reciprocity affiché (sitter_id, sit_id, views)
   | "alma_invite_from_alma_clicked"             // Clic CTA Inviter depuis la bulle Alma (sitter_id, sit_id)
   | "sit_invite_opened"                         // Lot I1 : ouverture du choix d'annonce à proposer (source, sitter_id)
+  | "sit_proposal_opened"                       // Lot I2 : « Lui proposer ma garde » ouvert (sitter_id)
+  | "sit_proposal_blocked"                      // Lot I2 : brouillon incomplet (sit_id, blockers)
+  | "sit_proposal_complete_start"               // Lot I2 : clic « Compléter ma garde » ou « Préparer ma garde »
+  | "sit_proposal_sent"                         // Lot I2 : proposition privée envoyée (sit_id, sitter_id)
+  | "sit_proposal_viewed"                       // Lot I2 : proposition ouverte par le gardien
+  | "sit_proposal_accepted"                     // Lot I2 : oui du gardien
+  | "sit_proposal_declined"                     // Lot I2 : non du gardien
+  | "sit_proposal_question"                     // Lot I2 : question posée au propriétaire
   // Alma Pass 2 Tour 3 : empty search + notif summary ---------------------
   | "alma_empty_search_bubble_seen"             // Bulle empty search affichée (restrictive_filter, radius, zone_mode)
   | "alma_empty_search_action_clicked"          // Action empty search cliquée (action_id, restrictive_filter?)

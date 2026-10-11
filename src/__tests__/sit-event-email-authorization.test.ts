@@ -96,6 +96,26 @@ describe('six sit event authorizations', () => {
     const h = fixture(); h.rows.sit_invitations[0].status = status;
     expect(await authorizeSitEventEmail(h.db, h.input)).toEqual({ ok: false, status: 403 });
   });
+  it('lot I2 : une proposition privée ouverte sur un brouillon est autorisée et porte son identifiant', async () => {
+    const h = fixture(); h.rows.sits[0].status = 'draft';
+    Object.assign(h.rows.sit_invitations[0], { kind: 'private', expires_at: new Date(Date.now() + 86_400_000).toISOString() });
+    const result = await authorizeSitEventEmail(h.db, h.input);
+    expect(result.ok).toBe(true);
+    expect(result.ok && result.templateData.proposalId).toBe(event);
+  });
+  it('lot I2 : une proposition privée expirée est refusée', async () => {
+    const h = fixture(); h.rows.sits[0].status = 'draft';
+    Object.assign(h.rows.sit_invitations[0], { kind: 'private', expires_at: new Date(Date.now() - 60_000).toISOString() });
+    expect(await authorizeSitEventEmail(h.db, h.input)).toEqual({ ok: false, status: 403 });
+  });
+  it('lot I2 : une invitation ordinaire sur un brouillon reste refusée', async () => {
+    const h = fixture(); h.rows.sits[0].status = 'draft';
+    expect(await authorizeSitEventEmail(h.db, h.input)).toEqual({ ok: false, status: 403 });
+  });
+  it('lot I2 : une invitation ordinaire ne porte pas d identifiant de proposition', async () => {
+    const h = fixture(); const result = await authorizeSitEventEmail(h.db, h.input);
+    expect(result.ok && result.templateData.proposalId).toBe(null);
+  });
   it('does not rely only on the invitation owner if the real sit owner differs', async () => {
     const h = fixture(); h.rows.sits[0].user_id = other;
     expect(await authorizeSitEventEmail(h.db, h.input)).toEqual({ ok: false, status: 403 });

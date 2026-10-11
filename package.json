@@ -21,6 +21,7 @@
     "test:sql:profile-seo": "node scripts/test-profile-seo-lifecycle.mjs",
     "test:sql:cache-consumer": "node scripts/test-single-seo-cache-consumer.mjs",
     "test:sql:seo-outbox": "node scripts/test-seo-url-outbox.mjs",
+    "test:sql:sit-proposals": "node scripts/test-sit-private-proposals.mjs",
     "test:data": "vitest run src/__tests__/article-internal-links.test.ts src/__tests__/article-pricing-content.test.ts",
     "test:e2e:badges": "playwright test tests/badges-long-labels.spec.ts",
     "test:e2e:badges:update": "playwright test tests/badges-long-labels.spec.ts --update-snapshots",
