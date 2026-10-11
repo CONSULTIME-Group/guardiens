@@ -442,13 +442,13 @@ async function repairOnce(userId: string): Promise<PushRepair> {
   try {
     if (!reg) {
       // Worker perdu alors que l'autorisation reste accordée : réinstallé.
-      reg = await bounded(navigator.serviceWorker.register('/push-sw.js', { scope: '/' }));
+      reg = await bounded<ServiceWorkerRegistration>(navigator.serviceWorker.register('/push-sw.js', { scope: '/' }));
       await bounded(navigator.serviceWorker.ready);
     }
     // Worker confirmé avant de toucher à l'abonnement existant.
     await ensurePushWorkerCurrent(reg);
     if (sub) await bounded(sub.unsubscribe()).catch(() => false);
-    const fresh = await bounded(reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key }));
+    const fresh = await bounded<PushSubscription>(reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key }));
     return attachDevice(userId, fresh, prefs, row?.id ?? localId);
   } catch { return { kind: 'failed' }; }
 }
