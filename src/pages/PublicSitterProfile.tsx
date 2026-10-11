@@ -92,6 +92,7 @@ import {
   SitterConditionsSection,
   SitterGlanceBand,
 } from "@/components/profile/sitter/SitterF1Sections";
+import InviteToMySitButton from "@/components/sits/owner/InviteToMySitButton";
 import { groupSitterSkills, skillsHeadline } from "@/lib/sitterSkillGroups";
 import { declaredHelpOffer, hasEntraideFacet, entraideOfferBandText, lastVisitLabel } from "@/lib/profileSignals";
 import {
@@ -1821,6 +1822,20 @@ export default function PublicSitterProfile() {
               showButton={mobile ? "md" : "always"}
               ctaVisible={!heroCtaVisible}
               sticky={false}
+              secondary={
+                isOwner && !isOwn && id ? (
+                  <InviteToMySitButton
+                    sitter={{ id, first_name: firstName }}
+                    hideIfNoSits
+                    hideIcon
+                    source="public_profile"
+                    variant="outline"
+                    size="default"
+                    label="Lui proposer ma garde"
+                    className="w-full h-[48px] rounded-[99px] text-[15px] font-medium"
+                  />
+                ) : null
+              }
             />
             {journeyBlock(mobile ? "confiance-mobile" : "confiance")}
             {affinityNode}

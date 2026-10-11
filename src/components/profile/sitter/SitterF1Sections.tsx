@@ -341,6 +341,7 @@ export const SitterContactCard = ({
   showButton,
   ctaVisible = true,
   sticky,
+  secondary,
 }: {
   firstName: string;
   cta: HeroCtaVariant;
@@ -350,6 +351,8 @@ export const SitterContactCard = ({
   showButton: "always" | "md";
   ctaVisible?: boolean;
   sticky?: boolean;
+  /** Action secondaire visible à toutes les tailles (lot I1 : inviter sur une garde publiée). */
+  secondary?: ReactNode;
 }) => {
   if (cta.kind === "own") return null;
   const btnCls =
@@ -373,6 +376,7 @@ export const SitterContactCard = ({
           {reassurance || "Vous échangez d'abord, vous décidez ensuite."}
         </p>
       </div>
+      {secondary ? <div className="mt-[10px]" data-contact-secondary>{secondary}</div> : null}
       {facts.length > 0 && (
         <dl className="mt-[14px]">
           {facts.map((f) => (
