@@ -70,6 +70,8 @@ import { getCountryName } from "@/lib/countries";
 const PAGE_SIZE = 50;
 
 const AdminUsers = () => {
+  const geocodingRef = useRef(false);
+  const [geocoding, setGeocoding] = useState(false);
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
@@ -616,8 +618,36 @@ const AdminUsers = () => {
     has_identity_documents: u.has_identity_documents ?? !!(u.identity_document_url || u.identity_selfie_url),
   });
 
+  const handleGeocode = async (userId: string) => {
+    if (geocodingRef.current) return;
+    geocodingRef.current = true;
+    setGeocoding(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("geocode-profile", {
+        body: { user_id: userId },
+      });
+      if (error || data?.error) throw new Error(data?.error || "Le calcul a échoué. Réessayez ou vérifiez le déploiement du géocodage.");
+      if (data?.ok !== true) {
+        toast.error(data?.skipped === "no city"
+          ? "La ville du membre est manquante. Complétez sa localisation."
+          : "Localisation introuvable. Vérifiez la ville et le pays du membre.");
+        return;
+      }
+      toast.success("Localisation recalculée. Vous pouvez prévisualiser la diffusion de l'annonce.");
+      await fetchUsers();
+      await queryClient.invalidateQueries({ queryKey: ["admin-member-card", userId] });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Le calcul de la localisation a échoué.");
+    } finally {
+      geocodingRef.current = false;
+      setGeocoding(false);
+    }
+  };
+
   /** Chaque entrée ouvre le dialogue existant avec les mêmes valeurs qu'avant. */
   const actionsFor = (u: any): MemberActionsHandlers => ({
+    onGeocode: () => { void handleGeocode(u.id); },
+    geocoding,
     onWrite: () => setWriteTarget({ userId: u.id, userName: nameOf(u, "ce membre") }),
     onMessage: () => setMessageModal({ open: true, userId: u.id, userName: nameOf(u), content: "", step: "edit" }),
     onLastMessage: () => openLastMessage(u.id, nameOf(u)),
