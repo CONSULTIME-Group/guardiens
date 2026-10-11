@@ -240,7 +240,8 @@ export { lookupActiveLineTokens, LINE_TOKEN_CHUNK } from "./lineTokens.ts";
 import { lookupActiveLineTokens } from "./lineTokens.ts";
 
 async function applyMandatoryComplianceFilters<T extends { id: string; email: string }>(
-  serviceClient: ReturnType<typeof createClient>,
+  // deno-lint-ignore no-explicit-any
+  serviceClient: any,
   profiles: T[],
 ): Promise<T[]> {
   if (profiles.length === 0) return profiles;
@@ -289,7 +290,8 @@ async function applyMandatoryComplianceFilters<T extends { id: string; email: st
  * Retourne une map lowerEmail → token. Throw si une requête échoue.
  */
 async function ensureUnsubscribeTokens(
-  serviceClient: ReturnType<typeof createClient>,
+  // deno-lint-ignore no-explicit-any
+  serviceClient: any,
   emails: string[],
 ): Promise<Map<string, string>> {
   const map = new Map<string, string>();
@@ -342,7 +344,8 @@ async function ensureUnsubscribeTokens(
  * Logique côté serveur — utilise le service-role client.
  */
 async function fetchTargetedProfiles(
-  serviceClient: ReturnType<typeof createClient>,
+  // deno-lint-ignore no-explicit-any
+  serviceClient: any,
   segment: string,
   filters: MassEmailFilters,
 ): Promise<{ id: string; email: string; first_name: string | null }[]> {
@@ -626,7 +629,8 @@ async function fetchTargetedProfiles(
 
 /** Données Noël par destinataire, coordonnées relues côté serveur (jamais transmises). */
 async function noelDataByProfile(
-  serviceClient: ReturnType<typeof createClient>,
+  // deno-lint-ignore no-explicit-any
+  serviceClient: any,
   ids: string[],
 ): Promise<Map<string, NoelTemplateData>> {
   const owners: any[] = [];
@@ -647,7 +651,8 @@ async function noelDataByProfile(
  * sens que si cette page montre assez de personnes.
  */
 async function countHelpsWithProfiles(
-  serviceClient: ReturnType<typeof createClient>,
+  // deno-lint-ignore no-explicit-any
+  serviceClient: any,
 ): Promise<number> {
   const { count, error } = await serviceClient
     .from("profiles")
