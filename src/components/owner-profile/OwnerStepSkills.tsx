@@ -17,6 +17,7 @@ interface Props {
     owner_competences?: string[];
     owner_competences_disponible?: boolean;
     owner_skill_categories?: string[];
+    available_for_help?: boolean;
   }) => void;
 }
 
@@ -47,12 +48,16 @@ const OwnerStepSkills = ({
         owner_competences: string[];
         owner_skill_categories: string[];
         owner_competences_disponible?: boolean;
+        available_for_help?: boolean;
       } = {
         owner_competences: nextCompetences,
         owner_skill_categories: derived,
       };
+      // Lot E1 : un savoir-faire rempli rend disponible pour l'entraide
+      // (décision du 11/10/2026), comme côté gardien.
       if (nextCompetences.length > 0 && !competencesDisponible) {
         partial.owner_competences_disponible = true;
+        partial.available_for_help = true;
       }
       onChange(partial);
     },
@@ -135,7 +140,8 @@ const OwnerStepSkills = ({
         <Switch
           checked={competencesDisponible}
           onCheckedChange={(v) =>
-            onChange({ owner_competences_disponible: v })
+            // Lot E1 : l'interrupteur commande la visibilité réelle (profiles.available_for_help).
+            onChange({ owner_competences_disponible: v, available_for_help: v })
           }
         />
       </div>

@@ -1,25 +1,20 @@
 /**
- * Bannière /profile : pousse l'utilisateur disponible pour l'entraide à
- * remplir 2-3 savoir-faire (champ `custom_skills` sur `profiles`).
+ * Bannière /profile : invite le gardien disponible pour l'entraide à
+ * remplir 2 à 3 savoir-faire (sitter_profiles.competences).
  *
  * Conditions d'affichage :
  *  - utilisateur connecté
  *  - profil avec `available_for_help = true`
- *  - moins de 2 entrées dans `custom_skills`
+ *  - moins de 2 savoir-faire dans `sitter_profiles.competences` (lot E1)
  *
- * Si l'une des conditions n'est pas remplie → rien à afficher. Pas de modale,
- * pas de friction : c'est un nudge passif, dismissable 30j via localStorage.
- *
- * Le CTA renvoie vers `/petites-missions` (section où l'offre de coups de
- * main est saisie aujourd'hui). À terme, ce champ devra remonter sur /profile
- * pour fermer la boucle UX.
+ * Nudge passif, masquable 30 jours (localStorage). Le bouton ouvre la
+ * section des savoir-faire du profil (/profile?section=savoir-faire).
  */
-import { fetchMyProfile } from "@/lib/myProfile";
+import { fetchMyProfile, fetchMySitterProfile } from "@/lib/myProfile";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
 
 const SNOOZE_KEY = "fill_savoir_faire_banner_snoozed_until";
 const SNOOZE_DAYS = 30;
@@ -37,10 +32,12 @@ const FillSavoirFaireBanner = () => {
 
     let cancelled = false;
     (async () => {
-      const { data } = await fetchMyProfile(user.id!);
+      // Lot E1 : les savoir-faire vivent dans sitter_profiles.competences
+      // (custom_skills n'est plus écrit par aucun écran depuis 2026).
+      const [{ data }, { data: sitter }] = await Promise.all([fetchMyProfile(user.id!), fetchMySitterProfile(user.id!)]);
       if (cancelled || !data) return;
-      const cs = Array.isArray(data.custom_skills) ? data.custom_skills : [];
-      const filled = cs.filter((s) => typeof s === "string" && s.trim().length > 0).length;
+      const cs = Array.isArray(sitter?.competences) ? sitter.competences : [];
+      const filled = cs.filter((s: unknown) => typeof s === "string" && s.trim().length > 0).length;
       if (data.available_for_help && filled < 2) setShow(true);
     })();
     return () => {
@@ -79,13 +76,13 @@ const FillSavoirFaireBanner = () => {
           Ajoutez 2 à 3 savoir-faire à votre profil
         </h3>
         <p className="text-sm text-foreground/70 leading-relaxed mt-1.5 max-w-prose">
-          Les profils précisant leurs savoir-faire (promenade canine, arrosage,
-          petit bricolage…) reçoivent nettement plus de sollicitations que ceux
-          qui n'indiquent qu'une catégorie générique.
+          Vos savoir-faire apparaissent sur votre carte d'entraide : promenade
+          canine, arrosage, petit bricolage. Les personnes autour de vous savent
+          ainsi pour quoi vous solliciter.
         </p>
         <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
           <Link
-            to="/profile?section=competences"
+            to="/profile?section=savoir-faire"
             className="inline-flex items-center gap-1.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium px-3.5 py-1.5 hover:bg-primary/90 transition-colors"
           >
             Ajouter mes savoir-faire

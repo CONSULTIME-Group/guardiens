@@ -98,7 +98,7 @@ export const EntraideMemberHeader = ({ subtitle, availableForHelp, onNeed, onHel
       {availableForHelp ? (
         <p className="text-sm text-muted-foreground">
           Vous êtes disponible pour aider. Vous recevez les besoins publiés près de chez vous.{" "}
-          <Link to="/profile?section=skills" className="font-semibold text-primary underline underline-offset-4">Modifier</Link>
+          <Link to="/profile?section=savoir-faire" className="font-semibold text-primary underline underline-offset-4">Modifier</Link>
         </p>
       ) : (
         <Button variant="outline" onClick={onHelp}>Me rendre disponible pour aider</Button>

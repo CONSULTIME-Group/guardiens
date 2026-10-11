@@ -28,6 +28,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { computeOwnerCompletion } from "@/lib/profileCompletion";
 
+const OWNER_SECTION_ALIASES: Record<string, string> = { "savoir-faire": "skills", competences: "skills" };
+
 const SECTIONS_BASE: Array<{ id: string; num: number; optional?: boolean }> = [
   { id: "identity", num: 1 },
   { id: "housing", num: 2 },
@@ -93,10 +95,12 @@ const OwnerProfilePage = () => {
       lastAppliedSectionRef.current = null;
       return;
     }
-    const valid = SECTIONS_BASE.some(s => s.id === section);
+    // Lot E1 : adresse unique des savoir-faire pour les deux rôles.
+    const target = OWNER_SECTION_ALIASES[section] ?? section;
+    const valid = SECTIONS_BASE.some(s => s.id === target);
     if (valid && lastAppliedSectionRef.current !== section) {
       lastAppliedSectionRef.current = section;
-      setActiveSection(section);
+      setActiveSection(target);
       requestAnimationFrame(() => {
         document.getElementById("profile-section-content")?.scrollIntoView({ behavior: "smooth", block: "start" });
       });
@@ -411,7 +415,7 @@ const OwnerProfilePage = () => {
                 <>
                   <OwnerStepSkills
                     competences={mergedData.owner_competences || []}
-                    competencesDisponible={mergedData.owner_competences_disponible || false}
+                    competencesDisponible={mergedData.available_for_help === true}
                     skillCategories={mergedData.owner_skill_categories || []}
                     onChange={(partial) => handleChange(partial as any)}
                   />

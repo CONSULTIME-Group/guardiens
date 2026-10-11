@@ -86,7 +86,7 @@ export async function loadFirstStep(userId: string): Promise<FirstStepData> {
         life_pace: sp.life_pace ?? null, animal_types: sp.animal_types ?? null, sitter_gallery_count: (gallery as any)?.count ?? 0 });
       return { completion: r.score, missing: r.missing };
     })(),
-    hasAvatar: !!p.avatar_url, hasSkills: Array.isArray(p.competences) && p.competences.length > 0,
+    hasAvatar: !!p.avatar_url, hasSkills: Array.isArray((sitter as any)?.competences) && (sitter as any).competences.length > 0,
     alertActive: !!(alertRes as any)?.data,
   };
 }
