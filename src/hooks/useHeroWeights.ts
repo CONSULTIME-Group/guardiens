@@ -64,17 +64,26 @@ let channelStarted = false;
 function ensureRealtimeChannel() {
   if (channelStarted) return;
   channelStarted = true;
-  supabase
-    .channel("hero_weights_changes")
-    .on(
-      "postgres_changes",
-      { event: "UPDATE", schema: "public", table: "hero_weights" },
-      (payload) => {
-        const newRow = payload.new as Row | undefined;
-        if (newRow) notify(rowToWeights(newRow));
-      }
-    )
-    .subscribe();
+  // Lot F2 (12/10/2026) : sans WebSocket utilisable (navigateur ou réseau qui
+  // refuse la connexion), supabase-js lève une erreur synchrone dans
+  // subscribe(). Le temps réel est un confort : la page garde la lecture
+  // initiale et les valeurs par défaut, elle ne tombe jamais. Cas réel :
+  // 5 plantages de fiches gardien publiques les 11 et 12/10.
+  try {
+    supabase
+      .channel("hero_weights_changes")
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "hero_weights" },
+        (payload) => {
+          const newRow = payload.new as Row | undefined;
+          if (newRow) notify(rowToWeights(newRow));
+        }
+      )
+      .subscribe();
+  } catch (error) {
+    console.warn("[useHeroWeights] temps réel indisponible", error);
+  }
 }
 
 export function useHeroWeights(): HeroWeights {

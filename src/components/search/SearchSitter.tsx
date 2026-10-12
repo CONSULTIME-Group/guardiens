@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef, Suspense } from "react";
+import { lazyWithRetry } from "@/lib/lazyWithRetry";
 
 import { sitHasPhotos } from "@/lib/cardFacts";
 import InviteToMySitButton from "@/components/sits/owner/InviteToMySitButton";
@@ -7,7 +8,7 @@ import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { sitPath } from "@/lib/sitUrl";
 
-const SearchMapView = lazy(() => import("@/components/search/SearchMapView"));
+const SearchMapView = lazyWithRetry(() => import("@/components/search/SearchMapView"), "SearchMapView");
 import SearchListingCard from "@/components/search/listing/SearchListingCard";
 import AffinityMissingCTA from "@/components/matching/AffinityMissingCTA";
 

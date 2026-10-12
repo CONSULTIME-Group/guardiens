@@ -8,10 +8,11 @@
  *  - Pas de pénalité SEO (le contenu indexable, liste des lieux ,  *    est déjà dans le HTML rendu en dessous).
  *  - Économie réseau pour les visiteurs qui ne descendent pas jusqu'à la carte.
  */
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
+import { lazyWithRetry } from "@/lib/lazyWithRetry";
 import { MapPin } from "lucide-react";
 
-const GuideMap = lazy(() => import("@/components/guides/GuideMap"));
+const GuideMap = lazyWithRetry(() => import("@/components/guides/GuideMap"), "GuideMap");
 
 interface Place {
   id: string;

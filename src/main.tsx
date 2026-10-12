@@ -10,6 +10,8 @@ import { installDomTranslationGuard } from "./lib/domTranslationGuard";
 import { initPwaInstall } from "./lib/pwa-install";
 import "./i18n";
 import { runAfterFirstPaint, prefetchRouteChunk } from "./lib/bootSchedule";
+import { supabase } from "./integrations/supabase/client";
+import { guardRealtimeConnect } from "./lib/realtimeGuard";
 
 // Lot P2, travaux gardés avant le rendu (justesse) :
 // - installDomTranslationGuard : protège le DOM contre la traduction du
@@ -21,6 +23,8 @@ import { runAfterFirstPaint, prefetchRouteChunk } from "./lib/bootSchedule";
 //   couvrir le démarrage lui-même.
 installDomTranslationGuard();
 installStorageFallback();
+// Lot F2 : un WebSocket refusé ne fait jamais tomber une page.
+guardRealtimeConnect(supabase);
 initPwaInstall();
 // Outil de débogage OAuth : jamais dans le parcours de production.
 if (import.meta.env.DEV) {

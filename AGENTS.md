@@ -49,6 +49,8 @@
 
 - Garde-fous d'envoi (lots C1 à C3) : un email product dont le report dépasse sa durée de vie est annulé, jamais forcé (decideOverTtl reçoit la catégorie) ; send-transactional-email refuse tout email non transactionnel vers un compte suspendu ou non actif (_shared/account-email-block.ts, statut suppressed, motif account_suspended) ; le refus d'identité est une transition atomique (aucun nouveau journal ni email si le dossier est déjà refusé) et le bouton admin est verrouillé pendant l'appel ; pourquoi : 28 destinataires au-delà de 3 emails marketing par semaine, un compte suspendu jusqu'en 2036 encore relancé, 9 refus et 9 emails en 16 secondes le 29/09/2026.
 
+- Chargements robustes (lot F2) : tout composant chargé à la demande passe par lazyWithRetry (contenu) ou optionalLazy (accessoire, src/lib/optionalLazy.ts), jamais par React.lazy nu ; un import résolu à vide compte comme un échec ; staleChunk reconnaît « _result.default » et « reading 'default') » ; guardRealtimeConnect (src/lib/realtimeGuard.ts, appelé dans main.tsx) enveloppe connect() du temps réel Supabase ; pourquoi : après vite:preloadError + preventDefault, Vite résout l'import à vide et un React.lazy nu plantait (14 erreurs du 05 au 12/10/2026 dont /inscription), et un WebSocket refusé faisait tomber les fiches gardien publiques.
+
 <!-- LOVABLE:BEGIN -->
 - `build` ends with `test:guard` and CI runs `test:guard` directly; why: owner decision of 17/08/2026, a red test blocks publication.
 

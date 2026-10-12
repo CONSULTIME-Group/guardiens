@@ -1,4 +1,5 @@
-import { lazy, Suspense, useEffect, useState, type ComponentType } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { optionalLazy } from "@/lib/optionalLazy";
 
 // Trackers non essentiels au premier rendu. Chargés après le premier paint
 // via requestIdleCallback (fallback setTimeout) pour ne pas alourdir le
@@ -7,22 +8,8 @@ import { lazy, Suspense, useEffect, useState, type ComponentType } from "react";
 // Ces modules sont accessoires : un chunk périmé (déploiement pendant la
 // visite) ou une coupure réseau ne doit jamais faire tomber la page.
 // On retente une fois, puis on abandonne silencieusement en rendant null.
-const NullComponent = () => null;
-
-const optionalLazy = (factory: () => Promise<{ default: ComponentType }>) =>
-  lazy(async () => {
-    try {
-      return await factory();
-    } catch {
-      try {
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        return await factory();
-      } catch {
-        return { default: NullComponent };
-      }
-    }
-  });
-
+// Lot F2 : un module résolu à vide (fichier périmé après publication) compte
+// comme un échec, au lieu de faire planter React (src/lib/optionalLazy.ts).
 const PageViewTracker = optionalLazy(() => import("./PageViewTracker"));
 const FacebookReferralTracker = optionalLazy(() => import("./FacebookReferralTracker"));
 const AiReferralTracker = optionalLazy(() => import("./AiReferralTracker"));
