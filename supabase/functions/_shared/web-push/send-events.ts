@@ -41,7 +41,10 @@ export function pushFailure(err: unknown): { http_status: number | null; reason:
     ? e.body
     : typeof e.message === "string" ? e.message : "";
   // Retire toute adresse : une raison ne doit jamais porter d'endpoint.
-  const reason = raw.replace(/https?:\/\/\S+/g, "[url]").replace(/\s+/g, " ").trim().slice(0, REASON_MAX);
+  // Avec un code HTTP, seule la réponse du service compte comme raison ;
+  // le message générique de la bibliothèque n'en est pas une.
+  const source = code !== null ? (typeof e.body === "string" ? e.body : "") : raw;
+  const reason = source.replace(/https?:\/\/\S+/g, "[url]").replace(/\s+/g, " ").trim().slice(0, REASON_MAX);
   return { http_status: code, reason: reason || (code === null ? "network_ambiguous" : null) };
 }
 
@@ -116,7 +119,8 @@ export async function sendWithPushEvents(
     await record(client, pushEventRow("push_send_succeeded", ctx, { http_status: status, duration_ms: Date.now() - started }));
     if (opts.manageSubscription) {
       try {
-        await client.from("push_subscriptions").update({ last_success_at: new Date().toISOString() }).eq("id", ctx.subscriptionId);
+        const seen = await client.from("push_subscriptions").update({ last_success_at: new Date().toISOString() }).eq("id", ctx.subscriptionId);
+        if (seen?.error) console.warn("web-push last_success_at non enregistre");
       } catch {
         console.warn("web-push last_success_at non enregistre");
       }

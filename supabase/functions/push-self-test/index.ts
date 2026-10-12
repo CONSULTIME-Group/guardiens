@@ -1,5 +1,5 @@
 // Edge push-self-test : le membre teste son propre appareil.
-// Distincte de send-web-push-test (réservée au serveur, inchangée).
+// Distincte de send-web-push-test (réservée au serveur).
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 import webpush from 'npm:web-push@3.6.7';

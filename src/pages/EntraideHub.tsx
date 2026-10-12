@@ -310,7 +310,6 @@ const EntraideHub = () => {
   const pickIdea = (key: EntraideIdeaKey, label: string) => {
     // Lot M1 : tile_id stable (clé de l'idée) et page d'origine du clic.
     void trackEvent("entraide_idea_tile_clicked", {
-      source: "entraide_ideas",
       metadata: {
         tile_id: key,
         source: typeof window !== "undefined" ? window.location.pathname : null,

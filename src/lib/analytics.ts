@@ -255,7 +255,7 @@ export type EventType =
   | "projet_composer_step1_completed"           // Passage étape 1 vers étape 2
   | "projet_composer_step2_completed"           // Passage étape 2 vers étape 3
   | "projet_composer_field_abandoned"           // Blur du titre ou de la description sous le minimum (field, length)
-  | "projet_composer_submitted"                 // Publication réussie (mission_id, nature_projet, nb_transmis, nb_attendus, has_free_text)
+  | "projet_composer_submitted"                 // Publication réussie (mission_id, category, mission_type, nature_projet, nb_transmis, nb_attendus, has_free_text ; M1)
   | "projet_composer_abandoned"                 // Départ sans publication (last_step, last_field, has_title, title_len)
   // Alma Pass 1 (assistant incarné sur 6 moments transactionnels) --------------
   | "alma_message_opener_seen"                  // Bulle brise-glace Messages affichée (audience, has_sit, has_mission)

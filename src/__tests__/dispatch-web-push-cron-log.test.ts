@@ -32,6 +32,7 @@ function harness(
     from: (table: string) => ({
       insert: async (row: unknown) => { inserts.push({ table, row }); return { error: null }; },
       update: (row: unknown) => ({ eq: async (column: string, value: unknown) => { updates.push({ table, row, column, value }); return { error: null }; } }),
+      select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: table === "push_subscriptions" ? { user_id: "u1" } : null, error: null }) }) }),
     }),
     rpc: vi.fn(async (name: string, _args?: unknown) => {
       if (name === "push_claim_jobs") return { data: jobs, error: null };
@@ -97,8 +98,8 @@ describe("dispatch-web-push, visibilité cron", () => {
     const h = harness([{ job_id: "job-1", endpoint: "https://invalid.example/push", p256dh: "k", auth: "a", event_kind: "inconnu", payload: {} }]);
     const response = await h.run();
     expect(response.status).toBe(200);
-    expect(h.cronRows()).toHaveLength(1);
-    const row = h.cronRows()[0] as { table: string; row: Record<string, unknown> };
+    expect(h.inserts).toHaveLength(1);
+    const row = h.inserts[0] as { table: string; row: Record<string, unknown> };
     expect(row.table).toBe("cron_run_log");
     expect(row.row.edge_name).toBe("dispatch-web-push");
     expect(row.row.status).toBe("success");
@@ -171,6 +172,7 @@ describe("dispatch-web-push, visibilité cron", () => {
     await h.run();
     const events = h.pushEvents();
     expect(events.map((e) => e.event_type)).toEqual(["push_send_attempted", "push_send_succeeded"]);
+    expect(events.every((e) => e.user_id === "u1")).toBe(true);
     expect(events[0].metadata).toMatchObject({ channel: "dispatch", subscription_id: "s", endpoint_host: "fcm.googleapis.com", job_id: "j1", event_kind: "message" });
     expect(events[1].metadata.http_status).toBe(201);
     expect(JSON.stringify(events)).not.toContain("/fcm/send/abc");

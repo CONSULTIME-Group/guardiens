@@ -40,6 +40,8 @@ describe("M1, envois push tracés", () => {
     expect(pushFailure(new Error("timeout"))).toEqual({ http_status: null, reason: "timeout" });
     expect(pushFailure({})).toEqual({ http_status: null, reason: "network_ambiguous" });
     expect(pushFailure({ statusCode: 500, body: "x".repeat(400) }).reason!.length).toBe(160);
+    // Code présent, corps vide : le message générique de la bibliothèque n'est pas une raison.
+    expect(pushFailure({ statusCode: 410, body: "", message: "Received unexpected response code" })).toEqual({ http_status: 410, reason: null });
   });
 
   it("succès : tentative puis succès, last_success_at mis à jour (envoi de test)", async () => {
@@ -85,6 +87,12 @@ describe("M1, envois push tracés", () => {
       rpc: async () => ({ data: true, error: null }),
     };
     await expect(sendWithPushEvents(client, ctx, async () => 201, { manageSubscription: true })).resolves.toBe(201);
+  });
+
+  it("le limiteur anonyme laisse passer le service_role (migration préparée)", () => {
+    const sql = read("supabase/prepared-migrations/20261012090000_m1_limiteur_anonyme_service_role.sql");
+    expect(sql).toContain("IF auth.uid() IS NOT NULL OR COALESCE(auth.role(), '') = 'service_role' THEN");
+    expect(sql).toContain("RAISE EXCEPTION 'Rate limit exceeded for anonymous inserts on %'");
   });
 
   it("les trois chemins d'envoi passent par la trace", () => {
