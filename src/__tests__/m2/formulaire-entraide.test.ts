@@ -12,7 +12,7 @@ import { dropPublishIntentFor, readPublishIntent, rememberPublishIntent } from "
 describe("M2, bouton central de la barre basse", () => {
   it("gardien : ses disponibilités, partout hors entraide", () => {
     for (const path of ["/dashboard", "/search", "/sits", "/recherche-gardiens", "/mes-candidatures"]) {
-      expect(bottomNavFab(path, false)).toEqual({ to: SITTER_AVAILABILITY_PATH, label: "Dispo", icon: "availability" });
+      expect(bottomNavFab(path, false)).toEqual({ to: SITTER_AVAILABILITY_PATH, label: "Dispo", ariaLabel: "Mes disponibilités", icon: "availability" });
     }
   });
   it("entraide : coup de main pour tous les rôles", () => {
@@ -20,7 +20,7 @@ describe("M2, bouton central de la barre basse", () => {
     expect(bottomNavFab("/petites-missions", true).to).toBe("/petites-missions/creer");
   });
   it("propriétaire : publier une annonce de garde, inchangé", () => {
-    expect(bottomNavFab("/dashboard", true)).toEqual({ to: "/sits/create", label: "Publier", icon: "plus" });
+    expect(bottomNavFab("/dashboard", true)).toEqual({ to: "/sits/create", label: "Publier", ariaLabel: "Publier", icon: "plus" });
     expect(bottomNavFab("/sits", true).to).toBe("/sits/create");
   });
   it("règle d'affichage inchangée", () => {

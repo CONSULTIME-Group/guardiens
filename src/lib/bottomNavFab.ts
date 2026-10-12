@@ -54,9 +54,10 @@ export const isFabHidden = (pathname: string): boolean => {
 /**
  * Lot M2 (12/10/2026) : bouton central de la barre basse (mobile).
  *
- * Constat (base, 14 jours au 12/10) : 16 des 43 sorties du formulaire de
- * coup de main sans titre venaient de l'accueil, de la recherche ou des
- * annonces, presque toutes de gardiens passés par « Publier ».
+ * Constat (base, 14 jours au 12/10) : 16 des 43 sorties sans titre du
+ * formulaire de coup de main venaient, sur mobile, de l'accueil, de la
+ * recherche ou des annonces (12 gardiens, 4 double rôle), là où le bouton
+ * central « Publier » menait au formulaire.
  * Décision de Jérémie du 12/10/2026 : pour un gardien, le bouton mène à ses
  * disponibilités ; le coup de main reste proposé depuis l'entraide.
  */
@@ -65,15 +66,17 @@ export const SITTER_AVAILABILITY_PATH = "/profile?focus=availability";
 export interface BottomNavFab {
   to: string;
   label: string;
+  /** Nom annoncé par les lecteurs d'écran. */
+  ariaLabel: string;
   icon: "plus" | "availability";
 }
 
 export function bottomNavFab(path: string, isOwnerView: boolean): BottomNavFab {
   if (path.startsWith("/petites-missions")) {
-    return { to: "/petites-missions/creer", label: "Publier", icon: "plus" };
+    return { to: "/petites-missions/creer", label: "Publier", ariaLabel: "Publier", icon: "plus" };
   }
-  if (isOwnerView) return { to: "/sits/create", label: "Publier", icon: "plus" };
-  return { to: SITTER_AVAILABILITY_PATH, label: "Dispo", icon: "availability" };
+  if (isOwnerView) return { to: "/sits/create", label: "Publier", ariaLabel: "Publier", icon: "plus" };
+  return { to: SITTER_AVAILABILITY_PATH, label: "Dispo", ariaLabel: "Mes disponibilités", icon: "availability" };
 }
 
 export default isFabHidden;

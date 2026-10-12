@@ -42,7 +42,7 @@ export function clearPublishIntent(): void {
  */
 export function dropPublishIntentFor(prefix: string): void {
   const intent = readPublishIntent();
-  if (intent && (intent === prefix || intent.startsWith(prefix + "?") || intent.startsWith(prefix + "#"))) clearPublishIntent();
+  if (intent && (intent === prefix || ["?", "#", "/"].some((c) => intent.startsWith(prefix + c)))) clearPublishIntent();
 }
 
 /**

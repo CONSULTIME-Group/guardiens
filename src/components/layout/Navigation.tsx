@@ -459,7 +459,7 @@ export const BottomNav = () => {
             <button
               type="button"
               onClick={() => navigate(fab.to)}
-              aria-label={fab.label}
+              aria-label={fab.ariaLabel}
               className="group flex flex-col items-center justify-center"
             >
               <div className="w-14 h-14 bg-primary rounded-2xl shadow-lg shadow-primary/30 flex items-center justify-center text-primary-foreground transition-all duration-200 active:scale-90 group-hover:shadow-xl group-hover:shadow-primary/40 group-hover:-translate-y-0.5">
