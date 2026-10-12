@@ -8,6 +8,7 @@ import webpush from 'npm:web-push@3.6.7';
 import { nearbyBudget, runStatus } from '../_shared/web-push/dispatch-budget.ts';
 import { isServiceRoleCaller } from '../_shared/web-push/auth.ts';
 import { readVapidConfig } from '../_shared/web-push/config.ts';
+import { sendWithPushEvents } from '../_shared/web-push/send-events.ts';
 import { validatePushEndpoint } from '../_shared/web-push/endpoint.ts';
 import { buildNearbySitPayload, buildPushPayload, isPushEventKind, sanitizeBadge } from '../_shared/web-push/payload.ts';
 import {
@@ -129,12 +130,19 @@ Deno.serve(async (req) => {
       const attempts = typeof job.attempts === 'number' ? job.attempts : 1;
       let decision;
       try {
-        const response = await webpush.sendNotification(
+        // Lot M1 : trace tentative, puis succes ou echec (code HTTP, hote, raison).
+        const statusCode = await sendWithPushEvents(admin, {
+          channel: queue === MAIN ? 'dispatch' : 'dispatch_nearby',
+          subscriptionId: String(job.subscription_id),
+          endpoint: job.endpoint as string,
+          jobId: String(job.job_id),
+          eventKind: queue === MAIN ? String(job.event_kind ?? '') : 'nearby_sit',
+        }, async () => (await webpush.sendNotification(
           { endpoint: job.endpoint as string, keys: { auth: job.auth_key as string, p256dh: job.p256dh_key as string } },
           payload,
           { TTL: queue.ttl, timeout: PUSH_NETWORK_TIMEOUT_MS },
-        );
-        decision = classifyPushResponse(response.statusCode, attempts);
+        )).statusCode, { manageSubscription: false });
+        decision = classifyPushResponse(statusCode, attempts);
       } catch (err) {
         const status = (err as { statusCode?: number })?.statusCode;
         decision = typeof status === 'number' ? classifyPushResponse(status, attempts) : classifyNetworkFailure();

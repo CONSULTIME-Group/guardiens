@@ -327,8 +327,11 @@ export type EventType =
   | "next_mission_digest_card_seen"             // Carte "prochain digest mardi" affichée sur dashboard
   | "entraide_feed_chip_toggled"                // Chip filter mobile toggled (filter_types)
   | "entraide_feed_default_view"                // Vue par défaut du feed unifié mobile (une fois par session)
-  | "entraide_idea_tile_clicked"                // Lot E4 : tuile « Une idée pour commencer » (idea, authenticated)
-  | "alma_rail_action_clicked"                  // Lot E5 : lien direct de la carte Alma du tableau de bord (action, variant)
+  | "entraide_idea_tile_clicked"                // Lot E4 : tuile « Une idée pour commencer » (tile_id, source = page d'origine ; idea, authenticated)
+  | "alma_rail_action_clicked"                  // Lot E5 : lien direct de la carte Alma du tableau de bord (action_id, action, variant, href ; M1)
+  | "push_send_attempted"                       // Lot M1, serveur : avant l'appel au service de push (channel, subscription_id, endpoint_host, job_id, event_kind)
+  | "push_send_succeeded"                       // Lot M1, serveur : réponse 2xx du service de push (http_status, duration_ms)
+  | "push_send_failed"                          // Lot M1, serveur : échec (http_status, endpoint_host, reason, duration_ms)
   | "admin_mutual_aid_dashboard_seen"           // Dashboard admin entraide affiché (1x par montage)
   | "admin_alma_dashboard_seen"                 // Dashboard admin Alma affiché (1x par montage)
   | "admin_alma_export_csv_clicked"             // Export CSV depuis dashboard admin Alma

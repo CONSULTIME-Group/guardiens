@@ -5,6 +5,7 @@ import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 import webpush from 'npm:web-push@3.6.7';
 import { readVapidConfig } from '../_shared/web-push/config.ts';
 import { handleSelfTest, type SelfTestClaim } from '../_shared/web-push/self-test-handler.ts';
+import { sendWithPushEvents } from '../_shared/web-push/send-events.ts';
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
@@ -33,13 +34,16 @@ Deno.serve(async (req) => {
       if (error) throw new Error('subscription_unavailable');
       return data;
     },
-    send: async (sub, payload) => {
+    send: async (sub, payload, target) => {
       webpush.setVapidDetails(vapid!.subject, vapid!.publicKey, vapid!.privateKey);
-      const r = await webpush.sendNotification(
+      // Lot M1 : trace, last_success_at sur succès, désactivation sur 404 ou 410.
+      return sendWithPushEvents(admin!, {
+        channel: 'member_test', subscriptionId: target.subscription_id, endpoint: sub.endpoint,
+        userId: target.user_id, jobId: target.request_id, eventKind: 'test',
+      }, async () => (await webpush.sendNotification(
         { endpoint: sub.endpoint, keys: { auth: sub.auth_key, p256dh: sub.p256dh_key } },
         payload, { TTL: 60, timeout: 8000 },
-      );
-      return r.statusCode;
+      )).statusCode, { manageSubscription: true });
     },
     finish: async (requestId, outcome, status) => {
       const { data, error } = await admin!.from('push_test_attempts')

@@ -363,7 +363,10 @@ const CreateProjet = () => {
     try {
       trackEvent("projet_composer_submitted", {
         metadata: {
+          // Lot M1 : mêmes clés que mission_composer_submitted.
           mission_id: row?.id ?? null,
+          category: "projet",
+          mission_type: "besoin",
           nature_projet: nature,
           nb_transmis: transmis.length,
           nb_attendus: attendus.length,

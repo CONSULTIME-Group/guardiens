@@ -68,7 +68,9 @@ const AlmaRailWhisper = ({
       return;
     }
     if (action) {
-      void trackEvent("alma_rail_action_clicked", { metadata: { action: "savoir_faire", variant } });
+      void trackEvent("alma_rail_action_clicked", {
+        metadata: { action_id: action.id, action: action.id, variant, href: action.href },
+      });
       navigate(action.href);
       return;
     }

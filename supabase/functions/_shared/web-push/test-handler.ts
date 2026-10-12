@@ -11,7 +11,7 @@ export interface TestDependencies {
   configured: boolean;
   claim(target: TestTarget): Promise<boolean>;
   subscription(target: TestTarget): Promise<TestSubscription | null>;
-  send(subscription: TestSubscription, payload: string): Promise<number>;
+  send(subscription: TestSubscription, payload: string, target: TestTarget): Promise<number>;
   finish(requestId: string, outcome: TestOutcome, status: number | null): Promise<boolean>;
 }
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -45,7 +45,7 @@ export async function handlePushTest(req: Request, deps: TestDependencies): Prom
     if (sub && validatePushEndpoint(sub.endpoint).ok && validateSubscriptionKeys({auth:sub.auth_key,p256dh:sub.p256dh_key}).ok) {
       attempts=1;
       try {
-        const code = await deps.send(sub,JSON.stringify(buildPushPayload('message',target.request_id)));
+        const code = await deps.send(sub,JSON.stringify(buildPushPayload('message',target.request_id)),target);
         status = Number.isInteger(code) && code>=100 && code<=599 ? code : null;
         outcome = status === null ? 'unknown' : status>=200 && status<300 ? 'accepted' : 'rejected';
       } catch (error) {

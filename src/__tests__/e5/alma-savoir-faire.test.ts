@@ -21,7 +21,7 @@ describe("E5, gardien", () => {
   it("sans savoir-faire : invitation et lien direct", () => {
     const r = pickAlmaRail({ variant: "confirmed", hidden: false, profileCompletion: 80, isAvailable: true, skillsMissing: true });
     expect(r.phrase).toBe(ALMA_SKILLS_SITTER_PHRASE);
-    expect(r.action).toEqual({ label: ALMA_SKILLS_ACTION_LABEL, href: SAVOIR_FAIRE_PATH });
+    expect(r.action).toEqual({ id: "savoir_faire", label: ALMA_SKILLS_ACTION_LABEL, href: SAVOIR_FAIRE_PATH });
   });
   it("profil à compléter et disponibilité passent d'abord", () => {
     expect(pickAlmaRail({ variant: "confirmed", hidden: false, profileCompletion: 20, skillsMissing: true }).action).toBeNull();
