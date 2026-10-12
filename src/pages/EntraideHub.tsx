@@ -28,6 +28,8 @@ import {
   helpersCountLine,
   helpersMore,
   farNeedsLabel,
+  farNeedsHeading,
+  farNeedsOpenByDefault,
   NEEDS_SHOWN_WITHOUT_PLACE,
   helpersSectionTitle,
   needFormPath,
@@ -148,7 +150,8 @@ const EntraideHub = () => {
   const [confirmNeed, setConfirmNeed] = useState<EntraideNeed | null>(null);
   const [confirmFirstName, setConfirmFirstName] = useState<string | null>(null);
   const [helpersShown, setHelpersShown] = useState(HELPERS_FIRST_SHOWN);
-  const [farOpen, setFarOpen] = useState(false);
+  // Lot E11 : null tant que le membre n'a pas choisi ; sinon son choix.
+  const [farOpen, setFarOpen] = useState<boolean | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const [counts, setCounts] = useState<Map<string, { given_count: number | null; received_count: number | null }>>(new Map());
   const [badges, setBadges] = useState<Map<string, MissionBadgeRow[]>>(new Map());
@@ -268,6 +271,9 @@ const EntraideHub = () => {
     () => sortedNeeds.filter((need) => !nearNeeds.includes(need)),
     [sortedNeeds, nearNeeds],
   );
+  // Lot E11 : peu de besoins proches, les autres s'affichent d'emblée sous un titre.
+  const farDefaultOpen = farNeedsOpenByDefault(origin !== null, nearNeeds.length);
+  const farShown = farDefaultOpen || farOpen === true;
   // Membre : on attend son profil (son lieu) avant d'afficher chiffres et besoins.
   const originPending = isAuthenticated && !profileLoaded;
   const pageLoading = loading || originPending;
@@ -302,7 +308,7 @@ const EntraideHub = () => {
       setSearchedCity(city.trim());
       setShowLocationField(false);
       setHelpersShown(HELPERS_FIRST_SHOWN);
-      setFarOpen(false);
+      setFarOpen(null);
     }
   };
 
@@ -492,20 +498,25 @@ const EntraideHub = () => {
                 )}
 
                 {farNeeds.length > 0 && (
-                  <div className="mt-6">
-                    <button
-                      type="button"
-                      aria-expanded={farOpen}
-                      aria-controls="entraide-far-needs"
-                      onClick={() => setFarOpen((open) => !open)}
-                      className="text-left"
-                    >
-                      <span className="block text-sm font-semibold text-foreground underline-offset-4 hover:underline">
+                  <div className="mt-8">
+                    {farDefaultOpen ? (
+                      <div>
+                        <h3 className="font-heading text-lg font-semibold text-foreground">{farNeedsHeading(farNeeds.length)}</h3>
+                        <p className="text-sm text-muted-foreground">Pour celles et ceux qui passent par là.</p>
+                      </div>
+                    ) : (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        aria-expanded={farShown}
+                        aria-controls="entraide-far-needs"
+                        onClick={() => setFarOpen(!farShown)}
+                        className="h-auto whitespace-normal py-2 text-left"
+                      >
                         {farNeedsLabel(farNeeds.length, origin !== null)}
-                      </span>
-                      {origin && <span className="block text-xs text-muted-foreground">Pour celles et ceux qui passent par là.</span>}
-                    </button>
-                    <ul id="entraide-far-needs" hidden={!farOpen} className="mt-3 space-y-3">
+                      </Button>
+                    )}
+                    <ul id="entraide-far-needs" hidden={!farShown} className="mt-3 space-y-3">
                       {farNeeds.map((need) => (
                         <NeedRow
                           key={need.id}

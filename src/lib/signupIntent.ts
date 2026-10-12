@@ -21,6 +21,10 @@ export function detectSignupIntent(
   if (presetRole) return null;
   if (!redirectTarget) return null;
   if (redirectTarget.startsWith("/gardiens/")) return "owner";
+  // Lot I1 (12/10/2026) : « Publier mon annonce de garde » mène à /sits/create.
+  // Sans intention, une inscription Google sans rôle choisi prenait le rôle par
+  // défaut « gardien » (5 comptes sur 16 inscrits à 0 % du 09 au 12/10).
+  if (redirectTarget === "/sits/create" || redirectTarget.startsWith("/sits/create?") || redirectTarget.startsWith("/sits/create#")) return "owner";
   if (redirectTarget.startsWith("/annonces/")) return "sitter";
   if (redirectTarget.startsWith("/projets")) return "entraide";
   if (redirectTarget.startsWith("/petites-missions")) return "entraide";
@@ -44,6 +48,7 @@ export function signupIntentBannerKey(
   redirectTarget: string | null | undefined,
 ): string | null {
   if (!intent) return null;
+  if (intent === "owner" && redirectTarget?.startsWith("/sits/create")) return "owner_publish";
   if (intent !== "entraide") return intent;
   if (redirectTarget?.startsWith("/projets/publier")) return "entraide_projet";
   if (redirectTarget?.startsWith("/petites-missions")) return "entraide";

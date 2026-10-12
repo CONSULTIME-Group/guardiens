@@ -41,6 +41,23 @@ export function helpersSectionTitle(count: number, city: string | null): string 
 /** Sans lieu connu : les premiers besoins visibles, le reste replié. */
 export const NEEDS_SHOWN_WITHOUT_PLACE = 3;
 
+/**
+ * Lot E11 (12/10/2026) : sous ce nombre de besoins proches, les besoins plus
+ * loin s'affichent d'emblée, sous un titre. Avec 0 besoin à 30 km de Lyon et
+ * 12 ouverts ailleurs, le seul lien replié rendait la liste invisible.
+ */
+export const FAR_NEEDS_OPEN_BELOW = 3;
+
+/** Les besoins plus loin s'affichent-ils d'emblée ? */
+export function farNeedsOpenByDefault(hasPlace: boolean, nearCount: number): boolean {
+  return hasPlace && nearCount < FAR_NEEDS_OPEN_BELOW;
+}
+
+/** Titre de la section quand les besoins plus loin sont affichés d'emblée. */
+export function farNeedsHeading(count: number): string {
+  return count === 1 ? "Ailleurs en France, 1 besoin ouvert" : `Ailleurs en France, ${count} besoins ouverts`;
+}
+
 /** Libellé du bouton qui déplie les besoins lointains (ou les autres besoins, sans lieu). */
 export function farNeedsLabel(count: number, hasPlace: boolean): string {
   if (hasPlace) return `Plus loin : ${count === 1 ? "1 besoin ouvert" : `${count} besoins ouverts`} ailleurs en France`;

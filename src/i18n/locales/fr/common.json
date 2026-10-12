@@ -1032,6 +1032,7 @@
     "terms_accepted_edit": "Modifier",
     "intent_banner": {
       "owner": "Encore un pas, et vous pourrez contacter ce gardien.",
+        "owner_publish": "Encore un pas, et vous pourrez publier votre annonce de garde.",
       "sitter": "Encore un pas, et vous pourrez proposer vos services.",
       "entraide": "Encore un pas, et vous pourrez demander ou proposer un coup de main pr\u00e8s de chez vous.",
       "entraide_projet": "Encore un pas, et vous pourrez publier votre projet participatif.",
