@@ -502,7 +502,7 @@ const EntraideHub = () => {
                     {farDefaultOpen ? (
                       <div>
                         <h3 className="font-heading text-lg font-semibold text-foreground">{farNeedsHeading(farNeeds.length)}</h3>
-                        <p className="text-sm text-muted-foreground">Pour celles et ceux qui passent par là, ou qui ont de la famille dans le coin.</p>
+                        <p className="text-sm text-muted-foreground">Pour celles et ceux qui passent par là.</p>
                       </div>
                     ) : (
                       <Button
