@@ -2,20 +2,20 @@
   "version": 4,
   "sources": {
     "city_guides": {
-      "head": "2026-10-10T03:20:03.210566+00:00|98",
-      "fetchedAt": "2026-10-10T08:27:09.628Z"
+      "head": "2026-10-12T20:16:22.640719+00:00|101",
+      "fetchedAt": "2026-10-12T22:18:48.605Z"
     },
     "seo_city_pages": {
-      "head": "2026-10-10T12:30:06.554508+00:00|165",
-      "fetchedAt": "2026-10-10T12:34:49.829Z"
+      "head": "2026-10-12T16:50:06.022817+00:00|165",
+      "fetchedAt": "2026-10-12T22:18:48.634Z"
     },
     "articles": {
-      "head": "2026-10-09T12:10:12.374757+00:00|133",
-      "fetchedAt": "2026-10-10T08:27:09.683Z"
+      "head": "2026-10-12T16:10:12.763441+00:00|133",
+      "fetchedAt": "2026-10-12T22:18:48.632Z"
     },
     "seo_department_pages": {
-      "head": "2026-10-10T04:07:00.112846+00:00|102",
-      "fetchedAt": "2026-10-10T08:27:09.570Z"
+      "head": "2026-10-12T04:07:00.25173+00:00|102",
+      "fetchedAt": "2026-10-12T22:18:48.631Z"
     },
     "breed_profiles": {
       "head": "2026-08-19T19:06:57.126227+00:00|81",
@@ -48,6 +48,12 @@
       },
       {
         "loc": "/guides/caluire-et-cuire",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/vialas",
         "lastmod": null,
         "changefreq": "weekly",
         "priority": "0.7"
@@ -431,6 +437,12 @@
         "priority": "0.7"
       },
       {
+        "loc": "/guides/sonnaz",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
         "loc": "/guides/echirolles",
         "lastmod": null,
         "changefreq": "weekly",
@@ -582,6 +594,12 @@
       },
       {
         "loc": "/guides/st-cyr-sur-mer",
+        "lastmod": null,
+        "changefreq": "weekly",
+        "priority": "0.7"
+      },
+      {
+        "loc": "/guides/saint-ludger",
         "lastmod": null,
         "changefreq": "weekly",
         "priority": "0.7"
