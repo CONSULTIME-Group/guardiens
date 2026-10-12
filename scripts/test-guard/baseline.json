@@ -18,6 +18,10 @@
     {
       "file": "src/integration/__tests__/get-public-sit-dates.test.ts",
       "reason": "Dépend du contenu de la base de production (exige au moins une garde close). Sans cette donnée il échoue sans rapport avec le code : hors périmètre de la garde dans les deux sens. À lancer à la main dans un environnement connecté."
+    },
+    {
+      "file": "src/integration/__tests__/public-sitter-profiles-threshold.test.ts",
+      "reason": "Dépend du contenu de la base de production (nombre exact de gardiens au Canada). Une inscription canadienne le 11/10/2026 l'a fait passer de 2 à 3 sans rapport avec le code : hors périmètre de la garde dans les deux sens. À lancer à la main dans un environnement connecté."
     }
   ],
   "knownFailures": []
