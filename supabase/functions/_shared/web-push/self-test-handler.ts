@@ -14,7 +14,7 @@ export interface SelfTestDependencies {
   /** Motif renvoyé par push_claim_self_test. */
   claim(target: TestTarget): Promise<SelfTestClaim>;
   subscription(target: TestTarget): Promise<TestSubscription | null>;
-  send(subscription: TestSubscription, payload: string): Promise<number>;
+  send(subscription: TestSubscription, payload: string, target: TestTarget): Promise<number>;
   finish(requestId: string, outcome: TestOutcome, status: number | null): Promise<boolean>;
   headers?: Record<string, string>;
   /** Journal agrégé, sans identifiant. */
@@ -72,7 +72,7 @@ export async function handleSelfTest(req: Request, deps: SelfTestDependencies): 
       && validateSubscriptionKeys({ auth: sub.auth_key, p256dh: sub.p256dh_key }).ok) {
       attempts = 1;
       try {
-        const code = await deps.send(sub, JSON.stringify(buildTestPayload(target.request_id)));
+        const code = await deps.send(sub, JSON.stringify(buildTestPayload(target.request_id)), target);
         status = Number.isInteger(code) && code >= 100 && code <= 599 ? code : null;
         outcome = status === null ? 'unknown' : status >= 200 && status < 300 ? 'accepted' : 'rejected';
       } catch (error) {

@@ -43,10 +43,12 @@ export const ALMA_SKILLS_ACTION_LABEL = "Ajouter mes savoir-faire";
 export interface AlmaRailChoice {
   phrase: string;
   /** Lien direct (lot E5) ; sinon la carte ouvre la conversation avec Alma. */
-  action: { label: string; href: string } | null;
+  action: { id: string; label: string; href: string } | null;
 }
 
-const skillsAction = { label: ALMA_SKILLS_ACTION_LABEL, href: SAVOIR_FAIRE_PATH };
+/** Lot M1 : identifiant stable de l'action, porté par alma_rail_action_clicked. */
+export const ALMA_SKILLS_ACTION_ID = "savoir_faire";
+const skillsAction = { id: ALMA_SKILLS_ACTION_ID, label: ALMA_SKILLS_ACTION_LABEL, href: SAVOIR_FAIRE_PATH };
 
 /**
  * Lot E5 : phrase et lien éventuel. Les gardes passent d'abord (garde en

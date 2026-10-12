@@ -255,7 +255,7 @@ export type EventType =
   | "projet_composer_step1_completed"           // Passage étape 1 vers étape 2
   | "projet_composer_step2_completed"           // Passage étape 2 vers étape 3
   | "projet_composer_field_abandoned"           // Blur du titre ou de la description sous le minimum (field, length)
-  | "projet_composer_submitted"                 // Publication réussie (mission_id, nature_projet, nb_transmis, nb_attendus, has_free_text)
+  | "projet_composer_submitted"                 // Publication réussie (mission_id, category, mission_type, nature_projet, nb_transmis, nb_attendus, has_free_text ; M1)
   | "projet_composer_abandoned"                 // Départ sans publication (last_step, last_field, has_title, title_len)
   // Alma Pass 1 (assistant incarné sur 6 moments transactionnels) --------------
   | "alma_message_opener_seen"                  // Bulle brise-glace Messages affichée (audience, has_sit, has_mission)
@@ -327,8 +327,11 @@ export type EventType =
   | "next_mission_digest_card_seen"             // Carte "prochain digest mardi" affichée sur dashboard
   | "entraide_feed_chip_toggled"                // Chip filter mobile toggled (filter_types)
   | "entraide_feed_default_view"                // Vue par défaut du feed unifié mobile (une fois par session)
-  | "entraide_idea_tile_clicked"                // Lot E4 : tuile « Une idée pour commencer » (idea, authenticated)
-  | "alma_rail_action_clicked"                  // Lot E5 : lien direct de la carte Alma du tableau de bord (action, variant)
+  | "entraide_idea_tile_clicked"                // Lot E4 : tuile « Une idée pour commencer » (tile_id, source = page d'origine ; idea, authenticated)
+  | "alma_rail_action_clicked"                  // Lot E5 : lien direct de la carte Alma du tableau de bord (action_id, action, variant, href ; M1)
+  | "push_send_attempted"                       // Lot M1, serveur : avant l'appel au service de push (channel, subscription_id, endpoint_host, job_id, event_kind)
+  | "push_send_succeeded"                       // Lot M1, serveur : réponse 2xx du service de push (http_status, duration_ms)
+  | "push_send_failed"                          // Lot M1, serveur : échec (http_status, endpoint_host, reason, duration_ms)
   | "admin_mutual_aid_dashboard_seen"           // Dashboard admin entraide affiché (1x par montage)
   | "admin_alma_dashboard_seen"                 // Dashboard admin Alma affiché (1x par montage)
   | "admin_alma_export_csv_clicked"             // Export CSV depuis dashboard admin Alma

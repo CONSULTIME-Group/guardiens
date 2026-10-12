@@ -14,6 +14,7 @@ import * as endpoint from "../../supabase/functions/_shared/web-push/endpoint";
 import * as payload from "../../supabase/functions/_shared/web-push/payload";
 import * as transport from "../../supabase/functions/_shared/web-push/transport";
 import * as budget from "../../supabase/functions/_shared/web-push/dispatch-budget";
+import * as sendEvents from "../../supabase/functions/_shared/web-push/send-events";
 
 const serviceKey = "fixture-service-key";
 
@@ -21,6 +22,7 @@ function harness(
   jobs: Array<Record<string, unknown>>,
   nearby: () => { data: unknown; error: unknown } = () => ({ data: [], error: null }),
   badge: () => { data: unknown; error: unknown } = () => ({ data: null, error: null }),
+  sendImpl: () => Promise<{ statusCode: number }> = async () => ({ statusCode: 201 }),
 ) {
   let handler!: (request: Request) => Promise<Response>;
   const inserts: Array<{ table: string; row: unknown }> = [];
@@ -30,6 +32,7 @@ function harness(
     from: (table: string) => ({
       insert: async (row: unknown) => { inserts.push({ table, row }); return { error: null }; },
       update: (row: unknown) => ({ eq: async (column: string, value: unknown) => { updates.push({ table, row, column, value }); return { error: null }; } }),
+      select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: table === "push_subscriptions" ? { user_id: "u1" } : null, error: null }) }) }),
     }),
     rpc: vi.fn(async (name: string, _args?: unknown) => {
       if (name === "push_claim_jobs") return { data: jobs, error: null };
@@ -59,7 +62,7 @@ function harness(
     require: (specifier: string) => {
       if (specifier.includes("supabase-js@2/cors")) return { corsHeaders: {} };
       if (specifier.includes("supabase-js")) return { createClient: () => admin };
-      if (specifier.includes("web-push@")) return { default: { setVapidDetails: () => {}, sendNotification: async (_s: unknown, body: string) => { sent.push(body); return { statusCode: 201 }; } } };
+      if (specifier.includes("web-push@")) return { default: { setVapidDetails: () => {}, sendNotification: async (_s: unknown, body: string) => { sent.push(body); return sendImpl(); } } };
       if (specifier.includes("cron-trace")) return cronTrace;
       if (specifier.includes("dispatch-budget")) return budget;
       if (specifier.includes("web-push/auth")) return auth;
@@ -67,11 +70,14 @@ function harness(
       if (specifier.includes("web-push/endpoint")) return endpoint;
       if (specifier.includes("web-push/payload")) return payload;
       if (specifier.includes("web-push/transport")) return transport;
+      if (specifier.includes("web-push/send-events")) return sendEvents;
       throw new Error(`Unexpected import ${specifier}`);
     },
   });
+  const cronRows = () => inserts.filter((i) => i.table === "cron_run_log");
+  const pushEvents = () => inserts.filter((i) => i.table === "analytics_events").map((i) => i.row as Record<string, any>);
   return {
-    inserts, updates, sent, admin,
+    inserts, updates, sent, admin, cronRows, pushEvents,
     run: () => handler(new Request("https://fixture.invalid", {
       method: "POST",
       headers: { Authorization: `Bearer ${serviceKey}` },
@@ -124,7 +130,7 @@ describe("dispatch-web-push, visibilité cron", () => {
     const body = await response.json();
     expect(body.status).toBe("partial");
     expect(body.ok).toBe(false);
-    const row = (h.inserts[0] as { row: Record<string, unknown> }).row;
+    const row = (h.cronRows()[0] as { row: Record<string, unknown> }).row;
     expect(row.status).toBe("partial");
     expect(row.error_message).toBe("push_claim_nearby_jobs failed");
     expect((row.metrics as Record<string, number>).nearby_unavailable).toBe(1);
@@ -158,6 +164,29 @@ describe("dispatch-web-push, visibilité cron", () => {
     await h.run();
     const closes = h.admin.rpc.mock.calls.filter((c) => c[0] === "push_close_job");
     expect(closes[0][1]).toMatchObject({ p_job_id: "j1", p_outcome: "accepted" });
-    expect(((h.inserts[0] as { row: Record<string, unknown> }).row.metrics as Record<string, number>).accepted).toBe(1);
+    expect(((h.cronRows()[0] as { row: Record<string, unknown> }).row.metrics as Record<string, number>).accepted).toBe(1);
+  });
+
+  it("lot M1 : tentative puis succès tracés, sans endpoint complet", async () => {
+    const h = harness([fcm("j1")]);
+    await h.run();
+    const events = h.pushEvents();
+    expect(events.map((e) => e.event_type)).toEqual(["push_send_attempted", "push_send_succeeded"]);
+    expect(events.every((e) => e.user_id === "u1")).toBe(true);
+    expect(events[0].metadata).toMatchObject({ channel: "dispatch", subscription_id: "s", endpoint_host: "fcm.googleapis.com", job_id: "j1", event_kind: "message" });
+    expect(events[1].metadata.http_status).toBe(201);
+    expect(JSON.stringify(events)).not.toContain("/fcm/send/abc");
+  });
+
+  it("lot M1 : un 410 trace l'échec avec code, hôte et raison, la désactivation reste au dispatcher", async () => {
+    const gone = Object.assign(new Error("Received unexpected response code"), { statusCode: 410, body: "push subscription has unsubscribed or expired.\n" });
+    const h = harness([fcm("j1")], undefined, undefined, async () => { throw gone; });
+    await h.run();
+    const events = h.pushEvents();
+    expect(events.map((e) => e.event_type)).toEqual(["push_send_attempted", "push_send_failed"]);
+    expect(events[1].metadata).toMatchObject({ http_status: 410, endpoint_host: "fcm.googleapis.com", reason: "push subscription has unsubscribed or expired." });
+    const disables = h.admin.rpc.mock.calls.filter((c) => c[0] === "push_disable_subscription");
+    expect(disables).toHaveLength(1);
+    expect(disables[0][1]).toEqual({ p_subscription_id: "s", p_reason: "http_410" });
   });
 });
