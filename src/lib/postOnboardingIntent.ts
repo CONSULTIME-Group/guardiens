@@ -36,6 +36,16 @@ export function clearPublishIntent(): void {
 }
 
 /**
+ * Lot M2 : un formulaire quitté sans rien écrire n'est plus une intention.
+ * Sans cela, la fin de l'onboarding y ramenait le membre (14 sorties sans
+ * titre sur 43 en 14 jours, au 12/10/2026, juste après l'inscription).
+ */
+export function dropPublishIntentFor(prefix: string): void {
+  const intent = readPublishIntent();
+  if (intent && (intent === prefix || intent.startsWith(prefix + "?") || intent.startsWith(prefix + "#"))) clearPublishIntent();
+}
+
+/**
  * Destination de fin d'onboarding : `next` explicite, sinon intention de
  * publication connue, sinon repli fourni par l'appelant.
  */

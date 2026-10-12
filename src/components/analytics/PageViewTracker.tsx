@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import { trackEvent } from "@/lib/analytics";
 import { captureUtmFromUrl } from "@/lib/campaignAttribution";
 import { trackGoogleAnalyticsPageView } from "@/lib/cookieConsent";
+import { recordPath } from "@/lib/navHistory";
 
 /**
  * Track une vue de page à chaque changement de route.
@@ -32,6 +33,8 @@ const PageViewTracker = () => {
       path.startsWith("/assets/") ||
       /\.(js|css|map|png|jpg|jpeg|gif|svg|webp|avif|ico|woff2?|ttf|eot|json|xml|txt)$/i.test(path);
     if (isAssetNoise) return;
+    // Lot M2 : page précédente, lue par les formulaires pour savoir d'où l'on vient.
+    recordPath(path);
 
     const now = Date.now();
     if (lastPath.current === path && now - lastEmitAt.current < 1500) return;

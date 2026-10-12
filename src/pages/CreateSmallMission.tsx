@@ -1,4 +1,5 @@
-import { clearPublishIntent, rememberPublishIntent } from "@/lib/postOnboardingIntent";
+import { clearPublishIntent, dropPublishIntentFor, rememberPublishIntent } from "@/lib/postOnboardingIntent";
+import { previousPath } from "@/lib/navHistory";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { inferMissionCategory } from "@/lib/missionCategories";
@@ -219,12 +220,18 @@ const CreateSmallMission = () => {
   stepRef.current = step;
   const titleLenRef = useRef(title.trim().length);
   titleLenRef.current = title.trim().length;
+  const descLenRef = useRef(description.trim().length);
+  descLenRef.current = description.trim().length;
   useEffect(() => {
-    try { trackEvent("mission_composer_opened", { metadata: { type: missionType } }); } catch {}
+    // Lot M2 : page d'origine et titre prérempli, pour lire les sorties rapides.
+    const from = previousPath(window.location.pathname);
+    try { trackEvent("mission_composer_opened", { metadata: { type: missionType, from, prefilled: !!prefill.title } }); } catch {}
     return () => {
       if (!submittedRef.current) {
         const titleLen = titleLenRef.current;
-        try { trackEvent("mission_composer_abandoned", { metadata: { last_step: stepRef.current, has_title: titleLen > 0, title_len: titleLen } }); } catch {}
+        try { trackEvent("mission_composer_abandoned", { metadata: { last_step: stepRef.current, has_title: titleLen > 0, title_len: titleLen, from } }); } catch {}
+        // Lot M2 : rien d'écrit, l'intention de publication tombe.
+        if (titleLen === 0 && descLenRef.current === 0) dropPublishIntentFor("/petites-missions/creer");
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
