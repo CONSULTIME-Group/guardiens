@@ -1,5 +1,6 @@
 import { fetchMyProfile } from "@/lib/myProfile";
-import { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef, Suspense } from "react";
+import { lazyWithRetry } from "@/lib/lazyWithRetry";
 import { useTranslation } from "react-i18next";
 import PageMeta from "@/components/PageMeta";
 import { logger } from "@/lib/logger";
@@ -71,7 +72,7 @@ const RADIUS_SHORTCUTS = [5, 15, 30, 50];
 type SortOption = "affinity" | "closest" | "rating" | "experience";
 type ViewMode = "list" | "map";
 
-const SearchOwnerMapView = lazy(() => import("@/components/search/SearchOwnerMapView"));
+const SearchOwnerMapView = lazyWithRetry(() => import("@/components/search/SearchOwnerMapView"), "SearchOwnerMapView");
 
 const SearchOwner = () => {
   const { user, switchRole } = useAuth();

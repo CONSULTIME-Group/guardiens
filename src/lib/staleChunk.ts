@@ -6,8 +6,10 @@
 const KEY = "stale-chunk-reload-at";
 const WINDOW_MS = 60_000;
 
+// Lot F2 : « _result.default » et « reading 'default' » sont la signature d'un
+// React.lazy dont l'import a été résolu à vide par Vite après vite:preloadError.
 const STALE_RE =
-  /dynamically imported module|Importing a module script failed|Loading chunk|ChunkLoadError|Unable to preload CSS/i;
+  /dynamically imported module|Importing a module script failed|Loading chunk|ChunkLoadError|Unable to preload CSS|_result\.default|reading 'default'\)/i;
 
 export const isStaleChunkError = (error: unknown): boolean => {
   const message = error instanceof Error ? error.message : String(error ?? "");
