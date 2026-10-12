@@ -1903,10 +1903,12 @@ const CreateSit = () => {
     loading,
     hasProperty: !!property,
     hasPets: pets.length > 0,
-    // En express, la photo devient le geste 1 : elle n'est plus un prérequis d'entrée.
-    // Lot 1 : compte arrivée v2 sorti de P1 (prénom, commune, logement) :
-    // aucun écran de mise en route, la photo vient en premier geste.
-    hasPhoto: expressParams.express || arrivalV2Account ? true : hasPhoto,
+    // Lot I1 (12/10/2026) : la photo est demandée à l'étape 3, avant la
+    // publication (bloc « Photo de couverture » et règle de publication),
+    // jamais à l'entrée. Mesure du 12/10 sur 30 jours : 69 nouveaux comptes
+    // bloqués à l'entrée, 36 partis, dont 11 arrêtés précisément sur la photo.
+    // En express et en arrivée v2, c'était déjà le cas.
+    hasPhoto: true,
     hasIdentity: isIdentityComplete(profileFirstName, profilePostalCode, profileCountry),
     entered: setupEntered,
     dismissed: setupDismissed,

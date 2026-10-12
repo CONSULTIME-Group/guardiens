@@ -51,6 +51,10 @@
 
 - Chargements robustes (lot F2) : tout composant chargé à la demande passe par lazyWithRetry (contenu) ou optionalLazy (accessoire, src/lib/optionalLazy.ts), jamais par React.lazy nu ; un import résolu à vide compte comme un échec ; staleChunk reconnaît « _result.default » et « reading 'default') » ; guardRealtimeConnect (src/lib/realtimeGuard.ts, appelé dans main.tsx) enveloppe connect() du temps réel Supabase ; pourquoi : après vite:preloadError + preventDefault, Vite résout l'import à vide et un React.lazy nu plantait (14 erreurs du 05 au 12/10/2026 dont /inscription), et un WebSocket refusé faisait tomber les fiches gardien publiques.
 
+- Inscription vers publication (lot I1) : /sits/create en redirection d'inscription donne l'intention propriétaire (bandeau owner_publish) ; la photo n'est plus un prérequis d'entrée de /sits/create (demandée à l'étape 3 et par la règle de publication) ; le pourcentage de profil se recalcule aussi au changement de prénom, code postal, ville ou pays (supabase/prepared-migrations/20261012230000_i1_completion_prenom_lieu.sql) ; pourquoi : 36 nouveaux comptes sur 69 partis devant l'écran d'entrée en 30 jours, dont 11 sur la photo, des inscriptions Google enregistrées « gardien » faute d'intention, et 18 profils figés à un pourcentage trop bas.
+
+- Besoins ailleurs (lot E11) : sous 3 besoins à 30 km, les besoins plus loin s'affichent d'emblée sous « Ailleurs en France, N besoins ouverts » ; au-delà, repli derrière un bouton à contour ; pourquoi : 0 besoin proche et 12 ailleurs donnaient une page Entraide vide à Lyon.
+
 <!-- LOVABLE:BEGIN -->
 - `build` ends with `test:guard` and CI runs `test:guard` directly; why: owner decision of 17/08/2026, a red test blocks publication.
 
