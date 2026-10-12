@@ -146,7 +146,23 @@ describe("Entraide, la page vue d'un membre", () => {
     expect(screen.queryByTestId("entraide-map")).toBeNull();
   });
 
-  it("montre les besoins proches, replie les besoins lointains", async () => {
+  it("peu de besoins proches : les besoins ailleurs s'affichent d'emblée, après les proches (lot E11)", async () => {
+    renderHub();
+    await waitFor(() => expect(screen.getByText("Arroser les tomates")).toBeInTheDocument());
+    expect(screen.getByRole("heading", { name: "Ailleurs en France, 1 besoin ouvert" })).toBeInTheDocument();
+    expect(screen.getByText("Repeindre un portail")).toBeVisible();
+    expect(screen.queryByRole("button", { name: /Plus loin :/ })).toBeNull();
+    const titles = screen.getAllByRole("heading", { level: 3 }).map((node) => node.textContent);
+    expect(titles.indexOf("Arroser les tomates")).toBeLessThan(titles.indexOf("Repeindre un portail"));
+  });
+
+  it("trois besoins proches ou plus : les besoins lointains restent repliés derrière un bouton", async () => {
+    rows.public_small_missions = [
+      need("loin", "Repeindre un portail", 46.2, 5.2),
+      need("proche", "Arroser les tomates", 45.76, 4.86),
+      need("proche2", "Porter des cartons", 45.761, 4.861),
+      need("proche3", "Tondre la pelouse", 45.762, 4.862),
+    ];
     renderHub();
     await waitFor(() => expect(screen.getByText("Arroser les tomates")).toBeInTheDocument());
     expect(screen.getByText("Repeindre un portail")).not.toBeVisible();
@@ -155,8 +171,6 @@ describe("Entraide, la page vue d'un membre", () => {
     fireEvent.click(toggle);
     expect(toggle).toHaveAttribute("aria-expanded", "true");
     expect(screen.getByText("Repeindre un portail")).toBeVisible();
-    const titles = screen.getAllByRole("heading", { level: 3 }).map((node) => node.textContent);
-    expect(titles.indexOf("Arroser les tomates")).toBeLessThan(titles.indexOf("Repeindre un portail"));
   });
 
   it("une tuile d'idée ouvre le formulaire avec le titre écrit", async () => {
@@ -173,7 +187,8 @@ describe("Entraide, la page vue d'un membre", () => {
 
   it("branche le bouton « Je peux » sur la fonction de réponse partagée", async () => {
     renderHub();
-    await waitFor(() => expect(screen.getAllByRole("button", { name: "Je peux" }).filter((button) => button.closest("[hidden]") === null).length).toBe(1));
+    // Lot E11 : le besoin lointain s'affiche aussi (un seul besoin proche) ; le proche vient en tête.
+    await waitFor(() => expect(screen.getAllByRole("button", { name: "Je peux" }).filter((button) => button.closest("[hidden]") === null).length).toBe(2));
     fireEvent.click(screen.getAllByRole("button", { name: "Je peux" })[0]);
     expect(respondMock).not.toHaveBeenCalled();
     fireEvent.click(await screen.findByRole("button", { name: "Envoyer ma proposition" }));
