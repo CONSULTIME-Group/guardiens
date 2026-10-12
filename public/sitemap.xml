@@ -1531,6 +1531,11 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/guides/vialas</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/guides/meyzieu</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -1846,6 +1851,11 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/guides/sonnaz</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/guides/echirolles</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -1972,6 +1982,11 @@
   </url>
   <url>
     <loc>https://guardiens.fr/guides/st-cyr-sur-mer</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/guides/saint-ludger</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -3038,12 +3053,22 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/gardiens/2d155dfb-3d2e-4435-ac11-ff0aba9a2984</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/gardiens/2d8e9df0-0a94-41a2-b974-1ad3f2f9b204</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/gardiens/2f6c7299-d45f-4ac1-84df-525f73585bc3</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/gardiens/303628bc-446a-4481-9d76-5e04f0732efd</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -3114,6 +3139,11 @@
   </url>
   <url>
     <loc>https://guardiens.fr/gardiens/4cee5836-9387-4a11-8219-8a4527cc0b4d</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/gardiens/4d70044f-09c9-43fc-89c5-0217941bf83e</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -3493,6 +3523,11 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/gardiens/bd06cc73-da06-4a62-8518-ffaf79417c53</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/gardiens/bde9a7c2-0fc1-4ea3-bbea-c0e456359ea2</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
@@ -3718,17 +3753,17 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/annonces/garde-maison-avec-1-chienne-et-3-chats-grandchamp-des-fontaines-08b43a</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/annonces/gardiannage-de-maison-proche-du-zooparc-de-beauval-et-des-ch-villentrois-0a6da6</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/annonces/garde-milo-a-son-domicile-maison-a-la-campagne-saint-chef-2c79fa</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/annonces/garde-de-deux-chiens-frere-et-soeur-5-nuits-a-pusignan-69330-314465</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -3744,6 +3779,11 @@
   </url>
   <url>
     <loc>https://guardiens.fr/annonces/garde-de-chienne-a-saint-cyr-sur-mer-du-19-au-28-octobre-202-st-cyr-sur-mer-4e838b</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/annonces/urgent-garde-d-un-chien-en-cevennes-vialas-503f7c</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -3778,12 +3818,17 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/annonces/garde-2-chats-a-la-campagne-a-deux-pas-de-chambery-sonnaz-dff478</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/petites-missions/un-coup-de-main-pour-transporter-des-meubles</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/petites-missions/un-coup-de-main-pour-transporter-un-canape-2-place-surtout-dans-un-vehicule-plus</loc>
+    <loc>https://guardiens.fr/petites-missions/j-ai-besoin-de-quelqu-un-pour-rendre-visite-a-mon-chat-durant-mon-absence-verifi</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
