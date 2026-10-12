@@ -1,7 +1,7 @@
 import { NavLink, Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Home, Search, Calendar, MessageSquare, User,
-  PawPrint, Handshake, MoreHorizontal, Crown, Plus, Globe,
+  PawPrint, Handshake, MoreHorizontal, Crown, Plus, Globe, CalendarCheck,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
@@ -10,7 +10,7 @@ import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
 import { useNavBadgeCounts } from "@/hooks/useNavBadgeCounts";
 import { useChromeVisibility } from "./ChromeVisibility";
 import UserMenu from "./UserMenu";
-import { isFabHidden } from "@/lib/bottomNavFab";
+import { bottomNavFab, isFabHidden } from "@/lib/bottomNavFab";
 import {
   buildNavGroups,
   flattenNavGroups,
@@ -344,25 +344,10 @@ export const BottomNav = () => {
   const path = location.pathname;
 
   // FAB contextuel : libellé et destination s'adaptent à la section et au rôle.
-  // Propriétaire : publier une garde ou demander un coup de main.
-  // Gardien : proposer son aide (mission type=offre).
-  let fab: { to: string; label: string };
-  if (path.startsWith("/petites-missions")) {
-    fab = isOwnerView
-      ? { to: "/petites-missions/creer", label: "Publier" }
-      : { to: "/petites-missions/creer", label: "Publier" };
-  } else if (path.startsWith("/sits") || path.startsWith("/recherche-gardiens")) {
-    // Sur les pages annonces de garde, seul un propriétaire peut publier.
-    // Pour un gardien, on bascule sur l'action principale de son rôle.
-    fab = isOwnerView
-      ? { to: "/sits/create", label: "Publier" }
-      : { to: "/petites-missions/creer", label: "Publier" };
-  } else {
-    // Accueil, recherche, profil, réglages : action principale du rôle actif.
-    fab = isOwnerView
-      ? { to: "/sits/create", label: "Publier" }
-      : { to: "/petites-missions/creer", label: "Publier" };
-  }
+  // Propriétaire : publier une garde, ou un coup de main sur l'entraide.
+  // Gardien : ses disponibilités (lot M2, décision du 12/10/2026), et un coup
+  // de main seulement depuis l'entraide.
+  const fab = bottomNavFab(path, isOwnerView);
 
   // 2 onglets à gauche du FAB
   const leftTabs = [
@@ -474,11 +459,13 @@ export const BottomNav = () => {
             <button
               type="button"
               onClick={() => navigate(fab.to)}
-              aria-label={fab.label}
+              aria-label={fab.ariaLabel}
               className="group flex flex-col items-center justify-center"
             >
               <div className="w-14 h-14 bg-primary rounded-2xl shadow-lg shadow-primary/30 flex items-center justify-center text-primary-foreground transition-all duration-200 active:scale-90 group-hover:shadow-xl group-hover:shadow-primary/40 group-hover:-translate-y-0.5">
-                <Plus className="h-7 w-7 transition-transform duration-300 group-active:rotate-90" strokeWidth={2} />
+                {fab.icon === "availability"
+                  ? <CalendarCheck className="h-7 w-7" strokeWidth={2} />
+                  : <Plus className="h-7 w-7 transition-transform duration-300 group-active:rotate-90" strokeWidth={2} />}
               </div>
               <span
                 key={fab.label}

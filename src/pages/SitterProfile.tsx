@@ -142,6 +142,18 @@ const SitterProfile = () => {
           setTimeout(() => el.classList.remove("ring-2", "ring-primary", "rounded-xl"), 3000);
         }
       }, 500);
+    } else if (focus === "availability" && lastAppliedFocusRef.current !== focus) {
+      // Lot M2 : bouton « Dispo » de la barre basse, interrupteur « Je suis disponible ».
+      lastAppliedFocusRef.current = focus;
+      setActiveSection("sitter");
+      setTimeout(() => {
+        const el = document.getElementById("is-available-switch")?.closest<HTMLElement>("div.rounded-lg");
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+          el.classList.add("ring-2", "ring-primary");
+          setTimeout(() => el.classList.remove("ring-2", "ring-primary"), 3000);
+        }
+      }, 500);
     } else if (section && SECTION_PARAM_MAP[section] && lastAppliedSectionRef.current !== section) {
       lastAppliedSectionRef.current = section;
       const mapped = SECTION_PARAM_MAP[section];
