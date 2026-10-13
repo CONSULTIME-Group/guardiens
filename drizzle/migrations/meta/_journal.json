@@ -533,6 +533,13 @@
       "when": 1791880324045,
       "tag": "0075_x1_parcours_debloques",
       "breakpoints": true
+    },
+    {
+      "idx": 76,
+      "version": "7",
+      "when": 1791887542925,
+      "tag": "0076_gl_guides_lieux_sources",
+      "breakpoints": true
     }
   ]
 }
