@@ -76,12 +76,11 @@ describe("menu : groupe EMAILS", () => {
 });
 
 describe("abonnements et paramètres", () => {
-  it("boutons de rappel sous PRICING_IS_ACTIVE", () => {
+  it("rappels fondateurs retirés avec leurs fonctions (lot Z)", () => {
     const src = read("src/pages/admin/AdminSubscriptions.tsx");
-    const guard = src.indexOf("{PRICING_IS_ACTIVE && (");
-    expect(guard).toBeGreaterThan(-1);
-    expect(src.indexOf("Rappel J-30")).toBeGreaterThan(guard);
-    expect(src.indexOf("Rappel J-7")).toBeGreaterThan(guard);
+    expect(src).not.toContain("send-founder-reminder");
+    expect(src).not.toContain("Rappel J-30");
+    expect(src).not.toContain("Rappel J-7");
   });
   it("paramètres sans date figée", () => {
     const src = read("src/pages/admin/AdminSettings.tsx");

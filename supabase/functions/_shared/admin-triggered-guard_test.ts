@@ -7,8 +7,6 @@ const FNS = [
   "send-sitter-daily-digest",
   "send-mission-daily-digest",
   "prerender-recache-pending",
-  "send-founder-reminder-30",
-  "send-founder-reminder-7",
   // Lot A1b : fonctions lancées par cron (clé service du vault).
   "process-mass-email-queue",
   "send-alert-digest",

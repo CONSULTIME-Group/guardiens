@@ -1,8 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
-import { Bell, Lock } from "lucide-react";
+import { Bell } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   Popover,
@@ -12,6 +11,7 @@ import {
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { safeUUID } from "@/lib/uuid";
+import { markAllNotificationsRead, markNotificationRead } from "@/lib/notificationsRead";
 
 interface Notification {
   id: string;
@@ -30,7 +30,6 @@ interface NotificationBellProps {
 
 const NotificationBell = ({ onUnreadChange }: NotificationBellProps = {}) => {
   const { user } = useAuth();
-  const { hasAccess } = useSubscriptionAccess();
   const userId = user?.id;
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -127,15 +126,13 @@ const NotificationBell = ({ onUnreadChange }: NotificationBellProps = {}) => {
     };
   }, [userId]);
 
+  // Lot Z : toutes les non lues du membre en base, pas seulement les 20 chargées.
   const markAllRead = async () => {
     if (!userId || unreadCount === 0) return;
-    const unreadIds = notifications.filter((n) => !n.read_at).map((n) => n.id);
-    await supabase
-      .from("notifications")
-      .update({ read_at: new Date().toISOString() })
-      .in("id", unreadIds);
+    const { ok, readAt } = await markAllNotificationsRead(userId);
+    if (!ok) return;
     setNotifications((prev) =>
-      prev.map((n) => (n.read_at ? n : { ...n, read_at: new Date().toISOString() }))
+      prev.map((n) => (n.read_at ? n : { ...n, read_at: readAt }))
     );
     setUnreadCount(0);
   };
@@ -176,15 +173,6 @@ const NotificationBell = ({ onUnreadChange }: NotificationBellProps = {}) => {
             </div>
           ) : (
             notifications.map((n) => {
-              const isLockedInvite = n.type === "sit_invitation" && !hasAccess;
-              const displayTitle = isLockedInvite
-                ? "Une invitation à garder vous attend"
-                : n.title;
-              const displayBody = isLockedInvite
-                ? "Activez votre espace gardien pour découvrir l'annonce."
-                : n.body;
-              const displayLink = isLockedInvite ? "/pricing" : n.link;
-
               const inner = (
                 <div
                   className={`px-4 py-3 border-b border-border/50 hover:bg-accent/50 transition-colors ${
@@ -192,15 +180,13 @@ const NotificationBell = ({ onUnreadChange }: NotificationBellProps = {}) => {
                   }`}
                 >
                   <div className="flex items-start gap-2">
-                    {isLockedInvite ? (
-                      <Lock className="mt-1 h-3.5 w-3.5 text-primary shrink-0" />
-                    ) : !n.read_at ? (
+                    {!n.read_at ? (
                       <span className="mt-1.5 h-2 w-2 rounded-full bg-primary shrink-0" />
                     ) : null}
                     <div className="min-w-0">
-                      <p className="text-sm font-medium">{displayTitle}</p>
+                      <p className="text-sm font-medium">{n.title}</p>
                       <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
-                        {displayBody}
+                        {n.body}
                       </p>
                       <p className="text-[10px] text-muted-foreground mt-1">
                         {formatDistanceToNow(new Date(n.created_at), {
@@ -214,25 +200,20 @@ const NotificationBell = ({ onUnreadChange }: NotificationBellProps = {}) => {
               );
 
               const handleClick = async () => {
-                if (!n.read_at) {
-                  await supabase
-                    .from("notifications")
-                    .update({ read_at: new Date().toISOString() })
-                    .eq("id", n.id);
-                  setNotifications((prev) =>
-                    prev.map((x) =>
-                      x.id === n.id ? { ...x, read_at: new Date().toISOString() } : x
-                    )
-                  );
-                  setUnreadCount((prev) => Math.max(0, prev - 1));
-                }
                 setOpen(false);
+                if (n.read_at) return;
+                const { ok, readAt } = await markNotificationRead(n.id);
+                if (!ok) return;
+                setNotifications((prev) =>
+                  prev.map((x) => (x.id === n.id ? { ...x, read_at: readAt } : x))
+                );
+                setUnreadCount((prev) => Math.max(0, prev - 1));
               };
 
-              return displayLink ? (
+              return n.link ? (
                 <Link
                   key={n.id}
-                  to={displayLink}
+                  to={n.link}
                   onClick={handleClick}
                   className="block"
                 >
@@ -243,6 +224,15 @@ const NotificationBell = ({ onUnreadChange }: NotificationBellProps = {}) => {
               );
             })
           )}
+        </div>
+        <div className="border-t border-border px-4 py-2.5 text-center">
+          <Link
+            to="/notifications"
+            onClick={() => setOpen(false)}
+            className="text-xs font-medium text-primary hover:underline"
+          >
+            Tout voir
+          </Link>
         </div>
       </PopoverContent>
     </Popover>
