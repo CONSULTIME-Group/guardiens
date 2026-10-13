@@ -647,8 +647,8 @@
     "read": "Lire",
     "cta_question": "Vous allez garder à {{city}} ?",
     "categories": {
-      "dog_park": "Parcs & espaces verts",
-      "general_park": "Parcs publics",
+      "dog_park": "Espaces pour chiens",
+      "general_park": "Parcs et forêts",
       "walk_trail": "Balades & sentiers",
       "vet": "Vétérinaires",
       "dog_friendly_cafe": "Cafés & restos dog-friendly",
@@ -658,7 +658,7 @@
     },
     "questions": {
       "dog_park": "Où promener son chien à {{city}} ?",
-      "general_park": "Quels parcs accueillent les chiens à {{city}} ?",
+      "general_park": "Quels parcs et forêts autour de {{city}} ?",
       "walk_trail": "Quelles balades faire avec un chien autour de {{city}} ?",
       "vet": "Quel vétérinaire appeler à {{city}} ?",
       "dog_friendly_cafe": "Peut-on entrer au café ou au restaurant avec son chien à {{city}} ?",
@@ -672,6 +672,11 @@
       "source_prefix": "Source : {{source}}",
       "places_answer": "{{count}} lieux référencés, dont {{names}}",
       "and_more": "et {{count}} autres"
+    },
+    "links": {
+      "directions": "Itinéraire",
+      "google_reviews": "Avis sur Google Maps",
+      "source_osm": "Source : OpenStreetMap"
     }
   },
   "about": {
