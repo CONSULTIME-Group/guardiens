@@ -160,7 +160,7 @@ Deno.serve(async (req) => {
       if (!conv) return false;
 
       // Dedup : ne pas reinserer si un message identique existe deja
-      // (lot Z : .limit(1) et longueur, jamais maybeSingle).
+      // (lot Z : .limit(1) puis test de longueur).
       if (await alreadyPosted(conv.id, "%le guide de la maison est disponible%")) return false;
 
       await supabase.from("messages").insert({

@@ -254,7 +254,7 @@ describe("Z12, données", () => {
     const up = between("UPDATE public.faq_entries", ";");
     expect(up).toContain("arrive bientôt");
     expect(up).toContain("tableau de bord");
-    expect(up).not.toMatch(/SMS|dashboard|automatique/);
+    expect(up.slice(0, up.indexOf("WHERE"))).not.toMatch(/SMS|dashboard|automatique/);
     expect(up).toContain("id = 'f8571b95-5542-4527-b7bb-fba63fb5bfd6'");
     expect(up).toContain("position('alertes par SMS' IN answer) > 0");
   });
