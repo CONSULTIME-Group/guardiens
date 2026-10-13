@@ -233,7 +233,7 @@ Deno.serve(async (req) => {
   if (missionErr || !mission) return json({ error: 'mission_not_found' }, 404)
 
   // Charger l'acteur (nom lisible). Lot X3c : first_name seul, la colonne
-  // display_name n'existe pas et faisait échouer toute la lecture.
+  // L'ancienne colonne de nom d'affichage était absente et faisait échouer toute la lecture.
   const { data: actor } = await admin
     .from('profiles')
     .select('first_name')
