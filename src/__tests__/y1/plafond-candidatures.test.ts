@@ -23,6 +23,14 @@ describe("Y1, réglages par défaut", () => {
     const sql = read("supabase/prepared-migrations/20261013200000_y1_plafond_messages.sql");
     expect(sql).toContain("ALTER TABLE public.sits ALTER COLUMN max_applications SET DEFAULT 10;");
   });
+  it("les annonces publiées à l'ancien défaut de 5 passent à 10 (décision du 13/10/2026)", () => {
+    const sql = read("supabase/prepared-migrations/20261013200000_y1_plafond_messages.sql");
+    const block = sql.slice(sql.indexOf("-- 1d. Décision du 13/10/2026"));
+    expect(block).toMatch(/13 annonces visées sur 21/);
+    expect(block).toMatch(
+      /UPDATE public\.sits\s+SET max_applications = 10\s+WHERE status = 'published'\s+AND max_applications = 5;/,
+    );
+  });
   it("les paliers proposés relèvent toujours le plafond", () => {
     expect(nextCapSteps(10)).toEqual(MAX_APPLICATION_STEPS.filter((s) => s > 10));
     expect(nextCapSteps(10).length).toBeGreaterThan(0);

@@ -51,6 +51,18 @@ ALTER TABLE public.sits ALTER COLUMN max_applications SET DEFAULT 10;
 --           AND a.status NOT IN ('rejected'::application_status, 'cancelled'::application_status)
 --      ) >= s.max_applications;
 
+-- 1d. Décision du 13/10/2026 : les annonces publiées encore réglées sur
+--     l'ancien défaut de 5 passent au plafond de 10, comme toute nouvelle
+--     annonce. Lecture en base du 13/10/2026 : 13 annonces visées sur 21
+--     publiées (aucune sans plafond). Rejouable : un second passage ne trouve
+--     plus aucune ligne à 5. Seule la colonne max_applications change, aucun
+--     trigger de diffusion ne se déclenche (ni status, ni
+--     accepting_applications, ni unpublished_at).
+UPDATE public.sits
+   SET max_applications = 10
+ WHERE status = 'published'
+   AND max_applications = 5;
+
 
 -- 2. P4-03 : notifications vers des besoins effacés --------------------------
 -- 81 « mission_help_needed » sur 367 et 8 « mission_wave_relaunch » sur 36
