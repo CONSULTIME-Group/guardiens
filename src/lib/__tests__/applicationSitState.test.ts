@@ -31,7 +31,7 @@ describe("applicationSitState", () => {
 
   it("n'utilise ni tiret cadratin ni demi-cadratin dans les mentions", () => {
     const all = ["draft", "published", "confirmed", "in_progress", "completed", "cancelled", "archived"]
-      .map(sitStateNote)
+      .map((s) => sitStateNote(s))
       .filter(Boolean)
       .join(" ");
     expect(all).not.toMatch(/[—–]/);
