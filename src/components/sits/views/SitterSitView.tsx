@@ -47,6 +47,7 @@ import type { SitData } from "./types";
 import { sitterPresenceOnSit } from "@/lib/sitterSitPresence";
 import { applicationAvailability } from "@/lib/applicationCap";
 import { STARTED_SIT_NOTICE, isStartedOpenSit } from "@/lib/sitStarted";
+import { SWITCH_TO_SITTER_LABEL, sitApplySurface } from "@/lib/sitApplySurface";
 
 interface SitterSitViewProps {
   sit: SitData;
@@ -98,7 +99,7 @@ const SitterSitView = ({
   const { t } = useTranslation();
   // Lecture directe du profil, supprime les props `userRole`/`userFirstName`
   // qui dupliquaient l'info disponible via useAuth.
-  const { user } = useAuth();
+  const { user, switchRole } = useAuth();
   const { level: accessLevel, profileCompletion, canApplyGuards, identityRecommended } = useAccessLevel();
 
   const [applyOpen, setApplyOpen] = useState(false);
@@ -144,6 +145,12 @@ const SitterSitView = ({
       liveApplications: appCount,
     }) === "full";
   const canStillApply = Boolean(sit.accepting_applications) && !capFull;
+  // Lot Z2 (B-12) : même règle pour la barre du haut et la barre fixe mobile.
+  const applySurface = sitApplySurface({
+    activeRole,
+    userRole: user?.role ?? null,
+    sitStatus: sit.status,
+  });
   const [cancelOpen, setCancelOpen] = useState(false);
   const [ownerAccordSigned, setOwnerAccordSigned] = useState(false);
   const [ownerAccordDeclined, setOwnerAccordDeclined] = useState(false);
@@ -309,7 +316,30 @@ const SitterSitView = ({
           data-dashboard-star="sitter" : le sticky mobile ci-dessous utilise
           useStarVisibilityGate("sitter") pour ne s'afficher que lorsque cette
           barre est hors écran. */}
-      {activeRole === "sitter" && sit.status === "published" && (() => {
+      {applySurface === "switch_space" && (
+        <aside
+          aria-label="Action de candidature"
+          className="mt-4 mb-6 rounded-[20px] border border-border bg-card px-4 md:px-6 py-3 md:py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3"
+          data-testid="sit-switch-to-sitter"
+        >
+          <p className="text-sm text-muted-foreground">Vous consultez cette annonce en espace propriétaire.</p>
+          <Button
+            variant="outline"
+            className="w-full md:w-auto h-11 px-6 rounded-full text-sm font-semibold"
+            onClick={() => {
+              trackEvent("sit_apply_clicked", {
+                source: "sit_detail_switch_space",
+                metadata: { sit_id: sit.id },
+              });
+              switchRole("sitter");
+            }}
+          >
+            {SWITCH_TO_SITTER_LABEL}
+          </Button>
+        </aside>
+      )}
+
+      {applySurface === "apply" && (() => {
         const days =
           sit.start_date && sit.end_date
             ? Math.max(
@@ -654,9 +684,11 @@ const SitterSitView = ({
           juste sous le header (cf. ApplyBar plus haut dans ce composant). */}
 
       {/* Spacer pour éviter que la sticky mobile masque le contenu */}
-      <div className="md:hidden h-20" aria-hidden="true" />
+      {applySurface === "apply" && <div className="md:hidden h-20" aria-hidden="true" />}
 
-      {/* Sticky mobile : favoris + CTA principal, padding bottom géré côté layout via safe-area */}
+      {/* Sticky mobile : favoris + CTA principal, padding bottom géré côté layout via safe-area.
+          Lot Z2 (B-12) : affichée selon la même règle que la barre du haut. */}
+      {applySurface === "apply" && (
       <SitMobileStickyApply
         sitId={sit.id}
         state={
@@ -679,6 +711,7 @@ const SitterSitView = ({
         blockedCtaTo="/tarifs"
         blockedCtaLabel="Voir les avantages"
       />
+      )}
 
       <CompleteProfileToApplyModal
         open={completionOpen}
