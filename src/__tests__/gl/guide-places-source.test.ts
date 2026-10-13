@@ -353,3 +353,61 @@ describe("GL1, demande incohérente", () => {
     expect(c).toBeNull();
   });
 });
+
+describe("GL, fiabilité (13/10/2026)", () => {
+  it("Polynésie et Nouvelle-Calédonie : code pays OpenStreetMap", async () => {
+    const { fn, calls } = fakeFetch({ nominatim: () => [{ lat: "-17.535", lon: "-149.569", address: { state: "Îles du Vent" } }] });
+    await resolveGuideCenter({ city: "Papeete", postalCode: "98714", country: "FR", hint: null }, fn);
+    expect(calls[0]).toContain("countrycodes=pf");
+  });
+
+  it("une réponse Overpass tronquée par un délai est ignorée, le miroir suivant est essayé", async () => {
+    const urls: string[] = [];
+    const fn = async (url: string) => {
+      urls.push(url);
+      if (url.includes("overpass-api.de")) {
+        return new Response(JSON.stringify({ elements: [], remark: 'runtime error: Query timed out in "query" at line 1 after 30 seconds.' }));
+      }
+      return new Response(JSON.stringify({ elements: [el(1, { amenity: "veterinary", name: "Véto" }, north(2), SAINT_LUDGER.lon)] }));
+    };
+    const { runOverpass } = await import("../../../supabase/functions/_shared/guide-places/source");
+    const els = await runOverpass("q", fn);
+    expect(els).toHaveLength(1);
+    expect(urls[1]).toContain("mail.ru");
+  });
+
+  it("à l'étranger, un géocodeur indisponible garde le vétérinaire avec sa distance", async () => {
+    const fn = async (url: string) => {
+      if (url.includes("nominatim")) return new Response("blocked", { status: 403 });
+      return new Response(JSON.stringify({ elements: [el(6, { amenity: "veterinary", name: "Hôpital vétérinaire du Granit" }, north(25), SAINT_LUDGER.lon)] }));
+    };
+    const res = await collectPlaces(
+      { city: "Saint Ludger", postalCode: "G0M1W0", center: SAINT_LUDGER },
+      { names: new Set(), sources: new Set(), counts: {} },
+      fn,
+      noSleep,
+    );
+    const vet = res.rows.find((r) => r.category === "vet");
+    expect(vet?.address).toBe("25 km du centre de Saint Ludger");
+    expect(res.incomplete).toBe(false);
+  });
+});
+
+describe("GL, code postal générique", () => {
+  it("Lyon « 69000 » : sans résultat au code postal, la commune du même département est retenue", async () => {
+    const { fn, calls } = fakeFetch({
+      ban: (url) =>
+        url.includes("postcode=")
+          ? { features: [] }
+          : {
+              features: [
+                { geometry: { coordinates: [4.83, 45.76] }, properties: { name: "Lyon", score: 0.97, citycode: "69123", context: "69, Rhône" } },
+                { geometry: { coordinates: [-0.5, 47.4] }, properties: { name: "Lyon", score: 0.9, citycode: "49999", context: "49, Maine-et-Loire" } },
+              ],
+            },
+    });
+    const c = await resolveGuideCenter({ city: "Lyon", postalCode: "69000", country: "FR", hint: null }, fn);
+    expect(c).toEqual({ lat: 45.76, lon: 4.83, country: "FR", region: "Rhône" });
+    expect(calls).toHaveLength(2);
+  });
+});
