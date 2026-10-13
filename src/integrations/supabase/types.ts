@@ -4258,6 +4258,7 @@ export type Database = {
           osm_enrich_attempted_at: string | null
           osm_enrich_last_result: string | null
           places_source_attempted_at: string | null
+          places_source_report: Json | null
           places_source_result: string | null
           places_sourced_at: string | null
           postal_code: string
@@ -4283,6 +4284,7 @@ export type Database = {
           osm_enrich_attempted_at?: string | null
           osm_enrich_last_result?: string | null
           places_source_attempted_at?: string | null
+          places_source_report?: Json | null
           places_source_result?: string | null
           places_sourced_at?: string | null
           postal_code?: string
@@ -4308,6 +4310,7 @@ export type Database = {
           osm_enrich_attempted_at?: string | null
           osm_enrich_last_result?: string | null
           places_source_attempted_at?: string | null
+          places_source_report?: Json | null
           places_source_result?: string | null
           places_sourced_at?: string | null
           postal_code?: string
