@@ -142,9 +142,34 @@ export function buildOverpassQuery(categories: GuideCategory[], radiusM: number,
  */
 const EXCLUDED_NAME = /(d[ée]jection|canisette|sanisette|toilettes?\s+canines?|traboule)/i;
 
+/**
+ * Noms sans valeur pour un lecteur : essai à blanc de Marrakech du 14/10/2026,
+ * un chemin nommé « path1 » remontait comme balade.
+ */
+const PLACEHOLDER_NAME = /^(path|chemin|sentier|trail|walk|way|track|piste)[\s_-]*\d*$/i;
+
+/** Écritures autres que latines (arabe, hébreu, cyrillique, grec, Asie). */
+const NON_LATIN = /[\u0370-\u03FF\u0400-\u04FF\u0590-\u08FF\u0E00-\u0E7F\u3040-\u9FFF\uAC00-\uD7AF]+/g;
+
+/**
+ * Nom affiché d'un lieu : le nom français quand OpenStreetMap le donne, sinon
+ * le nom local sans la partie écrite dans un autre alphabet quand une partie
+ * latine existe (« Arset El Bilk عرصة البيلك » devient « Arset El Bilk »).
+ */
+export function displayName(tags: Record<string, string> | undefined): string {
+  const t = tags ?? {};
+  const fr = (t["name:fr"] ?? "").trim();
+  if (fr) return fr;
+  const name = (t.name ?? "").trim();
+  if (!name || !/[A-Za-zÀ-ÿ]/.test(name)) return name;
+  const latin = name.replace(NON_LATIN, " ").replace(/\(\s*\)/g, " ").replace(/\s{2,}/g, " ").replace(/^[\s,/(-]+|[\s,/(-]+$/g, "").trim();
+  return latin || name;
+}
+
 export function categorize(el: OsmElement): { category: GuideCategory; kind: PlaceKind } | null {
   const t = el.tags ?? {};
   if (t.name && EXCLUDED_NAME.test(t.name)) return null;
+  if (t.name && PLACEHOLDER_NAME.test(t.name.trim())) return null;
   if (t.leisure === "dog_park" && (!t.name || !t.name.trim())) return { category: "dog_park", kind: "dog_park" };
   if (!t.name || !t.name.trim()) return null;
   const dogOk = t.dog === "yes" || t.dog === "leashed";
@@ -233,7 +258,7 @@ export function toCandidates(
     const pt = elementPoint(el);
     if (!pt) continue;
     const sourceUrl = sourceUrlOf(el);
-    const name = (el.tags?.name ?? "").trim() || "Espace canin";
+    const name = displayName(el.tags) || "Espace canin";
     const key = `${cat.category}|${normName(name)}`;
     if (known.sources.has(sourceUrl) || known.names.has(normName(name))) continue;
     const distanceM = haversineM(center.lat, center.lon, pt.lat, pt.lon);
@@ -1004,7 +1029,9 @@ export function compactElements(els: OsmElement[], center: { lat: number; lon: n
     if (!withinGuide(cat.category, d)) continue;
     const tags: Record<string, string> = {};
     for (const k of KEPT_TAGS) if (el.tags?.[k] != null) tags[k] = String(el.tags[k]);
-    const key = `${cat.category}|${normName(el.tags?.name ?? String(el.id))}`;
+    // Le nom gardé est le nom affiché (français, ou partie latine du nom local).
+    if (tags.name) tags.name = displayName(el.tags);
+    const key = `${cat.category}|${normName(tags.name ?? String(el.id))}`;
     const prev = best.get(key);
     if (!prev || d < prev.d) best.set(key, { el: { type: el.type, id: el.id, lat: pt.lat, lon: pt.lon, tags }, d });
   }

@@ -295,6 +295,8 @@ describe("GL4, file et générateur", () => {
     expect(fn).toContain("waitUntil");
     expect(fn).toContain("202");
     expect(fn).toContain("advanceGuide");
+    // Un essai à blanc terminé n'est pas relancé par l'appel suivant (rapport gardé).
+    expect(fn).toContain("freshDryRun");
     const gen = readFileSync("supabase/functions/generate-city-guide/index.ts", "utf8");
     expect(gen).toContain("publish_when_sourced: true");
     expect(gen).not.toContain("ai.gateway");

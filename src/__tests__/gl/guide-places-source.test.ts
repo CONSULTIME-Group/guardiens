@@ -29,6 +29,8 @@ import {
   type Candidate,
   type OsmElement,
   type PlaceKind,
+  displayName,
+  compactElements,
 } from "../../../supabase/functions/_shared/guide-places/source";
 
 const SAINT_LUDGER = { lat: 45.742131, lon: -70.694618, country: "CA", region: "Québec" };
@@ -483,5 +485,26 @@ describe("GL, filtres sans réponse (essai Saint-Ludger du 13/10/2026)", () => {
   it("la recherche des chemins par leur nom reste sous 15 km", () => {
     expect(buildOverpassQuery(["walk_trail"], 15000, 45, -70)).toContain("highway");
     expect(buildOverpassQuery(["walk_trail"], 30000, 45, -70)).not.toContain("highway");
+  });
+});
+
+describe("GL, noms lisibles (essai Marrakech du 14/10/2026)", () => {
+  it("nom français d'abord, sinon partie latine du nom local", () => {
+    expect(displayName({ name: "Arset El Bilk عرصة البيلك" })).toBe("Arset El Bilk");
+    expect(displayName({ name: "حديقة ماجوريل", "name:fr": "Jardin Majorelle" })).toBe("Jardin Majorelle");
+    expect(displayName({ name: "Parc (حديقة)" })).toBe("Parc");
+    expect(displayName({ name: "حديقة" })).toBe("حديقة");
+    expect(displayName({ name: "Parc de la Tête d'Or" })).toBe("Parc de la Tête d'Or");
+  });
+
+  it("un chemin nommé « path1 » est écarté, un vrai nom de sentier reste", () => {
+    const c = { lat: 31.63, lon: -7.99 };
+    const els = [
+      { type: "way", id: 1, lat: 31.64, lon: -7.99, tags: { highway: "path", name: "path1" } },
+      { type: "way", id: 2, lat: 31.65, lon: -7.99, tags: { highway: "path", name: "Sentier de l'Ourika" } },
+      { type: "way", id: 3, lat: 31.635, lon: -7.99, tags: { leisure: "park", name: "Arset El Bilk عرصة البيلك" } },
+    ];
+    const out = compactElements(els as any, c);
+    expect(out.map((e) => e.tags!.name)).toEqual(["Arset El Bilk", "Sentier de l'Ourika"]);
   });
 });
