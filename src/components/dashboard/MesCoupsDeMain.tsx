@@ -95,8 +95,10 @@ export function useMyHelpExchanges() {
       ...(missions || []).map((m) => m.user_id),
       ...(responses || []).map((r) => r.responder_id),
     ]));
+    // Lot Y2 (P3-12) : profiles n'est lisible que de son titulaire ; le
+    // prénom de l'autre partie vient de get_member_display (vue membre).
     const { data: profiles } = otherIds.length
-      ? await supabase.from("profiles").select("id, first_name").in("id", otherIds)
+      ? await (supabase as any).rpc("get_member_display", { _ids: otherIds })
       : { data: [] as Array<{ id: string; first_name: string | null }> };
     const nameById = new Map((profiles || []).map((p) => [p.id, p.first_name || "un membre"]));
     const feedbacks = answered.data || [];
