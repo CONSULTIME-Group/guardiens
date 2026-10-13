@@ -18,6 +18,7 @@ import { Suspense, useState, useMemo, useEffect } from "react";
 import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
 import { GUIDE_OVERRIDES, COMMERCIAL_CATEGORIES, COMMERCIAL_DESCRIPTION } from "@/data/guideOverrides";
 import { visibleGuidePlaces, directionsUrl, googlePlaceUrl } from "@/lib/guidePlaces";
+import { nearestGuides, guidePlaceName, guideFacts, type MeshGuide } from "@/lib/guideMesh";
 import HouseSittingGuideInsert from "@/components/city/HouseSittingGuideInsert";
 
 // Carte chargée uniquement quand l'utilisateur s'en approche (lazy + IntersectionObserver)
@@ -195,22 +196,25 @@ const GuideDetail = () => {
   }, [contentReady]);
 
 
-  // Fetch nearby guides from same department
-  const { data: nearbyGuides = [] } = useQuery({
-    queryKey: ["nearby-guides", guide?.department, guide?.id],
+  // Guides voisins par distance (lot GL4) : tous les guides publiés, avec leur
+  // centre ; repli sur le même département quand les coordonnées manquent.
+  const { data: meshGuides = [] } = useQuery({
+    queryKey: ["guides-mesh"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("city_guides" as any)
-        .select("id, city, slug")
-        .eq("department", guide!.department)
-        .eq("published", true)
-        .neq("id", guide!.id)
-        .order("city");
+        .select("id, city, slug, department, country, latitude, longitude")
+        .eq("published", true);
       if (error) throw error;
-      return (data || []) as unknown as { id: string; city: string; slug: string }[];
+      return (data || []) as unknown as MeshGuide[];
     },
-    enabled: !!guide?.id && !!guide?.department,
+    enabled: !!guide?.id,
+    staleTime: 10 * 60 * 1000,
   });
+  const nearbyGuides = useMemo(
+    () => (guide ? nearestGuides(guide as unknown as MeshGuide, meshGuides) : []),
+    [guide, meshGuides],
+  );
 
   // Fetch related articles for this city
   const { data: relatedArticles = [] } = useQuery({
@@ -251,8 +255,8 @@ const GuideDetail = () => {
     // guide vaut undefined pendant le chargement : les lieux peuvent arriver
     // avant la fiche guide, dereférencer guide.city ici ferait tomber la page.
     if (!guide || places.length === 0) return null;
-    return {
-      "@context": "https://schema.org",
+    // Page (lot GL4) : date de vérification et lieu décrit, la liste des lieux en entité principale.
+    const list = {
       "@type": "ItemList",
       name: `Lieux utiles pour garder un chien à ${guide.city}`,
       numberOfItems: places.length,
@@ -284,9 +288,27 @@ const GuideDetail = () => {
         };
       }),
     };
+    return {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      url: `https://guardiens.fr/guides/${guide.slug}`,
+      name: `Guide local de ${guidePlaceName(guide)}`,
+      ...(guide.places_sourced_at ? { dateModified: guide.places_sourced_at } : {}),
+      ...(guide.latitude != null && guide.longitude != null
+        ? {
+            about: {
+              "@type": "Place",
+              name: guidePlaceName(guide),
+              geo: { "@type": "GeoCoordinates", latitude: guide.latitude, longitude: guide.longitude },
+              address: { "@type": "PostalAddress", addressLocality: guide.city, addressCountry: guide.country || "FR" },
+            },
+          }
+        : {}),
+      mainEntity: list,
+    };
   // Dependances en acces optionnel : guide vaut undefined pendant le chargement,
   // dereferencer guide.city ici ferait tomber le composant avant le garde NotFound.
-  }, [places, guide?.city, guide?.department, guide?.country]);
+  }, [places, guide]);
 
   // Bloc « L'essentiel » : chaque entree n'existe que si ses donnees existent.
   // Cette liste unique alimente a la fois l'affichage et le JSON-LD FAQPage,
@@ -332,6 +354,10 @@ const GuideDetail = () => {
       });
     }
 
+    // Faits citables (lot GL4) : vétérinaire le plus proche, balades à moins de
+    // 15 km, date de vérification, depuis les seuls lieux sourcés.
+    for (const f of guideFacts(city, places, guide.places_sourced_at)) entries.push(f);
+
     const shops = places.filter((p) => p.category === "pet_shop").slice(0, 4);
     if (shops.length > 0) {
       entries.push({
@@ -374,15 +400,17 @@ const GuideDetail = () => {
     return <NotFound />;
   }
 
+  // À l'étranger, le pays suit la ville (« Saint Ludger, Canada ») : titre sans ambiguïté.
+  const cityLabel = guidePlaceName(guide);
   const metaTitle = override ? override.metaTitle : hasCommercialPlaces
-    ? t("guide_detail.meta_title", { city: guide.city })
-    : t("guide_detail.meta_title_nature", { city: guide.city });
+    ? t("guide_detail.meta_title", { city: cityLabel })
+    : t("guide_detail.meta_title_nature", { city: cityLabel });
   const h1Title = override ? override.h1 : hasCommercialPlaces
-    ? t("guide_detail.title", { city: guide.city })
-    : t("guide_detail.title_nature", { city: guide.city });
+    ? t("guide_detail.title", { city: cityLabel })
+    : t("guide_detail.title_nature", { city: cityLabel });
   const metaDescription = override ? override.metaDescription : hasCommercialPlaces
-    ? t("guide_detail.meta_description", { city: guide.city, ideal: guide.ideal_for })
-    : t("guide_detail.meta_description_nature", { city: guide.city, ideal: guide.ideal_for });
+    ? t("guide_detail.meta_description", { city: cityLabel, ideal: guide.ideal_for })
+    : t("guide_detail.meta_description_nature", { city: cityLabel, ideal: guide.ideal_for });
 
   return (
     <>
@@ -589,7 +617,7 @@ const GuideDetail = () => {
           {nearbyGuides.length > 0 && (
             <div className="mt-14 border-t border-border pt-10">
               <h2 className="font-heading text-xl font-semibold text-foreground mb-4">
-                {t("guide_detail.nearby_title", { department: guide.department })}
+                {t("guide_detail.nearby_title_city", { city: guide.city })}
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                 {nearbyGuides.map((ng) => (
@@ -600,6 +628,9 @@ const GuideDetail = () => {
                   >
                     <MapPin className="h-4 w-4 text-primary shrink-0" />
                     <span className="text-sm font-medium text-foreground">{ng.city}</span>
+                    {ng.distanceKm != null && (
+                      <span className="text-xs text-muted-foreground ml-auto">{ng.distanceKm} km</span>
+                    )}
                   </Link>
                 ))}
               </div>

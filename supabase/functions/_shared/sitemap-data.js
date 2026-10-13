@@ -80,10 +80,11 @@ export async function collectSitemapData({ readAll, fetchOrCache, maxUpdatedAtWi
     fetchOrCache(
       "city_guides", cache,
       () => maxUpdatedAtWithCount("city_guides", "updated_at", q => q.eq("published", true)),
-      () => readAll("city_guides", "city_guides", "id, slug, updated_at", "id", q => q.eq("published", true)),
+      () => readAll("city_guides", "city_guides", "id, slug, updated_at, places_sourced_at", "id", q => q.eq("published", true)),
       rows => rows.map(cg => ({
         loc: `/guides/${cg.slug}`,
-        lastmod: NO_RELIABLE_LASTMOD,
+        // Lot GL4 : date fiable seulement pour un guide sourcé (lieux vérifiés ce jour-là).
+        lastmod: normalizeLastmod(cg.places_sourced_at, today),
         changefreq: "weekly",
         priority: "0.7",
       }))
