@@ -41,7 +41,7 @@ const HelperToGuardEmail = ({ firstName }: Props) => (
         <Section style={card} className="em-card">
           <Text style={cardTitle} className="em-card-title">Le pas suivant, si l'envie vient</Text>
           <Text style={cardLine} className="em-card-line">· Découvrez des annonces de garde d'animaux près de chez vous</Text>
-          <Text style={cardLine} className="em-card-line">· Postulez à celles qui vous parlent, à votre rythme, sans engagement</Text>
+          <Text style={cardLine} className="em-card-line">· Postulez à celles qui vous parlent, à votre rythme</Text>
           <Text style={cardLine} className="em-card-line">· Ou publiez la vôtre si vous cherchez quelqu'un pour vos compagnons</Text>
         </Section>
 

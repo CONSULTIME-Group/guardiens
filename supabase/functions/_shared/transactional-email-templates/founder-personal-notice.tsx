@@ -158,10 +158,10 @@ const FounderPersonalNoticeEmail = ({
         <Hr style={hr} />
 
         <SectionHeader label="MAINTENANT, LA DEMANDE" />
-        <Heading as="h2" style={h2}>Guardiens est gratuit, et c'est un échange</Heading>
+        <Heading as="h2" style={h2}>Guardiens est gratuit, votre avis le fait grandir</Heading>
 
         <Text style={text} className="em-text">
-          Guardiens est gratuit, sans limite et sans engagement. Vous avez tout. En face, j'attends votre présence, et votre avis.
+          Guardiens est gratuit, et c'est un échange. Vous avez tout. Ce que j'attends en face, c'est votre avis.
         </Text>
         <Text style={pullQuote}>Surtout quand il est mauvais.</Text>
         <Text style={text} className="em-text">

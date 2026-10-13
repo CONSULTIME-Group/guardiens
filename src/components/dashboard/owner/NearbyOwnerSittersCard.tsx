@@ -38,7 +38,7 @@ const NearbyOwnerSittersCard = ({ hideHeader = false }: Props) => {
               id="nearby-sitters-heading"
               className="font-heading text-2xl sm:text-3xl font-semibold text-foreground leading-tight"
             >
-              Gardiens près de chez vous
+              Gardiens à proximité
             </h3>
             {sitters.length > 0 && (
               <Link
@@ -63,7 +63,7 @@ const NearbyOwnerSittersCard = ({ hideHeader = false }: Props) => {
                 Les gardiens de votre secteur s'afficheront ici
               </p>
               <p className="text-xs text-muted-foreground leading-relaxed mt-1">
-                Personne n'est encore inscrit comme gardien près de chez vous. Publiez votre annonce&nbsp;: elle attire les nouveaux profils.
+                Le réseau grandit à proximité. Publiez votre annonce&nbsp;: elle attire les nouveaux profils.
               </p>
             </div>
             <Link

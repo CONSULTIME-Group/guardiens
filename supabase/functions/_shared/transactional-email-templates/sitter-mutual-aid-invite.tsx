@@ -17,14 +17,14 @@ const Email = ({ firstName }: Props) => {
   return (
     <Html lang="fr" dir="ltr">
       <BrandedHead />
-      <Preview>Pas d'animaux, pas de maison à confier ? Vous pouvez quand même rendre service.</Preview>
+      <Preview>Un coup de main, à votre rythme, près de chez vous.</Preview>
       <Body style={main}>
         <Container style={container}>
           <BrandHeader />
           <Heading style={h1}>{name ? `Bonjour ${name},` : 'Bonjour,'}</Heading>
           <Text style={text}>
-            Ce n'est pas parce que vous n'avez pas d'animaux ni de maison à confier
-            que vous ne pouvez pas être utile à la communauté {SITE_NAME}.
+            Chacun peut être utile à la communauté {SITE_NAME}, avec ou sans
+            animaux ni maison à confier.
           </Text>
           <Text style={text}>
             Sur {SITE_NAME}, les petits coups de main circulent aussi entre membres du coin :
@@ -33,7 +33,7 @@ const Email = ({ firstName }: Props) => {
             ou simplement demander de l'aide pour une tâche du quotidien.
           </Text>
           <Text style={text}>
-            C'est gratuit, sans engagement, et souvent l'occasion de faire une belle rencontre près de chez vous.
+            L'échange se fait en temps et en savoir-faire, à votre rythme, et c'est souvent l'occasion de faire une belle rencontre près de chez vous.
           </Text>
           <Section style={ctaSection}>
             <Button style={button} href={`${SITE_URL}/petites-missions`}>

@@ -16,31 +16,26 @@ import { getPricingBaseline, getPricingBaselineShort } from "@/lib/pricing";
 import { trackEvent } from "@/lib/analytics";
 
 const bullets = [
-  "Accès à toutes les fonctionnalités",
-  "Aucune limite d'usage",
-  "Aucun engagement, aucune carte bancaire requise",
+  "Annonces de garde, candidatures et messagerie pour tous les membres",
+  "Guide de la maison, accord de garde et entraide inclus",
+  "Une adresse email suffit pour commencer",
 ];
 
 const faqItems: Array<{ id: string; q: string; a: string }> = [
   {
     id: "cout",
     q: "Combien coûte Guardiens ?",
-    a: "Gratuit aujourd'hui. Nous facturerons quand le service aura atteint le niveau que nous voulons vous offrir. Vous serez informé à l'avance.",
+    a: "Guardiens est gratuit, pour tous les membres.",
   },
   {
-    id: "pourquoi",
-    q: "Pourquoi c'est gratuit maintenant ?",
-    a: "Parce que nous ne facturons pas un produit dont nous ne sommes pas encore pleinement satisfaits. Nous vous laissons découvrir Guardiens et grandir avec nous.",
-  },
-  {
-    id: "quand",
-    q: "Quand la facturation commencera-t-elle ?",
-    a: "Nous ne fixons pas de date. Nous préviendrons chaque membre 30 jours à l'avance quand ce sera le cas.",
+    id: "inclus",
+    q: "Que comprend Guardiens ?",
+    a: "Les annonces de garde, les candidatures, la messagerie, le guide de la maison, l'accord de garde et l'entraide entre membres.",
   },
   {
     id: "commission",
-    q: "Prendrez-vous une commission ?",
-    a: "Non. Aucune commission n'est prélevée sur les gardes. Aucune transaction n'est facilitée directement entre membres.",
+    q: "Prenez-vous une commission ?",
+    a: "Aucune commission n'est prélevée sur les gardes.",
   },
 ];
 
@@ -62,8 +57,8 @@ const Pricing = () => {
   return (
     <>
       <PageMeta
-        title="Tarifs Guardiens : nos engagements de service | Guardiens"
-        description="Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service. Accès complet, sans engagement, sans carte bancaire."
+        title="Guardiens est gratuit : nos engagements | Guardiens"
+        description="Guardiens est gratuit pour tous les membres : annonces, candidatures, messagerie et entraide. Aucune commission sur les gardes."
         path="/tarifs"
       />
       <Head>
@@ -77,7 +72,7 @@ const Pricing = () => {
         <main id="main-content" className="max-w-3xl mx-auto px-4 min-w-0">
           <section className="py-10 md:py-14 text-center">
             <h1 className="font-heading text-3xl md:text-5xl font-bold text-foreground leading-tight mb-4">
-              Tarifs Guardiens : nos engagements de service
+              Guardiens est gratuit
             </h1>
             <p className="text-base md:text-lg font-body text-foreground/70 leading-relaxed">
               {getPricingBaselineShort()}
@@ -87,7 +82,7 @@ const Pricing = () => {
           <Card className="border-2 border-primary/40">
             <CardContent className="p-6 md:p-10">
               <h2 className="font-heading text-2xl md:text-3xl font-semibold mb-4">
-                Guardiens reste gratuit aujourd'hui
+                Nos engagements
               </h2>
               <p className="font-body text-base md:text-lg text-foreground/80 leading-relaxed mb-6">
                 {getPricingBaseline()}
@@ -101,8 +96,7 @@ const Pricing = () => {
                 ))}
               </ul>
               <p className="font-body text-sm text-foreground/60 border-t pt-4">
-                Nous facturerons quand nous serons prêts à proposer un service qui vaut d'être payé.
-                Vous serez informé par email 30 jours à l'avance.
+                Aucune commission n'est prélevée sur les gardes : l'échange se fait entre membres, en temps et en services.
               </p>
             </CardContent>
           </Card>

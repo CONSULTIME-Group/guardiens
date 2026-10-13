@@ -92,7 +92,7 @@ export function ownerNoelSubject(p: OwnerNoelProps): string {
   const lead = p.period === 'hiver' ? 'Cet hiver' : 'Pour Noël'
   if (lowPercent(p)) return `${lead}, votre annonce en deux gestes`
   if (resolveVariant(p) === 'A') {
-    return `${lead}, ${gardiensCount(p.nearbyCount)} près de chez vous`
+    return `${lead}, ${gardiensCount(p.nearbyCount)} à proximité`
   }
   return `Votre annonce ${ofPeriod(p)} est prête à ${pct(p)} %`
 }
@@ -194,7 +194,7 @@ const PeopleBlock = ({ props, profileUrl }: { props: OwnerNoelProps; profileUrl:
   const sitters = (props.sitters ?? []).slice(0, 3)
   return (
     <Section style={card}>
-      <Eyebrow label="PRÈS DE CHEZ VOUS" />
+      <Eyebrow label="À PROXIMITÉ" />
       {resolveVariant(props) === 'A' ? (
         <>
           <Text style={h2}>{gardiensCount(props.nearbyCount)} à moins de 50 km de {town}</Text>
@@ -213,7 +213,7 @@ const PeopleBlock = ({ props, profileUrl }: { props: OwnerNoelProps; profileUrl:
       ) : (
         <>
           <Text style={h2}>Montrez votre annonce aux gardiens proches</Text>
-          <Text style={{ ...text, fontSize: '15.5px' }}>Ajoutez votre commune sur votre profil : votre annonce apparaît aux gardiens qui habitent près de chez vous, et vous découvrez qui ils sont.</Text>
+          <Text style={{ ...text, fontSize: '15.5px' }}>Ajoutez votre commune sur votre profil : votre annonce apparaît aux gardiens qui habitent à proximité, et vous découvrez qui ils sont.</Text>
           <Button style={buttonSecondary} href={profileUrl}>Ajouter ma commune</Button>
         </>
       )}
@@ -309,13 +309,13 @@ const Email = (props: OwnerNoelProps) => {
             <Eyebrow label="NOËL 2026" />
             <Text style={h1}>Partez l'esprit léger, quelqu'un du coin garde la maison.</Text>
             <Text style={text}>
-              {name ? `Bonjour ${name}, ` : 'Bonjour, '}les départs de fin d'année se décident maintenant. Votre annonce est en ligne en quelques minutes, et les gardiens proches de chez vous vous écrivent directement.
+              {name ? `Bonjour ${name}, ` : 'Bonjour, '}les départs de fin d'année se décident maintenant. Votre annonce est en ligne en quelques minutes, et les gardiens à proximité vous écrivent directement.
             </Text>
           </Section>
 
           <Section style={pad} className="em-pad">
             <Section style={card}>
-              <Eyebrow label="PRÈS DE CHEZ VOUS" />
+              <Eyebrow label="À PROXIMITÉ" />
               {variant === 'A' ? (
                 <>
                   <Text style={h2}>{gardiensCount(props.nearbyCount)} à moins de 50 km de {town}</Text>
@@ -334,7 +334,7 @@ const Email = (props: OwnerNoelProps) => {
               ) : (
                 <>
                   <Text style={h2}>Montrez votre annonce aux gardiens proches</Text>
-                  <Text style={{ ...text, fontSize: '15.5px' }}>Ajoutez votre commune sur votre profil : votre annonce apparaît aux gardiens qui habitent près de chez vous, et vous découvrez qui ils sont.</Text>
+                  <Text style={{ ...text, fontSize: '15.5px' }}>Ajoutez votre commune sur votre profil : votre annonce apparaît aux gardiens qui habitent à proximité, et vous découvrez qui ils sont.</Text>
                   <Button style={buttonSecondary} href={profileUrl}>Ajouter ma commune</Button>
                 </>
               )}

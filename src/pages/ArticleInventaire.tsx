@@ -102,10 +102,10 @@ export default function ArticleInventaire() {
       },
       {
         "@type": "Question",
-        name: "Est-ce que c'est payant pour les propriétaires ?",
+        name: "Combien coûte Guardiens ?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "Non. Les propriétaires ne paient rien, jamais. L'espace gardien est gratuit, aucune commission prélevée sur les gardes.",
+          text: "Guardiens est gratuit, pour tous les membres, et aucune commission n'est prélevée sur les gardes.",
         },
       },
     ],
@@ -249,7 +249,7 @@ export default function ArticleInventaire() {
             </h2>
             <div className="space-y-4 text-foreground leading-relaxed">
               <p>
-                Depuis 2021, en tant que fondateurs, nous avons accompagné 234 animaux et gardé 37 maisons. Cette période a servi à valider une intuition simple : la garde à domicile, 0 € pour les propriétaires, tient debout quand la confiance est bâtie en amont. Vérification d'identité, avis croisés, badges publics, Trust Score : rien de tout cela n'est cosmétique.
+                Depuis 2021, en tant que fondateurs, nous avons accompagné 234 animaux et gardé 37 maisons. Cette période a servi à valider une intuition simple : la garde à domicile entre particuliers, gratuite, tient debout quand la confiance est bâtie en amont. Vérification d'identité, avis croisés, badges publics, Trust Score : rien de tout cela n'est cosmétique.
               </p>
               <p>
                 Ce que nous voyons monter : la demande de proximité. Les gens du coin, ceux qu'on croise vraiment. C'est ce qui nous fait ajouter des villes une à une, plutôt que de tirer une couverture bâclée sur toute la France.

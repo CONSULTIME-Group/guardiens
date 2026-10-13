@@ -8,7 +8,7 @@
  *  - chaque photo rejoint la galerie du propriétaire (source unique lue par les
  *    annonces et les pages publiques) ET la colonne `properties.photos`, qui
  *    était restée vide sur les 85 logements en base ;
- *  - ton des écrans : tutoiement, direct, sans emoji.
+ *  - ton des écrans : vouvoiement, direct, sans emoji (lot Y3).
  */
 
 export type PhotoJourneyStepId =
@@ -49,7 +49,7 @@ export const PHOTO_JOURNEY_STEPS: PhotoJourneyStep[] = [
     id: "exterior",
     title: "La maison vue de l'extérieur",
     why: "C'est la première chose qu'on cherche quand on imagine y vivre.",
-    hint: "Recule de quelques pas, prends la façade en entier.",
+    hint: "Reculez de quelques pas, prenez la façade en entier.",
     category: "home_life",
     caption: "La maison vue de l'extérieur",
   },
@@ -57,14 +57,14 @@ export const PHOTO_JOURNEY_STEPS: PhotoJourneyStep[] = [
     id: "living",
     title: "Une pièce de vie",
     why: "Le salon, la cuisine, là où la personne passera ses soirées.",
-    hint: "Ouvre les rideaux, photographie depuis l'angle de la pièce.",
+    hint: "Ouvrez les rideaux, photographiez depuis l'angle de la pièce.",
     category: "home_life",
     caption: "Une pièce de vie",
   },
   {
     id: "bedroom",
     title: "La chambre",
-    why: "Elle dort chez toi, elle veut savoir où.",
+    why: "Elle dort chez vous, elle aime savoir où.",
     hint: "Le lit fait, la lumière du jour, rien à ranger d'autre.",
     category: "home_life",
     caption: "La chambre",
@@ -82,7 +82,7 @@ export const PHOTO_JOURNEY_STEPS: PhotoJourneyStep[] = [
     id: "surroundings",
     title: "Les environs",
     why: "Le village, le chemin, la vue. On vient aussi pour ça.",
-    hint: "Ce que tu montrerais en premier à quelqu'un qui arrive.",
+    hint: "Ce que vous montreriez en premier à quelqu'un qui arrive.",
     category: "neighborhood",
     caption: "Les environs",
   },

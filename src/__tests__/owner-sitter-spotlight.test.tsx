@@ -339,7 +339,7 @@ describe("OwnerSitterSpotlight, typographie de marque", () => {
   it("le panneau proximité utilise l'en-tête signature SectionHeader", () => {
     expect(nearbySrc).toContain("SectionHeader");
     expect(nearbySrc).toContain('eyebrow="Les gens du coin"');
-    expect(nearbySrc).toContain('title="Ils sont prêts à garder près de chez vous."');
+    expect(nearbySrc).toContain('title="Des gardiens à proximité, prêts à garder."');
   });
 });
 
@@ -366,7 +366,7 @@ describe("OwnerSitterSpotlight, hiérarchie de titres", () => {
     expect(h3.some((t) => t?.includes("gardien"))).toBe(true);
     expect(
       h3.some((t) =>
-        t?.includes("près de chez vous") ||
+        t?.includes("à proximité") ||
         t?.includes("se remplit encore"),
       ),
     ).toBe(true);

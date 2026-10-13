@@ -294,19 +294,19 @@ const CityPage = () => {
  : cityData.slug === "lyon"
  ? [
  { q: "Comment rencontrer un gardien avant de confier ma maison ?", a: "Après avoir accepté une candidature, vous organisez une rencontre directement via la messagerie Guardiens. La plupart des propriétaires à Lyon choisissent un café de quartier ou une visite du logement. Cette étape est facultative." },
- { q: "Que se passe-t-il en cas d'urgence ou d'imprévu ?", a: "Une alerte prioritaire peut être envoyée aux gardiens d'urgence éligibles à Lyon. En cas de problème vétérinaire, le gardien contacte la clinique indiquée dans le guide de la maison. En cas de problème technique, il suit les consignes laissées par le propriétaire." },
+ { q: "Que se passe-t-il en cas d'urgence ou d'imprévu ?", a: "Le gardien suit le guide de la maison. En cas de problème vétérinaire, le gardien contacte la clinique indiquée dans le guide de la maison. En cas de problème technique, il suit les consignes laissées par le propriétaire." },
  { q: "Comment fonctionne la vérification d'identité à Lyon ?", a: "La vérification d'identité est ouverte à tous les membres. Vous envoyez une pièce d'identité, elle est analysée automatiquement, et les dossiers qui ne passent pas ce premier contrôle sont revus par l'équipe. Les profils validés affichent l'écusson « Identité vérifiée ». Les avis croisés après chaque garde et les badges de fiabilité complètent le dispositif de confiance." },
  { q: "Puis-je publier une annonce pour un chien ET un chat ?", a: "Absolument. Votre annonce peut inclure tous vos animaux. Les gardiens qui postulent voient la composition exacte de votre foyer et décident en connaissance de cause." },
  { q: "Combien de temps à l'avance faut-il publier mon annonce ?", a: "Pour les vacances d'été à Lyon, nous recommandons un mois à l'avance. Pour un week-end, une à deux semaines suffisent. Plus l'annonce est publiée tôt, plus vous recevez de candidatures de qualité." },
- { q: "Que faire si mon gardien annule au dernier moment ?", a: "Vous pouvez solliciter les gardiens d'urgence éligibles de votre zone grâce à la fonction gardien d'urgence, et republier votre annonce. Le système de fiabilité pénalise les annulations répétées." },
+ { q: "Que faire si mon gardien annule au dernier moment ?", a: "Votre annonce est republiée si la garde n'a pas encore commencé, et de nouveaux gardiens peuvent postuler. Le système de fiabilité pénalise les annulations répétées." },
  { q: "Comment se passe la remise des clés à Lyon ?", a: "Le jour du départ, ou lors d'une rencontre préalable si vous en organisez une, vous remettez les clés en main propre à votre gardien. Certains propriétaires lyonnais laissent un double dans une boîte à clés sécurisée." },
  { q: "Guardiens fonctionne-t-il pour les gardes de plusieurs semaines ?", a: "Oui. La plateforme est conçue pour les gardes de toute durée, du week-end prolongé aux absences de plusieurs semaines. Les gardiens indiquent leurs disponibilités sur leur profil." },
  ]
  : [
  { q: `Comment trouver un gardien de maison à ${cityData.name} ?`, a: `Sur Guardiens, vous publiez une annonce et les gardiens disponibles à ${cityData.name} et ses environs postulent directement. La vérification d'identité est ouverte à tous les membres : la pièce envoyée est analysée automatiquement, les dossiers qui ne passent pas sont revus par l'équipe, et les profils validés affichent l'écusson « Identité vérifiée ». Regardez cet écusson sur les profils avant de choisir.` },
- { q: `Y a-t-il des frais pour les propriétaires à ${cityData.name} ?`, a: "Non. L'espace propriétaire coûte 0 €, et aucune commission n'est prélevée sur les gardes. Guardiens est gratuit, pour les propriétaires comme pour les gardiens." },
- { q: `Que se passe-t-il en cas d'urgence pendant la garde à ${cityData.name} ?`, a: `Guardiens propose une fonction gardien d'urgence : des gardiens expérimentés acceptent d'être sollicités en cas d'imprévu. En cas d'imprévu, animal malade, problème technique, le gardien en poste peut déclencher une alerte.` },
- { q: `Combien coûte une pension pour animaux à ${cityData.name} ?`, a: `Les tarifs des pensions varient selon la ville, la saison et la taille de l'animal : demandez un devis. Sur Guardiens, la garde à domicile est un échange et l'inscription est gratuite : le gardien s'installe chez vous et s'occupe de vos animaux dans leur environnement habituel.` },
+ { q: `Combien coûte Guardiens à ${cityData.name} ?`, a: "Guardiens est gratuit, pour les propriétaires comme pour les gardiens, et aucune commission n'est prélevée sur les gardes." },
+ { q: `Que se passe-t-il en cas d'urgence pendant la garde à ${cityData.name} ?`, a: `Le gardien suit les consignes du guide de la maison : vétérinaire habituel, clinique d'urgence, contacts et personne relais. Le réseau de gardiens d'urgence ouvrira dès que la ville comptera assez de gardiens expérimentés.` },
+ { q: `Comment se passe une garde à domicile à ${cityData.name} ?`, a: `Le gardien s'installe chez vous et s'occupe de vos animaux dans leur environnement habituel. L'échange se fait en temps et en services, et Guardiens est gratuit.` },
  { q: `Comment devenir gardien à ${cityData.name} ?`, a: `Inscrivez-vous, complétez votre profil et faites vérifier votre identité. Vous pourrez ensuite postuler aux gardes disponibles ${departmentIn(cityData.department)}. L'inscription est gratuite.` },
  ];
 
@@ -327,8 +327,8 @@ const CityPage = () => {
  subtitle={
  content?.subtitle ||
  (stats.guardiansCount > 0
-  ? `${stats.guardiansCount} gardien${stats.guardiansCount > 1 ? "s" : ""} inscrit${stats.guardiansCount > 1 ? "s" : ""} ${departmentIn(cityData.department)} · 0 € pour les propriétaires`
-  : `Gardiens inscrits ${departmentIn(cityData.department)} · 0 € pour les propriétaires`)
+  ? `${stats.guardiansCount} gardien${stats.guardiansCount > 1 ? "s" : ""} inscrit${stats.guardiansCount > 1 ? "s" : ""} ${departmentIn(cityData.department)} · Guardiens est gratuit`
+  : `Gardiens inscrits ${departmentIn(cityData.department)} · Guardiens est gratuit`)
  }
   heroAlt={cityData.heroImageAlt || `House-sitting à ${cityData.name}`}
   department={cityData.department}
@@ -364,7 +364,7 @@ const CityPage = () => {
  {stats.guardiansCount > 0
   ? `${stats.guardiansCount} gardien${stats.guardiansCount > 1 ? "s" : ""} inscrit${stats.guardiansCount > 1 ? "s" : ""} ${departmentIn(cityData.department)}`
    : `Gardiens inscrits ${departmentIn(cityData.department)}`}
-  {revised ? "" : " · 0 € pour les propriétaires"}
+  {revised ? "" : " · Guardiens est gratuit"}
   </p>
   {staticNearbyMention && (
   <p className="text-muted-foreground max-w-3xl leading-relaxed mb-6 -mt-3">
@@ -380,7 +380,7 @@ const CityPage = () => {
  {!revised && (
  <Badge variant="outline" className="text-sm px-4 py-2 gap-2">
  <Heart className="h-4 w-4" />
- Propriétaires : 0 €
+ Guardiens est gratuit
  </Badge>
  )}
  </div>
@@ -447,20 +447,20 @@ const CityPage = () => {
  {revised ? (
  <section className="max-w-5xl mx-auto px-4 py-6 md:py-12 border-t border-border">
  <h2 className="font-heading text-2xl font-bold text-foreground mb-6">
- Ce que Guardiens apporte, et ce qu'il ne garantit pas
+ Ce que Guardiens apporte, et ce qui se convient entre vous
  </h2>
  <div className="grid md:grid-cols-3 gap-6 text-sm text-muted-foreground">
  <div className="space-y-2">
  <h3 className="font-semibold text-foreground">Choisir en connaissance de cause</h3>
- <p>Profils, avis croisés après les gardes et vérification d'identité ouverte à tous. Un écusson ne dit rien du comportement : échangez et rencontrez la personne avant de confier vos clés.</p>
+ <p>Profils, avis croisés après les gardes et vérification d'identité ouverte à tous. Un écusson renseigne sur l'identité : échangez avec la personne, et rencontrez-la si vous le souhaitez, avant de confier vos clés.</p>
  </div>
  <div className="space-y-2">
- <h3 className="font-semibold text-foreground">Une garde non rémunérée</h3>
- <p>Le gardien est hébergé chez vous et n'est pas payé pour la garde. Les frais éventuels se conviennent entre vous. Les conditions de la plateforme sont sur la page <Link to="/tarifs" className="text-primary underline underline-offset-4">Tarifs</Link>.</p>
+ <h3 className="font-semibold text-foreground">Une garde en échange du logement</h3>
+ <p>Le gardien est hébergé chez vous en échange de la garde. Les frais éventuels se conviennent entre vous. Guardiens est gratuit, nos engagements sont sur la page <Link to="/tarifs" className="text-primary underline underline-offset-4">Nos engagements</Link>.</p>
  </div>
  <div className="space-y-2">
  <h3 className="font-semibold text-foreground">Un accord écrit et un plan B</h3>
- <p>Tâches, présence, contacts, vétérinaire et personne relais se notent dans l'accord. Aucune disponibilité n'est garantie et le réseau de gardiens d'urgence n'est pas encore activé.</p>
+ <p>Tâches, présence, contacts, vétérinaire et personne relais se notent dans l'accord. La disponibilité se convient avec chaque gardien, et le réseau de gardiens d'urgence ouvrira dès que la ville comptera assez de gardiens expérimentés.</p>
  </div>
  </div>
  </section>
@@ -480,16 +480,16 @@ const CityPage = () => {
  </div>
  <div className="space-y-3">
  <Heart className="h-6 w-6 text-primary" />
- <h3 className="font-semibold text-foreground">0 € pour les propriétaires</h3>
+ <h3 className="font-semibold text-foreground">Guardiens est gratuit</h3>
  <p className="text-sm text-muted-foreground">
- Aucun frais, aucune commission. Le gardien vit chez vous et s'occupe de vos animaux dans leur environnement.
+ Aucune commission n'est prélevée sur les gardes. Le gardien vit chez vous et s'occupe de vos animaux dans leur environnement.
  </p>
  </div>
  <div className="space-y-3">
  <Siren className="h-6 w-6 text-primary" />
- <h3 className="font-semibold text-foreground">Filet de sécurité local</h3>
+ <h3 className="font-semibold text-foreground">Un réseau qui se construit</h3>
  <p className="text-sm text-muted-foreground">
- Une alerte prioritaire peut être envoyée aux <Link to="/gardien-urgence" className="text-primary hover:underline">gardiens d'urgence</Link> éligibles à {cityData.name} en cas d'imprévu.
+ Le réseau de <Link to="/gardien-urgence" className="text-primary hover:underline">gardiens d'urgence</Link> ouvrira à {cityData.name} dès que la ville comptera assez de gardiens expérimentés.
  </p>
  </div>
  </div>
@@ -626,7 +626,7 @@ const CityPage = () => {
   </Link>
   )}
  <Link to="/guides" className="text-primary hover:underline">Tous les guides locaux →</Link>
- <Link to="/tarifs" className="text-primary hover:underline">Voir les tarifs →</Link>
+ <Link to="/tarifs" className="text-primary hover:underline">Voir nos engagements →</Link>
  {revised ? (
  <Link to="/actualites/preparer-maison-avant-garde" className="text-primary hover:underline">Préparer sa maison avant une garde →</Link>
  ) : (
@@ -643,7 +643,7 @@ const CityPage = () => {
  {revised ? `Organiser votre garde à ${cityData.name}` : "Prêt à partir l'esprit libre ?"}
  </h2>
  <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
- {revised ? "Décrivez votre logement, vos animaux et vos dates, puis échangez avec les gardiens qui postulent." : "Publiez votre annonce en 5 minutes, 0 €."}
+ {revised ? "Décrivez votre logement, vos animaux et vos dates, puis échangez avec les gardiens qui postulent." : "Publiez votre annonce en 5 minutes. Guardiens est gratuit."}
  </p>
  <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
  <Link to="/inscription?role=owner">
@@ -746,16 +746,16 @@ const CityPage = () => {
       a: `Sur Guardiens, vous publiez une annonce et les gardiens disponibles à ${dbPage.city} et ses environs postulent directement. La vérification d'identité est ouverte à tous les membres : la pièce envoyée est analysée automatiquement, les dossiers qui ne passent pas sont revus par l'équipe, et les profils validés affichent l'écusson « Identité vérifiée ». Regardez cet écusson sur les profils avant de choisir.`,
     },
     {
-      q: `Y a-t-il des frais pour les propriétaires à ${dbPage.city} ?`,
-      a: "Non. L'espace propriétaire coûte 0 €, et aucune commission n'est prélevée sur les gardes. Guardiens est gratuit, pour les propriétaires comme pour les gardiens.",
+      q: `Combien coûte Guardiens à ${dbPage.city} ?`,
+      a: "Guardiens est gratuit, pour les propriétaires comme pour les gardiens, et aucune commission n'est prélevée sur les gardes.",
     },
     {
       q: `Que se passe-t-il en cas d'urgence pendant la garde à ${dbPage.city} ?`,
-      a: `Guardiens propose une fonction gardien d'urgence : des gardiens expérimentés acceptent d'être sollicités en cas d'imprévu. En cas d'imprévu, animal malade ou problème technique, le gardien en poste peut déclencher une alerte.`,
+      a: `Le gardien suit les consignes du guide de la maison : vétérinaire habituel, clinique d'urgence, contacts et personne relais. Le réseau de gardiens d'urgence ouvrira dès que la ville comptera assez de gardiens expérimentés.`,
     },
     {
-      q: `Combien coûte une pension pour animaux à ${dbPage.city} ?`,
-      a: `Les tarifs des pensions varient selon la ville, la saison et la taille de l'animal : demandez un devis. Sur Guardiens, la garde à domicile est un échange et l'inscription est gratuite : le gardien s'installe chez vous et s'occupe de vos animaux dans leur environnement habituel.`,
+      q: `Comment se passe une garde à domicile à ${dbPage.city} ?`,
+      a: `Le gardien s'installe chez vous et s'occupe de vos animaux dans leur environnement habituel. L'échange se fait en temps et en services, et Guardiens est gratuit.`,
     },
     {
       q: `Comment devenir gardien à ${dbPage.city} ?`,
@@ -784,10 +784,7 @@ const CityPage = () => {
             "@type": "Offer",
             price: "0",
             priceCurrency: "EUR",
-            eligibleCustomerType: "Owner",
-            ...(dbRevision ? { description: "Espace propriétaire gratuit, garde non rémunérée." } : {
-            description: "Espace propriétaire à 0 €.",
-            }),
+            description: "Guardiens est gratuit.",
           },
         },
         {

@@ -494,12 +494,12 @@ const PublicSitDetail = () => {
  const cityPart = ownerCity ? `${ownerCity}. ` : "";
  const ogDescription = propertyDescShort
  ? `${cityPart}${datesPart} ${propertyDescShort} Partagez la confiance entre gens du coin avec Guardiens.`
- : "Partez l'esprit tranquille avec un gardien près de chez vous. Guardiens, c'est la confiance entre gens du coin.";
+ : "Partez l'esprit tranquille avec un gardien à proximité. Guardiens, c'est la confiance entre gens du coin.";
  const truncatedDesc = ogDescription.length > 200 ? ogDescription.slice(0, 197) + "…" : ogDescription;
 
  // SEO description (≤160 char), distincte de og:description
  const ownerFirstName = publicFirstName(owner?.first_name);
- const seoDescription = `Garde à ${cityForTitle} ${datesShort}. ${petsSummary}. ${ownerFirstName || "Un membre"} cherche un gardien du coin sur Guardiens, inscription : 0 € pour les propriétaires.`;
+ const seoDescription = `Garde à ${cityForTitle} ${datesShort}. ${petsSummary}. ${ownerFirstName || "Un membre"} cherche un gardien à proximité sur Guardiens. Guardiens est gratuit.`;
  const truncatedSeoDesc = seoDescription.length > 160 ? seoDescription.slice(0, 157) + "…" : seoDescription;
 
   // Canonical TOUJOURS sur le domaine de prod : sur preview/lovableproject,
@@ -545,8 +545,7 @@ const PublicSitDetail = () => {
  "@type": "Offer",
  price: "0",
  priceCurrency: "EUR",
- eligibleCustomerType: "Owner",
-  description: "0 € pour les propriétaires.",
+  description: "Guardiens est gratuit.",
  availability: hideDates ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
  // Aucune date exposée sur une garde pourvue ou terminée.
  ...(!hideDates && sit.start_date && { validFrom: sit.start_date }),

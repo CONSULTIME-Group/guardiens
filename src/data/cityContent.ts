@@ -67,15 +67,15 @@ Aucun délai de réponse n'est garanti : le nombre de candidatures dépend de vo
 Les panneaux à l'entrée de chaque lieu restent la référence. Le [guide des sorties avec un chien à Annecy](/guides/annecy) rassemble les lieux et les règles vérifiées, et l'article [parcs et balades avec un chien à Annecy](/actualites/parcs-balades-chiens-annecy-guide) donne d'autres idées.`,
  },
  {
- id: "comparer",
- title: "Garde à domicile, visites ou pension : comment choisir",
- content: `| Option | Où vit l'animal | Présence | Coût | À vérifier |
-|---|---|---|---|---|
-| Gardien qui séjourne chez vous | Chez vous | Selon l'accord, pas en continu | Pas de rémunération de la garde, frais convenus à part | Expérience, absences dans la journée, relais |
-| Visites d'un pet-sitter | Chez vous | Passages ponctuels | Sur devis | Nombre de passages, adapté surtout aux chats autonomes |
-| Pension | Chez le professionnel | Encadrement par une équipe | Sur devis | Vaccins demandés, conditions d'accueil, places en saison |
+ id: "chez-vous",
+ title: "Ce que la garde à domicile change pour vos animaux",
+ content: `- **Leurs repères** : votre animal garde sa maison, son panier, ses horaires et ses promenades habituelles.
+- **Une présence** : le gardien séjourne chez vous, selon ce que vous convenez dans l'accord de garde (présence, absences dans la journée).
+- **Une maison habitée** : courrier relevé, plantes arrosées, volets ouverts.
+- **Un échange** : le gardien est logé, la garde se fait en temps et en services, et Guardiens est gratuit. Les frais du quotidien (nourriture, litière) se conviennent entre vous.
+- **Une personne relais** : votre vétérinaire habituel et une personne joignable du coin, notés dans le guide de la maison.
 
-Aucune solution ne convient à tous les animaux. Un chien très anxieux ou un animal qui demande des soins peut justifier un avis vétérinaire avant de choisir. [Comparer les alternatives à la pension](/actualites/pension-chien-alternatives-guide).`,
+Chaque animal a ses besoins : un chien très anxieux ou un animal qui demande des soins peut justifier un avis vétérinaire avant la garde.`,
  },
  {
  id: "urgence",
@@ -123,7 +123,7 @@ Le nombre de candidatures dépend de vos dates, de votre quartier et de la péri
  content: `- **Présence** : combien d'heures votre animal peut rester seul, et si le gardien télétravaille ou s'absente en journée.
 - **Logement en ville** : étage sans ascenseur, interphone, local à vélos, règles de copropriété, voisinage sensible aux aboiements.
 - **Clés et badges** : remise en main propre, badge de parking ou de résidence, double chez une personne relais.
-- **Expérience** : chien réactif, chat qui sort, traitement à donner. Parlez-en franchement, puis vérifiez en rencontrant le gardien.
+- **Expérience** : chien réactif, chat qui sort, traitement à donner. Parlez-en franchement avec le gardien, et rencontrez-le si vous le souhaitez.
 - **Frais** : nourriture, litière, éventuelle consultation vétérinaire : qui avance, qui rembourse.
 - **Chaleur** : en été, horaires de sortie tôt le matin et tard le soir, volets, eau à disposition.
 
@@ -140,15 +140,15 @@ Le nombre de candidatures dépend de vos dates, de votre quartier et de la péri
 Les panneaux d'entrée de chaque parc font foi. Pour aller plus loin : le [guide des sorties avec un chien à Lyon](/guides/lyon) et l'article [parcs et balades avec un chien à Lyon](/actualites/parcs-chiens-lyon-guide-complet).`,
  },
  {
- id: "comparer",
- title: "Garde à domicile, visites ou pension",
- content: `| Option | Où vit l'animal | Présence | Coût | À vérifier |
-|---|---|---|---|---|
-| Gardien qui séjourne chez vous | Chez vous | Selon l'accord, pas en continu | Pas de rémunération de la garde, frais convenus à part | Expérience, absences, personne relais |
-| Visites d'un pet-sitter | Chez vous | Passages ponctuels | Sur devis | Nombre de passages, adapté surtout aux chats autonomes |
-| Pension | Chez le professionnel | Équipe sur place | Sur devis | Vaccins demandés, conditions d'accueil |
+ id: "chez-vous",
+ title: "Ce que la garde à domicile change pour vos animaux",
+ content: `- **Leurs repères** : votre animal garde sa maison, son panier, ses horaires et ses promenades habituelles.
+- **Une présence** : le gardien séjourne chez vous, selon ce que vous convenez dans l'accord de garde (présence, absences dans la journée).
+- **Une maison habitée** : courrier relevé, plantes arrosées, volets ouverts.
+- **Un échange** : le gardien est logé, la garde se fait en temps et en services, et Guardiens est gratuit. Les frais du quotidien (nourriture, litière) se conviennent entre vous.
+- **Une personne relais** : votre vétérinaire habituel et une personne joignable du coin, notés dans le guide de la maison.
 
-Le bon choix dépend de votre animal, de la durée et de votre logement. [Où faire garder son chien à Lyon pendant les vacances](/actualites/ou-faire-garder-chien-lyon-vacances) et [garde de chat à domicile à Lyon](/actualites/garde-chat-domicile-lyon) détaillent les options.`,
+[Où faire garder son chien à Lyon pendant les vacances](/actualites/ou-faire-garder-chien-lyon-vacances) et [garde de chat à domicile à Lyon](/actualites/garde-chat-domicile-lyon) détaillent l'organisation.`,
  },
  {
  id: "urgence",
@@ -194,7 +194,7 @@ Aucun délai de réponse n'est garanti, il dépend de vos dates et de votre sect
  content: `- **Présence** : temps de présence attendu, absences possibles en journée (randonnée, travail), besoins de l'animal.
 - **Pollution et chaleur** : en cas d'épisode de pollution ou de forte chaleur, quels horaires et quelle durée de sortie vous souhaitez.
 - **Accès au logement** : clés, badge, stationnement, et pour une maison en pente, accès par temps de neige.
-- **Expérience** : chien réactif, chat âgé, traitement. Dites-le dans l'annonce et vérifiez lors de la rencontre.
+- **Expérience** : chien réactif, chat âgé, traitement. Dites-le dans l'annonce et parlez-en avec le gardien.
 - **Frais** : nourriture, litière, soins éventuels : qui avance, qui rembourse.
 - **Relais** : une personne joignable du coin et votre vétérinaire habituel.`,
  },
@@ -210,15 +210,14 @@ Aucun délai de réponse n'est garanti, il dépend de vos dates et de votre sect
 Dans les bus et tramways, la Ville indique que les chiens voyagent portés, ou tenus en laisse et muselés. La signalétique sur place reste la référence. Pour d'autres idées : [parcs et balades avec un chien à Grenoble](/actualites/parcs-balades-chiens-grenoble-guide).`,
  },
  {
- id: "comparer",
- title: "Garde à domicile, visites ou pension",
- content: `| Option | Où vit l'animal | Présence | Coût | À vérifier |
-|---|---|---|---|---|
-| Gardien qui séjourne chez vous | Chez vous | Selon l'accord, pas en continu | Pas de rémunération de la garde, frais convenus à part | Expérience, absences, relais |
-| Visites d'un pet-sitter | Chez vous | Passages ponctuels | Sur devis | Nombre de passages, adapté surtout aux chats autonomes |
-| Pension | Chez le professionnel | Équipe sur place | Sur devis | Vaccins demandés, conditions d'accueil |
-
-[Comparer les alternatives à la pension](/actualites/pension-chien-alternatives-guide).`,
+ id: "chez-vous",
+ title: "Ce que la garde à domicile change pour vos animaux",
+ content: `- **Leurs repères** : votre animal garde sa maison, son panier, ses horaires et ses promenades habituelles.
+- **Une présence** : le gardien séjourne chez vous, selon ce que vous convenez dans l'accord de garde (présence, absences dans la journée).
+- **Une maison habitée** : courrier relevé, plantes arrosées, volets ouverts.
+- **Un échange** : le gardien est logé, la garde se fait en temps et en services, et Guardiens est gratuit. Les frais du quotidien (nourriture, litière) se conviennent entre vous.
+- **Une personne relais** : votre vétérinaire habituel et une personne joignable du coin, notés dans le guide de la maison.
+`,
  },
  {
  id: "urgence",

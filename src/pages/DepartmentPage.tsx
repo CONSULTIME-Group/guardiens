@@ -194,10 +194,10 @@ const DepartmentPage = () => {
   const h1Title = rewriteDepartmentMention(page.h1_title, page.department);
   const metaTitle = page.meta_title
     ? rewriteDepartmentMention(page.meta_title, page.department)
-    : `Pet sitting & House sitting ${deptIn}, garde d'animaux, de maison et de jardin 0 € pour les propriétaires | Guardiens`;
+    : `Garde d'animaux et de maison ${deptIn}, house-sitting entre particuliers | Guardiens`;
   const metaDescription = page.meta_description
     ? rewriteDepartmentMention(page.meta_description, page.department)
-    : `Trouvez un pet sitter ou house sitter ${deptIn}. Garde d'animaux, de maison et de jardin entre particuliers, 0 € pour les propriétaires. ${countLabel(cityPages.length, "ville couverte")} sur Guardiens.`;
+    : `Trouvez un gardien pour vos animaux et votre maison ${deptIn}. Garde d'animaux, de maison et de jardin entre particuliers. Guardiens est gratuit. ${countLabel(cityPages.length, "ville couverte")} sur Guardiens.`;
 
  return (
  <>
@@ -332,10 +332,10 @@ const DepartmentPage = () => {
       Combien coûte une garde d'animaux {deptIn} ?
     </h2>
     <p className="text-base text-foreground/90 leading-relaxed mb-3">
-      Guardiens est gratuit. Aucune commission côté propriétaire, aucun frais de mise en relation, une rencontre conseillée avant une garde.
+      Guardiens est gratuit, pour tous les membres, et aucune commission n'est prélevée sur les gardes. Le gardien est logé chez vous, l'échange se fait en temps et en services.
     </p>
     <p className="text-base text-foreground/80 leading-relaxed">
-      Une pension pour animaux {deptIn} se facture généralement entre 25 et 50 € par nuit et par animal, soit 350 à 700 € pour deux semaines avec un chien. Confier son animal à un gardien à domicile, c'est éviter le stress de la mise en pension, garder votre logement occupé pendant votre absence, et bénéficier d'une relation directe entre particuliers, sans intermédiaire commercial. Les profils dont l'identité a été validée affichent l'écusson « Identité vérifiée ». Consultez aussi les avis publics de la communauté et organisez une rencontre en amont.
+      Chez Guardiens, un gardien s'installe chez vous : vos animaux gardent leurs repères, la maison reste habitée pendant votre absence, et la relation se noue directement entre particuliers. Les profils dont l'identité a été validée affichent l'écusson « Identité vérifiée », et les avis de la communauté sont publics. Une rencontre se propose si vous le souhaitez tous les deux.
     </p>
   </section>
 
@@ -345,19 +345,19 @@ const DepartmentPage = () => {
       Comment trouver un gardien fiable {deptIn} ?
     </h2>
     <p className="text-base text-foreground/90 leading-relaxed mb-4">
-      Pour trouver un gardien fiable {deptIn}, publiez votre annonce sur Guardiens, recevez des candidatures de gardiens de votre secteur, consultez leurs profils et avis, puis organisez une rencontre avant de confirmer la garde. Le processus tient en trois étapes.
+      Pour trouver un gardien fiable {deptIn}, publiez votre annonce sur Guardiens, recevez des candidatures de gardiens de votre secteur, consultez leurs profils et avis, échangez avec eux, puis confirmez la garde. Le processus tient en trois étapes.
     </p>
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       <Card>
         <CardContent className="p-5">
           <h3 className="font-semibold text-foreground mb-2">1. Publiez votre annonce</h3>
-          <p className="text-sm text-muted-foreground">Décrivez votre maison, vos animaux, les dates, vos attentes. La publication coûte 0 € aux propriétaires. Précisez votre ville ou commune pour être trouvé par les gardiens de proximité.</p>
+          <p className="text-sm text-muted-foreground">Décrivez votre maison, vos animaux, les dates, vos attentes. Guardiens est gratuit. Précisez votre ville ou commune pour être trouvé par les gardiens à proximité.</p>
         </CardContent>
       </Card>
       <Card>
         <CardContent className="p-5">
-          <h3 className="font-semibold text-foreground mb-2">2. Rencontrez les candidats</h3>
-          <p className="text-sm text-muted-foreground">Consultez les profils, l'écusson « Identité vérifiée » quand il est présent, les avis de la communauté, l'expérience animale. Rencontrez-vous autour d'un café ou lors d'une visite du logement. C'est cette rencontre physique qui fait la différence.</p>
+          <h3 className="font-semibold text-foreground mb-2">2. Échangez avec les candidats</h3>
+          <p className="text-sm text-muted-foreground">Consultez les profils, l'écusson « Identité vérifiée » quand il est présent, les avis de la communauté, l'expérience animale. Échangez par la messagerie, et rencontrez-vous autour d'un café ou lors d'une visite du logement si vous le souhaitez.</p>
         </CardContent>
       </Card>
       <Card>
@@ -435,7 +435,7 @@ const DepartmentPage = () => {
  <Card>
  <CardContent className="p-4 md:p-6">
  <Heart className="h-8 w-8 text-primary mb-3" />
- <h3 className="font-semibold text-foreground mb-2">0 € pour les propriétaires</h3>
+ <h3 className="font-semibold text-foreground mb-2">Guardiens est gratuit</h3>
  <p className="text-sm text-muted-foreground">
  Inscription avec une adresse email. Aucune commission prélevée sur les gardes.
  </p>
@@ -474,8 +474,8 @@ const DepartmentPage = () => {
  __html: JSON.stringify({
  "@context": "https://schema.org",
  "@type": "Service",
-  name: `Pet sitting & House sitting ${deptIn}`,
-  description: `Service de garde d'animaux, de maison et de jardin, house sitting 0 € pour les propriétaires ${deptIn}. ${countLabel(cityPages.length, "ville couverte")}.`,
+  name: `Garde d'animaux et de maison ${deptIn}`,
+  description: `Garde d'animaux, de maison et de jardin entre particuliers ${deptIn}. Guardiens est gratuit. ${countLabel(cityPages.length, "ville couverte")}.`,
  provider: {
  "@type": "Organization",
  name: "Guardiens",
@@ -494,8 +494,7 @@ const DepartmentPage = () => {
  "@type": "Offer",
  price: "0",
  priceCurrency: "EUR",
- eligibleCustomerType: "Owner",
- description: "0 € pour les propriétaires.",
+ description: "Guardiens est gratuit.",
  },
  }),
  }}

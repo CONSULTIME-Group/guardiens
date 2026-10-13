@@ -67,7 +67,7 @@ const Email = ({
           <Heading style={h1}>{title}</Heading>
 
           <Text style={p}>
-            Si vous partez, votre maison, elle, reste. Une maison habitée pendant votre absence, c'est le courrier relevé, les plantes arrosées, et vos animaux chez eux plutôt qu'en pension.
+            Si vous partez, votre maison, elle, reste. Une maison habitée pendant votre absence, c'est le courrier relevé, les plantes arrosées, et vos animaux chez eux, dans leurs habitudes.
           </Text>
 
           <Text style={p}>

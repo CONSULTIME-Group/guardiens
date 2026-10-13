@@ -47,7 +47,7 @@ const LocalExpertise = ({ city }: Props) => {
       <div className="flex items-center gap-3 mb-6">
         <Icon className="h-6 w-6 text-primary" />
         <h2 className="font-heading text-2xl font-bold text-foreground">
-          Ce que savent nos gardiens à {city.name}
+          Préparer une garde à {city.name}
         </h2>
       </div>
 
@@ -65,7 +65,7 @@ const LocalExpertise = ({ city }: Props) => {
       </ul>
 
       <p className="text-sm font-medium text-foreground mb-3">
-        Nos gardiens {city.name} maîtrisent ces contraintes et savent quoi faire sans appeler le propriétaire.
+        À noter dans le guide de la maison, pour que votre gardien sache quoi faire à {city.name} :
       </p>
 
       <ul className="space-y-2">

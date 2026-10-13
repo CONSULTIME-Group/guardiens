@@ -187,7 +187,7 @@ const Dashboard = () => {
         <DashboardErrorBoundary
           section={displayedRole === "owner" ? "OwnerDashboard" : "SitterDashboard"}
           label={
-            displayedRole === "owner" ? "Le dashboard propriétaire" : "Le dashboard gardien"
+            displayedRole === "owner" ? "Le tableau de bord propriétaire" : "Le tableau de bord gardien"
           }
         >
           {displayedRole === "owner" ? <OwnerDashboard /> : <SitterDashboard />}

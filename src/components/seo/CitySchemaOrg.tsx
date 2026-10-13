@@ -33,8 +33,7 @@ const CitySchemaOrg = ({ city, faqItems }: Props) => {
  "@type": "Offer",
  price: "0",
  priceCurrency: "EUR",
- eligibleCustomerType: "Owner",
- description: "0 € pour les propriétaires.",
+ description: "Guardiens est gratuit.",
  },
  },
  ...(faqItems.length ? [

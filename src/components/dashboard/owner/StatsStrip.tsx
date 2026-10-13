@@ -52,7 +52,7 @@ const StatsStrip = memo(({ items }: StatsStripProps) => {
             case "note":
               return { phrase: "À découvrir", hint: "Vos premiers avis construiront votre réputation" };
             case "annonce":
-              return { phrase: "À publier", hint: "Votre première annonce attire les gardiens du coin" };
+              return { phrase: "À publier", hint: "Votre première annonce attire les gardiens à proximité" };
             case "récurrent":
             case "recurrent":
               return { phrase: "À fidéliser", hint: "Vos gardiens réguliers apparaîtront ici" };

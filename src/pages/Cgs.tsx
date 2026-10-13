@@ -7,7 +7,7 @@ const Cgs = () => {
     <div className="min-h-screen bg-background text-foreground">
       <PageMeta
         title="Conditions Générales de Services | Guardiens"
-        description="Conditions Générales de Services Guardiens : gratuité actuelle, fonctionnalités incluses, passage éventuel à un modèle payant et résiliation."
+        description="Conditions générales de services de Guardiens : service gratuit, fonctionnalités incluses, résiliation."
         path="/cgs"
       />
       <PublicHeader />

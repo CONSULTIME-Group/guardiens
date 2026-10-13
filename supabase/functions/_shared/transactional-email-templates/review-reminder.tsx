@@ -36,7 +36,7 @@ const ReviewReminderEmail = ({ firstName, sitTitle, revieweeName, sitId, isOwner
         <BrandHeader />
           {/* Stars header */}
           <Section style={starsSection}>
-            <Text style={starsText}>⭐⭐⭐⭐⭐</Text>
+            <Text style={starsText}>Notez votre garde de 1 à 5</Text>
           </Section>
 
           <Heading style={h1}>Comment s'est passée la garde ?</Heading>
@@ -150,7 +150,7 @@ export const template = {
 const main = { backgroundColor: '#ffffff', fontFamily: "'Outfit', Arial, sans-serif" }
 const container = { padding: '24px 28px', maxWidth: '560px', margin: '0 auto' }
 const starsSection = { textAlign: 'center' as const, margin: '0 0 8px' }
-const starsText = { fontSize: '28px', margin: '0', lineHeight: '1' }
+const starsText = { fontSize: '15px', fontWeight: 600 as const, color: '#2C6D50', margin: '0', lineHeight: '1.4' }
 const h1 = { fontSize: '22px', fontWeight: 'bold' as const, color: '#2C6D50', margin: '0 0 20px', textAlign: 'center' as const }
 const text = { fontSize: '14px', color: '#756F66', lineHeight: '1.6', margin: '0 0 16px' }
 const benefitsBox = {
