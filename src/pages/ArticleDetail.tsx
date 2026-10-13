@@ -402,27 +402,7 @@ export default function ArticleDetail() {
     )}
     </>
 
- {/* Product/Offer Schema for pricing articles */}
- {article.slug === "nouveaux-tarifs-2026" && (
- <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-  "@context": "https://schema.org",
-  "@type": "Service",
-  "serviceType": "Abonnement plateforme de gardiennage entre particuliers",
-  "name": "Abonnement Gardien Guardiens",
-  "description": "Abonnement pour devenir gardien de maison et d'animaux sur Guardiens. Résiliable à tout moment.",
-  "provider": { "@type": "Organization", "name": "Guardiens", "url": "https://guardiens.fr" },
-  "areaServed": { "@type": "Country", "name": "France" },
- "offers": {
- "@type": "Offer",
- "name": "Accès gardien",
- "price": "0",
- "priceCurrency": "EUR",
- "eligibleCustomerType": "Sitter",
- "description": "Accès gardien ouvert pendant la phase de lancement.",
- "availability": "https://schema.org/InStock"
- }
- }) }} />
- )}
+ {/* Lot X3c : schéma d'offre retiré, Guardiens est gratuit. */}
 
  {/* LocalBusiness Schema for geo-targeted guide articles */}
  {article.category === "guide_lieu" && article.city && (

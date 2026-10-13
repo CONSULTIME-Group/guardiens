@@ -177,7 +177,7 @@ export function useSitterPriorityAction(input: Input): SitterPriorityAction {
         eyebrow: "À faire maintenant",
         title: "Rendez un coup de main près de chez vous",
         description:
-          "C'est ouvert à tous, sans abonnement, et c'est le meilleur moyen de vous faire connaître avant vos premières gardes.",
+          "C'est ouvert à tous et gratuit, et c'est le meilleur moyen de vous faire connaître avant vos premières gardes.",
         ctaLabel: "Voir les coups de main",
         ctaTo: "/petites-missions",
         urgency: "medium",

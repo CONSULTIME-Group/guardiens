@@ -5,6 +5,7 @@ import {
   findRequest,
   recordDeletionRequest,
 } from "../_shared/admin-erasure.ts";
+import { findAccountByEmail } from "../_shared/admin-account-lookup.ts";
 
 
 const corsHeaders = {
@@ -73,21 +74,15 @@ Deno.serve(async (req) => {
     const requestId = typeof body?.requestId === "string" ? body.requestId : null;
 
     // --- Recherche du compte ------------------------------------------------
-    const { data: profile } = await adminClient
-      .from("profiles")
-      .select("id, email, first_name, last_name")
-      .ilike("email", rawEmail)
-      .maybeSingle();
-
-    let userId: string | null = profile?.id ?? null;
-    if (!userId) {
-      // Repli : l'email peut n'exister que dans auth.users.
-      const { data: list } = await adminClient.auth.admin.listUsers({ page: 1, perPage: 200 });
-      const match = list?.users?.find(
-        (u) => (u.email ?? "").toLowerCase() === rawEmail,
-      );
-      userId = match?.id ?? null;
+    // Lot X3c (D-10) : ilike exact puis toutes les pages de auth.users. Une
+    // lecture en échec arrête tout, plutôt que de conclure « aucun compte ».
+    const found = await findAccountByEmail(adminClient, rawEmail);
+    if (found.error) {
+      console.error("[admin-delete-account] recherche du compte impossible", found.error);
+      return json({ error: "Recherche du compte impossible, réessayez dans un instant." }, 503);
     }
+    const profile = found.profile;
+    const userId: string | null = found.userId;
 
     if (action === "lookup") {
       // Garde-fous métier : mêmes règles que self-delete-account.

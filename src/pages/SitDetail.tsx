@@ -27,6 +27,7 @@ import fallbackMarrakech from "@/assets/fallback-marrakech.webp";
 import { trackEvent } from "@/lib/analytics";
 import type { SitData } from "@/components/sits/views/types";
 import { useToast } from "@/hooks/use-toast";
+import { OWN_SIT_COLUMNS, ownSitLookupColumn } from "@/lib/ownSitAccess";
 
 /**
  * Cible de notification disparue : au lieu d'une page introuvable, on renvoie
@@ -92,6 +93,8 @@ const SitDetail = () => {
   const [appCount, setAppCount] = useState(0);
   const [pendingAppCount, setPendingAppCount] = useState(0);
   const [hasApplied, setHasApplied] = useState(false);
+  // Lot X3a (B-03) : statut de la candidature du visiteur (null sans candidature).
+  const [myApplicationStatus, setMyApplicationStatus] = useState<string | null>(null);
   const [hasReviewedThisSit, setHasReviewedThisSit] = useState(false);
   const [initialLogementOverride, setInitialLogementOverride] = useState("");
   const [initialAnimauxOverride, setInitialAnimauxOverride] = useState("");
@@ -115,6 +118,7 @@ const SitDetail = () => {
     setAppCount(0);
     setPendingAppCount(0);
     setHasApplied(false);
+    setMyApplicationStatus(null);
     setHasReviewedThisSit(false);
     setInitialLogementOverride("");
     setInitialAnimauxOverride("");
@@ -123,7 +127,18 @@ const SitDetail = () => {
       // Lecture via la RPC masquée : dates et champs libres sont filtrés côté
       // serveur pour tout visiteur qui n'est ni propriétaire ni gardien accepté.
       const { data: sitRows } = await supabase.rpc("get_public_sit", { p_param: id });
-      const sitData = (sitRows as any[] | null)?.[0];
+      let sitData = (sitRows as any[] | null)?.[0];
+      // Lot X3a (A-04) : l'auteur relit sa propre annonce expirée ou annulée
+      // sous sa RLS, mêmes colonnes que la RPC, dates jamais masquées.
+      if (!sitData && user?.id) {
+        const { data: ownRow } = await supabase
+          .from("sits")
+          .select(OWN_SIT_COLUMNS)
+          .eq(ownSitLookupColumn(id), id)
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (ownRow) sitData = { ...(ownRow as any), status: String((ownRow as any).status), dates_hidden: false };
+      }
       if (!sitData) {
         setLoading(false);
         return;
@@ -285,7 +300,7 @@ const SitDetail = () => {
           supabase.from("sitter_profiles").select("*").eq("user_id", user.id).limit(1),
           supabase
             .from("applications")
-            .select("id")
+            .select("id, status")
             .eq("sit_id", sitId)
             .eq("sitter_id", user.id)
             .limit(1),
@@ -297,7 +312,10 @@ const SitDetail = () => {
             .limit(1),
         ]);
         setSitterProfile(spRes.data?.[0] ?? null);
-        if (appRes.data?.[0]) setHasApplied(true);
+        if (appRes.data?.[0]) {
+          setHasApplied(true);
+          setMyApplicationStatus(((appRes.data[0] as any).status as string | undefined) ?? null);
+        }
         setHasReviewedThisSit(!!reviewRes.data?.[0]);
       }
 
@@ -420,6 +438,8 @@ const SitDetail = () => {
           setAppCount={setAppCount}
           hasApplied={hasApplied}
           setHasApplied={setHasApplied}
+          myApplicationStatus={myApplicationStatus}
+          setMyApplicationStatus={setMyApplicationStatus}
           hasReviewedThisSit={hasReviewedThisSit}
           sitterProfile={sitterProfile}
           currentUserId={user?.id || ""}

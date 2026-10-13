@@ -28,7 +28,7 @@ function fakeSub(endpoint: string, key: ArrayBuffer | null = new Uint8Array(keyB
 }
 function worker() {
   return { scriptURL: 'https://guardiens.fr/push-sw.js', state: 'activated', addEventListener() {}, removeEventListener() {},
-    postMessage: (msg: { type: string }, ports?: MessagePort[]) => { if (msg.type === 'GUARDIENS_PUSH_SW_VERSION' && ports?.[0]) ports[0].postMessage({ version: 'push-4' }); } };
+    postMessage: (msg: { type: string }, ports?: MessagePort[]) => { if (msg.type === 'GUARDIENS_PUSH_SW_VERSION' && ports?.[0]) ports[0].postMessage({ version: 'push-5' }); } };
 }
 
 let reg: any;

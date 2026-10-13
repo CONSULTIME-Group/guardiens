@@ -26,6 +26,8 @@ describe("structure H1 de la home", () => {
     expect(source).not.toContain("<NotreHistoireSection");
     expect(source).not.toContain("<InternationalStrip");
     expect(source).not.toContain("<ComparatifSection");
+    // Lot X3 (13/10/2026) : décision du fondateur, aucune comparaison avec d'autres acteurs sur l'accueil.
+    expect(readFileSync("src/components/landing/UsagesSection.tsx", "utf8")).not.toContain("<ComparatifSection");
   });
 
   it("garde neuf questions alignées, dont trois dans un accordéon monté", () => {

@@ -6,7 +6,7 @@ import { execSync } from "node:child_process";
  *
  * Règle produit : on dit ce que la chose EST, pas ce qu'elle n'est pas.
  *  - prix propriétaire   -> « 0 € pour les propriétaires » (badge : « Propriétaires : 0 € »)
- *  - accès               -> « l'accès est ouvert pendant la phase de lancement »
+ *  - accès               -> « Guardiens est gratuit » (lot X3c, sans durée)
  *  - commission          -> « aucune commission prélevée sur les gardes »
  *  - comparaison pension -> donner le coût de la pension, puis « 0 € » côté Guardiens
  *
@@ -75,7 +75,7 @@ describe("Vocabulaire marketing proscrit", () => {
       throw new Error(
         `${findings.length} formulation(s) proscrite(s) dans le contenu public.\n` +
           `Dire ce que la chose EST : « 0 € pour les propriétaires », ` +
-          `« l'accès est ouvert pendant la phase de lancement », ` +
+          `« Guardiens est gratuit », ` +
           `« aucune commission prélevée sur les gardes ».\n\n` +
           findings.join("\n"),
       );

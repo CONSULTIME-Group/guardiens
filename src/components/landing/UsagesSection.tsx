@@ -1,5 +1,4 @@
 import { useTranslation } from "react-i18next";
-import { ComparatifSection } from "@/components/landing/ComparatifSection";
 
 export function UsagesSection() {
   const { t } = useTranslation();
@@ -22,7 +21,6 @@ export function UsagesSection() {
           ))}
         </div>
       </div>
-      <ComparatifSection />
     </section>
   );
 }

@@ -16,6 +16,7 @@ import Head from "@/components/seo/Head";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { GOOGLE_REVIEW_URL } from "@/lib/constants";
 import { avatarImageUrl } from "@/lib/storageImage";
+import { isSitReviewable } from "@/lib/reviewEligibility";
 
 type ReviewDirection = "owner_to_sitter" | "sitter_to_owner";
 
@@ -70,7 +71,7 @@ const LeaveReview = () => {
 
       const { data: sitData, error: sitError } = await supabase
         .from("sits")
-        .select("id, status, title, user_id")
+        .select("id, status, title, user_id, end_date")
         .eq("id", sitId)
         .maybeSingle();
 
@@ -82,7 +83,8 @@ const LeaveReview = () => {
 
       setSit(sitData);
 
-      if (sitData.status !== "completed") {
+      // Lot X3a (A-08) : une garde terminée puis archivée reste ouverte aux avis.
+      if (!isSitReviewable(sitData as any)) {
         setLoading(false);
         return;
       }
@@ -319,9 +321,9 @@ const LeaveReview = () => {
     );
   }
 
-  if (!sit || !reviewee) return <div className="p-6">Garde introuvable.</div>;
-
-  if (sit.status !== "completed") {
+  // Lot X3a (A-08) : le statut se teste avant la personne évaluée, qui n'est
+  // chargée que pour une garde ouverte aux avis.
+  if (sit && !isSitReviewable(sit)) {
     return (
       <div className="p-6 md:p-10 max-w-2xl mx-auto text-center">
         <p className="text-lg font-heading font-semibold mb-2">Garde non terminée</p>
@@ -330,6 +332,8 @@ const LeaveReview = () => {
       </div>
     );
   }
+
+  if (!sit || !reviewee) return <div className="p-6">Garde introuvable.</div>;
 
   if (alreadyReviewed) {
     return (

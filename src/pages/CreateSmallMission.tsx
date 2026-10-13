@@ -533,6 +533,13 @@ const CreateSmallMission = () => {
         toast({ title: "Compte non actif", description: "Contactez le support pour rétablir l'accès à l'entraide.", variant: "destructive" });
         return;
       }
+      // Lot X3b (C-09) : la base refuse aussi un besoin sans lieu situé.
+      if (hint === "mission_place_missing" || msg.includes("mission_place_missing")) {
+        toast({ title: "Commune à préciser", description: MISSION_PLACE_NOT_FOUND, variant: "destructive" });
+        setStep(3);
+        setPlaceTouched(true);
+        return;
+      }
       if (hint === "duplicate_small_mission" || msg.includes("duplicate_small_mission")) {
         toast({
           title: "Vous avez déjà cette annonce en ligne",

@@ -85,7 +85,7 @@ const SECTIONS: SectionDef[] = [
   { id: "appearance", label: "Apparence", icon: Sun, group: "Préférences" },
   { id: "installation", label: "Installer Guardiens", icon: Download, group: "Préférences" },
   { id: "alma", label: "Fréquence d'Alma", icon: MessageCircle, group: "Préférences" },
-  { id: "billing", label: "Abonnement", icon: CreditCard, group: "Mes espaces" },
+  { id: "billing", label: "Gratuité", icon: CreditCard, group: "Mes espaces" },
   { id: "data", label: "Mes données", icon: Download, group: "Aide & données" },
   { id: "help", label: "Aide & liens utiles", icon: HelpCircle, group: "Aide & données" },
   { id: "danger", label: "Zone dangereuse", icon: AlertTriangle, group: "Zone dangereuse" },
@@ -781,14 +781,19 @@ const NotificationsSection = ({ prefs, savingKey, allNotifsOn, onMasterToggle, o
         </div>
       ))}
 
+      {/* Lot X3c : appliqué par notify-new-message et send-transactional-email
+          (supabase/functions/_shared/notification-preferences.ts). */}
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <Label className="text-sm shrink-0">Délai avant email (messages non-lus)</Label>
+        <div className="min-w-0">
+          <Label className="text-sm">Rythme des emails de messages</Label>
+          <p className="text-xs text-muted-foreground">Un email par conversation au plus sur cette durée.</p>
+        </div>
         <Select value={prefs.message_email_delay} onValueChange={(v) => onSave({ message_email_delay: v })}>
-          <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="30min">30 min</SelectItem>
-            <SelectItem value="1h">1 heure</SelectItem>
-            <SelectItem value="3h">3 heures</SelectItem>
+            <SelectItem value="30min">Toutes les 30 min</SelectItem>
+            <SelectItem value="1h">Toutes les heures</SelectItem>
+            <SelectItem value="3h">Toutes les 3 heures</SelectItem>
             <SelectItem value="never">Jamais</SelectItem>
           </SelectContent>
         </Select>
@@ -827,10 +832,13 @@ const EmergencySection = ({ user }: any) => {
           .select("user_id")
           .eq("user_id", user.id)
           .maybeSingle(),
+        // Lot X3c : avis publiés reçus par le membre (table reviews). La table
+        // l'ancienne table lue ici était absente, la carte restait toujours verrouillée.
         (supabase as any)
-          .from("sitter_reviews")
+          .from("reviews")
           .select("id", { count: "exact", head: true })
-          .eq("sitter_id", user.id),
+          .eq("reviewee_id", user.id)
+          .eq("published", true),
       ]);
       if (cancelled) return;
       setState({
@@ -1131,7 +1139,7 @@ const BillingSection = ({ user }: { user: any }) => {
   const isSitter = user?.role === "sitter" || user?.role === "both";
   return (
     <section>
-      <SectionHeader icon={CreditCard} title="Abonnement & facturation" description="Gérez votre formule et vos factures." />
+      <SectionHeader icon={CreditCard} title="Gratuité" description="Guardiens est gratuit pour tous les membres." />
       <div className="space-y-4">
         <div className="rounded-lg border border-border bg-muted/30 p-4">
           <p className="text-sm font-medium">Espace propriétaire</p>
@@ -1142,7 +1150,7 @@ const BillingSection = ({ user }: { user: any }) => {
           <div className="rounded-lg border border-border bg-muted/30 p-4">
             <p className="text-sm font-medium">Espace gardien</p>
             <p className="text-xs text-muted-foreground mt-1">
-              L'espace gardien est ouvert pendant la phase de lancement. Vous serez prévenu à l'avance en cas d'évolution tarifaire.
+              L'espace gardien coûte 0 €.
             </p>
           </div>
         )}
@@ -1155,7 +1163,7 @@ const BillingSection = ({ user }: { user: any }) => {
         <div className="flex flex-wrap gap-2 pt-2">
           <Button variant="outline" size="sm" asChild className="gap-2">
             <Link to="/tarifs">
-              Voir les formules
+              Voir nos engagements
               <ArrowRight className="h-4 w-4" />
             </Link>
           </Button>

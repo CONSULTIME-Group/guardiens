@@ -192,7 +192,7 @@
       "q1": "Qu'est-ce que le house-sitting ?",
       "a1": "Le house-sitting est un échange de services : un gardien habite dans votre maison pendant votre absence et prend soin de vos animaux. Chacun rend service à l'autre : l'échange se fait en temps et en services.",
       "q2": "Comment fonctionne l'accès à Guardiens ?",
-      "a2": "L'accès à Guardiens est ouvert pendant la phase de lancement : vous accédez à l'ensemble des fonctionnalités, et vous restez libre à tout moment. Toute évolution tarifaire vous sera annoncée à l'avance.",
+      "a2": "Guardiens est gratuit. Vous accédez à l'ensemble des fonctionnalités : annonces, candidatures, messagerie et entraide, et vous restez libre à tout moment.",
       "q3": "Comment trouver un pet sitter près de chez moi ?",
       "a3": "Inscrivez-vous sur Guardiens, publiez votre annonce de garde avec les dates et vos animaux, et recevez des candidatures de gardiens qui habitent près de chez vous. Vous échangez, vous pouvez vous rencontrer, puis vous choisissez.",
       "q4": "Qui sont les gardiens sur Guardiens ?",
@@ -202,7 +202,7 @@
       "q6": "Guardiens est-il disponible partout en France ?",
       "a6": "Oui, le service est ouvert dans toute la France : vous pouvez publier votre annonce où que vous habitiez. Le réseau, lui, se construit commune par commune, et sa densité varie encore selon les zones. C'est assumé, parce que la proximité est justement ce qui nous intéresse : un gardien qui habite à côté peut vous rencontrer avant, s'organiser plus simplement, et installer la confiance avant même votre départ. Publier votre annonce est le premier geste utile, elle est visible par les gardiens de votre secteur et au-delà.",
       "q7": "Quel est le modèle économique de Guardiens ?",
-      "a7": "L'accès à Guardiens est ouvert pendant la phase de lancement : vous accédez à l'ensemble des fonctionnalités, et vous restez libre à tout moment. Toute évolution tarifaire vous sera annoncée à l'avance.",
+      "a7": "Guardiens est gratuit pour tous les membres. L'échange se fait en temps et en services : le gardien est logé, le propriétaire part l'esprit tranquille et ses animaux restent chez eux.",
       "q8": "Le house-sitting est-il sécurisé ?",
       "a8": "La vérification d'identité est ouverte à tous les membres : la pièce envoyée est analysée automatiquement, les dossiers à compléter sont revus par notre équipe, et les profils validés affichent l'écusson « Identité vérifiée ». Une rencontre préalable entre le propriétaire et le gardien est vivement recommandée avant toute garde. Après chaque expérience, les avis croisés publiés sur le profil construisent une réputation vérifiable, visible par tous les membres.",
       "q9": "Est-ce que ça marche depuis l'étranger ?",
@@ -345,14 +345,14 @@
           "label": "Pension",
           "pet_home": "Non, l'animal est déplacé",
           "house_lived": "Sans objet",
-          "cost": "Payant, tarif journalier",
+          "cost": "Tarif journalier",
           "human": "Aucune préparation individuelle, personnel tournant"
         },
         "petsitter": {
           "label": "Pet-sitter à domicile",
           "pet_home": "Oui",
           "house_lived": "Non, visites ponctuelles",
-          "cost": "Payant, à la visite",
+          "cost": "Tarif à la visite",
           "human": "Visites courtes, pas de guide dédié"
         },
         "relative": {
@@ -397,7 +397,7 @@
       "owner": "Pour les propriétaires",
       "sitter": "Pour les gardiens",
       "security": "Sécurité & confiance",
-      "pricing": "Tarifs & abonnements",
+      "pricing": "Accès et gratuité",
       "operation": "Fonctionnement",
       "before_sit": "Avant la garde",
       "during_sit": "Pendant la garde",
@@ -427,13 +427,13 @@
     },
     "grace": {
       "title": "Accès offert jusqu'au {{date}}",
-      "text": "Les premiers membres bénéficient d'un accès ouvert pendant la phase de lancement."
+      "text": "Guardiens est gratuit pour tous les membres."
     },
     "owner_card": {
       "badge": "Toujours gratuit",
       "label": "Propriétaire",
       "price": "Gratuit",
-      "subtitle": "Accès ouvert pendant la phase de lancement.",
+      "subtitle": "Guardiens est gratuit.",
       "cta": "Publier une annonce",
       "features": [
         "Publiez une annonce en 5 minutes",
@@ -491,7 +491,7 @@
       "title": "L'entraide, indépendante de la garde",
       "free_tag": "Un service contre un service",
       "p1": "Les petites missions n'ont pas besoin d'animaux pour exister. Nadine cherche un coup de main pour ramasser ses légumes. Jacques passe une heure dans son jardin et repart avec un plat maison. Aucune garde, aucun argent : juste un service contre un service, entre gens du coin.",
-      "p2": "Cours de cuisine, arrosage de plantes, montage de meuble, prêt d'une perceuse, trajet partagé jusqu'à la gare : tout passe par l'entraide, sans abonnement.",
+      "p2": "Cours de cuisine, arrosage de plantes, montage de meuble, prêt d'une perceuse, trajet partagé jusqu'à la gare : tout passe par l'entraide, en temps et en savoir-faire.",
       "cta": "Découvrir l'entraide →"
     },
     "promise": {
@@ -763,7 +763,7 @@
     "explore_missions_desc": ", coups de main de proximité, un service contre un service",
     "explore_guides_desc": ", villes et conseils",
     "explore_pricing": "Tarifs gardien",
-    "explore_pricing_desc": "Accès ouvert à tous pendant la phase de lancement.",
+    "explore_pricing_desc": "Guardiens est gratuit pour tous.",
     "explore_intl": "Annonces hors France",
     "explore_intl_desc": ", Maroc, Espagne, Belgique…",
     "become_sitter_eyebrow": "Devenir gardien",
@@ -1150,7 +1150,7 @@
     "adv1": "Visibilité prioritaire dans les résultats de recherche",
     "adv2": "Alertes urgentes reçues en premier",
     "adv3": "Écusson distinctif « Gardien d'urgence »",
-    "adv4": "1 mois d'abonnement offert par intervention",
+    "adv4": "Remerciements des propriétaires aidés, visibles dans vos avis",
     "eligibility_soon": "Éligibilité (à venir)",
     "engagement_title": "Un engagement, pas juste un badge",
     "engagement_p1": "Être gardien d'urgence, c'est un engagement. Si vous refusez une demande d'urgence, pas de souci, ça arrive. Mais si vous refusez plus d'une fois, le statut est retiré et vous ne pourrez pas le réactiver avant 6 mois. Les propriétaires comptent sur la disponibilité des gardiens d'urgence.",
@@ -1188,11 +1188,11 @@
     "faq9_q": "Que se passe-t-il si je refuse une demande d'urgence ?",
     "faq9_a": "Le premier refus n'a aucune conséquence, c'est normal de ne pas être toujours disponible. En revanche, un deuxième refus consécutif entraîne la perte du statut pendant 6 mois. C'est notre garantie pour les propriétaires : un gardien d'urgence est vraiment disponible.",
     "faq10_q": "Qu'est-ce que je gagne à être gardien d'urgence ?",
-    "faq10_a": "Visibilité prioritaire dans les résultats de recherche, accès anticipé à des gardes intéressantes, écusson distinctif sur votre profil, et un mois d'abonnement offert par intervention d'urgence. Surtout : vous rendez un service réel à des gens du coin qui en ont vraiment besoin.",
+    "faq10_a": "Visibilité prioritaire dans les résultats de recherche, accès anticipé à des gardes intéressantes, écusson distinctif sur votre profil. Surtout : vous rendez un service réel à des gens du coin qui en ont vraiment besoin.",
     "faq11_q": "Comment je suis prévenu(e) d'une urgence ?",
     "faq11_a": "SMS + email + notification push (si activée). Vous configurez vos préférences depuis le dashboard : rayon d'intervention (5 à 200 km), plages horaires de disponibilité, types d'animaux acceptés. Seules les alertes correspondant à vos préférences vous parviennent.",
     "faq12_q": "Puis-je perdre mon statut de gardien d'urgence ?",
-    "faq12_a": "Oui, dans plusieurs cas : note qui descend sous 4.7 (statut mis en pause, récupérable), annulation d'une garde acceptée (perte immédiate, réactivable après 5 nouvelles gardes sans incident), deuxième refus d'urgence consécutif (suspension 6 mois), abonnement expiré (statut en pause)."
+    "faq12_a": "Oui, dans plusieurs cas : note qui descend sous 4.7 (statut mis en pause, récupérable), annulation d'une garde acceptée (perte immédiate, réactivable après 5 nouvelles gardes sans incident), deuxième refus d'urgence consécutif (suspension 6 mois)."
   },
   "small_missions_page": {
     "meta_title": "Entraide entre gens du coin | Guardiens",

@@ -136,7 +136,7 @@ const ProfileHero = (p: ProfileHeroProps) => {
       : p.cta.kind === "muted"
         ? (p.cta.hint ?? "")
         : p.cta.kind === "unauthenticated"
-          ? "L'inscription est ouverte pendant la phase de lancement."
+          ? "L'inscription est gratuite."
           : ""
   );
 

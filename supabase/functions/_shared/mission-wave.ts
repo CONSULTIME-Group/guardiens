@@ -124,6 +124,21 @@ export function waveRelaunchTitle(count: number): string {
 export const WAVE_EMPTY_MESSAGE =
   "Votre besoin est visible sur la page Entraide. Dès qu'une personne disponible rejoint votre secteur, elle le découvre et peut vous répondre.";
 
+/**
+ * Lot X3b (C-08) : « Votre demande reste visible » au plus une fois par
+ * besoin et par semaine. Le cron passe chaque heure ; sans ce garde-fou, la
+ * même notification était recréée à chaque passage (53 en 4 jours pour un
+ * même auteur). Une date illisible compte comme récente : on s'abstient.
+ */
+export const WAVE_EMPTY_NOTIFY_INTERVAL_DAYS = 7;
+
+export function waveEmptyNotificationDue(lastCreatedAt: string | null | undefined, now: Date): boolean {
+  if (!lastCreatedAt) return true;
+  const last = Date.parse(lastCreatedAt);
+  if (!Number.isFinite(last)) return false;
+  return now.getTime() - last >= WAVE_EMPTY_NOTIFY_INTERVAL_DAYS * 86400_000;
+}
+
 /** Date lisible, en français, pour l'annonce. */
 export function frenchDateLabel(iso: string | null | undefined): string | null {
   if (!iso) return null;

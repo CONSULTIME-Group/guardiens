@@ -232,15 +232,15 @@ Deno.serve(async (req) => {
     .maybeSingle()
   if (missionErr || !mission) return json({ error: 'mission_not_found' }, 404)
 
-  // Charger l'acteur (nom lisible)
+  // Charger l'acteur (nom lisible). Lot X3c : first_name seul, la colonne
+  // L'ancienne colonne de nom d'affichage était absente et faisait échouer toute la lecture.
   const { data: actor } = await admin
     .from('profiles')
-    .select('first_name, display_name')
+    .select('first_name')
     .eq('id', payload.actor_id)
     .maybeSingle()
   const actorName =
     (actor?.first_name as string | undefined)?.trim() ||
-    (actor?.display_name as string | undefined)?.trim() ||
     'Un membre'
 
   // Participants réels de la mission, résolus côté serveur : auteur + répondants.

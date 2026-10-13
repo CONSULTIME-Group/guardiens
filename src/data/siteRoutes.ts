@@ -371,7 +371,7 @@ export const staticRoutes: SiteRoute[] = [
  {
  path: "/inscription",
  title: "Inscription, créer un compte 0 € | Guardiens",
- metaDescription: "Rejoignez la communauté Guardiens. Inscription : 0 € pour tous. L'accès est ouvert pendant la phase de lancement.",
+ metaDescription: "Rejoignez la communauté Guardiens. Inscription : 0 € pour tous. Guardiens est gratuit.",
  h1: "Créer un compte",
  sitemapPriority: "0.6",
  changeFreq: "monthly",

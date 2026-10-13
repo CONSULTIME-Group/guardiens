@@ -93,6 +93,7 @@ import { useSitDerived } from "./useSitDerived";
 import SitImmersiveContent from "./SitImmersiveContent";
 import ReviewsTab from "./tabs/ReviewsTab";
 import type { SitData } from "./types";
+import ClosedSitOwnerNotice from "@/components/sits/owner/ClosedSitOwnerNotice";
 
 interface OwnerGalleryPhoto {
   id: string;
@@ -997,6 +998,9 @@ const OwnerSitView = ({
       </AlertDialog>
 
       {accordDialog}
+
+      {/* Lot X3a (A-04) : annonce expirée ou annulée, ce qu'elle est devenue et la suite. */}
+      <ClosedSitOwnerNotice sitId={sit.id} sitTitle={sit.title} status={sit.status} />
 
       {/* Emergency sitter alert, owner only, published sit starting within 15 days */}
       {sit.status === "published" && owner?.city && (

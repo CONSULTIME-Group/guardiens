@@ -16,6 +16,8 @@ interface SitterStatusBannerProps {
   city?: string | null;
   startDate?: string | null;
   endDate?: string | null;
+  /** Lot X3a (B-03) : candidature non retenue sur une garde confirmée ou en cours. */
+  otherSitterChosen?: boolean;
 }
 
 type BannerConfig = {
@@ -72,6 +74,14 @@ const UNPUBLISHED_OTHER: BannerConfig = {
   tone: "border-muted-foreground/20 bg-muted/40 text-muted-foreground",
 };
 
+export const OTHER_SITTER_CHOSEN: BannerConfig = {
+  Icon: UserCheck,
+  title: "Le propriétaire a retenu un autre gardien",
+  description:
+    "Merci pour votre candidature. D'autres gardes vous attendent, découvrez celles qui sont ouvertes près de chez vous.",
+  tone: "border-muted-foreground/20 bg-muted/40 text-muted-foreground",
+};
+
 const SitterStatusBanner = ({
   status,
   unpublishedAt,
@@ -79,8 +89,9 @@ const SitterStatusBanner = ({
   city,
   startDate,
   endDate,
+  otherSitterChosen = false,
 }: SitterStatusBannerProps) => {
-  let cfg: BannerConfig | null = CONFIG[status] ?? null;
+  let cfg: BannerConfig | null = otherSitterChosen ? OTHER_SITTER_CHOSEN : CONFIG[status] ?? null;
 
   // Cas dépubliée par le propriétaire (status revient à "draft" + unpublished_at)
   if (!cfg && status === "draft" && unpublishedAt) {

@@ -22,6 +22,6 @@ export function isStrategicPillar(slug: string): boolean {
  * Baseline éditorial court à utiliser dans les articles.
  */
 export const PRICING_BASELINE_LONG =
-  "L'accès à Guardiens est ouvert pendant la phase de lancement. Vous accédez à l'ensemble des fonctionnalités, et vous restez libre à tout moment. Vous serez prévenu à l'avance en cas d'évolution tarifaire.";
+  "Guardiens est gratuit. Vous accédez à l'ensemble des fonctionnalités, et vous restez libre à tout moment.";
 
-export const PRICING_BASELINE_SHORT = "Guardiens est ouvert pendant la phase de lancement.";
+export const PRICING_BASELINE_SHORT = "Guardiens est gratuit.";

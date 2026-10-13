@@ -153,7 +153,7 @@ export default function PushNotificationsSection() {
         {!loading && !config.enabled && !message && <p className="text-sm">Les notifications sur cet appareil arrivent bientôt. D’ici là, vos alertes arrivent par email.</p>}
         {(config.enabled || subscribed) && !uncertain && <>
           <div className="flex items-center justify-between gap-4"><Label htmlFor="push-messages">Nouveaux messages</Label><Switch id="push-messages" checked={prefs.messages} disabled={busy} onCheckedChange={(messages) => void save({ ...prefs, messages })} /></div>
-          <div className="flex items-center justify-between gap-4"><Label htmlFor="push-applications">Candidatures reçues</Label><Switch id="push-applications" checked={prefs.applications} disabled={busy} onCheckedChange={(applications) => void save({ ...prefs, applications })} /></div>
+          <div className="flex items-center justify-between gap-4"><Label htmlFor="push-applications">Candidatures et propositions d'aide</Label><Switch id="push-applications" checked={prefs.applications} disabled={busy} onCheckedChange={(applications) => void save({ ...prefs, applications })} /></div>
           {(nearbyAvailable || !subscribed) && <div className="flex items-center justify-between gap-4">
             <Label htmlFor="push-nearby">Nouvelles annonces près de chez moi<span className="block text-xs font-normal text-muted-foreground">Dans le rayon de recherche de votre profil, trois au plus par jour.</span></Label>
             <Switch id="push-nearby" checked={prefs.nearbySits === true} disabled={busy} onCheckedChange={(nearbySits) => void save({ ...prefs, nearbySits })} /></div>}

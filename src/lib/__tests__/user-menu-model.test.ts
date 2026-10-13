@@ -25,11 +25,11 @@ describe("menu déroulant de l'avatar", () => {
     ]);
   });
 
-  it("n'affiche Mon abonnement que pour le rôle gardien, avant Paramètres", () => {
+  it("n'affiche Mon accès que pour le rôle gardien, avant Paramètres", () => {
     const sitter = itemsOf({ ...base, isSitterView: true }).map((e) => e.label);
-    expect(sitter).toContain("Mon abonnement");
-    expect(sitter.indexOf("Mon abonnement")).toBeLessThan(sitter.indexOf("Paramètres"));
-    expect(itemsOf(base).some((e) => e.label === "Mon abonnement")).toBe(false);
+    expect(sitter).toContain("Mon accès");
+    expect(sitter.indexOf("Mon accès")).toBeLessThan(sitter.indexOf("Paramètres"));
+    expect(itemsOf(base).some((e) => e.label === "Mon accès")).toBe(false);
   });
 
   it("n'affiche Espace admin qu'aux administrateurs, après Aide & contact", () => {

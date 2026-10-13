@@ -101,7 +101,6 @@ const ParrainagePage = () => {
 
 
   const tiers = [
-    { count: 1, label: "Premier filleul", reward: "1 mois d'accès offert dès qu'il deviendra payant" },
     { count: 3, label: "3 filleuls", reward: "Mise en avant sur votre profil public" },
     { count: 5, label: "5 filleuls", reward: "Badge Ambassadeur permanent" },
     { count: 10, label: "10 filleuls", reward: "Statut Ambassadeur, accès prioritaire support" },
@@ -111,7 +110,7 @@ const ParrainagePage = () => {
     <div className="animate-fade-in">
       <PageMeta
         title="Parrainage Guardiens, invitez vos proches"
-        description="Invitez vos proches à rejoindre Guardiens. Inscription : 0 €, accès offert pour vous et votre filleul à l'activation de l'abonnement gardien."
+        description="Invitez vos proches à rejoindre Guardiens, gratuit pour tous. Chaque filleul fait grandir la communauté près de chez vous et vous rapproche des paliers Ambassadeur."
       />
       <PageBreadcrumb items={[{ label: "Parrainage" }]} />
 
@@ -122,7 +121,7 @@ const ParrainagePage = () => {
           </h1>
           <p className="text-muted-foreground font-body mt-2">
             Plus nous sommes nombreux, plus les gardes de confiance se trouvent près de chez vous.
-            Invitez vos proches, recevez un mois d'accès offert à chaque activation.
+            Invitez vos proches : chaque inscription compte dans vos paliers de récompense.
           </p>
         </header>
 
@@ -190,7 +189,7 @@ const ParrainagePage = () => {
               </div>
 
               <p className="text-xs text-muted-foreground font-body">
-                Quand l'abonnement gardien deviendra payant, vous recevez tous les deux un mois d'accès offert dès son activation.
+                Chaque filleul compte dans vos paliers : mise en avant sur votre profil, badge puis statut Ambassadeur.
               </p>
             </CardContent>
           </Card>
@@ -266,7 +265,7 @@ const ParrainagePage = () => {
               <li>Vous partagez votre lien personnel à un proche.</li>
               <li>Votre filleul crée son compte, 0 €, via votre lien.</li>
               <li>Dès qu'il active son espace, son inscription compte dans vos filleuls.</li>
-              <li>Au moment du passage à l'abonnement payant, vous recevez tous les deux un mois offert.</li>
+              <li>À 3, 5 puis 10 filleuls, vous débloquez les paliers de récompense.</li>
             </ol>
             <div className="mt-4">
               <Link to="/cgs" className="text-xs text-primary underline">Conditions du programme</Link>

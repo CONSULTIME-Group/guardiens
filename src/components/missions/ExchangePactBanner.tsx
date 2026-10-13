@@ -15,7 +15,7 @@ interface ExchangePactBannerProps {
 const ExchangePactBanner = ({ variant = "public", className }: ExchangePactBannerProps) => {
   const primaryCta =
     variant === "sitter"
-      ? { label: "Proposer mon aide", to: "/petites-missions/creer?type=offre" }
+      ? { label: "Proposer mon aide", to: "/profile?section=savoir-faire" }
       : { label: "Publier un besoin", to: "/petites-missions/creer?type=besoin" };
 
   const secondaryCta =
@@ -38,7 +38,7 @@ const ExchangePactBanner = ({ variant = "public", className }: ExchangePactBanne
             Un coup de main, c'est un échange.
           </p>
           <p className="text-xs md:text-sm text-foreground/75 mt-1 leading-relaxed">
-            Sans argent, sans abonnement. Vous demandez, vous proposez quelque chose en retour :
+            Un échange en temps et en savoir-faire. Vous demandez, vous proposez quelque chose en retour :
             un café, des œufs, un service, une histoire à raconter.
           </p>
           <div className="flex flex-wrap gap-2 mt-3">

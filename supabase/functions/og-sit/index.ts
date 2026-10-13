@@ -230,7 +230,7 @@ function buildLayout(opts: {
                 type: "div",
                 props: {
                   style: { fontSize: 18, color: "#FFFFFF", opacity: 0.7, display: "flex" },
-                  children: `Publiée par ${ownerFirstName} — Du coin ou d'ailleurs en France · Garde gratuite`,
+                  children: `Publiée par ${ownerFirstName} · Du coin ou d'ailleurs en France · Garde gratuite`,
                 },
               },
             ],

@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchMySmallMissionsIndex } from "@/lib/dashboardShared";
 import { getAppQueryClient } from "@/lib/appQueryClient";
+import { buildHelpProposals, type HelpProposal, type MyResponseRow } from "@/lib/myHelpProposals";
 
 const invalidateMine = (uid?: string) => {
   if (uid) void getAppQueryClient()?.invalidateQueries({ queryKey: ["my-small-missions-index", uid] });
@@ -34,36 +35,48 @@ export interface HelpRow {
 export function useMyHelpExchanges() {
   const { user } = useAuth();
   const [rows, setRows] = useState<HelpRow[]>([]);
+  const [proposals, setProposals] = useState<HelpProposal[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     if (!user?.id) return;
 
+    // Lot X3b (C-11) : une seule lecture de mes réponses, tous statuts utiles,
+    // sert aux coups de main retenus et au suivi de mes propositions.
     const [mine, answered] = await Promise.all([
       supabase
         .from("small_mission_responses")
-        .select("mission_id")
+        .select("id, mission_id, status, created_at, conversation_id")
         .eq("responder_id", user.id)
-        .eq("status", "accepted"),
+        .in("status", ["pending", "accepted", "declined"])
+        .order("created_at", { ascending: false })
+        .limit(40),
       supabase.from("mission_feedbacks").select("mission_id, comment, receiver_id, giver_id"),
     ]);
 
-    const helperMissionIds = (mine.data || []).map((r) => r.mission_id);
+    const myResponses = ((mine.data || []) as MyResponseRow[]);
+    const acceptedIds = new Set(myResponses.filter((r) => r.status === "accepted").map((r) => r.mission_id));
+    const answeredMissionIds = Array.from(new Set(myResponses.map((r) => r.mission_id)));
     // Lot P1b : mes propres coups de main viennent de la lecture partagée du
-    // tableau de bord ; seuls ceux où j'ai aidé sont lus ici, par identifiants.
+    // tableau de bord ; ceux où j'ai proposé mon aide sont lus ici, par
+    // identifiants, en une lecture (politique « Responders can read missions
+    // they answered », lot X1).
     const [mineAll, helped] = await Promise.all([
       fetchMySmallMissionsIndex(user.id).catch(() => []),
-      helperMissionIds.length
+      answeredMissionIds.length
         ? supabase
           .from("small_missions")
-          .select("id, title, city, status, close_reason, user_id, updated_at")
-          .in("id", helperMissionIds)
-          .in("status", ["in_progress", "completed"])
+          .select("id, title, city, status, close_reason, user_id, updated_at, slug, category")
+          .in("id", answeredMissionIds)
         : Promise.resolve({ data: [] as any[] }),
     ]);
+    const helpedRows = ((helped.data || []) as any[]);
+    setProposals(buildHelpProposals(myResponses, helpedRows));
     const byId = new Map<string, any>();
     for (const m of mineAll) if (m.status === "in_progress" || m.status === "completed") byId.set(m.id, m);
-    for (const m of (helped.data || []) as any[]) byId.set(m.id, m);
+    for (const m of helpedRows) {
+      if (acceptedIds.has(m.id) && (m.status === "in_progress" || m.status === "completed")) byId.set(m.id, m);
+    }
     const missions = Array.from(byId.values())
       .sort((a, b) => String(b.updated_at ?? "").localeCompare(String(a.updated_at ?? "")))
       .slice(0, 20) as Array<{ id: string; title: string; city: string | null; status: string; close_reason: string | null; user_id: string }>;
@@ -134,7 +147,43 @@ export function useMyHelpExchanges() {
     }
   };
 
-  return { rows, busy, answer };
+  return { rows, proposals, busy, answer };
+}
+
+/**
+ * Lot X3b (C-11) : « Vos propositions d'aide » : où la personne a proposé son
+ * aide, où en est chaque proposition, avec le besoin et la conversation.
+ */
+export function HelpProposalsList({ proposals }: { proposals: HelpProposal[] }) {
+  if (proposals.length === 0) return null;
+  return (
+    <div className="mt-[14px] rounded-[14px] bg-card px-[16px] py-[12px]" data-testid="help-proposals">
+      <p className="text-foreground text-[14px] font-semibold">Vos propositions d'aide</p>
+      <ul className="mt-[8px] space-y-[10px] list-none p-0">
+        {proposals.map((p) => (
+          <li key={p.responseId} className="flex flex-col sm:flex-row sm:items-center gap-[8px]" data-state={p.state}>
+            <div className="min-w-0 flex-1">
+              <p className="text-foreground text-[13.5px] font-medium">
+                {p.title}
+                {p.city ? <span className="font-normal text-muted-foreground">, {formatCityLabel(p.city)}</span> : null}
+              </p>
+              <p className="text-muted-foreground text-[12.5px]">{p.label}</p>
+            </div>
+            <div className="flex items-center gap-[12px] shrink-0">
+              <Link to={p.missionPath} className="text-primary text-[13px] font-semibold hover:underline underline-offset-4">
+                Voir le besoin
+              </Link>
+              {p.conversationPath && (
+                <Link to={p.conversationPath} className="text-primary text-[13px] font-semibold hover:underline underline-offset-4">
+                  Conversation
+                </Link>
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 }
 
 /**
@@ -142,8 +191,8 @@ export function useMyHelpExchanges() {
  * mot reçu quand la rencontre a eu lieu.
  */
 const MesCoupsDeMain = () => {
-  const { rows, busy, answer } = useMyHelpExchanges();
-  if (rows.length === 0) return null;
+  const { rows, proposals, busy, answer } = useMyHelpExchanges();
+  if (rows.length === 0 && proposals.length === 0) return null;
 
   return (
     <Card className="mt-6">
@@ -151,6 +200,7 @@ const MesCoupsDeMain = () => {
         <CardTitle className="font-heading text-xl">Vos coups de main</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        <HelpProposalsList proposals={proposals} />
         {rows.map((row) => (
           <div key={row.id} className="rounded-lg border border-border p-4">
             <p className="text-xs font-semibold text-primary">

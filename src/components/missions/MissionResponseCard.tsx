@@ -28,9 +28,10 @@ interface Props {
   onOpenMessages: () => void;
   /**
    * Lot X2 : « projet » pour la liste du porteur d'un projet participatif
-   * (statut affiché, conversation ouverte pour chaque candidature, pas de
-   * « Choisir », qui fermerait le projet aux autres participants). Défaut
-   * « mission » : rendu de la fiche besoin inchangé.
+   * (statut affiché, conversation ouverte pour chaque candidature). Lot X3b
+   * (décision du 13/10/2026) : « Choisir » revient, le projet passe en cours,
+   * les autres candidatures restent en attente et le porteur peut rouvrir les
+   * candidatures. Défaut « mission » : rendu de la fiche besoin inchangé.
    */
   variant?: "mission" | "projet";
 }
@@ -226,6 +227,36 @@ const MissionResponseCard = ({
                 <MessageSquare aria-hidden="true" className="h-3.5 w-3.5" />
                 <span>{r.conversation_id ? "Ouvrir la conversation" : `Écrire à ${r.responder?.first_name || "cette personne"}`}</span>
               </Button>
+            )}
+            {isProjet && isAuthor && (!r.status || r.status === "pending") && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    size="sm"
+                    disabled={processing}
+                    aria-disabled={processing}
+                    aria-busy={processing}
+                    aria-label={`Choisir ${r.responder?.first_name || "cette personne"}`}
+                    className="rounded-full min-h-11"
+                  >
+                    <CheckCircle2 aria-hidden="true" className="h-3.5 w-3.5 mr-1" />
+                    <span>{processing ? "Enregistrement en cours..." : `Choisir ${r.responder?.first_name || "cette personne"}`}</span>
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Choisir {r.responder?.first_name || "cette personne"} ?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Le projet passe en cours et les candidatures se ferment. Les autres candidatures restent
+                      en attente, et vous pouvez rouvrir les candidatures à tout moment depuis cette page.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Annuler</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => onSelect("keep")}>Choisir {r.responder?.first_name || "cette personne"}</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             )}
             {isProjet && isAuthor && (!r.status || r.status === "pending") && (
               <Button

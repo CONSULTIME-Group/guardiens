@@ -13,6 +13,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { cancelOutcomeFromStatus, cancelOutcomeMessage, type CancelOutcome } from "@/lib/sitCancellation";
 
 interface CancelSitModalProps {
   open: boolean;
@@ -23,7 +24,8 @@ interface CancelSitModalProps {
   otherPartyName?: string;
   startDate?: string;
   endDate?: string;
-  onCancelled: () => void;
+  /** Lot X3a (B-02) : issue réelle, annonce republiée ou garde annulée. */
+  onCancelled: (outcome?: CancelOutcome) => void;
 }
 
 const CancelSitModal = ({
@@ -81,27 +83,21 @@ const CancelSitModal = ({
 
       if (rpcError) throw rpcError;
 
-      // If sitter cancelled, re-publish the sit
+      // Lot X3a (B-02) : côté gardien, create_avis_annulation passe la
+      // candidature en cancelled et republie une garde à venir. On relit
+      // l'annonce pour dire ce qui s'est réellement passé : publiée, la RPC
+      // publique la rend ; annulée, elle ne la rend plus.
+      let outcome: CancelOutcome = "cancelled";
       if (isSitterCancelling) {
-        await supabase
-          .from("sits")
-          .update({ status: "published" as any })
-          .eq("id", sitId);
-      }
-
-      // Cancel accepted applications
-      await supabase
-        .from("applications")
-        .update({ status: "cancelled" })
-        .eq("sit_id", sitId)
-        .eq("status", "accepted");
-
-      if (isSitterCancelling) {
+        const { data: afterRows } = await supabase.rpc("get_public_sit", { p_param: sitId });
+        outcome = cancelOutcomeFromStatus((afterRows as any[] | null)?.[0]?.status ?? null);
+      } else {
+        // Propriétaire : la candidature acceptée est close (autorisé au propriétaire).
         await supabase
           .from("applications")
           .update({ status: "cancelled" })
           .eq("sit_id", sitId)
-          .eq("sitter_id", user.id);
+          .eq("status", "accepted");
       }
 
       // Send system message in conversation
@@ -141,14 +137,10 @@ const CancelSitModal = ({
         },
       });
 
-      toast.success(
-        isSitterCancelling
-          ? "Garde annulée. L'annonce est de nouveau visible pour d'autres gardiens."
-          : "Garde annulée. Le gardien a été notifié."
-      );
+      toast.success(cancelOutcomeMessage(cancelledByRole, outcome));
 
       setReason("");
-      onCancelled();
+      onCancelled(outcome);
       onOpenChange(false);
     } catch (err: any) {
       logger.error("CancelSitModal error", { err: String(err) });

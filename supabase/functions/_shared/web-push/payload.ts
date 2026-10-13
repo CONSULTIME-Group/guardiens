@@ -1,14 +1,14 @@
 // Contenu de notification strictement constant : aucun nom, aucun extrait,
 // aucune adresse, aucun identifiant de membre.
 
-export type PushEventKind = 'message' | 'application';
+export type PushEventKind = 'message' | 'application' | 'mission_response';
 
 export interface PushPayload {
   title: string;
   body: string;
   url: string;
   tag: string;
-  kind?: 'message' | 'application' | 'nearby_sit' | 'test';
+  kind?: 'message' | 'application' | 'mission_response' | 'nearby_sit' | 'test';
   /** Lot N2 : nombre de messages non lus, pour la pastille de l'icône. Jamais de contenu. */
   badge?: number;
 }
@@ -18,14 +18,24 @@ export function sanitizeBadge(value: unknown): number | undefined {
   return typeof value === 'number' && Number.isInteger(value) && value >= 0 ? Math.min(value, 99) : undefined;
 }
 
+/**
+ * Lot X3b : texte d'une proposition d'aide, affiché par le worker push-5.
+ * Le corps transmis reste celui d'une candidature : un worker plus ancien
+ * (push-4) l'affiche alors comme une candidature vers /notifications, jamais
+ * comme un faux message.
+ */
+export const MISSION_RESPONSE_BODY = "Quelqu'un vous propose son aide.";
+
 const BODIES: Record<PushEventKind, string> = {
   message: 'Vous avez un nouveau message.',
   application: 'Vous avez reçu une nouvelle candidature.',
+  mission_response: 'Vous avez reçu une nouvelle candidature.',
 };
 
 const URLS: Record<PushEventKind, string> = {
   message: '/messages',
   application: '/notifications',
+  mission_response: '/notifications',
 };
 
 export const NEARBY_SIT_BODY = 'Une nouvelle annonce de garde près de chez vous.';
@@ -35,7 +45,7 @@ export const TEST_URL = '/settings?section=notifications';
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export function isPushEventKind(value: unknown): value is PushEventKind {
-  return value === 'message' || value === 'application';
+  return value === 'message' || value === 'application' || value === 'mission_response';
 }
 
 export function buildPushPayload(kind: PushEventKind, jobId: string, badge?: unknown): PushPayload {
@@ -46,6 +56,7 @@ export function buildPushPayload(kind: PushEventKind, jobId: string, badge?: unk
     url: URLS[kind],
     // Le tag derive du seul identifiant de job, donnee technique non personnelle.
     tag: `guardiens-${kind}-${jobId}`,
+    ...(kind === 'mission_response' ? { kind } : {}),
     ...(count === undefined ? {} : { badge: count }),
   };
 }

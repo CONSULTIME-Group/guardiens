@@ -19,20 +19,20 @@ export default function MySubscription() {
   return (
     <>
       <PageMeta
-        title="Mon abonnement | Guardiens"
-        description="Vous avez accès complet à Guardiens gratuitement. Aucun abonnement à gérer aujourd'hui."
+        title="Mon accès | Guardiens"
+        description="Guardiens est gratuit : vous avez accès à toutes les fonctionnalités."
         path="/mon-abonnement"
         noindex
         nofollow
       />
       <div className="min-h-screen bg-background">
-        <PageBreadcrumb items={[{ label: "Mon abonnement" }]} />
+        <PageBreadcrumb items={[{ label: "Mon accès" }]} />
         <main className="max-w-2xl mx-auto px-4 py-10 min-w-0">
           <h1 className="font-heading text-3xl md:text-4xl font-bold mb-3">
             Vous avez accès complet à Guardiens
           </h1>
           <p className="font-body text-foreground/70 mb-6">
-            Aucun paiement à gérer pour le moment.
+            Guardiens est gratuit.
           </p>
 
           <Card className="border-2 border-primary/40">
@@ -42,8 +42,8 @@ export default function MySubscription() {
               </p>
               <ul className="font-body text-sm space-y-1.5 text-foreground/75 mb-6">
                 <li>· Accès à toutes les fonctionnalités</li>
-                <li>· Aucune limite d'usage</li>
-                <li>· Aucun engagement, aucune carte bancaire requise</li>
+                <li>· Toutes les annonces et toutes les conversations</li>
+                <li>· Une adresse email suffit pour commencer</li>
               </ul>
               <div className="flex flex-col sm:flex-row gap-3">
                 <Button asChild variant="outline">
@@ -56,9 +56,6 @@ export default function MySubscription() {
             </CardContent>
           </Card>
 
-          <p className="font-body text-xs text-foreground/55 mt-6">
-            Vous serez informé par email 30 jours à l'avance si le modèle change.
-          </p>
         </main>
       </div>
     </>

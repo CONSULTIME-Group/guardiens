@@ -318,6 +318,17 @@ const ApplicationModal = ({
         onSuccess();
         return;
       }
+      // Lot X3a (B-05) : garde serveur trg_guard_application_sit_open, annonce
+      // fermée ou plafond atteint entre l'ouverture du formulaire et l'envoi.
+      if (String((error as { message?: string }).message ?? "").includes("SIT_CLOSED")) {
+        toast({
+          title: "Candidatures fermées",
+          description: "Cette annonce a reçu toutes les candidatures prévues. D'autres gardes vous attendent dans la recherche.",
+          variant: "destructive",
+        });
+        onOpenChange(false);
+        return;
+      }
       // Garde serveur (trg_guard_application_min_completion) : sous 40 %, refus explicite.
       if (String((error as { message?: string }).message ?? "").includes("PROFILE_INCOMPLETE")) {
         toast({
@@ -378,17 +389,9 @@ const ApplicationModal = ({
     // d'idempotence `first-application-{app_id}` ou `new-application-{app_id}`.
 
 
-    // Vérifier si on doit fermer les candidatures (max atteint)
-    if (sitCheck.max_applications) {
-      const { count } = await supabase
-        .from("applications")
-        .select("id", { count: "exact", head: true })
-        .eq("sit_id", sitId)
-        .not("status", "in", "(rejected,cancelled)");
-      if (count !== null && count >= sitCheck.max_applications) {
-        await supabase.from("sits").update({ accepting_applications: false } as any).eq("id", sitId);
-      }
-    }
+    // Lot X3a (B-05) : la fermeture au plafond est faite côté serveur
+    // (trg_close_sit_when_application_cap_reached). L'écriture depuis le
+    // navigateur du gardien était refusée par la RLS de sits, sans erreur.
 
     // Candidature à une garde, RPC atomique (context: sit_application)
     const { data: convId, error: convErr } = await supabase.rpc("get_or_create_conversation", {
