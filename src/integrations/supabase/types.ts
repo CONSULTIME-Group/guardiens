@@ -13277,6 +13277,7 @@ export type Database = {
           cover_photo: string
           created_at: string
           owner_id: string
+          sit_cancelled_by_me: boolean
           sit_city: string
           sit_end_date: string
           sit_id: string
@@ -14140,8 +14141,13 @@ export type Database = {
         Args: { _code: string; _message: string; _sit_id: string }
         Returns: undefined
       }
+      sit_is_reviewable: { Args: { p_sit_id: string }; Returns: boolean }
       sit_proposal_blockers: { Args: { p_sit_id: string }; Returns: string[] }
       sit_proposal_limits: { Args: never; Returns: Json }
+      sit_review_parties_ok: {
+        Args: { p_reviewee: string; p_sit_id: string }
+        Returns: boolean
+      }
       sitter_missing_opportunities:
         | { Args: never; Returns: Json }
         | { Args: { _sitter_id?: string }; Returns: Json }
