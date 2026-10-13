@@ -130,7 +130,9 @@ Deno.serve(async (req) => {
     // ------------------------------------------------------------------
     if (body?.mode === "rating") {
       const ratingLimit = Math.min(60, Math.max(1, Number(body?.limit) || 20));
-      const sansNote = body?.sans_note === true;
+      // Lots GL (13/10/2026) : identifiant de lieu seul. Les conditions de
+      // Google (Places API, 5.4) n'autorisent pas à conserver la note.
+      const sansNote = true;
       const googleKey = Deno.env.get("GOOGLE_PLACES_API_KEY");
       if (!googleKey) {
         return json({

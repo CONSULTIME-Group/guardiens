@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCityPageExists } from "@/hooks/useCityPageExists";
 import { useDepartmentPageExists } from "@/hooks/useDepartmentPageExists";
 import PageMeta from "@/components/PageMeta";
-import { MapPin, TreePine, Stethoscope, Coffee, Store, Footprints, Droplets, Trees, Star, ArrowRight, ArrowLeft, Search } from "lucide-react";
+import { MapPin, TreePine, Stethoscope, Coffee, Store, Footprints, Droplets, Trees, ArrowRight, ArrowLeft, Search, Navigation, ExternalLink } from "lucide-react";
 import PageBreadcrumb from "@/components/seo/PageBreadcrumb";
 const guideHeaderImg = "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/object/public/property-photos/misc/guide-header.webp";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Suspense, useState, useMemo, useEffect } from "react";
 import { lazyWithRetry as lazy } from "@/lib/lazyWithRetry";
 import { GUIDE_OVERRIDES, COMMERCIAL_CATEGORIES, COMMERCIAL_DESCRIPTION } from "@/data/guideOverrides";
+import { visibleGuidePlaces, directionsUrl, googlePlaceUrl } from "@/lib/guidePlaces";
 import HouseSittingGuideInsert from "@/components/city/HouseSittingGuideInsert";
 
 // Carte chargée uniquement quand l'utilisateur s'en approche (lazy + IntersectionObserver)
@@ -32,6 +33,11 @@ interface CityGuide {
   department: string;
   leash_rule: string | null;
   leash_rule_source: string | null;
+  /** Lots GL : pays réel du guide (ISO), date à partir de laquelle seuls les lieux sourcés s'affichent. */
+  country?: string | null;
+  places_sourced_at?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 interface GuidePlace {
@@ -42,7 +48,9 @@ interface GuidePlace {
   address: string;
   latitude: number | null;
   longitude: number | null;
-  google_rating: number | null;
+  google_place_id?: string | null;
+  source_url?: string | null;
+  distance_km?: number | null;
   description: string;
   dogs_welcome: boolean;
   leash_required: boolean | null;
@@ -73,19 +81,38 @@ const SCHEMA_TYPE_MAP: Record<string, string> = {
   water_point: "Place",
 };
 
-const StarRating = ({ rating }: { rating: number | null }) => {
-  if (!rating) return null;
+
+/**
+ * Liens d'un lieu (lots GL) : itinéraire et fiche Google Maps (avis et note,
+ * lus chez Google), source OpenStreetMap. Aucune note Google n'est recopiée
+ * ici : les conditions de Google ne permettent de conserver que l'identifiant
+ * du lieu, et la carte de la page est une carte OpenStreetMap.
+ */
+const PlaceLinks = ({ place }: { place: GuidePlace }) => {
+  const { t } = useTranslation();
+  const route = directionsUrl(place);
+  const google = googlePlaceUrl(place);
+  if (!route && !google && !place.source_url) return null;
+  const linkClass = "inline-flex items-center gap-1 text-xs text-primary hover:underline underline-offset-4";
   return (
-    <div className="flex items-center gap-1">
-      {[1, 2, 3, 4, 5].map((i) => (
-        <Star
-          key={i}
-          className="h-3.5 w-3.5"
-          fill={i <= Math.round(rating) ? "#C4956A" : "transparent"}
-          stroke={i <= Math.round(rating) ? "#C4956A" : "hsl(var(--muted-foreground))"}
-        />
-      ))}
-      <span className="text-xs text-muted-foreground ml-1">{rating.toFixed(1)}</span>
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-3">
+      {route && (
+        <a href={route} target="_blank" rel="noopener noreferrer" className={linkClass}>
+          <Navigation className="h-3.5 w-3.5" aria-hidden="true" />
+          {t("guide_detail.links.directions")}
+        </a>
+      )}
+      {google && (
+        <a href={google} target="_blank" rel="noopener noreferrer" className={linkClass}>
+          <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+          {t("guide_detail.links.google_reviews")}
+        </a>
+      )}
+      {place.source_url && (
+        <a href={place.source_url} target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:underline underline-offset-4">
+          {t("guide_detail.links.source_osm")}
+        </a>
+      )}
     </div>
   );
 };
@@ -140,27 +167,24 @@ const GuideDetail = () => {
     enabled: !!guide?.id,
   });
 
-  // Guide refondu : seuls les lieux retenus sont affichés, conseils corrigés.
-  const places = useMemo(
-    () =>
-      override
-        ? rawPlaces
-            .filter((p) => override.places[p.id])
-            .map((p) => {
-              const o = override.places[p.id];
-              const commercial = COMMERCIAL_CATEGORIES.has(p.category);
-              return {
-                ...p,
-                ...o,
-                description: commercial ? COMMERCIAL_DESCRIPTION[p.category] : o.description ?? p.description,
-                // Inconnu n'est pas interdit : aucun badge sans source.
-                dogs_welcome: !commercial && o.dogs_welcome === true,
-                leash_required: commercial ? null : o.leash_required ?? null,
-              };
-            })
-        : rawPlaces,
-    [rawPlaces, override],
-  );
+  // Guide sourcé (lots GL) : seuls les lieux avec une source, plus la sélection
+  // des guides refondus. Guide refondu : conseils corrigés sur sa sélection.
+  const places = useMemo(() => {
+    const curated = override ? new Set(Object.keys(override.places)) : null;
+    return visibleGuidePlaces(rawPlaces, rawGuide, curated).map((p) => {
+      const o = override?.places[p.id];
+      if (!o) return p;
+      const commercial = COMMERCIAL_CATEGORIES.has(p.category);
+      return {
+        ...p,
+        ...o,
+        description: commercial ? COMMERCIAL_DESCRIPTION[p.category] : o.description ?? p.description,
+        // Inconnu n'est pas interdit : aucun badge sans source.
+        dogs_welcome: !commercial && o.dogs_welcome === true,
+        leash_required: commercial ? null : o.leash_required ?? null,
+      };
+    });
+  }, [rawPlaces, rawGuide, override]);
 
   // Le contenu principal (entête, intro, liste des lieux) doit être dans le DOM
   // avant que Prerender ne fige la page. La carte Leaflet ne bloque pas.
@@ -242,9 +266,10 @@ const GuideDetail = () => {
             streetAddress: place.address,
             addressLocality: guide.city,
             addressRegion: guide.department,
-            addressCountry: "FR",
+            addressCountry: guide.country || "FR",
           },
         };
+        if (place.source_url) item.sameAs = place.source_url;
         if (place.latitude != null && place.longitude != null) {
           item.geo = {
             "@type": "GeoCoordinates",
@@ -261,7 +286,7 @@ const GuideDetail = () => {
     };
   // Dependances en acces optionnel : guide vaut undefined pendant le chargement,
   // dereferencer guide.city ici ferait tomber le composant avant le garde NotFound.
-  }, [places, guide?.city, guide?.department]);
+  }, [places, guide?.city, guide?.department, guide?.country]);
 
   // Bloc « L'essentiel » : chaque entree n'existe que si ses donnees existent.
   // Cette liste unique alimente a la fois l'affichage et le JSON-LD FAQPage,
@@ -530,10 +555,7 @@ const GuideDetail = () => {
                     {catPlaces.map((place) => (
                       <Card key={place.id} className="border-border">
                         <CardContent className="p-4">
-                          <div className="flex items-start justify-between mb-1">
-                            <h3 className="font-semibold text-foreground text-sm">{place.name}</h3>
-                            <StarRating rating={place.google_rating} />
-                          </div>
+                          <h3 className="font-semibold text-foreground text-sm mb-1">{place.name}</h3>
                           <p className="text-xs text-muted-foreground mb-2">{place.address}</p>
                           <p className="text-sm text-foreground/80 mb-2">{place.description}</p>
                           <div className="flex items-center gap-2 mb-2">
@@ -553,6 +575,7 @@ const GuideDetail = () => {
                               </p>
                             </div>
                           )}
+                          <PlaceLinks place={place} />
                         </CardContent>
                       </Card>
                     ))}

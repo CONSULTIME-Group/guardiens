@@ -36,6 +36,9 @@ const AdminGuides = () => {
   const [city, setCity] = useState("");
   const [postalCode, setPostalCode] = useState("");
   const [department, setDepartment] = useState("");
+  const [countryCode, setCountryCode] = useState("FR");
+  // Lots GL : pays et lieu de la demande, pour viser la vraie commune (homonymes, étranger).
+  const [requestPlace, setRequestPlace] = useState<{ country: string | null; latitude: number | null; longitude: number | null } | null>(null);
   const [generating, setGenerating] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<CityGuide | null>(null);
   const [pendingUnpublish, setPendingUnpublish] = useState<CityGuide | null>(null);
@@ -115,6 +118,8 @@ const AdminGuides = () => {
     setCity(req.city || "");
     setPostalCode(req.postal_code || "");
     setDepartment(req.department || "");
+    setRequestPlace({ country: req.country ?? null, latitude: req.latitude ?? null, longitude: req.longitude ?? null });
+    setCountryCode((req.country || "FR").toUpperCase());
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -123,7 +128,14 @@ const AdminGuides = () => {
     setGenerating(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-city-guide", {
-        body: { city, postal_code: postalCode, department },
+        body: {
+          city,
+          postal_code: postalCode,
+          department,
+          country: (requestPlace?.country || countryCode || "FR").toUpperCase(),
+          latitude: requestPlace?.latitude ?? undefined,
+          longitude: requestPlace?.longitude ?? undefined,
+        },
       });
       if (error) {
         const res = (error as { context?: Response }).context;
@@ -137,10 +149,12 @@ const AdminGuides = () => {
         toast.error(msg);
         return;
       }
-      toast.success(`Guide généré pour ${data.city} (${data.places_count || 0} lieux)`);
+      toast.success(`Guide créé pour ${data.city} : lieux sourcés et publication dans une minute environ`);
       setCity("");
       setPostalCode("");
       setDepartment("");
+      setRequestPlace(null);
+      setCountryCode("FR");
       queryClient.invalidateQueries({ queryKey: ["admin-guides"] });
       queryClient.invalidateQueries({ queryKey: ["admin-guide-place-counts"] });
       refreshAdminBadges();
@@ -180,7 +194,7 @@ const AdminGuides = () => {
 
   return (
     <div className="space-y-6">
-      <AdminPageHeader title="Guides locaux" description={`${guides.length} guides · générés par IA avec des lieux réels`} />
+      <AdminPageHeader title="Guides locaux" description={`${guides.length} guides · lieux sourcés OpenStreetMap, introduction rédigée par IA`} />
 
       <Card>
         <CardHeader>
@@ -191,7 +205,10 @@ const AdminGuides = () => {
             <Input
               placeholder="Ville (ex: Lyon)"
               value={city}
-              onChange={(e) => setCity(e.target.value)}
+              onChange={(e) => {
+                setCity(e.target.value);
+                setRequestPlace(null);
+              }}
               className="w-48"
             />
             <Input
@@ -205,6 +222,17 @@ const AdminGuides = () => {
               value={department}
               onChange={(e) => setDepartment(e.target.value)}
               className="w-48"
+            />
+            <Input
+              placeholder="Pays (FR, CA, MA...)"
+              aria-label="Code pays"
+              value={countryCode}
+              maxLength={2}
+              onChange={(e) => {
+                setCountryCode(e.target.value.toUpperCase());
+                setRequestPlace(null);
+              }}
+              className="w-24"
             />
             <Button onClick={generateGuide} disabled={!city || generating} className="gap-2">
               {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
