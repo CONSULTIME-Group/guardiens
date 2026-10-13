@@ -16,7 +16,8 @@
  *    décliné automatiquement ;
  * 5. ouverture de l'accord de garde `AccordDeGarde` (role="proprio").
  */
-import { fetchMyProfile } from "@/lib/myProfile";
+import { fetchMyProfile, fetchMyOwnerProfile } from "@/lib/myProfile";
+import { buildAccordDeGardeData, fetchAccordHouseGuide } from "@/lib/accordDeGarde";
 import { useCallback, useState, type ReactNode } from "react";
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -118,7 +119,7 @@ export function useAcceptApplication(options: Options = {}) {
         // Données de l'annonce pour les messages et l'accord.
         const { data: sitFull } = (await supabase
           .from("sits")
-          .select("id, title, start_date, end_date, city, properties(pets(name, species, breed))")
+          .select("id, title, start_date, end_date, city, property_id, properties(pets(name, species, breed))")
           .eq("id", sitId)
           .maybeSingle()) as any;
         const { data: proprio } = (await fetchMyProfile(user.id!)) as any;
@@ -230,27 +231,26 @@ export function useAcceptApplication(options: Options = {}) {
         }
 
         // 5) Accord de garde.
+        // Lot Z : même construction que la fiche de l'annonce (guide de la
+        // maison, préférences du propriétaire, aucun montant imposé).
         setAccordSitId(sitId);
-        setAccordData({
-          gardeId: sitId,
-          dateDebut: startLong,
-          dateFin: endLong,
-          adresse: sitFull?.city || proprio?.city || "",
-          proprio: { prenom: ownerFirst || "Le propriétaire", telephone: "" },
-          gardien: { prenom: publicFirstName(target.sitterFirstName ?? "") || "Le gardien" },
-          animaux: petsRaw.map((p) => ({
-            prenom: p.name,
-            espece: p.species ?? "",
-            race: p.breed ?? undefined,
-          })),
-          reglesVie: { animauxPartout: null, invites: null, tabac: null, autresPrecisions: null },
-          voisinConfiance: null,
-          urgences: null,
-          montantVetMax: 300,
-          montantLogementMax: null,
-          estLongueDuree: false,
-          contributionCharges: null,
-        });
+        const [accordGuide, ownerRulesRes] = await Promise.all([
+          fetchAccordHouseGuide(supabase as any, sitFull?.property_id),
+          fetchMyOwnerProfile(user.id!).catch(() => ({ data: null })),
+        ]);
+        setAccordData(
+          buildAccordDeGardeData({
+            sitId,
+            dateDebut: startLong,
+            dateFin: endLong,
+            adresse: sitFull?.city || proprio?.city || "",
+            ownerFirstName: ownerFirst,
+            sitterFirstName: publicFirstName(target.sitterFirstName ?? ""),
+            pets: petsRaw,
+            guide: accordGuide,
+            ownerRules: ((ownerRulesRes as any)?.data ?? null) as any,
+          }),
+        );
 
         toast({ title: "Garde confirmée !", description: `${sitterName} a été choisi(e) pour cette garde.` });
         options.onAccepted?.(sitId);

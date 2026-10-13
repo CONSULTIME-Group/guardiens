@@ -86,13 +86,16 @@ const HelpDuringSitDialog = ({
     setSubmitting(true);
     try {
       // 1) récupère/crée la conversation liée à ce sit
+      // Signature en base : p_other_user_id, p_context_type, p_sit_id,
+      // p_small_mission_id. Un ancien appel passait `p_context` (lot Z) :
+      // la fonction était introuvable et « Besoin d'aide » échouait toujours.
       const { data: convData, error: convErr } = await supabase.rpc(
-        "get_or_create_conversation" as any,
+        "get_or_create_conversation",
         {
           p_other_user_id: recipientUserId,
-          p_context: "sit_application",
+          p_context_type: "sit_application",
           p_sit_id: sitId,
-        } as any,
+        },
       );
       if (convErr) throw convErr;
       const conversationId =

@@ -71,7 +71,7 @@ export function AccordOwnerStatusBanner({ sitId, sitStatus, onSignAccord, refres
         <p className="font-medium text-sm">Un accord de garde est disponible pour cette réservation.</p>
         <p className="text-sm text-muted-foreground">{description}</p>
         <p className="text-sm text-muted-foreground">
-          Il vous reste à le signer : cela verrouille les dates de la garde et rassure votre gardien.
+          Il vous reste à le signer : votre gardien est alors prévenu et peut le signer à son tour. Vous partagez ainsi une référence commune.
         </p>
         {onSignAccord && (
           <Button size="sm" className="mt-2" onClick={onSignAccord}>
@@ -117,7 +117,7 @@ export function AccordOwnerStatusBanner({ sitId, sitStatus, onSignAccord, refres
         <p className="font-medium text-sm">En attente de signature du gardien.</p>
         <p className="text-sm text-muted-foreground">{description}</p>
         <p className="text-sm text-muted-foreground">
-          Vous avez signé l'accord de garde. Nous relançons votre gardien pour qu'il le signe à son tour.
+          Vous avez signé l'accord de garde. Votre gardien en a été prévenu et peut le signer à son tour depuis la page de la garde.
         </p>
       </div>
     );
