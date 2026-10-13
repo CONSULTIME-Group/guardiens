@@ -106,12 +106,16 @@ export function overpassFilters(category: GuideCategory, radiusM: number, lat: n
     case "general_park":
       return [
         `nwr${a}["leisure"~"^(park|nature_reserve)$"]["name"];`,
-        `wr${a}[~"^(landuse|natural)$"~"^(forest|wood)$"]["name"];`,
+        // Deux filtres simples : la recherche par expression sur la clé est lente.
+        `wr${a}["landuse"="forest"]["name"];`,
+        `wr${a}["natural"="wood"]["name"];`,
       ];
     case "walk_trail":
+      // La recherche des chemins par leur nom est lourde : limitée à 15 km
+      // (au-delà, elle dépassait le délai d'Overpass le 13/10/2026).
       return [
         `relation${a}["route"~"^(hiking|foot)$"]["name"]["network"!~"^(iwn|nwn)$"];`,
-        `way${a}["highway"~"^(path|footway|track|cycleway)$"]["name"~"${WALK_NAME.source}",i];`,
+        ...(radiusM <= 15000 ? [`way${a}["highway"~"^(path|footway|track|cycleway)$"]["name"~"${WALK_NAME.source}",i];`] : []),
       ];
     case "vet":
       return [`nwr${a}["amenity"="veterinary"]["name"];`];
@@ -131,8 +135,16 @@ export function buildOverpassQuery(categories: GuideCategory[], radiusM: number,
 }
 
 /** Catégorie et nature d'un élément OSM, ou null s'il ne correspond à rien. */
+/**
+ * Noms écartés : essai à blanc sur Lyon du 13/10/2026, un « Espace de
+ * Déjection Canine » remontait comme espace pour chiens et des traboules
+ * (itinéraires piétons urbains) comme balades avec un chien.
+ */
+const EXCLUDED_NAME = /(d[ée]jection|canisette|sanisette|toilettes?\s+canines?|traboule)/i;
+
 export function categorize(el: OsmElement): { category: GuideCategory; kind: PlaceKind } | null {
   const t = el.tags ?? {};
+  if (t.name && EXCLUDED_NAME.test(t.name)) return null;
   if (t.leisure === "dog_park" && (!t.name || !t.name.trim())) return { category: "dog_park", kind: "dog_park" };
   if (!t.name || !t.name.trim()) return null;
   const dogOk = t.dog === "yes" || t.dog === "leashed";
@@ -739,7 +751,10 @@ export function dbOverpassBatch(
   };
   return async (queries, deadline) => {
     const results: (OsmElement[] | null)[] = queries.map(() => null);
-    let pending = queries.map((q, i) => ({ i, q, mirror: i % mirrors, tries: 0 }));
+    // Miroirs dans l'ordre openstreetmap.fr, mail.ru, overpass-api.de : le
+    // 13/10/2026, overpass-api.de répondait 504 trois fois sur trois.
+    const order = [1, 2, 0].slice(0, mirrors);
+    let pending = queries.map((q, i) => ({ i, q, mirror: order[i % order.length], tries: 0 }));
     while (pending.length > 0) {
       if (Date.now() + 6000 > deadline) break;
       const sent: { i: number; q: string; mirror: number; tries: number; id: number | null; t0: number }[] = [];
@@ -767,7 +782,9 @@ export function dbOverpassBatch(
           : !row ? "attente_depassee" : out === "retry" ? (row.timed_out ? "pg_net_timeout" : Number(row.status_code) !== 200 ? `http_${row.status_code}` : "remark_ou_json") : "ok";
         onAttempt?.({ via: "base", mirror: String(x.mirror), ms: Date.now() - x.t0, outcome });
         if (out === "retry") {
-          if (x.tries < 1) next.push({ i: x.i, q: x.q, mirror: (x.mirror + 1) % mirrors, tries: x.tries + 1 });
+          if (x.tries < 1) {
+            next.push({ i: x.i, q: x.q, mirror: order[(order.indexOf(x.mirror) + 1) % order.length], tries: x.tries + 1 });
+          }
         } else {
           results[x.i] = out;
         }
@@ -918,10 +935,10 @@ export async function collectPlaces(
       const answered = results.filter((r) => r !== null);
       for (const els of answered) take(els!);
       if (answered.length < results.length) {
-        overpassFailed = true;
+        // Une partie des filtres sans réponse : on élargit quand même pour les
+        // catégories qui manquent, et le guide reste en file pour un nouveau passage.
         incomplete = true;
-        // Sans réponse pour une partie des filtres, le rayon suivant attendra le passage suivant.
-        break;
+        if (answered.length === 0) overpassFailed = true;
       }
     } else {
       for (const statement of statements) {
