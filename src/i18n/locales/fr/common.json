@@ -412,7 +412,7 @@
       "title_before": "Tarifs, gratuits jusqu'au {{date}}",
       "title_after": "Tarifs, gratuit propriétaires · {{price}}",
       "desc_before": "Accès offert jusqu'au {{date}} pour tous, gardiens comme propriétaires. Aucune commission prélevée sur les gardes.",
-      "desc_after": "0 € pour les propriétaires. {{price}} pour les gardiens, résiliable à tout moment. Aucune commission prélevée sur les gardes."
+      "desc_after": "Guardiens est gratuit. Aucune commission prélevée sur les gardes."
     },
     "hero": {
       "eyebrow": "Aucune commission prélevée sur les gardes",
@@ -421,7 +421,7 @@
       "title_after_a": "Un seul prix.",
       "title_after_b": "Transparent.",
       "lede_before": "Jusqu'au {{date}}, l'accès complet est offert, gardiens comme propriétaires. Aucune carte bancaire demandée.",
-      "lede_after": "0 € pour les propriétaires. {{price}} pour les gardiens, résiliable à tout moment. C'est tout.",
+      "lede_after": "Guardiens est gratuit. C'est tout.",
       "cta_owner": "Publier mon annonce, gratuitement",
       "cta_sitter": "Je veux garder"
     },

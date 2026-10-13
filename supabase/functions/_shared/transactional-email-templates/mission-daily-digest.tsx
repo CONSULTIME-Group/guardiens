@@ -68,7 +68,7 @@ const MissionDailyDigestEmail = ({ helperFirstName, items = [] }: Props) => (
 
         <Text style={text}>
           Voici les petites missions publiées ces dernières 24 heures dans un rayon
-          de 30 km autour de chez vous. L'entraide, c'est un service contre un service, sans engagement.
+          de 30 km autour de chez vous. L'entraide, c'est un échange en temps et en savoir-faire.
         </Text>
 
 

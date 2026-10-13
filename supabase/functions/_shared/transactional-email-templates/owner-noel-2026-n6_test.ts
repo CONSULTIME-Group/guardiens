@@ -27,7 +27,7 @@ Deno.test('répondant Noël avec commune et 3 cartes : textes exacts', () => {
     'NOËL 2026',
     'Votre annonce de Noël est prête à 60 %.',
     'Bonjour Camille, vous nous avez dit partir à Noël. On a préparé votre annonce avec votre maison, Mila et Rex, votre commune. Il reste une photo de chez vous et vos dates.',
-    'PRÈS DE CHEZ VOUS',
+    'À PROXIMITÉ',
     '42 gardiens à moins de 50 km de Lyon',
     "En voici trois. Ils vous envoient leur candidature, et c'est vous qui choisissez.",
     'Identité vérifiée',

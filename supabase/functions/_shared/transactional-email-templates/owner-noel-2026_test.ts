@@ -44,7 +44,7 @@ Deno.test('variante A : textes exacts, préheader, 3 cartes', () => {
   assertEquals((template.subject as (d: Record<string, unknown>) => string)(p), 'Pour Noël, votre maison entre de bonnes mains')
   for (const s of COMMON) assert(h.includes(s), s)
   assert(h.includes('Bonjour Camille, les départs'))
-  assert(h.includes('PRÈS DE CHEZ VOUS'))
+  assert(h.includes('À PROXIMITÉ'))
   assert(h.includes('42 gardiens à moins de 50 km de Lyon'))
   assert(h.includes("En voici trois. Ils vous envoient leur candidature, et c'est vous qui choisissez."))
   for (const i of [1, 2, 3]) assert(h.includes(`Gardien${i}`))
