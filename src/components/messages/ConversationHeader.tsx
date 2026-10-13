@@ -619,7 +619,7 @@ const ConversationHeader = ({
           <DialogHeader>
             <DialogTitle>Signaler ce membre</DialogTitle>
             <DialogDescription>
-              Décrivez en quelques mots la raison du signalement. Notre équipe l'examine sous 24 h.
+              Décrivez en quelques mots la raison du signalement. Notre équipe l'examine.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-2">

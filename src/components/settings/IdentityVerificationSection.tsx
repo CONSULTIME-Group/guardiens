@@ -200,7 +200,7 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
           toast.success("Identité vérifiée avec succès !");
           void trackEvent("identity_verified", { source: "settings", metadata: { channel: "auto" } });
         } else if (newStatus === "needs_review") {
-          toast.info("Document reçu. Votre pièce est en cours de vérification par l'équipe, réponse sous 24 h.");
+          toast.info("Document reçu. Votre pièce est en cours de vérification par l'équipe.");
           void trackEvent("identity_auto_check_failed", {
             source: "settings",
             metadata: { status: newStatus, reason_kind: "needs_review" },
@@ -323,11 +323,11 @@ const IdentityVerificationSection = ({ user }: { user: any }) => {
   if (!loaded) return null;
 
   const statusConfig: Record<string, { icon: React.ElementType; label: string; desc: string; color: string }> = {
-    not_submitted: { icon: Upload, label: "Non vérifiée", desc: "Envoyez une pièce d'identité pour débloquer les fonctionnalités avancées (badge vérifié).", color: "text-muted-foreground" },
+    not_submitted: { icon: Upload, label: "Non vérifiée", desc: "Envoyez une pièce d'identité pour afficher le badge Identité vérifiée sur votre profil.", color: "text-muted-foreground" },
     pending: { icon: Clock, label: "Vérification en cours", desc: "Votre document est en cours de vérification automatique par IA.", color: "text-warning" },
-    needs_review: { icon: Clock, label: "Pièce en cours de vérification", desc: "L'équipe Guardiens vérifie votre pièce, réponse sous 24 h. Vous pouvez aussi envoyer une photo plus nette.", color: "text-warning" },
+    needs_review: { icon: Clock, label: "Pièce en cours de vérification", desc: "L'équipe Guardiens vérifie votre pièce. Vous pouvez aussi envoyer une photo plus nette.", color: "text-warning" },
     rejected: { icon: AlertCircle, label: "Nouvelle photo attendue", desc: "Envoyez une photo nette de votre pièce d'identité entière, avec toutes les informations bien lisibles.", color: "text-destructive" },
-    verified: { icon: CheckCircle2, label: "Identité vérifiée", desc: "Votre identité a été vérifiée avec succès. Vous avez accès à toutes les fonctionnalités.", color: "text-success" },
+    verified: { icon: CheckCircle2, label: "Identité vérifiée", desc: "Votre identité a été vérifiée. Le badge Identité vérifiée est affiché sur votre profil.", color: "text-success" },
   };
 
 
