@@ -698,12 +698,16 @@ Pour préparer votre profil : [Créer un profil gardien attractif](/actualites/c
 -- c) Avis 062d5d64 (01/10/2026) publié par l'équipe avant le lot Z : resté
 --    en_attente, donc invisible sur le profil public. Même règle que la
 --    publication par l'équipe désormais (AdminReviews pose valide).
+-- Drapeau app.review_publisher : sans lui, trg_prevent_review_moderation_self_update
+-- refuse le changement hors compte admin (application du 14/10/2026).
+SELECT set_config('app.review_publisher', 'on', true);
 UPDATE public.reviews
    SET moderation_status = 'valide'
  WHERE published = true
    AND moderation_status = 'en_attente'
    AND moderation_hidden_at IS NULL
    AND COALESCE(review_type, 'garde') = 'garde';
+SELECT set_config('app.review_publisher', 'off', true);
 
 -- =========================================================================
 -- Z13. Contrôles après application (chaque requête doit renvoyer 0 ligne).
