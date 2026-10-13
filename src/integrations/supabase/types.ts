@@ -13271,6 +13271,7 @@ export type Database = {
           sit_city: string
           sit_end_date: string
           sit_id: string
+          sit_reviewable: boolean
           sit_start_date: string
           sit_status: Database["public"]["Enums"]["sit_status"]
           sit_title: string
