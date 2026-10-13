@@ -2,6 +2,7 @@ import { publicProfilesLoader, publishedReviewsLoader, sitterAffinityLoader } fr
 import { fetchMyReviewsBothWays } from "@/lib/ownerSpaceReads";
 import { fetchMySmallMissionsIndex, fetchMyProperties, fetchMyPets, fetchApplicationsOnMySits, fetchOpenSmallMissions, fetchMySitsFull } from "@/lib/dashboardShared";
 import { fetchMyProfile } from "@/lib/myProfile";
+import { pickActiveEntraideMission, type ActiveEntraideMission } from "@/lib/activeEntraideMission";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/lib/logger";
@@ -28,6 +29,8 @@ export interface OwnerDashboardData {
   highlights: HighlightRow[];
   smallMissions: SmallMission[];
   myMissions: SmallMission[];
+  /** Lot X3b (C-04) : besoin en cours de l'auteur, tiré de tout l'index (sans lecture de plus). */
+  activeMission?: ActiveEntraideMission | null;
   verificationStatus: string;
   missionMetrics: { total: number; completed: number };
   sitterBadges: Record<string, { badge_key: string; count: number }[]>;
@@ -57,6 +60,7 @@ const INITIAL: OwnerDashboardData = {
   highlights: [],
   smallMissions: [],
   myMissions: [],
+  activeMission: null,
   verificationStatus: "not_submitted",
   missionMetrics: { total: 0, completed: 0 },
   sitterBadges: {},
@@ -381,6 +385,7 @@ export function useOwnerDashboardData(userId: string | undefined) {
           highlights: rawHighlights as HighlightRow[],
           smallMissions: (missionsRes.data || []) as SmallMission[],
           myMissions: (myMissionsDataRes.data || []) as SmallMission[],
+          activeMission: pickActiveEntraideMission(allMyMissions as any[]),
           verificationStatus: verStatus,
           missionMetrics: {
             total: allMyMissions.length,

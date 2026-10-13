@@ -9,7 +9,8 @@
 import { Link } from "react-router-dom";
 import entraideGouache from "@/assets/illustrations/sitter-entraide-empty.webp";
 import MeetupAnswer from "@/components/entraide/MeetupAnswer";
-import { useMyHelpExchanges, type HelpRow } from "@/components/dashboard/MesCoupsDeMain";
+import { useMyHelpExchanges, HelpProposalsList, type HelpRow } from "@/components/dashboard/MesCoupsDeMain";
+import type { HelpProposal } from "@/lib/myHelpProposals";
 import { useMutualAidRadiusKm, ALERT_SETTINGS_PATH, radiusLineText } from "@/components/entraide/MutualAidRadiusLine";
 import { useNearbyAssociation } from "@/components/associations/NearbyAssociationCard";
 import { formatDateRangeFr } from "@/lib/formatDateRangeFr";
@@ -35,8 +36,13 @@ export interface OwnerEntraideBandViewProps {
   /** Lot D2 : phrase d'accroche (variante gardien). Absente : rendu propriétaire. */
   headline?: string;
   /** Lot D2 : mission d'entraide active du membre, prioritaire sur la mission proche. */
-  activeMission?: (EntraideMission & { status?: string | null }) | null;
+  activeMission?: ActiveMissionInput | null;
+  /** Lot X3b (C-11) : propositions d'aide du membre, à suivre. */
+  proposals?: HelpProposal[];
 }
+
+/** Lot X3b (C-04) : adresse (projet ou besoin) et propositions en attente, quand elles sont connues. */
+export type ActiveMissionInput = EntraideMission & { status?: string | null; path?: string | null; pendingCount?: number | null };
 
 const MISSION_STATUS: Record<string, string> = {
   open: "Ouverte aux réponses",
@@ -58,14 +64,20 @@ export function OwnerEntraideBandView({
   association,
   headline,
   activeMission,
+  proposals = [],
 }: OwnerEntraideBandViewProps) {
   const ongoing = exchanges.find((r) => r.status === "in_progress") ?? null;
   const lastDone = ongoing ? null : exchanges.find((r) => r.status === "completed") ?? null;
   const helpersSentence = helpersCount > 0
     ? `${helpersCount} personne${helpersCount > 1 ? "s sont prêtes" : " est prête"} à aider à moins de ${helpersRadiusKm} km.`
     : null;
+  const pending = activeMission?.pendingCount ?? 0;
   const activeMeta = activeMission
-    ? [activeMission.city ? formatCityLabel(activeMission.city) : null, activeMission.status ? MISSION_STATUS[activeMission.status] ?? null : null].filter(Boolean).join(" · ")
+    ? [
+        activeMission.city ? formatCityLabel(activeMission.city) : null,
+        activeMission.status ? MISSION_STATUS[activeMission.status] ?? null : null,
+        pending > 0 ? `${pending} proposition${pending > 1 ? "s" : ""} à lire` : null,
+      ].filter(Boolean).join(" · ")
     : "";
   const missionMeta = mission
     ? [mission.city ? formatCityLabel(mission.city) : null, dateWithYear(mission.date_needed)].filter(Boolean).join(" · ")
@@ -117,7 +129,7 @@ export function OwnerEntraideBandView({
               {activeMeta && <p className="text-muted-foreground text-[12.5px] mt-[2px]">{activeMeta}</p>}
             </div>
             <Link
-              to={`/petites-missions/${activeMission.id}`}
+              to={activeMission.path || `/petites-missions/${activeMission.id}`}
               className="shrink-0 inline-flex items-center justify-center rounded-full border border-border px-[16px] min-h-[40px] text-[13px] font-semibold text-foreground hover:bg-muted/40"
             >
               Voir les réponses
@@ -164,6 +176,8 @@ export function OwnerEntraideBandView({
           </div>
         )}
 
+        {proposals.length > 0 && <HelpProposalsList proposals={proposals} />}
+
         {lastDone && (
           <p className="mt-[14px] text-muted-foreground text-[13px]" data-testid="entraide-last-done">
             Votre dernier échange : {lastDone.title}
@@ -207,15 +221,16 @@ export default function OwnerEntraideBand(props: {
   helpersRadiusKm: number;
   mission?: EntraideMission | null;
   headline?: string;
-  activeMission?: (EntraideMission & { status?: string | null }) | null;
+  activeMission?: ActiveMissionInput | null;
 }) {
-  const { rows, busy, answer } = useMyHelpExchanges();
+  const { rows, proposals, busy, answer } = useMyHelpExchanges();
   const mutualRadiusKm = useMutualAidRadiusKm();
   const association = useNearbyAssociation();
   return (
     <OwnerEntraideBandView
       {...props}
       exchanges={rows}
+      proposals={proposals}
       busyId={busy}
       onAnswer={(id, h, w, p) => void answer(id, h, w, p)}
       mutualRadiusKm={mutualRadiusKm}
