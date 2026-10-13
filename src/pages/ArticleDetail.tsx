@@ -402,7 +402,7 @@ export default function ArticleDetail() {
     )}
     </>
 
- {/* Lot X3c : plus de schéma « Abonnement Gardien », Guardiens est gratuit. */}
+ {/* Lot X3c : schéma d'offre retiré, Guardiens est gratuit. */}
 
  {/* LocalBusiness Schema for geo-targeted guide articles */}
  {article.category === "guide_lieu" && article.city && (
