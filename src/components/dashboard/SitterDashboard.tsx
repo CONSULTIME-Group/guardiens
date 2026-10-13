@@ -21,6 +21,7 @@ import { formatCityLabel } from "@/lib/cityLabel";
 import DashboardLoadError from "./DashboardLoadError";
 
 import RoleActivationBanner from "./RoleActivationBanner";
+import OwnerInboxNudge from "./sitter/OwnerInboxNudge";
 import AccessGateBanner from "@/components/access/AccessGateBanner";
 
 import SitterCockpit, { type SitterCockpitLine } from "./sitter/SitterCockpit";
@@ -185,6 +186,11 @@ const SitterDashboard = () => {
       )}
       <div className="px-4 sm:px-5 md:px-8">
         <RoleActivationBanner userRole={user?.role || "sitter"} />
+      </div>
+
+      {/* Lot X3a (A-07) : candidatures reçues d'un compte double rôle. */}
+      <div className="px-4 sm:px-5 md:px-8 mt-3 empty:hidden">
+        <OwnerInboxNudge />
       </div>
 
       {/* Grille lots D1 et D2 : colonne principale 720 px, colonne de droite 328 px, écart 48 px */}
