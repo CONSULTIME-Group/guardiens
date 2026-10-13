@@ -2297,6 +2297,27 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_y3_textes_20261013: {
+        Row: {
+          old_text: string | null
+          old_text2: string | null
+          row_id: string | null
+          src: string | null
+        }
+        Insert: {
+          old_text?: string | null
+          old_text2?: string | null
+          row_id?: string | null
+          src?: string | null
+        }
+        Update: {
+          old_text?: string | null
+          old_text2?: string | null
+          row_id?: string | null
+          src?: string | null
+        }
+        Relationships: []
+      }
       _score_rebalance_20260830: {
         Row: {
           apres: number | null
@@ -11550,34 +11571,6 @@ export type Database = {
           user_id: string | null
           welcome_notes: string | null
         }
-        Insert: {
-          competences?: string[] | null
-          competences_disponible?: boolean | null
-          created_at?: string | null
-          environments?: string[] | null
-          home_ambiance?: string[] | null
-          interests?: string[] | null
-          languages?: string[] | null
-          life_pace?: string | null
-          preferred_sitter_types?: string[] | null
-          presence_expected?: string | null
-          user_id?: string | null
-          welcome_notes?: string | null
-        }
-        Update: {
-          competences?: string[] | null
-          competences_disponible?: boolean | null
-          created_at?: string | null
-          environments?: string[] | null
-          home_ambiance?: string[] | null
-          interests?: string[] | null
-          languages?: string[] | null
-          life_pace?: string | null
-          preferred_sitter_types?: string[] | null
-          presence_expected?: string | null
-          user_id?: string | null
-          welcome_notes?: string | null
-        }
         Relationships: [
           {
             foreignKeyName: "owner_profiles_user_id_fkey"
@@ -11674,6 +11667,7 @@ export type Database = {
           available_for_help: boolean | null
           avatar_url: string | null
           bio: string | null
+          cancellation_count: number | null
           certifications: string[] | null
           city: string | null
           completed_sits_count: number | null
@@ -11682,6 +11676,7 @@ export type Database = {
           custom_skills: Json | null
           departement_code: string | null
           first_name: string | null
+          hero_image_index: number | null
           id: string | null
           identity_verified: boolean | null
           is_founder: boolean | null
@@ -12013,44 +12008,6 @@ export type Database = {
           travels_with_own_animals: boolean | null
           user_id: string | null
           work_during_sit: string | null
-        }
-        Insert: {
-          animal_types?: string[] | null
-          availability_during?: string | null
-          experience_years?: string | null
-          farm_animals_ok?: boolean | null
-          has_license?: boolean | null
-          has_vehicle?: boolean | null
-          interests?: string[] | null
-          languages?: string[] | null
-          life_pace?: string | null
-          lifestyle?: string[] | null
-          sensitivities?: string[] | null
-          sitter_type?: string | null
-          special_animal_skills?: string[] | null
-          travels_with_children?: boolean | null
-          travels_with_own_animals?: boolean | null
-          user_id?: string | null
-          work_during_sit?: string | null
-        }
-        Update: {
-          animal_types?: string[] | null
-          availability_during?: string | null
-          experience_years?: string | null
-          farm_animals_ok?: boolean | null
-          has_license?: boolean | null
-          has_vehicle?: boolean | null
-          interests?: string[] | null
-          languages?: string[] | null
-          life_pace?: string | null
-          lifestyle?: string[] | null
-          sensitivities?: string[] | null
-          sitter_type?: string | null
-          special_animal_skills?: string[] | null
-          travels_with_children?: boolean | null
-          travels_with_own_animals?: boolean | null
-          user_id?: string | null
-          work_during_sit?: string | null
         }
         Relationships: [
           {
@@ -12772,7 +12729,10 @@ export type Database = {
         Args: { p_reason?: string; p_token: string }
         Returns: Json
       }
-      consume_email_deep_link: { Args: { p_token: string }; Returns: Json }
+      consume_email_deep_link: {
+        Args: { p_caller?: string; p_token: string }
+        Returns: Json
+      }
       consume_mission_action_token: { Args: { p_token: string }; Returns: Json }
       consume_mission_choose_token: { Args: { p_token: string }; Returns: Json }
       count_eligible_sitters: {
@@ -14120,6 +14080,7 @@ export type Database = {
         Args: { p_reviewee: string; p_sit_id: string }
         Returns: boolean
       }
+      sitter_health_visible: { Args: { _sitter: string }; Returns: boolean }
       sitter_missing_opportunities:
         | { Args: never; Returns: Json }
         | { Args: { _sitter_id?: string }; Returns: Json }
