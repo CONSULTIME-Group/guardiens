@@ -26,7 +26,21 @@ interface Props {
   onSelect: (mode: "keep" | "decline_others") => void;
   onDecline: () => void;
   onOpenMessages: () => void;
+  /**
+   * Lot X2 : « projet » pour la liste du porteur d'un projet participatif
+   * (statut affiché, conversation ouverte pour chaque candidature, pas de
+   * « Choisir », qui fermerait le projet aux autres participants). Défaut
+   * « mission » : rendu de la fiche besoin inchangé.
+   */
+  variant?: "mission" | "projet";
 }
+
+/** Statut lisible d'une candidature de projet, côté porteur (lot X2). */
+export const PROJET_RESPONSE_STATUS_LABELS: Record<string, string> = {
+  pending: "Nouvelle candidature",
+  accepted: "Personne retenue",
+  declined: "Candidature écartée",
+};
 
 /**
  * Carte "réponse" (esprit commentaire) sur une petite mission.
@@ -45,7 +59,9 @@ const MissionResponseCard = ({
   onSelect,
   onDecline,
   onOpenMessages,
+  variant = "mission",
 }: Props) => {
+  const isProjet = variant === "projet";
   const { toast } = useToast();
   const [count, setCount] = useState<number>(r.helpful_count ?? 0);
   const [thanked, setThanked] = useState(false);
@@ -152,6 +168,11 @@ const MissionResponseCard = ({
               {format(new Date(r.created_at), "d MMM à HH:mm", { locale: fr })}
             </p>
           </div>
+          {isProjet && isAuthor && r.status !== "accepted" && !isWithdrawn && PROJET_RESPONSE_STATUS_LABELS[r.status || "pending"] && (
+            <p className="text-xs font-semibold text-muted-foreground mb-1" data-testid="projet-response-status">
+              {PROJET_RESPONSE_STATUS_LABELS[r.status || "pending"]}
+            </p>
+          )}
           {distanceKm !== null && (
             <p className="text-xs text-muted-foreground mb-1">À {distanceKm} km de vous</p>
           )}
@@ -194,7 +215,32 @@ const MissionResponseCard = ({
             )}
 
             {/* Actions auteur */}
-            {isAuthor && r.status === "pending" && (
+            {isProjet && isAuthor && (!r.status || r.status === "pending" || r.status === "accepted") && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={onOpenMessages}
+                aria-label={`${r.conversation_id ? "Ouvrir la conversation avec" : "Écrire à"} ${r.responder?.first_name || "cette personne"}`}
+                className="rounded-full gap-2 ml-auto min-h-11"
+              >
+                <MessageSquare aria-hidden="true" className="h-3.5 w-3.5" />
+                <span>{r.conversation_id ? "Ouvrir la conversation" : `Écrire à ${r.responder?.first_name || "cette personne"}`}</span>
+              </Button>
+            )}
+            {isProjet && isAuthor && (!r.status || r.status === "pending") && (
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={onDecline}
+                disabled={processing}
+                aria-disabled={processing}
+                aria-label={`Écarter la candidature de ${r.responder?.first_name || "cette personne"}`}
+                className="rounded-full text-muted-foreground min-h-11"
+              >
+                Écarter
+              </Button>
+            )}
+            {!isProjet && isAuthor && r.status === "pending" && (
               <>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
@@ -262,7 +308,7 @@ const MissionResponseCard = ({
                 </Button>
               </>
             )}
-            {isAuthor && r.status === "accepted" && (
+            {!isProjet && isAuthor && r.status === "accepted" && (
               <Button
                 size="sm"
                 variant="outline"

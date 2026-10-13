@@ -216,14 +216,14 @@ export default function DevenirHomeSitter() {
               </h2>
               <p className="text-muted-foreground m-0">
                 Créez votre profil, 0 €, et candidatez aux gardes près
-                de chez vous. Accès gardien ouvert pendant la phase de lancement.
+                de chez vous.
               </p>
               <div className="flex flex-wrap gap-3">
                 <Button asChild>
-                  <Link to="/auth?role=sitter">Créer mon profil gardien</Link>
+                  <Link to="/inscription?role=sitter">Créer mon profil gardien</Link>
                 </Button>
                 <Button asChild variant="outline">
-                  <Link to="/gardes">Voir les gardes disponibles</Link>
+                  <Link to="/annonces">Voir les gardes disponibles</Link>
                 </Button>
               </div>
             </CardContent>

@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -85,6 +86,14 @@ interface Props {
   /** Branche projet seulement : contenu du message de candidature. */
   applyMessage?: string;
   onApplyMessageChange?: (value: string) => void;
+  /**
+   * Branche projet seulement (lot X2) : liste des candidatures, posée par
+   * ProjetDetail quand le visiteur connecté porte le projet. L'encadré
+   * latéral renvoie alors vers cette liste au lieu d'inviter à candidater.
+   */
+  ownerPanel?: ReactNode;
+  /** Ancre de la liste du porteur, pour le lien de l'encadré latéral. */
+  ownerPanelAnchor?: string;
 }
 
 const CATEGORY_ICON: Record<string, typeof Dog> = {
@@ -114,6 +123,8 @@ const PublicMissionView = ({
   applying = false,
   applyMessage = "",
   onApplyMessageChange,
+  ownerPanel,
+  ownerPanelAnchor = "candidatures",
 }: Props) => {
   const { t } = useTranslation();
   const heroImage = mission.photos?.[0] || null;
@@ -230,6 +241,8 @@ const PublicMissionView = ({
               ]}
             />
           </div>
+
+          {ownerPanel}
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
             <article className="lg:col-span-8 min-w-0 space-y-[52px]">
@@ -485,7 +498,16 @@ const PublicMissionView = ({
                   )}
                 </div>
 
-                {registrationOpen ? (
+                {ownerPanel ? (
+                  <div className="space-y-3" data-testid="projet-owner-aside">
+                    <p className="text-sm text-foreground/85 leading-relaxed">
+                      Vous portez ce projet. Les candidatures reçues sont listées en haut de la page.
+                    </p>
+                    <Button asChild variant="outline" className="w-full rounded-full font-semibold">
+                      <a href={`#${ownerPanelAnchor}`}>Voir les candidatures</a>
+                    </Button>
+                  </div>
+                ) : registrationOpen ? (
                   <div className="space-y-3">
                     <Button asChild className="w-full h-auto py-4 rounded-full font-bold text-base whitespace-normal shadow-lg shadow-primary/20">
                       <a href={registrationUrl} target="_blank" rel="noopener noreferrer">
@@ -535,7 +557,7 @@ const PublicMissionView = ({
                     </Button>
                   </Link>
                 )}
-                {!registrationUrl && !hasApplied && p.accepting_applications !== false && (
+                {!ownerPanel && !registrationUrl && !hasApplied && p.accepting_applications !== false && (
                   <p className="mt-5 text-xs text-center text-muted-foreground px-2 leading-relaxed">
                     Votre message part directement au porteur du projet.
                   </p>

@@ -465,7 +465,7 @@ export const ALMA_KNOWLEDGE_EXCLUDED_ROUTES: string[] = [
   // Légal
   "/cgu", "/cgs", "/confidentialite", "/mentions-legales", "/cookies",
   // Authentification
-  "/inscription", "/register", "/login", "/auth/confirm", "/forgot-password", "/reset-password",
+  "/inscription", "/register", "/auth", "/login", "/auth/confirm", "/forgot-password", "/reset-password",
   // Parcours d'arrivée v2 (lot 1) : écrans d'une seule visite, sans Alma
   "/bienvenue", "/arrivee/*",
   // Liens à jeton ou de service ouverts depuis un email

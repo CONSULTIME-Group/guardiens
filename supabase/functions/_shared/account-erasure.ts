@@ -24,8 +24,11 @@ export async function sendErasureAcknowledgement(
   firstName?: string | null,
 ): Promise<boolean> {
   if (!email) return false;
-  const url = Deno.env.get("SUPABASE_URL")!;
-  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  // Lot X2 : lecture par globalThis, ce module est aussi chargé par les tests du site.
+  // deno-lint-ignore no-explicit-any
+  const env = (globalThis as any).Deno.env;
+  const url = env.get("SUPABASE_URL")!;
+  const serviceKey = env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   try {
     const resp = await fetch(`${url}/functions/v1/send-transactional-email`, {
       method: "POST",
