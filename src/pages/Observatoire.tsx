@@ -53,7 +53,7 @@ const KEY_STATS: Stat[] = [
  {
  label: "Abonnement gardien",
  value: "Aucun frais",
- detail: "Accès complet aux fonctionnalités pendant la phase de lancement.",
+ detail: "Guardiens est gratuit : accès complet aux fonctionnalités.",
  },
 
  {
@@ -386,7 +386,7 @@ const Observatoire = () => {
  Guardiens fonctionne sur un modèle volontairement déséquilibré : <strong>les propriétaires d'animaux n'ont jamais rien à payer</strong>. Pas d'inscription, pas de frais de mise en relation, pas de commission sur les gardes. C'est un choix structurel qui distingue la plateforme depuis sa création.
  </p>
  <p>
- Les gardiens accèdent aujourd'hui à toutes les fonctionnalités sans abonnement. <strong>L'accès à Guardiens est ouvert pendant la phase de lancement. Vous accédez à l'ensemble des fonctionnalités, et vous restez libre à tout moment. Vous serez prévenu à l'avance en cas d'évolution tarifaire.</strong> Aucune commission n'est prélevée sur les échanges, parce qu'il n'y a pas de transaction financière entre membres : l'échange repose sur la garde du logement contre la garde des animaux.
+ <strong>Guardiens est gratuit. Vous accédez à l'ensemble des fonctionnalités, et vous restez libre à tout moment.</strong> Aucune commission n'est prélevée sur les échanges, parce qu'il n'y a pas de transaction financière entre membres : l'échange repose sur la garde du logement contre la garde des animaux.
  </p>
 
  </div>
@@ -459,7 +459,7 @@ const Observatoire = () => {
  Les chiffres « 37 maisons gardées » et « 234 animaux accompagnés » correspondent au cumul vécu par les fondateurs Jérémie et Elisa entre 2021 et 2026, période de validation terrain qui a précédé l'ouverture publique de Guardiens.
  </p>
  <p>
- Les éléments tarifaires (accès complet pendant la phase de lancement) sont publiés sur <Link to="/tarifs" className="text-primary hover:underline">la page Nos engagements</Link>.
+ Guardiens est gratuit, nos engagements sont publiés sur <Link to="/tarifs" className="text-primary hover:underline">la page Nos engagements</Link>.
  </p>
 
  <p>

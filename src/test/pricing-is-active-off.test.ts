@@ -26,10 +26,12 @@ describe("Pricing helpers (PRICING_IS_ACTIVE = false)", () => {
     expect(getOwnerPriceLabel()).toBe("Gratuit");
   });
 
-  it("getPricingBaseline() annonce l'ouverture pendant la phase de lancement", () => {
-    expect(getPricingBaseline()).toContain(
-      "ouvert pendant la phase de lancement",
-    );
+  // Lot X3c (13/10/2026) : « Guardiens est gratuit », dit simplement, sans
+  // durée ni annonce d'évolution tarifaire (audit E-09).
+  it("getPricingBaseline() dit simplement que Guardiens est gratuit", () => {
+    expect(getPricingBaseline()).toContain("Guardiens est gratuit.");
+    expect(getPricingBaseline()).not.toContain("phase de lancement");
+    expect(getPricingBaseline()).not.toContain("évolution tarifaire");
   });
 
   // La formulation « sans engagement » a été proscrite le 07/09/2026 (voir

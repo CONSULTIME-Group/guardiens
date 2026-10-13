@@ -49,7 +49,8 @@ export const signalTypeLabel = (type: string): string =>
 export const SIGNAL_RELAUNCH_FN: Record<string, string> = {
   affinity_onboarding_stale: "nudge-affinity-onboarding",
   dormant_sitter: "nudge-sitter-dormant",
-  dormant_top_sitter: "nudge-dormant-top-sitters",
+  // Lot X3c : dormant_top_sitter n'a plus de bouton « Relancer », sa fonction
+  // nudge-dormant-top-sitters n'existe pas (l'appel échouait à chaque clic).
   stale_draft: "nudge-stale-draft",
   stale_verification: "nudge-verification-stale",
   no_applications: "nudge-owner-no-applications",

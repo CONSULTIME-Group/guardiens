@@ -72,7 +72,11 @@ export async function suppressEmail(
         reason: ERASURE_REASON,
         metadata: { ...metadata, suppressed_at: new Date().toISOString() },
       },
-      { onConflict: "email" },
+      // Lot X3c (D-06) : une ligne déjà posée (désinscription, rebond,
+      // plainte) garde son motif. Seul le motif account_deleted est levé à
+      // la réinscription confirmée (trg_lift_erasure_suppression), un
+      // désabonnement volontaire reste respecté.
+      { onConflict: "email", ignoreDuplicates: true },
     );
   if (error) {
     console.error("[account-erasure] suppression email échouée", error.message);

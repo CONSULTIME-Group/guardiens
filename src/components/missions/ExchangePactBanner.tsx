@@ -15,7 +15,7 @@ interface ExchangePactBannerProps {
 const ExchangePactBanner = ({ variant = "public", className }: ExchangePactBannerProps) => {
   const primaryCta =
     variant === "sitter"
-      ? { label: "Proposer mon aide", to: "/petites-missions/creer?type=offre" }
+      ? { label: "Proposer mon aide", to: "/profile?section=savoir-faire" }
       : { label: "Publier un besoin", to: "/petites-missions/creer?type=besoin" };
 
   const secondaryCta =

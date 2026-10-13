@@ -11,6 +11,7 @@ import { recordDeliveryFailure } from "../_shared/delivery-failure.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { requireCronCaller } from "../_shared/require-cron-caller.ts";
 import { createReminderSlot } from "../_shared/reminder-daily-slot.ts";
+import { checkNotificationPreference, readNotificationPreferences } from "../_shared/notification-preferences.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -90,13 +91,10 @@ Deno.serve(async (req) => {
 
       if (!recipient?.email) { stats.skipped++; continue; }
 
-      // Vérif préférence email
-      const { data: prefs } = await supabase
-        .from("notification_preferences")
-        .select("email_messages")
-        .eq("user_id", recipientId)
-        .maybeSingle();
-      if (prefs && prefs.email_messages === false) { stats.skipped++; continue; }
+      // Lot X3c : réglages « Messages » et « Délai avant email » lus par le
+      // module partagé (même règle que send-transactional-email).
+      const prefRead = await readNotificationPreferences(supabase, recipientId);
+      if (checkNotificationPreference("new-message", prefRead.row).allowed === false) { stats.skipped++; continue; }
 
       // Lot R1 : une relance déjà partie vers cette personne aujourd'hui.
       if (await slot.isTaken(recipient.email)) { stats.slot_taken++; continue; }
