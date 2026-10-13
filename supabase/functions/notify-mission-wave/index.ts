@@ -34,6 +34,7 @@ import {
   waveRelaunchMessage,
   waveRelaunchTitle,
   WAVE_EMPTY_MESSAGE,
+  waveEmptyNotificationDue,
   isMissionSitMode,
   sitModeEmailLine,
 } from "../_shared/mission-wave.ts";
@@ -263,13 +264,27 @@ async function runWave(supabase: any, missionId: string): Promise<WaveResult> {
           message: WAVE_EMPTY_MESSAGE,
         },
       });
-      await supabase.from("notifications").insert({
-        user_id: mission.user_id,
-        type: "mission_wave_empty",
-        title: "Votre demande reste visible",
-        body: WAVE_EMPTY_MESSAGE,
-        link: `/petites-missions/${missionId}`,
-      });
+      // Lot X3b (C-08) : une notification par besoin et par semaine au plus,
+      // le cron horaire la recréait à chaque passage. Lecture en échec : on
+      // s'abstient (le trigger de base écarte aussi toute copie).
+      const { data: lastEmpty, error: lastEmptyErr } = await supabase
+        .from("notifications")
+        .select("created_at")
+        .eq("user_id", mission.user_id)
+        .eq("type", "mission_wave_empty")
+        .eq("link", `/petites-missions/${missionId}`)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (!lastEmptyErr && waveEmptyNotificationDue(lastEmpty?.created_at ?? null, new Date())) {
+        await supabase.from("notifications").insert({
+          user_id: mission.user_id,
+          type: "mission_wave_empty",
+          title: "Votre demande reste visible",
+          body: WAVE_EMPTY_MESSAGE,
+          link: `/petites-missions/${missionId}`,
+        });
+      }
     }
     return { sent: 0, wave, empty: true, radiusFloor, ...cu };
   }
