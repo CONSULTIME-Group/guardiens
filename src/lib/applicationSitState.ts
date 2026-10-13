@@ -34,7 +34,23 @@ export function canShowSitContent(status: string | null | undefined): boolean {
  * Renvoie null quand l'annonce est simplement ouverte, le badge de statut
  * de candidature suffit alors.
  */
-export function sitStateNote(status: string | null | undefined): string | null {
+export interface SitStateNoteContext {
+  /** Statut de la candidature du gardien. */
+  appStatus?: string | null;
+  /** Candidature née d'une proposition privée (lot I2). */
+  fromProposal?: boolean;
+  /** Le gardien a lui-même annulé sa participation (get_my_applications). */
+  cancelledByMe?: boolean;
+}
+
+export function sitStateNote(status: string | null | undefined, ctx: SitStateNoteContext = {}): string | null {
+  // Lot X3a (B-02) : le gardien qui a annulé lit sa propre action.
+  if (ctx.cancelledByMe) return "Vous avez annulé votre participation";
+  // Lot X3a (B-07) : oui à une proposition privée, la garde reste en brouillon
+  // jusqu'à la confirmation du propriétaire.
+  if (String(status) === "draft" && ctx.fromProposal && isOpenApplicationStatus(ctx.appStatus)) {
+    return "Vous avez dit oui. Le propriétaire confirme la garde avec vous.";
+  }
   switch (String(status)) {
     case "cancelled":
       return "Annonce annulée par le propriétaire";
@@ -57,10 +73,18 @@ export function sitStateNote(status: string | null | undefined): string | null {
 
 export interface ApplicationLike {
   sit_status: string | null;
+  status?: string | null;
 }
 
-/** Repartit les candidatures en deux sections lisibles. */
-export function groupApplications<T extends ApplicationLike>(apps: readonly T[]): {
+/**
+ * Repartit les candidatures en deux sections lisibles.
+ * Lot X3a (B-07) : une candidature ouverte née d'une proposition privée
+ * (annonce en brouillon) reste « en cours », le propriétaire doit confirmer.
+ */
+export function groupApplications<T extends ApplicationLike>(
+  apps: readonly T[],
+  opts: { isProposal?: (a: T) => boolean } = {},
+): {
   active: T[];
   closed: T[];
 } {
@@ -68,9 +92,33 @@ export function groupApplications<T extends ApplicationLike>(apps: readonly T[])
   const closed: T[] = [];
   for (const a of apps) {
     if (isActiveSitStatus(a.sit_status)) active.push(a);
+    else if (String(a.sit_status) === "draft" && isOpenApplicationStatus(a.status) && opts.isProposal?.(a)) active.push(a);
     else closed.push(a);
   }
   return { active, closed };
+}
+
+/**
+ * Lot X3a (B-04) : libellé d'une candidature passée en cancelled. Une
+ * clôture système (annonce expirée, archivée, annulée) n'est jamais
+ * présentée comme un retrait du gardien.
+ */
+export function cancelledApplicationLabel(
+  sitStatus: string | null | undefined,
+  cancelledByMe = false,
+): string {
+  if (cancelledByMe) return "Participation annulée";
+  switch (String(sitStatus)) {
+    case "expired":
+      return "Annonce expirée";
+    case "archived":
+    case "cancelled":
+    case "completed":
+    case "draft":
+      return "Annonce close";
+    default:
+      return "Retirée";
+  }
 }
 
 /**
