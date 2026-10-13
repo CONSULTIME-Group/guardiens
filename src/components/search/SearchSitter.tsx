@@ -1416,10 +1416,10 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  <div className="absolute inset-0 z-30 bg-background/80 backdrop-blur-sm flex items-center justify-center">
  <div className="text-center space-y-4 max-w-sm mx-auto p-6">
  <Lock className="h-8 w-8 mx-auto text-muted-foreground" />
- <p className="font-heading font-semibold text-lg text-foreground">Réservé aux abonnés</p>
- <p className="text-sm text-muted-foreground">Abonnez-vous pour rechercher et postuler aux gardes.</p>
+ <p className="font-heading font-semibold text-lg text-foreground">Espace gardien</p>
+ <p className="text-sm text-muted-foreground">Activez votre espace gardien pour rechercher et postuler aux gardes.</p>
  <Link to="/mon-abonnement">
- <Button>S'abonner →</Button>
+ <Button>Activer mon espace gardien →</Button>
  </Link>
  </div>
  </div>

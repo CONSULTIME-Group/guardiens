@@ -39,10 +39,10 @@ const Email = ({ firstName }: Props) => {
             Des annonces sont parties de Bretagne, de Marseille, d'Alsace, du Pays basque, du Quercy. Et aussi de Marrakech, de La Réunion, et d'une maison à Tahiti qui cherche quelqu'un pour tout le mois de décembre. Celle-là, on ne l'avait pas vue venir.
           </Text>
           <Text style={text}>
-            En parallèle, on écrit. Plus de 200 articles et guides sont en ligne, sur les races, sur les villes, sur la préparation d'une garde. On avance comme on peut, tout est gratuit pour le moment, alors on fait au mieux.
+            En parallèle, on écrit. Plus de 200 articles et guides sont en ligne, sur les races, sur les villes, sur la préparation d'une garde. Guardiens est gratuit, alors on avance avec vous.
           </Text>
           <Text style={text}>
-            Il y a une chose qu'on aimerait vraiment voir décoller : l'entraide entre voisins. Arroser des plantes le temps d'un week-end, sortir un chien, donner un coup de main. Ça ne passe jamais par de l'argent, et ça ne marche que sur quelques kilomètres. Pour que ça prenne, il ne faut pas du monde partout, il faut du monde tout près. Beaucoup de monde.
+            Il y a une chose qu'on aimerait vraiment voir décoller : l'entraide entre gens du coin. Arroser des plantes le temps d'un week-end, sortir un chien, donner un coup de main. L'échange se fait en temps et en savoir-faire, sur quelques kilomètres. Pour que ça prenne, il faut du monde tout près. Beaucoup de monde.
           </Text>
           <Text style={text}>
             C'est là qu'on compte sur vous. Parlez de Guardiens autour de vous. Un partage, un message à quelqu'un du quartier, une mention dans un groupe. C'est ce qui nous aide le plus, et de loin.

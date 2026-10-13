@@ -148,7 +148,7 @@ const Terms = () => {
             En cas de résultat positif, le badge Identité vérifiée est affiché sur le profil. Ce dispositif n'est jamais une condition d'accès à la Plateforme : un refus ou une absence de demande n'empêche ni l'inscription, ni l'usage du service. Les durées de conservation des documents et les modalités d'exercice des droits sont décrites dans la <a href="/confidentialite" className="text-primary hover:underline">Politique de confidentialité</a>.
           </p>
           <p>
-            La confiance entre utilisateurs repose également sur la rencontre physique préalable à toute garde, les avis croisés publiés après chaque garde ou petite mission, l'historique visible sur chaque profil, et les mécanismes de signalement et de modération décrits aux articles 10 et 14.
+            La confiance entre utilisateurs repose également sur les échanges entre membres, une rencontre préalable proposée si les deux le souhaitent, les avis croisés publiés après chaque garde ou petite mission, l'historique visible sur chaque profil, et les mécanismes de signalement et de modération décrits aux articles 10 et 14.
           </p>
 
           {/* 9 */}

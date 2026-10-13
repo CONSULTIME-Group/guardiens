@@ -48,7 +48,7 @@ const SpotlightNearbyPanel = () => {
           as="h3"
           eyebrow="Les gens du coin"
           title="Votre secteur se remplit encore."
-          subtitle="Aucun gardien n'est inscrit tout près de chez vous pour le moment. Élargissez la recherche, ou invitez une personne de confiance à rejoindre Guardiens."
+          subtitle="Le réseau grandit encore à proximité. Élargissez la recherche, ou invitez une personne de confiance à rejoindre Guardiens."
         />
         <div className="rounded-2xl border border-dashed border-border bg-card p-5 md:p-6">
           <div className="flex flex-col items-start gap-3">
@@ -72,7 +72,7 @@ const SpotlightNearbyPanel = () => {
       <SectionHeader
         as="h3"
         eyebrow="Les gens du coin"
-        title="Ils sont prêts à garder près de chez vous."
+        title="Des gardiens à proximité, prêts à garder."
         subtitle={subtitle}
       />
 
@@ -182,7 +182,7 @@ const SpotlightNearbyPanel = () => {
           className="text-primary hover:underline underline-offset-4"
           style={{ fontSize: "13px", fontWeight: 700 }}
         >
-          Tous les gardiens près de chez vous
+          Tous les gardiens à proximité
         </Link>
       </div>
     </div>

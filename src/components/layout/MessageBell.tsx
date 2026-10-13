@@ -169,7 +169,7 @@ const MessageBell = ({ onUnreadChange }: MessageBellProps = {}) => {
     return (
       <Link
         to="/messages"
-        aria-label="Messagerie (abonnement requis)"
+        aria-label="Messagerie (espace gardien à activer)"
         className="relative inline-flex items-center justify-center w-11 h-11 rounded-full text-muted-foreground hover:bg-accent transition-colors"
       >
         <MessageSquare className="h-5 w-5" strokeWidth={1.8} />

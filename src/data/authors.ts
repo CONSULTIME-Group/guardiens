@@ -35,7 +35,7 @@ export const AUTHORS: Author[] = [
     shortBio:
       "Co-fondateur de Guardiens. 5 ans de house-sitting personnel avec Elisa. 37 maisons gardées, 234 animaux accompagnés en France.",
     longBio:
-      "Co-fondateur de Guardiens. 5 ans de house-sitting personnel avec Elisa. 37 maisons gardées, 234 animaux accompagnés partout en France. Écrit sur le terrain, pas depuis un bureau.",
+      "Co-fondateur de Guardiens. 5 ans de house-sitting personnel avec Elisa. 37 maisons gardées, 234 animaux accompagnés partout en France. Écrit depuis le terrain.",
     photo: jeremiePhoto,
     authorNameVariants: [
       "Jérémie",
@@ -48,7 +48,7 @@ export const AUTHORS: Author[] = [
     shortBio:
       "Co-fondatrice de Guardiens. 5 ans de house-sitting à deux avec Jérémie. Sensibilité particulière à l'expérience humaine et à l'attention portée aux animaux.",
     longBio:
-      "Co-fondatrice de Guardiens. 5 ans de house-sitting à deux avec Jérémie. Sensibilité particulière à l'expérience humaine et à l'attention portée aux animaux. Veille à ce que chaque garde soit une rencontre, pas seulement un service.",
+      "Co-fondatrice de Guardiens. 5 ans de house-sitting à deux avec Jérémie. Sensibilité particulière à l'expérience humaine et à l'attention portée aux animaux. Veille à ce que chaque garde soit une rencontre humaine autant qu'un service.",
     photo: elisaPhoto,
     authorNameVariants: [
       "Elisa",

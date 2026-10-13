@@ -21,7 +21,7 @@ const noGender = (h: string) => { for (const w of ['votre chienne', 'votre chien
 Deno.test('répondant Noël avec commune et 3 cartes : textes exacts', () => {
   const p = R({ variant: 'A', city: 'Lyon', nearbyCount: 42, sitters: [card(1, 'Identité vérifiée'), card(2), card(3)] })
   const h = html(p)
-  assertEquals(subject(p), 'Pour Noël, 42 gardiens près de chez vous')
+  assertEquals(subject(p), 'Pour Noël, 42 gardiens à proximité')
   assertEquals(ownerNoelPreheader(p as never), 'Votre annonce est prête à 60 %, il reste une photo de chez vous et vos dates')
   for (const s of [
     'NOËL 2026',
@@ -49,7 +49,7 @@ Deno.test('répondant Noël avec commune et 3 cartes : textes exacts', () => {
 Deno.test('répondant hiver : objet, eyebrow, titre, lien sans dates', () => {
   const p = R({ period: 'hiver', variant: 'A', city: 'Annecy', nearbyCount: 7, sitters: [card(1)] })
   const h = html(p)
-  assertEquals(subject(p), 'Cet hiver, 7 gardiens près de chez vous')
+  assertEquals(subject(p), 'Cet hiver, 7 gardiens à proximité')
   assert(h.includes('CET HIVER'))
   assert(h.includes('Votre annonce de cet hiver est prête à 60 %.'))
   assert(h.includes('vous nous avez dit partir cet hiver.'))
@@ -141,7 +141,7 @@ Deno.test('N7 : sous 40 %, objet et titre sans pourcentage, sans « On a prépar
 
 Deno.test('N7 : accord au singulier pour 1 gardien', () => {
   const p = R({ variant: 'A', city: 'Lyon', nearbyCount: 1, sitters: [card(1)] })
-  assertEquals(subject(p), 'Pour Noël, 1 gardien près de chez vous')
+  assertEquals(subject(p), 'Pour Noël, 1 gardien à proximité')
   const h = html(p)
   assert(h.includes('1 gardien à moins de 50 km de Lyon'))
   assert(h.includes('En voici un. Il vous envoie sa candidature'))

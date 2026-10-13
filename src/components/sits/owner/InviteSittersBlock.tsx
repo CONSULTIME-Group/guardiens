@@ -722,7 +722,7 @@ const InviteSittersBlock = ({
                 Tapez au moins 2 caractères, sélectionnez un département ou activez le rayon depuis votre ville.
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                Astuce : choisir le département de votre logement permet d'inviter les gardiens du coin.
+                Astuce : choisir le département de votre logement permet d'inviter les gardiens à proximité.
               </p>
             </div>
           ) : searching ? (

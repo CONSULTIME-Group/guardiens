@@ -1201,7 +1201,7 @@ const CreateSit = () => {
       });
       // Annonce publiable jamais publiée : quitter exige un choix explicite.
       if (offerExitChoiceIfReady(() => navigate("/dashboard"), "save_and_exit")) return;
-      toast({ title: "Brouillon enregistré", description: "Vous pourrez le reprendre depuis votre dashboard." });
+      toast({ title: "Brouillon enregistré", description: "Vous pourrez le reprendre depuis votre tableau de bord." });
       navigate("/dashboard");
     }
   };
@@ -2718,7 +2718,7 @@ const CreateSit = () => {
             </p>
             <Textarea
               id="owner-message"
-              placeholder="Ex : On confie nos animaux à un membre de confiance plutôt qu'à une pension. Vous repartirez sûrement avec des cookies maison et une connaissance fine du quartier !"
+              placeholder="Ex : On confie nos animaux à un membre de confiance qui vivra chez nous. Vous repartirez sûrement avec des cookies maison et une connaissance fine du quartier !"
               value={ownerMessage}
               onChange={e => { setOwnerMessage(e.target.value.slice(0, 800)); clearFieldVerdict("ownerMessage"); }}
               onPaste={makePlainTextPasteHandler(setOwnerMessage, { maxLength: 800 })}

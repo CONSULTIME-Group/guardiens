@@ -150,7 +150,7 @@ const PostPublishRecapDialog = ({
                 ? "Renseignez votre code postal pour cibler les gardiens de votre département."
                 : deptCount === 0
                   ? "Aucun gardien recensé pour l'instant. Élargissez la zone."
-                  : "Gardiens du coin, pertinents pour une rencontre rapide."
+                  : "Gardiens à proximité de votre logement."
             }
           />
           <RecapRow

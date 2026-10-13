@@ -34,7 +34,7 @@ const OwnerInterestsProgress = ({ count }: { count: number }) => {
   const label = status === "complete"
     ? `Complet · ${count}/${INTERESTS_TARGET}+`
     : status === "partial"
-    ? `${count}/${INTERESTS_TARGET} pour un bon matching`
+    ? `${count}/${INTERESTS_TARGET} pour une bonne affinité`
     : `Aucun · visez ${INTERESTS_TARGET}+`;
   const handleClick = () => {
     trackEvent("interests_focus_click", { source: "indicator", metadata: { count, status, role: "owner" } });
