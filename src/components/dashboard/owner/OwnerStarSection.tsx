@@ -33,6 +33,7 @@ import { trackEvent } from "@/lib/analytics";
 import { useImpressionOnce } from "@/hooks/useImpressionOnce";
 import { selectOwnerStarVariant } from "@/lib/ownerStarVariant";
 import { avatarImageUrl } from "@/lib/storageImage";
+import { staleSuffix } from "@/lib/applicationsAwaiting";
 
 const DATE_FMT = new Intl.DateTimeFormat("fr-FR", {
   day: "numeric",
@@ -319,11 +320,14 @@ const ApplicationsStar = ({
   sitterProfiles,
   sitterAffinityProfiles,
   onCtaClick,
+  oldestWaitingDays = 0,
 }: {
   pendingApps: AppRow[];
   sitterProfiles: Record<string, SitterInfo>;
   sitterAffinityProfiles?: Record<string, AffinitySitterInput>;
   onCtaClick?: () => void;
+  /** Lot X3a (A-05) : ancienneté de la plus ancienne candidature en attente. */
+  oldestWaitingDays?: number;
 }) => {
   const { owner } = useViewerOwnerForAffinity();
 
@@ -380,7 +384,9 @@ const ApplicationsStar = ({
       <SectionHeader
         eyebrow="Quelqu'un se propose"
         title={`${featuredSitter?.first_name ? capitalize(featuredSitter.first_name) : "Un gardien"} aimerait garder votre maison.`}
-        subtitle={`${n} candidature${n > 1 ? "s" : ""} attend${n > 1 ? "ent" : ""} votre regard.`}
+        subtitle={`${n} candidature${n > 1 ? "s" : ""} attend${n > 1 ? "ent" : ""} votre regard.${
+          staleSuffix(oldestWaitingDays) ? ` ${staleSuffix(oldestWaitingDays)}` : ""
+        }`}
       />
       <ApplicationCard
         app={featured}
@@ -462,6 +468,8 @@ export interface OwnerStarSectionProps {
   primaryAction: OwnerPrimaryAction | null;
   /** Lot D1 : annonce active (OwnerAnnonceSection) devenue contenu de la vedette. */
   activeAnnonce?: React.ReactNode;
+  /** Lot X3a (A-05) : ancienneté (jours) de la plus ancienne candidature en attente. */
+  oldestWaitingDays?: number;
 }
 
 const OwnerStarSection = ({
@@ -473,6 +481,7 @@ const OwnerStarSection = ({
   propertyCoverPhoto,
   primaryAction,
   activeAnnonce,
+  oldestWaitingDays = 0,
 }: OwnerStarSectionProps) => {
   const variant = selectOwnerStarVariant({
     ongoingSit,
@@ -516,6 +525,7 @@ const OwnerStarSection = ({
         sitterProfiles={sitterProfiles}
         sitterAffinityProfiles={sitterAffinityProfiles}
         onCtaClick={onCtaClick}
+        oldestWaitingDays={oldestWaitingDays}
       />
     );
   } else if (latestDraft) {

@@ -65,6 +65,9 @@ import { useAlmaUsageNudge } from "@/hooks/useAlmaUsageNudge";
 import { useAlmaFirstMeeting } from "@/hooks/useAlmaFirstMeeting";
 import { AlmaFirstMeeting } from "@/components/ai/alma/AlmaFirstMeeting";
 import { trackEvent } from "@/lib/analytics";
+import { awaitingLink, awaitingSentence, isAwaitingDecision, sitStatusMap, summarizeAwaiting } from "@/lib/applicationsAwaiting";
+
+const CLOSED_FOR_DECISION: readonly string[] = ["expired", "cancelled", "archived", "completed"];
 
 const OwnerDashboard = () => {
   const { user } = useAuth();
@@ -117,7 +120,19 @@ const OwnerDashboard = () => {
   /* ── Derived values ── */
   const now = new Date();
   const activeSits = useMemo(() => sits.filter(s => ["published", "confirmed"].includes(s.status)), [sits]);
-  const pendingAppCount = useMemo(() => recentApps.filter(a => a.status === "pending").length, [recentApps]);
+  // Lot X3a (A-03, A-05) : toute candidature qui attend une décision compte
+  // (pending, viewed, discussing), sur les annonces encore ouvertes ; la plus
+  // ancienne et son ancienneté donnent le repère de l'accueil.
+  const sitStatuses = useMemo(() => sitStatusMap(sits), [sits]);
+  const awaiting = useMemo(() => summarizeAwaiting(recentApps, sitStatuses), [recentApps, sitStatuses]);
+  const awaitingApps = useMemo(
+    () => recentApps
+      .filter((a) => isAwaitingDecision(a.status) && !CLOSED_FOR_DECISION.includes(sitStatuses[a.sit_id] ?? ""))
+      // Les nouvelles d'abord, l'ordre récent du chargement ensuite.
+      .sort((a, b) => Number(b.status === "pending") - Number(a.status === "pending")),
+    [recentApps, sitStatuses],
+  );
+  const pendingAppCount = awaiting.count;
 
   const latestDraft = useMemo(() => {
     const todayIso = new Date().toISOString().slice(0, 10);
@@ -206,7 +221,7 @@ const OwnerDashboard = () => {
       return `Votre prochaine garde commence dans ${daysUntil} jour${daysUntil > 1 ? "s" : ""}.`;
     }
     if (pendingAppCount > 0) {
-      return `${pendingAppCount} candidature${pendingAppCount > 1 ? "s" : ""} à examiner.`;
+      return awaitingSentence(awaiting) ?? `${pendingAppCount} candidature${pendingAppCount > 1 ? "s" : ""} à examiner.`;
     }
     if (sits.some(s => s.status === "published")) {
       return "Votre annonce est en ligne, les candidatures arrivent.";
@@ -230,7 +245,7 @@ const OwnerDashboard = () => {
     }
     return "Publiez votre première annonce pour trouver un gardien.";
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ongoingSit, sits, pendingAppCount, latestDraft, noActiveSit, earlyOwner, nearbyCount, nearbyRadius]);
+  }, [ongoingSit, sits, pendingAppCount, awaiting, latestDraft, noActiveSit, earlyOwner, nearbyCount, nearbyRadius]);
 
   const getNextSitForPet = useCallback((pet: Pet) => {
     const currentDate = new Date();
@@ -323,7 +338,7 @@ const OwnerDashboard = () => {
 
   // Lot D1 : rangée « À faire » de l'accueil, actions réelles en attente, 3 au plus.
   const todos: CockpitTodo[] = [];
-  if (pendingAppCount > 0) todos.push({ key: "apps", label: "Candidatures à traiter", to: "/sits", count: pendingAppCount });
+  if (pendingAppCount > 0) todos.push({ key: "apps", label: "Candidatures à traiter", to: awaitingLink(awaiting), count: pendingAppCount });
   if (unreadCount > 0) todos.push({ key: "messages", label: "Messages à lire", to: "/messages", count: unreadCount });
   if (helpsWithMissing) todos.push({ key: "helps", label: "Votre phrase d'entraide", to: "/ma-ligne" });
   // Ancien bloc 2bis : son action passe dans « À faire » si elle est
@@ -423,7 +438,8 @@ const OwnerDashboard = () => {
             {/* 2. Vedette unique */}
             <OwnerStarSection
               ongoingSit={ongoingSit ?? null}
-              pendingApps={recentApps.filter(a => a.status === "pending")}
+              pendingApps={awaitingApps}
+              oldestWaitingDays={awaiting.oldest?.days ?? 0}
               sitterProfiles={sitterProfiles}
               sitterAffinityProfiles={sitterAffinityProfiles}
               latestDraft={latestDraft as any}
@@ -511,7 +527,7 @@ const OwnerDashboard = () => {
 
       {/* CTA collant mobile : seulement pour les candidatures à traiter */}
       {pendingAppCount > 0 && !starIsPublishForm && (
-        <MobileStickyCTA label="Voir les candidatures" to="/sits" badge={pendingAppCount} />
+        <MobileStickyCTA label="Voir les candidatures" to={awaitingLink(awaiting)} badge={pendingAppCount} />
       )}
     </div>
   );

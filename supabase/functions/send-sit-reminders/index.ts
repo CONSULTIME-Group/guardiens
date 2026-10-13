@@ -1,6 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { startCronRun } from "../_shared/cron-run-log.ts";
 import { requireCronCaller } from "../_shared/require-cron-caller.ts";
+import { PRE_SIT_REMINDER_STATUSES, shouldSendPreSitReminder } from "../_shared/sit-reminders.ts";
 
 
 const corsHeaders = {
@@ -32,10 +33,11 @@ Deno.serve(async (req) => {
   const in2days = new Date(now);
   in2days.setDate(in2days.getDate() + 2);
 
+  // Lot X3a (A-06) : gardes confirmées seulement, avec un gardien retenu.
   const { data: upcomingSits } = await supabase
     .from("sits")
     .select("id, title, start_date, end_date, user_id, status")
-    .in("status", ["confirmed", "published"])
+    .in("status", [...PRE_SIT_REMINDER_STATUSES])
     .or(
       `start_date.eq.${formatDate(in7days)},start_date.eq.${formatDate(in2days)}`
     );
@@ -48,6 +50,14 @@ Deno.serve(async (req) => {
     );
     const reminderType = daysUntil <= 2 ? "reminder_48h" : "reminder_7days";
     const reminderText = daysUntil <= 2 ? "commence dans 48h" : "commence dans 7 jours";
+
+    const { data: acceptedApps } = await supabase
+      .from("applications")
+      .select("sitter_id")
+      .eq("sit_id", sit.id)
+      .eq("status", "accepted");
+    const acceptedSitterIds = (acceptedApps || []).map((a: { sitter_id: string }) => a.sitter_id);
+    if (!shouldSendPreSitReminder(sit.status, acceptedSitterIds)) continue;
 
     // Check if already sent
     const { data: existing } = await supabase
@@ -71,33 +81,25 @@ Deno.serve(async (req) => {
     count++;
 
     // Notify accepted sitter
-    if (sit.status === "confirmed") {
-      const { data: apps } = await supabase
-        .from("applications")
-        .select("sitter_id")
-        .eq("sit_id", sit.id)
-        .eq("status", "accepted");
+    for (const sitterId of acceptedSitterIds) {
+      const { data: existingSitter } = await supabase
+        .from("notifications")
+        .select("id")
+        .eq("user_id", sitterId)
+        .eq("type", reminderType)
+        .like("link", `%${sit.id}%`)
+        .limit(1);
 
-      for (const app of apps || []) {
-        const { data: existingSitter } = await supabase
-          .from("notifications")
-          .select("id")
-          .eq("user_id", app.sitter_id)
-          .eq("type", reminderType)
-          .like("link", `%${sit.id}%`)
-          .limit(1);
+      if (existingSitter && existingSitter.length > 0) continue;
 
-        if (existingSitter && existingSitter.length > 0) continue;
-
-        await supabase.from("notifications").insert({
-          user_id: app.sitter_id,
-          type: reminderType,
-          title: daysUntil <= 2 ? "Garde dans 48h !" : "Garde dans 7 jours",
-          body: `Votre garde « ${sit.title} » ${reminderText}.`,
-          link: `/sits/${sit.id}`,
-        });
-        count++;
-      }
+      await supabase.from("notifications").insert({
+        user_id: sitterId,
+        type: reminderType,
+        title: daysUntil <= 2 ? "Garde dans 48h !" : "Garde dans 7 jours",
+        body: `Votre garde « ${sit.title} » ${reminderText}.`,
+        link: `/sits/${sit.id}`,
+      });
+      count++;
     }
   }
 

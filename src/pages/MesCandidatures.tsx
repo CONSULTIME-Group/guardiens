@@ -31,9 +31,22 @@ import { logger } from "@/lib/logger";
 import HelpDuringSitDialog from "@/components/sits/HelpDuringSitDialog";
 import {
   canShowSitContent,
+  cancelledApplicationLabel,
   groupApplications,
+  isOpenApplicationStatus,
   sitStateNote,
 } from "@/lib/applicationSitState";
+import { sitterWaitingDays, sitterWaitingNote } from "@/lib/applicationsAwaiting";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface SitterApp {
   application_id: string;
@@ -49,7 +62,9 @@ interface SitterApp {
   owner_id: string;
   cover_photo: string | null;
   content_visible: boolean;
-  owner?: { id: string; first_name: string | null; avatar_url: string | null; city: string | null } | null;
+  /** Lot X3a : le gardien a lui-même annulé sa participation (migration X3a). */
+  sit_cancelled_by_me?: boolean | null;
+  owner?:{ id: string; first_name: string | null; avatar_url: string | null; city: string | null } | null;
 }
 
 const appStatusBadge: Record<string, { label: (viewedAt: string | null) => string; className: string }> = {
@@ -158,7 +173,50 @@ const MesCandidatures = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
-  const { active, closed } = useMemo(() => groupApplications(apps), [apps]);
+  // Lot X3a (B-07) : un oui à une proposition privée reste « en cours ».
+  const { active, closed } = useMemo(
+    () => groupApplications(apps, { isProposal: (a) => !!proposalBySit[a.sit_id] }),
+    [apps, proposalBySit],
+  );
+
+  // Lot X3a (B-08) : retrait depuis la carte, même écriture que /sits.
+  const [withdrawApp, setWithdrawApp] = useState<SitterApp | null>(null);
+  const [withdrawing, setWithdrawing] = useState(false);
+  const confirmWithdraw = async () => {
+    if (!withdrawApp || !user) return;
+    setWithdrawing(true);
+    try {
+      const { error } = await supabase
+        .from("applications")
+        .update({ status: "cancelled" as any })
+        .eq("id", withdrawApp.application_id)
+        .eq("sitter_id", user.id);
+      if (error) throw error;
+      const { data: conv } = await supabase
+        .from("conversations")
+        .select("id")
+        .eq("sit_id", withdrawApp.sit_id)
+        .eq("sitter_id", user.id)
+        .limit(1)
+        .maybeSingle();
+      if ((conv as { id?: string } | null)?.id) {
+        await supabase.from("messages").insert({
+          conversation_id: (conv as { id: string }).id,
+          sender_id: user.id,
+          content: "Le gardien a retiré sa candidature.",
+          is_system: true,
+        });
+      }
+      toast({ title: "Candidature retirée" });
+      setWithdrawApp(null);
+      void load();
+    } catch (e) {
+      logger.error("MesCandidatures.withdraw", { error: String(e) });
+      toast({ variant: "destructive", title: "Retrait impossible", description: "Réessayez dans un instant." });
+    } finally {
+      setWithdrawing(false);
+    }
+  };
 
   // Rappel de statut professionnel déclaré (visible par les propriétaires).
   const [proInfo, setProInfo] = useState<{ status: string; specialty: string | null } | null>(null);
@@ -202,7 +260,18 @@ const MesCandidatures = () => {
     const city = showContent ? app.sit_city || app.owner?.city : null;
     const period = showContent ? formatSitPeriod(app.sit_start_date, app.sit_end_date, null) : null;
     const badge = appStatusBadge[app.status] || appStatusBadge.pending;
-    const note = sitStateNote(app.sit_status);
+    // Lot X3a (B-04) : une clôture système n'est jamais lue comme un retrait.
+    const badgeLabel = app.status === "cancelled"
+      ? cancelledApplicationLabel(app.sit_status, !!app.sit_cancelled_by_me)
+      : badge.label(app.viewed_at);
+    const note = sitStateNote(app.sit_status, {
+      appStatus: app.status,
+      fromProposal: !!proposalBySit[app.sit_id],
+      cancelledByMe: !!app.sit_cancelled_by_me,
+    });
+    // Lot X3a (B-08) : sans réponse depuis plus de 7 jours, ce que le gardien peut faire.
+    const waitingDays = sitterWaitingDays(app.status, app.sit_status, app.created_at);
+    const canWithdraw = isOpenApplicationStatus(app.status) && app.sit_status === "published";
     const proposalId = !showContent ? proposalBySit[app.sit_id] : undefined;
     const title = showContent
       ? app.sit_title || "Annonce sans titre"
@@ -277,13 +346,22 @@ const MesCandidatures = () => {
               <span
                 className={`text-[11px] font-medium px-2 py-1 rounded-full whitespace-nowrap ${badge.className}`}
               >
-                {badge.label(app.viewed_at)}
+                {badgeLabel}
               </span>
             </div>
 
             {note && (
               <p className="text-xs text-muted-foreground bg-muted/60 rounded-lg px-2.5 py-1.5 w-fit">
                 {note}
+              </p>
+            )}
+
+            {waitingDays !== null && (
+              <p
+                data-testid="application-waiting-note"
+                className="text-xs text-foreground bg-accent/50 rounded-lg px-2.5 py-1.5 w-fit"
+              >
+                {sitterWaitingNote(waitingDays)}
               </p>
             )}
 
@@ -321,6 +399,16 @@ const MesCandidatures = () => {
                   <MessageSquare className="h-4 w-4 mr-1.5" />
                   Message
                 </Button>
+                {canWithdraw && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="rounded-xl text-muted-foreground"
+                    onClick={() => setWithdrawApp(app)}
+                  >
+                    Retirer
+                  </Button>
+                )}
               </div>
             </div>
           </div>
@@ -399,6 +487,29 @@ const MesCandidatures = () => {
           </div>
         )}
       </div>
+
+      <AlertDialog open={!!withdrawApp} onOpenChange={(o) => { if (!o && !withdrawing) setWithdrawApp(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Retirer votre candidature ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Votre place se libère pour d'autres gardiens et vous restez libre de postuler ailleurs.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={withdrawing}>Garder ma candidature</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={withdrawing}
+              onClick={(e) => {
+                e.preventDefault();
+                void confirmWithdraw();
+              }}
+            >
+              {withdrawing ? "Retrait…" : "Retirer"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

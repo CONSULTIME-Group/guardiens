@@ -44,6 +44,8 @@ import SitterAffinitySection from "./SitterAffinitySection";
 import { AlmaPopularSitWhisper } from "@/components/ai/alma/wiring/AlmaPopularSitWhisper";
 import { AlmaReactiveOwnerWhisper } from "@/components/ai/alma/wiring/AlmaReactiveOwnerWhisper";
 import type { SitData } from "./types";
+import { sitterPresenceOnSit } from "@/lib/sitterSitPresence";
+import { isCapReached } from "@/lib/applicationCap";
 
 interface SitterSitViewProps {
   sit: SitData;
@@ -58,6 +60,9 @@ interface SitterSitViewProps {
   setAppCount: (n: number) => void;
   hasApplied: boolean;
   setHasApplied: (b: boolean) => void;
+  /** Lot X3a (B-03) : statut de la candidature du visiteur, null sans candidature. */
+  myApplicationStatus?: string | null;
+  setMyApplicationStatus?: (s: string | null) => void;
   hasReviewedThisSit: boolean;
   sitterProfile: any;
   currentUserId: string;
@@ -77,11 +82,18 @@ const SitterSitView = ({
   setAppCount,
   hasApplied,
   setHasApplied,
+  myApplicationStatus = null,
+  setMyApplicationStatus = () => {},
   hasReviewedThisSit,
   sitterProfile,
   currentUserId,
   activeRole,
 }: SitterSitViewProps) => {
+  // Lot X3a (B-03) : la check-list, l'accord et l'annulation de participation
+  // ne concernent que le gardien retenu ; un candidat non retenu lit que le
+  // propriétaire a choisi un autre gardien.
+  const presence = sitterPresenceOnSit(sit.status, myApplicationStatus);
+  const isChosenSitter = presence === "chosen";
   const { t } = useTranslation();
   // Lecture directe du profil, supprime les props `userRole`/`userFirstName`
   // qui dupliquaient l'info disponible via useAuth.
@@ -150,10 +162,10 @@ const SitterSitView = ({
 
   useEffect(() => {
     const showAccord = ["confirmed", "in_progress", "completed"].includes(sit.status);
-    if (!showAccord || !currentUserId) return;
+    if (!showAccord || !currentUserId || !isChosenSitter) return;
     void loadAccordStatus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sit.id, sit.status, currentUserId]);
+  }, [sit.id, sit.status, currentUserId, isChosenSitter]);
 
   // Dérivés partagés (avgRating + formatDate + badges de matching).
   const { avgRating, formatDate, matchingBadges: badges } = useSitDerived({
@@ -218,6 +230,7 @@ const SitterSitView = ({
         city={owner?.city ?? null}
         startDate={sit.start_date}
         endDate={sit.end_date}
+        otherSitterChosen={presence === "other_chosen"}
       />
 
       {/* Header partagé (compact : back link + actions uniquement) */}
@@ -432,8 +445,8 @@ const SitterSitView = ({
         </>
       )}
 
-      {/* Post-confirmation checklist */}
-      {(sit.status === "confirmed" || sit.status === "in_progress") && (
+      {/* Post-confirmation checklist : gardien retenu seulement (lot X3a, B-03) */}
+      {isChosenSitter && (sit.status === "confirmed" || sit.status === "in_progress") && (
         <div className="mb-8">
           <PostConfirmationChecklist
             sitId={sit.id}
@@ -490,7 +503,7 @@ const SitterSitView = ({
 
       {/* Commodat : registre carnet (vague 21). Visible dès la confirmation,
           même si le propriétaire n'a pas encore signé : jamais de silence total. */}
-      {accordLoaded && ["confirmed", "in_progress", "completed"].includes(sit.status) && (
+      {isChosenSitter && accordLoaded && ["confirmed", "in_progress", "completed"].includes(sit.status) && (
         <div className="mt-8">
           {accordOpen && accordData ? (
             <AccordDeGarde
@@ -565,9 +578,10 @@ const SitterSitView = ({
         today.setHours(0, 0, 0, 0);
         const endDate = sit.end_date ? new Date(sit.end_date) : null;
         const isPast = endDate ? endDate < today : false;
+        // Lot X3a (B-03) : réservé au gardien retenu (candidature acceptée).
         const canSitterCancel =
           !isPast &&
-          hasApplied &&
+          isChosenSitter &&
           (sit.status === "confirmed" || sit.status === "in_progress");
         if (!canSitterCancel) return null;
         return (
@@ -656,17 +670,15 @@ const SitterSitView = ({
         city={owner?.city || ""}
         startDate={formatDate(sit.start_date)}
         endDate={formatDate(sit.end_date)}
-        onSuccess={async () => {
+        onSuccess={() => {
           setHasApplied(true);
-          // Auto-close if max_applications reached
+          setMyApplicationStatus("pending");
+          // Lot X3a (B-05) : la fermeture au plafond se fait côté serveur
+          // (trg_close_sit_when_application_cap_reached) ; l'écran suit.
           if (sit.max_applications) {
             const newCount = appCount + 1;
             setAppCount(newCount);
-            if (newCount >= sit.max_applications) {
-              await supabase
-                .from("sits")
-                .update({ accepting_applications: false } as any)
-                .eq("id", sit.id);
+            if (isCapReached(sit.max_applications, newCount)) {
               setSit({ ...sit, accepting_applications: false });
             }
           }
@@ -681,8 +693,10 @@ const SitterSitView = ({
         sitOwnerId={sit.user_id}
         startDate={formatDate(sit.start_date)}
         endDate={formatDate(sit.end_date)}
-        onCancelled={() => {
-          setSit({ ...sit, status: "cancelled" });
+        onCancelled={(outcome) => {
+          // Lot X3a (B-02) : annonce republiée pour d'autres gardiens, ou garde annulée.
+          setSit({ ...sit, status: outcome === "republished" ? "published" : "cancelled" });
+          setMyApplicationStatus("cancelled");
           setCancelOpen(false);
         }}
       />

@@ -4,12 +4,19 @@ import { useQuery } from "@tanstack/react-query";
 import { syncAppBadge } from "@/lib/appBadge";
 import { supabase } from "@/integrations/supabase/client";
 import { messagesUnreadExclusive } from "@/lib/navModel";
+import { summarizeAwaiting, sitStatusMap } from "@/lib/applicationsAwaiting";
 
 export interface NavBadgeCounts {
   unreadCount: number;
+  /**
+   * Lot X3a (A-03) : candidatures reçues qui attendent une décision
+   * (pending, viewed, discussing) sur des annonces encore ouvertes.
+   */
   ownerInboxCount: number;
   sitterActionCount: number;
   missionBadgeCount: number;
+  /** Lot X3a (A-07) : annonce de la plus ancienne candidature en attente. */
+  ownerInboxSitId?: string | null;
 }
 
 const EMPTY: NavBadgeCounts = {
@@ -17,6 +24,7 @@ const EMPTY: NavBadgeCounts = {
   ownerInboxCount: 0,
   sitterActionCount: 0,
   missionBadgeCount: 0,
+  ownerInboxSitId: null,
 };
 
 /**
@@ -76,9 +84,14 @@ export function useNavBadgeCounts(userId: string | undefined): NavBadgeCounts {
           : Promise.resolve({ count: 0 } as any),
         userSits.length > 0
           ? fetchApplicationsOnMySits(userId)
-              .then((rows) => ({ count: rows.filter((a: any) => a.status === "pending").length }))
-              .catch(() => ({ count: 0 }))
-          : Promise.resolve({ count: 0 } as any),
+              .then((rows) => {
+                // Lot X3a (A-03) : une candidature ouverte une fois attend
+                // toujours une décision, elle reste comptée.
+                const summary = summarizeAwaiting(rows as any[], sitStatusMap(userSits));
+                return { count: summary.count, sitId: summary.oldest?.sitId ?? null };
+              })
+              .catch(() => ({ count: 0, sitId: null }))
+          : Promise.resolve({ count: 0, sitId: null } as any),
       ]);
 
       if (convIds.length > 0) {
@@ -93,6 +106,7 @@ export function useNavBadgeCounts(userId: string | undefined): NavBadgeCounts {
       }
 
       result.ownerInboxCount = ownerInboxRes.count || 0;
+      result.ownerInboxSitId = ownerInboxRes.sitId ?? null;
 
       return result;
     },

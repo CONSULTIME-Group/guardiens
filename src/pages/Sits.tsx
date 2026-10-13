@@ -1392,9 +1392,11 @@ const Sits = () => {
  * La fiche publique ne sert jamais une annonce réellement annulée en base, ni
  * une annonce masquée. Le test porte sur le statut réel, jamais sur le statut
  * effectif, qui bascule en « archivé » dès qu'un motif d'archivage est posé.
+ * Lot X3a (A-04) : son auteur, lui, ouvre toujours sa fiche (historique des
+ * candidatures, republication).
  */
-const canOpenSitPage = (sit: any): boolean =>
-  !!sit && !sit.unavailable && sit.status !== "cancelled";
+const canOpenSitPage = (sit: any, isOwner = false): boolean =>
+  !!sit && !sit.unavailable && (isOwner || sit.status !== "cancelled");
 
 /**
  * Candidature dont l'annonce n'est plus consultable (retirée, confiée à un
@@ -1544,7 +1546,7 @@ const SitCard = ({
           {/* Top row */}
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
-              {canOpenSitPage(sit) ? (
+              {canOpenSitPage(sit, isOwner) ? (
                 <Link to={`/sits/${sit.id}`} className="hover:underline">
                   <h3 className="font-heading font-semibold truncate text-sm md:text-base">
                     {displayTitle}
@@ -1885,7 +1887,7 @@ const QuickActions = ({
   if (!isOwner && ["pending", "viewed", "discussing"].includes(sit.application_status)) {
     return (
       <>
-        {canOpenSitPage(sit) ? (
+        {canOpenSitPage(sit, isOwner) ? (
           <Link to={`/sits/${sit.id}`} className={cn(btnClass, "bg-accent text-muted-foreground hover:text-foreground")}>
             <ChevronRight className="h-3.5 w-3.5" /> Voir l'annonce
           </Link>
@@ -1979,7 +1981,7 @@ const ActionsMenu = ({
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-52">
-        {canOpenSitPage(sit) && (
+        {canOpenSitPage(sit, true) && (
           <DropdownMenuItem asChild>
             <Link to={`/sits/${sit.id}`} className="flex items-center gap-2">
               <Eye className="h-4 w-4" /> Voir l'annonce
