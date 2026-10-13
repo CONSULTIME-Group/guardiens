@@ -28,6 +28,10 @@ const ALWAYS_OPEN_PREFIXES = [
   "/review",
   "/mes-avis",
   "/house-guide",
+  // Lot I1b (13/10/2026) : l'entraide, dont la page du besoin qu'on vient de
+  // publier. Du 06 au 12/10, 5 auteurs renvoyés vers le questionnaire en
+  // ouvrant leur propre besoin, l'une trois fois en deux minutes.
+  "/petites-missions",
 ];
 
 function matchesPrefix(path: string, prefix: string): boolean {
