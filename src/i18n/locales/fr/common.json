@@ -23,7 +23,8 @@
       "by_department": "Par département",
       "local_guides": "Guides locaux",
       "resources": "Ressources",
-      "guardiens": "Guardiens"
+      "guardiens": "Guardiens",
+      "mutual_aid": "Entraide"
     },
     "links": {
       "all_guides": "Tous les guides",
@@ -43,17 +44,21 @@
       "all_departments": "Les 101 départements",
       "become_home_sitter": "Devenir home-sitter",
       "guide_city": "Guide {{city}}",
-      "house_sitting_city": "House-sitting {{city}}"
+      "house_sitting_city": "House-sitting {{city}}",
+      "all_mutual_aid": "Toute l'entraide",
+      "mutual_aid_city": "Entraide à {{city}}",
+      "associations": "Associations et refuges"
     },
     "tagline": "House-sitting de proximité",
     "version": "Guardiens · Version bêta · {{year}}",
     "legal": {
-      "cgu": "CGU",
-      "cgs": "CGS",
-      "privacy": "Politique de confidentialité",
+      "cgu": "Conditions d'utilisation",
+      "cgs": "Conditions de service",
+      "privacy": "Confidentialité",
       "legal_notice": "Mentions légales",
       "contact": "Contact",
-      "cookies": "Politique cookies"
+      "cookies": "Cookies",
+      "manage_cookies": "Gérer mes cookies"
     }
   },
   "landing": {
@@ -316,12 +321,12 @@
       "title": "Qu'est-ce que Guardiens ?",
       "body_1": "Guardiens est un réseau d'entraide entre particuliers, organisé par affinité autant que par proximité. On y garde des maisons, on s'y rend des services, on y rencontre des gens. À un kilomètre comme à mille.",
       "body_2": "La garde de maison et la garde d'animaux à domicile en sont l'usage principal. Un gardien s'installe chez vous pendant votre absence et veille sur ce que vous laissez : votre maison, votre jardin, vos animaux.",
-        "body_3": "À côté des gardes, les membres se rendent des coups de main : arrosage, courses, compagnie, un colis à réceptionner. L'échange se décide entre vous. La mise en relation s'appuie sur un score d'affinité calculé sur plusieurs critères pondérés, propres à chaque couple. Les membres font vérifier leur identité et publient des avis croisés après leurs expériences.",
-        "body_4": "La mise en relation s'appuie sur un score d'affinité calculé sur plusieurs critères pondérés, propres à chaque couple, où le mode de vie compte autant que la distance. Les membres documentent leur profil, font vérifier leur identité et publient des avis croisés après leurs expériences. Un réseau de gardiens d'urgence est en préparation.",
-        "body_5": "Guardiens publie aussi des guides de race et des guides locaux ville par ville, une sélection d'associations et de refuges présentés avec leurs besoins du moment, et un journal de conseils pratiques.",
-        "body_6": "Les membres peuvent aussi ouvrir un chantier chez eux, un potager, un abri, un mur en pierre sèche. Des gens viennent participer quelques jours et repartent avec un savoir-faire appris sur place. Cette partie du réseau commence tout juste, et nous l'alimentons à la main.",
-        "body_7": "Le réseau couvre la France entière, et met en relation les Français de l'étranger avec des gardiens sur place. Vous accédez à l'ensemble des fonctionnalités."
-      },
+      "body_3": "À côté des gardes, les membres se rendent des coups de main : arrosage, courses, compagnie, un colis à réceptionner. L'échange se décide entre vous. La mise en relation s'appuie sur un score d'affinité calculé sur plusieurs critères pondérés, propres à chaque couple. Les membres font vérifier leur identité et publient des avis croisés après leurs expériences.",
+      "body_4": "La mise en relation s'appuie sur un score d'affinité calculé sur plusieurs critères pondérés, propres à chaque couple, où le mode de vie compte autant que la distance. Les membres documentent leur profil, font vérifier leur identité et publient des avis croisés après leurs expériences. Un réseau de gardiens d'urgence est en préparation.",
+      "body_5": "Guardiens publie aussi des guides de race et des guides locaux ville par ville, une sélection d'associations et de refuges présentés avec leurs besoins du moment, et un journal de conseils pratiques.",
+      "body_6": "Les membres peuvent aussi ouvrir un chantier chez eux, un potager, un abri, un mur en pierre sèche. Des gens viennent participer quelques jours et repartent avec un savoir-faire appris sur place. Cette partie du réseau commence tout juste, et nous l'alimentons à la main.",
+      "body_7": "Le réseau couvre la France entière, et met en relation les Français de l'étranger avec des gardiens sur place. Vous accédez à l'ensemble des fonctionnalités."
+    },
     "compare": {
       "title": "House-sitting, pension, pet-sitter : que choisir ?",
       "intro": "Quatre solutions pour faire garder vos animaux pendant votre absence. Comparaison factuelle et mesurée.",
@@ -1038,13 +1043,13 @@
     "terms_accepted_edit": "Modifier",
     "intent_banner": {
       "owner": "Encore un pas, et vous pourrez contacter ce gardien.",
-        "owner_publish": "Encore un pas, et vous pourrez publier votre annonce de garde.",
+      "owner_publish": "Encore un pas, et vous pourrez publier votre annonce de garde.",
       "sitter": "Encore un pas, et vous pourrez proposer vos services.",
-      "entraide": "Encore un pas, et vous pourrez demander ou proposer un coup de main pr\u00e8s de chez vous.",
+      "entraide": "Encore un pas, et vous pourrez demander ou proposer un coup de main près de chez vous.",
       "entraide_projet": "Encore un pas, et vous pourrez publier votre projet participatif.",
-      "projets": "Encore un pas, et vous recevrez les projets publi\u00e9s pr\u00e8s de chez vous."
+      "projets": "Encore un pas, et vous recevrez les projets publiés près de chez vous."
     },
-    "footer_trust": "Pas de spam · Désinscription en 1 clic · Vos données restent en France",
+    "footer_trust": "Pas de spam · Désinscription en 1 clic",
     "have_account": "Déjà un compte ?",
     "sign_in": "Se connecter",
     "quit_signup": "Quitter l'inscription et revenir à la connexion",
