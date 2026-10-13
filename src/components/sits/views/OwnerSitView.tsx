@@ -1276,6 +1276,7 @@ const OwnerSitView = ({
           sitId={sit.id}
           sitOwnerId={sit.user_id}
           sitStatus={sit.status}
+          sitEndDate={sit.end_date}
           currentUserId={currentUserId}
           hasReviewedThisSit={hasReviewedThisSit}
         />

@@ -510,6 +510,8 @@ const SitterSitView = ({
           sitId={sit.id}
           sitOwnerId={sit.user_id}
           sitStatus={sit.status}
+          sitEndDate={sit.end_date}
+          isSitParty={isChosenSitter}
           currentUserId={currentUserId}
           hasReviewedThisSit={hasReviewedThisSit}
         />

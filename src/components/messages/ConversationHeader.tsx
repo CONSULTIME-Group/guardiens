@@ -15,6 +15,7 @@ import { reportError } from "@/lib/errorLogger";
 import { useAcceptApplication } from "@/hooks/useAcceptApplication";
 import { OPEN_APPLICATION_STATUSES } from "@/lib/declineOpenApplications";
 import { isOpenApplicationStatus } from "@/lib/applicationSitState";
+import { conversationSitBanner } from "@/lib/conversationSitBanner";
 import { sendTransactionalEmail } from "@/lib/sendTransactionalEmail";
 import { toast } from "sonner";
 import { format, isPast } from "date-fns";
@@ -76,8 +77,15 @@ const ConversationHeader = ({
   // pending en viewed (mark_sit_applications_viewed), le bouton doit rester.
   const isPendingApp = isOpenApplicationStatus(conv.application_status);
   const isConfirmed = conv.sit?.status === "confirmed";
-  const isInProgress = conv.sit?.status === "in_progress";
-  const isCompleted = conv.sit?.status === "completed";
+  // Lot Z : bandeaux de garde réservés à la candidature acceptée de cette
+  // conversation ; l'avis suit isSitReviewable (archivée comprise).
+  const sitBanner = conversationSitBanner({
+    sitStatus: conv.sit?.status,
+    sitEndDate: conv.sit?.end_date,
+    applicationStatus: conv.application_status,
+  });
+  const isInProgress = sitBanner === "in_progress";
+  const isCompleted = sitBanner === "reviewable";
   const isSmallMission = !!(conv as any).small_mission_id;
   const sitterName = capitalize(conv.other_user?.first_name) || "le gardien";
   const appBadge = conv.application_status ? appStatusBadge[conv.application_status] : null;

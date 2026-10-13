@@ -16,7 +16,12 @@ import Head from "@/components/seo/Head";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { GOOGLE_REVIEW_URL } from "@/lib/constants";
 import { avatarImageUrl } from "@/lib/storageImage";
-import { isSitReviewable } from "@/lib/reviewEligibility";
+import {
+  isSitReviewable,
+  REVIEW_PUBLICATION_RULE,
+  REVIEW_STALE_DAYS,
+  reviewConversationPair,
+} from "@/lib/reviewEligibility";
 
 type ReviewDirection = "owner_to_sitter" | "sitter_to_owner";
 
@@ -153,13 +158,18 @@ const LeaveReview = () => {
       setReviewee(profile);
       setAlreadyReviewed(!!existingReview);
 
-      const { data: convData } = await supabase
+      // Lot Z : le couple exact propriétaire, gardien retenu. Un filtre sur
+      // l'un ou l'autre participant renvoyait toutes les conversations du
+      // propriétaire sur l'annonce et maybeSingle échouait.
+      const pair = reviewConversationPair({ isOwnerReview: isOwner, userId: user.id, revieweeId });
+      const { data: convRows } = await supabase
         .from("conversations")
         .select("id")
         .eq("sit_id", sitId)
-        .or(`owner_id.eq.${user.id},sitter_id.eq.${user.id}`)
-        .maybeSingle();
-      setConversationId(convData?.id ?? null);
+        .eq("owner_id", pair.owner_id)
+        .eq("sitter_id", pair.sitter_id)
+        .limit(1);
+      setConversationId((convRows as { id: string }[] | null)?.[0]?.id ?? null);
 
       setLoading(false);
     };
@@ -278,16 +288,11 @@ const LeaveReview = () => {
       logger.warn("Email notification failed", { err: String(e) });
     }
 
-    const { data: conv } = await supabase
-      .from("conversations")
-      .select("id")
-      .eq("sit_id", sitId)
-      .or(`owner_id.eq.${user.id},sitter_id.eq.${user.id}`)
-      .maybeSingle();
-
-    if (conv) {
+    // Lot Z : conversation de la garde lue au chargement sur le couple exact
+    // (reviewConversationPair), jamais par un filtre « l'un ou l'autre ».
+    if (conversationId) {
       await supabase.from("messages").insert({
-        conversation_id: conv.id,
+        conversation_id: conversationId,
         sender_id: user.id,
         content: `Un avis a été laissé. ${wouldRecommend ? "Recommandation positive." : ""}`.trim(),
         is_system: true,
@@ -296,7 +301,7 @@ const LeaveReview = () => {
 
     toast({
       title: "Avis envoyé !",
-      description: "Il sera publié quand les deux parties auront donné le leur.",
+      description: REVIEW_PUBLICATION_RULE,
     });
     setShowThanks(true);
   };
@@ -474,10 +479,12 @@ const LeaveReview = () => {
       {/* Legal RGPD notice */}
       <div className="rounded-lg bg-muted/40 border border-border p-3 mb-8">
         <p className="text-[10px] text-muted-foreground leading-relaxed">
-          <strong>Informations légales :</strong> En soumettant cet avis, vous acceptez qu'il soit publié sur la plateforme
-          après modération, conformément aux articles L. 111-7-2 du Code de la consommation et au décret n° 2017-1436
-          relatif aux obligations d'information sur les avis en ligne. Les avis sont publiés simultanément pour les deux
-          parties (système « double aveugle »). Vos données sont traitées sur la base de l'intérêt légitime (art. 6.1.f RGPD).
+          <strong>Informations légales :</strong> En soumettant cet avis, vous acceptez qu'il soit publié sur la plateforme,
+          conformément aux articles L. 111-7-2 du Code de la consommation et au décret n° 2017-1436 relatif aux
+          obligations d'information sur les avis en ligne. Système « double aveugle » : chaque avis est publié dès que
+          les deux parties ont déposé le leur, ou au plus tard {REVIEW_STALE_DAYS} jours après son dépôt. L'équipe
+          Guardiens peut masquer un avis contraire aux règles de la communauté. Vos données sont traitées sur la base de
+          l'intérêt légitime (art. 6.1.f RGPD).
           L'autre partie sera notifiée par e-mail de votre dépôt d'avis, sans en voir le contenu avant publication.
           Vous disposez d'un droit d'accès, de rectification et de suppression (contact@guardiens.fr).
         </p>
@@ -488,7 +495,7 @@ const LeaveReview = () => {
           <DialogHeader>
             <DialogTitle className="font-heading">Merci pour votre avis</DialogTitle>
             <DialogDescription>
-              Votre retour sera publié dès que l'autre partie aura envoyé le sien.
+              {REVIEW_PUBLICATION_RULE}
             </DialogDescription>
           </DialogHeader>
           <div className="rounded-lg border border-border bg-muted/40 p-4 space-y-3">
