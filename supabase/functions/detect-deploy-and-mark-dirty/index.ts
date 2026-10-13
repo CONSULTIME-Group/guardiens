@@ -59,25 +59,33 @@ const SITE = "https://guardiens.fr";
  * La baisser augmente proportionnellement la consommation mensuelle, elle doit
  * donc etre revue avec MONTHLY_RENDER_BUDGET.
  */
-const MIN_MARK_INTERVAL_HOURS = 24;
+// 13/10/2026 (lot PR1) : 24 h -> 72 h. Avec une mise en ligne par jour, 24 h
+// relancait une vague quotidienne. L'expiration du cache Prerender est de
+// 7 jours : 72 h suffit a propager un gabarit bien avant cette echeance.
+const MIN_MARK_INTERVAL_HOURS = 72;
 
 
 /**
- * Plafond mensuel de renders Prerender inities par nous, toutes sources
- * confondues (vagues de deploiement, triggers de contenu, fiches gardien).
+ * Plafond de renders Prerender inities par nous, toutes sources confondues
+ * (vagues de deploiement, triggers de contenu, fiches gardien), lu sur une
+ * fenetre glissante de RENDER_BUDGET_WINDOW_DAYS jours.
  *
- * Le quota du compte Prerender est de 25 000 renders par mois et il est
- * partage avec un autre domaine. Les robots declenchent en plus leurs propres
- * renders a l'expiration naturelle du cache, de l'ordre de 2 800 par mois pour
- * 646 URLs a 7 jours. Plafonner nos propres renders a 18 000 laisse environ
- * 7 000 renders de marge pour ces deux postes, tout en autorisant environ
- * 41 vagues de 436 pages par mois, soit plus d'une par jour.
+ * 13/10/2026 (lot PR1) : 18 000 par mois calendaire -> 10 000 sur 30 jours
+ * glissants. Le cycle de facturation Prerender ne commence pas le 1er, et au
+ * 13/10 le quota de 25 000 du compte (partage avec un autre domaine, plus les
+ * renders des robots a l'expiration du cache) etait epuise, dont 17 768
+ * renders inities par nous depuis le 1er octobre. 10 000 laisse 15 000 aux
+ * robots et a l'autre domaine. Meme valeur que public.seo_reserve_render,
+ * qui borne le consommateur.
  *
- * Pour changer la valeur : modifier la constante ci-dessous. Le detecteur
- * compte les lignes de public.prerender_recache_log du mois calendaire en
- * cours et refuse de marquer une vague qui ferait franchir ce plafond.
+ * Le detecteur compte les lignes de public.prerender_recache_log de la
+ * fenetre et refuse de marquer une vague qui ferait franchir ce plafond.
  */
-const MONTHLY_RENDER_BUDGET = 18_000;
+const MONTHLY_RENDER_BUDGET = 10_000;
+export const RENDER_BUDGET_WINDOW_DAYS = 30;
+function budgetWindowStart(): Date {
+  return new Date(Date.now() - RENDER_BUDGET_WINDOW_DAYS * 86_400_000);
+}
 
 /** Identifiant d'entite fixe du signal admin "plafond mensuel atteint". */
 const BUDGET_SIGNAL_ENTITY_ID = "9e0b6f2a-7c41-4d2e-9a55-5b1f2c3d4e5f";
@@ -108,17 +116,26 @@ const ROUTE_HASHES_URL = `${SITE}/route-hashes.json`;
  * Famille de pages pre-rendues -> table portant seo_dirty_at.
  * Les cles doivent correspondre a FAMILY_ROOTS du greffon de build.
  */
-const FAMILY_TABLES: Record<string, { table: string; indexable: boolean; queued?: boolean }> = {
+/**
+ * `contentOnly` (lot PR1, 13/10/2026) : famille jamais remise en file par une
+ * mise en ligne. Ses pages ne sont rafraichies que sur modification de leur
+ * contenu (triggers seo_dirty_at et seo_url_outbox) ou a l'expiration
+ * naturelle du cache Prerender. Motif mesure : du 04/10 au 12/10, sept vagues
+ * ont remis en file 1 529 a 1 605 fiches gardien chacune (environ 2 300
+ * renders par vague, 11 175 renders de fiches en octobre), alors que le sitemap
+ * n'en declare qu'environ 170.
+ */
+const FAMILY_TABLES: Record<string, { table: string; indexable: boolean; queued?: boolean; contentOnly?: boolean }> = {
   cities: { table: "seo_city_pages", indexable: true },
   departments: { table: "seo_department_pages", indexable: true },
   guides: { table: "city_guides", indexable: false },
   articles: { table: "articles", indexable: true },
-  sitters: { table: "profiles", indexable: false, queued: true },
-  sits: { table: "sits", indexable: false, queued: true },
-  missions: { table: "small_missions", indexable: false, queued: true },
-  projets: { table: "small_missions", indexable: false, queued: true },
-  breeds: { table: "breed_profiles", indexable: false, queued: true },
-  associations: { table: "animal_associations", indexable: false, queued: true },
+  sitters: { table: "profiles", indexable: false, queued: true, contentOnly: true },
+  sits: { table: "sits", indexable: false, queued: true, contentOnly: true },
+  missions: { table: "small_missions", indexable: false, queued: true, contentOnly: true },
+  projets: { table: "small_missions", indexable: false, queued: true, contentOnly: true },
+  breeds: { table: "breed_profiles", indexable: false, queued: true, contentOnly: true },
+  associations: { table: "animal_associations", indexable: false, queued: true, contentOnly: true },
 };
 
 type RouteHashes = { global: string; families: Record<string, string> };
@@ -224,7 +241,10 @@ Deno.serve(async (req) => {
     const nowMs = Date.now();
     const lastMarkedAt = [
       ...rows.map((r) => r.marked_at),
-      ...Object.keys(FAMILY_TABLES).map((family) => state.get(family)?.last_marked_at),
+      // Les familles contenu seul ne font plus de vague : leur date ne compte
+      // plus dans l'intervalle minimal entre deux vagues.
+      ...Object.keys(FAMILY_TABLES).filter((family) => !FAMILY_TABLES[family].contentOnly)
+        .map((family) => state.get(family)?.last_marked_at),
     ].filter((d): d is string => !!d).sort((a, b) => Date.parse(a) - Date.parse(b)).pop();
     const hoursSinceLastMark = lastMarkedAt
       ? (nowMs - new Date(lastMarkedAt).getTime()) / 3_600_000
@@ -255,7 +275,10 @@ Deno.serve(async (req) => {
 
       let reason: string;
       let detail: string;
-      if (!hashes) {
+      if (FAMILY_TABLES[family].contentOnly) {
+        reason = "content_only";
+        detail = "famille rafraichie sur modification de contenu uniquement, jamais par une mise en ligne (lot PR1)";
+      } else if (!hashes) {
         reason = "hashes_unavailable";
         detail = "route-hashes.json illisible, marquage de securite de toutes les familles";
       } else if (!newHash) {
@@ -308,9 +331,7 @@ Deno.serve(async (req) => {
     let marked = 0;
 
     if (toMark.length > 0) {
-      const monthStart = new Date();
-      monthStart.setUTCDate(1);
-      monthStart.setUTCHours(0, 0, 0, 0);
+      const monthStart = budgetWindowStart();
       const { count: usedCount, error: usedError } = await sb
         .from("prerender_recache_log")
         .select("id", { count: "exact", head: true })
@@ -418,9 +439,7 @@ Deno.serve(async (req) => {
     if (staticBundleChanged && !isFirstEverRun) {
       let used = monthlyUsed;
       if (toMark.length === 0) {
-        const monthStart = new Date();
-        monthStart.setUTCDate(1);
-        monthStart.setUTCHours(0, 0, 0, 0);
+        const monthStart = budgetWindowStart();
         const { count, error: cErr } = await sb
           .from("prerender_recache_log")
           .select("id", { count: "exact", head: true })
@@ -480,7 +499,7 @@ Deno.serve(async (req) => {
     // marquage est différé ou refusé. Le cron suivant reverra le changement.
     if (hashes) {
       const nowIso = new Date().toISOString();
-      const upserts = decisions.filter((d) => d.family !== STATIC_FAMILY && d.reason !== "family_hash_missing").map((d) => {
+      const upserts = decisions.filter((d) => d.family !== STATIC_FAMILY && d.reason !== "family_hash_missing" && d.reason !== "content_only").map((d) => {
         const st = state.get(d.family);
         return {
           family: d.family,

@@ -13,6 +13,7 @@ import {
   STATIC_LOG_SOURCE,
   STATIC_RENDER_BUDGET,
 } from "../_shared/static-seo-refresh.ts";
+import { isSitterProfileIndexable } from "../_shared/sitterProfileIndexability.js";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -26,6 +27,17 @@ const BATCH = 50;
 const SITTER_SCAN_BATCH = 300;
 /** Renders Prerender réellement dépensés par passage pour les fiches gardien. */
 const SITTER_RENDER_BUDGET = 25;
+/**
+ * Lot PR1 (13/10/2026). Une fiche gardien hors index (meme regle que le
+ * sitemap et la balise robots de la page) n'est rendue que si Prerender en
+ * garde probablement une copie : recache reussi dans les NOINDEX_COPY_DAYS
+ * derniers jours (expiration du cache a 7 jours, plus un jour de marge). Sinon
+ * la demande est acquittee sans render. Mesure : en octobre, 1 612 fiches
+ * rendues pour environ 170 fiches declarees au sitemap.
+ */
+const NOINDEX_COPY_DAYS = 8;
+/** Taille des listes `in` envoyees a PostgREST, pour borner la longueur d'URL. */
+const IN_CHUNK = 50;
 
 /**
  * Budgets de renders par passage, cron toutes les 15 minutes.
@@ -93,11 +105,14 @@ interface SitterMetrics {
 /**
  * Consomme `profiles.seo_dirty_at` pour les fiches gardien.
  *
- * Trois garde-fous :
+ * Garde-fous :
  *  - lecture plafonnée à SITTER_SCAN_BATCH lignes, les plus anciennes d'abord ;
  *  - au plus SITTER_RENDER_BUDGET appels Prerender par passage ;
- *  - toutes les fiches déjà marquées sont traitées, même après un changement
- *    de rôle ou d'indexabilité ; aucune demande n'est effacée sans succès.
+ *  - fiche indexable (règle partagée avec le sitemap) : rendue ;
+ *  - fiche hors index (rôle quitté, bio vidée, jamais éligible) : rendue
+ *    seulement si une copie Prerender récente existe, pour la remplacer ;
+ *    sinon acquittée sans render (lot PR1, 13/10/2026) ;
+ *  - aucune demande rendue n'est effacée sans succès.
  *
  * Les triggers conservent une seule ligne sale par profil, avec la date de
  * sa dernière modification. L'acquittement id + date conserve une demande
@@ -120,21 +135,72 @@ async function processSitters(
 
   const { data, error } = await sb
     .from("profiles")
-    .select("id, seo_dirty_at")
+    .select("id, seo_dirty_at, role, bio, identity_verified")
     .not("seo_dirty_at", "is", null)
     .order("seo_dirty_at", { ascending: true })
     .limit(SITTER_SCAN_BATCH);
 
   if (error) throw error;
 
-  const rows = (data ?? []) as Array<{ id: string; seo_dirty_at: string }>;
+  const rows = (data ?? []) as Array<{
+    id: string; seo_dirty_at: string; role: string | null; bio: string | null; identity_verified: boolean | null;
+  }>;
   metrics.sitters_scanned = rows.length;
   if (rows.length === 0) return metrics;
 
-  const toRecache = rows.slice(0, SITTER_RENDER_BUDGET);
-  metrics.sitters_deferred = rows.length - toRecache.length;
-  for (const row of toRecache) {
-    const url = `${SITE}/gardiens/${row.id}`;
+  // Lectures non facturees : motivation et galerie, comme le sitemap.
+  const motivationById = new Map<string, string | null>();
+  const galleryCountById = new Map<string, number>();
+  for (let i = 0; i < rows.length; i += IN_CHUNK) {
+    const ids = rows.slice(i, i + IN_CHUNK).map((r) => r.id);
+    const [sp, gallery] = await Promise.all([
+      sb.from("sitter_profiles").select("user_id, motivation").in("user_id", ids),
+      sb.from("sitter_gallery").select("user_id").in("user_id", ids),
+    ]);
+    if (sp.error) throw sp.error;
+    if (gallery.error) throw gallery.error;
+    for (const r of (sp.data ?? []) as Array<{ user_id: string; motivation: string | null }>) {
+      motivationById.set(r.user_id, r.motivation);
+    }
+    for (const r of (gallery.data ?? []) as Array<{ user_id: string }>) {
+      galleryCountById.set(r.user_id, (galleryCountById.get(r.user_id) ?? 0) + 1);
+    }
+  }
+  const urlOf = (id: string) => `${SITE}/gardiens/${id}`;
+  const indexable = new Set(rows.filter((r) => isSitterProfileIndexable({
+    role: r.role,
+    bio: r.bio,
+    motivation: motivationById.get(r.id) ?? null,
+    identityVerified: r.identity_verified,
+    galleryCount: galleryCountById.get(r.id) ?? 0,
+  })).map((r) => r.id));
+
+  // Fiches hors index : copie Prerender probable seulement si recache recent.
+  const recentCopy = new Set<string>();
+  const outside = rows.filter((r) => !indexable.has(r.id)).map((r) => urlOf(r.id));
+  const since = new Date(Date.now() - NOINDEX_COPY_DAYS * 86_400_000).toISOString();
+  for (let i = 0; i < outside.length; i += IN_CHUNK) {
+    const { data: recent, error: recentError } = await sb
+      .from("prerender_recache_log")
+      .select("url")
+      .in("url", outside.slice(i, i + IN_CHUNK))
+      .eq("ok", true)
+      .gte("created_at", since);
+    if (recentError) throw recentError;
+    for (const r of (recent ?? []) as Array<{ url: string }>) recentCopy.add(r.url);
+  }
+
+  let attempts = 0;
+  for (const row of rows) {
+    const url = urlOf(row.id);
+    if (!indexable.has(row.id) && !recentCopy.has(url)) {
+      // Aucune copie a remplacer : acquitter sans render.
+      metrics.sitters_skipped_noindex += 1;
+      acknowledgements.push({ table: "profiles", id: row.id, seo_dirty_at: row.seo_dirty_at });
+      continue;
+    }
+    if (attempts >= SITTER_RENDER_BUDGET) { metrics.sitters_deferred += 1; continue; }
+    attempts += 1;
     const res = await recache(url);
     if (res.deferred) { metrics.sitters_deferred += 1; continue; }
     if (res.ok) {
