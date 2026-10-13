@@ -12800,6 +12800,7 @@ export type Database = {
       }
       consume_mission_action_token: { Args: { p_token: string }; Returns: Json }
       consume_mission_choose_token: { Args: { p_token: string }; Returns: Json }
+      count_completed_sits: { Args: { p_user_id: string }; Returns: number }
       count_eligible_sitters: {
         Args: { p_lat: number; p_lng: number; p_radius_km?: number }
         Returns: number
