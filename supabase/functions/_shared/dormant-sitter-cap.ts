@@ -66,6 +66,74 @@ export function dormantSendDecision(input: {
   return { send: true, reason: null };
 }
 
+export const DORMANT_TEMPLATE = "dormant-sitter-nudge";
+export const DORMANT_KEY_PREFIX = "dormant-sitter-";
+/** Statuts qui comptent comme un envoi (fait, en cours ou différé). */
+export const DORMANT_COUNTED_STATUSES = ["sent", "pending", "deferred"] as const;
+
+/**
+ * Filtre PostgREST des envois dormants passés. Lot Y1 (P4-01) :
+ * send-transactional-email écrit un UUID dans message_id et range la clé
+ * `dormant-sitter-{gardien}-{semaine}` dans metadata.idempotency_key ; seules
+ * les lignes antérieures au 01/10/2026 portent la clé dans message_id.
+ */
+export const DORMANT_PAST_SENDS_FILTER =
+  `message_id.like.${DORMANT_KEY_PREFIX}%,` +
+  `and(template_name.eq.${DORMANT_TEMPLATE},status.in.(${DORMANT_COUNTED_STATUSES.join(",")}))`;
+
+/** Filtre PostgREST du doublon d'une clé, aux deux formats du journal. */
+export function dormantDuplicateFilter(key: string): string {
+  return `message_id.eq.${key},and(metadata->>idempotency_key.eq.${key},template_name.eq.${DORMANT_TEMPLATE},status.in.(${DORMANT_COUNTED_STATUSES.join(",")}))`;
+}
+
+export interface DormantLogRow {
+  message_id?: string | null;
+  created_at?: string | null;
+  status?: string | null;
+  metadata?: { idempotency_key?: unknown } | null;
+}
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Clé dormante d'une ligne du journal, aux deux formats, null sinon. */
+export function dormantLogKey(row: DormantLogRow): string | null {
+  const meta = row.metadata?.idempotency_key;
+  if (typeof meta === "string" && meta.startsWith(DORMANT_KEY_PREFIX)) return meta;
+  const mid = row.message_id ?? "";
+  if (mid.startsWith(DORMANT_KEY_PREFIX)) return mid;
+  return null;
+}
+
+/**
+ * Nombre d'envois distincts et date du dernier envoi par gardien. Une clé
+ * (gardien et semaine) compte une fois, même si le journal porte plusieurs
+ * lignes pour elle. Les lignes échouées, abandonnées ou supprimées ne
+ * comptent pas ; une ligne historique sans statut compte.
+ */
+export function tallyDormantSends(rows: DormantLogRow[] | null | undefined): {
+  sentCounts: Map<string, number>;
+  lastSentAt: Map<string, string>;
+} {
+  const keysBySitter = new Map<string, Set<string>>();
+  const lastSentAt = new Map<string, string>();
+  for (const row of rows ?? []) {
+    const status = row.status ?? null;
+    if (status !== null && !(DORMANT_COUNTED_STATUSES as readonly string[]).includes(status)) continue;
+    const key = dormantLogKey(row);
+    if (!key) continue;
+    const sitterId = key.slice(DORMANT_KEY_PREFIX.length, DORMANT_KEY_PREFIX.length + 36);
+    if (!UUID_RE.test(sitterId)) continue;
+    const keys = keysBySitter.get(sitterId) ?? new Set<string>();
+    keys.add(key);
+    keysBySitter.set(sitterId, keys);
+    const prev = lastSentAt.get(sitterId);
+    if (row.created_at && (!prev || row.created_at > prev)) lastSentAt.set(sitterId, row.created_at);
+  }
+  const sentCounts = new Map<string, number>();
+  for (const [id, keys] of keysBySitter) sentCounts.set(id, keys.size);
+  return { sentCounts, lastSentAt };
+}
+
 export interface DormantCandidate {
   /** Distance de l'annonce ouverte la plus proche, null si inconnue. */
   nearestSitKm: number | null;
