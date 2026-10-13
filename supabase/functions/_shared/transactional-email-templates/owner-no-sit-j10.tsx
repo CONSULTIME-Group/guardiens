@@ -26,7 +26,7 @@ const Email = ({ firstName, city, nearby_sitters_count }: Props) => {
   return (
     <Html lang="fr" dir="ltr">
       <BrandedHead />
-      <Preview>Plus d'une annonce sur deux reçoit sa première candidature en moins de 48 h.</Preview>
+      <Preview>Publier tôt laisse le temps de recevoir des candidatures et d'échanger.</Preview>
       <Body style={main}>
         <Container style={container}>
           <BrandHeader />
@@ -35,29 +35,23 @@ const Email = ({ firstName, city, nearby_sitters_count }: Props) => {
 
           <Text style={text}>
             Un départ se prépare souvent plusieurs semaines à l'avance. Publier tôt laisse le temps
-            de recevoir des candidatures, d'échanger et de rencontrer la bonne personne.
+            de recevoir des candidatures et d'échanger avec la bonne personne.
           </Text>
-
-          <Section style={statCard}>
-            <Text style={statBig}>
-              Plus d'une annonce sur deux reçoit sa première candidature en moins de 48&nbsp;h.
-            </Text>
-          </Section>
 
           {nearby > 0 ? (
             <Text style={text}>
-              Autour de {cityLabel}, {nearby} gardiens sont inscrits.
+              À proximité de {cityLabel}, {nearby} gardiens sont inscrits.
             </Text>
           ) : null}
 
           <Text style={text}>
             Vos dates sont encore approximatives&nbsp;? Indiquez-les comme flexibles, vous les
-            ajusterez ensuite. Vous rencontrez chaque candidat avant de choisir, et la décision vous
-            appartient.
+            ajusterez ensuite. Vous échangez avec chaque candidat, une rencontre se propose si vous
+            le souhaitez, et la décision vous appartient.
           </Text>
 
           <Text style={baseline}>
-            Guardiens est gratuit pour les propriétaires.
+            Guardiens est gratuit.
           </Text>
 
           <Section style={ctaSection}>
@@ -101,9 +95,3 @@ const button = {
   borderRadius: '8px', fontSize: '15px', fontWeight: '600' as const,
   textDecoration: 'none', display: 'inline-block',
 }
-const statCard = {
-  backgroundColor: '#F8F6F2',
-  borderLeft: '3px solid #2C6D50',
-  padding: '14px 16px', borderRadius: '6px', margin: '16px 0',
-}
-const statBig = { fontSize: '15px', fontWeight: 'bold' as const, color: '#2C6D50', margin: 0, lineHeight: '1.5' }
