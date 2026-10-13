@@ -16,6 +16,7 @@ import {
   RESCHEDULE_ERRORS,
   suggestedEndDate,
   type ReschedulePatch,
+  type RescheduleResult,
 } from "@/lib/missionReschedule";
 
 interface Props {
@@ -58,8 +59,8 @@ const RescheduleMissionDialog = ({ open, onOpenChange, mission, onSaved }: Props
   const handleSave = async () => {
     if (saving) return;
     const result = buildReschedulePatch(mission, { start, end });
-    if (!result.ok) {
-      setError(RESCHEDULE_ERRORS[result.reason]);
+    if (result.ok === false) {
+      setError(RESCHEDULE_ERRORS[(result as Extract<RescheduleResult, { ok: false }>).reason]);
       return;
     }
     setSaving(true);
