@@ -106,12 +106,16 @@ export function overpassFilters(category: GuideCategory, radiusM: number, lat: n
     case "general_park":
       return [
         `nwr${a}["leisure"~"^(park|nature_reserve)$"]["name"];`,
-        `wr${a}[~"^(landuse|natural)$"~"^(forest|wood)$"]["name"];`,
+        // Deux filtres simples : la recherche par expression sur la clé est lente.
+        `wr${a}["landuse"="forest"]["name"];`,
+        `wr${a}["natural"="wood"]["name"];`,
       ];
     case "walk_trail":
+      // La recherche des chemins par leur nom est lourde : limitée à 15 km
+      // (au-delà, elle dépassait le délai d'Overpass le 13/10/2026).
       return [
         `relation${a}["route"~"^(hiking|foot)$"]["name"]["network"!~"^(iwn|nwn)$"];`,
-        `way${a}["highway"~"^(path|footway|track|cycleway)$"]["name"~"${WALK_NAME.source}",i];`,
+        ...(radiusM <= 15000 ? [`way${a}["highway"~"^(path|footway|track|cycleway)$"]["name"~"${WALK_NAME.source}",i];`] : []),
       ];
     case "vet":
       return [`nwr${a}["amenity"="veterinary"]["name"];`];
@@ -931,10 +935,10 @@ export async function collectPlaces(
       const answered = results.filter((r) => r !== null);
       for (const els of answered) take(els!);
       if (answered.length < results.length) {
-        overpassFailed = true;
+        // Une partie des filtres sans réponse : on élargit quand même pour les
+        // catégories qui manquent, et le guide reste en file pour un nouveau passage.
         incomplete = true;
-        // Sans réponse pour une partie des filtres, le rayon suivant attendra le passage suivant.
-        break;
+        if (answered.length === 0) overpassFailed = true;
       }
     } else {
       for (const statement of statements) {

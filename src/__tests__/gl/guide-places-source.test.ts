@@ -541,3 +541,37 @@ describe("GL, qualité des lieux (essai Lyon du 13/10/2026)", () => {
     expect(categorize(el(3, { leisure: "dog_park", name: "Aire canine de la Visitation" }, 0, 0))?.category).toBe("dog_park");
   });
 });
+
+describe("GL, filtres sans réponse (essai Saint-Ludger du 13/10/2026)", () => {
+  it("un filtre sans réponse n'arrête pas l'élargissement des autres catégories", async () => {
+    const radii: number[] = [];
+    const batch = async (queries: string[]) => {
+      const r = Number(/around:(\d+)/.exec(queries[0])![1]);
+      radii.push(r);
+      return queries.map((q) => {
+        if (q.includes("forest")) return null;
+        if (r === 30000 && q.includes("veterinary")) {
+          return [el(6, { amenity: "veterinary", name: "Hôpital vétérinaire du Granit", "addr:street": "Rue Laval" }, north(25), SAINT_LUDGER.lon)];
+        }
+        return [];
+      });
+    };
+    const res = await collectPlaces(
+      { city: "Saint Ludger", postalCode: "G0M1W0", center: SAINT_LUDGER },
+      { names: new Set(), sources: new Set(), counts: {} },
+      async () => new Response("[]"),
+      noSleep,
+      Number.POSITIVE_INFINITY,
+      undefined,
+      batch,
+    );
+    expect(radii).toEqual([5000, 15000, 30000, 50000]);
+    expect(res.rows.map((r) => r.name)).toContain("Hôpital vétérinaire du Granit");
+    expect(res.incomplete).toBe(true);
+  });
+
+  it("la recherche des chemins par leur nom reste sous 15 km", () => {
+    expect(buildOverpassQuery(["walk_trail"], 15000, 45, -70)).toContain("highway");
+    expect(buildOverpassQuery(["walk_trail"], 30000, 45, -70)).not.toContain("highway");
+  });
+});
