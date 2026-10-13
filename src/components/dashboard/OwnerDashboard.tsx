@@ -68,6 +68,7 @@ import { trackEvent } from "@/lib/analytics";
 import { awaitingLink, awaitingSentence, isAwaitingDecision, sitStatusMap, summarizeAwaiting } from "@/lib/applicationsAwaiting";
 
 const CLOSED_FOR_DECISION: readonly string[] = ["expired", "cancelled", "archived", "completed"];
+import { pickActiveEntraideMission } from "@/lib/activeEntraideMission";
 
 const OwnerDashboard = () => {
   const { user } = useAuth();
@@ -93,9 +94,11 @@ const OwnerDashboard = () => {
   const { data: helpersProximity } = useHelpersProximityCount(user?.id);
   const nearbyHelpersCount = helpersProximity?.localCount ?? nearbyHelpersData?.helpers?.length ?? 0;
   const { mission: firstNearbyMission } = useFirstNearbyMission(user?.id);
+  // Lot X3b (C-04) : besoin en cours de l'auteur, transmis au bandeau entraide
+  // (calculé sur tout l'index partagé, priorité aux propositions en attente).
   const myActiveMission = useMemo(
-    () => myMissions.find((m: any) => m.status !== "completed" && m.status !== "cancelled") ?? null,
-    [myMissions],
+    () => data.activeMission ?? pickActiveEntraideMission(myMissions as any[]),
+    [data.activeMission, myMissions],
   );
 
   /* ── Lot D1 : accueil ── */
@@ -476,6 +479,7 @@ const OwnerDashboard = () => {
                 helpersCount={nearbyHelpersCount}
                 helpersRadiusKm={helpersProximity?.radiusKm ?? 30}
                 mission={firstNearbyMission}
+                activeMission={myActiveMission}
               />
             </DeferredMount>
 

@@ -65,7 +65,7 @@ export async function fetchMySitsIndex(userId: string): Promise<MySitIndexRow[]>
 
 export type MyMissionIndexRow = {
   id: string; status: string; title?: string; category?: string; city?: string | null;
-  date_needed?: string | null; created_at?: string; updated_at?: string | null;
+  date_needed?: string | null; created_at?: string; updated_at?: string | null; slug?: string | null;
   close_reason?: string | null; user_id?: string; small_mission_responses?: Array<{ id: string; status: string }>;
 };
 
@@ -74,7 +74,7 @@ export function fetchMySmallMissionsIndex(userId: string): Promise<MyMissionInde
   return cached(["my-small-missions-index", userId], async () => {
     const { data, error } = await supabase
       .from("small_missions")
-      .select("id, title, category, city, date_needed, status, created_at, updated_at, close_reason, user_id, small_mission_responses(id, status)")
+      .select("id, title, category, slug, city, date_needed, status, created_at, updated_at, close_reason, user_id, small_mission_responses(id, status)")
       .eq("user_id", userId)
       .order("created_at", { ascending: false });
     if (error) throw error;

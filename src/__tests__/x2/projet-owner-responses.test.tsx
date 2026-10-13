@@ -122,10 +122,14 @@ describe("liste des candidatures du porteur", () => {
     expect(read.some((c) => c.args[0] === "mission_id" && c.args[1] === "p1")).toBe(true);
   });
 
-  it("pas de « Choisir » sur un projet, qui fermerait le projet aux autres", async () => {
+  // Lot X3b (décision du 13/10/2026) : « Choisir » revient sur un projet,
+  // pour les seules candidatures en attente (src/__tests__/x3b/).
+  it("« Choisir » seulement sur une candidature en attente", async () => {
     renderPanel();
     await screen.findByText("Je viens planter avec plaisir.");
-    expect(screen.queryByText(/^Choisir /)).toBeNull();
+    expect(screen.getByLabelText("Choisir Léa")).toBeTruthy();
+    expect(screen.queryByLabelText("Choisir Marc")).toBeNull();
+    expect(screen.queryByLabelText("Choisir Inès")).toBeNull();
   });
 
   it("une conversation existante s'ouvre directement", async () => {

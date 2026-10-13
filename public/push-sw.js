@@ -1,11 +1,13 @@
 /* Push only: no fetch handler and no cache of pages or private data. */
 /* Version read by the page before a test or nearby alerts: an older worker
    would show those payloads as "new message". Bump on every payload change. */
-var PUSH_SW_VERSION = 'push-4';
+var PUSH_SW_VERSION = 'push-5';
 var UUID = '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}';
 var NEARBY_BODY = 'Une nouvelle annonce de garde près de chez vous.';
 var TEST_BODY = 'Notification de test Guardiens : cet appareil peut recevoir vos alertes.';
 var TEST_URL = '/settings?section=notifications';
+/* Lot X3b (push-5) : proposition d'aide sur un besoin d'entraide. */
+var MISSION_RESPONSE_BODY = "Quelqu'un vous propose son aide.";
 
 /* Fixed texts only. A route is accepted only from a closed list. */
 function describe(payload) {
@@ -13,6 +15,10 @@ function describe(payload) {
   if (kind === 'nearby_sit' && typeof payload.url === 'string' && new RegExp('^/sits/' + UUID + '$').test(payload.url)) {
     var tag = new RegExp('^guardiens-nearby-' + UUID + '$').test(payload.tag) ? payload.tag : 'guardiens-nearby';
     return { body: NEARBY_BODY, url: payload.url, tag: tag };
+  }
+  if (kind === 'mission_response') {
+    var helpTag = new RegExp('^guardiens-mission_response-' + UUID + '$').test(payload.tag) ? payload.tag : 'guardiens-mission-response';
+    return { body: MISSION_RESPONSE_BODY, url: '/notifications', tag: helpTag };
   }
   if (kind === 'test') {
     var testTag = new RegExp('^guardiens-test-' + UUID + '$').test(payload.tag) ? payload.tag : 'guardiens-test';

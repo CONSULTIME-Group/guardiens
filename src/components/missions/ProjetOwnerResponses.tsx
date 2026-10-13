@@ -5,9 +5,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { logger } from "@/lib/logger";
 import MissionResponseCard from "@/components/missions/MissionResponseCard";
+import { Button } from "@/components/ui/button";
 
 interface Props {
-  projet: { id: string; user_id: string; title?: string | null };
+  projet: { id: string; user_id: string; title?: string | null; status?: string | null };
   currentUserId: string;
   /** Nombre de candidatures lues, pour le lien de l'encadré latéral. */
   onCountChange?: (count: number) => void;
@@ -20,6 +21,11 @@ export const PROJET_RESPONSES_ANCHOR = "candidatures";
  * Lecture de small_mission_responses du projet (politique « Owner and
  * responder can read mission responses »), prénoms et portraits par la vue
  * public_profiles, cartes MissionResponseCard en variante « projet ».
+ *
+ * Lot X3b (décision du fondateur du 13/10/2026) : « Choisir » une personne
+ * (accept_mission_response, autres candidatures laissées en attente) passe
+ * le projet en cours et ferme les candidatures ; « Rouvrir les candidatures »
+ * le remet au statut ouvert, les personnes retenues restent retenues.
  */
 const ProjetOwnerResponses = ({ projet, currentUserId, onCountChange }: Props) => {
   const navigate = useNavigate();
@@ -28,6 +34,9 @@ const ProjetOwnerResponses = ({ projet, currentUserId, onCountChange }: Props) =
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [status, setStatus] = useState<string>(projet.status || "open");
+  const [reopening, setReopening] = useState(false);
+  useEffect(() => { setStatus(projet.status || "open"); }, [projet.status]);
 
   const load = useCallback(async () => {
     setFailed(false);
@@ -97,6 +106,61 @@ const ProjetOwnerResponses = ({ projet, currentUserId, onCountChange }: Props) =
     }
   };
 
+  // Lot X3b : choisir une personne, le projet passe en cours (candidatures fermées).
+  const choose = async (r: any) => {
+    if (processingId) return;
+    setProcessingId(r.id);
+    try {
+      const { data, error } = await supabase.rpc("accept_mission_response", {
+        p_response_id: r.id,
+        p_decline_others: false,
+      });
+      if (error) throw error;
+      const convId: string | null = ((data ?? {}) as any).conversation_id ?? null;
+      setResponses((prev) => prev.map((x) => (x.id === r.id ? { ...x, status: "accepted", conversation_id: convId ?? x.conversation_id } : x)));
+      setStatus((s) => (s === "open" ? "in_progress" : s));
+      supabase.functions.invoke("notify-mission-event", {
+        body: {
+          event_type: "mission_accepted",
+          mission_id: projet.id,
+          actor_id: currentUserId,
+          target_ids: [r.responder_id],
+          metadata: { conversation_id: convId },
+        },
+      }).catch(() => {});
+      toast({
+        title: `${r.responder?.first_name || "Cette personne"} rejoint votre projet`,
+        description: "Les candidatures sont fermées. Vous pouvez les rouvrir à tout moment.",
+      });
+    } catch (err: any) {
+      logger.error("[ProjetOwnerResponses.choose]", { err: String(err) });
+      toast({ variant: "destructive", title: "Choix non enregistré", description: err?.message || "Réessayez dans un instant." });
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  // Lot X3b : rouvrir les candidatures, les personnes retenues restent retenues.
+  const reopen = async () => {
+    if (reopening) return;
+    setReopening(true);
+    try {
+      const { error } = await supabase
+        .from("small_missions")
+        .update({ status: "open" as any })
+        .eq("id", projet.id)
+        .eq("status", "in_progress");
+      if (error) throw error;
+      setStatus("open");
+      toast({ title: "Candidatures rouvertes", description: "Votre projet accueille de nouveau des candidatures." });
+    } catch (err: any) {
+      logger.error("[ProjetOwnerResponses.reopen]", { err: String(err) });
+      toast({ variant: "destructive", title: "Candidatures encore fermées", description: err?.message || "Réessayez dans un instant." });
+    } finally {
+      setReopening(false);
+    }
+  };
+
   const pendingCount = responses.filter((r) => !r.status || r.status === "pending").length;
 
   return (
@@ -115,6 +179,24 @@ const ProjetOwnerResponses = ({ projet, currentUserId, onCountChange }: Props) =
         Vous portez ce projet. Chaque candidature est visible par vous et par la personne qui l'a écrite.
         Écrivez-lui pour organiser sa venue.
       </p>
+      {status === "in_progress" && (
+        <div className="rounded-2xl bg-muted/40 p-4 text-sm flex flex-col sm:flex-row sm:items-center gap-3" data-testid="projet-reopen">
+          <p className="text-foreground flex-1">
+            Votre projet est en cours, les candidatures sont fermées. Les personnes retenues restent retenues si vous les rouvrez.
+          </p>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => void reopen()}
+            disabled={reopening}
+            aria-busy={reopening}
+            className="rounded-full min-h-11 shrink-0"
+          >
+            {reopening ? "Enregistrement en cours..." : "Rouvrir les candidatures"}
+          </Button>
+        </div>
+      )}
       {loading ? (
         <p className="text-sm text-muted-foreground" aria-busy="true">Chargement des candidatures</p>
       ) : failed ? (
@@ -140,7 +222,7 @@ const ProjetOwnerResponses = ({ projet, currentUserId, onCountChange }: Props) =
                 missionOwnerId={projet.user_id}
                 processing={processingId === r.id}
                 pendingCount={pendingCount}
-                onSelect={() => undefined}
+                onSelect={() => void choose(r)}
                 onDecline={() => void decline(r)}
                 onOpenMessages={() => void openConversation(r)}
               />
