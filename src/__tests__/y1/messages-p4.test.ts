@@ -226,7 +226,7 @@ describe("Y1, P4-07 : gratuité dite simplement", () => {
 describe("Y1, P4-08 : rencontre toujours facultative", () => {
   it("aucun gabarit ne présente la rencontre comme une étape", () => {
     expect(read(`${TPL}/sitter-encourage-candidature.tsx`)).not.toMatch(/vous vous rencontrez\s+avant de vous engager/);
-    expect(read(`${TPL}/sitter-encourage-candidature.tsx`)).toMatch(/en visio ou de vive\s+voix si vous le souhaitez/);
+    expect(read(`${TPL}/sitter-encourage-candidature.tsx`)).toMatch(/vous pouvez vous\s+rencontrer avant de vous engager si vous le souhaitez tous les deux/);
     expect(read(`${TPL}/owner-no-sit-j10.tsx`)).not.toContain("Vous rencontrez chaque candidat");
     expect(read(`${TPL}/owner-no-sit-j10.tsx`)).toContain("Guardiens est gratuit.");
     expect(read(`${TPL}/owner-no-sit-j10.tsx`)).not.toContain("gratuit pour les propriétaires");

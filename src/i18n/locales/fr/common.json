@@ -1722,7 +1722,7 @@
   },
   "mission_detail": {
     "not_found_title": "Ce besoin a été retiré par son auteur",
-    "not_found_body": "Son auteur a trouvé une solution ou a retiré sa demande. D'autres voisins attendent un coup de main près de chez vous.",
+    "not_found_body": "Son auteur a trouvé une solution ou a retiré sa demande. D'autres besoins attendent un coup de main près de chez vous.",
     "see_open": "Voir les besoins près de chez moi",
     "breadcrumb": "Entraide",
     "share": "Partager",
