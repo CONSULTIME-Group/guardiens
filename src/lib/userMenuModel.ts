@@ -48,7 +48,7 @@ export const buildUserMenuEntries = (opts: {
   if (opts.isSitterView) {
     entries.push({
       key: "subscription",
-      label: "Mon abonnement",
+      label: "Mon accès",
       icon: CreditCard,
       to: "/mon-abonnement",
     });

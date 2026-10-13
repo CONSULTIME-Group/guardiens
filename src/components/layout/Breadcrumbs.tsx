@@ -6,7 +6,7 @@ import { ChevronRight, Home } from "lucide-react";
  */
 const SEGMENT_LABELS: Record<string, string> = {
   dashboard: "Accueil",
-  "mon-abonnement": "Mon abonnement",
+  "mon-abonnement": "Mon accès",
   annonces: "Annonces",
   sits: "Mes annonces",
   create: "Nouvelle annonce",

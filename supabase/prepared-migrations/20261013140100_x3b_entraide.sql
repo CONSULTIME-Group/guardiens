@@ -19,10 +19,10 @@
 --    /projets/{slug} pour un projet, /petites-missions/{id} sinon.
 -- 4. C-08 : « Votre demande reste visible » au plus une fois par besoin et par
 --    semaine (114 notifications pour 5 besoins au 13/10/2026, jusqu'à 53 pour
---    un même auteur en 4 jours). Nettoyage de l'existant préparé, commenté.
+--    un même auteur en 4 jours). Nettoyage de l'existant (accord du 13/10).
 -- 5. C-09 : un besoin sans coordonnées est refusé à l'insertion (hors
 --    projets), même règle que resolveMissionCoords (lot E10). Traitement du
---    besoin de Mascouche préparé, commenté et désactivé : à arbitrer.
+--    besoin de Mascouche clos avec proposition d'annonce de garde (accord du 13/10).
 -- 6. C-10 : l'écusson « coup de main en or » suit le geste de l'auteur du
 --    besoin (« Marquer comme terminé » ou « oui » à la question de rencontre),
 --    jamais celui de l'aidant au nom de l'auteur. 0 écusson attribué à ce jour.
@@ -250,18 +250,20 @@ CREATE TRIGGER trg_close_pending_responses_on_mission_close
   EXECUTE FUNCTION public.close_pending_responses_on_mission_close();
 
 -- Reprise de l'existant (6 propositions « pending » sur 5 besoins fermés au
--- 13/10/2026), à décider par le fondateur : elle préviendrait des personnes
--- dont le besoin est clos depuis plusieurs semaines. Désactivée.
--- BEGIN;
---   SELECT set_config('guardiens.mission_closure', 'on', true);
---   UPDATE public.small_mission_responses r
---      SET status = 'declined'::small_mission_response_status
---     FROM public.small_missions m
---    WHERE m.id = r.mission_id
---      AND r.status = 'pending'::small_mission_response_status
---      AND m.status IN ('cancelled'::small_mission_status, 'completed'::small_mission_status);
---   SELECT set_config('guardiens.mission_closure', 'off', true);
--- COMMIT;
+-- 13/10/2026) : accord explicite du fondateur le 13/10/2026. Les personnes
+-- concernées reçoivent la même notification qu'à une clôture d'aujourd'hui.
+DO $reprise$
+BEGIN
+  PERFORM set_config('guardiens.mission_closure', 'on', true);
+  UPDATE public.small_mission_responses r
+     SET status = 'declined'::small_mission_response_status
+    FROM public.small_missions m
+   WHERE m.id = r.mission_id
+     AND r.status = 'pending'::small_mission_response_status
+     AND m.status IN ('cancelled'::small_mission_status, 'completed'::small_mission_status);
+  PERFORM set_config('guardiens.mission_closure', 'off', true);
+END
+$reprise$;
 
 -- 2. C-05 ---------------------------------------------------------------
 ALTER TABLE public.push_delivery_jobs DROP CONSTRAINT IF EXISTS push_delivery_jobs_event_kind_check;
@@ -533,14 +535,14 @@ CREATE TRIGGER trg_skip_repeated_wave_empty_notification
 
 -- Nettoyage de l'existant (114 lignes pour 5 couples auteur et besoin au
 -- 13/10/2026) : garde la plus ancienne notification de chaque couple, retire
--- les copies. Préparé, désactivé, à lancer après accord.
--- DELETE FROM public.notifications n
---  USING (
---    SELECT id, row_number() OVER (PARTITION BY user_id, link ORDER BY created_at, id) AS rang
---      FROM public.notifications
---     WHERE type = 'mission_wave_empty'
---  ) d
---  WHERE n.id = d.id AND d.rang > 1;
+-- les copies. Accord explicite du fondateur le 13/10/2026.
+DELETE FROM public.notifications n
+ USING (
+   SELECT id, row_number() OVER (PARTITION BY user_id, link ORDER BY created_at, id) AS rang
+     FROM public.notifications
+    WHERE type = 'mission_wave_empty'
+ ) d
+ WHERE n.id = d.id AND d.rang > 1;
 
 -- 5. C-09 ---------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.enforce_small_mission_place()
@@ -567,19 +569,23 @@ CREATE TRIGGER trg_enforce_small_mission_place
 
 -- Besoin de Mascouche (Québec, c54f53ff-8683-49be-b8af-b2236cd43908, publié
 -- le 11/10/2026, code postal « 704 », sans coordonnées, 0 proposition, 20
--- notifications « reste visible ») : à arbitrer par le fondateur. Piste
--- préparée, désactivée : clore le besoin et proposer à l'auteur une annonce
--- de garde, que le lot Q1 diffuse aux gardiens à l'échelle nationale.
--- BEGIN;
---   UPDATE public.small_missions
---      SET status = 'cancelled'::small_mission_status, closed_at = now(), close_reason = 'place_missing'
---    WHERE id = 'c54f53ff-8683-49be-b8af-b2236cd43908' AND status = 'open'::small_mission_status;
---   INSERT INTO public.notifications (user_id, type, title, body, link, actor_name)
---   SELECT m.user_id, 'mission_place_missing', 'Votre demande, en annonce de garde',
---          'Pour une garde au Québec, une annonce de garde part vers les gardiens de toute la France. Vos dates et votre texte sont repris en un clic.',
---          '/sits/create', 'Guardiens'
---     FROM public.small_missions m WHERE m.id = 'c54f53ff-8683-49be-b8af-b2236cd43908';
--- COMMIT;
+-- notifications « reste visible ») : accord explicite du fondateur le
+-- 13/10/2026 pour le clore et proposer à l'auteur une annonce de garde, que le
+-- lot Q1 diffuse aux gardiens à l'échelle nationale.
+DO $mascouche$
+BEGIN
+  UPDATE public.small_missions
+     SET status = 'cancelled'::small_mission_status, closed_at = now(), close_reason = 'place_missing'
+   WHERE id = 'c54f53ff-8683-49be-b8af-b2236cd43908' AND status = 'open'::small_mission_status;
+  IF FOUND THEN
+    INSERT INTO public.notifications (user_id, type, title, body, link, actor_name)
+    SELECT m.user_id, 'mission_place_missing', 'Votre demande, en annonce de garde',
+           'Pour une garde au Québec, une annonce de garde part vers les gardiens de toute la France. Elle se publie en quelques minutes.',
+           '/sits/create', 'Guardiens'
+      FROM public.small_missions m WHERE m.id = 'c54f53ff-8683-49be-b8af-b2236cd43908';
+  END IF;
+END
+$mascouche$;
 
 -- 6. C-10 ---------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.mark_mission_done(p_mission_id uuid)

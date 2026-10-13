@@ -81,10 +81,11 @@ describe("X3b, C-03 : clôture d'un besoin", () => {
     }
   });
 
-  it("la reprise des 6 propositions existantes reste commentée", () => {
+  it("la reprise des 6 propositions existantes (accord du 13/10) passe par le drapeau de clôture", () => {
     const repair = sql.slice(sql.indexOf("-- Reprise de l'existant"), sql.indexOf("-- 2. C-05 ---"));
-    expect(repair).toContain("UPDATE public.small_mission_responses r");
-    expect(active(repair).trim()).toBe("");
+    expect(active(repair)).toContain("UPDATE public.small_mission_responses r");
+    expect(repair.indexOf("PERFORM set_config('guardiens.mission_closure', 'on', true)")).toBeLessThan(repair.indexOf("UPDATE public.small_mission_responses r"));
+    expect(repair).toContain("PERFORM set_config('guardiens.mission_closure', 'off', true)");
   });
 });
 
@@ -148,10 +149,11 @@ describe("X3b, C-08 : « Votre demande reste visible »", () => {
     expect(sql).toMatch(/CREATE TRIGGER trg_skip_repeated_wave_empty_notification\s+BEFORE INSERT ON public\.notifications\s+FOR EACH ROW WHEN \(NEW\.type = 'mission_wave_empty'\)/);
   });
 
-  it("le nettoyage de l'existant est préparé et commenté", () => {
+  it("le nettoyage de l'existant (accord du 13/10) garde la plus ancienne de chaque couple", () => {
     const cleanup = sql.slice(sql.indexOf("-- Nettoyage de l'existant"), sql.indexOf("-- 5. C-09 ---"));
-    expect(cleanup).toContain("DELETE FROM public.notifications n");
-    expect(active(cleanup).trim()).toBe("");
+    expect(active(cleanup)).toContain("DELETE FROM public.notifications n");
+    expect(cleanup).toContain("WHERE type = 'mission_wave_empty'");
+    expect(cleanup).toContain("d.rang > 1");
   });
 });
 
@@ -167,10 +169,10 @@ describe("X3b, C-09 : lieu situé obligatoire", () => {
     const { MISSION_PLACE_NOT_FOUND } = await import("@/lib/missionPlace");
     expect(fn).toContain(MISSION_PLACE_NOT_FOUND.replace(/'/g, "''"));
   });
-  it("le besoin de Mascouche n'est traité que sur décision du fondateur", () => {
+  it("le besoin de Mascouche (accord du 13/10) est clos, une seule ligne visée", () => {
     const mascouche = sql.slice(sql.indexOf("-- Besoin de Mascouche"), sql.indexOf("-- 6. C-10 ---"));
-    expect(mascouche).toContain("c54f53ff-8683-49be-b8af-b2236cd43908");
-    expect(active(mascouche).trim()).toBe("");
+    expect(active(mascouche)).toContain("WHERE id = 'c54f53ff-8683-49be-b8af-b2236cd43908' AND status = 'open'::small_mission_status");
+    expect(mascouche).toContain("IF FOUND THEN");
   });
   it("le formulaire renvoie à l'étape du lieu sur ce refus", () => {
     const form = readFileSync("src/pages/CreateSmallMission.tsx", "utf8");

@@ -12,7 +12,7 @@ interface ExchangeHowItWorksProps {
 /**
  * Bloc pédagogique 3 étapes qui explique le concept d'échange des coups de main.
  * Décliné pour dashboards owner / sitter et pour la page publique.
- * Sans argent, sans abonnement, vouvoiement, ton chaleureux.
+ * Échange en temps et en savoir-faire, vouvoiement, ton chaleureux.
  */
 const ExchangeHowItWorks = ({
   variant = "public",
