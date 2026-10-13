@@ -366,7 +366,7 @@ describe("OwnerSitterSpotlight, hiérarchie de titres", () => {
     expect(h3.some((t) => t?.includes("gardien"))).toBe(true);
     expect(
       h3.some((t) =>
-        t?.includes("près de chez vous") ||
+        t?.includes("à proximité") ||
         t?.includes("se remplit encore"),
       ),
     ).toBe(true);

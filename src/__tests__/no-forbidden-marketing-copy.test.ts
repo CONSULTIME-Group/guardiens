@@ -5,16 +5,17 @@ import { execSync } from "node:child_process";
  * Garde anti-régression du vocabulaire marketing.
  *
  * Règle produit : on dit ce que la chose EST, pas ce qu'elle n'est pas.
- *  - prix propriétaire   -> « 0 € pour les propriétaires » (badge : « Propriétaires : 0 € »)
- *  - accès               -> « Guardiens est gratuit » (lot X3c, sans durée)
+ *  - accès               -> « Guardiens est gratuit » (lots X3c et Y3, sans durée,
+ *                           pour tous les membres : plus de « 0 € pour les
+ *                           propriétaires », qui sous-entend un accès gardien payant)
  *  - commission          -> « aucune commission prélevée sur les gardes »
- *  - comparaison pension -> donner le coût de la pension, puis « 0 € » côté Guardiens
+ *  - comparaison         -> aucune (ni pension, ni pet-sitter, ni plateformes)
  *
  * Les formulations en « sans ... » et la promesse « reste gratuit tant que »
- * sont proscrites dans tout le contenu public.
+ * sont proscrites dans tout le contenu public, emails compris (lot Y3).
  */
 
-const SCAN_PATHS = "src public";
+const SCAN_PATHS = "src public supabase/functions/_shared/transactional-email-templates";
 
 const EXCLUDE = [
   // Surfaces internes, jamais vues par un visiteur.
@@ -23,11 +24,10 @@ const EXCLUDE = [
   "--glob=!**/*.test.*",
   "--glob=!**/*.spec.*",
   "--glob=!**/__tests__/**",
+  "--glob=!**/*_test.ts",
   "--glob=!src/test/**",
-  // Pages tarifaires : elles décrivent l'offre commerciale et peuvent
-  // employer un vocabulaire contractuel (engagement, abonnement).
-  "--glob=!src/pages/Pricing.tsx",
-  "--glob=!src/pages/MySubscription.tsx",
+  // Lot Y3 : /tarifs (Pricing.tsx) et /mon-abonnement (MySubscription.tsx) ne
+  // sont plus exclus, ils disent « Guardiens est gratuit » comme le reste.
   // Documents juridiques : « sans frais ni pénalité » est une formule légale
   // reprise du Code de la consommation, elle ne se paraphrase pas.
   "--glob=!src/pages/Terms.tsx",
@@ -47,6 +47,14 @@ const FORBIDDEN: Array<{ label: string; pattern: string }> = [
   { label: "sans carte bancaire", pattern: "[Ss]ans carte bancaire" },
   { label: "zéro frais", pattern: "[Zz]éro frais" },
   { label: "sans frais", pattern: "[Ss]ans frais" },
+  // Lot Y3 (passe 5 du 13/10/2026) : gratuité restreinte aux propriétaires.
+  { label: "0 € pour les propriétaires", pattern: "0 € pour les propriétaires" },
+  { label: "gratuit pour les propriétaires", pattern: "[Gg]ratuite? pour les propriétaires" },
+  { label: "offert aux propriétaires", pattern: "offert aux propriétaires" },
+  { label: "Guardiens est offert", pattern: "Guardiens est offert" },
+  { label: "gratuit pour vous", pattern: "[Gg]ratuit pour vous" },
+  // Lot Y3 : les fondateurs ne cherchent pas de gardien pour quelqu'un.
+  { label: "nous cherchons des gardiens", pattern: "[Nn]ous cherchons des gardiens" },
 ];
 
 function search(pattern: string): string[] {
@@ -74,8 +82,7 @@ describe("Vocabulaire marketing proscrit", () => {
     if (findings.length > 0) {
       throw new Error(
         `${findings.length} formulation(s) proscrite(s) dans le contenu public.\n` +
-          `Dire ce que la chose EST : « 0 € pour les propriétaires », ` +
-          `« Guardiens est gratuit », ` +
+          `Dire ce que la chose EST : « Guardiens est gratuit », ` +
           `« aucune commission prélevée sur les gardes ».\n\n` +
           findings.join("\n"),
       );
