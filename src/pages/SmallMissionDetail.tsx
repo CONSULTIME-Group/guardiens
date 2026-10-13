@@ -41,6 +41,7 @@ import AccessGateBanner from "@/components/access/AccessGateBanner";
 import MissionPhotoGallery from "@/components/missions/MissionPhotoGallery";
 import MissionPublishedBanner from "@/components/missions/MissionPublishedBanner";
 import MatchedHelpersInviteBlock from "@/components/missions/MatchedHelpersInviteBlock";
+import { AUTHOR_CLOSE_NO_SELECT_REASON, closeMissionWithoutSelection } from "@/lib/missionCloseNoSelect";
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -670,12 +671,13 @@ const SmallMissionDetail = () => {
     setClosingNoSelect(true);
     try {
       const pending = responses.filter(r => r.status === "pending");
+      // Lot Z2 (C-15) : erreurs lues, date et motif de clôture posés.
+      const closed = await closeMissionWithoutSelection(supabase, {
+        missionId: mission.id,
+        pendingResponseIds: pending.map(r => r.id),
+      });
+      if (closed.ok === false) throw new Error(closed.message);
       if (pending.length > 0) {
-        const ids = pending.map(r => r.id);
-        // Batch update
-        await supabase.from("small_mission_responses")
-          .update({ status: "declined" as any })
-          .in("id", ids);
         // Fan-out serveur
         supabase.functions.invoke("notify-mission-event", {
           body: {
@@ -686,8 +688,7 @@ const SmallMissionDetail = () => {
           },
         }).catch(() => {});
       }
-      await supabase.from("small_missions").update({ status: "cancelled" as any }).eq("id", mission.id);
-      setMission((prev: any) => ({ ...prev, status: "cancelled" }));
+      setMission((prev: any) => ({ ...prev, status: "cancelled", close_reason: AUTHOR_CLOSE_NO_SELECT_REASON }));
       setResponses(prev => prev.map(r => r.status === "pending" ? { ...r, status: "declined" } : r));
       setCloseModalOpen(false);
       toast({ title: "Mission clôturée" });
