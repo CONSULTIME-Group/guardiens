@@ -547,6 +547,13 @@
       "when": 1791892089997,
       "tag": "0077_gl_osm_via_base",
       "breakpoints": true
+    },
+    {
+      "idx": 78,
+      "version": "7",
+      "when": 1791893009324,
+      "tag": "0078_x3a_proprietaire_gardien",
+      "breakpoints": true
     }
   ]
 }
