@@ -52,13 +52,26 @@ describe("X3a, A-08 : avis après archivage d'une garde terminée", () => {
     expect(fn).toContain("s.end_date < current_date");
     expect(fn).toMatch(/h\.old_status = 'completed'\s+AND h\.new_status = 'archived'/);
   });
-  it("la politique d'insertion des avis passe par sit_is_reviewable des deux côtés", () => {
+  it("la politique d'insertion des avis passe par sit_review_parties_ok (R1)", () => {
     const policy = block('DROP POLICY IF EXISTS "Users can create reviews for their sits" ON public.reviews;', "-- 3. B-02");
-    expect(policy).toMatch(/FOR INSERT\s+TO authenticated/);
+    expect(policy).toMatch(/FOR INSERT TO authenticated/);
     expect(policy).toContain("auth.uid() = reviewer_id");
-    expect(policy.match(/public\.sit_is_reviewable\(/g)?.length).toBe(2);
-    expect(policy).toContain("applications.status = 'accepted'::application_status");
+    expect(policy).toContain("reviews.review_type IS DISTINCT FROM 'annulation'");
+    expect(policy).toContain("public.sit_review_parties_ok(reviews.sit_id, reviews.reviewee_id)");
     expect(policy).not.toContain("sits.status = 'completed'::sit_status");
+  });
+  it("R1 : l'avis ne vise que l'autre partie de la garde", () => {
+    const parties = block("CREATE OR REPLACE FUNCTION public.sit_review_parties_ok", "DROP POLICY IF EXISTS");
+    expect(parties).toContain("SECURITY DEFINER");
+    expect(parties).toContain("SELECT public.sit_is_reviewable(p_sit_id) AND EXISTS (");
+    expect(parties).toContain("JOIN public.applications a ON a.sit_id = s.id AND a.status = 'accepted'::application_status");
+    expect(parties).toContain("(s.user_id = auth.uid() AND a.sitter_id = p_reviewee)");
+    expect(parties).toContain("(a.sitter_id = auth.uid() AND s.user_id = p_reviewee)");
+    expect(parties).toContain("REVOKE ALL ON FUNCTION public.sit_review_parties_ok(uuid, uuid) FROM PUBLIC, anon;");
+    expect(parties).toContain("GRANT EXECUTE ON FUNCTION public.sit_review_parties_ok(uuid, uuid) TO authenticated;");
+  });
+  it("l'en-tête annonce 3 gardes archivées ouvertes aux avis", () => {
+    expect(sql.slice(0, sql.indexOf("-- 1. A-04 ---"))).toContain("3 gardes archivées");
   });
   it("fonction fermée aux anonymes", () => {
     expect(fn).toContain("REVOKE ALL ON FUNCTION public.sit_is_reviewable(uuid) FROM PUBLIC, anon;");
@@ -89,10 +102,19 @@ describe("X3a, B-02 : annulation de participation par le gardien", () => {
     expect(branch).toContain("AND sitter_id = v_sitter_id");
   });
   it("republication seulement pour une garde qui commence après aujourd'hui, propriétaire prévenu", () => {
-    expect(fn).toContain("IF v_start_date IS NOT NULL AND v_start_date > current_date THEN");
+    expect(fn).toContain("IF v_start_date IS NOT NULL AND v_start_date > current_date\n");
     expect(fn).toContain("accepting_applications = true");
     expect(fn).toContain("'sit_republished'");
     expect(fn).toContain("est de nouveau ouverte aux candidatures.");
+  });
+  it("R3 : jamais de republication pour un propriétaire suspendu ou inactif, règle en ligne", () => {
+    const cond = fn.slice(fn.indexOf("IF v_start_date IS NOT NULL AND v_start_date > current_date"), fn.indexOf("status = 'published',"));
+    expect(cond).toContain("WHERE p.id = v_owner_id");
+    expect(cond).toContain("coalesce(p.account_status, 'active') <> 'active'");
+    expect(cond).toContain("p.suspended_until IS NULL OR p.suspended_until > now()");
+    expect(cond).toMatch(/AND NOT EXISTS \(/);
+    // Aucune dépendance vers une fonction du fichier X3c.
+    expect(sql).not.toContain("is_account_blocked_for_actions(");
   });
   it("le gardien passe accepted vers cancelled par ce seul drapeau", () => {
     const guard = block("CREATE OR REPLACE FUNCTION public.applications_guard_status_update", "-- 8. get_my_applications");
@@ -140,6 +162,15 @@ describe("X3a, B-05 : le plafond de candidatures tient côté serveur", () => {
     expect(close).toContain("SET accepting_applications = false");
     expect(close).toMatch(/CREATE TRIGGER trg_close_sit_when_application_cap_reached\s+AFTER INSERT ON public\.applications/);
     expect(close).toContain("UPDATE public.sits s\n   SET accepting_applications = false\n WHERE s.status = 'published'::sit_status");
+  });
+  it("R6 : une place libérée rouvre l'annonce publiée, sans relancer la diffusion", () => {
+    const reopen = block("CREATE OR REPLACE FUNCTION public.reopen_sit_when_application_slot_freed", "-- Rattrapage");
+    expect(reopen).toContain("UPDATE public.sits s SET accepting_applications = true");
+    expect(reopen).toContain("AND s.status = 'published'::sit_status");
+    expect(reopen).toContain("AND s.accepting_applications IS FALSE");
+    expect(reopen).toContain("< s.max_applications;");
+    expect(reopen).toMatch(/CREATE TRIGGER trg_reopen_sit_when_application_slot_freed\s+AFTER UPDATE OF status ON public\.applications/);
+    expect(reopen).toMatch(/WHEN \(OLD\.status NOT IN \('rejected'::application_status, 'cancelled'::application_status\)\s+AND NEW\.status IN \('rejected'::application_status, 'cancelled'::application_status\)\)/);
   });
   it("le navigateur du gardien n'écrit plus accepting_applications", () => {
     for (const path of ["src/components/sits/ApplicationModal.tsx", "src/components/sits/views/SitterSitView.tsx"]) {

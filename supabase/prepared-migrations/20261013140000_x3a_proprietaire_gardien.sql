@@ -8,17 +8,20 @@
 --    31 notifications « Nouvelle candidature » menaient au renvoi « retirée ou
 --    annulée » (base, 13/10/2026).
 -- 2. A-08 : une garde terminée puis archivée reste ouverte aux avis
---    (sit_is_reviewable, politique d'insertion de reviews). 1 garde archivée
---    le 16/08 sans aucun avis.
+--    (sit_is_reviewable, politique d'insertion de reviews). 3 gardes archivées
+--    deviennent ouvertes aux avis (relecture du 13/10/2026). R1 : l'avis ne
+--    vise que l'autre partie de la garde (sit_review_parties_ok).
 -- 3. B-02 : quand le gardien retenu annule sa participation, sa candidature
---    passe en cancelled et l'annonce est republiée si la garde n'a pas commencé,
---    dans la même transaction que l'avis d'annulation.
+--    passe en cancelled et l'annonce est republiée si la garde n'a pas commencé
+--    et si le propriétaire n'est ni suspendu ni inactif (R3), dans la même
+--    transaction que l'avis d'annulation.
 -- 4. B-04 : « Votre candidature a bien été annulée » ne part plus que pour un
 --    retrait fait par le gardien lui-même. 34 gardiens avaient reçu ce message
 --    après l'expiration de l'annonce.
 -- 5. B-05 : le plafond de candidatures se tient côté serveur : refus d'une
 --    candidature sur une annonce fermée ou au plafond, fermeture automatique
---    au plafond. 3 annonces publiées dépassaient leur plafond.
+--    au plafond, réouverture automatique quand une place se libère (R6).
+--    3 annonces publiées dépassaient leur plafond.
 -- 6. B-06 : le digest gardien n'écarte un gardien fumeur, avec enfants ou avec
 --    animaux que si l'annonce (ou le propriétaire pour le tabac) le refuse
 --    explicitement. 71 gardiens géolocalisés étaient écartés d'office.
@@ -127,31 +130,36 @@ $function$;
 REVOKE ALL ON FUNCTION public.sit_is_reviewable(uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.sit_is_reviewable(uuid) TO authenticated;
 
--- Même politique qu'en production, le test « status = completed » remplacé
--- par sit_is_reviewable. Les avis d'annulation passent toujours par
--- create_avis_annulation (SECURITY DEFINER), hors de cette politique.
+-- Relecture R1 (13/10/2026) : la politique de production ne contrôlait pas
+-- reviewee_id, et auto_publish_reviews publie tous les avis d'une garde dès
+-- le second : un propriétaire pouvait viser n'importe quel membre. Un avis ne
+-- vise désormais que l'autre partie de la garde (propriétaire vers gardien
+-- retenu, gardien retenu vers propriétaire). SECURITY DEFINER : le gardien ne
+-- lit pas l'annonce archivée sous la RLS. 0 avis existant hors « annulation »
+-- ne viole cette règle (production, 13/10/2026). Les avis d'annulation passent
+-- toujours par create_avis_annulation (SECURITY DEFINER), hors de cette
+-- politique.
+CREATE OR REPLACE FUNCTION public.sit_review_parties_ok(p_sit_id uuid, p_reviewee uuid)
+ RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path TO 'public'
+AS $function$
+  SELECT public.sit_is_reviewable(p_sit_id) AND EXISTS (
+    SELECT 1 FROM public.sits s
+      JOIN public.applications a ON a.sit_id = s.id AND a.status = 'accepted'::application_status
+     WHERE s.id = p_sit_id
+       AND ((s.user_id = auth.uid() AND a.sitter_id = p_reviewee)
+         OR (a.sitter_id = auth.uid() AND s.user_id = p_reviewee))
+  );
+$function$;
+REVOKE ALL ON FUNCTION public.sit_review_parties_ok(uuid, uuid) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.sit_review_parties_ok(uuid, uuid) TO authenticated;
+
 DROP POLICY IF EXISTS "Users can create reviews for their sits" ON public.reviews;
 CREATE POLICY "Users can create reviews for their sits"
-  ON public.reviews
-  FOR INSERT
-  TO authenticated
+  ON public.reviews FOR INSERT TO authenticated
   WITH CHECK (
     auth.uid() = reviewer_id
-    AND (
-      EXISTS (
-        SELECT 1 FROM public.sits
-        WHERE sits.id = reviews.sit_id
-          AND sits.user_id = auth.uid()
-          AND public.sit_is_reviewable(sits.id)
-      )
-      OR EXISTS (
-        SELECT 1 FROM public.applications
-        WHERE applications.sit_id = reviews.sit_id
-          AND applications.sitter_id = auth.uid()
-          AND applications.status = 'accepted'::application_status
-          AND public.sit_is_reviewable(applications.sit_id)
-      )
-    )
+    AND reviews.review_type IS DISTINCT FROM 'annulation'   -- les annulations passent par create_avis_annulation
+    AND public.sit_review_parties_ok(reviews.sit_id, reviews.reviewee_id)
   );
 
 -- 3. B-02 ---------------------------------------------------------------
@@ -269,7 +277,20 @@ BEGIN
 
     -- Garde à venir : l'annonce revient en ligne pour d'autres gardiens, et
     -- le propriétaire le lit dans sa cloche (en plus de « Garde annulée »).
-    IF v_start_date IS NOT NULL AND v_start_date > current_date THEN
+    -- Relecture R3 (13/10/2026) : jamais pour un propriétaire suspendu ou
+    -- inactif. Sinon trg_enforce_active_account_sits (lot X3c) annulerait toute
+    -- la transaction et le gardien ne pourrait plus annuler, ou, sans ce
+    -- trigger, l'annonce d'un compte suspendu serait diffusée à 100 gardiens.
+    -- Expression en ligne, même règle que is_account_blocked_for_actions, pour
+    -- que ce fichier ne dépende pas de X3c.
+    IF v_start_date IS NOT NULL AND v_start_date > current_date
+       AND NOT EXISTS (
+         SELECT 1 FROM public.profiles p
+          WHERE p.id = v_owner_id
+            AND (coalesce(p.account_status, 'active') <> 'active'
+                 OR (p.suspended_at IS NOT NULL
+                     AND (p.suspended_until IS NULL OR p.suspended_until > now())))
+       ) THEN
       UPDATE public.sits SET
         status = 'published',
         accepting_applications = true
@@ -384,8 +405,9 @@ CREATE TRIGGER trg_guard_application_sit_open
   BEFORE INSERT ON public.applications
   FOR EACH ROW EXECUTE FUNCTION public.guard_application_sit_open();
 
--- Après l'insertion : au plafond, l'annonce se ferme aux candidatures. Le
--- propriétaire la rouvre en relevant son plafond (ApplicationCapSection).
+-- Après l'insertion : au plafond, l'annonce se ferme aux candidatures. Elle
+-- se rouvre quand une place se libère (R6, plus bas) ou quand le propriétaire
+-- relève son plafond (ApplicationCapSection).
 CREATE OR REPLACE FUNCTION public.close_sit_when_application_cap_reached()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -419,6 +441,36 @@ DROP TRIGGER IF EXISTS trg_close_sit_when_application_cap_reached ON public.appl
 CREATE TRIGGER trg_close_sit_when_application_cap_reached
   AFTER INSERT ON public.applications
   FOR EACH ROW EXECUTE FUNCTION public.close_sit_when_application_cap_reached();
+
+-- Relecture R6 (13/10/2026, retenue par le fondateur, priorité « plus de
+-- candidatures ») : un retrait ou un refus qui repasse le décompte sous le
+-- plafond rouvre l'annonce. Aucun écran n'écrit false sur une annonce publiée
+-- hors plafond (OwnerSitView ne le fait qu'à la confirmation, statut
+-- confirmed), la réouverture ne contredit donc aucun choix du propriétaire.
+-- Elle ne relance pas la diffusion : notify_sitters_on_new_sit s'arrête dès
+-- que OLD.status = 'published'.
+CREATE OR REPLACE FUNCTION public.reopen_sit_when_application_slot_freed()
+ RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public'
+AS $function$
+BEGIN
+  UPDATE public.sits s SET accepting_applications = true
+   WHERE s.id = NEW.sit_id
+     AND s.status = 'published'::sit_status
+     AND s.accepting_applications IS FALSE
+     AND s.max_applications > 0
+     AND (SELECT count(*) FROM public.applications a
+           WHERE a.sit_id = s.id
+             AND a.status NOT IN ('rejected'::application_status, 'cancelled'::application_status)) < s.max_applications;
+  RETURN NEW;
+END;
+$function$;
+DROP TRIGGER IF EXISTS trg_reopen_sit_when_application_slot_freed ON public.applications;
+CREATE TRIGGER trg_reopen_sit_when_application_slot_freed
+  AFTER UPDATE OF status ON public.applications
+  FOR EACH ROW
+  WHEN (OLD.status NOT IN ('rejected'::application_status, 'cancelled'::application_status)
+        AND NEW.status IN ('rejected'::application_status, 'cancelled'::application_status))
+  EXECUTE FUNCTION public.reopen_sit_when_application_slot_freed();
 
 -- Rattrapage : les annonces publiées déjà au plafond se ferment (3 au 13/10/2026).
 UPDATE public.sits s

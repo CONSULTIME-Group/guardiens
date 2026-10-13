@@ -8,6 +8,8 @@
 --    (adresse vérifiée, ou Google), la ligne account_deleted est levée. Les
 --    motifs unsubscribe, bounce et complaint restent en place, et l'effacement
 --    ne réécrit plus le motif d'une ligne existante (code, account-erasure.ts).
+--    R5 : une adresse déjà désinscrite (jeton de désinscription utilisé)
+--    retrouve son motif unsubscribe au lieu d'être levée.
 -- 2. D-08 : « Qui peut voir mon profil » et « Afficher ma dernière connexion »
 --    sont appliqués par public_profiles et public_helpers (et donc par
 --    search_sitter_pool et search_sitter_pool_mobile, qui lisent
@@ -17,9 +19,11 @@
 --    Dernière connexion masquée : last_seen_at et last_active_on à NULL.
 --    5 profils restreints et 4 dernières connexions masquées, encore exposés.
 -- 3. D-09 : un compte suspendu ou inactif ne publie plus d'annonce, ne
---    candidate plus et n'écrit plus de message (les besoins et réponses
---    d'entraide l'étaient déjà par enforce_mutual_aid_eligibility). Les
---    lectures restent ouvertes. Même indice d'erreur account_not_active.
+--    candidate plus et n'écrit plus de message, même marqué is_system depuis
+--    son navigateur (R2) (les besoins et réponses d'entraide l'étaient déjà
+--    par enforce_mutual_aid_eligibility). Les lectures restent ouvertes. Même
+--    indice d'erreur account_not_active. is_account_blocked_for_actions est
+--    réservée au service_role (R4).
 -- 4. E-08 : trois tâches cron actives visent des fonctions absentes du dépôt.
 --    Déprogrammation préparée, commentée : à lancer après lecture des
 --    journaux Supabase (une fonction déployée hors dépôt serait arrêtée).
@@ -48,6 +52,23 @@ BEGIN
     RETURN NEW;
   END IF;
   IF coalesce(NEW.raw_user_meta_data ->> 'deleted', '') = 'true' THEN
+    RETURN NEW;
+  END IF;
+
+  -- Relecture R5 (13/10/2026) : jusqu'à ce lot, l'effacement réécrivait en
+  -- account_deleted le motif d'une désinscription existante (clé UNIQUE sur
+  -- email, upsert sans ignoreDuplicates). 2 des 10 lignes account_deleted ont
+  -- un jeton de désinscription utilisé. Pour elles, le motif d'origine est
+  -- rendu (unsubscribe, qui bloque déjà tout email dans
+  -- send-transactional-email, règle actuelle d'un désinscrit) au lieu de lever
+  -- la ligne.
+  IF EXISTS (SELECT 1 FROM public.email_unsubscribe_tokens t
+              WHERE lower(t.email) = lower(trim(NEW.email)) AND t.used_at IS NOT NULL) THEN
+    UPDATE public.suppressed_emails
+       SET reason = 'unsubscribe',
+           metadata = coalesce(metadata, '{}'::jsonb)
+                      || jsonb_build_object('restored_from', 'account_deleted', 'restored_at', now())
+     WHERE lower(email) = lower(trim(NEW.email)) AND reason = 'account_deleted';
     RETURN NEW;
   END IF;
 
@@ -191,6 +212,14 @@ AS $function$
   );
 $function$;
 
+-- Relecture R4 (13/10/2026) : sans REVOKE, les droits par défaut du schéma
+-- public donnent EXECUTE à PUBLIC, anon et authenticated, et tout visiteur
+-- apprendrait par /rpc/is_account_blocked_for_actions si un compte est
+-- suspendu. Le seul appelant, enforce_active_account_writes, est SECURITY
+-- DEFINER (exécuté en postgres) : rien ne casse.
+REVOKE ALL ON FUNCTION public.is_account_blocked_for_actions(uuid) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.is_account_blocked_for_actions(uuid) TO service_role;
+
 CREATE OR REPLACE FUNCTION public.enforce_active_account_writes()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -212,7 +241,13 @@ BEGIN
   ELSIF TG_TABLE_NAME = 'applications' THEN
     v_user_id := NEW.sitter_id;
   ELSIF TG_TABLE_NAME = 'messages' THEN
-    IF coalesce(NEW.is_system, false) THEN
+    -- Relecture R2 (13/10/2026) : la politique « Participants can send
+    -- messages » laisse le client poser is_system = true, un compte suspendu
+    -- aurait continué d'écrire ainsi par l'API.
+    -- Message système écrit par un tiers (RPC de l'autre partie, service_role) : passe.
+    -- Écrit par l'expéditeur lui-même depuis son navigateur : contrôlé comme un message.
+    IF coalesce(NEW.is_system, false)
+       AND (auth.uid() IS NULL OR auth.uid() IS DISTINCT FROM NEW.sender_id) THEN
       RETURN NEW;
     END IF;
     v_user_id := NEW.sender_id;

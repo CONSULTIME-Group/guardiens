@@ -4,16 +4,19 @@
 --
 -- 1. C-03 : à la clôture d'un besoin (manuelle, automatique, annulation, fin),
 --    les propositions encore en attente passent à « declined » et leurs auteurs
---    reçoivent une notification in-app, une seule fois, sans email. 6 des 8
+--    reçoivent une notification in-app, une seule fois, sans email (« trouvé
+--    son aide » seulement après une rencontre confirmée, R8). 6 des 8
 --    propositions « pending » portaient sur un besoin fermé, sans aucun signal
 --    à l'aidant. Le trigger couvre tous les chemins (auteur, cron
 --    auto-close-small-missions en service_role, mark_mission_done, équipe).
 -- 2. C-05 : une proposition d'aide (et sa réactivation) part aussi en push
 --    vers l'auteur, par la file push_delivery_jobs (type « mission_response »,
---    réglage « Candidatures et propositions d'aide » : opt_in_applications).
+--    réglage « Candidatures et propositions d'aide » : opt_in_applications),
+--    une réactivation au plus une fois par jour (R7).
 -- 3. C-12 et C-22 : notify_new_mission_response réagit aussi à une réponse
---    réactivée (withdrawn vers pending, reactivate_my_mission_response) et
---    pointe vers /projets/{slug} pour un projet, /petites-missions/{id} sinon.
+--    réactivée (withdrawn vers pending, reactivate_my_mission_response), au
+--    plus un email de réactivation par jour (R7), et pointe vers
+--    /projets/{slug} pour un projet, /petites-missions/{id} sinon.
 -- 4. C-08 : « Votre demande reste visible » au plus une fois par besoin et par
 --    semaine (114 notifications pour 5 besoins au 13/10/2026, jusqu'à 53 pour
 --    un même auteur en 4 jours). Nettoyage de l'existant préparé, commenté.
@@ -188,12 +191,20 @@ DECLARE
   v_head text;
   v_body text;
 BEGIN
+  -- Relecture R8 (13/10/2026) : « trouvé son aide » seulement après une
+  -- rencontre confirmée. Une fin sans personne retenue (completed_by_author,
+  -- auto_completed_after_date, meetup_not_happened) se lit « est clos ». Le
+  -- type suit toujours le statut.
   IF NEW.status = 'completed'::small_mission_status THEN
     v_type := 'mission_declined';
+  ELSE
+    v_type := 'mission_cancelled';
+  END IF;
+  IF NEW.status = 'completed'::small_mission_status
+     AND NEW.close_reason = 'meetup_confirmed' THEN
     v_head := 'Ce coup de main a trouvé son aide';
     v_body := '« ' || v_title || ' » est terminé. Merci pour votre proposition, d''autres besoins près de chez vous attendent un coup de main.';
   ELSE
-    v_type := 'mission_cancelled';
     v_head := 'Ce besoin est clos';
     v_body := '« ' || v_title || ' » est clos. Merci pour votre proposition, d''autres besoins près de chez vous attendent un coup de main.';
   END IF;
@@ -331,6 +342,8 @@ BEGIN
 
     -- Une réactivation reprend la tâche déjà terminée de la même réponse
     -- (clé unique abonnement, type, réponse), jamais une tâche en cours.
+    -- Relecture R7 (13/10/2026) : au plus une fois par jour, sinon un cycle
+    -- retrait puis réactivation relancerait le push en boucle vers l'auteur.
     INSERT INTO public.push_delivery_jobs AS j (subscription_id, user_id, event_kind, source_id, context_id)
     SELECT s.id, v_recipient, 'mission_response', NEW.id, NEW.mission_id
     FROM public.push_subscriptions s
@@ -340,7 +353,8 @@ BEGIN
           claimed_at = NULL, claim_expires_at = NULL,
           expires_at = now() + interval '1 hour', last_error_code = NULL,
           created_at = now(), updated_at = now()
-      WHERE j.status IN ('accepted', 'failed', 'skipped');
+      WHERE j.status IN ('accepted', 'failed', 'skipped')
+        AND j.updated_at < now() - interval '1 day';
 
   EXCEPTION WHEN OTHERS THEN
     -- Une proposition ne doit jamais échouer à cause du push.
@@ -446,9 +460,12 @@ BEGIN
     END IF;
 
     -- Lot X3b : une réactivation a sa propre clé, la première réponse garde la sienne.
+    -- Relecture R7 (13/10/2026) : clé du jour (heure de Paris), au plus un
+    -- email de réactivation par jour, sans délai minimal un aidant pouvait
+    -- relancer l'auteur en boucle.
     v_idem := 'mission-response-received-' || NEW.id::text
       || CASE WHEN v_reactivated
-              THEN '-' || floor(extract(epoch FROM coalesce(NEW.reactivated_at, now())))::bigint::text
+              THEN '-r' || to_char(now() AT TIME ZONE 'Europe/Paris', 'YYYYMMDD')
               ELSE '' END;
 
     PERFORM net.http_post(

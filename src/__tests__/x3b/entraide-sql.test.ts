@@ -51,6 +51,17 @@ describe("X3b, C-03 : clôture d'un besoin", () => {
     expect(fn).toContain("RAISE WARNING 'close_pending_responses_on_mission_close");
   });
 
+  it("R8 : « trouvé son aide » seulement après une rencontre confirmée", () => {
+    const found = fn.indexOf("v_head := 'Ce coup de main a trouvé son aide';");
+    const cond = fn.lastIndexOf("IF NEW.status = 'completed'::small_mission_status\n     AND NEW.close_reason = 'meetup_confirmed' THEN", found);
+    expect(cond).toBeGreaterThan(0);
+    expect(found).toBeGreaterThan(cond);
+    expect(fn.match(/v_head := 'Ce coup de main a trouvé son aide';/g)?.length).toBe(1);
+    expect(fn).toContain("v_head := 'Ce besoin est clos';");
+    expect(fn).toContain("v_type := 'mission_declined';");
+    expect(fn).toContain("v_type := 'mission_cancelled';");
+  });
+
   it("textes positifs, sans tiret long", () => {
     expect(fn).toContain("Merci pour votre proposition");
     expect(fn).not.toMatch(/[—–]/);
@@ -88,6 +99,8 @@ describe("X3b, C-05 : push d'une proposition d'aide", () => {
     expect(fn).toContain("s.enabled AND s.opt_in_applications");
     expect(fn).toContain("IF TG_OP = 'UPDATE' AND OLD.status IS DISTINCT FROM 'withdrawn'::small_mission_response_status THEN");
     expect(fn).toContain("WHERE j.status IN ('accepted', 'failed', 'skipped')");
+    // R7 : une réactivation relance le push au plus une fois par jour.
+    expect(fn).toMatch(/WHERE j\.status IN \('accepted', 'failed', 'skipped'\)\s+AND j\.updated_at < now\(\) - interval '1 day';/);
     expect(fn).toContain("RAISE WARNING 'push_enqueue_on_mission_response error %'");
     expect(sql).toMatch(/CREATE TRIGGER trg_push_enqueue_on_mission_response\s+AFTER INSERT OR UPDATE OF status ON public\.small_mission_responses/);
   });
@@ -111,9 +124,10 @@ describe("X3b, C-12 et C-22 : notify_new_mission_response", () => {
     expect(fn).toMatch(/IF TG_OP = 'UPDATE' THEN\s+IF NOT \(OLD\.status = 'withdrawn'::small_mission_response_status\s+AND NEW\.status = 'pending'::small_mission_response_status\) THEN\s+RETURN NEW;/);
   });
 
-  it("une réactivation a sa propre clé d'email", () => {
+  it("une réactivation a sa propre clé d'email, au plus une par jour (R7)", () => {
     expect(fn).toContain("'mission-response-received-' || NEW.id::text");
-    expect(fn).toContain("extract(epoch FROM coalesce(NEW.reactivated_at, now()))");
+    expect(fn).toContain("THEN '-r' || to_char(now() AT TIME ZONE 'Europe/Paris', 'YYYYMMDD')");
+    expect(fn).not.toContain("extract(epoch FROM");
     expect(fn).toContain("'idempotencyKey', v_idem");
   });
 

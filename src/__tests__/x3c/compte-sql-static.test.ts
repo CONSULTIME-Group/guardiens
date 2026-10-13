@@ -30,7 +30,20 @@ describe("D-06 · réinscription après effacement", () => {
 
   it("lève seulement le motif account_deleted", () => {
     expect(fn).toMatch(/DELETE FROM public\.suppressed_emails[\s\S]*reason = 'account_deleted'/);
-    expect(fn).not.toMatch(/'unsubscribe'|'bounce'|'complaint'/);
+    expect(fn).not.toMatch(/'bounce'|'complaint'/);
+    // R5 : 'unsubscribe' n'apparaît que comme motif rendu, jamais comme motif levé.
+    expect(fn.match(/'unsubscribe'/g)?.length).toBe(1);
+    expect(fn).toContain("SET reason = 'unsubscribe',");
+  });
+
+  it("R5 : une adresse désinscrite retrouve son motif unsubscribe avant toute levée", () => {
+    const restore = fn.indexOf("FROM public.email_unsubscribe_tokens t");
+    const del = fn.indexOf("DELETE FROM public.suppressed_emails");
+    expect(restore).toBeGreaterThan(0);
+    expect(del).toBeGreaterThan(restore);
+    expect(fn).toContain("t.used_at IS NOT NULL");
+    expect(fn).toContain("jsonb_build_object('restored_from', 'account_deleted', 'restored_at', now())");
+    expect(fn).toMatch(/WHERE lower\(email\) = lower\(trim\(NEW\.email\)\) AND reason = 'account_deleted';\s+RETURN NEW;\s+END IF;/);
   });
 
   it("attend une adresse confirmée et ignore un compte effacé ou banni", () => {
@@ -115,6 +128,17 @@ describe("D-09 · compte suspendu", () => {
     expect(fn).toContain("NEW.status IS DISTINCT FROM 'published'");
     expect(fn).toContain("coalesce(NEW.is_system, false)");
     expect(fn).toContain("has_role(auth.uid(), 'admin'::app_role)");
+  });
+
+  it("R2 : un message is_system écrit par l'expéditeur lui-même est contrôlé", () => {
+    expect(fn).toMatch(/IF coalesce\(NEW\.is_system, false\)\s+AND \(auth\.uid\(\) IS NULL OR auth\.uid\(\) IS DISTINCT FROM NEW\.sender_id\) THEN\s+RETURN NEW;/);
+    expect(fn).not.toMatch(/IF coalesce\(NEW\.is_system, false\) THEN/);
+  });
+
+  it("R4 : is_account_blocked_for_actions fermée aux visiteurs et aux membres", () => {
+    expect(ACTIVE).toContain("REVOKE ALL ON FUNCTION public.is_account_blocked_for_actions(uuid) FROM PUBLIC, anon, authenticated;");
+    expect(ACTIVE).toContain("GRANT EXECUTE ON FUNCTION public.is_account_blocked_for_actions(uuid) TO service_role;");
+    expect(ACTIVE).not.toMatch(/GRANT EXECUTE ON FUNCTION public\.is_account_blocked_for_actions\(uuid\) TO [^;]*\b(anon|authenticated)\b/);
   });
 
   it("n'ajoute aucune politique de lecture", () => {
