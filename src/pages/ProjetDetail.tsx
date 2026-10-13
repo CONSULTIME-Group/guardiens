@@ -5,6 +5,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { logger } from "@/lib/logger";
 import PublicMissionView from "@/components/missions/PublicMissionView";
+import ProjetOwnerResponses, { PROJET_RESPONSES_ANCHOR } from "@/components/missions/ProjetOwnerResponses";
+import { isAuthorOf } from "@/lib/ownership";
 import { Button } from "@/components/ui/button";
 import { isIndexableProjetMission } from "../../supabase/functions/_shared/entraideMissionIndexability.js";
 import PageMeta from "@/components/PageMeta";
@@ -92,6 +94,8 @@ const ProjetDetail = () => {
     scrubStaleProjetHead();
   }, [isCurrent, routeKey]);
 
+  const userId = user?.id ?? null;
+
   useEffect(() => {
     if (!slug) return;
     const gen = ++generation.current;
@@ -110,6 +114,23 @@ const ProjetDetail = () => {
         res = null;
       }
       if (!alive()) return;
+      // Lot X2 : un projet qui n'est plus ouvert sort de la vue publique ; son
+      // porteur connecté le relit sur sa propre ligne pour garder l'accès aux
+      // candidatures (politique « open or own » de small_missions).
+      if (userId && res && !res.error && !res.data) {
+        try {
+          const own = (supabase as any)
+            .from("small_missions")
+            .select("*")
+            .eq("category", "projet")
+            .eq("user_id", userId);
+          const ownRes = await (isUuid(slug) ? own.eq("id", slug) : own.eq("slug", slug)).maybeSingle();
+          if (!alive()) return;
+          if (ownRes && !ownRes.error && ownRes.data) res = ownRes;
+        } catch (err) {
+          logger.error("[ProjetDetail.ownLoad]", { err: String(err) });
+        }
+      }
       // Une lecture en échec n'est jamais une absence : sinon une panne
       // passagère servirait un 404 aux robots pour un projet réel.
       const result = classifyProjetLookup(res);
@@ -134,7 +155,7 @@ const ProjetDetail = () => {
       // Démontage ou nouveau paramètre : toute réponse en vol est ignorée.
       if (generation.current === gen) generation.current += 1;
     };
-  }, [slug, routeKey]);
+  }, [slug, routeKey, userId]);
 
   const onShare = useCallback(() => {
     const url = window.location.href;
@@ -261,8 +282,13 @@ const ProjetDetail = () => {
     );
   }
 
+  // Lot X2 : le porteur connecté lit ses candidatures sur la page du projet.
+  const isOwner = Boolean(user?.id) && isAuthorOf(user?.id, projet);
+
   return (
     <PublicMissionView
+      ownerPanel={isOwner ? <ProjetOwnerResponses projet={projet} currentUserId={user!.id} /> : undefined}
+      ownerPanelAnchor={PROJET_RESPONSES_ANCHOR}
       mission={projet}
       author={author}
       catMeta={{ label: "Projet participatif" }}
@@ -274,7 +300,7 @@ const ProjetDetail = () => {
       onShare={onShare}
       noindex={!isIndexableProjetMission(projet)}
       canonical={projetCanonicalUrl(projet)}
-      onApply={user ? handleApply : undefined}
+      onApply={user && !isOwner ? handleApply : undefined}
       hasApplied={hasApplied}
       applying={applying}
       applyMessage={applyMessage}
