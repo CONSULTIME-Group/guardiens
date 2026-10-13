@@ -653,7 +653,7 @@ const CityPage = () => {
  </Button>
  </Link>
  <Link
- to="/inscription?role=guardian"
+ to="/inscription?role=sitter"
  className="text-sm text-primary hover:underline"
  >
  Je suis gardien, je m'inscris →

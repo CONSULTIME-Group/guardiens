@@ -80,6 +80,7 @@ import {
 } from "@/lib/sitPublishRules";
 import { describeSitWriteError, sitWriteErrorNeedsSignal } from "@/lib/sitDbErrors";
 import { isIdentityComplete, resolveSetupState } from "@/lib/setupState";
+import { ensureOwnerSpace, needsOwnerSpace } from "@/lib/ownerSpace";
 import PublishExitDialog from "@/components/sits/owner/PublishExitDialog";
 import AnimalMentionDialog from "@/components/sits/owner/AnimalMentionDialog";
 import PublishPhotoPromptDialog from "@/components/sits/owner/PublishPhotoPromptDialog";
@@ -424,7 +425,14 @@ export function parsePrefillDate(raw: string | null): string | null {
 }
 
 const CreateSit = () => {
-  const { user } = useAuth();
+  const { user, refreshProfile, switchRole } = useAuth();
+  // Lot X2 : un compte gardien qui enregistre une annonce reçoit l'espace propriétaire.
+  const ownerSpaceAskedRef = useRef(false);
+  const grantOwnerSpace = () => {
+    if (!user || ownerSpaceAskedRef.current || !needsOwnerSpace((user as { role?: string }).role)) return;
+    ownerSpaceAskedRef.current = true;
+    void ensureOwnerSpace({ userId: user.id, role: (user as { role?: string }).role, refreshProfile, switchRole });
+  };
   const { toast } = useToast();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -1260,6 +1268,7 @@ const CreateSit = () => {
         if (error) throw error;
         setDraftId(data.id);
         markSaved();
+        grantOwnerSpace();
         return data.id;
       }
     } catch (e) {
@@ -1741,6 +1750,7 @@ const CreateSit = () => {
         sitId = sit.id;
       }
       clearPublishIntent();
+      grantOwnerSpace();
 
 
       try { await trackFirstAction("sit_created", { sit_id: sitId, is_urgent: isUrgent }); } catch {}

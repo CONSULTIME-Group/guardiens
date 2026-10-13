@@ -32,6 +32,8 @@ const ALWAYS_OPEN_PREFIXES = [
   // publier. Du 06 au 12/10, 5 auteurs renvoyés vers le questionnaire en
   // ouvrant leur propre besoin, l'une trois fois en deux minutes.
   "/petites-missions",
+  // Lot X2 : les projets participatifs, page et candidatures du porteur (C-13).
+  "/projets",
 ];
 
 function matchesPrefix(path: string, prefix: string): boolean {

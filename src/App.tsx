@@ -480,6 +480,9 @@ const AppRoutes = () => {
       <Route path="/register" element={<RegisterRedirect />} />
       <Route path="/inscription" element={<PublicOnlyRoute><Register /></PublicOnlyRoute>} />
       <Route path="/auth/confirm" element={<AuthConfirm />} />
+      {/* Lot X2 : anciens liens de /devenir-home-sitter (404 au 13/10/2026). */}
+      <Route path="/auth" element={<RegisterRedirect />} />
+      <Route path="/gardes" element={<Navigate to="/annonces" replace />} />
       <Route path="/forgot-password" element={<PublicOnlyRoute><ForgotPassword /></PublicOnlyRoute>} />
       <Route path="/reset-password" element={<ResetPassword />} />
       
