@@ -12835,6 +12835,10 @@ export type Database = {
         Args: { p_message?: string; p_sit_id: string; p_sitter_id: string }
         Returns: string
       }
+      deactivate_my_space: {
+        Args: { p_keep: Database["public"]["Enums"]["user_role"] }
+        Returns: Database["public"]["Enums"]["user_role"]
+      }
       decline_garde_accord: { Args: { p_garde_id: string }; Returns: undefined }
       delete_email: {
         Args: { message_id: number; queue_name: string }
@@ -13446,6 +13450,7 @@ export type Database = {
       is_account_empty: { Args: { _user_id: string }; Returns: boolean }
       is_engaged_sitter_of: { Args: { _owner_id: string }; Returns: boolean }
       is_llm_refusal_text: { Args: { _txt: string }; Returns: boolean }
+      is_mission_responder: { Args: { p_mission_id: string }; Returns: boolean }
       is_profile_ready_for_action: {
         Args: { p_user_id?: string }
         Returns: boolean
