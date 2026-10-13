@@ -19,6 +19,7 @@ const mockFrom = vi.fn((_table: string) => ({
   select: (_cols?: string) => mockSelect(),
 }));
 const mockInvoke = vi.fn(async (_name: string, _opts?: unknown) => ({ data: { url: "https://stripe.test/portal" }, error: null }));
+const mockRpc = vi.fn(async (_fn: string, _args?: unknown) => ({ data: null, error: null as null | { message: string } }));
 const toastSuccess = vi.fn();
 const toastError = vi.fn();
 
@@ -37,6 +38,7 @@ vi.mock("@/contexts/AuthContext", () => ({
 vi.mock("@/integrations/supabase/client", () => ({
   supabase: {
     from: (table: string) => mockFrom(table),
+    rpc: (fn: string, args?: unknown) => mockRpc(fn, args),
     functions: { invoke: (name: string, opts?: unknown) => mockInvoke(name, opts) },
   },
 }));
@@ -97,8 +99,8 @@ describe("ActiveRolesSection — bascule symétrique", () => {
     const [, sitterSwitch] = switches();
     fireEvent.click(sitterSwitch);
     expect(await screen.findByText(/Désactiver l'espace gardien/i)).toBeInTheDocument();
-    // Bouton de gestion Stripe présent
-    expect(screen.getByText(/Gérer mon abonnement Stripe/i)).toBeInTheDocument();
+    // Lot X1 : Guardiens est gratuit, aucune mention d'abonnement.
+    expect(screen.queryByText(/abonnement/i)).toBeNull();
   });
 
   it("role='both' → confirmation désactivation gardien → role='owner'", async () => {
@@ -106,6 +108,7 @@ describe("ActiveRolesSection — bascule symétrique", () => {
     fireEvent.click(switches()[1]); // sitter
     fireEvent.click(await screen.findByText(/Confirmer la désactivation/i));
     await waitFor(() => {
+      expect(mockRpc).toHaveBeenCalledWith("deactivate_my_space", { p_keep: "owner" });
       expect(mockSwitchRole).toHaveBeenCalledWith("owner");
       expect(mockRefreshProfile).toHaveBeenCalled();
       expect(toastSuccess).toHaveBeenCalledWith(expect.stringMatching(/gardien.*désactivé/i));
@@ -117,6 +120,7 @@ describe("ActiveRolesSection — bascule symétrique", () => {
     fireEvent.click(switches()[0]); // owner
     fireEvent.click(await screen.findByText(/Confirmer la désactivation/i));
     await waitFor(() => {
+      expect(mockRpc).toHaveBeenCalledWith("deactivate_my_space", { p_keep: "sitter" });
       expect(mockSwitchRole).toHaveBeenCalledWith("sitter");
       expect(toastSuccess).toHaveBeenCalledWith(expect.stringMatching(/propriétaire.*désactivé/i));
     });
@@ -187,5 +191,29 @@ describe("ActiveRolesSection — dernier rôle actif", () => {
     renderSection();
     fireEvent.click(switches()[1]);
     expect(await screen.findByText(/Supprimer mon compte/i)).toBeInTheDocument();
+  });
+});
+
+describe("ActiveRolesSection, lot X1 : retrait d'espace par deactivate_my_space", () => {
+  it("annonce en cours : message clair, aucun changement d'espace", async () => {
+    mockRpc.mockResolvedValueOnce({ data: null, error: { message: "ACTIVE_SITS: une annonce est encore en cours" } });
+    renderSection();
+    fireEvent.click(switches()[0]); // owner
+    fireEvent.click(await screen.findByText(/Confirmer la désactivation/i));
+    await waitFor(() => {
+      expect(toastError).toHaveBeenCalledWith(expect.stringMatching(/annonce est encore en cours/i));
+    });
+    expect(mockSwitchRole).not.toHaveBeenCalled();
+  });
+
+  it("candidature ouverte : message clair, aucun changement d'espace", async () => {
+    mockRpc.mockResolvedValueOnce({ data: null, error: { message: "ACTIVE_APPLICATIONS: une candidature est encore ouverte" } });
+    renderSection();
+    fireEvent.click(switches()[1]); // sitter
+    fireEvent.click(await screen.findByText(/Confirmer la désactivation/i));
+    await waitFor(() => {
+      expect(toastError).toHaveBeenCalledWith(expect.stringMatching(/candidature est encore ouverte/i));
+    });
+    expect(mockSwitchRole).not.toHaveBeenCalled();
   });
 });
