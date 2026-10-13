@@ -11,7 +11,8 @@ vi.stubGlobal("Deno", { env: { get: () => undefined } });
 
 import {
   advanceGuide,
-  nextMirror,
+  mirrorForTry,
+  IN_FLIGHT_MAX,
   parseOsmResponse,
   poolFrom,
   statementsFor,
@@ -39,14 +40,17 @@ function fakeDb(seed: Record<string, Row[]>) {
   let seq = 1000;
   const net: Record<number, any> = {};
   const enqueued: { id: number; query: string; mirror: number }[] = [];
+  const ctl = { enqueueError: false };
   const builder = (table: string) => {
     const filters: ((r: Row) => boolean)[] = [];
     let op: "select" | "update" | "delete" | "insert" | "upsert" = "select";
     let payload: any = null;
     let single = false;
+    let countOnly = false;
     const run = async () => {
       const rows = tables[table];
       const match = rows.filter((r) => filters.every((f) => f(r)));
+      if (op === "select" && countOnly) return { data: null, count: match.length, error: null };
       if (op === "select") return { data: single ? match[0] ?? null : match, error: null };
       if (op === "update") {
         match.forEach((r) => Object.assign(r, payload));
@@ -66,11 +70,11 @@ function fakeDb(seed: Record<string, Row[]>) {
       return { data: out, error: null };
     };
     const b: any = {
-      select: () => b,
+      select: (_c?: string, o?: { head?: boolean }) => ((countOnly = !!o?.head), b),
       eq: (k: string, v: any) => (filters.push((r) => r[k] === v), b),
       in: (k: string, v: any[]) => (filters.push((r) => v.includes(r[k])), b),
       is: (k: string, v: any) => (filters.push((r) => (r[k] ?? null) === v), b),
-      not: () => b,
+      not: (k: string, _op: string, v: any) => (filters.push((r) => (r[k] ?? null) !== v), b),
       or: () => b,
       order: () => b,
       limit: () => b,
@@ -88,10 +92,12 @@ function fakeDb(seed: Record<string, Row[]>) {
     tables,
     net,
     enqueued,
+    ctl,
     client: {
       from: (t: string) => builder(t),
       rpc: async (fn: string, args: any) => {
         if (fn === "guide_osm_enqueue") {
+          if (ctl.enqueueError) return { data: null, error: { code: "57014" } };
           const id = ++seq;
           enqueued.push({ id, query: args.p_query, mirror: args.p_mirror });
           return { data: id, error: null };
@@ -109,6 +115,24 @@ const guideRow = (extra: Row = {}) => ({
   places_sourced_at: null, places_source_passes: 0, places_source_report: { centre_final: SL }, ...extra,
 });
 
+/** Fait avancer le guide en répondant aux requêtes parties, jusqu'à une étape attendue. */
+async function runUntil(
+  db: ReturnType<typeof fakeDb>,
+  answer: (query: string) => any,
+  stop: (r: any) => boolean,
+  opts: Record<string, any> = {},
+  max = 30,
+) {
+  let r: any = null;
+  for (let i = 0; i < max; i++) {
+    for (const e of db.enqueued) if (!db.net[e.id]) db.net[e.id] = answer(e.query);
+    r = await advanceGuide(db.client, db.tables.city_guides[0], { dryRun: false, googleKey: null, ...opts });
+    if (stop(r)) return r;
+  }
+  return r;
+}
+const ok = (els: any[]) => ({ status_code: 200, content: JSON.stringify({ elements: els }) });
+
 describe("GL4, lecture des réponses", () => {
   it("réponse, délai, refus et remarque de délai Overpass", () => {
     expect(parseOsmResponse(null)).toBeNull();
@@ -118,10 +142,8 @@ describe("GL4, lecture des réponses", () => {
     expect(parseOsmResponse({ status_code: 200, content: '{"elements":[],"remark":"runtime error: Query timed out"}' })).toEqual({ failure: "remark_timeout" });
   });
 
-  it("miroirs : openstreetmap.fr, mail.ru, puis overpass-api.de", () => {
-    expect(nextMirror(1)).toBe(2);
-    expect(nextMirror(2)).toBe(0);
-    expect(nextMirror(0)).toBe(1);
+  it("miroirs par essai : openstreetmap.fr deux fois, puis mail.ru", () => {
+    expect([0, 1, 2, 3].map(mirrorForTry)).toEqual([1, 1, 2, 2]);
   });
 
   it("une réponse est réduite aux lieux utiles, dans le rayon, les plus proches d'abord", () => {
@@ -146,43 +168,36 @@ describe("GL4, passages successifs (Saint-Ludger)", () => {
   it("1er passage : envoie les requêtes du premier rayon et rend la main", async () => {
     const r = await advanceGuide(db.client, db.tables.city_guides[0], { dryRun: false, googleKey: null });
     expect(r).toMatchObject({ etape: "collecte", rayon: 5000, result: "en_cours" });
-    expect(db.enqueued.length).toBeGreaterThan(5);
-    expect(db.enqueued.every((e) => e.query.includes("around:5000,"))).toBe(true);
-    expect(db.enqueued.slice(0, 3).map((e) => e.mirror)).toEqual([1, 2, 0]);
+    // Au plus IN_FLIGHT_MAX en vol, le reste attend son tour en file.
+    expect(db.enqueued).toHaveLength(IN_FLIGHT_MAX);
+    expect(db.tables.guide_osm_requests.filter((r) => r.net_id == null).length).toBeGreaterThan(0);
+    expect(db.enqueued.every((e) => e.query.includes("around:5000,") && e.mirror === 1)).toBe(true);
   });
 
-  it("réponses absentes : attente ; refus : renvoi sur le miroir suivant", async () => {
+  it("réponses absentes : attente ; refus : renvoi sur openstreetmap.fr", async () => {
     await advanceGuide(db.client, db.tables.city_guides[0], { dryRun: false, googleKey: null });
     const first = db.enqueued[0];
     db.net[first.id] = { status_code: 504, content: "busy" };
     const r = await advanceGuide(db.client, db.tables.city_guides[0], { dryRun: false, googleKey: null });
     expect(r.etape).toBe("attente");
-    const resent = db.enqueued[db.enqueued.length - 1];
-    expect(resent.query).toBe(first.query);
-    expect(resent.mirror).toBe(nextMirror(first.mirror));
+    const resent = db.enqueued.filter((e) => e.query === first.query);
+    expect(resent).toHaveLength(2);
+    expect(resent[1].mirror).toBe(1);
+    const row = db.tables.guide_osm_requests.find((x) => first.query.includes(x.statement));
+    expect(row.tries).toBe(2);
   });
 
   it("rayon vide : élargit aux seules catégories manquantes, puis termine avec des lieux sourcés", async () => {
-    const answer = (fill: (q: string) => any[]) => {
-      for (const e of db.enqueued) if (!db.net[e.id]) db.net[e.id] = { status_code: 200, content: JSON.stringify({ elements: fill(e.query) }) };
-    };
     await advanceGuide(db.client, db.tables.city_guides[0], { dryRun: false, googleKey: null });
     // Trois forêts à 5 km : la catégorie atteint son minimum (3), elle n'est plus élargie.
-    answer((q) => (q.includes("forest")
-      ? [node(10, { landuse: "forest", name: "Forêt de Saint-Ludger" }, north(2)), node(12, { landuse: "forest", name: "Bois du Rang 9" }, north(3)), node(13, { landuse: "forest", name: "Forêt des Érables" }, north(4))]
-      : []));
-    const r2 = await advanceGuide(db.client, db.tables.city_guides[0], { dryRun: false, googleKey: null });
+    const forests = [node(10, { landuse: "forest", name: "Forêt de Saint-Ludger" }, north(2)), node(12, { landuse: "forest", name: "Bois du Rang 9" }, north(3)), node(13, { landuse: "forest", name: "Forêt des Érables" }, north(4))];
+    const vet = node(11, { amenity: "veterinary", name: "Hôpital vétérinaire du Granit", "addr:street": "Rue Laval", "addr:housenumber": "5000" }, north(25));
+    const answer = (q: string) => ok(q.includes("around:5000,") && q.includes("forest") ? forests : q.includes("around:30000,") && q.includes("veterinary") ? [vet] : []);
+    const r2 = await runUntil(db, answer, (r) => r.etape === "elargissement");
     expect(r2).toMatchObject({ etape: "elargissement", rayon: 15000 });
-    expect((r2.categories as string[])).not.toContain("general_park");
-    answer(() => []);
-    const r3 = await advanceGuide(db.client, db.tables.city_guides[0], { dryRun: false, googleKey: null });
-    expect(r3).toMatchObject({ etape: "elargissement", rayon: 30000 });
-    answer((q) => (q.includes("veterinary") ? [node(11, { amenity: "veterinary", name: "Hôpital vétérinaire du Granit", "addr:street": "Rue Laval", "addr:housenumber": "5000" }, north(25))] : []));
-    const r4 = await advanceGuide(db.client, db.tables.city_guides[0], { dryRun: false, googleKey: null });
-    expect(r4.etape).toBe("elargissement");
-    answer(() => []);
-    const r5 = await advanceGuide(db.client, db.tables.city_guides[0], { dryRun: false, googleKey: null });
-    expect(r5).toMatchObject({ etape: "termine", result: "ok" });
+    expect(r2.categories as string[]).not.toContain("general_park");
+    const end = await runUntil(db, answer, (r) => r.etape === "termine");
+    expect(end).toMatchObject({ etape: "termine", result: "ok" });
 
     const places = db.tables.city_guide_places;
     expect(places.map((p) => p.name).sort()).toEqual(["Bois du Rang 9", "Forêt de Saint-Ludger", "Forêt des Érables", "Hôpital vétérinaire du Granit"]);
@@ -193,36 +208,23 @@ describe("GL4, passages successifs (Saint-Ludger)", () => {
     expect(g.intro).toContain("Hôpital vétérinaire du Granit");
     expect(g.places_source_report.redaction.source).toBe("factuel");
     expect(db.tables.guide_osm_requests).toHaveLength(0);
+    // Jamais plus de IN_FLIGHT_MAX requêtes parties sans réponse relue.
+    expect(IN_FLIGHT_MAX).toBe(6);
   });
 
   it("essai à blanc : rapport et lignes, rien d'inséré, file vidée", async () => {
     await advanceGuide(db.client, db.tables.city_guides[0], { dryRun: true, googleKey: null });
-    for (let i = 0; i < 6; i++) {
-      for (const e of db.enqueued) if (!db.net[e.id]) db.net[e.id] = { status_code: 200, content: '{"elements":[]}' };
-      const r = await advanceGuide(db.client, db.tables.city_guides[0], { dryRun: false, googleKey: null });
-      if (r.etape === "termine") {
-        expect(r.result).toBe("dry_run");
-        break;
-      }
-    }
+    const r = await runUntil(db, () => ok([]), (x) => x.etape === "termine");
+    expect(r.result).toBe("dry_run");
     expect(db.tables.city_guide_places).toHaveLength(0);
     expect(db.tables.city_guides[0].places_sourced_at).toBeNull();
     expect(db.tables.guide_osm_requests).toHaveLength(0);
   });
 
-  it("une partie des requêtes sans réponse après deux miroirs : guide terminé en partiel, laissé en file", async () => {
+  it("une partie des requêtes sans réponse après trois essais : guide terminé en partiel, laissé en file", async () => {
     await advanceGuide(db.client, db.tables.city_guides[0], { dryRun: false, googleKey: null });
-    for (let i = 0; i < 10; i++) {
-      for (const e of db.enqueued) {
-        if (db.net[e.id]) continue;
-        db.net[e.id] = e.query.includes("veterinary") ? { status_code: 504, content: "busy" } : { status_code: 200, content: '{"elements":[]}' };
-      }
-      const r = await advanceGuide(db.client, db.tables.city_guides[0], { dryRun: false, googleKey: null });
-      if (r.etape === "termine") {
-        expect(r.result).toBe("partiel");
-        break;
-      }
-    }
+    const r = await runUntil(db, (q) => (q.includes("veterinary") ? { status_code: 504, content: "busy" } : ok([])), (x) => x.etape === "termine");
+    expect(r.result).toBe("partiel");
     const g = db.tables.city_guides[0];
     expect(g.places_sourced_at).toBeNull();
     expect(g.places_source_passes).toBe(1);
@@ -320,16 +322,19 @@ describe("GL4, relecture (file)", () => {
   it("aucune réponse sur tous les miroirs : le passage ne compte pas, rien n'est sourcé", async () => {
     const db = fakeDb({ city_guides: [guideRow()] });
     await advanceGuide(db.client, db.tables.city_guides[0], { dryRun: false, googleKey: null });
-    let last: any = null;
-    for (let i = 0; i < 4; i++) {
-      for (const e of db.enqueued) if (!db.net[e.id]) db.net[e.id] = { status_code: 504, content: "busy" };
-      last = await advanceGuide(db.client, db.tables.city_guides[0], { dryRun: false, googleKey: null });
-      if (last.result !== "en_cours") break;
-    }
+    const last = await runUntil(db, () => ({ status_code: 504, content: "busy" }), (r) => r.result !== "en_cours");
     expect(last.result).toBe("overpass_indisponible");
     const g = db.tables.city_guides[0];
     expect(g.places_sourced_at).toBeNull();
     expect(g.places_source_passes).toBe(0);
+    expect(db.tables.guide_osm_requests).toHaveLength(0);
+  });
+
+  it("dépôt refusé par la base à chaque essai : requêtes notées en échec, le guide ne reste pas bloqué", async () => {
+    const db = fakeDb({ city_guides: [guideRow()] });
+    db.ctl.enqueueError = true;
+    const last = await runUntil(db, () => ok([]), (r) => r.result !== "en_cours", {}, 12);
+    expect(last.result).toBe("overpass_indisponible");
     expect(db.tables.guide_osm_requests).toHaveLength(0);
   });
 
@@ -343,12 +348,7 @@ describe("GL4, relecture (file)", () => {
   it("fin trop proche de la limite d'exécution : terminé au passage suivant", async () => {
     const db = fakeDb({ city_guides: [guideRow()] });
     await advanceGuide(db.client, db.tables.city_guides[0], { dryRun: false, googleKey: null });
-    let r: any;
-    for (let i = 0; i < 6; i++) {
-      for (const e of db.enqueued) if (!db.net[e.id]) db.net[e.id] = { status_code: 200, content: '{"elements":[]}' };
-      r = await advanceGuide(db.client, db.tables.city_guides[0], { dryRun: false, googleKey: null, deadline: Date.now() + 10_000 });
-      if (r.detail === "fin_au_passage_suivant") break;
-    }
+    const r = await runUntil(db, () => ok([]), (x) => x.detail === "fin_au_passage_suivant", { deadline: Date.now() + 10_000 });
     expect(r.detail).toBe("fin_au_passage_suivant");
     expect(db.tables.guide_osm_requests.length).toBeGreaterThan(0);
   });

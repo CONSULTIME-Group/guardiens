@@ -58,10 +58,20 @@ import {
 
 const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
 
-/** Miroirs essayés dans cet ordre (indices de guide_osm_enqueue). */
-export const MIRROR_ORDER = [1, 2, 0];
-/** Deux essais par requête au plus, sur deux miroirs différents. */
-export const MAX_TRIES = 2;
+/**
+ * Miroirs (indices de guide_osm_enqueue) par essai : openstreetmap.fr deux
+ * fois, puis mail.ru. Mesure du 14/10/2026 (00 h 20) : depuis la base,
+ * openstreetmap.fr répond à toutes les requêtes (données mondiales : Montréal,
+ * Marrakech), mail.ru et overpass-api.de dépassent 28 s.
+ */
+export const MIRROR_BY_TRY = [1, 1, 2];
+/** Trois essais par requête au plus. */
+export const MAX_TRIES = MIRROR_BY_TRY.length;
+/**
+ * Requêtes en vol en même temps, tous guides confondus : 18 requêtes
+ * simultanées le 14/10/2026 donnaient 11 délais dépassés sur le même serveur.
+ */
+export const IN_FLIGHT_MAX = 6;
 /** Requête sans réponse au-delà : comptée comme échouée. */
 export const REQUEST_STALE_MS = 6 * 60 * 1000;
 /** Passages partiels au-delà desquels le guide est sourcé avec ce qui a répondu. */
@@ -112,8 +122,18 @@ export function parseOsmResponse(row: any): { elements: OsmElement[] } | { failu
   }
 }
 
-/** Miroir suivant dans l'ordre de préférence. */
-export const nextMirror = (m: number) => MIRROR_ORDER[(MIRROR_ORDER.indexOf(m) + 1) % MIRROR_ORDER.length];
+/** Miroir de l'essai suivant (tries = essais déjà faits). */
+export const mirrorForTry = (tries: number) => MIRROR_BY_TRY[Math.min(tries, MIRROR_BY_TRY.length - 1)];
+
+/** Requêtes envoyées sans réponse relue, tous guides confondus. */
+async function inFlight(supabase: any): Promise<number> {
+  const { count } = await supabase
+    .from("guide_osm_requests")
+    .select("id", { count: "exact", head: true })
+    .eq("status", "sent")
+    .not("net_id", "is", null);
+  return Number(count ?? 0);
+}
 
 /** Catégories à chercher au premier rayon : celles qui n'ont pas atteint leur maximum. */
 export function initialCategories(counts: Partial<Record<GuideCategory, number>>): GuideCategory[] {
@@ -160,24 +180,30 @@ export function countsWith(pool: Candidate[], known: Partial<Record<GuideCategor
 // Étapes avec la base
 // ---------------------------------------------------------------------------
 
+/**
+ * Range les requêtes d'un rayon. Au-delà de IN_FLIGHT_MAX en vol, une requête
+ * attend son tour (net_id vide, tries 0) et part à un passage suivant.
+ */
 async function enqueue(supabase: any, guideId: string, round: number, radius: number, statements: string[], dryRun: boolean) {
   const rows: Record<string, unknown>[] = [];
-  let i = 0;
+  let room = IN_FLIGHT_MAX - (await inFlight(supabase));
   for (const st of statements) {
-    const mirror = MIRROR_ORDER[i++ % MIRROR_ORDER.length];
+    const base = { city_guide_id: guideId, round, radius, statement: st, dry_run: dryRun };
+    if (room <= 0) {
+      rows.push({ ...base, mirror: mirrorForTry(0), net_id: null, tries: 0, status: "sent", outcome: "en_file" });
+      continue;
+    }
+    const mirror = mirrorForTry(0);
     const query = `[out:json][timeout:25];${st}out center tags;`;
     const { data: netId, error } = await supabase.rpc("guide_osm_enqueue", { p_query: query, p_mirror: mirror });
+    if (!error) room--;
     rows.push({
-      city_guide_id: guideId,
-      round,
-      radius,
-      statement: st,
+      ...base,
       mirror,
       net_id: error ? null : netId,
-      tries: 1,
-      status: error ? "failed" : "sent",
+      tries: error ? 0 : 1,
+      status: "sent",
       outcome: error ? `enqueue_${error.code ?? "erreur"}` : null,
-      dry_run: dryRun,
     });
   }
   if (rows.length) await supabase.from("guide_osm_requests").insert(rows);
@@ -232,8 +258,42 @@ async function pollRequests(supabase: any, rows: OsmRequestRow[], center: GuideC
   const now = Date.now();
   let waiting = 0;
   const outcomes: Record<string, number> = {};
+  let room = IN_FLIGHT_MAX - (await inFlight(supabase));
+  const send = async (r: OsmRequestRow, failure: string | null) => {
+    const mirror = mirrorForTry(r.tries);
+    const { data: netId, error } = await supabase.rpc("guide_osm_enqueue", {
+      p_query: `[out:json][timeout:25];${r.statement}out center tags;`,
+      p_mirror: mirror,
+    });
+    if (error) {
+      // Dépôt refusé par la base : compte comme un essai, la requête reste en file.
+      r.tries += 1;
+      r.outcome = `enqueue_${error.code ?? "erreur"}`;
+      await supabase.from("guide_osm_requests").update({
+        net_id: null, tries: r.tries, outcome: r.outcome, updated_at: new Date().toISOString(),
+      }).eq("id", r.id);
+      return false;
+    }
+    await supabase.from("guide_osm_requests").update({
+      net_id: netId, mirror, tries: r.tries + 1, outcome: failure, updated_at: new Date().toISOString(),
+    }).eq("id", r.id);
+    room--;
+    return true;
+  };
   for (const r of rows) {
     if (r.status !== "sent") continue;
+    // Requête en file : part dès qu'une place se libère.
+    if (r.net_id == null) {
+      if (r.tries >= MAX_TRIES) {
+        await supabase.from("guide_osm_requests").update({ status: "failed", updated_at: new Date().toISOString() }).eq("id", r.id);
+        r.status = "failed";
+        outcomes[r.outcome ?? "enqueue_erreur"] = (outcomes[r.outcome ?? "enqueue_erreur"] ?? 0) + 1;
+        continue;
+      }
+      if (room > 0) await send(r, r.outcome);
+      waiting++;
+      continue;
+    }
     const { data } = await supabase.rpc("guide_osm_result", { p_id: r.net_id });
     const res = parseOsmResponse(Array.isArray(data) ? data[0] ?? null : data ?? null);
     const stale = now - Date.parse(r.updated_at) > REQUEST_STALE_MS;
@@ -241,6 +301,8 @@ async function pollRequests(supabase: any, rows: OsmRequestRow[], center: GuideC
       waiting++;
       continue;
     }
+    // Réponse relue (ou abandonnée) : sa place en vol se libère.
+    room++;
     const failure = !res ? "sans_reponse" : "failure" in res ? res.failure : null;
     outcomes[failure ?? "ok"] = (outcomes[failure ?? "ok"] ?? 0) + 1;
     if (!failure && res && "elements" in res) {
@@ -251,18 +313,14 @@ async function pollRequests(supabase: any, rows: OsmRequestRow[], center: GuideC
       continue;
     }
     if (r.tries < MAX_TRIES) {
-      const mirror = nextMirror(r.mirror);
-      const { data: netId, error } = await supabase.rpc("guide_osm_enqueue", {
-        p_query: `[out:json][timeout:25];${r.statement}out center tags;`,
-        p_mirror: mirror,
-      });
-      if (!error) {
-        await supabase.from("guide_osm_requests").update({
-          net_id: netId, mirror, tries: r.tries + 1, outcome: failure, updated_at: new Date().toISOString(),
-        }).eq("id", r.id);
+      if (room > 0 && (await send(r, failure))) {
         waiting++;
         continue;
       }
+      // Plus de place en vol : la requête repasse en file pour l'essai suivant.
+      await supabase.from("guide_osm_requests").update({ net_id: null, outcome: failure, updated_at: new Date().toISOString() }).eq("id", r.id);
+      waiting++;
+      continue;
     }
     await supabase.from("guide_osm_requests").update({ status: "failed", outcome: failure, updated_at: new Date().toISOString() }).eq("id", r.id);
     r.status = "failed";
