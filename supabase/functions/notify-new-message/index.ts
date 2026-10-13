@@ -3,7 +3,8 @@
  *
  * Déclenché par un trigger DB (pg_net) à chaque INSERT de message non-système.
  * Envoie un email contextualisé au destinataire si :
- *  - il n'a pas déjà reçu un email pour cette conversation depuis 30 min (throttle)
+ *  - il n'a pas déjà reçu un email pour cette conversation dans la fenêtre
+ *    choisie dans ses réglages (30 min par défaut, lot X3c)
  *  - son email n'est pas suppressed
  *
  * Idempotency : `msg_<message_id>` (+ throttle DB pour la déduplication temporelle)
@@ -11,6 +12,12 @@
 
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { recordDeliveryFailure } from '../_shared/delivery-failure.ts'
+import {
+  checkNotificationPreference,
+  DEFAULT_MESSAGE_DELAY_MS,
+  messageEmailWindowMs,
+  readNotificationPreferences,
+} from '../_shared/notification-preferences.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -89,8 +96,22 @@ Deno.serve(async (req) => {
     })
   }
 
-  // 3. Throttle 30 min : vérifier qu'on n'a pas déjà notifié pour cette conv récemment
-  const thirtyMinAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString()
+  // 3. Lot X3c : réglages du destinataire (« Messages » et « Délai avant
+  //    email »), lus par _shared/notification-preferences.ts. « Jamais » ou
+  //    « Messages » coupé : aucun email. Sinon la fenêtre choisie (30 min,
+  //    1 h, 3 h) borne les emails d'une même conversation.
+  const prefRead = await readNotificationPreferences(supabase, recipientId)
+  if (prefRead.error) console.error('notification_preferences_read_failed', { err: prefRead.error })
+  const prefVerdict = checkNotificationPreference('new-message', prefRead.row)
+  if (prefVerdict.allowed === false) {
+    return new Response(JSON.stringify({ skipped: 'notification_preference', preference: prefVerdict.preference }), {
+      status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
+  }
+  const windowMs = messageEmailWindowMs(prefRead.row) ?? DEFAULT_MESSAGE_DELAY_MS
+
+  // 3b. Throttle : vérifier qu'on n'a pas déjà notifié pour cette conv dans la fenêtre
+  const windowStart = new Date(Date.now() - windowMs).toISOString()
   const { data: recentSends } = await supabase
     .from('email_send_log')
     .select('id, created_at')
@@ -98,12 +119,12 @@ Deno.serve(async (req) => {
     .in('status', ['sent', 'deferred'])
     .filter('metadata->>conversation_id', 'eq', payload.conversation_id)
     .filter('metadata->>recipient_id', 'eq', recipientId)
-    .gte('created_at', thirtyMinAgo)
+    .gte('created_at', windowStart)
     .limit(1)
 
   if (recentSends && recentSends.length > 0) {
     console.log('throttled', { conv: payload.conversation_id, recipient: recipientId })
-    return new Response(JSON.stringify({ skipped: 'throttled_30min' }), {
+    return new Response(JSON.stringify({ skipped: 'throttled_window', window_ms: windowMs }), {
       status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   }

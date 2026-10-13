@@ -781,14 +781,19 @@ const NotificationsSection = ({ prefs, savingKey, allNotifsOn, onMasterToggle, o
         </div>
       ))}
 
+      {/* Lot X3c : appliqué par notify-new-message et send-transactional-email
+          (supabase/functions/_shared/notification-preferences.ts). */}
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <Label className="text-sm shrink-0">Délai avant email (messages non-lus)</Label>
+        <div className="min-w-0">
+          <Label className="text-sm">Rythme des emails de messages</Label>
+          <p className="text-xs text-muted-foreground">Un email par conversation au plus sur cette durée.</p>
+        </div>
         <Select value={prefs.message_email_delay} onValueChange={(v) => onSave({ message_email_delay: v })}>
-          <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="30min">30 min</SelectItem>
-            <SelectItem value="1h">1 heure</SelectItem>
-            <SelectItem value="3h">3 heures</SelectItem>
+            <SelectItem value="30min">Toutes les 30 min</SelectItem>
+            <SelectItem value="1h">Toutes les heures</SelectItem>
+            <SelectItem value="3h">Toutes les 3 heures</SelectItem>
             <SelectItem value="never">Jamais</SelectItem>
           </SelectContent>
         </Select>

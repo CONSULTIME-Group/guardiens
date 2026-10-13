@@ -23,6 +23,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { startCronRun } from "../_shared/cron-run-log.ts";
 import { requireAdminOrServiceRole } from "../_shared/require-admin.ts";
 import { createReminderSlot } from "../_shared/reminder-daily-slot.ts";
+import { checkNotificationPreference, readNotificationPreferences } from "../_shared/notification-preferences.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -159,6 +160,11 @@ Deno.serve(async (req) => {
 
       if (!recipient?.email) { skipped++; continue; }
       if (recipientAccount?.account_status && recipientAccount.account_status !== "active") {
+        skipped++; continue;
+      }
+      // Lot X3c : « Messages » coupé ou délai « Jamais » dans les réglages.
+      const prefRead = await readNotificationPreferences(supabase, recipientId);
+      if (checkNotificationPreference("unread-messages-reminder", prefRead.row).allowed === false) {
         skipped++; continue;
       }
 

@@ -7,6 +7,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2'
 import { TEMPLATES } from '../_shared/transactional-email-templates/registry.ts'
 import { getEmailCategory, type EmailCategory } from '../_shared/email-categories.ts'
 import { bypassesSuppression } from '../_shared/email-suppression.ts'
+import { checkNotificationPreference, notificationPreferenceFor, readNotificationPreferencesByEmail } from '../_shared/notification-preferences.ts'
 import { evaluateSitAlert, isSitStatusGuardedTemplate } from '../_shared/sit-alert-guard.ts'
 import { REPLY_TO_ADDRESS, transactionalSender } from '../_shared/sender-address.ts'
 import { wrapEmailLink } from '../_shared/email-link-wrap.ts'
@@ -608,6 +609,39 @@ Deno.serve(async (req) => {
         console.log('Email blocked by category preference', { effectiveRecipient, category, templateName })
         return new Response(
           JSON.stringify({ success: false, reason: 'unsubscribed_category', category }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+    }
+  }
+
+  // 1c-bis. Lot X3c (13/10/2026) : interrupteurs « Notifications email » des
+  // réglages (Nouvelles candidatures, Messages, Rappels de garde, délai
+  // « Jamais »), lus par _shared/notification-preferences.ts. Ils valent aussi
+  // pour ces emails transactionnels, puisque le membre les a coupés lui-même.
+  // Lecture en échec : envoi maintenu et erreur journalisée, comme le lot C2.
+  if (notificationPreferenceFor(templateName)) {
+    const prefRead = await readNotificationPreferencesByEmail(supabase, effectiveRecipient)
+    if (prefRead.error) {
+      console.error('Lecture des réglages de notification impossible, envoi maintenu', { templateName, error: prefRead.error })
+    } else {
+      const verdict = checkNotificationPreference(templateName, prefRead.row)
+      if (verdict.allowed === false) {
+        const { error: logPrefErr } = await supabase.from('email_send_log').insert({
+          message_id: messageId,
+          template_name: templateName,
+          recipient_email: effectiveRecipient,
+          status: 'unsubscribed_category',
+          metadata: { idempotency_key: idempotencyKey, category, notification_preference: verdict.preference, ...logMetadata },
+        })
+        if (logPrefErr) {
+          console.error('email_send_log insert failed (notification_preference)', {
+            templateName, error: logPrefErr.message, code: logPrefErr.code,
+          })
+        }
+        console.log('Email blocked by notification preference', { templateName, preference: verdict.preference })
+        return new Response(
+          JSON.stringify({ success: false, reason: 'notification_preference', preference: verdict.preference }),
           { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
