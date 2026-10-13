@@ -9,7 +9,8 @@
 -- ne retire donc rien. Chaque REVOKE de ce fichier vise PUBLIC, anon et
 -- authenticated, puis un GRANT rend l'accès voulu.
 --
--- Ordre : P3-01 à P3-03 (déjà appliqués), P3-04, P3-05, P3-06, P3-07,
+-- Ordre : P3-01 à P3-03 (déjà appliqués), P3-04, P3-05, P3-06, P3-07
+-- (écarté, décision du fondateur du 13/10/2026),
 -- P3-08, P3-09, P3-11, P3-12, P3-13, P3-14, P3-15, P3-16, P3-17, P3-18,
 -- puis Y2-V1 (vues écrivables, constat ajouté pendant la correction).
 -- P3-10 se corrige dans le code seul (lecture de public_pets).
@@ -276,24 +277,13 @@ REVOKE ALL ON public.sitter_profiles_affinity FROM PUBLIC, anon, authenticated;
 GRANT SELECT ON public.sitter_profiles_affinity TO authenticated, service_role;
 
 -- =========================================================================
--- P3-07 : photos d'intérieur de logements jamais publiés lisibles par anon.
--- Même règle que properties : le titulaire, l'équipe, ou une annonce visible
--- (publiée, confirmée, en cours, terminée ou archivée, non masquée).
+-- P3-07 écarté par décision du fondateur du 13/10/2026 : photos de logement
+-- visibles sur le profil public, avec ou sans annonce en ligne.
+-- La lecture reste celle de la production au 13/10/2026 (relue en base) :
+-- politique « Owner gallery photos are publicly readable », FOR SELECT TO
+-- anon, authenticated USING (true). Ce fichier ne touche plus à
+-- public.owner_gallery.
 -- =========================================================================
-DROP POLICY IF EXISTS "Owner gallery photos are publicly readable" ON public.owner_gallery;
-DROP POLICY IF EXISTS "Owner gallery readable by owner or via visible sit" ON public.owner_gallery;
-CREATE POLICY "Owner gallery readable by owner or via visible sit" ON public.owner_gallery
-  FOR SELECT TO anon, authenticated
-  USING (
-    auth.uid() = user_id
-    OR public.has_role(auth.uid(), 'admin'::app_role)
-    OR EXISTS (
-      SELECT 1 FROM public.sits s
-       WHERE s.user_id = owner_gallery.user_id
-         AND s.status IN ('published', 'confirmed', 'in_progress', 'completed', 'archived')
-         AND s.moderation_hidden_at IS NULL
-    )
-  );
 
 -- =========================================================================
 -- P3-08 : écussons, mots d'entraide et mises en avant écrivables sur

@@ -106,7 +106,11 @@ describe("Y2, migration de droits", () => {
     expect(SQL).toMatch(/CREATE TRIGGER trg_guard_moderation_columns BEFORE UPDATE ON public\.sits/);
     expect(SQL).toMatch(/CREATE TRIGGER trg_guard_moderation_columns BEFORE UPDATE ON public\.small_missions/);
     expect(SQL).toMatch(/DROP POLICY IF EXISTS "ba_insert_authenticated" ON public\.badge_attributions;/);
-    expect(SQL).toMatch(/DROP POLICY IF EXISTS "Owner gallery photos are publicly readable" ON public\.owner_gallery;/);
+  });
+
+  it("galerie du propriétaire inchangée : P3-07 écarté par décision du fondateur", () => {
+    expect(SQL).toContain("P3-07 écarté par décision du fondateur du 13/10/2026 : photos de logement");
+    expect(SQL).not.toMatch(/ON public\.owner_gallery/);
   });
 
   it("le contrôle en base est inscrit, commenté", () => {
