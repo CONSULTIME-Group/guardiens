@@ -131,8 +131,16 @@ export function buildOverpassQuery(categories: GuideCategory[], radiusM: number,
 }
 
 /** Catégorie et nature d'un élément OSM, ou null s'il ne correspond à rien. */
+/**
+ * Noms écartés : essai à blanc sur Lyon du 13/10/2026, un « Espace de
+ * Déjection Canine » remontait comme espace pour chiens et des traboules
+ * (itinéraires piétons urbains) comme balades avec un chien.
+ */
+const EXCLUDED_NAME = /(d[ée]jection|canisette|sanisette|toilettes?\s+canines?|traboule)/i;
+
 export function categorize(el: OsmElement): { category: GuideCategory; kind: PlaceKind } | null {
   const t = el.tags ?? {};
+  if (t.name && EXCLUDED_NAME.test(t.name)) return null;
   if (t.leisure === "dog_park" && (!t.name || !t.name.trim())) return { category: "dog_park", kind: "dog_park" };
   if (!t.name || !t.name.trim()) return null;
   const dogOk = t.dog === "yes" || t.dog === "leashed";
@@ -739,7 +747,10 @@ export function dbOverpassBatch(
   };
   return async (queries, deadline) => {
     const results: (OsmElement[] | null)[] = queries.map(() => null);
-    let pending = queries.map((q, i) => ({ i, q, mirror: i % mirrors, tries: 0 }));
+    // Miroirs dans l'ordre openstreetmap.fr, mail.ru, overpass-api.de : le
+    // 13/10/2026, overpass-api.de répondait 504 trois fois sur trois.
+    const order = [1, 2, 0].slice(0, mirrors);
+    let pending = queries.map((q, i) => ({ i, q, mirror: order[i % order.length], tries: 0 }));
     while (pending.length > 0) {
       if (Date.now() + 6000 > deadline) break;
       const sent: { i: number; q: string; mirror: number; tries: number; id: number | null; t0: number }[] = [];
@@ -767,7 +778,9 @@ export function dbOverpassBatch(
           : !row ? "attente_depassee" : out === "retry" ? (row.timed_out ? "pg_net_timeout" : Number(row.status_code) !== 200 ? `http_${row.status_code}` : "remark_ou_json") : "ok";
         onAttempt?.({ via: "base", mirror: String(x.mirror), ms: Date.now() - x.t0, outcome });
         if (out === "retry") {
-          if (x.tries < 1) next.push({ i: x.i, q: x.q, mirror: (x.mirror + 1) % mirrors, tries: x.tries + 1 });
+          if (x.tries < 1) {
+            next.push({ i: x.i, q: x.q, mirror: order[(order.indexOf(x.mirror) + 1) % order.length], tries: x.tries + 1 });
+          }
         } else {
           results[x.i] = out;
         }

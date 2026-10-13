@@ -497,7 +497,7 @@ describe("GL, requêtes groupées par la base", () => {
         const id = enq.length;
         const q = String(args.p_query);
         // B échoue sur son premier miroir (504), réussit sur le suivant.
-        if (q === "B" && Number(args.p_mirror) === 1) rows.set(id, { status_code: 504, timed_out: false, content: "busy" });
+        if (q === "B" && Number(args.p_mirror) === 2) rows.set(id, { status_code: 504, timed_out: false, content: "busy" });
         else rows.set(id, { status_code: 200, timed_out: false, content: JSON.stringify({ elements: [{ type: "node", id, tags: { name: q } }] }) });
         return { data: id, error: null };
       }
@@ -505,8 +505,8 @@ describe("GL, requêtes groupées par la base", () => {
     };
     const attempts: any[] = [];
     const res = await dbOverpassBatch(rpc, noSleep, (a) => attempts.push(a))(["A", "B", "C"], Date.now() + 100000);
-    expect(enq.slice(0, 3).map((e) => e.m)).toEqual([0, 1, 2]);
-    expect(enq[3]).toEqual({ q: "B", m: 2 });
+    expect(enq.slice(0, 3).map((e) => e.m)).toEqual([1, 2, 0]);
+    expect(enq[3]).toEqual({ q: "B", m: 0 });
     expect(res.map((r) => r?.[0]?.tags?.name)).toEqual(["A", "B", "C"]);
     expect(attempts.filter((a) => a.outcome === "http_504")).toHaveLength(1);
   });
@@ -531,5 +531,13 @@ describe("GL, requêtes groupées par la base", () => {
     expect(batches[0].length).toBeGreaterThan(5);
     expect(batches[0].every((q) => q.includes("around:5000,"))).toBe(true);
     expect(res.rows.map((r) => r.name)).toContain("Véto du Granit");
+  });
+});
+
+describe("GL, qualité des lieux (essai Lyon du 13/10/2026)", () => {
+  it("écarte les espaces de déjection et les traboules", () => {
+    expect(categorize(el(1, { leisure: "dog_park", name: "Espace de Déjection Canine" }, 0, 0))).toBeNull();
+    expect(categorize(el(2, { route: "foot", name: "Traboule du Gouverneur" }, 0, 0))).toBeNull();
+    expect(categorize(el(3, { leisure: "dog_park", name: "Aire canine de la Visitation" }, 0, 0))?.category).toBe("dog_park");
   });
 });
