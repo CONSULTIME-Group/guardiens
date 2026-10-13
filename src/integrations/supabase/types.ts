@@ -4278,7 +4278,9 @@ export type Database = {
           longitude: number | null
           osm_enrich_attempted_at: string | null
           osm_enrich_last_result: string | null
+          pipeline_lock_until: string | null
           places_source_attempted_at: string | null
+          places_source_passes: number
           places_source_report: Json | null
           places_source_result: string | null
           places_sourced_at: string | null
@@ -4304,7 +4306,9 @@ export type Database = {
           longitude?: number | null
           osm_enrich_attempted_at?: string | null
           osm_enrich_last_result?: string | null
+          pipeline_lock_until?: string | null
           places_source_attempted_at?: string | null
+          places_source_passes?: number
           places_source_report?: Json | null
           places_source_result?: string | null
           places_sourced_at?: string | null
@@ -4330,7 +4334,9 @@ export type Database = {
           longitude?: number | null
           osm_enrich_attempted_at?: string | null
           osm_enrich_last_result?: string | null
+          pipeline_lock_until?: string | null
           places_source_attempted_at?: string | null
+          places_source_passes?: number
           places_source_report?: Json | null
           places_source_result?: string | null
           places_sourced_at?: string | null
@@ -5902,6 +5908,65 @@ export type Database = {
           normalized_name?: string
         }
         Relationships: []
+      }
+      guide_osm_requests: {
+        Row: {
+          city_guide_id: string
+          created_at: string
+          dry_run: boolean
+          elements: Json | null
+          id: number
+          mirror: number
+          net_id: number | null
+          outcome: string | null
+          radius: number
+          round: number
+          statement: string
+          status: string
+          tries: number
+          updated_at: string
+        }
+        Insert: {
+          city_guide_id: string
+          created_at?: string
+          dry_run?: boolean
+          elements?: Json | null
+          id?: number
+          mirror?: number
+          net_id?: number | null
+          outcome?: string | null
+          radius: number
+          round: number
+          statement: string
+          status?: string
+          tries?: number
+          updated_at?: string
+        }
+        Update: {
+          city_guide_id?: string
+          created_at?: string
+          dry_run?: boolean
+          elements?: Json | null
+          id?: number
+          mirror?: number
+          net_id?: number | null
+          outcome?: string | null
+          radius?: number
+          round?: number
+          statement?: string
+          status?: string
+          tries?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guide_osm_requests_city_guide_id_fkey"
+            columns: ["city_guide_id"]
+            isOneToOne: false
+            referencedRelation: "city_guides"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       guide_requests: {
         Row: {

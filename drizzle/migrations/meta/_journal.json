@@ -561,6 +561,13 @@
       "when": 1791894468438,
       "tag": "0079_gl_rapport_sourcing",
       "breakpoints": true
+    },
+    {
+      "idx": 80,
+      "version": "7",
+      "when": 1791929790950,
+      "tag": "0080_gl4_protocole_guides",
+      "breakpoints": true
     }
   ]
 }
