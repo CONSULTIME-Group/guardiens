@@ -69,6 +69,7 @@ import { readSitPrefill } from "@/lib/missionContentGuards";
 import { shouldApplyMissionDates } from "@/lib/missionSitMode";
 import { makePlainTextPasteHandler } from "@/lib/pastePlainText";
 import { DEFAULT_MAX_APPLICATIONS } from "@/lib/applicationCap";
+import MaxApplicationsField from "@/components/sits/owner/MaxApplicationsField";
 import {
   getSitPublishBlockers,
   getBlockingBlockers,
@@ -2994,46 +2995,9 @@ const CreateSit = () => {
           </div>
 
 
-          {/* Max candidatures */}
-          <div>
-            <Label className="text-sm font-medium text-foreground mb-1 block">Nombre max de candidatures</Label>
-            <p className="text-xs text-muted-foreground mb-3">
-              Une fois le maximum atteint, l'annonce cesse d'accepter de nouvelles candidatures.
-            </p>
-            <div className="flex items-center gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                className="h-12 w-12 shrink-0 text-lg"
-                onClick={() => setMaxApplications(prev => Math.max(1, (prev ?? DEFAULT_MAX_APPLICATIONS) - 1))}
-                disabled={maxApplications !== null && maxApplications <= 1}
-              >
-                −
-              </Button>
-              <Input
-                type="number"
-                min={1}
-                max={50}
-                value={maxApplications ?? ""}
-                onChange={e => {
-                  const v = e.target.value;
-                  setMaxApplications(v ? Math.max(1, Math.min(50, parseInt(v))) : null);
-                }}
-                className="w-24 text-center h-12 text-base"
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                className="h-12 w-12 shrink-0 text-lg"
-                onClick={() => setMaxApplications(prev => Math.min(50, (prev ?? DEFAULT_MAX_APPLICATIONS) + 1))}
-                disabled={maxApplications !== null && maxApplications >= 50}
-              >
-                +
-              </Button>
-            </div>
-          </div>
+          {/* Lot Y1 : nombre de candidatures souhaitées, 10 par défaut. */}
+          <MaxApplicationsField value={maxApplications} onChange={setMaxApplications} />
+
 
           {/* Animaux : sorti du bloc replié, c'est le point de blocage numéro un
               des annonces non publiées. */}

@@ -27,8 +27,8 @@ const ApplicationCapSection = ({ sits, onUpdated }: Props) => {
   const [savingId, setSavingId] = useState<string | null>(null);
 
   const capped = (sits || []).filter((s) => {
-    if (!["published", "draft"].includes(s.status)) return false;
-    if (s.status === "draft") return false;
+    if (s.status !== "published") return false;
+    if (s.accepting_applications === false) return false;
     return isCapReached(s.max_applications, countOpenApplications(s.applications));
   });
 
@@ -36,9 +36,11 @@ const ApplicationCapSection = ({ sits, onUpdated }: Props) => {
 
   const raise = async (sit: any, value: number) => {
     setSavingId(sit.id);
+    // Lot Y1 : l'annonce au plafond reste ouverte, seule la valeur du plafond
+    // change ; une annonce close par son propriétaire le reste.
     const { error } = await supabase
       .from("sits")
-      .update({ max_applications: value, accepting_applications: true } as any)
+      .update({ max_applications: value } as any)
       .eq("id", sit.id);
     setSavingId(null);
     if (error) {

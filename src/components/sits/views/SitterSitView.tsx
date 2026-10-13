@@ -45,7 +45,7 @@ import { AlmaPopularSitWhisper } from "@/components/ai/alma/wiring/AlmaPopularSi
 import { AlmaReactiveOwnerWhisper } from "@/components/ai/alma/wiring/AlmaReactiveOwnerWhisper";
 import type { SitData } from "./types";
 import { sitterPresenceOnSit } from "@/lib/sitterSitPresence";
-import { isCapReached } from "@/lib/applicationCap";
+import { applicationAvailability } from "@/lib/applicationCap";
 
 interface SitterSitViewProps {
   sit: SitData;
@@ -129,6 +129,20 @@ const SitterSitView = ({
   })();
   /** Encart identité affiché sur la page. Si vrai, la modale n'en remet pas un. */
   const showIdentityInvite = identityRecommended && accessLevel !== 0 && accessLevel !== 1 && canApplyGuards;
+  /**
+   * Lot Y1 : une annonce au plafond reste publiée, ouverte et visible ; le
+   * gardien qui n'a pas encore postulé lit « Candidatures complètes » à la
+   * place du bouton. Calcul à l'écran, aucune écriture navigateur.
+   */
+  const capFull =
+    !hasApplied &&
+    applicationAvailability({
+      status: sit.status,
+      acceptingApplications: sit.accepting_applications,
+      maxApplications: sit.max_applications,
+      liveApplications: appCount,
+    }) === "full";
+  const canStillApply = Boolean(sit.accepting_applications) && !capFull;
   const [cancelOpen, setCancelOpen] = useState(false);
   const [ownerAccordSigned, setOwnerAccordSigned] = useState(false);
   const [ownerAccordDeclined, setOwnerAccordDeclined] = useState(false);
@@ -195,7 +209,7 @@ const SitterSitView = ({
     if (deepLinkDone) return;
     const target = applyDeepLinkTarget({
       param: searchParams.get("postuler"),
-      acceptingApplications: Boolean(sit.accepting_applications),
+      acceptingApplications: canStillApply,
       accessLevel,
       hasApplied: Boolean(hasApplied),
       canApplyGuards: Boolean(canApplyGuards),
@@ -204,7 +218,7 @@ const SitterSitView = ({
     setDeepLinkDone(true);
     if (target === "apply") setApplyOpen(true);
     else setCompletionOpen(true);
-  }, [deepLinkDone, searchParams, sit.accepting_applications, accessLevel, hasApplied, canApplyGuards]);
+  }, [deepLinkDone, searchParams, canStillApply, accessLevel, hasApplied, canApplyGuards]);
 
   return (
     <>
@@ -300,7 +314,7 @@ const SitterSitView = ({
           accessLevel !== 1 &&
           canApplyGuards &&
           !hasApplied &&
-          sit.accepting_applications;
+          canStillApply;
 
         const Fact = ({ icon: Icon, label }: { icon: any; label: React.ReactNode }) => (
           <span className="inline-flex items-center gap-1.5 text-muted-foreground" style={{ fontSize: "13px" }}>
@@ -347,8 +361,8 @@ const SitterSitView = ({
               )}
 
               <div className="w-full md:w-auto md:shrink-0">
-                {!sit.accepting_applications && sit.max_applications ? (
-                  <div className="rounded-2xl border border-border bg-muted/40 p-4 md:min-w-[16rem]">
+                {capFull ? (
+                  <div className="rounded-2xl border border-border bg-muted/40 p-4 md:min-w-[16rem]" data-testid="sit-applications-full">
                     <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
                       {t("application_cap.badge")}
                     </p>
@@ -635,7 +649,9 @@ const SitterSitView = ({
         state={
           !sit.accepting_applications
             ? "closed"
-            : hasApplied
+            : capFull
+              ? "full"
+              : hasApplied
               ? "applied"
               : accessLevel === 1
                 ? "complete_profile"
@@ -673,15 +689,8 @@ const SitterSitView = ({
         onSuccess={() => {
           setHasApplied(true);
           setMyApplicationStatus("pending");
-          // Lot X3a (B-05) : la fermeture au plafond se fait côté serveur
-          // (trg_close_sit_when_application_cap_reached) ; l'écran suit.
-          if (sit.max_applications) {
-            const newCount = appCount + 1;
-            setAppCount(newCount);
-            if (isCapReached(sit.max_applications, newCount)) {
-              setSit({ ...sit, accepting_applications: false });
-            }
-          }
+          // Lot Y1 : l'annonce reste ouverte au plafond, seul le compteur suit.
+          setAppCount(appCount + 1);
         }}
       />
 

@@ -1552,15 +1552,15 @@
   },
   "application_cap": {
     "badge": "Candidatures complètes",
-    "sitter_message": "Le propriétaire a limité cette annonce à {{max}} candidatures, et elle est complète. Il peut rouvrir à tout moment.",
-    "owner_eyebrow": "Plafond de candidatures atteint",
-    "owner_title": "Votre annonce ne reçoit plus de nouvelles candidatures, vous avez atteint votre plafond de {{max}}.",
-    "owner_description": "Répondez aux candidats en attente, ou augmentez le plafond.",
+    "sitter_message": "Cette annonce a reçu les {{max}} candidatures souhaitées par le propriétaire. Elle reste visible, et le propriétaire peut en accueillir davantage à tout moment.",
+    "owner_eyebrow": "Candidatures complètes",
+    "owner_title": "Votre annonce a reçu les {{max}} candidatures prévues, elle reste visible.",
+    "owner_description": "Répondez aux candidats, ou relevez ce nombre pour en accueillir davantage.",
     "owner_review_cta": "Voir les candidatures",
-    "owner_raise_label": "Augmenter le plafond",
+    "owner_raise_label": "Recevoir plus de candidatures",
     "owner_raise_option": "{{value}} candidatures",
-    "owner_raise_success": "Plafond porté à {{max}} candidatures.",
-    "owner_raise_error": "Le plafond n'a pas pu être modifié, réessayez."
+    "owner_raise_success": "Votre annonce peut maintenant recevoir {{max}} candidatures.",
+    "owner_raise_error": "La modification n'a pas pu être enregistrée, réessayez."
   },
   "application_quick_action": {
     "page_title": "Répondre à une candidature",

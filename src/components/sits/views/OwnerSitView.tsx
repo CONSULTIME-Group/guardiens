@@ -88,6 +88,7 @@ import { publicFirstName } from "@/lib/displayName";
 import SitDetailHeader from "./SitDetailHeader";
 import SitFooterReassurance from "./SitFooterReassurance";
 import ReopenApplicationsCard from "./ReopenApplicationsCard";
+import { isCapReached } from "@/lib/applicationCap";
 import SitOverridesEditor from "./SitOverridesEditor";
 import { useSitDerived } from "./useSitDerived";
 import SitImmersiveContent from "./SitImmersiveContent";
@@ -1147,16 +1148,20 @@ const OwnerSitView = ({
               </div>
             )}
 
-            {!sit.accepting_applications && (
+            {/* Lot Y1 : au plafond, l'annonce reste ouverte ; le propriétaire
+                relève le nombre souhaité, ou rouvre une annonce qu'il a close. */}
+            {sit.status === "published" &&
+              (!sit.accepting_applications || isCapReached(sit.max_applications, internalAppCount)) && (
               <div className="mb-4">
                 <ReopenApplicationsCard
                   sit={sit}
                   setSit={setSit}
                   internalAppCount={internalAppCount}
+                  mode={sit.accepting_applications ? "full" : "closed"}
                 />
               </div>
             )}
-            {sit.accepting_applications && sit.max_applications && (
+            {sit.accepting_applications && sit.max_applications && !isCapReached(sit.max_applications, internalAppCount) && (
               <p className="text-xs text-muted-foreground mb-3">
                 {internalAppCount}/{sit.max_applications} candidature
                 {sit.max_applications > 1 ? "s" : ""} reçue{internalAppCount > 1 ? "s" : ""}
