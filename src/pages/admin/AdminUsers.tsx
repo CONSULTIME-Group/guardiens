@@ -681,13 +681,28 @@ const AdminUsers = () => {
 
   const handleDeleteUser = async () => {
     setDeleting(true);
+    // Circuit RGPD partagé (lot X2) : trace, accusé, blocage de l'adresse, purge des fichiers.
     const { data, error } = await supabase.functions.invoke("admin-delete-user", {
       body: { userId: deleteConfirm.userId },
     });
-    if (error || data?.error) {
-      toast.error(data?.error || "Erreur lors de la suppression");
+    let errorMessage: string | null = data?.error ?? null;
+    if (error && !errorMessage) {
+      errorMessage = "Erreur lors de la suppression";
+      const ctx = (error as { context?: Response }).context;
+      if (ctx && typeof ctx.json === "function") {
+        try {
+          const j = await ctx.json();
+          if (j?.error) errorMessage = j.error;
+        } catch { /* corps non JSON */ }
+      }
+    }
+    if (errorMessage) {
+      toast.error(errorMessage);
     } else {
-      toast.success("Compte supprimé définitivement");
+      const parts = ["Compte effacé et anonymisé"];
+      parts.push(data?.acknowledged ? "accusé envoyé" : "accusé à envoyer à la main");
+      parts.push(data?.suppressed ? "adresse bloquée" : "adresse à bloquer à la main");
+      toast.success(parts.join(", ") + ".");
       fetchUsers();
     }
     setDeleting(false);

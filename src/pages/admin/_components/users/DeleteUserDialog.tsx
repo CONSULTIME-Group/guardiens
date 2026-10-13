@@ -18,8 +18,11 @@ export const DeleteUserDialog = ({ open, userName, deleting, onClose, onConfirm 
           Suppression définitive
         </AlertDialogTitle>
         <AlertDialogDescription>
-          Vous êtes sur le point de supprimer définitivement le compte de <strong>{userName}</strong>.
-          Cette action est <strong>irréversible</strong> : toutes les données (profil, annonces, candidatures, messages) seront supprimées.
+          Le compte de <strong>{userName}</strong> est effacé selon la procédure RGPD : données
+          personnelles anonymisées, fichiers supprimés, accusé de traitement envoyé, adresse bloquée,
+          demande tracée dans les demandes RGPD. Les avis et conversations des autres membres restent
+          en place, sous un nom anonyme. L'effacement attend la fin des gardes et candidatures en
+          cours. Cette action est <strong>irréversible</strong>.
         </AlertDialogDescription>
       </AlertDialogHeader>
       <AlertDialogFooter>

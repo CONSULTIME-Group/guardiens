@@ -14,7 +14,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Search, ShieldAlert, Trash2, RefreshCw } from "lucide-react";
+import { Search, ShieldAlert, Trash2, RefreshCw, ClipboardList } from "lucide-react";
 import { toast } from "sonner";
 
 interface RequestRow {
@@ -24,9 +24,16 @@ interface RequestRow {
   source: string;
   status: string;
   requested_at: string;
+  scheduled_deletion_at: string | null;
   processed_at: string | null;
   processed_by: string | null;
   notes: string | null;
+}
+
+interface PendingRequest {
+  id: string;
+  requestedAt: string | null;
+  scheduledDeletionAt: string | null;
 }
 
 interface LookupResult {
@@ -38,6 +45,23 @@ interface LookupResult {
   confirmedSits: number;
   pendingApplications: number;
   blocked: boolean;
+  pendingRequest?: PendingRequest | null;
+}
+
+/** Demande à exécuter : adresse et, si elle existe, ligne déjà enregistrée. */
+interface ExecuteTarget {
+  email: string;
+  requestId: string | null;
+}
+
+class FunctionCallError extends Error {
+  status: number | null;
+  body: Record<string, unknown> | null;
+  constructor(message: string, status: number | null, body: Record<string, unknown> | null) {
+    super(message);
+    this.status = status;
+    this.body = body;
+  }
 }
 
 const STATUS_LABEL: Record<string, string> = {
@@ -48,12 +72,17 @@ const STATUS_LABEL: Record<string, string> = {
 
 const SOURCE_LABEL: Record<string, string> = {
   self: "Depuis le compte",
-  admin: "Reçue par email",
+  admin: "Saisie par l'équipe",
 };
 
-function fmt(date: string | null): string {
+function fmt(date: string | null | undefined): string {
   if (!date) return "·";
   return new Date(date).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" });
+}
+
+function fmtDay(date: string | null | undefined): string {
+  if (!date) return "·";
+  return new Date(date).toLocaleDateString("fr-FR", { dateStyle: "short" });
 }
 
 export default function AdminDeletionRequests() {
@@ -64,13 +93,13 @@ export default function AdminDeletionRequests() {
   const [notes, setNotes] = useState("");
   const [lookup, setLookup] = useState<LookupResult | null>(null);
   const [busy, setBusy] = useState(false);
-  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [target, setTarget] = useState<ExecuteTarget | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("account_deletion_requests")
-      .select("id, user_id, requester_email, source, status, requested_at, processed_at, processed_by, notes")
+      .select("id, user_id, requester_email, source, status, requested_at, scheduled_deletion_at, processed_at, processed_by, notes")
       .order("requested_at", { ascending: false })
       .limit(200);
     if (error) {
@@ -102,14 +131,19 @@ export default function AdminDeletionRequests() {
     if (error) {
       // L'edge function renvoie un corps JSON même en erreur : on tente de le lire.
       let message = error.message;
+      let status: number | null = null;
+      let parsed: Record<string, unknown> | null = null;
       const ctx = (error as { context?: Response }).context;
-      if (ctx && typeof ctx.json === "function") {
-        try {
-          const j = await ctx.json();
-          if (j?.error) message = j.error;
-        } catch { /* corps non JSON */ }
+      if (ctx) {
+        status = typeof ctx.status === "number" ? ctx.status : null;
+        if (typeof ctx.json === "function") {
+          try {
+            parsed = await ctx.json();
+            if (parsed && typeof parsed.error === "string") message = parsed.error;
+          } catch { /* corps non JSON */ }
+        }
       }
-      throw new Error(message);
+      throw new FunctionCallError(message, status, parsed);
     }
     return data as Record<string, unknown>;
   };
@@ -131,21 +165,65 @@ export default function AdminDeletionRequests() {
     }
   };
 
+  const handleRecord = async () => {
+    const address = (lookup?.email ?? email).trim();
+    if (!address) return;
+    setBusy(true);
+    try {
+      const res = await callFunction({
+        action: "record",
+        email: address,
+        notes: notes.trim() || null,
+      });
+      const pending: PendingRequest = {
+        id: String(res.requestId ?? ""),
+        requestedAt: (res.requestedAt as string | null) ?? null,
+        scheduledDeletionAt: (res.scheduledDeletionAt as string | null) ?? null,
+      };
+      setLookup((l) => (l ? { ...l, pendingRequest: pending } : l));
+      toast.success(
+        res.created
+          ? `Demande enregistrée. À traiter avant le ${fmtDay(pending.scheduledDeletionAt)}.`
+          : `Demande déjà enregistrée le ${fmtDay(pending.requestedAt)}. À traiter avant le ${fmtDay(pending.scheduledDeletionAt)}.`,
+      );
+      await load();
+      refreshAdminBadges();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Enregistrement impossible");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const openExecute = (next: ExecuteTarget) => setTarget(next);
+
   const handleExecute = async () => {
-    setConfirmOpen(false);
+    const current = target;
+    setTarget(null);
+    if (!current) return;
     setBusy(true);
     try {
       const res = await callFunction({
         action: "execute",
-        email: (lookup?.email ?? email).trim(),
+        email: current.email,
         notes: notes.trim() || null,
+        ...(current.requestId ? { requestId: current.requestId } : {}),
       });
       if ((res as { accountFound?: boolean }).accountFound === false) {
         toast.warning(
-          "Aucun compte pour cette adresse. Demande enregistrée comme traitée et adresse ajoutée à la liste de blocage.",
+          res.suppressed
+            ? "Aucun compte pour cette adresse. Demande enregistrée comme traitée et adresse ajoutée à la liste de blocage."
+            : "Aucun compte pour cette adresse. Demande enregistrée comme traitée. Le blocage de l'adresse a échoué : à reprendre dans Emails.",
         );
       } else {
-        toast.success("Effacement exécuté. Accusé de traitement envoyé et adresse bloquée.");
+        const failures = Array.isArray(res.storageFailures) ? res.storageFailures.length : 0;
+        const parts = ["Effacement exécuté"];
+        parts.push(res.acknowledged ? "accusé de traitement envoyé" : "accusé à envoyer à la main");
+        parts.push(res.suppressed ? "adresse bloquée" : "adresse à bloquer à la main");
+        if (failures > 0) parts.push(`${failures} espace(s) de fichiers à purger à la main`);
+        const text = parts.join(", ") + ".";
+        if (res.acknowledged && res.suppressed && failures === 0) toast.success(text);
+        else toast.warning(text);
       }
       setLookup(null);
       setEmail("");
@@ -153,17 +231,30 @@ export default function AdminDeletionRequests() {
       await load();
       refreshAdminBadges();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Effacement impossible");
+      if (e instanceof FunctionCallError && e.status === 409) {
+        // Engagements actifs : la fonction a enregistré la demande en attente.
+        toast.warning(
+          e.body?.recorded
+            ? "Engagements actifs. La demande est enregistrée en attente, à exécuter après la fin des gardes et candidatures."
+            : e.message,
+        );
+        await load();
+        refreshAdminBadges();
+      } else {
+        toast.error(e instanceof Error ? e.message : "Effacement impossible");
+      }
     } finally {
       setBusy(false);
     }
   };
 
+  const pending = lookup?.pendingRequest ?? null;
+
   return (
     <div className="space-y-6">
       <AdminPageHeader
         title="Demandes RGPD"
-        description="Traçabilité des demandes d'effacement, y compris celles reçues par email. Chaque exécution supprime le compte, envoie un accusé de traitement et bloque l'adresse."
+        description="Traçabilité des demandes d'effacement, y compris celles reçues par email. Une demande enregistrée garde sa date de réception et son échéance d'un mois. Chaque exécution anonymise le compte, envoie un accusé de traitement et bloque l'adresse."
       />
 
       <Card>
@@ -201,8 +292,8 @@ export default function AdminDeletionRequests() {
                   {lookup.blocked && (
                     <p className="flex items-start gap-2 text-destructive">
                       <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" />
-                      Engagements actifs détectés. L'effacement est refusé tant que ces gardes ou
-                      candidatures ne sont pas finalisées ou annulées.
+                      Engagements actifs détectés. Enregistrez la demande dès aujourd'hui : l'effacement
+                      s'exécute une fois ces gardes ou candidatures finalisées ou annulées.
                     </p>
                   )}
                 </>
@@ -213,6 +304,13 @@ export default function AdminDeletionRequests() {
                 </p>
               )}
 
+              {pending && (
+                <p className="text-foreground" data-testid="pending-request">
+                  Demande enregistrée le {fmtDay(pending.requestedAt)}, à traiter avant le{" "}
+                  {fmtDay(pending.scheduledDeletionAt)}.
+                </p>
+              )}
+
               <Textarea
                 placeholder="Notes de conformité (canal de la demande, pièce justificative, référence)"
                 value={notes}
@@ -220,14 +318,26 @@ export default function AdminDeletionRequests() {
                 rows={2}
               />
 
-              <Button
-                variant="destructive"
-                disabled={busy || (lookup.found && lookup.blocked)}
-                onClick={() => setConfirmOpen(true)}
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Exécuter l'effacement
-              </Button>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <Button
+                  variant={lookup.found && lookup.blocked ? "default" : "secondary"}
+                  disabled={busy || Boolean(pending)}
+                  onClick={handleRecord}
+                >
+                  <ClipboardList className="mr-2 h-4 w-4" />
+                  Enregistrer la demande
+                </Button>
+                <Button
+                  variant="destructive"
+                  disabled={busy || (lookup.found && lookup.blocked)}
+                  onClick={() =>
+                    openExecute({ email: (lookup.email ?? email).trim(), requestId: pending?.id ?? null })
+                  }
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Exécuter l'effacement
+                </Button>
+              </div>
             </div>
           )}
         </CardContent>
@@ -257,9 +367,11 @@ export default function AdminDeletionRequests() {
                     <TableHead>Demandeur</TableHead>
                     <TableHead>Origine</TableHead>
                     <TableHead>Demandée le</TableHead>
+                    <TableHead>À traiter avant</TableHead>
                     <TableHead>Traitée le</TableHead>
                     <TableHead>Traitée par</TableHead>
                     <TableHead>Notes</TableHead>
+                    <TableHead>Action</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -277,12 +389,30 @@ export default function AdminDeletionRequests() {
                         {SOURCE_LABEL[r.source] ?? adminLabel(r.source)}
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">{fmt(r.requested_at)}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {r.status === "pending" ? fmtDay(r.scheduled_deletion_at) : "·"}
+                      </TableCell>
                       <TableCell className="text-sm text-muted-foreground">{fmt(r.processed_at)}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {r.processed_by ? (admins[r.processed_by] ?? r.processed_by) : "·"}
                       </TableCell>
                       <TableCell className="max-w-[220px] truncate text-sm text-muted-foreground" title={r.notes ?? ""}>
                         {r.notes ?? "·"}
+                      </TableCell>
+                      <TableCell>
+                        {r.status === "pending" && r.requester_email ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={busy}
+                            aria-label={`Exécuter la demande de ${r.requester_email}`}
+                            onClick={() => openExecute({ email: r.requester_email as string, requestId: r.id })}
+                          >
+                            Exécuter
+                          </Button>
+                        ) : (
+                          <span className="text-sm text-muted-foreground">·</span>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -293,14 +423,15 @@ export default function AdminDeletionRequests() {
         </CardContent>
       </Card>
 
-      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+      <AlertDialog open={target !== null} onOpenChange={(o) => { if (!o) setTarget(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmer l'effacement définitif</AlertDialogTitle>
             <AlertDialogDescription>
-              Cette action supprime définitivement le compte associé à {lookup?.email ?? email} et
-              l'ensemble de ses données. Un accusé de traitement est envoyé au demandeur et son
-              adresse est ajoutée à la liste de blocage. L'opération est irréversible.
+              Cette action anonymise définitivement le compte associé à {target?.email} et supprime
+              ses fichiers. Un accusé de traitement est envoyé au demandeur et son adresse est ajoutée
+              à la liste de blocage. Avec une garde ou une candidature en cours, la demande reste
+              enregistrée en attente. L'opération est irréversible.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

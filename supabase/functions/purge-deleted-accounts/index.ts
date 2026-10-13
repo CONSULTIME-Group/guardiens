@@ -22,11 +22,16 @@ Deno.serve(async (req) => {
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
-    // Find deletion requests that have passed their scheduled date
+    // Find deletion requests that have passed their scheduled date.
+    // Les demandes saisies par l'équipe (source admin, lot X2) portent une
+    // échéance RGPD, pas une date d'exécution : elles sont exécutées par un
+    // admin après contrôle des engagements, jamais par cette purge.
     const { data: requests, error: fetchErr } = await adminClient
       .from("account_deletion_requests")
       .select("id, user_id, requester_email")
       .eq("status", "pending")
+      .neq("source", "admin")
+      .not("user_id", "is", null)
       .lte("scheduled_deletion_at", new Date().toISOString());
 
     if (fetchErr) {

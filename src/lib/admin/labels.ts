@@ -247,6 +247,7 @@ export const AUDIT_ACTION_LABELS: Dict = {
   small_mission_delete: "Suppression d'une demande d'entraide",
   hide_duplicate_mission: "Masquage d'un doublon d'entraide",
   gdpr_account_erasure: "Effacement de compte (RGPD)",
+  gdpr_request_recorded: "Demande d'effacement enregistrée (RGPD)",
   llm_refusal_cleanup: "Nettoyage des refus de l'assistant",
   content_ai_generate: "Génération de contenu assistée",
   content_ai_image_repatriate: "Rapatriement d'images générées",

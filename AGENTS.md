@@ -55,6 +55,8 @@
 
 - Besoins ailleurs (lot E11) : sous 3 besoins à 30 km, les besoins plus loin s'affichent d'emblée sous « Ailleurs en France, N besoins ouverts » ; au-delà, repli derrière un bouton à contour ; pourquoi : 0 besoin proche et 12 ailleurs donnaient une page Entraide vide à Lyon.
 
+- Suppression tracée (lot X2) : tout effacement admin passe par executeAdminErasure (supabase/functions/_shared/admin-erasure.ts, puis anonymizeAccount), que ce soit la fiche membre (admin-delete-user, origine admin_users) ou /admin/demandes-suppression (admin-delete-account, origine admin_gdpr_request) : engagement actif bloquant (409), trace account_deletion_requests source admin passée en completed, accusé, blocage de l'adresse, purge des fichiers, journal admin_action_logs, jamais de deleteUser ; l'action « record » (bouton « Enregistrer la demande ») crée une demande pending avec échéance à 30 jours, un 409 à l'exécution l'enregistre aussi, et le requestId transmis à execute la clôt ; purge-deleted-accounts ignore les demandes source admin ; pourquoi : deleteUser emportait en cascade les conversations et avis des autres membres sans trace ni accusé, et deux demandes reçues par email (29/07 et 05/10/2026) n'avaient laissé aucune ligne (audit D-02, D-03 du 13/10/2026).
+
 <!-- LOVABLE:BEGIN -->
 - `build` ends with `test:guard` and CI runs `test:guard` directly; why: owner decision of 17/08/2026, a red test blocks publication.
 

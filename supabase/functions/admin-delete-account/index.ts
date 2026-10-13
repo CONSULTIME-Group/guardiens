@@ -1,9 +1,10 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import { countActiveCommitments } from "../_shared/account-erasure.ts";
 import {
-  anonymizeAccount,
-  countActiveCommitments,
-  finalizeErasure,
-} from "../_shared/account-erasure.ts";
+  executeAdminErasure,
+  findRequest,
+  recordDeletionRequest,
+} from "../_shared/admin-erasure.ts";
 
 
 const corsHeaders = {
@@ -20,10 +21,14 @@ const corsHeaders = {
  * service_role côté client n'est possible.
  *
  * Actions :
- *  - action = "lookup"  : recherche le compte par email et renvoie les garde-fous métier.
- *  - action = "execute" : supprime le compte (auth.admin.deleteUser + cascade),
- *                         envoie l'accusé de traitement, ajoute l'email à
- *                         suppressed_emails, et trace la demande en 'completed'.
+ *  - action = "lookup"  : recherche le compte par email, renvoie les garde-fous
+ *                         métier et la demande déjà enregistrée s'il y en a une.
+ *  - action = "record"  : enregistre la demande en 'pending' (source admin,
+ *                         échéance d'un mois) sans rien effacer (lot X2).
+ *  - action = "execute" : anonymise le compte par le circuit partagé
+ *                         (_shared/admin-erasure.ts puis account-erasure.ts),
+ *                         passe la demande en 'completed'. En cas d'engagement
+ *                         actif, renvoie 409 et enregistre la demande en 'pending'.
  */
 
 const json = (body: unknown, status = 200) =>
@@ -61,6 +66,11 @@ Deno.serve(async (req) => {
     if (!rawEmail || !rawEmail.includes("@")) {
       return json({ error: "Email requis" }, 400);
     }
+    if (!["lookup", "record", "execute"].includes(action)) {
+      return json({ error: "Action inconnue" }, 400);
+    }
+    const notes = typeof body?.notes === "string" ? body.notes : null;
+    const requestId = typeof body?.requestId === "string" ? body.requestId : null;
 
     // --- Recherche du compte ------------------------------------------------
     const { data: profile } = await adminClient
@@ -79,110 +89,99 @@ Deno.serve(async (req) => {
       userId = match?.id ?? null;
     }
 
-    // Garde-fous métier : mêmes règles que self-delete-account.
-    let confirmedSits = 0;
-    let pendingApplications = 0;
-    if (userId) {
-
-      const commitments = await countActiveCommitments(adminClient, userId);
-      confirmedSits = commitments.sits;
-      pendingApplications = commitments.applications;
-    }
-
-    const blockers = confirmedSits + pendingApplications;
-
     if (action === "lookup") {
+      // Garde-fous métier : mêmes règles que self-delete-account.
+      const commitments = userId
+        ? await countActiveCommitments(adminClient, userId)
+        : { sits: 0, applications: 0, total: 0 };
+      const existing = await findRequest(adminClient, userId, rawEmail);
       return json({
         found: Boolean(userId),
         userId,
         email: profile?.email ?? rawEmail,
         firstName: profile?.first_name ?? null,
         lastName: profile?.last_name ?? null,
-        confirmedSits,
-        pendingApplications,
-        blocked: blockers > 0,
+        confirmedSits: commitments.sits,
+        pendingApplications: commitments.applications,
+        blocked: commitments.total > 0,
+        pendingRequest:
+          existing && existing.status === "pending"
+            ? {
+                id: existing.id,
+                requestedAt: existing.requested_at,
+                scheduledDeletionAt: existing.scheduled_deletion_at,
+              }
+            : null,
       });
     }
 
-    if (action !== "execute") return json({ error: "Action inconnue" }, 400);
+    if (action === "record") {
+      const rec = await recordDeletionRequest(adminClient, {
+        email: rawEmail,
+        userId,
+        callerId,
+        notes,
+      });
+      if (rec.error) return json({ error: `Enregistrement impossible : ${rec.error}` }, 500);
+      return json({ success: true, recorded: true, accountFound: Boolean(userId), userId, ...rec });
+    }
 
-    const force = body?.force === true;
-    if (userId && blockers > 0 && !force) {
+    // --- execute --------------------------------------------------------------
+    const result = await executeAdminErasure(adminClient, {
+      userId,
+      email: profile?.email ?? rawEmail,
+      callerId,
+      origin: "admin_gdpr_request",
+      notes,
+      requestId,
+      force: body?.force === true,
+    });
+
+    if (result.kind === "blocked") {
+      // La demande est gardée en attente : date de réception et délai d'un mois tracés.
+      const rec = await recordDeletionRequest(adminClient, {
+        email: rawEmail,
+        userId,
+        callerId,
+        notes,
+      });
       return json(
         {
           error:
-            "Engagements actifs détectés. Finalisez ou annulez les gardes confirmées et candidatures en attente avant l'effacement.",
-          confirmedSits,
-          pendingApplications,
+            "Engagements actifs détectés. La demande est enregistrée en attente. Finalisez ou annulez les gardes confirmées et candidatures en attente, puis exécutez l'effacement.",
+          confirmedSits: result.confirmedSits,
+          pendingApplications: result.pendingApplications,
+          recorded: !rec.error,
+          requestId: rec.requestId,
+          requestedAt: rec.requestedAt,
+          scheduledDeletionAt: rec.scheduledDeletionAt,
         },
         409,
       );
     }
 
-    const nowIso = new Date().toISOString();
-    const trace = {
-      requester_email: rawEmail,
-      source: "admin",
-      status: "completed",
-      processed_by: callerId,
-      processed_at: nowIso,
-      scheduled_deletion_at: nowIso,
-      notes: typeof body?.notes === "string" ? body.notes : null,
-    };
-
-    // Cas 1 : aucun compte correspondant. On ne plante pas : trace + suppression email.
-    if (!userId) {
-      await adminClient.from("account_deletion_requests").insert({ ...trace, user_id: null });
-      const { suppressed } = await finalizeErasure(adminClient, rawEmail, {
-        metadata: { source: "admin_gdpr_request", account_found: false },
-      });
+    if (result.kind === "no_account") {
       return json({
         success: true,
         accountFound: false,
-        suppressed,
+        requestId: result.requestId,
+        suppressed: result.suppressed,
         acknowledged: false,
         message:
           "Aucun compte ne correspond à cette adresse. La demande est enregistrée comme traitée et l'adresse est ajoutée à la liste de blocage.",
       });
     }
 
-    // Cas 2 : compte existant. Trace de conformité écrite d'abord, puis
-    // anonymisation (accusé de traitement, purge du stockage, neutralisation auth).
-    const existing = typeof body?.requestId === "string" ? body.requestId : null;
-    if (existing) {
-      await adminClient.from("account_deletion_requests").update(trace).eq("id", existing);
-    } else {
-      const { error: upErr } = await adminClient
-        .from("account_deletion_requests")
-        .upsert({ ...trace, user_id: userId }, { onConflict: "user_id" });
-      if (upErr) console.error("[admin-delete-account] trace échouée", upErr.message);
-    }
-
-    const outcome = await anonymizeAccount(adminClient, userId, {
-      fallbackEmail: profile?.email ?? rawEmail,
-      source: "admin_gdpr_request",
+    return json({
+      success: true,
+      accountFound: true,
+      userId: result.userId,
+      requestId: result.requestId,
+      acknowledged: result.acknowledged,
+      suppressed: result.suppressed,
+      storageFailures: result.storageFailures,
+      authNeutralized: result.authNeutralized,
     });
-    const { acknowledged, suppressed } = outcome;
-
-    await adminClient.from("admin_action_logs").insert({
-      admin_id: callerId,
-      action: "gdpr_account_erasure",
-      target_type: "profile",
-      target_id: userId,
-      note: `Anonymisation RGPD exécutée pour ${rawEmail}`,
-      metadata: {
-        email: rawEmail,
-        acknowledged,
-        suppressed,
-        forced: force,
-        storage_removed: outcome.storageRemoved,
-        storage_failures: outcome.storageFailures,
-        auth_neutralized: outcome.authNeutralized,
-      },
-
-    });
-
-    return json({ success: true, accountFound: true, userId, acknowledged, suppressed });
   } catch (e) {
     console.error("[admin-delete-account]", e);
     return json({ error: e instanceof Error ? e.message : String(e) }, 500);
