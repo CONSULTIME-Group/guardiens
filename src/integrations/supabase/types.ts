@@ -4108,6 +4108,7 @@ export type Database = {
           city_guide_id: string
           created_at: string
           description: string
+          distance_km: number | null
           dogs_welcome: boolean
           google_place_id: string | null
           google_rating: number | null
@@ -4119,6 +4120,7 @@ export type Database = {
           longitude: number | null
           name: string
           photo_url: string | null
+          place_kind: string | null
           source_url: string | null
           tips: string | null
           verified_at: string | null
@@ -4129,6 +4131,7 @@ export type Database = {
           city_guide_id: string
           created_at?: string
           description?: string
+          distance_km?: number | null
           dogs_welcome?: boolean
           google_place_id?: string | null
           google_rating?: number | null
@@ -4140,6 +4143,7 @@ export type Database = {
           longitude?: number | null
           name: string
           photo_url?: string | null
+          place_kind?: string | null
           source_url?: string | null
           tips?: string | null
           verified_at?: string | null
@@ -4150,6 +4154,7 @@ export type Database = {
           city_guide_id?: string
           created_at?: string
           description?: string
+          distance_km?: number | null
           dogs_welcome?: boolean
           google_place_id?: string | null
           google_rating?: number | null
@@ -4161,6 +4166,7 @@ export type Database = {
           longitude?: number | null
           name?: string
           photo_url?: string | null
+          place_kind?: string | null
           source_url?: string | null
           tips?: string | null
           verified_at?: string | null
@@ -4238,17 +4244,24 @@ export type Database = {
       city_guides: {
         Row: {
           city: string
+          country: string
           created_at: string
           department: string
           generated_at: string
           id: string
           ideal_for: string
           intro: string
+          latitude: number | null
           leash_rule: string | null
           leash_rule_source: string | null
+          longitude: number | null
           osm_enrich_attempted_at: string | null
           osm_enrich_last_result: string | null
+          places_source_attempted_at: string | null
+          places_source_result: string | null
+          places_sourced_at: string | null
           postal_code: string
+          publish_when_sourced: boolean
           published: boolean
           seo_dirty_at: string | null
           slug: string
@@ -4256,17 +4269,24 @@ export type Database = {
         }
         Insert: {
           city: string
+          country?: string
           created_at?: string
           department?: string
           generated_at?: string
           id?: string
           ideal_for?: string
           intro?: string
+          latitude?: number | null
           leash_rule?: string | null
           leash_rule_source?: string | null
+          longitude?: number | null
           osm_enrich_attempted_at?: string | null
           osm_enrich_last_result?: string | null
+          places_source_attempted_at?: string | null
+          places_source_result?: string | null
+          places_sourced_at?: string | null
           postal_code?: string
+          publish_when_sourced?: boolean
           published?: boolean
           seo_dirty_at?: string | null
           slug: string
@@ -4274,17 +4294,24 @@ export type Database = {
         }
         Update: {
           city?: string
+          country?: string
           created_at?: string
           department?: string
           generated_at?: string
           id?: string
           ideal_for?: string
           intro?: string
+          latitude?: number | null
           leash_rule?: string | null
           leash_rule_source?: string | null
+          longitude?: number | null
           osm_enrich_attempted_at?: string | null
           osm_enrich_last_result?: string | null
+          places_source_attempted_at?: string | null
+          places_source_result?: string | null
+          places_sourced_at?: string | null
           postal_code?: string
+          publish_when_sourced?: boolean
           published?: boolean
           seo_dirty_at?: string | null
           slug?: string
@@ -5858,11 +5885,14 @@ export type Database = {
           admin_notes: string | null
           city: string
           city_guide_id: string | null
+          country: string | null
           created_at: string
           department: string | null
           first_requested_at: string
           id: string
           last_seen_at: string
+          latitude: number | null
+          longitude: number | null
           postal_code: string | null
           slug: string
           status: string
@@ -5873,11 +5903,14 @@ export type Database = {
           admin_notes?: string | null
           city: string
           city_guide_id?: string | null
+          country?: string | null
           created_at?: string
           department?: string | null
           first_requested_at?: string
           id?: string
           last_seen_at?: string
+          latitude?: number | null
+          longitude?: number | null
           postal_code?: string | null
           slug: string
           status?: string
@@ -5888,11 +5921,14 @@ export type Database = {
           admin_notes?: string | null
           city?: string
           city_guide_id?: string | null
+          country?: string | null
           created_at?: string
           department?: string | null
           first_requested_at?: string
           id?: string
           last_seen_at?: string
+          latitude?: number | null
+          longitude?: number | null
           postal_code?: string | null
           slug?: string
           status?: string
@@ -13396,6 +13432,14 @@ export type Database = {
           email: string
           id: string
         }[]
+      }
+      guide_distance_km: {
+        Args: { lat1: number; lat2: number; lon1: number; lon2: number }
+        Returns: number
+      }
+      guide_homonym_slug: {
+        Args: { p_country: string; p_postal: string; p_slug: string }
+        Returns: string
       }
       has_accepted_application: {
         Args: { p_sit_id: string; p_user_id: string }
