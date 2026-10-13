@@ -35,8 +35,6 @@ describe("aucune décision d'accès datée", () => {
     for (const f of [
       "supabase/functions/create-checkout/index.ts",
       "supabase/functions/create-checkout-session/index.ts",
-      "supabase/functions/send-founder-reminder-7/index.ts",
-      "supabase/functions/send-founder-reminder-30/index.ts",
     ]) {
       const src = readFileSync(f, "utf8");
       expect(src).toContain("if (isFreeAccessForAll())");

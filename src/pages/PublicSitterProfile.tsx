@@ -992,13 +992,16 @@ export default function PublicSitterProfile() {
   useEffect(() => {
     if (activeTab !== 'entraide') return;
     if (!id) return;
+    const isSignedIn = !!auth?.user;
 
     const loadEntraideData = async () => {
       setEntraideLoading(true);
       try {
+        // Lot Z : small_missions est fermée à anon, un visiteur lit la vue
+        // publique (besoins ouverts et visibles), comme le compteur plus haut.
         const [publishedRes, helpedResult, recognitionRes] = await Promise.all([
           supabase
-            .from('small_missions')
+            .from(isSignedIn ? 'small_missions' : ('public_small_missions' as any))
             .select('id, title, category, status, created_at, exchange_offer')
             .eq('user_id', id)
             .order('created_at', { ascending: false })
@@ -1026,7 +1029,7 @@ export default function PublicSitterProfile() {
     };
 
     loadEntraideData();
-  }, [activeTab, id]);
+  }, [activeTab, id, auth?.user]);
 
   // Navigation clavier de la visionneuse : Échap ferme, les flèches circulent
   // (boucle aux extrémités) et Tab reste piégé dans la modale.
