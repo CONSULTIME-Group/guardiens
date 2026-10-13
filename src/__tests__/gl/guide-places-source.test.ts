@@ -54,7 +54,9 @@ function fakeFetch(routes: {
   const fn = async (url: string, init?: RequestInit) => {
     calls.push(url);
     if (url.includes("overpass")) {
-      const q = decodeURIComponent(String(init?.body ?? "").replace(/^data=/, ""));
+      const q = init?.body
+        ? decodeURIComponent(String(init.body).replace(/^data=/, ""))
+        : new URL(url).searchParams.get("data") ?? "";
       const els = routes.overpass?.(q);
       if (els === null) return new Response("busy", { status: 429 });
       return new Response(JSON.stringify({ elements: els ?? [] }), { status: 200 });
@@ -463,5 +465,23 @@ describe("GL, Overpass depuis la base", () => {
     expect(asked.length).toBeGreaterThan(0);
     expect(fetched.some((u) => u.includes("overpass") || u.includes("mail.ru"))).toBe(false);
     expect(res.rows.map((r) => r.name)).toContain("Véto du Granit");
+  });
+});
+
+describe("GL, diagnostic Overpass", () => {
+  it("chaque essai est noté (miroir, durée, issue), requête en GET", async () => {
+    const { runOverpass } = await import("../../../supabase/functions/_shared/guide-places/source");
+    const attempts: any[] = [];
+    const methods: string[] = [];
+    const fn = async (url: string, init?: RequestInit) => {
+      methods.push(String(init?.method));
+      if (url.includes("overpass-api.de")) return new Response("busy", { status: 429 });
+      return new Response(JSON.stringify({ elements: [] }));
+    };
+    const els = await runOverpass("[out:json][timeout:25];x;", fn, 1000, Date.now() + 60000, (a) => attempts.push(a));
+    expect(els).toEqual([]);
+    expect(methods.every((m) => m === "GET")).toBe(true);
+    expect(attempts.map((a) => a.outcome)).toEqual(["http_429", "ok"]);
+    expect(attempts[0].mirror).toBe("overpass-api.de");
   });
 });
