@@ -460,24 +460,36 @@ export async function resolveGuideCenter(
   const city = input.city.trim();
 
   if (usesBan(country, input.postalCode)) {
-    try {
+    const pc = (input.postalCode ?? "").trim();
+    const dept = /^\d{5}$/.test(pc) ? (/^9[78]/.test(pc) ? pc.slice(0, 3) : pc.slice(0, 2)) : null;
+    // La BAN rend toujours un résultat approchant : seule une commune au nom
+    // exact et au score franc compte (sinon « Essaouira » deviendrait une
+    // commune française).
+    const banHits = async (withPostcode: boolean) => {
       const params = new URLSearchParams({ q: city, type: "municipality", limit: "5" });
-      const pc = (input.postalCode ?? "").trim();
-      if (/^\d{5}$/.test(pc)) params.set("postcode", pc);
+      if (withPostcode) params.set("postcode", pc);
       const r = await fetchFn(`https://api-adresse.data.gouv.fr/search/?${params}`, { headers: UA });
-      if (r.ok) {
-        const data = await r.json();
-        // La BAN rend toujours un résultat approchant : seule une commune au nom
-        // exact et au score franc compte (sinon « Essaouira » deviendrait une
-        // commune française).
-        const hits: { lat: number; lon: number; context: string }[] = (data?.features ?? [])
-          .filter((f: any) => Number(f?.properties?.score ?? 0) >= 0.6 && normName(String(f?.properties?.name ?? "")) === normName(city))
-          .map((f: any) => ({
-            lat: Number(f?.geometry?.coordinates?.[1]),
-            lon: Number(f?.geometry?.coordinates?.[0]),
-            context: String(f?.properties?.context ?? ""),
-          }))
-          .filter((h: { lat: number; lon: number }) => Number.isFinite(h.lat) && Number.isFinite(h.lon));
+      if (!r.ok) return null;
+      const data = await r.json();
+      return (data?.features ?? [])
+        .filter((f: any) => Number(f?.properties?.score ?? 0) >= 0.6 && normName(String(f?.properties?.name ?? "")) === normName(city))
+        // Sans le code postal exact (« 69000 » pour Lyon), même département exigé.
+        .filter((f: any) => withPostcode || !dept || String(f?.properties?.citycode ?? f?.properties?.postcode ?? "").startsWith(dept))
+        .map((f: any) => ({
+          lat: Number(f?.geometry?.coordinates?.[1]),
+          lon: Number(f?.geometry?.coordinates?.[0]),
+          context: String(f?.properties?.context ?? ""),
+        }))
+        .filter((h: { lat: number; lon: number }) => Number.isFinite(h.lat) && Number.isFinite(h.lon)) as {
+          lat: number;
+          lon: number;
+          context: string;
+        }[];
+    };
+    try {
+      let hits = dept ? await banHits(true) : null;
+      if (!hits || hits.length === 0) hits = await banHits(false);
+      if (hits) {
         const best = pickNearest(hits, input.hint);
         // Communes trouvées, toutes loin du lieu indiqué : la demande est incohérente.
         if (!best && hits.length > 0) return null;

@@ -392,3 +392,22 @@ describe("GL, fiabilité (13/10/2026)", () => {
     expect(res.incomplete).toBe(false);
   });
 });
+
+describe("GL, code postal générique", () => {
+  it("Lyon « 69000 » : sans résultat au code postal, la commune du même département est retenue", async () => {
+    const { fn, calls } = fakeFetch({
+      ban: (url) =>
+        url.includes("postcode=")
+          ? { features: [] }
+          : {
+              features: [
+                { geometry: { coordinates: [4.83, 45.76] }, properties: { name: "Lyon", score: 0.97, citycode: "69123", context: "69, Rhône" } },
+                { geometry: { coordinates: [-0.5, 47.4] }, properties: { name: "Lyon", score: 0.9, citycode: "49999", context: "49, Maine-et-Loire" } },
+              ],
+            },
+    });
+    const c = await resolveGuideCenter({ city: "Lyon", postalCode: "69000", country: "FR", hint: null }, fn);
+    expect(c).toEqual({ lat: 45.76, lon: 4.83, country: "FR", region: "Rhône" });
+    expect(calls).toHaveLength(2);
+  });
+});
