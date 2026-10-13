@@ -7,6 +7,9 @@ import {
   ALL_CATEGORIES,
   collectPlaces,
   dbOverpass,
+  runOverpass,
+  type OverpassAttempt,
+  type OverpassTransport,
   countryLabel,
   haversineM,
   matchGooglePlaceId,
@@ -104,14 +107,24 @@ export async function sourceOneGuide(
   if (tooFar.length) report.sources_existantes_hors_rayon = tooFar;
 
   // 3. Collecte
+  // Overpass en direct d'abord (GET), par la base ensuite ; chaque essai est
+  // compté pour le diagnostic (report.overpass).
+  const attempts: OverpassAttempt[] = [];
+  const onAttempt = (a: OverpassAttempt) => attempts.push(a);
+  const viaBase = dbOverpass((fn, args) => supabase.rpc(fn, args), sleep, 2, onAttempt);
+  const transport: OverpassTransport = async (q, d) =>
+    (await runOverpass(q, fetch, 15000, d, onAttempt)) ?? (await viaBase(q, d));
   const collected = await collectPlaces(
     { city: guide.city, postalCode: guide.postal_code, center },
     known,
     fetch,
     sleep,
     deadline,
-    dbOverpass((fn, args) => supabase.rpc(fn, args), sleep),
+    transport,
   );
+  const summary: Record<string, number> = {};
+  for (const a of attempts) summary[`${a.via}:${a.mirror}:${a.outcome}`] = (summary[`${a.via}:${a.mirror}:${a.outcome}`] ?? 0) + 1;
+  report.overpass = { essais: attempts.length, par_issue: summary, premiers: attempts.slice(0, 8) };
   report.rayons = collected.radiiUsed;
   report.rejetes_distance = collected.rejectedDistance;
   report.rejetes_adresse = collected.rejectedAddress;

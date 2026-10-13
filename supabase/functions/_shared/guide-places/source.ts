@@ -584,30 +584,55 @@ export const OVERPASS_MIRRORS = [
 ];
 
 /** Exécute une requête Overpass sur les miroirs successifs ; null si tous échouent. */
+/** Issue d'un essai sur un miroir, pour le diagnostic (aucune donnée de lieu). */
+export interface OverpassAttempt {
+  via: "direct" | "base";
+  mirror: string;
+  ms: number;
+  outcome: string;
+}
+
+/**
+ * Exécute une requête Overpass sur les miroirs successifs ; null si tous
+ * échouent. Requête en GET, la forme qui répond depuis la base le 13/10/2026.
+ */
 export async function runOverpass(
   query: string,
   fetchFn: FetchLike,
   timeoutMs = 20000,
   deadline = Number.POSITIVE_INFINITY,
+  onAttempt?: (a: OverpassAttempt) => void,
 ): Promise<OsmElement[] | null> {
   for (const mirror of OVERPASS_MIRRORS) {
     if (Date.now() + 5000 > deadline) return null;
+    const t0 = Date.now();
+    const note = (outcome: string) => onAttempt?.({ via: "direct", mirror: new URL(mirror).hostname, ms: Date.now() - t0, outcome });
     try {
-      const r = await fetchFn(mirror, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded", ...UA },
-        body: `data=${encodeURIComponent(query)}`,
+      const r = await fetchFn(`${mirror}?data=${encodeURIComponent(query)}`, {
+        method: "GET",
+        headers: { ...UA },
         signal: typeof AbortSignal !== "undefined" && "timeout" in AbortSignal ? AbortSignal.timeout(timeoutMs) : undefined,
       });
-      if (!r.ok) continue;
+      if (!r.ok) {
+        note(`http_${r.status}`);
+        continue;
+      }
       const text = await r.text();
-      if (!text.trim().startsWith("{")) continue;
+      if (!text.trim().startsWith("{")) {
+        note("non_json");
+        continue;
+      }
       const data = JSON.parse(text);
       // Délai ou mémoire dépassés : Overpass répond 200 avec une remarque et
       // une liste tronquée. Ce n'est pas un résultat.
-      if (/runtime (error|remark)|timed out|out of memory/i.test(String(data?.remark ?? ""))) continue;
+      if (/runtime (error|remark)|timed out|out of memory/i.test(String(data?.remark ?? ""))) {
+        note("remark_timeout");
+        continue;
+      }
+      note("ok");
       return Array.isArray(data?.elements) ? data.elements : [];
-    } catch {
+    } catch (e) {
+      note(`exception_${String((e as Error)?.name ?? "erreur")}`);
       continue;
     }
   }
@@ -628,12 +653,22 @@ export type RpcLike = (fn: string, args: Record<string, unknown>) => PromiseLike
  * guide_osm_enqueue envoie la requête (transaction validée, pg_net l'expédie),
  * guide_osm_result lit la réponse.
  */
-export function dbOverpass(rpc: RpcLike, sleep: (ms: number) => Promise<void>, mirrors = 3): OverpassTransport {
+export function dbOverpass(
+  rpc: RpcLike,
+  sleep: (ms: number) => Promise<void>,
+  mirrors = 3,
+  onAttempt?: (a: OverpassAttempt) => void,
+): OverpassTransport {
   return async (query, deadline) => {
     for (let mirror = 0; mirror < mirrors; mirror++) {
       if (Date.now() + 6000 > deadline) return null;
+      const t0 = Date.now();
+      const note = (outcome: string) => onAttempt?.({ via: "base", mirror: String(mirror), ms: Date.now() - t0, outcome });
       const { data: id, error } = await rpc("guide_osm_enqueue", { p_query: query, p_mirror: mirror });
-      if (error || id == null) return null;
+      if (error || id == null) {
+        note(`enqueue_${error?.code ?? error?.message ?? "vide"}`);
+        return null;
+      }
       // Attente de la réponse : 30 s au plus (délai pg_net 28 s).
       const until = Math.min(Date.now() + 30000, deadline - 2000);
       let row: any = null;
@@ -643,14 +678,29 @@ export function dbOverpass(rpc: RpcLike, sleep: (ms: number) => Promise<void>, m
         row = Array.isArray(data) ? data[0] ?? null : data ?? null;
         if (row) break;
       }
-      if (!row || row.timed_out || Number(row.status_code) !== 200) continue;
+      if (!row) {
+        note("attente_depassee");
+        continue;
+      }
+      if (row.timed_out || Number(row.status_code) !== 200) {
+        note(row.timed_out ? "pg_net_timeout" : `http_${row.status_code}`);
+        continue;
+      }
       const text = String(row.content ?? "");
-      if (!text.trim().startsWith("{")) continue;
+      if (!text.trim().startsWith("{")) {
+        note("non_json");
+        continue;
+      }
       try {
         const parsed = JSON.parse(text);
-        if (/runtime (error|remark)|timed out|out of memory/i.test(String(parsed?.remark ?? ""))) continue;
+        if (/runtime (error|remark)|timed out|out of memory/i.test(String(parsed?.remark ?? ""))) {
+          note("remark_timeout");
+          continue;
+        }
+        note("ok");
         return Array.isArray(parsed?.elements) ? parsed.elements : [];
       } catch {
+        note("json_invalide");
         continue;
       }
     }
