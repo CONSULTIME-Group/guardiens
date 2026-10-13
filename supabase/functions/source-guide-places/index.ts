@@ -40,6 +40,8 @@ const json = (body: unknown, status = 200) =>
 const ACTIVE_MAX = 3;
 /** Un guide terminé en échec repasse une heure plus tard. */
 const RETRY_AFTER_MS = 3600 * 1000;
+/** Rapport d'un essai à blanc terminé gardé tel quel pendant ce délai. */
+const DRY_RUN_REPORT_MS = 30 * 60 * 1000;
 /** Verrou d'un guide pendant son traitement (deux passages ne se chevauchent pas). */
 const LOCK_MS = 3 * 60 * 1000;
 
@@ -79,7 +81,17 @@ Deno.serve(async (req) => {
     let targets: any[] = [];
     if (slugs) {
       const { data } = await supabase.from("city_guides").select(COLS).in("slug", slugs);
-      targets = (data ?? []).filter((g: any) => force || dryRun || !g.places_sourced_at || activeIds.includes(g.id));
+      // Essai à blanc tout juste terminé : son rapport reste lisible, l'appel
+      // suivant ne le relance pas (sauf force). Essai de Marrakech du 14/10/2026,
+      // le rapport final était écrasé par un nouvel essai au passage suivant.
+      const freshDryRun = (g: any) =>
+        g.places_source_report?.result === "dry_run" &&
+        Date.now() - Date.parse(g.places_source_report?.at ?? "") < DRY_RUN_REPORT_MS;
+      targets = (data ?? []).filter(
+        (g: any) =>
+          activeIds.includes(g.id) ||
+          (dryRun ? force || !freshDryRun(g) : force || !g.places_sourced_at),
+      );
       // Reprise forcée : le guide garde son affichage sourcé pendant le passage,
       // le compteur de passages repart de zéro.
       if (force && !dryRun) {
