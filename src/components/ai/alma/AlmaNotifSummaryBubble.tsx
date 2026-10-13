@@ -15,6 +15,7 @@ import { trackEvent } from "@/lib/analytics";
 import { useAlmaFrequency } from "@/hooks/useAlmaFrequency";
 import { useAuth } from "@/contexts/AuthContext";
 import type { NotificationData } from "@/components/notifications/NotificationItem";
+import { isUrgentNotification, notificationCategory } from "@/lib/notificationKinds";
 
 interface Props {
   notifications: NotificationData[];
@@ -22,35 +23,16 @@ interface Props {
   urgentFilterActive?: boolean;
 }
 
-const APPLICATION_TYPES = new Set([
-  "new_application",
-  "application_accepted",
-  "application_rejected",
-  "application_cancelled",
-  "mission_proposal",
-  "mission_accepted",
-  "mission_declined",
-]);
-
-const MESSAGE_TYPES = new Set(["new_message"]);
-
-const SOCIAL_TYPES = new Set([
-  "review_published",
-  "sitter_available",
-  "identity_verified",
-  "experience_verified",
-]);
-
-const URGENT_TYPES = new Set(["mission_proposal", "mission_accepted", "new_message"]);
-
 function categorize(notifs: NotificationData[]) {
   let applications = 0;
   let messages = 0;
   let social = 0;
+  // Lot Z : familles tirées de src/lib/notificationKinds.ts (types réels).
   for (const n of notifs) {
-    if (APPLICATION_TYPES.has(n.type)) applications++;
-    else if (MESSAGE_TYPES.has(n.type)) messages++;
-    else if (SOCIAL_TYPES.has(n.type)) social++;
+    const category = notificationCategory(n.type);
+    if (category === "applications") applications++;
+    else if (category === "messages") messages++;
+    else if (category === "social") social++;
   }
   return { applications, messages, social };
 }
@@ -74,7 +56,7 @@ export function AlmaNotifSummaryBubble({
     [last20],
   );
   const urgentCount = useMemo(
-    () => unread.filter((n) => URGENT_TYPES.has(n.type)).length,
+    () => unread.filter((n) => isUrgentNotification(n.type)).length,
     [unread],
   );
 
@@ -111,12 +93,16 @@ export function AlmaNotifSummaryBubble({
   const intro = `Vous avez ${unread.length} notification${unread.length > 1 ? "s" : ""} non lue${unread.length > 1 ? "s" : ""}.`;
 
   const details = [
-    applications > 0 ? `${applications} candidature${applications > 1 ? "s" : ""} à trier` : null,
+    applications > 0
+      ? (applications > 1 ? `${applications} candidatures et propositions d'aide` : "1 candidature ou proposition d'aide")
+      : null,
     messages > 0 ? `${messages} message${messages > 1 ? "s" : ""}` : null,
-    social > 0 ? `${social} social` : null,
+    social > 0 ? `${social} bonne${social > 1 ? "s" : ""} nouvelle${social > 1 ? "s" : ""}` : null,
   ].filter(Boolean).join(", ");
 
-  const question = `On regarde les ${urgentCount || 3} urgente${(urgentCount || 3) > 1 ? "s" : ""} d'abord ?`;
+  const question = urgentCount > 1
+    ? `On regarde les ${urgentCount} urgentes d'abord ?`
+    : urgentCount === 1 ? "On regarde l'urgente d'abord ?" : "";
 
   return (
     <div className="mb-4">

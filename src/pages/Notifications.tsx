@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { Bell, CheckCheck } from "lucide-react";
 import Head from "@/components/seo/Head";
 import { Button } from "@/components/ui/button";
 import { isToday, isYesterday, isThisWeek } from "date-fns";
 import { safeUUID } from "@/lib/uuid";
+import { isUrgentNotification } from "@/lib/notificationKinds";
+import { markAllNotificationsRead, markNotificationRead } from "@/lib/notificationsRead";
 
 import type { NotificationData } from "@/components/notifications/NotificationItem";
 import { NotificationSkeleton } from "@/components/notifications/NotificationSkeleton";
@@ -50,13 +51,11 @@ function groupByDay(notifications: NotificationData[]): { label: GroupKey; items
 
 const Notifications = () => {
   const { user } = useAuth();
-  const { hasAccess } = useSubscriptionAccess();
   const userId = user?.id;
 
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
   const [loading, setLoading] = useState(true);
   const [urgentFilter, setUrgentFilter] = useState(false);
-  const URGENT_TYPES = new Set(["mission_proposal", "mission_accepted", "new_message"]);
 
   const load = useCallback(async () => {
     if (!userId) { setNotifications([]); setLoading(false); return; }
@@ -89,18 +88,19 @@ const Notifications = () => {
     return () => { supabase.removeChannel(channel); };
   }, [userId]);
 
+  // Lot Z : un clic sur une notification la marque comme lue (NotificationItem).
   const markRead = async (id: string) => {
-    const now = new Date().toISOString();
-    await supabase.from("notifications").update({ read_at: now }).eq("id", id);
-    setNotifications((prev) => prev.map((n) => n.id === id ? { ...n, read_at: now } : n));
+    const { ok, readAt } = await markNotificationRead(id);
+    if (!ok) return;
+    setNotifications((prev) => prev.map((n) => n.id === id && !n.read_at ? { ...n, read_at: readAt } : n));
   };
 
+  // Lot Z : toutes les non lues du membre en base, pas seulement les 50 chargées.
   const markAllRead = async () => {
-    const ids = notifications.filter((n) => !n.read_at).map((n) => n.id);
-    if (!ids.length) return;
-    const now = new Date().toISOString();
-    await supabase.from("notifications").update({ read_at: now }).in("id", ids);
-    setNotifications((prev) => prev.map((n) => n.read_at ? n : { ...n, read_at: now }));
+    if (!userId) return;
+    const { ok, readAt } = await markAllNotificationsRead(userId);
+    if (!ok) return;
+    setNotifications((prev) => prev.map((n) => n.read_at ? n : { ...n, read_at: readAt }));
   };
 
   const deleteNotification = async (id: string) => {
@@ -110,7 +110,7 @@ const Notifications = () => {
 
   const unreadCount = notifications.filter((n) => !n.read_at).length;
   const displayed = urgentFilter
-    ? notifications.filter((n) => URGENT_TYPES.has(n.type))
+    ? notifications.filter((n) => isUrgentNotification(n.type))
     : notifications;
   const groups = groupByDay(displayed);
 
@@ -181,7 +181,6 @@ const Notifications = () => {
               key={label}
               label={label}
               items={items}
-              hasAccess={hasAccess}
               onMarkRead={markRead}
               onDelete={deleteNotification}
             />
