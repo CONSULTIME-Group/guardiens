@@ -42,6 +42,7 @@ import MissionPhotoGallery from "@/components/missions/MissionPhotoGallery";
 import MissionPublishedBanner from "@/components/missions/MissionPublishedBanner";
 import MatchedHelpersInviteBlock from "@/components/missions/MatchedHelpersInviteBlock";
 import { AUTHOR_CLOSE_NO_SELECT_REASON, closeMissionWithoutSelection } from "@/lib/missionCloseNoSelect";
+import { showMissionInviteBlock } from "@/lib/missionInviteBlock";
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -1198,8 +1199,9 @@ const SmallMissionDetail = () => {
           </div>
         )}
 
-        {/* Bloc d'invitation directe, uniquement à la publication, pour l'auteur */}
-        {showPublishedBanner && isAuthor && mission.status === "open" && (
+        {/* Bloc d'invitation directe pour l'auteur, tant que le besoin est ouvert
+            et sans proposition vivante (lot Z2, C-18). */}
+        {showMissionInviteBlock({ isAuthor, status: mission.status, responses }) && (
           <MatchedHelpersInviteBlock
             missionId={mission.id}
             missionCategory={mission.category}
