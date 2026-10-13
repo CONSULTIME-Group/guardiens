@@ -16,6 +16,7 @@ import { useAcceptApplication } from "@/hooks/useAcceptApplication";
 import { OPEN_APPLICATION_STATUSES } from "@/lib/declineOpenApplications";
 import { isOpenApplicationStatus } from "@/lib/applicationSitState";
 import { sendTransactionalEmail } from "@/lib/sendTransactionalEmail";
+import { chooseMissionResponse, declineMissionResponse } from "@/lib/missionResponseDecision";
 import { toast } from "sonner";
 import { format, isPast } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -114,7 +115,7 @@ const ConversationHeader = ({
     const load = async () => {
       const [{ data: mission }, { data: response }] = await Promise.all([
         supabase.from("small_missions")
-          .select("id, title, exchange_offer, date_needed, user_id, status, close_reason")
+          .select("id, title, exchange_offer, date_needed, user_id, status, close_reason, category")
           .eq("id", missionId)
           .single(),
         supabase.from("small_mission_responses")
@@ -142,34 +143,54 @@ const ConversationHeader = ({
     return () => { supabase.removeChannel(channel); };
   }, [conv.id, (conv as any).small_mission_id]);
 
+  // Lot Z : même chemin que le bandeau « Choisir » et la page du besoin
+  // (accept_mission_response puis notify-mission-event). L'ancien code
+  // écrivait la notification de l'autre personne depuis le navigateur,
+  // refusée par la RLS : la personne n'était jamais prévenue.
+  const [deciding, setDeciding] = useState(false);
   const handleAcceptExchange = async () => {
-    if (!responseData?.id) return;
-    await supabase.from("small_mission_responses")
-      .update({ status: "accepted" as any })
-      .eq("id", responseData.id);
-    await supabase.from("notifications").insert({
-      user_id: responseData.responder_id,
-      type: "mission_accepted",
-      title: "Échange accepté !",
-      body: `${capitalize(conv.other_user?.first_name) || "Un membre"} a accepté votre proposition pour "${missionData?.title}"`,
-      link: `/messages?c=${conv.id}`,
+    if (!responseData?.id || !missionData?.id || !userId || deciding) return;
+    setDeciding(true);
+    const result = await chooseMissionResponse({
+      responseId: responseData.id,
+      missionId: missionData.id,
+      actorId: userId,
+      responderId: responseData.responder_id,
+      declineOthers: missionData.category !== "projet",
     });
+    setDeciding(false);
+    if (result.ok === false) {
+      toast.error(result.reason === "not_pending"
+        ? "Cette proposition a déjà reçu une réponse."
+        : "Réessayez dans un instant pour accepter l'échange.");
+      onActionDone();
+      return;
+    }
     setResponseData((prev: any) => ({ ...prev, status: "accepted" }));
+    setMissionData((prev: any) => (prev?.status === "open" ? { ...prev, status: "in_progress" } : prev));
+    toast.success(`C'est noté, ${capitalize(conv.other_user?.first_name) || "cette personne"} vous aide.`);
+    onActionDone();
   };
 
   const handleDeclineExchange = async () => {
-    if (!responseData?.id) return;
-    await supabase.from("small_mission_responses")
-      .update({ status: "declined" as any })
-      .eq("id", responseData.id);
-    await supabase.from("notifications").insert({
-      user_id: responseData.responder_id,
-      type: "mission_declined",
-      title: "Échange décliné",
-      body: `${capitalize(conv.other_user?.first_name) || "Un membre"} n'est pas disponible pour "${missionData?.title}"`,
-      link: `/messages?c=${conv.id}`,
+    if (!responseData?.id || !missionData?.id || !userId || deciding) return;
+    setDeciding(true);
+    const result = await declineMissionResponse({
+      responseId: responseData.id,
+      missionId: missionData.id,
+      actorId: userId,
+      responderId: responseData.responder_id,
     });
+    setDeciding(false);
+    if (result.ok === false) {
+      toast.error(result.reason === "not_pending"
+        ? "Cette proposition a déjà reçu une réponse."
+        : "Réessayez dans un instant pour décliner l'échange.");
+      onActionDone();
+      return;
+    }
     setResponseData((prev: any) => ({ ...prev, status: "declined" }));
+    onActionDone();
   };
 
   // Lot E2a : la fin d'un coup de main passe par mark_mission_done (auteur ou
@@ -503,8 +524,8 @@ const ConversationHeader = ({
           </p>
           {isRecipient && (
             <div className="flex gap-2">
-              <Button size="sm" onClick={handleAcceptExchange}>Accepter l'échange</Button>
-              <Button size="sm" variant="outline" onClick={handleDeclineExchange}>Décliner</Button>
+              <Button size="sm" onClick={handleAcceptExchange} disabled={deciding}>Accepter l'échange</Button>
+              <Button size="sm" variant="outline" onClick={handleDeclineExchange} disabled={deciding}>Décliner</Button>
             </div>
           )}
           {isInitiator && (

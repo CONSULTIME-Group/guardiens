@@ -10,7 +10,8 @@
  * Enchaînement, identique à l'historique d'ApplicationsList :
  * 1. RPC atomique `accept_application` (candidature acceptée, autres
  *    candidatures ouvertes déclinées, annonce en `confirmed`) ;
- * 2. message système au gardien retenu, notification `sit_confirmed` ;
+ * 2. message système au gardien retenu (la notification `sit_confirmed` vient
+ *    du trigger notify_sit_confirmed) ;
  * 3. emails `application-accepted` (gardien) et `sit-confirmed` (propriétaire) ;
  * 4. message système et email `application-declined` pour chaque candidat
  *    décliné automatiquement ;
@@ -130,7 +131,7 @@ export function useAcceptApplication(options: Options = {}) {
         const endLong = fmt(sitFull?.end_date, "d MMMM yyyy");
         const ownerFirst = publicFirstName(proprio?.first_name ?? "");
 
-        // 2) Message système + notification (post-transaction, non bloquant).
+        // 2) Message système (post-transaction, non bloquant).
         const petsPart = petNames.length > 0 ? `garder ${petNames.join(", ")}` : "cette garde";
         const datesPart = startLong && endLong ? ` du ${startLong} au ${endLong}` : "";
         const confirmMsg = `La garde est confirmée. Vous avez été choisi(e) pour ${petsPart}${datesPart}.`;
@@ -153,32 +154,9 @@ export function useAcceptApplication(options: Options = {}) {
             .eq("id", acceptedConv.id);
         }
 
-        const notifLink = `/mes-gardes?sit=${sitId}`;
-        const { data: existingNotif } = await supabase
-          .from("notifications")
-          .select("id")
-          .eq("user_id", sitterId)
-          .eq("type", "sit_confirmed")
-          .eq("link", notifLink)
-          .maybeSingle();
-        if (!existingNotif) {
-          const { data: guideCheck } = await supabase
-            .from("house_guides")
-            .select("id")
-            .eq("user_id", user.id)
-            .eq("published", true)
-            .maybeSingle();
-          const startShort = fmt(sitFull?.start_date, "dd MMMM");
-          await supabase.from("notifications").insert({
-            user_id: sitterId,
-            type: "sit_confirmed",
-            title: "Garde confirmée",
-            body: guideCheck
-              ? `Votre garde chez ${ownerFirst || "votre hôte"} est confirmée. Le guide de la maison sera disponible dans votre espace à partir du ${startShort}.`
-              : `Votre garde chez ${ownerFirst || "votre hôte"} est confirmée. Rendez-vous dans "Mes gardes" pour les détails.`,
-            link: notifLink,
-          });
-        }
+        // Lot Z : la notification sit_confirmed du gardien vient du trigger
+        // notify_sit_confirmed. L'écriture faite ici pour autrui était refusée
+        // par la RLS et menait vers /mes-gardes, route absente.
 
         // 3) Emails, idempotence côté serveur.
         sendTransactionalEmail({

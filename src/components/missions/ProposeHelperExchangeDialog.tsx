@@ -1,4 +1,3 @@
-import { fetchMyProfile } from "@/lib/myProfile";
 import { useState } from "react";
 import { logger } from "@/lib/logger";
 import { useNavigate } from "react-router-dom";
@@ -87,21 +86,9 @@ const ProposeHelperExchangeDialog = ({
       });
       if (msgError) throw msgError;
 
-      // Resolve sender display name from profiles for safer notification body
-      let senderName = (user as any).first_name as string | undefined;
-      if (!senderName) {
-        const { data: me } = await fetchMyProfile(user.id!);
-        senderName = me?.first_name || "Un membre";
-      }
-
-      // Notify helper (non-blocking)
-      await supabase.from("notifications").insert({
-        user_id: helper.id,
-        type: "mission_proposal",
-        title: "Proposition d'échange",
-        body: `${senderName} vous propose un échange : "${needDescription.trim().slice(0, 60)}"`,
-        link: `/messages?c=${convId}`,
-      });
+      // Lot Z : le message suffit, notify_new_message prévient la personne
+      // (cloche, email, push). Une notification écrite ici pour autrui était
+      // refusée par la RLS (auth.uid() = user_id).
 
       onClose();
       switchRole("owner");
