@@ -70,6 +70,17 @@ describe("Y2, P3-06 : allergie servie sous un libellé neutre", () => {
 });
 
 describe("Y2, migration de droits", () => {
+  it("profile_reputation en droits du propriétaire ne compte que les avis publiés et validés", () => {
+    const start = SQL.indexOf("CREATE OR REPLACE VIEW public.profile_reputation AS");
+    expect(start).toBeGreaterThan(-1);
+    const view = SQL.slice(start, SQL.indexOf("ALTER VIEW public.profile_reputation SET (security_invoker = false);"));
+    const avg = view.slice(view.indexOf("avg_ratings AS"));
+    expect(avg).toMatch(/reviews\.published = true/);
+    expect(avg).toMatch(/reviews\.moderation_status = 'valide'::text/);
+    expect(view).toMatch(/AS user_id,[\s\S]*AS completed_sits,[\s\S]*AS active_badges,[\s\S]*AS note_moyenne,[\s\S]*AS statut_gardien/);
+    expect(view).toMatch(/WHERE p\.account_status = 'active'::text;/);
+  });
+
   it("chaque REVOKE vise PUBLIC, anon et authenticated", () => {
     const body = SQL.replace(/--[^\n]*/g, " ");
     const revokes = body.match(/REVOKE[^;]*;/g) ?? [];

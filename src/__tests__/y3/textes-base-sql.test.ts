@@ -1,7 +1,8 @@
 /**
  * Lot Y3 : textes stockés en base (articles, FAQ, pages ville et département).
- * Le fichier préparé ne fait que des UPDATE ciblés et gardés par l'ancien
- * texte (rejouables), et les nouveaux textes suivent la doctrine.
+ * Le fichier préparé sauvegarde d'abord les lignes visées (relecture du
+ * 13/10/2026, point C), puis ne fait que des UPDATE ciblés et gardés par
+ * l'ancien texte (rejouables), et les nouveaux textes suivent la doctrine.
  * Lecture statique du SQL, aucune base touchée.
  */
 import { describe, it, expect } from "vitest";
@@ -13,10 +14,13 @@ const sql = readFileSync(
   "utf8",
 );
 const code = sql.replace(/^\s*--[^\n]*$/gm, "");
-const statements = code
+const allStatements = code
   .split(/;\s*\n/)
   .map((s) => s.trim())
   .filter((s) => s.length > 0);
+const BACKUP = "public._backup_y3_textes_20261013";
+const backupStatements = allStatements.filter((s) => s.includes(BACKUP));
+const statements = allStatements.filter((s) => !s.includes(BACKUP));
 
 /** Nouveaux textes : second membre des replace(), et valeurs posées par SET. */
 function newTexts(): string[] {
@@ -30,8 +34,24 @@ function newTexts(): string[] {
 }
 
 describe("Y3 · SQL des textes en base", () => {
-  it("uniquement des UPDATE, chacun avec sa clause WHERE", () => {
-    expect(code).not.toMatch(/\b(DELETE|INSERT|TRUNCATE|DROP|ALTER|CREATE)\b/i);
+  it("sauvegarde rejouable et fermée, avant tout UPDATE", () => {
+    expect(backupStatements.length).toBe(3);
+    expect(backupStatements[0]).toMatch(/^CREATE TABLE IF NOT EXISTS public\._backup_y3_textes_20261013 AS\s+SELECT /);
+    expect(backupStatements[1]).toBe(`ALTER TABLE ${BACKUP} ENABLE ROW LEVEL SECURITY`);
+    expect(backupStatements[2]).toBe(`REVOKE ALL ON ${BACKUP} FROM PUBLIC, anon, authenticated`);
+    expect(allStatements.slice(0, 3)).toEqual(backupStatements);
+    const backup = backupStatements[0];
+    for (const t of ["articles", "faq_entries", "seo_department_pages", "seo_city_pages"]) {
+      expect(backup).toContain(`FROM public.${t}`);
+    }
+    // Chaque article et chaque entrée de FAQ réécrits figurent dans la sauvegarde.
+    const ids = [...code.matchAll(/WHERE id = '([0-9a-f-]{36})'/g)].map((m) => m[1]);
+    expect(ids.length).toBe(11);
+    for (const id of ids) expect(backup).toContain(`'${id}'`);
+  });
+
+  it("hors sauvegarde, uniquement des UPDATE, chacun avec sa clause WHERE", () => {
+    expect(statements.join("\n")).not.toMatch(/\b(DELETE|INSERT|TRUNCATE|DROP|ALTER|CREATE|REVOKE|GRANT)\b/i);
     expect(statements.length).toBeGreaterThan(0);
     for (const s of statements) {
       expect(s, s.slice(0, 80)).toMatch(/^UPDATE public\.(articles|faq_entries|seo_city_pages|seo_department_pages)\b/);

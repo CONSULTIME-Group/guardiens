@@ -14,7 +14,9 @@
 --
 -- Lignes visées (relecture du 13/10/2026) :
 --   articles                2 lignes (P5-02, P5-18)
---   faq_entries             8 lignes (P5-04 : 4, P2 P5-29, P5-34, P5-38, P5-41)
+--   faq_entries             9 lignes (P5-04 : 4, P2 P5-29, P5-34, P5-38, P5-41 ;
+--                           9 UPDATE ciblés, une ligne chacun, relecture du
+--                           13/10/2026)
 --   seo_department_pages  101 lignes (P5-16, P2 P5-46)
 --   seo_city_pages        107 lignes (P5-07 : 83 « gratuit pour les
 --                           propriétaires », 43 « sans frais pour les
@@ -23,6 +25,46 @@
 -- Écarté : les comparaisons de fond avec la pension dans les articles (famille
 -- comparative, 43 articles) et dans 125 pages ville relèvent d'un lot
 -- éditorial, une réécriture par motif y casserait le sens.
+--
+-- Hors périmètre de ce fichier (relecture indépendante du 13/10/2026,
+-- R-y-relecture, point B ; constats faits sur une simulation de Y3 en
+-- lecture seule), à traiter dans un lot éditorial séparé, relu à la main :
+--   seo_city_pages.content       65 pages gardent « sans engagement »
+--                                (« gratuites aujourd'hui, et ce, sans
+--                                engagement », « sans frais et sans
+--                                engagement », « se font sans engagement ») ;
+--   seo_city_pages.content       30 pages disent une gratuité datée ou
+--                                provisoire (« gratuit… aujourd'hui »,
+--                                « offre de lancement », « phase de
+--                                lancement ») ;
+--   seo_city_pages.intro_text    7 introductions avec « sans engagement » ;
+--   meta_description, h1_title,  9 pages avec « sans engagement » dans un
+--   meta_title, excerpt          champ lu par les moteurs.
+-- Ce fichier ne contient pas ces réécritures.
+--
+-- Sauvegarde (relecture, point C) : les lignes visées sont copiées dans
+-- public._backup_y3_textes_20261013 avant toute réécriture. CREATE TABLE IF
+-- NOT EXISTS … AS garde le fichier rejouable : une seconde exécution ne
+-- réécrit pas la copie. RLS activée et droits retirés à PUBLIC, anon et
+-- authenticated (les droits par défaut du schéma public ouvriraient sinon la
+-- table en lecture et en écriture à anon).
+
+
+-- ═══ 0. Sauvegarde des lignes visées ═══════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS public._backup_y3_textes_20261013 AS
+SELECT 'articles'::text AS src, id::text AS row_id, content AS old_text, NULL::text AS old_text2 FROM public.articles
+ WHERE id IN ('87ae0e1f-f8d3-4bc9-a575-cb6d345c799e','82e6449c-ec8f-4af1-93ee-37d5495cc72a')
+UNION ALL SELECT 'faq_entries', id::text, answer, question FROM public.faq_entries
+ WHERE id IN ('3322cc84-1b6b-4270-87e9-f1697694e9d3','751cf9e0-6a27-41bc-8b6d-b405e1ef8a57','d3808396-da82-45fb-b273-0fc28745e0d3','0d1e4ab0-5b28-4f16-b6de-c38c456cb514','f29103b1-a546-4d41-9f4e-526520d60285','aab6d381-624c-4be3-8897-7cb189650725','91f64d7e-79a3-492c-a9a4-c0fecb8ed589','438d3d27-388e-4669-b47a-da79340fd837','c3ab8ed2-846a-4bae-8d41-cbd9a3412441')
+UNION ALL SELECT 'seo_department_pages', id::text, intro_text, NULL FROM public.seo_department_pages
+ WHERE intro_text LIKE '%, à domicile et sans mise en pension,%' OR intro_text LIKE '%avec des gardiens recommandés par la communauté%'
+UNION ALL SELECT 'seo_city_pages', id::text, content, intro_text FROM public.seo_city_pages
+ WHERE content ~ 'gratuite?s? pour les propriétaires' OR intro_text ~ 'gratuite?s? pour les propriétaires'
+    OR content LIKE '%sans frais pour les propriétaires%' OR intro_text LIKE '%sans frais pour les propriétaires%'
+    OR content LIKE '% sans frais, sans engagement%';
+ALTER TABLE public._backup_y3_textes_20261013 ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON public._backup_y3_textes_20261013 FROM PUBLIC, anon, authenticated;
 
 
 -- ═══ 1. Articles publiés ═══════════════════════════════════════════════════

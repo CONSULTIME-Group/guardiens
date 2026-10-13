@@ -427,6 +427,73 @@ SELECT f.receiver_id AS user_id,
 ALTER VIEW public.profile_mission_badges SET (security_invoker = false);
 
 -- profile_reputation filtre déjà les comptes actifs (définition relue).
+-- Relecture indépendante du 13/10/2026 (R-y-relecture, point A) : en droits
+-- du propriétaire, la RLS de reviews ne borne plus la moyenne ; avg_ratings
+-- ne compte donc que les avis publiés et validés en modération (un avis en
+-- double aveugle ou refusé ne fait plus bouger la note publique). Reste de la
+-- définition recopié de la production (pg_get_viewdef du 13/10/2026) :
+-- mêmes colonnes, même ordre, mêmes types (user_id uuid, completed_sits
+-- bigint, active_badges bigint, note_moyenne numeric, statut_gardien text).
+CREATE OR REPLACE VIEW public.profile_reputation AS
+ WITH config AS (
+         SELECT ( SELECT reputation_config.value::integer AS value
+                   FROM reputation_config
+                  WHERE reputation_config.key = 'confirmed_min_sits'::text) AS confirmed_sits,
+            ( SELECT reputation_config.value::integer AS value
+                   FROM reputation_config
+                  WHERE reputation_config.key = 'confirmed_min_badges'::text) AS confirmed_badges,
+            ( SELECT reputation_config.value::integer AS value
+                   FROM reputation_config
+                  WHERE reputation_config.key = 'super_min_sits'::text) AS super_sits,
+            ( SELECT reputation_config.value::integer AS value
+                   FROM reputation_config
+                  WHERE reputation_config.key = 'super_min_badges'::text) AS super_badges,
+            ( SELECT reputation_config.value::numeric AS value
+                   FROM reputation_config
+                  WHERE reputation_config.key = 'super_min_rating'::text) AS super_rating,
+            ( SELECT reputation_config.value::integer AS value
+                   FROM reputation_config
+                  WHERE reputation_config.key = 'badge_expiry_months'::text) AS expiry_months
+        ), active_badges AS (
+         SELECT ba.user_id,
+            count(DISTINCT ba.badge_id) AS active_badge_count
+           FROM public_badge_attributions ba
+             CROSS JOIN config c_1
+          WHERE ba.created_at > (now() - ((c_1.expiry_months || ' months'::text)::interval))
+          GROUP BY ba.user_id
+        ), completed_sits AS (
+         SELECT a.sitter_id AS user_id,
+            count(DISTINCT s.id) AS sit_count
+           FROM sits s
+             JOIN applications a ON a.sit_id = s.id AND a.status = 'accepted'::application_status
+          WHERE s.status = 'completed'::sit_status
+          GROUP BY a.sitter_id
+        ), avg_ratings AS (
+         SELECT reviews.reviewee_id AS user_id,
+            round(avg(reviews.overall_rating), 2) AS note_moyenne
+           FROM reviews
+          WHERE (reviews.review_type IS NULL OR reviews.review_type <> 'mission'::text)
+            AND reviews.published = true
+            AND reviews.moderation_status = 'valide'::text
+          GROUP BY reviews.reviewee_id
+        )
+ SELECT p.id AS user_id,
+    COALESCE(cs.sit_count, 0::bigint) AS completed_sits,
+    COALESCE(ab.active_badge_count, 0::bigint) AS active_badges,
+    COALESCE(ar.note_moyenne, 0::numeric) AS note_moyenne,
+        CASE
+            WHEN COALESCE(pm.is_manual_super, false) = true THEN 'super_gardien'::text
+            WHEN COALESCE(cs.sit_count, 0::bigint) >= c.super_sits AND COALESCE(ab.active_badge_count, 0::bigint) >= c.super_badges AND COALESCE(ar.note_moyenne, 0::numeric) >= c.super_rating THEN 'super_gardien'::text
+            WHEN COALESCE(cs.sit_count, 0::bigint) >= c.confirmed_sits AND COALESCE(ab.active_badge_count, 0::bigint) >= c.confirmed_badges THEN 'confirme'::text
+            ELSE 'novice'::text
+        END AS statut_gardien
+   FROM profiles p
+     CROSS JOIN config c
+     LEFT JOIN completed_sits cs ON cs.user_id = p.id
+     LEFT JOIN active_badges ab ON ab.user_id = p.id
+     LEFT JOIN avg_ratings ar ON ar.user_id = p.id
+     LEFT JOIN profile_moderation pm ON pm.profile_id = p.id
+  WHERE p.account_status = 'active'::text;
 ALTER VIEW public.profile_reputation SET (security_invoker = false);
 
 REVOKE ALL ON public.helper_recognition_stats, public.profile_mission_badges, public.profile_reputation FROM PUBLIC, anon, authenticated;

@@ -100,7 +100,7 @@ export function useMyHelpExchanges() {
     const { data: profiles } = otherIds.length
       ? await (supabase as any).rpc("get_member_display", { _ids: otherIds })
       : { data: [] as Array<{ id: string; first_name: string | null }> };
-    const nameById = new Map((profiles || []).map((p) => [p.id, p.first_name || "un membre"]));
+    const nameById = new Map<string, string>(((profiles || []) as Array<{ id: string; first_name: string | null }>).map((p) => [p.id, p.first_name || "un membre"] as [string, string]));
     const feedbacks = answered.data || [];
 
     setRows((missions || []).flatMap((m) => {
