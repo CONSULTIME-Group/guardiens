@@ -827,10 +827,13 @@ const EmergencySection = ({ user }: any) => {
           .select("user_id")
           .eq("user_id", user.id)
           .maybeSingle(),
+        // Lot X3c : avis publiés reçus par le membre (table reviews). La table
+        // sitter_reviews n'existe pas, la carte restait toujours verrouillée.
         (supabase as any)
-          .from("sitter_reviews")
+          .from("reviews")
           .select("id", { count: "exact", head: true })
-          .eq("sitter_id", user.id),
+          .eq("reviewee_id", user.id)
+          .eq("published", true),
       ]);
       if (cancelled) return;
       setState({
