@@ -631,15 +631,27 @@ const SmallMissionDetail = () => {
     }
   };
 
-  // Suppression définitive par l'auteur, même modèle que les annonces de garde.
+  // Lot Y1 (P4-03) : un besoin ouvert ou en cours que l'auteur retire est
+  // clos (cancelled, close_reason author_withdrew), jamais effacé : les
+  // personnes déjà prévenues gardent un lien qui mène à une page lisible, et
+  // les propositions en attente sont refusées avec une notification
+  // (trg_close_pending_responses_on_mission_close). Un besoin déjà clos ou
+  // terminé reste supprimable ; ses notifications non lues partent avec lui
+  // (trg_purge_unread_notifications_of_deleted_mission).
   const handleDeleteMission = async () => {
     if (deleting) return;
     setDeleting(true);
     try {
-      const { error } = await supabase.from("small_missions").delete().eq("id", mission.id);
+      const stillLive = mission.status === "open" || mission.status === "in_progress";
+      const { error } = stillLive
+        ? await supabase
+            .from("small_missions")
+            .update({ status: "cancelled" as any, close_reason: "author_withdrew", closed_at: new Date().toISOString() } as any)
+            .eq("id", mission.id)
+        : await supabase.from("small_missions").delete().eq("id", mission.id);
       if (error) throw error;
       setDeleteModalOpen(false);
-      toast({ title: "Publication supprimée", description: "Elle n'est plus visible en ligne." });
+      toast({ title: "Publication retirée", description: "Votre besoin est retiré de la page Entraide." });
       navigate("/petites-missions");
     } catch (err: any) {
       logger.error("[handleDeleteMission]", { err: String(err) });
@@ -787,7 +799,7 @@ const SmallMissionDetail = () => {
   if (!mission) return (
     <>
       {!user && <PublicHeader />}
-      <PageMeta title="Mission indisponible" description="Cette mission n’est plus disponible sur Guardiens." noindex noCanonical statusCode={404} />
+      <PageMeta title="Besoin retiré" description="Ce besoin d'entraide a été retiré par son auteur." noindex noCanonical statusCode={404} />
       <div className="p-6 md:p-10 max-w-3xl mx-auto min-h-[40vh]">
         <h1 className="font-heading text-2xl font-bold mb-2">{tr("mission_detail.not_found_title")}</h1>
         <p className="text-muted-foreground mb-4">{tr("mission_detail.not_found_body")}</p>
@@ -906,7 +918,7 @@ const SmallMissionDetail = () => {
             onClick={() => setDeleteModalOpen(true)}
             className="text-xs text-muted-foreground hover:text-destructive w-full text-center transition-colors"
           >
-            Supprimer cette publication
+            Retirer cette publication
           </button>
         </div>
       );
@@ -1829,19 +1841,19 @@ const SmallMissionDetail = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Suppression définitive par l'auteur */}
+      {/* Retrait par l'auteur (lot Y1, P4-03) */}
       <Dialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Supprimer cette publication ?</DialogTitle>
+            <DialogTitle>Retirer cette publication ?</DialogTitle>
           </DialogHeader>
           <DialogDescription>
-            Cette action est irréversible. La publication et les réponses associées seront définitivement supprimées, et la page ne sera plus accessible en ligne.
+            Votre besoin sera clos et retiré de la page Entraide. Les personnes qui ont proposé leur aide seront prévenues.
           </DialogDescription>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteModalOpen(false)}>Annuler</Button>
             <Button variant="destructive" onClick={handleDeleteMission} disabled={deleting}>
-              {deleting ? "Suppression..." : "Supprimer"}
+              {deleting ? "Retrait..." : "Retirer"}
             </Button>
           </DialogFooter>
         </DialogContent>
