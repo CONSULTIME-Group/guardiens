@@ -99,7 +99,11 @@ const ActiveRolesSection = () => {
       if (error) {
         const msg = String(error.message || "");
         if (msg.includes("ACTIVE_SITS")) {
-          toast.error("Une annonce est encore en cours : clôturez-la avant de retirer votre espace propriétaire.");
+          toast.error("Une annonce est en ligne ou une garde est prévue : votre espace propriétaire reste ouvert jusqu'à sa fin.");
+          return;
+        }
+        if (msg.includes("ACTIVE_SITTING")) {
+          toast.error("Une garde est prévue : votre espace gardien reste ouvert jusqu'à sa fin.");
           return;
         }
         if (msg.includes("ACTIVE_APPLICATIONS")) {
@@ -269,8 +273,8 @@ const ActiveRolesSection = () => {
                 </>
               ) : (
                 <>
-                  Votre historique est conservé. Une annonce encore en cours se clôture
-                  d'abord.
+                  Votre historique et vos brouillons sont conservés. Une annonce en ligne ou
+                  une garde prévue garde votre espace ouvert jusqu'à sa fin.
                 </>
               )}
             </DialogDescription>

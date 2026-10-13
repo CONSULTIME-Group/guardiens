@@ -9,7 +9,8 @@
 --    changement de statut hors propriétaire (37 candidatures ouvertes).
 --    enforce_application_status_transitions continue de valider la transition.
 -- 3. C-01 : une personne qui a proposé son aide lit le besoin quel que soit son
---    statut (en cours, terminé, annulé). La lecture était limitée aux besoins
+--    statut (en cours, terminé, annulé), hors masquage par l'équipe ; une réponse
+--    ne se crée que sur un besoin ouvert et visible. La lecture était limitée aux besoins
 --    ouverts et à l'auteur : l'aidant retenu voyait « Mission indisponible » et
 --    perdait « Marquer comme terminé » et l'avis. Fonction SECURITY DEFINER pour
 --    éviter la boucle avec la politique de small_mission_responses.
@@ -32,17 +33,24 @@ BEGIN
   IF _uid IS NULL OR p_role IS NULL THEN
     RETURN false;
   END IF;
-  SELECT raw_user_meta_data ->> 'role' INTO _meta_role FROM auth.users WHERE id = _uid;
+  -- Lot X1 : date de création lue dans auth.users, que le membre n'écrit pas
+  -- (profiles.created_at reste modifiable par son titulaire).
+  SELECT u.raw_user_meta_data ->> 'role', u.created_at
+    INTO _meta_role, _created
+    FROM auth.users u WHERE u.id = _uid;
   IF _meta_role IN ('owner','sitter','both') THEN
     RETURN false;
   END IF;
-  SELECT created_at INTO _created FROM public.profiles WHERE id = _uid;
   IF _created IS NULL OR _created < now() - interval '30 minutes' THEN
     RETURN false;
   END IF;
-  -- Lot X1 : même drapeau que change_user_role, limité à cette transaction.
+  IF NOT EXISTS (SELECT 1 FROM public.profiles WHERE id = _uid) THEN
+    RETURN false;
+  END IF;
+  -- Lot X1 : même drapeau que change_user_role, éteint juste après l'écriture.
   PERFORM set_config('app.allow_internal_profile_update', 'on', true);
   UPDATE public.profiles SET role = p_role WHERE id = _uid;
+  PERFORM set_config('app.allow_internal_profile_update', 'off', true);
   IF p_role IN ('sitter','both') THEN
     INSERT INTO public.sitter_profiles (user_id) VALUES (_uid) ON CONFLICT (user_id) DO NOTHING;
   END IF;
@@ -93,30 +101,75 @@ END;
 $function$;
 
 -- 3. C-01 ---------------------------------------------------------------
-CREATE OR REPLACE FUNCTION public.is_mission_responder(p_mission_id uuid, p_uid uuid)
+-- Une réponse ne se crée que sur un besoin ouvert et visible : sans ce verrou,
+-- insérer une réponse aurait ouvert la lecture de n'importe quel besoin, même
+-- masqué par l'équipe. 0 réponse créée après clôture en base au 13/10/2026.
+CREATE OR REPLACE FUNCTION public.enforce_mission_response_open()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+DECLARE
+  v_status small_mission_status;
+  v_owner uuid;
+  v_hidden boolean;
+BEGIN
+  IF current_setting('role', true) = 'service_role'
+     OR public.has_role(auth.uid(), 'admin'::app_role) THEN
+    RETURN NEW;
+  END IF;
+  SELECT m.status, m.user_id, (m.hidden_by IS NOT NULL OR m.moderation_hidden_at IS NOT NULL)
+    INTO v_status, v_owner, v_hidden
+    FROM public.small_missions m WHERE m.id = NEW.mission_id;
+  IF v_owner IS NULL THEN
+    RAISE EXCEPTION 'mission_missing' USING ERRCODE = 'P0001', HINT = 'mission_missing';
+  END IF;
+  IF v_owner = NEW.responder_id THEN
+    RAISE EXCEPTION 'own_mission' USING ERRCODE = 'P0001', HINT = 'own_mission';
+  END IF;
+  IF v_status <> 'open'::small_mission_status OR v_hidden THEN
+    RAISE EXCEPTION 'mission_closed' USING ERRCODE = 'P0001', HINT = 'mission_closed';
+  END IF;
+  RETURN NEW;
+END;
+$function$;
+
+DROP TRIGGER IF EXISTS trg_enforce_mission_response_open ON public.small_mission_responses;
+CREATE TRIGGER trg_enforce_mission_response_open
+  BEFORE INSERT ON public.small_mission_responses
+  FOR EACH ROW EXECUTE FUNCTION public.enforce_mission_response_open();
+
+-- Lecture par la personne qui a répondu, sans paramètre d'identité (aucun
+-- moyen de savoir si quelqu'un d'autre a répondu à un besoin).
+CREATE OR REPLACE FUNCTION public.is_mission_responder(p_mission_id uuid)
  RETURNS boolean
  LANGUAGE sql
  STABLE
  SECURITY DEFINER
  SET search_path TO 'public'
 AS $function$
-  SELECT p_uid IS NOT NULL AND EXISTS (
+  SELECT auth.uid() IS NOT NULL AND EXISTS (
     SELECT 1 FROM public.small_mission_responses r
     WHERE r.mission_id = p_mission_id
-      AND r.responder_id = p_uid
+      AND r.responder_id = auth.uid()
       AND r.status <> 'withdrawn'::small_mission_response_status
   );
 $function$;
 
-REVOKE ALL ON FUNCTION public.is_mission_responder(uuid, uuid) FROM PUBLIC, anon;
-GRANT EXECUTE ON FUNCTION public.is_mission_responder(uuid, uuid) TO authenticated;
+REVOKE ALL ON FUNCTION public.is_mission_responder(uuid) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.is_mission_responder(uuid) TO authenticated;
 
 DROP POLICY IF EXISTS "Responders can read missions they answered" ON public.small_missions;
 CREATE POLICY "Responders can read missions they answered"
   ON public.small_missions
   FOR SELECT
   TO authenticated
-  USING (public.is_mission_responder(id, auth.uid()));
+  USING (
+    hidden_by IS NULL
+    AND moderation_hidden_at IS NULL
+    AND public.is_mission_responder(id)
+  );
 
 -- 4. D-01 ---------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.deactivate_my_space(p_keep user_role)
@@ -145,7 +198,17 @@ BEGIN
     WHERE s.user_id = v_uid
       AND s.status IN ('published'::sit_status, 'confirmed'::sit_status, 'in_progress'::sit_status)
   ) THEN
-    RAISE EXCEPTION 'ACTIVE_SITS: une annonce est encore en cours, clôturez-la avant de retirer votre espace propriétaire';
+    RAISE EXCEPTION 'ACTIVE_SITS: une annonce est en ligne ou une garde est prévue, votre espace propriétaire reste ouvert jusqu''à sa fin';
+  END IF;
+
+  IF p_keep = 'owner'::user_role AND EXISTS (
+    SELECT 1 FROM public.applications a
+    JOIN public.sits s ON s.id = a.sit_id
+    WHERE a.sitter_id = v_uid
+      AND a.status = 'accepted'::application_status
+      AND s.status IN ('published'::sit_status, 'confirmed'::sit_status, 'in_progress'::sit_status)
+  ) THEN
+    RAISE EXCEPTION 'ACTIVE_SITTING: une garde est prévue, votre espace gardien reste ouvert jusqu''à sa fin';
   END IF;
 
   IF p_keep = 'owner'::user_role AND EXISTS (
@@ -153,7 +216,7 @@ BEGIN
     JOIN public.sits s ON s.id = a.sit_id
     WHERE a.sitter_id = v_uid
       AND a.status IN ('pending'::application_status, 'viewed'::application_status,
-                       'discussing'::application_status, 'accepted'::application_status)
+                       'discussing'::application_status)
       AND s.status IN ('published'::sit_status, 'confirmed'::sit_status, 'in_progress'::sit_status)
   ) THEN
     RAISE EXCEPTION 'ACTIVE_APPLICATIONS: une candidature est encore ouverte, retirez-la avant de retirer votre espace gardien';
@@ -161,6 +224,10 @@ BEGIN
 
   PERFORM set_config('app.allow_internal_profile_update', 'on', true);
   UPDATE public.profiles SET role = p_keep WHERE id = v_uid;
+  PERFORM set_config('app.allow_internal_profile_update', 'off', true);
+  IF p_keep = 'owner'::user_role THEN
+    UPDATE public.sitter_profiles SET is_available = false WHERE user_id = v_uid;
+  END IF;
   RETURN p_keep;
 END;
 $function$;

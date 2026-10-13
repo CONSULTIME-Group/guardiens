@@ -196,12 +196,12 @@ describe("ActiveRolesSection — dernier rôle actif", () => {
 
 describe("ActiveRolesSection, lot X1 : retrait d'espace par deactivate_my_space", () => {
   it("annonce en cours : message clair, aucun changement d'espace", async () => {
-    mockRpc.mockResolvedValueOnce({ data: null, error: { message: "ACTIVE_SITS: une annonce est encore en cours" } });
+    mockRpc.mockResolvedValueOnce({ data: null, error: { message: "ACTIVE_SITS: une annonce est en ligne" } });
     renderSection();
     fireEvent.click(switches()[0]); // owner
     fireEvent.click(await screen.findByText(/Confirmer la désactivation/i));
     await waitFor(() => {
-      expect(toastError).toHaveBeenCalledWith(expect.stringMatching(/annonce est encore en cours/i));
+      expect(toastError).toHaveBeenCalledWith(expect.stringMatching(/annonce est en ligne ou une garde est prévue/i));
     });
     expect(mockSwitchRole).not.toHaveBeenCalled();
   });
@@ -213,6 +213,16 @@ describe("ActiveRolesSection, lot X1 : retrait d'espace par deactivate_my_space"
     fireEvent.click(await screen.findByText(/Confirmer la désactivation/i));
     await waitFor(() => {
       expect(toastError).toHaveBeenCalledWith(expect.stringMatching(/candidature est encore ouverte/i));
+    });
+    expect(mockSwitchRole).not.toHaveBeenCalled();
+  });
+  it("garde prévue côté gardien : message dédié, aucun changement d'espace", async () => {
+    mockRpc.mockResolvedValueOnce({ data: null, error: { message: "ACTIVE_SITTING: une garde est prévue" } });
+    renderSection();
+    fireEvent.click(switches()[1]); // sitter
+    fireEvent.click(await screen.findByText(/Confirmer la désactivation/i));
+    await waitFor(() => {
+      expect(toastError).toHaveBeenCalledWith(expect.stringMatching(/garde est prévue : votre espace gardien/i));
     });
     expect(mockSwitchRole).not.toHaveBeenCalled();
   });
