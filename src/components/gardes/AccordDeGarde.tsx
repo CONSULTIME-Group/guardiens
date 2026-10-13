@@ -8,46 +8,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { trackEvent } from "@/lib/analytics";
 
-type AccordDeGardeData = {
- gardeId: string;
- dateDebut: string;
- dateFin: string;
- adresse: string;
- proprio: {
- prenom: string;
- telephone: string;
- plagesDisponibilite?: string;
- };
- gardien: {
- prenom: string;
- };
- animaux: Array<{
- prenom: string;
- espece: string;
- race?: string;
- age?: string;
- }>;
- reglesVie: {
- animauxPartout?: boolean | null;
- invites?: boolean | null;
- tabac?: boolean | null;
- autresPrecisions?: string | null;
- };
- voisinConfiance?: {
- prenom: string;
- telephone: string;
- } | null;
- urgences?: {
- vetNom?: string;
- vetTel?: string;
- vetAdresse?: string;
- urgences24h?: string;
- } | null;
- montantVetMax?: number | null;
- montantLogementMax?: number | null;
- estLongueDuree?: boolean;
- contributionCharges?: string | null;
-};
+import { joinFilled, type AccordDeGardeData, type AccordRuleValue } from "@/lib/accordDeGarde";
 
 interface AccordDeGardeProps {
  garde: AccordDeGardeData;
@@ -55,9 +16,10 @@ interface AccordDeGardeProps {
  onClose?: () => void;
 }
 
-function BoolDisplay({ value }: { value: boolean | null | undefined }) {
+function BoolDisplay({ value }: { value: AccordRuleValue | undefined }) {
  if (value === true) return <span>Oui</span>;
  if (value === false) return <span>Non</span>;
+ if (typeof value === "string" && value.trim()) return <span>{value.trim()}</span>;
  return <span className="italic text-muted-foreground">À confirmer</span>;
 }
 
@@ -161,7 +123,10 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
   p_ip_address: null,
   });
   if (error) throw error;
-  toast("Accord signé, vous recevrez le PDF par email.");
+  // Aucun PDF n'est envoyé : la signature prévient le gardien
+  // (notify-accord-signed, notification et email) et l'accord reste
+  // consultable sur la page de la garde.
+  toast("Accord signé. Votre gardien est prévenu et peut le signer à son tour.");
   onClose?.();
   }
   } catch (err: any) {
@@ -308,8 +273,8 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
  <span>Tabac</span>
  <BoolDisplay value={garde.reglesVie.tabac} />
  </div>
- {garde.reglesVie.autresPrecisions != null && (
- <p className="text-sm mt-3">Autres précisions : {garde.reglesVie.autresPrecisions}</p>
+ {garde.reglesVie.autresPrecisions != null && garde.reglesVie.autresPrecisions.trim() !== "" && (
+ <p className="text-sm mt-3 whitespace-pre-line">Autres précisions : {garde.reglesVie.autresPrecisions}</p>
  )}
  </div>
 
@@ -320,23 +285,30 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
  Même avec les meilleurs soins, un imprévu peut arriver. Ce qui a été convenu ici évite d'avoir à improviser au mauvais moment.
  </p>
  <div className="bg-muted rounded-lg p-4 text-sm space-y-1">
- <p>Joindre {p} en premier : {garde.proprio.telephone}</p>
- {garde.urgences?.vetNom ? (
- <p>Vétérinaire habituel : {garde.urgences.vetNom} · {garde.urgences.vetTel} · {garde.urgences.vetAdresse}</p>
+ {garde.proprio.telephone?.trim() ? (
+ <p>Joindre {p} en premier : {garde.proprio.telephone.trim()}</p>
  ) : (
- <p className="italic text-muted-foreground">Vétérinaire non renseigné, à compléter dans le guide.</p>
+ <p>Joindre {p} en premier, par la messagerie Guardiens.</p>
  )}
- {garde.urgences?.urgences24h && (
- <p>Urgences 24h/24 : {garde.urgences.urgences24h}</p>
+ {joinFilled([garde.urgences?.vetNom, garde.urgences?.vetTel, garde.urgences?.vetAdresse]) ? (
+ <p>Vétérinaire habituel : {joinFilled([garde.urgences?.vetNom, garde.urgences?.vetTel, garde.urgences?.vetAdresse])}</p>
+ ) : (
+ <p className="italic text-muted-foreground">Le vétérinaire habituel se renseigne dans le guide de la maison.</p>
+ )}
+ {garde.urgences?.urgences24h?.trim() && (
+ <p>Urgences 24h/24 : {garde.urgences.urgences24h.trim()}</p>
+ )}
+ {joinFilled([garde.contactUrgence?.nom, garde.contactUrgence?.telephone]) && (
+ <p>Contact d'urgence : {joinFilled([garde.contactUrgence?.nom, garde.contactUrgence?.telephone])}</p>
  )}
  </div>
- {garde.montantVetMax != null ? (
+ {garde.montantVetMax != null && garde.montantVetMax > 0 ? (
  <p className="text-sm mt-3">
  {g} peut engager des soins jusqu'à {garde.montantVetMax}€ sans attendre. Au-delà, {g} tente de joindre {p} avant d'agir. Si {p} est injoignable et que l'état de l'animal l'exige, {g} agit dans l'intérêt de l'animal et conserve tous les justificatifs. Les frais sont remboursés par {p} sur présentation de la facture.
  </p>
  ) : (
- <p className="italic text-muted-foreground text-sm mt-3">
- Montant non renseigné, à convenir entre les parties. 150€ est une base courante.
+ <p className="text-sm mt-3">
+ Le montant de soins que {g} peut engager sans attendre se convient entre {p} et {g} avant la garde, par la messagerie. Si l'état de l'animal l'exige et que {p} reste injoignable, {g} agit dans l'intérêt de l'animal et conserve tous les justificatifs, remboursés par {p} sur présentation de la facture.
  </p>
  )}
  </div>
@@ -352,9 +324,9 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
  Dans ce cas, {g} peut engager des frais jusqu'à {garde.montantLogementMax}€ et conserve tous les justificatifs pour remboursement.
  </p>
  )}
- {garde.voisinConfiance != null && (
+ {joinFilled([garde.voisinConfiance?.prenom, garde.voisinConfiance?.telephone]) && (
  <p className="text-sm mt-2">
- Personne de confiance : {garde.voisinConfiance.prenom} · {garde.voisinConfiance.telephone}
+ Personne de confiance : {joinFilled([garde.voisinConfiance?.prenom, garde.voisinConfiance?.telephone])}
  </p>
  )}
  </div>
@@ -395,11 +367,17 @@ export default function AccordDeGarde({ garde, role = "proprio", onClose }: Acco
  <p className="font-semibold text-sm mb-2">Contacts pendant la garde</p>
  <div className="bg-muted rounded-lg p-4 text-sm space-y-1">
  <p>
- {p} · {garde.proprio.telephone}
- {garde.proprio.plagesDisponibilite ? ` · disponible ${garde.proprio.plagesDisponibilite}` : ""}
+ {joinFilled([
+ p,
+ garde.proprio.telephone?.trim() || "par la messagerie Guardiens",
+ garde.proprio.plagesDisponibilite ? `disponible ${garde.proprio.plagesDisponibilite}` : null,
+ ])}
  </p>
- {garde.voisinConfiance != null && (
- <p>{garde.voisinConfiance.prenom} · {garde.voisinConfiance.telephone}</p>
+ {joinFilled([garde.voisinConfiance?.prenom, garde.voisinConfiance?.telephone]) && (
+ <p>{joinFilled([garde.voisinConfiance?.prenom, garde.voisinConfiance?.telephone])}</p>
+ )}
+ {joinFilled([garde.contactUrgence?.nom, garde.contactUrgence?.telephone]) && (
+ <p>Contact d'urgence : {joinFilled([garde.contactUrgence?.nom, garde.contactUrgence?.telephone])}</p>
  )}
  <p>Urgences : 15 (SAMU) · 17 (Police) · 18 (Pompiers)</p>
  </div>

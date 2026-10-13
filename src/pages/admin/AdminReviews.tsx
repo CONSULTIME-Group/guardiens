@@ -35,11 +35,15 @@ export const MODERATION_LABELS: Record<string, string> = { en_attente: "En atten
 export const RESPONSE_LABELS: Record<string, string> = { aucune: "Aucune", en_attente: "En attente", validee: "Validée", refusee: "Refusée" };
 
 /** Lot A9 : un masquage marque moderation_hidden_at, la republication l'efface
- * (le trigger notify_review_published ne renotifie pas dans ce cas). */
+ * (le trigger notify_review_published ne renotifie pas dans ce cas).
+ * Lot Z : « Publier » pose aussi moderation_status = 'valide', sans quoi
+ * l'avis restait invisible des visiteurs (politique « Anon can view published
+ * reviews » : published et moderation_status valide). Le masquage garde le
+ * statut de modération tel quel. */
 export function togglePublishedUpdate(published: boolean, adminId: string | null, now: string) {
   return published
     ? { published: false, moderation_hidden_at: now, moderation_hidden_by: adminId }
-    : { published: true, moderation_hidden_at: null, moderation_hidden_by: null };
+    : { published: true, moderation_status: "valide", moderation_hidden_at: null, moderation_hidden_by: null };
 }
 
 /** Jointures de l'annonce concernée : garde (sits) ou entraide (small_missions, via mission_id). */

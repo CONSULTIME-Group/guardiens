@@ -64,6 +64,7 @@ import ApplicationsList from "@/components/sits/ApplicationsList";
 import PostConfirmationChecklist from "@/components/sits/PostConfirmationChecklist";
 import AccordOwnerStatusBanner from "@/components/gardes/AccordOwnerStatusBanner";
 import AccordDeGarde from "@/components/gardes/AccordDeGarde";
+import { buildAccordDeGardeData, fetchAccordHouseGuide } from "@/lib/accordDeGarde";
 import CancelSitModal from "@/components/sits/CancelSitModal";
 import OwnerSitManagement from "@/components/sits/shared/OwnerSitManagement";
 import SitPhotoManager from "@/components/sits/owner/SitPhotoManager";
@@ -599,34 +600,26 @@ const OwnerSitView = ({
           .maybeSingle();
         if (sp?.first_name) gardienPrenom = sp.first_name;
       }
-      setAccordData({
-        gardeId: sit.id,
-        dateDebut: formatDate(sit.start_date),
-        dateFin: formatDate(sit.end_date),
-        adresse: (sit as any).city || owner?.city || "",
-        proprio: {
-          prenom: owner?.first_name ?? "Le propriétaire",
-          telephone: (ownerProfile as any)?.phone ?? "",
-        },
-        gardien: { prenom: gardienPrenom },
-        animaux: (pets ?? []).map((pet: any) => ({
-          prenom: pet?.name ?? "Animal",
-          espece: pet?.species ?? "",
-          race: pet?.breed ?? undefined,
-        })),
-        reglesVie: {
-          animauxPartout: null,
-          invites: null,
-          tabac: null,
-          autresPrecisions: null,
-        },
-        voisinConfiance: null,
-        urgences: null,
-        montantVetMax: 300,
-        montantLogementMax: null,
-        estLongueDuree: false,
-        contributionCharges: null,
-      });
+      // Lot Z : l'accord reprend le guide de la maison et les préférences du
+      // propriétaire (src/lib/accordDeGarde.ts). Aucune lecture de téléphone
+      // (colonne absente) ni montant vétérinaire imposé.
+      const guide = await fetchAccordHouseGuide(
+        supabase as any,
+        (sit as any).property_id ?? (property as any)?.id,
+      );
+      setAccordData(
+        buildAccordDeGardeData({
+          sitId: sit.id,
+          dateDebut: formatDate(sit.start_date),
+          dateFin: formatDate(sit.end_date),
+          adresse: (sit as any).city || owner?.city || "",
+          ownerFirstName: owner?.first_name ?? "",
+          sitterFirstName: gardienPrenom,
+          pets: (pets ?? []) as any[],
+          guide,
+          ownerRules: ownerProfile as any,
+        }),
+      );
       setAccordOpen(true);
     } catch (e) {
       logger.error("handleSignAccord failed", { sitId: sit.id, error: String(e) });
@@ -1283,6 +1276,7 @@ const OwnerSitView = ({
           sitId={sit.id}
           sitOwnerId={sit.user_id}
           sitStatus={sit.status}
+          sitEndDate={sit.end_date}
           currentUserId={currentUserId}
           hasReviewedThisSit={hasReviewedThisSit}
         />

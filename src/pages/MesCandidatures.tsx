@@ -3,8 +3,9 @@
  *
  * Liste TOUTES les candidatures du gardien, quel que soit l'état de l'annonce,
  * via la RPC sécurisée `get_my_applications` (le contenu des annonces en
- * brouillon reste masqué). Deux sections : candidatures en cours, puis
- * candidatures sans suite avec la mention explicite de l'état de l'annonce.
+ * brouillon reste masqué). Trois sections : candidatures en cours, gardes
+ * réalisées (lot Z, avec accès à l'avis), puis candidatures sans suite avec
+ * la mention explicite de l'état de l'annonce.
  *
  * Realtime : subscribe sur `applications` filtré sur sitter_id = auth.uid().
  *
@@ -15,7 +16,8 @@ import { Link, useNavigate } from "react-router-dom";
 import Head from "@/components/seo/Head";
 import { format, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Calendar, MapPin, MessageSquare, Search as SearchIcon } from "lucide-react";
+import { Calendar, MapPin, MessageSquare, Search as SearchIcon, Star } from "lucide-react";
+import { isSitReviewable } from "@/lib/reviewEligibility";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -174,10 +176,36 @@ const MesCandidatures = () => {
   }, [user?.id]);
 
   // Lot X3a (B-07) : un oui à une proposition privée reste « en cours ».
-  const { active, closed } = useMemo(
+  // Lot Z : les gardes réalisées ont leur propre section (avant, elles
+  // tombaient sous « Candidatures sans suite »).
+  const { active, done, closed } = useMemo(
     () => groupApplications(apps, { isProposal: (a) => !!proposalBySit[a.sit_id] }),
     [apps, proposalBySit],
   );
+  const doneIds = useMemo(() => new Set(done.map((a) => a.application_id)), [done]);
+
+  // Avis déjà déposés par le gardien sur ses gardes réalisées (une lecture).
+  const [reviewedSitIds, setReviewedSitIds] = useState<Set<string>>(new Set());
+  const doneSitKey = done.map((a) => a.sit_id).sort().join(",");
+  useEffect(() => {
+    if (!user?.id || !doneSitKey) {
+      setReviewedSitIds(new Set());
+      return;
+    }
+    let cancelled = false;
+    supabase
+      .from("reviews")
+      .select("sit_id")
+      .eq("reviewer_id", user.id)
+      .in("sit_id", doneSitKey.split(","))
+      .then(({ data }) => {
+        if (cancelled) return;
+        setReviewedSitIds(new Set(((data as { sit_id: string | null }[] | null) ?? []).map((r) => String(r.sit_id))));
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id, doneSitKey]);
 
   // Lot X3a (B-08) : retrait depuis la carte, même écriture que /sits.
   const [withdrawApp, setWithdrawApp] = useState<SitterApp | null>(null);
@@ -264,11 +292,20 @@ const MesCandidatures = () => {
     const badgeLabel = app.status === "cancelled"
       ? cancelledApplicationLabel(app.sit_status, !!app.sit_cancelled_by_me)
       : badge.label(app.viewed_at);
-    const note = sitStateNote(app.sit_status, {
-      appStatus: app.status,
-      fromProposal: !!proposalBySit[app.sit_id],
-      cancelledByMe: !!app.sit_cancelled_by_me,
-    });
+    const isDone = doneIds.has(app.application_id);
+    const note = isDone
+      ? "Garde terminée"
+      : sitStateNote(app.sit_status, {
+          appStatus: app.status,
+          fromProposal: !!proposalBySit[app.sit_id],
+          cancelledByMe: !!app.sit_cancelled_by_me,
+        });
+    // Lot Z : accès à l'avis tant que la garde est évaluable (terminée, ou
+    // archivée après sa date de fin), même règle que /review.
+    const canReview =
+      isDone &&
+      !reviewedSitIds.has(app.sit_id) &&
+      isSitReviewable({ status: app.sit_status, end_date: app.sit_end_date });
     // Lot X3a (B-08) : sans réponse depuis plus de 7 jours, ce que le gardien peut faire.
     const waitingDays = sitterWaitingDays(app.status, app.sit_status, app.created_at);
     const canWithdraw = isOpenApplicationStatus(app.status) && app.sit_status === "published";
@@ -390,6 +427,17 @@ const MesCandidatures = () => {
                     className="rounded-xl"
                   />
                 )}
+                {canReview && (
+                  <Button asChild size="sm" className="rounded-xl">
+                    <Link to={`/review/${app.sit_id}`}>
+                      <Star className="h-4 w-4 mr-1.5" aria-hidden="true" />
+                      Laisser un avis
+                    </Link>
+                  </Button>
+                )}
+                {isDone && reviewedSitIds.has(app.sit_id) && (
+                  <span className="text-xs text-muted-foreground">Avis déposé</span>
+                )}
                 <Button
                   variant="outline"
                   size="sm"
@@ -469,6 +517,18 @@ const MesCandidatures = () => {
                   Candidatures en cours ({active.length})
                 </h2>
                 <ul className="space-y-3">{active.map(renderCard)}</ul>
+              </section>
+            )}
+
+            {done.length > 0 && (
+              <section>
+                <h2 className="text-sm font-medium text-foreground mb-1">
+                  Gardes réalisées ({done.length})
+                </h2>
+                <p className="text-xs text-muted-foreground mb-3">
+                  Les gardes que vous avez menées. Votre avis aide la communauté à se faire confiance.
+                </p>
+                <ul className="space-y-3">{done.map(renderCard)}</ul>
               </section>
             )}
 

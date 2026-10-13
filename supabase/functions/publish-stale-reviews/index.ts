@@ -27,15 +27,9 @@ Deno.serve(async (req) => {
   const run = await startCronRun("publish-stale-reviews");
 
   try {
-    // Recupere les avis concernes avant publication, pour pouvoir notifier.
-    const cutoff = new Date(Date.now() - STALE_DAYS * 86400_000).toISOString();
-    const { data: candidates } = await supabase
-      .from("reviews")
-      .select("id, reviewee_id")
-      .eq("published", false)
-      .lt("created_at", cutoff)
-      .limit(500);
-
+    // Lot Z : aucune notification ecrite ici. Le passage a published = true
+    // declenche le trigger on_review_notify (notify_review_published), qui
+    // notifie deja la personne evaluee : l'insertion d'ici faisait doublon.
     const { data: publishedCount, error: rpcErr } = await supabase.rpc(
       "publish_stale_reviews",
       { p_days: STALE_DAYS },
@@ -43,31 +37,9 @@ Deno.serve(async (req) => {
     if (rpcErr) throw rpcErr;
 
     const published = (publishedCount as number) ?? 0;
-    let notified = 0;
 
-    if (published > 0) {
-      for (const r of candidates ?? []) {
-        try {
-          await supabase.from("notifications").insert({
-            user_id: r.reviewee_id,
-            type: "review_published",
-            title: "Un avis vous concernant est publie",
-            body: "L'avis depose a votre sujet est desormais visible sur votre profil.",
-            link: `/gardiens/${r.reviewee_id}`,
-          });
-          notified++;
-        } catch (e) {
-          console.warn("[publish-stale-reviews] notif failed", r.id, e);
-        }
-      }
-    }
-
-    await run.finish("success", {
-      candidates: candidates?.length ?? 0,
-      published,
-      notified,
-    });
-    return new Response(JSON.stringify({ ok: true, published, notified }), {
+    await run.finish("success", { published });
+    return new Response(JSON.stringify({ ok: true, published }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {

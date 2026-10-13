@@ -74,28 +74,54 @@ export function sitStateNote(status: string | null | undefined, ctx: SitStateNot
 export interface ApplicationLike {
   sit_status: string | null;
   status?: string | null;
+  sit_end_date?: string | null;
+}
+
+/** Jour local au format AAAA-MM-JJ. */
+function localDay(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
 }
 
 /**
- * Repartit les candidatures en deux sections lisibles.
+ * Lot Z : garde réalisée par le gardien. Candidature acceptée sur une annonce
+ * terminée, ou archivée après sa date de fin (même règle que isSitReviewable).
+ * Avant ce lot, ces gardes apparaissaient sous « Candidatures sans suite ».
+ */
+export function isCompletedSitForSitter(a: ApplicationLike, now: Date = new Date()): boolean {
+  if (a.status !== "accepted") return false;
+  if (a.sit_status === "completed") return true;
+  if (a.sit_status !== "archived" || !a.sit_end_date) return false;
+  return String(a.sit_end_date).slice(0, 10) < localDay(now);
+}
+
+/**
+ * Repartit les candidatures en trois sections lisibles : en cours, gardes
+ * réalisées (lot Z), sans suite.
  * Lot X3a (B-07) : une candidature ouverte née d'une proposition privée
  * (annonce en brouillon) reste « en cours », le propriétaire doit confirmer.
  */
 export function groupApplications<T extends ApplicationLike>(
   apps: readonly T[],
-  opts: { isProposal?: (a: T) => boolean } = {},
+  opts: { isProposal?: (a: T) => boolean; now?: Date } = {},
 ): {
   active: T[];
+  done: T[];
   closed: T[];
 } {
   const active: T[] = [];
+  const done: T[] = [];
   const closed: T[] = [];
+  const now = opts.now ?? new Date();
   for (const a of apps) {
     if (isActiveSitStatus(a.sit_status)) active.push(a);
     else if (String(a.sit_status) === "draft" && isOpenApplicationStatus(a.status) && opts.isProposal?.(a)) active.push(a);
+    else if (isCompletedSitForSitter(a, now)) done.push(a);
     else closed.push(a);
   }
-  return { active, closed };
+  return { active, done, closed };
 }
 
 /**
