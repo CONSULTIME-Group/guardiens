@@ -72,8 +72,8 @@ const Email = ({
 
           <Text style={p}>
             {certain
-              ? `Publier trois à quatre semaines avant le départ laisse le temps de recevoir des candidatures et de rencontrer la personne. Pour un départ le ${startFr}, c'est maintenant.`
-              : "Publier trois à quatre semaines avant le départ laisse le temps de recevoir des candidatures et de rencontrer la personne."}
+              ? `Publier trois à quatre semaines avant le départ laisse le temps de recevoir des candidatures et d'échanger avec la personne. Pour un départ le ${startFr}, c'est maintenant.`
+              : "Publier trois à quatre semaines avant le départ laisse le temps de recevoir des candidatures et d'échanger avec la personne."}
           </Text>
 
           <Text style={p}>

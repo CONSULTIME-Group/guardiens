@@ -30,19 +30,16 @@ const Email = ({ firstName }: Props) => {
             />
           </Section>
           <Text style={almaLine}>Alma, votre assistante Guardiens</Text>
-          <Heading style={title}>On est maintenant plus de 1 200</Heading>
+          <Heading style={title}>Guardiens grandit avec vous</Heading>
           <AlmaIntro firstName={firstName} seen="Des nouvelles de Guardiens, et un coup de main à vous demander." />
           <Text style={text}>
-            Depuis juin, près de 700 personnes nous ont rejoints. On est aujourd'hui plus de 1 200, et on ne s'attendait pas à ce rythme. Merci.
+            Chaque semaine, de nouveaux membres nous rejoignent, et des annonces arrivent de toute la France. Merci d'en faire partie.
           </Text>
           <Text style={text}>
-            Des annonces sont parties de Bretagne, de Marseille, d'Alsace, du Pays basque, du Quercy. Et aussi de Marrakech, de La Réunion, et d'une maison à Tahiti qui cherche quelqu'un pour tout le mois de décembre. Celle-là, on ne l'avait pas vue venir.
+            Guardiens est gratuit. Nos guides sur les races, les villes et la préparation d'une garde sont en ligne, en accès libre, pour tous.
           </Text>
           <Text style={text}>
-            En parallèle, on écrit. Plus de 200 articles et guides sont en ligne, sur les races, sur les villes, sur la préparation d'une garde. On avance comme on peut, tout est gratuit pour le moment, alors on fait au mieux.
-          </Text>
-          <Text style={text}>
-            Il y a une chose qu'on aimerait vraiment voir décoller : l'entraide entre voisins. Arroser des plantes le temps d'un week-end, sortir un chien, donner un coup de main. Ça ne passe jamais par de l'argent, et ça ne marche que sur quelques kilomètres. Pour que ça prenne, il ne faut pas du monde partout, il faut du monde tout près. Beaucoup de monde.
+            Une chose nous tient particulièrement à cœur : l'entraide entre voisins. Arroser des plantes le temps d'un week-end, sortir un chien, donner un coup de main. C'est un échange en temps et en savoir-faire, qui vit à quelques kilomètres de chez soi. Pour qu'il prenne, il faut du monde tout près.
           </Text>
           <Text style={text}>
             C'est là qu'on compte sur vous. Parlez de Guardiens autour de vous. Un partage, un message à quelqu'un du quartier, une mention dans un groupe. C'est ce qui nous aide le plus, et de loin.
@@ -56,7 +53,7 @@ const Email = ({ firstName }: Props) => {
             Le lien à partager : guardiens.fr
           </Text>
           <Text style={closingBlock}>
-            En échange, on n'a qu'un merci à offrir. Mais il est sincère.
+            En échange, on vous offre un merci, et il est sincère.
           </Text>
           <Hr style={hr} />
           <LegalFooter purpose="la fidélisation de nos membres actifs" basis="6.1.f" />
@@ -68,7 +65,7 @@ const Email = ({ firstName }: Props) => {
 
 export const template = {
   component: Email,
-  subject: 'On est plus de 1 200',
+  subject: 'Guardiens grandit avec vous',
   displayName: 'Appel au partage',
   previewData: { firstName: 'Marie' },
 } satisfies TemplateEntry

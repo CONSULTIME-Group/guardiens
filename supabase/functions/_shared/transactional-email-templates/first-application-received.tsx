@@ -106,7 +106,7 @@ const FirstApplicationEmail = ({
           <Text style={tips}>
             <strong>Nos conseils pour ce premier échange :</strong><br />
             · Répondez même si vous hésitez, un simple «&nbsp;merci&nbsp;» est apprécié.<br />
-            · Proposez une visio ou une rencontre avant de confirmer.
+            · Proposez une visio ou une rencontre avant de confirmer, si vous le souhaitez.
           </Text>
 
           <LegalFooter

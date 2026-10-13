@@ -50,8 +50,8 @@ const SitterEncourageCandidatureEmail = ({ firstName, nearbySits, primarySitUrl 
         </Section>
 
         <Text style={text}>
-          Le propriétaire lit votre message, puis vous échangez directement, et vous vous rencontrez
-          avant de vous engager.
+          Le propriétaire lit votre message, puis vous échangez directement, en visio ou de vive
+          voix si vous le souhaitez.
         </Text>
 
         <Text style={text}>Elisa et Jérémie</Text>

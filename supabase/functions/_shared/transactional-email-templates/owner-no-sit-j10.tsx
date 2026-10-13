@@ -35,7 +35,7 @@ const Email = ({ firstName, city, nearby_sitters_count }: Props) => {
 
           <Text style={text}>
             Un départ se prépare souvent plusieurs semaines à l'avance. Publier tôt laisse le temps
-            de recevoir des candidatures, d'échanger et de rencontrer la bonne personne.
+            de recevoir des candidatures, d'échanger et de trouver la bonne personne.
           </Text>
 
           <Section style={statCard}>
@@ -52,12 +52,12 @@ const Email = ({ firstName, city, nearby_sitters_count }: Props) => {
 
           <Text style={text}>
             Vos dates sont encore approximatives&nbsp;? Indiquez-les comme flexibles, vous les
-            ajusterez ensuite. Vous rencontrez chaque candidat avant de choisir, et la décision vous
-            appartient.
+            ajusterez ensuite. Vous échangez avec chaque candidat avant de choisir, et la décision
+            vous appartient.
           </Text>
 
           <Text style={baseline}>
-            Guardiens est gratuit pour les propriétaires.
+            Guardiens est gratuit.
           </Text>
 
           <Section style={ctaSection}>
