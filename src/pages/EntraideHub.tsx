@@ -330,7 +330,12 @@ const EntraideHub = () => {
       navigate("/inscription?redirect=/petites-missions");
       return;
     }
-    await supabase.from("profiles").update({ available_for_help: true }).eq("id", user.id);
+    // Lot Z2 (C-21) : la confirmation suit l'écriture réelle.
+    const { error } = await supabase.from("profiles").update({ available_for_help: true }).eq("id", user.id);
+    if (error) {
+      toast.error("Un souci de connexion a interrompu l'enregistrement. Réessayez dans un instant.");
+      return;
+    }
     setProfile((prev) => (prev ? { ...prev, available_for_help: true } : prev));
     toast.success("C'est noté. Vous recevrez les besoins publiés près de chez vous, et vous choisirez ceux qui vous parlent.");
     void trackEvent("mission_can_help", { metadata: { source: "hub", action: "helper_enabled" } });
