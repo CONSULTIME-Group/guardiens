@@ -159,9 +159,12 @@ describe("GL2, collecte d'un guide à l'étranger (Saint Ludger, Québec)", () =
 
     expect(calls.some((u) => u.includes("api-adresse.data.gouv.fr"))).toBe(false);
     expect(queries[0]).toContain("around:5000,");
-    // Les parcs et sentiers sont trouvés à 5 km : ils ne sont plus cherchés plus loin.
-    expect(queries[2]).not.toContain("forest");
-    expect(queries[2]).toContain("veterinary");
+    // Une requête courte par filtre.
+    expect(queries.every((q) => (q.match(/around:/g) ?? []).length === 1)).toBe(true);
+    // Les parcs, forêts et sentiers sont trouvés à 5 km : ils ne sont plus cherchés plus loin.
+    const wider = queries.filter((q) => !q.includes("around:5000,"));
+    expect(wider.some((q) => /forest|"park"|hiking/.test(q))).toBe(false);
+    expect(wider.some((q) => q.includes("veterinary"))).toBe(true);
 
     const names = res.rows.map((r) => r.name);
     expect(names).toEqual(expect.arrayContaining([
@@ -409,5 +412,14 @@ describe("GL, code postal générique", () => {
     const c = await resolveGuideCenter({ city: "Lyon", postalCode: "69000", country: "FR", hint: null }, fn);
     expect(c).toEqual({ lat: 45.76, lon: 4.83, country: "FR", region: "Rhône" });
     expect(calls).toHaveLength(2);
+  });
+});
+
+describe("GL, forme de la requête Overpass", () => {
+  it("le rayon précède toujours les étiquettes (forme qui répond, mesurée le 13/10/2026)", () => {
+    const q = buildOverpassQuery(ALL_CATEGORIES, 5000, 45.74, -70.69);
+    const statements = q.slice(q.indexOf("(") + 1, q.lastIndexOf(");out")).split(";").filter(Boolean);
+    expect(statements.length).toBeGreaterThan(8);
+    for (const st of statements) expect(st).toMatch(/^(nwr|wr|way|relation)\(around:5000,45\.74,-70\.69\)\[/);
   });
 });
