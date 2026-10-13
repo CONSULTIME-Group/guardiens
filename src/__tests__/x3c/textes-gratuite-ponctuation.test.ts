@@ -15,7 +15,7 @@ const fr = JSON.parse(readFileSync(join(__dirname, "..", "..", "..", "src/i18n/l
 
 const root = join(__dirname, "..", "..", "..");
 const read = (p: string) => readFileSync(join(root, p), "utf8");
-const DASHES = /[–—]/;
+const DASHES = new RegExp("[\\u2013\\u2014]");
 
 const PUBLIC_FILES = [
   "src/i18n/locales/fr/common.json",
