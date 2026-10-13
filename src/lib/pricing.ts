@@ -62,7 +62,7 @@ export function getOwnerPriceLabel(): string {
 }
 
 export function getPricingBaseline(): string {
-  return "L'accès à Guardiens est ouvert pendant la phase de lancement. Les propriétaires publient leur annonce et échangent avec les gardiens, les gardiens candidatent et construisent leur profil. Toute évolution tarifaire sera annoncée à l'avance.";
+  return "Guardiens est gratuit. Les propriétaires publient leur annonce et échangent avec les gardiens, les gardiens candidatent et construisent leur profil.";
 }
 
 export function getPricingBaselineShort(): string {
@@ -105,7 +105,7 @@ export const FOUNDER_DEADLINE = "à une date ultérieure";
 // NB: littéraux string (pas d'appel de fonction) pour que le script
 // scripts/sync-index-html.mjs puisse les extraire par regex.
 export const PRICING_LONG =
-  "L'accès à Guardiens est ouvert pendant la phase de lancement. Les propriétaires publient leur annonce et échangent avec les gardiens, les gardiens candidatent et construisent leur profil. Toute évolution tarifaire sera annoncée à l'avance.";
+  "Guardiens est gratuit. Les propriétaires publient leur annonce et échangent avec les gardiens, les gardiens candidatent et construisent leur profil.";
 export const PRICING_SHORT =
   "Une adresse email et un mot de passe suffisent pour commencer, vous restez libre à tout moment.";
 export const PRICING_VERY_SHORT = "Une adresse email et un mot de passe suffisent pour commencer.";

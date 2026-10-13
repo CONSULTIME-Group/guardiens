@@ -17,12 +17,12 @@ const corsHeaders = {
 }
 
 const EMAIL_SUBJECTS: Record<string, string> = {
-  signup: 'Bienvenue sur Guardiens — confirmez votre adresse',
+  signup: 'Bienvenue sur Guardiens : confirmez votre adresse',
   invite: 'Vous êtes invité(e) sur Guardiens',
-  magiclink: 'Votre lien de connexion — Guardiens',
-  recovery: 'Réinitialisation de votre mot de passe — Guardiens',
-  email_change: 'Confirmez votre nouvel email — Guardiens',
-  reauthentication: 'Votre code de vérification — Guardiens',
+  magiclink: 'Guardiens : votre lien de connexion',
+  recovery: 'Guardiens : réinitialisation de votre mot de passe',
+  email_change: 'Guardiens : confirmez votre nouvel email',
+  reauthentication: 'Guardiens : votre code de vérification',
 }
 
 // Template mapping

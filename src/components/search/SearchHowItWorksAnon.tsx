@@ -122,7 +122,7 @@ const SearchHowItWorksAnon = () => (
             Prêt à postuler à votre première garde ?
           </p>
           <p className="text-sm text-muted-foreground mt-1">
-            Inscription : 0 €. L'espace gardien est ouvert pendant la phase de lancement.
+            Inscription : 0 €. L'espace gardien est gratuit.
           </p>
         </div>
         <div className="flex gap-2 shrink-0">

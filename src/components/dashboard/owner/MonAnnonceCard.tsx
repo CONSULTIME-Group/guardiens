@@ -275,7 +275,7 @@ const MonAnnonceCard = memo(({ sits, pets, propertyType, propertyEnvironment, pe
                   to={`/sits/${currentSit.id}/edit#photos`}
                   className="hover:underline"
                 >
-                  Ajoutez 2–3 photos lumineuses (maison + animaux)
+                  Ajoutez 2 ou 3 photos lumineuses (maison + animaux)
                 </Link>
               </li>
               <li className="flex items-start gap-2">

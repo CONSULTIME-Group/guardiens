@@ -85,7 +85,7 @@ const SECTIONS: SectionDef[] = [
   { id: "appearance", label: "Apparence", icon: Sun, group: "Préférences" },
   { id: "installation", label: "Installer Guardiens", icon: Download, group: "Préférences" },
   { id: "alma", label: "Fréquence d'Alma", icon: MessageCircle, group: "Préférences" },
-  { id: "billing", label: "Abonnement", icon: CreditCard, group: "Mes espaces" },
+  { id: "billing", label: "Gratuité", icon: CreditCard, group: "Mes espaces" },
   { id: "data", label: "Mes données", icon: Download, group: "Aide & données" },
   { id: "help", label: "Aide & liens utiles", icon: HelpCircle, group: "Aide & données" },
   { id: "danger", label: "Zone dangereuse", icon: AlertTriangle, group: "Zone dangereuse" },
@@ -1139,7 +1139,7 @@ const BillingSection = ({ user }: { user: any }) => {
   const isSitter = user?.role === "sitter" || user?.role === "both";
   return (
     <section>
-      <SectionHeader icon={CreditCard} title="Abonnement & facturation" description="Gérez votre formule et vos factures." />
+      <SectionHeader icon={CreditCard} title="Gratuité" description="Guardiens est gratuit pour tous les membres." />
       <div className="space-y-4">
         <div className="rounded-lg border border-border bg-muted/30 p-4">
           <p className="text-sm font-medium">Espace propriétaire</p>
@@ -1150,7 +1150,7 @@ const BillingSection = ({ user }: { user: any }) => {
           <div className="rounded-lg border border-border bg-muted/30 p-4">
             <p className="text-sm font-medium">Espace gardien</p>
             <p className="text-xs text-muted-foreground mt-1">
-              L'espace gardien est ouvert pendant la phase de lancement. Vous serez prévenu à l'avance en cas d'évolution tarifaire.
+              L'espace gardien coûte 0 €.
             </p>
           </div>
         )}
@@ -1163,7 +1163,7 @@ const BillingSection = ({ user }: { user: any }) => {
         <div className="flex flex-wrap gap-2 pt-2">
           <Button variant="outline" size="sm" asChild className="gap-2">
             <Link to="/tarifs">
-              Voir les formules
+              Voir nos engagements
               <ArrowRight className="h-4 w-4" />
             </Link>
           </Button>

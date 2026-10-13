@@ -37,7 +37,7 @@ async function ensureMonthlyPrice(stripe: Stripe): Promise<string> {
 
   if (!product) {
     product = await stripe.products.create({
-      name: "Guardiens — Abonnement mensuel",
+      name: "Guardiens : abonnement mensuel",
       description: "Accès complet Guardiens pour les gardiens. 6,99€/mois sans engagement.",
       metadata: { guardiens_type: "monthly_699eur" },
     });
@@ -160,7 +160,7 @@ serve(async (req) => {
             currency: "eur",
             unit_amount: amount * 100, // cents
             product_data: {
-              name: `Guardiens — Accès 2026 (${months} mois restants)`,
+              name: `Guardiens : accès 2026 (${months} mois restants)`,
               description: `Accès complet jusqu'au 31 décembre 2026. -20% vs mensuel.`,
             },
           },

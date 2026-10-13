@@ -1020,13 +1020,13 @@ const Messages = () => {
                   Cette conversation vous attend.
                 </p>
                 <p className="text-[12.5px] text-muted-foreground mt-1 leading-relaxed">
-                  L'abonnement gardien ouvre les réponses aux annonces de garde.
+                  L'espace gardien ouvre les réponses aux annonces de garde.
                 </p>
                 <Link
                   to="/mon-abonnement"
                   className="inline-block mt-2 text-[12px] font-bold text-primary hover:underline"
                 >
-                  Découvrir l'abonnement
+                  Voir mon accès
                 </Link>
               </div>
             </div>
