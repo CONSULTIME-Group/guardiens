@@ -38,6 +38,7 @@ await db.exec(`
   INSERT INTO city_guides(id,slug,published) VALUES ('${a}','guide',true);
 `);
 await db.exec(readFileSync(new URL('../supabase/prepared-migrations/20261003213000_seo_url_outbox.sql',import.meta.url),'utf8'));
+await db.exec(readFileSync(new URL('../supabase/prepared-migrations/20261013180000_pr1_budget_glissant.sql',import.meta.url),'utf8'));
 await db.exec(readFileSync(new URL('../supabase/prepared-migrations/20261003223500_seo_public_content_fields.sql',import.meta.url),'utf8'));
 const query=async(s)=>(await db.query(s)).rows;
 const paths=async()=>(await query('SELECT path FROM seo_url_outbox ORDER BY path')).map(r=>r.path);
@@ -118,14 +119,21 @@ test('verrou empeche deux consommateurs puis autorise apres liberation',async()=
   await db.exec(`SELECT seo_release_consumer('${a}')`);
   assert.equal((await query(`SELECT seo_acquire_consumer('${b}') AS ok`))[0].ok,true);
 });
-test('plafond mensuel 18000 reserve avant tout appel',async()=>{
+test('plafond glissant 30 jours reserve avant tout appel',async()=>{
   await db.exec(`SELECT seo_release_consumer('${b}');SELECT seo_acquire_consumer('${a}');INSERT INTO prerender_recache_log VALUES (now()),(now())`);
   assert.equal((await query(`SELECT seo_reserve_render('${a}') AS ok`))[0].ok,true);
   assert.equal((await query('SELECT attempts FROM seo_render_budget'))[0].attempts,3);
-  await db.exec('UPDATE seo_render_budget SET attempts=17999 WHERE true');
+  // Lignes de plus de 30 jours : hors fenetre, elles ne bloquent rien.
+  await db.exec("INSERT INTO prerender_recache_log SELECT now()-interval '31 days' FROM generate_series(1,9900)");
   assert.equal((await query(`SELECT seo_reserve_render('${a}') AS ok`))[0].ok,true);
+  // 9 899 lignes dans la fenetre (dont 2 deja la) : derniere place, puis refus.
+  await db.exec("INSERT INTO prerender_recache_log SELECT now()-interval '29 days' FROM generate_series(1,9897)");
+  assert.equal((await query(`SELECT seo_reserve_render('${a}') AS ok`))[0].ok,true);
+  await db.exec('INSERT INTO prerender_recache_log VALUES (now())');
   assert.equal((await query(`SELECT seo_reserve_render('${a}') AS ok`))[0].ok,false);
-  assert.equal((await query('SELECT attempts FROM seo_render_budget'))[0].attempts,18000);
+  // Le refus ne compte pas de tentative.
+  assert.equal((await query('SELECT attempts FROM seo_render_budget'))[0].attempts,5);
+  await db.exec("DELETE FROM prerender_recache_log WHERE created_at < now()-interval '1 day'");
 });
 test('verrou expire refuse la reservation et peut etre repris',async()=>{
   await db.exec("UPDATE seo_consumer_lease SET expires_at=now()-interval '1 minute' WHERE singleton");

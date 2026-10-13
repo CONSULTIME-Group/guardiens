@@ -13,6 +13,7 @@ import {
   STATIC_LOG_SOURCE,
   STATIC_RENDER_BUDGET,
 } from "../_shared/static-seo-refresh.ts";
+import { isSitterProfileIndexable } from "../_shared/sitterProfileIndexability.js";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -26,6 +27,15 @@ const BATCH = 50;
 const SITTER_SCAN_BATCH = 300;
 /** Renders Prerender réellement dépensés par passage pour les fiches gardien. */
 const SITTER_RENDER_BUDGET = 25;
+/**
+ * Lot PR1 (13/10/2026). Une fiche gardien hors index (meme regle et memes vues
+ * publiques que le sitemap) n'est rendue que si `profiles.seo_indexed_at` est
+ * pose, c'est-a-dire si Prerender en garde une version indexable a remplacer.
+ * Sinon la demande est acquittee sans render. Mesure : en octobre, 1 612 fiches
+ * rendues pour environ 170 fiches declarees au sitemap.
+ */
+/** Taille des listes `in` envoyees a PostgREST, pour borner la longueur d'URL. */
+const IN_CHUNK = 50;
 
 /**
  * Budgets de renders par passage, cron toutes les 15 minutes.
@@ -82,6 +92,9 @@ async function requestRecache(url: string, token: string): Promise<RecacheResult
   }
 }
 
+/** Repere `profiles.seo_indexed_at` a poser (fiche rendue indexable) ou effacer. */
+interface IndexedMark { id: string; indexed: boolean }
+
 interface SitterMetrics {
   sitters_scanned: number;
   sitters_recached: number;
@@ -93,11 +106,15 @@ interface SitterMetrics {
 /**
  * Consomme `profiles.seo_dirty_at` pour les fiches gardien.
  *
- * Trois garde-fous :
+ * Garde-fous :
  *  - lecture plafonnée à SITTER_SCAN_BATCH lignes, les plus anciennes d'abord ;
  *  - au plus SITTER_RENDER_BUDGET appels Prerender par passage ;
- *  - toutes les fiches déjà marquées sont traitées, même après un changement
- *    de rôle ou d'indexabilité ; aucune demande n'est effacée sans succès.
+ *  - fiche indexable (règle partagée avec le sitemap) : rendue ;
+ *  - fiche hors index (rôle quitté, bio vidée, compte inactif, jamais
+ *    éligible) : rendue seulement si `seo_indexed_at` est posé, pour remplacer
+ *    la version indexable gardée par Prerender, puis repère effacé ; sinon
+ *    acquittée sans render (lot PR1, 13/10/2026) ;
+ *  - aucune demande rendue n'est effacée sans succès.
  *
  * Les triggers conservent une seule ligne sale par profil, avec la date de
  * sa dernière modification. L'acquittement id + date conserve une demande
@@ -109,6 +126,7 @@ async function processSitters(
   recache: Recacher,
   logRows: Array<Record<string, unknown>>,
   acknowledgements: DirtyAcknowledgement[],
+  indexedMarks: IndexedMark[],
 ): Promise<SitterMetrics> {
   const metrics: SitterMetrics = {
     sitters_scanned: 0,
@@ -120,26 +138,72 @@ async function processSitters(
 
   const { data, error } = await sb
     .from("profiles")
-    .select("id, seo_dirty_at")
+    .select("id, seo_dirty_at, seo_indexed_at")
     .not("seo_dirty_at", "is", null)
     .order("seo_dirty_at", { ascending: true })
     .limit(SITTER_SCAN_BATCH);
 
   if (error) throw error;
 
-  const rows = (data ?? []) as Array<{ id: string; seo_dirty_at: string }>;
+  const rows = (data ?? []) as Array<{ id: string; seo_dirty_at: string; seo_indexed_at: string | null }>;
   metrics.sitters_scanned = rows.length;
   if (rows.length === 0) return metrics;
 
-  const toRecache = rows.slice(0, SITTER_RENDER_BUDGET);
-  metrics.sitters_deferred = rows.length - toRecache.length;
-  for (const row of toRecache) {
-    const url = `${SITE}/gardiens/${row.id}`;
+  // Lectures non facturees, sur les vues publiques que lit le sitemap : une
+  // fiche absente de public_profiles (compte inactif, profil masque) est hors index.
+  const publicById = new Map<string, { bio: string | null; identity_verified: boolean | null; role: string | null }>();
+  const motivationById = new Map<string, string | null>();
+  const galleryCountById = new Map<string, number>();
+  for (let i = 0; i < rows.length; i += IN_CHUNK) {
+    const ids = rows.slice(i, i + IN_CHUNK).map((r) => r.id);
+    const [pub, sp, gallery] = await Promise.all([
+      sb.from("public_profiles").select("id, bio, identity_verified, role").in("id", ids),
+      sb.from("public_sitter_profiles").select("user_id, motivation").in("user_id", ids),
+      sb.from("public_sitter_gallery_counts").select("user_id, photo_count").in("user_id", ids),
+    ]);
+    if (pub.error) throw pub.error;
+    if (sp.error) throw sp.error;
+    if (gallery.error) throw gallery.error;
+    for (const r of (pub.data ?? []) as Array<{ id: string; bio: string | null; identity_verified: boolean | null; role: string | null }>) {
+      publicById.set(r.id, r);
+    }
+    for (const r of (sp.data ?? []) as Array<{ user_id: string; motivation: string | null }>) {
+      motivationById.set(r.user_id, r.motivation);
+    }
+    for (const r of (gallery.data ?? []) as Array<{ user_id: string; photo_count: number | null }>) {
+      galleryCountById.set(r.user_id, r.photo_count ?? 0);
+    }
+  }
+  const urlOf = (id: string) => `${SITE}/gardiens/${id}`;
+  const isIndexable = (id: string) => {
+    const pub = publicById.get(id);
+    return !!pub && isSitterProfileIndexable({
+      role: pub.role,
+      bio: pub.bio,
+      motivation: motivationById.get(id) ?? null,
+      identityVerified: pub.identity_verified,
+      galleryCount: galleryCountById.get(id) ?? 0,
+    });
+  };
+
+  let attempts = 0;
+  for (const row of rows) {
+    const url = urlOf(row.id);
+    const indexable = isIndexable(row.id);
+    if (!indexable && !row.seo_indexed_at) {
+      // Aucune version indexable a remplacer : acquitter sans render.
+      metrics.sitters_skipped_noindex += 1;
+      acknowledgements.push({ table: "profiles", id: row.id, seo_dirty_at: row.seo_dirty_at });
+      continue;
+    }
+    if (attempts >= SITTER_RENDER_BUDGET) { metrics.sitters_deferred += 1; continue; }
+    attempts += 1;
     const res = await recache(url);
     if (res.deferred) { metrics.sitters_deferred += 1; continue; }
     if (res.ok) {
       metrics.sitters_recached += 1;
       acknowledgements.push({ table: "profiles", id: row.id, seo_dirty_at: row.seo_dirty_at });
+      if (indexable !== !!row.seo_indexed_at) indexedMarks.push({ id: row.id, indexed: indexable });
     } else {
       metrics.sitters_failed += 1;
     }
@@ -466,7 +530,8 @@ Deno.serve(async (req) => {
 
     // Fiches gardien : même token, même journalisation, budget de renders
     // propre pour ne pas entamer le quota partagé du compte Prerender.
-    const sitterMetrics = await processSitters(sb, recache, logRows, acknowledgements);
+    const indexedMarks: IndexedMark[] = [];
+    const sitterMetrics = await processSitters(sb, recache, logRows, acknowledgements, indexedMarks);
     urlsFailed += sitterMetrics.sitters_failed;
     urlsOk += sitterMetrics.sitters_recached;
 
@@ -487,6 +552,15 @@ Deno.serve(async (req) => {
       const { error: ackError } = await sb.from("seo_url_outbox").delete()
         .eq("path", row.path).eq("dirty_at", row.dirty_at);
       if (ackError) throw ackError;
+    }
+    // Repere de version indexable, apres journalisation : pose quand la fiche
+    // vient d'etre rendue indexable, efface quand sa copie vient d'etre
+    // remplacee par une version hors index.
+    for (const mark of indexedMarks) {
+      const { error: markError } = await sb.from("profiles")
+        .update({ seo_indexed_at: mark.indexed ? new Date().toISOString() : null })
+        .eq("id", mark.id);
+      if (markError) throw markError;
     }
     // Journaliser les tentatives avant tout acquittement de la file.
     for (let offset = 0; offset < acknowledgements.length; offset += ACKNOWLEDGEMENT_BATCH) {
