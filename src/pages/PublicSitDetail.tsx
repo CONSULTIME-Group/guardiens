@@ -39,6 +39,7 @@ import { petSpeciesLabelLower } from "@/lib/petLabels";
 import { publicFirstName } from "@/lib/displayName";
 import { loadSitLocationLabel } from "@/lib/sitLocationLoad";
 import { applicationAvailability } from "@/lib/applicationCap";
+import { STARTED_SIT_NOTICE, isStartedOpenSit } from "@/lib/sitStarted";
 
 type ViewerType = "anonymous" | "gardien" | "proprio" | "owner_of_sit" | "admin";
 
@@ -659,6 +660,15 @@ const PublicSitDetail = () => {
       )}
 
 
+
+      {/* Lot Z2 (A-12) : garde publiée dont le début est passé, toujours ouverte. */}
+      {!hideDates && isStartedOpenSit(sit) && (
+        <div className="bg-primary/5 border-b border-primary/15" data-testid="started-sit-notice">
+          <div className="max-w-6xl mx-auto px-4 py-3">
+            <p className="text-sm font-medium text-foreground">{STARTED_SIT_NOTICE}</p>
+          </div>
+        </div>
+      )}
 
       {/* Bandeau "aperçu public", propriétaire de l'annonce */}
       {viewerType === "owner_of_sit" && (

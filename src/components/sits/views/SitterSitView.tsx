@@ -46,6 +46,7 @@ import { AlmaReactiveOwnerWhisper } from "@/components/ai/alma/wiring/AlmaReacti
 import type { SitData } from "./types";
 import { sitterPresenceOnSit } from "@/lib/sitterSitPresence";
 import { applicationAvailability } from "@/lib/applicationCap";
+import { STARTED_SIT_NOTICE, isStartedOpenSit } from "@/lib/sitStarted";
 
 interface SitterSitViewProps {
   sit: SitData;
@@ -246,6 +247,16 @@ const SitterSitView = ({
         endDate={sit.end_date}
         otherSitterChosen={presence === "other_chosen"}
       />
+
+      {/* Lot Z2 (A-12) : garde publiée dont le début est passé, toujours ouverte. */}
+      {isStartedOpenSit(sit) && (
+        <p
+          className="mb-4 rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-sm font-medium text-foreground"
+          data-testid="started-sit-notice"
+        >
+          {STARTED_SIT_NOTICE}
+        </p>
+      )}
 
       {/* Header partagé (compact : back link + actions uniquement) */}
       <SitDetailHeader
