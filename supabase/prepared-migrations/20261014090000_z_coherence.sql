@@ -17,6 +17,11 @@
 -- new_sit_nearby non lues sur 7 399 visent une annonce non publiée
 -- (expired 2 892, draft 798, archived 444, cancelled 401), aucune une annonce
 -- absente.
+-- Relecture du 14/10/2026 : seuls les états terminaux purgent (expired,
+-- archived, cancelled, completed). Un brouillon ou une garde confirmée peut
+-- revenir en ligne (republication par le propriétaire, create_avis_annulation),
+-- et notify_sitters_on_new_sit ne renotifie jamais un gardien déjà en file :
+-- sa notification doit rester. Les 798 notifications sur brouillon sont gardées.
 -- =========================================================================
 CREATE OR REPLACE FUNCTION public.purge_unread_new_sit_nearby_of_sit()
  RETURNS trigger
@@ -42,18 +47,21 @@ DROP TRIGGER IF EXISTS trg_purge_new_sit_nearby_on_unpublish ON public.sits;
 CREATE TRIGGER trg_purge_new_sit_nearby_on_unpublish
   AFTER UPDATE OF status ON public.sits
   FOR EACH ROW
-  WHEN (OLD.status = 'published'::sit_status AND NEW.status <> 'published'::sit_status)
+  WHEN (OLD.status IS DISTINCT FROM NEW.status
+        AND NEW.status IN ('expired'::sit_status, 'archived'::sit_status,
+                           'cancelled'::sit_status, 'completed'::sit_status))
   EXECUTE FUNCTION public.purge_unread_new_sit_nearby_of_sit();
 
--- Rattrapage Z1 : 4 535 lignes au 13/10/2026. Un lien illisible compte comme
--- une annonce absente.
+-- Rattrapage Z1 : 3 737 lignes au 14/10/2026 (expired 2 892, archived 444,
+-- cancelled 401), plus toute notification dont l'annonce n'existe plus.
 DELETE FROM public.notifications n
  WHERE n.type = 'new_sit_nearby'
    AND n.read_at IS NULL
    AND NOT EXISTS (
      SELECT 1 FROM public.sits s
       WHERE s.id::text = substring(n.link FROM '^/sits/([0-9a-fA-F-]{36})')
-        AND s.status = 'published'::sit_status
+        AND s.status NOT IN ('expired'::sit_status, 'archived'::sit_status,
+                             'cancelled'::sit_status, 'completed'::sit_status)
    );
 
 -- =========================================================================
@@ -93,6 +101,16 @@ END;
 $function$;
 
 REVOKE EXECUTE ON FUNCTION public.purge_unread_notifications_of_mission() FROM PUBLIC, anon, authenticated;
+
+-- Le trigger couvre aussi le besoin terminé (relecture du 14/10/2026), même
+-- règle que le rattrapage.
+DROP TRIGGER IF EXISTS trg_purge_help_invitations_of_cancelled_mission ON public.small_missions;
+CREATE TRIGGER trg_purge_help_invitations_of_cancelled_mission
+  AFTER UPDATE OF status ON public.small_missions
+  FOR EACH ROW
+  WHEN (OLD.status IN ('open'::small_mission_status, 'in_progress'::small_mission_status)
+        AND NEW.status IN ('cancelled'::small_mission_status, 'completed'::small_mission_status))
+  EXECUTE FUNCTION public.purge_unread_notifications_of_mission();
 
 -- Rattrapage Z2 : 108 lignes au 13/10/2026 (99 + 9).
 DELETE FROM public.notifications n
@@ -663,22 +681,39 @@ SELECT p.id
    AND NOT EXISTS (SELECT 1 FROM public.sitter_profiles sp WHERE sp.user_id = p.id)
 ON CONFLICT (user_id) DO NOTHING;
 
--- b) FAQ « Comment devenir gardien d'urgence ? » : « dashboard » devient
---    « tableau de bord » (1 entrée sur la base).
+-- b) FAQ « Comment devenir gardien d'urgence ? » : doctrine Y3 (réseau
+--    d'urgence présenté comme à venir, ni SMS ni automatisme annoncé) et
+--    « tableau de bord » au lieu de « dashboard ». Gardé par l'ancien texte.
 UPDATE public.faq_entries
-   SET answer = replace(answer, 'dashboard', 'tableau de bord')
+   SET answer = $z$Le réseau des gardiens d'urgence arrive bientôt sur Guardiens.
+
+Il réunira les gardiens les plus expérimentés de la communauté : 5 gardes réalisées sur Guardiens, une note de 4,7 ou plus, zéro annulation et une identité vérifiée. Quand vous remplirez ces conditions, une invitation apparaîtra sur votre tableau de bord.
+
+Vous choisirez alors votre rayon d'intervention, vos plages horaires et les animaux que vous accueillez, et vous activerez votre disponibilité quand vous le souhaitez. Un écusson sur votre profil indiquera aux propriétaires que vous faites partie du réseau.
+
+Pour préparer votre profil : [Créer un profil gardien attractif](/actualites/creer-profil-gardien-attractif)$z$
  WHERE id = 'f8571b95-5542-4527-b7bb-fba63fb5bfd6'
-   AND position('dashboard' IN answer) > 0;
+   AND position('alertes par SMS' IN answer) > 0;
+
+-- c) Avis 062d5d64 (01/10/2026) publié par l'équipe avant le lot Z : resté
+--    en_attente, donc invisible sur le profil public. Même règle que la
+--    publication par l'équipe désormais (AdminReviews pose valide).
+UPDATE public.reviews
+   SET moderation_status = 'valide'
+ WHERE published = true
+   AND moderation_status = 'en_attente'
+   AND moderation_hidden_at IS NULL
+   AND COALESCE(review_type, 'garde') = 'garde';
 
 -- =========================================================================
 -- Z13. Contrôles après application (chaque requête doit renvoyer 0 ligne).
 -- =========================================================================
--- Z1, new_sit_nearby non lue vers une annonce non publiée ou absente :
+-- Z1, new_sit_nearby non lue vers une annonce close ou absente :
 -- SELECT n.id FROM public.notifications n
 --  WHERE n.type = 'new_sit_nearby' AND n.read_at IS NULL
 --    AND NOT EXISTS (SELECT 1 FROM public.sits s
 --         WHERE s.id::text = substring(n.link FROM '^/sits/([0-9a-fA-F-]{36})')
---           AND s.status = 'published');
+--           AND s.status NOT IN ('expired', 'archived', 'cancelled', 'completed'));
 --
 -- Z2, invitation ou relance non lue vers un besoin clos :
 -- SELECT n.id FROM public.notifications n

@@ -268,9 +268,12 @@ describe("Z11, une seule notification au lendemain d'une garde", () => {
   it("la fin de la veille est couverte par le rappel J+1 du matin", () => {
     expect(previousUtcDay("2026-10-14")).toBe("2026-10-13");
     expect(previousUtcDay("2026-11-01")).toBe("2026-10-31");
-    expect(completionNoticeCoveredByMorningReminder("2026-10-13", "2026-10-14")).toBe(true);
-    expect(completionNoticeCoveredByMorningReminder("2026-10-10", "2026-10-14")).toBe(false);
-    expect(completionNoticeCoveredByMorningReminder(null, "2026-10-14")).toBe(false);
+    expect(completionNoticeCoveredByMorningReminder("2026-10-13", "2026-10-14", 0)).toBe(true);
+    expect(completionNoticeCoveredByMorningReminder("2026-10-13", "2026-10-14", 5)).toBe(true);
+    // Après 6 h UTC, le rappel J+1 est passé : la notification de fin reste due.
+    expect(completionNoticeCoveredByMorningReminder("2026-10-13", "2026-10-14", 6)).toBe(false);
+    expect(completionNoticeCoveredByMorningReminder("2026-10-10", "2026-10-14", 0)).toBe(false);
+    expect(completionNoticeCoveredByMorningReminder(null, "2026-10-14", 0)).toBe(false);
   });
 
   it("auto-transition-sits n'écrit sa notification que hors rappel du matin, les emails restent", () => {

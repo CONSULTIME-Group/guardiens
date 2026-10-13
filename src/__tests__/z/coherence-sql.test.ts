@@ -95,7 +95,7 @@ describe("Z1 et Z2, notifications mortes", () => {
     expect(fn).toContain("n.type = 'new_sit_nearby'");
     expect(fn).toContain("n.link = v_base OR n.link LIKE v_base || '?%' OR n.link LIKE v_base || '#%'");
     expect(sql).toMatch(
-      /CREATE TRIGGER trg_purge_new_sit_nearby_on_unpublish\s+AFTER UPDATE OF status ON public\.sits\s+FOR EACH ROW\s+WHEN \(OLD\.status = 'published'::sit_status AND NEW\.status <> 'published'::sit_status\)/,
+      /CREATE TRIGGER trg_purge_new_sit_nearby_on_unpublish\s+AFTER UPDATE OF status ON public\.sits\s+FOR EACH ROW\s+WHEN \(OLD\.status IS DISTINCT FROM NEW\.status\s+AND NEW\.status IN \('expired'::sit_status, 'archived'::sit_status,\s+'cancelled'::sit_status, 'completed'::sit_status\)\)/,
     );
     expect(sql).toContain(
       "REVOKE EXECUTE ON FUNCTION public.purge_unread_new_sit_nearby_of_sit() FROM PUBLIC, anon, authenticated;",
@@ -106,8 +106,9 @@ describe("Z1 et Z2, notifications mortes", () => {
     const del = between("DELETE FROM public.notifications n\n WHERE n.type = 'new_sit_nearby'", ");");
     expect(del).toContain("n.read_at IS NULL");
     expect(del).toContain("NOT EXISTS");
-    expect(del).toContain("s.status = 'published'::sit_status");
-    expect(raw).toContain("4 535");
+    expect(del).toContain("s.status NOT IN ('expired'::sit_status, 'archived'::sit_status,");
+    expect(del).not.toContain("'draft'");
+    expect(raw).toContain("3 737");
   });
 
   it("la purge d'un besoin annulé couvre aussi mission_wave_relaunch, branche DELETE inchangée", () => {
@@ -249,10 +250,20 @@ describe("Z12, données", () => {
     expect(ins).toContain("p.account_status = 'active'");
   });
 
-  it("FAQ : « dashboard » devient « tableau de bord », remplacement gardé", () => {
+  it("FAQ urgence : réseau à venir, sans SMS, « tableau de bord », réécriture gardée", () => {
     const up = between("UPDATE public.faq_entries", ";");
-    expect(up).toContain("replace(answer, 'dashboard', 'tableau de bord')");
+    expect(up).toContain("arrive bientôt");
+    expect(up).toContain("tableau de bord");
+    expect(up).not.toMatch(/SMS|dashboard|automatique/);
     expect(up).toContain("id = 'f8571b95-5542-4527-b7bb-fba63fb5bfd6'");
-    expect(up).toContain("position('dashboard' IN answer) > 0");
+    expect(up).toContain("position('alertes par SMS' IN answer) > 0");
+  });
+
+  it("avis publié par l'équipe resté en attente : validé, hors annulation et hors masqué", () => {
+    const up = between("UPDATE public.reviews\n   SET moderation_status = 'valide'", ";");
+    expect(up).toContain("published = true");
+    expect(up).toContain("moderation_status = 'en_attente'");
+    expect(up).toContain("moderation_hidden_at IS NULL");
+    expect(up).toContain("COALESCE(review_type, 'garde') = 'garde'");
   });
 });

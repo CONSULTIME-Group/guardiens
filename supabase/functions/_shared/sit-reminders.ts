@@ -33,8 +33,12 @@ export function previousUtcDay(day: string): string {
 export function completionNoticeCoveredByMorningReminder(
   endDate: string | null | undefined,
   todayUtc: string,
+  nowUtcHour: number = new Date().getUTCHours(),
 ): boolean {
   if (!endDate) return false;
+  // Relecture du 14/10/2026 : après 6 h UTC, le rappel J+1 est déjà passé
+  // (il ne lit que les gardes terminées) ; la notification de fin reste due.
+  if (nowUtcHour >= 6) return false;
   return endDate.slice(0, 10) === previousUtcDay(todayUtc);
 }
 
