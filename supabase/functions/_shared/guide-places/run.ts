@@ -6,6 +6,7 @@
 import {
   ALL_CATEGORIES,
   collectPlaces,
+  dbOverpass,
   countryLabel,
   haversineM,
   matchGooglePlaceId,
@@ -109,6 +110,7 @@ export async function sourceOneGuide(
     fetch,
     sleep,
     deadline,
+    dbOverpass((fn, args) => supabase.rpc(fn, args), sleep),
   );
   report.rayons = collected.radiiUsed;
   report.rejetes_distance = collected.rejectedDistance;

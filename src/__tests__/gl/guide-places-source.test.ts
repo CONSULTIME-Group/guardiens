@@ -423,3 +423,45 @@ describe("GL, forme de la requête Overpass", () => {
     for (const st of statements) expect(st).toMatch(/^(nwr|wr|way|relation)\(around:5000,45\.74,-70\.69\)\[/);
   });
 });
+
+describe("GL, Overpass depuis la base", () => {
+  it("envoie par guide_osm_enqueue, lit par guide_osm_result, passe au miroir suivant sur délai dépassé", async () => {
+    const { dbOverpass } = await import("../../../supabase/functions/_shared/guide-places/source");
+    const calls: string[] = [];
+    const responses: Record<number, unknown> = {
+      1: { status_code: 200, timed_out: false, content: JSON.stringify({ elements: [], remark: 'runtime error: Query timed out in "query"' }) },
+      2: { status_code: 200, timed_out: false, content: JSON.stringify({ elements: [{ type: "node", id: 6, lat: 45.9, lon: -70.69, tags: { amenity: "veterinary", name: "Véto" } }] }) },
+    };
+    let next = 0;
+    const rpc = async (fn: string, args: Record<string, unknown>) => {
+      calls.push(`${fn}:${JSON.stringify(args)}`);
+      if (fn === "guide_osm_enqueue") return { data: ++next, error: null };
+      return { data: [responses[Number(args.p_id)]].filter(Boolean), error: null };
+    };
+    const els = await dbOverpass(rpc, noSleep)("[out:json][timeout:25];x;", Date.now() + 100000);
+    expect(els).toHaveLength(1);
+    expect(calls[0]).toContain('"p_mirror":0');
+    expect(calls.some((c) => c.includes('"p_mirror":1'))).toBe(true);
+  });
+
+  it("collectPlaces passe par le transport fourni, jamais par fetch pour Overpass", async () => {
+    const fetched: string[] = [];
+    const fn = async (url: string) => { fetched.push(url); return new Response("[]"); };
+    const asked: string[] = [];
+    const transport = async (q: string) => {
+      asked.push(q);
+      return q.includes("veterinary") ? [el(6, { amenity: "veterinary", name: "Véto du Granit", "addr:street": "Rue Laval" }, north(3), SAINT_LUDGER.lon)] : [];
+    };
+    const res = await collectPlaces(
+      { city: "Saint Ludger", postalCode: "G0M1W0", center: SAINT_LUDGER },
+      { names: new Set(), sources: new Set(), counts: {} },
+      fn,
+      noSleep,
+      Number.POSITIVE_INFINITY,
+      transport,
+    );
+    expect(asked.length).toBeGreaterThan(0);
+    expect(fetched.some((u) => u.includes("overpass") || u.includes("mail.ru"))).toBe(false);
+    expect(res.rows.map((r) => r.name)).toContain("Véto du Granit");
+  });
+});
