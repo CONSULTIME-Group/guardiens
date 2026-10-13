@@ -417,7 +417,8 @@ describe("parité des entrées du moteur d'affinité", () => {
             expect(d.star, `${delegate} : fetchMyPets doit lire pets en entier`).toBe(true);
             return;
           }
-          const { cols } = projectedColumns(path, ["pets"]);
+          // Lot Y2 (P3-10) : un gardien lit les animaux d'autrui par public_pets.
+          const { cols } = projectedColumns(path, ["pets", "public_pets"]);
           const missingPetCols = PETS_TRIPLE.filter((c) => !cols.has(c));
           expect(
             missingPetCols,
@@ -540,7 +541,8 @@ describe("parité des entrées du moteur d'affinité", () => {
       const proj = projectedColumns(path, ["owner_profiles", "public_owner_profiles"]);
       const missingCols = OWNER_TABLE_COLUMNS.filter((c) => !proj.cols.has(c));
       expect(missingCols, `colonnes owner_profiles absentes : ${missingCols.join(", ")}`).toEqual([]);
-      const petsProj = projectedColumns(path, ["pets"]);
+      // Lot Y2 (P3-10) : animaux de l'annonce par la vue public_pets.
+      const petsProj = projectedColumns(path, ["pets", "public_pets"]);
       const missingPetCols = PETS_TRIPLE.filter((c) => !petsProj.cols.has(c));
       expect(missingPetCols, `projection pets incomplète : ${missingPetCols.join(", ")}`).toEqual([]);
     });

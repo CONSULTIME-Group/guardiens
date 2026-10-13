@@ -207,8 +207,10 @@ export function useSitterTopAffinitySits(): Result {
 
       const [petsRes, ownerProfilesRes, propertiesRes]: any[] = await Promise.all([
         propertyIds.length > 0
-          ? supabase
-              .from("pets")
+          ? // Lot Y2 (P3-10) : pets est réservé au propriétaire et au gardien
+            // retenu, les annonces ouvertes se lisent par public_pets.
+            (supabase as any)
+              .from("public_pets" as any)
               .select("property_id, species, special_needs, photo_url, breed")
               .in("property_id", propertyIds)
           : Promise.resolve({ data: [] }),

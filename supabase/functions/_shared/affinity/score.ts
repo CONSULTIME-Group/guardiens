@@ -90,6 +90,7 @@ import {
   SPECIES_LABEL_PLURAL,
 
   SENSITIVITY_BY_SPECIES,
+  NEUTRAL_SENSITIVITY_BY_SPECIES,
   SENSITIVITY_EXPLANATION,
   SENS_ALLERGIE_CHAT,
   SENS_ALLERGIE_CHIEN,
@@ -337,7 +338,11 @@ function coveredSpecies(
 
     // Sensibilités bloquantes applicables à cette espèce / cet animal.
     const breedUnknown = pet.breed == null || normalizeFreeText(pet.breed) === "";
-    const applicable = (SENSITIVITY_BY_SPECIES[canon] ?? []).filter((sens) => {
+    // Lot Y2 : le libellé neutre (« Pas de chats ») bloque comme l'allergie.
+    const applicable = [
+      ...(SENSITIVITY_BY_SPECIES[canon] ?? []),
+      ...(NEUTRAL_SENSITIVITY_BY_SPECIES[canon] ?? []),
+    ].filter((sens) => {
       if (!sitterSens.has(sens)) return false;
       if (canon === "dog" && sens === SENS_GRANDS_CHIENS) {
         // Prudence : race non renseignée ⇒ on respecte le refus déclaré.

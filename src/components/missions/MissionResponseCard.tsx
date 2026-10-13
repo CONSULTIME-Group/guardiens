@@ -120,9 +120,11 @@ const MissionResponseCard = ({
   useEffect(() => {
     if (!isAuthor || !r.responder_id) return;
     let cancelled = false;
-    supabase
-      .from("profiles")
-      .select("helps_with")
+    // Lot Y2 (P3-12) : profiles n'est lisible que de son titulaire, la
+    // phrase vient de la vue public_helpers (personnes disponibles).
+    (supabase as any)
+      .from("public_helpers")
+      .select("id, helps_with")
       .eq("id", r.responder_id)
       .maybeSingle()
       .then(({ data }) => { if (!cancelled) setHelpsWith((data as any)?.helps_with ?? null); });

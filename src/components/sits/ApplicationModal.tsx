@@ -196,8 +196,10 @@ const ApplicationModal = ({
           // voiture requise. Parité des entrées verrouillée par
           // affinity-input-parity.test.ts.
           const [{ data: petsData }, { data: propertyRow }] = await Promise.all([
-            supabase
-              .from("pets")
+            // Lot Y2 (P3-10) : candidature sur une annonce publiée, les
+            // animaux se lisent par public_pets (pets réservé aux parties).
+            (supabase as any)
+              .from("public_pets" as any)
               .select("species, special_needs, breed")
               .eq("property_id", propertyId),
             supabase

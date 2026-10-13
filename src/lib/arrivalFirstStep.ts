@@ -27,7 +27,8 @@ async function scoreCards(cards: FirstStepCard[], raws: Map<string, any>, sitter
   const propIds = cards.map((c) => raws.get(c.id)?.property_id).filter(Boolean);
   const ownerIds = cards.map((c) => raws.get(c.id)?.user_id).filter(Boolean);
   const [pets, owners, props]: any[] = await Promise.all([
-    supabase.from("pets").select("property_id, species, special_needs, photo_url, breed").in("property_id", propIds),
+    // Lot Y2 (P3-10) : annonces publiées, animaux lus par la vue public_pets.
+    (supabase.from("public_pets" as any) as any).select("property_id, species, special_needs, photo_url, breed").in("property_id", propIds),
     supabase.from("public_owner_profiles").select("user_id, preferred_sitter_types, home_ambiance, languages, interests, life_pace, presence_expected").in("user_id", ownerIds),
     supabase.from("properties").select("id, car_required").in("id", propIds),
   ]);
