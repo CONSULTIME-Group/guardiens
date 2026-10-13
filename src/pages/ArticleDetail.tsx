@@ -409,7 +409,7 @@ export default function ArticleDetail() {
  <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
  "@context": "https://schema.org",
  "@type": "LocalBusiness",
- "name": `Guardiens, Pet-sitting & House-sitting ${article.city}`,
+ "name": `Guardiens, garde d'animaux et house-sitting ${article.city}`,
  "description": article.excerpt,
  "url": `https://guardiens.fr/actualites/${article.slug}`,
  "address": {
@@ -418,7 +418,7 @@ export default function ArticleDetail() {
 ...(article.region ? { "addressRegion": article.region } : {}),
  "addressCountry": "FR"
  },
- "priceRange": "0 € pour les propriétaires",
+ "priceRange": "Guardiens est gratuit",
  }) }} />
  )}
 

@@ -61,8 +61,8 @@ export default function SpotlightForYouPanel() {
         <SectionHeader
           as="h3"
           eyebrow="Pour vous"
-          title="Des gardiens vous attendent près de chez vous"
-          subtitle="Nous cherchons des gardiens dans votre secteur, revenez dans quelques jours ou parrainez un proche."
+          title="Le réseau grandit à proximité"
+          subtitle="Votre annonce publiée alerte les gardiens à proximité, et vous pouvez inviter une personne de confiance à rejoindre Guardiens."
         />
         <div className="mt-4 flex flex-col items-start gap-3">
           <Link

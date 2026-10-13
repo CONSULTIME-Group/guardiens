@@ -201,11 +201,11 @@ export const CITIES: CityData[] = [
  "Jardins avec piscine : fermeture sécurisée à vérifier avant chaque mission",
  ],
  expertiseTips: [
- "Nos gardiens Caluire connaissent les zones inondables et savent gérer les accès en période de crue.",
- "Pour les maisons avec jardin et piscine, nos gardiens appliquent le protocole de sécurité piscine standard.",
+ "Indiquez dans le guide de la maison les accès à utiliser en période de crue.",
+ "Notez les consignes de sécurité de la piscine dans l'accord de garde.",
  ],
  heroImageAlt:
- "House-sitting Caluire-et-Cuire - Garde maison nord Lyon - Guardiens",
+ "Garde de maison à Caluire-et-Cuire, au nord de Lyon",
  },
  {
  slug: "chambery",
@@ -247,10 +247,10 @@ export const CITIES: CityData[] = [
  "Brouillard matinal automnal persistent : vigilance pour les sorties tôt le matin",
  ],
  expertiseTips: [
- "Nos gardiens chambériens anticipent le verglas et adaptent les horaires de sorties animaux en conséquence.",
- "Pour les résidences avec cave ou sous-sol humide, nos gardiens vérifient les pompes de relevage en hiver.",
+ "Précisez les horaires de sortie des animaux à privilégier les jours de verglas.",
+ "Signalez la pompe de relevage de la cave et son fonctionnement en hiver.",
  ],
  heroImageAlt:
- "House-sitting Chambéry - Garde maison Savoie - Guardiens",
+ "Garde de maison à Chambéry, Savoie",
  },
 ];

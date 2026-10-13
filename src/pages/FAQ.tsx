@@ -260,7 +260,7 @@ const FAQ = () => {
  <p className="font-heading font-semibold text-foreground mb-1">{t("faq.pricing_cta_title")}</p>
  <p className="text-sm text-muted-foreground mb-4">{t("faq.pricing_cta_text")}</p>
  <Link
- to="/actualites/nouveaux-tarifs-2026"
+ to="/tarifs"
  className="inline-flex items-center justify-center rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
  >
  {t("faq.pricing_cta_link")}

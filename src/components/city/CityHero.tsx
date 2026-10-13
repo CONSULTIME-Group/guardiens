@@ -2,7 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { slugify } from "@/lib/normalize";
 import { getOptimizedImageUrl } from "@/lib/imageOptim";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, ShieldCheck, Siren, BadgeCheck, Mountain } from "lucide-react";
+import { ArrowRight, ShieldCheck, BadgeCheck, Mountain, MessageCircle } from "lucide-react";
 interface CityHeroProps {
   city: string;
   h1Title: string;
@@ -24,8 +24,8 @@ export const CITY_HERO_IMAGES: Record<string, string> = {
 
 const trustSignals = [
   { icon: BadgeCheck, label: "Identité vérifiable" },
-  { icon: Siren, label: "Gardiens d'urgence" },
-  { icon: ShieldCheck, label: "Propriétaires : 0 €" },
+  { icon: MessageCircle, label: "Avis croisés" },
+  { icon: ShieldCheck, label: "Guardiens est gratuit" },
   { icon: Mountain, label: "Esprit de proximité" },
 ];
 

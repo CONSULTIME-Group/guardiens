@@ -2444,6 +2444,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  resultCoords={resultCoords}
  userCoords={userCoords}
  hasAccess={hasAccess}
+ isLoggedIn={!!user}
  formatDate={formatDate}
  tab={tab}
  sitterEligible={sitterEligible}
