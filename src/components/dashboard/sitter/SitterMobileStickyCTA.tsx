@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Search, MessageSquare, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useStarVisibilityGate } from "@/hooks/useStarVisibilityGate";
+import { SITTER_APPLICATIONS_PATH } from "@/lib/sitterApplicationsLink";
 
 interface SitterMobileStickyCTAProps {
   pendingAppsCount?: number;
@@ -33,7 +34,8 @@ const SitterMobileStickyCTA = memo(({ pendingAppsCount = 0, unreadCount = 0 }: S
     Icon = MessageSquare;
   } else if (pendingAppsCount > 0) {
     label = "Mes candidatures";
-    to = "/sits";
+    // Lot Z2 (B-16) : même adresse que la barre de navigation gardien.
+    to = SITTER_APPLICATIONS_PATH;
     badge = pendingAppsCount;
     Icon = FileText;
   } else {
