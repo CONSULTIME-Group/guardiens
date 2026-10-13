@@ -614,6 +614,50 @@ export async function runOverpass(
   return null;
 }
 
+/** Une requête Overpass rendue en éléments, ou null si aucun miroir n'a répondu. */
+export type OverpassTransport = (query: string, deadline: number) => Promise<OsmElement[] | null>;
+
+/** Appel d'une fonction de la base (supabase.rpc), réduit à ce dont on a besoin. */
+export type RpcLike = (fn: string, args: Record<string, unknown>) => PromiseLike<{ data: any; error: any }>;
+
+/**
+ * Overpass appelé depuis la base (pg_net), pas depuis la fonction serveur.
+ * Mesure du 13/10/2026 : les mêmes requêtes courtes répondent depuis la base
+ * et échouent sur les quatre miroirs depuis les fonctions serveur, dont
+ * l'adresse de sortie est partagée et épuise la limite par adresse d'Overpass.
+ * guide_osm_enqueue envoie la requête (transaction validée, pg_net l'expédie),
+ * guide_osm_result lit la réponse.
+ */
+export function dbOverpass(rpc: RpcLike, sleep: (ms: number) => Promise<void>, mirrors = 3): OverpassTransport {
+  return async (query, deadline) => {
+    for (let mirror = 0; mirror < mirrors; mirror++) {
+      if (Date.now() + 6000 > deadline) return null;
+      const { data: id, error } = await rpc("guide_osm_enqueue", { p_query: query, p_mirror: mirror });
+      if (error || id == null) return null;
+      // Attente de la réponse : 30 s au plus (délai pg_net 28 s).
+      const until = Math.min(Date.now() + 30000, deadline - 2000);
+      let row: any = null;
+      while (Date.now() < until) {
+        await sleep(1000);
+        const { data } = await rpc("guide_osm_result", { p_id: id });
+        row = Array.isArray(data) ? data[0] ?? null : data ?? null;
+        if (row) break;
+      }
+      if (!row || row.timed_out || Number(row.status_code) !== 200) continue;
+      const text = String(row.content ?? "");
+      if (!text.trim().startsWith("{")) continue;
+      try {
+        const parsed = JSON.parse(text);
+        if (/runtime (error|remark)|timed out|out of memory/i.test(String(parsed?.remark ?? ""))) continue;
+        return Array.isArray(parsed?.elements) ? parsed.elements : [];
+      } catch {
+        continue;
+      }
+    }
+    return null;
+  };
+}
+
 /**
  * Adresse lisible d'un point : BAN en France, Nominatim ailleurs.
  * `error` distingue une panne (à refaire) d'une absence d'adresse.
@@ -710,8 +754,10 @@ export async function collectPlaces(
   fetchFn: FetchLike,
   sleep: (ms: number) => Promise<void>,
   deadline = Number.POSITIVE_INFINITY,
+  overpass?: OverpassTransport,
 ): Promise<CollectReport> {
   const { center } = guide;
+  const ask: OverpassTransport = overpass ?? ((q, d) => runOverpass(q, fetchFn, 20000, d));
   let incomplete = false;
   const pool: Candidate[] = [];
   const radiiUsed: Partial<Record<GuideCategory, number>> = {};
@@ -739,7 +785,7 @@ export async function collectPlaces(
           break outer;
         }
         if (requests++ > 0) await sleep(500);
-        const els = await runOverpass(`[out:json][timeout:25];${statement}out center tags;`, fetchFn, 20000, deadline);
+        const els = await ask(`[out:json][timeout:25];${statement}out center tags;`, deadline);
         if (els === null) {
           overpassFailed = true;
           incomplete = true;
