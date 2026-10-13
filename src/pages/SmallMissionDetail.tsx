@@ -430,8 +430,10 @@ const SmallMissionDetail = () => {
   const MIN_MESSAGE_LEN = MIN_MISSION_MESSAGE_LEN;
   const MAX_MESSAGE_LEN = MAX_MISSION_MESSAGE_LEN;
 
-  const handleRespond = async (overrideMessage?: string) => {
-    if (!user || !id || submitting) return;
+  // Lot Z2 (C-19) : renvoie true seulement quand la réponse est enregistrée,
+  // pour que la mesure ne compte jamais un envoi refusé.
+  const handleRespond = async (overrideMessage?: string): Promise<boolean> => {
+    if (!user || !id || submitting) return false;
     setSubmitting(true);
     try {
       const outcome = await respondToMission({
@@ -442,32 +444,32 @@ const SmallMissionDetail = () => {
       switch (outcome.kind) {
         case "empty":
           toast({ variant: "destructive", title: "Message vide", description: "Écrivez un mot avant d'envoyer votre réponse." });
-          return;
+          return false;
         case "too_short":
           toast({ variant: "destructive", title: "Message trop court", description: `Ajoutez au moins ${outcome.min} caractères pour que l'auteur comprenne votre proposition.` });
-          return;
+          return false;
         case "missing":
           throw new Error("Mission introuvable.");
         case "closed":
           toast({ variant: "destructive", title: "Mission clôturée", description: "Cette mission n'accepte plus de réponses." });
-          return;
+          return false;
         case "own_mission":
           toast({ variant: "destructive", title: "Action impossible", description: "Vous ne pouvez pas répondre à votre propre annonce." });
-          return;
+          return false;
         case "duplicate":
           toast({ variant: "destructive", title: "Déjà envoyé", description: "Vous avez déjà proposé votre aide pour cette mission." });
           setHasResponded(true);
-          return;
+          return false;
         case "account_not_active":
           toast({ variant: "destructive", title: "Compte non actif", description: "Contactez le support pour rétablir l'accès à l'entraide." });
-          return;
+          return false;
         case "cap_reached":
           toast({
             variant: "destructive",
             title: "Mission temporairement fermée",
             description: "5 personnes ont déjà proposé leur aide. Une place se libérera si l'auteur en décline une.",
           });
-          return;
+          return false;
         case "failed":
           throw new Error(outcome.message);
         default:
@@ -503,6 +505,7 @@ const SmallMissionDetail = () => {
         },
       });
       toast({ title: "Réponse envoyée !", description: "La personne qui demande va être prévenue." });
+      return true;
 
       // Note : le fan-out (notif in-app + email) est déclenché côté serveur
       // par le trigger `notify_new_mission_response` sur l'insertion de la
@@ -513,6 +516,7 @@ const SmallMissionDetail = () => {
     } finally {
       setSubmitting(false);
     }
+    return false;
   };
 
 
@@ -1870,10 +1874,12 @@ const SmallMissionDetail = () => {
         authorFirstName={author?.first_name}
         submitting={submitting}
         onSubmit={async (msg) => {
-          await handleRespond(msg);
-          trackEvent("mission_response_submitted_from_modal", {
-            metadata: { mission_id: mission.id },
-          });
+          const sent = await handleRespond(msg);
+          if (sent) {
+            trackEvent("mission_response_submitted_from_modal", {
+              metadata: { mission_id: mission.id },
+            });
+          }
           setResponseModalOpen(false);
         }}
       />
