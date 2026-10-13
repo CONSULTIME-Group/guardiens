@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { UserCog, ExternalLink } from "lucide-react";
+import { UserCog } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -26,7 +26,6 @@ const ActiveRolesSection = () => {
   const [target, setTarget] = useState<DeactivateTarget>(null);
   const [activateDialog, setActivateDialog] = useState<"gardien" | "proprio" | null>(null);
   const [loading, setLoading] = useState(false);
-  const [openingPortal, setOpeningPortal] = useState(false);
   const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
   const [availLoading, setAvailLoading] = useState(false);
 
@@ -89,33 +88,30 @@ const ActiveRolesSection = () => {
     setTarget(which);
   };
 
-  const openCustomerPortal = async () => {
-    setOpeningPortal(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("customer-portal", {
-        body: {},
-      });
-      if (error) throw error;
-      if (data?.url) {
-        window.open(data.url, "_blank", "noopener,noreferrer");
-      }
-    } catch {
-      toast.error("Impossible d'ouvrir le portail. Réessayez.");
-    } finally {
-      setOpeningPortal(false);
-    }
-  };
-
   const confirmDeactivate = async () => {
     if (!target || !user) return;
     setLoading(true);
     try {
       const newRole = target === "sitter" ? "owner" : "sitter";
-      const { error } = await supabase
-        .from("profiles")
-        .update({ role: newRole } as any)
-        .eq("id", user.id);
-      if (error) throw error;
+      // Lot X1 : l'écriture directe de profiles.role est refusée par le
+      // garde-fou des champs sensibles, le retrait passe par une fonction dédiée.
+      const { error } = await supabase.rpc("deactivate_my_space" as any, { p_keep: newRole } as any);
+      if (error) {
+        const msg = String(error.message || "");
+        if (msg.includes("ACTIVE_SITS")) {
+          toast.error("Une annonce est en ligne ou une garde est prévue : votre espace propriétaire reste ouvert jusqu'à sa fin.");
+          return;
+        }
+        if (msg.includes("ACTIVE_SITTING")) {
+          toast.error("Une garde est prévue : votre espace gardien reste ouvert jusqu'à sa fin.");
+          return;
+        }
+        if (msg.includes("ACTIVE_APPLICATIONS")) {
+          toast.error("Une candidature est encore ouverte : retirez-la avant de retirer votre espace gardien.");
+          return;
+        }
+        throw error;
+      }
 
       // Bascule l'activeRole sur le rôle restant pour éviter un état UI incohérent
       switchRole(newRole as "owner" | "sitter");
@@ -168,7 +164,7 @@ const ActiveRolesSection = () => {
             <div className="space-y-0.5">
               <Label className="text-sm font-medium">Espace gardien</Label>
               <p className="text-xs text-muted-foreground">
-                Postuler aux annonces et garder des animaux. Abonnement requis.
+                Postuler aux annonces et garder des animaux. 0 €.
               </p>
             </div>
             <Switch
@@ -272,17 +268,13 @@ const ActiveRolesSection = () => {
                 </>
               ) : target === "sitter" ? (
                 <>
-                  Votre profil de gardien sera masqué et vous ne pourrez plus postuler aux
-                  annonces. Votre historique et vos avis sont conservés.
-                  <br />
-                  <br />
-                  <strong>Important :</strong> votre abonnement Stripe reste actif. Pour ne plus
-                  être facturé, annulez-le depuis le portail de gestion.
+                  Votre profil de gardien sera masqué des recherches. Votre historique et vos
+                  avis sont conservés. Une candidature encore ouverte se retire d'abord.
                 </>
               ) : (
                 <>
-                  Vos annonces actives seront masquées et vous ne pourrez plus en publier de
-                  nouvelles. Votre historique est conservé.
+                  Votre historique et vos brouillons sont conservés. Une annonce en ligne ou
+                  une garde prévue garde votre espace ouvert jusqu'à sa fin.
                 </>
               )}
             </DialogDescription>
@@ -316,17 +308,6 @@ const ActiveRolesSection = () => {
               </>
             ) : (
               <>
-                {target === "sitter" && (
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={openCustomerPortal}
-                    disabled={openingPortal}
-                  >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    {openingPortal ? "Ouverture..." : "Gérer mon abonnement Stripe"}
-                  </Button>
-                )}
                 <Button
                   variant="destructive"
                   className="w-full"

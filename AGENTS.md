@@ -55,6 +55,8 @@
 
 - Besoins ailleurs (lot E11) : sous 3 besoins à 30 km, les besoins plus loin s'affichent d'emblée sous « Ailleurs en France, N besoins ouverts » ; au-delà, repli derrière un bouton à contour ; pourquoi : 0 besoin proche et 12 ailleurs donnaient une page Entraide vide à Lyon.
 
+- Parcours débloqués (lot X1, audit complet du 13/10/2026) : toute écriture de profiles.role passe par une fonction qui pose app.allow_internal_profile_update puis l'éteint (change_user_role, apply_signup_role, dont la fenêtre de 30 minutes se lit dans auth.users.created_at, deactivate_my_space pour retirer un espace, refusé tant qu'une annonce, une garde ou une candidature est en cours), jamais par un update direct ; un gardien retire lui-même une candidature pending, viewed ou discussing (applications_guard_status_update) ; une réponse d'entraide ne se crée que sur un besoin ouvert et visible (trg_enforce_mission_response_open) et la personne qui a répondu lit ensuite le besoin quel que soit son statut, hors masquage (is_mission_responder, politique « Responders can read missions they answered ») ; pourquoi : 0 compte Google propriétaire en 30 jours, 37 candidatures impossibles à retirer, aidants retenus devant « Mission indisponible », 148 comptes double rôle sans moyen de retirer un espace.
+
 <!-- LOVABLE:BEGIN -->
 - `build` ends with `test:guard` and CI runs `test:guard` directly; why: owner decision of 17/08/2026, a red test blocks publication.
 

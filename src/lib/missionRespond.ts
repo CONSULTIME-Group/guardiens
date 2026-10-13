@@ -63,6 +63,10 @@ export const respondToMission = async ({ missionId, userId, message }: {
         return { kind: "duplicate" };
       }
       if (hint === "account_not_active" || text.includes("account_not_active")) return { kind: "account_not_active" };
+      // Lot X1 : verrou serveur, une réponse ne se crée que sur un besoin ouvert.
+      if (hint === "mission_closed" || text.includes("mission_closed")) return { kind: "closed" };
+      if (hint === "own_mission" || text.includes("own_mission")) return { kind: "own_mission" };
+      if (hint === "mission_missing" || text.includes("mission_missing")) return { kind: "missing" };
       if (hint === "mission_response_cap_reached" || text.includes("mission_response_cap_reached")) return { kind: "cap_reached" };
       return { kind: "failed", message: text || "Impossible d'envoyer votre réponse." };
     }
