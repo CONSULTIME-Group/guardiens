@@ -366,6 +366,16 @@ export function usesBan(country: string, postalCode: string | null | undefined):
   return true;
 }
 
+/** Code pays au sens d'OpenStreetMap : la Polynésie (987) et la Nouvelle-Calédonie (988) y ont le leur. */
+export function nominatimCountry(country: string, postalCode: string | null | undefined): string {
+  const c = (country || "FR").toUpperCase();
+  const p = (postalCode ?? "").trim();
+  if (c === "FR" && /^987/.test(p)) return "pf";
+  if (c === "FR" && /^988/.test(p)) return "nc";
+  if (c === "FR" && /^986/.test(p)) return "wf";
+  return c.toLowerCase();
+}
+
 /** Nom du pays en français (« Canada », « Maroc »). */
 export function countryLabel(country: string): string {
   try {
@@ -486,7 +496,7 @@ export async function resolveGuideCenter(
         addressdetails: "1",
         limit: "10",
         city,
-        countrycodes: country.toLowerCase(),
+        countrycodes: nominatimCountry(country, input.postalCode),
         "accept-language": "fr",
       });
       const r = await fetchFn(`https://nominatim.openstreetmap.org/search?${params}`, { headers: UA });
@@ -547,8 +557,12 @@ export const stripDashes = (s: string) =>
 // Collecte : Overpass, rayon élargi par catégorie, adresses
 // ---------------------------------------------------------------------------
 
+// Le 13/10/2026, overpass-api.de répondait 504 ou « Query timed out » et
+// kumi comme private.coffee ne répondaient pas en 60 s : quatre miroirs, 20 s
+// chacun.
 export const OVERPASS_MIRRORS = [
   "https://overpass-api.de/api/interpreter",
+  "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
   "https://overpass.kumi.systems/api/interpreter",
   "https://overpass.private.coffee/api/interpreter",
 ];
@@ -557,7 +571,7 @@ export const OVERPASS_MIRRORS = [
 export async function runOverpass(
   query: string,
   fetchFn: FetchLike,
-  timeoutMs = 25000,
+  timeoutMs = 20000,
   deadline = Number.POSITIVE_INFINITY,
 ): Promise<OsmElement[] | null> {
   for (const mirror of OVERPASS_MIRRORS) {
@@ -697,7 +711,7 @@ export async function collectPlaces(
   for (let i = 0; i < RADII_M.length && pending.length > 0; i++) {
     const radius = RADII_M[i];
     if (i > 0) await sleep(1000);
-    const els = await runOverpass(buildOverpassQuery(pending, radius, center.lat, center.lon), fetchFn, 25000, deadline);
+    const els = await runOverpass(buildOverpassQuery(pending, radius, center.lat, center.lon), fetchFn, 20000, deadline);
     if (els === null) {
       overpassFailed = true;
       incomplete = true;
@@ -721,6 +735,7 @@ export async function collectPlaces(
   for (const c of selected) {
     const commercial = isCommercial(c.kind);
     let address = addressFromTags(c.tags);
+    let geocoderDown = false;
     if (!address) {
       if (Date.now() + 3000 > deadline) {
         incomplete = true;
@@ -733,14 +748,19 @@ export async function collectPlaces(
         sleep,
       );
       if (rev.error) {
-        // Panne du géocodeur : le lieu sera repris au passage suivant.
-        incomplete = true;
-        continue;
+        if (usesBan(center.country, guide.postalCode)) {
+          // Panne de la BAN : le lieu sera repris au passage suivant.
+          incomplete = true;
+          continue;
+        }
+        // Hors de France, Nominatim refuse souvent les serveurs partagés : le
+        // lieu garde sa distance au centre, l'itinéraire donne l'adresse.
+        geocoderDown = true;
       }
       address = rev.address;
     }
     if (!address) {
-      if (commercial) {
+      if (commercial && !geocoderDown) {
         rejectedAddress++;
         continue;
       }

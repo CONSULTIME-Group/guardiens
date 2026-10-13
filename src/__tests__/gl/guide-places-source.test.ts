@@ -353,3 +353,42 @@ describe("GL1, demande incohérente", () => {
     expect(c).toBeNull();
   });
 });
+
+describe("GL, fiabilité (13/10/2026)", () => {
+  it("Polynésie et Nouvelle-Calédonie : code pays OpenStreetMap", async () => {
+    const { fn, calls } = fakeFetch({ nominatim: () => [{ lat: "-17.535", lon: "-149.569", address: { state: "Îles du Vent" } }] });
+    await resolveGuideCenter({ city: "Papeete", postalCode: "98714", country: "FR", hint: null }, fn);
+    expect(calls[0]).toContain("countrycodes=pf");
+  });
+
+  it("une réponse Overpass tronquée par un délai est ignorée, le miroir suivant est essayé", async () => {
+    const urls: string[] = [];
+    const fn = async (url: string) => {
+      urls.push(url);
+      if (url.includes("overpass-api.de")) {
+        return new Response(JSON.stringify({ elements: [], remark: 'runtime error: Query timed out in "query" at line 1 after 30 seconds.' }));
+      }
+      return new Response(JSON.stringify({ elements: [el(1, { amenity: "veterinary", name: "Véto" }, north(2), SAINT_LUDGER.lon)] }));
+    };
+    const { runOverpass } = await import("../../../supabase/functions/_shared/guide-places/source");
+    const els = await runOverpass("q", fn);
+    expect(els).toHaveLength(1);
+    expect(urls[1]).toContain("mail.ru");
+  });
+
+  it("à l'étranger, un géocodeur indisponible garde le vétérinaire avec sa distance", async () => {
+    const fn = async (url: string) => {
+      if (url.includes("nominatim")) return new Response("blocked", { status: 403 });
+      return new Response(JSON.stringify({ elements: [el(6, { amenity: "veterinary", name: "Hôpital vétérinaire du Granit" }, north(25), SAINT_LUDGER.lon)] }));
+    };
+    const res = await collectPlaces(
+      { city: "Saint Ludger", postalCode: "G0M1W0", center: SAINT_LUDGER },
+      { names: new Set(), sources: new Set(), counts: {} },
+      fn,
+      noSleep,
+    );
+    const vet = res.rows.find((r) => r.category === "vet");
+    expect(vet?.address).toBe("25 km du centre de Saint Ludger");
+    expect(res.incomplete).toBe(false);
+  });
+});

@@ -58,7 +58,8 @@ Deno.serve(async (req) => {
     const force = body?.force === true;
     const limit = Math.min(3, Math.max(1, Number(body?.limit) || 1));
     const cols = "id, slug, city, postal_code, department, country, latitude, longitude, published, publish_when_sourced, places_sourced_at, places_source_attempted_at";
-    const sixHoursAgo = new Date(Date.now() - 6 * 3600 * 1000).toISOString();
+    // Un guide en échec (panne Overpass le plus souvent) repasse une heure plus tard.
+    const sixHoursAgo = new Date(Date.now() - 3600 * 1000).toISOString();
 
     let guides: any[] = [];
     if (slugs) {
@@ -66,7 +67,7 @@ Deno.serve(async (req) => {
       if (error) return json({ error: error.message }, 500);
       guides = (data ?? []).filter((g: any) => force || !g.places_sourced_at).slice(0, 3);
     } else {
-      // File : jamais tentés d'abord, puis tentés il y a plus de 6 heures.
+      // File : jamais tentés d'abord, puis tentés il y a plus d'une heure.
       const { data, error } = await supabase
         .from("city_guides")
         .select(cols)
