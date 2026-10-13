@@ -6,10 +6,8 @@
 import {
   ALL_CATEGORIES,
   collectPlaces,
-  dbOverpass,
-  runOverpass,
+  dbOverpassBatch,
   type OverpassAttempt,
-  type OverpassTransport,
   countryLabel,
   haversineM,
   matchGooglePlaceId,
@@ -107,20 +105,20 @@ export async function sourceOneGuide(
   if (tooFar.length) report.sources_existantes_hors_rayon = tooFar;
 
   // 3. Collecte
-  // Overpass en direct d'abord (GET), par la base ensuite ; chaque essai est
-  // compté pour le diagnostic (report.overpass).
+  // Overpass par la base seulement : diagnostic du 13/10/2026, depuis la
+  // fonction serveur overpass-api.de répond 406 en 0,5 s et les autres miroirs
+  // ne répondent pas en 15 s. Les filtres d'un même rayon partent ensemble.
   const attempts: OverpassAttempt[] = [];
   const onAttempt = (a: OverpassAttempt) => attempts.push(a);
-  const viaBase = dbOverpass((fn, args) => supabase.rpc(fn, args), sleep, 2, onAttempt);
-  const transport: OverpassTransport = async (q, d) =>
-    (await runOverpass(q, fetch, 15000, d, onAttempt)) ?? (await viaBase(q, d));
+  const batch = dbOverpassBatch((fn, args) => supabase.rpc(fn, args), sleep, onAttempt);
   const collected = await collectPlaces(
     { city: guide.city, postalCode: guide.postal_code, center },
     known,
     fetch,
     sleep,
     deadline,
-    transport,
+    undefined,
+    batch,
   );
   const summary: Record<string, number> = {};
   for (const a of attempts) summary[`${a.via}:${a.mirror}:${a.outcome}`] = (summary[`${a.via}:${a.mirror}:${a.outcome}`] ?? 0) + 1;

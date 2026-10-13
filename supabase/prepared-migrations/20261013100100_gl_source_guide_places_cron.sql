@@ -2,7 +2,8 @@
 -- Référence au coffre-fort : à exécuter dans l'éditeur SQL du backend, pas par
 -- l'outil de migration. Un guide toutes les 4 minutes : la file des 101 guides
 -- passe en 7 heures environ, puis chaque appel ne fait qu'une lecture vide.
--- Un guide en panne Overpass repasse 6 heures plus tard.
+-- Un guide en panne Overpass repasse une heure plus tard. La fonction répond
+-- tout de suite et travaille en arrière-plan : l appel pg_net reste court.
 DO $activation$
 BEGIN
   IF EXISTS (SELECT 1 FROM cron.job WHERE jobname = 'source-guide-places') THEN
@@ -17,7 +18,7 @@ BEGIN
         'x-geocode-secret', (SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name = 'GEOCODE_PROFILE_SECRET' LIMIT 1)
       ),
       body := '{"limit":1}'::jsonb,
-      timeout_milliseconds := 150000
+      timeout_milliseconds := 10000
     );
   $job$);
 END;
