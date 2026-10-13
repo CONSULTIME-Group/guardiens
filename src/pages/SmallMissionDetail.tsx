@@ -1109,7 +1109,7 @@ const SmallMissionDetail = () => {
           )}
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
             <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Un service contre un service</span>
-            <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Résiliable à tout moment</span>
+            <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Vous pouvez retirer votre réponse à tout moment</span>
           </div>
         </div>
       );
@@ -1683,7 +1683,7 @@ const SmallMissionDetail = () => {
               {!isAuthor && hasResponded && (
                 <div className="bg-success-soft/40 border border-success/30 rounded-2xl p-4 text-sm text-foreground/80 flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
-                  Vous avez déjà répondu. {author?.first_name || "L'auteur"} vous répondra ici même.
+                  Vous avez déjà répondu. {author?.first_name || "L'auteur"} vous répondra dans la messagerie, une notification vous préviendra.
                 </div>
               )}
               {!isAuthor && mission.status === "open" && !canApplyMissions && accessLevel === 1 && (
