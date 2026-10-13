@@ -91,32 +91,36 @@ export const GOOGLE_MATCH_TOLERANCE_M: Partial<Record<PlaceKind, number>> = {
 
 const WALK_NAME = /(sentier|chemin|promenade|balade|randonn|boucle|voie verte|halage|trail|path|walk|sendero|percorso)/i;
 
-/** Filtres Overpass par catégorie : éléments nommés uniquement. */
+/**
+ * Filtres Overpass par catégorie : éléments nommés uniquement.
+ * Le rayon vient en premier : mesuré le 13/10/2026, la même recherche de
+ * vétérinaires à 2 km de Lyon finit en délai dépassé quand l'étiquette précède
+ * le rayon, et répond en quelques secondes quand le rayon précède l'étiquette
+ * (overpass-api.de et overpass.openstreetmap.fr).
+ */
 export function overpassFilters(category: GuideCategory, radiusM: number, lat: number, lon: number): string[] {
   const a = `(around:${radiusM},${lat},${lon})`;
   switch (category) {
     case "dog_park":
-      return [`nwr["leisure"="dog_park"]${a};`];
+      return [`nwr${a}["leisure"="dog_park"];`];
     case "general_park":
       return [
-        `nwr["leisure"="park"]["name"]${a};`,
-        `nwr["leisure"="nature_reserve"]["name"]${a};`,
-        `wr["landuse"="forest"]["name"]${a};`,
-        `wr["natural"="wood"]["name"]${a};`,
+        `nwr${a}["leisure"~"^(park|nature_reserve)$"]["name"];`,
+        `wr${a}[~"^(landuse|natural)$"~"^(forest|wood)$"]["name"];`,
       ];
     case "walk_trail":
       return [
-        `relation["route"~"^(hiking|foot)$"]["name"]["network"!~"^(iwn|nwn)$"]${a};`,
-        `way["highway"~"^(path|footway|track|cycleway)$"]["name"~"${WALK_NAME.source}",i]${a};`,
+        `relation${a}["route"~"^(hiking|foot)$"]["name"]["network"!~"^(iwn|nwn)$"];`,
+        `way${a}["highway"~"^(path|footway|track|cycleway)$"]["name"~"${WALK_NAME.source}",i];`,
       ];
     case "vet":
-      return [`nwr["amenity"="veterinary"]["name"]${a};`];
+      return [`nwr${a}["amenity"="veterinary"]["name"];`];
     case "pet_shop":
-      return [`nwr["shop"="pet"]["name"]${a};`];
+      return [`nwr${a}["shop"="pet"]["name"];`];
+    // Même requête pour les cafés et les restaurants : elle n'est envoyée qu'une fois.
     case "dog_friendly_cafe":
-      return [`nwr["amenity"="cafe"]["name"]["dog"~"^(yes|leashed)$"]${a};`];
     case "dog_friendly_restaurant":
-      return [`nwr["amenity"~"^(restaurant|pub|bar)$"]["name"]["dog"~"^(yes|leashed)$"]${a};`];
+      return [`nwr${a}["amenity"~"^(cafe|restaurant|pub|bar)$"]["name"]["dog"~"^(yes|leashed)$"];`];
   }
 }
 
@@ -720,22 +724,36 @@ export async function collectPlaces(
   };
 
   let pending = ALL_CATEGORIES.filter((c) => (known.counts[c] ?? 0) < CATEGORY_RULES[c].max);
-  for (let i = 0; i < RADII_M.length && pending.length > 0; i++) {
+  let requests = 0;
+  // Une requête courte par filtre, l'une après l'autre : mesuré le 13/10/2026,
+  // un serveur Overpass chargé répond à une recherche simple et coupe à 30 s
+  // une union de plusieurs filtres, et refuse (504) les requêtes simultanées.
+  outer: for (let i = 0; i < RADII_M.length && pending.length > 0; i++) {
     const radius = RADII_M[i];
-    if (i > 0) await sleep(1000);
-    const els = await runOverpass(buildOverpassQuery(pending, radius, center.lat, center.lon), fetchFn, 20000, deadline);
-    if (els === null) {
-      overpassFailed = true;
-      incomplete = true;
-      break;
-    }
     const seen = new Set(pool.map((p) => p.sourceUrl));
-    const { candidates, rejectedDistance: rd } = toCandidates(els, center, known);
-    rejectedDistance += rd;
-    for (const c of candidates) {
-      if (!pending.includes(c.category) || seen.has(c.sourceUrl)) continue;
-      pool.push(c);
-      radiiUsed[c.category] = radiiUsed[c.category] ?? radius;
+    const statements = [...new Set(pending.flatMap((c) => overpassFilters(c, radius, center.lat, center.lon)))];
+    {
+      for (const statement of statements) {
+        if (Date.now() + 8000 > deadline) {
+          incomplete = true;
+          break outer;
+        }
+        if (requests++ > 0) await sleep(500);
+        const els = await runOverpass(`[out:json][timeout:25];${statement}out center tags;`, fetchFn, 20000, deadline);
+        if (els === null) {
+          overpassFailed = true;
+          incomplete = true;
+          break outer;
+        }
+        const { candidates, rejectedDistance: rd } = toCandidates(els, center, known);
+        rejectedDistance += rd;
+        for (const c of candidates) {
+          if (!pending.includes(c.category) || seen.has(c.sourceUrl)) continue;
+          seen.add(c.sourceUrl);
+          pool.push(c);
+          radiiUsed[c.category] = radiiUsed[c.category] ?? radius;
+        }
+      }
     }
     const next = RADII_M[i + 1];
     pending = next ? categoriesToWiden(counts(), next) : [];
