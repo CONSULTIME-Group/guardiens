@@ -11687,52 +11687,6 @@ export type Database = {
           role: Database["public"]["Enums"]["user_role"] | null
           skill_categories: string[] | null
         }
-        Insert: {
-          available_for_help?: boolean | null
-          avatar_url?: string | null
-          bio?: string | null
-          certifications?: string[] | null
-          city?: string | null
-          completed_sits_count?: number | null
-          country?: never
-          created_at?: string | null
-          custom_skills?: Json | null
-          departement_code?: string | null
-          first_name?: string | null
-          id?: string | null
-          identity_verified?: boolean | null
-          is_founder?: boolean | null
-          last_seen_at?: string | null
-          latitude_approx?: never
-          longitude_approx?: never
-          postal_code?: string | null
-          profile_completion?: number | null
-          role?: Database["public"]["Enums"]["user_role"] | null
-          skill_categories?: string[] | null
-        }
-        Update: {
-          available_for_help?: boolean | null
-          avatar_url?: string | null
-          bio?: string | null
-          certifications?: string[] | null
-          city?: string | null
-          completed_sits_count?: number | null
-          country?: never
-          created_at?: string | null
-          custom_skills?: Json | null
-          departement_code?: string | null
-          first_name?: string | null
-          id?: string | null
-          identity_verified?: boolean | null
-          is_founder?: boolean | null
-          last_seen_at?: string | null
-          latitude_approx?: never
-          longitude_approx?: never
-          postal_code?: string | null
-          profile_completion?: number | null
-          role?: Database["public"]["Enums"]["user_role"] | null
-          skill_categories?: string[] | null
-        }
         Relationships: []
       }
       public_responsiveness: {
@@ -12737,6 +12691,10 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: number
       }
+      can_view_restricted_profile: {
+        Args: { _subject: string }
+        Returns: boolean
+      }
       change_user_role: {
         Args: {
           p_new_role: Database["public"]["Enums"]["user_role"]
@@ -13505,6 +13463,10 @@ export type Database = {
         Args: { p_helper_id: string; p_mission_id: string }
         Returns: string
       }
+      is_account_blocked_for_actions: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
       is_account_empty: { Args: { _user_id: string }; Returns: boolean }
       is_engaged_sitter_of: { Args: { _owner_id: string }; Returns: boolean }
       is_llm_refusal_text: { Args: { _txt: string }; Returns: boolean }
@@ -13589,6 +13551,10 @@ export type Database = {
           responder_id: string
           response_id: string
         }[]
+      }
+      mission_link_for: {
+        Args: { p_category: string; p_id: string; p_slug: string }
+        Returns: string
       }
       mission_wave_audience: {
         Args: { p_limit?: number; p_mission_id: string; p_offset?: number }
