@@ -16,6 +16,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.45.0'
 import { startCronRun } from '../_shared/cron-run-log.ts'
 import { requireAdminOrServiceRole } from '../_shared/require-admin.ts'
+import { missionAutoClosedNoticeBody } from '../_shared/mission-auto-close-copy.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -218,7 +219,8 @@ Deno.serve(async (req) => {
           user_id: m.user_id,
           type: 'mission_auto_closed',
           title: 'Votre mission a été clôturée automatiquement',
-          body: `« ${m.title} » a été clôturée après ${m.ageDays} jours sans activité. Vous pouvez la republier.`,
+          // Lot Z2 (C-14) : texte selon le motif réel (date passée ou ancienneté).
+          body: missionAutoClosedNoticeBody(m.title, m.reason, m.ageDays),
           link: `/petites-missions/${m.id}`,
           actor_name: 'Système',
         })
@@ -261,6 +263,7 @@ Deno.serve(async (req) => {
               missionTitle: m.title,
               missionId: m.id,
               ageDays: m.ageDays,
+              reason: m.reason,
             },
             logMetadata: { mission_id: m.id, close_reason: 'expired', age_days: m.ageDays, reason: m.reason },
           }),
