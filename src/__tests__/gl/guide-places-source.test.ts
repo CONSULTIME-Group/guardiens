@@ -485,3 +485,51 @@ describe("GL, diagnostic Overpass", () => {
     expect(attempts[0].mirror).toBe("overpass-api.de");
   });
 });
+
+describe("GL, requêtes groupées par la base", () => {
+  it("envoie tout d'un coup sur des miroirs différents, renvoie une fois sur le miroir suivant", async () => {
+    const { dbOverpassBatch } = await import("../../../supabase/functions/_shared/guide-places/source");
+    const enq: { q: string; m: number }[] = [];
+    const rows = new Map<number, unknown>();
+    const rpc = async (fn: string, args: Record<string, unknown>) => {
+      if (fn === "guide_osm_enqueue") {
+        enq.push({ q: String(args.p_query), m: Number(args.p_mirror) });
+        const id = enq.length;
+        const q = String(args.p_query);
+        // B échoue sur son premier miroir (504), réussit sur le suivant.
+        if (q === "B" && Number(args.p_mirror) === 1) rows.set(id, { status_code: 504, timed_out: false, content: "busy" });
+        else rows.set(id, { status_code: 200, timed_out: false, content: JSON.stringify({ elements: [{ type: "node", id, tags: { name: q } }] }) });
+        return { data: id, error: null };
+      }
+      return { data: [rows.get(Number(args.p_id))].filter(Boolean), error: null };
+    };
+    const attempts: any[] = [];
+    const res = await dbOverpassBatch(rpc, noSleep, (a) => attempts.push(a))(["A", "B", "C"], Date.now() + 100000);
+    expect(enq.slice(0, 3).map((e) => e.m)).toEqual([0, 1, 2]);
+    expect(enq[3]).toEqual({ q: "B", m: 2 });
+    expect(res.map((r) => r?.[0]?.tags?.name)).toEqual(["A", "B", "C"]);
+    expect(attempts.filter((a) => a.outcome === "http_504")).toHaveLength(1);
+  });
+
+  it("collectPlaces envoie les filtres d'un rayon ensemble et garde ce qui a répondu", async () => {
+    const batches: string[][] = [];
+    const batch = async (queries: string[]) => {
+      batches.push(queries);
+      return queries.map((q) =>
+        q.includes("veterinary") ? [el(6, { amenity: "veterinary", name: "Véto du Granit", "addr:street": "Rue Laval" }, north(3), SAINT_LUDGER.lon)] : [],
+      );
+    };
+    const res = await collectPlaces(
+      { city: "Saint Ludger", postalCode: "G0M1W0", center: SAINT_LUDGER },
+      { names: new Set(), sources: new Set(), counts: {} },
+      async () => new Response("[]"),
+      noSleep,
+      Number.POSITIVE_INFINITY,
+      undefined,
+      batch,
+    );
+    expect(batches[0].length).toBeGreaterThan(5);
+    expect(batches[0].every((q) => q.includes("around:5000,"))).toBe(true);
+    expect(res.rows.map((r) => r.name)).toContain("Véto du Granit");
+  });
+});

@@ -81,51 +81,64 @@ Deno.serve(async (req) => {
     }
 
     const googleKey = Deno.env.get("GOOGLE_PLACES_API_KEY") || null;
-    const details: unknown[] = [];
-    for (const g of guides) {
-      // Réservation : un guide pris par un autre passage (tâche planifiée,
-      // nouveau guide en cours) est laissé de côté.
-      if (!dryRun && !slugs) {
-        const { data: claimed } = await supabase
-          .from("city_guides")
-          .update({ places_source_attempted_at: new Date().toISOString() })
-          .eq("id", g.id)
-          .is("places_sourced_at", null)
-          .or(`places_source_attempted_at.is.null,places_source_attempted_at.lt.${sixHoursAgo}`)
-          .select("id");
-        if (!claimed || claimed.length === 0) {
-          details.push({ slug: g.slug, result: "deja_pris" });
-          continue;
+
+    // Traitement en arrière-plan : la réponse part tout de suite. Constat du
+    // 13/10/2026 : appelée par pg_net (tâche planifiée), la fonction tenait
+    // l'appel ouvert pendant tout le traitement, et pg_net n'expédiait les
+    // requêtes Overpass déposées par la fonction qu'une fois cet appel terminé.
+    // Le rapport de chaque guide est écrit dans city_guides.places_source_report.
+    const work = async () => {
+      const details: unknown[] = [];
+      for (const g of guides) {
+        // Réservation : un guide pris par un autre passage (tâche planifiée,
+        // nouveau guide en cours) est laissé de côté.
+        if (!dryRun && !slugs) {
+          const { data: claimed } = await supabase
+            .from("city_guides")
+            .update({ places_source_attempted_at: new Date().toISOString() })
+            .eq("id", g.id)
+            .is("places_sourced_at", null)
+            .or(`places_source_attempted_at.is.null,places_source_attempted_at.lt.${sixHoursAgo}`)
+            .select("id");
+          if (!claimed || claimed.length === 0) {
+            details.push({ slug: g.slug, result: "deja_pris" });
+            continue;
+          }
         }
-      }
-      let report: Record<string, unknown>;
-      try {
-        report = await sourceOneGuide(supabase, g, { dryRun, googleKey });
-      } catch (e) {
-        report = { slug: g.slug, result: "erreur", erreur: String(e) };
-      }
-      details.push(report);
-      if (!dryRun) {
+        let report: Record<string, unknown>;
+        try {
+          report = await sourceOneGuide(supabase, g, { dryRun, googleKey });
+        } catch (e) {
+          report = { slug: g.slug, result: "erreur", erreur: String(e) };
+        }
+        details.push(report);
         const patch: Record<string, unknown> = {
-          places_source_attempted_at: new Date().toISOString(),
-          places_source_result: String(report.result),
+          places_source_report: { ...report, dry_run: dryRun, at: new Date().toISOString() },
         };
-        if (report.result === "ok") patch.places_sourced_at = new Date().toISOString();
-        // Nouveau guide resté sans lieu à sa création : publié dès qu'il est sourcé.
-        if (report.result === "ok" && g.publish_when_sourced && Number(report.total_sources) > 0) {
-          patch.published = true;
-          patch.publish_when_sourced = false;
+        if (!dryRun) {
+          patch.places_source_attempted_at = new Date().toISOString();
+          patch.places_source_result = String(report.result);
+          if (report.result === "ok") patch.places_sourced_at = new Date().toISOString();
+          // Nouveau guide resté sans lieu à sa création : publié dès qu'il est sourcé.
+          if (report.result === "ok" && g.publish_when_sourced && Number(report.total_sources) > 0) {
+            patch.published = true;
+            patch.publish_when_sourced = false;
+          }
         }
         await supabase.from("city_guides").update(patch).eq("id", g.id);
       }
+      return details;
+    };
+
+    // { "wait": true } garde l'ancien comportement (appel direct depuis l'admin).
+    if (body?.wait === true) {
+      const details = await work();
+      return json({ traites: guides.length, dry_run: dryRun, details });
     }
-
-    const { count: restants } = await supabase
-      .from("city_guides")
-      .select("id", { count: "exact", head: true })
-      .is("places_sourced_at", null);
-
-    return json({ traites: guides.length, restants: restants ?? null, dry_run: dryRun, details });
+    const task = work().catch((e) => console.error("[source-guide-places]", e));
+    const runtime = (globalThis as any).EdgeRuntime;
+    if (runtime?.waitUntil) runtime.waitUntil(task);
+    return json({ lance: guides.map((g: any) => g.slug), dry_run: dryRun }, 202);
   } catch (e) {
     return json({ error: String(e) }, 500);
   }

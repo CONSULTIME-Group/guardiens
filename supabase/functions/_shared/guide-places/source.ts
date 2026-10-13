@@ -708,6 +708,76 @@ export function dbOverpass(
   };
 }
 
+/** Plusieurs requêtes Overpass en parallèle ; une entrée null par requête restée sans réponse. */
+export type OverpassBatch = (queries: string[], deadline: number) => Promise<(OsmElement[] | null)[]>;
+
+/**
+ * Requêtes envoyées ensemble par la base, réparties sur les miroirs, puis
+ * relues jusqu'à réponse. Diagnostic du 13/10/2026 : depuis la fonction
+ * serveur, overpass-api.de répond 406 en 0,5 s et les trois autres miroirs ne
+ * répondent pas en 15 s ; depuis la base, les mêmes requêtes répondent. Une
+ * requête sans réponse est renvoyée une fois, sur le miroir suivant.
+ */
+export function dbOverpassBatch(
+  rpc: RpcLike,
+  sleep: (ms: number) => Promise<void>,
+  onAttempt?: (a: OverpassAttempt) => void,
+  mirrors = 3,
+): OverpassBatch {
+  const parse = (row: any): OsmElement[] | null | "retry" => {
+    if (!row) return "retry";
+    if (row.timed_out || Number(row.status_code) !== 200) return "retry";
+    const text = String(row.content ?? "");
+    if (!text.trim().startsWith("{")) return "retry";
+    try {
+      const parsed = JSON.parse(text);
+      if (/runtime (error|remark)|timed out|out of memory/i.test(String(parsed?.remark ?? ""))) return "retry";
+      return Array.isArray(parsed?.elements) ? parsed.elements : [];
+    } catch {
+      return "retry";
+    }
+  };
+  return async (queries, deadline) => {
+    const results: (OsmElement[] | null)[] = queries.map(() => null);
+    let pending = queries.map((q, i) => ({ i, q, mirror: i % mirrors, tries: 0 }));
+    while (pending.length > 0) {
+      if (Date.now() + 6000 > deadline) break;
+      const sent: { i: number; q: string; mirror: number; tries: number; id: number | null; t0: number }[] = [];
+      for (const p of pending) {
+        const { data: id, error } = await rpc("guide_osm_enqueue", { p_query: p.q, p_mirror: p.mirror });
+        sent.push({ ...p, id: error || id == null ? null : Number(id), t0: Date.now() });
+      }
+      const until = Math.min(Date.now() + 35000, deadline - 2000);
+      const done = new Map<number, any>();
+      while (Date.now() < until && done.size < sent.filter((x) => x.id != null).length) {
+        await sleep(1500);
+        for (const x of sent) {
+          if (x.id == null || done.has(x.id)) continue;
+          const { data } = await rpc("guide_osm_result", { p_id: x.id });
+          const row = Array.isArray(data) ? data[0] ?? null : data ?? null;
+          if (row) done.set(x.id, row);
+        }
+      }
+      const next: typeof pending = [];
+      for (const x of sent) {
+        const row = x.id == null ? null : done.get(x.id) ?? null;
+        const out = x.id == null ? "retry" : parse(row);
+        const outcome = x.id == null
+          ? "enqueue_refuse"
+          : !row ? "attente_depassee" : out === "retry" ? (row.timed_out ? "pg_net_timeout" : Number(row.status_code) !== 200 ? `http_${row.status_code}` : "remark_ou_json") : "ok";
+        onAttempt?.({ via: "base", mirror: String(x.mirror), ms: Date.now() - x.t0, outcome });
+        if (out === "retry") {
+          if (x.tries < 1) next.push({ i: x.i, q: x.q, mirror: (x.mirror + 1) % mirrors, tries: x.tries + 1 });
+        } else {
+          results[x.i] = out;
+        }
+      }
+      pending = next;
+    }
+    return results;
+  };
+}
+
 /**
  * Adresse lisible d'un point : BAN en France, Nominatim ailleurs.
  * `error` distingue une panne (à refaire) d'une absence d'adresse.
@@ -805,6 +875,7 @@ export async function collectPlaces(
   sleep: (ms: number) => Promise<void>,
   deadline = Number.POSITIVE_INFINITY,
   overpass?: OverpassTransport,
+  batch?: OverpassBatch,
 ): Promise<CollectReport> {
   const { center } = guide;
   const ask: OverpassTransport = overpass ?? ((q, d) => runOverpass(q, fetchFn, 20000, d));
@@ -828,7 +899,31 @@ export async function collectPlaces(
     const radius = RADII_M[i];
     const seen = new Set(pool.map((p) => p.sourceUrl));
     const statements = [...new Set(pending.flatMap((c) => overpassFilters(c, radius, center.lat, center.lon)))];
-    {
+    const take = (els: OsmElement[]) => {
+      const { candidates, rejectedDistance: rd } = toCandidates(els, center, known);
+      rejectedDistance += rd;
+      for (const c of candidates) {
+        if (!pending.includes(c.category) || seen.has(c.sourceUrl)) continue;
+        seen.add(c.sourceUrl);
+        pool.push(c);
+        radiiUsed[c.category] = radiiUsed[c.category] ?? radius;
+      }
+    };
+    if (batch) {
+      if (Date.now() + 8000 > deadline) {
+        incomplete = true;
+        break;
+      }
+      const results = await batch(statements.map((st) => `[out:json][timeout:25];${st}out center tags;`), deadline);
+      const answered = results.filter((r) => r !== null);
+      for (const els of answered) take(els!);
+      if (answered.length < results.length) {
+        overpassFailed = true;
+        incomplete = true;
+        // Sans réponse pour une partie des filtres, le rayon suivant attendra le passage suivant.
+        break;
+      }
+    } else {
       for (const statement of statements) {
         if (Date.now() + 8000 > deadline) {
           incomplete = true;
@@ -841,14 +936,7 @@ export async function collectPlaces(
           incomplete = true;
           break outer;
         }
-        const { candidates, rejectedDistance: rd } = toCandidates(els, center, known);
-        rejectedDistance += rd;
-        for (const c of candidates) {
-          if (!pending.includes(c.category) || seen.has(c.sourceUrl)) continue;
-          seen.add(c.sourceUrl);
-          pool.push(c);
-          radiiUsed[c.category] = radiiUsed[c.category] ?? radius;
-        }
+        take(els);
       }
     }
     const next = RADII_M[i + 1];
