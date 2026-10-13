@@ -100,8 +100,9 @@ const AdminVerifications = () => {
     //          (b) les profils "not_submitted" qui ont quand même déposé au moins un fichier (selfie OU pièce) → dossier incomplet à relancer
     // NB : on fait deux requêtes séparées car PostgREST gère mal les `or()` imbriqués dans un `and()`.
     const SELECT = "id, first_name, last_name, email, avatar_url, identity_document_url, identity_selfie_url, identity_verification_status, created_at, updated_at";
-    // (c) les profils en "needs_review" : analysés par l'IA, confiance jugée
-    //     insuffisante, ils demandent un arbitrage humain prioritaire.
+    // (c) les profils en "needs_review" : refus proposé par l'IA (hors document
+    //     illisible ou sans rapport, lot Y1), confiance insuffisante ou dates
+    //     incohérentes selon le code ; arbitrage humain prioritaire.
     const [pendingFull, incompleteDoc, incompleteSelfie] = await Promise.all([
       supabase.from("profiles").select(SELECT).in("identity_verification_status", ["pending", "needs_review"]),
       supabase.from("profiles").select(SELECT).eq("identity_verification_status", "not_submitted").not("identity_document_url", "is", null),
@@ -274,7 +275,7 @@ const AdminVerifications = () => {
       case "verified": return <Badge className="bg-success-soft text-success border-0">Validée</Badge>;
       case "rejected": return <Badge className="bg-destructive/10 text-destructive border-0">Refusée</Badge>;
       case "pending": return <Badge className="bg-warning-soft text-warning-foreground border-0">En attente</Badge>;
-      case "needs_review": return <Badge className="bg-info/10 text-info border-0">Révision IA</Badge>;
+      case "needs_review": return <Badge className="bg-info/10 text-info border-0">Revue humaine</Badge>;
       default: return <Badge variant="outline">{status}</Badge>;
     }
   };
@@ -351,7 +352,7 @@ const AdminVerifications = () => {
                       <div className="flex flex-wrap items-center gap-2">
                         {needsReview && (
                           <Badge className="bg-info/10 text-info border-0 text-xs">
-                            <AlertTriangle className="h-3 w-3 mr-1" /> Révision IA, confiance insuffisante
+                            <AlertTriangle className="h-3 w-3 mr-1" /> Revue humaine demandée
                           </Badge>
                         )}
                         {isIncomplete && (
@@ -366,11 +367,14 @@ const AdminVerifications = () => {
                     </div>
                     {needsReview && (
                       <div className="rounded-lg border border-info/30 bg-info/5 p-3">
-                        <p className="text-xs font-medium text-info uppercase tracking-wide">Analyse automatique non concluante</p>
+                        <p className="text-xs font-medium text-info uppercase tracking-wide">Proposition de l'IA, à confirmer</p>
                         <p className="text-xs text-muted-foreground mt-1">
                           {reviewReason
-                            ? `Motif relevé : ${reviewReason}`
-                            : "Aucun motif détaillé n'a été enregistré, contrôlez la pièce à l'oeil."}
+                            ? `Motif proposé par l'IA : ${reviewReason}`
+                            : "Motif à établir : contrôlez la pièce à l'oeil."}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Dates contrôlées par le code. Le membre lit « Pièce en cours de vérification » et reçoit votre décision : Valider, ou Refuser avec un motif.
                         </p>
                       </div>
                     )}
@@ -452,7 +456,8 @@ const AdminVerifications = () => {
                           ts: log.created_at,
                           label:
                             log.result === "verified" ? "Validée par l'admin" :
-                            log.result === "rejected" ? "Refusée par l'admin" :
+                            log.result === "rejected" ? "Refusée" :
+                            log.result === "needs_review" ? "Mise en revue humaine" :
                             `Décision : ${log.result}`,
                           tone: log.result === "verified" ? "success" : log.result === "rejected" ? "destructive" : "warning",
                           detail: log.rejection_reason || log.document_type || undefined,
@@ -509,7 +514,7 @@ const AdminVerifications = () => {
                 variant={historyFilter === f ? "default" : "outline"}
                 onClick={() => { setHistoryFilter(f); setHistoryPage(0); }}
               >
-                {{ all: "Toutes", verified: "Validées", rejected: "Refusées", pending: "En attente", needs_review: "Révision IA" }[f]}
+                {{ all: "Toutes", verified: "Validées", rejected: "Refusées", pending: "En attente", needs_review: "Revue humaine" }[f]}
               </Button>
             ))}
           </div>

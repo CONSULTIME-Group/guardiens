@@ -615,3 +615,10 @@ $function$;
 
 REVOKE ALL ON FUNCTION public.consume_email_deep_link(text, uuid) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.consume_email_deep_link(text, uuid) TO service_role;
+
+-- P4-02 : vérification d'identité relue par un humain (décision du fondateur
+-- du 13/10/2026). Aucun changement SQL : le statut needs_review existe déjà
+-- (profiles.identity_verification_status et identity_verification_logs.result
+-- sont en text, sans contrainte de valeurs, relu en base le 13/10/2026) et
+-- l'écran admin le lit. Tout se joue dans verify-identity,
+-- admin-manage-identity-verification et _shared/identity-review.ts.

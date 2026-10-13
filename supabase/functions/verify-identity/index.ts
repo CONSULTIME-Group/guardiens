@@ -1,5 +1,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import {
+  asSentence,
+  decideIdentityOutcome,
+  identityRejectionEmailAllowed,
+} from "../_shared/identity-review.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -127,11 +132,14 @@ Your task:
 2. Check authenticity signals (security features visible, not obviously edited/screenshot of a screen).
 3. Check that text is legible and a photo is visible.
 4. Return a confidence score in [0,1] for your decision.
-5. List red flags if any (blurry, edited, expired, photocopy without official stamp, screen capture, partial document, etc.).
+5. List red flags if any (blurry, edited, photocopy without official stamp, screen capture, partial document, etc.).
+6. Read the issue date and the expiry date printed on the document and return them as YYYY-MM-DD in issue_date and expiry_date (empty string if not printed or not legible).
 
 Rules:
 - Do NOT try to verify the actual identity of the person. Just verify it's a real, legible ID document.
-- Be strict: if anything is suspicious, set is_valid=false with a clear French reason.
+- Do NOT judge the dates yourself: never mention dates, expiry or validity in rejection_reason or red_flags. The dates are checked by code from issue_date and expiry_date.
+- If anything is suspicious, set is_valid=false with a short French reason. A human reviews every refusal, except two cases.
+- rejection_category, when is_valid=false: "unreadable" if the image is too blurry, dark, cropped or small to read the document; "not_identity_document" if the image shows something other than an identity document; "other" for any other doubt.
 - Respond ONLY via the provided tool.`,
           },
           {
@@ -158,7 +166,14 @@ Rules:
                   },
                   confidence: { type: "number", description: "Confidence score between 0 and 1" },
                   red_flags: { type: "array", items: { type: "string" }, description: "List of issues detected (in French)" },
-                  rejection_reason: { type: "string", description: "If rejected, brief French reason" },
+                  rejection_reason: { type: "string", description: "If rejected, brief French reason, without any date" },
+                  rejection_category: {
+                    type: "string",
+                    enum: ["unreadable", "not_identity_document", "other"],
+                    description: "If rejected: unreadable, not_identity_document or other",
+                  },
+                  issue_date: { type: "string", description: "Issue date printed on the document, YYYY-MM-DD, empty if unknown" },
+                  expiry_date: { type: "string", description: "Expiry date printed on the document, YYYY-MM-DD, empty if unknown" },
                 },
                 required: ["is_valid", "document_type", "confidence"],
                 additionalProperties: false,
@@ -200,22 +215,21 @@ Rules:
     const verification = JSON.parse(toolCall.function.arguments);
     console.log("Verification result:", JSON.stringify(verification));
 
-    const confidence = typeof verification.confidence === "number" ? verification.confidence : 0;
-    const redFlags: string[] = Array.isArray(verification.red_flags) ? verification.red_flags : [];
-    const AUTO_APPROVE_THRESHOLD = 0.85;
-
-    // Decision: valid + confidence ≥ threshold → verified ; valid + low confidence → needs_review ; invalid → rejected
-    let finalStatus: "verified" | "needs_review" | "rejected";
-    if (!verification.is_valid) finalStatus = "rejected";
-    else if (confidence >= AUTO_APPROVE_THRESHOLD) finalStatus = "verified";
-    else finalStatus = "needs_review";
+    // Lot Y1 (P4-02) : le modèle propose, le code décide. Refus automatique
+    // seulement pour un document illisible ou sans rapport avec une pièce
+    // d'identité (libellé fixe), revue humaine pour tout autre refus proposé,
+    // dates contrôlées par le code (_shared/identity-review.ts).
+    const outcome = decideIdentityOutcome(verification);
+    const finalStatus = outcome.status;
+    const confidence = outcome.confidence;
+    const redFlags = outcome.redFlags;
 
     // Log the verification attempt
     await supabaseAdmin.from("identity_verification_logs").insert({
       user_id: user.id,
-      result: finalStatus === "verified" ? "verified" : finalStatus === "rejected" ? "rejected" : "needs_review",
-      document_type: verification.document_type || null,
-      rejection_reason: verification.rejection_reason || (redFlags.length ? redFlags.join(" ; ") : null),
+      result: finalStatus,
+      document_type: outcome.documentType,
+      rejection_reason: finalStatus === "rejected" ? outcome.memberReason : outcome.reviewReason,
     });
 
     // Récupère l'email pour les notifications transactionnelles
@@ -268,8 +282,8 @@ Rules:
         supabaseAdmin.from("notifications").insert({
           user_id: user.id,
           type: "identity_pending",
-          title: "Vérification en cours",
-          body: "Votre document est en cours de revue par notre équipe. Vous serez notifié sous 24h.",
+          title: "Pièce en cours de vérification",
+          body: "Votre pièce d'identité est en cours de vérification par l'équipe Guardiens. Réponse sous 24 h.",
           link: "/settings?section=security&focus=identity",
         }),
         (async () => {
@@ -287,9 +301,14 @@ Rules:
             entity_type: "profile",
             entity_id: user.id,
             metadata: {
-              title: "Dossier d'identité en attente de décision humaine",
+              title: outcome.aiProposal === "reject"
+                ? "Refus proposé par l'IA, décision de l'équipe attendue"
+                : "Dossier d'identité en attente de décision humaine",
               confidence,
-              document_type: verification.document_type ?? null,
+              document_type: outcome.documentType,
+              ai_proposal: outcome.aiProposal,
+              review_reason: outcome.reviewReason,
+              date_check: outcome.dateCheck.status,
               red_flags: redFlags,
             },
           });
@@ -304,16 +323,21 @@ Rules:
         .update({ identity_verified: false, identity_verification_status: "rejected" })
         .eq("id", user.id);
 
-      const reason = verification.rejection_reason || (redFlags.length ? redFlags.join(" ; ") : "Document non conforme");
+      // Libellé fixe, jamais le texte libre du modèle.
+      const reason = outcome.memberReason ?? "";
+      // Au plus un email de refus par membre et par 24 heures.
+      const emailAllowed = await identityRejectionEmailAllowed(supabaseAdmin, userEmail);
       await Promise.allSettled([
         supabaseAdmin.from("notifications").insert({
           user_id: user.id,
           type: "identity_rejected",
-          title: "Vérification refusée",
-          body: `Votre document n'a pas pu être validé : ${reason}. Vous pouvez soumettre un nouveau document.`,
+          title: "Nouvelle photo de votre pièce attendue",
+          body: `${asSentence(reason)} Vous pouvez envoyer un nouveau document depuis vos paramètres.`,
           link: "/settings?section=security&focus=identity",
         }),
-        sendEmail("identity-rejected", `identity-rejected-${user.id}-${Date.now()}`, { reason }),
+        emailAllowed
+          ? sendEmail("identity-rejected", `identity-rejected-${user.id}-${Date.now()}`, { reason: asSentence(reason) })
+          : Promise.resolve(),
       ]);
     }
 
@@ -323,10 +347,11 @@ Rules:
       JSON.stringify({
         verified: finalStatus === "verified",
         status: finalStatus,
-        document_type: verification.document_type,
+        document_type: outcome.documentType,
         confidence,
-        red_flags: redFlags,
-        rejection_reason: verification.rejection_reason || null,
+        // Libellé fixe en cas de refus automatique ; en revue humaine, le
+        // membre lit seulement que sa pièce est en cours de vérification.
+        rejection_reason: outcome.memberReason,
       }),
 
       {

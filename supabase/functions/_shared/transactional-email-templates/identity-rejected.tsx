@@ -15,24 +15,24 @@ interface Props { reason?: string }
 const IdentityRejectedEmail = ({ reason }: Props) => (
   <Html lang="fr" dir="ltr">
     <BrandedHead />
-    <Preview>Votre vérification d'identité nécessite une action</Preview>
+    <Preview>Une nouvelle photo de votre pièce d'identité est attendue</Preview>
     <Body style={main}>
       <Container style={container}>
         <BrandHeader />
         <Heading style={h1}>Vérification d'identité</Heading>
         <Text style={text}>
-          Votre demande de vérification d'identité n'a pas pu être validée.
+          Merci pour votre envoi. Pour terminer la vérification de votre identité, nous avons besoin d'une nouvelle photo de votre pièce.
         </Text>
         {reason && (
           <Text style={{ ...text, backgroundColor: '#F5F3EF', padding: '12px 16px', borderRadius: '8px' }}>
-            <strong>Raison :</strong> {reason}
+            <strong>Motif :</strong> {reason}
           </Text>
         )}
         <Text style={text}>
-          Vous pouvez soumettre un nouveau document depuis votre profil. Assurez-vous que la photo est nette et que toutes les informations sont lisibles.
+          Envoyez depuis vos paramètres une photo nette de la pièce entière, avec toutes les informations bien lisibles.
         </Text>
-        <Button style={button} href={`${SITE_URL}/dashboard`}>
-          Soumettre un nouveau document
+        <Button style={button} href={`${SITE_URL}/settings?section=security&focus=identity`}>
+          Envoyer une nouvelle photo
         </Button>
         <LegalFooter
           purpose="la gestion de votre demande de vérification d'identité"
@@ -45,9 +45,9 @@ const IdentityRejectedEmail = ({ reason }: Props) => (
 
 export const template = {
   component: IdentityRejectedEmail,
-  subject: 'Votre vérification d’identité nécessite une action',
+  subject: 'Une nouvelle photo de votre pièce d’identité est attendue',
   displayName: 'Identité refusée',
-  previewData: { reason: 'Document illisible, veuillez fournir une photo plus nette.' },
+  previewData: { reason: 'Photo à reprendre : envoyez une photo nette de la pièce entière, avec toutes les informations bien lisibles.' },
 } satisfies TemplateEntry
 
 const main = { backgroundColor: '#ffffff', fontFamily: "'Outfit', Arial, sans-serif" }

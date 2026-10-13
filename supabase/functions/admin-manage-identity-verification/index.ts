@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import { asSentence, identityRejectionEmailAllowed } from "../_shared/identity-review.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -146,17 +147,22 @@ Deno.serve(async (req) => {
       if (!updated || updated.length === 0) return json({ success: true, already: "rejected" });
 
       const email = await getUserEmail(userId);
+      // Lot Y1 (P4-02) : au plus un email de refus par membre et par 24 heures,
+      // refus automatique compris (_shared/identity-review.ts).
+      const emailAllowed = email ? await identityRejectionEmailAllowed(adminClient, email) : false;
 
       await Promise.allSettled([
         adminClient.from("identity_verification_logs").insert({ user_id: userId, result: "rejected", rejection_reason: reason }),
         adminClient.from("notifications").insert({
           user_id: userId,
           type: "identity_rejected",
-          title: "Vérification d'identité refusée",
-          body: `Votre document n'a pas pu être validé. Raison : ${reason}. Vous pouvez soumettre un nouveau document.`,
-          link: "/settings",
+          title: "Nouvelle photo de votre pièce attendue",
+          body: `Motif : ${asSentence(reason)} Vous pouvez envoyer un nouveau document depuis vos paramètres.`,
+          link: "/settings?section=security&focus=identity",
         }),
-        email ? sendEmail("identity-rejected", email, `identity-rejected-${userId}-${Date.now()}`, { reason }) : Promise.resolve(),
+        email && emailAllowed
+          ? sendEmail("identity-rejected", email, `identity-rejected-${userId}-${Date.now()}`, { reason: asSentence(reason) })
+          : Promise.resolve(),
       ]);
 
       await resolveNeedsReviewSignal(userId, "reject");
