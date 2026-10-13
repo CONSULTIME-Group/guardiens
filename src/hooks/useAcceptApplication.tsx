@@ -10,13 +10,15 @@
  * Enchaînement, identique à l'historique d'ApplicationsList :
  * 1. RPC atomique `accept_application` (candidature acceptée, autres
  *    candidatures ouvertes déclinées, annonce en `confirmed`) ;
- * 2. message système au gardien retenu, notification `sit_confirmed` ;
+ * 2. message système au gardien retenu (la notification `sit_confirmed` vient
+ *    du trigger notify_sit_confirmed) ;
  * 3. emails `application-accepted` (gardien) et `sit-confirmed` (propriétaire) ;
  * 4. message système et email `application-declined` pour chaque candidat
  *    décliné automatiquement ;
  * 5. ouverture de l'accord de garde `AccordDeGarde` (role="proprio").
  */
-import { fetchMyProfile } from "@/lib/myProfile";
+import { fetchMyProfile, fetchMyOwnerProfile } from "@/lib/myProfile";
+import { buildAccordDeGardeData, fetchAccordHouseGuide } from "@/lib/accordDeGarde";
 import { useCallback, useState, type ReactNode } from "react";
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -118,7 +120,7 @@ export function useAcceptApplication(options: Options = {}) {
         // Données de l'annonce pour les messages et l'accord.
         const { data: sitFull } = (await supabase
           .from("sits")
-          .select("id, title, start_date, end_date, city, properties(pets(name, species, breed))")
+          .select("id, title, start_date, end_date, city, property_id, properties(pets(name, species, breed))")
           .eq("id", sitId)
           .maybeSingle()) as any;
         const { data: proprio } = (await fetchMyProfile(user.id!)) as any;
@@ -130,7 +132,7 @@ export function useAcceptApplication(options: Options = {}) {
         const endLong = fmt(sitFull?.end_date, "d MMMM yyyy");
         const ownerFirst = publicFirstName(proprio?.first_name ?? "");
 
-        // 2) Message système + notification (post-transaction, non bloquant).
+        // 2) Message système (post-transaction, non bloquant).
         const petsPart = petNames.length > 0 ? `garder ${petNames.join(", ")}` : "cette garde";
         const datesPart = startLong && endLong ? ` du ${startLong} au ${endLong}` : "";
         const confirmMsg = `La garde est confirmée. Vous avez été choisi(e) pour ${petsPart}${datesPart}.`;
@@ -153,32 +155,9 @@ export function useAcceptApplication(options: Options = {}) {
             .eq("id", acceptedConv.id);
         }
 
-        const notifLink = `/mes-gardes?sit=${sitId}`;
-        const { data: existingNotif } = await supabase
-          .from("notifications")
-          .select("id")
-          .eq("user_id", sitterId)
-          .eq("type", "sit_confirmed")
-          .eq("link", notifLink)
-          .maybeSingle();
-        if (!existingNotif) {
-          const { data: guideCheck } = await supabase
-            .from("house_guides")
-            .select("id")
-            .eq("user_id", user.id)
-            .eq("published", true)
-            .maybeSingle();
-          const startShort = fmt(sitFull?.start_date, "dd MMMM");
-          await supabase.from("notifications").insert({
-            user_id: sitterId,
-            type: "sit_confirmed",
-            title: "Garde confirmée",
-            body: guideCheck
-              ? `Votre garde chez ${ownerFirst || "votre hôte"} est confirmée. Le guide de la maison sera disponible dans votre espace à partir du ${startShort}.`
-              : `Votre garde chez ${ownerFirst || "votre hôte"} est confirmée. Rendez-vous dans "Mes gardes" pour les détails.`,
-            link: notifLink,
-          });
-        }
+        // Lot Z : la notification sit_confirmed du gardien vient du trigger
+        // notify_sit_confirmed. L'écriture faite ici pour autrui était refusée
+        // par la RLS et menait vers /mes-gardes, route absente.
 
         // 3) Emails, idempotence côté serveur.
         sendTransactionalEmail({
@@ -230,27 +209,26 @@ export function useAcceptApplication(options: Options = {}) {
         }
 
         // 5) Accord de garde.
+        // Lot Z : même construction que la fiche de l'annonce (guide de la
+        // maison, préférences du propriétaire, aucun montant imposé).
         setAccordSitId(sitId);
-        setAccordData({
-          gardeId: sitId,
-          dateDebut: startLong,
-          dateFin: endLong,
-          adresse: sitFull?.city || proprio?.city || "",
-          proprio: { prenom: ownerFirst || "Le propriétaire", telephone: "" },
-          gardien: { prenom: publicFirstName(target.sitterFirstName ?? "") || "Le gardien" },
-          animaux: petsRaw.map((p) => ({
-            prenom: p.name,
-            espece: p.species ?? "",
-            race: p.breed ?? undefined,
-          })),
-          reglesVie: { animauxPartout: null, invites: null, tabac: null, autresPrecisions: null },
-          voisinConfiance: null,
-          urgences: null,
-          montantVetMax: 300,
-          montantLogementMax: null,
-          estLongueDuree: false,
-          contributionCharges: null,
-        });
+        const [accordGuide, ownerRulesRes] = await Promise.all([
+          fetchAccordHouseGuide(supabase as any, sitFull?.property_id),
+          fetchMyOwnerProfile(user.id!).catch(() => ({ data: null })),
+        ]);
+        setAccordData(
+          buildAccordDeGardeData({
+            sitId,
+            dateDebut: startLong,
+            dateFin: endLong,
+            adresse: sitFull?.city || proprio?.city || "",
+            ownerFirstName: ownerFirst,
+            sitterFirstName: publicFirstName(target.sitterFirstName ?? ""),
+            pets: petsRaw,
+            guide: accordGuide,
+            ownerRules: ((ownerRulesRes as any)?.data ?? null) as any,
+          }),
+        );
 
         toast({ title: "Garde confirmée !", description: `${sitterName} a été choisi(e) pour cette garde.` });
         options.onAccepted?.(sitId);

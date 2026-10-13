@@ -7,11 +7,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { capitalizeFirstName } from "@/lib/displayName";
+import { chooseMissionResponse } from "@/lib/missionResponseDecision";
 
 /**
  * Bandeau « Choisir {prénom} » dans une conversation liée à un besoin ouvert.
  * Visible seulement pour l'auteur du besoin, tant que la réponse de l'autre
- * personne est en attente. Même chemin que la page du besoin : accept_mission_response.
+ * personne est en attente. Même chemin que la page du besoin : accept_mission_response
+ * puis notify-mission-event (lot Z, src/lib/missionResponseDecision.ts).
  */
 export const MissionChooseBanner = ({ missionId, userId, otherUserId, otherFirstName, onChosen }: {
   missionId: string;
@@ -20,7 +22,7 @@ export const MissionChooseBanner = ({ missionId, userId, otherUserId, otherFirst
   otherFirstName: string | null | undefined;
   onChosen?: () => void;
 }) => {
-  const [state, setState] = useState<{ responseId: string; title: string } | null>(null);
+  const [state, setState] = useState<{ responseId: string; title: string; isProjet: boolean } | null>(null);
   const [busy, setBusy] = useState(false);
   const name = capitalizeFirstName(otherFirstName) || "cette personne";
 
@@ -28,12 +30,12 @@ export const MissionChooseBanner = ({ missionId, userId, otherUserId, otherFirst
     let active = true;
     setState(null);
     const load = async () => {
-      const { data: mission } = await supabase.from("small_missions").select("id, title, status, user_id").eq("id", missionId).maybeSingle();
+      const { data: mission } = await supabase.from("small_missions").select("id, title, status, user_id, category").eq("id", missionId).maybeSingle();
       if (!active || !mission || mission.user_id !== userId || mission.status !== "open") return;
       const { data: response } = await supabase.from("small_mission_responses").select("id, status")
         .eq("mission_id", missionId).eq("responder_id", otherUserId).maybeSingle();
       if (!active || !response || response.status !== "pending") return;
-      setState({ responseId: response.id, title: mission.title });
+      setState({ responseId: response.id, title: mission.title, isProjet: mission.category === "projet" });
     };
     void load();
     return () => { active = false; };
@@ -43,9 +45,15 @@ export const MissionChooseBanner = ({ missionId, userId, otherUserId, otherFirst
 
   const choose = async () => {
     setBusy(true);
-    const { error } = await supabase.rpc("accept_mission_response", { p_response_id: state.responseId, p_decline_others: true });
+    const result = await chooseMissionResponse({
+      responseId: state.responseId,
+      missionId,
+      actorId: userId,
+      responderId: otherUserId,
+      declineOthers: !state.isProjet,
+    });
     setBusy(false);
-    if (error) { toast.error("Réessayez dans un instant."); return; }
+    if (result.ok === false) { toast.error("Réessayez dans un instant."); return; }
     toast.success(`C'est noté, ${name} vous aide.`);
     setState(null);
     onChosen?.();
@@ -63,7 +71,11 @@ export const MissionChooseBanner = ({ missionId, userId, otherUserId, otherFirst
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Choisir {name} ?</AlertDialogTitle>
-            <AlertDialogDescription>Votre besoin passe en cours et les autres réponses sont écartées.</AlertDialogDescription>
+            <AlertDialogDescription>
+              {state.isProjet
+                ? "Votre projet passe en cours et les candidatures se ferment. Vous pouvez les rouvrir à tout moment."
+                : "Votre besoin passe en cours et les autres réponses sont écartées."}
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Annuler</AlertDialogCancel>

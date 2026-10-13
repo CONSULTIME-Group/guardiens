@@ -72,7 +72,7 @@ describe("AlmaNotifSummaryBubble", () => {
     const onFilter = vi.fn();
     const notifs = [
       ...Array.from({ length: 4 }, (_, i) => mk("new_message", i)),
-      mk("mission_proposal", 5),
+      mk("mission_response_received", 5),
       mk("mission_accepted", 6),
     ];
     render(<AlmaNotifSummaryBubble notifications={notifs} onFilterUrgent={onFilter} />);

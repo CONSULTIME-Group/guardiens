@@ -1,8 +1,9 @@
-import { Check, Trash2, Lock } from "lucide-react";
+import { Check, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { avatarImageUrl } from "@/lib/storageImage";
+import { notificationTone } from "@/lib/notificationKinds";
 
 export interface NotificationData {
   id: string;
@@ -16,40 +17,6 @@ export interface NotificationData {
   actor_avatar_url: string | null;
 }
 
-const typeTone: Record<string, "success" | "info" | "warning" | "destructive" | "muted"> = {
-  sitter_available: "success",
-  new_application: "info",
-  sit_confirmed: "success",
-  sit_started: "success",
-  sit_completed: "success",
-  sit_cancelled: "destructive",
-  sit_unconfirmed: "warning",
-  review_published: "info",
-  new_message: "info",
-  application_accepted: "success",
-  application_rejected: "warning",
-  application_cancelled: "muted",
-  reminder_7days: "info",
-  reminder_48h: "warning",
-  identity_verified: "success",
-  identity_rejected: "warning",
-  experience_verified: "success",
-  experience_rejected: "warning",
-  emergency_alert: "destructive",
-  mission_proposal: "info",
-  mission_accepted: "success",
-  mission_declined: "muted",
-  mission_completed: "success",
-  mission_cancelled: "muted",
-  subscription_offered: "success",
-  accord_ready_for_sitter: "info",
-  accord_signed_both: "success",
-  listing_hidden: "warning",
-  listing_deleted: "destructive",
-  admin_contact: "info",
-  info: "muted",
-};
-
 const toneDot: Record<string, string> = {
   success: "bg-success",
   info: "bg-info",
@@ -60,22 +27,21 @@ const toneDot: Record<string, string> = {
 
 interface Props {
   notification: NotificationData;
-  hasAccess: boolean;
   onMarkRead: (id: string) => void;
   onDelete: (id: string) => void;
 }
 
-export const NotificationItem = ({ notification: n, hasAccess, onMarkRead, onDelete }: Props) => {
-  const tone = typeTone[n.type] ?? "muted";
-  const isLockedInvite = n.type === "sit_invitation" && !hasAccess;
-
-  const displayTitle = isLockedInvite ? "Une invitation à garder vous attend" : n.title;
-  const displayBody = isLockedInvite
-    ? "Activez votre espace gardien pour découvrir l'annonce, le propriétaire et candidater."
-    : n.body;
-  const displayLink = isLockedInvite ? "/pricing" : n.link;
-  const displayAvatar = isLockedInvite ? null : n.actor_avatar_url;
+export const NotificationItem = ({ notification: n, onMarkRead, onDelete }: Props) => {
+  const tone = notificationTone(n.type);
+  const displayTitle = n.title;
+  const displayBody = n.body;
+  const displayLink = n.link;
+  const displayAvatar = n.actor_avatar_url;
   const isUnread = !n.read_at;
+  // Lot Z : ouvrir une notification la marque comme lue.
+  const handleOpen = () => {
+    if (isUnread) onMarkRead(n.id);
+  };
 
   const inner = (
     <div
@@ -103,10 +69,6 @@ export const NotificationItem = ({ notification: n, hasAccess, onMarkRead, onDel
             alt=""
             className="w-9 h-9 rounded-full object-cover shrink-0 mt-0.5"
           />
-        ) : isLockedInvite ? (
-          <span className="shrink-0 h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center mt-0.5">
-            <Lock className="h-4 w-4 text-primary" />
-          </span>
         ) : (
           <span
             aria-hidden
@@ -125,11 +87,6 @@ export const NotificationItem = ({ notification: n, hasAccess, onMarkRead, onDel
             </span>
           </div>
           <p className="text-sm text-muted-foreground line-clamp-2">{displayBody}</p>
-          {isLockedInvite && (
-            <p className="text-xs text-primary font-medium pt-1">
-              Activer mon espace gardien
-            </p>
-          )}
         </div>
       </div>
 
@@ -160,10 +117,10 @@ export const NotificationItem = ({ notification: n, hasAccess, onMarkRead, onDel
   );
 
   return displayLink ? (
-    <Link to={displayLink} className="block" aria-label={displayTitle}>
+    <Link to={displayLink} onClick={handleOpen} className="block" aria-label={displayTitle}>
       {inner}
     </Link>
   ) : (
-    <div>{inner}</div>
+    <div onClick={handleOpen} className={isUnread ? "cursor-pointer" : undefined}>{inner}</div>
   );
 };

@@ -167,7 +167,7 @@ Deno.serve(async (req) => {
     body: JSON.stringify({
       templateName,
       recipientEmail: recipientProfile.email,
-      idempotencyKey: `accord_${payload.garde_id}_${payload.signer_role}`,
+      idempotencyKey: `accord_${payload.garde_id}_${payload.signer_role}_${recipientId}`,
       templateData,
       logMetadata: {
         garde_id: payload.garde_id,

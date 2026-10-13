@@ -52,6 +52,7 @@ import { describeSitWriteError, sitWriteErrorNeedsSignal } from "@/lib/sitDbErro
 import { trackEvent } from "@/lib/analytics";
 import PublishPhotoPromptDialog from "@/components/sits/owner/PublishPhotoPromptDialog";
 import { readVisiblePets } from "@/lib/visiblePets";
+import { isSitReviewable } from "@/lib/reviewEligibility";
 import {
   countPropertyPhotos,
   shouldPromptPublishPhotos,
@@ -1831,9 +1832,19 @@ const QuickActions = ({
     );
   }
 
-  if (effectiveStatus === "completed") {
+  // Lot Z : l'avis suit isSitReviewable (terminée, ou archivée après sa date
+  // de fin) et ne s'offre qu'aux deux parties de la garde.
+  const isSitParty = isOwner
+    ? sit.status === "completed" || !!sit.acceptedSitter
+    : sit.application_status === "accepted";
+  if (isSitParty && isSitReviewable({ status: sit.status, end_date: sit.end_date })) {
     return (
       <>
+        {isOwner && effectiveStatus === "archived" && (
+          <button onClick={onRepublish} className={cn(btnClass, "bg-primary/10 text-primary hover:bg-primary/20")}>
+            <RefreshCw className="h-3.5 w-3.5" /> Republier
+          </button>
+        )}
         {!sit.hasReviewed && (
           <Link to={`/review/${sit.id}`} className={cn(btnClass, "bg-secondary/10 text-secondary hover:bg-secondary/20")}>
             <Star className="h-3.5 w-3.5" /> Laisser un avis

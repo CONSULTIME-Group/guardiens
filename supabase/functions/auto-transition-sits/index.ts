@@ -1,6 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { expiryCandidatesOrClause, publishedSitExpiryReason, sitExpiredNotificationBody } from "../_shared/sit-expiry.ts";
 import { startCronRun } from "../_shared/cron-run-log.ts";
+import { completionNoticeCoveredByMorningReminder } from "../_shared/sit-reminders.ts";
 
 
 const corsHeaders = {
@@ -70,6 +71,9 @@ Deno.serve(async (req) => {
       return conv?.id ?? null;
     }
 
+    // Lot Z : .limit(1) et test de longueur. Avec maybeSingle, deux messages
+    // identiques renvoyaient une erreur, lue comme « absent » : le message
+    // était reposté à chaque passage horaire.
     async function alreadyPosted(conversationId: string, pattern: string) {
       const { data } = await supabase
         .from("messages")
@@ -77,8 +81,8 @@ Deno.serve(async (req) => {
         .eq("conversation_id", conversationId)
         .eq("is_system", true)
         .ilike("content", pattern)
-        .maybeSingle();
-      return !!data;
+        .limit(1);
+      return Array.isArray(data) && data.length > 0;
     }
 
     async function postSystemMessage(conversationId: string, senderId: string, content: string) {
@@ -134,33 +138,30 @@ Deno.serve(async (req) => {
 
 
     // Poste le message systeme "guide disponible" si la conversation existe,
-    // que le guide existe, et que le message n'a pas deja ete poste.
+    // que le guide est PUBLIE (lot Z : un brouillon de guide n'est pas
+    // disponible pour le gardien), et que le message n'a pas deja ete poste.
     async function postGuideMessage(sit: { id: string; user_id: string; property_id: string | null }, sitterId: string) {
       if (!sit.property_id) return false;
-      const { data: guide } = await supabase
+      const { data: guides } = await supabase
         .from("house_guides")
         .select("id")
         .eq("property_id", sit.property_id)
-        .maybeSingle();
-      if (!guide) return false;
+        .eq("published", true)
+        .limit(1);
+      if (!Array.isArray(guides) || guides.length === 0) return false;
 
-      const { data: conv } = await supabase
+      const { data: convs } = await supabase
         .from("conversations")
         .select("id")
         .eq("sit_id", sit.id)
         .eq("sitter_id", sitterId)
-        .maybeSingle();
+        .limit(1);
+      const conv = Array.isArray(convs) && convs.length > 0 ? convs[0] : null;
       if (!conv) return false;
 
-      // Dedup : ne pas reinserer si un message identique existe deja.
-      const { data: existing } = await supabase
-        .from("messages")
-        .select("id")
-        .eq("conversation_id", conv.id)
-        .eq("is_system", true)
-        .ilike("content", "%le guide de la maison est disponible%")
-        .maybeSingle();
-      if (existing) return false;
+      // Dedup : ne pas reinserer si un message identique existe deja
+      // (lot Z : .limit(1) puis test de longueur).
+      if (await alreadyPosted(conv.id, "%le guide de la maison est disponible%")) return false;
 
       await supabase.from("messages").insert({
         conversation_id: conv.id,
@@ -271,14 +272,20 @@ Deno.serve(async (req) => {
       try {
         await supabase.from("sits").update({ status: "completed" as any }).eq("id", sit.id);
 
+        // Lot Z : fin de la veille, le rappel J+1 de send-sit-reminders (6 h)
+        // prévient les deux parties ; aucune notification de fin ici.
+        const coveredByMorningReminder = completionNoticeCoveredByMorningReminder(sit.end_date, today);
+
         // Notify owner
-        await supabase.from("notifications").insert({
-          user_id: sit.user_id,
-          type: "sit_completed",
-          title: "Garde terminée !",
-          body: `Votre garde « ${sit.title} » est terminée. Pensez à laisser un avis !`,
-          link: `/review/${sit.id}`,
-        });
+        if (!coveredByMorningReminder) {
+          await supabase.from("notifications").insert({
+            user_id: sit.user_id,
+            type: "sit_completed",
+            title: "Garde terminée !",
+            body: `Votre garde « ${sit.title} » est terminée. Pensez à laisser un avis !`,
+            link: `/review/${sit.id}`,
+          });
+        }
 
         // Notify accepted sitter
         const { data: apps } = await supabase
@@ -288,13 +295,15 @@ Deno.serve(async (req) => {
           .eq("status", "accepted");
 
         for (const app of apps || []) {
-          await supabase.from("notifications").insert({
-            user_id: app.sitter_id,
-            type: "sit_completed",
-            title: "Garde terminée !",
-            body: `La garde « ${sit.title} » est terminée. Pensez à laisser un avis !`,
-            link: `/review/${sit.id}`,
-          });
+          if (!coveredByMorningReminder) {
+            await supabase.from("notifications").insert({
+              user_id: app.sitter_id,
+              type: "sit_completed",
+              title: "Garde terminée !",
+              body: `La garde « ${sit.title} » est terminée. Pensez à laisser un avis !`,
+              link: `/review/${sit.id}`,
+            });
+          }
 
           // Proposition de recuperation des photos partagees pendant la garde.
           try {
