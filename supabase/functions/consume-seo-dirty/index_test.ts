@@ -5,7 +5,7 @@ const serve = Deno.serve;
 Object.defineProperty(Deno, "serve", { value: (h: typeof handler) => { handler = h; }, configurable: true });
 try { await import("./index.ts"); } finally { Object.defineProperty(Deno, "serve", { value: serve, configurable: true }); }
 
-type Profile = { id: string; role: string; bio: string; identity_verified: boolean; seo_dirty_at: string | null };
+type Profile = { id: string; role: string; bio: string; identity_verified: boolean; seo_dirty_at: string | null; seo_indexed_at?: string | null; hidden?: boolean };
 type ContentRow = { id: string; slug: string | null; published: boolean; noindex: boolean; canonical_url?: string | null; seo_dirty_at: string | null };
 const contentTables = ["articles", "seo_city_pages", "city_guides", "seo_department_pages"] as const;
 const dirty = "2026-10-03T10:00:00.000Z";
@@ -21,7 +21,6 @@ function fixture(profiles: Profile[] = []) {
     logError: false, contentReadError: "",
     ackInFlight: 0, ackMaxInFlight: 0,
     outbox: [] as Array<{ path: string; dirty_at: string }>,
-    recentCopies: [] as string[],
     busy: false, capacity: 18000, reserved: 0, released: 0, outboxConcurrent: false,
     outboxReadError: false, outboxAckError: false, reserveError: false,
   };
@@ -96,13 +95,15 @@ async function run(f: ReturnType<typeof fixture>) {
         const id = url.searchParams.get("id");
         const version = url.searchParams.get("seo_dirty_at");
         if ((id === `eq.${r.id}` || id?.startsWith("in.(") && id.includes(r.id)) && (!version || version === `eq.${r.seo_dirty_at}`)) {
-          r.seo_dirty_at = body.seo_dirty_at;
+          Object.assign(r, body);
         }
       }
-    } else if (table === "prerender_recache_log" && req.method === "GET") {
-      assertEquals(url.searchParams.get("ok"), "eq.true");
-      const wanted = url.searchParams.get("url") ?? "";
-      result = f.recentCopies.filter((u) => wanted.includes(u)).map((u) => ({ url: u }));
+    } else if (table === "public_profiles" && req.method === "GET") {
+      const wanted = url.searchParams.get("id") ?? "";
+      result = f.profiles.filter((p) => !p.hidden && wanted.includes(p.id))
+        .map((p) => ({ id: p.id, bio: p.bio, identity_verified: p.identity_verified, role: p.role }));
+    } else if (["public_sitter_profiles", "public_sitter_gallery_counts"].includes(table) && req.method === "GET") {
+      result = [];
     } else if (table === "prerender_recache_log" && req.method === "POST") {
       f.events.push("log");
       if (f.logError) return new Response(JSON.stringify({ message: "test log failed" }), { status: 500 });
@@ -123,19 +124,18 @@ async function run(f: ReturnType<typeof fixture>) {
   }
 }
 
-Deno.test("fiche devenue non indexable : remplacer la copie récente, puis effacer la demande", async () => {
-  const f = fixture([profile("ineligible", { bio: "", identity_verified: false })]);
-  f.recentCopies = ["https://guardiens.fr/gardiens/ineligible"];
+Deno.test("fiche sortie de l index : remplacer la version indexable, puis effacer demande et repère", async () => {
+  const f = fixture([profile("ineligible", { bio: "", identity_verified: false, seo_indexed_at: dirty })]);
   const result = await run(f);
   assertEquals(result.status, 200);
   assertEquals(f.recached, ["https://guardiens.fr/gardiens/ineligible"]);
   assertEquals(f.profiles[0].seo_dirty_at, null);
+  assertEquals(f.profiles[0].seo_indexed_at, null);
   assertEquals(result.payload.sitters_skipped_noindex, 0);
 });
 
 Deno.test("changement de rôle déjà marqué : traiter aussi la fiche devenue propriétaire", async () => {
-  const f = fixture([profile("former-sitter", { role: "owner" })]);
-  f.recentCopies = ["https://guardiens.fr/gardiens/former-sitter"];
+  const f = fixture([profile("former-sitter", { role: "owner", seo_indexed_at: dirty })]);
   await run(f);
   assertEquals(f.recached, ["https://guardiens.fr/gardiens/former-sitter"]);
   assertEquals(f.profiles[0].seo_dirty_at, null);
@@ -318,7 +318,7 @@ Deno.test("canonical externe : recache la page Guardiens par son slug", async ()
   assertEquals((await run(f)).status, 200); assertEquals(f.recached, ["https://guardiens.fr/actualites/article"]);
 });
 
-Deno.test("fiche hors index sans copie récente : acquittée sans render ni trace", async () => {
+Deno.test("fiche hors index sans repère : acquittée sans render ni trace", async () => {
   const f = fixture([
     profile("never-eligible", { bio: "Bonjour", identity_verified: false }),
     profile("owner-only", { role: "owner" }),
@@ -341,4 +341,26 @@ Deno.test("fiches hors index en masse : aucune ne consomme le budget des fiches 
   assertEquals(f.recached.length, 3);
   assertEquals(result.payload.sitters_skipped_noindex, 200);
   assertEquals(result.payload.sitters_recached, 3);
+});
+
+Deno.test("fiche devenue indexable : rendue et repère posé", async () => {
+  const f = fixture([profile("new-good")]);
+  await run(f);
+  assertEquals(f.recached, ["https://guardiens.fr/gardiens/new-good"]);
+  assert(f.profiles[0].seo_indexed_at);
+});
+
+Deno.test("compte masqué des vues publiques avec repère : copie remplacée puis repère effacé", async () => {
+  const f = fixture([profile("suspended", { hidden: true, seo_indexed_at: dirty })]);
+  await run(f);
+  assertEquals(f.recached, ["https://guardiens.fr/gardiens/suspended"]);
+  assertEquals(f.profiles[0].seo_indexed_at, null);
+});
+
+Deno.test("échec Prerender sur fiche hors index : repère conservé", async () => {
+  const f = fixture([profile("leaving", { bio: "", identity_verified: false, seo_indexed_at: dirty })]);
+  f.recacheError = true;
+  await run(f);
+  assertEquals(f.profiles[0].seo_indexed_at, dirty);
+  assertEquals(f.profiles[0].seo_dirty_at, dirty);
 });
