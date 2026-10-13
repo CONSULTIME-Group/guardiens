@@ -20,6 +20,7 @@
 
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { recordDeliveryFailure } from '../_shared/delivery-failure.ts'
+import { missionLinkFor } from '../_shared/mission-link.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -79,11 +80,12 @@ interface EventCopy {
 
 function buildCopy(
   event: EventType,
-  mission: { id: string; title: string; user_id: string },
+  mission: { id: string; title: string; user_id: string; slug?: string | null; category?: string | null },
   actorName: string,
   metadata: Record<string, unknown>,
 ): EventCopy {
-  const missionLink = `/petites-missions/${mission.id}`
+  // Lot X2 : un projet participatif renvoie vers /projets/{slug}, où son porteur lit les candidatures.
+  const missionLink = missionLinkFor(mission)
   const missionTitle = mission.title || 'Votre mission'
   const meta = metadata ?? {}
 
@@ -106,6 +108,14 @@ function buildCopy(
         emailTemplate: 'mission-proposal-accepted',
       }
     case 'mission_declined':
+      if (mission.category === 'projet') {
+        return {
+          title: 'Votre candidature au projet',
+          body: `${actorName} a donné suite à d'autres candidatures pour "${missionTitle}". D'autres projets vous attendent sur Guardiens.`,
+          link: missionLink,
+          emailTemplate: 'mission-proposal-declined',
+        }
+      }
       return {
         title: 'Votre proposition n\'a pas été retenue',
         body: `${actorName} a retenu une autre proposition pour "${missionTitle}".`,
@@ -217,7 +227,7 @@ Deno.serve(async (req) => {
   // Charger la mission
   const { data: mission, error: missionErr } = await admin
     .from('small_missions')
-    .select('id, title, user_id')
+    .select('id, title, user_id, slug, category')
     .eq('id', payload.mission_id)
     .maybeSingle()
   if (missionErr || !mission) return json({ error: 'mission_not_found' }, 404)

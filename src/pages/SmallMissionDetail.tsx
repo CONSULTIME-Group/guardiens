@@ -14,7 +14,7 @@ import {
   Heart, MessageSquare, CheckCircle2, Users, XCircle, ThumbsUp,
   ThumbsDown, Star, RotateCcw, Send, Home, X, Share2, ShieldCheck, Sparkles,
 } from "lucide-react";
-import { format, differenceInCalendarDays } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
@@ -48,6 +48,8 @@ import PublicMissionView from "@/components/missions/PublicMissionView";
 import RelatedMissionCard from "@/components/missions/RelatedMissionCard";
 import MissionResponseCard from "@/components/missions/MissionResponseCard";
 import MissionResponseModal from "@/components/missions/MissionResponseModal";
+import RescheduleMissionDialog from "@/components/missions/RescheduleMissionDialog";
+import { isMissionDatePassed, missionReferenceDate, localIsoDay, daysBetween } from "@/lib/missionReschedule";
 import ApproximateLocationMap from "@/components/shared/ApproximateLocationMap";
 import { isAuthorOf } from "@/lib/ownership";
 import { isMissionSitMode, sitModeLine } from "@/lib/missionSitMode";
@@ -240,6 +242,7 @@ const SmallMissionDetail = () => {
   const [processingResponseId, setProcessingResponseId] = useState<string | null>(null);
   const [completing, setCompleting] = useState(false);
   const [responseModalOpen, setResponseModalOpen] = useState(false);
+  const [rescheduleOpen, setRescheduleOpen] = useState(false);
 
   // Per-person feedback tracking: receiverId → submitted
   const [feedbackSent, setFeedbackSent] = useState<Record<string, boolean>>({});
@@ -806,7 +809,10 @@ const SmallMissionDetail = () => {
     "5 personnes ont déjà proposé leur aide. Une place se libérera si l'auteur en décline une.";
   // Une OFFRE (disponibilité) n'a pas d'échéance : pas de bannière "date dépassée".
   const isOfferMission = (mission as any).mission_type === "offre";
-  const isDatePassed = !isOfferMission && mission.date_needed && new Date(mission.date_needed) < new Date();
+  // Lot X2 : la fin de période prime sur la date souhaitée (même règle que la
+  // page Entraide et la clôture automatique), le jour même reste valable.
+  const missionRefDate = missionReferenceDate(mission);
+  const isDatePassed = !isOfferMission && isMissionDatePassed(mission);
   const shouldNoindex = !isIndexableEntraideMission(mission);
 
   const handleSharePublishedLink = async () => {
@@ -1213,11 +1219,20 @@ const SmallMissionDetail = () => {
         )}
 
         {/* Bannière "date dépassée" (Chantier 8 EntraideHub Pass 1) */}
-        {isDatePassed && (mission.status === "open" || mission.status === "in_progress") && mission.date_needed && (
+        {isDatePassed && (mission.status === "open" || mission.status === "in_progress") && missionRefDate && (
           <ExpiredMissionBanner
             missionId={mission.id}
-            dateNeeded={mission.date_needed}
+            refDate={missionRefDate}
             isAuthor={isAuthor}
+            onReschedule={() => setRescheduleOpen(true)}
+          />
+        )}
+        {isAuthor && (
+          <RescheduleMissionDialog
+            open={rescheduleOpen}
+            onOpenChange={setRescheduleOpen}
+            mission={mission}
+            onSaved={(patch) => setMission((prev: any) => (prev ? { ...prev, ...patch } : prev))}
           />
         )}
 
@@ -1881,22 +1896,24 @@ const SmallMissionDetail = () => {
 };
 
 /**
- * Bannière "date dépassée" (Chantier 8 EntraideHub Pass 1).
- * Affichée en tête de mission dont date_needed est passée et statut open|in_progress.
- * Auteur : CTA "Clôturer" + "Reporter à une nouvelle date" (redirige vers édition).
+ * Bannière "date dépassée" (Chantier 8 EntraideHub Pass 1, lot X2).
+ * Affichée en tête d'un besoin dont la période est terminée (fin de période,
+ * sinon date souhaitée) et de statut open|in_progress.
+ * Auteur : bouton « Reporter », qui ouvre le choix d'une nouvelle date sur la page.
  * Autre visiteur : simple info textuelle.
  */
 const ExpiredMissionBanner = ({
   missionId,
-  dateNeeded,
+  refDate,
   isAuthor,
+  onReschedule,
 }: {
   missionId: string;
-  dateNeeded: string;
+  refDate: string;
   isAuthor: boolean;
+  onReschedule: () => void;
 }) => {
-  const navigate = useNavigate();
-  const daysOverdue = Math.max(0, differenceInCalendarDays(new Date(), new Date(dateNeeded)));
+  const daysOverdue = Math.max(0, daysBetween(refDate, localIsoDay()));
   const seenRef = useRef(false);
   useEffect(() => {
     if (seenRef.current) return;
@@ -1906,19 +1923,19 @@ const ExpiredMissionBanner = ({
     });
   }, [missionId, daysOverdue]);
   const formatted = (() => {
-    try { return format(new Date(dateNeeded), "d MMMM yyyy"); } catch { return dateNeeded; }
+    try { return format(parseISO(refDate), "d MMMM yyyy", { locale: fr }); } catch { return refDate; }
   })();
   return (
     <div className="bg-warning/10 border border-warning/40 rounded-2xl p-4 mb-6 flex flex-col sm:flex-row sm:items-center gap-3">
       <div className="flex-1 min-w-0">
         <p className="font-medium text-warning-foreground">
           {isAuthor
-            ? `Cette mission avait besoin d'aide le ${formatted}, il y a ${daysOverdue} jour${daysOverdue > 1 ? "s" : ""}.`
-            : `Attention : la date souhaitée (${formatted}) est passée depuis ${daysOverdue} jour${daysOverdue > 1 ? "s" : ""}.`}
+            ? `La date de ce besoin était le ${formatted}, il y a ${daysOverdue} jour${daysOverdue > 1 ? "s" : ""}.`
+            : `La date souhaitée (${formatted}) est passée depuis ${daysOverdue} jour${daysOverdue > 1 ? "s" : ""}.`}
         </p>
         {isAuthor && (
           <p className="text-sm text-warning-foreground/80 mt-1">
-            Clôturez la mission si elle n'est plus d'actualité, ou reportez-la à une nouvelle date.
+            Reportez-la à une nouvelle date, ou clôturez-la si elle n'est plus d'actualité.
           </p>
         )}
       </div>
@@ -1929,7 +1946,7 @@ const ExpiredMissionBanner = ({
             size="sm"
             onClick={() => {
               void trackEvent("mission_expired_reschedule_clicked", { metadata: { mission_id: missionId } });
-              navigate(`/petites-missions/${missionId}/editer`);
+              onReschedule();
             }}
           >
             Reporter

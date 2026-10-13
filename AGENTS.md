@@ -55,6 +55,8 @@
 
 - Besoins ailleurs (lot E11) : sous 3 besoins à 30 km, les besoins plus loin s'affichent d'emblée sous « Ailleurs en France, N besoins ouverts » ; au-delà, repli derrière un bouton à contour ; pourquoi : 0 besoin proche et 12 ailleurs donnaient une page Entraide vide à Lyon.
 
+- Date d'un besoin et candidatures d'un projet (lot X2) : « Reporter » ouvre RescheduleMissionDialog sur la page du besoin (date à partir d'aujourd'hui, fin de période proposée avec la même durée, écriture de date_needed et end_date sur la ligne de l'auteur), la bannière « date passée » suit end_date puis date_needed au jour calendaire (src/lib/missionReschedule.ts, même règle que la page Entraide et la clôture automatique) ; le porteur connecté d'un projet lit ses candidatures sur /projets/:slug (ProjetOwnerResponses, MissionResponseCard variant="projet" sans « Choisir », conversation par open_mission_response_conversation, relecture de sa propre ligne quand le projet sort de la vue publique) et notify-mission-event pointe un projet vers /projets/:slug (missionLinkFor, supabase/functions/_shared/mission-link.ts) ; pourquoi : « Reporter » menait à une route absente (5 clics vers la page 404), la bannière s'affichait sur des besoins encore en période (27 vues sur 89) et aucun écran ne montrait au porteur les candidatures de son projet (audit du 13/10/2026, constats E-02, C-06, C-07, C-02).
+
 <!-- LOVABLE:BEGIN -->
 - `build` ends with `test:guard` and CI runs `test:guard` directly; why: owner decision of 17/08/2026, a red test blocks publication.
 
