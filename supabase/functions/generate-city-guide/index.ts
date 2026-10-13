@@ -1,29 +1,24 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { requireAdminOrServiceRole } from "../_shared/require-admin.ts";
-import { sourceOneGuide } from "../_shared/guide-places/run.ts";
 import {
   baseSlug,
   countryLabel,
   haversineM,
   homonymSlug,
-  introPrompt,
   resolveGuideCenter,
-  stripDashes,
-  type GuideCenter,
 } from "../_shared/guide-places/source.ts";
 
 /**
- * generate-city-guide (refonte GL2, 13/10/2026)
+ * generate-city-guide (lots GL1 à GL4, 13/10/2026)
  *
- * Avant : l'IA inventait les lieux « de [ville] en France ». Le 10/10/2026, le
+ * Crée la fiche d'un guide sur son centre réel (pays, coordonnées ; un
+ * homonyme éloigné reçoit son propre slug), sans lieu ni texte. Le guide suit
+ * ensuite le protocole de génération (supabase/functions/_shared/guide-places/
+ * pipeline.ts) par la file source-guide-places : lieux sourcés, contrôles,
+ * rédaction vérifiée, publication dès qu'il a des lieux.
+ *
+ * Avant le 13/10/2026 : l'IA inventait les lieux « de [ville] en France » ; le
  * guide de Saint-Ludger (Québec) a été publié avec 20 lieux fictifs en France.
- * Maintenant :
- * - le centre réel du guide est résolu d'abord (pays, coordonnées), un
- *   homonyme éloigné reçoit son propre slug ;
- * - les lieux viennent d'OpenStreetMap (sourceOneGuide), jamais de l'IA ;
- * - l'IA n'écrit que l'introduction, avec le vrai pays et les seuls noms de
- *   lieux trouvés ;
- * - le guide est publié une fois sourcé, en arrière-plan.
  */
 
 const corsHeaders = {
@@ -32,74 +27,8 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const LOVABLE_API_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
-
-class AiGatewayError extends Error {
-  constructor(public status: number, message: string) {
-    super(message);
-  }
-}
-
-async function callAI(apiKey: string, prompt: string, maxTokens = 500) {
-  const res = await fetch(LOVABLE_API_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
-    body: JSON.stringify({
-      model: "google/gemini-2.5-flash",
-      messages: [{ role: "user", content: prompt }],
-      max_tokens: maxTokens,
-      temperature: 0.4,
-    }),
-  });
-  if (res.status === 402) throw new AiGatewayError(402, "Crédits IA épuisés. Rechargez les crédits de l'espace de travail pour générer un guide.");
-  if (res.status === 429) throw new AiGatewayError(429, "Trop de requêtes IA, réessayez dans un instant.");
-  if (!res.ok) throw new AiGatewayError(res.status, `Erreur fournisseur IA (statut ${res.status}).`);
-  const data = await res.json();
-  const content = data.choices?.[0]?.message?.content || "";
-  const match = content.match(/\{[\s\S]*\}/);
-  if (!match) throw new Error("Could not parse AI JSON response");
-  return JSON.parse(match[0]);
-}
-
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-
-async function finishInBackground(supabase: any, guide: any, center0: GuideCenter, apiKey: string | null) {
-  const googleKey = Deno.env.get("GOOGLE_PLACES_API_KEY") || null;
-  let report: Record<string, unknown> = {};
-  try {
-    report = await sourceOneGuide(supabase, guide, { dryRun: false, googleKey, center: center0 });
-  } catch (e) {
-    report = { result: "erreur", erreur: String(e) };
-  }
-  const center = (report.centre_final as GuideCenter | undefined) ?? center0;
-  const names = Array.isArray(report.noms) ? (report.noms as string[]) : [];
-  let intro = "";
-  let ideal = "";
-  if (apiKey) {
-    try {
-      const data = await callAI(apiKey, introPrompt(guide.city, center, names));
-      intro = stripDashes(String(data.intro ?? ""));
-      ideal = stripDashes(String(data.ideal_for ?? ""));
-    } catch (e) {
-      console.error("[generate-city-guide] intro:", e);
-    }
-  }
-  // Publié seulement avec des lieux sourcés ; sinon la file le publiera
-  // dès que ses lieux seront trouvés (publish_when_sourced).
-  const hasPlaces = Number(report.total_sources ?? 0) > 0;
-  const patch: Record<string, unknown> = {
-    places_source_attempted_at: new Date().toISOString(),
-    places_source_result: String(report.result ?? "erreur"),
-    published: hasPlaces,
-    publish_when_sourced: !hasPlaces,
-  };
-  if (report.result === "ok") patch.places_sourced_at = new Date().toISOString();
-  if (intro) patch.intro = intro;
-  if (ideal) patch.ideal_for = ideal;
-  await supabase.from("city_guides").update(patch).eq("id", guide.id);
-  console.log(`[generate-city-guide] ${guide.slug} : ${String(report.result)}, ${names.length} lieux`);
-}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -167,23 +96,17 @@ Deno.serve(async (req) => {
         ideal_for: "",
         published: false,
         publish_when_sourced: true,
-        // Réservé par ce traitement : la tâche planifiée ne le prend pas en même temps.
-        places_source_attempted_at: new Date().toISOString(),
       })
       .select()
       .single();
     if (guideErr) throw guideErr;
 
-    const task = finishInBackground(supabase, guide, center, Deno.env.get("LOVABLE_API_KEY") || null);
-    const runtime = (globalThis as any).EdgeRuntime;
-    if (runtime?.waitUntil) runtime.waitUntil(task);
-    else task.catch((e) => console.error("[generate-city-guide] arrière-plan:", e));
-
+    // La file prend en premier les guides jamais tentés : le protocole démarre
+    // au prochain passage (deux minutes au plus).
     return json({ ...guide, places_count: 0, sourcing: "pending" });
   } catch (error) {
     console.error("City guide generation error:", error);
-    const isGateway = error instanceof AiGatewayError;
     const message = error instanceof Error ? error.message : String(error);
-    return json({ error: message, code: isGateway ? "AI_GATEWAY" : "INTERNAL" }, isGateway ? error.status : 500);
+    return json({ error: message, code: "INTERNAL" }, 500);
   }
 });

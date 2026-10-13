@@ -344,8 +344,8 @@ describe("GL2, générateur sans lieux inventés", () => {
     expect(gen).not.toMatch(/Liste les .* les plus connus/);
     expect(gen).not.toContain("countrycodes=fr");
     expect(gen).not.toContain("en France. Liste");
-    expect(gen).toContain("sourceOneGuide");
-    expect(gen).toContain("introPrompt");
+    expect(gen).toContain("publish_when_sourced: true");
+    expect(gen).not.toContain("ai.gateway");
   });
 });
 
@@ -426,48 +426,6 @@ describe("GL, forme de la requête Overpass", () => {
   });
 });
 
-describe("GL, Overpass depuis la base", () => {
-  it("envoie par guide_osm_enqueue, lit par guide_osm_result, passe au miroir suivant sur délai dépassé", async () => {
-    const { dbOverpass } = await import("../../../supabase/functions/_shared/guide-places/source");
-    const calls: string[] = [];
-    const responses: Record<number, unknown> = {
-      1: { status_code: 200, timed_out: false, content: JSON.stringify({ elements: [], remark: 'runtime error: Query timed out in "query"' }) },
-      2: { status_code: 200, timed_out: false, content: JSON.stringify({ elements: [{ type: "node", id: 6, lat: 45.9, lon: -70.69, tags: { amenity: "veterinary", name: "Véto" } }] }) },
-    };
-    let next = 0;
-    const rpc = async (fn: string, args: Record<string, unknown>) => {
-      calls.push(`${fn}:${JSON.stringify(args)}`);
-      if (fn === "guide_osm_enqueue") return { data: ++next, error: null };
-      return { data: [responses[Number(args.p_id)]].filter(Boolean), error: null };
-    };
-    const els = await dbOverpass(rpc, noSleep)("[out:json][timeout:25];x;", Date.now() + 100000);
-    expect(els).toHaveLength(1);
-    expect(calls[0]).toContain('"p_mirror":0');
-    expect(calls.some((c) => c.includes('"p_mirror":1'))).toBe(true);
-  });
-
-  it("collectPlaces passe par le transport fourni, jamais par fetch pour Overpass", async () => {
-    const fetched: string[] = [];
-    const fn = async (url: string) => { fetched.push(url); return new Response("[]"); };
-    const asked: string[] = [];
-    const transport = async (q: string) => {
-      asked.push(q);
-      return q.includes("veterinary") ? [el(6, { amenity: "veterinary", name: "Véto du Granit", "addr:street": "Rue Laval" }, north(3), SAINT_LUDGER.lon)] : [];
-    };
-    const res = await collectPlaces(
-      { city: "Saint Ludger", postalCode: "G0M1W0", center: SAINT_LUDGER },
-      { names: new Set(), sources: new Set(), counts: {} },
-      fn,
-      noSleep,
-      Number.POSITIVE_INFINITY,
-      transport,
-    );
-    expect(asked.length).toBeGreaterThan(0);
-    expect(fetched.some((u) => u.includes("overpass") || u.includes("mail.ru"))).toBe(false);
-    expect(res.rows.map((r) => r.name)).toContain("Véto du Granit");
-  });
-});
-
 describe("GL, diagnostic Overpass", () => {
   it("chaque essai est noté (miroir, durée, issue), requête en GET", async () => {
     const { runOverpass } = await import("../../../supabase/functions/_shared/guide-places/source");
@@ -483,54 +441,6 @@ describe("GL, diagnostic Overpass", () => {
     expect(methods.every((m) => m === "GET")).toBe(true);
     expect(attempts.map((a) => a.outcome)).toEqual(["http_429", "ok"]);
     expect(attempts[0].mirror).toBe("overpass-api.de");
-  });
-});
-
-describe("GL, requêtes groupées par la base", () => {
-  it("envoie tout d'un coup sur des miroirs différents, renvoie une fois sur le miroir suivant", async () => {
-    const { dbOverpassBatch } = await import("../../../supabase/functions/_shared/guide-places/source");
-    const enq: { q: string; m: number }[] = [];
-    const rows = new Map<number, unknown>();
-    const rpc = async (fn: string, args: Record<string, unknown>) => {
-      if (fn === "guide_osm_enqueue") {
-        enq.push({ q: String(args.p_query), m: Number(args.p_mirror) });
-        const id = enq.length;
-        const q = String(args.p_query);
-        // B échoue sur son premier miroir (504), réussit sur le suivant.
-        if (q === "B" && Number(args.p_mirror) === 2) rows.set(id, { status_code: 504, timed_out: false, content: "busy" });
-        else rows.set(id, { status_code: 200, timed_out: false, content: JSON.stringify({ elements: [{ type: "node", id, tags: { name: q } }] }) });
-        return { data: id, error: null };
-      }
-      return { data: [rows.get(Number(args.p_id))].filter(Boolean), error: null };
-    };
-    const attempts: any[] = [];
-    const res = await dbOverpassBatch(rpc, noSleep, (a) => attempts.push(a))(["A", "B", "C"], Date.now() + 100000);
-    expect(enq.slice(0, 3).map((e) => e.m)).toEqual([1, 2, 0]);
-    expect(enq[3]).toEqual({ q: "B", m: 0 });
-    expect(res.map((r) => r?.[0]?.tags?.name)).toEqual(["A", "B", "C"]);
-    expect(attempts.filter((a) => a.outcome === "http_504")).toHaveLength(1);
-  });
-
-  it("collectPlaces envoie les filtres d'un rayon ensemble et garde ce qui a répondu", async () => {
-    const batches: string[][] = [];
-    const batch = async (queries: string[]) => {
-      batches.push(queries);
-      return queries.map((q) =>
-        q.includes("veterinary") ? [el(6, { amenity: "veterinary", name: "Véto du Granit", "addr:street": "Rue Laval" }, north(3), SAINT_LUDGER.lon)] : [],
-      );
-    };
-    const res = await collectPlaces(
-      { city: "Saint Ludger", postalCode: "G0M1W0", center: SAINT_LUDGER },
-      { names: new Set(), sources: new Set(), counts: {} },
-      async () => new Response("[]"),
-      noSleep,
-      Number.POSITIVE_INFINITY,
-      undefined,
-      batch,
-    );
-    expect(batches[0].length).toBeGreaterThan(5);
-    expect(batches[0].every((q) => q.includes("around:5000,"))).toBe(true);
-    expect(res.rows.map((r) => r.name)).toContain("Véto du Granit");
   });
 });
 

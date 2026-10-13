@@ -643,6 +643,7 @@
     "leash_free": "Chiens libres",
     "good_to_know": "Bon à savoir : {{tips}}",
     "nearby_title": "Autres guides locaux : {{department}}",
+    "nearby_title_city": "Guides locaux autour de {{city}}",
     "related_title": "Articles sur {{city}}",
     "read": "Lire",
     "cta_question": "Vous allez garder à {{city}} ?",

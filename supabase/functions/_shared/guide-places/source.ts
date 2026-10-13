@@ -426,6 +426,10 @@ export function googlePlaceUrl(p: { name: string; address?: string | null; googl
 
 export type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
 
+/** Délai d'attente d'un appel réseau (sans effet là où AbortSignal.timeout manque). */
+export const timeoutSignal = (ms: number): AbortSignal | undefined =>
+  typeof AbortSignal !== "undefined" && "timeout" in AbortSignal ? AbortSignal.timeout(ms) : undefined;
+
 const UA = { "User-Agent": "Guardiens/1.0 (guides locaux; contact@guardiens.fr)" };
 
 interface NominatimSearchHit {
@@ -568,7 +572,8 @@ export function introPrompt(city: string, center: GuideCenter, placeNames: strin
     `Écris une introduction de 3 phrases pour un guide destiné aux gardiens de maison et d'animaux qui séjournent à ${where}.`,
     `Ton chaleureux et concret. Ne cite aucun nom de lieu, de rue, de commerce ou de rivière${names.length ? ` en dehors de cette liste de lieux réels : ${names.join(" ; ")}` : ""}.`,
     `N'invente aucun fait. Décris l'ambiance de façon générale et ce qui rend le coin agréable pour promener un chien.`,
-    `Ponctuation : virgules, points, deux-points, parenthèses. Aucun tiret long.`,
+    `Ponctuation : virgules, points, deux-points, parenthèses. Aucun tiret.`,
+    `Écris uniquement des phrases affirmatives : dis ce que le lieu est et offre, jamais ce qu'il n'est pas (aucun « ne », « pas », « sans », « aucun », « jamais »).`,
     `Termine par une phrase séparée qui commence par « Idéal pour les gardiens qui ».`,
     `Réponds UNIQUEMENT en JSON valide : {"intro": "...", "ideal_for": "Idéal pour les gardiens qui..."}`,
   ].join("\n");
@@ -579,6 +584,7 @@ export const stripDashes = (s: string) =>
   (s ?? "")
     .replace(/(\d)\s*[\u2013\u2014]\s*(\d)/g, "$1 à $2")
     .replace(/\s*[\u2013\u2014]\s*/g, ", ")
+    .replace(/\s+-\s+/g, ", ")
     .replace(/,\s*,/g, ",");
 
 // ---------------------------------------------------------------------------
@@ -654,146 +660,8 @@ export async function runOverpass(
 /** Une requête Overpass rendue en éléments, ou null si aucun miroir n'a répondu. */
 export type OverpassTransport = (query: string, deadline: number) => Promise<OsmElement[] | null>;
 
-/** Appel d'une fonction de la base (supabase.rpc), réduit à ce dont on a besoin. */
-export type RpcLike = (fn: string, args: Record<string, unknown>) => PromiseLike<{ data: any; error: any }>;
-
-/**
- * Overpass appelé depuis la base (pg_net), pas depuis la fonction serveur.
- * Mesure du 13/10/2026 : les mêmes requêtes courtes répondent depuis la base
- * et échouent sur les quatre miroirs depuis les fonctions serveur, dont
- * l'adresse de sortie est partagée et épuise la limite par adresse d'Overpass.
- * guide_osm_enqueue envoie la requête (transaction validée, pg_net l'expédie),
- * guide_osm_result lit la réponse.
- */
-export function dbOverpass(
-  rpc: RpcLike,
-  sleep: (ms: number) => Promise<void>,
-  mirrors = 3,
-  onAttempt?: (a: OverpassAttempt) => void,
-): OverpassTransport {
-  return async (query, deadline) => {
-    for (let mirror = 0; mirror < mirrors; mirror++) {
-      if (Date.now() + 6000 > deadline) return null;
-      const t0 = Date.now();
-      const note = (outcome: string) => onAttempt?.({ via: "base", mirror: String(mirror), ms: Date.now() - t0, outcome });
-      const { data: id, error } = await rpc("guide_osm_enqueue", { p_query: query, p_mirror: mirror });
-      if (error || id == null) {
-        note(`enqueue_${error?.code ?? error?.message ?? "vide"}`);
-        return null;
-      }
-      // Attente de la réponse : 30 s au plus (délai pg_net 28 s).
-      const until = Math.min(Date.now() + 30000, deadline - 2000);
-      let row: any = null;
-      while (Date.now() < until) {
-        await sleep(1000);
-        const { data } = await rpc("guide_osm_result", { p_id: id });
-        row = Array.isArray(data) ? data[0] ?? null : data ?? null;
-        if (row) break;
-      }
-      if (!row) {
-        note("attente_depassee");
-        continue;
-      }
-      if (row.timed_out || Number(row.status_code) !== 200) {
-        note(row.timed_out ? "pg_net_timeout" : `http_${row.status_code}`);
-        continue;
-      }
-      const text = String(row.content ?? "");
-      if (!text.trim().startsWith("{")) {
-        note("non_json");
-        continue;
-      }
-      try {
-        const parsed = JSON.parse(text);
-        if (/runtime (error|remark)|timed out|out of memory/i.test(String(parsed?.remark ?? ""))) {
-          note("remark_timeout");
-          continue;
-        }
-        note("ok");
-        return Array.isArray(parsed?.elements) ? parsed.elements : [];
-      } catch {
-        note("json_invalide");
-        continue;
-      }
-    }
-    return null;
-  };
-}
-
-/** Plusieurs requêtes Overpass en parallèle ; une entrée null par requête restée sans réponse. */
+/** Plusieurs requêtes Overpass ; une entrée null par requête restée sans réponse. */
 export type OverpassBatch = (queries: string[], deadline: number) => Promise<(OsmElement[] | null)[]>;
-
-/**
- * Requêtes envoyées ensemble par la base, réparties sur les miroirs, puis
- * relues jusqu'à réponse. Diagnostic du 13/10/2026 : depuis la fonction
- * serveur, overpass-api.de répond 406 en 0,5 s et les trois autres miroirs ne
- * répondent pas en 15 s ; depuis la base, les mêmes requêtes répondent. Une
- * requête sans réponse est renvoyée une fois, sur le miroir suivant.
- */
-export function dbOverpassBatch(
-  rpc: RpcLike,
-  sleep: (ms: number) => Promise<void>,
-  onAttempt?: (a: OverpassAttempt) => void,
-  mirrors = 3,
-): OverpassBatch {
-  const parse = (row: any): OsmElement[] | null | "retry" => {
-    if (!row) return "retry";
-    if (row.timed_out || Number(row.status_code) !== 200) return "retry";
-    const text = String(row.content ?? "");
-    if (!text.trim().startsWith("{")) return "retry";
-    try {
-      const parsed = JSON.parse(text);
-      if (/runtime (error|remark)|timed out|out of memory/i.test(String(parsed?.remark ?? ""))) return "retry";
-      return Array.isArray(parsed?.elements) ? parsed.elements : [];
-    } catch {
-      return "retry";
-    }
-  };
-  return async (queries, deadline) => {
-    const results: (OsmElement[] | null)[] = queries.map(() => null);
-    // Miroirs dans l'ordre openstreetmap.fr, mail.ru, overpass-api.de : le
-    // 13/10/2026, overpass-api.de répondait 504 trois fois sur trois.
-    const order = [1, 2, 0].slice(0, mirrors);
-    let pending = queries.map((q, i) => ({ i, q, mirror: order[i % order.length], tries: 0 }));
-    while (pending.length > 0) {
-      if (Date.now() + 6000 > deadline) break;
-      const sent: { i: number; q: string; mirror: number; tries: number; id: number | null; t0: number }[] = [];
-      for (const p of pending) {
-        const { data: id, error } = await rpc("guide_osm_enqueue", { p_query: p.q, p_mirror: p.mirror });
-        sent.push({ ...p, id: error || id == null ? null : Number(id), t0: Date.now() });
-      }
-      const until = Math.min(Date.now() + 35000, deadline - 2000);
-      const done = new Map<number, any>();
-      while (Date.now() < until && done.size < sent.filter((x) => x.id != null).length) {
-        await sleep(1500);
-        for (const x of sent) {
-          if (x.id == null || done.has(x.id)) continue;
-          const { data } = await rpc("guide_osm_result", { p_id: x.id });
-          const row = Array.isArray(data) ? data[0] ?? null : data ?? null;
-          if (row) done.set(x.id, row);
-        }
-      }
-      const next: typeof pending = [];
-      for (const x of sent) {
-        const row = x.id == null ? null : done.get(x.id) ?? null;
-        const out = x.id == null ? "retry" : parse(row);
-        const outcome = x.id == null
-          ? "enqueue_refuse"
-          : !row ? "attente_depassee" : out === "retry" ? (row.timed_out ? "pg_net_timeout" : Number(row.status_code) !== 200 ? `http_${row.status_code}` : "remark_ou_json") : "ok";
-        onAttempt?.({ via: "base", mirror: String(x.mirror), ms: Date.now() - x.t0, outcome });
-        if (out === "retry") {
-          if (x.tries < 1) {
-            next.push({ i: x.i, q: x.q, mirror: order[(order.indexOf(x.mirror) + 1) % order.length], tries: x.tries + 1 });
-          }
-        } else {
-          results[x.i] = out;
-        }
-      }
-      pending = next;
-    }
-    return results;
-  };
-}
 
 /**
  * Adresse lisible d'un point : BAN en France, Nominatim ailleurs.
@@ -810,7 +678,7 @@ export async function reverseAddress(
       const type = opts.commercial ? "housenumber" : "municipality";
       const r = await fetchFn(
         `https://api-adresse.data.gouv.fr/reverse/?lon=${pt.lon}&lat=${pt.lat}&type=${type}`,
-        { headers: UA },
+        { headers: UA, signal: timeoutSignal(8000) },
       );
       if (!r.ok) return { address: null, error: true };
       const f = (await r.json())?.features?.[0];
@@ -837,7 +705,7 @@ export async function reverseAddress(
       addressdetails: "1",
       "accept-language": "fr",
     });
-    const r = await fetchFn(`https://nominatim.openstreetmap.org/reverse?${params}`, { headers: UA });
+    const r = await fetchFn(`https://nominatim.openstreetmap.org/reverse?${params}`, { headers: UA, signal: timeoutSignal(8000) });
     if (!r.ok) return { address: null, error: true };
     const a = (await r.json())?.address ?? {};
     const town = a.city ?? a.town ?? a.village ?? a.municipality ?? a.hamlet ?? null;
@@ -961,6 +829,26 @@ export async function collectPlaces(
   }
 
   const selected = selectByCategory(pool, known.counts);
+  const built = await buildRows(selected, guide, fetchFn, sleep, deadline);
+  if (built.incomplete) incomplete = true;
+  const { rows, rejectedAddress } = built;
+  return { rows, radiiUsed, incomplete, overpassFailed, rejectedDistance, rejectedAddress };
+}
+
+
+/**
+ * Lignes prêtes à insérer pour des candidats retenus : adresse (étiquettes,
+ * puis BAN en France, Nominatim ailleurs), description, téléphone, badges.
+ */
+export async function buildRows(
+  selected: Candidate[],
+  guide: GuideForSourcing,
+  fetchFn: FetchLike,
+  sleep: (ms: number) => Promise<void>,
+  deadline = Number.POSITIVE_INFINITY,
+): Promise<{ rows: SourcedRow[]; incomplete: boolean; rejectedAddress: number }> {
+  const { center } = guide;
+  let incomplete = false;
   const rows: SourcedRow[] = [];
   let rejectedAddress = 0;
   for (const c of selected) {
@@ -1014,7 +902,7 @@ export async function collectPlaces(
       source_url: c.sourceUrl,
     });
   }
-  return { rows, radiiUsed, incomplete, overpassFailed, rejectedDistance, rejectedAddress };
+  return { rows, incomplete, rejectedAddress };
 }
 
 // ---------------------------------------------------------------------------
@@ -1085,3 +973,102 @@ export function homonymSlug(slug: string, center: GuideCenter, postalCode: strin
   return `${slug}-${center.country.toLowerCase()}`;
 }
 
+
+// ---------------------------------------------------------------------------
+// Protocole de génération (lot GL4) : éléments compacts, rédaction vérifiée
+// ---------------------------------------------------------------------------
+
+/** Guides refondus à la main (src/data/guideOverrides.ts) : leur texte n'est jamais réécrit. */
+export const CURATED_SLUGS = ["lyon", "annecy", "rennes", "clermont-ferrand"] as const;
+
+const KEPT_TAGS = [
+  "name", "dog", "distance", "phone", "contact:phone", "emergency", "leisure", "amenity", "shop",
+  "route", "highway", "landuse", "natural", "network",
+  "addr:housenumber", "addr:street", "addr:postcode", "addr:city",
+];
+
+/**
+ * Réponse Overpass réduite à ce que le guide utilise : éléments reconnus,
+ * dans le rayon, étiquettes utiles, les plus proches d'abord (60 au plus).
+ * C'est ce qui est gardé en base entre deux passages de la file.
+ */
+export function compactElements(els: OsmElement[], center: { lat: number; lon: number }, max = 60): OsmElement[] {
+  // Un même nom (chemin découpé en tronçons) ne garde que son tronçon le plus
+  // proche, avant la limite : les autres lieux restent dans la liste.
+  const best = new Map<string, { el: OsmElement; d: number }>();
+  for (const el of els) {
+    const cat = categorize(el);
+    const pt = elementPoint(el);
+    if (!cat || !pt) continue;
+    const d = haversineM(center.lat, center.lon, pt.lat, pt.lon);
+    if (!withinGuide(cat.category, d)) continue;
+    const tags: Record<string, string> = {};
+    for (const k of KEPT_TAGS) if (el.tags?.[k] != null) tags[k] = String(el.tags[k]);
+    const key = `${cat.category}|${normName(el.tags?.name ?? String(el.id))}`;
+    const prev = best.get(key);
+    if (!prev || d < prev.d) best.set(key, { el: { type: el.type, id: el.id, lat: pt.lat, lon: pt.lon, tags }, d });
+  }
+  return [...best.values()].sort((a, b) => a.d - b.d).slice(0, max).map((k) => k.el);
+}
+
+export interface FactPlace {
+  category: string;
+  name: string;
+  distance_km: number | null;
+}
+
+/** Libellé de lieu : « Saint Ludger (Québec, Canada) », « Lyon (Rhône) ». */
+export function placeLabel(city: string, country: string, region: string | null): string {
+  const parts = [region, country.toUpperCase() !== "FR" ? countryLabel(country) : null].filter(Boolean);
+  return parts.length ? `${city} (${parts.join(", ")})` : city;
+}
+
+const km = (d: number | null) => (d == null ? null : formatDistance(d * 1000));
+
+/**
+ * Introduction factuelle, écrite depuis les seules données vérifiées : sert de
+ * texte de repli quand la rédaction par l'IA échoue au contrôle, et de résumé
+ * citable par les moteurs.
+ */
+export function factualIntro(city: string, label: string, places: FactPlace[]): { intro: string; ideal_for: string } {
+  const nature = places.filter((p) => ["general_park", "walk_trail", "dog_park"].includes(p.category));
+  const vets = places.filter((p) => p.category === "vet").sort((a, b) => (a.distance_km ?? 999) - (b.distance_km ?? 999));
+  const parts: string[] = [];
+  parts.push(`Ce guide réunit ${places.length} lieu${places.length > 1 ? "x" : ""} vérifié${places.length > 1 ? "s" : ""} dans OpenStreetMap autour de ${label}.`);
+  if (nature.length) {
+    const names = nature.slice(0, 3).map((p) => p.name).join(", ");
+    parts.push(`Pour promener un chien : ${names}${nature.length > 3 ? ", et d'autres balades listées plus bas" : ""}.`);
+  }
+  if (vets[0]) {
+    const d = km(vets[0].distance_km);
+    parts.push(`Le vétérinaire le plus proche, ${vets[0].name}, se trouve ${d ? `à ${d} du centre` : "dans le secteur"}.`);
+  }
+  return {
+    intro: parts.join(" "),
+    ideal_for: `Idéal pour les gardiens qui veulent repérer avant d'arriver les balades et les adresses utiles autour de ${city}.`,
+  };
+}
+
+// Mot-clé de lieu sans casse imposée, nom propre qui suit en majuscule.
+const PROPER_PLACE = /\b(?:[Pp]arc|[Ff]orêt|[Ff]oret|[Bb]ois|[Jj]ardin|[Ss]quare|[Rr]ue|[Aa]venue|[Bb]oulevard|[Pp]lace|[Cc]hemin|[Ss]entier|[Ll]ac|[Rr]ivière|[Rr]iviere|[Cc]linique|[Cc]abinet|[Cc]afé|[Cc]afe|[Rr]estaurant|[Aa]nimalerie|[Pp]lage|[Mm]ont|[Cc]ol|[Vv]allée|[Vv]allee|[Qq]uais?|[Bb]erges?)\s+(?:de\s+la\s+|du\s+|des\s+|de\s+l'|d'|de\s+)?(\p{Lu}[\p{L}'-]+)/gu;
+
+/** Tournures négatives, proscrites dans les textes publics. */
+const NEGATIVE = /(?:^|[\s,.;:(])(?:ne|n'|n’|pas|aucune?|sans|jamais|rien|ni)(?=[\s,.;:)!?]|$)/iu;
+
+/**
+ * Contrôle de la rédaction : refuse un texte qui contient un tiret long ou qui
+ * nomme un lieu (« Parc de la Ludgerette ») absent de la liste vérifiée.
+ */
+export function introProblems(text: string, allowedNames: string[]): string[] {
+  const problems: string[] = [];
+  if (/[\u2013\u2014]/.test(text)) problems.push("tiret_long");
+  // « à deux pas » est une tournure affirmative.
+  if (NEGATIVE.test(text.replace(/à deux pas/giu, ""))) problems.push("tournure_negative");
+  const allowed = allowedNames.map(normName).join(" | ");
+  for (const m of text.matchAll(PROPER_PLACE)) {
+    const phrase = normName(m[0]);
+    const word = normName(m[1]);
+    if (!allowed.includes(word) && !allowed.includes(phrase)) problems.push(`lieu_non_verifie:${m[0]}`);
+  }
+  return problems;
+}

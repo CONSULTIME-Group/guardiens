@@ -11,6 +11,7 @@ const guideHeaderImg = "https://erhccyqevdyevpyctsjj.supabase.co/storage/v1/obje
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { guideGroupLabel, visiblePlaceCounts } from "@/lib/guidesListing";
 interface CityGuide {
   id: string;
   city: string;
@@ -18,12 +19,9 @@ interface CityGuide {
   intro: string;
   ideal_for: string;
   department: string | null;
+  country?: string | null;
+  places_sourced_at?: string | null;
   published: boolean;
-}
-
-interface PlaceCount {
-  city_guide_id: string;
-  count: number;
 }
 
 
@@ -47,49 +45,52 @@ const GuidesListing = () => {
     },
   });
 
-  const { data: placeCounts = [] } = useQuery({
-    queryKey: ["guide-place-counts"],
+  // Lieux comptés comme sur la page du guide (lot GL4) : un guide sourcé ou à
+  // l'étranger ne compte que ses lieux sourcés.
+  const { data: placeRows = [] } = useQuery({
+    queryKey: ["guide-place-counts", "visible"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("city_guide_places" as any)
-        .select("city_guide_id");
-      if (error) throw error;
-      // Count per guide
-      const counts: Record<string, number> = {};
-      ((data || []) as any[]).forEach((p: any) => {
-        counts[p.city_guide_id] = (counts[p.city_guide_id] || 0) + 1;
-      });
-      return Object.entries(counts).map(([city_guide_id, count]) => ({
-        city_guide_id,
-        count,
-      })) as PlaceCount[];
+      // Lecture par pages de 1 000 : la base plafonne une réponse à 1 000 lignes.
+      const out: { city_guide_id: string; source_url: string | null }[] = [];
+      for (let from = 0; from < 20000; from += 1000) {
+        const { data, error } = await supabase
+          .from("city_guide_places" as any)
+          .select("city_guide_id, source_url")
+          .order("id")
+          .range(from, from + 999);
+        if (error) throw error;
+        const rows = (data || []) as unknown as { city_guide_id: string; source_url: string | null }[];
+        out.push(...rows);
+        if (rows.length < 1000) break;
+      }
+      return out;
     },
   });
+  const placeCounts = useMemo(() => visiblePlaceCounts(guides, placeRows), [guides, placeRows]);
+  const getPlaceCount = (guideId: string) => placeCounts[guideId] ?? 0;
 
-  const getPlaceCount = (guideId: string) =>
-    placeCounts.find((p) => p.city_guide_id === guideId)?.count || 0;
-
-  const allDepartments = useMemo(() => 
-    [...new Set(guides.map((g) => g.department).filter(Boolean))].sort(),
+  // Groupes : département en France, pays ailleurs (lot GL4).
+  const allDepartments = useMemo(() =>
+    [...new Set(guides.map((g) => guideGroupLabel(g)).filter(Boolean))].sort((a, b) => a.localeCompare(b, "fr")),
     [guides]
   );
 
   const filteredGuides = useMemo(() => {
     let result = guides;
     if (selectedDept !== "all") {
-      result = result.filter((g) => g.department === selectedDept);
+      result = result.filter((g) => guideGroupLabel(g) === selectedDept);
     }
     if (search.trim()) {
       const q = search.toLowerCase().trim();
-      result = result.filter((g) => g.city.toLowerCase().includes(q) || (g.department ?? "").toLowerCase().includes(q));
+      result = result.filter((g) => g.city.toLowerCase().includes(q) || guideGroupLabel(g).toLowerCase().includes(q));
     }
     return result;
   }, [guides, search, selectedDept]);
 
   // Groupes par département ; les guides sans département (ex. hors de
   // France) forment un dernier groupe au lieu de disparaître de la liste.
-  const departments = [...new Set(filteredGuides.map((g) => g.department ?? ""))].sort(
-    (a, b) => Number(a === "") - Number(b === ""),
+  const departments = [...new Set(filteredGuides.map((g) => guideGroupLabel(g)))].sort(
+    (a, b) => Number(a === "") - Number(b === "") || a.localeCompare(b, "fr"),
   );
 
   return (
@@ -168,7 +169,7 @@ const GuidesListing = () => {
           ) : (
             <div className="space-y-10">
               {departments.map((dept) => {
-                const deptGuides = filteredGuides.filter((g) => (g.department ?? "") === dept);
+                const deptGuides = filteredGuides.filter((g) => guideGroupLabel(g) === dept);
                 return (
                   <section key={dept || "autres"}>
                     <h2 className="font-heading text-xl font-semibold text-foreground mb-4">
@@ -225,6 +226,16 @@ const GuidesListing = () => {
                 url: "https://guardiens.fr",
               },
               numberOfItems: filteredGuides.length,
+              mainEntity: {
+                "@type": "ItemList",
+                numberOfItems: guides.length,
+                itemListElement: guides.map((g, i) => ({
+                  "@type": "ListItem",
+                  position: i + 1,
+                  url: `https://guardiens.fr/guides/${g.slug}`,
+                  name: g.city,
+                })),
+              },
             }),
           }}
         />
