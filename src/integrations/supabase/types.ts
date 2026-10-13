@@ -7864,6 +7864,7 @@ export type Database = {
           referred_by: string | null
           role: Database["public"]["Enums"]["user_role"]
           seo_dirty_at: string | null
+          seo_indexed_at: string | null
           skill_categories: string[] | null
           suspended_at: string | null
           suspended_by: string | null
@@ -7926,6 +7927,7 @@ export type Database = {
           referred_by?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           seo_dirty_at?: string | null
+          seo_indexed_at?: string | null
           skill_categories?: string[] | null
           suspended_at?: string | null
           suspended_by?: string | null
@@ -7988,6 +7990,7 @@ export type Database = {
           referred_by?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           seo_dirty_at?: string | null
+          seo_indexed_at?: string | null
           skill_categories?: string[] | null
           suspended_at?: string | null
           suspended_by?: string | null
