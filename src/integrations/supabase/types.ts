@@ -13441,6 +13441,19 @@ export type Database = {
         Args: { p_country: string; p_postal: string; p_slug: string }
         Returns: string
       }
+      guide_osm_enqueue: {
+        Args: { p_mirror?: number; p_query: string }
+        Returns: number
+      }
+      guide_osm_result: {
+        Args: { p_id: number }
+        Returns: {
+          content: string
+          error_msg: string
+          status_code: number
+          timed_out: boolean
+        }[]
+      }
       has_accepted_application: {
         Args: { p_sit_id: string; p_user_id: string }
         Returns: boolean
