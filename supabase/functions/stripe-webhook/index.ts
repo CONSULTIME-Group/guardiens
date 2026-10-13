@@ -26,32 +26,9 @@ Deno.serve(async (req) => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
   );
 
-  // Helper to send subscription-expired email (idempotent via key)
-  const sendExpiredEmail = async (user_id: string, marker: string) => {
-    try {
-      const { data: userData } = await supabase.auth.admin.getUserById(user_id);
-      const recipientEmail = userData?.user?.email;
-      if (!recipientEmail) {
-        console.warn(`[stripe-webhook] No email found for user ${user_id}, skipping expired email`);
-        return;
-      }
-      const _steRes = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-transactional-email`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}` },
-        body: JSON.stringify({
-          templateName: "subscription-expired",
-          recipientEmail,
-          idempotencyKey: `subscription-expired-${user_id}-${marker}`,
-        }),
-      });
-      const _steTxt1 = _steRes.ok ? '' : await _steRes.text().catch(() => '');
-      if (!_steRes.ok) console.error('send-transactional-email failed', _steRes.status, _steTxt1);
-      const mailError = _steRes.ok ? null : new Error(`send-transactional-email ${_steRes.status}: ${_steTxt1}`);
-      if (mailError) console.error("[stripe-webhook] send-transactional-email error:", mailError);
-    } catch (e) {
-      console.error("[stripe-webhook] sendExpiredEmail failed:", e);
-    }
-  };
+  // Lot Y1 (P4-07) : Guardiens est gratuit. La fin d'un abonnement Stripe
+  // historique met la ligne à jour sans email : les gabarits subscription-*
+  // (« Renouvelez votre abonnement ») ne partent plus d'ici.
 
   try {
     switch (event.type) {
@@ -107,11 +84,6 @@ Deno.serve(async (req) => {
           expires_at: new Date(sub.current_period_end * 1000).toISOString(),
           started_at: new Date().toISOString(),
         }, { onConflict: "user_id" });
-
-        // Send expired email if subscription transitioned to expired
-        if (statut === "expired") {
-          await sendExpiredEmail(user_id, `sub-${sub.id}-${sub.current_period_end}`);
-        }
         break;
       }
 
@@ -125,8 +97,6 @@ Deno.serve(async (req) => {
           stripe_subscription_id: sub.id,
           started_at: new Date().toISOString(),
         }, { onConflict: "user_id" });
-
-        await sendExpiredEmail(user_id, `deleted-${sub.id}`);
         break;
       }
 

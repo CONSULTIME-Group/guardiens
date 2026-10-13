@@ -8,6 +8,12 @@
  * Garanties :
  *  - jeton a usage unique, duree de vie 24 heures, lie au destinataire et,
  *    quand elle existe, a la conversation ciblee ;
+ *  - lot Y1 (P4-06) : une session ne s'ouvre que pour un email immediat
+ *    (message, candidature, avis recu) dans les 2 heures qui suivent l'envoi,
+ *    sur un navigateur sans compte connecte ; le meme compte deja connecte
+ *    suit le lien sans nouvelle session ; un autre compte connecte garde sa
+ *    session et le jeton reste intact ; une relance ou un lien plus ancien
+ *    mene a la connexion, destination conservee (consume_email_deep_link) ;
  *  - aucune regle de securite contournee : la session ouverte est une session
  *    utilisateur standard, la RLS s'applique integralement ;
  *  - aucune action sur GET, l'execution exige un POST explicite depuis la page
@@ -51,7 +57,17 @@ Deno.serve(async (req) => {
       return json({ ok: false, reason: 'invalid', next: '/messages' })
     }
 
-    const { data, error } = await service.rpc('consume_email_deep_link', { p_token: token })
+    // Lot Y1 (P4-06) : compte déjà connecté sur ce navigateur. Le même compte
+    // suit le lien sans nouvelle session ; un autre compte ne consomme pas le
+    // jeton et garde sa session. Un jeton public (clé anon) ne donne personne.
+    let callerId: string | null = null
+    const bearer = (req.headers.get('authorization') ?? '').replace(/^Bearer\s+/i, '').trim()
+    if (bearer && bearer.split('.').length === 3) {
+      const { data: who } = await service.auth.getUser(bearer).catch(() => ({ data: null }))
+      callerId = who?.user?.id ?? null
+    }
+
+    const { data, error } = await service.rpc('consume_email_deep_link', { p_token: token, p_caller: callerId })
     if (error) {
       console.error('[email-deep-link] consume failed', error.message)
       return json({ ok: false, reason: 'error', next: '/messages' })
@@ -62,6 +78,10 @@ Deno.serve(async (req) => {
 
     if (!result.ok) {
       return json({ ok: false, reason: String(result.reason ?? 'invalid'), next })
+    }
+
+    if (result.same_account) {
+      return json({ ok: true, sameAccount: true, next })
     }
 
     const email = String(result.email)

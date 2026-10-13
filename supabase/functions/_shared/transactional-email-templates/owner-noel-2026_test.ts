@@ -24,7 +24,7 @@ const card = (i: number, chip?: string) => ({
 const COMMON = [
   'NOËL 2026',
   "Partez l'esprit léger, quelqu'un du coin garde la maison.",
-  "les départs de fin d'année se décident maintenant. Votre annonce est en ligne en quelques minutes, et les gardiens proches de chez vous vous écrivent directement.",
+  "les départs de fin d'année se décident maintenant. Votre annonce est en ligne en quelques minutes, et les gardiens à proximité vous écrivent directement.",
   'Je prépare ma garde de Noël',
   'Publier et choisir votre gardien : c\'est gratuit.',
   'CE QUE GUARDIENS FAIT POUR VOUS',
@@ -44,7 +44,7 @@ Deno.test('variante A : textes exacts, préheader, 3 cartes', () => {
   assertEquals((template.subject as (d: Record<string, unknown>) => string)(p), 'Pour Noël, votre maison entre de bonnes mains')
   for (const s of COMMON) assert(h.includes(s), s)
   assert(h.includes('Bonjour Camille, les départs'))
-  assert(h.includes('PRÈS DE CHEZ VOUS'))
+  assert(h.includes('À PROXIMITÉ'))
   assert(h.includes('42 gardiens à moins de 50 km de Lyon'))
   assert(h.includes("En voici trois. Ils vous envoient leur candidature, et c'est vous qui choisissez."))
   for (const i of [1, 2, 3]) assert(h.includes(`Gardien${i}`))
@@ -84,7 +84,7 @@ Deno.test('variante B : textes exacts, sans prénom', () => {
   for (const s of COMMON) assert(h.includes(s), s)
   assert(h.includes('Bonjour, les départs'))
   assert(h.includes('Montrez votre annonce aux gardiens proches'))
-  assert(h.includes('Ajoutez votre commune sur votre profil : votre annonce apparaît aux gardiens qui habitent près de chez vous, et vous découvrez qui ils sont.'))
+  assert(h.includes('Ajoutez votre commune sur votre profil : votre annonce apparaît aux gardiens qui habitent à proximité, et vous découvrez qui ils sont.'))
   assert(h.includes('Ajouter ma commune'))
   assert(!h.includes('gardiens à moins de 50 km'))
   assertEquals(ownerNoelPreheader(p as never), 'Vos dates, votre commune, et les gardiens proches vous écrivent')

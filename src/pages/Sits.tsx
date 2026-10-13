@@ -51,6 +51,7 @@ import {
 import { describeSitWriteError, sitWriteErrorNeedsSignal } from "@/lib/sitDbErrors";
 import { trackEvent } from "@/lib/analytics";
 import PublishPhotoPromptDialog from "@/components/sits/owner/PublishPhotoPromptDialog";
+import { readVisiblePets } from "@/lib/visiblePets";
 import {
   countPropertyPhotos,
   shouldPromptPublishPhotos,
@@ -319,9 +320,10 @@ const Sits = () => {
         const propertyIds = [...new Set(data?.map((a: any) => a.sit?.property_id).filter(Boolean) || [])];
         let petsByProperty: Record<string, any[]> = {};
         if (propertyIds.length > 0) {
-          const { data: pets } = await supabase
-            .from("pets").select("name, species, special_needs, property_id").in("property_id", propertyIds);
-          pets?.forEach((p: any) => {
+          // Lot Y2 (P3-10) : pets n'est lisible que du gardien retenu, la vue
+          // public_pets sert les annonces publiées (readVisiblePets).
+          const pets = await readVisiblePets(propertyIds as string[], "name, species, special_needs, property_id");
+          pets.forEach((p: any) => {
             if (!petsByProperty[p.property_id]) petsByProperty[p.property_id] = [];
             petsByProperty[p.property_id].push(p);
           });

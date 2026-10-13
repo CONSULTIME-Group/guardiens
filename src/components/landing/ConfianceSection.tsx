@@ -4,8 +4,8 @@ import { RevealSection } from "@/components/ui/RevealSection";
 export function ConfianceSection() {
   const pillars = [
     ["La proximité réelle", "Les dix personnes les plus proches reçoivent votre besoin, et la carte montre qui vit autour de vous."],
-    ["La rencontre en personne", "Nous vous conseillons de vous voir avant une garde, autour d'un café ou d'une visite. Après un coup de main, nous vous demandons si la rencontre a eu lieu."],
-  ["La confiance vérifiée", "Écusson « Identité vérifiée » et avis croisés publiés après les gardes. Pour les propriétaires, Guardiens est offert."],
+    ["Se voir, si vous le souhaitez", "Autour d'un café ou d'une visite avant une garde, quand vous en avez envie tous les deux. Après un coup de main, nous vous demandons si vous vous êtes vus."],
+  ["La confiance vérifiée", "Écusson « Identité vérifiée » et avis croisés publiés après les gardes. Guardiens est gratuit pour tous les membres."],
   ];
 
   return (
@@ -16,7 +16,7 @@ export function ConfianceSection() {
             Les repères essentiels
           </p>
           <h2 id="trust-heading" className="mt-4 font-heading text-3xl font-semibold leading-tight text-foreground md:text-5xl">
-            Trois conditions pour se faire confiance
+            Trois repères pour se faire confiance
           </h2>
         </RevealSection>
 

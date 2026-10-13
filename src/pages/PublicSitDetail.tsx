@@ -38,6 +38,7 @@ import {
 import { petSpeciesLabelLower } from "@/lib/petLabels";
 import { publicFirstName } from "@/lib/displayName";
 import { loadSitLocationLabel } from "@/lib/sitLocationLoad";
+import { applicationAvailability } from "@/lib/applicationCap";
 
 type ViewerType = "anonymous" | "gardien" | "proprio" | "owner_of_sit" | "admin";
 
@@ -64,6 +65,8 @@ const PublicSitDetail = () => {
  const [applyOpen, setApplyOpen] = useState(false);
  const [hasApplied, setHasApplied] = useState(false);
  const [isAcceptedSitter, setIsAcceptedSitter] = useState(false);
+ /** Lot Y1 : candidatures vivantes, lues pour un membre connecté seulement. */
+ const [liveAppCount, setLiveAppCount] = useState<number | null>(null);
 
   const [viewerType, setViewerType] = useState<ViewerType>("anonymous");
 
@@ -81,7 +84,7 @@ const PublicSitDetail = () => {
     setLoading(true); setLoadError(null); setCanonicalRedirect(null); setSit(null); setOwner(null); setProperty(null);
     setPets([]); setOwnerProfile(null); setHasHouseGuide(false); setBadges([]);
     setAvgRating(null); setReviewCount(0); setLatestReviews([]); setHasApplied(false);
-    setIsAcceptedSitter(false); setViewerType("anonymous"); sitViewFired.current = false;
+    setIsAcceptedSitter(false); setLiveAppCount(null); setViewerType("anonymous"); sitViewFired.current = false;
     if (!param) { setLoadError("not_found"); setLoading(false); return; }
     const load = async () => {
       try {
@@ -232,6 +235,16 @@ const PublicSitDetail = () => {
             if (appRows?.[0]) commit(() => setHasApplied(true));
             if (appRows?.[0]?.status === "accepted") commit(() => setIsAcceptedSitter(true));
           } catch (e) { logger.warn("[PublicSitDetail] applications check failed", { error: (e as any)?.message }); }
+          // Lot Y1 : « Candidatures complètes » se calcule à l'écran à partir
+          // du nombre de candidatures vivantes et du plafond (membre connecté,
+          // la fonction de décompte est fermée aux visiteurs anonymes).
+          if (sitData.max_applications && sitData.status === "published" && sitData.accepting_applications !== false) {
+            try {
+              const { data: countRows } = await supabase.rpc("get_sit_application_counts", { p_sit_id: sitData.id });
+              const live = (countRows as any)?.[0]?.app_count ?? 0;
+              commit(() => setLiveAppCount(live));
+            } catch (e) { logger.warn("[PublicSitDetail] application counts failed", { error: (e as any)?.message }); }
+          }
         }
 
 
@@ -481,12 +494,12 @@ const PublicSitDetail = () => {
  const cityPart = ownerCity ? `${ownerCity}. ` : "";
  const ogDescription = propertyDescShort
  ? `${cityPart}${datesPart} ${propertyDescShort} Partagez la confiance entre gens du coin avec Guardiens.`
- : "Partez l'esprit tranquille avec un gardien près de chez vous. Guardiens, c'est la confiance entre gens du coin.";
+ : "Partez l'esprit tranquille avec un gardien à proximité. Guardiens, c'est la confiance entre gens du coin.";
  const truncatedDesc = ogDescription.length > 200 ? ogDescription.slice(0, 197) + "…" : ogDescription;
 
  // SEO description (≤160 char), distincte de og:description
  const ownerFirstName = publicFirstName(owner?.first_name);
- const seoDescription = `Garde à ${cityForTitle} ${datesShort}. ${petsSummary}. ${ownerFirstName || "Un membre"} cherche un gardien du coin sur Guardiens, inscription : 0 € pour les propriétaires.`;
+ const seoDescription = `Garde à ${cityForTitle} ${datesShort}. ${petsSummary}. ${ownerFirstName || "Un membre"} cherche un gardien à proximité sur Guardiens. Guardiens est gratuit.`;
  const truncatedSeoDesc = seoDescription.length > 160 ? seoDescription.slice(0, 157) + "…" : seoDescription;
 
   // Canonical TOUJOURS sur le domaine de prod : sur preview/lovableproject,
@@ -532,8 +545,7 @@ const PublicSitDetail = () => {
  "@type": "Offer",
  price: "0",
  priceCurrency: "EUR",
- eligibleCustomerType: "Owner",
-  description: "0 € pour les propriétaires.",
+  description: "Guardiens est gratuit.",
  availability: hideDates ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
  // Aucune date exposée sur une garde pourvue ou terminée.
  ...(!hideDates && sit.start_date && { validFrom: sit.start_date }),
@@ -709,6 +721,15 @@ const PublicSitDetail = () => {
         onApply={handleApply}
         isClosed={isClosedSit}
         isPast={isPastSit}
+        applicationsFull={
+          liveAppCount !== null &&
+          applicationAvailability({
+            status: sit.status,
+            acceptingApplications: sit.accepting_applications,
+            maxApplications: sit.max_applications,
+            liveApplications: liveAppCount,
+          }) === "full"
+        }
       />
 
       {/* Rebond : annonces ouvertes à proximité, sous le contenu de la fiche. */}

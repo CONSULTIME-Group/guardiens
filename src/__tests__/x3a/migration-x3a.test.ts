@@ -158,26 +158,30 @@ describe("X3a, B-05 : le plafond de candidatures tient côté serveur", () => {
     const lib = readFileSync("src/lib/applicationCap.ts", "utf8");
     expect(lib).toContain('a.status !== "rejected" && a.status !== "cancelled"');
   });
-  it("fermeture après insertion au plafond, et rattrapage des annonces déjà au plafond", () => {
-    expect(close).toContain("SET accepting_applications = false");
+  // Lot Y1 (décision du fondateur du 13/10/2026) : la fermeture au plafond et
+  // la réouverture automatique de X3a sont retirées. Le fichier X3a garde son
+  // historique (déjà appliqué) ; le fichier Y1, appliqué après, les supprime.
+  it("Y1 : fermeture et réouverture automatiques retirées après X3a", () => {
     expect(close).toMatch(/CREATE TRIGGER trg_close_sit_when_application_cap_reached\s+AFTER INSERT ON public\.applications/);
-    expect(close).toContain("UPDATE public.sits s\n   SET accepting_applications = false\n WHERE s.status = 'published'::sit_status");
+    const y1 = readFileSync("supabase/prepared-migrations/20261013200000_y1_plafond_messages.sql", "utf8");
+    expect(y1).toContain("DROP TRIGGER IF EXISTS trg_close_sit_when_application_cap_reached ON public.applications;");
+    expect(y1).toContain("DROP TRIGGER IF EXISTS trg_reopen_sit_when_application_slot_freed ON public.applications;");
+    expect(y1).toContain("DROP FUNCTION IF EXISTS public.close_sit_when_application_cap_reached();");
+    expect(y1).toContain("DROP FUNCTION IF EXISTS public.reopen_sit_when_application_slot_freed();");
+    expect(y1).toContain("ALTER TABLE public.sits ALTER COLUMN max_applications SET DEFAULT 10;");
   });
-  it("R6 : une place libérée rouvre l'annonce publiée, sans relancer la diffusion", () => {
-    const reopen = block("CREATE OR REPLACE FUNCTION public.reopen_sit_when_application_slot_freed", "-- Rattrapage");
-    expect(reopen).toContain("UPDATE public.sits s SET accepting_applications = true");
-    expect(reopen).toContain("AND s.status = 'published'::sit_status");
-    expect(reopen).toContain("AND s.accepting_applications IS FALSE");
-    expect(reopen).toContain("< s.max_applications;");
-    expect(reopen).toMatch(/CREATE TRIGGER trg_reopen_sit_when_application_slot_freed\s+AFTER UPDATE OF status ON public\.applications/);
-    expect(reopen).toMatch(/WHEN \(OLD\.status NOT IN \('rejected'::application_status, 'cancelled'::application_status\)\s+AND NEW\.status IN \('rejected'::application_status, 'cancelled'::application_status\)\)/);
-  });
-  it("le navigateur du gardien n'écrit plus accepting_applications", () => {
-    for (const path of ["src/components/sits/ApplicationModal.tsx", "src/components/sits/views/SitterSitView.tsx"]) {
+  it("aucun navigateur n'écrit accepting_applications à false au plafond", () => {
+    for (const path of [
+      "src/components/sits/ApplicationModal.tsx",
+      "src/components/sits/views/SitterSitView.tsx",
+      "src/components/sits/views/ReopenApplicationsCard.tsx",
+      "src/components/dashboard/owner/ApplicationCapSection.tsx",
+    ]) {
       const src = readFileSync(path, "utf8");
-      expect(src, path).not.toMatch(/update\(\{\s*accepting_applications:\s*false/);
+      expect(src, path).not.toMatch(/accepting_applications:\s*false/);
     }
-    expect(readFileSync("src/components/sits/ApplicationModal.tsx", "utf8")).toContain('includes("SIT_CLOSED")');
+    expect(readFileSync("src/components/sits/ApplicationModal.tsx", "utf8")).toContain("describeSitClosedError(");
+    expect(readFileSync("src/lib/applicationCap.ts", "utf8")).toContain('includes("SIT_CLOSED")');
   });
 });
 

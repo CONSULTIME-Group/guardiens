@@ -17,7 +17,14 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { startCronRun } from "../_shared/cron-run-log.ts";
-import { dormantRunBatch, dormantSendDecision } from "../_shared/dormant-sitter-cap.ts";
+import {
+  DORMANT_PAST_SENDS_FILTER,
+  dormantDuplicateFilter,
+  dormantRunBatch,
+  dormantSendDecision,
+  tallyDormantSends,
+  type DormantLogRow,
+} from "../_shared/dormant-sitter-cap.ts";
 import {
   fetchOpenSits,
   nearbySitsTemplateData,
@@ -142,21 +149,17 @@ Deno.serve(async (req) => {
     const adminIds = new Set((adminRows ?? []).map((r: { user_id: string }) => r.user_id));
 
     // Plafond de trois relances par gardien, tous envois confondus, et date du
-    // dernier envoi effectif pour l'espacement de quatorze jours.
-    const { data: pastSends } = await service
+    // dernier envoi effectif pour l'espacement de quatorze jours. Lot Y1
+    // (P4-01) : la clé vit dans metadata.idempotency_key (message_id est un
+    // UUID depuis le 01/10/2026), les deux formats sont lus. Une lecture en
+    // échec arrête le passage : sans compteur, aucun plafond ne tient.
+    const { data: pastSends, error: pastSendsErr } = await service
       .from("email_send_log")
-      .select("message_id, created_at")
-      .like("message_id", "dormant-sitter-%")
-      .limit(5000);
-    const sentCounts = new Map<string, number>();
-    const lastSentAt = new Map<string, string>();
-    for (const row of (pastSends ?? []) as Array<{ message_id: string | null; created_at: string | null }>) {
-      const id = (row.message_id ?? "").slice("dormant-sitter-".length, "dormant-sitter-".length + 36);
-      if (!id) continue;
-      sentCounts.set(id, (sentCounts.get(id) ?? 0) + 1);
-      const prev = lastSentAt.get(id);
-      if (row.created_at && (!prev || row.created_at > prev)) lastSentAt.set(id, row.created_at);
-    }
+      .select("message_id, created_at, status, metadata")
+      .or(DORMANT_PAST_SENDS_FILTER)
+      .limit(10000);
+    if (pastSendsErr) throw new Error(`dormant past sends read failed: ${pastSendsErr.message}`);
+    const { sentCounts, lastSentAt } = tallyDormantSends(pastSends as DormantLogRow[] | null);
 
     // Coordonnées et dernière visite des gardiens, pour les cartes annonce et
     // pour l'ordre de passage.
@@ -252,7 +255,7 @@ Deno.serve(async (req) => {
       const { data: dup } = await service
         .from("email_send_log")
         .select("id")
-        .eq("message_id", messageId)
+        .or(dormantDuplicateFilter(messageId))
         .limit(1)
         .maybeSingle();
       if (dup) { emailsSkipped += 1; continue; }

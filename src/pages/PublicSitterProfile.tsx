@@ -547,6 +547,7 @@ export default function PublicSitterProfile() {
       // `last_name` retiré du select, jamais rendu publiquement.
       const BASE_PROFILE_COLS =
         "id, role, first_name, avatar_url, bio, city, postal_code, created_at, identity_verified, is_founder, profile_completion, completed_sits_count, cancellation_count, hero_image_index";
+      const PUBLIC_EXTRA_COLS = "id, cancellation_count, hero_image_index";
 
       // Vue publique : alignée sur les entrées scorées du moteur (symétrie
       // du 23/08/2026), sauf sensitivities (donnée de santé, jamais exposée).
@@ -555,7 +556,13 @@ export default function PublicSitterProfile() {
       const [profileRes, baseProfileRes, sitterRes, reviewsRes, galleryRes, emergencyRes, subRes, ownerRes, missionsRes, extExpRes] =
         await Promise.all([
           supabase.from("public_profiles").select(PUBLIC_PROFILE_COLS).eq("id", id).maybeSingle(),
-          supabase.from("profiles").select(BASE_PROFILE_COLS).eq("id", id).maybeSingle(),
+          // Lot Y2 (P3-12) : profiles n'est lisible que du titulaire. Un
+          // visiteur lit annulations et image d'en-tête dans public_profiles
+          // (colonnes ajoutées par 20261013200100_y2_droits.sql) ; avant
+          // application, l'erreur de colonne laisse les valeurs par défaut.
+          auth?.user?.id === id
+            ? supabase.from("profiles").select(BASE_PROFILE_COLS).eq("id", id).maybeSingle()
+            : (supabase as any).from("public_profiles").select(PUBLIC_EXTRA_COLS).eq("id", id).maybeSingle(),
           (supabase as any).from("public_sitter_profiles").select(PUBLIC_SITTER_COLS).eq("user_id", id).maybeSingle(),
 
           // Avis publiés + rôle calculé côté serveur : un visiteur ne lit pas

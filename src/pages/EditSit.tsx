@@ -32,6 +32,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { getSitPublishBlockers, buildSitPublishInput, MAX_TITLE_LENGTH } from "@/lib/sitPublishRules";
+import { DEFAULT_MAX_APPLICATIONS } from "@/lib/applicationCap";
+import MaxApplicationsField from "@/components/sits/owner/MaxApplicationsField";
 
 /** Carte de section pour grouper visuellement les champs d'édition. */
 const SectionCard = ({
@@ -150,6 +152,9 @@ const EditSit = () => {
   const [openTo, setOpenTo] = useState<string[]>([]);
   const [isUrgent, setIsUrgent] = useState(false);
   const [minGardienSits, setMinGardienSits] = useState(0);
+  /** Lot Y1 : nombre de candidatures souhaitées, réglable et relevable. */
+  const [maxApplications, setMaxApplications] = useState<number | null>(DEFAULT_MAX_APPLICATIONS);
+  const [liveApplications, setLiveApplications] = useState<number | null>(null);
   const [sitStatus, setSitStatus] = useState("");
   const [coverPhotoUrl, setCoverPhotoUrl] = useState<string | null>(null);
   const [ownerGallery, setOwnerGallery] = useState<{ id: string; photo_url: string; category?: string | null }[]>([]);
@@ -217,6 +222,14 @@ const EditSit = () => {
       setOpenTo((data.open_to as string[]) || []);
       setIsUrgent(data.is_urgent || false);
       setMinGardienSits((data as any).min_gardien_sits || 0);
+      const loadedMax = ((data as any).max_applications as number | null) ?? null;
+      setMaxApplications(loadedMax);
+      supabase
+        .rpc("get_sit_application_counts", { p_sit_id: data.id })
+        .then(({ data: countRows }) => {
+          if (cancelled) return;
+          setLiveApplications((countRows as any)?.[0]?.app_count ?? null);
+        });
       setSitStatus(data.status || "");
       setCoverPhotoUrl(((data as any).cover_photo_url as string | null) ?? null);
       // Charge la galerie propriétaire (owner_gallery) pour permettre le choix
@@ -244,6 +257,7 @@ const EditSit = () => {
         openTo: (data.open_to as string[]) || [],
         isUrgent: data.is_urgent || false,
         minGardienSits: (data as any).min_gardien_sits || 0,
+        maxApplications: loadedMax,
       });
       setLoading(false);
     })();
@@ -348,9 +362,10 @@ const EditSit = () => {
       JSON.stringify({
         title, startDate, endDate, flexibleDates, flexibleMonths,
         flexibleDuration, flexibleFreeNote, specificExpectations, openTo, isUrgent, minGardienSits,
+        maxApplications,
       }),
     [title, startDate, endDate, flexibleDates, flexibleMonths, flexibleDuration,
-      flexibleFreeNote, specificExpectations, openTo, isUrgent, minGardienSits],
+      flexibleFreeNote, specificExpectations, openTo, isUrgent, minGardienSits, maxApplications],
   );
 
   const isDirty = !loading && currentSnapshot !== initialSnapshot.current;
@@ -398,6 +413,8 @@ const EditSit = () => {
         open_to: openTo,
         is_urgent: isUrgent,
         min_gardien_sits: minGardienSits,
+        // Lot Y1 : seule la valeur change, l'ouverture reste au propriétaire.
+        max_applications: maxApplications,
       } as any)
       .eq("id", id)
       .eq("user_id", user.id);
@@ -413,7 +430,7 @@ const EditSit = () => {
   }, [
     user, id, canSave, persistedDesc, trimmedTitle, startDate, endDate,
     flexibleDates, flexibleMonths, flexibleDuration, flexibleFreeNote, inlineFlexibility, openTo, isUrgent,
-    minGardienSits, currentSnapshot, navigate, toast, proposalReturn,
+    minGardienSits, maxApplications, currentSnapshot, navigate, toast, proposalReturn,
   ]);
 
 
@@ -832,6 +849,13 @@ const EditSit = () => {
                 ))}
               </div>
             </div>
+
+            <MaxApplicationsField
+              value={maxApplications}
+              onChange={setMaxApplications}
+              disabled={isLocked}
+              liveApplications={liveApplications}
+            />
 
             {showUrgent && (
               <div className="flex items-start gap-3 rounded-xl border border-warning-border bg-warning-soft p-4">

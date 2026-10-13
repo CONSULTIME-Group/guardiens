@@ -176,10 +176,12 @@ Deno.serve(async (req) => {
       const messageId = `sit-unconfirmed-${row.sit_id}-${row.urgency}`;
       const email = row.owner_email.trim().toLowerCase();
 
+      // Lot Y1 (P4-01) : la clé vit dans metadata.idempotency_key, message_id
+      // est un UUID ; les deux formats sont lus.
       const { data: dup } = await service
         .from("email_send_log")
         .select("id")
-        .eq("message_id", messageId)
+        .or(`message_id.eq.${messageId},and(metadata->>idempotency_key.eq.${messageId},template_name.eq.owner-sit-unconfirmed,status.in.(sent,pending,deferred))`)
         .limit(1)
         .maybeSingle();
       if (dup) {

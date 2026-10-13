@@ -61,7 +61,7 @@ const OnboardingJ1Email = ({
             <>
               <Text style={text}>
                 Bienvenue sur {SITE_NAME}. Publier votre première annonce prend
-                deux minutes, et c'est gratuit sans engagement.
+                deux minutes. Guardiens est gratuit.
               </Text>
 
               {typeof nearbySittersCount === 'number' && nearbySittersCount > 0 && (
@@ -134,8 +134,8 @@ const OnboardingJ1Email = ({
               <Text style={text}>
                 Pour accéder aux annonces de garde et aux petites missions près de chez vous,
                 ou ailleurs en France si vous élargissez votre rayon,
-                votre profil doit être complété à 60 % minimum. Il vous manque
-                peut-être juste une photo et une courte bio.
+                votre profil s'ouvre aux annonces à partir de 40 % : une photo et une
+                courte présentation suffisent souvent.
               </Text>
               <Section style={ctaSection}>
                 <Button style={button} href={`${SITE_URL}/profile?${utm}`}>

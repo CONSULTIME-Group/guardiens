@@ -46,13 +46,13 @@ const KEY_STATS: Stat[] = [
  detail: "Foyers confiés à un gardien Guardiens ou aux fondateurs. Du studio urbain à la maison de campagne avec dépendances.",
  },
  {
- label: "Coût pour les propriétaires",
- value: "Aucun frais",
- detail: "Aucun frais d'inscription, aucune commission sur les gardes, aucun prélèvement entre membres. Modèle inchangé depuis la création.",
+ label: "Espace propriétaire",
+ value: "Gratuit",
+ detail: "Guardiens est gratuit : aucune commission sur les gardes, aucun prélèvement entre membres. Modèle inchangé depuis la création.",
  },
  {
- label: "Abonnement gardien",
- value: "Aucun frais",
+ label: "Espace gardien",
+ value: "Gratuit",
  detail: "Guardiens est gratuit : accès complet aux fonctionnalités.",
  },
 

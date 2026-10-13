@@ -82,7 +82,7 @@ const MentionsLegales = () => {
             <li>Ne saurait être tenu responsable des difficultés d'accès ou d'indisponibilité temporaire du service</li>
           </ul>
           <p>
-            Les utilisateurs reconnaissent que la confiance mutuelle repose sur la rencontre physique préalable à toute garde, les avis croisés publiés après chaque expérience, et l'historique visible sur chaque profil. Les utilisateurs sont seuls responsables de vérifier la couverture de leur assurance responsabilité civile et de leur assurance multirisque habitation avant toute garde ou mission.
+            Les utilisateurs reconnaissent que la confiance mutuelle repose sur les échanges entre membres, une rencontre préalable proposée si les deux le souhaitent, les avis croisés publiés après chaque expérience, et l'historique visible sur chaque profil. Les utilisateurs sont seuls responsables de vérifier la couverture de leur assurance responsabilité civile et de leur assurance multirisque habitation avant toute garde ou mission.
           </p>
           <p>
             Le régime détaillé de responsabilité, incluant les cas d'exclusion, les garanties expressément réservées par la loi et le plafond d'indemnisation, figure à l'article 13 des <a href="/cgu" className="text-primary hover:underline">Conditions Générales d'Utilisation</a>.

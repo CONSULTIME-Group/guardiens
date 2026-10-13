@@ -33,6 +33,7 @@ import { detectRestrictionInText } from "@/lib/detectRestriction";
 import { publicFirstName } from "@/lib/displayName";
 import AffinityBadge from "@/components/matching/AffinityBadge";
 import { computeAffinityResultFull, type AffinityOwnerInput, type AffinitySitterInput, type AffinityResult } from "@/lib/affinityScore";
+import { describeSitClosedError, SIT_CLOSED_NOTICE, type SitClosedNotice } from "@/lib/applicationCap";
 
 
 interface ApplicationModalProps {
@@ -67,6 +68,14 @@ const ApplicationModal = ({
   const [almaUsed, setAlmaUsed] = useState(false);
   const [almaDraftText, setAlmaDraftText] = useState<string | null>(null);
   const [unpersonalizedConfirmOpen, setUnpersonalizedConfirmOpen] = useState(false);
+  /**
+   * Lot Y1 : annonce complète ou close au moment de l'envoi. Le message reste
+   * dans la fenêtre de candidature, avec une sortie vers la recherche.
+   */
+  const [closedNotice, setClosedNotice] = useState<SitClosedNotice | null>(null);
+  useEffect(() => {
+    if (open) setClosedNotice(null);
+  }, [open, sitId]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   /**
    * Verrou synchrone anti double soumission. L'état `sending` n'est posé
@@ -187,8 +196,10 @@ const ApplicationModal = ({
           // voiture requise. Parité des entrées verrouillée par
           // affinity-input-parity.test.ts.
           const [{ data: petsData }, { data: propertyRow }] = await Promise.all([
-            supabase
-              .from("pets")
+            // Lot Y2 (P3-10) : candidature sur une annonce publiée, les
+            // animaux se lisent par public_pets (pets réservé aux parties).
+            (supabase as any)
+              .from("public_pets" as any)
               .select("species, special_needs, breed")
               .eq("property_id", propertyId),
             supabase
@@ -286,12 +297,7 @@ const ApplicationModal = ({
       .single();
     if (!sitCheck || sitCheck.status !== "published" || !sitCheck.accepting_applications) {
       setSending(false);
-      toast({
-        title: "Candidatures fermées",
-        description: "Cette annonce n'accepte plus de candidatures.",
-        variant: "destructive",
-      });
-      onOpenChange(false);
+      setClosedNotice(SIT_CLOSED_NOTICE);
       return;
     }
 
@@ -318,15 +324,12 @@ const ApplicationModal = ({
         onSuccess();
         return;
       }
-      // Lot X3a (B-05) : garde serveur trg_guard_application_sit_open, annonce
-      // fermée ou plafond atteint entre l'ouverture du formulaire et l'envoi.
-      if (String((error as { message?: string }).message ?? "").includes("SIT_CLOSED")) {
-        toast({
-          title: "Candidatures fermées",
-          description: "Cette annonce a reçu toutes les candidatures prévues. D'autres gardes vous attendent dans la recherche.",
-          variant: "destructive",
-        });
-        onOpenChange(false);
+      // Lot X3a (B-05), Y1 : garde serveur trg_guard_application_sit_open,
+      // annonce close ou complète entre l'ouverture du formulaire et l'envoi.
+      // Le message SIT_CLOSED est traduit et reste affiché dans la fenêtre.
+      const sitClosed = describeSitClosedError((error as { message?: string }).message);
+      if (sitClosed) {
+        setClosedNotice(sitClosed);
         return;
       }
       // Garde serveur (trg_guard_application_min_completion) : sous 40 %, refus explicite.
@@ -442,6 +445,25 @@ const ApplicationModal = ({
   };
 
   const p = sitterInfo?.profile;
+
+  if (closedNotice) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-md" data-testid="application-closed-notice">
+          <DialogHeader>
+            <DialogTitle className="font-heading">{closedNotice.title}</DialogTitle>
+            <DialogDescription>{closedNotice.description}</DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>Fermer</Button>
+            <Button asChild>
+              <Link to="/recherche" onClick={() => onOpenChange(false)}>Voir d'autres gardes</Link>
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

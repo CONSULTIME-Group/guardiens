@@ -13,7 +13,8 @@ import { useStarVisibilityGate } from "@/hooks/useStarVisibilityGate";
 
 interface SitMobileStickyApplyProps {
   sitId: string;
-  state: "apply" | "applied" | "closed" | "blocked" | "complete_profile";
+  /** « full » (lot Y1) : annonce ouverte au plafond, « Candidatures complètes ». */
+  state: "apply" | "applied" | "closed" | "full" | "blocked" | "complete_profile";
   onApply: () => void;
   /** Ouvre la complétion de profil en place, sans quitter l'annonce. */
   onCompleteProfile?: () => void;
@@ -93,6 +94,10 @@ const SitMobileStickyApply = ({
         ) : state === "closed" ? (
           <Button className="flex-1 h-11 text-sm font-semibold" disabled>
             Candidatures fermées
+          </Button>
+        ) : state === "full" ? (
+          <Button className="flex-1 h-11 text-sm font-semibold" disabled>
+            Candidatures complètes
           </Button>
         ) : (
           <Button

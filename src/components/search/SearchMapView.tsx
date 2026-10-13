@@ -101,6 +101,8 @@ interface SearchMapViewProps {
   resultCoords: Map<string, { lat: number; lng: number }>;
   userCoords: { lat: number; lng: number } | null;
   hasAccess: boolean;
+  /** Visiteur sans session : la carte propose de créer son profil (lot Y3). */
+  isLoggedIn?: boolean;
   formatDate: (d: string | null) => string;
   tab: string;
   sitterEligible: boolean;
@@ -112,6 +114,7 @@ const SearchMapView = ({
   resultCoords,
   userCoords,
   hasAccess,
+  isLoggedIn = true,
   formatDate,
   tab,
   sitterEligible,
@@ -373,14 +376,21 @@ const SearchMapView = ({
                   >
                     Voir l'annonce →
                   </Link>
-                ) : (
+                ) : !isLoggedIn ? (
                   <Link
-                    to="/mon-abonnement"
+                    to="/inscription?role=sitter"
                     className="block w-full py-2 text-xs text-center bg-primary text-primary-foreground rounded-lg font-medium"
                   >
-                    S'abonner pour postuler
+                    Créer mon profil pour postuler
                   </Link>
-                )}
+                ) : linkTo ? (
+                  <Link
+                    to={linkTo}
+                    className="block w-full py-2 text-xs text-center bg-primary text-primary-foreground rounded-lg font-medium"
+                  >
+                    Voir l'annonce →
+                  </Link>
+                ) : null}
               </div>
               <div className="hidden md:block absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-card border-b border-r border-border rotate-45" />
             </div>

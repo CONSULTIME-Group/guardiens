@@ -1,7 +1,6 @@
 import { sitPath } from "@/lib/sitUrl";
 import { Link, useLocation } from "react-router-dom";
 import { storageImageUrl } from "@/lib/storageImage";
-import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
 
 import EnvironmentPills from "@/components/shared/EnvironmentPills";
@@ -47,7 +46,6 @@ const SearchListingCard = ({
   formatDate,
   viewerSitterProfile,
 }: SearchListingCardProps) => {
-  const { t } = useTranslation();
   // Annonce de garde : lieu résolu par la recherche (resolveSitPlace, profil
   // propriétaire puis repli annonce), jamais un mélange des deux sources.
   // Mission : profil comme auparavant.
@@ -95,12 +93,10 @@ const SearchListingCard = ({
     return end.getTime() < today.getTime();
   })();
   const isInactive = isAssigned || isCompleted || isPast;
-  // Plafond de candidatures atteint : l'annonce reste visible et lisible.
-  const isCapReached =
-    !isMission && !isDemo && !isInactive &&
-    item.status === "published" &&
-    item.accepting_applications === false &&
-    !!item.max_applications;
+  // Lot Y1 : une annonce au plafond reste ouverte et s'affiche comme les
+  // autres en recherche ; « Candidatures complètes » se lit sur la fiche,
+  // calculé à partir des candidatures vivantes. accepting_applications à
+  // false n'est plus qu'un choix du propriétaire (annonce close).
   const isOutOfZone =
     !isMission &&
     !isDemo &&
@@ -368,12 +364,6 @@ const SearchListingCard = ({
             data-testid="demo-example-badge"
           >
             Exemple
-          </span>
-        )}
-
-        {isCapReached && (
-          <span className="absolute top-3 left-3 bg-muted/95 text-muted-foreground text-[10px] font-semibold uppercase tracking-[0.16em] px-2 py-0.5 rounded-full shadow-sm">
-            {t("application_cap.badge")}
           </span>
         )}
 

@@ -73,7 +73,7 @@ const Email = ({
   return (
     <Html lang="fr" dir="ltr">
       <BrandedHead />
-      <Preview>En voici trois, ils habitent près de chez vous.</Preview>
+      <Preview>En voici trois, ils habitent à proximité.</Preview>
       <Body style={main}>
         <Container style={container}>
           <BrandHeader />
@@ -132,8 +132,8 @@ export const template = {
     const n = typeof d?.nearby_sitters_count === 'number' ? d.nearby_sitters_count : 0
     const cityLabel = d?.city || 'chez vous'
     if (n === 0) return 'Votre première annonce, en quelques minutes'
-    if (n === 1) return `Un gardien habite autour de ${cityLabel}`
-    return `${n} gardiens habitent autour de ${cityLabel}`
+    if (n === 1) return `Un gardien à proximité de ${cityLabel}`
+    return `${n} gardiens à proximité de ${cityLabel}`
   },
   displayName: 'Propriétaire sans annonce, J+3',
   previewData: {

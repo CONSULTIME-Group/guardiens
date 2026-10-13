@@ -78,7 +78,7 @@ const PhotoJourneyDialog = ({ open, onOpenChange, userId, startPosition = 0, onP
       window.dispatchEvent(new Event("owner-gallery:changed"));
       advance();
     } catch (e: unknown) {
-      const message = e instanceof Error ? e.message : "Réessaie dans un instant.";
+      const message = e instanceof Error ? e.message : "Réessayez dans un instant.";
       toast.error("Photo non ajoutée", { description: message });
     } finally {
       setUploading(false);
@@ -96,7 +96,7 @@ const PhotoJourneyDialog = ({ open, onOpenChange, userId, startPosition = 0, onP
               {PHOTO_JOURNEY_INTRO}
             </DialogDescription>
             <p className="text-sm text-muted-foreground">
-              Rien n'est obligatoire ici. Tu peux passer un écran ou sortir quand tu veux.
+              Chaque écran est facultatif : vous pouvez en passer un ou sortir quand vous voulez.
             </p>
             <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
               <Button variant="ghost" className="min-h-11" onClick={() => onOpenChange(false)}>
@@ -167,8 +167,8 @@ const PhotoJourneyDialog = ({ open, onOpenChange, userId, startPosition = 0, onP
             </DialogTitle>
             <DialogDescription className="text-base text-foreground">
               {addedCount > 0
-                ? `${addedCount} photo${addedCount > 1 ? "s" : ""} rejoignent ta galerie et tes annonces. Tu peux les réordonner à tout moment.`
-                : "Aucune photo ajoutée. Tu peux revenir quand tu veux, rien n'est bloqué."}
+                ? `${addedCount} photo${addedCount > 1 ? "s" : ""} rejoignent votre galerie et vos annonces. Vous pouvez les réordonner à tout moment.`
+                : "Vous pourrez ajouter vos photos quand vous voulez, votre annonce reste ouverte."}
             </DialogDescription>
             <Button className="w-full min-h-12" onClick={() => onOpenChange(false)}>
               Fermer

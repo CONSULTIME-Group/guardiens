@@ -72,8 +72,9 @@ describe('lot N2, vocabulaire des gabarits réécrits', () => {
     );
     expect(read('relance-cp-manquant')).toContain('Indiquer mon code postal');
     expect(read('owner-no-sit-j3')).toContain('Publier mon annonce');
+    // Lot Y3 (P5-09) : la statistique non sourcée est retirée du J+10.
     expect(read('owner-no-sit-j10')).toContain(
-      'Plus d\'une annonce sur deux reçoit sa première candidature en moins de 48',
+      'Publier tôt laisse le temps de recevoir des candidatures et d\'échanger',
     );
     expect(read('owner-no-sit-j21')).toContain('Une question de Jérémie');
     expect(read('owner-activation-nudge')).toContain(

@@ -133,6 +133,8 @@ interface Props {
   /** Garde déjà attribuée ou passée : contenu consultable, aucune candidature. */
   isClosed?: boolean;
   isPast?: boolean;
+  /** Lot Y1 : plafond atteint, « Candidatures complètes » à la place du bouton. */
+  applicationsFull?: boolean;
 }
 
 const PublicSitView = ({
@@ -156,6 +158,7 @@ const PublicSitView = ({
   onApply,
   isClosed = false,
   isPast = false,
+  applicationsFull = false,
 }: Props) => {
   const [openPet, setOpenPet] = useState<PetLike | null>(null);
   const { t } = useTranslation();
@@ -170,8 +173,9 @@ const PublicSitView = ({
   const description = property?.description || "";
 
   const accepting = sit.accepting_applications !== false;
-  // Plafond atteint : choix du propriétaire, jamais une panne ni un refus.
-  const capReached = !accepting && !!sit.max_applications;
+  // Lot Y1 : plafond atteint sur une annonce qui reste ouverte et visible,
+  // calculé par la page à partir des candidatures vivantes (membre connecté).
+  const capReached = accepting && applicationsFull && !hasApplied && !!sit.max_applications;
 
   return (
     <>

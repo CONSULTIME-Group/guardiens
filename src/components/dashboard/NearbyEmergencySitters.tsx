@@ -47,7 +47,8 @@ const NearbyEmergencySitters = ({ hideHeader = false }: { hideHeader?: boolean }
       const [profilesRes, reviewsRes, sitterRes] = await Promise.all([
         supabase.from("public_profiles").select("id, first_name, avatar_url, city, custom_skills").in("id", userIds),
         supabase.from("reviews").select("reviewee_id, overall_rating").in("reviewee_id", userIds).eq("published", true),
-        supabase.from("sitter_profiles").select("user_id, competences").in("user_id", userIds),
+        // Lot Y2 (P3-12) : sitter_profiles est réservé au titulaire.
+        (supabase as any).from("public_sitter_profiles").select("user_id, competences").in("user_id", userIds),
       ]);
 
       const ratingMap = new Map<string, number[]>();

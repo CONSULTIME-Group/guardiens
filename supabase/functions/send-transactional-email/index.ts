@@ -151,6 +151,22 @@ const DEEP_LINK_TEMPLATES = new Set<string>([
   'relance-cp-manquant',
 ])
 
+// Lot Y1 (P4-06) : gabarits immédiats dont le bouton peut ouvrir une session,
+// dans les 2 heures qui suivent l'envoi et sur un navigateur sans autre
+// compte connecté (liste et fenêtre tenues par consume_email_deep_link,
+// supabase/prepared-migrations/20261013200000_y1_plafond_messages.sql). Les
+// relances (unread-messages-reminder, owner-pending-application-nudge,
+// discussion-stalled-nudge, review-reminder, relance-cp-manquant) gardent le
+// lien direct vers la bonne page, derrière la connexion.
+const DEEP_LINK_SESSION_TEMPLATES = new Set<string>([
+  'new-message',
+  'new-application',
+  'first-application-received',
+  'review-received',
+])
+const DEEP_LINK_SESSION_NOTICE =
+  'Le bouton de cet email vous connecte directement pendant 2 heures : gardez ce message pour vous.'
+
 // Cibles forcees pour les gabarits dont la destination n'est ni un fil de
 // conversation ni une annonce. La relance secteur depose la personne sur la
 // page qui ne demande que le code postal et le rayon, session deja ouverte.
@@ -1239,6 +1255,10 @@ Deno.serve(async (req) => {
   // a usage unique, valable 24 heures, lie au destinataire et, quand elle
   // existe, a la conversation ciblee. Il n'ouvre qu'une session normale, la
   // RLS s'applique integralement.
+  // Lot Y1 (P4-06) : seul un email immédiat ouvre une session depuis son
+  // bouton, et seulement dans les 2 heures (consume_email_deep_link). Le pied
+  // de page le dit, pour que l'email reste entre les mains du destinataire.
+  let deepLinkOpensSession = false
   if (DEEP_LINK_TEMPLATES.has(templateName)) {
     try {
       const conversationId =
@@ -1267,6 +1287,7 @@ Deno.serve(async (req) => {
         console.error('[deep-link] creation failed', deepErr.message)
       } else if (typeof deepToken === 'string' && deepToken.length > 0) {
         templateData = { ...templateData, deepLinkUrl: `${SITE_URL}/acces?t=${deepToken}` }
+        deepLinkOpensSession = DEEP_LINK_SESSION_TEMPLATES.has(templateName)
       }
     } catch (e) {
       // Un echec de minting ne doit jamais empecher l'envoi : le gabarit
@@ -1299,11 +1320,11 @@ Deno.serve(async (req) => {
     footerHtml = `
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:24px;border-top:1px solid #e7e1d8;padding-top:16px;font-family:Arial,sans-serif;">
         <tr><td style="font-size:11px;color:#999;line-height:1.6;text-align:center;">
-          Cet email essentiel est lié au fonctionnement de votre compte Guardiens.<br/>
+          ${deepLinkOpensSession ? `${DEEP_LINK_SESSION_NOTICE}<br/>` : ''}Cet email essentiel est lié au fonctionnement de votre compte Guardiens.<br/>
           <a href="${prefsUrl}" style="color:#666;text-decoration:underline;">Gérer mes préférences email</a>
         </td></tr>
       </table>`
-    footerText = `\n\n· · ·\nCet email essentiel est lié au fonctionnement de votre compte Guardiens.\nGérer mes préférences : ${prefsUrl}\n`
+    footerText = `\n\n· · ·\n${deepLinkOpensSession ? `${DEEP_LINK_SESSION_NOTICE}\n` : ''}Cet email essentiel est lié au fonctionnement de votre compte Guardiens.\nGérer mes préférences : ${prefsUrl}\n`
   } else {
     footerHtml = `
       <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:24px;border-top:1px solid #e7e1d8;padding-top:16px;font-family:Arial,sans-serif;">

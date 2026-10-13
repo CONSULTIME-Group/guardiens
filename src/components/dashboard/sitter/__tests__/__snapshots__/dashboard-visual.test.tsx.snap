@@ -740,7 +740,7 @@ exports[`SitterEmergencyCard — modes aperçu > snapshot — vue ACTIVE (profil
       <p
         class="text-amber-700 font-medium pt-1"
       >
-        2 interventions, 2 mois offerts
+        2 interventions d'urgence
       </p>
     </div>
     <button

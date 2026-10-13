@@ -67,13 +67,13 @@ const Email = ({
           <Heading style={h1}>{title}</Heading>
 
           <Text style={p}>
-            Si vous partez, votre maison, elle, reste. Une maison habitée pendant votre absence, c'est le courrier relevé, les plantes arrosées, et vos animaux chez eux plutôt qu'en pension.
+            Si vous partez, votre maison, elle, reste. Une maison habitée pendant votre absence, c'est le courrier relevé, les plantes arrosées, et vos animaux chez eux, dans leurs habitudes.
           </Text>
 
           <Text style={p}>
             {certain
-              ? `Publier trois à quatre semaines avant le départ laisse le temps de recevoir des candidatures et de rencontrer la personne. Pour un départ le ${startFr}, c'est maintenant.`
-              : "Publier trois à quatre semaines avant le départ laisse le temps de recevoir des candidatures et de rencontrer la personne."}
+              ? `Publier trois à quatre semaines avant le départ laisse le temps de recevoir des candidatures et d'échanger avec la personne. Pour un départ le ${startFr}, c'est maintenant.`
+              : "Publier trois à quatre semaines avant le départ laisse le temps de recevoir des candidatures et d'échanger avec la personne."}
           </Text>
 
           <Text style={p}>

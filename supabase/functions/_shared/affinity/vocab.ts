@@ -299,6 +299,21 @@ export const SENS_NAC = "Pas de NAC";
 export const SENS_CHEVAUX_FERME = "Pas de chevaux ou animaux de ferme";
 
 /**
+ * Libellés neutres servis par la vue sitter_profiles_affinity (lot Y2) à la
+ * place d'une allergie, donnée de santé : seuls le titulaire et les parties
+ * d'une garde engagée lisent le libellé d'origine. Le moteur les traite
+ * comme l'allergie correspondante.
+ */
+export const SENS_PAS_DE_CHATS = "Pas de chats";
+export const SENS_PAS_DE_CHIENS = "Pas de chiens";
+
+/** Libellés neutres bloquants par espèce (code canonique EN), lot Y2. */
+export const NEUTRAL_SENSITIVITY_BY_SPECIES: Record<string, string[]> = {
+  cat: [SENS_PAS_DE_CHATS],
+  dog: [SENS_PAS_DE_CHIENS],
+};
+
+/**
  * Libellés de sensibilités bloquantes par espèce (code canonique EN).
  * Si le gardien coche l'un des libellés listés pour une espèce présente
  * chez l'owner, c'est une incompatibilité DÉCLARÉE : jamais masquante en
@@ -329,8 +344,12 @@ export const ALL_BLOCKING_SENSITIVITIES = Array.from(
  * JAMAIS d'identifiant technique à l'écran.
  */
 export const SENSITIVITY_EXPLANATION: Record<string, string> = {
-  [SENS_ALLERGIE_CHAT]: "A déclaré une allergie aux chats",
-  [SENS_ALLERGIE_CHIEN]: "A déclaré une allergie aux chiens",
+  // Lot Y2 : une allergie est une donnée de santé, la phrase dit seulement
+  // l'espèce refusée, quel que soit le lecteur.
+  [SENS_ALLERGIE_CHAT]: "N'accepte pas les chats",
+  [SENS_ALLERGIE_CHIEN]: "N'accepte pas les chiens",
+  [SENS_PAS_DE_CHATS]: "N'accepte pas les chats",
+  [SENS_PAS_DE_CHIENS]: "N'accepte pas les chiens",
   [SENS_GRANDS_CHIENS]: "N'accepte pas les très grands chiens",
   [SENS_CHIENS_CATEGORISES]: "N'accepte pas les chiens catégorisés",
   [SENS_REPTILES]: "N'accepte pas les reptiles",

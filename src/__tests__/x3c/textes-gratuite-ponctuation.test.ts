@@ -27,6 +27,7 @@ const PUBLIC_FILES = [
   "src/pages/ArticleDetail.tsx",
   "src/pages/Settings.tsx",
   "src/pages/MySubscription.tsx",
+  "src/pages/Pricing.tsx", // lot Y3 (P5-01)
   "src/pages/Messages.tsx",
   "src/components/city/CitySittersGrid.tsx",
   "src/components/profile/ProfileHero.tsx",

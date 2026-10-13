@@ -17,7 +17,7 @@ const Email = ({ firstName }: Props) => {
   return (
     <Html lang="fr" dir="ltr">
       <BrandedHead />
-      <Preview>L'arrosage, les animaux, la surveillance : tout est gratuit sur Guardiens.</Preview>
+      <Preview>L'arrosage, les animaux, la maison : un gardien à proximité peut s'en occuper.</Preview>
       <Body style={main}>
         <Container style={container}>
           <BrandHeader />
@@ -27,10 +27,10 @@ const Email = ({ firstName }: Props) => {
             pensez à confier votre maison, vos plantes ou vos animaux à une personne de confiance.
           </Text>
           <Text style={text}>
-            Sur {SITE_NAME}, publier votre besoin est simple et entièrement gratuit.
+            Sur {SITE_NAME}, publier votre besoin est simple, et Guardiens est gratuit.
             Que ce soit pour arroser les plantes, veiller sur les animaux
             ou simplement garder la maison pendant votre absence,
-            il y a sûrement un gardien près de chez vous.
+            des gardiens à proximité peuvent vous répondre.
           </Text>
           <Section style={ctaSection}>
             <Button style={button} href={`${SITE_URL}/sits/create`}>
@@ -50,7 +50,7 @@ const Email = ({ firstName }: Props) => {
 
 export const template = {
   component: Email,
-  subject: 'Cet été, ne laissez pas votre maison seule',
+  subject: 'Cet été, votre maison reste habitée',
   displayName: 'Rappel été propriétaire, publication annonce',
   previewData: { firstName: 'Marie' },
 } satisfies TemplateEntry

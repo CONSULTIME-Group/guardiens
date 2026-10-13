@@ -30,12 +30,12 @@ const ExchangeHowItWorks = ({
           {
             icon: MessageCircle,
             title: "2. Convenez d'un petit échange",
-            text: "Ni tarif ni facture. Un café, des œufs du jardin, une histoire à partager, un service en retour : vous décidez ensemble.",
+            text: "L'échange se fait en temps et en savoir-faire : un café, des œufs du jardin, une histoire à partager, un service en retour, vous décidez ensemble.",
           },
           {
             icon: Sparkles,
-            title: "3. Rendez-vous, puis laissez un avis",
-            text: "Vous vous rencontrez, vous rendez service, vous vous notez. Chaque échange nourrit votre réputation.",
+            title: "3. Rendez service, puis laissez un avis",
+            text: "Vous convenez du moment, vous rendez service, vous laissez un avis. Chaque échange nourrit votre réputation.",
           },
         ]
       : variant === "owner"
@@ -48,7 +48,7 @@ const ExchangeHowItWorks = ({
           {
             icon: MessageCircle,
             title: "2. Convenez d'un petit échange",
-            text: "Ni tarif ni facture. Un café, des œufs du jardin, une histoire à partager, un service en retour : vous décidez ensemble.",
+            text: "L'échange se fait en temps et en savoir-faire : un café, des œufs du jardin, une histoire à partager, un service en retour, vous décidez ensemble.",
           },
           {
             icon: Sparkles,

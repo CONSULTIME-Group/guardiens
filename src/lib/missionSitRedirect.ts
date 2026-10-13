@@ -5,7 +5,7 @@
 
 export const SIT_REDIRECT_TITLE = "Pour une garde de plusieurs jours, publiez une annonce de garde";
 export const SIT_REDIRECT_TEXT =
-  "Les gardiens de votre secteur la reçoivent, et vous choisissez après les avoir rencontrés.";
+  "Les gardiens à proximité la reçoivent, vous échangez avec eux, et vous choisissez.";
 export const SIT_REDIRECT_PRIMARY = "Publier une annonce de garde";
 export const SIT_REDIRECT_SECONDARY = "Publier quand même un besoin";
 

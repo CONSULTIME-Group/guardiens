@@ -159,12 +159,11 @@ export default function DevenirHomeSitter() {
               4. Combien gagne un home-sitter sur Guardiens ?
             </h2>
             <p>
-              Sur Guardiens, les gardes à domicile reposent sur un échange de
-              services entre particuliers : pas de transaction financière
-              directe via la plateforme. Vous bénéficiez gratuitement du
-              logement et de la confiance des propriétaires ; eux profitent
-              d'une garde sereine pour leurs animaux. Ce modèle attire des
-              gardiens engagés par passion, pas par opportunisme.
+              Sur Guardiens, une garde à domicile est un échange de services
+              entre particuliers : vous êtes logé, vous découvrez une ville de
+              l'intérieur, et les propriétaires vous confient ce qu'ils ont de
+              plus cher ; eux profitent d'une garde sereine pour leurs animaux.
+              Ce modèle attire des gardiens engagés par passion.
             </p>
           </section>
 

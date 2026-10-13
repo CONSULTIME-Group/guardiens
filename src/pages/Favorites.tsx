@@ -20,6 +20,7 @@ import SitterCard from "@/components/favorites/SitterCard";
 import SitCard from "@/components/favorites/SitCard";
 import { useAlmaCulturalFact } from "@/hooks/useAlmaCulturalFact";
 import { useAlmaUsageNudge } from "@/hooks/useAlmaUsageNudge";
+import { readVisiblePets } from "@/lib/visiblePets";
 
 
 
@@ -141,12 +142,9 @@ const Favorites = () => {
               .select("user_id, preferred_sitter_types, home_ambiance, languages, interests, life_pace, presence_expected")
               .in("user_id", ownerIds)
           : Promise.resolve({ data: [] as any[] }),
-        propertyIds.length > 0
-          ? supabase
-              .from("pets")
-              .select("property_id, species, special_needs")
-              .in("property_id", propertyIds)
-          : Promise.resolve({ data: [] as any[] }),
+        // Lot Y2 (P3-10) : animaux par la vue public_pets (pets réservé au
+        // propriétaire et au gardien retenu).
+        readVisiblePets(propertyIds, "property_id, species, special_needs").then((data) => ({ data })),
       ]);
       const ownerBy = new Map((owners || []).map((o: any) => [o.user_id, o]));
       const petsByProp = new Map<string, any[]>();

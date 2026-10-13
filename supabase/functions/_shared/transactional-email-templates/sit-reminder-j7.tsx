@@ -51,7 +51,7 @@ const SitReminderJ7 = ({
     ? `Votre garde ${sitTitle ? `« ${sitTitle} » ` : ''}avec ${counterpartFirstName || 'votre gardien'} commence le ${startDateFr || 'bientôt'}.`
     : `Votre garde ${sitTitle ? `« ${sitTitle} » ` : ''}chez ${counterpartFirstName || 'votre propriétaire'} commence le ${startDateFr || 'bientôt'}.`
   const checklist = isOwner
-    ? 'Pensez à préparer le guide de la maison et à prévoir une rencontre si ce n\'est pas déjà fait.'
+    ? 'Pensez au guide de la maison. Un appel ou une rencontre, si vous le souhaitez, aide à bien préparer l\'arrivée.'
     : 'Pensez à confirmer les derniers détails avec le propriétaire et à relire le guide de la maison.'
   const breedUrl = isOwner ? null : absolute(breedGuidePath)
   const cityUrl = isOwner ? null : absolute(cityGuidePath)

@@ -5,8 +5,8 @@ import path from "node:path";
 /**
  * Garde-fou éditorial (pivot pricing "gratuit sans deadline", 5 juillet 2026).
  *
- * La promesse publique est :
- *   « Guardiens reste gratuit tant que nous ne sommes pas satisfaits du service. »
+ * La promesse publique est (lots X3c et Y3) :
+ *   « Guardiens est gratuit », dit simplement, sans durée.
  *
  * Ce test bloque toute réintroduction d'une date de bascule tarifaire dans
  * les fichiers pivots (Pricing.tsx, MySubscription.tsx, Cgs.tsx, Observatoire,

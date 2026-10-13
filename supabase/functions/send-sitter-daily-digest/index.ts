@@ -293,6 +293,13 @@ Deno.serve(async (req) => {
           sittersSkipped++
           continue
         }
+        // Lot Y1 (P4-04) : un compte passé propriétaire seul ne reçoit plus le
+        // récapitulatif gardien (25 envois à 20 propriétaires en 30 jours).
+        if (profile.role === 'owner') {
+          await markSkipped(supabase, rows.map(r => r.id), 'not_sitter_role', body.dry_run)
+          sittersSkipped++
+          continue
+        }
 
         const { data: prefs } = await supabase
           .from('email_preferences')

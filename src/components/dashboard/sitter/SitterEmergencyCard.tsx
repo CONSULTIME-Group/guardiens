@@ -211,7 +211,7 @@ const SitterEmergencyCard = ({ hasEmergencyProfile }: SitterEmergencyCardProps) 
               <p>Alertes SMS : <span className="font-medium text-foreground">{effectiveProfile.sms_alerts ? "activées" : "désactivées"}</span></p>
               {(effectiveProfile as any).interventions_count > 0 && (
                 <p className="text-amber-700 font-medium pt-1">
-                  {(effectiveProfile as any).interventions_count} intervention{(effectiveProfile as any).interventions_count > 1 ? "s" : ""}, {(effectiveProfile as any).interventions_count} mois offert{(effectiveProfile as any).interventions_count > 1 ? "s" : ""}
+                  {(effectiveProfile as any).interventions_count} intervention{(effectiveProfile as any).interventions_count > 1 ? "s" : ""} d'urgence
                 </p>
               )}
             </div>
