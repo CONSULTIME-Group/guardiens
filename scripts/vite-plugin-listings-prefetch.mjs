@@ -44,7 +44,7 @@ export const LISTINGS_PREFETCH_SPEC = {
 
 const SECOND_WAVE = ["owners", "gallery", "pets", "reviews", "badges", "ownerProfs"];
 
-export function listingsPrefetchScript(supabaseUrl, anonKey) {
+export function listingsPrefetchScript(supabaseUrl, anonKey, bootSrc = null) {
   if (!supabaseUrl || !anonKey) return "";
   const spec = LISTINGS_PREFETCH_SPEC;
   const page = `&offset=0&limit=${PREFETCH_PAGE}`;
@@ -59,6 +59,7 @@ export function listingsPrefetchScript(supabaseUrl, anonKey) {
     m: PREFETCH_MAX_IDS,
     n: PREFETCH_PAGE,
     pg: page,
+    b: bootSrc,
   };
   // ES5, tout en try/catch : un navigateur sans fetch ou sans stockage ne lance rien.
   return `<script data-listings-prefetch>(function(){try{
@@ -78,19 +79,74 @@ return Promise.all(C.s.map(function(w){var l=ids[w[4]];if(!l.length)return [];re
 var out={open:r[0],closed:r[1]};for(var j=0;j<C.s.length;j++)out[C.s[j][0]]=x[j];return out;});
 })["catch"](function(){return null;});
 window.${PREFETCH_GLOBAL}={at:Date.now(),p:p};
+if(C.b){var b=document.createElement("script");b.src=C.b;b.async=true;b.fetchPriority="high";document.head.appendChild(b);}
 }catch(e){}})();</script>`;
+}
+
+/** Textes du haut de /annonces, tirés du dictionnaire (mêmes clés que PublicListings). */
+export function bootTexts(dict) {
+  const p = dict.public_listings, s = dict.search_results;
+  return {
+    h1: p.h1,
+    subtitle: p.subtitle_short,
+    eyebrow: p.eyebrow,
+    eyebrowStatsOne: p.eyebrow_stats_one,
+    eyebrowStatsOther: p.eyebrow_stats_other,
+    citiesOne: p.cities_count_one,
+    citiesOther: p.cities_count_other,
+    allFrance: p.all_france,
+    seeAlsoMissions: p.see_also_missions,
+    localGuides: p.local_guides,
+    pricing: p.pricing,
+    intlOne: p.intl_count_one,
+    intlOther: p.intl_count_other,
+    groupAvailable: s.group_available,
+  };
+}
+
+/**
+ * Lot perf 4 : premier affichage de /annonces (src/boot/bootListingsEntry.ts)
+ * empaqueté seul, fichier haché sous assets/, chargé par le script en ligne.
+ */
+export async function buildBootListings(root) {
+  const { build } = await import("esbuild");
+  const { readFileSync } = await import("node:fs");
+  const { createHash } = await import("node:crypto");
+  const path = await import("node:path");
+  const dict = JSON.parse(readFileSync(path.join(root, "src/i18n/locales/fr/common.json"), "utf8"));
+  const out = await build({
+    entryPoints: [path.join(root, "src/boot/bootListingsEntry.ts")],
+    bundle: true,
+    write: false,
+    minify: true,
+    format: "iife",
+    target: ["es2019"],
+    platform: "browser",
+    tsconfig: path.join(root, "tsconfig.app.json"),
+    define: { __BOOT_TEXTS__: JSON.stringify(bootTexts(dict)) },
+    legalComments: "none",
+  });
+  const code = out.outputFiles[0].text;
+  const hash = createHash("sha256").update(code).digest("hex").slice(0, 10);
+  return { code, fileName: `assets/boot-listings-${hash}.js` };
 }
 
 export function listingsPrefetchPlugin() {
   let env = {};
+  let root = process.cwd();
+  let boot = null;
   return {
     name: "perf3-listings-prefetch",
     apply: "build",
-    configResolved(cfg) { env = cfg.env || {}; },
+    configResolved(cfg) { env = cfg.env || {}; root = cfg.root || root; },
+    async buildStart() {
+      boot = await buildBootListings(root);
+      this.emitFile({ type: "asset", fileName: boot.fileName, source: boot.code });
+    },
     transformIndexHtml: {
       order: "post",
       handler(html) {
-        const script = listingsPrefetchScript(env.VITE_SUPABASE_URL, env.VITE_SUPABASE_PUBLISHABLE_KEY);
+        const script = listingsPrefetchScript(env.VITE_SUPABASE_URL, env.VITE_SUPABASE_PUBLISHABLE_KEY, boot ? `/${boot.fileName}` : null);
         if (!script) return html;
         const at = html.indexOf('<script type="module"');
         if (at === -1) throw new Error("[perf3-listings-prefetch] script d'entrée introuvable");

@@ -70,7 +70,7 @@ import { Search, MapPin, Lock, Sparkles, Globe2, X, AlertCircle, RefreshCw } fro
 import { format, differenceInDays, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
-import { takeListingsPrefetch } from "@/lib/listingsPrefetch";
+import { endBootListings, takeListingsPrefetch } from "@/lib/listingsPrefetch";
 import { fetchIntlOpenSits, intlCountryCounts, carryOverParams, DEST_WORLD, DEST_ABROAD } from "@/lib/intlSitSearch";
 import DestinationCountrySelect from "@/components/search/DestinationCountrySelect";
 import { profilePlacePoint } from "@/lib/sitPlacePoint";
@@ -651,6 +651,8 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  // les visiteurs, navigation interne comprise (src/lib/perfMarks.ts).
  useEffect(() => {
    if (!firstSearchSettled || loading) return;
+   // Lot perf 4 : la vraie liste est là, le premier affichage du HTML s'efface.
+   endBootListings();
    // Réponse sans carte à mesurer : la vue ne compte pas comme un abandon.
    if (searchError) { skipMilestones("error"); return; }
    if (tab !== "sits") { skipMilestones("other_tab"); return; }

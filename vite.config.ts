@@ -51,8 +51,11 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     mode === "production" && routeHashesPlugin(),
     memberPreloadPlugin(),
-    routePreloadPlugin(),
+    // Ordre voulu : chaque greffon s'insère juste avant le script d'entrée,
+    // dans l'ordre de cette liste. Les lectures et le premier affichage de
+    // /annonces partent avant les préchargements en priorité basse.
     listingsPrefetchPlugin(),
+    routePreloadPlugin(),
     mode === "production" && entryBudgetPlugin(),
   ].filter(Boolean) as Plugin[],
   resolve: {

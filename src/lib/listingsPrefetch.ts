@@ -45,3 +45,31 @@ export async function takeListingsPrefetch(eligible: boolean): Promise<ListingsP
     return null;
   }
 }
+
+/**
+ * Lot perf 4 : retire le premier affichage de /annonces posé avant le code
+ * (src/boot/bootListingsEntry.ts). Sans effet s'il n'existe pas.
+ */
+export function endBootListings(): void {
+  if (typeof window === "undefined") return;
+  try { (window as any).__guardiensBootListingsDone?.(); } catch { /* accessoire */ }
+}
+
+/** Compteurs du haut de /annonces calculés par le premier affichage (lot perf 4). */
+export interface BootListingsCounts { openCount: number; citiesCount: number; intlCount: number }
+
+/**
+ * Lot perf 4 : compteurs posés par le premier affichage, repris par
+ * PublicListings pour que la vraie page s'ouvre avec les mêmes lignes (aucun
+ * saut au relais). null si absents ou anciens.
+ */
+export function takeBootListingsCounts(): BootListingsCounts | null {
+  if (typeof window === "undefined") return null;
+  const w = window as any;
+  // Laissés en place (double rendu du mode strict, retour sur la page) : les
+  // lectures de PublicListings les remplacent de toute façon.
+  const c = w.__GUARDIENS_LISTINGS_COUNTS__;
+  if (!c || typeof c.at !== "number" || Date.now() - c.at > PREFETCH_MAX_AGE_MS) return null;
+  const ok = ["openCount", "citiesCount", "intlCount"].every((k) => Number.isInteger(c[k]) && c[k] >= 0);
+  return ok ? { openCount: c.openCount, citiesCount: c.citiesCount, intlCount: c.intlCount } : null;
+}
