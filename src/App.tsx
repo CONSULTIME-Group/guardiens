@@ -194,6 +194,7 @@ const AdminBreeds = lazy(() => import("./pages/admin/AdminBreeds"), "AdminBreeds
 const AdminLongTailArticles = lazy(() => import("./pages/admin/AdminLongTailArticles"), "AdminLongTailArticles");
 const Parrainage = lazy(() => import("./pages/Parrainage"), "Parrainage");
 const DevenirHomeSitter = lazy(() => import("./pages/DevenirHomeSitter"), "DevenirHomeSitter");
+const GardiennageQuebec = lazy(() => import("./pages/GardiennageQuebec"), "GardiennageQuebec");
 const AlmaTips = lazy(() => import("./pages/AlmaTips"), "AlmaTips");
 const AlmaEvolution = lazy(() => import("./pages/AlmaEvolution"), "AlmaEvolution");
 
@@ -522,6 +523,7 @@ const AppRoutes = () => {
       <Route path="/guides/:slug" element={<PublicShellRoute><GuideDetail /></PublicShellRoute>} />
       <Route path="/guide" element={<Navigate to="/guides" replace />} />
       <Route path="/guide/:slug" element={<NavigateGuideSlug />} />
+      <Route path="/gardiennage-maison-quebec" element={<PublicShellRoute><GardiennageQuebec /></PublicShellRoute>} />
       <Route path="/house-sitting" element={<PublicShellRoute><HouseSittingHub /></PublicShellRoute>} />
       <Route path="/house-sitting/:slug" element={<PublicShellRoute><CityPage /></PublicShellRoute>} />
       <Route path="/races" element={<PublicShellRoute><BreedsListing /></PublicShellRoute>} />

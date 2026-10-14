@@ -103,6 +103,9 @@ const HouseSittingHub = () => {
             <Link to="/devenir-home-sitter" className="text-primary hover:underline">
               Devenir home-sitter
             </Link>
+            <Link to="/gardiennage-maison-quebec" className="text-primary hover:underline">
+              Gardiennage de maison au Québec
+            </Link>
           </div>
         </section>
 

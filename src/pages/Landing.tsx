@@ -61,7 +61,9 @@ const Landing = () => {
   const [homeOrigin, setHomeOrigin] = useState<HomeOrigin | null>(null);
   const [profileOrigin, setProfileOrigin] = useState<HomeOrigin | null>(null);
 
-  // Membre connecté : la ville du profil sert d'origine tant qu'aucune ville n'est saisie.
+  // Membre connecté : la ville du profil sert à afficher la distance des
+  // annonces, sans changer l'ordre de la vitrine nationale. Seule une ville
+  // saisie trie par proximité.
   useEffect(() => {
     if (!user?.id) { setProfileOrigin(null); return; }
     let active = true;
@@ -298,7 +300,7 @@ const Landing = () => {
 
       {/* ═══════════════ ANNONCES DISPONIBLES (preuve vivante, remontée en
           troisième position le 06/09/2026, agrandie à six annonces) ═══════════════ */}
-       <LiveListingsStrip origin={homeOrigin ?? profileOrigin} />
+       <LiveListingsStrip origin={homeOrigin} profileOrigin={profileOrigin} />
 
       {/* ═══════════════ SOMMAIRE DE PAGE, maillage interne ═══════════════ */}
       <LandingTocBar />
