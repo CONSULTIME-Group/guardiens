@@ -108,7 +108,7 @@ describe("A3, chemins d'Alma vers les formulaires de publication", () => {
 });
 
 describe("A3, entonnoir admin : membres connectés seulement", () => {
-  const sql = read("supabase/prepared-migrations/20261014180000_a3_alma_mesure.sql");
+  const sql = read("supabase/prepared-migrations/20261014180100_a3_alma_mesure.sql");
 
   it("la fonction exclut user_id nul et les comptes administrateurs, partout", () => {
     expect(sql).toContain("CREATE OR REPLACE FUNCTION public.admin_a3_alma_funnel_counts(p_since timestamptz)");

@@ -292,7 +292,7 @@ describe("A7, moments célébrés", () => {
 
 describe("A7, câblage", () => {
   it("migration : une fonction pour soi, réservée aux membres connectés", () => {
-    const sql = read("supabase/prepared-migrations/20261014180000_a7_alma_lien.sql");
+    const sql = read("supabase/prepared-migrations/20261014180200_a7_alma_lien.sql");
     expect(sql).toContain("CREATE OR REPLACE FUNCTION public.my_alma_bond_signals()");
     expect(sql).toContain("v_uid uuid := auth.uid()");
     expect(sql).toContain("REVOKE ALL ON FUNCTION public.my_alma_bond_signals() FROM anon;");
