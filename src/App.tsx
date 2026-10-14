@@ -54,6 +54,9 @@ const PwaInstallTracking = lazy(
   "PwaInstallTracking",
 );
 const DuplicateAccountGuard = lazy(() => import("@/components/auth/DuplicateAccountGuard"), "DuplicateAccountGuard");
+// Lot J2b : réacceptation des textes (CGU 15.4). Avant la date d'effet, ni
+// fichier chargé ni appel réseau : seul le calendrier local est lu.
+import LegalReacceptMount from "@/components/legal/LegalReacceptMount";
 // Bandeau de diagnostic : outil de l'aperçu de développement, absent du build
 // de production (la condition est éliminée à la compilation).
 const PreviewDiagnosticBanner = import.meta.env.DEV
@@ -713,6 +716,7 @@ const App = () => (
                 <Suspense fallback={null}>
                   <DuplicateAccountGuard />
                 </Suspense>
+                <LegalReacceptMount />
               </MemberOnly>
               <ChromeVisibilityProvider>
                 <AppRoutes />
