@@ -51,7 +51,7 @@ interface ExtractedLink {
 
 /** Lot A3 : nature du lien suivi depuis la conversation. */
 export interface AlmaLinkClick {
-  kind: "action" | "chip" | "inline_link" | "source" | "journal";
+  kind: "action" | "chip" | "inline_link" | "source" | "journal" | "carnet";
   /** Motif calculé par le moteur (action principale) ou règle du journal. */
   reason?: string;
 }
@@ -423,7 +423,7 @@ export function AlmaConversation({
                 <button
                   type="button"
                   data-testid="alma-bond-line"
-                  onClick={() => followLink("/alma#carnet")}
+                  onClick={() => followLink("/alma#carnet", { kind: "carnet" })}
                   aria-label={`${bondLine}. Ouvrir notre carnet`}
                   className="mt-1 text-left text-[11.5px] font-semibold text-terra underline-offset-2 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
