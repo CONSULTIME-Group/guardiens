@@ -184,7 +184,6 @@ const SearchListingCard = ({
               alt=""
               className={`w-full h-full object-cover transition-transform duration-[900ms] ease-out ${isClickable ? "group-hover:scale-[1.03]" : ""}`}
               loading="lazy"
-              onLoad={listIndex === 0 ? () => markMilestone("FIRST_CARD_PHOTO") : undefined}
             />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center text-muted-foreground/40">
@@ -348,6 +347,7 @@ const SearchListingCard = ({
             alt=""
             className={`w-full h-full object-cover transition-transform duration-[900ms] ease-out ${isClickable ? "group-hover:scale-[1.03]" : ""}`}
             loading="lazy"
+            onLoad={listIndex === 0 && !isDemo ? () => markMilestone("FIRST_CARD_PHOTO") : undefined}
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-muted-foreground/40">

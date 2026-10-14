@@ -4,9 +4,9 @@
  */
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
-import { __resetPerfMarks, currentPerfView, markMilestone, markNavigation, subscribePerfMarks } from "@/lib/perfMarks";
+import { __resetPerfMarks, currentPerfView, markMilestone, markNavigation, skipMilestones, subscribePerfMarks } from "@/lib/perfMarks";
 import { createMilestoneReporter, milestoneRating, milestoneTemplate, normalizeVitalPath, exactVitalPath, shouldReportVitals } from "@/lib/webVitals";
-import { isPerfLabSession } from "@/lib/labTraffic";
+import { isBotAgent, isPerfLabSession } from "@/lib/labTraffic";
 
 const base = { host: "guardiens.fr", device: "mobile", auth: "visitor", connection: "4g", build: "b" };
 
@@ -14,7 +14,7 @@ function wire() {
   const send = vi.fn();
   let n = 0;
   const reporter = createMilestoneReporter({ sampled: true, base, send, hardPv: "hard", newPv: () => `soft${++n}` });
-  subscribePerfMarks({ onMilestone: (m) => reporter.onMilestone(m), onViewEnd: (v, at) => reporter.onViewEnd(v, at) });
+  subscribePerfMarks({ onMilestone: (m) => reporter.onMilestone(m), onViewEnd: (v, at) => reporter.onViewEnd(v, at), onSkip: (v, r) => reporter.onSkip(v, r) });
   return { send, reporter };
 }
 
@@ -28,11 +28,14 @@ describe("gabarits de chemin", () => {
     expect(normalizeVitalPath("/petites-missions/creer")).toBe("/petites-missions/creer");
     expect(normalizeVitalPath("/annonces/12345?x=1")).toBe("/annonces/:id");
     expect(exactVitalPath("/annonces/gardien-a-rodilhan?x=1")).toBe("/annonces/gardien-a-rodilhan");
+    expect(exactVitalPath("/annonce-noel/abcDEF123secret")).toBe("/annonce-noel/:token");
+    expect(exactVitalPath("/ma-ligne/xyz")).toBe("/ma-ligne/:token");
   });
 
   it("listes et fiches suivies par les jalons", () => {
     expect(milestoneTemplate("/annonces")).toBe("list");
-    expect(milestoneTemplate("/search")).toBe("list");
+    expect(milestoneTemplate("/search")).toBeNull();
+    expect(milestoneTemplate("/sits/create")).toBeNull();
     expect(milestoneTemplate("/annonces/une-fiche")).toBe("fiche");
     expect(milestoneTemplate("/sits/abc")).toBe("fiche");
     expect(milestoneTemplate("/annonces/international")).toBeNull();
@@ -73,12 +76,29 @@ describe("jalons d'une liste d'annonces", () => {
     expect(row).toMatchObject({ path: "/annonces", nav: "hard", abandoned: true, metrics: { FIRST_CARD: { value: 9000, rating: "abandoned" } } });
   });
 
-  it("page masquée sans jalon : abandon de la vue courante", () => {
+  it("page masquée pendant le chargement : la vue attend, la vraie valeur part au retour", () => {
     const { send, reporter } = wire();
-    reporter.flushCurrent(4000, currentPerfView());
+    reporter.flushCurrent(4000, currentPerfView(), false);
+    expect(send).not.toHaveBeenCalled();
+    markMilestone("FIRST_CARD", undefined, 9000);
+    reporter.flushCurrent(9500, currentPerfView(), false);
+    expect(send.mock.calls[0][0]).toMatchObject({ metrics: { FIRST_CARD: { value: 9000, rating: "poor" } } });
+    expect(send.mock.calls[0][0].abandoned).toBeUndefined();
+  });
+
+  it("page quittée sans jalon : abandon de la vue courante, une seule fois", () => {
+    const { send, reporter } = wire();
+    reporter.flushCurrent(4000, currentPerfView(), true);
     expect(send.mock.calls[0][0]).toMatchObject({ abandoned: true, metrics: { FIRST_CARD: { value: 4000 } } });
-    reporter.flushCurrent(5000, currentPerfView());
+    reporter.flushCurrent(5000, currentPerfView(), true);
     expect(send).toHaveBeenCalledTimes(1);
+  });
+
+  it("liste vide ou erreur : la vue ne compte pas comme un abandon", () => {
+    const { send } = wire();
+    skipMilestones("empty");
+    markNavigation("/", 5000);
+    expect(send).not.toHaveBeenCalled();
   });
 
   it("une page hors gabarit sans jalon n'envoie rien", () => {
@@ -105,7 +125,28 @@ describe("jalons d'une liste d'annonces", () => {
   });
 });
 
+describe("redirection", () => {
+  it("un remplacement d'adresse (identifiant vers slug) prolonge la vue", () => {
+    __resetPerfMarks("/annonces/0b0c");
+    const { send } = wire();
+    window.history.replaceState(null, "", "/annonces/le-slug");
+    markNavigation("/annonces/le-slug");
+    expect(currentPerfView()).toMatchObject({ seq: 0, nav: "hard", path: "/annonces/le-slug", start: 0 });
+    markMilestone("SIT_HERO", undefined, 2800);
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(send.mock.calls[0][0]).toMatchObject({ nav: "hard", path_full: "/annonces/le-slug", metrics: { SIT_HERO: { value: 2800 } } });
+    window.history.replaceState(null, "", "/");
+  });
+});
+
 describe("robots et laboratoire exclus", () => {
+  it("robots reconnus, téléphone Cubot compté comme visiteur", () => {
+    expect(isBotAgent("Mozilla/5.0 (compatible; Googlebot/2.1)")).toBe(true);
+    expect(isBotAgent("facebookexternalhit/1.1")).toBe(true);
+    expect(isBotAgent("Mozilla/5.0 (Linux; Android 12; CUBOT X50) AppleWebKit/537.36 Mobile Safari/537.36")).toBe(false);
+    expect(isBotAgent("Mozilla/5.0 (iPhone; CPU iPhone OS 17_0) Mobile/15E148 [FBAN/FBIOS]")).toBe(false);
+  });
+
   it("?perf_lab=1 marque toute la session de l'onglet", () => {
     expect(isPerfLabSession("")).toBe(false);
     expect(isPerfLabSession("?perf_lab=1")).toBe(true);

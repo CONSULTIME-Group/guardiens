@@ -174,7 +174,9 @@ export function communeDeptFromCoords(lat: number, lng: number): Promise<string 
   const p = (async () => {
     await acquireCommuneSlot();
     try {
-      const r = await fetch(`https://geo.api.gouv.fr/communes?lat=${lat}&lon=${lng}&fields=codeDepartement&format=json`);
+      const r = await fetch(`https://geo.api.gouv.fr/communes?lat=${lat}&lon=${lng}&fields=codeDepartement&format=json`, {
+        signal: typeof AbortSignal !== "undefined" && "timeout" in AbortSignal ? AbortSignal.timeout(5000) : undefined,
+      });
       if (!r.ok) return null;
       const data = await r.json();
       const dept = Array.isArray(data) && data[0]?.codeDepartement ? String(data[0].codeDepartement) : null;

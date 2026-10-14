@@ -11,7 +11,8 @@
  * (src/lib/labTraffic.ts).
  *
  * Usage :
- *   node scripts/perf/measure-listings.mjs [--runs 3] [--fast] [--budget budget.json] url...
+ *   node scripts/perf/measure-listings.mjs [--runs 3] [--fast] [--with-first-fiche] [--budget budget.json] url...
+ * --with-first-fiche : mesure aussi la fiche de la première carte de la première liste.
  * Sans url : /annonces et /annonces?ville=Lyon&zone=radius sur guardiens.fr.
  * Sortie : JSON des médianes ; code 1 si une médiane dépasse son budget.
  * Les machines de mesure sont loin de la France : lecture relative seulement.
@@ -36,6 +37,7 @@ const flag = (name) => {
 const runs = Number(opt("--runs", "3"));
 const budgetFile = opt("--budget", null);
 const fast = flag("--fast");
+const withFiche = flag("--with-first-fiche");
 const urls = args.length ? args : [
   "https://guardiens.fr/annonces",
   "https://guardiens.fr/annonces?ville=Lyon&zone=radius",
@@ -70,6 +72,7 @@ async function measure(browser, url) {
       out.content = await page.waitForSelector("main h1", { timeout: 90_000 }).then(() => Date.now() - t0).catch(() => null);
     } else {
       out.content = await page.waitForSelector('[data-testid="search-card-real"]', { timeout: 90_000 }).then(() => Date.now() - t0).catch(() => null);
+      out.firstHref = await page.$eval('[data-testid="search-card-real"]', (el) => el.closest("a")?.getAttribute("href") ?? null).catch(() => null);
       out.photo = await page.waitForFunction(() => {
         const img = document.querySelector('[data-testid="search-card-real"] img');
         return !!img && img.complete && img.naturalWidth > 0;
@@ -81,22 +84,35 @@ async function measure(browser, url) {
   return out;
 }
 
+// Un passage en échec compte comme le plus lent : la médiane ne l'ignore pas.
 const median = (xs) => {
-  const v = xs.filter((x) => typeof x === "number").sort((a, b) => a - b);
-  return v.length ? v[Math.floor((v.length - 1) / 2)] : null;
+  if (!xs.length) return null;
+  const v = xs.map((x) => (typeof x === "number" ? x : Number.POSITIVE_INFINITY)).sort((a, b) => a - b);
+  const m = v[Math.floor((v.length - 1) / 2)];
+  return Number.isFinite(m) ? m : null;
 };
 
 const browser = await chromium.launch(process.env.CHROME ? { executablePath: process.env.CHROME } : {});
 const report = [];
 let failed = false;
 try {
-  for (const url of urls) {
+  const queue = [...urls];
+  let ficheAdded = false;
+  while (queue.length) {
+    const url = queue.shift();
     const samples = [];
     for (let i = 0; i < runs; i++) samples.push(await measure(browser, url));
     const row = { url, runs, content_ms: median(samples.map((s) => s.content)), photo_ms: median(samples.map((s) => s.photo)), samples };
-    const budget = budgets[new URL(url).pathname + new URL(url).search];
+    const u = new URL(url);
+    const key = /^\/(annonces|sits)\/[^/]+$/.test(u.pathname) && !u.pathname.startsWith("/annonces/international") ? "fiche" : u.pathname + u.search;
+    const budget = budgets[key];
     if (budget && (row.content_ms === null || row.content_ms > budget)) { row.over_budget = budget; failed = true; }
     report.push(row);
+    const href = samples.map((x) => x.firstHref).find(Boolean);
+    if (withFiche && !ficheAdded && href) {
+      ficheAdded = true;
+      queue.push(new URL(href, url).toString());
+    }
   }
 } finally {
   await browser.close();

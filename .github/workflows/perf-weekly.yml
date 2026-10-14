@@ -32,7 +32,8 @@ jobs:
 
       - name: Mesurer
         run: |
-          node scripts/perf/measure-listings.mjs --runs 3 --budget scripts/perf/budgets.json \
+          set -o pipefail
+          node scripts/perf/measure-listings.mjs --runs 3 --with-first-fiche --budget scripts/perf/budgets.json \
             "https://guardiens.fr/annonces" \
             "https://guardiens.fr/annonces?ville=Lyon&zone=radius" \
             | tee perf-report.json

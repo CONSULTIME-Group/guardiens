@@ -65,11 +65,22 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
  * (/annonces/international, /petites-missions/creer) gardent leur nom.
  */
 const TEMPLATE_PREFIXES = ["annonces", "sits", "gardiens", "house-sitting", "guides", "actualites", "petites-missions", "projets"];
-const TEMPLATE_KEEP = new Set(["international", "demo", "creer", "nouvelle", "carte"]);
+const TEMPLATE_KEEP = new Set(["international", "demo", "creer", "nouvelle", "carte", "create", "new", "publier"]);
 
-/** Chemin exact sans requête, borné (champ path_full). */
+/** Pages dont le second segment est un jeton personnel, jamais recopié. */
+const TOKEN_PREFIXES = new Set(["annonce-noel", "ma-ligne", "ma-periode", "unsubscribe", "desinscription", "reset-password", "invitation"]);
+
+/** Chemin exact sans requête ni jeton, borné (champ path_full). */
 export function exactVitalPath(pathname: string): string {
-  return ((pathname || "/").split(/[?#]/)[0] || "/").slice(0, 160);
+  const clean = ((pathname || "/").split(/[?#]/)[0] || "/");
+  const segs = clean.split("/");
+  const out = segs.map((seg, i) => {
+    if (!seg) return seg;
+    if (i === 2 && TOKEN_PREFIXES.has(segs[1])) return ":token";
+    if (UUID.test(seg) || /^[0-9a-f]{16,}$/i.test(seg) || /^[A-Za-z0-9_-]{32,}$/.test(seg)) return ":id";
+    return seg;
+  });
+  return out.join("/").slice(0, 160);
 }
 
 /** Chemin sans requête, identifiants (uuid, nombres, jetons, slugs de fiche) remplacés par :id. */
@@ -158,9 +169,11 @@ export function createVitalsCollector(env: CollectorEnv) {
 /** Gabarit suivi par les jalons : liste d'annonces ou fiche d'annonce. */
 export function milestoneTemplate(pathname: string): "list" | "fiche" | null {
   const path = exactVitalPath(pathname).replace(/\/$/, "") || "/";
-  if (path === "/annonces" || path === "/search") return "list";
+  // /search sert aussi la recherche de gardiens (SearchOwner) : jalons envoyés
+  // s'ils existent, jamais d'abandon compté.
+  if (path === "/annonces") return "list";
   const segs = path.split("/");
-  if (segs.length === 3 && segs[1] === "sits" && segs[2]) return "fiche";
+  if (segs.length === 3 && segs[1] === "sits" && segs[2] && !TEMPLATE_KEEP.has(segs[2])) return "fiche";
   if (segs.length === 3 && segs[1] === "annonces" && segs[2] && !TEMPLATE_KEEP.has(segs[2])) return "fiche";
   return null;
 }
@@ -191,30 +204,39 @@ export interface MilestoneReporterEnv {
  * Pure, testée (src/__tests__/perf1/).
  */
 export function createMilestoneReporter(env: MilestoneReporterEnv) {
-  type State = { view: PerfView; pv: string; metrics: Record<string, VitalEntry>; extra: Record<string, unknown>; sent: boolean };
+  type State = { view: PerfView; pv: string; metrics: Record<string, VitalEntry>; extra: Record<string, unknown>; sent: boolean; skip?: string };
   const views = new Map<number, State>();
+  const done = new Set<number>();
   let current: PerfView | null = null;
   const newPv = env.newPv ?? randomPv;
   const stateOf = (view: PerfView): State => {
     let st = views.get(view.seq);
     if (!st) {
-      st = { view, pv: view.seq === 0 ? env.hardPv : newPv(), metrics: {}, extra: {}, sent: false };
+      st = { view, pv: view.seq === 0 ? env.hardPv : newPv(), metrics: {}, extra: {}, sent: done.has(view.seq) };
       views.set(view.seq, st);
     }
+    // Une redirection prolonge la vue sous une nouvelle adresse.
+    if (view.path !== st.view.path) st.view = view;
     if (!current || view.seq >= current.seq) current = view;
     return st;
+  };
+  const close = (st: State) => {
+    st.sent = true;
+    done.add(st.view.seq);
+    views.delete(st.view.seq);
   };
   const flushState = (st: State, endedAt: number | null) => {
     if (st.sent || !env.sampled) return;
     const template = milestoneTemplate(st.view.path);
-    if (!template && Object.keys(st.metrics).length === 0) return;
+    if (!template && Object.keys(st.metrics).length === 0) { if (endedAt !== null) close(st); return; }
+    if (st.skip && Object.keys(st.metrics).length === 0) { if (endedAt !== null) close(st); return; }
     let abandoned = false;
-    if (template && endedAt !== null && !st.metrics[PRIMARY[template]]) {
+    if (template && endedAt !== null && !st.skip && !st.metrics[PRIMARY[template]]) {
       st.metrics[PRIMARY[template]] = { value: Math.max(0, Math.round(endedAt - st.view.start)), rating: "abandoned" };
       abandoned = true;
     }
     if (Object.keys(st.metrics).length === 0) return;
-    st.sent = true;
+    close(st);
     env.send({
       ...env.base,
       ...st.extra,
@@ -239,10 +261,22 @@ export function createMilestoneReporter(env: MilestoneReporterEnv) {
     onViewEnd(view: PerfView, endedAt: number) {
       flushState(stateOf(view), endedAt);
     },
-    /** Page masquée ou quittée : la vue courante part, abandonnée si besoin. */
-    flushCurrent(endedAt: number, view?: PerfView) {
+    onSkip(view: PerfView, reason: string) {
+      const st = stateOf(view);
+      if (!st.sent) st.skip = reason;
+    },
+    /**
+     * Page masquée (final faux) : la vue part seulement si son jalon principal
+     * est là, sinon elle attend (le visiteur peut revenir). Page quittée
+     * (final vrai) : la vue part, abandonnée si besoin.
+     */
+    flushCurrent(endedAt: number, view?: PerfView, final = true) {
       const v = view ?? current;
-      if (v) flushState(stateOf(v), endedAt);
+      if (!v) return;
+      const st = stateOf(v);
+      const template = milestoneTemplate(st.view.path);
+      if (!final && template && !st.metrics[PRIMARY[template]]) return;
+      flushState(st, final ? endedAt : null);
     },
   };
 }
@@ -380,6 +414,7 @@ const reportWebVitals = (onPerfEntry?: (metric: MetricWithAttribution) => void) 
   subscribePerfMarks({
     onMilestone: (m) => milestones.onMilestone(m),
     onViewEnd: (v, at) => milestones.onViewEnd(v, at),
+    onSkip: (v, reason) => milestones.onSkip(v, reason),
   });
 
   // Plus longue tâche des 10 premières secondes (entrées tamponnées depuis le début).
@@ -395,12 +430,12 @@ const reportWebVitals = (onPerfEntry?: (metric: MetricWithAttribution) => void) 
     window.setTimeout(() => po.disconnect(), LONG_TASK_WINDOW_MS);
   } catch { /* longtask non pris en charge (Safari, Firefox) */ }
 
-  const flush = () => {
+  const flush = (final: boolean) => {
     collector.flush();
-    milestones.flushCurrent(performance.now(), currentPerfView());
+    milestones.flushCurrent(performance.now(), currentPerfView(), final);
   };
-  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") flush(); });
-  window.addEventListener("pagehide", flush);
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") flush(false); });
+  window.addEventListener("pagehide", () => flush(true));
 
   const handler = (m: MetricWithAttribution) => {
     collector.record(m.name as VitalName, m.value, m.rating, vitalAttribution(m));
