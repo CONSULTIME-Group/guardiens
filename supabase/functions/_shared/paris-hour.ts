@@ -64,11 +64,11 @@ export const ALERT_DIGEST_TARGET_PARIS_HOURS = [8, 12, 18] as const;
 
 /**
  * Fenêtre du digest quotidien gardien. Le premier passage utile reste 8h à
- * Paris. Les passages de 9h et 10h reprennent seulement la file encore en
- * attente, ce qui couvre les crons 07:05 et 08:05 UTC en été, et le dernier
- * passage 08:05 UTC en hiver.
+ * Paris. Les passages de 9h à 13h reprennent seulement la file encore en
+ * attente (cron « 5 5-12 * * * » UTC, été comme hiver). Le 14/10/2026, 3
+ * passages de 53 envois laissaient 157 gardiens sur 240 sans récapitulatif.
  */
-export const SITTER_DAILY_DIGEST_TARGET_PARIS_HOURS = [8, 9, 10] as const;
+export const SITTER_DAILY_DIGEST_TARGET_PARIS_HOURS = [8, 9, 10, 11, 12, 13] as const;
 
 /**
  * Variante multi-créneaux de parisWindowVerdict : le passage courant est le
