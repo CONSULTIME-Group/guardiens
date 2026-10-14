@@ -14171,6 +14171,15 @@ export type Database = {
         Returns: Json
       }
       retry_missing_geocoding: { Args: never; Returns: Json }
+      review_sit_periods: {
+        Args: { p_review_ids: string[] }
+        Returns: {
+          review_id: string
+          sit_end_date: string
+          sit_id: string
+          sit_start_date: string
+        }[]
+      }
       school_zone_from_postal_code: { Args: { p_cp: string }; Returns: string }
       search_alma_knowledge: {
         Args: { p_limit?: number; p_query: string }

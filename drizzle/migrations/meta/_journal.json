@@ -610,6 +610,13 @@
       "when": 1791974211408,
       "tag": "0086_j2b_versions_legales",
       "breakpoints": true
+    },
+    {
+      "idx": 87,
+      "version": "7",
+      "when": 1791974227160,
+      "tag": "0087_j2d_periodes_avis",
+      "breakpoints": true
     }
   ]
 }
