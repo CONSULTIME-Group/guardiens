@@ -120,7 +120,90 @@ const PublicSitDetail = () => {
         const id = sitData.id;
 
 
-        const [ownerRes, propRes, reviewsRes, badgeRes, galleryRes] = await Promise.all([
+        // Lot perf 2 : toutes les lectures de la fiche partent ensemble, dès
+        // l'annonce connue (elles ne dépendent que d'elle et du membre). Six
+        // salves en série auparavant : la fiche attendait 3,6 s sans ralenti.
+        const propertyId = sitData.property_id ?? null;
+        const ownerProfileLoad = async (): Promise<any> => {
+          if (!propertyId) return null;
+          try {
+            if (!user) {
+              // Visiteur : seule la vue publique lui est ouverte.
+              const { data: publicRow } = await supabase
+                .from("public_owner_profiles" as any)
+                .select("presence_expected, welcome_notes, environments, preferred_sitter_types, home_ambiance, languages, interests, life_pace")
+                .eq("user_id", sitData.user_id)
+                .maybeSingle();
+              return (publicRow as any) || null;
+            }
+            const { data: opRow } = await supabase
+              .from("owner_profiles")
+              .select("presence_expected, visits_allowed, overnight_guest, space_usage, smoker_accepted, rules_notes, meeting_preference, handover_preference, welcome_notes, news_frequency, news_format, communication_notes, competences, competences_disponible, specific_expectations, experience_required, environments, preferred_sitter_types, home_ambiance, languages, interests, life_pace")
+              .eq("user_id", sitData.user_id)
+              .maybeSingle();
+            // SEC1 : owner_profiles complet pour le propriétaire, l'admin et le
+            // gardien en discussion ou accepté. Les autres membres lisent la vue
+            // membre (sans foyer ni habitudes de contact), les visiteurs la vue publique.
+            const { data: memberRow } = opRow
+              ? { data: null }
+              : await supabase
+                  .from("member_owner_profiles" as any)
+                  .select("presence_expected, visits_allowed, overnight_guest, space_usage, smoker_accepted, rules_notes, meeting_preference, handover_preference, welcome_notes, news_frequency, news_format, environments, preferred_sitter_types, home_ambiance, languages, interests, life_pace")
+                  .eq("user_id", sitData.user_id)
+                  .maybeSingle();
+            if (opRow || memberRow) return opRow || memberRow;
+            const { data: publicRow } = await supabase
+              .from("public_owner_profiles" as any)
+              .select("presence_expected, welcome_notes, environments, preferred_sitter_types, home_ambiance, languages, interests, life_pace")
+              .eq("user_id", sitData.user_id)
+              .maybeSingle();
+            return (publicRow as any) || null;
+          } catch (e) { logger.warn("[PublicSitDetail] owner_profile load failed", { error: (e as any)?.message }); return null; }
+        };
+        const petsLoad = async (): Promise<any[] | null> => {
+          if (!propertyId) return null;
+          try {
+            const { data: petsData } = await supabase.from("public_pets" as any).select("*").eq("property_id", propertyId);
+            return (petsData as any[]) || [];
+          } catch (e) { logger.warn("[PublicSitDetail] pets load failed", { error: (e as any)?.message }); return null; }
+        };
+        const houseGuideLoad = async (): Promise<boolean | null> => {
+          if (!propertyId) return null;
+          try {
+            const { data: hgRow } = await supabase
+              .from("house_guides")
+              .select("id")
+              .eq("property_id", propertyId)
+              .maybeSingle();
+            return !!hgRow;
+          } catch (e) { logger.warn("[PublicSitDetail] house_guide load failed", { error: (e as any)?.message }); return null; }
+        };
+        const applicationLoad = async (): Promise<{ applied: boolean; accepted: boolean }> => {
+          if (!user) return { applied: false, accepted: false };
+          try {
+            const { data: appRows } = await supabase.from("applications").select("id, status").eq("sit_id", id!).eq("sitter_id", user.id).limit(1);
+            return { applied: !!appRows?.[0], accepted: appRows?.[0]?.status === "accepted" };
+          } catch (e) { logger.warn("[PublicSitDetail] applications check failed", { error: (e as any)?.message }); return { applied: false, accepted: false }; }
+        };
+        // Lot Y1 : « Candidatures complètes » se calcule à l'écran à partir
+        // du nombre de candidatures vivantes et du plafond (membre connecté,
+        // la fonction de décompte est fermée aux visiteurs anonymes).
+        const appCountLoad = async (): Promise<number | null> => {
+          if (!user || !(sitData.max_applications && sitData.status === "published" && sitData.accepting_applications !== false)) return null;
+          try {
+            const { data: countRows } = await supabase.rpc("get_sit_application_counts", { p_sit_id: sitData.id });
+            return (countRows as any)?.[0]?.app_count ?? 0;
+          } catch (e) { logger.warn("[PublicSitDetail] application counts failed", { error: (e as any)?.message }); return null; }
+        };
+        const adminLoad = async (): Promise<boolean> => {
+          if (!user || sitData.user_id === user.id) return false;
+          try {
+            const { data: roleRows } = await supabase.from("user_roles").select("role").eq("user_id", user.id).eq("role", "admin").limit(1);
+            return !!roleRows?.[0];
+          } catch { return false; }
+        };
+
+        const [ownerRes, propRes, reviewsRes, badgeRes, galleryRes, petsData, ownerProfileRow, hasGuide, appState, liveCount, isAdmin] = await Promise.all([
           supabase.from("public_profiles").select("id, first_name, city, postal_code, avatar_url, identity_verified, bio, completed_sits_count, is_founder").eq("id", sitData.user_id).limit(1),
           supabase.from("properties").select("*").eq("id", sitData.property_id).limit(1),
           // Lot J2d (CGU 9.7) : fonction publique, ouverte aux visiteurs, qui
@@ -128,6 +211,12 @@ const PublicSitDetail = () => {
           supabase.rpc("public_profile_reviews", { p_user_id: sitData.user_id }),
           supabase.from("public_badge_attributions").select("badge_id").eq("user_id", sitData.user_id),
           supabase.from("owner_gallery").select("photo_url, position, width, height").eq("user_id", sitData.user_id).order("position", { ascending: true }),
+          petsLoad(),
+          ownerProfileLoad(),
+          houseGuideLoad(),
+          applicationLoad(),
+          appCountLoad(),
+          adminLoad(),
         ]);
 
         if (!active) return;
@@ -197,77 +286,20 @@ const PublicSitDetail = () => {
         commit(() => setBadges(Array.from(badgeMap.entries()).map(([badge_key, count]) => ({ badge_key, count })).sort((a, b) => b.count - a.count)));
 
         if (propertyData) {
-          try {
-            const { data: petsData } = await supabase.from("public_pets" as any).select("*").eq("property_id", propertyData.id);
-            commit(() => setPets(petsData || []));
-          } catch (e) { logger.warn("[PublicSitDetail] pets load failed", { error: (e as any)?.message }); }
-          try {
-            const { data: opRow } = await supabase
-              .from("owner_profiles")
-              .select("presence_expected, visits_allowed, overnight_guest, space_usage, smoker_accepted, rules_notes, meeting_preference, handover_preference, welcome_notes, news_frequency, news_format, communication_notes, competences, competences_disponible, specific_expectations, experience_required, environments, preferred_sitter_types, home_ambiance, languages, interests, life_pace")
-              .eq("user_id", sitData.user_id)
-              .maybeSingle();
-            // SEC1 : owner_profiles complet pour le propriétaire, l'admin et le
-            // gardien en discussion ou accepté. Les autres membres lisent la vue
-            // membre (sans foyer ni habitudes de contact), les visiteurs la vue publique.
-            const { data: memberRow } = opRow
-              ? { data: null }
-              : await supabase
-                  .from("member_owner_profiles" as any)
-                  .select("presence_expected, visits_allowed, overnight_guest, space_usage, smoker_accepted, rules_notes, meeting_preference, handover_preference, welcome_notes, news_frequency, news_format, environments, preferred_sitter_types, home_ambiance, languages, interests, life_pace")
-                  .eq("user_id", sitData.user_id)
-                  .maybeSingle();
-            if (opRow || memberRow) {
-              commit(() => setOwnerProfile(opRow || memberRow));
-            } else {
-              const { data: publicRow } = await supabase
-                .from("public_owner_profiles" as any)
-                .select("presence_expected, welcome_notes, environments, preferred_sitter_types, home_ambiance, languages, interests, life_pace")
-                .eq("user_id", sitData.user_id)
-                .maybeSingle();
-              commit(() => setOwnerProfile((publicRow as any) || null));
-            }
-          } catch (e) { logger.warn("[PublicSitDetail] owner_profile load failed", { error: (e as any)?.message }); }
-
-          try {
-            const { data: hgRow } = await supabase
-              .from("house_guides")
-              .select("id")
-              .eq("property_id", propertyData.id)
-              .maybeSingle();
-            commit(() => setHasHouseGuide(!!hgRow));
-          } catch (e) { logger.warn("[PublicSitDetail] house_guide load failed", { error: (e as any)?.message }); }
+          if (petsData) commit(() => setPets(petsData));
+          commit(() => setOwnerProfile(ownerProfileRow));
+          if (hasGuide !== null) commit(() => setHasHouseGuide(hasGuide));
         }
 
-        if (user) {
-          try {
-            const { data: appRows } = await supabase.from("applications").select("id, status").eq("sit_id", id!).eq("sitter_id", user.id).limit(1);
-            if (appRows?.[0]) commit(() => setHasApplied(true));
-            if (appRows?.[0]?.status === "accepted") commit(() => setIsAcceptedSitter(true));
-          } catch (e) { logger.warn("[PublicSitDetail] applications check failed", { error: (e as any)?.message }); }
-          // Lot Y1 : « Candidatures complètes » se calcule à l'écran à partir
-          // du nombre de candidatures vivantes et du plafond (membre connecté,
-          // la fonction de décompte est fermée aux visiteurs anonymes).
-          if (sitData.max_applications && sitData.status === "published" && sitData.accepting_applications !== false) {
-            try {
-              const { data: countRows } = await supabase.rpc("get_sit_application_counts", { p_sit_id: sitData.id });
-              const live = (countRows as any)?.[0]?.app_count ?? 0;
-              commit(() => setLiveAppCount(live));
-            } catch (e) { logger.warn("[PublicSitDetail] application counts failed", { error: (e as any)?.message }); }
-          }
-        }
-
+        if (appState.applied) commit(() => setHasApplied(true));
+        if (appState.accepted) commit(() => setIsAcceptedSitter(true));
+        if (liveCount !== null) commit(() => setLiveAppCount(liveCount));
 
         let resolvedViewer: ViewerType = "anonymous";
         if (user) {
           if (sitData.user_id === user.id) {
             resolvedViewer = "owner_of_sit";
           } else {
-            let isAdmin = false;
-            try {
-              const { data: roleRows } = await supabase.from("user_roles").select("role").eq("user_id", user.id).eq("role", "admin").limit(1);
-              isAdmin = !!roleRows?.[0];
-            } catch { isAdmin = false; }
             if (isAdmin) {
               resolvedViewer = "admin";
             } else {

@@ -4,8 +4,9 @@
  * des annonces, sur un téléphone simulé (390 x 844, 150 ms d'aller-retour,
  * 1,6 Mbit/s, processeur divisé par 4).
  *
- * Mesure, pour chaque adresse, la première vraie carte d'annonce
- * ([data-testid="search-card-real"]), la photo de la première carte, ou le
+ * Mesure, pour chaque adresse, la première carte vue (visible_ms : premier
+ * affichage du HTML, lot perf 4, ou vraie carte), la première vraie carte
+ * d'annonce ([data-testid="search-card-real"]), la photo de la première carte, ou le
  * titre d'une fiche (#root h1, la fiche publique n'a pas de <main>). Chaque adresse porte ?perf_lab=1 : la visite
  * n'entre ni dans la mesure d'audience ni dans la mesure de vitesse
  * (src/lib/labTraffic.ts).
@@ -56,6 +57,18 @@ async function measure(browser, url) {
     isMobile: true,
     userAgent: "Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Mobile Safari/537.36 GuardiensPerfProbe",
   });
+  // Moment d'apparition relevé dans la page (MutationObserver) : la
+  // scrutation de Playwright retarde sa détection quand le fil principal est
+  // occupé par le code de la page.
+  await ctx.addInitScript(() => {
+    const seen = (window.__probeSeen = {});
+    const look = () => {
+      const t = performance.now();
+      if (seen.boot === undefined && document.querySelector('[data-testid="search-card-boot"]')) seen.boot = t;
+      if (seen.real === undefined && document.querySelector('[data-testid="search-card-real"]')) seen.real = t;
+    };
+    new MutationObserver(look).observe(document, { childList: true, subtree: true });
+  });
   const page = await ctx.newPage();
   if (!fast) {
     const cdp = await ctx.newCDPSession(page);
@@ -71,7 +84,13 @@ async function measure(browser, url) {
     if (isFiche) {
       out.content = await page.waitForSelector("#root h1", { timeout: 90_000 }).then(() => Date.now() - t0).catch(() => null);
     } else {
+      // Lot perf 4 : première carte vue (premier affichage du HTML ou vraie carte).
       out.content = await page.waitForSelector('[data-testid="search-card-real"]', { timeout: 90_000 }).then(() => Date.now() - t0).catch(() => null);
+      const seen = await page.evaluate(() => window.__probeSeen || {}).catch(() => ({}));
+      // Instants de la page (depuis le début de la navigation), plus fidèles.
+      if (typeof seen.real === "number") out.content = Math.round(seen.real);
+      const firsts = [seen.boot, seen.real].filter((x) => typeof x === "number");
+      out.visible = firsts.length ? Math.round(Math.min(...firsts)) : out.content;
       out.firstHref = await page.$eval('[data-testid="search-card-real"]', (el) => el.closest("a")?.getAttribute("href") ?? null).catch(() => null);
       out.photo = await page.waitForFunction(() => {
         const img = document.querySelector('[data-testid="search-card-real"] img');
@@ -102,7 +121,7 @@ try {
     const url = queue.shift();
     const samples = [];
     for (let i = 0; i < runs; i++) samples.push(await measure(browser, url));
-    const row = { url, runs, content_ms: median(samples.map((s) => s.content)), photo_ms: median(samples.map((s) => s.photo)), samples };
+    const row = { url, runs, visible_ms: median(samples.map((s) => s.visible ?? s.content)), content_ms: median(samples.map((s) => s.content)), photo_ms: median(samples.map((s) => s.photo)), samples };
     const u = new URL(url);
     const key = /^\/(annonces|sits)\/[^/]+$/.test(u.pathname) && !u.pathname.startsWith("/annonces/international") ? "fiche" : u.pathname + u.search;
     const budget = budgets[key];

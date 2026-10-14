@@ -70,6 +70,7 @@ import { Search, MapPin, Lock, Sparkles, Globe2, X, AlertCircle, RefreshCw } fro
 import { format, differenceInDays, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
+import { endBootListings, takeListingsPrefetch } from "@/lib/listingsPrefetch";
 import { fetchIntlOpenSits, intlCountryCounts, carryOverParams, DEST_WORLD, DEST_ABROAD } from "@/lib/intlSitSearch";
 import DestinationCountrySelect from "@/components/search/DestinationCountrySelect";
 import { profilePlacePoint } from "@/lib/sitPlacePoint";
@@ -245,6 +246,12 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  const [sitterProfile, setSitterProfile] = useState<any>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
  const initialLoadDone = useRef(false);
+ // Lot perf 2 : numéro de la recherche en cours ; un résultat tardif d'une
+ // recherche remplacée n'est jamais appliqué.
+ const searchGenRef = useRef(0);
+ // Compteurs département et région en attente du département de référence
+ // (rayon affiché sans l'attendre) : la mesure d'impression attend.
+ const [deptCountsPending, setDeptCountsPending] = useState(false);
  // null = lecture en échec : lien sans chiffre, jamais un 0 présenté comme compté.
  const [intlCount, setIntlCount] = useState<number | null>(0);
  const [intlCounts, setIntlCounts] = useState<Array<{ code: string; name: string; count: number }>>([]);
@@ -509,10 +516,15 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
 
  // Auto-search when filters change (debounced)
  const doSearch = useCallback(async () => {
+ const gen = ++searchGenRef.current;
  try {
  setLoading(true);
   setSearchError(null);
   setResultsTruncated(false);
+  setDeptCountsPending(false);
+ // Lot perf 2 : les lectures des annonces partent tout de suite, en même
+ // temps que le géocodage de la ville cherchée (elles n'en dépendent pas).
+ const sitBase = tab === "sits" ? loadSitBase() : null;
  let searchCoords = userCoords;
  setGeocodeFailedCity(null);
  if (city && city !== userCity) {
@@ -522,8 +534,10 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  if (coords) searchCoords = coords;
  else { searchCoords = null; setGeocodeFailedCity(city); }
  }
- if (tab === "sits") {
- await searchSits(searchCoords);
+ if (tab === "sits" && sitBase) {
+ // Département de référence cherché dès que le point est connu, pendant
+ // les lectures (lot perf 2).
+ await searchSits(searchCoords, sitBase, startRefDept(searchCoords), gen);
  } else {
  if (missionSubTab === "members") {
  await searchAvailableMembers(searchCoords);
@@ -637,6 +651,8 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  // les visiteurs, navigation interne comprise (src/lib/perfMarks.ts).
  useEffect(() => {
    if (!firstSearchSettled || loading) return;
+   // Lot perf 4 : la vraie liste est là, le premier affichage du HTML s'efface.
+   endBootListings();
    // Réponse sans carte à mesurer : la vue ne compte pas comme un abandon.
    if (searchError) { skipMilestones("error"); return; }
    if (tab !== "sits") { skipMilestones("other_tab"); return; }
@@ -764,7 +780,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  // Track out-of-zone banner impression (déduplique par tab+zoneMode dans la session)
  const outOfZoneTrackedRef = useRef<Set<string>>(new Set());
   useEffect(() => {
- if (loading || tab !== "sits" || zoneMode === "france") return;
+ if (loading || deptCountsPending || tab !== "sits" || zoneMode === "france") return;
  const delta = densityCounts.france - densityCounts.radius;
  if (delta <= 0) return;
  const key = `${tab}|${zoneMode}|${delta}`;
@@ -785,7 +801,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  city: city || null,
  },
  });
- }, [loading, tab, zoneMode, userPostalCode, densityCounts, radius, city]);
+ }, [loading, deptCountsPending, tab, zoneMode, userPostalCode, densityCounts, radius, city]);
 
  const { crossTabCount, launchModeCount, nearbyZones, nearbyRegions } = useEmptyStateBreakdown({
   loading,
@@ -840,10 +856,29 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
    * PROPRIÉTAIRE (profil public : ville, pays, département), repli sur
    * l'annonce seulement si elle manque (resolveSitPlace). France = FR strict.
    */
+  /**
+   * Département de référence de la recherche : code postal de la ville
+   * choisie ; sinon, pour une ville saisie ou reçue par lien sans code postal,
+   * département de sa position géocodée ; sinon code postal du profil.
+   * Lot perf 2 : lancé dès que le point est connu, pendant les lectures.
+   */
+  const startRefDept = (searchCoords: { lat: number; lng: number } | null): Promise<string | null> => {
+   const cityGiven = !!city && city !== userCity;
+   if (cityPostalCode) return Promise.resolve(getDeptCode(cityPostalCode));
+   if (cityGiven) {
+     return searchCoords
+       ? communeDeptFromCoords(searchCoords.lat, searchCoords.lng).then(normalizeRefDept, () => null)
+       : Promise.resolve(null);
+   }
+   return Promise.resolve(getDeptCode(userPostalCode));
+  };
+
   const filterSitsByLocation = async (
    items: any[],
    searchCoords: { lat: number; lng: number } | null,
    today: string,
+   refDeptPromise: Promise<string | null>,
+   gen: number,
   ) => {
    // Lot H3 : sans point de recherche, aucun appel réseau avant la liste ;
    // la carte situe les lieux restants à son ouverture (effet plus bas).
@@ -857,15 +892,16 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
 
    const french = items.filter((s) => isFrancePlace(s));
   const frenchOpen = french.filter((s) => isOpenSit(s, today));
-  // Département de référence : code postal de la ville choisie ; sinon, pour une
-  // ville saisie ou reçue par lien sans code postal, département de sa position
-  // géocodée ; sinon code postal du profil.
-  const cityGiven = !!city && city !== userCity;
-  const refDept = cityPostalCode
-    ? getDeptCode(cityPostalCode)
-    : cityGiven
-    ? (searchCoords ? normalizeRefDept(await communeDeptFromCoords(searchCoords.lat, searchCoords.lng)) : null)
-    : getDeptCode(userPostalCode);
+  // Lot perf 2 : en rayon, la liste ne dépend que du point ; le département de
+  // référence ne sert qu'aux compteurs département et région, complétés à son
+  // arrivée. Les autres zones l'attendent.
+  const PENDING = Symbol("pending");
+  const refDeptOrPending: string | null | typeof PENDING = zoneMode === "radius"
+    ? await Promise.race([refDeptPromise, Promise.resolve(PENDING)])
+    : await refDeptPromise;
+  const refDept = refDeptOrPending === PENDING ? null : refDeptOrPending;
+  // Recherche remplacée entre-temps : elle n'écrit plus rien.
+  if (searchGenRef.current !== gen) return null;
   const refRegion = getRegionCode(refDept);
   const hasReference = !!(city || userCity);
   // Rayon : seulement les coordonnées vérifiées à distance <= rayon. Une annonce
@@ -877,12 +913,19 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
   };
   const inDept = (s: any) => !!refDept && placeOf(s).dept === refDept;
   const inRegion = (s: any) => !!refRegion && getRegionCode(placeOf(s).dept) === refRegion;
-  setDensityCounts({
-    radius: searchCoords ? frenchOpen.filter(inRadius).length : 0,
-    dept: refDept ? frenchOpen.filter(inDept).length : 0,
-    region: refRegion ? frenchOpen.filter(inRegion).length : 0,
-    france: frenchOpen.length,
-  });
+  const radiusCount = searchCoords ? frenchOpen.filter(inRadius).length : 0;
+  // Compteurs département et région, et annonces du département sans commune
+  // situable (rayon seulement).
+  const applyDeptCounts = (rd: string | null, applied: string) => {
+    const rr = getRegionCode(rd);
+    setDensityCounts({
+      radius: radiusCount,
+      dept: rd ? frenchOpen.filter((s) => placeOf(s).dept === rd).length : 0,
+      region: rr ? frenchOpen.filter((s) => getRegionCode(placeOf(s).dept) === rr).length : 0,
+      france: frenchOpen.length,
+    });
+    setUnlocatedCount(applied === "radius" && rd ? frenchOpen.filter((s) => !coordsOf(s) && placeOf(s).dept === rd).length : 0);
+  };
 
   let filtered = french;
   let applied: "radius" | "dept" | "region" | "france" = "france";
@@ -905,7 +948,17 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
   setZoneRefMissing(hasReference && (zoneMode === "radius" ? !searchCoords : zoneMode === "dept" ? !refDept : zoneMode === "region" ? !refRegion : false));
   // Annonces ouvertes du département de référence sans coordonnées vérifiées :
   // jamais dans le rayon, signalées pour un élargissement explicite.
-  setUnlocatedCount(applied === "radius" && refDept ? frenchOpen.filter((s) => !coordsOf(s) && placeOf(s).dept === refDept).length : 0);
+  applyDeptCounts(refDept, applied);
+  if (refDeptOrPending === PENDING) {
+    setDeptCountsPending(true);
+    void refDeptPromise.then((rd) => {
+      if (searchGenRef.current !== gen) return;
+      applyDeptCounts(rd, applied);
+      setDeptCountsPending(false);
+    });
+  } else {
+    setDeptCountsPending(false);
+  }
   setAppliedZone(applied);
   const decorate = (s: any) => {
     const pl = placeOf(s);
@@ -914,7 +967,17 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
   return { items: filtered.map(decorate), coordsOf };
  };
 
-   const searchSits = async (searchCoords: { lat: number; lng: number } | null) => {
+   /**
+    * Lot perf 2 : toutes les lectures d'annonces en deux salves, sans attendre
+    * le point de recherche. Salve 1 : annonces ouvertes et fermées. Salve 2,
+    * en parallèle : propriétaires, galeries, animaux, avis, écussons, profils
+    * propriétaires (identifiants tirés de la salve 1). Jamais de rejet : une
+    * erreur revient avec le message affiché.
+    */
+   type SitBase = { error: string | null; items: any[]; truncated: boolean; petsRows: any[]; reviewsRows: any[]; badgesRows: any[]; ownerProfRows: any[] };
+   const loadSitBase = async (): Promise<SitBase> => {
+   const empty: SitBase = { error: null, items: [], truncated: false, petsRows: [], reviewsRows: [], badgesRows: [], ownerProfRows: [] };
+   try {
    // On inclut les statuts passés (expired / completed / cancelled / archived)
    // ainsi que les annonces dépubliées (draft + unpublished_at) pour la
    // transparence côté membre connecté : elles s'affichent grisées avec un
@@ -948,25 +1011,31 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
         .order("id", { ascending: true })
         .range(from, to) as any;
 
-    const [openRes, closedRes] = await Promise.all([fetchAllPages<any>(openPage), fetchAllPages<any>(closedPage)]);
+    // Lot perf 3 : visiteur sans dates, les lectures lancées par le HTML
+    // pendant le téléchargement du code sont reprises telles quelles.
+    const pre = await takeListingsPrefetch(isPublic && !user && !startDate && !endDate);
+    const asPage = (rows: any[]) => ({ rows, error: null, truncated: false });
+    const asChunk = (data: any[]) => ({ data, error: null, truncated: false });
+    const [openRes, closedRes] = pre
+      ? [asPage(pre.open), asPage(pre.closed)]
+      : await Promise.all([fetchAllPages<any>(openPage), fetchAllPages<any>(closedPage)]);
     if (openRes.error) {
       console.error("[SearchSitter] Erreur chargement annonces:", openRes.error);
-      setSearchError("Impossible de charger les annonces.");
-      return;
+      return { ...empty, error: "Impossible de charger les annonces." };
     }
     if (closedRes.error) {
       console.error("[SearchSitter] Erreur chargement annonces fermées:", closedRes.error);
     }
-      let items = [...openRes.rows, ...closedRes.rows];
-      setResultsTruncated(openRes.truncated || closedRes.truncated);
+    let items = [...openRes.rows, ...closedRes.rows];
+    const truncated = openRes.truncated || closedRes.truncated;
 
-
-   // Hydrate owner data from public_profiles (safe public view) in a single batched call
-   const ownerIds = Array.from(new Set(items.map((s: any) => s.user_id).filter(Boolean)));
-   if (ownerIds.length > 0) {
    // Lectures .in() découpées et paginées (fetchInChunks) : aucune borne
    // PostgREST de 1 000 lignes ni URL trop longue au-delà de 150 identifiants.
-   const [ownersRes, galleryRes] = await Promise.all([
+   const ownerIds = Array.from(new Set(items.map((s: any) => s.user_id).filter(Boolean)));
+   const propertyIds = Array.from(new Set(items.map((s: any) => s.property_id).filter(Boolean)));
+   const [ownersRes, galleryRes, petsRes, reviewsRes, badgesRes, ownerProfRes] = pre
+     ? [asChunk(pre.owners), asChunk(pre.gallery), asChunk(pre.pets), asChunk(pre.reviews), asChunk(pre.badges), asChunk(pre.ownerProfs)]
+     : await Promise.all([
      fetchInChunks<any>(ownerIds, (chunk, from, to) => supabase
        .from("public_profiles")
        .select("id, first_name, avatar_url, city, postal_code, departement_code, country, identity_verified, is_founder, latitude_approx, longitude_approx")
@@ -975,19 +1044,41 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
        .from("owner_gallery")
        .select("id, user_id, photo_url, position, category")
        .in("user_id", chunk).order("id", { ascending: true }).range(from, to) as any),
+     fetchInChunks<any>(propertyIds, (chunk, from, to) =>
+       (supabase.from("public_pets" as any) as any).select("id, species, name, special_needs, property_id").in("property_id", chunk).order("id", { ascending: true }).range(from, to) as any),
+     fetchInChunks<any>(ownerIds, (chunk, from, to) =>
+       supabase.from("reviews").select("id, overall_rating, reviewee_id").in("reviewee_id", chunk).eq("published", true).order("id", { ascending: true }).range(from, to) as any),
+     fetchInChunks<any>(ownerIds, (chunk, from, to) =>
+       supabase.from("public_badge_attributions").select("id, badge_id, user_id").in("user_id", chunk).order("id", { ascending: true }).range(from, to) as any),
+     fetchInChunks<any>(ownerIds, (chunk, from, to) =>
+       supabase.from("public_owner_profiles").select("user_id, environments, preferred_sitter_types, home_ambiance, languages, interests, life_pace, presence_expected").in("user_id", chunk).order("user_id", { ascending: true }).range(from, to) as any),
    ]);
    if (ownersRes.error || galleryRes.error) {
      console.error("[SearchSitter] Erreur hydratation propriétaires:", ownersRes.error || galleryRes.error);
-     setSearchError("Impossible de charger les informations des propriétaires.");
-     return;
+     return { ...empty, error: "Impossible de charger les informations des propriétaires." };
    }
-   const owners = ownersRes.data;
-   const galleryRows = [...galleryRes.data].sort((a: any, b: any) => (a.position ?? 0) - (b.position ?? 0));
-   const ownerMap = new Map((owners || []).map((o: any) => [o.id, o]));
+   if (petsRes.error) {
+     console.error("[SearchSitter] Erreur chargement pets:", petsRes.error);
+     return { ...empty, error: "Impossible de charger les animaux." };
+   }
+   if (reviewsRes.error) {
+     console.error("[SearchSitter] Erreur chargement reviews:", reviewsRes.error);
+     return { ...empty, error: "Impossible de charger les avis." };
+   }
+   if (badgesRes.error) {
+     console.error("[SearchSitter] Erreur chargement badges:", badgesRes.error);
+     return { ...empty, error: "Impossible de charger les badges." };
+   }
+   if (ownerProfRes.error) {
+     console.error("[SearchSitter] Erreur chargement owner_profiles:", ownerProfRes.error);
+     return { ...empty, error: "Impossible de charger les profils propriétaires." };
+   }
+   const galleryRows = [...(galleryRes.data || [])].sort((a: any, b: any) => (a.position ?? 0) - (b.position ?? 0));
+   const ownerMap = new Map((ownersRes.data || []).map((o: any) => [o.id, o]));
    // Repli d'affichage : on retient la photo de LIEU la mieux placée
    // (logement, jardin, puis quartier), jamais une photo d'animal en priorité.
    const galleryByOwner = new Map<string, any[]>();
-   (galleryRows || []).forEach((g: any) => {
+   galleryRows.forEach((g: any) => {
      if (!g?.user_id || !g?.photo_url) return;
      const arr = galleryByOwner.get(g.user_id) || [];
      arr.push(g);
@@ -998,12 +1089,34 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
      const best = pickPlaceCover(rows);
      if (best) galleryFirstMap.set(ownerId, best);
    });
-   items = items.map((s: any) => ({
-     ...s,
-     owner: ownerMap.get(s.user_id) || null,
-     ownerGalleryFirstPhoto: galleryFirstMap.get(s.user_id) || null,
-   }));
+   if (ownerIds.length > 0) {
+     items = items.map((s: any) => ({
+       ...s,
+       owner: ownerMap.get(s.user_id) || null,
+       ownerGalleryFirstPhoto: galleryFirstMap.get(s.user_id) || null,
+     }));
    }
+   return { error: null, items, truncated, petsRows: petsRes.data || [], reviewsRows: reviewsRes.data || [], badgesRows: badgesRes.data || [], ownerProfRows: ownerProfRes.data || [] };
+   } catch (e) {
+     console.error("[SearchSitter] Erreur chargement annonces:", e);
+     return { ...empty, error: "Impossible de charger les annonces." };
+   }
+   };
+
+   const searchSits = async (
+    searchCoords: { lat: number; lng: number } | null,
+    basePromise: Promise<SitBase>,
+    refDeptPromise: Promise<string | null>,
+    gen: number,
+   ) => {
+   const base = await basePromise;
+   if (searchGenRef.current !== gen) return;
+   if (base.error) {
+     setSearchError(base.error);
+     return;
+   }
+   setResultsTruncated(base.truncated);
+   let items = base.items;
    // Mark assigned/past sits (will be rendered greyed-out, non-clickable).
    // Lot L1 : date du jour à Paris, date de fin incluse.
    const todayIso = parisTodayIso();
@@ -1025,57 +1138,21 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
        isPast: !isCompleted && isPastSit(s, todayIso),
      };
    });
-  const { items: locFiltered, coordsOf } = await filterSitsByLocation(items, searchCoords, todayIso);
+  const located = await filterSitsByLocation(items, searchCoords, todayIso, refDeptPromise, gen);
+  if (!located) return;
+  const { items: locFiltered, coordsOf } = located;
 
   items = locFiltered;
 
-  // Batched hydration to avoid N+1 : 4 requêtes uniques au lieu de 4 par annonce.
-  const allPropertyIds = Array.from(new Set(items.map((s: any) => s.property_id).filter(Boolean)));
-  const allUserIds = Array.from(new Set(items.map((s: any) => s.user_id).filter(Boolean)));
-
-  // Lectures découpées et paginées, triées sur une colonne unique.
-  const petsPromise = fetchInChunks<any>(allPropertyIds, (chunk, from, to) =>
-    (supabase.from("public_pets" as any) as any).select("id, species, name, special_needs, property_id").in("property_id", chunk).order("id", { ascending: true }).range(from, to) as any);
-  const reviewsPromise = fetchInChunks<any>(allUserIds, (chunk, from, to) =>
-    supabase.from("reviews").select("id, overall_rating, reviewee_id").in("reviewee_id", chunk).eq("published", true).order("id", { ascending: true }).range(from, to) as any);
-  const badgesPromise = fetchInChunks<any>(allUserIds, (chunk, from, to) =>
-    supabase.from("public_badge_attributions").select("id, badge_id, user_id").in("user_id", chunk).order("id", { ascending: true }).range(from, to) as any);
-  const ownerProfPromise = fetchInChunks<any>(allUserIds, (chunk, from, to) =>
-    supabase.from("public_owner_profiles").select("user_id, environments, preferred_sitter_types, home_ambiance, languages, interests, life_pace, presence_expected").in("user_id", chunk).order("user_id", { ascending: true }).range(from, to) as any);
-
-  const [petsRes, reviewsRes, badgesRes, ownerProfRes] = await Promise.all([
-    petsPromise, reviewsPromise, badgesPromise, ownerProfPromise,
-  ]);
-  if (petsRes.error) {
-    console.error("[SearchSitter] Erreur chargement pets:", petsRes.error);
-    setSearchError("Impossible de charger les animaux.");
-    return;
-  }
-  if (reviewsRes.error) {
-    console.error("[SearchSitter] Erreur chargement reviews:", reviewsRes.error);
-    setSearchError("Impossible de charger les avis.");
-    return;
-  }
-  if (badgesRes.error) {
-    console.error("[SearchSitter] Erreur chargement badges:", badgesRes.error);
-    setSearchError("Impossible de charger les badges.");
-    return;
-  }
-  if (ownerProfRes.error) {
-    console.error("[SearchSitter] Erreur chargement owner_profiles:", ownerProfRes.error);
-    setSearchError("Impossible de charger les profils propriétaires.");
-    return;
-  }
-
   const petsByProperty = new Map<string, any[]>();
-  (petsRes.data || []).forEach((p: any) => {
+  base.petsRows.forEach((p: any) => {
     if (!p?.property_id) return;
     const arr = petsByProperty.get(p.property_id) || [];
     arr.push(p);
     petsByProperty.set(p.property_id, arr);
   });
   const reviewAggByUser = new Map<string, { sum: number; count: number }>();
-  (reviewsRes.data || []).forEach((r: any) => {
+  base.reviewsRows.forEach((r: any) => {
     if (!r?.reviewee_id) return;
     const cur = reviewAggByUser.get(r.reviewee_id) || { sum: 0, count: 0 };
     cur.sum += r.overall_rating || 0;
@@ -1083,14 +1160,14 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
     reviewAggByUser.set(r.reviewee_id, cur);
   });
   const badgesByUser = new Map<string, any[]>();
-  (badgesRes.data || []).forEach((b: any) => {
+  base.badgesRows.forEach((b: any) => {
     if (!b?.user_id) return;
     const arr = badgesByUser.get(b.user_id) || [];
     arr.push(b);
     badgesByUser.set(b.user_id, arr);
   });
   const ownerProfByUser = new Map<string, any>();
-  (ownerProfRes.data || []).forEach((o: any) => {
+  base.ownerProfRows.forEach((o: any) => {
     if (o?.user_id) ownerProfByUser.set(o.user_id, o);
   });
 
@@ -1119,6 +1196,8 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
     return { ...sit, pets, avgRating, reviewCount: agg?.count || 0, topBadges, distance: dist, isNew, durationDays: days, environments: resolvedEnvs, ownerEnvironments: ownerEnvs, ownerMatch: ownerProf };
   });
 
+  // Lot perf 2 : une recherche remplacée entre-temps n'écrase pas la suivante.
+  if (searchGenRef.current !== gen) return;
   setResultCoords(coordsMap);
   // Lot H3 : carte à situer à son ouverture quand la recherche n'avait pas de point.
   deferredMapItemsRef.current = !searchCoords && enriched.some((sit: any) => !coordsMap.has(sit.id) && sitCoordsKey(sit)) ? enriched : null;

@@ -1,27 +1,15 @@
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { DEPT_NAMES } from "@/lib/departments";
+import { OVERSEAS_NAMES } from "@/lib/homeListingPlace";
 
 /**
- * Table de correspondance code de département vers nom lisible.
- * 103 lignes, DOM-TOM inclus, chargées une seule fois et partagées par
- * toutes les cartes via le cache react-query.
+ * Table de correspondance code de département vers nom lisible, DOM-TOM et
+ * collectivités d'outre-mer inclus (« Polynésie française », jamais
+ * « Outre-mer »).
  *
- * On lit `nom` et jamais `nom_region` : pour la Polynésie française,
- * `nom_region` vaut « Outre-mer », moins informatif.
+ * Lot perf 2 (14/10/2026) : table locale, aucune lecture. La lecture de la
+ * table departements partait à l'affichage de la première carte de
+ * /annonces et occupait le réseau au moment des photos.
  */
-export const useDepartementNames = (): Map<string, string> => {
-  const { data } = useQuery({
-    queryKey: ["departement-names"],
-    staleTime: 24 * 60 * 60 * 1000,
-    gcTime: 24 * 60 * 60 * 1000,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("departements" as any)
-        .select("code, nom");
-      if (error) return [] as { code: string; nom: string }[];
-      return (data || []) as unknown as { code: string; nom: string }[];
-    },
-  });
+const NAMES: Map<string, string> = new Map([...Object.entries(DEPT_NAMES), ...Object.entries(OVERSEAS_NAMES)]);
 
-  return new Map((data || []).map((d) => [String(d.code), d.nom]));
-};
+export const useDepartementNames = (): Map<string, string> => NAMES;

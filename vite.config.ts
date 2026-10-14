@@ -8,6 +8,10 @@ import { routeHashesPlugin } from "./scripts/vite-plugin-route-hashes.mjs";
 import { memberPreloadPlugin } from "./scripts/vite-plugin-member-preload.mjs";
 // @ts-expect-error greffon JS sans types
 import { entryBudgetPlugin } from "./scripts/vite-plugin-entry-budget.mjs";
+// @ts-expect-error greffon JS sans types
+import { routePreloadPlugin } from "./scripts/vite-plugin-route-preload.mjs";
+// @ts-expect-error greffon JS sans types
+import { listingsPrefetchPlugin } from "./scripts/vite-plugin-listings-prefetch.mjs";
 
 /**
  * Le build n'appelle plus aucune fonction serveur. Le rafraichissement
@@ -47,6 +51,11 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     mode === "production" && routeHashesPlugin(),
     memberPreloadPlugin(),
+    // Ordre voulu : chaque greffon s'insère juste avant le script d'entrée,
+    // dans l'ordre de cette liste. Les lectures et le premier affichage de
+    // /annonces partent avant les préchargements en priorité basse.
+    listingsPrefetchPlugin(),
+    routePreloadPlugin(),
     mode === "production" && entryBudgetPlugin(),
   ].filter(Boolean) as Plugin[],
   resolve: {
