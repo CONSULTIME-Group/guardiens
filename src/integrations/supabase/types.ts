@@ -2318,6 +2318,36 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_z2_villes_20261014: {
+        Row: {
+          content: string | null
+          excerpt: string | null
+          id: string | null
+          intro_text: string | null
+          meta_description: string | null
+          saved_at: string | null
+          slug: string | null
+        }
+        Insert: {
+          content?: string | null
+          excerpt?: string | null
+          id?: string | null
+          intro_text?: string | null
+          meta_description?: string | null
+          saved_at?: string | null
+          slug?: string | null
+        }
+        Update: {
+          content?: string | null
+          excerpt?: string | null
+          id?: string | null
+          intro_text?: string | null
+          meta_description?: string | null
+          saved_at?: string | null
+          slug?: string | null
+        }
+        Relationships: []
+      }
       _score_rebalance_20260830: {
         Row: {
           apres: number | null
