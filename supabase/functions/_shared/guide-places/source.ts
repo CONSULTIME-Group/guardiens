@@ -417,15 +417,39 @@ export function usesBan(country: string, postalCode: string | null | undefined):
   return true;
 }
 
-/** Code pays au sens d'OpenStreetMap : la Polynésie (987) et la Nouvelle-Calédonie (988) y ont le leur. */
-export function nominatimCountry(country: string, postalCode: string | null | undefined): string {
+/** Collectivités françaises d'outre-mer, rangées sous « fr » par Nominatim. */
+const FRENCH_OVERSEAS = new Set(["PF", "NC", "WF", "PM", "BL", "MF", "TF", "RE", "GP", "MQ", "GF", "YT"]);
+
+/**
+ * Code pays pour Nominatim. Mesure du 14/10/2026 : Nouméa, Punaauia et
+ * Taravao n'y sont trouvés qu'avec « fr » (country_code fr), « pf » et « nc »
+ * ne rendent rien.
+ */
+export function nominatimCountry(country: string, _postalCode?: string | null): string {
   const c = (country || "FR").toUpperCase();
-  const p = (postalCode ?? "").trim();
-  if (c === "FR" && /^987/.test(p)) return "pf";
-  if (c === "FR" && /^988/.test(p)) return "nc";
-  if (c === "FR" && /^986/.test(p)) return "wf";
+  if (c === "FR" || FRENCH_OVERSEAS.has(c)) return "fr";
   return c.toLowerCase();
 }
+
+/** Paramètres d'une recherche Nominatim (par commune ou en texte libre), partagés avec la recherche par la base. */
+export function nominatimParams(
+  city: string,
+  country: string,
+  postalCode: string | null | undefined,
+  mode: "city" | "q",
+): Record<string, string> {
+  return {
+    format: "jsonv2",
+    addressdetails: "1",
+    limit: "10",
+    [mode]: city.trim(),
+    countrycodes: nominatimCountry(country, postalCode),
+    "accept-language": "fr",
+  };
+}
+
+/** Types de résultat Nominatim qui désignent une localité (pas une baie ni un commerce). */
+const LOCALITY_TYPES = new Set(["city", "town", "village", "hamlet", "municipality", "suburb", "locality", "neighbourhood", "quarter"]);
 
 /** Nom du pays en français (« Canada », « Maroc »). */
 export function countryLabel(country: string): string {
@@ -556,7 +580,13 @@ export async function resolveGuideCenter(
       if (!r.ok) return null;
       const data = await r.json();
       return (data?.features ?? [])
-        .filter((f: any) => Number(f?.properties?.score ?? 0) >= 0.6 && normName(String(f?.properties?.name ?? "")) === normName(city))
+        // Nom exact, ou commune nouvelle qui commence par le nom du guide
+        // (« Oullins » devenue « Oullins-Pierre-Bénite », code postal changé).
+        .filter((f: any) => {
+          const n = normName(String(f?.properties?.name ?? ""));
+          const c = normName(city);
+          return Number(f?.properties?.score ?? 0) >= 0.6 && (n === c || n.startsWith(`${c} `));
+        })
         // Sans le code postal exact (« 69000 » pour Lyon), même département exigé.
         .filter((f: any) => withPostcode || !dept || String(f?.properties?.citycode ?? f?.properties?.postcode ?? "").startsWith(dept))
         .map((f: any) => ({
@@ -591,21 +621,25 @@ export async function resolveGuideCenter(
     }
   } else {
     try {
-      const params = new URLSearchParams({
-        format: "jsonv2",
-        addressdetails: "1",
-        limit: "10",
-        city,
-        countrycodes: nominatimCountry(country, input.postalCode),
-        "accept-language": "fr",
-      });
-      const r = await fetchFn(`https://nominatim.openstreetmap.org/search?${params}`, { headers: UA });
-      if (r.ok) {
-        const data = (await r.json()) as NominatimSearchHit[];
-        const hits = (Array.isArray(data) ? data : [])
+      // Recherche par commune d'abord, puis en texte libre réduit aux
+      // localités : Taravao n'est trouvé qu'en texte libre (mesure du 14/10/2026).
+      const search = async (mode: "city" | "q") => {
+        const params = new URLSearchParams(nominatimParams(city, country, input.postalCode, mode));
+        const r = await fetchFn(`https://nominatim.openstreetmap.org/search?${params}`, { headers: UA });
+        if (!r.ok) return null;
+        const data = (await r.json()) as (NominatimSearchHit & { addresstype?: string; type?: string })[];
+        return (Array.isArray(data) ? data : [])
+          .filter((h) => mode === "city" || LOCALITY_TYPES.has(String(h.addresstype ?? h.type ?? "")))
           .map((h) => ({ lat: Number(h.lat), lon: Number(h.lon), address: h.address ?? {} }))
           .filter((h) => Number.isFinite(h.lat) && Number.isFinite(h.lon));
-        const best = pickNearest(hits, input.hint);
+      };
+      let hits = await search("city");
+      if (hits && hits.length === 0) hits = await search("q");
+      if (hits) {
+        // Hors BAN, le lieu du propriétaire peut être approximatif (Taravao :
+        // 60 km, mesure du 14/10/2026) : 100 km de tolérance, assez pour écarter
+        // un homonyme lointain (Saint-Ludger-de-Milot à 300 km).
+        const best = pickNearest(hits, input.hint, 100);
         if (!best && hits.length > 0) return null;
         if (best) {
           const region = best.address.state ?? best.address.region ?? best.address.county ?? null;
