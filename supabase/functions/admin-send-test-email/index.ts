@@ -6,6 +6,8 @@ import { OWNER_NOEL_TEMPLATE, buildNoelDataFor, type NoelTemplateData } from "..
 import { buildResponderData } from "../_shared/owner-noel-v2.ts";
 import { mintDepartureTokens, periodBaseUrl } from "../_shared/owner-departure-audience.ts";
 import { DEPARTURE_TEMPLATE } from "../_shared/owner-departure-logic.ts";
+import { buildNoelV3DataFor } from "../_shared/owner-noel-v3-audience.ts";
+import { NOEL_V3_CAMPAIGN, NOEL_V3_RELANCE_TEMPLATE, NOEL_V3_TEMPLATES, noelDraftTitle, NOEL_DEFAULT_DATES, type NoelV3Variant } from "../_shared/owner-noel-v3.ts";
 import { resendFetch } from "../_shared/resend-guard.ts";
 import { SENDER_FROM, REPLY_TO_ADDRESS } from "../_shared/sender-address.ts";
 
@@ -99,7 +101,7 @@ Deno.serve(async (req) => {
     const ctaLabel: string | undefined = payload?.cta_label ? String(payload.cta_label) : undefined;
     const ctaUrl: string | undefined = payload?.cta_url ? String(payload.cta_url) : undefined;
 
-    const templateName: string = typeof payload?.template_name === "string" ? payload.template_name.trim() : "";
+    let templateName: string = typeof payload?.template_name === "string" ? payload.template_name.trim() : "";
 
     // Test fidèle : même chemin que l'envoi réel (send-transactional-email).
     // __urgent franchit le plafond de fréquence (send-transactional-email/index.ts, ligne 670) ;
@@ -132,6 +134,21 @@ Deno.serve(async (req) => {
         const tokens = await mintDepartureTokens(admin, [userData.user.id]);
         const t = tokens.get(userData.user.id);
         if (t) noelData = { periodBaseUrl: periodBaseUrl(t) };
+      }
+      // Lot V1 : email de Noël v3, vrai jeton /annonce-noel sur le compte de
+      // l'admin, variante choisie dans l'écran (le gabarit réel en dépend).
+      if (templateName === NOEL_V3_CAMPAIGN || templateName === NOEL_V3_RELANCE_TEMPLATE) {
+        const raw = String(payload?.noel_v3_test_mode ?? "");
+        const variant: NoelV3Variant = raw === "photo" || raw === "logement" ? raw : "pret";
+        const mine = (await buildNoelV3DataFor(admin, [userData.user.id])).get(userData.user.id);
+        if (!mine) throw new Error("Données Noël v3 introuvables pour le compte admin");
+        noelData = {
+          ...mine,
+          variant,
+          propertyLabel: mine.propertyLabel ?? "votre logement",
+          draftTitle: mine.draftTitle ?? noelDraftTitle({ city: mine.city, petNames: mine.petNames, start: NOEL_DEFAULT_DATES.start, end: NOEL_DEFAULT_DATES.end }),
+        } as unknown as Record<string, unknown>;
+        if (templateName === NOEL_V3_CAMPAIGN) templateName = NOEL_V3_TEMPLATES[variant];
       }
       const { data: sent, error: sendErr } = await admin.functions.invoke("send-transactional-email", {
         body: {

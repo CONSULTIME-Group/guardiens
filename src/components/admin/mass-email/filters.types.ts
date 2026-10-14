@@ -60,6 +60,10 @@ export interface MassEmailFilters {
   exclude_departure_answered?: boolean;
   /** Lot N6 : témoin exclu, printemps/été/plus tard exclus, noel et hiver en mode répondant. */
   noel_v2_split?: boolean;
+  /** Lot V1 : email de Noël v3 (témoin, départ lointain, un seul email de Noël, pression). */
+  noel_v3?: boolean;
+  /** Lot V1 : campagne v3 du J0 visée par la relance (dernière campagne v3 si absent). */
+  noel_v3_relance_of?: string;
 }
 
 

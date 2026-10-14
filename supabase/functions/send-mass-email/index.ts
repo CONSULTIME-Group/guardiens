@@ -18,6 +18,18 @@ import {
   type NoelTemplateData,
 } from "../_shared/owner-noel-audience.ts";
 import { isAccountBlockedForMarketing } from "../_shared/account-email-block.ts";
+import { NOEL_EMAIL_GROUP, NOEL_V3_CAMPAIGN, NOEL_V3_RELANCE_TEMPLATE, noelV3Variant } from "../_shared/owner-noel-v3.ts";
+import {
+  buildNoelV3DataFor,
+  loadDepartureHolds,
+  loadOwnerNoelFacts,
+  loadReceivedTemplates,
+  loadRelanceTargets,
+  loadSeasonalNoelReceived,
+  noelV3TemplateFor,
+  relanceTooEarly,
+  splitNoelV3Audience,
+} from "../_shared/owner-noel-v3-audience.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -85,9 +97,21 @@ interface MassEmailFilters {
   // Lot N6, Noël 2026 en J+7 de la séquence v2
   /** Témoin exclu, printemps/été/plus tard exclus, noel et hiver en mode répondant. */
   noel_v2_split?: boolean;
+  // Lot V1, email de Noël v3
+  /**
+   * Audience v3 : témoin exclu, réponse de départ lointaine récente exclue,
+   * un seul email de Noël par personne, pression. Avec template_name
+   * « owner-noel-v3 », le gabarit réel est choisi par destinataire
+   * (owner-noel-v3-pret, -photo ou -logement).
+   */
+  noel_v3?: boolean;
+  /** Relance J+3 : identifiant de la campagne v3 du J0 (ouvreurs sans clic, page jamais ouverte). */
+  noel_v3_relance_of?: string;
 }
 
-type DepartureFiltered<T> = { rows: T[]; holdout: number | null; answered: number | null; pressure: number | null; otherPeriod?: number; responders?: Map<string, NoelResponderPeriod>; alreadyReceived?: number | null; admins?: number };
+const isNoelV3Template = (t?: string) => t === NOEL_V3_CAMPAIGN || t === NOEL_V3_RELANCE_TEMPLATE;
+
+type DepartureFiltered<T> = { rows: T[]; holdout: number | null; answered: number | null; pressure: number | null; otherPeriod?: number; responders?: Map<string, NoelResponderPeriod>; alreadyReceived?: number | null; admins?: number; departureHold?: number; noelReceived?: number; relanceTargets?: number };
 
 /**
  * Filtres propriétaires, puis (lot A8) admins toujours exclus et anti-doublon
@@ -118,9 +142,48 @@ async function applyDepartureFilters<T extends { id: string; email?: string | nu
 async function applyDepartureFiltersBase<T extends { id: string; email?: string | null }>(
   // deno-lint-ignore no-explicit-any
   serviceClient: any, rows: T[], filters: MassEmailFilters,
-): Promise<{ rows: T[]; holdout: number | null; answered: number | null; pressure: number | null; otherPeriod?: number; responders?: Map<string, NoelResponderPeriod> }> {
-  const isOwnerCampaign = filters.template_name === OWNER_NOEL_TEMPLATE || filters.template_name === DEPARTURE_TEMPLATE;
+) {
+  // Lot V1 : un seul email de Noël, l'ancien gabarit owner-noel-2026 écarte
+  // qui a déjà reçu la v3.
+  if (filters.template_name === OWNER_NOEL_TEMPLATE) {
+    const v3 = await loadReceivedTemplates(serviceClient, rows.map((r) => r.email ?? ""), NOEL_EMAIL_GROUP.filter((t) => t !== OWNER_NOEL_TEMPLATE));
+    const kept = rows.filter((r) => !v3.has((r.email ?? "").trim().toLowerCase()));
+    const r = await applyDepartureFiltersInner(serviceClient, kept, filters);
+    return { ...r, noelReceived: rows.length - kept.length };
+  }
+  return applyDepartureFiltersInner(serviceClient, rows, filters);
+}
+
+async function applyDepartureFiltersInner<T extends { id: string; email?: string | null }>(
+  // deno-lint-ignore no-explicit-any
+  serviceClient: any, rows: T[], filters: MassEmailFilters,
+): Promise<{ rows: T[]; holdout: number | null; answered: number | null; pressure: number | null; otherPeriod?: number; responders?: Map<string, NoelResponderPeriod>; departureHold?: number; noelReceived?: number; relanceTargets?: number }> {
+  const isOwnerCampaign = filters.template_name === OWNER_NOEL_TEMPLATE || filters.template_name === DEPARTURE_TEMPLATE
+    || isNoelV3Template(filters.template_name);
   const counts = isOwnerCampaign ? await loadRecentEmailCounts(serviceClient, rows.map((r) => r.email ?? "")) : new Map<string, number>();
+  // Lot V1 : email de Noël v3 et sa relance J+3.
+  if (filters.noel_v3) {
+    let pool = rows;
+    let relanceTargets: number | undefined;
+    const relance = filters.template_name === NOEL_V3_RELANCE_TEMPLATE;
+    if (relance) {
+      if (!filters.noel_v3_relance_of) throw new Error("noel_v3_relance_of requis pour la relance");
+      const emailToId = new Map(rows.map((r) => [(r.email ?? "").trim().toLowerCase(), r.id] as [string, string]));
+      const targets = await loadRelanceTargets(serviceClient, filters.noel_v3_relance_of, emailToId);
+      relanceTargets = targets.size;
+      pool = rows.filter((r) => targets.has((r.email ?? "").trim().toLowerCase()));
+    }
+    const holds = await loadDepartureHolds(serviceClient, pool.map((r) => r.id));
+    // J0 : un seul email de Noël par personne. Relance : une seule relance.
+    const emails = pool.map((r) => r.email ?? "");
+    const received = await loadReceivedTemplates(serviceClient, emails, relance ? [NOEL_V3_RELANCE_TEMPLATE] : NOEL_EMAIL_GROUP);
+    if (!relance) for (const e of await loadSeasonalNoelReceived(serviceClient, emails)) received.add(e);
+    const split = splitNoelV3Audience(pool, { holds, received, recentCounts: counts });
+    return {
+      rows: split.rows, holdout: split.holdoutExcluded, answered: null, pressure: split.pressureExcluded,
+      departureHold: split.departureHoldExcluded, noelReceived: split.alreadyReceived, relanceTargets,
+    };
+  }
   if (filters.noel_v2_split) {
     const split = splitNoelV2Audience(rows, await loadLatestIntents(serviceClient, rows.map((r) => r.id)), counts);
     return { rows: split.rows, holdout: split.holdoutExcluded, answered: null, pressure: split.pressureExcluded, otherPeriod: split.otherPeriodExcluded, responders: split.responders };
@@ -710,6 +773,17 @@ Deno.serve(async (req) => {
     const segment: string = payload.segment || "tous";
     const filters: MassEmailFilters = payload.filters || {};
 
+    // Lot V1 : relance J+3 sans campagne désignée, la dernière campagne v3 non annulée.
+    if (filters.noel_v3 && filters.template_name === NOEL_V3_RELANCE_TEMPLATE && !filters.noel_v3_relance_of) {
+      const id = (await loadNoelV3Campaign(serviceClient, null))?.id;
+      if (!id) {
+        return new Response(JSON.stringify({ error: "Aucune campagne owner-noel-v3 envoyée : la relance attend l'email de Noël." }), {
+          status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      filters.noel_v3_relance_of = id;
+    }
+
     // Mode COUNT — estimation réelle : applique aussi les filtres obligatoires
     // (suppression list + opt-out produit) pour ne pas surestimer.
     if (mode === "count") {
@@ -748,8 +822,26 @@ Deno.serve(async (req) => {
           else (noel.get(id)?.variant === "A" ? variantA++ : variantB++);
         }
       }
+      // Lot V1 : répartition par variante, lecture seule (aucun jeton créé en estimation).
+      let v3Counts: Record<string, number> | null = null;
+      if (filters.noel_v3) {
+        const seen = new Set<string>();
+        const ids = compliant.filter((p) => !seen.has(p.email) && seen.add(p.email)).map((p) => p.id);
+        const facts = await loadOwnerNoelFacts(serviceClient, ids);
+        v3Counts = { pret: 0, photo: 0, logement: 0 };
+        for (const id of ids) {
+          const f = facts.get(id);
+          v3Counts[noelV3Variant({ hasProperty: !!f?.property, photoCount: f?.photoCount ?? 0 })]++;
+        }
+      }
       return new Response(JSON.stringify({
         count: uniqueEmails.size,
+        ...(v3Counts ? {
+          noel_v3_variants: v3Counts,
+          departure_hold_excluded: departure.departureHold ?? 0,
+          noel_already_received: departure.noelReceived ?? 0,
+          ...(departure.relanceTargets !== undefined ? { relance_targets: departure.relanceTargets } : {}),
+        } : {}),
         variant_a: variantA,
         variant_b: variantB,
         holdout_excluded: departure.holdout,
@@ -864,6 +956,21 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "No recipients found" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    // Lot V1 : la relance J+3 vise une campagne v3 envoyée il y a 72 heures au moins.
+    if (filters.noel_v3 && filters.template_name === NOEL_V3_RELANCE_TEMPLATE) {
+      const j0 = await loadNoelV3Campaign(serviceClient, filters.noel_v3_relance_of ?? "");
+      if (!j0) {
+        return new Response(JSON.stringify({ error: "La relance vise une campagne owner-noel-v3 existante. Rien n'est parti." }), {
+          status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (relanceTooEarly(j0.created_at)) {
+        return new Response(JSON.stringify({ error: "La relance part 72 heures après l'email de Noël, pas avant. Rien n'est parti." }), {
+          status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
     }
 
     // Garde-fou gabarit : un template_name part uniquement par la file, qui rend
@@ -1081,6 +1188,17 @@ Deno.serve(async (req) => {
         }
       }
 
+      // Lot V1 : email de Noël v3, gabarit et données par destinataire (jetons
+      // de page et de période créés ici, au lancement).
+      let noelV3ByProfile: Map<string, Record<string, unknown>> | null = null;
+      if (filters.noel_v3 && isNoelV3Template(filters.template_name)) {
+        const ids = remainingRecipients
+          .map((email) => idByEmail.get(email.toLowerCase()))
+          .filter((id): id is string => !!id);
+        noelV3ByProfile = await buildNoelV3DataFor(serviceClient, ids) as unknown as Map<string, Record<string, unknown>>;
+      }
+      const relanceV3 = filters.template_name === NOEL_V3_RELANCE_TEMPLATE;
+
       // Question de départ (lot N4) : un lien à jeton /ma-periode par destinataire.
       const periodUrlByEmail = new Map<string, string>();
       if (filters.template_name === DEPARTURE_TEMPLATE) {
@@ -1093,8 +1211,21 @@ Deno.serve(async (req) => {
       }
 
       let enqueued = 0;
+      let v3Missing = 0;
       for (const email of remainingRecipients) {
-        const templateName = filters.template_name;
+        let templateName = filters.template_name;
+        let v3Data: Record<string, unknown> | null = null;
+        if (noelV3ByProfile) {
+          v3Data = noelV3ByProfile.get(idByEmail.get(email.toLowerCase()) ?? "") ?? null;
+          if (!v3Data) {
+            // Sans données, aucun envoi : jamais un gabarit v3 à moitié rempli.
+            v3Missing++;
+            await serviceClient.from("mass_email_sends").update({ status: "skipped", last_error: "noel_v3_data_missing" })
+              .eq("mass_email_id", campaignId).eq("recipient_email", email).eq("status", "queued");
+            continue;
+          }
+          templateName = noelV3TemplateFor(v3Data as { variant: "pret" | "photo" | "logement" }, relanceV3);
+        }
         const { error } = await serviceClient.rpc("enqueue_email", {
           queue_name: "mass_emails",
           payload: {
@@ -1102,7 +1233,9 @@ Deno.serve(async (req) => {
             recipient_email: email,
             template_name: templateName,
             idempotency_key: `mass-${campaignId}-${email.toLowerCase()}`,
-            template_data: templateName
+            template_data: v3Data
+              ? v3Data
+              : templateName
               ? {
                   firstName: firstNameByEmail.get(email.toLowerCase()) ?? "",
                   ...(lineUrlByEmail.has(email.toLowerCase()) ? { lineUrl: lineUrlByEmail.get(email.toLowerCase()) } : {}),
@@ -1130,7 +1263,7 @@ Deno.serve(async (req) => {
         .eq("id", campaignId);
 
       return new Response(
-        JSON.stringify({ queued: enqueued, campaign_id: campaignId, mode: "queue", resumed }),
+        JSON.stringify({ queued: enqueued, campaign_id: campaignId, mode: "queue", resumed, ...(noelV3ByProfile ? { noel_v3_missing: v3Missing } : {}) }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
@@ -1322,3 +1455,21 @@ Deno.serve(async (req) => {
     });
   }
 });
+
+/**
+ * Lot V1 : campagne owner-noel-v3 visée par la relance (identifiant donné),
+ * ou la dernière non annulée (identifiant null). Lecture seule.
+ */
+async function loadNoelV3Campaign(
+  // deno-lint-ignore no-explicit-any
+  serviceClient: any,
+  id: string | null,
+): Promise<{ id: string; created_at: string } | null> {
+  let q = serviceClient.from("mass_emails").select("id, created_at, status, filters")
+    .eq("filters->>template_name", NOEL_V3_CAMPAIGN).neq("status", "cancelled");
+  if (id !== null) q = q.eq("id", id);
+  const { data, error } = await q.order("created_at", { ascending: false }).limit(1);
+  if (error) throw new Error(`noel v3 campaign lookup failed: ${error.message}`);
+  const row = (data ?? [])[0] as { id: string; created_at: string } | undefined;
+  return row ?? null;
+}
