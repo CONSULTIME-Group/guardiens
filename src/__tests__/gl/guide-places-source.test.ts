@@ -30,6 +30,8 @@ import {
   type OsmElement,
   type PlaceKind,
   displayName,
+  categoriesToWiden,
+  withinGuide,
   compactElements,
 } from "../../../supabase/functions/_shared/guide-places/source";
 
@@ -335,7 +337,8 @@ describe("GL2, textes et liens", () => {
   it("chaque catégorie a un rayon maximal et un minimum cohérents", () => {
     for (const c of ALL_CATEGORIES) {
       expect(CATEGORY_RULES[c].min).toBeLessThanOrEqual(CATEGORY_RULES[c].max);
-      expect(CATEGORY_RULES[c].maxRadius).toBeLessThanOrEqual(50000);
+      // 80 km pour un vétérinaire seulement (zone rurale), 50 km ailleurs.
+      expect(CATEGORY_RULES[c].maxRadius).toBeLessThanOrEqual(c === "vet" ? 80000 : 50000);
     }
   });
 });
@@ -362,10 +365,26 @@ describe("GL1, demande incohérente", () => {
 });
 
 describe("GL, fiabilité (13/10/2026)", () => {
-  it("Polynésie et Nouvelle-Calédonie : code pays OpenStreetMap", async () => {
+  it("Polynésie et Nouvelle-Calédonie : Nominatim les range sous « fr » (mesure du 14/10/2026)", async () => {
     const { fn, calls } = fakeFetch({ nominatim: () => [{ lat: "-17.535", lon: "-149.569", address: { state: "Îles du Vent" } }] });
     await resolveGuideCenter({ city: "Papeete", postalCode: "98714", country: "FR", hint: null }, fn);
-    expect(calls[0]).toContain("countrycodes=pf");
+    expect(calls[0]).toContain("countrycodes=fr");
+    expect(calls.some((u) => u.includes("api-adresse"))).toBe(false);
+  });
+
+  it("Taravao (PF) : texte libre réduit aux localités quand la recherche par commune est vide", async () => {
+    const { fn, calls } = fakeFetch({
+      nominatim: (url: string) =>
+        url.includes("city=")
+          ? []
+          : [
+              { lat: "-17.7196", lon: "-149.3012", addresstype: "bay", address: {} },
+              { lat: "-17.7257", lon: "-149.3135", addresstype: "town", address: { state: "Îles du Vent" } },
+            ],
+    });
+    const c = await resolveGuideCenter({ city: "Taravao", postalCode: "98719", country: "PF", hint: null }, fn);
+    expect(c).toEqual({ lat: -17.7257, lon: -149.3135, country: "PF", region: "Îles du Vent" });
+    expect(calls.every((u) => u.includes("countrycodes=fr"))).toBe(true);
   });
 
   it("une réponse Overpass tronquée par un délai est ignorée, le miroir suivant est essayé", async () => {
@@ -506,5 +525,57 @@ describe("GL, noms lisibles (essai Marrakech du 14/10/2026)", () => {
     ];
     const out = compactElements(els as any, c);
     expect(out.map((e) => e.tags!.name)).toEqual(["Arset El Bilk", "Sentier de l'Ourika"]);
+  });
+});
+
+describe("GL, vétérinaire en zone rurale (Saint-Ludger, 14/10/2026)", () => {
+  it("80 km seulement pour une catégorie encore vide à 50 km", () => {
+    expect(categoriesToWiden({ vet: 0, pet_shop: 0, general_park: 4, walk_trail: 4, dog_park: 3, dog_friendly_cafe: 3, dog_friendly_restaurant: 3 }, 80000)).toEqual(["vet"]);
+    expect(categoriesToWiden({ vet: 1, pet_shop: 1, general_park: 4, walk_trail: 4, dog_park: 3, dog_friendly_cafe: 3, dog_friendly_restaurant: 3 }, 80000)).toEqual([]);
+    expect(categoriesToWiden({ vet: 1 }, 50000)).toContain("vet");
+  });
+
+  it("un vétérinaire à 75 km est gardé, une forêt à 75 km est écartée", () => {
+    expect(withinGuide("vet", 75000)).toBe(true);
+    expect(withinGuide("vet", 83000)).toBe(false);
+    expect(withinGuide("general_park", 75000)).toBe(false);
+  });
+});
+
+describe("GL, guide nommé d'après un pays (Beaujolais, 14/10/2026)", () => {
+  it("nom absent des communes : centre de la commune du code postal qui reprend le nom", async () => {
+    const { fn, calls } = fakeFetch({
+      ban: (url: string) =>
+        url.includes("q=69220")
+          ? {
+              features: [
+                { geometry: { coordinates: [4.75, 46.1] }, properties: { name: "Saint-Jean-d'Ardières", postcode: "69220", population: 900, context: "69, Rhône" } },
+                { geometry: { coordinates: [4.74, 46.11] }, properties: { name: "Belleville-en-Beaujolais", postcode: "69220", population: 13000, context: "69, Rhône" } },
+                { geometry: { coordinates: [4.8, 46.2] }, properties: { name: "Ailleurs", postcode: "71000", population: 99999, context: "71" } },
+              ],
+            }
+          : { features: [{ geometry: { coordinates: [4.6, 46.0] }, properties: { name: "Beaujeu", score: 0.5, context: "69" } }] },
+    });
+    const c = await resolveGuideCenter({ city: "Beaujolais", postalCode: "69220", country: "FR", hint: null }, fn);
+    expect(c).toEqual({ lat: 46.11, lon: 4.74, country: "FR", region: "Rhône" });
+    expect(calls.some((u) => u.includes("q=69220"))).toBe(true);
+  });
+});
+
+describe("GL5, commune nouvelle (Oullins, 14/10/2026)", () => {
+  it("« Oullins » trouve « Oullins-Pierre-Bénite » dans le même département, pas « Oulins »", async () => {
+    const { fn } = fakeFetch({
+      ban: (url: string) =>
+        url.includes("postcode=")
+          ? { features: [] }
+          : {
+              features: [
+                { geometry: { coordinates: [4.806746, 45.709441] }, properties: { name: "Oullins-Pierre-Bénite", score: 0.86, citycode: "69149", postcode: "69310", context: "69, Rhône" } },
+                { geometry: { coordinates: [1.47, 48.87] }, properties: { name: "Oulins", score: 0.7, citycode: "28293", context: "28, Eure-et-Loir" } },
+              ],
+            },
+    });
+    const c = await resolveGuideCenter({ city: "Oullins", postalCode: "69600", country: "FR", hint: null }, fn);
+    expect(c).toEqual({ lat: 45.709441, lon: 4.806746, country: "FR", region: "Rhône" });
   });
 });

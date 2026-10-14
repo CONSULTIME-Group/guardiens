@@ -46,6 +46,8 @@ import {
   overpassFilters,
   placeLabel,
   resolveGuideCenter,
+  nominatimParams,
+  usesBan,
   selectByCategory,
   stripDashes,
   toCandidates,
@@ -210,7 +212,58 @@ async function enqueue(supabase: any, guideId: string, round: number, radius: nu
   return rows.length;
 }
 
-async function ensureCenter(supabase: any, guide: any, report: StepReport, dryRun: boolean): Promise<GuideCenter | null> {
+/** Réponse Nominatim attendue au-delà : nouvelle recherche. */
+export const GEOCODE_STALE_MS = 10 * 60 * 1000;
+
+/**
+ * Hors BAN (étranger, Polynésie, Nouvelle-Calédonie), la recherche Nominatim
+ * part de la base (guide_geocode_enqueue) et se relit au passage suivant :
+ * mesure du 14/10/2026, Nominatim ne répond pas aux fonctions serveur.
+ * Rend un fetch qui sert les réponses relues, ou "pending" tant qu'elles manquent.
+ */
+async function geocodeViaBase(
+  supabase: any,
+  guide: any,
+  report: StepReport,
+  country: string,
+): Promise<typeof fetch | "pending" | null> {
+  const prev = guide.places_source_report?.centre_requetes as { city?: number; q?: number; at?: string } | undefined;
+  const read = async (id?: number) => {
+    if (id == null) return null;
+    const { data } = await supabase.rpc("guide_osm_result", { p_id: id });
+    const row = Array.isArray(data) ? data[0] ?? null : data ?? null;
+    return row && row.status_code != null ? row : null;
+  };
+  if (prev?.city != null || prev?.q != null) {
+    const [cityRes, qRes] = [await read(prev.city), await read(prev.q)];
+    const fresh = Date.now() - Date.parse(prev.at ?? "") < GEOCODE_STALE_MS;
+    if (cityRes || qRes || !fresh) {
+      report.centre_reponses = { city: cityRes?.status_code ?? null, q: qRes?.status_code ?? null };
+      const serve = (res: any) =>
+        new Response(res && res.status_code === 200 ? String(res.content ?? "[]") : "[]", { status: res?.status_code ?? 503 });
+      // Nominatim servi depuis les réponses relues, la BAN reste appelée en direct.
+      return (async (url: string, init?: RequestInit) =>
+        String(url).includes("nominatim.openstreetmap.org")
+          ? serve(String(url).includes("city=") ? cityRes : qRes)
+          : fetch(url, init)) as typeof fetch;
+    }
+    report.centre_requetes = prev;
+    return "pending";
+  }
+  const ids: { city?: number; q?: number; at: string } = { at: new Date().toISOString() };
+  for (const mode of ["city", "q"] as const) {
+    const { data, error } = await supabase.rpc("guide_geocode_enqueue", {
+      p_params: nominatimParams(guide.city, country, guide.postal_code, mode),
+    });
+    if (!error && data != null) ids[mode] = Number(data);
+  }
+  // Base indisponible : recherche directe (peut échouer, le lieu indiqué sert alors de repli).
+  if (ids.city == null && ids.q == null) return null;
+  report.centre_requetes = ids;
+  return "pending";
+}
+
+async function ensureCenter(supabase: any, guide: any, report: StepReport, dryRun: boolean): Promise<GuideCenter | "pending" | null> {
   if (guide.latitude != null && guide.longitude != null) {
     return { lat: Number(guide.latitude), lon: Number(guide.longitude), country: guide.country || "FR", region: guide.places_source_report?.centre_final?.region ?? null };
   }
@@ -222,7 +275,13 @@ async function ensureCenter(supabase: any, guide: any, report: StepReport, dryRu
     .maybeSingle();
   const hint = req?.latitude != null && req?.longitude != null ? { lat: Number(req.latitude), lon: Number(req.longitude) } : null;
   const country = (req?.country || guide.country || "FR").toUpperCase();
-  const center = await resolveGuideCenter({ city: guide.city, postalCode: guide.postal_code, country, hint }, fetch);
+  let fetchFn: typeof fetch = fetch;
+  if (!usesBan(country, guide.postal_code)) {
+    const viaBase = await geocodeViaBase(supabase, guide, report, country);
+    if (viaBase === "pending") return "pending";
+    if (viaBase) fetchFn = viaBase;
+  }
+  const center = await resolveGuideCenter({ city: guide.city, postalCode: guide.postal_code, country, hint }, fetchFn);
   if (!center) return null;
   const patch: Record<string, unknown> = { country: center.country, latitude: center.lat, longitude: center.lon };
   if (center.country !== "FR" && looksLikeBadDepartment(guide.department)) {
@@ -393,6 +452,7 @@ export async function advanceGuide(
 
   // 1. Centre
   const center = await ensureCenter(supabase, guide, report, dryRun);
+  if (center === "pending") return { ...report, etape: "centre", result: "en_cours", detail: "geocodage_en_attente" };
   if (!center) return { ...report, etape: "centre", result: "sans_centre" };
   report.centre_final = center;
 
@@ -421,9 +481,11 @@ export async function advanceGuide(
 
   // 3. Élargissement
   const round = Math.max(...requests.map((r) => r.round));
-  // Aucune réponse au dernier rayon : panne d'OpenStreetMap. Le passage ne
-  // compte pas, le guide garde son affichage et repasse plus tard.
-  if (!requests.some((r) => r.round === round && r.status === "done")) {
+  // Aucune réponse sur tout le guide : panne d'OpenStreetMap. Le passage ne
+  // compte pas, le guide garde son affichage et repasse plus tard. Un rayon
+  // élargi qui échoue seul (une catégorie, ex. vétérinaire à 80 km) garde les
+  // réponses des rayons précédents : le guide termine en partiel.
+  if (!requests.some((r) => r.status === "done")) {
     await supabase.from("guide_osm_requests").delete().eq("city_guide_id", guide.id);
     return { ...report, etape: "collecte", rayon: RADII_M[round], result: "overpass_indisponible" };
   }

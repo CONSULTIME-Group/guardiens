@@ -415,6 +415,15 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     opener: "Le parcours de gardien est expliqué sur /devenir-home-sitter.",
   },
   {
+    key: "gardiennage_quebec",
+    path: "/gardiennage-maison-quebec",
+    label: "Gardiennage de maison au Québec",
+    purpose: "Faire garder sa maison au Québec, devenir gardien au Québec, garder une maison au Québec depuis la France.",
+    audience: "all",
+    triggers: ["quebec", "gardiennage", "montreal"],
+    opener: "Tout ce qui concerne le Québec est réuni sur /gardiennage-maison-quebec.",
+  },
+  {
     key: "observatoire",
     path: "/observatoire-garde-animaux",
     label: "Observatoire",

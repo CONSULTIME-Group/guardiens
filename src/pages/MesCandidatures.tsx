@@ -66,6 +66,8 @@ interface SitterApp {
   content_visible: boolean;
   /** Lot X3a : le gardien a lui-même annulé sa participation (migration X3a). */
   sit_cancelled_by_me?: boolean | null;
+  /** Lot Z2 : public.sit_is_reviewable(sit_id), même règle que l'insertion d'un avis. */
+  sit_reviewable?: boolean | null;
   owner?:{ id: string; first_name: string | null; avatar_url: string | null; city: string | null } | null;
 }
 
@@ -302,10 +304,13 @@ const MesCandidatures = () => {
         });
     // Lot Z : accès à l'avis tant que la garde est évaluable (terminée, ou
     // archivée après sa date de fin), même règle que /review.
+    // Lot Z2 : le verdict serveur (sit_reviewable) prime quand il est présent.
     const canReview =
       isDone &&
       !reviewedSitIds.has(app.sit_id) &&
-      isSitReviewable({ status: app.sit_status, end_date: app.sit_end_date });
+      (typeof app.sit_reviewable === "boolean"
+        ? app.sit_reviewable
+        : isSitReviewable({ status: app.sit_status, end_date: app.sit_end_date }));
     // Lot X3a (B-08) : sans réponse depuis plus de 7 jours, ce que le gardien peut faire.
     const waitingDays = sitterWaitingDays(app.status, app.sit_status, app.created_at);
     const canWithdraw = isOpenApplicationStatus(app.status) && app.sit_status === "published";

@@ -9,13 +9,14 @@
  *   n'est pas répété ;
  * - un guide français pas encore sourcé garde son affichage jusqu'à son
  *   passage : aucun guide ne se vide pendant le rattrapage ;
- * - quand le centre du guide est connu, tout lieu situé à plus de 52 km est
- *   écarté, sourcé ou non.
+ * - quand le centre du guide est connu, tout lieu situé au-delà du rayon
+ *   maximal de sa catégorie (plus 2 km) est écarté, sourcé ou non : 52 km en
+ *   général, 82 km pour un vétérinaire (zone rurale, décision du 14/10/2026).
  *
  * Les liens et distances viennent du module partagé avec les fonctions
  * serveur (supabase/functions/_shared/guide-places/source.ts).
  */
-import { haversineM, normName } from "../../supabase/functions/_shared/guide-places/source.ts";
+import { CATEGORY_RULES, haversineM, normName } from "../../supabase/functions/_shared/guide-places/source.ts";
 
 export {
   directionsUrl,
@@ -26,6 +27,12 @@ export {
 
 /** Rayon maximal d'un guide (50 km) et marge du centre d'une forêt ou d'un sentier. */
 export const GUIDE_MAX_KM = 52;
+
+/** Distance maximale affichée pour une catégorie : son rayon maximal plus 2 km, au moins 52 km. */
+export function guideMaxKmFor(category: string): number {
+  const rule = (CATEGORY_RULES as Record<string, { maxRadius: number }>)[category];
+  return Math.max(GUIDE_MAX_KM, rule ? rule.maxRadius / 1000 + 2 : GUIDE_MAX_KM);
+}
 
 export interface VisiblePlaceInput {
   id: string;
@@ -67,7 +74,7 @@ export function visibleGuidePlaces<T extends VisiblePlaceInput>(
       (p) =>
         p.latitude == null ||
         p.longitude == null ||
-        haversineM(cLat, cLon, p.latitude, p.longitude) <= GUIDE_MAX_KM * 1000,
+        haversineM(cLat, cLon, p.latitude, p.longitude) <= guideMaxKmFor(p.category) * 1000,
     );
   }
 

@@ -558,8 +558,9 @@ const EditSit = () => {
               Garde {sitStatus === "in_progress" ? "en cours" : "confirmée"}
             </p>
             <p className="text-warning-foreground/80 text-xs mt-0.5">
-              Toute modification (dates, attentes, etc.) n'enverra pas de notification automatique
-              au gardien. Pensez à le prévenir via la messagerie.
+              Si vous changez les dates, le gardien reçoit une notification avec les nouvelles
+              dates, rappelées aussi dans votre conversation. Pour les autres changements, un mot
+              dans la messagerie l'aide à suivre.
             </p>
           </div>
         </div>
@@ -912,9 +913,8 @@ const EditSit = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>Modifier les dates d'une garde confirmée ?</AlertDialogTitle>
             <AlertDialogDescription>
-              Cette garde est confirmée. La modification des dates n'enverra <strong>pas</strong> de
-              notification automatique au gardien. Pensez à le prévenir via la messagerie après
-              avoir enregistré.
+              Cette garde est confirmée. À l'enregistrement, le gardien reçoit une notification
+              avec les nouvelles dates, rappelées aussi dans votre conversation.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

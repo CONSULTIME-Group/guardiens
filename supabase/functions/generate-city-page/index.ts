@@ -217,8 +217,8 @@ ${sitterCountLine}
 
     const brandContext = `CONTEXTE MARQUE Guardiens (plateforme de house-sitting de proximité, sans transaction financière directe) :
 - Fondée par Jérémie et Elisa, qui pratiquent et défendent le house-sitting en France.
-- Guardiens recommande une rencontre préalable entre propriétaire et gardien avant la garde, afin d'échanger sur le logement, les animaux et les consignes.
-- Propriétaires : gratuit. Gardiens : gratuit aujourd'hui, sans engagement. Aucune commission par garde. Décrire uniquement la tarification actuelle, sans promesse sur son évolution future.
+- Une rencontre entre propriétaire et gardien avant la garde est possible si les deux le souhaitent (jamais une étape ni une condition), pour échanger sur le logement, les animaux et les consignes.
+- Gratuité : écrire seulement « Guardiens est gratuit », pour tous les membres, sans durée, sans condition, sans formule commerciale et sans comparaison avec une autre solution de garde.
 - L'animal reste chez lui, la maison reste vivante (courrier, plantes, lumières). Possibilité de vérifier son identité, signalée par un écusson sur les profils concernés, et avis croisés entre membres.
 
 RÈGLES STRICTES :
@@ -265,15 +265,15 @@ Structure EXACTE :
 ## Pourquoi ${city} a besoin d'une plateforme de garde de proximité
 ### Une ville où les animaux font partie de la famille
 (paragraphe qualitatif, sans chiffre inventé)
-### Les limites des pensions classiques
-(paragraphe qualitatif, sans fourchette de prix inventée)
-### Le house-sitting, une alternative qui a fait ses preuves
+### Un animal qui garde ses habitudes
+(paragraphe qualitatif : l'animal reste chez lui, ses repères et son rythme, sans comparaison avec d'autres solutions)
+### Le house-sitting, un échange entre voisins
 (paragraphe)
 
 ## Comment fonctionne Guardiens à ${city}
 ### Étape 1, Publiez votre annonce
 (paragraphe avec lien [tarifs](/tarifs))
-### Étape 2, Rencontrez les gardiens intéressés
+### Étape 2, Échangez avec les gardiens intéressés
 (paragraphe)
 ### Étape 3, Confirmez la garde
 (paragraphe)
@@ -285,19 +285,19 @@ Structure EXACTE :
 
 
 ## Propriétaires à ${city}, ce que Guardiens vous offre
-(5 à 6 bénéfices en **gras** suivis de 1-2 phrases : animal chez lui, maison vivante, rencontre préalable recommandée, aucune commission, accord de garde clair, profils détaillés et avis croisés)
+(5 à 6 bénéfices en **gras** suivis de 1-2 phrases : animal chez lui, maison vivante, rencontre possible si vous le souhaitez, accord de garde clair, profils détaillés et avis croisés)
 
 ## Qui sont les gardiens à ${city}
 (intro + 4 profils en **gras** : retraités actifs, jeunes actifs en télétravail, familles, étudiants. Mentionnez les [petites missions](/petites-missions) pour les gardes courtes. Si aucun gardien n'est encore actif, présentez les profils recherchés et invitez à rejoindre les premiers, sans jamais écrire un nombre nul.)
 
 ## Combien ça coûte à ${city}
-(un paragraphe factuel : Guardiens est gratuit pour les propriétaires et pour les gardiens aujourd'hui, sans engagement, aucune commission par garde. Lien [tarifs](/tarifs). AUCUN montant, AUCUNE date.)
+(un paragraphe factuel : Guardiens est gratuit, pour tous les membres. Lien [Gratuité](/tarifs). AUCUN montant, AUCUNE date, aucune comparaison.)
 
 ## Notre histoire et notre engagement à ${city}
 (2-3 paragraphes : fondation Jérémie & Elisa, leur passion du house-sitting, déploiement en France, ${city} intégrée au maillage. AUCUNE date de lancement inventée, AUCUN chiffre de maisons ou d'animaux.)
 
 ## Questions fréquentes des propriétaires à ${city}
-(5 à 6 questions au format **Question ?** + réponse 2-3 phrases : rencontre préalable, urgence, animaux à besoins spécifiques, durée min/max, vérification d'identité, sécurité du logement. Aucune question sur les prix d'abonnement ou une date de fin de gratuité.)`;
+(5 à 6 questions au format **Question ?** + réponse 2-3 phrases : rencontre si les deux le souhaitent, urgence, animaux à besoins spécifiques, durée min/max, vérification d'identité, sécurité du logement. Aucune question sur les prix d'abonnement ou une date de fin de gratuité.)`;
 
     const callAI = async (p: string, jsonMode: boolean) => {
       const res = await fetch(LOVABLE_API_URL, {

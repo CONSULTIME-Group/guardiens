@@ -2318,6 +2318,36 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_z2_villes_20261014: {
+        Row: {
+          content: string | null
+          excerpt: string | null
+          id: string | null
+          intro_text: string | null
+          meta_description: string | null
+          saved_at: string | null
+          slug: string | null
+        }
+        Insert: {
+          content?: string | null
+          excerpt?: string | null
+          id?: string | null
+          intro_text?: string | null
+          meta_description?: string | null
+          saved_at?: string | null
+          slug?: string | null
+        }
+        Update: {
+          content?: string | null
+          excerpt?: string | null
+          id?: string | null
+          intro_text?: string | null
+          meta_description?: string | null
+          saved_at?: string | null
+          slug?: string | null
+        }
+        Relationships: []
+      }
       _score_rebalance_20260830: {
         Row: {
           apres: number | null
@@ -13271,6 +13301,7 @@ export type Database = {
           sit_city: string
           sit_end_date: string
           sit_id: string
+          sit_reviewable: boolean
           sit_start_date: string
           sit_status: Database["public"]["Enums"]["sit_status"]
           sit_title: string
@@ -13428,6 +13459,7 @@ export type Database = {
         Args: { lat1: number; lat2: number; lon1: number; lon2: number }
         Returns: number
       }
+      guide_geocode_enqueue: { Args: { p_params: Json }; Returns: number }
       guide_homonym_slug: {
         Args: { p_country: string; p_postal: string; p_slug: string }
         Returns: string

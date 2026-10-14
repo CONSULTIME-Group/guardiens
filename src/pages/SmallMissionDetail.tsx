@@ -41,6 +41,8 @@ import AccessGateBanner from "@/components/access/AccessGateBanner";
 import MissionPhotoGallery from "@/components/missions/MissionPhotoGallery";
 import MissionPublishedBanner from "@/components/missions/MissionPublishedBanner";
 import MatchedHelpersInviteBlock from "@/components/missions/MatchedHelpersInviteBlock";
+import { AUTHOR_CLOSE_NO_SELECT_REASON, closeMissionWithoutSelection } from "@/lib/missionCloseNoSelect";
+import { showMissionInviteBlock } from "@/lib/missionInviteBlock";
 import PublicHeader from "@/components/layout/PublicHeader";
 import PublicFooter from "@/components/layout/PublicFooter";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -428,8 +430,10 @@ const SmallMissionDetail = () => {
   const MIN_MESSAGE_LEN = MIN_MISSION_MESSAGE_LEN;
   const MAX_MESSAGE_LEN = MAX_MISSION_MESSAGE_LEN;
 
-  const handleRespond = async (overrideMessage?: string) => {
-    if (!user || !id || submitting) return;
+  // Lot Z2 (C-19) : renvoie true seulement quand la réponse est enregistrée,
+  // pour que la mesure ne compte jamais un envoi refusé.
+  const handleRespond = async (overrideMessage?: string): Promise<boolean> => {
+    if (!user || !id || submitting) return false;
     setSubmitting(true);
     try {
       const outcome = await respondToMission({
@@ -440,32 +444,32 @@ const SmallMissionDetail = () => {
       switch (outcome.kind) {
         case "empty":
           toast({ variant: "destructive", title: "Message vide", description: "Écrivez un mot avant d'envoyer votre réponse." });
-          return;
+          return false;
         case "too_short":
           toast({ variant: "destructive", title: "Message trop court", description: `Ajoutez au moins ${outcome.min} caractères pour que l'auteur comprenne votre proposition.` });
-          return;
+          return false;
         case "missing":
           throw new Error("Mission introuvable.");
         case "closed":
           toast({ variant: "destructive", title: "Mission clôturée", description: "Cette mission n'accepte plus de réponses." });
-          return;
+          return false;
         case "own_mission":
           toast({ variant: "destructive", title: "Action impossible", description: "Vous ne pouvez pas répondre à votre propre annonce." });
-          return;
+          return false;
         case "duplicate":
           toast({ variant: "destructive", title: "Déjà envoyé", description: "Vous avez déjà proposé votre aide pour cette mission." });
           setHasResponded(true);
-          return;
+          return false;
         case "account_not_active":
           toast({ variant: "destructive", title: "Compte non actif", description: "Contactez le support pour rétablir l'accès à l'entraide." });
-          return;
+          return false;
         case "cap_reached":
           toast({
             variant: "destructive",
             title: "Mission temporairement fermée",
             description: "5 personnes ont déjà proposé leur aide. Une place se libérera si l'auteur en décline une.",
           });
-          return;
+          return false;
         case "failed":
           throw new Error(outcome.message);
         default:
@@ -501,6 +505,7 @@ const SmallMissionDetail = () => {
         },
       });
       toast({ title: "Réponse envoyée !", description: "La personne qui demande va être prévenue." });
+      return true;
 
       // Note : le fan-out (notif in-app + email) est déclenché côté serveur
       // par le trigger `notify_new_mission_response` sur l'insertion de la
@@ -511,6 +516,7 @@ const SmallMissionDetail = () => {
     } finally {
       setSubmitting(false);
     }
+    return false;
   };
 
 
@@ -670,12 +676,13 @@ const SmallMissionDetail = () => {
     setClosingNoSelect(true);
     try {
       const pending = responses.filter(r => r.status === "pending");
+      // Lot Z2 (C-15) : erreurs lues, date et motif de clôture posés.
+      const closed = await closeMissionWithoutSelection(supabase, {
+        missionId: mission.id,
+        pendingResponseIds: pending.map(r => r.id),
+      });
+      if (closed.ok === false) throw new Error(closed.message);
       if (pending.length > 0) {
-        const ids = pending.map(r => r.id);
-        // Batch update
-        await supabase.from("small_mission_responses")
-          .update({ status: "declined" as any })
-          .in("id", ids);
         // Fan-out serveur
         supabase.functions.invoke("notify-mission-event", {
           body: {
@@ -686,8 +693,7 @@ const SmallMissionDetail = () => {
           },
         }).catch(() => {});
       }
-      await supabase.from("small_missions").update({ status: "cancelled" as any }).eq("id", mission.id);
-      setMission((prev: any) => ({ ...prev, status: "cancelled" }));
+      setMission((prev: any) => ({ ...prev, status: "cancelled", close_reason: AUTHOR_CLOSE_NO_SELECT_REASON }));
       setResponses(prev => prev.map(r => r.status === "pending" ? { ...r, status: "declined" } : r));
       setCloseModalOpen(false);
       toast({ title: "Mission clôturée" });
@@ -1108,7 +1114,7 @@ const SmallMissionDetail = () => {
           )}
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
             <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Un service contre un service</span>
-            <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Résiliable à tout moment</span>
+            <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Vous pouvez retirer votre réponse tant que l'auteur n'a pas choisi</span>
           </div>
         </div>
       );
@@ -1197,8 +1203,9 @@ const SmallMissionDetail = () => {
           </div>
         )}
 
-        {/* Bloc d'invitation directe, uniquement à la publication, pour l'auteur */}
-        {showPublishedBanner && isAuthor && mission.status === "open" && (
+        {/* Bloc d'invitation directe pour l'auteur, tant que le besoin est ouvert
+            et sans proposition vivante (lot Z2, C-18). */}
+        {showMissionInviteBlock({ isAuthor, status: mission.status, responses }) && (
           <MatchedHelpersInviteBlock
             missionId={mission.id}
             missionCategory={mission.category}
@@ -1682,7 +1689,7 @@ const SmallMissionDetail = () => {
               {!isAuthor && hasResponded && (
                 <div className="bg-success-soft/40 border border-success/30 rounded-2xl p-4 text-sm text-foreground/80 flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
-                  Vous avez déjà répondu. {author?.first_name || "L'auteur"} vous répondra ici même.
+                  Vous avez déjà répondu. {author?.first_name || "L'auteur"} vous répondra dans la messagerie, une notification vous préviendra.
                 </div>
               )}
               {!isAuthor && mission.status === "open" && !canApplyMissions && accessLevel === 1 && (
@@ -1867,10 +1874,12 @@ const SmallMissionDetail = () => {
         authorFirstName={author?.first_name}
         submitting={submitting}
         onSubmit={async (msg) => {
-          await handleRespond(msg);
-          trackEvent("mission_response_submitted_from_modal", {
-            metadata: { mission_id: mission.id },
-          });
+          const sent = await handleRespond(msg);
+          if (sent) {
+            trackEvent("mission_response_submitted_from_modal", {
+              metadata: { mission_id: mission.id },
+            });
+          }
           setResponseModalOpen(false);
         }}
       />

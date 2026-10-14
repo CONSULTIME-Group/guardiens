@@ -41,6 +41,7 @@ function fakeDb(seed: Record<string, Row[]>) {
   const net: Record<number, any> = {};
   const enqueued: { id: number; query: string; mirror: number }[] = [];
   const ctl = { enqueueError: false };
+  const geocoded: { id: number; params: Record<string, string> }[] = [];
   const builder = (table: string) => {
     const filters: ((r: Row) => boolean)[] = [];
     let op: "select" | "update" | "delete" | "insert" | "upsert" = "select";
@@ -93,6 +94,7 @@ function fakeDb(seed: Record<string, Row[]>) {
     net,
     enqueued,
     ctl,
+    geocoded,
     client: {
       from: (t: string) => builder(t),
       rpc: async (fn: string, args: any) => {
@@ -100,6 +102,11 @@ function fakeDb(seed: Record<string, Row[]>) {
           if (ctl.enqueueError) return { data: null, error: { code: "57014" } };
           const id = ++seq;
           enqueued.push({ id, query: args.p_query, mirror: args.p_mirror });
+          return { data: id, error: null };
+        }
+        if (fn === "guide_geocode_enqueue") {
+          const id = ++seq;
+          geocoded.push({ id, params: args.p_params });
           return { data: id, error: null };
         }
         if (fn === "guide_osm_result") return { data: net[args.p_id] ? [net[args.p_id]] : [], error: null };
@@ -223,7 +230,7 @@ describe("GL4, passages successifs (Saint-Ludger)", () => {
 
   it("une partie des requêtes sans réponse après trois essais : guide terminé en partiel, laissé en file", async () => {
     await advanceGuide(db.client, db.tables.city_guides[0], { dryRun: false, googleKey: null });
-    const r = await runUntil(db, (q) => (q.includes("veterinary") ? { status_code: 504, content: "busy" } : ok([])), (x) => x.etape === "termine");
+    const r = await runUntil(db, (q) => (q.includes("veterinary") ? { status_code: 504, content: "busy" } : ok([])), (x) => x.etape === "termine", {}, 60);
     expect(r.result).toBe("partiel");
     const g = db.tables.city_guides[0];
     expect(g.places_sourced_at).toBeNull();
@@ -353,5 +360,37 @@ describe("GL4, relecture (file)", () => {
     const r = await runUntil(db, () => ok([]), (x) => x.detail === "fin_au_passage_suivant", { deadline: Date.now() + 10_000 });
     expect(r.detail).toBe("fin_au_passage_suivant");
     expect(db.tables.guide_osm_requests.length).toBeGreaterThan(0);
+  });
+});
+
+describe("GL5, centre hors BAN cherché par la base (Taravao, 14/10/2026)", () => {
+  it("1er passage : deux recherches déposées, attente ; 2e passage : centre tiré des réponses, lieu du propriétaire ignoré", async () => {
+    const db = fakeDb({
+      city_guides: [guideRow({ id: "g-ta", slug: "taravao", city: "Taravao", postal_code: "98719", country: "PF", latitude: null, longitude: null, places_source_report: null })],
+      guide_requests: [{ city_guide_id: "g-ta", slug: "taravao", country: "PF", latitude: -17.76, longitude: -148.74 }],
+    });
+    const g = db.tables.city_guides[0];
+    const r1 = await advanceGuide(db.client, g, { dryRun: false, googleKey: null });
+    expect(r1).toMatchObject({ etape: "centre", result: "en_cours", detail: "geocodage_en_attente" });
+    expect(db.geocoded.map((x) => Object.keys(x.params).find((k) => k === "city" || k === "q"))).toEqual(["city", "q"]);
+    expect(db.geocoded.every((x) => x.params.countrycodes === "fr")).toBe(true);
+    expect(db.enqueued).toHaveLength(0);
+
+    // La file écrit le rapport du passage, puis les réponses arrivent.
+    g.places_source_report = r1;
+    const [cityReq, qReq] = db.geocoded;
+    db.net[cityReq.id] = { status_code: 200, content: "[]" };
+    db.net[qReq.id] = {
+      status_code: 200,
+      content: JSON.stringify([
+        { lat: "-17.7196", lon: "-149.3012", addresstype: "bay", address: {} },
+        { lat: "-17.7257", lon: "-149.3135", addresstype: "town", address: { state: "Îles du Vent" } },
+      ]),
+    };
+    const r2 = await advanceGuide(db.client, g, { dryRun: false, googleKey: null });
+    expect(r2.etape).toBe("collecte");
+    expect(g.latitude).toBeCloseTo(-17.7257, 3);
+    expect(g.longitude).toBeCloseTo(-149.3135, 3);
+    expect(db.enqueued.every((e) => e.query.includes("-17.7257") && e.query.includes("-149.3135"))).toBe(true);
   });
 });

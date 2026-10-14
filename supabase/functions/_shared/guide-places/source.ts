@@ -58,8 +58,15 @@ export interface GuideCenter {
   region: string | null;
 }
 
-/** Rayons de recherche successifs, en mètres. */
-export const RADII_M = [5000, 15000, 30000, 50000] as const;
+/**
+ * Rayons de recherche successifs, en mètres. Le dernier (80 km) ne sert qu'aux
+ * catégories encore vides à 50 km (voir `categoriesToWiden`) : essai à blanc de
+ * Saint-Ludger (Québec) du 14/10/2026, le vétérinaire le plus proche connu
+ * d'OpenStreetMap est à 52 km (décision de Jérémie du 14/10/2026).
+ */
+export const RADII_M = [5000, 15000, 30000, 50000, 80000] as const;
+/** Au-delà de ce rayon, seules les catégories sans aucun lieu sont cherchées. */
+export const NEAR_RADIUS_M = 50000;
 
 /**
  * Règles par catégorie :
@@ -71,7 +78,7 @@ export const CATEGORY_RULES: Record<GuideCategory, { min: number; max: number; m
   general_park: { min: 3, max: 4, maxRadius: 30000 },
   walk_trail: { min: 2, max: 4, maxRadius: 30000 },
   dog_park: { min: 1, max: 3, maxRadius: 15000 },
-  vet: { min: 2, max: 4, maxRadius: 50000 },
+  vet: { min: 2, max: 4, maxRadius: 80000 },
   pet_shop: { min: 1, max: 3, maxRadius: 50000 },
   dog_friendly_cafe: { min: 1, max: 3, maxRadius: 15000 },
   dog_friendly_restaurant: { min: 1, max: 3, maxRadius: 15000 },
@@ -305,9 +312,12 @@ export function categoriesToWiden(
   counts: Partial<Record<GuideCategory, number>>,
   nextRadiusM: number,
 ): GuideCategory[] {
-  return ALL_CATEGORIES.filter(
-    (c) => (counts[c] ?? 0) < CATEGORY_RULES[c].min && nextRadiusM <= CATEGORY_RULES[c].maxRadius,
-  );
+  return ALL_CATEGORIES.filter((c) => {
+    const n = counts[c] ?? 0;
+    if (n >= CATEGORY_RULES[c].min || nextRadiusM > CATEGORY_RULES[c].maxRadius) return false;
+    // Zone rurale : au-delà de 50 km, seulement si la catégorie est encore vide.
+    return nextRadiusM <= NEAR_RADIUS_M || n === 0;
+  });
 }
 
 /** « 800 m », « 3,2 km », « 18 km ». */
@@ -407,15 +417,39 @@ export function usesBan(country: string, postalCode: string | null | undefined):
   return true;
 }
 
-/** Code pays au sens d'OpenStreetMap : la Polynésie (987) et la Nouvelle-Calédonie (988) y ont le leur. */
-export function nominatimCountry(country: string, postalCode: string | null | undefined): string {
+/** Collectivités françaises d'outre-mer, rangées sous « fr » par Nominatim. */
+const FRENCH_OVERSEAS = new Set(["PF", "NC", "WF", "PM", "BL", "MF", "TF", "RE", "GP", "MQ", "GF", "YT"]);
+
+/**
+ * Code pays pour Nominatim. Mesure du 14/10/2026 : Nouméa, Punaauia et
+ * Taravao n'y sont trouvés qu'avec « fr » (country_code fr), « pf » et « nc »
+ * ne rendent rien.
+ */
+export function nominatimCountry(country: string, _postalCode?: string | null): string {
   const c = (country || "FR").toUpperCase();
-  const p = (postalCode ?? "").trim();
-  if (c === "FR" && /^987/.test(p)) return "pf";
-  if (c === "FR" && /^988/.test(p)) return "nc";
-  if (c === "FR" && /^986/.test(p)) return "wf";
+  if (c === "FR" || FRENCH_OVERSEAS.has(c)) return "fr";
   return c.toLowerCase();
 }
+
+/** Paramètres d'une recherche Nominatim (par commune ou en texte libre), partagés avec la recherche par la base. */
+export function nominatimParams(
+  city: string,
+  country: string,
+  postalCode: string | null | undefined,
+  mode: "city" | "q",
+): Record<string, string> {
+  return {
+    format: "jsonv2",
+    addressdetails: "1",
+    limit: "10",
+    [mode]: city.trim(),
+    countrycodes: nominatimCountry(country, postalCode),
+    "accept-language": "fr",
+  };
+}
+
+/** Types de résultat Nominatim qui désignent une localité (pas une baie ni un commerce). */
+const LOCALITY_TYPES = new Set(["city", "town", "village", "hamlet", "municipality", "suburb", "locality", "neighbourhood", "quarter"]);
 
 /** Nom du pays en français (« Canada », « Maroc »). */
 export function countryLabel(country: string): string {
@@ -492,6 +526,35 @@ export function pickNearest<T extends { lat: number; lon: number }>(
 /** Coordonnées arrondies au kilomètre : un lieu de propriétaire n'est jamais repris tel quel. */
 export const roundCoord = (v: number) => Math.round(v * 100) / 100;
 
+/** Communes d'un code postal (BAN), la plus proche du nom du guide d'abord, puis la plus peuplée. */
+export async function banByPostcode(
+  pc: string,
+  city: string,
+  fetchFn: FetchLike,
+): Promise<{ lat: number; lon: number; context: string }[] | null> {
+  const params = new URLSearchParams({ q: pc, type: "municipality", limit: "10" });
+  const r = await fetchFn(`https://api-adresse.data.gouv.fr/search/?${params}`, { headers: UA });
+  if (!r.ok) return null;
+  const data = await r.json();
+  const words = normName(city).split(" ").filter((w) => w.length > 3);
+  const ranked = (data?.features ?? [])
+    .filter((f: any) => String(f?.properties?.postcode ?? "") === pc)
+    .map((f: any) => {
+      const name = normName(String(f?.properties?.name ?? ""));
+      return {
+        lat: Number(f?.geometry?.coordinates?.[1]),
+        lon: Number(f?.geometry?.coordinates?.[0]),
+        context: String(f?.properties?.context ?? ""),
+        named: words.some((w) => name.includes(w)) ? 1 : 0,
+        population: Number(f?.properties?.population ?? 0),
+      };
+    })
+    .filter((h: { lat: number; lon: number }) => Number.isFinite(h.lat) && Number.isFinite(h.lon))
+    .sort((a: any, b: any) => b.named - a.named || b.population - a.population);
+  // Une seule commune retenue : le centre du guide, jamais une moyenne.
+  return ranked.slice(0, 1).map(({ lat, lon, context }: any) => ({ lat, lon, context }));
+}
+
 export async function resolveGuideCenter(
   input: {
     city: string;
@@ -517,7 +580,13 @@ export async function resolveGuideCenter(
       if (!r.ok) return null;
       const data = await r.json();
       return (data?.features ?? [])
-        .filter((f: any) => Number(f?.properties?.score ?? 0) >= 0.6 && normName(String(f?.properties?.name ?? "")) === normName(city))
+        // Nom exact, ou commune nouvelle qui commence par le nom du guide
+        // (« Oullins » devenue « Oullins-Pierre-Bénite », code postal changé).
+        .filter((f: any) => {
+          const n = normName(String(f?.properties?.name ?? ""));
+          const c = normName(city);
+          return Number(f?.properties?.score ?? 0) >= 0.6 && (n === c || n.startsWith(`${c} `));
+        })
         // Sans le code postal exact (« 69000 » pour Lyon), même département exigé.
         .filter((f: any) => withPostcode || !dept || String(f?.properties?.citycode ?? f?.properties?.postcode ?? "").startsWith(dept))
         .map((f: any) => ({
@@ -534,6 +603,10 @@ export async function resolveGuideCenter(
     try {
       let hits = dept ? await banHits(true) : null;
       if (!hits || hits.length === 0) hits = await banHits(false);
+      // Nom qui n'est pas une commune (« Beaujolais », un pays ou une vallée) :
+      // centre de la commune du code postal, celle dont le nom reprend un mot
+      // du guide d'abord, puis la plus peuplée (essai réel du 14/10/2026).
+      if ((!hits || hits.length === 0) && /^\d{5}$/.test(pc)) hits = await banByPostcode(pc, city, fetchFn);
       if (hits) {
         const best = pickNearest(hits, input.hint);
         // Communes trouvées, toutes loin du lieu indiqué : la demande est incohérente.
@@ -548,21 +621,25 @@ export async function resolveGuideCenter(
     }
   } else {
     try {
-      const params = new URLSearchParams({
-        format: "jsonv2",
-        addressdetails: "1",
-        limit: "10",
-        city,
-        countrycodes: nominatimCountry(country, input.postalCode),
-        "accept-language": "fr",
-      });
-      const r = await fetchFn(`https://nominatim.openstreetmap.org/search?${params}`, { headers: UA });
-      if (r.ok) {
-        const data = (await r.json()) as NominatimSearchHit[];
-        const hits = (Array.isArray(data) ? data : [])
+      // Recherche par commune d'abord, puis en texte libre réduit aux
+      // localités : Taravao n'est trouvé qu'en texte libre (mesure du 14/10/2026).
+      const search = async (mode: "city" | "q") => {
+        const params = new URLSearchParams(nominatimParams(city, country, input.postalCode, mode));
+        const r = await fetchFn(`https://nominatim.openstreetmap.org/search?${params}`, { headers: UA });
+        if (!r.ok) return null;
+        const data = (await r.json()) as (NominatimSearchHit & { addresstype?: string; type?: string })[];
+        return (Array.isArray(data) ? data : [])
+          .filter((h) => mode === "city" || LOCALITY_TYPES.has(String(h.addresstype ?? h.type ?? "")))
           .map((h) => ({ lat: Number(h.lat), lon: Number(h.lon), address: h.address ?? {} }))
           .filter((h) => Number.isFinite(h.lat) && Number.isFinite(h.lon));
-        const best = pickNearest(hits, input.hint);
+      };
+      let hits = await search("city");
+      if (hits && hits.length === 0) hits = await search("q");
+      if (hits) {
+        // Hors BAN, le lieu du propriétaire peut être approximatif (Taravao :
+        // 60 km, mesure du 14/10/2026) : 100 km de tolérance, assez pour écarter
+        // un homonyme lointain (Saint-Ludger-de-Milot à 300 km).
+        const best = pickNearest(hits, input.hint, 100);
         if (!best && hits.length > 0) return null;
         if (best) {
           const region = best.address.state ?? best.address.region ?? best.address.county ?? null;
