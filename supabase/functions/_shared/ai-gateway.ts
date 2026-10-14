@@ -26,7 +26,7 @@ export async function callLovableAI(opts: GatewayCallOptions): Promise<GatewayRe
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: opts.model ?? "google/gemini-2.5-flash",
+      model: opts.model ?? "google/gemini-3.8-flash",
       messages: opts.messages,
       ...(opts.tools ? { tools: opts.tools } : {}),
       ...(opts.tool_choice ? { tool_choice: opts.tool_choice } : {}),

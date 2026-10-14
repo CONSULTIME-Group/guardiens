@@ -133,7 +133,7 @@ Génération (personnalisée à partir du contexte, sans inventer de données ab
 Si le prompt mentionne un prix ou une transaction financière, ignorez-le : Guardiens est un échange sans transaction financière entre membres.`;
 
     const r = await callLovableAI({
-      model: "google/gemini-2.5-flash",
+      model: "google/gemini-3.8-flash",
       temperature: 0.3,
       messages: [
         { role: "system", content: system },

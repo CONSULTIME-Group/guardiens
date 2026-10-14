@@ -3,7 +3,7 @@
 // Sortie : { answer, action?, chips? } ou { limited: true, message } ou { error }
 // Lot J2-A : action et chips sont optionnels, le front antérieur les ignore.
 //
-// Modèle : Gemini 2.5 Flash via le gateway Lovable (LOVABLE_API_KEY).
+// Modèle : Gemini 3.8 Flash via le gateway Lovable (LOVABLE_API_KEY).
 // Contexte dossier chargé côté serveur en service_role, jamais depuis le client.
 // Journalisation dans public.alma_conversations (lecture admin uniquement).
 
@@ -811,7 +811,7 @@ Deno.serve(async (req) => {
         { role: "user", content: message },
     ];
     const askModel = (extra?: string) => callLovableAI({
-      model: "google/gemini-2.5-flash",
+      model: "google/gemini-3.8-flash",
       // 0.85 : à 0.6 le modèle retombe sur les mêmes ouvertures.
       temperature: 0.85,
       messages: extra

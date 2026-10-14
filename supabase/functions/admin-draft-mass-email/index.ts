@@ -1,5 +1,5 @@
 // Assistant IA de rédaction d'emails de masse (Guardiens).
-// Utilise la passerelle Lovable AI (google/gemini-2.5-pro) avec response_format JSON.
+// Utilise la passerelle Lovable AI (google/gemini-3.1-pro-preview) avec response_format JSON.
 import { requireAdminOrServiceRole } from "../_shared/require-admin.ts";
 
 const corsHeaders = {
@@ -203,7 +203,7 @@ Deno.serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-pro",
+        model: "google/gemini-3.1-pro-preview",
         response_format: { type: "json_object" },
         messages: [
           { role: "system", content: systemPrompt },
