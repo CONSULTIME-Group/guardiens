@@ -14,7 +14,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useFeatureFlag, getFlag } from "@/hooks/useFeatureFlag";
 import { useAffinityOnboardingStatus } from "@/hooks/useAffinityOnboardingStatus";
 import { isPublishPath, rememberPublishIntent } from "@/lib/postOnboardingIntent";
-import { isAffinityOnboardingSnoozed, isGateAlwaysOpenPath } from "@/lib/onboardingGateRules";
+import { isAffinityOnboardingSnoozed, isGateAlwaysOpenPath, isGateOpenProfileFocus } from "@/lib/onboardingGateRules";
 
 /** Lot 1 : compte arrivée v2 (copie locale de src/lib/arrivalFlag.ts, évite un module de plus dans la coquille). */
 const isArrivalV2Account = (f: { enabled: boolean; appliesSince: string | null }, created: string | null | undefined) =>
@@ -52,6 +52,8 @@ const OnboardingGate = () => {
     // Lot J1 : publier une première demande passe avant l'onboarding
     // affinité ; il est proposé après la publication (page suivante).
     if (isGateAlwaysOpenPath(path) || isPublishPath(path)) return;
+    // Lot Z2 (B-15) : « Dispo » (/profile?focus=availability) reste ouvert.
+    if (isGateOpenProfileFocus(path, location.search)) return;
     // Lot G1 : « Plus tard » reporte la porte de 24 h.
     if (isAffinityOnboardingSnoozed()) return;
     const redirect = `${location.pathname}${location.search}${location.hash}`;

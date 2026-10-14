@@ -45,6 +45,7 @@ import { sitterNextStep } from "@/lib/dashboardNextStep";
 
 import { useIsNewSitter } from "@/hooks/useIsNewUser";
 import { useSitterTopAffinitySits } from "@/hooks/useSitterTopAffinitySits";
+import { SITTER_APPLICATIONS_PATH } from "@/lib/sitterApplicationsLink";
 
 export const SITTER_ENTRAIDE_HEADLINE = "Entre deux gardes, un coup de main près de chez vous.";
 
@@ -150,7 +151,7 @@ const SitterDashboard = () => {
 
   // Rangée « À faire » : actions réelles en attente, 3 au plus, dans cet ordre.
   const todos: CockpitTodo[] = [];
-  if ((pendingAppsCount ?? 0) > 0) todos.push({ key: "apps", label: "Candidatures en attente de réponse", to: "/sits", count: pendingAppsCount });
+  if ((pendingAppsCount ?? 0) > 0) todos.push({ key: "apps", label: "Candidatures en attente de réponse", to: SITTER_APPLICATIONS_PATH, count: pendingAppsCount });
   if ((unreadCount ?? 0) > 0) todos.push({ key: "messages", label: "Messages à lire", to: "/messages", count: unreadCount });
   if (!postalCode) todos.push({ key: "postal", label: "Votre code postal", to: "/profile?focus=postal_code" });
   if (helpsWithMissing) todos.push({ key: "helps", label: "Votre phrase d'entraide", to: "/ma-ligne" });

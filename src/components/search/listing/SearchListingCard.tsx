@@ -11,6 +11,7 @@ import { useDepartementNames } from "@/hooks/useDepartementNames";
 import { departementNameFromCode, formatCityDepartement } from "@/lib/locationLabel";
 import { sitCommune, sitLocationLabel } from "@/lib/sitLocation";
 import { projetMetaLine, projetNatureLabel } from "@/lib/projets";
+import { STARTED_SIT_NOTICE, isStartedOpenSit } from "@/lib/sitStarted";
 
 
 import { PawPrint, Cat, Bird } from "lucide-react";
@@ -93,6 +94,8 @@ const SearchListingCard = ({
     return end.getTime() < today.getTime();
   })();
   const isInactive = isAssigned || isCompleted || isPast;
+  // Lot Z2 (A-12) : garde publiée dont le début est passé, sans gardien retenu.
+  const isStarted = !isMission && !isDemo && !isInactive && isStartedOpenSit(item as any);
   // Lot Y1 : une annonce au plafond reste ouverte et s'affiche comme les
   // autres en recherche ; « Candidatures complètes » se lit sur la fiche,
   // calculé à partir des candidatures vivantes. accepting_applications à
@@ -444,6 +447,9 @@ const SearchListingCard = ({
 
         {/* Bloc de pied de carte : épingle en bas pour aligner les cartes d'une rangée */}
         <div className="mt-auto">
+          {isStarted && (
+            <p className="mt-2 text-[11px] font-medium text-primary" data-testid="started-sit-notice">{STARTED_SIT_NOTICE}</p>
+          )}
           {isAssigned && (
             <p className="mt-2 text-[11px] text-muted-foreground italic">Cette garde a déjà trouvé son gardien.</p>
           )}

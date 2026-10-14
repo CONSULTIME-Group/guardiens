@@ -68,6 +68,8 @@ export const NOTIFICATION_KINDS: Readonly<Record<string, NotificationKind>> = {
   sit_unconfirmed: { tone: "warning", category: "garde" },
   sit_expired: { tone: "muted", category: "garde" },
   sit_republished: { tone: "info", category: "garde" },
+  // Lot Z2 : nouvelles dates d'une garde confirmée ou en cours (trigger serveur).
+  sit_dates_changed: { tone: "warning", category: "garde" },
   reminder_7days: { tone: "info", category: "garde" },
   reminder_48h: { tone: "warning", category: "garde" },
   review_reminder_j1: { tone: "info", category: "garde" },

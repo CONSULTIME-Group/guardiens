@@ -7,6 +7,7 @@ import { AlmaSignature, AlmaIntro } from './_alma-signature.tsx'
 import { AlmaSignoff } from './_alma-signoff.tsx'
 import { LegalFooter } from './_legal-footer.tsx'
 import type { TemplateEntry } from './registry.ts'
+import { missionAutoCloseCause } from '../mission-auto-close-copy.ts'
 
 const SITE_URL = 'https://guardiens.fr'
 
@@ -15,9 +16,11 @@ interface Props {
   missionTitle?: string
   missionId?: string
   ageDays?: number
+  /** Lot Z2 (C-14) : end_date_past, date_needed_past ou dormant_45d. */
+  reason?: string
 }
 
-const Email = ({ firstName, missionTitle = 'Votre mission', missionId, ageDays }: Props) => {
+const Email = ({ firstName, missionTitle = 'Votre mission', missionId, ageDays, reason }: Props) => {
   const publishUrl = `${SITE_URL}/petites-missions/creer?utm_source=email&utm_campaign=mission_auto_closed`
   const detailUrl = missionId ? `${SITE_URL}/petites-missions/${missionId}` : `${SITE_URL}/petites-missions`
   return (
@@ -31,7 +34,7 @@ const Email = ({ firstName, missionTitle = 'Votre mission', missionId, ageDays }
           <AlmaIntro firstName={firstName} />
           <Heading style={h1}>Votre mission a été clôturée</Heading>
           <Text style={p}>
-            La mission « {missionTitle} » a été clôturée automatiquement{ageDays ? ` après ${ageDays} jours sans activité` : ''}.
+            La mission « {missionTitle} » a été clôturée automatiquement, {missionAutoCloseCause(reason, ageDays)}.
             C'est un simple nettoyage pour garder le fil de l'entraide clair.
           </Text>
           <Text style={p}>
@@ -57,7 +60,7 @@ export const template = {
   component: Email,
   subject: (data: Record<string, any>) => `Votre mission « ${data?.missionTitle ?? 'mission'} » a été clôturée`,
   displayName: 'Mission clôturée automatiquement',
-  previewData: { firstName: 'Marie', missionTitle: 'Sortir mon chien mardi soir', missionId: 'demo', ageDays: 45 },
+  previewData: { firstName: 'Marie', missionTitle: 'Sortir mon chien mardi soir', missionId: 'demo', ageDays: 45, reason: 'dormant_45d' },
 } satisfies TemplateEntry
 
 const main = { backgroundColor: '#ffffff', fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif" }
