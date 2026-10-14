@@ -561,3 +561,21 @@ describe("GL, guide nommé d'après un pays (Beaujolais, 14/10/2026)", () => {
     expect(calls.some((u) => u.includes("q=69220"))).toBe(true);
   });
 });
+
+describe("GL5, commune nouvelle (Oullins, 14/10/2026)", () => {
+  it("« Oullins » trouve « Oullins-Pierre-Bénite » dans le même département, pas « Oulins »", async () => {
+    const { fn } = fakeFetch({
+      ban: (url: string) =>
+        url.includes("postcode=")
+          ? { features: [] }
+          : {
+              features: [
+                { geometry: { coordinates: [4.806746, 45.709441] }, properties: { name: "Oullins-Pierre-Bénite", score: 0.86, citycode: "69149", postcode: "69310", context: "69, Rhône" } },
+                { geometry: { coordinates: [1.47, 48.87] }, properties: { name: "Oulins", score: 0.7, citycode: "28293", context: "28, Eure-et-Loir" } },
+              ],
+            },
+    });
+    const c = await resolveGuideCenter({ city: "Oullins", postalCode: "69600", country: "FR", hint: null }, fn);
+    expect(c).toEqual({ lat: 45.709441, lon: 4.806746, country: "FR", region: "Rhône" });
+  });
+});

@@ -74,9 +74,14 @@ Deno.serve(async (req) => {
     const t0 = Date.now();
     const nowIso = () => new Date().toISOString();
 
-    // Guides en cours : ceux qui ont des requêtes dans guide_osm_requests.
+    // Guides en cours : ceux qui ont des requêtes dans guide_osm_requests, et
+    // ceux dont la recherche du centre attend sa réponse (lot GL5).
     const { data: activeRows } = await supabase.from("guide_osm_requests").select("city_guide_id");
-    const activeIds = [...new Set((activeRows ?? []).map((r: any) => r.city_guide_id))];
+    const { data: geocoding } = await supabase
+      .from("city_guides")
+      .select("id")
+      .eq("places_source_report->>detail", "geocodage_en_attente");
+    const activeIds = [...new Set([...(activeRows ?? []), ...(geocoding ?? []).map((g: any) => ({ city_guide_id: g.id }))].map((r: any) => r.city_guide_id))];
 
     let targets: any[] = [];
     if (slugs) {

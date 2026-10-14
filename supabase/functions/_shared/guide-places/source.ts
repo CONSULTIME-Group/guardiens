@@ -431,6 +431,23 @@ export function nominatimCountry(country: string, _postalCode?: string | null): 
   return c.toLowerCase();
 }
 
+/** Paramètres d'une recherche Nominatim (par commune ou en texte libre), partagés avec la recherche par la base. */
+export function nominatimParams(
+  city: string,
+  country: string,
+  postalCode: string | null | undefined,
+  mode: "city" | "q",
+): Record<string, string> {
+  return {
+    format: "jsonv2",
+    addressdetails: "1",
+    limit: "10",
+    [mode]: city.trim(),
+    countrycodes: nominatimCountry(country, postalCode),
+    "accept-language": "fr",
+  };
+}
+
 /** Types de résultat Nominatim qui désignent une localité (pas une baie ni un commerce). */
 const LOCALITY_TYPES = new Set(["city", "town", "village", "hamlet", "municipality", "suburb", "locality", "neighbourhood", "quarter"]);
 
@@ -563,7 +580,13 @@ export async function resolveGuideCenter(
       if (!r.ok) return null;
       const data = await r.json();
       return (data?.features ?? [])
-        .filter((f: any) => Number(f?.properties?.score ?? 0) >= 0.6 && normName(String(f?.properties?.name ?? "")) === normName(city))
+        // Nom exact, ou commune nouvelle qui commence par le nom du guide
+        // (« Oullins » devenue « Oullins-Pierre-Bénite », code postal changé).
+        .filter((f: any) => {
+          const n = normName(String(f?.properties?.name ?? ""));
+          const c = normName(city);
+          return Number(f?.properties?.score ?? 0) >= 0.6 && (n === c || n.startsWith(`${c} `));
+        })
         // Sans le code postal exact (« 69000 » pour Lyon), même département exigé.
         .filter((f: any) => withPostcode || !dept || String(f?.properties?.citycode ?? f?.properties?.postcode ?? "").startsWith(dept))
         .map((f: any) => ({
@@ -601,14 +624,7 @@ export async function resolveGuideCenter(
       // Recherche par commune d'abord, puis en texte libre réduit aux
       // localités : Taravao n'est trouvé qu'en texte libre (mesure du 14/10/2026).
       const search = async (mode: "city" | "q") => {
-        const params = new URLSearchParams({
-          format: "jsonv2",
-          addressdetails: "1",
-          limit: "10",
-          [mode]: city,
-          countrycodes: nominatimCountry(country, input.postalCode),
-          "accept-language": "fr",
-        });
+        const params = new URLSearchParams(nominatimParams(city, country, input.postalCode, mode));
         const r = await fetchFn(`https://nominatim.openstreetmap.org/search?${params}`, { headers: UA });
         if (!r.ok) return null;
         const data = (await r.json()) as (NominatimSearchHit & { addresstype?: string; type?: string })[];
@@ -620,7 +636,10 @@ export async function resolveGuideCenter(
       let hits = await search("city");
       if (hits && hits.length === 0) hits = await search("q");
       if (hits) {
-        const best = pickNearest(hits, input.hint);
+        // Hors BAN, le lieu du propriétaire peut être approximatif (Taravao :
+        // 60 km, mesure du 14/10/2026) : 100 km de tolérance, assez pour écarter
+        // un homonyme lointain (Saint-Ludger-de-Milot à 300 km).
+        const best = pickNearest(hits, input.hint, 100);
         if (!best && hits.length > 0) return null;
         if (best) {
           const region = best.address.state ?? best.address.region ?? best.address.county ?? null;
