@@ -71,7 +71,7 @@ const MentionsLegales = () => {
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">6. Statut d'hébergeur et d'intermédiaire</h2>
           <p>
-            Pour les contenus publiés par les membres (annonces, profils, photos, avis, messages), Guardiens a la qualité d'hébergeur au sens de l'article 6-I-2 de la loi n° 2004-575 du 21 juin 2004 pour la confiance dans l'économie numérique (LCEN). Guardiens met en relation les membres et reste extérieur aux accords qu'ils concluent entre eux, gardes comme coups de main.
+            Pour les contenus publiés par les membres (annonces, profils, photos, avis, messages), Guardiens a la qualité d'hébergeur au sens de la loi n° 2004-575 du 21 juin 2004 pour la confiance dans l'économie numérique (LCEN) et du règlement (UE) 2022/2065 sur les services numériques. Guardiens met en relation les membres et reste extérieur aux accords qu'ils concluent entre eux, gardes comme coups de main.
           </p>
           <p>
             Avant toute garde ou tout coup de main, chaque membre vérifie la couverture de son assurance responsabilité civile et, pour le propriétaire, de son assurance multirisque habitation.

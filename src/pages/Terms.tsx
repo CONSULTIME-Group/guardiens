@@ -71,7 +71,7 @@ const Terms = () => {
           <p>La Plateforme combine deux régimes juridiques distincts, qui déterminent l'étendue de la responsabilité de Guardiens&nbsp;:</p>
           <ul className="list-disc pl-6 space-y-1">
             <li><strong className="text-foreground">Régime «&nbsp;éditeur&nbsp;»</strong> pour les contenus éditoriaux Guardiens (guides locaux, fiches races, articles, pages institutionnelles, charte graphique). Guardiens en assume la responsabilité éditoriale au sens de la loi du 29 juillet 1881 et de la LCEN.</li>
-            <li><strong className="text-foreground">Régime «&nbsp;hébergeur&nbsp;»</strong> au sens de l'article 6-I-2 de la LCEN pour les contenus utilisateurs (annonces, profils, photos, avis, messages, candidatures). Guardiens n'a pas d'obligation générale de surveillance&nbsp;; sa responsabilité ne peut être engagée du fait de ces contenus que si, dûment notifiée dans les conditions de l'article 14, elle n'a pas agi promptement pour les retirer.</li>
+            <li><strong className="text-foreground">Régime «&nbsp;hébergeur&nbsp;»</strong> au sens de la LCEN et du DSA pour les contenus utilisateurs (annonces, profils, photos, avis, messages, candidatures). Guardiens n'a pas d'obligation générale de surveillance&nbsp;; sa responsabilité ne peut être engagée du fait de ces contenus que si, dûment notifiée dans les conditions de l'article 14, elle n'a pas agi promptement pour les retirer.</li>
           </ul>
           <p>
             La Plateforme constitue par ailleurs un service intermédiaire au sens du Règlement (UE) 2022/2065 du 19 octobre 2022 (Digital Services Act, ci-après «&nbsp;DSA&nbsp;»).
@@ -280,7 +280,7 @@ const Terms = () => {
           {/* 14 */}
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">14. Modération, signalement, recours (LCEN &amp; DSA)</h2>
           <h3 className="font-heading text-lg font-semibold text-foreground pt-2">14.1 Notification de contenus illicites</h3>
-          <p>Conformément à l'article 16 du DSA et à l'article 6-I-5 de la LCEN, tout utilisateur peut signaler un contenu qu'il estime illicite via le formulaire de signalement intégré à chaque fiche, ou par email à <a href="mailto:contact@guardiens.fr" className="text-primary hover:underline">contact@guardiens.fr</a>. La notification doit comprendre&nbsp;:</p>
+          <p>Conformément à l'article 16 du DSA et à la LCEN, tout utilisateur peut signaler un contenu qu'il estime illicite via le formulaire de signalement intégré à chaque fiche, ou par email à <a href="mailto:contact@guardiens.fr" className="text-primary hover:underline">contact@guardiens.fr</a>. La notification doit comprendre&nbsp;:</p>
           <ul className="list-disc pl-6 space-y-1">
             <li>l'identification précise du contenu (URL ou capture)&nbsp;;</li>
             <li>les motifs précis du signalement et la qualification juridique alléguée&nbsp;;</li>
