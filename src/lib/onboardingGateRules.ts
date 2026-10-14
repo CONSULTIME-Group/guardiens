@@ -46,6 +46,21 @@ export function isGateAlwaysOpenPath(path: string | null | undefined): boolean {
   return ALWAYS_OPEN_PREFIXES.some((p) => matchesPrefix(path, p));
 }
 
+/**
+ * Lot Z2 (audit B-15 du 13/10/2026) : le bouton central « Dispo » du gardien
+ * (lot M2, bottomNavFab) mène à /profile?focus=availability. Cette adresse
+ * précise reste ouverte : déclarer sa disponibilité ne passe pas par le
+ * questionnaire. Le reste de /profile garde la porte.
+ */
+export function isGateOpenProfileFocus(path: string | null | undefined, search: string | null | undefined): boolean {
+  if (path !== "/profile") return false;
+  try {
+    return new URLSearchParams(search ?? "").get("focus") === "availability";
+  } catch {
+    return false;
+  }
+}
+
 const SNOOZE_KEY = "guardiens_affinity_snooze_until";
 export const AFFINITY_SNOOZE_MS = 24 * 3600 * 1000;
 

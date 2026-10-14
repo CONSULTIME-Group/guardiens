@@ -43,6 +43,8 @@ import {
 } from "@/lib/intlSitSearch";
 import { MAP_TILE_WORLD_URL, MAP_TILE_WORLD_ATTRIBUTION, MAP_TILE_WORLD_MAX_ZOOM } from "@/lib/mapTiles";
 import fallbackMarrakech from "@/assets/fallback-marrakech.webp";
+// Lot Z2 (A-12) : liste issue de fetchIntlOpenSits, annonces publiées seulement.
+import { STARTED_SIT_NOTICE, isStartedOpenSit } from "@/lib/sitStarted";
 
 const CANONICAL = "https://guardiens.fr/annonces/international";
 const RADII = [25, 50, 100, 200];
@@ -531,6 +533,9 @@ export default function InternationalListings() {
                           </p>
                           <h3 className="font-heading text-base font-medium text-foreground line-clamp-2 mb-2">{s.title || t("intl_listings.default_title")}</h3>
                           <p className="text-xs text-muted-foreground">{formatPeriod(s.start_date, s.end_date)}</p>
+                          {isStartedOpenSit({ status: "published", start_date: s.start_date, end_date: s.end_date }) && (
+                            <p className="mt-1 text-xs font-medium text-primary" data-testid="started-sit-notice">{STARTED_SIT_NOTICE}</p>
+                          )}
                         </div>
                       </Link>
                     );

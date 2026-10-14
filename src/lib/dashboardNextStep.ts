@@ -11,6 +11,15 @@
  */
 import { ALMA_PROFILE_NUDGE_THRESHOLD } from "@/lib/alma/profileNudge";
 
+/**
+ * Lot Z2 (audit E-17 du 13/10/2026) : SitterProfile ne lit que ?section= et
+ * ?focus= ; les anciens liens ?tab=profil et ?tab=alertes ouvraient la
+ * section par défaut. Photo et bio vivent dans la section identité, le code
+ * postal se rejoint par le même lien que « À faire ».
+ */
+export const SITTER_PROFILE_IDENTITY_PATH = "/profile?section=identite";
+export const SITTER_POSTAL_CODE_PATH = "/profile?focus=postal_code";
+
 export interface RailNextStep {
   eyebrow: string;
   title: string;
@@ -171,7 +180,7 @@ export const sitterNextStep = (input: SitterNextStepInput): RailNextStep | null 
       title: "Ajoutez une photo de profil",
       phrase: "Quelques détails suffisent pour rassurer les propriétaires.",
       ctaLabel: "Compléter mon profil",
-      ctaTo: "/profile?tab=profil",
+      ctaTo: SITTER_PROFILE_IDENTITY_PATH,
       progressPct: pct,
     };
   }
@@ -181,7 +190,7 @@ export const sitterNextStep = (input: SitterNextStepInput): RailNextStep | null 
       title: "Écrivez votre bio",
       phrase: "Quelques détails suffisent pour rassurer les propriétaires.",
       ctaLabel: "Compléter mon profil",
-      ctaTo: "/profile?tab=profil",
+      ctaTo: SITTER_PROFILE_IDENTITY_PATH,
       progressPct: pct,
     };
   }
@@ -191,7 +200,7 @@ export const sitterNextStep = (input: SitterNextStepInput): RailNextStep | null 
       title: "Confirmez votre code postal",
       phrase: "C'est ce qui déclenche les alertes près de chez vous.",
       ctaLabel: "Compléter mon profil",
-      ctaTo: "/profile?tab=alertes",
+      ctaTo: SITTER_POSTAL_CODE_PATH,
       progressPct: pct,
     };
   }
@@ -206,7 +215,7 @@ export const sitterNextStep = (input: SitterNextStepInput): RailNextStep | null 
     };
   }
   if (pct < 100) {
-    const deepLink = topMissingHref(missing) ?? "/profile?tab=profil";
+    const deepLink = topMissingHref(missing) ?? SITTER_PROFILE_IDENTITY_PATH;
     if (pct >= 90) {
       return {
         eyebrow: "Votre prochain pas",
@@ -320,7 +329,7 @@ export interface SitterActionInput {
 }
 
 export const sitterActionStep = (input: SitterActionInput): RailActionStep => {
-  const secondaryLink = profileSecondaryLink(input.missing, "/profile?tab=profil");
+  const secondaryLink = profileSecondaryLink(input.missing, SITTER_PROFILE_IDENTITY_PATH);
   const open = (m: RailNearbyMission) => !m.status || m.status === "open";
   const sit = input.nearbyListings.find((s) => s.id && s.id !== input.starSitId);
   if (sit) {
