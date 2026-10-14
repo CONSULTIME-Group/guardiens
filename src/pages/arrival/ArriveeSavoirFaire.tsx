@@ -17,6 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { SKILL_CATEGORIES, deriveCategoriesFromCompetences } from "@/lib/skills/categories";
 import { afterG4, readCarry } from "@/lib/arrival";
 import { hasMoneyMention } from "@/lib/missionContentGuards";
+import { HOMEWORK_SKILL_NOTE, isHomeworkSkill } from "@/lib/missionHomework";
 import { ArrivalShell, Eyebrow, Gouache, MultiChoice, SaveError, trackArrival, useArrivalT, useArrivalViewed } from "@/components/arrival/ArrivalUI";
 const spotJardin = new URL("../../assets/missions/spot-jardin-160.webp", import.meta.url).href;
 
@@ -138,6 +139,10 @@ const ArriveeSavoirFaire = () => {
             onChange={(v) => choose([...competences.filter((c) => !list.includes(c)), ...v])} />
         );
       })}
+      {/* Lot J2d : conditions de l'aide aux devoirs (CGU 7.4). */}
+      {competences.some(isHomeworkSkill) && (
+        <p role="note" className="text-sm text-muted-foreground">{HOMEWORK_SKILL_NOTE}</p>
+      )}
       <div className="space-y-2">
         <Label htmlFor="g4-free">{t("arrival.g4.free_label")}</Label>
         <Textarea id="g4-free" className="arrival-field" rows={3} maxLength={G4_MAX_HELPS_WITH} value={helpsWith} onChange={(e) => setHelpsWith(e.target.value)} />

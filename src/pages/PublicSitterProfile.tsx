@@ -2,6 +2,8 @@ import { travelZoneLabels, countryName } from "@/lib/travelZones";
 import { formatRatingFr } from "@/lib/formatRatingFr";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { splitReviewsByRole, sitterReviewsHeading } from "@/lib/publicProfileReviews";
+import { sortReviewsNewestFirst } from "@/lib/reviewDates";
+import ReviewDatesText from "@/components/reviews/ReviewDatesText";
 import { getMemberAvatarUrl, getMemberPublicFirstName, getMemberInitial } from "@/lib/memberUtils";
 import { capitalizeFirstName } from "@/lib/displayName";
 import { buildPublicSitterProfilePresentation } from "@/lib/publicSitterProfilePresentation";
@@ -351,9 +353,7 @@ export default function PublicSitterProfile() {
                 </Avatar>
                 <div className="flex flex-col">
                   <span className="text-sm font-medium text-foreground leading-tight font-body">{authorName}</span>
-                  <span className="text-[11px] text-muted-foreground leading-tight font-body">
-                    {format(new Date(r.created_at), "MMMM yyyy", { locale: fr })}
-                  </span>
+                  <ReviewDatesText review={r} className="text-[11px] text-muted-foreground leading-tight font-body" />
                 </div>
               </div>
               {r.overall_rating !== null && (
@@ -679,7 +679,9 @@ export default function PublicSitterProfile() {
 
 
       if (reviewsRes.data) {
-        const enrichedReviews = await hydrateReviewers(reviewsRes.data as any[]);
+        // Lot J2d (CGU 9.7) : du plus récent au plus ancien, quelle que soit
+        // la note ; dates de la garde portées par public_profile_reviews.
+        const enrichedReviews = await hydrateReviewers(sortReviewsNewestFirst(reviewsRes.data as any[]));
         if (!active) return;
         setReviews(enrichedReviews);
         setReviewCount(reviewsRes.data.length);
@@ -2462,9 +2464,7 @@ export default function PublicSitterProfile() {
                                 {'★'.repeat(stars)}{'☆'.repeat(5 - stars)}
                               </span>
                             )}
-                            <span className="text-xs text-foreground/40 font-body ml-auto">
-                              {new Date(review.created_at).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
-                            </span>
+                            <ReviewDatesText review={review} className="text-xs text-foreground/60 font-body ml-auto" />
                           </div>
                           {review.comment && (
                             <p className="text-sm text-foreground/70 font-body leading-relaxed">{review.comment}</p>

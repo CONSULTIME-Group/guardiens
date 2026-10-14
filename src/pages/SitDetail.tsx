@@ -165,11 +165,9 @@ const SitDetail = () => {
         supabase.from("public_profiles").select("*").eq("id", sitData.user_id).limit(1),
         supabase.from("properties").select("*").eq("id", sitData.property_id).limit(1),
         supabase.from("owner_profiles").select("*").eq("user_id", sitData.user_id).limit(1),
-        supabase
-          .from("reviews")
-          .select("*")
-          .eq("reviewee_id", sitData.user_id)
-          .eq("published", true),
+        // Lot J2d : même source que la liste de l'onglet Avis (ReviewsDisplay),
+        // avis publiés et validés hors annulation, dates de la garde comprises.
+        supabase.rpc("public_profile_reviews", { p_user_id: sitData.user_id }),
         // Galerie propriétaire = source de vérité unique pour les photos.
         supabase
           .from("owner_gallery")
