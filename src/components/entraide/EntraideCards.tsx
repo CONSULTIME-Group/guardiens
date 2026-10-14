@@ -4,13 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import MissionBadgesReceived, { type MissionBadgeRow } from "@/components/missions/MissionBadgesReceived";
 import HelpCounts from "@/components/entraide/HelpCounts";
-import { categoryInitial } from "@/lib/entraideHubModel";
 import { startConversation } from "@/lib/conversation";
 import { helperActivityLabel, helperFirstMessage, helperSkills } from "@/lib/helperDisplay";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { capitalizeFirstName, publicFirstName } from "@/lib/displayName";
 import { avatarImageUrl } from "@/lib/storageImage";
+import { missionSpotKey } from "@/lib/missionSpot";
+import { MISSION_SPOT_LARGE, MISSION_SPOT_SMALL } from "@/components/entraide/missionSpotImages";
 
 export interface EntraideNeed {
   id: string;
@@ -65,10 +66,12 @@ export const NeedCard = ({ need, distance, showDistance, compact = false }: {
   compact?: boolean;
 }) => {
   const photo = need.photos?.[0] || null;
-  // Sans photo de mission : portrait public de l'auteur, sinon en-tête typographique.
+  // Sans photo de mission : portrait public de l'auteur, sinon gouache de la
+  // catégorie (lot P3).
   const [avatarFailed, setAvatarFailed] = useState(false);
   const authorAvatar = !photo && !avatarFailed ? need.author_avatar_url || null : null;
   const authorName = capitalizeFirstName(need.author_first_name) || null;
+  const spot = !photo && !authorAvatar ? MISSION_SPOT_LARGE[missionSpotKey(need.category, need.title)] : null;
   return (
     <article className={`border border-border bg-card ${compact ? "p-3" : "p-4 sm:p-5"} rounded-lg`}>
       {/* Photo réelle en tête de carte, ou en-tête typographique sobre avec ville et date. */}
@@ -98,16 +101,25 @@ export const NeedCard = ({ need, distance, showDistance, compact = false }: {
           />
         </div>
       ) : (
-        <div className={`rounded-md border border-border bg-muted/40 ${compact ? "mb-3 px-3 py-2.5" : "mb-4 px-4 py-3"}`}>
-          <p className="text-xs font-semibold text-primary">{locationLabel(need.city, distance, showDistance)}</p>
-          <p className="mt-0.5 text-xs text-muted-foreground">{dateLabel(need)}</p>
+        <div className={`flex aspect-[4/3] items-center justify-center overflow-hidden rounded-md border border-border bg-muted/40 ${compact ? "mb-3" : "mb-4"}`}>
+          <img
+            src={spot ?? undefined}
+            alt=""
+            aria-hidden="true"
+            width={480}
+            height={480}
+            loading="lazy"
+            decoding="async"
+            data-testid="need-card-spot"
+            className="h-[85%] w-auto object-contain"
+          />
         </div>
       )}
       <h3 className="font-heading text-lg font-semibold text-foreground">{need.title}</h3>
       <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
         {photo && <span>{dateLabel(need)}</span>}
-        {!photo && authorAvatar && <span>{locationLabel(need.city, distance, showDistance)}</span>}
-        {!photo && authorAvatar && <span>{dateLabel(need)}</span>}
+        {!photo && <span>{locationLabel(need.city, distance, showDistance)}</span>}
+        {!photo && <span>{dateLabel(need)}</span>}
         {need.response_count > 0 && (
           <span>{need.response_count} personne{need.response_count > 1 ? "s ont" : " a"} dit je peux</span>
         )}
@@ -133,7 +145,8 @@ export const NeedRow = ({ need, distance, state, onCanHelp, pending = false }: {
   pending?: boolean;
 }) => {
   const photo = need.photos?.[0] || null;
-  // Sans photo de mission : portrait public de l'auteur, sinon initiale de catégorie.
+  // Sans photo de mission : portrait public de l'auteur, sinon gouache de la
+  // catégorie (lot P3).
   const [avatarFailed, setAvatarFailed] = useState(false);
   const authorAvatar = !photo && !avatarFailed ? need.author_avatar_url || null : null;
   const authorName = capitalizeFirstName(need.author_first_name) || null;
@@ -170,12 +183,17 @@ export const NeedRow = ({ need, distance, state, onCanHelp, pending = false }: {
           className="h-[72px] w-[72px] shrink-0 rounded-md border border-border object-cover"
         />
       ) : (
-        <span
+        <img
+          src={MISSION_SPOT_SMALL[missionSpotKey(need.category, need.title)]}
+          alt=""
           aria-hidden="true"
-          className="flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-md bg-secondary font-heading text-xl font-semibold text-secondary-foreground"
-        >
-          {categoryInitial(need.category)}
-        </span>
+          width={72}
+          height={72}
+          loading="lazy"
+          decoding="async"
+          data-testid="need-row-spot"
+          className="h-[72px] w-[72px] shrink-0 rounded-md border border-border bg-muted/40 object-contain p-1"
+        />
       )}
       <div className="min-w-0 flex-1">
         <h3 className="line-clamp-2 sm:line-clamp-1 font-heading text-base font-semibold text-foreground">

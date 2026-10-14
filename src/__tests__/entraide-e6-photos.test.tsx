@@ -33,9 +33,13 @@ describe("Lot E6 partie 3, photos des besoins", () => {
     expect(html).toMatch(/aspect-\[4\/3\]/);
   });
 
-  it("n'affiche pas d'image générique sans photo et garde un en-tête typographique sobre avec ville et date", () => {
+  // Lot P3 (14/10/2026, décision de Jérémie) : sans photo ni portrait, la carte
+  // montre la gouache de la catégorie, jamais une photo générique ; ville et
+  // date restent sous le titre.
+  it("sans photo : gouache de la catégorie, avec ville et date", () => {
     const html = renderNeed({ ...baseNeed, photos: null });
-    expect(html).not.toContain("<img");
+    expect(html).toContain('data-testid="need-card-spot"');
+    expect(html).toMatch(/spot-chat-480/);
     expect(html).toContain("Lyon");
     expect(html).toContain("À convenir ensemble");
   });
