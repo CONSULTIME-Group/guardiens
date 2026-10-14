@@ -43,7 +43,7 @@ const DisputeReviewDialog = ({ open, onOpenChange, reviewId, onSubmitted }: Disp
       toast.error(error.message || "Une erreur est survenue.");
       return;
     }
-    toast.success("Contestation envoyée. Un administrateur l'examinera sous 7 jours.");
+    toast.success("Contestation envoyée. Notre équipe l'examine.");
     setCategory("");
     setReason("");
     onOpenChange(false);
@@ -60,7 +60,7 @@ const DisputeReviewDialog = ({ open, onOpenChange, reviewId, onSubmitted }: Disp
           </DialogTitle>
           <DialogDescription>
             Votre demande sera examinée par un administrateur. Si elle est acceptée, l'avis sera retiré.
-            Délai : 30 jours après publication.
+            Délai : 30 jours après le dépôt de l'avis.
           </DialogDescription>
         </DialogHeader>
 
