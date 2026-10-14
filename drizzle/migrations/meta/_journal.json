@@ -589,6 +589,13 @@
       "when": 1791974127646,
       "tag": "0083_c1_faq_sans_engagements",
       "breakpoints": true
+    },
+    {
+      "idx": 84,
+      "version": "7",
+      "when": 1791974152585,
+      "tag": "0084_j1_preuve_acceptation",
+      "breakpoints": true
     }
   ]
 }

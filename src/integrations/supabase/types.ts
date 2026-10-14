@@ -6502,6 +6502,51 @@ export type Database = {
           },
         ]
       }
+      legal_acceptances: {
+        Row: {
+          accepted_at: string
+          document: string
+          id: string
+          source: string
+          user_id: string
+          version: string
+        }
+        Insert: {
+          accepted_at?: string
+          document: string
+          id?: string
+          source: string
+          user_id: string
+          version: string
+        }
+        Update: {
+          accepted_at?: string
+          document?: string
+          id?: string
+          source?: string
+          user_id?: string
+          version?: string
+        }
+        Relationships: []
+      }
+      legal_document_versions: {
+        Row: {
+          document: string
+          published_on: string
+          version: string
+        }
+        Insert: {
+          document: string
+          published_on: string
+          version: string
+        }
+        Update: {
+          document?: string
+          published_on?: string
+          version?: string
+        }
+        Relationships: []
+      }
       location_profiles: {
         Row: {
           activities: string
@@ -14044,6 +14089,14 @@ export type Database = {
           _source: string
         }
         Returns: undefined
+      }
+      record_legal_acceptance_for: {
+        Args: { p_source: string; p_user: string }
+        Returns: undefined
+      }
+      record_my_legal_acceptance: {
+        Args: { p_source: string }
+        Returns: boolean
       }
       refresh_all_sitter_reply_stats: { Args: never; Returns: number }
       refresh_sitter_reply_stats: {
