@@ -26,6 +26,7 @@ import { useAccessLevel, MIN_COMPLETION_TO_APPLY } from "@/hooks/useAccessLevel"
 import { canPublishSmallMission, shouldNudgeProfileCompletion } from "@/lib/missionPublishAccess";
 import MissionPhotoUpload from "@/components/missions/MissionPhotoUpload";
 import { geocodeCity } from "@/lib/geocode";
+import { CHILD_CARE_EXCLUDED_MESSAGE, CHILD_CARE_EXCLUDED_TITLE, isChildCareRequest } from "@/lib/missionChildCare";
 import { MISSION_PLACE_NOT_FOUND, officialPostalCentre, resolveMissionCoords, type Coords } from "@/lib/missionPlace";
 import { trackFirstAction, trackEvent } from "@/lib/analytics";
 import { recordMissionCreatedAttribution } from "@/lib/campaignAttribution";
@@ -451,6 +452,14 @@ const CreateSmallMission = () => {
       return;
     }
 
+    // Lot E12 : la garde d'enfants est exclue de l'Entraide (CGU 7).
+    if (isChildCareRequest(title, description)) {
+      toast({ title: CHILD_CARE_EXCLUDED_TITLE, description: CHILD_CARE_EXCLUDED_MESSAGE, variant: "destructive" });
+      setStep(2);
+      setDescTouched(true);
+      return;
+    }
+
     // Une annonce d'entraide est une page publique indexable : les coordonnées
     // personnelles y sont bloquantes, contrairement à la messagerie privée.
     const contactKinds = detectContactDetails(`${title}\n${description}`);
@@ -531,6 +540,12 @@ const CreateSmallMission = () => {
       }
       if (hint === "account_not_active" || msg.includes("account_not_active")) {
         toast({ title: "Compte non actif", description: "Contactez le support pour rétablir l'accès à l'entraide.", variant: "destructive" });
+        return;
+      }
+      // Lot E12 : la base refuse aussi un besoin de garde d'enfants.
+      if (hint === "child_care_in_mutual_aid" || msg.includes("child_care_in_mutual_aid")) {
+        toast({ title: CHILD_CARE_EXCLUDED_TITLE, description: CHILD_CARE_EXCLUDED_MESSAGE, variant: "destructive" });
+        setStep(2);
         return;
       }
       // Lot X3b (C-09) : la base refuse aussi un besoin sans lieu situé.
