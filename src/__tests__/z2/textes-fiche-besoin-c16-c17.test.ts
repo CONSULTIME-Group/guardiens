@@ -14,7 +14,7 @@ const SRC = readFileSync("src/pages/SmallMissionDetail.tsx", "utf8");
 describe("C-16 et C-17, fiche du besoin", () => {
   it("plus de vocabulaire d'abonnement sous « Je peux »", () => {
     expect(SRC).not.toMatch(/Résiliable/i);
-    expect(SRC).toContain("Vous pouvez retirer votre réponse à tout moment");
+    expect(SRC).toContain("Vous pouvez retirer votre réponse tant que l'auteur n'a pas choisi");
   });
 
   it("le retrait de réponse existe bien sur la page", () => {

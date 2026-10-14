@@ -1503,14 +1503,14 @@ WHERE position($z2$ Nous déconseillons vivement de confirmer une garde sans cet
 UPDATE public.seo_city_pages
 SET content = replace(content,
   $z2$Nous déconseillons vivement de confirmer une garde sans qu'une rencontre préalable en personne ait eu lieu.$z2$,
-  $z2$Elle permet de faire connaissance en personne avant la garde.$z2$)
+  $z2$La rencontre permet de faire connaissance en personne avant la garde.$z2$)
 WHERE position($z2$Nous déconseillons vivement de confirmer une garde sans qu'une rencontre préalable en personne ait eu lieu.$z2$ in content) > 0;
 
 -- [137] R · 1 page (relecture du 14/10/2026)
 UPDATE public.seo_city_pages
 SET content = replace(content,
   $z2$Nous déconseillons vivement de confirmer une garde sans une rencontre physique préalable entre vous et la personne candidate.$z2$,
-  $z2$Elle permet de faire connaissance en personne avec la personne candidate.$z2$)
+  $z2$La rencontre permet de faire connaissance avec la personne candidate.$z2$)
 WHERE position($z2$Nous déconseillons vivement de confirmer une garde sans une rencontre physique préalable entre vous et la personne candidate.$z2$ in content) > 0;
 
 -- [138] R · 1 page (relecture du 14/10/2026)
@@ -1524,7 +1524,7 @@ WHERE position($z2$C'est essentiel pour établir la confiance et s'assurer que l
 UPDATE public.seo_city_pages
 SET content = replace(content,
   $z2$Nous déconseillons vivement de confirmer une garde sans une rencontre physique préalable entre vous et le gardien, à votre domicile.$z2$,
-  $z2$Elle permet de faire connaissance avec le gardien, à votre domicile.$z2$)
+  $z2$La rencontre permet de faire connaissance avec le gardien, à votre domicile.$z2$)
 WHERE position($z2$Nous déconseillons vivement de confirmer une garde sans une rencontre physique préalable entre vous et le gardien, à votre domicile.$z2$ in content) > 0;
 
 -- [140] R · 1 page (relecture du 14/10/2026)
@@ -1538,7 +1538,7 @@ WHERE position($z2$Cette étape est essentielle pour établir la confiance.$z2$ 
 UPDATE public.seo_city_pages
 SET content = replace(content,
   $z2$Nous déconseillons vivement de confirmer une garde sur notre plateforme sans qu'une rencontre en personne ait eu lieu entre le propriétaire et le gardien.$z2$,
-  $z2$Elle permet au propriétaire et au gardien de faire connaissance en personne.$z2$)
+  $z2$La rencontre permet au propriétaire et au gardien de faire connaissance en personne.$z2$)
 WHERE position($z2$Nous déconseillons vivement de confirmer une garde sur notre plateforme sans qu'une rencontre en personne ait eu lieu entre le propriétaire et le gardien.$z2$ in content) > 0;
 
 -- [142] R · 1 page (relecture du 14/10/2026)
@@ -1552,7 +1552,7 @@ WHERE position($z2$Cette étape est déterminante pour établir une relation de 
 UPDATE public.seo_city_pages
 SET content = replace(content,
   $z2$Nous déconseillons vivement de confirmer une garde sur Guardiens sans que le propriétaire et le gardien ne se soient rencontrés en personne.$z2$,
-  $z2$Elle permet au propriétaire et au gardien de faire connaissance en personne.$z2$)
+  $z2$La rencontre permet au propriétaire et au gardien de faire connaissance en personne.$z2$)
 WHERE position($z2$Nous déconseillons vivement de confirmer une garde sur Guardiens sans que le propriétaire et le gardien ne se soient rencontrés en personne.$z2$ in content) > 0;
 
 -- [144] R · 1 page (relecture du 14/10/2026)
@@ -2947,7 +2947,7 @@ WHERE position($z2$**Gardiens, plusieurs formules pour accéder aux annonces.**$
 UPDATE public.seo_city_pages
 SET content = replace(content,
   $z2$Pour connaître le détail de nos formules, vous pouvez consulter nos [tarifs](/tarifs).$z2$,
-  $z2$Pour connaître le détail de notre fonctionnement, vous pouvez consulter nos [tarifs](/tarifs).$z2$)
+  $z2$Pour connaître le détail de notre fonctionnement, vous pouvez consulter la page [Gratuité](/tarifs).$z2$)
 WHERE position($z2$Pour connaître le détail de nos formules, vous pouvez consulter nos [tarifs](/tarifs).$z2$ in content) > 0;
 
 -- --- 6. content · comparaison avec d'autres acteurs (« contrairement à d'autres plateformes ») ---
@@ -3084,7 +3084,7 @@ WHERE position($z2$Cela réduit considérablement l'anxiété de la séparation 
 UPDATE public.seo_city_pages
 SET content = replace(content,
   $z2$En évitant le changement d'environnement d'une pension, vous préservez le bien-être et l'équilibre de votre compagnon.$z2$,
-  $z2$En le laissant dans son environnement, vous préservez le bien-être et l'équilibre de votre compagnon.$z2$)
+  $z2$En laissant votre compagnon dans son environnement, vous préservez son bien-être et son équilibre.$z2$)
 WHERE position($z2$En évitant le changement d'environnement d'une pension, vous préservez le bien-être et l'équilibre de votre compagnon.$z2$ in content) > 0;
 
 -- [362] P · 2 pages (relecture du 14/10/2026)
@@ -3197,7 +3197,7 @@ WHERE position($z2$L'inscription est actuellement gratuite pour tous les membres
 UPDATE public.seo_city_pages
 SET intro_text = replace(intro_text,
   $z2$Mise en relation sans frais, logement offert pour le gardien.$z2$,
-  $z2$Guardiens est gratuit : le gardien est logé chez vous, vos animaux gardent leurs habitudes.$z2$)
+  $z2$Guardiens est gratuit. Le gardien est logé chez vous et vos animaux gardent leurs habitudes.$z2$)
 WHERE position($z2$Mise en relation sans frais, logement offert pour le gardien.$z2$ in intro_text) > 0;
 
 -- --- 12. intro_text · rencontre présentée comme une obligation, une règle, une étape ou une recommandation appuyée ---

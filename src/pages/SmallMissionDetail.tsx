@@ -1114,7 +1114,7 @@ const SmallMissionDetail = () => {
           )}
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
             <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Un service contre un service</span>
-            <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Vous pouvez retirer votre réponse à tout moment</span>
+            <span className="inline-flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Vous pouvez retirer votre réponse tant que l'auteur n'a pas choisi</span>
           </div>
         </div>
       );
