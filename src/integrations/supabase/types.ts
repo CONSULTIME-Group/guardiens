@@ -13429,6 +13429,7 @@ export type Database = {
         Args: { lat1: number; lat2: number; lon1: number; lon2: number }
         Returns: number
       }
+      guide_geocode_enqueue: { Args: { p_params: Json }; Returns: number }
       guide_homonym_slug: {
         Args: { p_country: string; p_postal: string; p_slug: string }
         Returns: string
