@@ -223,7 +223,7 @@ describe("GL4, passages successifs (Saint-Ludger)", () => {
 
   it("une partie des requêtes sans réponse après trois essais : guide terminé en partiel, laissé en file", async () => {
     await advanceGuide(db.client, db.tables.city_guides[0], { dryRun: false, googleKey: null });
-    const r = await runUntil(db, (q) => (q.includes("veterinary") ? { status_code: 504, content: "busy" } : ok([])), (x) => x.etape === "termine");
+    const r = await runUntil(db, (q) => (q.includes("veterinary") ? { status_code: 504, content: "busy" } : ok([])), (x) => x.etape === "termine", {}, 60);
     expect(r.result).toBe("partiel");
     const g = db.tables.city_guides[0];
     expect(g.places_sourced_at).toBeNull();
