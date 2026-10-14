@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { toast } from "sonner";
 import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
-import { CreditCard, Users, Crown, AlertTriangle, Clock, Gift, Plus, Minus, ShieldCheck, ShieldX, Search, Eye } from "lucide-react";
+import { CreditCard, Users, Crown, AlertTriangle, Clock, Plus, Minus, ShieldCheck, ShieldX, Search, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { avatarImageUrl } from "@/lib/storageImage";
 
@@ -96,26 +96,10 @@ const AdminSubscriptions = () => {
     const { sub, action, duration, motif } = actionModal;
     if (!sub) return;
 
-    if (action === "offer_premium") {
-      const months = parseInt(duration);
-      const expiresAt = new Date(Date.now() + months * 30 * 86400000).toISOString();
-      // Upsert subscription
-      const { error } = await supabase.from("subscriptions").upsert({
-        user_id: sub.user_id || sub.id,
-        plan: "annual_sitter" as any,
-        status: "active" as any,
-        started_at: new Date().toISOString(),
-        expires_at: expiresAt,
-      }, { onConflict: "user_id" });
-      if (error) { toast.error("Erreur"); return; }
-      await supabase.from("notifications").insert({
-        user_id: sub.user_id || sub.id, type: "subscription_offered",
-        title: "Accès Premium offert !",
-        body: `L'équipe Guardiens vous offre ${months} mois d'accès Premium. Motif : ${motif || "·"}.`,
-        link: "/dashboard",
-      });
-      toast.success("Premium offert");
-    } else if (action === "extend") {
+    // Lot Z2 : l'action « Offrir Premium » est retirée. Guardiens est gratuit
+    // pour tous (PRICING_IS_ACTIVE = false) et aucune notification
+    // subscription_offered n'a jamais été envoyée (base, 14/10/2026).
+    if (action === "extend") {
       const months = parseInt(duration);
       const currentExpiry = sub.expires_at ? new Date(sub.expires_at) : new Date();
       const newExpiry = new Date(currentExpiry.getTime() + months * 30 * 86400000).toISOString();
@@ -183,7 +167,7 @@ const AdminSubscriptions = () => {
             <div className="p-2 rounded-lg bg-success-soft"><CreditCard className="h-5 w-5 text-success" /></div>
             <div>
               <p className="text-2xl font-bold">Gratuit</p>
-              <p className="text-xs text-muted-foreground">Revenus (offre gratuite pour l'instant)</p>
+              <p className="text-xs text-muted-foreground">Guardiens est gratuit</p>
             </div>
           </CardContent>
         </Card>
@@ -272,9 +256,6 @@ const AdminSubscriptions = () => {
                       <Button variant="ghost" size="icon" title="Voir profil" onClick={() => navigate(`/gardiens/${sub.user_id}`)}>
                         <Eye className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" title="Offrir Premium" onClick={() => setActionModal({ open: true, sub, action: "offer_premium", duration: "1", motif: "" })}>
-                        <Gift className="h-4 w-4 text-primary" />
-                      </Button>
                       <Button variant="ghost" size="icon" title="Prolonger" onClick={() => setActionModal({ open: true, sub, action: "extend", duration: "1", motif: "" })}>
                         <Plus className="h-4 w-4" />
                       </Button>
@@ -301,7 +282,6 @@ const AdminSubscriptions = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {actionModal.action === "offer_premium" && "Offrir Premium gratuit"}
               {actionModal.action === "extend" && "Prolonger l'abonnement"}
               {actionModal.action === "grant_founder" && "Attribuer le badge Fondateur"}
               {actionModal.action === "revoke_founder" && "Révoquer le badge Fondateur"}
@@ -309,7 +289,7 @@ const AdminSubscriptions = () => {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
-            {(actionModal.action === "offer_premium" || actionModal.action === "extend") && (
+            {actionModal.action === "extend" && (
               <Select value={actionModal.duration} onValueChange={(v) => setActionModal(s => ({ ...s, duration: v }))}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -319,9 +299,6 @@ const AdminSubscriptions = () => {
                   <SelectItem value="12">1 an</SelectItem>
                 </SelectContent>
               </Select>
-            )}
-            {actionModal.action === "offer_premium" && (
-              <Input placeholder="Motif (optionnel)" value={actionModal.motif} onChange={(e) => setActionModal(s => ({ ...s, motif: e.target.value }))} />
             )}
             {actionModal.action === "revoke_founder" && (
               <DialogDescription>Le badge Fondateur sera retiré de ce profil. Cette action est réversible.</DialogDescription>

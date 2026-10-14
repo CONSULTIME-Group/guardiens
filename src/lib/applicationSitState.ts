@@ -75,6 +75,12 @@ export interface ApplicationLike {
   sit_status: string | null;
   status?: string | null;
   sit_end_date?: string | null;
+  /**
+   * Lot Z2 : verdict serveur public.sit_is_reviewable(sit_id), renvoyé par
+   * get_my_applications. Quand il est présent, il fait foi (même règle que
+   * l'insertion d'un avis) ; absent, la règle d'écran ci-dessous s'applique.
+   */
+  sit_reviewable?: boolean | null;
 }
 
 /** Jour local au format AAAA-MM-JJ. */
@@ -88,10 +94,13 @@ function localDay(d: Date): string {
 /**
  * Lot Z : garde réalisée par le gardien. Candidature acceptée sur une annonce
  * terminée, ou archivée après sa date de fin (même règle que isSitReviewable).
+ * Lot Z2 : sit_reviewable, quand get_my_applications le fournit, tranche.
  * Avant ce lot, ces gardes apparaissaient sous « Candidatures sans suite ».
  */
 export function isCompletedSitForSitter(a: ApplicationLike, now: Date = new Date()): boolean {
   if (a.status !== "accepted") return false;
+  // Lot Z2 : le serveur sait si l'annonce archivée est passée par « terminée ».
+  if (typeof a.sit_reviewable === "boolean") return a.sit_reviewable;
   if (a.sit_status === "completed") return true;
   if (a.sit_status !== "archived" || !a.sit_end_date) return false;
   return String(a.sit_end_date).slice(0, 10) < localDay(now);
