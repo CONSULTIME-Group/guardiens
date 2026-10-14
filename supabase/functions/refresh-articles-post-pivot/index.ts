@@ -7,7 +7,7 @@ import { requireAdminOrServiceRole } from "../_shared/require-admin.ts";
 import { STRATEGIC_PILLARS, PRICING_BASELINE_LONG, PRICING_BASELINE_SHORT } from "./pillars.ts";
 import { validateRefreshedContent, FORBIDDEN_PATTERNS } from "./validator.ts";
 
-const GEMINI_MODEL = "google/gemini-2.5-flash";
+const GEMINI_MODEL = "google/gemini-3.8-flash";
 
 const SYSTEM_PROMPT = `Vous êtes un rédacteur éditorial de Guardiens.fr, plateforme française de mise en relation entre propriétaires et gardiens vérifiés pour la garde d'animaux à domicile.
 
