@@ -7671,6 +7671,95 @@ export type Database = {
           },
         ]
       }
+      owner_noel_tokens: {
+        Row: {
+          answers: Json
+          campaign: string
+          created_at: string
+          draft_sit_id: string | null
+          expires_at: string
+          id: string
+          profile_id: string
+          revoked_at: string | null
+          token: string
+          used_at: string | null
+        }
+        Insert: {
+          answers?: Json
+          campaign?: string
+          created_at?: string
+          draft_sit_id?: string | null
+          expires_at: string
+          id?: string
+          profile_id: string
+          revoked_at?: string | null
+          token: string
+          used_at?: string | null
+        }
+        Update: {
+          answers?: Json
+          campaign?: string
+          created_at?: string
+          draft_sit_id?: string | null
+          expires_at?: string
+          id?: string
+          profile_id?: string
+          revoked_at?: string | null
+          token?: string
+          used_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "owner_noel_tokens_draft_sit_id_fkey"
+            columns: ["draft_sit_id"]
+            isOneToOne: false
+            referencedRelation: "public_closed_sits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_noel_tokens_draft_sit_id_fkey"
+            columns: ["draft_sit_id"]
+            isOneToOne: false
+            referencedRelation: "sits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_noel_tokens_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profile_reputation"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "owner_noel_tokens_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_noel_tokens_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "public_helpers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_noel_tokens_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_noel_tokens_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
+          },
+        ]
+      }
       owner_profiles: {
         Row: {
           accept_unsolicited_pitches: boolean
