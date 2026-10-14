@@ -134,6 +134,7 @@ const Terms = () => {
           {/* 7 */}
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">7. Entraide</h2>
           <p>L'Entraide repose sur des échanges ponctuels entre membres, sans nuitée. Elle repose sur le don de temps et de savoir-faire&nbsp;; un <strong className="text-foreground">échange en nature</strong> (repas, produits du jardin, service réciproque) reste possible. Tout échange d'argent est strictement interdit et expose le compte à une suspension immédiate.</p>
+          <p>La garde d'enfants est exclue de l'Entraide&nbsp;: un besoin qui demande de garder un mineur est refusé à la publication et peut être retiré à tout moment.</p>
           <p>Ces échanges entre particuliers, à titre non lucratif et sans recherche de profit, ne constituent pas, en principe, des revenus imposables (cf. BOI-IR-BASE-10-10-10-10 et instruction fiscale du 30 août 2016 relative aux revenus issus de l'économie collaborative). Chaque utilisateur reste néanmoins seul responsable de ses obligations déclaratives au titre de la solidarité et de l'entraide entre particuliers.</p>
 
           {/* 8 */}
@@ -357,10 +358,7 @@ const Terms = () => {
             <li><strong className="text-foreground">Email</strong> : <a href="mailto:contact@guardiens.fr" className="text-primary hover:underline">contact@guardiens.fr</a></li>
             <li><strong className="text-foreground">Adresse</strong> : 22 rue Juiverie, 69005 Lyon, France</li>
           </ul>
-          <p>Pour toute question relative à la protection des données personnelles&nbsp;:</p>
-          <ul className="list-disc pl-6 space-y-1">
-            <li><strong className="text-foreground">Email</strong> : <a href="mailto:dpo@guardiens.fr" className="text-primary hover:underline">dpo@guardiens.fr</a></li>
-          </ul>
+          <p>Les questions relatives à la protection des données personnelles passent par la même adresse, avec l'objet « Données personnelles ».</p>
         </div>
       </main>
 

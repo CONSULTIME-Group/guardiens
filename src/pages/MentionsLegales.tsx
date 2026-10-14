@@ -58,7 +58,7 @@ const MentionsLegales = () => {
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">4. Données personnelles</h2>
           <p>
-            Conformément à la loi n° 78-17 du 6 janvier 1978 modifiée (Informatique et Libertés) et au Règlement Général sur la Protection des Données (RGPD, UE 2016/679), vous disposez d'un droit d'accès, de rectification, d'effacement, d'opposition, de limitation et de portabilité de vos données. Pour exercer ces droits, écrivez à <a href="mailto:dpo@guardiens.fr" className="text-primary hover:underline">dpo@guardiens.fr</a> en précisant la mention "Données personnelles" dans l'objet du message.
+            Conformément à la loi n° 78-17 du 6 janvier 1978 modifiée (Informatique et Libertés) et au Règlement Général sur la Protection des Données (RGPD, UE 2016/679), vous disposez d'un droit d'accès, de rectification, d'effacement, d'opposition, de limitation et de portabilité de vos données. Pour exercer ces droits, écrivez à <a href="mailto:contact@guardiens.fr" className="text-primary hover:underline">contact@guardiens.fr</a> en précisant la mention "Données personnelles" dans l'objet du message.
           </p>
           <p>
             Pour en savoir plus, consultez la <a href="/confidentialite" className="text-primary hover:underline">Politique de confidentialité</a> et les <a href="/cgu" className="text-primary hover:underline">Conditions Générales d'Utilisation</a>.

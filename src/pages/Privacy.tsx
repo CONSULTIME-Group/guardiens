@@ -31,10 +31,10 @@ const Privacy = () => {
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">2. Point de contact protection des données</h2>
           <ul className="list-disc pl-6 space-y-1">
-            <li><strong className="text-foreground">Email</strong> : <a href="mailto:dpo@guardiens.fr" className="text-primary hover:underline">dpo@guardiens.fr</a></li>
+            <li><strong className="text-foreground">Email</strong> : <a href="mailto:contact@guardiens.fr" className="text-primary hover:underline">contact@guardiens.fr</a>, objet « Données personnelles »</li>
           </ul>
           <p>
-            Conformément à l'article 37 du RGPD, la désignation d'un Délégué à la Protection des Données au sens formel du Règlement n'est pas obligatoire compte tenu de la taille de la structure. Les missions équivalentes sont assurées par le responsable du traitement.
+            Le responsable du traitement traite lui-même les questions relatives aux données personnelles. Compte tenu de la taille de la structure, la désignation d'un délégué à la protection des données relève du choix de l'éditeur (article 37 du RGPD).
           </p>
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">3. Données collectées</h2>
@@ -99,9 +99,7 @@ const Privacy = () => {
           <p>
             <strong className="text-foreground">Aucune donnée n'est vendue à des tiers.</strong> Les données ne sont communiquées à des autorités publiques qu'en cas de réquisition légale.
           </p>
-          <p>
-            <strong className="text-foreground">Opt-out spécifique Lovable</strong> : Guardiens a notifié par écrit à Lovable Labs Incorporated son opposition à l'utilisation des données de ses utilisateurs pour l'entraînement de modèles d'intelligence artificielle.
-          </p>
+          
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">7. Transferts hors Union européenne</h2>
           <p>
@@ -113,7 +111,7 @@ const Privacy = () => {
             Droit d'accès, de rectification, à l'effacement, à la limitation, à la portabilité, d'opposition, retrait du consentement à tout moment, directives post-mortem (art. 85 LIL).
           </p>
           <p>
-            <strong className="text-foreground">Exercice</strong> : <a href="mailto:dpo@guardiens.fr" className="text-primary hover:underline">dpo@guardiens.fr</a>. Délai de réponse : 30 jours, prolongeable à 60 jours pour les demandes complexes.
+            <strong className="text-foreground">Exercice</strong> : <a href="mailto:contact@guardiens.fr" className="text-primary hover:underline">contact@guardiens.fr</a>. Délai de réponse : 30 jours, prolongeable à 60 jours pour les demandes complexes.
           </p>
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">9. Cookies et traceurs</h2>
@@ -129,7 +127,7 @@ const Privacy = () => {
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">10. Sécurité</h2>
           <p>
-            Chiffrement HTTPS/TLS 1.3, mots de passe bcrypt, Row Level Security Supabase, authentification à deux facteurs admin, accès restreint prod, journalisation, sauvegardes chiffrées quotidiennes, audits réguliers.
+            Échanges chiffrés (HTTPS), mots de passe conservés sous forme hachée, règles d'accès appliquées par la base de données à chaque lecture et écriture (Row Level Security), accès d'administration réservé à l'équipe de l'éditeur.
           </p>
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">11. Violation de données</h2>
@@ -137,22 +135,17 @@ const Privacy = () => {
             Conformément aux articles 33 et 34 du RGPD : notification CNIL sous 72 heures, information directe des utilisateurs concernés en cas de risque élevé, registre interne des violations.
           </p>
 
-          <h2 className="font-heading text-xl font-bold text-foreground pt-4">12. AIPD</h2>
-          <p>
-            Une analyse d'impact relative à la protection des données a été réalisée compte tenu de la nature de certains traitements (géolocalisation, communications entre membres). Elle est mise à jour à chaque évolution majeure du service, notamment avant l'activation d'un modèle payant.
-          </p>
-
-          <h2 className="font-heading text-xl font-bold text-foreground pt-4">13. Mineurs</h2>
+          <h2 className="font-heading text-xl font-bold text-foreground pt-4">12. Mineurs</h2>
           <p>
             Plateforme strictement réservée aux personnes majeures (18 ans révolus). La création de compte par un mineur entraîne suppression immédiate. Interdiction de publier des photographies de mineurs identifiables sans consentement écrit des représentants légaux.
           </p>
 
-          <h2 className="font-heading text-xl font-bold text-foreground pt-4">14. Modification</h2>
+          <h2 className="font-heading text-xl font-bold text-foreground pt-4">13. Modification</h2>
           <p>
             Toute modification substantielle est notifiée par email et sur la Plateforme 30 jours avant entrée en vigueur.
           </p>
 
-          <h2 className="font-heading text-xl font-bold text-foreground pt-4">15. Réclamation CNIL</h2>
+          <h2 className="font-heading text-xl font-bold text-foreground pt-4">14. Réclamation CNIL</h2>
           <p>
             CNIL : <a href="https://www.cnil.fr/fr/plaintes" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">www.cnil.fr/fr/plaintes</a>, 3 Place de Fontenoy, TSA 80715, 75334 Paris Cedex 07, tél. 01 53 73 22 22.
           </p>
