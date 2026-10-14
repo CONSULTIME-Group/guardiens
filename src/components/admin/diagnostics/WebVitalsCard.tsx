@@ -49,6 +49,7 @@ export default function WebVitalsCard() {
                   <TableHead>Page</TableHead>
                   <TableHead>Appareil</TableHead>
                   <TableHead className="text-right">Affichage</TableHead>
+                  <TableHead className="text-right">Première annonce</TableHead>
                   <TableHead className="text-right">Réactivité</TableHead>
                   <TableHead className="text-right">Plus longue tâche</TableHead>
                   <TableHead className="text-right">Mesures</TableHead>
@@ -65,9 +66,10 @@ export default function WebVitalsCard() {
                           <TableCell className="font-mono text-xs">{p.path}</TableCell>
                           <TableCell>{DEVICE_LABEL[d]}</TableCell>
                           <TableCell className="text-right">{fmt(c.LCP)}</TableCell>
+                          <TableCell className="text-right">{fmt(c.CONTENT)}</TableCell>
                           <TableCell className="text-right">{fmt(c.INP)}</TableCell>
                           <TableCell className="text-right">{fmt(c.LONG_TASK)}</TableCell>
-                          <TableCell className="text-right">{Math.max(c.LCP.count, c.INP.count, c.LONG_TASK.count)}</TableCell>
+                          <TableCell className="text-right">{Math.max(c.LCP.count, c.INP.count, c.LONG_TASK.count, c.CONTENT.count)}</TableCell>
                         </TableRow>
                       );
                     }),

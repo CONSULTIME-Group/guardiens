@@ -1,0 +1,5 @@
+{
+  "/annonces": 12000,
+  "/annonces?ville=Lyon&zone=radius": 15000,
+  "fiche": 15000
+}

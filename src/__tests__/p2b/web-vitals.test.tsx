@@ -29,7 +29,10 @@ describe("webVitals, collecteur", () => {
     c.flush();
     const payload = send.mock.calls[0][0];
     expect(payload.path).toBe("/sits/:id");
-    expect(Object.keys(payload).sort()).toEqual(["auth", "build", "connection", "device", "host", "metrics", "path"]);
+    // Lot perf 1 : chemin exact (adresse publique de la page), vue et identifiant de vue.
+    expect(Object.keys(payload).sort()).toEqual(["auth", "build", "connection", "device", "host", "metrics", "nav", "path", "path_full", "pv"]);
+    expect(payload.path_full).toBe("/sits/42");
+    expect(payload.nav).toBe("hard");
   });
 
   it("échantillonnage : 100 % mobile et tablette, 25 % ordinateur", () => {

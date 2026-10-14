@@ -21,14 +21,21 @@ const sitCoordsKey = (s: any): string | null => {
  * retenu seulement si son département est celui du lieu. Les appels d'un même
  * instant partent groupés (geocodeCity, lot H3).
  */
-async function locateSitPlaces(items: any[]): Promise<Map<string, { lat: number; lng: number }>> {
+async function locateSitPlaces(items: any[], allowNetwork = true): Promise<Map<string, { lat: number; lng: number }>> {
   const coordsByKey = new Map<string, { lat: number; lng: number }>();
   const keys = new Map<string, { city: string; country: string | null; place: ReturnType<typeof resolveSitPlace> }>();
   items.forEach((s) => {
     const g = sitGeocodeKey(s);
     const k = sitCoordsKey(s);
-    if (g && k) keys.set(k, { ...g, place: resolveSitPlace(s) });
+    if (!g || !k || coordsByKey.has(k)) return;
+    // Lot H4 : lieu tiré du profil du propriétaire, déjà situé par le profil
+    // (centre officiel de la commune du code postal, arrondi à 0,01°) : aucun
+    // appel réseau. Seuls les lieux sans coordonnées passent au géocodage.
+    const point = profilePlacePoint(s);
+    if (point) { coordsByKey.set(k, point); keys.delete(k); return; }
+    keys.set(k, { ...g, place: resolveSitPlace(s) });
   });
+  if (!allowNetwork) return coordsByKey;
   await Promise.all([...keys.entries()].map(async ([k, g]) => {
     const c = await geocodeCity(g.city, g.country);
     if (!c) return;
@@ -65,6 +72,8 @@ import { fr } from "date-fns/locale";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
 import { fetchIntlOpenSits, intlCountryCounts, carryOverParams, DEST_WORLD, DEST_ABROAD } from "@/lib/intlSitSearch";
 import DestinationCountrySelect from "@/components/search/DestinationCountrySelect";
+import { profilePlacePoint } from "@/lib/sitPlacePoint";
+import { markMilestone, skipMilestones } from "@/lib/perfMarks";
 import { applyOpenSitFilter, checkGeocodedPoint, communeDeptFromCoords, pointUsable, fetchAllPages, fetchInChunks, isEndedSit, isFrancePlace, isOpenSit, isPastSit, isWithinRadius, parisTodayIso, resolveSitPlace, sitGeocodeKey, sitGeocodeKeyString } from "@/lib/sitSearchRules";
 import { sanitizeBioForCard } from "@/lib/sanitizeBio";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
@@ -624,6 +633,18 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
    onShownListChange(state);
  }, [firstSearchSettled, loading, searchError, tab, results, visibleCount, onShownListChange]);
 
+ // Lot perf 1 : jalon FIRST_CARD (première vraie carte affichée), mesuré chez
+ // les visiteurs, navigation interne comprise (src/lib/perfMarks.ts).
+ useEffect(() => {
+   if (!firstSearchSettled || loading) return;
+   // Réponse sans carte à mesurer : la vue ne compte pas comme un abandon.
+   if (searchError) { skipMilestones("error"); return; }
+   if (tab !== "sits") { skipMilestones("other_tab"); return; }
+   const realCount = results.filter((r: any) => !r.is_demo).length;
+   if (realCount === 0) { skipMilestones("empty"); return; }
+   markMilestone("FIRST_CARD", { with_point: !!(city || userCoords), sits_loaded: rawResults.length });
+ }, [tab, firstSearchSettled, loading, searchError, results, rawResults.length, city, userCoords]);
+
  const availableMembers = useMemo(() => {
    if (!(tab === "missions" && missionSubTab === "members")) return [];
    let items = rawAvailableMembers.slice();
@@ -824,10 +845,10 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
    searchCoords: { lat: number; lng: number } | null,
    today: string,
   ) => {
-   // Lot H3 : sans point de recherche, aucune distance ni rayon à calculer.
-   // La liste s'affiche sans attendre le géocodage ; la carte situe les
-   // annonces à son ouverture (locateSitPlaces, effet plus bas).
-   const coordsByKey = searchCoords ? await locateSitPlaces(items) : new Map<string, { lat: number; lng: number }>();
+   // Lot H3 : sans point de recherche, aucun appel réseau avant la liste ;
+   // la carte situe les lieux restants à son ouverture (effet plus bas).
+   // Lot H4 : les lieux tirés du profil du propriétaire sont situés sans appel.
+   const coordsByKey = await locateSitPlaces(items, !!searchCoords);
    const placeOf = (s: any) => resolveSitPlace(s);
    const coordsOf = (s: any) => {
      const k = sitCoordsKey(s);
@@ -948,7 +969,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
    const [ownersRes, galleryRes] = await Promise.all([
      fetchInChunks<any>(ownerIds, (chunk, from, to) => supabase
        .from("public_profiles")
-       .select("id, first_name, avatar_url, city, postal_code, departement_code, country, identity_verified, is_founder")
+       .select("id, first_name, avatar_url, city, postal_code, departement_code, country, identity_verified, is_founder, latitude_approx, longitude_approx")
        .in("id", chunk).order("id", { ascending: true }).range(from, to) as any),
      fetchInChunks<any>(ownerIds, (chunk, from, to) => supabase
        .from("owner_gallery")
@@ -1100,7 +1121,7 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
 
   setResultCoords(coordsMap);
   // Lot H3 : carte à situer à son ouverture quand la recherche n'avait pas de point.
-  deferredMapItemsRef.current = searchCoords ? null : enriched;
+  deferredMapItemsRef.current = !searchCoords && enriched.some((sit: any) => !coordsMap.has(sit.id) && sitCoordsKey(sit)) ? enriched : null;
   setRawResults(enriched);
   setRawAvailableMembers([]);
   setVisibleCount(12);

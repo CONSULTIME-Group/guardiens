@@ -6,6 +6,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { getDeviceContext } from "@/lib/deviceContext";
 import { getSafeLocalStorage } from "@/lib/storageFallback";
+import { isLabOrBotTraffic } from "@/lib/labTraffic";
 
 export type EventType =
   // Lot V1, email de Noël v3 : écran affiché et clic sur « Publier mon annonce ».
@@ -470,6 +471,8 @@ function readSyncSession(): { accessToken: string; userId: string } | null {
 export function trackEventBeacon(eventType: EventType, opts: TrackOptions = {}): boolean {
   try {
     if (typeof window === "undefined") return false;
+    // Lot perf 1 : robots, navigateurs pilotés et laboratoire jamais comptés.
+    if (isLabOrBotTraffic()) return false;
     const url = import.meta.env.VITE_SUPABASE_URL;
     const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
     if (!url || !key) return false;
@@ -510,6 +513,7 @@ export async function trackEvent(eventType: EventType, opts: TrackOptions = {}) 
     trackEventBeacon(eventType, opts);
     return;
   }
+  if (isLabOrBotTraffic()) return;
   try {
     // Lot P1b : identifiant lu dans la session locale, jamais d'appel réseau
     // auth/v1/user par événement.
@@ -558,6 +562,7 @@ export async function trackEventWithUserId(
 ) {
   try {
     if (!userId) return;
+    if (isLabOrBotTraffic()) return;
 
     if (import.meta.env.DEV) {
       // eslint-disable-next-line no-console

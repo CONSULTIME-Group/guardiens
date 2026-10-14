@@ -148,6 +148,19 @@ function rememberCommuneDept(key: string, dept: string) {
     localStorage.setItem(COMMUNE_DEPT_KEY, JSON.stringify(Object.fromEntries(entries)));
   } catch { /* stockage plein ou bloqué : cache de session seul */ }
 }
+// Lot perf 1 : 4 vérifications de département simultanées au plus, pour
+// laisser la bande passante d'un téléphone aux lectures et aux photos.
+export const COMMUNE_DEPT_MAX_CONCURRENT = 4;
+let communeActive = 0;
+const communeQueue: Array<() => void> = [];
+function acquireCommuneSlot(): Promise<void> {
+  if (communeActive < COMMUNE_DEPT_MAX_CONCURRENT) { communeActive++; return Promise.resolve(); }
+  return new Promise((resolve) => communeQueue.push(() => { communeActive++; resolve(); }));
+}
+function releaseCommuneSlot() {
+  communeActive--;
+  communeQueue.shift()?.();
+}
 export function communeDeptFromCoords(lat: number, lng: number): Promise<string | null> {
   const key = `${lat.toFixed(3)},${lng.toFixed(3)}`;
   const hit = communeDeptCache.get(key);
@@ -159,8 +172,11 @@ export function communeDeptFromCoords(lat: number, lng: number): Promise<string 
     return p;
   }
   const p = (async () => {
+    await acquireCommuneSlot();
     try {
-      const r = await fetch(`https://geo.api.gouv.fr/communes?lat=${lat}&lon=${lng}&fields=codeDepartement&format=json`);
+      const r = await fetch(`https://geo.api.gouv.fr/communes?lat=${lat}&lon=${lng}&fields=codeDepartement&format=json`, {
+        signal: typeof AbortSignal !== "undefined" && "timeout" in AbortSignal ? AbortSignal.timeout(5000) : undefined,
+      });
       if (!r.ok) return null;
       const data = await r.json();
       const dept = Array.isArray(data) && data[0]?.codeDepartement ? String(data[0].codeDepartement) : null;
@@ -168,6 +184,8 @@ export function communeDeptFromCoords(lat: number, lng: number): Promise<string 
       return dept;
     } catch {
       return null;
+    } finally {
+      releaseCommuneSlot();
     }
   })();
   communeDeptCache.set(key, p);
