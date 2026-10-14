@@ -18,6 +18,7 @@ import {
   subscribeAlmaConversation,
 } from "@/lib/alma/conversation-store";
 import { ALMA_HUMAN_CONTACT_LABEL, AlmaHumanContactForm } from "./AlmaHumanContact";
+import { trackEvent } from "@/lib/analytics";
 import { ALMA_PAGE_LABELS } from "../../../../supabase/functions/_shared/alma-page-labels";
 
 export const ALMA_THINKING_LINES = [
@@ -46,6 +47,33 @@ interface ExtractedLink {
   title: string;
   kind: "source" | "action";
   label?: string;
+}
+
+/** Lot A3 : nature du lien suivi depuis la conversation. */
+export interface AlmaLinkClick {
+  kind: "action" | "chip" | "inline_link" | "source" | "journal";
+  /** Motif calculé par le moteur (action principale) ou règle du journal. */
+  reason?: string;
+}
+
+/** Chemin mesuré : adresse interne sans paramètres ni ancre. */
+export function almaClickPath(path: string): string {
+  return path.split(/[?#]/)[0] || "/";
+}
+
+/**
+ * Lot A3 : événement alma_action_clicked. Le motif vaut celui du moteur pour
+ * le bouton principal, sinon la nature du lien.
+ */
+export function trackAlmaActionClick(path: string, click: AlmaLinkClick, surface: string) {
+  void trackEvent("alma_action_clicked", {
+    metadata: {
+      reason: click.reason || click.kind,
+      kind: click.kind,
+      path: almaClickPath(path),
+      surface,
+    },
+  });
 }
 
 export type AlmaMessageSegment =
@@ -345,9 +373,12 @@ export function AlmaConversation({
   const submit = () => send(draft);
 
   // Suivre un lien ferme le panneau : la page d'arrivée reste utilisable.
-  const followLink = (href: string) => {
+  // Lot A3 : chaque lien suivi depuis la conversation est mesuré
+  // (alma_action_clicked), chemin sans paramètres.
+  const followLink = (href: string, click: AlmaLinkClick) => {
     const path = normalizeInternalPath(href);
     if (!path) return;
+    trackAlmaActionClick(path, click, surface);
     onOpenChange(false);
     navigate(path);
   };
@@ -425,7 +456,7 @@ export function AlmaConversation({
                   data-testid="alma-journal-action"
                   onClick={() => {
                     onJournalAction?.(entry);
-                    followLink(entry.action!.href);
+                    followLink(entry.action!.href, { kind: "journal", reason: entry.ruleKey });
                   }}
                   className="alma-action-link mt-3 inline-flex min-h-11 items-center gap-2 text-left text-[13px] font-bold text-pine focus-visible:ring-2 focus-visible:ring-ring"
                 >
@@ -466,7 +497,7 @@ export function AlmaConversation({
                             key={segIndex}
                             type="button"
                             data-testid="alma-inline-link"
-                            onClick={() => followLink(segment.href)}
+                            onClick={() => followLink(segment.href, { kind: "inline_link" })}
                             className="inline font-semibold text-pine underline underline-offset-4 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                           >
                             {segment.title}
@@ -478,7 +509,7 @@ export function AlmaConversation({
                       <button
                         key={`${message.id}-${link.href}`}
                         type="button"
-                        onClick={() => followLink(link.href)}
+                        onClick={() => followLink(link.href, { kind: "source" })}
                         className="alma-source-card notebook-card mt-3 block w-full bg-card p-4 text-left focus-visible:ring-2 focus-visible:ring-ring"
                       >
                         <span className="block text-[10.5px] font-bold uppercase text-terra [letter-spacing:.16em]">{link.label}</span>
@@ -492,7 +523,15 @@ export function AlmaConversation({
                       <Button
                         type="button"
                         data-testid="alma-message-action"
-                        onClick={() => (message.action!.path === "/contact" ? openAlmaHumanContact() : followLink(message.action!.path))}
+                        onClick={() => {
+                          const click: AlmaLinkClick = { kind: "action", reason: message.action!.reason };
+                          if (message.action!.path === "/contact") {
+                            trackAlmaActionClick("/contact", click, surface);
+                            openAlmaHumanContact();
+                          } else {
+                            followLink(message.action!.path, click);
+                          }
+                        }}
                         className="mt-3 h-11 max-w-full justify-start gap-2 whitespace-normal text-left text-[13px] font-bold"
                       >
                         <span>{message.action.label}</span><ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
@@ -516,7 +555,7 @@ export function AlmaConversation({
                             key={`${message.id}-${chip.label}`}
                             type="button"
                             variant="outline"
-                            onClick={() => (chip.path ? followLink(chip.path) : chip.prompt ? send(chip.prompt) : undefined)}
+                            onClick={() => (chip.path ? followLink(chip.path, { kind: "chip" }) : chip.prompt ? send(chip.prompt) : undefined)}
                             className="h-11 shrink-0 px-3 text-xs font-normal text-muted-foreground"
                           >
                             {chip.label}

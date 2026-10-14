@@ -27,7 +27,7 @@ describe("entonnoir de découvrabilité d'Alma", () => {
     expect(store).toContain('trackEvent("alma_conversation_message_sent"');
   });
 
-  it("l'entonnoir admin liste les six étapes dans l'ordre", () => {
+  it("l'entonnoir admin liste les étapes dans l'ordre (lot A3 : lien suivi en dernier)", () => {
     expect(ALMA_FUNNEL_STEPS.map((s) => s.event)).toEqual([
       "alma_dock_expanded",
       "alma_composer_seen",
@@ -35,6 +35,7 @@ describe("entonnoir de découvrabilité d'Alma", () => {
       "alma_composer_focused",
       "alma_composer_typed",
       "alma_conversation_message_sent",
+      "alma_action_clicked",
     ]);
   });
 
