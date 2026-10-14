@@ -1193,9 +1193,11 @@ const HelpSection = () => (
       {[
         { to: "/dashboard?tour=true", label: "Revoir la présentation de Guardiens" },
         { to: "/faq", label: "Foire aux questions" },
-        { to: "/cgu", label: "Conditions générales d'utilisation" },
         { to: "/mentions-legales", label: "Mentions légales" },
+        { to: "/cgu", label: "Conditions générales d'utilisation" },
+        { to: "/cgs", label: "Conditions générales de services" },
         { to: "/confidentialite", label: "Politique de confidentialité" },
+        { to: "/cookies", label: "Politique cookies" },
         { to: "/contact", label: "Nous contacter" },
       ].map(({ to, label }) => (
         <li key={to}>

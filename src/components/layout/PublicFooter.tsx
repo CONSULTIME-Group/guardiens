@@ -44,11 +44,13 @@ const PublicFooter = React.forwardRef<HTMLElement, PublicFooterProps>(({ local }
   // La localisation COMPLETE une colonne, elle ne la vide jamais : sous deux
   // entrées locales, les entrées génériques prennent le relais jusqu'à quatre,
   // sans jamais répéter un lien déjà posé.
+  // Couverture nationale : villes au plus fort vivier de gardiens
+  // (seo_city_pages.sitter_count, relevé du 14/10/2026).
   const GENERIC_CITIES = [
     { city: "Lyon", slug: "lyon" },
-    { city: "Annecy", slug: "annecy" },
-    { city: "Grenoble", slug: "grenoble" },
-    { city: "Chambéry", slug: "chambery" },
+    { city: "Paris", slug: "paris" },
+    { city: "Marseille", slug: "marseille" },
+    { city: "Toulouse", slug: "toulouse" },
   ];
   const GENERIC_DEPARTMENTS = [
     { name: "Rhône (69)", slug: "rhone" },
@@ -59,13 +61,16 @@ const PublicFooter = React.forwardRef<HTMLElement, PublicFooterProps>(({ local }
     { name: "Bouches-du-Rhône (13)", slug: "bouches-du-rhone" },
     { name: "Paris (75)", slug: "paris" },
   ];
+  // Guides publiés dans les grandes villes, répartis sur le territoire.
   const GENERIC_GUIDES = [
+    { city: "Paris", slug: "paris" },
     { city: "Lyon", slug: "lyon" },
+    { city: "Marseille", slug: "marseille" },
+    { city: "Nantes", slug: "nantes" },
     { city: "Annecy", slug: "annecy" },
-    { city: "Grenoble", slug: "grenoble" },
-    { city: "Chambéry", slug: "chambery" },
-    { city: "Aix-les-Bains", slug: "aix-les-bains" },
   ];
+  /** Entraide : six villes dans le pied de page, toutes depuis /petites-missions. */
+  const FOOTER_MISSION_CITIES = MISSIONS_CITY_INDEX.slice(0, 6);
   const MIN_LOCAL_ENTRIES = 2;
   const TARGET_ENTRIES = 4;
 
@@ -98,12 +103,17 @@ const PublicFooter = React.forwardRef<HTMLElement, PublicFooterProps>(({ local }
     : GENERIC_DEPARTMENTS;
   const guideEntries = local ? completeWith(local.guides, GENERIC_GUIDES) : GENERIC_GUIDES;
 
+  const heading = "font-body text-xs uppercase tracking-widest text-white/80 mb-4";
+  const legalLink = "inline-flex min-h-[44px] min-w-[44px] items-center hover:text-white transition-colors";
+  const Sep = () => <span aria-hidden="true" className="hidden sm:inline text-white/55">·</span>;
+
   return (
-    <footer ref={ref} className="public-footer bg-footer border-t border-white/10">
+    <footer ref={ref} className="public-footer bg-footer border-t border-white/10" aria-labelledby="footer-title">
       <div className="max-w-6xl mx-auto px-6 md:px-12 py-10">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-8">
-          <div>
-            <h3 className="font-body text-xs uppercase tracking-widest text-white/80 mb-4">{t("footer.sections.by_city")}</h3>
+        <h2 id="footer-title" className="sr-only">Plan du site Guardiens</h2>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 mb-8">
+          <nav aria-label={t("footer.sections.by_city")}>
+            <h3 className={heading}>{t("footer.sections.by_city")}</h3>
             <ul className="space-y-0">
               <li><Link to="/house-sitting" className={linkCls}>{t("footer.links.all_cities")}</Link></li>
               {cityEntries.map((c) => (
@@ -114,9 +124,9 @@ const PublicFooter = React.forwardRef<HTMLElement, PublicFooterProps>(({ local }
                 </li>
               ))}
             </ul>
-          </div>
-          <div>
-            <h3 className="font-body text-xs uppercase tracking-widest text-white/80 mb-4">{t("footer.sections.by_department")}</h3>
+          </nav>
+          <nav aria-label={t("footer.sections.by_department")}>
+            <h3 className={heading}>{t("footer.sections.by_department")}</h3>
             <ul className="space-y-0">
               <li><Link to="/departement" className={linkCls}>{t("footer.links.all_departments")}</Link></li>
               {departmentEntries.map((d) => (
@@ -125,10 +135,9 @@ const PublicFooter = React.forwardRef<HTMLElement, PublicFooterProps>(({ local }
                 </li>
               ))}
             </ul>
-          </div>
-
-          <div>
-            <h3 className="font-body text-xs uppercase tracking-widest text-white/80 mb-4">{t("footer.sections.local_guides")}</h3>
+          </nav>
+          <nav aria-label={t("footer.sections.local_guides")}>
+            <h3 className={heading}>{t("footer.sections.local_guides")}</h3>
             <ul className="space-y-0">
               <li><Link to="/guides" className={linkCls}>{t("footer.links.all_guides")}</Link></li>
               {guideEntries.map((g) => (
@@ -139,66 +148,69 @@ const PublicFooter = React.forwardRef<HTMLElement, PublicFooterProps>(({ local }
                 </li>
               ))}
             </ul>
-          </div>
-
-          <div>
-            <h3 className="font-body text-xs uppercase tracking-widest text-white/80 mb-4">{t("footer.sections.resources")}</h3>
+          </nav>
+          <nav aria-label={t("footer.sections.mutual_aid")}>
+            <h3 className={heading}>{t("footer.sections.mutual_aid")}</h3>
             <ul className="space-y-0">
-              <li><Link to="/actualites" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.articles")}</Link></li>
-              <li><Link to="/actualites/house-sitting-aura-guide-complet" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.house_sitting_guide")}</Link></li>
-              <li><Link to="/faq" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.faq")}</Link></li>
-              <li><Link to="/tarifs" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.pricing")}</Link></li>
-              <li><Link to="/observatoire-garde-animaux" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.observatory")}</Link></li>
-              <li><Link to="/actualites/c-est-quoi-le-house-sitting" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.what_is_house_sitting")}</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h3 className="font-body text-xs uppercase tracking-widest text-white/80 mb-4">{t("footer.sections.guardiens")}</h3>
-            <ul className="space-y-0">
-              <li><Link to="/a-propos" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.about")}</Link></li>
-              <li><Link to="/contact" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.contact")}</Link></li>
-              <li><Link to="/inscription" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.register")}</Link></li>
-              <li><Link to="/devenir-home-sitter" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.become_home_sitter")}</Link></li>
-              <li><Link to="/petites-missions" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.small_missions")}</Link></li>
-              {MISSIONS_CITY_INDEX.map(({ slug, cityName }) => (
-                <li key={slug}><Link to={`/petites-missions/${slug}`} className={linkCls}>Entraide à {cityName}</Link></li>
+              <li><Link to="/petites-missions" className={linkCls}>{t("footer.links.all_mutual_aid")}</Link></li>
+              {FOOTER_MISSION_CITIES.map(({ slug, cityName }) => (
+                <li key={slug}><Link to={`/petites-missions/${slug}`} className={linkCls}>{t("footer.links.mutual_aid_city", { city: cityName })}</Link></li>
               ))}
-              <li><Link to="/gardien-urgence" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">{t("footer.links.emergency_sitter")}</Link></li>
-              <li><Link to="/associations" className="inline-flex items-center min-h-[44px] font-body text-sm text-white/75 hover:text-white transition-colors">Associations et refuges</Link></li>
             </ul>
-          </div>
+          </nav>
+          <nav aria-label={t("footer.sections.resources")}>
+            <h3 className={heading}>{t("footer.sections.resources")}</h3>
+            <ul className="space-y-0">
+              <li><Link to="/actualites" className={linkCls}>{t("footer.links.articles")}</Link></li>
+              <li><Link to="/actualites/c-est-quoi-le-house-sitting" className={linkCls}>{t("footer.links.what_is_house_sitting")}</Link></li>
+              <li><Link to="/actualites/voyager-gratuitement-france-house-sitting" className={linkCls}>{t("footer.links.house_sitting_guide")}</Link></li>
+              <li><Link to="/faq" className={linkCls}>{t("footer.links.faq")}</Link></li>
+              <li><Link to="/observatoire-garde-animaux" className={linkCls}>{t("footer.links.observatory")}</Link></li>
+              <li><Link to="/tarifs" className={linkCls}>{t("footer.links.pricing")}</Link></li>
+            </ul>
+          </nav>
+          <nav aria-label={t("footer.sections.guardiens")}>
+            <h3 className={heading}>{t("footer.sections.guardiens")}</h3>
+            <ul className="space-y-0">
+              <li><Link to="/a-propos" className={linkCls}>{t("footer.links.about")}</Link></li>
+              <li><Link to="/devenir-home-sitter" className={linkCls}>{t("footer.links.become_home_sitter")}</Link></li>
+              <li><Link to="/gardien-urgence" className={linkCls}>{t("footer.links.emergency_sitter")}</Link></li>
+              <li><Link to="/associations" className={linkCls}>{t("footer.links.associations")}</Link></li>
+              <li><Link to="/contact" className={linkCls}>{t("footer.links.contact")}</Link></li>
+              <li><Link to="/inscription" className={linkCls}>{t("footer.links.register")}</Link></li>
+            </ul>
+          </nav>
         </div>
 
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-white/10">
           <div>
-            <h3 className="font-heading text-lg font-semibold text-white/90">
+            <p className="font-heading text-lg font-semibold text-white/90">
               <Link to="/" aria-label="Guardiens, accueil" className="hover:opacity-80 transition-opacity">
                 <span className="text-primary-on-dark">g</span>uardiens
               </Link>
-            </h3>
+            </p>
             <p className="font-body text-sm text-white/70">
               {t("footer.tagline")}
             </p>
           </div>
           {/* Mobile : pile verticale, une entrée par ligne, cible 44 px, aucun
-              séparateur. Desktop : ligne unique avec séparateurs. */}
-          <div className="w-full sm:w-auto flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:gap-4 text-sm text-white/75 font-body">
+              séparateur. Desktop : ligne unique avec séparateurs. Ordre légal :
+              mentions, conditions, données, traceurs. */}
+          <nav aria-label="Informations légales" className="w-full sm:w-auto flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:gap-4 text-sm text-white/75 font-body">
             <span className="text-xs text-white/80 font-body py-2 sm:py-0">{t("footer.version", { year: new Date().getFullYear() })}</span>
-            <span aria-hidden="true" className="hidden sm:inline text-white/55">·</span>
-            <Link to="/cgu" className="inline-flex min-h-[44px] min-w-[44px] items-center hover:text-white transition-colors">{t("footer.legal.cgu")}</Link>
-            <span aria-hidden="true" className="hidden sm:inline text-white/55">·</span>
-            <Link to="/confidentialite" className="inline-flex min-h-[44px] min-w-[44px] items-center hover:text-white transition-colors">{t("footer.legal.privacy")}</Link>
-            <span aria-hidden="true" className="hidden sm:inline text-white/55">·</span>
-            <Link to="/cgs" className="inline-flex min-h-[44px] min-w-[44px] items-center hover:text-white transition-colors">{t("footer.legal.cgs")}</Link>
-            <span aria-hidden="true" className="hidden sm:inline text-white/55">·</span>
-            <Link to="/cookies" className="inline-flex min-h-[44px] min-w-[44px] items-center hover:text-white transition-colors">{t("footer.legal.cookies")}</Link>
-            <span aria-hidden="true" className="hidden sm:inline text-white/55">·</span>
-            <button type="button" onClick={openCookiePreferences} className="inline-flex min-h-[44px] min-w-[44px] items-center hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm">Gérer mes cookies</button>
-            <span aria-hidden="true" className="hidden sm:inline text-white/55">·</span>
-            <Link to="/mentions-legales" className="inline-flex min-h-[44px] min-w-[44px] items-center hover:text-white transition-colors">{t("footer.legal.legal_notice")}</Link>
-            <span aria-hidden="true" className="hidden sm:inline text-white/55">·</span>
-            <Link to="/contact" className="inline-flex min-h-[44px] min-w-[44px] items-center hover:text-white transition-colors">{t("footer.legal.contact")}</Link>
-          </div>
+            <Sep />
+            <Link to="/mentions-legales" className={legalLink}>{t("footer.legal.legal_notice")}</Link>
+            <Sep />
+            <Link to="/cgu" className={legalLink}>{t("footer.legal.cgu")}</Link>
+            <Sep />
+            <Link to="/cgs" className={legalLink}>{t("footer.legal.cgs")}</Link>
+            <Sep />
+            <Link to="/confidentialite" className={legalLink}>{t("footer.legal.privacy")}</Link>
+            <Sep />
+            <Link to="/cookies" className={legalLink}>{t("footer.legal.cookies")}</Link>
+            <Sep />
+            <button type="button" onClick={openCookiePreferences} className={`${legalLink} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm`}>{t("footer.legal.manage_cookies")}</button>
+          </nav>
         </div>
 
         {/* Mention presse permanente : ligne discrète, sans cadre ni fond.
