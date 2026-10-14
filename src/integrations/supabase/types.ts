@@ -1148,6 +1148,42 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_departements_20261014: {
+        Row: {
+          h1_title: string | null
+          highlights: string | null
+          id: string | null
+          intro_text: string | null
+          meta_description: string | null
+          meta_title: string | null
+          published: boolean | null
+          saved_at: string | null
+          slug: string | null
+        }
+        Insert: {
+          h1_title?: string | null
+          highlights?: string | null
+          id?: string | null
+          intro_text?: string | null
+          meta_description?: string | null
+          meta_title?: string | null
+          published?: boolean | null
+          saved_at?: string | null
+          slug?: string | null
+        }
+        Update: {
+          h1_title?: string | null
+          highlights?: string | null
+          id?: string | null
+          intro_text?: string | null
+          meta_description?: string | null
+          meta_title?: string | null
+          published?: boolean | null
+          saved_at?: string | null
+          slug?: string | null
+        }
+        Relationships: []
+      }
       _backup_digest_cron_20260919: {
         Row: {
           active: boolean | null
@@ -1593,6 +1629,36 @@ export type Database = {
           schemaname?: string | null
           tablename?: string | null
           with_check?: string | null
+        }
+        Relationships: []
+      }
+      _backup_polynesie_20261014: {
+        Row: {
+          content: string | null
+          id: string | null
+          intro_text: string | null
+          meta_description: string | null
+          published: boolean | null
+          saved_at: string | null
+          slug: string | null
+        }
+        Insert: {
+          content?: string | null
+          id?: string | null
+          intro_text?: string | null
+          meta_description?: string | null
+          published?: boolean | null
+          saved_at?: string | null
+          slug?: string | null
+        }
+        Update: {
+          content?: string | null
+          id?: string | null
+          intro_text?: string | null
+          meta_description?: string | null
+          published?: boolean | null
+          saved_at?: string | null
+          slug?: string | null
         }
         Relationships: []
       }
