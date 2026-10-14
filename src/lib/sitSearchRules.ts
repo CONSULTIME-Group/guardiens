@@ -120,16 +120,52 @@ export function isWithinRadius(distanceKm: number | null | undefined, radiusKm: 
  * (aucune incohérence n'est alors déclarée).
  */
 const communeDeptCache = new Map<string, Promise<string | null>>();
+// Lot H3 : départements trouvés gardés 30 jours dans le navigateur (jamais un
+// échec), pour qu'une visite suivante ne refasse aucun appel.
+const COMMUNE_DEPT_KEY = "guardiens_commune_dept_v1";
+const COMMUNE_DEPT_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+let communeDeptStore: Record<string, { d: string; t: number }> | null = null;
+function readCommuneDeptStore(): Record<string, { d: string; t: number }> {
+  if (communeDeptStore) return communeDeptStore;
+  communeDeptStore = {};
+  try {
+    const raw = typeof localStorage !== "undefined" ? localStorage.getItem(COMMUNE_DEPT_KEY) : null;
+    const parsed = raw ? JSON.parse(raw) : null;
+    const now = Date.now();
+    if (parsed && typeof parsed === "object") {
+      for (const [k, v] of Object.entries(parsed as Record<string, { d: string; t: number }>)) {
+        if (v && typeof v.d === "string" && now - (v.t || 0) < COMMUNE_DEPT_TTL_MS) communeDeptStore[k] = v;
+      }
+    }
+  } catch { /* stockage illisible : cache vide */ }
+  return communeDeptStore;
+}
+function rememberCommuneDept(key: string, dept: string) {
+  const store = readCommuneDeptStore();
+  store[key] = { d: dept, t: Date.now() };
+  try {
+    const entries = Object.entries(store).sort((a, b) => b[1].t - a[1].t).slice(0, 600);
+    localStorage.setItem(COMMUNE_DEPT_KEY, JSON.stringify(Object.fromEntries(entries)));
+  } catch { /* stockage plein ou bloqué : cache de session seul */ }
+}
 export function communeDeptFromCoords(lat: number, lng: number): Promise<string | null> {
   const key = `${lat.toFixed(3)},${lng.toFixed(3)}`;
   const hit = communeDeptCache.get(key);
   if (hit) return hit;
+  const stored = readCommuneDeptStore()[key];
+  if (stored) {
+    const p = Promise.resolve(stored.d);
+    communeDeptCache.set(key, p);
+    return p;
+  }
   const p = (async () => {
     try {
       const r = await fetch(`https://geo.api.gouv.fr/communes?lat=${lat}&lon=${lng}&fields=codeDepartement&format=json`);
       if (!r.ok) return null;
       const data = await r.json();
-      return Array.isArray(data) && data[0]?.codeDepartement ? String(data[0].codeDepartement) : null;
+      const dept = Array.isArray(data) && data[0]?.codeDepartement ? String(data[0].codeDepartement) : null;
+      if (dept) rememberCommuneDept(key, dept);
+      return dept;
     } catch {
       return null;
     }

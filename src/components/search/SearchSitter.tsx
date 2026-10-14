@@ -9,6 +9,37 @@ import { useTranslation } from "react-i18next";
 import { sitPath } from "@/lib/sitUrl";
 
 const SearchMapView = lazyWithRetry(() => import("@/components/search/SearchMapView"), "SearchMapView");
+
+/** Clé d'un lieu de garde : commune, pays et département (Montreuil 93 / 62). */
+const sitCoordsKey = (s: any): string | null => {
+  const k0 = sitGeocodeKeyString(s);
+  return k0 ? `${k0}::${resolveSitPlace(s).dept ?? ""}` : null;
+};
+
+/**
+ * Coordonnées vérifiées des lieux de garde (lot L1) : commune géocodée, point
+ * retenu seulement si son département est celui du lieu. Les appels d'un même
+ * instant partent groupés (geocodeCity, lot H3).
+ */
+async function locateSitPlaces(items: any[]): Promise<Map<string, { lat: number; lng: number }>> {
+  const coordsByKey = new Map<string, { lat: number; lng: number }>();
+  const keys = new Map<string, { city: string; country: string | null; place: ReturnType<typeof resolveSitPlace> }>();
+  items.forEach((s) => {
+    const g = sitGeocodeKey(s);
+    const k = sitCoordsKey(s);
+    if (g && k) keys.set(k, { ...g, place: resolveSitPlace(s) });
+  });
+  await Promise.all([...keys.entries()].map(async ([k, g]) => {
+    const c = await geocodeCity(g.city, g.country);
+    if (!c) return;
+    const check = g.place.country === "FR" && g.place.dept
+      ? checkGeocodedPoint(g.place, await communeDeptFromCoords(c.lat, c.lng))
+      : "not_applicable";
+    // Point discordant ou invérifiable : jamais une coordonnée vérifiée.
+    if (pointUsable(check)) coordsByKey.set(k, { lat: c.lat, lng: c.lng });
+  }));
+  return coordsByKey;
+}
 import SearchListingCard from "@/components/search/listing/SearchListingCard";
 import AffinityMissingCTA from "@/components/matching/AffinityMissingCTA";
 
@@ -168,7 +199,32 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  // Les filtres purement clients (avec véhicule, vérifié, photos, animaux, durée, urgence, tri…)
  // sont appliqués en mémoire via useMemo plus bas, sans refetch ni géocodage.
  const [rawResults, setRawResults] = useState<any[]>([]);
+ const rawResultsRef = useRef<any[]>(rawResults);
+ rawResultsRef.current = rawResults;
+ // Lot H3 : à l'ouverture de la carte, situer les annonces d'une recherche sans
+ // point (liste déjà affichée). Une nouvelle recherche entre-temps l'emporte.
+ const locatingMapRef = useRef<any[] | null>(null);
+ useEffect(() => {
+  if (viewMode !== "map") return;
+  const items = deferredMapItemsRef.current;
+  if (!items || items.length === 0 || locatingMapRef.current === items) return;
+  locatingMapRef.current = items;
+  void locateSitPlaces(items).then((coordsByKey) => {
+   if (locatingMapRef.current === items) locatingMapRef.current = null;
+   if (rawResultsRef.current !== items || deferredMapItemsRef.current !== items) return;
+   deferredMapItemsRef.current = null;
+   const coordsMap = new Map<string, { lat: number; lng: number }>();
+   items.forEach((sit: any) => {
+    const k = sitCoordsKey(sit);
+    const co = k ? coordsByKey.get(k) : null;
+    if (co) coordsMap.set(sit.id, co);
+   });
+   setResultCoords(coordsMap);
+  });
+ }, [viewMode, rawResults]);
  const [resultCoords, setResultCoords] = useState<Map<string, { lat: number; lng: number }>>(new Map());
+ // Lot H3 : annonces dont la carte attend ses coordonnées (recherche sans point).
+ const deferredMapItemsRef = useRef<any[] | null>(null);
  const [loading, setLoading] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
  // Vrai quand la requête serveur a atteint le plafond (jeu potentiellement tronqué → tri distance/affinité partiel).
@@ -768,28 +824,14 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
    searchCoords: { lat: number; lng: number } | null,
    today: string,
   ) => {
-   const coordsByKey = new Map<string, { lat: number; lng: number }>();
-   const keys = new Map<string, { city: string; country: string | null; place: ReturnType<typeof resolveSitPlace> }>();
-   items.forEach((s) => {
-     const g = sitGeocodeKey(s); const pl = resolveSitPlace(s);
-     // Clé incluant le département : même commune, départements différents
-     // (Montreuil 93 / 62) vérifiés séparément.
-     const k0 = sitGeocodeKeyString(s); const k = k0 ? `${k0}::${pl.dept ?? ""}` : null;
-     if (g && k) keys.set(k, { ...g, place: pl });
-   });
-   await Promise.all([...keys.entries()].map(async ([k, g]) => {
-     const c = await geocodeCity(g.city, g.country);
-     if (!c) return;
-     const check = g.place.country === "FR" && g.place.dept
-       ? checkGeocodedPoint(g.place, await communeDeptFromCoords(c.lat, c.lng))
-       : "not_applicable";
-     // Point discordant ou invérifiable : jamais une coordonnée vérifiée.
-     if (pointUsable(check)) coordsByKey.set(k, { lat: c.lat, lng: c.lng });
-   }));
+   // Lot H3 : sans point de recherche, aucune distance ni rayon à calculer.
+   // La liste s'affiche sans attendre le géocodage ; la carte situe les
+   // annonces à son ouverture (locateSitPlaces, effet plus bas).
+   const coordsByKey = searchCoords ? await locateSitPlaces(items) : new Map<string, { lat: number; lng: number }>();
    const placeOf = (s: any) => resolveSitPlace(s);
    const coordsOf = (s: any) => {
-     const k0 = sitGeocodeKeyString(s);
-     return k0 ? coordsByKey.get(`${k0}::${resolveSitPlace(s).dept ?? ""}`) ?? null : null;
+     const k = sitCoordsKey(s);
+     return k ? coordsByKey.get(k) ?? null : null;
    };
 
    const french = items.filter((s) => isFrancePlace(s));
@@ -1057,6 +1099,8 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
   });
 
   setResultCoords(coordsMap);
+  // Lot H3 : carte à situer à son ouverture quand la recherche n'avait pas de point.
+  deferredMapItemsRef.current = searchCoords ? null : enriched;
   setRawResults(enriched);
   setRawAvailableMembers([]);
   setVisibleCount(12);
