@@ -10,7 +10,7 @@ import { DEPT_NAMES } from "@/lib/departments";
 import { formatCityDepartement } from "@/lib/locationLabel";
 
 /** Collectivités d'outre-mer absentes de DEPT_NAMES (codes 975 à 988). */
-const OVERSEAS_NAMES: Record<string, string> = {
+export const OVERSEAS_NAMES: Record<string, string> = {
   "975": "Saint-Pierre-et-Miquelon",
   "977": "Saint-Barthélemy",
   "978": "Saint-Martin",

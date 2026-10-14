@@ -8,6 +8,8 @@ import { routeHashesPlugin } from "./scripts/vite-plugin-route-hashes.mjs";
 import { memberPreloadPlugin } from "./scripts/vite-plugin-member-preload.mjs";
 // @ts-expect-error greffon JS sans types
 import { entryBudgetPlugin } from "./scripts/vite-plugin-entry-budget.mjs";
+// @ts-expect-error greffon JS sans types
+import { routePreloadPlugin } from "./scripts/vite-plugin-route-preload.mjs";
 
 /**
  * Le build n'appelle plus aucune fonction serveur. Le rafraichissement
@@ -47,6 +49,7 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     mode === "production" && routeHashesPlugin(),
     memberPreloadPlugin(),
+    routePreloadPlugin(),
     mode === "production" && entryBudgetPlugin(),
   ].filter(Boolean) as Plugin[],
   resolve: {
