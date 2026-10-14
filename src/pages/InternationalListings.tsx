@@ -340,6 +340,14 @@ export default function InternationalListings() {
             <Link to="/annonces" className="text-primary font-semibold hover:underline underline-offset-4">
               {t("intl_listings.back_link")}
             </Link>
+            {country === "CA" ? (
+              <>
+                {" · "}
+                <Link to="/gardiennage-maison-quebec" className="text-primary font-semibold hover:underline underline-offset-4">
+                  Gardiennage de maison au Québec
+                </Link>
+              </>
+            ) : null}
           </p>
         </section>
 
