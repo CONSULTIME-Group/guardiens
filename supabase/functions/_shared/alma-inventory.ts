@@ -25,6 +25,25 @@ export interface AlmaInventory {
   projets: InventoryItem[];
   associations: InventoryItem[];
   questions_sans_reponse: InventoryItem[];
+  /**
+   * Lot A5 : gardes publiées au lieu cité par la question quand ce lieu est
+   * hors du département de la personne (Québec, Papeete), 3 au plus.
+   */
+  hors_departement?: InventoryItem[];
+  /** Lot A5 : le lieu cité est hors de France (page internationale). */
+  lieu_demande_hors_france?: boolean;
+}
+
+/** Lot A5 : ligne d'inventaire d'une annonce publiée lue par alma-chat. */
+export function inventoryItemOfSit(s: { id?: string | null; slug?: string | null; title?: string | null; city?: string | null; start_date?: string | null; end_date?: string | null }): InventoryItem {
+  return {
+    titre: s.title ?? "Annonce de garde",
+    ville: s.city ?? null,
+    debut: s.start_date ?? null,
+    fin: s.end_date ?? null,
+    lien: `/annonces/${s.slug || s.id}`,
+    id: s.id ?? undefined,
+  };
 }
 
 export interface InventoryProfile {
@@ -94,6 +113,11 @@ export function formatInventory(inv: AlmaInventory, opts: { foreignOpen?: boolea
   block("Projets ouverts", inv.projets);
   block("Associations", inv.associations);
   block("Questions sans réponse", inv.questions_sans_reponse);
+  const asked = inv.hors_departement ?? [];
+  if (asked.length) {
+    block("Gardes publiées au lieu demandé, hors de son département", asked);
+    if (inv.lieu_demande_hors_france) lines.push("Toutes les gardes hors de France sont réunies sur /annonces/international.");
+  }
   if (inventoryIsEmpty(inv)) {
     lines.push(
       "Rien n'est encore publié dans son département. Propose de lancer la première demande d'entraide du coin (/petites-missions/creer) ou le premier projet (/projets/publier), et de régler l'alerte de secteur (/mon-secteur).",

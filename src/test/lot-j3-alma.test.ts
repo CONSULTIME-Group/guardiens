@@ -73,7 +73,10 @@ describe("J3, défauts 1 et 2 : action principale et titre", () => {
     const { answer } = extractClassification(REAL_OUTPUT);
     const d = applyDraftToAction(answer, next.action, next.chips);
     const titre = new URLSearchParams(d.action!.path.split("?")[1]).get("titre");
-    expect(titre).toBe("Aide quotidienne pour mes chevaux");
+    // Lot A5 (décision du 14/10/2026, CGU 6.3) : en entraide, chevaux et
+    // poneys se disent « ponctuel », le titre d'Alma suit dans le texte.
+    expect(titre).toBe("Aide ponctuelle pour mes chevaux");
+    expect(d.answer).toContain("Aide ponctuelle pour mes chevaux");
     expect(d.action!.path).not.toMatch(/poney/i);
     expect(d.answer).not.toContain("BROUILLON");
     for (const c of d.chips) expect(c.path ?? "").not.toMatch(/titre=/);
@@ -81,7 +84,7 @@ describe("J3, défauts 1 et 2 : action principale et titre", () => {
   it("titre cité seul dans le texte : même titre", () => {
     const next = computeNextAction(base());
     const d = applyDraftToAction('Je vous propose le titre : "Aide quotidienne pour mes chevaux".', next.action, next.chips);
-    expect(new URLSearchParams(d.action!.path.split("?")[1]).get("titre")).toBe("Aide quotidienne pour mes chevaux");
+    expect(new URLSearchParams(d.action!.path.split("?")[1]).get("titre")).toBe("Aide ponctuelle pour mes chevaux");
   });
   it("sans titre d'Alma, le formulaire s'ouvre sans titre inventé", () => {
     const next = computeNextAction(base());

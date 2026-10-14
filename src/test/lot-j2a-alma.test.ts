@@ -92,12 +92,14 @@ describe("J2-A, base de connaissance", () => {
   });
 
   it("textes conformes : sans tiret long, sans voisin, sans gratuit, sans garde d'enfants", () => {
-    const text = JSON.stringify(ALMA_SITE_KNOWLEDGE);
+    // Lot A5 : « Guardiens est gratuit », seule forme permise (décision du 14/10/2026).
+    const text = JSON.stringify(ALMA_SITE_KNOWLEDGE).replace(/Guardiens est gratuit/g, "");
     expect(text).not.toMatch(/[\u2014\u2013]/);
     expect(text).not.toMatch(/voisin/i);
     expect(text).not.toMatch(/gratuit/i);
     expect(text).not.toMatch(/garde d'enfant/i);
-    expect(text).toMatch(/échecs/);
+    // Lot A5 : exemples alignés sur les tuiles de la page Entraide.
+    expect(text).toMatch(/arroser le potager/);
     expect(text).toMatch(/l'échange se fait en temps et en savoir-faire/);
   });
 
@@ -194,7 +196,7 @@ describe("J2-A, moteur de prochaine action", () => {
       accountRole: "both", activeRole: "sitter", helpIntent: true, largeAnimals: true, completion: 20,
       question: "je ne pose pas ma candidature je cherche au contraire de l'aide ! j'ai 15 chevaux et poneys",
     }));
-    expect(r.action?.path).toBe(`/petites-missions/creer?titre=${encodeURIComponent("Un coup de main pour mes chevaux et poneys")}`);
+    expect(r.action?.path).toBe(`/petites-missions/creer?titre=${encodeURIComponent("Un coup de main ponctuel pour mes chevaux et poneys")}`);
     expect(r.chips.some((c) => c.path?.startsWith("/sits/create"))).toBe(true);
     expect([r.action, ...r.chips].some((c) => c?.path?.includes("profile"))).toBe(false);
   });
@@ -357,7 +359,9 @@ describe("J2-C, relecture des descriptions", () => {
   const byKey = (k: string) => ALMA_SITE_KNOWLEDGE.find((e) => e.key === k)!;
   it("parrainage et abonnement sans prix ni bascule tarifaire", () => {
     expect(byKey("parrainage").purpose).toBe("Lien personnel pour inviter des proches et des gens du coin à rejoindre Guardiens.");
-    expect(byKey("abonnement").purpose).toBe("État de l'accès gardien du compte.");
+    // Lot A5 : entrée réécrite selon la doctrine Y3, page Mon accès.
+    expect(byKey("abonnement").purpose).toMatch(/^Guardiens est gratuit, pour tous les membres/);
+    expect(byKey("abonnement").label).toBe("Mon accès");
   });
   it("identité affirmative", () => {
     expect(byKey("identite").purpose).toBe("Réglages du compte, préférences d'email et vérification d'identité, qui ajoute l'écusson Identité vérifiée sur le profil.");
@@ -372,7 +376,7 @@ describe("J2-C, relecture des descriptions", () => {
   });
   it("aucune formulation proscrite dans descriptions et amorces", () => {
     for (const e of ALMA_SITE_KNOWLEDGE) {
-      const t = `${e.purpose} ${e.opener ?? ""}`;
+      const t = `${e.purpose} ${e.opener ?? ""}`.replace(/Guardiens est gratuit/g, "");
       expect(t, e.key).not.toMatch(/gratuit|voisin|enfant|payant|\u2014|\u2013/i);
       expect(t, e.key).not.toMatch(/\b(ne|n')\s?\S+\s(pas|plus|jamais)\b|\baucune?\b/i);
     }

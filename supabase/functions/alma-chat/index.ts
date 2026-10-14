@@ -33,7 +33,7 @@ import {
 import { normalizeContactMessage } from "../_shared/normalize-contact-message.ts";
 import { formatKnowledge, selectKnowledge } from "../_shared/alma-site-knowledge.ts";
 import { isMoodLineTruthful, loadVerifiedFacts, moodTruthFromFacts } from "../_shared/alma-facts.ts";
-import { formatInventory, loadAlmaInventory } from "../_shared/alma-inventory.ts";
+import { formatInventory, inventoryItemOfSit, loadAlmaInventory } from "../_shared/alma-inventory.ts";
 import { almaResponseAction, almaResponseChips, applyDraftToAction, computeNextAction, formatActionDirective, isAnimalEmergency } from "../_shared/alma-next-action.ts";
 import { isChildCareRequest } from "../_shared/mission-child-care.ts";
 import { ALMA_VERSION } from "../_shared/alma-version.ts";
@@ -50,6 +50,8 @@ import {
 import { deptCodeFromPostal, sitCommune, sitLocationLabel } from "../_shared/sit-location.ts";
 import {
   ALERT_ACTION,
+  askedPlaceSits,
+  doctrineSources,
   asksAboutListings,
   expressedIntent,
   foreignNoneSentence,
@@ -57,11 +59,12 @@ import {
   foreignPlaceInConversation,
   foreignWordsWithoutListings,
   frenchNoneSentence,
-  frenchPlaceIn,
+  frenchPlaceSitsIn,
   hasForeignSits,
   isMessagingQuestion,
   MESSAGING_DIRECTIVE,
-  SCOPE_DIRECTIVE,
+  scopeDirective,
+  scopeSentence,
   scrubTruth,
   spaceGuidance,
   type FrenchPlaceMatch,
@@ -556,9 +559,11 @@ Deno.serve(async (req) => {
     try {
       const { data } = await adminClient
         .from("sits")
-        .select("country, city, departement_code")
+        .select("id, slug, title, country, city, departement_code, start_date, end_date")
         .eq("status", "published")
         .eq("accepting_applications", true)
+        // Lot A5 : annonces ouvertes seulement (règle isOpenSit du site, fin incluse).
+        .or(`end_date.is.null,end_date.gte.${todayIso}`)
         .limit(1000);
       publishedRows = Array.isArray(data) ? (data as PublishedSitRow[]) : [];
     } catch (e) {
@@ -580,12 +585,21 @@ Deno.serve(async (req) => {
       console.error("alma-chat departements failed", e);
     }
     let frenchNone: FrenchPlaceMatch | null = null;
-    if (!foreign && placeAsked) {
-      const match = frenchPlaceIn(message, departements, publishedRows);
-      if (match && match.count === 0) frenchNone = match;
+    const frenchMatch = !foreign && placeAsked ? frenchPlaceSitsIn(message, departements, publishedRows) : null;
+    if (frenchMatch && frenchMatch.count === 0) frenchNone = { label: frenchMatch.label, count: 0 };
+    // Lot A5 : le lieu demandé hors du département de la personne (Québec,
+    // Papeete, une autre région) fait entrer ses annonces dans l'inventaire.
+    if (inventory && placeAsked) {
+      const asked = askedPlaceSits({ foreign, french: frenchMatch, rows: publishedRows, personDept: inventory.departement });
+      if (asked.length) {
+        inventory.hors_departement = asked.map(inventoryItemOfSit);
+        inventory.lieu_demande_hors_france = Boolean(foreign);
+      }
     }
+    // Lot A5 : périmètre dit depuis les pays des annonces publiées et ouvertes.
+    const scope = scopeSentence(publishedRows);
     if (!locked && !viewed && (guidance || foreignNone || frenchNone)) {
-      const placeSentence = foreignNone ? foreignNoneSentence(foreignNone.inCountry) : frenchNone ? frenchNoneSentence(frenchNone.label) : null;
+      const placeSentence = foreignNone ? foreignNoneSentence(foreignNone.inCountry, publishedRows) : frenchNone ? frenchNoneSentence(frenchNone.label) : null;
       const truthAnswer = [placeSentence, guidance?.sentence ?? null].filter(Boolean).join(" ");
       const truthAction = guidance
         ? (foreignNone && guidance.switchable ? { ...guidance.action, label: "Passer en espace gardien et voir les gardes en France" } : guidance.action)
@@ -605,6 +619,7 @@ Deno.serve(async (req) => {
         foreignInCountry: foreignNone ? foreignNone.inCountry : null,
         frenchNoneLabel: frenchNone ? frenchNone.label : null,
         askedPlaceWords: placeWords.map((w) => w.charAt(0).toUpperCase() + w.slice(1)),
+        scopeSentence: scope,
         action: truthAction,
         template: truthAnswer,
       });
@@ -813,7 +828,8 @@ Deno.serve(async (req) => {
           p_query: message,
           p_limit: 3,
         });
-        sources = Array.isArray(data) ? data : [];
+        // Lot A5 : aucune source qui compare avec la pension.
+        sources = Array.isArray(data) ? doctrineSources(data) : [];
       } catch (_e) {
         sources = [];
       }
@@ -866,7 +882,7 @@ Deno.serve(async (req) => {
           : []),
         ...(next ? [{ role: "system" as const, content: formatActionDirective(next) }] : []),
         ...(helpDirective ? [{ role: "system" as const, content: helpDirective }] : []),
-        { role: "system" as const, content: SCOPE_DIRECTIVE },
+        { role: "system" as const, content: scopeDirective(publishedRows) },
         ...(messagingAsked ? [{ role: "system" as const, content: MESSAGING_DIRECTIVE }] : []),
         ...(bond ? [{ role: "system" as const, content: formatBondBlock(bond, todayIso) }] : []),
         { role: "system" as const, content: companion },
