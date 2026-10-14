@@ -20,6 +20,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { ModerationRuleSelect } from "@/components/admin/moderation/ModerationRuleSelect";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -83,6 +84,9 @@ const AdminReports = () => {
   const [reporters, setReporters] = useState<Record<string, { name: string; avatar: string | null }>>({});
   const [noteModal, setNoteModal] = useState<{ open: boolean; reportId: string; note: string }>({ open: false, reportId: "", note: "" });
   const [memberMessage, setMemberMessage] = useState("");
+  // Lot J2c : règle des CGU et faits retenus, repris dans l'email de décision.
+  const [ruleId, setRuleId] = useState("");
+  const [facts, setFacts] = useState("");
   const [msgConversations, setMsgConversations] = useState<Record<string, string>>({});
   const [actionModal, setActionModal] = useState<{ open: boolean; reportId: string; action: ActionKey | "" }>({ open: false, reportId: "", action: "" });
   const [confirmDestructive, setConfirmDestructive] = useState<{ open: boolean; action: ActionKey | null }>({ open: false, action: null });
@@ -158,12 +162,16 @@ const AdminReports = () => {
           action: actionModal.action,
           admin_note: currentReport?.admin_notes || undefined,
           member_message: memberMessage.trim() || undefined,
+          rule_id: actionModal.action !== "none" ? ruleId || undefined : undefined,
+          facts: actionModal.action !== "none" ? facts.trim() || undefined : undefined,
         },
       });
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
       toast.success(`${actionLabels[actionModal.action] || "Décision"} : signalement clos`);
       setMemberMessage("");
+      setRuleId("");
+      setFacts("");
       setActionModal({ open: false, reportId: "", action: "" });
       setConfirmDestructive({ open: false, action: null });
       fetchReports();
@@ -364,9 +372,36 @@ const AdminReports = () => {
             />
             <p className="text-xs text-muted-foreground">La note interne reste dans l'espace admin.</p>
           </div>
+          {actionModal.action && actionModal.action !== "none" && (
+            <div className="space-y-3">
+              <div className="space-y-1.5">
+                <label htmlFor="report-rule" className="text-sm font-medium">Règle appliquée (envoyée au membre)</label>
+                <ModerationRuleSelect id="report-rule" value={ruleId} onChange={setRuleId} disabled={submitting} />
+              </div>
+              <div className="space-y-1.5">
+                <label htmlFor="report-facts" className="text-sm font-medium">Faits retenus, en une phrase (envoyés au membre)</label>
+                <Textarea
+                  id="report-facts"
+                  value={facts}
+                  onChange={(e) => setFacts(e.target.value)}
+                  rows={2}
+                  maxLength={500}
+                  disabled={submitting}
+                  placeholder="Par exemple : l'annonce indiquait un tarif à la nuit."
+                />
+              </div>
+            </div>
+          )}
           <DialogFooter>
             <Button variant="outline" disabled={submitting} onClick={() => setActionModal({ open: false, reportId: "", action: "" })}>Annuler</Button>
-            <Button onClick={onConfirmClick} disabled={!actionModal.action || submitting}>
+            <Button
+              onClick={onConfirmClick}
+              disabled={
+                !actionModal.action
+                || submitting
+                || (actionModal.action !== "none" && (!ruleId || !facts.trim()))
+              }
+            >
               {submitting ? "En cours…" : "Confirmer"}
             </Button>
           </DialogFooter>

@@ -130,9 +130,29 @@ export async function runModerationMutations(service: any, i: MutationInput): Pr
   return null
 }
 
-/** Données du gabarit moderation-decision : jamais la note interne. */
-export function buildModerationEmailData(action: Action, targetType: TargetType, memberMessage: string | null) {
-  return { action, targetType, memberMessage: memberMessage ?? undefined }
+/**
+ * Données du gabarit moderation-decision : jamais la note interne.
+ * Lot J2c : la décision d'un signalement dit son origine (signalement), la
+ * main humaine, la règle choisie par l'équipe et les faits retenus (CGU 14.5).
+ * Une règle ou des faits absents restent absents de l'email.
+ */
+export function buildModerationEmailData(
+  action: Action,
+  targetType: TargetType,
+  memberMessage: string | null,
+  extra: { ruleStatement?: string | null; facts?: string | null } = {},
+) {
+  return {
+    action,
+    targetType,
+    memberMessage: memberMessage ?? undefined,
+    origin: 'report' as const,
+    automated: 'none' as const,
+    ruleStatement: extra.ruleStatement ?? undefined,
+    facts: extra.facts ?? undefined,
+    // Suspension depuis un signalement : sans durée choisie, elle dure le temps de l'examen.
+    ...(action === 'suspend' ? { durationDays: null } : {}),
+  }
 }
 
 /**

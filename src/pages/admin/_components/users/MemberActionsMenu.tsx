@@ -38,6 +38,8 @@ export interface MemberActionsHandlers {
   onToggleSuper: () => void;
   onNote: () => void;
   onSuspend: () => void;
+  /** Lot J2c : résiliation pour manquement, motivée (CGU 11.5, 14.5). */
+  onTerminate?: () => void;
   onReactivate: () => void;
   onDelete: () => void;
 }
@@ -48,7 +50,9 @@ export function visibleMemberActions(t: MemberActionsTarget): string[] {
   if (t.email_confirmed !== true) keys.push("resend-confirmation");
   if (!t.identity_verified) keys.push("force-verify");
   if (t.has_identity_documents) keys.push("documents");
-  keys.push("change-role", "super", "note", suspended ? "reactivate" : "suspend", "delete");
+  keys.push("change-role", "super", "note", suspended ? "reactivate" : "suspend");
+  if (t.account_status !== "deleted") keys.push("terminate");
+  keys.push("delete");
   return keys;
 }
 
@@ -109,6 +113,9 @@ export const MemberActionsMenu = ({ target, handlers, align = "end" }: { target:
             <DropdownMenuItem onSelect={handlers.onReactivate}>Réactiver le compte</DropdownMenuItem>
           ) : (
             <DropdownMenuItem onSelect={handlers.onSuspend}>Suspendre le compte</DropdownMenuItem>
+          )}
+          {show.has("terminate") && handlers.onTerminate && (
+            <DropdownMenuItem onSelect={handlers.onTerminate}>Résilier le compte</DropdownMenuItem>
           )}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />

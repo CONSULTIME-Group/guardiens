@@ -5,7 +5,7 @@
 // où. Ici, chaque champ est évalué séparément, ce qui permet d'afficher
 // l'erreur sous le champ concerné et d'y amener directement.
 
-import { moderateContent, type ModerationVerdict } from "@/lib/moderation";
+import { describeRetainedText, moderateContent, type ModerationVerdict } from "@/lib/moderation";
 
 export type ModeratedFieldKey =
   | "title"
@@ -77,8 +77,14 @@ export async function moderateSitFields(
   return { verdicts, blocked, warned };
 }
 
-/** Phrase affichée sous le champ refusé, factuelle et jamais culpabilisante. */
+/**
+ * Phrase affichée sous le champ refusé, factuelle et jamais culpabilisante.
+ * Lot J2c : un passage retenu dit la vérification automatique, la règle en
+ * cause et l'examen humain sur demande (CGU 14.5) ; une réserve garde ses
+ * motifs seuls.
+ */
 export function describeFieldRefusal(verdict: ModerationVerdict | undefined): string {
+  if (verdict?.status === "block") return describeRetainedText("sit", verdict);
   const reasons = (verdict?.reasons ?? []).filter(Boolean);
   if (reasons.length > 0) return reasons.join(" · ");
   return "Ce passage ne peut pas être publié tel quel, retirez les coordonnées ou reformulez.";

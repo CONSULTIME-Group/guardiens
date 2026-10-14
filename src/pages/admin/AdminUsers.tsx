@@ -20,7 +20,8 @@ import { fr } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, Download, MessageSquare } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { SuspendUserDialog } from "./_components/users/SuspendUserDialog";
+import { AccountMeasureDialog, type AccountMeasureTarget } from "@/components/admin/moderation/AccountMeasureDialog";
+import type { AccountMeasure } from "@/lib/admin/accountMeasure";
 import { NoteUserDialog } from "./_components/users/NoteUserDialog";
 import { DeleteUserDialog } from "./_components/users/DeleteUserDialog";
 import { SendMessageDialog, type MessageModalState } from "./_components/users/SendMessageDialog";
@@ -101,8 +102,9 @@ const AdminUsers = () => {
   const [noteModal, setNoteModal] = useState<{ open: boolean; userId: string; currentNote: string }>({
     open: false, userId: "", currentNote: ""
   });
-  const [suspendModal, setSuspendModal] = useState<{ open: boolean; userId: string; reason: string }>({
-    open: false, userId: "", reason: ""
+  // Lot J2c : suspension et résiliation motivées (règle, faits, durée, mode).
+  const [measureModal, setMeasureModal] = useState<{ target: AccountMeasureTarget | null; measure: AccountMeasure }>({
+    target: null, measure: "suspend",
   });
   const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; userId: string; userName: string }>({
     open: false, userId: "", userName: ""
@@ -434,41 +436,12 @@ const AdminUsers = () => {
   };
 
 
-  const handleSuspend = async () => {
-    const userId = suspendModal.userId;
-    const reason = suspendModal.reason.trim();
-    const { data: userData } = await supabase.auth.getUser();
-    const adminId = userData.user?.id ?? null;
-
-    const { error } = await supabase
-      .from("profiles")
-      .update({ account_status: "suspended" })
-      .eq("id", userId);
-    if (error) {
-      toast.error("Erreur");
-      setSuspendModal({ open: false, userId: "", reason: "" });
-      return;
-    }
-    if (reason) {
-      // Motif de suspension : colonne dédiée, n'écrase PAS admin_notes (note interne).
-      await supabase.from("profile_moderation").upsert({
-        profile_id: userId,
-        suspension_reason: reason,
-      }, { onConflict: "profile_id" });
-    }
-    if (adminId) {
-      await supabase.from("admin_action_logs").insert({
-        admin_id: adminId,
-        action: "suspend_account",
-        target_type: "profile",
-        target_id: userId,
-        metadata: reason ? { reason } : null,
-      });
-    }
-    toast.success("Compte suspendu");
-    fetchUsers();
-    setSuspendModal({ open: false, userId: "", reason: "" });
-  };
+  // Lot J2c : la mesure, l'email motivé et le journal passent par
+  // AccountMeasureDialog (src/lib/admin/accountMeasure.ts).
+  const openMeasure = (u: any, measure: AccountMeasure) => setMeasureModal({
+    measure,
+    target: { userId: u.id, userName: nameOf(u), firstName: u.first_name ?? null },
+  });
 
   const confirmReactivate = async () => {
     const userId = reactivateModal.userId;
@@ -477,9 +450,12 @@ const AdminUsers = () => {
     const { data: userData } = await supabase.auth.getUser();
     const adminId = userData.user?.id ?? null;
 
+    // Lot J2c : la suspension pose suspended_at et suspended_until ; la
+    // réactivation les retire, sans quoi les garde-fous d'envoi et d'écriture
+    // traiteraient encore le compte comme suspendu.
     const { error } = await supabase
       .from("profiles")
-      .update({ account_status: "active" })
+      .update({ account_status: "active", suspended_at: null, suspended_by: null, suspended_until: null })
       .eq("id", userId);
     if (error) {
       toast.error("Erreur");
@@ -656,7 +632,8 @@ const AdminUsers = () => {
     onChangeRole: () => setRoleModal({ open: true, userId: u.id, userName: nameOf(u), currentRole: u.role }),
     onToggleSuper: () => setSuperModal({ open: true, userId: u.id, userName: `${u.first_name || ""} ${u.last_name || ""}`.trim() || "Utilisateur", email: u.email || "", newValue: !u.is_manual_super }),
     onNote: () => setNoteModal({ open: true, userId: u.id, currentNote: u.admin_notes || "" }),
-    onSuspend: () => setSuspendModal({ open: true, userId: u.id, reason: "" }),
+    onSuspend: () => openMeasure(u, "suspend"),
+    onTerminate: () => openMeasure(u, "terminate"),
     onReactivate: () => setReactivateModal({ open: true, userId: u.id, userName: `${u.first_name || ""} ${u.last_name || ""}`.trim() || "Utilisateur", email: u.email || "" }),
     onDelete: () => setDeleteConfirm({ open: true, userId: u.id, userName: nameOf(u) }),
   });
@@ -989,12 +966,18 @@ const AdminUsers = () => {
 
       <MemberCardSheet userId={memberId} onClose={closeMember} handlers={panelHandlers} onSaveNote={persistNote} />
 
-      <SuspendUserDialog
-        open={suspendModal.open}
-        reason={suspendModal.reason}
-        onReasonChange={(reason) => setSuspendModal((s) => ({ ...s, reason }))}
-        onClose={() => setSuspendModal({ open: false, userId: "", reason: "" })}
-        onConfirm={handleSuspend}
+      <AccountMeasureDialog
+        target={measureModal.target}
+        measure={measureModal.measure}
+        origin="initiative"
+        automated="none"
+        onClose={() => setMeasureModal((s) => ({ ...s, target: null }))}
+        onDone={(result) => {
+          if (result.applied) {
+            fetchUsers();
+            if (memberId) void queryClient.invalidateQueries({ queryKey: ["admin-member-card", memberId] });
+          }
+        }}
       />
 
       <NoteUserDialog

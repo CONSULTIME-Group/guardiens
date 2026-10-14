@@ -1,6 +1,8 @@
 // Modération pré-publication d'un texte (annonce, message, bio).
 // Entrée : { content_type: 'sit'|'message'|'bio', text }
-// Sortie : { status: 'ok'|'warning'|'block', reasons: string[], suggestion?: string }
+// Sortie : { status: 'ok'|'warning'|'block', reasons: string[], suggestion?: string,
+//            rule?: AutomatedRuleId (lot J2c, présent quand status = 'block') }
+// La règle permet à l'écran de citer l'article des CGU en cause (CGU 14.5).
 //
 // Détection combinée :
 //  1) Heuristiques regex rapides (coordonnées, mot proscrit).
@@ -8,6 +10,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { callLovableAI, extractToolArgs, STYLE_GUARDRAILS, STYLE_GUARDRAILS_MESSAGING, CORS_HEADERS } from "../_shared/ai-gateway.ts";
+import { AUTOMATED_RULE_IDS, type AutomatedRuleId } from "../_shared/moderation-rules.ts";
 
 // Regex sans flag /g : .test() sur une regex globale fait avancer lastIndex,
 // ce qui rend la détection intermittente dans un isolate Deno réutilisé.
@@ -51,21 +54,29 @@ type Reason = string;
 // Doctrine produit : l'échange de coordonnées est AUTORISÉ en messagerie privée
 // (le propriétaire doit pouvoir joindre son gardien). Il reste interdit dans les
 // annonces, qui sont des pages publiques indexées.
-function heuristics(text: string, contentType: string): { reasons: Reason[]; block: boolean } {
+function heuristics(text: string, contentType: string): { reasons: Reason[]; block: boolean; rule: AutomatedRuleId | null } {
   const reasons: Reason[] = [];
   let block = false;
+  let rule: AutomatedRuleId | null = null;
   const isPublicListing = contentType === "sit";
   if (isPublicListing) {
-    if (PHONE_RE.test(text)) { reasons.push("Numéro de téléphone détecté"); block = true; }
-    if (EMAIL_RE.test(text)) { reasons.push("Adresse email détectée"); block = true; }
+    if (PHONE_RE.test(text)) { reasons.push("Numéro de téléphone détecté"); block = true; rule = "contact_details"; }
+    if (EMAIL_RE.test(text)) { reasons.push("Adresse email détectée"); block = true; rule = "contact_details"; }
     if (looksLikeTestContent(text)) {
       reasons.push("Annonce de test interne, ne doit pas être publiée");
       block = true;
+      rule = rule ?? "test_content";
     }
   }
   if (URL_RE.test(text)) { reasons.push("Lien externe détecté"); }
   if (FORBIDDEN_WORDS.test(text)) { reasons.push("Vocabulaire à éviter : « voisin »"); }
-  return { reasons, block };
+  return { reasons, block, rule };
+}
+
+function asRule(raw: unknown): AutomatedRuleId | null {
+  return typeof raw === "string" && (AUTOMATED_RULE_IDS as readonly string[]).includes(raw)
+    ? raw as AutomatedRuleId
+    : null;
 }
 
 
@@ -108,6 +119,7 @@ Deno.serve(async (req) => {
     let llmReasons: string[] = [];
     let llmStatus: "ok" | "warning" | "block" = "ok";
     let suggestion: string | undefined;
+    let llmRule: AutomatedRuleId | null = null;
 
     if (text.length >= 30) {
       const isPublicListing = ct === "sit";
@@ -129,7 +141,8 @@ ${isPublicListing ? STYLE_GUARDRAILS : STYLE_GUARDRAILS_MESSAGING}
 Évaluez le texte suivant et renvoyez :
 ${rules}
 - reasons : liste courte et concrète (max 3).
-- suggestion : si warning, une reformulation brève en vouvoiement. Sinon laissez vide.`;
+- suggestion : si warning, une reformulation brève en vouvoiement. Sinon laissez vide.
+- rule : si block, la catégorie de la règle en cause : "hate" (propos haineux, discriminatoires ou menaçants), "sexual" (contenu sexuel), "scam" (arnaque), "payment" (paiement ou rémunération entre membres), "contact_details" (coordonnées dans une annonce), "test_content" (contenu de test). Sinon laissez vide.`;
 
 
       const r = await callLovableAI({
@@ -148,6 +161,7 @@ ${rules}
                 status: { type: "string", enum: ["ok", "warning", "block"] },
                 reasons: { type: "array", items: { type: "string" }, maxItems: 3 },
                 suggestion: { type: "string" },
+                rule: { type: "string", enum: ["hate", "sexual", "scam", "payment", "contact_details", "test_content"] },
               },
               required: ["status", "reasons"],
               additionalProperties: false,
@@ -164,6 +178,7 @@ ${rules}
           llmStatus = parsed.status;
           llmReasons = Array.isArray(parsed.reasons) ? parsed.reasons : [];
           suggestion = parsed.suggestion?.replaceAll("—", ",") || undefined;
+          llmRule = asRule(parsed.rule);
         }
       } else if (r.status === 429 || r.status === 402) {
         // Tolérance : si quota IA, on ne bloque pas l'utilisateur. Heuristiques only.
@@ -191,7 +206,10 @@ ${rules}
       }).then(({ error }) => { if (error) console.error("log error", error); });
     }
 
-    return new Response(JSON.stringify({ status, reasons: allReasons, suggestion }), {
+    // Lot J2c : règle en cause d'un texte retenu, citée à l'écran (CGU 14.5).
+    const rule = status === "block" ? (h.block ? h.rule : llmRule) ?? undefined : undefined;
+
+    return new Response(JSON.stringify({ status, reasons: allReasons, suggestion, rule }), {
       headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
     });
   } catch (e) {
