@@ -137,3 +137,20 @@ export async function runInBatches<T, R>(
 export function isRateLimitFailure(reason: string): boolean {
   return /ratelimit/i.test(reason) || /\b429\b/.test(reason)
 }
+
+// ── Lot V1 : un seul email de Noël ──────────────────────────────────────────
+
+/** Période de Noël : la clé commence par « noel » (ex. noel-2026). */
+export const isNoelPeriodKey = (periodKey: string): boolean => /^noel/i.test((periodKey ?? '').trim())
+
+/**
+ * Retire du plan de Noël les personnes qui ont reçu l'email de Noël v3
+ * (owner-noel-v3-pret, -photo ou -logement). Comparaison en minuscules.
+ */
+export function excludeNoelV3Recipients<T extends { email: string | null }>(
+  rows: T[],
+  received: ReadonlySet<string>,
+): { rows: T[]; excluded: number } {
+  const kept = rows.filter((r) => !received.has((r.email ?? '').trim().toLowerCase()))
+  return { rows: kept, excluded: rows.length - kept.length }
+}

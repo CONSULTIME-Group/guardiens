@@ -7,6 +7,7 @@
 // Plafond : 25 envois max par run, les plus anciens d'abord.
 
 import { createClient } from "npm:@supabase/supabase-js@2.45.0";
+import { NOEL_V3_ALL_TEMPLATES } from "../_shared/owner-noel-v3.ts";
 import { loadMissingDraftItems } from "../_shared/sit-draft-missing.ts";
 import { ownerHasPublished } from "../_shared/published-sit.ts";
 import { loadOwnerSitterPool, ownerNearbyContext, type SitterRow } from "../_shared/owner-nearby.ts";
@@ -125,6 +126,21 @@ Deno.serve(async (req) => {
         .filter("metadata->>source", "like", "journey:%")
         .limit(1);
       if (recentJourneyErr || (recentJourney ?? []).length > 0) {
+        skipped++;
+        continue;
+      }
+
+      // Lot V1 : l'email de Noël v3 (et sa relance) compte comme une demande
+      // de publication, la relance du brouillon attend aussi 48 heures.
+      const { data: recentNoel, error: recentNoelErr } = await supabase
+        .from("email_send_log")
+        .select("id")
+        .ilike("recipient_email", emailPattern)
+        .in("status", ["sent", "pending", "deferred"])
+        .gte("created_at", journeySince)
+        .in("template_name", NOEL_V3_ALL_TEMPLATES)
+        .limit(1);
+      if (recentNoelErr || (recentNoel ?? []).length > 0) {
         skipped++;
         continue;
       }

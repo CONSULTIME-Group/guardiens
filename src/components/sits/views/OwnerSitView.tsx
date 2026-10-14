@@ -13,7 +13,7 @@
  */
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { Calendar, MapPin, Send, Star, Home, Users, ChevronDown } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -712,6 +712,25 @@ const OwnerSitView = ({
       duration: 6000,
     });
   };
+
+  // Lot V1 (email de Noël v3) : « Publier mon annonce » de la page
+  // /annonce-noel mène ici avec ?publier=1, après connexion si besoin. Le
+  // clic lance la même publication que le bouton de la fiche (signaux
+  // animaux et photos compris), une seule fois, et seulement quand tous les
+  // prérequis sont remplis ; sinon la liste de publication reste affichée.
+  const [publishParams, setPublishParams] = useSearchParams();
+  const autoPublishDone = useRef(false);
+  const wantsAutoPublish = publishParams.get("publier") === "1";
+  useEffect(() => {
+    if (autoPublishDone.current || !wantsAutoPublish) return;
+    if (!isDraft || publishNeedsForm || !canPublish || publishing) return;
+    autoPublishDone.current = true;
+    const next = new URLSearchParams(publishParams);
+    next.delete("publier");
+    setPublishParams(next, { replace: true });
+    handlePublish();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wantsAutoPublish, isDraft, publishNeedsForm, canPublish, publishing]);
 
   return (
     <>

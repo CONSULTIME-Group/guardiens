@@ -479,6 +479,8 @@ export const ALMA_KNOWLEDGE_EXCLUDED_ROUTES: string[] = [
   "/bienvenue", "/arrivee/*",
   // Liens à jeton ou de service ouverts depuis un email
   "/go", "/acces", "/unsubscribe", "/email-preferences", "/candidature/reponse",
+  // Email de Noël v3 (lot V1) : page à jeton, sans connexion
+  "/annonce-noel/:token",
   // Proposition de garde privée (lot I2), ouverte depuis la notification ou l'email
   "/propositions/:id",
   // Pages de ville entraide, décrites par l'entrée villes
