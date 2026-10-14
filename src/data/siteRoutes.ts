@@ -155,6 +155,14 @@ export const staticRoutes: SiteRoute[] = [
  changeFreq: "weekly",
  },
  {
+ path: "/gardiennage-maison-quebec",
+ title: "Gardiennage de maison au Québec, gardiens de confiance | Guardiens",
+ metaDescription: "Faites garder votre maison et vos animaux au Québec par un gardien de confiance, ou gardez une maison au Québec. Guardiens est gratuit, pour les propriétaires comme pour les gardiens.",
+ h1: "Gardiennage de maison et d'animaux au Québec",
+ sitemapPriority: "0.8",
+ changeFreq: "weekly",
+ },
+ {
  path: "/devenir-home-sitter",
  title: "Devenir home-sitter, guide complet | Guardiens",
  metaDescription: "Comment devenir home-sitter en France : créer votre profil, décrocher vos premières gardes, gagner la confiance des propriétaires. Guide pratique.",
