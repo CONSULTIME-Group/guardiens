@@ -163,7 +163,7 @@ const PublicFooter = React.forwardRef<HTMLElement, PublicFooterProps>(({ local }
             <ul className="space-y-0">
               <li><Link to="/actualites" className={linkCls}>{t("footer.links.articles")}</Link></li>
               <li><Link to="/actualites/c-est-quoi-le-house-sitting" className={linkCls}>{t("footer.links.what_is_house_sitting")}</Link></li>
-              <li><Link to="/actualites/house-sitting-aura-guide-complet" className={linkCls}>{t("footer.links.house_sitting_guide")}</Link></li>
+              <li><Link to="/actualites/voyager-gratuitement-france-house-sitting" className={linkCls}>{t("footer.links.house_sitting_guide")}</Link></li>
               <li><Link to="/faq" className={linkCls}>{t("footer.links.faq")}</Link></li>
               <li><Link to="/observatoire-garde-animaux" className={linkCls}>{t("footer.links.observatory")}</Link></li>
               <li><Link to="/tarifs" className={linkCls}>{t("footer.links.pricing")}</Link></li>
