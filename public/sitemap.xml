@@ -806,6 +806,11 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/house-sitting/papeete</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/house-sitting/megeve</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -872,6 +877,16 @@
   </url>
   <url>
     <loc>https://guardiens.fr/house-sitting/pau</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/house-sitting/paea</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/house-sitting/pirae</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -981,6 +996,11 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/house-sitting/taiarapu-est</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/house-sitting/meaux</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -997,6 +1017,11 @@
   </url>
   <url>
     <loc>https://guardiens.fr/house-sitting/chamonix</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/house-sitting/punaauia</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1097,6 +1122,11 @@
   </url>
   <url>
     <loc>https://guardiens.fr/house-sitting/saint-etienne</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/house-sitting/mahina</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1387,6 +1417,11 @@
   </url>
   <url>
     <loc>https://guardiens.fr/house-sitting/antony</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/house-sitting/faaa</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -2329,6 +2364,11 @@
   </url>
   <url>
     <loc>https://guardiens.fr/departement/isere</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/departement/polynesie-francaise</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
