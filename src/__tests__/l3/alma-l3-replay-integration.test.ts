@@ -1,6 +1,6 @@
 /**
  * Lot L3 : les 5 phrases réelles rejouées sur le code source d'alma-chat tel
- * que déployé, avec le contexte réel simulé (Martine : both, espace
+ * que déployé, avec le contexte réel simulé (Odile : both, espace
  * propriétaire, brouillon du 03/09 périmé ; 16 annonces publiées, toutes en
  * France dont 2 en Polynésie française). Aucun appel au modèle n'est attendu.
  */
@@ -23,6 +23,8 @@ import * as homePhoto from "../../../supabase/functions/_shared/alma-home-photo"
 import * as truth from "../../../supabase/functions/_shared/alma-truth";
 import * as companion from "../../../supabase/functions/_shared/alma-companion";
 import * as places from "../../../supabase/functions/_shared/alma-places";
+import * as childCare from "../../../supabase/functions/_shared/mission-child-care";
+import * as almaVersion from "../../../supabase/functions/_shared/alma-version";
 import { ALMA_REPLAY_CASES } from "@/data/almaReplayCases";
 import { checkReplayAnswer } from "@/lib/alma/replayChecks";
 
@@ -32,7 +34,7 @@ const PUBLISHED = [
   { country: "PF", city: "Papeete", departement_code: "987" },
   { country: "PF", city: "Moorea", departement_code: "987" },
 ];
-const OWN_SITS = [{ id: "68f35bdd-554d-47c5-b401-197b2b63ce91", title: "Suite à plusieurs annulations je cherche un gardien pour Angus du 3/9 au 20/9", status: "draft", city: "Damgan", start_date: "2026-09-03", end_date: "2026-09-20" }];
+const OWN_SITS = [{ id: "00000000-0000-4000-8000-0000000000a1", title: "Suite à plusieurs annulations je cherche un gardien pour Filou du 3/9 au 20/9", status: "draft", city: "Vannes", start_date: "2026-09-03", end_date: "2026-09-20" }];
 const DEPS = [{ code: "56", nom: "Morbihan", nom_region: "Bretagne" }, { code: "987", nom: "Polynésie française", nom_region: "Outre-mer" }];
 
 function harness(profile: Record<string, unknown>, modelAnswers: string[] = ["Réponse du modèle."]) {
@@ -65,7 +67,7 @@ function harness(profile: Record<string, unknown>, modelAnswers: string[] = ["R�
     "alma-system-prompt.ts": prompt, "alma-intent.ts": almaIntent, "alma-site-knowledge.ts": siteKnowledge,
     "alma-facts.ts": almaFacts, "alma-inventory.ts": almaInventory, "alma-next-action.ts": nextAction,
     "alma-classify.ts": almaClassify, "alma-output.ts": almaOutput, "normalize-contact-message.ts": normalizeContact,
-    "alma-owner-question.ts": ownerQuestion, "sit-location.ts": sitLocation, "alma-home-photo.ts": homePhoto, "alma-truth.ts": truth, "alma-companion.ts": companion, "alma-places.ts": places,
+    "alma-owner-question.ts": ownerQuestion, "sit-location.ts": sitLocation, "alma-home-photo.ts": homePhoto, "alma-truth.ts": truth, "alma-companion.ts": companion, "alma-places.ts": places, "mission-child-care.ts": childCare, "alma-version.ts": almaVersion,
   };
   runInNewContext(outputText, {
     exports: {}, Request, Response, Date, console: { error: vi.fn(), log: vi.fn() },
@@ -96,7 +98,7 @@ export const REPLAY_OUTPUT: Record<string, { answer: string; action: string; pat
 
 // Lot L4 : le modèle rédige dans la voix d'Alma, sur faits verrouillés.
 const VOICE: Record<string, string> = {
-  "cas-43": "Vous êtes dans votre espace propriétaire, Martine : la page Annonces y montre vos propres annonces. Les gardes proposées par les propriétaires vous attendent dans votre espace gardien. Guardiens propose des gardes en France, Polynésie française comprise, et il n'y a aucune garde en Italie aujourd'hui.",
+  "cas-43": "Vous êtes dans votre espace propriétaire, Odile : la page Annonces y montre vos propres annonces. Les gardes proposées par les propriétaires vous attendent dans votre espace gardien. Guardiens propose des gardes en France, Polynésie française comprise, et il n'y a aucune garde en Italie aujourd'hui.",
   "cas-44": "Garder un chien en Italie, je comprends l'envie, mais il n'y a aucune garde en Italie aujourd'hui : Guardiens propose des gardes en France, Polynésie française comprise. Depuis votre espace propriétaire, vous voyez vos annonces ; les gardes à garder sont dans votre espace gardien.",
   "cas-45": "Guardiens propose des gardes en France, Polynésie française comprise, et il n'y a aucune garde en Italie aujourd'hui. C'est normal : vous êtes dans votre espace propriétaire, et la page Annonces y montre vos propres annonces. Les gardes proposées par les autres propriétaires se trouvent dans votre espace gardien, je vous y emmène.",
   "cas-46": "Guardiens propose des gardes en France, Polynésie française comprise ; il n'y a aucune garde en Italie aujourd'hui. Elle se trouve dans votre espace gardien. Ici, dans votre espace propriétaire, la page Annonces ne montre que les vôtres ; un clic suffit pour changer d'espace.",
@@ -114,7 +116,7 @@ describe("L3 et L4, rejeu des 5 phrases réelles sur alma-chat", () => {
   for (const id of ["cas-43", "cas-44", "cas-45", "cas-46", "cas-47"]) {
     it(`${id} : voix libre conforme aux faits verrouillés`, async () => {
       const c = ALMA_REPLAY_CASES.find((x) => x.id === id)!;
-      const h = harness({ role: c.accountRole, first_name: "Martine", city: "Damgan", departement_code: "56", country: "FR" }, [VOICE[id]]);
+      const h = harness({ role: c.accountRole, first_name: "Odile", city: "Vannes", departement_code: "56", country: "FR" }, [VOICE[id]]);
       const out = await h.invoke(c);
       REPLAY_OUTPUT[id] = { answer: out.answer, action: out.action?.label, path: out.action?.path };
       expect(h.callLovableAI).toHaveBeenCalledTimes(1);
@@ -127,7 +129,7 @@ describe("L3 et L4, rejeu des 5 phrases réelles sur alma-chat", () => {
     });
     it(`${id} : interdit ou fait manquant, repli sur le gabarit journalisé`, async () => {
       const c = ALMA_REPLAY_CASES.find((x) => x.id === id)!;
-      const h = harness({ role: c.accountRole, first_name: "Martine", city: "Damgan", departement_code: "56", country: "FR" }, [BAD[id]]);
+      const h = harness({ role: c.accountRole, first_name: "Odile", city: "Vannes", departement_code: "56", country: "FR" }, [BAD[id]]);
       const out = await h.invoke(c);
       expect(out.answer).not.toBe(BAD[id]);
       const v = checkReplayAnswer({ question: c.question, answer: out.answer, action: out.action, expect: c.expect });

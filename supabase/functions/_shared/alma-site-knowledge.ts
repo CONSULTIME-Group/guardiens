@@ -175,10 +175,10 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     key: "urgence",
     path: "/gardien-urgence",
     label: "Gardien d'urgence",
-    purpose: "Un propriétaire avec un imprévu alerte les gardiens d'urgence dans un rayon de 35 km ; un gardien peut s'y déclarer disponible.",
+    purpose: "Le réseau des gardiens d'urgence arrive bientôt : la page présente le projet et les conditions prévues pour y entrer. Les alertes partiront à son lancement.",
     audience: "all",
-    triggers: ["urgence", "imprevu", "derniere minute", "annulation", "demain"],
-    opener: "Pour un imprévu, le gardien d'urgence est expliqué sur /gardien-urgence.",
+    triggers: ["gardien d'urgence", "gardiens d'urgence", "reseau d'urgence", "remplacant"],
+    opener: "Le réseau des gardiens d'urgence arrive, son projet est présenté sur /gardien-urgence.",
   },
   {
     key: "guide_maison",
@@ -420,7 +420,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     label: "Gardiennage de maison au Québec",
     purpose: "Faire garder sa maison au Québec, devenir gardien au Québec, garder une maison au Québec depuis la France.",
     audience: "all",
-    triggers: ["quebec", "gardiennage", "montreal"],
+    triggers: ["quebec", "quebecois", "quebecoise", "canada", "montreal", "gatineau", "sherbrooke", "trois-rivieres"],
     opener: "Tout ce qui concerne le Québec est réuni sur /gardiennage-maison-quebec.",
   },
   {
@@ -503,6 +503,21 @@ export interface KnowledgeSelectInput {
   max?: number;
 }
 
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * Déclencheur trouvé comme mot ou groupe de mots entiers dans le texte replié,
+ * pluriel en s ou x accepté (« association » trouve « associations ») ; « spa »
+ * ne trouve plus « espace », ni « cles » « articles » (audit Alma du 14/10/2026).
+ */
+export function triggerMatches(foldedQuestion: string, trigger: string): boolean {
+  const t = foldText(trigger).trim();
+  if (!t) return false;
+  return new RegExp(`(^|[^a-z0-9])${escapeRegExp(t)}(s|x)?(?=$|[^a-z0-9])`).test(foldedQuestion);
+}
+
 /** Entrées pertinentes du tour : mots de la question, puis public, puis socle. */
 export function selectKnowledge(input: KnowledgeSelectInput): AlmaKnowledgeEntry[] {
   const q = foldText(input.question);
@@ -510,7 +525,7 @@ export function selectKnowledge(input: KnowledgeSelectInput): AlmaKnowledgeEntry
   const fits = (e: AlmaKnowledgeEntry) =>
     e.audience === "all" || input.both || e.audience === input.role;
   const scored = ALMA_SITE_KNOWLEDGE.map((e, i) => {
-    const hits = e.triggers.filter((t) => q.includes(foldText(t))).length;
+    const hits = e.triggers.filter((t) => triggerMatches(q, t)).length;
     return { e, i, score: hits * 10 + (fits(e) ? 2 : 0) + (e.core ? 1 : 0) };
   });
   const matched = scored.filter((s) => s.score >= 10).sort((a, b) => b.score - a.score || a.i - b.i);

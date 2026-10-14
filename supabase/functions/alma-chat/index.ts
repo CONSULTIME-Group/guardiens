@@ -33,7 +33,9 @@ import { normalizeContactMessage } from "../_shared/normalize-contact-message.ts
 import { formatKnowledge, selectKnowledge } from "../_shared/alma-site-knowledge.ts";
 import { isMoodLineTruthful, loadVerifiedFacts, moodTruthFromFacts } from "../_shared/alma-facts.ts";
 import { formatInventory, loadAlmaInventory } from "../_shared/alma-inventory.ts";
-import { applyDraftToAction, computeNextAction, formatActionDirective } from "../_shared/alma-next-action.ts";
+import { applyDraftToAction, computeNextAction, formatActionDirective, isAnimalEmergency } from "../_shared/alma-next-action.ts";
+import { isChildCareRequest } from "../_shared/mission-child-care.ts";
+import { ALMA_VERSION } from "../_shared/alma-version.ts";
 import { almaProfileVisibleToModel, polishAlmaAnswer } from "../_shared/alma-output.ts";
 import { sitIdFromPath } from "../_shared/alma-next-action.ts";
 import {
@@ -138,6 +140,9 @@ async function loadViewedSit(admin: any, ref: string, userId: string, activeRole
   const q = admin.from("sits").select(cols);
   const { data: sit } = await (UUID_RE.test(ref) ? q.eq("id", ref) : q.eq("slug", ref)).maybeSingle();
   if (!sit || sit.user_id === userId) return null;
+  // Lot A1 (audit du 14/10/2026) : une annonce non publiée d'un autre membre
+  // reste hors du contexte, sauf candidature ou conversation de la personne.
+  const linkedOnly = sit.status !== "published";
   const [ownerRes, petsRes, appRes, convRes] = await Promise.all([
     admin.from("profiles").select("city, postal_code").eq("id", sit.user_id).maybeSingle(),
     sit.property_id
@@ -163,6 +168,7 @@ async function loadViewedSit(admin: any, ref: string, userId: string, activeRole
   }
   const app = ((appRes?.data ?? []) as any[]).find((a) => a.status !== "cancelled") ?? null;
   const conversationId = ((convRes?.data ?? []) as any[])[0]?.id ?? null;
+  if (linkedOnly && ((appRes?.data ?? []) as any[]).length === 0 && !conversationId) return null;
   const viewer: ViewerState = app ? "applied" : activeRole === "owner" ? "owner_space" : "can_apply";
   const petsList = ((petsRes?.data ?? []) as any[]).map((p) => ({ name: p.name ?? null, species: p.species ?? null, breed: p.breed ?? null, age: typeof p.age === "number" ? p.age : null }));
   const description = [sit.owner_message, sit.specific_expectations].filter((x: unknown) => typeof x === "string" && x).join(" ").slice(0, 800) || null;
@@ -195,7 +201,8 @@ function json(body: unknown, status = 200) {
 }
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: CORS_HEADERS });
+  // Lot A1 : la version servie se lit sans compte, par une requête OPTIONS.
+  if (req.method === "OPTIONS") return new Response(null, { headers: { ...CORS_HEADERS, "X-Alma-Version": ALMA_VERSION } });
 
   const startedAt = Date.now();
   try {
@@ -295,7 +302,11 @@ Deno.serve(async (req) => {
       if (isReplay) return null;
       const { data } = await adminClient
         .from("alma_conversations")
-        .insert({ ...row, page_path: pagePath })
+        .insert({
+          ...row,
+          page_path: pagePath,
+          classification: { ...((row.classification as Record<string, unknown> | null) ?? {}), version: ALMA_VERSION },
+        })
         .select("id")
         .single();
       return (data as any)?.id ?? null;
@@ -339,6 +350,7 @@ Deno.serve(async (req) => {
         register,
         refusal_reason: "daily_limit",
         latency_ms: Date.now() - startedAt,
+        classification: { version: ALMA_VERSION },
 
       });
       return json({ limited: true, message: ALMA_CHAT_LIMIT_MESSAGE });
@@ -386,7 +398,8 @@ Deno.serve(async (req) => {
       // Lot L4, transparence : Alma dit qu'elle est une IA, jamais de déni.
       locked = aiIdentityBrief();
     }
-    const helpDirective = almaHelpDirective(intent);
+    // Lot A1 : ni urgence animale ni garde d'enfants ne s'orientent vers une publication.
+    const helpDirective = isAnimalEmergency(message) || isChildCareRequest(message) ? null : almaHelpDirective(intent);
 
     // Lot L1 : fiche d'annonce consultée.
     const viewedRef = sitIdFromPath(pagePath);
@@ -948,7 +961,8 @@ Deno.serve(async (req) => {
       const r2 = await askModel(feedback);
       if (r2.ok) {
         const raw2: string = r2.data?.choices?.[0]?.message?.content ?? "";
-        const second = finish(normalizeAlmaOutput(extractClassification(raw2).answer));
+        // Lot A1 : la ligne BROUILLON de la relance est retirée comme la première.
+        const second = finish(applyDraftToAction(normalizeAlmaOutput(extractClassification(raw2).answer), null).answer);
         const issues2 = [...hardIssues(second), ...softIssues(second)];
         if (second && issues2.length < issues.length) { answer = second; issues = issues2; }
       }

@@ -483,7 +483,8 @@ export function AlmaProvider({ children }: { children: ReactNode }) {
         const { data } = await supabase.rpc("get_alma_cultural_fact" as any, {
           p_user_id: user.id,
           p_surface: surface,
-          p_context: (context ?? {}) as any,
+          // Lot A1 : l'espace actif choisit le public du fait (target_role).
+          p_context: { ...(context ?? {}), active_role: audience } as any,
           p_bypass_cooldown: true,
           p_exclude_ids: excluded,
           p_on_demand: onDemand,

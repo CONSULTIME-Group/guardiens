@@ -52,7 +52,7 @@ describe("règle 1 : espace actif", () => {
 });
 
 describe("règle 2 : périmètre réel", () => {
-  const sits = [{ country: "FR", city: "Damgan", departement_code: "56" }, { country: "PF", city: "Papeete", departement_code: "987" }];
+  const sits = [{ country: "FR", city: "Vannes", departement_code: "56" }, { country: "PF", city: "Papeete", departement_code: "987" }];
   const deps = [{ code: "56", nom: "Morbihan", nom_region: "Bretagne" }, { code: "29", nom: "Finistère", nom_region: "Bretagne" }, { code: "74", nom: "Haute-Savoie", nom_region: "Savoies" }, { code: "987", nom: "Polynésie française" }];
   it("Toscane et Italie : Italie, phrase exacte", () => {
     expect(foreignPlaceIn("une garde en toscane")?.iso).toBe("IT");
@@ -67,7 +67,7 @@ describe("règle 2 : périmètre réel", () => {
   it("lieu en France vérifié : Haute-Savoie sans annonce, Bretagne avec une annonce", () => {
     expect(frenchPlaceIn("je cherche une garde en haute-savoie", deps, sits)).toEqual({ label: "Haute-Savoie", count: 0 });
     expect(frenchPlaceIn("une garde en Bretagne", deps, sits)?.count).toBe(1);
-    expect(frenchPlaceIn("une garde à Damgan", deps, sits)?.count).toBe(1);
+    expect(frenchPlaceIn("une garde à Vannes", deps, sits)?.count).toBe(1);
   });
   it.each(["je cherche à garder un chien", "comment postuler ?"])("aucun lieu reconnu : « %s »", (q) =>
     expect(frenchPlaceIn(q, deps, sits)).toBeNull());
@@ -88,7 +88,7 @@ describe("règle 2 : périmètre réel", () => {
 
 function base(): any {
   return {
-    facts: { brouillons: [{ sit_id: "d1", titre: "Angus", debut: "2026-09-03" }], candidatures_envoyees: {}, candidatures_recues_non_ouvertes: 0, annonces_publiees: [], candidature_sans_reponse_jours: null },
+    facts: { brouillons: [{ sit_id: "d1", titre: "Filou", debut: "2026-09-03" }], candidatures_envoyees: {}, candidatures_recues_non_ouvertes: 0, annonces_publiees: [], candidature_sans_reponse_jours: null },
     inventory: { departement: "56", hors_france: false, pays: "FR", gardes: [], demandes_entraide: [], offres_entraide: [], projets: [], associations: [], questions_sans_reponse: [] },
     accountRole: "both", activeRole: "owner", question: "Bonjour", register: "dossier", completion: 80, today: "2026-10-07",
   };

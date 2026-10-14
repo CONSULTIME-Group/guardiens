@@ -75,7 +75,8 @@ export function useAlmaCulturalFact({
           {
             p_user_id: user.id,
             p_surface: surface,
-            p_context: (context ?? {}) as any,
+            // Lot A1 : l'espace actif choisit le public du fait (target_role).
+            p_context: { ...(context ?? {}), active_role: activeRole === "owner" ? "owner" : "sitter" } as any,
             p_frequency: frequency,
           },
         );

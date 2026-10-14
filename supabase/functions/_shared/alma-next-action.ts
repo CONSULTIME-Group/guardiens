@@ -10,6 +10,7 @@ import type { VerifiedFacts } from "./alma-facts.ts";
 import type { AlmaInventory } from "./alma-inventory.ts";
 import { foldText } from "./alma-site-knowledge.ts";
 import { isStaleDraft, STALE_DRAFT_LABEL, staleDraftPath } from "./alma-truth.ts";
+import { isChildCareRequest } from "./mission-child-care.ts";
 
 export interface AlmaAction {
   label: string;
@@ -53,6 +54,18 @@ export interface NextActionInput {
   foreignOpen?: boolean;
   /** Lot L3 : date du jour (ISO court) pour juger un brouillon périmé. */
   today?: string;
+}
+
+/**
+ * Lot A1 (audit Alma du 14/10/2026) : urgence pour un animal. Aucun bouton de
+ * publication ni d'entraide sous un empoisonnement ou une blessure : la
+ * réponse renvoie vers le vétérinaire, sans action calculée. Texte replié.
+ */
+export const ANIMAL_EMERGENCY =
+  /\b(avale|a mange du chocolat|chocolat|xylitol|raisins? secs?|empoisonn\w*|intoxi\w*|poison|saigne\w*|saignement|convuls\w*|crise d.epilepsie|ne respire plus|respire mal|etouffe\w*|vomi\w*|diarrhee de sang|renverse par|percute|accident|morsure|mordu|fugue\w*|s.est echappe\w*|perdu mon (chien|chat)|a disparu|coup de chaleur|ne bouge plus|inconscient)\b/;
+
+export function isAnimalEmergency(question: string): boolean {
+  return ANIMAL_EMERGENCY.test(foldText(question));
 }
 
 export interface NextActionResult {
@@ -127,6 +140,19 @@ export function computeNextAction(input: NextActionInput): NextActionResult {
       : input.frustration || input.leaving ? "after"
       : input.register === "sensible" ? "after"
       : "end";
+
+  // Lot A1 : urgence animale, aucune action ni pastille.
+  if (ANIMAL_EMERGENCY.test(q)) return { action: null, chips: [], placement: "none" };
+
+  // Lot A1 : garde d'enfants (lot E12, CGU 7), jamais de formulaire de
+  // publication, ni annonce de garde ni demande d'entraide.
+  if (isChildCareRequest(input.question)) {
+    return {
+      action: { label: "Voir l'entraide près de chez moi", path: "/petites-missions", reason: "garde_enfants_hors_entraide" },
+      chips: [],
+      placement,
+    };
+  }
 
   const sitIntent = SIT_INTENT.test(q) || Boolean(input.largeAnimals);
 

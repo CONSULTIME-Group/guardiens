@@ -136,9 +136,22 @@ describe("J4, point 6 : « gratuit » reformulé (cas-04)", () => {
   it.each(["C'est gratuit.", "Une inscription gratuite.", "La gratuité du logement.", "Gratuitement, bien sûr.", "gratuité"])("aucune forme ne reste : %s", (t) => {
     expect(rewriteForbiddenWords(t)).not.toMatch(/gratuit/i);
   });
-  it("la consigne proscrit toutes les formes", () => {
-    expect(ALMA_SYSTEM_PROMPT).toContain("gratuit sous toutes ses formes");
+  it("la consigne n'autorise que « Guardiens est gratuit » (doctrine Y3, 14/10/2026)", () => {
+    expect(ALMA_SYSTEM_PROMPT).toContain("tu dis exactement « Guardiens est gratuit »");
     expect(ALMA_SYSTEM_PROMPT).toContain("sans rien payer pour le logement");
+  });
+  it("« Guardiens est gratuit », les chemins et les titres cités restent intacts (audit du 14/10/2026)", () => {
+    expect(rewriteForbiddenWords("Guardiens est gratuit, pour tous les membres.")).toBe("Guardiens est gratuit, pour tous les membres.");
+    const link = "Lisez /actualites/voyager-gratuitement-france-house-sitting pour commencer.";
+    expect(rewriteForbiddenWords(link)).toBe(link);
+    const url = "Voir https://guardiens.fr/actualites/voyager-gratuitement-france-house-sitting.";
+    expect(rewriteForbiddenWords(url)).toBe(url);
+    const title = "L'article « Voyager gratuitement en France » le raconte.";
+    expect(rewriteForbiddenWords(title)).toBe(title);
+  });
+  it("« gratuitement » hors logement devient « sans frais »", () => {
+    expect(rewriteForbiddenWords("Vous pouvez publier gratuitement.")).toBe("Vous pouvez publier sans frais.");
+    expect(rewriteForbiddenWords("Le gardien est logé gratuitement.")).toBe("Le gardien est logé sans rien payer.");
   });
 });
 
