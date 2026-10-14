@@ -27,6 +27,8 @@ import { canPublishSmallMission, shouldNudgeProfileCompletion } from "@/lib/miss
 import MissionPhotoUpload from "@/components/missions/MissionPhotoUpload";
 import { geocodeCity } from "@/lib/geocode";
 import { CHILD_CARE_EXCLUDED_MESSAGE, CHILD_CARE_EXCLUDED_TITLE, isChildCareRequest } from "@/lib/missionChildCare";
+import { isHomeworkHelpRequest } from "@/lib/missionHomework";
+import HomeworkConditionsNote from "@/components/missions/HomeworkConditionsNote";
 import { automatedRetentionNotice } from "@/lib/moderation";
 
 // Lot J2c : un besoin retenu par un filtre automatique dit la vérification
@@ -377,6 +379,11 @@ const CreateSmallMission = () => {
   const rehoming = useMemo(() => rehomingSignals(title, description), [title, description]);
   const moneyWording = useMemo(
     () => moneyWordingSignals(title, description),
+    [title, description],
+  );
+  // Lot J2d : conditions de l'aide aux devoirs (CGU 7.4), encadré non bloquant.
+  const homeworkHelp = useMemo(
+    () => isHomeworkHelpRequest(title, description),
     [title, description],
   );
 
@@ -732,6 +739,7 @@ const CreateSmallMission = () => {
                     </p>
                   </div>
                 )}
+                {homeworkHelp && <HomeworkConditionsNote />}
                 {rehoming && (
                   <div className="rounded-xl border border-warning/40 bg-warning/10 p-4 space-y-1" role="note">
                     <p className="text-sm font-semibold text-foreground">

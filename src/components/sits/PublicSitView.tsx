@@ -19,6 +19,7 @@ import { useViewerSitterForAffinity } from "@/hooks/useViewerSitterForAffinity";
 import { sanitizeBioForPublic } from "@/lib/sanitizeBio";
 import { avatarImageUrl, storageImageUrl } from "@/lib/storageImage";
 import BreedEditorialLink from "@/components/breeds/BreedEditorialLink";
+import ReviewDatesText from "@/components/reviews/ReviewDatesText";
 import { petSpeciesLabel, petActivityLabel, petWalkLabel, petAloneLabel } from "@/lib/petLabels";
 
 interface SitLike {
@@ -87,6 +88,8 @@ interface ReviewLike {
   overall_rating: number;
   comment: string;
   created_at: string;
+  sit_start_date?: string | null;
+  sit_end_date?: string | null;
 }
 
 interface OwnerProfileLike {
@@ -578,6 +581,7 @@ const PublicSitView = ({
                         <p className="font-heading text-lg italic leading-snug text-foreground/90">
                           « {r.comment} »
                         </p>
+                        <ReviewDatesText review={r} className="block mt-2 text-xs text-muted-foreground" />
                       </article>
                     ))}
                   </div>

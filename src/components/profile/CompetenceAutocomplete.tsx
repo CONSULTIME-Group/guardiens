@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { SKILL_CATEGORIES } from "@/lib/skills/categories";
+import { HOMEWORK_SKILL_NOTE, isHomeworkSkill } from "@/lib/missionHomework";
 
 interface Suggestion {
   label: string;
@@ -408,6 +409,13 @@ const CompetenceAutocomplete = ({
             );
           })}
         </div>
+      )}
+
+      {/* Lot J2d : conditions de l'aide aux devoirs (CGU 7.4). */}
+      {competences.some(isHomeworkSkill) && (
+        <p className="text-xs text-muted-foreground rounded-lg bg-muted/40 px-3 py-2" role="note">
+          {HOMEWORK_SKILL_NOTE}
+        </p>
       )}
 
       <p className="text-xs text-muted-foreground italic mt-2">

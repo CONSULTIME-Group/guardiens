@@ -21,6 +21,7 @@ import { sanitizeUserTitle } from "@/lib/sanitizeTitle";
 import { logger } from "@/lib/logger";
 import { captureDigestAttribution } from "@/lib/digestAttribution";
 import { isSitRichEnough } from "@/lib/sitIndexability";
+import { sortReviewsNewestFirst } from "@/lib/reviewDates";
 import NearbySitsModule from "@/components/sits/NearbySitsModule";
 import { DEFAULT_OG_IMAGE } from "@/data/siteRoutes";
 import LegacyProjetRedirect from "@/components/seo/LegacyProjetRedirect";
@@ -59,7 +60,7 @@ const PublicSitDetail = () => {
  const [badges, setBadges] = useState<{ badge_key: string; count: number }[]>([]);
  const [avgRating, setAvgRating] = useState<string | null>(null);
  const [reviewCount, setReviewCount] = useState(0);
- const [latestReviews, setLatestReviews] = useState<{ overall_rating: number; comment: string; created_at: string }[]>([]);
+ const [latestReviews, setLatestReviews] = useState<{ overall_rating: number; comment: string; created_at: string; sit_start_date?: string | null; sit_end_date?: string | null }[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [canonicalRedirect, setCanonicalRedirect] = useState<string | null>(null);
@@ -116,7 +117,9 @@ const PublicSitDetail = () => {
         const [ownerRes, propRes, reviewsRes, badgeRes, galleryRes] = await Promise.all([
           supabase.from("public_profiles").select("id, first_name, city, postal_code, avatar_url, identity_verified, bio, completed_sits_count, is_founder").eq("id", sitData.user_id).limit(1),
           supabase.from("properties").select("*").eq("id", sitData.property_id).limit(1),
-          supabase.from("reviews").select("id, overall_rating, comment, created_at").eq("reviewee_id", sitData.user_id).eq("published", true).order("created_at", { ascending: false }),
+          // Lot J2d (CGU 9.7) : fonction publique, ouverte aux visiteurs, qui
+          // porte les dates de la garde et écarte les avis d'annulation (lot Z).
+          supabase.rpc("public_profile_reviews", { p_user_id: sitData.user_id }),
           supabase.from("public_badge_attributions").select("badge_id").eq("user_id", sitData.user_id),
           supabase.from("owner_gallery").select("photo_url, position, width, height").eq("user_id", sitData.user_id).order("position", { ascending: true }),
         ]);
@@ -167,7 +170,7 @@ const PublicSitDetail = () => {
         commit(() => setOwner(enrichedOwner));
         commit(() => setProperty(enrichedProperty));
 
-        const reviewsRaw = reviewsRes.data || [];
+        const reviewsRaw = sortReviewsNewestFirst((reviewsRes.data || []) as any[]);
         const seenIds = new Set<string>();
         const reviews = reviewsRaw.filter((r: any) => {
           if (!r?.id || seenIds.has(r.id)) return false;

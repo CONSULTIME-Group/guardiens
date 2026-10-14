@@ -1,8 +1,7 @@
 /**
  * Faits de la fiche gardien publique (lot F1). Logique pure, testée.
  */
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { reviewDatesLine } from "@/lib/reviewDates";
 
 const cap = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 
@@ -68,23 +67,12 @@ export function listLabel(values: string[] | null | undefined, exclude: string[]
   return cap((values ?? []).filter((v) => v && !ex.includes(v.toLowerCase())).join(", "));
 }
 
-/** Date d'un avis : « Garde du 20 au 31 août 2026 », sinon « août 2026 ». */
+/**
+ * Dates d'un avis (lot J2d, CGU 9.7) : « Garde du 20 au 31 août 2026 · Avis du
+ * 2 septembre 2026 », la date de dépôt seule pour un avis sans garde.
+ */
 export function reviewDateLabel(start: string | null | undefined, end: string | null | undefined, createdAt: string): string {
-  if (start && end) {
-    const s = new Date(`${start}T12:00:00`);
-    const e = new Date(`${end}T12:00:00`);
-    if (!Number.isNaN(s.getTime()) && !Number.isNaN(e.getTime())) {
-      const endLabel = format(e, "d MMMM yyyy", { locale: fr });
-      const startLabel =
-        s.getFullYear() !== e.getFullYear()
-          ? format(s, "d MMMM yyyy", { locale: fr })
-          : s.getMonth() !== e.getMonth()
-            ? format(s, "d MMMM", { locale: fr })
-            : format(s, "d", { locale: fr });
-      return `Garde du ${startLabel} au ${endLabel}`;
-    }
-  }
-  return format(new Date(createdAt), "MMMM yyyy", { locale: fr });
+  return reviewDatesLine({ created_at: createdAt, sit_start_date: start, sit_end_date: end });
 }
 
 
