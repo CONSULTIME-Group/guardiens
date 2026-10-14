@@ -25,7 +25,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import { useSubscriptionAccess } from "@/hooks/useSubscriptionAccess";
 import { trackFirstAction, trackEvent } from "@/lib/analytics";
-import { moderateContent } from "@/lib/moderation";
+import { describeRetainedText, moderateContent, RETENTION_TITLE } from "@/lib/moderation";
 import { appStatusBadge as appStatusLabels } from "@/lib/messageStatus";
 import { useAutoOpenConversation } from "@/hooks/useAutoOpenConversation";
 import { toast as toastSonner } from "sonner";
@@ -554,10 +554,11 @@ const Messages = () => {
     {
       const verdict = await moderateContent("message", trimmed);
       if (verdict.status === "block") {
+        // Lot J2c : décision automatique, règle en cause, examen humain sur demande.
         toast({
           variant: "destructive",
-          title: "Message bloqué",
-          description: verdict.reasons.join(" · ") || "Ce message n'a pas pu être envoyé. Reformulez-le, ou écrivez-nous si le problème persiste.",
+          title: RETENTION_TITLE.message,
+          description: describeRetainedText("message", verdict),
         });
         setSending(false);
         return;

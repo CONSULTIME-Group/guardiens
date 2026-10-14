@@ -5,7 +5,10 @@
 // Payload attendu :
 //   { report_id: string,
 //     action: 'warn' | 'hide' | 'suspend' | 'delete' | 'none',
-//     admin_note?: string }
+//     admin_note?: string,
+//     member_message?: string,
+//     rule_id?: string (lot J2c, _shared/moderation-rules.ts),
+//     facts?: string (lot J2c, faits retenus en une phrase) }
 //
 // Sécurité : verify_jwt = true par défaut. On revérifie explicitement en
 // interne que l'appelant est admin via has_role. Le service_role côté client
@@ -13,6 +16,7 @@
 
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { buildModerationEmailData, buildReporterEmailData, cleanText, runModerationMutations } from './moderation.ts'
+import { findModerationRule } from '../_shared/moderation-rules.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -70,6 +74,12 @@ Deno.serve(async (req) => {
   const adminNote: string | null = cleanText(body.admin_note, 4000)
   // Lot A9 : message au membre, seul texte envoyé par email.
   const memberMessage: string | null = cleanText(body.member_message, 2000)
+  // Lot J2c : règle des CGU appliquée et faits retenus, repris dans l'email
+  // de décision (CGU 14.5). Une règle inconnue est refusée.
+  const facts: string | null = cleanText(body.facts, 500)
+  const hasRuleId = body.rule_id != null && body.rule_id !== ''
+  const rule = hasRuleId ? findModerationRule(body.rule_id) : null
+  if (hasRuleId && !rule) return json({ error: 'invalid rule_id' }, 400)
 
   if (!reportId || typeof reportId !== 'string') return json({ error: 'report_id required' }, 400)
   if (!VALID_ACTIONS.includes(action)) return json({ error: 'invalid action' }, 400)
@@ -175,7 +185,7 @@ Deno.serve(async (req) => {
     target_id: targetId,
     report_id: reportId,
     note: adminNote,
-    metadata: opMeta,
+    metadata: { ...opMeta, rule_id: rule?.id ?? null, facts },
   })
   if (logErr) console.error('audit log failed', logErr)
 
@@ -185,7 +195,7 @@ Deno.serve(async (req) => {
     const ownerEmail = await emailOf(service, ownerUserId)
     if (ownerEmail) {
       await sendTemplate('moderation-decision', ownerEmail, `moderation-${reportId}-${action}`,
-        buildModerationEmailData(action, targetType, memberMessage))
+        buildModerationEmailData(action, targetType, memberMessage, { ruleStatement: rule?.statement ?? null, facts }))
     }
   }
   const reporterEmail = report.reporter_id ? await emailOf(service, report.reporter_id) : null
