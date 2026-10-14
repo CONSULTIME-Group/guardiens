@@ -6532,17 +6532,23 @@ export type Database = {
       legal_document_versions: {
         Row: {
           document: string
+          effective_on: string
           published_on: string
+          requires_reaccept: boolean
           version: string
         }
         Insert: {
           document: string
+          effective_on: string
           published_on: string
+          requires_reaccept?: boolean
           version: string
         }
         Update: {
           document?: string
+          effective_on?: string
           published_on?: string
+          requires_reaccept?: boolean
           version?: string
         }
         Relationships: []
@@ -13793,6 +13799,14 @@ export type Database = {
         Returns: Json
       }
       my_mutual_aid_radius_km: { Args: never; Returns: number }
+      my_pending_legal_documents: {
+        Args: never
+        Returns: {
+          document: string
+          effective_on: string
+          version: string
+        }[]
+      }
       normalize_analytics_source: { Args: { raw: string }; Returns: string }
       normalize_city_name: { Args: { txt: string }; Returns: string }
       notify_owner_of_new_application: {
