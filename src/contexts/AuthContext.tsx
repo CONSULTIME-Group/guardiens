@@ -7,6 +7,7 @@ import { getSignupRedirectUrl } from "@/lib/authRedirect";
 import { getOAuthTraceId, logOAuthStage, endOAuthFlow } from "@/lib/oauthLogger";
 import { cleanupPushOnLogoutLazy as cleanupPushOnLogout, reconcilePushSessionLazy as reconcilePushSession } from "@/lib/pushSession";
 import { applyPendingSignupRole } from "@/lib/signupRole";
+import { applyPendingLegalAcceptance, LEGAL_ACCEPTED_SIGNUP } from "@/lib/legalAcceptance";
 
 type Role = "owner" | "sitter" | "both";
 type ActiveRole = "owner" | "sitter";
@@ -168,6 +169,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setAuthTimeout(false);
     // Lot 0 : rôle choisi avant Google, appliqué avant la lecture du profil.
     await applyPendingSignupRole();
+    // Lot J1 : trace d'acceptation d'une inscription Google, sans attendre.
+    void applyPendingLegalAcceptance();
     const profileRequest = fetchMyProfile(supabaseUser.id!, { fresh: true });
 
     let timeoutId: number | undefined;
@@ -407,7 +410,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       password,
       options: {
         emailRedirectTo: getSignupRedirectUrl(nextPath),
-        data: { role },
+        // Lot J1 : la case cochée à l'inscription, écrite côté serveur.
+        data: { role, legal_accepted: LEGAL_ACCEPTED_SIGNUP },
       },
     });
     if (error) throw error;
