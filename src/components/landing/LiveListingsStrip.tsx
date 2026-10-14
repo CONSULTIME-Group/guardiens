@@ -6,6 +6,7 @@ import { haversineDistance } from "@/lib/geocode";
 import { storageImageSrcSet, storageImageUrl } from "@/lib/storageImage";
 import type { HomeOrigin } from "@/components/landing/HomeProximitySearch";
 import RecentSitsItemListJsonLd from "@/components/seo/RecentSitsItemListJsonLd";
+import { homeListingPlace } from "@/lib/homeListingPlace";
 
 interface HomeListing {
   id: string;
@@ -27,6 +28,8 @@ interface HomeListing {
   country?: string | null;
   /** Auteur de l'annonce, pour ne montrer qu'une annonce par membre. */
   ownerId?: string | null;
+  /** Lieu affiché : commune puis département, ou pays hors de France (lot H2). */
+  place?: string;
 }
 
 const MAX_LISTINGS = 6;
@@ -136,7 +139,7 @@ export default function LiveListingsStrip({ origin = null, profileOrigin = null 
     let active = true;
     void supabase
       .from("public_small_missions")
-      .select("id, slug, title, city, date_needed, photos, latitude, longitude, created_at")
+      .select("id, slug, title, city, postal_code, date_needed, photos, latitude, longitude, created_at")
       .eq("status", "open")
       .eq("mission_type", "besoin")
       .order("created_at", { ascending: false })
@@ -148,6 +151,7 @@ export default function LiveListingsStrip({ origin = null, profileOrigin = null 
           kind: "besoin",
           title: mission.title || "Coup de main",
           city: mission.city,
+          place: homeListingPlace({ city: mission.city, postalCode: mission.postal_code }),
           date: mission.date_needed,
           endDate: null,
           photo: mission.photos?.[0] ?? null,
@@ -169,6 +173,7 @@ export default function LiveListingsStrip({ origin = null, profileOrigin = null 
       kind: "garde",
       title: sit.title,
       city: sit.city,
+      place: homeListingPlace({ city: sit.city, departementCode: sit.departement_code, country: sit.country }),
       date: sit.start_date,
       endDate: sit.end_date,
       photo: sit.cover_photo_url,
@@ -206,6 +211,7 @@ export default function LiveListingsStrip({ origin = null, profileOrigin = null 
             {listings.map((listing) => {
               const start = formatDate(listing.date);
               const end = formatDate(listing.endDate);
+              const meta = [start && end ? `${start} au ${end}` : start, listing.distance !== null ? `${Math.round(listing.distance)} km` : null].filter(Boolean).join(" · ");
               return (
                 <Link key={`${listing.kind}-${listing.id}`} to={listing.href} className="group w-[80%] shrink-0 snap-start overflow-hidden rounded-lg md:w-auto md:shrink border border-border bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   <div className="aspect-[4/3] overflow-hidden bg-muted">
@@ -214,7 +220,8 @@ export default function LiveListingsStrip({ origin = null, profileOrigin = null 
                   <div className="p-4">
                     <p className="text-xs font-semibold uppercase tracking-[0.12em] text-primary">{listing.kind === "garde" ? "Garde" : "Besoin"}</p>
                     <h3 className="mt-2 line-clamp-2 font-heading text-lg font-semibold text-foreground">{listing.title}</h3>
-                    <p className="mt-2 text-sm text-muted-foreground">{[listing.city, start && end ? `${start} au ${end}` : start, listing.distance !== null ? `${Math.round(listing.distance)} km` : null].filter(Boolean).join(" · ")}</p>
+                    {(listing.place || listing.city) && <p className="mt-2 truncate text-sm font-medium text-foreground/80" data-testid="live-listing-place">{listing.place || listing.city}</p>}
+                    {meta && <p className="mt-0.5 text-sm text-muted-foreground">{meta}</p>}
                   </div>
                 </Link>
               );
