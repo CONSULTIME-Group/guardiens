@@ -27,6 +27,8 @@ import { startCronRun } from "../_shared/cron-run-log.ts";
 import { requireCronCaller } from "../_shared/require-cron-caller.ts";
 import { evaluateSitAlert, PUBLISHED_STATUS } from "../_shared/sit-alert-guard.ts";
 import { isFarForRecipient, isOwnerFarFromFrance } from "../_shared/far-listing.ts";
+import { isBothNeverPublished, parisDay, routeBothAlert } from "../_shared/both-alert-cap.ts";
+import { loadPublishedOwnerIdSet } from "../_shared/published-sit.ts";
 import {
   APPLY_COMPLETION_THRESHOLD,
   completionMessageFor,
@@ -208,8 +210,16 @@ Deno.serve(async (req) => {
     already_notified: 0,
     send_failed: 0,
     dropped_over_cap: 0,
+    deferred_to_digest: 0,
   };
   const errors: string[] = [];
+  // Lot W0 (point 11) : comptes « both » jamais publiés, une alerte immédiate
+  // par jour, les suivantes rejoignent le récapitulatif. Chargements paresseux,
+  // un seul par passage.
+  let publishedOwners: Set<string> | null = null;
+  const immediateTodayByUser = new Map<string, number>();
+  const digestServes = new Map<string, boolean>();
+  const today = parisDay();
 
   try {
     const since = new Date(Date.now() - PUBLISH_LOOKBACK_MINUTES * 60_000).toISOString();
@@ -484,6 +494,73 @@ Deno.serve(async (req) => {
 
       for (const t of selected) {
         const idempotencyKey = `publish-alert-${sit.id}-${t.user_id}`;
+
+        // Lot W0 (point 11) : plafond quotidien des comptes « both » jamais
+        // publiés. Toute lecture en échec garde l'alerte immédiate (aucune
+        // alerte perdue), de même qu'une mise en récapitulatif en échec.
+        const sitterRole = sitterById.get(t.user_id)?.role ?? null;
+        if (String(sitterRole ?? "") === "both") {
+          try {
+            if (publishedOwners === null) publishedOwners = await loadPublishedOwnerIdSet(supabase);
+            const hasPublished = publishedOwners.has(t.user_id);
+            if (isBothNeverPublished(sitterRole, hasPublished)) {
+              if (!digestServes.has(t.user_id)) {
+                // Le récapitulatif ne sert pas un compte qui l'a refusé : dans
+                // ce cas l'alerte reste immédiate.
+                const { data: dp, error: dpErr } = await supabase
+                  .from("email_preferences").select("new_sit_digest").eq("user_id", t.user_id).maybeSingle();
+                if (dpErr) throw new Error(dpErr.message);
+                digestServes.set(t.user_id, (dp as { new_sit_digest?: boolean | null } | null)?.new_sit_digest !== false);
+              }
+              if (!immediateTodayByUser.has(t.user_id)) {
+                // Une lecture par compte concerné et par passage, bornée : seul
+                // « au moins une » compte pour le plafond.
+                const { data: todayRows, error: todayErr } = await supabase
+                  .from("sit_notification_log")
+                  .select("idempotency_key")
+                  .eq("user_id", t.user_id)
+                  .eq("source", "notify-sitters-on-publish")
+                  .eq("status", "claimed")
+                  .eq("notification_date", today)
+                  .limit(5);
+                if (todayErr) throw new Error(todayErr.message);
+                immediateTodayByUser.set(t.user_id, (todayRows ?? []).length);
+              }
+              const route = routeBothAlert({
+                role: sitterRole,
+                hasPublished,
+                immediateToday: immediateTodayByUser.get(t.user_id) ?? 0,
+              });
+              if (route === "digest" && digestServes.get(t.user_id) === true) {
+                const { error: queueErr } = await supabase.from("sitter_digest_queue").upsert({
+                  sitter_id: t.user_id,
+                  sit_id: sit.id,
+                  distance_km: t.distance_km,
+                  status: "queued",
+                }, { onConflict: "sitter_id,sit_id", ignoreDuplicates: true });
+                // Une ligne déjà écartée par un récapitulatif précédent repart
+                // en file : l'alerte n'est jamais perdue.
+                let requeueErr: { message: string } | null = null;
+                if (!queueErr) {
+                  const { error } = await supabase.from("sitter_digest_queue")
+                    .update({ status: "queued", skip_reason: null, sent_at: null, queued_at: new Date().toISOString() })
+                    .eq("sitter_id", t.user_id)
+                    .eq("sit_id", sit.id)
+                    .eq("status", "skipped");
+                  requeueErr = error;
+                }
+                if (!queueErr && !requeueErr) {
+                  metrics.deferred_to_digest++;
+                  continue;
+                }
+                console.error("[publish-alert] mise en récapitulatif impossible, alerte immédiate gardée", (queueErr ?? requeueErr)?.message);
+              }
+            }
+          } catch (capErr) {
+            console.error("[publish-alert] plafond both illisible, alerte immédiate gardée", capErr);
+          }
+        }
+
         // Idempotence stricte : la cle primaire de sit_notification_log
         // interdit un second envoi, meme si le cron repasse. Une ligne
         // relachee apres un echec technique reste en base, et redevient
@@ -553,6 +630,9 @@ Deno.serve(async (req) => {
           
         } else {
           metrics.emails_sent++;
+          if (immediateTodayByUser.has(t.user_id)) {
+            immediateTodayByUser.set(t.user_id, (immediateTodayByUser.get(t.user_id) ?? 0) + 1);
+          }
         }
       }
     }

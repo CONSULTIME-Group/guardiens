@@ -13,6 +13,25 @@ import {
 } from '../_shared/nearby-open-sits.ts'
 import { deferDecision } from '../_shared/journey-defer.ts'
 import { journeyIsOwner } from '../_shared/journey-audience.ts'
+import { loadPublishedOwnerIdSet, ownerHasPublished } from '../_shared/published-sit.ts'
+import {
+  loadOwnerSitterPool,
+  ownerNearbyContext,
+  ownerNearbyTemplateData,
+  type SitterRow,
+} from '../_shared/owner-nearby.ts'
+import {
+  ALREADY_SENT_STATUSES,
+  decideStep,
+  departureHoldsPublishAsk,
+  draftResumeUrl,
+  isNeverPublishedOwnerOnly,
+  loadLastDepartureAnswer,
+  ONCE_PER_PERSON_TEMPLATES,
+  PUBLISH_ASK_TEMPLATES,
+  SEQUENCES_EXCLUDING_NEVER_PUBLISHED_OWNER,
+  SITTER_VOICE_TEMPLATES,
+} from '../_shared/owner-sequence-rules.ts'
 
 // Étapes dont l'envoi est conditionné à une annonce ouverte à portée.
 const NEARBY_CONDITIONED_TEMPLATES = new Set([
@@ -59,6 +78,12 @@ interface Step {
   delay_hours: number
   template_name: string
   exit_condition: ExitCondition | null
+  /**
+   * Lot W0 : condition qui saute cette étape seule (le parcours continue).
+   * Ex. onboarding-j1 sauté pour un profil déjà à 60 %, la séquence
+   * propriétaire garde ses relances jusqu'à la publication.
+   */
+  skip_condition?: ExitCondition | null
 }
 
 interface Sequence {
@@ -159,10 +184,10 @@ async function runEvaluation(
 ) {
   const stats = {
     enrolled: 0, sent: 0, exited: 0, completed: 0, skipped: 0, errors: 0, capped: false,
-    bySequence: {} as Record<string, { enrolled: number; sent: number; exited: number; skipped: number }>,
+    bySequence: {} as Record<string, { enrolled: number; sent: number; exited: number; skipped: number; held: number }>,
   }
-  const bumpSeq = (key: string, field: 'enrolled' | 'sent' | 'exited' | 'skipped', n = 1) => {
-    const r = stats.bySequence[key] ?? { enrolled: 0, sent: 0, exited: 0, skipped: 0 }
+  const bumpSeq = (key: string, field: 'enrolled' | 'sent' | 'exited' | 'skipped' | 'held', n = 1) => {
+    const r = stats.bySequence[key] ?? { enrolled: 0, sent: 0, exited: 0, skipped: 0, held: 0 }
     r[field] += n
     stats.bySequence[key] = r
   }
@@ -178,15 +203,31 @@ async function runEvaluation(
 
   // Lot 7 : on traite les sequences par priorite croissante, pour que
   // l'onboarding gagne quand plusieurs sequences sont eligibles au meme run.
+  // Égalité de priorité : ordre alphabétique de la clé, donc onboarding-owner
+  // avant onboarding-sitter pour un compte « both » (lot W0).
   const sequences = ((sequencesRaw ?? []) as Sequence[])
     .slice()
-    .sort((a, b) => (a.priority ?? sequencePriority(a.key)) - (b.priority ?? sequencePriority(b.key)))
+    .sort((a, b) =>
+      ((a.priority ?? sequencePriority(a.key)) - (b.priority ?? sequencePriority(b.key)))
+      || a.key.localeCompare(b.key))
   if (!sequences.length) return stats
 
-  const { data: stepsRaw } = await supabase
+  // Lot W0 : une lecture d'étapes en échec arrête le passage. Sans étapes,
+  // chaque parcours actif passerait pour terminé. Tant que la migration W0
+  // n'a pas ajouté skip_condition, on relit sans cette colonne.
+  let { data: stepsRaw, error: stepsErr } = await supabase
     .from('nurturing_steps')
-    .select('id, sequence_id, step_order, delay_hours, template_name, exit_condition')
+    .select('id, sequence_id, step_order, delay_hours, template_name, exit_condition, skip_condition')
     .order('step_order', { ascending: true })
+  if (stepsErr && /skip_condition/.test(stepsErr.message ?? '')) {
+    ;({ data: stepsRaw, error: stepsErr } = await supabase
+      .from('nurturing_steps')
+      .select('id, sequence_id, step_order, delay_hours, template_name, exit_condition')
+      .order('step_order', { ascending: true }))
+  }
+  if (stepsErr || !Array.isArray(stepsRaw)) {
+    throw new Error(`nurturing_steps lookup failed: ${stepsErr?.message ?? 'no data'}`)
+  }
 
   const stepsBySeq = new Map<string, Step[]>()
   for (const s of (stepsRaw ?? []) as Step[]) {
@@ -195,10 +236,18 @@ async function runEvaluation(
     stepsBySeq.set(s.sequence_id, arr)
   }
 
+  // Propriétaires ayant publié : un seul chargement par passage, partagé par
+  // les exclusions d'enrôlement (lot W0, définition unique published-sit.ts).
+  let publishedCache: Set<string> | null = null
+  const loadPublished = async (): Promise<Set<string>> => {
+    if (publishedCache === null) publishedCache = await loadPublishedOwnerIdSet(supabase)
+    return publishedCache
+  }
+
   for (const seq of sequences) {
     if (Date.now() > DEADLINE_MS) { stats.capped = true; break }
     try {
-      const enrolled = await enrollForSequence(supabase, seq, dryRun)
+      const enrolled = await enrollForSequence(supabase, seq, dryRun, loadPublished)
       stats.enrolled += enrolled
       if (enrolled) bumpSeq(seq.key, 'enrolled', enrolled)
     } catch (e) {
@@ -242,12 +291,40 @@ async function runEvaluation(
     console.warn('[frequency-cap] lookup failed, proceeding without global cap', freqErr)
   }
 
+  // Lot W0 : une seule demande « publier » à la fois. Une relance de
+  // brouillon partie dans les 48 heures fait attendre les relances
+  // owner-no-sit (l'inverse est tenu par send-sit-draft-reminder).
+  const recentDraftReminder = new Set<string>()
+  try {
+    const { data: drafts, error: draftsErr } = await supabase
+      .from('email_send_log')
+      .select('recipient_email')
+      .eq('template_name', 'sit-draft-reminder')
+      .in('status', ['sent', 'pending', 'deferred'])
+      .gte('created_at', freqSince)
+      .limit(5000)
+    if (draftsErr) throw draftsErr
+    for (const r of (drafts ?? []) as Array<{ recipient_email: string | null }>) {
+      if (r.recipient_email) recentDraftReminder.add(r.recipient_email.toLowerCase())
+    }
+  } catch (draftErr) {
+    console.warn('[frequency-cap] draft reminder lookup failed', draftErr)
+  }
+
   // Les annonces ouvertes sont peu nombreuses : un seul chargement par
   // passage, partagé entre tous les destinataires.
   let openSitsCache: OpenSitRow[] | null = null
   const loadOpenSits = async (): Promise<OpenSitRow[]> => {
     if (openSitsCache === null) openSitsCache = await fetchOpenSits(supabase)
     return openSitsCache
+  }
+
+  // Vivier « gardiens à proximité » des emails propriétaires (lot W0) : même
+  // calcul que l'email de Noël, un seul chargement par passage.
+  let sitterPoolCache: SitterRow[] | null = null
+  const loadSitterPool = async (): Promise<SitterRow[]> => {
+    if (sitterPoolCache === null) sitterPoolCache = await loadOwnerSitterPool(supabase)
+    return sitterPoolCache
   }
 
   for (const j of activeJourneys ?? []) {
@@ -257,6 +334,8 @@ async function runEvaluation(
       const seq = seqByKey.get(j.sequence_key)
       if (!seq) continue
       const steps = stepsBySeq.get(seq.id) ?? []
+      // Séquence sans étape lue : rien à conclure, le parcours reste actif.
+      if (steps.length === 0) continue
       const nextStep = steps.find((s) => s.step_order === j.current_step + 1)
 
 
@@ -306,29 +385,90 @@ async function runEvaluation(
         continue
       }
 
-      if (dryRun) { stats.sent++; bumpSeq(j.sequence_key, 'sent'); continue }
-
       const { data: profile } = await supabase
         .from('profiles')
-        .select('email, first_name, last_seen_at, role, latitude, longitude, sitter_profiles(geographic_radius)')
+        .select('email, first_name, last_seen_at, role, city, latitude, longitude, sitter_profiles(geographic_radius)')
         .eq('id', j.user_id)
         .maybeSingle()
       if (!profile?.email) {
-        await supabase.from('journey_step_log').insert({
-          journey_id: j.id, step_order: nextStep.step_order,
-          template_name: nextStep.template_name, sent: false, reason: 'no_email',
-        })
-        await supabase.from('user_journeys').update({
-          status: 'exited', exit_reason: 'no_email', completed_at: new Date().toISOString(),
-        }).eq('id', j.id)
+        if (!dryRun) {
+          await supabase.from('journey_step_log').insert({
+            journey_id: j.id, step_order: nextStep.step_order,
+            template_name: nextStep.template_name, sent: false, reason: 'no_email',
+          })
+          await supabase.from('user_journeys').update({
+            status: 'exited', exit_reason: 'no_email', completed_at: new Date().toISOString(),
+          }).eq('id', j.id)
+        }
         stats.skipped++
         bumpSeq(j.sequence_key, 'skipped')
         continue
       }
 
+      // Lot W0 : faits de l'étape, puis une seule décision (decideStep).
+      const template = nextStep.template_name
+      const role = (profile as { role?: string | null }).role ?? null
+      // Publication lue seulement quand un texte de gardien vise un rôle owner.
+      const hasPublished = SITTER_VOICE_TEMPLATES.has(template) && role === 'owner'
+        ? await ownerHasPublished(supabase, j.user_id)
+        : true
+      const skipMet = await checkExitCondition(supabase, j.user_id, nextStep.skip_condition ?? null)
+      const alreadySent = ONCE_PER_PERSON_TEMPLATES.has(template)
+        ? await templateAlreadySent(supabase, template, profile.email)
+        : false
+      const departureHold = PUBLISH_ASK_TEMPLATES.has(template)
+        ? departureHoldsPublishAsk(await loadLastDepartureAnswer(supabase, j.user_id))
+        : false
+      const verdict = decideStep({
+        template, exitMet: false, skipMet, alreadySent, role, hasPublished, departureHold,
+      })
+
+      if (verdict.kind === 'exit') {
+        if (!dryRun) {
+          await supabase.from('user_journeys').update({
+            status: 'exited', exit_reason: verdict.reason, completed_at: new Date().toISOString(),
+          }).eq('id', j.id)
+          await supabase.from('journey_step_log').insert({
+            journey_id: j.id, step_order: nextStep.step_order,
+            template_name: template, sent: false, reason: verdict.reason,
+          })
+        }
+        stats.exited++
+        bumpSeq(j.sequence_key, 'exited')
+        continue
+      }
+      if (verdict.kind === 'skip') {
+        // L'étape est sautée, le parcours avance : l'étape suivante garde son
+        // écart relatif à partir de maintenant.
+        if (!dryRun) {
+          await supabase.from('journey_step_log').insert({
+            journey_id: j.id, step_order: nextStep.step_order,
+            template_name: template, sent: false, reason: verdict.reason,
+          })
+          await supabase.from('user_journeys').update({
+            current_step: nextStep.step_order,
+            last_step_at: new Date().toISOString(),
+            transient_failure_count: 0,
+          }).eq('id', j.id)
+        }
+        stats.skipped++
+        bumpSeq(j.sequence_key, 'skipped')
+        continue
+      }
+      if (verdict.kind === 'hold') {
+        // Réponse de départ lointaine de moins de 30 jours : l'étape attend,
+        // sans écriture, et repart au premier passage après l'échéance.
+        stats.skipped++
+        bumpSeq(j.sequence_key, 'held')
+        continue
+      }
+
+      if (dryRun) { stats.sent++; bumpSeq(j.sequence_key, 'sent'); continue }
+
       // Garde de fréquence globale : max 1 email de nurturing / 48h / destinataire.
       // On ne fait PAS avancer current_step : l'étape repartira au prochain run éligible.
-      if (recentlyServed.has(profile.email.toLowerCase())) {
+      if (recentlyServed.has(profile.email.toLowerCase())
+        || (template.startsWith('owner-no-sit-') && recentDraftReminder.has(profile.email.toLowerCase()))) {
         await supabase.from('journey_step_log').insert({
           journey_id: j.id, step_order: nextStep.step_order,
           template_name: nextStep.template_name, sent: false, reason: 'frequency_capped',
@@ -374,20 +514,50 @@ async function runEvaluation(
         nearbyData = nearbySitsTemplateData(nearby.sits)
       }
 
-      const idempotencyKey = `journey-${j.sequence_key}-${j.id}-step-${nextStep.step_order}`
+      // Lot W0 : les relances owner-no-sit-* portent le nom du gabarit dans la
+      // clé, pas le rang. La séquence propriétaire a été renumérotée et un
+      // ancien rang déjà envoyé (conseils, relance profil) ne doit jamais
+      // faire passer une nouvelle étape pour un doublon. L'envoi unique de ces
+      // gabarits est garanti par templateAlreadySent.
+      const idempotencyKey = template.startsWith('owner-no-sit-')
+        ? `journey-${j.sequence_key}-${j.id}-${template}`
+        : `journey-${j.sequence_key}-${j.id}-step-${nextStep.step_order}`
 
-      // Enrichissement contextuel : pour les séquences owner-no-sit-*, on
-      // hydrate ville, gardiens à proximité et top 3 prénoms via la RPC PG.
-      // Fail-open : si la RPC échoue ou renvoie null, on envoie sans ces champs.
+      // Enrichissement propriétaire (lot W0) : gardiens à proximité par le
+      // calcul unique (owner-nearby.ts, 50 km), cartes du J+3 et brouillon à
+      // reprendre. Fail-open : en cas d'échec, l'email part sans ces champs.
+      const isOwnerRecipient = journeyIsOwner(seq.audience, role)
       let ownerContext: Record<string, unknown> = {}
-      if (j.sequence_key === 'owner-no-sit-relance') {
+      if (template.startsWith('owner-no-sit-') || (template === 'onboarding-j1' && isOwnerRecipient)) {
         try {
-          const { data: ctx } = await supabase.rpc('get_owner_nurturing_context', { _owner_id: j.user_id })
-          if (ctx && typeof ctx === 'object') {
-            ownerContext = ctx as Record<string, unknown>
-          }
+          const pool = await loadSitterPool()
+          const ctx = ownerNearbyContext({
+            id: j.user_id,
+            first_name: profile.first_name,
+            city: (profile as any).city ?? null,
+            latitude: (profile as any).latitude ?? null,
+            longitude: (profile as any).longitude ?? null,
+          }, pool)
+          ownerContext = ownerNearbyTemplateData(ctx)
         } catch (ctxErr) {
-          console.warn('[owner-context] rpc failed, sending without enrichment', ctxErr)
+          console.warn('[owner-context] nearby lookup failed, sending without enrichment', ctxErr)
+        }
+        if (template === 'owner-no-sit-j3') {
+          try {
+            const { data: draft } = await supabase.from('sits')
+              .select('id')
+              .eq('user_id', j.user_id)
+              .eq('status', 'draft')
+              .is('published_at', null)
+              .order('created_at', { ascending: false })
+              .limit(1)
+              .maybeSingle()
+            if (draft?.id) {
+              ownerContext = { ...ownerContext, hasDraft: true, resumeUrl: draftResumeUrl(draft.id as string) }
+            }
+          } catch (draftErr) {
+            console.warn('[owner-context] draft lookup failed', draftErr)
+          }
         }
       }
 
@@ -416,7 +586,7 @@ async function runEvaluation(
               : undefined,
             // Rôle du destinataire pour cette séquence : un template dont le
             // contenu ou le sujet dépend du rôle ne doit jamais se tromper.
-            isOwner: journeyIsOwner(seq.audience, (profile as { role?: string | null }).role ?? null),
+            isOwner: isOwnerRecipient,
             ...nearbyData,
             ...ownerContext,
           },
@@ -654,6 +824,7 @@ async function enrollForSequence(
   supabase: any,
   seq: Sequence,
   dryRun: boolean,
+  loadPublished: () => Promise<Set<string>> = async () => new Set<string>(),
 ): Promise<number> {
   const audienceFilter =
     seq.audience === 'sitter' ? ['sitter', 'both']
@@ -665,7 +836,7 @@ async function enrollForSequence(
   const nowMs = Date.now()
 
   // Build candidates list according to rule type
-  let candidates: Array<{ id: string; anchor_at: string }> = []
+  let candidates: Array<{ id: string; anchor_at: string; role?: string | null }> = []
 
   if (rule.type === 'signup') {
     // Optional min_age_days targets users older than N days.
@@ -697,7 +868,7 @@ async function enrollForSequence(
     const { data } = await q.limit(500)
     candidates = (data ?? [])
       .filter((c: { last_seen_at: string | null }) => !!c.last_seen_at)
-      .map((c: { id: string; last_seen_at: string }) => ({ id: c.id, anchor_at: c.last_seen_at }))
+      .map((c: { id: string; role: string | null; last_seen_at: string }) => ({ id: c.id, anchor_at: c.last_seen_at, role: c.role }))
   } else if (rule.type === 'owner_no_sit') {
     const { lowerBound: windowAt, upperBound: minAgeAt } = ageWindow(rule as AgeRule, nowMs, { minAgeDays: 7, windowDays })
     let q = supabase
@@ -855,6 +1026,15 @@ async function enrollForSequence(
 
   if (!candidates.length) return 0
 
+  // Lot W0 (point 5) : une séquence au texte de gardien n'enrôle jamais un
+  // compte au rôle owner qui n'a jamais publié.
+  if (SEQUENCES_EXCLUDING_NEVER_PUBLISHED_OWNER.has(seq.key)) {
+    const published = await loadPublished()
+    candidates = candidates.filter((c) =>
+      !isNeverPublishedOwnerOnly((c as { role?: string | null }).role ?? null, published.has(c.id)))
+    if (!candidates.length) return 0
+  }
+
   // Onboarding double-enrollment guard : un profil 'both' ne doit pas être
   // enrôlé dans onboarding-owner ET onboarding-sitter. Si l'autre séquence
   // d'onboarding a déjà une journey (tout statut) pour ce user, on skip.
@@ -995,11 +1175,9 @@ async function checkExitCondition(
       return (data?.completed_sits_count ?? 0) > 0
     }
     case 'has_published_sit': {
-      const { count } = await supabase.from('sits')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', userId)
-        .in('status', ['published', 'confirmed', 'in_progress', 'completed'])
-      return (count ?? 0) > 0
+      // Définition unique du lot W0 : published_at renseigné, quel que soit
+      // le statut actuel. Une lecture en échec lève : l'étape ne part pas.
+      return await ownerHasPublished(supabase, userId)
     }
     case 'has_application_received': {
       const { count } = await supabase
@@ -1048,4 +1226,22 @@ async function checkExitCondition(
     default:
       return false
   }
+}
+
+// ---------------------------------------------------------------------------
+// Lot W0 : un gabarit à envoi unique déjà parti vers cette adresse, par
+// n'importe quelle voie (parcours, cron, bouton admin), adresse comparée sans
+// tenir compte de la casse. Lecture en échec : on lève, l'étape ne part pas.
+// ---------------------------------------------------------------------------
+async function templateAlreadySent(supabase: any, template: string, email: string): Promise<boolean> {
+  const pattern = email.trim().toLowerCase().replace(/[\\%_]/g, (c) => `\\${c}`)
+  const { data, error } = await supabase
+    .from('email_send_log')
+    .select('id')
+    .eq('template_name', template)
+    .ilike('recipient_email', pattern)
+    .in('status', ALREADY_SENT_STATUSES as string[])
+    .limit(1)
+  if (error) throw new Error(`email_send_log lookup failed: ${error.message}`)
+  return (data ?? []).length > 0
 }

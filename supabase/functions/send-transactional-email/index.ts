@@ -19,6 +19,8 @@ import { authorizeDeferredMemberEmail, EMAIL_ORIGIN_FIELD, MEMBER_EMAIL_TEMPLATE
 import { acquireMemberSendClaim, finishMemberSendClaim, memberSendOutcome, type SendClaim } from '../_shared/member-email-send-claim.ts'
 
 const SITE_URL = 'https://guardiens.fr'
+// Lot W0 : gabarits qui affichent un lien de désinscription à jeton dans leur corps.
+const UNSUBSCRIBE_LINK_TEMPLATES: ReadonlySet<string> = new Set(['owner-no-sit-j21'])
 
 // Trace d'un refus d'autorisation : sans elle, un 403 ou un 503 disparaissait
 // sans laisser d'occurrence agrégeable. Aucune adresse email n'est écrite,
@@ -1298,6 +1300,13 @@ Deno.serve(async (req) => {
 
   // 4. Render React Email template to HTML and plain text (synchrone,
   // voir la note d'import : renderAsync corrompt les accents).
+  // Lot W0 : lien de désinscription à jeton mis à disposition du gabarit
+  // (owner-no-sit-j21 seul), même jeton que le pied de page, toujours posé ici
+  // et jamais repris de l'appelant. Les autres gabarits reçoivent leurs
+  // données inchangées.
+  if (UNSUBSCRIBE_LINK_TEMPLATES.has(templateName)) {
+    templateData = { ...templateData, unsubscribeAllUrl: `${SITE_URL}/unsubscribe?token=${unsubscribeToken}` }
+  }
   templateData = normalizeEmailFirstNames(templateData)
   let html = render(
     React.createElement(template.component, templateData)

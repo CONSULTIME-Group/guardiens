@@ -4,8 +4,6 @@ import {
 } from 'npm:@react-email/components@0.0.22'
 import { BrandedHead } from './_branded-head.tsx'
 import { BrandHeader } from './_brand-header.tsx'
-import { AlmaSignature } from './_alma-signature.tsx'
-import { AlmaSignoff } from './_alma-signoff.tsx'
 import { LegalFooter } from './_legal-footer.tsx'
 import type { TemplateEntry } from './registry.ts'
 
@@ -15,14 +13,19 @@ interface Props {
   firstName?: string
   city?: string
   nearby_sitters_count?: number
+  /** Libellé « N gardiens à moins de 50 km de {commune} » (owner-nearby.ts). */
+  nearbySittersLabel?: string | null
+  /** Lien de désinscription à jeton, posé par send-transactional-email. */
+  unsubscribeAllUrl?: string
 }
 
-const Email = ({ firstName, city, nearby_sitters_count }: Props) => {
+const Email = ({ firstName, nearbySittersLabel, unsubscribeAllUrl }: Props) => {
   const name = firstName || ''
-  const cityLabel = city || 'chez vous'
-  const nearby = typeof nearby_sitters_count === 'number' ? nearby_sitters_count : 0
+  const label = typeof nearbySittersLabel === 'string' && nearbySittersLabel.trim() ? nearbySittersLabel.trim() : null
   const publishUrl = `${SITE_URL}/sits/create?utm_source=email&utm_campaign=owner_no_sit&utm_medium=j21`
-  const unsubUrl = `${SITE_URL}/unsubscribe?scope=all`
+  // Lien à jeton : un clic désinscrit vraiment. En aperçu, la page des
+  // préférences prend le relais.
+  const unsubUrl = unsubscribeAllUrl || `${SITE_URL}/email-preferences`
 
   return (
     <Html lang="fr" dir="ltr">
@@ -31,7 +34,6 @@ const Email = ({ firstName, city, nearby_sitters_count }: Props) => {
       <Body style={main}>
         <Container style={container}>
           <BrandHeader />
-          <AlmaSignature />
           <Heading style={h1}>{name ? `Bonjour ${name},` : 'Bonjour,'}</Heading>
 
           <Text style={text}>
@@ -41,7 +43,7 @@ const Email = ({ firstName, city, nearby_sitters_count }: Props) => {
           </Text>
 
           <Text style={text}>
-            Vous vous êtes inscrit il y a trois semaines, et j'aimerais comprendre ce que vous
+            Votre inscription date de trois semaines, et j'aimerais comprendre ce que vous
             cherchez. Un départ prévu&nbsp;? Une simple curiosité&nbsp;? Un besoin plus ponctuel,
             comme quelqu'un pour nourrir le chat un soir&nbsp;?
           </Text>
@@ -50,10 +52,10 @@ const Email = ({ firstName, city, nearby_sitters_count }: Props) => {
             Répondez simplement à cet email, je lis chaque réponse moi-même.
           </Text>
 
-          {nearby > 0 ? (
+          {label ? (
             <>
               <Text style={text}>
-                Au passage, {nearby} gardiens habitent autour de {cityLabel}.
+                Au passage, autour de vous&nbsp;: {label}.
               </Text>
               <Section style={ctaSection}>
                 <Button style={button} href={publishUrl}>Publier mon annonce</Button>
@@ -68,7 +70,6 @@ const Email = ({ firstName, city, nearby_sitters_count }: Props) => {
 
           <Text style={sig}>Jérémie</Text>
 
-          <AlmaSignoff />
           <Hr style={hr} />
           <LegalFooter
             purpose="l'accompagnement à la prise en main de votre compte"
@@ -85,7 +86,13 @@ export const template = {
   component: Email,
   subject: 'Une question de Jérémie',
   displayName: 'Propriétaire sans annonce, J+21 (relance personnelle)',
-  previewData: { firstName: 'Camille', city: 'Lyon', nearby_sitters_count: 137 },
+  previewData: {
+    firstName: 'Camille',
+    city: 'Lyon',
+    nearby_sitters_count: 137,
+    nearbySittersLabel: '137 gardiens à moins de 50 km de Lyon',
+    unsubscribeAllUrl: 'https://guardiens.fr/unsubscribe?token=exemple',
+  },
 } satisfies TemplateEntry
 
 const main = { backgroundColor: '#ffffff', fontFamily: "'Outfit', Arial, sans-serif" }

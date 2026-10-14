@@ -17,6 +17,7 @@ import {
   loadSitterPool,
   type NoelTemplateData,
 } from "../_shared/owner-noel-audience.ts";
+import { isAccountBlockedForMarketing } from "../_shared/account-email-block.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -62,9 +63,13 @@ interface MassEmailFilters {
   /** Relance : ceux qui ont ouvert la campagne passent en tête. */
   prioritize_opened?: boolean;
   // Lot N3, Noël 2026
-  /** Exclut les comptes suspendus (suspended_at posé, sans échéance passée). */
+  /**
+   * Exclut les comptes suspendus. Depuis le lot W0, l'exclusion des comptes
+   * suspendus ou inactifs s'applique toujours ; le drapeau reste accepté pour
+   * les préréglages enregistrés.
+   */
   exclude_suspended?: boolean;
-  /** Jamais publié : aucune annonce hors brouillon ni published_at renseigné. */
+  /** Jamais publié : aucune annonce avec published_at (définition unique, lot W0). */
   never_published_sit?: boolean;
   /** Lot N7 : a déjà publié au moins une annonce, aucune annonce publiée à venir. */
   past_published_no_upcoming?: boolean;
@@ -426,9 +431,9 @@ async function fetchTargetedProfiles(
       if (!p.email) continue;
       // Ligne d'entraide non renseignée (null, vide ou espaces)
       if (filters.helps_with_empty && String(p.helps_with ?? "").trim().length > 0) continue;
-      // Compte suspendu (sans échéance, ou échéance future)
-      if (filters.exclude_suspended && p.suspended_at
-        && (!p.suspended_until || new Date(p.suspended_until).getTime() > Date.now())) continue;
+      // Lot W0 (point 7) : compte suspendu (sans échéance ou échéance future)
+      // ou inactif, toujours exclu, quel que soit le préréglage.
+      if (isAccountBlockedForMarketing(p)) continue;
       all.push({ id: p.id, email: p.email, first_name: p.first_name ?? null });
     }
     if (data.length < PAGE) break;
@@ -494,13 +499,12 @@ async function fetchTargetedProfiles(
     result = result.filter((p) => !withApp.has(p.id));
   }
 
-  // Aucune annonce jamais publiée
-  if (filters.no_sit_published_ever) {
-    const { data: sitOwners } = await serviceClient
-      .from("sits")
-      .select("user_id");
-    const withSit = new Set((sitOwners || []).map((s: any) => s.user_id));
-    result = result.filter((p) => !withSit.has(p.id));
+  // Aucune annonce jamais publiée. Lot W0 : même définition que
+  // never_published_sit (published_at renseigné, un brouillon ne compte pas),
+  // les deux clés restent acceptées pour les préréglages enregistrés.
+  if (filters.no_sit_published_ever || filters.never_published_sit) {
+    const published = await loadPublishedOwnerIds(serviceClient);
+    result = result.filter((p) => !published.has(p.id));
   }
 
   // Aucune conversation jamais (ni owner ni sitter)
@@ -573,11 +577,6 @@ async function fetchTargetedProfiles(
     result = result.filter((p) => !excluded.has(p.id));
   }
 
-  // Jamais publié (lot N3) : un brouillon seul ne compte pas comme publication.
-  if (filters.never_published_sit) {
-    const published = await loadPublishedOwnerIds(serviceClient);
-    result = result.filter((p) => !published.has(p.id));
-  }
 
   // Anciens publiants (lot N7) : déjà publié, rien de publié à venir.
   if (filters.past_published_no_upcoming) {

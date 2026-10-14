@@ -4,6 +4,8 @@
 // - Throttling : appel séquentiel à send-transactional-email (qui enqueue dans pgmq)
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { loadPublishedOwnerIdSet } from "../_shared/published-sit.ts";
+import { sitterVoiceBlocked } from "../_shared/owner-sequence-rules.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -50,14 +52,18 @@ Deno.serve(async (req) => {
     const cutoff = new Date(Date.now() - 2 * 86400000).toISOString();
     const { data: profiles, error: pErr } = await service
       .from("profiles")
-      .select("id, email, first_name, profile_completion, created_at")
+      .select("id, email, first_name, profile_completion, created_at, role")
       .lte("created_at", cutoff)
       .or("profile_completion.is.null,profile_completion.eq.0")
       .not("email", "is", null)
       .limit(limit);
 
     if (pErr) throw pErr;
-    const candidates = (profiles || []).filter(p => p.email);
+    // Lot W0 (point 5) : texte de gardien, jamais envoyé à un compte au rôle
+    // owner qui n'a jamais publié (définition unique, published-sit.ts).
+    const published = await loadPublishedOwnerIdSet(service);
+    const candidates = (profiles || []).filter(p =>
+      p.email && !sitterVoiceBlocked("relance-profil-incomplet", (p as any).role ?? null, published.has(p.id)));
 
     // Filtre suppression list
     const emails = candidates.map(p => p.email);

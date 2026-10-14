@@ -9,6 +9,7 @@ import { requireCronCaller } from '../_shared/require-cron-caller.ts'
 import { startCronRun } from '../_shared/cron-run-log.ts'
 import {
   clampInt,
+  cohortRefusal,
   filterToFrozenCohort,
   isRateLimitFailure,
   runInBatches,
@@ -98,22 +99,25 @@ Deno.serve(async (req) => {
     const cibleRetenue = cohortFilter.cibleRetenue
     const ecartesHorsCible = cohortFilter.ecartesHorsCible
 
-    // Un croisement vide sur un plan non vide signale une erreur de donnees :
-    // on refuse, on n'elargit jamais.
-    if (cohortFilter.cohortPresent && planBrut > 0 && cibleRetenue === 0) {
-      const reason = `cohorte figée présente pour ${periodKey} mais croisement vide, envoi refusé`
+    // Lot W0 : sans cohorte figée pour la période, ou avec un croisement vide
+    // sur un plan non vide, on refuse (409). On n'élargit jamais au plan
+    // entier. Un essai à blanc reste possible pour préparer le gel.
+    const reason = cohortRefusal(cohortFilter, periodKey, !!body.dry_run)
+    if (reason) {
       await run.fail(new Error(reason), {
         period_key: periodKey,
         plan_brut: planBrut,
-        cible_retenue: 0,
+        cible_retenue: cibleRetenue,
         ecartes_hors_cible: ecartesHorsCible,
+        cohort_present: cohortFilter.cohortPresent,
         reason,
       })
       return json({
         ok: false,
         error: reason,
+        cohort_present: cohortFilter.cohortPresent,
         plan_brut: planBrut,
-        cible_retenue: 0,
+        cible_retenue: cibleRetenue,
         ecartes_hors_cible: ecartesHorsCible,
         period_key: periodKey,
       }, 409)

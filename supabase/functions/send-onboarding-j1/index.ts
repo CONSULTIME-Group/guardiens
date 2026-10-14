@@ -1,6 +1,10 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { computeAffinityResultFull } from '../_shared/affinity/score.ts'
 import { requireCronCaller } from '../_shared/require-cron-caller.ts'
+import { ALREADY_SENT_STATUSES } from '../_shared/owner-sequence-rules.ts'
+import { loadOwnerSitterPool, ownerNearbyContext, type SitterRow } from '../_shared/owner-nearby.ts'
+import { excludeStaffSitters, FOUNDER_PROFILE_IDS, loadAdminIds, nearbySitters } from '../_shared/owner-noel-audience.ts'
+import { isAccountBlockedForMarketing } from '../_shared/account-email-block.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -67,17 +71,24 @@ Deno.serve(async (req) => {
 
   let sent = 0
   let skipped = 0
+  // Vivier « à proximité » partagé (lot W0), chargé à la première demande.
+  let sitterPool: SitterRow[] | null = null
+  let adminIds: Set<string> | null = null
 
   for (const profile of eligibleProfiles) {
-    // Anti-duplicate: check if onboarding-j1 already sent to this user
-    const { data: alreadySent } = await supabase
+    // Lot W0 (point 8) : un seul onboarding-j1 par personne, toutes voies
+    // confondues (parcours ou ce déclenchement), adresse sans casse, statuts
+    // envoyés ou en attente. Lecture en échec : on n'envoie pas.
+    const pattern = String(profile.email).trim().toLowerCase().replace(/[\\%_]/g, (c) => `\\${c}`)
+    const { data: alreadySent, error: alreadyErr } = await supabase
       .from('email_send_log')
       .select('id')
       .eq('template_name', 'onboarding-j1')
-      .eq('recipient_email', profile.email)
+      .ilike('recipient_email', pattern)
+      .in('status', ALREADY_SENT_STATUSES as string[])
       .limit(1)
 
-    if (alreadySent && alreadySent.length > 0) {
+    if (alreadyErr || (alreadySent && alreadySent.length > 0)) {
       skipped++
       continue
     }
@@ -85,17 +96,31 @@ Deno.serve(async (req) => {
     // Enrich for owners: nearby sitter count + top 3 affinity sitters
     const isOwner = profile.role === 'owner' || profile.role === 'both'
     let nearbySittersCount: number | null = null
+    let nearbySittersLabel: string | null = null
     let topSitters: unknown[] = []
 
     if (isOwner) {
       try {
-        const { data: ctx } = await supabase.rpc('get_owner_nurturing_context', { _owner_id: profile.id })
-        if (ctx && typeof ctx === 'object') {
-          const c = ctx as Record<string, unknown>
-          if (typeof c.nearby_sitters_count === 'number') {
-            nearbySittersCount = c.nearby_sitters_count
-          }
-        }
+        // Gardiens à proximité : calcul unique des emails propriétaires
+        // (lot W0, owner-nearby.ts, 50 km, sans « vérifiés »).
+        if (sitterPool === null) sitterPool = await loadOwnerSitterPool(supabase)
+        const near = ownerNearbyContext({
+          id: profile.id,
+          first_name: profile.first_name,
+          city: profile.city ?? null,
+          latitude: (profile as any).latitude ?? null,
+          longitude: (profile as any).longitude ?? null,
+        }, sitterPool)
+        nearbySittersCount = near.count
+        nearbySittersLabel = near.label
+        if (adminIds === null) adminIds = await loadAdminIds(supabase)
+        // Cartes tirées des seuls gardiens à moins de 50 km, même ensemble
+        // que le libellé (lot W0) : aucune carte lointaine sous la phrase.
+        const nearbyIds = new Set(nearbySitters({
+          id: profile.id,
+          latitude: (profile as any).latitude ?? null,
+          longitude: (profile as any).longitude ?? null,
+        }, sitterPool).map((n) => n.row.id))
 
         // Top 3 via le MOTEUR UNIQUE partagé (le même calcul que
         // l'affichage dans l'app et que le digest), mode distribution :
@@ -111,14 +136,17 @@ Deno.serve(async (req) => {
             .select('id, car_required, pets(species, special_needs, breed)')
             .eq('user_id', profile.id),
           supabase.from('profiles')
-            .select('id, first_name, avatar_url, city, latitude, longitude, identity_verified, account_status')
+            .select('id, first_name, avatar_url, city, latitude, longitude, identity_verified, account_status, suspended_at, suspended_until')
             .in('role', ['sitter', 'both'])
             .neq('id', profile.id)
             .limit(1000),
         ])
 
-        const poolRows = (pool ?? []).filter(
-          (p: any) => (p.account_status ?? 'active') === 'active'
+        // Fondateurs, admins et comptes suspendus hors des cartes (lot W0).
+        const poolRows = excludeStaffSitters(
+          (pool ?? []).filter((p: any) => nearbyIds.has(p.id) && !isAccountBlockedForMarketing(p)),
+          adminIds ?? new Set<string>(),
+          FOUNDER_PROFILE_IDS,
         )
         const { data: sitterRows } = poolRows.length
           ? await supabase.from('sitter_profiles').select(SITTER_AFFINITY_COLUMNS)
@@ -204,6 +232,7 @@ Deno.serve(async (req) => {
           isOwner,
           city: profile.city ?? null,
           nearbySittersCount,
+          nearbySittersLabel,
           topSitters,
         },
       }),
