@@ -976,6 +976,8 @@ const ALMA_CATEGORY_GROUPS: AlmaCategoryGroup[] = [
     types: [
       { id: "animal_humor", label: "Humour animalier" },
       { id: "social_stat", label: "Statistiques communautaires" },
+      // Lot A7 : bulles des moments du carnet (première annonce, première garde...).
+      { id: "alma_moment", label: "Moments de notre carnet" },
     ],
   },
 ];

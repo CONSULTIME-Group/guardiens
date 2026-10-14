@@ -20,6 +20,11 @@ import {
 } from "@/components/ai/alma/AlmaAvatarAnimated";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { useAlmaBond } from "@/hooks/useAlmaBond";
+import { AlmaCarnet } from "@/components/ai/alma/AlmaCarnet";
 
 const STAGE_MOOD: Record<AlmaStage, "gentle" | "attentive" | "happy" | "playful"> = {
   nouvelle: "gentle",
@@ -32,7 +37,15 @@ const PROGRESSION_BASE_SIZE = 80;
 
 export default function AlmaEvolution() {
   const { data, isLoading } = useAlmaEvolution();
-  const currentStage: AlmaStage = data?.stage ?? "nouvelle";
+  // Lot A7 : « Notre carnet » pour un membre connecté ; un visiteur garde la page.
+  const { user } = useAuth();
+  const { bond } = useAlmaBond(!!user?.id);
+  const location = useLocation();
+  const currentStage: AlmaStage = bond?.stage ?? data?.stage ?? "nouvelle";
+  useEffect(() => {
+    if (location.hash !== "#carnet" || !bond) return;
+    document.getElementById("carnet")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [bond, location.hash]);
   const currentIndex = ALMA_STAGES.indexOf(currentStage);
 
   return (
@@ -113,7 +126,9 @@ export default function AlmaEvolution() {
 
 
 
-        {data?.nextMilestone && (
+        {bond && <AlmaCarnet bond={bond} />}
+
+        {!bond && data?.nextMilestone && (
           <Card className="p-4 md:p-5 mb-6 border-primary/30 bg-primary/5">
             <p className="text-xs font-semibold uppercase tracking-wide text-primary mb-1">
               Prochain jalon

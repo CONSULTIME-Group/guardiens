@@ -306,6 +306,8 @@ export type EventType =
   | "alma_notif_summary_seen"                   // Résumé notifs affiché (unread, applications, messages, social)
   | "alma_notif_urgent_filter_clicked"          // Filtre "3 urgentes" cliqué (audience)
   // Alma Pass 4 : narratrice cross-page ------------------------------------
+  | "alma_moment_shown"                         // Lot A7 : bulle d'un moment ou d'un passage de stade (rule_key, kind, stage)
+  | "alma_moment_clicked"                       // Lot A7 : bouton de la bulle de moment (rule_key, kind, href)
   | "alma_whisper_emitted"                      // Whisper narratif affiché (whisper_type, surface, priority)
   | "alma_whisper_dismissed"                    // Whisper fermé (whisper_type, reason)
   | "alma_whisper_action_clicked"               // Action d'un whisper cliquée (whisper_type, action_id)

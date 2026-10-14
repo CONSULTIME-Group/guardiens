@@ -92,7 +92,8 @@ import {
   type OutputGuardInput,
 } from "../_shared/alma-companion.ts";
 import { FRENCH_CITIES } from "../_shared/alma-places.ts";
-import { NO_AWAITING, summarizeAwaiting, type VerifiedFacts } from "../_shared/alma-facts.ts";
+import { NO_AWAITING, summarizeAwaiting, type VerifiedFacts, type VerifiedFactsRaw } from "../_shared/alma-facts.ts";
+import { allowedBondClaims, computeAlmaBond, formatBondBlock, type AlmaBond, type BondServerSignals } from "../_shared/alma-bond.ts";
 
 /** Lot L4b : rejeu, faits vides puis complétés par le contexte simulé seul. */
 function simulatedFacts(role: string | null, extra: any): VerifiedFacts {
@@ -441,7 +442,7 @@ Deno.serve(async (req) => {
     const [profileRes, sitterRes, ownerRes] = await Promise.all([
       adminClient
         .from("profiles")
-        .select("first_name, city, profile_completion, identity_verified, role, postal_code, departement_code, country, latitude, longitude")
+        .select("first_name, city, profile_completion, identity_verified, role, postal_code, departement_code, country, latitude, longitude, created_at")
         .eq("id", userId)
         .maybeSingle(),
       adminClient
@@ -476,22 +477,64 @@ Deno.serve(async (req) => {
       prof.profile_completion = null;
       prof.identity_verified = null;
     }
+    // Lot A7 : les lignes lues par les faits nourrissent aussi le lien, sans lecture de plus.
+    const factsRaw: VerifiedFactsRaw = { ownSits: [], sent: [], missions: [] };
     const [facts, inventory] = await Promise.all([
-      rc ? Promise.resolve(simulatedFacts(accountRole, rc.facts)) : loadVerifiedFacts(adminClient, userId, accountRole, todayIso).catch(() => null),
+      rc ? Promise.resolve(simulatedFacts(accountRole, rc.facts)) : loadVerifiedFacts(adminClient, userId, accountRole, todayIso, factsRaw).catch(() => null),
       loadAlmaInventory(adminClient, prof, todayIso).catch(() => null),
     ]);
 
     // Lot L4 : compagnon. Ses animaux (tous rôles) et ses 20 dernières réponses
     // d'Alma (continuité de moins de 7 jours, amorces à ne pas répéter).
     const safeRead = async (f: () => any) => { try { return await f(); } catch { return { data: [] }; } };
-    const [myPetsRes, recentRes] = await Promise.all([
+    // Lot A7 : le lien avec Alma. Une lecture (my_alma_bond_signals, jeton du
+    // membre) ; si la fonction manque, une seule lecture de secours : premier
+    // échange et nombre d'échanges. En rejeu, seul replay_context.bond compte.
+    const readBondSignals = async (): Promise<BondServerSignals | null> => {
+      if (rc) return rc.bond && typeof rc.bond === "object" ? rc.bond as BondServerSignals : null;
+      try {
+        const { data: sig, error: sigErr } = await userClient.rpc("my_alma_bond_signals");
+        if (!sigErr && sig && typeof sig === "object" && !Array.isArray(sig)) return sig as BondServerSignals;
+        const { data: first, count: exchanges } = await adminClient
+          .from("alma_conversations")
+          .select("created_at", { count: "exact" })
+          .eq("user_id", userId)
+          .not("answer", "is", null)
+          .order("created_at", { ascending: true })
+          .limit(1);
+        return { member_since: prof.created_at ?? null, alma_exchanges: exchanges ?? 0, alma_first_at: (first as any[] | null)?.[0]?.created_at ?? null };
+      } catch (e) {
+        console.error("alma-chat bond signals failed", e);
+        return null;
+      }
+    };
+    const [myPetsRes, recentRes, bondSignals] = await Promise.all([
       rc
         ? Promise.resolve({ data: Array.isArray(rc.pets) ? rc.pets : [] })
         : safeRead(() => adminClient.from("pets").select("name, species, breed, age, properties!inner(user_id)").eq("properties.user_id", userId).limit(10)),
       rc
         ? Promise.resolve({ data: (Array.isArray(rc.recent_answers) ? rc.recent_answers : []).map((a: string) => ({ answer: a, question: "", created_at: new Date().toISOString() })) })
         : safeRead(() => adminClient.from("alma_conversations").select("question, answer, created_at").eq("user_id", userId).not("answer", "is", null).order("created_at", { ascending: false }).limit(20)),
+      readBondSignals(),
     ]);
+    let bond: AlmaBond | null = null;
+    try {
+      const server = bondSignals;
+      if (server) {
+        bond = computeAlmaBond({
+          today: todayIso,
+          activeRole,
+          profileCompletion: typeof prof.profile_completion === "number" ? prof.profile_completion : null,
+          ownSits: factsRaw.ownSits.map((x) => ({ id: x.id, status: x.status, published_at: x.published_at ?? null, created_at: x.created_at ?? null, start_date: x.start_date, end_date: x.end_date })),
+          sentApplications: factsRaw.sent.map((a) => ({ sit_id: a.sit_id, status: a.status, created_at: a.created_at, sit: a.sit ? { id: a.sit.id, status: a.sit.status, start_date: a.sit.start_date, end_date: a.sit.end_date } : null })),
+          missions: factsRaw.missions.map((m) => ({ id: m.id, status: m.status, created_at: m.created_at ?? null })),
+          server,
+        });
+      }
+    } catch (e) {
+      console.error("alma-chat bond failed", e);
+      bond = null;
+    }
     const myPets: ListingPet[] = ((myPetsRes?.data ?? []) as any[]).map((p) => ({ name: p.name ?? null, species: p.species ?? null, breed: p.breed ?? null, age: typeof p.age === "number" ? p.age : null }));
     const recentRows = ((recentRes?.data ?? []) as any[]).filter((r) => typeof r?.answer === "string" && r.answer);
     const recentAnswers: string[] = recentRows.map((r) => r.answer);
@@ -825,6 +868,7 @@ Deno.serve(async (req) => {
         ...(helpDirective ? [{ role: "system" as const, content: helpDirective }] : []),
         { role: "system" as const, content: SCOPE_DIRECTIVE },
         ...(messagingAsked ? [{ role: "system" as const, content: MESSAGING_DIRECTIVE }] : []),
+        ...(bond ? [{ role: "system" as const, content: formatBondBlock(bond, todayIso) }] : []),
         { role: "system" as const, content: companion },
         ...(locked ? [{ role: "system" as const, content: lockedDirective(locked) }] : []),
         { role: "system", content: CLASSIFICATION_DIRECTIVE },
@@ -953,6 +997,8 @@ Deno.serve(async (req) => {
       actionLabels,
       hasPriorExchange: history.length > 0 || Boolean(lastExchange),
       allowAlmaBio: register === "perso" || aboutAlma,
+      // Lot A7 : un moment évoqué doit figurer dans le lien ou dans les faits.
+      ...(bond ? { allowedClaims: allowedBondClaims(bond, facts) } : {}),
     };
     const hardIssues = (text: string) => [...(locked ? checkLocked(text, locked) : []), ...checkOutput(text, guard)];
     let issues = [...hardIssues(answer), ...softIssues(answer)];
@@ -967,6 +1013,7 @@ Deno.serve(async (req) => {
           : x.startsWith("lieu_sans_annonce:") ? `- Lieu sans aucune annonce (${x.split(":")[1]}) : ne le cite que pour dire qu'il n'y a aucune garde dans ce pays aujourd'hui, jamais comme destination.`
           : x.startsWith("lieu_hors_faits:") ? `- Lieu absent des faits (${x.split(":")[1]}) : retire-le, ne cite que des lieux présents dans ses faits ou sa question.`
           : x === "echange_fantome" ? "- Tu évoques un échange passé qui n'existe pas : retire cette référence."
+          : x.startsWith("moment_fantome:") ? `- Tu évoques un moment (${x.split(":")[1].replace(/_/g, " ")}) absent de votre lien et de ses faits : retire cette phrase.`
           : x === "libelle_recopie" ? "- Tu recopies le libellé d'un bouton avec sa majuscule : décris l'action avec tes mots."
           : `- Contenu interdit : ${x.replace("interdit:", "")}.`),
         `Ta réponse précédente : « ${answer.slice(0, 600)} »`,

@@ -11,6 +11,8 @@
  * 5. Transparence : Alma est une IA et le dit, jamais de déni.
  */
 
+import { bondClaimsIn, type BondClaimKind } from "./alma-bond.ts";
+
 export const foldC = (s: string): string =>
   (s || "")
     .normalize("NFD")
@@ -493,6 +495,11 @@ export interface OutputGuardInput {
   hasPriorExchange: boolean;
   /** Question sur Alma elle-même : sa biographie (Lyon, Córdoba) peut être citée. */
   allowAlmaBio?: boolean;
+  /**
+   * Lot A7 : moments qu'Alma peut évoquer (bloc du lien et faits vérifiés).
+   * Absent : aucun contrôle ; présent : tout autre moment évoqué est un fantôme.
+   */
+  allowedClaims?: BondClaimKind[];
 }
 
 const stripAccents = (s: string) => (s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -562,6 +569,9 @@ export function checkOutput(answer: string, g: OutputGuardInput): string[] {
       else if (!inText(g.contextText, k) && !(g.allowAlmaBio && ALMA_BIO.includes(k))) issues.add(`lieu_hors_faits:${k}`);
     }
     if (!g.hasPriorExchange && PHANTOM.test(f)) issues.add("echange_fantome");
+    if (g.allowedClaims) {
+      for (const k of bondClaimsIn(sentence)) if (!g.allowedClaims.includes(k)) issues.add(`moment_fantome:${k}`);
+    }
   }
   if (labelCopies(answer, g.actionLabels).length) issues.add("libelle_recopie");
   return [...issues];
@@ -569,7 +579,8 @@ export function checkOutput(answer: string, g: OutputGuardInput): string[] {
 
 /**
  * Réparation déterministe : verbe de bouton remis en minuscule, phrases qui
- * citent un lieu interdit ou un échange fantôme retirées.
+ * citent un lieu interdit, un échange fantôme ou un moment fantôme (lot A7)
+ * retirées.
  */
 export function repairOutput(answer: string, g: OutputGuardInput): string {
   let text = answer || "";
