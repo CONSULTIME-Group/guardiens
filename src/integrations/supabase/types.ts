@@ -395,6 +395,27 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_articles_a5_20261014: {
+        Row: {
+          content: string | null
+          id: string | null
+          saved_at: string | null
+          slug: string | null
+        }
+        Insert: {
+          content?: string | null
+          id?: string | null
+          saved_at?: string | null
+          slug?: string | null
+        }
+        Update: {
+          content?: string | null
+          id?: string | null
+          saved_at?: string | null
+          slug?: string | null
+        }
+        Relationships: []
+      }
       _backup_articles_gratuite_20261004: {
         Row: {
           admin_notes: string | null
@@ -3202,6 +3223,7 @@ export type Database = {
           results: Json
           run_by: string
           total: number
+          version: string | null
         }
         Insert: {
           created_at?: string
@@ -3211,6 +3233,7 @@ export type Database = {
           results?: Json
           run_by: string
           total?: number
+          version?: string | null
         }
         Update: {
           created_at?: string
@@ -3220,6 +3243,7 @@ export type Database = {
           results?: Json
           run_by?: string
           total?: number
+          version?: string | null
         }
         Relationships: []
       }
@@ -12932,6 +12956,15 @@ export type Database = {
       alma_answer_acted: {
         Args: { p_conversation_id: string }
         Returns: boolean
+      }
+      alma_reserve_turn: {
+        Args: {
+          p_kind: string
+          p_limit: number
+          p_row: Json
+          p_user_id: string
+        }
+        Returns: Json
       }
       alma_weekly_summary: { Args: { p_since?: string }; Returns: Json }
       anonymize_user_account: {
