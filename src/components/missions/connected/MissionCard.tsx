@@ -1,10 +1,8 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { formatCity, ModeFilter, DURATION_LABELS } from "./constants";
-import spotChien from "@/assets/missions/spot-chien.png";
-import spotJardin from "@/assets/missions/spot-jardin.png";
-import spotBricolage from "@/assets/missions/spot-bricolage.png";
-import spotBienetre from "@/assets/missions/spot-bienetre.png";
+import { missionSpotKey } from "@/lib/missionSpot";
+import { MISSION_SPOT_LARGE } from "@/components/entraide/missionSpotImages";
 import { avatarImageUrl } from "@/lib/storageImage";
 
 const LOCALE_MAP: Record<string, string> = { fr: "fr-FR", en: "en-US" };
@@ -17,45 +15,8 @@ const CATEGORY_GRADIENT: Record<string, string> = {
   skills: "from-primary/75 to-primary/45",
 };
 
-// Illustration gouache par catégorie (réutilise les assets existants src/assets/missions/).
-// Les 4 catégories réelles du schéma small_mission_category ont toutes une gouache adaptée.
-const CATEGORY_ILLUSTRATION: Record<string, string> = {
-  animals: spotChien,
-  garden: spotJardin,
-  house: spotBricolage,
-  skills: spotBienetre,
-};
-
-// Icônes de repli discrètes pour les couvertures sans photo.
-const CategoryGlyph = ({ category, className }: { category: string; className?: string }) => {
-  const c = className || "w-16 h-16 text-primary-foreground/20";
-  if (category === "garden") {
-    return (
-      <svg className={c} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-      </svg>
-    );
-  }
-  if (category === "house") {
-    return (
-      <svg className={c} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3 12l2-2m0 0l7-7 7 7m-9 2v8a2 2 0 002 2h4a2 2 0 002-2v-8"/>
-      </svg>
-    );
-  }
-  if (category === "skills") {
-    return (
-      <svg className={c} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
-      </svg>
-    );
-  }
-  return (
-    <svg className={c} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-    </svg>
-  );
-};
+// Illustration gouache par catégorie et par espèce citée (lot P3,
+// src/lib/missionSpot.ts), en 480 px au lieu des PNG de 1 024 px.
 
 interface Props {
   mission: any;
@@ -139,20 +100,18 @@ const MissionCard = ({ mission: m, currentUserId, isAuthenticated, canApplyMissi
             decoding="async"
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
-        ) : CATEGORY_ILLUSTRATION[catKey] ? (
+        ) : (
           <div className={`relative w-full h-full bg-gradient-to-br ${CATEGORY_GRADIENT[catKey]} overflow-hidden`}>
             <img
-              src={CATEGORY_ILLUSTRATION[catKey]}
+              src={MISSION_SPOT_LARGE[missionSpotKey(m.category, m.title, m.description)]}
               alt=""
               aria-hidden="true"
+              width={480}
+              height={480}
               loading="lazy"
               decoding="async"
               className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
-          </div>
-        ) : (
-          <div className={`w-full h-full bg-gradient-to-br ${CATEGORY_GRADIENT[catKey]} flex items-center justify-center transition-transform duration-700 group-hover:scale-105`}>
-            <CategoryGlyph category={catKey} />
           </div>
         )}
         {/* Badges type + catégorie empilés en haut à gauche */}
