@@ -525,3 +525,23 @@ describe("GL, vétérinaire en zone rurale (Saint-Ludger, 14/10/2026)", () => {
     expect(withinGuide("general_park", 75000)).toBe(false);
   });
 });
+
+describe("GL, guide nommé d'après un pays (Beaujolais, 14/10/2026)", () => {
+  it("nom absent des communes : centre de la commune du code postal qui reprend le nom", async () => {
+    const { fn, calls } = fakeFetch({
+      ban: (url: string) =>
+        url.includes("q=69220")
+          ? {
+              features: [
+                { geometry: { coordinates: [4.75, 46.1] }, properties: { name: "Saint-Jean-d'Ardières", postcode: "69220", population: 900, context: "69, Rhône" } },
+                { geometry: { coordinates: [4.74, 46.11] }, properties: { name: "Belleville-en-Beaujolais", postcode: "69220", population: 13000, context: "69, Rhône" } },
+                { geometry: { coordinates: [4.8, 46.2] }, properties: { name: "Ailleurs", postcode: "71000", population: 99999, context: "71" } },
+              ],
+            }
+          : { features: [{ geometry: { coordinates: [4.6, 46.0] }, properties: { name: "Beaujeu", score: 0.5, context: "69" } }] },
+    });
+    const c = await resolveGuideCenter({ city: "Beaujolais", postalCode: "69220", country: "FR", hint: null }, fn);
+    expect(c).toEqual({ lat: 46.11, lon: 4.74, country: "FR", region: "Rhône" });
+    expect(calls.some((u) => u.includes("q=69220"))).toBe(true);
+  });
+});

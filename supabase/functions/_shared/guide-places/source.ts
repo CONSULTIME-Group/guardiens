@@ -502,6 +502,35 @@ export function pickNearest<T extends { lat: number; lon: number }>(
 /** Coordonnées arrondies au kilomètre : un lieu de propriétaire n'est jamais repris tel quel. */
 export const roundCoord = (v: number) => Math.round(v * 100) / 100;
 
+/** Communes d'un code postal (BAN), la plus proche du nom du guide d'abord, puis la plus peuplée. */
+export async function banByPostcode(
+  pc: string,
+  city: string,
+  fetchFn: FetchLike,
+): Promise<{ lat: number; lon: number; context: string }[] | null> {
+  const params = new URLSearchParams({ q: pc, type: "municipality", limit: "10" });
+  const r = await fetchFn(`https://api-adresse.data.gouv.fr/search/?${params}`, { headers: UA });
+  if (!r.ok) return null;
+  const data = await r.json();
+  const words = normName(city).split(" ").filter((w) => w.length > 3);
+  const ranked = (data?.features ?? [])
+    .filter((f: any) => String(f?.properties?.postcode ?? "") === pc)
+    .map((f: any) => {
+      const name = normName(String(f?.properties?.name ?? ""));
+      return {
+        lat: Number(f?.geometry?.coordinates?.[1]),
+        lon: Number(f?.geometry?.coordinates?.[0]),
+        context: String(f?.properties?.context ?? ""),
+        named: words.some((w) => name.includes(w)) ? 1 : 0,
+        population: Number(f?.properties?.population ?? 0),
+      };
+    })
+    .filter((h: { lat: number; lon: number }) => Number.isFinite(h.lat) && Number.isFinite(h.lon))
+    .sort((a: any, b: any) => b.named - a.named || b.population - a.population);
+  // Une seule commune retenue : le centre du guide, jamais une moyenne.
+  return ranked.slice(0, 1).map(({ lat, lon, context }: any) => ({ lat, lon, context }));
+}
+
 export async function resolveGuideCenter(
   input: {
     city: string;
@@ -544,6 +573,10 @@ export async function resolveGuideCenter(
     try {
       let hits = dept ? await banHits(true) : null;
       if (!hits || hits.length === 0) hits = await banHits(false);
+      // Nom qui n'est pas une commune (« Beaujolais », un pays ou une vallée) :
+      // centre de la commune du code postal, celle dont le nom reprend un mot
+      // du guide d'abord, puis la plus peuplée (essai réel du 14/10/2026).
+      if ((!hits || hits.length === 0) && /^\d{5}$/.test(pc)) hits = await banByPostcode(pc, city, fetchFn);
       if (hits) {
         const best = pickNearest(hits, input.hint);
         // Communes trouvées, toutes loin du lieu indiqué : la demande est incohérente.
