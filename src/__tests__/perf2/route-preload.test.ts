@@ -3,7 +3,6 @@
  * jamais sur les autres adresses.
  */
 import { describe, expect, it } from "vitest";
-// @ts-expect-error greffon JS sans types
 import { ROUTE_PRELOADS, collectRouteFiles, routePreloadScript } from "../../../scripts/vite-plugin-route-preload.mjs";
 
 const chunk = (fileName: string, facadeModuleId: string | null, imports: string[] = [], isEntry = false) =>

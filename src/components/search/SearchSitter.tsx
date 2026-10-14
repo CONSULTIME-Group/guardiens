@@ -70,6 +70,7 @@ import { Search, MapPin, Lock, Sparkles, Globe2, X, AlertCircle, RefreshCw } fro
 import { format, differenceInDays, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
 import { geocodeCity, haversineDistance } from "@/lib/geocode";
+import { takeListingsPrefetch } from "@/lib/listingsPrefetch";
 import { fetchIntlOpenSits, intlCountryCounts, carryOverParams, DEST_WORLD, DEST_ABROAD } from "@/lib/intlSitSearch";
 import DestinationCountrySelect from "@/components/search/DestinationCountrySelect";
 import { profilePlacePoint } from "@/lib/sitPlacePoint";
@@ -1008,7 +1009,14 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
         .order("id", { ascending: true })
         .range(from, to) as any;
 
-    const [openRes, closedRes] = await Promise.all([fetchAllPages<any>(openPage), fetchAllPages<any>(closedPage)]);
+    // Lot perf 3 : visiteur sans dates, les lectures lancées par le HTML
+    // pendant le téléchargement du code sont reprises telles quelles.
+    const pre = await takeListingsPrefetch(isPublic && !user && !startDate && !endDate);
+    const asPage = (rows: any[]) => ({ rows, error: null, truncated: false });
+    const asChunk = (data: any[]) => ({ data, error: null, truncated: false });
+    const [openRes, closedRes] = pre
+      ? [asPage(pre.open), asPage(pre.closed)]
+      : await Promise.all([fetchAllPages<any>(openPage), fetchAllPages<any>(closedPage)]);
     if (openRes.error) {
       console.error("[SearchSitter] Erreur chargement annonces:", openRes.error);
       return { ...empty, error: "Impossible de charger les annonces." };
@@ -1023,7 +1031,9 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
    // PostgREST de 1 000 lignes ni URL trop longue au-delà de 150 identifiants.
    const ownerIds = Array.from(new Set(items.map((s: any) => s.user_id).filter(Boolean)));
    const propertyIds = Array.from(new Set(items.map((s: any) => s.property_id).filter(Boolean)));
-   const [ownersRes, galleryRes, petsRes, reviewsRes, badgesRes, ownerProfRes] = await Promise.all([
+   const [ownersRes, galleryRes, petsRes, reviewsRes, badgesRes, ownerProfRes] = pre
+     ? [asChunk(pre.owners), asChunk(pre.gallery), asChunk(pre.pets), asChunk(pre.reviews), asChunk(pre.badges), asChunk(pre.ownerProfs)]
+     : await Promise.all([
      fetchInChunks<any>(ownerIds, (chunk, from, to) => supabase
        .from("public_profiles")
        .select("id, first_name, avatar_url, city, postal_code, departement_code, country, identity_verified, is_founder, latitude_approx, longitude_approx")

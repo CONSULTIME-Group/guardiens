@@ -10,6 +10,8 @@ import { memberPreloadPlugin } from "./scripts/vite-plugin-member-preload.mjs";
 import { entryBudgetPlugin } from "./scripts/vite-plugin-entry-budget.mjs";
 // @ts-expect-error greffon JS sans types
 import { routePreloadPlugin } from "./scripts/vite-plugin-route-preload.mjs";
+// @ts-expect-error greffon JS sans types
+import { listingsPrefetchPlugin } from "./scripts/vite-plugin-listings-prefetch.mjs";
 
 /**
  * Le build n'appelle plus aucune fonction serveur. Le rafraichissement
@@ -50,6 +52,7 @@ export default defineConfig(({ mode }) => ({
     mode === "production" && routeHashesPlugin(),
     memberPreloadPlugin(),
     routePreloadPlugin(),
+    listingsPrefetchPlugin(),
     mode === "production" && entryBudgetPlugin(),
   ].filter(Boolean) as Plugin[],
   resolve: {
