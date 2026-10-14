@@ -17,7 +17,7 @@ const Terms = () => {
           Conditions Générales d'Utilisation
         </h1>
         <p className="text-sm text-muted-foreground mb-8">
-          Version 7, Dernière mise à jour : 5 août 2026
+          Version 8, dernière mise à jour : 14 octobre 2026
         </p>
 
         <div className="prose prose-lg max-w-none text-muted-foreground space-y-6">
@@ -60,7 +60,7 @@ const Terms = () => {
           {/* 2 */}
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">2. Objet</h2>
           <p>
-            Les présentes CGU définissent les règles d'accès et d'utilisation de la Plateforme, qui met en relation des propriétaires de logements et d'animaux avec des gardiens, dans une logique d'échange de bons procédés non lucratif (house-sitting).
+            Les présentes CGU définissent les règles d'accès et d'utilisation de la Plateforme, qui met en relation des propriétaires de logements et d'animaux avec des gardiens (house-sitting), et des membres qui se rendent des coups de main (Entraide), dans une logique d'échange de bons procédés non lucratif.
           </p>
           <p>
             L'utilisation de la Plateforme implique l'acceptation pleine et entière des présentes CGU, des <a href="/cgs" className="text-primary hover:underline">Conditions Générales de Services</a> et de la <a href="/confidentialite" className="text-primary hover:underline">Politique de confidentialité</a>. Cette acceptation se matérialise lors de la création du compte par une case à cocher distincte et non pré-cochée.
@@ -84,7 +84,8 @@ const Terms = () => {
             <li><strong className="text-foreground">Gardien</strong> : utilisateur postulant pour effectuer une garde.</li>
             <li><strong className="text-foreground">Garde</strong> : période durant laquelle un gardien occupe le logement d'un propriétaire et prend soin de ses animaux.</li>
             <li><strong className="text-foreground">Entraide</strong> : échange ponctuel entre membres, sans nuitée et sans contrepartie financière.</li>
-            <li><strong className="text-foreground">Avis</strong> : évaluation publiée par un utilisateur après une garde ou une mission.</li>
+            <li><strong className="text-foreground">Avis</strong> : évaluation publiée par un utilisateur après une garde ou un coup de main.</li>
+            <li><strong className="text-foreground">Alma</strong> : assistante conversationnelle de la Plateforme, fonctionnant par intelligence artificielle.</li>
             <li><strong className="text-foreground">Contenu utilisateur</strong> : tout élément publié par un utilisateur sur la Plateforme (annonce, profil, photo, message, avis, candidature).</li>
           </ul>
 
@@ -132,7 +133,7 @@ const Terms = () => {
 
           {/* 7 */}
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">7. Entraide</h2>
-          <p>L'Entraide repose sur des échanges ponctuels entre membres, sans nuitée. Elle fonctionne exclusivement sur le principe de l'<strong className="text-foreground">échange en nature</strong> (repas, produits du jardin, service réciproque). Tout échange d'argent est strictement interdit et expose le compte à une suspension immédiate.</p>
+          <p>L'Entraide repose sur des échanges ponctuels entre membres, sans nuitée. Elle repose sur le don de temps et de savoir-faire&nbsp;; un <strong className="text-foreground">échange en nature</strong> (repas, produits du jardin, service réciproque) reste possible. Tout échange d'argent est strictement interdit et expose le compte à une suspension immédiate.</p>
           <p>Ces échanges entre particuliers, à titre non lucratif et sans recherche de profit, ne constituent pas, en principe, des revenus imposables (cf. BOI-IR-BASE-10-10-10-10 et instruction fiscale du 30 août 2016 relative aux revenus issus de l'économie collaborative). Chaque utilisateur reste néanmoins seul responsable de ses obligations déclaratives au titre de la solidarité et de l'entraide entre particuliers.</p>
 
           {/* 8 */}
@@ -148,8 +149,23 @@ const Terms = () => {
             En cas de résultat positif, le badge Identité vérifiée est affiché sur le profil. Ce dispositif n'est jamais une condition d'accès à la Plateforme : un refus ou une absence de demande n'empêche ni l'inscription, ni l'usage du service. Les durées de conservation des documents et les modalités d'exercice des droits sont décrites dans la <a href="/confidentialite" className="text-primary hover:underline">Politique de confidentialité</a>.
           </p>
           <p>
-            La confiance entre utilisateurs repose également sur les échanges entre membres, une rencontre préalable proposée si les deux le souhaitent, les avis croisés publiés après chaque garde ou petite mission, l'historique visible sur chaque profil, et les mécanismes de signalement et de modération décrits aux articles 10 et 14.
+            La confiance entre utilisateurs repose également sur les échanges entre membres, une rencontre préalable proposée si les deux le souhaitent, les avis croisés publiés après chaque garde ou coup de main, l'historique visible sur chaque profil, et les mécanismes de signalement et de modération décrits aux articles 10 et 14.
           </p>
+
+          {/* 8 bis */}
+          <h2 className="font-heading text-xl font-bold text-foreground pt-4">8 bis. Classement des annonces et des profils (art. L.&nbsp;111-7 C. conso)</h2>
+          <p>Les annonces, les profils et les besoins d'entraide sont présentés selon les filtres choisis par l'utilisateur (lieu, dates, espèces) puis ordonnés selon les paramètres principaux suivants&nbsp;:</p>
+          <ul className="list-disc pl-6 space-y-1">
+            <li>la <strong className="text-foreground">proximité géographique</strong> entre le lieu de la garde ou du besoin et celui du membre&nbsp;;</li>
+            <li>le <strong className="text-foreground">score d'affinité</strong>, calculé à partir des informations déclarées par chacun (animaux, rythme de vie, présence attendue, ambiance du logement, profil recherché, centres d'intérêt, langues, distance)&nbsp;;</li>
+            <li>des <strong className="text-foreground">signaux de confiance et de complétude</strong> (identité vérifiée, avis reçus, profil renseigné), qui pondèrent l'ordre&nbsp;;</li>
+            <li>pour la sélection affichée en page d'accueil, la <strong className="text-foreground">fraîcheur</strong> de l'annonce et le nombre de photos du logement.</li>
+          </ul>
+          <p>Le classement ordonne sans écarter&nbsp;: tout membre reste visible. Aucune rémunération ni relation commerciale n'influence le classement.</p>
+
+          {/* 8 ter */}
+          <h2 className="font-heading text-xl font-bold text-foreground pt-4">8 ter. Alma, assistante par intelligence artificielle</h2>
+          <p>Alma est un système d'intelligence artificielle, signalé comme tel dans son interface. Elle aide à rédiger une annonce ou un profil, oriente dans la Plateforme et répond aux questions des membres. Ses réponses sont des indications générales, à relire et à vérifier&nbsp;: pour une question juridique, vétérinaire ou d'assurance, un professionnel fait référence. Les données utilisées par Alma sont décrites dans la Politique de confidentialité.</p>
 
           {/* 9 */}
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">9. Avis en ligne (art. L.&nbsp;111-7-2 C. conso)</h2>
@@ -212,7 +228,7 @@ const Terms = () => {
           {/* 12 */}
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">12. Propriété intellectuelle</h2>
           <h3 className="font-heading text-lg font-semibold text-foreground pt-2">12.1 Éléments Guardiens</h3>
-          <p>L'ensemble des éléments composant la Plateforme (textes éditoriaux, illustrations, logos, charte graphique, bases de données, code source, structure et organisation des contenus) est la propriété exclusive de Guardiens, sauf mention contraire. Toute reproduction, représentation, adaptation ou exploitation non autorisée est passible de poursuites au titre des articles L.&nbsp;335-2 et suivants du CPI.</p>
+          <p>L'ensemble des éléments composant la Plateforme (textes éditoriaux, illustrations, logos, charte graphique, bases de données, code source, structure et organisation des contenus) est la propriété exclusive de l'éditeur, sauf mention contraire. Toute reproduction, représentation, adaptation ou exploitation non autorisée est passible de poursuites au titre des articles L.&nbsp;335-2 et suivants du CPI.</p>
           <p>Guardiens concède à l'utilisateur un droit d'utilisation personnel, non exclusif et non cessible de la Plateforme, strictement limité à un usage conforme aux présentes CGU.</p>
           <h3 className="font-heading text-lg font-semibold text-foreground pt-2">12.2 Contenus utilisateurs</h3>
           <p>Les utilisateurs conservent l'intégralité de leurs droits sur les contenus qu'ils publient. Ils accordent à Guardiens, conformément à l'article L.&nbsp;131-3 du CPI, une licence non exclusive, gratuite, pour le monde entier, pour la durée strictement nécessaire à la diffusion sur la Plateforme, augmentée d'un délai technique maximal de 30 jours permettant la purge des sauvegardes, aux seules fins&nbsp;:</p>
@@ -237,7 +253,7 @@ const Terms = () => {
           <p>Sous réserve des dispositions légales d'ordre public, Guardiens ne peut être tenu responsable&nbsp;:</p>
           <ul className="list-disc pl-6 space-y-1">
             <li>des litiges survenant entre utilisateurs&nbsp;;</li>
-            <li>des dommages matériels ou immatériels survenus lors d'une garde ou d'une petite mission, hors faute lourde ou dolosive imputable à Guardiens&nbsp;;</li>
+            <li>des dommages matériels ou immatériels survenus lors d'une garde ou d'un coup de main, hors faute lourde ou dolosive imputable à Guardiens&nbsp;;</li>
             <li>de la véracité des informations fournies par les utilisateurs&nbsp;;</li>
             <li>de l'indisponibilité temporaire de la Plateforme due à une opération de maintenance ou à un cas de force majeure&nbsp;;</li>
             <li>du contenu échangé entre utilisateurs dans la messagerie interne.</li>
@@ -251,7 +267,7 @@ const Terms = () => {
             <li>violation d'une obligation d'ordre public.</li>
           </ul>
           <h3 className="font-heading text-lg font-semibold text-foreground pt-2">13.4 Plafond d'indemnisation</h3>
-          <p>Sans préjudice des cas visés au 13.3, et conformément à l'article 1231-3 du Code civil, la responsabilité totale de Guardiens envers un utilisateur, tous chefs de préjudices confondus et toutes causes confondues, est expressément limitée au montant des sommes effectivement versées par cet utilisateur à Guardiens au titre des douze (12) derniers mois précédant le fait générateur du dommage. Pour les utilisateurs n'ayant versé aucune somme (Propriétaires, comptes non abonnés ou en période de gratuité de lancement), ce plafond est fixé à cent (100) euros.</p>
+          <p>Sans préjudice des cas visés au 13.3, et conformément à l'article 1231-3 du Code civil, la responsabilité totale de Guardiens envers un utilisateur, tous chefs de préjudices confondus et toutes causes confondues, est expressément limitée au montant des sommes effectivement versées par cet utilisateur à Guardiens au titre des douze (12) derniers mois précédant le fait générateur du dommage. Pour les utilisateurs n'ayant versé aucune somme, ce qui est le cas de tous les membres tant que Guardiens est gratuit, ce plafond est fixé à cent (100) euros.</p>
           <p>Cette stipulation reflète l'équilibre économique d'un service à très faible coût et ne saurait être considérée comme excluant la réparation d'un préjudice essentiel.</p>
           <h3 className="font-heading text-lg font-semibold text-foreground pt-2">13.5 Disponibilité du service</h3>
           <p>Guardiens s'engage à fournir ses meilleurs efforts pour assurer la disponibilité de la Plateforme 24/7, sans toutefois souscrire d'engagement chiffré de niveau de service (SLA). Cette obligation est une obligation de moyens.</p>
@@ -272,6 +288,7 @@ const Terms = () => {
           </ul>
           <h3 className="font-heading text-lg font-semibold text-foreground pt-2">14.2 Traitement et motivation</h3>
           <p>Guardiens accuse réception du signalement et l'examine dans un délai cible de 14 jours ouvrés. Toute décision de modération (retrait, déréférencement, restriction de visibilité, suspension ou résiliation de compte) est motivée et notifiée à l'utilisateur concerné, conformément à l'article 17 du DSA.</p>
+          <p>La Plateforme utilise des outils automatisés pour détecter les contenus susceptibles d'enfreindre les présentes CGU (annonces, messages, biographies, pièces d'identité). L'équipe peut revoir toute décision issue de ces outils, et toute personne peut demander un réexamen humain à <a href="mailto:contact@guardiens.fr" className="text-primary hover:underline">contact@guardiens.fr</a>.</p>
           <h3 className="font-heading text-lg font-semibold text-foreground pt-2">14.3 Recours interne</h3>
           <p>Conformément à l'article 20 du DSA, l'utilisateur destinataire d'une décision de modération dispose d'un droit de recours interne à exercer dans un délai de 6 mois auprès de <a href="mailto:contact@guardiens.fr" className="text-primary hover:underline">contact@guardiens.fr</a>. Le recours est examiné par une personne distincte de celle ayant pris la décision initiale, dans un délai de 14 jours ouvrés.</p>
           <p>À défaut de résolution interne satisfaisante, l'utilisateur peut recourir aux voies prévues à l'article 19 des présentes CGU.</p>
@@ -317,7 +334,6 @@ const Terms = () => {
           <h3 className="font-heading text-lg font-semibold text-foreground pt-2">19.2 Voies de recours</h3>
           <p>En cas de désaccord persistant après la procédure amiable, le consommateur conserve la faculté de saisir&nbsp;:</p>
           <ul className="list-disc pl-6 space-y-1">
-            <li>la <strong className="text-foreground">plateforme européenne de Règlement en Ligne des Litiges</strong> (RLL), accessible à&nbsp;: <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">https://ec.europa.eu/consumers/odr</a>&nbsp;;</li>
             <li>les <strong className="text-foreground">autorités administratives compétentes</strong>, notamment la DGCCRF via SignalConso (<a href="https://signal.conso.gouv.fr" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">https://signal.conso.gouv.fr</a>)&nbsp;;</li>
             <li>la <strong className="text-foreground">juridiction compétente</strong> conformément à l'article 21.</li>
           </ul>

@@ -14,7 +14,7 @@ const Privacy = () => {
 
       <main id="main-content" className="px-6 md:px-12 py-16 max-w-3xl mx-auto">
         <h1 className="font-heading text-3xl md:text-4xl font-bold mb-2">Politique de confidentialité</h1>
-        <p className="text-sm text-muted-foreground mb-8">Version 4, dernière mise à jour : 5 août 2026</p>
+        <p className="text-sm text-muted-foreground mb-8">Version 5, dernière mise à jour : 14 octobre 2026</p>
 
         <div className="prose prose-lg max-w-none text-muted-foreground space-y-6">
           <p>
@@ -48,6 +48,7 @@ const Privacy = () => {
             <li><strong className="text-foreground">3.7 Technique</strong> : IP, navigateur, système d'exploitation, logs, pages visitées (sous consentement).</li>
             <li><strong className="text-foreground">3.8 Vérification d'identité (optionnelle)</strong> : pièce d'identité officielle (carte nationale d'identité, passeport, permis de conduire ou titre de séjour) et photographie de la personne prise depuis l'application, déposées volontairement par l'utilisateur qui souhaite obtenir le badge Identité vérifiée. Finalité : confiance entre membres et prévention des usurpations. Base légale : consentement, retirable à tout moment. Ces documents font l'objet d'une analyse automatisée destinée à contrôler la cohérence entre la pièce et la photographie. Cette analyse ne produit aucune décision ayant un effet juridique : un refus n'empêche ni l'inscription, ni l'usage de la plateforme, il prive seulement du badge. Le résultat automatique est contrôlé a posteriori par l'équipe, qui dispose d'une interface d'administration dédiée lui permettant de consulter les dossiers, la pièce et la photographie ainsi que l'historique des décisions, et d'infirmer à tout moment une décision automatique, de demander un nouveau document ou de révoquer un badge déjà attribué. Toute personne peut demander un réexamen humain en écrivant à <a href="mailto:contact@guardiens.fr" className="text-primary hover:underline">contact@guardiens.fr</a>.</li>
             <li><strong className="text-foreground">3.9 Données professionnelles (optionnelles)</strong> : numéro SIRET, raison sociale, spécialité, tarif indicatif, et pièces justificatives (Kbis, diplômes, certificat ACACED, attestation de responsabilité civile professionnelle) déposées par les membres exerçant à titre professionnel. Finalité : affichage du statut professionnel et vérification de son authenticité. Base légale : consentement. Ces pièces font également l'objet d'une analyse automatisée, suivie le cas échéant d'un examen humain.</li>
+            <li><strong className="text-foreground">3.10 Échanges avec Alma et aides à la rédaction</strong> : messages écrits ou dictés à Alma, l'assistante de la Plateforme (la voix est transcrite en texte, l'enregistrement est utilisé pour la seule transcription), textes soumis aux aides à la rédaction (annonce, profil) et photos analysées pour en vérifier la qualité. Finalité : répondre au membre et l'aider à utiliser la Plateforme. Base légale : exécution du contrat. Ces contenus sont traités par des modèles d'intelligence artificielle fournis par les sous-traitants décrits à l'article 6.</li>
           </ul>
           <p>
             Les annonces, les messages et les biographies font l'objet d'un contrôle automatisé destiné à détecter les contenus contraires aux conditions d'utilisation. Base légale : intérêt légitime.
@@ -62,6 +63,7 @@ const Privacy = () => {
             <li>Notifications marketing : consentement (art. 6.1.a)</li>
             <li>Mesure d'audience : consentement</li>
             <li>Modération et lutte contre la fraude : intérêt légitime (art. 6.1.f)</li>
+            <li>Assistance par Alma, aides à la rédaction, analyse de la qualité des photos : exécution du contrat</li>
             <li>Amélioration du service, statistiques anonymisées : intérêt légitime</li>
             <li>Obligations comptables et fiscales : obligation légale (art. 6.1.c)</li>
           </ul>
@@ -89,6 +91,10 @@ const Privacy = () => {
             <li><strong className="text-foreground">Resend Inc.</strong> : envoi d'emails transactionnels. États-Unis. SCC UE + EU-US Data Privacy Framework.</li>
             <li><strong className="text-foreground">Prerender LLC</strong> : pré-rendu SEO. États-Unis. SCC UE + EU-US Data Privacy Framework.</li>
             <li><strong className="text-foreground">Google LLC</strong> (via Google Ireland Ltd.) : mesure d'audience Google Analytics 4, uniquement sous consentement. Union européenne (Dublin), transferts US encadrés SCC UE + EU-US Data Privacy Framework.</li>
+            <li><strong className="text-foreground">Lovable Labs (passerelle d'intelligence artificielle)</strong> : acheminement des requêtes d'intelligence artificielle (vérification d'identité, analyse de photos, aides à la rédaction, Alma, transcription de la voix) vers les fournisseurs de modèles ci-dessous. Clauses contractuelles types (SCC) Module 2.</li>
+            <li><strong className="text-foreground">Google LLC (modèles Gemini)</strong> : analyse automatisée des pièces d'identité et des photos, réponses d'Alma, aides à la rédaction. États-Unis, transferts encadrés par l'EU-US Data Privacy Framework ou les SCC.</li>
+            <li><strong className="text-foreground">OpenAI (modèles de transcription)</strong> : transcription en texte des messages vocaux adressés à Alma. États-Unis, transferts encadrés par l'EU-US Data Privacy Framework ou les SCC.</li>
+            <li><strong className="text-foreground">Services de notification des navigateurs</strong> (Google, Apple, Mozilla) : acheminement des notifications push, à partir de l'adresse technique de l'appareil, pour les membres qui les activent.</li>
           </ul>
           <p>
             <strong className="text-foreground">Aucune donnée n'est vendue à des tiers.</strong> Les données ne sont communiquées à des autorités publiques qu'en cas de réquisition légale.
@@ -99,7 +105,7 @@ const Privacy = () => {
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">7. Transferts hors Union européenne</h2>
           <p>
-            La majorité des données sont hébergées au sein de l'Union européenne. Certains sous-traitants secondaires (Resend, Prerender, Google Analytics) sont susceptibles de traiter les données depuis les États-Unis. Ces transferts sont encadrés par le EU-US Data Privacy Framework (décision UE 2023/1795) ou par les clauses contractuelles types Module 2 (décision UE 2021/914). Ces mécanismes garantissent un niveau de protection équivalent au RGPD.
+            La majorité des données sont hébergées au sein de l'Union européenne. Certains sous-traitants secondaires (Resend, Prerender, Google Analytics, fournisseurs de modèles d'intelligence artificielle, services de notification des navigateurs) sont susceptibles de traiter les données depuis les États-Unis. Ces transferts sont encadrés par le EU-US Data Privacy Framework (décision UE 2023/1795) ou par les clauses contractuelles types Module 2 (décision UE 2021/914). Ces mécanismes garantissent un niveau de protection équivalent au RGPD.
           </p>
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">8. Vos droits (art. 15 à 22 RGPD)</h2>
