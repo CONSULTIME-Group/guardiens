@@ -8,8 +8,16 @@ import {
 const SRC = readFileSync("supabase/functions/send-sitter-daily-digest/index.ts", "utf8");
 
 describe("send-sitter-daily-digest, orchestration bornée", () => {
-  it("sert 8h, 9h et 10h Paris pour permettre les reprises du matin", () => {
-    expect([...SITTER_DAILY_DIGEST_TARGET_PARIS_HOURS]).toEqual([8, 9, 10]);
+  it("sert de 8h à 13h Paris pour permettre les reprises de la matinée", () => {
+    expect([...SITTER_DAILY_DIGEST_TARGET_PARIS_HOURS]).toEqual([8, 9, 10, 11, 12, 13]);
+    expect(parisWindowVerdictForHours(
+      new Date("2026-10-14T11:05:00Z"),
+      SITTER_DAILY_DIGEST_TARGET_PARIS_HOURS,
+    ).run).toBe(true);
+    expect(parisWindowVerdictForHours(
+      new Date("2026-10-14T12:05:00Z"),
+      SITTER_DAILY_DIGEST_TARGET_PARIS_HOURS,
+    ).run).toBe(false);
     expect(parisWindowVerdictForHours(
       new Date("2026-08-26T06:05:00Z"),
       SITTER_DAILY_DIGEST_TARGET_PARIS_HOURS,

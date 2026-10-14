@@ -51,3 +51,6 @@ jobs:
 
       - name: Séquence propriétaire unique, lot W0 (Postgres local)
         run: npm run test:sql:w0
+
+      - name: Email de Noël v3, jetons et photo obligatoire, lot V1 (Postgres local)
+        run: npm run test:sql:v1

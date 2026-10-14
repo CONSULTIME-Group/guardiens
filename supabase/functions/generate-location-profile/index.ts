@@ -103,9 +103,10 @@ Si tu ne connais pas précisément cette localité, base-toi sur le département
         Authorization: `Bearer ${LOVABLE_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-3.8-flash",
+        reasoning_effort: "low",
         messages: [{ role: "user", content: prompt }],
-        max_tokens: 500,
+        max_tokens: 2000,
         temperature: 0.7,
       }),
     });

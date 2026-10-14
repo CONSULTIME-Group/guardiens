@@ -1286,6 +1286,30 @@ export type Database = {
         }
         Relationships: []
       }
+      _backup_faq_urgence_20261014: {
+        Row: {
+          answer: string | null
+          id: string | null
+          published: boolean | null
+          question: string | null
+          saved_at: string | null
+        }
+        Insert: {
+          answer?: string | null
+          id?: string | null
+          published?: boolean | null
+          question?: string | null
+          saved_at?: string | null
+        }
+        Update: {
+          answer?: string | null
+          id?: string | null
+          published?: boolean | null
+          question?: string | null
+          saved_at?: string | null
+        }
+        Relationships: []
+      }
       _backup_fn_acl_20260920: {
         Row: {
           acl: string | null
@@ -7358,6 +7382,7 @@ export type Database = {
           id: string
           send_condition: Json | null
           sequence_id: string
+          skip_condition: Json | null
           step_order: number
           template_name: string
         }
@@ -7368,6 +7393,7 @@ export type Database = {
           id?: string
           send_condition?: Json | null
           sequence_id: string
+          skip_condition?: Json | null
           step_order: number
           template_name: string
         }
@@ -7378,6 +7404,7 @@ export type Database = {
           id?: string
           send_condition?: Json | null
           sequence_id?: string
+          skip_condition?: Json | null
           step_order?: number
           template_name?: string
         }
@@ -7638,6 +7665,95 @@ export type Database = {
           {
             foreignKeyName: "owner_highlights_sitter_id_fkey"
             columns: ["sitter_id"]
+            isOneToOne: false
+            referencedRelation: "seo_couverture_manquante"
+            referencedColumns: ["profil_id"]
+          },
+        ]
+      }
+      owner_noel_tokens: {
+        Row: {
+          answers: Json
+          campaign: string
+          created_at: string
+          draft_sit_id: string | null
+          expires_at: string
+          id: string
+          profile_id: string
+          revoked_at: string | null
+          token: string
+          used_at: string | null
+        }
+        Insert: {
+          answers?: Json
+          campaign?: string
+          created_at?: string
+          draft_sit_id?: string | null
+          expires_at: string
+          id?: string
+          profile_id: string
+          revoked_at?: string | null
+          token: string
+          used_at?: string | null
+        }
+        Update: {
+          answers?: Json
+          campaign?: string
+          created_at?: string
+          draft_sit_id?: string | null
+          expires_at?: string
+          id?: string
+          profile_id?: string
+          revoked_at?: string | null
+          token?: string
+          used_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "owner_noel_tokens_draft_sit_id_fkey"
+            columns: ["draft_sit_id"]
+            isOneToOne: false
+            referencedRelation: "public_closed_sits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_noel_tokens_draft_sit_id_fkey"
+            columns: ["draft_sit_id"]
+            isOneToOne: false
+            referencedRelation: "sits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_noel_tokens_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profile_reputation"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "owner_noel_tokens_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_noel_tokens_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "public_helpers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_noel_tokens_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_noel_tokens_profile_id_fkey"
+            columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "seo_couverture_manquante"
             referencedColumns: ["profil_id"]
@@ -12407,6 +12523,14 @@ export type Database = {
           whisper_type: string
         }[]
       }
+      admin_a3_alma_funnel_counts: {
+        Args: { p_since: string }
+        Returns: {
+          members: number
+          n: number
+          step: string
+        }[]
+      }
       admin_alma_action_rate: {
         Args: { p_days?: number }
         Returns: {
@@ -13599,6 +13723,7 @@ export type Database = {
         Returns: boolean
       }
       has_active_subscription: { Args: { p_user_id: string }; Returns: boolean }
+      has_published_sit: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -13794,6 +13919,7 @@ export type Database = {
           user_id: string
         }[]
       }
+      my_alma_bond_signals: { Args: never; Returns: Json }
       my_mission_meetup_tokens: {
         Args: { p_mission_id: string }
         Returns: Json

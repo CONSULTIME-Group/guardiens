@@ -228,6 +228,10 @@ export type OverTtlAction = 'send_now' | 'cancel'
 export const DATED_TEMPLATES = new Set<string>([
   // Lot N7 : campagnes propriétaires datées, annulées plutôt que forcées.
   'owner-noel-2026',
+  'owner-noel-v3-pret',
+  'owner-noel-v3-photo',
+  'owner-noel-v3-logement',
+  'owner-noel-v3-relance',
   'owner-departure-question',
   'sitter-daily-digest',
   'nearby-daily-digest',

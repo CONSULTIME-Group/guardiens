@@ -307,9 +307,10 @@ Structure EXACTE :
           Authorization: `Bearer ${LOVABLE_API_KEY}`,
         },
         body: JSON.stringify({
-          model: "google/gemini-2.5-pro",
+          model: "google/gemini-3.1-pro-preview",
+          reasoning_effort: "low",
           messages: [{ role: "user", content: p }],
-          max_tokens: jsonMode ? 2000 : 8000,
+          max_tokens: jsonMode ? 6000 : 12000,
           temperature: 0.7,
           ...(jsonMode ? { response_format: { type: "json_object" } } : {}),
         }),

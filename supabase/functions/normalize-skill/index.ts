@@ -82,7 +82,8 @@ Deno.serve(async (req) => {
         Authorization: `Bearer ${lovableApiKey}`,
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-3.8-flash",
+        reasoning_effort: "low",
         messages: [
           {
             role: "system",
@@ -104,7 +105,7 @@ Retourne uniquement des suggestions destinées à un modérateur humain :
           },
         ],
         temperature: 0.1,
-        max_tokens: 300,
+        max_tokens: 1500,
       }),
     });
 

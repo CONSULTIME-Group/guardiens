@@ -16,7 +16,10 @@ import { audioExtension, closedRole, closedSurface, TRANSCRIBE_LIMIT_MESSAGE, TR
 // Source : GET https://ai.gateway.lovable.dev/v1/models (listing authentifié),
 // vérifié le 10/09/2026, et documentation Lovable AI, section speech to text.
 // Modèle principal, puis repli si le workspace ne sert que l'autre.
-const PRIMARY_MODEL = "openai/gpt-4o-mini-transcribe";
+// 14/10/2026 : principal openai/gpt-transcribe (gpt-4o-mini-transcribe retiré
+// le 26/02/2027) ; repli openai/gpt-4o-transcribe gardé jusqu'au 26/02/2027,
+// à remplacer avant cette date (décision de Jérémie, option 3).
+const PRIMARY_MODEL = "openai/gpt-transcribe";
 const FALLBACK_MODEL = "openai/gpt-4o-transcribe";
 
 function json(body: unknown, status = 200) {

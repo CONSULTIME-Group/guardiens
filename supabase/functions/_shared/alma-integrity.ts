@@ -61,7 +61,8 @@ export function trustedHistory(clientHistory: ChatTurn[], serverAnswers: string[
 
 export const ALMA_MODEL_TIMEOUT_MS = 15_000;
 /** Réponse, ligne BROUILLON et ligne CLASSEMENT tiennent largement sous ce plafond. */
-export const ALMA_MAX_TOKENS = 1500;
+// 3 000 : la réflexion du modèle (reasoning_effort low, lot IA2) compte dans les jetons de sortie.
+export const ALMA_MAX_TOKENS = 3000;
 
 /** Options du gateway pour Alma : délai de 15 s et plafond de jetons. */
 export function almaModelOptions<T extends GatewayCallOptions>(base: T, timeoutMs = ALMA_MODEL_TIMEOUT_MS): T & { max_tokens: number; signal: AbortSignal } {

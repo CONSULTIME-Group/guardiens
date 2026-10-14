@@ -346,6 +346,58 @@ const CAMPAIGN_PRESETS: CampaignPreset[] = [
     utmContent: "cta",
   },
   {
+    // Lot V1 : aucun envoi automatique. Jérémie lance lui-même la campagne
+    // (envoi visé le mardi 27/10/2026). Remplace owner-noel-2026 et l'envoi
+    // saisonnier noel-2026 pour les propriétaires jamais publiés.
+    key: "owner_noel_v3",
+    label: "Propriétaires, Noël v3 (un email, un geste)",
+    segment: "proprios",
+    filters: {
+      comptes_actifs: true,
+      exclude_suspended: true,
+      exclude_admins: true,
+      respect_product_optout: true,
+      never_published_sit: true,
+      exclude_founder_followup: true,
+      prioritize_recent_openers: true,
+      noel_v3: true,
+      template_name: "owner-noel-v3",
+    },
+    subject: "Votre annonce de Noël",
+    body: "Gabarit dédié owner-noel-v3 : trois variantes choisies pour chaque destinataire au lancement (annonce prête, il manque la photo, trois questions), lien à jeton vers /annonce-noel, gardiens à proximité, témoin de 10 % exclu.",
+    ctaEnabled: true,
+    ctaLabel: "Voir mon annonce",
+    ctaUrl: "https://guardiens.fr/dashboard?utm_source=email&utm_medium=email&utm_campaign=owner_noel_v3",
+    utmEnabled: false,
+    utmCampaign: "owner_noel_v3",
+    utmContent: "cta",
+  },
+  {
+    // Lot V1 : relance J+3, ouvreurs sans clic, page jamais ouverte, jamais
+    // publiés. Refusée par le serveur avant 72 heures.
+    key: "owner_noel_v3_relance",
+    label: "Propriétaires, Noël v3, relance J+3",
+    segment: "proprios",
+    filters: {
+      comptes_actifs: true,
+      exclude_suspended: true,
+      exclude_admins: true,
+      respect_product_optout: true,
+      never_published_sit: true,
+      exclude_founder_followup: true,
+      noel_v3: true,
+      template_name: "owner-noel-v3-relance",
+    },
+    subject: "Votre annonce de Noël vous attend",
+    body: "Gabarit dédié owner-noel-v3-relance : même contenu que l'email de Noël v3, variante recalculée au lancement, nouvel objet, envoyé aux ouvreurs sans clic de la dernière campagne owner-noel-v3.",
+    ctaEnabled: true,
+    ctaLabel: "Voir mon annonce",
+    ctaUrl: "https://guardiens.fr/dashboard?utm_source=email&utm_medium=email&utm_campaign=owner_noel_v3_relance",
+    utmEnabled: false,
+    utmCampaign: "owner_noel_v3_relance",
+    utmContent: "cta",
+  },
+  {
     // Lot N4 : aucun envoi automatique. Jérémie lance lui-même la campagne.
     key: "owner_departure_question",
     label: "Propriétaires, question de départ",
@@ -450,6 +502,8 @@ const AdminMassEmails = () => {
   const [departureCounts, setDepartureCounts] = useState<{ holdout: number | null; answered: number | null; pressure?: number | null; received?: number | null; admins?: number | null } | null>(null);
   const [noelV2Counts, setNoelV2Counts] = useState<{ noel: number; hiver: number; other: number } | null>(null);
   const [noelTestMode, setNoelTestMode] = useState<"responder_noel" | "responder_hiver" | "variant_a" | "variant_b">("responder_noel");
+  const [noelV3TestMode, setNoelV3TestMode] = useState<"pret" | "photo" | "logement">("pret");
+  const [noelV3Counts, setNoelV3Counts] = useState<{ pret: number; photo: number; logement: number; hold: number; received: number; relance: number | null } | null>(null);
 
   const [countLoading, setCountLoading] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -590,6 +644,7 @@ const AdminMassEmails = () => {
           cta_url: ctaEnabled ? withUtm(ctaUrl.trim()) : undefined,
           template_name: filters.template_name || undefined,
           ...(filters.template_name === "owner-noel-2026" ? { noel_test_mode: noelTestMode } : {}),
+          ...(filters.noel_v3 ? { noel_v3_test_mode: noelV3TestMode } : {}),
         },
       });
       if (error) throw new Error((error as { message?: string }).message || "Erreur d'envoi test");
@@ -721,12 +776,25 @@ const AdminMassEmails = () => {
             ? { holdout: data.holdout_excluded ?? null, answered: data.already_answered ?? null, pressure: data.pressure_excluded ?? null, received: data.already_received ?? null, admins: data.admins_excluded ?? null }
             : null,
         );
+        setNoelV3Counts(
+          data?.noel_v3_variants
+            ? {
+                pret: data.noel_v3_variants.pret ?? 0,
+                photo: data.noel_v3_variants.photo ?? 0,
+                logement: data.noel_v3_variants.logement ?? 0,
+                hold: data.departure_hold_excluded ?? 0,
+                received: data.noel_already_received ?? 0,
+                relance: typeof data.relance_targets === "number" ? data.relance_targets : null,
+              }
+            : null,
+        );
         setNoelV2Counts(
           typeof data?.responders_noel === "number"
             ? { noel: data.responders_noel, hiver: data.responders_hiver ?? 0, other: data.other_period_excluded ?? 0 }
             : null,
         );
       } catch {
+        setNoelV3Counts(null);
         setNoelV2Counts(null);
         setDepartureCounts(null);
         setRecipientCount(null);
@@ -1103,6 +1171,21 @@ const AdminMassEmails = () => {
               </p>
             )}
 
+            {filters.noel_v3 && (
+              <div className="space-y-1.5">
+                <Label htmlFor="noel-v3-test-mode" className="text-xs text-muted-foreground">Variante du test</Label>
+                <select
+                  id="noel-v3-test-mode"
+                  value={noelV3TestMode}
+                  onChange={(e) => setNoelV3TestMode(e.target.value as "pret" | "photo" | "logement")}
+                  className="w-full h-11 rounded-md border border-input bg-background px-3 text-sm"
+                >
+                  <option value="pret">Annonce prête</option>
+                  <option value="photo">Il manque la photo</option>
+                  <option value="logement">Trois questions</option>
+                </select>
+              </div>
+            )}
             {filters.template_name === "owner-noel-2026" && (
               <div className="space-y-1.5">
                 <Label htmlFor="noel-test-mode" className="text-xs text-muted-foreground">Version du test</Label>
@@ -1271,6 +1354,36 @@ const AdminMassEmails = () => {
                     <span className="text-muted-foreground">Destinataires</span>
                     <span className="font-semibold text-base">{recipientCount ?? 0}</span>
                   </div>
+                  {noelV3Counts && (
+                    <>
+                      {noelV3Counts.relance !== null && (
+                        <div className="flex items-center justify-between" data-testid="noel-v3-relance">
+                          <span className="text-muted-foreground">Ouvreurs sans clic du J0</span>
+                          <span className="font-medium">{noelV3Counts.relance}</span>
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between" data-testid="noel-v3-pret">
+                        <span className="text-muted-foreground">Annonce prête</span>
+                        <span className="font-medium">{noelV3Counts.pret}</span>
+                      </div>
+                      <div className="flex items-center justify-between" data-testid="noel-v3-photo">
+                        <span className="text-muted-foreground">Il manque la photo</span>
+                        <span className="font-medium">{noelV3Counts.photo}</span>
+                      </div>
+                      <div className="flex items-center justify-between" data-testid="noel-v3-logement">
+                        <span className="text-muted-foreground">Trois questions</span>
+                        <span className="font-medium">{noelV3Counts.logement}</span>
+                      </div>
+                      <div className="flex items-center justify-between" data-testid="noel-v3-hold">
+                        <span className="text-muted-foreground">Exclus, départ au printemps, en été ou plus tard</span>
+                        <span className="font-medium">{noelV3Counts.hold}</span>
+                      </div>
+                      <div className="flex items-center justify-between" data-testid="noel-v3-received">
+                        <span className="text-muted-foreground">Exclus, email de Noël déjà reçu</span>
+                        <span className="font-medium">{noelV3Counts.received}</span>
+                      </div>
+                    </>
+                  )}
                   {noelV2Counts && (
                     <>
                       <div className="flex items-center justify-between" data-testid="noel-responders-noel">

@@ -1,4 +1,4 @@
-// Speech-to-text via Lovable AI Gateway (openai/gpt-4o-mini-transcribe).
+// Speech-to-text via Lovable AI Gateway (openai/gpt-transcribe).
 // Reçoit un multipart/form-data avec le champ "file" (audio enregistré côté navigateur).
 // Retourne { text: string }.
 //
@@ -83,7 +83,7 @@ Deno.serve(async (req) => {
     const ext = extMap[mime] ?? "webm";
 
     const upstream = new FormData();
-    upstream.append("model", "openai/gpt-4o-mini-transcribe");
+    upstream.append("model", "openai/gpt-transcribe");
     upstream.append("language", "fr");
     upstream.append("file", file, `voice.${ext}`);
 

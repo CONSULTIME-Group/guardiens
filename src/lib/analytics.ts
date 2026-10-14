@@ -8,6 +8,9 @@ import { getDeviceContext } from "@/lib/deviceContext";
 import { getSafeLocalStorage } from "@/lib/storageFallback";
 
 export type EventType =
+  // Lot V1, email de Noël v3 : écran affiché et clic sur « Publier mon annonce ».
+  | "noel_v3_page_step"
+  | "noel_v3_publish_clicked"
   | "pwa_install_guide_viewed"
   | "pwa_install_clicked"
   | "pwa_install_choice"

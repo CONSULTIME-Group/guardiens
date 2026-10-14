@@ -10,11 +10,15 @@ import { startCronRun } from '../_shared/cron-run-log.ts'
 import {
   clampInt,
   cohortRefusal,
+  excludeNoelV3Recipients,
+  isNoelPeriodKey,
   filterToFrozenCohort,
   isRateLimitFailure,
   runInBatches,
   type CohortRow,
 } from './cohort.ts'
+import { loadReceivedTemplates } from '../_shared/owner-noel-v3-audience.ts'
+import { NOEL_V3_TEMPLATES } from '../_shared/owner-noel-v3.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -127,6 +131,16 @@ Deno.serve(async (req) => {
       planRows = planRows.filter((r) => r.user_id === body.recipient_id)
     }
     planRows = planRows.filter((r) => !!r.email)
+
+    // Lot V1 : un seul email de Noël. Qui a reçu l'email de Noël v3 sort du
+    // plan de Noël. Lecture en échec : rien ne part (erreur levée).
+    let ecartesNoelV3 = 0
+    if (isNoelPeriodKey(periodKey) && planRows.length > 0) {
+      const received = await loadReceivedTemplates(admin, planRows.map((r) => r.email ?? ''), Object.values(NOEL_V3_TEMPLATES))
+      const ex = excludeNoelV3Recipients(planRows, received)
+      planRows = ex.rows
+      ecartesNoelV3 = ex.excluded
+    }
     if (typeof body.limit === 'number' && body.limit > 0) {
       planRows = planRows.slice(0, body.limit)
     }
@@ -144,6 +158,7 @@ Deno.serve(async (req) => {
       return json({
         ok: true, planned: 0, sent: 0, skipped: 0, failed: 0, retried: 0, reason: 'no_plan',
         plan_brut: planBrut, cible_retenue: cibleRetenue, ecartes_hors_cible: ecartesHorsCible,
+        ecartes_noel_v3: ecartesNoelV3,
         period_key: periodKey,
       })
     }
@@ -275,6 +290,7 @@ Deno.serve(async (req) => {
       plan_brut: planBrut,
       cible_retenue: cibleRetenue,
       ecartes_hors_cible: ecartesHorsCible,
+      ecartes_noel_v3: ecartesNoelV3,
       batch_size: batchSize,
       batch_delay_ms: batchDelayMs,
       shortfall_ratio: planned > 0 ? Number((1 - sent / planned).toFixed(2)) : 0,
@@ -294,6 +310,7 @@ Deno.serve(async (req) => {
       plan_brut: planBrut,
       cible_retenue: cibleRetenue,
       ecartes_hors_cible: ecartesHorsCible,
+      ecartes_noel_v3: ecartesNoelV3,
       batch_size: batchSize,
       batch_delay_ms: batchDelayMs,
       period_key: periodKey,
