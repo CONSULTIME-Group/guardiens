@@ -128,7 +128,7 @@ const Cookies = () => {
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">5. Contact</h2>
           <p>
-            Pour toute question relative aux cookies : <a href="mailto:dpo@guardiens.fr" className="text-primary hover:underline">dpo@guardiens.fr</a>.
+            Pour toute question relative aux cookies : <a href="mailto:contact@guardiens.fr" className="text-primary hover:underline">contact@guardiens.fr</a>.
           </p>
         </div>
       </main>

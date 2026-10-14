@@ -17,7 +17,7 @@ const MentionsLegales = () => {
         <h1 className="font-heading text-2xl md:text-4xl font-bold mb-5 md:mb-8">Mentions légales</h1>
 
         <div className="prose prose-lg max-w-none text-muted-foreground space-y-6">
-          <p className="text-sm">Dernière mise à jour : 13 juillet 2026</p>
+          <p className="text-sm">Dernière mise à jour : 14 octobre 2026</p>
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">1. Éditeur du site</h2>
           <p>Le site guardiens.fr est édité par :</p>
@@ -53,12 +53,12 @@ const MentionsLegales = () => {
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">3. Propriété intellectuelle</h2>
           <p>
-            L'ensemble des éléments composant le site (textes, graphismes, logos, icônes, images, extraits sonores, logiciels, mise en page) sont la propriété exclusive de Guardiens ou de ses partenaires. Toute reproduction, représentation, modification, publication ou adaptation de tout ou partie des éléments du site est interdite sans autorisation écrite préalable.
+            L'ensemble des éléments composant le site (textes, graphismes, logos, icônes, images, extraits sonores, logiciels, mise en page) sont la propriété exclusive de l'éditeur ou de ses partenaires. Toute reproduction, représentation, modification, publication ou adaptation de tout ou partie des éléments du site est interdite sans autorisation écrite préalable.
           </p>
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">4. Données personnelles</h2>
           <p>
-            Conformément à la loi n° 78-17 du 6 janvier 1978 modifiée (Informatique et Libertés) et au Règlement Général sur la Protection des Données (RGPD, UE 2016/679), vous disposez d'un droit d'accès, de rectification, d'effacement, d'opposition, de limitation et de portabilité de vos données. Pour exercer ces droits, écrivez à <a href="mailto:dpo@guardiens.fr" className="text-primary hover:underline">dpo@guardiens.fr</a> en précisant la mention "Données personnelles" dans l'objet du message.
+            Conformément à la loi n° 78-17 du 6 janvier 1978 modifiée (Informatique et Libertés) et au Règlement Général sur la Protection des Données (RGPD, UE 2016/679), vous disposez d'un droit d'accès, de rectification, d'effacement, d'opposition, de limitation et de portabilité de vos données. Pour exercer ces droits, écrivez à <a href="mailto:contact@guardiens.fr" className="text-primary hover:underline">contact@guardiens.fr</a> en précisant la mention "Données personnelles" dans l'objet du message.
           </p>
           <p>
             Pour en savoir plus, consultez la <a href="/confidentialite" className="text-primary hover:underline">Politique de confidentialité</a> et les <a href="/cgu" className="text-primary hover:underline">Conditions Générales d'Utilisation</a>.
@@ -69,23 +69,15 @@ const MentionsLegales = () => {
             Le site utilise des cookies strictement nécessaires à son fonctionnement (authentification, session, sécurité, préférences d'affichage), exemptés de consentement conformément aux lignes directrices de la CNIL du 17 septembre 2020. Les cookies de mesure d'audience sont déposés uniquement après recueil du consentement explicite via la bannière affichée à la première visite. Aucun cookie publicitaire ni cookie de profilage commercial n'est utilisé. Le détail des traceurs figure sur la page Politique cookies.
           </p>
 
-          <h2 className="font-heading text-xl font-bold text-foreground pt-4">6. Statut d'intermédiaire technique et exclusion de responsabilité</h2>
+          <h2 className="font-heading text-xl font-bold text-foreground pt-4">6. Statut d'hébergeur et d'intermédiaire</h2>
           <p>
-            Guardiens agit exclusivement en qualité d'intermédiaire technique de mise en relation entre utilisateurs, au sens de l'article 6-I-2 de la loi n° 2004-575 du 21 juin 2004 pour la confiance dans l'économie numérique (LCEN). À ce titre, Guardiens :
-          </p>
-          <ul className="list-disc pl-6 space-y-1">
-            <li>N'est ni partie, ni mandataire, ni garant des accords conclus entre utilisateurs</li>
-            <li>N'exerce aucun contrôle sur la véracité, la fiabilité ou la légalité des contenus, profils, annonces et communications publiés par les utilisateurs</li>
-            <li>N'exerce aucune surveillance des gardes, missions, échanges ou activités convenus entre utilisateurs</li>
-            <li>Ne saurait être tenu responsable des litiges, dommages matériels, immatériels ou corporels survenant à l'occasion ou dans le cadre d'une garde, d'une mission ou d'une rencontre entre utilisateurs</li>
-            <li>Ne saurait être tenu responsable de la véracité des informations fournies par les utilisateurs, ni des comportements des utilisateurs entre eux ou envers les tiers</li>
-            <li>Ne saurait être tenu responsable des difficultés d'accès ou d'indisponibilité temporaire du service</li>
-          </ul>
-          <p>
-            Les utilisateurs reconnaissent que la confiance mutuelle repose sur les échanges entre membres, une rencontre préalable proposée si les deux le souhaitent, les avis croisés publiés après chaque expérience, et l'historique visible sur chaque profil. Les utilisateurs sont seuls responsables de vérifier la couverture de leur assurance responsabilité civile et de leur assurance multirisque habitation avant toute garde ou mission.
+            Pour les contenus publiés par les membres (annonces, profils, photos, avis, messages), Guardiens a la qualité d'hébergeur au sens de la loi n° 2004-575 du 21 juin 2004 pour la confiance dans l'économie numérique (LCEN) et du règlement (UE) 2022/2065 sur les services numériques. Guardiens met en relation les membres et reste extérieur aux accords qu'ils concluent entre eux, gardes comme coups de main.
           </p>
           <p>
-            Le régime détaillé de responsabilité, incluant les cas d'exclusion, les garanties expressément réservées par la loi et le plafond d'indemnisation, figure à l'article 13 des <a href="/cgu" className="text-primary hover:underline">Conditions Générales d'Utilisation</a>.
+            Avant toute garde ou tout coup de main, chaque membre vérifie la couverture de son assurance responsabilité civile et, pour le propriétaire, de son assurance multirisque habitation.
+          </p>
+          <p>
+            Le régime de responsabilité de l'éditeur, avec les garanties que la loi réserve dans tous les cas, figure à l'article 13 des <a href="/cgu" className="text-primary hover:underline">Conditions Générales d'Utilisation</a>.
           </p>
 
           <h2 id="mediation" className="font-heading text-xl font-bold text-foreground pt-4">7. Droit applicable, réclamations et médiation</h2>
@@ -93,13 +85,10 @@ const MentionsLegales = () => {
             Les présentes mentions sont régies par le droit français. En cas de litige, et après échec d'une résolution amiable, les tribunaux français territorialement compétents au sens des articles 42 et suivants du Code de procédure civile pourront être saisis. Le consommateur conserve la faculté de saisir, à son choix, la juridiction du lieu où il demeurait au moment de la conclusion du contrat ou de la survenance du fait dommageable (article R. 631-3 du Code de la consommation).
           </p>
           <p>
-            <strong className="text-foreground">Réclamation préalable</strong> : toute réclamation doit être adressée en premier lieu à <a href="mailto:contact@guardiens.fr" className="text-primary hover:underline">contact@guardiens.fr</a>. Guardiens s'engage à répondre dans un délai maximal de deux mois.
+            <strong className="text-foreground">Réclamation préalable</strong> : toute réclamation doit être adressée en premier lieu à <a href="mailto:contact@guardiens.fr" className="text-primary hover:underline">contact@guardiens.fr</a>. Les modalités de traitement figurent à l'article 19 des <a href="/cgu" className="text-primary hover:underline">Conditions Générales d'Utilisation</a>.
           </p>
           <p>
             <strong className="text-foreground">Médiation de la consommation</strong> : le service Guardiens est, à la date des présentes, fourni à titre entièrement gratuit à ses utilisateurs. Aucune somme n'est perçue auprès des consommateurs. Le dispositif de médiation de la consommation prévu aux articles L. 611-1 et suivants du Code de la consommation s'applique aux litiges nés de l'exécution d'un contrat de vente ou de fourniture de services à titre onéreux entre un professionnel et un consommateur. En l'absence de relation contractuelle onéreuse, Guardiens n'est pas tenu, à ce stade, de désigner un médiateur de la consommation. Un médiateur agréé par la Commission d'évaluation et de contrôle de la médiation de la consommation (CECMC) sera désigné préalablement à l'ouverture de toute offre payante destinée aux consommateurs.
-          </p>
-          <p>
-            <strong className="text-foreground">Plateforme européenne de règlement en ligne des litiges</strong> : conformément à l'article 14 du règlement (UE) n° 524/2013, la Commission européenne met à disposition une plateforme de règlement en ligne des litiges, accessible à <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">ec.europa.eu/consumers/odr</a>.
           </p>
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">8. Crédits</h2>

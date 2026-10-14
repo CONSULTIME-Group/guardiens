@@ -31,7 +31,7 @@ const legalPages = [
     title: "Conditions Générales de Service",
     path: "/cgs",
     icon: ScrollText,
-    description: "Conditions de l'accès gardien et des services associés.",
+    description: "Conditions commerciales du service : gratuité, fonctionnalités incluses, passage éventuel au payant.",
     lastUpdate: "Gérée dans le code (Cgs.tsx)",
   },
   {
