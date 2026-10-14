@@ -161,6 +161,10 @@ describe("Y3 · rencontre toujours facultative", () => {
   const FILES = [
     ...ALL,
     "src/pages/Terms.tsx",
+    // Lot J2b : le texte des CGU vit dans un composant par version.
+    "src/components/legal/TermsV8.tsx",
+    "src/components/legal/TermsV9.tsx",
+    "src/components/legal/CgsV3.tsx",
     "src/pages/MentionsLegales.tsx",
     "supabase/functions/_shared/alma-system-prompt.ts",
   ];

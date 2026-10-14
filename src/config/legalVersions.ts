@@ -26,6 +26,8 @@ export const LEGAL_VERSIONS: readonly LegalVersion[] = [
   { document: "privacy", version: "5", publishedOn: "2026-10-14", effectiveOn: "2026-10-14", requiresReaccept: false },
   { document: "cgu", version: "9", publishedOn: "2026-10-16", effectiveOn: "2026-11-16", requiresReaccept: true },
   { document: "cgs", version: "3", publishedOn: "2026-10-16", effectiveOn: "2026-11-16", requiresReaccept: true },
+  // Information alignée sur les CGU v9 (identité, mineurs, contrôle automatisé), effet immédiat.
+  { document: "privacy", version: "6", publishedOn: "2026-10-16", effectiveOn: "2026-10-16", requiresReaccept: false },
 ];
 
 /** Jour courant à Paris, AAAA-MM-JJ. */
