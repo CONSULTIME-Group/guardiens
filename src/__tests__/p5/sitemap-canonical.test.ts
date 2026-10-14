@@ -25,7 +25,7 @@ describe("lot P5, canoniques et sitemap", () => {
     }
   });
 
-  it("l'ancienne adresse AURA redirige vers la canonique nationale", () => {
+  it("l'ancienne adresse régionale redirige vers la canonique nationale", () => {
     expect(sqlSrc).toContain("'house-sitting-aura-guide-complet', 'voyager-gratuitement-france-house-sitting', 301");
   });
 });
