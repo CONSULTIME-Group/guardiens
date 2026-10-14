@@ -86,6 +86,7 @@ ${prompt.trim()}`;
 
     const r = await callLovableAI({
       model: "google/gemini-3.8-flash",
+      reasoning_effort: "low",
       temperature: 0.4,
       messages: [
         { role: "system", content: system },

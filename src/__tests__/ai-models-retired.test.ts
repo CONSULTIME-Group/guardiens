@@ -60,6 +60,26 @@ describe("modèles d'IA retirés", () => {
     expect(low).toEqual([]);
   });
 
+  // Lot IA2 : sans réglage, gemini-3.8-flash a réfléchi 860 à 1 440 jetons
+  // pour une normalisation (un appel sur trois coupé, 8 à 12 s) ; avec
+  // reasoning_effort « low », 0 jeton et 1,5 s (essai de la passerelle du
+  // 14/10/2026). Les appels Pro de verify-identity et admin-activity-analysis
+  // gardent la réflexion par défaut (lecture de pièce, analyse).
+  it("tout appel flash ou flash-lite, et le helper partagé, limitent la réflexion", () => {
+    const missing: string[] = [];
+    for (const file of walk(ROOT)) {
+      const text = readFileSync(file, "utf8");
+      const calls = text.match(/model:\s*["'`]google\/gemini-3\.(8-flash|1-flash-lite)["'`]/g) ?? [];
+      const efforts = text.match(/reasoning_effort:\s*["'`]low["'`]/g) ?? [];
+      if (calls.length > efforts.length) {
+        missing.push(`${relative(process.cwd(), file)} : ${calls.length} appel(s), ${efforts.length} réglage(s)`);
+      }
+    }
+    expect(missing).toEqual([]);
+    const gateway = readFileSync(join(ROOT, "_shared/ai-gateway.ts"), "utf8");
+    expect(gateway).toContain('reasoning_effort: opts.reasoning_effort ?? "low"');
+  });
+
   it("gpt-4o-transcribe ne sert que de repli à alma-transcribe", () => {
     const users = walk(ROOT).filter((file) =>
       readFileSync(file, "utf8").includes('"openai/gpt-4o-transcribe"'),

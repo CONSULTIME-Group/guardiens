@@ -9,6 +9,8 @@ export type GatewayCallOptions = {
   tools?: unknown[];
   tool_choice?: unknown;
   temperature?: number;
+  /** Réflexion du modèle : « low » par défaut (lot IA2, essai du 14/10/2026). */
+  reasoning_effort?: "low" | "medium" | "high";
 };
 
 export type GatewayResult =
@@ -27,6 +29,7 @@ export async function callLovableAI(opts: GatewayCallOptions): Promise<GatewayRe
     },
     body: JSON.stringify({
       model: opts.model ?? "google/gemini-3.8-flash",
+      reasoning_effort: opts.reasoning_effort ?? "low",
       messages: opts.messages,
       ...(opts.tools ? { tools: opts.tools } : {}),
       ...(opts.tool_choice ? { tool_choice: opts.tool_choice } : {}),

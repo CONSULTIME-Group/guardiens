@@ -394,7 +394,7 @@ async function callAI(prompt: string): Promise<{ intro?: string; ideal_for?: str
     const res = await fetch(LOVABLE_API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
-      body: JSON.stringify({ model: "google/gemini-3.8-flash", messages: [{ role: "user", content: prompt }], max_tokens: 2000, temperature: 0.4 }),
+      body: JSON.stringify({ model: "google/gemini-3.8-flash", reasoning_effort: "low", messages: [{ role: "user", content: prompt }], max_tokens: 2000, temperature: 0.4 }),
       signal: AbortSignal.timeout(20000),
     });
     if (!res.ok) return null;

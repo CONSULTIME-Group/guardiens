@@ -83,6 +83,7 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         model: "google/gemini-3.8-flash",
+        reasoning_effort: "low",
         messages: [
           {
             role: "system",

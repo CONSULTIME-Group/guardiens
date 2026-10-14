@@ -308,6 +308,7 @@ Structure EXACTE :
         },
         body: JSON.stringify({
           model: "google/gemini-3.1-pro-preview",
+          reasoning_effort: "low",
           messages: [{ role: "user", content: p }],
           max_tokens: jsonMode ? 6000 : 12000,
           temperature: 0.7,
