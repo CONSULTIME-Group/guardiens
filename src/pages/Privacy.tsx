@@ -14,7 +14,7 @@ const Privacy = () => {
 
       <main id="main-content" className="px-6 md:px-12 py-16 max-w-3xl mx-auto">
         <h1 className="font-heading text-3xl md:text-4xl font-bold mb-2">Politique de confidentialité</h1>
-        <p className="text-sm text-muted-foreground mb-8">Version 5, dernière mise à jour : 14 octobre 2026</p>
+        <p className="text-sm text-muted-foreground mb-8">Version 6, dernière mise à jour : 16 octobre 2026</p>
 
         <div className="prose prose-lg max-w-none text-muted-foreground space-y-6">
           <p>
@@ -46,12 +46,12 @@ const Privacy = () => {
             <li><strong className="text-foreground">3.5 Géolocalisation</strong> : coordonnées approximatives via code postal, adresse précise uniquement après confirmation d'une garde.</li>
             <li><strong className="text-foreground">3.6 Paiement</strong> : aucune donnée bancaire complète conservée, traitement délégué à Stripe Payments Europe Limited (Dublin).</li>
             <li><strong className="text-foreground">3.7 Technique</strong> : IP, navigateur, système d'exploitation, logs, pages visitées (sous consentement).</li>
-            <li><strong className="text-foreground">3.8 Vérification d'identité (optionnelle)</strong> : pièce d'identité officielle (carte nationale d'identité, passeport, permis de conduire ou titre de séjour) et photographie de la personne prise depuis l'application, déposées volontairement par l'utilisateur qui souhaite obtenir le badge Identité vérifiée. Finalité : confiance entre membres et prévention des usurpations. Base légale : consentement, retirable à tout moment. Ces documents font l'objet d'une analyse automatisée destinée à contrôler la cohérence entre la pièce et la photographie. Cette analyse ne produit aucune décision ayant un effet juridique : un refus n'empêche ni l'inscription, ni l'usage de la plateforme, il prive seulement du badge. Le résultat automatique est contrôlé a posteriori par l'équipe, qui dispose d'une interface d'administration dédiée lui permettant de consulter les dossiers, la pièce et la photographie ainsi que l'historique des décisions, et d'infirmer à tout moment une décision automatique, de demander un nouveau document ou de révoquer un badge déjà attribué. Toute personne peut demander un réexamen humain en écrivant à <a href="mailto:contact@guardiens.fr" className="text-primary hover:underline">contact@guardiens.fr</a>.</li>
+            <li><strong className="text-foreground">3.8 Vérification d'identité (facultative)</strong> : photo d'une pièce d'identité officielle (carte nationale d'identité, passeport, permis de conduire ou titre de séjour) et, à titre facultatif, selfie pris depuis l'application, déposés volontairement par le membre qui souhaite obtenir le badge Identité vérifiée. Finalité : confiance entre membres et prévention des usurpations. Base légale : consentement, retirable à tout moment. Une analyse automatisée, fondée sur l'intelligence artificielle, examine la pièce seule : nature du document, lisibilité, signes apparents d'authenticité ; les dates d'émission et d'expiration lues sur la pièce sont contrôlées par le code de la Plateforme. Le selfie sert à la relecture par l'équipe. Un refus automatique vise uniquement un document illisible ou étranger à une pièce d'identité ; tout autre cas de doute est relu par une personne de l'équipe, qui décide. Le seul effet de la décision porte sur le badge : l'inscription et l'usage de la Plateforme restent ouverts à tout membre, avec ou sans badge, y compris après un refus. L'équipe consulte les dossiers et l'historique des décisions dans une interface d'administration dédiée ; elle peut à tout moment revenir sur une décision, demander un nouveau document ou retirer un badge. Toute personne peut demander un réexamen humain en écrivant à <a href="mailto:contact@guardiens.fr" className="text-primary hover:underline">contact@guardiens.fr</a>. La pièce et le selfie sont effacés automatiquement 30 jours après la décision.</li>
             <li><strong className="text-foreground">3.9 Données professionnelles (optionnelles)</strong> : numéro SIRET, raison sociale, spécialité, tarif indicatif, et pièces justificatives (Kbis, diplômes, certificat ACACED, attestation de responsabilité civile professionnelle) déposées par les membres exerçant à titre professionnel. Finalité : affichage du statut professionnel et vérification de son authenticité. Base légale : consentement. Ces pièces font également l'objet d'une analyse automatisée, suivie le cas échéant d'un examen humain.</li>
             <li><strong className="text-foreground">3.10 Échanges avec Alma et aides à la rédaction</strong> : messages écrits ou dictés à Alma, l'assistante de la Plateforme (la voix est transcrite en texte, l'enregistrement est utilisé pour la seule transcription), textes soumis aux aides à la rédaction (annonce, profil) et photos analysées pour en vérifier la qualité. Finalité : répondre au membre et l'aider à utiliser la Plateforme. Base légale : exécution du contrat. Ces contenus sont traités par des modèles d'intelligence artificielle fournis par les sous-traitants décrits à l'article 6.</li>
           </ul>
           <p>
-            Les annonces, les messages et les biographies font l'objet d'un contrôle automatisé destiné à détecter les contenus contraires aux conditions d'utilisation. Base légale : intérêt légitime.
+            Les annonces, les candidatures, les propositions d'aide, les messages et les biographies font l'objet d'un contrôle automatisé, dont certains outils fondés sur l'intelligence artificielle, destiné à repérer les contenus contraires aux conditions d'utilisation. Une personne de l'équipe peut revoir toute décision issue de ces outils, d'office ou à la demande de la personne concernée. Base légale : intérêt légitime.
           </p>
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">4. Finalités et bases légales (art. 6 RGPD)</h2>
@@ -72,7 +72,7 @@ const Privacy = () => {
           <ul className="list-disc pl-6 space-y-1">
             <li>Données de compte actif : durée de l'inscription</li>
             <li>Données après suppression : anonymisation immédiate du compte et effacement des documents et fichiers. Les avis et les messages sont conservés sous forme anonymisée, sans lien avec une personne identifiable, pour préserver l'intégrité des échanges entre membres et du système d'évaluation. La purge des sauvegardes techniques intervient dans un délai maximal de 30 jours.</li>
-            <li>Pièce d'identité et photographie : effacement automatique 30 jours après la décision de vérification</li>
+            <li>Pièce d'identité et selfie facultatif : effacement automatique 30 jours après la décision de vérification</li>
             <li>Documents professionnels : effacement 30 jours après la décision, ou sur demande du membre</li>
             <li>Journal des vérifications : conservation du résultat sans le document, 12 mois</li>
             <li>Messages : durée du compte, anonymisés à la suppression</li>
@@ -137,7 +137,7 @@ const Privacy = () => {
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">12. Mineurs</h2>
           <p>
-            Plateforme strictement réservée aux personnes majeures (18 ans révolus). La création de compte par un mineur entraîne suppression immédiate. Interdiction de publier des photographies de mineurs identifiables sans consentement écrit des représentants légaux.
+            La Plateforme est réservée aux personnes majeures (18 ans révolus), qui déclarent leur majorité à l'inscription. Guardiens supprime tout compte dont il apprend qu'il a été créé par un mineur, avec les données associées. Les contenus publiés (profils, annonces, photos, besoins, avis) montrent des adultes, des animaux et des lieux ; un mineur y apparaît seulement de façon anonyme, et tout élément permettant de l'identifier ou de le localiser (prénom, école, emploi du temps) en est exclu. Guardiens masque ou retire un contenu contraire à cette règle dès qu'il en a connaissance.
           </p>
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">13. Modification</h2>

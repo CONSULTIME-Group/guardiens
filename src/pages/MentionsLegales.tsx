@@ -17,7 +17,7 @@ const MentionsLegales = () => {
         <h1 className="font-heading text-2xl md:text-4xl font-bold mb-5 md:mb-8">Mentions légales</h1>
 
         <div className="prose prose-lg max-w-none text-muted-foreground space-y-6">
-          <p className="text-sm">Dernière mise à jour : 14 octobre 2026</p>
+          <p className="text-sm">Dernière mise à jour : 16 octobre 2026</p>
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">1. Éditeur du site</h2>
           <p>Le site guardiens.fr est édité par :</p>
@@ -88,7 +88,7 @@ const MentionsLegales = () => {
             <strong className="text-foreground">Réclamation préalable</strong> : toute réclamation doit être adressée en premier lieu à <a href="mailto:contact@guardiens.fr" className="text-primary hover:underline">contact@guardiens.fr</a>. Les modalités de traitement figurent à l'article 19 des <a href="/cgu" className="text-primary hover:underline">Conditions Générales d'Utilisation</a>.
           </p>
           <p>
-            <strong className="text-foreground">Médiation de la consommation</strong> : le service Guardiens est, à la date des présentes, fourni à titre entièrement gratuit à ses utilisateurs. Aucune somme n'est perçue auprès des consommateurs. Le dispositif de médiation de la consommation prévu aux articles L. 611-1 et suivants du Code de la consommation s'applique aux litiges nés de l'exécution d'un contrat de vente ou de fourniture de services à titre onéreux entre un professionnel et un consommateur. En l'absence de relation contractuelle onéreuse, Guardiens n'est pas tenu, à ce stade, de désigner un médiateur de la consommation. Un médiateur agréé par la Commission d'évaluation et de contrôle de la médiation de la consommation (CECMC) sera désigné préalablement à l'ouverture de toute offre payante destinée aux consommateurs.
+            <strong className="text-foreground">Médiation de la consommation</strong> : lorsqu'un contrat conclu à titre onéreux lie Guardiens à un consommateur, les conditions de ce contrat désignent le médiateur de la consommation compétent, auquel le consommateur recourt gratuitement.
           </p>
 
           <h2 className="font-heading text-xl font-bold text-foreground pt-4">8. Crédits</h2>
