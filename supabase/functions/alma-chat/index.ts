@@ -812,6 +812,7 @@ Deno.serve(async (req) => {
     ];
     const askModel = (extra?: string) => callLovableAI({
       model: "google/gemini-3.8-flash",
+      reasoning_effort: "low",
       // 0.85 : à 0.6 le modèle retombe sur les mêmes ouvertures.
       temperature: 0.85,
       messages: extra

@@ -81,6 +81,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         model: "google/gemini-3.1-flash-lite",
+        reasoning_effort: "low",
         messages: [
           {
             role: "system",

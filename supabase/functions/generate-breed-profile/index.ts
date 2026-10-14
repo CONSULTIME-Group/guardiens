@@ -387,6 +387,7 @@ RÈGLES MARKDOWN : utilisez **gras** pour les points clés, listes à puces, sou
     for (let attempt = 0; attempt < 2 && !profile; attempt++) {
       const { content, finishReason } = await callAi({
         model: "google/gemini-3.8-flash",
+        reasoning_effort: "low",
         messages: [{ role: "user", content: prompt }],
         max_tokens: 10000,
         temperature: attempt === 0 ? 0.7 : 0.3,
@@ -407,6 +408,7 @@ RÈGLES MARKDOWN : utilisez **gras** pour les points clés, listes à puces, sou
     try {
       const { content } = await callAi({
         model: "google/gemini-3.8-flash",
+        reasoning_effort: "low",
         messages: [{ role: "user", content: richPrompt }],
         max_tokens: 16000,
         temperature: 0.7,

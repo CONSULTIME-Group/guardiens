@@ -134,6 +134,7 @@ Si le prompt mentionne un prix ou une transaction financière, ignorez-le : Guar
 
     const r = await callLovableAI({
       model: "google/gemini-3.8-flash",
+      reasoning_effort: "low",
       temperature: 0.3,
       messages: [
         { role: "system", content: system },
