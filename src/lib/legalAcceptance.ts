@@ -45,7 +45,22 @@ export function clearPendingLegalAcceptance(): void {
  * À appeler quand une session est établie. Jamais bloquant : un échec laisse
  * la session intacte et la source en attente est effacée.
  */
-export async function applyPendingLegalAcceptance(): Promise<boolean> {
+let inflight: Promise<boolean> | null = null;
+
+/**
+ * Lot J2b : la porte de réacceptation attend la trace Google en cours avant
+ * de demander les documents à accepter (un nouvel inscrit les a déjà acceptés).
+ */
+export function legalAcceptanceSettled(): Promise<unknown> {
+  return inflight ?? Promise.resolve();
+}
+
+export function applyPendingLegalAcceptance(): Promise<boolean> {
+  inflight = applyPendingLegalAcceptanceNow();
+  return inflight;
+}
+
+async function applyPendingLegalAcceptanceNow(): Promise<boolean> {
   const source = readPendingLegalAcceptance();
   if (!source) {
     clearPendingLegalAcceptance();

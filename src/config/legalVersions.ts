@@ -49,3 +49,19 @@ export function frenchDate(iso: string): string {
   const [y, m, d] = iso.split("-").map(Number);
   return new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(Date.UTC(y, m - 1, d)));
 }
+
+/**
+ * Lot J2b : plus proche date d'effet d'une version qui exige une acceptation
+ * expresse, ou null. Avant ce jour, la porte de réacceptation reste inerte
+ * (aucun fichier chargé, aucun appel réseau).
+ */
+export function firstReacceptEffectiveOn(): string | null {
+  const dates = LEGAL_VERSIONS.filter((v) => v.requiresReaccept).map((v) => v.effectiveOn).sort();
+  return dates[0] ?? null;
+}
+
+/** Vrai si une version à réaccepter est entrée en vigueur (calcul local). */
+export function reacceptCheckDue(today: string = parisToday()): boolean {
+  const first = firstReacceptEffectiveOn();
+  return first !== null && first <= today;
+}
