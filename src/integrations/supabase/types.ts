@@ -12434,6 +12434,14 @@ export type Database = {
           whisper_type: string
         }[]
       }
+      admin_a3_alma_funnel_counts: {
+        Args: { p_since: string }
+        Returns: {
+          members: number
+          n: number
+          step: string
+        }[]
+      }
       admin_alma_action_rate: {
         Args: { p_days?: number }
         Returns: {
@@ -13822,6 +13830,7 @@ export type Database = {
           user_id: string
         }[]
       }
+      my_alma_bond_signals: { Args: never; Returns: Json }
       my_mission_meetup_tokens: {
         Args: { p_mission_id: string }
         Returns: Json
