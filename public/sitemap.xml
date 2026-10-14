@@ -16,6 +16,11 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/gardiennage-maison-quebec</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/devenir-home-sitter</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -781,6 +786,11 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/house-sitting/papeete</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/house-sitting/megeve</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -847,6 +857,16 @@
   </url>
   <url>
     <loc>https://guardiens.fr/house-sitting/pau</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/house-sitting/paea</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/house-sitting/pirae</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -956,6 +976,11 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/house-sitting/taiarapu-est</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/house-sitting/meaux</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -972,6 +997,11 @@
   </url>
   <url>
     <loc>https://guardiens.fr/house-sitting/chamonix</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/house-sitting/punaauia</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1072,6 +1102,11 @@
   </url>
   <url>
     <loc>https://guardiens.fr/house-sitting/saint-etienne</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/house-sitting/mahina</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1362,6 +1397,11 @@
   </url>
   <url>
     <loc>https://guardiens.fr/house-sitting/antony</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/house-sitting/faaa</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1702,6 +1742,7 @@
   </url>
   <url>
     <loc>https://guardiens.fr/guides/monts-du-lyonnais</loc>
+    <lastmod>2026-10-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1713,6 +1754,7 @@
   </url>
   <url>
     <loc>https://guardiens.fr/guides/papeete</loc>
+    <lastmod>2026-10-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1946,6 +1988,7 @@
   </url>
   <url>
     <loc>https://guardiens.fr/guides/noumea</loc>
+    <lastmod>2026-10-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1993,6 +2036,7 @@
   </url>
   <url>
     <loc>https://guardiens.fr/guides/oullins</loc>
+    <lastmod>2026-10-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -2070,6 +2114,7 @@
   </url>
   <url>
     <loc>https://guardiens.fr/guides/beaujolais</loc>
+    <lastmod>2026-10-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -2087,6 +2132,7 @@
   </url>
   <url>
     <loc>https://guardiens.fr/guides/punaauia</loc>
+    <lastmod>2026-10-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -3855,11 +3901,6 @@
   </url>
   <url>
     <loc>https://guardiens.fr/annonces/nous-recherchons-une-personne-ou-un-couple-retraite-pour-gar-853154</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/annonces/garde-de-mon-elevage-canin-8-chiens-cavalier-king-charles-et-chassenard-959a70</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>

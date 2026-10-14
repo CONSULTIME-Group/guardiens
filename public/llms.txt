@@ -30,8 +30,9 @@ Guardiens est gratuit : vous accédez à l'ensemble des fonctionnalités, et vou
 - [Petites missions à Bordeaux](/petites-missions/bordeaux): Hub local des coups de main entre membres à Bordeaux.
 - [Gardien d'urgence](/gardien-urgence): Le réseau de gardiens d'urgence, ouvert dès que chaque secteur compte assez de gardiens expérimentés.
 - [Devenir home-sitter](/devenir-home-sitter): Guide pour devenir gardien à domicile sur Guardiens.
+- [Gardiennage de maison au Québec](/gardiennage-maison-quebec): Faire garder sa maison et ses animaux au Québec, devenir gardien au Québec, garder une maison au Québec depuis la France (autorisation de voyage électronique, hiver, pratique).
 - [Guides de villes](/guides): Guides locaux indépendants des annonces de garde.
-- [House-sitting par ville](/house-sitting): Pages ville dédiées au house-sitting et à la garde d'animaux, de maison et de jardin, 162 villes couvertes.
+- [House-sitting par ville](/house-sitting): Pages ville dédiées au house-sitting et à la garde d'animaux, de maison et de jardin, 169 villes couvertes.
 - [House-sitting par département](/departement): Pages département, chacune recense villes couvertes, gardiens inscrits et guides locaux, 99 départements couverts.
 - [Annonces de garde](/annonces): Toutes les annonces de garde à domicile, partout en France.
 - [Pros animaliers](/pros): Annuaire de vétérinaires, éducateurs, toiletteurs, ostéopathes, transporteurs vérifiés.
