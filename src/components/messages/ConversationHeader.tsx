@@ -260,7 +260,7 @@ const ConversationHeader = ({
       toast.error("Une erreur est survenue, réessayez.");
       return;
     }
-    toast.success("Signalement envoyé. On examine ça dans les 24h.");
+    toast.success("Signalement envoyé. Notre équipe l'examine.");
     setReportOpen(false);
     setReportReason("");
     setReportDetails("");
