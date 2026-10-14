@@ -584,7 +584,7 @@ describe("A4 · rejeu : 12 cas de sûreté et version", () => {
     expect(tab).toContain('body: { kind: "version" }');
     expect(tab).toContain("version: runVersion");
     expect(tab).toContain("replayFreshness(liveVersion, last ?? null)");
-    expect(ALMA_VERSION).toBe("2026-10-14.a4");
+    expect(ALMA_VERSION).toMatch(/^2026-10-14\.a\d+$/);
   });
 });
 

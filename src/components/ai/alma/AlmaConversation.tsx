@@ -19,7 +19,7 @@ import {
 } from "@/lib/alma/conversation-store";
 import { ALMA_HUMAN_CONTACT_LABEL, AlmaHumanContactForm } from "./AlmaHumanContact";
 import { trackEvent } from "@/lib/analytics";
-import { ALMA_PAGE_LABELS, almaPageLabel } from "../../../../supabase/functions/_shared/alma-page-labels";
+import { ALMA_PAGE_LABELS, almaPageKindLabel, almaPageLabel } from "../../../../supabase/functions/_shared/alma-page-labels";
 
 export const ALMA_THINKING_LINES = [
   "Je regarde.",
@@ -99,10 +99,18 @@ function normalizeInternalPath(href: string): string | null {
   }
 }
 
+/**
+ * Lot A5 : pages de contenu public (article, ville, race, guide) citées comme
+ * sources ; elles gardent leur titre propre et une étiquette de nature.
+ */
+const CONTENT_SOURCE_PATH = /^\/(actualites|guides|races|house-sitting|departement|associations|auteurs)\/[^/]+/;
+
 function sourceLabel(path: string): string {
   if (path.includes("faq")) return "Dans la FAQ";
   if (path.includes("conseil")) return "Conseil";
-  return "Le journal";
+  // Lot A5 : la nature de la page vient de la carte (« Fiche d'une annonce »),
+  // plus de « Le journal » pour une annonce ou une page de ville.
+  return almaPageKindLabel(path) ?? "Le journal";
 }
 
 function readableSourceTitle(path: string): string {
@@ -122,8 +130,10 @@ function readableSourceTitle(path: string): string {
 
 function extractedLink(path: string): ExtractedLink {
   const basePath = path.split(/[?#]/)[0];
+  // Lot A5 : une source publique (FAQ, conseils, article, ville) reste une source.
+  const publicSource = basePath in PUBLIC_SOURCE_TITLES || CONTENT_SOURCE_PATH.test(basePath);
   // Lot A2 : la rubrique exacte (/settings?section=spaces) d'abord.
-  const menuLabel = almaPageLabel(path) ?? SECTION_LABELS[basePath];
+  const menuLabel = publicSource ? null : almaPageLabel(path) ?? SECTION_LABELS[basePath];
   return menuLabel
     ? { href: path, title: menuLabel, kind: "action" }
     : {

@@ -188,7 +188,7 @@ export function shouldAnswerDirectly(intent: AlmaIntent): boolean {
 export function almaHelpDirective(intent: AlmaIntent): string | null {
   if (!intent.helpSeeking) return null
   const animals = intent.largeAnimals
-    ? " Chevaux, poneys, troupeaux et animaux de ferme sont des besoins légitimes, en entraide comme en garde."
+    ? " Chevaux, poneys, troupeaux et animaux de ferme sont des besoins légitimes, en entraide comme en garde. En entraide, c'est un coup de main ponctuel (un passage, le foin, l'eau), et le brouillon ne dit ni « quotidien » ni « régulier » ; des soins chaque jour pendant une absence se publient en annonce de garde."
     : ""
   return `La personne cherche de l'aide, elle ne veut pas postuler comme gardien. Réponds en une ou deux phrases : oriente vers la publication. Sans départ annoncé, commence par la demande d'entraide (page Demander un coup de main, ${HELP_PATHS.entraide}) ; l'annonce de garde (page Créer une annonce de garde, ${HELP_PATHS.garde}) sert à une absence. Tu nommes ces pages, tu n'écris jamais leur chemin.${animals} Ne parle ni de score, ni de points de profil, ni de complétion. Aucune blague, aucune anecdote.`
 }

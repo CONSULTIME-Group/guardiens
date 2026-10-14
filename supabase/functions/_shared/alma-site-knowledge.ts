@@ -41,7 +41,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     purpose: "Liste des gardes publiées par les propriétaires, avec carte, dates et ville ; un gardien y choisit une garde et envoie sa candidature.",
     audience: "sitter",
     triggers: ["annonce", "garde", "postuler", "candidater", "trouver une garde", "chercher une garde"],
-    opener: "Les gardes ouvertes près de chez vous sont sur /annonces.",
+    opener: "Les gardes ouvertes près de chez vous sont réunies dans Les annonces de garde.",
     core: true,
   },
   {
@@ -62,7 +62,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     purpose: "Formulaire de création d'une garde : dates, logement, animaux, message d'accueil, photo ; le brouillon s'enregistre tout seul et la publication est immédiate.",
     audience: "owner",
     triggers: ["publier une annonce", "je pars", "partir", "vacances", "faire garder", "garder mes animaux", "garder ma maison", "trouver un gardien", "garde de maison", "chevaux", "poneys", "troupeau"],
-    opener: "Votre annonce se publie sur /sits/create, je vous propose le titre.",
+    opener: "Votre annonce se publie depuis la page Créer une annonce de garde, je vous propose le titre.",
     core: true,
   },
   {
@@ -72,7 +72,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     purpose: "Les annonces du propriétaire, leurs brouillons, les candidatures reçues à ouvrir, accepter ou décliner, puis l'accord de garde signé des deux côtés.",
     audience: "owner",
     triggers: ["mes annonces", "candidatures recues", "brouillon", "accepter", "accord de garde", "accord"],
-    opener: "Vos annonces et les candidatures reçues sont sur /sits.",
+    opener: "Vos annonces et les candidatures reçues sont dans Mes annonces.",
   },
   {
     key: "recherche_gardiens",
@@ -81,7 +81,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     purpose: "Carte et liste des gardiens autour d'une ville, triés par affinité avec vos animaux, filtres zone, animaux, disponibilité et identité vérifiée.",
     audience: "owner",
     triggers: ["chercher un gardien", "trouver un gardien", "gardiens pres", "qui peut garder"],
-    opener: "Les gardiens autour de chez vous sont sur /recherche-gardiens.",
+    opener: "Les gardiens à proximité de chez vous sont dans Rechercher un gardien.",
   },
   {
     key: "recherche_gardes",
@@ -91,7 +91,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     purpose: "Recherche des gardes par ville, rayon, dates et animaux, avec carte.",
     audience: "sitter",
     triggers: ["rechercher", "rayon", "autour de", "pres de"],
-    opener: "La recherche par ville et rayon est sur /recherche.",
+    opener: "La recherche par ville et par rayon est dans Rechercher une garde.",
   },
   {
     key: "international",
@@ -100,7 +100,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     purpose: "Gardes publiées hors de France, carte mondiale et pays affiché sur chaque carte.",
     audience: "all",
     triggers: ["etranger", "international", "belgique", "suisse", "espagne", "italie", "canada", "portugal", "allemagne", "hors de france", "pays"],
-    opener: "Les gardes hors de France sont réunies sur /annonces/international.",
+    opener: "Les gardes hors de France sont réunies dans Les gardes à l'international.",
   },
   {
     key: "candidatures",
@@ -109,7 +109,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     purpose: "Suivi des candidatures envoyées par le gardien : en attente, vue, en discussion, acceptée, déclinée.",
     audience: "sitter",
     triggers: ["mes candidatures", "reponse", "sans reponse", "relancer"],
-    opener: "Où en sont vos candidatures : /mes-candidatures.",
+    opener: "Où en sont vos candidatures : la page Mes candidatures le dit.",
   },
   {
     key: "entraide",
@@ -119,17 +119,17 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     purpose: "Les demandes de coup de main des gens du coin (besoin) et les offres de savoir-faire (offre), catégories animaux, jardin, maison, compétences, courses, trajets, compagnie ; un « je peux » suffit pour répondre, profil à 40 % minimum.",
     audience: "all",
     triggers: ["entraide", "coup de main", "aider", "rendre service", "petite mission", "jardin", "potager", "courses", "marche", "trajet", "voiture", "echecs", "scrabble", "belote", "jeux de societe", "compagnie"],
-    opener: "Les coups de main demandés autour de vous sont sur /petites-missions.",
+    opener: "Les coups de main demandés autour de vous sont dans L'entraide près de chez vous.",
     core: true,
   },
   {
     key: "entraide_creer",
     path: "/petites-missions/creer",
     label: "Demander un coup de main",
-    purpose: "Formulaire d'une demande d'entraide : un titre (100 caractères), une description, le lieu et la date ; publication ouverte à tout profil. Exemples : partie d'échecs, Scrabble ou belote, aide au jardin, légumes du potager à partager, courses au marché, trajet en voiture.",
+    purpose: "Formulaire d'une demande d'entraide : un titre (100 caractères), une description, le lieu et la date ; publication ouverte à tout profil. Exemples de la page Entraide : arroser le potager, faire les courses, monter un meuble, promener le chien, nourrir le chat, une partie de jeux de société.",
     audience: "all",
     triggers: ["j'ai besoin", "besoin d'aide", "je cherche de l'aide", "demander", "publier une demande", "quelqu'un pour"],
-    opener: "Je vous propose le titre, la demande se publie sur /petites-missions/creer.",
+    opener: "Je vous propose le titre, la demande se publie depuis la page Demander un coup de main.",
     core: true,
   },
   {
@@ -150,7 +150,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     purpose: "Chantiers à plusieurs : jardin et potager, construction et bricolage, low tech et récupération, rénovation écologique, abris pour animaux, événement. Charte : participation libre, lieu associatif ou privé, porteur présent, l'échange se fait en temps et en savoir-faire : on donne du temps et on transmet un savoir-faire (permaculture, pierre sèche, charpente, réparation, poulailler, cuisine et conserves).",
     audience: "all",
     triggers: ["projet", "chantier", "a plusieurs", "haie", "abri", "poulailler", "potager", "construire", "renovation", "permaculture"],
-    opener: "Les chantiers à plusieurs sont sur /projets.",
+    opener: "Les chantiers à plusieurs sont réunis dans Les projets.",
   },
   {
     key: "projets_publier",
@@ -159,7 +159,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     purpose: "Formulaire en trois étapes : titre (10 caractères minimum), description (150 minimum), nature du chantier, période, savoir-faire attendus et transmis, hébergement ; les déclarations de la charte se cochent par le porteur.",
     audience: "all",
     triggers: ["lancer un projet", "publier un projet", "organiser un chantier"],
-    opener: "Un projet se lance sur /projets/publier, je vous propose le titre.",
+    opener: "Un projet se lance depuis la page Lancer un projet, je vous propose le titre.",
   },
   {
     key: "associations",
@@ -169,7 +169,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     purpose: "Associations de protection animale qui cherchent des bénévoles, avec ville et besoins.",
     audience: "all",
     triggers: ["association", "refuge", "benevole", "benevolat", "spa"],
-    opener: "Les associations qui cherchent des bras sont sur /associations.",
+    opener: "Les associations qui cherchent des bras sont réunies dans Les associations.",
   },
   {
     key: "urgence",
@@ -178,7 +178,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     purpose: "Le réseau des gardiens d'urgence arrive bientôt : la page présente le projet et les conditions prévues pour y entrer. Les alertes partiront à son lancement.",
     audience: "all",
     triggers: ["gardien d'urgence", "gardiens d'urgence", "reseau d'urgence", "remplacant"],
-    opener: "Le réseau des gardiens d'urgence arrive, son projet est présenté sur /gardien-urgence.",
+    opener: "Le réseau des gardiens d'urgence arrive, son projet est présenté sur la page Gardien d'urgence.",
   },
   {
     key: "guide_maison",
@@ -197,7 +197,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     purpose: "Avis croisés après chaque garde, publiés quand les deux côtés ont écrit ou après le délai.",
     audience: "all",
     triggers: ["avis", "laisser un avis", "note", "evaluation"],
-    opener: "Vos avis sont réunis sur /mes-avis.",
+    opener: "Vos avis sont réunis dans Mes avis.",
   },
   {
     key: "ecussons",
@@ -206,7 +206,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     purpose: "Planche des écussons qui se gagnent par les gardes, l'entraide et les avis.",
     audience: "all",
     triggers: ["ecusson", "badge", "recompense"],
-    opener: "La planche des écussons est sur /planche-badges.",
+    opener: "Les écussons se découvrent sur la planche des écussons.",
   },
   {
     key: "affinite",
@@ -215,7 +215,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     purpose: "Questions sur vos animaux, votre rythme et votre maison, qui servent à trier les gardiens et les gardes par compatibilité.",
     audience: "all",
     triggers: ["affinite", "compatibilite", "score d'affinite"],
-    opener: "Les questions d'affinité sont sur /onboarding/affinity.",
+    opener: "Les questions d'affinité vous attendent sur la page Affinité.",
   },
   {
     key: "secteur",
@@ -224,7 +224,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     purpose: "Code postal et rayon de déplacement ; enregistre la zone des alertes et affiche aussitôt les gardes ouvertes dans ce rayon.",
     audience: "all",
     triggers: ["alerte", "secteur", "rayon", "prevenir", "code postal", "rien pres"],
-    opener: "Votre secteur et vos alertes se règlent sur /mon-secteur.",
+    opener: "Votre secteur et vos alertes se règlent dans Mon secteur.",
   },
   {
     key: "ma_periode",
@@ -234,7 +234,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     purpose: "Le propriétaire indique quand il part (Noël, hiver, printemps, été, plus tard) pour préparer son annonce au bon moment.",
     audience: "owner",
     triggers: ["quand je pars", "periode", "noel", "ete", "hiver", "printemps"],
-    opener: "Dites nous quand vous partez sur /ma-periode.",
+    opener: "Dites nous quand vous partez sur la page Ma période de départ.",
   },
   {
     key: "parrainage",
@@ -243,7 +243,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     purpose: "Lien personnel pour inviter des proches et des gens du coin à rejoindre Guardiens.",
     audience: "all",
     triggers: ["parrainage", "inviter", "parrain", "filleul", "ami"],
-    opener: "Votre lien d'invitation est sur /parrainage.",
+    opener: "Votre lien d'invitation est sur la page Parrainage.",
   },
   {
     key: "identite",
@@ -252,7 +252,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     purpose: "Réglages du compte, préférences d'email et vérification d'identité, qui ajoute l'écusson Identité vérifiée sur le profil.",
     audience: "all",
     triggers: ["identite", "verification", "piece d'identite", "reglages", "parametres", "email", "mot de passe"],
-    opener: "La vérification d'identité est dans /settings.",
+    opener: "La vérification d'identité se fait dans vos Réglages.",
   },
   {
     key: "suppression",
@@ -261,7 +261,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     purpose: "Dans les réglages, la suppression du compte est immédiate et irréversible : le profil est anonymisé sur-le-champ, avis et messages restent sous forme anonyme.",
     audience: "all",
     triggers: ["supprimer mon compte", "suppression", "desinscrire", "effacer"],
-    opener: "La suppression du compte se demande dans /settings.",
+    opener: "La suppression du compte se demande dans vos Réglages.",
   },
   {
     key: "messagerie",
@@ -271,7 +271,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     purpose: "Conversations avec les propriétaires, les gardiens et les gens du coin qui répondent à une demande.",
     audience: "all",
     triggers: ["message", "messagerie", "ecrire", "repondre", "conversation"],
-    opener: "Vos échanges sont sur /messages.",
+    opener: "Vos échanges sont dans la Messagerie.",
   },
   {
     key: "favoris",
@@ -280,7 +280,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     purpose: "Gardiens et annonces mis de côté, en deux onglets.",
     audience: "all",
     triggers: ["favori", "mettre de cote", "sauvegarder"],
-    opener: "Ce que vous avez mis de côté est sur /favoris.",
+    opener: "Ce que vous avez mis de côté est dans Mes favoris.",
   },
   {
     key: "notifications",
@@ -289,7 +289,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     purpose: "Toutes les alertes du compte : candidatures, messages, gardes proches, réponses d'entraide.",
     audience: "all",
     triggers: ["notification", "alerte recue"],
-    opener: "Vos notifications sont sur /notifications.",
+    opener: "Vos notifications sont réunies dans Mes notifications.",
   },
   // Lot A2 (audit Alma du 14/10/2026) : réponses fausses du 09/10 (« retirer
   // un espace est impossible ») et du 12/10 (alertes mail placées dans Mon
@@ -303,7 +303,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     purpose: "Dans les réglages, rubrique Mes espaces : chaque membre ajoute ou retire son espace gardien ou son espace propriétaire, et garde son compte et son historique. Un espace se retire une fois terminées ou retirées ses annonces, gardes et candidatures en cours ; au moins un espace reste actif.",
     audience: "all",
     triggers: ["mes espaces", "espace gardien", "espace proprietaire", "retirer mon espace", "retirer l'espace", "desactiver mon espace", "desactiver l'espace", "ajouter un espace", "ajouter l'espace", "activer l'espace", "double role", "deux espaces", "deux roles"],
-    opener: "Vos espaces s'ajoutent et se retirent dans /settings?section=spaces.",
+    opener: "Vos espaces s'ajoutent et se retirent dans vos Réglages, rubrique Mes espaces.",
   },
   {
     key: "emails_alertes",
@@ -313,7 +313,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     purpose: "Dans les réglages, la rubrique Alertes annonces règle ou coupe les alertes de gardes et de besoins d'entraide par zone, heure et fréquence ; la rubrique Notifications choisit les emails reçus (candidatures, messages, rappels, avis) et le rythme des emails de messages, avec un interrupteur pour tout couper.",
     audience: "all",
     triggers: ["alertes mail", "alerte mail", "alertes email", "alerte email", "alertes par mail", "alertes par email", "mail", "emails", "courriel", "newsletter", "annuler les alertes", "arreter les alertes", "couper les alertes", "desactiver les alertes", "supprimer les alertes", "couper les emails", "arreter les emails", "trop d'emails", "trop de mails", "me desabonner", "desabonner", "notifications par email", "notifications par mail", "frequence des emails"],
-    opener: "Vos emails et vos alertes se règlent dans /settings?section=alerts et /settings?section=notifications.",
+    opener: "Vos emails et vos alertes se règlent dans vos Réglages, rubriques Alertes annonces et Notifications.",
   },
   {
     key: "savoir_faire",
@@ -322,7 +322,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     purpose: "Rubrique du profil, la même pour les deux espaces : jusqu'à 10 savoir-faire (animaux, jardin et potager, maison, et d'autres) qui disent aux gens du coin pour quoi vous pouvez aider ; un savoir-faire rempli vous rend disponible pour l'entraide.",
     audience: "all",
     triggers: ["savoir-faire", "savoir faire", "mes competences", "competence", "ce que je sais faire", "mes talents", "proposer mon aide", "je peux aider"],
-    opener: "Vos savoir-faire se remplissent dans /profile?section=savoir-faire.",
+    opener: "Vos savoir-faire se remplissent dans votre profil, rubrique Mes savoir-faire.",
   },
   {
     key: "tableau_de_bord",
@@ -331,7 +331,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     purpose: "Point de départ du membre : prochaine action, gardes, candidatures, entraide autour de chez soi.",
     audience: "all",
     triggers: ["tableau de bord", "accueil", "par ou commencer"],
-    opener: "Tout part du tableau de bord, /dashboard.",
+    opener: "Tout part de votre Tableau de bord.",
   },
   {
     key: "profil_gardien",
@@ -340,7 +340,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     purpose: "Profil publié par défaut : présentation, expérience, animaux, photo ; 40 % de complétion pour apparaître dans la recherche et pour postuler.",
     audience: "sitter",
     triggers: ["mon profil", "profil", "completion", "presentation", "photo de profil"],
-    opener: "Votre profil gardien se complète sur /profile.",
+    opener: "Votre profil gardien se complète dans Mon profil gardien.",
   },
   {
     key: "profil_proprietaire",
@@ -349,7 +349,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     purpose: "Présentation du propriétaire, de sa maison et de ses animaux, lue par les gardiens avant de postuler.",
     audience: "owner",
     triggers: ["profil proprietaire", "mes animaux", "ma maison"],
-    opener: "Votre maison et vos animaux se présentent sur /owner-profile.",
+    opener: "Votre maison et vos animaux se présentent dans Mon profil propriétaire.",
   },
   {
     key: "fiche_gardien",
@@ -369,7 +369,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     purpose: "Conseils d'Alma et articles pratiques sur la garde, les animaux et l'entraide.",
     audience: "all",
     triggers: ["conseil", "astuce", "comment faire", "preparer"],
-    opener: "Les conseils pratiques sont sur /conseils.",
+    opener: "Les conseils pratiques sont réunis dans Les conseils d'Alma.",
   },
   {
     key: "journal",
@@ -379,7 +379,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     purpose: "Articles et nouvelles de Guardiens.",
     audience: "all",
     triggers: ["article", "journal", "actualite"],
-    opener: "Le journal de Guardiens est sur /actualites.",
+    opener: "Les articles de Guardiens sont réunis dans Le journal.",
   },
   {
     key: "guides_locaux",
@@ -389,7 +389,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     purpose: "Balades, parcs, vétérinaires et lieux qui acceptent les chiens, ville par ville.",
     audience: "all",
     triggers: ["balade", "parc", "veterinaire", "promenade", "guide local"],
-    opener: "Les bons coins pour les chiens sont dans /guides.",
+    opener: "Les bons coins pour les chiens sont dans Les guides locaux.",
   },
   {
     key: "villes",
@@ -399,7 +399,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     purpose: "Pages de ville et de département : gardes, gardiens et entraide du secteur.",
     audience: "all",
     triggers: ["ville", "departement", "region", "ma commune"],
-    opener: "Votre ville a sa page sur /house-sitting.",
+    opener: "Votre ville a sa page dans Villes et départements.",
   },
   {
     key: "races",
@@ -409,7 +409,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     purpose: "Caractère, besoins et conseils de garde par race.",
     audience: "all",
     triggers: ["race", "berger", "labrador", "chat de race"],
-    opener: "Les fiches de race sont sur /races.",
+    opener: "Les fiches de race sont réunies dans Les fiches de race.",
   },
   {
     key: "faq",
@@ -418,7 +418,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     purpose: "Réponses sur le fonctionnement, la confiance, l'entraide et les gardes.",
     audience: "all",
     triggers: ["comment ca marche", "fonctionnement", "faq", "confiance"],
-    opener: "Le fonctionnement est détaillé sur /faq.",
+    opener: "Le fonctionnement est détaillé dans la FAQ.",
   },
   {
     key: "contact",
@@ -427,7 +427,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     purpose: "Écrire directement à Jérémie et Elisa, qui répondent à chaque message.",
     audience: "all",
     triggers: ["contact", "parler a quelqu'un", "humain", "jeremie", "elisa", "probleme", "bug"],
-    opener: "Jérémie et Elisa vous répondent sur /contact.",
+    opener: "Jérémie et Elisa vous répondent depuis la page Écrire à Jérémie et Elisa.",
   },
   {
     key: "alma",
@@ -436,7 +436,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     purpose: "Qui est Alma, son histoire et comment elle accompagne sur le site.",
     audience: "all",
     triggers: ["alma", "qui es tu", "ton histoire"],
-    opener: "Mon histoire est racontée sur /alma.",
+    opener: "Mon histoire est racontée sur la page Mon parcours avec Alma.",
   },
   {
     key: "devenir_gardien",
@@ -445,7 +445,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     purpose: "Ce que fait un gardien, comment se passe une garde et comment commencer.",
     audience: "sitter",
     triggers: ["devenir gardien", "home sitter", "comment commencer"],
-    opener: "Le parcours de gardien est expliqué sur /devenir-home-sitter.",
+    opener: "Le parcours de gardien est expliqué sur la page Devenir gardien.",
   },
   {
     key: "gardiennage_quebec",
@@ -454,7 +454,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     purpose: "Faire garder sa maison au Québec, devenir gardien au Québec, garder une maison au Québec depuis la France.",
     audience: "all",
     triggers: ["quebec", "quebecois", "quebecoise", "canada", "montreal", "gatineau", "sherbrooke", "trois-rivieres"],
-    opener: "Tout ce qui concerne le Québec est réuni sur /gardiennage-maison-quebec.",
+    opener: "Tout ce qui concerne le Québec est réuni sur la page Gardiennage de maison au Québec.",
   },
   {
     key: "observatoire",
@@ -463,17 +463,17 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     purpose: "Données publiques sur la garde d'animaux en France.",
     audience: "all",
     triggers: ["observatoire", "statistiques", "etude"],
-    opener: "Les données publiques sont sur /observatoire-garde-animaux.",
+    opener: "Les données publiques sont réunies dans L'observatoire de la garde d'animaux.",
   },
   {
     key: "abonnement",
     path: "/mon-abonnement",
     aliases: ["/tarifs"],
-    label: "Accès gardien",
-    purpose: "État de l'accès gardien du compte.",
-    audience: "sitter",
-    triggers: ["abonnement", "acces gardien"],
-    opener: "L'état de votre accès est sur /mon-abonnement.",
+    label: "Mon accès",
+    purpose: "Guardiens est gratuit, pour tous les membres : annonces, candidatures, messagerie et entraide. La page Mon accès le rappelle depuis le compte, la page Guardiens est gratuit le présente à tous.",
+    audience: "all",
+    triggers: ["abonnement", "mon acces", "acces gardien", "payant", "tarif", "tarifs", "prix", "combien ca coute", "cout"],
+    opener: "Guardiens est gratuit, la page Mon accès le rappelle.",
   },
   {
     key: "ma_ligne",
@@ -483,7 +483,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     purpose: "Ce que la personne peut offrir aux gens du coin, en une ligne, pour être sollicitée sur ce qu'elle aime faire.",
     audience: "all",
     triggers: ["ce que je peux offrir", "ma ligne", "ma carte"],
-    opener: "Ce que vous aimez faire pour les autres tient en une ligne sur /ma-ligne.",
+    opener: "Ce que vous aimez faire pour les autres tient en une ligne sur la page Ma carte d'entraide.",
   },
   {
     key: "a_propos",
@@ -492,7 +492,7 @@ export const ALMA_SITE_KNOWLEDGE: AlmaKnowledgeEntry[] = [
     purpose: "Pourquoi Guardiens existe et qui le fait.",
     audience: "all",
     triggers: ["qui etes vous", "pourquoi guardiens", "a propos"],
-    opener: "L'histoire de Guardiens est sur /a-propos.",
+    opener: "L'histoire de Guardiens est sur la page À propos.",
   },
 ];
 

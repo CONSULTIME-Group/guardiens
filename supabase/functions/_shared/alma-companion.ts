@@ -271,6 +271,8 @@ export interface SpaceScopeInput {
   frenchNoneLabel: string | null;
   /** Mots du lieu demandé à ne jamais présenter comme disponibles (« Toscane »). */
   askedPlaceWords: string[];
+  /** Lot A5 : phrase de périmètre construite depuis les annonces publiées (scopeSentence). */
+  scopeSentence?: string;
   action: { label: string; path: string; reason: string };
   template: string;
 }
@@ -279,7 +281,7 @@ export function spaceScopeBrief(i: SpaceScopeInput): LockedBrief {
   const facts: LockedFact[] = [];
   if (i.foreignInCountry) {
     const country = foldC(i.foreignInCountry.replace(/^(en|au|aux)\s+/i, ""));
-    facts.push({ key: "france", text: "Guardiens propose des gardes en France, Polynésie française comprise.", present: (f) => /france/.test(f) });
+    facts.push({ key: "france", text: i.scopeSentence ?? "Guardiens propose des gardes en France.", present: (f) => /france/.test(f) });
     facts.push({ key: "pays_sans_garde", text: `Il n'y a aucune garde ${i.foreignInCountry} aujourd'hui.`, present: (f) => f.includes(country) && /\b(aucune?|pas de|n'y a pas)\b/.test(f) });
   }
   if (i.frenchNoneLabel) {
@@ -426,7 +428,7 @@ export const VOICE_EXAMPLES = [
   "EXEMPLES DE TON (lieux, dates et animaux entre crochets sont des places vides : ne reprends que ceux des faits de ce tour, jamais ceux des exemples) :",
   "1. Fiche d'annonce avec un yorkshire, question « Quel est le nom de votre village ? » : « La garde se trouve à [localisation de la fiche], du [dates de la fiche], avec un yorkshire de [âge] ans à la maison. À cet âge, un yorkshire apprécie surtout les siestes au chaud et les petits tours du jardin, je le comprends bien. Le nom exact du village, c'est le propriétaire qui vous le donnera : envoyez-lui votre candidature avec un message, il vous répondra. »",
   "2. Question « Comment supprimer la photo de ma maison ? » : « Les photos de votre logement se gèrent à un seul endroit, la Galerie de votre profil propriétaire. Chacune s'y remplace ou s'y supprime, et si c'était la couverture de votre annonce, la suivante prend sa place. Une maison bien montrée, c'est comme une porte entrouverte : on a envie d'y passer la truffe. »",
-  "3. Question « Je cherche une garde en Toscane » depuis l'espace propriétaire : « Il n'y a aucune garde en Italie aujourd'hui : Guardiens propose des gardes en France, Polynésie française comprise. Vous êtes dans votre espace propriétaire, qui montre vos propres annonces ; les gardes des autres membres vous attendent dans votre espace gardien. Côté France, il y a de belles balades à faire, j'en remue déjà la queue. »",
+  "3. Question « Je cherche une garde en Toscane » depuis l'espace propriétaire : « Il n'y a aucune garde en Italie aujourd'hui : Guardiens propose des gardes en France. Vous êtes dans votre espace propriétaire, qui montre vos propres annonces ; les gardes des autres membres vous attendent dans votre espace gardien. Côté France, il y a de belles balades à faire, j'en remue déjà la queue. »",
   "Dans ces exemples : une seule touche de chien, liée au sujet, jamais en ouverture ; prénom au plus une fois ; vouvoiement ; aucun tiret long.",
 ].join("\n");
 

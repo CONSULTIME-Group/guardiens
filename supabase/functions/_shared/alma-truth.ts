@@ -1,5 +1,7 @@
 // Lot L3 : Alma dit vrai sur l'espace actif, le périmètre réel et les
 // brouillons. Module pur, testé ; les lectures en base restent dans alma-chat.
+// Lot A5 : le périmètre France suit la règle du site (_shared/sit-place.ts).
+import { FRANCE_COUNTRY_CODES, isAbroadPlace, isFrancePlace, resolveSitPlace, type SitPlaceInput } from "./sit-place.ts";
 
 export const fold = (s: string): string =>
   (s || "")
@@ -120,6 +122,10 @@ const NL = { iso: "NL", inCountry: "aux Pays-Bas" };
 const IE = { iso: "IE", inCountry: "en Irlande" };
 const AT = { iso: "AT", inCountry: "en Autriche" };
 const HR = { iso: "HR", inCountry: "en Croatie" };
+// Lot A5 (décision de Jérémie du 14/10/2026) : les territoires hors
+// départements suivent la règle du site, ils vont sur la page internationale.
+const PF = { iso: "PF", inCountry: "en Polynésie française" };
+const NC = { iso: "NC", inCountry: "en Nouvelle-Calédonie" };
 
 const FOREIGN: Array<[RegExp, ForeignPlace]> = [
   [/\b(italie|toscane|sicile|sardaigne|ombrie|pouilles|piemont|lombardie|rome|florence|venise|milan|naples|sienne)\b/, IT],
@@ -138,9 +144,17 @@ const FOREIGN: Array<[RegExp, ForeignPlace]> = [
   [/\b(irlande|dublin)\b/, IE],
   [/\b(autriche|vienne en autriche)\b/, AT],
   [/\b(croatie)\b/, HR],
+  [/\b(polynesie|tahiti|papeete|punaauia|taravao|moorea|bora bora|raiatea)\b/, PF],
+  [/\b(nouvelle-caledonie|nouvelle caledonie|noumea)\b/, NC],
 ];
 
-/** Pays étranger cité dans la question, ou null. La Polynésie française est en France. */
+/** Façon de dire « dans ce pays », par code ISO (phrase de périmètre). */
+const IN_COUNTRY: Record<string, string> = Object.fromEntries(FOREIGN.map(([, p]) => [p.iso, p.inCountry]));
+
+/**
+ * Pays hors de France cité dans la question, ou null. Lot A5 : la Polynésie
+ * française et la Nouvelle-Calédonie sont hors de France, comme sur le site.
+ */
 export function foreignPlaceIn(message: string): ForeignPlace | null {
   const q = fold(message);
   for (const [re, place] of FOREIGN) if (re.test(q)) return place;
@@ -149,7 +163,7 @@ export function foreignPlaceIn(message: string): ForeignPlace | null {
 
 /** Lot L4b : mots repliés des lieux étrangers dont le pays n'a aucune annonce publiée. */
 export function foreignWordsWithoutListings(rows: PublishedSitRow[]): string[] {
-  const open = new Set(rows.map((r) => ((r.country || "") + "").toUpperCase()));
+  const open = new Set(rows.map((r) => resolveSitPlace(r).country ?? ""));
   const out: string[] = [];
   for (const [re, place] of FOREIGN) {
     if (open.has(place.iso)) continue;
@@ -169,22 +183,51 @@ export function foreignPlaceInConversation(message: string, previousUserMessages
   return null;
 }
 
-/** Codes pays servis par Guardiens comme France (métropole et outre-mer). */
-export const FRANCE_CODES = new Set(["FR", "PF", "GP", "MQ", "GF", "RE", "YT", "NC", "PM", "WF", "BL", "MF"]);
+/**
+ * Codes pays servis par Guardiens comme France. Lot A5 : règle du site
+ * (isFrancePlace, src/lib/sitSearchRules.ts), « FR » seul ; la Polynésie et
+ * les territoires hors départements vont sur la page internationale.
+ */
+export const FRANCE_CODES = new Set(FRANCE_COUNTRY_CODES);
 
-export interface PublishedSitRow {
-  country?: string | null;
-  city?: string | null;
-  departement_code?: string | null;
+/** Annonce publiée et ouverte lue par alma-chat (lieu au sens du site). */
+export interface PublishedSitRow extends SitPlaceInput {
+  id?: string | null;
+  slug?: string | null;
+  title?: string | null;
+  start_date?: string | null;
+  end_date?: string | null;
 }
 
+/** Au moins une annonce hors de France (règle de /annonces/international). */
 export function hasForeignSits(rows: PublishedSitRow[]): boolean {
-  return rows.some((r) => !FRANCE_CODES.has(((r.country || "FR") + "").toUpperCase()));
+  return rows.some((r) => isAbroadPlace(r));
 }
 
-export const FRANCE_SCOPE_SENTENCE = "Guardiens propose des gardes en France, Polynésie française comprise.";
-export const foreignNoneSentence = (inCountry: string) =>
-  `${FRANCE_SCOPE_SENTENCE} Il n'y a aucune garde ${inCountry} aujourd'hui.`;
+/** Phrase de base, sans annonce hors de France. */
+export const FRANCE_SCOPE_SENTENCE = "Guardiens propose des gardes en France.";
+
+function joinFr(items: string[]): string {
+  if (items.length <= 1) return items.join("");
+  return `${items.slice(0, -1).join(", ")} et ${items[items.length - 1]}`;
+}
+
+/**
+ * Lot A5 : phrase de périmètre construite depuis les pays des annonces
+ * publiées et ouvertes (plus de « Polynésie comprise » figé). Exemple :
+ * « Guardiens propose des gardes en France, et aujourd'hui aussi au Canada et
+ * en Polynésie française. »
+ */
+export function scopeSentence(rows: PublishedSitRow[]): string {
+  const codes = [...new Set(rows.filter((r) => isAbroadPlace(r)).map((r) => resolveSitPlace(r).country as string))].sort();
+  if (!codes.length) return FRANCE_SCOPE_SENTENCE;
+  const named = codes.map((c) => IN_COUNTRY[c]).filter(Boolean);
+  const where = named.length === codes.length ? joinFr(named) : "hors de France";
+  return `Guardiens propose des gardes en France, et aujourd'hui aussi ${where}.`;
+}
+
+export const foreignNoneSentence = (inCountry: string, rows: PublishedSitRow[] = []) =>
+  `${scopeSentence(rows)} Il n'y a aucune garde ${inCountry} aujourd'hui.`;
 
 export interface DepartementRow { code: string; nom: string; nom_region?: string | null }
 
@@ -194,6 +237,13 @@ export interface FrenchPlaceMatch {
   count: number;
 }
 
+/** Lot A5 : lieu français reconnu avec ses annonces (départements ou commune). */
+export interface FrenchPlaceSits extends FrenchPlaceMatch {
+  /** Départements du lieu (vide pour une commune). */
+  codes: string[];
+  sits: PublishedSitRow[];
+}
+
 const PLACE_AFTER = /\b(?:en|a|au|aux|dans le|dans la|dans les|dans l'|sur|vers|pres de|autour de|du cote de)\s+([a-z' -]{3,40})/g;
 
 /**
@@ -201,6 +251,15 @@ const PLACE_AFTER = /\b(?:en|a|au|aux|dans le|dans la|dans les|dans l'|sur|vers|
  * vérifié contre les lignes lues en base. Null si aucun lieu reconnu.
  */
 export function frenchPlaceIn(message: string, deps: DepartementRow[], sits: PublishedSitRow[]): FrenchPlaceMatch | null {
+  const found = frenchPlaceSitsIn(message, deps, sits);
+  return found ? { label: found.label, count: found.count } : null;
+}
+
+/**
+ * Lot A5 : lieu français cité et ses annonces publiées. Seules les annonces
+ * situées en France au sens du site (isFrancePlace) comptent.
+ */
+export function frenchPlaceSitsIn(message: string, deps: DepartementRow[], sits: PublishedSitRow[]): FrenchPlaceSits | null {
   const q = fold(message).replace(/[?!.,;:]/g, " ");
   const tokens: string[] = [];
   for (const m of q.matchAll(PLACE_AFTER)) {
@@ -208,19 +267,50 @@ export function frenchPlaceIn(message: string, deps: DepartementRow[], sits: Pub
     for (let n = Math.min(4, words.length); n >= 1; n--) tokens.push(words.slice(0, n).join(" "));
   }
   if (tokens.length === 0) return null;
-  const french = sits.filter((s) => FRANCE_CODES.has(((s.country || "FR") + "").toUpperCase()));
+  const french = sits.filter((s) => isFrancePlace(s));
+  const depOf = (s: PublishedSitRow) => (s.departement_code || "").toUpperCase();
   for (const t of tokens) {
     const dep = deps.find((d) => fold(d.nom) === t);
-    if (dep) return { label: dep.nom, count: french.filter((s) => (s.departement_code || "").toUpperCase() === dep.code.toUpperCase()).length };
+    if (dep) {
+      const list = french.filter((s) => depOf(s) === dep.code.toUpperCase());
+      return { label: dep.nom, count: list.length, codes: [dep.code.toUpperCase()], sits: list };
+    }
     const regionDeps = deps.filter((d) => d.nom_region && fold(d.nom_region) === t);
     if (regionDeps.length) {
       const codes = new Set(regionDeps.map((d) => d.code.toUpperCase()));
-      return { label: regionDeps[0].nom_region!, count: french.filter((s) => codes.has((s.departement_code || "").toUpperCase())).length };
+      const list = french.filter((s) => codes.has(depOf(s)));
+      return { label: regionDeps[0].nom_region!, count: list.length, codes: [...codes], sits: list };
     }
     const city = french.filter((s) => s.city && fold(s.city) === t);
-    if (city.length) return { label: city[0].city!, count: city.length };
+    if (city.length) return { label: city[0].city!, count: city.length, codes: [], sits: city };
   }
   return null;
+}
+
+/** Au plus 3 annonces du lieu demandé, hors du département de la personne. */
+export const ASKED_PLACE_MAX = 3;
+
+/**
+ * Lot A5 : annonces du lieu cité quand ce lieu est absent du département de
+ * la personne (Québec, Papeete, une autre région). L'inventaire d'Alma se
+ * limite au département ; ces annonces entrent dans le contexte du tour.
+ */
+export function askedPlaceSits(input: {
+  foreign: { iso: string } | null;
+  french: FrenchPlaceSits | null;
+  rows: PublishedSitRow[];
+  personDept: string | null;
+}): PublishedSitRow[] {
+  const dept = (input.personDept || "").toUpperCase();
+  let list: PublishedSitRow[] = [];
+  if (input.foreign) {
+    list = input.rows.filter((r) => resolveSitPlace(r).country === input.foreign!.iso);
+  } else if (input.french) {
+    list = input.french.sits.filter((s) => !dept || (s.departement_code || "").toUpperCase() !== dept);
+  }
+  return [...list]
+    .sort((a, b) => String(a.start_date ?? "").localeCompare(String(b.start_date ?? "")))
+    .slice(0, ASKED_PLACE_MAX);
 }
 
 export const frenchNoneSentence = (label: string) =>
@@ -291,7 +381,30 @@ Dis clairement : "Je ne peux pas consulter votre messagerie ni vérifier l'envoi
 Si une réponse précédente prétendait avoir vérifié ses messages, rectifie cette affirmation. Tu peux aider à rédiger un message à partir du texte fourni par la personne, sans prétendre le lire dans son compte ni l'envoyer.
 Ces limites priment sur les consignes de prochaine action : reste sur cette question.`;
 
-/** Consigne de périmètre, envoyée à chaque tour. */
-export const SCOPE_DIRECTIVE = `PÉRIMÈTRE RÉEL
-Guardiens propose des gardes en France, Polynésie française comprise. Tu n'affirmes jamais qu'il existe des annonces dans un lieu, un pays ou une région que l'inventaire ou les faits de ce tour ne nomment pas. Sans annonce vérifiée, tu dis qu'il n'y en a pas aujourd'hui et tu proposes l'alerte de secteur.
+/**
+ * Consigne de périmètre, envoyée à chaque tour. Lot A5 : la phrase de
+ * périmètre vient des pays des annonces publiées et ouvertes.
+ */
+export function scopeDirective(rows: PublishedSitRow[] = []): string {
+  return `PÉRIMÈTRE RÉEL
+${scopeSentence(rows)} Tu n'affirmes jamais qu'il existe des annonces dans un lieu, un pays ou une région que l'inventaire ou les faits de ce tour ne nomment pas. Sans annonce vérifiée, tu dis qu'il n'y en a pas aujourd'hui et tu proposes l'alerte de secteur.
 Tu ne dis jamais « dossier » à la personne : tu dis « vos annonces », « votre profil », « sur Guardiens ».`;
+}
+
+// ---------------------------------------------------------------------------
+// Lot A5 : sources citées par Alma conformes à la doctrine.
+// ---------------------------------------------------------------------------
+
+const COMPARISON_SOURCE = /\b(pensions?|chenils?)\b/i;
+
+/**
+ * Sources de search_alma_knowledge gardées pour le modèle : un article, un
+ * conseil ou une page de ville qui compare avec la pension sort (doctrine Y3,
+ * aucune comparaison). La FAQ reste : « pensions » y nomme une profession.
+ */
+export function doctrineSources<T extends { source?: string | null; title?: string | null; snippet?: string | null }>(rows: T[]): T[] {
+  return rows.filter((r) => r.source === "faq" || !COMPARISON_SOURCE.test(`${r.title ?? ""} ${r.snippet ?? ""}`));
+}
+
+/** Consigne sans annonce hors de France (compatibilité des appels existants). */
+export const SCOPE_DIRECTIVE = scopeDirective([]);

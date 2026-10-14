@@ -108,7 +108,7 @@ export function suggestMissionTitle(question: string): string {
   if (/jardin|tondre|haie|tailler/.test(q)) return "Un coup de main au jardin";
   if (/course|marche\b|marché/.test(q)) return "Courses au marché ensemble";
   if (/trajet|voiture|covoitur|conduire/.test(q)) return "Un trajet en voiture";
-  if (/cheva|poney|equid/.test(q)) return "Un coup de main pour mes chevaux et poneys";
+  if (/cheva|poney|equid/.test(q)) return "Un coup de main ponctuel pour mes chevaux et poneys";
   if (/chat|chien|animal|animaux/.test(q)) return "Passer nourrir mes animaux";
   return "Une partie de Scrabble entre gens du coin";
 }
@@ -228,9 +228,13 @@ export function computeNextAction(input: NextActionInput): NextActionResult {
   // 2. Gardien.
   if (sitterSide) {
     const nearby = inventory.gardes[0];
+    // Lot A5 : la garde du lieu demandé (Québec, Papeete) passe devant la garde proche.
+    const askedPlace = (inventory.hors_departement ?? [])[0];
     const waiting = (facts.candidature_sans_reponse_jours ?? 0) > 7;
     if (input.viewedSit) {
       // Lot L1 : jamais une autre annonce tant que celle-ci est ouverte.
+    } else if (askedPlace?.id) {
+      candidates.push({ label: `Postuler : ${askedPlace.titre}`, path: `/sits/${askedPlace.id}?postuler=1`, reason: "annonce_lieu_demande" });
     } else if (nearby) {
       candidates.push({ label: `Postuler : ${nearby.titre}`, path: `/sits/${nearby.id}?postuler=1`, reason: waiting ? "candidature_sans_reponse" : "annonce_proche" });
     } else if (!input.helpIntent) {
@@ -338,16 +342,59 @@ function stripPrefillTitle(path: string): string {
  * inventé par le moteur. Sans titre d'Alma, le formulaire s'ouvre vide.
  * La ligne BROUILLON est lue où qu'elle soit (avant ou après CLASSEMENT).
  */
+/**
+ * Lot A5 (décision de Jérémie du 14/10/2026, CGU 6.3 : coups de main
+ * ponctuels) : en entraide, un besoin pour des chevaux ou des poneys se dit
+ * ponctuel. « quotidien » et « régulier » deviennent « ponctuel » dans le
+ * titre ; une phrase de description qui les porte est retirée.
+ */
+const HORSE_WORDS = /\b(chevaux|cheval|poneys?|equides?|juments?|anes?)\b/;
+const RECURRING_WORDS = /\b(quotidien(ne)?s?|r[ée]guli[èe]re?s?|r[ée]guli[èe]rement|tous les jours|chaque jour|chaque matin|chaque soir)\b/i;
+
+export function isHorseHelpText(text: string): boolean {
+  return HORSE_WORDS.test(foldText(text));
+}
+
+export function punctualHorseTitle(title: string): string {
+  return title
+    .replace(/\bquotidien(ne)?(s)?\b/gi, (_m, f, s) => `ponctuel${f ? "le" : ""}${s ?? ""}`)
+    .replace(/\br[ée]guli[èe]rement\b/gi, "ponctuellement")
+    .replace(/\br[ée]guli(?:er|[èe]re)(s)?\b/gi, (m, s) => `ponctuel${/[èe]re/i.test(m) ? "le" : ""}${s ?? ""}`)
+    .replace(/\s*\b(tous les jours|chaque jour|chaque matin|chaque soir)\b/gi, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
+
+export function punctualHorseDescription(desc: string): string {
+  return desc
+    .split(/(?<=[.!?])\s+/)
+    .filter((s) => !RECURRING_WORDS.test(s))
+    .join(" ")
+    .trim();
+}
+
 export function applyDraftToAction(
   answer: string,
   action: AlmaAction | null,
   chips: AlmaChip[] = [],
 ): { answer: string; action: AlmaAction | null; chips: AlmaChip[]; title: string | null } {
   const m = answer.match(DRAFT_LINE_RE);
-  const cleaned = m ? answer.replace(DRAFT_LINE_RE, "").replace(/\n{3,}/g, "\n\n").trim() : answer;
+  let cleaned = m ? answer.replace(DRAFT_LINE_RE, "").replace(/\n{3,}/g, "\n\n").trim() : answer;
   const quoted = cleaned.match(QUOTED_TITLE_RE);
-  const title = (m ? m[1] : quoted ? quoted[1] : "").trim().replace(/^["«“]\s*|\s*["»”]$/g, "").slice(0, 100) || null;
-  const desc = m ? (m[2] || "").trim().slice(0, 1000) : "";
+  let title = (m ? m[1] : quoted ? quoted[1] : "").trim().replace(/^["«“]\s*|\s*["»”]$/g, "").slice(0, 100) || null;
+  let desc = m ? (m[2] || "").trim().slice(0, 1000) : "";
+  // Lot A5 : chevaux et poneys en entraide, coup de main ponctuel.
+  const missionForm = action?.path.split("?")[0] === "/petites-missions/creer";
+  if (missionForm && isHorseHelpText(`${title ?? ""} ${desc}`)) {
+    if (title) {
+      const punctual = punctualHorseTitle(title);
+      if (punctual && punctual !== title) {
+        cleaned = cleaned.split(title).join(punctual);
+        title = punctual;
+      }
+    }
+    desc = punctualHorseDescription(desc);
+  }
   const outChips = chips.map((c) => (c.path ? { ...c, path: stripPrefillTitle(c.path) } : c));
   if (!action) return { answer: cleaned, action, chips: outChips, title };
   const base = action.path.split("?")[0];

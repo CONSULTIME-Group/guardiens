@@ -27,8 +27,7 @@ export function parisTodayIso(now: Date = new Date()): string {
   return `${get("year")}-${get("month")}-${get("day")}`;
 }
 
-export const isFranceSit = (s: { country?: string | null }): boolean =>
-  (s.country ?? "").trim().toUpperCase() === "FR";
+export const isFranceSit = (s: { country?: string | null }): boolean => isFranceCountry(s.country);
 
 export const isOpenSit = (
   s: { status?: string | null; accepting_applications?: boolean | null; end_date?: string | null },
@@ -66,76 +65,19 @@ export function applyOpenSitFilter<Q extends { eq: any; or: any; not: any }>(q: 
     .or(`end_date.is.null,end_date.gte.${today}`) as Q;
 }
 
-export interface SitPlaceInput {
-  city?: string | null;
-  country?: string | null;
-  departement_code?: string | null;
-  owner?: {
-    city?: string | null;
-    postal_code?: string | null;
-    country?: string | null;
-    departement_code?: string | null;
-  } | null;
-}
-
-const cleanStr = (v: unknown): string => {
-  if (typeof v !== "string") return "";
-  const t = v.trim();
-  const l = t.toLowerCase();
-  return t && l !== "null" && l !== "undefined" ? t : "";
-};
-
-const normDept = (d: string | null | undefined): string | null => {
-  const v = (d ?? "").trim().toUpperCase();
-  if (!v) return null;
-  return /^\d$/.test(v) ? `0${v}` : v;
-};
-
-const deptFromPostalStrict = (postal: string | null | undefined): string | null => {
-  const p = cleanStr(postal);
-  if (!/^\d{5}$/.test(p)) return null;
-  return p.startsWith("97") || p.startsWith("98") ? p.slice(0, 3) : p.slice(0, 2);
-};
-
-export interface SitPlace {
-  /** Commune retenue, null si aucune source n'en fournit. */
-  city: string | null;
-  /** Pays ISO retenu, null si inconnu (jamais déduit FR). */
-  country: string | null;
-  /** Département (France seulement), null si non fiable. */
-  dept: string | null;
-  /** owner = profil public du propriétaire ; sit = repli annonce ; none. */
-  source: "owner" | "sit" | "none";
-}
-
-/**
- * Lieu de garde (décision Jérémie, 10/10/2026 : « la ville du proprio c'est la
- * base »). Source PRINCIPALE = profil public du propriétaire (ville + pays,
- * département ou code postal du même profil). Repli entier sur l'annonce
- * seulement si la localisation du propriétaire est incomplète (ville ou pays
- * absent). Les deux sources ne sont jamais mélangées : pas de département
- * d'annonce accolé à la ville du propriétaire, pas de pays FR déduit.
- */
-export function resolveSitPlace(s: SitPlaceInput): SitPlace {
-  const o = s.owner ?? null;
-  const oCity = cleanStr(o?.city);
-  const oCountry = cleanStr(o?.country).toUpperCase() || null;
-  if (oCity) {
-    // Ville du propriétaire = base. Pays du propriétaire, sinon pays de
-    // l'annonce en repli (jamais FR déduit). Département lu sur le seul profil
-    // du propriétaire, jamais celui de l'annonce accolé à sa ville.
-    const country = oCountry || cleanStr(s.country).toUpperCase() || null;
-    const dept = country === "FR" ? normDept(o?.departement_code) ?? deptFromPostalStrict(o?.postal_code) : null;
-    return { city: oCity, country, dept, source: "owner" };
-  }
-  const sCity = cleanStr(s.city);
-  const sCountry = cleanStr(s.country).toUpperCase() || null;
-  if (sCity || sCountry) {
-    const dept = sCountry === "FR" ? normDept(s.departement_code) : null;
-    return { city: sCity || null, country: sCountry, dept, source: "sit" };
-  }
-  return { city: null, country: null, dept: null, source: "none" };
-}
+// Lot A5 (14/10/2026) : lieu de garde et règle France vivent dans un module
+// partagé avec Alma (supabase/functions/_shared/sit-place.ts), réexporté ici
+// sur le modèle de missionChildCare : une seule règle pour le site et Alma.
+import { isFranceCountry, normDept, resolveSitPlace, type SitPlace, type SitPlaceInput } from "../../supabase/functions/_shared/sit-place";
+export {
+  FRANCE_COUNTRY_CODES,
+  isAbroadPlace,
+  isFranceCountry,
+  isFrancePlace,
+  resolveSitPlace,
+  type SitPlace,
+  type SitPlaceInput,
+} from "../../supabase/functions/_shared/sit-place";
 
 /** Clé de géocodage du lieu résolu, null si la commune manque. */
 export function sitGeocodeKey(s: SitPlaceInput): { city: string; country: string | null } | null {
@@ -149,9 +91,6 @@ export const sitGeocodeKeyString = (s: SitPlaceInput): string | null => {
   return k ? `${k.city.toLowerCase()}::${(k.country ?? "").toLowerCase()}` : null;
 };
 
-/** France stricte sur le lieu résolu (pays du propriétaire, sinon de l'annonce). */
-export const isFrancePlace = (s: SitPlaceInput): boolean => resolveSitPlace(s).country === "FR";
-
 export const sitDeptCode = (s: SitPlaceInput): string | null => resolveSitPlace(s).dept;
 
 /**
@@ -163,7 +102,7 @@ export const sitDeptCode = (s: SitPlaceInput): string | null => resolveSitPlace(
  */
 export type PointCheck = "verified" | "mismatch" | "unverifiable" | "not_applicable";
 export function checkGeocodedPoint(place: Pick<SitPlace, "country" | "dept">, pointDept: string | null | undefined): PointCheck {
-  if (place.country !== "FR" || !place.dept) return "not_applicable";
+  if (!isFranceCountry(place.country) || !place.dept) return "not_applicable";
   const pd = normDept(pointDept);
   if (!pd) return "unverifiable";
   return pd === normDept(place.dept) ? "verified" : "mismatch";
