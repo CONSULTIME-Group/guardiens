@@ -33,6 +33,9 @@ import * as childCare from "../../../supabase/functions/_shared/mission-child-ca
 import * as almaVersion from "../../../supabase/functions/_shared/alma-version";
 import * as almaUsage from "../../../supabase/functions/_shared/alma-usage";
 import * as almaBond from "../../../supabase/functions/_shared/alma-bond";
+import * as almaSafety from "../../../supabase/functions/_shared/alma-safety";
+import * as turnCap from "../../../supabase/functions/_shared/alma-turn-cap";
+import * as almaIntegrity from "../../../supabase/functions/_shared/alma-integrity";
 import * as sitPlace from "../../../supabase/functions/_shared/sit-place";
 import { ALMA_PAGE_LABELS, almaPageKindLabel, almaPageLabel } from "../../../supabase/functions/_shared/alma-page-labels";
 import * as siteRules from "@/lib/sitSearchRules";
@@ -186,6 +189,7 @@ function harness(profile: Record<string, unknown>) {
     chain.eq = (c: string, v: unknown) => { filters[c] = v; return chain; };
     chain.gte = chain.lte = chain.order = chain.in = chain.or = chain.like = chain.neq = chain.ilike = chain.not = chain.is = chain.limit = chain.contains = chain.overlaps = chain.filter = chain.range = () => chain;
     chain.maybeSingle = chain.single = () => { single = true; return chain; };
+    chain.update = (row: any) => { writes.push({ table, row }); return { eq: () => Promise.resolve({ error: null }) }; };
     chain.insert = (row: any) => { writes.push({ table, row }); const p: any = Promise.resolve({ error: null }); p.select = () => ({ single: () => Promise.resolve({ data: { id: "conv-1" }, error: null }) }); return p; };
     chain.then = (resolve: (v: unknown) => unknown, reject: (r: unknown) => unknown) => {
       let rows: any[] = [];
@@ -197,13 +201,13 @@ function harness(profile: Record<string, unknown>) {
     return chain;
   });
   const callLovableAI = vi.fn(async (_req: any) => ({ ok: true, data: { choices: [{ message: { content: "Une garde vous attend au Québec, pour Noël." } }] } }));
-  const client = { from, rpc: vi.fn(async () => ({ data: [], error: null })), auth: { getUser: vi.fn(async () => ({ data: { user: { id: "a5000000-0000-4000-8000-000000000069" } }, error: null })) } };
+  const client = { from, rpc: vi.fn(async (name: string) => name === "alma_reserve_turn" ? { data: { ok: true, id: "conv-1", used: 1 }, error: null } : { data: [], error: null }), auth: { getUser: vi.fn(async () => ({ data: { user: { id: "a5000000-0000-4000-8000-000000000069" } }, error: null })) } };
   const { outputText } = ts.transpileModule(read("supabase/functions/alma-chat/index.ts"), { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS } });
   const mods: Record<string, unknown> = {
     "alma-system-prompt.ts": prompt, "alma-intent.ts": almaIntent, "alma-site-knowledge.ts": siteKnowledge,
     "alma-facts.ts": almaFacts, "alma-inventory.ts": almaInventory, "alma-next-action.ts": nextAction,
     "alma-classify.ts": almaClassify, "alma-output.ts": almaOutput, "normalize-contact-message.ts": normalizeContact,
-    "alma-owner-question.ts": ownerQuestion, "sit-location.ts": sitLocation, "alma-home-photo.ts": homePhoto, "alma-truth.ts": truth, "alma-companion.ts": companion, "alma-places.ts": places, "mission-child-care.ts": childCare, "alma-version.ts": almaVersion, "alma-usage.ts": almaUsage, "alma-bond.ts": almaBond,
+    "alma-owner-question.ts": ownerQuestion, "sit-location.ts": sitLocation, "alma-home-photo.ts": homePhoto, "alma-truth.ts": truth, "alma-companion.ts": companion, "alma-places.ts": places, "mission-child-care.ts": childCare, "alma-version.ts": almaVersion, "alma-usage.ts": almaUsage, "alma-bond.ts": almaBond, "alma-safety.ts": almaSafety, "alma-turn-cap.ts": turnCap, "alma-integrity.ts": almaIntegrity,
   };
   runInNewContext(outputText, {
     exports: {}, Request, Response, Date, console: { error: vi.fn(), log: vi.fn() },
