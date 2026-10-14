@@ -13,6 +13,9 @@ export interface RawSit {
   city: string | null;
   start_date: string | null;
   end_date: string | null;
+  /** Lot A7 : dates lues pour le lien avec Alma. */
+  published_at?: string | null;
+  created_at?: string | null;
 }
 
 export interface RawSentApplication {
@@ -35,6 +38,7 @@ export interface RawMission {
   status: string;
   mission_type: string;
   category: string | null;
+  created_at?: string | null;
 }
 
 export interface VerifiedFactsInput {
@@ -181,13 +185,20 @@ export function moodTruthFromFacts(facts: VerifiedFacts, today: string): MoodTru
   };
 }
 
-/** Chargement serveur, les deux côtés toujours. */
+/** Lot A7 : lignes brutes lues par loadVerifiedFacts, reprises pour le lien avec Alma. */
+export interface VerifiedFactsRaw {
+  ownSits: RawSit[];
+  sent: RawSentApplication[];
+  missions: RawMission[];
+}
+
+/** Chargement serveur, les deux côtés toujours. `raw` reçoit les lignes lues (lot A7), sans lecture de plus. */
 // deno-lint-ignore no-explicit-any
-export async function loadVerifiedFacts(client: any, userId: string, role: VerifiedFactsInput["role"], today: string): Promise<VerifiedFacts> {
+export async function loadVerifiedFacts(client: any, userId: string, role: VerifiedFactsInput["role"], today: string, raw?: VerifiedFactsRaw): Promise<VerifiedFacts> {
   const [ownRes, sentRes, missRes] = await Promise.all([
-    client.from("sits").select("id, title, status, city, start_date, end_date").eq("user_id", userId).order("created_at", { ascending: false }).limit(20),
+    client.from("sits").select("id, title, status, city, start_date, end_date, published_at, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(20),
     client.from("applications").select("sit_id, status, created_at, sits(id, title, status, city, start_date, end_date)").eq("sitter_id", userId).order("created_at", { ascending: false }).limit(20),
-    client.from("small_missions").select("id, title, status, mission_type, category").eq("user_id", userId).order("created_at", { ascending: false }).limit(10),
+    client.from("small_missions").select("id, title, status, mission_type, category, created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(10),
   ]);
   const ownSits = (ownRes?.data ?? []) as RawSit[];
   let received: RawReceivedApplication[] = [];
@@ -197,5 +208,10 @@ export async function loadVerifiedFacts(client: any, userId: string, role: Verif
   }
   // deno-lint-ignore no-explicit-any
   const sent = ((sentRes?.data ?? []) as any[]).map((a) => ({ sit_id: a.sit_id, status: a.status, created_at: a.created_at, sit: a.sits ?? null }));
+  if (raw) {
+    raw.ownSits = ownSits;
+    raw.sent = sent;
+    raw.missions = (missRes?.data ?? []) as RawMission[];
+  }
   return buildVerifiedFacts({ role, ownSits, received, sent, missions: (missRes?.data ?? []) as RawMission[], today });
 }

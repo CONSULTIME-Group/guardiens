@@ -224,6 +224,8 @@ interface AlmaConversationProps {
   moodLine?: string | null;
   stageLabel?: string;
   stage?: "nouvelle" | "eveillee" | "complice" | "fidele";
+  /** Lot A7 : « Avec vous depuis le 3 septembre · Proche », lien vers le carnet. */
+  bondLine?: string | null;
   subject?: string;
   focusSignal?: number;
   starters?: string[];
@@ -256,6 +258,7 @@ export function AlmaConversation({
   moodLine,
   stageLabel,
   stage,
+  bondLine,
   subject,
   focusSignal,
   starters,
@@ -383,9 +386,22 @@ export function AlmaConversation({
               <p className="font-heading text-[19px] leading-tight text-foreground">Alma</p>
               {/* Lot L4, transparence (règlement européen sur l'IA, article 50). */}
               <p className="text-[11px] text-muted-foreground">Compagne IA de Guardiens</p>
-              <p className="mt-1 text-[10.5px] font-bold uppercase text-terra [letter-spacing:.16em]">
-                {stageLabel ?? "Votre assistante"}
-              </p>
+              {bondLine ? (
+                // Lot A7 : le lien, calculé par le module partagé ; mène au carnet.
+                <button
+                  type="button"
+                  data-testid="alma-bond-line"
+                  onClick={() => followLink("/alma#carnet")}
+                  aria-label={`${bondLine}. Ouvrir notre carnet`}
+                  className="mt-1 text-left text-[11.5px] font-semibold text-terra underline-offset-2 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  {bondLine}
+                </button>
+              ) : (
+                <p className="mt-1 text-[10.5px] font-bold uppercase text-terra [letter-spacing:.16em]">
+                  {stageLabel ?? "Votre assistante"}
+                </p>
+              )}
               {moodLine && (
                 <p className="alma-header-mood mt-1 font-heading text-[13px] italic text-muted-foreground">
                   {moodLine}
