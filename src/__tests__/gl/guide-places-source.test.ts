@@ -365,10 +365,26 @@ describe("GL1, demande incohérente", () => {
 });
 
 describe("GL, fiabilité (13/10/2026)", () => {
-  it("Polynésie et Nouvelle-Calédonie : code pays OpenStreetMap", async () => {
+  it("Polynésie et Nouvelle-Calédonie : Nominatim les range sous « fr » (mesure du 14/10/2026)", async () => {
     const { fn, calls } = fakeFetch({ nominatim: () => [{ lat: "-17.535", lon: "-149.569", address: { state: "Îles du Vent" } }] });
     await resolveGuideCenter({ city: "Papeete", postalCode: "98714", country: "FR", hint: null }, fn);
-    expect(calls[0]).toContain("countrycodes=pf");
+    expect(calls[0]).toContain("countrycodes=fr");
+    expect(calls.some((u) => u.includes("api-adresse"))).toBe(false);
+  });
+
+  it("Taravao (PF) : texte libre réduit aux localités quand la recherche par commune est vide", async () => {
+    const { fn, calls } = fakeFetch({
+      nominatim: (url: string) =>
+        url.includes("city=")
+          ? []
+          : [
+              { lat: "-17.7196", lon: "-149.3012", addresstype: "bay", address: {} },
+              { lat: "-17.7257", lon: "-149.3135", addresstype: "town", address: { state: "Îles du Vent" } },
+            ],
+    });
+    const c = await resolveGuideCenter({ city: "Taravao", postalCode: "98719", country: "PF", hint: null }, fn);
+    expect(c).toEqual({ lat: -17.7257, lon: -149.3135, country: "PF", region: "Îles du Vent" });
+    expect(calls.every((u) => u.includes("countrycodes=fr"))).toBe(true);
   });
 
   it("une réponse Overpass tronquée par un délai est ignorée, le miroir suivant est essayé", async () => {
