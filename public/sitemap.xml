@@ -316,11 +316,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/actualites/reseau-entraide-quartier-lyon-aura</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://guardiens.fr/actualites/premiers-pas-sur-guardiens</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -456,11 +451,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/actualites/demenagement-entraide-locale-france</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://guardiens.fr/actualites/cavalier-king-charles-guide-race</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -499,11 +489,6 @@
     <loc>https://guardiens.fr/actualites/voyager-gratuitement-france-house-sitting</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://guardiens.fr/actualites/bricolage-montage-meubles-entraide-grenoble-lyon</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://guardiens.fr/actualites/house-sitting-haute-savoie-annecy-megeve</loc>
@@ -711,11 +696,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://guardiens.fr/actualites/courses-aide-domicile-entraide-senior-lyon</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://guardiens.fr/actualites/preparer-maison-avant-garde</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -806,6 +786,11 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/house-sitting/papeete</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/house-sitting/megeve</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -872,6 +857,16 @@
   </url>
   <url>
     <loc>https://guardiens.fr/house-sitting/pau</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/house-sitting/paea</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/house-sitting/pirae</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -981,6 +976,11 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://guardiens.fr/house-sitting/taiarapu-est</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://guardiens.fr/house-sitting/meaux</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -997,6 +997,11 @@
   </url>
   <url>
     <loc>https://guardiens.fr/house-sitting/chamonix</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/house-sitting/punaauia</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1097,6 +1102,11 @@
   </url>
   <url>
     <loc>https://guardiens.fr/house-sitting/saint-etienne</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/house-sitting/mahina</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -1387,6 +1397,11 @@
   </url>
   <url>
     <loc>https://guardiens.fr/house-sitting/antony</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://guardiens.fr/house-sitting/faaa</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
