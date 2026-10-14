@@ -195,7 +195,7 @@ describe("sources des listes d'avis", () => {
   });
 
   it("review_sit_periods : SQL préparé, droits Y2, avis d'annulation hors du public", () => {
-    const sql = read("supabase/prepared-migrations/20261014150000_j2d_periodes_avis.sql");
+    const sql = read("supabase/prepared-migrations/20261014151000_j2d_periodes_avis.sql");
     expect(sql).toMatch(/CREATE OR REPLACE FUNCTION public\.review_sit_periods\(p_review_ids uuid\[\]\)/);
     expect(sql).toMatch(/SECURITY DEFINER/);
     expect(sql).toMatch(/auth\.uid\(\) IS NOT NULL/);
