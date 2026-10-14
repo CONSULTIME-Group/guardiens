@@ -13,6 +13,8 @@ export interface RecentPublishedSit {
   title: string;
   city: string | null;
   country: string | null;
+  /** Code département de l'annonce (lot H2), pour le lieu des cartes de l'accueil. */
+  departement_code: string | null;
   start_date: string | null;
   end_date: string | null;
   daily_routine: string | null;
@@ -41,7 +43,7 @@ export function useRecentPublishedSits() {
           // Photos du logement embarquées dans la même lecture (clé
           // sits_property_id_fkey), lisibles par un visiteur via la règle
           // « Properties are readable via active sits ». Aucune lecture en plus.
-          "id, slug, title, city, country, start_date, end_date, daily_routine, created_at, user_id, property_id, cover_photo_url, is_urgent, property:properties(photos)"
+          "id, slug, title, city, country, departement_code, start_date, end_date, daily_routine, created_at, user_id, property_id, cover_photo_url, is_urgent, property:properties(photos)"
         )
         .eq("status", "published")
         .eq("accepting_applications", true)
