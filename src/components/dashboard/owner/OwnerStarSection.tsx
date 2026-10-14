@@ -6,7 +6,10 @@
  *   b) candidatures pending -> "Découvrir sa candidature" (ring d'affinité
  *      réciproque si calculable, avatar sinon)
  *   c) brouillon            -> "Reprendre mon annonce"
- *   d) aucune annonce       -> "Publier une annonce" + concierge Alma imbriqué
+ *   d) aucune annonce       -> bouton « Publier mon annonce de garde » vers
+ *      /sits/create (lot A6, décision du 14/10/2026 : le champ « une phrase »
+ *      SitDraftFromPrompt, 421 vues depuis le 01/09 pour 0 brouillon, reste
+ *      dans le dépôt, démonté)
  *
  * Réutilise strictement les données déjà chargées par OwnerDashboard :
  * pas de fetch supplémentaire. Toutes les copies suivent les règles
@@ -27,7 +30,6 @@ import {
 } from "@/lib/affinityScore";
 import type { AppRow, SitterInfo, SitRow } from "./types";
 import { capitalize } from "./helpers";
-import SitDraftFromPrompt from "@/components/dashboard/SitDraftFromPrompt";
 import type { OwnerPrimaryAction } from "@/hooks/useOwnerPrimaryAction";
 import { trackEvent } from "@/lib/analytics";
 import { useImpressionOnce } from "@/hooks/useImpressionOnce";
@@ -442,14 +444,63 @@ const DraftStar = ({ draft, onCtaClick }: { draft: SitRow; onCtaClick?: () => vo
 /* ================================================================== */
 /*  D. Aucune annonce active                                          */
 /* ================================================================== */
+/** Lot A6 : destination unique du bouton de publication de la vedette. */
+const OWNER_STAR_PUBLISH_PATH = "/sits/create";
+
 const PublishStar = ({
   primaryAction,
+  onCtaClick,
 }: {
   primaryAction: OwnerPrimaryAction | null;
-}) => (
-  // Lot D1 : état « aucune annonce », le formulaire Alma EST la vedette.
-  <SitDraftFromPrompt layout="star" primary={primaryAction} />
-);
+  onCtaClick?: () => void;
+}) => {
+  // Brouillon prêt sans annonce publiée : même reprise qu'avant le lot A6.
+  if (primaryAction?.action === "publish_draft" && primaryAction.draftId) {
+    const draftId = primaryAction.draftId;
+    return (
+      <>
+        <SectionHeader
+          eyebrow="Votre annonce vous attend"
+          title="Votre brouillon est prêt, il reste la publication."
+          subtitle="Une fois publiée, votre annonce prévient les gardiens à proximité."
+        />
+        <PrimaryCta
+          to={`/sits/create?resume=${draftId}`}
+          onClick={() => {
+            onCtaClick?.();
+            void trackEvent("owner_primary_action_publish_draft_click", {
+              metadata: { draft_id: draftId },
+            });
+          }}
+        >
+          Reprendre et publier
+        </PrimaryCta>
+      </>
+    );
+  }
+
+  return (
+    <div data-testid="owner-star-publish">
+      <SectionHeader
+        eyebrow="Publier une annonce"
+        title="Votre annonce prévient les gardiens à proximité."
+        subtitle="Dates, logement, animaux : Alma vous accompagne à chaque étape."
+      />
+      <PrimaryCta
+        to={OWNER_STAR_PUBLISH_PATH}
+        onClick={() => {
+          onCtaClick?.();
+          void trackEvent("owner_publish_cta_clicked", {
+            source: "owner_dashboard_star",
+            metadata: { source: "owner_dashboard_star", surface: "owner_dashboard" },
+          });
+        }}
+      >
+        Publier mon annonce de garde
+      </PrimaryCta>
+    </div>
+  );
+};
 
 /* ================================================================== */
 /*  Section wrapper                                                   */
@@ -533,7 +584,7 @@ const OwnerStarSection = ({
   } else if (activeAnnonce) {
     content = activeAnnonce;
   } else {
-    content = <PublishStar primaryAction={primaryAction} />;
+    content = <PublishStar primaryAction={primaryAction} onCtaClick={onCtaClick} />;
   }
 
   return (

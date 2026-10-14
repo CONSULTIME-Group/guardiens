@@ -4,7 +4,7 @@ import { lazyWithRetry } from "@/lib/lazyWithRetry";
 import { sitHasPhotos } from "@/lib/cardFacts";
 import InviteToMySitButton from "@/components/sits/owner/InviteToMySitButton";
 import { Sprout, PawPrint, GraduationCap, Handshake as HandshakeIcon, LayoutGrid, Map as MapIcon, SlidersHorizontal, Loader2, Home, Wrench } from "lucide-react";
-import { Link, useSearchParams, useNavigate } from "react-router-dom";
+import { Link, useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { sitPath } from "@/lib/sitUrl";
 
@@ -49,6 +49,7 @@ import DatesPickerPopover from "@/components/search/header/DatesPickerPopover";
 import AnimalsPickerPopover from "@/components/search/header/AnimalsPickerPopover";
 import { useEmptyStateBreakdown } from "@/hooks/search/useEmptyStateBreakdown";
 import { useSearchAlert } from "@/hooks/search/useSearchAlert";
+import { shouldResumeVisitorAlert, visitorSearchRedirect, visitorSectorSignupUrl, VISITOR_ALERT_PARAM } from "@/lib/almaVisitorSearch";
 import { useSearchUserProfile } from "@/hooks/search/useSearchUserProfile";
 import { PRICING_IS_ACTIVE } from "@/config/pricing";
 import { avatarImageUrl } from "@/lib/storageImage";
@@ -92,7 +93,7 @@ export type ShownListState = {
 
 const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProps = {}) => {
   const isPublic = mode === "public";
- const { user } = useAuth();
+ const { user, loading: authLoading } = useAuth();
  const { hasAccess } = useSubscriptionAccess();
  const isMobile = useIsMobile();
  const { t } = useTranslation();
@@ -718,6 +719,12 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
  });
 
 
+ // Lot A6 : visiteur avéré (session lue, aucun compte). Toute demande d'alerte
+ // part vers l'inscription gardien avec retour à cette recherche.
+ const location = useLocation();
+ const isVisitor = !user && !authLoading;
+ const visitorSearchPath = visitorSearchRedirect(location.pathname, location.search, zoneMode);
+
  const { alertCreated, isCreatingAlert, handleCreateAlert } = useSearchAlert({
   city,
   cityPostalCode,
@@ -726,7 +733,25 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
   setRadius,
    zoneMode,
    resetKeys: [city, radius, zoneMode],
+   visitorSignupUrl: isVisitor ? visitorSectorSignupUrl(visitorSearchPath) : null,
  });
+
+ // Lot A6 : retour d'inscription depuis « Recevoir les annonces de ce secteur ».
+ // L'alerte du secteur est créée une seule fois, puis le marqueur quitte l'URL.
+ const visitorAlertResumedRef = useRef(false);
+ useEffect(() => {
+  if (visitorAlertResumedRef.current) return;
+  const alertParam = searchParams.get(VISITOR_ALERT_PARAM);
+  if (alertParam !== "1" || !user) return;
+  visitorAlertResumedRef.current = true;
+  const next = new URLSearchParams(searchParams);
+  next.delete(VISITOR_ALERT_PARAM);
+  setSearchParams(next, { replace: true });
+  if (shouldResumeVisitorAlert({ isMember: true, alertParam, zoneMode, city })) {
+   void handleCreateAlert();
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+ }, [user, searchParams]);
 
 
  // Reference postal code for dept/region zone modes (selected city if available, else user CP)
@@ -2289,6 +2314,8 @@ const SearchSitter = ({ mode = "internal", onShownListChange }: SearchSitterProp
           setRadius([100]);
         }}
         onOpenAlert={() => { void handleCreateAlert(); }}
+        isVisitor={isVisitor}
+        visitorSearchPath={visitorSearchPath}
         onRelaxFilter={(filter) => {
           if (filter === "emergencyOnly") setEmergencyOnly(false);
           else if (filter === "verifiedOnly") setVerifiedOnly(false);

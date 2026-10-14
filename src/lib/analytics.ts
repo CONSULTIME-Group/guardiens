@@ -302,7 +302,9 @@ export type EventType =
   | "sit_proposal_question"                     // Lot I2 : question posée au propriétaire
   // Alma Pass 2 Tour 3 : empty search + notif summary ---------------------
   | "alma_empty_search_bubble_seen"             // Bulle empty search affichée (restrictive_filter, radius, zone_mode)
-  | "alma_empty_search_action_clicked"          // Action empty search cliquée (action_id, restrictive_filter?)
+  | "alma_empty_search_action_clicked"          // Action empty search cliquée (action_id, restrictive_filter?, zone_mode, is_visitor)
+  | "alma_whisper_card_clicked"                 // Lot A6 : carte Alma d'un profil public cliquée (is_visitor, surface, action)
+  | "owner_publish_cta_clicked"                 // Lot A6 : bouton « Publier mon annonce de garde » (source)
   | "alma_notif_summary_seen"                   // Résumé notifs affiché (unread, applications, messages, social)
   | "alma_notif_urgent_filter_clicked"          // Filtre "3 urgentes" cliqué (audience)
   // Alma Pass 4 : narratrice cross-page ------------------------------------

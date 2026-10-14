@@ -344,6 +344,8 @@ export const EVENT_LABELS: Dict = {
   application_sent: "Candidature envoyée",
   dashboard_star_seen: "Carte vedette vue",
   dashboard_star_cta_clicked: "Bouton de la carte vedette cliqué",
+  owner_publish_cta_clicked: "Bouton « Publier mon annonce de garde » cliqué",
+  alma_whisper_card_clicked: "Carte d'Alma d'un profil public cliquée",
   alma_opened: "Alma ouverte",
   alma_bubble_shown: "Bulle d'Alma affichée",
   alma_bubble_clicked: "Bulle d'Alma cliquée",
