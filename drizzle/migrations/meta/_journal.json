@@ -575,6 +575,13 @@
       "when": 1791965710064,
       "tag": "0081_z2_finitions",
       "breakpoints": true
+    },
+    {
+      "idx": 82,
+      "version": "7",
+      "when": 1791966748308,
+      "tag": "0082_gl5_centre_par_la_base",
+      "breakpoints": true
     }
   ]
 }
